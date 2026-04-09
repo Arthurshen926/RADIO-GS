@@ -219,25 +219,49 @@ def l1_loss(pred, gt):
     return (pred - gt).abs().mean()
 
 
+_ssim_window_cache: dict = {}
+
+
+def _gaussian_window(window_size, sigma, channels, dtype, device):
+    """Create a 2-D Gaussian window for SSIM (cached across calls)."""
+    key = (window_size, sigma, channels, dtype, device)
+    if key not in _ssim_window_cache:
+        coords = torch.arange(window_size, dtype=dtype, device=device) - window_size // 2
+        g = torch.exp(-coords ** 2 / (2 * sigma ** 2))
+        g = g / g.sum()
+        window_2d = g.unsqueeze(1) @ g.unsqueeze(0)
+        _ssim_window_cache[key] = window_2d.unsqueeze(0).unsqueeze(0).expand(
+            channels, 1, -1, -1
+        ).contiguous()
+    return _ssim_window_cache[key]
+
+
 def ssim_loss(pred, gt, window_size=11):
-    """Simple SSIM loss (1 - SSIM)."""
+    """Structural similarity loss: 1 − SSIM (Gaussian-weighted window)."""
     C1 = 0.01 ** 2
     C2 = 0.03 ** 2
-    # pred, gt: [H, W, 3] → [1, 3, H, W]
     p = pred.permute(2, 0, 1).unsqueeze(0)
     g = gt.permute(2, 0, 1).unsqueeze(0)
-
+    C = p.shape[1]
     pad = window_size // 2
-    mu_p = F.avg_pool2d(p, window_size, stride=1, padding=pad)
-    mu_g = F.avg_pool2d(g, window_size, stride=1, padding=pad)
 
-    mu_pp = mu_p ** 2
-    mu_gg = mu_g ** 2
+    p = F.pad(p, [pad, pad, pad, pad], mode="reflect")
+    g = F.pad(g, [pad, pad, pad, pad], mode="reflect")
+
+    window = _gaussian_window(window_size, 1.5, C, p.dtype, p.device)
+
+    mu_p = F.conv2d(p, window, groups=C)
+    mu_g = F.conv2d(g, window, groups=C)
+    mu_pp = mu_p * mu_p
+    mu_gg = mu_g * mu_g
     mu_pg = mu_p * mu_g
 
-    sigma_pp = F.avg_pool2d(p ** 2, window_size, stride=1, padding=pad) - mu_pp
-    sigma_gg = F.avg_pool2d(g ** 2, window_size, stride=1, padding=pad) - mu_gg
-    sigma_pg = F.avg_pool2d(p * g, window_size, stride=1, padding=pad) - mu_pg
+    sigma_pp = F.conv2d(p ** 2, window, groups=C) - mu_pp
+    sigma_gg = F.conv2d(g ** 2, window, groups=C) - mu_gg
+    sigma_pg = F.conv2d(p * g, window, groups=C) - mu_pg
+
+    sigma_pp = sigma_pp.clamp(min=0.0)
+    sigma_gg = sigma_gg.clamp(min=0.0)
 
     ssim_map = ((2 * mu_pg + C1) * (2 * sigma_pg + C2)) / \
                ((mu_pp + mu_gg + C1) * (sigma_pp + sigma_gg + C2))
