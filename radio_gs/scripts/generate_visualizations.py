@@ -29,6 +29,12 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
+from radio_gs.artifact_paths import (
+    DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
+    DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
+    resolve_siglip_projection_path,
+    resolve_siglip_text_embeddings_path,
+)
 from radio_gs.config import load_config
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.hcd_codec import HCDCodec
@@ -467,9 +473,9 @@ def main():
     parser.add_argument("--scale", type=int, default=16,
                         help="Upscale factor for feature-resolution images")
     parser.add_argument("--text_embeddings",
-                        default="output/radio_gs/siglip2_text_embeddings_v2.pt")
+                        default=DEFAULT_SIGLIP2_TEXT_EMBEDDINGS)
     parser.add_argument("--projection_weights",
-                        default="output/radio_gs/siglip2_feat_projection.pth")
+                        default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS)
     parser.add_argument("--grounding_queries", nargs="+",
                         default=["chair", "table", "sofa", "plant", "shelf",
                                  "cushion", "floor", "wall", "door", "window"])
@@ -798,8 +804,8 @@ def main():
 
     # ── Step 6: Text grounding heatmaps ──────────────────────────────────────
     print("\n[6/6] Generating text grounding heatmaps...")
-    text_emb_path = Path(args.text_embeddings)
-    proj_path = Path(args.projection_weights)
+    text_emb_path = resolve_siglip_text_embeddings_path(args.text_embeddings)
+    proj_path = resolve_siglip_projection_path(args.projection_weights)
     # Create grounding_seg output dir
     grounding_seg_dir = out_root / "grounding_seg"
     grounding_seg_dir.mkdir(parents=True, exist_ok=True)

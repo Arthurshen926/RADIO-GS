@@ -65,6 +65,7 @@ RGB images
 ```text
 RADIO-GS/
 ├── README.md
+├── checkpoints/
 ├── requirements.txt
 ├── setup.py
 └── radio_gs/
@@ -89,6 +90,14 @@ This repo assumes:
 - `gsplat >= 1.4`
 - a local clone of the official `RADIO` repository
 
+The repo already ships with the small-but-required grounding resources under `checkpoints/`:
+
+- `checkpoints/siglip2_feat_projection.pth`
+- `checkpoints/siglip2_text_embeddings_v2.pt`
+- `checkpoints/siglip2_text_embeddings_v4.pt`
+
+So a fresh clone does **not** need to redownload those files.
+
 Example setup:
 
 ```bash
@@ -109,6 +118,12 @@ export RADIO_REPO=/path/to/RADIO
 ```
 
 `radio_gs/config.py` will pick up `RADIO_REPO` automatically. You can also override `radio_repo` inside YAML configs or per-command flags.
+
+No code change is needed to load a local RADIO checkout or local checkpoint files:
+
+- `radio_repo` already accepts a local directory path
+- `siglip_projection_weights` and `grounding_text_embeddings` already accept local file paths
+- current defaults now point to the bundled `checkpoints/` directory, with fallback to the old `output/radio_gs/...` paths for backward compatibility
 
 ## Expected data layout
 

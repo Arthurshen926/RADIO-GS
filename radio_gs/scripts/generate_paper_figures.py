@@ -31,6 +31,12 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
+from radio_gs.artifact_paths import (
+    DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
+    DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
+    resolve_siglip_projection_path,
+    resolve_siglip_text_embeddings_path,
+)
 from radio_gs.config import load_config
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.hcd_codec import HCDCodec
@@ -820,9 +826,9 @@ def main():
     parser.add_argument("--scale", type=int, default=8,
                         help="Upscale factor for feature-res images")
     parser.add_argument("--text_embeddings",
-                        default="output/radio_gs/siglip2_text_embeddings_v2.pt")
+                        default=DEFAULT_SIGLIP2_TEXT_EMBEDDINGS)
     parser.add_argument("--projection_weights",
-                        default="output/radio_gs/siglip2_feat_projection.pth")
+                        default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS)
     args = parser.parse_args()
 
     device = torch.device(args.device)
@@ -889,8 +895,8 @@ def main():
 
     # ── Load grounding resources ──────────────────────────────────────────
     print("\n[3/5] Loading SigLIP2 grounding resources...")
-    text_emb_path = Path(args.text_embeddings)
-    proj_path = Path(args.projection_weights)
+    text_emb_path = resolve_siglip_text_embeddings_path(args.text_embeddings)
+    proj_path = resolve_siglip_projection_path(args.projection_weights)
     grounding_available = text_emb_path.exists() and proj_path.exists()
     if grounding_available:
         text_data = torch.load(str(text_emb_path), map_location="cpu")

@@ -16,6 +16,11 @@ from typing import Any, Dict
 
 import yaml
 
+from radio_gs.artifact_paths import (
+    DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
+    DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
+)
+
 
 @dataclass
 class RadioGSConfig:
@@ -61,7 +66,7 @@ class RadioGSConfig:
     grounding_query_loss_weight: float = 0.0
     grounding_query_temperature: float = 1.0
     grounding_query_loss_downsample: int = 1
-    grounding_text_embeddings: str = "output/radio_gs/siglip2_text_embeddings_v2.pt"
+    grounding_text_embeddings: str = DEFAULT_SIGLIP2_TEXT_EMBEDDINGS
 
     # HCD Codec
     bottleneck_dim: int = 64
@@ -126,6 +131,8 @@ class RadioGSConfig:
     consistency_weight: float = 0.1
     adaptor_weight: float = 0.1
     siglip_alignment_weight: float = 0.0
+    siglip_summary_alignment_weight: float = 0.0
+    siglip_summary_head_weights: str = "checkpoints/siglip2_summary_head.pth"
     tv_weight: float = 0.01
     feat_norm_weight: float = 0.0
     gradient_loss_weight: float = 0.0
@@ -144,7 +151,7 @@ class RadioGSConfig:
     depth_alpha_threshold: float = 0.05
     depth_supervision_loss_type: str = "scale_invariant"
     geom_depth_supervision_loss_type: str = "scale_invariant"
-    siglip_projection_weights: str = "output/radio_gs/siglip2_feat_projection.pth"
+    siglip_projection_weights: str = DEFAULT_SIGLIP2_PROJECTION_WEIGHTS
 
     # Data
     feature_dir: str = ""  # pre-extracted RADIO features
@@ -186,8 +193,23 @@ class RadioGSConfig:
     seg_ignore_index: int = 255
     grounding_use_adaptor: bool = True
 
+    # Frozen depth head supervision (core innovation)
+    frozen_depth_head_weight: float = 0.0
+    frozen_depth_head_path: str = ""
+    frozen_depth_head_type: str = "mlp"
+    frozen_depth_head_hidden_dim: int = 256
+    frozen_depth_head_num_layers: int = 3
+    frozen_depth_loss_type: str = "scale_invariant"
+    frozen_depth_gradient_weight: float = 0.0
+    frozen_depth_warmup_epochs: int = 0  # Curriculum: ramp FDH weight from 0→target over N epochs
+
+    # Best-checkpoint selection
+    best_metric: str = "cosine"  # cosine, psnr, depth_gt, depth_geom, frozen_depth, seg_aux_miou, ground_query_acc, proxy_depth
+    best_metric_mode: str = "auto"  # auto, min, max
+
     # Checkpointing
     save_every: int = 10
+    save_periodic_every: int = 0  # Save epoch_XXX.pth every N epochs (0=disabled)
     eval_every: int = 5
     log_every: int = 100  # iterations
     resume_from: str = ""  # Resume training from checkpoint (model + optimizer)

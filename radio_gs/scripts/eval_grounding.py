@@ -20,6 +20,13 @@ from tqdm import tqdm
 from timm.models.vision_transformer import Block
 
 sys.path.insert(0, '.')
+from radio_gs.artifact_paths import (
+    DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
+    DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
+    resolve_siglip_projection_path,
+    resolve_siglip_text_embeddings_path,
+)
+from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.config import load_config
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
@@ -35,7 +42,6 @@ from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 from radio_gs.data.benchmark_paths import resolve_split_pose_source
 
 device = torch.device("cuda")
-DEFAULT_SIGLIP2_TEXT_EMBEDDINGS = "output/radio_gs/siglip2_text_embeddings_v2.pt"
 
 from radio_gs.replica_constants import REPLICA_CLASSES, GROUNDING_QUERIES, SEG_COLORS
 
@@ -286,7 +292,7 @@ def load_semantic_gt(sem_dir, idx, target_size):
 
 def load_text_embedding_candidates(text_emb_path):
     """Load one or more SigLIP2 text banks and prefer v2 by default."""
-    text_emb_path = Path(text_emb_path)
+    text_emb_path = resolve_siglip_text_embeddings_path(text_emb_path)
     if text_emb_path.name.startswith("siglip2_text_embeddings"):
         candidate_paths = sorted(
             text_emb_path.parent.glob("siglip2_text_embeddings*.pt"),
@@ -428,16 +434,28 @@ def evaluate_grounding(args):
     print(f"Active queries ({len(active_queries)}): {active_queries}")
     print(f"Active class IDs: {active_class_ids}")
 
-    # Load SigLIP2 feature projection
-    if args.projection_weights:
-        proj = SigLIP2FeatureProjection()
-        proj.load_state_dict(torch.load(args.projection_weights, map_location="cpu"))
+    # Load SigLIP2 projection
+    if args.use_summary_head:
+        head_path = Path(args.summary_head_weights)
+        if head_path.exists():
+            proj = SigLIP2SummaryHead.from_extracted_weights(str(head_path))
+            print(f"Loaded SigLIP2 summary head (text-aligned) from {head_path}")
+        else:
+            proj = SigLIP2SummaryHead.from_radio_checkpoint(
+                "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
+            )
+            print("Loaded SigLIP2 summary head from RADIO checkpoint")
     else:
-        proj = SigLIP2FeatureProjection.from_radio_checkpoint(
-            "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
-        )
+        if args.projection_weights:
+            proj_path = resolve_siglip_projection_path(args.projection_weights)
+            proj = SigLIP2FeatureProjection()
+            proj.load_state_dict(torch.load(proj_path, map_location="cpu"))
+        else:
+            proj = SigLIP2FeatureProjection.from_radio_checkpoint(
+                "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
+            )
+        print("Loaded SigLIP2 spatial feature projection (NOT text-aligned)")
     proj = proj.to(device).half().eval()
-    print("Loaded SigLIP2 feature projection")
 
     # Load RADIO-GS model
     model, codec, renderer, sharpener, refiner, config, is_hybrid = \
@@ -748,8 +766,14 @@ def main():
                         default=DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
                         help="Pre-computed SigLIP2 text embeddings")
     parser.add_argument("--projection_weights",
-                        default="output/radio_gs/siglip2_feat_projection.pth",
+                        default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
                         help="SigLIP2 feature projection weights")
+    parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth",
+                        help="SigLIP2 summary head weights (text-aligned)")
+    parser.add_argument("--use_summary_head", action="store_true", default=True,
+                        help="Use text-aligned summary head instead of spatial projection (default)")
+    parser.add_argument("--no_summary_head", dest="use_summary_head", action="store_false",
+                        help="Use spatial feature projection (NOT text-aligned)")
     parser.add_argument("--vis_dir", default=None,
                         help="Dir to save visualization grids")
     args = parser.parse_args()

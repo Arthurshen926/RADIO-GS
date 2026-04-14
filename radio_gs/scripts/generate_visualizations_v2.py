@@ -30,7 +30,15 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
+from radio_gs.artifact_paths import (
+    DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
+    DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
+    resolve_siglip_projection_path,
+    resolve_siglip_text_embeddings_path,
+)
 from radio_gs.config import load_config
+from radio_gs.data.benchmark_paths import resolve_scene_root
+from radio_gs.heads.depth_head import DepthHead
 from radio_gs.models.depth_fusion import (
     predict_depth_fusion,
     prepare_depth_fusion_sample,
@@ -51,7 +59,6 @@ from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 device = torch.device("cuda")
 probe_device = torch.device("cpu")
-DEFAULT_SIGLIP2_TEXT_EMBEDDINGS = "output/radio_gs/siglip2_text_embeddings_v2.pt"
 
 def inference_dtype(target_device: torch.device) -> torch.dtype:
     return torch.float16 if target_device.type == "cuda" else torch.float32
@@ -441,7 +448,7 @@ def _build_probe(in_dim, out_dim, hidden=256):
     )
 
 
-def _train_probe(probe, train_X, train_Y, epochs=300, batch_size=16384,
+def _train_probe(probe, train_X, train_Y, epochs=60, batch_size=16384,
                  lr=1e-3, task="regression", class_weights=None):
     """Train a probe with mini-batch sampling for stable visualization heads."""
     probe = probe.to(probe_device).train()
@@ -536,6 +543,51 @@ def predict_depth(probe, feat, fH, fW):
     return pred.cpu().numpy()
 
 
+def load_depth_head_checkpoint(checkpoint_path, fallback_config=None):
+    """Load a pretrained depth head checkpoint for direct qualitative rendering."""
+    ckpt = torch.load(checkpoint_path, map_location=device)
+    state = ckpt.get("state_dict", ckpt)
+    head_cfg = ckpt.get("config", {})
+    if fallback_config is not None:
+        feature_dim = head_cfg.get("feature_dim", getattr(fallback_config, "radio_feature_dim", 1280))
+        hidden_dim = head_cfg.get("hidden_dim", getattr(fallback_config, "frozen_depth_head_hidden_dim", 256))
+        num_layers = head_cfg.get("num_layers", getattr(fallback_config, "frozen_depth_head_num_layers", 3))
+        head_type = head_cfg.get("head_type", getattr(fallback_config, "frozen_depth_head_type", "mlp"))
+    else:
+        feature_dim = head_cfg.get("feature_dim", 1280)
+        hidden_dim = head_cfg.get("hidden_dim", 256)
+        num_layers = head_cfg.get("num_layers", 3)
+        head_type = head_cfg.get("head_type", "mlp")
+
+    head = DepthHead(
+        feature_dim=feature_dim,
+        hidden_dim=hidden_dim,
+        num_layers=num_layers,
+        head_type=head_type,
+    ).to(device)
+    head.load_state_dict(state)
+    head.eval()
+    return head, {
+        "feature_dim": feature_dim,
+        "hidden_dim": hidden_dim,
+        "num_layers": num_layers,
+        "head_type": head_type,
+    }
+
+
+def predict_depth_head(head, feat, fH, fW):
+    """Predict depth directly with a pretrained depth head."""
+    if feat.shape[1:] != (fH, fW):
+        feat = F.interpolate(
+            feat.unsqueeze(0).to(device), (fH, fW), mode="bilinear", align_corners=False
+        )
+    else:
+        feat = feat.unsqueeze(0).to(device)
+    with torch.no_grad():
+        pred = head(feat).squeeze(0).squeeze(0)
+    return pred.cpu().numpy()
+
+
 def _restore_original_seg_ids(seg_map, contiguous_to_id=None):
     """Map contiguous probe outputs back to original semantic IDs if needed."""
     if contiguous_to_id is None:
@@ -582,6 +634,8 @@ def predict_seg_smooth(probe, feat, fH, fW, target_h, target_w, contiguous_to_id
 def train_depth_probe_paths(features, depth_paths, fH, fW):
     """Train a linear depth probe using explicit file paths (mixed_split compatible)."""
     train_X, train_Y = [], []
+    pixel_budget = 128
+    rng = torch.Generator().manual_seed(42)
     for feat, dpath in zip(features, depth_paths):
         dpath = Path(dpath)
         if not dpath.exists():
@@ -597,13 +651,19 @@ def train_depth_probe_paths(features, depth_paths, fH, fW):
         valid = d > 0.01
         if valid.sum() < 10:
             continue
-        train_X.append(feat.reshape(C, -1).T[valid.reshape(-1)])
-        train_Y.append(d.reshape(-1)[valid.reshape(-1)])
+        valid_idx = valid.reshape(-1).nonzero(as_tuple=False).squeeze(1)
+        if valid_idx.numel() > pixel_budget:
+            perm = torch.randperm(valid_idx.numel(), generator=rng)
+            valid_idx = valid_idx[perm[:pixel_budget]]
+        flat_feat = feat.reshape(C, -1).T
+        flat_depth = d.reshape(-1)
+        train_X.append(flat_feat.index_select(0, valid_idx))
+        train_Y.append(flat_depth.index_select(0, valid_idx))
 
     train_X = torch.cat(train_X, 0).to(probe_device)
     train_Y = torch.cat(train_Y, 0).to(probe_device)
     probe = _build_probe(train_X.shape[1], 1)
-    return _train_probe(probe, train_X, train_Y, epochs=300, task="regression")
+    return _train_probe(probe, train_X, train_Y, epochs=60, task="regression")
 
 
 def train_fused_depth_probe_paths(features, geom_depths, geom_alphas, depth_paths, fH, fW):
@@ -652,7 +712,7 @@ def train_fused_depth_probe_paths(features, geom_depths, geom_alphas, depth_path
         torch.cat(train_geom_valid, 0),
         torch.cat(train_Y, 0),
         probe_device,
-        epochs=300,
+        epochs=60,
     )
     return {"depth_probe": depth_probe, "fusion_probe": fusion_probe}
 
@@ -660,6 +720,8 @@ def train_fused_depth_probe_paths(features, geom_depths, geom_alphas, depth_path
 def train_seg_probe_paths(features, sem_paths, fH, fW):
     """Train a segmentation probe using explicit file paths."""
     train_X, train_Y = [], []
+    pixel_budget = 128
+    rng = torch.Generator().manual_seed(42)
     for feat, spath in zip(features, sem_paths):
         spath = Path(spath)
         if not spath.exists():
@@ -672,8 +734,13 @@ def train_seg_probe_paths(features, sem_paths, fH, fW):
         C = feat.shape[0]
         if feat.shape[1:] != (fH, fW):
             feat = F.interpolate(feat[None], (fH, fW), mode="bilinear", align_corners=False).squeeze(0)
-        train_X.append(feat.reshape(C, -1).T)
-        train_Y.append(sem.reshape(-1))
+        flat_feat = feat.reshape(C, -1).T
+        flat_sem = sem.reshape(-1)
+        sample_count = min(pixel_budget, flat_sem.numel())
+        perm = torch.randperm(flat_sem.numel(), generator=rng)
+        sample_idx = perm[:sample_count]
+        train_X.append(flat_feat.index_select(0, sample_idx))
+        train_Y.append(flat_sem.index_select(0, sample_idx))
 
     train_X = torch.cat(train_X, 0).to(probe_device)
     train_Y = torch.cat(train_Y, 0).to(probe_device)
@@ -687,7 +754,7 @@ def train_seg_probe_paths(features, sem_paths, fH, fW):
     weights = (1.0 / counts)
     weights = (weights / weights.sum() * n_classes).to(probe_device)
     probe = _build_probe(train_X.shape[1], n_classes)
-    probe = _train_probe(probe, train_X, train_Y, epochs=500, task="classification",
+    probe = _train_probe(probe, train_X, train_Y, epochs=100, task="classification",
                          class_weights=weights)
     return probe, id_to_contiguous, contiguous_to_id
 
@@ -735,7 +802,8 @@ def load_siglip2_projection(projection_weights, target_device=None):
             return self.mlp_final(x)
 
     proj = SigLIP2FeatureProjection()
-    ckpt = torch.load(projection_weights, map_location="cpu")
+    proj_path = resolve_siglip_projection_path(projection_weights)
+    ckpt = torch.load(proj_path, map_location="cpu")
     # Handle full RADIO checkpoint vs standalone projection weights
     if "state_dict" in ckpt:
         # Full RADIO checkpoint — extract SigLIP2 adaptor head weights
@@ -756,7 +824,7 @@ def load_siglip2_projection(projection_weights, target_device=None):
 
 def load_text_embedding_candidates(text_emb_path):
     """Load one or more SigLIP2 text-embedding files as candidate banks."""
-    text_emb_path = Path(text_emb_path)
+    text_emb_path = resolve_siglip_text_embeddings_path(text_emb_path)
     if text_emb_path.name.startswith("siglip2_text_embeddings"):
         candidate_paths = sorted(
             text_emb_path.parent.glob("siglip2_text_embeddings*.pt"),
@@ -988,7 +1056,7 @@ def main():
     parser.add_argument("--text_embeddings",
                         default=DEFAULT_SIGLIP2_TEXT_EMBEDDINGS)
     parser.add_argument("--projection_weights",
-                        default="output/radio_gs/siglip2_feat_projection.pth")
+                        default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS)
     parser.add_argument("--grounding_queries", nargs="+",
                         default=list(GROUNDING_QUERY_CLASS_IDS.keys()))
     parser.add_argument("--grounding_seg_threshold", type=float, default=0.35,
@@ -997,6 +1065,8 @@ def main():
                         help="Device for qualitative grounding visualization")
     parser.add_argument("--probe_device", choices=["cpu", "cuda"], default="cpu",
                         help="Device for visualization probe training/prediction")
+    parser.add_argument("--depth_head_checkpoint",
+                        help="Optional pretrained depth head checkpoint to visualize direct depth predictions")
     args = parser.parse_args()
 
     S = args.scale
@@ -1017,8 +1087,7 @@ def main():
     model, codec, renderer, sharpener, refiner, config, is_hybrid = load_pipeline(
         args.config, args.checkpoint)
 
-    scene = getattr(config, "scene", "room_0")
-    scene_root = Path("dataset") / scene
+    scene_root = resolve_scene_root(config)
     train_split = getattr(config, "train_split", "Sequence_1")
     val_split = getattr(config, "val_split", "Sequence_2")
     train_feat_dir = resolve_split_feature_dir(config, "train")
@@ -1267,12 +1336,30 @@ def main():
     print("  Training rendered segmentation probe...")
     rend_seg_probe, rend_seg_id_to_contig, rend_seg_contig_to_id = train_seg_probe_paths(
         train_rend_feats, train_sem_paths, fH, fW)
+    direct_depth_head = None
+    direct_depth_cfg = None
+    direct_depth_label = "Direct Head"
+    if args.depth_head_checkpoint:
+        direct_depth_head, direct_depth_cfg = load_depth_head_checkpoint(
+            args.depth_head_checkpoint, config
+        )
+        ckpt_name = Path(args.depth_head_checkpoint).stem.lower()
+        if "dm" in ckpt_name:
+            direct_depth_label = "Direct DM Head"
+        elif "oracle" in ckpt_name:
+            direct_depth_label = "Direct Oracle Head"
+        print(
+            f"  Loaded {direct_depth_label}: "
+            f"type={direct_depth_cfg['head_type']} hidden={direct_depth_cfg['hidden_dim']} "
+            f"layers={direct_depth_cfg['num_layers']}"
+        )
 
     # Cache task predictions used by multiple visualization stages
     tH, tW = fH * S, fW * S
     oracle_depth_preds = []
     rend_depth_preds = []
     fused_depth_preds = []
+    direct_depth_preds = []
     oracle_seg_preds_hr = []
     rend_seg_preds_hr = []
     for j in range(n_vis):
@@ -1282,6 +1369,10 @@ def main():
             predict_fused_depth(
                 fused_depth_probe, rend_feats[j], geom_depths_lowres[j],
                 geom_alphas_lowres[j], fH, fW)
+        )
+        direct_depth_preds.append(
+            predict_depth_head(direct_depth_head, rend_feats[j], fH, fW)
+            if direct_depth_head is not None else None
         )
         oracle_seg_preds_hr.append(
             predict_seg_smooth(
@@ -1299,7 +1390,7 @@ def main():
     if device.type == "cuda":
         for module in [
             model, codec, renderer, geom_renderer, sharpener, refiner,
-            oracle_depth_probe, rend_depth_probe, fused_depth_probe,
+            oracle_depth_probe, rend_depth_probe, fused_depth_probe, direct_depth_head,
             oracle_seg_probe, rend_seg_probe,
         ]:
             if isinstance(module, nn.Module):
@@ -1397,6 +1488,10 @@ def main():
         oracle_pred = resize_depth_map(oracle_depth_preds[j], gt_depth.shape[:2])
         rend_pred = resize_depth_map(rend_depth_preds[j], gt_depth.shape[:2])
         fused_pred = resize_depth_map(fused_depth_preds[j], gt_depth.shape[:2])
+        direct_pred = (
+            resize_depth_map(direct_depth_preds[j], gt_depth.shape[:2])
+            if direct_depth_preds[j] is not None else None
+        )
         rgb = load_vis_rgb(j)
         rgb_display = cv2.resize(rgb, (tW, tH), interpolation=cv2.INTER_LINEAR)
 
@@ -1417,15 +1512,24 @@ def main():
         else:
             panels.append(np.zeros((tH, tW, 3), dtype=np.uint8))
 
-        panels += [
-            _resize_panel(depth_to_colormap(oracle_pred, gt_vmin, gt_vmax)),
-            _resize_panel(depth_to_colormap(rend_pred, gt_vmin, gt_vmax)),
-            _resize_panel(depth_to_colormap(fused_pred, gt_vmin, gt_vmax)),
-            _resize_panel(depth_error_map(fused_pred, gt_depth)),
-        ]
+        panels.append(_resize_panel(depth_to_colormap(oracle_pred, gt_vmin, gt_vmax)))
+        labels = ["RGB", "GT Depth (Full)", "Geom Depth", "Oracle Pred"]
 
-        labels = ["RGB", "GT Depth (Full)", "Geom Depth", "Oracle Pred",
-                   "Feature Pred", "Fused Pred", "Fused Error"]
+        if direct_pred is not None:
+            panels += [
+                _resize_panel(depth_to_colormap(direct_pred, gt_vmin, gt_vmax)),
+                _resize_panel(depth_to_colormap(fused_pred, gt_vmin, gt_vmax)),
+                _resize_panel(depth_error_map(direct_pred, gt_depth)),
+            ]
+            labels += [direct_depth_label, "Fused Pred", f"{direct_depth_label} Error"]
+        else:
+            panels += [
+                _resize_panel(depth_to_colormap(rend_pred, gt_vmin, gt_vmax)),
+                _resize_panel(depth_to_colormap(fused_pred, gt_vmin, gt_vmax)),
+                _resize_panel(depth_error_map(fused_pred, gt_depth)),
+            ]
+            labels += ["Feature Pred", "Fused Pred", "Fused Error"]
+
         for k, label in enumerate(labels):
             panels[k] = add_text(panels[k], label, pos=(5, 20), font_scale=0.5)
 
@@ -1453,6 +1557,10 @@ def main():
 
         r_pred = resize_depth_map(rend_depth_preds[j], gt_d.shape[:2])
         f_pred = resize_depth_map(fused_depth_preds[j], gt_d.shape[:2])
+        d_pred = (
+            resize_depth_map(direct_depth_preds[j], gt_d.shape[:2])
+            if direct_depth_preds[j] is not None else None
+        )
         rgb = load_vis_rgb(j)
 
         geom_panel = (cv2.resize(depth_to_colormap(gd, gt_vmin, gt_vmax), (tW, tH),
@@ -1465,19 +1573,24 @@ def main():
                 return cv2.resize(img, (tW, tH), interpolation=cv2.INTER_LINEAR)
             return img
 
+        depth_panel = d_pred if d_pred is not None else r_pred
+        depth_label = direct_depth_label if d_pred is not None else "Feature Pred"
+        error_panel = depth_error_map(depth_panel, gt_d)
+        error_label = f"{depth_label} Error"
+
         panels = [
             cv2.resize(rgb, (tW, tH), interpolation=cv2.INTER_LINEAR),
             _dgrid(depth_to_colormap(gt_d, gt_vmin, gt_vmax)),
             geom_panel,
-            _dgrid(depth_to_colormap(r_pred, gt_vmin, gt_vmax)),
+            _dgrid(depth_to_colormap(depth_panel, gt_vmin, gt_vmax)),
             _dgrid(depth_to_colormap(f_pred, gt_vmin, gt_vmax)),
-            _dgrid(depth_error_map(f_pred, gt_d)),
+            _dgrid(error_panel),
         ]
         grid_rows.append(hconcat_with_border(panels, border=2))
 
     if grid_rows:
         header = make_header(
-            ["Input RGB", "GT Depth (Full)", "Geom Depth", "Feature Pred", "Fused Pred", "Fused Error"],
+            ["Input RGB", "GT Depth (Full)", "Geom Depth", depth_label, "Fused Pred", error_label],
             fW * S, height=30, border=2)
         full_grid = vconcat_with_border([header] + grid_rows, border=2)
         cv2.imwrite(str(dirs["depth"] / "depth_grid.png"),
@@ -1545,8 +1658,8 @@ def main():
 
     # ── Step 6: Text grounding heatmaps (per-query normalized + softmax) ─────
     print("\n[6/7] Generating text grounding heatmaps...")
-    text_emb_path = Path(args.text_embeddings)
-    proj_path = Path(args.projection_weights)
+    text_emb_path = resolve_siglip_text_embeddings_path(args.text_embeddings)
+    proj_path = resolve_siglip_projection_path(args.projection_weights)
     if text_emb_path.exists() and proj_path.exists():
         candidate_banks = load_text_embedding_candidates(text_emb_path)
         if not candidate_banks:
@@ -1818,8 +1931,12 @@ def main():
 
         # Depth error map (absolute difference, jet colormap)
         if d_raw is not None:
-            r_depth = resize_depth_map(fused_depth_preds[j], gt_d.shape[:2])
-            depth_err = np.abs(r_depth - gt_d)
+            chosen_depth = (
+                resize_depth_map(direct_depth_preds[j], gt_d.shape[:2])
+                if direct_depth_preds[j] is not None
+                else resize_depth_map(fused_depth_preds[j], gt_d.shape[:2])
+            )
+            depth_err = np.abs(chosen_depth - gt_d)
             depth_err[gt_d < 0.01] = 0
             err_max = np.percentile(depth_err[gt_d > 0.01], 95) if (gt_d > 0.01).any() else 1.0
             err_norm = np.clip(depth_err / max(err_max, 1e-6), 0, 1)
@@ -1833,10 +1950,23 @@ def main():
                        geom_depth_panel, gt_seg_panel]
         row1_labels = ["Input RGB", "Rendered PCA", "GT Depth (Full)",
                        "Geom Depth", "GT Segmentation"]
-        row2_panels = [cos_panel, gt_pca_panel, rend_depth_panel,
+        selected_depth_panel = rend_depth_panel
+        selected_depth_label = "Fused Depth"
+        if direct_depth_preds[j] is not None and d_raw is not None:
+            direct_depth_panel = _to_display(
+                depth_to_colormap(
+                    resize_depth_map(direct_depth_preds[j], gt_d.shape[:2]),
+                    gt_d[gt_d > 0.01].min() if (gt_d > 0.01).any() else 0,
+                    gt_d.max(),
+                )
+            )
+            selected_depth_panel = direct_depth_panel
+            selected_depth_label = direct_depth_label
+
+        row2_panels = [cos_panel, gt_pca_panel, selected_depth_panel,
                        depth_err_panel, rend_seg_panel]
         row2_labels = [f"Cosine ({cos.mean():.3f})", "GT PCA",
-                       "Fused Depth", "Depth Error", "Pred Segmentation"]
+                       selected_depth_label, "Depth Error", "Pred Segmentation"]
 
         for k in range(5):
             row1_panels[k] = add_text(row1_panels[k], row1_labels[k], font_scale=0.45)

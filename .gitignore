@@ -1,6 +1,5 @@
 output/
-dataset/
-reference/
+
 
 *.log
 *.pt
@@ -8,6 +7,12 @@ reference/
 *.ply
 *.npy
 *.npz
+
+!checkpoints/
+checkpoints/*
+!checkpoints/siglip2_feat_projection.pth
+!checkpoints/siglip2_text_embeddings_v2.pt
+!checkpoints/siglip2_text_embeddings_v4.pt
 
 __pycache__/
 *.pyc

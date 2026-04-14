@@ -29,6 +29,7 @@ from radio_gs.data.benchmark_paths import (
     resolve_split_frame_ids,
     resolve_split_pose_source,
 )
+from radio_gs.heads.depth_head import DepthHead
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.depth_fusion import (
     predict_depth_fusion,
@@ -459,6 +460,10 @@ def main():
     parser.add_argument("--n_val", type=int, default=100)
     parser.add_argument("--use_rendered_rgb", action="store_true",
                         help="Use 2DGS-rendered RGB as refiner guide instead of GT RGB")
+    parser.add_argument("--depth_head_checkpoint",
+                        help="Optional pretrained depth head checkpoint for direct evaluation")
+    parser.add_argument("--direct_depth_only", action="store_true",
+                        help="Skip probe fitting and only evaluate a provided depth head on val views")
     args = parser.parse_args()
     
     print(f"Loading model from {args.checkpoint}...")
@@ -541,7 +546,11 @@ def main():
             return w2c_s1[fidx] if seq == train_split else w2c_s2[fidx]
         
         def _get_gt_dir(seq):
-            return Path(f"output/radio_features_1280d/{scene}/{seq}/backbone")
+            if seq == train_split:
+                base = resolve_split_feature_dir(config, "train")
+            else:
+                base = resolve_split_feature_dir(config, "val")
+            return base / "backbone" if (base / "backbone").exists() else base
         
         # Build dir_idx pairs for GT data loading
         train_depth_dir_idx = [(scene_root / seq / "depth", fidx) for seq, fidx in train_seq_frame]
@@ -643,7 +652,8 @@ def main():
         use_2dgs=getattr(config, "use_2dgs", False),
     ).to(device)
     
-    print(f"\n=== Rendering features ({len(train_indices)} train, {len(val_indices)} val) ===")
+    n_train_render = 0 if args.direct_depth_only else len(train_indices)
+    print(f"\n=== Rendering features ({n_train_render} train, {len(val_indices)} val) ===")
     if rgb_guide_enabled:
         if self_guided:
             print(f"  RGB guide: SELF-RENDERED from model SH (feature_size={feature_size})")
@@ -667,8 +677,6 @@ def main():
     train_gt_1280 = []
     train_geom_depths = []
     train_geom_alphas = []
-    if not mixed_split:
-        gt_dir = Path(f"output/radio_features_1280d/{scene}/{train_split}/backbone")
     
     def _render_one_frame(w2c_mat, frame_idx, gt_feat_path, rgb_dir_for_guide=None):
         """Render a single frame and return decoded features plus geometric cues."""
@@ -713,24 +721,25 @@ def main():
         gt_feat = torch.load(gt_feat_path).float()
         return decoded, gt_feat, geom_depth, geom_alpha, result, pose
     
-    print("  Rendering train features...")
-    with torch.no_grad():
-        for j, i in enumerate(tqdm(train_indices, leave=False)):
-            if mixed_split:
-                seq, fidx = train_seq_frame[j]
-                w2c_mat = _get_w2c(seq, fidx)
-                gt_path = _get_gt_dir(seq) / f"rgb_{fidx}.pt"
-                rgb_guide_dir = str(scene_root / seq / "rgb") if (rgb_guide_enabled and not use_rendered_rgb) else None
-            else:
-                w2c_mat = train_w2c[j]
-                gt_path = gt_dir / f"rgb_{i}.pt"
-                rgb_guide_dir = train_rgb_dir
-            decoded, gt_feat, geom_depth, geom_alpha, _, _ = _render_one_frame(
-                w2c_mat, i if not mixed_split else fidx, gt_path, rgb_guide_dir)
-            train_decoded.append(decoded)
-            train_gt_1280.append(gt_feat)
-            train_geom_depths.append(geom_depth)
-            train_geom_alphas.append(geom_alpha)
+    if not args.direct_depth_only:
+        print("  Rendering train features...")
+        with torch.no_grad():
+            for j, i in enumerate(tqdm(train_indices, leave=False)):
+                if mixed_split:
+                    seq, fidx = train_seq_frame[j]
+                    w2c_mat = _get_w2c(seq, fidx)
+                    gt_path = _get_gt_dir(seq) / f"rgb_{fidx}.pt"
+                    rgb_guide_dir = str(scene_root / seq / "rgb") if (rgb_guide_enabled and not use_rendered_rgb) else None
+                else:
+                    w2c_mat = train_w2c[j]
+                    gt_path = gt_dir / f"rgb_{i}.pt"
+                    rgb_guide_dir = train_rgb_dir
+                decoded, gt_feat, geom_depth, geom_alpha, _, _ = _render_one_frame(
+                    w2c_mat, i if not mixed_split else fidx, gt_path, rgb_guide_dir)
+                train_decoded.append(decoded)
+                train_gt_1280.append(gt_feat)
+                train_geom_depths.append(geom_depth)
+                train_geom_alphas.append(geom_alpha)
     
     # Render val features
     val_decoded = []
@@ -793,11 +802,79 @@ def main():
         val_depth = val_split_inputs["depth_dir"]
         train_sem = train_split_inputs["sem_dir"]
         val_sem = val_split_inputs["sem_dir"]
+
+    val_gt_sub = [val_gt_1280[j] for j in range(len(val_indices))]
+
+    if args.direct_depth_only:
+        if not args.depth_head_checkpoint:
+            raise ValueError("--direct_depth_only requires --depth_head_checkpoint")
+
+        depth_head, head_cfg = load_depth_head_checkpoint(args.depth_head_checkpoint, config)
+        print(f"\n=== DIRECT HEAD ONLY: Loaded {args.depth_head_checkpoint} ===")
+        print(f"  type={head_cfg['head_type']} hidden={head_cfg['hidden_dim']} layers={head_cfg['num_layers']}")
+
+        direct_head_oracle = eval_depth_head_indexed(
+            depth_head,
+            val_gt_sub,
+            val_indices,
+            val_depth,
+            fH=gt_fH,
+            fW=gt_fW,
+            val_dir_idx=val_depth_dir_idx,
+            dataset_type=dataset_type,
+        )
+        print(
+            f"  GT feat head: AbsRel={direct_head_oracle['depth_abs_rel']:.4f}  "
+            f"RMSE={direct_head_oracle['depth_rmse']:.4f}  "
+            f"δ<1.25={direct_head_oracle['depth_delta1']:.4f}"
+        )
+
+        direct_head_rendered = eval_depth_head_indexed(
+            depth_head,
+            val_decoded,
+            val_indices,
+            val_depth,
+            fH=rend_fH,
+            fW=rend_fW,
+            val_dir_idx=val_depth_dir_idx,
+            dataset_type=dataset_type,
+        )
+        print(
+            f"  Rendered head: AbsRel={direct_head_rendered['depth_abs_rel']:.4f}  "
+            f"RMSE={direct_head_rendered['depth_rmse']:.4f}  "
+            f"δ<1.25={direct_head_rendered['depth_delta1']:.4f}"
+        )
+
+        geom_depth = eval_geom_depth(
+            val_geom_depths,
+            val_indices,
+            val_depth,
+            fH=rend_fH,
+            fW=rend_fW,
+            val_dir_idx=val_depth_dir_idx,
+            dataset_type=dataset_type,
+        )
+        geom_hr_depth = eval_fullres_geom_depth(
+            val_fullres_depths,
+            val_indices,
+            val_depth,
+            val_dir_idx=val_depth_dir_idx,
+            dataset_type=dataset_type,
+        )
+
+        print("\n" + "=" * 72)
+        print(f"{'Direct depth-only summary':<26} {'AbsRel':>8} {'RMSE':>8} {'δ<1.25':>8}")
+        print("-" * 72)
+        print(f"{'Head @ GT feat':<26} {direct_head_oracle['depth_abs_rel']:>8.4f} {direct_head_oracle['depth_rmse']:>8.4f} {direct_head_oracle['depth_delta1']:>8.4f}")
+        print(f"{'Head @ rendered':<26} {direct_head_rendered['depth_abs_rel']:>8.4f} {direct_head_rendered['depth_rmse']:>8.4f} {direct_head_rendered['depth_delta1']:>8.4f}")
+        print(f"{'Geom same-res':<26} {geom_depth['depth_abs_rel']:>8.4f} {geom_depth['depth_rmse']:>8.4f} {geom_depth['depth_delta1']:>8.4f}")
+        print(f"{'Geom full-res':<26} {geom_hr_depth['depth_abs_rel']:>8.4f} {geom_hr_depth['depth_rmse']:>8.4f} {geom_hr_depth['depth_delta1']:>8.4f}")
+        print("=" * 72)
+        return
     
     # ====== Evaluation Mode 1: Oracle (GT features) ======
     print("\n=== ORACLE: Depth (GT features) ===")
     train_gt_sub = [train_gt_1280[j] for j in range(len(train_indices))]
-    val_gt_sub = [val_gt_1280[j] for j in range(len(val_indices))]
     oracle_depth = eval_depth_indexed(train_gt_sub, train_indices, train_depth,
                                        val_gt_sub, val_indices, val_depth,
                                        fH=gt_fH, fW=gt_fW,
@@ -833,6 +910,47 @@ def main():
                                       val_dir_idx=val_sem_dir_idx,
                                       dataset_type=dataset_type)
     print(f"  mIoU={rendered_seg['seg_mIoU']:.4f}  PixelAcc={rendered_seg['seg_pixel_acc']:.4f}")
+
+    direct_head_oracle = None
+    direct_head_rendered = None
+    if args.depth_head_checkpoint:
+        depth_head, head_cfg = load_depth_head_checkpoint(args.depth_head_checkpoint, config)
+        print(f"\n=== DIRECT HEAD: Loaded {args.depth_head_checkpoint} ===")
+        print(f"  type={head_cfg['head_type']} hidden={head_cfg['hidden_dim']} layers={head_cfg['num_layers']}")
+
+        print("\n=== DIRECT HEAD: Depth on GT features ===")
+        direct_head_oracle = eval_depth_head_indexed(
+            depth_head,
+            val_gt_sub,
+            val_indices,
+            val_depth,
+            fH=gt_fH,
+            fW=gt_fW,
+            val_dir_idx=val_depth_dir_idx,
+            dataset_type=dataset_type,
+        )
+        print(
+            f"  AbsRel={direct_head_oracle['depth_abs_rel']:.4f}  "
+            f"RMSE={direct_head_oracle['depth_rmse']:.4f}  "
+            f"δ<1.25={direct_head_oracle['depth_delta1']:.4f}"
+        )
+
+        print("\n=== DIRECT HEAD: Depth on rendered features ===")
+        direct_head_rendered = eval_depth_head_indexed(
+            depth_head,
+            val_decoded,
+            val_indices,
+            val_depth,
+            fH=rend_fH,
+            fW=rend_fW,
+            val_dir_idx=val_depth_dir_idx,
+            dataset_type=dataset_type,
+        )
+        print(
+            f"  AbsRel={direct_head_rendered['depth_abs_rel']:.4f}  "
+            f"RMSE={direct_head_rendered['depth_rmse']:.4f}  "
+            f"δ<1.25={direct_head_rendered['depth_delta1']:.4f}"
+        )
 
     # ====== Evaluation Mode 2b: Geometric depth (scale-shift aligned) ======
     print("\n=== GEOMETRIC: Depth (3DGS rendered, scale-shift aligned, 30x40) ===")
@@ -918,6 +1036,14 @@ def main():
     print(f"{'Cross (GT→render)':<25} {cross_depth['depth_abs_rel']:>8.4f} {cross_depth['depth_rmse']:>8.4f} {cross_depth['depth_delta1']:>8.4f} {cross_seg['seg_mIoU']:>8.4f} {cross_seg['seg_pixel_acc']:>8.4f} {_g(cross_grnd, 'grnd_mAP')} {_g(cross_grnd, 'grnd_mIoU@0.5')} {_g(cross_grnd, 'grnd_corr')}")
     print("="*114)
 
+    if direct_head_oracle is not None and direct_head_rendered is not None:
+        print("\n" + "=" * 55)
+        print(f"{'Direct depth head':<20} {'AbsRel':>8} {'RMSE':>8} {'δ<1.25':>8}")
+        print("-" * 55)
+        print(f"{'Head @ GT feat':<20} {direct_head_oracle['depth_abs_rel']:>8.4f} {direct_head_oracle['depth_rmse']:>8.4f} {direct_head_oracle['depth_delta1']:>8.4f}")
+        print(f"{'Head @ rendered':<20} {direct_head_rendered['depth_abs_rel']:>8.4f} {direct_head_rendered['depth_rmse']:>8.4f} {direct_head_rendered['depth_delta1']:>8.4f}")
+        print("=" * 55)
+
 
 def eval_depth_indexed(train_feats, train_idx, depth_dir, val_feats, val_idx, val_depth_dir, fH=30, fW=40,
                        train_dir_idx=None, val_dir_idx=None, dataset_type="replica"):
@@ -984,6 +1110,78 @@ def eval_depth_indexed(train_feats, train_idx, depth_dir, val_feats, val_idx, va
             delta1s.append((torch.max(p/g, g/p) < 1.25).float().mean().item())
     
     return {"depth_abs_rel": np.mean(abs_rels), "depth_rmse": np.mean(rmses), "depth_delta1": np.mean(delta1s)}
+
+
+def load_depth_head_checkpoint(checkpoint_path, fallback_config=None):
+    ckpt = torch.load(checkpoint_path, map_location=device)
+    state = ckpt.get("state_dict", ckpt)
+    head_cfg = ckpt.get("config", {})
+    if fallback_config is not None:
+        feature_dim = head_cfg.get("feature_dim", getattr(fallback_config, "radio_feature_dim", 1280))
+        hidden_dim = head_cfg.get("hidden_dim", getattr(fallback_config, "frozen_depth_head_hidden_dim", 256))
+        num_layers = head_cfg.get("num_layers", getattr(fallback_config, "frozen_depth_head_num_layers", 3))
+        head_type = head_cfg.get("head_type", getattr(fallback_config, "frozen_depth_head_type", "mlp"))
+    else:
+        feature_dim = head_cfg.get("feature_dim", 1280)
+        hidden_dim = head_cfg.get("hidden_dim", 256)
+        num_layers = head_cfg.get("num_layers", 3)
+        head_type = head_cfg.get("head_type", "mlp")
+
+    head = DepthHead(
+        feature_dim=feature_dim,
+        hidden_dim=hidden_dim,
+        num_layers=num_layers,
+        head_type=head_type,
+    ).to(device)
+    head.load_state_dict(state)
+    head.eval()
+    return head, {
+        "feature_dim": feature_dim,
+        "hidden_dim": hidden_dim,
+        "num_layers": num_layers,
+        "head_type": head_type,
+    }
+
+
+def eval_depth_head_indexed(head, val_feats, val_idx, val_depth_dir, fH=30, fW=40,
+                            val_dir_idx=None, dataset_type="replica"):
+    """Evaluate a pretrained depth head directly without fitting a probe."""
+    _val_pairs = val_dir_idx if val_dir_idx else [(val_depth_dir, i) for i in val_idx]
+
+    abs_rels, rmses, delta1s = [], [], []
+    with torch.no_grad():
+        for feat, (ddir, i) in zip(val_feats, _val_pairs):
+            dpath = resolve_depth_path(ddir, i, dataset_type)
+            if dpath is None or not dpath.exists():
+                continue
+            d = cv2.imread(str(dpath), cv2.IMREAD_UNCHANGED)
+            if d is None:
+                continue
+            d = torch.from_numpy(d.astype(np.float32) / 1000.0).to(device)
+            d = F.interpolate(
+                d.unsqueeze(0).unsqueeze(0), (fH, fW), mode="bilinear", align_corners=False
+            ).squeeze()
+            if feat.shape[1:] != (fH, fW):
+                feat_r = F.interpolate(
+                    feat.unsqueeze(0).to(device), (fH, fW), mode="bilinear", align_corners=False
+                )
+            else:
+                feat_r = feat.unsqueeze(0).to(device)
+            pred = head(feat_r).squeeze(0).squeeze(0)
+            valid = d > 0.01
+            if valid.sum() < 10:
+                continue
+            p = pred[valid].clamp(min=1e-6)
+            g = d[valid].clamp(min=1e-6)
+            abs_rels.append((torch.abs(p - g) / g).mean().item())
+            rmses.append(torch.sqrt(((p - g) ** 2).mean()).item())
+            delta1s.append((torch.max(p / g, g / p) < 1.25).float().mean().item())
+
+    return {
+        "depth_abs_rel": np.mean(abs_rels),
+        "depth_rmse": np.mean(rmses),
+        "depth_delta1": np.mean(delta1s),
+    }
 
 
 def eval_seg_indexed(train_feats, train_idx, sem_dir, val_feats, val_idx, val_sem_dir, fH=30, fW=40,
