@@ -4,7 +4,7 @@
 #
 # Prerequisites for each scene:
 #   1. RADIO features extracted: output/radio_features_1280d/{scene}/Sequence_{1,2}/backbone/
-#   2. 2DGS model trained: output/2dgs_models/{scene}/v8_fixed_poses/point_cloud/iteration_30000/point_cloud.ply
+#   2. 3DGS model trained: output/3dgs_models/{scene}/v8_fixed_poses_3dgs/point_cloud/iteration_30000/point_cloud.ply
 #   3. Config: radio_gs/configs/replica_explicit_v11_{scene}.yaml
 
 set -e
@@ -34,7 +34,7 @@ for i in "${!SCENE_LIST[@]}"; do
     gpu="${GPU_LIST[$i]}"
     scene_nounderscore="${scene//_/}"
     CONFIG="radio_gs/configs/replica_explicit_v11_${scene}.yaml"
-    PLY="output/2dgs_models/${scene}/v8_fixed_poses/point_cloud/iteration_30000/point_cloud.ply"
+    PLY="output/3dgs_models/${scene}/v8_fixed_poses_3dgs/point_cloud/iteration_30000/point_cloud.ply"
 
     echo "============================================================"
     echo "  Scene: $scene | GPU: $gpu"
@@ -43,7 +43,7 @@ for i in "${!SCENE_LIST[@]}"; do
     echo "============================================================"
 
     if [ ! -f "$PLY" ]; then
-        echo "  ERROR: PLY not found, skipping. Train 2DGS first."
+        echo "  ERROR: PLY not found, skipping. Train 3DGS first."
         continue
     fi
 

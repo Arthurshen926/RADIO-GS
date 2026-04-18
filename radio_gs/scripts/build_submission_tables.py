@@ -152,11 +152,11 @@ AUXILIARY_PUBLISHED_METHODS = [
 READINESS_AREAS = [
     ("Problem framing", 0.80, "Main task definition is already coherent."),
     ("Method implementation", 0.85, "Training, evaluation, and visualization all exist."),
-    ("Main grounding results", 0.75, "LERF-OVS evidence is already strong."),
+    ("Main grounding results", 0.80, "LERF-OVS evidence is already strong and now provenance-backed."),
     ("Published baseline coverage", 0.45, "Main grounding baselines exist, auxiliary baselines remain thin."),
     ("Statistical confidence", 0.35, "Multiple seeds and confidence intervals are still missing."),
     ("Cross-domain generalization", 0.35, "Replica + LERF-OVS is not enough for a top-conference claim."),
-    ("Submission packaging", 0.50, "Narrative exists, but tables and evidence are not frozen yet."),
+    ("Submission packaging", 0.60, "Main table and audit are frozen; statistics and efficiency are still missing."),
 ]
 
 

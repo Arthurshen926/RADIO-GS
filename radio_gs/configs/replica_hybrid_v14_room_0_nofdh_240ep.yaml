@@ -4,7 +4,7 @@ seed: 42
 
 scene: "room_0"
 scene_root: "/mnt/pool/sqy/dataset/room_0"
-ply_path: "/root/ICLPose/output/2dgs_models/room_0/v8_fixed_poses/point_cloud/iteration_30000/point_cloud.ply"
+ply_path: "/root/RADIO-GS/output/3dgs_models/room_0/v8_fixed_poses_3dgs/point_cloud/iteration_30000/point_cloud.ply"
 
 radio_version: "c-radio_v4-h"
 radio_repo: "/root/RADIO"
@@ -66,7 +66,7 @@ cy: 239.5
 feature_height: 60
 feature_width: 80
 max_channels_per_chunk: 32
-use_2dgs: true
+use_2dgs: false
 
 epochs: 240
 batch_size: 1
@@ -106,8 +106,8 @@ seg_head_num_layers: 3
 seg_loss_type: "ce"
 seg_ignore_index: 255
 
-feature_dir: "/root/ICLPose/output/radio_features_1280d_reextract_20260407/room_0/Sequence_1"
-val_feature_dir: "/root/ICLPose/output/radio_features_1280d_reextract_20260407/room_0/Sequence_2"
+feature_dir: "/root/RADIO-GS/output/radio_features_1280d_reextract_20260407/room_0/Sequence_1"
+val_feature_dir: "/root/RADIO-GS/output/radio_features_1280d_reextract_20260407/room_0/Sequence_2"
 train_split: "Sequence_1"
 val_split: "Sequence_2"
 mixed_split: true

@@ -242,13 +242,16 @@ def train_oracle_head(
         nw_train = 0 if getattr(dataset, '_preloaded', False) else 2
         nw_val = 0 if getattr(val_dataset, '_preloaded', False) else 2
 
+    pin_train = nw_train > 0
+    pin_val = nw_val > 0
+
     train_loader = DataLoader(
         train_subset, batch_size=batch_size, shuffle=True,
-        num_workers=nw_train, pin_memory=True, drop_last=True,
+        num_workers=nw_train, pin_memory=pin_train, drop_last=True,
     )
     val_loader = DataLoader(
         val_subset, batch_size=batch_size, shuffle=False,
-        num_workers=nw_val, pin_memory=True,
+        num_workers=nw_val, pin_memory=pin_val,
     )
 
     optimizer = torch.optim.AdamW(head.parameters(), lr=lr, weight_decay=1e-5)

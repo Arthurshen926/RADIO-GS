@@ -39,6 +39,7 @@ from radio_gs.data.benchmark_paths import (
     resolve_split_frame_ids,
     resolve_split_pose_source,
 )
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.featsharp_3d import FeatSharp3D
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
@@ -83,6 +84,7 @@ def build_components(config: RadioGSConfig, checkpoint_path: str, device: torch.
     ply_path = getattr(config, "ply_path", None)
     if ply_path:
         model.load_from_ply(ply_path)
+    use_2dgs = resolve_use_2dgs(config, ply_path)
 
     codec = HCDCodec(
         input_dim=getattr(config, "radio_feature_dim", 1280),
@@ -104,7 +106,7 @@ def build_components(config: RadioGSConfig, checkpoint_path: str, device: torch.
         cx=config.cx * config.feature_width / config.image_width,
         cy=config.cy * config.feature_height / config.image_height,
         max_channels_per_chunk=getattr(config, "max_channels_per_chunk", 32),
-        use_2dgs=getattr(config, "use_2dgs", False),
+        use_2dgs=use_2dgs,
     )
 
     # Load checkpoint

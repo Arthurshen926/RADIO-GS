@@ -38,6 +38,7 @@ from radio_gs.artifact_paths import (
 )
 from radio_gs.config import load_config
 from radio_gs.data.benchmark_paths import resolve_scene_root
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.heads.depth_head import DepthHead
 from radio_gs.models.depth_fusion import (
     predict_depth_fusion,
@@ -77,6 +78,7 @@ def build_renderer(config, image_height=None, image_width=None):
     """Build a feature/RGB renderer at the requested output resolution."""
     H = image_height or getattr(config, "feature_height", 30)
     W = image_width or getattr(config, "feature_width", 40)
+    use_2dgs = resolve_use_2dgs(config)
     return FeatureFieldRenderer(
         image_height=H, image_width=W,
         fx=getattr(config, "fx", 320.0) * W / getattr(config, "image_width", 640),
@@ -84,7 +86,7 @@ def build_renderer(config, image_height=None, image_width=None):
         cx=getattr(config, "cx", 319.5) * W / getattr(config, "image_width", 640),
         cy=getattr(config, "cy", 239.5) * H / getattr(config, "image_height", 480),
         max_channels_per_chunk=getattr(config, "max_channels_per_chunk", 32),
-        use_2dgs=getattr(config, "use_2dgs", False),
+        use_2dgs=use_2dgs,
     ).to(device)
 
 

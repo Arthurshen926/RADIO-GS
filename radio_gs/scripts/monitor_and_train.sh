@@ -1,9 +1,9 @@
 #!/bin/bash
-# Monitor 2DGS training completion and auto-start V11 feature field training
+# Monitor 3DGS training completion and auto-start V11 feature field training
 # Usage: bash radio_gs/scripts/monitor_and_train.sh [--eval-after]
 #
 # This script:
-# 1. Polls for 2DGS PLY files for room_1 and room_2
+# 1. Polls for 3DGS PLY files for room_1 and room_2
 # 2. As soon as a PLY appears, launches V11 training on the corresponding GPU
 # 3. Optionally runs evaluation after training completes
 
@@ -14,14 +14,14 @@ if [[ "$1" == "--eval-after" ]]; then
     EVAL_AFTER=true
 fi
 
-PLY_ROOM1="output/2dgs_models/room_1/v8_fixed_poses/point_cloud/iteration_30000/point_cloud.ply"
-PLY_ROOM2="output/2dgs_models/room_2/v8_fixed_poses/point_cloud/iteration_30000/point_cloud.ply"
+PLY_ROOM1="output/3dgs_models/room_1/v8_fixed_poses_3dgs/point_cloud/iteration_30000/point_cloud.ply"
+PLY_ROOM2="output/3dgs_models/room_2/v8_fixed_poses_3dgs/point_cloud/iteration_30000/point_cloud.ply"
 
 CONFIG_ROOM1="radio_gs/configs/replica_explicit_v11_room_1.yaml"
 CONFIG_ROOM2="radio_gs/configs/replica_explicit_v11_room_2.yaml"
 
-GPU_ROOM1=3  # Same GPU as 2DGS training (freed after completion)
-GPU_ROOM2=2  # Same GPU as 2DGS training (freed after completion)
+GPU_ROOM1=3  # Same GPU as geometry training (freed after completion)
+GPU_ROOM2=2  # Same GPU as geometry training (freed after completion)
 
 ROOM1_STARTED=false
 ROOM2_STARTED=false
@@ -31,7 +31,7 @@ ROOM2_PID=""
 echo "=========================================="
 echo "  RADIO-GS Auto-Training Monitor"
 echo "=========================================="
-echo "Monitoring for 2DGS completion..."
+echo "Monitoring for 3DGS completion..."
 echo "  room_1 PLY: $PLY_ROOM1"
 echo "  room_2 PLY: $PLY_ROOM2"
 echo ""
@@ -39,7 +39,7 @@ echo ""
 while true; do
     # Check room_1
     if [ "$ROOM1_STARTED" = false ] && [ -f "$PLY_ROOM1" ]; then
-        echo "[$(date)] ✅ room_1 2DGS complete! PLY found."
+        echo "[$(date)] ✅ room_1 3DGS complete! PLY found."
         echo "  Starting V11 training on GPU $GPU_ROOM1..."
         
         CUDA_VISIBLE_DEVICES=$GPU_ROOM1 python radio_gs/scripts/train_feature_field.py \
@@ -52,7 +52,7 @@ while true; do
     
     # Check room_2
     if [ "$ROOM2_STARTED" = false ] && [ -f "$PLY_ROOM2" ]; then
-        echo "[$(date)] ✅ room_2 2DGS complete! PLY found."
+        echo "[$(date)] ✅ room_2 3DGS complete! PLY found."
         echo "  Starting V11 training on GPU $GPU_ROOM2..."
         
         CUDA_VISIBLE_DEVICES=$GPU_ROOM2 python radio_gs/scripts/train_feature_field.py \

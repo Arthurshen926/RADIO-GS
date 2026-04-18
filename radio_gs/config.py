@@ -200,8 +200,19 @@ class RadioGSConfig:
     frozen_depth_head_hidden_dim: int = 256
     frozen_depth_head_num_layers: int = 3
     frozen_depth_loss_type: str = "scale_invariant"
+    frozen_depth_teacher: str = "geom_depth"  # "geom_depth" or "gt_features"
     frozen_depth_gradient_weight: float = 0.0
     frozen_depth_warmup_epochs: int = 0  # Curriculum: ramp FDH weight from 0→target over N epochs
+
+    # Frozen segmentation head supervision
+    frozen_seg_head_weight: float = 0.0
+    frozen_seg_head_path: str = ""
+    frozen_seg_head_type: str = "mlp"
+    frozen_seg_head_hidden_dim: int = 256
+    frozen_seg_head_num_layers: int = 3
+    frozen_seg_num_classes: int = 40
+    frozen_seg_loss_type: str = "kl"  # "kl" or "mse"
+    frozen_seg_temperature: float = 1.0
 
     # Best-checkpoint selection
     best_metric: str = "cosine"  # cosine, psnr, depth_gt, depth_geom, frozen_depth, seg_aux_miou, ground_query_acc, proxy_depth

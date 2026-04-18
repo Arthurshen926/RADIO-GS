@@ -7,14 +7,13 @@ since depth initialization is already dense).
 
 Usage:
     CUDA_VISIBLE_DEVICES=0 python radio_gs/scripts/train_rgb_gs.py \
-        --scene room_0 --sequence Sequence_1 --iters 10000
+        --scene room_0 --sequences Sequence_1,Sequence_2 --iters 30000
 
 The trained model + rendered RGB images are saved for use as RGB guide
 in the RADIO-GS feature distillation pipeline.
 """
 
 import argparse
-import glob
 import json
 import math
 import os
@@ -34,41 +33,48 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from gsplat import rasterization
 from radio_gs.data.benchmark_paths import extract_feature_frame_index
+from radio_gs.scripts.train_colmap_gs import save_ply
 
 
 # ─── helpers ───────────────────────────────────────────────────────
 
-def load_replica_data(scene: str, sequence: str, dataset_root: str = "dataset",
-                      subsample: int = 1):
-    """Load RGB images, depth maps, and poses for a Replica sequence."""
-    base = Path(dataset_root) / scene / sequence
-    rgb_dir = base / "rgb"
-    depth_dir = base / "depth"
-    pose_file = base / "traj_w_c.txt"
+def _list_indexed_files(directory: Path, prefix: str) -> list[Path]:
+    return sorted(directory.glob(f"{prefix}_*.png"), key=extract_feature_frame_index)
 
-    rgb_files = sorted(
-        glob.glob(str(rgb_dir / "rgb_*.png")),
-        key=lambda p: extract_feature_frame_index(Path(p)),
-    )
-    depth_files = sorted(
-        glob.glob(str(depth_dir / "depth_*.png")),
-        key=lambda p: extract_feature_frame_index(Path(p)),
-    )
-    poses_flat = np.loadtxt(str(pose_file))
-    poses = poses_flat.reshape(-1, 4, 4)  # camera-to-world
 
-    n = min(len(rgb_files), len(depth_files), len(poses))
-    indices = list(range(0, n, subsample))
-
+def load_replica_data(
+    scene: str,
+    sequences: list[str],
+    dataset_root: str = "dataset",
+    subsample: int = 1,
+):
+    """Load RGB images, depth maps, and poses for one or more Replica sequences."""
     images, depths, c2ws = [], [], []
-    for i in indices:
-        img = np.array(Image.open(rgb_files[i]).convert("RGB")).astype(np.float32) / 255.0
-        dep = np.array(Image.open(depth_files[i])).astype(np.float32) / 1000.0  # mm→m
-        images.append(torch.from_numpy(img))       # [H, W, 3]
-        depths.append(torch.from_numpy(dep))        # [H, W]
-        c2ws.append(torch.from_numpy(poses[i].astype(np.float32)))
 
-    print(f"Loaded {len(images)} frames from {base}")
+    for sequence in sequences:
+        base = Path(dataset_root) / scene / sequence
+        rgb_dir = base / "rgb"
+        depth_dir = base / "depth"
+        pose_file = base / "traj_w_c.txt"
+
+        rgb_files = _list_indexed_files(rgb_dir, "rgb")
+        depth_files = _list_indexed_files(depth_dir, "depth")
+        poses_flat = np.loadtxt(str(pose_file))
+        poses = poses_flat.reshape(-1, 4, 4)
+
+        n = min(len(rgb_files), len(depth_files), len(poses))
+        indices = list(range(0, n, subsample))
+
+        for i in indices:
+            img = np.array(Image.open(rgb_files[i]).convert("RGB")).astype(np.float32) / 255.0
+            dep = np.array(Image.open(depth_files[i])).astype(np.float32) / 1000.0
+            images.append(torch.from_numpy(img))
+            depths.append(torch.from_numpy(dep))
+            c2ws.append(torch.from_numpy(poses[i].astype(np.float32)))
+
+        print(f"Loaded {len(indices)} frames from {base}")
+
+    print(f"Loaded {len(images)} total Replica frames from {scene}: {', '.join(sequences)}")
     return images, depths, c2ws
 
 
@@ -282,20 +288,23 @@ def train(args):
                      dtype=torch.float32, device=device)
 
     # Load data
+    sequences = [seq.strip() for seq in args.sequences.split(",") if seq.strip()]
+    if not sequences:
+        raise ValueError("--sequences must contain at least one Replica split")
+
     images, depths, c2ws = load_replica_data(
-        args.scene, args.sequence, args.dataset_root, subsample=1
+        args.scene, sequences, args.dataset_root, subsample=1
     )
-    images = [img.to(device) for img in images]
-    depths = [d.to(device) for d in depths]
-    c2ws = [p.to(device) for p in c2ws]
     n_frames = len(images)
 
+    init_c2ws = c2ws
+
     # Pre-compute w2c matrices
-    w2cs = [torch.inverse(c2w) for c2w in c2ws]
+    w2cs = [torch.inverse(c2w.to(device)) for c2w in c2ws]
 
     # Initialize from depth
     init_data = init_gaussians_from_depth(
-        images, depths, c2ws, fx, fy, cx, cy,
+        images, depths, init_c2ws, fx, fy, cx, cy,
         n_init_frames=args.init_frames,
         stride=args.init_stride,
         max_points=args.max_points,
@@ -320,8 +329,10 @@ def train(args):
     )
 
     # Output directory
-    out_dir = Path(args.output_dir) / f"{args.scene}_{args.sequence}_rgb"
+    out_dir = Path(args.output_dir) / args.scene / args.tag
     out_dir.mkdir(parents=True, exist_ok=True)
+    ply_dir = out_dir / "point_cloud" / f"iteration_{args.iters}"
+    ply_dir.mkdir(parents=True, exist_ok=True)
 
     bg = torch.zeros(3, device=device)  # black background
     best_psnr = 0.0
@@ -330,7 +341,7 @@ def train(args):
     for step in pbar:
         # Random frame
         idx = random.randint(0, n_frames - 1)
-        gt_img = images[idx]     # [H, W, 3]
+        gt_img = images[idx].to(device, non_blocking=True)     # [H, W, 3]
         w2c = w2cs[idx]          # [4, 4]
 
         result = model.render(w2c, K, W, H, bg)
@@ -357,7 +368,8 @@ def train(args):
             with torch.no_grad():
                 for ei in eval_frames:
                     res = model.render(w2cs[ei], K, W, H, bg)
-                    mse = ((res["rgb"].clamp(0, 1) - images[ei]) ** 2).mean()
+                    gt_eval = images[ei].to(device, non_blocking=True)
+                    mse = ((res["rgb"].clamp(0, 1) - gt_eval) ** 2).mean()
                     psnr_sum += -10 * math.log10(mse.item() + 1e-10)
             avg_psnr = psnr_sum / len(eval_frames)
             print(f"\n  [Iter {step+1}] Eval PSNR: {avg_psnr:.2f} dB ({len(eval_frames)} frames)")
@@ -369,6 +381,15 @@ def train(args):
 
     # Final save
     torch.save(model.state_dict(), str(out_dir / "final.pth"))
+    export_state = {
+        "means": model.means,
+        "scales": model.log_scales,
+        "quats": model.quats,
+        "opacities": model.logit_opacity,
+        "sh0": model.sh_coeffs[:, :1, :],
+        "shN": model.sh_coeffs[:, 1:, :],
+    }
+    save_ply(str(ply_dir / "point_cloud.ply"), export_state, model.sh_degree)
     print(f"\nTraining complete. Best PSNR: {best_psnr:.2f} dB")
     print(f"Model saved to {out_dir}")
 
@@ -397,10 +418,19 @@ def render_all_frames(model, w2cs, K, W, H, bg, out_dir, n_frames):
 def main():
     parser = argparse.ArgumentParser(description="Train 3DGS RGB model on Replica")
     parser.add_argument("--scene", default="room_0")
-    parser.add_argument("--sequence", default="Sequence_1")
+    parser.add_argument(
+        "--sequences",
+        default="Sequence_1,Sequence_2",
+        help="Comma-separated Replica sequences to train on",
+    )
     parser.add_argument("--dataset_root", default="dataset")
-    parser.add_argument("--output_dir", default="output/radio_gs/rgb_models")
-    parser.add_argument("--iters", type=int, default=10000)
+    parser.add_argument("--output_dir", default="output/3dgs_models")
+    parser.add_argument(
+        "--tag",
+        default="v8_fixed_poses_3dgs",
+        help="Subdirectory under output_dir/<scene>/ for this geometry run",
+    )
+    parser.add_argument("--iters", type=int, default=30000)
     parser.add_argument("--sh_degree", type=int, default=3)
     parser.add_argument("--init_frames", type=int, default=50)
     parser.add_argument("--init_stride", type=int, default=8)

@@ -18,6 +18,7 @@ from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from radio_gs.config import RadioGSConfig, load_config
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.featsharp_3d import FeatSharp3D
@@ -88,6 +89,7 @@ def main():
     if ply_path:
         model.load_from_ply(ply_path)
     model = model.to(device)
+    use_2dgs = resolve_use_2dgs(config, ply_path)
     
     codec = HCDCodec(
         input_dim=getattr(config, "radio_feature_dim", 1280),
@@ -102,7 +104,7 @@ def main():
         cx=getattr(config, "cx", 319.5) * getattr(config, "feature_width", 40) / getattr(config, "image_width", 640),
         cy=getattr(config, "cy", 239.5) * getattr(config, "feature_height", 30) / getattr(config, "image_height", 480),
         max_channels_per_chunk=getattr(config, "max_channels_per_chunk", 32),
-        use_2dgs=getattr(config, "use_2dgs", False),
+        use_2dgs=use_2dgs,
     ).to(device)
     
     sharpener = FeatSharp3D(

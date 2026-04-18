@@ -39,9 +39,12 @@ Under that framing, the paper solves the following problem:
 
 - [output/radio_gs/reports/sota_comparison_table.md](../output/radio_gs/reports/sota_comparison_table.md)
 - [output/radio_gs/reports/comprehensive_results.md](../output/radio_gs/reports/comprehensive_results.md)
-- [output/lerf_ovs_eval/ramen_v14_fdh_ws240_240ep/lerf_ovs_results.json](../output/lerf_ovs_eval/ramen_v14_fdh_ws240_240ep/lerf_ovs_results.json)
-- [output/lerf_ovs_eval/teatime_v14_fdh_ws240_240ep/lerf_ovs_results.json](../output/lerf_ovs_eval/teatime_v14_fdh_ws240_240ep/lerf_ovs_results.json)
-- [output/lerf_ovs_eval/waldo_kitchen_v14_full_softmax/lerf_ovs_results.json](../output/lerf_ovs_eval/waldo_kitchen_v14_full_softmax/lerf_ovs_results.json)
+- [output/radio_gs/reports/paper_submission_main_table.md](../output/radio_gs/reports/paper_submission_main_table.md)
+- [output/radio_gs/reports/paper_submission_result_audit.md](../output/radio_gs/reports/paper_submission_result_audit.md)
+- [output/lerf_ovs_eval/figurines_best/lerf_ovs_results.json](../output/lerf_ovs_eval/figurines_best/lerf_ovs_results.json)
+- [output/lerf_ovs_eval/ramen_best/lerf_ovs_results.json](../output/lerf_ovs_eval/ramen_best/lerf_ovs_results.json)
+- [output/lerf_ovs_eval/teatime_best/lerf_ovs_results.json](../output/lerf_ovs_eval/teatime_best/lerf_ovs_results.json)
+- [output/lerf_ovs_eval/waldo_best/lerf_ovs_results.json](../output/lerf_ovs_eval/waldo_best/lerf_ovs_results.json)
 
 ### Method explanation assets
 
@@ -86,18 +89,18 @@ an observation spread across reports.
 The paper still needs a dedicated table for training cost, memory, inference
 latency, and feature-resolution trade-offs.
 
-### 6. Result provenance is not yet frozen
+### 6. Main-table provenance is fixed, but future runs still need the same discipline
 
-The internal summary tables already provide a strong paper narrative, but not
-every reported best number is currently tied to an exact rendered JSON result in
-the repository. Before submission freeze, the main table needs a provenance pass
-so every claimed scene score is backed by a concrete run artifact.
+The LERF-OVS main table is now backed by exact rendered JSON artifacts, which
+removes one major submission risk. The remaining requirement is procedural:
+every new ablation, seed run, and cross-domain result should be frozen with the
+same exact-report discipline instead of relying on informal notes.
 
 ## Immediate implementation priorities
 
-1. Freeze the published grounding main table using the generated report files in [output/radio_gs/reports/](../output/radio_gs/reports/).
+1. Validate the LERF depth-only pure-frozen recipe and freeze the follow-up four-scene comparison.
 2. Add a ScanNet or similarly distinct domain experiment.
 3. Add a 2x feature-resolution figurines study and document its effect on small-object grounding.
 4. Add a three-seed summary for the most important checkpoints.
-5. Resolve the generated result audit in output/radio_gs/reports/ so every main-table number has a frozen source.
+5. Add a dedicated efficiency/cost table with runtime and memory profiles.
 6. Convert the current report notes into the actual abstract, introduction, contributions, and main experiment sections.

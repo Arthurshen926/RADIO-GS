@@ -29,6 +29,7 @@ from radio_gs.data.benchmark_paths import (
     resolve_split_frame_ids,
     resolve_split_pose_source,
 )
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.heads.depth_head import DepthHead
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.depth_fusion import (
@@ -126,6 +127,7 @@ def load_model_and_render(config_path, checkpoint_path):
     if ply_path:
         model.load_from_ply(ply_path)
     model = model.to(device).eval()
+    use_2dgs = resolve_use_2dgs(config, ply_path)
     
     codec = HCDCodec(
         input_dim=getattr(config, "radio_feature_dim", 1280),
@@ -142,7 +144,7 @@ def load_model_and_render(config_path, checkpoint_path):
         cx=getattr(config, "cx", 319.5) * getattr(config, "feature_width", 40) / getattr(config, "image_width", 640),
         cy=getattr(config, "cy", 239.5) * getattr(config, "feature_height", 30) / getattr(config, "image_height", 480),
         max_channels_per_chunk=getattr(config, "max_channels_per_chunk", 32),
-        use_2dgs=getattr(config, "use_2dgs", False),
+        use_2dgs=use_2dgs,
     ).to(device)
     
     sharpener = FeatSharp3D(
@@ -492,7 +494,7 @@ def main():
             fy=getattr(config, "fy", 320.0),
             cx=getattr(config, "cx", 319.5),
             cy=getattr(config, "cy", 239.5),
-            use_2dgs=getattr(config, "use_2dgs", False),
+            use_2dgs=renderer.use_2dgs,
         ).to(device)
         train_rgb_dir = None
         val_rgb_dir = None
@@ -649,7 +651,7 @@ def main():
         fy=getattr(config, "fy", 320.0),
         cx=getattr(config, "cx", 319.5),
         cy=getattr(config, "cy", 239.5),
-        use_2dgs=getattr(config, "use_2dgs", False),
+        use_2dgs=renderer.use_2dgs,
     ).to(device)
     
     n_train_render = 0 if args.direct_depth_only else len(train_indices)
@@ -658,7 +660,7 @@ def main():
         if self_guided:
             print(f"  RGB guide: SELF-RENDERED from model SH (feature_size={feature_size})")
         elif use_rendered_rgb:
-            print(f"  RGB guide: RENDERED from 2DGS (feature_size={feature_size})")
+            print(f"  RGB guide: RENDERED from {'2DGS' if renderer.use_2dgs else '3DGS'} (feature_size={feature_size})")
         else:
             print(f"  RGB guide: GT from disk (feature_size={feature_size})")
     if depth_guide_enabled:

@@ -21,7 +21,7 @@
 ### 2.1 总体目标
 
 RADIO-GS 的目标是：  
-**把冻结的 RADIO C-RADIOv4-H 的高维空间特征（1280d）蒸馏进一个 3DGS/2DGS 场景表示中，使得任意新视角都能渲染出可被下游 foundation heads/adaptors 直接消费的特征图。**
+**把冻结的 RADIO C-RADIOv4-H 的高维空间特征（1280d）蒸馏进一个 3DGS 场景表示中，使得任意新视角都能渲染出可被下游 foundation heads/adaptors 直接消费的特征图。**
 
 这意味着模型不是只生成 RGB，也不是只重建深度，而是要重建一种“**可迁移的 foundation feature field**”。
 
@@ -85,14 +85,14 @@ RGB / pose / depth / semantics
 
 ## 4. 当前方法的核心组成模块
 
-## 4.1 几何骨架：3DGS / 2DGS
+## 4.1 几何骨架：3DGS
 
 场景几何不是从零学习的，而是依赖一个已经收敛的 Gaussian scene backbone。
 
 当前 `room_0` 主线配置中使用的是：
 
-- `use_2dgs: true`
-- `ply_path: /root/ICLPose/output/2dgs_models/room_0/.../point_cloud.ply`
+- `use_2dgs: false`
+- `ply_path: /root/RADIO-GS/output/3dgs_models/room_0/v8_fixed_poses_3dgs/point_cloud/iteration_30000/point_cloud.ply`
 
 它提供三类关键信息：
 

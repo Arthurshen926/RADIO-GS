@@ -54,6 +54,7 @@ from radio_gs.artifact_paths import (
     DEFAULT_SIGLIP2_PROJECTION_WEIGHTS,
     resolve_siglip_projection_path,
 )
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.data.lerf_dataset import (
     LERFDataset,
     _coerce_polygons,
@@ -435,6 +436,7 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
     if ply_path:
         model.load_from_ply(ply_path)
     model = model.to(device).eval()
+    use_2dgs = resolve_use_2dgs(config, ply_path)
 
     codec = R["HCDCodec"](
         input_dim=getattr(config, "radio_feature_dim", 1280),
@@ -452,7 +454,7 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
         cx=getattr(config, "cx", 319.5) * fW / getattr(config, "image_width", 640),
         cy=getattr(config, "cy", 239.5) * fH / getattr(config, "image_height", 480),
         max_channels_per_chunk=getattr(config, "max_channels_per_chunk", 32),
-        use_2dgs=getattr(config, "use_2dgs", False),
+        use_2dgs=use_2dgs,
     ).to(device)
 
     sharpener = R["FeatSharp3D"](

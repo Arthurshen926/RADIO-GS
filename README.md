@@ -25,7 +25,7 @@ RGB images
   -> 1280d teacher features
                   |
                   v
-3DGS / 2DGS geometry + learnable feature field
+3DGS geometry + learnable feature field
   -> render compact latent feature maps
   -> HCD codec / decoder
   -> screen-space refiner
@@ -162,13 +162,32 @@ then `LERFDataset` can read the COLMAP sparse model and polygon JSON annotations
 
 ### 1. Train or prepare geometry
 
-Train a clean RGB Gaussian scene model first:
+Train a clean 3DGS geometry model first.
+
+Replica scenes use the in-repo depth-initialized trainer and write the standard
+Gaussian PLY directly to `output/3dgs_models/...`:
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python radio_gs/scripts/train_rgb_gs.py \
   --scene room_2 \
-  --sequence Sequence_1 \
+  --sequences Sequence_1,Sequence_2 \
+  --tag v8_fixed_poses_3dgs \
   --iters 30000
+```
+
+LERF scenes use the COLMAP-backed trainer:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python radio_gs/scripts/train_colmap_gs.py \
+  --scene_root /mnt/pool/sqy/lerf_ovs/figurines \
+  --output_dir output/3dgs_models/figurines \
+  --iters 30000
+```
+
+The repository also ships a convenience rebuild script for asset recovery:
+
+```bash
+bash radio_gs/scripts/rebuild_3dgs_assets.sh all
 ```
 
 This writes the geometry backbone that later configs reference through `ply_path`.

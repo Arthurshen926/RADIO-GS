@@ -194,20 +194,21 @@ def _estimate_initial_scales(means: Tensor, scene_scale: float) -> Tensor:
     """Estimate per-Gaussian initial log-scale from nearest-neighbour distances."""
     N = means.shape[0]
     device = means.device
+    cpu_means = means.detach().cpu()
 
     # For large point clouds, subsample to estimate median NN distance
     max_sample = min(N, 50_000)
-    idx = torch.randperm(N, device=device)[:max_sample]
-    subset = means[idx]
+    idx = torch.randperm(N)[:max_sample]
+    subset = cpu_means[idx]
 
-    # Pairwise distances on the subset (chunked to avoid OOM)
-    chunk = 4096
+    # Pairwise distances on CPU (chunked to avoid GPU OOM during init)
+    chunk = 1024
     nn_dists = []
     for i in range(0, len(subset), chunk):
         end = min(i + chunk, len(subset))
         dists = torch.cdist(subset[i:end], subset)  # [chunk_sz, max_sample]
         # Mask self-distances on the diagonal (local row j → global col i+j)
-        rows = torch.arange(end - i, device=device)
+        rows = torch.arange(end - i)
         dists[rows, i + rows] = float("inf")
         nn_dist, _ = dists.min(dim=1)
         nn_dists.append(nn_dist)

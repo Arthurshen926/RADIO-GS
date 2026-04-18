@@ -54,6 +54,7 @@ from radio_gs.data.benchmark_paths import (
     resolve_split_frame_ids,
     resolve_split_pose_source,
 )
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.scripts.eval_rendered import load_model_and_render
 
 
@@ -99,6 +100,7 @@ def render_all_training_features(
     # Optional RGB renderer for self-guided refiner
     rgb_renderer = None
     if use_rendered_rgb and rgb_guide_enabled:
+        use_2dgs = resolve_use_2dgs(config)
         rgb_renderer = FeatureFieldRenderer(
             image_height=getattr(config, "image_height", 480),
             image_width=getattr(config, "image_width", 640),
@@ -106,7 +108,7 @@ def render_all_training_features(
             fy=getattr(config, "fy", 320.0),
             cx=getattr(config, "cx", 319.5),
             cy=getattr(config, "cy", 239.5),
-            use_2dgs=getattr(config, "use_2dgs", False),
+            use_2dgs=use_2dgs,
         ).to(device)
 
     mixed_split = getattr(config, "mixed_split", False) and dataset_type == "replica"

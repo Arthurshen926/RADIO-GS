@@ -41,6 +41,7 @@ from radio_gs.artifact_paths import (
     resolve_siglip_text_embeddings_path,
 )
 from radio_gs.config import RadioGSConfig, load_config
+from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.data.benchmark_paths import (
     extract_feature_frame_index,
     list_feature_paths,
@@ -253,7 +254,7 @@ class RadioGSTrainer:
             cx=getattr(config, "cx", 319.5) * getattr(config, "feature_width", 40) / getattr(config, "image_width", 640),
             cy=getattr(config, "cy", 239.5) * getattr(config, "feature_height", 30) / getattr(config, "image_height", 480),
             max_channels_per_chunk=getattr(config, "max_channels_per_chunk", 32),
-            use_2dgs=getattr(config, "use_2dgs", False),
+            use_2dgs=resolve_use_2dgs(config),
         ).to(self.device)
         self.sharpener = FeatSharp3D(
             mode=getattr(config, "featsharp_mode", "analytical"),
@@ -347,6 +348,7 @@ class RadioGSTrainer:
         self.frozen_depth_head_weight = getattr(config, "frozen_depth_head_weight", 0.0)
         self.frozen_depth_head_weight_target = self.frozen_depth_head_weight  # for curriculum
         self.frozen_depth_warmup_epochs = getattr(config, "frozen_depth_warmup_epochs", 0)
+        self.frozen_depth_teacher = getattr(config, "frozen_depth_teacher", "geom_depth")
         self.frozen_depth_head: Optional[DepthHead] = None
         self.frozen_depth_loss_fn: Optional[DepthLoss] = None
         self.frozen_depth_gradient_weight = getattr(config, "frozen_depth_gradient_weight", 0.0)
@@ -377,6 +379,40 @@ class RadioGSTrainer:
                 weight=1.0,
             )
             self._log(f"Frozen depth head loaded ({sum(p.numel() for p in self.frozen_depth_head.parameters()) / 1e6:.3f}M params, all frozen)")
+
+        self.frozen_seg_head_weight = getattr(config, "frozen_seg_head_weight", 0.0)
+        self.frozen_seg_loss_type = getattr(config, "frozen_seg_loss_type", "kl")
+        self.frozen_seg_temperature = float(getattr(config, "frozen_seg_temperature", 1.0))
+        self.frozen_seg_head: Optional[SegmentationHead] = None
+        if self.frozen_seg_head_weight > 0:
+            frozen_seg_path = getattr(config, "frozen_seg_head_path", "")
+            if not frozen_seg_path or not Path(frozen_seg_path).exists():
+                raise FileNotFoundError(
+                    f"frozen_seg_head_path required when frozen_seg_head_weight > 0, "
+                    f"got: '{frozen_seg_path}'"
+                )
+            self._log(f"Loading frozen segmentation head from {frozen_seg_path}")
+            ckpt = torch.load(frozen_seg_path, map_location=self.device)
+            head_cfg = ckpt.get("config", {})
+            self.frozen_seg_head = SegmentationHead(
+                feature_dim=head_cfg.get("feature_dim", getattr(config, "radio_feature_dim", 1280)),
+                num_classes=head_cfg.get(
+                    "num_classes",
+                    getattr(config, "frozen_seg_num_classes", getattr(config, "seg_num_classes", 40)),
+                ),
+                hidden_dim=head_cfg.get("hidden_dim", getattr(config, "frozen_seg_head_hidden_dim", 256)),
+                num_layers=head_cfg.get("num_layers", getattr(config, "frozen_seg_head_num_layers", 3)),
+                head_type=head_cfg.get("head_type", getattr(config, "frozen_seg_head_type", "mlp")),
+            ).to(self.device)
+            state = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
+            self.frozen_seg_head.load_state_dict(state)
+            for p in self.frozen_seg_head.parameters():
+                p.requires_grad = False
+            self.frozen_seg_head.eval()
+            self._log(
+                "Frozen segmentation head loaded "
+                f"({sum(p.numel() for p in self.frozen_seg_head.parameters()) / 1e6:.3f}M params, all frozen)"
+            )
 
         self.seg_loss_weight = getattr(config, "seg_loss_weight", 0.0)
         self.seg_head: Optional[SegmentationHead] = None
@@ -545,6 +581,9 @@ class RadioGSTrainer:
             self._log(f"Depth aux head params: {self._count_params(self.depth_head):.2f}M")
         if self.frozen_depth_head is not None:
             self._log(f"Frozen depth head params: {self._count_params(self.frozen_depth_head):.2f}M (frozen)")
+            self._log(f"Frozen depth teacher: {self.frozen_depth_teacher}")
+        if self.frozen_seg_head is not None:
+            self._log(f"Frozen seg head params: {self._count_params(self.frozen_seg_head):.2f}M (frozen)")
         if self.seg_head is not None:
             self._log(f"Seg aux head params: {self._count_params(self.seg_head):.2f}M")
         self._log(
@@ -741,6 +780,7 @@ class RadioGSTrainer:
             "summary_align",
             "ground_query",
             "seg_aux",
+            "frozen_seg",
         }
 
     def _resolve_best_metric(self, metrics: Dict[str, float]) -> Tuple[str, float, float]:
@@ -966,6 +1006,7 @@ class RadioGSTrainer:
             "depth_geom": 0.0,
             "frozen_depth": 0.0,
             "seg_aux": 0.0,
+            "frozen_seg": 0.0,
             "siglip_align": 0.0,
             "summary_align": 0.0,
             "ground_query": 0.0,
@@ -1125,10 +1166,15 @@ class RadioGSTrainer:
                 frozen_depth_losses = self._compute_frozen_depth_loss(
                     render_result=result,
                     decoded=decoded_for_depth,
+                    teacher_features=gt_radio_rs if self.train_mode != "latent" else None,
                 )
                 seg_losses = self._compute_seg_aux_losses(
                     batch=batch,
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                )
+                frozen_seg_losses = self._compute_frozen_seg_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    teacher_features=gt_radio_rs if self.train_mode != "latent" else None,
                 )
                 l_siglip = self._compute_siglip_alignment_loss(
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
@@ -1270,7 +1316,15 @@ class RadioGSTrainer:
                     loss = loss + self.feat_norm_weight * l_feat_norm
                 if self.rgb_loss_weight > 0:
                     loss = loss + self.rgb_loss_weight * l_rgb
-                loss = loss + depth_losses["total"] + frozen_depth_losses["total"] + seg_losses["total"] + l_siglip + l_summary
+                loss = (
+                    loss
+                    + depth_losses["total"]
+                    + frozen_depth_losses["total"]
+                    + seg_losses["total"]
+                    + frozen_seg_losses["total"]
+                    + l_siglip
+                    + l_summary
+                )
 
             self.scaler.scale(loss).backward()
             self.scaler.unscale_(self.optimizer)
@@ -1311,6 +1365,7 @@ class RadioGSTrainer:
             loss_accum["depth_geom"] += depth_losses["depth_geom"].item()
             loss_accum["frozen_depth"] += frozen_depth_losses["total"].item()
             loss_accum["seg_aux"] += seg_losses["total"].item()
+            loss_accum["frozen_seg"] += frozen_seg_losses["total"].item()
             loss_accum["siglip_align"] += l_siglip.item()
             loss_accum["summary_align"] += l_summary.item()
             loss_accum["ground_query"] += l_ground_query.item()
@@ -1369,6 +1424,9 @@ class RadioGSTrainer:
                 )
                 self.writer.add_scalar(
                     "train/seg_aux", seg_losses["total"].item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/frozen_seg", frozen_seg_losses["total"].item(), self.global_step
                 )
                 self.writer.add_scalar(
                     "train/siglip_align", l_siglip.item(), self.global_step
@@ -1431,6 +1489,7 @@ class RadioGSTrainer:
         frozen_depth_accum = 0.0
         seg_aux_accum = 0.0
         seg_aux_miou_accum = 0.0
+        frozen_seg_accum = 0.0
         siglip_align_accum = 0.0
         summary_align_accum = 0.0
         ground_query_accum = 0.0
@@ -1544,16 +1603,22 @@ class RadioGSTrainer:
             frozen_depth_losses = self._compute_frozen_depth_loss(
                 render_result=val_result,
                 decoded=decoded_for_depth,
+                teacher_features=gt_radio if self.train_mode != "latent" else None,
             )
             seg_losses = self._compute_seg_aux_losses(
                 batch=batch,
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
+            )
+            frozen_seg_losses = self._compute_frozen_seg_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                teacher_features=gt_radio if self.train_mode != "latent" else None,
             )
             depth_gt_accum += depth_losses["depth_gt"].item()
             depth_geom_accum += depth_losses["depth_geom"].item()
             frozen_depth_accum += frozen_depth_losses["total"].item()
             seg_aux_accum += seg_losses["total"].item()
             seg_aux_miou_accum += seg_losses["miou"]
+            frozen_seg_accum += frozen_seg_losses["total"].item()
             siglip_align_accum += self._compute_siglip_alignment_loss(
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
@@ -1601,6 +1666,7 @@ class RadioGSTrainer:
             "frozen_depth": frozen_depth_accum / n,
             "seg_aux": seg_aux_accum / n,
             "seg_aux_miou": seg_aux_miou_accum / n,
+            "frozen_seg": frozen_seg_accum / n,
             "siglip_align": siglip_align_accum / n,
             "summary_align": summary_align_accum / n,
             "ground_query": ground_query_accum / n,
@@ -1617,6 +1683,7 @@ class RadioGSTrainer:
             self.writer.add_scalar("val/frozen_depth", metrics["frozen_depth"], epoch)
             self.writer.add_scalar("val/seg_aux", metrics["seg_aux"], epoch)
             self.writer.add_scalar("val/seg_aux_miou", metrics["seg_aux_miou"], epoch)
+            self.writer.add_scalar("val/frozen_seg", metrics["frozen_seg"], epoch)
             self.writer.add_scalar("val/siglip_align", metrics["siglip_align"], epoch)
             self.writer.add_scalar("val/summary_align", metrics["summary_align"], epoch)
             self.writer.add_scalar("val/ground_query", metrics["ground_query"], epoch)
@@ -2072,12 +2139,16 @@ class RadioGSTrainer:
         self,
         render_result: Dict[str, torch.Tensor],
         decoded: torch.Tensor,
+        teacher_features: Optional[torch.Tensor] = None,
     ) -> Dict[str, torch.Tensor]:
         """Compute frozen depth head regularization loss.
 
-        Mechanism: decoded features → frozen head → predicted depth
-        vs geometric depth from 3DGS. Gradient flows to features only.
-        Uses per-image scale-shift alignment to handle metric mismatch.
+        Mechanism:
+        - geom_depth mode: decoded features → frozen head → predicted depth
+          vs geometric depth from 3DGS.
+        - gt_features mode: decoded features → frozen head vs frozen head on GT RADIO features.
+
+        Gradients flow to decoded features only.
         """
         zero = decoded.sum() * 0.0
         losses = {"frozen_depth": zero, "frozen_depth_grad": zero, "total": zero}
@@ -2085,15 +2156,49 @@ class RadioGSTrainer:
         if self.frozen_depth_head is None or self.frozen_depth_head_weight <= 0:
             return losses
 
-        # Get geometric depth from 3DGS (high quality, detached)
-        geom_key = "geom_depth" if "geom_depth" in render_result else "depth_map"
-        geom_raw = render_result[geom_key].to(self.device).float().detach()
-        alpha = render_result.get("alpha_map")
-
         # Predict depth from decoded features via frozen head
         # NOTE: no torch.no_grad() — we need gradients through features
         frozen_pred = self.frozen_depth_head(decoded.float())  # [B, 1, H, W]
         target_size = frozen_pred.shape[-2:]
+
+        if self.frozen_depth_teacher == "gt_features":
+            if teacher_features is None:
+                return losses
+            teacher_input = teacher_features.to(self.device).float()
+            if teacher_input.shape[-2:] != target_size:
+                teacher_input = F.interpolate(
+                    teacher_input,
+                    size=target_size,
+                    mode="bilinear",
+                    align_corners=False,
+                )
+            with torch.no_grad():
+                teacher_depth = self.frozen_depth_head(teacher_input)
+            valid_mask = torch.isfinite(teacher_depth) & torch.isfinite(frozen_pred)
+            valid_mask = valid_mask & (teacher_depth > 0)
+            if valid_mask.any():
+                assert self.frozen_depth_loss_fn is not None
+                losses["frozen_depth"] = self.frozen_depth_loss_fn(
+                    frozen_pred,
+                    teacher_depth,
+                    valid_mask,
+                )
+                if self.frozen_depth_gradient_weight > 0:
+                    losses["frozen_depth_grad"] = self._depth_gradient_loss(
+                        frozen_pred,
+                        teacher_depth,
+                        valid_mask,
+                    )
+            losses["total"] = (
+                self.frozen_depth_head_weight * losses["frozen_depth"]
+                + self.frozen_depth_gradient_weight * losses["frozen_depth_grad"]
+            )
+            return losses
+
+        # Default teacher: geometric depth from 3DGS (high quality, detached)
+        geom_key = "geom_depth" if "geom_depth" in render_result else "depth_map"
+        geom_raw = render_result[geom_key].to(self.device).float().detach()
+        alpha = render_result.get("alpha_map")
 
         geom_depth = self._resize_map(geom_raw, target_size)
         geom_mask = geom_depth > 0.01
@@ -2128,6 +2233,49 @@ class RadioGSTrainer:
             self.frozen_depth_head_weight * losses["frozen_depth"]
             + self.frozen_depth_gradient_weight * losses["frozen_depth_grad"]
         )
+        return losses
+
+    def _compute_frozen_seg_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        teacher_features: Optional[torch.Tensor],
+    ) -> Dict[str, torch.Tensor]:
+        zero = (
+            decoded.sum() * 0.0
+            if decoded is not None
+            else torch.tensor(0.0, device=self.device)
+        )
+        losses = {"frozen_seg": zero, "total": zero}
+        if (
+            self.frozen_seg_head is None
+            or self.frozen_seg_head_weight <= 0
+            or decoded is None
+            or teacher_features is None
+        ):
+            return losses
+
+        pred_logits = self.frozen_seg_head(decoded.float())
+        teacher_input = teacher_features.to(self.device).float()
+        if teacher_input.shape[-2:] != pred_logits.shape[-2:]:
+            teacher_input = F.interpolate(
+                teacher_input,
+                size=pred_logits.shape[-2:],
+                mode="bilinear",
+                align_corners=False,
+            )
+        with torch.no_grad():
+            teacher_logits = self.frozen_seg_head(teacher_input)
+
+        temp = max(self.frozen_seg_temperature, 1e-6)
+        if self.frozen_seg_loss_type == "mse":
+            seg_loss = F.mse_loss(pred_logits, teacher_logits)
+        else:
+            log_probs = F.log_softmax(pred_logits / temp, dim=1)
+            teacher_probs = F.softmax(teacher_logits / temp, dim=1)
+            seg_loss = F.kl_div(log_probs, teacher_probs, reduction="batchmean") * (temp ** 2)
+
+        losses["frozen_seg"] = seg_loss
+        losses["total"] = self.frozen_seg_head_weight * seg_loss
         return losses
 
     @staticmethod

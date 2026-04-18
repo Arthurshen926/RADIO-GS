@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from collections import defaultdict
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
 # --- Config: methods to aggregate ---
 METHODS = {
     # method_key: (display_name, eval_log_pattern, grounding_log_pattern, notes)
@@ -266,7 +268,7 @@ def print_latex_table(all_results):
 
 
 def main():
-    os.chdir("/root/ICLPose")
+    os.chdir(REPO_ROOT)
     all_results = collect_all_results()
 
     if not all_results:
