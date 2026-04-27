@@ -329,7 +329,7 @@ queue_file_job \
       bash radio_gs/scripts/wait_for_file_and_run.sh \
         "${LERF_FDH_COPY_MARKER[waldo_kitchen]}" \
         "$LOG_ROOT/build_submission_tables_ready.log" \
-        python radio_gs/scripts/build_submission_tables.py --lerf_eval_dir "$AGG_EVAL_ROOT"
+        python radio_gs/scripts/build_submission_tables.py --lerf_eval_dir output/radio_gs
 
 cat <<EOF
 Queued pipeline jobs.

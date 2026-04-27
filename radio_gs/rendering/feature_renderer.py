@@ -53,6 +53,23 @@ class FeatureFieldRenderer(nn.Module):
         K = self._build_K_matrix(fx, fy, cx, cy)
         self.register_buffer("K", K)
 
+    @staticmethod
+    def _canonicalize_batch_map(x: Tensor) -> Tensor:
+        """Convert common single-channel raster outputs to [B, H, W]."""
+        if x.dim() == 4 and x.shape[-1] == 1:
+            return x[..., 0]
+        if x.dim() == 4 and x.shape[1] == 1:
+            return x[:, 0]
+        return x
+
+    @staticmethod
+    def _canonicalize_single_map(x: Tensor) -> Tensor:
+        """Convert common single-view raster outputs to [H, W]."""
+        x = FeatureFieldRenderer._canonicalize_batch_map(x)
+        if x.dim() == 3 and x.shape[0] == 1:
+            return x[0]
+        return x
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -111,8 +128,8 @@ class FeatureFieldRenderer(nn.Module):
         # feat_render: [1, fH, fW, D], depth: [1, fH, fW, 1], alpha: [1, fH, fW, 1]
 
         feature_map = feat_render[0].permute(2, 0, 1)  # [D, fH, fW]
-        depth_map = depth[0, :, :, 0]                  # [fH, fW]
-        alpha_map = alpha[0, :, :, 0]                  # [fH, fW]
+        depth_map = self._canonicalize_single_map(depth)
+        alpha_map = self._canonicalize_single_map(alpha)
 
         return {
             "feature_map": feature_map,
@@ -170,8 +187,8 @@ class FeatureFieldRenderer(nn.Module):
         # feat_render: [B, fH, fW, D]
 
         feature_map = feat_render.permute(0, 3, 1, 2)  # [B, D, fH, fW]
-        depth_map = depth[:, :, :, 0]                   # [B, fH, fW]
-        alpha_map = alpha[:, :, :, 0]                    # [B, fH, fW]
+        depth_map = self._canonicalize_batch_map(depth)
+        alpha_map = self._canonicalize_batch_map(alpha)
 
         return {
             "feature_map": feature_map,
@@ -364,19 +381,16 @@ class FeatureFieldRenderer(nn.Module):
                 near_plane=self.near_plane,
                 far_plane=self.far_plane,
                 backgrounds=bg.unsqueeze(0),
+                render_mode="RGB+ED",
                 sh_degree=sh_degree,
             )
-        # renders: [1, H, W, 3], alphas: [1, H, W, 1]
+        # renders: [1, H, W, 4], alphas: [1, H, W, 1]
 
-        rgb_render = renders[0, ..., :3] if self.use_2dgs else renders[0]
+        rgb_render = renders[0, ..., :3]
         rgb = rgb_render.permute(2, 0, 1).clamp(0.0, 1.0)   # [3, H, W]
         alpha = alphas[0, :, :, 0]           # [H, W]
 
-        depth_map = torch.zeros(H, W, device=device)
-        if self.use_2dgs:
-            depth_map = renders[0, :, :, 3]
-        elif "depths" in info:
-            depth_map = info["depths"][0, :, :, 0]
+        depth_map = renders[0, :, :, 3]
 
         return {"rgb": rgb, "depth": depth_map, "alpha": alpha}
 
@@ -430,6 +444,7 @@ class FeatureFieldRenderer(nn.Module):
             c_start = i * chunk_size
             c_end = min(c_start + chunk_size, D)
             chunk_feat = features[:, c_start:c_end]  # [N, c_dim]
+            render_mode = "RGB+ED" if (not self.use_2dgs and i == 0) else "RGB"
 
             bg = torch.full(
                 (chunk_feat.shape[1],),
@@ -467,18 +482,22 @@ class FeatureFieldRenderer(nn.Module):
                     near_plane=self.near_plane,
                     far_plane=self.far_plane,
                     backgrounds=bg.unsqueeze(0).expand(viewmats.shape[0], -1),
+                    render_mode=render_mode,
                 )
             # renders: [C, H, W, c_dim], alphas: [C, H, W, 1]
 
-            rendered_chunks.append(renders)
+            if not self.use_2dgs and i == 0:
+                rendered_chunks.append(renders[..., :-1])
+            else:
+                rendered_chunks.append(renders)
 
             # Capture depth and alpha from the first chunk only
             if i == 0:
                 alpha_out = alphas
                 if _median is not None:
                     depth_out = _median
-                elif "depths" in info:
-                    depth_out = info["depths"]
+                elif not self.use_2dgs:
+                    depth_out = renders[..., -1:]
 
         # Concatenate feature chunks along the channel dimension
         feature_render = torch.cat(rendered_chunks, dim=-1)  # [C, H, W, D]

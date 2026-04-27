@@ -63,8 +63,9 @@ Use Replica room_0 depth and semantic visualizations as evidence that the recons
 1. Main grounding table: output/radio_gs/reports/paper_submission_main_table.tex
 2. Result provenance audit: output/radio_gs/reports/paper_submission_result_audit.md
 3. Benchmark target sheet: output/radio_gs/reports/paper_benchmark_targets.md
-4. Replica qualitative figure: output/paper_figures/room0_comparison/overview_comparison.png
-5. LERF-OVS qualitative grids: output/lerf_ovs_eval/*/visualisations/
+4. Frozen figure shortlist: output/radio_gs/reports/figure_shortlist.md
+5. Replica qualitative figure: output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png
+6. LERF-OVS qualitative grids: output/radio_gs/paper_figures/*_grounding_vis/
 
 ## Writing rules before freeze
 

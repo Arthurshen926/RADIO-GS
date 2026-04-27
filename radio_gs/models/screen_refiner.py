@@ -42,6 +42,8 @@ def _ensure_map_4d(x: torch.Tensor) -> torch.Tensor:
         x = x.unsqueeze(0).unsqueeze(0)
     elif x.dim() == 3:
         x = x.unsqueeze(1)
+    elif x.dim() == 1:
+        x = x.view(1, 1, -1, 1)
     return x.float()
 
 
@@ -104,12 +106,13 @@ def build_refiner_guide(
 ) -> Optional[torch.Tensor]:
     """Assemble the optional guide tensor used by the screen-space refiner."""
     parts: list[torch.Tensor] = []
+    depth_map = render_result.get("depth_map")
     if rgb_guide is not None:
         parts.append(rgb_guide)
-    if use_depth_guide:
+    if use_depth_guide and depth_map is not None:
         parts.append(
             build_depth_guide(
-                render_result["depth_map"],
+                depth_map,
                 depth_grad=use_depth_grad,
                 grad_scale=depth_grad_scale,
             )
@@ -117,10 +120,10 @@ def build_refiner_guide(
     alpha_map = render_result.get("alpha_map")
     if use_alpha_guide and alpha_map is not None:
         parts.append(_ensure_map_4d(alpha_map).clamp(0.0, 1.0))
-    if use_boundary_guide:
+    if use_boundary_guide and depth_map is not None:
         parts.append(
             build_boundary_guide(
-                render_result["depth_map"],
+                depth_map,
                 alpha_map=alpha_map,
                 grad_scale=depth_grad_scale,
             )
@@ -229,6 +232,18 @@ class ScreenSpaceRefiner(nn.Module):
             Refined feature map [B, D, H, W].
         """
         if guide is not None:
+            if guide.shape[1] < self.extra_channels:
+                pad = torch.zeros(
+                    guide.shape[0],
+                    self.extra_channels - guide.shape[1],
+                    guide.shape[2],
+                    guide.shape[3],
+                    device=guide.device,
+                    dtype=guide.dtype,
+                )
+                guide = torch.cat([guide, pad], dim=1)
+            elif guide.shape[1] > self.extra_channels:
+                guide = guide[:, : self.extra_channels]
             inp = torch.cat([x, guide], dim=1)
         elif self.extra_channels > 0:
             # No guide provided but network expects extra channels — zero-pad

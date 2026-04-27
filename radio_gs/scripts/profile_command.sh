@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-GPU=0
+GPU="${SELECTED_GPU:-0}"
 OUTPUT_DIR=""
 
 while [[ $# -gt 0 ]]; do
@@ -53,7 +53,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-/usr/bin/time -v "$@" 2> "$TIME_LOG" | tee "$CMD_LOG"
+if [[ -x "/usr/bin/time" ]]; then
+  /usr/bin/time -v "$@" 2> "$TIME_LOG" | tee "$CMD_LOG"
+else
+  TIMEFORMAT=$'real %3R\nuser %3U\nsys %3S'
+  { time "$@"; } 2> "$TIME_LOG" | tee "$CMD_LOG"
+fi
 
 printf 'end=%s\n' "$(date '+%F %T')" >> "$META_LOG"
 cleanup

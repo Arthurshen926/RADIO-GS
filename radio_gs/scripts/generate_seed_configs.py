@@ -39,6 +39,8 @@ def main() -> None:
             seeded = load_config(str(base_path))
             suffix = f"seed{seed}"
             seeded.seed = seed
+            if hasattr(seeded, "mixed_seed"):
+                seeded.mixed_seed = seed
             seeded.exp_name = f"{cfg.exp_name}_{suffix}"
             seeded.output_dir = f"{cfg.output_dir}_{suffix}"
             out_path = output_dir / f"{base_path.stem}_{suffix}.yaml"

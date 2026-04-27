@@ -13,10 +13,13 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import random
+import socket
 import sys
 import time
+import traceback
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -227,6 +230,10 @@ class RadioGSTrainer:
     def __init__(self, config: RadioGSConfig) -> None:
         self.cfg = config
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.start_time_unix = time.time()
+        self.run_start_time = time.strftime("%Y-%m-%d %H:%M:%S")
+        self.run_status = "initializing"
+        self.failure_info: Optional[Dict[str, str]] = None
 
         # Training mode: "latent" trains in 64d space with frozen decoder,
         # "decoded" (default/legacy) trains through decoder in 1280d space
@@ -240,7 +247,8 @@ class RadioGSTrainer:
         self.ckpt_dir = self.output_dir / "checkpoints"
         self.log_dir = self.output_dir / "logs"
         self.vis_dir = self.output_dir / "visualizations"
-        for d in (self.ckpt_dir, self.log_dir, self.vis_dir):
+        self.report_dir = self.output_dir / "reports"
+        for d in (self.ckpt_dir, self.log_dir, self.vis_dir, self.report_dir):
             d.mkdir(parents=True, exist_ok=True)
 
         # Components
@@ -571,6 +579,18 @@ class RadioGSTrainer:
         self.best_metric_mode = getattr(config, "best_metric_mode", "auto")
         self.best_selection_score = float("-inf")
         self.best_selection_value: Optional[float] = None
+        self.best_epoch = 0
+        self.last_train_metrics: Dict[str, float] = {}
+        self.last_val_metrics: Dict[str, float] = {}
+        self.resolved_config_path = (
+            str(Path(getattr(config, "config_path", "")).resolve())
+            if getattr(config, "config_path", None)
+            else None
+        )
+        self.metrics_history_path = self.report_dir / "metrics_history.jsonl"
+        self.resolved_config_path_json = self.report_dir / "resolved_config.json"
+
+        self._write_run_manifest()
 
         self._log(f"Model params: {self._count_params(self.model):.2f}M")
         self._log(f"Codec params: {self._count_params(self.codec):.2f}M")
@@ -1043,6 +1063,11 @@ class RadioGSTrainer:
                     result = self.renderer.render_features_and_rgb(
                         self.model, pose_w2c
                     )
+                    result = self._canonicalize_render_result(
+                        result,
+                        batch_size=pose_w2c.shape[0],
+                        spatial_size=result["feature_map"].shape[-2:],
+                    )
                     rendered_compact = result["feature_map"]
                     rendered_rgb = result["rgb"]
 
@@ -1055,11 +1080,21 @@ class RadioGSTrainer:
                     result = self.renderer.render_features_and_rgb(
                         self.model, pose_w2c
                     )
+                    result = self._canonicalize_render_result(
+                        result,
+                        batch_size=pose_w2c.shape[0],
+                        spatial_size=result["feature_map"].shape[-2:],
+                    )
                     rendered_compact = result["feature_map"]
                     rendered_rgb = result["rgb"].detach()
                 else:
                     result = self.renderer.render_features_batch(
                         self.model, pose_w2c
+                    )
+                    result = self._canonicalize_render_result(
+                        result,
+                        batch_size=pose_w2c.shape[0],
+                        spatial_size=result["feature_map"].shape[-2:],
                     )
                     rendered_compact = result["feature_map"]
 
@@ -1074,7 +1109,12 @@ class RadioGSTrainer:
                 # Hybrid architecture: decode via hash grid + fusion
                 if self._is_hybrid:
                     from radio_gs.models.hybrid_gaussian import unproject_depth_to_positions
-                    depth_map = result["depth_map"].float()
+                    Bf, _, Hf, Wf = rendered_compact.shape
+                    depth_map = self._canonicalize_spatial_map(
+                        result.get("depth_map"),
+                        batch_size=Bf,
+                        spatial_size=(Hf, Wf),
+                    )
                     position_map = unproject_depth_to_positions(
                         depth_map, pose_w2c.float(), self.renderer.K.float(),
                         depth_map.shape[1], depth_map.shape[2],
@@ -1204,11 +1244,12 @@ class RadioGSTrainer:
                         if hybrid_aux is not None and "geometry" in hybrid_aux
                         else rendered_compact
                     )
-                    gd = geom_depth.unsqueeze(0).unsqueeze(0) if geom_depth.dim() == 2 else geom_depth
-                    if gd.dim() == 3:
-                        gd = gd.unsqueeze(1)
-                    if gd.shape[-2:] != feat_for_smooth.shape[-2:]:
-                        gd = F.interpolate(gd, size=feat_for_smooth.shape[-2:], mode='bilinear', align_corners=False)
+                    gd = self._canonicalize_spatial_map(
+                        geom_depth,
+                        batch_size=feat_for_smooth.shape[0],
+                        spatial_size=feat_for_smooth.shape[-2:],
+                        add_channel_dim=True,
+                    )
                     l_depth_feat = self.depth_guided_feat_loss(feat_for_smooth, gd)
 
                 # Boundary-aware feature loss
@@ -1216,18 +1257,18 @@ class RadioGSTrainer:
                 if self.boundary_aware_loss_fn is not None and geom_depth is not None:
                     pred_feat = decoded_for_depth if self.train_mode != "latent" else rendered_compact
                     gt_feat = gt_radio_rs if self.train_mode != "latent" else gt_compact
-                    gd_ba = geom_depth.unsqueeze(0).unsqueeze(0) if geom_depth.dim() == 2 else geom_depth
-                    if gd_ba.dim() == 3:
-                        gd_ba = gd_ba.unsqueeze(1)
-                    alpha_ba = None
-                    if alpha_for_edges is not None:
-                        alpha_ba = alpha_for_edges.unsqueeze(0).unsqueeze(0) if alpha_for_edges.dim() == 2 else alpha_for_edges
-                        if alpha_ba.dim() == 3:
-                            alpha_ba = alpha_ba.unsqueeze(1)
-                    if gd_ba.shape[-2:] != pred_feat.shape[-2:]:
-                        gd_ba = F.interpolate(gd_ba, size=pred_feat.shape[-2:], mode='bilinear', align_corners=False)
-                    if alpha_ba is not None and alpha_ba.shape[-2:] != pred_feat.shape[-2:]:
-                        alpha_ba = F.interpolate(alpha_ba.float(), size=pred_feat.shape[-2:], mode='bilinear', align_corners=False)
+                    gd_ba = self._canonicalize_spatial_map(
+                        geom_depth,
+                        batch_size=pred_feat.shape[0],
+                        spatial_size=pred_feat.shape[-2:],
+                        add_channel_dim=True,
+                    )
+                    alpha_ba = self._canonicalize_spatial_map(
+                        alpha_for_edges,
+                        batch_size=pred_feat.shape[0],
+                        spatial_size=pred_feat.shape[-2:],
+                        add_channel_dim=True,
+                    )
                     l_boundary = self.boundary_aware_loss_fn(pred_feat, gt_feat, gd_ba, alpha_ba)
 
                 l_geom_edge = torch.tensor(0.0, device=self.device)
@@ -1262,27 +1303,18 @@ class RadioGSTrainer:
                         ground_query_valid = ground_query_stats["valid_ratio"]
                 if hybrid_aux is not None and geom_depth is not None:
                     if self.geometric_edge_loss_fn is not None:
-                        gd = geom_depth.unsqueeze(0).unsqueeze(0) if geom_depth.dim() == 2 else geom_depth
-                        if gd.dim() == 3:
-                            gd = gd.unsqueeze(1)
-                        alpha_map = None
-                        if alpha_for_edges is not None:
-                            alpha_map = (
-                                alpha_for_edges.unsqueeze(0).unsqueeze(0)
-                                if alpha_for_edges.dim() == 2 else alpha_for_edges
-                            )
-                            if alpha_map.dim() == 3:
-                                alpha_map = alpha_map.unsqueeze(1)
-                        if gd.shape[-2:] != hybrid_aux["geometry"].shape[-2:]:
-                            gd = F.interpolate(
-                                gd, size=hybrid_aux["geometry"].shape[-2:],
-                                mode="bilinear", align_corners=False,
-                            )
-                        if alpha_map is not None and alpha_map.shape[-2:] != hybrid_aux["geometry"].shape[-2:]:
-                            alpha_map = F.interpolate(
-                                alpha_map.float(), size=hybrid_aux["geometry"].shape[-2:],
-                                mode="bilinear", align_corners=False,
-                            )
+                        gd = self._canonicalize_spatial_map(
+                            geom_depth,
+                            batch_size=hybrid_aux["geometry"].shape[0],
+                            spatial_size=hybrid_aux["geometry"].shape[-2:],
+                            add_channel_dim=True,
+                        )
+                        alpha_map = self._canonicalize_spatial_map(
+                            alpha_for_edges,
+                            batch_size=hybrid_aux["geometry"].shape[0],
+                            spatial_size=hybrid_aux["geometry"].shape[-2:],
+                            add_channel_dim=True,
+                        )
                         l_geom_edge = self.geometric_edge_loss_fn(
                             hybrid_aux["geometry"], gd, alpha_map,
                         )
@@ -1506,9 +1538,19 @@ class RadioGSTrainer:
             rendered_rgb = None
             if self.self_guided:
                 val_result = self.renderer.render_features_and_rgb(self.model, pose_w2c)
+                val_result = self._canonicalize_render_result(
+                    val_result,
+                    batch_size=pose_w2c.shape[0],
+                    spatial_size=val_result["feature_map"].shape[-2:],
+                )
                 rendered_rgb = val_result["rgb"]
             else:
                 val_result = self.renderer.render_features_batch(self.model, pose_w2c)
+                val_result = self._canonicalize_render_result(
+                    val_result,
+                    batch_size=pose_w2c.shape[0],
+                    spatial_size=val_result["feature_map"].shape[-2:],
+                )
             rendered_compact = val_result["feature_map"]
             rendered_compact = self.sharpener(rendered_compact)
             if self.use_refiner and self.refiner is not None:
@@ -1519,7 +1561,11 @@ class RadioGSTrainer:
             hybrid_aux = None
             if self._is_hybrid:
                 from radio_gs.models.hybrid_gaussian import unproject_depth_to_positions
-                depth_map = val_result["depth_map"].float()
+                depth_map = self._canonicalize_spatial_map(
+                    val_result.get("depth_map"),
+                    batch_size=rendered_compact.shape[0],
+                    spatial_size=rendered_compact.shape[-2:],
+                )
                 position_map = unproject_depth_to_positions(
                     depth_map, pose_w2c.float(), self.renderer.K.float(),
                     depth_map.shape[1], depth_map.shape[2],
@@ -1734,10 +1780,167 @@ class RadioGSTrainer:
             torch.save(state, self.ckpt_dir / "latest.pth")
         if is_best:
             torch.save(state, self.ckpt_dir / "best.pth")
+            self.best_epoch = epoch
         # Save periodic epoch checkpoint if configured
         periodic = getattr(self.cfg, "save_periodic_every", 0)
         if periodic > 0 and epoch % periodic == 0:
             torch.save(state, self.ckpt_dir / f"epoch_{epoch:03d}.pth")
+        self._write_experiment_report(epoch)
+
+    def _config_to_dict(self) -> Dict[str, object]:
+        result: Dict[str, object] = {}
+        for key, value in vars(self.cfg).items():
+            result[key] = str(value) if isinstance(value, Path) else value
+        return result
+
+    @staticmethod
+    def _safe_jsonify(value):
+        if isinstance(value, dict):
+            return {str(k): RadioGSTrainer._safe_jsonify(v) for k, v in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [RadioGSTrainer._safe_jsonify(v) for v in value]
+        if isinstance(value, Path):
+            return str(value)
+        if isinstance(value, (np.floating, np.integer)):
+            return value.item()
+        if isinstance(value, torch.Tensor):
+            if value.numel() == 1:
+                return value.item()
+            return {"shape": list(value.shape), "dtype": str(value.dtype)}
+        return value
+
+    @staticmethod
+    def _get_git_metadata() -> Dict[str, object]:
+        try:
+            import subprocess
+
+            root = Path(__file__).resolve().parents[2]
+            commit = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip()
+            status = subprocess.run(
+                ["git", "status", "--short"],
+                cwd=root,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip()
+            return {
+                "commit": commit,
+                "dirty": bool(status),
+                "status_short": status.splitlines(),
+            }
+        except Exception:
+            return {"commit": None, "dirty": None, "status_short": None}
+
+    def _artifact_paths(self) -> Dict[str, object]:
+        return {
+            "logs_dir": str(self.log_dir),
+            "visualizations_dir": str(self.vis_dir),
+            "reports_dir": str(self.report_dir),
+            "best_checkpoint": str(self.ckpt_dir / "best.pth"),
+            "latest_checkpoint": str(self.ckpt_dir / "latest.pth"),
+            "metrics_history": str(self.metrics_history_path),
+            "resolved_config": str(self.resolved_config_path_json),
+            "failure_report": str(self.report_dir / "failure.json"),
+        }
+
+    def _append_metrics_history(
+        self,
+        epoch: int,
+        train_metrics: Dict[str, float],
+        val_metrics: Optional[Dict[str, float]] = None,
+    ) -> None:
+        payload = {
+            "epoch": epoch,
+            "global_step": self.global_step,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "train": self._safe_jsonify(train_metrics),
+            "val": self._safe_jsonify(val_metrics or {}),
+            "best_epoch": self.best_epoch,
+            "best_metric_name": self.best_metric_name,
+            "best_selection_score": self.best_selection_score,
+            "best_selection_value": self.best_selection_value,
+        }
+        with open(self.metrics_history_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(payload) + "\n")
+
+    def _write_failure_report(self, exc: BaseException) -> None:
+        failure = {
+            "exp_name": getattr(self.cfg, "exp_name", self.output_dir.name),
+            "status": "failed",
+            "global_step": self.global_step,
+            "failed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "error_type": type(exc).__name__,
+            "error_message": str(exc),
+            "traceback": traceback.format_exc(),
+            "artifacts": self._artifact_paths(),
+        }
+        self.failure_info = {
+            "error_type": failure["error_type"],
+            "error_message": failure["error_message"],
+        }
+        with open(self.report_dir / "failure.json", "w", encoding="utf-8") as f:
+            json.dump(failure, f, indent=2)
+
+    def _write_run_manifest(self) -> None:
+        config_payload = self._safe_jsonify(self._config_to_dict())
+        manifest = {
+            "exp_name": getattr(self.cfg, "exp_name", self.output_dir.name),
+            "output_dir": str(self.output_dir),
+            "command": " ".join(sys.argv),
+            "cwd": os.getcwd(),
+            "pid": os.getpid(),
+            "start_time": self.run_start_time,
+            "hostname": socket.gethostname(),
+            "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES", ""),
+            "config_path": self.resolved_config_path,
+            "config": config_payload,
+            "git": self._get_git_metadata(),
+            "environment": {
+                "python": sys.version,
+                "torch": torch.__version__,
+                "cuda_available": torch.cuda.is_available(),
+                "cuda_version": torch.version.cuda,
+                "device": str(self.device),
+            },
+            "artifacts": self._artifact_paths(),
+        }
+        with open(self.report_dir / "run_manifest.json", "w", encoding="utf-8") as f:
+            json.dump(manifest, f, indent=2)
+        with open(self.resolved_config_path_json, "w", encoding="utf-8") as f:
+            json.dump(config_payload, f, indent=2)
+
+    def _write_experiment_report(self, epoch: int, final: bool = False) -> None:
+        duration_sec = max(0.0, time.time() - self.start_time_unix)
+        report = {
+            "exp_name": getattr(self.cfg, "exp_name", self.output_dir.name),
+            "status": self.run_status,
+            "epoch": epoch,
+            "final": final,
+            "global_step": self.global_step,
+            "best_epoch": self.best_epoch,
+            "best_metric_name": self.best_metric_name,
+            "best_metric_mode": self.best_metric_mode,
+            "best_selection_score": self.best_selection_score,
+            "best_selection_value": self.best_selection_value,
+            "last_train_metrics": self.last_train_metrics,
+            "last_val_metrics": self.last_val_metrics,
+            "best_checkpoint": str(self.ckpt_dir / "best.pth"),
+            "latest_checkpoint": str(self.ckpt_dir / "latest.pth"),
+            "artifacts": self._artifact_paths(),
+            "start_time": self.run_start_time,
+            "duration_sec": duration_sec,
+            "failure": self.failure_info,
+            "config_path": self.resolved_config_path,
+            "updated_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        with open(self.report_dir / "experiment_report.json", "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2)
 
     def _warmstart_refiner_state(
         self, refiner_state_dict: Dict[str, torch.Tensor]
@@ -1995,6 +2198,7 @@ class RadioGSTrainer:
         total_epochs = getattr(self.cfg, "epochs", 100)
         eval_every = getattr(self.cfg, "eval_every", 5)
         save_every = getattr(self.cfg, "save_every", 10)
+        self.run_status = "running"
 
         self._log(
             f"Starting training: epochs {self.start_epoch}→{total_epochs}, "
@@ -2007,9 +2211,11 @@ class RadioGSTrainer:
                 ramp = min(1.0, epoch / self.frozen_depth_warmup_epochs)
                 self.frozen_depth_head_weight = ramp * self.frozen_depth_head_weight_target
             train_metrics = self.train_epoch(epoch)
+            self.last_train_metrics = train_metrics
 
             if epoch % eval_every == 0 or epoch == total_epochs:
                 val_metrics = self.validate(epoch)
+                self.last_val_metrics = val_metrics
                 metric_name, metric_value, metric_score = self._resolve_best_metric(
                     val_metrics
                 )
@@ -2018,18 +2224,26 @@ class RadioGSTrainer:
                 if is_best:
                     self.best_selection_score = metric_score
                     self.best_selection_value = metric_value
+                    self.best_epoch = epoch
                     self._log(
                         f"  ★ New best! {metric_name}={metric_value:.4f} "
                         f"cosine={val_metrics.get('cosine', 0):.4f} "
                         f"psnr={val_metrics.get('psnr', 0):.2f}"
                     )
                 self.save_checkpoint(epoch, val_metrics, is_best=is_best)
+                self._append_metrics_history(epoch, train_metrics, val_metrics)
             elif epoch % save_every == 0:
                 self.save_checkpoint(epoch, train_metrics)
+                self._append_metrics_history(epoch, train_metrics, None)
+            else:
+                self._append_metrics_history(epoch, train_metrics, None)
 
             self.scheduler.step()
+            self._write_experiment_report(epoch)
 
         self._log("Training complete.")
+        self.run_status = "completed"
+        self._write_experiment_report(total_epochs, final=True)
         if self.writer is not None:
             self.writer.close()
 
@@ -2066,6 +2280,89 @@ class RadioGSTrainer:
             return torch.tensor(batch)
         return batch
 
+    def _canonicalize_spatial_map(
+        self,
+        x: Optional[torch.Tensor],
+        *,
+        batch_size: int,
+        spatial_size: Tuple[int, int],
+        add_channel_dim: bool = False,
+        fill_value: float = 0.0,
+    ) -> Optional[torch.Tensor]:
+        """Coerce malformed map tensors to [B,H,W] or [B,1,H,W]."""
+        if x is None:
+            return None
+
+        target_numel = batch_size * spatial_size[0] * spatial_size[1]
+        x = x.to(self.device).float().contiguous()
+
+        if x.dim() == 4:
+            if x.shape[1] == 1:
+                x = x[:, 0]
+            elif x.shape[-1] == 1:
+                x = x[..., 0]
+        elif x.dim() == 0:
+            x = x.view(1, 1, 1).expand(batch_size, *spatial_size)
+        elif x.dim() == 1:
+            if x.numel() == target_numel:
+                x = x.view(batch_size, *spatial_size)
+            elif x.numel() == spatial_size[0] * spatial_size[1]:
+                x = x.view(1, *spatial_size).expand(batch_size, -1, -1)
+            else:
+                x = x.new_full((batch_size, *spatial_size), fill_value)
+        elif x.dim() == 2:
+            if x.shape == spatial_size:
+                x = x.unsqueeze(0).expand(batch_size, -1, -1)
+            elif x.shape[0] == batch_size and x.shape[1] == spatial_size[0] * spatial_size[1]:
+                x = x.view(batch_size, *spatial_size)
+            elif x.numel() == target_numel:
+                x = x.reshape(batch_size, *spatial_size)
+            else:
+                x = x.new_full((batch_size, *spatial_size), fill_value)
+        elif x.dim() != 3:
+            x = x.new_full((batch_size, *spatial_size), fill_value)
+
+        if x.dim() == 3 and x.shape[0] != batch_size:
+            if x.shape[0] == 1:
+                x = x.expand(batch_size, -1, -1)
+            elif x.numel() == target_numel:
+                x = x.reshape(batch_size, *spatial_size)
+            else:
+                x = x.new_full((batch_size, *spatial_size), fill_value)
+
+        if x.dim() == 3 and x.shape[-2:] != spatial_size:
+            x = F.interpolate(
+                x.unsqueeze(1),
+                size=spatial_size,
+                mode="bilinear",
+                align_corners=False,
+            ).squeeze(1)
+
+        if x.dim() != 3:
+            x = x.new_full((batch_size, *spatial_size), fill_value)
+
+        if add_channel_dim:
+            return x.unsqueeze(1)
+        return x
+
+    def _canonicalize_render_result(
+        self,
+        render_result: Dict[str, torch.Tensor],
+        *,
+        batch_size: int,
+        spatial_size: Tuple[int, int],
+    ) -> Dict[str, torch.Tensor]:
+        """Normalize renderer depth/alpha maps to a consistent batch-first format."""
+        render_result = dict(render_result)
+        for key in ("depth_map", "alpha_map", "geom_depth", "geom_alpha"):
+            if key in render_result:
+                render_result[key] = self._canonicalize_spatial_map(
+                    render_result[key],
+                    batch_size=batch_size,
+                    spatial_size=spatial_size,
+                )
+        return render_result
+
     @staticmethod
     def _resize_map(
         x: torch.Tensor,
@@ -2073,6 +2370,12 @@ class RadioGSTrainer:
         is_mask: bool = False,
     ) -> torch.Tensor:
         """Resize a dense [B,H,W] or [B,1,H,W] map to the target spatial size."""
+        if x.dim() == 2:
+            x = x.unsqueeze(0).unsqueeze(0)
+        elif x.dim() == 3 and x.shape[0] != 1:
+            x = x.unsqueeze(1)
+        elif x.dim() == 3:
+            x = x.unsqueeze(0)
         if x.dim() == 3:
             x = x.unsqueeze(1)
         if x.shape[-2:] == size:
@@ -2548,6 +2851,13 @@ class RadioGSTrainer:
                     B, _, H, W = render_result["feature_map"].shape
                     rgb_part = torch.zeros(B, 3, H, W, device=self.device)
 
+        B, _, H, W = render_result["feature_map"].shape
+        render_result = self._canonicalize_render_result(
+            render_result,
+            batch_size=B,
+            spatial_size=(H, W),
+        )
+
         return build_refiner_guide(
             render_result,
             rgb_guide=rgb_part,
@@ -2595,40 +2905,107 @@ class RadioGSTrainer:
         with open(log_file, "a") as f:
             f.write(line + "\n")
 
+    @staticmethod
+    def _feature_to_pca_rgb(feat: torch.Tensor) -> torch.Tensor:
+        flat = feat[0].float().flatten(1)
+        mean = flat.mean(dim=1, keepdim=True)
+        centered = flat - mean
+        U, _S, _V = torch.pca_lowrank(centered.T, q=3)
+        rgb = U.T.reshape(3, *feat.shape[-2:])
+        return (rgb - rgb.min()) / (rgb.max() - rgb.min() + 1e-8)
+
+    @staticmethod
+    def _write_ppm(path: Path, image: torch.Tensor) -> None:
+        image = image.detach().clamp(0.0, 1.0).cpu()
+        if image.dim() == 3 and image.shape[0] == 1:
+            image = image.repeat(3, 1, 1)
+        if image.dim() != 3 or image.shape[0] != 3:
+            raise ValueError(f"Expected [3,H,W] image, got {tuple(image.shape)}")
+        h, w = image.shape[1], image.shape[2]
+        array = (image.permute(1, 2, 0).numpy() * 255.0).round().astype(np.uint8)
+        with open(path, "wb") as f:
+            f.write(f"P6\n{w} {h}\n255\n".encode("ascii"))
+            f.write(array.tobytes())
+
+    @torch.no_grad()
+    def _render_validation_sample(
+        self,
+        sample: Dict[str, torch.Tensor],
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        gt = sample["radio_features"].unsqueeze(0).to(self.device)
+        pose = sample["pose_w2c"].unsqueeze(0).to(self.device)
+
+        rendered_rgb = None
+        if self.self_guided:
+            result = self.renderer.render_features_and_rgb(self.model, pose)
+            result = self._canonicalize_render_result(
+                result,
+                batch_size=pose.shape[0],
+                spatial_size=result["feature_map"].shape[-2:],
+            )
+            rendered_rgb = result["rgb"]
+        else:
+            result = self.renderer.render_features_batch(self.model, pose)
+            result = self._canonicalize_render_result(
+                result,
+                batch_size=pose.shape[0],
+                spatial_size=result["feature_map"].shape[-2:],
+            )
+
+        rendered_compact = self.sharpener(result["feature_map"])
+        if self.use_refiner and self.refiner is not None:
+            guide = self._build_guide(sample, result, rendered_rgb=rendered_rgb)
+            rendered_compact = self.refiner(rendered_compact, guide=guide)
+
+        if self._is_hybrid:
+            from radio_gs.models.hybrid_gaussian import unproject_depth_to_positions
+
+            depth_map = self._canonicalize_spatial_map(
+                result.get("depth_map"),
+                batch_size=rendered_compact.shape[0],
+                spatial_size=rendered_compact.shape[-2:],
+            )
+            position_map = unproject_depth_to_positions(
+                depth_map,
+                pose.float(),
+                self.renderer.K.float(),
+                depth_map.shape[1],
+                depth_map.shape[2],
+            )
+            position_map = self._normalize_positions(position_map)
+            decode_result = self.model.decode_screen_space(
+                rendered_compact.float(),
+                position_map,
+                return_aux=self.hybrid_decoupled_heads,
+                depth_map=depth_map,
+            )
+            rendered_compact = (
+                decode_result["fused"]
+                if self.hybrid_decoupled_heads
+                else decode_result
+            )
+
+        decoded = self.codec.decoder(rendered_compact)
+        if decoded.shape[-2:] != gt.shape[-2:]:
+            gt = F.interpolate(
+                gt, size=decoded.shape[-2:], mode="bilinear", align_corners=False
+            )
+        return gt, decoded
+
     @torch.no_grad()
     def _save_vis(self, epoch: int) -> None:
         """Save PCA visualisation for the first validation sample."""
         try:
             sample = self.val_dataset[0]
-            gt = sample["radio_features"].unsqueeze(0).to(self.device)
-            pose = sample["pose_w2c"].unsqueeze(0).to(self.device)
+            gt, decoded = self._render_validation_sample(sample)
 
-            rendered = self.renderer.render_features_batch(self.model, pose)["feature_map"]
-            rendered = self.sharpener(rendered)
-            if self.use_refiner and self.refiner is not None:
-                rgb_guide = sample.get("rgb_guide")
-                if rgb_guide is not None:
-                    rgb_guide = rgb_guide.unsqueeze(0).to(self.device)
-                rendered = self.refiner(rendered, guide=rgb_guide)
-            decoded = self.codec.decoder(rendered)
-
-            if decoded.shape[-2:] != gt.shape[-2:]:
-                gt = F.interpolate(
-                    gt, size=decoded.shape[-2:], mode="bilinear", align_corners=False
-                )
-
-            # Simple 3-component PCA → RGB image
             for tag, feat in [("gt", gt), ("decoded", decoded)]:
-                flat = feat[0].float().flatten(1)           # [C, H*W]
-                mean = flat.mean(dim=1, keepdim=True)
-                centered = flat - mean
-                U, S, _ = torch.pca_lowrank(centered.T, q=3)  # [H*W, 3]
-                rgb = U.T.reshape(3, *decoded.shape[-2:])
-                rgb = (rgb - rgb.min()) / (rgb.max() - rgb.min() + 1e-8)
+                rgb = self._feature_to_pca_rgb(feat)
                 if self.writer is not None:
                     self.writer.add_image(f"val/{tag}", rgb, epoch)
-        except Exception:
-            pass  # visualisation is best-effort
+                self._write_ppm(self.vis_dir / f"epoch_{epoch:03d}_{tag}_pca.ppm", rgb)
+        except Exception as exc:
+            self._log(f"Visualization save failed at epoch {epoch}: {exc}")
 
 
 # ===================================================================
@@ -2651,29 +3028,58 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_config(args.config)
-    trainer = RadioGSTrainer(config)
+    setattr(config, "config_path", args.config)
+    trainer: Optional[RadioGSTrainer] = None
 
-    # Load pretrained codec first (before resume/warmstart which may override)
-    if args.pretrained_codec:
-        ckpt = torch.load(args.pretrained_codec, map_location=trainer.device)
-        trainer.codec.load_state_dict(ckpt["codec_state_dict"])
-        trainer._log(f"Loaded pretrained codec from {args.pretrained_codec}")
+    try:
+        trainer = RadioGSTrainer(config)
 
-    if args.resume:
-        trainer.load_checkpoint(args.resume, resume=True)
-    elif args.warmstart:
-        trainer.load_checkpoint(args.warmstart, resume=False)
-    else:
-        # Check config for resume_from / warmstart_from
-        resume_from = getattr(config, "resume_from", None) or None
-        warmstart_from = getattr(config, "warmstart_from", None) or None
-        if resume_from:
-            trainer.load_checkpoint(resume_from, resume=False)
-            trainer._log(f"Warmstart from config: {resume_from}")
-        elif warmstart_from:
-            trainer.load_checkpoint(warmstart_from, resume=False)
+        # Load pretrained codec first (before resume/warmstart which may override)
+        if args.pretrained_codec:
+            ckpt = torch.load(args.pretrained_codec, map_location=trainer.device)
+            trainer.codec.load_state_dict(ckpt["codec_state_dict"])
+            trainer._log(f"Loaded pretrained codec from {args.pretrained_codec}")
 
-    trainer.train()
+        if args.resume:
+            trainer.load_checkpoint(args.resume, resume=True)
+        elif args.warmstart:
+            trainer.load_checkpoint(args.warmstart, resume=False)
+        else:
+            # Check config for resume_from / warmstart_from
+            resume_from = getattr(config, "resume_from", None) or None
+            warmstart_from = getattr(config, "warmstart_from", None) or None
+            if resume_from:
+                trainer.load_checkpoint(resume_from, resume=False)
+                trainer._log(f"Warmstart from config: {resume_from}")
+            elif warmstart_from:
+                trainer.load_checkpoint(warmstart_from, resume=False)
+
+        trainer.train()
+    except Exception as exc:
+        if trainer is not None:
+            trainer.run_status = "failed"
+            trainer._write_failure_report(exc)
+            trainer._write_experiment_report(max(trainer.start_epoch, 1), final=False)
+            trainer._log(f"Training failed: {type(exc).__name__}: {exc}")
+        else:
+            bootstrap_output_dir = Path(getattr(config, "output_dir", "output/radio_gs"))
+            bootstrap_report_dir = bootstrap_output_dir / "reports"
+            bootstrap_report_dir.mkdir(parents=True, exist_ok=True)
+            failure = {
+                "exp_name": getattr(config, "exp_name", bootstrap_output_dir.name),
+                "status": "failed_before_trainer_init",
+                "failed_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "config_path": args.config,
+                "error_type": type(exc).__name__,
+                "error_message": str(exc),
+                "traceback": traceback.format_exc(),
+            }
+            with open(bootstrap_report_dir / "failure.json", "w", encoding="utf-8") as f:
+                json.dump(failure, f, indent=2)
+        raise
+    finally:
+        if trainer is not None and trainer.writer is not None:
+            trainer.writer.flush()
 
 
 if __name__ == "__main__":

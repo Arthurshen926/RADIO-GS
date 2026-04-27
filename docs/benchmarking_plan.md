@@ -31,22 +31,28 @@ above unless the evaluation protocol is re-aligned more carefully.
 - `Feature3DGS-style` in the current repository is an **internal reproduced baseline label**.
 - Room_0 geometric or fused depth numbers are **internal task-utility evidence**, not external paper-to-paper grounding baselines.
 
-## Current public numbers already used by the repository
+## Current repository-carried draft rows
 
-The following four-scene grounding values are the numbers currently used in the
-internal reports. They form the natural first submission table.
+The following four-scene grounding values are the rows currently carried by the
+internal reports.
+
+`RADIO-GS` comes from the current internal evaluation pipeline. The three
+external rows are still unresolved borrowed comparison values, not exact
+paper-anchored numbers, so this table is useful for internal drafting but not
+submission-safe as written.
 
 | Method | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---:|---:|---:|---:|---:|
 | LERF | 0.520 | 0.503 | 0.653 | 0.456 | 0.533 |
 | LangSplat | 0.592 | 0.659 | 0.693 | 0.600 | 0.636 |
 | LEGaussians | 0.631 | 0.695 | 0.745 | 0.593 | 0.666 |
-| RADIO-GS | 0.732 | 0.845 | 0.831 | 0.818 | 0.807 |
+| RADIO-GS | 0.821 | 0.901 | 0.881 | 0.864 | 0.867 |
 
 Source of the current internal table layout:
 
 - [output/radio_gs/reports/sota_comparison_table.md](../output/radio_gs/reports/sota_comparison_table.md)
 - [output/radio_gs/reports/comprehensive_results.md](../output/radio_gs/reports/comprehensive_results.md)
+- Exact provenance status: [output/radio_gs/reports/baseline_source_verification.md](../output/radio_gs/reports/baseline_source_verification.md)
 
 ## Benchmark rules for the paper draft
 

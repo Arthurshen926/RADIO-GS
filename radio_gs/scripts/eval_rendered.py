@@ -6,6 +6,11 @@ Two evaluation modes:
 
 Uses the decoder FT checkpoint which has both Gaussian features and fine-tuned decoder.
 """
+import json
+import os
+import random
+import time
+
 import torch, sys, cv2
 import torch.nn as nn
 import torch.nn.functional as F
@@ -49,6 +54,18 @@ from radio_gs.models.screen_refiner import (
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 device = torch.device("cuda")
+
+
+def _seed_eval(seed: int) -> None:
+    """Keep probe fitting reproducible across repeated eval runs."""
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    if torch.backends.cudnn.is_available():
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 
 def _build_probe(in_dim, out_dim, hidden=256):
@@ -458,6 +475,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--checkpoint", required=True)
+    parser.add_argument("--output_dir", default=None)
     parser.add_argument("--n_train", type=int, default=200)
     parser.add_argument("--n_val", type=int, default=100)
     parser.add_argument("--use_rendered_rgb", action="store_true",
@@ -466,10 +484,16 @@ def main():
                         help="Optional pretrained depth head checkpoint for direct evaluation")
     parser.add_argument("--direct_depth_only", action="store_true",
                         help="Skip probe fitting and only evaluate a provided depth head on val views")
+    parser.add_argument("--eval_seed", type=int, default=42,
+                        help="Random seed used for evaluation probe fitting")
     args = parser.parse_args()
+
+    _seed_eval(args.eval_seed)
     
     print(f"Loading model from {args.checkpoint}...")
     model, codec, renderer, sharpener, refiner, config, is_hybrid = load_model_and_render(args.config, args.checkpoint)
+    output_dir = Path(args.output_dir) if args.output_dir else Path(args.checkpoint).resolve().parents[1] / "auto_eval"
+    output_dir.mkdir(parents=True, exist_ok=True)
     
     dataset_type = resolve_dataset_type(config)
     scene = getattr(config, "scene", "room_0")
@@ -666,15 +690,9 @@ def main():
     if depth_guide_enabled:
         print(f"  Depth guide: {'3ch (depth+grad)' if depth_grad_enabled else '1ch'}")
     
-    # Render train features
-    if mixed_split:
-        # Mixed: each frame maps to a specific sequence
-        pass  # handled below in unified loop
-    else:
-        train_poses_file = str(scene_root / train_split / "traj_w_c.txt")
-        all_train_poses = np.loadtxt(train_poses_file).reshape(-1, 4, 4).astype(np.float32)
-        train_w2c = np.linalg.inv(all_train_poses)
-    
+    # Render train features. Non-mixed splits already resolved their poses via
+    # resolve_split_pose_source()/load_w2c_from_pose_* above, so do not override
+    # them with a Replica-specific traj_w_c.txt lookup here.
     train_decoded = []
     train_gt_1280 = []
     train_geom_depths = []
@@ -783,7 +801,8 @@ def main():
             dec_resized = dec
         cos = F.cosine_similarity(dec_resized.flatten().unsqueeze(0), gt.flatten().unsqueeze(0)).item()
         cos_sims.append(cos)
-    print(f"  Val decoded cosine: {np.mean(cos_sims):.4f}")
+    mean_cosine = float(np.mean(cos_sims)) if cos_sims else None
+    print(f"  Val decoded cosine: {mean_cosine:.4f}" if mean_cosine is not None else "  Val decoded cosine: N/A")
     print(f"  Rendered resolution: {val_decoded[0].shape[1:] if val_decoded else 'N/A'}")
     print(f"  GT resolution: {val_gt_1280[0].shape[1:] if val_gt_1280 else 'N/A'}")
     
@@ -806,6 +825,70 @@ def main():
         val_sem = val_split_inputs["sem_dir"]
 
     val_gt_sub = [val_gt_1280[j] for j in range(len(val_indices))]
+
+    def _sanitize_for_json(value):
+        if isinstance(value, dict):
+            return {key: _sanitize_for_json(val) for key, val in value.items()}
+        if isinstance(value, (list, tuple)):
+            return [_sanitize_for_json(val) for val in value]
+        if isinstance(value, np.ndarray):
+            return _sanitize_for_json(value.tolist())
+        if isinstance(value, (np.bool_, bool)):
+            return bool(value)
+        if isinstance(value, (np.integer, int)):
+            return int(value)
+        if isinstance(value, (np.floating, float)):
+            value = float(value)
+            return value if np.isfinite(value) else None
+        return value
+
+    def _write_results(**metrics):
+        results_payload = {
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "config_path": str(Path(args.config).resolve()),
+            "checkpoint": str(Path(args.checkpoint).resolve()),
+            "depth_head_checkpoint": (
+                str(Path(args.depth_head_checkpoint).resolve())
+                if args.depth_head_checkpoint else None
+            ),
+            "output_dir": str(output_dir.resolve()),
+            "args": {
+                "n_train": args.n_train,
+                "n_val": args.n_val,
+                "use_rendered_rgb": args.use_rendered_rgb,
+                "direct_depth_only": args.direct_depth_only,
+                "eval_seed": args.eval_seed,
+            },
+            "scene": scene,
+            "dataset_type": dataset_type,
+            "render_feature_size": [rend_fH, rend_fW],
+            "gt_feature_size": [gt_fH, gt_fW],
+            "feature_quality": {
+                "val_decoded_cosine": mean_cosine,
+            },
+            "oracle_depth": None,
+            "oracle_seg": None,
+            "rendered_depth": None,
+            "rendered_seg": None,
+            "geom_depth": None,
+            "geom_hr_depth": None,
+            "fused_depth": None,
+            "cross_depth": None,
+            "cross_seg": None,
+            "oracle_grounding": None,
+            "rendered_grounding": None,
+            "cross_grounding": None,
+            "direct_head_oracle": None,
+            "direct_head_rendered": None,
+        }
+        results_payload.update(metrics)
+        results_payload = _sanitize_for_json(results_payload)
+        report_path = output_dir / "eval_rendered_results.json"
+        report_path.write_text(
+            json.dumps(results_payload, indent=2, allow_nan=False),
+            encoding="utf-8",
+        )
+        print(f"Saved structured eval report to {report_path}")
 
     if args.direct_depth_only:
         if not args.depth_head_checkpoint:
@@ -872,6 +955,12 @@ def main():
         print(f"{'Geom same-res':<26} {geom_depth['depth_abs_rel']:>8.4f} {geom_depth['depth_rmse']:>8.4f} {geom_depth['depth_delta1']:>8.4f}")
         print(f"{'Geom full-res':<26} {geom_hr_depth['depth_abs_rel']:>8.4f} {geom_hr_depth['depth_rmse']:>8.4f} {geom_hr_depth['depth_delta1']:>8.4f}")
         print("=" * 72)
+        _write_results(
+            geom_depth=geom_depth,
+            geom_hr_depth=geom_hr_depth,
+            direct_head_oracle=direct_head_oracle,
+            direct_head_rendered=direct_head_rendered,
+        )
         return
     
     # ====== Evaluation Mode 1: Oracle (GT features) ======
@@ -1045,6 +1134,23 @@ def main():
         print(f"{'Head @ GT feat':<20} {direct_head_oracle['depth_abs_rel']:>8.4f} {direct_head_oracle['depth_rmse']:>8.4f} {direct_head_oracle['depth_delta1']:>8.4f}")
         print(f"{'Head @ rendered':<20} {direct_head_rendered['depth_abs_rel']:>8.4f} {direct_head_rendered['depth_rmse']:>8.4f} {direct_head_rendered['depth_delta1']:>8.4f}")
         print("=" * 55)
+
+    _write_results(
+        oracle_depth=oracle_depth,
+        oracle_seg=oracle_seg,
+        rendered_depth=rendered_depth,
+        rendered_seg=rendered_seg,
+        geom_depth=geom_depth,
+        geom_hr_depth=geom_hr_depth,
+        fused_depth=fused_depth,
+        cross_depth=cross_depth,
+        cross_seg=cross_seg,
+        oracle_grounding=oracle_grnd,
+        rendered_grounding=rendered_grnd,
+        cross_grounding=cross_grnd,
+        direct_head_oracle=direct_head_oracle,
+        direct_head_rendered=direct_head_rendered,
+    )
 
 
 def eval_depth_indexed(train_feats, train_idx, depth_dir, val_feats, val_idx, val_depth_dir, fH=30, fW=40,

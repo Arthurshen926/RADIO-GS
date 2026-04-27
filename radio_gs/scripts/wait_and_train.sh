@@ -74,7 +74,7 @@ while true; do
                 trap 'unlock_gpu "$gpu_idx"' EXIT
                 export CUDA_VISIBLE_DEVICES="$gpu_idx"
                 export PYTHONUNBUFFERED=1
-                python radio_gs/scripts/train_feature_field.py --config "$CONFIG_PATH" 2>&1 | tee -a "$LOG_PATH"
+                bash radio_gs/scripts/run_repo_python.sh radio_gs/scripts/train_feature_field.py --config "$CONFIG_PATH" 2>&1 | tee -a "$LOG_PATH"
                 exit $?
             fi
         fi

@@ -19,19 +19,32 @@ def parse_time_log(path: Path) -> dict[str, str]:
     for key, pattern in patterns.items():
         match = re.search(pattern, text)
         fields[key] = match.group(1).strip() if match else "-"
+    if fields["wall"] == "-":
+        match = re.search(r"^real\s+(.+)$", text, flags=re.MULTILINE)
+        if match:
+            fields["wall"] = match.group(1).strip() + " s"
+    if fields["cpu"] == "-":
+        fields["cpu"] = "shell-time"
     return fields
 
 
-def parse_gpu_log(path: Path) -> tuple[str, str]:
+def parse_gpu_log(path: Path) -> tuple[str, str, str]:
     peak_mem = 0.0
     peak_util = 0.0
+    total_util = 0.0
+    samples = 0
     for line in path.read_text(encoding="utf-8").splitlines():
         parts = [part.strip() for part in line.split(",")]
         if len(parts) < 5:
             continue
-        peak_util = max(peak_util, float(parts[2]))
-        peak_mem = max(peak_mem, float(parts[3]))
-    return f"{peak_mem:.0f}", f"{peak_util:.0f}"
+        util = float(parts[2])
+        mem = float(parts[3])
+        peak_util = max(peak_util, util)
+        peak_mem = max(peak_mem, mem)
+        total_util += util
+        samples += 1
+    mean_util = total_util / samples if samples else 0.0
+    return f"{peak_mem:.0f}", f"{peak_util:.0f}", f"{mean_util:.2f}"
 
 
 def main() -> None:
@@ -43,14 +56,14 @@ def main() -> None:
     lines = [
         "# Efficiency Profile Summary",
         "",
-        "| Profile | Wall Time | Peak GPU Mem (MiB) | Peak GPU Util (%) | Max RSS (KB) | CPU % |",
-        "|---|---:|---:|---:|---:|---:|",
+        "| Profile | Wall Time | Peak GPU Mem (MiB) | Peak GPU Util (%) | Mean GPU Util (%) | Max RSS (KB) | CPU % |",
+        "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for profile_dir in [Path(p) for p in args.profile_dirs]:
         time_info = parse_time_log(profile_dir / "time.log")
-        peak_mem, peak_util = parse_gpu_log(profile_dir / "gpu_metrics.csv")
+        peak_mem, peak_util, mean_util = parse_gpu_log(profile_dir / "gpu_metrics.csv")
         lines.append(
-            f"| `{profile_dir}` | {time_info['wall']} | {peak_mem} | {peak_util} | "
+            f"| `{profile_dir}` | {time_info['wall']} | {peak_mem} | {peak_util} | {mean_util} | "
             f"{time_info['max_rss_kb']} | {time_info['cpu']} |"
         )
 

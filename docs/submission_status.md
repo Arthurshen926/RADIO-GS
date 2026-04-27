@@ -53,19 +53,21 @@ Under that framing, the paper solves the following problem:
 
 ### Qualitative figures
 
-- [output/paper_figures/room0_comparison/overview_comparison.png](../output/paper_figures/room0_comparison/overview_comparison.png)
-- [output/lerf_ovs_eval/visualisations/figurines/](../output/lerf_ovs_eval/visualisations/figurines/)
-- [output/lerf_ovs_eval/ramen_v14_fdh_ws240_240ep/visualisations/ramen/](../output/lerf_ovs_eval/ramen_v14_fdh_ws240_240ep/visualisations/ramen/)
-- [output/lerf_ovs_eval/teatime_v14_fdh_ws240_240ep/visualisations/teatime/](../output/lerf_ovs_eval/teatime_v14_fdh_ws240_240ep/visualisations/teatime/)
-- [output/lerf_ovs_eval/waldo_kitchen_v14_softmax/visualisations/waldo_kitchen/](../output/lerf_ovs_eval/waldo_kitchen_v14_softmax/visualisations/waldo_kitchen/)
+- [output/radio_gs/reports/figure_shortlist.md](../output/radio_gs/reports/figure_shortlist.md)
+- [output/radio_gs/paper_figures/fig_grounding_comparison.png](../output/radio_gs/paper_figures/fig_grounding_comparison.png)
+- [output/radio_gs/paper_figures/fig_radio_flow_comparison.png](../output/radio_gs/paper_figures/fig_radio_flow_comparison.png)
+- [output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png](../output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png)
 
 ## What still blocks a strong main-track submission
 
-### 1. Public baseline coverage is not frozen
+### 1. Public baseline provenance is conservatively frozen, but not paper-anchored
 
 The main LERF-OVS comparison has a strong core trio: LERF, LangSplat, LEGaussians.
-That is enough to form a serious main table, but the numbers still need to be
-locked to exact paper references before a paper freeze.
+That is enough to form a serious main table, and the repository now explicitly
+freezes those external rows as unresolved draft placeholders rather than claiming
+they are exact paper-anchored values. The remaining weakness is not ambiguity,
+but that the paper-facing comparison still relies on protocol-misaligned
+cross-paper external rows.
 
 ### 2. Cross-domain generalization is still weak
 
@@ -73,10 +75,12 @@ Replica plus LERF-OVS is not enough to support a strong generalization claim for
 top-conference review. At least one additional domain, ideally ScanNet, should be
 added.
 
-### 3. Statistical confidence is missing
+### 3. Statistical confidence is improved, but still narrow
 
-Current results are mostly single-run best results. For a strong claim, at least
-3 seeds are needed on key settings, especially on high-variance scenes.
+The conservative route now includes a completed four-scene `n=3` seed summary
+for `figurines`, `ramen`, `teatime`, and `waldo_kitchen`. That meaningfully
+lowers submission risk and resolves the earlier missing Teatime evidence, but it
+is still narrower than a benchmark-wide statistical treatment.
 
 ### 4. Small-object failure analysis is still incomplete
 
@@ -91,16 +95,18 @@ latency, and feature-resolution trade-offs.
 
 ### 6. Main-table provenance is fixed, but future runs still need the same discipline
 
-The LERF-OVS main table is now backed by exact rendered JSON artifacts, which
-removes one major submission risk. The remaining requirement is procedural:
-every new ablation, seed run, and cross-domain result should be frozen with the
-same exact-report discipline instead of relying on informal notes.
+The LERF-OVS main table is now backed by exact rendered JSON artifacts, and the
+repository now freezes `paper_submission_main_table.md` as the canonical paper
+main table while `paper_main_table.md` is demoted to supporting seed-robustness
+evidence. The remaining requirement is procedural: every new ablation, seed run,
+and cross-domain result should be frozen with the same exact-report discipline
+instead of relying on informal notes.
 
 ## Immediate implementation priorities
 
 1. Validate the LERF depth-only pure-frozen recipe and freeze the follow-up four-scene comparison.
 2. Add a ScanNet or similarly distinct domain experiment.
 3. Add a 2x feature-resolution figurines study and document its effect on small-object grounding.
-4. Add a three-seed summary for the most important checkpoints.
+4. Extend the current key-scene three-seed summary into a broader benchmark-wide statistical section.
 5. Add a dedicated efficiency/cost table with runtime and memory profiles.
 6. Convert the current report notes into the actual abstract, introduction, contributions, and main experiment sections.

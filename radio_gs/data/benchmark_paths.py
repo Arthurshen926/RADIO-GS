@@ -273,9 +273,14 @@ def load_w2c_from_pose_file(pose_file: str | Path, frame_indices: Optional[Seque
         return w2c
     max_frame = max(int(fid) for fid in frame_indices) if frame_indices else -1
     if max_frame >= len(w2c):
-        raise IndexError(
-            f"Pose file {pose_path} has {len(w2c)} frames, but frame {max_frame} was requested"
-        )
+        if len(frame_indices) != len(w2c):
+            raise IndexError(
+                f"Pose file {pose_path} has {len(w2c)} frames, but frame {max_frame} was requested"
+            )
+        # Some LERF feature folders retain original image indices (e.g. frame_301)
+        # while traj_w_c.txt is stored densely in capture order. In that case,
+        # align features to poses by sequence order instead of raw filename index.
+        return w2c[: len(frame_indices)]
     return np.stack([w2c[int(fid)] for fid in frame_indices], axis=0)
 
 

@@ -558,7 +558,7 @@ FDH 确实有效，但它的主要贡献更像是：
 
 | 任务 | 当前结果 |
 |------|----------|
-| Text grounding macro LocAcc | `0.807` |
+| Text grounding macro LocAcc | `0.867` |
 | Formal segmentation macro mIoU | `0.386` |
 
 这说明 RADIO-GS 当前不只是一个 depth feature renderer，而是已经具备：

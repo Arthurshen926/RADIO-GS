@@ -62,6 +62,17 @@ def _collect_image_paths(image_dir: str) -> tuple[list[Path], str]:
     return sorted(paths), "lexicographic"
 
 
+def _apply_subsampling(
+    image_paths: list[Path],
+    frame_stride: int,
+    max_frames: int | None,
+) -> list[Path]:
+    sampled = image_paths[:: max(1, frame_stride)]
+    if max_frames is not None:
+        sampled = sampled[:max_frames]
+    return sampled
+
+
 def _nearest_radio_resolution(h: int, w: int, patch_size: int = 16) -> tuple[int, int]:
     """Round h, w to nearest multiples of *patch_size*."""
     return (
@@ -154,6 +165,11 @@ def extract(args: argparse.Namespace) -> None:
 
     # Collect images
     image_paths, image_sort_mode = _collect_image_paths(args.image_dir)
+    image_paths = _apply_subsampling(
+        image_paths,
+        frame_stride=args.frame_stride,
+        max_frames=args.max_frames,
+    )
     print(f"[RADIO] Found {len(image_paths)} images in {args.image_dir}")
     print(f"[RADIO] Image ordering: {image_sort_mode}")
 
@@ -318,6 +334,18 @@ def main() -> None:
         help="RADIO model version string",
     )
     parser.add_argument("--batch_size", type=int, default=4, help="Images per batch")
+    parser.add_argument(
+        "--frame_stride",
+        type=int,
+        default=1,
+        help="Use every Nth image from image_dir",
+    )
+    parser.add_argument(
+        "--max_frames",
+        type=int,
+        default=None,
+        help="Optional cap on the number of images to extract",
+    )
     parser.add_argument(
         "--extract_adaptors",
         action="store_true",

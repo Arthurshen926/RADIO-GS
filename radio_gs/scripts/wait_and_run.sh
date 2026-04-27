@@ -75,6 +75,7 @@ while true; do
           trap 'unlock_gpu "$gpu_idx"' EXIT
           cd "$ROOT_DIR"
           export CUDA_VISIBLE_DEVICES="$gpu_idx"
+          export SELECTED_GPU="$gpu_idx"
           export PYTHONUNBUFFERED=1
           "${CMD[@]}"
         ) 2>&1 | tee -a "$LOG_PATH"

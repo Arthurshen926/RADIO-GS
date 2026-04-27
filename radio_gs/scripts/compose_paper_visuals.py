@@ -12,9 +12,9 @@ for the main modalities:
 
 Example:
   python radio_gs/scripts/compose_paper_visuals.py \
-    --baseline_dir output/paper_figures/room0_nofdh_240ep \
-    --ours_dir output/paper_figures/room0_fdh_ws240 \
-    --output_dir output/paper_figures/room0_comparison
+    --baseline_dir output/radio_gs/paper_figures/room0_nofdh_240ep \
+    --ours_dir output/radio_gs/paper_figures/room0_fdh_ws240 \
+    --output_dir output/radio_gs/paper_figures/room0_comparison
 """
 
 from __future__ import annotations

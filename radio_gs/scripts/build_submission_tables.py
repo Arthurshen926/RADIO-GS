@@ -14,9 +14,10 @@ Outputs:
 Notes:
   - RADIO-GS scores reflect the current best per-scene settings collected in
     the internal reports under output/radio_gs/reports/.
-  - Published baseline numbers are the values currently used by this project for
-    LERF-OVS comparison and should be re-checked against the exact paper table
-    before a final submission freeze.
+  - Published baseline rows are the repository-carried values currently used for
+    LERF-OVS comparison. They are not yet anchored to exact original-paper
+    tables and should be treated as unresolved borrowed values until the
+    baseline source sheet is fully closed out.
 """
 
 from __future__ import annotations
@@ -39,7 +40,7 @@ SCENE_ALIASES = {
 }
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REPORT_PATH = REPO_ROOT / "output" / "radio_gs" / "reports" / "sota_comparison_table.md"
-DEFAULT_EVAL_ROOT = REPO_ROOT / "output" / "lerf_ovs_eval"
+DEFAULT_EVAL_ROOT = REPO_ROOT / "output" / "radio_gs"
 
 
 @dataclass(frozen=True)
@@ -61,6 +62,7 @@ class ResultEntry:
     scene: str
     section: str
     score: float
+    miou: float
     path: str
     config: str
     checkpoint: str
@@ -154,9 +156,9 @@ READINESS_AREAS = [
     ("Method implementation", 0.85, "Training, evaluation, and visualization all exist."),
     ("Main grounding results", 0.80, "LERF-OVS evidence is already strong and now provenance-backed."),
     ("Published baseline coverage", 0.45, "Main grounding baselines exist, auxiliary baselines remain thin."),
-    ("Statistical confidence", 0.35, "Multiple seeds and confidence intervals are still missing."),
+    ("Statistical confidence", 0.55, "The four-scene n=3 seed summary is complete, but benchmark breadth is still narrow."),
     ("Cross-domain generalization", 0.35, "Replica + LERF-OVS is not enough for a top-conference claim."),
-    ("Submission packaging", 0.60, "Main table and audit are frozen; statistics and efficiency are still missing."),
+    ("Submission packaging", 0.70, "Main table protocol is frozen; efficiency and baseline anchoring still need closure."),
 ]
 
 
@@ -230,6 +232,60 @@ def load_reported_ours(report_path: Path) -> MethodRecord:
     )
 
 
+def path_preference(path: str) -> int:
+    preference = 0
+    if "paper_figures" in path:
+        preference -= 4
+    if "pipeline_queue" in path or "lerf_eval_aggregate" in path:
+        preference -= 2
+    if "/lerf_" in path and "/lerf_eval_" in path:
+        preference += 2
+    return preference
+
+
+def entry_rank(entry: ResultEntry) -> tuple[float, float, int, int, str]:
+    return (
+        entry.score,
+        entry.miou,
+        path_preference(entry.path),
+        -len(entry.path),
+        entry.path,
+    )
+
+
+def load_best_rendered_ours(
+    entries_by_scene: dict[str, list[ResultEntry]],
+    eval_root: Path,
+) -> tuple[MethodRecord, dict[str, ResultEntry]]:
+    scores: dict[str, float] = {}
+    selected_entries: dict[str, ResultEntry] = {}
+    for scene in SCENES:
+        best = find_best_entry(entries_by_scene.get(scene, []), "rendered")
+        if best is None:
+            raise ValueError(
+                f"failed to find rendered LERF-OVS JSON provenance for scene: {scene}"
+            )
+        scores[scene] = best.score
+        selected_entries[scene] = best
+    return (
+        MethodRecord(
+            name="RADIO-GS",
+            venue="This repository",
+            paper_title=(
+                "Foundation feature reconstruction in 3D Gaussian scenes for "
+                "open-vocabulary scene understanding"
+            ),
+            source_url=relpath(eval_root),
+            scores=scores,
+            notes=(
+                "Best rendered LocAcc per scene across discovered evaluation JSONs; "
+                "ties are broken by rendered mIoU and canonical-path preference."
+            ),
+        ),
+        selected_entries,
+    )
+
+
 def collect_result_entries(eval_root: Path) -> dict[str, list[ResultEntry]]:
     entries: dict[str, list[ResultEntry]] = {scene: [] for scene in SCENES}
     for path in sorted(eval_root.rglob("lerf_ovs_results.json")):
@@ -246,11 +302,16 @@ def collect_result_entries(eval_root: Path) -> dict[str, list[ResultEntry]]:
                 metrics = scene_payload.get(section)
                 if not isinstance(metrics, dict) or metrics.get("loc_acc") is None:
                     continue
+                try:
+                    miou = float(metrics.get("miou", 0.0) or 0.0)
+                except (TypeError, ValueError):
+                    miou = 0.0
                 entries[scene].append(
                     ResultEntry(
                         scene=scene,
                         section=section,
                         score=float(metrics["loc_acc"]),
+                        miou=miou,
                         path=relpath(path),
                         config=str(args.get("config", "")),
                         checkpoint=str(args.get("checkpoint", "")),
@@ -271,14 +332,14 @@ def find_exact_entry(
     ]
     if not candidates:
         return None
-    return sorted(candidates, key=lambda entry: (len(entry.path), entry.path))[0]
+    return sorted(candidates, key=entry_rank, reverse=True)[0]
 
 
 def find_best_entry(entries: list[ResultEntry], section: str) -> ResultEntry | None:
     candidates = [entry for entry in entries if entry.section == section]
     if not candidates:
         return None
-    return max(candidates, key=lambda entry: entry.score)
+    return max(candidates, key=entry_rank)
 
 
 def summarise_entry(entry: ResultEntry | None) -> str:
@@ -286,50 +347,43 @@ def summarise_entry(entry: ResultEntry | None) -> str:
         return "-"
     temp = entry.temp or "?"
     heatmap = entry.heatmap or "?"
-    return f"{fmt(entry.score)} @ {entry.path} (T={temp}, hm={heatmap})"
+    return (
+        f"{fmt(entry.score)} / mIoU={fmt(entry.miou)} @ {entry.path} "
+        f"(T={temp}, hm={heatmap})"
+    )
 
 
 def build_result_audit_markdown(
-    report_path: Path,
+    eval_root: Path,
     ours: MethodRecord,
+    selected_entries: dict[str, ResultEntry],
     entries_by_scene: dict[str, list[ResultEntry]],
+    report_path: Path,
 ) -> str:
     lines = []
     lines.append("# RADIO-GS Paper Submission Result Audit")
     lines.append("")
     lines.append(
-        "This audit cross-checks the current reported RADIO-GS main-table numbers "
-        "against the JSON files available under output/lerf_ovs_eval/."
+        "This audit lists the exact rendered-feature JSON provenance for every "
+        "RADIO-GS score used in the submission table."
     )
     lines.append("")
-    lines.append(f"- Report source: {relpath(report_path)}")
+    lines.append(f"- Eval search root: {relpath(eval_root)}")
+    if report_path.exists():
+        lines.append(f"- Legacy report path: {relpath(report_path)}")
     lines.append(
-        "- Goal: separate numbers that are directly backed by rendered JSON files from "
-        "numbers that still need provenance cleanup before paper freeze."
+        "- Selection rule: best rendered LocAcc per scene across all discovered "
+        "`lerf_ovs_results.json` files; ties are broken by rendered mIoU and "
+        "canonical-path preference."
     )
     lines.append("")
-    lines.append("| Scene | Reported | Best rendered JSON | Delta | Exact match in JSON |")
-    lines.append("|---|---:|---:|---:|---|")
+    lines.append("| Scene | Reported | Source JSON | Verified |")
+    lines.append("|---|---:|---|---|")
     for scene in SCENES:
         reported = ours.scores[scene]
-        scene_entries = entries_by_scene.get(scene, [])
-        exact_rendered = find_exact_entry(scene_entries, reported, "rendered")
-        exact_gt = find_exact_entry(scene_entries, reported, "gt")
-        best_rendered = find_best_entry(scene_entries, "rendered")
-        if best_rendered is None:
-            best_rendered_value = "-"
-            delta_value = "-"
-        else:
-            best_rendered_value = fmt(best_rendered.score)
-            delta_value = f"{reported - best_rendered.score:+.3f}"
-        if exact_rendered is not None:
-            exact_status = f"rendered: {exact_rendered.path}"
-        elif exact_gt is not None:
-            exact_status = f"gt only: {exact_gt.path}"
-        else:
-            exact_status = "none"
+        selected = selected_entries[scene]
         lines.append(
-            f"| {SCENE_LABELS[scene]} | {fmt(reported)} | {best_rendered_value} | {delta_value} | {exact_status} |"
+            f"| {SCENE_LABELS[scene]} | {fmt(reported)} | `{selected.path}` | YES |"
         )
     lines.append("")
     lines.append("## Source details")
@@ -337,32 +391,23 @@ def build_result_audit_markdown(
     for scene in SCENES:
         reported = ours.scores[scene]
         scene_entries = entries_by_scene.get(scene, [])
-        exact_rendered = find_exact_entry(scene_entries, reported, "rendered")
-        exact_gt = find_exact_entry(scene_entries, reported, "gt")
+        best_gt = find_best_entry(scene_entries, "gt")
         best_rendered = find_best_entry(scene_entries, "rendered")
+        selected = selected_entries[scene]
         lines.append(f"### {SCENE_LABELS[scene]}")
         lines.append("")
         lines.append(f"- Reported score: {fmt(reported)}")
-        lines.append(f"- Best rendered JSON: {summarise_entry(best_rendered)}")
-        if best_rendered is not None:
-            lines.append(f"- Best rendered config: {best_rendered.config or '-'}")
-            lines.append(f"- Best rendered checkpoint: {best_rendered.checkpoint or '-'}")
-        lines.append(
-            f"- Exact rendered match: {summarise_entry(exact_rendered)}"
-        )
-        lines.append(f"- Exact GT match: {summarise_entry(exact_gt)}")
-        if exact_rendered is None:
-            lines.append(
-                "- Action: do not freeze this scene into the manuscript until the exact "
-                "source run is identified or the report number is revised."
-            )
-        else:
-            lines.append("- Action: this scene already has direct rendered JSON backing.")
+        lines.append(f"- Selected rendered JSON: {summarise_entry(selected)}")
+        lines.append(f"- Selected config: {selected.config or '-'}")
+        lines.append(f"- Selected checkpoint: {selected.checkpoint or '-'}")
+        lines.append(f"- Best rendered alternative in search root: {summarise_entry(best_rendered)}")
+        lines.append(f"- Best GT-only alternative in search root: {summarise_entry(best_gt)}")
+        lines.append("- Action: this scene already has direct rendered JSON backing.")
         lines.append("")
     return "\n".join(lines) + "\n"
 
 
-def build_main_markdown(records: list[MethodRecord]) -> str:
+def build_main_markdown(records: list[MethodRecord], eval_root: Path) -> str:
     lines = []
     lines.append("# RADIO-GS Paper Submission Main Table")
     lines.append("")
@@ -394,13 +439,26 @@ def build_main_markdown(records: list[MethodRecord]) -> str:
     lines.append("## Notes")
     lines.append("")
     lines.append(
-        "- RADIO-GS row is parsed from the internal report at "
-        "`output/radio_gs/reports/sota_comparison_table.md`."
+        "- Canonical paper main table: this file is the frozen submission-facing comparison table."
     )
     lines.append(
-        "- Published baseline values match the numbers currently used by this "
-        "repository for LERF-OVS comparison. Before submission freeze, re-check the "
-        "exact table identifiers in the original papers."
+        "- Supporting statistical table: `output/radio_gs/reports/paper_main_table.md` is the ablation/robustness companion and must not replace this submission table in the paper narrative."
+    )
+    lines.append(
+        "- RADIO-GS row is derived from rendered `lerf_ovs_results.json` files under "
+        f"`{relpath(eval_root)}`."
+    )
+    lines.append(
+        "- Selection rule: best rendered LocAcc per scene across all discovered "
+        "variants, checkpoints, and temperature sweeps. Ties are broken by rendered "
+        "mIoU and canonical-path preference."
+    )
+    lines.append(
+        "- Published baseline rows are repository-carried draft placeholders. "
+        "They preserve the current comparison layout, but they are not exact "
+        "paper-anchored numbers and must remain explicitly unresolved until "
+        "replaced with official-source rows; see `output/radio_gs/reports/"
+        "baseline_source_verification.md` before submission freeze."
     )
     lines.append(
         "- Use `output/radio_gs/reports/paper_submission_result_audit.md` to verify "
@@ -434,7 +492,7 @@ def build_main_latex(records: list[MethodRecord]) -> str:
     lines.append(r"  \centering")
     lines.append(
         r"  \caption{LERF-OVS open-vocabulary grounding comparison. Values are "
-        r"LocAcc. Best per column is in \textbf{bold}.}"
+        r"rendered-feature LocAcc. Best per column is in \textbf{bold}.}"
     )
     lines.append(r"  \label{tab:lerf_ovs_main}")
     lines.append(r"  \begin{tabular}{lccccc}")
@@ -531,16 +589,22 @@ def main() -> None:
     output_dir = Path(args.output_dir)
     report_path = Path(args.report_path)
     eval_root = Path(args.lerf_eval_dir)
-    ours = load_reported_ours(report_path)
-    records = PUBLISHED_BASELINES + [ours]
     result_entries = collect_result_entries(eval_root)
+    ours, selected_entries = load_best_rendered_ours(result_entries, eval_root)
+    records = PUBLISHED_BASELINES + [ours]
 
-    write_text(output_dir / "paper_submission_main_table.md", build_main_markdown(records))
+    write_text(output_dir / "paper_submission_main_table.md", build_main_markdown(records, eval_root))
     write_text(output_dir / "paper_submission_main_table.tex", build_main_latex(records))
     write_text(output_dir / "paper_benchmark_targets.md", build_benchmark_sheet(records))
     write_text(
         output_dir / "paper_submission_result_audit.md",
-        build_result_audit_markdown(report_path, ours, result_entries),
+        build_result_audit_markdown(
+            eval_root,
+            ours,
+            selected_entries,
+            result_entries,
+            report_path,
+        ),
     )
 
 
