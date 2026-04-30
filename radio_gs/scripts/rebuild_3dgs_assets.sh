@@ -6,7 +6,7 @@ MODE="${1:-replica}"
 
 RADIO_REPO="${RADIO_REPO:-/root/RADIO}"
 REPLICA_ROOT="${REPLICA_ROOT:-/mnt/pool/sqy/dataset}"
-LERF_ROOT="${LERF_ROOT:-/mnt/pool/sqy/lerf_ovs}"
+LERF_ROOT="${LERF_ROOT:-/mnt/pool/sqy/3d_understanding/lerf_ovs}"
 REPLICA_SCENES="${REPLICA_SCENES:-room_0,room_2}"
 LERF_SCENES="${LERF_SCENES:-figurines,ramen,teatime,waldo_kitchen}"
 REPLICA_SEQUENCES="${REPLICA_SEQUENCES:-Sequence_1,Sequence_2}"

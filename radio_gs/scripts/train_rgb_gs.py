@@ -201,12 +201,13 @@ class SimpleGaussianModel(nn.Module):
         opacities = torch.sigmoid(self.logit_opacity).squeeze(-1)
         quats_n = F.normalize(self.quats, p=2, dim=-1)
 
+        colors = self.sh_coeffs if self.sh_degree > 0 else self.sh_coeffs[:, 0, :]
         renders, alphas, info = rasterization(
             means=self.means,
             quats=quats_n,
             scales=scales,
             opacities=opacities,
-            colors=self.sh_coeffs,
+            colors=colors,
             viewmats=viewmat.unsqueeze(0),
             Ks=K.unsqueeze(0),
             width=W,

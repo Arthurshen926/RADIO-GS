@@ -7,7 +7,7 @@ Pipeline
    (falls back to a pre-computed bank if the ``transformers`` model is
    unavailable).
 3. For each labeled frame:
-   a. **GT mode** – load pre-extracted RADIO 1280-d features.
+   a. **Teacher mode** – load pre-extracted RADIO 1280-d features from real RGB.
    b. **Rendered mode** – render latent features from the trained 3DGS
       feature field and decode to 1280-d.
 4. Project 1280-d features → SigLIP2 1536-d using a frozen projection head.
@@ -25,7 +25,7 @@ Usage
         --checkpoint output/lerf_figurines/best.pt \\
         --scene figurines
 
-    # GT features only (upper-bound evaluation)
+    # Teacher/oracle RADIO features only (upper-bound evaluation)
     python -m radio_gs.scripts.eval_lerf_grounding \\
         --gt_feature_dir output/radio_features_lerf/figurines/backbone \\
         --scene figurines --gt_only
@@ -39,7 +39,7 @@ import logging
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Mapping, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -70,14 +70,188 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 LERF_OVS_SCENES = ("figurines", "ramen", "teatime", "waldo_kitchen")
 
-DEFAULT_LABEL_DIR = "/mnt/pool/sqy/lerf_ovs/label"
+DEFAULT_LABEL_DIR = "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+LEGACY_LABEL_DIR = "/mnt/pool/sqy/lerf_ovs/label"
 DEFAULT_GT_FEATURE_ROOT = "output/radio_features_lerf"
+DEFAULT_PROMPT_TEMPLATES = "{query}"
+
+
+def canonical_lerf_mode(mode: str) -> str:
+    """Return the canonical public name for a LERF evaluator feature source."""
+    normalized = str(mode).strip().lower()
+    if normalized in {"gt", "teacher", "oracle", "oracle_teacher"}:
+        return "teacher"
+    if normalized == "rendered":
+        return "rendered"
+    raise ValueError(f"Unsupported LERF evaluator mode: {mode}")
+
+
+def lerf_mode_tag(mode: str) -> str:
+    """Filename tag for a LERF evaluator mode."""
+    return canonical_lerf_mode(mode)
+
+
+def display_lerf_mode(mode: str) -> str:
+    """Human-readable label for summaries and figure scripts."""
+    canonical = canonical_lerf_mode(mode)
+    if canonical == "teacher":
+        return "TEACHER RADIO features"
+    return "RENDERED RADIO-GS features"
+
+
+def iter_lerf_report_modes(scene_result: Dict) -> List[str]:
+    """Canonical report order, accepting the legacy ``gt`` alias."""
+    modes: List[str] = []
+    for mode in ("teacher", "rendered"):
+        if mode in scene_result or (mode == "teacher" and "gt" in scene_result):
+            modes.append(mode)
+    return modes
+
+
+def get_lerf_mode_metrics(scene_result: Dict, mode: str) -> Optional[Dict]:
+    """Fetch metrics by canonical mode while accepting the legacy ``gt`` key."""
+    canonical = canonical_lerf_mode(mode)
+    if canonical in scene_result:
+        return scene_result[canonical]
+    if canonical == "teacher":
+        return scene_result.get("gt")
+    return None
 
 
 # ---------------------------------------------------------------------------
 # Text-embedding generation (SigLIP2 via ``transformers``)
 # ---------------------------------------------------------------------------
 _SIGLIP2_MODEL_NAME = "google/siglip2-giant-opt-patch16-384"
+
+
+def _restore_siglip2_text_head_from_state(
+    model: nn.Module,
+    state: Mapping[str, torch.Tensor],
+) -> bool:
+    """Restore SigLIP2's 1536d text projection head when transformers builds 1152d.
+
+    Some transformers versions instantiate ``google/siglip2-giant-opt-patch16-384``
+    with ``text_model.head`` shaped 1152→1152 even though the checkpoint and
+    config define a 1152→1536 text-aligned head.  That silently breaks text
+    embeddings if loaded with ``ignore_mismatched_sizes=True``.
+    """
+    text_model = getattr(model, "text_model", None)
+    head = getattr(text_model, "head", None)
+    text_config = getattr(getattr(model, "config", None), "text_config", None)
+    if text_model is None or head is None or text_config is None:
+        return False
+
+    weight = state.get("text_model.head.weight")
+    bias = state.get("text_model.head.bias")
+    if weight is None or weight.ndim != 2:
+        return False
+
+    projection_size = int(getattr(text_config, "projection_size", weight.shape[0]))
+    hidden_size = int(getattr(text_config, "hidden_size", weight.shape[1]))
+    if tuple(weight.shape) != (projection_size, hidden_size):
+        return False
+    if bias is not None and tuple(bias.shape) != (projection_size,):
+        return False
+
+    head_weight = getattr(head, "weight", None)
+    device = head_weight.device if head_weight is not None else torch.device("cpu")
+    dtype = head_weight.dtype if head_weight is not None else weight.dtype
+    restored = nn.Linear(hidden_size, projection_size, bias=bias is not None)
+    restored = restored.to(device=device, dtype=dtype)
+    with torch.no_grad():
+        restored.weight.copy_(weight.to(device=device, dtype=dtype))
+        if bias is not None and restored.bias is not None:
+            restored.bias.copy_(bias.to(device=device, dtype=dtype))
+    text_model.head = restored
+    return True
+
+
+def _load_siglip2_text_head_state(model_name: str) -> Optional[Dict[str, torch.Tensor]]:
+    """Load only SigLIP2 text-head tensors from local/HF safetensors shards."""
+    try:
+        from huggingface_hub import snapshot_download
+        from safetensors import safe_open
+    except Exception:
+        return None
+
+    try:
+        snapshot = Path(
+            snapshot_download(
+                model_name,
+                allow_patterns=[
+                    "model.safetensors",
+                    "model-*.safetensors",
+                    "model.safetensors.index.json",
+                ],
+            )
+        )
+    except Exception as exc:
+        logger.warning("Could not locate SigLIP2 safetensors for text-head restore: %s", exc)
+        return None
+
+    state: Dict[str, torch.Tensor] = {}
+    for shard in sorted(snapshot.glob("*.safetensors")):
+        try:
+            with safe_open(str(shard), framework="pt", device="cpu") as handle:
+                for key in ("text_model.head.weight", "text_model.head.bias"):
+                    if key in handle.keys() and key not in state:
+                        state[key] = handle.get_tensor(key)
+        except Exception as exc:
+            logger.warning("Could not read SigLIP2 safetensors shard %s: %s", shard, exc)
+    return state or None
+
+
+def _load_siglip2_model_for_text(model_name: str, device: torch.device) -> nn.Module:
+    from transformers import AutoConfig, AutoModel
+
+    config = AutoConfig.from_pretrained(model_name)
+    text_config = getattr(config, "text_config", None)
+    projection_size = int(getattr(text_config, "projection_size", 0) or 0)
+    hidden_size = int(getattr(text_config, "hidden_size", 0) or 0)
+    needs_head_restore = projection_size and hidden_size and projection_size != hidden_size
+
+    if needs_head_restore:
+        model = AutoModel.from_pretrained(model_name, ignore_mismatched_sizes=True)
+        state = _load_siglip2_text_head_state(model_name)
+        if state is None or not _restore_siglip2_text_head_from_state(model, state):
+            raise RuntimeError(
+                "SigLIP2 text head has mismatched projection size and could not be "
+                "restored from checkpoint safetensors."
+            )
+    else:
+        model = AutoModel.from_pretrained(model_name)
+    return model.to(device).eval()
+
+
+def _resolve_siglip2_text_max_length(config: object) -> int:
+    text_config = getattr(config, "text_config", None)
+    max_length = int(getattr(text_config, "max_position_embeddings", 0) or 0)
+    return max_length if max_length > 0 else 64
+
+
+def _tokenize_siglip2_text(
+    queries: List[str],
+    model_name: str,
+) -> Dict[str, torch.Tensor]:
+    try:
+        from transformers import AutoProcessor
+
+        processor = AutoProcessor.from_pretrained(model_name)
+        inputs = processor(text=queries, padding="max_length", return_tensors="pt")
+    except Exception as exc:
+        logger.warning("AutoProcessor text tokenization failed, falling back to AutoTokenizer: %s", exc)
+        from transformers import AutoConfig, AutoTokenizer
+
+        config = AutoConfig.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        inputs = tokenizer(
+            queries,
+            padding="max_length",
+            truncation=True,
+            max_length=_resolve_siglip2_text_max_length(config),
+            return_tensors="pt",
+        )
+    return {k: v for k, v in inputs.items() if isinstance(v, torch.Tensor)}
 
 
 @torch.no_grad()
@@ -95,18 +269,16 @@ def encode_text_siglip2(
         ``RuntimeError`` when the ``transformers`` model cannot be loaded.
     """
     try:
-        from transformers import AutoModel, AutoProcessor
+        import transformers  # noqa: F401
     except ImportError as exc:
         raise RuntimeError(
             "The `transformers` library is required to generate SigLIP2 text "
             "embeddings.  Install with: pip install transformers"
         ) from exc
 
-    processor = AutoProcessor.from_pretrained(model_name)
-    model = AutoModel.from_pretrained(model_name).to(device).eval()
-
-    inputs = processor(text=queries, padding="max_length", return_tensors="pt")
-    inputs = {k: v.to(device) for k, v in inputs.items() if isinstance(v, torch.Tensor)}
+    model = _load_siglip2_model_for_text(model_name, device)
+    inputs = _tokenize_siglip2_text(queries, model_name)
+    inputs = {k: v.to(device) for k, v in inputs.items()}
 
     text_emb = model.get_text_features(**inputs)  # [N, D]
     text_emb = F.normalize(text_emb.float(), dim=-1)
@@ -124,6 +296,16 @@ def load_or_generate_text_embeddings(
     no GPU memory, etc.) and a *cache_path* exists, falls back to the cached
     bank – but **only** if every query is present.
     """
+    # Prefer an exact cache hit. Loading SigLIP2 text towers is expensive and
+    # can occupy the same GPU we want to use for rendering.
+    if cache_path and Path(cache_path).exists():
+        data = torch.load(cache_path, map_location="cpu")
+        bank = {q: e for q, e in zip(data["queries"], data["embeddings"])}
+        missing = [q for q in queries if q not in bank]
+        if not missing:
+            emb = torch.stack([bank[q] for q in queries])
+            return F.normalize(emb.float(), dim=-1).to(device)
+
     # Try on-the-fly generation
     try:
         emb = encode_text_siglip2(queries, device)
@@ -153,6 +335,124 @@ def load_or_generate_text_embeddings(
         "Cannot generate SigLIP2 text embeddings and no cache is available.  "
         "Install `transformers` and ensure network access, or provide a "
         "pre-computed bank via --text_embedding_cache."
+    )
+
+
+def resolve_lerf_label_dir(label_dir: str) -> str:
+    """Resolve the new LERF-OVS label root with legacy fallback."""
+    requested = Path(label_dir)
+    if requested.exists():
+        return str(requested)
+    if str(label_dir) == DEFAULT_LABEL_DIR and Path(LEGACY_LABEL_DIR).exists():
+        logger.warning(
+            "Default LERF label dir missing (%s); falling back to legacy %s",
+            DEFAULT_LABEL_DIR,
+            LEGACY_LABEL_DIR,
+        )
+        return LEGACY_LABEL_DIR
+    return str(requested)
+
+
+def resolve_lerf_scene_root(scene: str, raw_root: str | Path) -> Path:
+    """Resolve scene root across the new 3d_understanding layout and legacy paths."""
+    raw_root = Path(raw_root) if raw_root else Path()
+    candidates = []
+    if raw_root:
+        candidates.append(raw_root)
+        candidates.append(raw_root / scene)
+        candidates.append(raw_root.parent / scene)
+    candidates.extend(
+        [
+            Path("/mnt/pool/sqy/3d_understanding/lerf_ovs") / scene,
+            Path("/mnt/pool/sqy/lerf_ovs") / scene,
+            Path("dataset") / "lerf" / scene,
+        ]
+    )
+    for candidate in candidates:
+        if candidate.exists() and ((candidate / "sparse").exists() or (candidate / "transforms.json").exists()):
+            return candidate
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+def parse_prompt_templates(raw: str | List[str] | Tuple[str, ...] | None) -> List[str]:
+    """Parse prompt templates from a pipe/comma separated CLI value."""
+    if raw is None:
+        return ["{query}"]
+    if isinstance(raw, (list, tuple)):
+        templates = [str(item).strip() for item in raw if str(item).strip()]
+    else:
+        sep = "|" if "|" in raw else ","
+        templates = [part.strip() for part in str(raw).split(sep) if part.strip()]
+    return templates or ["{query}"]
+
+
+def build_prompt_variants(query: str, templates: List[str]) -> List[str]:
+    """Expand one class/query string through prompt templates."""
+    variants: List[str] = []
+    for template in templates:
+        if "{query}" in template:
+            text = template.replace("{query}", query)
+        elif "{}" in template:
+            text = template.format(query)
+        else:
+            text = f"{template} {query}".strip()
+        variants.append(text)
+    return variants
+
+
+def load_or_generate_prompt_ensemble_embeddings(
+    queries: List[str],
+    device: torch.device,
+    cache_path: Optional[str] = None,
+    prompt_templates: Optional[List[str]] = None,
+) -> torch.Tensor:
+    """Encode prompt ensembles and average them into one embedding per query."""
+    templates = prompt_templates or ["{query}"]
+    if len(templates) == 1 and templates[0] == "{query}":
+        return load_or_generate_text_embeddings(queries, device, cache_path)
+
+    def _load_cache() -> Optional[torch.Tensor]:
+        if not cache_path or not Path(cache_path).exists():
+            return None
+        data = torch.load(cache_path, map_location="cpu")
+        cached_queries = [str(q) for q in data.get("queries", [])]
+        cached_templates = [str(t) for t in data.get("prompt_templates", ["{query}"])]
+        if cached_queries == list(queries) and cached_templates == list(templates):
+            return F.normalize(data["embeddings"].float(), dim=-1).to(device)
+        return None
+
+    cached = _load_cache()
+    if cached is not None:
+        return cached
+
+    try:
+        flat_prompts: List[str] = []
+        for query in queries:
+            flat_prompts.extend(build_prompt_variants(query, templates))
+        flat_emb = encode_text_siglip2(flat_prompts, device)
+        emb = flat_emb.reshape(len(queries), len(templates), -1).mean(dim=1)
+        emb = F.normalize(emb.float(), dim=-1)
+        if cache_path:
+            Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
+            torch.save(
+                {
+                    "queries": queries,
+                    "prompt_templates": templates,
+                    "embeddings": emb.cpu(),
+                },
+                cache_path,
+            )
+            logger.info("Cached prompt-ensemble text embeddings → %s", cache_path)
+        return emb
+    except Exception as exc:
+        logger.warning("Prompt-ensemble SigLIP2 text encoding failed: %s", exc)
+
+    raise RuntimeError(
+        "Cannot generate prompt-ensemble SigLIP2 text embeddings and no matching "
+        "cache is available."
     )
 
 
@@ -567,6 +867,7 @@ def save_heatmap_vis(
     frame_id: int,
     out_dir: Path,
     tag: str = "",
+    source_label: Optional[str] = None,
 ) -> None:
     """Save a grid visualisation of heatmaps vs GT masks for one frame."""
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -592,6 +893,21 @@ def save_heatmap_vis(
         rows.append(row)
 
     grid = np.concatenate(rows, axis=0)
+    col_w = grid.shape[1] // 3
+    header = np.zeros((28, grid.shape[1], 3), dtype=np.uint8)
+    labels = ["query", "GT mask", source_label or f"{tag or 'feature'} heatmap"]
+    for col, label in enumerate(labels):
+        cv2.putText(
+            header,
+            label,
+            (col * col_w + 4, 19),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.45,
+            (255, 255, 255),
+            1,
+            cv2.LINE_AA,
+        )
+    grid = np.concatenate([header, grid], axis=0)
     suffix = f"_{tag}" if tag else ""
     cv2.imwrite(str(out_dir / f"lerf_grounding_frame_{frame_id:05d}{suffix}.png"), grid)
 
@@ -648,9 +964,10 @@ def evaluate_scene(
         if mode == "rendered":
             model, codec, renderer, sharpener, refiner, config, is_hybrid = render_pipeline
 
+        canonical_mode = canonical_lerf_mode(mode)
         for frame_id, frame_objects in tqdm(
             sorted(frame_annotations.items()),
-            desc=f"  {scene}/{mode}",
+            desc=f"  {scene}/{canonical_mode}",
             leave=False,
         ):
             # --- obtain 1280-d features ---
@@ -677,7 +994,7 @@ def evaluate_scene(
                 # Load RGB image for refiner guide if needed
                 rgb_tensor = None
                 if getattr(config, "refiner_rgb_guide", False):
-                    scene_root = Path(getattr(config, "scene_root", ""))
+                    scene_root = resolve_lerf_scene_root(scene, getattr(config, "scene_root", ""))
                     img_path = scene_root / "images" / f"frame_{frame_id:05d}.jpg"
                     if not img_path.exists():
                         img_path = scene_root / "images" / f"frame_{frame_id:05d}.png"
@@ -770,7 +1087,19 @@ def evaluate_scene(
                     gt_vis[cat] = gt_feat
 
             if vis_dir is not None and hm_vis:
-                save_heatmap_vis(hm_vis, gt_vis, frame_id, vis_dir / scene, tag=mode)
+                source_label = (
+                    "teacher RADIO heatmap"
+                    if canonical_mode == "teacher"
+                    else "rendered RADIO-GS heatmap"
+                )
+                save_heatmap_vis(
+                    hm_vis,
+                    gt_vis,
+                    frame_id,
+                    vis_dir / scene,
+                    tag=lerf_mode_tag(mode),
+                    source_label=source_label,
+                )
 
         loc_acc = loc_correct / max(loc_total, 1)
         miou = float(np.mean(ious)) if ious else 0.0
@@ -785,7 +1114,7 @@ def evaluate_scene(
                 "n_samples": len(cat_loc),
             }
 
-        results[mode] = {
+        mode_metrics = {
             "loc_acc": loc_acc,
             "miou": miou,
             "loc_correct": loc_correct,
@@ -793,6 +1122,10 @@ def evaluate_scene(
             "n_iou_samples": len(ious),
             "per_category": per_cat_summary,
         }
+        results[canonical_mode] = mode_metrics
+        if canonical_mode == "teacher":
+            # Backward-compatible JSON alias for existing sweep scripts/results.
+            results["gt"] = mode_metrics
 
     return results
 
@@ -811,11 +1144,11 @@ def main() -> None:
                         help="Path to LERF feature-field config YAML (for rendered mode)")
     parser.add_argument("--checkpoint", default=None,
                         help="Path to trained model checkpoint (for rendered mode)")
-    # GT features
+    # Teacher/oracle RADIO features
     parser.add_argument("--gt_feature_dir", default=None,
-                        help="Dir with GT RADIO 1280-d .pt files (or parent with backbone/ subdir)")
+                        help="Dir with teacher/oracle RADIO 1280-d .pt files (or parent with backbone/ subdir)")
     parser.add_argument("--gt_only", action="store_true",
-                        help="Evaluate GT features only (skip rendered mode)")
+                        help="Evaluate teacher/oracle RADIO features only (skip rendered mode)")
     # Scene selection
     parser.add_argument("--scene", default="all",
                         help="Scene name or 'all' (default: all)")
@@ -834,6 +1167,8 @@ def main() -> None:
                         help="Use spatial feature projection instead of summary head")
     parser.add_argument("--text_embedding_cache", default=None,
                         help="Path to cache/load pre-computed text embeddings")
+    parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES,
+                        help="Prompt templates separated by '|'. Use {query} as placeholder")
     # Evaluation
     parser.add_argument("--iou_threshold", type=float, default=0.5,
                         help="Threshold ratio (fraction of max) for mIoU binarisation")
@@ -842,7 +1177,7 @@ def main() -> None:
                         help="Scoring: 'softmax_scene' (recommended, softmax over scene categories), "
                              "'cosine' (raw similarity), or 'relevancy' (LERF-style canonical)")
     parser.add_argument("--relevancy_temp", type=float, default=50.0,
-                        help="Temperature scaling for softmax_scene (default 50) or relevancy (default 0.01)")
+                        help="Logit scale for softmax_scene (default 50); denominator temperature for relevancy")
     parser.add_argument("--save_vis", action="store_true",
                         help="Save heatmap visualisations")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
@@ -852,6 +1187,8 @@ def main() -> None:
                         help="GPU device id")
 
     args = parser.parse_args()
+    args.label_dir = resolve_lerf_label_dir(args.label_dir)
+    prompt_templates = parse_prompt_templates(args.prompt_templates)
 
     # Validate arguments
     if not args.gt_only and (args.config is None or args.checkpoint is None):
@@ -872,9 +1209,10 @@ def main() -> None:
     print("=" * 70)
     print(f"  Scenes:     {', '.join(scenes)}")
     print(f"  Label dir:  {args.label_dir}")
-    print(f"  Mode:       {'GT only' if args.gt_only else 'GT + Rendered'}")
+    print(f"  Mode:       {'Teacher only' if args.gt_only else 'Teacher + Rendered'}")
     print(f"  IoU thresh: {args.iou_threshold}")
     print(f"  Heatmap ↑:  {args.heatmap_upsample}×")
+    print(f"  Prompts:    {len(prompt_templates)} template(s)")
     print()
 
     # ------------------------------------------------------------------
@@ -926,8 +1264,11 @@ def main() -> None:
     # ------------------------------------------------------------------
     print("Generating SigLIP2 text embeddings …")
     t0 = time.time()
-    text_embeddings = load_or_generate_text_embeddings(
-        categories, device, cache_path=args.text_embedding_cache,
+    text_embeddings = load_or_generate_prompt_ensemble_embeddings(
+        categories,
+        device,
+        cache_path=args.text_embedding_cache,
+        prompt_templates=prompt_templates,
     )  # [N, 1536]
     text_embeddings = text_embeddings.half()
     print(f"  {text_embeddings.shape[0]} embeddings ({text_embeddings.shape[1]}-d), "
@@ -948,6 +1289,8 @@ def main() -> None:
             ).to(device).half()
             print(f"  Using mean-category canonical embedding: {canonical_emb.shape}")
         print(f"  Scoring: LERF-style relevancy")
+    elif args.scoring == "softmax_scene":
+        print("  Scoring: scene-category softmax")
     else:
         print("  Scoring: raw cosine similarity")
 
@@ -964,17 +1307,10 @@ def main() -> None:
         fW = getattr(config, "feature_width", 40)
         # Build LERFDataset per scene for pose access
         for scene in scenes:
-            # config.scene_root may already include the scene name
-            # (e.g. /mnt/pool/sqy/lerf_ovs/ramen), so try it directly first
-            raw_root = Path(getattr(config, "scene_root", ""))
-            if raw_root.exists() and (raw_root / "sparse").exists():
-                scene_root_cand = raw_root
-            else:
-                scene_root_cand = raw_root / scene
-            if not scene_root_cand.exists():
-                scene_root_cand = raw_root.parent / scene
-            if not scene_root_cand.exists():
-                scene_root_cand = Path("dataset") / "lerf" / scene
+            scene_root_cand = resolve_lerf_scene_root(
+                scene,
+                getattr(config, "scene_root", ""),
+            )
             feat_dir_cand = Path(args.gt_feature_dir or DEFAULT_GT_FEATURE_ROOT) / scene
             if not feat_dir_cand.exists():
                 feat_dir_cand = Path(DEFAULT_GT_FEATURE_ROOT) / scene
@@ -1044,14 +1380,16 @@ def main() -> None:
     print("  LERF-OVS RESULTS SUMMARY")
     print("=" * 70)
 
-    for mode in ("gt", "rendered"):
+    for mode in ("teacher", "rendered"):
         scene_metrics = [
-            (s, r[mode]) for s, r in all_results.items() if mode in r
+            (s, get_lerf_mode_metrics(r, mode))
+            for s, r in all_results.items()
+            if get_lerf_mode_metrics(r, mode) is not None
         ]
         if not scene_metrics:
             continue
 
-        print(f"\n  [{mode.upper()} features]")
+        print(f"\n  [{display_lerf_mode(mode)}]")
         print(f"  {'Scene':<20} {'Loc Acc':>10} {'mIoU':>10} {'Samples':>10}")
         print(f"  {'─' * 50}")
 
@@ -1077,7 +1415,7 @@ def main() -> None:
               f"{agg_loc_total:>10d}")
 
         # Per-category breakdown (across scenes)
-        print(f"\n  Per-category breakdown ({mode}):")
+        print(f"\n  Per-category breakdown ({canonical_lerf_mode(mode)}):")
         print(f"  {'Category':<30} {'Loc Acc':>10} {'mIoU':>10} {'N':>6}")
         print(f"  {'─' * 56}")
         for cat in categories:
@@ -1102,12 +1440,16 @@ def main() -> None:
     report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "args": {k: str(v) for k, v in vars(args).items()},
+        "prompt_templates": prompt_templates,
         "categories": categories,
         "scenes": {},
     }
     for scene_name, scene_res in all_results.items():
         scene_report: Dict = {}
-        for mode, m in scene_res.items():
+        for mode in iter_lerf_report_modes(scene_res):
+            m = get_lerf_mode_metrics(scene_res, mode)
+            if m is None:
+                continue
             # Convert per_category values for JSON serialisation
             per_cat_json = {}
             for cat, info in m["per_category"].items():
@@ -1123,6 +1465,8 @@ def main() -> None:
                 "loc_total": m["loc_total"],
                 "per_category": per_cat_json,
             }
+            if mode == "teacher":
+                scene_report["gt"] = scene_report[mode]
         report["scenes"][scene_name] = scene_report
 
     report_path = out_dir / "lerf_ovs_results.json"

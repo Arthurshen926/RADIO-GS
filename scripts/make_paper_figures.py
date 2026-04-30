@@ -49,7 +49,9 @@ grounding_scenes = [
 
 rows = []
 for label, prefix in grounding_scenes:
-    gt = cv2.imread(f"{prefix}_gt.png")
+    gt = cv2.imread(f"{prefix}_teacher.png")
+    if gt is None:
+        gt = cv2.imread(f"{prefix}_gt.png")
     rd = cv2.imread(f"{prefix}_rendered.png")
     assert gt is not None and rd is not None, f"Missing {prefix}"
     # Match heights then concat side-by-side
@@ -74,7 +76,7 @@ header_h = 60
 header = np.full((header_h, header_w, 3), 255, dtype=np.uint8)
 content_w = header_w - LABEL_WIDTH
 half = content_w // 2
-for text, cx in [("Ground Truth", LABEL_WIDTH + half // 2), ("Rendered", LABEL_WIDTH + half + half // 2)]:
+for text, cx in [("Teacher RADIO", LABEL_WIDTH + half // 2), ("Rendered", LABEL_WIDTH + half + half // 2)]:
     (tw, th), _ = cv2.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS)
     cv2.putText(header, text, (cx - tw // 2, header_h - 10), FONT, FONT_SCALE, (0, 0, 0), FONT_THICKNESS, cv2.LINE_AA)
 

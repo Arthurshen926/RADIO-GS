@@ -787,6 +787,399 @@ class HybridFeatureGaussian(nn.Module):
             )
         return self.fusion_head(fine_feat, coarse_feat)  # [B, output_dim, H, W]
 
+    # -- direct 3-D point querying ------------------------------------------
+
+    def scene_bounds(self, margin: float = 0.1) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Return padded world-space bounds inferred from loaded Gaussians."""
+        xyz = self.get_xyz()
+        if xyz.numel() == 0:
+            raise RuntimeError("HybridFeatureGaussian geometry is empty; call load_from_ply first")
+        lo = xyz.min(dim=0).values - margin
+        hi = xyz.max(dim=0).values + margin
+        return lo, hi
+
+    def normalize_world_positions(
+        self,
+        positions: torch.Tensor,
+        *,
+        margin: float = 0.1,
+        clamp: bool = True,
+    ) -> torch.Tensor:
+        """Normalize world-space positions to the hash field's ``[0, 1]`` cube.
+
+        Supports both point tensors ``[N, 3]`` and dense maps ``[B, 3, H, W]``.
+        The bounds match the training-time normalization used in
+        ``train_feature_field.py``.
+        """
+        lo, hi = self.scene_bounds(margin=margin)
+        lo = lo.to(device=positions.device, dtype=positions.dtype)
+        hi = hi.to(device=positions.device, dtype=positions.dtype)
+        extent = (hi - lo).clamp(min=1e-6)
+        if positions.dim() == 2:
+            normed = (positions - lo.view(1, 3)) / extent.view(1, 3)
+        elif positions.dim() == 4:
+            normed = (positions - lo.view(1, 3, 1, 1)) / extent.view(1, 3, 1, 1)
+        else:
+            raise ValueError(
+                f"Expected positions shaped [N,3] or [B,3,H,W], got {tuple(positions.shape)}"
+            )
+        return normed.clamp(0.0, 1.0) if clamp else normed
+
+    def _decode_point_features(
+        self,
+        latent_points: torch.Tensor,
+        normalized_points: torch.Tensor,
+        *,
+        return_aux: bool = False,
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
+        """Decode point-aligned latent/position tensors.
+
+        Args:
+            latent_points: ``[N, latent_dim]``.
+            normalized_points: ``[N, 3]`` in ``[0, 1]``.
+        """
+        if latent_points.dim() != 2 or latent_points.shape[1] != self._latent_dim:
+            raise ValueError(
+                f"Expected latent_points [N,{self._latent_dim}], got {tuple(latent_points.shape)}"
+            )
+        if normalized_points.dim() != 2 or normalized_points.shape[1] != 3:
+            raise ValueError(f"Expected normalized_points [N,3], got {tuple(normalized_points.shape)}")
+
+        n_points = latent_points.shape[0]
+        latent_map = latent_points.reshape(n_points, self._latent_dim, 1, 1)
+        position_map = normalized_points.reshape(n_points, 3, 1, 1)
+        decoded = self.decode_screen_space(
+            latent_map.float(),
+            position_map.float(),
+            return_aux=return_aux,
+        )
+        if not return_aux:
+            return decoded[:, :, 0, 0].contiguous()
+
+        if torch.is_tensor(decoded):
+            return {"features": decoded[:, :, 0, 0].contiguous()}
+
+        assert isinstance(decoded, dict)
+        out: dict[str, torch.Tensor] = {}
+        for key, value in decoded.items():
+            if (
+                torch.is_tensor(value)
+                and value.dim() == 4
+                and value.shape[0] == n_points
+                and value.shape[-2:] == (1, 1)
+            ):
+                out[key] = value[:, :, 0, 0].contiguous()
+            else:
+                out[key] = value
+        if "fused" in out:
+            out["features"] = out["fused"]
+        return out
+
+    def _knn_gaussians(
+        self,
+        points_xyz: torch.Tensor,
+        k: int,
+        *,
+        point_chunk_size: int = 2048,
+        gaussian_chunk_size: int = 16384,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Memory-bounded Euclidean KNN over loaded Gaussian centers."""
+        xyz = self.get_xyz().to(device=points_xyz.device, dtype=points_xyz.dtype)
+        n_gaussians = xyz.shape[0]
+        if n_gaussians == 0:
+            raise RuntimeError("HybridFeatureGaussian geometry is empty; call load_from_ply first")
+        k = min(max(int(k), 1), n_gaussians)
+
+        all_dists: list[torch.Tensor] = []
+        all_indices: list[torch.Tensor] = []
+        for p0 in range(0, points_xyz.shape[0], point_chunk_size):
+            pts = points_xyz[p0 : p0 + point_chunk_size]
+            best_d = torch.full(
+                (pts.shape[0], k),
+                float("inf"),
+                device=points_xyz.device,
+                dtype=points_xyz.dtype,
+            )
+            best_i = torch.full(
+                (pts.shape[0], k),
+                -1,
+                device=points_xyz.device,
+                dtype=torch.long,
+            )
+            for g0 in range(0, n_gaussians, gaussian_chunk_size):
+                g1 = min(g0 + gaussian_chunk_size, n_gaussians)
+                dist = torch.cdist(pts.float(), xyz[g0:g1].float()).to(points_xyz.dtype)
+                local_k = min(k, g1 - g0)
+                d_chunk, i_chunk = torch.topk(dist, k=local_k, largest=False, dim=1)
+                i_chunk = i_chunk + g0
+                cand_d = torch.cat([best_d, d_chunk], dim=1)
+                cand_i = torch.cat([best_i, i_chunk], dim=1)
+                best_d, order = torch.topk(cand_d, k=k, largest=False, dim=1)
+                best_i = cand_i.gather(1, order)
+                del dist
+            all_dists.append(best_d)
+            all_indices.append(best_i)
+        return torch.cat(all_dists, dim=0), torch.cat(all_indices, dim=0)
+
+    @staticmethod
+    def _quaternion_to_rotation_matrix(quat: torch.Tensor) -> torch.Tensor:
+        """Convert unit quaternions in ``w, x, y, z`` order to rotation matrices."""
+        q = F.normalize(quat.float(), p=2, dim=-1)
+        w, x, y, z = q.unbind(dim=-1)
+        ww, xx, yy, zz = w * w, x * x, y * y, z * z
+        wx, wy, wz = w * x, w * y, w * z
+        xy, xz, yz = x * y, x * z, y * z
+        return torch.stack(
+            [
+                ww + xx - yy - zz,
+                2.0 * (xy - wz),
+                2.0 * (xz + wy),
+                2.0 * (xy + wz),
+                ww - xx + yy - zz,
+                2.0 * (yz - wx),
+                2.0 * (xz - wy),
+                2.0 * (yz + wx),
+                ww - xx - yy + zz,
+            ],
+            dim=-1,
+        ).reshape(*q.shape[:-1], 3, 3)
+
+    def query_compact_points(
+        self,
+        points_xyz: torch.Tensor,
+        k: int = 8,
+        candidate_k: Optional[int] = None,
+        return_aux: bool = False,
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
+        """Query RADIO-GS compact features directly at world-space 3-D points.
+
+        Neighbouring Gaussian latents are aggregated with an opacity-weighted,
+        scale-aware Gaussian kernel, then fused with the hash-field coarse branch
+        using the same decoders as screen-space rendering.
+
+        Args:
+            points_xyz: ``[N, 3]`` world-space point coordinates.
+            k: Number of neighbouring Gaussians to aggregate.
+            candidate_k: Optional Euclidean candidate count before pruning by
+                opacity-weighted anisotropic Gaussian density.  Values larger
+                than ``k`` let broad/high-density Gaussians compete even when
+                they are outside the closest Euclidean ``k``.
+            return_aux: Include KNN indices/weights and decoder auxiliaries.
+
+        Returns:
+            ``[N, output_dim]`` compact bottleneck features, or an aux dict.
+        """
+        if points_xyz.dim() != 2 or points_xyz.shape[1] != 3:
+            raise ValueError(f"Expected points_xyz [N,3], got {tuple(points_xyz.shape)}")
+        if self._latent.numel() == 0:
+            raise RuntimeError("Per-Gaussian latent codes are empty; load a checkpoint first")
+        if points_xyz.shape[0] == 0:
+            empty_feat = torch.empty(
+                0,
+                self._output_dim,
+                device=self._latent.device,
+                dtype=self._latent.dtype,
+            )
+            if return_aux:
+                return {
+                    "features": empty_feat,
+                    "gaussian_indices": torch.empty(
+                        0,
+                        0,
+                        device=self._latent.device,
+                        dtype=torch.long,
+                    ),
+                    "weights": torch.empty(
+                        0,
+                        0,
+                        device=self._latent.device,
+                        dtype=torch.float32,
+                    ),
+                    "normalized_points": torch.empty(
+                        0,
+                        3,
+                        device=self._latent.device,
+                        dtype=torch.float32,
+                    ),
+                    "latent": torch.empty(
+                        0,
+                        self._latent_dim,
+                        device=self._latent.device,
+                        dtype=self._latent.dtype,
+                    ),
+                    "euclidean_dist": torch.empty(
+                        0,
+                        0,
+                        device=self._latent.device,
+                        dtype=torch.float32,
+                    ),
+                    "mahalanobis_dist2": torch.empty(
+                        0,
+                        0,
+                        device=self._latent.device,
+                        dtype=torch.float32,
+                    ),
+                    "density": torch.empty(
+                        0,
+                        0,
+                        device=self._latent.device,
+                        dtype=torch.float32,
+                    ),
+                }
+            return empty_feat
+
+        device = self._latent.device
+        dtype = self._latent.dtype if self._latent.is_floating_point() else torch.float32
+        points = points_xyz.to(device=device, dtype=torch.float32)
+        k = max(int(k), 1)
+        candidate_k = k if candidate_k is None else max(int(candidate_k), k)
+        _, candidate_idx = self._knn_gaussians(points, k=candidate_k)
+
+        xyz = self.get_xyz().to(device=device, dtype=torch.float32)
+        scales = self.get_scaling().to(device=device, dtype=torch.float32).clamp_min(1e-6)
+        rotations = self.get_rotation().to(device=device, dtype=torch.float32)
+        opacity = self.get_opacity().to(device=device, dtype=torch.float32).squeeze(-1)
+
+        neigh_xyz = xyz[candidate_idx]              # [N, candidate_k, 3]
+        neigh_scales = scales[candidate_idx]        # [N, candidate_k, 3]
+        neigh_rot = rotations[candidate_idx]        # [N, candidate_k, 4]
+        delta = points.unsqueeze(1) - neigh_xyz
+        euclidean_dist = torch.linalg.norm(delta, dim=-1)
+        rot_mats = self._quaternion_to_rotation_matrix(neigh_rot)
+        local_delta = torch.einsum("nki,nkij->nkj", delta.float(), rot_mats)
+        mahalanobis_dist2 = ((local_delta / neigh_scales) ** 2).sum(dim=-1)
+        density = torch.exp(-0.5 * mahalanobis_dist2)
+        raw_weights = density * opacity[candidate_idx].clamp_min(1e-6)
+        if candidate_idx.shape[1] > k:
+            selected_k = min(k, candidate_idx.shape[1])
+            raw_weights, order = torch.topk(
+                raw_weights,
+                k=selected_k,
+                largest=True,
+                dim=1,
+            )
+            knn_idx = candidate_idx.gather(1, order)
+            gather_vec = order.unsqueeze(-1).expand(-1, -1, 3)
+            neigh_xyz = neigh_xyz.gather(1, gather_vec)
+            neigh_scales = neigh_scales.gather(1, gather_vec)
+            neigh_rot = neigh_rot.gather(1, order.unsqueeze(-1).expand(-1, -1, 4))
+            euclidean_dist = euclidean_dist.gather(1, order)
+            mahalanobis_dist2 = mahalanobis_dist2.gather(1, order)
+            density = density.gather(1, order)
+        else:
+            knn_idx = candidate_idx
+
+        weights = raw_weights
+        weight_sum = weights.sum(dim=1, keepdim=True)
+        uniform = torch.full_like(weights, 1.0 / weights.shape[1])
+        weights = torch.where(weight_sum > 1e-12, weights / weight_sum.clamp_min(1e-12), uniform)
+
+        latent = self.get_latent().to(device=device, dtype=torch.float32)
+        latent_points = (latent[knn_idx] * weights.unsqueeze(-1)).sum(dim=1)
+        normalized_points = self.normalize_world_positions(points)
+        decoded = self._decode_point_features(
+            latent_points.to(dtype=dtype),
+            normalized_points,
+            return_aux=return_aux,
+        )
+
+        if not return_aux:
+            return decoded
+        assert isinstance(decoded, dict)
+        decoded.update(
+            {
+                "gaussian_indices": knn_idx,
+                "weights": weights,
+                "normalized_points": normalized_points,
+                "latent": latent_points,
+                "euclidean_dist": euclidean_dist,
+                "mahalanobis_dist2": mahalanobis_dist2,
+                "density": density,
+            }
+        )
+        return decoded
+
+    def query_gaussian_points(
+        self,
+        gaussian_indices: torch.Tensor,
+        points_xyz: Optional[torch.Tensor] = None,
+        return_aux: bool = False,
+    ) -> torch.Tensor | dict[str, torch.Tensor]:
+        """Decode compact features for selected Gaussian rows.
+
+        By default the hash/coarse branch is evaluated at the selected Gaussian
+        centers.  ``points_xyz`` can override those coordinates while keeping
+        the per-Gaussian latent indexed by row; this is useful for row-aligned
+        ScanNet label vertices whose original point coordinates differ from the
+        optimized Gaussian centers.
+        """
+        if self._latent.numel() == 0:
+            raise RuntimeError("Per-Gaussian latent codes are empty; load a checkpoint first")
+        indices = torch.as_tensor(gaussian_indices, device=self._latent.device, dtype=torch.long).reshape(-1)
+        if indices.numel() == 0:
+            empty_feat = torch.empty(
+                0,
+                self._output_dim,
+                device=self._latent.device,
+                dtype=self._latent.dtype,
+            )
+            if return_aux:
+                return {"features": empty_feat, "gaussian_indices": indices}
+            return empty_feat
+        if int(indices.min()) < 0 or int(indices.max()) >= self.num_gaussians:
+            raise IndexError(
+                f"Gaussian index out of range for {self.num_gaussians} Gaussians"
+            )
+
+        latent_points = self.get_latent()[indices]
+        centers = self.get_xyz().to(device=self._latent.device, dtype=torch.float32)[indices]
+        if points_xyz is None:
+            points = centers
+        else:
+            points = torch.as_tensor(
+                points_xyz,
+                device=self._latent.device,
+                dtype=torch.float32,
+            )
+            if points.shape != centers.shape:
+                raise ValueError(
+                    "points_xyz must match gaussian_indices as [N,3], got "
+                    f"{tuple(points.shape)} for {tuple(indices.shape)} indices"
+                )
+        normalized_points = self.normalize_world_positions(points)
+        decoded = self._decode_point_features(
+            latent_points,
+            normalized_points,
+            return_aux=return_aux,
+        )
+        if not return_aux:
+            return decoded
+        assert isinstance(decoded, dict)
+        decoded.update(
+            {
+                "gaussian_indices": indices,
+                "weights": torch.ones(indices.shape[0], 1, device=indices.device),
+                "query_points": points,
+                "gaussian_centers": centers,
+                "normalized_points": normalized_points,
+                "latent": latent_points,
+                "euclidean_dist": torch.linalg.norm(points - centers, dim=-1, keepdim=True),
+                "mahalanobis_dist2": torch.zeros(
+                    indices.shape[0],
+                    1,
+                    device=indices.device,
+                    dtype=torch.float32,
+                ),
+                "density": torch.ones(
+                    indices.shape[0],
+                    1,
+                    device=indices.device,
+                    dtype=torch.float32,
+                ),
+            }
+        )
+        return decoded
+
     # -- trainable parameters -----------------------------------------------
 
     def trainable_parameters(self) -> List[torch.nn.Parameter]:

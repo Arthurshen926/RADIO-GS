@@ -81,6 +81,22 @@ def _nearest_radio_resolution(h: int, w: int, patch_size: int = 16) -> tuple[int
     )
 
 
+def _compute_scaled_radio_resolution(
+    h: int,
+    w: int,
+    resolution_scale: float,
+    patch_size: int = 16,
+) -> tuple[int, int]:
+    """Scale an image size and snap it to RADIO patch multiples."""
+    if resolution_scale <= 0:
+        raise ValueError("--resolution_scale must be positive")
+    return _nearest_radio_resolution(
+        h * resolution_scale,
+        w * resolution_scale,
+        patch_size=patch_size,
+    )
+
+
 def _load_and_preprocess(
     paths: list[Path],
     target_h: int,
@@ -95,6 +111,170 @@ def _load_and_preprocess(
         t = torch.from_numpy(np.array(img)).permute(2, 0, 1).float().div_(255.0)
         tensors.append(t)
     return torch.stack(tensors).to(device)
+
+
+def _sliding_starts(length: int, tile_size: int, tile_overlap: int) -> list[int]:
+    """Return start indices that cover *length* with overlapping tiles."""
+    if tile_size <= 0:
+        raise ValueError("--tile_size must be positive")
+    if tile_overlap < 0:
+        raise ValueError("--tile_overlap must be non-negative")
+    if tile_overlap >= tile_size:
+        raise ValueError("--tile_overlap must be smaller than --tile_size")
+    if length <= tile_size:
+        return [0]
+
+    stride = tile_size - tile_overlap
+    starts = list(range(0, max(length - tile_size + 1, 1), stride))
+    last = length - tile_size
+    if starts[-1] != last:
+        starts.append(last)
+    return starts
+
+
+def _stitch_sliding_window_features(
+    output_shape: tuple[int, int, int, int] | torch.Size,
+    tiles: list[tuple[int, int, torch.Tensor]],
+) -> torch.Tensor:
+    """Average overlapping feature tiles into one feature map.
+
+    Tile coordinates are in feature-grid units, not input-pixel units.
+    """
+    if not tiles:
+        raise ValueError("No sliding-window tiles to stitch")
+    first = tiles[0][2]
+    accum = first.new_zeros(tuple(output_shape), dtype=torch.float32)
+    weight = first.new_zeros(tuple(output_shape), dtype=torch.float32)
+
+    for top, left, feat in tiles:
+        _, _, h, w = feat.shape
+        accum[:, :, top : top + h, left : left + w] += feat.float()
+        weight[:, :, top : top + h, left : left + w] += 1.0
+
+    return accum / weight.clamp_min(1.0)
+
+
+def _unpack_radio_output(
+    output,
+    patch_h: int,
+    patch_w: int,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
+    """Convert RADIO output into summary, backbone grid, adaptor grids."""
+    if isinstance(output, tuple) and len(output) == 2:
+        summary, spatial = output
+        adaptor_outputs = {}
+    else:
+        summary, spatial, adaptor_outputs = output
+
+    B, _, D = spatial.shape
+    spatial_2d = spatial.permute(0, 2, 1).reshape(B, D, patch_h, patch_w)
+
+    adaptor_2d: dict[str, torch.Tensor] = {}
+    for name in ["siglip2-g", "sam3"]:
+        if not adaptor_outputs or name not in adaptor_outputs:
+            continue
+        ad_out = adaptor_outputs[name]
+        ad_spatial = ad_out.get("spatial", ad_out) if isinstance(ad_out, dict) else ad_out
+        if ad_spatial.ndim == 3:
+            D_ad = ad_spatial.shape[-1]
+            adaptor_2d[name] = ad_spatial.permute(0, 2, 1).reshape(
+                B, D_ad, patch_h, patch_w
+            )
+        else:
+            adaptor_2d[name] = ad_spatial
+    return summary, spatial_2d, adaptor_2d
+
+
+def _run_radio_batch(
+    model,
+    conditioner,
+    imgs: torch.Tensor,
+    amp: bool,
+    patch_h: int,
+    patch_w: int,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
+    imgs = conditioner(imgs)
+    with torch.cuda.amp.autocast(enabled=amp):
+        output = model(imgs)
+    return _unpack_radio_output(output, patch_h, patch_w)
+
+
+def _extract_sliding_window_single(
+    model,
+    conditioner,
+    img: torch.Tensor,
+    amp: bool,
+    tile_size: int,
+    tile_overlap: int,
+    patch_size: int = 16,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
+    """Extract and stitch features for a single preprocessed image tensor."""
+    if img.shape[0] != 1:
+        raise ValueError("Sliding-window extraction expects single-image batches")
+
+    _, _, target_h, target_w = img.shape
+    tile_size = _nearest_radio_resolution(tile_size, tile_size, patch_size)[0]
+    tile_overlap = max(0, round(tile_overlap / patch_size) * patch_size)
+
+    if target_h <= tile_size and target_w <= tile_size:
+        return _run_radio_batch(
+            model,
+            conditioner,
+            img,
+            amp,
+            target_h // patch_size,
+            target_w // patch_size,
+        )
+
+    row_tile = min(tile_size, target_h)
+    col_tile = min(tile_size, target_w)
+    row_overlap = min(tile_overlap, max(0, row_tile - patch_size))
+    col_overlap = min(tile_overlap, max(0, col_tile - patch_size))
+    row_starts = _sliding_starts(target_h, row_tile, row_overlap)
+    col_starts = _sliding_starts(target_w, col_tile, col_overlap)
+    summaries: list[torch.Tensor] = []
+    backbone_tiles: list[tuple[int, int, torch.Tensor]] = []
+    adaptor_tiles: dict[str, list[tuple[int, int, torch.Tensor]]] = {}
+
+    for top in row_starts:
+        for left in col_starts:
+            bottom = min(top + row_tile, target_h)
+            right = min(left + col_tile, target_w)
+            top = bottom - row_tile
+            left = right - col_tile
+            tile = img[:, :, top:bottom, left:right]
+            patch_h = tile.shape[-2] // patch_size
+            patch_w = tile.shape[-1] // patch_size
+            summary, spatial_2d, adaptors = _run_radio_batch(
+                model,
+                conditioner,
+                tile,
+                amp,
+                patch_h,
+                patch_w,
+            )
+            summaries.append(summary)
+            grid_top = top // patch_size
+            grid_left = left // patch_size
+            backbone_tiles.append((grid_top, grid_left, spatial_2d))
+            for name, value in adaptors.items():
+                adaptor_tiles.setdefault(name, []).append((grid_top, grid_left, value))
+
+    full_shape = (
+        1,
+        backbone_tiles[0][2].shape[1],
+        target_h // patch_size,
+        target_w // patch_size,
+    )
+    spatial_full = _stitch_sliding_window_features(full_shape, backbone_tiles)
+    adaptor_full = {
+        name: _stitch_sliding_window_features(
+            (1, tiles[0][2].shape[1], target_h // patch_size, target_w // patch_size),
+            tiles,
+        )
+        for name, tiles in adaptor_tiles.items()
+    }
+    return torch.stack(summaries, dim=0).mean(dim=0), spatial_full, adaptor_full
 
 
 # ---- model loading --------------------------------------------------------
@@ -176,10 +356,26 @@ def extract(args: argparse.Namespace) -> None:
     # Probe resolution from first image
     probe_img = Image.open(image_paths[0])
     orig_w, orig_h = probe_img.size
-    target_h, target_w = _nearest_radio_resolution(orig_h, orig_w, patch_size=16)
+    target_h, target_w = _compute_scaled_radio_resolution(
+        orig_h,
+        orig_w,
+        args.resolution_scale,
+        patch_size=16,
+    )
     patch_h, patch_w = target_h // 16, target_w // 16
-    print(f"[RADIO] Input resolution: {orig_h}×{orig_w} → padded {target_h}×{target_w}")
+    print(
+        f"[RADIO] Input resolution: {orig_h}×{orig_w} "
+        f"→ scale {args.resolution_scale:g} → {target_h}×{target_w}"
+    )
     print(f"[RADIO] Feature grid: {patch_h}×{patch_w}")
+    if args.sliding_window:
+        if args.batch_size != 1:
+            print("[RADIO] Sliding-window mode uses single-image batches; overriding batch_size=1")
+            args.batch_size = 1
+        print(
+            f"[RADIO] Sliding-window extraction: tile={args.tile_size}px, "
+            f"overlap={args.tile_overlap}px"
+        )
 
     # Prepare output dirs
     subdirs = ["backbone", "summary"]
@@ -199,22 +395,26 @@ def extract(args: argparse.Namespace) -> None:
         batch_paths = image_paths[start : start + args.batch_size]
         imgs = _load_and_preprocess(batch_paths, target_h, target_w, device)
 
-        # Apply RADIO-specific normalization
-        imgs = conditioner(imgs)
-
-        with torch.cuda.amp.autocast(enabled=args.amp):
-            output = model(imgs)
-
-        # Unpack backbone features
-        if isinstance(output, tuple) and len(output) == 2:
-            summary, spatial = output  # summary: (B, D_sum), spatial: (B, N, D)
-            adaptor_outputs = {}
+        if args.sliding_window:
+            summary, spatial_2d, adaptor_2d = _extract_sliding_window_single(
+                model,
+                conditioner,
+                imgs,
+                args.amp,
+                tile_size=args.tile_size,
+                tile_overlap=args.tile_overlap,
+            )
         else:
-            # With adaptors: output is (summary, spatial, adaptor_dict)
-            summary, spatial, adaptor_outputs = output
+            summary, spatial_2d, adaptor_2d = _run_radio_batch(
+                model,
+                conditioner,
+                imgs,
+                args.amp,
+                patch_h,
+                patch_w,
+            )
 
-        B, N, D = spatial.shape
-        spatial_2d = spatial.permute(0, 2, 1).reshape(B, D, patch_h, patch_w)
+        B, D, _, _ = spatial_2d.shape
 
         # Save per-frame
         for i in range(B):
@@ -250,20 +450,12 @@ def extract(args: argparse.Namespace) -> None:
             pca_accumulator.append(bb.float())
 
             # Adaptor features
-            if args.extract_adaptors and adaptor_outputs:
+            if args.extract_adaptors and adaptor_2d:
                 for name in ["siglip2-g", "sam3"]:
-                    if name not in adaptor_outputs:
+                    if name not in adaptor_2d:
                         continue
-                    ad_out = adaptor_outputs[name]
-                    ad_spatial = ad_out.get("spatial", ad_out) if isinstance(ad_out, dict) else ad_out
-                    if ad_spatial.ndim == 3:
-                        # (B, N, D_ad) → (B, D_ad, Hp, Wp)
-                        D_ad = ad_spatial.shape[-1]
-                        ad_2d = ad_spatial.permute(0, 2, 1).reshape(B, D_ad, patch_h, patch_w)
-                    else:
-                        ad_2d = ad_spatial
                     short_name = name.replace("-g", "").replace("-", "")  # siglip2, sam3
-                    ad_frame = ad_2d[i].cpu().half()
+                    ad_frame = adaptor_2d[name][i].cpu().half()
                     ad_path = os.path.join(args.output_dir, short_name, f"{stem}.pt")
                     torch.save(ad_frame, ad_path)
                     total_bytes += ad_frame.nelement() * ad_frame.element_size()
@@ -350,6 +542,29 @@ def main() -> None:
         "--extract_adaptors",
         action="store_true",
         help="Also extract SigLIP2 and SAM3 adaptor features",
+    )
+    parser.add_argument(
+        "--resolution_scale",
+        type=float,
+        default=1.0,
+        help="Scale input images before RADIO extraction (default: 1.0)",
+    )
+    parser.add_argument(
+        "--sliding_window",
+        action="store_true",
+        help="Extract high-resolution features by stitching overlapping single-image tiles",
+    )
+    parser.add_argument(
+        "--tile_size",
+        type=int,
+        default=1024,
+        help="Sliding-window tile size in input pixels (default: 1024)",
+    )
+    parser.add_argument(
+        "--tile_overlap",
+        type=int,
+        default=128,
+        help="Sliding-window tile overlap in input pixels (default: 128)",
     )
     parser.add_argument(
         "--device", type=str, default="cuda", help="Torch device (default: cuda)"

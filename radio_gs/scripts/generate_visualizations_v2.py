@@ -19,7 +19,9 @@ from __future__ import annotations
 import argparse
 import gc
 import sys
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional, Union
 
 import torch
 import torch.nn as nn
@@ -49,11 +51,18 @@ from radio_gs.models.depth_fusion import (
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.featsharp_3d import FeatSharp3D
+from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.models.screen_refiner import (
     ScreenSpaceRefiner,
     build_depth_guide,
     build_refiner_guide,
     compute_refiner_extra_channels,
+)
+from radio_gs.scripts.eval_lerf_grounding import (
+    compute_relevancy_heatmap,
+    load_or_generate_prompt_ensemble_embeddings,
+    parse_prompt_templates,
+    project_to_siglip2,
 )
 from radio_gs.data.benchmark_paths import resolve_split_feature_dir
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
@@ -778,49 +787,37 @@ def predict_fused_depth(probe, feat, geom_depth, geom_alpha, fH, fW):
 
 # ── SigLIP2 grounding ────────────────────────────────────────────────────────
 
-def load_siglip2_projection(projection_weights, target_device=None):
-    """Load SigLIP2 feature projection model.
+@dataclass(frozen=True)
+class EvalCompatibleGroundingSelection:
+    active_queries: list[str]
+    scene_categories: list[str]
+    active_indices: list[int]
+    scene_indices: list[int]
+    active_scene_indices: list[int]
 
-    Handles both standalone projection weights and full RADIO checkpoint files.
-    """
+def load_siglip2_projection(
+    projection_weights,
+    target_device=None,
+    *,
+    use_summary_head=True,
+    summary_head_weights="checkpoints/siglip2_summary_head.pth",
+    radio_checkpoint="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+):
+    """Load the SigLIP2 projection used for qualitative grounding."""
     target_device = target_device or device
     target_dtype = inference_dtype(target_device)
-    from timm.models.vision_transformer import Block
-
-    class SigLIP2FeatureProjection(nn.Module):
-        def __init__(self):
-            super().__init__()
-            self.blocks = nn.Sequential(*[
-                Block(1280, num_heads=16, init_values=1e-5) for _ in range(2)
-            ])
-            self.mlp_fc1 = nn.Linear(1280, 1520)
-            self.mlp_final = nn.Sequential(
-                nn.LayerNorm(1520), nn.GELU(), nn.Linear(1520, 1536),
-            )
-
-        def forward(self, x):
-            x = self.blocks(x)
-            x = self.mlp_fc1(x)
-            return self.mlp_final(x)
-
-    proj = SigLIP2FeatureProjection()
-    proj_path = resolve_siglip_projection_path(projection_weights)
-    ckpt = torch.load(proj_path, map_location="cpu")
-    # Handle full RADIO checkpoint vs standalone projection weights
-    if "state_dict" in ckpt:
-        # Full RADIO checkpoint — extract SigLIP2 adaptor head weights
-        sd = ckpt["state_dict"]
-        prefix = "model.summary.adaptors.siglip2."
-        proj_sd = {}
-        for k, v in sd.items():
-            if k.startswith(prefix):
-                new_key = k[len(prefix):]
-                proj_sd[new_key] = v
-        if not proj_sd:
-            raise RuntimeError(f"No SigLIP2 adaptor keys found in checkpoint with prefix '{prefix}'")
-        proj.load_state_dict(proj_sd)
+    if use_summary_head:
+        head_path = Path(summary_head_weights)
+        if head_path.exists():
+            proj = SigLIP2SummaryHead.from_extracted_weights(str(head_path))
+        else:
+            proj = SigLIP2SummaryHead.from_radio_checkpoint(str(radio_checkpoint))
     else:
-        proj.load_state_dict(ckpt)
+        proj_path = resolve_siglip_projection_path(projection_weights)
+        if proj_path.exists():
+            proj = SigLIP2FeatureProjection.from_extracted_weights(str(proj_path))
+        else:
+            proj = SigLIP2FeatureProjection.from_radio_checkpoint(str(radio_checkpoint))
     return proj.to(target_device, dtype=target_dtype).eval()
 
 
@@ -852,6 +849,108 @@ def load_text_embedding_candidates(text_emb_path):
         }
         candidates.append((path.name, bank))
     return candidates
+
+
+def build_eval_compatible_grounding_selection(
+    categories: list[str],
+    scene_categories: list[str],
+    requested_queries: list[str],
+) -> EvalCompatibleGroundingSelection:
+    """Build the same category index mapping used by ``eval_lerf_grounding``.
+
+    ``categories`` must match the row order of the text-embedding tensor.
+    """
+    cat_to_idx = {str(cat): i for i, cat in enumerate(categories)}
+    scene_sorted = sorted({str(cat) for cat in scene_categories if str(cat) in cat_to_idx})
+    active = sorted(
+        {str(query) for query in requested_queries if str(query) in scene_sorted}
+    )
+    scene_indices = [cat_to_idx[cat] for cat in scene_sorted]
+    active_indices = [cat_to_idx[cat] for cat in active]
+    active_scene_indices = [scene_sorted.index(cat) for cat in active]
+    return EvalCompatibleGroundingSelection(
+        active_queries=active,
+        scene_categories=scene_sorted,
+        active_indices=active_indices,
+        scene_indices=scene_indices,
+        active_scene_indices=active_scene_indices,
+    )
+
+
+def load_eval_compatible_text_embeddings(
+    categories: list[str],
+    target_device: torch.device,
+    *,
+    text_embedding_cache: Optional[str] = None,
+    prompt_templates: Optional[list[str]] = None,
+    fallback_text_embeddings: Optional[Union[str, Path]] = None,
+) -> torch.Tensor:
+    """Load/generate text embeddings with formal eval semantics.
+
+    A cache path uses ``eval_lerf_grounding``'s prompt-ensemble loader.  Without
+    a cache, an exact precomputed bank may be used to keep legacy visualization
+    commands cheap and offline.
+    """
+    if text_embedding_cache:
+        return load_or_generate_prompt_ensemble_embeddings(
+            categories,
+            target_device,
+            cache_path=text_embedding_cache,
+            prompt_templates=prompt_templates,
+        )
+
+    if fallback_text_embeddings is not None:
+        bank_path = Path(fallback_text_embeddings)
+        if bank_path.exists():
+            data = torch.load(str(bank_path), map_location="cpu")
+            bank = {str(q): e for q, e in zip(data["queries"], data["embeddings"])}
+            missing = [cat for cat in categories if cat not in bank]
+            if not missing:
+                emb = torch.stack([bank[cat] for cat in categories])
+                return F.normalize(emb.float(), dim=-1).to(target_device)
+
+    return load_or_generate_prompt_ensemble_embeddings(
+        categories,
+        target_device,
+        cache_path=None,
+        prompt_templates=prompt_templates,
+    )
+
+
+def compute_eval_compatible_grounding_heatmaps(
+    features_1280: torch.Tensor,
+    proj_model: nn.Module,
+    text_embeddings: torch.Tensor,
+    selection: EvalCompatibleGroundingSelection,
+    *,
+    temperature: float = 50.0,
+    scoring: str = "softmax_scene",
+    canonical_emb: Optional[torch.Tensor] = None,
+    target_device: Optional[torch.device] = None,
+) -> torch.Tensor:
+    """Compute heatmaps with the same scoring protocol as formal LERF eval."""
+    target_device = target_device or device
+    target_dtype = inference_dtype(target_device)
+    features_1280 = features_1280.to(target_device, dtype=target_dtype)
+    text_embeddings = text_embeddings.to(target_device, dtype=target_dtype)
+    siglip_feat = project_to_siglip2(features_1280, proj_model)
+
+    active_emb = text_embeddings[selection.active_indices]
+    all_scene_emb = None
+    active_scene_indices = None
+    if scoring == "softmax_scene":
+        all_scene_emb = text_embeddings[selection.scene_indices]
+        active_scene_indices = selection.active_scene_indices
+
+    return compute_relevancy_heatmap(
+        siglip_feat,
+        active_emb,
+        canonical_emb=canonical_emb,
+        temperature=temperature,
+        scoring=scoring,
+        all_scene_emb=all_scene_emb,
+        active_scene_indices=active_scene_indices,
+    )
 
 
 def select_scene_text_embeddings(
@@ -926,14 +1025,14 @@ def select_scene_text_embeddings(
     return torch.stack(selected_embeddings).to(target_device, dtype=torch.float32), selected_sources
 
 
-def compute_grounding_heatmaps(features_1280, proj_model, text_emb, temperature=1.0, target_device=None):
+def compute_grounding_heatmaps(features_1280, proj_model, text_emb, temperature=50.0, target_device=None):
     """Compute text grounding heatmaps with cosine-softmax normalization.
 
     Args:
         features_1280: [1, 1280, H, W]
         proj_model: SigLIP2 projection
         text_emb: [K, 1536] normalized text embeddings
-        temperature: softmax temperature (1.0 recommended; 0.07 is too aggressive)
+        temperature: logit scale for softmax, matching eval_lerf_grounding
 
     Returns:
         raw_sim: [K, H, W] raw cosine similarity heatmaps
@@ -953,10 +1052,10 @@ def compute_grounding_heatmaps(features_1280, proj_model, text_emb, temperature=
     raw_sim = text_emb.float() @ siglip.float().T  # [K, HW]
     raw_sim = raw_sim.float().reshape(-1, H, W)
 
-    # Softmax across queries with moderate temperature
+    # Softmax across queries with the same logit-scale convention as eval_lerf_grounding.
     K = raw_sim.shape[0]
     sim_flat = raw_sim.reshape(K, -1)  # [K, HW]
-    probs = F.softmax(sim_flat / temperature, dim=0)   # softmax across queries
+    probs = F.softmax(sim_flat * temperature, dim=0)   # softmax across queries
     probs = probs.reshape(raw_sim.shape)               # [K, H, W]
 
     return raw_sim, probs
@@ -1059,10 +1158,33 @@ def main():
                         default=DEFAULT_SIGLIP2_TEXT_EMBEDDINGS)
     parser.add_argument("--projection_weights",
                         default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS)
+    parser.add_argument("--summary_head_weights",
+                        default="checkpoints/siglip2_summary_head.pth",
+                        help="SigLIP2 summary head weights for text-aligned grounding")
+    parser.add_argument("--radio_checkpoint",
+                        default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+                        help="RADIO checkpoint fallback for extracting SigLIP2 heads")
+    parser.add_argument("--use_summary_head", action="store_true", default=True,
+                        help="Use RADIO's SigLIP2 summary head for text grounding")
+    parser.add_argument("--no_summary_head", dest="use_summary_head", action="store_false",
+                        help="Use the spatial feature projection instead of the summary head")
     parser.add_argument("--grounding_queries", nargs="+",
                         default=list(GROUNDING_QUERY_CLASS_IDS.keys()))
     parser.add_argument("--grounding_seg_threshold", type=float, default=0.35,
                         help="Confidence threshold for text-derived grounding masks")
+    parser.add_argument("--eval_compatible_grounding", action="store_true",
+                        help="Use formal eval_lerf_grounding text/scoring protocol for grounding panels")
+    parser.add_argument("--grounding_scoring", choices=["cosine", "softmax_scene", "relevancy"],
+                        default="softmax_scene",
+                        help="Scoring mode used with --eval_compatible_grounding")
+    parser.add_argument("--grounding_relevancy_temp", type=float, default=50.0,
+                        help="Logit scale/temperature matching eval_lerf_grounding")
+    parser.add_argument("--grounding_prompt_templates", default="{query}",
+                        help="Prompt templates for eval-compatible text embeddings")
+    parser.add_argument("--grounding_text_embedding_cache", default=None,
+                        help="Optional eval-compatible prompt embedding cache")
+    parser.add_argument("--grounding_scene_categories", nargs="+", default=None,
+                        help="Full scene category set for eval-compatible softmax denominator")
     parser.add_argument("--grounding_device", choices=["cpu", "cuda"], default="cpu",
                         help="Device for qualitative grounding visualization")
     parser.add_argument("--probe_device", choices=["cpu", "cuda"], default="cpu",
@@ -1662,54 +1784,101 @@ def main():
     print("\n[6/7] Generating text grounding heatmaps...")
     text_emb_path = resolve_siglip_text_embeddings_path(args.text_embeddings)
     proj_path = resolve_siglip_projection_path(args.projection_weights)
-    if text_emb_path.exists() and proj_path.exists():
-        candidate_banks = load_text_embedding_candidates(text_emb_path)
-        if not candidate_banks:
-            print("  ⚠ Skipping grounding: no text embedding files could be loaded")
-            candidate_banks = []
-        all_queries = sorted({q for _, bank in candidate_banks for q in bank.keys()})
-        query_to_idx = {q: i for i, q in enumerate(all_queries)}
+    summary_path = Path(args.summary_head_weights)
+    radio_path = Path(args.radio_checkpoint)
+    projection_available = (
+        summary_path.exists()
+        if args.use_summary_head
+        else proj_path.exists()
+    ) or radio_path.exists()
+    text_available = args.eval_compatible_grounding or text_emb_path.exists()
+    if text_available and projection_available:
+        proj_model = load_siglip2_projection(
+            str(proj_path),
+            grounding_device,
+            use_summary_head=args.use_summary_head,
+            summary_head_weights=args.summary_head_weights,
+            radio_checkpoint=args.radio_checkpoint,
+        )
+        print(
+            "  Grounding projection: "
+            + ("SigLIP2 summary head" if args.use_summary_head else "SigLIP2 spatial projection")
+        )
 
-        proj_model = load_siglip2_projection(str(proj_path), grounding_device)
+        eval_selection = None
+        eval_text_embeddings = None
+        if args.eval_compatible_grounding:
+            scene_categories = args.grounding_scene_categories or list(args.grounding_queries)
+            categories = sorted({str(cat) for cat in scene_categories})
+            eval_text_embeddings = load_eval_compatible_text_embeddings(
+                categories,
+                grounding_device,
+                text_embedding_cache=args.grounding_text_embedding_cache,
+                prompt_templates=parse_prompt_templates(args.grounding_prompt_templates),
+                fallback_text_embeddings=text_emb_path,
+            )
+            eval_selection = build_eval_compatible_grounding_selection(
+                categories=categories,
+                scene_categories=[str(cat) for cat in scene_categories],
+                requested_queries=[str(q) for q in args.grounding_queries],
+            )
+            active_queries = eval_selection.active_queries
+            active_query_cids = [
+                GROUNDING_QUERY_CLASS_IDS.get(q, qi)
+                for qi, q in enumerate(active_queries)
+            ]
+            print(
+                "  Grounding scoring: "
+                f"{args.grounding_scoring} T={args.grounding_relevancy_temp:g} "
+                f"scene_categories={len(eval_selection.scene_categories)}"
+            )
+        else:
+            candidate_banks = load_text_embedding_candidates(text_emb_path)
+            if not candidate_banks:
+                print("  ⚠ Skipping grounding: no text embedding files could be loaded")
+                candidate_banks = []
+            all_queries = sorted({q for _, bank in candidate_banks for q in bank.keys()})
+            query_to_idx = {q: i for i, q in enumerate(all_queries)}
 
-        scene_present_ids = set()
-        for spath in train_sem_paths[: min(len(train_sem_paths), 64)]:
-            sem = cv2.imread(str(spath), cv2.IMREAD_GRAYSCALE)
-            if sem is not None:
-                scene_present_ids.update(np.unique(sem).tolist())
-        for j in range(n_vis):
-            sem = load_vis_sem(j)
-            if sem is not None:
-                scene_present_ids.update(np.unique(sem).tolist())
+            scene_present_ids = set()
+            for spath in train_sem_paths[: min(len(train_sem_paths), 64)]:
+                sem = cv2.imread(str(spath), cv2.IMREAD_GRAYSCALE)
+                if sem is not None:
+                    scene_present_ids.update(np.unique(sem).tolist())
+            for j in range(n_vis):
+                sem = load_vis_sem(j)
+                if sem is not None:
+                    scene_present_ids.update(np.unique(sem).tolist())
 
-        # Filter to requested queries that are both embedded and present in scene semantics
-        active_queries = [
-            q for q in args.grounding_queries
-            if q in query_to_idx and GROUNDING_QUERY_CLASS_IDS.get(q) in scene_present_ids
-        ]
-        # Sort by class ID for deterministic ordering (matches eval_grounding.py)
-        active_queries.sort(key=lambda q: GROUNDING_QUERY_CLASS_IDS[q])
+            # Filter to requested queries that are both embedded and present in scene semantics
+            active_queries = [
+                q for q in args.grounding_queries
+                if q in query_to_idx and GROUNDING_QUERY_CLASS_IDS.get(q) in scene_present_ids
+            ]
+            # Sort by class ID for deterministic ordering (matches eval_grounding.py)
+            active_queries.sort(key=lambda q: GROUNDING_QUERY_CLASS_IDS[q])
+            if active_queries:
+                active_query_cids = [GROUNDING_QUERY_CLASS_IDS[q] for q in active_queries]
+                active_text_emb, text_sources = select_scene_text_embeddings(
+                    candidate_banks,
+                    proj_model,
+                    train_gt_feats,
+                    train_sem_paths,
+                    active_queries,
+                    active_query_cids,
+                    fH,
+                    fW,
+                    target_device=grounding_device,
+                )
+                print("  Selected text embeddings:")
+                for q in active_queries:
+                    print(f"    {q}: {text_sources[q]}")
+
         dropped_queries = [q for q in args.grounding_queries if q not in active_queries]
         if dropped_queries:
             print(f"  Skipping absent/unmapped queries: {dropped_queries}")
         if not active_queries:
             print("  ⚠ No requested grounding queries are present in this scene")
-        else:
-            active_query_cids = [GROUNDING_QUERY_CLASS_IDS[q] for q in active_queries]
-            active_text_emb, text_sources = select_scene_text_embeddings(
-                candidate_banks,
-                proj_model,
-                train_gt_feats,
-                train_sem_paths,
-                active_queries,
-                active_query_cids,
-                fH,
-                fW,
-                target_device=grounding_device,
-            )
-            print("  Selected text embeddings:")
-            for q in active_queries:
-                print(f"    {q}: {text_sources[q]}")
 
         # Assign a color per active query for softmax segmentation
         query_colors = {}
@@ -1728,11 +1897,35 @@ def main():
             gt_f = gt_feats[j].unsqueeze(0)
             rend_f = rend_feats[j].unsqueeze(0)
 
-            gt_raw, gt_probs = compute_grounding_heatmaps(
-                gt_f, proj_model, active_text_emb, target_device=grounding_device)
-            rend_raw, rend_probs = compute_grounding_heatmaps(
-                rend_f, proj_model, active_text_emb, target_device=grounding_device)
-            rend_probs_np = rend_probs.cpu().numpy()
+            if args.eval_compatible_grounding:
+                assert eval_selection is not None and eval_text_embeddings is not None
+                gt_heatmaps = compute_eval_compatible_grounding_heatmaps(
+                    gt_f,
+                    proj_model,
+                    eval_text_embeddings,
+                    eval_selection,
+                    temperature=args.grounding_relevancy_temp,
+                    scoring=args.grounding_scoring,
+                    target_device=grounding_device,
+                )
+                rend_heatmaps = compute_eval_compatible_grounding_heatmaps(
+                    rend_f,
+                    proj_model,
+                    eval_text_embeddings,
+                    eval_selection,
+                    temperature=args.grounding_relevancy_temp,
+                    scoring=args.grounding_scoring,
+                    target_device=grounding_device,
+                )
+                rend_probs_np = rend_heatmaps.cpu().numpy()
+            else:
+                gt_raw, gt_probs = compute_grounding_heatmaps(
+                    gt_f, proj_model, active_text_emb, target_device=grounding_device)
+                rend_raw, rend_probs = compute_grounding_heatmaps(
+                    rend_f, proj_model, active_text_emb, target_device=grounding_device)
+                gt_heatmaps = gt_raw
+                rend_heatmaps = rend_raw
+                rend_probs_np = rend_probs.cpu().numpy()
 
             # Load semantic GT for mask overlay
             sem_raw = load_vis_sem(j)
@@ -1746,7 +1939,7 @@ def main():
             rgb = load_vis_rgb(j)
             rgb_hr = cv2.resize(rgb, (tW, tH), interpolation=cv2.INTER_LINEAR)
 
-            # Per-query rows: GT Semantic Mask | Rendered Text Mask | Rendered Heatmap
+            # Per-query rows: GT Semantic Mask | Teacher Heatmap | Rendered Text Mask | Rendered Heatmap
             if j == 0:
                 print(f"  [DEBUG] Frame {get_vis_label(j)} grounding correspondence:")
                 for qi_dbg, q_dbg in enumerate(active_queries):
@@ -1755,19 +1948,28 @@ def main():
                     print(f"    qi={qi_dbg}: query='{q_dbg}' class_id={cid_dbg} gt_pixels={gt_area}")
             query_rows = []
             for qi, qname in enumerate(active_queries):
-                gt_h = gt_raw[qi].cpu().numpy()
-                rend_h = rend_raw[qi].cpu().numpy()
+                gt_h = gt_heatmaps[qi].cpu().numpy()
+                rend_h = rend_heatmaps[qi].cpu().numpy()
 
                 # Per-query percentile normalization for better contrast
-                def _normalize(arr, plo=2, phi=98):
-                    lo = np.percentile(arr, plo)
-                    hi = np.percentile(arr, phi)
+                def _normalize(arr, plo=2, phi=98, lo=None, hi=None):
+                    if lo is None:
+                        lo = np.percentile(arr, plo)
+                    if hi is None:
+                        hi = np.percentile(arr, phi)
                     if hi - lo > 1e-8:
                         return np.clip((arr - lo) / (hi - lo), 0, 1)
                     return np.zeros_like(arr)
 
-                gt_norm = _normalize(gt_h)
-                rend_norm = _normalize(rend_h)
+                if args.eval_compatible_grounding:
+                    paired = np.concatenate([gt_h.reshape(-1), rend_h.reshape(-1)])
+                    lo = np.percentile(paired, 2)
+                    hi = np.percentile(paired, 98)
+                    gt_norm = _normalize(gt_h, lo=lo, hi=hi)
+                    rend_norm = _normalize(rend_h, lo=lo, hi=hi)
+                else:
+                    gt_norm = _normalize(gt_h)
+                    rend_norm = _normalize(rend_h)
 
                 # Upscale heatmaps to display resolution (bilinear for smooth gradients)
                 gt_norm_hr = cv2.resize(gt_norm, (tW, tH), interpolation=cv2.INTER_LINEAR)
@@ -1799,14 +2001,15 @@ def main():
                 pred_blend = (0.5 * pred_vis + 0.5 * rgb_hr).astype(np.uint8)
 
                 rend_overlay = (0.5 * rend_color + 0.5 * rgb_hr).astype(np.uint8)
+                gt_overlay = (0.5 * gt_color + 0.5 * rgb_hr).astype(np.uint8)
 
-                panels = [mask_blend, pred_blend, rend_overlay]
+                panels = [mask_blend, gt_overlay, pred_blend, rend_overlay]
                 panels[0] = add_text(panels[0], qname, pos=(5, 20), font_scale=0.55)
                 query_rows.append(hconcat_with_border(panels, border=2))
 
             if query_rows:
                 header = make_header(
-                    ["GT Semantic Mask", "Rendered Text Mask", "Rendered Heatmap"],
+                    ["GT Semantic Mask", "Teacher Heatmap", "Rendered Text Mask", "Rendered Heatmap"],
                     tW, height=28, border=2)
                 rgb_labeled = add_text(rgb_hr.copy(), f"Frame {get_vis_label(j)}", pos=(5, 20), font_scale=0.55)
                 rgb_row = np.zeros((rgb_hr.shape[0], header.shape[1], 3), dtype=np.uint8)
@@ -1818,10 +2021,15 @@ def main():
                 cv2.imwrite(str(save_path), cv2.cvtColor(full, cv2.COLOR_RGB2BGR))
 
             # ── Zero-shot segmentation from softmax grounding ────────────
-            # Upscale grounding probabilities bilinearly before argmax
             rend_seg_vis = np.zeros((tH, tW, 3), dtype=np.uint8)
-            for qi, cid in enumerate(active_query_cids):
-                rend_seg_vis[rend_seg_preds_hr[j] == cid] = query_colors[qi]
+            if args.eval_compatible_grounding:
+                text_pred_lr = rend_probs_np.argmax(axis=0).astype(np.uint8)
+                text_pred_hr = cv2.resize(text_pred_lr, (tW, tH), interpolation=cv2.INTER_NEAREST)
+                for qi in range(len(active_queries)):
+                    rend_seg_vis[text_pred_hr == qi] = query_colors[qi]
+            else:
+                for qi, cid in enumerate(active_query_cids):
+                    rend_seg_vis[rend_seg_preds_hr[j] == cid] = query_colors[qi]
 
             # GT segmentation restricted to the chosen active semantic classes
             gt_seg_vis = np.zeros((tH, tW, 3), dtype=np.uint8)

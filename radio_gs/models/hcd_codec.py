@@ -157,6 +157,20 @@ class HCDDecoder(nn.Module):
         """
         return self.norm(self.mlp(z) + self.residual(z))
 
+    def forward_points(self, z: torch.Tensor) -> torch.Tensor:
+        """Decode compact point features without coupling different points.
+
+        Args:
+            z: (N, bottleneck_dim) compact point features.
+
+        Returns:
+            (N, output_dim) decoded RADIO point features.
+        """
+        if z.ndim != 2:
+            raise ValueError(f"Expected [N, C] compact points, got shape {tuple(z.shape)}")
+        decoded = self.forward(z[:, :, None, None].float())
+        return decoded[:, :, 0, 0].contiguous()
+
 
 class HCDCodec(nn.Module):
     """Hierarchical Compression-Decompression codec for RADIO-GS.
@@ -213,6 +227,15 @@ class HCDCodec(nn.Module):
             (B, input_dim, H, W).
         """
         return self.decoder(z)
+
+    def decode_points(self, z: torch.Tensor) -> torch.Tensor:
+        """Reconstruct per-point RADIO features without cross-point normalization.
+
+        This is the correct API for direct 3D queries.  Passing point features
+        as a pseudo image of shape ``[1, C, N, 1]`` would make GroupNorm depend
+        on all points in the current chunk.
+        """
+        return self.decoder.forward_points(z)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Full encode → decode pass.

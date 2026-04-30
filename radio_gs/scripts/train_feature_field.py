@@ -76,6 +76,7 @@ from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.featsharp_3d import FeatSharp3D
 from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
+from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.models.screen_refiner import (
     ScreenSpaceRefiner,
@@ -84,6 +85,10 @@ from radio_gs.models.screen_refiner import (
 )
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 from radio_gs.replica_constants import GROUNDING_QUERIES
+from radio_gs.scannet_constants import (
+    NYU40_ID_TO_NAME,
+    OPENGAUSSIAN_NYU40_CLASS_SPLITS,
+)
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -91,6 +96,320 @@ try:
     _HAS_TB = True
 except ImportError:
     _HAS_TB = False
+
+
+def parse_direct_point_text_splits(raw: str | None, default_split: str) -> list[str]:
+    """Parse a comma/space separated ScanNet text split list."""
+    if raw is None or str(raw).strip() == "":
+        values = [str(default_split)]
+    else:
+        values = str(raw).replace(",", " ").split()
+    splits: list[str] = []
+    for split in values:
+        split = str(split).strip()
+        if split and split not in splits:
+            splits.append(split)
+    return splits
+
+
+def read_ply_xyz(path: str | Path) -> torch.Tensor:
+    """Read vertex xyz coordinates from a PLY file."""
+    xyz, _ = read_ply_xyz_labels(path)
+    return xyz
+
+
+def read_ply_xyz_labels(path: str | Path) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+    """Read vertex xyz coordinates and optional raw labels from a PLY file."""
+    from plyfile import PlyData
+
+    ply = PlyData.read(str(path))
+    vertex = ply["vertex"]
+    missing = [name for name in ("x", "y", "z") if name not in vertex.data.dtype.names]
+    if missing:
+        raise ValueError(f"PLY is missing vertex coordinate fields {missing}: {path}")
+    xyz = np.stack(
+        [
+            np.asarray(vertex["x"], dtype=np.float32),
+            np.asarray(vertex["y"], dtype=np.float32),
+            np.asarray(vertex["z"], dtype=np.float32),
+        ],
+        axis=1,
+    )
+    labels = None
+    if "label" in vertex.data.dtype.names:
+        labels_np = np.asarray(vertex["label"], dtype=np.int64)
+        labels = torch.from_numpy(labels_np.copy()).long()
+    return torch.from_numpy(xyz.copy()).float(), labels
+
+
+def resolve_scannet_label_ply(scene_root: str | Path, scene: str | None = None) -> Path:
+    """Resolve the OpenGaussian/ScanNet label mesh PLY used for point eval."""
+    root = Path(scene_root)
+    scene_name = scene or root.name
+    preferred = root / f"{scene_name}_vh_clean_2.labels.ply"
+    if preferred.exists():
+        return preferred
+    matches = sorted(root.glob("*.labels.ply"))
+    if matches:
+        return matches[0]
+    raise FileNotFoundError(f"No *.labels.ply file found in {root}")
+
+
+def sample_multiview_radio_targets(
+    points_xyz: torch.Tensor,
+    gt_features: torch.Tensor,
+    pose_w2c: torch.Tensor,
+    K: torch.Tensor,
+    *,
+    depth_map: Optional[torch.Tensor] = None,
+    alpha_map: Optional[torch.Tensor] = None,
+    depth_tolerance: float = 0.08,
+    relative_depth_tolerance: float = 0.02,
+    alpha_threshold: float = 0.0,
+    normalize_sampled_features: bool = False,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Sample multi-view RADIO targets for world-space points.
+
+    Args:
+        points_xyz: ``[N, 3]`` world-space points.
+        gt_features: ``[B, C, H, W]`` feature maps.
+        pose_w2c: ``[B, 4, 4]`` world-to-camera matrices.
+        K: feature-resolution camera intrinsics.
+        depth_map: optional ``[B, H, W]`` depth visibility map.
+        alpha_map: optional ``[B, H, W]`` opacity visibility map.
+        normalize_sampled_features: L2-normalize each valid per-view sampled
+            feature before multi-view averaging.
+
+    Returns:
+        target features ``[N, C]``, valid mask ``[N]``, and valid view counts
+        ``[N]``.
+    """
+    if points_xyz.dim() != 2 or points_xyz.shape[1] != 3:
+        raise ValueError(f"Expected points_xyz [N,3], got {tuple(points_xyz.shape)}")
+    if gt_features.dim() != 4:
+        raise ValueError(f"Expected gt_features [B,C,H,W], got {tuple(gt_features.shape)}")
+    if pose_w2c.dim() != 3 or pose_w2c.shape[-2:] != (4, 4):
+        raise ValueError(f"Expected pose_w2c [B,4,4], got {tuple(pose_w2c.shape)}")
+
+    n_points = points_xyz.shape[0]
+    batch_size, channels, height, width = gt_features.shape
+    if n_points == 0:
+        return (
+            torch.empty(0, channels, device=gt_features.device, dtype=gt_features.dtype),
+            torch.empty(0, device=gt_features.device, dtype=torch.bool),
+            torch.empty(0, device=gt_features.device, dtype=torch.long),
+        )
+    if pose_w2c.shape[0] != batch_size:
+        raise ValueError(
+            f"pose_w2c batch ({pose_w2c.shape[0]}) does not match features ({batch_size})"
+        )
+
+    device = gt_features.device
+    points = points_xyz.to(device=device, dtype=torch.float32)
+    poses = pose_w2c.to(device=device, dtype=torch.float32)
+    intrinsics = K.to(device=device, dtype=torch.float32)
+
+    ones = torch.ones(n_points, 1, device=device, dtype=torch.float32)
+    points_h = torch.cat([points, ones], dim=1)
+    cam = torch.einsum("bij,nj->bni", poses, points_h)
+    z = cam[..., 2]
+    z_safe = z.clamp_min(1e-6)
+    u = intrinsics[0, 0] * (cam[..., 0] / z_safe) + intrinsics[0, 2]
+    v = intrinsics[1, 1] * (cam[..., 1] / z_safe) + intrinsics[1, 2]
+
+    valid = (
+        (z > 1e-6)
+        & (u >= 0.0)
+        & (u <= float(width - 1))
+        & (v >= 0.0)
+        & (v <= float(height - 1))
+    )
+
+    if width > 1:
+        grid_x = 2.0 * u / float(width - 1) - 1.0
+    else:
+        grid_x = torch.zeros_like(u)
+    if height > 1:
+        grid_y = 2.0 * v / float(height - 1) - 1.0
+    else:
+        grid_y = torch.zeros_like(v)
+    grid = torch.stack([grid_x, grid_y], dim=-1).reshape(batch_size, n_points, 1, 2)
+
+    if depth_map is not None:
+        depth = depth_map.to(device=device, dtype=torch.float32)
+        if depth.dim() == 4 and depth.shape[1] == 1:
+            depth = depth[:, 0]
+        if depth.shape != (batch_size, height, width):
+            depth = F.interpolate(
+                depth[:, None],
+                size=(height, width),
+                mode="bilinear",
+                align_corners=True,
+            )[:, 0]
+        sampled_depth = F.grid_sample(
+            depth[:, None],
+            grid,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=True,
+        )[:, 0, :, 0]
+        tolerance = torch.maximum(
+            torch.full_like(z, float(depth_tolerance)),
+            z.abs() * float(relative_depth_tolerance),
+        )
+        valid = valid & (sampled_depth > 0.0) & ((sampled_depth - z).abs() <= tolerance)
+
+    if alpha_map is not None and alpha_threshold > 0:
+        alpha = alpha_map.to(device=device, dtype=torch.float32)
+        if alpha.dim() == 4 and alpha.shape[1] == 1:
+            alpha = alpha[:, 0]
+        if alpha.shape != (batch_size, height, width):
+            alpha = F.interpolate(
+                alpha[:, None],
+                size=(height, width),
+                mode="bilinear",
+                align_corners=True,
+            )[:, 0]
+        sampled_alpha = F.grid_sample(
+            alpha[:, None],
+            grid,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=True,
+        )[:, 0, :, 0]
+        valid = valid & (sampled_alpha >= float(alpha_threshold))
+
+    sampled = F.grid_sample(
+        gt_features.float(),
+        grid,
+        mode="bilinear",
+        padding_mode="zeros",
+        align_corners=True,
+    )[:, :, :, 0].permute(2, 0, 1)
+    if normalize_sampled_features:
+        sampled = F.normalize(sampled.float(), dim=-1)
+    valid_points_views = valid.T
+    view_counts = valid_points_views.sum(dim=1)
+    weights = valid_points_views.to(sampled.dtype).unsqueeze(-1)
+    targets = (sampled * weights).sum(dim=1)
+    denom = view_counts.clamp_min(1).to(sampled.dtype).unsqueeze(-1)
+    targets = targets / denom
+    return targets.to(dtype=gt_features.dtype), view_counts > 0, view_counts
+
+
+def select_visible_gaussian_indices(
+    points_xyz: torch.Tensor,
+    pose_w2c: torch.Tensor,
+    K: torch.Tensor,
+    *,
+    image_height: int,
+    image_width: int,
+    sample_count: int,
+    depth_map: Optional[torch.Tensor] = None,
+    alpha_map: Optional[torch.Tensor] = None,
+    depth_tolerance: float = 0.08,
+    relative_depth_tolerance: float = 0.02,
+    alpha_threshold: float = 0.0,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Select point indices visible in the current training views.
+
+    The returned indices are relative to ``points_xyz``.  If fewer than
+    ``sample_count`` points are visible, all visible points are returned.
+    """
+    if points_xyz.dim() != 2 or points_xyz.shape[1] != 3:
+        raise ValueError(f"Expected points_xyz [N,3], got {tuple(points_xyz.shape)}")
+    if pose_w2c.dim() != 3 or pose_w2c.shape[-2:] != (4, 4):
+        raise ValueError(f"Expected pose_w2c [B,4,4], got {tuple(pose_w2c.shape)}")
+    if sample_count <= 0 or points_xyz.shape[0] == 0:
+        empty = torch.empty(0, device=points_xyz.device, dtype=torch.long)
+        visible = torch.zeros(points_xyz.shape[0], device=points_xyz.device, dtype=torch.bool)
+        return empty, visible
+
+    device = points_xyz.device
+    points = points_xyz.to(device=device, dtype=torch.float32)
+    poses = pose_w2c.to(device=device, dtype=torch.float32)
+    intrinsics = K.to(device=device, dtype=torch.float32)
+    batch_size = poses.shape[0]
+    n_points = points.shape[0]
+    height = int(image_height)
+    width = int(image_width)
+
+    ones = torch.ones(n_points, 1, device=device, dtype=torch.float32)
+    points_h = torch.cat([points, ones], dim=1)
+    cam = torch.einsum("bij,nj->bni", poses, points_h)
+    z = cam[..., 2]
+    z_safe = z.clamp_min(1e-6)
+    u = intrinsics[0, 0] * (cam[..., 0] / z_safe) + intrinsics[0, 2]
+    v = intrinsics[1, 1] * (cam[..., 1] / z_safe) + intrinsics[1, 2]
+
+    visible = (
+        (z > 1e-6)
+        & (u >= 0.0)
+        & (u <= float(width - 1))
+        & (v >= 0.0)
+        & (v <= float(height - 1))
+    )
+
+    if width > 1:
+        grid_x = 2.0 * u / float(width - 1) - 1.0
+    else:
+        grid_x = torch.zeros_like(u)
+    if height > 1:
+        grid_y = 2.0 * v / float(height - 1) - 1.0
+    else:
+        grid_y = torch.zeros_like(v)
+    grid = torch.stack([grid_x, grid_y], dim=-1).reshape(batch_size, n_points, 1, 2)
+
+    if depth_map is not None:
+        depth = depth_map.to(device=device, dtype=torch.float32)
+        if depth.dim() == 4 and depth.shape[1] == 1:
+            depth = depth[:, 0]
+        if depth.shape != (batch_size, height, width):
+            depth = F.interpolate(
+                depth[:, None],
+                size=(height, width),
+                mode="bilinear",
+                align_corners=True,
+            )[:, 0]
+        sampled_depth = F.grid_sample(
+            depth[:, None],
+            grid,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=True,
+        )[:, 0, :, 0]
+        tolerance = torch.maximum(
+            torch.full_like(z, float(depth_tolerance)),
+            z.abs() * float(relative_depth_tolerance),
+        )
+        visible = visible & (sampled_depth > 0.0) & ((sampled_depth - z).abs() <= tolerance)
+
+    if alpha_map is not None and alpha_threshold > 0:
+        alpha = alpha_map.to(device=device, dtype=torch.float32)
+        if alpha.dim() == 4 and alpha.shape[1] == 1:
+            alpha = alpha[:, 0]
+        if alpha.shape != (batch_size, height, width):
+            alpha = F.interpolate(
+                alpha[:, None],
+                size=(height, width),
+                mode="bilinear",
+                align_corners=True,
+            )[:, 0]
+        sampled_alpha = F.grid_sample(
+            alpha[:, None],
+            grid,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=True,
+        )[:, 0, :, 0]
+        visible = visible & (sampled_alpha >= float(alpha_threshold))
+
+    point_visible = visible.any(dim=0)
+    visible_indices = torch.nonzero(point_visible, as_tuple=False).flatten()
+    if visible_indices.numel() > sample_count:
+        order = torch.randperm(visible_indices.numel(), device=device)[:sample_count]
+        visible_indices = visible_indices[order]
+    return visible_indices, point_visible
 
 
 # ===================================================================
@@ -348,6 +667,231 @@ class RadioGSTrainer:
                 edge_threshold=getattr(config, "boundary_aware_edge_threshold", 0.1),
             ).to(self.device)
         self.hybrid_semantic_aux_weight = getattr(config, "hybrid_semantic_aux_weight", 0.0)
+        self.direct_point_loss_weight = getattr(config, "direct_point_loss_weight", 0.0)
+        self.direct_point_sample_count = max(0, int(getattr(config, "direct_point_sample_count", 2048)))
+        self.direct_point_sample_strategy = str(
+            getattr(config, "direct_point_sample_strategy", "uniform")
+        )
+        self.direct_point_query_mode = getattr(config, "direct_point_query_mode", "gaussian_index")
+        self.direct_point_gaussian_position_mode = str(
+            getattr(config, "direct_point_gaussian_position_mode", "gaussian_center")
+        )
+        self.direct_point_source = getattr(config, "direct_point_source", "gaussian")
+        self.direct_point_teacher_cache = str(
+            getattr(config, "direct_point_teacher_cache", "") or ""
+        )
+        self.direct_point_feature_key = getattr(config, "direct_point_feature_key", "features")
+        self.direct_point_k = max(1, int(getattr(config, "direct_point_k", 8)))
+        self.direct_point_candidate_k = max(
+            0, int(getattr(config, "direct_point_candidate_k", 0) or 0)
+        )
+        self.direct_point_depth_tolerance = float(getattr(config, "direct_point_depth_tolerance", 0.08))
+        self.direct_point_relative_depth_tolerance = float(
+            getattr(config, "direct_point_relative_depth_tolerance", 0.02)
+        )
+        self.direct_point_alpha_threshold = float(getattr(config, "direct_point_alpha_threshold", 0.02))
+        self.direct_point_summary_alignment_weight = float(
+            getattr(config, "direct_point_summary_alignment_weight", 0.0)
+        )
+        self.direct_point_summary_adapter_weight = float(
+            getattr(config, "direct_point_summary_adapter_weight", 0.0)
+        )
+        self.direct_point_text_loss_weight = float(
+            getattr(config, "direct_point_text_loss_weight", 0.0)
+        )
+        self.direct_point_adapter_text_loss_weight = float(
+            getattr(config, "direct_point_adapter_text_loss_weight", 0.0)
+        )
+        self.direct_point_adapter_text_distill_weight = float(
+            getattr(config, "direct_point_adapter_text_distill_weight", 0.0)
+        )
+        self.direct_point_text_pseudo_ce_weight = float(
+            getattr(config, "direct_point_text_pseudo_ce_weight", 0.0)
+        )
+        self.direct_point_text_pseudo_ce_confidence_threshold = float(
+            getattr(
+                config,
+                "direct_point_text_pseudo_ce_confidence_threshold",
+                0.0,
+            )
+        )
+        self.direct_point_text_pseudo_ce_logit_scale = float(
+            getattr(config, "direct_point_text_pseudo_ce_logit_scale", 1.0)
+        )
+        self.direct_point_text_pseudo_ce_center_logits = bool(
+            getattr(config, "direct_point_text_pseudo_ce_center_logits", False)
+        )
+        self.direct_point_text_pseudo_ce_splits = str(
+            getattr(config, "direct_point_text_pseudo_ce_splits", "") or ""
+        )
+        self.direct_point_adapter_text_pseudo_ce_weight = float(
+            getattr(config, "direct_point_adapter_text_pseudo_ce_weight", 0.0)
+        )
+        self.direct_point_adapter_text_pseudo_ce_confidence_threshold = float(
+            getattr(
+                config,
+                "direct_point_adapter_text_pseudo_ce_confidence_threshold",
+                0.0,
+            )
+        )
+        self.direct_point_adapter_text_pseudo_ce_logit_scale = float(
+            getattr(config, "direct_point_adapter_text_pseudo_ce_logit_scale", 1.0)
+        )
+        self.direct_point_adapter_text_pseudo_ce_center_logits = bool(
+            getattr(config, "direct_point_adapter_text_pseudo_ce_center_logits", False)
+        )
+        self.direct_point_adapter_text_pseudo_ce_splits = str(
+            getattr(config, "direct_point_adapter_text_pseudo_ce_splits", "") or ""
+        )
+        self.direct_point_adapter_decoder_anchor_weight = float(
+            getattr(config, "direct_point_adapter_decoder_anchor_weight", 0.0)
+        )
+        self.direct_point_text_temperature = max(
+            1e-6, float(getattr(config, "direct_point_text_temperature", 0.07))
+        )
+        self.direct_point_text_ce_weighting = str(
+            getattr(config, "direct_point_text_ce_weighting", "none")
+        )
+        self.direct_point_text_ce_min_weight = float(
+            getattr(config, "direct_point_text_ce_min_weight", 0.5)
+        )
+        self.direct_point_text_ce_max_weight = float(
+            getattr(config, "direct_point_text_ce_max_weight", 3.0)
+        )
+        self.direct_point_text_distill_weight = float(
+            getattr(config, "direct_point_text_distill_weight", 0.0)
+        )
+        self.direct_point_text_distill_temperature = max(
+            1e-6,
+            float(getattr(config, "direct_point_text_distill_temperature", 1.0)),
+        )
+        self.direct_point_text_distill_confidence_threshold = float(
+            getattr(config, "direct_point_text_distill_confidence_threshold", 0.0)
+        )
+        self.direct_point_text_split = str(
+            getattr(config, "direct_point_text_split", "19")
+        )
+        self.direct_point_text_pseudo_ce_split_list = parse_direct_point_text_splits(
+            self.direct_point_text_pseudo_ce_splits,
+            self.direct_point_text_split,
+        )
+        self.direct_point_adapter_text_pseudo_ce_split_list = parse_direct_point_text_splits(
+            self.direct_point_adapter_text_pseudo_ce_splits,
+            self.direct_point_text_split,
+        )
+        self.direct_point_text_split_ids: list[int] = []
+        self.direct_point_text_embeddings: Optional[torch.Tensor] = None
+        self.direct_point_text_pseudo_ce_banks: list[
+            tuple[str, list[int], torch.Tensor]
+        ] = []
+        self.direct_point_adapter_text_pseudo_ce_banks: list[
+            tuple[str, list[int], torch.Tensor]
+        ] = []
+        if self.direct_point_query_mode not in {"gaussian_index", "knn"}:
+            raise ValueError(
+                "direct_point_query_mode must be one of: gaussian_index, knn"
+            )
+        if self.direct_point_gaussian_position_mode not in {"gaussian_center", "label_point"}:
+            raise ValueError(
+                "direct_point_gaussian_position_mode must be one of: "
+                "gaussian_center, label_point"
+            )
+        if self.direct_point_sample_strategy not in {
+            "uniform",
+            "class_balanced",
+            "teacher_balanced",
+        }:
+            raise ValueError(
+                "direct_point_sample_strategy must be one of: "
+                "uniform, class_balanced, teacher_balanced"
+            )
+        if self.direct_point_source not in {"gaussian", "label_ply", "points3d"}:
+            raise ValueError(
+                "direct_point_source must be one of: gaussian, label_ply, points3d"
+            )
+        if self.direct_point_feature_key not in {"features", "fused", "semantic", "geometry"}:
+            raise ValueError(
+                "direct_point_feature_key must be one of: features, fused, semantic, geometry"
+            )
+        configured_text_splits = [
+            self.direct_point_text_split,
+            *self.direct_point_text_pseudo_ce_split_list,
+            *self.direct_point_adapter_text_pseudo_ce_split_list,
+        ]
+        invalid_text_splits = sorted(
+            {
+                split
+                for split in configured_text_splits
+                if split not in OPENGAUSSIAN_NYU40_CLASS_SPLITS
+            }
+        )
+        if invalid_text_splits:
+            raise ValueError(
+                "direct point text splits must be one of "
+                f"{sorted(OPENGAUSSIAN_NYU40_CLASS_SPLITS)}, got {invalid_text_splits}"
+            )
+        if self.direct_point_text_ce_weighting not in {
+            "none",
+            "inverse_batch",
+            "inverse_pool",
+            "sqrt_inverse_pool_capped",
+        }:
+            raise ValueError(
+                "direct_point_text_ce_weighting must be one of: "
+                "none, inverse_batch, inverse_pool, sqrt_inverse_pool_capped"
+            )
+        if self.direct_point_text_ce_min_weight < 0:
+            raise ValueError("direct_point_text_ce_min_weight must be non-negative")
+        if self.direct_point_text_ce_max_weight < self.direct_point_text_ce_min_weight:
+            raise ValueError(
+                "direct_point_text_ce_max_weight must be >= direct_point_text_ce_min_weight"
+            )
+        if self.direct_point_source == "points3d" and self.direct_point_query_mode == "gaussian_index":
+            raise ValueError(
+                "direct_point_query_mode=gaussian_index is only valid with "
+                "direct_point_source=gaussian or row-aligned label_ply; use "
+                "direct_point_query_mode=knn for unaligned point-cloud supervision"
+            )
+        if self.direct_point_loss_weight > 0 and not self._is_hybrid:
+            self._log("direct_point_loss_weight is only supported for hybrid models; disabling")
+            self.direct_point_loss_weight = 0.0
+        self.direct_point_pool: Optional[torch.Tensor] = None
+        self.direct_point_pool_labels: Optional[torch.Tensor] = None
+        self.direct_point_teacher_features: Optional[torch.Tensor] = None
+        self.direct_point_teacher_valid: Optional[torch.Tensor] = None
+        self.direct_point_teacher_view_counts: Optional[torch.Tensor] = None
+        self.direct_point_teacher_pseudo_label_cache: Optional[torch.Tensor] = None
+        if self.direct_point_loss_weight > 0 and self._is_hybrid:
+            self.direct_point_pool = self._load_direct_point_pool(config)
+            if self.direct_point_teacher_cache:
+                self._load_direct_point_teacher_cache(config)
+        self.point_summary_adapter: Optional[CompactToSummaryAdapter] = None
+        if (
+            self.direct_point_summary_adapter_weight > 0
+            or self.direct_point_adapter_text_loss_weight > 0
+            or self.direct_point_adapter_text_distill_weight > 0
+            or self.direct_point_adapter_text_pseudo_ce_weight > 0
+            or self.direct_point_adapter_decoder_anchor_weight > 0
+        ):
+            if not self._is_hybrid:
+                self._log("direct point summary adapter losses require hybrid models; disabling")
+                self.direct_point_summary_adapter_weight = 0.0
+                self.direct_point_adapter_text_loss_weight = 0.0
+                self.direct_point_adapter_text_distill_weight = 0.0
+                self.direct_point_adapter_text_pseudo_ce_weight = 0.0
+                self.direct_point_adapter_decoder_anchor_weight = 0.0
+            else:
+                self.point_summary_adapter = CompactToSummaryAdapter(
+                    input_dim=getattr(
+                        config,
+                        "bottleneck_dim",
+                        getattr(config, "hybrid_output_dim", 128),
+                    ),
+                    output_dim=1536,
+                    hidden_dim=getattr(config, "point_summary_adapter_hidden_dim", 512),
+                    num_layers=getattr(config, "point_summary_adapter_num_layers", 2),
+                    dropout=getattr(config, "point_summary_adapter_dropout", 0.0),
+                ).to(self.device)
         self.depth_alpha_threshold = getattr(config, "depth_alpha_threshold", 0.05)
         self.depth_head: Optional[DepthHead] = None
         self.depth_supervision_loss: Optional[DepthLoss] = None
@@ -472,7 +1016,7 @@ class RadioGSTrainer:
                 loss_type=getattr(config, "seg_loss_type", "ce"),
                 ignore_index=getattr(config, "seg_ignore_index", 255),
             )
-        if self.siglip_alignment_weight > 0 or self.grounding_query_loss_weight > 0:
+        if self.siglip_alignment_weight > 0:
             proj_path = resolve_siglip_projection_path(
                 getattr(
                     config,
@@ -491,7 +1035,19 @@ class RadioGSTrainer:
             self.siglip_projection.eval()
             for param in self.siglip_projection.parameters():
                 param.requires_grad = False
-        if self.siglip_summary_alignment_weight > 0:
+        if (
+            self.siglip_summary_alignment_weight > 0
+            or self.grounding_query_loss_weight > 0
+            or self.direct_point_summary_alignment_weight > 0
+            or self.direct_point_summary_adapter_weight > 0
+            or self.direct_point_text_loss_weight > 0
+            or self.direct_point_adapter_text_loss_weight > 0
+            or self.direct_point_text_distill_weight > 0
+            or self.direct_point_adapter_text_distill_weight > 0
+            or self.direct_point_text_pseudo_ce_weight > 0
+            or self.direct_point_adapter_text_pseudo_ce_weight > 0
+            or self.direct_point_adapter_decoder_anchor_weight > 0
+        ):
             summary_path = Path(
                 getattr(
                     config,
@@ -512,7 +1068,73 @@ class RadioGSTrainer:
                 param.requires_grad = False
             self._log(
                 f"SigLIP2 summary head loaded for text-space alignment "
-                f"(weight={self.siglip_summary_alignment_weight})"
+                f"(image_weight={self.siglip_summary_alignment_weight}, "
+                f"point_weight={self.direct_point_summary_alignment_weight})"
+            )
+
+        direct_point_text_bank_needed = (
+            self.direct_point_text_loss_weight > 0
+            or self.direct_point_adapter_text_loss_weight > 0
+            or self.direct_point_text_distill_weight > 0
+            or self.direct_point_adapter_text_distill_weight > 0
+            or self.direct_point_text_pseudo_ce_weight > 0
+            or self.direct_point_adapter_text_pseudo_ce_weight > 0
+        )
+        if direct_point_text_bank_needed:
+            if self.siglip_summary_head is None:
+                raise RuntimeError(
+                    "direct point text losses require SigLIP2SummaryHead; "
+                    "set siglip_summary_head_weights"
+                )
+            (
+                self.direct_point_text_split_ids,
+                self.direct_point_text_embeddings,
+            ) = self._load_direct_point_text_embeddings(
+                config,
+                split=self.direct_point_text_split,
+            )
+            if self.direct_point_text_pseudo_ce_weight > 0:
+                self.direct_point_text_pseudo_ce_banks = (
+                    self._load_direct_point_text_embedding_banks(
+                        config,
+                        self.direct_point_text_pseudo_ce_split_list,
+                    )
+                )
+            if self.direct_point_adapter_text_pseudo_ce_weight > 0:
+                self.direct_point_adapter_text_pseudo_ce_banks = (
+                    self._load_direct_point_text_embedding_banks(
+                        config,
+                        self.direct_point_adapter_text_pseudo_ce_split_list,
+                    )
+                )
+            if (
+                self.direct_point_pool_labels is None
+                and (
+                    self.direct_point_text_loss_weight > 0
+                    or self.direct_point_adapter_text_loss_weight > 0
+                )
+            ):
+                self._log(
+                    "direct point text losses require label PLY labels; disabling "
+                    "direct_point_text_loss_weight and direct_point_adapter_text_loss_weight"
+                )
+                self.direct_point_text_loss_weight = 0.0
+                self.direct_point_adapter_text_loss_weight = 0.0
+            names = [
+                NYU40_ID_TO_NAME.get(class_id, f"class_{class_id}")
+                for class_id in self.direct_point_text_split_ids
+            ]
+            self._log(
+                "Loaded direct point text bank: "
+                f"split={self.direct_point_text_split} "
+                f"classes={len(names)} "
+                f"ce_temperature={self.direct_point_text_temperature:g} "
+                f"distill_weight={self.direct_point_text_distill_weight:g} "
+                f"adapter_distill_weight={self.direct_point_adapter_text_distill_weight:g} "
+                f"pseudo_ce_weight={self.direct_point_text_pseudo_ce_weight:g} "
+                f"pseudo_ce_splits={self.direct_point_text_pseudo_ce_split_list} "
+                f"adapter_pseudo_ce_weight={self.direct_point_adapter_text_pseudo_ce_weight:g} "
+                f"adapter_pseudo_ce_splits={self.direct_point_adapter_text_pseudo_ce_split_list}"
             )
 
         if self.grounding_query_loss_weight > 0:
@@ -606,6 +1228,11 @@ class RadioGSTrainer:
             self._log(f"Frozen seg head params: {self._count_params(self.frozen_seg_head):.2f}M (frozen)")
         if self.seg_head is not None:
             self._log(f"Seg aux head params: {self._count_params(self.seg_head):.2f}M")
+        if self.point_summary_adapter is not None:
+            self._log(
+                f"Point summary adapter params: "
+                f"{self._count_params(self.point_summary_adapter):.2f}M"
+            )
         self._log(
             f"Best checkpoint metric: {self.best_metric_name} "
             f"(mode={self.best_metric_mode})"
@@ -759,6 +1386,14 @@ class RadioGSTrainer:
                     "name": "seg_head",
                 }
             )
+        if self.point_summary_adapter is not None:
+            param_groups.append(
+                {
+                    "params": self.point_summary_adapter.parameters(),
+                    "lr": getattr(config, "lr_point_summary_adapter", 1e-4),
+                    "name": "point_summary_adapter",
+                }
+            )
         return optim.AdamW(
             param_groups,
             weight_decay=getattr(config, "weight_decay", 1e-5),
@@ -844,6 +1479,121 @@ class RadioGSTrainer:
     # ------------------------------------------------------------------
     # Dataset
     # ------------------------------------------------------------------
+
+    def _load_direct_point_pool(self, config: RadioGSConfig) -> Optional[torch.Tensor]:
+        """Load optional non-Gaussian 3-D points for direct point distillation."""
+        if self.direct_point_source == "gaussian":
+            return None
+
+        scene_root = resolve_scene_root(config)
+        scene = getattr(config, "scene", Path(scene_root).name)
+        explicit_path = getattr(config, "direct_point_ply_path", "") or ""
+        if explicit_path:
+            ply_path = Path(str(explicit_path).format(scene=scene))
+        elif self.direct_point_source == "label_ply":
+            ply_path = resolve_scannet_label_ply(scene_root, scene)
+        else:
+            ply_path = Path(scene_root) / "points3d.ply"
+
+        if not ply_path.exists():
+            raise FileNotFoundError(
+                f"direct_point_source={self.direct_point_source} requested, "
+                f"but point PLY does not exist: {ply_path}"
+            )
+        points, labels = read_ply_xyz_labels(ply_path)
+        if points.numel() == 0:
+            raise ValueError(f"Direct point PLY has no vertices: {ply_path}")
+        points = points.to(device=self.device, dtype=torch.float32).contiguous()
+        if labels is not None:
+            self.direct_point_pool_labels = labels.to(
+                device=self.device, dtype=torch.long
+            ).contiguous()
+        self._log(
+            f"Direct point supervision source: {self.direct_point_source} "
+            f"({points.shape[0]} points from {ply_path}, "
+            f"labels={'yes' if self.direct_point_pool_labels is not None else 'no'})"
+        )
+        return points
+
+    def _load_direct_point_teacher_cache(self, config: RadioGSConfig) -> None:
+        """Load optional pre-aggregated multiview RADIO teacher point features."""
+        cache_raw = str(getattr(config, "direct_point_teacher_cache", "") or "")
+        if not cache_raw:
+            return
+        scene_root = resolve_scene_root(config)
+        scene = getattr(config, "scene", Path(scene_root).name)
+        cache_path = Path(cache_raw.format(scene=scene))
+        if not cache_path.is_absolute():
+            cache_path = Path.cwd() / cache_path
+        if not cache_path.exists():
+            raise FileNotFoundError(f"direct_point_teacher_cache not found: {cache_path}")
+
+        payload = torch.load(cache_path, map_location="cpu")
+        if not isinstance(payload, dict):
+            raise ValueError(f"Teacher cache must be a dict payload: {cache_path}")
+        if "features" not in payload:
+            raise KeyError(f"Teacher cache missing 'features': {cache_path}")
+
+        features = torch.as_tensor(payload["features"], dtype=torch.float32)
+        if features.dim() != 2:
+            raise ValueError(
+                f"Teacher cache features must be [N,C], got {tuple(features.shape)}"
+            )
+        num_points = int(features.shape[0])
+        xyz_payload = payload.get("xyz")
+        if xyz_payload is not None:
+            xyz = torch.as_tensor(xyz_payload, dtype=torch.float32)
+            if xyz.shape != (num_points, 3):
+                raise ValueError(
+                    "Teacher cache xyz must match features as [N,3], got "
+                    f"{tuple(xyz.shape)} for {tuple(features.shape)}"
+                )
+            xyz = xyz.to(device=self.device, dtype=torch.float32).contiguous()
+            if self.direct_point_pool is None:
+                self.direct_point_pool = xyz
+            elif int(self.direct_point_pool.shape[0]) != num_points:
+                raise ValueError(
+                    "Teacher cache point count does not match direct point pool: "
+                    f"{num_points} vs {int(self.direct_point_pool.shape[0])}"
+                )
+
+        labels_payload = payload.get("labels")
+        if labels_payload is not None and self.direct_point_pool_labels is None:
+            labels = torch.as_tensor(labels_payload, dtype=torch.long)
+            if labels.shape[0] != num_points:
+                raise ValueError(
+                    f"Teacher cache labels length {labels.shape[0]} does not match {num_points}"
+                )
+            self.direct_point_pool_labels = labels.to(self.device).contiguous()
+
+        valid_payload = payload.get("valid")
+        if valid_payload is None:
+            valid = torch.ones(num_points, dtype=torch.bool)
+        else:
+            valid = torch.as_tensor(valid_payload, dtype=torch.bool)
+            if valid.shape[0] != num_points:
+                raise ValueError(
+                    f"Teacher cache valid length {valid.shape[0]} does not match {num_points}"
+                )
+        counts_payload = payload.get("view_counts")
+        if counts_payload is None:
+            view_counts = valid.long()
+        else:
+            view_counts = torch.as_tensor(counts_payload, dtype=torch.long)
+            if view_counts.shape[0] != num_points:
+                raise ValueError(
+                    "Teacher cache view_counts length "
+                    f"{view_counts.shape[0]} does not match {num_points}"
+                )
+
+        self.direct_point_teacher_features = features.to(self.device).contiguous()
+        self.direct_point_teacher_valid = valid.to(self.device).contiguous()
+        self.direct_point_teacher_view_counts = view_counts.to(self.device).contiguous()
+        self._log(
+            "Loaded direct point teacher cache: "
+            f"{cache_path} ({num_points} points, dim={features.shape[1]}, "
+            f"valid={int(valid.sum())}/{num_points})"
+        )
 
     def build_dataset(
         self, config: RadioGSConfig
@@ -1027,6 +1777,31 @@ class RadioGSTrainer:
             "frozen_depth": 0.0,
             "seg_aux": 0.0,
             "frozen_seg": 0.0,
+            "direct_point": 0.0,
+            "direct_point_valid": 0.0,
+            "direct_point_text": 0.0,
+            "direct_point_text_valid": 0.0,
+            "direct_point_text_acc": 0.0,
+            "direct_point_adapter_text": 0.0,
+            "direct_point_adapter_text_valid": 0.0,
+            "direct_point_adapter_text_acc": 0.0,
+            "direct_point_text_distill": 0.0,
+            "direct_point_text_distill_valid": 0.0,
+            "direct_point_text_distill_teacher_conf": 0.0,
+            "direct_point_text_distill_agreement": 0.0,
+            "direct_point_text_pseudo_ce": 0.0,
+            "direct_point_text_pseudo_ce_valid": 0.0,
+            "direct_point_text_pseudo_ce_teacher_conf": 0.0,
+            "direct_point_text_pseudo_ce_agreement": 0.0,
+            "direct_point_adapter_text_distill": 0.0,
+            "direct_point_adapter_text_distill_valid": 0.0,
+            "direct_point_adapter_text_distill_teacher_conf": 0.0,
+            "direct_point_adapter_text_distill_agreement": 0.0,
+            "direct_point_adapter_text_pseudo_ce": 0.0,
+            "direct_point_adapter_text_pseudo_ce_valid": 0.0,
+            "direct_point_adapter_text_pseudo_ce_teacher_conf": 0.0,
+            "direct_point_adapter_text_pseudo_ce_agreement": 0.0,
+            "direct_point_adapter_decoder_anchor": 0.0,
             "siglip_align": 0.0,
             "summary_align": 0.0,
             "ground_query": 0.0,
@@ -1274,6 +2049,31 @@ class RadioGSTrainer:
                 l_geom_edge = torch.tensor(0.0, device=self.device)
                 l_semantic_aux = torch.tensor(0.0, device=self.device)
                 l_semantic_adaptor_reg = torch.tensor(0.0, device=self.device)
+                l_direct_point = torch.tensor(0.0, device=self.device)
+                direct_point_valid = torch.tensor(0.0, device=self.device)
+                direct_point_text = torch.tensor(0.0, device=self.device)
+                direct_point_text_valid = torch.tensor(0.0, device=self.device)
+                direct_point_text_acc = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_valid = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_acc = torch.tensor(0.0, device=self.device)
+                direct_point_text_distill = torch.tensor(0.0, device=self.device)
+                direct_point_text_distill_valid = torch.tensor(0.0, device=self.device)
+                direct_point_text_distill_teacher_conf = torch.tensor(0.0, device=self.device)
+                direct_point_text_distill_agreement = torch.tensor(0.0, device=self.device)
+                direct_point_text_pseudo_ce = torch.tensor(0.0, device=self.device)
+                direct_point_text_pseudo_ce_valid = torch.tensor(0.0, device=self.device)
+                direct_point_text_pseudo_ce_teacher_conf = torch.tensor(0.0, device=self.device)
+                direct_point_text_pseudo_ce_agreement = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_distill = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_distill_valid = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_distill_teacher_conf = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_distill_agreement = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_pseudo_ce = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_pseudo_ce_valid = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_pseudo_ce_teacher_conf = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_text_pseudo_ce_agreement = torch.tensor(0.0, device=self.device)
+                direct_point_adapter_decoder_anchor = torch.tensor(0.0, device=self.device)
                 l_ground_query = torch.tensor(0.0, device=self.device)
                 ground_query_acc = torch.tensor(0.0, device=self.device)
                 ground_query_valid = torch.tensor(0.0, device=self.device)
@@ -1326,6 +2126,96 @@ class RadioGSTrainer:
                     l_semantic_adaptor_reg = (
                         hybrid_aux["semantic_confidence"].float() - 1.0
                     ).pow(2).mean()
+                if self.direct_point_loss_weight > 0 and self.train_mode != "latent":
+                    direct_point_stats = self._compute_direct_point_loss(
+                        batch=batch,
+                        render_result=result,
+                        target_features=gt_radio_rs,
+                    )
+                    l_direct_point = direct_point_stats["loss"]
+                    direct_point_valid = direct_point_stats["valid_ratio"]
+                    direct_point_text = direct_point_stats.get("text", direct_point_text)
+                    direct_point_text_valid = direct_point_stats.get(
+                        "text_valid_ratio", direct_point_text_valid
+                    )
+                    direct_point_text_acc = direct_point_stats.get(
+                        "text_acc", direct_point_text_acc
+                    )
+                    direct_point_adapter_text = direct_point_stats.get(
+                        "adapter_text", direct_point_adapter_text
+                    )
+                    direct_point_adapter_text_valid = direct_point_stats.get(
+                        "adapter_text_valid_ratio", direct_point_adapter_text_valid
+                    )
+                    direct_point_adapter_text_acc = direct_point_stats.get(
+                        "adapter_text_acc", direct_point_adapter_text_acc
+                    )
+                    direct_point_text_distill = direct_point_stats.get(
+                        "text_distill", direct_point_text_distill
+                    )
+                    direct_point_text_distill_valid = direct_point_stats.get(
+                        "text_distill_valid_ratio", direct_point_text_distill_valid
+                    )
+                    direct_point_text_distill_teacher_conf = direct_point_stats.get(
+                        "text_distill_teacher_conf",
+                        direct_point_text_distill_teacher_conf,
+                    )
+                    direct_point_text_distill_agreement = direct_point_stats.get(
+                        "text_distill_agreement",
+                        direct_point_text_distill_agreement,
+                    )
+                    direct_point_text_pseudo_ce = direct_point_stats.get(
+                        "text_pseudo_ce",
+                        direct_point_text_pseudo_ce,
+                    )
+                    direct_point_text_pseudo_ce_valid = direct_point_stats.get(
+                        "text_pseudo_ce_valid_ratio",
+                        direct_point_text_pseudo_ce_valid,
+                    )
+                    direct_point_text_pseudo_ce_teacher_conf = direct_point_stats.get(
+                        "text_pseudo_ce_teacher_conf",
+                        direct_point_text_pseudo_ce_teacher_conf,
+                    )
+                    direct_point_text_pseudo_ce_agreement = direct_point_stats.get(
+                        "text_pseudo_ce_agreement",
+                        direct_point_text_pseudo_ce_agreement,
+                    )
+                    direct_point_adapter_text_distill = direct_point_stats.get(
+                        "adapter_text_distill",
+                        direct_point_adapter_text_distill,
+                    )
+                    direct_point_adapter_text_distill_valid = direct_point_stats.get(
+                        "adapter_text_distill_valid_ratio",
+                        direct_point_adapter_text_distill_valid,
+                    )
+                    direct_point_adapter_text_distill_teacher_conf = direct_point_stats.get(
+                        "adapter_text_distill_teacher_conf",
+                        direct_point_adapter_text_distill_teacher_conf,
+                    )
+                    direct_point_adapter_text_distill_agreement = direct_point_stats.get(
+                        "adapter_text_distill_agreement",
+                        direct_point_adapter_text_distill_agreement,
+                    )
+                    direct_point_adapter_text_pseudo_ce = direct_point_stats.get(
+                        "adapter_text_pseudo_ce",
+                        direct_point_adapter_text_pseudo_ce,
+                    )
+                    direct_point_adapter_text_pseudo_ce_valid = direct_point_stats.get(
+                        "adapter_text_pseudo_ce_valid_ratio",
+                        direct_point_adapter_text_pseudo_ce_valid,
+                    )
+                    direct_point_adapter_text_pseudo_ce_teacher_conf = direct_point_stats.get(
+                        "adapter_text_pseudo_ce_teacher_conf",
+                        direct_point_adapter_text_pseudo_ce_teacher_conf,
+                    )
+                    direct_point_adapter_text_pseudo_ce_agreement = direct_point_stats.get(
+                        "adapter_text_pseudo_ce_agreement",
+                        direct_point_adapter_text_pseudo_ce_agreement,
+                    )
+                    direct_point_adapter_decoder_anchor = direct_point_stats.get(
+                        "adapter_decoder_anchor",
+                        direct_point_adapter_decoder_anchor,
+                    )
 
                 adaptor_w = getattr(self.cfg, "adaptor_weight", 0.1)
                 tv_w = getattr(self.cfg, "tv_weight", 0.01)
@@ -1342,6 +2232,8 @@ class RadioGSTrainer:
                     loss = loss + self.hybrid_semantic_aux_weight * l_semantic_aux
                 if self.hybrid_semantic_adaptor_reg_weight > 0:
                     loss = loss + self.hybrid_semantic_adaptor_reg_weight * l_semantic_adaptor_reg
+                if self.direct_point_loss_weight > 0:
+                    loss = loss + self.direct_point_loss_weight * l_direct_point
                 if self.grounding_query_loss_weight > 0:
                     loss = loss + self.grounding_query_loss_weight * l_ground_query
                 if self.feat_norm_weight > 0:
@@ -1398,6 +2290,59 @@ class RadioGSTrainer:
             loss_accum["frozen_depth"] += frozen_depth_losses["total"].item()
             loss_accum["seg_aux"] += seg_losses["total"].item()
             loss_accum["frozen_seg"] += frozen_seg_losses["total"].item()
+            loss_accum["direct_point"] += l_direct_point.item()
+            loss_accum["direct_point_valid"] += direct_point_valid.item()
+            loss_accum["direct_point_text"] += direct_point_text.item()
+            loss_accum["direct_point_text_valid"] += direct_point_text_valid.item()
+            loss_accum["direct_point_text_acc"] += direct_point_text_acc.item()
+            loss_accum["direct_point_adapter_text"] += direct_point_adapter_text.item()
+            loss_accum["direct_point_adapter_text_valid"] += direct_point_adapter_text_valid.item()
+            loss_accum["direct_point_adapter_text_acc"] += direct_point_adapter_text_acc.item()
+            loss_accum["direct_point_text_distill"] += direct_point_text_distill.item()
+            loss_accum["direct_point_text_distill_valid"] += direct_point_text_distill_valid.item()
+            loss_accum["direct_point_text_distill_teacher_conf"] += (
+                direct_point_text_distill_teacher_conf.item()
+            )
+            loss_accum["direct_point_text_distill_agreement"] += (
+                direct_point_text_distill_agreement.item()
+            )
+            loss_accum["direct_point_text_pseudo_ce"] += (
+                direct_point_text_pseudo_ce.item()
+            )
+            loss_accum["direct_point_text_pseudo_ce_valid"] += (
+                direct_point_text_pseudo_ce_valid.item()
+            )
+            loss_accum["direct_point_text_pseudo_ce_teacher_conf"] += (
+                direct_point_text_pseudo_ce_teacher_conf.item()
+            )
+            loss_accum["direct_point_text_pseudo_ce_agreement"] += (
+                direct_point_text_pseudo_ce_agreement.item()
+            )
+            loss_accum["direct_point_adapter_text_distill"] += direct_point_adapter_text_distill.item()
+            loss_accum["direct_point_adapter_text_distill_valid"] += (
+                direct_point_adapter_text_distill_valid.item()
+            )
+            loss_accum["direct_point_adapter_text_distill_teacher_conf"] += (
+                direct_point_adapter_text_distill_teacher_conf.item()
+            )
+            loss_accum["direct_point_adapter_text_distill_agreement"] += (
+                direct_point_adapter_text_distill_agreement.item()
+            )
+            loss_accum["direct_point_adapter_text_pseudo_ce"] += (
+                direct_point_adapter_text_pseudo_ce.item()
+            )
+            loss_accum["direct_point_adapter_text_pseudo_ce_valid"] += (
+                direct_point_adapter_text_pseudo_ce_valid.item()
+            )
+            loss_accum["direct_point_adapter_text_pseudo_ce_teacher_conf"] += (
+                direct_point_adapter_text_pseudo_ce_teacher_conf.item()
+            )
+            loss_accum["direct_point_adapter_text_pseudo_ce_agreement"] += (
+                direct_point_adapter_text_pseudo_ce_agreement.item()
+            )
+            loss_accum["direct_point_adapter_decoder_anchor"] += (
+                direct_point_adapter_decoder_anchor.item()
+            )
             loss_accum["siglip_align"] += l_siglip.item()
             loss_accum["summary_align"] += l_summary.item()
             loss_accum["ground_query"] += l_ground_query.item()
@@ -1459,6 +2404,125 @@ class RadioGSTrainer:
                 )
                 self.writer.add_scalar(
                     "train/frozen_seg", frozen_seg_losses["total"].item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/direct_point", l_direct_point.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_valid", direct_point_valid.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text", direct_point_text.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_valid",
+                    direct_point_text_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_acc",
+                    direct_point_text_acc.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text",
+                    direct_point_adapter_text.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_valid",
+                    direct_point_adapter_text_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_acc",
+                    direct_point_adapter_text_acc.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_distill",
+                    direct_point_text_distill.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_distill_valid",
+                    direct_point_text_distill_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_distill_teacher_conf",
+                    direct_point_text_distill_teacher_conf.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_distill_agreement",
+                    direct_point_text_distill_agreement.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_pseudo_ce",
+                    direct_point_text_pseudo_ce.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_pseudo_ce_valid",
+                    direct_point_text_pseudo_ce_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_pseudo_ce_teacher_conf",
+                    direct_point_text_pseudo_ce_teacher_conf.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_text_pseudo_ce_agreement",
+                    direct_point_text_pseudo_ce_agreement.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_distill",
+                    direct_point_adapter_text_distill.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_distill_valid",
+                    direct_point_adapter_text_distill_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_distill_teacher_conf",
+                    direct_point_adapter_text_distill_teacher_conf.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_distill_agreement",
+                    direct_point_adapter_text_distill_agreement.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_pseudo_ce",
+                    direct_point_adapter_text_pseudo_ce.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_pseudo_ce_valid",
+                    direct_point_adapter_text_pseudo_ce_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_pseudo_ce_teacher_conf",
+                    direct_point_adapter_text_pseudo_ce_teacher_conf.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_text_pseudo_ce_agreement",
+                    direct_point_adapter_text_pseudo_ce_agreement.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_adapter_decoder_anchor",
+                    direct_point_adapter_decoder_anchor.item(),
+                    self.global_step,
                 )
                 self.writer.add_scalar(
                     "train/siglip_align", l_siglip.item(), self.global_step
@@ -1776,6 +2840,8 @@ class RadioGSTrainer:
             state["depth_head_state_dict"] = self.depth_head.state_dict()
         if self.seg_head is not None:
             state["seg_head_state_dict"] = self.seg_head.state_dict()
+        if self.point_summary_adapter is not None:
+            state["point_summary_adapter_state_dict"] = self.point_summary_adapter.state_dict()
         if not getattr(self.cfg, "skip_latest_checkpoint", False):
             torch.save(state, self.ckpt_dir / "latest.pth")
         if is_best:
@@ -2162,6 +3228,19 @@ class RadioGSTrainer:
             except RuntimeError as e:
                 self._log(
                     f"Seg head state_dict size mismatch, starting seg head from scratch: {e}"
+                )
+        if (
+            "point_summary_adapter_state_dict" in ckpt
+            and self.point_summary_adapter is not None
+        ):
+            try:
+                self.point_summary_adapter.load_state_dict(
+                    ckpt["point_summary_adapter_state_dict"], strict=False
+                )
+            except RuntimeError as e:
+                self._log(
+                    "Point summary adapter state_dict size mismatch, "
+                    f"starting adapter from scratch: {e}"
                 )
 
         if resume:
@@ -2643,6 +3722,660 @@ class RadioGSTrainer:
         projected = projected.permute(0, 2, 1).reshape(B, -1, H, W)
         return F.normalize(projected, dim=1)
 
+    def _subsample_direct_point_indices(
+        self,
+        source_indices: torch.Tensor,
+        sample_count: int,
+    ) -> torch.Tensor:
+        """Subsample visible direct-supervision points for the current batch."""
+        if source_indices.numel() <= sample_count:
+            return source_indices
+        strategy = getattr(self, "direct_point_sample_strategy", "uniform")
+        if strategy == "uniform":
+            return source_indices[:sample_count]
+
+        if strategy == "teacher_balanced":
+            source_labels = self._direct_point_teacher_pseudo_labels(source_indices)
+            if source_labels is None:
+                return source_indices[:sample_count]
+            class_ids = torch.unique(source_labels).detach().cpu().tolist()
+            class_ids = [int(class_id) for class_id in class_ids]
+            return self._balanced_subsample_by_labels(
+                source_indices,
+                source_labels.long(),
+                class_ids,
+                sample_count,
+            )
+
+        if strategy != "class_balanced":
+            return source_indices[:sample_count]
+
+        labels = getattr(self, "direct_point_pool_labels", None)
+        if labels is None:
+            return source_indices[:sample_count]
+        source_labels = labels[source_indices].long()
+        split_ids = [int(v) for v in getattr(self, "direct_point_text_split_ids", [])]
+        if split_ids:
+            class_ids = [
+                raw_id
+                for raw_id in split_ids
+                if bool((source_labels == raw_id).any().item())
+            ]
+        else:
+            present = torch.unique(source_labels[source_labels > 0]).detach().cpu().tolist()
+            class_ids = [int(raw_id) for raw_id in present]
+        if not class_ids:
+            return source_indices[:sample_count]
+
+        return self._balanced_subsample_by_labels(
+            source_indices,
+            source_labels,
+            class_ids,
+            sample_count,
+        )
+
+    def _balanced_subsample_by_labels(
+        self,
+        source_indices: torch.Tensor,
+        source_labels: torch.Tensor,
+        class_ids: list[int],
+        sample_count: int,
+    ) -> torch.Tensor:
+        """Subsample source indices approximately evenly over the provided labels."""
+        per_class = max(1, (sample_count + len(class_ids) - 1) // len(class_ids))
+        parts: list[torch.Tensor] = []
+        for raw_id in class_ids:
+            class_indices = source_indices[source_labels == int(raw_id)]
+            if class_indices.numel() == 0:
+                continue
+            if class_indices.numel() > per_class:
+                order = torch.randperm(class_indices.numel(), device=source_indices.device)[:per_class]
+                class_indices = class_indices[order]
+            parts.append(class_indices)
+        if not parts:
+            return source_indices[:sample_count]
+
+        sampled = torch.cat(parts, dim=0)
+        if sampled.numel() > sample_count:
+            order = torch.randperm(sampled.numel(), device=source_indices.device)[:sample_count]
+            sampled = sampled[order]
+        elif sampled.numel() < sample_count:
+            remaining_mask = ~torch.isin(source_indices, sampled)
+            remaining = source_indices[remaining_mask]
+            if remaining.numel() > 0:
+                take = min(sample_count - sampled.numel(), remaining.numel())
+                order = torch.randperm(remaining.numel(), device=source_indices.device)[:take]
+                sampled = torch.cat([sampled, remaining[order]], dim=0)
+        return sampled[:sample_count]
+
+    def _direct_point_teacher_pseudo_labels(
+        self,
+        source_indices: torch.Tensor,
+    ) -> Optional[torch.Tensor]:
+        """Return teacher text pseudo-labels for source indices without GT labels."""
+        teacher_features = getattr(self, "direct_point_teacher_features", None)
+        if (
+            teacher_features is None
+            or getattr(self, "siglip_summary_head", None) is None
+        ):
+            return None
+
+        cached = getattr(self, "direct_point_teacher_pseudo_label_cache", None)
+        if cached is not None and int(cached.shape[0]) == int(teacher_features.shape[0]):
+            return cached.to(source_indices.device)[source_indices].long()
+
+        banks = getattr(self, "direct_point_text_pseudo_ce_banks", None) or []
+        if banks:
+            _split, _split_ids, text_embeddings = banks[0]
+        else:
+            text_embeddings = getattr(self, "direct_point_text_embeddings", None)
+            if text_embeddings is None or not getattr(self, "direct_point_text_split_ids", []):
+                return None
+
+        text = F.normalize(text_embeddings.to(teacher_features.device).float(), dim=-1)
+        chunk_size = max(
+            1,
+            int(getattr(self, "direct_point_teacher_pseudo_label_chunk_size", 8192)),
+        )
+        logit_scale = float(getattr(self, "direct_point_text_pseudo_ce_logit_scale", 1.0))
+        logits_parts: list[torch.Tensor] = []
+        with torch.no_grad():
+            for start in range(0, int(teacher_features.shape[0]), chunk_size):
+                end = min(start + chunk_size, int(teacher_features.shape[0]))
+                features = teacher_features[start:end].float()
+                feature_map = features[:, :, None, None].contiguous()
+                summary_map = self._project_summary_head_features(feature_map)
+                summary = self._direct_point_map_to_rows(summary_map)
+                logits_parts.append((summary.float() @ text.T) * logit_scale)
+            logits = torch.cat(logits_parts, dim=0)
+            if bool(getattr(self, "direct_point_text_pseudo_ce_center_logits", False)):
+                logits = logits - logits.mean(dim=0, keepdim=True)
+            labels = logits.argmax(dim=-1).long()
+        self.direct_point_teacher_pseudo_label_cache = labels
+        return labels.to(source_indices.device)[source_indices].long()
+
+    def _decode_direct_point_map(
+        self,
+        compact: torch.Tensor,
+        target_points: torch.Tensor,
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Decode compact point features without coupling points in one pseudo image."""
+        if hasattr(self.codec, "decode_points"):
+            decoded_rows = self.codec.decode_points(compact.float())
+            return (
+                decoded_rows[:, :, None, None].contiguous(),
+                target_points.float()[:, :, None, None].contiguous(),
+            )
+        compact_map = compact.T.reshape(1, compact.shape[1], compact.shape[0], 1)
+        target_map = target_points.T.reshape(
+            1,
+            target_points.shape[1],
+            target_points.shape[0],
+            1,
+        )
+        return self.codec.decoder(compact_map.float()), target_map.float()
+
+    def _num_model_gaussians(self) -> int:
+        value = getattr(self.model, "num_gaussians", None)
+        if callable(value):
+            value = value()
+        if value is None:
+            return int(self.model.get_xyz().shape[0])
+        return int(value)
+
+    @staticmethod
+    def _direct_point_map_to_rows(point_map: torch.Tensor) -> torch.Tensor:
+        """Convert legacy [1,C,N,1] or pointwise [N,C,1,1] direct maps to [N,C]."""
+        if point_map.ndim != 4:
+            raise ValueError(f"Expected [B, C, H, W] point map, got {tuple(point_map.shape)}")
+        if point_map.shape[0] == 1 and point_map.shape[-1] == 1:
+            return point_map.squeeze(0).squeeze(-1).T.contiguous()
+        if point_map.shape[-2:] == (1, 1):
+            return point_map[:, :, 0, 0].contiguous()
+        raise ValueError(f"Unsupported direct point map shape: {tuple(point_map.shape)}")
+
+    def _compute_direct_point_loss(
+        self,
+        batch: Dict[str, torch.Tensor],
+        render_result: Dict[str, torch.Tensor],
+        target_features: Optional[torch.Tensor],
+    ) -> Dict[str, torch.Tensor]:
+        zero = (
+            target_features.sum() * 0.0
+            if target_features is not None
+            else torch.tensor(0.0, device=self.device)
+        )
+        stats = {
+            "loss": zero,
+            "valid_ratio": zero,
+            "summary": zero,
+            "summary_adapter": zero,
+            "text": zero,
+            "text_valid_ratio": zero,
+            "text_acc": zero,
+            "adapter_text": zero,
+            "adapter_text_valid_ratio": zero,
+            "adapter_text_acc": zero,
+            "text_distill": zero,
+            "text_distill_valid_ratio": zero,
+            "text_distill_teacher_conf": zero,
+            "text_distill_agreement": zero,
+            "text_pseudo_ce": zero,
+            "text_pseudo_ce_valid_ratio": zero,
+            "text_pseudo_ce_teacher_conf": zero,
+            "text_pseudo_ce_agreement": zero,
+            "adapter_text_distill": zero,
+            "adapter_text_distill_valid_ratio": zero,
+            "adapter_text_distill_teacher_conf": zero,
+            "adapter_text_distill_agreement": zero,
+            "adapter_text_pseudo_ce": zero,
+            "adapter_text_pseudo_ce_valid_ratio": zero,
+            "adapter_text_pseudo_ce_teacher_conf": zero,
+            "adapter_text_pseudo_ce_agreement": zero,
+            "adapter_decoder_anchor": zero,
+        }
+        teacher_features = getattr(self, "direct_point_teacher_features", None)
+        has_teacher_cache = teacher_features is not None
+        if (
+            self.direct_point_loss_weight <= 0
+            or (target_features is None and not has_teacher_cache)
+            or not self._is_hybrid
+            or self.direct_point_sample_count <= 0
+        ):
+            return stats
+
+        points_all = (
+            self.direct_point_pool
+            if self.direct_point_pool is not None
+            else self.model.get_xyz().to(device=self.device, dtype=torch.float32)
+        )
+        num_source_points = int(points_all.shape[0])
+        if num_source_points <= 0:
+            return stats
+        sample_count = min(self.direct_point_sample_count, num_source_points)
+
+        if has_teacher_cache:
+            assert teacher_features is not None
+            if int(teacher_features.shape[0]) != num_source_points:
+                raise RuntimeError(
+                    "direct_point_teacher_cache point count does not match direct point pool: "
+                    f"{int(teacher_features.shape[0])} vs {num_source_points}"
+                )
+            with torch.no_grad():
+                source_indices = torch.arange(num_source_points, device=self.device)
+                teacher_valid = getattr(self, "direct_point_teacher_valid", None)
+                if teacher_valid is not None:
+                    source_indices = source_indices[teacher_valid.to(self.device).bool()]
+                if source_indices.numel() == 0:
+                    return stats
+                sample_count = min(sample_count, int(source_indices.numel()))
+                if source_indices.numel() > sample_count:
+                    order = torch.randperm(source_indices.numel(), device=self.device)
+                    source_indices = source_indices[order]
+                indices = self._subsample_direct_point_indices(source_indices, sample_count)
+                points = points_all[indices]
+                point_targets = teacher_features[indices].float()
+                valid = torch.ones(indices.shape[0], device=self.device, dtype=torch.bool)
+                view_counts_all = getattr(self, "direct_point_teacher_view_counts", None)
+                if view_counts_all is None:
+                    view_counts = valid.long()
+                else:
+                    view_counts = view_counts_all[indices].long()
+        else:
+            assert target_features is not None
+            target = target_features.detach()
+            spatial_size = target.shape[-2:]
+            depth_map = self._canonicalize_spatial_map(
+                render_result.get("depth_map"),
+                batch_size=target.shape[0],
+                spatial_size=spatial_size,
+            )
+            alpha_map = self._canonicalize_spatial_map(
+                render_result.get("alpha_map"),
+                batch_size=target.shape[0],
+                spatial_size=spatial_size,
+            )
+            K = self.renderer.K.float()
+            if spatial_size != (self.renderer.image_height, self.renderer.image_width):
+                scale_x = float(spatial_size[1]) / float(self.renderer.image_width)
+                scale_y = float(spatial_size[0]) / float(self.renderer.image_height)
+                K = K.clone()
+                K[0, 0] *= scale_x
+                K[0, 2] *= scale_x
+                K[1, 1] *= scale_y
+                K[1, 2] *= scale_y
+
+            with torch.no_grad():
+                candidate_count = min(num_source_points, max(sample_count, sample_count * 64))
+                candidate_indices = torch.randperm(num_source_points, device=self.device)[:candidate_count]
+                candidate_points = points_all[candidate_indices]
+                visible_rel, _ = select_visible_gaussian_indices(
+                    candidate_points,
+                    batch["pose_w2c"].to(self.device).float(),
+                    K,
+                    image_height=spatial_size[0],
+                    image_width=spatial_size[1],
+                    sample_count=sample_count,
+                    depth_map=depth_map,
+                    alpha_map=alpha_map,
+                    depth_tolerance=self.direct_point_depth_tolerance,
+                    relative_depth_tolerance=self.direct_point_relative_depth_tolerance,
+                    alpha_threshold=self.direct_point_alpha_threshold,
+                )
+                if visible_rel.numel() > 0:
+                    indices = candidate_indices[visible_rel]
+                else:
+                    indices = candidate_indices[:sample_count]
+                indices = self._subsample_direct_point_indices(indices, sample_count)
+                points = points_all[indices]
+                point_targets, valid, view_counts = sample_multiview_radio_targets(
+                    points,
+                    target.float(),
+                    batch["pose_w2c"].to(self.device).float(),
+                    K,
+                    depth_map=depth_map,
+                    alpha_map=alpha_map,
+                    depth_tolerance=self.direct_point_depth_tolerance,
+                    relative_depth_tolerance=self.direct_point_relative_depth_tolerance,
+                    alpha_threshold=self.direct_point_alpha_threshold,
+                )
+        valid_ratio = view_counts.float().gt(0).float().mean()
+        stats["valid_ratio"] = valid_ratio
+        if not valid.any():
+            return stats
+
+        valid_indices = indices[valid]
+        point_labels = None
+        direct_point_pool_labels = getattr(self, "direct_point_pool_labels", None)
+        if direct_point_pool_labels is not None:
+            point_labels = direct_point_pool_labels[valid_indices]
+        direct_point_feature_key = getattr(self, "direct_point_feature_key", "features")
+        if self.direct_point_query_mode == "knn":
+            query_kwargs = {"k": self.direct_point_k}
+            if getattr(self, "direct_point_candidate_k", 0) > 0:
+                query_kwargs["candidate_k"] = self.direct_point_candidate_k
+            if direct_point_feature_key == "features":
+                compact = self.model.query_compact_points(
+                    points[valid],
+                    **query_kwargs,
+                )
+            else:
+                compact_aux = self.model.query_compact_points(
+                    points[valid],
+                    return_aux=True,
+                    **query_kwargs,
+                )
+                if direct_point_feature_key not in compact_aux:
+                    raise KeyError(
+                        f"Requested direct_point_feature_key='{direct_point_feature_key}', "
+                        f"available={sorted(compact_aux.keys())}"
+                    )
+                compact = compact_aux[direct_point_feature_key]
+        else:
+            if self.direct_point_pool is not None:
+                model_count = self._num_model_gaussians()
+                if num_source_points != model_count:
+                    raise RuntimeError(
+                        "direct_point_query_mode=gaussian_index with "
+                        "direct_point_source=label_ply requires row-aligned point "
+                        f"and Gaussian counts, got {num_source_points} points vs "
+                        f"{model_count} Gaussians"
+                    )
+            gaussian_points = (
+                points[valid]
+                if getattr(
+                    self,
+                    "direct_point_gaussian_position_mode",
+                    "gaussian_center",
+                )
+                == "label_point"
+                else None
+            )
+            if direct_point_feature_key == "features":
+                if gaussian_points is None:
+                    compact = self.model.query_gaussian_points(valid_indices)
+                else:
+                    compact = self.model.query_gaussian_points(
+                        valid_indices,
+                        points_xyz=gaussian_points,
+                    )
+            else:
+                if gaussian_points is None:
+                    compact_aux = self.model.query_gaussian_points(
+                        valid_indices,
+                        return_aux=True,
+                    )
+                else:
+                    compact_aux = self.model.query_gaussian_points(
+                        valid_indices,
+                        points_xyz=gaussian_points,
+                        return_aux=True,
+                    )
+                if direct_point_feature_key not in compact_aux:
+                    raise KeyError(
+                        f"Requested direct_point_feature_key='{direct_point_feature_key}', "
+                        f"available={sorted(compact_aux.keys())}"
+                    )
+                compact = compact_aux[direct_point_feature_key]
+        decoded_points, target_map = self._decode_direct_point_map(
+            compact,
+            point_targets[valid],
+        )
+        distill = self.distill_loss_fn(decoded_points, target_map.float())
+        summary_loss = decoded_points.sum() * 0.0
+        pred_summary = None
+        if (
+            self.direct_point_summary_alignment_weight > 0
+            and self.siglip_summary_head is not None
+        ):
+            pred_summary = self._project_summary_head_features(decoded_points)
+            with torch.no_grad():
+                target_summary = self._project_summary_head_features(target_map.float())
+            summary_loss = 1.0 - (pred_summary * target_summary).sum(dim=1).mean()
+        else:
+            target_summary = None
+        adapter_loss = decoded_points.sum() * 0.0
+        pred_summary_points = None
+        if (
+            getattr(self, "direct_point_summary_adapter_weight", 0.0) > 0
+            and getattr(self, "point_summary_adapter", None) is not None
+            and self.siglip_summary_head is not None
+        ):
+            pred_summary_points = F.normalize(
+                self.point_summary_adapter(compact.float()),
+                dim=-1,
+            )
+            with torch.no_grad():
+                target_summary_map = self._project_summary_head_features(target_map.float())
+                target_summary_points = self._direct_point_map_to_rows(target_summary_map)
+            adapter_loss = 1.0 - (pred_summary_points * target_summary_points).sum(dim=-1).mean()
+        text_loss = decoded_points.sum() * 0.0
+        text_valid_ratio = text_loss.detach()
+        text_acc = text_loss.detach()
+        if (
+            getattr(self, "direct_point_text_loss_weight", 0.0) > 0
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary is None:
+                pred_summary = self._project_summary_head_features(decoded_points)
+            pred_summary_text = self._direct_point_map_to_rows(pred_summary)
+            text_loss, text_valid_ratio, text_acc = self._compute_direct_point_text_ce(
+                pred_summary_text,
+                point_labels,
+            )
+        adapter_text_loss = decoded_points.sum() * 0.0
+        adapter_text_valid_ratio = adapter_text_loss.detach()
+        adapter_text_acc = adapter_text_loss.detach()
+        if (
+            getattr(self, "direct_point_adapter_text_loss_weight", 0.0) > 0
+            and getattr(self, "point_summary_adapter", None) is not None
+        ):
+            if pred_summary_points is None:
+                pred_summary_points = F.normalize(
+                    self.point_summary_adapter(compact.float()),
+                    dim=-1,
+                )
+            (
+                adapter_text_loss,
+                adapter_text_valid_ratio,
+                adapter_text_acc,
+            ) = self._compute_direct_point_text_ce(
+                pred_summary_points,
+                point_labels,
+            )
+        text_distill_loss = decoded_points.sum() * 0.0
+        text_distill_valid_ratio = text_distill_loss.detach()
+        text_distill_teacher_conf = text_distill_loss.detach()
+        text_distill_agreement = text_distill_loss.detach()
+        text_pseudo_ce_loss = decoded_points.sum() * 0.0
+        text_pseudo_ce_valid_ratio = text_pseudo_ce_loss.detach()
+        text_pseudo_ce_teacher_conf = text_pseudo_ce_loss.detach()
+        text_pseudo_ce_agreement = text_pseudo_ce_loss.detach()
+        adapter_text_distill_loss = decoded_points.sum() * 0.0
+        adapter_text_distill_valid_ratio = adapter_text_distill_loss.detach()
+        adapter_text_distill_teacher_conf = adapter_text_distill_loss.detach()
+        adapter_text_distill_agreement = adapter_text_distill_loss.detach()
+        adapter_text_pseudo_ce_loss = decoded_points.sum() * 0.0
+        adapter_text_pseudo_ce_valid_ratio = adapter_text_pseudo_ce_loss.detach()
+        adapter_text_pseudo_ce_teacher_conf = adapter_text_pseudo_ce_loss.detach()
+        adapter_text_pseudo_ce_agreement = adapter_text_pseudo_ce_loss.detach()
+        adapter_decoder_anchor_loss = decoded_points.sum() * 0.0
+        if (
+            getattr(self, "direct_point_text_distill_weight", 0.0) > 0
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary is None:
+                pred_summary = self._project_summary_head_features(decoded_points)
+            pred_summary_points_for_distill = self._direct_point_map_to_rows(pred_summary)
+            if target_summary is None:
+                with torch.no_grad():
+                    target_summary = self._project_summary_head_features(target_map.float())
+            target_summary_points = self._direct_point_map_to_rows(target_summary)
+            (
+                text_distill_loss,
+                text_distill_valid_ratio,
+                text_distill_teacher_conf,
+                text_distill_agreement,
+            ) = self._compute_direct_point_text_distill_kl(
+                pred_summary_points_for_distill,
+                target_summary_points,
+            )
+        if (
+            getattr(self, "direct_point_text_pseudo_ce_weight", 0.0) > 0
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary is None:
+                pred_summary = self._project_summary_head_features(decoded_points)
+            pred_summary_points_for_pseudo_ce = self._direct_point_map_to_rows(pred_summary)
+            if target_summary is None:
+                with torch.no_grad():
+                    target_summary = self._project_summary_head_features(target_map.float())
+            target_summary_points = self._direct_point_map_to_rows(target_summary)
+            (
+                text_pseudo_ce_loss,
+                text_pseudo_ce_valid_ratio,
+                text_pseudo_ce_teacher_conf,
+                text_pseudo_ce_agreement,
+            ) = self._compute_multi_split_direct_point_text_pseudo_ce(
+                pred_summary_points_for_pseudo_ce,
+                target_summary_points,
+                logit_scale=getattr(self, "direct_point_text_pseudo_ce_logit_scale", 1.0),
+                confidence_threshold=getattr(
+                    self,
+                    "direct_point_text_pseudo_ce_confidence_threshold",
+                    0.0,
+                ),
+                center_logits=getattr(
+                    self,
+                    "direct_point_text_pseudo_ce_center_logits",
+                    False,
+                ),
+                banks=getattr(self, "direct_point_text_pseudo_ce_banks", []),
+            )
+        if (
+            getattr(self, "direct_point_adapter_text_distill_weight", 0.0) > 0
+            and getattr(self, "point_summary_adapter", None) is not None
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary_points is None:
+                pred_summary_points = F.normalize(
+                    self.point_summary_adapter(compact.float()),
+                    dim=-1,
+                )
+            if target_summary is None:
+                with torch.no_grad():
+                    target_summary = self._project_summary_head_features(target_map.float())
+            target_summary_points = self._direct_point_map_to_rows(target_summary)
+            (
+                adapter_text_distill_loss,
+                adapter_text_distill_valid_ratio,
+                adapter_text_distill_teacher_conf,
+                adapter_text_distill_agreement,
+            ) = self._compute_direct_point_text_distill_kl(
+                pred_summary_points,
+                target_summary_points,
+            )
+        if (
+            getattr(self, "direct_point_adapter_text_pseudo_ce_weight", 0.0) > 0
+            and getattr(self, "point_summary_adapter", None) is not None
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary_points is None:
+                pred_summary_points = F.normalize(
+                    self.point_summary_adapter(compact.float()),
+                    dim=-1,
+                )
+            if target_summary is None:
+                with torch.no_grad():
+                    target_summary = self._project_summary_head_features(target_map.float())
+            target_summary_points = self._direct_point_map_to_rows(target_summary)
+            (
+                adapter_text_pseudo_ce_loss,
+                adapter_text_pseudo_ce_valid_ratio,
+                adapter_text_pseudo_ce_teacher_conf,
+                adapter_text_pseudo_ce_agreement,
+            ) = self._compute_multi_split_direct_point_text_pseudo_ce(
+                pred_summary_points,
+                target_summary_points,
+                logit_scale=getattr(
+                    self,
+                    "direct_point_adapter_text_pseudo_ce_logit_scale",
+                    1.0,
+                ),
+                confidence_threshold=getattr(
+                    self,
+                    "direct_point_adapter_text_pseudo_ce_confidence_threshold",
+                    0.0,
+                ),
+                center_logits=getattr(
+                    self,
+                    "direct_point_adapter_text_pseudo_ce_center_logits",
+                    False,
+                ),
+                banks=getattr(self, "direct_point_adapter_text_pseudo_ce_banks", []),
+            )
+        if (
+            getattr(self, "direct_point_adapter_decoder_anchor_weight", 0.0) > 0
+            and getattr(self, "point_summary_adapter", None) is not None
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary_points is None:
+                pred_summary_points = F.normalize(
+                    self.point_summary_adapter(compact.float()),
+                    dim=-1,
+                )
+            if pred_summary is None:
+                with torch.no_grad():
+                    decoder_anchor_summary = self._project_summary_head_features(decoded_points)
+            else:
+                decoder_anchor_summary = pred_summary.detach()
+            decoder_anchor_points = self._direct_point_map_to_rows(decoder_anchor_summary)
+            adapter_decoder_anchor_loss = (
+                1.0 - (pred_summary_points * decoder_anchor_points).sum(dim=-1).mean()
+            )
+        stats["summary"] = summary_loss
+        stats["summary_adapter"] = adapter_loss
+        stats["text"] = text_loss
+        stats["text_valid_ratio"] = text_valid_ratio
+        stats["text_acc"] = text_acc
+        stats["adapter_text"] = adapter_text_loss
+        stats["adapter_text_valid_ratio"] = adapter_text_valid_ratio
+        stats["adapter_text_acc"] = adapter_text_acc
+        stats["text_distill"] = text_distill_loss
+        stats["text_distill_valid_ratio"] = text_distill_valid_ratio
+        stats["text_distill_teacher_conf"] = text_distill_teacher_conf
+        stats["text_distill_agreement"] = text_distill_agreement
+        stats["text_pseudo_ce"] = text_pseudo_ce_loss
+        stats["text_pseudo_ce_valid_ratio"] = text_pseudo_ce_valid_ratio
+        stats["text_pseudo_ce_teacher_conf"] = text_pseudo_ce_teacher_conf
+        stats["text_pseudo_ce_agreement"] = text_pseudo_ce_agreement
+        stats["adapter_text_distill"] = adapter_text_distill_loss
+        stats["adapter_text_distill_valid_ratio"] = adapter_text_distill_valid_ratio
+        stats["adapter_text_distill_teacher_conf"] = adapter_text_distill_teacher_conf
+        stats["adapter_text_distill_agreement"] = adapter_text_distill_agreement
+        stats["adapter_text_pseudo_ce"] = adapter_text_pseudo_ce_loss
+        stats["adapter_text_pseudo_ce_valid_ratio"] = adapter_text_pseudo_ce_valid_ratio
+        stats["adapter_text_pseudo_ce_teacher_conf"] = adapter_text_pseudo_ce_teacher_conf
+        stats["adapter_text_pseudo_ce_agreement"] = adapter_text_pseudo_ce_agreement
+        stats["adapter_decoder_anchor"] = adapter_decoder_anchor_loss
+        stats["loss"] = (
+            distill["total"]
+            + self.direct_point_summary_alignment_weight * summary_loss
+            + getattr(self, "direct_point_summary_adapter_weight", 0.0) * adapter_loss
+            + getattr(self, "direct_point_text_loss_weight", 0.0) * text_loss
+            + getattr(self, "direct_point_adapter_text_loss_weight", 0.0) * adapter_text_loss
+            + getattr(self, "direct_point_text_distill_weight", 0.0) * text_distill_loss
+            + getattr(self, "direct_point_text_pseudo_ce_weight", 0.0)
+            * text_pseudo_ce_loss
+            + getattr(self, "direct_point_adapter_text_distill_weight", 0.0)
+            * adapter_text_distill_loss
+            + getattr(self, "direct_point_adapter_text_pseudo_ce_weight", 0.0)
+            * adapter_text_pseudo_ce_loss
+            + getattr(self, "direct_point_adapter_decoder_anchor_weight", 0.0)
+            * adapter_decoder_anchor_loss
+        )
+        return stats
+
     def _compute_siglip_alignment_loss(
         self,
         decoded: Optional[torch.Tensor],
@@ -2670,6 +4403,348 @@ class RadioGSTrainer:
         projected = self.siglip_summary_head(feat_flat)
         projected = projected.permute(0, 2, 1).reshape(B, -1, H, W)
         return F.normalize(projected, dim=1)
+
+    def _resolve_direct_point_text_embedding_path(
+        self,
+        raw_path: str,
+        *,
+        split: Optional[str] = None,
+    ) -> Path:
+        raw = Path(raw_path).expanduser()
+        split = str(split or self.direct_point_text_split)
+
+        def with_split_suffix(path: Path) -> Path:
+            return path.with_name(f"{path.stem}_split{split}{path.suffix}")
+
+        repo_root = Path(__file__).resolve().parents[2]
+        candidates: list[Path] = []
+        for base in (raw, repo_root / raw if not raw.is_absolute() else raw):
+            candidates.append(with_split_suffix(base))
+            candidates.append(base)
+        seen: set[Path] = set()
+        for candidate in candidates:
+            if candidate in seen:
+                continue
+            seen.add(candidate)
+            if candidate.exists():
+                return candidate
+        return candidates[0]
+
+    def _load_direct_point_text_embeddings(
+        self,
+        config: RadioGSConfig,
+        *,
+        split: Optional[str] = None,
+    ) -> tuple[list[int], torch.Tensor]:
+        split = str(split or self.direct_point_text_split)
+        split_ids = OPENGAUSSIAN_NYU40_CLASS_SPLITS[split]
+        class_names = [NYU40_ID_TO_NAME[class_id] for class_id in split_ids]
+        text_path = self._resolve_direct_point_text_embedding_path(
+            getattr(
+                config,
+                "direct_point_text_embeddings",
+                "checkpoints/siglip2_scannet_og_text_embeddings.pt",
+            ),
+            split=split,
+        )
+        if not text_path.exists():
+            raise FileNotFoundError(
+                f"Direct point text embeddings not found: {text_path}"
+            )
+        data = torch.load(text_path, map_location="cpu")
+        queries = [str(query) for query in data.get("queries", [])]
+        embeddings = data["embeddings"].float()
+        if queries:
+            bank = {
+                query: F.normalize(embedding.float(), dim=0)
+                for query, embedding in zip(queries, embeddings)
+            }
+            missing = [name for name in class_names if name not in bank]
+            if missing:
+                raise ValueError(
+                    f"Direct point text bank {text_path} is missing classes: {missing}"
+                )
+            text_embeddings = torch.stack([bank[name] for name in class_names])
+        elif embeddings.shape[0] == len(class_names):
+            text_embeddings = F.normalize(embeddings, dim=-1)
+        else:
+            raise ValueError(
+                f"Direct point text bank {text_path} has no query names and "
+                f"{embeddings.shape[0]} embeddings; expected {len(class_names)}"
+            )
+        return list(split_ids), text_embeddings.to(self.device)
+
+    def _load_direct_point_text_embedding_banks(
+        self,
+        config: RadioGSConfig,
+        splits: list[str],
+    ) -> list[tuple[str, list[int], torch.Tensor]]:
+        banks: list[tuple[str, list[int], torch.Tensor]] = []
+        for split in splits:
+            split_ids, embeddings = self._load_direct_point_text_embeddings(
+                config,
+                split=split,
+            )
+            banks.append((split, split_ids, embeddings))
+        return banks
+
+    def _remap_direct_point_text_labels(
+        self,
+        labels: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        target = torch.full_like(labels, -1, dtype=torch.long)
+        valid = torch.zeros_like(labels, dtype=torch.bool)
+        for out_idx, raw_id in enumerate(self.direct_point_text_split_ids):
+            mask = labels == int(raw_id)
+            target[mask] = int(out_idx)
+            valid |= mask
+        return target, valid
+
+    def _direct_point_text_ce_weights(
+        self,
+        targets: torch.Tensor,
+        num_classes: int,
+    ) -> Optional[torch.Tensor]:
+        mode = getattr(self, "direct_point_text_ce_weighting", "none")
+        if mode == "none" or targets.numel() == 0:
+            return None
+        use_pool_counts = mode in {"inverse_pool", "sqrt_inverse_pool_capped"}
+        if use_pool_counts and getattr(self, "direct_point_pool_labels", None) is not None:
+            pool_targets, pool_valid = self._remap_direct_point_text_labels(
+                self.direct_point_pool_labels.to(targets.device).long()
+            )
+            count_targets = pool_targets[pool_valid]
+            if count_targets.numel() == 0:
+                count_targets = targets
+        else:
+            count_targets = targets
+        counts = torch.bincount(
+            count_targets.long(),
+            minlength=int(num_classes),
+        ).to(device=targets.device, dtype=torch.float32)
+        present = counts > 0
+        weights = torch.zeros_like(counts)
+        if present.any():
+            total = counts[present].sum()
+            weights[present] = total / (float(num_classes) * counts[present])
+        if mode == "sqrt_inverse_pool_capped":
+            weights[present] = weights[present].sqrt()
+            min_weight = float(getattr(self, "direct_point_text_ce_min_weight", 0.5))
+            max_weight = float(getattr(self, "direct_point_text_ce_max_weight", 3.0))
+            weights[present] = weights[present].clamp(min=min_weight, max=max_weight)
+        return weights
+
+    def _compute_direct_point_text_ce(
+        self,
+        point_summary: torch.Tensor,
+        point_labels: Optional[torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        zero = point_summary.sum() * 0.0
+        if (
+            point_labels is None
+            or getattr(self, "direct_point_text_embeddings", None) is None
+            or not getattr(self, "direct_point_text_split_ids", [])
+        ):
+            return zero, zero.detach(), zero.detach()
+        targets, label_valid = self._remap_direct_point_text_labels(point_labels.long())
+        valid_ratio = label_valid.float().mean()
+        if not label_valid.any():
+            return zero, valid_ratio.detach(), zero.detach()
+        text_embeddings = self.direct_point_text_embeddings.to(point_summary.device)
+        logits = (
+            point_summary[label_valid].float() @ text_embeddings.T.float()
+        ) / self.direct_point_text_temperature
+        valid_targets = targets[label_valid]
+        weights = self._direct_point_text_ce_weights(
+            valid_targets,
+            num_classes=int(text_embeddings.shape[0]),
+        )
+        loss = F.cross_entropy(logits, valid_targets, weight=weights)
+        pred = logits.argmax(dim=-1)
+        acc = (pred == valid_targets).float().mean()
+        return loss, valid_ratio.detach(), acc.detach()
+
+    def _compute_direct_point_text_distill_kl(
+        self,
+        point_summary: torch.Tensor,
+        teacher_summary: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        zero = point_summary.sum() * 0.0
+        if (
+            getattr(self, "direct_point_text_embeddings", None) is None
+            or not getattr(self, "direct_point_text_split_ids", [])
+        ):
+            return zero, zero.detach(), zero.detach(), zero.detach()
+        if point_summary.shape != teacher_summary.shape:
+            raise ValueError(
+                "point_summary and teacher_summary must have the same shape, got "
+                f"{tuple(point_summary.shape)} vs {tuple(teacher_summary.shape)}"
+            )
+
+        text_embeddings = self.direct_point_text_embeddings.to(point_summary.device).float()
+        temperature = max(
+            1e-6,
+            float(getattr(self, "direct_point_text_distill_temperature", 1.0)),
+        )
+        student_logits = point_summary.float() @ text_embeddings.T
+        with torch.no_grad():
+            teacher_logits = teacher_summary.float() @ text_embeddings.T
+            teacher_probs = F.softmax(teacher_logits / temperature, dim=-1)
+            teacher_conf = teacher_probs.max(dim=-1).values
+            threshold = float(
+                getattr(self, "direct_point_text_distill_confidence_threshold", 0.0)
+            )
+            valid = teacher_conf >= threshold
+        valid_ratio = valid.float().mean()
+        if not valid.any():
+            return zero, valid_ratio.detach(), zero.detach(), zero.detach()
+
+        log_probs = F.log_softmax(student_logits[valid] / temperature, dim=-1)
+        loss = F.kl_div(
+            log_probs,
+            teacher_probs[valid],
+            reduction="batchmean",
+        )
+        if temperature != 1.0:
+            loss = loss * (temperature ** 2)
+        with torch.no_grad():
+            student_pred = student_logits[valid].argmax(dim=-1)
+            teacher_pred = teacher_probs[valid].argmax(dim=-1)
+            agreement = (student_pred == teacher_pred).float().mean()
+            mean_conf = teacher_conf[valid].mean()
+        return loss, valid_ratio.detach(), mean_conf.detach(), agreement.detach()
+
+    def _compute_direct_point_text_pseudo_ce(
+        self,
+        point_summary: torch.Tensor,
+        teacher_summary: torch.Tensor,
+        *,
+        logit_scale: Optional[float] = None,
+        confidence_threshold: Optional[float] = None,
+        center_logits: bool = False,
+        split_ids: Optional[list[int]] = None,
+        text_embeddings: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        zero = point_summary.sum() * 0.0
+        active_split_ids = (
+            split_ids
+            if split_ids is not None
+            else getattr(self, "direct_point_text_split_ids", [])
+        )
+        active_text_embeddings = (
+            text_embeddings
+            if text_embeddings is not None
+            else getattr(self, "direct_point_text_embeddings", None)
+        )
+        if (
+            active_text_embeddings is None
+            or not active_split_ids
+        ):
+            return zero, zero.detach(), zero.detach(), zero.detach()
+        if point_summary.shape != teacher_summary.shape:
+            raise ValueError(
+                "point_summary and teacher_summary must have the same shape, got "
+                f"{tuple(point_summary.shape)} vs {tuple(teacher_summary.shape)}"
+            )
+
+        text_embeddings = F.normalize(
+            active_text_embeddings.to(point_summary.device).float(),
+            dim=-1,
+        )
+        active_logit_scale = float(
+            getattr(self, "direct_point_adapter_text_pseudo_ce_logit_scale", 1.0)
+            if logit_scale is None
+            else logit_scale
+        )
+        student_logits = (point_summary.float() @ text_embeddings.T) * active_logit_scale
+        with torch.no_grad():
+            teacher_logits = (teacher_summary.float() @ text_embeddings.T) * active_logit_scale
+            teacher_bias = (
+                teacher_logits.mean(dim=0, keepdim=True)
+                if bool(center_logits)
+                else None
+            )
+            if teacher_bias is not None:
+                teacher_logits = teacher_logits - teacher_bias
+            teacher_probs = F.softmax(teacher_logits, dim=-1)
+            teacher_conf, teacher_targets = teacher_probs.max(dim=-1)
+            active_threshold = float(
+                getattr(
+                    self,
+                    "direct_point_adapter_text_pseudo_ce_confidence_threshold",
+                    0.0,
+                )
+                if confidence_threshold is None
+                else confidence_threshold
+            )
+            valid = teacher_conf >= float(
+                active_threshold
+            )
+        if bool(center_logits) and teacher_bias is not None:
+            student_logits = student_logits - teacher_bias.to(
+                device=student_logits.device,
+                dtype=student_logits.dtype,
+            )
+        valid_ratio = valid.float().mean()
+        if not valid.any():
+            return zero, valid_ratio.detach(), zero.detach(), zero.detach()
+
+        loss = F.cross_entropy(student_logits[valid], teacher_targets[valid])
+        with torch.no_grad():
+            student_pred = student_logits[valid].argmax(dim=-1)
+            agreement = (student_pred == teacher_targets[valid]).float().mean()
+            mean_conf = teacher_conf[valid].mean()
+        return loss, valid_ratio.detach(), mean_conf.detach(), agreement.detach()
+
+    def _compute_multi_split_direct_point_text_pseudo_ce(
+        self,
+        point_summary: torch.Tensor,
+        teacher_summary: torch.Tensor,
+        *,
+        logit_scale: Optional[float] = None,
+        confidence_threshold: Optional[float] = None,
+        center_logits: bool = False,
+        banks: Optional[list[tuple[str, list[int], torch.Tensor]]] = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        zero = point_summary.sum() * 0.0
+        active_banks = (
+            banks
+            if banks is not None
+            else getattr(self, "direct_point_text_pseudo_ce_banks", None)
+        )
+        if not active_banks:
+            default_embeddings = getattr(self, "direct_point_text_embeddings", None)
+            default_split_ids = getattr(self, "direct_point_text_split_ids", [])
+            if default_embeddings is not None and default_split_ids:
+                active_banks = [
+                    (
+                        str(getattr(self, "direct_point_text_split", "default")),
+                        default_split_ids,
+                        default_embeddings,
+                    )
+                ]
+            else:
+                active_banks = []
+        outputs: list[tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]] = []
+        for _split, split_ids, text_embeddings in active_banks:
+            outputs.append(
+                self._compute_direct_point_text_pseudo_ce(
+                    point_summary,
+                    teacher_summary,
+                    logit_scale=logit_scale,
+                    confidence_threshold=confidence_threshold,
+                    center_logits=center_logits,
+                    split_ids=split_ids,
+                    text_embeddings=text_embeddings,
+                )
+            )
+        if not outputs:
+            return zero, zero.detach(), zero.detach(), zero.detach()
+
+        averaged = []
+        for metric_idx in range(4):
+            averaged.append(torch.stack([out[metric_idx] for out in outputs]).mean())
+        return tuple(averaged)  # type: ignore[return-value]
 
     def _compute_summary_alignment_loss(
         self,
@@ -2771,7 +4846,12 @@ class RadioGSTrainer:
                 target_size,
                 is_mask=True,
             ).squeeze(1).long()
-        pred_siglip = self._project_siglip_features(decoded_for_loss)
+        if self.siglip_summary_head is None:
+            raise RuntimeError(
+                "grounding_query_loss requires SigLIP2SummaryHead; "
+                "check siglip_summary_head_weights"
+            )
+        pred_siglip = self._project_summary_head_features(decoded_for_loss)
         return self.grounding_query_loss_fn(
             pred_siglip,
             self.grounding_text_embeddings,
