@@ -4,6 +4,10 @@ This note turns the current repository assets into a first-pass manuscript scaff
 It is intentionally conservative: any quantitative statement used in the paper
 should be frozen against the generated audit report before it enters the final draft.
 
+For the current 2026-05-02 frozen numbers and manuscript text, use
+[`paper_draft_current.md`](paper_draft_current.md) as the active draft. This file
+is retained as the older writing scaffold.
+
 ## Working title
 
 Foundation Feature Reconstruction in 3D Gaussian Scenes for Open-Vocabulary Scene Understanding
