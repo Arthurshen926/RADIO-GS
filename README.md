@@ -4,6 +4,22 @@
 
 This repository keeps only the `RADIO + Gaussian Splatting` pipeline for novel-view foundation feature rendering and downstream scene understanding. The old localization / pose-estimation line is intentionally left out.
 
+## Current paper mainline
+
+The cleaned submission route is documented in:
+
+- `docs/PROJECT_MAINLINE.md`
+- `docs/submission_status.md`
+- `docs/paper_draft_current.md`
+- `paper/radio_gs_draft.tex`
+- `output/radio_gs/reports/submission_freeze_report.md`
+
+Older plans and obsolete report entry points were moved to archive locations so
+they do not compete with the current freeze package:
+
+- `docs/archive/2026-05-02_legacy/`
+- `output/radio_gs/reports/archive_legacy_20260502/`
+
 ## What this repo does
 
 The goal is to distill `RADIO C-RADIOv4-H` spatial features (`1280d`) into a Gaussian-splat scene representation so that a rendered novel view can be decoded back into RADIO-like features and consumed by downstream adaptors / heads.

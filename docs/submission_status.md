@@ -6,9 +6,9 @@ repository to a top-conference paper package?
 
 ## Current level
 
-- **Method maturity**: mature research prototype with paper-facing automation now started
-- **Current submission maturity**: conservative paper package in freeze preparation
-- **Estimated top-conference completion**: about 84% after the 2026-05-02 freeze report, profile refresh, current paper draft, and freeze figure shortlist
+- **Method maturity**: mature research prototype with paper-facing automation and archive discipline in place
+- **Current submission maturity**: conservative paper package with LaTeX draft
+- **Estimated top-conference completion**: about 87% after the 2026-05-02 archive cleanup and LaTeX draft
 
 The repository now contains a coherent method, a strong LERF-OVS result,
 repeatable evaluation code, and a completed 10-scene fair ScanNet v67 aggregate.
@@ -27,6 +27,8 @@ The current generated freeze package is:
 - [efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
 - [baseline_source_verification.md](../output/radio_gs/reports/baseline_source_verification.md)
 - [paper_draft_current.md](paper_draft_current.md)
+- [PROJECT_MAINLINE.md](PROJECT_MAINLINE.md)
+- [radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
 These generated files supersede older manually edited status notes when numbers
 conflict.
@@ -57,16 +59,12 @@ Under that framing, the paper solves the following problem:
 
 - [output/radio_gs/reports/submission_freeze_report.md](../output/radio_gs/reports/submission_freeze_report.md)
 - [output/radio_gs/reports/submission_freeze_manifest.json](../output/radio_gs/reports/submission_freeze_manifest.json)
-- [output/radio_gs/reports/sota_comparison_table.md](../output/radio_gs/reports/sota_comparison_table.md)
-- [output/radio_gs/reports/comprehensive_results.md](../output/radio_gs/reports/comprehensive_results.md)
 - [output/radio_gs/reports/paper_submission_main_table.md](../output/radio_gs/reports/paper_submission_main_table.md)
 - [output/radio_gs/reports/paper_submission_result_audit.md](../output/radio_gs/reports/paper_submission_result_audit.md)
 - [output/radio_gs/reports/submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
 - [output/radio_gs/reports/efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
-- [output/lerf_ovs_eval/figurines_best/lerf_ovs_results.json](../output/lerf_ovs_eval/figurines_best/lerf_ovs_results.json)
-- [output/lerf_ovs_eval/ramen_best/lerf_ovs_results.json](../output/lerf_ovs_eval/ramen_best/lerf_ovs_results.json)
-- [output/lerf_ovs_eval/teatime_best/lerf_ovs_results.json](../output/lerf_ovs_eval/teatime_best/lerf_ovs_results.json)
-- [output/lerf_ovs_eval/waldo_best/lerf_ovs_results.json](../output/lerf_ovs_eval/waldo_best/lerf_ovs_results.json)
+- [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
+- [paper/radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
 ### Method explanation assets
 
@@ -75,10 +73,11 @@ Under that framing, the paper solves the following problem:
 
 ### Qualitative figures
 
-- [output/radio_gs/reports/figure_shortlist.md](../output/radio_gs/reports/figure_shortlist.md)
-- [output/radio_gs/paper_figures/fig_grounding_comparison.png](../output/radio_gs/paper_figures/fig_grounding_comparison.png)
-- [output/radio_gs/paper_figures/fig_radio_flow_comparison.png](../output/radio_gs/paper_figures/fig_radio_flow_comparison.png)
-- [output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png](../output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png)
+- [output/radio_gs/reports/submission_freeze_figure_shortlist.md](../output/radio_gs/reports/submission_freeze_figure_shortlist.md)
+- [output/radio_gs/freeze_eval/lerf_figurines_overlay_20260502](../output/radio_gs/freeze_eval/lerf_figurines_overlay_20260502)
+- [output/radio_gs/freeze_eval/lerf_ramen_overlay_20260502](../output/radio_gs/freeze_eval/lerf_ramen_overlay_20260502)
+- [output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502](../output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502)
+- [output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502](../output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502)
 
 ## What still blocks a strong main-track submission
 
@@ -130,9 +129,9 @@ instead of relying on informal notes.
 
 ## Immediate implementation priorities
 
-1. Turn `submission_freeze_report.md` into the full claim-to-artifact matrix for the paper.
-2. Close external LERF baseline provenance or clearly mark rows as reproduced/unresolved.
-3. Convert the refreshed profile evidence into a dedicated efficiency/cost table.
-4. Add a fixed-protocol LERF statistical table beside the best-achievable table.
-5. Write the actual abstract, introduction, method, experiments, limitations, and related work sections.
-6. Keep ScanNet v43/v62 label-informed diagnostics separate from the fair v67 main result.
+1. Close external LERF baseline provenance or run reproduced baselines under one protocol.
+2. Convert the refreshed profile evidence and training logs into one polished efficiency/cost table.
+3. Decide how much of the fixed-protocol seed-robustness table belongs in the main paper versus appendix.
+4. Assemble the final qualitative figure from `submission_freeze_figure_shortlist.md`.
+5. Move `paper/radio_gs_draft.tex` into the target venue template and expand related work.
+6. Add a concise small-object failure analysis for Figurines.

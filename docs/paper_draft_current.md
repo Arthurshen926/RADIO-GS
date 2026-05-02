@@ -3,6 +3,8 @@
 Status: 2026-05-02 submission-freeze draft. Numbers in this file must be kept
 consistent with `output/radio_gs/reports/submission_freeze_report.md`.
 
+The active LaTeX draft is `paper/radio_gs_draft.tex`.
+
 ## Working Title
 
 Foundation Feature Reconstruction in 3D Gaussian Scenes for Open-Vocabulary
