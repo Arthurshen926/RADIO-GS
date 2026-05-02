@@ -133,6 +133,10 @@ class RadioGSConfig:
     siglip_alignment_weight: float = 0.0
     siglip_summary_alignment_weight: float = 0.0
     siglip_summary_head_weights: str = "checkpoints/siglip2_summary_head.pth"
+    radio_adaptor_alignment_names: str = ""
+    radio_adaptor_alignment_weight: float = 0.0
+    radio_adaptor_alignment_kind: str = "feature_projection"
+    radio_adaptor_alignment_checkpoint: str = "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
     tv_weight: float = 0.01
     feat_norm_weight: float = 0.0
     gradient_loss_weight: float = 0.0

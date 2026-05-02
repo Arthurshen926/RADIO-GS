@@ -72,11 +72,13 @@ from radio_gs.losses.distillation_loss import (
     MultiViewConsistencyLoss,
     TotalVariationLoss,
 )
+from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_alignment_loss
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.featsharp_3d import FeatSharp3D
 from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
+from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.models.screen_refiner import (
     ScreenSpaceRefiner,
@@ -110,6 +112,18 @@ def parse_direct_point_text_splits(raw: str | None, default_split: str) -> list[
         if split and split not in splits:
             splits.append(split)
     return splits
+
+
+def parse_radio_adaptor_names(raw: str | None) -> list[str]:
+    """Parse comma/space separated RADIO adaptor names."""
+    if raw is None or str(raw).strip() == "":
+        return []
+    names: list[str] = []
+    for name in str(raw).replace(",", " ").split():
+        name = name.strip()
+        if name and name not in names:
+            names.append(name)
+    return names
 
 
 def read_ply_xyz(path: str | Path) -> torch.Tensor:
@@ -985,6 +999,16 @@ class RadioGSTrainer:
         self.siglip_summary_alignment_weight = getattr(
             config, "siglip_summary_alignment_weight", 0.0
         )
+        self.radio_adaptor_alignment_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_alignment_names", "")
+        )
+        self.radio_adaptor_alignment_weight = float(
+            getattr(config, "radio_adaptor_alignment_weight", 0.0)
+        )
+        self.radio_adaptor_alignment_kind = str(
+            getattr(config, "radio_adaptor_alignment_kind", "feature_projection")
+        )
+        self.radio_adaptor_alignment_adaptors = nn.ModuleDict()
         if self.depth_loss_weight > 0 or self.geom_depth_loss_weight > 0:
             self.depth_head = DepthHead(
                 feature_dim=getattr(config, "radio_feature_dim", 1280),
@@ -1035,6 +1059,34 @@ class RadioGSTrainer:
             self.siglip_projection.eval()
             for param in self.siglip_projection.parameters():
                 param.requires_grad = False
+        if self.radio_adaptor_alignment_weight > 0 and self.radio_adaptor_alignment_names:
+            radio_ckpt_path = Path(
+                getattr(
+                    config,
+                    "radio_adaptor_alignment_checkpoint",
+                    "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+                )
+            ).expanduser()
+            if not radio_ckpt_path.exists():
+                raise FileNotFoundError(
+                    f"RADIO adaptor checkpoint not found: {radio_ckpt_path}"
+                )
+            for adaptor_name in self.radio_adaptor_alignment_names:
+                adaptor = load_radio_adaptor_from_checkpoint(
+                    radio_ckpt_path,
+                    adaptor_name,
+                    kind=self.radio_adaptor_alignment_kind,
+                ).to(self.device)
+                adaptor.eval()
+                for param in adaptor.parameters():
+                    param.requires_grad = False
+                self.radio_adaptor_alignment_adaptors[adaptor_name] = adaptor
+            self._log(
+                "Loaded RADIO adaptor alignment heads: "
+                f"{self.radio_adaptor_alignment_names} "
+                f"kind={self.radio_adaptor_alignment_kind} "
+                f"weight={self.radio_adaptor_alignment_weight:g}"
+            )
         if (
             self.siglip_summary_alignment_weight > 0
             or self.grounding_query_loss_weight > 0
@@ -1433,6 +1485,7 @@ class RadioGSTrainer:
             "frozen_depth",
             "siglip_align",
             "summary_align",
+            "radio_adaptors",
             "ground_query",
             "seg_aux",
             "frozen_seg",
@@ -1804,6 +1857,7 @@ class RadioGSTrainer:
             "direct_point_adapter_decoder_anchor": 0.0,
             "siglip_align": 0.0,
             "summary_align": 0.0,
+            "radio_adaptors": 0.0,
             "ground_query": 0.0,
             "ground_query_acc": 0.0,
             "ground_query_valid": 0.0,
@@ -1996,6 +2050,10 @@ class RadioGSTrainer:
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
                 l_summary = self._compute_summary_alignment_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
+                l_radio_adaptors = self._compute_radio_adaptor_alignment_loss(
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
@@ -2248,6 +2306,7 @@ class RadioGSTrainer:
                     + frozen_seg_losses["total"]
                     + l_siglip
                     + l_summary
+                    + l_radio_adaptors
                 )
 
             self.scaler.scale(loss).backward()
@@ -2345,6 +2404,7 @@ class RadioGSTrainer:
             )
             loss_accum["siglip_align"] += l_siglip.item()
             loss_accum["summary_align"] += l_summary.item()
+            loss_accum["radio_adaptors"] += l_radio_adaptors.item()
             loss_accum["ground_query"] += l_ground_query.item()
             loss_accum["ground_query_acc"] += ground_query_acc.item()
             loss_accum["ground_query_valid"] += ground_query_valid.item()
@@ -2404,6 +2464,9 @@ class RadioGSTrainer:
                 )
                 self.writer.add_scalar(
                     "train/frozen_seg", frozen_seg_losses["total"].item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/radio_adaptors", l_radio_adaptors.item(), self.global_step
                 )
                 self.writer.add_scalar(
                     "train/direct_point", l_direct_point.item(), self.global_step
@@ -2588,6 +2651,7 @@ class RadioGSTrainer:
         frozen_seg_accum = 0.0
         siglip_align_accum = 0.0
         summary_align_accum = 0.0
+        radio_adaptor_align_accum = 0.0
         ground_query_accum = 0.0
         ground_query_acc_metric = 0.0
         ground_query_valid_accum = 0.0
@@ -2737,6 +2801,10 @@ class RadioGSTrainer:
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
             ).item()
+            radio_adaptor_align_accum += self._compute_radio_adaptor_alignment_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
             semantic_decoded = None
             if (
                 hybrid_aux is not None
@@ -2779,6 +2847,7 @@ class RadioGSTrainer:
             "frozen_seg": frozen_seg_accum / n,
             "siglip_align": siglip_align_accum / n,
             "summary_align": summary_align_accum / n,
+            "radio_adaptors": radio_adaptor_align_accum / n,
             "ground_query": ground_query_accum / n,
             "ground_query_acc": ground_query_acc_metric / n,
             "ground_query_valid": ground_query_valid_accum / n,
@@ -2796,6 +2865,7 @@ class RadioGSTrainer:
             self.writer.add_scalar("val/frozen_seg", metrics["frozen_seg"], epoch)
             self.writer.add_scalar("val/siglip_align", metrics["siglip_align"], epoch)
             self.writer.add_scalar("val/summary_align", metrics["summary_align"], epoch)
+            self.writer.add_scalar("val/radio_adaptors", metrics["radio_adaptors"], epoch)
             self.writer.add_scalar("val/ground_query", metrics["ground_query"], epoch)
             self.writer.add_scalar("val/ground_query_acc", metrics["ground_query_acc"], epoch)
             self.writer.add_scalar("val/ground_query_valid", metrics["ground_query_valid"], epoch)
@@ -4394,6 +4464,28 @@ class RadioGSTrainer:
         with torch.no_grad():
             target_siglip = self._project_siglip_features(target)
         return self.siglip_alignment_weight * F.mse_loss(pred_siglip, target_siglip)
+
+    def _compute_radio_adaptor_alignment_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        if (
+            self.radio_adaptor_alignment_weight <= 0
+            or not self.radio_adaptor_alignment_adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        adaptor_loss, _ = compute_radio_adaptor_alignment_loss(
+            decoded.float(),
+            target.float(),
+            self.radio_adaptor_alignment_adaptors,
+        )
+        return self.radio_adaptor_alignment_weight * adaptor_loss
 
     def _project_summary_head_features(self, features: torch.Tensor) -> torch.Tensor:
         """Project [B, C, H, W] features through frozen SigLIP2SummaryHead to text-aligned space."""
