@@ -36,6 +36,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 import sys
 import time
 from pathlib import Path
@@ -551,6 +552,12 @@ def project_to_siglip2(
     """Project ``[1, 1280, H, W]`` to L2-normalised ``[1, 1536, H, W]``."""
     B, C, H, W = features_1280.shape
     feat_flat = features_1280.reshape(B, C, H * W).permute(0, 2, 1)  # [B, HW, 1280]
+    try:
+        first_param = next(proj_model.parameters())
+    except StopIteration:
+        first_param = None
+    if first_param is not None and feat_flat.dtype != first_param.dtype:
+        feat_flat = feat_flat.to(dtype=first_param.dtype)
     with torch.no_grad():
         siglip = proj_model(feat_flat)  # [B, HW, 1536]
     siglip = F.normalize(siglip, dim=-1)
@@ -861,6 +868,11 @@ def render_1280d(
 # Visualisation
 # ---------------------------------------------------------------------------
 
+def _slugify_vis_name(value: str) -> str:
+    slug = re.sub(r"[^0-9A-Za-z]+", "_", value.strip().lower()).strip("_")
+    return slug or "query"
+
+
 def save_heatmap_vis(
     heatmaps: Dict[str, np.ndarray],
     gt_masks: Dict[str, np.ndarray],
@@ -868,12 +880,43 @@ def save_heatmap_vis(
     out_dir: Path,
     tag: str = "",
     source_label: Optional[str] = None,
+    rgb_image: Optional[np.ndarray] = None,
+    save_per_query: bool = False,
 ) -> None:
-    """Save a grid visualisation of heatmaps vs GT masks for one frame."""
+    """Save a grid visualisation of heatmaps vs GT masks for one frame.
+
+    If ``rgb_image`` is provided, append RGB/overlay columns for qualitative
+    inspection.  The image is expected in OpenCV BGR channel order.  Overlay
+    panels preserve the RGB aspect ratio by resizing masks/heatmaps to RGB
+    resolution instead of resizing the RGB image to feature-map resolution.
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
     cats = [c for c in sorted(heatmaps.keys()) if gt_masks.get(c) is not None and gt_masks[c].any()]
     if not cats:
         return
+
+    suffix = f"_{tag}" if tag else ""
+    labels = ["query", "GT mask", source_label or f"{tag or 'feature'} heatmap"]
+    if rgb_image is not None:
+        labels.extend(["RGB", "GT/RGB", "heatmap/RGB"])
+    num_cols = len(labels)
+
+    def add_header(rows: List[np.ndarray]) -> np.ndarray:
+        grid = np.concatenate(rows, axis=0)
+        col_w = grid.shape[1] // num_cols
+        header = np.zeros((28, grid.shape[1], 3), dtype=np.uint8)
+        for col, label in enumerate(labels):
+            cv2.putText(
+                header,
+                label,
+                (col * col_w + 4, 19),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.45,
+                (255, 255, 255),
+                1,
+                cv2.LINE_AA,
+            )
+        return np.concatenate([header, grid], axis=0)
 
     rows = []
     for cat in cats[:8]:  # max 8 rows
@@ -884,32 +927,56 @@ def save_heatmap_vis(
             hm_norm = ((hm - hmin) / (hmax - hmin) * 255).astype(np.uint8)
         else:
             hm_norm = np.zeros_like(hm, dtype=np.uint8)
+        mask_u8 = (mask > 0).astype(np.uint8)
+
+        if rgb_image is not None:
+            target_h, target_w = rgb_image.shape[:2]
+            hm_norm = cv2.resize(hm_norm, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
+            mask_u8 = cv2.resize(mask_u8, (target_w, target_h), interpolation=cv2.INTER_NEAREST)
+
         hm_color = cv2.applyColorMap(hm_norm, cv2.COLORMAP_JET)
-        mask_vis = cv2.applyColorMap((mask * 255).astype(np.uint8), cv2.COLORMAP_BONE)
+        mask_vis = cv2.applyColorMap((mask_u8 * 255).astype(np.uint8), cv2.COLORMAP_BONE)
 
         label_img = np.zeros_like(hm_color)
         cv2.putText(label_img, cat, (2, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (255, 255, 255), 1)
-        row = np.concatenate([label_img, mask_vis, hm_color], axis=1)
+        row_parts = [label_img, mask_vis, hm_color]
+        if rgb_image is not None:
+            rgb_resized = rgb_image.copy()
+            mask_rgb = rgb_resized.copy()
+            mask_overlay = np.zeros_like(mask_rgb)
+            mask_overlay[:, :, 1] = mask_u8 * 255
+            mask_rgb = cv2.addWeighted(mask_rgb, 0.65, mask_overlay, 0.35, 0.0)
+            heat_rgb = cv2.addWeighted(rgb_resized, 0.55, hm_color, 0.45, 0.0)
+            row_parts.extend([rgb_resized, mask_rgb, heat_rgb])
+        row = np.concatenate(row_parts, axis=1)
         rows.append(row)
 
-    grid = np.concatenate(rows, axis=0)
-    col_w = grid.shape[1] // 3
-    header = np.zeros((28, grid.shape[1], 3), dtype=np.uint8)
-    labels = ["query", "GT mask", source_label or f"{tag or 'feature'} heatmap"]
-    for col, label in enumerate(labels):
-        cv2.putText(
-            header,
-            label,
-            (col * col_w + 4, 19),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.45,
-            (255, 255, 255),
-            1,
-            cv2.LINE_AA,
-        )
-    grid = np.concatenate([header, grid], axis=0)
-    suffix = f"_{tag}" if tag else ""
-    cv2.imwrite(str(out_dir / f"lerf_grounding_frame_{frame_id:05d}{suffix}.png"), grid)
+        if save_per_query:
+            per_query_grid = add_header([row])
+            query_suffix = _slugify_vis_name(cat)
+            cv2.imwrite(
+                str(out_dir / f"lerf_grounding_frame_{frame_id:05d}{suffix}_{query_suffix}.png"),
+                per_query_grid,
+            )
+
+    cv2.imwrite(str(out_dir / f"lerf_grounding_frame_{frame_id:05d}{suffix}.png"), add_header(rows))
+
+
+def load_lerf_rgb_frame(scene: str, frame_id: int, scene_root_hint: str | Path = "") -> Optional[np.ndarray]:
+    """Load an RGB frame as an OpenCV BGR image for visual overlays."""
+    scene_root = resolve_lerf_scene_root(scene, scene_root_hint)
+    candidates = [
+        scene_root / "images" / f"frame_{frame_id:05d}.jpg",
+        scene_root / "images" / f"frame_{frame_id:05d}.png",
+        scene_root / f"frame_{frame_id:05d}.jpg",
+        scene_root / f"frame_{frame_id:05d}.png",
+    ]
+    for path in candidates:
+        if path.exists():
+            image = cv2.imread(str(path), cv2.IMREAD_COLOR)
+            if image is not None:
+                return image
+    return None
 
 
 # ---------------------------------------------------------------------------
@@ -933,6 +1000,8 @@ def evaluate_scene(
     temperature: float = 50.0,
     scoring: str = "softmax_scene",
     heatmap_upsample: int = 1,
+    save_overlay_vis: bool = False,
+    save_per_query_vis: bool = False,
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -963,6 +1032,9 @@ def evaluate_scene(
 
         if mode == "rendered":
             model, codec, renderer, sharpener, refiner, config, is_hybrid = render_pipeline
+            scene_root_hint = getattr(config, "scene_root", "")
+        else:
+            scene_root_hint = ""
 
         canonical_mode = canonical_lerf_mode(mode)
         for frame_id, frame_objects in tqdm(
@@ -1092,6 +1164,11 @@ def evaluate_scene(
                     if canonical_mode == "teacher"
                     else "rendered RADIO-GS heatmap"
                 )
+                rgb_image = (
+                    load_lerf_rgb_frame(scene, frame_id, scene_root_hint)
+                    if save_overlay_vis
+                    else None
+                )
                 save_heatmap_vis(
                     hm_vis,
                     gt_vis,
@@ -1099,6 +1176,8 @@ def evaluate_scene(
                     vis_dir / scene,
                     tag=lerf_mode_tag(mode),
                     source_label=source_label,
+                    rgb_image=rgb_image,
+                    save_per_query=save_per_query_vis,
                 )
 
         loc_acc = loc_correct / max(loc_total, 1)
@@ -1180,6 +1259,10 @@ def main() -> None:
                         help="Logit scale for softmax_scene (default 50); denominator temperature for relevancy")
     parser.add_argument("--save_vis", action="store_true",
                         help="Save heatmap visualisations")
+    parser.add_argument("--save_overlay_vis", action="store_true",
+                        help="When saving heatmaps, append RGB, GT/RGB, and heatmap/RGB overlay columns")
+    parser.add_argument("--save_per_query_vis", action="store_true",
+                        help="Also write one visualisation PNG per frame/query. Enabled automatically with --save_overlay_vis")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
                         help="Upsample heatmaps by this factor before localization (default 4)")
     # Hardware
@@ -1257,7 +1340,9 @@ def main() -> None:
             print(f"Loaded SigLIP2 spatial projection from {proj_path}")
         else:
             raise FileNotFoundError(f"Projection weights not found: {proj_path}")
-    proj = proj.to(device).half().eval()
+    proj = proj.to(device)
+    proj = proj.half() if device.type == "cuda" else proj.float()
+    proj = proj.eval()
 
     # ------------------------------------------------------------------
     # 3. Generate / load text embeddings
@@ -1270,7 +1355,7 @@ def main() -> None:
         cache_path=args.text_embedding_cache,
         prompt_templates=prompt_templates,
     )  # [N, 1536]
-    text_embeddings = text_embeddings.half()
+    text_embeddings = text_embeddings.half() if device.type == "cuda" else text_embeddings.float()
     print(f"  {text_embeddings.shape[0]} embeddings ({text_embeddings.shape[1]}-d), "
           f"{time.time() - t0:.1f}s")
 
@@ -1280,13 +1365,15 @@ def main() -> None:
         canon_cache = Path("checkpoints/siglip2_canonical_embeddings.pt")
         if canon_cache.exists():
             cdata = torch.load(canon_cache, map_location="cpu")
-            canonical_emb = F.normalize(cdata["embeddings"].float(), dim=-1).to(device).half()
+            canonical_emb = F.normalize(cdata["embeddings"].float(), dim=-1).to(device)
+            canonical_emb = canonical_emb.half() if device.type == "cuda" else canonical_emb.float()
             print(f"  Loaded canonical embeddings from {canon_cache}: {canonical_emb.shape}")
         else:
             # Fallback: use mean of all category embeddings as canonical
             canonical_emb = F.normalize(
                 text_embeddings.float().mean(dim=0, keepdim=True), dim=-1
-            ).to(device).half()
+            ).to(device)
+            canonical_emb = canonical_emb.half() if device.type == "cuda" else canonical_emb.float()
             print(f"  Using mean-category canonical embedding: {canonical_emb.shape}")
         print(f"  Scoring: LERF-style relevancy")
     elif args.scoring == "softmax_scene":
@@ -1370,6 +1457,8 @@ def main() -> None:
             temperature=args.relevancy_temp,
             scoring=args.scoring,
             heatmap_upsample=args.heatmap_upsample,
+            save_overlay_vis=args.save_overlay_vis,
+            save_per_query_vis=args.save_per_query_vis or args.save_overlay_vis,
         )
         all_results[scene] = scene_results
 

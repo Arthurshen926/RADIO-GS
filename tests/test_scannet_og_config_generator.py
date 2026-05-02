@@ -78,7 +78,7 @@ def test_generate_config_targets_prepared_opengaussian_scene(tmp_path):
     assert payload["frozen_seg_head_weight"] == 0.0
 
     loaded = load_config(str(output_path))
-    assert loaded.direct_point_gaussian_position_mode == "gaussian_center"
+    assert loaded.direct_point_gaussian_position_mode == "label_point"
     assert loaded.feature_height == 60
     assert loaded.feature_width == 80
 

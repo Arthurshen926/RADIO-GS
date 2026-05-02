@@ -63,6 +63,15 @@ def test_read_label_ply_reads_xyz_and_raw_labels(tmp_path):
     assert labels.tolist() == [0, 1, 2, 33]
 
 
+def test_gaussian_index_eval_defaults_to_label_point_positions():
+    parser = argparse.ArgumentParser()
+    _add_query_mode_args(parser)
+
+    args = parser.parse_args([])
+
+    assert args.gaussian_index_position_mode == "label_point"
+
+
 def test_apply_opacity_label_filter_marks_low_opacity_labels_invalid():
     labels = np.array([1, 2, 33, 34], dtype=np.int32)
     opacities = torch.tensor([[0.05], [0.10], [0.50], [0.09]], dtype=torch.float32)

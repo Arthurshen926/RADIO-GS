@@ -154,34 +154,84 @@ def _stitch_sliding_window_features(
     return accum / weight.clamp_min(1.0)
 
 
+def _parse_adaptor_names(value: str | list[str] | tuple[str, ...] | None) -> list[str]:
+    if value is None:
+        return []
+    items = value.split(",") if isinstance(value, str) else list(value)
+    names: list[str] = []
+    for item in items:
+        name = str(item).strip()
+        if name and name not in names:
+            names.append(name)
+    return names
+
+
+def _adaptor_output_subdir(name: str) -> str:
+    if name == "siglip2-g":
+        return "siglip2"
+    return name.replace("-", "_")
+
+
+def _split_radio_output_pair(value) -> tuple[torch.Tensor, torch.Tensor]:
+    if torch.is_tensor(value):
+        return None, value
+    if isinstance(value, dict):
+        summary = value.get("summary")
+        features = value.get("features")
+        if features is None:
+            features = value.get("spatial")
+        if features is None:
+            raise ValueError("RADIO output dict must contain features/spatial")
+        return summary, features
+    if hasattr(value, "summary") and hasattr(value, "features"):
+        return value.summary, value.features
+    if isinstance(value, (tuple, list)) and len(value) >= 2:
+        return value[0], value[1]
+    raise TypeError(f"Unsupported RADIO output value type: {type(value)!r}")
+
+
+def _spatial_to_feature_grid(
+    spatial: torch.Tensor,
+    patch_h: int,
+    patch_w: int,
+) -> torch.Tensor:
+    if spatial.ndim == 4:
+        return spatial
+    if spatial.ndim != 3:
+        raise ValueError(f"Expected RADIO spatial features as [B,N,D] or [B,D,H,W], got {tuple(spatial.shape)}")
+    B, _, D = spatial.shape
+    return spatial.permute(0, 2, 1).reshape(B, D, patch_h, patch_w)
+
+
 def _unpack_radio_output(
     output,
     patch_h: int,
     patch_w: int,
+    adaptor_names: list[str] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
     """Convert RADIO output into summary, backbone grid, adaptor grids."""
-    if isinstance(output, tuple) and len(output) == 2:
-        summary, spatial = output
+    if isinstance(output, dict):
+        if "backbone" not in output:
+            raise ValueError("RADIO dict output is missing the 'backbone' entry")
+        summary, spatial = _split_radio_output_pair(output["backbone"])
+        adaptor_outputs = {
+            name: value for name, value in output.items() if name != "backbone"
+        }
+    elif isinstance(output, tuple) and len(output) == 2:
+        summary, spatial = _split_radio_output_pair(output)
         adaptor_outputs = {}
     else:
         summary, spatial, adaptor_outputs = output
 
-    B, _, D = spatial.shape
-    spatial_2d = spatial.permute(0, 2, 1).reshape(B, D, patch_h, patch_w)
+    spatial_2d = _spatial_to_feature_grid(spatial, patch_h, patch_w)
 
     adaptor_2d: dict[str, torch.Tensor] = {}
-    for name in ["siglip2-g", "sam3"]:
+    for name in adaptor_names or []:
         if not adaptor_outputs or name not in adaptor_outputs:
             continue
         ad_out = adaptor_outputs[name]
-        ad_spatial = ad_out.get("spatial", ad_out) if isinstance(ad_out, dict) else ad_out
-        if ad_spatial.ndim == 3:
-            D_ad = ad_spatial.shape[-1]
-            adaptor_2d[name] = ad_spatial.permute(0, 2, 1).reshape(
-                B, D_ad, patch_h, patch_w
-            )
-        else:
-            adaptor_2d[name] = ad_spatial
+        _, ad_spatial = _split_radio_output_pair(ad_out)
+        adaptor_2d[name] = _spatial_to_feature_grid(ad_spatial, patch_h, patch_w)
     return summary, spatial_2d, adaptor_2d
 
 
@@ -192,11 +242,12 @@ def _run_radio_batch(
     amp: bool,
     patch_h: int,
     patch_w: int,
+    adaptor_names: list[str] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
     imgs = conditioner(imgs)
     with torch.cuda.amp.autocast(enabled=amp):
         output = model(imgs)
-    return _unpack_radio_output(output, patch_h, patch_w)
+    return _unpack_radio_output(output, patch_h, patch_w, adaptor_names=adaptor_names)
 
 
 def _extract_sliding_window_single(
@@ -207,6 +258,7 @@ def _extract_sliding_window_single(
     tile_size: int,
     tile_overlap: int,
     patch_size: int = 16,
+    adaptor_names: list[str] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
     """Extract and stitch features for a single preprocessed image tensor."""
     if img.shape[0] != 1:
@@ -224,6 +276,7 @@ def _extract_sliding_window_single(
             amp,
             target_h // patch_size,
             target_w // patch_size,
+            adaptor_names=adaptor_names,
         )
 
     row_tile = min(tile_size, target_h)
@@ -252,6 +305,7 @@ def _extract_sliding_window_single(
                 amp,
                 patch_h,
                 patch_w,
+                adaptor_names=adaptor_names,
             )
             summaries.append(summary)
             grid_top = top // patch_size
@@ -334,7 +388,7 @@ def extract(args: argparse.Namespace) -> None:
     # Determine adaptor setup
     adaptor_names: list[str] | None = None
     if args.extract_adaptors:
-        adaptor_names = ["siglip2-g", "sam3"]
+        adaptor_names = _parse_adaptor_names(args.adaptor_names)
         print(f"[RADIO] Extracting with adaptors: {adaptor_names}")
 
     # Load model
@@ -379,8 +433,8 @@ def extract(args: argparse.Namespace) -> None:
 
     # Prepare output dirs
     subdirs = ["backbone", "summary"]
-    if args.extract_adaptors:
-        subdirs += ["siglip2", "sam3"]
+    if adaptor_names:
+        subdirs += [_adaptor_output_subdir(name) for name in adaptor_names]
     for sd in subdirs:
         os.makedirs(os.path.join(args.output_dir, sd), exist_ok=True)
 
@@ -403,6 +457,7 @@ def extract(args: argparse.Namespace) -> None:
                 args.amp,
                 tile_size=args.tile_size,
                 tile_overlap=args.tile_overlap,
+                adaptor_names=adaptor_names,
             )
         else:
             summary, spatial_2d, adaptor_2d = _run_radio_batch(
@@ -412,6 +467,7 @@ def extract(args: argparse.Namespace) -> None:
                 args.amp,
                 patch_h,
                 patch_w,
+                adaptor_names=adaptor_names,
             )
 
         B, D, _, _ = spatial_2d.shape
@@ -450,11 +506,11 @@ def extract(args: argparse.Namespace) -> None:
             pca_accumulator.append(bb.float())
 
             # Adaptor features
-            if args.extract_adaptors and adaptor_2d:
-                for name in ["siglip2-g", "sam3"]:
+            if adaptor_names and adaptor_2d:
+                for name in adaptor_names:
                     if name not in adaptor_2d:
                         continue
-                    short_name = name.replace("-g", "").replace("-", "")  # siglip2, sam3
+                    short_name = _adaptor_output_subdir(name)
                     ad_frame = adaptor_2d[name][i].cpu().half()
                     ad_path = os.path.join(args.output_dir, short_name, f"{stem}.pt")
                     torch.save(ad_frame, ad_path)
@@ -474,6 +530,36 @@ def extract(args: argparse.Namespace) -> None:
                 "image_dir": str(Path(args.image_dir).resolve()),
                 "image_sort_mode": image_sort_mode,
                 "num_frames": len(frame_manifest),
+                "features": {
+                    "backbone": {
+                        "subdir": "backbone",
+                        "dim": int(D),
+                        "grid": [int(patch_h), int(patch_w)],
+                        "dtype": "float16",
+                    },
+                    "summary": {
+                        "subdir": "summary",
+                        "dim": int(summary.shape[-1]),
+                        "dtype": "float32",
+                    },
+                    "adaptors": [
+                        {
+                            "name": name,
+                            "subdir": _adaptor_output_subdir(name),
+                            "dim": int(adaptor_2d[name].shape[1]) if name in adaptor_2d else None,
+                            "grid": (
+                                [
+                                    int(adaptor_2d[name].shape[2]),
+                                    int(adaptor_2d[name].shape[3]),
+                                ]
+                                if name in adaptor_2d and adaptor_2d[name].ndim == 4
+                                else None
+                            ),
+                            "dtype": "float16",
+                        }
+                        for name in (adaptor_names or [])
+                    ],
+                },
                 "frames": frame_manifest,
             },
             indent=2,
@@ -541,7 +627,16 @@ def main() -> None:
     parser.add_argument(
         "--extract_adaptors",
         action="store_true",
-        help="Also extract SigLIP2 and SAM3 adaptor features",
+        help="Also extract adaptor features listed by --adaptor_names",
+    )
+    parser.add_argument(
+        "--adaptor_names",
+        type=str,
+        default="siglip2-g,sam3",
+        help=(
+            "Comma-separated RADIO adaptor names to extract when --extract_adaptors "
+            "is set, e.g. siglip2-g,dino_v3,sam3"
+        ),
     )
     parser.add_argument(
         "--resolution_scale",

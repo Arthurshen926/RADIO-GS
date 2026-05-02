@@ -149,7 +149,7 @@ class RadioGSConfig:
     direct_point_sample_count: int = 2048
     direct_point_sample_strategy: str = "uniform"  # "uniform" or "class_balanced"
     direct_point_query_mode: str = "gaussian_index"  # "gaussian_index" or "knn"
-    direct_point_gaussian_position_mode: str = "gaussian_center"  # "gaussian_center" or "label_point"
+    direct_point_gaussian_position_mode: str = "label_point"  # "gaussian_center" or "label_point"
     direct_point_source: str = "gaussian"  # "gaussian", "label_ply", or "points3d"
     direct_point_ply_path: str = ""  # optional override; may contain {scene}
     direct_point_teacher_cache: str = ""  # optional .pt cache from eval_scannet_pointcloud_radio_teacher.py

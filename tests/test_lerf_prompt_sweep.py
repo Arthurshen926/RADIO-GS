@@ -7,8 +7,11 @@ from pathlib import Path
 import torch
 
 from radio_gs.scripts.extract_radio_features import (
+    _adaptor_output_subdir,
     _compute_scaled_radio_resolution,
+    _parse_adaptor_names,
     _stitch_sliding_window_features,
+    _unpack_radio_output,
 )
 from radio_gs.scripts import eval_lerf_grounding as eval_lerf_grounding_module
 from radio_gs.scripts.eval_lerf_grounding import load_or_generate_prompt_ensemble_embeddings
@@ -125,6 +128,69 @@ def test_stitch_sliding_window_features_blends_overlaps() -> None:
     assert stitched[0, 0, 0, 0].item() == 1.0
     assert stitched[0, 0, 1, 1].item() == 2.0
     assert stitched[0, 0, 3, 3].item() == 3.0
+
+
+def test_radio_adaptor_names_are_configurable() -> None:
+    assert _parse_adaptor_names("siglip2-g,dino_v3,sam3") == [
+        "siglip2-g",
+        "dino_v3",
+        "sam3",
+    ]
+    assert _adaptor_output_subdir("siglip2-g") == "siglip2"
+    assert _adaptor_output_subdir("dino_v3") == "dino_v3"
+
+
+def test_unpack_radio_output_keeps_requested_adaptors() -> None:
+    summary = torch.zeros(1, 2)
+    spatial = torch.arange(1 * 4 * 3).reshape(1, 4, 3).float()
+    output = (
+        summary,
+        spatial,
+        {
+            "siglip2-g": {"spatial": torch.ones(1, 4, 5)},
+            "dino_v3": {"spatial": torch.full((1, 4, 7), 2.0)},
+        },
+    )
+
+    _, _, adaptors = _unpack_radio_output(
+        output,
+        patch_h=2,
+        patch_w=2,
+        adaptor_names=["dino_v3"],
+    )
+
+    assert list(adaptors) == ["dino_v3"]
+    assert adaptors["dino_v3"].shape == (1, 7, 2, 2)
+    assert torch.all(adaptors["dino_v3"] == 2.0)
+
+
+def test_unpack_radio_output_handles_radio_dict_output() -> None:
+    output = {
+        "backbone": (
+            torch.zeros(1, 3),
+            torch.arange(1 * 4 * 3).reshape(1, 4, 3).float(),
+        ),
+        "siglip2-g": (
+            torch.zeros(1, 5),
+            torch.ones(1, 4, 5),
+        ),
+        "sam3": (
+            torch.zeros(1, 6),
+            torch.full((1, 4, 6), 3.0),
+        ),
+    }
+
+    summary, spatial, adaptors = _unpack_radio_output(
+        output,
+        patch_h=2,
+        patch_w=2,
+        adaptor_names=["siglip2-g", "sam3"],
+    )
+
+    assert summary.shape == (1, 3)
+    assert spatial.shape == (1, 3, 2, 2)
+    assert adaptors["siglip2-g"].shape == (1, 5, 2, 2)
+    assert adaptors["sam3"].shape == (1, 6, 2, 2)
 
 
 def test_prompt_ensemble_loads_exact_cache_before_encoding(tmp_path: Path, monkeypatch) -> None:

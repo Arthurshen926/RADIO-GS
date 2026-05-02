@@ -907,7 +907,7 @@ def evaluate_scene(
     compact_feature_key: str = "features",
     use_point_summary_adapter: bool = False,
     point_summary_adapter_blend_alpha: float = 1.0,
-    gaussian_index_position_mode: str = "gaussian_center",
+    gaussian_index_position_mode: str = "label_point",
     opacity_threshold: Optional[float] = 0.1,
     opacity_filter_mode: str = "auto",
     logit_calibration: str = "none",
@@ -1415,7 +1415,7 @@ def _add_query_mode_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "--gaussian_index_position_mode",
         choices=GAUSSIAN_INDEX_POSITION_MODES,
-        default="gaussian_center",
+        default="label_point",
         help=(
             "For query_mode=gaussian_index, decode the hash/coarse branch at the "
             "optimized Gaussian center or at the row-aligned label point coordinate."

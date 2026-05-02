@@ -53,7 +53,7 @@ def generate_config(
     direct_point_sample_count: int = 2048,
     direct_point_sample_strategy: str = "uniform",
     direct_point_query_mode: str = "gaussian_index",
-    direct_point_gaussian_position_mode: str = "gaussian_center",
+    direct_point_gaussian_position_mode: str = "label_point",
     direct_point_source: str = "gaussian",
     direct_point_teacher_cache: str = "",
     direct_point_feature_key: str = "features",
@@ -274,7 +274,7 @@ def main() -> None:
     parser.add_argument(
         "--direct_point_gaussian_position_mode",
         choices=["gaussian_center", "label_point"],
-        default="gaussian_center",
+        default="label_point",
     )
     parser.add_argument(
         "--direct_point_source",

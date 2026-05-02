@@ -674,7 +674,7 @@ class RadioGSTrainer:
         )
         self.direct_point_query_mode = getattr(config, "direct_point_query_mode", "gaussian_index")
         self.direct_point_gaussian_position_mode = str(
-            getattr(config, "direct_point_gaussian_position_mode", "gaussian_center")
+            getattr(config, "direct_point_gaussian_position_mode", "label_point")
         )
         self.direct_point_source = getattr(config, "direct_point_source", "gaussian")
         self.direct_point_teacher_cache = str(

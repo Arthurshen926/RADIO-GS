@@ -1,9 +1,15 @@
 from pathlib import Path
 
+import cv2
+import numpy as np
 import torch
 
 from radio_gs.scripts import generate_visualizations_v2 as viz
-from radio_gs.scripts.eval_lerf_grounding import compute_relevancy_heatmap, project_to_siglip2
+from radio_gs.scripts.eval_lerf_grounding import (
+    compute_relevancy_heatmap,
+    project_to_siglip2,
+    save_heatmap_vis,
+)
 
 
 class _MarkerProjection(torch.nn.Module):
@@ -106,3 +112,60 @@ def test_eval_compatible_grounding_heatmaps_match_formal_scene_softmax():
     assert torch.allclose(heatmaps, expected)
     assert heatmaps.shape == (1, 1, 1)
     assert heatmaps[0, 0, 0].item() < 0.25
+
+
+def test_project_to_siglip2_accepts_half_features_on_cpu():
+    projection = torch.nn.Linear(1280, 3).cpu().float()
+    features = torch.zeros(1, 1280, 1, 1, dtype=torch.float16)
+
+    projected = project_to_siglip2(features, projection)
+
+    assert projected.device.type == "cpu"
+    assert projected.dtype == torch.float32
+    assert projected.shape == (1, 3, 1, 1)
+
+
+def test_lerf_overlay_preserves_rgb_aspect_ratio(tmp_path):
+    heatmaps = {"apple": np.ones((2, 2), dtype=np.float32)}
+    masks = {"apple": np.array([[0, 1], [1, 0]], dtype=np.uint8)}
+    rgb = np.zeros((4, 8, 3), dtype=np.uint8)
+
+    save_heatmap_vis(
+        heatmaps,
+        masks,
+        frame_id=7,
+        out_dir=tmp_path,
+        tag="rendered",
+        rgb_image=rgb,
+    )
+
+    image = cv2.imread(str(tmp_path / "lerf_grounding_frame_00007_rendered.png"))
+
+    assert image is not None
+    assert image.shape[1] == 6 * rgb.shape[1]
+    assert image.shape[0] == 28 + rgb.shape[0]
+
+
+def test_lerf_overlay_can_write_per_query_files(tmp_path):
+    heatmaps = {
+        "apple": np.ones((2, 2), dtype=np.float32),
+        "red cup": np.zeros((2, 2), dtype=np.float32),
+    }
+    masks = {
+        "apple": np.ones((2, 2), dtype=np.uint8),
+        "red cup": np.ones((2, 2), dtype=np.uint8),
+    }
+    rgb = np.zeros((4, 8, 3), dtype=np.uint8)
+
+    save_heatmap_vis(
+        heatmaps,
+        masks,
+        frame_id=7,
+        out_dir=tmp_path,
+        tag="rendered",
+        rgb_image=rgb,
+        save_per_query=True,
+    )
+
+    assert (tmp_path / "lerf_grounding_frame_00007_rendered_apple.png").exists()
+    assert (tmp_path / "lerf_grounding_frame_00007_rendered_red_cup.png").exists()
