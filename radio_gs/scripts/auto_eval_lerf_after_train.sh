@@ -23,6 +23,29 @@ timestamp() {
   date '+%F %T'
 }
 
+EVAL_LOCK_DIR="$OUTPUT_DIR/reports/lerf_eval.lock"
+
+acquire_eval_lock() {
+  mkdir -p "$OUTPUT_DIR/reports"
+  while true; do
+    if mkdir "$EVAL_LOCK_DIR" 2>/dev/null; then
+      echo "$$" > "$EVAL_LOCK_DIR/pid"
+      trap 'rm -rf "$EVAL_LOCK_DIR"' EXIT
+      return 0
+    fi
+
+    local lock_pid=""
+    if [[ -f "$EVAL_LOCK_DIR/pid" ]]; then
+      lock_pid="$(cat "$EVAL_LOCK_DIR/pid" 2>/dev/null || true)"
+    fi
+    if [[ -n "$lock_pid" ]] && ps -p "$lock_pid" >/dev/null 2>&1; then
+      echo "[$(timestamp)] LERF eval lock is active for $OUTPUT_DIR (pid=$lock_pid); skipping duplicate eval" >&2
+      exit 75
+    fi
+    rm -rf "$EVAL_LOCK_DIR"
+  done
+}
+
 BEST_CKPT="$OUTPUT_DIR/checkpoints/best.pth"
 LATEST_CKPT="$OUTPUT_DIR/checkpoints/latest.pth"
 ran_eval=0
@@ -132,6 +155,7 @@ case "$WAIT_TOKEN" in
     ;;
 esac
 
+acquire_eval_lock
 run_sweep "$BEST_CKPT" "$OUTPUT_DIR/lerf_eval_best"
 recover_partial_summary "$OUTPUT_DIR/lerf_eval_best"
 run_sweep "$LATEST_CKPT" "$OUTPUT_DIR/lerf_eval_latest"

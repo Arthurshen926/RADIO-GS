@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU.}
+\label{tab:component_ablation}
+\begin{tabular}{lcccccc}
+\toprule
+Variant & Fig. & Ramen & Tea. & Waldo & LocAcc & mIoU \\
+\midrule
+Full RADIO-GS & 0.768 & 0.901 & 0.898 & 0.864 & 0.858 & 0.485 \\
+w/o FDH warm-start & 0.696 & 0.845 & 0.847 & 0.818 & 0.802 & 0.424 \\
+w/o refiner & 0.768 & 0.859 & 0.915 & 0.818 & 0.840 & 0.480 \\
+w/o hybrid & 0.768 & 0.873 & 0.898 & 0.818 & 0.839 & 0.507 \\
+w/o HCD & 0.268 & 0.648 & 0.661 & 0.545 & 0.531 & 0.260 \\
+\bottomrule
+\end{tabular}
+\end{table}

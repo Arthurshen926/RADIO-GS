@@ -322,3 +322,93 @@ class HCDCodec(nn.Module):
     def compression_ratio(self) -> float:
         """Dimensionality compression ratio (input_dim / bottleneck_dim)."""
         return self.input_dim / self.bottleneck_dim
+
+
+class DirectProjectionEncoder(nn.Module):
+    """Single 1x1 projection encoder used for the no-HCD ablation."""
+
+    def __init__(self, input_dim: int = 1280, bottleneck_dim: int = 64) -> None:
+        super().__init__()
+        self.input_dim = input_dim
+        self.bottleneck_dim = bottleneck_dim
+        self.proj = nn.Conv2d(input_dim, bottleneck_dim, kernel_size=1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.proj(x.float())
+
+
+class DirectProjectionDecoder(nn.Module):
+    """Single 1x1 projection decoder from compact codes to RADIO space."""
+
+    def __init__(self, bottleneck_dim: int = 64, output_dim: int = 1280) -> None:
+        super().__init__()
+        self.bottleneck_dim = bottleneck_dim
+        self.output_dim = output_dim
+        self.proj = nn.Conv2d(bottleneck_dim, output_dim, kernel_size=1)
+        self.norm = nn.GroupNorm(1, output_dim)
+
+    def forward(self, z: torch.Tensor) -> torch.Tensor:
+        return self.norm(self.proj(z.float()))
+
+    def forward_points(self, z: torch.Tensor) -> torch.Tensor:
+        if z.ndim != 2:
+            raise ValueError(f"Expected [N, C] compact points, got shape {tuple(z.shape)}")
+        decoded = self.forward(z[:, :, None, None])
+        return decoded[:, :, 0, 0].contiguous()
+
+
+class DirectProjectionCodec(nn.Module):
+    """No-HCD baseline codec with direct 1x1 encode/decode projections.
+
+    This keeps the compact feature-field interface identical to HCD while
+    removing the dual-stream hierarchical MLP structure, making it suitable for
+    controlled HCD-vs-direct ablations.
+    """
+
+    def __init__(self, input_dim: int = 1280, bottleneck_dim: int = 64) -> None:
+        super().__init__()
+        self.input_dim = input_dim
+        self.bottleneck_dim = bottleneck_dim
+        self.encoder = DirectProjectionEncoder(input_dim, bottleneck_dim)
+        self.decoder = DirectProjectionDecoder(bottleneck_dim, input_dim)
+
+    def encode(self, x: torch.Tensor) -> torch.Tensor:
+        return self.encoder(x)
+
+    def decode(self, z: torch.Tensor) -> torch.Tensor:
+        return self.decoder(z)
+
+    def decode_points(self, z: torch.Tensor) -> torch.Tensor:
+        return self.decoder.forward_points(z)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.decode(self.encode(x))
+
+    @property
+    def compression_ratio(self) -> float:
+        return self.input_dim / self.bottleneck_dim
+
+
+def build_feature_codec(
+    *,
+    input_dim: int = 1280,
+    bottleneck_dim: int = 64,
+    codec_type: str = "hcd",
+    dual_stream: bool = True,
+    symmetric_decoder: bool = False,
+) -> nn.Module:
+    """Build the configured compact-to-RADIO feature codec."""
+    normalized = str(codec_type or "hcd").strip().lower()
+    if normalized in {"hcd", "hierarchical"}:
+        return HCDCodec(
+            input_dim=input_dim,
+            bottleneck_dim=bottleneck_dim,
+            dual_stream=dual_stream,
+            symmetric_decoder=symmetric_decoder,
+        )
+    if normalized in {"direct", "linear", "projection"}:
+        return DirectProjectionCodec(
+            input_dim=input_dim,
+            bottleneck_dim=bottleneck_dim,
+        )
+    raise ValueError(f"Unknown codec_type: {codec_type}")

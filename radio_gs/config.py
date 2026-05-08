@@ -69,6 +69,7 @@ class RadioGSConfig:
     grounding_text_embeddings: str = DEFAULT_SIGLIP2_TEXT_EMBEDDINGS
 
     # HCD Codec
+    codec_type: str = "hcd"  # "hcd" main method, "direct" for no-HCD ablation
     bottleneck_dim: int = 64
     dual_stream: bool = True
     symmetric_decoder: bool = False
@@ -137,6 +138,27 @@ class RadioGSConfig:
     radio_adaptor_alignment_weight: float = 0.0
     radio_adaptor_alignment_kind: str = "feature_projection"
     radio_adaptor_alignment_checkpoint: str = "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
+    radio_adaptor_relation_names: str = ""
+    radio_adaptor_relation_weight: float = 0.0
+    radio_adaptor_relation_downsample: int = 1
+    radio_adaptor_relation_max_tokens: int = 512
+    radio_adaptor_relation_temperature: float = 1.0
+    radio_adaptor_region_names: str = ""
+    radio_adaptor_region_weight: float = 0.0
+    radio_adaptor_region_downsample: int = 1
+    radio_adaptor_region_max_tokens: int = 512
+    radio_adaptor_region_num_anchors: int = 16
+    radio_adaptor_region_temperature: float = 0.07
+    radio_adaptor_cross_view_names: str = ""
+    radio_adaptor_cross_view_weight: float = 0.0
+    radio_adaptor_cross_view_downsample: int = 2
+    radio_adaptor_cross_view_max_tokens: int = 256
+    radio_adaptor_cross_view_temperature: float = 1.0
+    text_heatmap_distill_weight: float = 0.0
+    text_heatmap_distill_embeddings: str = ""
+    text_heatmap_distill_downsample: int = 2
+    text_heatmap_distill_temperature: float = 20.0
+    text_heatmap_distill_mode: str = "query"
     tv_weight: float = 0.01
     feat_norm_weight: float = 0.0
     gradient_loss_weight: float = 0.0

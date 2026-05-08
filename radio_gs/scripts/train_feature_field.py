@@ -72,10 +72,18 @@ from radio_gs.losses.distillation_loss import (
     MultiViewConsistencyLoss,
     TotalVariationLoss,
 )
-from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_alignment_loss
+from radio_gs.losses.radio_adaptor_loss import (
+    compute_radio_adaptor_alignment_loss,
+    compute_radio_adaptor_cross_view_loss,
+    compute_radio_adaptor_region_loss,
+    compute_radio_adaptor_relation_loss,
+)
+from radio_gs.losses.text_heatmap_distill_loss import (
+    compute_text_heatmap_distill_loss,
+)
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.featsharp_3d import FeatSharp3D
-from radio_gs.models.hcd_codec import HCDCodec
+from radio_gs.models.hcd_codec import build_feature_codec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
@@ -124,6 +132,16 @@ def parse_radio_adaptor_names(raw: str | None) -> list[str]:
         if name and name not in names:
             names.append(name)
     return names
+
+
+def merge_radio_adaptor_names(*groups: list[str]) -> list[str]:
+    """Merge adaptor-name groups while preserving first-seen order."""
+    merged: list[str] = []
+    for group in groups:
+        for name in group:
+            if name and name not in merged:
+                merged.append(name)
+    return merged
 
 
 def read_ply_xyz(path: str | Path) -> torch.Tensor:
@@ -999,6 +1017,22 @@ class RadioGSTrainer:
         self.siglip_summary_alignment_weight = getattr(
             config, "siglip_summary_alignment_weight", 0.0
         )
+        self.text_heatmap_distill_weight = float(
+            getattr(config, "text_heatmap_distill_weight", 0.0)
+        )
+        self.text_heatmap_distill_embeddings_path = str(
+            getattr(config, "text_heatmap_distill_embeddings", "") or ""
+        )
+        self.text_heatmap_distill_downsample = max(
+            1, int(getattr(config, "text_heatmap_distill_downsample", 2))
+        )
+        self.text_heatmap_distill_temperature = float(
+            getattr(config, "text_heatmap_distill_temperature", 20.0)
+        )
+        self.text_heatmap_distill_mode = str(
+            getattr(config, "text_heatmap_distill_mode", "query") or "query"
+        )
+        self.text_heatmap_distill_embeddings: Optional[torch.Tensor] = None
         self.radio_adaptor_alignment_names = parse_radio_adaptor_names(
             getattr(config, "radio_adaptor_alignment_names", "")
         )
@@ -1007,6 +1041,54 @@ class RadioGSTrainer:
         )
         self.radio_adaptor_alignment_kind = str(
             getattr(config, "radio_adaptor_alignment_kind", "feature_projection")
+        )
+        self.radio_adaptor_relation_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_relation_names", "")
+        )
+        self.radio_adaptor_relation_weight = float(
+            getattr(config, "radio_adaptor_relation_weight", 0.0)
+        )
+        self.radio_adaptor_relation_downsample = max(
+            1, int(getattr(config, "radio_adaptor_relation_downsample", 1))
+        )
+        self.radio_adaptor_relation_max_tokens = int(
+            getattr(config, "radio_adaptor_relation_max_tokens", 512)
+        )
+        self.radio_adaptor_relation_temperature = float(
+            getattr(config, "radio_adaptor_relation_temperature", 1.0)
+        )
+        self.radio_adaptor_region_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_region_names", "")
+        )
+        self.radio_adaptor_region_weight = float(
+            getattr(config, "radio_adaptor_region_weight", 0.0)
+        )
+        self.radio_adaptor_region_downsample = max(
+            1, int(getattr(config, "radio_adaptor_region_downsample", 1))
+        )
+        self.radio_adaptor_region_max_tokens = int(
+            getattr(config, "radio_adaptor_region_max_tokens", 512)
+        )
+        self.radio_adaptor_region_num_anchors = int(
+            getattr(config, "radio_adaptor_region_num_anchors", 16)
+        )
+        self.radio_adaptor_region_temperature = float(
+            getattr(config, "radio_adaptor_region_temperature", 0.07)
+        )
+        self.radio_adaptor_cross_view_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_cross_view_names", "")
+        )
+        self.radio_adaptor_cross_view_weight = float(
+            getattr(config, "radio_adaptor_cross_view_weight", 0.0)
+        )
+        self.radio_adaptor_cross_view_downsample = max(
+            1, int(getattr(config, "radio_adaptor_cross_view_downsample", 2))
+        )
+        self.radio_adaptor_cross_view_max_tokens = int(
+            getattr(config, "radio_adaptor_cross_view_max_tokens", 256)
+        )
+        self.radio_adaptor_cross_view_temperature = float(
+            getattr(config, "radio_adaptor_cross_view_temperature", 1.0)
         )
         self.radio_adaptor_alignment_adaptors = nn.ModuleDict()
         if self.depth_loss_weight > 0 or self.geom_depth_loss_weight > 0:
@@ -1059,7 +1141,21 @@ class RadioGSTrainer:
             self.siglip_projection.eval()
             for param in self.siglip_projection.parameters():
                 param.requires_grad = False
-        if self.radio_adaptor_alignment_weight > 0 and self.radio_adaptor_alignment_names:
+        enabled_radio_adaptors = merge_radio_adaptor_names(
+            self.radio_adaptor_alignment_names
+            if self.radio_adaptor_alignment_weight > 0
+            else [],
+            self.radio_adaptor_relation_names
+            if self.radio_adaptor_relation_weight > 0
+            else [],
+            self.radio_adaptor_region_names
+            if self.radio_adaptor_region_weight > 0
+            else [],
+            self.radio_adaptor_cross_view_names
+            if self.radio_adaptor_cross_view_weight > 0
+            else [],
+        )
+        if enabled_radio_adaptors:
             radio_ckpt_path = Path(
                 getattr(
                     config,
@@ -1071,7 +1167,7 @@ class RadioGSTrainer:
                 raise FileNotFoundError(
                     f"RADIO adaptor checkpoint not found: {radio_ckpt_path}"
                 )
-            for adaptor_name in self.radio_adaptor_alignment_names:
+            for adaptor_name in enabled_radio_adaptors:
                 adaptor = load_radio_adaptor_from_checkpoint(
                     radio_ckpt_path,
                     adaptor_name,
@@ -1083,12 +1179,16 @@ class RadioGSTrainer:
                 self.radio_adaptor_alignment_adaptors[adaptor_name] = adaptor
             self._log(
                 "Loaded RADIO adaptor alignment heads: "
-                f"{self.radio_adaptor_alignment_names} "
+                f"{enabled_radio_adaptors} "
                 f"kind={self.radio_adaptor_alignment_kind} "
-                f"weight={self.radio_adaptor_alignment_weight:g}"
+                f"alignment_weight={self.radio_adaptor_alignment_weight:g} "
+                f"relation_weight={self.radio_adaptor_relation_weight:g} "
+                f"region_weight={self.radio_adaptor_region_weight:g} "
+                f"cross_view_weight={self.radio_adaptor_cross_view_weight:g}"
             )
         if (
             self.siglip_summary_alignment_weight > 0
+            or self.text_heatmap_distill_weight > 0
             or self.grounding_query_loss_weight > 0
             or self.direct_point_summary_alignment_weight > 0
             or self.direct_point_summary_adapter_weight > 0
@@ -1122,6 +1222,23 @@ class RadioGSTrainer:
                 f"SigLIP2 summary head loaded for text-space alignment "
                 f"(image_weight={self.siglip_summary_alignment_weight}, "
                 f"point_weight={self.direct_point_summary_alignment_weight})"
+            )
+
+        if self.text_heatmap_distill_weight > 0:
+            if self.siglip_summary_head is None:
+                raise RuntimeError(
+                    "text_heatmap_distill requires SigLIP2SummaryHead; "
+                    "set siglip_summary_head_weights"
+                )
+            self.text_heatmap_distill_embeddings = (
+                self._load_text_heatmap_distill_embeddings(config)
+            )
+            self._log(
+                "Loaded text heatmap distillation bank: "
+                f"{self.text_heatmap_distill_embeddings.shape[0]} queries "
+                f"T={self.text_heatmap_distill_temperature:g} "
+                f"mode={self.text_heatmap_distill_mode} "
+                f"weight={self.text_heatmap_distill_weight:g}"
             )
 
         direct_point_text_bank_needed = (
@@ -1350,9 +1467,10 @@ class RadioGSTrainer:
 
     @staticmethod
     def _build_codec(config: RadioGSConfig) -> nn.Module:
-        return HCDCodec(
+        return build_feature_codec(
             input_dim=getattr(config, "radio_feature_dim", 1280),
             bottleneck_dim=getattr(config, "bottleneck_dim", 64),
+            codec_type=getattr(config, "codec_type", "hcd"),
             dual_stream=getattr(config, "dual_stream", True),
             symmetric_decoder=getattr(config, "symmetric_decoder", False),
         )
@@ -1486,6 +1604,8 @@ class RadioGSTrainer:
             "siglip_align",
             "summary_align",
             "radio_adaptors",
+            "radio_relations",
+            "radio_regions",
             "ground_query",
             "seg_aux",
             "frozen_seg",
@@ -1857,7 +1977,11 @@ class RadioGSTrainer:
             "direct_point_adapter_decoder_anchor": 0.0,
             "siglip_align": 0.0,
             "summary_align": 0.0,
+            "text_heatmaps": 0.0,
             "radio_adaptors": 0.0,
+            "radio_relations": 0.0,
+            "radio_regions": 0.0,
+            "radio_cross_views": 0.0,
             "ground_query": 0.0,
             "ground_query_acc": 0.0,
             "ground_query_valid": 0.0,
@@ -2053,7 +2177,23 @@ class RadioGSTrainer:
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
+                l_text_heatmaps = self._compute_text_heatmap_distill_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
                 l_radio_adaptors = self._compute_radio_adaptor_alignment_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
+                l_radio_relations = self._compute_radio_adaptor_relation_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
+                l_radio_regions = self._compute_radio_adaptor_region_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
+                l_radio_cross_views = self._compute_radio_adaptor_cross_view_loss(
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
@@ -2306,7 +2446,11 @@ class RadioGSTrainer:
                     + frozen_seg_losses["total"]
                     + l_siglip
                     + l_summary
+                    + l_text_heatmaps
                     + l_radio_adaptors
+                    + l_radio_relations
+                    + l_radio_regions
+                    + l_radio_cross_views
                 )
 
             self.scaler.scale(loss).backward()
@@ -2404,7 +2548,11 @@ class RadioGSTrainer:
             )
             loss_accum["siglip_align"] += l_siglip.item()
             loss_accum["summary_align"] += l_summary.item()
+            loss_accum["text_heatmaps"] += l_text_heatmaps.item()
             loss_accum["radio_adaptors"] += l_radio_adaptors.item()
+            loss_accum["radio_relations"] += l_radio_relations.item()
+            loss_accum["radio_regions"] += l_radio_regions.item()
+            loss_accum["radio_cross_views"] += l_radio_cross_views.item()
             loss_accum["ground_query"] += l_ground_query.item()
             loss_accum["ground_query_acc"] += ground_query_acc.item()
             loss_accum["ground_query_valid"] += ground_query_valid.item()
@@ -2466,7 +2614,19 @@ class RadioGSTrainer:
                     "train/frozen_seg", frozen_seg_losses["total"].item(), self.global_step
                 )
                 self.writer.add_scalar(
+                    "train/text_heatmaps", l_text_heatmaps.item(), self.global_step
+                )
+                self.writer.add_scalar(
                     "train/radio_adaptors", l_radio_adaptors.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/radio_relations", l_radio_relations.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/radio_regions", l_radio_regions.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/radio_cross_views", l_radio_cross_views.item(), self.global_step
                 )
                 self.writer.add_scalar(
                     "train/direct_point", l_direct_point.item(), self.global_step
@@ -2651,7 +2811,11 @@ class RadioGSTrainer:
         frozen_seg_accum = 0.0
         siglip_align_accum = 0.0
         summary_align_accum = 0.0
+        text_heatmap_accum = 0.0
         radio_adaptor_align_accum = 0.0
+        radio_adaptor_relation_accum = 0.0
+        radio_adaptor_region_accum = 0.0
+        radio_adaptor_cross_view_accum = 0.0
         ground_query_accum = 0.0
         ground_query_acc_metric = 0.0
         ground_query_valid_accum = 0.0
@@ -2805,6 +2969,22 @@ class RadioGSTrainer:
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
             ).item()
+            text_heatmap_accum += self._compute_text_heatmap_distill_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
+            radio_adaptor_relation_accum += self._compute_radio_adaptor_relation_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
+            radio_adaptor_region_accum += self._compute_radio_adaptor_region_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
+            radio_adaptor_cross_view_accum += self._compute_radio_adaptor_cross_view_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
             semantic_decoded = None
             if (
                 hybrid_aux is not None
@@ -2847,7 +3027,11 @@ class RadioGSTrainer:
             "frozen_seg": frozen_seg_accum / n,
             "siglip_align": siglip_align_accum / n,
             "summary_align": summary_align_accum / n,
+            "text_heatmaps": text_heatmap_accum / n,
             "radio_adaptors": radio_adaptor_align_accum / n,
+            "radio_relations": radio_adaptor_relation_accum / n,
+            "radio_regions": radio_adaptor_region_accum / n,
+            "radio_cross_views": radio_adaptor_cross_view_accum / n,
             "ground_query": ground_query_accum / n,
             "ground_query_acc": ground_query_acc_metric / n,
             "ground_query_valid": ground_query_valid_accum / n,
@@ -2865,7 +3049,11 @@ class RadioGSTrainer:
             self.writer.add_scalar("val/frozen_seg", metrics["frozen_seg"], epoch)
             self.writer.add_scalar("val/siglip_align", metrics["siglip_align"], epoch)
             self.writer.add_scalar("val/summary_align", metrics["summary_align"], epoch)
+            self.writer.add_scalar("val/text_heatmaps", metrics["text_heatmaps"], epoch)
             self.writer.add_scalar("val/radio_adaptors", metrics["radio_adaptors"], epoch)
+            self.writer.add_scalar("val/radio_relations", metrics["radio_relations"], epoch)
+            self.writer.add_scalar("val/radio_regions", metrics["radio_regions"], epoch)
+            self.writer.add_scalar("val/radio_cross_views", metrics["radio_cross_views"], epoch)
             self.writer.add_scalar("val/ground_query", metrics["ground_query"], epoch)
             self.writer.add_scalar("val/ground_query_acc", metrics["ground_query_acc"], epoch)
             self.writer.add_scalar("val/ground_query_valid", metrics["ground_query_valid"], epoch)
@@ -4487,6 +4675,93 @@ class RadioGSTrainer:
         )
         return self.radio_adaptor_alignment_weight * adaptor_loss
 
+    def _radio_adaptor_subset(self, names: list[str]) -> dict[str, nn.Module]:
+        return {
+            name: self.radio_adaptor_alignment_adaptors[name]
+            for name in names
+            if name in self.radio_adaptor_alignment_adaptors
+        }
+
+    def _compute_radio_adaptor_relation_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_relation_names)
+        if (
+            self.radio_adaptor_relation_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        relation_loss, _ = compute_radio_adaptor_relation_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_relation_downsample,
+            max_tokens=self.radio_adaptor_relation_max_tokens,
+            temperature=self.radio_adaptor_relation_temperature,
+        )
+        return self.radio_adaptor_relation_weight * relation_loss
+
+    def _compute_radio_adaptor_region_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_region_names)
+        if (
+            self.radio_adaptor_region_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        region_loss, _ = compute_radio_adaptor_region_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_region_downsample,
+            max_tokens=self.radio_adaptor_region_max_tokens,
+            num_anchors=self.radio_adaptor_region_num_anchors,
+            temperature=self.radio_adaptor_region_temperature,
+        )
+        return self.radio_adaptor_region_weight * region_loss
+
+    def _compute_radio_adaptor_cross_view_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_cross_view_names)
+        if (
+            self.radio_adaptor_cross_view_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+            or decoded.shape[0] < 2
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        cross_view_loss, _ = compute_radio_adaptor_cross_view_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_cross_view_downsample,
+            max_tokens=self.radio_adaptor_cross_view_max_tokens,
+            temperature=self.radio_adaptor_cross_view_temperature,
+        )
+        return self.radio_adaptor_cross_view_weight * cross_view_loss
+
     def _project_summary_head_features(self, features: torch.Tensor) -> torch.Tensor:
         """Project [B, C, H, W] features through frozen SigLIP2SummaryHead to text-aligned space."""
         assert self.siglip_summary_head is not None
@@ -4864,6 +5139,34 @@ class RadioGSTrainer:
         cos_sim = (pred_summary * target_summary).sum(dim=1).mean()  # dot product of unit vecs
         return self.siglip_summary_alignment_weight * (1.0 - cos_sim)
 
+    def _compute_text_heatmap_distill_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        if (
+            self.text_heatmap_distill_weight <= 0
+            or self.siglip_summary_head is None
+            or self.text_heatmap_distill_embeddings is None
+            or decoded is None
+            or target is None
+        ):
+            return torch.tensor(0.0, device=self.device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        pred_summary = self._project_summary_head_features(decoded)
+        with torch.no_grad():
+            target_summary = self._project_summary_head_features(target)
+        heatmap_loss, _ = compute_text_heatmap_distill_loss(
+            pred_summary,
+            target_summary,
+            self.text_heatmap_distill_embeddings,
+            downsample=self.text_heatmap_distill_downsample,
+            temperature=self.text_heatmap_distill_temperature,
+            mode=self.text_heatmap_distill_mode,
+        )
+        return self.text_heatmap_distill_weight * heatmap_loss
+
     def _load_grounding_text_embeddings(
         self,
         config: RadioGSConfig,
@@ -4895,6 +5198,31 @@ class RadioGSTrainer:
         query_class_ids = [class_id for _, class_id in selected]
         text_embeddings = torch.stack([bank[query] for query in query_names]).to(self.device)
         return query_names, query_class_ids, text_embeddings
+
+    def _load_text_heatmap_distill_embeddings(
+        self,
+        config: RadioGSConfig,
+    ) -> torch.Tensor:
+        raw_path = self.text_heatmap_distill_embeddings_path or getattr(
+            config,
+            "grounding_text_embeddings",
+            DEFAULT_SIGLIP2_TEXT_EMBEDDINGS,
+        )
+        text_path = resolve_siglip_text_embeddings_path(raw_path)
+        if not text_path.exists():
+            raise FileNotFoundError(
+                f"Text heatmap distillation embeddings not found: {text_path}"
+            )
+        data = torch.load(text_path, map_location="cpu")
+        embeddings = data.get("embeddings")
+        if embeddings is None:
+            raise ValueError(f"Missing 'embeddings' tensor in {text_path}")
+        embeddings = F.normalize(embeddings.float(), dim=1)
+        if embeddings.ndim != 2:
+            raise ValueError(
+                f"Expected text heatmap embeddings [Q, C], got {tuple(embeddings.shape)}"
+            )
+        return embeddings.to(self.device)
 
     def _compute_grounding_query_loss(
         self,
@@ -5184,6 +5512,77 @@ class RadioGSTrainer:
 # Entry point
 # ===================================================================
 
+def _pid_is_running(pid: int) -> bool:
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _load_training_lock(lock_path: Path) -> dict:
+    try:
+        with open(lock_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
+
+def _acquire_training_lock(config: RadioGSConfig, config_path: str) -> Path | None:
+    if os.environ.get("RADIO_GS_DISABLE_TRAIN_LOCK", "").strip() == "1":
+        return None
+
+    output_dir = Path(getattr(config, "output_dir", "output/radio_gs"))
+    report_dir = output_dir / "reports"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    lock_path = report_dir / "training.lock"
+    payload = {
+        "pid": os.getpid(),
+        "hostname": socket.gethostname(),
+        "started_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "config_path": config_path,
+    }
+    encoded = json.dumps(payload, indent=2).encode("utf-8")
+
+    while True:
+        try:
+            fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+            with os.fdopen(fd, "wb") as f:
+                f.write(encoded)
+            return lock_path
+        except FileExistsError:
+            existing = _load_training_lock(lock_path)
+            existing_pid = existing.get("pid")
+            if isinstance(existing_pid, int) and _pid_is_running(existing_pid):
+                print(
+                    f"Training lock is active for {output_dir}: "
+                    f"pid={existing_pid}, config={existing.get('config_path', 'unknown')}",
+                    file=sys.stderr,
+                )
+                raise SystemExit(75)
+            try:
+                lock_path.unlink()
+            except FileNotFoundError:
+                pass
+
+
+def _release_training_lock(lock_path: Path | None) -> None:
+    if lock_path is None:
+        return
+    existing = _load_training_lock(lock_path)
+    if existing.get("pid") != os.getpid():
+        return
+    try:
+        lock_path.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="Train RADIO-GS feature field via distillation."
@@ -5202,6 +5601,7 @@ def main() -> None:
     config = load_config(args.config)
     setattr(config, "config_path", args.config)
     trainer: Optional[RadioGSTrainer] = None
+    training_lock = _acquire_training_lock(config, args.config)
 
     try:
         trainer = RadioGSTrainer(config)
@@ -5252,6 +5652,7 @@ def main() -> None:
     finally:
         if trainer is not None and trainer.writer is not None:
             trainer.writer.flush()
+        _release_training_lock(training_lock)
 
 
 if __name__ == "__main__":

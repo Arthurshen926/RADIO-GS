@@ -30,12 +30,13 @@ codec, screen-space refinement, and geometry-aware frozen-head supervision. The
 resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
 frozen \method{} package reaches 0.8712 macro localization accuracy and 0.4941
-macro mIoU across four scenes. On a 10-scene ScanNet direct point-query
-protocol, \method{} reaches 0.3538, 0.3573, and 0.4293 mIoU on the 19-, 15-,
-and 10-class splits, respectively. These results support the central claim that
-3D Gaussian scenes can serve as reusable foundation-feature memories, while the
-remaining submission risk is mainly baseline provenance and final paper
-formatting rather than core method viability.
+macro mIoU across four scenes; a DINOv3/SAM3 adaptor-enhanced candidate keeps
+the same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
+ScanNet direct point-query protocol, \method{} reaches 0.3538, 0.3573, and
+0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. These results
+support the central claim that 3D Gaussian scenes can serve as reusable
+foundation-feature memories, while the remaining submission risk is mainly
+baseline provenance and final paper formatting rather than core method viability.
 \end{abstract}
 
 \section{Introduction}
@@ -104,6 +105,15 @@ vision backbone~\cite{ranzinger2024radio,nvidia2026cradiov4}. \method{} uses
 \radio{} as a frozen teacher and studies whether its dense features can be
 reconstructed from 3D scenes at novel views.
 
+\paragraph{Foundation-model regularization in 3DGS.}
+FMGS embeds 2D foundation-model features into Gaussian scenes and uses DINO-style
+spatial structure to improve feature consistency~\cite{liu2024fmgs}. SAM-based
+Gaussian methods such as SAGA distill 2D segmentation priors into 3D Gaussian
+features for promptable object segmentation~\cite{cen2023saga}. Our adaptor
+regularizers follow the same principle, but use the official \radio{} adaptor
+heads so that the reconstructed feature remains a single RADIO-compatible
+representation at inference time.
+
 \section{Method}
 
 \subsection{Problem Setup}
@@ -161,6 +171,70 @@ where $\mathcal{L}_{si}$ is a scale-invariant depth loss. The head is frozen; th
 feature field must adapt so that its rendered features remain useful to the
 head.
 
+\subsection{RADIO Adaptor Consistency}
+
+\radio{} exposes frozen adaptor heads for \texttt{siglip2-g}, \texttt{dino\_v3},
+and \texttt{sam3}. The main open-vocabulary evaluator uses the text-aligned
+\texttt{siglip2-g} path, while training can additionally supervise the rendered
+feature through the other adaptors. For an adaptor $A_a$, we add a pointwise
+consistency term:
+\begin{equation}
+  \mathcal{L}_{a}
+  =
+  1 - \cos(A_a(\hat{F}_v), A_a(F_v^{\star})).
+\end{equation}
+
+For \texttt{dino\_v3}, we also match the token self-similarity structure rather
+than only the local feature value. Given normalized adaptor tokens $D$ and
+$D^{\star}$, we compute:
+\begin{equation}
+  \mathcal{L}_{rel}
+  =
+  \|DD^\top - D^{\star}{D^{\star}}^\top\|_2^2.
+\end{equation}
+This transfers DINO-like boundary and correspondence structure into the
+rendered RADIO feature field, similar in spirit to DINO regularization in FMGS.
+We also evaluate a cross-view variant inspired by ProFuse's use of dense
+cross-view correspondence and context fusion~\cite{chiou2026profuse}. For two
+training views $p$ and $q$, we match teacher and rendered DINO token affinity:
+\begin{equation}
+  \mathcal{L}_{cv}
+  =
+  \|D_pD_q^\top - D_p^{\star}{D_q^{\star}}^\top\|_2^2.
+\end{equation}
+Unlike ProFuse, this is an optimization-time regularizer on rendered feature
+maps, not a full pre-registration or context-proposal pipeline. To prevent
+cross-view smoothing from erasing text-grounding peaks, we add a label-free
+SigLIP text-heatmap distillation term over a fixed LERF text bank. The
+per-pixel query variant preserves the scene-category distribution:
+\begin{equation}
+  \mathcal{L}_{txt}^{query}
+  =
+  \mathrm{KL}(
+  \mathrm{softmax}(S^{\star}T^\top/\tau) \,\|\, \mathrm{softmax}(\hat{S}T^\top/\tau)).
+\end{equation}
+We also evaluate a spatial variant that normalizes each query over image
+locations, directly targeting the LERF argmax localization failure mode:
+\begin{equation}
+  \mathcal{L}_{txt}^{spatial}
+  =
+  \mathrm{KL}(
+  \mathrm{softmax}_{xy}(s_q^{\star}/\tau) \,\|\, \mathrm{softmax}_{xy}(\hat{s}_q/\tau)).
+\end{equation}
+
+For \texttt{sam3}, the current implementation uses a mask-free soft-region loss.
+Teacher SAM3 tokens define deterministic anchor prototypes; each pixel is softly
+assigned to anchors by teacher similarity, and the rendered feature is trained to
+match the teacher region prototypes:
+\begin{equation}
+  \mathcal{L}_{reg}
+  =
+  \sum_k \|\mu_k(A_{\mathrm{sam3}}(\hat{F}_v))
+  - \mu_k(A_{\mathrm{sam3}}(F_v^{\star}))\|_2^2.
+\end{equation}
+This approximates SAM-style region supervision when external SAM mask caches are
+not available, while keeping the inference-time representation unchanged.
+
 \subsection{Warm-Start Protocol}
 
 Directly applying frozen-head losses early in training can conflict with feature
@@ -181,9 +255,11 @@ localization accuracy and mIoU over query heatmaps.
 
 \subsection{Submission-Freeze Protocol}
 
-All numbers in this section come from the 2026-05-02 submission-freeze report:
-\texttt{output/radio\_gs/reports/submission\_freeze\_report.md}. External
-baseline rows are not yet treated as final claims because
+The conservative baseline numbers come from the 2026-05-02 submission-freeze
+report:
+\texttt{output/radio\_gs/reports/submission\_freeze\_report.md}. The RADIO
+adaptor ablations were completed on 2026-05-03 under the same LERF sweep
+protocol. External baseline rows are not yet treated as final claims because
 \texttt{baseline\_source\_verification.md} records unresolved cross-paper
 protocol mismatches.
 
@@ -209,9 +285,200 @@ Macro & 0.8712 & 0.4941 & -- \\
 
 Table~\ref{tab:lerf} is the current main internal result. Ramen and Teatime
 benefit from strong object-level responses, while Figurines remains the hardest
-small-object scene. The current paper should compare this row to LERF,
-LangSplat, and LEGaussians only after the external rows are replaced with
-protocol-matched official or reproduced values.
+small-object scene. This table is intentionally the conservative frozen mainline:
+the adaptor-enhanced candidate in Table~\ref{tab:adaptor_ablation} is reported
+as an ablation/selector result rather than replacing the main row. The current
+paper should compare this row to LERF, LangSplat, and LEGaussians only after the
+external rows are replaced with protocol-matched official or reproduced values.
+
+\subsection{Rendered Features vs. Original RADIO Features}
+
+\begin{table}[t]
+\centering
+\caption{Same-evaluator comparison between original RADIO features extracted
+from RGB frames and \method{} rendered features. Both use the same frozen
+SigLIP2 head and scene-category scoring.}
+\label{tab:teacher_vs_rendered}
+\begin{tabular}{lcccc}
+\toprule
+Scene & \multicolumn{2}{c}{RADIO RGB} & \multicolumn{2}{c}{\method{}} \\
+ & LocAcc & mIoU & LocAcc & mIoU \\
+\midrule
+Figurines & 0.7321 & 0.4303 & 0.8214 & 0.4308 \\
+Ramen & 0.8873 & 0.5883 & 0.9014 & 0.5862 \\
+Teatime & 0.8475 & 0.5210 & 0.8983 & 0.5486 \\
+Waldo Kitchen & 0.7273 & 0.4293 & 0.8636 & 0.4106 \\
+\midrule
+Macro & 0.7985 & 0.4922 & 0.8712 & 0.4941 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:teacher_vs_rendered} supports the inference-time feature-memory
+claim: the rendered feature field is not merely a lossy copy of the teacher. It
+can sharpen the task-relevant scene response after multiview reconstruction,
+especially for localization, even though the original RADIO RGB feature remains
+the direct 2D teacher used during training.
+
+\subsection{Core Component Ablation}
+
+\input{lerf_component_ablation_table}
+
+Table~\ref{tab:component_ablation} isolates the main architectural choices on
+LERF-OVS with a controlled seed-7 protocol. Unlike Table~\ref{tab:lerf}, which
+reports the conservative current best per scene, this table keeps the same seed
+route for the full model and its ablations. The goal is to verify whether each
+component contributes under the same evaluator: the hybrid field tests compact
+feature storage, HCD tests the nonlinear bottleneck codec, the screen-space
+refiner tests peak and boundary correction, and the FDH warm-start tests the
+geometry-aware training stage.
+
+The largest dependency is the HCD codec. Replacing HCD with a direct $1\times1$
+projection drops macro LocAcc from 0.858 to 0.531 and macro mIoU from 0.485 to
+0.260, with every scene degraded. FDH warm-start is the next strongest
+component, improving macro LocAcc by 0.056 and macro mIoU by 0.061 over the
+no-FDH run. The refiner gives a smaller but consistent localization gain
+($+0.018$ macro LocAcc) with almost unchanged mIoU. The hybrid representation
+mainly affects peak stability: the explicit non-hybrid variant reaches higher
+macro mIoU (0.507) but lower macro LocAcc (0.839), improving region overlap on
+Figurines/Teatime while losing peak accuracy on Ramen/Waldo. This explains why
+some enhancement branches can improve mIoU without preserving LocAcc.
+
+\subsection{Adaptor Consistency Ablation}
+
+\begin{table}[t]
+\centering
+\caption{Full-sweep LERF-OVS adaptor ablations. We only promote adaptor variants
+that preserve localization accuracy while improving mIoU.}
+\label{tab:adaptor_ablation}
+\begin{tabular}{llcc}
+\toprule
+Scene & Variant & LocAcc & mIoU \\
+\midrule
+Figurines & baseline & 0.8214 & 0.4308 \\
+Figurines & DINO rel. + SAM3 region & 0.8036 & 0.4399 \\
+Figurines & DINO cv + spatial text & 0.8214 & 0.4343 \\
+Ramen & baseline & 0.9014 & 0.5862 \\
+Ramen & DINO rel. + SAM3 region & 0.9014 & 0.5873 \\
+Teatime & baseline & 0.8983 & 0.5486 \\
+Teatime & DINO rel. + SAM3 region & 0.8983 & 0.5592 \\
+Waldo Kitchen & baseline & 0.8636 & 0.4106 \\
+Waldo Kitchen & DINO + SAM3 pointwise & 0.8636 & 0.4103 \\
+\midrule
+Macro & promoted selector & 0.8712 & 0.4979 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:adaptor_ablation} shows that adaptor supervision is useful but
+scene-dependent. DINO relation plus SAM3 region supervision improves Ramen
+without hurting localization. Teatime also benefits from the relation/region
+variant, reaching 0.5592 mIoU at unchanged localization accuracy. For
+Figurines, DINO cross-view with spatial text-heatmap distillation recovers the
+baseline localization score while improving mIoU from 0.4308 to 0.4343. Waldo
+Kitchen remains on the baseline checkpoint. Using the promoted Figurines,
+Ramen, and Teatime adaptor/cross-view checkpoints while keeping baseline Waldo
+Kitchen gives a candidate adaptor-enhanced macro score of 0.8712 LocAcc and
+0.4979 mIoU.
+
+The main failure mode is a localization/region tradeoff. The DINO relation and
+SAM3 region losses often smooth or broaden object-consistent heatmaps, which can
+raise thresholded overlap while moving the single argmax outside a small polygon.
+Because LERF-OVS LocAcc is an argmax-inside-mask metric, one feature-cell shift
+can hurt LocAcc even when the region response is visually cleaner. For
+submission, we therefore only promote adaptor checkpoints that preserve LocAcc;
+future training should add an explicit peak-preservation term or mask-aware
+small-object weighting before replacing the conservative main table.
+
+\begin{table}[t]
+\centering
+\caption{ProFuse-inspired DINOv3 cross-view diagnostics on LERF-OVS. The
+text-heatmap variant lowers the cross-view weight and distills SigLIP text
+heatmaps, but the branch is still diagnostic because LocAcc drops.}
+\label{tab:cross_view_diagnostics}
+\begin{tabular}{lccc}
+\toprule
+Scene / Variant & Temp. & LocAcc & mIoU \\
+\midrule
+Figurines baseline & 50 & 0.8214 & 0.4308 \\
+Figurines DINO cross-view & 50 & 0.8036 & 0.4339 \\
+Figurines cross-view + text heatmap & 50 & 0.8036 & 0.4381 \\
+Figurines cross-view + spatial heatmap & 50 & 0.8214 & 0.4343 \\
+Waldo baseline & 25 & 0.8636 & 0.4106 \\
+Waldo DINO cross-view & 25 & 0.5909 & 0.3662 \\
+Waldo cross-view + text heatmap & 40 & 0.6818 & 0.4563 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:cross_view_diagnostics} answers the cross-view question
+directly. DINO cross-view affinity and text-heatmap preservation can increase
+thresholded overlap, especially on Waldo at high temperature. The spatial
+heatmap variant recovers the Figurines localization score and becomes the only
+promoted cross-view LERF branch, but Waldo still loses the single-peak
+localization score. This suggests that cross-view affinity encourages coherent
+object regions while peak placement remains scene dependent; a full
+ProFuse-style pre-registration/context proposal module remains a future method
+extension rather than a paper-main result.
+
+\subsection{DINO/SAM Adaptor Downstream Probes}
+
+\begin{table}[t]
+\centering
+\caption{Frozen adaptor-space downstream probes on LERF-OVS. ``Teacher'' uses
+original RADIO RGB features; ``Rendered'' uses \method{} rendered features.
+Prototype segmentation uses same-category support masks from other frames.
+Matching uses the first annotated frame as source.}
+\label{tab:adaptor_downstream}
+\begin{tabular}{llcccc}
+\toprule
+Adaptor & Probe & \multicolumn{2}{c}{Teacher} & \multicolumn{2}{c}{Rendered} \\
+ & & LocAcc & mIoU & LocAcc & mIoU \\
+\midrule
+DINOv3 & Prototype seg. & 0.6543 & 0.0945 & 0.6277 & 0.0937 \\
+DINOv3 & Source-target match & 0.5957 & 0.1032 & 0.5035 & 0.1019 \\
+SAM3 & Prototype seg. & 0.8404 & 0.0757 & 0.6649 & 0.0564 \\
+SAM3 & Source-target match & 0.7872 & 0.0953 & 0.7092 & 0.0687 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:adaptor_downstream} is diagnostic rather than a claimed
+improvement: rendered features are competitive in DINOv3 mIoU but do not yet
+beat original RADIO features on aggregate, and SAM3 exposes a larger
+teacher-rendered gap. Per-scene positives still exist, especially on Waldo
+Kitchen source-target matching, where rendered DINOv3 improves from 0.2500 to
+0.5000 LocAcc and from 0.2708 to 0.2948 mIoU, and rendered SAM3 improves mIoU
+from 0.2965 to 0.3147 at unchanged LocAcc. These probes therefore support the
+feature-compatibility story while identifying adaptor-space preservation as the
+next optimization target.
+
+\begin{table}[t]
+\centering
+\caption{Promptable SAM3 and dense DINOv3 tasks on LERF-OVS. These probes use
+the same annotations as the grounding benchmark but replace text queries with
+adaptor-space prompts or source-target correspondences.}
+\label{tab:sam_dino_tasks}
+\begin{tabular}{lcccc}
+\toprule
+Task & \multicolumn{2}{c}{Teacher} & \multicolumn{2}{c}{Rendered} \\
+ & LocAcc/Hit & mIoU/Score & LocAcc/Hit & mIoU/Score \\
+\midrule
+SAM3 point prompt & 1.0000 & 0.2304 & 1.0000 & 0.1210 \\
+SAM3 box prompt & 0.8606 & 0.0910 & 0.7885 & 0.0614 \\
+SAM3 mask propagation & 0.7872 & 0.0953 & 0.7092 & 0.0687 \\
+DINOv3 dense matching & 0.5723 & 0.8547 & 0.5396 & 0.9063 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:sam_dino_tasks} separates two claims. First, rendered features
+remain usable for promptable SAM3-style segmentation and DINOv3 dense matching.
+Second, the current reconstruction still trails the original RADIO teacher in
+SAM3 masks and DINO hit rate; the higher rendered DINO similarity score suggests
+that the feature field can become over-smooth and select visually similar
+nearby regions. This motivates the cross-view DINO and text-heatmap protected
+training variants evaluated next.
 
 \subsection{ScanNet Direct Point-Query Transfer}
 
@@ -235,6 +502,31 @@ scenes using \texttt{gaussian\_index} queries, \texttt{label\_point} positions,
 and \texttt{label\_index} opacity filtering. This is not presented as a full
 ScanNet semantic segmentation leaderboard result; it is a fair direct probe of
 the learned feature field.
+
+\begin{table}[t]
+\centering
+\caption{ScanNet DINOv3 cross-view diagnostics on two difficult scenes. The
+branch is warm-started from the v67 teacher-balanced checkpoint and uses
+conservative DINO cross-view affinity weights.}
+\label{tab:scannet_cross_view}
+\begin{tabular}{llccc}
+\toprule
+Scene & Variant & 19 cls & 15 cls & 10 cls \\
+\midrule
+scene0070\_00 & baseline & 0.2297 & 0.2405 & 0.3238 \\
+scene0070\_00 & DINO cv, $\lambda=0.001$ & 0.2437 & 0.2466 & 0.3284 \\
+scene0645\_00 & baseline & 0.2381 & 0.2458 & 0.2875 \\
+scene0645\_00 & DINO cv, $\lambda=0.003$ & 0.2427 & 0.2500 & 0.2833 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:scannet_cross_view} shows that DINO cross-view context can
+improve ScanNet point-query transfer when the weight is conservative. On
+scene0070\_00, $\lambda=0.001$ improves all three splits. On scene0645\_00,
+$\lambda=0.003$ improves the 19- and 15-class splits but slightly lowers the
+10-class split, so the current recommendation is to sweep lower weights before
+promoting the branch to the 10-scene main ScanNet result.
 
 \subsection{Profile Evidence}
 
@@ -275,6 +567,27 @@ overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen
 \radio{} teacher heatmap, and rendered \method{} heatmap for a representative
 query.}
 \label{fig:qualitative}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/lerf_adaptor_downstream_qualitative.png}
+\caption{Qualitative DINOv3/SAM3 adaptor-space source-target matching. Each row
+shows RGB, GT mask, original RADIO teacher heatmap, and \method{} rendered
+heatmap. The Waldo Kitchen rows show cases where rendered features move the
+peak onto the target object; the Ramen row illustrates that the aggregate SAM3
+gap remains visible even when localization is correct.}
+\label{fig:adaptor_downstream_qual}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/lerf_sam_dino_tasks_qualitative.png}
+\caption{Qualitative promptable downstream probes from reconstructed features.
+Top: SAM3 mask-prompt propagation from a source annotation to a target view.
+Bottom: DINOv3 dense matching visualized with teacher and rendered
+correspondences.}
+\label{fig:sam_dino_tasks_qual}
 \end{figure*}
 
 \section{Discussion}

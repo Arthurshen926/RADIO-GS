@@ -675,7 +675,7 @@ def _import_render_pipeline():
     from radio_gs.config import load_config
     from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
     from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
-    from radio_gs.models.hcd_codec import HCDCodec
+    from radio_gs.models.hcd_codec import build_feature_codec
     from radio_gs.models.featsharp_3d import FeatSharp3D
     from radio_gs.models.screen_refiner import (
         ScreenSpaceRefiner,
@@ -688,7 +688,7 @@ def _import_render_pipeline():
         "load_config": load_config,
         "HybridFeatureGaussian": HybridFeatureGaussian,
         "ExplicitFeatureGaussian": ExplicitFeatureGaussian,
-        "HCDCodec": HCDCodec,
+        "build_feature_codec": build_feature_codec,
         "FeatSharp3D": FeatSharp3D,
         "ScreenSpaceRefiner": ScreenSpaceRefiner,
         "build_refiner_guide": build_refiner_guide,
@@ -745,9 +745,10 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
     model = model.to(device).eval()
     use_2dgs = resolve_use_2dgs(config, ply_path)
 
-    codec = R["HCDCodec"](
+    codec = R["build_feature_codec"](
         input_dim=getattr(config, "radio_feature_dim", 1280),
         bottleneck_dim=getattr(config, "bottleneck_dim", 64),
+        codec_type=getattr(config, "codec_type", "hcd"),
         dual_stream=getattr(config, "dual_stream", True),
         symmetric_decoder=getattr(config, "symmetric_decoder", False),
     ).to(device).eval()

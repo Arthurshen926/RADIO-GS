@@ -1,7 +1,9 @@
 # RADIO-GS Current Paper Draft
 
-Status: 2026-05-02 submission-freeze draft. Numbers in this file must be kept
-consistent with `output/radio_gs/reports/submission_freeze_report.md`.
+Status: 2026-05-03 submission draft plus adaptor/cross-view diagnostics. Frozen
+mainline numbers must stay consistent with
+`output/radio_gs/reports/submission_freeze_report.md`; promoted diagnostic
+candidates are tracked in `docs/PROJECT_MAINLINE.md`.
 
 The active LaTeX draft is `paper/radio_gs_draft.tex`.
 
@@ -21,12 +23,14 @@ codec, screen-space refinement, and geometry-aware frozen-head supervision. The
 resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
 frozen RADIO-GS package reaches 0.8712 macro localization accuracy and 0.4941
-macro mIoU across four scenes. On a 10-scene ScanNet direct point-query protocol,
-RADIO-GS reaches 0.3538, 0.3573, and 0.4293 mIoU on the 19-, 15-, and 10-class
-splits, respectively. These results support the central claim that 3D Gaussian
-scenes can serve as reusable foundation-feature memories, while the remaining
-submission risk is mainly baseline provenance and final paper formatting rather
-than core method viability.
+macro mIoU across four scenes; a promoted adaptor/cross-view candidate keeps the
+same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
+ScanNet direct point-query protocol, RADIO-GS reaches 0.3538, 0.3573, and
+0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. These results
+support the central claim that 3D Gaussian scenes can serve as reusable
+foundation-feature memories, while the remaining submission risk is mainly
+baseline provenance and final paper formatting rather than core method
+viability.
 
 ## Main Contributions
 
@@ -83,6 +87,16 @@ The frozen main LERF-OVS result uses the rendered-feature best-scene summary in
 The paper should present this as the primary internal RADIO-GS result. External
 LERF/LangSplat/LEGaussians rows should remain clearly marked as published or
 reproduced only after their exact source and protocol alignment are closed.
+
+Promoted adaptor/cross-view candidate:
+
+| Scene | Selected branch | LocAcc | mIoU | Temperature |
+|---|---|---:|---:|---:|
+| Figurines | DINO cv + spatial text heatmap | 0.8214 | 0.4343 | 50 |
+| Ramen | DINO relation + SAM3 region | 0.9014 | 0.5873 | 40 |
+| Teatime | DINO relation + SAM3 region | 0.8983 | 0.5592 | 28 |
+| Waldo Kitchen | Baseline | 0.8636 | 0.4106 | 25 |
+| Macro | - | 0.8712 | 0.4979 | - |
 
 ### ScanNet Direct Point Query
 
