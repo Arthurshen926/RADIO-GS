@@ -88,6 +88,12 @@ run_step() {
   log "START ${name}"
   mkdir -p "$(dirname "${log_path}")" "$(dirname "${marker}")"
 
+  if [[ "${DRY_RUN}" == "1" ]]; then
+    log "DRY_RUN command for ${name}:"
+    print_cmd bash radio_gs/scripts/run_and_mark_success.sh "${marker}" "$@"
+    return 0
+  fi
+
   if [[ -f "${marker}" ]]; then
     log "SKIP ${name}: marker exists"
     return 0
@@ -95,12 +101,6 @@ run_step() {
 
   if [[ "${FORCE_CLEAR_STAGE_LOCKS}" == "1" ]]; then
     rm -rf "${marker}.lock"
-  fi
-
-  if [[ "${DRY_RUN}" == "1" ]]; then
-    log "DRY_RUN command for ${name}:"
-    print_cmd bash radio_gs/scripts/run_and_mark_success.sh "${marker}" "$@"
-    return 0
   fi
 
   bash radio_gs/scripts/run_and_mark_success.sh "${marker}" "$@" >> "${log_path}" 2>&1
