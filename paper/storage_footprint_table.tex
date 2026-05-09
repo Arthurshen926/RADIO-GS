@@ -1,0 +1,16 @@
+\begin{table}[t]
+\centering
+\caption{Storage footprint accounting for compact teacher-feature fields. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian; compact total counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors.}
+\label{tab:storage_footprint}
+\begin{tabular}{lrrrr}
+\toprule
+Scene & \#G & Direct & Compact & Saving \\
+ &  & MiB & MiB &  \\
+\midrule
+Figurines & 168,791 & 412.1 & 237.0 & 1.74$\times$ \\
+Ramen & 382,687 & 934.3 & 311.2 & 3.00$\times$ \\
+Teatime & 460,157 & 1123.4 & 338.1 & 3.32$\times$ \\
+Waldo Kitchen & 691,728 & 1688.8 & 418.5 & 4.04$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}

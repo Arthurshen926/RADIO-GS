@@ -8,7 +8,9 @@ repository to a top-conference paper package?
 
 - **Method maturity**: mature research prototype with paper-facing automation and archive discipline in place
 - **Current submission maturity**: conservative paper package with LaTeX draft
-- **Estimated top-conference completion**: about 90% after the 2026-05-03 RADIO adaptor experiments and LaTeX updates
+- **Estimated top-conference completion**: about 90% for the conservative
+  RADIO-GS package, and about 82% for the stricter CTF-GS paper outline until
+  external baselines and final venue formatting are closed
 
 The repository now contains a coherent method, a strong LERF-OVS result,
 repeatable evaluation code, and a completed 10-scene fair ScanNet v67 aggregate.
@@ -36,9 +38,19 @@ conflict.
 
 ## Best-supported paper framing
 
-The cleanest current framing is:
+The cleanest current framing is now:
 
-> **Foundation feature reconstruction in 3D Gaussian scenes for open-vocabulary scene understanding.**
+> **Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding.**
+
+The paper-facing method name is **CTF-GS**. `RADIO-GS` remains the repository and
+implementation name. The current module names should be mapped as:
+
+| Implementation name | Paper-facing name |
+|---|---|
+| Hybrid Gaussian feature field | HGCF: Hybrid Gaussian Code Field |
+| HCD codec | CTR: Compact-to-Teacher Reconstruction |
+| Screen-space refiner | VFA: View-Space Feature Aligner |
+| FDH warm-start | FGC: Frozen Geometry-Head Consistency |
 
 Under that framing, the paper solves the following problem:
 
@@ -49,7 +61,9 @@ Under that framing, the paper solves the following problem:
 ## Strongest current claims
 
 1. The project can already support a strong **LERF-OVS grounding** main result.
-2. The project has a technically non-trivial unified pipeline: Hybrid Gaussian feature field, HCD codec, screen-space refinement, FDH supervision, and ws240 warm-start training.
+2. The project has a technically non-trivial unified pipeline: HGCF compact
+   code storage, CTR/HCD reconstruction, VFA/screen refinement, FGC/FDH
+   supervision, and ws240 warm-start training.
 3. The project now has a paper-facing **ScanNet direct point-query** cross-domain result under the v67 teacher-balanced fair protocol.
 4. The project has credible auxiliary evidence that the learned feature field is useful beyond grounding, especially on Replica room_0 depth and segmentation.
 5. The freeze package now includes formal LERF overlay/profile runs for all four main scenes plus one full ScanNet v67 evaluation profile.
@@ -76,10 +90,10 @@ Under that framing, the paper solves the following problem:
     DINO cross-view with `text_heatmap_distill_mode: spatial` keeps LocAcc at
     0.8214 and improves mIoU from 0.4308 to 0.4343.
 12. The core LERF component ablation is now closed under the controlled seed-7
-    protocol. HCD is the strongest architectural dependency (`w/o HCD` macro
-    LocAcc 0.5306 vs. full 0.8578), FDH warm-start provides the largest training
-    route gain (`w/o FDH` 0.8018), and refiner/hybrid mainly affect peak
-    stability rather than raw region coverage.
+    protocol. CTR/HCD is the strongest architectural dependency (`w/o CTR`
+    macro LocAcc 0.5306 vs. full 0.8578), FGC/FDH warm-start provides the
+    largest training route gain (`w/o FGC` 0.8018), and VFA/HGCF mainly affect
+    peak stability rather than raw region coverage.
 
 ## What is already paper-grade
 
@@ -99,6 +113,8 @@ Under that framing, the paper solves the following problem:
 
 - [README.md](../README.md)
 - [docs/feature_reconstruction_analysis.md](feature_reconstruction_analysis.md)
+- [output/radio_gs/reports/storage_footprint_report.md](../output/radio_gs/reports/storage_footprint_report.md)
+- [output/radio_gs/reports/lerf_failure_analysis.md](../output/radio_gs/reports/lerf_failure_analysis.md)
 
 ### Qualitative figures
 
@@ -145,11 +161,12 @@ for `figurines`, `ramen`, `teatime`, and `waldo_kitchen`. That meaningfully
 lowers submission risk and resolves the earlier missing Teatime evidence, but it
 is still narrower than a benchmark-wide statistical treatment.
 
-### 4. Small-object failure analysis is still incomplete
+### 4. Small-object failure analysis is now paper-usable, but can be deepened
 
-The figurines scene strongly suggests that feature resolution and object scale are
-limiting factors. This should become a targeted analysis section rather than only
-an observation spread across reports.
+The generated `lerf_failure_analysis.md` and `lerf_failure_analysis_table.tex`
+now provide a paper-facing analysis of fragile categories. A deeper optional
+analysis would correlate mask area or feature-cell footprint against LocAcc, but
+the current table is enough to support a limitations/discussion section.
 
 ### 5. Efficiency and cost have current eval profiles, but need final paper framing
 
@@ -174,6 +191,6 @@ instead of relying on informal notes.
 2. Convert the refreshed profile evidence and training logs into one polished efficiency/cost table.
 3. Decide how much of the fixed-protocol seed-robustness table belongs in the main paper versus appendix.
 4. Decide whether the adaptor-enhanced LERF candidate is main-paper or ablation-only.
-5. Assemble the final qualitative figure from `submission_freeze_figure_shortlist.md`.
-6. Move `paper/radio_gs_draft.tex` into the target venue template and polish related work.
-7. Add a concise small-object failure analysis for Figurines.
+5. Move `paper/radio_gs_draft.tex` into the target venue template and polish related work.
+6. Keep the small-object failure analysis and storage footprint tables in the main paper unless page limits force them to appendix.
+7. Promote ScanNet DINO cross-view only after a full 10-scene conservative-weight sweep preserves the main fair protocol.

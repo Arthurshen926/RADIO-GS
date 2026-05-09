@@ -7,20 +7,25 @@ current strongest paper route from historical validation branches.
 
 ## One-Sentence Thesis
 
-RADIO-GS reconstructs frozen RADIO foundation features inside 3D Gaussian
-scenes so that novel views can render reusable feature maps for open-vocabulary
-grounding and cross-domain scene understanding.
+The paper-facing method, **CTF-GS**, compactly distills frozen RADIO teacher
+features into 3D Gaussian scenes so that novel views can render reusable
+teacher-compatible feature maps for open-vocabulary grounding and cross-domain
+scene understanding. `RADIO-GS` remains the repository/project implementation
+name.
 
 ## Current Strongest Mainline
 
 The active paper route is:
 
 1. Frozen 3DGS geometry.
-2. Hybrid Gaussian feature field with per-Gaussian latent storage and a coarse
-   spatial branch.
-3. HCD bottleneck codec from compact features back to 1280d RADIO space.
-4. Screen-space feature refinement.
-5. FDH warm-start training as the main geometry-aware regularizer.
+2. **HGCF**: Hybrid Gaussian Code Field with per-Gaussian latent storage and a
+   coarse spatial branch.
+3. **CTR**: Compact-to-Teacher Reconstruction from compact features back to
+   1280d RADIO space (implemented as the HCD codec).
+4. **VFA**: View-Space Feature Alignment (implemented as screen-space feature
+   refinement).
+5. **FGC**: Frozen Geometry-Head Consistency warm-start training as the main
+   geometry-aware regularizer (formerly FDH warm-start).
 6. LERF-OVS as the primary benchmark.
 7. ScanNet v67 direct point query as cross-domain feature-usability evidence.
 8. Formal profile runs for evaluation runtime and peak VRAM.
@@ -42,6 +47,8 @@ Use these files first:
 | Baseline provenance risk | `output/radio_gs/reports/baseline_source_verification.md` |
 | Profile summary | `output/radio_gs/reports/submission_freeze_profile_summary.md` |
 | Figure shortlist | `output/radio_gs/reports/submission_freeze_figure_shortlist.md` |
+| Storage footprint | `output/radio_gs/reports/storage_footprint_report.md` |
+| LERF failure analysis | `output/radio_gs/reports/lerf_failure_analysis.md` |
 
 ## Active Quantitative Claims
 
@@ -131,6 +138,17 @@ Use `output/radio_gs/reports/submission_freeze_profile_summary.md`.
 | LERF Waldo Kitchen overlay | 21.101 s | 2076 MiB |
 | ScanNet v67 10-scene eval | 150.903 s | 1666 MiB |
 
+### Storage Footprint Evidence
+
+Use `output/radio_gs/reports/storage_footprint_report.md`.
+
+| Scene | Direct 1280-D fp16 | Compact total | Saving |
+|---|---:|---:|---:|
+| Figurines | 412.1 MiB | 237.0 MiB | 1.74x |
+| Ramen | 934.3 MiB | 311.2 MiB | 3.00x |
+| Teatime | 1123.4 MiB | 338.1 MiB | 3.32x |
+| Waldo Kitchen | 1688.8 MiB | 418.5 MiB | 4.04x |
+
 ## Active Configs
 
 Do not treat every YAML under `radio_gs/configs/` as a current paper route. The
@@ -153,15 +171,15 @@ route.
 
 | Branch | What It Validated | Current Status |
 |---|---|---|
-| noFDH seed runs | Robustness and ablation companion for FDH | Supporting table only |
+| noFGC/noFDH seed runs | Robustness and ablation companion for geometry-head consistency | Supporting table only |
 | pure frozen depth-only | Whether frozen depth supervision alone carries useful geometry | Archived support branch |
 | room0 Replica depth/segmentation | Downstream utility beyond grounding | Supporting qualitative/auxiliary evidence |
-| FDH weight sweeps | Sensitivity of geometry regularization | Archived design evidence |
+| FGC/FDH weight sweeps | Sensitivity of geometry regularization | Archived design evidence |
 | Figurines 2x | Small-object feature-resolution hypothesis | Archived unless re-run under frozen protocol |
 | ScanNet v43/v62 diagnostics | Early point-query and label-informed debugging | Archived; not fair main table |
 | ScanNet v67 | Current fair cross-domain protocol | Active mainline support |
 | prompt ensemble / overlay sweeps | Visualization and prompt-sensitivity checks | Supporting only |
-| LERF component ablations | Validated FDH, refiner, hybrid, and HCD under controlled seed-7 LERF-OVS | Active paper ablation; see `output/radio_gs/reports/lerf_component_ablation.md` |
+| LERF component ablations | Validated FGC/FDH, VFA/refiner, HGCF/hybrid, and CTR/HCD under controlled seed-7 LERF-OVS | Active paper ablation; see `output/radio_gs/reports/lerf_component_ablation.md` |
 | RADIO DINOv3/SAM3 adaptor ablations | Tested adaptor-space consistency, DINO relation, and SAM3 soft-region supervision | Active ablation; only Ramen/Teatime promoted |
 | ProFuse-style DINO cross-view branch | Tested cross-view DINO affinity plus text-heatmap peak protection | LERF diagnostic only; improves some overlap scores but does not preserve LocAcc |
 | ScanNet DINO cross-view branch | Tested DINO affinity as cross-view context for direct point queries | Positive targeted diagnostic; needs full 10-scene conservative-weight sweep |

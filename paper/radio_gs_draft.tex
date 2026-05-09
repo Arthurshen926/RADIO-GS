@@ -8,11 +8,12 @@
 \usepackage{xcolor}
 \usepackage{hyperref}
 
-\newcommand{\method}{RADIO-GS}
+\newcommand{\method}{CTF-GS}
+\newcommand{\project}{RADIO-GS}
 \newcommand{\radio}{C-RADIOv4-H}
 \newcommand{\todo}[1]{\textcolor{red}{[#1]}}
 
-\title{\method: Foundation Feature Reconstruction in 3D Gaussian Scenes for Open-Vocabulary Scene Understanding}
+\title{Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding}
 
 \author{Anonymous Authors}
 \date{}
@@ -25,14 +26,15 @@ We study whether dense vision-foundation features can be reconstructed as a
 3D Gaussian scene representation and reused at novel views for open-vocabulary
 scene understanding. Instead of training a scene-specific classifier or storing
 raw high-dimensional features directly on every Gaussian, \method{} distills
-frozen RADIO features into a hybrid Gaussian feature field with a compact HCD
-codec, screen-space refinement, and geometry-aware frozen-head supervision. The
+frozen RADIO features into a Hybrid Gaussian Code Field (HGCF), reconstructs
+teacher-space features with Compact-to-Teacher Reconstruction (CTR), and uses
+View-Space Feature Alignment (VFA) plus Frozen Geometry-Head Consistency (FGC). The
 resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
-frozen \method{} package reaches 0.8712 macro localization accuracy and 0.4941
+frozen \project{} package reaches 0.8712 macro localization accuracy and 0.4941
 macro mIoU across four scenes; a DINOv3/SAM3 adaptor-enhanced candidate keeps
 the same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
-ScanNet direct point-query protocol, \method{} reaches 0.3538, 0.3573, and
+ScanNet direct point-query protocol, \project{} reaches 0.3538, 0.3573, and
 0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. These results
 support the central claim that 3D Gaussian scenes can serve as reusable
 foundation-feature memories, while the remaining submission risk is mainly
@@ -48,7 +50,7 @@ open-vocabulary 3D understanding, this creates a gap: the strongest 2D feature
 extractors are available at training images, but a deployed 3D scene must answer
 queries from novel views.
 
-\method{} targets this gap by reconstructing foundation features inside a 3D
+\method{} targets this gap by reconstructing teacher foundation features inside a 3D
 Gaussian scene. Our goal is not to train a new per-scene language classifier.
 Instead, we ask whether a scene representation can render novel-view feature maps
 that remain compatible with frozen downstream heads and text embeddings. This
@@ -57,13 +59,13 @@ directly to a radiance field or optimize only a final task score.
 
 The technical challenge is that RADIO features are high-dimensional, dense, and
 expensive to store directly on every Gaussian. We therefore learn a compact
-hybrid Gaussian feature field, decode it through an HCD bottleneck codec, and
-refine it in screen space before comparison to the frozen RADIO teacher. We also
-use frozen-head supervision as a geometry-aware regularizer: a frozen downstream
-head guides the feature field without turning the model into a task-specific
-predictor.
+Hybrid Gaussian Code Field, decode it through a Compact-to-Teacher
+Reconstruction module, and refine it in view space before comparison to the
+frozen RADIO teacher. We also use Frozen Geometry-Head Consistency as a
+geometry-aware regularizer: a frozen downstream head guides the feature field
+without turning the model into a task-specific predictor.
 
-Our current paper package is conservative. We freeze all internal \method{}
+Our current paper package is conservative. We freeze all internal \project{}
 numbers to concrete artifacts and separate them from external baseline rows whose
 cross-paper provenance is still unresolved. The result is a clear submission
 route: LERF-OVS provides the main open-vocabulary grounding evidence, ScanNet
@@ -73,12 +75,15 @@ evaluation runs quantify runtime and memory.
 \paragraph{Contributions.}
 This draft makes four claims:
 \begin{itemize}
-  \item We formulate 3D Gaussian feature reconstruction from frozen RADIO
-  features as a reusable scene-memory problem.
-  \item We introduce a hybrid Gaussian feature field with compact latent
-  storage, a coarse spatial branch, HCD decoding, and screen-space refinement.
-  \item We use frozen-head supervision as a geometry-aware training signal while
-  keeping downstream heads fixed.
+  \item We formulate compact teacher-feature distillation for queryable 3D
+  Gaussian scene understanding across rendered-view localization and direct 3D
+  point queries.
+  \item We introduce a Hybrid Gaussian Code Field with compact latent storage and
+  a coarse spatial branch, avoiding direct high-dimensional teacher-feature
+  storage on every Gaussian.
+  \item We use Compact-to-Teacher Reconstruction, View-Space Feature Alignment,
+  and Frozen Geometry-Head Consistency to recover teacher-compatible features
+  while keeping teachers and downstream heads fixed.
   \item We provide a frozen evaluation package covering LERF-OVS, ScanNet
   direct point-query transfer, qualitative overlays, and profile evidence.
 \end{itemize}
@@ -90,8 +95,8 @@ LERF embeds language-aligned features in neural radiance fields and enables
 open-vocabulary querying in 3D scenes~\cite{kerr2023lerf}. LangSplat and
 Language Embedded 3D Gaussians adapt this direction to Gaussian scene
 representations~\cite{qin2024langsplat,shi2024legaussians}. \method{} differs
-in its emphasis on reconstructing a general frozen foundation feature map rather
-than only learning a final language field.
+in its emphasis on compactly reconstructing a high-dimensional unified teacher
+feature space rather than only learning a final language field.
 
 \paragraph{Gaussian scene representations.}
 3D Gaussian Splatting provides an explicit and efficient scene representation
@@ -128,7 +133,7 @@ $T(\cdot)$ be the frozen RADIO encoder. The teacher target is:
 We learn a Gaussian feature field that renders $\hat{F}_v$ and minimizes feature
 reconstruction losses against $F_v^{\star}$.
 
-\subsection{Hybrid Gaussian Feature Field}
+\subsection{Hybrid Gaussian Code Field}
 
 The scene geometry is provided by a frozen 3DGS model with Gaussians
 $\{g_i\}_{i=1}^N$. \method{} attaches compact learnable latent features to the
@@ -139,13 +144,15 @@ Gaussians and combines two paths:
   \item a coarse path that queries a spatial feature branch from reconstructed
   3D positions.
 \end{enumerate}
-The two paths are fused into a compact feature map $Z_v$. An HCD decoder
-$D_{\theta}$ maps this compact representation back to RADIO feature space:
+The two paths are fused into a compact feature map $Z_v$. A
+Compact-to-Teacher Reconstruction module (implemented as the HCD codec in the
+codebase) maps this compact representation back to RADIO feature space:
 \begin{equation}
   \hat{F}_v = D_{\theta}(Z_v).
 \end{equation}
-A screen-space refiner then improves local alignment using rendered guidance
-signals such as visibility, alpha, and geometric depth.
+A View-Space Feature Aligner (implemented as the screen-space refiner in the
+codebase) then improves local alignment using rendered guidance signals such as
+visibility, alpha, and geometric depth.
 
 \subsection{Training Objective}
 
@@ -158,20 +165,20 @@ The base feature loss combines cosine and reconstruction terms:
   + \lambda_{rec}\|\hat{F}_v - F_v^{\star}\|_1.
 \end{equation}
 
-For the FDH warm-start route, we add a frozen depth-head loss. Let $h_d$ be a
+For the FGC route, we add a frozen depth-head consistency loss. Let $h_d$ be a
 frozen depth head and $d_v^{geo}$ be the geometric depth rendered from the 3DGS
 backbone. We optimize:
 \begin{equation}
   \mathcal{L}
   =
   \mathcal{L}_{feat}
-  + \lambda_{fdh}\mathcal{L}_{si}(h_d(\hat{F}_v), d_v^{geo}),
+  + \lambda_{fgc}\mathcal{L}_{si}(h_d(\hat{F}_v), d_v^{geo}),
 \end{equation}
 where $\mathcal{L}_{si}$ is a scale-invariant depth loss. The head is frozen; the
 feature field must adapt so that its rendered features remain useful to the
 head.
 
-\subsection{RADIO Adaptor Consistency}
+\subsection{Frozen Adaptor Consistency}
 
 \radio{} exposes frozen adaptor heads for \texttt{siglip2-g}, \texttt{dino\_v3},
 and \texttt{sam3}. The main open-vocabulary evaluator uses the text-aligned
@@ -239,9 +246,9 @@ not available, while keeping the inference-time representation unchanged.
 
 Directly applying frozen-head losses early in training can conflict with feature
 reconstruction. The mainline therefore uses a warm-start schedule: first train a
-no-FDH feature field, then initialize the FDH model from that checkpoint and
-continue training with the frozen-head loss active. This makes FDH a late
-geometry-aware refinement signal instead of an early competing objective.
+feature-only field, then initialize the FGC model from that checkpoint and
+continue training with the frozen geometry-head loss active. This makes FGC a
+late geometry-aware refinement signal instead of an early competing objective.
 
 \subsection{Open-Vocabulary Grounding}
 
@@ -255,13 +262,14 @@ localization accuracy and mIoU over query heatmaps.
 
 \subsection{Submission-Freeze Protocol}
 
-The conservative baseline numbers come from the 2026-05-02 submission-freeze
+The conservative \project{} numbers come from the 2026-05-02 submission-freeze
 report:
 \texttt{output/radio\_gs/reports/submission\_freeze\_report.md}. The RADIO
 adaptor ablations were completed on 2026-05-03 under the same LERF sweep
-protocol. External baseline rows are not yet treated as final claims because
-\texttt{baseline\_source\_verification.md} records unresolved cross-paper
-protocol mismatches.
+protocol. External baseline rows are used only as protocol-context placeholders
+until either reproduced under the same evaluator or replaced by clearly captioned
+official-source rows, because \texttt{baseline\_source\_verification.md} records
+unresolved cross-paper protocol mismatches.
 
 \subsection{LERF-OVS Main Result}
 
@@ -328,21 +336,34 @@ Table~\ref{tab:component_ablation} isolates the main architectural choices on
 LERF-OVS with a controlled seed-7 protocol. Unlike Table~\ref{tab:lerf}, which
 reports the conservative current best per scene, this table keeps the same seed
 route for the full model and its ablations. The goal is to verify whether each
-component contributes under the same evaluator: the hybrid field tests compact
-feature storage, HCD tests the nonlinear bottleneck codec, the screen-space
-refiner tests peak and boundary correction, and the FDH warm-start tests the
-geometry-aware training stage.
+component contributes under the same evaluator: HGCF tests compact feature
+storage, CTR tests the nonlinear compact-to-teacher bottleneck, VFA tests peak
+and boundary correction, and FGC warm-start tests the geometry-aware training
+stage.
 
-The largest dependency is the HCD codec. Replacing HCD with a direct $1\times1$
+The largest dependency is the CTR codec. Replacing CTR with a direct $1\times1$
 projection drops macro LocAcc from 0.858 to 0.531 and macro mIoU from 0.485 to
-0.260, with every scene degraded. FDH warm-start is the next strongest
+0.260, with every scene degraded. FGC warm-start is the next strongest
 component, improving macro LocAcc by 0.056 and macro mIoU by 0.061 over the
-no-FDH run. The refiner gives a smaller but consistent localization gain
-($+0.018$ macro LocAcc) with almost unchanged mIoU. The hybrid representation
+feature-only run. VFA gives a smaller but consistent localization gain
+($+0.018$ macro LocAcc) with almost unchanged mIoU. The hybrid code field
 mainly affects peak stability: the explicit non-hybrid variant reaches higher
 macro mIoU (0.507) but lower macro LocAcc (0.839), improving region overlap on
 Figurines/Teatime while losing peak accuracy on Ramen/Waldo. This explains why
 some enhancement branches can improve mIoU without preserving LocAcc.
+
+\subsection{Storage Footprint}
+
+\input{storage_footprint_table}
+
+Table~\ref{tab:storage_footprint} closes the compactness claim with explicit
+footprint accounting. Direct storage assumes one 1280-D fp16 teacher feature per
+Gaussian and excludes ordinary RGB/geometry attributes. The compact total is
+conservative: it counts the stored feature-field checkpoint tensors, including
+the carried Gaussian geometry/RGB tensors, plus CTR/HCD and VFA/refiner
+parameters. Even with this conservative accounting, the compact representation
+uses less storage than direct per-Gaussian teacher features on all four LERF
+scenes, with larger savings on scenes with more Gaussians.
 
 \subsection{Adaptor Consistency Ablation}
 
@@ -590,6 +611,20 @@ correspondences.}
 \label{fig:sam_dino_tasks_qual}
 \end{figure*}
 
+\subsection{Failure Analysis}
+
+\input{lerf_failure_analysis_table}
+
+Table~\ref{tab:failure_analysis} turns the qualitative small-object observation
+into a paper-facing diagnostic. The lowest-ranked categories are mostly tiny or
+visually ambiguous objects, such as Figurines bags, character toys, and isolated
+kitchen tools. The failure pattern is not only low region overlap: some
+categories show nonzero mIoU but zero or partial LocAcc, which means the
+rendered heatmap covers a plausible object region while the single maximum lands
+outside the annotated polygon. This is why the paper treats mIoU improvements
+from adaptor or cross-view losses conservatively unless localization accuracy is
+preserved.
+
 \section{Discussion}
 
 \paragraph{Why feature reconstruction matters.}
@@ -611,7 +646,9 @@ teacher feature resolution and rendered feature alignment limit heatmap
 sharpness. The current ScanNet protocol is a direct point-query feature probe,
 not a replacement for a full standardized segmentation benchmark. Finally,
 external baseline provenance remains the main blocker for strong SOTA-style
-claims.
+claims. The storage table reports checkpoint footprint rather than a deployed
+runtime memory allocator, so future packaging should separate feature-field
+parameters, rendering buffers, and optional downstream heads.
 
 \section{Conclusion}
 
@@ -620,8 +657,8 @@ By reconstructing frozen RADIO features rather than training a scene-specific
 classifier, it supports open-vocabulary grounding and cross-domain feature
 queries from novel views. The current freeze package provides a coherent
 submission path: strong LERF-OVS internal results, fair ScanNet direct-query
-evidence, formal runtime profiles, and clear remaining work on external baseline
-provenance.
+evidence, explicit storage and runtime profiles, failure analysis, and clear
+remaining work on external baseline provenance.
 
 \bibliographystyle{plain}
 \bibliography{radio_gs_refs}
