@@ -11,7 +11,7 @@ import yaml
 
 
 BASE_VARIANT = "v67fair_teacherbalanced_gidx_labelpoint_dp080_pce10_tdist05_s32768_b4_long20_fromv63"
-DEFAULT_VARIANT = "v67_dino_cv001_b4_s32768_ft20"
+DEFAULT_VARIANT = "v67_dino_cv001_b2_s32768_ft20"
 SCENES = [
     "scene0000_00",
     "scene0062_00",
@@ -44,7 +44,7 @@ def generate_config(
     repo_root: Path,
     variant: str = DEFAULT_VARIANT,
     cross_view_weight: float = 0.001,
-    batch_size: int = 4,
+    batch_size: int = 2,
     epochs: int = 20,
     cross_view_downsample: int = 2,
     cross_view_max_tokens: int = 128,
@@ -93,7 +93,7 @@ def generate_configs(
     repo_root: Path,
     variant: str = DEFAULT_VARIANT,
     cross_view_weight: float = 0.001,
-    batch_size: int = 4,
+    batch_size: int = 2,
     epochs: int = 20,
 ) -> list[Path]:
     return [
@@ -119,7 +119,14 @@ def scene_from_config_path(path: Path, variant: str) -> str:
     return name[len(prefix) : -len(".yaml")]
 
 
-def write_launch_plan(paths: list[Path], variant: str, path: Path) -> None:
+def write_launch_plan(
+    paths: list[Path],
+    variant: str,
+    path: Path,
+    *,
+    batch_size: int,
+    cross_view_weight: float,
+) -> None:
     gpu4 = [scene_from_config_path(p, variant) for p in paths[::2]]
     gpu5 = [scene_from_config_path(p, variant) for p in paths[1::2]]
     lines = [
@@ -127,9 +134,9 @@ def write_launch_plan(paths: list[Path], variant: str, path: Path) -> None:
         "",
         f"- Variant: `{variant}`",
         "- Protocol: v67 teacher-balanced, gaussian_index, label_point, label_index",
-        "- Batch size: 4",
+        f"- Batch size: {batch_size}",
         "- Direct point samples: inherited from v67 configs (`32768`)",
-        "- Cross-view adaptor: `dino_v3`, weight `0.001`",
+        f"- Cross-view adaptor: `dino_v3`, weight `{cross_view_weight:g}`",
         "",
         "## Suggested GPU Split",
         "",
@@ -152,7 +159,7 @@ def main() -> None:
     parser.add_argument("--repo_root", default=str(Path.cwd().resolve()))
     parser.add_argument("--variant", default=DEFAULT_VARIANT)
     parser.add_argument("--cross_view_weight", type=float, default=0.001)
-    parser.add_argument("--batch_size", type=int, default=4)
+    parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--epochs", type=int, default=20)
     args = parser.parse_args()
 
@@ -170,6 +177,8 @@ def main() -> None:
         paths,
         args.variant,
         Path(args.repo_root) / "output/radio_gs/reports/scannet_dino_cv_launch_plan.md",
+        batch_size=args.batch_size,
+        cross_view_weight=args.cross_view_weight,
     )
     for path in paths:
         print(path)

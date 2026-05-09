@@ -14,7 +14,7 @@ def test_scannet_dino_cv_queue_launcher_prints_config_path() -> None:
     )
 
     assert "radio_gs/configs/generated/scannet_dino_cv" in result.stdout
-    assert "v67_dino_cv001_b4_s32768_ft20_scene0000_00.yaml" in result.stdout
+    assert "v67_dino_cv001_b2_s32768_ft20_scene0000_00.yaml" in result.stdout
 
 
 def test_scannet_dino_cv_queue_launcher_preserves_prompt_braces() -> None:

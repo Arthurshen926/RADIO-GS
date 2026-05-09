@@ -129,7 +129,7 @@ Expected: legacy names only appear as implementation aliases or project names.
 
 - [ ] **Step 1: Write config-generator test**
 
-Assert generated configs preserve v67 fair settings, use new output dirs, set `batch_size=4`, and set conservative DINO cross-view weights.
+Assert generated configs preserve v67 fair settings, use new output dirs, set OOM-safe DINO-CV `batch_size=2`, and set conservative DINO cross-view weights.
 
 - [ ] **Step 2: Implement config generator**
 

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-VARIANT="${VARIANT:-v67_dino_cv001_b4_s32768_ft20}"
+VARIANT="${VARIANT:-v67_dino_cv001_b2_s32768_ft20}"
 CONFIG_ROOT="${CONFIG_ROOT:-radio_gs/configs/generated/scannet_dino_cv}"
 TEXT_CACHE="${TEXT_CACHE:-checkpoints/siglip2_scannet_og_text_embeddings_ens5.pt}"
 if [[ -z "${PROMPT_TEMPLATES:-}" ]]; then
