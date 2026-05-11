@@ -9,15 +9,16 @@ manually editing numbers across multiple notes.
 Outputs:
   - output/radio_gs/reports/paper_submission_main_table.md
   - output/radio_gs/reports/paper_submission_main_table.tex
+  - paper/lerf_ovs_main_table.tex
   - output/radio_gs/reports/paper_benchmark_targets.md
 
 Notes:
   - RADIO-GS scores reflect the current best per-scene settings collected in
     the internal reports under output/radio_gs/reports/.
-  - Published baseline rows are the repository-carried values currently used for
-    LERF-OVS comparison. They are not yet anchored to exact original-paper
-    tables and should be treated as unresolved borrowed values until the
-    baseline source sheet is fully closed out.
+  - Published baseline rows are official-source values from the original papers
+    or supplements, converted to decimals when the paper reports percentages.
+    They remain cross-paper context rows unless reproduced under the local
+    evaluator.
 """
 
 from __future__ import annotations
@@ -41,6 +42,13 @@ SCENE_ALIASES = {
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REPORT_PATH = REPO_ROOT / "output" / "radio_gs" / "reports" / "sota_comparison_table.md"
 DEFAULT_EVAL_ROOT = REPO_ROOT / "output" / "radio_gs"
+DEFAULT_FROZEN_MAINLINE_PATH = (
+    REPO_ROOT
+    / "output"
+    / "radio_gs"
+    / "lerf_summary_tables"
+    / "current_best_lerf_ovs_per_scene.json"
+)
 
 
 @dataclass(frozen=True)
@@ -80,12 +88,15 @@ PUBLISHED_BASELINES = [
             "Kerr_LERF_Language_Embedded_Radiance_Fields_ICCV_2023_paper.html"
         ),
         scores={
-            "figurines": 0.520,
-            "ramen": 0.503,
-            "teatime": 0.653,
-            "waldo_kitchen": 0.456,
+            "figurines": 0.795,
+            "ramen": 0.625,
+            "teatime": 0.938,
+            "waldo_kitchen": 0.815,
         },
-        notes="Foundational NeRF-based open-vocabulary 3D querying baseline.",
+        notes=(
+            "Official ICCV 2023 Table 1 LocAcc row; paper reports percentages "
+            "and the macro here is recomputed over the four LERF-OVS scenes."
+        ),
     ),
     MethodRecord(
         name="LangSplat",
@@ -96,12 +107,15 @@ PUBLISHED_BASELINES = [
             "Qin_LangSplat_3D_Language_Gaussian_Splatting_CVPR_2024_paper.html"
         ),
         scores={
-            "figurines": 0.592,
-            "ramen": 0.659,
-            "teatime": 0.693,
-            "waldo_kitchen": 0.600,
+            "figurines": 0.804,
+            "ramen": 0.732,
+            "teatime": 0.881,
+            "waldo_kitchen": 0.955,
         },
-        notes="Fast 3DGS-based language field with strong boundary quality.",
+        notes=(
+            "Official CVPR 2024 Table 1 LangSplat LocAcc row; paper reports "
+            "percentages and the values are converted to decimals."
+        ),
     ),
     MethodRecord(
         name="LEGaussians",
@@ -111,17 +125,20 @@ PUBLISHED_BASELINES = [
             "Understanding"
         ),
         source_url=(
-            "https://openaccess.thecvf.com/content/CVPR2024/html/"
-            "Shi_Language_Embedded_3D_Gaussians_for_Open-Vocabulary_"
-            "Scene_Understanding_CVPR_2024_paper.html"
+            "https://openaccess.thecvf.com/content/CVPR2024/supplemental/"
+            "Shi_Language_Embedded_3D_CVPR_2024_supplemental.pdf"
         ),
         scores={
-            "figurines": 0.631,
-            "ramen": 0.695,
-            "teatime": 0.745,
-            "waldo_kitchen": 0.593,
+            "figurines": 0.767,
+            "ramen": 0.737,
+            "teatime": 0.683,
+            "waldo_kitchen": 0.523,
         },
-        notes="Current strongest directly aligned published baseline in our setting.",
+        notes=(
+            "Official CVPR 2024 supplementary Table 5 LA row; the supplement "
+            "labels the last scene as kitchen, so this is an official-source "
+            "context row rather than a reproduced local-protocol row."
+        ),
     ),
 ]
 
@@ -155,10 +172,10 @@ READINESS_AREAS = [
     ("Problem framing", 0.80, "Main task definition is already coherent."),
     ("Method implementation", 0.85, "Training, evaluation, and visualization all exist."),
     ("Main grounding results", 0.80, "LERF-OVS evidence is already strong and now provenance-backed."),
-    ("Published baseline coverage", 0.45, "Main grounding baselines exist, auxiliary baselines remain thin."),
-    ("Statistical confidence", 0.55, "The four-scene n=3 seed summary is complete, but benchmark breadth is still narrow."),
-    ("Cross-domain generalization", 0.35, "Replica + LERF-OVS is not enough for a top-conference claim."),
-    ("Submission packaging", 0.70, "Main table protocol is frozen; efficiency and baseline anchoring still need closure."),
+    ("Published baseline coverage", 0.75, "Primary external rows now use exact official-source table values."),
+    ("Statistical confidence", 0.75, "The four-scene n=3 seed summary and 10-scene ScanNet ablation are complete."),
+    ("Cross-domain generalization", 0.70, "ScanNet v67 direct-query evidence and DINO cross-view ablation are complete."),
+    ("Submission packaging", 0.85, "Main tables, provenance, and efficiency evidence are frozen; venue-template polish remains."),
 ]
 
 
@@ -286,6 +303,48 @@ def load_best_rendered_ours(
     )
 
 
+def load_frozen_mainline_ours(summary_path: Path) -> tuple[MethodRecord, dict[str, ResultEntry]]:
+    payload = json.loads(summary_path.read_text(encoding="utf-8"))
+    scene_payloads = payload.get("scenes", {})
+    scores: dict[str, float] = {}
+    selected_entries: dict[str, ResultEntry] = {}
+    for scene in SCENES:
+        item = scene_payloads.get(scene)
+        if not isinstance(item, dict):
+            raise ValueError(f"missing frozen mainline scene in {summary_path}: {scene}")
+        output_dir = Path(str(item.get("output_dir", "")))
+        result_path = output_dir / "lerf_ovs_results.json"
+        scores[scene] = float(item["loc_acc"])
+        selected_entries[scene] = ResultEntry(
+            scene=scene,
+            section="rendered",
+            score=float(item["loc_acc"]),
+            miou=float(item.get("miou", 0.0) or 0.0),
+            path=relpath(result_path),
+            config=str(item.get("config", "")),
+            checkpoint=str(item.get("checkpoint", "")),
+            temp=str(item.get("temp", "")),
+            heatmap="4",
+        )
+    return (
+        MethodRecord(
+            name="RADIO-GS",
+            venue="This repository",
+            paper_title=(
+                "Foundation feature reconstruction in 3D Gaussian scenes for "
+                "open-vocabulary scene understanding"
+            ),
+            source_url=relpath(summary_path),
+            scores=scores,
+            notes=(
+                "Frozen submission mainline from current_best_lerf_ovs_per_scene; "
+                "component ablations and adaptor candidates are reported separately."
+            ),
+        ),
+        selected_entries,
+    )
+
+
 def collect_result_entries(eval_root: Path) -> dict[str, list[ResultEntry]]:
     entries: dict[str, list[ResultEntry]] = {scene: [] for scene in SCENES}
     for path in sorted(eval_root.rglob("lerf_ovs_results.json")):
@@ -372,9 +431,10 @@ def build_result_audit_markdown(
     if report_path.exists():
         lines.append(f"- Legacy report path: {relpath(report_path)}")
     lines.append(
-        "- Selection rule: best rendered LocAcc per scene across all discovered "
-        "`lerf_ovs_results.json` files; ties are broken by rendered mIoU and "
-        "canonical-path preference."
+        "- Selection rule: frozen mainline scene rows from "
+        "`output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.json`; "
+        "component ablations and adaptor candidates are audited as alternatives, "
+        "not auto-promoted into the main row."
     )
     lines.append("")
     lines.append("| Scene | Reported | Source JSON | Verified |")
@@ -449,16 +509,15 @@ def build_main_markdown(records: list[MethodRecord], eval_root: Path) -> str:
         f"`{relpath(eval_root)}`."
     )
     lines.append(
-        "- Selection rule: best rendered LocAcc per scene across all discovered "
-        "variants, checkpoints, and temperature sweeps. Ties are broken by rendered "
-        "mIoU and canonical-path preference."
+        "- Selection rule: frozen mainline scene rows from "
+        "`output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.json`; "
+        "component ablations and adaptor candidates are reported separately."
     )
     lines.append(
-        "- Published baseline rows are repository-carried draft placeholders. "
-        "They preserve the current comparison layout, but they are not exact "
-        "paper-anchored numbers and must remain explicitly unresolved until "
-        "replaced with official-source rows; see `output/radio_gs/reports/"
-        "baseline_source_verification.md` before submission freeze."
+        "- Published baseline rows are official-source values from the cited paper "
+        "tables or supplements. They are used as cross-paper context rows, not as "
+        "claims of a reproduced unified evaluator; see `output/radio_gs/reports/"
+        "baseline_source_verification.md`."
     )
     lines.append(
         "- Use `output/radio_gs/reports/paper_submission_result_audit.md` to verify "
@@ -470,7 +529,7 @@ def build_main_markdown(records: list[MethodRecord], eval_root: Path) -> str:
     for record in records:
         lines.append(
             f"- **{record.name}**: {record.paper_title}. {record.venue}. "
-            f"Source: {record.source_url}"
+            f"Source: {record.source_url}. Notes: {record.notes}"
         )
     lines.append("")
     lines.append("## Current readiness snapshot")
@@ -491,8 +550,9 @@ def build_main_latex(records: list[MethodRecord]) -> str:
     lines.append(r"\begin{table}[t]")
     lines.append(r"  \centering")
     lines.append(
-        r"  \caption{LERF-OVS open-vocabulary grounding comparison. Values are "
-        r"rendered-feature LocAcc. Best per column is in \textbf{bold}.}"
+        r"  \caption{LERF-OVS open-vocabulary grounding comparison. External rows "
+        r"are official-source LocAcc values converted to decimals; \method{} is "
+        r"the local rendered-feature result. Best per column is in \textbf{bold}.}"
     )
     lines.append(r"  \label{tab:lerf_ovs_main}")
     lines.append(r"  \begin{tabular}{lccccc}")
@@ -561,9 +621,9 @@ def build_benchmark_sheet(records: list[MethodRecord]) -> str:
     lines.append("")
     lines.append("## Next benchmark actions")
     lines.append("")
-    lines.append("1. Freeze a single four-scene LERF-OVS main table with LERF, LangSplat, LEGaussians, and RADIO-GS.")
-    lines.append("2. Re-check every external number against the exact original paper table before paper freeze.")
-    lines.append("3. Add one cross-domain benchmark, ideally ScanNet, to support a stronger generalization claim.")
+    lines.append("1. Keep the official-source four-scene LERF-OVS main table frozen unless new reproduced baselines are added.")
+    lines.append("2. If making a strict SOTA claim, reproduce LERF/LangSplat/LEGaussians under the local evaluator instead of mixing paper protocols.")
+    lines.append("3. Keep ScanNet v67 as direct-query transfer evidence rather than a full leaderboard claim.")
     return "\n".join(lines) + "\n"
 
 
@@ -584,17 +644,27 @@ def main() -> None:
         default=str(DEFAULT_EVAL_ROOT),
         help="Directory containing LERF-OVS evaluation JSON files for provenance audit.",
     )
+    parser.add_argument(
+        "--frozen_mainline_path",
+        default=str(DEFAULT_FROZEN_MAINLINE_PATH),
+        help="Frozen LERF-OVS mainline JSON used for the RADIO-GS paper row.",
+    )
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir)
     report_path = Path(args.report_path)
     eval_root = Path(args.lerf_eval_dir)
+    frozen_mainline_path = Path(args.frozen_mainline_path)
     result_entries = collect_result_entries(eval_root)
-    ours, selected_entries = load_best_rendered_ours(result_entries, eval_root)
+    if frozen_mainline_path.exists():
+        ours, selected_entries = load_frozen_mainline_ours(frozen_mainline_path)
+    else:
+        ours, selected_entries = load_best_rendered_ours(result_entries, eval_root)
     records = PUBLISHED_BASELINES + [ours]
 
     write_text(output_dir / "paper_submission_main_table.md", build_main_markdown(records, eval_root))
     write_text(output_dir / "paper_submission_main_table.tex", build_main_latex(records))
+    write_text(REPO_ROOT / "paper" / "lerf_ovs_main_table.tex", build_main_latex(records))
     write_text(output_dir / "paper_benchmark_targets.md", build_benchmark_sheet(records))
     write_text(
         output_dir / "paper_submission_result_audit.md",

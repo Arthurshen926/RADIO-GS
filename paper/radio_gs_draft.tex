@@ -35,10 +35,13 @@ frozen \project{} package reaches 0.8712 macro localization accuracy and 0.4941
 macro mIoU across four scenes; a DINOv3/SAM3 adaptor-enhanced candidate keeps
 the same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
 ScanNet direct point-query protocol, \project{} reaches 0.3538, 0.3573, and
-0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. These results
+0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. An
+OpenGaussian-style direct 3D object-selection stress test exposes a remaining
+primitive-level gap, where pre-refiner Gaussian-center features are queryable
+but not yet competitive with clustered language-Gaussian methods. These results
 support the central claim that 3D Gaussian scenes can serve as reusable
-foundation-feature memories, while the remaining submission risk is mainly
-baseline provenance and final paper formatting rather than core method viability.
+foundation-feature memories, while clarifying that strong primitive-level
+selection still requires direct 3D supervision or instance aggregation.
 \end{abstract}
 
 \section{Introduction}
@@ -66,11 +69,12 @@ geometry-aware regularizer: a frozen downstream head guides the feature field
 without turning the model into a task-specific predictor.
 
 Our current paper package is conservative. We freeze all internal \project{}
-numbers to concrete artifacts and separate them from external baseline rows whose
-cross-paper provenance is still unresolved. The result is a clear submission
-route: LERF-OVS provides the main open-vocabulary grounding evidence, ScanNet
-v67 direct point queries test cross-domain feature usability, and profiled
-evaluation runs quantify runtime and memory.
+numbers to concrete artifacts and use official-source external baseline rows only
+as cross-paper context unless a baseline is reproduced under the local evaluator.
+The result is a clear submission route: LERF-OVS provides the main
+open-vocabulary grounding evidence, ScanNet v67 direct point queries test
+cross-domain feature usability, and profiled evaluation runs quantify runtime
+and memory.
 
 \paragraph{Contributions.}
 This draft makes four claims:
@@ -94,7 +98,10 @@ This draft makes four claims:
 LERF embeds language-aligned features in neural radiance fields and enables
 open-vocabulary querying in 3D scenes~\cite{kerr2023lerf}. LangSplat and
 Language Embedded 3D Gaussians adapt this direction to Gaussian scene
-representations~\cite{qin2024langsplat,shi2024legaussians}. \method{} differs
+representations~\cite{qin2024langsplat,shi2024legaussians}. OpenGaussian
+formalizes a stronger primitive-level protocol in which text selects 3D
+Gaussians that are then rendered only for mask evaluation~\cite{wu2024opengaussian}.
+\method{} differs
 in its emphasis on compactly reconstructing a high-dimensional unified teacher
 feature space rather than only learning a final language field.
 
@@ -258,6 +265,16 @@ feature-text similarity with a scene-category softmax temperature $\tau$. The
 predicted localization point is the heatmap maximum. LERF-OVS reports
 localization accuracy and mIoU over query heatmaps.
 
+For direct 3D querying, we bypass the VFA screen-space refiner and decode
+pre-refiner compact features at Gaussian centers:
+\[
+  \hat{f}_i = D_{\theta}(c_i), \qquad
+  s_i(q) = \cos(A_{\mathrm{SigLIP2}}(\hat{f}_i), e_q),
+\]
+where $A_{\mathrm{SigLIP2}}$ is the frozen text-aligned summary head. This
+readout is structurally the same compact field used by ScanNet point-query
+experiments, but without rendered-view alignment.
+
 \section{Experiments}
 
 \subsection{Submission-Freeze Protocol}
@@ -266,10 +283,10 @@ The conservative \project{} numbers come from the 2026-05-02 submission-freeze
 report:
 \texttt{output/radio\_gs/reports/submission\_freeze\_report.md}. The RADIO
 adaptor ablations were completed on 2026-05-03 under the same LERF sweep
-protocol. External baseline rows are used only as protocol-context placeholders
-until either reproduced under the same evaluator or replaced by clearly captioned
-official-source rows, because \texttt{baseline\_source\_verification.md} records
-unresolved cross-paper protocol mismatches.
+protocol. External baseline rows are now official-source values from the cited
+papers or supplements and are captioned as cross-paper context rather than
+reproduced same-evaluator results; the exact source rows and protocol caveats
+are recorded in \texttt{baseline\_source\_verification.md}.
 
 \subsection{LERF-OVS Main Result}
 
@@ -295,9 +312,40 @@ Table~\ref{tab:lerf} is the current main internal result. Ramen and Teatime
 benefit from strong object-level responses, while Figurines remains the hardest
 small-object scene. This table is intentionally the conservative frozen mainline:
 the adaptor-enhanced candidate in Table~\ref{tab:adaptor_ablation} is reported
-as an ablation/selector result rather than replacing the main row. The current
-paper should compare this row to LERF, LangSplat, and LEGaussians only after the
-external rows are replaced with protocol-matched official or reproduced values.
+as an ablation/selector result rather than replacing the main row.
+
+\input{lerf_ovs_main_table}
+
+Table~\ref{tab:lerf_ovs_main} provides the paper-facing external comparison.
+The LERF, LangSplat, and LEGaussians rows are traced to official paper or
+supplement tables and converted to decimal LocAcc when originally reported as
+percentages. Because these rows are not rerun under the \project{} evaluator, we
+use them as context for the main claim rather than as a strict reproduced-SOTA
+leaderboard.
+
+\subsection{LERF Direct 3D Object Selection}
+
+\input{lerf_direct_3d_selection_table}
+
+Table~\ref{tab:lerf-direct-3d-selection} evaluates the missing primitive-level
+bridge to 2024--2025 open-vocabulary 3DGS work. We follow the OpenGaussian-style
+query-select-render protocol: text similarity is computed on Gaussian-center
+features, selected primitives are rendered to official LERF-OVS annotated views,
+and metrics are mIoU and Acc@0.25. This protocol is not the same as the
+rendered-view heatmap evaluation in Table~\ref{tab:lerf}; it is a direct 3D
+object-selection stress test.
+
+The result is a useful negative finding. Pre-refiner Gaussian-center features
+are directly queryable, but they are not yet competitive with instance- or
+cluster-aware language Gaussian methods. The fixed top-10\% primitive selector
+reaches 0.080 macro mIoU and 0.093 macro Acc@0.25, far below OpenGaussian's
+reported 0.384/0.514. Even a diagnostic best-by-scene ratio sweep only reaches
+0.091 macro mIoU. Additional no-GT diagnostics with KNN point readout,
+semantic/geometry scoring heads, scene-softmax calibration, adaptor-promoted
+checkpoints, and voxel score aggregation do not improve the fixed-protocol macro
+mIoU. We therefore keep LERF direct selection as an aligned protocol and
+limitation, not as a main SOTA claim; improving it likely requires direct 3D
+language supervision or instance-aware primitive aggregation.
 
 \subsection{Rendered Features vs. Original RADIO Features}
 
@@ -526,51 +574,40 @@ the learned feature field.
 
 \begin{table}[t]
 \centering
-\caption{ScanNet DINOv3 cross-view diagnostics on two difficult scenes. The
-branch is warm-started from the v67 teacher-balanced checkpoint and uses
-conservative DINO cross-view affinity weights.}
+\caption{Full 10-scene ScanNet DINOv3 cross-view ablation. The branch is
+warm-started from the v67 teacher-balanced checkpoint and uses conservative
+DINO cross-view affinity weight $\lambda=0.001$ with batch size 2.}
 \label{tab:scannet_cross_view}
-\begin{tabular}{llccc}
+\begin{tabular}{lrrrrrr}
 \toprule
-Scene & Variant & 19 cls & 15 cls & 10 cls \\
+Split & Base mIoU & DINO mIoU & $\Delta$ & Base mAcc & DINO mAcc & $\Delta$ \\
 \midrule
-scene0070\_00 & baseline & 0.2297 & 0.2405 & 0.3238 \\
-scene0070\_00 & DINO cv, $\lambda=0.001$ & 0.2437 & 0.2466 & 0.3284 \\
-scene0645\_00 & baseline & 0.2381 & 0.2458 & 0.2875 \\
-scene0645\_00 & DINO cv, $\lambda=0.003$ & 0.2427 & 0.2500 & 0.2833 \\
+19 classes & 0.3538 & 0.3640 & +0.0102 & 0.6076 & 0.6205 & +0.0128 \\
+15 classes & 0.3573 & 0.3662 & +0.0089 & 0.6203 & 0.6313 & +0.0110 \\
+10 classes & 0.4293 & 0.4308 & +0.0014 & 0.7051 & 0.7071 & +0.0020 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:scannet_cross_view} shows that DINO cross-view context can
-improve ScanNet point-query transfer when the weight is conservative. On
-scene0070\_00, $\lambda=0.001$ improves all three splits. On scene0645\_00,
-$\lambda=0.003$ improves the 19- and 15-class splits but slightly lowers the
-10-class split, so the current recommendation is to sweep lower weights before
-promoting the branch to the 10-scene main ScanNet result.
+Table~\ref{tab:scannet_cross_view} upgrades the earlier two-scene diagnostic
+to a full 10-scene ablation. DINO cross-view affinity improves the macro
+19-class and 15-class probes more clearly than the 10-class probe, with
+positive macro mIoU and mAcc on all splits. The effect remains scene-dependent:
+the DINO branch improves 6/10, 7/10, and 5/10 scenes on the 19-, 15-, and
+10-class mIoU splits, respectively. We therefore report it as a
+compatibility/FAC ablation rather than replacing the conservative main ScanNet
+row in Table~\ref{tab:scannet}.
 
-\subsection{Profile Evidence}
+\subsection{Efficiency and Cost}
 
-\begin{table}[t]
-\centering
-\caption{Formal evaluation-profile evidence from the freeze package.}
-\label{tab:profile}
-\begin{tabular}{lcc}
-\toprule
-Workload & Wall Time & Peak VRAM \\
-\midrule
-LERF Figurines overlay & 26.198 s & 1568 MiB \\
-LERF Ramen overlay & 40.474 s & 1762 MiB \\
-LERF Teatime overlay & 36.997 s & 1850 MiB \\
-LERF Waldo Kitchen overlay & 21.101 s & 2076 MiB \\
-ScanNet v67 10-scene eval & 150.903 s & 1666 MiB \\
-\bottomrule
-\end{tabular}
-\end{table}
+\input{efficiency_cost_table}
 
-The profile table separates evaluation cost from training throughput. Training
-cost should be reported in a separate table because log-derived training time
-and explicit GPU telemetry are different measurement types.
+Table~\ref{tab:efficiency_cost} separates profiled evaluation cost from storage
+footprint accounting. The four LERF overlay evaluations take 124.770 seconds in
+total and peak at 2076 MiB, while the full 10-scene ScanNet v67 direct-query
+evaluation takes 150.903 seconds and peaks at 1666 MiB. Training throughput is
+kept as supplementary log-derived evidence because training wall time and
+explicit GPU telemetry are different measurement types.
 
 \subsection{Qualitative Results}
 
@@ -631,12 +668,16 @@ preserved.
 The LERF-OVS results show that rendered RADIO-like features retain enough
 semantic structure for open-vocabulary localization. The ScanNet results suggest
 that the same representation can be probed outside the LERF object-query setting.
+The LERF direct-selection experiment further clarifies the boundary of this
+claim: the compact field supports a direct Gaussian-center readout, but the
+current readout lacks the primitive grouping needed for strong object selection.
 
-\paragraph{Current external-baseline risk.}
-The repository carries draft LERF, LangSplat, and LEGaussians comparison rows,
-but the nearest official table values do not exactly match those rows. The final
-submission must either reproduce baselines under a unified protocol or use
-official rows with a clear caption explaining protocol differences.
+\paragraph{External-baseline scope.}
+The LERF, LangSplat, and LEGaussians comparison rows are now traced to official
+paper or supplementary tables. They still come from cross-paper protocols, so
+the paper treats them as source-anchored context rows. A strict SOTA claim would
+require rerunning those baselines under the same evaluator and annotations used
+by \project{}.
 
 \section{Limitations}
 
@@ -644,11 +685,15 @@ official rows with a clear caption explaining protocol differences.
 to improve RGB reconstruction. Small objects remain challenging because the
 teacher feature resolution and rendered feature alignment limit heatmap
 sharpness. The current ScanNet protocol is a direct point-query feature probe,
-not a replacement for a full standardized segmentation benchmark. Finally,
-external baseline provenance remains the main blocker for strong SOTA-style
-claims. The storage table reports checkpoint footprint rather than a deployed
-runtime memory allocator, so future packaging should separate feature-field
-parameters, rendering buffers, and optional downstream heads.
+not a replacement for a full standardized segmentation benchmark. The new LERF
+direct 3D object-selection result is substantially weaker than OpenGaussian-style
+clustered primitive selection, so the paper should not claim primitive-level
+SOTA without additional direct 3D supervision or instance aggregation. Finally,
+the external comparison is official-source but not reproduced under one evaluator, so
+strong SOTA-style claims require additional baseline reruns. The storage table
+reports checkpoint footprint rather than a deployed runtime memory allocator, so
+future packaging should separate feature-field parameters, rendering buffers, and
+optional downstream heads.
 
 \section{Conclusion}
 
@@ -657,8 +702,8 @@ By reconstructing frozen RADIO features rather than training a scene-specific
 classifier, it supports open-vocabulary grounding and cross-domain feature
 queries from novel views. The current freeze package provides a coherent
 submission path: strong LERF-OVS internal results, fair ScanNet direct-query
-evidence, explicit storage and runtime profiles, failure analysis, and clear
-remaining work on external baseline provenance.
+evidence, explicit storage and runtime profiles, failure analysis, and
+source-anchored external comparison caveats.
 
 \bibliographystyle{plain}
 \bibliography{radio_gs_refs}

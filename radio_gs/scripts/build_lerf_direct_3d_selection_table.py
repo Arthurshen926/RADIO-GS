@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+"""Build paper/report tables for LERF direct 3D object selection."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+from typing import Dict, List
+
+from radio_gs.scripts.summarize_opengaussian_baseline import OPENGAUSSIAN_PAPER_LERF
+
+
+SCENES = ["figurines", "ramen", "teatime", "waldo_kitchen"]
+SCENE_LABELS = {
+    "figurines": "Figurines",
+    "ramen": "Ramen",
+    "teatime": "Teatime",
+    "waldo_kitchen": "Waldo Kitchen",
+}
+
+
+def fmt(value: float) -> str:
+    return f"{value:.4f}"
+
+
+def texfmt(value: float) -> str:
+    return f"{value:.3f}"
+
+
+def load_scene_results(root: Path, extra_roots: List[Path] | None = None) -> Dict[str, dict]:
+    results = {}
+    for scene in SCENES:
+        path = root / scene / "lerf_direct_3d_selection_results.json"
+        if not path.exists():
+            raise FileNotFoundError(f"Missing direct-selection result: {path}")
+        data = json.loads(path.read_text(encoding="utf-8"))
+        results[scene] = data["scene"]
+    for extra_root in extra_roots or []:
+        for scene in SCENES:
+            path = extra_root / scene / "lerf_direct_3d_selection_results.json"
+            if not path.exists():
+                raise FileNotFoundError(f"Missing extra direct-selection result: {path}")
+            data = json.loads(path.read_text(encoding="utf-8"))["scene"]
+            results[scene]["results"].update(data["results"])
+            results[scene]["best_by_miou"] = max(
+                results[scene]["results"],
+                key=lambda tag: results[scene]["results"][tag]["miou"],
+            )
+    return results
+
+
+def selection_tags(results: Dict[str, dict]) -> List[str]:
+    tags = set()
+    for scene in SCENES:
+        tags.update(results[scene]["results"].keys())
+    return sorted(tags, key=lambda tag: float(tag.replace("top", "").replace("p", ".")))
+
+
+def macro_for_tag(results: Dict[str, dict], tag: str, metric: str) -> float:
+    values = [float(results[scene]["results"][tag][metric]) for scene in SCENES]
+    return sum(values) / len(values)
+
+
+def best_fixed_tag(results: Dict[str, dict]) -> str:
+    return max(selection_tags(results), key=lambda tag: macro_for_tag(results, tag, "miou"))
+
+
+def best_by_scene_row(results: Dict[str, dict], metric: str) -> Dict[str, float]:
+    values = {}
+    for scene in SCENES:
+        tag = results[scene]["best_by_miou"]
+        values[scene] = float(results[scene]["results"][tag][metric])
+    values["macro"] = sum(values[scene] for scene in SCENES) / len(SCENES)
+    return values
+
+
+def fixed_row(results: Dict[str, dict], tag: str, metric: str) -> Dict[str, float]:
+    values = {scene: float(results[scene]["results"][tag][metric]) for scene in SCENES}
+    values["macro"] = sum(values[scene] for scene in SCENES) / len(SCENES)
+    return values
+
+
+def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
+    lines = [
+        "# LERF-OVS Direct 3D Object Selection",
+        "",
+        "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are computed at Gaussian centers from pre-refiner RADIO-GS features; selected primitives are rendered only to compare with LERF-OVS object masks.",
+        "",
+        f"Input root: `{root}`",
+        f"Fixed-protocol candidate selected by global macro mIoU among the sweep: `{fixed_tag}`. This is a diagnostic sweep result and should be reported separately from rendered-view grounding.",
+        "",
+        "## Fixed-Ratio Sweep",
+        "",
+        "| Selection | Figurines mIoU | Ramen mIoU | Teatime mIoU | Waldo mIoU | Macro mIoU | Macro Acc@0.25 |",
+        "|---|---:|---:|---:|---:|---:|---:|",
+    ]
+    for tag in selection_tags(results):
+        row = fixed_row(results, tag, "miou")
+        macro_acc = macro_for_tag(results, tag, "acc025")
+        lines.append(
+            f"| {tag} | {fmt(row['figurines'])} | {fmt(row['ramen'])} | "
+            f"{fmt(row['teatime'])} | {fmt(row['waldo_kitchen'])} | "
+            f"{fmt(row['macro'])} | {fmt(macro_acc)} |"
+        )
+
+    fixed_miou = fixed_row(results, fixed_tag, "miou")
+    fixed_acc = fixed_row(results, fixed_tag, "acc025")
+    best_miou = best_by_scene_row(results, "miou")
+    best_acc = best_by_scene_row(results, "acc025")
+    lines.extend(
+        [
+            "",
+            "## Paper-Facing Direct-Selection Context",
+            "",
+            "| Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |",
+            "|---|---|---|---:|---:|---:|---:|---:|",
+            "| OpenGaussian | CLIP | official paper mIoU | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['figurines']['miou'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['ramen']['miou'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['teatime']['miou'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['miou'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['macro']['miou'])} |",
+            f"| RADIO-GS | SigLIP2 | fixed {fixed_tag} mIoU | "
+            f"{fmt(fixed_miou['figurines'])} | {fmt(fixed_miou['ramen'])} | "
+            f"{fmt(fixed_miou['teatime'])} | {fmt(fixed_miou['waldo_kitchen'])} | "
+            f"{fmt(fixed_miou['macro'])} |",
+            "| RADIO-GS | SigLIP2 | diagnostic best-by-scene mIoU | "
+            f"{fmt(best_miou['figurines'])} | {fmt(best_miou['ramen'])} | "
+            f"{fmt(best_miou['teatime'])} | {fmt(best_miou['waldo_kitchen'])} | "
+            f"{fmt(best_miou['macro'])} |",
+            "| OpenGaussian | CLIP | official paper Acc@0.25 | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['figurines']['macc025'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['ramen']['macc025'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['teatime']['macc025'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['macc025'])} | "
+            f"{fmt(OPENGAUSSIAN_PAPER_LERF['macro']['macc025'])} |",
+            f"| RADIO-GS | SigLIP2 | fixed {fixed_tag} Acc@0.25 | "
+            f"{fmt(fixed_acc['figurines'])} | {fmt(fixed_acc['ramen'])} | "
+            f"{fmt(fixed_acc['teatime'])} | {fmt(fixed_acc['waldo_kitchen'])} | "
+            f"{fmt(fixed_acc['macro'])} |",
+            "| RADIO-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | "
+            f"{fmt(best_acc['figurines'])} | {fmt(best_acc['ramen'])} | "
+            f"{fmt(best_acc['teatime'])} | {fmt(best_acc['waldo_kitchen'])} | "
+            f"{fmt(best_acc['macro'])} |",
+            "",
+            "Interpretation: direct Gaussian-center text selection is implemented and aligned with the query-select-render-evaluate protocol, but current pre-refiner Gaussian features are substantially weaker than rendered-view grounding for LERF object selection. This should be framed as a remaining direct-3D selection gap unless new direct 3D supervision or instance aggregation is added.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def summarize_variant(results: Dict[str, dict]) -> Dict[str, float | str]:
+    fixed_tag = best_fixed_tag(results)
+    fixed_miou = fixed_row(results, fixed_tag, "miou")
+    fixed_acc = fixed_row(results, fixed_tag, "acc025")
+    best_miou = best_by_scene_row(results, "miou")
+    best_acc = best_by_scene_row(results, "acc025")
+    return {
+        "fixed_tag": fixed_tag,
+        "fixed_miou": fixed_miou["macro"],
+        "fixed_acc025": fixed_acc["macro"],
+        "best_scene_miou": best_miou["macro"],
+        "best_scene_acc025": best_acc["macro"],
+    }
+
+
+def append_diagnostics(
+    markdown: str,
+    diagnostics: List[tuple[str, Dict[str, dict]]],
+) -> str:
+    if not diagnostics:
+        return markdown
+    lines = markdown.rstrip().splitlines()
+    lines.extend(
+        [
+            "",
+            "## Direct-Readout Diagnostics",
+            "",
+            "These variants do not use GT masks for scoring. They test whether the direct-selection gap is caused by scoring, compact readout choice, spatial aggregation, or adaptor-enhanced checkpoints.",
+            "",
+            "| Variant | Best fixed selection | Fixed macro mIoU | Fixed macro Acc@0.25 | Best-by-scene macro mIoU | Best-by-scene macro Acc@0.25 |",
+            "|---|---|---:|---:|---:|---:|",
+        ]
+    )
+    for name, result in diagnostics:
+        summary = summarize_variant(result)
+        lines.append(
+            f"| {name} | {summary['fixed_tag']} | "
+            f"{fmt(float(summary['fixed_miou']))} | "
+            f"{fmt(float(summary['fixed_acc025']))} | "
+            f"{fmt(float(summary['best_scene_miou']))} | "
+            f"{fmt(float(summary['best_scene_acc025']))} |"
+        )
+    lines.extend(
+        [
+            "",
+            "Diagnostic takeaway: the original pre-refiner Gaussian-center readout remains the best fixed-mIoU setting. KNN point readout and voxel aggregation modestly improve a few scene-specific ratios or Acc@0.25, but they do not close the primitive-level gap to OpenGaussian.",
+            "",
+        ]
+    )
+    return "\n".join(lines)
+
+
+def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
+    fixed_miou = fixed_row(results, fixed_tag, "miou")
+    fixed_acc = fixed_row(results, fixed_tag, "acc025")
+    best_miou = best_by_scene_row(results, "miou")
+    rows = [
+        r"\begin{table}[t]",
+        r"  \centering",
+        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; RADIO-GS uses pre-refiner Gaussian-center features and a SigLIP2 text head.}",
+        r"  \label{tab:lerf-direct-3d-selection}",
+        r"  \begin{tabular}{llccccc}",
+        r"    \toprule",
+        r"    Method & Protocol & Fig. & Ramen & Tea. & Waldo & Macro \\",
+        r"    \midrule",
+        "    OpenGaussian & mIoU & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['figurines']['miou'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['ramen']['miou'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['teatime']['miou'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['miou'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['macro']['miou'])} \\\\",
+        f"    RADIO-GS & {fixed_tag} mIoU & "
+        f"{texfmt(fixed_miou['figurines'])} & {texfmt(fixed_miou['ramen'])} & "
+        f"{texfmt(fixed_miou['teatime'])} & {texfmt(fixed_miou['waldo_kitchen'])} & "
+        f"{texfmt(fixed_miou['macro'])} \\\\",
+        f"    RADIO-GS & diag. best mIoU & "
+        f"{texfmt(best_miou['figurines'])} & {texfmt(best_miou['ramen'])} & "
+        f"{texfmt(best_miou['teatime'])} & {texfmt(best_miou['waldo_kitchen'])} & "
+        f"{texfmt(best_miou['macro'])} \\\\",
+        r"    \midrule",
+        "    OpenGaussian & Acc@0.25 & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['figurines']['macc025'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['ramen']['macc025'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['teatime']['macc025'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['macc025'])} & "
+        f"{texfmt(OPENGAUSSIAN_PAPER_LERF['macro']['macc025'])} \\\\",
+        f"    RADIO-GS & {fixed_tag} Acc@0.25 & "
+        f"{texfmt(fixed_acc['figurines'])} & {texfmt(fixed_acc['ramen'])} & "
+        f"{texfmt(fixed_acc['teatime'])} & {texfmt(fixed_acc['waldo_kitchen'])} & "
+        f"{texfmt(fixed_acc['macro'])} \\\\",
+        r"    \bottomrule",
+        r"  \end{tabular}",
+        r"\end{table}",
+    ]
+    return "\n".join(rows) + "\n"
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--results_root", default="output/radio_gs/lerf_direct_3d_selection_mainline_20260511")
+    parser.add_argument("--extra_results_root", action="append", default=[], help="Additional result roots to merge")
+    parser.add_argument(
+        "--diagnostic_root",
+        action="append",
+        default=[],
+        help="Diagnostic result root as name=path",
+    )
+    parser.add_argument("--fixed_tag", default="", help="Fixed selection tag to expose; empty chooses best macro mIoU")
+    parser.add_argument("--output_md", default="output/radio_gs/reports/lerf_direct_3d_selection.md")
+    parser.add_argument("--output_tex", default="paper/lerf_direct_3d_selection_table.tex")
+    args = parser.parse_args()
+
+    root = Path(args.results_root)
+    results = load_scene_results(root, [Path(item) for item in args.extra_results_root])
+    fixed_tag = args.fixed_tag or best_fixed_tag(results)
+    md = make_markdown(results, root, fixed_tag)
+    diagnostics: List[tuple[str, Dict[str, dict]]] = []
+    for item in args.diagnostic_root:
+        if "=" not in item:
+            raise ValueError(f"--diagnostic_root must be name=path, got {item!r}")
+        name, raw_path = item.split("=", 1)
+        diagnostics.append((name, load_scene_results(Path(raw_path))))
+    md = append_diagnostics(md, diagnostics)
+    tex = make_tex(results, fixed_tag)
+    out_md = Path(args.output_md)
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text(md + "\n", encoding="utf-8")
+    out_tex = Path(args.output_tex)
+    out_tex.parent.mkdir(parents=True, exist_ok=True)
+    out_tex.write_text(tex, encoding="utf-8")
+    print(f"fixed_tag={fixed_tag}")
+    print(f"wrote {out_md}")
+    print(f"wrote {out_tex}")
+
+
+if __name__ == "__main__":
+    main()

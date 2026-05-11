@@ -44,6 +44,8 @@ def extract_main_table_summary(path: Path) -> str:
 
 
 def extract_pending_items(path: Path) -> list[str]:
+    if not path.exists():
+        return []
     items: list[str] = []
     for line in read_text(path).splitlines():
         stripped = line.strip()
@@ -63,6 +65,8 @@ def main() -> None:
 
     main_table = REPORT_DIR / "paper_submission_main_table.md"
     efficiency = REPORT_DIR / "efficiency_profile_summary.md"
+    efficiency_cost = REPORT_DIR / "efficiency_cost_table.md"
+    direct_selection = REPORT_DIR / "lerf_direct_3d_selection.md"
     readiness = REPORT_DIR / "submission_readiness_checklist.md"
     manifest = {
         "generated": datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -77,25 +81,21 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "paper_submission_main_table.tex"),
                 "description": "LaTeX main table",
             },
-            "paper_ablation_table.md": {
-                "path": rel(REPORT_DIR / "paper_ablation_table.md"),
-                "description": "LERF three-variant ablation report",
+            "paper_main_table.md": {
+                "path": rel(REPORT_DIR / "paper_main_table.md"),
+                "description": "Seed-robustness companion table",
             },
-            "paper_ablation_table.tex": {
-                "path": rel(REPORT_DIR / "paper_ablation_table.tex"),
-                "description": "LaTeX ablation tables",
+            "lerf_component_ablation.md": {
+                "path": rel(REPORT_DIR / "lerf_component_ablation.md"),
+                "description": "LERF component ablation report",
             },
-            "room0_variant_comparison.md": {
-                "path": rel(REPORT_DIR / "room0_variant_comparison.md"),
-                "description": "Room0 variant comparison report (markdown)",
+            "paper/lerf_component_ablation_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_component_ablation_table.tex"),
+                "description": "LaTeX component ablation table",
             },
-            "room0_variant_comparison.tex": {
-                "path": rel(REPORT_DIR / "room0_variant_comparison.tex"),
-                "description": "Room0 variant comparison report (LaTeX)",
-            },
-            "paper_protocol_freeze.md": {
-                "path": rel(REPORT_DIR / "paper_protocol_freeze.md"),
-                "description": "Frozen conservative submission protocol and claims",
+            "scannet_dino_cv_ablation.md": {
+                "path": rel(REPORT_DIR / "scannet_dino_cv_ablation.md"),
+                "description": "10-scene ScanNet DINO cross-view ablation",
             },
             "baseline_source_verification.md": {
                 "path": rel(REPORT_DIR / "baseline_source_verification.md"),
@@ -105,13 +105,37 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "submission_readiness_checklist.md"),
                 "description": "Submission freeze checklist",
             },
-            "figure_shortlist.md": {
-                "path": rel(REPORT_DIR / "figure_shortlist.md"),
+            "submission_freeze_figure_shortlist.md": {
+                "path": rel(REPORT_DIR / "submission_freeze_figure_shortlist.md"),
                 "description": "Frozen figure shortlist and captions",
             },
             "efficiency_profile_summary.md": {
                 "path": rel(efficiency),
                 "description": "Efficiency summary table",
+            },
+            "efficiency_cost_table.md": {
+                "path": rel(efficiency_cost),
+                "description": "Paper-facing efficiency/cost table",
+            },
+            "paper/efficiency_cost_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "efficiency_cost_table.tex"),
+                "description": "LaTeX efficiency/cost table",
+            },
+            "paper/lerf_ovs_main_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_ovs_main_table.tex"),
+                "description": "LaTeX official-source LERF-OVS comparison table",
+            },
+            "lerf_direct_3d_selection.md": {
+                "path": rel(direct_selection),
+                "description": "LERF direct 3D object-selection report",
+            },
+            "paper/lerf_direct_3d_selection_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_direct_3d_selection_table.tex"),
+                "description": "LaTeX LERF direct 3D object-selection table",
+            },
+            "paper/radio_gs_draft.tex": {
+                "path": rel(REPO_ROOT / "paper" / "radio_gs_draft.tex"),
+                "description": "Current LaTeX paper draft",
             },
         },
         "figures": {},

@@ -31,7 +31,6 @@ def main() -> None:
 
     main_table = REPORT_DIR / "paper_submission_main_table.md"
     audit = REPORT_DIR / "paper_submission_result_audit.md"
-    room0 = REPORT_DIR / "room0_variant_comparison.md"
     manifest = REPORT_DIR / "paper_assets_manifest.json"
 
     manifest_payload = load_json(manifest) if manifest.exists() else {}
@@ -44,7 +43,23 @@ def main() -> None:
         "| Artifact | Exists | Path |",
         "|---|---|---|",
     ]
-    for path in [main_table, audit, room0, manifest, REPORT_DIR / "paper_ablation_table.md", REPORT_DIR / "figure_shortlist.md", REPORT_DIR / "efficiency_profile_summary.md"]:
+    required_paths = [
+        main_table,
+        audit,
+        manifest,
+        REPORT_DIR / "baseline_source_verification.md",
+        REPORT_DIR / "efficiency_cost_table.md",
+        REPORT_DIR / "submission_freeze_report.md",
+        REPORT_DIR / "submission_freeze_figure_shortlist.md",
+        REPORT_DIR / "lerf_component_ablation.md",
+        REPORT_DIR / "scannet_dino_cv_ablation.md",
+        REPORT_DIR / "lerf_direct_3d_selection.md",
+        REPO_ROOT / "paper" / "radio_gs_draft.tex",
+        REPO_ROOT / "paper" / "lerf_ovs_main_table.tex",
+        REPO_ROOT / "paper" / "efficiency_cost_table.tex",
+        REPO_ROOT / "paper" / "lerf_direct_3d_selection_table.tex",
+    ]
+    for path in required_paths:
         lines.append(f"| {path.name} | {'YES' if path.exists() else 'NO'} | `{rel(path)}` |")
 
     lines.extend(
@@ -55,7 +70,9 @@ def main() -> None:
             f"- route: `{manifest_payload.get('route', 'unknown')}`",
             f"- manifest generated: `{manifest_payload.get('generated', 'missing')}`",
             "- conservative rule: main table remains `LERF / LangSplat / LEGaussians / RADIO-GS` on rendered `LocAcc`.",
-            "- room0 remains supporting analysis only.",
+            "- external baselines are official-source context rows unless reproduced under the local evaluator.",
+            "- ScanNet remains direct-query transfer evidence rather than a full leaderboard claim.",
+            "- LERF direct 3D selection is now protocol-aligned, but current RADIO-GS numbers are limitation evidence rather than a promoted SOTA claim.",
             "",
             "## Open Items",
             "",

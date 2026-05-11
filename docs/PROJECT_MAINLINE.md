@@ -1,6 +1,6 @@
 # RADIO-GS Project Mainline
 
-Status: 2026-05-03 conservative submission mainline plus adaptor-enhanced candidate.
+Status: 2026-05-11 conservative submission mainline plus adaptor-enhanced candidate and direct-selection stress test.
 
 This document is the navigation layer for the cleaned project. It separates the
 current strongest paper route from historical validation branches.
@@ -10,8 +10,9 @@ current strongest paper route from historical validation branches.
 The paper-facing method, **CTF-GS**, compactly distills frozen RADIO teacher
 features into 3D Gaussian scenes so that novel views can render reusable
 teacher-compatible feature maps for open-vocabulary grounding and cross-domain
-scene understanding. `RADIO-GS` remains the repository/project implementation
-name.
+scene understanding, while also exposing a pre-refiner Gaussian-level readout
+for direct 3D querying. `RADIO-GS` remains the repository/project
+implementation name.
 
 ## Current Strongest Mainline
 
@@ -28,8 +29,11 @@ The active paper route is:
    geometry-aware regularizer (formerly FDH warm-start).
 6. LERF-OVS as the primary benchmark.
 7. ScanNet v67 direct point query as cross-domain feature-usability evidence.
-8. Formal profile runs for evaluation runtime and peak VRAM.
-9. Optional RADIO adaptor/cross-view consistency: DINOv3 relation + SAM3
+8. LERF-OVS direct 3D object selection as an OpenGaussian-style protocol
+   alignment stress test; current numbers are a limitation, not a main SOTA
+   claim.
+9. Formal profile runs for evaluation runtime and peak VRAM.
+10. Optional RADIO adaptor/cross-view consistency: DINOv3 relation + SAM3
    soft-region alignment for Ramen/Teatime, and DINOv3 cross-view + spatial
    text-heatmap preservation for Figurines.
 
@@ -49,6 +53,7 @@ Use these files first:
 | Figure shortlist | `output/radio_gs/reports/submission_freeze_figure_shortlist.md` |
 | Storage footprint | `output/radio_gs/reports/storage_footprint_report.md` |
 | LERF failure analysis | `output/radio_gs/reports/lerf_failure_analysis.md` |
+| LERF direct 3D selection | `output/radio_gs/reports/lerf_direct_3d_selection.md` |
 
 ## Active Quantitative Claims
 
@@ -85,6 +90,32 @@ strong relation/region and query-distribution heatmap weights but loses
 localization, while the conservative spatial heatmap branch is the only
 Figurines branch promoted by the preserve-LocAcc rule. Waldo Kitchen does not
 benefit from adaptor/cross-view supervision yet.
+
+### LERF-OVS Direct 3D Object Selection
+
+Use `output/radio_gs/reports/lerf_direct_3d_selection.md`.
+
+This experiment follows an OpenGaussian-style query-select-render protocol:
+text similarity is computed at 3D Gaussian centers from pre-refiner RADIO-GS
+features, selected primitives are rendered into binary masks, and evaluation
+uses LERF-OVS object masks. The current result is protocol-aligned but weak, so
+it should be presented as a limitation/stress test unless direct 3D supervision
+or instance aggregation is added.
+
+| Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
+|---|---|---|---:|---:|---:|---:|---:|
+| OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
+| RADIO-GS | SigLIP2 | fixed top0p1 mIoU | 0.0474 | 0.0858 | 0.1141 | 0.0744 | 0.0804 |
+| RADIO-GS | SigLIP2 | diagnostic best-by-scene mIoU | 0.0474 | 0.0858 | 0.1327 | 0.0996 | 0.0914 |
+| OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
+| RADIO-GS | SigLIP2 | fixed top0p1 Acc@0.25 | 0.0536 | 0.1268 | 0.1017 | 0.0909 | 0.0932 |
+
+GPU4/GPU5 follow-up diagnostics tested KNN point readout, semantic/geometry
+heads, scene-softmax scoring, adaptor-promoted checkpoints, and voxel score
+aggregation. None improved fixed-protocol macro mIoU over the original
+pre-refiner Gaussian-center cosine readout, so the direct-selection branch is
+now closed as a protocol-alignment stress test rather than a paper-leading
+result.
 
 ### DINOv3/SAM3 Downstream Adaptor Probes
 
@@ -182,7 +213,8 @@ route.
 | LERF component ablations | Validated FGC/FDH, VFA/refiner, HGCF/hybrid, and CTR/HCD under controlled seed-7 LERF-OVS | Active paper ablation; see `output/radio_gs/reports/lerf_component_ablation.md` |
 | RADIO DINOv3/SAM3 adaptor ablations | Tested adaptor-space consistency, DINO relation, and SAM3 soft-region supervision | Active ablation; only Ramen/Teatime promoted |
 | ProFuse-style DINO cross-view branch | Tested cross-view DINO affinity plus text-heatmap peak protection | LERF diagnostic only; improves some overlap scores but does not preserve LocAcc |
-| ScanNet DINO cross-view branch | Tested DINO affinity as cross-view context for direct point queries | Positive targeted diagnostic; needs full 10-scene conservative-weight sweep |
+| ScanNet DINO cross-view branch | Tested DINO affinity as cross-view context for direct point queries | Completed 10-scene conservative-weight ablation; positive but modest supporting evidence |
+| LERF direct 3D selection | Tested OpenGaussian-style primitive querying using pre-refiner Gaussian-center features plus GPU4/GPU5 readout/scoring diagnostics | Active stress test; aligned protocol, but current result is too weak for a dual-readout SOTA claim |
 
 ## Archive Policy
 

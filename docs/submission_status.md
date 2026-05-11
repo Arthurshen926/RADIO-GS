@@ -9,14 +9,16 @@ repository to a top-conference paper package?
 - **Method maturity**: mature research prototype with paper-facing automation and archive discipline in place
 - **Current submission maturity**: conservative paper package with LaTeX draft
 - **Estimated top-conference completion**: about 90% for the conservative
-  RADIO-GS package, and about 82% for the stricter CTF-GS paper outline until
-  external baselines and final venue formatting are closed
+  RADIO-GS package, and about 78% for a stricter dual-readout / primitive-level
+  CTF-GS paper unless LERF direct 3D object selection is improved with direct
+  3D supervision or instance aggregation
 
 The repository now contains a coherent method, a strong LERF-OVS result,
 repeatable evaluation code, and a completed 10-scene fair ScanNet v67 aggregate.
-What is still missing is mostly paper-freeze discipline: external baseline
-provenance, final training-cost measurements, venue-formatted manuscript prose,
-and related-work anchoring.
+The remaining conservative-route work is mostly presentation: venue-formatted
+manuscript prose, related-work tightening, and deciding which diagnostic tables
+belong in the appendix. A stricter 2025-style primitive-level paper additionally
+needs stronger LERF direct 3D object selection.
 
 ## Current source of truth
 
@@ -82,10 +84,9 @@ Under that framing, the paper solves the following problem:
    diagnostic path. It can increase thresholded overlap on some LERF scenes
    (for example Waldo high-temperature mIoU), but it still lowers LocAcc, so it
    is not promoted to the main LERF table.
-10. ScanNet DINO cross-view diagnostics are positive on targeted scenes when the
-    weight is conservative: scene0070_00 improves split19 from 0.2297 to 0.2437
-    at weight 0.001, while scene0645_00 improves split19/15 at weight 0.003 but
-    slightly lowers split10.
+10. ScanNet DINO cross-view is now a full 10-scene ablation at conservative
+    weight 0.001. It improves macro split19 mIoU from 0.3538 to 0.3640,
+    split15 from 0.3573 to 0.3662, and split10 from 0.4293 to 0.4308.
 11. The LERF peak-preservation diagnostic is now positive on Figurines:
     DINO cross-view with `text_heatmap_distill_mode: spatial` keeps LocAcc at
     0.8214 and improves mIoU from 0.4308 to 0.4343.
@@ -94,6 +95,15 @@ Under that framing, the paper solves the following problem:
     macro LocAcc 0.5306 vs. full 0.8578), FGC/FDH warm-start provides the
     largest training route gain (`w/o FGC` 0.8018), and VFA/HGCF mainly affect
     peak stability rather than raw region coverage.
+13. LERF direct 3D object selection has now been implemented under an
+    OpenGaussian-style query-select-render protocol. The aligned experiment is
+    complete, but it exposes a real direct-3D gap: fixed top-10% Gaussian
+    selection reaches only 0.0804 macro mIoU / 0.0932 macro Acc@0.25, versus
+    OpenGaussian's official 0.3836 / 0.5143. GPU4/GPU5 validation sweeps over
+    KNN point readout, semantic/geometry scoring heads, scene-softmax scores,
+    adaptor-promoted checkpoints, and voxel score aggregation did not improve
+    fixed-protocol macro mIoU. This should be framed as a limitation and
+    improvement target, not as a main claim.
 
 ## What is already paper-grade
 
@@ -105,7 +115,9 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/paper_submission_result_audit.md](../output/radio_gs/reports/paper_submission_result_audit.md)
 - [output/radio_gs/reports/submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
 - [output/radio_gs/reports/efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
+- [output/radio_gs/reports/efficiency_cost_table.md](../output/radio_gs/reports/efficiency_cost_table.md)
 - [output/radio_gs/reports/lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
+- [output/radio_gs/reports/lerf_direct_3d_selection.md](../output/radio_gs/reports/lerf_direct_3d_selection.md)
 - [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
 - [paper/radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
@@ -129,14 +141,14 @@ Under that framing, the paper solves the following problem:
 
 ## What still blocks a strong main-track submission
 
-### 1. Public baseline provenance is conservatively frozen, but not paper-anchored
+### 1. Public baseline provenance is now paper-anchored, with protocol caveats
 
 The main LERF-OVS comparison has a strong core trio: LERF, LangSplat, LEGaussians.
-That is enough to form a serious main table, and the repository now explicitly
-freezes those external rows as unresolved draft placeholders rather than claiming
-they are exact paper-anchored values. The remaining weakness is not ambiguity,
-but that the paper-facing comparison still relies on protocol-misaligned
-cross-paper external rows.
+The repository now replaces the old unresolved placeholder rows with exact
+official-source values from LERF ICCV 2023 Table 1, LangSplat CVPR 2024 Table 1,
+and the LEGaussians CVPR 2024 supplementary Table 5 LA row. The remaining caveat
+is protocol scope: these rows are cross-paper context, not reproduced
+same-evaluator baselines.
 
 ### 2. Cross-domain generalization is improved, but needs paper-safe framing
 
@@ -145,14 +157,14 @@ cross-domain table. The remaining risk is not lack of ScanNet evidence, but
 clean framing: label-supervised and GT-label-balanced ScanNet diagnostics must
 stay out of the main fair table.
 
-Targeted DINO cross-view diagnostics:
+The DINO cross-view branch has also been expanded from a two-scene diagnostic to
+a full 10-scene ScanNet ablation:
 
-| Scene | Branch | split19 | split15 | split10 |
-|---|---|---:|---:|---:|
-| scene0070_00 | v67 baseline | 0.2297 | 0.2405 | 0.3238 |
-| scene0070_00 | DINO cv weight 0.001 | 0.2437 | 0.2466 | 0.3284 |
-| scene0645_00 | v67 baseline | 0.2381 | 0.2458 | 0.2875 |
-| scene0645_00 | DINO cv weight 0.003 | 0.2427 | 0.2500 | 0.2833 |
+| Split | Base mIoU | DINO-CV mIoU | Delta | Base mAcc | DINO-CV mAcc | Delta |
+|---|---:|---:|---:|---:|---:|---:|
+| 19 classes | 0.3538 | 0.3640 | +0.0102 | 0.6076 | 0.6205 | +0.0128 |
+| 15 classes | 0.3573 | 0.3662 | +0.0089 | 0.6203 | 0.6313 | +0.0110 |
+| 10 classes | 0.4293 | 0.4308 | +0.0014 | 0.7051 | 0.7071 | +0.0020 |
 
 ### 3. Statistical confidence is improved, but still narrow
 
@@ -168,13 +180,14 @@ now provide a paper-facing analysis of fragile categories. A deeper optional
 analysis would correlate mask area or feature-cell footprint against LocAcc, but
 the current table is enough to support a limitations/discussion section.
 
-### 5. Efficiency and cost have current eval profiles, but need final paper framing
+### 5. Efficiency and cost now have a paper-facing table
 
 The paper now has formal wall-clock and peak-VRAM profiles for all four frozen
 LERF overlay evaluations and the full 10-scene ScanNet v67 point-query
-evaluation. The remaining gap is a polished table that separates training cost,
-evaluation latency, memory, and feature-resolution trade-offs without comparing
-misaligned workloads.
+evaluation. `efficiency_cost_table.md` and `paper/efficiency_cost_table.tex`
+convert those profiles plus the storage-footprint accounting into a main-paper
+efficiency/cost table. Training throughput remains supplementary because it is
+log-derived rather than explicit GPU telemetry.
 
 ### 6. Main-table provenance is fixed, but future runs still need the same discipline
 
@@ -185,12 +198,29 @@ evidence. The remaining requirement is procedural: every new ablation, seed run,
 and cross-domain result should be frozen with the same exact-report discipline
 instead of relying on informal notes.
 
+### 7. Direct LERF primitive selection is aligned but not yet strong
+
+The new `eval_lerf_direct_3d_selection.py` evaluator follows the
+OpenGaussian-style protocol: score Gaussian-center features with text, select
+3D primitives, render selected primitives to LERF annotated views, then compute
+mIoU and Acc@0.25. The experiment closes the protocol gap, but the current
+pre-refiner Gaussian-center readout is weak. Follow-up GPU4/GPU5 sweeps tested
+whether the gap came from score calibration, direct readout, spatial smoothing,
+or checkpoint selection. The original Gaussian-center cosine readout remains the
+best fixed-mIoU setting; KNN readout and voxel aggregation only help a few
+scene-specific ratios or Acc@0.25. A paper that wants to compete directly with
+OpenGaussian/CAGS/Dr. Splat-style primitive selection needs one of the following
+before promoting this claim: direct 3D language supervision, instance/SAM-cluster
+aggregation over Gaussians, or a learned compact-to-text adapter trained without
+using test masks.
+
 ## Immediate implementation priorities
 
-1. Close external LERF baseline provenance or run reproduced baselines under one protocol.
-2. Convert the refreshed profile evidence and training logs into one polished efficiency/cost table.
-3. Decide how much of the fixed-protocol seed-robustness table belongs in the main paper versus appendix.
-4. Decide whether the adaptor-enhanced LERF candidate is main-paper or ablation-only.
-5. Move `paper/radio_gs_draft.tex` into the target venue template and polish related work.
-6. Keep the small-object failure analysis and storage footprint tables in the main paper unless page limits force them to appendix.
-7. Promote ScanNet DINO cross-view only after a full 10-scene conservative-weight sweep preserves the main fair protocol.
+1. Move `paper/radio_gs_draft.tex` into the target venue template and polish related work.
+2. Decide how much of the fixed-protocol seed-robustness table belongs in the main paper versus appendix.
+3. Keep the adaptor-enhanced LERF candidate as an ablation/selector result unless the main-row policy changes.
+4. Keep the small-object failure analysis, storage footprint table, and efficiency/cost table in the main paper unless page limits force them to appendix.
+5. Reproduce external baselines under the local evaluator only if the paper wants a strict SOTA leaderboard claim.
+6. If the paper adopts a dual-readout title, prioritize improving LERF direct
+   3D object selection; otherwise keep that table as a limitation/appendix
+   protocol-alignment experiment.
