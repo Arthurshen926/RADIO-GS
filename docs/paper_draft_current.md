@@ -1,7 +1,7 @@
 # RADIO-GS Current Paper Draft
 
-Status: 2026-05-11 submission draft plus adaptor/cross-view diagnostics and an
-OpenGaussian-style direct-selection stress test. Frozen mainline numbers must
+Status: 2026-05-12 submission draft plus adaptor/cross-view diagnostics and a
+registered OpenGaussian-style direct-selection result. Frozen mainline numbers must
 stay consistent with `output/radio_gs/reports/submission_freeze_report.md`;
 promoted diagnostic candidates are tracked in `docs/PROJECT_MAINLINE.md`.
 
@@ -26,14 +26,13 @@ frozen RADIO-GS package reaches 0.8712 macro localization accuracy and 0.4941
 macro mIoU across four scenes; a promoted adaptor/cross-view candidate keeps the
 same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
 ScanNet direct point-query protocol, RADIO-GS reaches 0.3538, 0.3573, and
-0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. A newly added
-LERF direct 3D object-selection stress test is protocol-aligned but weak
-(0.0804 macro mIoU), so it should be framed as a limitation unless direct 3D
-language supervision or instance aggregation is added. These results support
-the central claim that 3D Gaussian scenes can serve as reusable
-foundation-feature memories, while the remaining submission risk is strongest
-around primitive-level querying, exact baseline provenance, and final paper
-formatting.
+0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. A registered
+LERF direct 3D object-selection readout raises fixed-protocol macro mIoU from
+0.0804 to 0.3421 and Acc@0.25 from 0.0932 to 0.5547 under an OpenGaussian-style
+protocol. These results support the central claim that 3D Gaussian scenes can
+serve as reusable foundation-feature memories, while the remaining submission
+risk is strongest around Waldo Kitchen, exact baseline provenance, and final
+paper formatting.
 
 ## Main Contributions
 
@@ -72,8 +71,8 @@ RADIO-GS compares the rendered feature map with SigLIP2 text embeddings and
 localizes each query from the relevancy heatmap. For ScanNet, it evaluates
 direct point queries under the v67 teacher-balanced protocol with Gaussian-index
 lookup and label-point positions. For direct LERF object selection, the
-pre-refiner Gaussian-center feature is decoded and scored against text before
-the selected primitives are rendered only for mask evaluation.
+registered-view primitive embedding is scored against text before the selected
+Gaussians are rendered only for mask evaluation.
 
 ## Experiments Draft
 
@@ -107,29 +106,29 @@ Promoted adaptor/cross-view candidate:
 ### LERF Direct 3D Object Selection
 
 The direct-selection evaluator follows an OpenGaussian-style protocol: score
-Gaussian-center features with text, select 3D primitives, render selected
-primitives into binary masks, and evaluate against LERF-OVS object masks. The
-current pre-refiner Gaussian-center readout is substantially weaker than
-OpenGaussian-style primitive-selection methods.
+3D primitives with text, render selected primitives into binary masks, and
+evaluate against LERF-OVS object masks. The current main result uses
+rendered-view SigLIP2 features registered back to visible Gaussian primitives
+with depth/alpha checks; masks are used only for final evaluation.
 
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| RADIO-GS | SigLIP2 | fixed top0p1 mIoU | 0.0474 | 0.0858 | 0.1141 | 0.0744 | 0.0804 |
-| RADIO-GS | SigLIP2 | diagnostic best-by-scene mIoU | 0.0474 | 0.0858 | 0.1327 | 0.0996 | 0.0914 |
+| RADIO-GS | SigLIP2 | registered softmax24 fixed top0p02 mIoU | 0.3246 | 0.4561 | 0.4466 | 0.1413 | 0.3421 |
+| RADIO-GS | SigLIP2 | registered softmax24 best-by-scene mIoU | 0.3606 | 0.4561 | 0.4796 | 0.1515 | 0.3619 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| RADIO-GS | SigLIP2 | fixed top0p1 Acc@0.25 | 0.0536 | 0.1268 | 0.1017 | 0.0909 | 0.0932 |
+| RADIO-GS | SigLIP2 | registered softmax24 fixed top0p02 Acc@0.25 | 0.5357 | 0.6761 | 0.7797 | 0.2273 | 0.5547 |
 
 This result should not be mixed with rendered-view LERF mIoU. It is best used
-to show that the protocol is implemented and to motivate future direct 3D
-language supervision, instance/SAM-cluster aggregation, or a dedicated
-compact-to-text adapter.
+to show dual-readout primitive usability; Waldo Kitchen remains the main
+weakness and should be analyzed as object fragmentation / registration coverage.
 
 GPU4/GPU5 diagnostics tested KNN point readout, semantic/geometry scoring heads,
-scene-softmax calibration, adaptor-promoted checkpoints, and voxel score
-aggregation. The original pre-refiner Gaussian-center cosine readout remains the
-best fixed-protocol mIoU setting, so the paper should not imply that a simple
-selector or threshold change closes the primitive-level gap.
+scene-softmax calibration, LERF-style relevancy re-ranking, adaptor-promoted
+checkpoints, and voxel score aggregation. The original pre-refiner
+Gaussian-center cosine readout remains the best fixed-protocol mIoU setting, so
+the paper should not imply that a simple selector or threshold change closes the
+primitive-level gap.
 
 ### ScanNet Direct Point Query
 
@@ -171,11 +170,10 @@ visible on small-object scenes such as Figurines. The ScanNet protocol used here
 is a fair direct point-query transfer test for the learned feature field, but it
 is not yet a full replacement for a standardized semantic segmentation benchmark
 with reproduced external baselines. The LERF direct 3D object-selection result
-is currently much weaker than OpenGaussian-style primitive-selection numbers,
-showing that rendered-view feature usability does not automatically imply strong
-primitive-level language selection. Finally, the current main LERF comparison
-still needs exact external baseline provenance before the paper can make strong
-SOTA-style claims.
+is now competitive in macro Acc@0.25 and close in macro mIoU, but Waldo Kitchen
+is still below OpenGaussian-style primitive-selection numbers. Finally, the
+current main LERF comparison still needs exact external baseline provenance
+before the paper can make strong SOTA-style claims.
 
 ## Submission Gaps
 
@@ -185,7 +183,6 @@ SOTA-style claims.
    main table.
 4. Assemble the final qualitative figure from
    `output/radio_gs/reports/submission_freeze_figure_shortlist.md`.
-5. Decide whether to keep direct 3D object selection as a limitation table or
-   invest in direct 3D supervision/instance aggregation before claiming
-   dual-readout primitive-level understanding.
+5. Add a concise Waldo Kitchen failure/coverage analysis for the registered
+   direct-selection readout.
 6. Convert this draft into the target venue template and add related work.

@@ -36,6 +36,8 @@ def load_scene_results(root: Path, extra_roots: List[Path] | None = None) -> Dic
             raise FileNotFoundError(f"Missing direct-selection result: {path}")
         data = json.loads(path.read_text(encoding="utf-8"))
         results[scene] = data["scene"]
+        results[scene]["_args"] = data.get("args", {})
+        results[scene]["_protocol"] = data.get("protocol", {})
     for extra_root in extra_roots or []:
         for scene in SCENES:
             path = extra_root / scene / "lerf_direct_3d_selection_results.json"
@@ -81,11 +83,57 @@ def fixed_row(results: Dict[str, dict], tag: str, metric: str) -> Dict[str, floa
     return values
 
 
+def first_protocol(results: Dict[str, dict]) -> Dict[str, str]:
+    for scene in SCENES:
+        protocol = results.get(scene, {}).get("_protocol", {})
+        if protocol:
+            return protocol
+    return {}
+
+
+def first_args(results: Dict[str, dict]) -> Dict[str, str]:
+    for scene in SCENES:
+        args = results.get(scene, {}).get("_args", {})
+        if args:
+            return args
+    return {}
+
+
+def direct_protocol_sentence(results: Dict[str, dict]) -> str:
+    protocol = first_protocol(results)
+    args = first_args(results)
+    score_source = protocol.get("score_source", args.get("score_source", "direct"))
+    scoring = args.get("scoring", "cosine")
+    if score_source == "registered_view":
+        max_frames = protocol.get("registration_max_frames", args.get("registration_max_frames", ""))
+        frame_mode = protocol.get("registration_frame_mode", args.get("registration_frame_mode", ""))
+        return (
+            "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are "
+            "computed on Gaussian primitives from rendered-view SigLIP2 features registered "
+            f"back to 3D with depth/alpha visibility checks ({frame_mode}, max_frames={max_frames}, "
+            f"scoring={scoring}); selected primitives are rendered only for mask evaluation."
+        )
+    return (
+        "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are computed "
+        "at Gaussian centers from pre-refiner RADIO-GS features; selected primitives are rendered "
+        "only to compare with LERF-OVS object masks."
+    )
+
+
+def direct_caption_feature_source(results: Dict[str, dict]) -> str:
+    protocol = first_protocol(results)
+    args = first_args(results)
+    score_source = protocol.get("score_source", args.get("score_source", "direct"))
+    if score_source == "registered_view":
+        return "rendered-view registered primitive features"
+    return "pre-refiner Gaussian-center features"
+
+
 def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
     lines = [
         "# LERF-OVS Direct 3D Object Selection",
         "",
-        "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are computed at Gaussian centers from pre-refiner RADIO-GS features; selected primitives are rendered only to compare with LERF-OVS object masks.",
+        direct_protocol_sentence(results),
         "",
         f"Input root: `{root}`",
         f"Fixed-protocol candidate selected by global macro mIoU among the sweep: `{fixed_tag}`. This is a diagnostic sweep result and should be reported separately from rendered-view grounding.",
@@ -144,7 +192,7 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
             f"{fmt(best_acc['teatime'])} | {fmt(best_acc['waldo_kitchen'])} | "
             f"{fmt(best_acc['macro'])} |",
             "",
-            "Interpretation: direct Gaussian-center text selection is implemented and aligned with the query-select-render-evaluate protocol, but current pre-refiner Gaussian features are substantially weaker than rendered-view grounding for LERF object selection. This should be framed as a remaining direct-3D selection gap unless new direct 3D supervision or instance aggregation is added.",
+            "Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.",
             "",
         ]
     )
@@ -196,7 +244,7 @@ def append_diagnostics(
     lines.extend(
         [
             "",
-            "Diagnostic takeaway: the original pre-refiner Gaussian-center readout remains the best fixed-mIoU setting. KNN point readout and voxel aggregation modestly improve a few scene-specific ratios or Acc@0.25, but they do not close the primitive-level gap to OpenGaussian.",
+            "Diagnostic takeaway: rendered-feature registration is the main factor that improves direct 3D object selection. Scoring and view-count variants mainly trade fixed-ratio mIoU against Waldo-specific coverage.",
             "",
         ]
     )
@@ -210,7 +258,9 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
     rows = [
         r"\begin{table}[t]",
         r"  \centering",
-        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; RADIO-GS uses pre-refiner Gaussian-center features and a SigLIP2 text head.}",
+        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; RADIO-GS uses "
+        + direct_caption_feature_source(results)
+        + r" and a SigLIP2 text head.}",
         r"  \label{tab:lerf-direct-3d-selection}",
         r"  \begin{tabular}{llccccc}",
         r"    \toprule",

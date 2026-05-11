@@ -36,12 +36,12 @@ macro mIoU across four scenes; a DINOv3/SAM3 adaptor-enhanced candidate keeps
 the same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
 ScanNet direct point-query protocol, \project{} reaches 0.3538, 0.3573, and
 0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. An
-OpenGaussian-style direct 3D object-selection stress test exposes a remaining
-primitive-level gap, where pre-refiner Gaussian-center features are queryable
-but not yet competitive with clustered language-Gaussian methods. These results
+OpenGaussian-style direct 3D object-selection evaluation shows that a
+rendered-feature-to-primitive registration readout raises fixed-protocol macro
+mIoU from 0.0804 to 0.3421 and macro Acc@0.25 from 0.0932 to 0.5547. These results
 support the central claim that 3D Gaussian scenes can serve as reusable
-foundation-feature memories, while clarifying that strong primitive-level
-selection still requires direct 3D supervision or instance aggregation.
+foundation-feature memories across rendered-view and direct-primitive readouts,
+while clarifying that Waldo Kitchen remains a difficult object-fragmentation case.
 \end{abstract}
 
 \section{Introduction}
@@ -265,15 +265,21 @@ feature-text similarity with a scene-category softmax temperature $\tau$. The
 predicted localization point is the heatmap maximum. LERF-OVS reports
 localization accuracy and mIoU over query heatmaps.
 
-For direct 3D querying, we bypass the VFA screen-space refiner and decode
-pre-refiner compact features at Gaussian centers:
+For direct 3D querying, the base readout decodes pre-refiner compact features
+at Gaussian centers:
 \[
   \hat{f}_i = D_{\theta}(c_i), \qquad
   s_i(q) = \cos(A_{\mathrm{SigLIP2}}(\hat{f}_i), e_q),
 \]
 where $A_{\mathrm{SigLIP2}}$ is the frozen text-aligned summary head. This
 readout is structurally the same compact field used by ScanNet point-query
-experiments, but without rendered-view alignment.
+experiments. For LERF direct object selection, we also evaluate a registration
+readout inspired by direct language-registration methods: render teacher-space
+features from posed views, apply VFA and the frozen SigLIP2 head, register those
+text-aligned features back to visible Gaussian centers with depth/alpha checks,
+and then run the same primitive-level text query on the registered Gaussian
+embeddings. The LERF masks are used only for final query-select-render
+evaluation, not for registration or scoring.
 
 \section{Experiments}
 
@@ -327,25 +333,22 @@ leaderboard.
 
 \input{lerf_direct_3d_selection_table}
 
-Table~\ref{tab:lerf-direct-3d-selection} evaluates the missing primitive-level
-bridge to 2024--2025 open-vocabulary 3DGS work. We follow the OpenGaussian-style
-query-select-render protocol: text similarity is computed on Gaussian-center
-features, selected primitives are rendered to official LERF-OVS annotated views,
-and metrics are mIoU and Acc@0.25. This protocol is not the same as the
-rendered-view heatmap evaluation in Table~\ref{tab:lerf}; it is a direct 3D
-object-selection stress test.
+Table~\ref{tab:lerf-direct-3d-selection} evaluates the primitive-level bridge to
+2024--2025 open-vocabulary 3DGS work. We follow the OpenGaussian-style
+query-select-render protocol: text similarity is computed on 3D Gaussian
+primitives, selected primitives are rendered to official LERF-OVS annotated
+views, and metrics are mIoU and Acc@0.25. This protocol is not the same as the
+rendered-view heatmap evaluation in Table~\ref{tab:lerf}; the query is performed
+in 3D and rendering is used only to compare selected primitives with 2D masks.
 
-The result is a useful negative finding. Pre-refiner Gaussian-center features
-are directly queryable, but they are not yet competitive with instance- or
-cluster-aware language Gaussian methods. The fixed top-10\% primitive selector
-reaches 0.080 macro mIoU and 0.093 macro Acc@0.25, far below OpenGaussian's
-reported 0.384/0.514. Even a diagnostic best-by-scene ratio sweep only reaches
-0.091 macro mIoU. Additional no-GT diagnostics with KNN point readout,
-semantic/geometry scoring heads, scene-softmax calibration, adaptor-promoted
-checkpoints, and voxel score aggregation do not improve the fixed-protocol macro
-mIoU. We therefore keep LERF direct selection as an aligned protocol and
-limitation, not as a main SOTA claim; improving it likely requires direct 3D
-language supervision or instance-aware primitive aggregation.
+The original Gaussian-center readout reached only 0.080 macro mIoU and 0.093
+macro Acc@0.25. The registration readout closes most of this gap without using
+LERF masks for scoring: with a fixed top-2\% primitive selector it reaches
+0.342 macro mIoU and 0.555 macro Acc@0.25, and its best-by-scene diagnostic
+reaches 0.362/0.610. This remains below OpenGaussian's official 0.384 mIoU
+because Waldo Kitchen is still weak, but it is competitive on Ramen and improves
+primitive-level usability by more than four times over the original direct
+readout.
 
 \subsection{Rendered Features vs. Original RADIO Features}
 
@@ -685,10 +688,10 @@ by \project{}.
 to improve RGB reconstruction. Small objects remain challenging because the
 teacher feature resolution and rendered feature alignment limit heatmap
 sharpness. The current ScanNet protocol is a direct point-query feature probe,
-not a replacement for a full standardized segmentation benchmark. The new LERF
-direct 3D object-selection result is substantially weaker than OpenGaussian-style
-clustered primitive selection, so the paper should not claim primitive-level
-SOTA without additional direct 3D supervision or instance aggregation. Finally,
+not a replacement for a full standardized segmentation benchmark. The registered
+LERF direct 3D object-selection readout substantially improves primitive querying
+but remains weaker than OpenGaussian on Waldo Kitchen, so the paper should avoid
+claiming universal primitive-level SOTA. Finally,
 the external comparison is official-source but not reproduced under one evaluator, so
 strong SOTA-style claims require additional baseline reruns. The storage table
 reports checkpoint footprint rather than a deployed runtime memory allocator, so

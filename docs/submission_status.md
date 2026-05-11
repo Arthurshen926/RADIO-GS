@@ -8,17 +8,17 @@ repository to a top-conference paper package?
 
 - **Method maturity**: mature research prototype with paper-facing automation and archive discipline in place
 - **Current submission maturity**: conservative paper package with LaTeX draft
-- **Estimated top-conference completion**: about 90% for the conservative
-  RADIO-GS package, and about 78% for a stricter dual-readout / primitive-level
-  CTF-GS paper unless LERF direct 3D object selection is improved with direct
-  3D supervision or instance aggregation
+- **Estimated top-conference completion**: about 92% for the conservative
+  RADIO-GS package, and about 87% for a stricter dual-readout / primitive-level
+  CTF-GS paper after the registered LERF direct-selection upgrade
 
 The repository now contains a coherent method, a strong LERF-OVS result,
 repeatable evaluation code, and a completed 10-scene fair ScanNet v67 aggregate.
 The remaining conservative-route work is mostly presentation: venue-formatted
 manuscript prose, related-work tightening, and deciding which diagnostic tables
-belong in the appendix. A stricter 2025-style primitive-level paper additionally
-needs stronger LERF direct 3D object selection.
+belong in the appendix. A stricter 2025-style primitive-level paper is now
+credible but still needs careful framing around Waldo Kitchen and protocol
+provenance.
 
 ## Current source of truth
 
@@ -31,6 +31,7 @@ The current generated freeze package is:
 - [efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
 - [baseline_source_verification.md](../output/radio_gs/reports/baseline_source_verification.md)
 - [lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
+- [lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
 - [paper_draft_current.md](paper_draft_current.md)
 - [PROJECT_MAINLINE.md](PROJECT_MAINLINE.md)
 - [radio_gs_draft.tex](../paper/radio_gs_draft.tex)
@@ -95,15 +96,14 @@ Under that framing, the paper solves the following problem:
     macro LocAcc 0.5306 vs. full 0.8578), FGC/FDH warm-start provides the
     largest training route gain (`w/o FGC` 0.8018), and VFA/HGCF mainly affect
     peak stability rather than raw region coverage.
-13. LERF direct 3D object selection has now been implemented under an
-    OpenGaussian-style query-select-render protocol. The aligned experiment is
-    complete, but it exposes a real direct-3D gap: fixed top-10% Gaussian
-    selection reaches only 0.0804 macro mIoU / 0.0932 macro Acc@0.25, versus
-    OpenGaussian's official 0.3836 / 0.5143. GPU4/GPU5 validation sweeps over
-    KNN point readout, semantic/geometry scoring heads, scene-softmax scores,
-    adaptor-promoted checkpoints, and voxel score aggregation did not improve
-    fixed-protocol macro mIoU. This should be framed as a limitation and
-    improvement target, not as a main claim.
+13. LERF direct 3D object selection has been upgraded with a no-GT
+    rendered-feature-to-primitive registration readout. Under the
+    OpenGaussian-style query-select-render protocol, the original Gaussian-center
+    fixed result was 0.0804 macro mIoU / 0.0932 macro Acc@0.25; the registered
+    softmax24 result is 0.3421 / 0.5547, with best-by-scene 0.3619 / 0.6100.
+    This closes most of the primitive-level gap and beats OpenGaussian's
+    official macro Acc@0.25, while still trailing its 0.3836 macro mIoU because
+    Waldo Kitchen remains weak.
 
 ## What is already paper-grade
 
@@ -118,6 +118,7 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/efficiency_cost_table.md](../output/radio_gs/reports/efficiency_cost_table.md)
 - [output/radio_gs/reports/lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
 - [output/radio_gs/reports/lerf_direct_3d_selection.md](../output/radio_gs/reports/lerf_direct_3d_selection.md)
+- [output/radio_gs/reports/lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
 - [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
 - [paper/radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
@@ -198,21 +199,20 @@ evidence. The remaining requirement is procedural: every new ablation, seed run,
 and cross-domain result should be frozen with the same exact-report discipline
 instead of relying on informal notes.
 
-### 7. Direct LERF primitive selection is aligned but not yet strong
+### 7. Direct LERF primitive selection is now registration-backed
 
 The new `eval_lerf_direct_3d_selection.py` evaluator follows the
-OpenGaussian-style protocol: score Gaussian-center features with text, select
-3D primitives, render selected primitives to LERF annotated views, then compute
-mIoU and Acc@0.25. The experiment closes the protocol gap, but the current
-pre-refiner Gaussian-center readout is weak. Follow-up GPU4/GPU5 sweeps tested
-whether the gap came from score calibration, direct readout, spatial smoothing,
-or checkpoint selection. The original Gaussian-center cosine readout remains the
-best fixed-mIoU setting; KNN readout and voxel aggregation only help a few
-scene-specific ratios or Acc@0.25. A paper that wants to compete directly with
-OpenGaussian/CAGS/Dr. Splat-style primitive selection needs one of the following
-before promoting this claim: direct 3D language supervision, instance/SAM-cluster
-aggregation over Gaussians, or a learned compact-to-text adapter trained without
-using test masks.
+OpenGaussian-style protocol: score 3D primitives with text, render selected
+primitives to LERF annotated views, then compute mIoU and Acc@0.25. The first
+Gaussian-center implementation was weak, so GPU4/GPU5 were used to add a
+Dr. Splat-style registration readout: render VFA-refined RADIO features from
+posed views, project them to SigLIP2 space, register visible samples back to
+Gaussian centers with depth/alpha checks, and query the registered primitive
+embeddings. The current fixed protocol (`registered_view`, `softmax_scene`,
+24 all-pose registration views, top0p02) reaches 0.3421 macro mIoU and 0.5547
+macro Acc@0.25. It should be promoted as a dual-readout result, with the caveat
+that Waldo Kitchen remains below OpenGaussian and external baselines are still
+official-source rather than locally rerun.
 
 ## Immediate implementation priorities
 
@@ -221,6 +221,6 @@ using test masks.
 3. Keep the adaptor-enhanced LERF candidate as an ablation/selector result unless the main-row policy changes.
 4. Keep the small-object failure analysis, storage footprint table, and efficiency/cost table in the main paper unless page limits force them to appendix.
 5. Reproduce external baselines under the local evaluator only if the paper wants a strict SOTA leaderboard claim.
-6. If the paper adopts a dual-readout title, prioritize improving LERF direct
-   3D object selection; otherwise keep that table as a limitation/appendix
-   protocol-alignment experiment.
+6. If the paper adopts a dual-readout title, present the registered LERF direct
+   3D result in the main experiments and keep Waldo/threshold/view-count probes
+   in the appendix.

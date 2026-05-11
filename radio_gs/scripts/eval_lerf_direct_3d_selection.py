@@ -23,7 +23,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 import cv2
 import numpy as np
@@ -42,13 +42,17 @@ from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_PROMPT_TEMPLATES,
     LERF_OVS_SCENES,
     build_gt_masks,
+    load_lerf_rgb_frame,
     load_lerf_ovs_labels,
     load_or_generate_prompt_ensemble_embeddings,
     load_render_pipeline,
     parse_prompt_templates,
+    project_to_siglip2,
+    render_1280d,
     resolve_lerf_label_dir,
     resolve_lerf_scene_root,
 )
+from radio_gs.scripts.train_feature_field import sample_multiview_radio_targets
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 logger = logging.getLogger(__name__)
@@ -167,6 +171,136 @@ def select_gaussians_from_scores(
         return (scores.float() > mean + float(spec.value) * std).float()
 
     raise ValueError(f"Unsupported selection mode: {spec.mode}")
+
+
+def _sorted_unique_ints(values: Iterable[int]) -> List[int]:
+    return sorted({int(value) for value in values})
+
+
+def _evenly_subsample_frames(frames: List[int], max_frames: int) -> List[int]:
+    if max_frames <= 0 or len(frames) <= max_frames:
+        return list(frames)
+    positions = np.linspace(0, len(frames) - 1, num=max_frames)
+    selected: List[int] = []
+    for pos in positions:
+        frame = frames[int(round(float(pos)))]
+        if frame not in selected:
+            selected.append(frame)
+    return selected
+
+
+def select_registration_frame_ids(
+    *,
+    available_pose_ids: Iterable[int],
+    annotated_frame_ids: Iterable[int],
+    official_frame_ids: Iterable[int],
+    mode: str,
+    max_frames: int = 0,
+) -> List[int]:
+    """Select GT-free posed RGB/rendered views for primitive registration.
+
+    ``official`` means the OpenGaussian official annotated subset when poses are
+    available. If a scene has no matching official IDs, the function falls back
+    to annotated IDs so the evaluator fails less often on local data variants.
+    """
+    available = set(_sorted_unique_ints(available_pose_ids))
+    annotated = set(_sorted_unique_ints(annotated_frame_ids))
+    official = set(_sorted_unique_ints(official_frame_ids))
+
+    if mode == "official":
+        frames = sorted(available & annotated & official)
+        if not frames:
+            frames = sorted(available & annotated)
+    elif mode == "annotated":
+        frames = sorted(available & annotated)
+    elif mode == "all_poses":
+        frames = sorted(available)
+    else:
+        raise ValueError(f"Unsupported registration frame mode: {mode}")
+
+    return _evenly_subsample_frames(frames, int(max_frames))
+
+
+def score_text_aligned_embeddings(
+    embeddings: torch.Tensor,
+    text_embeddings: torch.Tensor,
+    *,
+    canonical_embeddings: Optional[torch.Tensor] = None,
+    scoring: str,
+    softmax_temperature: float = 50.0,
+) -> torch.Tensor:
+    """Score normalized visual/text embeddings with direct-eval scoring modes."""
+    if embeddings.ndim != 2 or text_embeddings.ndim != 2:
+        raise ValueError(
+            "Expected embeddings [N,D] and text_embeddings [K,D], got "
+            f"{tuple(embeddings.shape)} and {tuple(text_embeddings.shape)}"
+        )
+    visual = F.normalize(embeddings.float(), dim=-1)
+    text = F.normalize(text_embeddings.float(), dim=-1).to(visual.device)
+
+    if scoring == "softmax_scene":
+        logits = visual @ text.T
+        return torch.softmax(logits * float(softmax_temperature), dim=-1)
+
+    if scoring == "cosine":
+        return visual @ text.T
+
+    if scoring == "relevancy":
+        if canonical_embeddings is None or canonical_embeddings.numel() == 0:
+            raise ValueError("scoring='relevancy' requires canonical embeddings")
+        canonical = F.normalize(canonical_embeddings.float(), dim=-1).to(visual.device)
+        sim = visual @ text.T
+        canon = visual @ canonical.T
+        canon_max = canon.max(dim=1, keepdim=True).values
+        sim_scaled = sim * float(softmax_temperature)
+        canon_scaled = canon_max.expand_as(sim) * float(softmax_temperature)
+        max_val = torch.maximum(sim_scaled, canon_scaled)
+        return torch.exp(sim_scaled - max_val) / (
+            torch.exp(sim_scaled - max_val)
+            + torch.exp(canon_scaled - max_val)
+            + 1e-8
+        )
+
+    raise ValueError(f"Unsupported scoring mode: {scoring}")
+
+
+def merge_registered_scores(
+    registered_embeddings: torch.Tensor,
+    valid_mask: torch.Tensor,
+    text_embeddings: torch.Tensor,
+    *,
+    fallback_scores: Optional[torch.Tensor] = None,
+    canonical_embeddings: Optional[torch.Tensor] = None,
+    scoring: str,
+    softmax_temperature: float = 50.0,
+) -> torch.Tensor:
+    """Score registered primitive embeddings and fill unregistered rows."""
+    scores = score_text_aligned_embeddings(
+        registered_embeddings,
+        text_embeddings,
+        canonical_embeddings=canonical_embeddings,
+        scoring=scoring,
+        softmax_temperature=softmax_temperature,
+    )
+    valid = valid_mask.to(device=scores.device, dtype=torch.bool)
+    if valid.shape != (scores.shape[0],):
+        raise ValueError(
+            f"Expected valid_mask [{scores.shape[0]}], got {tuple(valid.shape)}"
+        )
+    if valid.all():
+        return scores
+
+    merged = scores.clone()
+    if fallback_scores is None:
+        merged[~valid] = -1.0e4
+    else:
+        fallback = fallback_scores.to(device=scores.device, dtype=scores.dtype)
+        if fallback.shape != scores.shape:
+            raise ValueError(
+                f"Expected fallback_scores {tuple(scores.shape)}, got {tuple(fallback.shape)}"
+            )
+        merged[~valid] = fallback[~valid]
+    return merged
 
 
 def aggregate_scores_by_voxel(
@@ -291,6 +425,7 @@ def compute_gaussian_text_scores(
     codec: torch.nn.Module,
     summary_head: torch.nn.Module,
     text_embeddings: torch.Tensor,
+    canonical_embeddings: Optional[torch.Tensor] = None,
     *,
     is_hybrid: bool,
     direct_readout_mode: str,
@@ -310,6 +445,9 @@ def compute_gaussian_text_scores(
     all_scores: List[torch.Tensor] = []
     text = F.normalize(text_embeddings.float(), dim=-1).to(device)
     text_for_compute = text.half() if device.type == "cuda" else text.float()
+    canonical = None
+    if canonical_embeddings is not None:
+        canonical = F.normalize(canonical_embeddings.float(), dim=-1).to(device)
     knn_indices_np: Optional[np.ndarray] = None
     knn_dist_np: Optional[np.ndarray] = None
     knn_latent: Optional[torch.Tensor] = None
@@ -405,6 +543,20 @@ def compute_gaussian_text_scores(
             scores = torch.softmax(logits * float(softmax_temperature), dim=-1)
         elif scoring == "cosine":
             scores = siglip @ text.float().T
+        elif scoring == "relevancy":
+            if canonical is None or canonical.numel() == 0:
+                raise ValueError("scoring='relevancy' requires canonical embeddings")
+            sim = siglip @ text.float().T
+            canon = siglip @ canonical.float().T
+            canon_max = canon.max(dim=1, keepdim=True).values
+            sim_scaled = sim * float(softmax_temperature)
+            canon_scaled = canon_max.expand_as(sim) * float(softmax_temperature)
+            max_val = torch.maximum(sim_scaled, canon_scaled)
+            scores = torch.exp(sim_scaled - max_val) / (
+                torch.exp(sim_scaled - max_val)
+                + torch.exp(canon_scaled - max_val)
+                + 1e-8
+            )
         else:
             raise ValueError(f"Unsupported scoring mode: {scoring}")
         all_scores.append(scores.cpu())
@@ -414,6 +566,178 @@ def compute_gaussian_text_scores(
             torch.cuda.empty_cache()
 
     return torch.cat(all_scores, dim=0)
+
+
+def _load_lerf_rgb_tensor(
+    scene: str,
+    frame_id: int,
+    config: object,
+    device: torch.device,
+) -> Optional[torch.Tensor]:
+    image_bgr = load_lerf_rgb_frame(scene, frame_id, getattr(config, "scene_root", ""))
+    if image_bgr is None:
+        return None
+    image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+    tensor = torch.from_numpy(np.ascontiguousarray(image_rgb)).permute(2, 0, 1)
+    return tensor.float().div(255.0).unsqueeze(0).to(device)
+
+
+@torch.no_grad()
+def compute_registered_view_text_scores(
+    *,
+    scene: str,
+    model: torch.nn.Module,
+    codec: torch.nn.Module,
+    renderer: FeatureFieldRenderer,
+    sharpener: torch.nn.Module,
+    refiner: Optional[torch.nn.Module],
+    config: object,
+    is_hybrid: bool,
+    dataset: LERFDataset,
+    frame_annotations: Dict[int, List[dict]],
+    summary_head: torch.nn.Module,
+    text_embeddings: torch.Tensor,
+    canonical_embeddings: Optional[torch.Tensor],
+    scoring: str,
+    softmax_temperature: float,
+    registration_frame_mode: str,
+    registration_max_frames: int,
+    registration_chunk_size: int,
+    registration_depth_tolerance: float,
+    registration_relative_depth_tolerance: float,
+    registration_alpha_threshold: float,
+    fallback_scores: Optional[torch.Tensor],
+    device: torch.device,
+) -> Tuple[torch.Tensor, Dict[str, object]]:
+    """Register rendered SigLIP2 features back to Gaussian centers and score text.
+
+    This is the P0, no-training object-aware primitive readout: query still
+    happens in 3D on Gaussian primitives, while rendered views provide a
+    Dr. Splat-style language-aligned registration signal without using LERF
+    labels or masks for training/scoring.
+    """
+    frame_ids = select_registration_frame_ids(
+        available_pose_ids=dataset.pose_by_frame_idx.keys(),
+        annotated_frame_ids=frame_annotations.keys(),
+        official_frame_ids=OPEN_GAUSSIAN_LERF_FRAMES.get(scene, []),
+        mode=registration_frame_mode,
+        max_frames=registration_max_frames,
+    )
+    if not frame_ids:
+        raise RuntimeError(
+            f"No registration frames selected for {scene} with mode={registration_frame_mode}"
+        )
+
+    xyz_cpu = model.get_xyz().detach().cpu().float()
+    n_gaussians = int(xyz_cpu.shape[0])
+    text = F.normalize(text_embeddings.float(), dim=-1).to(device)
+    canonical = (
+        F.normalize(canonical_embeddings.float(), dim=-1).to(device)
+        if canonical_embeddings is not None
+        else None
+    )
+    embedding_dim = int(text.shape[1])
+    registered_sum = torch.zeros(n_gaussians, embedding_dim, dtype=torch.float32)
+    registered_counts = torch.zeros(n_gaussians, dtype=torch.float32)
+    chunk_size = max(int(registration_chunk_size), 1)
+
+    for frame_id in tqdm(frame_ids, desc="  register rendered views", leave=False):
+        pose_w2c = dataset.pose_by_frame_idx.get(frame_id)
+        if pose_w2c is None:
+            continue
+        viewmat = torch.from_numpy(pose_w2c.copy()).float().to(device).unsqueeze(0)
+        rgb_tensor = None
+        if getattr(config, "refiner_rgb_guide", False):
+            rgb_tensor = _load_lerf_rgb_tensor(scene, frame_id, config, device)
+
+        feat_1280 = render_1280d(
+            model,
+            codec,
+            renderer,
+            sharpener,
+            refiner,
+            viewmat,
+            is_hybrid=is_hybrid,
+            config=config,
+            device=device,
+            rgb_image=rgb_tensor,
+        )
+        head_param = next(summary_head.parameters(), None)
+        if head_param is not None:
+            feat_1280 = feat_1280.to(dtype=head_param.dtype)
+        siglip_feat = project_to_siglip2(feat_1280, summary_head).float()
+        siglip_feat = F.normalize(siglip_feat, dim=1)
+
+        aux = renderer.render_features(model, viewmat.squeeze(0))
+        depth_map = aux["depth_map"].detach().float().unsqueeze(0)
+        alpha_map = aux["alpha_map"].detach().float().unsqueeze(0)
+
+        for start in range(0, n_gaussians, chunk_size):
+            end = min(start + chunk_size, n_gaussians)
+            points = xyz_cpu[start:end].to(device=device, dtype=torch.float32)
+            targets, valid, counts = sample_multiview_radio_targets(
+                points,
+                siglip_feat,
+                viewmat,
+                renderer.K,
+                depth_map=depth_map,
+                alpha_map=alpha_map,
+                depth_tolerance=registration_depth_tolerance,
+                relative_depth_tolerance=registration_relative_depth_tolerance,
+                alpha_threshold=registration_alpha_threshold,
+                normalize_sampled_features=True,
+            )
+            valid_cpu = valid.detach().cpu()
+            if valid_cpu.any():
+                counts_valid = counts[valid].detach().float().cpu()
+                registered_sum[start:end][valid_cpu] += (
+                    targets[valid].detach().float().cpu()
+                    * counts_valid.unsqueeze(1)
+                )
+                registered_counts[start:end][valid_cpu] += counts_valid
+
+        del feat_1280, siglip_feat, aux, depth_map, alpha_map
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+
+    valid_all = registered_counts > 0
+    all_scores: List[torch.Tensor] = []
+    for start in tqdm(range(0, n_gaussians, chunk_size), desc="  score registered", leave=False):
+        end = min(start + chunk_size, n_gaussians)
+        counts = registered_counts[start:end].clamp_min(1.0).unsqueeze(1)
+        registered = registered_sum[start:end] / counts
+        registered = F.normalize(registered, dim=-1).to(device)
+        fallback_chunk = None
+        if fallback_scores is not None:
+            fallback_chunk = fallback_scores[start:end]
+        scores = merge_registered_scores(
+            registered,
+            valid_all[start:end],
+            text,
+            fallback_scores=fallback_chunk,
+            canonical_embeddings=canonical,
+            scoring=scoring,
+            softmax_temperature=softmax_temperature,
+        )
+        all_scores.append(scores.detach().cpu())
+        del registered, scores
+
+    valid_count = int(valid_all.sum().item())
+    stats: Dict[str, object] = {
+        "frame_mode": registration_frame_mode,
+        "frame_ids": frame_ids,
+        "num_frames": len(frame_ids),
+        "registered_gaussians": valid_count,
+        "total_gaussians": n_gaussians,
+        "registered_fraction": float(valid_count / max(n_gaussians, 1)),
+        "mean_valid_views": float(registered_counts[valid_all].mean().item()) if valid_count else 0.0,
+        "max_valid_views": float(registered_counts.max().item()) if n_gaussians else 0.0,
+        "fallback": "direct" if fallback_scores is not None else "low",
+        "depth_tolerance": float(registration_depth_tolerance),
+        "relative_depth_tolerance": float(registration_relative_depth_tolerance),
+        "alpha_threshold": float(registration_alpha_threshold),
+    }
+    return torch.cat(all_scores, dim=0), stats
 
 
 def build_lerf_dataset_for_scene(
@@ -541,8 +865,10 @@ def evaluate_scene(
     output_dir: Path,
     summary_head: torch.nn.Module,
     text_embedding_cache: Optional[str],
+    canonical_embedding_cache: Optional[str],
     prompt_templates: List[str],
     selection_specs: List[SelectionSpec],
+    score_source: str,
     scoring: str,
     compact_feature_key: str,
     direct_readout_mode: str,
@@ -552,6 +878,13 @@ def evaluate_scene(
     score_aggregation: str,
     score_aggregation_resolution: int,
     score_aggregation_blend: float,
+    registered_view_fallback: str,
+    registration_frame_mode: str,
+    registration_max_frames: int,
+    registration_chunk_size: int,
+    registration_depth_tolerance: float,
+    registration_relative_depth_tolerance: float,
+    registration_alpha_threshold: float,
     silhouette_threshold: float,
     min_select: int,
     chunk_size: int,
@@ -599,23 +932,86 @@ def evaluate_scene(
         prompt_templates=prompt_templates,
     )
     scene_text = F.normalize(scene_text.float(), dim=-1)
+    canonical_text = None
+    if scoring == "relevancy":
+        if not canonical_embedding_cache or not Path(canonical_embedding_cache).exists():
+            raise FileNotFoundError(
+                "scoring='relevancy' requires --canonical_embedding_cache"
+            )
+        canon_payload = torch.load(canonical_embedding_cache, map_location="cpu")
+        canonical_text = F.normalize(canon_payload["embeddings"].float(), dim=-1)
+        print(
+            f"  loaded canonical embeddings from {canonical_embedding_cache}: "
+            f"{tuple(canonical_text.shape)}"
+        )
 
-    print("  computing Gaussian-level text scores")
-    scores = compute_gaussian_text_scores(
-        model,
-        codec,
-        summary_head,
-        scene_text,
-        is_hybrid=is_hybrid,
-        direct_readout_mode=direct_readout_mode,
-        direct_readout_k=direct_readout_k,
-        direct_readout_candidate_k=direct_readout_candidate_k,
-        compact_feature_key=compact_feature_key,
-        scoring=scoring,
-        softmax_temperature=softmax_temperature,
-        chunk_size=chunk_size,
-        device=device,
+    registration_stats: Dict[str, object] = {}
+    direct_scores: Optional[torch.Tensor] = None
+    needs_direct_scores = score_source == "direct" or (
+        score_source == "registered_view" and registered_view_fallback == "direct"
     )
+    if needs_direct_scores:
+        print("  computing Gaussian-level text scores")
+        direct_scores = compute_gaussian_text_scores(
+            model,
+            codec,
+            summary_head,
+            scene_text,
+            canonical_text,
+            is_hybrid=is_hybrid,
+            direct_readout_mode=direct_readout_mode,
+            direct_readout_k=direct_readout_k,
+            direct_readout_candidate_k=direct_readout_candidate_k,
+            compact_feature_key=compact_feature_key,
+            scoring=scoring,
+            softmax_temperature=softmax_temperature,
+            chunk_size=chunk_size,
+            device=device,
+        )
+
+    if score_source == "direct":
+        if direct_scores is None:
+            raise RuntimeError("Internal error: direct score source missing direct scores")
+        scores = direct_scores
+    elif score_source == "registered_view":
+        print(
+            "  computing registered-view primitive scores "
+            f"({registration_frame_mode}, max_frames={registration_max_frames or 'all'})"
+        )
+        scores, registration_stats = compute_registered_view_text_scores(
+            scene=scene,
+            model=model,
+            codec=codec,
+            renderer=_renderer,
+            sharpener=_sharpener,
+            refiner=_refiner,
+            config=config,
+            is_hybrid=is_hybrid,
+            dataset=dataset,
+            frame_annotations=frame_annotations,
+            summary_head=summary_head,
+            text_embeddings=scene_text,
+            canonical_embeddings=canonical_text,
+            scoring=scoring,
+            softmax_temperature=softmax_temperature,
+            registration_frame_mode=registration_frame_mode,
+            registration_max_frames=registration_max_frames,
+            registration_chunk_size=registration_chunk_size,
+            registration_depth_tolerance=registration_depth_tolerance,
+            registration_relative_depth_tolerance=registration_relative_depth_tolerance,
+            registration_alpha_threshold=registration_alpha_threshold,
+            fallback_scores=direct_scores if registered_view_fallback == "direct" else None,
+            device=device,
+        )
+        print(
+            "  registered "
+            f"{registration_stats['registered_gaussians']}/"
+            f"{registration_stats['total_gaussians']} Gaussians "
+            f"({registration_stats['registered_fraction']:.3f})"
+        )
+    else:
+        raise ValueError(f"Unsupported score source: {score_source}")
+
     if score_aggregation != "none" and score_aggregation_blend > 0:
         print(
             "  aggregating Gaussian scores "
@@ -660,7 +1056,10 @@ def evaluate_scene(
         "scene": scene,
         "config": config_path,
         "checkpoint": checkpoint_path,
+        "score_source": score_source,
         "compact_feature_key": compact_feature_key,
+        "canonical_embedding_cache": canonical_embedding_cache if scoring == "relevancy" else "",
+        "registration": registration_stats,
         "categories": scene_categories,
         "image_height": img_h,
         "image_width": img_w,
@@ -703,7 +1102,18 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
     rows.append(f"- Scene: `{scene}`")
     rows.append("- Protocol: OpenGaussian-style direct 3D primitive selection; rendering is used only for mask evaluation.")
     rows.append("- Query location: 3D Gaussian primitives.")
-    rows.append("- Feature source: pre-refiner RADIO-GS Gaussian-center decoded features.")
+    protocol = report.get("protocol", {})
+    rows.append(f"- Feature source: {protocol.get('feature_source', 'pre-refiner RADIO-GS Gaussian-center decoded features')}.")
+    rows.append(f"- Score source: `{protocol.get('score_source', 'direct')}`.")
+    registration = report.get("scene", {}).get("registration", {})
+    if registration:
+        rows.append(
+            "- Registration views: "
+            f"{registration.get('num_frames', 0)} frames, "
+            f"{registration.get('registered_gaussians', 0)}/"
+            f"{registration.get('total_gaussians', 0)} Gaussians "
+            f"({float(registration.get('registered_fraction', 0.0)):.3f})."
+        )
     rows.append("- Text head: SigLIP2 summary/text space.")
     rows.append("")
     rows.append("| Selection | mIoU | Acc@0.25 | Acc@0.50 | N |")
@@ -739,7 +1149,9 @@ def main() -> None:
     parser.add_argument("--threshold_sweep", default="", help="Comma/space separated score thresholds")
     parser.add_argument("--mean_std", type=float, default=1.0, help="Main mean+std multiplier for mean_std mode")
     parser.add_argument("--mean_std_sweep", default="", help="Comma/space separated mean_std multipliers")
-    parser.add_argument("--scoring", choices=["cosine", "softmax_scene"], default="cosine", help="Text-Gaussian score")
+    parser.add_argument("--score_source", choices=["direct", "registered_view"], default="direct", help="Primitive score source for direct 3D selection")
+    parser.add_argument("--scoring", choices=["cosine", "softmax_scene", "relevancy"], default="cosine", help="Text-Gaussian score")
+    parser.add_argument("--canonical_embedding_cache", default="checkpoints/siglip2_canonical_embeddings.pt", help="Canonical text embeddings for relevancy scoring")
     parser.add_argument("--direct_readout_mode", choices=["gaussian", "knn"], default="gaussian", help="Direct 3D compact readout mode before HCD decoding")
     parser.add_argument("--direct_readout_k", type=int, default=8, help="Neighbour count for knn direct_readout_mode")
     parser.add_argument("--direct_readout_candidate_k", type=int, default=0, help="Optional candidate count before scale-aware KNN pruning")
@@ -748,6 +1160,13 @@ def main() -> None:
     parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
+    parser.add_argument("--registered_view_fallback", choices=["direct", "low"], default="direct", help="Fallback score for Gaussians not visible in registration views")
+    parser.add_argument("--registration_frame_mode", choices=["official", "annotated", "all_poses"], default="official", help="Views used to register rendered features back to primitives")
+    parser.add_argument("--registration_max_frames", type=int, default=0, help="Evenly subsample registration views; 0 uses all selected views")
+    parser.add_argument("--registration_chunk_size", type=int, default=32768, help="Gaussian chunk size for rendered-view registration sampling")
+    parser.add_argument("--registration_depth_tolerance", type=float, default=0.08, help="Absolute depth tolerance for rendered-view primitive registration")
+    parser.add_argument("--registration_relative_depth_tolerance", type=float, default=0.02, help="Relative depth tolerance for rendered-view primitive registration")
+    parser.add_argument("--registration_alpha_threshold", type=float, default=0.02, help="Minimum rendered alpha for rendered-view primitive registration")
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
@@ -768,6 +1187,7 @@ def main() -> None:
     print(f"Scene:      {args.scene}")
     print(f"Device:     {device}")
     print(f"Selection:  {', '.join(spec.tag for spec in specs)}")
+    print(f"Score src:  {args.score_source}")
     print(f"Scoring:    {args.scoring}")
     print(f"Silhouette: > {args.silhouette_threshold}")
     print()
@@ -783,8 +1203,10 @@ def main() -> None:
         output_dir=out_root,
         summary_head=summary_head,
         text_embedding_cache=args.text_embedding_cache,
+        canonical_embedding_cache=args.canonical_embedding_cache,
         prompt_templates=prompt_templates,
         selection_specs=specs,
+        score_source=args.score_source,
         scoring=args.scoring,
         compact_feature_key=args.compact_feature_key,
         direct_readout_mode=args.direct_readout_mode,
@@ -794,6 +1216,13 @@ def main() -> None:
         score_aggregation=args.score_aggregation,
         score_aggregation_resolution=args.score_aggregation_resolution,
         score_aggregation_blend=args.score_aggregation_blend,
+        registered_view_fallback=args.registered_view_fallback,
+        registration_frame_mode=args.registration_frame_mode,
+        registration_max_frames=args.registration_max_frames,
+        registration_chunk_size=args.registration_chunk_size,
+        registration_depth_tolerance=args.registration_depth_tolerance,
+        registration_relative_depth_tolerance=args.registration_relative_depth_tolerance,
+        registration_alpha_threshold=args.registration_alpha_threshold,
         silhouette_threshold=args.silhouette_threshold,
         min_select=args.min_select,
         chunk_size=args.chunk_size,
@@ -807,15 +1236,27 @@ def main() -> None:
         "protocol": {
             "name": "OpenGaussian-style LERF-OVS direct 3D object selection",
             "query_location": "3D Gaussian primitives",
-            "feature_source": "pre-refiner Gaussian-center decoded RADIO-compatible features",
+            "feature_source": (
+                "post-refiner rendered SigLIP2 features registered back to Gaussian primitives"
+                if args.score_source == "registered_view"
+                else "pre-refiner Gaussian-center decoded RADIO-compatible features"
+            ),
+            "score_source": args.score_source,
             "compact_feature_key": args.compact_feature_key,
             "direct_readout_mode": args.direct_readout_mode,
             "direct_readout_k": args.direct_readout_k,
             "direct_readout_candidate_k": args.direct_readout_candidate_k,
             "text_head": "SigLIP2 summary/text-aligned head",
+            "canonical_embedding_cache": args.canonical_embedding_cache if args.scoring == "relevancy" else "",
             "score_aggregation": args.score_aggregation,
             "score_aggregation_resolution": args.score_aggregation_resolution,
             "score_aggregation_blend": args.score_aggregation_blend,
+            "registered_view_fallback": args.registered_view_fallback,
+            "registration_frame_mode": args.registration_frame_mode,
+            "registration_max_frames": args.registration_max_frames,
+            "registration_depth_tolerance": args.registration_depth_tolerance,
+            "registration_relative_depth_tolerance": args.registration_relative_depth_tolerance,
+            "registration_alpha_threshold": args.registration_alpha_threshold,
             "render_role": "render selected primitives only for mask evaluation",
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50"],
             "silhouette_threshold": args.silhouette_threshold,

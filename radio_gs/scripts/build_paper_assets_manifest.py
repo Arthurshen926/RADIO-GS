@@ -127,7 +127,11 @@ def main() -> None:
             },
             "lerf_direct_3d_selection.md": {
                 "path": rel(direct_selection),
-                "description": "LERF direct 3D object-selection report",
+                "description": "LERF registered direct 3D object-selection report",
+            },
+            "lerf_direct_3d_debug_audit.md": {
+                "path": rel(REPORT_DIR / "lerf_direct_3d_debug_audit.md"),
+                "description": "LERF direct 3D object-selection audit plus registration follow-up",
             },
             "paper/lerf_direct_3d_selection_table.tex": {
                 "path": rel(REPO_ROOT / "paper" / "lerf_direct_3d_selection_table.tex"),
