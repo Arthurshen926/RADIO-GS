@@ -3,14 +3,15 @@
 
 This script implements an OpenGaussian-style protocol for RADIO-GS:
 
-1. Decode pre-refiner Gaussian/primitive features at 3D Gaussian centers.
-2. Project decoded RADIO-compatible features into SigLIP2 text space.
-3. Select 3D primitives from text-Gaussian similarity scores.
-4. Render selected primitives as binary masks on the official LERF-OVS views.
-5. Report mIoU, Acc@0.25, and Acc@0.50 against LERF-OVS masks.
+1. Decode pre-refiner Gaussian/primitive features at 3D Gaussian centers, or
+   register rendered SigLIP2-aligned features back to visible primitives.
+2. Select 3D primitives from text-Gaussian similarity scores.
+3. Render selected primitives as binary masks on the official LERF-OVS views.
+4. Report mIoU, Acc@0.25, and Acc@0.50 against LERF-OVS masks.
 
-The view-space refiner is intentionally not used. It is a rendered-view module,
-while this evaluator queries Gaussian-level features directly in 3D.
+The registered-view path is View-to-Primitive Registration (VPR): text queries
+still operate on Gaussian primitives, while rendered teacher-compatible features
+provide the registration signal.
 """
 
 from __future__ import annotations
@@ -34,6 +35,12 @@ from tqdm import tqdm
 sys.path.insert(0, ".")
 
 from radio_gs.data.lerf_dataset import LERFDataset
+from radio_gs.data.benchmark_paths import (
+    extract_feature_frame_index,
+    list_feature_paths,
+    resolve_split_frame_ids,
+    resolve_split_feature_dir,
+)
 from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.scripts.eval_lerf_grounding import (
@@ -173,6 +180,108 @@ def select_gaussians_from_scores(
     raise ValueError(f"Unsupported selection mode: {spec.mode}")
 
 
+def refine_selection_by_voxel_components(
+    selected: torch.Tensor,
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    mode: str,
+    resolution: int,
+    keep_components: int,
+    min_component_size: int,
+    rank_by: str,
+) -> torch.Tensor:
+    """Filter selected primitives by GT-free 3D connected components.
+
+    This is an instance-consistency diagnostic inspired by Gaussian grouping
+    methods: selection still comes from text scores, then disconnected tiny
+    fragments can be removed before rendering masks.
+    """
+    if mode == "none":
+        return selected
+    if mode not in {"top_score_components", "largest_components"}:
+        raise ValueError(f"Unsupported selection refinement mode: {mode}")
+    if rank_by not in {"mean_score", "score_sum", "size"}:
+        raise ValueError(f"Unsupported component rank_by: {rank_by}")
+    if selected.ndim != 2 or scores.ndim != 2 or selected.shape != scores.shape:
+        raise ValueError(
+            f"Expected selected/scores [N,K] with same shape, got "
+            f"{tuple(selected.shape)} and {tuple(scores.shape)}"
+        )
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or xyz.shape[0] != selected.shape[0]:
+        raise ValueError(
+            f"Expected xyz [N,3] aligned with selected [N,K], got "
+            f"{tuple(xyz.shape)} and {tuple(selected.shape)}"
+        )
+    if resolution <= 1 or keep_components <= 0:
+        return selected
+
+    try:
+        from scipy import ndimage
+    except Exception as exc:  # pragma: no cover - environment dependent
+        raise RuntimeError("selection component refinement requires scipy") from exc
+
+    device = selected.device
+    selected_cpu = selected.detach().float().cpu()
+    scores_cpu = scores.detach().float().cpu()
+    xyz_cpu = xyz.detach().float().cpu()
+    lo = xyz_cpu.min(dim=0).values
+    hi = xyz_cpu.max(dim=0).values
+    extent = (hi - lo).clamp_min(1e-6)
+    coords = ((xyz_cpu - lo) / extent * float(resolution)).floor().long()
+    coords = coords.clamp_(0, resolution - 1).numpy()
+
+    refined = torch.zeros_like(selected_cpu)
+    structure = ndimage.generate_binary_structure(3, 1)
+    min_size = max(int(min_component_size), 1)
+    keep_count = max(int(keep_components), 1)
+    grid_shape = (int(resolution), int(resolution), int(resolution))
+
+    for query_idx in range(selected_cpu.shape[1]):
+        idx = torch.nonzero(selected_cpu[:, query_idx] > 0, as_tuple=False).flatten()
+        if idx.numel() == 0:
+            continue
+        idx_np = idx.numpy()
+        query_coords = coords[idx_np]
+        occupancy = np.zeros(grid_shape, dtype=bool)
+        occupancy[query_coords[:, 0], query_coords[:, 1], query_coords[:, 2]] = True
+        labels, num_components = ndimage.label(occupancy, structure=structure)
+        if num_components <= 0:
+            refined[idx, query_idx] = selected_cpu[idx, query_idx]
+            continue
+
+        component_labels = labels[
+            query_coords[:, 0],
+            query_coords[:, 1],
+            query_coords[:, 2],
+        ].astype(np.int64)
+        sizes = np.bincount(component_labels, minlength=num_components + 1).astype(np.float64)
+        score_values = scores_cpu[idx, query_idx].numpy().astype(np.float64)
+        score_sums = np.bincount(
+            component_labels,
+            weights=score_values,
+            minlength=num_components + 1,
+        )
+        valid_labels = np.arange(1, num_components + 1, dtype=np.int64)
+        valid_labels = valid_labels[sizes[valid_labels] >= min_size]
+        if valid_labels.size == 0:
+            valid_labels = np.array([int(sizes[1:].argmax()) + 1], dtype=np.int64)
+
+        if mode == "largest_components" or rank_by == "size":
+            ranks = sizes[valid_labels]
+        elif rank_by == "score_sum":
+            ranks = score_sums[valid_labels]
+        else:
+            ranks = score_sums[valid_labels] / np.maximum(sizes[valid_labels], 1.0)
+        order = np.argsort(-ranks, kind="stable")
+        kept_labels = set(int(label) for label in valid_labels[order[:keep_count]])
+        keep_mask = np.array([int(label) in kept_labels for label in component_labels], dtype=bool)
+        if keep_mask.any():
+            refined[idx[torch.from_numpy(keep_mask)], query_idx] = 1.0
+
+    return refined.to(device=device, dtype=selected.dtype)
+
+
 def _sorted_unique_ints(values: Iterable[int]) -> List[int]:
     return sorted({int(value) for value in values})
 
@@ -194,6 +303,8 @@ def select_registration_frame_ids(
     available_pose_ids: Iterable[int],
     annotated_frame_ids: Iterable[int],
     official_frame_ids: Iterable[int],
+    train_frame_ids: Optional[Iterable[int]] = None,
+    val_frame_ids: Optional[Iterable[int]] = None,
     mode: str,
     max_frames: int = 0,
 ) -> List[int]:
@@ -206,6 +317,8 @@ def select_registration_frame_ids(
     available = set(_sorted_unique_ints(available_pose_ids))
     annotated = set(_sorted_unique_ints(annotated_frame_ids))
     official = set(_sorted_unique_ints(official_frame_ids))
+    train = set(_sorted_unique_ints(train_frame_ids or []))
+    val = set(_sorted_unique_ints(val_frame_ids or []))
 
     if mode == "official":
         frames = sorted(available & annotated & official)
@@ -215,10 +328,47 @@ def select_registration_frame_ids(
         frames = sorted(available & annotated)
     elif mode == "all_poses":
         frames = sorted(available)
+    elif mode == "train":
+        frames = sorted(available & train)
+    elif mode == "val":
+        frames = sorted(available & val)
     else:
         raise ValueError(f"Unsupported registration frame mode: {mode}")
 
     return _evenly_subsample_frames(frames, int(max_frames))
+
+
+def resolve_registration_split_frame_ids(config: object, split: str) -> Optional[List[int]]:
+    """Return the frame ids used by train/val splits for LERF-style configs.
+
+    If explicit split files are absent, mirror the generic split logic in
+    ``train_feature_field.py``: sort feature files, apply a seeded random split,
+    and return frame ids from the chosen side.
+    """
+    explicit = resolve_split_frame_ids(config, split)
+    if explicit is not None:
+        return [int(frame_id) for frame_id in explicit]
+
+    feature_dir = resolve_split_feature_dir(config, "train")
+    feature_paths = list_feature_paths(feature_dir)
+    if not feature_paths:
+        return None
+
+    frame_ids = [extract_feature_frame_index(path) for path in feature_paths]
+    generator = torch.Generator().manual_seed(int(getattr(config, "mixed_seed", 42)))
+    perm = torch.randperm(len(frame_ids), generator=generator).tolist()
+    train_cut = int(float(getattr(config, "mixed_train_ratio", 0.8)) * len(frame_ids))
+    selected_positions = perm[:train_cut] if split == "train" else perm[train_cut:]
+    return sorted(frame_ids[pos] for pos in selected_positions)
+
+
+def choose_registration_refiner(
+    refiner: Optional[torch.nn.Module],
+    *,
+    disable_registered_refiner: bool,
+) -> Optional[torch.nn.Module]:
+    """Optionally remove VFA from the VPR feature source for ablation."""
+    return None if disable_registered_refiner else refiner
 
 
 def score_text_aligned_embeddings(
@@ -311,7 +461,7 @@ def aggregate_scores_by_voxel(
     resolution: int,
     blend: float,
 ) -> torch.Tensor:
-    """Blend per-Gaussian scores with same-voxel spatial context.
+    """Blend per-Gaussian scores with local voxel spatial context.
 
     This is a GT-free primitive aggregation diagnostic.  It keeps the query in
     3D, but tests whether isolated Gaussian-center scores are too fragmented for
@@ -326,7 +476,7 @@ def aggregate_scores_by_voxel(
             f"Expected xyz [N,3] aligned with scores [N,K], got {tuple(xyz.shape)} "
             f"and {tuple(scores.shape)}"
         )
-    if mode not in {"voxel_mean", "voxel_max"}:
+    if mode not in {"voxel_mean", "voxel_max", "voxel_max_dilate"}:
         raise ValueError(f"Unsupported score aggregation mode: {mode}")
 
     scores_f = scores.float()
@@ -371,6 +521,54 @@ def aggregate_scores_by_voxel(
             voxel_scores,
             torch.zeros_like(voxel_scores),
         )
+        if mode == "voxel_max_dilate":
+            # Sparse one-hop voxel dilation: each occupied voxel receives the
+            # strongest score from its 26-neighborhood, avoiding dense component
+            # selection while reducing primitive-level fragmentation.
+            num_dense = int(resolution) ** 3
+            dense_scores = torch.full(
+                (num_dense, scores_f.shape[1]),
+                -float("inf"),
+                dtype=scores_f.dtype,
+                device=scores_f.device,
+            )
+            dense_scores[unique] = voxel_scores
+            unique_coords = torch.stack(
+                (
+                    unique // (resolution * resolution),
+                    (unique // resolution) % resolution,
+                    unique % resolution,
+                ),
+                dim=1,
+            )
+            dilated_scores = voxel_scores.clone()
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    for dz in (-1, 0, 1):
+                        if dx == 0 and dy == 0 and dz == 0:
+                            continue
+                        neighbor_coords = unique_coords + unique_coords.new_tensor([dx, dy, dz])
+                        valid = (
+                            (neighbor_coords >= 0).all(dim=1)
+                            & (neighbor_coords < resolution).all(dim=1)
+                        )
+                        if not bool(valid.any()):
+                            continue
+                        neighbor_linear = (
+                            neighbor_coords[valid, 0] * resolution * resolution
+                            + neighbor_coords[valid, 1] * resolution
+                            + neighbor_coords[valid, 2]
+                        )
+                        neighbor_scores = dense_scores[neighbor_linear]
+                        dilated_scores[valid] = torch.maximum(
+                            dilated_scores[valid],
+                            neighbor_scores,
+                        )
+            voxel_scores = torch.where(
+                torch.isfinite(dilated_scores),
+                dilated_scores,
+                voxel_scores,
+            )
 
     blend = min(max(float(blend), 0.0), 1.0)
     return scores_f * (1.0 - blend) + voxel_scores[inverse] * blend
@@ -611,15 +809,16 @@ def compute_registered_view_text_scores(
 ) -> Tuple[torch.Tensor, Dict[str, object]]:
     """Register rendered SigLIP2 features back to Gaussian centers and score text.
 
-    This is the P0, no-training object-aware primitive readout: query still
-    happens in 3D on Gaussian primitives, while rendered views provide a
-    Dr. Splat-style language-aligned registration signal without using LERF
-    labels or masks for training/scoring.
+    This is the no-training VPR primitive readout: query still happens in 3D
+    on Gaussian primitives, while rendered views provide the language-aligned
+    registration signal without using LERF labels or masks for training/scoring.
     """
     frame_ids = select_registration_frame_ids(
         available_pose_ids=dataset.pose_by_frame_idx.keys(),
         annotated_frame_ids=frame_annotations.keys(),
         official_frame_ids=OPEN_GAUSSIAN_LERF_FRAMES.get(scene, []),
+        train_frame_ids=resolve_registration_split_frame_ids(config, "train"),
+        val_frame_ids=resolve_registration_split_frame_ids(config, "val"),
         mode=registration_frame_mode,
         max_frames=registration_max_frames,
     )
@@ -778,6 +977,11 @@ def evaluate_selection_spec(
     dataset: LERFDataset,
     scores: torch.Tensor,
     spec: SelectionSpec,
+    selection_refinement: str,
+    component_resolution: int,
+    component_keep: int,
+    component_min_size: int,
+    component_rank_by: str,
     silhouette_threshold: float,
     min_select: int,
     output_dir: Path,
@@ -788,7 +992,19 @@ def evaluate_selection_spec(
         scores,
         spec,
         min_select=min_select,
-    ).to(device=device, dtype=torch.float32)
+    )
+    if selection_refinement != "none":
+        selected = refine_selection_by_voxel_components(
+            selected,
+            scores,
+            model.get_xyz().detach().cpu(),
+            mode=selection_refinement,
+            resolution=component_resolution,
+            keep_components=component_keep,
+            min_component_size=component_min_size,
+            rank_by=component_rank_by,
+        )
+    selected = selected.to(device=device, dtype=torch.float32)
     proxy = GaussianSelectionProxy(model, selected)
 
     ious: List[float] = []
@@ -848,6 +1064,11 @@ def evaluate_selection_spec(
             "selection_mode": spec.mode,
             "selection_value": spec.value,
             "selection_tag": spec.tag,
+            "selection_refinement": selection_refinement,
+            "component_resolution": component_resolution,
+            "component_keep": component_keep,
+            "component_min_size": component_min_size,
+            "component_rank_by": component_rank_by,
             "silhouette_threshold": silhouette_threshold,
             "per_category": per_cat_summary,
             "per_frame": per_frame,
@@ -878,6 +1099,11 @@ def evaluate_scene(
     score_aggregation: str,
     score_aggregation_resolution: int,
     score_aggregation_blend: float,
+    selection_refinement: str,
+    component_resolution: int,
+    component_keep: int,
+    component_min_size: int,
+    component_rank_by: str,
     registered_view_fallback: str,
     registration_frame_mode: str,
     registration_max_frames: int,
@@ -885,6 +1111,7 @@ def evaluate_scene(
     registration_depth_tolerance: float,
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
+    disable_registered_refiner: bool,
     silhouette_threshold: float,
     min_select: int,
     chunk_size: int,
@@ -984,7 +1211,10 @@ def evaluate_scene(
             codec=codec,
             renderer=_renderer,
             sharpener=_sharpener,
-            refiner=_refiner,
+            refiner=choose_registration_refiner(
+                _refiner,
+                disable_registered_refiner=disable_registered_refiner,
+            ),
             config=config,
             is_hybrid=is_hybrid,
             dataset=dataset,
@@ -1025,6 +1255,12 @@ def evaluate_scene(
             resolution=score_aggregation_resolution,
             blend=score_aggregation_blend,
         )
+    if selection_refinement != "none":
+        print(
+            "  refining selections by voxel components "
+            f"({selection_refinement}, res={component_resolution}, "
+            f"keep={component_keep}, min={component_min_size}, rank={component_rank_by})"
+        )
 
     scene_results: Dict[str, Dict] = {}
     for spec in selection_specs:
@@ -1039,6 +1275,11 @@ def evaluate_scene(
             dataset=dataset,
             scores=scores,
             spec=spec,
+            selection_refinement=selection_refinement,
+            component_resolution=component_resolution,
+            component_keep=component_keep,
+            component_min_size=component_min_size,
+            component_rank_by=component_rank_by,
             silhouette_threshold=silhouette_threshold,
             min_select=min_select,
             output_dir=output_dir,
@@ -1114,6 +1355,21 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
             f"{registration.get('total_gaussians', 0)} Gaussians "
             f"({float(registration.get('registered_fraction', 0.0)):.3f})."
         )
+    if protocol.get("score_aggregation", "none") != "none":
+        rows.append(
+            "- Score aggregation: "
+            f"{protocol.get('score_aggregation')} "
+            f"(res={protocol.get('score_aggregation_resolution')}, "
+            f"blend={protocol.get('score_aggregation_blend')})."
+        )
+    if protocol.get("selection_refinement", "none") != "none":
+        rows.append(
+            "- Selection refinement: "
+            f"{protocol.get('selection_refinement')} "
+            f"(res={protocol.get('component_resolution')}, "
+            f"keep={protocol.get('component_keep')}, "
+            f"rank={protocol.get('component_rank_by')})."
+        )
     rows.append("- Text head: SigLIP2 summary/text space.")
     rows.append("")
     rows.append("| Selection | mIoU | Acc@0.25 | Acc@0.50 | N |")
@@ -1157,16 +1413,22 @@ def main() -> None:
     parser.add_argument("--direct_readout_candidate_k", type=int, default=0, help="Optional candidate count before scale-aware KNN pruning")
     parser.add_argument("--compact_feature_key", choices=["features", "fused", "semantic", "geometry"], default="features", help="Hybrid compact readout before HCD decoding")
     parser.add_argument("--softmax_temperature", type=float, default=50.0, help="Logit scale for softmax_scene")
-    parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
+    parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max", "voxel_max_dilate"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
+    parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
+    parser.add_argument("--component_resolution", type=int, default=64, help="Voxel resolution for selection_refinement")
+    parser.add_argument("--component_keep", type=int, default=1, help="Number of connected components to keep per query")
+    parser.add_argument("--component_min_size", type=int, default=8, help="Minimum selected Gaussians per component before ranking")
+    parser.add_argument("--component_rank_by", choices=["mean_score", "score_sum", "size"], default="score_sum", help="How top_score_components ranks connected components")
     parser.add_argument("--registered_view_fallback", choices=["direct", "low"], default="direct", help="Fallback score for Gaussians not visible in registration views")
-    parser.add_argument("--registration_frame_mode", choices=["official", "annotated", "all_poses"], default="official", help="Views used to register rendered features back to primitives")
+    parser.add_argument("--registration_frame_mode", choices=["official", "annotated", "all_poses", "train", "val"], default="official", help="Views used to register rendered features back to primitives")
     parser.add_argument("--registration_max_frames", type=int, default=0, help="Evenly subsample registration views; 0 uses all selected views")
     parser.add_argument("--registration_chunk_size", type=int, default=32768, help="Gaussian chunk size for rendered-view registration sampling")
     parser.add_argument("--registration_depth_tolerance", type=float, default=0.08, help="Absolute depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_relative_depth_tolerance", type=float, default=0.02, help="Relative depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_alpha_threshold", type=float, default=0.02, help="Minimum rendered alpha for rendered-view primitive registration")
+    parser.add_argument("--disable_registered_refiner", action="store_true", help="Disable VFA/screen refiner only for registered-view primitive scoring")
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
@@ -1216,6 +1478,11 @@ def main() -> None:
         score_aggregation=args.score_aggregation,
         score_aggregation_resolution=args.score_aggregation_resolution,
         score_aggregation_blend=args.score_aggregation_blend,
+        selection_refinement=args.selection_refinement,
+        component_resolution=args.component_resolution,
+        component_keep=args.component_keep,
+        component_min_size=args.component_min_size,
+        component_rank_by=args.component_rank_by,
         registered_view_fallback=args.registered_view_fallback,
         registration_frame_mode=args.registration_frame_mode,
         registration_max_frames=args.registration_max_frames,
@@ -1223,6 +1490,7 @@ def main() -> None:
         registration_depth_tolerance=args.registration_depth_tolerance,
         registration_relative_depth_tolerance=args.registration_relative_depth_tolerance,
         registration_alpha_threshold=args.registration_alpha_threshold,
+        disable_registered_refiner=args.disable_registered_refiner,
         silhouette_threshold=args.silhouette_threshold,
         min_select=args.min_select,
         chunk_size=args.chunk_size,
@@ -1237,7 +1505,11 @@ def main() -> None:
             "name": "OpenGaussian-style LERF-OVS direct 3D object selection",
             "query_location": "3D Gaussian primitives",
             "feature_source": (
-                "post-refiner rendered SigLIP2 features registered back to Gaussian primitives"
+                (
+                    "pre-refiner rendered SigLIP2 features registered back to Gaussian primitives"
+                    if args.disable_registered_refiner
+                    else "post-refiner rendered SigLIP2 features registered back to Gaussian primitives"
+                )
                 if args.score_source == "registered_view"
                 else "pre-refiner Gaussian-center decoded RADIO-compatible features"
             ),
@@ -1251,12 +1523,18 @@ def main() -> None:
             "score_aggregation": args.score_aggregation,
             "score_aggregation_resolution": args.score_aggregation_resolution,
             "score_aggregation_blend": args.score_aggregation_blend,
+            "selection_refinement": args.selection_refinement,
+            "component_resolution": args.component_resolution,
+            "component_keep": args.component_keep,
+            "component_min_size": args.component_min_size,
+            "component_rank_by": args.component_rank_by,
             "registered_view_fallback": args.registered_view_fallback,
             "registration_frame_mode": args.registration_frame_mode,
             "registration_max_frames": args.registration_max_frames,
             "registration_depth_tolerance": args.registration_depth_tolerance,
             "registration_relative_depth_tolerance": args.registration_relative_depth_tolerance,
             "registration_alpha_threshold": args.registration_alpha_threshold,
+            "disable_registered_refiner": bool(args.disable_registered_refiner),
             "render_role": "render selected primitives only for mask evaluation",
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50"],
             "silhouette_threshold": args.silhouette_threshold,

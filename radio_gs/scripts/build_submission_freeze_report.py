@@ -203,7 +203,7 @@ def build_markdown(
     warnings = [
         "External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.",
         "ScanNet label-supervised or GT-label-balanced runs are diagnostic only and excluded from this fair v67 summary.",
-        "LERF direct 3D object selection is protocol-aligned, and GPU4/GPU5 readout/scoring/relevancy diagnostics did not close the primitive-level gap.",
+        "LERF direct 3D object selection is protocol-aligned; registered-view readout plus GT-free voxel context improves the fixed protocol while Waldo remains the limiting scene.",
     ]
     warnings.extend(lerf.get("warnings", []))
     warnings.extend(scannet.get("warnings", []))
@@ -239,8 +239,8 @@ def build_markdown(
             "`output/radio_gs/reports/baseline_source_verification.md` | Main comparison table with protocol caveat |"
         ),
         (
-            "| LERF direct 3D object selection | Registered-view direct primitive readout | "
-            "`output/radio_gs/reports/lerf_direct_3d_selection.md` | OpenGaussian-style dual-readout result |"
+            "| LERF direct 3D object selection | Registered-view + voxel-context primitive readout | "
+            "`output/radio_gs/reports/lerf_direct_3d_selection.md` | OpenGaussian-style VPR primitive-level result |"
         ),
         "",
         "## LERF-OVS",
@@ -271,11 +271,12 @@ def build_markdown(
                 "",
                 "- Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.",
                 "- Readout: rendered SigLIP2 features registered back to 3D Gaussian primitives with depth/alpha visibility checks.",
-                "- RADIO-GS fixed `top0p02`: macro mIoU `0.3421`, macro Acc@0.25 `0.5547`.",
-                "- RADIO-GS best-by-scene diagnostic: macro mIoU `0.3619`, macro Acc@0.25 `0.6100`.",
+                "- Context aggregation: GT-free voxel-max propagation at resolution `80` with blend `0.50`.",
+                "- CTF-GS fixed `top0p02`: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.",
+                "- CTF-GS best-by-scene diagnostic: macro mIoU `0.3968`, macro Acc@0.25 `0.6651`.",
                 "- OpenGaussian official context: macro mIoU `0.3836`, macro Acc@0.25 `0.5143`.",
-                "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered cosine24 is `0.3121`; Waldo remains the limiting scene.",
-                "- Paper use: direct 3D dual-readout evidence with an explicit Waldo/provenance caveat.",
+                "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`.",
+                "- Paper use: VPR-backed primitive-level evidence with an explicit Waldo/provenance caveat.",
             ]
         )
 

@@ -9,8 +9,8 @@ The active LaTeX draft is `paper/radio_gs_draft.tex`.
 
 ## Working Title
 
-Foundation Feature Reconstruction in 3D Gaussian Scenes for Open-Vocabulary
-Scene Understanding
+CTF-GS: Compact Teacher Feature Fields with View-to-Primitive Registration for
+Open-Vocabulary 3D Gaussian Scene Understanding
 
 ## Abstract
 
@@ -19,20 +19,22 @@ We study whether dense vision-foundation features can be reconstructed as a
 scene understanding. Instead of training a scene-specific classifier or storing
 raw high-dimensional features directly on every Gaussian, RADIO-GS distills
 frozen RADIO features into a hybrid Gaussian feature field with a compact HCD
-codec, screen-space refinement, and geometry-aware frozen-head supervision. The
+codec, screen-space refinement, geometry-aware frozen-head supervision, and a
+View-to-Primitive Registration (VPR) bridge for primitive-level querying. The
 resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
 frozen RADIO-GS package reaches 0.8712 macro localization accuracy and 0.4941
 macro mIoU across four scenes; a promoted adaptor/cross-view candidate keeps the
 same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
 ScanNet direct point-query protocol, RADIO-GS reaches 0.3538, 0.3573, and
-0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. A registered
+0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. A VPR-registered
 LERF direct 3D object-selection readout raises fixed-protocol macro mIoU from
-0.0804 to 0.3421 and Acc@0.25 from 0.0932 to 0.5547 under an OpenGaussian-style
-protocol. These results support the central claim that 3D Gaussian scenes can
-serve as reusable foundation-feature memories, while the remaining submission
-risk is strongest around Waldo Kitchen, exact baseline provenance, and final
-paper formatting.
+0.0804 to 0.3850 and Acc@0.25 from 0.0932 to 0.6428 under an OpenGaussian-style
+protocol, after GT-free voxel context aggregation. These results support the
+central claim that 3D Gaussian scenes can serve as reusable foundation-feature
+memories across rendered-view and registered primitive-level interfaces, while
+the remaining submission risk is strongest around Waldo Kitchen, exact baseline
+provenance, and final paper formatting.
 
 ## Main Contributions
 
@@ -46,8 +48,8 @@ paper formatting.
    downstream head behavior to shape the feature field without turning the model
    into a task-specific classifier.
 4. We provide a conservative frozen evaluation package covering LERF-OVS,
-   LERF direct 3D object-selection diagnostics, ScanNet direct point-query
-   transfer, and profiled runtime/memory evidence.
+   VPR-backed LERF direct 3D object-selection diagnostics, ScanNet direct
+   point-query transfer, and profiled runtime/memory evidence.
 
 ## Method Narrative
 
@@ -70,9 +72,10 @@ At test time, the model renders a novel-view feature map. For LERF-OVS grounding
 RADIO-GS compares the rendered feature map with SigLIP2 text embeddings and
 localizes each query from the relevancy heatmap. For ScanNet, it evaluates
 direct point queries under the v67 teacher-balanced protocol with Gaussian-index
-lookup and label-point positions. For direct LERF object selection, the
-registered-view primitive embedding is scored against text before the selected
-Gaussians are rendered only for mask evaluation.
+lookup and label-point positions. For direct LERF object selection, VPR scores
+registered-view primitive embeddings against text before the selected Gaussians
+are rendered only for mask evaluation. The raw Gaussian-center readout remains a
+diagnostic lower bound, not the paper-facing direct-selection method.
 
 ## Experiments Draft
 
@@ -114,13 +117,14 @@ with depth/alpha checks; masks are used only for final evaluation.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| RADIO-GS | SigLIP2 | registered softmax24 fixed top0p02 mIoU | 0.3246 | 0.4561 | 0.4466 | 0.1413 | 0.3421 |
-| RADIO-GS | SigLIP2 | registered softmax24 best-by-scene mIoU | 0.3606 | 0.4561 | 0.4796 | 0.1515 | 0.3619 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4527 | 0.4491 | 0.4862 | 0.1991 | 0.3968 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| RADIO-GS | SigLIP2 | registered softmax24 fixed top0p02 Acc@0.25 | 0.5357 | 0.6761 | 0.7797 | 0.2273 | 0.5547 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
 
 This result should not be mixed with rendered-view LERF mIoU. It is best used
-to show dual-readout primitive usability; Waldo Kitchen remains the main
+to show VPR-backed primitive usability; the macro now slightly exceeds the
+OpenGaussian official reference, but Waldo Kitchen remains the main
 weakness and should be analyzed as object fragmentation / registration coverage.
 
 GPU4/GPU5 diagnostics tested KNN point readout, semantic/geometry scoring heads,

@@ -59,6 +59,7 @@ def main() -> None:
         REPO_ROOT / "paper" / "lerf_ovs_main_table.tex",
         REPO_ROOT / "paper" / "efficiency_cost_table.tex",
         REPO_ROOT / "paper" / "lerf_direct_3d_selection_table.tex",
+        REPO_ROOT / "paper" / "lerf_vpr_ablation_table.tex",
     ]
     for path in required_paths:
         lines.append(f"| {path.name} | {'YES' if path.exists() else 'NO'} | `{rel(path)}` |")
@@ -73,7 +74,7 @@ def main() -> None:
             "- conservative rule: main table remains `LERF / LangSplat / LEGaussians / RADIO-GS` on rendered `LocAcc`.",
             "- external baselines are official-source context rows unless reproduced under the local evaluator.",
             "- ScanNet remains direct-query transfer evidence rather than a full leaderboard claim.",
-            "- LERF direct 3D selection now uses a registered-view primitive readout; it is promoted as dual-readout evidence with a Waldo/provenance caveat.",
+            "- LERF direct 3D selection now uses a VPR registered-view + GT-free voxel-context primitive readout; it is promoted as primitive-level evidence with a Waldo/provenance caveat.",
             "",
             "## Open Items",
             "",

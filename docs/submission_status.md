@@ -9,7 +9,7 @@ repository to a top-conference paper package?
 - **Method maturity**: mature research prototype with paper-facing automation and archive discipline in place
 - **Current submission maturity**: conservative paper package with LaTeX draft
 - **Estimated top-conference completion**: about 92% for the conservative
-  RADIO-GS package, and about 87% for a stricter dual-readout / primitive-level
+  RADIO-GS package, and about 87% for a stricter VPR-backed primitive-level
   CTF-GS paper after the registered LERF direct-selection upgrade
 
 The repository now contains a coherent method, a strong LERF-OVS result,
@@ -17,8 +17,8 @@ repeatable evaluation code, and a completed 10-scene fair ScanNet v67 aggregate.
 The remaining conservative-route work is mostly presentation: venue-formatted
 manuscript prose, related-work tightening, and deciding which diagnostic tables
 belong in the appendix. A stricter 2025-style primitive-level paper is now
-credible but still needs careful framing around Waldo Kitchen and protocol
-provenance.
+credible if framed as VPR-backed direct selection, but still needs careful
+discussion around Waldo Kitchen and protocol provenance.
 
 ## Current source of truth
 
@@ -100,9 +100,11 @@ Under that framing, the paper solves the following problem:
     rendered-feature-to-primitive registration readout. Under the
     OpenGaussian-style query-select-render protocol, the original Gaussian-center
     fixed result was 0.0804 macro mIoU / 0.0932 macro Acc@0.25; the registered
-    softmax24 result is 0.3421 / 0.5547, with best-by-scene 0.3619 / 0.6100.
-    This closes most of the primitive-level gap and beats OpenGaussian's
-    official macro Acc@0.25, while still trailing its 0.3836 macro mIoU because
+    softmax24 result is 0.3421 / 0.5547, and the current registered+voxel
+    context result is 0.3850 / 0.6428, with best-by-scene 0.3968 / 0.6651.
+    This closes most of the primitive-level gap and slightly exceeds
+    OpenGaussian's official macro mIoU and Acc@0.25 reference, while still
+    requiring a provenance caveat because baselines are not locally rerun and
     Waldo Kitchen remains weak.
 
 ## What is already paper-grade
@@ -205,14 +207,15 @@ The new `eval_lerf_direct_3d_selection.py` evaluator follows the
 OpenGaussian-style protocol: score 3D primitives with text, render selected
 primitives to LERF annotated views, then compute mIoU and Acc@0.25. The first
 Gaussian-center implementation was weak, so GPU4/GPU5 were used to add a
-Dr. Splat-style registration readout: render VFA-refined RADIO features from
+VPR registration readout: render VFA-refined RADIO features from
 posed views, project them to SigLIP2 space, register visible samples back to
 Gaussian centers with depth/alpha checks, and query the registered primitive
 embeddings. The current fixed protocol (`registered_view`, `softmax_scene`,
-24 all-pose registration views, top0p02) reaches 0.3421 macro mIoU and 0.5547
-macro Acc@0.25. It should be promoted as a dual-readout result, with the caveat
-that Waldo Kitchen remains below OpenGaussian and external baselines are still
-official-source rather than locally rerun.
+96 all-pose registration views, GT-free voxel-max context aggregation, top0p02)
+reaches 0.3850 macro mIoU and 0.6428 macro Acc@0.25. It should be promoted as a
+VPR-backed primitive-level result, with the caveat that Waldo Kitchen remains
+below OpenGaussian and external baselines are still official-source rather than
+locally rerun.
 
 ## Immediate implementation priorities
 
@@ -221,6 +224,6 @@ official-source rather than locally rerun.
 3. Keep the adaptor-enhanced LERF candidate as an ablation/selector result unless the main-row policy changes.
 4. Keep the small-object failure analysis, storage footprint table, and efficiency/cost table in the main paper unless page limits force them to appendix.
 5. Reproduce external baselines under the local evaluator only if the paper wants a strict SOTA leaderboard claim.
-6. If the paper adopts a dual-readout title, present the registered LERF direct
-   3D result in the main experiments and keep Waldo/threshold/view-count probes
-   in the appendix.
+6. If the paper adopts the VPR title, present the registered LERF direct 3D
+   result in the main experiments and keep Waldo/threshold/view-count probes in
+   the appendix.

@@ -13,7 +13,7 @@
 \newcommand{\radio}{C-RADIOv4-H}
 \newcommand{\todo}[1]{\textcolor{red}{[#1]}}
 
-\title{Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding}
+\title{\method{}: Compact Teacher Feature Fields with View-to-Primitive Registration for Open-Vocabulary 3D Gaussian Scene Understanding}
 
 \author{Anonymous Authors}
 \date{}
@@ -28,20 +28,23 @@ scene understanding. Instead of training a scene-specific classifier or storing
 raw high-dimensional features directly on every Gaussian, \method{} distills
 frozen RADIO features into a Hybrid Gaussian Code Field (HGCF), reconstructs
 teacher-space features with Compact-to-Teacher Reconstruction (CTR), and uses
-View-Space Feature Alignment (VFA) plus Frozen Geometry-Head Consistency (FGC). The
-resulting scene representation renders feature maps that remain compatible with
-text grounding and other frozen downstream probes. On LERF-OVS, the current
+View-Space Feature Alignment (VFA) plus Frozen Geometry-Head Consistency (FGC).
+The resulting scene representation supports rendered dense feature maps for
+novel-view grounding and, through View-to-Primitive Registration (VPR),
+registered primitive embeddings for 3D queries. On LERF-OVS, the current
 frozen \project{} package reaches 0.8712 macro localization accuracy and 0.4941
 macro mIoU across four scenes; a DINOv3/SAM3 adaptor-enhanced candidate keeps
 the same localization accuracy and raises macro mIoU to 0.4979. On a 10-scene
 ScanNet direct point-query protocol, \project{} reaches 0.3538, 0.3573, and
 0.4293 mIoU on the 19-, 15-, and 10-class splits, respectively. An
 OpenGaussian-style direct 3D object-selection evaluation shows that a
-rendered-feature-to-primitive registration readout raises fixed-protocol macro
-mIoU from 0.0804 to 0.3421 and macro Acc@0.25 from 0.0932 to 0.5547. These results
+rendered-feature-to-primitive registration readout with GT-free voxel context
+aggregation raises fixed-protocol macro mIoU from 0.0804 to 0.3850 and macro
+Acc@0.25 from 0.0932 to 0.6428. These results
 support the central claim that 3D Gaussian scenes can serve as reusable
-foundation-feature memories across rendered-view and direct-primitive readouts,
-while clarifying that Waldo Kitchen remains a difficult object-fragmentation case.
+foundation-feature memories across rendered-view and registered primitive-level
+readouts, while clarifying that raw Gaussian-center readout is weak and Waldo
+Kitchen remains a difficult object-fragmentation case.
 \end{abstract}
 
 \section{Introduction}
@@ -53,12 +56,15 @@ open-vocabulary 3D understanding, this creates a gap: the strongest 2D feature
 extractors are available at training images, but a deployed 3D scene must answer
 queries from novel views.
 
-\method{} targets this gap by reconstructing teacher foundation features inside a 3D
-Gaussian scene. Our goal is not to train a new per-scene language classifier.
-Instead, we ask whether a scene representation can render novel-view feature maps
-that remain compatible with frozen downstream heads and text embeddings. This
-feature-reconstruction framing differs from methods that attach a language code
-directly to a radiance field or optimize only a final task score.
+\method{} targets this gap by reconstructing teacher foundation features inside a
+3D Gaussian scene. Our goal is not to train a new per-scene language classifier.
+Instead, we ask whether a scene representation can support two complementary
+interfaces from the same compact field: dense novel-view feature maps for
+rendered open-vocabulary localization, and registered primitive/point-level
+features for direct 3D selection or semantic querying. This
+feature-reconstruction framing differs from
+methods that attach only a final language code to a radiance field or optimize a
+single downstream score.
 
 The technical challenge is that RADIO features are high-dimensional, dense, and
 expensive to store directly on every Gaussian. We therefore learn a compact
@@ -80,16 +86,17 @@ and memory.
 This draft makes four claims:
 \begin{itemize}
   \item We formulate compact teacher-feature distillation for queryable 3D
-  Gaussian scene understanding across rendered-view localization and direct 3D
-  point queries.
+  Gaussian scene understanding across rendered-view localization, VPR-based
+  direct Gaussian object selection, and direct point queries.
   \item We introduce a Hybrid Gaussian Code Field with compact latent storage and
   a coarse spatial branch, avoiding direct high-dimensional teacher-feature
   storage on every Gaussian.
   \item We use Compact-to-Teacher Reconstruction, View-Space Feature Alignment,
   and Frozen Geometry-Head Consistency to recover teacher-compatible features
   while keeping teachers and downstream heads fixed.
-  \item We provide a frozen evaluation package covering LERF-OVS, ScanNet
-  direct point-query transfer, qualitative overlays, and profile evidence.
+  \item We provide a frozen evaluation package covering LERF-OVS rendered
+  grounding, OpenGaussian-style VPR direct 3D object selection, ScanNet direct
+  point-query transfer, qualitative overlays, and profile evidence.
 \end{itemize}
 
 \section{Related Work}
@@ -100,10 +107,21 @@ open-vocabulary querying in 3D scenes~\cite{kerr2023lerf}. LangSplat and
 Language Embedded 3D Gaussians adapt this direction to Gaussian scene
 representations~\cite{qin2024langsplat,shi2024legaussians}. OpenGaussian
 formalizes a stronger primitive-level protocol in which text selects 3D
-Gaussians that are then rendered only for mask evaluation~\cite{wu2024opengaussian}.
-\method{} differs
-in its emphasis on compactly reconstructing a high-dimensional unified teacher
-feature space rather than only learning a final language field.
+Gaussians that are then rendered only for mask
+evaluation~\cite{wu2024opengaussian}. Recent methods push this direction
+further: Dr. Splat registers language-aligned features directly to dominant
+Gaussians along pixel rays~\cite{kim2025drsplat}, CAGS introduces spatial
+context to reduce fragmented Gaussian representations~\cite{sun2025cags}, and
+InstanceGaussian and OpenSplat3D move toward instance-level Gaussian grouping
+and open-vocabulary instance segmentation~\cite{li2025instancegaussian,piekenbrinck2025opensplat3d}.
+OpenInsGaussian further studies context-aware cross-view fusion for instance
+Gaussian segmentation~\cite{huang2025openinsgaussian}, while very recent
+Ilov3Splat uses view-consistent feature fields and two-stage 3D clustering for
+instance-level open-vocabulary querying~\cite{nguyen2026ilov3splat}.
+SuperGSeg clusters Gaussians into structured super-primitives for hierarchical
+understanding~\cite{liang2026supergseg}. \method{} differs in its emphasis on
+compactly reconstructing a high-dimensional unified teacher feature space while
+using VPR to expose a registered primitive-level interface.
 
 \paragraph{Gaussian scene representations.}
 3D Gaussian Splatting provides an explicit and efficient scene representation
@@ -265,21 +283,24 @@ feature-text similarity with a scene-category softmax temperature $\tau$. The
 predicted localization point is the heatmap maximum. LERF-OVS reports
 localization accuracy and mIoU over query heatmaps.
 
-For direct 3D querying, the base readout decodes pre-refiner compact features
-at Gaussian centers:
+For direct 3D querying, the base Gaussian-center readout decodes pre-refiner
+compact features at Gaussian centers:
 \[
   \hat{f}_i = D_{\theta}(c_i), \qquad
   s_i(q) = \cos(A_{\mathrm{SigLIP2}}(\hat{f}_i), e_q),
 \]
 where $A_{\mathrm{SigLIP2}}$ is the frozen text-aligned summary head. This
 readout is structurally the same compact field used by ScanNet point-query
-experiments. For LERF direct object selection, we also evaluate a registration
-readout inspired by direct language-registration methods: render teacher-space
-features from posed views, apply VFA and the frozen SigLIP2 head, register those
+experiments, but it is not sufficiently reliable for LERF primitive selection
+on its own. We therefore introduce \emph{View-to-Primitive Registration} (VPR)
+for the LERF direct-selection protocol. VPR renders teacher-space features from
+posed views, applies VFA and the frozen SigLIP2 head, registers those
 text-aligned features back to visible Gaussian centers with depth/alpha checks,
-and then run the same primitive-level text query on the registered Gaussian
-embeddings. The LERF masks are used only for final query-select-render
-evaluation, not for registration or scoring.
+and then runs the same primitive-level text query on the registered Gaussian
+embeddings. A GT-free voxel-max context aggregation step propagates high
+primitive scores within local 3D neighborhoods to reduce fragmentation before
+selection. The LERF masks are used only for final query-select-render
+evaluation, not for registration, calibration, or scoring.
 
 \section{Experiments}
 
@@ -343,12 +364,24 @@ in 3D and rendering is used only to compare selected primitives with 2D masks.
 
 The original Gaussian-center readout reached only 0.080 macro mIoU and 0.093
 macro Acc@0.25. The registration readout closes most of this gap without using
-LERF masks for scoring: with a fixed top-2\% primitive selector it reaches
-0.342 macro mIoU and 0.555 macro Acc@0.25, and its best-by-scene diagnostic
-reaches 0.362/0.610. This remains below OpenGaussian's official 0.384 mIoU
-because Waldo Kitchen is still weak, but it is competitive on Ramen and improves
-primitive-level usability by more than four times over the original direct
-readout.
+LERF masks for scoring. With GT-free voxel-max context aggregation and a fixed
+top-2\% primitive selector it reaches 0.385 macro mIoU and 0.643 macro
+Acc@0.25, and its best-by-scene diagnostic reaches 0.397/0.665. This is slightly
+above the OpenGaussian official macro reference while using a different SigLIP2
+text head and no locally rerun baseline reproduction; Waldo Kitchen and Teatime
+also show that explicit instance grouping can still be valuable on fragmented
+objects. We therefore use the result as evidence for registered primitive-level
+usability rather than as a universal primitive-level SOTA claim.
+
+\input{lerf_vpr_ablation_table}
+
+Table~\ref{tab:vpr_ablation} audits the implementation choices. The raw
+Gaussian-center score is nearly unusable under the same fixed top-2\% selector.
+Registering VFA-refined rendered features back to visible primitives is the main
+gain; disabling VFA collapses the result, and removing the depth check registers
+almost every Gaussian but does not improve mIoU. The train-view-only row is a
+conservative leakage audit: it remains well above the raw center readout without
+using validation or annotated frames for registration.
 
 \subsection{Rendered Features vs. Original RADIO Features}
 
@@ -672,8 +705,9 @@ The LERF-OVS results show that rendered RADIO-like features retain enough
 semantic structure for open-vocabulary localization. The ScanNet results suggest
 that the same representation can be probed outside the LERF object-query setting.
 The LERF direct-selection experiment further clarifies the boundary of this
-claim: the compact field supports a direct Gaussian-center readout, but the
-current readout lacks the primitive grouping needed for strong object selection.
+claim: the compact field supports direct primitive querying once rendered
+features are registered back to Gaussians, but the current voxel context is still
+weaker than explicit instance- or super-Gaussian grouping on fragmented scenes.
 
 \paragraph{External-baseline scope.}
 The LERF, LangSplat, and LEGaussians comparison rows are now traced to official
@@ -690,7 +724,9 @@ teacher feature resolution and rendered feature alignment limit heatmap
 sharpness. The current ScanNet protocol is a direct point-query feature probe,
 not a replacement for a full standardized segmentation benchmark. The registered
 LERF direct 3D object-selection readout substantially improves primitive querying
-but remains weaker than OpenGaussian on Waldo Kitchen, so the paper should avoid
+and slightly exceeds the OpenGaussian official macro reference under the reported
+OpenGaussian-style context, but it remains weaker on Waldo Kitchen and is not a
+locally rerun same-evaluator comparison. The paper should therefore avoid
 claiming universal primitive-level SOTA. Finally,
 the external comparison is official-source but not reproduced under one evaluator, so
 strong SOTA-style claims require additional baseline reruns. The storage table

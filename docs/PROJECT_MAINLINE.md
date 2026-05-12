@@ -10,8 +10,8 @@ current strongest paper route from historical validation branches.
 The paper-facing method, **CTF-GS**, compactly distills frozen RADIO teacher
 features into 3D Gaussian scenes so that novel views can render reusable
 teacher-compatible feature maps for open-vocabulary grounding and cross-domain
-scene understanding, while also exposing a registered Gaussian-level readout
-for direct 3D querying. `RADIO-GS` remains the repository/project
+scene understanding, while View-to-Primitive Registration (VPR) exposes a
+registered Gaussian-level readout for direct 3D querying. `RADIO-GS` remains the repository/project
 implementation name.
 
 ## Current Strongest Mainline
@@ -29,7 +29,7 @@ The active paper route is:
    geometry-aware regularizer (formerly FDH warm-start).
 6. LERF-OVS as the primary benchmark.
 7. ScanNet v67 direct point query as cross-domain feature-usability evidence.
-8. LERF-OVS direct 3D object selection via rendered-feature-to-primitive
+8. LERF-OVS direct 3D object selection via **VPR** rendered-feature-to-primitive
    registration under an OpenGaussian-style query-select-render protocol.
 9. Formal profile runs for evaluation runtime and peak VRAM.
 10. Optional RADIO adaptor/cross-view consistency: DINOv3 relation + SAM3
@@ -104,18 +104,21 @@ evaluation uses LERF-OVS object masks only at the final metric stage.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| RADIO-GS | SigLIP2 | registered softmax24 fixed top0p02 mIoU | 0.3246 | 0.4561 | 0.4466 | 0.1413 | 0.3421 |
-| RADIO-GS | SigLIP2 | registered softmax24 best-by-scene mIoU | 0.3606 | 0.4561 | 0.4796 | 0.1515 | 0.3619 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4527 | 0.4491 | 0.4862 | 0.1991 | 0.3968 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| RADIO-GS | SigLIP2 | registered softmax24 fixed top0p02 Acc@0.25 | 0.5357 | 0.6761 | 0.7797 | 0.2273 | 0.5547 |
-| RADIO-GS | SigLIP2 | registered softmax24 best-by-scene Acc@0.25 | 0.6607 | 0.6761 | 0.8305 | 0.2727 | 0.6100 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene Acc@0.25 | 0.7679 | 0.7324 | 0.7966 | 0.3636 | 0.6651 |
 
 GPU4/GPU5 follow-up diagnostics show that rendered-feature registration, not
-score thresholding, is the main improvement. The old Gaussian-center direct
-readout was 0.0804 macro mIoU / 0.0932 macro Acc@0.25; registered cosine24
-reached 0.3121 / 0.5474, and registered softmax24 is the current strongest
-fixed protocol at 0.3421 / 0.5547. Waldo Kitchen remains below OpenGaussian and
-should be discussed as a residual object-fragmentation/coverage limitation.
+score thresholding, is the main improvement. GT-free voxel-max context
+aggregation further reduces primitive fragmentation. The old Gaussian-center
+direct readout was 0.0804 macro mIoU / 0.0932 macro Acc@0.25; registered
+softmax24 reached 0.3421 / 0.5547, and registered+voxel context is the current
+strongest fixed-mIoU protocol at 0.3850 / 0.6428. This slightly exceeds the
+OpenGaussian official macro reference, but Waldo Kitchen remains below
+OpenGaussian and the table is still official-source context rather than a
+locally rerun same-evaluator SOTA comparison.
 
 ### DINOv3/SAM3 Downstream Adaptor Probes
 

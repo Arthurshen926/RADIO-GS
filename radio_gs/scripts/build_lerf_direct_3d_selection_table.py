@@ -104,14 +104,23 @@ def direct_protocol_sentence(results: Dict[str, dict]) -> str:
     args = first_args(results)
     score_source = protocol.get("score_source", args.get("score_source", "direct"))
     scoring = args.get("scoring", "cosine")
+    aggregation = protocol.get("score_aggregation", args.get("score_aggregation", "none"))
+    aggregation_suffix = ""
+    if aggregation and aggregation != "none":
+        aggregation_suffix = (
+            f"; GT-free {aggregation} context aggregation is applied "
+            f"(res={protocol.get('score_aggregation_resolution', args.get('score_aggregation_resolution', ''))}, "
+            f"blend={protocol.get('score_aggregation_blend', args.get('score_aggregation_blend', ''))})"
+        )
     if score_source == "registered_view":
         max_frames = protocol.get("registration_max_frames", args.get("registration_max_frames", ""))
         frame_mode = protocol.get("registration_frame_mode", args.get("registration_frame_mode", ""))
         return (
-            "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are "
-            "computed on Gaussian primitives from rendered-view SigLIP2 features registered "
-            f"back to 3D with depth/alpha visibility checks ({frame_mode}, max_frames={max_frames}, "
-            f"scoring={scoring}); selected primitives are rendered only for mask evaluation."
+            "Protocol: OpenGaussian-style direct 3D primitive selection with View-to-Primitive "
+            "Registration (VPR). Query scores are computed on Gaussian primitives from rendered-view "
+            "SigLIP2 features registered back to 3D with depth/alpha visibility checks "
+            f"({frame_mode}, max_frames={max_frames}, "
+            f"scoring={scoring}{aggregation_suffix}); selected primitives are rendered only for mask evaluation."
         )
     return (
         "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are computed "
@@ -124,9 +133,13 @@ def direct_caption_feature_source(results: Dict[str, dict]) -> str:
     protocol = first_protocol(results)
     args = first_args(results)
     score_source = protocol.get("score_source", args.get("score_source", "direct"))
+    aggregation = protocol.get("score_aggregation", args.get("score_aggregation", "none"))
+    suffix = ""
+    if aggregation and aggregation != "none":
+        suffix = f" with GT-free {aggregation} context aggregation"
     if score_source == "registered_view":
-        return "rendered-view registered primitive features"
-    return "pre-refiner Gaussian-center features"
+        return "rendered-view registered primitive features" + suffix
+    return "pre-refiner Gaussian-center features" + suffix
 
 
 def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
@@ -136,7 +149,7 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
         direct_protocol_sentence(results),
         "",
         f"Input root: `{root}`",
-        f"Fixed-protocol candidate selected by global macro mIoU among the sweep: `{fixed_tag}`. This is a diagnostic sweep result and should be reported separately from rendered-view grounding.",
+        f"Paper-facing fixed selection: `{fixed_tag}`. The complete ratio sweep below is diagnostic and should be reported separately from rendered-view grounding.",
         "",
         "## Fixed-Ratio Sweep",
         "",
@@ -169,11 +182,11 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['teatime']['miou'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['miou'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['macro']['miou'])} |",
-            f"| RADIO-GS | SigLIP2 | fixed {fixed_tag} mIoU | "
+            f"| CTF-GS | SigLIP2 | fixed {fixed_tag} mIoU | "
             f"{fmt(fixed_miou['figurines'])} | {fmt(fixed_miou['ramen'])} | "
             f"{fmt(fixed_miou['teatime'])} | {fmt(fixed_miou['waldo_kitchen'])} | "
             f"{fmt(fixed_miou['macro'])} |",
-            "| RADIO-GS | SigLIP2 | diagnostic best-by-scene mIoU | "
+            "| CTF-GS | SigLIP2 | diagnostic best-by-scene mIoU | "
             f"{fmt(best_miou['figurines'])} | {fmt(best_miou['ramen'])} | "
             f"{fmt(best_miou['teatime'])} | {fmt(best_miou['waldo_kitchen'])} | "
             f"{fmt(best_miou['macro'])} |",
@@ -183,16 +196,16 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['teatime']['macc025'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['macc025'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['macro']['macc025'])} |",
-            f"| RADIO-GS | SigLIP2 | fixed {fixed_tag} Acc@0.25 | "
+            f"| CTF-GS | SigLIP2 | fixed {fixed_tag} Acc@0.25 | "
             f"{fmt(fixed_acc['figurines'])} | {fmt(fixed_acc['ramen'])} | "
             f"{fmt(fixed_acc['teatime'])} | {fmt(fixed_acc['waldo_kitchen'])} | "
             f"{fmt(fixed_acc['macro'])} |",
-            "| RADIO-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | "
+            "| CTF-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | "
             f"{fmt(best_acc['figurines'])} | {fmt(best_acc['ramen'])} | "
             f"{fmt(best_acc['teatime'])} | {fmt(best_acc['waldo_kitchen'])} | "
             f"{fmt(best_acc['macro'])} |",
             "",
-            "Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.",
+            "Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. GT-free voxel context aggregation further improves fixed-ratio direct selection by reducing primitive-level fragmentation, though Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.",
             "",
         ]
     )
@@ -226,7 +239,7 @@ def append_diagnostics(
             "",
             "## Direct-Readout Diagnostics",
             "",
-            "These variants do not use GT masks for scoring. They test whether the direct-selection gap is caused by scoring, compact readout choice, spatial aggregation, or adaptor-enhanced checkpoints.",
+            "These variants do not use GT masks for scoring. They test whether the direct-selection gap is caused by raw Gaussian-center readout, VPR scoring, VFA, view coverage, visibility checks, or GT-free spatial aggregation.",
             "",
             "| Variant | Best fixed selection | Fixed macro mIoU | Fixed macro Acc@0.25 | Best-by-scene macro mIoU | Best-by-scene macro Acc@0.25 |",
             "|---|---|---:|---:|---:|---:|",
@@ -244,7 +257,7 @@ def append_diagnostics(
     lines.extend(
         [
             "",
-            "Diagnostic takeaway: rendered-feature registration is the main factor that improves direct 3D object selection. Scoring and view-count variants mainly trade fixed-ratio mIoU against Waldo-specific coverage.",
+            "Diagnostic takeaway: VPR is the main factor that improves direct 3D object selection. View coverage, VFA, and GT-free voxel context control the precision/coverage tradeoff, while Waldo Kitchen remains the hardest fragmented scene.",
             "",
         ]
     )
@@ -258,7 +271,7 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
     rows = [
         r"\begin{table}[t]",
         r"  \centering",
-        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; RADIO-GS uses "
+        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses "
         + direct_caption_feature_source(results)
         + r" and a SigLIP2 text head.}",
         r"  \label{tab:lerf-direct-3d-selection}",
@@ -272,11 +285,11 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['teatime']['miou'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['miou'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['macro']['miou'])} \\\\",
-        f"    RADIO-GS & {fixed_tag} mIoU & "
+        f"    CTF-GS & {fixed_tag} mIoU & "
         f"{texfmt(fixed_miou['figurines'])} & {texfmt(fixed_miou['ramen'])} & "
         f"{texfmt(fixed_miou['teatime'])} & {texfmt(fixed_miou['waldo_kitchen'])} & "
         f"{texfmt(fixed_miou['macro'])} \\\\",
-        f"    RADIO-GS & diag. best mIoU & "
+        f"    CTF-GS & diag. best mIoU & "
         f"{texfmt(best_miou['figurines'])} & {texfmt(best_miou['ramen'])} & "
         f"{texfmt(best_miou['teatime'])} & {texfmt(best_miou['waldo_kitchen'])} & "
         f"{texfmt(best_miou['macro'])} \\\\",
@@ -287,7 +300,7 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['teatime']['macc025'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['macc025'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['macro']['macc025'])} \\\\",
-        f"    RADIO-GS & {fixed_tag} Acc@0.25 & "
+        f"    CTF-GS & {fixed_tag} Acc@0.25 & "
         f"{texfmt(fixed_acc['figurines'])} & {texfmt(fixed_acc['ramen'])} & "
         f"{texfmt(fixed_acc['teatime'])} & {texfmt(fixed_acc['waldo_kitchen'])} & "
         f"{texfmt(fixed_acc['macro'])} \\\\",

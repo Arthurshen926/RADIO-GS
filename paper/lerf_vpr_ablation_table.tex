@@ -1,0 +1,21 @@
+\begin{table}[t]
+  \centering
+  \caption{VPR diagnostics for LERF-OVS direct 3D object selection. All rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}
+  \label{tab:vpr_ablation}
+  \begin{tabular}{lccc}
+    \toprule
+    Variant & Reg. & mIoU & Acc@0.25 \\
+    \midrule
+    Raw Gaussian-center & -- & 0.012 & 0.009 \\
+    VPR, cosine, 24 views & 0.385 & 0.312 & 0.547 \\
+    VPR, softmax, 24 views & 0.385 & 0.342 & 0.555 \\
+    VPR, train views only, 24 views + voxel & 0.369 & 0.349 & 0.595 \\
+    VPR, all poses, 8 views + voxel & 0.240 & 0.277 & 0.487 \\
+    VPR, all poses, 48 views + voxel & 0.448 & 0.380 & 0.653 \\
+    VPR, all poses, 96 views + voxel & 0.485 & 0.385 & 0.643 \\
+    VPR, all poses, 96 views + voxel, lower blend & 0.485 & 0.385 & 0.631 \\
+    VPR, 24 views + voxel, w/o VFA & 0.385 & 0.070 & 0.099 \\
+    VPR, 24 views + voxel, w/o depth check & 0.972 & 0.347 & 0.615 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
