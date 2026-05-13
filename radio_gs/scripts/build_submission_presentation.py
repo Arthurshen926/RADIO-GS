@@ -483,15 +483,16 @@ def build_deck() -> None:
     slide = deck.add_slide("SAM/DINO 下游探针", "Diagnostics")
     rows = [
         ["Task", "Teacher", "Rendered", "Readout"],
-        ["SAM3 point prompt", "1.000 / 0.230", "1.000 / 0.121", "usable but mask gap"],
-        ["SAM3 box prompt", "0.861 / 0.091", "0.789 / 0.061", "teacher stronger"],
-        ["DINO dense matching", "0.572 / 0.855", "0.540 / 0.906", "smooth similarity"],
+        ["SAM3 point prompt", "1.000 / 0.370", "1.000 / 0.417", "mask mIoU win"],
+        ["SAM3 box prompt", "0.870 / 0.656", "0.822 / 0.664", "mask mIoU win"],
+        ["DINO dense matching", "0.590 / 0.854", "0.554 / 0.905", "smooth similarity"],
+        ["DINO mask prop.", "0.716 / 0.392", "0.738 / 0.368", "gap narrowed"],
     ]
-    deck.table(slide, 0.55, 1.25, 6.3, 2.1, rows, font_size=10, emphasize_rows=[3])
+    deck.table(slide, 0.55, 1.25, 6.3, 2.35, rows, font_size=9, emphasize_rows=[3])
     deck.image(slide, "paper/figures/lerf_sam_dino_tasks_qualitative.png", 7.15, 1.25, 5.4, 2.75)
     deck.bullets(slide, 0.9, 4.4, 11.1, 1.45, [
-        "Rendered features 对 DINO matching 和 SAM-style prompting 可用，但 SAM3 mask 仍有明显 teacher-rendered gap。",
-        "这支持 feature compatibility，同时也界定下一步优化目标：adaptor-space preservation。"
+        "Rendered features 在 SAM3-adaptor prompt mask mIoU 上超过 frame-wise teacher。",
+        "DINO mask propagation 经 source-background contrast 明显改善，但 mIoU 仍未完全追平 teacher。"
     ], 15)
 
     slide = deck.add_slide("ScanNet v67：跨域 direct point-query", "Results")

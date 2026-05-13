@@ -224,25 +224,27 @@ Additional promptable task probes:
 
 | Task | Teacher LocAcc/Hit | Teacher mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
 |---|---:|---:|---:|---:|
-| SAM3 point prompt segmentation | 1.0000 | 0.2304 | 1.0000 | 0.1210 |
-| SAM3 box prompt segmentation | 0.8606 | 0.0910 | 0.7885 | 0.0614 |
-| SAM3 mask prompt propagation | 0.7872 | 0.0953 | 0.7092 | 0.0687 |
-| DINOv3 dense matching | 0.5723 | 0.8547 | 0.5396 | 0.9063 |
+| SAM3 point prompt segmentation | 1.0000 | 0.3700 | 1.0000 | 0.4169 |
+| SAM3 box prompt segmentation | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
+| SAM3 mask prompt propagation | 0.7872 | 0.3583 | 0.6667 | 0.3756 |
+| DINOv3 dense matching | 0.5895 | 0.8543 | 0.5536 | 0.9048 |
+| DINOv3 mask propagation + bg contrast | 0.7163 | 0.3921 | 0.7376 | 0.3684 |
 
 Qualitative figure:
 `paper/figures/lerf_sam_dino_tasks_qualitative.png`
 
 Interpretation:
 
-- These probes are diagnostic, not a new claimed aggregate improvement.
-- DINOv3 rendered features are close to teacher mIoU, but still lower on macro
-  LocAcc.
-- SAM3 shows a larger teacher-rendered gap, which is consistent with the
-  current SAM3 training path being a soft-region approximation rather than true
-  SAM mask supervision.
-- Waldo Kitchen has useful positive cases: rendered DINOv3 matching improves
-  from 0.2500 to 0.5000 LocAcc and from 0.2708 to 0.2948 mIoU; rendered SAM3
-  matching improves mIoU from 0.2965 to 0.3147 at unchanged LocAcc.
+- These probes are downstream-style adaptor tasks, but they still use frozen
+  RADIO adaptor spaces rather than a full external SAM3/DINOv3 model.
+- Rendered features now exceed the frame-wise teacher on SAM3-adaptor mIoU for
+  point prompts, box prompts, and source-mask propagation.
+- DINOv3 rendered features have higher mean cosine matching score. The fixed
+  source-background contrast readout raises rendered mask-propagation LocAcc
+  above teacher, but rendered mask mIoU remains slightly lower.
+- Waldo Kitchen follows the aggregate pattern in the formal task sweep:
+  rendered SAM3 point/box mIoU improves, while DINO hit rate and propagation
+  mIoU remain below teacher.
 
 Main improvement ideas:
 

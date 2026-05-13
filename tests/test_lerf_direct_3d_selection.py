@@ -1,11 +1,15 @@
 import torch
 
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+    apply_selection_ratio_bounds,
     aggregate_scores_by_voxel,
+    bootstrap_mean_ci,
     choose_registration_refiner,
     merge_registered_scores,
+    sample_registration_view_weights,
     refine_selection_by_voxel_components,
     score_text_aligned_embeddings,
+    select_gaussians_with_seed_expand_components,
     select_registration_frame_ids,
 )
 
@@ -90,6 +94,56 @@ def test_merge_registered_scores_uses_fallback_for_unregistered_gaussians():
     assert torch.allclose(scores, torch.tensor([[1.0], [0.7]]), atol=1e-6)
 
 
+def test_sample_registration_view_weights_uses_alpha_confidence():
+    points = torch.tensor([[0.0, 0.0, 1.0], [0.5, 0.0, 1.0]], dtype=torch.float32)
+    pose = torch.eye(4, dtype=torch.float32).unsqueeze(0)
+    K = torch.tensor(
+        [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 0.0, 1.0]],
+        dtype=torch.float32,
+    )
+    alpha = torch.tensor([[[0.1, 0.2, 0.3], [0.4, 0.8, 1.0], [0.7, 0.5, 0.9]]])
+
+    valid, weights = sample_registration_view_weights(
+        points,
+        pose,
+        K,
+        image_height=3,
+        image_width=3,
+        alpha_map=alpha,
+        mode="alpha",
+    )
+
+    assert torch.equal(valid, torch.tensor([True, True]))
+    assert weights[1] > weights[0]
+
+
+def test_sample_registration_view_weights_penalizes_depth_mismatch():
+    points = torch.tensor([[0.0, 0.0, 1.0], [0.0, 0.0, 1.2]], dtype=torch.float32)
+    pose = torch.eye(4, dtype=torch.float32).unsqueeze(0)
+    K = torch.tensor(
+        [[1.0, 0.0, 1.0], [0.0, 1.0, 1.0], [0.0, 0.0, 1.0]],
+        dtype=torch.float32,
+    )
+    depth = torch.ones(1, 3, 3, dtype=torch.float32)
+    alpha = torch.ones(1, 3, 3, dtype=torch.float32)
+
+    valid, weights = sample_registration_view_weights(
+        points,
+        pose,
+        K,
+        image_height=3,
+        image_width=3,
+        depth_map=depth,
+        alpha_map=alpha,
+        depth_tolerance=0.5,
+        relative_depth_tolerance=0.0,
+        mode="alpha_depth",
+    )
+
+    assert torch.equal(valid, torch.tensor([True, True]))
+    assert weights[0] > weights[1]
+
+
 def test_aggregate_scores_by_voxel_dilate_propagates_neighbor_context():
     xyz = torch.tensor(
         [
@@ -166,3 +220,96 @@ def test_refine_selection_by_voxel_components_none_returns_input():
     )
 
     assert refined is selected
+
+
+def test_seed_expand_components_expands_only_seeded_support_component():
+    xyz = torch.tensor(
+        [
+            [0.00, 0.00, 0.00],
+            [0.01, 0.00, 0.00],
+            [0.02, 0.00, 0.00],
+            [0.90, 0.90, 0.90],
+            [0.91, 0.90, 0.90],
+            [0.92, 0.90, 0.90],
+        ],
+        dtype=torch.float32,
+    )
+    scores = torch.tensor([[0.95], [0.50], [0.45], [0.70], [0.65], [0.60]])
+    seed_selected = torch.tensor([[1.0], [0.0], [0.0], [0.0], [0.0], [0.0]])
+
+    expanded = select_gaussians_with_seed_expand_components(
+        seed_selected,
+        scores,
+        xyz,
+        support_ratio=1.0,
+        resolution=8,
+        keep_components=1,
+        min_component_size=1,
+        rank_by="score_sum",
+    )
+
+    assert torch.equal(expanded[:, 0], torch.tensor([1.0, 1.0, 1.0, 0.0, 0.0, 0.0]))
+
+
+def test_seed_expand_components_falls_back_to_seed_when_no_support_overlap():
+    xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.2, 0.0, 0.0], [1.0, 1.0, 1.0]],
+        dtype=torch.float32,
+    )
+    scores = torch.tensor([[0.9], [0.8], [0.7]])
+    seed_selected = torch.tensor([[0.0], [0.0], [1.0]])
+
+    expanded = select_gaussians_with_seed_expand_components(
+        seed_selected,
+        scores,
+        xyz,
+        support_ratio=0.34,
+        resolution=8,
+        keep_components=1,
+        min_component_size=1,
+        rank_by="score_sum",
+    )
+
+    assert torch.equal(expanded[:, 0], seed_selected[:, 0])
+
+
+def test_bootstrap_mean_ci_is_deterministic_and_contains_mean():
+    summary = bootstrap_mean_ci([0.1, 0.2, 0.4, 0.8], num_samples=200, seed=7)
+
+    assert summary["mean"] == torch.tensor([0.375]).item()
+    assert summary["ci_low"] <= summary["mean"] <= summary["ci_high"]
+    assert summary == bootstrap_mean_ci([0.1, 0.2, 0.4, 0.8], num_samples=200, seed=7)
+
+
+def test_apply_selection_ratio_bounds_adds_floor_and_caps_selected_scores():
+    scores = torch.tensor(
+        [
+            [0.90, 0.10],
+            [0.80, 0.70],
+            [0.70, 0.60],
+            [0.20, 0.95],
+            [0.10, 0.05],
+        ],
+        dtype=torch.float32,
+    )
+    selected = torch.tensor(
+        [
+            [1.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 0.0],
+            [1.0, 1.0],
+            [0.0, 0.0],
+        ],
+        dtype=torch.float32,
+    )
+
+    bounded = apply_selection_ratio_bounds(
+        selected,
+        scores,
+        min_ratio=0.4,
+        max_ratio=0.4,
+        min_select=1,
+    )
+
+    assert torch.equal(bounded[:, 0], torch.tensor([1.0, 1.0, 0.0, 0.0, 0.0]))
+    assert torch.equal(bounded[:, 1], torch.tensor([0.0, 1.0, 0.0, 1.0, 0.0]))

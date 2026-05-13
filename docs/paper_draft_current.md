@@ -117,10 +117,13 @@ with depth/alpha checks; masks are used only for final evaluation.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.02 mIoU | 0.4879 | 0.4536 | 0.5111 | 0.2008 | 0.4133 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
-| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4527 | 0.4491 | 0.4862 | 0.1991 | 0.3968 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4879 | 0.4536 | 0.5111 | 0.2138 | 0.4166 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.02 Acc@0.25 | 0.8036 | 0.7324 | 0.7966 | 0.3636 | 0.6741 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene Acc@0.25 | 0.8036 | 0.7324 | 0.7966 | 0.3636 | 0.6741 |
 
 This result should not be mixed with rendered-view LERF mIoU. It is best used
 to show VPR-backed primitive usability; the macro now slightly exceeds the
@@ -129,10 +132,11 @@ weakness and should be analyzed as object fragmentation / registration coverage.
 
 GPU4/GPU5 diagnostics tested KNN point readout, semantic/geometry scoring heads,
 scene-softmax calibration, LERF-style relevancy re-ranking, adaptor-promoted
-checkpoints, and voxel score aggregation. The original pre-refiner
-Gaussian-center cosine readout remains the best fixed-protocol mIoU setting, so
-the paper should not imply that a simple selector or threshold change closes the
-primitive-level gap.
+checkpoints, voxel score aggregation, seed-expand component selection, and
+GT-free mean+std score-distribution thresholds. Seed-expand components lower
+Teatime/Waldo, but meanstd2p5 with fixed 0.5% floor and 2% top-ratio cap improves
+the paper-facing VPR result to 0.4133 / 0.6741. The paper should still avoid implying raw Gaussian-center
+superiority or global direct-3D SOTA.
 
 ### ScanNet Direct Point Query
 

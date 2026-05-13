@@ -145,6 +145,51 @@ def summarize_ious(ious: Sequence[float]) -> Dict[str, float | int]:
     }
 
 
+def bootstrap_mean_ci(
+    values: Sequence[float],
+    *,
+    num_samples: int = 1000,
+    seed: int = 13,
+    alpha: float = 0.05,
+) -> Dict[str, float | int]:
+    """Return a deterministic bootstrap CI for a small query-level mean."""
+    if not values:
+        return {"mean": 0.0, "ci_low": 0.0, "ci_high": 0.0, "n": 0}
+    arr = np.asarray(values, dtype=np.float32)
+    if arr.size == 1 or num_samples <= 0:
+        mean = float(arr.mean())
+        return {"mean": mean, "ci_low": mean, "ci_high": mean, "n": int(arr.size)}
+    rng = np.random.default_rng(int(seed))
+    samples = rng.choice(arr, size=(int(num_samples), int(arr.size)), replace=True)
+    means = samples.mean(axis=1)
+    low = float(np.quantile(means, float(alpha) * 0.5))
+    high = float(np.quantile(means, 1.0 - float(alpha) * 0.5))
+    return {"mean": float(arr.mean()), "ci_low": low, "ci_high": high, "n": int(arr.size)}
+
+
+def mask_overlap_stats(pred: np.ndarray, gt: np.ndarray) -> Dict[str, float | int]:
+    pred_u8 = (pred > 0).astype(np.uint8)
+    gt_u8 = (gt > 0).astype(np.uint8)
+    if pred_u8.shape != gt_u8.shape:
+        pred_u8 = cv2.resize(
+            pred_u8,
+            (gt_u8.shape[1], gt_u8.shape[0]),
+            interpolation=cv2.INTER_NEAREST,
+        )
+    inter = int(np.logical_and(pred_u8, gt_u8).sum())
+    union = int(np.logical_or(pred_u8, gt_u8).sum())
+    pred_pixels = int(pred_u8.sum())
+    gt_pixels = int(gt_u8.sum())
+    return {
+        "iou": float(inter / union) if union > 0 else 0.0,
+        "intersection_pixels": inter,
+        "union_pixels": union,
+        "pred_pixels": pred_pixels,
+        "gt_pixels": gt_pixels,
+        "overselect_ratio": float(pred_pixels / max(gt_pixels, 1)),
+    }
+
+
 def select_gaussians_from_scores(
     scores: torch.Tensor,
     spec: SelectionSpec,
@@ -178,6 +223,185 @@ def select_gaussians_from_scores(
         return (scores.float() > mean + float(spec.value) * std).float()
 
     raise ValueError(f"Unsupported selection mode: {spec.mode}")
+
+
+def _ratio_to_count(n_items: int, ratio: float, min_select: int) -> int:
+    ratio = min(max(float(ratio), 0.0), 1.0)
+    count = max(int(round(n_items * ratio)), int(min_select))
+    return min(max(count, 0), int(n_items))
+
+
+def apply_selection_ratio_bounds(
+    selected: torch.Tensor,
+    scores: torch.Tensor,
+    *,
+    min_ratio: float = 0.0,
+    max_ratio: float = 0.0,
+    min_select: int = 1,
+) -> torch.Tensor:
+    """Apply GT-free per-query floor/cap ratios to a selection matrix.
+
+    The floor unions in top-scoring primitives when a distribution threshold is
+    too strict. The cap keeps only the strongest selected primitives when a
+    threshold over-selects clutter.
+    """
+    if selected.ndim != 2 or scores.ndim != 2 or selected.shape != scores.shape:
+        raise ValueError(
+            f"Expected selected/scores [N,K] with same shape, got "
+            f"{tuple(selected.shape)} and {tuple(scores.shape)}"
+        )
+    n_gaussians, n_queries = scores.shape
+    if n_gaussians == 0 or n_queries == 0:
+        return selected
+    if min_ratio <= 0 and max_ratio <= 0:
+        return selected
+
+    result = selected.float().clone()
+    scores_f = scores.float()
+    if min_ratio > 0:
+        floor_count = _ratio_to_count(n_gaussians, min_ratio, min_select)
+        if floor_count > 0:
+            _, floor_idx = torch.topk(scores_f, k=floor_count, dim=0, largest=True)
+            result.scatter_(0, floor_idx, 1.0)
+
+    if max_ratio > 0:
+        cap_count = _ratio_to_count(n_gaussians, max_ratio, min_select)
+        capped = torch.zeros_like(result)
+        for query_idx in range(n_queries):
+            idx = torch.nonzero(result[:, query_idx] > 0, as_tuple=False).flatten()
+            if idx.numel() == 0:
+                continue
+            if idx.numel() <= cap_count:
+                capped[idx, query_idx] = 1.0
+                continue
+            local_scores = scores_f[idx, query_idx]
+            _, order = torch.topk(local_scores, k=cap_count, largest=True)
+            capped[idx[order], query_idx] = 1.0
+        result = capped
+
+    return result.to(device=selected.device, dtype=selected.dtype)
+
+
+def select_gaussians_with_seed_expand_components(
+    seed_selected: torch.Tensor,
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    support_ratio: float,
+    resolution: int,
+    keep_components: int,
+    min_component_size: int,
+    rank_by: str,
+) -> torch.Tensor:
+    """Expand high-confidence primitive seeds to connected support components.
+
+    The seed set is normally a strict top-ratio selector. The support set is a
+    wider GT-free top-ratio candidate pool. Only connected support components
+    that contain at least one seed survive, which makes the selector closer to
+    object-proposal selection without using LERF masks.
+    """
+    if rank_by not in {"mean_score", "score_sum", "size"}:
+        raise ValueError(f"Unsupported component rank_by: {rank_by}")
+    if seed_selected.ndim != 2 or scores.ndim != 2 or seed_selected.shape != scores.shape:
+        raise ValueError(
+            f"Expected seed_selected/scores [N,K] with same shape, got "
+            f"{tuple(seed_selected.shape)} and {tuple(scores.shape)}"
+        )
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or xyz.shape[0] != scores.shape[0]:
+        raise ValueError(
+            f"Expected xyz [N,3] aligned with scores [N,K], got "
+            f"{tuple(xyz.shape)} and {tuple(scores.shape)}"
+        )
+    if resolution <= 1 or support_ratio <= 0:
+        return seed_selected
+
+    try:
+        from scipy import ndimage
+    except Exception as exc:  # pragma: no cover - environment dependent
+        raise RuntimeError("seed-expand component selection requires scipy") from exc
+
+    support = select_gaussians_from_scores(
+        scores,
+        SelectionSpec("top_ratio", float(support_ratio)),
+        min_select=1,
+    )
+    support = torch.maximum(support.float(), seed_selected.float())
+
+    device = seed_selected.device
+    seed_cpu = seed_selected.detach().float().cpu()
+    support_cpu = support.detach().float().cpu()
+    scores_cpu = scores.detach().float().cpu()
+    xyz_cpu = xyz.detach().float().cpu()
+    lo = xyz_cpu.min(dim=0).values
+    hi = xyz_cpu.max(dim=0).values
+    extent = (hi - lo).clamp_min(1e-6)
+    coords = ((xyz_cpu - lo) / extent * float(resolution)).floor().long()
+    coords = coords.clamp_(0, resolution - 1).numpy()
+
+    expanded = torch.zeros_like(seed_cpu)
+    structure = ndimage.generate_binary_structure(3, 1)
+    grid_shape = (int(resolution), int(resolution), int(resolution))
+    keep_count = max(int(keep_components), 1)
+    min_size = max(int(min_component_size), 1)
+
+    for query_idx in range(seed_cpu.shape[1]):
+        seed_idx = torch.nonzero(seed_cpu[:, query_idx] > 0, as_tuple=False).flatten()
+        support_idx = torch.nonzero(support_cpu[:, query_idx] > 0, as_tuple=False).flatten()
+        if seed_idx.numel() == 0 or support_idx.numel() == 0:
+            continue
+
+        support_np = support_idx.numpy()
+        support_coords = coords[support_np]
+        occupancy = np.zeros(grid_shape, dtype=bool)
+        occupancy[support_coords[:, 0], support_coords[:, 1], support_coords[:, 2]] = True
+        labels, num_components = ndimage.label(occupancy, structure=structure)
+        if num_components <= 0:
+            expanded[seed_idx, query_idx] = seed_cpu[seed_idx, query_idx]
+            continue
+
+        support_labels = labels[
+            support_coords[:, 0],
+            support_coords[:, 1],
+            support_coords[:, 2],
+        ].astype(np.int64)
+        seed_np = seed_idx.numpy()
+        seed_coords = coords[seed_np]
+        seed_labels = labels[
+            seed_coords[:, 0],
+            seed_coords[:, 1],
+            seed_coords[:, 2],
+        ].astype(np.int64)
+        seeded_labels = np.array(sorted({int(label) for label in seed_labels if label > 0}))
+        if seeded_labels.size == 0:
+            expanded[seed_idx, query_idx] = seed_cpu[seed_idx, query_idx]
+            continue
+
+        sizes = np.bincount(support_labels, minlength=num_components + 1).astype(np.float64)
+        score_values = scores_cpu[support_idx, query_idx].numpy().astype(np.float64)
+        score_sums = np.bincount(
+            support_labels,
+            weights=score_values,
+            minlength=num_components + 1,
+        )
+        valid_labels = seeded_labels[sizes[seeded_labels] >= min_size]
+        if valid_labels.size == 0:
+            valid_labels = seeded_labels
+
+        if rank_by == "size":
+            ranks = sizes[valid_labels]
+        elif rank_by == "mean_score":
+            ranks = score_sums[valid_labels] / np.maximum(sizes[valid_labels], 1.0)
+        else:
+            ranks = score_sums[valid_labels]
+        order = np.argsort(-ranks, kind="stable")
+        kept_labels = set(int(label) for label in valid_labels[order[:keep_count]])
+        keep_mask = np.array([int(label) in kept_labels for label in support_labels], dtype=bool)
+        if keep_mask.any():
+            expanded[support_idx[torch.from_numpy(keep_mask)], query_idx] = 1.0
+        else:
+            expanded[seed_idx, query_idx] = seed_cpu[seed_idx, query_idx]
+
+    return expanded.to(device=device, dtype=seed_selected.dtype)
 
 
 def refine_selection_by_voxel_components(
@@ -451,6 +675,130 @@ def merge_registered_scores(
             )
         merged[~valid] = fallback[~valid]
     return merged
+
+
+def sample_registration_view_weights(
+    points_xyz: torch.Tensor,
+    pose_w2c: torch.Tensor,
+    K: torch.Tensor,
+    *,
+    image_height: int,
+    image_width: int,
+    depth_map: Optional[torch.Tensor] = None,
+    alpha_map: Optional[torch.Tensor] = None,
+    depth_tolerance: float = 0.08,
+    relative_depth_tolerance: float = 0.02,
+    alpha_threshold: float = 0.0,
+    mode: str = "uniform",
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Compute GT-free visibility weights for one registered-view sample.
+
+    ``uniform`` matches the original VPR behavior. ``alpha`` weights registered
+    samples by rendered opacity. ``alpha_depth`` additionally downweights
+    samples farther from the rendered depth surface, echoing dominant-ray
+    registration without requiring per-Gaussian rasterization contributions.
+    """
+    if mode not in {"uniform", "alpha", "alpha_depth"}:
+        raise ValueError(f"Unsupported registration weight mode: {mode}")
+    if points_xyz.dim() != 2 or points_xyz.shape[1] != 3:
+        raise ValueError(f"Expected points_xyz [N,3], got {tuple(points_xyz.shape)}")
+    if pose_w2c.dim() != 3 or pose_w2c.shape[-2:] != (4, 4):
+        raise ValueError(f"Expected pose_w2c [B,4,4], got {tuple(pose_w2c.shape)}")
+    if pose_w2c.shape[0] != 1:
+        raise ValueError("sample_registration_view_weights expects a single view")
+
+    device = points_xyz.device
+    n_points = int(points_xyz.shape[0])
+    if n_points == 0:
+        return (
+            torch.empty(0, dtype=torch.bool, device=device),
+            torch.empty(0, dtype=torch.float32, device=device),
+        )
+
+    points = points_xyz.to(device=device, dtype=torch.float32)
+    pose = pose_w2c.to(device=device, dtype=torch.float32)
+    intrinsics = K.to(device=device, dtype=torch.float32)
+    ones = torch.ones(n_points, 1, device=device, dtype=torch.float32)
+    points_h = torch.cat([points, ones], dim=1)
+    cam = torch.einsum("bij,nj->bni", pose, points_h)
+    z = cam[0, :, 2]
+    z_safe = z.clamp_min(1e-6)
+    u = intrinsics[0, 0] * (cam[0, :, 0] / z_safe) + intrinsics[0, 2]
+    v = intrinsics[1, 1] * (cam[0, :, 1] / z_safe) + intrinsics[1, 2]
+    height = int(image_height)
+    width = int(image_width)
+    valid = (
+        (z > 1e-6)
+        & (u >= 0.0)
+        & (u <= float(width - 1))
+        & (v >= 0.0)
+        & (v <= float(height - 1))
+    )
+    grid_x = 2.0 * u / float(max(width - 1, 1)) - 1.0 if width > 1 else torch.zeros_like(u)
+    grid_y = 2.0 * v / float(max(height - 1, 1)) - 1.0 if height > 1 else torch.zeros_like(v)
+    grid = torch.stack([grid_x, grid_y], dim=-1).reshape(1, n_points, 1, 2)
+    weights = torch.ones(n_points, dtype=torch.float32, device=device)
+
+    sampled_depth = None
+    tolerance = None
+    if depth_map is not None:
+        depth = depth_map.to(device=device, dtype=torch.float32)
+        if depth.dim() == 2:
+            depth = depth.unsqueeze(0)
+        if depth.dim() == 4 and depth.shape[1] == 1:
+            depth = depth[:, 0]
+        if depth.shape != (1, height, width):
+            depth = F.interpolate(
+                depth[:, None],
+                size=(height, width),
+                mode="bilinear",
+                align_corners=True,
+            )[:, 0]
+        sampled_depth = F.grid_sample(
+            depth[:, None],
+            grid,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=True,
+        )[0, 0, :, 0]
+        tolerance = torch.maximum(
+            torch.full_like(z, float(depth_tolerance)),
+            z.abs() * float(relative_depth_tolerance),
+        )
+        valid = valid & (sampled_depth > 0.0) & ((sampled_depth - z).abs() <= tolerance)
+
+    sampled_alpha = None
+    if alpha_map is not None:
+        alpha = alpha_map.to(device=device, dtype=torch.float32)
+        if alpha.dim() == 2:
+            alpha = alpha.unsqueeze(0)
+        if alpha.dim() == 4 and alpha.shape[1] == 1:
+            alpha = alpha[:, 0]
+        if alpha.shape != (1, height, width):
+            alpha = F.interpolate(
+                alpha[:, None],
+                size=(height, width),
+                mode="bilinear",
+                align_corners=True,
+            )[:, 0]
+        sampled_alpha = F.grid_sample(
+            alpha[:, None],
+            grid,
+            mode="bilinear",
+            padding_mode="zeros",
+            align_corners=True,
+        )[0, 0, :, 0].clamp_min(0.0)
+        if alpha_threshold > 0:
+            valid = valid & (sampled_alpha >= float(alpha_threshold))
+        if mode in {"alpha", "alpha_depth"}:
+            weights = weights * sampled_alpha.clamp_min(1e-6)
+
+    if mode == "alpha_depth" and sampled_depth is not None and tolerance is not None:
+        depth_error = (sampled_depth - z).abs()
+        weights = weights * torch.exp(-depth_error / tolerance.clamp_min(1e-6))
+
+    weights = torch.where(valid, weights, torch.zeros_like(weights))
+    return valid, weights
 
 
 def aggregate_scores_by_voxel(
@@ -804,6 +1152,7 @@ def compute_registered_view_text_scores(
     registration_depth_tolerance: float,
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
+    registration_weight_mode: str,
     fallback_scores: Optional[torch.Tensor],
     device: torch.device,
 ) -> Tuple[torch.Tensor, Dict[str, object]]:
@@ -886,9 +1235,26 @@ def compute_registered_view_text_scores(
                 alpha_threshold=registration_alpha_threshold,
                 normalize_sampled_features=True,
             )
+            if registration_weight_mode == "uniform":
+                weights = counts.to(device=device, dtype=torch.float32)
+            else:
+                weight_valid, weights = sample_registration_view_weights(
+                    points,
+                    viewmat,
+                    renderer.K,
+                    image_height=int(siglip_feat.shape[-2]),
+                    image_width=int(siglip_feat.shape[-1]),
+                    depth_map=depth_map,
+                    alpha_map=alpha_map,
+                    depth_tolerance=registration_depth_tolerance,
+                    relative_depth_tolerance=registration_relative_depth_tolerance,
+                    alpha_threshold=registration_alpha_threshold,
+                    mode=registration_weight_mode,
+                )
+                valid = valid & weight_valid
             valid_cpu = valid.detach().cpu()
             if valid_cpu.any():
-                counts_valid = counts[valid].detach().float().cpu()
+                counts_valid = weights[valid].detach().float().cpu()
                 registered_sum[start:end][valid_cpu] += (
                     targets[valid].detach().float().cpu()
                     * counts_valid.unsqueeze(1)
@@ -935,6 +1301,7 @@ def compute_registered_view_text_scores(
         "depth_tolerance": float(registration_depth_tolerance),
         "relative_depth_tolerance": float(registration_relative_depth_tolerance),
         "alpha_threshold": float(registration_alpha_threshold),
+        "weight_mode": registration_weight_mode,
     }
     return torch.cat(all_scores, dim=0), stats
 
@@ -978,6 +1345,9 @@ def evaluate_selection_spec(
     scores: torch.Tensor,
     spec: SelectionSpec,
     selection_refinement: str,
+    selection_min_ratio: float,
+    selection_max_ratio: float,
+    component_support_ratio: float,
     component_resolution: int,
     component_keep: int,
     component_min_size: int,
@@ -993,7 +1363,25 @@ def evaluate_selection_spec(
         spec,
         min_select=min_select,
     )
-    if selection_refinement != "none":
+    selected = apply_selection_ratio_bounds(
+        selected,
+        scores,
+        min_ratio=selection_min_ratio,
+        max_ratio=selection_max_ratio,
+        min_select=min_select,
+    )
+    if selection_refinement == "seed_expand_components":
+        selected = select_gaussians_with_seed_expand_components(
+            selected,
+            scores,
+            model.get_xyz().detach().cpu(),
+            support_ratio=component_support_ratio,
+            resolution=component_resolution,
+            keep_components=component_keep,
+            min_component_size=component_min_size,
+            rank_by=component_rank_by,
+        )
+    elif selection_refinement != "none":
         selected = refine_selection_by_voxel_components(
             selected,
             scores,
@@ -1010,6 +1398,7 @@ def evaluate_selection_spec(
     ious: List[float] = []
     per_category: Dict[str, List[float]] = {cat: [] for cat in scene_categories}
     per_frame: Dict[str, Dict[str, float]] = {}
+    query_details: List[Dict[str, float | int | str]] = []
 
     for frame_id, frame_objects in tqdm(
         sorted(frame_annotations.items()),
@@ -1036,10 +1425,25 @@ def evaluate_selection_spec(
             gt = gt_masks[cat]
             if gt.sum() == 0:
                 continue
-            iou = mask_iou(pred, gt)
+            overlap = mask_overlap_stats(pred, gt)
+            iou = float(overlap["iou"])
             ious.append(iou)
             per_category[cat].append(iou)
             frame_scores[cat] = iou
+            query_details.append(
+                {
+                    "frame": f"frame_{frame_id:05d}",
+                    "frame_id": int(frame_id),
+                    "category": cat,
+                    "iou": iou,
+                    "pred_pixels": int(overlap["pred_pixels"]),
+                    "gt_pixels": int(overlap["gt_pixels"]),
+                    "intersection_pixels": int(overlap["intersection_pixels"]),
+                    "union_pixels": int(overlap["union_pixels"]),
+                    "overselect_ratio": float(overlap["overselect_ratio"]),
+                    "selected_gaussians": int(selected[:, cat_idx].sum().item()),
+                }
+            )
             if save_masks:
                 mask_path = (
                     output_dir
@@ -1065,6 +1469,9 @@ def evaluate_selection_spec(
             "selection_value": spec.value,
             "selection_tag": spec.tag,
             "selection_refinement": selection_refinement,
+            "selection_min_ratio": selection_min_ratio,
+            "selection_max_ratio": selection_max_ratio,
+            "component_support_ratio": component_support_ratio,
             "component_resolution": component_resolution,
             "component_keep": component_keep,
             "component_min_size": component_min_size,
@@ -1072,6 +1479,8 @@ def evaluate_selection_spec(
             "silhouette_threshold": silhouette_threshold,
             "per_category": per_cat_summary,
             "per_frame": per_frame,
+            "query_details": query_details,
+            "bootstrap_miou": bootstrap_mean_ci(ious),
         }
     )
     return summary
@@ -1100,6 +1509,9 @@ def evaluate_scene(
     score_aggregation_resolution: int,
     score_aggregation_blend: float,
     selection_refinement: str,
+    selection_min_ratio: float,
+    selection_max_ratio: float,
+    component_support_ratio: float,
     component_resolution: int,
     component_keep: int,
     component_min_size: int,
@@ -1111,6 +1523,7 @@ def evaluate_scene(
     registration_depth_tolerance: float,
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
+    registration_weight_mode: str,
     disable_registered_refiner: bool,
     silhouette_threshold: float,
     min_select: int,
@@ -1230,6 +1643,7 @@ def evaluate_scene(
             registration_depth_tolerance=registration_depth_tolerance,
             registration_relative_depth_tolerance=registration_relative_depth_tolerance,
             registration_alpha_threshold=registration_alpha_threshold,
+            registration_weight_mode=registration_weight_mode,
             fallback_scores=direct_scores if registered_view_fallback == "direct" else None,
             device=device,
         )
@@ -1259,7 +1673,8 @@ def evaluate_scene(
         print(
             "  refining selections by voxel components "
             f"({selection_refinement}, res={component_resolution}, "
-            f"keep={component_keep}, min={component_min_size}, rank={component_rank_by})"
+            f"support={component_support_ratio:g}, keep={component_keep}, "
+            f"min={component_min_size}, rank={component_rank_by})"
         )
 
     scene_results: Dict[str, Dict] = {}
@@ -1276,6 +1691,9 @@ def evaluate_scene(
             scores=scores,
             spec=spec,
             selection_refinement=selection_refinement,
+            selection_min_ratio=selection_min_ratio,
+            selection_max_ratio=selection_max_ratio,
+            component_support_ratio=component_support_ratio,
             component_resolution=component_resolution,
             component_keep=component_keep,
             component_min_size=component_min_size,
@@ -1367,16 +1785,29 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
             "- Selection refinement: "
             f"{protocol.get('selection_refinement')} "
             f"(res={protocol.get('component_resolution')}, "
+            f"support={protocol.get('component_support_ratio')}, "
             f"keep={protocol.get('component_keep')}, "
             f"rank={protocol.get('component_rank_by')})."
+        )
+    if float(protocol.get("selection_min_ratio", 0.0) or 0.0) > 0 or float(
+        protocol.get("selection_max_ratio", 0.0) or 0.0
+    ) > 0:
+        rows.append(
+            "- Selection ratio bounds: "
+            f"floor={protocol.get('selection_min_ratio')}, "
+            f"cap={protocol.get('selection_max_ratio')}."
         )
     rows.append("- Text head: SigLIP2 summary/text space.")
     rows.append("")
     rows.append("| Selection | mIoU | Acc@0.25 | Acc@0.50 | N |")
     rows.append("|---|---:|---:|---:|---:|")
     for tag, metrics in report["scene"]["results"].items():
+        ci = metrics.get("bootstrap_miou", {})
+        ci_suffix = ""
+        if ci:
+            ci_suffix = f" [{float(ci.get('ci_low', 0.0)):.4f}, {float(ci.get('ci_high', 0.0)):.4f}]"
         rows.append(
-            f"| {tag} | {metrics['miou']:.4f} | {metrics['acc025']:.4f} | "
+            f"| {tag} | {metrics['miou']:.4f}{ci_suffix} | {metrics['acc025']:.4f} | "
             f"{metrics['acc050']:.4f} | {metrics['n']} |"
         )
     rows.append("")
@@ -1405,6 +1836,8 @@ def main() -> None:
     parser.add_argument("--threshold_sweep", default="", help="Comma/space separated score thresholds")
     parser.add_argument("--mean_std", type=float, default=1.0, help="Main mean+std multiplier for mean_std mode")
     parser.add_argument("--mean_std_sweep", default="", help="Comma/space separated mean_std multipliers")
+    parser.add_argument("--selection_min_ratio", type=float, default=0.0, help="Optional GT-free top-ratio floor applied after selection")
+    parser.add_argument("--selection_max_ratio", type=float, default=0.0, help="Optional GT-free top-ratio cap applied after selection")
     parser.add_argument("--score_source", choices=["direct", "registered_view"], default="direct", help="Primitive score source for direct 3D selection")
     parser.add_argument("--scoring", choices=["cosine", "softmax_scene", "relevancy"], default="cosine", help="Text-Gaussian score")
     parser.add_argument("--canonical_embedding_cache", default="checkpoints/siglip2_canonical_embeddings.pt", help="Canonical text embeddings for relevancy scoring")
@@ -1416,7 +1849,8 @@ def main() -> None:
     parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max", "voxel_max_dilate"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
-    parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
+    parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components", "seed_expand_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
+    parser.add_argument("--component_support_ratio", type=float, default=0.05, help="Wider top-ratio support pool for seed_expand_components")
     parser.add_argument("--component_resolution", type=int, default=64, help="Voxel resolution for selection_refinement")
     parser.add_argument("--component_keep", type=int, default=1, help="Number of connected components to keep per query")
     parser.add_argument("--component_min_size", type=int, default=8, help="Minimum selected Gaussians per component before ranking")
@@ -1428,6 +1862,7 @@ def main() -> None:
     parser.add_argument("--registration_depth_tolerance", type=float, default=0.08, help="Absolute depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_relative_depth_tolerance", type=float, default=0.02, help="Relative depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_alpha_threshold", type=float, default=0.02, help="Minimum rendered alpha for rendered-view primitive registration")
+    parser.add_argument("--registration_weight_mode", choices=["uniform", "alpha", "alpha_depth"], default="uniform", help="Contribution-style weighting for VPR registered samples")
     parser.add_argument("--disable_registered_refiner", action="store_true", help="Disable VFA/screen refiner only for registered-view primitive scoring")
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
@@ -1479,6 +1914,9 @@ def main() -> None:
         score_aggregation_resolution=args.score_aggregation_resolution,
         score_aggregation_blend=args.score_aggregation_blend,
         selection_refinement=args.selection_refinement,
+        selection_min_ratio=args.selection_min_ratio,
+        selection_max_ratio=args.selection_max_ratio,
+        component_support_ratio=args.component_support_ratio,
         component_resolution=args.component_resolution,
         component_keep=args.component_keep,
         component_min_size=args.component_min_size,
@@ -1490,6 +1928,7 @@ def main() -> None:
         registration_depth_tolerance=args.registration_depth_tolerance,
         registration_relative_depth_tolerance=args.registration_relative_depth_tolerance,
         registration_alpha_threshold=args.registration_alpha_threshold,
+        registration_weight_mode=args.registration_weight_mode,
         disable_registered_refiner=args.disable_registered_refiner,
         silhouette_threshold=args.silhouette_threshold,
         min_select=args.min_select,
@@ -1524,6 +1963,9 @@ def main() -> None:
             "score_aggregation_resolution": args.score_aggregation_resolution,
             "score_aggregation_blend": args.score_aggregation_blend,
             "selection_refinement": args.selection_refinement,
+            "selection_min_ratio": args.selection_min_ratio,
+            "selection_max_ratio": args.selection_max_ratio,
+            "component_support_ratio": args.component_support_ratio,
             "component_resolution": args.component_resolution,
             "component_keep": args.component_keep,
             "component_min_size": args.component_min_size,
@@ -1534,6 +1976,7 @@ def main() -> None:
             "registration_depth_tolerance": args.registration_depth_tolerance,
             "registration_relative_depth_tolerance": args.registration_relative_depth_tolerance,
             "registration_alpha_threshold": args.registration_alpha_threshold,
+            "registration_weight_mode": args.registration_weight_mode,
             "disable_registered_refiner": bool(args.disable_registered_refiner),
             "render_role": "render selected primitives only for mask evaluation",
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50"],

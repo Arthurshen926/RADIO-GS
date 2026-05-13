@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Dict, List
 
@@ -26,6 +27,10 @@ def fmt(value: float) -> str:
 
 def texfmt(value: float) -> str:
     return f"{value:.3f}"
+
+
+def tex_escape(text: str) -> str:
+    return text.replace("_", r"\_")
 
 
 def load_scene_results(root: Path, extra_roots: List[Path] | None = None) -> Dict[str, dict]:
@@ -52,11 +57,24 @@ def load_scene_results(root: Path, extra_roots: List[Path] | None = None) -> Dic
     return results
 
 
+def selection_tag_sort_key(tag: str) -> tuple[int, float, str]:
+    match = re.fullmatch(r"top([0-9]+(?:p[0-9]+)?)", tag)
+    if match:
+        return (0, float(match.group(1).replace("p", ".")), tag)
+    match = re.fullmatch(r"thr([0-9]+(?:p[0-9]+)?)", tag)
+    if match:
+        return (1, float(match.group(1).replace("p", ".")), tag)
+    match = re.fullmatch(r"meanstd([0-9]+(?:p[0-9]+)?)", tag)
+    if match:
+        return (2, float(match.group(1).replace("p", ".")), tag)
+    return (99, float("inf"), tag)
+
+
 def selection_tags(results: Dict[str, dict]) -> List[str]:
     tags = set()
     for scene in SCENES:
         tags.update(results[scene]["results"].keys())
-    return sorted(tags, key=lambda tag: float(tag.replace("top", "").replace("p", ".")))
+    return sorted(tags, key=selection_tag_sort_key)
 
 
 def macro_for_tag(results: Dict[str, dict], tag: str, metric: str) -> float:
@@ -99,6 +117,29 @@ def first_args(results: Dict[str, dict]) -> Dict[str, str]:
     return {}
 
 
+def _ratio_value(protocol: Dict[str, str], args: Dict[str, str], key: str) -> float:
+    value = protocol.get(key, args.get(key, 0.0))
+    try:
+        return float(value or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def selection_bounds_suffix(results: Dict[str, dict]) -> str:
+    protocol = first_protocol(results)
+    args = first_args(results)
+    min_ratio = _ratio_value(protocol, args, "selection_min_ratio")
+    max_ratio = _ratio_value(protocol, args, "selection_max_ratio")
+    bounds = []
+    if min_ratio > 0:
+        bounds.append(f"selection floor={min_ratio:g}")
+    if max_ratio > 0:
+        bounds.append(f"selection cap={max_ratio:g}")
+    if not bounds:
+        return ""
+    return "; GT-free " + ", ".join(bounds)
+
+
 def direct_protocol_sentence(results: Dict[str, dict]) -> str:
     protocol = first_protocol(results)
     args = first_args(results)
@@ -112,6 +153,7 @@ def direct_protocol_sentence(results: Dict[str, dict]) -> str:
             f"(res={protocol.get('score_aggregation_resolution', args.get('score_aggregation_resolution', ''))}, "
             f"blend={protocol.get('score_aggregation_blend', args.get('score_aggregation_blend', ''))})"
         )
+    selection_suffix = selection_bounds_suffix(results)
     if score_source == "registered_view":
         max_frames = protocol.get("registration_max_frames", args.get("registration_max_frames", ""))
         frame_mode = protocol.get("registration_frame_mode", args.get("registration_frame_mode", ""))
@@ -120,12 +162,12 @@ def direct_protocol_sentence(results: Dict[str, dict]) -> str:
             "Registration (VPR). Query scores are computed on Gaussian primitives from rendered-view "
             "SigLIP2 features registered back to 3D with depth/alpha visibility checks "
             f"({frame_mode}, max_frames={max_frames}, "
-            f"scoring={scoring}{aggregation_suffix}); selected primitives are rendered only for mask evaluation."
+            f"scoring={scoring}{aggregation_suffix}{selection_suffix}); selected primitives are rendered only for mask evaluation."
         )
     return (
         "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are computed "
         "at Gaussian centers from pre-refiner RADIO-GS features; selected primitives are rendered "
-        "only to compare with LERF-OVS object masks."
+        f"only to compare with LERF-OVS object masks{selection_suffix}."
     )
 
 
@@ -136,7 +178,10 @@ def direct_caption_feature_source(results: Dict[str, dict]) -> str:
     aggregation = protocol.get("score_aggregation", args.get("score_aggregation", "none"))
     suffix = ""
     if aggregation and aggregation != "none":
-        suffix = f" with GT-free {aggregation} context aggregation"
+        suffix = f" with GT-free {tex_escape(aggregation)} context aggregation"
+    selection_suffix = selection_bounds_suffix(results)
+    if selection_suffix:
+        suffix += selection_suffix.replace("; GT-free", " and GT-free")
     if score_source == "registered_view":
         return "rendered-view registered primitive features" + suffix
     return "pre-refiner Gaussian-center features" + suffix
@@ -151,7 +196,7 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
         f"Input root: `{root}`",
         f"Paper-facing fixed selection: `{fixed_tag}`. The complete ratio sweep below is diagnostic and should be reported separately from rendered-view grounding.",
         "",
-        "## Fixed-Ratio Sweep",
+        "## Selector Sweep",
         "",
         "| Selection | Figurines mIoU | Ramen mIoU | Teatime mIoU | Waldo mIoU | Macro mIoU | Macro Acc@0.25 |",
         "|---|---:|---:|---:|---:|---:|---:|",

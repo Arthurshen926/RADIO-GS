@@ -1,0 +1,23 @@
+\begin{table}[t]
+  \centering
+  \caption{VPR protocol card for LERF-OVS direct 3D object selection.}
+  \label{tab:vpr_protocol_card}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{ll}
+    \toprule
+    Item & Setting \\
+    \midrule
+    Query target & 3D Gaussian primitives; rendering is used only after selection for mask evaluation \\
+    Registration feature & Rendered RADIO-compatible features after VFA, projected by frozen SigLIP2 summary head \\
+    Registration views & Posed RGB/render views selected from all COLMAP poses; main row uses 96 evenly spaced views \\
+    Leakage audit & Train-view-only 24-view row is reported separately and remains above raw center readout \\
+    Visibility hygiene & Depth and alpha checks; no LERF masks or text labels are used during registration \\
+    Text scoring & Frozen SigLIP2 text/query embeddings with scene-wise softmax scoring \\
+    Selection & Fixed mean+2.5std score-distribution selector; fixed-ratio sweep is diagnostic only \\
+    Context aggregation & GT-free voxel-max score aggregation, resolution 80, blend 0.50 \\
+    Persistent storage & No extra trained state; optional registered primitive/voxel caches are reported separately \\
+    Metrics & OpenGaussian-style mIoU and Acc@0.25 after rendering selected primitives \\
+    \bottomrule
+  \end{tabular}
+  }
+\end{table}

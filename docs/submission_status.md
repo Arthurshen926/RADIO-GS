@@ -32,6 +32,10 @@ The current generated freeze package is:
 - [baseline_source_verification.md](../output/radio_gs/reports/baseline_source_verification.md)
 - [lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
 - [lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
+- [vpr_protocol_card.md](../output/radio_gs/reports/vpr_protocol_card.md)
+- [vpr_contribution_weighting_ablation.md](../output/radio_gs/reports/vpr_contribution_weighting_ablation.md)
+- [lerf_direct_3d_published_context.md](../output/radio_gs/reports/lerf_direct_3d_published_context.md)
+- [expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
 - [paper_draft_current.md](paper_draft_current.md)
 - [PROJECT_MAINLINE.md](PROJECT_MAINLINE.md)
 - [radio_gs_draft.tex](../paper/radio_gs_draft.tex)
@@ -78,9 +82,14 @@ Under that framing, the paper solves the following problem:
    promoted adaptor-enhanced candidate keeps macro LocAcc at 0.8712 and improves
    macro mIoU from 0.4941 to 0.4979 by using the Figurines spatial text-heatmap
    cross-view checkpoint plus relation/region checkpoints for Ramen and Teatime.
-8. DINOv3/SAM3 downstream adaptor probes are now complete. They are diagnostic
-   rather than main-claim improvements: rendered DINOv3 is close to teacher mIoU,
-   but macro LocAcc drops; SAM3 still has a larger teacher-rendered gap.
+8. DINOv3/SAM3 downstream adaptor probes are now complete. Under the formal
+   prompt-constrained task sweep, rendered features beat the frame-wise teacher
+   on SAM3-adaptor mask mIoU for point prompts (0.4169 vs. 0.3700), box prompts
+   (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). DINOv3 still
+   trails teacher on correspondence hit rate and mask-propagation mIoU, but the
+   fixed source-background contrast readout raises rendered DINO mask
+   propagation to 0.7376 LocAcc / 0.3684 mIoU and narrows the teacher mIoU gap
+   to 0.0237.
 9. The ProFuse-inspired DINO cross-view branch is implemented and evaluated as a
    diagnostic path. It can increase thresholded overlap on some LERF scenes
    (for example Waldo high-temperature mIoU), but it still lowers LocAcc, so it
@@ -99,13 +108,28 @@ Under that framing, the paper solves the following problem:
 13. LERF direct 3D object selection has been upgraded with a no-GT
     rendered-feature-to-primitive registration readout. Under the
     OpenGaussian-style query-select-render protocol, the original Gaussian-center
-    fixed result was 0.0804 macro mIoU / 0.0932 macro Acc@0.25; the registered
-    softmax24 result is 0.3421 / 0.5547, and the current registered+voxel
-    context result is 0.3850 / 0.6428, with best-by-scene 0.3968 / 0.6651.
+    result was 0.0804 macro mIoU / 0.0932 macro Acc@0.25 under its earlier
+    top10% selector and 0.012 / 0.009 under the same top2% selector used by VPR;
+    the registered softmax24 result is 0.3421 / 0.5547, the conservative
+    registered+voxel top2% result is 0.3850 / 0.6428, and the current
+    paper-facing registered+voxel mean+2.5std selector with a fixed 0.5% floor and 2% cap reaches 0.4133 / 0.6741,
+    with best-by-scene diagnostic 0.4166 / 0.6741.
     This closes most of the primitive-level gap and slightly exceeds
     OpenGaussian's official macro mIoU and Acc@0.25 reference, while still
     requiring a provenance caveat because baselines are not locally rerun and
     Waldo Kitchen remains weak.
+    A separate published-context table records newer method references
+    (Dr. Splat, CAGS, InstanceGaussian, OpenGaFF) and prevents the paper from
+    overclaiming global direct-3D SOTA.
+14. The VPR protocol is now explicitly auditable: the paper includes a protocol
+    card, separates rendered-view grounding from 3D primitive querying, and
+    reports optional VPR cache storage separately from persistent compact
+    checkpoint storage.
+15. A Dr. Splat-inspired contribution-weighted VPR variant has been implemented
+    and tested. It is a negative ablation: alpha weighting reaches 0.2978 macro
+    mIoU / 0.5389 Acc@0.25 and alpha-depth weighting reaches 0.2967 / 0.5345,
+    below the uniform VPR top2% baseline at 0.3850 / 0.6428 and the adaptive
+    meanstd2p5+floor0.005+cap0.02 selector at 0.4133 / 0.6741, so it is not promoted.
 
 ## What is already paper-grade
 
@@ -121,6 +145,11 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
 - [output/radio_gs/reports/lerf_direct_3d_selection.md](../output/radio_gs/reports/lerf_direct_3d_selection.md)
 - [output/radio_gs/reports/lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
+- [output/radio_gs/reports/vpr_protocol_card.md](../output/radio_gs/reports/vpr_protocol_card.md)
+- [output/radio_gs/reports/vpr_contribution_weighting_ablation.md](../output/radio_gs/reports/vpr_contribution_weighting_ablation.md)
+- [output/radio_gs/reports/lerf_direct_3d_published_context.md](../output/radio_gs/reports/lerf_direct_3d_published_context.md)
+- [output/radio_gs/reports/expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
+- [output/lerf_sam_dino_tasks/formal_v4_bgcontrast05/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v4_bgcontrast05/lerf_sam_dino_task_report.md)
 - [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
 - [paper/radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
@@ -139,6 +168,8 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502](../output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502)
 - [paper/figures/lerf_adaptor_downstream_qualitative.png](../paper/figures/lerf_adaptor_downstream_qualitative.png)
 - [paper/figures/lerf_sam_dino_tasks_qualitative.png](../paper/figures/lerf_sam_dino_tasks_qualitative.png)
+- [paper/figures/lerf_vpr_direct_3d_qualitative.png](../paper/figures/lerf_vpr_direct_3d_qualitative.png)
+- [output/radio_gs/reports/lerf_vpr_direct_3d_qualitative_manifest.json](../output/radio_gs/reports/lerf_vpr_direct_3d_qualitative_manifest.json)
 - [output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502](../output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502)
 - [paper/figures/lerf_adaptor_downstream_qualitative.png](../paper/figures/lerf_adaptor_downstream_qualitative.png)
 
@@ -211,11 +242,18 @@ VPR registration readout: render VFA-refined RADIO features from
 posed views, project them to SigLIP2 space, register visible samples back to
 Gaussian centers with depth/alpha checks, and query the registered primitive
 embeddings. The current fixed protocol (`registered_view`, `softmax_scene`,
-96 all-pose registration views, GT-free voxel-max context aggregation, top0p02)
-reaches 0.3850 macro mIoU and 0.6428 macro Acc@0.25. It should be promoted as a
-VPR-backed primitive-level result, with the caveat that Waldo Kitchen remains
-below OpenGaussian and external baselines are still official-source rather than
-locally rerun.
+96 all-pose registration views, GT-free voxel-max context aggregation,
+meanstd2p5 selector with a fixed 0.5% floor and 2% cap) reaches 0.4133 macro mIoU and 0.6741 macro Acc@0.25; the
+fixed top0p02 selector remains a conservative audit at 0.3850 / 0.6428. It
+should be promoted as a VPR-backed primitive-level result, with the caveat that
+Waldo Kitchen remains below OpenGaussian and external baselines are still
+official-source rather than locally rerun.
+
+The final implementation pass also added alpha and alpha-depth registration
+weighting, which approximates contribution-aware primitive assignment from
+registration-style methods. The measured result is negative under the current
+center-sampling approximation, so this branch is retained as an audit/appendix
+result instead of a method claim.
 
 ## Immediate implementation priorities
 
@@ -227,3 +265,6 @@ locally rerun.
 6. If the paper adopts the VPR title, present the registered LERF direct 3D
    result in the main experiments and keep Waldo/threshold/view-count probes in
    the appendix.
+7. Do not count optional persisted VPR caches as compact scene storage. The main
+   compactness claim should use persistent checkpoint footprint; the optional
+   inference cache row is reported for transparency.

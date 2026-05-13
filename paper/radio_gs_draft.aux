@@ -49,74 +49,88 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Open-Vocabulary Grounding}{3}{subsection.3.6}\protected@file@percent }
 \@writefile{toc}{\contentsline {section}{\numberline {4}Experiments}{3}{section.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Submission-Freeze Protocol}{3}{subsection.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}LERF-OVS Main Result}{3}{subsection.4.2}\protected@file@percent }
+\citation{wu2024opengaussian}
+\citation{kim2025drsplat}
+\citation{sun2025cags}
+\citation{li2025instancegaussian}
+\citation{li2026opengaff}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Frozen CTF-GS{} LERF-OVS rendered-feature grounding result.}}{4}{table.1}\protected@file@percent }
 \newlabel{tab:lerf}{{1}{4}{Frozen \method {} LERF-OVS rendered-feature grounding result}{table.1}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces LERF-OVS open-vocabulary grounding comparison. External rows are official-source LocAcc values converted to decimals; CTF-GS{} is the local rendered-feature result. Best per column is in \textbf  {bold}.}}{4}{table.2}\protected@file@percent }
 \newlabel{tab:lerf_ovs_main}{{2}{4}{LERF-OVS open-vocabulary grounding comparison. External rows are official-source LocAcc values converted to decimals; \method {} is the local rendered-feature result. Best per column is in \textbf {bold}}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}LERF-OVS Main Result}{4}{subsection.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.3}LERF Direct 3D Object Selection}{4}{subsection.4.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features with GT-free voxel\_max context aggregation and a SigLIP2 text head.}}{4}{table.3}\protected@file@percent }
-\newlabel{tab:lerf-direct-3d-selection}{{3}{4}{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features with GT-free voxel\_max context aggregation and a SigLIP2 text head}{table.3}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces VPR diagnostics for LERF-OVS direct 3D object selection. All rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}}{4}{table.4}\protected@file@percent }
-\newlabel{tab:vpr_ablation}{{4}{4}{VPR diagnostics for LERF-OVS direct 3D object selection. All rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation}{table.4}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Rendered Features vs. Original RADIO Features}{4}{subsection.4.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Same-evaluator comparison between original RADIO features extracted from RGB frames and CTF-GS{} rendered features. Both use the same frozen SigLIP2 head and scene-category scoring.}}{5}{table.5}\protected@file@percent }
-\newlabel{tab:teacher_vs_rendered}{{5}{5}{Same-evaluator comparison between original RADIO features extracted from RGB frames and \method {} rendered features. Both use the same frozen SigLIP2 head and scene-category scoring}{table.5}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU.}}{5}{table.6}\protected@file@percent }
-\newlabel{tab:component_ablation}{{6}{5}{Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features with GT-free voxel\_max context aggregation and GT-free selection floor=0.005, selection cap=0.02 and a SigLIP2 text head.}}{4}{table.3}\protected@file@percent }
+\newlabel{tab:lerf-direct-3d-selection}{{3}{4}{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features with GT-free voxel\_max context aggregation and GT-free selection floor=0.005, selection cap=0.02 and a SigLIP2 text head}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from the cited papers or expert-traced source tables and are not same-evaluator local reruns. This table is only for positioning relative to recent primitive-/instance-level methods.}}{4}{table.4}\protected@file@percent }
+\newlabel{tab:lerf-direct-3d-context}{{4}{4}{Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from the cited papers or expert-traced source tables and are not same-evaluator local reruns. This table is only for positioning relative to recent primitive-/instance-level methods}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces VPR protocol card for LERF-OVS direct 3D object selection.}}{5}{table.5}\protected@file@percent }
+\newlabel{tab:vpr_protocol_card}{{5}{5}{VPR protocol card for LERF-OVS direct 3D object selection}{table.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces VPR diagnostics for LERF-OVS direct 3D object selection. Except for the explicitly marked historical raw-center row, rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}}{5}{table.6}\protected@file@percent }
+\newlabel{tab:vpr_ablation}{{6}{5}{VPR diagnostics for LERF-OVS direct 3D object selection. Except for the explicitly marked historical raw-center row, rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Query-level audit for LERF direct 3D object selection. Confidence intervals are bootstrap intervals over query masks for the fixed meanstd2p5 selector.}}{5}{table.7}\protected@file@percent }
+\newlabel{tab:direct3d_query_audit}{{7}{5}{Query-level audit for LERF direct 3D object selection. Confidence intervals are bootstrap intervals over query masks for the fixed meanstd2p5 selector}{table.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Same-evaluator comparison between original RADIO features extracted from RGB frames and CTF-GS{} rendered features. Both use the same frozen SigLIP2 head and scene-category scoring.}}{5}{table.8}\protected@file@percent }
+\newlabel{tab:teacher_vs_rendered}{{8}{5}{Same-evaluator comparison between original RADIO features extracted from RGB frames and \method {} rendered features. Both use the same frozen SigLIP2 head and scene-category scoring}{table.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Rendered Features vs. Original RADIO Features}{5}{subsection.4.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Core Component Ablation}{5}{subsection.4.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Storage footprint accounting for compact teacher-feature fields. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian; compact total counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors.}}{5}{table.7}\protected@file@percent }
-\newlabel{tab:storage_footprint}{{7}{5}{Storage footprint accounting for compact teacher-feature fields. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian; compact total counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors}{table.7}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Full-sweep LERF-OVS adaptor ablations. We only promote adaptor variants that preserve localization accuracy while improving mIoU.}}{5}{table.8}\protected@file@percent }
-\newlabel{tab:adaptor_ablation}{{8}{5}{Full-sweep LERF-OVS adaptor ablations. We only promote adaptor variants that preserve localization accuracy while improving mIoU}{table.8}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Storage Footprint}{5}{subsection.4.6}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Adaptor Consistency Ablation}{5}{subsection.4.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces ProFuse-inspired DINOv3 cross-view diagnostics on LERF-OVS. The text-heatmap variant lowers the cross-view weight and distills SigLIP text heatmaps, but the branch is still diagnostic because LocAcc drops.}}{6}{table.9}\protected@file@percent }
-\newlabel{tab:cross_view_diagnostics}{{9}{6}{ProFuse-inspired DINOv3 cross-view diagnostics on LERF-OVS. The text-heatmap variant lowers the cross-view weight and distills SigLIP text heatmaps, but the branch is still diagnostic because LocAcc drops}{table.9}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}DINO/SAM Adaptor Downstream Probes}{6}{subsection.4.8}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Frozen adaptor-space downstream probes on LERF-OVS. ``Teacher'' uses original RADIO RGB features; ``Rendered'' uses CTF-GS{} rendered features. Prototype segmentation uses same-category support masks from other frames. Matching uses the first annotated frame as source.}}{6}{table.10}\protected@file@percent }
-\newlabel{tab:adaptor_downstream}{{10}{6}{Frozen adaptor-space downstream probes on LERF-OVS. ``Teacher'' uses original RADIO RGB features; ``Rendered'' uses \method {} rendered features. Prototype segmentation uses same-category support masks from other frames. Matching uses the first annotated frame as source}{table.10}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Promptable SAM3 and dense DINOv3 tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences.}}{6}{table.11}\protected@file@percent }
-\newlabel{tab:sam_dino_tasks}{{11}{6}{Promptable SAM3 and dense DINOv3 tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences}{table.11}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}ScanNet Direct Point-Query Transfer}{6}{subsection.4.9}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces ScanNet v67 teacher-balanced direct point-query results.}}{7}{table.12}\protected@file@percent }
-\newlabel{tab:scannet}{{12}{7}{ScanNet v67 teacher-balanced direct point-query results}{table.12}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Full 10-scene ScanNet DINOv3 cross-view ablation. The branch is warm-started from the v67 teacher-balanced checkpoint and uses conservative DINO cross-view affinity weight $\lambda =0.001$ with batch size 2.}}{7}{table.13}\protected@file@percent }
-\newlabel{tab:scannet_cross_view}{{13}{7}{Full 10-scene ScanNet DINOv3 cross-view ablation. The branch is warm-started from the v67 teacher-balanced checkpoint and uses conservative DINO cross-view affinity weight $\lambda =0.001$ with batch size 2}{table.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU.}}{6}{table.9}\protected@file@percent }
+\newlabel{tab:component_ablation}{{9}{6}{Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Storage footprint accounting for compact teacher-feature fields and optional VPR caches. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Compact ckpt counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors. VPR caches are inference-time artifacts, not persistent trained state.}}{6}{table.10}\protected@file@percent }
+\newlabel{tab:storage_footprint}{{10}{6}{Storage footprint accounting for compact teacher-feature fields and optional VPR caches. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Compact ckpt counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors. VPR caches are inference-time artifacts, not persistent trained state}{table.10}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Storage Footprint}{6}{subsection.4.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}Adaptor Consistency Ablation}{6}{subsection.4.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Full-sweep LERF-OVS adaptor ablations. We only promote adaptor variants that preserve localization accuracy while improving mIoU.}}{6}{table.11}\protected@file@percent }
+\newlabel{tab:adaptor_ablation}{{11}{6}{Full-sweep LERF-OVS adaptor ablations. We only promote adaptor variants that preserve localization accuracy while improving mIoU}{table.11}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces ProFuse-inspired DINOv3 cross-view diagnostics on LERF-OVS. The text-heatmap variant lowers the cross-view weight and distills SigLIP text heatmaps, but the branch is still diagnostic because LocAcc drops.}}{6}{table.12}\protected@file@percent }
+\newlabel{tab:cross_view_diagnostics}{{12}{6}{ProFuse-inspired DINOv3 cross-view diagnostics on LERF-OVS. The text-heatmap variant lowers the cross-view weight and distills SigLIP text heatmaps, but the branch is still diagnostic because LocAcc drops}{table.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Frozen adaptor-space downstream probes on LERF-OVS. ``Teacher'' uses original RADIO RGB features; ``Rendered'' uses CTF-GS{} rendered features. Prototype segmentation uses same-category support masks from other frames. Matching uses the first annotated frame as source.}}{7}{table.13}\protected@file@percent }
+\newlabel{tab:adaptor_downstream}{{13}{7}{Frozen adaptor-space downstream probes on LERF-OVS. ``Teacher'' uses original RADIO RGB features; ``Rendered'' uses \method {} rendered features. Prototype segmentation uses same-category support masks from other frames. Matching uses the first annotated frame as source}{table.13}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}DINO/SAM Adaptor Downstream Probes}{7}{subsection.4.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Promptable SAM3-adaptor and dense DINOv3-adaptor tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences. SAM3 point/box prompts are prompt-constrained, mask propagation uses source-view support only, DINO mask propagation uses a fixed source-background contrast weight of 0.5, and no external SAM3 mask decoder is called.}}{7}{table.14}\protected@file@percent }
+\newlabel{tab:sam_dino_tasks}{{14}{7}{Promptable SAM3-adaptor and dense DINOv3-adaptor tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences. SAM3 point/box prompts are prompt-constrained, mask propagation uses source-view support only, DINO mask propagation uses a fixed source-background contrast weight of 0.5, and no external SAM3 mask decoder is called}{table.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces ScanNet v67 teacher-balanced direct point-query results.}}{7}{table.15}\protected@file@percent }
+\newlabel{tab:scannet}{{15}{7}{ScanNet v67 teacher-balanced direct point-query results}{table.15}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}ScanNet Direct Point-Query Transfer}{7}{subsection.4.9}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.10}Efficiency and Cost}{7}{subsection.4.10}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.11}Qualitative Results}{7}{subsection.4.11}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.12}Failure Analysis}{7}{subsection.4.12}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {14}{\ignorespaces Submission efficiency and cost evidence. Runtime rows use explicit freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16 teacher features against the stored compact feature-field footprint.}}{7}{table.14}\protected@file@percent }
-\newlabel{tab:efficiency_cost}{{14}{7}{Submission efficiency and cost evidence. Runtime rows use explicit freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16 teacher features against the stored compact feature-field footprint}{table.14}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {15}{\ignorespaces Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off.}}{7}{table.15}\protected@file@percent }
-\newlabel{tab:failure_analysis}{{15}{7}{Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off}{table.15}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{7}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Why feature reconstruction matters.}{7}{section*.7}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{External-baseline scope.}{7}{section*.8}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {6}Limitations}{7}{section.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {16}{\ignorespaces Full 10-scene ScanNet DINOv3 cross-view ablation. The branch is warm-started from the v67 teacher-balanced checkpoint and uses conservative DINO cross-view affinity weight $\lambda =0.001$ with batch size 2.}}{8}{table.16}\protected@file@percent }
+\newlabel{tab:scannet_cross_view}{{16}{8}{Full 10-scene ScanNet DINOv3 cross-view ablation. The branch is warm-started from the v67 teacher-balanced checkpoint and uses conservative DINO cross-view affinity weight $\lambda =0.001$ with batch size 2}{table.16}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {17}{\ignorespaces Submission efficiency and cost evidence. Runtime rows use explicit freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16 teacher features against the stored compact feature-field footprint.}}{8}{table.17}\protected@file@percent }
+\newlabel{tab:efficiency_cost}{{17}{8}{Submission efficiency and cost evidence. Runtime rows use explicit freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16 teacher features against the stored compact feature-field footprint}{table.17}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.11}Qualitative Results}{8}{subsection.4.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.12}Failure Analysis}{8}{subsection.4.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Discussion}{8}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why feature reconstruction matters.}{8}{section*.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {18}{\ignorespaces Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off.}}{8}{table.18}\protected@file@percent }
+\newlabel{tab:failure_analysis}{{18}{8}{Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off}{table.18}{}}
+\@writefile{toc}{\contentsline {paragraph}{External-baseline scope.}{8}{section*.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Limitations}{8}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}\protected@file@percent }
 \bibstyle{plain}
 \bibdata{radio_gs_refs}
 \bibcite{cen2023saga}{1}
 \bibcite{chiou2026profuse}{2}
 \bibcite{huang2025openinsgaussian}{3}
 \bibcite{kerbl2023gaussians}{4}
-\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Qualitative open-vocabulary grounding examples from the frozen LERF overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen C-RADIOv4-H{} teacher heatmap, and rendered CTF-GS{} heatmap for a representative query.}}{8}{figure.1}\protected@file@percent }
-\newlabel{fig:qualitative}{{1}{8}{Qualitative open-vocabulary grounding examples from the frozen LERF overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen \radio {} teacher heatmap, and rendered \method {} heatmap for a representative query}{figure.1}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{8}{section.7}\protected@file@percent }
 \bibcite{kerr2023lerf}{5}
 \bibcite{kim2025drsplat}{6}
 \bibcite{li2025instancegaussian}{7}
-\bibcite{liang2026supergseg}{8}
-\bibcite{nguyen2026ilov3splat}{9}
-\bibcite{nvidia2026cradiov4}{10}
-\bibcite{piekenbrinck2025opensplat3d}{11}
-\bibcite{qin2024langsplat}{12}
-\bibcite{ranzinger2024radio}{13}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Qualitative DINOv3/SAM3 adaptor-space source-target matching. Each row shows RGB, GT mask, original RADIO teacher heatmap, and CTF-GS{} rendered heatmap. The Waldo Kitchen rows show cases where rendered features move the peak onto the target object; the Ramen row illustrates that the aggregate SAM3 gap remains visible even when localization is correct.}}{9}{figure.2}\protected@file@percent }
-\newlabel{fig:adaptor_downstream_qual}{{2}{9}{Qualitative DINOv3/SAM3 adaptor-space source-target matching. Each row shows RGB, GT mask, original RADIO teacher heatmap, and \method {} rendered heatmap. The Waldo Kitchen rows show cases where rendered features move the peak onto the target object; the Ramen row illustrates that the aggregate SAM3 gap remains visible even when localization is correct}{figure.2}{}}
-\bibcite{shi2024legaussians}{14}
-\bibcite{sun2025cags}{15}
-\bibcite{wu2024opengaussian}{16}
-\bibcite{liu2024fmgs}{17}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Qualitative promptable downstream probes from reconstructed features. Top: SAM3 mask-prompt propagation from a source annotation to a target view. Bottom: DINOv3 dense matching visualized with teacher and rendered correspondences.}}{10}{figure.3}\protected@file@percent }
-\newlabel{fig:sam_dino_tasks_qual}{{3}{10}{Qualitative promptable downstream probes from reconstructed features. Top: SAM3 mask-prompt propagation from a source annotation to a target view. Bottom: DINOv3 dense matching visualized with teacher and rendered correspondences}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Qualitative open-vocabulary grounding examples from the frozen LERF overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen C-RADIOv4-H{} teacher heatmap, and rendered CTF-GS{} heatmap for a representative query.}}{9}{figure.1}\protected@file@percent }
+\newlabel{fig:qualitative}{{1}{9}{Qualitative open-vocabulary grounding examples from the frozen LERF overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen \radio {} teacher heatmap, and rendered \method {} heatmap for a representative query}{figure.1}{}}
+\bibcite{li2026opengaff}{8}
+\bibcite{liang2026supergseg}{9}
+\bibcite{nguyen2026ilov3splat}{10}
+\bibcite{nvidia2026cradiov4}{11}
+\bibcite{piekenbrinck2025opensplat3d}{12}
+\bibcite{qin2024langsplat}{13}
+\bibcite{ranzinger2024radio}{14}
+\bibcite{shi2024legaussians}{15}
+\bibcite{sun2025cags}{16}
+\bibcite{wu2024opengaussian}{17}
+\bibcite{liu2024fmgs}{18}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Qualitative LERF direct 3D object selection with VPR. Each row fixes a scene, annotated frame, and query, then shows RGB, ground-truth mask, the rendered mask from top-2\% VPR-selected Gaussians, and an error map. Green is true positive, red is false positive, and blue is false negative. The Waldo Kitchen row illustrates the remaining fragmentation and clutter failure mode.}}{11}{figure.2}\protected@file@percent }
+\newlabel{fig:vpr_direct_3d_qual}{{2}{11}{Qualitative LERF direct 3D object selection with VPR. Each row fixes a scene, annotated frame, and query, then shows RGB, ground-truth mask, the rendered mask from top-2\% VPR-selected Gaussians, and an error map. Green is true positive, red is false positive, and blue is false negative. The Waldo Kitchen row illustrates the remaining fragmentation and clutter failure mode}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Qualitative DINOv3/SAM3 adaptor-space source-target matching. Each row shows RGB, GT mask, original RADIO teacher heatmap, and CTF-GS{} rendered heatmap. The Waldo Kitchen rows show cases where rendered features move the peak onto the target object; the Ramen row illustrates that the aggregate SAM3 gap remains visible even when localization is correct.}}{12}{figure.3}\protected@file@percent }
+\newlabel{fig:adaptor_downstream_qual}{{3}{12}{Qualitative DINOv3/SAM3 adaptor-space source-target matching. Each row shows RGB, GT mask, original RADIO teacher heatmap, and \method {} rendered heatmap. The Waldo Kitchen rows show cases where rendered features move the peak onto the target object; the Ramen row illustrates that the aggregate SAM3 gap remains visible even when localization is correct}{figure.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Qualitative promptable downstream probes from reconstructed features. Top: SAM3 mask-prompt propagation from a source annotation to a target view. Bottom: DINOv3 dense matching visualized with teacher and rendered correspondences.}}{12}{figure.4}\protected@file@percent }
+\newlabel{fig:sam_dino_tasks_qual}{{4}{12}{Qualitative promptable downstream probes from reconstructed features. Top: SAM3 mask-prompt propagation from a source annotation to a target view. Bottom: DINOv3 dense matching visualized with teacher and rendered correspondences}{figure.4}{}}

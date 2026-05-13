@@ -1,9 +1,10 @@
-"""SAM3 prompt-style segmentation and DINOv3 dense matching probes on LERF-OVS.
+"""SAM3 prompt-style segmentation and DINOv3 matching/propagation probes.
 
 The script uses frozen RADIO adaptor projections on either original RADIO RGB
 features (teacher) or RADIO-GS rendered features.  It does not call an external
 SAM or DINO model; the goal is to test whether reconstructed RADIO features
-remain useful in the official SAM3/DINOv3 adaptor spaces.
+remain useful in the official SAM3/DINOv3 adaptor spaces. DINO mask propagation
+optionally contrasts source-mask features against source-background features.
 """
 
 from __future__ import annotations
@@ -34,7 +35,6 @@ from radio_gs.scripts.eval_lerf_adaptor_downstream import (
     _overlay_heatmap,
     _overlay_mask,
     _resolve_gt_feature_dir,
-    _score_heatmap,
     build_masked_prototype,
     compute_prototype_heatmap,
     select_source_target_pairs,
@@ -42,7 +42,6 @@ from radio_gs.scripts.eval_lerf_adaptor_downstream import (
 from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_LABEL_DIR,
     LERF_OVS_SCENES,
-    compute_iou,
     load_lerf_ovs_labels,
     load_lerf_rgb_frame,
     load_render_pipeline,
@@ -138,6 +137,150 @@ def dense_match_points(
             }
         )
     return matches
+
+
+def binary_iou(pred_mask: np.ndarray, target_mask: np.ndarray) -> float:
+    """IoU between two binary masks at the same resolution."""
+    pred = pred_mask.astype(bool)
+    target = target_mask.astype(bool)
+    if pred.shape != target.shape:
+        raise ValueError(f"Mask shape mismatch: {pred.shape} vs {target.shape}")
+    union = np.logical_or(pred, target).sum()
+    if union == 0:
+        return 0.0
+    intersection = np.logical_and(pred, target).sum()
+    return float(intersection) / float(union)
+
+
+def topk_mask_from_scores(
+    scores: torch.Tensor | np.ndarray,
+    k: int,
+    *,
+    allowed_mask: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """Return a binary mask containing the top-k score locations.
+
+    ``allowed_mask`` is a prompt constraint, e.g. a SAM box prompt. It does not
+    use the target evaluation mask.
+    """
+    score_np = (
+        scores.detach().cpu().numpy().astype(np.float32)
+        if isinstance(scores, torch.Tensor)
+        else np.asarray(scores, dtype=np.float32)
+    )
+    if score_np.ndim != 2:
+        raise ValueError(f"Expected 2D scores, got {score_np.shape}")
+    valid = np.ones(score_np.shape, dtype=bool)
+    if allowed_mask is not None:
+        if allowed_mask.shape != score_np.shape:
+            raise ValueError(
+                f"allowed_mask shape {allowed_mask.shape} does not match scores {score_np.shape}"
+            )
+        valid &= allowed_mask.astype(bool)
+    valid_indices = np.flatnonzero(valid.reshape(-1))
+    if valid_indices.size == 0 or k <= 0:
+        return np.zeros(score_np.shape, dtype=np.uint8)
+    k_eff = min(int(k), int(valid_indices.size))
+    flat_scores = score_np.reshape(-1)
+    valid_scores = flat_scores[valid_indices]
+    chosen_local = np.argpartition(valid_scores, -k_eff)[-k_eff:]
+    chosen = valid_indices[chosen_local]
+    out = np.zeros(score_np.size, dtype=np.uint8)
+    out[chosen] = 1
+    return out.reshape(score_np.shape)
+
+
+def mask_heatmap_outside_prompt(heatmap: torch.Tensor, allowed_mask: np.ndarray) -> torch.Tensor:
+    """Suppress heatmap tokens outside a prompt mask before peak-based metrics."""
+    if heatmap.ndim != 2:
+        raise ValueError(f"Expected 2D heatmap, got {tuple(heatmap.shape)}")
+    if allowed_mask.shape != tuple(heatmap.shape):
+        raise ValueError(
+            f"allowed_mask shape {allowed_mask.shape} does not match heatmap {tuple(heatmap.shape)}"
+        )
+    valid = torch.as_tensor(allowed_mask.astype(bool), device=heatmap.device)
+    if not bool(valid.any().item()):
+        return heatmap
+    floor = heatmap.detach().min() - heatmap.detach().abs().max().clamp_min(1.0) - 1.0
+    return torch.where(valid, heatmap, floor.to(dtype=heatmap.dtype, device=heatmap.device))
+
+
+def connected_component_from_seed(mask: np.ndarray, seed_y: int, seed_x: int) -> np.ndarray:
+    """Keep only the connected component containing the prompt seed."""
+    binary = (mask > 0).astype(np.uint8)
+    if binary.size == 0:
+        return binary
+    seed_y = int(np.clip(seed_y, 0, binary.shape[0] - 1))
+    seed_x = int(np.clip(seed_x, 0, binary.shape[1] - 1))
+    num_labels, labels = cv2.connectedComponents(binary, connectivity=4)
+    if num_labels <= 1:
+        return binary
+    label = int(labels[seed_y, seed_x])
+    if label == 0:
+        return np.zeros_like(binary)
+    return (labels == label).astype(np.uint8)
+
+
+def threshold_mask_from_heatmap(
+    heatmap: torch.Tensor,
+    threshold_ratio: float,
+    *,
+    allowed_mask: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    """Binarize a heatmap with the same relative threshold used by LERF mIoU."""
+    values = heatmap.detach().cpu().float().numpy()
+    hmin = float(values.min())
+    hmax = float(values.max())
+    if hmax - hmin <= 1e-8:
+        binary = np.zeros(values.shape, dtype=np.uint8)
+    else:
+        threshold = hmin + float(threshold_ratio) * (hmax - hmin)
+        binary = (values >= threshold).astype(np.uint8)
+    if allowed_mask is not None:
+        if allowed_mask.shape != binary.shape:
+            raise ValueError(
+                f"allowed_mask shape {allowed_mask.shape} does not match heatmap {binary.shape}"
+            )
+        binary = (binary & allowed_mask.astype(np.uint8)).astype(np.uint8)
+    return binary
+
+
+def propagate_mask_by_dense_matches(
+    source_feature: torch.Tensor,
+    target_feature: torch.Tensor,
+    source_mask: np.ndarray,
+    *,
+    target_area: Optional[int] = None,
+    background_contrast: float = 0.0,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Propagate a source mask to the target view by dense DINO-style matching."""
+    if source_feature.ndim != 3 or target_feature.ndim != 3:
+        raise ValueError("Expected source/target features with shape [C,H,W]")
+    src = F.normalize(source_feature.float(), dim=0)
+    tgt = F.normalize(target_feature.float(), dim=0)
+    _, src_h, src_w = src.shape
+    channels, tgt_h, tgt_w = tgt.shape
+    mask = cv2.resize(
+        (source_mask > 0).astype(np.uint8),
+        (src_w, src_h),
+        interpolation=cv2.INTER_NEAREST,
+    ).astype(bool)
+    if not mask.any():
+        return np.zeros((tgt_h, tgt_w), dtype=np.uint8), np.zeros((tgt_h, tgt_w), dtype=np.float32)
+    source_tokens = src[:, mask].transpose(0, 1)  # [Ns,C]
+    target_tokens = tgt.reshape(channels, tgt_h * tgt_w).transpose(0, 1)  # [Nt,C]
+    score_flat = target_tokens @ source_tokens.transpose(0, 1)
+    score_flat = score_flat.max(dim=1).values
+    if background_contrast > 0:
+        background = ~mask
+        if bool(background.any()):
+            background_tokens = src[:, background].transpose(0, 1)
+            background_scores = target_tokens @ background_tokens.transpose(0, 1)
+            score_flat = score_flat - float(background_contrast) * background_scores.max(dim=1).values
+    score_map = score_flat.reshape(tgt_h, tgt_w)
+    area = int(target_area if target_area is not None else mask.sum())
+    pred = topk_mask_from_scores(score_map, k=max(area, 1))
+    return pred, score_map.detach().cpu().numpy().astype(np.float32)
 
 
 def feature_token_to_image_xy(
@@ -328,6 +471,7 @@ def evaluate_scene_tasks(
     iou_threshold: float = 0.5,
     max_visuals: int = 10,
     max_match_points: int = 24,
+    dino_background_contrast: float = 0.0,
 ) -> Dict:
     frame_annotations, _, img_h, img_w = load_lerf_ovs_labels(label_dir, scene)
     frame_ids = sorted(frame_annotations)
@@ -364,6 +508,7 @@ def evaluate_scene_tasks(
         for task in ("point_prompt_segmentation", "box_prompt_segmentation", "mask_prompt_propagation")
     }
     dino_accs = defaultdict(_empty_match_acc)
+    dino_mask_accs = defaultdict(_empty_acc)
     visual_paths: List[str] = []
     visual_counts: Dict[str, int] = defaultdict(int)
     scene_root_hint = getattr(render_pipeline[5], "scene_root", "") if render_pipeline is not None else ""
@@ -382,12 +527,30 @@ def evaluate_scene_tasks(
                     if task == "point_prompt_segmentation":
                         y, x = mask_centroid_token(mask_full, feature.shape[-2], feature.shape[-1])
                         prototype = F.normalize(feature[:, y, x].float(), dim=0)
+                        prompt_mask = None
+                        seed = (y, x)
                     else:
                         box_mask = _box_mask_at_feature_resolution(mask_full, feature.shape[-2], feature.shape[-1])
                         prototype = build_masked_prototype(feature, box_mask)
+                        prompt_mask = box_mask
+                        seed = None
                     heatmap = compute_prototype_heatmap(feature, prototype)
-                    loc = localization_accuracy(heatmap, mask_full)
-                    iou = compute_iou(heatmap, feat_masks[frame_id][category], threshold_ratio=iou_threshold)
+                    metric_heatmap = (
+                        mask_heatmap_outside_prompt(heatmap, prompt_mask)
+                        if prompt_mask is not None
+                        else heatmap
+                    )
+                    loc = localization_accuracy(metric_heatmap, mask_full)
+                    pred_mask = threshold_mask_from_heatmap(
+                        heatmap,
+                        iou_threshold,
+                        allowed_mask=prompt_mask,
+                    )
+                    if seed is not None:
+                        component = connected_component_from_seed(pred_mask, seed_y=seed[0], seed_x=seed[1])
+                        if component.any():
+                            pred_mask = component
+                    iou = binary_iou(pred_mask, feat_masks[frame_id][category])
                     _update_seg(sam_accs[task][mode], loc, iou)
                     heatmaps_for_vis[mode] = heatmap.detach().cpu()
                 if (
@@ -423,12 +586,13 @@ def evaluate_scene_tasks(
                 continue
             prototype = build_masked_prototype(source_feature, feat_masks[source_frame][category])
             heatmap = compute_prototype_heatmap(target_feature, prototype)
-            loc, iou = _score_heatmap(
+            source_area = int(feat_masks[source_frame][category].sum())
+            pred_mask = topk_mask_from_scores(
                 heatmap,
-                full_masks[target_frame][category],
-                feat_masks[target_frame][category],
-                iou_threshold,
+                k=max(source_area, 1),
             )
+            loc = localization_accuracy(heatmap, full_masks[target_frame][category])
+            iou = binary_iou(pred_mask, feat_masks[target_frame][category])
             _update_seg(sam_accs["mask_prompt_propagation"][mode], loc, iou)
             mask_heatmaps[mode] = heatmap.detach().cpu()
         if mask_heatmaps and visual_counts["mask_prompt_propagation"] < max_visuals:
@@ -462,6 +626,19 @@ def evaluate_scene_tasks(
                 source_feature.shape[-2],
                 source_feature.shape[-1],
             )
+            propagated_mask, propagation_scores = propagate_mask_by_dense_matches(
+                source_feature,
+                target_feature,
+                source_mask_feat,
+                background_contrast=dino_background_contrast,
+            )
+            propagation_heatmap = torch.from_numpy(propagation_scores)
+            loc = localization_accuracy(
+                propagation_heatmap,
+                full_masks[target_frame][category],
+            )
+            iou = binary_iou(propagated_mask, feat_masks[target_frame][category])
+            _update_seg(dino_mask_accs[mode], loc, iou)
             if visual_counts[f"dino_{mode}"] < max_visuals and matches:
                 drawn = _draw_matches(
                     source_rgb,
@@ -492,7 +669,10 @@ def evaluate_scene_tasks(
         "dino_v3": {
             "dense_matching": {
                 mode: _finalize_match(acc) for mode, acc in sorted(dino_accs.items())
-            }
+            },
+            "mask_propagation": {
+                mode: _finalize_seg(acc) for mode, acc in sorted(dino_mask_accs.items())
+            },
         },
         "visualizations": visual_paths,
     }
@@ -518,6 +698,14 @@ def _print_summary(report: Mapping[str, object]) -> None:
                 f"  {mode:<8} hit={metrics['hit_rate']:.4f} "
                 f"score={metrics['mean_score']:.4f} n={metrics['n_matches']}"
             )
+    dino_mask = macro.get("dino_v3", {}).get("mask_propagation", {})
+    if dino_mask:
+        print("\n[DINOv3] mask_propagation")
+        for mode, metrics in dino_mask.items():
+            print(
+                f"  {mode:<8} loc={metrics['loc_acc']:.4f} "
+                f"miou={metrics['miou']:.4f} n={metrics['n_samples']}"
+            )
 
 
 def main() -> None:
@@ -533,6 +721,7 @@ def main() -> None:
     parser.add_argument("--iou_threshold", type=float, default=0.5)
     parser.add_argument("--max_visuals", type=int, default=10)
     parser.add_argument("--max_match_points", type=int, default=24)
+    parser.add_argument("--dino_background_contrast", type=float, default=0.5)
     parser.add_argument("--gt_only", action="store_true")
     parser.add_argument("--gpu", type=int, default=0)
     args = parser.parse_args()
@@ -581,6 +770,7 @@ def main() -> None:
         for task in ("point_prompt_segmentation", "box_prompt_segmentation", "mask_prompt_propagation")
     }
     dino_macro = defaultdict(_empty_match_acc)
+    dino_mask_macro = defaultdict(_empty_acc)
 
     for scene in scenes:
         print(f"\nScene: {scene}")
@@ -599,6 +789,7 @@ def main() -> None:
             iou_threshold=args.iou_threshold,
             max_visuals=args.max_visuals,
             max_match_points=args.max_match_points,
+            dino_background_contrast=args.dino_background_contrast,
         )
         scene_reports[scene] = scene_report
         for task, modes in scene_report["sam3"].items():
@@ -610,6 +801,10 @@ def main() -> None:
             dino_macro[mode]["hits"] += metrics["hit_rate"] * metrics["n_matches"]
             dino_macro[mode]["total"] += metrics["n_matches"]
             dino_macro[mode]["score_sum"] += metrics["mean_score"] * metrics["n_matches"]
+        for mode, metrics in scene_report["dino_v3"]["mask_propagation"].items():
+            dino_mask_macro[mode]["correct"] += metrics["loc_acc"] * metrics["n_samples"]
+            dino_mask_macro[mode]["total"] += metrics["n_samples"]
+            dino_mask_macro[mode]["iou_sum"] += metrics["miou"] * metrics["n_samples"]
 
     macro = {
         "sam3": {
@@ -619,12 +814,30 @@ def main() -> None:
         "dino_v3": {
             "dense_matching": {
                 mode: _finalize_match(acc) for mode, acc in sorted(dino_macro.items())
-            }
+            },
+            "mask_propagation": {
+                mode: _finalize_seg(acc) for mode, acc in sorted(dino_mask_macro.items())
+            },
         },
     }
     report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "args": {k: str(v) for k, v in vars(args).items()},
+        "protocol": {
+            "sam3": (
+                "SAM3-adaptor prompted region segmentation: point/box prompts are "
+                "derived from each target annotation, and mask propagation uses a "
+                "source-view support mask. The frozen RADIO SAM3 adaptor is used; "
+                "no external SAM3 mask decoder is called."
+            ),
+            "dino_v3": (
+                "DINOv3-adaptor source-target dense matching and mask propagation: "
+                "source masks are propagated with frozen adaptor-space nearest-neighbor "
+                "similarity and evaluated on target LERF masks. Optional source-background "
+                f"contrast weight is {args.dino_background_contrast:g}."
+            ),
+            "gt_usage": "GT masks are used to form prompts/support masks and for final evaluation only.",
+        },
         "scenes": scene_reports,
         "macro": macro,
     }

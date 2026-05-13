@@ -1,17 +1,17 @@
 \begin{table}[t]
   \centering
-  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features with GT-free voxel\_max context aggregation and a SigLIP2 text head.}
+  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features with GT-free voxel\_max context aggregation and GT-free selection floor=0.005, selection cap=0.02 and a SigLIP2 text head.}
   \label{tab:lerf-direct-3d-selection}
   \begin{tabular}{llccccc}
     \toprule
     Method & Protocol & Fig. & Ramen & Tea. & Waldo & Macro \\
     \midrule
     OpenGaussian & mIoU & 0.393 & 0.310 & 0.604 & 0.227 & 0.384 \\
-    CTF-GS & top0p02 mIoU & 0.406 & 0.449 & 0.486 & 0.199 & 0.385 \\
-    CTF-GS & diag. best mIoU & 0.453 & 0.449 & 0.486 & 0.199 & 0.397 \\
+    CTF-GS & meanstd2p5 mIoU & 0.488 & 0.454 & 0.511 & 0.201 & 0.413 \\
+    CTF-GS & diag. best mIoU & 0.488 & 0.454 & 0.511 & 0.214 & 0.417 \\
     \midrule
     OpenGaussian & Acc@0.25 & 0.554 & 0.422 & 0.763 & 0.318 & 0.514 \\
-    CTF-GS & top0p02 Acc@0.25 & 0.679 & 0.732 & 0.797 & 0.364 & 0.643 \\
+    CTF-GS & meanstd2p5 Acc@0.25 & 0.804 & 0.732 & 0.797 & 0.364 & 0.674 \\
     \bottomrule
   \end{tabular}
 \end{table}

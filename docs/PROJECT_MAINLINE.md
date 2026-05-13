@@ -94,6 +94,11 @@ benefit from adaptor/cross-view supervision yet.
 ### LERF-OVS Direct 3D Object Selection
 
 Use `output/radio_gs/reports/lerf_direct_3d_selection.md`.
+Use `output/radio_gs/reports/vpr_protocol_card.md` for the protocol card and
+`output/radio_gs/reports/vpr_contribution_weighting_ablation.md` for the
+Dr. Splat-inspired registration-weighting ablation.
+Use `output/radio_gs/reports/lerf_direct_3d_published_context.md` for the
+published-context table against newer primitive-/instance-aware methods.
 
 This experiment follows an OpenGaussian-style query-select-render protocol:
 rendered SigLIP2-aligned features are registered back to visible 3D Gaussian
@@ -104,21 +109,42 @@ evaluation uses LERF-OVS object masks only at the final metric stage.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.02 mIoU | 0.4879 | 0.4536 | 0.5111 | 0.2008 | 0.4133 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
-| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4527 | 0.4491 | 0.4862 | 0.1991 | 0.3968 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4879 | 0.4536 | 0.5111 | 0.2138 | 0.4166 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.02 Acc@0.25 | 0.8036 | 0.7324 | 0.7966 | 0.3636 | 0.6741 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
-| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene Acc@0.25 | 0.7679 | 0.7324 | 0.7966 | 0.3636 | 0.6651 |
+| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene Acc@0.25 | 0.8036 | 0.7324 | 0.7966 | 0.3636 | 0.6741 |
+
+Published-context rows from newer primitive-/instance-aware methods are kept in
+a separate context table rather than the strict local table: Dr. Splat
+43.29/64.30, CAGS 50.79/69.62, InstanceGaussian 45.30/58.44, and OpenGaFF
+54.36/80.84 mIoU/Acc@0.25. These numbers show that CTF-GS + VPR is competitive
+with the OpenGaussian anchor but should not be claimed as global direct-3D SOTA.
 
 GPU4/GPU5 follow-up diagnostics show that rendered-feature registration, not
 score thresholding, is the main improvement. GT-free voxel-max context
-aggregation further reduces primitive fragmentation. The old Gaussian-center
-direct readout was 0.0804 macro mIoU / 0.0932 macro Acc@0.25; registered
-softmax24 reached 0.3421 / 0.5547, and registered+voxel context is the current
-strongest fixed-mIoU protocol at 0.3850 / 0.6428. This slightly exceeds the
-OpenGaussian official macro reference, but Waldo Kitchen remains below
-OpenGaussian and the table is still official-source context rather than a
-locally rerun same-evaluator SOTA comparison.
+aggregation further reduces primitive fragmentation. The earlier Gaussian-center
+direct readout was 0.0804 macro mIoU / 0.0932 macro Acc@0.25 under its top10%
+selector; under the same top2% selector used by the VPR rows it is 0.012 /
+0.009. Registered softmax24 reached 0.3421 / 0.5547, registered+voxel with the
+fixed top2% selector reached 0.3850 / 0.6428, and the GT-free mean+2.5std
+score-distribution selector with fixed 0.5% floor and 2% cap is now the
+strongest paper-facing protocol at 0.4133 / 0.6741. This exceeds the OpenGaussian official macro reference, but
+Waldo Kitchen remains below OpenGaussian and the table is still official-source
+context rather than a locally rerun same-evaluator SOTA comparison.
+
+The Dr. Splat-inspired contribution-weighting path has been implemented in the
+evaluator as `--registration_weight_mode {alpha,alpha_depth}`. Under the same
+96-view VPR + voxel-max + fixed top-2% protocol, alpha weighting drops macro
+mIoU/Acc@0.25 to 0.2978/0.5389 and alpha-depth weighting drops to
+0.2967/0.5345, compared with the uniform top2% VPR baseline at 0.3850/0.6428
+and the fixed meanstd2p5 + floor0.005 + cap0.02 VPR selector at 0.4133/0.6741. This
+negative result means the paper should keep uniform VPR as the main primitive
+readout and describe contribution-weighted registration as future work that
+needs true rasterization-contribution assignment rather than center-sampled
+alpha weighting.
 
 ### DINOv3/SAM3 Downstream Adaptor Probes
 
@@ -137,8 +163,28 @@ main result.
 
 Qualitative examples are in
 `paper/figures/lerf_adaptor_downstream_qualitative.png`. The aggregate takeaway
-is mixed: rendered DINOv3 is close in mIoU and has positive Waldo Kitchen
-matching cases, while SAM3 still exposes a clear teacher-rendered gap.
+for these preliminary prototype probes is mixed: rendered DINOv3 is close in
+mIoU and has positive Waldo Kitchen matching cases, while unconstrained SAM3
+prototype scoring still exposes a teacher-rendered gap.
+
+The formal promptable task sweep upgrades the SAM3/DINOv3 evidence from
+prototype probes to downstream-style tasks. Use
+`output/lerf_sam_dino_tasks/formal_v4_bgcontrast05/lerf_sam_dino_task_report.md`.
+
+| Task | Teacher LocAcc/Hit | Teacher mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
+|---|---:|---:|---:|---:|
+| SAM3 point prompt | 1.0000 | 0.3700 | 1.0000 | 0.4169 |
+| SAM3 box prompt | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
+| SAM3 mask propagation | 0.7872 | 0.3583 | 0.6667 | 0.3756 |
+| DINOv3 dense matching | 0.5895 | 0.8543 | 0.5536 | 0.9048 |
+| DINOv3 mask propagation + bg contrast | 0.7163 | 0.3921 | 0.7376 | 0.3684 |
+
+Rendered CTF-GS features now exceed the frame-wise teacher on SAM3-adaptor
+mask mIoU for all three prompt modes. The DINO source-background contrast
+readout greatly improves mask propagation and gives rendered features higher
+LocAcc than teacher, but rendered mIoU remains slightly lower. The paper claim
+should therefore be "improves SigLIP2 grounding and SAM3-adaptor region mIoU,
+narrows DINO propagation gap while preserving high DINO similarity."
 
 ### ScanNet v67 Direct Point Query
 
@@ -176,12 +222,18 @@ Use `output/radio_gs/reports/submission_freeze_profile_summary.md`.
 
 Use `output/radio_gs/reports/storage_footprint_report.md`.
 
-| Scene | Direct 1280-D fp16 | Compact total | Saving |
-|---|---:|---:|---:|
-| Figurines | 412.1 MiB | 237.0 MiB | 1.74x |
-| Ramen | 934.3 MiB | 311.2 MiB | 3.00x |
-| Teatime | 1123.4 MiB | 338.1 MiB | 3.32x |
-| Waldo Kitchen | 1688.8 MiB | 418.5 MiB | 4.04x |
+| Scene | Direct 1280-D fp16 | Compact ckpt | Saving | Optional VPR cache | Saving w/ cache |
+|---|---:|---:|---:|---:|---:|
+| Figurines | 412.1 MiB | 237.0 MiB | 1.74x | 501.3 MiB | 0.56x |
+| Ramen | 934.3 MiB | 311.2 MiB | 3.00x | 1131.4 MiB | 0.65x |
+| Teatime | 1123.4 MiB | 338.1 MiB | 3.32x | 1360.4 MiB | 0.66x |
+| Waldo Kitchen | 1688.8 MiB | 418.5 MiB | 4.04x | 2050.3 MiB | 0.68x |
+
+The compactness claim applies to persistent scene/checkpoint storage. VPR is a
+streamed inference-time readout; if the 1536-D registered SigLIP2 primitive
+embeddings and per-query voxel scores are persisted as a cache, that optional
+cache is larger than direct 1280-D feature storage and must be reported
+separately.
 
 ## Active Configs
 

@@ -1,0 +1,19 @@
+\begin{table}[t]
+  \centering
+  \caption{Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from the cited papers or expert-traced source tables and are not same-evaluator local reruns. This table is only for positioning relative to recent primitive-/instance-level methods.}
+  \label{tab:lerf-direct-3d-context}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{llcc}
+    \toprule
+    Method & Source type & mIoU & Acc@0.25 \\
+    \midrule
+    OpenGaussian~\cite{wu2024opengaussian} & official paper & 38.36 & 51.43 \\
+    Dr. Splat~\cite{kim2025drsplat} & published context & 43.29 & 64.30 \\
+    CAGS~\cite{sun2025cags} & published context & 50.79 & 69.62 \\
+    InstanceGaussian~\cite{li2025instancegaussian} & published context & 45.30 & 58.44 \\
+    OpenGaFF~\cite{li2026opengaff} & arXiv context & 54.36 & 80.84 \\
+    \method{} + VPR & local, SigLIP2, mean+2.5std+floor0.005+cap0.02 & 41.33 & 67.41 \\
+    \bottomrule
+  \end{tabular}
+  }
+\end{table}

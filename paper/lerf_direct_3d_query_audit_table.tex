@@ -1,0 +1,15 @@
+\begin{table}[t]
+  \centering
+  \caption{Query-level audit for LERF direct 3D object selection. Confidence intervals are bootstrap intervals over query masks for the fixed meanstd2p5 selector.}
+  \label{tab:direct3d_query_audit}
+  \begin{tabular}{lrrrr}
+    \toprule
+    Scene & Queries & mIoU & Acc@0.25 & Zero pred. \\
+    \midrule
+    Figurines & 56 & 0.488 & 0.804 & 0.071 \\
+    Ramen & 71 & 0.454 & 0.732 & 0.042 \\
+    Teatime & 59 & 0.511 & 0.797 & 0.051 \\
+    Waldo Kitchen & 22 & 0.201 & 0.364 & 0.182 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

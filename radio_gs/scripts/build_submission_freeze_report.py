@@ -272,10 +272,12 @@ def build_markdown(
                 "- Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.",
                 "- Readout: rendered SigLIP2 features registered back to 3D Gaussian primitives with depth/alpha visibility checks.",
                 "- Context aggregation: GT-free voxel-max propagation at resolution `80` with blend `0.50`.",
-                "- CTF-GS fixed `top0p02`: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.",
-                "- CTF-GS best-by-scene diagnostic: macro mIoU `0.3968`, macro Acc@0.25 `0.6651`.",
+                "- Selector: fixed GT-free `meanstd2p5` with `selection_min_ratio=0.005` and `selection_max_ratio=0.02`.",
+                "- CTF-GS fixed `meanstd2p5+floor0.005+cap0.02`: macro mIoU `0.4133`, macro Acc@0.25 `0.6741`.",
+                "- CTF-GS fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.",
+                "- CTF-GS best-by-scene diagnostic: macro mIoU `0.4166`, macro Acc@0.25 `0.6741`.",
                 "- OpenGaussian official context: macro mIoU `0.3836`, macro Acc@0.25 `0.5143`.",
-                "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`.",
+                "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`, GT-free score-distribution selection improves it to `0.3934`, adding the fixed 2% cap improves it to `0.4072`, and adding the fixed 0.5% floor improves it to `0.4133`.",
                 "- Paper use: VPR-backed primitive-level evidence with an explicit Waldo/provenance caveat.",
             ]
         )
