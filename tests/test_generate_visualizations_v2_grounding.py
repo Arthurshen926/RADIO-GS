@@ -6,8 +6,11 @@ import torch
 
 from radio_gs.scripts import generate_visualizations_v2 as viz
 from radio_gs.scripts.eval_lerf_grounding import (
+    compute_iou,
     compute_relevancy_heatmap,
     project_to_siglip2,
+    refine_mask_with_rgb_edges,
+    resolve_heatmap_threshold_ratio,
     save_heatmap_vis,
 )
 
@@ -123,6 +126,95 @@ def test_project_to_siglip2_accepts_half_features_on_cpu():
     assert projected.device.type == "cpu"
     assert projected.dtype == torch.float32
     assert projected.shape == (1, 3, 1, 1)
+
+
+def test_refine_mask_with_rgb_edges_snaps_grounding_mask_to_boundary():
+    rgb = np.zeros((48, 48, 3), dtype=np.uint8)
+    rgb[:, :] = (20, 20, 180)
+    rgb[16:32, 16:32] = (180, 20, 20)
+    mask = np.zeros((48, 48), dtype=np.uint8)
+    mask[10:38, 10:38] = 1
+
+    refined = refine_mask_with_rgb_edges(
+        rgb,
+        mask,
+        iterations=2,
+        dilate_pixels=4,
+        erode_pixels=3,
+    )
+
+    assert refined.dtype == np.bool_
+    assert refined.sum() < mask.sum()
+    assert refined[20:28, 20:28].mean() > 0.9
+    assert refined[:8, :8].sum() == 0
+
+
+def test_compute_iou_can_use_rgb_edge_refinement():
+    rgb = np.zeros((48, 48, 3), dtype=np.uint8)
+    rgb[:, :] = (20, 20, 180)
+    rgb[16:32, 16:32] = (180, 20, 20)
+    gt = np.zeros((48, 48), dtype=np.uint8)
+    gt[16:32, 16:32] = 1
+    heatmap = torch.zeros(48, 48)
+    heatmap[10:38, 10:38] = 1.0
+
+    plain_iou = compute_iou(heatmap, gt, threshold_ratio=0.5)
+    refined_iou = compute_iou(
+        heatmap,
+        gt,
+        threshold_ratio=0.5,
+        rgb_image=rgb,
+        mask_refinement="rgb_grabcut",
+        mask_refinement_iters=2,
+        mask_refinement_dilate=4,
+        mask_refinement_erode=3,
+    )
+
+    assert refined_iou > plain_iou
+
+
+def test_resolve_heatmap_threshold_ratio_supports_mean_std_mode():
+    heatmap = torch.tensor(
+        [
+            [0.0, 0.1, 0.1, 0.2],
+            [0.0, 0.1, 0.8, 1.0],
+        ],
+        dtype=torch.float32,
+    )
+
+    fixed = resolve_heatmap_threshold_ratio(heatmap, 0.6, mode="fixed")
+    adaptive = resolve_heatmap_threshold_ratio(
+        heatmap,
+        0.6,
+        mode="mean_std",
+        mean_std_k=1.0,
+        min_ratio=0.3,
+        max_ratio=0.9,
+    )
+
+    assert fixed == 0.6
+    assert 0.3 <= adaptive <= 0.9
+    assert adaptive != fixed
+
+
+def test_compute_iou_accepts_adaptive_threshold_mode():
+    heatmap = torch.zeros(16, 16)
+    heatmap[4:12, 4:12] = 0.4
+    heatmap[6:10, 6:10] = 1.0
+    gt = np.zeros((16, 16), dtype=np.uint8)
+    gt[6:10, 6:10] = 1
+
+    adaptive_iou = compute_iou(
+        heatmap,
+        gt,
+        threshold_ratio=0.5,
+        threshold_mode="mean_std",
+        threshold_mean_std_k=1.0,
+        threshold_min_ratio=0.3,
+        threshold_max_ratio=0.9,
+    )
+
+    assert adaptive_iou > 0.0
 
 
 def test_lerf_overlay_preserves_rgb_aspect_ratio(tmp_path):

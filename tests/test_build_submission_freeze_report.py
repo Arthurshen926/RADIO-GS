@@ -52,6 +52,74 @@ def test_collect_lerf_best_row_reads_macro(tmp_path: Path) -> None:
     assert len(summary["rows"]) == 2
 
 
+def test_collect_lerf_threshold_sweep_reads_calibrated_variant(tmp_path: Path) -> None:
+    sweep_path = tmp_path / "threshold_sweep.json"
+    sweep_path.write_text(
+        json.dumps(
+            {
+                "variants": {
+                    "0.60": {
+                        "rows": [
+                            {
+                                "scene": "figurines",
+                                "loc": 0.8,
+                                "miou": 0.42,
+                                "temp": 50.0,
+                                "n": 4,
+                            },
+                            {
+                                "scene": "ramen",
+                                "loc": 0.9,
+                                "miou": 0.62,
+                                "temp": 40.0,
+                                "n": 5,
+                            },
+                        ],
+                        "macro": {"loc": 0.85, "miou": 0.52},
+                        "weighted": {"loc": 0.8556, "miou": 0.5311},
+                    }
+                }
+            }
+        )
+    )
+
+    summary = report.collect_lerf_threshold_sweep(sweep_path, "0.60")
+
+    assert summary["macro_loc_acc"] == 0.85
+    assert summary["macro_miou"] == 0.52
+    assert summary["weighted_miou"] == 0.5311
+    assert summary["rows"][0]["scene"] == "figurines"
+    assert summary["rows"][0]["miou"] == 0.42
+    assert summary["readout"] == "threshold 0.60"
+
+
+def test_collect_direct3d_silhouette_sweep_reads_variant(tmp_path: Path) -> None:
+    sweep_path = tmp_path / "direct_sweep.json"
+    sweep_path.write_text(
+        json.dumps(
+            {
+                "variants": {
+                    "0.60": {
+                        "rows": [
+                            {"scene": "figurines", "miou": 0.54, "acc025": 0.78, "acc050": 0.64, "n": 4},
+                            {"scene": "ramen", "miou": 0.47, "acc025": 0.74, "acc050": 0.49, "n": 5},
+                        ],
+                        "macro": {"miou": 0.505, "acc025": 0.76, "acc050": 0.565},
+                        "weighted": {"miou": 0.5011, "acc025": 0.7578, "acc050": 0.5567},
+                    }
+                }
+            }
+        )
+    )
+
+    summary = report.collect_direct3d_silhouette_sweep(sweep_path, "0.60")
+
+    assert summary["macro_miou"] == 0.505
+    assert summary["macro_acc025"] == 0.76
+    assert summary["weighted_miou"] == 0.5011
+    assert summary["rows"][1]["scene"] == "ramen"
+
+
 def test_write_report_outputs_markdown_and_manifest(tmp_path: Path) -> None:
     output_dir = tmp_path / "reports"
     lerf = {"macro_loc_acc": 0.85, "macro_miou": 0.5, "rows": [], "warnings": []}
@@ -79,6 +147,48 @@ def test_write_report_outputs_markdown_and_manifest(tmp_path: Path) -> None:
     assert "ScanNet" in markdown
     assert manifest["lerf"]["macro_loc_acc"] == 0.85
     assert manifest["scannet"]["macro_miou"]["10"] == 0.5
+
+
+def test_write_report_includes_calibrated_lerf_and_direct3d(tmp_path: Path) -> None:
+    output_dir = tmp_path / "reports"
+    lerf = {
+        "macro_loc_acc": 0.8712,
+        "macro_miou": 0.5243,
+        "weighted_miou": 0.5397,
+        "readout": "threshold 0.60",
+        "source": "threshold_sweep.json",
+        "rows": [
+            {"scene": "figurines", "loc_acc": 0.8214, "miou": 0.4244, "temp": 50.0, "summary": "threshold_sweep.json"}
+        ],
+        "warnings": [],
+    }
+    direct3d = {
+        "silhouette": "0.60",
+        "macro_miou": 0.4554,
+        "macro_acc025": 0.7014,
+        "macro_acc050": 0.4663,
+        "weighted_miou": 0.4932,
+        "rows": [],
+        "source": "direct_sweep.json",
+        "warnings": [],
+    }
+    scannet = {
+        "scene_count": 0,
+        "macro_miou": {"19": 0.0, "15": 0.0, "10": 0.0},
+        "macro_macc": {"19": 0.0, "15": 0.0, "10": 0.0},
+        "rows": [],
+        "warnings": [],
+    }
+
+    paths = report.write_freeze_outputs(output_dir, lerf, scannet, direct3d=direct3d)
+
+    markdown = paths["markdown"].read_text()
+    manifest = json.loads(paths["manifest"].read_text())
+    assert "threshold 0.60" in markdown
+    assert "0.5243" in markdown
+    assert "RGB snap silhouette 0.60" in markdown
+    assert "0.4554" in markdown
+    assert manifest["direct3d"]["macro_acc025"] == 0.7014
 
 
 def test_collect_profile_runs_reads_time_and_gpu_logs(tmp_path: Path) -> None:

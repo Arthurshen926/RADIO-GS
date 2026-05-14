@@ -24,7 +24,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import cv2
 import numpy as np
@@ -63,6 +63,7 @@ from radio_gs.scripts.train_feature_field import sample_multiview_radio_targets
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 logger = logging.getLogger(__name__)
+SCORE_CACHE_VERSION = 1
 
 
 OPEN_GAUSSIAN_LERF_FRAMES: Dict[str, List[int]] = {
@@ -110,6 +111,82 @@ class GaussianSelectionProxy:
 
     def get_features(self) -> torch.Tensor:
         return self.features
+
+
+def _canonical_cache_value(value: Any) -> Any:
+    if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, dict):
+        return {str(key): _canonical_cache_value(val) for key, val in sorted(value.items())}
+    if isinstance(value, (list, tuple)):
+        return [_canonical_cache_value(val) for val in value]
+    if isinstance(value, np.generic):
+        return value.item()
+    return value
+
+
+def canonical_score_cache_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+    """Return JSON-stable metadata used to guard VPR score-cache reuse."""
+    return {
+        str(key): _canonical_cache_value(value)
+        for key, value in sorted(metadata.items())
+    }
+
+
+def save_score_cache(
+    path: str | Path,
+    scores: torch.Tensor,
+    *,
+    metadata: Dict[str, Any],
+    registration_stats: Dict[str, Any],
+) -> None:
+    """Persist pre-aggregation primitive text scores with protocol metadata."""
+    cache_path = Path(path)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "version": SCORE_CACHE_VERSION,
+            "metadata": canonical_score_cache_metadata(metadata),
+            "registration_stats": _canonical_cache_value(registration_stats),
+            "scores": scores.detach().cpu(),
+        },
+        cache_path,
+    )
+
+
+def load_score_cache(
+    path: str | Path,
+    *,
+    expected_metadata: Dict[str, Any],
+) -> Tuple[torch.Tensor, Dict[str, Any]]:
+    """Load cached primitive text scores after exact protocol matching."""
+    cache_path = Path(path)
+    payload = torch.load(cache_path, map_location="cpu")
+    version = int(payload.get("version", -1))
+    if version != SCORE_CACHE_VERSION:
+        raise ValueError(
+            f"unsupported score cache version {version}; expected {SCORE_CACHE_VERSION}"
+        )
+    expected = canonical_score_cache_metadata(expected_metadata)
+    cached = canonical_score_cache_metadata(payload.get("metadata", {}))
+    if cached != expected:
+        mismatched_keys = [
+            key
+            for key in sorted(set(cached) | set(expected))
+            if cached.get(key) != expected.get(key)
+        ]
+        preview = ", ".join(
+            f"{key}: cached={cached.get(key)!r}, expected={expected.get(key)!r}"
+            for key in mismatched_keys[:6]
+        )
+        raise ValueError(f"score cache metadata mismatch ({preview})")
+    scores = payload.get("scores")
+    if not isinstance(scores, torch.Tensor) or scores.ndim != 2:
+        raise ValueError("score cache payload must contain a 2D tensor under 'scores'")
+    registration_stats = payload.get("registration_stats", {})
+    if not isinstance(registration_stats, dict):
+        raise ValueError("score cache payload registration_stats must be a dict")
+    return scores.float().cpu(), registration_stats
 
 
 def parse_float_list(raw: str | None) -> List[float]:
@@ -677,6 +754,42 @@ def merge_registered_scores(
     return merged
 
 
+def apply_registration_confidence(
+    scores: torch.Tensor,
+    registered_counts: torch.Tensor,
+    *,
+    blend: float = 0.0,
+    mode: str = "log",
+) -> torch.Tensor:
+    """Downweight primitive scores with weak multi-view registration support.
+
+    The calibration is GT-free: it only uses how many valid rendered-view
+    samples contributed to each Gaussian.  ``blend=0`` preserves the original
+    scores, while larger values keep all scores but reduce low-support
+    primitives by a bounded row-wise confidence scale.
+    """
+    blend_f = min(max(float(blend), 0.0), 1.0)
+    if blend_f <= 0.0:
+        return scores
+    if scores.ndim != 2:
+        raise ValueError(f"Expected scores [N,K], got {tuple(scores.shape)}")
+    if registered_counts.shape != (scores.shape[0],):
+        raise ValueError(
+            f"Expected registered_counts [{scores.shape[0]}], got "
+            f"{tuple(registered_counts.shape)}"
+        )
+    counts = registered_counts.to(device=scores.device, dtype=scores.dtype).clamp_min(0.0)
+    max_count = counts.max().clamp_min(1.0)
+    if mode == "log":
+        confidence = torch.log1p(counts) / torch.log1p(max_count)
+    elif mode == "linear":
+        confidence = counts / max_count
+    else:
+        raise ValueError(f"Unsupported registration confidence mode: {mode}")
+    scale = (1.0 - blend_f) + blend_f * confidence.clamp(0.0, 1.0)
+    return scores * scale.unsqueeze(1)
+
+
 def sample_registration_view_weights(
     points_xyz: torch.Tensor,
     pose_w2c: torch.Tensor,
@@ -1153,6 +1266,8 @@ def compute_registered_view_text_scores(
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
     registration_weight_mode: str,
+    registration_confidence_blend: float,
+    registration_confidence_mode: str,
     fallback_scores: Optional[torch.Tensor],
     device: torch.device,
 ) -> Tuple[torch.Tensor, Dict[str, object]]:
@@ -1284,6 +1399,12 @@ def compute_registered_view_text_scores(
             scoring=scoring,
             softmax_temperature=softmax_temperature,
         )
+        scores = apply_registration_confidence(
+            scores,
+            registered_counts[start:end],
+            blend=registration_confidence_blend,
+            mode=registration_confidence_mode,
+        )
         all_scores.append(scores.detach().cpu())
         del registered, scores
 
@@ -1302,6 +1423,8 @@ def compute_registered_view_text_scores(
         "relative_depth_tolerance": float(registration_relative_depth_tolerance),
         "alpha_threshold": float(registration_alpha_threshold),
         "weight_mode": registration_weight_mode,
+        "confidence_blend": float(registration_confidence_blend),
+        "confidence_mode": registration_confidence_mode,
     }
     return torch.cat(all_scores, dim=0), stats
 
@@ -1332,6 +1455,67 @@ def save_pred_mask(path: Path, mask: np.ndarray) -> None:
     cv2.imwrite(str(path), (mask.astype(np.uint8) * 255))
 
 
+def refine_mask_with_rgb_edges(
+    rgb_bgr: np.ndarray,
+    mask: np.ndarray,
+    *,
+    iterations: int = 1,
+    dilate_pixels: int = 5,
+    erode_pixels: int = 2,
+) -> np.ndarray:
+    """Snap a predicted binary mask to local RGB edges without using GT masks.
+
+    This is an optional 2D readout refinement for visualization/ablation.  The
+    initializer is built only from the rendered prediction: eroded prediction is
+    sure foreground, the dilated support is probable foreground, and everything
+    outside the support is background.
+    """
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    if rgb_bgr.shape[:2] != pred.shape:
+        raise ValueError(f"RGB/mask shape mismatch: {rgb_bgr.shape[:2]} vs {pred.shape}")
+    if not pred.any() or pred.all():
+        return pred.copy()
+    kernel_size = max(1, int(dilate_pixels) * 2 + 1)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
+    pred_u8 = pred.astype(np.uint8)
+    support = cv2.dilate(pred_u8, kernel, iterations=1).astype(bool)
+    if int(erode_pixels) > 0:
+        erode_size = max(1, int(erode_pixels) * 2 + 1)
+        erode_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (erode_size, erode_size))
+        sure_fg = cv2.erode(pred_u8, erode_kernel, iterations=1).astype(bool)
+    else:
+        sure_fg = pred
+    if not sure_fg.any():
+        sure_fg = pred
+
+    init = np.full(pred.shape, cv2.GC_BGD, dtype=np.uint8)
+    init[support] = cv2.GC_PR_FGD
+    init[pred] = cv2.GC_PR_FGD
+    init[sure_fg] = cv2.GC_FGD
+    init[~support] = cv2.GC_BGD
+    if not np.any(init == cv2.GC_BGD) or not np.any((init == cv2.GC_FGD) | (init == cv2.GC_PR_FGD)):
+        return pred.copy()
+
+    bgd_model = np.zeros((1, 65), np.float64)
+    fgd_model = np.zeros((1, 65), np.float64)
+    try:
+        cv2.grabCut(
+            rgb_bgr,
+            init,
+            None,
+            bgd_model,
+            fgd_model,
+            max(1, int(iterations)),
+            cv2.GC_INIT_WITH_MASK,
+        )
+    except cv2.error:
+        return pred.copy()
+    refined = (init == cv2.GC_FGD) | (init == cv2.GC_PR_FGD)
+    return refined & support
+
+
 def evaluate_selection_spec(
     *,
     scene: str,
@@ -1353,6 +1537,10 @@ def evaluate_selection_spec(
     component_min_size: int,
     component_rank_by: str,
     silhouette_threshold: float,
+    mask_refinement: str,
+    mask_refinement_iters: int,
+    mask_refinement_dilate: int,
+    mask_refinement_erode: int,
     min_select: int,
     output_dir: Path,
     save_masks: bool,
@@ -1414,6 +1602,9 @@ def evaluate_selection_spec(
             rendered = renderer.render_features(proxy, viewmat)
             silhouette = rendered["feature_map"].detach().float().cpu().numpy()
         gt_masks = build_gt_masks(frame_objects, scene_categories, img_h, img_w)
+        rgb_for_refinement = None
+        if mask_refinement != "none":
+            rgb_for_refinement = load_lerf_rgb_frame(scene, frame_id, getattr(dataset, "scene_root", ""))
 
         active_cats = sorted({obj["category"] for obj in frame_objects})
         frame_scores: Dict[str, float] = {}
@@ -1422,6 +1613,14 @@ def evaluate_selection_spec(
                 continue
             cat_idx = scene_categories.index(cat)
             pred = silhouette[cat_idx] > float(silhouette_threshold)
+            if mask_refinement == "rgb_grabcut" and rgb_for_refinement is not None:
+                pred = refine_mask_with_rgb_edges(
+                    rgb_for_refinement,
+                    pred,
+                    iterations=mask_refinement_iters,
+                    dilate_pixels=mask_refinement_dilate,
+                    erode_pixels=mask_refinement_erode,
+                )
             gt = gt_masks[cat]
             if gt.sum() == 0:
                 continue
@@ -1477,6 +1676,10 @@ def evaluate_selection_spec(
             "component_min_size": component_min_size,
             "component_rank_by": component_rank_by,
             "silhouette_threshold": silhouette_threshold,
+            "mask_refinement": mask_refinement,
+            "mask_refinement_iters": mask_refinement_iters,
+            "mask_refinement_dilate": mask_refinement_dilate,
+            "mask_refinement_erode": mask_refinement_erode,
             "per_category": per_cat_summary,
             "per_frame": per_frame,
             "query_details": query_details,
@@ -1494,8 +1697,10 @@ def evaluate_scene(
     label_dir: str,
     output_dir: Path,
     summary_head: torch.nn.Module,
+    summary_head_weights: str,
     text_embedding_cache: Optional[str],
     canonical_embedding_cache: Optional[str],
+    score_cache_path: Optional[str],
     prompt_templates: List[str],
     selection_specs: List[SelectionSpec],
     score_source: str,
@@ -1524,8 +1729,14 @@ def evaluate_scene(
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
     registration_weight_mode: str,
+    registration_confidence_blend: float,
+    registration_confidence_mode: str,
     disable_registered_refiner: bool,
     silhouette_threshold: float,
+    mask_refinement: str,
+    mask_refinement_iters: int,
+    mask_refinement_dilate: int,
+    mask_refinement_erode: int,
     min_select: int,
     chunk_size: int,
     official_frames_only: bool,
@@ -1586,11 +1797,66 @@ def evaluate_scene(
         )
 
     registration_stats: Dict[str, object] = {}
+    score_cache_info: Dict[str, object] = {"enabled": bool(score_cache_path)}
+    score_cache_metadata: Dict[str, object] = {
+        "scene": scene,
+        "config": str(config_path),
+        "checkpoint": str(checkpoint_path),
+        "label_dir": str(label_dir),
+        "summary_head_weights": str(summary_head_weights),
+        "text_embedding_cache": str(text_embedding_cache or ""),
+        "canonical_embedding_cache": str(canonical_embedding_cache or "")
+        if scoring == "relevancy"
+        else "",
+        "prompt_templates": list(prompt_templates),
+        "categories": list(scene_categories),
+        "image_height": int(img_h),
+        "image_width": int(img_w),
+        "num_gaussians": int(model.get_xyz().shape[0]),
+        "official_frames_only": bool(official_frames_only),
+        "score_source": score_source,
+        "scoring": scoring,
+        "compact_feature_key": compact_feature_key,
+        "direct_readout_mode": direct_readout_mode,
+        "direct_readout_k": int(direct_readout_k),
+        "direct_readout_candidate_k": int(direct_readout_candidate_k),
+        "softmax_temperature": float(softmax_temperature),
+        "registered_view_fallback": registered_view_fallback,
+        "registration_frame_mode": registration_frame_mode,
+        "registration_max_frames": int(registration_max_frames),
+        "registration_depth_tolerance": float(registration_depth_tolerance),
+        "registration_relative_depth_tolerance": float(registration_relative_depth_tolerance),
+        "registration_alpha_threshold": float(registration_alpha_threshold),
+        "registration_weight_mode": registration_weight_mode,
+        "registration_confidence_blend": float(registration_confidence_blend),
+        "registration_confidence_mode": registration_confidence_mode,
+        "disable_registered_refiner": bool(disable_registered_refiner),
+    }
+    scores: Optional[torch.Tensor] = None
+    cache_path = Path(score_cache_path) if score_cache_path else None
+    if cache_path is not None:
+        score_cache_info["path"] = str(cache_path)
+        if cache_path.exists():
+            print(f"  loading primitive score cache: {cache_path}")
+            scores, registration_stats = load_score_cache(
+                cache_path,
+                expected_metadata=score_cache_metadata,
+            )
+            score_cache_info["status"] = "hit"
+            if tuple(scores.shape) != (int(model.get_xyz().shape[0]), len(scene_categories)):
+                raise ValueError(
+                    "score cache shape mismatch: "
+                    f"got {tuple(scores.shape)}, expected "
+                    f"{(int(model.get_xyz().shape[0]), len(scene_categories))}"
+                )
+        else:
+            score_cache_info["status"] = "miss"
+
     direct_scores: Optional[torch.Tensor] = None
     needs_direct_scores = score_source == "direct" or (
         score_source == "registered_view" and registered_view_fallback == "direct"
     )
-    if needs_direct_scores:
+    if scores is None and needs_direct_scores:
         print("  computing Gaussian-level text scores")
         direct_scores = compute_gaussian_text_scores(
             model,
@@ -1609,7 +1875,12 @@ def evaluate_scene(
             device=device,
         )
 
-    if score_source == "direct":
+    if scores is not None:
+        print(
+            f"  using cached primitive scores "
+            f"({scores.shape[0]} Gaussians x {scores.shape[1]} queries)"
+        )
+    elif score_source == "direct":
         if direct_scores is None:
             raise RuntimeError("Internal error: direct score source missing direct scores")
         scores = direct_scores
@@ -1644,6 +1915,8 @@ def evaluate_scene(
             registration_relative_depth_tolerance=registration_relative_depth_tolerance,
             registration_alpha_threshold=registration_alpha_threshold,
             registration_weight_mode=registration_weight_mode,
+            registration_confidence_blend=registration_confidence_blend,
+            registration_confidence_mode=registration_confidence_mode,
             fallback_scores=direct_scores if registered_view_fallback == "direct" else None,
             device=device,
         )
@@ -1655,6 +1928,16 @@ def evaluate_scene(
         )
     else:
         raise ValueError(f"Unsupported score source: {score_source}")
+
+    if cache_path is not None and score_cache_info.get("status") == "miss":
+        print(f"  writing primitive score cache: {cache_path}")
+        save_score_cache(
+            cache_path,
+            scores,
+            metadata=score_cache_metadata,
+            registration_stats=registration_stats,
+        )
+        score_cache_info["status"] = "written"
 
     if score_aggregation != "none" and score_aggregation_blend > 0:
         print(
@@ -1699,6 +1982,10 @@ def evaluate_scene(
             component_min_size=component_min_size,
             component_rank_by=component_rank_by,
             silhouette_threshold=silhouette_threshold,
+            mask_refinement=mask_refinement,
+            mask_refinement_iters=mask_refinement_iters,
+            mask_refinement_dilate=mask_refinement_dilate,
+            mask_refinement_erode=mask_refinement_erode,
             min_select=min_select,
             output_dir=output_dir,
             save_masks=save_masks,
@@ -1719,6 +2006,7 @@ def evaluate_scene(
         "compact_feature_key": compact_feature_key,
         "canonical_embedding_cache": canonical_embedding_cache if scoring == "relevancy" else "",
         "registration": registration_stats,
+        "score_cache": score_cache_info,
         "categories": scene_categories,
         "image_height": img_h,
         "image_width": img_w,
@@ -1828,6 +2116,7 @@ def main() -> None:
     parser.add_argument("--output_dir", default="output/radio_gs/lerf_direct_3d_selection", help="Output root")
     parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth", help="SigLIP2 summary head weights")
     parser.add_argument("--text_embedding_cache", default="checkpoints/siglip2_lerf_text_embeddings.pt", help="SigLIP2 text embedding cache")
+    parser.add_argument("--score_cache", default="", help="Optional primitive text-score cache path; loaded if metadata matches, written when missing")
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES, help="Prompt templates separated by '|'; use {query}")
     parser.add_argument("--selection_mode", choices=["top_ratio", "score_threshold", "mean_std"], default="top_ratio")
     parser.add_argument("--top_ratio", type=float, default=0.02, help="Main fixed Gaussian top-ratio for top_ratio mode")
@@ -1863,8 +2152,14 @@ def main() -> None:
     parser.add_argument("--registration_relative_depth_tolerance", type=float, default=0.02, help="Relative depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_alpha_threshold", type=float, default=0.02, help="Minimum rendered alpha for rendered-view primitive registration")
     parser.add_argument("--registration_weight_mode", choices=["uniform", "alpha", "alpha_depth"], default="uniform", help="Contribution-style weighting for VPR registered samples")
+    parser.add_argument("--registration_confidence_blend", type=float, default=0.0, help="Blend weight for GT-free registration-count confidence calibration")
+    parser.add_argument("--registration_confidence_mode", choices=["log", "linear"], default="log", help="How registration counts are mapped to confidence")
     parser.add_argument("--disable_registered_refiner", action="store_true", help="Disable VFA/screen refiner only for registered-view primitive scoring")
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
+    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut"], default="none", help="Optional GT-free RGB boundary snapping after rendering selected primitives")
+    parser.add_argument("--mask_refinement_iters", type=int, default=1, help="GrabCut iterations for rgb_grabcut mask refinement")
+    parser.add_argument("--mask_refinement_dilate", type=int, default=5, help="Pixel dilation radius defining the rgb_grabcut support band")
+    parser.add_argument("--mask_refinement_erode", type=int, default=2, help="Pixel erosion radius defining sure foreground for rgb_grabcut")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
     parser.add_argument("--all_labeled_frames", action="store_true", help="Use all local labels instead of OpenGaussian official frames")
@@ -1887,6 +2182,8 @@ def main() -> None:
     print(f"Score src:  {args.score_source}")
     print(f"Scoring:    {args.scoring}")
     print(f"Silhouette: > {args.silhouette_threshold}")
+    if args.mask_refinement != "none":
+        print(f"Mask ref.:  {args.mask_refinement}")
     print()
 
     summary_head = load_summary_head(args.summary_head_weights, device)
@@ -1899,8 +2196,10 @@ def main() -> None:
         label_dir=args.label_dir,
         output_dir=out_root,
         summary_head=summary_head,
+        summary_head_weights=args.summary_head_weights,
         text_embedding_cache=args.text_embedding_cache,
         canonical_embedding_cache=args.canonical_embedding_cache,
+        score_cache_path=args.score_cache or None,
         prompt_templates=prompt_templates,
         selection_specs=specs,
         score_source=args.score_source,
@@ -1929,8 +2228,14 @@ def main() -> None:
         registration_relative_depth_tolerance=args.registration_relative_depth_tolerance,
         registration_alpha_threshold=args.registration_alpha_threshold,
         registration_weight_mode=args.registration_weight_mode,
+        registration_confidence_blend=args.registration_confidence_blend,
+        registration_confidence_mode=args.registration_confidence_mode,
         disable_registered_refiner=args.disable_registered_refiner,
         silhouette_threshold=args.silhouette_threshold,
+        mask_refinement=args.mask_refinement,
+        mask_refinement_iters=args.mask_refinement_iters,
+        mask_refinement_dilate=args.mask_refinement_dilate,
+        mask_refinement_erode=args.mask_refinement_erode,
         min_select=args.min_select,
         chunk_size=args.chunk_size,
         official_frames_only=not args.all_labeled_frames,
@@ -1953,6 +2258,7 @@ def main() -> None:
                 else "pre-refiner Gaussian-center decoded RADIO-compatible features"
             ),
             "score_source": args.score_source,
+            "score_cache": args.score_cache,
             "compact_feature_key": args.compact_feature_key,
             "direct_readout_mode": args.direct_readout_mode,
             "direct_readout_k": args.direct_readout_k,
@@ -1977,10 +2283,16 @@ def main() -> None:
             "registration_relative_depth_tolerance": args.registration_relative_depth_tolerance,
             "registration_alpha_threshold": args.registration_alpha_threshold,
             "registration_weight_mode": args.registration_weight_mode,
+            "registration_confidence_blend": args.registration_confidence_blend,
+            "registration_confidence_mode": args.registration_confidence_mode,
             "disable_registered_refiner": bool(args.disable_registered_refiner),
             "render_role": "render selected primitives only for mask evaluation",
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50"],
             "silhouette_threshold": args.silhouette_threshold,
+            "mask_refinement": args.mask_refinement,
+            "mask_refinement_iters": args.mask_refinement_iters,
+            "mask_refinement_dilate": args.mask_refinement_dilate,
+            "mask_refinement_erode": args.mask_refinement_erode,
         },
         "prompt_templates": prompt_templates,
         "elapsed_seconds": time.time() - t0,

@@ -183,7 +183,9 @@ def direct_caption_feature_source(results: Dict[str, dict]) -> str:
     if selection_suffix:
         suffix += selection_suffix.replace("; GT-free", " and GT-free")
     if score_source == "registered_view":
-        return "rendered-view registered primitive features" + suffix
+        max_frames = protocol.get("registration_max_frames", args.get("registration_max_frames", ""))
+        view_suffix = f" from {max_frames} all-pose VPR views" if max_frames else ""
+        return "rendered-view registered primitive features" + view_suffix + suffix
     return "pre-refiner Gaussian-center features" + suffix
 
 
@@ -320,6 +322,7 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
         + direct_caption_feature_source(results)
         + r" and a SigLIP2 text head.}",
         r"  \label{tab:lerf-direct-3d-selection}",
+        r"  \resizebox{\linewidth}{!}{%",
         r"  \begin{tabular}{llccccc}",
         r"    \toprule",
         r"    Method & Protocol & Fig. & Ramen & Tea. & Waldo & Macro \\",
@@ -351,6 +354,7 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
         f"{texfmt(fixed_acc['macro'])} \\\\",
         r"    \bottomrule",
         r"  \end{tabular}",
+        r"  }",
         r"\end{table}",
     ]
     return "\n".join(rows) + "\n"

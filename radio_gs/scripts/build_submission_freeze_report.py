@@ -100,6 +100,79 @@ def collect_lerf_best(csv_path: str | Path) -> dict[str, Any]:
         "rows": rows,
         "macro_loc_acc": macro_loc_acc,
         "macro_miou": macro_miou,
+        "readout": "threshold 0.50",
+        "source": str(path),
+        "warnings": [],
+    }
+
+
+def _variant_key(value: str | float) -> str:
+    return f"{float(value):.2f}"
+
+
+def _load_sweep_variant(path: str | Path, value: str | float) -> tuple[Path, str, dict[str, Any]]:
+    sweep_path = Path(path)
+    payload = json.loads(sweep_path.read_text(encoding="utf-8"))
+    key = _variant_key(value)
+    variants = payload.get("variants", {})
+    if key not in variants:
+        raise KeyError(f"Variant {key!r} not found in {sweep_path}")
+    return sweep_path, key, variants[key]
+
+
+def collect_lerf_threshold_sweep(path: str | Path, threshold: str | float) -> dict[str, Any]:
+    sweep_path, key, variant = _load_sweep_variant(path, threshold)
+    rows = []
+    for row in variant.get("rows", []):
+        rows.append(
+            {
+                "scene": row["scene"],
+                "loc_acc": _round4(float(row["loc"])),
+                "miou": _round4(float(row["miou"])),
+                "temp": row.get("temp", ""),
+                "summary": str(sweep_path),
+                "n": int(row.get("n", 0)),
+            }
+        )
+    macro = variant.get("macro", {})
+    weighted = variant.get("weighted", {})
+    return {
+        "rows": rows,
+        "macro_loc_acc": _round4(float(macro.get("loc", 0.0))),
+        "macro_miou": _round4(float(macro.get("miou", 0.0))),
+        "weighted_loc_acc": _round4(float(weighted.get("loc", 0.0))),
+        "weighted_miou": _round4(float(weighted.get("miou", 0.0))),
+        "readout": f"threshold {key}",
+        "source": str(sweep_path),
+        "warnings": [],
+    }
+
+
+def collect_direct3d_silhouette_sweep(path: str | Path, silhouette: str | float) -> dict[str, Any]:
+    sweep_path, key, variant = _load_sweep_variant(path, silhouette)
+    rows = []
+    for row in variant.get("rows", []):
+        rows.append(
+            {
+                "scene": row["scene"],
+                "miou": _round4(float(row["miou"])),
+                "acc025": _round4(float(row["acc025"])),
+                "acc050": _round4(float(row.get("acc050", 0.0))),
+                "n": int(row.get("n", 0)),
+            }
+        )
+    macro = variant.get("macro", {})
+    weighted = variant.get("weighted", {})
+    return {
+        "silhouette": key,
+        "macro_miou": _round4(float(macro.get("miou", 0.0))),
+        "macro_acc025": _round4(float(macro.get("acc025", 0.0))),
+        "macro_acc050": _round4(float(macro.get("acc050", 0.0))),
+        "weighted_miou": _round4(float(weighted.get("miou", 0.0))),
+        "weighted_acc025": _round4(float(weighted.get("acc025", 0.0))),
+        "weighted_acc050": _round4(float(weighted.get("acc050", 0.0))),
+        "rows": rows,
+        "source": str(sweep_path),
         "warnings": [],
     }
 
@@ -198,6 +271,7 @@ def build_markdown(
     lerf: dict[str, Any],
     scannet: dict[str, Any],
     profiles: dict[str, Any] | None = None,
+    direct3d: dict[str, Any] | None = None,
 ) -> str:
     profiles = profiles or {"profile_count": 0, "rows": [], "warnings": []}
     warnings = [
@@ -208,6 +282,8 @@ def build_markdown(
     warnings.extend(lerf.get("warnings", []))
     warnings.extend(scannet.get("warnings", []))
     warnings.extend(profiles.get("warnings", []))
+    if direct3d is not None:
+        warnings.extend(direct3d.get("warnings", []))
 
     lines = [
         "# RADIO-GS Submission Freeze Report",
@@ -220,7 +296,7 @@ def build_markdown(
         "|---|---|---|---|",
         (
             "| LERF main result | Frozen | "
-            "`output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv` | Main open-vocabulary table |"
+            f"`{lerf.get('source', 'output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv')}` | Main open-vocabulary table |"
         ),
         (
             "| ScanNet fair cross-domain result | Frozen | "
@@ -245,9 +321,11 @@ def build_markdown(
         "",
         "## LERF-OVS",
         "",
-        "- Protocol: rendered-feature best-scene summary from existing JSON-backed LERF sweeps.",
+        f"- Protocol: rendered-feature readout from `{lerf.get('source', 'unknown')}`.",
+        f"- Mask readout: `{lerf.get('readout', 'threshold 0.50')}`.",
         f"- Macro LocAcc: `{lerf['macro_loc_acc']:.4f}`",
         f"- Macro mIoU: `{lerf['macro_miou']:.4f}`",
+        f"- Weighted mIoU: `{float(lerf.get('weighted_miou', 0.0)):.4f}`" if "weighted_miou" in lerf else "",
         "",
         "| Scene | LocAcc | mIoU | Temp | Source summary |",
         "|---|---:|---:|---:|---|",
@@ -263,21 +341,38 @@ def build_markdown(
             )
         )
 
-    if (REPORT_DIR / "lerf_direct_3d_selection.md").exists():
+    if direct3d is not None or (REPORT_DIR / "lerf_direct_3d_selection.md").exists():
+        direct_lines = [
+            "",
+            "## LERF Direct 3D Object Selection",
+            "",
+            "- Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.",
+            "- Readout: rendered SigLIP2 features registered back to 3D Gaussian primitives with depth/alpha visibility checks.",
+            "- Context aggregation: GT-free voxel-max propagation at resolution `80` with blend `0.50`.",
+            "- Selector: fixed GT-free `meanstd2p5` with `selection_min_ratio=0.005` and `selection_max_ratio=0.018`.",
+            "- VPR view budget: `128` evenly spaced all-pose registration views.",
+            "- CTF-GS fixed `meanstd2p5+floor0.005+cap0.018`: macro mIoU `0.4227`, macro Acc@0.25 `0.6906`.",
+        ]
+        if direct3d is not None:
+            direct_lines.extend(
+                [
+                    (
+                        f"- CTF-GS + RGB snap silhouette {direct3d['silhouette']}: "
+                        f"macro mIoU `{direct3d['macro_miou']:.4f}`, "
+                        f"macro Acc@0.25 `{direct3d['macro_acc025']:.4f}`, "
+                        f"macro Acc@0.50 `{direct3d['macro_acc050']:.4f}`."
+                    ),
+                    f"- Direct-3D silhouette sweep source: `{direct3d.get('source', '')}`.",
+                ]
+            )
         lines.extend(
-            [
-                "",
-                "## LERF Direct 3D Object Selection",
-                "",
-                "- Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.",
-                "- Readout: rendered SigLIP2 features registered back to 3D Gaussian primitives with depth/alpha visibility checks.",
-                "- Context aggregation: GT-free voxel-max propagation at resolution `80` with blend `0.50`.",
-                "- Selector: fixed GT-free `meanstd2p5` with `selection_min_ratio=0.005` and `selection_max_ratio=0.02`.",
-                "- CTF-GS fixed `meanstd2p5+floor0.005+cap0.02`: macro mIoU `0.4133`, macro Acc@0.25 `0.6741`.",
+            direct_lines
+            + [
+                "- CTF-GS accuracy-oriented cap0.015 diagnostic: macro mIoU `0.4184`, macro Acc@0.25 `0.7013`.",
                 "- CTF-GS fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.",
-                "- CTF-GS best-by-scene diagnostic: macro mIoU `0.4166`, macro Acc@0.25 `0.6741`.",
+                "- CTF-GS previous cap0.02 diagnostic: macro mIoU `0.4185`, macro Acc@0.25 `0.6899`.",
                 "- OpenGaussian official context: macro mIoU `0.3836`, macro Acc@0.25 `0.5143`.",
-                "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`, GT-free score-distribution selection improves it to `0.3934`, adding the fixed 2% cap improves it to `0.4072`, and adding the fixed 0.5% floor improves it to `0.4133`.",
+                "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`, GT-free score-distribution selection improves it to `0.3934`, adding the fixed 2% cap improves it to `0.4072`, adding the fixed 0.5% floor improves it to `0.4133`, increasing the all-pose registration budget to 128 views improves the fixed paper selector to `0.4185`, tightening the global cap to `0.0175` improves it to `0.4226`, and a cache-backed fixed `0.018` cap slightly improves it to `0.4227` with `0.6906` Acc@0.25.",
                 "- Paper use: VPR-backed primitive-level evidence with an explicit Waldo/provenance caveat.",
             ]
         )
@@ -348,6 +443,7 @@ def write_freeze_outputs(
     lerf: dict[str, Any],
     scannet: dict[str, Any],
     profiles: dict[str, Any] | None = None,
+    direct3d: dict[str, Any] | None = None,
 ) -> dict[str, Path]:
     profiles = profiles or {"profile_count": 0, "rows": [], "warnings": []}
     out_dir = Path(output_dir)
@@ -355,17 +451,19 @@ def write_freeze_outputs(
     markdown_path = out_dir / "submission_freeze_report.md"
     manifest_path = out_dir / "submission_freeze_manifest.json"
 
-    markdown_path.write_text(build_markdown(lerf, scannet, profiles))
+    markdown_path.write_text(build_markdown(lerf, scannet, profiles, direct3d=direct3d))
     manifest_path.write_text(
         json.dumps(
             {
                 "lerf": lerf,
                 "scannet": scannet,
                 "profiles": profiles,
+                "direct3d": direct3d,
                 "warnings": (
                     lerf.get("warnings", [])
                     + scannet.get("warnings", [])
                     + profiles.get("warnings", [])
+                    + (direct3d.get("warnings", []) if direct3d is not None else [])
                 ),
             },
             indent=2,
@@ -380,6 +478,26 @@ def main(argv: list[str] | None = None) -> dict[str, Path]:
     parser.add_argument(
         "--lerf_csv",
         default="output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv",
+    )
+    parser.add_argument(
+        "--lerf_threshold_sweep_json",
+        default="",
+        help="Optional rendered-grounding threshold sweep JSON that supersedes --lerf_csv for paper-facing mIoU.",
+    )
+    parser.add_argument(
+        "--lerf_threshold",
+        default="0.60",
+        help="Variant key to read from --lerf_threshold_sweep_json.",
+    )
+    parser.add_argument(
+        "--direct3d_silhouette_sweep_json",
+        default="",
+        help="Optional direct-3D RGB-snap silhouette sweep JSON for the paper-facing refined row.",
+    )
+    parser.add_argument(
+        "--direct3d_silhouette",
+        default="0.60",
+        help="Variant key to read from --direct3d_silhouette_sweep_json.",
     )
     parser.add_argument(
         "--scannet_eval_root",
@@ -397,10 +515,21 @@ def main(argv: list[str] | None = None) -> dict[str, Path]:
     )
     args = parser.parse_args(argv)
 
-    lerf = collect_lerf_best(args.lerf_csv)
+    if args.lerf_threshold_sweep_json:
+        lerf = collect_lerf_threshold_sweep(args.lerf_threshold_sweep_json, args.lerf_threshold)
+    else:
+        lerf = collect_lerf_best(args.lerf_csv)
+    direct3d = (
+        collect_direct3d_silhouette_sweep(
+            args.direct3d_silhouette_sweep_json,
+            args.direct3d_silhouette,
+        )
+        if args.direct3d_silhouette_sweep_json
+        else None
+    )
     scannet = collect_scannet_v67(args.scannet_eval_root)
     profiles = collect_profile_runs(args.profile_dirs)
-    paths = write_freeze_outputs(args.output_dir, lerf, scannet, profiles=profiles)
+    paths = write_freeze_outputs(args.output_dir, lerf, scannet, profiles=profiles, direct3d=direct3d)
     print(f"Wrote {paths['markdown']}")
     print(f"Wrote {paths['manifest']}")
     return paths

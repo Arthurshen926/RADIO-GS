@@ -86,11 +86,11 @@ def main() -> None:
             "- conservative rule: main table remains `LERF / LangSplat / LEGaussians / RADIO-GS` on rendered `LocAcc`.",
             "- external baselines are official-source context rows unless reproduced under the local evaluator.",
             "- ScanNet remains direct-query transfer evidence rather than a full leaderboard claim.",
-            "- LERF direct 3D selection now uses a VPR registered-view + GT-free voxel-context primitive readout with a fixed mean+2.5std score-distribution selector; it is promoted as primitive-level evidence with a Waldo/provenance caveat.",
+            "- LERF direct 3D selection now uses a VPR registered-view + GT-free voxel-context primitive readout with a fixed mean+2.5std score-distribution selector, 0.5% floor, and 1.8% cap; it is promoted as primitive-level evidence at 0.4227 macro mIoU / 0.6906 Acc@0.25 with a Waldo/provenance caveat.",
             "- Dr. Splat-inspired alpha/alpha-depth registration weighting was implemented and tested, but is not promoted because it lowers the fixed-protocol VPR result.",
             "- VPR cache memory is reported separately from persistent compact checkpoint storage.",
             "",
-            "## Open Items",
+            "## Artifact Open Items",
             "",
         ]
     )
@@ -100,7 +100,19 @@ def main() -> None:
         for item in pending_items:
             lines.append(f"- {item}")
     else:
-        lines.append("- none")
+        lines.append("- none; required paper-facing artifacts are present.")
+
+    lines.extend(
+        [
+            "",
+            "## Claim Constraints",
+            "",
+            "- Strict LERF same-evaluator SOTA claims still require locally rerun external direct-3D baselines; OpenGaussian is locally reproduced for ScanNet, but its LERF recipe is blocked by the missing official LangSplat-reannotated language-feature package.",
+            "- True Dr. Splat-style rasterizer contribution assignment remains future work; the implemented center-sampled alpha/alpha-depth approximation regressed.",
+            "- SAM3 evidence is an adaptor-space promptable-region probe, not an official frozen SAM3 decoder or mask-logit benchmark.",
+            "- Component-aware VPR was tested with reusable per-Gaussian score caches and did not beat voxel-max; stronger GT-free object proposals remain future work.",
+        ]
+    )
 
     Path(args.output).write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"wrote {args.output}")

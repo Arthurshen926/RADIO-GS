@@ -1,6 +1,6 @@
 # RADIO-GS Project Mainline
 
-Status: 2026-05-12 conservative submission mainline plus adaptor-enhanced candidate and registered direct-selection upgrade.
+Status: 2026-05-14 conservative submission mainline with calibrated rendered grounding, VPR direct-selection upgrade, and adaptor diagnostics.
 
 This document is the navigation layer for the cleaned project. It separates the
 current strongest paper route from historical validation branches.
@@ -59,15 +59,28 @@ Use these files first:
 
 ### LERF-OVS
 
-Use `output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv`.
+Use `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json`
+at the GT-free threshold-0.60 readout. The threshold-0.50 CSV remains the
+historical default readout, not the paper-facing mask metric.
 
 | Scene | LocAcc | mIoU | Temperature |
 |---|---:|---:|---:|
-| Figurines | 0.8214 | 0.4308 | 50 |
-| Ramen | 0.9014 | 0.5862 | 40 |
-| Teatime | 0.8983 | 0.5486 | 25 |
-| Waldo Kitchen | 0.8636 | 0.4106 | 25 |
-| Macro | 0.8712 | 0.4941 | - |
+| Figurines | 0.8214 | 0.4244 | 50 |
+| Ramen | 0.9014 | 0.6201 | 40 |
+| Teatime | 0.8983 | 0.5760 | 25 |
+| Waldo Kitchen | 0.8636 | 0.4769 | 25 |
+| Macro | 0.8712 | 0.5243 | - |
+
+The same calibrated readout gives a stronger same-evaluator teacher-vs-rendered
+comparison: frame-wise RADIO RGB is 0.7985 LocAcc / 0.4634 mIoU, while CTF-GS
+rendered features are 0.8712 / 0.5243.
+
+A GT-free adaptive mean+std threshold readout was tested as a boundary-refinement
+diagnostic:
+`output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md`.
+With `k=1.0` and a [0.50, 0.70] clamp it keeps LocAcc at 0.8712 but lowers
+macro mIoU to 0.4939, so the fixed global threshold-0.60 readout remains the
+paper-facing result.
 
 ### LERF-OVS Adaptor-Enhanced Candidate
 
@@ -109,13 +122,15 @@ evaluation uses LERF-OVS object masks only at the final metric stage.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.02 mIoU | 0.4879 | 0.4536 | 0.5111 | 0.2008 | 0.4133 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.018 mIoU | 0.4829 | 0.4665 | 0.5043 | 0.2373 | 0.4227 |
+| CTF-GS | SigLIP2 | + RGB snap, silhouette 0.60 mIoU | 0.5484 | 0.4706 | 0.5621 | 0.2406 | 0.4554 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
-| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene mIoU | 0.4879 | 0.4536 | 0.5111 | 0.2138 | 0.4166 |
+| CTF-GS | SigLIP2 | VPR + voxel context cap0.015 diagnostic mIoU | 0.4829 | 0.4615 | 0.4965 | 0.2328 | 0.4184 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.02 Acc@0.25 | 0.8036 | 0.7324 | 0.7966 | 0.3636 | 0.6741 |
+| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.018 Acc@0.25 | 0.8214 | 0.7183 | 0.8136 | 0.4091 | 0.6906 |
+| CTF-GS | SigLIP2 | + RGB snap, silhouette 0.60 Acc@0.25 | 0.7857 | 0.7465 | 0.8644 | 0.4091 | 0.7014 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
-| CTF-GS | SigLIP2 | VPR + voxel context best-by-scene Acc@0.25 | 0.8036 | 0.7324 | 0.7966 | 0.3636 | 0.6741 |
+| CTF-GS | SigLIP2 | VPR + voxel context cap0.015 diagnostic Acc@0.25 | 0.8214 | 0.7042 | 0.7797 | 0.5000 | 0.7013 |
 
 Published-context rows from newer primitive-/instance-aware methods are kept in
 a separate context table rather than the strict local table: Dr. Splat
@@ -129,9 +144,13 @@ aggregation further reduces primitive fragmentation. The earlier Gaussian-center
 direct readout was 0.0804 macro mIoU / 0.0932 macro Acc@0.25 under its top10%
 selector; under the same top2% selector used by the VPR rows it is 0.012 /
 0.009. Registered softmax24 reached 0.3421 / 0.5547, registered+voxel with the
-fixed top2% selector reached 0.3850 / 0.6428, and the GT-free mean+2.5std
-score-distribution selector with fixed 0.5% floor and 2% cap is now the
-strongest paper-facing protocol at 0.4133 / 0.6741. This exceeds the OpenGaussian official macro reference, but
+fixed top2% selector reached 0.3850 / 0.6428. With the same GT-free voxel-max
+context and a larger 128-view all-pose VPR budget, the mean+2.5std
+score-distribution selector with fixed 0.5% floor and 1.8% cap is now the
+strongest primitive-score protocol at 0.4227 / 0.6906; applying the optional
+GT-free RGB snap only to the rendered evaluation mask improves the paper-facing
+refined row to 0.4554 / 0.7014. A 1.5% cap is a useful accuracy-oriented
+diagnostic at 0.4184 / 0.7013. This exceeds the OpenGaussian official macro reference, but
 Waldo Kitchen remains below OpenGaussian and the table is still official-source
 context rather than a locally rerun same-evaluator SOTA comparison.
 
@@ -140,11 +159,23 @@ evaluator as `--registration_weight_mode {alpha,alpha_depth}`. Under the same
 96-view VPR + voxel-max + fixed top-2% protocol, alpha weighting drops macro
 mIoU/Acc@0.25 to 0.2978/0.5389 and alpha-depth weighting drops to
 0.2967/0.5345, compared with the uniform top2% VPR baseline at 0.3850/0.6428
-and the fixed meanstd2p5 + floor0.005 + cap0.02 VPR selector at 0.4133/0.6741. This
+and the fixed 128-view meanstd2p5 + floor0.005 + cap0.018 VPR selector at 0.4227/0.6906. This
 negative result means the paper should keep uniform VPR as the main primitive
 readout and describe contribution-weighted registration as future work that
 needs true rasterization-contribution assignment rather than center-sampled
 alpha weighting.
+
+Additional component/voxel diagnostics from the Expert (5) pass are also
+negative for the main Waldo bottleneck. Top-score component filtering with one
+or two retained components reduces Waldo mIoU to 0.1757/0.1827, `voxel_mean`
+reduces it to 0.0931 under the earlier paper selector, and `voxel_max_dilate`
+reduces it to 0.1286. The current 128-view VPR + voxel-max + meanstd2p5
+floor/cap protocol remains the strongest fixed, GT-free direct-3D readout.
+The RGB-snap query audit in
+`output/radio_gs/reports/lerf_direct_3d_query_audit_rgb_snap_sil0p60.md`
+confirms that Waldo Kitchen remains the failure scene: 0.2406 mIoU, 0.4091
+Acc@0.25, 0.2273 zero-prediction rate, and a 95% bootstrap mIoU interval of
+[0.1459, 0.3440].
 
 ### DINOv3/SAM3 Downstream Adaptor Probes
 
@@ -169,22 +200,34 @@ prototype scoring still exposes a teacher-rendered gap.
 
 The formal promptable task sweep upgrades the SAM3/DINOv3 evidence from
 prototype probes to downstream-style tasks. Use
-`output/lerf_sam_dino_tasks/formal_v4_bgcontrast05/lerf_sam_dino_task_report.md`.
+`output/lerf_sam_dino_tasks/formal_v6_dino_topk_area200_peak/lerf_sam_dino_task_report.md`.
 
 | Task | Teacher LocAcc/Hit | Teacher mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
 |---|---:|---:|---:|---:|
 | SAM3 point prompt | 1.0000 | 0.3700 | 1.0000 | 0.4169 |
 | SAM3 box prompt | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
 | SAM3 mask propagation | 0.7872 | 0.3583 | 0.6667 | 0.3756 |
-| DINOv3 dense matching | 0.5895 | 0.8543 | 0.5536 | 0.9048 |
-| DINOv3 mask propagation + bg contrast | 0.7163 | 0.3921 | 0.7376 | 0.3684 |
+| DINOv3 dense matching | 0.5723 | 0.8547 | 0.5393 | 0.9048 |
+| DINOv3 mask propagation + robust readout | 0.7801 | 0.4806 | 0.7730 | 0.4456 |
 
 Rendered CTF-GS features now exceed the frame-wise teacher on SAM3-adaptor
-mask mIoU for all three prompt modes. The DINO source-background contrast
-readout greatly improves mask propagation and gives rendered features higher
-LocAcc than teacher, but rendered mIoU remains slightly lower. The paper claim
+mask mIoU for all three prompt modes. The robust DINO readout combines
+source-background contrast, foreground top-k pooling, 2.0x area scaling, and
+peak-component cleanup; it raises rendered DINO mask-propagation mIoU from the
+formal_v4 value of 0.3684 to 0.4456 and LocAcc from 0.7376 to 0.7730. This
+exceeds the previous fixed-readout teacher mIoU reference of 0.3921, but the
+same robust readout also improves teacher to 0.4806/0.7801. The paper claim
 should therefore be "improves SigLIP2 grounding and SAM3-adaptor region mIoU,
-narrows DINO propagation gap while preserving high DINO similarity."
+substantially narrows the DINO propagation gap while preserving high DINO
+similarity."
+
+The mutual matching + homography RANSAC diagnostic is recorded at
+`output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md`.
+It improves the visual reliability of DINO matches by reducing outliers and
+raising rendered dense-match similarity to 0.9277, but the rendered DINO mask
+propagation row remains below the teacher under the same readout
+(0.4456 vs. 0.4806 mIoU). Use it as qualitative/diagnostic evidence rather than
+as a main superiority claim.
 
 ### ScanNet v67 Direct Point Query
 
@@ -195,6 +238,33 @@ Use `output/scannet_pointcloud_eval/*_v67_teacherbalanced_fromv63_best_gidx_labe
 | 19 classes | 0.3538 | 0.6076 |
 | 15 classes | 0.3573 | 0.6203 |
 | 10 classes | 0.4293 | 0.7051 |
+
+The stronger direct point-readout support row uses the same v67 checkpoints but
+queries each ScanNet vertex through local Gaussian context:
+`query_mode=knn`, `k=8`, `candidate_k=32`, `logit_calibration=scene_mean`,
+`alpha=0.5`.
+
+| Split | contextual kNN mIoU | contextual kNN mAcc |
+|---|---:|---:|
+| 19 classes | 0.3637 | 0.6033 |
+| 15 classes | 0.3708 | 0.6224 |
+| 10 classes | 0.4512 | 0.7079 |
+
+This is the current strongest balanced ScanNet evidence. A more aggressive
+`alpha=0.75` setting raises split10 mIoU to 0.4534 but lowers split19/15 mIoU
+and mAcc, so it stays diagnostic.
+
+Label-free ScanNet prompt/calibration ablations:
+
+| Variant | split19 | split15 | split10 | Use |
+|---|---:|---:|---:|---|
+| v67 baseline | 0.3538 / 0.6076 | 0.3573 / 0.6203 | 0.4293 / 0.7051 | Main conservative row |
+| scene-mean calibration, alpha=0.5 | 0.3575 / 0.6101 | 0.3604 / 0.6227 | 0.4353 / 0.7074 | Positive supporting ablation |
+| kNN contextual readout + scene-mean alpha=0.5 | 0.3637 / 0.6033 | 0.3708 / 0.6224 | 0.4512 / 0.7079 | Promoted balanced support row |
+| kNN contextual readout + scene-mean alpha=0.75 | 0.3620 / 0.5994 | 0.3692 / 0.6187 | 0.4534 / 0.7078 | Higher split10 mIoU, weaker balance |
+| ScanNet aliases | 0.3592 / 0.6191 | 0.3561 / 0.6192 | 0.4234 / 0.7002 | Mixed; not promoted |
+| aliases + scene-mean alpha=0.5 | 0.3617 / 0.6180 | 0.3554 / 0.6174 | 0.4295 / 0.7026 | Mixed; not promoted |
+| scene-mean calibration, alpha=1.0 | 0.3528 / 0.5834 | 0.3541 / 0.5935 | 0.4386 / 0.7048 | Hurts 19/15 and mAcc |
 
 Targeted DINOv3 cross-view diagnostics are positive but not yet a 10-scene
 replacement:

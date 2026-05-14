@@ -69,6 +69,13 @@ def main() -> None:
     efficiency_cost = REPORT_DIR / "efficiency_cost_table.md"
     direct_selection = REPORT_DIR / "lerf_direct_3d_selection.md"
     readiness = REPORT_DIR / "submission_readiness_checklist.md"
+    sam_dino_tasks = (
+        REPO_ROOT
+        / "output"
+        / "lerf_sam_dino_tasks"
+        / "formal_v6_dino_topk_area200_peak"
+        / "lerf_sam_dino_task_report.md"
+    )
     manifest = {
         "generated": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "route": "conservative_submission",
@@ -97,6 +104,14 @@ def main() -> None:
             "scannet_dino_cv_ablation.md": {
                 "path": rel(REPORT_DIR / "scannet_dino_cv_ablation.md"),
                 "description": "10-scene ScanNet DINO cross-view ablation",
+            },
+            "scannet_prompt_calibration_ablation.md": {
+                "path": rel(REPORT_DIR / "scannet_prompt_calibration_ablation.md"),
+                "description": "10-scene ScanNet prompt and label-free calibration ablation",
+            },
+            "lerf_sam_dino_task_report.md": {
+                "path": rel(sam_dino_tasks),
+                "description": "Formal SAM3/DINOv3 downstream task sweep with robust DINO propagation readout",
             },
             "baseline_source_verification.md": {
                 "path": rel(REPORT_DIR / "baseline_source_verification.md"),
@@ -181,6 +196,10 @@ def main() -> None:
             "expert4_improvement_completion_audit.md": {
                 "path": rel(REPORT_DIR / "expert4_improvement_completion_audit.md"),
                 "description": "Implementation and validation audit for expert suggestion (4)",
+            },
+            "expert5_improvement_update.md": {
+                "path": rel(REPORT_DIR / "expert5_improvement_update.md"),
+                "description": "Implementation and validation update for expert suggestion (5)",
             },
             "lerf_vpr_direct_3d_qualitative_manifest.json": {
                 "path": rel(REPORT_DIR / "lerf_vpr_direct_3d_qualitative_manifest.json"),

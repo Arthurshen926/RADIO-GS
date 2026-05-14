@@ -23,6 +23,7 @@ OPENGAUSSIAN_PAPER_LERF = {
     "waldo_kitchen": {"miou": 0.2270, "macc025": 0.3182},
     "macro": {"miou": 0.3836, "macc025": 0.5143},
 }
+LERF_SCENES = ("figurines", "ramen", "teatime", "waldo_kitchen")
 
 
 def _fmt(value: float | None) -> str:
@@ -42,6 +43,58 @@ def _load_radio_lerf(path: Path) -> list[dict[str, str]]:
         return []
     with path.open(newline="", encoding="utf-8") as handle:
         return list(csv.DictReader(handle))
+
+
+def _load_radio_lerf_threshold_sweep(path: Path, threshold: str | float) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    key = f"{float(threshold):.2f}"
+    variant = payload.get("variants", {}).get(key)
+    if variant is None:
+        return []
+    rows: list[dict[str, str]] = []
+    for row in variant.get("rows", []):
+        rows.append(
+            {
+                "scene": str(row["scene"]),
+                "loc_acc": _fmt(float(row["loc"])),
+                "miou": _fmt(float(row["miou"])),
+            }
+        )
+    macro = variant.get("macro", {})
+    rows.append(
+        {
+            "scene": "macro",
+            "loc_acc": _fmt(float(macro.get("loc", 0.0))),
+            "miou": _fmt(float(macro.get("miou", 0.0))),
+        }
+    )
+    return rows
+
+
+def _load_radio_direct_lerf_results(path: Path, tag: str) -> dict[str, dict[str, float]] | None:
+    if not path.exists():
+        return None
+    direct: dict[str, dict[str, float]] = {}
+    for scene in LERF_SCENES:
+        result_path = path / scene / "lerf_direct_3d_selection_results.json"
+        payload = _load_json(result_path)
+        if payload is None:
+            return None
+        scene_payload = payload.get("scene", {})
+        result = scene_payload.get("results", {}).get(tag)
+        if result is None:
+            return None
+        direct[scene] = {
+            "miou": float(result["miou"]),
+            "acc025": float(result["acc025"]),
+        }
+    direct["macro"] = {
+        "miou": sum(direct[scene]["miou"] for scene in LERF_SCENES) / len(LERF_SCENES),
+        "acc025": sum(direct[scene]["acc025"] for scene in LERF_SCENES) / len(LERF_SCENES),
+    }
+    return direct
 
 
 def _scan_table_lines(radio: dict[str, Any] | None, og: dict[str, Any] | None) -> list[str]:
@@ -108,11 +161,14 @@ def _scan_table_lines(radio: dict[str, Any] | None, og: dict[str, Any] | None) -
     return lines
 
 
-def _lerf_lines(rows: list[dict[str, str]]) -> list[str]:
+def _lerf_lines(
+    rows: list[dict[str, str]],
+    direct: dict[str, dict[str, float]] | None = None,
+) -> list[str]:
     lines = [
         "## LERF-OVS",
         "",
-        "OpenGaussian reports LeRF as 3D object selection mIoU and mAcc@0.25. RADIO-GS currently reports rendered-feature 2D grounding LocAcc and heatmap mIoU. These are both useful qualitative/quantitative evidence, but they are not a single identical metric protocol.",
+        "OpenGaussian reports LeRF as 3D object selection mIoU and mAcc@0.25. RADIO-GS reports rendered-feature 2D grounding and, when available, VPR-backed direct 3D primitive selection. The direct 3D rows follow the same query-select-render metric family, while rendered-feature rows are a different protocol.",
         "",
         "| Method | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |",
         "|---|---|---:|---:|---:|---:|---:|",
@@ -145,6 +201,19 @@ def _lerf_lines(rows: list[dict[str, str]]) -> list[str]:
             f"{_fmt(float(by_scene['teatime']['miou']))} | {_fmt(float(by_scene['waldo_kitchen']['miou']))} | "
             f"{_fmt(float(macro['miou']))} |"
         )
+    if direct is not None:
+        lines.append(
+            "| RADIO-GS/CTF-GS | VPR direct 3D selection mIoU | "
+            f"{_fmt(direct['figurines']['miou'])} | {_fmt(direct['ramen']['miou'])} | "
+            f"{_fmt(direct['teatime']['miou'])} | {_fmt(direct['waldo_kitchen']['miou'])} | "
+            f"{_fmt(direct['macro']['miou'])} |"
+        )
+        lines.append(
+            "| RADIO-GS/CTF-GS | VPR direct 3D selection Acc@0.25 | "
+            f"{_fmt(direct['figurines']['acc025'])} | {_fmt(direct['ramen']['acc025'])} | "
+            f"{_fmt(direct['teatime']['acc025'])} | {_fmt(direct['waldo_kitchen']['acc025'])} | "
+            f"{_fmt(direct['macro']['acc025'])} |"
+        )
     lines.extend(
         [
             "",
@@ -160,13 +229,23 @@ def main() -> None:
     parser.add_argument("--opengaussian-scannet-json", default="output/baselines/opengaussian/scannet_eval/opengaussian_scannet_results.json")
     parser.add_argument("--radio-scannet-json", default="output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/scannet_pointcloud_radio_gs_results.json")
     parser.add_argument("--radio-lerf-csv", default="output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv")
+    parser.add_argument("--radio-lerf-threshold-sweep-json", default="output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json")
+    parser.add_argument("--radio-lerf-threshold", default="0.60")
+    parser.add_argument("--radio-direct-lerf-root", default="output/radio_gs/lerf_direct_3d_selection_max128_cap0p018_cache_20260514")
+    parser.add_argument("--radio-direct-lerf-tag", default="meanstd2p5")
     parser.add_argument("--qualitative-image", default="output/baselines/opengaussian/scannet_qualitative_comparison.png")
     parser.add_argument("--output", default="output/baselines/opengaussian/opengaussian_vs_radio_gs_report.md")
     args = parser.parse_args()
 
     og = _load_json(Path(args.opengaussian_scannet_json))
     radio = _load_json(Path(args.radio_scannet_json))
-    lerf_rows = _load_radio_lerf(Path(args.radio_lerf_csv))
+    lerf_rows = _load_radio_lerf_threshold_sweep(
+        Path(args.radio_lerf_threshold_sweep_json),
+        args.radio_lerf_threshold,
+    )
+    if not lerf_rows:
+        lerf_rows = _load_radio_lerf(Path(args.radio_lerf_csv))
+    direct_lerf = _load_radio_direct_lerf_results(Path(args.radio_direct_lerf_root), args.radio_direct_lerf_tag)
 
     lines = [
         "# OpenGaussian vs RADIO-GS Baseline Report",
@@ -177,7 +256,7 @@ def main() -> None:
         "",
     ]
     lines.extend(_scan_table_lines(radio, og))
-    lines.extend(_lerf_lines(lerf_rows))
+    lines.extend(_lerf_lines(lerf_rows, direct_lerf))
     q = Path(args.qualitative_image)
     lines.extend(
         [

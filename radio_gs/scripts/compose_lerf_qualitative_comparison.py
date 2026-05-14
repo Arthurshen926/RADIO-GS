@@ -190,11 +190,11 @@ def default_rows() -> list[SceneRow]:
             scene="Figurines",
             query="green apple, pikachu, rubics cube",
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_figurines_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_figurines_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/figurines/lerf_grounding_frame_00152_teacher.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_figurines_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_figurines_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/figurines/lerf_grounding_frame_00152_rendered.png"
             ),
         ),
@@ -202,11 +202,11 @@ def default_rows() -> list[SceneRow]:
             scene="Ramen",
             query="bowl, chopsticks, egg, wavy noodles",
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_ramen_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_ramen_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/ramen/lerf_grounding_frame_00024_teacher.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_ramen_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_ramen_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/ramen/lerf_grounding_frame_00024_rendered.png"
             ),
         ),
@@ -214,11 +214,11 @@ def default_rows() -> list[SceneRow]:
             scene="Teatime",
             query="apple, coffee mug, sheep, tea",
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_teatime_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/teatime/lerf_grounding_frame_00140_teacher.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_teatime_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/teatime/lerf_grounding_frame_00140_rendered.png"
             ),
         ),
@@ -226,11 +226,11 @@ def default_rows() -> list[SceneRow]:
             scene="Waldo Kitchen",
             query="knife, sink, refrigerator",
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_waldo_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/waldo_kitchen/lerf_grounding_frame_00089_teacher.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_waldo_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/waldo_kitchen/lerf_grounding_frame_00089_rendered.png"
             ),
         ),
@@ -244,11 +244,11 @@ def default_query_rows() -> list[QueryRow]:
             query="green apple",
             frame_id=152,
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_figurines_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_figurines_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/figurines/lerf_grounding_frame_00152_teacher_green_apple.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_figurines_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_figurines_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/figurines/lerf_grounding_frame_00152_rendered_green_apple.png"
             ),
         ),
@@ -257,11 +257,11 @@ def default_query_rows() -> list[QueryRow]:
             query="wavy noodles",
             frame_id=24,
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_ramen_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_ramen_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/ramen/lerf_grounding_frame_00024_teacher_wavy_noodles.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_ramen_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_ramen_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/ramen/lerf_grounding_frame_00024_rendered_wavy_noodles.png"
             ),
         ),
@@ -270,11 +270,11 @@ def default_query_rows() -> list[QueryRow]:
             query="coffee mug",
             frame_id=140,
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_teatime_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/teatime/lerf_grounding_frame_00140_teacher_coffee_mug.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_teatime_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/teatime/lerf_grounding_frame_00140_rendered_coffee_mug.png"
             ),
         ),
@@ -283,11 +283,11 @@ def default_query_rows() -> list[QueryRow]:
             query="knife",
             frame_id=89,
             teacher_path=Path(
-                "output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_waldo_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/waldo_kitchen/lerf_grounding_frame_00089_teacher_knife.png"
             ),
             rendered_path=Path(
-                "output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502/"
+                "output/radio_gs/freeze_eval/lerf_waldo_overlay_calibrated_thr0p60_vis_20260514/"
                 "visualisations/waldo_kitchen/lerf_grounding_frame_00089_rendered_knife.png"
             ),
         ),

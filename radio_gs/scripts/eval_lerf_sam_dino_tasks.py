@@ -112,31 +112,110 @@ def dense_match_points(
     source_feature: torch.Tensor,
     target_feature: torch.Tensor,
     source_points: Iterable[Tuple[int, int]],
+    *,
+    mutual_check: bool = False,
+    cycle_max_distance: float = 1.5,
+    min_score: Optional[float] = None,
 ) -> List[Dict[str, float]]:
     """Nearest-neighbor dense matches from source tokens to target tokens."""
     if source_feature.ndim != 3 or target_feature.ndim != 3:
         raise ValueError("Expected source/target features with shape [C,H,W]")
     src = F.normalize(source_feature.float(), dim=0)
     tgt = F.normalize(target_feature.float(), dim=0)
+    _, src_h, src_w = src.shape
     channels, tgt_h, tgt_w = tgt.shape
+    if channels != src.shape[0]:
+        raise ValueError(f"Channel mismatch: {src.shape[0]} vs {channels}")
+    src_tokens = src.reshape(channels, src_h * src_w)
     tgt_tokens = tgt.reshape(channels, tgt_h * tgt_w)
 
     matches: List[Dict[str, float]] = []
     for y, x in source_points:
-        vector = src[:, int(y), int(x)]
+        sy = int(y)
+        sx = int(x)
+        if sy < 0 or sy >= src_h or sx < 0 or sx >= src_w:
+            continue
+        vector = src[:, sy, sx]
         scores = vector @ tgt_tokens
         flat = int(scores.argmax().item())
         ty, tx = divmod(flat, tgt_w)
-        matches.append(
-            {
-                "src_y": int(y),
-                "src_x": int(x),
-                "tgt_y": int(ty),
-                "tgt_x": int(tx),
-                "score": float(scores[flat].item()),
-            }
-        )
+        score = float(scores[flat].item())
+        if min_score is not None and score < float(min_score):
+            continue
+        match = {
+            "src_y": sy,
+            "src_x": sx,
+            "tgt_y": int(ty),
+            "tgt_x": int(tx),
+            "score": score,
+        }
+        if mutual_check:
+            reverse_scores = tgt[:, int(ty), int(tx)] @ src_tokens
+            reverse_flat = int(reverse_scores.argmax().item())
+            reverse_y, reverse_x = divmod(reverse_flat, src_w)
+            cycle_distance = float(((reverse_y - sy) ** 2 + (reverse_x - sx) ** 2) ** 0.5)
+            if cycle_distance > float(cycle_max_distance):
+                continue
+            match["reverse_src_y"] = int(reverse_y)
+            match["reverse_src_x"] = int(reverse_x)
+            match["cycle_distance"] = cycle_distance
+        matches.append(match)
     return matches
+
+
+def filter_matches_by_ransac(
+    matches: List[Dict[str, float]],
+    *,
+    model: str = "none",
+    reproj_threshold: float = 1.5,
+    min_inliers: int = 4,
+) -> List[Dict[str, float]]:
+    """Filter dense matches with a GT-free geometric RANSAC model."""
+    if model == "none" or not matches:
+        return matches
+    if model not in {"homography", "fundamental"}:
+        raise ValueError(f"Unsupported RANSAC model: {model}")
+    min_required = 4 if model == "homography" else 8
+    if len(matches) < max(min_required, int(min_inliers)):
+        return matches
+
+    src_pts = np.asarray(
+        [[float(match["src_x"]), float(match["src_y"])] for match in matches],
+        dtype=np.float32,
+    )
+    tgt_pts = np.asarray(
+        [[float(match["tgt_x"]), float(match["tgt_y"])] for match in matches],
+        dtype=np.float32,
+    )
+    cv2.setRNGSeed(0)
+    if model == "homography":
+        _, inlier_mask = cv2.findHomography(
+            src_pts,
+            tgt_pts,
+            cv2.RANSAC,
+            ransacReprojThreshold=float(reproj_threshold),
+        )
+    else:
+        _, inlier_mask = cv2.findFundamentalMat(
+            src_pts,
+            tgt_pts,
+            cv2.FM_RANSAC,
+            ransacReprojThreshold=float(reproj_threshold),
+            confidence=0.99,
+        )
+    if inlier_mask is None:
+        return matches
+    inliers = inlier_mask.reshape(-1).astype(bool)
+    if int(inliers.sum()) < int(min_inliers):
+        return matches
+    filtered: List[Dict[str, float]] = []
+    for match, keep in zip(matches, inliers):
+        if not keep:
+            continue
+        out = dict(match)
+        out["ransac_inlier"] = 1.0
+        filtered.append(out)
+    return filtered
 
 
 def binary_iou(pred_mask: np.ndarray, target_mask: np.ndarray) -> float:
@@ -188,6 +267,91 @@ def topk_mask_from_scores(
     out = np.zeros(score_np.size, dtype=np.uint8)
     out[chosen] = 1
     return out.reshape(score_np.shape)
+
+
+def pooled_token_similarity(
+    target_tokens: torch.Tensor,
+    reference_tokens: torch.Tensor,
+    *,
+    mode: str = "max",
+    topk_ratio: float = 0.1,
+) -> torch.Tensor:
+    """Compute pooled target-to-reference dot-product similarity."""
+    if target_tokens.ndim != 2 or reference_tokens.ndim != 2:
+        raise ValueError("Expected target/reference tokens with shape [N,C]")
+    if target_tokens.shape[1] != reference_tokens.shape[1]:
+        raise ValueError(
+            f"Token channel mismatch: {target_tokens.shape[1]} vs {reference_tokens.shape[1]}"
+        )
+    if reference_tokens.shape[0] == 0:
+        return torch.zeros(target_tokens.shape[0], dtype=target_tokens.dtype, device=target_tokens.device)
+    scores = target_tokens @ reference_tokens.transpose(0, 1)
+    if mode == "max":
+        return scores.max(dim=1).values
+    if mode == "mean":
+        return scores.mean(dim=1)
+    if mode == "topk_mean":
+        k = max(1, int(round(reference_tokens.shape[0] * float(topk_ratio))))
+        k = min(k, int(reference_tokens.shape[0]))
+        return torch.topk(scores, k=k, dim=1, largest=True).values.mean(dim=1)
+    raise ValueError(f"Unsupported token pooling mode: {mode}")
+
+
+def scaled_bounded_area(
+    *,
+    source_area: int,
+    total_area: int,
+    scale: float = 1.0,
+    min_area_ratio: float = 0.0,
+    max_area_ratio: float = 0.0,
+) -> int:
+    """Scale a source-support area with optional GT-free feature-grid bounds."""
+    total = max(int(total_area), 1)
+    area = max(1, int(round(int(source_area) * float(scale))))
+    if min_area_ratio > 0:
+        area = max(area, int(round(total * float(min_area_ratio))))
+    if max_area_ratio > 0:
+        area = min(area, max(1, int(round(total * float(max_area_ratio)))))
+    return min(max(area, 1), total)
+
+
+def keep_component_by_score(
+    mask: np.ndarray,
+    scores: np.ndarray,
+    *,
+    mode: str = "none",
+) -> np.ndarray:
+    """Apply GT-free connected-component cleanup to a binary mask."""
+    binary = (mask > 0).astype(np.uint8)
+    if mode == "none" or not binary.any():
+        return binary
+    if scores.shape != binary.shape:
+        raise ValueError(f"scores shape {scores.shape} does not match mask {binary.shape}")
+    num_labels, labels = cv2.connectedComponents(binary, connectivity=4)
+    if num_labels <= 1:
+        return binary
+    score_np = np.asarray(scores, dtype=np.float32)
+    if mode == "peak":
+        flat = int(np.argmax(np.where(binary > 0, score_np, -np.inf).reshape(-1)))
+        label = int(labels.reshape(-1)[flat])
+    elif mode == "largest":
+        component_ids, counts = np.unique(labels[binary > 0], return_counts=True)
+        label = int(component_ids[int(np.argmax(counts))])
+    elif mode == "score_sum":
+        best_label = 0
+        best_score = -float("inf")
+        for component_id in range(1, num_labels):
+            component = labels == component_id
+            component_score = float(score_np[component].sum())
+            if component_score > best_score:
+                best_score = component_score
+                best_label = component_id
+        label = best_label
+    else:
+        raise ValueError(f"Unsupported component cleanup mode: {mode}")
+    if label <= 0:
+        return np.zeros_like(binary)
+    return (labels == label).astype(np.uint8)
 
 
 def mask_heatmap_outside_prompt(heatmap: torch.Tensor, allowed_mask: np.ndarray) -> torch.Tensor:
@@ -252,6 +416,14 @@ def propagate_mask_by_dense_matches(
     *,
     target_area: Optional[int] = None,
     background_contrast: float = 0.0,
+    foreground_pool: str = "max",
+    foreground_topk_ratio: float = 0.1,
+    background_pool: str = "max",
+    background_topk_ratio: float = 0.1,
+    area_scale: float = 1.0,
+    min_area_ratio: float = 0.0,
+    max_area_ratio: float = 0.0,
+    component_cleanup: str = "none",
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Propagate a source mask to the target view by dense DINO-style matching."""
     if source_feature.ndim != 3 or target_feature.ndim != 3:
@@ -269,17 +441,38 @@ def propagate_mask_by_dense_matches(
         return np.zeros((tgt_h, tgt_w), dtype=np.uint8), np.zeros((tgt_h, tgt_w), dtype=np.float32)
     source_tokens = src[:, mask].transpose(0, 1)  # [Ns,C]
     target_tokens = tgt.reshape(channels, tgt_h * tgt_w).transpose(0, 1)  # [Nt,C]
-    score_flat = target_tokens @ source_tokens.transpose(0, 1)
-    score_flat = score_flat.max(dim=1).values
+    score_flat = pooled_token_similarity(
+        target_tokens,
+        source_tokens,
+        mode=foreground_pool,
+        topk_ratio=foreground_topk_ratio,
+    )
     if background_contrast > 0:
         background = ~mask
         if bool(background.any()):
             background_tokens = src[:, background].transpose(0, 1)
-            background_scores = target_tokens @ background_tokens.transpose(0, 1)
-            score_flat = score_flat - float(background_contrast) * background_scores.max(dim=1).values
+            background_scores = pooled_token_similarity(
+                target_tokens,
+                background_tokens,
+                mode=background_pool,
+                topk_ratio=background_topk_ratio,
+            )
+            score_flat = score_flat - float(background_contrast) * background_scores
     score_map = score_flat.reshape(tgt_h, tgt_w)
-    area = int(target_area if target_area is not None else mask.sum())
+    raw_area = int(target_area if target_area is not None else mask.sum())
+    area = scaled_bounded_area(
+        source_area=raw_area,
+        total_area=tgt_h * tgt_w,
+        scale=area_scale,
+        min_area_ratio=min_area_ratio,
+        max_area_ratio=max_area_ratio,
+    )
     pred = topk_mask_from_scores(score_map, k=max(area, 1))
+    pred = keep_component_by_score(
+        pred,
+        score_map.detach().cpu().numpy().astype(np.float32),
+        mode=component_cleanup,
+    )
     return pred, score_map.detach().cpu().numpy().astype(np.float32)
 
 
@@ -385,11 +578,11 @@ def _draw_matches(
         (70, 240, 240),
         (240, 50, 230),
     ]
-    for idx, ((sy, sx), match) in enumerate(zip(source_points, matches)):
+    for idx, match in enumerate(matches):
         color = colors[idx % len(colors)]
         src_px, src_py = feature_token_to_image_xy(
-            sy,
-            sx,
+            int(match["src_y"]),
+            int(match["src_x"]),
             feature_height=feature_height,
             feature_width=feature_width,
             image_height=src.shape[0],
@@ -422,6 +615,8 @@ def _save_sam_visual(
     rgb: np.ndarray,
     mask_full: np.ndarray,
     heatmaps: Mapping[str, torch.Tensor],
+    *,
+    family: str = "sam3",
 ) -> str:
     out_dir.mkdir(parents=True, exist_ok=True)
     parts = [rgb, _overlay_mask(rgb, mask_full)]
@@ -440,7 +635,7 @@ def _save_sam_visual(
     header = np.zeros((52, grid.shape[1], 3), dtype=np.uint8)
     cv2.putText(
         header,
-        f"{scene} | sam3 | {task} | {category} | frame {frame_id}",
+        f"{scene} | {family} | {task} | {category} | frame {frame_id}",
         (8, 20),
         cv2.FONT_HERSHEY_SIMPLEX,
         0.55,
@@ -453,7 +648,10 @@ def _save_sam_visual(
         cv2.putText(header, label, (x + 8, 44), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (220, 220, 220), 1)
         x += part.shape[1]
     image = np.concatenate([header, grid], axis=0)
-    path = out_dir / f"{_slugify(scene)}_sam3_{_slugify(task)}_{frame_id:05d}_{_slugify(category)}.png"
+    path = out_dir / (
+        f"{_slugify(scene)}_{_slugify(family)}_{_slugify(task)}_"
+        f"{frame_id:05d}_{_slugify(category)}.png"
+    )
     cv2.imwrite(str(path), image)
     return str(path)
 
@@ -472,6 +670,20 @@ def evaluate_scene_tasks(
     max_visuals: int = 10,
     max_match_points: int = 24,
     dino_background_contrast: float = 0.0,
+    dino_foreground_pool: str = "max",
+    dino_foreground_topk_ratio: float = 0.1,
+    dino_background_pool: str = "max",
+    dino_background_topk_ratio: float = 0.1,
+    dino_area_scale: float = 1.0,
+    dino_min_area_ratio: float = 0.0,
+    dino_max_area_ratio: float = 0.0,
+    dino_component_cleanup: str = "none",
+    dino_match_mutual: bool = False,
+    dino_match_cycle_max_distance: float = 1.5,
+    dino_match_min_score: Optional[float] = None,
+    dino_match_ransac_model: str = "none",
+    dino_match_ransac_threshold: float = 1.5,
+    dino_match_ransac_min_inliers: int = 4,
 ) -> Dict:
     frame_annotations, _, img_h, img_w = load_lerf_ovs_labels(label_dir, scene)
     frame_ids = sorted(frame_annotations)
@@ -610,6 +822,7 @@ def evaluate_scene_tasks(
             )
             visual_counts["mask_prompt_propagation"] += 1
 
+        dino_propagation_heatmaps = {}
         for mode in ("teacher", "rendered"):
             dino_features = projected.get(mode, {}).get("dino_v3", {})
             source_feature = dino_features.get(source_frame)
@@ -618,7 +831,20 @@ def evaluate_scene_tasks(
                 continue
             source_mask_feat = feat_masks[source_frame][category]
             points = _sample_source_points(source_mask_feat, max_match_points)
-            matches = dense_match_points(source_feature, target_feature, points)
+            matches = dense_match_points(
+                source_feature,
+                target_feature,
+                points,
+                mutual_check=dino_match_mutual,
+                cycle_max_distance=dino_match_cycle_max_distance,
+                min_score=dino_match_min_score,
+            )
+            matches = filter_matches_by_ransac(
+                matches,
+                model=dino_match_ransac_model,
+                reproj_threshold=dino_match_ransac_threshold,
+                min_inliers=dino_match_ransac_min_inliers,
+            )
             _update_match(
                 dino_accs[mode],
                 matches,
@@ -631,6 +857,14 @@ def evaluate_scene_tasks(
                 target_feature,
                 source_mask_feat,
                 background_contrast=dino_background_contrast,
+                foreground_pool=dino_foreground_pool,
+                foreground_topk_ratio=dino_foreground_topk_ratio,
+                background_pool=dino_background_pool,
+                background_topk_ratio=dino_background_topk_ratio,
+                area_scale=dino_area_scale,
+                min_area_ratio=dino_min_area_ratio,
+                max_area_ratio=dino_max_area_ratio,
+                component_cleanup=dino_component_cleanup,
             )
             propagation_heatmap = torch.from_numpy(propagation_scores)
             loc = localization_accuracy(
@@ -639,6 +873,7 @@ def evaluate_scene_tasks(
             )
             iou = binary_iou(propagated_mask, feat_masks[target_frame][category])
             _update_seg(dino_mask_accs[mode], loc, iou)
+            dino_propagation_heatmaps[mode] = propagation_heatmap
             if visual_counts[f"dino_{mode}"] < max_visuals and matches:
                 drawn = _draw_matches(
                     source_rgb,
@@ -660,6 +895,21 @@ def evaluate_scene_tasks(
                 cv2.imwrite(str(path), drawn)
                 visual_paths.append(str(path))
                 visual_counts[f"dino_{mode}"] += 1
+        if dino_propagation_heatmaps and visual_counts["dino_mask_propagation"] < max_visuals:
+            visual_paths.append(
+                _save_sam_visual(
+                    output_dir / "visualizations" / scene,
+                    scene,
+                    "mask_propagation",
+                    category,
+                    target_frame,
+                    target_rgb,
+                    full_masks[target_frame][category],
+                    dino_propagation_heatmaps,
+                    family="dino_v3",
+                )
+            )
+            visual_counts["dino_mask_propagation"] += 1
 
     return {
         "sam3": {
@@ -722,6 +972,20 @@ def main() -> None:
     parser.add_argument("--max_visuals", type=int, default=10)
     parser.add_argument("--max_match_points", type=int, default=24)
     parser.add_argument("--dino_background_contrast", type=float, default=0.5)
+    parser.add_argument("--dino_foreground_pool", default="max", choices=["max", "mean", "topk_mean"])
+    parser.add_argument("--dino_foreground_topk_ratio", type=float, default=0.1)
+    parser.add_argument("--dino_background_pool", default="max", choices=["max", "mean", "topk_mean"])
+    parser.add_argument("--dino_background_topk_ratio", type=float, default=0.1)
+    parser.add_argument("--dino_area_scale", type=float, default=1.0)
+    parser.add_argument("--dino_min_area_ratio", type=float, default=0.0)
+    parser.add_argument("--dino_max_area_ratio", type=float, default=0.0)
+    parser.add_argument("--dino_component_cleanup", default="none", choices=["none", "peak", "largest", "score_sum"])
+    parser.add_argument("--dino_match_mutual", action="store_true", help="Keep only source-target matches whose reverse nearest neighbor cycles back to the source token")
+    parser.add_argument("--dino_match_cycle_max_distance", type=float, default=1.5, help="Maximum feature-grid cycle distance for --dino_match_mutual")
+    parser.add_argument("--dino_match_min_score", type=float, default=None, help="Optional cosine-score floor for DINO dense-match visualization/metric")
+    parser.add_argument("--dino_match_ransac_model", default="none", choices=["none", "homography", "fundamental"], help="Optional GT-free RANSAC outlier filtering for DINO dense-match diagnostics")
+    parser.add_argument("--dino_match_ransac_threshold", type=float, default=1.5, help="Feature-grid reprojection threshold for DINO RANSAC match filtering")
+    parser.add_argument("--dino_match_ransac_min_inliers", type=int, default=4, help="Minimum inliers required to accept DINO RANSAC filtering")
     parser.add_argument("--gt_only", action="store_true")
     parser.add_argument("--gpu", type=int, default=0)
     args = parser.parse_args()
@@ -790,6 +1054,20 @@ def main() -> None:
             max_visuals=args.max_visuals,
             max_match_points=args.max_match_points,
             dino_background_contrast=args.dino_background_contrast,
+            dino_foreground_pool=args.dino_foreground_pool,
+            dino_foreground_topk_ratio=args.dino_foreground_topk_ratio,
+            dino_background_pool=args.dino_background_pool,
+            dino_background_topk_ratio=args.dino_background_topk_ratio,
+            dino_area_scale=args.dino_area_scale,
+            dino_min_area_ratio=args.dino_min_area_ratio,
+            dino_max_area_ratio=args.dino_max_area_ratio,
+            dino_component_cleanup=args.dino_component_cleanup,
+            dino_match_mutual=args.dino_match_mutual,
+            dino_match_cycle_max_distance=args.dino_match_cycle_max_distance,
+            dino_match_min_score=args.dino_match_min_score,
+            dino_match_ransac_model=args.dino_match_ransac_model,
+            dino_match_ransac_threshold=args.dino_match_ransac_threshold,
+            dino_match_ransac_min_inliers=args.dino_match_ransac_min_inliers,
         )
         scene_reports[scene] = scene_report
         for task, modes in scene_report["sam3"].items():
@@ -834,7 +1112,11 @@ def main() -> None:
                 "DINOv3-adaptor source-target dense matching and mask propagation: "
                 "source masks are propagated with frozen adaptor-space nearest-neighbor "
                 "similarity and evaluated on target LERF masks. Optional source-background "
-                f"contrast weight is {args.dino_background_contrast:g}."
+                f"contrast weight is {args.dino_background_contrast:g}; foreground pool is "
+                f"{args.dino_foreground_pool}, background pool is {args.dino_background_pool}, "
+                f"area_scale={args.dino_area_scale:g}, component_cleanup={args.dino_component_cleanup}; "
+                f"dense_match_mutual={bool(args.dino_match_mutual)}, "
+                f"ransac_model={args.dino_match_ransac_model}."
             ),
             "gt_usage": "GT masks are used to form prompts/support masks and for final evaluation only.",
         },

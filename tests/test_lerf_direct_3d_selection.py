@@ -1,12 +1,18 @@
+import pytest
+import numpy as np
 import torch
 
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+    apply_registration_confidence,
     apply_selection_ratio_bounds,
     aggregate_scores_by_voxel,
     bootstrap_mean_ci,
     choose_registration_refiner,
+    load_score_cache,
     merge_registered_scores,
+    refine_mask_with_rgb_edges,
     sample_registration_view_weights,
+    save_score_cache,
     refine_selection_by_voxel_components,
     score_text_aligned_embeddings,
     select_gaussians_with_seed_expand_components,
@@ -92,6 +98,26 @@ def test_merge_registered_scores_uses_fallback_for_unregistered_gaussians():
     )
 
     assert torch.allclose(scores, torch.tensor([[1.0], [0.7]]), atol=1e-6)
+
+
+def test_apply_registration_confidence_blend_zero_preserves_scores():
+    scores = torch.tensor([[0.2, 0.8], [0.6, 0.4]], dtype=torch.float32)
+    counts = torch.tensor([0.0, 10.0], dtype=torch.float32)
+
+    calibrated = apply_registration_confidence(scores, counts, blend=0.0, mode="log")
+
+    assert calibrated is scores
+
+
+def test_apply_registration_confidence_downweights_low_support_rows():
+    scores = torch.ones(3, 2, dtype=torch.float32)
+    counts = torch.tensor([0.0, 5.0, 10.0], dtype=torch.float32)
+
+    calibrated = apply_registration_confidence(scores, counts, blend=0.5, mode="linear")
+
+    assert torch.allclose(calibrated[0], torch.full((2,), 0.5))
+    assert torch.allclose(calibrated[1], torch.full((2,), 0.75))
+    assert torch.allclose(calibrated[2], torch.ones(2))
 
 
 def test_sample_registration_view_weights_uses_alpha_confidence():
@@ -313,3 +339,76 @@ def test_apply_selection_ratio_bounds_adds_floor_and_caps_selected_scores():
 
     assert torch.equal(bounded[:, 0], torch.tensor([1.0, 1.0, 0.0, 0.0, 0.0]))
     assert torch.equal(bounded[:, 1], torch.tensor([0.0, 1.0, 0.0, 1.0, 0.0]))
+
+
+def test_score_cache_roundtrip_preserves_scores_and_metadata(tmp_path):
+    cache_path = tmp_path / "scores.pt"
+    metadata = {
+        "scene": "figurines",
+        "checkpoint": "checkpoint.pth",
+        "score_source": "registered_view",
+        "registration_max_frames": 128,
+    }
+    scores = torch.tensor([[0.1, 0.2], [0.3, 0.4]], dtype=torch.float32)
+    stats = {"registered_gaussians": 2, "num_frames": 128}
+
+    save_score_cache(cache_path, scores, metadata=metadata, registration_stats=stats)
+    loaded_scores, loaded_stats = load_score_cache(cache_path, expected_metadata=metadata)
+
+    assert torch.equal(loaded_scores, scores)
+    assert loaded_stats == stats
+
+
+def test_score_cache_rejects_mismatched_protocol(tmp_path):
+    cache_path = tmp_path / "scores.pt"
+    metadata = {
+        "scene": "figurines",
+        "score_source": "registered_view",
+        "registration_max_frames": 128,
+    }
+    save_score_cache(
+        cache_path,
+        torch.ones(2, 1),
+        metadata=metadata,
+        registration_stats={},
+    )
+
+    with pytest.raises(ValueError, match="score cache metadata mismatch"):
+        load_score_cache(
+            cache_path,
+            expected_metadata={
+                **metadata,
+                "registration_max_frames": 96,
+            },
+        )
+
+
+def test_refine_mask_with_rgb_edges_snaps_to_color_boundary():
+    rgb = np.zeros((48, 48, 3), dtype=np.uint8)
+    rgb[:, :] = (20, 20, 180)
+    rgb[16:32, 16:32] = (180, 20, 20)
+    mask = np.zeros((48, 48), dtype=np.uint8)
+    mask[10:38, 10:38] = 1
+
+    refined = refine_mask_with_rgb_edges(
+        rgb,
+        mask,
+        iterations=2,
+        dilate_pixels=4,
+        erode_pixels=3,
+    )
+
+    assert refined.dtype == np.bool_
+    assert refined.sum() < mask.sum()
+    assert refined[20:28, 20:28].mean() > 0.9
+    assert refined[:8, :8].sum() == 0
+
+
+def test_refine_mask_with_rgb_edges_preserves_empty_mask():
+    rgb = np.zeros((8, 8, 3), dtype=np.uint8)
+    mask = np.zeros((8, 8), dtype=np.uint8)
+
+    refined = refine_mask_with_rgb_edges(rgb, mask)
+
+    assert refined.shape == mask.shape
+    assert refined.sum() == 0

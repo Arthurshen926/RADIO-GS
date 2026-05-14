@@ -227,8 +227,8 @@ Additional promptable task probes:
 | SAM3 point prompt segmentation | 1.0000 | 0.3700 | 1.0000 | 0.4169 |
 | SAM3 box prompt segmentation | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
 | SAM3 mask prompt propagation | 0.7872 | 0.3583 | 0.6667 | 0.3756 |
-| DINOv3 dense matching | 0.5895 | 0.8543 | 0.5536 | 0.9048 |
-| DINOv3 mask propagation + bg contrast | 0.7163 | 0.3921 | 0.7376 | 0.3684 |
+| DINOv3 dense matching | 0.5723 | 0.8547 | 0.5393 | 0.9048 |
+| DINOv3 mask propagation + robust readout | 0.7801 | 0.4806 | 0.7730 | 0.4456 |
 
 Qualitative figure:
 `paper/figures/lerf_sam_dino_tasks_qualitative.png`
@@ -239,9 +239,10 @@ Interpretation:
   RADIO adaptor spaces rather than a full external SAM3/DINOv3 model.
 - Rendered features now exceed the frame-wise teacher on SAM3-adaptor mIoU for
   point prompts, box prompts, and source-mask propagation.
-- DINOv3 rendered features have higher mean cosine matching score. The fixed
-  source-background contrast readout raises rendered mask-propagation LocAcc
-  above teacher, but rendered mask mIoU remains slightly lower.
+- DINOv3 rendered features have higher mean cosine matching score. The robust
+  propagation readout raises rendered mask-propagation mIoU from 0.3684 to
+  0.4456 and LocAcc from 0.7376 to 0.7730, but under the same robust readout
+  teacher remains higher at 0.4806/0.7801.
 - Waldo Kitchen follows the aggregate pattern in the formal task sweep:
   rendered SAM3 point/box mIoU improves, while DINO hit rate and propagation
   mIoU remain below teacher.

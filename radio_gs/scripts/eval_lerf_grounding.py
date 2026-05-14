@@ -641,25 +641,162 @@ def localization_accuracy(
     return bool(gt_mask[py, px] > 0)
 
 
+def heatmap_to_binary_mask(
+    heatmap: torch.Tensor,
+    *,
+    threshold_ratio: float = 0.5,
+    threshold_mode: str = "fixed",
+    threshold_mean_std_k: float = 1.0,
+    threshold_min_ratio: float = 0.0,
+    threshold_max_ratio: float = 1.0,
+    target_shape: Optional[Tuple[int, int]] = None,
+) -> np.ndarray:
+    """Binarize a heatmap and optionally resize it to a target H,W."""
+    hmax = heatmap.max().item()
+    if hmax <= 0:
+        source = np.zeros(tuple(heatmap.shape), dtype=np.uint8)
+    else:
+        ratio = resolve_heatmap_threshold_ratio(
+            heatmap,
+            threshold_ratio,
+            mode=threshold_mode,
+            mean_std_k=threshold_mean_std_k,
+            min_ratio=threshold_min_ratio,
+            max_ratio=threshold_max_ratio,
+        )
+        source = (heatmap > ratio * hmax).cpu().numpy().astype(np.uint8)
+    if target_shape is not None and tuple(source.shape) != tuple(target_shape):
+        source = cv2.resize(
+            source,
+            (int(target_shape[1]), int(target_shape[0])),
+            interpolation=cv2.INTER_NEAREST,
+        )
+    return source
+
+
+def resolve_heatmap_threshold_ratio(
+    heatmap: torch.Tensor,
+    threshold_ratio: float,
+    *,
+    mode: str = "fixed",
+    mean_std_k: float = 1.0,
+    min_ratio: float = 0.0,
+    max_ratio: float = 1.0,
+) -> float:
+    """Return a GT-free peak-relative threshold ratio for one heatmap."""
+    fixed = float(threshold_ratio)
+    if mode == "fixed":
+        return fixed
+    values = heatmap.detach().float()
+    hmax = float(values.max().item()) if values.numel() else 0.0
+    if hmax <= 1e-12:
+        return fixed
+    if mode == "mean_std":
+        normalized = (values / hmax).reshape(-1)
+        ratio = float(normalized.mean().item()) + float(mean_std_k) * float(normalized.std(unbiased=False).item())
+        return float(np.clip(ratio, float(min_ratio), float(max_ratio)))
+    raise ValueError(f"Unsupported threshold_mode: {mode}")
+
+
+def refine_mask_with_rgb_edges(
+    rgb_bgr: np.ndarray,
+    mask: np.ndarray,
+    *,
+    iterations: int = 1,
+    dilate_pixels: int = 5,
+    erode_pixels: int = 2,
+) -> np.ndarray:
+    """Snap a predicted binary mask to local RGB edges without using GT masks."""
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    if rgb_bgr.shape[:2] != pred.shape:
+        raise ValueError(f"RGB/mask shape mismatch: {rgb_bgr.shape[:2]} vs {pred.shape}")
+    if not pred.any() or pred.all():
+        return pred.copy()
+
+    dilate_size = max(1, int(dilate_pixels) * 2 + 1)
+    dilate_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (dilate_size, dilate_size))
+    pred_u8 = pred.astype(np.uint8)
+    support = cv2.dilate(pred_u8, dilate_kernel, iterations=1).astype(bool)
+    if int(erode_pixels) > 0:
+        erode_size = max(1, int(erode_pixels) * 2 + 1)
+        erode_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (erode_size, erode_size))
+        sure_fg = cv2.erode(pred_u8, erode_kernel, iterations=1).astype(bool)
+    else:
+        sure_fg = pred
+    if not sure_fg.any():
+        sure_fg = pred
+
+    init = np.full(pred.shape, cv2.GC_BGD, dtype=np.uint8)
+    init[support] = cv2.GC_PR_FGD
+    init[pred] = cv2.GC_PR_FGD
+    init[sure_fg] = cv2.GC_FGD
+    init[~support] = cv2.GC_BGD
+    if not np.any(init == cv2.GC_BGD) or not np.any((init == cv2.GC_FGD) | (init == cv2.GC_PR_FGD)):
+        return pred.copy()
+
+    bgd_model = np.zeros((1, 65), np.float64)
+    fgd_model = np.zeros((1, 65), np.float64)
+    try:
+        cv2.grabCut(
+            rgb_bgr,
+            init,
+            None,
+            bgd_model,
+            fgd_model,
+            max(1, int(iterations)),
+            cv2.GC_INIT_WITH_MASK,
+        )
+    except cv2.error:
+        return pred.copy()
+    refined = (init == cv2.GC_FGD) | (init == cv2.GC_PR_FGD)
+    return refined & support
+
+
 def compute_iou(
     heatmap: torch.Tensor,
     gt_mask_np: np.ndarray,
     threshold_ratio: float = 0.5,
+    *,
+    threshold_mode: str = "fixed",
+    threshold_mean_std_k: float = 1.0,
+    threshold_min_ratio: float = 0.0,
+    threshold_max_ratio: float = 1.0,
+    rgb_image: Optional[np.ndarray] = None,
+    mask_refinement: str = "none",
+    mask_refinement_iters: int = 1,
+    mask_refinement_dilate: int = 5,
+    mask_refinement_erode: int = 2,
 ) -> float:
     """IoU between a thresholded heatmap and a GT binary mask.
 
     Threshold = ``threshold_ratio × max(heatmap)``.  Both inputs must share
     the same spatial resolution.
     """
-    hmax = heatmap.max().item()
-    if hmax <= 0:
-        return 0.0
-    pred = (heatmap > threshold_ratio * hmax).cpu().numpy().astype(np.uint8)
     gt = gt_mask_np.astype(np.uint8)
-
-    # Resize pred to GT resolution if they differ
-    if pred.shape != gt.shape:
-        pred = cv2.resize(pred, (gt.shape[1], gt.shape[0]), interpolation=cv2.INTER_NEAREST)
+    target_shape = tuple(rgb_image.shape[:2]) if rgb_image is not None and mask_refinement != "none" else tuple(gt.shape)
+    pred = heatmap_to_binary_mask(
+        heatmap,
+        threshold_ratio=threshold_ratio,
+        threshold_mode=threshold_mode,
+        threshold_mean_std_k=threshold_mean_std_k,
+        threshold_min_ratio=threshold_min_ratio,
+        threshold_max_ratio=threshold_max_ratio,
+        target_shape=target_shape,
+    )
+    if tuple(gt.shape) != tuple(pred.shape):
+        gt = cv2.resize(gt, (pred.shape[1], pred.shape[0]), interpolation=cv2.INTER_NEAREST)
+    if mask_refinement == "rgb_grabcut" and rgb_image is not None:
+        pred = refine_mask_with_rgb_edges(
+            rgb_image,
+            pred,
+            iterations=mask_refinement_iters,
+            dilate_pixels=mask_refinement_dilate,
+            erode_pixels=mask_refinement_erode,
+        ).astype(np.uint8)
+    elif mask_refinement != "none":
+        raise ValueError(f"Unsupported mask_refinement: {mask_refinement}")
 
     inter = (pred & gt).sum()
     union = (pred | gt).sum()
@@ -997,12 +1134,20 @@ def evaluate_scene(
     lerf_dataset: Optional[LERFDataset] = None,
     vis_dir: Optional[Path] = None,
     iou_threshold: float = 0.5,
+    threshold_mode: str = "fixed",
+    threshold_mean_std_k: float = 1.0,
+    threshold_min_ratio: float = 0.0,
+    threshold_max_ratio: float = 1.0,
     canonical_emb: Optional[torch.Tensor] = None,
     temperature: float = 50.0,
     scoring: str = "softmax_scene",
     heatmap_upsample: int = 1,
     save_overlay_vis: bool = False,
     save_per_query_vis: bool = False,
+    mask_refinement: str = "none",
+    mask_refinement_iters: int = 1,
+    mask_refinement_dilate: int = 5,
+    mask_refinement_erode: int = 2,
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -1133,6 +1278,9 @@ def evaluate_scene(
             # Scale polygons from image coords to feature resolution
             gt_masks_feat = build_gt_masks(frame_objects, active_cats, fH, fW,
                                            src_height=img_h, src_width=img_w)
+            rgb_image_for_masks = None
+            if mask_refinement != "none" or save_overlay_vis:
+                rgb_image_for_masks = load_lerf_rgb_frame(scene, frame_id, scene_root_hint)
 
             hm_vis: Dict[str, np.ndarray] = {}
             gt_vis: Dict[str, np.ndarray] = {}
@@ -1150,8 +1298,33 @@ def evaluate_scene(
                 loc_total += 1
                 per_cat_loc[cat].append(is_correct)
 
-                # mIoU at feature resolution
-                iou = compute_iou(hm, gt_feat, threshold_ratio=iou_threshold)
+                # mIoU at feature resolution by default; optional RGB refinement
+                # evaluates the refined mask at image resolution without using GT.
+                if mask_refinement != "none" and rgb_image_for_masks is not None:
+                    iou = compute_iou(
+                        hm,
+                        gt_full,
+                        threshold_ratio=iou_threshold,
+                        threshold_mode=threshold_mode,
+                        threshold_mean_std_k=threshold_mean_std_k,
+                        threshold_min_ratio=threshold_min_ratio,
+                        threshold_max_ratio=threshold_max_ratio,
+                        rgb_image=rgb_image_for_masks,
+                        mask_refinement=mask_refinement,
+                        mask_refinement_iters=mask_refinement_iters,
+                        mask_refinement_dilate=mask_refinement_dilate,
+                        mask_refinement_erode=mask_refinement_erode,
+                    )
+                else:
+                    iou = compute_iou(
+                        hm,
+                        gt_feat,
+                        threshold_ratio=iou_threshold,
+                        threshold_mode=threshold_mode,
+                        threshold_mean_std_k=threshold_mean_std_k,
+                        threshold_min_ratio=threshold_min_ratio,
+                        threshold_max_ratio=threshold_max_ratio,
+                    )
                 ious.append(iou)
                 per_cat_iou[cat].append(iou)
 
@@ -1165,11 +1338,7 @@ def evaluate_scene(
                     if canonical_mode == "teacher"
                     else "rendered RADIO-GS heatmap"
                 )
-                rgb_image = (
-                    load_lerf_rgb_frame(scene, frame_id, scene_root_hint)
-                    if save_overlay_vis
-                    else None
-                )
+                rgb_image = rgb_image_for_masks if save_overlay_vis else None
                 save_heatmap_vis(
                     hm_vis,
                     gt_vis,
@@ -1252,6 +1421,15 @@ def main() -> None:
     # Evaluation
     parser.add_argument("--iou_threshold", type=float, default=0.5,
                         help="Threshold ratio (fraction of max) for mIoU binarisation")
+    parser.add_argument("--threshold_mode", choices=["fixed", "mean_std"], default="fixed",
+                        help="GT-free mask threshold rule. 'fixed' uses --iou_threshold; "
+                             "'mean_std' uses mean+k*std of the peak-normalized heatmap.")
+    parser.add_argument("--threshold_mean_std_k", type=float, default=1.0,
+                        help="k for --threshold_mode mean_std")
+    parser.add_argument("--threshold_min_ratio", type=float, default=0.0,
+                        help="Lower clamp for adaptive threshold ratios")
+    parser.add_argument("--threshold_max_ratio", type=float, default=1.0,
+                        help="Upper clamp for adaptive threshold ratios")
     parser.add_argument("--scoring", choices=["cosine", "softmax_scene", "relevancy"],
                         default="softmax_scene",
                         help="Scoring: 'softmax_scene' (recommended, softmax over scene categories), "
@@ -1266,6 +1444,14 @@ def main() -> None:
                         help="Also write one visualisation PNG per frame/query. Enabled automatically with --save_overlay_vis")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
                         help="Upsample heatmaps by this factor before localization (default 4)")
+    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut"], default="none",
+                        help="Optional GT-free RGB boundary snapping after heatmap binarisation")
+    parser.add_argument("--mask_refinement_iters", type=int, default=1,
+                        help="GrabCut iterations for rgb_grabcut mask refinement")
+    parser.add_argument("--mask_refinement_dilate", type=int, default=5,
+                        help="Pixel dilation radius defining rgb_grabcut support band")
+    parser.add_argument("--mask_refinement_erode", type=int, default=2,
+                        help="Pixel erosion radius defining sure foreground for rgb_grabcut")
     # Hardware
     parser.add_argument("--gpu", type=int, default=0,
                         help="GPU device id")
@@ -1295,7 +1481,9 @@ def main() -> None:
     print(f"  Label dir:  {args.label_dir}")
     print(f"  Mode:       {'Teacher only' if args.gt_only else 'Teacher + Rendered'}")
     print(f"  IoU thresh: {args.iou_threshold}")
+    print(f"  Thr mode:   {args.threshold_mode}")
     print(f"  Heatmap ↑:  {args.heatmap_upsample}×")
+    print(f"  Mask ref.:  {args.mask_refinement}")
     print(f"  Prompts:    {len(prompt_templates)} template(s)")
     print()
 
@@ -1454,12 +1642,20 @@ def main() -> None:
             lerf_dataset=lerf_datasets.get(scene),
             vis_dir=vis_root,
             iou_threshold=args.iou_threshold,
+            threshold_mode=args.threshold_mode,
+            threshold_mean_std_k=args.threshold_mean_std_k,
+            threshold_min_ratio=args.threshold_min_ratio,
+            threshold_max_ratio=args.threshold_max_ratio,
             canonical_emb=canonical_emb,
             temperature=args.relevancy_temp,
             scoring=args.scoring,
             heatmap_upsample=args.heatmap_upsample,
             save_overlay_vis=args.save_overlay_vis,
             save_per_query_vis=args.save_per_query_vis or args.save_overlay_vis,
+            mask_refinement=args.mask_refinement,
+            mask_refinement_iters=args.mask_refinement_iters,
+            mask_refinement_dilate=args.mask_refinement_dilate,
+            mask_refinement_erode=args.mask_refinement_erode,
         )
         all_results[scene] = scene_results
 

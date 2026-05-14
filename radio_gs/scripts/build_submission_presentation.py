@@ -299,7 +299,7 @@ def build_deck() -> None:
     deck.text(slide, 0.55, 1.55, 11.4, 0.9, "Foundation Feature Reconstruction in 3D Gaussian Scenes", 30, COLORS["ink"], bold=True)
     deck.text(slide, 0.6, 2.55, 10.7, 0.45, "面向论文投稿的完整项目汇报", 17, COLORS["muted"])
     deck.card(slide, 0.75, 3.55, 3.1, 1.15, "Main LERF", "0.8712 LocAcc\n0.4941 mIoU", COLORS["blue"])
-    deck.card(slide, 4.1, 3.55, 3.1, 1.15, "ScanNet v67", "0.3538 / 0.3573 / 0.4293 mIoU", COLORS["teal"], body_size=15)
+    deck.card(slide, 4.1, 3.55, 3.1, 1.15, "ScanNet v67", "0.3637 / 0.3708 / 0.4512 mIoU", COLORS["teal"], body_size=15)
     deck.card(slide, 7.45, 3.55, 3.1, 1.15, "Core Ablation", "HCD: -0.3272 LocAcc when removed", COLORS["amber"], body_size=15)
     deck.text(slide, 0.6, 6.35, 10.5, 0.3, "Current package: LaTeX draft + frozen reports + qualitative figures + component ablations", 11, COLORS["muted"])
     deck.add_note("开场用一句话定义：不是训练一个语言分类器，而是把 RADIO foundation features 重建成一个可渲染的 3D feature memory。")
@@ -485,42 +485,45 @@ def build_deck() -> None:
         ["Task", "Teacher", "Rendered", "Readout"],
         ["SAM3 point prompt", "1.000 / 0.370", "1.000 / 0.417", "mask mIoU win"],
         ["SAM3 box prompt", "0.870 / 0.656", "0.822 / 0.664", "mask mIoU win"],
-        ["DINO dense matching", "0.590 / 0.854", "0.554 / 0.905", "smooth similarity"],
-        ["DINO mask prop.", "0.716 / 0.392", "0.738 / 0.368", "gap narrowed"],
+        ["DINO dense matching", "0.572 / 0.855", "0.539 / 0.905", "smooth similarity"],
+        ["DINO mask prop.", "0.780 / 0.481", "0.773 / 0.446", "gap narrowed"],
     ]
     deck.table(slide, 0.55, 1.25, 6.3, 2.35, rows, font_size=9, emphasize_rows=[3])
     deck.image(slide, "paper/figures/lerf_sam_dino_tasks_qualitative.png", 7.15, 1.25, 5.4, 2.75)
     deck.bullets(slide, 0.9, 4.4, 11.1, 1.45, [
         "Rendered features 在 SAM3-adaptor prompt mask mIoU 上超过 frame-wise teacher。",
-        "DINO mask propagation 经 source-background contrast 明显改善，但 mIoU 仍未完全追平 teacher。"
+        "DINO robust propagation 进一步提升 rendered mIoU，但同一读出下仍未完全追平 teacher。"
     ], 15)
 
     slide = deck.add_slide("ScanNet v67：跨域 direct point-query", "Results")
     rows = [
-        ["Split", "mIoU", "mAcc"],
-        ["19 classes", "0.3538", "0.6076"],
-        ["15 classes", "0.3573", "0.6203"],
-        ["10 classes", "0.4293", "0.7051"],
+        ["Readout", "Split", "mIoU", "mAcc"],
+        ["G-index", "19", "0.3538", "0.6076"],
+        ["G-index", "15", "0.3573", "0.6203"],
+        ["G-index", "10", "0.4293", "0.7051"],
+        ["kNN+calib", "19", "0.3637", "0.6033"],
+        ["kNN+calib", "15", "0.3708", "0.6224"],
+        ["kNN+calib", "10", "0.4512", "0.7079"],
     ]
-    deck.table(slide, 0.75, 1.35, 4.8, 1.8, rows, font_size=13, emphasize_rows=[3])
+    deck.table(slide, 0.65, 1.25, 5.25, 2.35, rows, font_size=11, emphasize_rows=[4, 5, 6])
     deck.image(slide, "output/radio_gs/paper_figures/vis_batch_20260501_overlay/contact_sheets/scannet_scene0070_00_gt_pred_error_split19.png", 6.0, 1.25, 6.6, 4.45)
     deck.bullets(slide, 0.9, 3.8, 4.6, 1.6, [
         "10-scene fair protocol。",
         "用于证明 reconstructed feature field 不是只对 LERF text grounding 有效。",
+        "Contextual kNN readout + label-free calibration: +0.0099 / +0.0135 / +0.0219 mIoU。",
         "不包装成完整 ScanNet leaderboard。"
     ], 13)
 
     slide = deck.add_slide("ProFuse-inspired DINO cross-view diagnostics", "Diagnostics")
     rows = [
-        ["Scene / Branch", "split19", "split15", "split10"],
-        ["scene0070 baseline", "0.2297", "0.2405", "0.3238"],
-        ["scene0070 DINO cv 0.001", "0.2437", "0.2466", "0.3284"],
-        ["scene0645 baseline", "0.2381", "0.2458", "0.2875"],
-        ["scene0645 DINO cv 0.003", "0.2427", "0.2500", "0.2833"],
+        ["Split", "Base mIoU", "DINO-CV mIoU", "Delta"],
+        ["19 classes", "0.3538", "0.3640", "+0.0102"],
+        ["15 classes", "0.3573", "0.3662", "+0.0089"],
+        ["10 classes", "0.4293", "0.4308", "+0.0014"],
     ]
-    deck.table(slide, 0.65, 1.35, 7.2, 2.4, rows, font_size=11, emphasize_rows=[2, 4])
-    deck.card(slide, 8.35, 1.55, 3.8, 1.4, "Interpretation", "DINO cross-view context 对部分 ScanNet 场景有效，但还不是完整 10-scene 主线。", COLORS["teal"], 12, 15)
-    deck.card(slide, 8.35, 3.45, 3.8, 1.35, "Next step", "做 conservative-weight 全 10-scene sweep，再决定是否进入 main paper。", COLORS["amber"], 12, 15)
+    deck.table(slide, 0.65, 1.35, 7.2, 2.0, rows, font_size=12, emphasize_rows=[1, 2, 3])
+    deck.card(slide, 8.35, 1.55, 3.8, 1.4, "Interpretation", "DINO cross-view context 在 10-scene macro 上正向，但增益仍 modest。", COLORS["teal"], 12, 15)
+    deck.card(slide, 8.35, 3.45, 3.8, 1.35, "Paper use", "作为 FAC / compatibility ablation，不替换保守 ScanNet main row。", COLORS["amber"], 12, 15)
 
     slide = deck.add_slide("效率与成本：分开报告不同 measurement type", "Efficiency")
     rows = [

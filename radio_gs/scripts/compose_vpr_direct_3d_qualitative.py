@@ -52,8 +52,8 @@ def build_gt_mask(label_json: Path, category: str) -> np.ndarray:
     return mask.astype(bool)
 
 
-def load_pred_mask(mask_root: Path, scene: str, frame_id: str, query: str) -> np.ndarray:
-    path = mask_root / "pred_masks" / "top0p02" / scene / f"frame_{frame_id}_{query}.png"
+def load_pred_mask(mask_root: Path, selection: str, scene: str, frame_id: str, query: str) -> np.ndarray:
+    path = mask_root / "pred_masks" / selection / scene / f"frame_{frame_id}_{query}.png"
     image = cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)
     if image is None:
         raise FileNotFoundError(path)
@@ -115,12 +115,14 @@ def make_case(
     *,
     label_root: Path,
     mask_root: Path,
+    selection: str,
+    selection_label: str,
 ) -> tuple[np.ndarray, dict[str, object]]:
     rgb_path = label_root / scene / f"frame_{frame_id}.jpg"
     json_path = label_root / scene / f"frame_{frame_id}.json"
     rgb = read_rgb(rgb_path)
     gt = build_gt_mask(json_path, query)
-    pred = load_pred_mask(mask_root, scene, frame_id, query)
+    pred = load_pred_mask(mask_root, selection, scene, frame_id, query)
     if pred.shape != gt.shape:
         pred = cv2.resize(pred.astype(np.uint8), (gt.shape[1], gt.shape[0]), interpolation=cv2.INTER_NEAREST) > 0
     iou = compute_iou(gt, pred)
@@ -128,7 +130,7 @@ def make_case(
     panels = [
         add_title(resize_panel(rgb), scene.replace("_", " "), query),
         add_title(resize_panel(overlay_mask(rgb, gt, (40, 190, 60))), "GT mask"),
-        add_title(resize_panel(overlay_mask(rgb, pred, (45, 120, 230))), "VPR top2%"),
+        add_title(resize_panel(overlay_mask(rgb, pred, (45, 120, 230))), selection_label),
         add_title(resize_panel(error_map(rgb, gt, pred)), f"error IoU={iou:.3f}", "green TP / red FP / blue FN"),
     ]
     height = max(panel.shape[0] for panel in panels)
@@ -139,7 +141,7 @@ def make_case(
         "query": query,
         "iou": round(iou, 4),
         "rgb": rel_or_str(rgb_path),
-        "pred_mask": rel_or_str(mask_root / "pred_masks" / "top0p02" / scene / f"frame_{frame_id}_{query}.png"),
+        "pred_mask": rel_or_str(mask_root / "pred_masks" / selection / scene / f"frame_{frame_id}_{query}.png"),
     }
     return row, manifest
 
@@ -148,6 +150,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mask_root", default="output/radio_gs/lerf_direct_3d_selection_vpr_masks96_vm80b50_20260513")
     parser.add_argument("--label_root", default="/mnt/pool/sqy/3d_understanding/lerf_ovs/label")
+    parser.add_argument("--selection", default="top0p02")
+    parser.add_argument("--selection_label", default="VPR top2%")
+    parser.add_argument("--protocol", default="96-view VPR + voxel_max(res=80, blend=0.50)")
     parser.add_argument("--output", default="paper/figures/lerf_vpr_direct_3d_qualitative.png")
     parser.add_argument("--manifest", default="output/radio_gs/reports/lerf_vpr_direct_3d_qualitative_manifest.json")
     args = parser.parse_args()
@@ -157,7 +162,15 @@ def main() -> None:
     rows: list[np.ndarray] = []
     manifests: list[dict[str, object]] = []
     for scene, frame_id, query in DEFAULT_CASES:
-        row, manifest = make_case(scene, frame_id, query, label_root=label_root, mask_root=mask_root)
+        row, manifest = make_case(
+            scene,
+            frame_id,
+            query,
+            label_root=label_root,
+            mask_root=mask_root,
+            selection=args.selection,
+            selection_label=args.selection_label,
+        )
         rows.append(row)
         manifests.append(manifest)
 
@@ -172,8 +185,8 @@ def main() -> None:
         "figure": str(output),
         "mask_root": str(mask_root),
         "label_root": str(label_root),
-        "selection": "top0p02",
-        "protocol": "96-view VPR + voxel_max(res=80, blend=0.50)",
+        "selection": args.selection,
+        "protocol": args.protocol,
         "cases": manifests,
     }
     manifest_path = Path(args.manifest)

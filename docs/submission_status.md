@@ -76,8 +76,8 @@ Under that framing, the paper solves the following problem:
 5. The freeze package now includes formal LERF overlay/profile runs for all four main scenes plus one full ScanNet v67 evaluation profile.
 6. The LERF evaluator already includes a same-protocol feature-source check:
    rendered RADIO-GS features outperform original RADIO RGB features on macro
-   localization accuracy (0.8712 vs. 0.7985) and slightly improve macro mIoU
-   (0.4941 vs. 0.4922) under the frozen SigLIP2 scoring setup.
+   localization accuracy (0.8712 vs. 0.7985) and improve calibrated macro mIoU
+   (0.5243 vs. 0.4634) under the frozen SigLIP2 scoring setup.
 7. DINOv3/SAM3 adaptor supervision now has completed full LERF sweeps. The
    promoted adaptor-enhanced candidate keeps macro LocAcc at 0.8712 and improves
    macro mIoU from 0.4941 to 0.4979 by using the Figurines spatial text-heatmap
@@ -85,11 +85,15 @@ Under that framing, the paper solves the following problem:
 8. DINOv3/SAM3 downstream adaptor probes are now complete. Under the formal
    prompt-constrained task sweep, rendered features beat the frame-wise teacher
    on SAM3-adaptor mask mIoU for point prompts (0.4169 vs. 0.3700), box prompts
-   (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). DINOv3 still
-   trails teacher on correspondence hit rate and mask-propagation mIoU, but the
-   fixed source-background contrast readout raises rendered DINO mask
-   propagation to 0.7376 LocAcc / 0.3684 mIoU and narrows the teacher mIoU gap
-   to 0.0237.
+   (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). The latest
+   DINOv3 robust readout raises rendered mask propagation from the previous
+   0.7376 LocAcc / 0.3684 mIoU to 0.7730 LocAcc / 0.4456 mIoU. This exceeds the
+   previous fixed-readout teacher mIoU reference of 0.3921, but the same robust
+   readout also raises teacher to 0.7801 LocAcc / 0.4806 mIoU, so the correct
+   claim is a substantially narrowed DINO propagation gap. A mutual matching +
+   homography RANSAC diagnostic further raises rendered dense-match similarity
+   to 0.9277 and improves qualitative match cleanliness, but it does not close
+   the DINO mask-propagation gap and stays diagnostic.
 9. The ProFuse-inspired DINO cross-view branch is implemented and evaluated as a
    diagnostic path. It can increase thresholded overlap on some LERF scenes
    (for example Waldo high-temperature mIoU), but it still lowers LocAcc, so it
@@ -97,6 +101,12 @@ Under that framing, the paper solves the following problem:
 10. ScanNet DINO cross-view is now a full 10-scene ablation at conservative
     weight 0.001. It improves macro split19 mIoU from 0.3538 to 0.3640,
     split15 from 0.3573 to 0.3662, and split10 from 0.4293 to 0.4308.
+    The strongest balanced ScanNet point-query support row now uses a
+    label-free contextual kNN readout (`k=8`, `candidate_k=32`) plus
+    scene-mean calibration at alpha 0.5, improving split19/15/10 mIoU to
+    0.3637/0.3708/0.4512 with mAcc 0.6033/0.6224/0.7079. Alpha 0.75 further
+    raises split10 mIoU to 0.4534 but weakens split19/15 and mAcc, and ScanNet
+    alias prompts remain mixed.
 11. The LERF peak-preservation diagnostic is now positive on Figurines:
     DINO cross-view with `text_heatmap_distill_mode: spatial` keeps LocAcc at
     0.8214 and improves mIoU from 0.4308 to 0.4343.
@@ -112,8 +122,11 @@ Under that framing, the paper solves the following problem:
     top10% selector and 0.012 / 0.009 under the same top2% selector used by VPR;
     the registered softmax24 result is 0.3421 / 0.5547, the conservative
     registered+voxel top2% result is 0.3850 / 0.6428, and the current
-    paper-facing registered+voxel mean+2.5std selector with a fixed 0.5% floor and 2% cap reaches 0.4133 / 0.6741,
-    with best-by-scene diagnostic 0.4166 / 0.6741.
+   paper-facing registered+voxel mean+2.5std selector with a fixed 0.5% floor and 1.8% cap reaches 0.4227 / 0.6906
+   after increasing the all-pose VPR registration budget to 128 views, with
+   a 1.5% cap accuracy-oriented diagnostic at 0.4184 / 0.7013. Applying the
+   optional GT-free RGB snap to the rendered evaluation mask raises the
+   paper-facing refined row to 0.4554 / 0.7014.
     This closes most of the primitive-level gap and slightly exceeds
     OpenGaussian's official macro mIoU and Acc@0.25 reference, while still
     requiring a provenance caveat because baselines are not locally rerun and
@@ -129,7 +142,11 @@ Under that framing, the paper solves the following problem:
     and tested. It is a negative ablation: alpha weighting reaches 0.2978 macro
     mIoU / 0.5389 Acc@0.25 and alpha-depth weighting reaches 0.2967 / 0.5345,
     below the uniform VPR top2% baseline at 0.3850 / 0.6428 and the adaptive
-    meanstd2p5+floor0.005+cap0.02 selector at 0.4133 / 0.6741, so it is not promoted.
+    128-view meanstd2p5+floor0.005+cap0.018 selector at 0.4227 / 0.6906, so it is not promoted.
+16. A GT-free adaptive mean+std rendered-mask threshold was tested for boundary
+    refinement. It keeps LERF LocAcc at 0.8712 but lowers macro mIoU to 0.4939,
+    so the calibrated fixed global threshold-0.60 row remains the paper-facing
+    rendered-grounding metric.
 
 ## What is already paper-grade
 
@@ -145,11 +162,16 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
 - [output/radio_gs/reports/lerf_direct_3d_selection.md](../output/radio_gs/reports/lerf_direct_3d_selection.md)
 - [output/radio_gs/reports/lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
+- [output/radio_gs/reports/lerf_direct_3d_query_audit_rgb_snap_sil0p60.md](../output/radio_gs/reports/lerf_direct_3d_query_audit_rgb_snap_sil0p60.md)
+- [output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md](../output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md)
 - [output/radio_gs/reports/vpr_protocol_card.md](../output/radio_gs/reports/vpr_protocol_card.md)
 - [output/radio_gs/reports/vpr_contribution_weighting_ablation.md](../output/radio_gs/reports/vpr_contribution_weighting_ablation.md)
 - [output/radio_gs/reports/lerf_direct_3d_published_context.md](../output/radio_gs/reports/lerf_direct_3d_published_context.md)
 - [output/radio_gs/reports/expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
-- [output/lerf_sam_dino_tasks/formal_v4_bgcontrast05/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v4_bgcontrast05/lerf_sam_dino_task_report.md)
+- [output/radio_gs/reports/expert5_improvement_update.md](../output/radio_gs/reports/expert5_improvement_update.md)
+- [output/radio_gs/reports/scannet_prompt_calibration_ablation.md](../output/radio_gs/reports/scannet_prompt_calibration_ablation.md)
+- [output/lerf_sam_dino_tasks/formal_v6_dino_topk_area200_peak/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v6_dino_topk_area200_peak/lerf_sam_dino_task_report.md)
+- [output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md)
 - [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
 - [paper/radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
@@ -200,6 +222,15 @@ a full 10-scene ScanNet ablation:
 | 15 classes | 0.3573 | 0.3662 | +0.0089 | 0.6203 | 0.6313 | +0.0110 |
 | 10 classes | 0.4293 | 0.4308 | +0.0014 | 0.7051 | 0.7071 | +0.0020 |
 
+The current strongest balanced ScanNet row is not the DINO branch but a
+contextual direct point readout on the same v67 checkpoints:
+
+| Split | Gaussian-index mIoU | kNN+calib mIoU | Delta | Gaussian-index mAcc | kNN+calib mAcc | Delta |
+|---|---:|---:|---:|---:|---:|---:|
+| 19 classes | 0.3538 | 0.3637 | +0.0099 | 0.6076 | 0.6033 | -0.0043 |
+| 15 classes | 0.3573 | 0.3708 | +0.0135 | 0.6203 | 0.6224 | +0.0021 |
+| 10 classes | 0.4293 | 0.4512 | +0.0219 | 0.7051 | 0.7079 | +0.0028 |
+
 ### 3. Statistical confidence is improved, but still narrow
 
 The conservative route now includes a completed four-scene `n=3` seed summary
@@ -242,8 +273,9 @@ VPR registration readout: render VFA-refined RADIO features from
 posed views, project them to SigLIP2 space, register visible samples back to
 Gaussian centers with depth/alpha checks, and query the registered primitive
 embeddings. The current fixed protocol (`registered_view`, `softmax_scene`,
-96 all-pose registration views, GT-free voxel-max context aggregation,
-meanstd2p5 selector with a fixed 0.5% floor and 2% cap) reaches 0.4133 macro mIoU and 0.6741 macro Acc@0.25; the
+128 all-pose registration views, GT-free voxel-max context aggregation,
+meanstd2p5 selector with a fixed 0.5% floor and 1.8% cap) reaches 0.4227 macro mIoU and 0.6906 macro Acc@0.25; the
+optional GT-free RGB snap row reaches 0.4554 / 0.7014; the
 fixed top0p02 selector remains a conservative audit at 0.3850 / 0.6428. It
 should be promoted as a VPR-backed primitive-level result, with the caveat that
 Waldo Kitchen remains below OpenGaussian and external baselines are still
