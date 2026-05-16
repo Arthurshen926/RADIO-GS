@@ -231,3 +231,41 @@ def test_keep_component_by_score_keeps_peak_component():
     expected = np.zeros_like(mask)
     expected[3:5, 4:6] = 1
     assert np.array_equal(kept, expected)
+
+
+def test_keep_component_by_score_can_keep_multiple_ranked_components():
+    mask = np.zeros((6, 7), dtype=np.uint8)
+    mask[0:2, 0:2] = 1
+    mask[2:4, 3:5] = 1
+    mask[4:6, 5:7] = 1
+    scores = np.zeros_like(mask, dtype=np.float32)
+    scores[0:2, 0:2] = 0.1
+    scores[2:4, 3:5] = 0.8
+    scores[4:6, 5:7] = 0.6
+
+    kept = keep_component_by_score(mask, scores, mode="score_sum", keep_count=2)
+
+    expected = np.zeros_like(mask)
+    expected[2:4, 3:5] = 1
+    expected[4:6, 5:7] = 1
+    assert np.array_equal(kept, expected)
+
+
+def test_keep_component_by_score_can_anchor_to_dense_match_seed():
+    mask = np.zeros((5, 6), dtype=np.uint8)
+    mask[0:2, 0:2] = 1
+    mask[3:5, 4:6] = 1
+    scores = np.zeros_like(mask, dtype=np.float32)
+    scores[0:2, 0:2] = 0.9
+    scores[3:5, 4:6] = 0.2
+
+    kept = keep_component_by_score(
+        mask,
+        scores,
+        mode="match_seed",
+        seed_points=[(3, 4)],
+    )
+
+    expected = np.zeros_like(mask)
+    expected[3:5, 4:6] = 1
+    assert np.array_equal(kept, expected)

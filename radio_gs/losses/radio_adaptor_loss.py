@@ -165,6 +165,63 @@ def compute_radio_adaptor_region_loss(
     return total, losses
 
 
+def compute_radio_adaptor_mask_logit_loss(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    *,
+    downsample: int = 1,
+    max_tokens: int = 512,
+    num_anchors: int = 16,
+    temperature: float = 0.07,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Distill SAM-style soft mask logits in frozen adaptor space.
+
+    This is the mask-logit fallback used when an external frozen SAM3 decoder
+    is unavailable. Teacher adaptor tokens define deterministic mask anchors;
+    the loss matches the per-token soft assignment logits from decoded features
+    to those teacher anchors. It is stricter than prototype-only region loss
+    because every spatial token must preserve its teacher mask distribution.
+    """
+    if not adaptors:
+        return _zero_like_features(decoded), {}
+    if num_anchors <= 0:
+        raise ValueError("num_anchors must be positive")
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+
+    losses: dict[str, torch.Tensor] = {}
+    for name, adaptor in adaptors.items():
+        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred_tokens = _flatten_projected_tokens(
+            pred, downsample=downsample, max_tokens=max_tokens
+        )
+        with torch.no_grad():
+            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref_tokens = _flatten_projected_tokens(
+                ref, downsample=downsample, max_tokens=max_tokens
+            )
+            anchors = min(num_anchors, ref_tokens.shape[1])
+            anchor_idx = torch.linspace(
+                0,
+                ref_tokens.shape[1] - 1,
+                steps=anchors,
+                device=ref_tokens.device,
+            ).round().long()
+            anchor_tokens = ref_tokens.index_select(1, anchor_idx)
+            ref_logits = torch.matmul(ref_tokens, anchor_tokens.transpose(1, 2)) / temperature
+            ref_prob = F.softmax(ref_logits, dim=-1)
+
+        pred_logits = torch.matmul(pred_tokens, anchor_tokens.transpose(1, 2)) / temperature
+        pred_log_prob = F.log_softmax(pred_logits, dim=-1)
+        losses[name] = -(ref_prob * pred_log_prob).sum(dim=-1).mean() + (
+            ref_prob * ref_prob.clamp_min(1e-8).log()
+        ).sum(dim=-1).mean()
+
+    total = torch.stack(list(losses.values())).mean()
+    return total, losses
+
+
 def compute_radio_adaptor_cross_view_loss(
     decoded: torch.Tensor,
     target: torch.Tensor,

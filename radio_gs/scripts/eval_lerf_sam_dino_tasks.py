@@ -320,6 +320,8 @@ def keep_component_by_score(
     scores: np.ndarray,
     *,
     mode: str = "none",
+    keep_count: int = 1,
+    seed_points: Optional[Iterable[Tuple[int, int]]] = None,
 ) -> np.ndarray:
     """Apply GT-free connected-component cleanup to a binary mask."""
     binary = (mask > 0).astype(np.uint8)
@@ -331,27 +333,47 @@ def keep_component_by_score(
     if num_labels <= 1:
         return binary
     score_np = np.asarray(scores, dtype=np.float32)
+    keep_count = max(1, int(keep_count))
+    keep_count = min(keep_count, num_labels - 1)
     if mode == "peak":
-        flat = int(np.argmax(np.where(binary > 0, score_np, -np.inf).reshape(-1)))
-        label = int(labels.reshape(-1)[flat])
+        component_scores = []
+        for component_id in range(1, num_labels):
+            component = labels == component_id
+            component_scores.append((float(score_np[component].max()), component_id))
     elif mode == "largest":
-        component_ids, counts = np.unique(labels[binary > 0], return_counts=True)
-        label = int(component_ids[int(np.argmax(counts))])
+        component_scores = []
+        for component_id in range(1, num_labels):
+            component_scores.append((float((labels == component_id).sum()), component_id))
     elif mode == "score_sum":
-        best_label = 0
-        best_score = -float("inf")
+        component_scores = []
         for component_id in range(1, num_labels):
             component = labels == component_id
             component_score = float(score_np[component].sum())
-            if component_score > best_score:
-                best_score = component_score
-                best_label = component_id
-        label = best_label
+            component_scores.append((component_score, component_id))
+    elif mode == "match_seed":
+        seeded: Dict[int, float] = defaultdict(float)
+        for point in seed_points or ():
+            seed_y, seed_x = point
+            seed_y = int(np.clip(seed_y, 0, labels.shape[0] - 1))
+            seed_x = int(np.clip(seed_x, 0, labels.shape[1] - 1))
+            component_id = int(labels[seed_y, seed_x])
+            if component_id <= 0:
+                continue
+            seeded[component_id] += 1.0 + float(score_np[labels == component_id].sum())
+        if seeded:
+            component_scores = [(score, component_id) for component_id, score in seeded.items()]
+        else:
+            component_scores = []
+            for component_id in range(1, num_labels):
+                component = labels == component_id
+                component_scores.append((float(score_np[component].max()), component_id))
     else:
         raise ValueError(f"Unsupported component cleanup mode: {mode}")
-    if label <= 0:
+    component_scores.sort(key=lambda item: item[0], reverse=True)
+    kept_labels = {component_id for _, component_id in component_scores[:keep_count] if component_id > 0}
+    if not kept_labels:
         return np.zeros_like(binary)
-    return (labels == label).astype(np.uint8)
+    return np.isin(labels, list(kept_labels)).astype(np.uint8)
 
 
 def mask_heatmap_outside_prompt(heatmap: torch.Tensor, allowed_mask: np.ndarray) -> torch.Tensor:
@@ -424,6 +446,8 @@ def propagate_mask_by_dense_matches(
     min_area_ratio: float = 0.0,
     max_area_ratio: float = 0.0,
     component_cleanup: str = "none",
+    component_keep_count: int = 1,
+    component_seed_points: Optional[Iterable[Tuple[int, int]]] = None,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Propagate a source mask to the target view by dense DINO-style matching."""
     if source_feature.ndim != 3 or target_feature.ndim != 3:
@@ -472,6 +496,8 @@ def propagate_mask_by_dense_matches(
         pred,
         score_map.detach().cpu().numpy().astype(np.float32),
         mode=component_cleanup,
+        keep_count=component_keep_count,
+        seed_points=component_seed_points,
     )
     return pred, score_map.detach().cpu().numpy().astype(np.float32)
 
@@ -678,6 +704,7 @@ def evaluate_scene_tasks(
     dino_min_area_ratio: float = 0.0,
     dino_max_area_ratio: float = 0.0,
     dino_component_cleanup: str = "none",
+    dino_component_keep_count: int = 1,
     dino_match_mutual: bool = False,
     dino_match_cycle_max_distance: float = 1.5,
     dino_match_min_score: Optional[float] = None,
@@ -865,6 +892,8 @@ def evaluate_scene_tasks(
                 min_area_ratio=dino_min_area_ratio,
                 max_area_ratio=dino_max_area_ratio,
                 component_cleanup=dino_component_cleanup,
+                component_keep_count=dino_component_keep_count,
+                component_seed_points=[(int(match["tgt_y"]), int(match["tgt_x"])) for match in matches],
             )
             propagation_heatmap = torch.from_numpy(propagation_scores)
             loc = localization_accuracy(
@@ -979,7 +1008,8 @@ def main() -> None:
     parser.add_argument("--dino_area_scale", type=float, default=1.0)
     parser.add_argument("--dino_min_area_ratio", type=float, default=0.0)
     parser.add_argument("--dino_max_area_ratio", type=float, default=0.0)
-    parser.add_argument("--dino_component_cleanup", default="none", choices=["none", "peak", "largest", "score_sum"])
+    parser.add_argument("--dino_component_cleanup", default="none", choices=["none", "peak", "largest", "score_sum", "match_seed"])
+    parser.add_argument("--dino_component_keep_count", type=int, default=1, help="Number of ranked propagated-mask components to keep for GT-free DINO cleanup")
     parser.add_argument("--dino_match_mutual", action="store_true", help="Keep only source-target matches whose reverse nearest neighbor cycles back to the source token")
     parser.add_argument("--dino_match_cycle_max_distance", type=float, default=1.5, help="Maximum feature-grid cycle distance for --dino_match_mutual")
     parser.add_argument("--dino_match_min_score", type=float, default=None, help="Optional cosine-score floor for DINO dense-match visualization/metric")
@@ -1062,6 +1092,7 @@ def main() -> None:
             dino_min_area_ratio=args.dino_min_area_ratio,
             dino_max_area_ratio=args.dino_max_area_ratio,
             dino_component_cleanup=args.dino_component_cleanup,
+            dino_component_keep_count=args.dino_component_keep_count,
             dino_match_mutual=args.dino_match_mutual,
             dino_match_cycle_max_distance=args.dino_match_cycle_max_distance,
             dino_match_min_score=args.dino_match_min_score,
@@ -1114,7 +1145,8 @@ def main() -> None:
                 "similarity and evaluated on target LERF masks. Optional source-background "
                 f"contrast weight is {args.dino_background_contrast:g}; foreground pool is "
                 f"{args.dino_foreground_pool}, background pool is {args.dino_background_pool}, "
-                f"area_scale={args.dino_area_scale:g}, component_cleanup={args.dino_component_cleanup}; "
+                f"area_scale={args.dino_area_scale:g}, component_cleanup={args.dino_component_cleanup}, "
+                f"component_keep_count={args.dino_component_keep_count}; "
                 f"dense_match_mutual={bool(args.dino_match_mutual)}, "
                 f"ransac_model={args.dino_match_ransac_model}."
             ),

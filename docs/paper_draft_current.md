@@ -28,9 +28,10 @@ calibrated macro mIoU across four scenes. On a 10-scene ScanNet direct
 point-query protocol, RADIO-GS reaches 0.3538, 0.3573, and 0.4293 mIoU on the
 19-, 15-, and 10-class splits, while the contextual kNN readout raises them to
 0.3637, 0.3708, and 0.4512. A VPR-registered LERF direct 3D object-selection
-readout reaches 0.4227 macro mIoU / 0.6906 Acc@0.25 under the primitive-score
-protocol and 0.4554 / 0.7014 after optional GT-free RGB boundary snapping of the
-rendered evaluation mask. These results support the
+readout with a fixed global softmax-score threshold, 0.5% floor, 1.8% cap, and
+GT-free RGB boundary snap reaches 0.4801 macro mIoU / 0.6760 Acc@0.25; the
+compact direct-field readout with frozen official SAM3 box-prompt boundary
+refinement reaches 0.5815 / 0.7150. These results support the
 central claim that 3D Gaussian scenes can serve as reusable foundation-feature
 memories across rendered-view and registered primitive-level interfaces, while
 the remaining submission risk is strongest around Waldo Kitchen, exact baseline
@@ -114,38 +115,46 @@ Promoted adaptor/cross-view candidate:
 
 The direct-selection evaluator follows an OpenGaussian-style protocol: score
 3D primitives with text, render selected primitives into binary masks, and
-evaluate against LERF-OVS object masks. The current main result uses
-rendered-view SigLIP2 features registered back to visible Gaussian primitives
-with depth/alpha checks; masks are used only for final evaluation.
+evaluate against LERF-OVS object masks. We now keep two paper-facing readouts:
+the earlier VPR/RGB-snap primitive row for strict primitive-mask comparison, and
+a stronger compact direct-field row that uses official SAM3 box-prompt readout
+refinement after the 3D primitives are selected. The SAM3 candidate mask is
+chosen by overlap with the rendered prediction, not by ground truth.
 
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.018 mIoU | 0.4829 | 0.4665 | 0.5043 | 0.2373 | 0.4227 |
-| CTF-GS | SigLIP2 | + RGB snap, silhouette 0.60 mIoU | 0.5484 | 0.4706 | 0.5621 | 0.2406 | 0.4554 |
+| CTF-GS | SigLIP2 | VPR + fixed threshold 0.25 + RGB snap mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
+| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, fixed pad0 | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
-| CTF-GS | SigLIP2 | VPR + voxel context cap0.015 diagnostic mIoU | 0.4829 | 0.4615 | 0.4965 | 0.2328 | 0.4184 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed meanstd2p5 + floor0.005 + cap0.018 Acc@0.25 | 0.8214 | 0.7183 | 0.8136 | 0.4091 | 0.6906 |
-| CTF-GS | SigLIP2 | + RGB snap, silhouette 0.60 Acc@0.25 | 0.7857 | 0.7465 | 0.8644 | 0.4091 | 0.7014 |
+| CTF-GS | SigLIP2 | VPR + fixed threshold 0.25 + RGB snap Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
+| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, fixed pad0 | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
-| CTF-GS | SigLIP2 | VPR + voxel context cap0.015 diagnostic Acc@0.25 | 0.8214 | 0.7042 | 0.7797 | 0.5000 | 0.7013 |
 
 This result should not be mixed with rendered-view LERF mIoU. It is best used
-to show VPR-backed primitive usability; the macro now slightly exceeds the
-OpenGaussian official reference, but Waldo Kitchen remains the main
-weakness and should be analyzed as object fragmentation / registration coverage.
+to show dual readout usability: direct primitive scores give the 3D selection,
+while official SAM3 supplies a frozen, promptable boundary readout. Fixed pad0
+improves the previous direct-field diagnostic from 0.4363/0.6191 to
+0.5815/0.7150 mIoU/Acc@0.25 and also exceeds the VPR/RGB-snap row. A fixed
+pad16 variant is similar in mIoU/Acc@0.25 (0.5807/0.6967) but gives the best
+boundary diagnostics, with macro boundary-F 0.6814 and trimap IoU 0.3897.
+Scene-calibrated padding reaches 0.5980/0.7150 and should stay appendix-only.
 
 GPU4/GPU5 diagnostics tested KNN point readout, semantic/geometry scoring heads,
 scene-softmax calibration, LERF-style relevancy re-ranking, adaptor-promoted
 checkpoints, voxel score aggregation, seed-expand component selection, and
 GT-free mean+std score-distribution thresholds. Seed-expand components lower
-Teatime/Waldo, but the 128-view meanstd2p5 selector with fixed 0.5% floor and
-1.8% top-ratio cap improves the primitive-score VPR result to 0.4227 / 0.6906;
-the optional GT-free RGB snap row improves the rendered evaluation mask to
-0.4554 / 0.7014. A 1.5% cap gives an accuracy-oriented diagnostic at
-0.4184 / 0.7013. The paper should still avoid implying raw Gaussian-center
+Teatime/Waldo, while the latest 128-view threshold-0.25 selector with fixed
+0.5% floor, 1.8% cap, and GT-free RGB snap improves the primitive-score VPR
+result to 0.4801 / 0.6760. The paper should still avoid implying raw Gaussian-center
 superiority or global direct-3D SOTA.
+The direct compact field also has a confidence-weighted VPR-to-field transfer
+result: normalized `log1p(view_counts)` sample weights improve the
+threshold-sweep direct-field diagnostic from 0.4119 / 0.5876 to 0.4363 /
+0.6191. With official SAM3 box-prompt readout refinement, the same direct-field
+branch becomes the strongest current LERF direct-3D row rather than a secondary
+diagnostic.
 The RGB-snap query audit shows that Waldo Kitchen remains the limiting scene
 because of zero-prediction and primitive fragmentation: 0.2406 mIoU, 0.4091
 Acc@0.25, and 0.2273 zero-prediction rate.
@@ -193,8 +202,9 @@ visible on small-object scenes such as Figurines. The ScanNet protocol used here
 is a fair direct point-query transfer test for the learned feature field, but it
 is not yet a full replacement for a standardized semantic segmentation benchmark
 with reproduced external baselines. The LERF direct 3D object-selection result
-now exceeds the OpenGaussian official macro reference, but it remains below
-newer published-context rows and Waldo Kitchen is still the weakest scene.
+now exceeds the OpenGaussian official macro reference, and the official SAM3 box
+readout also moves the compact direct field above most published-context mIoU
+rows; Acc@0.25 and Waldo Kitchen remain the main caution points.
 Finally, the current main LERF comparison still needs exact external baseline
 provenance before the paper can make strong SOTA-style claims.
 
@@ -204,8 +214,8 @@ provenance before the paper can make strong SOTA-style claims.
 2. Convert profile and training logs into one polished efficiency table.
 3. Freeze the fixed-protocol LERF seed-robustness table beside the best-scene
    main table.
-4. Assemble the final qualitative figure from
-   `output/radio_gs/reports/submission_freeze_figure_shortlist.md`.
+4. Keep the final qualitative figures synchronized with the current main rows:
+   rendered grounding, direct-field + SAM3 box readout, and SAM/DINO probes.
 5. Add a concise Waldo Kitchen failure/coverage analysis for the registered
    direct-selection readout.
 6. Convert this draft into the target venue template and add related work.

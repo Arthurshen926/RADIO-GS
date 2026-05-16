@@ -51,6 +51,43 @@ def test_lerf_lines_include_direct_3d_when_available():
     assert "0.3500" in lines
 
 
+def test_inspect_opengaussian_lerf_assets_detects_missing_language_features(tmp_path):
+    scene_root = tmp_path / "figurines"
+    (scene_root / "images").mkdir(parents=True)
+    (scene_root / "images" / "frame_00001.jpg").write_bytes(b"x")
+    (tmp_path / "label" / "figurines" / "gt" / "frame_00001").mkdir(parents=True)
+    (tmp_path / "label" / "figurines" / "gt" / "frame_00001" / "object.jpg").write_bytes(b"x")
+
+    status = summary.inspect_opengaussian_lerf_assets(tmp_path)
+
+    assert status["figurines"]["images"] == 1
+    assert status["figurines"]["labels"] == 1
+    assert status["figurines"]["language_feature_masks"] == 0
+    assert status["figurines"]["ready"] is False
+
+
+def test_lerf_lines_include_local_asset_blocker():
+    lines = "\n".join(
+        summary._lerf_lines(
+            [],
+            None,
+            {
+                scene: {
+                    "images": 1,
+                    "language_feature_masks": 0,
+                    "language_feature_vectors": 0,
+                    "labels": 1,
+                    "ready": False,
+                }
+                for scene in summary.LERF_SCENES
+            },
+        )
+    )
+
+    assert "Local OpenGaussian LeRF Asset Check" in lines
+    assert "language_features/*_s.npy" in lines
+
+
 def test_load_radio_lerf_threshold_sweep_returns_calibrated_rows(tmp_path):
     sweep_path = tmp_path / "threshold_sweep.json"
     sweep_path.write_text(

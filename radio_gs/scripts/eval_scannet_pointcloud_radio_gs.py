@@ -31,6 +31,7 @@ from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 from radio_gs.scannet_constants import (
     NYU40_ID_TO_NAME,
     OPENGAUSSIAN_NYU40_CLASS_SPLITS,
@@ -354,7 +355,7 @@ def _build_hybrid_model(config, checkpoint_path: str, device: torch.device):
         symmetric_decoder=getattr(config, "symmetric_decoder", False),
     ).to(device).eval()
 
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     _load_state_or_raise(
         model,
         ckpt["model_state_dict"],
@@ -492,7 +493,7 @@ def _build_point_summary_adapter(config, checkpoint_path: str, device: torch.dev
         num_layers=getattr(config, "point_summary_adapter_num_layers", 2),
         dropout=getattr(config, "point_summary_adapter_dropout", 0.0),
     ).to(device)
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     state = ckpt.get("point_summary_adapter_state_dict")
     if state is None:
         raise KeyError(

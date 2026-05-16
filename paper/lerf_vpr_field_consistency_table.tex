@@ -1,0 +1,22 @@
+\begin{table}[t]
+  \centering
+  \caption{VPR-to-field consistency for LERF-OVS direct 3D object selection. All rows use the same softmax-threshold selector family, 0.5\% floor, 1.8\% cap, and GT-free RGB boundary snap. Raw and VPR-to-field rows report per-scene diagnostic-best thresholds from the sweep; registered VPR reports the fixed thr0p25 paper row. VPR-to-field distills cached registered VPR summary features into the compact direct field and evaluates the direct Gaussian-center readout with a 0.5 residual blend to the original field. The confidence-weighted row uses GT-free log view-count weights from VPR registration.}
+  \label{tab:vpr_field_consistency}
+  \resizebox{\linewidth}{!}{%
+  \begin{tabular}{llccccc}
+    \toprule
+    Readout & Metric & Fig. & Ramen & Tea. & Waldo & Macro \\
+    \midrule
+    Raw Gaussian-center & mIoU & 0.001 & 0.006 & 0.158 & 0.019 & 0.046 \\
+    VPR-to-field consistency & mIoU & 0.488 & 0.438 & 0.510 & 0.212 & 0.412 \\
+    VPR-to-field + conf. weights & mIoU & 0.404 & 0.598 & 0.520 & 0.225 & 0.436 \\
+    Registered VPR readout & mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
+    \midrule
+    Raw Gaussian-center & Acc@0.25 & 0.000 & 0.000 & 0.237 & 0.045 & 0.071 \\
+    VPR-to-field consistency & Acc@0.25 & 0.714 & 0.578 & 0.695 & 0.364 & 0.588 \\
+    VPR-to-field + conf. weights & Acc@0.25 & 0.643 & 0.746 & 0.678 & 0.409 & 0.619 \\
+    Registered VPR readout & Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
+    \bottomrule
+  \end{tabular}
+  }
+\end{table}

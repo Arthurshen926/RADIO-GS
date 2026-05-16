@@ -2,6 +2,7 @@ import torch
 
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_alignment_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_cross_view_loss
+from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_mask_logit_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_region_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_relation_loss
 
@@ -80,6 +81,35 @@ def test_compute_radio_adaptor_region_loss_matches_teacher_soft_regions():
 
     assert loss.item() < 1e-6
     assert "sam3" in stats
+
+
+def test_compute_radio_adaptor_mask_logit_loss_matches_teacher_logits():
+    decoded = torch.randn(1, 4, 4, 4)
+
+    loss, stats = compute_radio_adaptor_mask_logit_loss(
+        decoded,
+        decoded.clone(),
+        {"sam3": IdentityAdaptor()},
+        num_anchors=4,
+    )
+
+    assert loss.item() < 1e-6
+    assert "sam3" in stats
+
+
+def test_compute_radio_adaptor_mask_logit_loss_detects_assignment_changes():
+    target = torch.randn(1, 4, 4, 4)
+    decoded = target.flip(-1)
+
+    loss, _ = compute_radio_adaptor_mask_logit_loss(
+        decoded,
+        target,
+        {"sam3": IdentityAdaptor()},
+        num_anchors=4,
+        temperature=0.1,
+    )
+
+    assert loss.item() > 1e-4
 
 
 def test_compute_radio_adaptor_cross_view_loss_matches_identical_cross_view_structure():

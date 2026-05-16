@@ -62,7 +62,7 @@ def main() -> None:
     parser.add_argument(
         "--dino_visual",
         default=(
-            "output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_vis/ramen/visualizations/"
+            "output/lerf_sam_dino_tasks/formal_v9_dino_bg110_vis/ramen/visualizations/"
             "ramen/ramen_dino_v3_mask_propagation_00024_bowl.png"
         ),
     )
@@ -97,8 +97,9 @@ def main() -> None:
         "sam_visual": rel_or_str(sam_path),
         "dino_visual": rel_or_str(dino_path),
         "notes": (
-            "DINO panel uses the formal robust mask-propagation readout rather than raw "
-            "nearest-neighbor match lines; raw dense matching remains a diagnostic."
+            "DINO panel uses the formal v9 background-suppressed mask-propagation "
+            "readout rather than raw nearest-neighbor match lines; raw dense matching "
+            "remains a diagnostic."
         ),
     }
     manifest_path = Path(args.manifest)

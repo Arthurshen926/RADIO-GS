@@ -54,3 +54,28 @@ def test_direct_protocol_sentence_mentions_selection_bounds():
 
     assert "selection cap=0.02" in sentence
     assert "selection cap=0.02" in caption_source
+
+
+def test_direct_protocol_sentence_mentions_mask_refinement():
+    results = {
+        scene: {
+            "results": {"thr0p25": {"miou": 0.4, "acc025": 0.5}},
+            "_protocol": {
+                "score_source": "registered_view",
+                "registration_frame_mode": "all_poses",
+                "registration_max_frames": 128,
+                "score_aggregation": "none",
+                "selection_min_ratio": 0.005,
+                "selection_max_ratio": 0.018,
+                "mask_refinement": "rgb_grabcut",
+            },
+            "_args": {"scoring": "softmax_scene"},
+        }
+        for scene in table.SCENES
+    }
+
+    sentence = table.direct_protocol_sentence(results)
+    caption_source = table.direct_caption_feature_source(results)
+
+    assert "GT-free rgb_grabcut mask refinement" in sentence
+    assert r"GT-free rgb\_grabcut mask refinement" in caption_source

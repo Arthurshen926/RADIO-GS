@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses rendered-view registered primitive features from 128 all-pose VPR views with GT-free voxel\_max context aggregation and GT-free selection floor=0.005, selection cap=0.018 and a SigLIP2 text head. RGB snap is a GT-free rendered-mask boundary refinement with silhouette threshold 0.60 and is reported separately from the primitive-selection protocol.}
+  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features and GT-free RGB snap. The SAM3-box row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout refinement selected by overlap with the rendered mask, not by ground truth.}
   \label{tab:lerf-direct-3d-selection}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccccc}
@@ -8,12 +8,13 @@
     Method & Protocol & Fig. & Ramen & Tea. & Waldo & Macro \\
     \midrule
     OpenGaussian & mIoU & 0.393 & 0.310 & 0.604 & 0.227 & 0.384 \\
-    CTF-GS & meanstd2p5 mIoU & 0.483 & 0.466 & 0.504 & 0.237 & 0.423 \\
-    CTF-GS & + RGB snap mIoU & 0.548 & 0.471 & 0.562 & 0.241 & 0.455 \\
+    CTF-GS & thr0p25 mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
+    CTF-GS & direct field + SAM3 box mIoU & 0.592 & 0.683 & 0.656 & 0.395 & 0.581 \\
+    CTF-GS & diag. best mIoU & 0.533 & 0.582 & 0.566 & 0.246 & 0.482 \\
     \midrule
     OpenGaussian & Acc@0.25 & 0.554 & 0.422 & 0.763 & 0.318 & 0.514 \\
-    CTF-GS & meanstd2p5 Acc@0.25 & 0.821 & 0.718 & 0.814 & 0.409 & 0.691 \\
-    CTF-GS & + RGB snap Acc@0.25 & 0.786 & 0.746 & 0.864 & 0.409 & 0.701 \\
+    CTF-GS & thr0p25 Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
+    CTF-GS & direct field + SAM3 box Acc@0.25 & 0.732 & 0.803 & 0.780 & 0.546 & 0.715 \\
     \bottomrule
   \end{tabular}
   }

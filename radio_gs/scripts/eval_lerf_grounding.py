@@ -63,6 +63,7 @@ from radio_gs.data.lerf_dataset import (
     _rasterize_polygons,
 )
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 
 logger = logging.getLogger(__name__)
 
@@ -926,7 +927,7 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
             norm_type=getattr(config, "refiner_norm_type", "gn"),
         ).to(device).eval()
 
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     model.load_state_dict(ckpt["model_state_dict"], strict=False)
     codec.load_state_dict(ckpt["codec_state_dict"], strict=False)
     if "sharpener_state_dict" in ckpt:

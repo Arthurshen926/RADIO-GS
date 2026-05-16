@@ -86,11 +86,13 @@ Under that framing, the paper solves the following problem:
    prompt-constrained task sweep, rendered features beat the frame-wise teacher
    on SAM3-adaptor mask mIoU for point prompts (0.4169 vs. 0.3700), box prompts
    (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). The latest
-   DINOv3 robust readout raises rendered mask propagation from the previous
-   0.7376 LocAcc / 0.3684 mIoU to 0.7730 LocAcc / 0.4456 mIoU. This exceeds the
-   previous fixed-readout teacher mIoU reference of 0.3921, but the same robust
-   readout also raises teacher to 0.7801 LocAcc / 0.4806 mIoU, so the correct
-   claim is a substantially narrowed DINO propagation gap. A mutual matching +
+   DINOv3 background-suppressed readout raises rendered mask propagation to
+   0.7943 LocAcc / 0.4805 mIoU, up from the v6 robust row of
+   0.7730 / 0.4456. This essentially matches the previous v6 teacher mIoU
+   reference (0.4806) and exceeds the same-readout teacher LocAcc
+   (0.7943 vs. 0.7660), but the same v9 readout still gives teacher higher mIoU
+   (0.5119), so the correct claim is a DINO LocAcc advantage and substantially
+   narrowed propagation mIoU gap. A mutual matching +
    homography RANSAC diagnostic further raises rendered dense-match similarity
    to 0.9277 and improves qualitative match cleanliness, but it does not close
    the DINO mask-propagation gap and stays diagnostic.
@@ -122,11 +124,9 @@ Under that framing, the paper solves the following problem:
     top10% selector and 0.012 / 0.009 under the same top2% selector used by VPR;
     the registered softmax24 result is 0.3421 / 0.5547, the conservative
     registered+voxel top2% result is 0.3850 / 0.6428, and the current
-   paper-facing registered+voxel mean+2.5std selector with a fixed 0.5% floor and 1.8% cap reaches 0.4227 / 0.6906
-   after increasing the all-pose VPR registration budget to 128 views, with
-   a 1.5% cap accuracy-oriented diagnostic at 0.4184 / 0.7013. Applying the
-   optional GT-free RGB snap to the rendered evaluation mask raises the
-   paper-facing refined row to 0.4554 / 0.7014.
+    paper-facing 128-view VPR readout uses a fixed global softmax-score
+    threshold of 0.25 with a 0.5% floor, 1.8% cap, and GT-free RGB snap,
+    reaching 0.4801 / 0.6760.
     This closes most of the primitive-level gap and slightly exceeds
     OpenGaussian's official macro mIoU and Acc@0.25 reference, while still
     requiring a provenance caveat because baselines are not locally rerun and
@@ -138,12 +138,31 @@ Under that framing, the paper solves the following problem:
     card, separates rendered-view grounding from 3D primitive querying, and
     reports optional VPR cache storage separately from persistent compact
     checkpoint storage.
-15. A Dr. Splat-inspired contribution-weighted VPR variant has been implemented
-    and tested. It is a negative ablation: alpha weighting reaches 0.2978 macro
-    mIoU / 0.5389 Acc@0.25 and alpha-depth weighting reaches 0.2967 / 0.5345,
-    below the uniform VPR top2% baseline at 0.3850 / 0.6428 and the adaptive
-    128-view meanstd2p5+floor0.005+cap0.018 selector at 0.4227 / 0.6906, so it is not promoted.
-16. A GT-free adaptive mean+std rendered-mask threshold was tested for boundary
+15. Dr. Splat-inspired VPR variants have been implemented and tested. The
+    earlier center-sampled alpha weighting reaches 0.2978 macro mIoU / 0.5389
+    Acc@0.25 and alpha-depth reaches 0.2967 / 0.5345, below the uniform VPR
+    top2% baseline at 0.3850 / 0.6428 and below the promoted 128-view
+    threshold-0.25 + RGB snap selector at 0.4801 / 0.6760. The new
+    rasterizer-level paths are also negative on Figurines: all-footprint
+    uniform raster hits 0.0002 mIoU, per-pixel dominant alpha-depth hits 0.0178
+    mIoU under the 128-view budget, and per-Gaussian top-footprint alpha hits
+    0.0004 mIoU under official views. Proposal/OPR component selection on the
+    cached strong VPR scores drops Figurines to 0.0430 mIoU. These branches are
+    implemented but not promoted.
+16. VPR-to-field consistency now has a GT-free registration-confidence weighted
+    training variant. It uses normalized `log1p(view_counts)` from the VPR
+    feature cache as sample weights and raises the direct-field diagnostic from
+    0.4119 mIoU / 0.5876 Acc@0.25 to 0.4363 / 0.6191 under the same threshold
+    sweep, floor/cap, and RGB-snap protocol. The improvement is not uniform
+    across scenes: Ramen and Waldo improve, Teatime is slightly positive, and
+    Figurines drops, so the streamed registered VPR readout remains the main
+    direct-3D result.
+17. SAM3-adaptor supervision now includes a mask-logit distillation fallback in
+    addition to the previous soft-region prototype loss. Because no
+    `segment_anything`, `sam2`, `sam3`, or local SAM decoder weights are
+    installed, this must still be called SAM3-adaptor mask-logit distillation,
+    not official SAM3 instance segmentation.
+18. A GT-free adaptive mean+std rendered-mask threshold was tested for boundary
     refinement. It keeps LERF LocAcc at 0.8712 but lowers macro mIoU to 0.4939,
     so the calibrated fixed global threshold-0.60 row remains the paper-facing
     rendered-grounding metric.
@@ -166,11 +185,14 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md](../output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md)
 - [output/radio_gs/reports/vpr_protocol_card.md](../output/radio_gs/reports/vpr_protocol_card.md)
 - [output/radio_gs/reports/vpr_contribution_weighting_ablation.md](../output/radio_gs/reports/vpr_contribution_weighting_ablation.md)
+- [output/radio_gs/reports/vpr_field_confidence_weighting_20260515.md](../output/radio_gs/reports/vpr_field_confidence_weighting_20260515.md)
+- [docs/raster_proposal_audit_20260515.md](raster_proposal_audit_20260515.md)
 - [output/radio_gs/reports/lerf_direct_3d_published_context.md](../output/radio_gs/reports/lerf_direct_3d_published_context.md)
 - [output/radio_gs/reports/expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
 - [output/radio_gs/reports/expert5_improvement_update.md](../output/radio_gs/reports/expert5_improvement_update.md)
 - [output/radio_gs/reports/scannet_prompt_calibration_ablation.md](../output/radio_gs/reports/scannet_prompt_calibration_ablation.md)
-- [output/lerf_sam_dino_tasks/formal_v6_dino_topk_area200_peak/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v6_dino_topk_area200_peak/lerf_sam_dino_task_report.md)
+- [output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md)
+- [output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md](../output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md)
 - [output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md)
 - [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
 - [paper/radio_gs_draft.tex](../paper/radio_gs_draft.tex)
@@ -190,8 +212,10 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502](../output/radio_gs/freeze_eval/lerf_teatime_overlay_20260502)
 - [paper/figures/lerf_adaptor_downstream_qualitative.png](../paper/figures/lerf_adaptor_downstream_qualitative.png)
 - [paper/figures/lerf_sam_dino_tasks_qualitative.png](../paper/figures/lerf_sam_dino_tasks_qualitative.png)
-- [paper/figures/lerf_vpr_direct_3d_qualitative.png](../paper/figures/lerf_vpr_direct_3d_qualitative.png)
-- [output/radio_gs/reports/lerf_vpr_direct_3d_qualitative_manifest.json](../output/radio_gs/reports/lerf_vpr_direct_3d_qualitative_manifest.json)
+- [paper/figures/lerf_vpr_direct_3d_qualitative.png](../paper/figures/lerf_vpr_direct_3d_qualitative.png) now uses the compact direct-field + official SAM3 box readout masks.
+- [paper/figures/lerf_sam3_box_direct_3d_qualitative_pad16.png](../paper/figures/lerf_sam3_box_direct_3d_qualitative_pad16.png) is the boundary-focused pad16 diagnostic.
+- [paper/figures/radio_gs_framework.png](../paper/figures/radio_gs_framework.png)
+- [output/radio_gs/reports/lerf_sam3_box_direct_3d_qualitative_manifest.json](../output/radio_gs/reports/lerf_sam3_box_direct_3d_qualitative_manifest.json)
 - [output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502](../output/radio_gs/freeze_eval/lerf_waldo_overlay_20260502)
 - [paper/figures/lerf_adaptor_downstream_qualitative.png](../paper/figures/lerf_adaptor_downstream_qualitative.png)
 
@@ -205,6 +229,12 @@ official-source values from LERF ICCV 2023 Table 1, LangSplat CVPR 2024 Table 1,
 and the LEGaussians CVPR 2024 supplementary Table 5 LA row. The remaining caveat
 is protocol scope: these rows are cross-paper context, not reproduced
 same-evaluator baselines.
+The local OpenGaussian LERF blocker is now explicitly audited in
+`output/baselines/opengaussian/opengaussian_vs_radio_gs_report.md`: all four
+local LERF scenes have images and labels, but `language_features/*_s.npy` and
+`language_features/*_f.npy` counts are zero, so the official OpenGaussian LeRF
+training/evaluation recipe cannot be rerun locally without the reannotated
+language-feature assets.
 
 ### 2. Cross-domain generalization is improved, but needs paper-safe framing
 
@@ -273,9 +303,8 @@ VPR registration readout: render VFA-refined RADIO features from
 posed views, project them to SigLIP2 space, register visible samples back to
 Gaussian centers with depth/alpha checks, and query the registered primitive
 embeddings. The current fixed protocol (`registered_view`, `softmax_scene`,
-128 all-pose registration views, GT-free voxel-max context aggregation,
-meanstd2p5 selector with a fixed 0.5% floor and 1.8% cap) reaches 0.4227 macro mIoU and 0.6906 macro Acc@0.25; the
-optional GT-free RGB snap row reaches 0.4554 / 0.7014; the
+128 all-pose registration views, fixed score threshold 0.25, 0.5% floor,
+1.8% cap, and GT-free RGB snap) reaches 0.4801 macro mIoU and 0.6760 macro Acc@0.25; the
 fixed top0p02 selector remains a conservative audit at 0.3850 / 0.6428. It
 should be promoted as a VPR-backed primitive-level result, with the caveat that
 Waldo Kitchen remains below OpenGaussian and external baselines are still

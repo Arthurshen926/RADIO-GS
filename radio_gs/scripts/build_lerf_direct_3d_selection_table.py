@@ -140,6 +140,16 @@ def selection_bounds_suffix(results: Dict[str, dict]) -> str:
     return "; GT-free " + ", ".join(bounds)
 
 
+def mask_refinement_suffix(results: Dict[str, dict], *, escape_for_tex: bool = False) -> str:
+    protocol = first_protocol(results)
+    args = first_args(results)
+    mode = protocol.get("mask_refinement", args.get("mask_refinement", "none"))
+    if not mode or mode == "none":
+        return ""
+    mode_text = tex_escape(str(mode)) if escape_for_tex else str(mode)
+    return f"; GT-free {mode_text} mask refinement"
+
+
 def direct_protocol_sentence(results: Dict[str, dict]) -> str:
     protocol = first_protocol(results)
     args = first_args(results)
@@ -154,6 +164,7 @@ def direct_protocol_sentence(results: Dict[str, dict]) -> str:
             f"blend={protocol.get('score_aggregation_blend', args.get('score_aggregation_blend', ''))})"
         )
     selection_suffix = selection_bounds_suffix(results)
+    refinement_suffix = mask_refinement_suffix(results)
     if score_source == "registered_view":
         max_frames = protocol.get("registration_max_frames", args.get("registration_max_frames", ""))
         frame_mode = protocol.get("registration_frame_mode", args.get("registration_frame_mode", ""))
@@ -162,12 +173,12 @@ def direct_protocol_sentence(results: Dict[str, dict]) -> str:
             "Registration (VPR). Query scores are computed on Gaussian primitives from rendered-view "
             "SigLIP2 features registered back to 3D with depth/alpha visibility checks "
             f"({frame_mode}, max_frames={max_frames}, "
-            f"scoring={scoring}{aggregation_suffix}{selection_suffix}); selected primitives are rendered only for mask evaluation."
+            f"scoring={scoring}{aggregation_suffix}{selection_suffix}{refinement_suffix}); selected primitives are rendered only for mask evaluation."
         )
     return (
         "Protocol: OpenGaussian-style direct 3D primitive selection. Query scores are computed "
         "at Gaussian centers from pre-refiner RADIO-GS features; selected primitives are rendered "
-        f"only to compare with LERF-OVS object masks{selection_suffix}."
+        f"only to compare with LERF-OVS object masks{selection_suffix}{refinement_suffix}."
     )
 
 
@@ -182,6 +193,9 @@ def direct_caption_feature_source(results: Dict[str, dict]) -> str:
     selection_suffix = selection_bounds_suffix(results)
     if selection_suffix:
         suffix += selection_suffix.replace("; GT-free", " and GT-free")
+    refinement_suffix = mask_refinement_suffix(results, escape_for_tex=True)
+    if refinement_suffix:
+        suffix += refinement_suffix.replace("; GT-free", " and GT-free")
     if score_source == "registered_view":
         max_frames = protocol.get("registration_max_frames", args.get("registration_max_frames", ""))
         view_suffix = f" from {max_frames} all-pose VPR views" if max_frames else ""
@@ -196,7 +210,7 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
         direct_protocol_sentence(results),
         "",
         f"Input root: `{root}`",
-        f"Paper-facing fixed selection: `{fixed_tag}`. The complete ratio sweep below is diagnostic and should be reported separately from rendered-view grounding.",
+        f"Paper-facing fixed selection: `{fixed_tag}`. The complete selector sweep below is diagnostic and should be reported separately from rendered-view grounding.",
         "",
         "## Selector Sweep",
         "",
@@ -252,7 +266,7 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
             f"{fmt(best_acc['teatime'])} | {fmt(best_acc['waldo_kitchen'])} | "
             f"{fmt(best_acc['macro'])} |",
             "",
-            "Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. GT-free voxel context aggregation further improves fixed-ratio direct selection by reducing primitive-level fragmentation, though Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.",
+            "Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. The promoted fixed-threshold selector reduces primitive-level clutter under the same global rule; Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.",
             "",
         ]
     )
@@ -304,7 +318,7 @@ def append_diagnostics(
     lines.extend(
         [
             "",
-            "Diagnostic takeaway: VPR is the main factor that improves direct 3D object selection. View coverage, VFA, and GT-free voxel context control the precision/coverage tradeoff, while Waldo Kitchen remains the hardest fragmented scene.",
+            "Diagnostic takeaway: VPR is the main factor that improves direct 3D object selection. View coverage, VFA, selection calibration, and optional GT-free projection cleanup control the precision/coverage tradeoff, while Waldo Kitchen remains the hardest fragmented scene.",
             "",
         ]
     )

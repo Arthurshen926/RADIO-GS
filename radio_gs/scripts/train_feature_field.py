@@ -21,7 +21,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -75,6 +75,7 @@ from radio_gs.losses.distillation_loss import (
 from radio_gs.losses.radio_adaptor_loss import (
     compute_radio_adaptor_alignment_loss,
     compute_radio_adaptor_cross_view_loss,
+    compute_radio_adaptor_mask_logit_loss,
     compute_radio_adaptor_region_loss,
     compute_radio_adaptor_relation_loss,
 )
@@ -83,6 +84,11 @@ from radio_gs.losses.text_heatmap_distill_loss import (
 )
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.featsharp_3d import FeatSharp3D
+from radio_gs.models.foundation_cache import (
+    FoundationCache,
+    compute_foundation_cache_supervision_loss,
+    load_foundation_cache,
+)
 from radio_gs.models.hcd_codec import build_feature_codec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
@@ -99,6 +105,7 @@ from radio_gs.scannet_constants import (
     NYU40_ID_TO_NAME,
     OPENGAUSSIAN_NYU40_CLASS_SPLITS,
 )
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 
 try:
     from torch.utils.tensorboard import SummaryWriter
@@ -106,6 +113,87 @@ try:
     _HAS_TB = True
 except ImportError:
     _HAS_TB = False
+
+
+class FoundationFeatureMapProjector(nn.Module):
+    """Apply a frozen token projector to decoded `[B,C,H,W]` feature maps."""
+
+    def __init__(self, projector: nn.Module) -> None:
+        super().__init__()
+        self.projector = projector
+
+    def forward(self, features: torch.Tensor) -> torch.Tensor:
+        if features.ndim != 4:
+            raise ValueError(
+                f"FoundationFeatureMapProjector expects [B,C,H,W], got {tuple(features.shape)}"
+            )
+        tokens = features.flatten(2).transpose(1, 2)
+        return self.projector(tokens)
+
+
+class FoundationMaskLogitProjector(nn.Module):
+    """Small trainable probe for official mask-logit distillation caches."""
+
+    def __init__(
+        self,
+        input_dim: int,
+        hidden_dim: int = 256,
+        output_masks: int = 32,
+    ) -> None:
+        super().__init__()
+        if input_dim <= 0:
+            raise ValueError("input_dim must be positive")
+        if hidden_dim <= 0:
+            raise ValueError("hidden_dim must be positive")
+        if output_masks <= 0:
+            raise ValueError("output_masks must be positive")
+        self.net = nn.Sequential(
+            nn.Conv2d(input_dim, hidden_dim, kernel_size=1),
+            nn.GELU(),
+            nn.Conv2d(hidden_dim, output_masks, kernel_size=1),
+        )
+
+    def forward(self, features: torch.Tensor) -> torch.Tensor:
+        if features.ndim != 4:
+            raise ValueError(
+                f"FoundationMaskLogitProjector expects [B,C,H,W], got {tuple(features.shape)}"
+            )
+        return self.net(features)
+
+
+def resolve_foundation_cache_path(root: str | Path, frame_id: int | str) -> Optional[Path]:
+    """Resolve an optional per-frame official foundation cache file."""
+    raw_root = str(root).strip()
+    if not raw_root:
+        return None
+    root_path = Path(raw_root).expanduser()
+    if root_path.is_file():
+        return root_path
+    if not root_path.exists():
+        return None
+    frame_raw = str(frame_id)
+    candidates = [
+        f"{frame_raw}.pt",
+        f"frame_{frame_raw}.pt",
+        f"rgb_{frame_raw}.pt",
+    ]
+    try:
+        frame_int = int(frame_id)
+    except (TypeError, ValueError):
+        frame_int = None
+    if frame_int is not None:
+        candidates.extend(
+            [
+                f"{frame_int:06d}.pt",
+                f"frame_{frame_int:06d}.pt",
+                f"rgb_{frame_int:06d}.pt",
+            ]
+        )
+    for name in candidates:
+        path = root_path / name
+        if path.exists():
+            return path
+    return None
 
 
 def parse_direct_point_text_splits(raw: str | None, default_split: str) -> list[str]:
@@ -893,6 +981,9 @@ class RadioGSTrainer:
         self.direct_point_teacher_valid: Optional[torch.Tensor] = None
         self.direct_point_teacher_view_counts: Optional[torch.Tensor] = None
         self.direct_point_teacher_pseudo_label_cache: Optional[torch.Tensor] = None
+        self.point_summary_adapter_metadata: Dict[str, Any] = {}
+        self.point_summary_adapter_epoch: Optional[int] = None
+        self.point_summary_adapter_best_metric: Optional[float] = None
         if self.direct_point_loss_weight > 0 and self._is_hybrid:
             self.direct_point_pool = self._load_direct_point_pool(config)
             if self.direct_point_teacher_cache:
@@ -944,7 +1035,7 @@ class RadioGSTrainer:
                     f"got: '{frozen_path}'"
                 )
             self._log(f"Loading frozen depth head from {frozen_path}")
-            ckpt = torch.load(frozen_path, map_location=self.device)
+            ckpt = load_trusted_checkpoint(frozen_path, map_location=self.device)
             head_cfg = ckpt.get("config", {})
             self.frozen_depth_head = DepthHead(
                 feature_dim=head_cfg.get("feature_dim", getattr(config, "radio_feature_dim", 1280)),
@@ -976,7 +1067,7 @@ class RadioGSTrainer:
                     f"got: '{frozen_seg_path}'"
                 )
             self._log(f"Loading frozen segmentation head from {frozen_seg_path}")
-            ckpt = torch.load(frozen_seg_path, map_location=self.device)
+            ckpt = load_trusted_checkpoint(frozen_seg_path, map_location=self.device)
             head_cfg = ckpt.get("config", {})
             self.frozen_seg_head = SegmentationHead(
                 feature_dim=head_cfg.get("feature_dim", getattr(config, "radio_feature_dim", 1280)),
@@ -1075,6 +1166,24 @@ class RadioGSTrainer:
         self.radio_adaptor_region_temperature = float(
             getattr(config, "radio_adaptor_region_temperature", 0.07)
         )
+        self.radio_adaptor_mask_logit_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_mask_logit_names", "")
+        )
+        self.radio_adaptor_mask_logit_weight = float(
+            getattr(config, "radio_adaptor_mask_logit_weight", 0.0)
+        )
+        self.radio_adaptor_mask_logit_downsample = max(
+            1, int(getattr(config, "radio_adaptor_mask_logit_downsample", 1))
+        )
+        self.radio_adaptor_mask_logit_max_tokens = int(
+            getattr(config, "radio_adaptor_mask_logit_max_tokens", 512)
+        )
+        self.radio_adaptor_mask_logit_num_anchors = int(
+            getattr(config, "radio_adaptor_mask_logit_num_anchors", 16)
+        )
+        self.radio_adaptor_mask_logit_temperature = float(
+            getattr(config, "radio_adaptor_mask_logit_temperature", 0.07)
+        )
         self.radio_adaptor_cross_view_names = parse_radio_adaptor_names(
             getattr(config, "radio_adaptor_cross_view_names", "")
         )
@@ -1090,6 +1199,48 @@ class RadioGSTrainer:
         self.radio_adaptor_cross_view_temperature = float(
             getattr(config, "radio_adaptor_cross_view_temperature", 1.0)
         )
+        self.foundation_cache_root = str(getattr(config, "foundation_cache_root", "") or "")
+        self.foundation_cache_weight = float(getattr(config, "foundation_cache_weight", 0.0))
+        self.foundation_cache_heads = parse_radio_adaptor_names(
+            getattr(config, "foundation_cache_heads", "")
+        )
+        self.foundation_cache_mask_logit_weight = float(
+            getattr(config, "foundation_cache_mask_logit_weight", 0.0)
+        )
+        self.foundation_cache_mask_boundary_weight = float(
+            getattr(config, "foundation_cache_mask_boundary_weight", 0.0)
+        )
+        self.foundation_cache_token_weight = float(
+            getattr(config, "foundation_cache_token_weight", 0.0)
+        )
+        self.foundation_cache_region_consistency_weight = float(
+            getattr(config, "foundation_cache_region_consistency_weight", 0.0)
+        )
+        self.foundation_cache_region_separation_weight = float(
+            getattr(config, "foundation_cache_region_separation_weight", 0.0)
+        )
+        self.foundation_cache_feature_boundary_weight = float(
+            getattr(config, "foundation_cache_feature_boundary_weight", 0.0)
+        )
+        self.foundation_cache_region_score_threshold = float(
+            getattr(config, "foundation_cache_region_score_threshold", 0.0)
+        )
+        self.foundation_cache_region_max_masks = int(
+            getattr(config, "foundation_cache_region_max_masks", 16)
+        )
+        self.foundation_cache_region_separation_margin = float(
+            getattr(config, "foundation_cache_region_separation_margin", 0.25)
+        )
+        self.foundation_cache_require_official = bool(
+            getattr(config, "foundation_cache_require_official", False)
+        )
+        self.foundation_cache_mask_projector_hidden_dim = int(
+            getattr(config, "foundation_cache_mask_projector_hidden_dim", 256)
+        )
+        self.foundation_cache_mask_projector_masks = int(
+            getattr(config, "foundation_cache_mask_projector_masks", 32)
+        )
+        self.foundation_cache_projectors = nn.ModuleDict()
         self.radio_adaptor_alignment_adaptors = nn.ModuleDict()
         if self.depth_loss_weight > 0 or self.geom_depth_loss_weight > 0:
             self.depth_head = DepthHead(
@@ -1122,7 +1273,12 @@ class RadioGSTrainer:
                 loss_type=getattr(config, "seg_loss_type", "ce"),
                 ignore_index=getattr(config, "seg_ignore_index", 255),
             )
-        if self.siglip_alignment_weight > 0:
+        foundation_uses_siglip = (
+            self.foundation_cache_weight > 0
+            and self.foundation_cache_token_weight > 0
+            and any(name in {"siglip2", "siglip2-g"} for name in self.foundation_cache_heads)
+        )
+        if self.siglip_alignment_weight > 0 or foundation_uses_siglip:
             proj_path = resolve_siglip_projection_path(
                 getattr(
                     config,
@@ -1151,9 +1307,21 @@ class RadioGSTrainer:
             self.radio_adaptor_region_names
             if self.radio_adaptor_region_weight > 0
             else [],
+            self.radio_adaptor_mask_logit_names
+            if self.radio_adaptor_mask_logit_weight > 0
+            else [],
             self.radio_adaptor_cross_view_names
             if self.radio_adaptor_cross_view_weight > 0
             else [],
+            [
+                name
+                for name in self.foundation_cache_heads
+                if (
+                    self.foundation_cache_weight > 0
+                    and self.foundation_cache_token_weight > 0
+                    and name not in {"siglip2", "siglip2-g"}
+                )
+            ],
         )
         if enabled_radio_adaptors:
             radio_ckpt_path = Path(
@@ -1184,7 +1352,50 @@ class RadioGSTrainer:
                 f"alignment_weight={self.radio_adaptor_alignment_weight:g} "
                 f"relation_weight={self.radio_adaptor_relation_weight:g} "
                 f"region_weight={self.radio_adaptor_region_weight:g} "
+                f"mask_logit_weight={self.radio_adaptor_mask_logit_weight:g} "
                 f"cross_view_weight={self.radio_adaptor_cross_view_weight:g}"
+            )
+        if self.foundation_cache_weight > 0:
+            foundation_uses_mask_logits = (
+                self.foundation_cache_mask_logit_weight > 0
+                or self.foundation_cache_mask_boundary_weight > 0
+            )
+            for head_name in self.foundation_cache_heads:
+                if foundation_uses_mask_logits and head_name == "sam3":
+                    self.foundation_cache_projectors[head_name] = FoundationMaskLogitProjector(
+                        input_dim=getattr(config, "radio_feature_dim", 1280),
+                        hidden_dim=self.foundation_cache_mask_projector_hidden_dim,
+                        output_masks=self.foundation_cache_mask_projector_masks,
+                    ).to(self.device)
+                    continue
+                if head_name in {"siglip2", "siglip2-g"}:
+                    if self.siglip_projection is not None:
+                        projector = FoundationFeatureMapProjector(self.siglip_projection)
+                        self.foundation_cache_projectors["siglip2"] = projector
+                        self.foundation_cache_projectors["siglip2-g"] = projector
+                    continue
+                if head_name in self.radio_adaptor_alignment_adaptors:
+                    self.foundation_cache_projectors[head_name] = FoundationFeatureMapProjector(
+                        self.radio_adaptor_alignment_adaptors[head_name]
+                    )
+            self._log(
+                "Foundation cache supervision configured: "
+                f"root={self.foundation_cache_root or '<none>'} "
+                f"heads={self.foundation_cache_heads or 'all-cache-heads'} "
+                f"projectors={list(self.foundation_cache_projectors.keys())} "
+                f"weight={self.foundation_cache_weight:g} "
+                f"token_weight={self.foundation_cache_token_weight:g} "
+                f"mask_logit_weight={self.foundation_cache_mask_logit_weight:g} "
+                f"mask_boundary_weight={self.foundation_cache_mask_boundary_weight:g} "
+                f"region_consistency_weight={self.foundation_cache_region_consistency_weight:g} "
+                f"region_separation_weight={self.foundation_cache_region_separation_weight:g} "
+                f"feature_boundary_weight={self.foundation_cache_feature_boundary_weight:g} "
+                f"region_score_threshold={self.foundation_cache_region_score_threshold:g} "
+                f"region_max_masks={self.foundation_cache_region_max_masks} "
+                f"region_separation_margin={self.foundation_cache_region_separation_margin:g} "
+                f"mask_projector_hidden={self.foundation_cache_mask_projector_hidden_dim} "
+                f"mask_projector_masks={self.foundation_cache_mask_projector_masks} "
+                f"require_official={self.foundation_cache_require_official}"
             )
         if (
             self.siglip_summary_alignment_weight > 0
@@ -1562,6 +1773,19 @@ class RadioGSTrainer:
                     "params": self.point_summary_adapter.parameters(),
                     "lr": getattr(config, "lr_point_summary_adapter", 1e-4),
                     "name": "point_summary_adapter",
+                }
+            )
+        foundation_params = [
+            param
+            for param in self.foundation_cache_projectors.parameters()
+            if param.requires_grad
+        ]
+        if foundation_params:
+            param_groups.append(
+                {
+                    "params": foundation_params,
+                    "lr": getattr(config, "lr_heads", 1e-4),
+                    "name": "foundation_cache_projectors",
                 }
             )
         return optim.AdamW(
@@ -1981,7 +2205,9 @@ class RadioGSTrainer:
             "radio_adaptors": 0.0,
             "radio_relations": 0.0,
             "radio_regions": 0.0,
+            "radio_mask_logits": 0.0,
             "radio_cross_views": 0.0,
+            "foundation_cache": 0.0,
             "ground_query": 0.0,
             "ground_query_acc": 0.0,
             "ground_query_valid": 0.0,
@@ -2193,10 +2419,19 @@ class RadioGSTrainer:
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
+                l_radio_mask_logits = self._compute_radio_adaptor_mask_logit_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
                 l_radio_cross_views = self._compute_radio_adaptor_cross_view_loss(
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
+                foundation_cache_stats = self._compute_foundation_cache_loss(
+                    batch=batch,
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                )
+                l_foundation_cache = foundation_cache_stats["loss"]
 
                 l_tv = self.tv_loss_fn(rendered_compact)
 
@@ -2450,7 +2685,9 @@ class RadioGSTrainer:
                     + l_radio_adaptors
                     + l_radio_relations
                     + l_radio_regions
+                    + l_radio_mask_logits
                     + l_radio_cross_views
+                    + l_foundation_cache
                 )
 
             self.scaler.scale(loss).backward()
@@ -2552,7 +2789,9 @@ class RadioGSTrainer:
             loss_accum["radio_adaptors"] += l_radio_adaptors.item()
             loss_accum["radio_relations"] += l_radio_relations.item()
             loss_accum["radio_regions"] += l_radio_regions.item()
+            loss_accum["radio_mask_logits"] += l_radio_mask_logits.item()
             loss_accum["radio_cross_views"] += l_radio_cross_views.item()
+            loss_accum["foundation_cache"] += l_foundation_cache.item()
             loss_accum["ground_query"] += l_ground_query.item()
             loss_accum["ground_query_acc"] += ground_query_acc.item()
             loss_accum["ground_query_valid"] += ground_query_valid.item()
@@ -2626,7 +2865,17 @@ class RadioGSTrainer:
                     "train/radio_regions", l_radio_regions.item(), self.global_step
                 )
                 self.writer.add_scalar(
+                    "train/radio_mask_logits",
+                    l_radio_mask_logits.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
                     "train/radio_cross_views", l_radio_cross_views.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/foundation_cache",
+                    l_foundation_cache.item(),
+                    self.global_step,
                 )
                 self.writer.add_scalar(
                     "train/direct_point", l_direct_point.item(), self.global_step
@@ -2815,6 +3064,7 @@ class RadioGSTrainer:
         radio_adaptor_align_accum = 0.0
         radio_adaptor_relation_accum = 0.0
         radio_adaptor_region_accum = 0.0
+        radio_adaptor_mask_logit_accum = 0.0
         radio_adaptor_cross_view_accum = 0.0
         ground_query_accum = 0.0
         ground_query_acc_metric = 0.0
@@ -2981,6 +3231,10 @@ class RadioGSTrainer:
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
             ).item()
+            radio_adaptor_mask_logit_accum += self._compute_radio_adaptor_mask_logit_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
             radio_adaptor_cross_view_accum += self._compute_radio_adaptor_cross_view_loss(
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
@@ -3031,6 +3285,7 @@ class RadioGSTrainer:
             "radio_adaptors": radio_adaptor_align_accum / n,
             "radio_relations": radio_adaptor_relation_accum / n,
             "radio_regions": radio_adaptor_region_accum / n,
+            "radio_mask_logits": radio_adaptor_mask_logit_accum / n,
             "radio_cross_views": radio_adaptor_cross_view_accum / n,
             "ground_query": ground_query_accum / n,
             "ground_query_acc": ground_query_acc_metric / n,
@@ -3053,6 +3308,7 @@ class RadioGSTrainer:
             self.writer.add_scalar("val/radio_adaptors", metrics["radio_adaptors"], epoch)
             self.writer.add_scalar("val/radio_relations", metrics["radio_relations"], epoch)
             self.writer.add_scalar("val/radio_regions", metrics["radio_regions"], epoch)
+            self.writer.add_scalar("val/radio_mask_logits", metrics["radio_mask_logits"], epoch)
             self.writer.add_scalar("val/radio_cross_views", metrics["radio_cross_views"], epoch)
             self.writer.add_scalar("val/ground_query", metrics["ground_query"], epoch)
             self.writer.add_scalar("val/ground_query_acc", metrics["ground_query_acc"], epoch)
@@ -3100,6 +3356,22 @@ class RadioGSTrainer:
             state["seg_head_state_dict"] = self.seg_head.state_dict()
         if self.point_summary_adapter is not None:
             state["point_summary_adapter_state_dict"] = self.point_summary_adapter.state_dict()
+            if self.point_summary_adapter_metadata:
+                state["point_summary_adapter_metadata"] = dict(
+                    self.point_summary_adapter_metadata
+                )
+            if self.point_summary_adapter_epoch is not None:
+                state["point_summary_adapter_epoch"] = int(
+                    self.point_summary_adapter_epoch
+                )
+            if self.point_summary_adapter_best_metric is not None:
+                state["point_summary_adapter_best_metric"] = float(
+                    self.point_summary_adapter_best_metric
+                )
+        if self.foundation_cache_projectors:
+            state["foundation_cache_projectors_state_dict"] = (
+                self.foundation_cache_projectors.state_dict()
+            )
         if not getattr(self.cfg, "skip_latest_checkpoint", False):
             torch.save(state, self.ckpt_dir / "latest.pth")
         if is_best:
@@ -3427,7 +3699,8 @@ class RadioGSTrainer:
             self._log(f"{module_name} warmstart skipped/mismatched: {preview}")
 
     def load_checkpoint(self, path: str, resume: bool = True) -> None:
-        ckpt = torch.load(path, map_location=self.device)
+        checkpoint_map_location = self.device if resume else "cpu"
+        ckpt = load_trusted_checkpoint(path, map_location=checkpoint_map_location)
         try:
             self.model.load_state_dict(ckpt["model_state_dict"], strict=False)
         except RuntimeError as e:
@@ -3495,10 +3768,33 @@ class RadioGSTrainer:
                 self.point_summary_adapter.load_state_dict(
                     ckpt["point_summary_adapter_state_dict"], strict=False
                 )
+                self.point_summary_adapter_metadata = dict(
+                    ckpt.get("point_summary_adapter_metadata") or {}
+                )
+                self.point_summary_adapter_epoch = ckpt.get(
+                    "point_summary_adapter_epoch"
+                )
+                raw_metric = ckpt.get("point_summary_adapter_best_metric")
+                self.point_summary_adapter_best_metric = (
+                    float(raw_metric) if raw_metric is not None else None
+                )
             except RuntimeError as e:
                 self._log(
                     "Point summary adapter state_dict size mismatch, "
                     f"starting adapter from scratch: {e}"
+                )
+        if (
+            "foundation_cache_projectors_state_dict" in ckpt
+            and self.foundation_cache_projectors
+        ):
+            try:
+                self.foundation_cache_projectors.load_state_dict(
+                    ckpt["foundation_cache_projectors_state_dict"], strict=False
+                )
+            except RuntimeError as e:
+                self._log(
+                    "Foundation cache projector state_dict size mismatch, "
+                    f"starting projector from scratch: {e}"
                 )
 
         if resume:
@@ -3601,6 +3897,11 @@ class RadioGSTrainer:
             params += list(self.depth_head.parameters())
         if self.seg_head is not None:
             params += list(self.seg_head.parameters())
+        params += [
+            param
+            for param in self.foundation_cache_projectors.parameters()
+            if param.requires_grad
+        ]
         return params
 
     @staticmethod
@@ -4653,6 +4954,91 @@ class RadioGSTrainer:
             target_siglip = self._project_siglip_features(target)
         return self.siglip_alignment_weight * F.mse_loss(pred_siglip, target_siglip)
 
+    def _compute_foundation_cache_loss(
+        self,
+        batch: Dict[str, torch.Tensor],
+        decoded: Optional[torch.Tensor],
+    ) -> Dict[str, torch.Tensor]:
+        zero = torch.tensor(0.0, device=self.device)
+        stats: Dict[str, torch.Tensor] = {
+            "loss": zero,
+            "enabled": zero.detach(),
+            "heads": zero.detach(),
+            "missing": zero.detach(),
+            "skipped": zero.detach(),
+        }
+        uses_direct_region_cache = (
+            self.foundation_cache_region_consistency_weight > 0
+            or self.foundation_cache_region_separation_weight > 0
+            or self.foundation_cache_feature_boundary_weight > 0
+        )
+        uses_projected_cache = (
+            self.foundation_cache_token_weight > 0
+            or self.foundation_cache_mask_logit_weight > 0
+            or self.foundation_cache_mask_boundary_weight > 0
+        )
+        if (
+            self.foundation_cache_weight <= 0
+            or not self.foundation_cache_root
+            or decoded is None
+            or (not uses_direct_region_cache and not uses_projected_cache)
+            or (uses_projected_cache and not self.foundation_cache_projectors and not uses_direct_region_cache)
+        ):
+            return stats
+        frame_idx = batch.get("frame_idx")
+        if frame_idx is None:
+            return stats
+
+        frame_values = frame_idx.detach().cpu().reshape(-1).tolist()
+        losses: list[torch.Tensor] = []
+        head_count = 0
+        skipped_count = 0
+        missing_count = 0
+        enabled_count = 0
+        selected_heads = self.foundation_cache_heads or None
+        for batch_idx, frame_value in enumerate(frame_values):
+            cache_path = resolve_foundation_cache_path(self.foundation_cache_root, frame_value)
+            if cache_path is None:
+                missing_count += 1
+                continue
+            try:
+                cache = load_foundation_cache(
+                    cache_path,
+                    require_official=self.foundation_cache_require_official,
+                )
+            except (OSError, RuntimeError, ValueError) as exc:
+                self._log(f"Skipping invalid foundation cache {cache_path}: {exc}")
+                skipped_count += 1
+                continue
+            sample_loss, sample_stats = compute_foundation_cache_supervision_loss(
+                decoded_features=decoded[batch_idx : batch_idx + 1].float(),
+                cache=cache,
+                projectors=self.foundation_cache_projectors,
+                heads=selected_heads,
+                mask_logit_weight=self.foundation_cache_mask_logit_weight,
+                mask_boundary_weight=self.foundation_cache_mask_boundary_weight,
+                token_weight=self.foundation_cache_token_weight,
+                region_consistency_weight=self.foundation_cache_region_consistency_weight,
+                region_separation_weight=self.foundation_cache_region_separation_weight,
+                feature_boundary_weight=self.foundation_cache_feature_boundary_weight,
+                region_score_threshold=self.foundation_cache_region_score_threshold,
+                region_max_masks=self.foundation_cache_region_max_masks,
+                region_separation_margin=self.foundation_cache_region_separation_margin,
+            )
+            head_count += int(sample_stats.get("heads", 0))
+            skipped_count += int(sample_stats.get("skipped_heads", 0))
+            if int(sample_stats.get("enabled", 0)) > 0:
+                losses.append(sample_loss)
+                enabled_count += 1
+
+        if losses:
+            stats["loss"] = self.foundation_cache_weight * torch.stack(losses).mean()
+        stats["enabled"] = torch.tensor(float(enabled_count), device=self.device)
+        stats["heads"] = torch.tensor(float(head_count), device=self.device)
+        stats["missing"] = torch.tensor(float(missing_count), device=self.device)
+        stats["skipped"] = torch.tensor(float(skipped_count), device=self.device)
+        return stats
+
     def _compute_radio_adaptor_alignment_loss(
         self,
         decoded: Optional[torch.Tensor],
@@ -4734,6 +5120,33 @@ class RadioGSTrainer:
             temperature=self.radio_adaptor_region_temperature,
         )
         return self.radio_adaptor_region_weight * region_loss
+
+    def _compute_radio_adaptor_mask_logit_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_mask_logit_names)
+        if (
+            self.radio_adaptor_mask_logit_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        mask_logit_loss, _ = compute_radio_adaptor_mask_logit_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_mask_logit_downsample,
+            max_tokens=self.radio_adaptor_mask_logit_max_tokens,
+            num_anchors=self.radio_adaptor_mask_logit_num_anchors,
+            temperature=self.radio_adaptor_mask_logit_temperature,
+        )
+        return self.radio_adaptor_mask_logit_weight * mask_logit_loss
 
     def _compute_radio_adaptor_cross_view_loss(
         self,
@@ -5608,7 +6021,9 @@ def main() -> None:
 
         # Load pretrained codec first (before resume/warmstart which may override)
         if args.pretrained_codec:
-            ckpt = torch.load(args.pretrained_codec, map_location=trainer.device)
+            ckpt = load_trusted_checkpoint(
+                args.pretrained_codec, map_location=trainer.device
+            )
             trainer.codec.load_state_dict(ckpt["codec_state_dict"])
             trainer._log(f"Loaded pretrained codec from {args.pretrained_codec}")
 

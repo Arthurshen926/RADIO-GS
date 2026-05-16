@@ -19,6 +19,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 import re
 import sys
 import time
@@ -30,6 +31,7 @@ import cv2
 import numpy as np
 import torch
 import torch.nn.functional as F
+from PIL import Image
 from tqdm import tqdm
 
 sys.path.insert(0, ".")
@@ -42,7 +44,9 @@ from radio_gs.data.benchmark_paths import (
     resolve_split_feature_dir,
 )
 from radio_gs.geometry_utils import resolve_use_2dgs
+from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_GT_FEATURE_ROOT,
     DEFAULT_LABEL_DIR,
@@ -64,6 +68,7 @@ from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 logger = logging.getLogger(__name__)
 SCORE_CACHE_VERSION = 1
+REGISTERED_FEATURE_CACHE_VERSION = 1
 
 
 OPEN_GAUSSIAN_LERF_FRAMES: Dict[str, List[int]] = {
@@ -87,6 +92,12 @@ class SelectionSpec:
             return f"thr{self.value:g}".replace(".", "p")
         if self.mode == "mean_std":
             return f"meanstd{self.value:g}".replace(".", "p")
+        if self.mode == "score_margin":
+            return f"margin{self.value:g}".replace(".", "p")
+        if self.mode == "score_ratio":
+            return f"ratio{self.value:g}".replace(".", "p")
+        if self.mode == "entropy_score":
+            return f"entropy{self.value:g}".replace(".", "p")
         return f"{self.mode}_{self.value:g}".replace(".", "p")
 
 
@@ -154,6 +165,50 @@ def save_score_cache(
     )
 
 
+def save_registered_feature_cache(
+    path: str | Path,
+    *,
+    xyz: torch.Tensor,
+    summary_features: torch.Tensor,
+    valid: torch.Tensor,
+    view_counts: torch.Tensor,
+    metadata: Dict[str, Any],
+) -> None:
+    """Persist VPR-registered primitive summary features for distillation.
+
+    The cache stores SigLIP2 summary-space features at Gaussian granularity.
+    This gives the direct 3D readout a training target derived from rendered
+    VPR registration, without using LERF masks or per-query GT thresholds.
+    """
+    if xyz.ndim != 2 or xyz.shape[1] != 3:
+        raise ValueError(f"Expected xyz [N,3], got {tuple(xyz.shape)}")
+    if summary_features.ndim != 2 or summary_features.shape[0] != xyz.shape[0]:
+        raise ValueError(
+            f"Expected summary_features [N,D] aligned with xyz, got "
+            f"{tuple(summary_features.shape)} and {tuple(xyz.shape)}"
+        )
+    if valid.shape != (xyz.shape[0],):
+        raise ValueError(f"Expected valid [{xyz.shape[0]}], got {tuple(valid.shape)}")
+    if view_counts.shape != (xyz.shape[0],):
+        raise ValueError(
+            f"Expected view_counts [{xyz.shape[0]}], got {tuple(view_counts.shape)}"
+        )
+
+    cache_path = Path(path)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "version": REGISTERED_FEATURE_CACHE_VERSION,
+            "metadata": canonical_score_cache_metadata(metadata),
+            "xyz": xyz.detach().cpu().float(),
+            "summary_features": summary_features.detach().cpu().float(),
+            "valid": valid.detach().cpu().bool(),
+            "view_counts": view_counts.detach().cpu().float(),
+        },
+        cache_path,
+    )
+
+
 def load_score_cache(
     path: str | Path,
     *,
@@ -169,6 +224,12 @@ def load_score_cache(
         )
     expected = canonical_score_cache_metadata(expected_metadata)
     cached = canonical_score_cache_metadata(payload.get("metadata", {}))
+    if (
+        "registration_assignment_mode" in expected
+        and "registration_assignment_mode" not in cached
+        and expected.get("registration_assignment_mode") == "center"
+    ):
+        cached["registration_assignment_mode"] = "center"
     if cached != expected:
         mismatched_keys = [
             key
@@ -208,6 +269,74 @@ def mask_iou(pred: np.ndarray, gt: np.ndarray) -> float:
     inter = np.logical_and(pred_u8, gt_u8).sum()
     union = np.logical_or(pred_u8, gt_u8).sum()
     return float(inter / union) if union > 0 else 0.0
+
+
+def _resize_binary_mask(pred: np.ndarray, gt: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    pred_u8 = (pred > 0).astype(np.uint8)
+    gt_u8 = (gt > 0).astype(np.uint8)
+    if pred_u8.shape != gt_u8.shape:
+        pred_u8 = cv2.resize(
+            pred_u8,
+            (gt_u8.shape[1], gt_u8.shape[0]),
+            interpolation=cv2.INTER_NEAREST,
+        )
+    return pred_u8, gt_u8
+
+
+def _disk_kernel(radius: int) -> np.ndarray:
+    radius_i = max(int(radius), 1)
+    size = radius_i * 2 + 1
+    return cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (size, size))
+
+
+def _binary_boundary(mask: np.ndarray) -> np.ndarray:
+    mask_u8 = (mask > 0).astype(np.uint8)
+    if not mask_u8.any():
+        return np.zeros_like(mask_u8, dtype=np.uint8)
+    eroded = cv2.erode(mask_u8, np.ones((3, 3), dtype=np.uint8), iterations=1)
+    return (mask_u8 != eroded).astype(np.uint8)
+
+
+def boundary_f_score(pred: np.ndarray, gt: np.ndarray, *, dilation_ratio: float = 0.02) -> float:
+    """Return boundary F-score with deterministic morphology tolerance."""
+    pred_u8, gt_u8 = _resize_binary_mask(pred, gt)
+    pred_boundary = _binary_boundary(pred_u8)
+    gt_boundary = _binary_boundary(gt_u8)
+    pred_count = int(pred_boundary.sum())
+    gt_count = int(gt_boundary.sum())
+    if pred_count == 0 and gt_count == 0:
+        return 1.0
+    if pred_count == 0 or gt_count == 0:
+        return 0.0
+
+    diag = math.sqrt(float(gt_u8.shape[0] ** 2 + gt_u8.shape[1] ** 2))
+    dilation_pixels = max(1, int(round(float(dilation_ratio) * diag)))
+    kernel = _disk_kernel(dilation_pixels)
+    pred_match = cv2.dilate(pred_boundary, kernel, iterations=1) > 0
+    gt_match = cv2.dilate(gt_boundary, kernel, iterations=1) > 0
+    precision = float(np.logical_and(pred_boundary > 0, gt_match).sum() / max(pred_count, 1))
+    recall = float(np.logical_and(gt_boundary > 0, pred_match).sum() / max(gt_count, 1))
+    denom = precision + recall
+    return float(2.0 * precision * recall / denom) if denom > 0 else 0.0
+
+
+def trimap_iou(pred: np.ndarray, gt: np.ndarray, *, dilation_pixels: int = 2) -> float:
+    """Return IoU measured only in a GT boundary trimap."""
+    pred_u8, gt_u8 = _resize_binary_mask(pred, gt)
+    if not gt_u8.any():
+        return 0.0
+    kernel = _disk_kernel(dilation_pixels)
+    dilated = cv2.dilate(gt_u8, kernel, iterations=1) > 0
+    eroded = cv2.erode(gt_u8, kernel, iterations=1) > 0
+    trimap = np.logical_xor(dilated, eroded)
+    if not trimap.any():
+        trimap = gt_u8 > 0
+    pred_band = np.logical_and(pred_u8 > 0, trimap)
+    gt_band = np.logical_and(gt_u8 > 0, trimap)
+    union = np.logical_or(pred_band, gt_band).sum()
+    if union == 0:
+        return 1.0
+    return float(np.logical_and(pred_band, gt_band).sum() / union)
 
 
 def summarize_ious(ious: Sequence[float]) -> Dict[str, float | int]:
@@ -267,6 +396,39 @@ def mask_overlap_stats(pred: np.ndarray, gt: np.ndarray) -> Dict[str, float | in
     }
 
 
+def compute_selection_ranking_scores(scores: torch.Tensor, *, mode: str) -> torch.Tensor:
+    """Return the score surface used by a GT-free primitive selector.
+
+    ``score_margin`` and ``score_ratio`` suppress ambiguous primitives by
+    comparing each query score against the strongest competing text query for
+    the same Gaussian. ``entropy_score`` additionally downweights primitives
+    whose scene-softmax distribution is high entropy.
+    """
+    if scores.ndim != 2:
+        raise ValueError(f"Expected score matrix [N,K], got {tuple(scores.shape)}")
+    scores_f = scores.float()
+    if mode in {"top_ratio", "score_threshold", "mean_std"}:
+        return scores_f
+    if scores_f.shape[1] <= 1:
+        return scores_f
+    if mode in {"score_margin", "score_ratio"}:
+        top2 = torch.topk(scores_f, k=2, dim=1, largest=True).values
+        top1 = top2[:, :1]
+        top2_val = top2[:, 1:2]
+        competitors = torch.where(scores_f == top1, top2_val, top1)
+        if mode == "score_margin":
+            return scores_f - competitors
+        return scores_f / competitors.clamp_min(1e-8)
+    if mode == "entropy_score":
+        probs = scores_f.clamp_min(1e-8)
+        probs = probs / probs.sum(dim=1, keepdim=True).clamp_min(1e-8)
+        entropy = -(probs * probs.log()).sum(dim=1, keepdim=True)
+        max_entropy = math.log(max(int(scores_f.shape[1]), 2))
+        confidence = (1.0 - entropy / max_entropy).clamp_min(0.0)
+        return scores_f * confidence
+    raise ValueError(f"Unsupported selection ranking mode: {mode}")
+
+
 def select_gaussians_from_scores(
     scores: torch.Tensor,
     spec: SelectionSpec,
@@ -280,24 +442,25 @@ def select_gaussians_from_scores(
     if n_gaussians == 0 or n_queries == 0:
         return scores.new_zeros(scores.shape)
 
-    selected = torch.zeros_like(scores, dtype=torch.float32)
+    scores_for_selection = compute_selection_ranking_scores(scores, mode=spec.mode)
+    selected = torch.zeros_like(scores_for_selection, dtype=torch.float32)
     if spec.mode == "top_ratio":
         ratio = min(max(float(spec.value), 0.0), 1.0)
         k = max(int(round(n_gaussians * ratio)), int(min_select))
         k = min(k, n_gaussians)
         if k <= 0:
             return selected
-        _, idx = torch.topk(scores.float(), k=k, dim=0, largest=True)
+        _, idx = torch.topk(scores_for_selection.float(), k=k, dim=0, largest=True)
         selected.scatter_(0, idx, 1.0)
         return selected
 
-    if spec.mode == "score_threshold":
-        return (scores.float() > float(spec.value)).float()
+    if spec.mode in {"score_threshold", "score_margin", "score_ratio", "entropy_score"}:
+        return (scores_for_selection.float() > float(spec.value)).float()
 
     if spec.mode == "mean_std":
-        mean = scores.float().mean(dim=0, keepdim=True)
-        std = scores.float().std(dim=0, keepdim=True, unbiased=False)
-        return (scores.float() > mean + float(spec.value) * std).float()
+        mean = scores_for_selection.float().mean(dim=0, keepdim=True)
+        std = scores_for_selection.float().std(dim=0, keepdim=True, unbiased=False)
+        return (scores_for_selection.float() > mean + float(spec.value) * std).float()
 
     raise ValueError(f"Unsupported selection mode: {spec.mode}")
 
@@ -479,6 +642,107 @@ def select_gaussians_with_seed_expand_components(
             expanded[seed_idx, query_idx] = seed_cpu[seed_idx, query_idx]
 
     return expanded.to(device=device, dtype=seed_selected.dtype)
+
+
+def select_gaussians_by_proposal_components(
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    support_ratio: float,
+    resolution: int,
+    keep_components: int,
+    min_component_size: int,
+    rank_by: str,
+) -> torch.Tensor:
+    """Select object-like connected proposals from a broad score support set.
+
+    Unlike seed expansion, this branch does not start from a strict primitive
+    mask. It first builds a GT-free support pool from text scores, groups that
+    support into 3D connected components, and then selects the highest-ranked
+    components as object proposals. This is the formal OPR-style readout used
+    for direct 3D object selection.
+    """
+    if rank_by not in {"mean_score", "score_sum", "size"}:
+        raise ValueError(f"Unsupported component rank_by: {rank_by}")
+    if scores.ndim != 2:
+        raise ValueError(f"Expected scores [N,K], got {tuple(scores.shape)}")
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or xyz.shape[0] != scores.shape[0]:
+        raise ValueError(
+            f"Expected xyz [N,3] aligned with scores [N,K], got "
+            f"{tuple(xyz.shape)} and {tuple(scores.shape)}"
+        )
+    if resolution <= 1 or support_ratio <= 0:
+        return torch.zeros_like(scores, dtype=torch.float32)
+
+    try:
+        from scipy import ndimage
+    except Exception as exc:  # pragma: no cover - environment dependent
+        raise RuntimeError("proposal component selection requires scipy") from exc
+
+    support = select_gaussians_from_scores(
+        scores,
+        SelectionSpec("top_ratio", float(support_ratio)),
+        min_select=1,
+    )
+    device = scores.device
+    support_cpu = support.detach().float().cpu()
+    scores_cpu = scores.detach().float().cpu()
+    xyz_cpu = xyz.detach().float().cpu()
+    lo = xyz_cpu.min(dim=0).values
+    hi = xyz_cpu.max(dim=0).values
+    extent = (hi - lo).clamp_min(1e-6)
+    coords = ((xyz_cpu - lo) / extent * float(resolution)).floor().long()
+    coords = coords.clamp_(0, resolution - 1).numpy()
+
+    selected = torch.zeros_like(scores_cpu)
+    structure = ndimage.generate_binary_structure(3, 1)
+    grid_shape = (int(resolution), int(resolution), int(resolution))
+    keep_count = max(int(keep_components), 1)
+    min_size = max(int(min_component_size), 1)
+
+    for query_idx in range(scores_cpu.shape[1]):
+        support_idx = torch.nonzero(support_cpu[:, query_idx] > 0, as_tuple=False).flatten()
+        if support_idx.numel() == 0:
+            continue
+
+        support_np = support_idx.numpy()
+        support_coords = coords[support_np]
+        occupancy = np.zeros(grid_shape, dtype=bool)
+        occupancy[support_coords[:, 0], support_coords[:, 1], support_coords[:, 2]] = True
+        labels, num_components = ndimage.label(occupancy, structure=structure)
+        if num_components <= 0:
+            continue
+
+        component_labels = labels[
+            support_coords[:, 0],
+            support_coords[:, 1],
+            support_coords[:, 2],
+        ].astype(np.int64)
+        sizes = np.bincount(component_labels, minlength=num_components + 1).astype(np.float64)
+        score_values = scores_cpu[support_idx, query_idx].numpy().astype(np.float64)
+        score_sums = np.bincount(
+            component_labels,
+            weights=score_values,
+            minlength=num_components + 1,
+        )
+        valid_labels = np.arange(1, num_components + 1, dtype=np.int64)
+        valid_labels = valid_labels[sizes[valid_labels] >= min_size]
+        if valid_labels.size == 0:
+            valid_labels = np.arange(1, num_components + 1, dtype=np.int64)
+
+        if rank_by == "size":
+            ranks = sizes[valid_labels]
+        elif rank_by == "mean_score":
+            ranks = score_sums[valid_labels] / np.maximum(sizes[valid_labels], 1.0)
+        else:
+            ranks = score_sums[valid_labels]
+        order = np.argsort(-ranks, kind="stable")
+        kept_labels = set(int(label) for label in valid_labels[order[:keep_count]])
+        keep_mask = np.array([int(label) in kept_labels for label in component_labels], dtype=bool)
+        if keep_mask.any():
+            selected[support_idx[torch.from_numpy(keep_mask)], query_idx] = 1.0
+
+    return selected.to(device=device, dtype=torch.float32)
 
 
 def refine_selection_by_voxel_components(
@@ -914,6 +1178,398 @@ def sample_registration_view_weights(
     return valid, weights
 
 
+def _normalize_single_view_image(
+    image: torch.Tensor,
+    *,
+    image_height: int,
+    image_width: int,
+) -> torch.Tensor:
+    """Return a single-channel image as [H,W], resized if needed."""
+    tensor = image.float()
+    if tensor.dim() == 4 and tensor.shape[0] == 1 and tensor.shape[1] == 1:
+        tensor = tensor[0, 0]
+    elif tensor.dim() == 3 and tensor.shape[0] == 1:
+        tensor = tensor[0]
+    elif tensor.dim() == 2:
+        pass
+    else:
+        raise ValueError(f"Expected single-view image, got {tuple(image.shape)}")
+    if tuple(tensor.shape) != (int(image_height), int(image_width)):
+        tensor = F.interpolate(
+            tensor[None, None],
+            size=(int(image_height), int(image_width)),
+            mode="bilinear",
+            align_corners=True,
+        )[0, 0]
+    return tensor
+
+
+def compute_raster_contribution_weights(
+    gaussian_ids: torch.Tensor,
+    pixel_ids: torch.Tensor,
+    means2d: torch.Tensor,
+    conics: torch.Tensor,
+    opacities: torch.Tensor,
+    *,
+    image_height: int,
+    image_width: int,
+    depths: Optional[torch.Tensor] = None,
+    depth_map: Optional[torch.Tensor] = None,
+    alpha_map: Optional[torch.Tensor] = None,
+    depth_tolerance: float = 0.08,
+    relative_depth_tolerance: float = 0.02,
+    alpha_threshold: float = 0.0,
+    mode: str = "uniform",
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Approximate per-Gaussian raster contribution weights for VPR.
+
+    The input indices are rasterizer-level Gaussian/pixel intersections from
+    gsplat. ``alpha`` uses the projected Gaussian footprint and opacity as the
+    contribution weight; ``alpha_depth`` additionally gates non-surface hits by
+    the rendered expected-depth map. This replaces the earlier center-only VPR
+    assignment path while keeping the protocol GT-free.
+    """
+    if mode not in {"uniform", "alpha", "alpha_depth"}:
+        raise ValueError(f"Unsupported registration weight mode: {mode}")
+    if gaussian_ids.ndim != 1 or pixel_ids.ndim != 1 or gaussian_ids.shape != pixel_ids.shape:
+        raise ValueError(
+            f"Expected gaussian_ids/pixel_ids [M], got "
+            f"{tuple(gaussian_ids.shape)} and {tuple(pixel_ids.shape)}"
+        )
+    device = gaussian_ids.device
+    n_hits = int(gaussian_ids.numel())
+    if n_hits == 0:
+        empty = torch.empty(0, dtype=torch.float32, device=device)
+        return torch.empty(0, dtype=torch.bool, device=device), empty
+
+    height = int(image_height)
+    width = int(image_width)
+    gids = gaussian_ids.long()
+    pids = pixel_ids.long()
+
+    means = means2d.float()
+    if means.dim() == 3:
+        if means.shape[0] != 1:
+            raise ValueError("compute_raster_contribution_weights expects one view")
+        means = means[0]
+    conic = conics.float()
+    if conic.dim() == 3:
+        if conic.shape[0] != 1:
+            raise ValueError("compute_raster_contribution_weights expects one view")
+        conic = conic[0]
+    opacity = opacities.float()
+    if opacity.dim() == 2:
+        if opacity.shape[0] == 1:
+            opacity = opacity[0]
+        elif opacity.shape[1] == 1:
+            opacity = opacity[:, 0]
+    opacity = opacity.reshape(-1)
+
+    valid = (
+        (gids >= 0)
+        & (gids < means.shape[0])
+        & (pids >= 0)
+        & (pids < height * width)
+    )
+    x = (pids % width).to(dtype=torch.float32)
+    y = torch.div(pids, width, rounding_mode="floor").to(dtype=torch.float32)
+    mu = means[gids.clamp(0, means.shape[0] - 1)]
+    q = conic[gids.clamp(0, conic.shape[0] - 1)]
+    dx = x - mu[:, 0]
+    dy = y - mu[:, 1]
+    power = -0.5 * (q[:, 0] * dx.square() + 2.0 * q[:, 1] * dx * dy + q[:, 2] * dy.square())
+    footprint_alpha = opacity[gids.clamp(0, opacity.shape[0] - 1)] * torch.exp(power.clamp(max=0.0))
+    footprint_alpha = footprint_alpha.clamp(min=0.0, max=0.999)
+
+    if mode == "uniform":
+        weights = torch.ones(n_hits, dtype=torch.float32, device=device)
+    else:
+        weights = footprint_alpha.clamp_min(1e-8)
+
+    sampled_alpha = None
+    if alpha_map is not None:
+        alpha = _normalize_single_view_image(
+            alpha_map.to(device=device),
+            image_height=height,
+            image_width=width,
+        )
+        sampled_alpha = alpha.reshape(-1)[pids.clamp(0, height * width - 1)].clamp_min(0.0)
+        if alpha_threshold > 0:
+            valid = valid & (sampled_alpha >= float(alpha_threshold))
+
+    if mode == "alpha_depth" and depth_map is not None and depths is not None:
+        rendered_depth = _normalize_single_view_image(
+            depth_map.to(device=device),
+            image_height=height,
+            image_width=width,
+        )
+        sampled_depth = rendered_depth.reshape(-1)[pids.clamp(0, height * width - 1)]
+        gaussian_depths = depths.float()
+        if gaussian_depths.dim() == 3 and gaussian_depths.shape[-1] == 1:
+            gaussian_depths = gaussian_depths[..., 0]
+        if gaussian_depths.dim() == 2:
+            if gaussian_depths.shape[0] != 1:
+                raise ValueError("compute_raster_contribution_weights expects one view")
+            gaussian_depths = gaussian_depths[0]
+        gaussian_depths = gaussian_depths.reshape(-1).to(device=device)
+        z = gaussian_depths[gids.clamp(0, gaussian_depths.shape[0] - 1)]
+        tolerance = torch.maximum(
+            torch.full_like(z, float(depth_tolerance)),
+            z.abs() * float(relative_depth_tolerance),
+        ).clamp_min(1e-6)
+        depth_error = (sampled_depth - z).abs()
+        valid = valid & (sampled_depth > 0.0) & (depth_error <= tolerance)
+        weights = weights * torch.exp(-depth_error / tolerance)
+
+    weights = torch.where(valid, weights, torch.zeros_like(weights))
+    return valid, weights.float()
+
+
+def accumulate_raster_contribution_features(
+    feature_map: torch.Tensor,
+    gaussian_ids: torch.Tensor,
+    pixel_ids: torch.Tensor,
+    weights: torch.Tensor,
+    *,
+    n_gaussians: int,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Scatter weighted rendered-view features from raster hits to Gaussians."""
+    if feature_map.dim() == 4:
+        if feature_map.shape[0] != 1:
+            raise ValueError("accumulate_raster_contribution_features expects one view")
+        features = feature_map[0]
+    elif feature_map.dim() == 3:
+        features = feature_map
+    else:
+        raise ValueError(f"Expected feature map [C,H,W] or [1,C,H,W], got {tuple(feature_map.shape)}")
+    if gaussian_ids.ndim != 1 or pixel_ids.ndim != 1 or weights.ndim != 1:
+        raise ValueError("gaussian_ids, pixel_ids, and weights must be 1D")
+    if gaussian_ids.shape != pixel_ids.shape or gaussian_ids.shape != weights.shape:
+        raise ValueError("gaussian_ids, pixel_ids, and weights must have matching shapes")
+
+    device = features.device
+    channels, height, width = features.shape
+    gids = gaussian_ids.to(device=device, dtype=torch.long)
+    pids = pixel_ids.to(device=device, dtype=torch.long)
+    w = weights.to(device=device, dtype=torch.float32)
+    valid = (
+        (gids >= 0)
+        & (gids < int(n_gaussians))
+        & (pids >= 0)
+        & (pids < height * width)
+        & (w > 0)
+    )
+    sums = torch.zeros(int(n_gaussians), channels, dtype=torch.float32, device=device)
+    counts = torch.zeros(int(n_gaussians), dtype=torch.float32, device=device)
+    if not bool(valid.any()):
+        return sums, counts
+
+    gids = gids[valid]
+    pids = pids[valid]
+    w = w[valid]
+    flat = features.float().reshape(channels, height * width).t()
+    sampled = flat[pids] * w.unsqueeze(1)
+    sums.index_add_(0, gids, sampled)
+    counts.index_add_(0, gids, w)
+    return sums, counts
+
+
+def select_dominant_raster_hits(
+    pixel_ids: torch.Tensor,
+    weights: torch.Tensor,
+    *,
+    num_pixels: int,
+) -> torch.Tensor:
+    """Keep the strongest Gaussian hit for each rendered pixel."""
+    if pixel_ids.ndim != 1 or weights.ndim != 1 or pixel_ids.shape != weights.shape:
+        raise ValueError("pixel_ids and weights must be matching 1D tensors")
+    device = pixel_ids.device
+    if pixel_ids.numel() == 0:
+        return torch.empty(0, dtype=torch.bool, device=device)
+    pids = pixel_ids.long()
+    w = weights.float()
+    valid = (pids >= 0) & (pids < int(num_pixels)) & (w > 0)
+    max_weights = torch.full(
+        (int(num_pixels),),
+        -float("inf"),
+        dtype=torch.float32,
+        device=device,
+    )
+    if bool(valid.any()):
+        max_weights.scatter_reduce_(
+            0,
+            pids[valid],
+            w[valid],
+            reduce="amax",
+            include_self=True,
+        )
+    return valid & (w >= max_weights[pids.clamp(0, int(num_pixels) - 1)] - 1e-8)
+
+
+def select_top_raster_hits_per_gaussian(
+    gaussian_ids: torch.Tensor,
+    weights: torch.Tensor,
+    *,
+    n_gaussians: int,
+) -> torch.Tensor:
+    """Keep the strongest raster hit for each Gaussian footprint."""
+    if gaussian_ids.ndim != 1 or weights.ndim != 1 or gaussian_ids.shape != weights.shape:
+        raise ValueError("gaussian_ids and weights must be matching 1D tensors")
+    device = gaussian_ids.device
+    if gaussian_ids.numel() == 0:
+        return torch.empty(0, dtype=torch.bool, device=device)
+    gids = gaussian_ids.long()
+    w = weights.float()
+    valid = (gids >= 0) & (gids < int(n_gaussians)) & (w > 0)
+    max_weights = torch.full(
+        (int(n_gaussians),),
+        -float("inf"),
+        dtype=torch.float32,
+        device=device,
+    )
+    if bool(valid.any()):
+        max_weights.scatter_reduce_(
+            0,
+            gids[valid],
+            w[valid],
+            reduce="amax",
+            include_self=True,
+        )
+    return valid & (w >= max_weights[gids.clamp(0, int(n_gaussians) - 1)] - 1e-8)
+
+
+@torch.no_grad()
+def rasterize_registered_view_features(
+    *,
+    model: torch.nn.Module,
+    renderer: FeatureFieldRenderer,
+    viewmat: torch.Tensor,
+    siglip_feat: torch.Tensor,
+    depth_map: torch.Tensor,
+    alpha_map: torch.Tensor,
+    registration_depth_tolerance: float,
+    registration_relative_depth_tolerance: float,
+    registration_alpha_threshold: float,
+    registration_weight_mode: str,
+    dominant_only: bool = False,
+    gaussian_top1: bool = False,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Register a rendered feature map to primitives using rasterizer hits."""
+    if getattr(renderer, "use_2dgs", False):
+        raise RuntimeError("raster_contrib registration currently supports 3DGS rasterization only")
+
+    from gsplat import rasterization
+    from gsplat.cuda._wrapper import rasterize_to_indices_in_range
+
+    device = siglip_feat.device
+    if viewmat.dim() == 2:
+        viewmats = viewmat.to(device=device, dtype=torch.float32).unsqueeze(0)
+    elif viewmat.dim() == 3 and viewmat.shape[0] == 1:
+        viewmats = viewmat.to(device=device, dtype=torch.float32)
+    else:
+        raise ValueError(f"Expected single view matrix, got {tuple(viewmat.shape)}")
+
+    n_gaussians = int(model.get_xyz().shape[0])
+    if n_gaussians == 0:
+        return (
+            torch.empty(0, int(siglip_feat.shape[1]), dtype=torch.float32, device=device),
+            torch.empty(0, dtype=torch.float32, device=device),
+        )
+
+    height = int(siglip_feat.shape[-2])
+    width = int(siglip_feat.shape[-1])
+    means = model.get_xyz().to(device=device, dtype=torch.float32)
+    quats = model.get_rotation().to(device=device, dtype=torch.float32)
+    scales = model.get_scaling().to(device=device, dtype=torch.float32)
+    opacities = model.get_opacity().to(device=device, dtype=torch.float32)
+    if opacities.dim() == 2 and opacities.shape[1] == 1:
+        opacities = opacities[:, 0]
+    colors = torch.zeros(n_gaussians, 3, dtype=torch.float32, device=device)
+    backgrounds = torch.zeros(1, 3, dtype=torch.float32, device=device)
+    Ks = renderer.K.to(device=device, dtype=torch.float32).unsqueeze(0)
+
+    _renders, _alphas, info = rasterization(
+        means=means,
+        quats=quats,
+        scales=scales,
+        opacities=opacities,
+        colors=colors,
+        viewmats=viewmats,
+        Ks=Ks,
+        width=width,
+        height=height,
+        near_plane=renderer.near_plane,
+        far_plane=renderer.far_plane,
+        backgrounds=backgrounds,
+        render_mode="RGB+ED",
+        packed=False,
+    )
+    total_intersections = int(info.get("flatten_ids", torch.empty(0, device=device)).numel())
+    if total_intersections <= 0:
+        return (
+            torch.zeros(n_gaussians, int(siglip_feat.shape[1]), dtype=torch.float32, device=device),
+            torch.zeros(n_gaussians, dtype=torch.float32, device=device),
+        )
+
+    transmittances = torch.ones(1, height, width, dtype=torch.float32, device=device)
+    gaussian_ids, pixel_ids, camera_ids = rasterize_to_indices_in_range(
+        0,
+        total_intersections,
+        transmittances,
+        info["means2d"],
+        info["conics"],
+        info["opacities"],
+        width,
+        height,
+        info["tile_size"],
+        info["isect_offsets"],
+        info["flatten_ids"],
+    )
+    if camera_ids.numel() > 0:
+        keep = camera_ids == 0
+        gaussian_ids = gaussian_ids[keep]
+        pixel_ids = pixel_ids[keep]
+
+    valid, weights = compute_raster_contribution_weights(
+        gaussian_ids,
+        pixel_ids,
+        info["means2d"],
+        info["conics"],
+        info["opacities"],
+        image_height=height,
+        image_width=width,
+        depths=info.get("depths"),
+        depth_map=depth_map,
+        alpha_map=alpha_map,
+        depth_tolerance=registration_depth_tolerance,
+        relative_depth_tolerance=registration_relative_depth_tolerance,
+        alpha_threshold=registration_alpha_threshold,
+        mode=registration_weight_mode,
+    )
+    if dominant_only:
+        dominant = select_dominant_raster_hits(
+            pixel_ids,
+            weights,
+            num_pixels=height * width,
+        )
+        valid = valid & dominant
+    if gaussian_top1:
+        top1 = select_top_raster_hits_per_gaussian(
+            gaussian_ids,
+            weights,
+            n_gaussians=n_gaussians,
+        )
+        valid = valid & top1
+    sums, counts = accumulate_raster_contribution_features(
+        siglip_feat,
+        gaussian_ids[valid],
+        pixel_ids[valid],
+        weights[valid],
+        n_gaussians=n_gaussians,
+    )
+    return sums, counts
+
+
 def aggregate_scores_by_voxel(
     scores: torch.Tensor,
     xyz: torch.Tensor,
@@ -1078,6 +1734,91 @@ def build_mask_renderer(
     return renderer.to(device).eval()
 
 
+def _build_point_summary_adapter(
+    config: object,
+    checkpoint_path: str,
+    device: torch.device,
+) -> torch.nn.Module:
+    adapter = CompactToSummaryAdapter(
+        input_dim=getattr(config, "bottleneck_dim", getattr(config, "hybrid_output_dim", 128)),
+        output_dim=1536,
+        hidden_dim=getattr(config, "point_summary_adapter_hidden_dim", 512),
+        num_layers=getattr(config, "point_summary_adapter_num_layers", 2),
+        dropout=getattr(config, "point_summary_adapter_dropout", 0.0),
+    ).to(device)
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+    state = ckpt.get("point_summary_adapter_state_dict")
+    if state is None:
+        raise KeyError(
+            "Checkpoint has no point_summary_adapter_state_dict; train a "
+            "VPR-to-primitive point summary adapter first"
+        )
+    adapter.load_state_dict(state, strict=True)
+    return adapter.eval()
+
+
+def _load_point_summary_adapter_valid_mask(
+    checkpoint_path: str,
+    *,
+    expected_count: int,
+    device: torch.device,
+) -> Optional[torch.Tensor]:
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    metadata = ckpt.get("point_summary_adapter_metadata") or {}
+    teacher_cache = metadata.get("teacher_cache")
+    if not teacher_cache:
+        return None
+    cache_path = Path(str(teacher_cache))
+    if not cache_path.exists():
+        logger.warning("Point summary adapter teacher cache not found: %s", cache_path)
+        return None
+    payload = torch.load(cache_path, map_location="cpu")
+    valid = payload.get("valid")
+    if not isinstance(valid, torch.Tensor):
+        logger.warning("Point summary adapter teacher cache has no valid mask: %s", cache_path)
+        return None
+    if int(valid.numel()) != int(expected_count):
+        logger.warning(
+            "Point summary adapter valid mask size mismatch: got %d, expected %d",
+            int(valid.numel()),
+            int(expected_count),
+        )
+        return None
+    return valid.bool().to(device=device)
+
+
+def _blend_point_summary_adapter_features(
+    base_summary: torch.Tensor,
+    adapter_summary: torch.Tensor,
+    *,
+    alpha: float,
+    valid_mask: Optional[torch.Tensor] = None,
+) -> torch.Tensor:
+    """Blend base decoded summaries with adapter summaries, gated by VPR support."""
+    if base_summary.shape != adapter_summary.shape:
+        raise ValueError(
+            f"base/adapter summary shape mismatch: "
+            f"{tuple(base_summary.shape)} vs {tuple(adapter_summary.shape)}"
+        )
+    blend = torch.full(
+        (base_summary.shape[0], 1),
+        min(max(float(alpha), 0.0), 1.0),
+        dtype=base_summary.dtype,
+        device=base_summary.device,
+    )
+    if valid_mask is not None:
+        if valid_mask.shape != (base_summary.shape[0],):
+            raise ValueError(
+                f"valid_mask shape mismatch: got {tuple(valid_mask.shape)}, "
+                f"expected {(base_summary.shape[0],)}"
+            )
+        blend = blend * valid_mask.to(device=base_summary.device, dtype=base_summary.dtype).unsqueeze(1)
+    return F.normalize(
+        base_summary.float() * (1.0 - blend.float()) + adapter_summary.float() * blend.float(),
+        dim=-1,
+    )
+
+
 @torch.no_grad()
 def compute_gaussian_text_scores(
     model: torch.nn.Module,
@@ -1095,8 +1836,13 @@ def compute_gaussian_text_scores(
     softmax_temperature: float,
     chunk_size: int,
     device: torch.device,
+    point_summary_adapter: Optional[torch.nn.Module] = None,
+    point_summary_adapter_blend_alpha: float = 1.0,
+    point_summary_adapter_valid_mask: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     """Decode Gaussian-center features and score them against scene text queries."""
+    if not 0.0 <= float(point_summary_adapter_blend_alpha) <= 1.0:
+        raise ValueError("point_summary_adapter_blend_alpha must be in [0, 1]")
     n_gaussians = int(model.num_gaussians)
     if n_gaussians <= 0:
         raise RuntimeError("Model has no Gaussians")
@@ -1189,13 +1935,35 @@ def compute_gaussian_text_scores(
             compact = compact_result[compact_feature_key]
         else:
             compact = compact_result
-        radio = codec.decode_points(compact.float())
-        radio_tokens = radio.unsqueeze(0)
-        head_param = next(summary_head.parameters(), None)
-        if head_param is not None:
-            radio_tokens = radio_tokens.to(dtype=head_param.dtype)
-        siglip = summary_head(radio_tokens).squeeze(0)
-        siglip = F.normalize(siglip.float(), dim=-1)
+        adapter_siglip = None
+        if point_summary_adapter is not None:
+            adapter_siglip = F.normalize(point_summary_adapter(compact.float()).float(), dim=-1)
+
+        valid_mask_chunk = None
+        if point_summary_adapter_valid_mask is not None:
+            valid_mask_chunk = point_summary_adapter_valid_mask[idx].to(device=device)
+
+        if (
+            point_summary_adapter is not None
+            and point_summary_adapter_blend_alpha >= 1.0
+            and valid_mask_chunk is None
+        ):
+            siglip = adapter_siglip
+        else:
+            radio = codec.decode_points(compact.float())
+            radio_tokens = radio.unsqueeze(0)
+            head_param = next(summary_head.parameters(), None)
+            if head_param is not None:
+                radio_tokens = radio_tokens.to(dtype=head_param.dtype)
+            siglip = summary_head(radio_tokens).squeeze(0)
+            siglip = F.normalize(siglip.float(), dim=-1)
+            if adapter_siglip is not None:
+                siglip = _blend_point_summary_adapter_features(
+                    siglip,
+                    adapter_siglip,
+                    alpha=float(point_summary_adapter_blend_alpha),
+                    valid_mask=valid_mask_chunk,
+                )
 
         if scoring == "softmax_scene":
             logits = siglip @ text.float().T
@@ -1220,7 +1988,13 @@ def compute_gaussian_text_scores(
             raise ValueError(f"Unsupported scoring mode: {scoring}")
         all_scores.append(scores.cpu())
 
-        del compact, radio, radio_tokens, siglip, scores
+        del compact, siglip, scores
+        if "radio" in locals():
+            del radio
+        if "radio_tokens" in locals():
+            del radio_tokens
+        if adapter_siglip is not None:
+            del adapter_siglip
         if device.type == "cuda":
             torch.cuda.empty_cache()
 
@@ -1265,18 +2039,23 @@ def compute_registered_view_text_scores(
     registration_depth_tolerance: float,
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
+    registration_assignment_mode: str,
     registration_weight_mode: str,
     registration_confidence_blend: float,
     registration_confidence_mode: str,
     fallback_scores: Optional[torch.Tensor],
     device: torch.device,
+    registered_feature_cache_path: Optional[str] = None,
+    registered_feature_cache_metadata: Optional[Dict[str, Any]] = None,
 ) -> Tuple[torch.Tensor, Dict[str, object]]:
-    """Register rendered SigLIP2 features back to Gaussian centers and score text.
+    """Register rendered SigLIP2 features back to Gaussian primitives and score text.
 
     This is the no-training VPR primitive readout: query still happens in 3D
     on Gaussian primitives, while rendered views provide the language-aligned
     registration signal without using LERF labels or masks for training/scoring.
     """
+    if registration_assignment_mode not in {"center", "raster_contrib", "raster_dominant", "raster_gaussian_top1"}:
+        raise ValueError(f"Unsupported registration assignment mode: {registration_assignment_mode}")
     frame_ids = select_registration_frame_ids(
         available_pose_ids=dataset.pose_by_frame_idx.keys(),
         annotated_frame_ids=frame_annotations.keys(),
@@ -1335,52 +2114,90 @@ def compute_registered_view_text_scores(
         depth_map = aux["depth_map"].detach().float().unsqueeze(0)
         alpha_map = aux["alpha_map"].detach().float().unsqueeze(0)
 
-        for start in range(0, n_gaussians, chunk_size):
-            end = min(start + chunk_size, n_gaussians)
-            points = xyz_cpu[start:end].to(device=device, dtype=torch.float32)
-            targets, valid, counts = sample_multiview_radio_targets(
-                points,
-                siglip_feat,
-                viewmat,
-                renderer.K,
+        if registration_assignment_mode in {"raster_contrib", "raster_dominant", "raster_gaussian_top1"}:
+            frame_sum, frame_counts = rasterize_registered_view_features(
+                model=model,
+                renderer=renderer,
+                viewmat=viewmat,
+                siglip_feat=siglip_feat,
                 depth_map=depth_map,
                 alpha_map=alpha_map,
-                depth_tolerance=registration_depth_tolerance,
-                relative_depth_tolerance=registration_relative_depth_tolerance,
-                alpha_threshold=registration_alpha_threshold,
-                normalize_sampled_features=True,
+                registration_depth_tolerance=registration_depth_tolerance,
+                registration_relative_depth_tolerance=registration_relative_depth_tolerance,
+                registration_alpha_threshold=registration_alpha_threshold,
+                registration_weight_mode=registration_weight_mode,
+                dominant_only=registration_assignment_mode == "raster_dominant",
+                gaussian_top1=registration_assignment_mode == "raster_gaussian_top1",
             )
-            if registration_weight_mode == "uniform":
-                weights = counts.to(device=device, dtype=torch.float32)
-            else:
-                weight_valid, weights = sample_registration_view_weights(
+            frame_counts_cpu = frame_counts.detach().float().cpu()
+            valid_cpu = frame_counts_cpu > 0
+            if valid_cpu.any():
+                registered_sum[valid_cpu] += frame_sum.detach().float().cpu()[valid_cpu]
+                registered_counts[valid_cpu] += frame_counts_cpu[valid_cpu]
+        else:
+            for start in range(0, n_gaussians, chunk_size):
+                end = min(start + chunk_size, n_gaussians)
+                points = xyz_cpu[start:end].to(device=device, dtype=torch.float32)
+                targets, valid, counts = sample_multiview_radio_targets(
                     points,
+                    siglip_feat,
                     viewmat,
                     renderer.K,
-                    image_height=int(siglip_feat.shape[-2]),
-                    image_width=int(siglip_feat.shape[-1]),
                     depth_map=depth_map,
                     alpha_map=alpha_map,
                     depth_tolerance=registration_depth_tolerance,
                     relative_depth_tolerance=registration_relative_depth_tolerance,
                     alpha_threshold=registration_alpha_threshold,
-                    mode=registration_weight_mode,
+                    normalize_sampled_features=True,
                 )
-                valid = valid & weight_valid
-            valid_cpu = valid.detach().cpu()
-            if valid_cpu.any():
-                counts_valid = weights[valid].detach().float().cpu()
-                registered_sum[start:end][valid_cpu] += (
-                    targets[valid].detach().float().cpu()
-                    * counts_valid.unsqueeze(1)
-                )
-                registered_counts[start:end][valid_cpu] += counts_valid
+                if registration_weight_mode == "uniform":
+                    weights = counts.to(device=device, dtype=torch.float32)
+                else:
+                    weight_valid, weights = sample_registration_view_weights(
+                        points,
+                        viewmat,
+                        renderer.K,
+                        image_height=int(siglip_feat.shape[-2]),
+                        image_width=int(siglip_feat.shape[-1]),
+                        depth_map=depth_map,
+                        alpha_map=alpha_map,
+                        depth_tolerance=registration_depth_tolerance,
+                        relative_depth_tolerance=registration_relative_depth_tolerance,
+                        alpha_threshold=registration_alpha_threshold,
+                        mode=registration_weight_mode,
+                    )
+                    valid = valid & weight_valid
+                valid_cpu = valid.detach().cpu()
+                if valid_cpu.any():
+                    counts_valid = weights[valid].detach().float().cpu()
+                    registered_sum[start:end][valid_cpu] += (
+                        targets[valid].detach().float().cpu()
+                        * counts_valid.unsqueeze(1)
+                    )
+                    registered_counts[start:end][valid_cpu] += counts_valid
 
         del feat_1280, siglip_feat, aux, depth_map, alpha_map
         if device.type == "cuda":
             torch.cuda.empty_cache()
 
     valid_all = registered_counts > 0
+    if registered_feature_cache_path:
+        summary_features = torch.zeros_like(registered_sum)
+        if bool(valid_all.any()):
+            summary_features[valid_all] = F.normalize(
+                registered_sum[valid_all]
+                / registered_counts[valid_all].clamp_min(1.0).unsqueeze(1),
+                dim=-1,
+            )
+        save_registered_feature_cache(
+            registered_feature_cache_path,
+            xyz=xyz_cpu,
+            summary_features=summary_features,
+            valid=valid_all,
+            view_counts=registered_counts,
+            metadata=registered_feature_cache_metadata or {},
+        )
+
     all_scores: List[torch.Tensor] = []
     for start in tqdm(range(0, n_gaussians, chunk_size), desc="  score registered", leave=False):
         end = min(start + chunk_size, n_gaussians)
@@ -1422,6 +2239,7 @@ def compute_registered_view_text_scores(
         "depth_tolerance": float(registration_depth_tolerance),
         "relative_depth_tolerance": float(registration_relative_depth_tolerance),
         "alpha_threshold": float(registration_alpha_threshold),
+        "assignment_mode": registration_assignment_mode,
         "weight_mode": registration_weight_mode,
         "confidence_blend": float(registration_confidence_blend),
         "confidence_mode": registration_confidence_mode,
@@ -1453,6 +2271,29 @@ def build_lerf_dataset_for_scene(
 def save_pred_mask(path: Path, mask: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(path), (mask.astype(np.uint8) * 255))
+
+
+def keep_largest_mask_component(mask: np.ndarray) -> np.ndarray:
+    """Keep the largest 8-connected component in a predicted binary mask.
+
+    This is a GT-free projection cleanup for direct 3D selection. It removes
+    isolated rendered fragments while preserving the dominant predicted object
+    support.
+    """
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    if not pred.any():
+        return pred.copy()
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+        pred.astype(np.uint8),
+        connectivity=8,
+    )
+    if num_labels <= 2:
+        return pred.copy()
+    component_areas = stats[1:, cv2.CC_STAT_AREA]
+    largest_label = int(component_areas.argmax()) + 1
+    return labels == largest_label
 
 
 def refine_mask_with_rgb_edges(
@@ -1516,6 +2357,165 @@ def refine_mask_with_rgb_edges(
     return refined & support
 
 
+def mask_to_sam3_box_prompt(
+    mask: np.ndarray,
+    *,
+    padding_pixels: int = 0,
+) -> Optional[List[float]]:
+    """Convert a binary mask to SAM3's normalized [cx, cy, w, h] box prompt."""
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    if not pred.any():
+        return None
+    height, width = pred.shape
+    ys, xs = np.nonzero(pred)
+    pad = max(int(padding_pixels), 0)
+    x0 = max(int(xs.min()) - pad, 0)
+    x1 = min(int(xs.max()) + pad + 1, width)
+    y0 = max(int(ys.min()) - pad, 0)
+    y1 = min(int(ys.max()) + pad + 1, height)
+    box_w = max(float(x1 - x0), 1.0)
+    box_h = max(float(y1 - y0), 1.0)
+    cx = (float(x0) + box_w * 0.5) / float(max(width, 1))
+    cy = (float(y0) + box_h * 0.5) / float(max(height, 1))
+    return [
+        float(np.clip(cx, 0.0, 1.0)),
+        float(np.clip(cy, 0.0, 1.0)),
+        float(np.clip(box_w / float(max(width, 1)), 0.0, 1.0)),
+        float(np.clip(box_h / float(max(height, 1)), 0.0, 1.0)),
+    ]
+
+
+def choose_sam3_box_refined_mask(
+    initial_mask: np.ndarray,
+    candidate_masks: np.ndarray,
+    *,
+    scores: Optional[np.ndarray] = None,
+    min_initial_iou: float = 0.05,
+) -> np.ndarray:
+    """Select a SAM3 candidate by overlap with the initial predicted mask.
+
+    This deliberately uses the rendered prediction as the only selector, not GT.
+    The SAM3 score only breaks ties between candidates with similar prompt-mask
+    overlap.
+    """
+    initial = np.asarray(initial_mask).astype(bool)
+    if initial.ndim != 2:
+        raise ValueError(f"Expected 2D initial mask, got {initial.shape}")
+    if not initial.any():
+        return initial.copy()
+    masks = np.asarray(candidate_masks)
+    if masks.ndim == 4 and masks.shape[1] == 1:
+        masks = masks[:, 0]
+    if masks.ndim == 2:
+        masks = masks[None]
+    if masks.ndim != 3 or masks.shape[-2:] != initial.shape:
+        return initial.copy()
+
+    score_arr = np.asarray(scores if scores is not None else np.zeros((masks.shape[0],)), dtype=np.float32)
+    if score_arr.ndim != 1 or score_arr.shape[0] != masks.shape[0]:
+        score_arr = np.zeros((masks.shape[0],), dtype=np.float32)
+    best_idx = -1
+    best_overlap = -1.0
+    best_score = -float("inf")
+    for idx, candidate in enumerate(masks):
+        cand = np.asarray(candidate) > 0
+        inter = float(np.logical_and(initial, cand).sum())
+        union = float(np.logical_or(initial, cand).sum())
+        overlap = inter / union if union > 0 else 0.0
+        candidate_score = float(score_arr[idx])
+        if overlap > best_overlap + 1e-8 or (
+            abs(overlap - best_overlap) <= 1e-8 and candidate_score > best_score
+        ):
+            best_idx = idx
+            best_overlap = overlap
+            best_score = candidate_score
+    if best_idx < 0 or best_overlap < float(min_initial_iou):
+        return initial.copy()
+    return (np.asarray(masks[best_idx]) > 0).astype(bool)
+
+
+class Sam3BoxMaskRefiner:
+    """Official SAM3 box-prompt mask refinement for projected 3D selections."""
+
+    def __init__(
+        self,
+        *,
+        checkpoint_path: str,
+        device: str,
+        confidence_threshold: float,
+        resolution: int,
+        amp_dtype: str,
+        box_padding_pixels: int,
+        min_initial_iou: float,
+    ) -> None:
+        from radio_gs.scripts.build_sam3_foundation_cache import (
+            _load_sam3_model,
+            resolve_sam3_amp_dtype,
+            validate_sam3_resolution,
+        )
+
+        resolved_resolution = validate_sam3_resolution(
+            resolution,
+            allow_unsafe=False,
+        )
+        self.processor = _load_sam3_model(
+            checkpoint_path=checkpoint_path,
+            device=device,
+            confidence_threshold=confidence_threshold,
+            dtype="auto",
+            resolution=resolved_resolution,
+        )
+        self.amp_dtype = resolve_sam3_amp_dtype(device, amp_dtype)
+        self.box_padding_pixels = int(box_padding_pixels)
+        self.min_initial_iou = float(min_initial_iou)
+
+    def set_image(self, rgb_bgr: np.ndarray) -> Dict[str, Any]:
+        from radio_gs.scripts.build_sam3_foundation_cache import sam3_autocast_context
+
+        rgb = cv2.cvtColor(rgb_bgr, cv2.COLOR_BGR2RGB)
+        image = Image.fromarray(np.ascontiguousarray(rgb))
+        with sam3_autocast_context(str(self.processor.device), self.amp_dtype):
+            return self.processor.set_image(image)
+
+    def refine_from_state(self, state: Dict[str, Any], mask: np.ndarray) -> np.ndarray:
+        from radio_gs.scripts.build_sam3_foundation_cache import sam3_autocast_context
+
+        pred = np.asarray(mask).astype(bool)
+        box = mask_to_sam3_box_prompt(
+            pred,
+            padding_pixels=self.box_padding_pixels,
+        )
+        if box is None:
+            return pred.copy()
+        query_state = dict(state)
+        with sam3_autocast_context(str(self.processor.device), self.amp_dtype):
+            output = self.processor.add_geometric_prompt(box, True, query_state)
+        masks = output.get("masks")
+        if masks is None:
+            logits = output.get("masks_logits")
+            if logits is None:
+                return pred.copy()
+            masks = logits > 0.5
+        if torch.is_tensor(masks):
+            masks_np = masks.detach().cpu().numpy()
+        else:
+            masks_np = np.asarray(masks)
+        scores = output.get("scores")
+        scores_np = (
+            scores.detach().float().cpu().numpy()
+            if torch.is_tensor(scores)
+            else np.asarray(scores if scores is not None else [], dtype=np.float32)
+        )
+        return choose_sam3_box_refined_mask(
+            pred,
+            masks_np,
+            scores=scores_np,
+            min_initial_iou=self.min_initial_iou,
+        )
+
+
 def evaluate_selection_spec(
     *,
     scene: str,
@@ -1541,6 +2541,7 @@ def evaluate_selection_spec(
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
     mask_refinement_erode: int,
+    sam3_box_refiner: Optional[Sam3BoxMaskRefiner],
     min_select: int,
     output_dir: Path,
     save_masks: bool,
@@ -1551,14 +2552,25 @@ def evaluate_selection_spec(
         spec,
         min_select=min_select,
     )
+    ranking_scores = compute_selection_ranking_scores(scores, mode=spec.mode)
     selected = apply_selection_ratio_bounds(
         selected,
-        scores,
+        ranking_scores,
         min_ratio=selection_min_ratio,
         max_ratio=selection_max_ratio,
         min_select=min_select,
     )
-    if selection_refinement == "seed_expand_components":
+    if selection_refinement == "proposal_components":
+        selected = select_gaussians_by_proposal_components(
+            scores,
+            model.get_xyz().detach().cpu(),
+            support_ratio=component_support_ratio,
+            resolution=component_resolution,
+            keep_components=component_keep,
+            min_component_size=component_min_size,
+            rank_by=component_rank_by,
+        )
+    elif selection_refinement == "seed_expand_components":
         selected = select_gaussians_with_seed_expand_components(
             selected,
             scores,
@@ -1584,7 +2596,11 @@ def evaluate_selection_spec(
     proxy = GaussianSelectionProxy(model, selected)
 
     ious: List[float] = []
+    boundary_fs: List[float] = []
+    trimap_ious: List[float] = []
     per_category: Dict[str, List[float]] = {cat: [] for cat in scene_categories}
+    per_category_boundary: Dict[str, List[float]] = {cat: [] for cat in scene_categories}
+    per_category_trimap: Dict[str, List[float]] = {cat: [] for cat in scene_categories}
     per_frame: Dict[str, Dict[str, float]] = {}
     query_details: List[Dict[str, float | int | str]] = []
 
@@ -1603,8 +2619,11 @@ def evaluate_selection_spec(
             silhouette = rendered["feature_map"].detach().float().cpu().numpy()
         gt_masks = build_gt_masks(frame_objects, scene_categories, img_h, img_w)
         rgb_for_refinement = None
+        sam3_state = None
         if mask_refinement != "none":
             rgb_for_refinement = load_lerf_rgb_frame(scene, frame_id, getattr(dataset, "scene_root", ""))
+            if mask_refinement == "sam3_box" and rgb_for_refinement is not None and sam3_box_refiner is not None:
+                sam3_state = sam3_box_refiner.set_image(rgb_for_refinement)
 
         active_cats = sorted({obj["category"] for obj in frame_objects})
         frame_scores: Dict[str, float] = {}
@@ -1613,7 +2632,12 @@ def evaluate_selection_spec(
                 continue
             cat_idx = scene_categories.index(cat)
             pred = silhouette[cat_idx] > float(silhouette_threshold)
-            if mask_refinement == "rgb_grabcut" and rgb_for_refinement is not None:
+            if mask_refinement in {"largest_component", "largest_component_rgb_grabcut"}:
+                pred = keep_largest_mask_component(pred)
+            if (
+                mask_refinement in {"rgb_grabcut", "largest_component_rgb_grabcut", "rgb_grabcut_largest_component"}
+                and rgb_for_refinement is not None
+            ):
                 pred = refine_mask_with_rgb_edges(
                     rgb_for_refinement,
                     pred,
@@ -1621,13 +2645,23 @@ def evaluate_selection_spec(
                     dilate_pixels=mask_refinement_dilate,
                     erode_pixels=mask_refinement_erode,
                 )
+            if mask_refinement == "rgb_grabcut_largest_component":
+                pred = keep_largest_mask_component(pred)
+            if mask_refinement == "sam3_box" and sam3_state is not None and sam3_box_refiner is not None:
+                pred = sam3_box_refiner.refine_from_state(sam3_state, pred)
             gt = gt_masks[cat]
             if gt.sum() == 0:
                 continue
             overlap = mask_overlap_stats(pred, gt)
             iou = float(overlap["iou"])
+            boundary_f = boundary_f_score(pred, gt)
+            trimap_score = trimap_iou(pred, gt)
             ious.append(iou)
+            boundary_fs.append(boundary_f)
+            trimap_ious.append(trimap_score)
             per_category[cat].append(iou)
+            per_category_boundary[cat].append(boundary_f)
+            per_category_trimap[cat].append(trimap_score)
             frame_scores[cat] = iou
             query_details.append(
                 {
@@ -1635,6 +2669,8 @@ def evaluate_selection_spec(
                     "frame_id": int(frame_id),
                     "category": cat,
                     "iou": iou,
+                    "boundary_f": boundary_f,
+                    "trimap_iou": trimap_score,
                     "pred_pixels": int(overlap["pred_pixels"]),
                     "gt_pixels": int(overlap["gt_pixels"]),
                     "intersection_pixels": int(overlap["intersection_pixels"]),
@@ -1657,13 +2693,23 @@ def evaluate_selection_spec(
     per_cat_summary = {
         cat: {
             **summarize_ious(vals),
+            "boundary_f": float(np.asarray(per_category_boundary[cat], dtype=np.float32).mean())
+            if per_category_boundary[cat]
+            else 0.0,
+            "trimap_iou": float(np.asarray(per_category_trimap[cat], dtype=np.float32).mean())
+            if per_category_trimap[cat]
+            else 0.0,
             "selected_gaussians": int(selected[:, ci].sum().item()),
         }
         for ci, (cat, vals) in enumerate(per_category.items())
     }
     summary = summarize_ious(ious)
+    boundary_summary = bootstrap_mean_ci(boundary_fs)
+    trimap_summary = bootstrap_mean_ci(trimap_ious)
     summary.update(
         {
+            "boundary_f": float(boundary_summary["mean"]),
+            "trimap_iou": float(trimap_summary["mean"]),
             "selection_mode": spec.mode,
             "selection_value": spec.value,
             "selection_tag": spec.tag,
@@ -1684,6 +2730,8 @@ def evaluate_selection_spec(
             "per_frame": per_frame,
             "query_details": query_details,
             "bootstrap_miou": bootstrap_mean_ci(ious),
+            "bootstrap_boundary_f": boundary_summary,
+            "bootstrap_trimap_iou": trimap_summary,
         }
     )
     return summary
@@ -1701,6 +2749,7 @@ def evaluate_scene(
     text_embedding_cache: Optional[str],
     canonical_embedding_cache: Optional[str],
     score_cache_path: Optional[str],
+    registered_feature_cache_path: Optional[str],
     prompt_templates: List[str],
     selection_specs: List[SelectionSpec],
     score_source: str,
@@ -1728,15 +2777,24 @@ def evaluate_scene(
     registration_depth_tolerance: float,
     registration_relative_depth_tolerance: float,
     registration_alpha_threshold: float,
+    registration_assignment_mode: str,
     registration_weight_mode: str,
     registration_confidence_blend: float,
     registration_confidence_mode: str,
     disable_registered_refiner: bool,
+    use_point_summary_adapter: bool,
+    point_summary_adapter_blend_alpha: float,
     silhouette_threshold: float,
     mask_refinement: str,
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
     mask_refinement_erode: int,
+    sam3_checkpoint_path: str,
+    sam3_confidence_threshold: float,
+    sam3_resolution: int,
+    sam3_amp_dtype: str,
+    sam3_box_padding: int,
+    sam3_min_initial_iou: float,
     min_select: int,
     chunk_size: int,
     official_frames_only: bool,
@@ -1765,6 +2823,20 @@ def evaluate_scene(
     )
     if not is_hybrid:
         logger.warning("Model architecture is explicit; direct readout will use per-Gaussian compact codes")
+    point_summary_adapter = (
+        _build_point_summary_adapter(config, checkpoint_path, device)
+        if use_point_summary_adapter
+        else None
+    )
+    point_summary_adapter_valid_mask = (
+        _load_point_summary_adapter_valid_mask(
+            checkpoint_path,
+            expected_count=int(model.get_xyz().shape[0]),
+            device=device,
+        )
+        if use_point_summary_adapter
+        else None
+    )
 
     dataset = build_lerf_dataset_for_scene(
         scene,
@@ -1774,6 +2846,23 @@ def evaluate_scene(
         feature_width=img_w,
     )
     renderer = build_mask_renderer(config, height=img_h, width=img_w, device=device)
+    sam3_box_refiner: Optional[Sam3BoxMaskRefiner] = None
+    if mask_refinement == "sam3_box":
+        if not sam3_checkpoint_path:
+            raise ValueError("--sam3_checkpoint_path is required for --mask_refinement sam3_box")
+        print(
+            "  loading official SAM3 box refiner "
+            f"(checkpoint={sam3_checkpoint_path}, resolution={sam3_resolution})"
+        )
+        sam3_box_refiner = Sam3BoxMaskRefiner(
+            checkpoint_path=sam3_checkpoint_path,
+            device="cuda" if device.type == "cuda" else "cpu",
+            confidence_threshold=sam3_confidence_threshold,
+            resolution=sam3_resolution,
+            amp_dtype=sam3_amp_dtype,
+            box_padding_pixels=sam3_box_padding,
+            min_initial_iou=sam3_min_initial_iou,
+        )
 
     print("  loading SigLIP2 text embeddings")
     scene_text = load_or_generate_prompt_ensemble_embeddings(
@@ -1827,11 +2916,20 @@ def evaluate_scene(
         "registration_depth_tolerance": float(registration_depth_tolerance),
         "registration_relative_depth_tolerance": float(registration_relative_depth_tolerance),
         "registration_alpha_threshold": float(registration_alpha_threshold),
+        "registration_assignment_mode": registration_assignment_mode,
         "registration_weight_mode": registration_weight_mode,
         "registration_confidence_blend": float(registration_confidence_blend),
         "registration_confidence_mode": registration_confidence_mode,
         "disable_registered_refiner": bool(disable_registered_refiner),
     }
+    if use_point_summary_adapter:
+        score_cache_metadata.update(
+            {
+                "use_point_summary_adapter": True,
+                "point_summary_adapter_blend_alpha": float(point_summary_adapter_blend_alpha),
+                "point_summary_adapter_valid_mask": "teacher_cache",
+            }
+        )
     scores: Optional[torch.Tensor] = None
     cache_path = Path(score_cache_path) if score_cache_path else None
     if cache_path is not None:
@@ -1873,6 +2971,9 @@ def evaluate_scene(
             softmax_temperature=softmax_temperature,
             chunk_size=chunk_size,
             device=device,
+            point_summary_adapter=point_summary_adapter,
+            point_summary_adapter_blend_alpha=point_summary_adapter_blend_alpha,
+            point_summary_adapter_valid_mask=point_summary_adapter_valid_mask,
         )
 
     if scores is not None:
@@ -1914,11 +3015,14 @@ def evaluate_scene(
             registration_depth_tolerance=registration_depth_tolerance,
             registration_relative_depth_tolerance=registration_relative_depth_tolerance,
             registration_alpha_threshold=registration_alpha_threshold,
+            registration_assignment_mode=registration_assignment_mode,
             registration_weight_mode=registration_weight_mode,
             registration_confidence_blend=registration_confidence_blend,
             registration_confidence_mode=registration_confidence_mode,
             fallback_scores=direct_scores if registered_view_fallback == "direct" else None,
             device=device,
+            registered_feature_cache_path=registered_feature_cache_path,
+            registered_feature_cache_metadata=score_cache_metadata,
         )
         print(
             "  registered "
@@ -1986,6 +3090,7 @@ def evaluate_scene(
             mask_refinement_iters=mask_refinement_iters,
             mask_refinement_dilate=mask_refinement_dilate,
             mask_refinement_erode=mask_refinement_erode,
+            sam3_box_refiner=sam3_box_refiner,
             min_select=min_select,
             output_dir=output_dir,
             save_masks=save_masks,
@@ -2024,6 +3129,8 @@ def build_selection_specs(args: argparse.Namespace) -> List[SelectionSpec]:
         values = parse_float_list(args.threshold_sweep) or [float(args.score_threshold)]
     elif args.selection_mode == "mean_std":
         values = parse_float_list(args.mean_std_sweep) or [float(args.mean_std)]
+    elif args.selection_mode in {"score_margin", "score_ratio", "entropy_score"}:
+        values = parse_float_list(args.confidence_sweep) or [float(args.confidence_threshold)]
     else:
         raise ValueError(f"Unsupported selection mode: {args.selection_mode}")
     seen = set()
@@ -2059,7 +3166,9 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
             f"{registration.get('num_frames', 0)} frames, "
             f"{registration.get('registered_gaussians', 0)}/"
             f"{registration.get('total_gaussians', 0)} Gaussians "
-            f"({float(registration.get('registered_fraction', 0.0)):.3f})."
+            f"({float(registration.get('registered_fraction', 0.0)):.3f}); "
+            f"assignment={registration.get('assignment_mode', 'center')}, "
+            f"weight={registration.get('weight_mode', 'uniform')}."
         )
     if protocol.get("score_aggregation", "none") != "none":
         rows.append(
@@ -2117,14 +3226,21 @@ def main() -> None:
     parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth", help="SigLIP2 summary head weights")
     parser.add_argument("--text_embedding_cache", default="checkpoints/siglip2_lerf_text_embeddings.pt", help="SigLIP2 text embedding cache")
     parser.add_argument("--score_cache", default="", help="Optional primitive text-score cache path; loaded if metadata matches, written when missing")
+    parser.add_argument("--registered_feature_cache", default="", help="Optional VPR-registered primitive summary-feature cache path written when registered-view scores are computed")
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES, help="Prompt templates separated by '|'; use {query}")
-    parser.add_argument("--selection_mode", choices=["top_ratio", "score_threshold", "mean_std"], default="top_ratio")
+    parser.add_argument(
+        "--selection_mode",
+        choices=["top_ratio", "score_threshold", "mean_std", "score_margin", "score_ratio", "entropy_score"],
+        default="top_ratio",
+    )
     parser.add_argument("--top_ratio", type=float, default=0.02, help="Main fixed Gaussian top-ratio for top_ratio mode")
     parser.add_argument("--ratio_sweep", default="", help="Comma/space separated top-ratio sweep values")
     parser.add_argument("--score_threshold", type=float, default=0.25, help="Main score threshold for score_threshold mode")
     parser.add_argument("--threshold_sweep", default="", help="Comma/space separated score thresholds")
     parser.add_argument("--mean_std", type=float, default=1.0, help="Main mean+std multiplier for mean_std mode")
     parser.add_argument("--mean_std_sweep", default="", help="Comma/space separated mean_std multipliers")
+    parser.add_argument("--confidence_threshold", type=float, default=0.0, help="Main confidence threshold for score_margin/score_ratio/entropy_score modes")
+    parser.add_argument("--confidence_sweep", default="", help="Comma/space separated confidence thresholds")
     parser.add_argument("--selection_min_ratio", type=float, default=0.0, help="Optional GT-free top-ratio floor applied after selection")
     parser.add_argument("--selection_max_ratio", type=float, default=0.0, help="Optional GT-free top-ratio cap applied after selection")
     parser.add_argument("--score_source", choices=["direct", "registered_view"], default="direct", help="Primitive score source for direct 3D selection")
@@ -2138,7 +3254,7 @@ def main() -> None:
     parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max", "voxel_max_dilate"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
-    parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components", "seed_expand_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
+    parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components", "seed_expand_components", "proposal_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
     parser.add_argument("--component_support_ratio", type=float, default=0.05, help="Wider top-ratio support pool for seed_expand_components")
     parser.add_argument("--component_resolution", type=int, default=64, help="Voxel resolution for selection_refinement")
     parser.add_argument("--component_keep", type=int, default=1, help="Number of connected components to keep per query")
@@ -2151,15 +3267,29 @@ def main() -> None:
     parser.add_argument("--registration_depth_tolerance", type=float, default=0.08, help="Absolute depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_relative_depth_tolerance", type=float, default=0.02, help="Relative depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_alpha_threshold", type=float, default=0.02, help="Minimum rendered alpha for rendered-view primitive registration")
+    parser.add_argument("--registration_assignment_mode", choices=["center", "raster_contrib", "raster_dominant", "raster_gaussian_top1"], default="center", help="Primitive assignment for registered-view scoring; raster_contrib uses gsplat Gaussian-pixel intersections, raster_dominant keeps the strongest hit per pixel, raster_gaussian_top1 keeps the strongest hit per Gaussian")
     parser.add_argument("--registration_weight_mode", choices=["uniform", "alpha", "alpha_depth"], default="uniform", help="Contribution-style weighting for VPR registered samples")
     parser.add_argument("--registration_confidence_blend", type=float, default=0.0, help="Blend weight for GT-free registration-count confidence calibration")
     parser.add_argument("--registration_confidence_mode", choices=["log", "linear"], default="log", help="How registration counts are mapped to confidence")
     parser.add_argument("--disable_registered_refiner", action="store_true", help="Disable VFA/screen refiner only for registered-view primitive scoring")
+    parser.add_argument("--use_point_summary_adapter", action="store_true", help="Use checkpoint point_summary_adapter_state_dict for direct Gaussian text scoring")
+    parser.add_argument("--point_summary_adapter_blend_alpha", type=float, default=1.0, help="Blend decoded base summary with point adapter summary; 1 uses adapter only")
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
-    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut"], default="none", help="Optional GT-free RGB boundary snapping after rendering selected primitives")
+    parser.add_argument(
+        "--mask_refinement",
+        choices=["none", "rgb_grabcut", "largest_component", "largest_component_rgb_grabcut", "rgb_grabcut_largest_component", "sam3_box"],
+        default="none",
+        help="Optional GT-free projection cleanup after rendering selected primitives",
+    )
     parser.add_argument("--mask_refinement_iters", type=int, default=1, help="GrabCut iterations for rgb_grabcut mask refinement")
     parser.add_argument("--mask_refinement_dilate", type=int, default=5, help="Pixel dilation radius defining the rgb_grabcut support band")
     parser.add_argument("--mask_refinement_erode", type=int, default=2, help="Pixel erosion radius defining sure foreground for rgb_grabcut")
+    parser.add_argument("--sam3_checkpoint_path", default="checkpoints/sam3_modelscope/sam3.pt", help="Official SAM3 checkpoint for sam3_box refinement")
+    parser.add_argument("--sam3_confidence_threshold", type=float, default=0.0, help="SAM3 confidence threshold for sam3_box refinement")
+    parser.add_argument("--sam3_resolution", type=int, default=1008, help="SAM3 processor resolution")
+    parser.add_argument("--sam3_amp_dtype", choices=["auto", "off", "bfloat16"], default="auto", help="SAM3 CUDA autocast dtype")
+    parser.add_argument("--sam3_box_padding", type=int, default=8, help="Pixel padding around rendered mask box before SAM3 prompt")
+    parser.add_argument("--sam3_min_initial_iou", type=float, default=0.05, help="Minimum initial-mask overlap required to accept a SAM3 box-refined mask")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
     parser.add_argument("--all_labeled_frames", action="store_true", help="Use all local labels instead of OpenGaussian official frames")
@@ -2181,6 +3311,8 @@ def main() -> None:
     print(f"Selection:  {', '.join(spec.tag for spec in specs)}")
     print(f"Score src:  {args.score_source}")
     print(f"Scoring:    {args.scoring}")
+    if args.score_source == "registered_view":
+        print(f"VPR assign: {args.registration_assignment_mode}/{args.registration_weight_mode}")
     print(f"Silhouette: > {args.silhouette_threshold}")
     if args.mask_refinement != "none":
         print(f"Mask ref.:  {args.mask_refinement}")
@@ -2200,6 +3332,7 @@ def main() -> None:
         text_embedding_cache=args.text_embedding_cache,
         canonical_embedding_cache=args.canonical_embedding_cache,
         score_cache_path=args.score_cache or None,
+        registered_feature_cache_path=args.registered_feature_cache or None,
         prompt_templates=prompt_templates,
         selection_specs=specs,
         score_source=args.score_source,
@@ -2227,15 +3360,24 @@ def main() -> None:
         registration_depth_tolerance=args.registration_depth_tolerance,
         registration_relative_depth_tolerance=args.registration_relative_depth_tolerance,
         registration_alpha_threshold=args.registration_alpha_threshold,
+        registration_assignment_mode=args.registration_assignment_mode,
         registration_weight_mode=args.registration_weight_mode,
         registration_confidence_blend=args.registration_confidence_blend,
         registration_confidence_mode=args.registration_confidence_mode,
         disable_registered_refiner=args.disable_registered_refiner,
+        use_point_summary_adapter=args.use_point_summary_adapter,
+        point_summary_adapter_blend_alpha=args.point_summary_adapter_blend_alpha,
         silhouette_threshold=args.silhouette_threshold,
         mask_refinement=args.mask_refinement,
         mask_refinement_iters=args.mask_refinement_iters,
         mask_refinement_dilate=args.mask_refinement_dilate,
         mask_refinement_erode=args.mask_refinement_erode,
+        sam3_checkpoint_path=args.sam3_checkpoint_path,
+        sam3_confidence_threshold=args.sam3_confidence_threshold,
+        sam3_resolution=args.sam3_resolution,
+        sam3_amp_dtype=args.sam3_amp_dtype,
+        sam3_box_padding=args.sam3_box_padding,
+        sam3_min_initial_iou=args.sam3_min_initial_iou,
         min_select=args.min_select,
         chunk_size=args.chunk_size,
         official_frames_only=not args.all_labeled_frames,
@@ -2255,10 +3397,15 @@ def main() -> None:
                     else "post-refiner rendered SigLIP2 features registered back to Gaussian primitives"
                 )
                 if args.score_source == "registered_view"
-                else "pre-refiner Gaussian-center decoded RADIO-compatible features"
+                else (
+                    "pre-refiner Gaussian-center compact features projected by VPR-trained point summary adapter"
+                    if args.use_point_summary_adapter
+                    else "pre-refiner Gaussian-center decoded RADIO-compatible features"
+                )
             ),
             "score_source": args.score_source,
             "score_cache": args.score_cache,
+            "registered_feature_cache": args.registered_feature_cache,
             "compact_feature_key": args.compact_feature_key,
             "direct_readout_mode": args.direct_readout_mode,
             "direct_readout_k": args.direct_readout_k,
@@ -2282,17 +3429,26 @@ def main() -> None:
             "registration_depth_tolerance": args.registration_depth_tolerance,
             "registration_relative_depth_tolerance": args.registration_relative_depth_tolerance,
             "registration_alpha_threshold": args.registration_alpha_threshold,
+            "registration_assignment_mode": args.registration_assignment_mode,
             "registration_weight_mode": args.registration_weight_mode,
             "registration_confidence_blend": args.registration_confidence_blend,
             "registration_confidence_mode": args.registration_confidence_mode,
             "disable_registered_refiner": bool(args.disable_registered_refiner),
+            "use_point_summary_adapter": bool(args.use_point_summary_adapter),
+            "point_summary_adapter_blend_alpha": float(args.point_summary_adapter_blend_alpha),
+            "point_summary_adapter_valid_mask": "teacher_cache" if args.use_point_summary_adapter else "",
             "render_role": "render selected primitives only for mask evaluation",
-            "metrics": ["mIoU", "Acc@0.25", "Acc@0.50"],
+            "metrics": ["mIoU", "Acc@0.25", "Acc@0.50", "boundary_f", "trimap_iou"],
             "silhouette_threshold": args.silhouette_threshold,
             "mask_refinement": args.mask_refinement,
             "mask_refinement_iters": args.mask_refinement_iters,
             "mask_refinement_dilate": args.mask_refinement_dilate,
             "mask_refinement_erode": args.mask_refinement_erode,
+            "sam3_checkpoint_path": args.sam3_checkpoint_path if args.mask_refinement == "sam3_box" else "",
+            "sam3_confidence_threshold": args.sam3_confidence_threshold if args.mask_refinement == "sam3_box" else 0.0,
+            "sam3_resolution": args.sam3_resolution if args.mask_refinement == "sam3_box" else 0,
+            "sam3_box_padding": args.sam3_box_padding if args.mask_refinement == "sam3_box" else 0,
+            "sam3_min_initial_iou": args.sam3_min_initial_iou if args.mask_refinement == "sam3_box" else 0.0,
         },
         "prompt_templates": prompt_templates,
         "elapsed_seconds": time.time() - t0,

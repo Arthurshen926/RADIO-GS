@@ -12,7 +12,8 @@ Usage:
 import argparse
 import os
 from dataclasses import asdict, dataclass, fields
-from typing import Any, Dict
+from pathlib import Path
+from typing import Any, Dict, Optional, Set, Union
 
 import yaml
 
@@ -149,11 +150,32 @@ class RadioGSConfig:
     radio_adaptor_region_max_tokens: int = 512
     radio_adaptor_region_num_anchors: int = 16
     radio_adaptor_region_temperature: float = 0.07
+    radio_adaptor_mask_logit_names: str = ""
+    radio_adaptor_mask_logit_weight: float = 0.0
+    radio_adaptor_mask_logit_downsample: int = 1
+    radio_adaptor_mask_logit_max_tokens: int = 512
+    radio_adaptor_mask_logit_num_anchors: int = 16
+    radio_adaptor_mask_logit_temperature: float = 0.07
     radio_adaptor_cross_view_names: str = ""
     radio_adaptor_cross_view_weight: float = 0.0
     radio_adaptor_cross_view_downsample: int = 2
     radio_adaptor_cross_view_max_tokens: int = 256
     radio_adaptor_cross_view_temperature: float = 1.0
+    foundation_cache_root: str = ""
+    foundation_cache_weight: float = 0.0
+    foundation_cache_heads: str = ""
+    foundation_cache_mask_logit_weight: float = 0.0
+    foundation_cache_mask_boundary_weight: float = 0.0
+    foundation_cache_token_weight: float = 0.0
+    foundation_cache_region_consistency_weight: float = 0.0
+    foundation_cache_region_separation_weight: float = 0.0
+    foundation_cache_feature_boundary_weight: float = 0.0
+    foundation_cache_region_score_threshold: float = 0.0
+    foundation_cache_region_max_masks: int = 16
+    foundation_cache_region_separation_margin: float = 0.25
+    foundation_cache_require_official: bool = False
+    foundation_cache_mask_projector_hidden_dim: int = 256
+    foundation_cache_mask_projector_masks: int = 32
     text_heatmap_distill_weight: float = 0.0
     text_heatmap_distill_embeddings: str = ""
     text_heatmap_distill_downsample: int = 2
@@ -310,14 +332,36 @@ def _coerce_value(field_type: type, value: Any) -> Any:
     return field_type(value)
 
 
+def _load_raw_config(
+    yaml_path: Union[str, Path],
+    seen: Optional[Set[Path]] = None,
+) -> Dict[str, Any]:
+    path = Path(yaml_path).expanduser().resolve()
+    seen = set() if seen is None else seen
+    if path in seen:
+        raise ValueError(f"Recursive base_config detected for {path}")
+    seen.add(path)
+    with open(path, "r", encoding="utf-8") as f:
+        raw: Dict[str, Any] = yaml.safe_load(f) or {}
+
+    base_config = raw.pop("base_config", None)
+    if not base_config:
+        return raw
+    base_path = Path(str(base_config)).expanduser()
+    if not base_path.is_absolute():
+        base_path = path.parent / base_path
+    merged = _load_raw_config(base_path, seen)
+    merged.update(raw)
+    return merged
+
+
 def load_config(yaml_path: str) -> RadioGSConfig:
     """Load a RadioGSConfig from a YAML file.
 
     Unknown keys in the YAML are silently ignored so that experiment
     configs can carry extra metadata without breaking the loader.
     """
-    with open(yaml_path, "r", encoding="utf-8") as f:
-        raw: Dict[str, Any] = yaml.safe_load(f) or {}
+    raw = _load_raw_config(yaml_path)
 
     valid_fields = {fld.name: fld for fld in fields(RadioGSConfig)}
     kwargs: Dict[str, Any] = {}

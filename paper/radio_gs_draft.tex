@@ -1,12 +1,16 @@
-\documentclass[10pt,twocolumn]{article}
+\documentclass[10pt,twocolumn,letterpaper]{article}
 
-\usepackage[margin=0.75in]{geometry}
+\usepackage[review]{cvpr}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{multirow}
 \usepackage{xcolor}
-\usepackage{hyperref}
+\usepackage[pagebackref,breaklinks,colorlinks]{hyperref}
+
+\def\confName{CVPR}
+\def\confYear{2026}
+\def\paperID{0000}
 
 \newcommand{\method}{CTF-GS}
 \newcommand{\project}{RADIO-GS}
@@ -31,21 +35,27 @@ teacher-space features with Compact-to-Teacher Reconstruction (CTR), and uses
 View-Space Feature Alignment (VFA) plus Frozen Geometry-Head Consistency (FGC).
 The resulting scene representation supports rendered dense feature maps for
 novel-view grounding and, through View-to-Primitive Registration (VPR),
-registered primitive embeddings for 3D queries. On LERF-OVS, the current
-frozen \project{} package reaches 0.8712 macro localization accuracy and 0.5243
+registered primitive embeddings for 3D queries. A label-free VPR-to-field
+consistency stage can also transfer registered view evidence back into the
+compact direct field. On LERF-OVS, the current frozen \project{} package reaches
+0.8712 macro localization accuracy and 0.5243
 calibrated macro mIoU across four scenes. On a 10-scene
 ScanNet direct point-query protocol, a conservative Gaussian-index readout
 reaches 0.3538, 0.3573, and 0.4293 mIoU on the 19-, 15-, and 10-class splits;
 a contextual kNN point readout with label-free scene-mean calibration further
 improves them to 0.3637, 0.3708, and 0.4512. An
 OpenGaussian-style direct 3D object-selection evaluation shows that a
-rendered-feature-to-primitive registration readout with GT-free voxel context
-aggregation and a fixed mean+2.5std score-distribution selector with a 0.5\%
-floor and 1.8\% top-ratio cap reaches 0.4227 macro mIoU and 0.6906 macro
-Acc@0.25; the optional GT-free RGB boundary snap used for rendered-mask
-projection improves this to 0.4554 macro mIoU and 0.7014 Acc@0.25. For context, the raw Gaussian-center
+rendered-feature-to-primitive registration readout with a fixed global
+softmax-score threshold, a 0.5\% selection floor, a 1.8\% selection cap, and
+GT-free RGB boundary snap reaches 0.4801 macro mIoU and 0.6760 macro
+Acc@0.25. The compact direct-field readout with a frozen official SAM3
+box-prompt boundary readout further reaches 0.5815 macro mIoU and 0.7150
+Acc@0.25. For context, the raw Gaussian-center
 diagnostic reaches only 0.012/0.009 under the fixed top-2\% selector used in
-the VPR sweep and 0.0804/0.0932 under an earlier top-10\% selector. These results
+the VPR sweep and 0.0804/0.0932 under an earlier top-10\% selector; under the
+same threshold-sweep diagnostic protocol, confidence-weighted VPR-to-field
+consistency lifts the direct Gaussian-center readout from 0.0458/0.0707 to
+0.4363/0.6191. These results
 support the central claim that 3D Gaussian scenes can serve as reusable
 foundation-feature memories across rendered-view and registered primitive-level
 readouts, while clarifying that raw Gaussian-center readout is weak and Waldo
@@ -103,6 +113,22 @@ This draft makes four claims:
   grounding, OpenGaussian-style VPR direct 3D object selection, ScanNet direct
   point-query transfer, qualitative overlays, and profile evidence.
 \end{itemize}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/radio_gs_framework.pdf}
+\caption{\method{} framework. A compact hybrid Gaussian teacher-feature field
+stores per-Gaussian codes and spatial context, decodes them into teacher-space
+features, and supports three readouts: rendered dense feature maps for
+novel-view open-vocabulary grounding, VPR primitive scores for direct 3D object
+selection, and direct point features for ScanNet semantic querying. A frozen
+official SAM3 box-prompt readout can refine the rendered selection boundary
+after primitive scoring. Optional raster-contribution and proposal/OPR branches
+are implemented as audited diagnostics. Frozen RADIO/SigLIP2/DINOv3/SAM3 heads
+supervise feature, relation, geometry, and mask-logit consistency without
+training task-specific evaluators.}
+\label{fig:framework}
+\end{figure*}
 
 \section{Related Work}
 
@@ -271,6 +297,23 @@ match the teacher region prototypes:
 \end{equation}
 This approximates SAM-style region supervision when external SAM mask caches are
 not available, while keeping the inference-time representation unchanged.
+We additionally implement a mask-logit distillation fallback for the
+\texttt{sam3} adaptor. Teacher SAM3-adaptor tokens define deterministic mask
+anchors, and we match the rendered feature's per-token soft assignment logits to
+the teacher distribution:
+\begin{equation}
+  \mathcal{L}_{mask}
+  =
+  \mathrm{KL}\!\left(
+  \mathrm{softmax}(A_{\mathrm{sam3}}(F_v^\star)P^\top/\tau)
+  \,\|\,
+  \mathrm{softmax}(A_{\mathrm{sam3}}(\hat{F}_v)P^\top/\tau)
+  \right),
+\end{equation}
+where $P$ are teacher anchor tokens. This remains an adaptor-space training
+loss rather than an official frozen SAM3 mask-decoder loss. The official SAM3
+weights are used only in the separate promptable readout/cache path, where the
+decoder is frozen and does not train the evaluator.
 
 \subsection{Warm-Start Protocol}
 
@@ -302,10 +345,35 @@ for the LERF direct-selection protocol. VPR renders teacher-space features from
 posed views, applies VFA and the frozen SigLIP2 head, registers those
 text-aligned features back to visible Gaussian centers with depth/alpha checks,
 and then runs the same primitive-level text query on the registered Gaussian
-embeddings. A GT-free voxel-max context aggregation step propagates high
-primitive scores within local 3D neighborhoods to reduce fragmentation before
-selection. The LERF masks are used only for final query-select-render
+embeddings. The promoted readout uses a fixed global score threshold with
+floor/cap bounds; voxel context and component grouping are kept as diagnostics.
+The LERF masks are used only for final query-select-render
 evaluation, not for registration, calibration, or scoring.
+To make the direct compact field itself more usable, we additionally train a
+label-free VPR-to-field consistency variant. Let $\bar{e}^{\mathrm{vpr}}_i$ be
+the cached normalized summary feature registered to Gaussian $i$ by VPR, and
+let $n_i$ be the number of VPR views that registered valid evidence to
+Gaussian $i$. The promoted transfer uses a GT-free confidence weight
+$w_i=\log(1+n_i)/\mathrm{mean}_j\log(1+n_j)$ over valid registered primitives.
+We fine-tune the compact field and a lightweight summary adaptor with
+\[
+  \mathcal{L}_{v2f}
+  = 1 - \cos(A_{\mathrm{SigLIP2}}(D_{\theta}(c_i)),
+             \mathrm{sg}[\bar{e}^{\mathrm{vpr}}_i])
+  + \lambda\,\mathcal{L}_{text},
+\]
+where $\mathcal{L}_{text}$ matches the registered VPR scene-query distribution
+and uses only the LERF text categories, not object masks; all loss terms are
+averaged with $w_i$. This stage is a direct-field transfer objective: the
+streamed registered VPR readout remains the strongest paper-facing direct-3D
+result, while the VPR-to-field variant tests whether registered multiview
+evidence can be compressed back into the queryable Gaussian-center field.
+For the Dr.~Splat-inspired audit, we also implement rasterizer-level
+Gaussian--pixel hit registration variants: all footprint contributions,
+per-pixel dominant hits, and per-Gaussian top-contribution pixels. These variants
+capture real rasterization intersections instead of only projected centers, but
+they are reported as diagnostics because they reduce the current LERF direct-3D
+metrics under the fixed protocol.
 
 \section{Experiments}
 
@@ -386,21 +454,21 @@ in 3D and rendering is used only to compare selected primitives with 2D masks.
 The original Gaussian-center readout reached 0.080 macro mIoU and 0.093 macro
 Acc@0.25 under an earlier top-10\% selector, but only 0.012/0.009 under the same
 fixed top-2\% selector used by the VPR ablation rows. The registration readout closes
-most of this gap without using LERF masks for scoring. With GT-free voxel-max
-context aggregation, the conservative fixed top-2\% selector reaches
-0.385/0.643, while increasing the VPR view budget to 128 posed views and using
-the GT-free mean+2.5std score-distribution selector with a 0.5\% floor and 2\%
-top-ratio cap reaches 0.419 macro mIoU and 0.690 macro Acc@0.25. Tightening the
-global cap to 1.8\% improves the promoted row to 0.423/0.691, while
-1.75\% remains a near-tie diagnostic at 0.423/0.686 and 1.5\% gives an
-accuracy-oriented diagnostic at 0.418/0.701. Applying the optional GT-free RGB
-snap only to the rendered evaluation mask improves the promoted 1.8\% row from
-0.423/0.691 to 0.455/0.701 by aligning the final projection with image
-boundaries. This is above the OpenGaussian official macro reference while using
-a different SigLIP2 text head and no locally rerun baseline reproduction; Waldo
-Kitchen also shows that explicit instance grouping can still be valuable on
-fragmented objects. We therefore use the result as evidence for registered
-primitive-level usability rather than as a universal primitive-level SOTA claim.
+most of this gap without using LERF masks for scoring. Under the same VPR
+readout, the mean+std score-distribution selector with a 0.5\%
+floor, 1.8\% cap, and GT-free RGB snap reaches 0.446/0.661. Replacing it with a
+single global softmax-score threshold of 0.25 reduces primitive clutter and
+improves the promoted row to 0.480 macro mIoU and 0.676 macro Acc@0.25.
+The compact direct-field row with official SAM3 box-prompt readout refinement
+further improves to 0.581 macro mIoU and 0.715 macro Acc@0.25 under a fixed
+pad0 box protocol. SAM3 is used only after the 3D primitives have been scored
+and rendered; its candidate mask is selected by overlap with the rendered
+prediction rather than ground truth. This is above the OpenGaussian official
+macro reference while using a different SigLIP2 text head and no locally rerun
+baseline reproduction; Waldo Kitchen also shows that explicit instance grouping
+can still be valuable on fragmented objects. We therefore use the result as
+evidence for direct-field usability with a frozen promptable boundary readout
+rather than as a universal primitive-level SOTA claim.
 
 \input{lerf_direct_3d_context_table}
 
@@ -415,8 +483,8 @@ rather than serving as a strict same-evaluator leaderboard.
 Table~\ref{tab:vpr_protocol_card} makes the direct-3D protocol auditable. The
 registration step uses 128 posed rendered views and visibility checks, but no LERF
 object masks or query labels. The paper-facing selector uses a fixed
-mean+2.5std multiplier on each query's primitive-score distribution; fixed-ratio
-sweeps, best-by-scene choices, and component-refinement variants are diagnostic.
+global softmax threshold with fixed floor/cap bounds; fixed-ratio sweeps,
+best-by-scene choices, and component-refinement variants are diagnostic.
 
 \input{lerf_vpr_ablation_table}
 
@@ -430,11 +498,34 @@ and keeps reasonable Acc@0.25, but does not improve mIoU over the promoted
 96-view VPR row. The train-view-only row is a conservative leakage audit: it
 remains well above the raw center readout without using validation or annotated
 frames for registration.
-We also tested Dr.~Splat-inspired contribution-weighted registration using
-center-sampled alpha and alpha-depth weights. This lowered the fixed-protocol
-macro result to 0.298 and 0.297 mIoU, respectively, so we keep uniform VPR as
-the main row and leave true rasterization-contribution assignment as future
-work.
+We also tested Dr.~Splat-inspired contribution-weighted registration. The
+earlier center-sampled alpha and alpha-depth variants lowered the fixed-protocol
+macro result to 0.298 and 0.297 mIoU, respectively. The new rasterizer-level
+variants are also negative on Figurines under the same paper selector:
+all-footprint raster hits with uniform weights reach only 0.0002 mIoU,
+per-pixel dominant alpha-depth hits reach 0.0178 mIoU with the 128-view budget,
+and per-Gaussian top-footprint alpha hits reach 0.0004 mIoU in the official-view
+probe. Proposal/OPR component selection on the cached strong VPR scores also
+drops Figurines to 0.0430 mIoU. We therefore keep center-based uniform VPR with
+global score-threshold selection as the promoted row and report raster/proposal branches as
+implemented negative diagnostics rather than paper-facing improvements.
+We also audited GT-free confidence selectors based on score margin, ratio, and
+entropy. The best margin sweep reaches 0.446 macro mIoU and 0.628 macro
+Acc@0.25, below the fixed global-threshold row, so confidence selection is kept
+as a diagnostic rather than the main protocol.
+
+\input{lerf_vpr_field_consistency_table}
+
+Table~\ref{tab:vpr_field_consistency} tests whether the VPR signal can be
+compressed back into the student field. Under the same threshold-sweep
+diagnostic selector family and boundary snap, raw direct Gaussian-center scoring is nearly unusable at
+0.0458 macro mIoU and 0.0707 Acc@0.25. VPR-to-field consistency lifts this
+direct-field readout to 0.4119/0.5876, and GT-free confidence weighting further
+improves it to 0.4363/0.6191, closing much of the gap to the streamed
+registered VPR readout at 0.4799/0.6760. This supports the student
+foundation-feature-field claim more directly than a pure registration cache,
+while the remaining gap, especially on Waldo Kitchen, keeps registered VPR as
+the promoted direct-3D readout.
 
 \input{lerf_direct_3d_query_audit_table}
 
@@ -611,6 +702,7 @@ original RADIO RGB features; ``Rendered'' uses \method{} rendered features.
 Prototype segmentation uses same-category support masks from other frames.
 Matching uses the first annotated frame as source.}
 \label{tab:adaptor_downstream}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{llcccc}
 \toprule
 Adaptor & Probe & \multicolumn{2}{c}{Teacher} & \multicolumn{2}{c}{Rendered} \\
@@ -622,6 +714,7 @@ SAM3 & Prototype seg. & 0.8404 & 0.0757 & 0.6649 & 0.0564 \\
 SAM3 & Source-target match & 0.7872 & 0.0953 & 0.7092 & 0.0687 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
 
 Table~\ref{tab:adaptor_downstream} is diagnostic rather than a claimed
@@ -644,7 +737,7 @@ These probes use the same annotations as the grounding benchmark but replace
 text queries with adaptor-space prompts or source-target correspondences. SAM3
 point/box prompts are prompt-constrained, mask propagation uses source-view
 support only, and no external SAM3 mask decoder is called. DINO mask
-propagation uses source-background contrast 0.5 plus GT-free robust readout:
+propagation uses source-background contrast 1.10 plus GT-free robust readout:
 top-$k$ foreground pooling, 2.0$\times$ propagated-area scaling, and
 peak-component cleanup.}
 \label{tab:sam_dino_tasks}
@@ -658,7 +751,7 @@ SAM3 point prompt & 1.0000 & 0.3700 & 1.0000 & 0.4169 \\
 SAM3 box prompt & 0.8702 & 0.6560 & 0.8221 & 0.6638 \\
 SAM3 mask propagation & 0.7872 & 0.3583 & 0.6667 & 0.3756 \\
 DINOv3 dense matching & 0.5723 & 0.8547 & 0.5393 & 0.9048 \\
-DINOv3 mask propagation + robust readout & 0.7801 & 0.4806 & 0.7730 & 0.4456 \\
+DINOv3 mask propagation + bg-suppressed readout & 0.7660 & 0.5119 & 0.7943 & 0.4805 \\
 \bottomrule
 \end{tabular}
 }
@@ -670,11 +763,13 @@ for point prompts, box prompts, and mask propagation, while preserving perfect
 point-prompt localization. Second, source-background contrast makes DINOv3 mask
 propagation substantially stronger; adding robust foreground pooling,
 area-bounded propagation, and connected-component cleanup raises rendered DINO
-mask-propagation mIoU from the previous 0.3684 to 0.4456. This exceeds the
-previous fixed-readout teacher reference of 0.3921, but under the same robust
-readout the teacher also improves to 0.4806 mIoU and 0.7801 LocAcc. We therefore
-use this result as evidence that the DINO propagation gap is substantially
-narrowed, not as a same-protocol superiority claim. The higher rendered
+mask-propagation from the previous robust row of 0.7730/0.4456 to
+0.7943/0.4805 LocAcc/mIoU. This essentially matches the previous robust teacher
+mIoU reference of 0.4806 and exceeds the same-readout teacher LocAcc, but under
+the same background-suppressed readout the teacher remains higher in mIoU
+(0.5119). We therefore use this result as evidence that the DINO propagation
+gap is substantially narrowed, not as a same-protocol mIoU superiority claim.
+The higher rendered
 dense-matching similarity score suggests that the feature field can become
 over-smooth and select visually similar nearby regions. This motivates the
 cross-view DINO and text-heatmap protected training variants evaluated next.
@@ -779,13 +874,13 @@ boundary calibration as Table~\ref{tab:lerf}.}
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/lerf_vpr_direct_3d_qualitative.png}
-\caption{Qualitative LERF direct 3D object selection with VPR. Each row fixes a
-scene, annotated frame, and query, then shows RGB, ground-truth mask, the
-rendered mask from the promoted mean+2.5std VPR selector with a 0.5\% floor and
-1.8\% cap after GT-free RGB snap with silhouette threshold 0.60, and an error
-map. Green is true positive, red is false positive, and blue is false negative.
-The Waldo Kitchen row illustrates the remaining fragmentation and clutter
-failure mode.}
+\caption{Qualitative LERF direct 3D object selection with compact direct-field
+scores and frozen official SAM3 box-prompt readout. Each row fixes a scene,
+annotated frame, and query, then shows RGB, ground-truth mask, the rendered
+direct-field selection refined by the SAM3 box readout, and an error map. Green
+is true positive, red is false positive, and blue is false negative. The Waldo
+Kitchen row illustrates that boundary quality improves but clutter and
+fragmentation remain the main failure mode.}
 \label{fig:vpr_direct_3d_qual}
 \end{figure*}
 
@@ -805,10 +900,9 @@ gap remains visible even when localization is correct.}
 \includegraphics[width=\linewidth]{figures/lerf_sam_dino_tasks_qualitative.png}
 \caption{Qualitative promptable downstream probes from reconstructed features.
 Top: SAM3 mask-prompt propagation from a source annotation to a target view.
-Bottom: DINOv3 dense matching visualized with teacher and rendered
-correspondences. The paper-facing diagnostic can optionally apply mutual
-matching plus homography RANSAC to suppress geometric outliers in this bottom
-row.}
+Bottom: DINOv3 source-mask propagation with the promoted background-suppressed
+readout. Dense correspondences and homography-RANSAC filtering are kept as
+diagnostic visualizations rather than the main quantitative DINO evidence.}
 \label{fig:sam_dino_tasks_qual}
 \end{figure*}
 
@@ -834,8 +928,9 @@ semantic structure for open-vocabulary localization. The ScanNet results suggest
 that the same representation can be probed outside the LERF object-query setting.
 The LERF direct-selection experiment further clarifies the boundary of this
 claim: the compact field supports direct primitive querying once rendered
-features are registered back to Gaussians, but the current voxel context is still
-weaker than explicit instance- or super-Gaussian grouping on fragmented scenes.
+features are registered back to Gaussians, but the current score-threshold
+selection is still weaker than explicit instance- or super-Gaussian grouping on
+fragmented scenes.
 
 \paragraph{External-baseline scope.}
 The LERF, LangSplat, and LEGaussians comparison rows are now traced to official
@@ -855,7 +950,9 @@ LERF direct 3D object-selection readout substantially improves primitive queryin
 and slightly exceeds the OpenGaussian official macro reference under the reported
 OpenGaussian-style context, but it remains weaker on Waldo Kitchen and is not a
 locally rerun same-evaluator comparison. The paper should therefore avoid
-claiming universal primitive-level SOTA. Finally,
+claiming universal primitive-level SOTA. Confidence-weighted VPR-to-field
+consistency improves the direct student field substantially, but it does not
+yet fully replace the streamed registered VPR readout on all scenes. Finally,
 the external comparison is official-source but not reproduced under one evaluator, so
 strong SOTA-style claims require additional baseline reruns. The storage table
 reports checkpoint footprint rather than a deployed runtime memory allocator, so
@@ -872,7 +969,7 @@ submission path: strong LERF-OVS internal results, fair ScanNet direct-query
 evidence, explicit storage and runtime profiles, failure analysis, and
 source-anchored external comparison caveats.
 
-\bibliographystyle{plain}
+\bibliographystyle{ieeenat_fullname}
 \bibliography{radio_gs_refs}
 
 \end{document}

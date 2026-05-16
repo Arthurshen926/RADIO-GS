@@ -73,8 +73,14 @@ def main() -> None:
         REPO_ROOT
         / "output"
         / "lerf_sam_dino_tasks"
-        / "formal_v6_dino_topk_area200_peak"
+        / "formal_v9_dino_topk_area200_bg110_peak_20260514"
         / "lerf_sam_dino_task_report.md"
+    )
+    sam_dino_sweep = (
+        REPO_ROOT
+        / "output"
+        / "lerf_sam_dino_tasks"
+        / "formal_v9_dino_readout_sweep_20260514.md"
     )
     manifest = {
         "generated": datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -111,7 +117,11 @@ def main() -> None:
             },
             "lerf_sam_dino_task_report.md": {
                 "path": rel(sam_dino_tasks),
-                "description": "Formal SAM3/DINOv3 downstream task sweep with robust DINO propagation readout",
+                "description": "Formal SAM3/DINOv3 downstream task sweep with bg-suppressed DINO propagation readout",
+            },
+            "formal_v9_dino_readout_sweep_20260514.md": {
+                "path": rel(sam_dino_sweep),
+                "description": "DINOv3 readout sweep and promotion decision",
             },
             "baseline_source_verification.md": {
                 "path": rel(REPORT_DIR / "baseline_source_verification.md"),

@@ -101,10 +101,10 @@ structure:
    - cross-view mask consistency when the same 3D Gaussians project into
      multiple views.
 
-The current implementation adds a mask-free SAM3 soft-region loss. Teacher
-SAM3 adaptor features define deterministic anchor tokens; each pixel is softly
-assigned to anchors by SAM3 feature similarity, and RADIO-GS is trained to
-match the same region prototypes:
+The implementation now has two SAM3-adaptor training paths. The first is a
+mask-free SAM3 soft-region loss. Teacher SAM3 adaptor features define
+deterministic anchor tokens; each pixel is softly assigned to anchors by SAM3
+feature similarity, and RADIO-GS is trained to match the same region prototypes:
 
 ```yaml
 radio_adaptor_region_names: sam3
@@ -115,10 +115,114 @@ radio_adaptor_region_num_anchors: 24
 radio_adaptor_region_temperature: 0.07
 ```
 
-This is the feasible FMGS/SAM-style path in the current environment because no
-`segment_anything`, `sam2`, `sam3`, or local SAM mask weights are installed.
-External SAM/SAM3 mask caches remain the next step for true mask-boundary
-supervision.
+The second path is the mask-logit fallback requested in the latest expert pass.
+It uses the same teacher anchors but distills each pixel/token's soft assignment
+logits rather than only the aggregated region prototypes:
+
+```yaml
+radio_adaptor_mask_logit_names: sam3
+radio_adaptor_mask_logit_weight: 0.005
+radio_adaptor_mask_logit_downsample: 2
+radio_adaptor_mask_logit_max_tokens: 384
+radio_adaptor_mask_logit_num_anchors: 24
+radio_adaptor_mask_logit_temperature: 0.07
+```
+
+The current environment has now been upgraded to `torch==2.7.1+cu118` and can
+import `sam3`, `sam2`, `segment_anything`, and `dinov3`. The official SAM3 image
+model can be instantiated in-process, and
+`radio_gs/scripts/build_sam3_foundation_cache.py` builds official SAM3
+mask-logit caches through `sam3.model_builder.build_sam3_image_model` and
+`sam3.model.sam3_image_processor.Sam3Processor`.
+
+The local checkpoint path `checkpoints/sam3_modelscope/sam3.pt` now loads with
+the official SAM3 code. It is the public ModelScope mirror of `facebook/sam3`;
+the recorded SHA256 is
+`9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e`.
+Experiments using this path should be described as official SAM3 code with a
+ModelScope mirror checkpoint. Experiments that do not use the new cache builder
+should still be described as SAM3-adaptor mask-logit distillation, not as
+official frozen SAM3 decoder distillation.
+
+The official-decoder path is now explicit rather than implicit. Foundation
+caches can carry per-head producer metadata:
+
+```python
+{
+    "version": 1,
+    "frame_id": 7,
+    "heads": {
+        "sam3": {
+            "mask_logits": torch.Tensor,  # [M, H, W]
+            "producer": {
+                "official": True,
+                "backend": "facebookresearch/sam3",
+                "decoder": "Sam3Image+Sam3Processor",
+            },
+        }
+    },
+}
+```
+
+Training can set:
+
+```yaml
+foundation_cache_require_official: true
+foundation_cache_mask_logit_weight: 0.01
+foundation_cache_mask_boundary_weight: 0.01
+foundation_cache_heads: sam3,dino_v3,siglip2
+```
+
+With `foundation_cache_require_official: true`, RADIO-GS rejects caches that do
+not declare an official producer. The new
+`foundation_cache_mask_boundary_weight` distills mask-logit boundary responses,
+so boundary quality is a training objective, not just an RGB GrabCut cleanup or
+qualitative metric.
+
+Implementation notes from the first official-weight run:
+
+- Keep the official SAM3 weights in FP32 and run CUDA inference under BF16
+  autocast. Fully casting the model to BF16 causes dtype mismatch at the input
+  convolution.
+- Keep the official image resolution at 1008. Lowering it without a matching
+  official model configuration triggers RoPE shape mismatches.
+- CPU execution is not a reliable fallback for grounding because the official
+  path still mixes in CUDA tensors. A genuinely free GPU is required for cache
+  generation.
+
+## Official SAM3 Box-Prompt Readout Refinement
+
+The first consistently positive official-SAM3 use is not the training-time
+object-boundary branch. That branch remains a negative diagnostic on the
+current checkpoints. The promoted path is a frozen readout refinement for LERF
+direct 3D object selection:
+
+1. Score compact direct-field Gaussian primitives with the SigLIP2 text head.
+2. Render the selected 3D primitives into a binary mask on the annotated view.
+3. Convert the rendered mask to a normalized SAM3 box prompt.
+4. Run the official SAM3 image model and choose the candidate mask by overlap
+   with the rendered prediction, using SAM3 confidence only as a tie-breaker.
+5. Evaluate the refined mask against LERF-OVS ground truth.
+
+This keeps the method claim clean: 3D selection still comes from the learned
+feature field, while SAM3 supplies a frozen promptable boundary readout. It is
+not a GT-tuned mask oracle and should be reported separately from raw
+OpenGaussian-style primitive masks.
+
+Fixed-padding results:
+
+| Readout | Fig. mIoU | Ramen mIoU | Tea. mIoU | Waldo mIoU | Macro mIoU | Macro Acc@0.25 | Boundary-F | Trimap IoU |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| direct field + RGB/GrabCut | 0.5203 | 0.5861 | 0.5723 | 0.2736 | 0.4881 | 0.6788 | 0.6226 | 0.3360 |
+| direct field + official SAM3 box, pad0 | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 | 0.7150 | 0.6731 | 0.3777 |
+| direct field + official SAM3 box, pad16 | 0.6422 | 0.6529 | 0.6165 | 0.4110 | 0.5807 | 0.6967 | 0.6814 | 0.3897 |
+
+The pad0 row is the safer main-table setting because it has the best fixed
+macro mIoU/Acc@0.25. The pad16 row is useful for the boundary-risk analysis,
+because it gives the best fixed boundary-F and trimap IoU. Best-by-scene
+padding reaches 0.5980 macro mIoU / 0.7150 Acc@0.25, but should stay in the
+appendix as a sensitivity diagnostic unless a validation-based padding protocol
+is added.
 
 ## Full-Experiment Status
 
@@ -228,7 +332,7 @@ Additional promptable task probes:
 | SAM3 box prompt segmentation | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
 | SAM3 mask prompt propagation | 0.7872 | 0.3583 | 0.6667 | 0.3756 |
 | DINOv3 dense matching | 0.5723 | 0.8547 | 0.5393 | 0.9048 |
-| DINOv3 mask propagation + robust readout | 0.7801 | 0.4806 | 0.7730 | 0.4456 |
+| DINOv3 mask propagation + bg-suppressed readout | 0.7660 | 0.5119 | 0.7943 | 0.4805 |
 
 Qualitative figure:
 `paper/figures/lerf_sam_dino_tasks_qualitative.png`
@@ -239,10 +343,12 @@ Interpretation:
   RADIO adaptor spaces rather than a full external SAM3/DINOv3 model.
 - Rendered features now exceed the frame-wise teacher on SAM3-adaptor mIoU for
   point prompts, box prompts, and source-mask propagation.
-- DINOv3 rendered features have higher mean cosine matching score. The robust
-  propagation readout raises rendered mask-propagation mIoU from 0.3684 to
-  0.4456 and LocAcc from 0.7376 to 0.7730, but under the same robust readout
-  teacher remains higher at 0.4806/0.7801.
+- DINOv3 rendered features have higher mean cosine matching score. The v9
+  background-suppressed propagation readout raises rendered mask propagation to
+  0.7943 LocAcc / 0.4805 mIoU, essentially matching the previous v6 teacher mIoU
+  reference and exceeding the same-readout teacher LocAcc. Same-readout teacher
+  mIoU remains higher at 0.5119, so this is a narrowed-gap claim rather than
+  DINO mIoU superiority.
 - Waldo Kitchen follows the aggregate pattern in the formal task sweep:
   rendered SAM3 point/box mIoU improves, while DINO hit rate and propagation
   mIoU remain below teacher.
