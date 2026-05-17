@@ -339,6 +339,111 @@ def trimap_iou(pred: np.ndarray, gt: np.ndarray, *, dilation_pixels: int = 2) ->
     return float(np.logical_and(pred_band, gt_band).sum() / union)
 
 
+def _as_numpy_2d(value: np.ndarray | torch.Tensor) -> np.ndarray:
+    if isinstance(value, torch.Tensor):
+        arr = value.detach().float().cpu().numpy()
+    else:
+        arr = np.asarray(value, dtype=np.float32)
+    arr = np.squeeze(arr)
+    if arr.ndim != 2:
+        raise ValueError(f"Expected a 2D map after squeezing, got {arr.shape}")
+    return arr.astype(np.float32, copy=False)
+
+
+def _resize_float_map(value: np.ndarray, shape: Tuple[int, int]) -> np.ndarray:
+    if value.shape == shape:
+        return value.astype(np.float32, copy=False)
+    return cv2.resize(value.astype(np.float32), (shape[1], shape[0]), interpolation=cv2.INTER_LINEAR)
+
+
+def _normalize_edge_map(value: np.ndarray) -> np.ndarray:
+    edge = np.nan_to_num(value.astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+    edge = np.maximum(edge, 0.0)
+    if not np.any(edge > 0):
+        return np.zeros_like(edge, dtype=np.float32)
+    scale = float(np.percentile(edge[edge > 0], 95))
+    if scale <= 1e-8:
+        scale = float(edge.max())
+    return np.clip(edge / max(scale, 1e-8), 0.0, 1.0).astype(np.float32)
+
+
+def geometry_discontinuity_maps(
+    alpha_map: np.ndarray | torch.Tensor,
+    depth_map: np.ndarray | torch.Tensor,
+) -> Dict[str, np.ndarray]:
+    """Build normalized alpha/depth edge maps for boundary-failure analysis."""
+    alpha = _as_numpy_2d(alpha_map)
+    depth = _as_numpy_2d(depth_map)
+    if depth.shape != alpha.shape:
+        depth = _resize_float_map(depth, alpha.shape)
+
+    alpha_smooth = cv2.GaussianBlur(np.nan_to_num(alpha, nan=0.0), (3, 3), 0)
+    alpha_dx = cv2.Sobel(alpha_smooth, cv2.CV_32F, 1, 0, ksize=3)
+    alpha_dy = cv2.Sobel(alpha_smooth, cv2.CV_32F, 0, 1, ksize=3)
+    alpha_edge = _normalize_edge_map(np.sqrt(alpha_dx * alpha_dx + alpha_dy * alpha_dy))
+
+    valid_depth = np.isfinite(depth) & (depth > 0)
+    depth_clean = np.where(valid_depth, depth, 0.0).astype(np.float32)
+    if valid_depth.any():
+        median_depth = float(np.median(depth_clean[valid_depth]))
+        depth_clean = np.where(valid_depth, depth_clean, median_depth).astype(np.float32)
+    depth_smooth = cv2.GaussianBlur(depth_clean, (3, 3), 0)
+    depth_dx = cv2.Sobel(depth_smooth, cv2.CV_32F, 1, 0, ksize=3)
+    depth_dy = cv2.Sobel(depth_smooth, cv2.CV_32F, 0, 1, ksize=3)
+    depth_edge = _normalize_edge_map(np.sqrt(depth_dx * depth_dx + depth_dy * depth_dy))
+
+    discontinuity = np.maximum(alpha_edge, depth_edge).astype(np.float32)
+    return {
+        "alpha_edge": alpha_edge,
+        "depth_edge": depth_edge,
+        "discontinuity": discontinuity,
+    }
+
+
+def _mean_on_mask(value: np.ndarray, mask: np.ndarray) -> float:
+    mask_bool = mask.astype(bool)
+    if not mask_bool.any():
+        return 0.0
+    return float(np.asarray(value, dtype=np.float32)[mask_bool].mean())
+
+
+def compute_geometry_boundary_alignment(
+    pred: np.ndarray,
+    gt: np.ndarray,
+    alpha_map: np.ndarray | torch.Tensor,
+    depth_map: np.ndarray | torch.Tensor,
+) -> Dict[str, float | int]:
+    """Measure alpha/depth discontinuity strength on predicted and GT boundaries."""
+    pred_u8, gt_u8 = _resize_binary_mask(pred, gt)
+    maps = geometry_discontinuity_maps(alpha_map, depth_map)
+    for name, value in list(maps.items()):
+        maps[name] = _resize_float_map(value, gt_u8.shape)
+
+    pred_boundary = _binary_boundary(pred_u8)
+    gt_boundary = _binary_boundary(gt_u8)
+    union_boundary = np.logical_or(pred_boundary > 0, gt_boundary > 0)
+    matched_boundary = np.logical_and(pred_boundary > 0, gt_boundary > 0)
+    error_boundary = np.logical_xor(pred_boundary > 0, gt_boundary > 0)
+    background = ~union_boundary
+
+    metrics: Dict[str, float | int] = {
+        "geometry_valid": 1,
+        "gt_boundary_pixels": int(gt_boundary.sum()),
+        "pred_boundary_pixels": int(pred_boundary.sum()),
+        "boundary_union_pixels": int(union_boundary.sum()),
+        "boundary_matched_pixels": int(matched_boundary.sum()),
+        "boundary_error_pixels": int(error_boundary.sum()),
+    }
+    for key, value in maps.items():
+        metrics[f"{key}_gt_boundary_mean"] = _mean_on_mask(value, gt_boundary)
+        metrics[f"{key}_pred_boundary_mean"] = _mean_on_mask(value, pred_boundary)
+        metrics[f"{key}_union_boundary_mean"] = _mean_on_mask(value, union_boundary)
+        metrics[f"{key}_matched_boundary_mean"] = _mean_on_mask(value, matched_boundary)
+        metrics[f"{key}_error_boundary_mean"] = _mean_on_mask(value, error_boundary)
+        metrics[f"{key}_background_mean"] = _mean_on_mask(value, background)
+    return metrics
+
+
 def summarize_ious(ious: Sequence[float]) -> Dict[str, float | int]:
     if not ious:
         return {"miou": 0.0, "acc025": 0.0, "acc050": 0.0, "n": 0}
@@ -2273,6 +2378,31 @@ def save_pred_mask(path: Path, mask: np.ndarray) -> None:
     cv2.imwrite(str(path), (mask.astype(np.uint8) * 255))
 
 
+def save_float_heatmap(path: Path, value: np.ndarray) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    heat = np.clip(np.asarray(value, dtype=np.float32), 0.0, 1.0)
+    u8 = (heat * 255.0).round().astype(np.uint8)
+    cv2.imwrite(str(path), cv2.applyColorMap(u8, cv2.COLORMAP_INFERNO))
+
+
+def save_geometry_alignment_overlay(
+    path: Path,
+    discontinuity: np.ndarray,
+    pred: np.ndarray,
+    gt: np.ndarray,
+) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    heat = np.clip(_resize_float_map(discontinuity, gt.shape), 0.0, 1.0)
+    overlay = cv2.applyColorMap((heat * 255.0).round().astype(np.uint8), cv2.COLORMAP_INFERNO)
+    pred_u8, gt_u8 = _resize_binary_mask(pred, gt)
+    gt_boundary = _binary_boundary(gt_u8) > 0
+    pred_boundary = _binary_boundary(pred_u8) > 0
+    overlay[gt_boundary] = (0, 255, 0)
+    overlay[pred_boundary] = (0, 0, 255)
+    overlay[np.logical_and(gt_boundary, pred_boundary)] = (255, 255, 255)
+    cv2.imwrite(str(path), overlay)
+
+
 def keep_largest_mask_component(mask: np.ndarray) -> np.ndarray:
     """Keep the largest 8-connected component in a predicted binary mask.
 
@@ -2545,6 +2675,7 @@ def evaluate_selection_spec(
     min_select: int,
     output_dir: Path,
     save_masks: bool,
+    save_geometry_maps: bool,
     device: torch.device,
 ) -> Dict:
     selected = select_gaussians_from_scores(
@@ -2617,6 +2748,19 @@ def evaluate_selection_spec(
         with torch.no_grad():
             rendered = renderer.render_features(proxy, viewmat)
             silhouette = rendered["feature_map"].detach().float().cpu().numpy()
+            alpha_np = rendered["alpha_map"].detach().float().cpu().numpy()
+            depth_np = rendered["depth_map"].detach().float().cpu().numpy()
+        geometry_maps = geometry_discontinuity_maps(alpha_np, depth_np) if save_geometry_maps else None
+        if save_geometry_maps and geometry_maps is not None:
+            for map_name, map_value in geometry_maps.items():
+                save_float_heatmap(
+                    output_dir
+                    / "geometry_maps"
+                    / spec.tag
+                    / scene
+                    / f"frame_{frame_id:05d}_{map_name}.png",
+                    map_value,
+                )
         gt_masks = build_gt_masks(frame_objects, scene_categories, img_h, img_w)
         rgb_for_refinement = None
         sam3_state = None
@@ -2664,7 +2808,7 @@ def evaluate_selection_spec(
             per_category_trimap[cat].append(trimap_score)
             frame_scores[cat] = iou
             query_details.append(
-                {
+                query_detail := {
                     "frame": f"frame_{frame_id:05d}",
                     "frame_id": int(frame_id),
                     "category": cat,
@@ -2679,6 +2823,38 @@ def evaluate_selection_spec(
                     "selected_gaussians": int(selected[:, cat_idx].sum().item()),
                 }
             )
+            if geometry_maps is not None:
+                geom_metrics = compute_geometry_boundary_alignment(pred, gt, alpha_np, depth_np)
+                query_detail.update(
+                    {
+                        key: float(value) if isinstance(value, float) else int(value)
+                        for key, value in geom_metrics.items()
+                    }
+                )
+                for map_name in geometry_maps:
+                    query_detail[f"geometry_{map_name}_path"] = str(
+                        (
+                            output_dir
+                            / "geometry_maps"
+                            / spec.tag
+                            / scene
+                            / f"frame_{frame_id:05d}_{map_name}.png"
+                        ).relative_to(output_dir)
+                    )
+                overlay_path = (
+                    output_dir
+                    / "geometry_overlays"
+                    / spec.tag
+                    / scene
+                    / f"frame_{frame_id:05d}_{cat.replace('/', '_')}.png"
+                )
+                save_geometry_alignment_overlay(
+                    overlay_path,
+                    geometry_maps["discontinuity"],
+                    pred,
+                    gt,
+                )
+                query_detail["geometry_overlay_path"] = str(overlay_path.relative_to(output_dir))
             if save_masks:
                 mask_path = (
                     output_dir
@@ -2799,6 +2975,7 @@ def evaluate_scene(
     chunk_size: int,
     official_frames_only: bool,
     save_masks: bool,
+    save_geometry_maps: bool,
     device: torch.device,
 ) -> Dict:
     print(f"\n{'=' * 72}\nLERF direct 3D object selection: {scene}\n{'=' * 72}")
@@ -3094,6 +3271,7 @@ def evaluate_scene(
             min_select=min_select,
             output_dir=output_dir,
             save_masks=save_masks,
+            save_geometry_maps=save_geometry_maps,
             device=device,
         )
         m = scene_results[spec.tag]
@@ -3294,6 +3472,11 @@ def main() -> None:
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
     parser.add_argument("--all_labeled_frames", action="store_true", help="Use all local labels instead of OpenGaussian official frames")
     parser.add_argument("--save_masks", action="store_true", help="Save rendered binary prediction masks")
+    parser.add_argument(
+        "--save_geometry_maps",
+        action="store_true",
+        help="Save alpha/depth discontinuity maps and per-query boundary-alignment overlays",
+    )
     parser.add_argument("--gpu", type=int, default=0, help="GPU id")
     args = parser.parse_args()
 
@@ -3382,6 +3565,7 @@ def main() -> None:
         chunk_size=args.chunk_size,
         official_frames_only=not args.all_labeled_frames,
         save_masks=args.save_masks,
+        save_geometry_maps=args.save_geometry_maps,
         device=device,
     )
     report = {
@@ -3439,6 +3623,7 @@ def main() -> None:
             "point_summary_adapter_valid_mask": "teacher_cache" if args.use_point_summary_adapter else "",
             "render_role": "render selected primitives only for mask evaluation",
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50", "boundary_f", "trimap_iou"],
+            "geometry_alignment_maps": bool(args.save_geometry_maps),
             "silhouette_threshold": args.silhouette_threshold,
             "mask_refinement": args.mask_refinement,
             "mask_refinement_iters": args.mask_refinement_iters,

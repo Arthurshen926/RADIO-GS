@@ -21,6 +21,11 @@ def test_collect_scannet_v67_results_computes_macro(tmp_path: Path) -> None:
                         "10": {"miou": vals[2], "macc": 0.9},
                     },
                     "args": {
+                        "config": f"configs/{scene}.yaml",
+                        "checkpoint": f"checkpoints/{scene}.pth",
+                        "text_embedding_cache": "checkpoints/siglip2_scannet.pt",
+                        "radio_checkpoint": "checkpoints/c-radio_v4-h.pth.tar",
+                        "sample_seed": "42",
                         "query_mode": "gaussian_index",
                         "opacity_filter_mode": "label_index",
                         "gaussian_index_position_mode": "label_point",
@@ -33,6 +38,12 @@ def test_collect_scannet_v67_results_computes_macro(tmp_path: Path) -> None:
 
     assert summary["scene_count"] == 2
     assert summary["macro_miou"] == {"19": 0.3, "15": 0.4, "10": 0.5}
+    assert summary["rows"][0]["config"].endswith("scene0000_00.yaml")
+    assert summary["rows"][0]["checkpoint"].endswith("scene0000_00.pth")
+    assert summary["rows"][0]["text_embedding_cache"] == "checkpoints/siglip2_scannet.pt"
+    assert summary["rows"][0]["teacher_model"] == "checkpoints/c-radio_v4-h.pth.tar"
+    assert summary["rows"][0]["selector_policy"] == "v67_teacherbalanced_gaussian_index_labelpoint"
+    assert summary["rows"][0]["evaluator"] == "eval_scannet_pointcloud_radio_gs"
     assert not summary["warnings"]
 
 
@@ -91,6 +102,9 @@ def test_collect_lerf_threshold_sweep_reads_calibrated_variant(tmp_path: Path) -
     assert summary["rows"][0]["scene"] == "figurines"
     assert summary["rows"][0]["miou"] == 0.42
     assert summary["readout"] == "threshold 0.60"
+    assert summary["selector_policy"] == "fixed_threshold:0.60"
+    assert summary["text_head"] == "SigLIP2"
+    assert summary["evaluator"] == "eval_lerf_grounding"
 
 
 def test_collect_direct3d_silhouette_sweep_reads_variant(tmp_path: Path) -> None:
@@ -118,6 +132,108 @@ def test_collect_direct3d_silhouette_sweep_reads_variant(tmp_path: Path) -> None
     assert summary["macro_acc025"] == 0.76
     assert summary["weighted_miou"] == 0.5011
     assert summary["rows"][1]["scene"] == "ramen"
+
+
+def _write_direct3d_scene_result(
+    root: Path,
+    scene: str,
+    tag: str,
+    *,
+    miou: float,
+    acc025: float,
+    boundary_f: float,
+    trimap_iou: float,
+) -> None:
+    result_dir = root / scene / scene
+    result_dir.mkdir(parents=True)
+    (result_dir / "lerf_direct_3d_selection_results.json").write_text(
+        json.dumps(
+            {
+                "args": {
+                    "config": f"configs/{scene}.yaml",
+                    "checkpoint": f"checkpoints/{scene}.pth",
+                    "text_embedding_cache": "checkpoints/siglip2_lerf.pt",
+                    "score_cache": f"score_caches/{scene}.pt",
+                    "scoring": "softmax_scene",
+                    "mask_refinement": "sam3_box",
+                },
+                "protocol": {
+                    "score_source": "direct",
+                    "feature_source": "pre-refiner compact features",
+                    "mask_refinement": "sam3_box",
+                    "sam3_box_padding": 0,
+                    "selection_min_ratio": 0.003,
+                    "selection_max_ratio": 0.06,
+                },
+                "scene": {
+                    "scene": scene,
+                    "results": {
+                        tag: {
+                            "miou": miou,
+                            "acc025": acc025,
+                            "acc050": acc025 - 0.1,
+                            "n": 5,
+                            "boundary_f": boundary_f,
+                            "trimap_iou": trimap_iou,
+                            "selection_tag": tag,
+                            "selection_value": 0.25,
+                            "selection_min_ratio": 0.003,
+                            "selection_max_ratio": 0.06,
+                            "mask_refinement": "sam3_box",
+                        }
+                    },
+                    "best_by_miou": tag,
+                },
+            }
+        )
+    )
+
+
+def test_collect_direct3d_scene_readout_reads_nested_sam3_results(tmp_path: Path) -> None:
+    root = tmp_path / "sam3_pad0"
+    values = {
+        "figurines": ("thr0p11", 0.5924, 0.7321, 0.6813, 0.3523),
+        "ramen": ("thr0p16", 0.6830, 0.8028, 0.7770, 0.4210),
+        "teatime": ("thr0p38", 0.6556, 0.7797, 0.7730, 0.4800),
+        "waldo_kitchen": ("thr0p3", 0.3949, 0.5455, 0.4613, 0.2552),
+    }
+    for scene, (tag, miou, acc025, boundary_f, trimap_iou) in values.items():
+        _write_direct3d_scene_result(
+            root,
+            scene,
+            tag,
+            miou=miou,
+            acc025=acc025,
+            boundary_f=boundary_f,
+            trimap_iou=trimap_iou,
+        )
+
+    summary = report.collect_direct3d_scene_readout(
+        root,
+        label="direct field + official SAM3 box, pad0",
+        text_head="SigLIP2+SAM3",
+        protocol_label="compact direct field + official SAM3 box readout",
+    )
+
+    assert summary["scene_count"] == 4
+    assert summary["macro_miou"] == 0.5815
+    assert summary["macro_acc025"] == 0.715
+    assert summary["macro_boundary_f"] == 0.6732
+    assert summary["macro_trimap_iou"] == 0.3771
+    assert summary["rows"][0]["scene"] == "figurines"
+    assert summary["rows"][0]["selection"] == "thr0p11"
+    assert summary["rows"][0]["source"].endswith(
+        "sam3_pad0/figurines/figurines/lerf_direct_3d_selection_results.json"
+    )
+    assert summary["rows"][0]["config"] == "configs/figurines.yaml"
+    assert summary["rows"][0]["checkpoint"] == "checkpoints/figurines.pth"
+    assert summary["rows"][0]["text_embedding_cache"] == "checkpoints/siglip2_lerf.pt"
+    assert summary["rows"][0]["score_cache"] == "score_caches/figurines.pt"
+    assert summary["rows"][0]["selector_policy"] == "best_by_miou"
+    assert summary["rows"][0]["text_head"] == "SigLIP2+SAM3"
+    assert summary["rows"][0]["evaluator"] == "eval_lerf_direct_3d_selection"
+    assert summary["protocol"]["mask_refinement"] == "sam3_box"
+    assert summary["selector_policy"] == "best_by_miou"
 
 
 def test_write_report_outputs_markdown_and_manifest(tmp_path: Path) -> None:
@@ -189,6 +305,62 @@ def test_write_report_includes_calibrated_lerf_and_direct3d(tmp_path: Path) -> N
     assert "RGB snap silhouette 0.60" in markdown
     assert "0.4554" in markdown
     assert manifest["direct3d"]["macro_acc025"] == 0.7014
+
+
+def test_write_report_includes_direct3d_readout_registry(tmp_path: Path) -> None:
+    output_dir = tmp_path / "reports"
+    lerf = {"macro_loc_acc": 0.85, "macro_miou": 0.5, "rows": [], "warnings": []}
+    scannet = {
+        "scene_count": 0,
+        "macro_miou": {"19": 0.0, "15": 0.0, "10": 0.0},
+        "macro_macc": {"19": 0.0, "15": 0.0, "10": 0.0},
+        "rows": [],
+        "warnings": [],
+    }
+    sam3_readout = {
+        "label": "direct field + official SAM3 box, pad0",
+        "text_head": "SigLIP2+SAM3",
+        "protocol_label": "compact direct field + official SAM3 box readout",
+        "selector_policy": "best_by_miou",
+        "scene_count": 4,
+        "macro_miou": 0.5815,
+        "macro_acc025": 0.715,
+        "macro_acc050": 0.63,
+        "macro_boundary_f": 0.6731,
+        "macro_trimap_iou": 0.3777,
+        "rows": [
+            {
+                "scene": "figurines",
+                "selection": "thr0p11",
+                "miou": 0.5924,
+                "acc025": 0.7321,
+                "acc050": 0.6607,
+                "boundary_f": 0.6813,
+                "trimap_iou": 0.3523,
+                "n": 56,
+                "source": "result.json",
+            }
+        ],
+        "source_root": "output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516",
+        "protocol": {"mask_refinement": "sam3_box", "sam3_box_padding": 0},
+        "warnings": [],
+    }
+
+    paths = report.write_freeze_outputs(
+        output_dir,
+        lerf,
+        scannet,
+        direct3d_readouts=[sam3_readout],
+    )
+
+    markdown = paths["markdown"].read_text()
+    manifest = json.loads(paths["manifest"].read_text())
+    assert "Direct-3D Readout Registry" in markdown
+    assert "official SAM3 box" in markdown
+    assert "Boundary-F" in markdown
+    assert "thr0p11" in markdown
+    assert manifest["direct3d_readouts"][0]["macro_miou"] == 0.5815
+    assert manifest["direct3d_readouts"][0]["macro_boundary_f"] == 0.6731
 
 
 def test_collect_profile_runs_reads_time_and_gpu_logs(tmp_path: Path) -> None:

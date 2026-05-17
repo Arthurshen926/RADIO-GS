@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\caption{Direct3D mechanism audit using GT-free VPR view coverage, primitive teacher-score confidence, and text-margin ambiguity. Scene rows report mean valid registered views; teacher-bucket rows report mean top-1\% primitive text score; text-margin rows report score margin against the strongest competing category.}
+\label{tab:direct3d_confidence_coverage}
+\begin{tabular}{llrrrr}
+\toprule
+Group & Item & Support & Coverage/score & mIoU & Acc@0.25 \\
+\midrule
+Scene & figurines & 56 & 9.5911 & 0.5309 & 0.7857 \\
+Scene & ramen & 71 & 20.8716 & 0.5805 & 0.7465 \\
+Scene & teatime & 59 & 13.0006 & 0.5662 & 0.7627 \\
+Scene & waldo\_kitchen & 22 & 5.7542 & 0.2429 & 0.4091 \\
+\midrule
+Teacher bucket & low & 70 & 0.1800 & 0.4345 & 0.6143 \\
+Teacher bucket & mid & 69 & 0.4257 & 0.5132 & 0.7101 \\
+Teacher bucket & high & 69 & 0.6939 & 0.6358 & 0.8551 \\
+Text margin & ambiguous & 70 & -0.0882 & 0.4329 & 0.6286 \\
+Text margin & mixed & 69 & 0.2451 & 0.5303 & 0.7246 \\
+Text margin & distinct & 69 & 0.6074 & 0.6202 & 0.8261 \\
+\bottomrule
+\end{tabular}
+\end{table}

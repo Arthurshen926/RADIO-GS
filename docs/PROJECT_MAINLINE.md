@@ -51,9 +51,23 @@ Use these files first:
 | Profile summary | `output/radio_gs/reports/submission_freeze_profile_summary.md` |
 | Figure shortlist | `output/radio_gs/reports/submission_freeze_figure_shortlist.md` |
 | Storage footprint | `output/radio_gs/reports/storage_footprint_report.md` |
+| Compression/downstream correlation | `output/radio_gs/reports/compression_downstream_correlation.md` |
+| Feature error vs text relevance | `output/radio_gs/reports/feature_error_text_relevance_report.md` |
+| Boundary-error readout | `output/radio_gs/reports/boundary_error_readout_report.md` |
+| Alpha/depth boundary alignment coverage | `output/radio_gs/reports/alpha_depth_boundary_alignment_report.md` |
+| Alpha/depth boundary case figure | `paper/figures/alpha_depth_boundary_cases.png` |
+| SAM3-box geometry-map sweep | `output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260517_geometry.md` |
+| Training-entry auditability report | `output/radio_gs/reports/train_feature_field_audit.md` |
 | LERF failure analysis | `output/radio_gs/reports/lerf_failure_analysis.md` |
+| Waldo failure stratification | `output/radio_gs/reports/waldo_failure_stratification.md` |
+| Direct3D confidence/coverage analysis | `output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md` |
 | LERF direct 3D selection | `output/radio_gs/reports/lerf_direct_3d_selection.md` |
 | LERF direct 3D debug audit | `output/radio_gs/reports/lerf_direct_3d_debug_audit.md` |
+| Latest expert follow-up audit | `docs/experiments/2026-05-16-expert-latest-followup-audit.md` |
+| Controlled evidence table | `output/radio_gs/reports/controlled_evidence_table.md` |
+| Nearest-view cache baseline | `output/radio_gs/reports/lerf_nearest_view_cache_baseline.md` |
+| Per-Gaussian 1280-D explicit baseline | `output/radio_gs/reports/lerf_per_gaussian_1280d_baseline.md` |
+| Controlled baseline gap audit | `output/radio_gs/reports/controlled_baseline_gap_audit.md` |
 
 ## Active Quantitative Claims
 
@@ -74,6 +88,24 @@ historical default readout, not the paper-facing mask metric.
 The same calibrated readout gives a stronger same-evaluator teacher-vs-rendered
 comparison: frame-wise RADIO RGB is 0.7985 LocAcc / 0.4634 mIoU, while CTF-GS
 rendered features are 0.8712 / 0.5243.
+
+The controlled evidence table also includes a measured nearest-view RADIO cache
+baseline. For each target annotation frame, it uses the closest cached RADIO
+feature frame by camera-center distance, excludes the target frame itself, does
+not warp the feature map, and then runs the same LERF text scorer and mask
+evaluator. This cache-only control reaches 0.2722 macro LocAcc / 0.1545 macro
+mIoU, far below the rendered CTF-GS row, so it should be framed as evidence
+that a simple 2D feature cache is not a substitute for the reconstructed 3D
+feature field.
+
+The same controlled table now includes the full per-Gaussian 1280-D explicit
+RADIO-memory baseline. Cached teacher features are registered to visible
+Gaussian centers, stored as fp16 1280-D vectors, rendered to the annotated LERF
+views, and scored with the same frozen SigLIP2 evaluator. It reaches 0.5642
+macro LocAcc / 0.3182 macro mIoU with 0.2020 mean registered-Gaussian fraction
+and 1039.7 MiB mean fp16 feature storage. This closes the raw-feature
+scene-memory control, while the compact CTF-GS row remains stronger at 0.8712 /
+0.5243 and uses 3.03x less mean checkpoint storage.
 
 A GT-free adaptive mean+std threshold readout was tested as a boundary-refinement
 diagnostic:
@@ -116,22 +148,25 @@ published-context table against newer primitive-/instance-aware methods.
 This experiment follows an OpenGaussian-style query-select-render protocol:
 text similarity is computed on 3D Gaussian primitives, selected primitives are
 rendered into binary masks, and evaluation uses LERF-OVS object masks only at
-the final metric stage. The current paper-facing set keeps the older VPR/RGB
-snap row for strict primitive-mask comparison and adds the stronger compact
-direct-field row with official SAM3 box-prompt readout refinement. The SAM3
-mask candidate is selected by overlap with the rendered prediction, not by
-ground truth.
+the final metric stage. The current strict primitive-mask row is the VPR/RGB
+snap result with a fixed global score threshold. The compact direct-field rows
+with official SAM3 box-prompt readout are boundary-readout probes: SAM3
+candidates are selected by overlap with the rendered prediction, not by ground
+truth. The latest global-threshold SAM3-box sweep adds a strict fixed `thr0p25`
+pad16 row; scene-locked and best-fixed variants remain diagnostics.
 
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
 | CTF-GS | SigLIP2 | VPR + fixed score threshold 0.25 + RGB snap mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, fixed pad0 | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
+| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 fixed `thr0p25` | 0.6136 | 0.6409 | 0.6130 | 0.4142 | 0.5705 |
+| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad0 diagnostic | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
 | CTF-GS | SigLIP2 | diagnostic best-by-scene mIoU | 0.5327 | 0.5822 | 0.5662 | 0.2463 | 0.4819 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
 | CTF-GS | SigLIP2 | VPR + fixed score threshold 0.25 + RGB snap Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, fixed pad0 | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
+| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 fixed `thr0p25` | 0.6964 | 0.7465 | 0.7458 | 0.5455 | 0.6835 |
+| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad0 diagnostic | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
 | CTF-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.7679 | 0.7465 | 0.7627 | 0.4091 | 0.6715 |
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
 
@@ -144,11 +179,13 @@ with the OpenGaussian anchor but should not be claimed as global direct-3D SOTA.
 The latest follow-up diagnostics show that rendered-feature registration is a
 strong primitive scoring path, while official SAM3 box-prompt readout fixes the
 main direct-field boundary/fragmentation gap without changing the selected 3D
-primitive scores. Fixed pad0 improves the direct field to 0.5815 macro mIoU /
-0.7150 Acc@0.25, above the VPR/RGB-snap row. Fixed pad16 is slightly lower in
-mIoU/Acc@0.25 at 0.5807/0.6967 but gives the best boundary metrics
-(0.6814 boundary-F and 0.3897 trimap IoU). A scene-calibrated padding oracle
-reaches 0.5980/0.7150 and should remain appendix-only.
+primitive scores. Under the new strict fixed-global SAM3-box readout, pad16 at
+`thr0p25` reaches 0.5705 macro mIoU / 0.6835 Acc@0.25 / 0.6081 Acc@0.50, above
+the VPR/RGB-snap row and with the strongest tested fixed-threshold mIoU. The
+post-hoc best fixed pad16 threshold (`thr0p18`) reaches 0.5863 mIoU, and the
+scene-locked pad16 upper bound reaches 0.5972 mIoU / 0.7009 Acc@0.25 with
+0.6817 boundary-F and 0.4043 trimap IoU. These latter rows should remain
+appendix-only unless selected on held-out validation scenes.
 
 The earlier Gaussian-center direct readout was 0.0804 macro
 mIoU / 0.0932 macro Acc@0.25 under its top10%
@@ -198,11 +235,64 @@ reported separately from the still-stronger streamed registered VPR readout
 at 0.4799 / 0.6760. Two follow-up sweeps were negative: lowering the
 adapter blend to 0.3 reduced Ramen/Figurines, and a `log` weight floor of 2.0
 did not recover Figurines while reducing Ramen.
+The compression/downstream mechanism audit in
+`output/radio_gs/reports/compression_downstream_correlation.md` explicitly
+separates compactness from downstream robustness. Checkpoint saving ratio has
+only weak positive correlation with rendered mIoU (Pearson r=0.3606) and a
+negative correlation with Direct3D mIoU (r=-0.6158), mainly because Waldo has
+the highest storage saving but the weakest direct-query result. The paper
+should therefore present compact storage and direct-3D robustness as separate
+claims rather than implying compression causes better querying.
+The feature-error/text-relevance audit in
+`output/radio_gs/reports/feature_error_text_relevance_report.md` connects
+global reconstruction quality to rendered grounding errors: `1 - best validation
+cos_decoded` correlates with rendered mIoU error at Pearson r=0.9568 and with
+LocAcc error at r=0.8713 across the four frozen LERF scenes. This supports the
+feature reconstruction thesis, while remaining a scene-level mechanism audit
+rather than a per-query causal proof.
 The RGB-snap query audit in
 `output/radio_gs/reports/lerf_direct_3d_query_audit_rgb_snap_sil0p60.md`
 confirms that Waldo Kitchen remains the failure scene: 0.2429 mIoU, 0.4091
 Acc@0.25, 0.1818 zero-prediction rate, and a 95% bootstrap mIoU interval of
 [0.1487, 0.3403].
+The confidence/coverage mechanism report in
+`output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md` adds a
+GT-free explanation layer: scene-level mean valid VPR views correlate with
+strict Direct3D mIoU at Pearson r=0.7588, and query instances in the highest
+teacher-score bucket reach 0.6358 mean IoU / 0.8551 Acc@0.25 versus 0.4345 /
+0.6143 in the lowest bucket. Text-margin stratification adds the ambiguity
+view: distinct-margin queries reach 0.6202 / 0.8261 versus 0.4329 / 0.6286 for
+ambiguous queries. This supports discussing Waldo failures as a
+coverage/confidence/ambiguity bottleneck without using LERF masks for
+selection.
+The boundary-error readout in
+`output/radio_gs/reports/boundary_error_readout_report.md` adds a measured
+boundary layer for the strict pad16 SAM3-box row. Across 208 query instances,
+IoU correlates with boundary-F at Pearson r=0.9148 and with trimap IoU at
+r=0.8412. Balanced-size predictions have low mean boundary error (0.0637),
+whereas under-selection and over-selection have much higher errors (0.7042 and
+0.6919). The alpha/depth boundary-alignment instrumentation is now populated
+for the strict pad16 Direct3D rerun via `--save_geometry_maps`, and
+`output/radio_gs/reports/alpha_depth_boundary_alignment_report.md` records
+208/208 query-level geometry-map overlays. Boundary error has weak positive
+correlation with alpha/depth discontinuity statistics, and the high
+discontinuity bucket has lower mean IoU and higher boundary error than the low
+bucket. This supports boundary-mechanism discussion, not a causal
+occlusion/discontinuity proof.
+The compact qualitative subset for this diagnostic is now generated at
+`paper/figures/alpha_depth_boundary_cases.png`, with selected case provenance in
+`output/radio_gs/reports/alpha_depth_boundary_case_figure_manifest.md`.
+
+### Training-Code Auditability
+
+Use `output/radio_gs/reports/train_feature_field_audit.md`. The current
+training entry point has the important paper-freeze guards in place: run
+manifest, git metadata, artifact paths, metrics history, train/val split
+resolution, trusted checkpoint loading, and an output training lock. The audit
+now marks the release state as `pass`: `radio_gs/scripts/train_feature_field.py`
+is reduced to 3735 lines, the extracted support modules live under
+`radio_gs/training/`, and feature/text/cache tensor loads go through
+`load_training_tensor_cache`.
 
 ### DINOv3/SAM3 Downstream Adaptor Probes
 

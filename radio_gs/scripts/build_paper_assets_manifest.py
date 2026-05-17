@@ -82,6 +82,12 @@ def main() -> None:
         / "lerf_sam_dino_tasks"
         / "formal_v9_dino_readout_sweep_20260514.md"
     )
+    sam3_box_results = REPO_ROOT / "docs" / "experiments" / "2026-05-16-sam3-box-readout-results.md"
+    sam3_global_threshold_sweep = REPORT_DIR / "lerf_sam3_box_global_threshold_sweep_20260516.md"
+    sam3_geometry_threshold_sweep = REPORT_DIR / "lerf_sam3_box_global_threshold_sweep_20260517_geometry.md"
+    expert_latest_audit = (
+        REPO_ROOT / "docs" / "experiments" / "2026-05-16-expert-latest-followup-audit.md"
+    )
     manifest = {
         "generated": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "route": "conservative_submission",
@@ -147,6 +153,54 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "storage_footprint_report.md"),
                 "description": "Storage footprint report with separate optional VPR cache accounting",
             },
+            "compression_downstream_correlation.md": {
+                "path": rel(REPORT_DIR / "compression_downstream_correlation.md"),
+                "description": "Compression-ratio versus rendered/direct-3D downstream mIoU mechanism audit",
+            },
+            "compression_downstream_correlation.json": {
+                "path": rel(REPORT_DIR / "compression_downstream_correlation.json"),
+                "description": "Machine-readable compression/downstream correlation report",
+            },
+            "feature_error_text_relevance_report.md": {
+                "path": rel(REPORT_DIR / "feature_error_text_relevance_report.md"),
+                "description": "Feature reconstruction error versus rendered text-grounding error mechanism audit",
+            },
+            "feature_error_text_relevance_report.json": {
+                "path": rel(REPORT_DIR / "feature_error_text_relevance_report.json"),
+                "description": "Machine-readable feature-error/text-relevance mechanism audit",
+            },
+            "boundary_error_readout_report.md": {
+                "path": rel(REPORT_DIR / "boundary_error_readout_report.md"),
+                "description": "Measured SAM3-box boundary-error readout with per-query over/under-selection buckets",
+            },
+            "boundary_error_readout_report.json": {
+                "path": rel(REPORT_DIR / "boundary_error_readout_report.json"),
+                "description": "Machine-readable SAM3-box boundary-error readout",
+            },
+            "alpha_depth_boundary_alignment_report.md": {
+                "path": rel(REPORT_DIR / "alpha_depth_boundary_alignment_report.md"),
+                "description": "Alpha/depth discontinuity alignment coverage report for SAM3-box boundary errors",
+            },
+            "alpha_depth_boundary_alignment_report.json": {
+                "path": rel(REPORT_DIR / "alpha_depth_boundary_alignment_report.json"),
+                "description": "Machine-readable alpha/depth boundary-alignment coverage report",
+            },
+            "alpha_depth_boundary_case_figure_manifest.md": {
+                "path": rel(REPORT_DIR / "alpha_depth_boundary_case_figure_manifest.md"),
+                "description": "Selected alpha/depth boundary-case figure manifest",
+            },
+            "alpha_depth_boundary_case_figure_manifest.json": {
+                "path": rel(REPORT_DIR / "alpha_depth_boundary_case_figure_manifest.json"),
+                "description": "Machine-readable selected alpha/depth boundary-case figure manifest",
+            },
+            "train_feature_field_audit.md": {
+                "path": rel(REPORT_DIR / "train_feature_field_audit.md"),
+                "description": "Auditability and reproducibility report for the modularized training entry point",
+            },
+            "train_feature_field_audit.json": {
+                "path": rel(REPORT_DIR / "train_feature_field_audit.json"),
+                "description": "Machine-readable train_feature_field audit report",
+            },
             "paper/efficiency_cost_table.tex": {
                 "path": rel(REPO_ROOT / "paper" / "efficiency_cost_table.tex"),
                 "description": "LaTeX efficiency/cost table",
@@ -154,6 +208,26 @@ def main() -> None:
             "paper/storage_footprint_table.tex": {
                 "path": rel(REPO_ROOT / "paper" / "storage_footprint_table.tex"),
                 "description": "LaTeX compact-storage and optional VPR cache table",
+            },
+            "paper/compression_downstream_correlation_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "compression_downstream_correlation_table.tex"),
+                "description": "LaTeX compression/downstream correlation table",
+            },
+            "paper/feature_error_text_relevance_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "feature_error_text_relevance_table.tex"),
+                "description": "LaTeX feature-error/text-relevance mechanism table",
+            },
+            "paper/boundary_error_readout_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "boundary_error_readout_table.tex"),
+                "description": "LaTeX SAM3-box boundary-error readout table",
+            },
+            "paper/alpha_depth_boundary_alignment_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "alpha_depth_boundary_alignment_table.tex"),
+                "description": "LaTeX alpha/depth boundary-alignment coverage table",
+            },
+            "paper/train_feature_field_audit_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "train_feature_field_audit_table.tex"),
+                "description": "LaTeX training-entry auditability table",
             },
             "paper/lerf_ovs_main_table.tex": {
                 "path": rel(REPO_ROOT / "paper" / "lerf_ovs_main_table.tex"),
@@ -215,6 +289,138 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "lerf_vpr_direct_3d_qualitative_manifest.json"),
                 "description": "Manifest for VPR direct 3D qualitative cases",
             },
+            "2026-05-16-sam3-box-readout-results.md": {
+                "path": rel(sam3_box_results),
+                "description": "Official SAM3 box-prompt direct-3D readout results and protocol note",
+            },
+            "2026-05-16-expert-latest-followup-audit.md": {
+                "path": rel(expert_latest_audit),
+                "description": "Checklist mapping the latest expert recommendations to current artifacts and remaining gaps",
+            },
+            "lerf_sam3_box_global_threshold_sweep_20260516.md": {
+                "path": rel(sam3_global_threshold_sweep),
+                "description": "Fixed-global-threshold SAM3 box direct-3D padding sweep summary",
+            },
+            "lerf_sam3_box_global_threshold_sweep_20260516.json": {
+                "path": rel(REPORT_DIR / "lerf_sam3_box_global_threshold_sweep_20260516.json"),
+                "description": "Machine-readable fixed-global-threshold SAM3 box direct-3D sweep manifest",
+            },
+            "lerf_sam3_box_global_threshold_sweep_20260517_geometry.md": {
+                "path": rel(sam3_geometry_threshold_sweep),
+                "description": "Geometry-map rerun of the strict pad16 SAM3 box direct-3D sweep",
+            },
+            "lerf_sam3_box_global_threshold_sweep_20260517_geometry.json": {
+                "path": rel(REPORT_DIR / "lerf_sam3_box_global_threshold_sweep_20260517_geometry.json"),
+                "description": "Machine-readable geometry-map rerun of the strict pad16 SAM3 box direct-3D sweep",
+            },
+            "controlled_evidence_table.md": {
+                "path": rel(REPORT_DIR / "controlled_evidence_table.md"),
+                "description": "Controlled evidence table combining teacher, full CTF-GS, ablations, direct-3D readouts, storage, and runtime",
+            },
+            "controlled_evidence_table.json": {
+                "path": rel(REPORT_DIR / "controlled_evidence_table.json"),
+                "description": "Machine-readable controlled evidence table",
+            },
+            "lerf_nearest_view_cache_baseline.md": {
+                "path": rel(REPORT_DIR / "lerf_nearest_view_cache_baseline.md"),
+                "description": "Measured unwarped nearest-view RADIO cache baseline under the LERF evaluator",
+            },
+            "lerf_nearest_view_cache_baseline.json": {
+                "path": rel(REPORT_DIR / "lerf_nearest_view_cache_baseline.json"),
+                "description": "Machine-readable nearest-view RADIO cache baseline",
+            },
+            "paper/lerf_nearest_view_cache_baseline_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_nearest_view_cache_baseline_table.tex"),
+                "description": "LaTeX nearest-view RADIO cache baseline table",
+            },
+            "lerf_per_gaussian_1280d_baseline.md": {
+                "path": rel(REPORT_DIR / "lerf_per_gaussian_1280d_baseline.md"),
+                "description": "Measured per-Gaussian 1280-D explicit RADIO-memory baseline under the LERF evaluator",
+            },
+            "lerf_per_gaussian_1280d_baseline.json": {
+                "path": rel(REPORT_DIR / "lerf_per_gaussian_1280d_baseline.json"),
+                "description": "Machine-readable per-Gaussian 1280-D explicit RADIO-memory baseline",
+            },
+            "paper/lerf_per_gaussian_1280d_baseline_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_per_gaussian_1280d_baseline_table.tex"),
+                "description": "LaTeX per-Gaussian 1280-D explicit RADIO-memory baseline table",
+            },
+            "controlled_baseline_gap_audit.md": {
+                "path": rel(REPORT_DIR / "controlled_baseline_gap_audit.md"),
+                "description": "Audit documenting nearest-view measured status and per-Gaussian 1280-D explicit measured controlled baseline row",
+            },
+            "waldo_failure_stratification.md": {
+                "path": rel(REPORT_DIR / "waldo_failure_stratification.md"),
+                "description": "Waldo Kitchen direct-3D object-size and zero-prediction failure stratification",
+            },
+            "waldo_failure_stratification.json": {
+                "path": rel(REPORT_DIR / "waldo_failure_stratification.json"),
+                "description": "Machine-readable Waldo Kitchen failure stratification",
+            },
+            "lerf_direct3d_confidence_coverage_analysis.md": {
+                "path": rel(REPORT_DIR / "lerf_direct3d_confidence_coverage_analysis.md"),
+                "description": "Direct3D scene view-coverage and teacher-score confidence mechanism analysis",
+            },
+            "lerf_direct3d_confidence_coverage_analysis.json": {
+                "path": rel(REPORT_DIR / "lerf_direct3d_confidence_coverage_analysis.json"),
+                "description": "Machine-readable Direct3D confidence/coverage mechanism analysis",
+            },
+            "paper/lerf_direct3d_confidence_coverage_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_direct3d_confidence_coverage_table.tex"),
+                "description": "LaTeX Direct3D confidence/coverage mechanism table",
+            },
+            "verify_submission_provenance.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "verify_submission_provenance.py"),
+                "description": "Verifier for required row-level provenance fields in the submission freeze manifest",
+            },
+            "build_waldo_failure_stratification.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_waldo_failure_stratification.py"),
+                "description": "Generator for Waldo Kitchen failure stratification report",
+            },
+            "build_direct3d_confidence_coverage_report.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_direct3d_confidence_coverage_report.py"),
+                "description": "Generator for Direct3D confidence/coverage mechanism report",
+            },
+            "build_compression_downstream_correlation.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_compression_downstream_correlation.py"),
+                "description": "Generator for compression-ratio versus downstream-mIoU correlation report",
+            },
+            "build_feature_error_text_relevance_report.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_feature_error_text_relevance_report.py"),
+                "description": "Generator for feature-error versus text-relevance mechanism report",
+            },
+            "build_boundary_error_report.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_boundary_error_report.py"),
+                "description": "Generator for SAM3-box boundary-error readout report",
+            },
+            "build_alpha_depth_boundary_alignment_report.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_alpha_depth_boundary_alignment_report.py"),
+                "description": "Generator for alpha/depth boundary-alignment coverage report",
+            },
+            "build_alpha_depth_case_figure.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_alpha_depth_case_figure.py"),
+                "description": "Generator for selected alpha/depth boundary-case figure",
+            },
+            "build_train_feature_field_audit.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_train_feature_field_audit.py"),
+                "description": "Generator for train_feature_field auditability report",
+            },
+            "build_lerf_nearest_view_cache_baseline.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_lerf_nearest_view_cache_baseline.py"),
+                "description": "Generator for the unwarped nearest-view RADIO cache baseline",
+            },
+            "build_lerf_per_gaussian_1280d_baseline.py": {
+                "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_lerf_per_gaussian_1280d_baseline.py"),
+                "description": "Generator for the per-Gaussian 1280-D explicit RADIO-memory baseline",
+            },
+            "lerf_sam3_box_direct_3d_qualitative_manifest.json": {
+                "path": rel(REPORT_DIR / "lerf_sam3_box_direct_3d_qualitative_manifest.json"),
+                "description": "Manifest for fixed-pad0 SAM3 box direct-3D qualitative cases",
+            },
+            "lerf_sam3_box_direct_3d_qualitative_pad16_manifest.json": {
+                "path": rel(REPORT_DIR / "lerf_sam3_box_direct_3d_qualitative_pad16_manifest.json"),
+                "description": "Manifest for fixed-pad16 SAM3 box boundary-diagnostic qualitative cases",
+            },
             "paper/radio_gs_draft.tex": {
                 "path": rel(REPO_ROOT / "paper" / "radio_gs_draft.tex"),
                 "description": "Current LaTeX paper draft",
@@ -250,6 +456,8 @@ def main() -> None:
         "lerf_adaptor_downstream_qualitative.png": "DINOv3/SAM3 adaptor qualitative probes",
         "lerf_sam_dino_tasks_qualitative.png": "Formal SAM/DINO downstream task qualitative probes",
         "lerf_vpr_direct_3d_qualitative.png": "VPR direct 3D object-selection qualitative grid",
+        "lerf_sam3_box_direct_3d_qualitative_pad16.png": "SAM3 box direct-3D boundary diagnostic qualitative grid",
+        "alpha_depth_boundary_cases.png": "Selected alpha/depth boundary-case montage for SAM3-box diagnostics",
     }
     for name, description in paper_figure_descriptions.items():
         path = PAPER_FIG_DIR / name

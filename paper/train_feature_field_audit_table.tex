@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Auditability checks for the training entry point. Status `risk' means the guard exists but needs release hardening.}
+\label{tab:train_feature_field_audit}
+\begin{tabular}{llll}
+\toprule
+Check & Status & Severity & Evidence \\
+\midrule
+script\_size & pass & medium & 3735 lines; threshold 4000 \\
+run\_manifest & pass & high & present \\
+split\_resolution & pass & high & train/val split tokens present \\
+trusted\_checkpoint\_io & pass & high & load\_trusted\_checkpoint referenced \\
+training\_lock & pass & medium & lock acquisition/release present \\
+raw\_tensor\_load\_sites & pass & medium & 1 raw torch.load site behind or replaced by load\_training\_tensor\_cache \\
+\bottomrule
+\end{tabular}
+\end{table}

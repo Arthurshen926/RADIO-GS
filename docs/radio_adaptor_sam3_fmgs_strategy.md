@@ -217,12 +217,13 @@ Fixed-padding results:
 | direct field + official SAM3 box, pad0 | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 | 0.7150 | 0.6731 | 0.3777 |
 | direct field + official SAM3 box, pad16 | 0.6422 | 0.6529 | 0.6165 | 0.4110 | 0.5807 | 0.6967 | 0.6814 | 0.3897 |
 
-The pad0 row is the safer main-table setting because it has the best fixed
-macro mIoU/Acc@0.25. The pad16 row is useful for the boundary-risk analysis,
-because it gives the best fixed boundary-F and trimap IoU. Best-by-scene
-padding reaches 0.5980 macro mIoU / 0.7150 Acc@0.25, but should stay in the
-appendix as a sensitivity diagnostic unless a validation-based padding protocol
-is added.
+These fixed-padding exports are best-by-scene diagnostics. The later
+global-threshold sweep adds a strict paper-facing SAM3-box row: pad16 with a
+fixed global `thr0p25` selector reaches 0.5705 macro mIoU / 0.6835 Acc@0.25 /
+0.6081 Acc@0.50, with 0.6681 boundary-F and 0.3958 trimap IoU. The scene-locked
+pad16 upper bound reaches 0.5972 / 0.7009 and the legacy pad0 best-by-scene
+export reaches 0.5815 / 0.7150, but both stay diagnostics unless selected by a
+held-out validation protocol.
 
 ## Full-Experiment Status
 

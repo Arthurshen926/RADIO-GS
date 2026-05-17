@@ -16,8 +16,10 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     boundary_f_score,
     choose_sam3_box_refined_mask,
     choose_registration_refiner,
+    compute_geometry_boundary_alignment,
     compute_selection_ranking_scores,
     compute_raster_contribution_weights,
+    geometry_discontinuity_maps,
     load_score_cache,
     merge_registered_scores,
     accumulate_raster_contribution_features,
@@ -57,6 +59,7 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
 
     assert result.returncode == 0, result.stderr
     assert "--mask_refinement_erode" in result.stdout
+    assert "--save_geometry_maps" in result.stdout
 
 
 def test_select_registration_frame_ids_uses_official_available_frames():
@@ -570,6 +573,40 @@ def test_trimap_iou_ignores_far_background():
     score = trimap_iou(pred, gt, dilation_pixels=2)
 
     assert 0.95 <= score <= 1.0
+
+
+def test_geometry_discontinuity_maps_detect_alpha_and_depth_edges():
+    alpha = np.zeros((16, 16), dtype=np.float32)
+    alpha[:, 8:] = 1.0
+    depth = np.ones((16, 16), dtype=np.float32)
+    depth[8:, :] = 3.0
+
+    maps = geometry_discontinuity_maps(alpha, depth)
+
+    assert set(maps) == {"alpha_edge", "depth_edge", "discontinuity"}
+    assert maps["alpha_edge"][:, 7:9].mean() > maps["alpha_edge"][:, :3].mean()
+    assert maps["depth_edge"][7:9, :].mean() > maps["depth_edge"][:3, :].mean()
+    assert maps["discontinuity"].max() <= 1.0
+
+
+def test_compute_geometry_boundary_alignment_scores_query_boundaries():
+    alpha = np.zeros((32, 32), dtype=np.float32)
+    alpha[:, 16:] = 1.0
+    depth = np.ones((32, 32), dtype=np.float32)
+    depth[16:, :] = 4.0
+    gt = np.zeros((32, 32), dtype=np.uint8)
+    gt[8:24, 8:24] = 1
+    pred = np.zeros_like(gt)
+    pred[8:24, 12:28] = 1
+
+    metrics = compute_geometry_boundary_alignment(pred, gt, alpha, depth)
+
+    assert metrics["geometry_valid"] == 1
+    assert metrics["gt_boundary_pixels"] > 0
+    assert metrics["pred_boundary_pixels"] > 0
+    assert metrics["discontinuity_gt_boundary_mean"] > 0.0
+    assert metrics["discontinuity_pred_boundary_mean"] > 0.0
+    assert metrics["discontinuity_error_boundary_mean"] >= 0.0
 
 
 def test_apply_selection_ratio_bounds_adds_floor_and_caps_selected_scores():

@@ -1,0 +1,15 @@
+\begin{table}[t]
+\centering
+\caption{Feature reconstruction error versus text relevance error. Feature error is $1-$ best validation decoded cosine from the scene training log; text relevance errors are derived from the frozen rendered-grounding readout.}
+\label{tab:feature_error_text_relevance}
+\begin{tabular}{lrrrr}
+\toprule
+Scene & Feature err. & mIoU err. & LocAcc err. & Best cosine \\
+\midrule
+Figurines & 0.2382 & 0.5756 & 0.1786 & 0.7618 \\
+Ramen & 0.1624 & 0.3799 & 0.0986 & 0.8376 \\
+Teatime & 0.2005 & 0.4240 & 0.1017 & 0.7995 \\
+Waldo Kitchen & 0.2209 & 0.5231 & 0.1364 & 0.7791 \\
+\bottomrule
+\end{tabular}
+\end{table}

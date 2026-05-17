@@ -1,0 +1,17 @@
+\begin{table}[t]
+\centering
+\caption{Nearest-view cached-teacher baseline on LERF-OVS. Each annotated target frame uses the closest cached RADIO feature map by camera-center distance, excluding the target frame itself; the feature map is not warped into the target camera.}
+\label{tab:nearest_view_cache_baseline}
+\begin{tabular}{lrrrr}
+\toprule
+Scene & LocAcc & mIoU & N & Dist. \\
+\midrule
+Figurines & 0.1786 & 0.0755 & 56 & 0.2831 \\
+Ramen & 0.2817 & 0.1740 & 71 & 0.5443 \\
+Teatime & 0.3559 & 0.2114 & 59 & 0.4266 \\
+Waldo Kitchen & 0.2727 & 0.1570 & 22 & 0.5787 \\
+\midrule
+Macro & 0.2722 & 0.1545 & -- & 0.4582 \\
+\bottomrule
+\end{tabular}
+\end{table}

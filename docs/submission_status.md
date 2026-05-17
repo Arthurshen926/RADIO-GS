@@ -26,22 +26,36 @@ The current generated freeze package is:
 
 - [submission_freeze_report.md](../output/radio_gs/reports/submission_freeze_report.md)
 - [submission_freeze_manifest.json](../output/radio_gs/reports/submission_freeze_manifest.json)
+- [verify_submission_provenance.py](../radio_gs/scripts/verify_submission_provenance.py)
 - [submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
 - [submission_freeze_figure_shortlist.md](../output/radio_gs/reports/submission_freeze_figure_shortlist.md)
 - [efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
+- [controlled_evidence_table.md](../output/radio_gs/reports/controlled_evidence_table.md)
+- [lerf_nearest_view_cache_baseline.md](../output/radio_gs/reports/lerf_nearest_view_cache_baseline.md)
+- [lerf_per_gaussian_1280d_baseline.md](../output/radio_gs/reports/lerf_per_gaussian_1280d_baseline.md)
+- [train_feature_field_audit.md](../output/radio_gs/reports/train_feature_field_audit.md)
 - [baseline_source_verification.md](../output/radio_gs/reports/baseline_source_verification.md)
 - [lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
 - [lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
+- [waldo_failure_stratification.md](../output/radio_gs/reports/waldo_failure_stratification.md)
 - [vpr_protocol_card.md](../output/radio_gs/reports/vpr_protocol_card.md)
 - [vpr_contribution_weighting_ablation.md](../output/radio_gs/reports/vpr_contribution_weighting_ablation.md)
 - [lerf_direct_3d_published_context.md](../output/radio_gs/reports/lerf_direct_3d_published_context.md)
 - [expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
+- [expert latest follow-up audit](experiments/2026-05-16-expert-latest-followup-audit.md)
 - [paper_draft_current.md](paper_draft_current.md)
 - [PROJECT_MAINLINE.md](PROJECT_MAINLINE.md)
 - [radio_gs_draft.tex](../paper/radio_gs_draft.tex)
 
 These generated files supersede older manually edited status notes when numbers
 conflict.
+
+The freeze manifest is now expected to pass:
+
+```bash
+bash radio_gs/scripts/run_repo_python.sh radio_gs/scripts/verify_submission_provenance.py \
+  output/radio_gs/reports/submission_freeze_manifest.json --check_paths --root /root/RADIO-GS
+```
 
 ## Best-supported paper framing
 
@@ -127,6 +141,11 @@ Under that framing, the paper solves the following problem:
     paper-facing 128-view VPR readout uses a fixed global softmax-score
     threshold of 0.25 with a 0.5% floor, 1.8% cap, and GT-free RGB snap,
     reaching 0.4801 / 0.6760.
+    The compact direct-field row with frozen official SAM3 box-prompt boundary
+    readout is reported separately from primitive scoring. Its strict fixed
+    global pad16 `thr0p25` selector reaches 0.5705 macro mIoU / 0.6835
+    Acc@0.25, while the scene-locked diagnostic upper bound reaches
+    0.5972 / 0.7009.
     This closes most of the primitive-level gap and slightly exceeds
     OpenGaussian's official macro mIoU and Acc@0.25 reference, while still
     requiring a provenance caveat because baselines are not locally rerun and
@@ -178,9 +197,21 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
 - [output/radio_gs/reports/efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
 - [output/radio_gs/reports/efficiency_cost_table.md](../output/radio_gs/reports/efficiency_cost_table.md)
+- [output/radio_gs/reports/compression_downstream_correlation.md](../output/radio_gs/reports/compression_downstream_correlation.md)
+- [output/radio_gs/reports/feature_error_text_relevance_report.md](../output/radio_gs/reports/feature_error_text_relevance_report.md)
+- [output/radio_gs/reports/boundary_error_readout_report.md](../output/radio_gs/reports/boundary_error_readout_report.md)
+- [output/radio_gs/reports/alpha_depth_boundary_alignment_report.md](../output/radio_gs/reports/alpha_depth_boundary_alignment_report.md)
+- [output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260517_geometry.md](../output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260517_geometry.md)
+- [output/radio_gs/reports/train_feature_field_audit.md](../output/radio_gs/reports/train_feature_field_audit.md)
 - [output/radio_gs/reports/lerf_component_ablation.md](../output/radio_gs/reports/lerf_component_ablation.md)
+- [output/radio_gs/reports/controlled_evidence_table.md](../output/radio_gs/reports/controlled_evidence_table.md)
+- [output/radio_gs/reports/lerf_nearest_view_cache_baseline.md](../output/radio_gs/reports/lerf_nearest_view_cache_baseline.md)
+- [output/radio_gs/reports/lerf_per_gaussian_1280d_baseline.md](../output/radio_gs/reports/lerf_per_gaussian_1280d_baseline.md)
+- [output/radio_gs/reports/controlled_baseline_gap_audit.md](../output/radio_gs/reports/controlled_baseline_gap_audit.md)
 - [output/radio_gs/reports/lerf_direct_3d_selection.md](../output/radio_gs/reports/lerf_direct_3d_selection.md)
 - [output/radio_gs/reports/lerf_direct_3d_debug_audit.md](../output/radio_gs/reports/lerf_direct_3d_debug_audit.md)
+- [output/radio_gs/reports/waldo_failure_stratification.md](../output/radio_gs/reports/waldo_failure_stratification.md)
+- [output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md](../output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md)
 - [output/radio_gs/reports/lerf_direct_3d_query_audit_rgb_snap_sil0p60.md](../output/radio_gs/reports/lerf_direct_3d_query_audit_rgb_snap_sil0p60.md)
 - [output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md](../output/radio_gs/reports/lerf_rendered_grounding_adaptive_threshold_diagnostic.md)
 - [output/radio_gs/reports/vpr_protocol_card.md](../output/radio_gs/reports/vpr_protocol_card.md)
@@ -188,6 +219,7 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/vpr_field_confidence_weighting_20260515.md](../output/radio_gs/reports/vpr_field_confidence_weighting_20260515.md)
 - [docs/raster_proposal_audit_20260515.md](raster_proposal_audit_20260515.md)
 - [output/radio_gs/reports/lerf_direct_3d_published_context.md](../output/radio_gs/reports/lerf_direct_3d_published_context.md)
+- [output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260516.md](../output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260516.md)
 - [output/radio_gs/reports/expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
 - [output/radio_gs/reports/expert5_improvement_update.md](../output/radio_gs/reports/expert5_improvement_update.md)
 - [output/radio_gs/reports/scannet_prompt_calibration_ablation.md](../output/radio_gs/reports/scannet_prompt_calibration_ablation.md)
@@ -235,6 +267,23 @@ local LERF scenes have images and labels, but `language_features/*_s.npy` and
 `language_features/*_f.npy` counts are zero, so the official OpenGaussian LeRF
 training/evaluation recipe cannot be rerun locally without the reannotated
 language-feature assets.
+The internal nearest-view cache control is now measured under the same LERF
+readout: unwarped closest cached RADIO frames reach 0.2722 macro LocAcc /
+0.1545 macro mIoU, far below rendered CTF-GS at 0.8712 / 0.5243. The full
+per-Gaussian 1280-D explicit same-evaluator row is also measured: registered
+fp16 teacher features attached to Gaussian primitives reach 0.5642 macro LocAcc
+/ 0.3182 macro mIoU with 0.2020 mean registered-Gaussian fraction and 1039.7
+MiB mean fp16 feature storage. This closes the controlled raw-feature baseline
+gap.
+Alpha/depth discontinuity instrumentation is implemented in the Direct3D
+evaluator, and the strict pad16 geometry-map rerun now gives 208/208 query
+records and overlays in `alpha_depth_boundary_alignment_report.md`. The
+alpha/depth correlations with boundary error are weak, so this should be used
+as mechanism context rather than causal occlusion proof.
+The training entry point is now audited in `train_feature_field_audit.md`.
+Critical guards are present and feature/text/cache tensor loads now go through
+`load_training_tensor_cache`. After modularizing support code under
+`radio_gs/training/`, the audit now passes with a 3735-line entry script.
 
 ### 2. Cross-domain generalization is improved, but needs paper-safe framing
 

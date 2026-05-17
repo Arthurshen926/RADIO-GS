@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features and GT-free RGB snap. The SAM3-box row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout refinement selected by overlap with the rendered mask, not by ground truth.}
+  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features, a fixed global threshold, and GT-free RGB snap. The SAM3-box fixed row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout selected by overlap with the rendered mask, not by ground truth. The scene-locked SAM3-box row is diagnostic.}
   \label{tab:lerf-direct-3d-selection}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccccc}
@@ -9,12 +9,14 @@
     \midrule
     OpenGaussian & mIoU & 0.393 & 0.310 & 0.604 & 0.227 & 0.384 \\
     CTF-GS & thr0p25 mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
-    CTF-GS & direct field + SAM3 box mIoU & 0.592 & 0.683 & 0.656 & 0.395 & 0.581 \\
+    CTF-GS & SAM3 box fixed mIoU & 0.614 & 0.641 & 0.613 & 0.414 & 0.570 \\
+    CTF-GS & SAM3 box scene-locked mIoU & 0.642 & 0.649 & 0.653 & 0.444 & 0.597 \\
     CTF-GS & diag. best mIoU & 0.533 & 0.582 & 0.566 & 0.246 & 0.482 \\
     \midrule
     OpenGaussian & Acc@0.25 & 0.554 & 0.422 & 0.763 & 0.318 & 0.514 \\
     CTF-GS & thr0p25 Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
-    CTF-GS & direct field + SAM3 box Acc@0.25 & 0.732 & 0.803 & 0.780 & 0.546 & 0.715 \\
+    CTF-GS & SAM3 box fixed Acc@0.25 & 0.696 & 0.746 & 0.746 & 0.546 & 0.684 \\
+    CTF-GS & SAM3 box scene-locked Acc@0.25 & 0.732 & 0.746 & 0.780 & 0.546 & 0.701 \\
     \bottomrule
   \end{tabular}
   }

@@ -6,17 +6,123 @@ import json
 import csv
 import argparse
 import re
+import hashlib
+import subprocess
+import ast
 from pathlib import Path
 from typing import Any
 
 
 SCAN_SPLITS = ("19", "15", "10")
+DIRECT3D_SCENES = ("figurines", "ramen", "teatime", "waldo_kitchen")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REPORT_DIR = REPO_ROOT / "output" / "radio_gs" / "reports"
+LERF_PROVENANCE_JSON = REPO_ROOT / "output" / "radio_gs" / "lerf_summary_tables" / "current_best_lerf_ovs_per_scene.json"
+EVALUATOR_SCRIPTS = {
+    "eval_lerf_grounding": "radio_gs/scripts/eval_lerf_grounding.py",
+    "eval_scannet_pointcloud_radio_gs": "radio_gs/scripts/eval_scannet_pointcloud_radio_gs.py",
+    "eval_lerf_direct_3d_selection": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+}
 
 
 def _round4(value: float) -> float:
     return round(float(value), 4)
+
+
+def _sha256_path(path: str | Path) -> str:
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        candidate = REPO_ROOT / candidate
+    if not candidate.exists() or not candidate.is_file():
+        return ""
+    digest = hashlib.sha256()
+    with candidate.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _config_scalar(config_path: str | Path, key: str) -> str:
+    candidate = Path(config_path)
+    if not candidate.is_absolute():
+        candidate = REPO_ROOT / candidate
+    if not candidate.exists() or not candidate.is_file():
+        return ""
+    pattern = re.compile(rf"^\s*{re.escape(key)}\s*:\s*(.+?)\s*$")
+    for line in candidate.read_text(encoding="utf-8", errors="ignore").splitlines():
+        match = pattern.match(line)
+        if not match:
+            continue
+        value = match.group(1).split("#", 1)[0].strip()
+        return value.strip("\"'")
+    return ""
+
+
+def _config_provenance(config_path: str | Path) -> dict[str, Any]:
+    if not config_path:
+        return {
+            "config_sha256": "",
+            "teacher_model": "",
+            "feature_manifest": "",
+            "seed": "",
+        }
+    return {
+        "config_sha256": _sha256_path(config_path),
+        "teacher_model": _config_scalar(config_path, "radio_version"),
+        "feature_manifest": _config_scalar(config_path, "feature_dir"),
+        "seed": _config_scalar(config_path, "seed"),
+    }
+
+
+def _evaluator_provenance(evaluator: str) -> dict[str, str]:
+    script = EVALUATOR_SCRIPTS.get(evaluator, "")
+    return {
+        "evaluator": evaluator,
+        "evaluator_script": script,
+        "evaluator_sha256": _sha256_path(script) if script else "",
+    }
+
+
+def _path_from_payload_value(value: Any) -> str:
+    if isinstance(value, dict):
+        return str(value.get("path", ""))
+    if isinstance(value, str) and value.strip().startswith("{"):
+        try:
+            parsed = ast.literal_eval(value)
+        except (SyntaxError, ValueError):
+            return value
+        if isinstance(parsed, dict):
+            return str(parsed.get("path", value))
+    return str(value or "")
+
+
+def _git_metadata() -> dict[str, Any]:
+    def _run_git(args: list[str]) -> str:
+        try:
+            return subprocess.check_output(
+                ["git", *args],
+                cwd=REPO_ROOT,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            return ""
+
+    status = _run_git(["status", "--short"])
+    return {
+        "git_commit": _run_git(["rev-parse", "HEAD"]),
+        "git_branch": _run_git(["branch", "--show-current"]),
+        "git_dirty": bool(status),
+    }
+
+
+def _load_lerf_provenance_index(path: str | Path = LERF_PROVENANCE_JSON) -> dict[str, dict[str, Any]]:
+    candidate = Path(path)
+    if not candidate.exists():
+        return {}
+    payload = json.loads(candidate.read_text(encoding="utf-8"))
+    scenes = payload.get("scenes", {})
+    return {str(scene): dict(value) for scene, value in scenes.items()}
 
 
 def collect_scannet_v67(eval_root: str | Path) -> dict[str, Any]:
@@ -41,10 +147,25 @@ def collect_scannet_v67(eval_root: str | Path) -> dict[str, Any]:
                 f"{args.get('gaussian_index_position_mode')}"
             )
         macro = payload["macro"]
+        config = str(args.get("config", ""))
+        config_meta = _config_provenance(config)
+        evaluator_meta = _evaluator_provenance("eval_scannet_pointcloud_radio_gs")
         rows.append(
             {
                 "scene": scene,
                 "path": str(path),
+                "source": str(path),
+                "config": config,
+                "checkpoint": str(args.get("checkpoint", "")),
+                "config_sha256": config_meta["config_sha256"],
+                "teacher_model": str(args.get("radio_checkpoint") or config_meta["teacher_model"]),
+                "feature_manifest": config_meta["feature_manifest"]
+                or str(Path(str(args.get("prepared_root", ""))) / scene),
+                "seed": str(args.get("sample_seed") or config_meta["seed"]),
+                "text_embedding_cache": str(args.get("text_embedding_cache", "")),
+                "selector_policy": "v67_teacherbalanced_gaussian_index_labelpoint",
+                "text_head": "SigLIP2",
+                **evaluator_meta,
                 "miou": {split: float(macro[split]["miou"]) for split in SCAN_SPLITS},
                 "macc": {split: float(macro[split]["macc"]) for split in SCAN_SPLITS},
             }
@@ -71,6 +192,9 @@ def collect_scannet_v67(eval_root: str | Path) -> dict[str, Any]:
         "rows": rows,
         "macro_miou": macro_miou,
         "macro_macc": macro_macc,
+        "selector_policy": "v67_teacherbalanced_gaussian_index_labelpoint",
+        "text_head": "SigLIP2",
+        **_evaluator_provenance("eval_scannet_pointcloud_radio_gs"),
         "warnings": warnings,
     }
 
@@ -122,15 +246,32 @@ def _load_sweep_variant(path: str | Path, value: str | float) -> tuple[Path, str
 
 def collect_lerf_threshold_sweep(path: str | Path, threshold: str | float) -> dict[str, Any]:
     sweep_path, key, variant = _load_sweep_variant(path, threshold)
+    provenance_index = _load_lerf_provenance_index()
     rows = []
+    evaluator_meta = _evaluator_provenance("eval_lerf_grounding")
     for row in variant.get("rows", []):
+        scene = str(row["scene"])
+        provenance = provenance_index.get(scene, {})
+        config = str(provenance.get("config", ""))
+        config_meta = _config_provenance(config)
         rows.append(
             {
-                "scene": row["scene"],
+                "scene": scene,
                 "loc_acc": _round4(float(row["loc"])),
                 "miou": _round4(float(row["miou"])),
                 "temp": row.get("temp", ""),
                 "summary": str(sweep_path),
+                "source": str(sweep_path),
+                "config": config,
+                "checkpoint": str(provenance.get("checkpoint", "")),
+                "config_sha256": config_meta["config_sha256"],
+                "teacher_model": config_meta["teacher_model"] or "c-radio_v4-h",
+                "feature_manifest": config_meta["feature_manifest"],
+                "seed": config_meta["seed"],
+                "selector_policy": f"fixed_threshold:{key}",
+                "threshold_rule": f"fixed global threshold {key}",
+                "text_head": "SigLIP2",
+                **evaluator_meta,
                 "n": int(row.get("n", 0)),
             }
         )
@@ -143,6 +284,11 @@ def collect_lerf_threshold_sweep(path: str | Path, threshold: str | float) -> di
         "weighted_loc_acc": _round4(float(weighted.get("loc", 0.0))),
         "weighted_miou": _round4(float(weighted.get("miou", 0.0))),
         "readout": f"threshold {key}",
+        "selector_policy": f"fixed_threshold:{key}",
+        "threshold_rule": f"fixed global threshold {key}",
+        "text_head": "SigLIP2",
+        "teacher_model": "c-radio_v4-h",
+        **_evaluator_provenance("eval_lerf_grounding"),
         "source": str(sweep_path),
         "warnings": [],
     }
@@ -174,6 +320,139 @@ def collect_direct3d_silhouette_sweep(path: str | Path, silhouette: str | float)
         "rows": rows,
         "source": str(sweep_path),
         "warnings": [],
+    }
+
+
+def _load_direct3d_scene_payload(root: Path, scene: str) -> tuple[Path, dict[str, Any]] | None:
+    preferred = [
+        root / scene / "lerf_direct_3d_selection_results.json",
+        root / scene / scene / "lerf_direct_3d_selection_results.json",
+    ]
+    for path in preferred:
+        if not path.exists():
+            continue
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("scene", {}).get("scene") == scene:
+            return path, payload
+
+    matches: list[tuple[Path, dict[str, Any]]] = []
+    for path in sorted(root.glob("**/lerf_direct_3d_selection_results.json")):
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        if payload.get("scene", {}).get("scene") == scene:
+            matches.append((path, payload))
+    if not matches:
+        return None
+    return min(matches, key=lambda item: (len(item[0].parts), str(item[0])))
+
+
+def _select_direct3d_result(
+    scene_payload: dict[str, Any],
+    fixed_tag: str | None,
+) -> tuple[str, dict[str, Any], str]:
+    results = scene_payload.get("results", {})
+    if not results:
+        raise KeyError(f"No direct-3D results for scene {scene_payload.get('scene', 'unknown')}")
+    if fixed_tag and fixed_tag != "best":
+        if fixed_tag not in results:
+            raise KeyError(
+                f"Selection tag {fixed_tag!r} not found for scene "
+                f"{scene_payload.get('scene', 'unknown')}"
+            )
+        return fixed_tag, results[fixed_tag], f"fixed:{fixed_tag}"
+    tag = scene_payload.get("best_by_miou") or max(results, key=lambda key: float(results[key]["miou"]))
+    return str(tag), results[tag], "best_by_miou"
+
+
+def _mean_metric(rows: list[dict[str, Any]], key: str) -> float:
+    if not rows:
+        return 0.0
+    return _round4(sum(float(row.get(key, 0.0)) for row in rows) / len(rows))
+
+
+def collect_direct3d_scene_readout(
+    root: str | Path,
+    *,
+    label: str,
+    text_head: str,
+    protocol_label: str,
+    fixed_tag: str | None = None,
+) -> dict[str, Any]:
+    """Collect a paper-facing direct-3D readout from per-scene result JSON files."""
+
+    root_path = Path(root)
+    rows: list[dict[str, Any]] = []
+    raw_rows: list[dict[str, float]] = []
+    warnings: list[str] = []
+    first_protocol: dict[str, Any] = {}
+    selector_policy = "best_by_miou" if not fixed_tag or fixed_tag == "best" else f"fixed:{fixed_tag}"
+    evaluator_meta = _evaluator_provenance("eval_lerf_direct_3d_selection")
+
+    for scene in DIRECT3D_SCENES:
+        match = _load_direct3d_scene_payload(root_path, scene)
+        if match is None:
+            warnings.append(f"missing direct-3D scene result for {scene} under {root_path}")
+            continue
+        path, payload = match
+        args = payload.get("args", {})
+        scene_payload = payload.get("scene", {})
+        if not first_protocol:
+            first_protocol = dict(payload.get("protocol", {}))
+        tag, metrics, observed_policy = _select_direct3d_result(scene_payload, fixed_tag)
+        selector_policy = observed_policy if selector_policy == "best_by_miou" else selector_policy
+        config = str(scene_payload.get("config") or args.get("config", ""))
+        config_meta = _config_provenance(config)
+        raw_row = {
+            "miou": float(metrics.get("miou", 0.0)),
+            "acc025": float(metrics.get("acc025", 0.0)),
+            "acc050": float(metrics.get("acc050", 0.0)),
+            "boundary_f": float(metrics.get("boundary_f", 0.0)),
+            "trimap_iou": float(metrics.get("trimap_iou", 0.0)),
+        }
+        raw_rows.append(raw_row)
+        rows.append(
+            {
+                "scene": scene,
+                "selection": tag,
+                "miou": _round4(raw_row["miou"]),
+                "acc025": _round4(raw_row["acc025"]),
+                "acc050": _round4(raw_row["acc050"]),
+                "boundary_f": _round4(raw_row["boundary_f"]),
+                "trimap_iou": _round4(raw_row["trimap_iou"]),
+                "n": int(metrics.get("n", 0)),
+                "source": str(path),
+                "config": config,
+                "checkpoint": str(scene_payload.get("checkpoint") or args.get("checkpoint", "")),
+                "config_sha256": config_meta["config_sha256"],
+                "teacher_model": config_meta["teacher_model"] or "c-radio_v4-h",
+                "feature_manifest": config_meta["feature_manifest"],
+                "seed": config_meta["seed"],
+                "text_embedding_cache": str(args.get("text_embedding_cache", "")),
+                "score_cache": _path_from_payload_value(
+                    scene_payload.get("score_cache") or args.get("score_cache", "")
+                ),
+                "selector_policy": selector_policy,
+                "text_head": text_head,
+                **evaluator_meta,
+                "mask_refinement": str(metrics.get("mask_refinement") or args.get("mask_refinement", "")),
+            }
+        )
+
+    return {
+        "label": label,
+        "text_head": text_head,
+        "protocol_label": protocol_label,
+        "selector_policy": selector_policy,
+        **evaluator_meta,
+        "scene_count": len(rows),
+        "macro_miou": _mean_metric(raw_rows, "miou"),
+        "macro_acc025": _mean_metric(raw_rows, "acc025"),
+        "macro_acc050": _mean_metric(raw_rows, "acc050"),
+        "macro_boundary_f": _mean_metric(raw_rows, "boundary_f"),
+        "macro_trimap_iou": _mean_metric(raw_rows, "trimap_iou"),
+        "rows": rows,
+        "source_root": str(root_path),
+        "protocol": first_protocol,
+        "warnings": warnings,
     }
 
 
@@ -272,18 +551,26 @@ def build_markdown(
     scannet: dict[str, Any],
     profiles: dict[str, Any] | None = None,
     direct3d: dict[str, Any] | None = None,
+    direct3d_readouts: list[dict[str, Any]] | None = None,
 ) -> str:
     profiles = profiles or {"profile_count": 0, "rows": [], "warnings": []}
+    direct3d_readouts = direct3d_readouts or []
     warnings = [
         "External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.",
         "ScanNet label-supervised or GT-label-balanced runs are diagnostic only and excluded from this fair v67 summary.",
-        "LERF direct 3D object selection is protocol-aligned; registered-view readout plus GT-free voxel context improves the fixed protocol while Waldo remains the limiting scene.",
+        "LERF direct 3D object selection is protocol-aligned; direct primitive scoring, RGB-snap cleanup, and official SAM3 box boundary readout are reported as separate readouts.",
     ]
     warnings.extend(lerf.get("warnings", []))
     warnings.extend(scannet.get("warnings", []))
     warnings.extend(profiles.get("warnings", []))
     if direct3d is not None:
         warnings.extend(direct3d.get("warnings", []))
+    for readout in direct3d_readouts:
+        warnings.extend(readout.get("warnings", []))
+        if readout.get("selector_policy") == "best_by_miou":
+            warnings.append(
+                f"Direct-3D readout `{readout.get('label', 'unknown')}` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added."
+            )
 
     lines = [
         "# RADIO-GS Submission Freeze Report",
@@ -316,7 +603,7 @@ def build_markdown(
         ),
         (
             "| LERF direct 3D object selection | Registered-view + voxel-context primitive readout | "
-            "`output/radio_gs/reports/lerf_direct_3d_selection.md` | OpenGaussian-style VPR primitive-level result |"
+            "`output/radio_gs/reports/lerf_direct_3d_selection.md` | OpenGaussian-style VPR primitive-level result plus separated boundary-readout diagnostics |"
         ),
         "",
         "## LERF-OVS",
@@ -341,17 +628,14 @@ def build_markdown(
             )
         )
 
-    if direct3d is not None or (REPORT_DIR / "lerf_direct_3d_selection.md").exists():
+    if direct3d is not None or direct3d_readouts or (REPORT_DIR / "lerf_direct_3d_selection.md").exists():
         direct_lines = [
             "",
             "## LERF Direct 3D Object Selection",
             "",
             "- Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.",
-            "- Readout: rendered SigLIP2 features registered back to 3D Gaussian primitives with depth/alpha visibility checks.",
-            "- Context aggregation: GT-free voxel-max propagation at resolution `80` with blend `0.50`.",
-            "- Selector: fixed GT-free `meanstd2p5` with `selection_min_ratio=0.005` and `selection_max_ratio=0.018`.",
-            "- VPR view budget: `128` evenly spaced all-pose registration views.",
-            "- CTF-GS fixed `meanstd2p5+floor0.005+cap0.018`: macro mIoU `0.4227`, macro Acc@0.25 `0.6906`.",
+            "- The registry below separates primitive scoring, GT-free RGB boundary cleanup, and frozen official SAM3 box-prompt boundary readout.",
+            "- VPR readouts compute text scores on Gaussian primitives; SAM3 box readout refines only the rendered selection boundary and does not use GT masks for candidate selection.",
         ]
         if direct3d is not None:
             direct_lines.extend(
@@ -365,6 +649,52 @@ def build_markdown(
                     f"- Direct-3D silhouette sweep source: `{direct3d.get('source', '')}`.",
                 ]
             )
+        if direct3d_readouts:
+            direct_lines.extend(
+                [
+                    "",
+                    "## Direct-3D Readout Registry",
+                    "",
+                    "| Readout | Text head | Selector policy | Macro mIoU | Macro Acc@0.25 | Boundary-F | Trimap IoU | Source root |",
+                    "|---|---|---|---:|---:|---:|---:|---|",
+                ]
+            )
+            for readout in direct3d_readouts:
+                direct_lines.append(
+                    "| {label} | {text_head} | `{selector}` | {miou:.4f} | {acc:.4f} | {boundary:.4f} | {trimap:.4f} | `{source}` |".format(
+                        label=readout["label"],
+                        text_head=readout["text_head"],
+                        selector=readout["selector_policy"],
+                        miou=float(readout["macro_miou"]),
+                        acc=float(readout["macro_acc025"]),
+                        boundary=float(readout.get("macro_boundary_f", 0.0)),
+                        trimap=float(readout.get("macro_trimap_iou", 0.0)),
+                        source=readout.get("source_root", ""),
+                    )
+                )
+            for readout in direct3d_readouts:
+                direct_lines.extend(
+                    [
+                        "",
+                        f"### {readout['label']} Scene Selectors",
+                        "",
+                        "| Scene | Selection | mIoU | Acc@0.25 | Boundary-F | Trimap IoU | N | Source JSON |",
+                        "|---|---|---:|---:|---:|---:|---:|---|",
+                    ]
+                )
+                for row in readout.get("rows", []):
+                    direct_lines.append(
+                        "| {scene} | `{selection}` | {miou:.4f} | {acc:.4f} | {boundary:.4f} | {trimap:.4f} | {n} | `{source}` |".format(
+                            scene=row["scene"],
+                            selection=row["selection"],
+                            miou=float(row["miou"]),
+                            acc=float(row["acc025"]),
+                            boundary=float(row.get("boundary_f", 0.0)),
+                            trimap=float(row.get("trimap_iou", 0.0)),
+                            n=int(row.get("n", 0)),
+                            source=row.get("source", ""),
+                        )
+                    )
         lines.extend(
             direct_lines
             + [
@@ -444,26 +774,43 @@ def write_freeze_outputs(
     scannet: dict[str, Any],
     profiles: dict[str, Any] | None = None,
     direct3d: dict[str, Any] | None = None,
+    direct3d_readouts: list[dict[str, Any]] | None = None,
 ) -> dict[str, Path]:
     profiles = profiles or {"profile_count": 0, "rows": [], "warnings": []}
+    direct3d_readouts = direct3d_readouts or []
     out_dir = Path(output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     markdown_path = out_dir / "submission_freeze_report.md"
     manifest_path = out_dir / "submission_freeze_manifest.json"
 
-    markdown_path.write_text(build_markdown(lerf, scannet, profiles, direct3d=direct3d))
+    markdown_path.write_text(
+        build_markdown(
+            lerf,
+            scannet,
+            profiles,
+            direct3d=direct3d,
+            direct3d_readouts=direct3d_readouts,
+        )
+    )
     manifest_path.write_text(
         json.dumps(
             {
+                "metadata": _git_metadata(),
                 "lerf": lerf,
                 "scannet": scannet,
                 "profiles": profiles,
                 "direct3d": direct3d,
+                "direct3d_readouts": direct3d_readouts,
                 "warnings": (
                     lerf.get("warnings", [])
                     + scannet.get("warnings", [])
                     + profiles.get("warnings", [])
                     + (direct3d.get("warnings", []) if direct3d is not None else [])
+                    + [
+                        warning
+                        for readout in direct3d_readouts
+                        for warning in readout.get("warnings", [])
+                    ]
                 ),
             },
             indent=2,
@@ -500,6 +847,16 @@ def main(argv: list[str] | None = None) -> dict[str, Path]:
         help="Variant key to read from --direct3d_silhouette_sweep_json.",
     )
     parser.add_argument(
+        "--direct3d_scene_readout",
+        action="append",
+        default=[],
+        help=(
+            "Direct-3D per-scene readout spec formatted as "
+            "label|text_head|protocol_label|root_path[|fixed_tag]. "
+            "Use fixed_tag=best or omit it to read each scene's best_by_miou tag."
+        ),
+    )
+    parser.add_argument(
         "--scannet_eval_root",
         default="output/scannet_pointcloud_eval",
     )
@@ -527,9 +884,35 @@ def main(argv: list[str] | None = None) -> dict[str, Path]:
         if args.direct3d_silhouette_sweep_json
         else None
     )
+    direct3d_readouts = []
+    for spec in args.direct3d_scene_readout:
+        parts = spec.split("|")
+        if len(parts) not in {4, 5}:
+            raise ValueError(
+                "--direct3d_scene_readout must be "
+                "label|text_head|protocol_label|root_path[|fixed_tag]"
+            )
+        label, text_head, protocol_label, root_path = parts[:4]
+        fixed_tag = parts[4] if len(parts) == 5 else None
+        direct3d_readouts.append(
+            collect_direct3d_scene_readout(
+                root_path,
+                label=label,
+                text_head=text_head,
+                protocol_label=protocol_label,
+                fixed_tag=fixed_tag,
+            )
+        )
     scannet = collect_scannet_v67(args.scannet_eval_root)
     profiles = collect_profile_runs(args.profile_dirs)
-    paths = write_freeze_outputs(args.output_dir, lerf, scannet, profiles=profiles, direct3d=direct3d)
+    paths = write_freeze_outputs(
+        args.output_dir,
+        lerf,
+        scannet,
+        profiles=profiles,
+        direct3d=direct3d,
+        direct3d_readouts=direct3d_readouts,
+    )
     print(f"Wrote {paths['markdown']}")
     print(f"Wrote {paths['manifest']}")
     return paths
