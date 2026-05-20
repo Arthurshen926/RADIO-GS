@@ -27,6 +27,36 @@ The current generated freeze package is:
 - [submission_freeze_report.md](../output/radio_gs/reports/submission_freeze_report.md)
 - [submission_freeze_manifest.json](../output/radio_gs/reports/submission_freeze_manifest.json)
 - [verify_submission_provenance.py](../radio_gs/scripts/verify_submission_provenance.py)
+- [validate_final_rows_registry.py](../radio_gs/scripts/validate_final_rows_registry.py)
+- [validate_paper_claims.py](../radio_gs/scripts/validate_paper_claims.py)
+- [paper artifact README](../paper/artifacts/README.md)
+- [active goal completion audit](../paper/artifacts/active_goal_completion_audit.md)
+- [paper artifact checksum snapshot](../paper/artifacts/checksums.txt)
+- [submission freeze report public snapshot](../paper/artifacts/submission_freeze_report.md)
+- [baseline source verification public snapshot](../paper/artifacts/baseline_source_verification.md)
+- [paper main table public snapshot](../paper/artifacts/paper_submission_main_table.md)
+- [paper result audit public snapshot](../paper/artifacts/paper_submission_result_audit.md)
+- [direct-3D query audit public snapshot](../paper/artifacts/lerf_direct_3d_query_audit.md)
+- [direct-3D selection public snapshot](../paper/artifacts/lerf_direct_3d_selection.md)
+- [direct-3D Figurines result JSON snapshot](../paper/artifacts/lerf_direct_3d_selection_figurines_results.json)
+- [direct-3D Ramen result JSON snapshot](../paper/artifacts/lerf_direct_3d_selection_ramen_results.json)
+- [direct-3D Teatime result JSON snapshot](../paper/artifacts/lerf_direct_3d_selection_teatime_results.json)
+- [direct-3D Waldo Kitchen result JSON snapshot](../paper/artifacts/lerf_direct_3d_selection_waldo_kitchen_results.json)
+- [VPR protocol card public snapshot](../paper/artifacts/vpr_protocol_card.md)
+- [published direct-3D context public snapshot](../paper/artifacts/lerf_direct_3d_published_context.md)
+- [direct-3D confidence/coverage public snapshot](../paper/artifacts/lerf_direct3d_confidence_coverage_analysis.md)
+- [Waldo failure stratification public snapshot](../paper/artifacts/waldo_failure_stratification.md)
+- [LERF failure analysis public snapshot](../paper/artifacts/lerf_failure_analysis.md)
+- [component ablation public snapshot](../paper/artifacts/lerf_component_ablation.md)
+- [alpha/depth boundary alignment public snapshot](../paper/artifacts/alpha_depth_boundary_alignment_report.md)
+- [boundary-error readout public snapshot](../paper/artifacts/boundary_error_readout_report.md)
+- [controlled baseline gap audit public snapshot](../paper/artifacts/controlled_baseline_gap_audit.md)
+- [train feature-field audit public snapshot](../paper/artifacts/train_feature_field_audit.md)
+- [efficiency/cost public snapshot](../paper/artifacts/efficiency_cost_table.md)
+- [storage footprint public snapshot](../paper/artifacts/storage_footprint_report.md)
+- [ScanNet RADIO-GS v67 direct point-query JSON snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_v67_direct_point_query_results.json)
+- [ScanNet RADIO-GS contextual kNN JSON snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_v67_contextual_knn_scene_mean_a05_results.json)
+- [LangSplatV2 LERF summary snapshot](../paper/artifacts/langsplatv2_lerf_summary.md)
 - [submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
 - [submission_freeze_figure_shortlist.md](../output/radio_gs/reports/submission_freeze_figure_shortlist.md)
 - [efficiency_profile.md](../output/radio_gs/reports/efficiency_profile.md)
@@ -262,11 +292,63 @@ and the LEGaussians CVPR 2024 supplementary Table 5 LA row. The remaining caveat
 is protocol scope: these rows are cross-paper context, not reproduced
 same-evaluator baselines.
 The local OpenGaussian LERF blocker is now explicitly audited in
-`output/baselines/opengaussian/opengaussian_vs_radio_gs_report.md`: all four
-local LERF scenes have images and labels, but `language_features/*_s.npy` and
-`language_features/*_f.npy` counts are zero, so the official OpenGaussian LeRF
-training/evaluation recipe cannot be rerun locally without the reannotated
-language-feature assets.
+`output/baselines/opengaussian/opengaussian_vs_radio_gs_report.md` and
+`paper/artifacts/external_baseline_audit.md`. All four local LERF scenes have
+images and labels, and `figurines`, `ramen`, `teatime`, and `waldo_kitchen` now
+have guarded complete `language_features` symlinks from the LangSplat-format
+extraction cache. The generated assets use the documented `--skip_mask_nms`
+compatibility patch, so the official OpenGaussian LERF training/evaluation
+recipe is not yet a strict full-benchmark rerun.
+The 2026-05-17 external-baseline pass extends this audit to the latest P0/P1
+methods requested by the expert reply. OpenGaussian, LangSplatV2, OccamLGS,
+GAGS, Dr. Splat, LangSplat, LEGaussians, CAGS, Semantic Gaussians, and LaGa are
+now tracked in `paper/artifacts/final_rows.yaml`, with local clone paths,
+commits, and blocker notes where code is available. CAGS' bundled rasterizer and
+PyG compiled ops have been rebuilt into `output/baselines/cags/local_site`,
+clearing the import/ABI blockers through `train.py --help` and
+`render_lerf_by_text.py --help`. LaGa's local setup now restores the
+`third_party/kmeans_pytorch` gitlink through a `.gitmodules` mapping, builds
+`simple_knn` plus both diff rasterizers into `output/baselines/laga/local_site`,
+and reaches `train_scene.py --help` plus `train_affinity_features.py --help`
+with a chunked `torch.cdist` fallback for the incompatible PyTorch3D KNN import.
+GAGS and Dr. Splat now also have isolated local sites for their vendored native
+and SAM packages, clearing import/ABI blockers through `train.py --help` plus
+`render.py --help` for GAGS and `train.py --help` plus
+`render_activation.py --help` for Dr. Splat.
+LangSplat now has an isolated local site for vendored `simple_knn`,
+`langsplat-rasterization`, and `segment-anything-langsplat` under
+`output/baselines/langsplat/local_site`, with NumPy pinned to 1.26.4; `train.py`,
+`render.py`, and `eval/evaluate_iou_loc.py` reach CLI help. Strict comparison
+still needs pretrained checkpoints or a fresh same-protocol run plus
+same-evaluator metric export.
+LEGaussians also has a local `.gitmodules` repair for both preprocess Segment
+Anything gitlinks, clean recursive submodule status, vendored
+`simple_knn`/`diff_gaussian_rasterization` builds in
+`output/baselines/legaussians/local_site`, and `train.py --help` CLI smoke;
+strict reproduction still requires dataset-specific preprocessing, training,
+rendering, and same-evaluator metric export.
+Semantic Gaussians now has vendored `simple_knn`, `rgbd-rasterization`,
+`channel-rasterization`, and `segment-anything` builds in
+`output/baselines/semantic_gaussians/local_site`, with compatible
+NumPy/scikit-image/viser/TensorFlow imports; `train.py` and `fusion.py` import
+successfully. Strict ScanNet export is still blocked by
+`MinkowskiEngine==0.5.4` failing to compile against the host PyTorch
+2.7.1/CUDA headers at `spmm.cu`, and the LSeg visualizer path still needs
+PyTorch-Encoding (`encoding`).
+OpenGaFF is tracked as a published context row only: its 2026-05-07 arXiv source
+states that code will be publicly released upon acceptance, and no public
+implementation was found in arXiv metadata/source or web search on 2026-05-18.
+The detailed status is recorded in
+`docs/experiments/2026-05-17-three-task-open-baseline-audit.md`. Since that
+audit began, OpenGaussian has an all-four-scene LERF compatibility readout
+(0.4273 mIoU / 0.5865 Acc@0.25 / 0.4727 Acc@0.5), and OccamLGS has an
+all-four-scene normalized pre-rendered compatibility readout (0.8221 LocAcc /
+0.4515 mIoU over 208 objects). LangSplatV2 has a completed teatime compatibility
+sanity row and now has guarded all-level compatibility extensions in flight:
+ramen is training on GPU2, figurines is training on GPU3, and waldo_kitchen is
+queued behind the safe-headroom GPU guard. These rows reduce the external-baseline gap,
+but they remain compatibility-asset bring-up rows rather than strict
+released-checkpoint/official-extraction SOTA rows.
 The internal nearest-view cache control is now measured under the same LERF
 readout: unwarped closest cached RADIO frames reach 0.2722 macro LocAcc /
 0.1545 macro mIoU, far below rendered CTF-GS at 0.8712 / 0.5243. The full
@@ -356,8 +438,9 @@ embeddings. The current fixed protocol (`registered_view`, `softmax_scene`,
 1.8% cap, and GT-free RGB snap) reaches 0.4801 macro mIoU and 0.6760 macro Acc@0.25; the
 fixed top0p02 selector remains a conservative audit at 0.3850 / 0.6428. It
 should be promoted as a VPR-backed primitive-level result, with the caveat that
-Waldo Kitchen remains below OpenGaussian and external baselines are still
-official-source rather than locally rerun.
+Waldo Kitchen remains below OpenGaussian and LERF external baselines are still
+official-source or compatibility-asset bring-up rows rather than strict local
+official-policy reruns.
 
 The final implementation pass also added alpha and alpha-depth registration
 weighting, which approximates contribution-aware primitive assignment from

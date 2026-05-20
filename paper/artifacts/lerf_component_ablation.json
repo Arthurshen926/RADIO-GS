@@ -1,0 +1,328 @@
+{
+  "protocol": "controlled seed-7 LERF-OVS rendered-feature temperature sweep",
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "variants": [
+    {
+      "key": "full",
+      "label": "Full RADIO-GS",
+      "note": "hybrid + HCD + refiner + FDH warm-start"
+    },
+    {
+      "key": "no_fdh",
+      "label": "w/o FDH warm-start",
+      "note": "same hybrid/HCD/refiner, no frozen-depth-head stage"
+    },
+    {
+      "key": "no_refiner",
+      "label": "w/o refiner",
+      "note": "refiner disabled during the FDH refinement run"
+    },
+    {
+      "key": "no_hybrid",
+      "label": "w/o hybrid",
+      "note": "explicit per-Gaussian compact field, HCD/refiner retained"
+    },
+    {
+      "key": "direct_codec",
+      "label": "w/o HCD",
+      "note": "direct 1x1 projection codec replaces HCD"
+    }
+  ],
+  "results": {
+    "full": {
+      "figurines": {
+        "loc_acc": 0.7678571428571429,
+        "miou": 0.3945520254402578,
+        "loc_total": 56,
+        "temp": 50.0,
+        "source": "output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep_seed7/lerf_eval_best/T50/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_figurines_fdh_ws240_240ep_seed7.yaml",
+        "scene": "figurines",
+        "variant": "full",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_figurines_fdh_ws240_240ep_seed7.yaml"
+      },
+      "ramen": {
+        "loc_acc": 0.9014084507042254,
+        "miou": 0.5862163201021663,
+        "loc_total": 71,
+        "temp": 40.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep_seed7/lerf_eval_latest/T40/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_ramen_fdh_ws240_240ep_seed7.yaml",
+        "scene": "ramen",
+        "variant": "full",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_ramen_fdh_ws240_240ep_seed7.yaml"
+      },
+      "teatime": {
+        "loc_acc": 0.8983050847457628,
+        "miou": 0.5486192340454077,
+        "loc_total": 59,
+        "temp": 25.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep_seed7/lerf_eval_best/T25/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_teatime_fdh_ws240_240ep_seed7.yaml",
+        "scene": "teatime",
+        "variant": "full",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_teatime_fdh_ws240_240ep_seed7.yaml"
+      },
+      "waldo_kitchen": {
+        "loc_acc": 0.8636363636363636,
+        "miou": 0.4106268000805872,
+        "loc_total": 22,
+        "temp": 25.0,
+        "source": "output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep_seed7/lerf_eval_latest/T25/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep_seed7.yaml",
+        "scene": "waldo_kitchen",
+        "variant": "full",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep_seed7.yaml"
+      }
+    },
+    "no_fdh": {
+      "figurines": {
+        "loc_acc": 0.6964285714285714,
+        "miou": 0.42430987878940074,
+        "loc_total": 56,
+        "temp": 50.0,
+        "source": "output/radio_gs/lerf_figurines_v14_nofdh_240ep_seed7/lerf_eval_latest/T50/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_figurines_v14_nofdh_240ep_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "output/radio_gs/lerf_figurines_v14_nofdh_240ep_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_figurines_nofdh_240ep_seed7.yaml",
+        "scene": "figurines",
+        "variant": "no_fdh",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_figurines_v14_nofdh_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_figurines_nofdh_240ep_seed7.yaml"
+      },
+      "ramen": {
+        "loc_acc": 0.8450704225352113,
+        "miou": 0.5665392806370966,
+        "loc_total": 71,
+        "temp": 40.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_nofdh_240ep_seed7/lerf_eval_best/T40/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_nofdh_240ep_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_nofdh_240ep_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_ramen_nofdh_240ep_seed7.yaml",
+        "scene": "ramen",
+        "variant": "no_fdh",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_nofdh_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_ramen_nofdh_240ep_seed7.yaml"
+      },
+      "teatime": {
+        "loc_acc": 0.847457627118644,
+        "miou": 0.5551996479617719,
+        "loc_total": 59,
+        "temp": 28.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_nofdh_240ep_seed7/lerf_eval_best/T28/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_nofdh_240ep_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_nofdh_240ep_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_teatime_nofdh_240ep_seed7.yaml",
+        "scene": "teatime",
+        "variant": "no_fdh",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_nofdh_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_teatime_nofdh_240ep_seed7.yaml"
+      },
+      "waldo_kitchen": {
+        "loc_acc": 0.8181818181818182,
+        "miou": 0.14849228841653062,
+        "loc_total": 22,
+        "temp": 12.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_nofdh_240ep_seed7/lerf_eval_best/T12/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_nofdh_240ep_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_nofdh_240ep_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/seeds/lerf_hybrid_v14_waldo_kitchen_nofdh_240ep_seed7.yaml",
+        "scene": "waldo_kitchen",
+        "variant": "no_fdh",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_nofdh_240ep_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/seeds/lerf_hybrid_v14_waldo_kitchen_nofdh_240ep_seed7.yaml"
+      }
+    },
+    "no_refiner": {
+      "figurines": {
+        "loc_acc": 0.7678571428571429,
+        "miou": 0.41704437817947654,
+        "loc_total": 56,
+        "temp": 40.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_refiner_seed7/lerf_eval_best/T40/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_refiner_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_refiner_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_figurines_component_no_refiner_seed7.yaml",
+        "scene": "figurines",
+        "variant": "no_refiner",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_refiner_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_figurines_component_no_refiner_seed7.yaml"
+      },
+      "ramen": {
+        "loc_acc": 0.8591549295774648,
+        "miou": 0.5737660781663708,
+        "loc_total": 71,
+        "temp": 40.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_refiner_seed7/lerf_eval_best/T40/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_refiner_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_refiner_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_ramen_component_no_refiner_seed7.yaml",
+        "scene": "ramen",
+        "variant": "no_refiner",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_refiner_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_ramen_component_no_refiner_seed7.yaml"
+      },
+      "teatime": {
+        "loc_acc": 0.9152542372881356,
+        "miou": 0.5297300189873919,
+        "loc_total": 59,
+        "temp": 25.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_refiner_seed7/lerf_eval_latest/T25/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_refiner_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_refiner_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_teatime_component_no_refiner_seed7.yaml",
+        "scene": "teatime",
+        "variant": "no_refiner",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_refiner_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_teatime_component_no_refiner_seed7.yaml"
+      },
+      "waldo_kitchen": {
+        "loc_acc": 0.8181818181818182,
+        "miou": 0.39796558141299143,
+        "loc_total": 22,
+        "temp": 25.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_refiner_seed7/lerf_eval_latest/T25/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_refiner_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_refiner_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_waldo_kitchen_component_no_refiner_seed7.yaml",
+        "scene": "waldo_kitchen",
+        "variant": "no_refiner",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_refiner_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_waldo_kitchen_component_no_refiner_seed7.yaml"
+      }
+    },
+    "no_hybrid": {
+      "figurines": {
+        "loc_acc": 0.7678571428571429,
+        "miou": 0.44721482285525976,
+        "loc_total": 56,
+        "temp": 50.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_hybrid_seed7/lerf_eval_latest/T50/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_hybrid_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_hybrid_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_figurines_component_no_hybrid_seed7.yaml",
+        "scene": "figurines",
+        "variant": "no_hybrid",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_no_hybrid_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_figurines_component_no_hybrid_seed7.yaml"
+      },
+      "ramen": {
+        "loc_acc": 0.8732394366197183,
+        "miou": 0.5935628071020803,
+        "loc_total": 71,
+        "temp": 40.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_hybrid_seed7/lerf_eval_best/T40/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_hybrid_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_hybrid_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_ramen_component_no_hybrid_seed7.yaml",
+        "scene": "ramen",
+        "variant": "no_hybrid",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_no_hybrid_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_ramen_component_no_hybrid_seed7.yaml"
+      },
+      "teatime": {
+        "loc_acc": 0.8983050847457628,
+        "miou": 0.5692436489853704,
+        "loc_total": 59,
+        "temp": 28.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_hybrid_seed7/lerf_eval_best/T28/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_hybrid_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_hybrid_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_teatime_component_no_hybrid_seed7.yaml",
+        "scene": "teatime",
+        "variant": "no_hybrid",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_no_hybrid_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_teatime_component_no_hybrid_seed7.yaml"
+      },
+      "waldo_kitchen": {
+        "loc_acc": 0.8181818181818182,
+        "miou": 0.4175290593217636,
+        "loc_total": 22,
+        "temp": 25.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_hybrid_seed7/lerf_eval_latest/T25/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_hybrid_seed7/lerf_eval_latest/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_hybrid_seed7/checkpoints/latest.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_waldo_kitchen_component_no_hybrid_seed7.yaml",
+        "scene": "waldo_kitchen",
+        "variant": "no_hybrid",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_no_hybrid_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_waldo_kitchen_component_no_hybrid_seed7.yaml"
+      }
+    },
+    "direct_codec": {
+      "figurines": {
+        "loc_acc": 0.26785714285714285,
+        "miou": 0.1763898308488104,
+        "loc_total": 56,
+        "temp": 50.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_direct_codec_seed7/lerf_eval_best/T50/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_direct_codec_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_direct_codec_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_figurines_component_direct_codec_seed7.yaml",
+        "scene": "figurines",
+        "variant": "direct_codec",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_figurines_component_direct_codec_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_figurines_component_direct_codec_seed7.yaml"
+      },
+      "ramen": {
+        "loc_acc": 0.647887323943662,
+        "miou": 0.3050943315122894,
+        "loc_total": 71,
+        "temp": 25.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_direct_codec_seed7/lerf_eval_best/T25/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_direct_codec_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_direct_codec_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_ramen_component_direct_codec_seed7.yaml",
+        "scene": "ramen",
+        "variant": "direct_codec",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_ramen_component_direct_codec_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_ramen_component_direct_codec_seed7.yaml"
+      },
+      "teatime": {
+        "loc_acc": 0.6610169491525424,
+        "miou": 0.34433199451580276,
+        "loc_total": 59,
+        "temp": 35.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_direct_codec_seed7/lerf_eval_best/T35/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_direct_codec_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_direct_codec_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_teatime_component_direct_codec_seed7.yaml",
+        "scene": "teatime",
+        "variant": "direct_codec",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_teatime_component_direct_codec_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_teatime_component_direct_codec_seed7.yaml"
+      },
+      "waldo_kitchen": {
+        "loc_acc": 0.5454545454545454,
+        "miou": 0.2125887092769772,
+        "loc_total": 22,
+        "temp": 18.0,
+        "source": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_direct_codec_seed7/lerf_eval_best/T18/lerf_ovs_results.json",
+        "summary": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_direct_codec_seed7/lerf_eval_best/summary.json",
+        "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_direct_codec_seed7/checkpoints/best.pth",
+        "config": "radio_gs/configs/generated/ablation/lerf_waldo_kitchen_component_direct_codec_seed7.yaml",
+        "scene": "waldo_kitchen",
+        "variant": "direct_codec",
+        "exp_dir": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_component_direct_codec_seed7",
+        "config_path": "/root/RADIO-GS/radio_gs/configs/generated/ablation/lerf_waldo_kitchen_component_direct_codec_seed7.yaml"
+      }
+    }
+  }
+}

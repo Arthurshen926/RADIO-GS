@@ -1,0 +1,6230 @@
+{
+  "timestamp": "2026-05-02 01:50:06",
+  "args": {
+    "scene": "all",
+    "prepared_root": "dataset/scannet_og",
+    "config": "radio_gs/configs/generated/scannet_og/scannet_og_hybrid_v67fair_teacherbalanced_gidx_labelpoint_dp080_pce10_tdist05_s32768_b4_long20_fromv63_{scene}.yaml",
+    "checkpoint": "output/radio_gs/scannet_og_{scene}_v67fair_teacherbalanced_gidx_labelpoint_dp080_pce10_tdist05_s32768_b4_long20_fromv63/checkpoints/best.pth",
+    "label_ply": "None",
+    "output_dir": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502",
+    "class_splits": "19,15,10",
+    "k": "8",
+    "candidate_k": "0",
+    "chunk_size": "4096",
+    "max_points": "None",
+    "sample_seed": "42",
+    "opacity_threshold": "0.1",
+    "opacity_filter_mode": "label_index",
+    "save_ply": "False",
+    "save_feature_rgb_ply": "True",
+    "save_language_features_npz": "False",
+    "feature_rgb_seed": "20260429",
+    "query_mode": "gaussian_index",
+    "save_logits_npz": "True",
+    "compact_feature_key": "features",
+    "logit_calibration": "none",
+    "logit_calibration_alpha": "1.0",
+    "class_aliases": "none",
+    "gaussian_index_position_mode": "label_point",
+    "prompt_templates": "{query}",
+    "text_embedding_cache": "checkpoints/siglip2_scannet_og_text_embeddings_ens5.pt",
+    "projection_weights": "checkpoints/siglip2_feat_projection.pth",
+    "summary_head_weights": "checkpoints/siglip2_summary_head.pth",
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False",
+    "point_summary_adapter_blend_alpha": "1.0",
+    "device": "cuda:5"
+  },
+  "prompt_templates": [
+    "{query}"
+  ],
+  "class_aliases": "none",
+  "gaussian_index_position_mode": "label_point",
+  "macro": {
+    "19": {
+      "miou": 0.3537525167952785,
+      "macc": 0.6076387405496747
+    },
+    "15": {
+      "miou": 0.3572877912640239,
+      "macc": 0.6202982042683068
+    },
+    "10": {
+      "miou": 0.4293324423648598,
+      "macc": 0.7050885878615982
+    }
+  },
+  "scenes": {
+    "scene0000_00": {
+      "scene": "scene0000_00",
+      "label_ply": "dataset/scannet_og/scene0000_00/scene0000_00_vh_clean_2.labels.ply",
+      "num_points": 81369,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 36182,
+        "num_points": 81369
+      },
+      "query_diagnostics": {
+        "num_points": 81369,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.024626466347707137,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0000_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.2938670562276867,
+          "macc": 0.5971861668507444,
+          "num_valid": 33055,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2687751452838623,
+              "acc": 0.2775854108956602,
+              "intersection": 2405,
+              "union": 8948,
+              "gt_count": 8664,
+              "pred_count": 2689
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.35570469798657717,
+              "acc": 0.37329308610033063,
+              "intersection": 2597,
+              "union": 7301,
+              "gt_count": 6957,
+              "pred_count": 2941
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.3880597014925373,
+              "acc": 0.42639019792648447,
+              "intersection": 2262,
+              "union": 5829,
+              "gt_count": 5305,
+              "pred_count": 2786
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.39959973315543695,
+              "acc": 0.9975020815986678,
+              "intersection": 1198,
+              "union": 2998,
+              "gt_count": 1201,
+              "pred_count": 2995
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1254,
+              "gt_count": 0,
+              "pred_count": 1254
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.31811870878167303,
+              "acc": 0.9940347071583514,
+              "intersection": 1833,
+              "union": 5762,
+              "gt_count": 1844,
+              "pred_count": 5751
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.103125,
+              "acc": 0.10650887573964497,
+              "intersection": 198,
+              "union": 1920,
+              "gt_count": 1859,
+              "pred_count": 259
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3398876404494382,
+              "acc": 0.9577836411609498,
+              "intersection": 726,
+              "union": 2136,
+              "gt_count": 758,
+              "pred_count": 2104
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.19577308120133483,
+              "acc": 0.31040564373897706,
+              "intersection": 176,
+              "union": 899,
+              "gt_count": 567,
+              "pred_count": 508
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1496,
+              "gt_count": 0,
+              "pred_count": 1496
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 72,
+              "gt_count": 0,
+              "pred_count": 72
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.014583333333333334,
+              "acc": 0.1065989847715736,
+              "intersection": 21,
+              "union": 1440,
+              "gt_count": 197,
+              "pred_count": 1264
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.23588553750966745,
+              "acc": 0.36835748792270534,
+              "intersection": 305,
+              "union": 1293,
+              "gt_count": 828,
+              "pred_count": 770
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.669757174392936,
+              "acc": 0.8249048395867319,
+              "intersection": 3034,
+              "union": 4530,
+              "gt_count": 3678,
+              "pred_count": 3886
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.5296523517382413,
+              "acc": 0.8931034482758621,
+              "intersection": 777,
+              "union": 1467,
+              "gt_count": 870,
+              "pred_count": 1374
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 384,
+              "gt_count": 0,
+              "pred_count": 384
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.09290454313425217,
+              "acc": 1.0,
+              "intersection": 182,
+              "union": 1959,
+              "gt_count": 182,
+              "pred_count": 1959
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.2023121387283237,
+              "acc": 0.7241379310344828,
+              "intersection": 105,
+              "union": 519,
+              "gt_count": 145,
+              "pred_count": 479
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 84,
+              "gt_count": 0,
+              "pred_count": 84
+            }
+          },
+          "mean_top1_margin": 0.10298824161454109,
+          "mean_top1_confidence_softmax": 0.06371973511667815,
+          "class_mean_logits": {
+            "wall": 0.008923571687790791,
+            "floor": 0.017616032150563534,
+            "cabinet": 0.04884814599573295,
+            "bed": 0.02227197593954595,
+            "chair": 0.02394335050962274,
+            "sofa": 0.0289796156492307,
+            "table": 0.017728110172782877,
+            "door": 0.012496624560888773,
+            "window": 0.0005832565915060224,
+            "bookshelf": 0.022689133304928385,
+            "picture": 0.0369184527046541,
+            "counter": 0.026072762691647496,
+            "desk": 0.01388705005750532,
+            "curtain": 0.010537675146399125,
+            "refrigerator": 0.018364666676468265,
+            "shower curtain": 0.00034627650251701364,
+            "toilet": -0.008149658451784248,
+            "sink": 0.008800691351618475,
+            "bathtub": -0.024061528547766328
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0000_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.2738760565425501,
+          "macc": 0.5895958478764807,
+          "num_valid": 32185,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2712641108751537,
+              "acc": 0.2801246537396122,
+              "intersection": 2427,
+              "union": 8947,
+              "gt_count": 8664,
+              "pred_count": 2710
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3621562457244493,
+              "acc": 0.38048009199367544,
+              "intersection": 2647,
+              "union": 7309,
+              "gt_count": 6957,
+              "pred_count": 2999
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.3919795221843003,
+              "acc": 0.4329877474081056,
+              "intersection": 2297,
+              "union": 5860,
+              "gt_count": 5305,
+              "pred_count": 2852
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.39695162359178265,
+              "acc": 0.9975020815986678,
+              "intersection": 1198,
+              "union": 3018,
+              "gt_count": 1201,
+              "pred_count": 3015
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1273,
+              "gt_count": 0,
+              "pred_count": 1273
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.3180635085892764,
+              "acc": 0.9940347071583514,
+              "intersection": 1833,
+              "union": 5763,
+              "gt_count": 1844,
+              "pred_count": 5752
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.10102040816326531,
+              "acc": 0.10650887573964497,
+              "intersection": 198,
+              "union": 1960,
+              "gt_count": 1859,
+              "pred_count": 299
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3149674620390456,
+              "acc": 0.9577836411609498,
+              "intersection": 726,
+              "union": 2305,
+              "gt_count": 758,
+              "pred_count": 2273
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.19555555555555557,
+              "acc": 0.31040564373897706,
+              "intersection": 176,
+              "union": 900,
+              "gt_count": 567,
+              "pred_count": 509
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1498,
+              "gt_count": 0,
+              "pred_count": 1498
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.030539311241065625,
+              "acc": 0.23857868020304568,
+              "intersection": 47,
+              "union": 1539,
+              "gt_count": 197,
+              "pred_count": 1389
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.23588553750966745,
+              "acc": 0.36835748792270534,
+              "intersection": 305,
+              "union": 1293,
+              "gt_count": 828,
+              "pred_count": 770
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.6829579260518487,
+              "acc": 0.8738444806960305,
+              "intersection": 3214,
+              "union": 4706,
+              "gt_count": 3678,
+              "pred_count": 4242
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.08996539792387544,
+              "acc": 1.0,
+              "intersection": 182,
+              "union": 2023,
+              "gt_count": 182,
+              "pred_count": 2023
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.16908212560386474,
+              "acc": 0.7241379310344828,
+              "intersection": 105,
+              "union": 621,
+              "gt_count": 145,
+              "pred_count": 581
+            }
+          },
+          "mean_top1_margin": 0.10878923494875102,
+          "mean_top1_confidence_softmax": 0.08028680861657714,
+          "class_mean_logits": {
+            "wall": 0.008923572900848487,
+            "floor": 0.017616033539426694,
+            "cabinet": 0.04884814781238941,
+            "bed": 0.022271983944554714,
+            "chair": 0.02394333441756266,
+            "sofa": 0.028979606765194618,
+            "table": 0.017728105695603746,
+            "door": 0.012496632296329158,
+            "window": 0.0005832503826430756,
+            "bookshelf": 0.022689125127044248,
+            "counter": 0.026072756506225276,
+            "desk": 0.013887037721821977,
+            "curtain": 0.010537663574004501,
+            "toilet": -0.008149678282640512,
+            "sink": 0.008800675365041677
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0000_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.3065320893038922,
+          "macc": 0.6854362173413987,
+          "num_valid": 22032,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.31577749971561825,
+              "acc": 0.3204062788550323,
+              "intersection": 2776,
+              "union": 8791,
+              "gt_count": 8664,
+              "pred_count": 2903
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.36437080651786935,
+              "acc": 0.382492453643812,
+              "intersection": 2661,
+              "union": 7303,
+              "gt_count": 6957,
+              "pred_count": 3007
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.39577139081598944,
+              "acc": 0.9975020815986678,
+              "intersection": 1198,
+              "union": 3027,
+              "gt_count": 1201,
+              "pred_count": 3024
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 623,
+              "gt_count": 0,
+              "pred_count": 623
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.34711211778029444,
+              "acc": 0.9972885032537961,
+              "intersection": 1839,
+              "union": 5298,
+              "gt_count": 1844,
+              "pred_count": 5293
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.40445026178010474,
+              "acc": 0.49865519096288324,
+              "intersection": 927,
+              "union": 2292,
+              "gt_count": 1859,
+              "pred_count": 1360
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3946796959826276,
+              "acc": 0.9591029023746702,
+              "intersection": 727,
+              "union": 1842,
+              "gt_count": 758,
+              "pred_count": 1811
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.15577889447236182,
+              "acc": 0.328042328042328,
+              "intersection": 186,
+              "union": 1194,
+              "gt_count": 567,
+              "pred_count": 813
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 749,
+              "gt_count": 0,
+              "pred_count": 749
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.07431604736627195,
+              "acc": 1.0,
+              "intersection": 182,
+              "union": 2449,
+              "gt_count": 182,
+              "pred_count": 2449
+            }
+          },
+          "mean_top1_margin": 0.11967753694780875,
+          "mean_top1_confidence_softmax": 0.11770768764440388,
+          "class_mean_logits": {
+            "wall": 0.008923571687790791,
+            "floor": 0.017616032150563534,
+            "bed": 0.02227197593954595,
+            "chair": 0.02394335050962274,
+            "sofa": 0.0289796156492307,
+            "table": 0.017728110172782877,
+            "door": 0.012496624560888773,
+            "window": 0.0005832565915060224,
+            "bookshelf": 0.022689133304928385,
+            "toilet": -0.008149658451784248
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0000_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0062_00": {
+      "scene": "scene0062_00",
+      "label_ply": "dataset/scannet_og/scene0062_00/scene0062_00_vh_clean_2.labels.ply",
+      "num_points": 51610,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 17063,
+        "num_points": 51610
+      },
+      "query_diagnostics": {
+        "num_points": 51610,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.025742900577124597,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0062_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.37942143080807794,
+          "macc": 0.7303204363325135,
+          "num_valid": 30366,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.46218908589687363,
+              "acc": 0.46448809973554966,
+              "intersection": 7377,
+              "union": 15961,
+              "gt_count": 15882,
+              "pred_count": 7456
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6359735164296224,
+              "acc": 0.9082472421642445,
+              "intersection": 5187,
+              "union": 8156,
+              "gt_count": 5711,
+              "pred_count": 7632
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.7395759717314487,
+              "acc": 0.9453477868112015,
+              "intersection": 4186,
+              "union": 5660,
+              "gt_count": 4428,
+              "pred_count": 5418
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.0543267365153279,
+              "acc": 0.06383948928408573,
+              "intersection": 140,
+              "union": 2577,
+              "gt_count": 2193,
+              "pred_count": 524
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.3055244195356285,
+              "acc": 1.0,
+              "intersection": 1908,
+              "union": 6245,
+              "gt_count": 1908,
+              "pred_count": 6245
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.07893885473956648,
+              "acc": 1.0,
+              "intersection": 244,
+              "union": 3091,
+              "gt_count": 244,
+              "pred_count": 3091
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.10367068634594949,
+          "mean_top1_confidence_softmax": 0.0630109704573287,
+          "class_mean_logits": {
+            "wall": 0.03431020676454494,
+            "floor": 0.05009962498414103,
+            "cabinet": 0.025148138309767764,
+            "bed": -0.049504415168015674,
+            "chair": -0.03223179937494607,
+            "sofa": -0.06809314564433447,
+            "table": -0.003859235870355415,
+            "door": 0.04109716070781635,
+            "window": 0.0027532653114726853,
+            "bookshelf": -0.03867403555923459,
+            "picture": 0.023560594611564272,
+            "counter": 0.039962168059545854,
+            "desk": -0.012090575161471752,
+            "curtain": -0.01881778796868046,
+            "refrigerator": 0.002243541733420789,
+            "shower curtain": 0.03814439941713732,
+            "toilet": 0.10943390968764759,
+            "sink": 0.06568864860453362,
+            "bathtub": 0.043869399654844474
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0062_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.37942143080807794,
+          "macc": 0.7303204363325135,
+          "num_valid": 30366,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.46218908589687363,
+              "acc": 0.46448809973554966,
+              "intersection": 7377,
+              "union": 15961,
+              "gt_count": 15882,
+              "pred_count": 7456
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6359735164296224,
+              "acc": 0.9082472421642445,
+              "intersection": 5187,
+              "union": 8156,
+              "gt_count": 5711,
+              "pred_count": 7632
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.7395759717314487,
+              "acc": 0.9453477868112015,
+              "intersection": 4186,
+              "union": 5660,
+              "gt_count": 4428,
+              "pred_count": 5418
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.0543267365153279,
+              "acc": 0.06383948928408573,
+              "intersection": 140,
+              "union": 2577,
+              "gt_count": 2193,
+              "pred_count": 524
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.3055244195356285,
+              "acc": 1.0,
+              "intersection": 1908,
+              "union": 6245,
+              "gt_count": 1908,
+              "pred_count": 6245
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.07893885473956648,
+              "acc": 1.0,
+              "intersection": 244,
+              "union": 3091,
+              "gt_count": 244,
+              "pred_count": 3091
+            }
+          },
+          "mean_top1_margin": 0.10367069018947318,
+          "mean_top1_confidence_softmax": 0.08007716204948699,
+          "class_mean_logits": {
+            "wall": 0.03431020484278309,
+            "floor": 0.05009961666882535,
+            "cabinet": 0.025148140675013114,
+            "bed": -0.04950441812457236,
+            "chair": -0.032231838401494343,
+            "sofa": -0.06809317195768898,
+            "table": -0.003859251614019774,
+            "door": 0.04109716331328193,
+            "window": 0.0027532612600661,
+            "bookshelf": -0.03867403509727261,
+            "counter": 0.03996216385569182,
+            "desk": -0.012090589260551454,
+            "curtain": -0.018817809108060773,
+            "toilet": 0.10943390347887855,
+            "sink": 0.06568862813037857
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0062_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.5266440496781378,
+          "macc": 0.8295207821777488,
+          "num_valid": 27929,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4640206315259781,
+              "acc": 0.46448809973554966,
+              "intersection": 7377,
+              "union": 15898,
+              "gt_count": 15882,
+              "pred_count": 7393
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6360515021459228,
+              "acc": 0.9082472421642445,
+              "intersection": 5187,
+              "union": 8155,
+              "gt_count": 5711,
+              "pred_count": 7631
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 51,
+              "gt_count": 0,
+              "pred_count": 51
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.7398373983739838,
+              "acc": 0.9453477868112015,
+              "intersection": 4186,
+              "union": 5658,
+              "gt_count": 4428,
+              "pred_count": 5416
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 283,
+              "gt_count": 0,
+              "pred_count": 283
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.26666666666666666,
+              "acc": 1.0,
+              "intersection": 1908,
+              "union": 7155,
+              "gt_count": 1908,
+              "pred_count": 7155
+            }
+          },
+          "mean_top1_margin": 0.12332687717933706,
+          "mean_top1_confidence_softmax": 0.1196025272599257,
+          "class_mean_logits": {
+            "wall": 0.03431020676454494,
+            "floor": 0.05009962498414103,
+            "bed": -0.049504415168015674,
+            "chair": -0.03223179937494607,
+            "sofa": -0.06809314564433447,
+            "table": -0.003859235870355415,
+            "door": 0.04109716070781635,
+            "window": 0.0027532653114726853,
+            "bookshelf": -0.03867403555923459,
+            "toilet": 0.10943390968764759
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0062_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0070_00": {
+      "scene": "scene0070_00",
+      "label_ply": "dataset/scannet_og/scene0070_00/scene0070_00_vh_clean_2.labels.ply",
+      "num_points": 109380,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 51826,
+        "num_points": 109380
+      },
+      "query_diagnostics": {
+        "num_points": 109380,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.02389269989398699,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0070_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.22971858114701582,
+          "macc": 0.3311149887856206,
+          "num_valid": 43189,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.3284044282728188,
+              "acc": 0.33011673151750975,
+              "intersection": 4242,
+              "union": 12917,
+              "gt_count": 12850,
+              "pred_count": 4309
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.39461789130663305,
+              "acc": 0.40115409275486213,
+              "intersection": 3754,
+              "union": 9513,
+              "gt_count": 9358,
+              "pred_count": 3909
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.19887840240733143,
+              "acc": 0.21636904761904763,
+              "intersection": 1454,
+              "union": 7311,
+              "gt_count": 6720,
+              "pred_count": 2045
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2833,
+              "gt_count": 2812,
+              "pred_count": 21
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.20234564572661096,
+              "acc": 1.0,
+              "intersection": 1501,
+              "union": 7418,
+              "gt_count": 1501,
+              "pred_count": 7418
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4822,
+              "gt_count": 0,
+              "pred_count": 4822
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1866,
+              "gt_count": 1866,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 803,
+              "gt_count": 0,
+              "pred_count": 803
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 568,
+              "gt_count": 568,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4726,
+              "gt_count": 0,
+              "pred_count": 4726
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.14431586113002043,
+              "acc": 0.15975885455915598,
+              "intersection": 212,
+              "union": 1469,
+              "gt_count": 1327,
+              "pred_count": 354
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2237,
+              "gt_count": 0,
+              "pred_count": 2237
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 5985,
+              "gt_count": 0,
+              "pred_count": 5985
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.7989050014797278,
+              "acc": 0.8726361726200097,
+              "intersection": 5399,
+              "union": 6758,
+              "gt_count": 6187,
+              "pred_count": 5970
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 125,
+              "gt_count": 0,
+              "pred_count": 125
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 465,
+              "gt_count": 0,
+              "pred_count": 465
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.08580322391177296,
+          "mean_top1_confidence_softmax": 0.06379865519763739,
+          "class_mean_logits": {
+            "wall": -0.007171356030630006,
+            "floor": 0.007349518204676993,
+            "cabinet": 0.052147049467052266,
+            "bed": -0.0013266308736182104,
+            "chair": 0.048548709829626537,
+            "sofa": 0.02512823453789155,
+            "table": 0.032881182885557976,
+            "door": -0.010403583706526024,
+            "window": 0.0003466741904455601,
+            "bookshelf": 0.03589005624600576,
+            "picture": 0.02663595670754828,
+            "counter": 0.020016915479075168,
+            "desk": 0.04568487402071441,
+            "curtain": 0.015667775946313883,
+            "refrigerator": -0.010338858106734003,
+            "shower curtain": -0.012333578739943986,
+            "toilet": -0.024563595145248716,
+            "sink": -0.024916697673201232,
+            "bathtub": -0.04909502721002843
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0070_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.24047119556176427,
+          "macc": 0.3525345055639287,
+          "num_valid": 41862,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.3289137008606653,
+              "acc": 0.33011673151750975,
+              "intersection": 4242,
+              "union": 12897,
+              "gt_count": 12850,
+              "pred_count": 4289
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.39461789130663305,
+              "acc": 0.40115409275486213,
+              "intersection": 3754,
+              "union": 9513,
+              "gt_count": 9358,
+              "pred_count": 3909
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.19896004378763,
+              "acc": 0.21636904761904763,
+              "intersection": 1454,
+              "union": 7308,
+              "gt_count": 6720,
+              "pred_count": 2042
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2833,
+              "gt_count": 2812,
+              "pred_count": 21
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.202372927059458,
+              "acc": 1.0,
+              "intersection": 1501,
+              "union": 7417,
+              "gt_count": 1501,
+              "pred_count": 7417
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4819,
+              "gt_count": 0,
+              "pred_count": 4819
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1866,
+              "gt_count": 1866,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 801,
+              "gt_count": 0,
+              "pred_count": 801
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 568,
+              "gt_count": 568,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 3767,
+              "gt_count": 0,
+              "pred_count": 3767
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2271,
+              "gt_count": 0,
+              "pred_count": 2271
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 5971,
+              "gt_count": 0,
+              "pred_count": 5971
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.7989050014797278,
+              "acc": 0.8726361726200097,
+              "intersection": 5399,
+              "union": 6758,
+              "gt_count": 6187,
+              "pred_count": 5970
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 120,
+              "gt_count": 0,
+              "pred_count": 120
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 465,
+              "gt_count": 0,
+              "pred_count": 465
+            }
+          },
+          "mean_top1_margin": 0.09187483558229302,
+          "mean_top1_confidence_softmax": 0.08035088833997053,
+          "class_mean_logits": {
+            "wall": -0.007171363711989238,
+            "floor": 0.007349526871272994,
+            "cabinet": 0.05214705579698053,
+            "bed": -0.0013266257643372687,
+            "chair": 0.048548694030962604,
+            "sofa": 0.025128241513019116,
+            "table": 0.03288117918874037,
+            "door": -0.010403565443680303,
+            "window": 0.0003466799263981191,
+            "bookshelf": 0.03589005049152552,
+            "counter": 0.02001691518045252,
+            "desk": 0.04568486619113372,
+            "curtain": 0.01566775990352048,
+            "toilet": -0.024563619253033367,
+            "sink": -0.0249167109172247
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0070_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.32377786041522666,
+          "macc": 0.4917528021615711,
+          "num_valid": 28955,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.42250233426704015,
+              "acc": 0.422568093385214,
+              "intersection": 5430,
+              "union": 12852,
+              "gt_count": 12850,
+              "pred_count": 5432
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.4013771186440678,
+              "acc": 0.4048942081641376,
+              "intersection": 3789,
+              "union": 9440,
+              "gt_count": 9358,
+              "pred_count": 3871
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2824,
+              "gt_count": 2812,
+              "pred_count": 12
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.1778436018957346,
+              "acc": 1.0,
+              "intersection": 1501,
+              "union": 8440,
+              "gt_count": 1501,
+              "pred_count": 8440
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4318,
+              "gt_count": 0,
+              "pred_count": 4318
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.12994754411063425,
+              "acc": 0.2920685959271168,
+              "intersection": 545,
+              "union": 4194,
+              "gt_count": 1866,
+              "pred_count": 2873
+            },
+            "8": {
+              "name": "door",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 939,
+              "gt_count": 0,
+              "pred_count": 939
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.8109965635738832,
+              "acc": 0.8309859154929577,
+              "intersection": 472,
+              "union": 582,
+              "gt_count": 568,
+              "pred_count": 486
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2412,
+              "gt_count": 0,
+              "pred_count": 2412
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 172,
+              "gt_count": 0,
+              "pred_count": 172
+            }
+          },
+          "mean_top1_margin": 0.09853309203074824,
+          "mean_top1_confidence_softmax": 0.11649482574993,
+          "class_mean_logits": {
+            "wall": -0.007171356030630006,
+            "floor": 0.007349518204676993,
+            "bed": -0.0013266308736182104,
+            "chair": 0.048548709829626537,
+            "sofa": 0.02512823453789155,
+            "table": 0.032881182885557976,
+            "door": -0.010403583706526024,
+            "window": 0.0003466741904455601,
+            "bookshelf": 0.03589005624600576,
+            "toilet": -0.024563595145248716
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0070_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0097_00": {
+      "scene": "scene0097_00",
+      "label_ply": "dataset/scannet_og/scene0097_00/scene0097_00_vh_clean_2.labels.ply",
+      "num_points": 72007,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 21645,
+        "num_points": 72007
+      },
+      "query_diagnostics": {
+        "num_points": 72007,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.020119489435404148,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0097_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.4533003168866809,
+          "macc": 0.7680577540370646,
+          "num_valid": 44647,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4299048147121338,
+              "acc": 0.43022287986682695,
+              "intersection": 9304,
+              "union": 21642,
+              "gt_count": 21626,
+              "pred_count": 9320
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6649373881932021,
+              "acc": 0.8498913913341717,
+              "intersection": 7434,
+              "union": 11180,
+              "gt_count": 8747,
+              "pred_count": 9867
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.5954565312363478,
+              "acc": 0.8451402883273911,
+              "intersection": 5452,
+              "union": 9156,
+              "gt_count": 6451,
+              "pred_count": 8157
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 366,
+              "gt_count": 0,
+              "pred_count": 366
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3598349381017882,
+              "acc": 0.7741935483870968,
+              "intersection": 2616,
+              "union": 7270,
+              "gt_count": 3379,
+              "pred_count": 6507
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 426,
+              "gt_count": 0,
+              "pred_count": 426
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 11,
+              "gt_count": 0,
+              "pred_count": 11
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.3581744656268053,
+              "acc": 0.5540661304736372,
+              "intersection": 620,
+              "union": 1731,
+              "gt_count": 1119,
+              "pred_count": 1232
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 79,
+              "gt_count": 0,
+              "pred_count": 79
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.4224385572933291,
+              "acc": 0.9271453590192644,
+              "intersection": 2647,
+              "union": 6266,
+              "gt_count": 2855,
+              "pred_count": 6058
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 6,
+              "gt_count": 0,
+              "pred_count": 6
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1253,
+              "gt_count": 0,
+              "pred_count": 1253
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.3423555230431602,
+              "acc": 0.9957446808510638,
+              "intersection": 468,
+              "union": 1367,
+              "gt_count": 470,
+              "pred_count": 1365
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.09723751515186078,
+          "mean_top1_confidence_softmax": 0.06245781249016751,
+          "class_mean_logits": {
+            "wall": 0.026635920935047828,
+            "floor": 0.03691572858718854,
+            "cabinet": 0.06562603916754295,
+            "bed": -0.039384332097134434,
+            "chair": -0.020933944439595634,
+            "sofa": -0.0491867924712669,
+            "table": -0.0005949605831872181,
+            "door": 0.05689783565290209,
+            "window": 0.00899227097886486,
+            "bookshelf": -0.012597775700002686,
+            "picture": 0.029801979336712164,
+            "counter": 0.052599629349673924,
+            "desk": 0.009266486172145856,
+            "curtain": -0.02336515045229588,
+            "refrigerator": 0.06486877452822741,
+            "shower curtain": -0.01206580744633725,
+            "toilet": 0.0236986179667813,
+            "sink": 0.034342026967778626,
+            "bathtub": -0.02235987255400999
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0097_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.4310729610599994,
+          "macc": 0.7537087802739134,
+          "num_valid": 41792,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4795102795102795,
+              "acc": 0.4799315638583187,
+              "intersection": 10379,
+              "union": 21645,
+              "gt_count": 21626,
+              "pred_count": 10398
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6700009011444534,
+              "acc": 0.8500057162455699,
+              "intersection": 7435,
+              "union": 11097,
+              "gt_count": 8747,
+              "pred_count": 9785
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.5583113990686374,
+              "acc": 0.8549062160905286,
+              "intersection": 5515,
+              "union": 9878,
+              "gt_count": 6451,
+              "pred_count": 8942
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 366,
+              "gt_count": 0,
+              "pred_count": 366
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3502008032128514,
+              "acc": 0.7741935483870968,
+              "intersection": 2616,
+              "union": 7470,
+              "gt_count": 3379,
+              "pred_count": 6707
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 426,
+              "gt_count": 0,
+              "pred_count": 426
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.23183643665571377,
+              "acc": 0.5674709562109026,
+              "intersection": 635,
+              "union": 2739,
+              "gt_count": 1119,
+              "pred_count": 2255
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 79,
+              "gt_count": 0,
+              "pred_count": 79
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1258,
+              "gt_count": 0,
+              "pred_count": 1258
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.2965779467680608,
+              "acc": 0.9957446808510638,
+              "intersection": 468,
+              "union": 1578,
+              "gt_count": 470,
+              "pred_count": 1576
+            }
+          },
+          "mean_top1_margin": 0.09451820724982955,
+          "mean_top1_confidence_softmax": 0.0784089702453787,
+          "class_mean_logits": {
+            "wall": 0.026635919714926917,
+            "floor": 0.036915713243795605,
+            "cabinet": 0.0656260433129741,
+            "bed": -0.03938434438774182,
+            "chair": -0.020933971775601704,
+            "sofa": -0.04918681302624821,
+            "table": -0.0005949775092607438,
+            "door": 0.05689784042081012,
+            "window": 0.008992260224583404,
+            "bookshelf": -0.012597773633909204,
+            "counter": 0.05259962170777688,
+            "desk": 0.009266482425695895,
+            "curtain": -0.02336518087419798,
+            "toilet": 0.02369858869381259,
+            "sink": 0.03434200475727369
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0097_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.48505586212284646,
+          "macc": 0.7113729470027841,
+          "num_valid": 33752,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4954009706494107,
+              "acc": 0.49560713955424024,
+              "intersection": 10718,
+              "union": 21635,
+              "gt_count": 21626,
+              "pred_count": 10727
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6792504320931502,
+              "acc": 0.8536641134103121,
+              "intersection": 7467,
+              "union": 10993,
+              "gt_count": 8747,
+              "pred_count": 9713
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 399,
+              "gt_count": 0,
+              "pred_count": 399
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1249,
+              "gt_count": 0,
+              "pred_count": 1249
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.2805161836259784,
+              "acc": 0.7848475880438,
+              "intersection": 2652,
+              "union": 9454,
+              "gt_count": 3379,
+              "pred_count": 8727
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 450,
+              "gt_count": 0,
+              "pred_count": 450
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 435,
+              "gt_count": 0,
+              "pred_count": 435
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2052,
+              "gt_count": 0,
+              "pred_count": 2052
+            }
+          },
+          "mean_top1_margin": 0.08827962886888656,
+          "mean_top1_confidence_softmax": 0.1148249541012777,
+          "class_mean_logits": {
+            "wall": 0.026635920935047828,
+            "floor": 0.03691572858718854,
+            "bed": -0.039384332097134434,
+            "chair": -0.020933944439595634,
+            "sofa": -0.0491867924712669,
+            "table": -0.0005949605831872181,
+            "door": 0.05689783565290209,
+            "window": 0.00899227097886486,
+            "bookshelf": -0.012597775700002686,
+            "toilet": 0.0236986179667813
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0097_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0140_00": {
+      "scene": "scene0140_00",
+      "label_ply": "dataset/scannet_og/scene0140_00/scene0140_00_vh_clean_2.labels.ply",
+      "num_points": 372941,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 213688,
+        "num_points": 372941
+      },
+      "query_diagnostics": {
+        "num_points": 372941,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.02053523408174678,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0140_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.31944281407343933,
+          "macc": 0.5174710931315508,
+          "num_valid": 138641,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.440736280750043,
+              "acc": 0.45582553883692556,
+              "intersection": 17934,
+              "union": 40691,
+              "gt_count": 39344,
+              "pred_count": 19281
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.13,
+              "acc": 0.13211812627291242,
+              "intersection": 6487,
+              "union": 49900,
+              "gt_count": 49100,
+              "pred_count": 7287
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.1863013698630137,
+              "acc": 0.3175287356321839,
+              "intersection": 884,
+              "union": 4745,
+              "gt_count": 2784,
+              "pred_count": 2845
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3373099637122596,
+              "acc": 0.9419790700755067,
+              "intersection": 28444,
+              "union": 84326,
+              "gt_count": 30196,
+              "pred_count": 82574
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.37139183542269366,
+              "acc": 0.7029690922365539,
+              "intersection": 5777,
+              "union": 15555,
+              "gt_count": 8218,
+              "pred_count": 13114
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6205753878596174,
+              "acc": 0.9175946547884187,
+              "intersection": 4120,
+              "union": 6639,
+              "gt_count": 4490,
+              "pred_count": 6269
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.4692276749798874,
+              "acc": 0.671753527209905,
+              "intersection": 2333,
+              "union": 4972,
+              "gt_count": 3473,
+              "pred_count": 3832
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 222,
+              "gt_count": 0,
+              "pred_count": 222
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1198,
+              "gt_count": 1036,
+              "pred_count": 162
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 632,
+              "gt_count": 0,
+              "pred_count": 632
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1512,
+              "gt_count": 0,
+              "pred_count": 1512
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 604,
+              "gt_count": 0,
+              "pred_count": 604
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 70,
+              "gt_count": 0,
+              "pred_count": 70
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 237,
+              "gt_count": 0,
+              "pred_count": 237
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.10918400264811806,
+          "mean_top1_confidence_softmax": 0.06443540657194821,
+          "class_mean_logits": {
+            "wall": 0.010663517531070149,
+            "floor": 0.02428668539086821,
+            "cabinet": 0.028088765005544844,
+            "bed": -0.017436346708920334,
+            "chair": 0.1291360502545223,
+            "sofa": 0.01650971146382919,
+            "table": 0.05331654488756049,
+            "door": 0.0038727350685699717,
+            "window": -0.012541954565586374,
+            "bookshelf": -0.019323363318188246,
+            "picture": 0.029448033597642892,
+            "counter": 0.010902310282464316,
+            "desk": 0.07039367597424383,
+            "curtain": -0.020651789770885158,
+            "refrigerator": -0.029960139520078016,
+            "shower curtain": -0.051322143147872104,
+            "toilet": -0.008559422645375628,
+            "sink": -0.03894927953588311,
+            "bathtub": -0.04843699756324772
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0140_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.36713188349613973,
+          "macc": 0.592208308096045,
+          "num_valid": 137605,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.45067202612737095,
+              "acc": 0.4559526230174868,
+              "intersection": 17939,
+              "union": 39805,
+              "gt_count": 39344,
+              "pred_count": 18400
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.13,
+              "acc": 0.13211812627291242,
+              "intersection": 6487,
+              "union": 49900,
+              "gt_count": 49100,
+              "pred_count": 7287
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.18752633796881585,
+              "acc": 0.319683908045977,
+              "intersection": 890,
+              "union": 4746,
+              "gt_count": 2784,
+              "pred_count": 2852
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3373099637122596,
+              "acc": 0.9419790700755067,
+              "intersection": 28444,
+              "union": 84326,
+              "gt_count": 30196,
+              "pred_count": 82574
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.37319189971070393,
+              "acc": 0.7063762472621076,
+              "intersection": 5805,
+              "union": 15555,
+              "gt_count": 8218,
+              "pred_count": 13142
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6205753878596174,
+              "acc": 0.9175946547884187,
+              "intersection": 4120,
+              "union": 6639,
+              "gt_count": 4490,
+              "pred_count": 6269
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.4706475690942102,
+              "acc": 0.671753527209905,
+              "intersection": 2333,
+              "union": 4957,
+              "gt_count": 3473,
+              "pred_count": 3817
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 222,
+              "gt_count": 0,
+              "pred_count": 222
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 635,
+              "gt_count": 0,
+              "pred_count": 635
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1508,
+              "gt_count": 0,
+              "pred_count": 1508
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 604,
+              "gt_count": 0,
+              "pred_count": 604
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 3,
+              "gt_count": 0,
+              "pred_count": 3
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 292,
+              "gt_count": 0,
+              "pred_count": 292
+            }
+          },
+          "mean_top1_margin": 0.1167552511161453,
+          "mean_top1_confidence_softmax": 0.08090131372390527,
+          "class_mean_logits": {
+            "wall": 0.010663497064104034,
+            "floor": 0.024286674828468892,
+            "cabinet": 0.028088774436715157,
+            "bed": -0.01743635624269718,
+            "chair": 0.12913602847764477,
+            "sofa": 0.01650971287283101,
+            "table": 0.05331654281944757,
+            "door": 0.0038727425837790977,
+            "window": -0.012541971754897163,
+            "bookshelf": -0.019323354710247542,
+            "counter": 0.010902304136141374,
+            "desk": 0.07039365344555772,
+            "curtain": -0.02065180935506752,
+            "toilet": -0.008559457437939438,
+            "sink": -0.03894928951396861
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0140_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.38884957199054093,
+          "macc": 0.6613643533507707,
+          "num_valid": 134821,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4563267766975658,
+              "acc": 0.4616968279788532,
+              "intersection": 18165,
+              "union": 39807,
+              "gt_count": 39344,
+              "pred_count": 18628
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.13060217770558863,
+              "acc": 0.13264765784114052,
+              "intersection": 6513,
+              "union": 49869,
+              "gt_count": 49100,
+              "pred_count": 7282
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3424169475204622,
+              "acc": 0.9421115379520466,
+              "intersection": 28448,
+              "union": 83080,
+              "gt_count": 30196,
+              "pred_count": 81332
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.3802484095728567,
+              "acc": 0.7636894621562424,
+              "intersection": 6276,
+              "union": 16505,
+              "gt_count": 8218,
+              "pred_count": 14563
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5089438863023769,
+              "acc": 0.9251670378619153,
+              "intersection": 4154,
+              "union": 8162,
+              "gt_count": 4490,
+              "pred_count": 7826
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.5145592341443956,
+              "acc": 0.7428735963144256,
+              "intersection": 2580,
+              "union": 5014,
+              "gt_count": 3473,
+              "pred_count": 4121
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 428,
+              "gt_count": 0,
+              "pred_count": 428
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 641,
+              "gt_count": 0,
+              "pred_count": 641
+            }
+          },
+          "mean_top1_margin": 0.13839819626538627,
+          "mean_top1_confidence_softmax": 0.12043001616596406,
+          "class_mean_logits": {
+            "wall": 0.010663517531070149,
+            "floor": 0.02428668539086821,
+            "bed": -0.017436346708920334,
+            "chair": 0.1291360502545223,
+            "sofa": 0.01650971146382919,
+            "table": 0.05331654488756049,
+            "door": 0.0038727350685699717,
+            "window": -0.012541954565586374,
+            "bookshelf": -0.019323363318188246,
+            "toilet": -0.008559422645375628
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0140_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0200_00": {
+      "scene": "scene0200_00",
+      "label_ply": "dataset/scannet_og/scene0200_00/scene0200_00_vh_clean_2.labels.ply",
+      "num_points": 83291,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 34679,
+        "num_points": 83291
+      },
+      "query_diagnostics": {
+        "num_points": 83291,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.025544811710027406,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0200_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.4334768039843325,
+          "macc": 0.6871719877901448,
+          "num_valid": 43044,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4536406495547407,
+              "acc": 0.4542865707434053,
+              "intersection": 6062,
+              "union": 13363,
+              "gt_count": 13344,
+              "pred_count": 6081
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.39112861436418284,
+              "acc": 0.4151815181518152,
+              "intersection": 3774,
+              "union": 9649,
+              "gt_count": 9090,
+              "pred_count": 4333
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.3608865710560626,
+              "acc": 0.5616883116883117,
+              "intersection": 1384,
+              "union": 3835,
+              "gt_count": 2464,
+              "pred_count": 2755
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.40840813335775783,
+              "acc": 0.9875968992248062,
+              "intersection": 4459,
+              "union": 10918,
+              "gt_count": 4515,
+              "pred_count": 10862
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.26726190476190476,
+              "acc": 0.9889867841409692,
+              "intersection": 449,
+              "union": 1680,
+              "gt_count": 454,
+              "pred_count": 1675
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.7470158766948661,
+              "acc": 0.9012863534675615,
+              "intersection": 6446,
+              "union": 8629,
+              "gt_count": 7152,
+              "pred_count": 7923
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.6787061994609165,
+              "acc": 0.943542343242568,
+              "intersection": 3777,
+              "union": 5565,
+              "gt_count": 4003,
+              "pred_count": 5339
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1291,
+              "gt_count": 0,
+              "pred_count": 1291
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1059,
+              "gt_count": 0,
+              "pred_count": 1059
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.16076648262422866,
+              "acc": 0.24480712166172106,
+              "intersection": 495,
+              "union": 3079,
+              "gt_count": 2022,
+              "pred_count": 1552
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 174,
+              "gt_count": 0,
+              "pred_count": 174
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.11675696494297619,
+          "mean_top1_confidence_softmax": 0.06458005108123246,
+          "class_mean_logits": {
+            "wall": 0.018817171439222718,
+            "floor": 0.03321875905122125,
+            "cabinet": 0.04953626583295525,
+            "bed": 0.05774878731073455,
+            "chair": 0.006423418530268161,
+            "sofa": -0.0188606144181376,
+            "table": 0.011991465900784471,
+            "door": 0.026815349347431874,
+            "window": 0.028454722547615285,
+            "bookshelf": 0.02034075732957694,
+            "picture": 0.03567672848388036,
+            "counter": 0.017053788538200453,
+            "desk": 0.03219920049371653,
+            "curtain": -0.00810573244482428,
+            "refrigerator": -0.0038553295897374947,
+            "shower curtain": -0.02709007433787228,
+            "toilet": -0.02608018358204508,
+            "sink": -0.028986159844689382,
+            "bathtub": -0.05093650150570435
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0200_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.4334768039843325,
+          "macc": 0.6871719877901448,
+          "num_valid": 43044,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4536406495547407,
+              "acc": 0.4542865707434053,
+              "intersection": 6062,
+              "union": 13363,
+              "gt_count": 13344,
+              "pred_count": 6081
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.39112861436418284,
+              "acc": 0.4151815181518152,
+              "intersection": 3774,
+              "union": 9649,
+              "gt_count": 9090,
+              "pred_count": 4333
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.3608865710560626,
+              "acc": 0.5616883116883117,
+              "intersection": 1384,
+              "union": 3835,
+              "gt_count": 2464,
+              "pred_count": 2755
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.40840813335775783,
+              "acc": 0.9875968992248062,
+              "intersection": 4459,
+              "union": 10918,
+              "gt_count": 4515,
+              "pred_count": 10862
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.26726190476190476,
+              "acc": 0.9889867841409692,
+              "intersection": 449,
+              "union": 1680,
+              "gt_count": 454,
+              "pred_count": 1675
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.7470158766948661,
+              "acc": 0.9012863534675615,
+              "intersection": 6446,
+              "union": 8629,
+              "gt_count": 7152,
+              "pred_count": 7923
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.6787061994609165,
+              "acc": 0.943542343242568,
+              "intersection": 3777,
+              "union": 5565,
+              "gt_count": 4003,
+              "pred_count": 5339
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1291,
+              "gt_count": 0,
+              "pred_count": 1291
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1059,
+              "gt_count": 0,
+              "pred_count": 1059
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.16076648262422866,
+              "acc": 0.24480712166172106,
+              "intersection": 495,
+              "union": 3079,
+              "gt_count": 2022,
+              "pred_count": 1552
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 174,
+              "gt_count": 0,
+              "pred_count": 174
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.1183230515305877,
+          "mean_top1_confidence_softmax": 0.08133096856733495,
+          "class_mean_logits": {
+            "wall": 0.01881716162665126,
+            "floor": 0.033218754177854005,
+            "cabinet": 0.04953626729854352,
+            "bed": 0.05774877012442212,
+            "chair": 0.006423403038542164,
+            "sofa": -0.018860634627225835,
+            "table": 0.01199146039910351,
+            "door": 0.026815367667285234,
+            "window": 0.02845471605551725,
+            "bookshelf": 0.020340753012961493,
+            "counter": 0.01705377468381135,
+            "desk": 0.032199183882761995,
+            "curtain": -0.008105761195544148,
+            "toilet": -0.02608021398155175,
+            "sink": -0.028986196942392437
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0200_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.5132038197637676,
+          "macc": 0.7855019348560991,
+          "num_valid": 38558,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4691709069140976,
+              "acc": 0.4698741007194245,
+              "intersection": 6270,
+              "union": 13364,
+              "gt_count": 13344,
+              "pred_count": 6290
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.39369914458585437,
+              "acc": 0.4151815181518152,
+              "intersection": 3774,
+              "union": 9586,
+              "gt_count": 9090,
+              "pred_count": 4270
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.4095710480389455,
+              "acc": 0.9875968992248062,
+              "intersection": 4459,
+              "union": 10887,
+              "gt_count": 4515,
+              "pred_count": 10831
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3911149825783972,
+              "acc": 0.9889867841409692,
+              "intersection": 449,
+              "union": 1148,
+              "gt_count": 454,
+              "pred_count": 1143
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1045,
+              "gt_count": 0,
+              "pred_count": 1045
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.7411737734983952,
+              "acc": 0.904082774049217,
+              "intersection": 6466,
+              "union": 8724,
+              "gt_count": 7152,
+              "pred_count": 8038
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.6744930629669157,
+              "acc": 0.9472895328503622,
+              "intersection": 3792,
+              "union": 5622,
+              "gt_count": 4003,
+              "pred_count": 5411
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1359,
+              "gt_count": 0,
+              "pred_count": 1359
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 171,
+              "gt_count": 0,
+              "pred_count": 171
+            }
+          },
+          "mean_top1_margin": 0.14115978931213072,
+          "mean_top1_confidence_softmax": 0.12063374727564728,
+          "class_mean_logits": {
+            "wall": 0.018817171439222718,
+            "floor": 0.03321875905122125,
+            "bed": 0.05774878731073455,
+            "chair": 0.006423418530268161,
+            "sofa": -0.0188606144181376,
+            "table": 0.011991465900784471,
+            "door": 0.026815349347431874,
+            "window": 0.028454722547615285,
+            "bookshelf": 0.02034075732957694,
+            "toilet": -0.02608018358204508
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0200_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0347_00": {
+      "scene": "scene0347_00",
+      "label_ply": "dataset/scannet_og/scene0347_00/scene0347_00_vh_clean_2.labels.ply",
+      "num_points": 67984,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 20112,
+        "num_points": 67984
+      },
+      "query_diagnostics": {
+        "num_points": 67984,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.02218132558837445,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0347_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.5938061952204295,
+          "macc": 0.7617903587447732,
+          "num_valid": 37568,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.6437186610651849,
+              "acc": 0.6536397412962708,
+              "intersection": 9500,
+              "union": 14758,
+              "gt_count": 14534,
+              "pred_count": 9724
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6947840260798696,
+              "acc": 0.7794285714285715,
+              "intersection": 3410,
+              "union": 4908,
+              "gt_count": 4375,
+              "pred_count": 3943
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.49479659413434246,
+              "acc": 0.702013422818792,
+              "intersection": 3138,
+              "union": 6342,
+              "gt_count": 4470,
+              "pred_count": 5010
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 529,
+              "gt_count": 0,
+              "pred_count": 529
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6508284266739696,
+              "acc": 0.9268720748829953,
+              "intersection": 4753,
+              "union": 7303,
+              "gt_count": 5128,
+              "pred_count": 6928
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 759,
+              "gt_count": 0,
+              "pred_count": 759
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 645,
+              "gt_count": 0,
+              "pred_count": 645
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.37995629097720884,
+              "acc": 0.45648912228057015,
+              "intersection": 2434,
+              "union": 6406,
+              "gt_count": 5332,
+              "pred_count": 3508
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 139,
+              "gt_count": 0,
+              "pred_count": 139
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.7212230215827338,
+              "acc": 0.8583660363895826,
+              "intersection": 2406,
+              "union": 3336,
+              "gt_count": 2803,
+              "pred_count": 2939
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1936,
+              "gt_count": 0,
+              "pred_count": 1936
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.5713363460296966,
+              "acc": 0.9557235421166307,
+              "intersection": 885,
+              "union": 1549,
+              "gt_count": 926,
+              "pred_count": 1508
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.09251170496178616,
+          "mean_top1_confidence_softmax": 0.06305346889590117,
+          "class_mean_logits": {
+            "wall": 0.03771829302713124,
+            "floor": 0.011244151491393873,
+            "cabinet": 0.05764766310657942,
+            "bed": -0.055889916549039804,
+            "chair": -0.04020985998134384,
+            "sofa": -0.06595260245739978,
+            "table": -0.001541345715382487,
+            "door": 0.05072678996271514,
+            "window": 0.005707960811663471,
+            "bookshelf": -0.009132537632219705,
+            "picture": 0.032646167527986825,
+            "counter": 0.04822267391704677,
+            "desk": -0.00197182309910897,
+            "curtain": -0.022614515158787252,
+            "refrigerator": 0.06747317566650562,
+            "shower curtain": -0.007811609872174729,
+            "toilet": 0.024242778933589726,
+            "sink": 0.03422100908982386,
+            "bathtub": -0.01976324370971257
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0347_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.5754155031911687,
+          "macc": 0.747881530269137,
+          "num_valid": 34765,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.6444610270673632,
+              "acc": 0.6536397412962708,
+              "intersection": 9500,
+              "union": 14741,
+              "gt_count": 14534,
+              "pred_count": 9707
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.7038183694530443,
+              "acc": 0.7794285714285715,
+              "intersection": 3410,
+              "union": 4845,
+              "gt_count": 4375,
+              "pred_count": 3880
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.4944916587976078,
+              "acc": 0.7029082774049217,
+              "intersection": 3142,
+              "union": 6354,
+              "gt_count": 4470,
+              "pred_count": 5026
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 526,
+              "gt_count": 0,
+              "pred_count": 526
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6475231355470876,
+              "acc": 0.9278471138845554,
+              "intersection": 4758,
+              "union": 7348,
+              "gt_count": 5128,
+              "pred_count": 6978
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 759,
+              "gt_count": 0,
+              "pred_count": 759
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 810,
+              "gt_count": 0,
+              "pred_count": 810
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.38938329430132707,
+              "acc": 0.46774193548387094,
+              "intersection": 2494,
+              "union": 6405,
+              "gt_count": 5332,
+              "pred_count": 3567
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 137,
+              "gt_count": 0,
+              "pred_count": 137
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1871,
+              "gt_count": 0,
+              "pred_count": 1871
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.5728155339805825,
+              "acc": 0.9557235421166307,
+              "intersection": 885,
+              "union": 1545,
+              "gt_count": 926,
+              "pred_count": 1504
+            }
+          },
+          "mean_top1_margin": 0.09911257599516178,
+          "mean_top1_confidence_softmax": 0.0795628719819128,
+          "class_mean_logits": {
+            "wall": 0.03771829107286622,
+            "floor": 0.011244133881090052,
+            "cabinet": 0.05764766995220584,
+            "bed": -0.05588992822027173,
+            "chair": -0.04020988612939229,
+            "sofa": -0.06595262894211838,
+            "table": -0.0015413621911780362,
+            "door": 0.05072679866002739,
+            "window": 0.005707952493105139,
+            "bookshelf": -0.009132540676278994,
+            "counter": 0.04822266730288108,
+            "desk": -0.0019718250630181883,
+            "curtain": -0.022614541419059088,
+            "toilet": 0.02424275632057787,
+            "sink": 0.03422098881947514
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0347_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.7067074180882317,
+          "macc": 0.8009536137908588,
+          "num_valid": 24037,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.692745865074463,
+              "acc": 0.6945094261731113,
+              "intersection": 10094,
+              "union": 14571,
+              "gt_count": 14534,
+              "pred_count": 10131
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.7405077023215448,
+              "acc": 0.7801142857142858,
+              "intersection": 3413,
+              "union": 4609,
+              "gt_count": 4375,
+              "pred_count": 3647
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 3,
+              "gt_count": 0,
+              "pred_count": 3
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 400,
+              "gt_count": 0,
+              "pred_count": 400
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6868686868686869,
+              "acc": 0.9282371294851794,
+              "intersection": 4760,
+              "union": 6930,
+              "gt_count": 5128,
+              "pred_count": 6562
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 711,
+              "gt_count": 0,
+              "pred_count": 711
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 663,
+              "gt_count": 0,
+              "pred_count": 663
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1920,
+              "gt_count": 0,
+              "pred_count": 1920
+            }
+          },
+          "mean_top1_margin": 0.12329704426518326,
+          "mean_top1_confidence_softmax": 0.1179279225044852,
+          "class_mean_logits": {
+            "wall": 0.03771829302713124,
+            "floor": 0.011244151491393873,
+            "bed": -0.055889916549039804,
+            "chair": -0.04020985998134384,
+            "sofa": -0.06595260245739978,
+            "table": -0.001541345715382487,
+            "door": 0.05072678996271514,
+            "window": 0.005707960811663471,
+            "bookshelf": -0.009132537632219705,
+            "toilet": 0.024242778933589726
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0347_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0400_00": {
+      "scene": "scene0400_00",
+      "label_ply": "dataset/scannet_og/scene0400_00/scene0400_00_vh_clean_2.labels.ply",
+      "num_points": 155959,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 74837,
+        "num_points": 155959
+      },
+      "query_diagnostics": {
+        "num_points": 155959,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.024229519184948017,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0400_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.3299111720373954,
+          "macc": 0.6603294023184327,
+          "num_valid": 55604,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2780208799917307,
+              "acc": 0.2797365227942451,
+              "intersection": 8069,
+              "union": 29023,
+              "gt_count": 28845,
+              "pred_count": 8247
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.7474535090178488,
+              "acc": 0.8995164192532613,
+              "intersection": 15997,
+              "union": 21402,
+              "gt_count": 17784,
+              "pred_count": 19615
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 275,
+              "gt_count": 0,
+              "pred_count": 275
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.4280696152003832,
+              "acc": 0.9585269932070075,
+              "intersection": 2681,
+              "union": 6263,
+              "gt_count": 2797,
+              "pred_count": 6147
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1287,
+              "gt_count": 1287,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.014970974641002138,
+              "acc": 0.57421875,
+              "intersection": 147,
+              "union": 9819,
+              "gt_count": 256,
+              "pred_count": 9710
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.5536769199429619,
+              "acc": 0.9752421959095802,
+              "intersection": 2718,
+              "union": 4909,
+              "gt_count": 2787,
+              "pred_count": 4840
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 567,
+              "gt_count": 0,
+              "pred_count": 567
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.28718630546784113,
+              "acc": 0.935064935064935,
+              "intersection": 1728,
+              "union": 6017,
+              "gt_count": 1848,
+              "pred_count": 5897
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 183,
+              "gt_count": 0,
+              "pred_count": 183
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 123,
+              "gt_count": 0,
+              "pred_count": 123
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.08829668913348086,
+          "mean_top1_confidence_softmax": 0.06299001372460758,
+          "class_mean_logits": {
+            "wall": 0.03721354123735964,
+            "floor": 0.06574756195567531,
+            "cabinet": 0.0502954848854831,
+            "bed": 0.02421873584522017,
+            "chair": 0.004952572028299802,
+            "sofa": -0.03140766631841548,
+            "table": 0.0039736323066201056,
+            "door": 0.04612857286068754,
+            "window": 0.036752221813002195,
+            "bookshelf": 0.02055159191686605,
+            "picture": 0.02998101075552484,
+            "counter": 0.018648026544597598,
+            "desk": 0.028622329505279227,
+            "curtain": -0.00278558430776165,
+            "refrigerator": 0.0009998676588990273,
+            "shower curtain": -0.016814574840709216,
+            "toilet": -0.010397930300093042,
+            "sink": -0.022982461398413093,
+            "bathtub": -0.04550579437621188
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0400_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.3299111720373954,
+          "macc": 0.6603294023184327,
+          "num_valid": 55604,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2780208799917307,
+              "acc": 0.2797365227942451,
+              "intersection": 8069,
+              "union": 29023,
+              "gt_count": 28845,
+              "pred_count": 8247
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.7474535090178488,
+              "acc": 0.8995164192532613,
+              "intersection": 15997,
+              "union": 21402,
+              "gt_count": 17784,
+              "pred_count": 19615
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 275,
+              "gt_count": 0,
+              "pred_count": 275
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.4280696152003832,
+              "acc": 0.9585269932070075,
+              "intersection": 2681,
+              "union": 6263,
+              "gt_count": 2797,
+              "pred_count": 6147
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1287,
+              "gt_count": 1287,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.014970974641002138,
+              "acc": 0.57421875,
+              "intersection": 147,
+              "union": 9819,
+              "gt_count": 256,
+              "pred_count": 9710
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.5536769199429619,
+              "acc": 0.9752421959095802,
+              "intersection": 2718,
+              "union": 4909,
+              "gt_count": 2787,
+              "pred_count": 4840
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 567,
+              "gt_count": 0,
+              "pred_count": 567
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.28718630546784113,
+              "acc": 0.935064935064935,
+              "intersection": 1728,
+              "union": 6017,
+              "gt_count": 1848,
+              "pred_count": 5897
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 183,
+              "gt_count": 0,
+              "pred_count": 183
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 123,
+              "gt_count": 0,
+              "pred_count": 123
+            }
+          },
+          "mean_top1_margin": 0.08830083621246952,
+          "mean_top1_confidence_softmax": 0.07933023825144214,
+          "class_mean_logits": {
+            "wall": 0.03721354377504481,
+            "floor": 0.06574755805436655,
+            "cabinet": 0.050295486202480554,
+            "bed": 0.024218718873304054,
+            "chair": 0.004952558233076328,
+            "sofa": -0.03140768446745062,
+            "table": 0.003973623953661211,
+            "door": 0.046128589285319745,
+            "window": 0.036752211454354776,
+            "bookshelf": 0.020551579236083833,
+            "counter": 0.01864801098522431,
+            "desk": 0.028622318889805844,
+            "curtain": -0.002785614157665635,
+            "toilet": -0.01039795812749252,
+            "sink": -0.022982498344663194
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0400_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.3907844047308111,
+          "macc": 0.7831884556941238,
+          "num_valid": 53756,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2782965234469214,
+              "acc": 0.2800138672213555,
+              "intersection": 8077,
+              "union": 29023,
+              "gt_count": 28845,
+              "pred_count": 8255
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.7508213648737445,
+              "acc": 0.8995164192532613,
+              "intersection": 15997,
+              "union": 21306,
+              "gt_count": 17784,
+              "pred_count": 19519
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.43215761042262474,
+              "acc": 0.9724705041115481,
+              "intersection": 2720,
+              "union": 6294,
+              "gt_count": 2797,
+              "pred_count": 6217
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3147830350576122,
+              "acc": 0.9976689976689976,
+              "intersection": 1284,
+              "union": 4079,
+              "gt_count": 1287,
+              "pred_count": 4076
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.014970974641002138,
+              "acc": 0.57421875,
+              "intersection": 147,
+              "union": 9819,
+              "gt_count": 256,
+              "pred_count": 9710
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.5536769199429619,
+              "acc": 0.9752421959095802,
+              "intersection": 2718,
+              "union": 4909,
+              "gt_count": 2787,
+              "pred_count": 4840
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 841,
+              "gt_count": 0,
+              "pred_count": 841
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 298,
+              "gt_count": 0,
+              "pred_count": 298
+            }
+          },
+          "mean_top1_margin": 0.10655954672809789,
+          "mean_top1_confidence_softmax": 0.11849461141508069,
+          "class_mean_logits": {
+            "wall": 0.03721354123735964,
+            "floor": 0.06574756195567531,
+            "bed": 0.02421873584522017,
+            "chair": 0.004952572028299802,
+            "sofa": -0.03140766631841548,
+            "table": 0.0039736323066201056,
+            "door": 0.04612857286068754,
+            "window": 0.036752221813002195,
+            "bookshelf": 0.02055159191686605,
+            "toilet": -0.010397930300093042
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0400_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0590_00": {
+      "scene": "scene0590_00",
+      "label_ply": "dataset/scannet_og/scene0590_00/scene0590_00_vh_clean_2.labels.ply",
+      "num_points": 222957,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 139535,
+        "num_points": 222957
+      },
+      "query_diagnostics": {
+        "num_points": 222957,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.020258385994685258,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0590_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.2664479371264283,
+          "macc": 0.43873893912165957,
+          "num_valid": 65408,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2554996983712045,
+              "acc": 0.2676750653071543,
+              "intersection": 6353,
+              "union": 24865,
+              "gt_count": 23734,
+              "pred_count": 7484
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.31807647740440326,
+              "acc": 0.34492146596858636,
+              "intersection": 3294,
+              "union": 10356,
+              "gt_count": 9550,
+              "pred_count": 4100
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.21437371663244353,
+              "acc": 0.3208358942839582,
+              "intersection": 522,
+              "union": 2435,
+              "gt_count": 1627,
+              "pred_count": 1330
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.5585384517280959,
+              "acc": 0.9562227074235807,
+              "intersection": 8759,
+              "union": 15682,
+              "gt_count": 9160,
+              "pred_count": 15281
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3570233037208703,
+              "acc": 0.8257891602144133,
+              "intersection": 2773,
+              "union": 7767,
+              "gt_count": 3358,
+              "pred_count": 7182
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.3431779350744447,
+              "acc": 0.7716794731064764,
+              "intersection": 1406,
+              "union": 4097,
+              "gt_count": 1822,
+              "pred_count": 3681
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1176,
+              "gt_count": 1176,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.560966810966811,
+              "acc": 0.8586416344561016,
+              "intersection": 3110,
+              "union": 5544,
+              "gt_count": 3622,
+              "pred_count": 5032
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4457,
+              "gt_count": 0,
+              "pred_count": 4457
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 288,
+              "gt_count": 0,
+              "pred_count": 288
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.2670573461699456,
+              "acc": 0.2714893617021277,
+              "intersection": 638,
+              "union": 2389,
+              "gt_count": 2350,
+              "pred_count": 677
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.20175438596491227,
+              "acc": 0.3265720081135903,
+              "intersection": 161,
+              "union": 798,
+              "gt_count": 493,
+              "pred_count": 466
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.17745173745173745,
+              "acc": 0.5702233250620348,
+              "intersection": 1149,
+              "union": 6475,
+              "gt_count": 2015,
+              "pred_count": 5609
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.40888137676705594,
+              "acc": 0.4580822861077638,
+              "intersection": 2661,
+              "union": 6508,
+              "gt_count": 5809,
+              "pred_count": 3360
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 363,
+              "gt_count": 363,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1275,
+              "gt_count": 0,
+              "pred_count": 1275
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4629,
+              "gt_count": 0,
+              "pred_count": 4629
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.06746987951807229,
+              "acc": 0.1702127659574468,
+              "intersection": 56,
+              "union": 830,
+              "gt_count": 329,
+              "pred_count": 557
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          },
+          "mean_top1_margin": 0.0865036526629789,
+          "mean_top1_confidence_softmax": 0.06275662335293528,
+          "class_mean_logits": {
+            "wall": 0.0038142988351867334,
+            "floor": 0.02220433256016462,
+            "cabinet": 0.02222586810539914,
+            "bed": 0.06609078220378434,
+            "chair": 0.03239782086222081,
+            "sofa": 0.01477278830791152,
+            "table": 0.019515040159731264,
+            "door": -0.0003901124329373767,
+            "window": -0.0031187064022416204,
+            "bookshelf": -0.02215037579880918,
+            "picture": 0.029686090945203015,
+            "counter": 0.0010989749246666403,
+            "desk": 0.03291513114215765,
+            "curtain": 0.007037274731318353,
+            "refrigerator": -0.008197849572773945,
+            "shower curtain": 0.0013152258018144926,
+            "toilet": 0.01050498378341681,
+            "sink": 0.00046602610105998907,
+            "bathtub": -0.02024630655737403
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0590_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.29633633398278053,
+          "macc": 0.4949237374721038,
+          "num_valid": 62695,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2676422491509078,
+              "acc": 0.26893907474509143,
+              "intersection": 6383,
+              "union": 23849,
+              "gt_count": 23734,
+              "pred_count": 6498
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.31823012269345957,
+              "acc": 0.34492146596858636,
+              "intersection": 3294,
+              "union": 10351,
+              "gt_count": 9550,
+              "pred_count": 4095
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.25,
+              "acc": 0.3208358942839582,
+              "intersection": 522,
+              "union": 2088,
+              "gt_count": 1627,
+              "pred_count": 983
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.5617984734782887,
+              "acc": 0.9562227074235807,
+              "intersection": 8759,
+              "union": 15591,
+              "gt_count": 9160,
+              "pred_count": 15190
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.357253285235764,
+              "acc": 0.8257891602144133,
+              "intersection": 2773,
+              "union": 7762,
+              "gt_count": 3358,
+              "pred_count": 7177
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.3461349089118661,
+              "acc": 0.7716794731064764,
+              "intersection": 1406,
+              "union": 4062,
+              "gt_count": 1822,
+              "pred_count": 3646
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1176,
+              "gt_count": 1176,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.560966810966811,
+              "acc": 0.8586416344561016,
+              "intersection": 3110,
+              "union": 5544,
+              "gt_count": 3622,
+              "pred_count": 5032
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4375,
+              "gt_count": 0,
+              "pred_count": 4375
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 283,
+              "gt_count": 0,
+              "pred_count": 283
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.2022613065326633,
+              "acc": 0.3265720081135903,
+              "intersection": 161,
+              "union": 796,
+              "gt_count": 493,
+              "pred_count": 464
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.1775888717156105,
+              "acc": 0.5702233250620348,
+              "intersection": 1149,
+              "union": 6470,
+              "gt_count": 2015,
+              "pred_count": 5604
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.44669009958992384,
+              "acc": 0.5250473403339645,
+              "intersection": 3050,
+              "union": 6828,
+              "gt_count": 5809,
+              "pred_count": 4069
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4722,
+              "gt_count": 0,
+              "pred_count": 4722
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.06746987951807229,
+              "acc": 0.1702127659574468,
+              "intersection": 56,
+              "union": 830,
+              "gt_count": 329,
+              "pred_count": 557
+            }
+          },
+          "mean_top1_margin": 0.09115285489346127,
+          "mean_top1_confidence_softmax": 0.07922567767926085,
+          "class_mean_logits": {
+            "wall": 0.003814294938483323,
+            "floor": 0.022204321380667965,
+            "cabinet": 0.02222586059002275,
+            "bed": 0.0660907881215551,
+            "chair": 0.03239779346018324,
+            "sofa": 0.014772790519322785,
+            "table": 0.019515029161489065,
+            "door": -0.00039010725515529316,
+            "window": -0.0031187104465150283,
+            "bookshelf": -0.022150374532701373,
+            "counter": 0.0010989685492150125,
+            "desk": 0.03291511019791149,
+            "curtain": 0.007037255917213029,
+            "toilet": 0.010504964921190834,
+            "sink": 0.0004659973676844034
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0590_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.36431915181385993,
+          "macc": 0.6351776921941037,
+          "num_valid": 52422,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.28225399495374265,
+              "acc": 0.28280104491446867,
+              "intersection": 6712,
+              "union": 23780,
+              "gt_count": 23734,
+              "pred_count": 6758
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3199922284826112,
+              "acc": 0.34492146596858636,
+              "intersection": 3294,
+              "union": 10294,
+              "gt_count": 9550,
+              "pred_count": 4038
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.572016192217289,
+              "acc": 0.9564410480349345,
+              "intersection": 8761,
+              "union": 15316,
+              "gt_count": 9160,
+              "pred_count": 14917
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.3603462787062643,
+              "acc": 0.8924955330553901,
+              "intersection": 2997,
+              "union": 8317,
+              "gt_count": 3358,
+              "pred_count": 7956
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.3463907366346391,
+              "acc": 0.7716794731064764,
+              "intersection": 1406,
+              "union": 4059,
+              "gt_count": 1822,
+              "pred_count": 3643
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.10721982758620689,
+              "acc": 0.33843537414965985,
+              "intersection": 398,
+              "union": 3712,
+              "gt_count": 1176,
+              "pred_count": 2934
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5620148041162665,
+              "acc": 0.8594699061292104,
+              "intersection": 3113,
+              "union": 5539,
+              "gt_count": 3622,
+              "pred_count": 5030
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2765,
+              "gt_count": 0,
+              "pred_count": 2765
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 289,
+              "gt_count": 0,
+              "pred_count": 289
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4092,
+              "gt_count": 0,
+              "pred_count": 4092
+            }
+          },
+          "mean_top1_margin": 0.10927461784042947,
+          "mean_top1_confidence_softmax": 0.11767906354893404,
+          "class_mean_logits": {
+            "wall": 0.0038142988351867334,
+            "floor": 0.02220433256016462,
+            "bed": 0.06609078220378434,
+            "chair": 0.03239782086222081,
+            "sofa": 0.01477278830791152,
+            "table": 0.019515040159731264,
+            "door": -0.0003901124329373767,
+            "window": -0.0031187064022416204,
+            "bookshelf": -0.02215037579880918,
+            "toilet": 0.01050498378341681
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0590_00/split_10_logits.npz"
+        }
+      }
+    },
+    "scene0645_00": {
+      "scene": "scene0645_00",
+      "label_ply": "dataset/scannet_og/scene0645_00/scene0645_00_vh_clean_2.labels.ply",
+      "num_points": 352477,
+      "sample_indices": null,
+      "query_mode": "gaussian_index",
+      "gaussian_index_position_mode": "label_point",
+      "candidate_k": null,
+      "compact_feature_key": "features",
+      "feature_projection": "hcd_decoder_plus_siglip_summary_head",
+      "point_summary_adapter_blend_alpha": null,
+      "logit_calibration": {
+        "mode": "none",
+        "alpha": 1.0,
+        "bias_by_split": {
+          "19": null,
+          "15": null,
+          "10": null
+        }
+      },
+      "opacity_filter": {
+        "enabled": true,
+        "mode": "label_index",
+        "threshold": 0.1,
+        "num_filtered": 216182,
+        "num_points": 352477
+      },
+      "query_diagnostics": {
+        "num_points": 352477,
+        "mean_top1_weight": 1.0,
+        "mean_weight_entropy": 0.0,
+        "mean_effective_neighbors": 1.0,
+        "mean_top1_euclidean_dist": 0.019256414244274166,
+        "mean_top1_mahalanobis_dist2": 0.0,
+        "mean_top1_density": 1.0
+      },
+      "language_feature_rgb_ply": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/visualizations/scene0645_00/language_feature_rgb.ply",
+      "language_features_npz": null,
+      "splits": {
+        "19": {
+          "miou": 0.2381328604412987,
+          "macc": 0.5842062783842428,
+          "num_valid": 107700,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.3199456929218424,
+              "acc": 0.3224021399546689,
+              "intersection": 15789,
+              "union": 49349,
+              "gt_count": 48973,
+              "pred_count": 16165
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.2575982386445221,
+              "acc": 0.2791783380018674,
+              "intersection": 5382,
+              "union": 20893,
+              "gt_count": 19278,
+              "pred_count": 6997
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.11634671320535195,
+              "acc": 0.3645200486026732,
+              "intersection": 1200,
+              "union": 10314,
+              "gt_count": 3292,
+              "pred_count": 8222
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.33837860252954594,
+              "acc": 0.9031543995572773,
+              "intersection": 6528,
+              "union": 19292,
+              "gt_count": 7228,
+              "pred_count": 18592
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.255472137041345,
+              "acc": 0.668141592920354,
+              "intersection": 2416,
+              "union": 9457,
+              "gt_count": 3616,
+              "pred_count": 8257
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.2980392156862745,
+              "acc": 0.9854132901134521,
+              "intersection": 2432,
+              "union": 8160,
+              "gt_count": 2468,
+              "pred_count": 8124
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.07941249688822505,
+              "acc": 0.25622489959839356,
+              "intersection": 319,
+              "union": 4017,
+              "gt_count": 1245,
+              "pred_count": 3091
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.21605273361768126,
+              "acc": 0.6546052631578947,
+              "intersection": 2786,
+              "union": 12895,
+              "gt_count": 4256,
+              "pred_count": 11425
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.33411986786219916,
+              "acc": 0.6651009863785815,
+              "intersection": 1416,
+              "union": 4238,
+              "gt_count": 2129,
+              "pred_count": 3525
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.22394789579158317,
+              "acc": 0.8277777777777777,
+              "intersection": 447,
+              "union": 1996,
+              "gt_count": 540,
+              "pred_count": 1903
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2041,
+              "gt_count": 0,
+              "pred_count": 2041
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.10520694259012016,
+              "acc": 0.28509406657018815,
+              "intersection": 394,
+              "union": 3745,
+              "gt_count": 1382,
+              "pred_count": 2757
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.5711623344776852,
+              "acc": 0.5931547315880615,
+              "intersection": 5823,
+              "union": 10195,
+              "gt_count": 9817,
+              "pred_count": 6201
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": 0.2173084254670225,
+              "acc": 0.43116490166414523,
+              "intersection": 570,
+              "union": 2623,
+              "gt_count": 1322,
+              "pred_count": 1871
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.1661253653783696,
+              "acc": 0.9359560841720037,
+              "intersection": 1023,
+              "union": 6158,
+              "gt_count": 1093,
+              "pred_count": 6088
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.14732142857142858,
+              "acc": 0.7857142857142857,
+              "intersection": 132,
+              "union": 896,
+              "gt_count": 168,
+              "pred_count": 860
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": 0.1636876763875823,
+              "acc": 0.3896976483762598,
+              "intersection": 348,
+              "union": 2126,
+              "gt_count": 893,
+              "pred_count": 1581
+            }
+          },
+          "mean_top1_margin": 0.06571997521296498,
+          "mean_top1_confidence_softmax": 0.0615275464648982,
+          "class_mean_logits": {
+            "wall": 0.015211395251136666,
+            "floor": 0.02946887631233244,
+            "cabinet": 0.043433638999731454,
+            "bed": 0.05065095080529073,
+            "chair": 0.03873676921329048,
+            "sofa": 0.03203414995731595,
+            "table": 0.030184452942584046,
+            "door": 0.02508434528729922,
+            "window": 0.023841799275650936,
+            "bookshelf": 0.0007126107601184148,
+            "picture": 0.04564726971166126,
+            "counter": 0.0036238781052230547,
+            "desk": 0.025109841768200285,
+            "curtain": 0.023613425822299756,
+            "refrigerator": 0.004607227485461564,
+            "shower curtain": 0.013160760398478945,
+            "toilet": 0.017291478913585165,
+            "sink": 0.006168602787784134,
+            "bathtub": -0.007412887927539757
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0645_00/split_19_logits.npz"
+        },
+        "15": {
+          "miou": 0.24576457197602936,
+          "macc": 0.5943075066903688,
+          "num_valid": 104945,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.344265943671091,
+              "acc": 0.3474363424744247,
+              "intersection": 17015,
+              "union": 49424,
+              "gt_count": 48973,
+              "pred_count": 17466
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.2578450630000479,
+              "acc": 0.2791783380018674,
+              "intersection": 5382,
+              "union": 20873,
+              "gt_count": 19278,
+              "pred_count": 6977
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.11681105811350141,
+              "acc": 0.3645200486026732,
+              "intersection": 1200,
+              "union": 10273,
+              "gt_count": 3292,
+              "pred_count": 8181
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.33918736360802243,
+              "acc": 0.9031543995572773,
+              "intersection": 6528,
+              "union": 19246,
+              "gt_count": 7228,
+              "pred_count": 18546
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.25552617662612376,
+              "acc": 0.668141592920354,
+              "intersection": 2416,
+              "union": 9455,
+              "gt_count": 3616,
+              "pred_count": 8255
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.29822194972409566,
+              "acc": 0.9854132901134521,
+              "intersection": 2432,
+              "union": 8155,
+              "gt_count": 2468,
+              "pred_count": 8119
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.07959081836327345,
+              "acc": 0.25622489959839356,
+              "intersection": 319,
+              "union": 4008,
+              "gt_count": 1245,
+              "pred_count": 3082
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.2241351568785197,
+              "acc": 0.6546052631578947,
+              "intersection": 2786,
+              "union": 12430,
+              "gt_count": 4256,
+              "pred_count": 10960
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.33223915592028136,
+              "acc": 0.665570690465007,
+              "intersection": 1417,
+              "union": 4265,
+              "gt_count": 2129,
+              "pred_count": 3553
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2028,
+              "gt_count": 0,
+              "pred_count": 2028
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.10382081686429513,
+              "acc": 0.28509406657018815,
+              "intersection": 394,
+              "union": 3795,
+              "gt_count": 1382,
+              "pred_count": 2807
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.5636942675159236,
+              "acc": 0.5949882856269736,
+              "intersection": 5841,
+              "union": 10362,
+              "gt_count": 9817,
+              "pred_count": 6386
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.13112022558318379,
+              "acc": 0.9359560841720037,
+              "intersection": 1023,
+              "union": 7802,
+              "gt_count": 1093,
+              "pred_count": 7732
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.1484814398200225,
+              "acc": 0.7857142857142857,
+              "intersection": 132,
+              "union": 889,
+              "gt_count": 168,
+              "pred_count": 853
+            }
+          },
+          "mean_top1_margin": 0.06974181491133828,
+          "mean_top1_confidence_softmax": 0.07760584553772157,
+          "class_mean_logits": {
+            "wall": 0.015211395936338879,
+            "floor": 0.029468878590815813,
+            "cabinet": 0.043433632276227006,
+            "bed": 0.05065096797187215,
+            "chair": 0.03873674214949407,
+            "sofa": 0.03203414817294927,
+            "table": 0.0301844503466958,
+            "door": 0.02508435229760104,
+            "window": 0.023841797359384527,
+            "bookshelf": 0.0007126034895682736,
+            "counter": 0.003623871807518011,
+            "desk": 0.025109821841194153,
+            "curtain": 0.023613414430136547,
+            "toilet": 0.017291464520956635,
+            "sink": 0.006168583525687949
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0645_00/split_15_logits.npz"
+        },
+        "10": {
+          "miou": 0.28745019574128317,
+          "macc": 0.6666170800465244,
+          "num_valid": 90286,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.3467385773888267,
+              "acc": 0.3478855695995753,
+              "intersection": 17037,
+              "union": 49135,
+              "gt_count": 48973,
+              "pred_count": 17199
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.27023581899298915,
+              "acc": 0.2859217761178546,
+              "intersection": 5512,
+              "union": 20397,
+              "gt_count": 19278,
+              "pred_count": 6631
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.3403490492315707,
+              "acc": 0.9038461538461539,
+              "intersection": 6533,
+              "union": 19195,
+              "gt_count": 7228,
+              "pred_count": 18500
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.2868677273806697,
+              "acc": 0.668141592920354,
+              "intersection": 2416,
+              "union": 8422,
+              "gt_count": 3616,
+              "pred_count": 7222
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.3074200480343825,
+              "acc": 0.9854132901134521,
+              "intersection": 2432,
+              "union": 7911,
+              "gt_count": 2468,
+              "pred_count": 7875
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0464,
+              "acc": 0.25622489959839356,
+              "intersection": 319,
+              "union": 6875,
+              "gt_count": 1245,
+              "pred_count": 5949
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.21874210659257387,
+              "acc": 0.8139097744360902,
+              "intersection": 3464,
+              "union": 15836,
+              "gt_count": 4256,
+              "pred_count": 15044
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.629097605893186,
+              "acc": 0.8022545796148427,
+              "intersection": 1708,
+              "union": 2715,
+              "gt_count": 2129,
+              "pred_count": 2294
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2397,
+              "gt_count": 0,
+              "pred_count": 2397
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.14120082815734988,
+              "acc": 0.9359560841720037,
+              "intersection": 1023,
+              "union": 7245,
+              "gt_count": 1093,
+              "pred_count": 7175
+            }
+          },
+          "mean_top1_margin": 0.08371578909812331,
+          "mean_top1_confidence_softmax": 0.11502892062953109,
+          "class_mean_logits": {
+            "wall": 0.015211395251136666,
+            "floor": 0.02946887631233244,
+            "bed": 0.05065095080529073,
+            "chair": 0.03873676921329048,
+            "sofa": 0.03203414995731595,
+            "table": 0.030184452942584046,
+            "door": 0.02508434528729922,
+            "window": 0.023841799275650936,
+            "bookshelf": 0.0007126107601184148,
+            "toilet": 0.017291478913585165
+          },
+          "logits_npz": "output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/logits/scene0645_00/split_10_logits.npz"
+        }
+      }
+    }
+  }
+}

@@ -45,6 +45,16 @@ def _load_radio_lerf(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def _feature_stems(feature_dir: Path, suffix: str) -> set[str]:
+    if not feature_dir.exists():
+        return set()
+    return {
+        path.name.removesuffix(suffix)
+        for path in feature_dir.glob(f"*{suffix}")
+        if path.is_file()
+    }
+
+
 def inspect_opengaussian_lerf_assets(lerf_root: Path) -> dict[str, dict[str, int | bool]]:
     """Inspect whether local LERF folders can run OpenGaussian's LeRF recipe."""
     status: dict[str, dict[str, int | bool]] = {}
@@ -53,18 +63,23 @@ def inspect_opengaussian_lerf_assets(lerf_root: Path) -> dict[str, dict[str, int
         image_dir = scene_root / "images"
         language_dir = scene_root / "language_features"
         label_dir = lerf_root / "label" / scene
+        image_stems = (
+            {path.stem for path in image_dir.glob("*") if path.is_file()}
+            if image_dir.exists()
+            else set()
+        )
+        mask_stems = _feature_stems(language_dir, "_s.npy")
+        vector_stems = _feature_stems(language_dir, "_f.npy")
         status[scene] = {
             "scene_root_exists": scene_root.exists(),
-            "images": len(list(image_dir.glob("*"))) if image_dir.exists() else 0,
-            "language_feature_masks": len(list(language_dir.glob("*_s.npy"))) if language_dir.exists() else 0,
-            "language_feature_vectors": len(list(language_dir.glob("*_f.npy"))) if language_dir.exists() else 0,
+            "images": len(image_stems),
+            "language_feature_masks": len(mask_stems),
+            "language_feature_vectors": len(vector_stems),
             "labels": len(list(label_dir.rglob("*.jpg"))) if label_dir.exists() else 0,
             "ready": (
-                scene_root.exists()
-                and image_dir.exists()
-                and language_dir.exists()
-                and any(language_dir.glob("*_s.npy"))
-                and any(language_dir.glob("*_f.npy"))
+                bool(image_stems)
+                and mask_stems == image_stems
+                and vector_stems == image_stems
             ),
         }
     return status
@@ -120,6 +135,33 @@ def _load_radio_direct_lerf_results(path: Path, tag: str) -> dict[str, dict[str,
         "acc025": sum(direct[scene]["acc025"] for scene in LERF_SCENES) / len(LERF_SCENES),
     }
     return direct
+
+
+def _load_opengaussian_lerf_results(path: Path) -> dict[str, dict[str, float]] | None:
+    payload = _load_json(path)
+    if payload is None:
+        return None
+    rows: dict[str, dict[str, float]] = {}
+    for scene in LERF_SCENES:
+        scene_payload = payload.get("scenes", {}).get(scene)
+        if scene_payload is None:
+            return None
+        rows[scene] = {
+            "miou": float(scene_payload["miou"]),
+            "acc025": float(scene_payload["acc025"]),
+        }
+    macro = payload.get("macro", {})
+    if "miou" in macro and "acc025" in macro:
+        rows["macro"] = {
+            "miou": float(macro["miou"]),
+            "acc025": float(macro["acc025"]),
+        }
+    else:
+        rows["macro"] = {
+            "miou": sum(rows[scene]["miou"] for scene in LERF_SCENES) / len(LERF_SCENES),
+            "acc025": sum(rows[scene]["acc025"] for scene in LERF_SCENES) / len(LERF_SCENES),
+        }
+    return rows
 
 
 def _scan_table_lines(radio: dict[str, Any] | None, og: dict[str, Any] | None) -> list[str]:
@@ -190,6 +232,7 @@ def _lerf_lines(
     rows: list[dict[str, str]],
     direct: dict[str, dict[str, float]] | None = None,
     asset_status: dict[str, dict[str, int | bool]] | None = None,
+    opengaussian_lerf: dict[str, dict[str, float]] | None = None,
 ) -> list[str]:
     lines = [
         "## LERF-OVS",
@@ -212,6 +255,19 @@ def _lerf_lines(
         f"{_fmt(lerf['teatime']['macc025'])} | {_fmt(lerf['waldo_kitchen']['macc025'])} | "
         f"{_fmt(lerf['macro']['macc025'])} |"
     )
+    if opengaussian_lerf is not None:
+        lines.append(
+            "| OpenGaussian | local compatibility rerun object-selection mIoU | "
+            f"{_fmt(opengaussian_lerf['figurines']['miou'])} | {_fmt(opengaussian_lerf['ramen']['miou'])} | "
+            f"{_fmt(opengaussian_lerf['teatime']['miou'])} | {_fmt(opengaussian_lerf['waldo_kitchen']['miou'])} | "
+            f"{_fmt(opengaussian_lerf['macro']['miou'])} |"
+        )
+        lines.append(
+            "| OpenGaussian | local compatibility rerun Acc@0.25 | "
+            f"{_fmt(opengaussian_lerf['figurines']['acc025'])} | {_fmt(opengaussian_lerf['ramen']['acc025'])} | "
+            f"{_fmt(opengaussian_lerf['teatime']['acc025'])} | {_fmt(opengaussian_lerf['waldo_kitchen']['acc025'])} | "
+            f"{_fmt(opengaussian_lerf['macro']['acc025'])} |"
+        )
     if rows:
         by_scene = {row["scene"]: row for row in rows}
         macro = by_scene.get("macro", {})
@@ -261,9 +317,17 @@ def _lerf_lines(
             )
         lines.append("")
         if ready:
-            lines.append(
-                "Local OpenGaussian LeRF reproduction assets appear complete; run the official `train_lerf.sh`, `render_lerf_by_text.py`, and `compute_lerf_iou.py` flow under the local paths."
-            )
+            if opengaussian_lerf is not None:
+                macro = opengaussian_lerf["macro"]
+                lines.append(
+                    "Local OpenGaussian LeRF compatibility rerun completed with "
+                    f"macro mIoU {_fmt(macro['miou'])} and Acc@0.25 {_fmt(macro['acc025'])}; "
+                    "see `output/baselines/opengaussian/lerf_compat_20260518/opengaussian_lerf_eval.json`."
+                )
+            else:
+                lines.append(
+                    "Local OpenGaussian LeRF reproduction assets appear complete; run the official `train_lerf.sh`, `render_lerf_by_text.py`, and `compute_lerf_iou.py` flow under the local paths."
+                )
         else:
             lines.append(
                 "Local OpenGaussian LeRF reproduction is blocked: OpenGaussian's LeRF recipe requires per-frame `language_features/*_s.npy` SAM masks and `language_features/*_f.npy` CLIP features. The inspected local LERF folders have images/COLMAP/labels but no complete `language_features/` assets."
@@ -276,18 +340,24 @@ def _lerf_lines(
     return lines
 
 
-def main() -> None:
+def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--opengaussian-scannet-json", default="output/baselines/opengaussian/scannet_eval/opengaussian_scannet_results.json")
     parser.add_argument("--radio-scannet-json", default="output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/scannet_pointcloud_radio_gs_results.json")
     parser.add_argument("--radio-lerf-csv", default="output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv")
     parser.add_argument("--radio-lerf-threshold-sweep-json", default="output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json")
     parser.add_argument("--radio-lerf-threshold", default="0.60")
-    parser.add_argument("--radio-direct-lerf-root", default="output/radio_gs/lerf_direct_3d_selection_max128_cap0p018_cache_20260514")
-    parser.add_argument("--radio-direct-lerf-tag", default="meanstd2p5")
+    parser.add_argument("--radio-direct-lerf-root", default="output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515")
+    parser.add_argument("--radio-direct-lerf-tag", default="thr0p25")
     parser.add_argument("--opengaussian-lerf-root", default="/mnt/pool/sqy/3d_understanding/lerf_ovs")
+    parser.add_argument("--opengaussian-lerf-json", default="output/baselines/opengaussian/lerf_compat_20260518/opengaussian_lerf_eval.json")
     parser.add_argument("--qualitative-image", default="output/baselines/opengaussian/scannet_qualitative_comparison.png")
     parser.add_argument("--output", default="output/baselines/opengaussian/opengaussian_vs_radio_gs_report.md")
+    return parser
+
+
+def main() -> None:
+    parser = build_arg_parser()
     args = parser.parse_args()
 
     og = _load_json(Path(args.opengaussian_scannet_json))
@@ -299,6 +369,7 @@ def main() -> None:
     if not lerf_rows:
         lerf_rows = _load_radio_lerf(Path(args.radio_lerf_csv))
     direct_lerf = _load_radio_direct_lerf_results(Path(args.radio_direct_lerf_root), args.radio_direct_lerf_tag)
+    opengaussian_lerf = _load_opengaussian_lerf_results(Path(args.opengaussian_lerf_json))
     lerf_assets = inspect_opengaussian_lerf_assets(Path(args.opengaussian_lerf_root))
 
     lines = [
@@ -310,7 +381,7 @@ def main() -> None:
         "",
     ]
     lines.extend(_scan_table_lines(radio, og))
-    lines.extend(_lerf_lines(lerf_rows, direct_lerf, lerf_assets))
+    lines.extend(_lerf_lines(lerf_rows, direct_lerf, lerf_assets, opengaussian_lerf))
     q = Path(args.qualitative_image)
     lines.extend(
         [

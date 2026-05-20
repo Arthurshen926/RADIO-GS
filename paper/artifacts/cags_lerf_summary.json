@@ -1,0 +1,62 @@
+{
+  "root": "output/baselines/cags/lerf_compat_20260518",
+  "completed_rows": [
+    {
+      "scene": "figurines",
+      "iteration": 40000,
+      "threshold": 10,
+      "miou": 0.4283267605118523,
+      "acc025": 0.6071428571428571,
+      "acc05": 0.48214285714285715,
+      "object_count": 56,
+      "missing": 2,
+      "json_path": "output/baselines/cags/lerf_compat_20260518/eval/cags_figurines_iter40000_lerf_iou.json"
+    },
+    {
+      "scene": "ramen",
+      "iteration": 40001,
+      "threshold": 10,
+      "miou": 0.024694217420336874,
+      "acc025": 0.0,
+      "acc05": 0.0,
+      "object_count": 71,
+      "missing": 24,
+      "json_path": "output/baselines/cags/lerf_compat_20260518/eval/cags_ramen_iter40001_lerf_iou.json"
+    },
+    {
+      "scene": "teatime",
+      "iteration": 40000,
+      "threshold": 10,
+      "miou": 0.2946158265999074,
+      "acc025": 0.4915254237288136,
+      "acc05": 0.22033898305084745,
+      "object_count": 59,
+      "missing": 2,
+      "json_path": "output/baselines/cags/lerf_compat_20260518/eval/cags_teatime_iter40000_lerf_iou.json"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "iteration": 40000,
+      "threshold": 10,
+      "miou": 0.3030784597738357,
+      "acc025": 0.5,
+      "acc05": 0.3181818181818182,
+      "object_count": 22,
+      "missing": 6,
+      "json_path": "output/baselines/cags/lerf_compat_20260518/eval/cags_waldo_kitchen_iter40000_lerf_iou.json"
+    }
+  ],
+  "scene_mean": {
+    "miou": 0.2626788160764831,
+    "acc025": 0.3996670702179177,
+    "acc05": 0.2551659145938807
+  },
+  "object_weighted": {
+    "miou": 0.23937330725926237,
+    "acc025": 0.3557692307692308,
+    "acc05": 0.22596153846153846,
+    "object_count": 208,
+    "missing": 34
+  },
+  "caveat": "Local OpenGaussian-compatible CAGS LERF compatibility rerun. Missing rendered masks are counted in the source JSONs; this is a reproduced diagnostic row, not a SOTA or released-checkpoint claim."
+}

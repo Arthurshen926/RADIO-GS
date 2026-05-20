@@ -1,0 +1,242 @@
+{
+  "baselines": [
+    {
+      "blocker": "ScanNet is reproduced locally; four-scene LERF language_features are available, but a strict official-policy LERF training/evaluation rerun is pending.",
+      "commit": "1f99db1",
+      "dirty": true,
+      "exists": true,
+      "method": "OpenGaussian",
+      "repo_path": "/root/baselines/OpenGaussian",
+      "submodule_missing": false,
+      "submodule_status": [],
+      "url": "https://github.com/yanmin-wu/OpenGaussian"
+    },
+    {
+      "blocker": "Local LERF compatibility reruns completed all four scenes through all three feature levels plus eval_lerf.py --quick_render; current summary is LocAcc 0.6176 / mIoU 0.4601 scene-mean and LocAcc 0.6010 / mIoU 0.4487 object-weighted over 208 queries. This remains a compatibility rerun, not a strict released-checkpoint macro.",
+      "commit": "1667303",
+      "dirty": true,
+      "exists": true,
+      "method": "LangSplatV2",
+      "repo_path": "/root/baselines/LangSplatV2",
+      "submodule_missing": false,
+      "submodule_status": [
+        "1305b7c23ff64092cd6c4b0e4996d6557e56c76a submodules/efficient-langsplat-rasterization (heads/main)",
+        " e5dbe4b5616e24f02f15ce5a439a5edf228b3a75 submodules/segment-anything-langsplat (heads/main)",
+        " 31e3f086a8cbc32c489aae513b2134377c8e17a4 submodules/simple-knn (heads/main)"
+      ],
+      "url": "https://github.com/ZhaoYujie2002/LangSplatV2"
+    },
+    {
+      "blocker": "all four LERF compatibility scenes completed RGB training, language-feature extraction, test feature-map rendering, and tracked normalized pre-rendered readout: LocAcc 0.8221 / mIoU 0.4515 over 208 objects. This remains a compatibility readout, not a strict released-checkpoint macro.",
+      "commit": "eb98bcb",
+      "dirty": true,
+      "exists": true,
+      "method": "OccamLGS",
+      "repo_path": "/root/baselines/OccamLGS",
+      "submodule_missing": false,
+      "submodule_status": [
+        "d8856f60c5384cc1975439193bb627d77d917d77 SIBR_viewers (d8856f6)",
+        " 9c5c2028f6fbee2be239bc4c9421ff894fe4fbe0 submodules/diff-gaussian-rasterization (9c5c202)",
+        " 5c46b9c07008ae65cb81ab79cd677ecc1934b903 submodules/diff-gaussian-rasterization/third_party/glm (5c46b9c0)",
+        " 1272e21a282342e89537159e4bad508b19b34157 submodules/fused-ssim (1272e21)",
+        " 5791713f43935a9093c61b21febe8c98b84607d9 submodules/gsplat (heads/main)",
+        " 33b4a621a697a305bc3a7610d290677b96beb181 submodules/gsplat/gsplat/cuda/csrc/third_party/glm (33b4a62)",
+        " 86710c2d4b46680c02301765dd79e465819c8f19 submodules/simple-knn (heads/main)"
+      ],
+      "url": "https://github.com/insait-institute/OccamLGS"
+    },
+    {
+      "blocker": "Full local GAGS LERF compatibility training/eval completed on all four scenes from local feature extraction/training. Shared-summary metrics: scene-mean LocAcc 0.7273 / mIoU 0.4893; object-weighted LocAcc 0.7308 / mIoU 0.4935 over 208 queries. This remains a local compatibility rerun because pretrained/preprocessed GAGS models are not released.",
+      "commit": "4ce2721",
+      "dirty": true,
+      "exists": true,
+      "method": "GAGS",
+      "repo_path": "/root/baselines/GAGS",
+      "submodule_missing": false,
+      "submodule_status": [
+        "5242ba5d1d46ca48fdce2700e3a680efa8b7dfad submodules/segment-anything (heads/main)",
+        " 178bc0e0be9dc3e514700992f3b915c2543c2266 submodules/simple-knn (heads/main)"
+      ],
+      "url": "https://github.com/WHU-USI3DV/GAGS"
+    },
+    {
+      "blocker": "Dr. Splat local LERF compatibility mask export/evaluation completed on all four scenes with the shared nested-mask evaluator: mIoU 0.1762 / Acc@0.25 0.2561 / Acc@0.5 0.1137 over 208 objects, with 0 missing masks counted. This is a same-evaluator local compatibility row; upstream released-checkpoint/protocol caveats remain separate from the metric export. Official evaluation remains TBA upstream, so the local wrapper path is recorded explicitly.",
+      "commit": "764f608",
+      "dirty": true,
+      "exists": true,
+      "method": "Dr. Splat",
+      "repo_path": "/root/baselines/Dr-Splat",
+      "submodule_missing": false,
+      "submodule_status": [],
+      "url": "https://github.com/kaist-ami/Dr-Splat"
+    },
+    {
+      "blocker": "The local simple_knn/langsplat-rasterization/segment-anything-langsplat local site is built with NumPy pinned to 1.26.4; train.py/render.py/evaluate_iou_loc.py reach CLI help. All four scenes completed local compatibility training/render/eval after fp32 dim-3 feature conversion, chunked decoder eval, and split-aware train/test feature path fixes. Current summary: scene-mean LocAcc 0.7335 / mIoU 0.4433 and object-weighted LocAcc 0.7356 / mIoU 0.4613 over 208 queries. This remains a compatibility rerun, not a strict released-checkpoint macro.",
+      "commit": "d70edb8",
+      "dirty": true,
+      "exists": true,
+      "method": "LangSplat",
+      "repo_path": "/root/baselines/LangSplat",
+      "submodule_missing": false,
+      "submodule_status": [
+        "329f8e8c64a56f3f018397faa4a4996cbf024de0 submodules/langsplat-rasterization (329f8e8)",
+        " adf31f555e73e2bd6fda373bb5d8740f9c6c17c0 submodules/langsplat-rasterization/third_party/glm (0.9.5.3-2855-gadf31f55)",
+        " e5dbe4b5616e24f02f15ce5a439a5edf228b3a75 submodules/segment-anything-langsplat (heads/main)",
+        " 44f764299fa305faf6ec5ebd99939e0508331503 submodules/simple-knn (44f7642)"
+      ],
+      "url": "https://github.com/minghanqin/LangSplat"
+    },
+    {
+      "blocker": "LEGaussians official quantize_features.py, train.py, and render_mask.py compatibility pipeline completed on all four LERF scenes. Shared evaluator metrics: scene-mean mIoU 0.2694 / Acc@0.25 0.3974 / Acc@0.5 0.2312; object-weighted mIoU 0.2694 over 208 objects with 0 missing masks counted. This is a local compatibility rerun, not a released-checkpoint macro.",
+      "commit": "c2230af",
+      "dirty": true,
+      "exists": true,
+      "method": "LEGaussians",
+      "repo_path": "/root/baselines/LEGaussians",
+      "submodule_missing": false,
+      "submodule_status": [
+        "6fdee8f2727f4506cfbbe553e23b895e27956588 preprocess/segment-anything (remotes/origin/gh/HDCharles/1/base)",
+        " e5dbe4b5616e24f02f15ce5a439a5edf228b3a75 preprocess/segment-anything-langsplat (heads/main)",
+        " 76f714c25be291ff3a9d272b155afd12c8df96bb submodules/diff-gaussian-rasterization (heads/main)",
+        " 5c46b9c07008ae65cb81ab79cd677ecc1934b903 submodules/diff-gaussian-rasterization/third_party/glm (0.9.5.3-2728-g5c46b9c0)",
+        " b2416cbe3509de8f4c9bc6b058691a54923f9541 submodules/simple-knn (heads/main)"
+      ],
+      "url": "https://github.com/buaavrcg/LEGaussians"
+    },
+    {
+      "blocker": "OpenGaussian-compatible LERF training/render/eval scripts are available; the rasterizer ABI blocker and PyG source builds are cleared locally via output/baselines/cags/local_site, and train.py/render_lerf_by_text.py reach CLI help. The vectorized clustering fix, PyTorch checkpoint-loading wrapper, CPU-only FAISS fallback, and train/test render wrapper fix are in place. All four scenes completed local compatibility training/render/eval from OpenGaussian 30k starts: scene-mean mIoU 0.2627 / Acc@0.25 0.3997 and object-weighted mIoU 0.2394 / Acc@0.25 0.3558 over 208 objects, with 34 missing rendered masks counted. This is a diagnostic reproduced row, not a SOTA claim. ScanNet evaluation is marked TODO upstream.",
+      "commit": "9136592",
+      "dirty": true,
+      "exists": true,
+      "method": "CAGS",
+      "repo_path": "/root/baselines/CAGS",
+      "submodule_missing": false,
+      "submodule_status": [],
+      "url": "https://github.com/Wistzz/CAGS"
+    },
+    {
+      "blocker": "Semantic Gaussians ScanNet compatibility distill/eval completed on the four tracked ScanNet scenes using the local label-PLY evaluator. Mean IoU is 0.0280 (scene0000_00 0.0209; scene0062_00 0.3634; scene0070_00 0.0213; scene0097_00 0.1315). This is a ScanNet-20 compatibility reproduction row; class-split leaderboard claims remain governed by the dedicated ScanNet protocol.",
+      "commit": "ae53137",
+      "dirty": true,
+      "exists": true,
+      "method": "Semantic Gaussians",
+      "repo_path": "/root/baselines/semantic-gaussians",
+      "submodule_missing": false,
+      "submodule_status": [
+        "5c46b9c07008ae65cb81ab79cd677ecc1934b903 submodules/channel-rasterization/third_party/glm (0.9.5.3-2728-g5c46b9c0)",
+        " 5c46b9c07008ae65cb81ab79cd677ecc1934b903 submodules/rgbd-rasterization/third_party/glm (0.9.5.3-2728-g5c46b9c0)"
+      ],
+      "url": "https://github.com/sharinka0715/semantic-gaussians"
+    },
+    {
+      "blocker": "LaGa scene point cloud export, affinity feature training, descriptor building, mask export, and shared evaluator pass completed. LaGa local LERF compatibility mask export/evaluation completed on all four scenes with the shared nested-mask evaluator: mIoU 0.2337 / Acc@0.25 0.3660 / Acc@0.5 0.1535 over 208 objects, with 0 missing masks counted. This is a same-evaluator local compatibility row; upstream released-checkpoint/protocol caveats remain separate from the metric export. The row is reported as a compatibility adaptation of the inference notebook rather than an upstream paper-table macro.",
+      "commit": "9df7586",
+      "dirty": true,
+      "exists": true,
+      "method": "LaGa",
+      "repo_path": "/root/baselines/LaGa",
+      "submodule_missing": false,
+      "submodule_status": [
+        "f7f36bd1cb4e3a761d73d584866d0a9c6b4d2805 third_party/kmeans_pytorch (v0.3-71-gf7f36bd)"
+      ],
+      "url": "https://github.com/SJTU-DeepVisionLab/LaGa"
+    },
+    {
+      "blocker": "Repository is not cloned locally. The arXiv paper reports state-of-the-art LERF-OVS and ScanNet context numbers, but its source states that code will be publicly released upon acceptance; no public implementation was found in the arXiv metadata/source or web search on 2026-05-18. Keep as published context, not a reproducible local baseline.",
+      "commit": null,
+      "dirty": null,
+      "exists": false,
+      "method": "OpenGaFF",
+      "repo_path": "/root/baselines/OpenGaFF",
+      "submodule_missing": null,
+      "submodule_status": [],
+      "url": "https://arxiv.org/abs/2605.06088"
+    }
+  ],
+  "baselines_root": "/root/baselines",
+  "created": "2026-05-20",
+  "lerf_assets": {
+    "figurines": {
+      "direct_language_feature_masks": 299,
+      "direct_language_feature_vectors": 299,
+      "direct_ready": false,
+      "images": 300,
+      "labels": 4,
+      "langsplat_complete_pairs": false,
+      "langsplat_language_feature_masks": 299,
+      "langsplat_language_feature_vectors": 299,
+      "scene_root_exists": true
+    },
+    "ramen": {
+      "direct_language_feature_masks": 131,
+      "direct_language_feature_vectors": 131,
+      "direct_ready": false,
+      "images": 132,
+      "labels": 7,
+      "langsplat_complete_pairs": false,
+      "langsplat_language_feature_masks": 131,
+      "langsplat_language_feature_vectors": 131,
+      "scene_root_exists": true
+    },
+    "teatime": {
+      "direct_language_feature_masks": 177,
+      "direct_language_feature_vectors": 177,
+      "direct_ready": false,
+      "images": 178,
+      "labels": 6,
+      "langsplat_complete_pairs": false,
+      "langsplat_language_feature_masks": 177,
+      "langsplat_language_feature_vectors": 177,
+      "scene_root_exists": true
+    },
+    "waldo_kitchen": {
+      "direct_language_feature_masks": 187,
+      "direct_language_feature_vectors": 187,
+      "direct_ready": false,
+      "images": 188,
+      "labels": 5,
+      "langsplat_complete_pairs": false,
+      "langsplat_language_feature_masks": 187,
+      "langsplat_language_feature_vectors": 187,
+      "scene_root_exists": true
+    }
+  },
+  "lerf_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs",
+  "occam_lerf_readout": {
+    "complete": true,
+    "loc_acc": 0.8221153846153846,
+    "miou": 0.45146960919709483,
+    "objects": 208,
+    "root": "output/baselines/occamlgs/lerf_compat_20260518",
+    "scenes": {
+      "figurines": {
+        "exists": true,
+        "json": "output/baselines/occamlgs/lerf_compat_20260518/occamlgs_figurines_lerf_prerendered_eval_script.json",
+        "loc_acc": 0.7857142857142857,
+        "miou": 0.33849489838550134,
+        "objects": 56
+      },
+      "ramen": {
+        "exists": true,
+        "json": "output/baselines/occamlgs/lerf_compat_20260518/occamlgs_ramen_lerf_prerendered_eval_script.json",
+        "loc_acc": 0.7464788732394366,
+        "miou": 0.5256654641059765,
+        "objects": 71
+      },
+      "teatime": {
+        "exists": true,
+        "json": "output/baselines/occamlgs/lerf_compat_20260518/occamlgs_teatime_lerf_prerendered_eval_script.json",
+        "loc_acc": 0.9322033898305084,
+        "miou": 0.49733609699849357,
+        "objects": 59
+      },
+      "waldo_kitchen": {
+        "exists": true,
+        "json": "output/baselines/occamlgs/lerf_compat_20260518/occamlgs_waldo_kitchen_lerf_prerendered_eval_script.json",
+        "loc_acc": 0.8636363636363636,
+        "miou": 0.3765857604078271,
+        "objects": 22
+      }
+    }
+  }
+}

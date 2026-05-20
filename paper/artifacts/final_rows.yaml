@@ -1,0 +1,276 @@
+version: 1
+created: '2026-05-17'
+purpose: Public, paper-facing canonical registry for the current three-track RADIO-GS/CTF-GS
+  evidence package.
+method_name: CTF-GS
+repository_name: RADIO-GS
+tracks:
+  t1_lerf_rendered_view_ovs:
+    task_name: LERF-OVS rendered-view open-vocabulary segmentation/localization
+    source_json: output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json
+    protocol:
+      scenes:
+      - figurines
+      - ramen
+      - teatime
+      - waldo_kitchen
+      evaluator: frozen SigLIP2 text scorer over rendered RADIO-compatible feature
+        maps
+      threshold_policy: fixed_global_mask_threshold:0.60
+      metrics:
+      - LocAcc
+      - mIoU
+      caveat: This is a rendered-view feature-map protocol, not direct primitive selection.
+    rows:
+      framewise_radio_teacher:
+        source: same evaluator controlled baseline
+        locacc: 0.7985
+        miou: 0.4634
+      nearest_view_radio_cache:
+        source: same evaluator controlled baseline
+        locacc: 0.2722
+        miou: 0.1545
+      per_gaussian_1280d_radio_memory:
+        source: same evaluator controlled baseline
+        locacc: 0.5642
+        miou: 0.3182
+        registered_gaussian_fraction: 0.202
+      ctfgs_rendered:
+        source: paper-facing main row
+        locacc: 0.8712
+        miou: 0.5243
+  t2_lerf_direct_3d_selection:
+    task_name: LERF-OVS text-to-Gaussian direct 3D object selection
+    source_report: output/radio_gs/reports/lerf_direct_3d_selection.md
+    protocol:
+      scenes:
+      - figurines
+      - ramen
+      - teatime
+      - waldo_kitchen
+      evaluator: OpenGaussian-style query-select-render mask evaluation
+      metrics:
+      - mIoU
+      - Acc@0.25
+      main_selector_policy: fixed_global_softmax_threshold:thr0p25
+      vpr_registration_views: 128
+      selection_floor: 0.005
+      selection_cap: 0.018
+      caveat: OpenGaussian is still an official-source context row for LERF; four-scene
+        compatibility language_features assets are now available, but a strict official-policy
+        rerun is still pending.
+    rows:
+      opengaussian_official_context:
+        source: OpenGaussian paper Table/official source
+        miou: 0.3836
+        acc025: 0.5143
+        reproduced_local: false
+      ctfgs_vpr_fixed_thr0p25_rgb_snap:
+        source: local CTF-GS run
+        miou: 0.4801
+        acc025: 0.676
+        reproduced_local: true
+      ctfgs_sam3_box_fixed_pad16_thr0p25:
+        source: local frozen official SAM3 box readout
+        miou: 0.5705
+        acc025: 0.6835
+        reproduced_local: true
+        caveat: 3D selection plus frozen 2D boundary readout; not pure Gaussian-level
+          segmentation.
+      ctfgs_sam3_box_scene_locked_diagnostic:
+        source: diagnostic only
+        miou: 0.5972
+        acc025: 0.7009
+        reproduced_local: true
+        promoted: false
+  t3_scannet_ov_point_cloud_segmentation:
+    task_name: ScanNet-v2 open-vocabulary point-cloud semantic segmentation
+    opengaussian_source_json: output/baselines/opengaussian/scannet_eval/opengaussian_scannet_results.json
+    radio_gs_source_json: output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/scannet_pointcloud_radio_gs_results.json
+    radio_gs_contextual_support_json: output/scannet_pointcloud_eval/v67_knn8_cand32_scene_mean_a05_20260514/scannet_pointcloud_radio_gs_results.json
+    protocol:
+      scenes:
+      - scene0000_00
+      - scene0062_00
+      - scene0070_00
+      - scene0097_00
+      - scene0140_00
+      - scene0200_00
+      - scene0347_00
+      - scene0400_00
+      - scene0590_00
+      - scene0645_00
+      class_splits:
+      - '19'
+      - '15'
+      - '10'
+      metrics:
+      - mIoU
+      - mAcc
+      caveat: RADIO-GS v67 row is a point-query feature-memory probe; the next benchmark
+        pass should keep all reproduced methods under the same point-cloud evaluator.
+    rows:
+      opengaussian_local_reproduction:
+        source: local OpenGaussian reproduction through radio_gs/scripts/eval_opengaussian_scannet_baseline.py
+        split19:
+          miou: 0.2978
+          macc: 0.4507
+        split15:
+          miou: 0.3275
+          macc: 0.4964
+        split10:
+          miou: 0.4186
+          macc: 0.5847
+        reproduced_local: true
+      radio_gs_v67_direct_point_query:
+        source: local RADIO-GS v67 row in OpenGaussian comparison report
+        split19:
+          miou: 0.3538
+          macc: 0.6076
+        split15:
+          miou: 0.3573
+          macc: 0.6203
+        split10:
+          miou: 0.4293
+          macc: 0.7051
+        reproduced_local: true
+      radio_gs_v67_contextual_knn_scene_mean_support:
+        source: local label-free contextual kNN support row; k=8, candidate_k=32,
+          scene-mean calibration alpha=0.5
+        split19:
+          miou: 0.3637
+          macc: 0.6033
+        split15:
+          miou: 0.3708
+          macc: 0.6224
+        split10:
+          miou: 0.4512
+          macc: 0.7079
+        reproduced_local: true
+        promoted: false
+        caveat: Stronger support row for feature-memory utility; conservative Gaussian-index
+          row remains the protocol anchor.
+external_reproduction_queue:
+  verified_date: '2026-05-18'
+  machine_audit:
+    json: paper/artifacts/external_baseline_audit.json
+    markdown: paper/artifacts/external_baseline_audit.md
+  public_sources:
+  - method: OpenGaussian
+    url: https://github.com/yanmin-wu/OpenGaussian
+  - method: LangSplatV2
+    url: https://github.com/ZhaoYujie2002/LangSplatV2
+  - method: OccamLGS
+    url: https://github.com/insait-institute/OccamLGS
+  - method: GAGS
+    url: https://github.com/WHU-USI3DV/GAGS
+  - method: Dr. Splat
+    url: https://github.com/kaist-ami/Dr-Splat
+  - method: LangSplat
+    url: https://github.com/minghanqin/LangSplat
+  - method: LEGaussians
+    url: https://github.com/buaavrcg/LEGaussians
+  - method: Semantic Gaussians
+    url: https://github.com/sharinka0715/semantic-gaussians
+  - method: CAGS
+    url: https://github.com/Wistzz/CAGS
+  - method: LaGa
+    url: https://github.com/SJTU-DeepVisionLab/LaGa
+  - method: OpenGaFF
+    url: https://arxiv.org/abs/2605.06088
+  p0:
+  - method: OpenGaussian
+    status: ScanNet reproduced locally; LERF compatibility rerun completed on all
+      four scenes with macro mIoU 0.4273 / Acc@0.25 0.5865, but strict official-policy
+      provenance is still pending because the current assets use the compatibility
+      extraction patch.
+    local_repo: /root/baselines/OpenGaussian
+    local_commit: 1f99db1
+  - method: LangSplatV2
+    status: 'all four LERF compatibility reruns completed with three feature-level
+      checkpoints and official eval_lerf.py quick-render readouts. Current summary:
+      scene-mean LocAcc 0.6176 / mIoU 0.4601 and object-weighted LocAcc 0.6010 / mIoU
+      0.4487 over 208 queries. This remains a compatibility rerun, not a strict released-checkpoint
+      macro.'
+    local_repo: /root/baselines/LangSplatV2
+    local_commit: '1667303'
+  - method: OccamLGS
+    status: 'all four LERF compatibility runs completed through RGB training, language-feature
+      extraction, test feature-map rendering, and tracked normalized pre-rendered
+      readout. Per-scene readouts: figurines LocAcc 0.7857 / mIoU 0.3385 over 56 objects;
+      ramen LocAcc 0.7465 / mIoU 0.5257 over 71 objects; teatime LocAcc 0.9322 / mIoU
+      0.4973 over 59 objects; waldo_kitchen LocAcc 0.8636 / mIoU 0.3766 over 22 objects.
+      Object-weighted all-scene readout: LocAcc 0.8221 / mIoU 0.4515 over 208 objects.
+      This remains a compatibility readout, not a strict released-checkpoint OccamLGS
+      macro.'
+    local_repo: /root/baselines/OccamLGS
+    local_commit: eb98bcb
+  - method: GAGS
+    status: 'all four LERF compatibility scenes completed in the local GAGS compatibility
+      rerun from Occam 30k RGB starts. Current summary: scene-mean LocAcc 0.7273 /
+      mIoU 0.4893 and object-weighted LocAcc 0.7308 / mIoU 0.4935 over 208 queries.
+      This remains a compatibility rerun, not a strict released-checkpoint macro.'
+    local_repo: /root/baselines/GAGS
+    local_commit: 4ce2721
+  - method: Dr. Splat
+    status: 'all four LERF compatibility scenes completed in the local Dr. Splat/VALA
+      nested-mask compatibility rerun from Occam 30k RGB starts and PQ majority voting.
+      Current summary: mIoU 0.1762 / Acc@0.25 0.2561 / Acc@0.5 0.1137 over 208 objects;
+      missing rendered masks counted: 0. This uses a local evaluator because upstream
+      evaluation remains TBA.'
+    local_repo: /root/baselines/Dr-Splat
+    local_commit: 764f608
+  p1:
+  - method: LangSplat
+    status: 'cloned locally with submodules; the vendored simple_knn, langsplat-rasterization,
+      and segment-anything-langsplat local site is built under output/baselines/langsplat/local_site
+      with NumPy pinned to 1.26.4. train.py, render.py, and eval/evaluate_iou_loc.py
+      reach CLI help. All four scenes completed local compatibility training/render/eval
+      after fp32 dim-3 feature conversion, chunked decoder eval, and split-aware train/test
+      feature path fixes. Current summary: scene-mean LocAcc 0.7335 / mIoU 0.4433
+      and object-weighted LocAcc 0.7356 / mIoU 0.4613 over 208 queries. This remains
+      a compatibility rerun, not a strict released-checkpoint macro.'
+    local_repo: /root/baselines/LangSplat
+    local_commit: d70edb8
+  - method: LEGaussians
+    status: 'all four LERF compatibility scenes completed in the local LEGaussians
+      compatibility rerun using official quantize_features.py/train.py/render_mask.py
+      outputs. Current summary: scene-mean mIoU 0.2694 / Acc@0.25 0.3974 / Acc@0.5
+      0.2312 and object-weighted mIoU 0.2694 over 208 objects; missing rendered masks
+      counted: 0. This remains a local LERF compatibility rerun.'
+    local_repo: /root/baselines/LEGaussians
+    local_commit: c2230af
+  - method: CAGS
+    status: 'cloned locally; README provides OpenGaussian-compatible LERF training/render/eval
+      scripts. The ashawkey rasterizer ABI blocker, PyG compiled-op blocker, hdbscan
+      import blocker, CPU-only FAISS fallback, and train/test render wrapper issue
+      are cleared. All four scenes completed local CAGS compatibility training/render/eval
+      from OpenGaussian 30k starts. Current local summary: scene-mean mIoU 0.2627
+      / Acc@0.25 0.3997 and object-weighted mIoU 0.2394 / Acc@0.25 0.3558 over 208
+      objects, with 34 missing rendered masks counted. This is a diagnostic reproduced
+      row, not a SOTA claim.'
+    local_repo: /root/baselines/CAGS
+    local_commit: '9136592'
+  - method: Semantic Gaussians
+    status: 'all four ScanNet compatibility scenes completed in the local Semantic
+      Gaussians RGB-GS/fusion/distill/label-PLY reproduction. Current summary: ScanNet-20
+      label-PLY mean IoU 0.0280 over 4 scenes. This uses label-PLY evaluation because
+      the extracted scenes provide *_vh_clean_2.labels.ply.'
+    local_repo: /root/baselines/semantic-gaussians
+    local_commit: ae53137
+  - method: LaGa
+    status: 'all four LERF compatibility scenes completed in the local LaGa compatibility
+      rerun using train_scene.py, train_affinity_features.py, batch descriptor export,
+      and nested-mask evaluation. Current summary: mIoU 0.2337 / Acc@0.25 0.3660 /
+      Acc@0.5 0.1535 over 208 objects; missing rendered masks counted: 0. This remains
+      a local LERF compatibility rerun.'
+    local_repo: /root/baselines/LaGa
+    local_commit: 9df7586
+  p2:
+  - method: OpenGaFF
+    status: published arXiv context row only; current arXiv source states that code
+      will be publicly released upon acceptance, and no public implementation was
+      found in arXiv metadata/source or web search on 2026-05-18. Strict same-protocol
+      reproduction is blocked until code or checkpoints are released.
+    local_repo: /root/baselines/OpenGaFF
+    local_commit: null

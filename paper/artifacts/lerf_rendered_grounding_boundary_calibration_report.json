@@ -1,0 +1,165 @@
+{
+  "protocol": "LERF rendered-view grounding readout calibration. All variants use the same checkpoints, temperatures, SigLIP2 text cache, softmax_scene scoring, and heatmap upsample. Threshold variants change only the peak-relative binary mask threshold and do not use GT masks. RGB-snap uses GT-free GrabCut initialized from predicted masks/RGB.",
+  "variants": {
+    "thr0.5_base": {
+      "rows": [
+        {
+          "scene": "figurines",
+          "temp": 50.0,
+          "loc": 0.8035714285714286,
+          "miou": 0.4312098303533442,
+          "n": 56
+        },
+        {
+          "scene": "ramen",
+          "temp": 40.0,
+          "loc": 0.8732394366197183,
+          "miou": 0.5935248330210706,
+          "n": 71
+        },
+        {
+          "scene": "teatime",
+          "temp": 15.0,
+          "loc": 0.8813559322033898,
+          "miou": 0.42064155710771745,
+          "n": 59
+        },
+        {
+          "scene": "waldo_kitchen",
+          "temp": 25.0,
+          "loc": 0.7727272727272727,
+          "miou": 0.38366367959973646,
+          "n": 22
+        }
+      ],
+      "macro": {
+        "loc": 0.8327235175304524,
+        "miou": 0.4572599750204671
+      },
+      "weighted": {
+        "loc": 0.8461538461538461,
+        "miou": 0.47858878108092695
+      }
+    },
+    "thr0.6": {
+      "rows": [
+        {
+          "scene": "figurines",
+          "temp": 50.0,
+          "loc": 0.8035714285714286,
+          "miou": 0.42638003030006083,
+          "n": 56
+        },
+        {
+          "scene": "ramen",
+          "temp": 40.0,
+          "loc": 0.8732394366197183,
+          "miou": 0.6232571254771457,
+          "n": 71
+        },
+        {
+          "scene": "teatime",
+          "temp": 15.0,
+          "loc": 0.8813559322033898,
+          "miou": 0.5085561194165925,
+          "n": 59
+        },
+        {
+          "scene": "waldo_kitchen",
+          "temp": 25.0,
+          "loc": 0.7727272727272727,
+          "miou": 0.43948962342382847,
+          "n": 22
+        }
+      ],
+      "macro": {
+        "loc": 0.8327235175304524,
+        "miou": 0.4994207246544069
+      },
+      "weighted": {
+        "loc": 0.8461538461538461,
+        "miou": 0.5182794248393459
+      }
+    },
+    "thr0.7": {
+      "rows": [
+        {
+          "scene": "figurines",
+          "temp": 50.0,
+          "loc": 0.8035714285714286,
+          "miou": 0.3956832784789782,
+          "n": 56
+        },
+        {
+          "scene": "ramen",
+          "temp": 40.0,
+          "loc": 0.8732394366197183,
+          "miou": 0.5972214591641322,
+          "n": 71
+        },
+        {
+          "scene": "teatime",
+          "temp": 15.0,
+          "loc": 0.8813559322033898,
+          "miou": 0.5605353582387106,
+          "n": 59
+        },
+        {
+          "scene": "waldo_kitchen",
+          "temp": 25.0,
+          "loc": 0.7727272727272727,
+          "miou": 0.46614795994023234,
+          "n": 22
+        }
+      ],
+      "macro": {
+        "loc": 0.8327235175304524,
+        "miou": 0.5048970139555133
+      },
+      "weighted": {
+        "loc": 0.8461538461538461,
+        "miou": 0.5186914829338711
+      }
+    },
+    "rgb_snap": {
+      "rows": [
+        {
+          "scene": "figurines",
+          "temp": 50.0,
+          "loc": 0.8035714285714286,
+          "miou": 0.4682632305413308,
+          "n": 56
+        },
+        {
+          "scene": "ramen",
+          "temp": 40.0,
+          "loc": 0.8732394366197183,
+          "miou": 0.5788521127577462,
+          "n": 71
+        },
+        {
+          "scene": "teatime",
+          "temp": 15.0,
+          "loc": 0.8813559322033898,
+          "miou": 0.4079247779618792,
+          "n": 59
+        },
+        {
+          "scene": "waldo_kitchen",
+          "temp": 25.0,
+          "loc": 0.7727272727272727,
+          "miou": 0.3730184009695996,
+          "n": 22
+        }
+      ],
+      "macro": {
+        "loc": 0.8327235175304524,
+        "miou": 0.45701463055763897
+      },
+      "weighted": {
+        "loc": 0.8461538461538461,
+        "miou": 0.4788231136403681
+      }
+    }
+  }
+}

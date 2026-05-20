@@ -1,0 +1,66 @@
+{
+  "protocol": "LERF rendered-view grounding with optional GT-free RGB GrabCut boundary snap; same checkpoint, same best-by-LocAcc temperature, same text scoring as existing runs.",
+  "settings": {
+    "mask_refinement": "rgb_grabcut",
+    "mask_refinement_iters": 2,
+    "mask_refinement_dilate": 5,
+    "mask_refinement_erode": 2,
+    "heatmap_upsample": 4,
+    "iou_threshold": 0.5
+  },
+  "rows": [
+    {
+      "scene": "figurines",
+      "temperature": 50.0,
+      "base_loc": 0.8035714285714286,
+      "snap_loc": 0.8035714285714286,
+      "base_miou": 0.4312098303533442,
+      "snap_miou": 0.4682632305413308,
+      "loc_total": 56
+    },
+    {
+      "scene": "ramen",
+      "temperature": 40.0,
+      "base_loc": 0.8732394366197183,
+      "snap_loc": 0.8732394366197183,
+      "base_miou": 0.5935248330210706,
+      "snap_miou": 0.5788521127577462,
+      "loc_total": 71
+    },
+    {
+      "scene": "teatime",
+      "temperature": 15.0,
+      "base_loc": 0.8813559322033898,
+      "snap_loc": 0.8813559322033898,
+      "base_miou": 0.42064155710771745,
+      "snap_miou": 0.4079247779618792,
+      "loc_total": 59
+    },
+    {
+      "scene": "waldo_kitchen",
+      "temperature": 25.0,
+      "base_loc": 0.7727272727272727,
+      "snap_loc": 0.7727272727272727,
+      "base_miou": 0.38366367959973646,
+      "snap_miou": 0.3730184009695996,
+      "loc_total": 22
+    }
+  ],
+  "macro": {
+    "base_miou": 0.4572599750204671,
+    "snap_miou": 0.45701463055763897,
+    "delta_miou": -0.00024534446282814537,
+    "base_loc": 0.8327235175304524,
+    "snap_loc": 0.8327235175304524,
+    "delta_loc": 0.0
+  },
+  "weighted": {
+    "base_miou": 0.47858878108092695,
+    "snap_miou": 0.4788231136403681,
+    "delta_miou": 0.00023433255944116382,
+    "base_loc": 0.8461538461538461,
+    "snap_loc": 0.8461538461538461,
+    "delta_loc": 0.0
+  },
+  "conclusion": "RGB boundary snap improves figurines rendered-view mIoU and leaves LocAcc unchanged, but this global setting is mixed across scenes. It should be treated as an optional boundary-aware rendered-mask readout/qualitative refinement unless a GT-free conservative rule or globally tuned setting improves macro metrics."
+}

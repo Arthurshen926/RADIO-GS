@@ -2,6 +2,11 @@
 
 Date: 2026-05-15.
 
+Protocol note: this is a historical negative-ablation audit. The later
+paper-facing direct-3D row supersedes the `mean+2.5std` selector with the fixed
+global `thr0p25` selector plus RGB snap; these raster/proposal rows remain
+diagnostics and are not the promoted protocol.
+
 This audit implements the remaining expert-requested direct-3D branches and
 tests them without using LERF masks for scoring or calibration.
 
@@ -25,7 +30,7 @@ voxel-max score context, SigLIP2 text head, and no GT mask tuning.
 
 | Branch | Views | Weight | Proposal | Registered frac. | mIoU | Acc@0.25 |
 |---|---:|---|---|---:|---:|---:|
-| Promoted center VPR cache | 128 all poses | uniform | no | 0.252 | 0.4829 | 0.8214 |
+| Historical center VPR cache | 128 all poses | uniform | no | 0.252 | 0.4829 | 0.8214 |
 | Raster all footprint | 4 official | uniform | no | 0.332 | 0.0002 | 0.0000 |
 | Raster per-pixel dominant | 128 all poses | alpha-depth | no | 0.084 | 0.0178 | 0.0536 |
 | Raster per-Gaussian top1 | 4 official | alpha | no | 0.332 | 0.0004 | 0.0000 |

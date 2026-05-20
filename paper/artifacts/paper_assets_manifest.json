@@ -1,0 +1,410 @@
+{
+  "generated": "2026-05-16T18:31:45Z",
+  "route": "conservative_submission",
+  "main_tables": {
+    "paper_submission_main_table.md": {
+      "path": "output/radio_gs/reports/paper_submission_main_table.md",
+      "description": "LERF-OVS main comparison table (markdown)",
+      "content": "LocAcc: LERF=0.793, LangSplat=0.843, LEGaussians=0.678, RADIO-GS=0.871"
+    },
+    "paper_submission_main_table.tex": {
+      "path": "output/radio_gs/reports/paper_submission_main_table.tex",
+      "description": "LaTeX main table"
+    },
+    "paper_main_table.md": {
+      "path": "output/radio_gs/reports/paper_main_table.md",
+      "description": "Seed-robustness companion table"
+    },
+    "lerf_component_ablation.md": {
+      "path": "output/radio_gs/reports/lerf_component_ablation.md",
+      "description": "LERF component ablation report"
+    },
+    "paper/lerf_component_ablation_table.tex": {
+      "path": "paper/lerf_component_ablation_table.tex",
+      "description": "LaTeX component ablation table"
+    },
+    "scannet_dino_cv_ablation.md": {
+      "path": "output/radio_gs/reports/scannet_dino_cv_ablation.md",
+      "description": "10-scene ScanNet DINO cross-view ablation"
+    },
+    "scannet_prompt_calibration_ablation.md": {
+      "path": "output/radio_gs/reports/scannet_prompt_calibration_ablation.md",
+      "description": "10-scene ScanNet prompt and label-free calibration ablation"
+    },
+    "lerf_sam_dino_task_report.md": {
+      "path": "output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md",
+      "description": "Formal SAM3/DINOv3 downstream task sweep with bg-suppressed DINO propagation readout"
+    },
+    "formal_v9_dino_readout_sweep_20260514.md": {
+      "path": "output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md",
+      "description": "DINOv3 readout sweep and promotion decision"
+    },
+    "baseline_source_verification.md": {
+      "path": "output/radio_gs/reports/baseline_source_verification.md",
+      "description": "External baseline source verification tracker"
+    },
+    "submission_readiness_checklist.md": {
+      "path": "output/radio_gs/reports/submission_readiness_checklist.md",
+      "description": "Submission freeze checklist"
+    },
+    "submission_freeze_figure_shortlist.md": {
+      "path": "output/radio_gs/reports/submission_freeze_figure_shortlist.md",
+      "description": "Frozen figure shortlist and captions"
+    },
+    "efficiency_profile_summary.md": {
+      "path": "output/radio_gs/reports/efficiency_profile_summary.md",
+      "description": "Efficiency summary table"
+    },
+    "efficiency_cost_table.md": {
+      "path": "output/radio_gs/reports/efficiency_cost_table.md",
+      "description": "Paper-facing efficiency/cost table"
+    },
+    "storage_footprint_report.md": {
+      "path": "output/radio_gs/reports/storage_footprint_report.md",
+      "description": "Storage footprint report with separate optional VPR cache accounting"
+    },
+    "compression_downstream_correlation.md": {
+      "path": "output/radio_gs/reports/compression_downstream_correlation.md",
+      "description": "Compression-ratio versus rendered/direct-3D downstream mIoU mechanism audit"
+    },
+    "compression_downstream_correlation.json": {
+      "path": "output/radio_gs/reports/compression_downstream_correlation.json",
+      "description": "Machine-readable compression/downstream correlation report"
+    },
+    "feature_error_text_relevance_report.md": {
+      "path": "output/radio_gs/reports/feature_error_text_relevance_report.md",
+      "description": "Feature reconstruction error versus rendered text-grounding error mechanism audit"
+    },
+    "feature_error_text_relevance_report.json": {
+      "path": "output/radio_gs/reports/feature_error_text_relevance_report.json",
+      "description": "Machine-readable feature-error/text-relevance mechanism audit"
+    },
+    "boundary_error_readout_report.md": {
+      "path": "output/radio_gs/reports/boundary_error_readout_report.md",
+      "description": "Measured SAM3-box boundary-error readout with per-query over/under-selection buckets"
+    },
+    "boundary_error_readout_report.json": {
+      "path": "output/radio_gs/reports/boundary_error_readout_report.json",
+      "description": "Machine-readable SAM3-box boundary-error readout"
+    },
+    "alpha_depth_boundary_alignment_report.md": {
+      "path": "output/radio_gs/reports/alpha_depth_boundary_alignment_report.md",
+      "description": "Alpha/depth discontinuity alignment coverage report for SAM3-box boundary errors"
+    },
+    "alpha_depth_boundary_alignment_report.json": {
+      "path": "output/radio_gs/reports/alpha_depth_boundary_alignment_report.json",
+      "description": "Machine-readable alpha/depth boundary-alignment coverage report"
+    },
+    "alpha_depth_boundary_case_figure_manifest.md": {
+      "path": "output/radio_gs/reports/alpha_depth_boundary_case_figure_manifest.md",
+      "description": "Selected alpha/depth boundary-case figure manifest"
+    },
+    "alpha_depth_boundary_case_figure_manifest.json": {
+      "path": "output/radio_gs/reports/alpha_depth_boundary_case_figure_manifest.json",
+      "description": "Machine-readable selected alpha/depth boundary-case figure manifest"
+    },
+    "train_feature_field_audit.md": {
+      "path": "output/radio_gs/reports/train_feature_field_audit.md",
+      "description": "Auditability and reproducibility report for the modularized training entry point"
+    },
+    "train_feature_field_audit.json": {
+      "path": "output/radio_gs/reports/train_feature_field_audit.json",
+      "description": "Machine-readable train_feature_field audit report"
+    },
+    "paper/efficiency_cost_table.tex": {
+      "path": "paper/efficiency_cost_table.tex",
+      "description": "LaTeX efficiency/cost table"
+    },
+    "paper/storage_footprint_table.tex": {
+      "path": "paper/storage_footprint_table.tex",
+      "description": "LaTeX compact-storage and optional VPR cache table"
+    },
+    "paper/compression_downstream_correlation_table.tex": {
+      "path": "paper/compression_downstream_correlation_table.tex",
+      "description": "LaTeX compression/downstream correlation table"
+    },
+    "paper/feature_error_text_relevance_table.tex": {
+      "path": "paper/feature_error_text_relevance_table.tex",
+      "description": "LaTeX feature-error/text-relevance mechanism table"
+    },
+    "paper/boundary_error_readout_table.tex": {
+      "path": "paper/boundary_error_readout_table.tex",
+      "description": "LaTeX SAM3-box boundary-error readout table"
+    },
+    "paper/alpha_depth_boundary_alignment_table.tex": {
+      "path": "paper/alpha_depth_boundary_alignment_table.tex",
+      "description": "LaTeX alpha/depth boundary-alignment coverage table"
+    },
+    "paper/train_feature_field_audit_table.tex": {
+      "path": "paper/train_feature_field_audit_table.tex",
+      "description": "LaTeX training-entry auditability table"
+    },
+    "paper/lerf_ovs_main_table.tex": {
+      "path": "paper/lerf_ovs_main_table.tex",
+      "description": "LaTeX official-source LERF-OVS comparison table"
+    },
+    "lerf_direct_3d_selection.md": {
+      "path": "output/radio_gs/reports/lerf_direct_3d_selection.md",
+      "description": "LERF registered + voxel-context direct 3D object-selection report"
+    },
+    "lerf_direct_3d_published_context.md": {
+      "path": "output/radio_gs/reports/lerf_direct_3d_published_context.md",
+      "description": "Published-context direct 3D object-selection table for recent methods"
+    },
+    "vpr_protocol_card.md": {
+      "path": "output/radio_gs/reports/vpr_protocol_card.md",
+      "description": "Auditable VPR protocol card for LERF direct 3D object selection"
+    },
+    "vpr_contribution_weighting_ablation.md": {
+      "path": "output/radio_gs/reports/vpr_contribution_weighting_ablation.md",
+      "description": "Dr. Splat-inspired alpha/alpha-depth VPR registration weighting ablation"
+    },
+    "lerf_direct_3d_debug_audit.md": {
+      "path": "output/radio_gs/reports/lerf_direct_3d_debug_audit.md",
+      "description": "LERF direct 3D object-selection audit plus registration follow-up"
+    },
+    "lerf_direct_3d_query_audit.md": {
+      "path": "output/radio_gs/reports/lerf_direct_3d_query_audit.md",
+      "description": "Query-level bootstrap/failure audit for the VPR direct 3D selector"
+    },
+    "paper/lerf_direct_3d_selection_table.tex": {
+      "path": "paper/lerf_direct_3d_selection_table.tex",
+      "description": "LaTeX LERF direct 3D object-selection table"
+    },
+    "paper/lerf_direct_3d_context_table.tex": {
+      "path": "paper/lerf_direct_3d_context_table.tex",
+      "description": "LaTeX published-context direct 3D table"
+    },
+    "paper/lerf_vpr_ablation_table.tex": {
+      "path": "paper/lerf_vpr_ablation_table.tex",
+      "description": "LaTeX VPR direct-selection diagnostic table"
+    },
+    "paper/lerf_direct_3d_query_audit_table.tex": {
+      "path": "paper/lerf_direct_3d_query_audit_table.tex",
+      "description": "LaTeX query-level audit table for VPR direct 3D selection"
+    },
+    "paper/vpr_protocol_card.tex": {
+      "path": "paper/vpr_protocol_card.tex",
+      "description": "LaTeX VPR protocol card"
+    },
+    "expert4_improvement_completion_audit.md": {
+      "path": "output/radio_gs/reports/expert4_improvement_completion_audit.md",
+      "description": "Implementation and validation audit for expert suggestion (4)"
+    },
+    "expert5_improvement_update.md": {
+      "path": "output/radio_gs/reports/expert5_improvement_update.md",
+      "description": "Implementation and validation update for expert suggestion (5)"
+    },
+    "lerf_vpr_direct_3d_qualitative_manifest.json": {
+      "path": "output/radio_gs/reports/lerf_vpr_direct_3d_qualitative_manifest.json",
+      "description": "Manifest for VPR direct 3D qualitative cases"
+    },
+    "2026-05-16-sam3-box-readout-results.md": {
+      "path": "docs/experiments/2026-05-16-sam3-box-readout-results.md",
+      "description": "Official SAM3 box-prompt direct-3D readout results and protocol note"
+    },
+    "2026-05-16-expert-latest-followup-audit.md": {
+      "path": "docs/experiments/2026-05-16-expert-latest-followup-audit.md",
+      "description": "Checklist mapping the latest expert recommendations to current artifacts and remaining gaps"
+    },
+    "lerf_sam3_box_global_threshold_sweep_20260516.md": {
+      "path": "output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260516.md",
+      "description": "Fixed-global-threshold SAM3 box direct-3D padding sweep summary"
+    },
+    "lerf_sam3_box_global_threshold_sweep_20260516.json": {
+      "path": "output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260516.json",
+      "description": "Machine-readable fixed-global-threshold SAM3 box direct-3D sweep manifest"
+    },
+    "lerf_sam3_box_global_threshold_sweep_20260517_geometry.md": {
+      "path": "output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260517_geometry.md",
+      "description": "Geometry-map rerun of the strict pad16 SAM3 box direct-3D sweep"
+    },
+    "lerf_sam3_box_global_threshold_sweep_20260517_geometry.json": {
+      "path": "output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260517_geometry.json",
+      "description": "Machine-readable geometry-map rerun of the strict pad16 SAM3 box direct-3D sweep"
+    },
+    "controlled_evidence_table.md": {
+      "path": "output/radio_gs/reports/controlled_evidence_table.md",
+      "description": "Controlled evidence table combining teacher, full CTF-GS, ablations, direct-3D readouts, storage, and runtime"
+    },
+    "controlled_evidence_table.json": {
+      "path": "output/radio_gs/reports/controlled_evidence_table.json",
+      "description": "Machine-readable controlled evidence table"
+    },
+    "lerf_nearest_view_cache_baseline.md": {
+      "path": "output/radio_gs/reports/lerf_nearest_view_cache_baseline.md",
+      "description": "Measured unwarped nearest-view RADIO cache baseline under the LERF evaluator"
+    },
+    "lerf_nearest_view_cache_baseline.json": {
+      "path": "output/radio_gs/reports/lerf_nearest_view_cache_baseline.json",
+      "description": "Machine-readable nearest-view RADIO cache baseline"
+    },
+    "paper/lerf_nearest_view_cache_baseline_table.tex": {
+      "path": "paper/lerf_nearest_view_cache_baseline_table.tex",
+      "description": "LaTeX nearest-view RADIO cache baseline table"
+    },
+    "lerf_per_gaussian_1280d_baseline.md": {
+      "path": "output/radio_gs/reports/lerf_per_gaussian_1280d_baseline.md",
+      "description": "Measured per-Gaussian 1280-D explicit RADIO-memory baseline under the LERF evaluator"
+    },
+    "lerf_per_gaussian_1280d_baseline.json": {
+      "path": "output/radio_gs/reports/lerf_per_gaussian_1280d_baseline.json",
+      "description": "Machine-readable per-Gaussian 1280-D explicit RADIO-memory baseline"
+    },
+    "paper/lerf_per_gaussian_1280d_baseline_table.tex": {
+      "path": "paper/lerf_per_gaussian_1280d_baseline_table.tex",
+      "description": "LaTeX per-Gaussian 1280-D explicit RADIO-memory baseline table"
+    },
+    "controlled_baseline_gap_audit.md": {
+      "path": "output/radio_gs/reports/controlled_baseline_gap_audit.md",
+      "description": "Audit documenting nearest-view measured status and per-Gaussian 1280-D explicit measured controlled baseline row"
+    },
+    "waldo_failure_stratification.md": {
+      "path": "output/radio_gs/reports/waldo_failure_stratification.md",
+      "description": "Waldo Kitchen direct-3D object-size and zero-prediction failure stratification"
+    },
+    "waldo_failure_stratification.json": {
+      "path": "output/radio_gs/reports/waldo_failure_stratification.json",
+      "description": "Machine-readable Waldo Kitchen failure stratification"
+    },
+    "lerf_direct3d_confidence_coverage_analysis.md": {
+      "path": "output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md",
+      "description": "Direct3D scene view-coverage and teacher-score confidence mechanism analysis"
+    },
+    "lerf_direct3d_confidence_coverage_analysis.json": {
+      "path": "output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.json",
+      "description": "Machine-readable Direct3D confidence/coverage mechanism analysis"
+    },
+    "paper/lerf_direct3d_confidence_coverage_table.tex": {
+      "path": "paper/lerf_direct3d_confidence_coverage_table.tex",
+      "description": "LaTeX Direct3D confidence/coverage mechanism table"
+    },
+    "verify_submission_provenance.py": {
+      "path": "radio_gs/scripts/verify_submission_provenance.py",
+      "description": "Verifier for required row-level provenance fields in the submission freeze manifest"
+    },
+    "build_waldo_failure_stratification.py": {
+      "path": "radio_gs/scripts/build_waldo_failure_stratification.py",
+      "description": "Generator for Waldo Kitchen failure stratification report"
+    },
+    "build_direct3d_confidence_coverage_report.py": {
+      "path": "radio_gs/scripts/build_direct3d_confidence_coverage_report.py",
+      "description": "Generator for Direct3D confidence/coverage mechanism report"
+    },
+    "build_compression_downstream_correlation.py": {
+      "path": "radio_gs/scripts/build_compression_downstream_correlation.py",
+      "description": "Generator for compression-ratio versus downstream-mIoU correlation report"
+    },
+    "build_feature_error_text_relevance_report.py": {
+      "path": "radio_gs/scripts/build_feature_error_text_relevance_report.py",
+      "description": "Generator for feature-error versus text-relevance mechanism report"
+    },
+    "build_boundary_error_report.py": {
+      "path": "radio_gs/scripts/build_boundary_error_report.py",
+      "description": "Generator for SAM3-box boundary-error readout report"
+    },
+    "build_alpha_depth_boundary_alignment_report.py": {
+      "path": "radio_gs/scripts/build_alpha_depth_boundary_alignment_report.py",
+      "description": "Generator for alpha/depth boundary-alignment coverage report"
+    },
+    "build_alpha_depth_case_figure.py": {
+      "path": "radio_gs/scripts/build_alpha_depth_case_figure.py",
+      "description": "Generator for selected alpha/depth boundary-case figure"
+    },
+    "build_train_feature_field_audit.py": {
+      "path": "radio_gs/scripts/build_train_feature_field_audit.py",
+      "description": "Generator for train_feature_field auditability report"
+    },
+    "build_lerf_nearest_view_cache_baseline.py": {
+      "path": "radio_gs/scripts/build_lerf_nearest_view_cache_baseline.py",
+      "description": "Generator for the unwarped nearest-view RADIO cache baseline"
+    },
+    "build_lerf_per_gaussian_1280d_baseline.py": {
+      "path": "radio_gs/scripts/build_lerf_per_gaussian_1280d_baseline.py",
+      "description": "Generator for the per-Gaussian 1280-D explicit RADIO-memory baseline"
+    },
+    "lerf_sam3_box_direct_3d_qualitative_manifest.json": {
+      "path": "output/radio_gs/reports/lerf_sam3_box_direct_3d_qualitative_manifest.json",
+      "description": "Manifest for fixed-pad0 SAM3 box direct-3D qualitative cases"
+    },
+    "lerf_sam3_box_direct_3d_qualitative_pad16_manifest.json": {
+      "path": "output/radio_gs/reports/lerf_sam3_box_direct_3d_qualitative_pad16_manifest.json",
+      "description": "Manifest for fixed-pad16 SAM3 box boundary-diagnostic qualitative cases"
+    },
+    "paper/radio_gs_draft.tex": {
+      "path": "paper/radio_gs_draft.tex",
+      "description": "Current LaTeX paper draft"
+    }
+  },
+  "figures": {
+    "fig_grounding_comparison.png": {
+      "path": "output/radio_gs/paper_figures/fig_grounding_comparison.png",
+      "description": "Main qualitative grounding comparison",
+      "size_mb": 1.7
+    },
+    "fig_radio_flow_comparison.png": {
+      "path": "output/radio_gs/paper_figures/fig_radio_flow_comparison.png",
+      "description": "Main feature reconstruction comparison",
+      "size_mb": 9.8
+    },
+    "fig_pipeline_figurines.png": {
+      "path": "output/radio_gs/paper_figures/fig_pipeline_figurines.png",
+      "description": "Pipeline visualization for Figurines",
+      "size_mb": 10.6
+    },
+    "fig_room0_radio_flow_comparison.png": {
+      "path": "output/radio_gs/paper_figures/fig_room0_radio_flow_comparison.png",
+      "description": "Room0 feature-flow comparison",
+      "size_mb": 5.9
+    },
+    "fig_room0_pipeline_comparison.png": {
+      "path": "output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png",
+      "description": "Room0 pipeline comparison",
+      "size_mb": 10.3
+    },
+    "lerf_adaptor_downstream_qualitative.png": {
+      "path": "paper/figures/lerf_adaptor_downstream_qualitative.png",
+      "description": "DINOv3/SAM3 adaptor qualitative probes",
+      "size_mb": 3.2
+    },
+    "lerf_sam_dino_tasks_qualitative.png": {
+      "path": "paper/figures/lerf_sam_dino_tasks_qualitative.png",
+      "description": "Formal SAM/DINO downstream task qualitative probes",
+      "size_mb": 2.6
+    },
+    "lerf_vpr_direct_3d_qualitative.png": {
+      "path": "paper/figures/lerf_vpr_direct_3d_qualitative.png",
+      "description": "VPR direct 3D object-selection qualitative grid",
+      "size_mb": 1.6
+    },
+    "lerf_sam3_box_direct_3d_qualitative_pad16.png": {
+      "path": "paper/figures/lerf_sam3_box_direct_3d_qualitative_pad16.png",
+      "description": "SAM3 box direct-3D boundary diagnostic qualitative grid",
+      "size_mb": 1.6
+    },
+    "alpha_depth_boundary_cases.png": {
+      "path": "paper/figures/alpha_depth_boundary_cases.png",
+      "description": "Selected alpha/depth boundary-case montage for SAM3-box diagnostics",
+      "size_mb": 1.2
+    }
+  },
+  "profiles": [
+    "output/radio_gs/profiles/figurines_fdh_ws240_sweep",
+    "output/radio_gs/profiles/figurines_fdh_ws240_sweep_fixed",
+    "output/radio_gs/profiles/freeze_lerf_figurines_overlay_20260502",
+    "output/radio_gs/profiles/freeze_lerf_ramen_overlay_20260502",
+    "output/radio_gs/profiles/freeze_lerf_teatime_overlay_20260502",
+    "output/radio_gs/profiles/freeze_lerf_waldo_overlay_20260502",
+    "output/radio_gs/profiles/freeze_scannet_v67_all_eval_20260502",
+    "output/radio_gs/profiles/ramen_nofdh_240ep_lerf_autoeval",
+    "output/radio_gs/profiles/room0_pure_frozen_depth_only_autoeval",
+    "output/radio_gs/profiles/waldo_kitchen_fdh_ws240_240ep_lerf_autoeval"
+  ],
+  "audit": {
+    "paper_submission_result_audit.md": {
+      "path": "output/radio_gs/reports/paper_submission_result_audit.md",
+      "status": "ALL_VERIFIED"
+    }
+  },
+  "pending": []
+}

@@ -1,0 +1,3903 @@
+{
+  "caveat": "Object-weighted metrics are diagnostic query-level aggregates. Scene-mean metrics match the paper-facing four-scene aggregate. Label groups are deterministic keyword diagnostics for appendix analysis; only footprint bins are purely geometric.",
+  "footprint_bins": {
+    "large": {
+      "acc025": 0.0,
+      "acc05": 0.0,
+      "count": 5,
+      "mean_gt_pixels": 273085.2,
+      "mean_selected_gaussians": 9671.2,
+      "miou": 0.15377745402916781
+    },
+    "medium": {
+      "acc025": 0.5333333333333333,
+      "acc05": 0.3333333333333333,
+      "count": 30,
+      "mean_gt_pixels": 65932.16666666667,
+      "mean_selected_gaussians": 6058.3,
+      "miou": 0.383605029341446
+    },
+    "small": {
+      "acc025": 0.8522727272727273,
+      "acc05": 0.75,
+      "count": 88,
+      "mean_gt_pixels": 15289.920454545454,
+      "mean_selected_gaussians": 4945.477272727273,
+      "miou": 0.6016839284024713
+    },
+    "tiny": {
+      "acc025": 0.7058823529411765,
+      "acc05": 0.611764705882353,
+      "count": 85,
+      "mean_gt_pixels": 3840.9058823529413,
+      "mean_selected_gaussians": 3778.4,
+      "miou": 0.5231546446242591
+    }
+  },
+  "inputs": [
+    "paper/artifacts/lerf_direct_3d_selection_figurines_results.json",
+    "paper/artifacts/lerf_direct_3d_selection_ramen_results.json",
+    "paper/artifacts/lerf_direct_3d_selection_teatime_results.json",
+    "paper/artifacts/lerf_direct_3d_selection_waldo_kitchen_results.json"
+  ],
+  "label_groups": {
+    "container_or_part": {
+      "acc025": 0.6111111111111112,
+      "acc05": 0.5,
+      "count": 54,
+      "mean_gt_pixels": 42409.01851851852,
+      "mean_selected_gaussians": 5902.907407407408,
+      "miou": 0.4503414303301434
+    },
+    "multi_instance_likely": {
+      "acc025": 1.0,
+      "acc05": 0.9230769230769231,
+      "count": 26,
+      "mean_gt_pixels": 8772.038461538461,
+      "mean_selected_gaussians": 6086.653846153846,
+      "miou": 0.7120126861222426
+    },
+    "other": {
+      "acc025": 0.72,
+      "acc05": 0.58,
+      "count": 100,
+      "mean_gt_pixels": 18442.46,
+      "mean_selected_gaussians": 3355.1,
+      "miou": 0.519473273388388
+    },
+    "reflective_or_transparent": {
+      "acc025": 0.6666666666666666,
+      "acc05": 0.5833333333333334,
+      "count": 12,
+      "mean_gt_pixels": 92756.16666666667,
+      "mean_selected_gaussians": 9368.833333333334,
+      "miou": 0.47987937078389614
+    },
+    "texture_like": {
+      "acc025": 0.8333333333333334,
+      "acc05": 0.7777777777777778,
+      "count": 36,
+      "mean_gt_pixels": 17370.777777777777,
+      "mean_selected_gaussians": 6557.972222222223,
+      "miou": 0.6198110630635936
+    }
+  },
+  "object_weighted": {
+    "acc025": 0.7259615384615384,
+    "acc05": 0.6153846153846154,
+    "count": 208,
+    "mean_gt_pixels": 24112.408653846152,
+    "mean_selected_gaussians": 4742.649038461538,
+    "miou": 0.5273719646291769
+  },
+  "queries": [
+    {
+      "category": "green apple",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010357923010052828,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 7435,
+      "intersection_pixels": 6182,
+      "iou": 0.5281503630926955,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.4057834566240752,
+      "pred_pixels": 10452,
+      "scene": "figurines",
+      "selected_gaussians": 1179,
+      "union_pixels": 11705
+    },
+    {
+      "category": "jake",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010799545282303903,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 7752,
+      "intersection_pixels": 3081,
+      "iou": 0.06588542223552808,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 5.4298245614035086,
+      "pred_pixels": 42092,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 46763
+    },
+    {
+      "category": "miffy",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0031373292022379242,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 2252,
+      "intersection_pixels": 924,
+      "iou": 0.18561671353957412,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.6207815275310835,
+      "pred_pixels": 3650,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 4978
+    },
+    {
+      "category": "old camera",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01723441365936295,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 12371,
+      "intersection_pixels": 5443,
+      "iou": 0.43606793783047587,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.44895319699296743,
+      "pred_pixels": 5554,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 12482
+    },
+    {
+      "category": "pikachu",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01683179903261039,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 12082,
+      "intersection_pixels": 6312,
+      "iou": 0.5219116917479742,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.5234232742923357,
+      "pred_pixels": 6324,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 12094
+    },
+    {
+      "category": "pink ice cream",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0067413570202616855,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 4839,
+      "intersection_pixels": 4672,
+      "iou": 0.604946264405024,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.5614796445546602,
+      "pred_pixels": 7556,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 7723
+    },
+    {
+      "category": "pirate hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0025563939103492857,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 1835,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 1835
+    },
+    {
+      "category": "porcelain hand",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005245135189354256,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 3765,
+      "intersection_pixels": 1956,
+      "iou": 0.40263482914779747,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.8098273572377158,
+      "pred_pixels": 3049,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 4858
+    },
+    {
+      "category": "red apple",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.011037770545884135,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 7923,
+      "intersection_pixels": 4720,
+      "iou": 0.4515450110016263,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.9150574277420169,
+      "pred_pixels": 7250,
+      "scene": "figurines",
+      "selected_gaussians": 864,
+      "union_pixels": 10453
+    },
+    {
+      "category": "red toy chair",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.03471541136348438,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 24919,
+      "intersection_pixels": 15526,
+      "iou": 0.5616205462108881,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7324531482001685,
+      "pred_pixels": 18252,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 27645
+    },
+    {
+      "category": "rubber duck with buoy",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010493056639101264,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 7532,
+      "intersection_pixels": 6938,
+      "iou": 0.6979177145156423,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.240971853425385,
+      "pred_pixels": 9347,
+      "scene": "figurines",
+      "selected_gaussians": 967,
+      "union_pixels": 9941
+    },
+    {
+      "category": "rubber duck with hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.008411720125716069,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 6038,
+      "intersection_pixels": 4647,
+      "iou": 0.3866699950074888,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.7600198741305069,
+      "pred_pixels": 10627,
+      "scene": "figurines",
+      "selected_gaussians": 1161,
+      "union_pixels": 12018
+    },
+    {
+      "category": "spatula",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.008786472148541113,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 6307,
+      "intersection_pixels": 5800,
+      "iou": 0.14434683059157313,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 6.29047090534327,
+      "pred_pixels": 39674,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 40181
+    },
+    {
+      "category": "tesla door handle",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.009573590709493346,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 6872,
+      "intersection_pixels": 4026,
+      "iou": 0.5759656652360515,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.6030267753201397,
+      "pred_pixels": 4144,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 6990
+    },
+    {
+      "category": "toy cat statue",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.002068798341617814,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 1485,
+      "intersection_pixels": 1133,
+      "iou": 0.5907194994786236,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0545454545454545,
+      "pred_pixels": 1566,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 1918
+    },
+    {
+      "category": "toy elephant",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01179841963310523,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 8469,
+      "intersection_pixels": 6463,
+      "iou": 0.7572349150556532,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7709292714606211,
+      "pred_pixels": 6529,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 8535
+    },
+    {
+      "category": "waldo",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004905211421438602,
+      "frame": "frame_00041",
+      "frame_id": 41,
+      "gt_pixels": 3521,
+      "intersection_pixels": 3383,
+      "iou": 0.2833096055606733,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 3.352172678216416,
+      "pred_pixels": 11803,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 11941
+    },
+    {
+      "category": "green apple",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.021069701089985064,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 15124,
+      "intersection_pixels": 14511,
+      "iou": 0.5157266233073888,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.8198889182755884,
+      "pred_pixels": 27524,
+      "scene": "figurines",
+      "selected_gaussians": 1179,
+      "union_pixels": 28137
+    },
+    {
+      "category": "green toy chair",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013963343958272964,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 10023,
+      "intersection_pixels": 7055,
+      "iou": 0.39992063941953404,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.4639329542053277,
+      "pred_pixels": 14673,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 17641
+    },
+    {
+      "category": "jake",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005625459732964804,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 4038,
+      "intersection_pixels": 1768,
+      "iou": 0.15004667741661715,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 2.3558692421991085,
+      "pred_pixels": 9513,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 11783
+    },
+    {
+      "category": "old camera",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.07715433653567527,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 55382,
+      "intersection_pixels": 44659,
+      "iou": 0.8021662206096313,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.8116355494565021,
+      "pred_pixels": 44950,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 55673
+    },
+    {
+      "category": "pink ice cream",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006714887546530548,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 4820,
+      "intersection_pixels": 4247,
+      "iou": 0.7112711438619996,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.1199170124481328,
+      "pred_pixels": 5398,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 5971
+    },
+    {
+      "category": "pirate hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0012524240465416937,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 899,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 899
+    },
+    {
+      "category": "pumpkin",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.0880555803223146,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 63207,
+      "intersection_pixels": 62831,
+      "iou": 0.9769564473745588,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.011549353710823,
+      "pred_pixels": 63937,
+      "scene": "figurines",
+      "selected_gaussians": 1914,
+      "union_pixels": 64313
+    },
+    {
+      "category": "red apple",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.048667610280186346,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 34934,
+      "intersection_pixels": 28775,
+      "iou": 0.7139312740354795,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.9774431785652945,
+      "pred_pixels": 34146,
+      "scene": "figurines",
+      "selected_gaussians": 864,
+      "union_pixels": 40305
+    },
+    {
+      "category": "rubber duck with buoy",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006146490426409291,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 4412,
+      "intersection_pixels": 4294,
+      "iou": 0.7873120645397873,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2094288304623753,
+      "pred_pixels": 5336,
+      "scene": "figurines",
+      "selected_gaussians": 967,
+      "union_pixels": 5454
+    },
+    {
+      "category": "rubber duck with hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0030258787865278737,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 2172,
+      "intersection_pixels": 1680,
+      "iou": 0.26469198046321096,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 2.695672191528545,
+      "pred_pixels": 5855,
+      "scene": "figurines",
+      "selected_gaussians": 1161,
+      "union_pixels": 6347
+    },
+    {
+      "category": "rubics cube",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006901566992844883,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 4954,
+      "intersection_pixels": 4856,
+      "iou": 0.9088527044731425,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0587404117884538,
+      "pred_pixels": 5245,
+      "scene": "figurines",
+      "selected_gaussians": 1095,
+      "union_pixels": 5343
+    },
+    {
+      "category": "spatula",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0026553061542919556,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 1906,
+      "intersection_pixels": 1767,
+      "iou": 0.8291881745659315,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0451206715634838,
+      "pred_pixels": 1992,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 2131
+    },
+    {
+      "category": "tesla door handle",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.014742103738046942,
+      "frame": "frame_00105",
+      "frame_id": 105,
+      "gt_pixels": 10582,
+      "intersection_pixels": 7432,
+      "iou": 0.6859885545504892,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.7261387261387261,
+      "pred_pixels": 7684,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 10834
+    },
+    {
+      "category": "green apple",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.009137540958027773,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 6559,
+      "intersection_pixels": 5665,
+      "iou": 0.7722191930207197,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.9821619149260558,
+      "pred_pixels": 6442,
+      "scene": "figurines",
+      "selected_gaussians": 1179,
+      "union_pixels": 7336
+    },
+    {
+      "category": "jake",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.015049985511445957,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 10803,
+      "intersection_pixels": 3920,
+      "iou": 0.11664583705290722,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 2.4736647227621957,
+      "pred_pixels": 26723,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 33606
+    },
+    {
+      "category": "pikachu",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.0272078327352161,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 19530,
+      "intersection_pixels": 10236,
+      "iou": 0.5241167434715822,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.5241167434715822,
+      "pred_pixels": 10236,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 19530
+    },
+    {
+      "category": "pirate hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0028977108084613156,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 2080,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 2080
+    },
+    {
+      "category": "porcelain hand",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007836357354612933,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 5625,
+      "intersection_pixels": 4072,
+      "iou": 0.7035245335176227,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.7528888888888889,
+      "pred_pixels": 4235,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 5788
+    },
+    {
+      "category": "red apple",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004193321891090653,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 3010,
+      "intersection_pixels": 1434,
+      "iou": 0.23706397751694494,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.486046511627907,
+      "pred_pixels": 4473,
+      "scene": "figurines",
+      "selected_gaussians": 864,
+      "union_pixels": 6049
+    },
+    {
+      "category": "rubber duck with hat",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.011406950047923678,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 8188,
+      "intersection_pixels": 5953,
+      "iou": 0.7247382517652788,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7302149487054226,
+      "pred_pixels": 5979,
+      "scene": "figurines",
+      "selected_gaussians": 1161,
+      "union_pixels": 8214
+    },
+    {
+      "category": "rubics cube",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.025243519158326462,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 18120,
+      "intersection_pixels": 16989,
+      "iou": 0.8789383827409591,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0043046357615895,
+      "pred_pixels": 18198,
+      "scene": "figurines",
+      "selected_gaussians": 1095,
+      "union_pixels": 19329
+    },
+    {
+      "category": "toy cat statue",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.009453781512605041,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 6786,
+      "intersection_pixels": 5979,
+      "iou": 0.8156889495225103,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.961243737105806,
+      "pred_pixels": 6523,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 7330
+    },
+    {
+      "category": "toy elephant",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.029296134899583177,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 21029,
+      "intersection_pixels": 17041,
+      "iou": 0.8067509349997632,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.8148271434685435,
+      "pred_pixels": 17135,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 21123
+    },
+    {
+      "category": "waldo",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.008434010208858079,
+      "frame": "frame_00152",
+      "frame_id": 152,
+      "gt_pixels": 6054,
+      "intersection_pixels": 5588,
+      "iou": 0.83068232495912,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0341922695738355,
+      "pred_pixels": 6261,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 6727
+    },
+    {
+      "category": "bag",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.008514811760247865,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 6112,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.10553010471204188,
+      "pred_pixels": 645,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 6757
+    },
+    {
+      "category": "green apple",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01048469785792301,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 7526,
+      "intersection_pixels": 5888,
+      "iou": 0.7806947759215063,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7844804677119319,
+      "pred_pixels": 5904,
+      "scene": "figurines",
+      "selected_gaussians": 1179,
+      "union_pixels": 7542
+    },
+    {
+      "category": "green toy chair",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.04363562401087756,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 31322,
+      "intersection_pixels": 29413,
+      "iou": 0.551548904890489,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.6416256944001022,
+      "pred_pixels": 51419,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 53328
+    },
+    {
+      "category": "miffy",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.001356908811269866,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 974,
+      "intersection_pixels": 408,
+      "iou": 0.05028965857266116,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 7.748459958932238,
+      "pred_pixels": 7547,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 8113
+    },
+    {
+      "category": "old camera",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.02689019905044246,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 19302,
+      "intersection_pixels": 14243,
+      "iou": 0.7097368945585011,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7775878147342244,
+      "pred_pixels": 15009,
+      "scene": "figurines",
+      "selected_gaussians": 3038,
+      "union_pixels": 20068
+    },
+    {
+      "category": "pink ice cream",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0085357087131935,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 6127,
+      "intersection_pixels": 5796,
+      "iou": 0.8711859311588757,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0318263424188021,
+      "pred_pixels": 6322,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 6653
+    },
+    {
+      "category": "pirate hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0026093328578115594,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 1873,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 1873
+    },
+    {
+      "category": "porcelain hand",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.002722176403717986,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 1954,
+      "intersection_pixels": 1737,
+      "iou": 0.878159757330637,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.9012282497441146,
+      "pred_pixels": 1761,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 1978
+    },
+    {
+      "category": "rubber duck with buoy",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005821891090653768,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 4179,
+      "intersection_pixels": 3837,
+      "iou": 0.6428212430892947,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.3464943766451305,
+      "pred_pixels": 5627,
+      "scene": "figurines",
+      "selected_gaussians": 967,
+      "union_pixels": 5969
+    },
+    {
+      "category": "rubber duck with hat",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005991852974611595,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 4301,
+      "intersection_pixels": 3334,
+      "iou": 0.42831449126413157,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.5849802371541502,
+      "pred_pixels": 6817,
+      "scene": "figurines",
+      "selected_gaussians": 1161,
+      "union_pixels": 7784
+    },
+    {
+      "category": "rubics cube",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00955687314713684,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 6860,
+      "intersection_pixels": 6779,
+      "iou": 0.9322057205720572,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0482507288629737,
+      "pred_pixels": 7191,
+      "scene": "figurines",
+      "selected_gaussians": 1095,
+      "union_pixels": 7272
+    },
+    {
+      "category": "spatula",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.012279049550854826,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 8814,
+      "intersection_pixels": 7296,
+      "iou": 0.3976238487111014,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.9095756750624007,
+      "pred_pixels": 16831,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 18349
+    },
+    {
+      "category": "toy cat statue",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004157100505984887,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 2984,
+      "intersection_pixels": 2308,
+      "iou": 0.7683089214380826,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7801608579088471,
+      "pred_pixels": 2328,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 3004
+    },
+    {
+      "category": "toy elephant",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007003265497180305,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 5027,
+      "intersection_pixels": 3469,
+      "iou": 0.6820684231222965,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.7018102247861547,
+      "pred_pixels": 3528,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 5086
+    },
+    {
+      "category": "waldo",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004318703608764461,
+      "frame": "frame_00195",
+      "frame_id": 195,
+      "gt_pixels": 3100,
+      "intersection_pixels": 2805,
+      "iou": 0.6875,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2209677419354839,
+      "pred_pixels": 3785,
+      "scene": "figurines",
+      "selected_gaussians": 844,
+      "union_pixels": 4080
+    },
+    {
+      "category": "bowl",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.07379387118749203,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 53296,
+      "intersection_pixels": 8347,
+      "iou": 0.15622309563915404,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.15913014109876913,
+      "pred_pixels": 8481,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 53430
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.009748998931085474,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 7041,
+      "intersection_pixels": 6750,
+      "iou": 0.8310760896330953,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.112199971594944,
+      "pred_pixels": 7831,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 8122
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.009646538212309687,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 6967,
+      "intersection_pixels": 6543,
+      "iou": 0.8919029443838604,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.9921056408784269,
+      "pred_pixels": 6912,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 7336
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0038865842919410492,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 2807,
+      "intersection_pixels": 2709,
+      "iou": 0.7425986842105263,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2646954043462773,
+      "pred_pixels": 3550,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 3648
+    },
+    {
+      "category": "napkin",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007667938656490748,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 5538,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.9526905019862766,
+      "pred_pixels": 5276,
+      "scene": "ramen",
+      "selected_gaussians": 6594,
+      "union_pixels": 10814
+    },
+    {
+      "category": "nori",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.018412468084870705,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 13298,
+      "intersection_pixels": 9498,
+      "iou": 0.7004941367357475,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.7338697548503534,
+      "pred_pixels": 9759,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 13559
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.003831200119629812,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 2767,
+      "intersection_pixels": 2194,
+      "iou": 0.6644457904300424,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.986266714853632,
+      "pred_pixels": 2729,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 3302
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.0678968414406531,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 49037,
+      "intersection_pixels": 22428,
+      "iou": 0.4573222951755638,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.45747088932846625,
+      "pred_pixels": 22433,
+      "scene": "ramen",
+      "selected_gaussians": 2654,
+      "union_pixels": 49042
+    },
+    {
+      "category": "sake cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.016606944067524384,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 11994,
+      "intersection_pixels": 11803,
+      "iou": 0.9689680650192923,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.9996664999166249,
+      "pred_pixels": 11990,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 12181
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006594870317960533,
+      "frame": "frame_00006",
+      "frame_id": 6,
+      "gt_pixels": 4763,
+      "intersection_pixels": 4309,
+      "iou": 0.7419077134986226,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.1240814612639094,
+      "pred_pixels": 5354,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 5808
+    },
+    {
+      "category": "bowl",
+      "footprint_bin": "large",
+      "footprint_ratio": 0.22304867714904433,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 161092,
+      "intersection_pixels": 38152,
+      "iou": 0.2343028397366611,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.24763489186303478,
+      "pred_pixels": 39892,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 162832
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01607940982625985,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 11613,
+      "intersection_pixels": 11144,
+      "iou": 0.8616716925693961,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.0732799448893482,
+      "pred_pixels": 12464,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 12933
+    },
+    {
+      "category": "corn",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0025435181133935543,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 1837,
+      "intersection_pixels": 1366,
+      "iou": 0.09561808763824724,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 7.520413718018508,
+      "pred_pixels": 13815,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 14286
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.03855015313723644,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 27842,
+      "intersection_pixels": 27667,
+      "iou": 0.9050672249664693,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0916600818906688,
+      "pred_pixels": 30394,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 30569
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.017785242333445948,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 12845,
+      "intersection_pixels": 12651,
+      "iou": 0.7403007782784247,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.3152977812378357,
+      "pred_pixels": 16895,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 17089
+    },
+    {
+      "category": "nori",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.13722120992262832,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 99105,
+      "intersection_pixels": 65747,
+      "iou": 0.6627053724422941,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.6644669794662227,
+      "pred_pixels": 65852,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 99210
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.025210875236075035,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 18208,
+      "intersection_pixels": 13096,
+      "iou": 0.6682655508496198,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.7955294376098418,
+      "pred_pixels": 14485,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 19597
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.0347355682693,
+      "frame": "frame_00024",
+      "frame_id": 24,
+      "gt_pixels": 25087,
+      "intersection_pixels": 24736,
+      "iou": 0.8890805837107325,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.0950292980428111,
+      "pred_pixels": 27471,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 27822
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.017700781470671313,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 12784,
+      "intersection_pixels": 12456,
+      "iou": 0.8219069613988783,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.1598091364205256,
+      "pred_pixels": 14827,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 15155
+    },
+    {
+      "category": "corn",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0019550612825866625,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 1412,
+      "intersection_pixels": 1100,
+      "iou": 0.1045428625736552,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 7.230878186968838,
+      "pred_pixels": 10210,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 10522
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.03298958223718826,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 23826,
+      "intersection_pixels": 23453,
+      "iou": 0.888943637948679,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0916645681188617,
+      "pred_pixels": 26010,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 26383
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013589891280869753,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 9815,
+      "intersection_pixels": 9744,
+      "iou": 0.7485595759391565,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.3190015282730514,
+      "pred_pixels": 12946,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 13017
+    },
+    {
+      "category": "napkin",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.028002237520561375,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 20224,
+      "intersection_pixels": 20216,
+      "iou": 0.920038228735266,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.0860858386075949,
+      "pred_pixels": 21965,
+      "scene": "ramen",
+      "selected_gaussians": 6594,
+      "union_pixels": 21973
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.014255885952912377,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 10296,
+      "intersection_pixels": 8452,
+      "iou": 0.7458524532297918,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.9215229215229215,
+      "pred_pixels": 9488,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 11332
+    },
+    {
+      "category": "sake cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013793428114113548,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 9962,
+      "intersection_pixels": 9376,
+      "iou": 0.931544957774466,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.9515157598875728,
+      "pred_pixels": 9479,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 10065
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.026322712495223114,
+      "frame": "frame_00060",
+      "frame_id": 60,
+      "gt_pixels": 19011,
+      "intersection_pixels": 18869,
+      "iou": 0.8452338290628919,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.166798169480827,
+      "pred_pixels": 22182,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 22324
+    },
+    {
+      "category": "bowl",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.11188295109023744,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 80805,
+      "intersection_pixels": 16218,
+      "iou": 0.20028156490812093,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.20282160757378875,
+      "pred_pixels": 16389,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 80976
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00784932182081005,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 5669,
+      "intersection_pixels": 5537,
+      "iou": 0.8480624904273243,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.1284177103545598,
+      "pred_pixels": 6397,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 6529
+    },
+    {
+      "category": "corn",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.001660140565029326,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 1199,
+      "intersection_pixels": 673,
+      "iou": 0.09025077108756872,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 5.780650542118432,
+      "pred_pixels": 6931,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 7457
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01849415973902978,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 13357,
+      "intersection_pixels": 13137,
+      "iou": 0.8929445350734094,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.084974170846747,
+      "pred_pixels": 14492,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 14712
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007638861966027349,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 5517,
+      "intersection_pixels": 5441,
+      "iou": 0.6812320020032553,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.433931484502447,
+      "pred_pixels": 7911,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 7987
+    },
+    {
+      "category": "napkin",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007465786427554733,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 5392,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.4534495548961424,
+      "pred_pixels": 7837,
+      "scene": "ramen",
+      "selected_gaussians": 6594,
+      "union_pixels": 13229
+    },
+    {
+      "category": "nori",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.031138366277685164,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 22489,
+      "intersection_pixels": 16103,
+      "iou": 0.695654052185934,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.7453421672817822,
+      "pred_pixels": 16762,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 23148
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.011940827550302674,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 8624,
+      "intersection_pixels": 5789,
+      "iou": 0.5696713245424129,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.8496057513914657,
+      "pred_pixels": 7327,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 10162
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.0551806354779931,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 39853,
+      "intersection_pixels": 12967,
+      "iou": 0.32478396994364434,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.32717737685996034,
+      "pred_pixels": 13039,
+      "scene": "ramen",
+      "selected_gaussians": 2654,
+      "union_pixels": 39925
+    },
+    {
+      "category": "sake cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01591187270501836,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 11492,
+      "intersection_pixels": 11164,
+      "iou": 0.9457009741634901,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.9986947441698573,
+      "pred_pixels": 11477,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 11805
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013477738331939498,
+      "frame": "frame_00065",
+      "frame_id": 65,
+      "gt_pixels": 9734,
+      "intersection_pixels": 9398,
+      "iou": 0.8180710306406686,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.1456749537702897,
+      "pred_pixels": 11152,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 11488
+    },
+    {
+      "category": "bowl",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.07102327796762241,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 51295,
+      "intersection_pixels": 5545,
+      "iou": 0.10779339437413736,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.1109464860122819,
+      "pred_pixels": 5691,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 51441
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.011166833742253138,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 8065,
+      "intersection_pixels": 7890,
+      "iou": 0.870572658060245,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.1020458772473651,
+      "pred_pixels": 8888,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 9063
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007656861822028501,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 5530,
+      "intersection_pixels": 5306,
+      "iou": 0.8971931011159959,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0289330922242315,
+      "pred_pixels": 5690,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 5914
+    },
+    {
+      "category": "glass of water",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01861462031380672,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 13444,
+      "intersection_pixels": 2605,
+      "iou": 0.19294867046885417,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.19800654567093126,
+      "pred_pixels": 2662,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 13501
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0027332089035595405,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 1974,
+      "intersection_pixels": 1940,
+      "iou": 0.7085463842220598,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.369807497467072,
+      "pred_pixels": 2704,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 2738
+    },
+    {
+      "category": "napkin",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005537032626815909,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 3999,
+      "intersection_pixels": 180,
+      "iou": 0.04491017964071856,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.047261815453863466,
+      "pred_pixels": 189,
+      "scene": "ramen",
+      "selected_gaussians": 6594,
+      "union_pixels": 4008
+    },
+    {
+      "category": "nori",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.032388663967611336,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 23392,
+      "intersection_pixels": 16870,
+      "iou": 0.7203552670908236,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.7223409712722298,
+      "pred_pixels": 16897,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 23419
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.002813515953410834,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 2032,
+      "intersection_pixels": 1707,
+      "iou": 0.8032941176470588,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.8858267716535433,
+      "pred_pixels": 1800,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 2125
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.04642578243989433,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 33530,
+      "intersection_pixels": 2597,
+      "iou": 0.07710807600950119,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.08192663286609007,
+      "pred_pixels": 2747,
+      "scene": "ramen",
+      "selected_gaussians": 2654,
+      "union_pixels": 33680
+    },
+    {
+      "category": "sake cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.015622490404692147,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 11283,
+      "intersection_pixels": 7548,
+      "iou": 0.6681419845976808,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.6702118230966941,
+      "pred_pixels": 7562,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 11297
+    },
+    {
+      "category": "spoon",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010246071877578826,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 7400,
+      "intersection_pixels": 7097,
+      "iou": 0.7312725399278722,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2705405405405406,
+      "pred_pixels": 9402,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 9705
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005973182983766899,
+      "frame": "frame_00081",
+      "frame_id": 81,
+      "gt_pixels": 4314,
+      "intersection_pixels": 4248,
+      "iou": 0.8881455153669245,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.093416782568382,
+      "pred_pixels": 4717,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 4783
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006803945568435453,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 4914,
+      "intersection_pixels": 4773,
+      "iou": 0.5565531716417911,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.7165242165242165,
+      "pred_pixels": 8435,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 8576
+    },
+    {
+      "category": "corn",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0010730683385302149,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 775,
+      "intersection_pixels": 678,
+      "iou": 0.0802936996684036,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 10.77032258064516,
+      "pred_pixels": 8347,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 8444
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.05188250801685894,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 37471,
+      "intersection_pixels": 37234,
+      "iou": 0.8355737079508988,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.1828881001307678,
+      "pred_pixels": 44324,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 44561
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.017104017014017734,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 12353,
+      "intersection_pixels": 12003,
+      "iou": 0.7859996070984219,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2078847243584554,
+      "pred_pixels": 14921,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 15271
+    },
+    {
+      "category": "nori",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.12773528581002122,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 92254,
+      "intersection_pixels": 65407,
+      "iou": 0.705584742014477,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.713811867236109,
+      "pred_pixels": 65852,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 92699
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013882042789811528,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 10026,
+      "intersection_pixels": 7548,
+      "iou": 0.7101994730899511,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.8128864951127069,
+      "pred_pixels": 8150,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 10628
+    },
+    {
+      "category": "sake cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010570069285599561,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 7634,
+      "intersection_pixels": 2728,
+      "iou": 0.3319542467753711,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.43384857217710243,
+      "pred_pixels": 3312,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 8218
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.05104897622357483,
+      "frame": "frame_00119",
+      "frame_id": 119,
+      "gt_pixels": 36869,
+      "intersection_pixels": 36695,
+      "iou": 0.794814590192341,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.2474978979630584,
+      "pred_pixels": 45994,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 46168
+    },
+    {
+      "category": "bowl",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.10629468810403363,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 76769,
+      "intersection_pixels": 9743,
+      "iou": 0.12674810391705368,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.12821581628000886,
+      "pred_pixels": 9843,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 76869
+    },
+    {
+      "category": "chopsticks",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013711736459954474,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 9903,
+      "intersection_pixels": 9431,
+      "iou": 0.7450624111234002,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.2305362011511662,
+      "pred_pixels": 12186,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 12658
+    },
+    {
+      "category": "corn",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0010010689145256069,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 723,
+      "intersection_pixels": 316,
+      "iou": 0.07679222357229648,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 5.128630705394191,
+      "pred_pixels": 3708,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 4115
+    },
+    {
+      "category": "egg",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.023589503591663574,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 17037,
+      "intersection_pixels": 16869,
+      "iou": 0.8679254990738835,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.1309502846745318,
+      "pred_pixels": 19268,
+      "scene": "ramen",
+      "selected_gaussians": 5431,
+      "union_pixels": 19436
+    },
+    {
+      "category": "glass of water",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.07192050155906445,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 51943,
+      "intersection_pixels": 16382,
+      "iou": 0.31373525356212656,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.3206399322334097,
+      "pred_pixels": 16655,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 52216
+    },
+    {
+      "category": "hand",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.012988973011292832,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 9381,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 9381
+    },
+    {
+      "category": "kamaboko",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007237326716770881,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 5227,
+      "intersection_pixels": 5108,
+      "iou": 0.7965070949633557,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2041323895159748,
+      "pred_pixels": 6294,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 6413
+    },
+    {
+      "category": "napkin",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004002891053794646,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 2891,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "ramen",
+      "selected_gaussians": 6594,
+      "union_pixels": 2891
+    },
+    {
+      "category": "nori",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.06275580564586253,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 45324,
+      "intersection_pixels": 31992,
+      "iou": 0.7051355521269561,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.7068661194951902,
+      "pred_pixels": 32038,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 45370
+    },
+    {
+      "category": "onion segments",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006743022978893092,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 4870,
+      "intersection_pixels": 3650,
+      "iou": 0.7435322876349562,
+      "label_groups": [
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.7574948665297742,
+      "pred_pixels": 3689,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 4909
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.08654192304923099,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 62503,
+      "intersection_pixels": 1720,
+      "iou": 0.026888023886570057,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.05097355326944307,
+      "pred_pixels": 3186,
+      "scene": "ramen",
+      "selected_gaussians": 2654,
+      "union_pixels": 63969
+    },
+    {
+      "category": "sake cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.017522167514967574,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 12655,
+      "intersection_pixels": 9962,
+      "iou": 0.7864529880792611,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.7881469774792572,
+      "pred_pixels": 9974,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 12667
+    },
+    {
+      "category": "spoon",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.02730716615805535,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 19722,
+      "intersection_pixels": 15454,
+      "iou": 0.6100825075993842,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0679951323395194,
+      "pred_pixels": 21063,
+      "scene": "ramen",
+      "selected_gaussians": 1913,
+      "union_pixels": 25331
+    },
+    {
+      "category": "wavy noodles",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.022941508775622104,
+      "frame": "frame_00128",
+      "frame_id": 128,
+      "gt_pixels": 16569,
+      "intersection_pixels": 15818,
+      "iou": 0.6182528825483682,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 1.498823103385841,
+      "pred_pixels": 24834,
+      "scene": "ramen",
+      "selected_gaussians": 6888,
+      "union_pixels": 25585
+    },
+    {
+      "category": "apple",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.002383395263712495,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 1719,
+      "intersection_pixels": 1688,
+      "iou": 0.907039226222461,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0645724258289704,
+      "pred_pixels": 1830,
+      "scene": "teatime",
+      "selected_gaussians": 2492,
+      "union_pixels": 1861
+    },
+    {
+      "category": "bag of cookies",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007209805335255948,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 5200,
+      "intersection_pixels": 4984,
+      "iou": 0.9453717754172989,
+      "label_groups": [
+        "texture_like",
+        "container_or_part",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.9723076923076923,
+      "pred_pixels": 5056,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 5272
+    },
+    {
+      "category": "bear nose",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013734679163662581,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 9906,
+      "intersection_pixels": 1099,
+      "iou": 0.09426194356291277,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.28790631940238237,
+      "pred_pixels": 2852,
+      "scene": "teatime",
+      "selected_gaussians": 2301,
+      "union_pixels": 11659
+    },
+    {
+      "category": "coffee",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004048582995951417,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 2920,
+      "intersection_pixels": 1716,
+      "iou": 0.5606011107481216,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.635958904109589,
+      "pred_pixels": 1857,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 3061
+    },
+    {
+      "category": "coffee mug",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0037976263102434695,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 2739,
+      "intersection_pixels": 2144,
+      "iou": 0.7756874095513748,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.791894852135816,
+      "pred_pixels": 2169,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 2764
+    },
+    {
+      "category": "paper napkin",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.007417780489157562,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 5350,
+      "intersection_pixels": 4667,
+      "iou": 0.8677947192264782,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.8775700934579439,
+      "pred_pixels": 4695,
+      "scene": "teatime",
+      "selected_gaussians": 2392,
+      "union_pixels": 5378
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005817758305141146,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 4196,
+      "intersection_pixels": 2948,
+      "iou": 0.6647125140924465,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.759532888465205,
+      "pred_pixels": 3187,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 4435
+    },
+    {
+      "category": "sheep",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.08786950252343187,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 63375,
+      "intersection_pixels": 27799,
+      "iou": 0.4374970491493681,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.44126232741617355,
+      "pred_pixels": 27965,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 63541
+    },
+    {
+      "category": "stuffed bear",
+      "footprint_bin": "large",
+      "footprint_ratio": 0.21036270866840442,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 151722,
+      "intersection_pixels": 34729,
+      "iou": 0.22633897730679492,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.24020906658230184,
+      "pred_pixels": 36445,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 153438
+    },
+    {
+      "category": "tea in a glass",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0046905329709943985,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 3383,
+      "intersection_pixels": 2555,
+      "iou": 0.7427325581395349,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.7720957729825598,
+      "pred_pixels": 2612,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 3440
+    },
+    {
+      "category": "three cookies",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.002119960068770451,
+      "frame": "frame_00002",
+      "frame_id": 2,
+      "gt_pixels": 1529,
+      "intersection_pixels": 1497,
+      "iou": 0.5845372901210465,
+      "label_groups": [
+        "texture_like",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.6540222367560498,
+      "pred_pixels": 2529,
+      "scene": "teatime",
+      "selected_gaussians": 7272,
+      "union_pixels": 2561
+    },
+    {
+      "category": "bag of cookies",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00847290776995175,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 6111,
+      "intersection_pixels": 5450,
+      "iou": 0.8884903814802739,
+      "label_groups": [
+        "texture_like",
+        "container_or_part",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.8955981017836688,
+      "pred_pixels": 5473,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 6134
+    },
+    {
+      "category": "bear nose",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01059148133769619,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 7639,
+      "intersection_pixels": 1317,
+      "iou": 0.1354798889003189,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.44495352794868437,
+      "pred_pixels": 3399,
+      "scene": "teatime",
+      "selected_gaussians": 2301,
+      "union_pixels": 9721
+    },
+    {
+      "category": "coffee",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004244079640618934,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 3061,
+      "intersection_pixels": 2518,
+      "iou": 0.8075689544579859,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.8412283567461614,
+      "pred_pixels": 2575,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 3118
+    },
+    {
+      "category": "coffee mug",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0037588042815151685,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 2711,
+      "intersection_pixels": 1967,
+      "iou": 0.7189327485380117,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.7347842124677241,
+      "pred_pixels": 1992,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 2736
+    },
+    {
+      "category": "hooves",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006486051799678332,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 4678,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.23428815733219324,
+      "pred_pixels": 1096,
+      "scene": "teatime",
+      "selected_gaussians": 2301,
+      "union_pixels": 5774
+    },
+    {
+      "category": "paper napkin",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0022350396539293437,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 1612,
+      "intersection_pixels": 1040,
+      "iou": 0.6451612903225806,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.6451612903225806,
+      "pred_pixels": 1040,
+      "scene": "teatime",
+      "selected_gaussians": 2392,
+      "union_pixels": 1612
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013453219455382397,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 9703,
+      "intersection_pixels": 7339,
+      "iou": 0.7085344661131493,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.8238689065237556,
+      "pred_pixels": 7994,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 10358
+    },
+    {
+      "category": "sheep",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.12584021962176253,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 90761,
+      "intersection_pixels": 73788,
+      "iou": 0.8024708812302205,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.8261037229647095,
+      "pred_pixels": 74978,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 91951
+    },
+    {
+      "category": "stuffed bear",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.11230381010481948,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 80998,
+      "intersection_pixels": 5820,
+      "iou": 0.07180486841942926,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0725326551272871,
+      "pred_pixels": 5875,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 81053
+    },
+    {
+      "category": "tea in a glass",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.003995895956963008,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 2882,
+      "intersection_pixels": 2362,
+      "iou": 0.7968960863697706,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.8480222068008327,
+      "pred_pixels": 2444,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 2964
+    },
+    {
+      "category": "three cookies",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004213576618046697,
+      "frame": "frame_00025",
+      "frame_id": 25,
+      "gt_pixels": 3039,
+      "intersection_pixels": 3015,
+      "iou": 0.4852728150651859,
+      "label_groups": [
+        "texture_like",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 2.0365251727541955,
+      "pred_pixels": 6189,
+      "scene": "teatime",
+      "selected_gaussians": 7272,
+      "union_pixels": 6213
+    },
+    {
+      "category": "apple",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005030225722367034,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 3628,
+      "intersection_pixels": 3628,
+      "iou": 0.9236252545824847,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0826901874310915,
+      "pred_pixels": 3928,
+      "scene": "teatime",
+      "selected_gaussians": 2492,
+      "union_pixels": 3928
+    },
+    {
+      "category": "bag of cookies",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.036879540790860185,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 26599,
+      "intersection_pixels": 19652,
+      "iou": 0.7233776272683771,
+      "label_groups": [
+        "texture_like",
+        "container_or_part",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.7601789540960187,
+      "pred_pixels": 20220,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 27167
+    },
+    {
+      "category": "coffee",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.012722533414674726,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 9176,
+      "intersection_pixels": 7909,
+      "iou": 0.8606093579978237,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.8634481255448997,
+      "pred_pixels": 7923,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 9190
+    },
+    {
+      "category": "coffee mug",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010680217403360878,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 7703,
+      "intersection_pixels": 4941,
+      "iou": 0.6379599741768883,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.6468908217577567,
+      "pred_pixels": 4983,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 7745
+    },
+    {
+      "category": "hooves",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.07647939659475347,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 55160,
+      "intersection_pixels": 3188,
+      "iou": 0.05770553524237049,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.05935460478607687,
+      "pred_pixels": 3274,
+      "scene": "teatime",
+      "selected_gaussians": 2301,
+      "union_pixels": 55246
+    },
+    {
+      "category": "paper napkin",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.011305529366091732,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 8154,
+      "intersection_pixels": 6432,
+      "iou": 0.7829580036518564,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.7962962962962963,
+      "pred_pixels": 6493,
+      "scene": "teatime",
+      "selected_gaussians": 2392,
+      "union_pixels": 8215
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.04731434751261716,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 34125,
+      "intersection_pixels": 25747,
+      "iou": 0.6904161750509492,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.8472967032967033,
+      "pred_pixels": 28914,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 37292
+    },
+    {
+      "category": "stuffed bear",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.07077533137374521,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 51046,
+      "intersection_pixels": 4520,
+      "iou": 0.08849384262975507,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.08915487991223603,
+      "pred_pixels": 4551,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 51077
+    },
+    {
+      "category": "tea in a glass",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.020206865953080806,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 14574,
+      "intersection_pixels": 10559,
+      "iou": 0.7059098810001337,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.7508576917798819,
+      "pred_pixels": 10943,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 14958
+    },
+    {
+      "category": "three cookies",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.014185291997116078,
+      "frame": "frame_00043",
+      "frame_id": 43,
+      "gt_pixels": 10231,
+      "intersection_pixels": 10207,
+      "iou": 0.532057964970809,
+      "label_groups": [
+        "texture_like",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.8727397126380607,
+      "pred_pixels": 19160,
+      "scene": "teatime",
+      "selected_gaussians": 7272,
+      "union_pixels": 19184
+    },
+    {
+      "category": "apple",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00235566524319228,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 1699,
+      "intersection_pixels": 1676,
+      "iou": 0.9555302166476625,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.0188346085932902,
+      "pred_pixels": 1731,
+      "scene": "teatime",
+      "selected_gaussians": 2492,
+      "union_pixels": 1754
+    },
+    {
+      "category": "bag of cookies",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010002218401641618,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 7214,
+      "intersection_pixels": 6169,
+      "iou": 0.8437970181917658,
+      "label_groups": [
+        "texture_like",
+        "container_or_part",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.8685888550041586,
+      "pred_pixels": 6266,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 7311
+    },
+    {
+      "category": "bear nose",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.03179662802950474,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 22933,
+      "intersection_pixels": 2141,
+      "iou": 0.09257177447250087,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.10186194566781494,
+      "pred_pixels": 2336,
+      "scene": "teatime",
+      "selected_gaussians": 2301,
+      "union_pixels": 23128
+    },
+    {
+      "category": "coffee mug",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005299206921413122,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 3822,
+      "intersection_pixels": 3256,
+      "iou": 0.8133899575318511,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.8992673992673993,
+      "pred_pixels": 3437,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 4003
+    },
+    {
+      "category": "dall-e brand",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0036936387332926627,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 2664,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.0015015015015015015,
+      "pred_pixels": 4,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 2668
+    },
+    {
+      "category": "paper napkin",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01763906605290888,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 12722,
+      "intersection_pixels": 10655,
+      "iou": 0.8375255462977519,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.8375255462977519,
+      "pred_pixels": 10655,
+      "scene": "teatime",
+      "selected_gaussians": 2392,
+      "union_pixels": 12722
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00944345848815928,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 6811,
+      "intersection_pixels": 3915,
+      "iou": 0.5439010836343429,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.6316253119953017,
+      "pred_pixels": 4302,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 7198
+    },
+    {
+      "category": "sheep",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.05211580056569242,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 37588,
+      "intersection_pixels": 8500,
+      "iou": 0.2255299954894001,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.22882302862615728,
+      "pred_pixels": 8601,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 37689
+    },
+    {
+      "category": "stuffed bear",
+      "footprint_bin": "large",
+      "footprint_ratio": 0.21990599523043647,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 158605,
+      "intersection_pixels": 22352,
+      "iou": 0.14068656453379322,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.14264997950884273,
+      "pred_pixels": 22625,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 158878
+    },
+    {
+      "category": "tea in a glass",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004686373467916366,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 3380,
+      "intersection_pixels": 2429,
+      "iou": 0.701010101010101,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.7437869822485207,
+      "pred_pixels": 2514,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 3465
+    },
+    {
+      "category": "three cookies",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0030766457767178747,
+      "frame": "frame_00107",
+      "frame_id": 107,
+      "gt_pixels": 2219,
+      "intersection_pixels": 2162,
+      "iou": 0.6589454434623591,
+      "label_groups": [
+        "texture_like",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.4529067147363677,
+      "pred_pixels": 3224,
+      "scene": "teatime",
+      "selected_gaussians": 7272,
+      "union_pixels": 3281
+    },
+    {
+      "category": "apple",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010017469912927736,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 7225,
+      "intersection_pixels": 7222,
+      "iou": 0.822926162260711,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.2142560553633217,
+      "pred_pixels": 8773,
+      "scene": "teatime",
+      "selected_gaussians": 2492,
+      "union_pixels": 8776
+    },
+    {
+      "category": "dall-e brand",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010318340635572071,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 7442,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 7442
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.020315013033109643,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 14652,
+      "intersection_pixels": 7589,
+      "iou": 0.4009615892640144,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.8097188097188097,
+      "pred_pixels": 11864,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 18927
+    },
+    {
+      "category": "sheep",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.16439742665409574,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 118570,
+      "intersection_pixels": 30873,
+      "iou": 0.25938466191692433,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.26420679767226113,
+      "pred_pixels": 31327,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 119024
+    },
+    {
+      "category": "tea in a glass",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01866507681215684,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 13462,
+      "intersection_pixels": 10960,
+      "iou": 0.6774213486618456,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 1.0159708809983659,
+      "pred_pixels": 13677,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 16179
+    },
+    {
+      "category": "three cookies",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00649991680993844,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 4688,
+      "intersection_pixels": 4688,
+      "iou": 0.3931236897274633,
+      "label_groups": [
+        "texture_like",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 2.5437286689419794,
+      "pred_pixels": 11925,
+      "scene": "teatime",
+      "selected_gaussians": 7272,
+      "union_pixels": 11925
+    },
+    {
+      "category": "yellow pouf",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.03203926570905662,
+      "frame": "frame_00129",
+      "frame_id": 129,
+      "gt_pixels": 23108,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.00030292539380301196,
+      "pred_pixels": 7,
+      "scene": "teatime",
+      "selected_gaussians": 2301,
+      "union_pixels": 23115
+    },
+    {
+      "category": "apple",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.009938439354445123,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 7168,
+      "intersection_pixels": 7162,
+      "iou": 0.9717774762550881,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.02734375,
+      "pred_pixels": 7364,
+      "scene": "teatime",
+      "selected_gaussians": 2492,
+      "union_pixels": 7370
+    },
+    {
+      "category": "bag of cookies",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.03398036714547169,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 24508,
+      "intersection_pixels": 22805,
+      "iou": 0.9225696832396133,
+      "label_groups": [
+        "texture_like",
+        "container_or_part",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.9391219193732658,
+      "pred_pixels": 23016,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 24719
+    },
+    {
+      "category": "coffee",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.020998558038932948,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 15145,
+      "intersection_pixels": 9755,
+      "iou": 0.6216939646931362,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.6801584681413008,
+      "pred_pixels": 10301,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 15691
+    },
+    {
+      "category": "coffee mug",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01981448616271976,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 14291,
+      "intersection_pixels": 10941,
+      "iou": 0.7466220827077931,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.7909873346861661,
+      "pred_pixels": 11304,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 14654
+    },
+    {
+      "category": "paper napkin",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.050519937884754035,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 36437,
+      "intersection_pixels": 35035,
+      "iou": 0.9503594195035941,
+      "label_groups": [
+        "texture_like"
+      ],
+      "overselect_ratio": 0.9732689299338585,
+      "pred_pixels": 35463,
+      "scene": "teatime",
+      "selected_gaussians": 2392,
+      "union_pixels": 36865
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.0417655704065221,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 30123,
+      "intersection_pixels": 21583,
+      "iou": 0.60449809545149,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.9017694120771503,
+      "pred_pixels": 27164,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 35704
+    },
+    {
+      "category": "stuffed bear",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.17627142144085187,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 127134,
+      "intersection_pixels": 16855,
+      "iou": 0.13257665140717667,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.13257665140717667,
+      "pred_pixels": 16855,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 127134
+    },
+    {
+      "category": "tea in a glass",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.046317453274915425,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 33406,
+      "intersection_pixels": 28012,
+      "iou": 0.7150113587053628,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 1.0112853978327248,
+      "pred_pixels": 33783,
+      "scene": "teatime",
+      "selected_gaussians": 8283,
+      "union_pixels": 39177
+    },
+    {
+      "category": "three cookies",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01299983361987688,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 9376,
+      "intersection_pixels": 9369,
+      "iou": 0.5014719263501579,
+      "label_groups": [
+        "texture_like",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 1.9918941979522184,
+      "pred_pixels": 18676,
+      "scene": "teatime",
+      "selected_gaussians": 7272,
+      "union_pixels": 18683
+    },
+    {
+      "category": "Stainless steel pots",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.014769123052686855,
+      "frame": "frame_00053",
+      "frame_id": 53,
+      "gt_pixels": 10547,
+      "intersection_pixels": 7479,
+      "iou": 0.5931477516059958,
+      "label_groups": [
+        "reflective_or_transparent",
+        "container_or_part",
+        "multi_instance_likely"
+      ],
+      "overselect_ratio": 0.9046174267564236,
+      "pred_pixels": 9541,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 11599,
+      "union_pixels": 12609
+    },
+    {
+      "category": "knife",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.013307194118676702,
+      "frame": "frame_00053",
+      "frame_id": 53,
+      "gt_pixels": 9503,
+      "intersection_pixels": 7515,
+      "iou": 0.4586232149395826,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.5151004945806588,
+      "pred_pixels": 14398,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 16386
+    },
+    {
+      "category": "ottolenghi",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.023677927533695083,
+      "frame": "frame_00053",
+      "frame_id": 53,
+      "gt_pixels": 16909,
+      "intersection_pixels": 9259,
+      "iou": 0.5326161988034974,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.5756697616653853,
+      "pred_pixels": 9734,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 7873,
+      "union_pixels": 17384
+    },
+    {
+      "category": "pour-over vessel",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.010789427621214773,
+      "frame": "frame_00053",
+      "frame_id": 53,
+      "gt_pixels": 7705,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 11408,
+      "union_pixels": 7705
+    },
+    {
+      "category": "toaster",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.01286049361106249,
+      "frame": "frame_00053",
+      "frame_id": 53,
+      "gt_pixels": 9184,
+      "intersection_pixels": 4082,
+      "iou": 0.29648460197559556,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.9435975609756098,
+      "pred_pixels": 8666,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 4621,
+      "union_pixels": 13768
+    },
+    {
+      "category": "yellow desk",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.09292630841939437,
+      "frame": "frame_00053",
+      "frame_id": 53,
+      "gt_pixels": 66361,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.029520350808456775,
+      "pred_pixels": 1959,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 68320
+    },
+    {
+      "category": "plastic ladle",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.004982321022230001,
+      "frame": "frame_00066",
+      "frame_id": 66,
+      "gt_pixels": 3558,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 3558
+    },
+    {
+      "category": "pot",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.027245930334325222,
+      "frame": "frame_00066",
+      "frame_id": 66,
+      "gt_pixels": 19457,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 19457
+    },
+    {
+      "category": "refrigerator",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.10088709959740942,
+      "frame": "frame_00066",
+      "frame_id": 66,
+      "gt_pixels": 72046,
+      "intersection_pixels": 10964,
+      "iou": 0.152180551314438,
+      "label_groups": [
+        "reflective_or_transparent"
+      ],
+      "overselect_ratio": 0.152180551314438,
+      "pred_pixels": 10964,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 72046
+    },
+    {
+      "category": "spatula",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.00344757570453352,
+      "frame": "frame_00066",
+      "frame_id": 66,
+      "gt_pixels": 2462,
+      "intersection_pixels": 363,
+      "iou": 0.14359177215189872,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.17424857839155158,
+      "pred_pixels": 429,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 11416,
+      "union_pixels": 2528
+    },
+    {
+      "category": "cabinet",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.1227082093471031,
+      "frame": "frame_00089",
+      "frame_id": 89,
+      "gt_pixels": 87629,
+      "intersection_pixels": 13141,
+      "iou": 0.12221798532379721,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.3769642469958575,
+      "pred_pixels": 33033,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 107521
+    },
+    {
+      "category": "ketchup",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.0038886749518641695,
+      "frame": "frame_00089",
+      "frame_id": 89,
+      "gt_pixels": 2777,
+      "intersection_pixels": 594,
+      "iou": 0.1774193548387097,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.4195174648901692,
+      "pred_pixels": 1165,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 3348
+    },
+    {
+      "category": "knife",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.04682093471030982,
+      "frame": "frame_00089",
+      "frame_id": 89,
+      "gt_pixels": 33436,
+      "intersection_pixels": 27631,
+      "iou": 0.48311856346056337,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.5369063285081948,
+      "pred_pixels": 51388,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 57193
+    },
+    {
+      "category": "dark cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.04212427796254157,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 30082,
+      "intersection_pixels": 26953,
+      "iou": 0.7248547762478486,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 1.132072335615983,
+      "pred_pixels": 34055,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3708,
+      "union_pixels": 37184
+    },
+    {
+      "category": "frog cup",
+      "footprint_bin": "small",
+      "footprint_ratio": 0.0372455802555575,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 26598,
+      "intersection_pixels": 4107,
+      "iou": 0.09971108791182112,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.7029851868561546,
+      "pred_pixels": 18698,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 41189
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.05142797129354105,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 36726,
+      "intersection_pixels": 23884,
+      "iou": 0.64868681930525,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.6528617328323258,
+      "pred_pixels": 23977,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 36819
+    },
+    {
+      "category": "sink",
+      "footprint_bin": "large",
+      "footprint_ratio": 0.5970775424470506,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 426388,
+      "intersection_pixels": 57909,
+      "iou": 0.131086718836656,
+      "label_groups": [
+        "reflective_or_transparent",
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.1718669380939426,
+      "pred_pixels": 73282,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 441761
+    },
+    {
+      "category": "spoon",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.005619464379485384,
+      "frame": "frame_00140",
+      "frame_id": 140,
+      "gt_pixels": 4013,
+      "intersection_pixels": 3081,
+      "iou": 0.3820210787352759,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 1.7774732120608023,
+      "pred_pixels": 7133,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 9825,
+      "union_pixels": 8065
+    },
+    {
+      "category": "knife",
+      "footprint_bin": "tiny",
+      "footprint_ratio": 0.006413443024680553,
+      "frame": "frame_00154",
+      "frame_id": 154,
+      "gt_pixels": 4580,
+      "intersection_pixels": 0,
+      "iou": 0.0,
+      "label_groups": [
+        "other"
+      ],
+      "overselect_ratio": 0.0,
+      "pred_pixels": 0,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 4580
+    },
+    {
+      "category": "plate",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.1697938036058113,
+      "frame": "frame_00154",
+      "frame_id": 154,
+      "gt_pixels": 121254,
+      "intersection_pixels": 219,
+      "iou": 0.0017946553688057757,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.008197667705807644,
+      "pred_pixels": 994,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 122029
+    },
+    {
+      "category": "red cup",
+      "footprint_bin": "medium",
+      "footprint_ratio": 0.05288569928233853,
+      "frame": "frame_00154",
+      "frame_id": 154,
+      "gt_pixels": 37767,
+      "intersection_pixels": 14064,
+      "iou": 0.36073562982532636,
+      "label_groups": [
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.4046919268144147,
+      "pred_pixels": 15284,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 3459,
+      "union_pixels": 38987
+    },
+    {
+      "category": "sink",
+      "footprint_bin": "large",
+      "footprint_ratio": 0.6548139331349554,
+      "frame": "frame_00154",
+      "frame_id": 154,
+      "gt_pixels": 467619,
+      "intersection_pixels": 17120,
+      "iou": 0.03647216973193381,
+      "label_groups": [
+        "reflective_or_transparent",
+        "container_or_part"
+      ],
+      "overselect_ratio": 0.04041751939078609,
+      "pred_pixels": 18900,
+      "scene": "waldo_kitchen",
+      "selected_gaussians": 12451,
+      "union_pixels": 469399
+    }
+  ],
+  "scene_breakdown": {
+    "figurines": {
+      "acc025": 0.7857142857142857,
+      "acc05": 0.625,
+      "count": 56,
+      "mean_gt_pixels": 9930.160714285714,
+      "mean_selected_gaussians": 1283.392857142857,
+      "miou": 0.5309182715798589
+    },
+    "ramen": {
+      "acc025": 0.7464788732394366,
+      "acc05": 0.6901408450704225,
+      "count": 71,
+      "mean_gt_pixels": 21558.718309859156,
+      "mean_selected_gaussians": 4943.56338028169,
+      "miou": 0.5804731848112324
+    },
+    "teatime": {
+      "acc025": 0.7627118644067796,
+      "acc05": 0.6779661016949152,
+      "count": 59,
+      "mean_gt_pixels": 24271.5593220339,
+      "mean_selected_gaussians": 6581.847457627118,
+      "miou": 0.5661624810580018
+    },
+    "waldo_kitchen": {
+      "acc025": 0.4090909090909091,
+      "acc05": 0.18181818181818182,
+      "count": 22,
+      "mean_gt_pixels": 68027.31818181818,
+      "mean_selected_gaussians": 7967.227272727273,
+      "miou": 0.2429437695625907
+    }
+  },
+  "scene_mean": {
+    "acc025": 0.6759989831128528,
+    "acc05": 0.5437312821458798,
+    "mean_gt_pixels": 30946.939131999236,
+    "mean_selected_gaussians": 5194.007741944734,
+    "miou": 0.48012442675292094,
+    "query_count": 208,
+    "scene_count": 4
+  },
+  "selection": "thr0p25"
+}

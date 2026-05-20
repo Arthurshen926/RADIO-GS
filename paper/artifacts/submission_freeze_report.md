@@ -1,0 +1,123 @@
+# RADIO-GS Submission Freeze Report
+
+This generated report is the current paper-facing source of truth for the conservative submission package.
+
+## Claim-to-Artifact Matrix
+
+| Paper claim | Current status | Primary artifact | Paper use |
+|---|---|---|---|
+| LERF main result | Frozen | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` | Main open-vocabulary table |
+| ScanNet fair cross-domain result | Frozen | `output/scannet_pointcloud_eval/*_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` | Cross-domain table |
+| Efficiency/profile evidence | Current eval profiles frozen | `output/radio_gs/profiles/freeze_*_20260502` | Runtime and memory table |
+| Qualitative figure shortlist | Frozen overlay candidates selected | `output/radio_gs/reports/submission_freeze_figure_shortlist.md` | Main qualitative figure |
+| External baseline comparison | Official-source provenance closed | `output/radio_gs/reports/baseline_source_verification.md` | Main comparison table with protocol caveat |
+| LERF direct 3D object selection | Registered-view + voxel-context primitive readout | `output/radio_gs/reports/lerf_direct_3d_selection.md` | OpenGaussian-style VPR primitive-level result plus separated boundary-readout diagnostics |
+
+## LERF-OVS
+
+- Protocol: rendered-feature readout from `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json`.
+- Mask readout: `threshold 0.60`.
+- Macro LocAcc: `0.8712`
+- Macro mIoU: `0.5243`
+- Weighted mIoU: `0.5397`
+
+| Scene | LocAcc | mIoU | Temp | Source summary |
+|---|---:|---:|---:|---|
+| figurines | 0.8214 | 0.4244 | 50.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
+| ramen | 0.9014 | 0.6201 | 40.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
+| teatime | 0.8983 | 0.5760 | 25.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
+| waldo_kitchen | 0.8636 | 0.4769 | 25.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
+
+## LERF Direct 3D Object Selection
+
+- Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.
+- The registry below separates primitive scoring, GT-free RGB boundary cleanup, and frozen official SAM3 box-prompt boundary readout.
+- VPR readouts compute text scores on Gaussian primitives; SAM3 box readout refines only the rendered selection boundary and does not use GT masks for candidate selection.
+- CTF-GS + RGB snap silhouette 0.60: macro mIoU `0.4554`, macro Acc@0.25 `0.7014`, macro Acc@0.50 `0.4663`.
+- Direct-3D silhouette sweep source: `output/radio_gs/reports/lerf_direct_3d_silhouette_sweep_report.json`.
+
+## Direct-3D Readout Registry
+
+| Readout | Text head | Selector policy | Macro mIoU | Macro Acc@0.25 | Boundary-F | Trimap IoU | Source root |
+|---|---|---|---:|---:|---:|---:|---|
+| VPR fixed threshold + RGB snap | SigLIP2 | `fixed:thr0p25` | 0.4801 | 0.6760 | 0.0000 | 0.0000 | `output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515` |
+| direct field + official SAM3 box, pad16 fixed global threshold | SigLIP2+SAM3 | `fixed:thr0p25` | 0.5705 | 0.6835 | 0.6681 | 0.3958 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5` |
+| direct field + official SAM3 box, pad16 scene-locked diagnostic | SigLIP2+SAM3 | `best_by_miou` | 0.5972 | 0.7009 | 0.6817 | 0.4043 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5` |
+| direct field + official SAM3 box, pad0 legacy diagnostic | SigLIP2+SAM3 | `best_by_miou` | 0.5815 | 0.7150 | 0.6731 | 0.3777 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516` |
+
+### VPR fixed threshold + RGB snap Scene Selectors
+
+| Scene | Selection | mIoU | Acc@0.25 | Boundary-F | Trimap IoU | N | Source JSON |
+|---|---|---:|---:|---:|---:|---:|---|
+| figurines | `thr0p25` | 0.5309 | 0.7857 | 0.0000 | 0.0000 | 56 | `output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515/figurines/lerf_direct_3d_selection_results.json` |
+| ramen | `thr0p25` | 0.5805 | 0.7465 | 0.0000 | 0.0000 | 71 | `output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515/ramen/lerf_direct_3d_selection_results.json` |
+| teatime | `thr0p25` | 0.5662 | 0.7627 | 0.0000 | 0.0000 | 59 | `output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515/teatime/lerf_direct_3d_selection_results.json` |
+| waldo_kitchen | `thr0p25` | 0.2429 | 0.4091 | 0.0000 | 0.0000 | 22 | `output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515/waldo_kitchen/lerf_direct_3d_selection_results.json` |
+
+### direct field + official SAM3 box, pad16 fixed global threshold Scene Selectors
+
+| Scene | Selection | mIoU | Acc@0.25 | Boundary-F | Trimap IoU | N | Source JSON |
+|---|---|---:|---:|---:|---:|---:|---|
+| figurines | `thr0p25` | 0.6136 | 0.6964 | 0.7116 | 0.3986 | 56 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/figurines/lerf_direct_3d_selection_results.json` |
+| ramen | `thr0p25` | 0.6409 | 0.7465 | 0.7713 | 0.4400 | 71 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/ramen/lerf_direct_3d_selection_results.json` |
+| teatime | `thr0p25` | 0.6130 | 0.7458 | 0.7255 | 0.4626 | 59 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/teatime/lerf_direct_3d_selection_results.json` |
+| waldo_kitchen | `thr0p25` | 0.4142 | 0.5455 | 0.4638 | 0.2820 | 22 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/waldo_kitchen/lerf_direct_3d_selection_results.json` |
+
+### direct field + official SAM3 box, pad16 scene-locked diagnostic Scene Selectors
+
+| Scene | Selection | mIoU | Acc@0.25 | Boundary-F | Trimap IoU | N | Source JSON |
+|---|---|---:|---:|---:|---:|---:|---|
+| figurines | `thr0p09` | 0.6422 | 0.7321 | 0.7263 | 0.4227 | 56 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/figurines/lerf_direct_3d_selection_results.json` |
+| ramen | `thr0p18` | 0.6494 | 0.7465 | 0.7733 | 0.4422 | 71 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/ramen/lerf_direct_3d_selection_results.json` |
+| teatime | `thr0p18` | 0.6528 | 0.7797 | 0.7482 | 0.4955 | 59 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/teatime/lerf_direct_3d_selection_results.json` |
+| waldo_kitchen | `thr0p55` | 0.4444 | 0.5455 | 0.4791 | 0.2568 | 22 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/waldo_kitchen/lerf_direct_3d_selection_results.json` |
+
+### direct field + official SAM3 box, pad0 legacy diagnostic Scene Selectors
+
+| Scene | Selection | mIoU | Acc@0.25 | Boundary-F | Trimap IoU | N | Source JSON |
+|---|---|---:|---:|---:|---:|---:|---|
+| figurines | `thr0p11` | 0.5924 | 0.7321 | 0.6813 | 0.3523 | 56 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/figurines/figurines/lerf_direct_3d_selection_results.json` |
+| ramen | `thr0p16` | 0.6830 | 0.8028 | 0.7970 | 0.4326 | 71 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/ramen/ramen/lerf_direct_3d_selection_results.json` |
+| teatime | `thr0p38` | 0.6556 | 0.7797 | 0.7530 | 0.4707 | 59 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/teatime/teatime/lerf_direct_3d_selection_results.json` |
+| waldo_kitchen | `thr0p3` | 0.3949 | 0.5455 | 0.4613 | 0.2552 | 22 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json` |
+- CTF-GS accuracy-oriented cap0.015 diagnostic: macro mIoU `0.4184`, macro Acc@0.25 `0.7013`.
+- CTF-GS fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.
+- CTF-GS previous cap0.02 diagnostic: macro mIoU `0.4185`, macro Acc@0.25 `0.6899`.
+- OpenGaussian official context: macro mIoU `0.3836`, macro Acc@0.25 `0.5143`.
+- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`, GT-free score-distribution selection improves it to `0.3934`, adding the fixed 2% cap improves it to `0.4072`, adding the fixed 0.5% floor improves it to `0.4133`, increasing the all-pose registration budget to 128 views improves the fixed paper selector to `0.4185`, tightening the global cap to `0.0175` improves it to `0.4226`, and a cache-backed fixed `0.018` cap slightly improves it to `0.4227` with `0.6906` Acc@0.25.
+- Paper use: VPR-backed primitive-level evidence with an explicit Waldo/provenance caveat.
+
+## ScanNet
+
+- Protocol: v67 teacher-balanced direct point query, `gaussian_index`, `label_point`, `label_index` opacity.
+- Scenes found: `10`
+- Macro mIoU: `19: 0.3538 / 15: 0.3573 / 10: 0.4293`
+- Macro mAcc: `19: 0.6076 / 15: 0.6203 / 10: 0.7051`
+
+| Scene | mIoU19 | mIoU15 | mIoU10 | Source JSON |
+|---|---:|---:|---:|---|
+| scene0000_00 | 0.2939 | 0.2739 | 0.3065 | `output/scannet_pointcloud_eval/scene0000_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0062_00 | 0.3794 | 0.3794 | 0.5266 | `output/scannet_pointcloud_eval/scene0062_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0070_00 | 0.2297 | 0.2405 | 0.3238 | `output/scannet_pointcloud_eval/scene0070_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0097_00 | 0.4533 | 0.4311 | 0.4851 | `output/scannet_pointcloud_eval/scene0097_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0140_00 | 0.3194 | 0.3671 | 0.3888 | `output/scannet_pointcloud_eval/scene0140_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0200_00 | 0.4335 | 0.4335 | 0.5132 | `output/scannet_pointcloud_eval/scene0200_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0347_00 | 0.5938 | 0.5754 | 0.7067 | `output/scannet_pointcloud_eval/scene0347_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0400_00 | 0.3299 | 0.3299 | 0.3908 | `output/scannet_pointcloud_eval/scene0400_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0590_00 | 0.2664 | 0.2963 | 0.3643 | `output/scannet_pointcloud_eval/scene0590_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0645_00 | 0.2381 | 0.2458 | 0.2875 | `output/scannet_pointcloud_eval/scene0645_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+
+## Profile Evidence
+
+- Profiled workloads: `0`
+
+| Profile | GPU | Wall Time | Peak VRAM (MiB) | Peak GPU% | Mean GPU% | Samples |
+|---|---:|---:|---:|---:|---:|---:|
+
+## Warnings
+
+- External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.
+- ScanNet label-supervised or GT-label-balanced runs are diagnostic only and excluded from this fair v67 summary.
+- LERF direct 3D object selection is protocol-aligned; direct primitive scoring, RGB-snap cleanup, and official SAM3 box boundary readout are reported as separate readouts.
+- Direct-3D readout `direct field + official SAM3 box, pad16 scene-locked diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.
+- Direct-3D readout `direct field + official SAM3 box, pad0 legacy diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.

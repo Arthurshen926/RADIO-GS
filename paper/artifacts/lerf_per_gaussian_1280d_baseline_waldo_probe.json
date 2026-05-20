@@ -1,0 +1,169 @@
+{
+  "generated": "2026-05-16T17:42:42Z",
+  "protocol": {
+    "feature_source": "registered RADIO 1280-D teacher features",
+    "feature_dim": 1280,
+    "storage_dtype": "fp16",
+    "compact": false,
+    "3d_memory": true,
+    "novel_view_feature": true,
+    "direct_3d_query": "partial",
+    "registration_frame_mode": "train",
+    "registration_max_frames": 8,
+    "depth_tolerance": 0.08,
+    "relative_depth_tolerance": 0.02,
+    "alpha_threshold": 0.02,
+    "iou_threshold": 0.6,
+    "scoring": "softmax_scene",
+    "heatmap_upsample": 4,
+    "prompt_templates": [
+      "{query}"
+    ],
+    "text_cache_root": "output/radio_gs/lerf_per_gaussian_1280d_baseline_20260517_waldo_probe/text_cache",
+    "text_embedding_cache_map": {
+      "waldo_kitchen": "output/radio_gs/lerf_nearest_view_cache_baseline_20260517/text_cache/waldo_kitchen_siglip2_text_embeddings.pt"
+    }
+  },
+  "rows": [
+    {
+      "scene": "Waldo Kitchen",
+      "loc_acc": 0.1364,
+      "miou": 0.0469,
+      "n": 22,
+      "total_gaussians": 691728,
+      "registered_gaussians": 19714,
+      "registered_fraction": 0.0285,
+      "storage_mib": 1688.8
+    }
+  ],
+  "macro": {
+    "loc_acc": 0.1364,
+    "miou": 0.0469
+  },
+  "weighted": {
+    "loc_acc": 0.1364,
+    "miou": 0.0469
+  },
+  "mean_registered_fraction": 0.0285,
+  "mean_storage_mib": 1688.8,
+  "scene_payloads": {
+    "waldo_kitchen": {
+      "cache_path": "output/radio_gs/lerf_per_gaussian_1280d_baseline_20260517_waldo_probe/per_gaussian_1280d/waldo_kitchen/features.pt",
+      "registration_frame_ids": [
+        1,
+        26,
+        55,
+        80,
+        107,
+        135,
+        164,
+        190
+      ],
+      "metrics": {
+        "loc_acc": 0.13636363636363635,
+        "miou": 0.046884551896219644,
+        "loc_correct": 3,
+        "loc_total": 22,
+        "n_iou_samples": 22,
+        "per_category": {
+          "Stainless steel pots": {
+            "loc_acc": 0.0,
+            "miou": 0.18160377358490565,
+            "n_samples": 1
+          },
+          "cabinet": {
+            "loc_acc": 0.0,
+            "miou": 0.12520161290322582,
+            "n_samples": 1
+          },
+          "dark cup": {
+            "loc_acc": 0.0,
+            "miou": 0.07947855340622371,
+            "n_samples": 1
+          },
+          "frog cup": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "ketchup": {
+            "loc_acc": 0.0,
+            "miou": 0.00474910394265233,
+            "n_samples": 1
+          },
+          "knife": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.06282542922380499,
+            "n_samples": 3
+          },
+          "ottolenghi": {
+            "loc_acc": 1.0,
+            "miou": 0.11160058737151249,
+            "n_samples": 1
+          },
+          "plastic ladle": {
+            "loc_acc": 0.0,
+            "miou": 0.005934451288045677,
+            "n_samples": 1
+          },
+          "plate": {
+            "loc_acc": 0.0,
+            "miou": 0.087969394029103,
+            "n_samples": 2
+          },
+          "pot": {
+            "loc_acc": 0.0,
+            "miou": 0.028405017921146955,
+            "n_samples": 1
+          },
+          "pour-over vessel": {
+            "loc_acc": 0.0,
+            "miou": 0.012460981395929578,
+            "n_samples": 1
+          },
+          "red cup": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "refrigerator": {
+            "loc_acc": 0.0,
+            "miou": 0.004838031131678587,
+            "n_samples": 1
+          },
+          "sink": {
+            "loc_acc": 0.0,
+            "miou": 0.0039941902687000725,
+            "n_samples": 2
+          },
+          "spatula": {
+            "loc_acc": 0.0,
+            "miou": 0.004301075268817204,
+            "n_samples": 1
+          },
+          "spoon": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "toaster": {
+            "loc_acc": 0.0,
+            "miou": 0.001059322033898305,
+            "n_samples": 1
+          },
+          "yellow desk": {
+            "loc_acc": 0.0,
+            "miou": 0.09942417520177467,
+            "n_samples": 1
+          }
+        }
+      },
+      "registered_gaussians": 19714,
+      "total_gaussians": 691728,
+      "registered_fraction": 0.0285,
+      "storage_mib": 1688.8,
+      "temperature": 25.0,
+      "text_embedding_cache": "output/radio_gs/lerf_nearest_view_cache_baseline_20260517/text_cache/waldo_kitchen_siglip2_text_embeddings.pt"
+    }
+  }
+}

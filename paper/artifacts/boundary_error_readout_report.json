@@ -1,0 +1,276 @@
+{
+  "sweep_source": "/root/RADIO-GS/output/radio_gs/reports/lerf_sam3_box_global_threshold_sweep_20260516.json",
+  "run_label": "pad16",
+  "source_root": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5",
+  "selection": "thr0p25",
+  "macro": {
+    "miou": 0.5705,
+    "boundary_f": 0.6681,
+    "boundary_error": 0.3319,
+    "trimap_iou": 0.3958,
+    "trimap_error": 0.6042
+  },
+  "scene_rows": [
+    {
+      "scene": "Figurines",
+      "selection": "thr0p25",
+      "miou": 0.6136,
+      "boundary_f": 0.7116,
+      "boundary_error": 0.2884,
+      "trimap_iou": 0.3986,
+      "trimap_error": 0.6014,
+      "n": 56,
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/figurines/lerf_direct_3d_selection_results.json"
+    },
+    {
+      "scene": "Ramen",
+      "selection": "thr0p25",
+      "miou": 0.6409,
+      "boundary_f": 0.7713,
+      "boundary_error": 0.2287,
+      "trimap_iou": 0.44,
+      "trimap_error": 0.56,
+      "n": 71,
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/ramen/lerf_direct_3d_selection_results.json"
+    },
+    {
+      "scene": "Teatime",
+      "selection": "thr0p25",
+      "miou": 0.613,
+      "boundary_f": 0.7255,
+      "boundary_error": 0.2745,
+      "trimap_iou": 0.4626,
+      "trimap_error": 0.5374,
+      "n": 59,
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/teatime/lerf_direct_3d_selection_results.json"
+    },
+    {
+      "scene": "Waldo Kitchen",
+      "selection": "thr0p25",
+      "miou": 0.4142,
+      "boundary_f": 0.4638,
+      "boundary_error": 0.5362,
+      "trimap_iou": 0.282,
+      "trimap_error": 0.718,
+      "n": 22,
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5/waldo_kitchen/lerf_direct_3d_selection_results.json"
+    }
+  ],
+  "query_count": 208,
+  "query_correlations": {
+    "iou_vs_boundary_f": 0.9148,
+    "iou_vs_trimap_iou": 0.8412,
+    "iou_vs_abs_log_overselect": -0.6217
+  },
+  "overselect_buckets": {
+    "under": {
+      "count": 52,
+      "mean_iou": 0.142,
+      "mean_boundary_f": 0.2958,
+      "mean_boundary_error": 0.7042,
+      "mean_trimap_iou": 0.0903,
+      "mean_gt_pixels": 42950.1346,
+      "mean_overselect_ratio": 0.1891
+    },
+    "balanced": {
+      "count": 134,
+      "mean_iou": 0.8559,
+      "mean_boundary_f": 0.9363,
+      "mean_boundary_error": 0.0637,
+      "mean_trimap_iou": 0.5665,
+      "mean_gt_pixels": 19809.597,
+      "mean_overselect_ratio": 1.0056
+    },
+    "over": {
+      "count": 22,
+      "mean_iou": 0.14,
+      "mean_boundary_f": 0.3081,
+      "mean_boundary_error": 0.6919,
+      "mean_trimap_iou": 0.2935,
+      "mean_gt_pixels": 5794.9091,
+      "mean_overselect_ratio": 5.1616
+    }
+  },
+  "area_buckets": {
+    "small": {
+      "count": 70,
+      "mean_iou": 0.5304,
+      "mean_boundary_f": 0.6837,
+      "mean_boundary_error": 0.3163,
+      "mean_trimap_iou": 0.4334,
+      "mean_gt_pixels": 3271.3571,
+      "mean_overselect_ratio": 1.8821
+    },
+    "mid": {
+      "count": 69,
+      "mean_iou": 0.7028,
+      "mean_boundary_f": 0.7995,
+      "mean_boundary_error": 0.2005,
+      "mean_trimap_iou": 0.4827,
+      "mean_gt_pixels": 9285.4638,
+      "mean_overselect_ratio": 1.1069
+    },
+    "large": {
+      "count": 69,
+      "mean_iou": 0.5728,
+      "mean_boundary_f": 0.6463,
+      "mean_boundary_error": 0.3537,
+      "mean_trimap_iou": 0.3393,
+      "mean_gt_pixels": 60082.4493,
+      "mean_overselect_ratio": 0.7249
+    }
+  },
+  "worst_boundary_cases": [
+    {
+      "scene": "Figurines",
+      "frame": "frame_00041",
+      "category": "miffy",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 2252,
+      "pred_pixels": 3791,
+      "overselect_ratio": 1.6834,
+      "overselect_log_abs": 0.5208,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00041",
+      "category": "pikachu",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 12082,
+      "pred_pixels": 7249,
+      "overselect_ratio": 0.6,
+      "overselect_log_abs": 0.5109,
+      "selected_gaussians": 3775
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00041",
+      "category": "pirate hat",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 1835,
+      "pred_pixels": 0,
+      "overselect_ratio": 0.0,
+      "overselect_log_abs": 13.8155,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00041",
+      "category": "tesla door handle",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 6872,
+      "pred_pixels": 4227,
+      "overselect_ratio": 0.6151,
+      "overselect_log_abs": 0.486,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00105",
+      "category": "pirate hat",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 899,
+      "pred_pixels": 0,
+      "overselect_ratio": 0.0,
+      "overselect_log_abs": 13.8155,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00105",
+      "category": "tesla door handle",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 10582,
+      "pred_pixels": 0,
+      "overselect_ratio": 0.0,
+      "overselect_log_abs": 13.8155,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00152",
+      "category": "jake",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 10803,
+      "pred_pixels": 55885,
+      "overselect_ratio": 5.1731,
+      "overselect_log_abs": 1.6435,
+      "selected_gaussians": 10127
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00152",
+      "category": "pirate hat",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 2080,
+      "pred_pixels": 0,
+      "overselect_ratio": 0.0,
+      "overselect_log_abs": 13.8155,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00195",
+      "category": "bag",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 6112,
+      "pred_pixels": 0,
+      "overselect_ratio": 0.0,
+      "overselect_log_abs": 13.8155,
+      "selected_gaussians": 506
+    },
+    {
+      "scene": "Figurines",
+      "frame": "frame_00195",
+      "category": "miffy",
+      "iou": 0.0,
+      "boundary_f": 0.0,
+      "boundary_error": 1.0,
+      "trimap_iou": 0.0,
+      "trimap_error": 1.0,
+      "gt_pixels": 974,
+      "pred_pixels": 8078,
+      "overselect_ratio": 8.2936,
+      "overselect_log_abs": 2.1155,
+      "selected_gaussians": 506
+    }
+  ],
+  "alpha_depth_status": "not_available"
+}

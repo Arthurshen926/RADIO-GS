@@ -1,0 +1,4408 @@
+{
+  "timestamp": "2026-05-15 01:37:40",
+  "args": {
+    "config": "radio_gs/configs/lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep.yaml",
+    "checkpoint": "output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "scene": "waldo_kitchen",
+    "label_dir": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "output_dir": "output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515",
+    "summary_head_weights": "checkpoints/siglip2_summary_head.pth",
+    "text_embedding_cache": "checkpoints/siglip2_lerf_text_embeddings.pt",
+    "score_cache": "output/radio_gs/vpr_score_cache/max128_softmax_20260514/waldo_kitchen.pt",
+    "prompt_templates": "{query}",
+    "selection_mode": "score_threshold",
+    "top_ratio": "0.02",
+    "ratio_sweep": "",
+    "score_threshold": "0.25",
+    "threshold_sweep": "0.10,0.12,0.15,0.18,0.20,0.25,0.30,0.35,0.40",
+    "mean_std": "1.0",
+    "mean_std_sweep": "",
+    "selection_min_ratio": "0.005",
+    "selection_max_ratio": "0.018",
+    "score_source": "registered_view",
+    "scoring": "softmax_scene",
+    "canonical_embedding_cache": "checkpoints/siglip2_canonical_embeddings.pt",
+    "direct_readout_mode": "gaussian",
+    "direct_readout_k": "8",
+    "direct_readout_candidate_k": "0",
+    "compact_feature_key": "features",
+    "softmax_temperature": "50.0",
+    "score_aggregation": "none",
+    "score_aggregation_resolution": "64",
+    "score_aggregation_blend": "0.0",
+    "selection_refinement": "none",
+    "component_support_ratio": "0.05",
+    "component_resolution": "64",
+    "component_keep": "1",
+    "component_min_size": "8",
+    "component_rank_by": "score_sum",
+    "registered_view_fallback": "direct",
+    "registration_frame_mode": "all_poses",
+    "registration_max_frames": "128",
+    "registration_chunk_size": "32768",
+    "registration_depth_tolerance": "0.2",
+    "registration_relative_depth_tolerance": "0.05",
+    "registration_alpha_threshold": "0.0",
+    "registration_assignment_mode": "center",
+    "registration_weight_mode": "uniform",
+    "registration_confidence_blend": "0.0",
+    "registration_confidence_mode": "log",
+    "disable_registered_refiner": "False",
+    "silhouette_threshold": "0.6",
+    "mask_refinement": "rgb_grabcut",
+    "mask_refinement_iters": "2",
+    "mask_refinement_dilate": "5",
+    "mask_refinement_erode": "2",
+    "min_select": "1",
+    "chunk_size": "8192",
+    "all_labeled_frames": "False",
+    "save_masks": "False",
+    "gpu": "0"
+  },
+  "protocol": {
+    "name": "OpenGaussian-style LERF-OVS direct 3D object selection",
+    "query_location": "3D Gaussian primitives",
+    "feature_source": "post-refiner rendered SigLIP2 features registered back to Gaussian primitives",
+    "score_source": "registered_view",
+    "score_cache": "output/radio_gs/vpr_score_cache/max128_softmax_20260514/waldo_kitchen.pt",
+    "compact_feature_key": "features",
+    "direct_readout_mode": "gaussian",
+    "direct_readout_k": 8,
+    "direct_readout_candidate_k": 0,
+    "text_head": "SigLIP2 summary/text-aligned head",
+    "canonical_embedding_cache": "",
+    "score_aggregation": "none",
+    "score_aggregation_resolution": 64,
+    "score_aggregation_blend": 0.0,
+    "selection_refinement": "none",
+    "selection_min_ratio": 0.005,
+    "selection_max_ratio": 0.018,
+    "component_support_ratio": 0.05,
+    "component_resolution": 64,
+    "component_keep": 1,
+    "component_min_size": 8,
+    "component_rank_by": "score_sum",
+    "registered_view_fallback": "direct",
+    "registration_frame_mode": "all_poses",
+    "registration_max_frames": 128,
+    "registration_depth_tolerance": 0.2,
+    "registration_relative_depth_tolerance": 0.05,
+    "registration_alpha_threshold": 0.0,
+    "registration_assignment_mode": "center",
+    "registration_weight_mode": "uniform",
+    "registration_confidence_blend": 0.0,
+    "registration_confidence_mode": "log",
+    "disable_registered_refiner": false,
+    "render_role": "render selected primitives only for mask evaluation",
+    "metrics": [
+      "mIoU",
+      "Acc@0.25",
+      "Acc@0.50"
+    ],
+    "silhouette_threshold": 0.6,
+    "mask_refinement": "rgb_grabcut",
+    "mask_refinement_iters": 2,
+    "mask_refinement_dilate": 5,
+    "mask_refinement_erode": 2
+  },
+  "prompt_templates": [
+    "{query}"
+  ],
+  "elapsed_seconds": 96.93974208831787,
+  "scene": {
+    "scene": "waldo_kitchen",
+    "config": "radio_gs/configs/lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep.yaml",
+    "checkpoint": "output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "score_source": "registered_view",
+    "compact_feature_key": "features",
+    "canonical_embedding_cache": "",
+    "registration": {
+      "alpha_threshold": 0.0,
+      "confidence_blend": 0.0,
+      "confidence_mode": "log",
+      "depth_tolerance": 0.2,
+      "fallback": "direct",
+      "frame_ids": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        8,
+        10,
+        11,
+        13,
+        14,
+        16,
+        17,
+        19,
+        20,
+        22,
+        23,
+        24,
+        26,
+        27,
+        29,
+        30,
+        32,
+        33,
+        35,
+        36,
+        38,
+        39,
+        41,
+        42,
+        43,
+        45,
+        46,
+        48,
+        49,
+        51,
+        52,
+        54,
+        55,
+        57,
+        58,
+        60,
+        61,
+        63,
+        64,
+        65,
+        67,
+        68,
+        70,
+        71,
+        73,
+        74,
+        76,
+        77,
+        79,
+        80,
+        82,
+        83,
+        84,
+        86,
+        87,
+        89,
+        90,
+        92,
+        93,
+        95,
+        96,
+        98,
+        99,
+        101,
+        102,
+        104,
+        105,
+        106,
+        108,
+        109,
+        111,
+        112,
+        114,
+        115,
+        117,
+        118,
+        120,
+        121,
+        123,
+        124,
+        125,
+        127,
+        128,
+        130,
+        131,
+        133,
+        134,
+        136,
+        137,
+        139,
+        140,
+        142,
+        143,
+        145,
+        146,
+        147,
+        149,
+        150,
+        152,
+        153,
+        158,
+        159,
+        161,
+        162,
+        164,
+        165,
+        167,
+        168,
+        169,
+        171,
+        172,
+        174,
+        175,
+        177,
+        178,
+        180,
+        181,
+        183,
+        184,
+        186,
+        187,
+        189,
+        190
+      ],
+      "frame_mode": "all_poses",
+      "max_valid_views": 28.0,
+      "mean_valid_views": 5.7542266845703125,
+      "num_frames": 128,
+      "registered_fraction": 0.5048993245900123,
+      "registered_gaussians": 349253,
+      "relative_depth_tolerance": 0.05,
+      "total_gaussians": 691728,
+      "weight_mode": "uniform"
+    },
+    "score_cache": {
+      "enabled": true,
+      "path": "output/radio_gs/vpr_score_cache/max128_softmax_20260514/waldo_kitchen.pt",
+      "status": "hit"
+    },
+    "categories": [
+      "Stainless steel pots",
+      "cabinet",
+      "dark cup",
+      "frog cup",
+      "ketchup",
+      "knife",
+      "ottolenghi",
+      "plastic ladle",
+      "plate",
+      "pot",
+      "pour-over vessel",
+      "red cup",
+      "refrigerator",
+      "sink",
+      "spatula",
+      "spoon",
+      "toaster",
+      "yellow desk"
+    ],
+    "image_height": 725,
+    "image_width": 985,
+    "official_frames_only": true,
+    "official_frames": [
+      53,
+      66,
+      89,
+      140,
+      154
+    ],
+    "results": {
+      "thr0p1": {
+        "miou": 0.2262691855430603,
+        "acc025": 0.36363636363636365,
+        "acc050": 0.13636363636363635,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.1,
+        "selection_tag": "thr0p1",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.5477213859558105,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "cabinet": {
+            "miou": 0.12288614362478256,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.4420984089374542,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "frog cup": {
+            "miou": 0.15428206324577332,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 8421
+          },
+          "ketchup": {
+            "miou": 0.12252887338399887,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "knife": {
+            "miou": 0.31408655643463135,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.5671609044075012,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.33982157707214355,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "red cup": {
+            "miou": 0.37480926513671875,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12235
+          },
+          "refrigerator": {
+            "miou": 0.15363796055316925,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08355531841516495,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.14461660385131836,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "spoon": {
+            "miou": 0.352500855922699,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "toaster": {
+            "miou": 0.20666630566120148,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5477214101461737,
+            "knife": 0.4582341814631765,
+            "ottolenghi": 0.5671609245529874,
+            "pour-over vessel": 0.0,
+            "toaster": 0.20666630768402347,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15363795352968937,
+            "spatula": 0.144616607071911
+          },
+          "frame_00089": {
+            "cabinet": 0.12288614347367056,
+            "ketchup": 0.12252887062047367,
+            "knife": 0.4840254474272931
+          },
+          "frame_00140": {
+            "dark cup": 0.4420984139894266,
+            "frog cup": 0.15428205967218966,
+            "plate": 0.6778496142562208,
+            "sink": 0.1306344435491902,
+            "spoon": 0.3525008506294658
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017935677256087075,
+            "red cup": 0.37480925226889406,
+            "sink": 0.03647619737453185
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5477214101461737,
+            "pred_pixels": 11053,
+            "gt_pixels": 10547,
+            "intersection_pixels": 7644,
+            "union_pixels": 13956,
+            "overselect_ratio": 1.0479757276950792,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4582341814631765,
+            "pred_pixels": 14396,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7510,
+            "union_pixels": 16389,
+            "overselect_ratio": 1.514890034725876,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5671609245529874,
+            "pred_pixels": 11839,
+            "gt_pixels": 16909,
+            "intersection_pixels": 10404,
+            "union_pixels": 18344,
+            "overselect_ratio": 0.7001596782778402,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.20666630768402347,
+            "pred_pixels": 13225,
+            "gt_pixels": 9184,
+            "intersection_pixels": 3838,
+            "union_pixels": 18571,
+            "overselect_ratio": 1.440004355400697,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 2006,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68367,
+            "overselect_ratio": 0.030228598122391162,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15363795352968937,
+            "pred_pixels": 11069,
+            "gt_pixels": 72046,
+            "intersection_pixels": 11069,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15363795352968937,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.144616607071911,
+            "pred_pixels": 419,
+            "gt_pixels": 2462,
+            "intersection_pixels": 364,
+            "union_pixels": 2517,
+            "overselect_ratio": 0.17018683996750608,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12288614347367056,
+            "pred_pixels": 33618,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13269,
+            "union_pixels": 107978,
+            "overselect_ratio": 0.3836401191386413,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.12252887062047367,
+            "pred_pixels": 8693,
+            "gt_pixels": 2777,
+            "intersection_pixels": 1252,
+            "union_pixels": 10218,
+            "overselect_ratio": 3.13035649981995,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.4840254474272931,
+            "pred_pixels": 51474,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27694,
+            "union_pixels": 57216,
+            "overselect_ratio": 1.5394784065079554,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.4420984139894266,
+            "pred_pixels": 58571,
+            "gt_pixels": 30082,
+            "intersection_pixels": 27178,
+            "union_pixels": 61475,
+            "overselect_ratio": 1.9470447443654013,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.15428205967218966,
+            "pred_pixels": 51009,
+            "gt_pixels": 26598,
+            "intersection_pixels": 10373,
+            "union_pixels": 67234,
+            "overselect_ratio": 1.9177757726144824,
+            "selected_gaussians": 8421
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.6778496142562208,
+            "pred_pixels": 25039,
+            "gt_pixels": 36726,
+            "intersection_pixels": 24953,
+            "union_pixels": 36812,
+            "overselect_ratio": 0.6817785764853237,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.1306344435491902,
+            "pred_pixels": 73167,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57719,
+            "union_pixels": 441836,
+            "overselect_ratio": 0.17159723069129526,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.3525008506294658,
+            "pred_pixels": 7912,
+            "gt_pixels": 4013,
+            "intersection_pixels": 3108,
+            "union_pixels": 8817,
+            "overselect_ratio": 1.9715923249439322,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017935677256087075,
+            "pred_pixels": 1068,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122103,
+            "overselect_ratio": 0.008807956850908011,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.37480925226889406,
+            "pred_pixels": 30704,
+            "gt_pixels": 37767,
+            "intersection_pixels": 18667,
+            "union_pixels": 49804,
+            "overselect_ratio": 0.8129848809807504,
+            "selected_gaussians": 12235
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.03647619737453185,
+            "pred_pixels": 18905,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17122,
+            "union_pixels": 469402,
+            "overselect_ratio": 0.04042821185623339,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.2262691855430603,
+          "ci_low": 0.13915025517344476,
+          "ci_high": 0.31289672330021856,
+          "n": 22
+        }
+      },
+      "thr0p12": {
+        "miou": 0.2277393937110901,
+        "acc025": 0.36363636363636365,
+        "acc050": 0.13636363636363635,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.12,
+        "selection_tag": "thr0p12",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.5504177212715149,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "cabinet": {
+            "miou": 0.12319795042276382,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.4441450238227844,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "frog cup": {
+            "miou": 0.13680848479270935,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 6550
+          },
+          "ketchup": {
+            "miou": 0.16021627187728882,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.3129875957965851,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.565634548664093,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.3396620750427246,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "red cup": {
+            "miou": 0.3905065953731537,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 8269
+          },
+          "refrigerator": {
+            "miou": 0.15433195233345032,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08340822160243988,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.1471400409936905,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "spoon": {
+            "miou": 0.346097856760025,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "toaster": {
+            "miou": 0.20666630566120148,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5504177470469606,
+            "knife": 0.4582672361195851,
+            "ottolenghi": 0.5656345399040559,
+            "pour-over vessel": 0.0,
+            "toaster": 0.20666630768402347,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15433195458457097,
+            "spatula": 0.14714003944773177
+          },
+          "frame_00089": {
+            "cabinet": 0.12319795164851476,
+            "ketchup": 0.16021627774615824,
+            "knife": 0.48069555481692705
+          },
+          "frame_00140": {
+            "dark cup": 0.44414502694757474,
+            "frog cup": 0.1368084887194808,
+            "plate": 0.677530622776284,
+            "sink": 0.13030174091744448,
+            "spoon": 0.3460978613817042
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017935236597710186,
+            "red cup": 0.3905065995098149,
+            "sink": 0.03651469961653174
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5504177470469606,
+            "pred_pixels": 10979,
+            "gt_pixels": 10547,
+            "intersection_pixels": 7642,
+            "union_pixels": 13884,
+            "overselect_ratio": 1.0409595145539017,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4582672361195851,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7511,
+            "union_pixels": 16390,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5656345399040559,
+            "pred_pixels": 11811,
+            "gt_pixels": 16909,
+            "intersection_pixels": 10376,
+            "union_pixels": 18344,
+            "overselect_ratio": 0.6985037553965344,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.20666630768402347,
+            "pred_pixels": 13225,
+            "gt_pixels": 9184,
+            "intersection_pixels": 3838,
+            "union_pixels": 18571,
+            "overselect_ratio": 1.440004355400697,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 2016,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68377,
+            "overselect_ratio": 0.030379289040249544,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15433195458457097,
+            "pred_pixels": 11119,
+            "gt_pixels": 72046,
+            "intersection_pixels": 11119,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15433195458457097,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.14714003944773177,
+            "pred_pixels": 446,
+            "gt_pixels": 2462,
+            "intersection_pixels": 373,
+            "union_pixels": 2535,
+            "overselect_ratio": 0.18115353371242893,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12319795164851476,
+            "pred_pixels": 33445,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13280,
+            "union_pixels": 107794,
+            "overselect_ratio": 0.38166588686393776,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.16021627774615824,
+            "pred_pixels": 1300,
+            "gt_pixels": 2777,
+            "intersection_pixels": 563,
+            "union_pixels": 3514,
+            "overselect_ratio": 0.4681310767014764,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.48069555481692705,
+            "pred_pixels": 51205,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27478,
+            "union_pixels": 57163,
+            "overselect_ratio": 1.5314331857877737,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.44414502694757474,
+            "pred_pixels": 58343,
+            "gt_pixels": 30082,
+            "intersection_pixels": 27195,
+            "union_pixels": 61230,
+            "overselect_ratio": 1.939465461073067,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.1368084887194808,
+            "pred_pixels": 39612,
+            "gt_pixels": 26598,
+            "intersection_pixels": 7968,
+            "union_pixels": 58242,
+            "overselect_ratio": 1.4892849086397473,
+            "selected_gaussians": 6550
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.677530622776284,
+            "pred_pixels": 25039,
+            "gt_pixels": 36726,
+            "intersection_pixels": 24946,
+            "union_pixels": 36819,
+            "overselect_ratio": 0.6817785764853237,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.13030174091744448,
+            "pred_pixels": 73020,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57572,
+            "union_pixels": 441836,
+            "overselect_ratio": 0.17125247427225906,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.3460978613817042,
+            "pred_pixels": 8009,
+            "gt_pixels": 4013,
+            "intersection_pixels": 3091,
+            "union_pixels": 8931,
+            "overselect_ratio": 1.9957637677547968,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017935236597710186,
+            "pred_pixels": 1071,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122106,
+            "overselect_ratio": 0.008832698302736405,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.3905065995098149,
+            "pred_pixels": 24073,
+            "gt_pixels": 37767,
+            "intersection_pixels": 17367,
+            "union_pixels": 44473,
+            "overselect_ratio": 0.6374083194323086,
+            "selected_gaussians": 8269
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.03651469961653174,
+            "pred_pixels": 18921,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17140,
+            "union_pixels": 469400,
+            "overselect_ratio": 0.04046242774566474,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.2277393937110901,
+          "ci_low": 0.14165065661072732,
+          "ci_high": 0.3157259449362755,
+          "n": 22
+        }
+      },
+      "thr0p15": {
+        "miou": 0.226084366440773,
+        "acc025": 0.36363636363636365,
+        "acc050": 0.13636363636363635,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.15,
+        "selection_tag": "thr0p15",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.5478852987289429,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "cabinet": {
+            "miou": 0.12164279073476791,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.44112637639045715,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "frog cup": {
+            "miou": 0.11031012237071991,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3635
+          },
+          "ketchup": {
+            "miou": 0.17747236788272858,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.3137006461620331,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.5548408031463623,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 8968
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.33981674909591675,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "red cup": {
+            "miou": 0.37837839126586914,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 5429
+          },
+          "refrigerator": {
+            "miou": 0.15215279161930084,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08366508036851883,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.14427268505096436,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "spoon": {
+            "miou": 0.3506317734718323,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "toaster": {
+            "miou": 0.2070772498846054,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5478853046594983,
+            "knife": 0.4586232149395826,
+            "ottolenghi": 0.5548408198866114,
+            "pour-over vessel": 0.0,
+            "toaster": 0.20707725553754727,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15215279127224274,
+            "spatula": 0.14427269124058661
+          },
+          "frame_00089": {
+            "cabinet": 0.12164279423353265,
+            "ketchup": 0.17747236331042726,
+            "knife": 0.4824786997673157
+          },
+          "frame_00140": {
+            "dark cup": 0.44112637674577043,
+            "frog cup": 0.11031012287887654,
+            "plate": 0.6778399521921008,
+            "sink": 0.1306200251740906,
+            "spoon": 0.3506317689530686
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017935677256087075,
+            "red cup": 0.3783783783783784,
+            "sink": 0.036710128254292894
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5478853046594983,
+            "pred_pixels": 11046,
+            "gt_pixels": 10547,
+            "intersection_pixels": 7643,
+            "union_pixels": 13950,
+            "overselect_ratio": 1.0473120318574003,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4586232149395826,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7515,
+            "union_pixels": 16386,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5548408198866114,
+            "pred_pixels": 11613,
+            "gt_pixels": 16909,
+            "intersection_pixels": 10178,
+            "union_pixels": 18344,
+            "overselect_ratio": 0.6867940150215861,
+            "selected_gaussians": 8968
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.20707725553754727,
+            "pred_pixels": 13159,
+            "gt_pixels": 9184,
+            "intersection_pixels": 3833,
+            "union_pixels": 18510,
+            "overselect_ratio": 1.432817944250871,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 2071,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68432,
+            "overselect_ratio": 0.03120808908847064,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15215279127224274,
+            "pred_pixels": 10962,
+            "gt_pixels": 72046,
+            "intersection_pixels": 10962,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15215279127224274,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.14427269124058661,
+            "pred_pixels": 425,
+            "gt_pixels": 2462,
+            "intersection_pixels": 364,
+            "union_pixels": 2523,
+            "overselect_ratio": 0.17262388302193338,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12164279423353265,
+            "pred_pixels": 33357,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13121,
+            "union_pixels": 107865,
+            "overselect_ratio": 0.380661653105707,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.17747236331042726,
+            "pred_pixels": 1164,
+            "gt_pixels": 2777,
+            "intersection_pixels": 594,
+            "union_pixels": 3347,
+            "overselect_ratio": 0.4191573640619373,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.4824786997673157,
+            "pred_pixels": 51301,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27578,
+            "union_pixels": 57159,
+            "overselect_ratio": 1.5343043426247158,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.44112637674577043,
+            "pred_pixels": 58762,
+            "gt_pixels": 30082,
+            "intersection_pixels": 27195,
+            "union_pixels": 61649,
+            "overselect_ratio": 1.9533940562462602,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.11031012287887654,
+            "pred_pixels": 20840,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4713,
+            "union_pixels": 42725,
+            "overselect_ratio": 0.7835175577111061,
+            "selected_gaussians": 3635
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.6778399521921008,
+            "pred_pixels": 25042,
+            "gt_pixels": 36726,
+            "intersection_pixels": 24954,
+            "union_pixels": 36814,
+            "overselect_ratio": 0.6818602624843435,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.1306200251740906,
+            "pred_pixels": 73034,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57698,
+            "union_pixels": 441724,
+            "overselect_ratio": 0.1712853082169292,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.3506317689530686,
+            "pred_pixels": 7959,
+            "gt_pixels": 4013,
+            "intersection_pixels": 3108,
+            "union_pixels": 8864,
+            "overselect_ratio": 1.9833042611512584,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017935677256087075,
+            "pred_pixels": 1068,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122103,
+            "overselect_ratio": 0.008807956850908011,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.3783783783783784,
+            "pred_pixels": 19098,
+            "gt_pixels": 37767,
+            "intersection_pixels": 15610,
+            "union_pixels": 41255,
+            "overselect_ratio": 0.5056795615219636,
+            "selected_gaussians": 5429
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.036710128254292894,
+            "pred_pixels": 18992,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17231,
+            "union_pixels": 469380,
+            "overselect_ratio": 0.04061426075501637,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.226084366440773,
+          "ci_low": 0.13906712420284748,
+          "ci_high": 0.3128828048706055,
+          "n": 22
+        }
+      },
+      "thr0p18": {
+        "miou": 0.22806979715824127,
+        "acc025": 0.36363636363636365,
+        "acc050": 0.18181818181818182,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.18,
+        "selection_tag": "thr0p18",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.5480100512504578,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "cabinet": {
+            "miou": 0.12576687335968018,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.5226616263389587,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 7021
+          },
+          "frog cup": {
+            "miou": 0.09878265857696533,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "ketchup": {
+            "miou": 0.16021627187728882,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.31314167380332947,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.5609865188598633,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 8295
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.3394005000591278,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "red cup": {
+            "miou": 0.36077767610549927,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "refrigerator": {
+            "miou": 0.1536101996898651,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08355353772640228,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.14754746854305267,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "spoon": {
+            "miou": 0.3461366295814514,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "toaster": {
+            "miou": 0.20770646631717682,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12375
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5480100394406597,
+            "knife": 0.4582672361195851,
+            "ottolenghi": 0.5609864970427407,
+            "pour-over vessel": 0.0,
+            "toaster": 0.20770646173828336,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.1536101934874941,
+            "spatula": 0.1475474683544304
+          },
+          "frame_00089": {
+            "cabinet": 0.12576687116564417,
+            "ketchup": 0.16021627774615824,
+            "knife": 0.4811577990631336
+          },
+          "frame_00140": {
+            "dark cup": 0.5226616350263776,
+            "frog cup": 0.09878265890391186,
+            "plate": 0.6770074975551451,
+            "sink": 0.1299318649976232,
+            "spoon": 0.3461366181410974
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017935236597710186,
+            "red cup": 0.3607776751821073,
+            "sink": 0.037175204315553545
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5480100394406597,
+            "pred_pixels": 11040,
+            "gt_pixels": 10547,
+            "intersection_pixels": 7642,
+            "union_pixels": 13945,
+            "overselect_ratio": 1.0467431497108182,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4582672361195851,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7511,
+            "union_pixels": 16390,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5609864970427407,
+            "pred_pixels": 11067,
+            "gt_pixels": 16909,
+            "intersection_pixels": 10054,
+            "union_pixels": 17922,
+            "overselect_ratio": 0.6545035188361228,
+            "selected_gaussians": 8295
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.20770646173828336,
+            "pred_pixels": 13132,
+            "gt_pixels": 9184,
+            "intersection_pixels": 3838,
+            "union_pixels": 18478,
+            "overselect_ratio": 1.4298780487804879,
+            "selected_gaussians": 12375
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 2026,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68387,
+            "overselect_ratio": 0.030529979958107925,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.1536101934874941,
+            "pred_pixels": 11067,
+            "gt_pixels": 72046,
+            "intersection_pixels": 11067,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.1536101934874941,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.1475474683544304,
+            "pred_pixels": 439,
+            "gt_pixels": 2462,
+            "intersection_pixels": 373,
+            "union_pixels": 2528,
+            "overselect_ratio": 0.1783103168155971,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12576687116564417,
+            "pred_pixels": 33481,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13530,
+            "union_pixels": 107580,
+            "overselect_ratio": 0.3820767097650321,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.16021627774615824,
+            "pred_pixels": 1300,
+            "gt_pixels": 2777,
+            "intersection_pixels": 563,
+            "union_pixels": 3514,
+            "overselect_ratio": 0.4681310767014764,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.4811577990631336,
+            "pred_pixels": 51304,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27528,
+            "union_pixels": 57212,
+            "overselect_ratio": 1.5343940662758704,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.5226616350263776,
+            "pred_pixels": 49002,
+            "gt_pixels": 30082,
+            "intersection_pixels": 27146,
+            "union_pixels": 51938,
+            "overselect_ratio": 1.628947543381424,
+            "selected_gaussians": 7021
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.09878265890391186,
+            "pred_pixels": 19074,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4106,
+            "union_pixels": 41566,
+            "overselect_ratio": 0.71712158808933,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.6770074975551451,
+            "pred_pixels": 25008,
+            "gt_pixels": 36726,
+            "intersection_pixels": 24922,
+            "union_pixels": 36812,
+            "overselect_ratio": 0.6809344878287862,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.1299318649976232,
+            "pred_pixels": 72782,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57400,
+            "union_pixels": 441770,
+            "overselect_ratio": 0.17069429721286716,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.3461366181410974,
+            "pred_pixels": 8008,
+            "gt_pixels": 4013,
+            "intersection_pixels": 3091,
+            "union_pixels": 8930,
+            "overselect_ratio": 1.995514577622726,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017935236597710186,
+            "pred_pixels": 1071,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122106,
+            "overselect_ratio": 0.008832698302736405,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.3607776751821073,
+            "pred_pixels": 15287,
+            "gt_pixels": 37767,
+            "intersection_pixels": 14066,
+            "union_pixels": 38988,
+            "overselect_ratio": 0.4047713612412953,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.037175204315553545,
+            "pred_pixels": 19202,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17449,
+            "union_pixels": 469372,
+            "overselect_ratio": 0.04106334430380288,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.22806979715824127,
+          "ci_low": 0.13848219737410544,
+          "ci_high": 0.3158121071755886,
+          "n": 22
+        }
+      },
+      "thr0p2": {
+        "miou": 0.23298805952072144,
+        "acc025": 0.36363636363636365,
+        "acc050": 0.18181818181818182,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.2,
+        "selection_tag": "thr0p2",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.548980176448822,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "cabinet": {
+            "miou": 0.12211447209119797,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.5941752791404724,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 5854
+          },
+          "frog cup": {
+            "miou": 0.09943285584449768,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "ketchup": {
+            "miou": 0.170860156416893,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.3133029043674469,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.5552240610122681,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 8152
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.340019553899765,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 7780
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "red cup": {
+            "miou": 0.360378623008728,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "refrigerator": {
+            "miou": 0.15423479676246643,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08367443829774857,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.1443871408700943,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "spoon": {
+            "miou": 0.35369738936424255,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "toaster": {
+            "miou": 0.23495569825172424,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 9164
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5489801781097385,
+            "knife": 0.4582672361195851,
+            "ottolenghi": 0.5552240518675771,
+            "pour-over vessel": 0.0,
+            "toaster": 0.2349557013001956,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15423479443688753,
+            "spatula": 0.14438714795715984
+          },
+          "frame_00089": {
+            "cabinet": 0.12211447536758571,
+            "ketchup": 0.1708601521357519,
+            "knife": 0.48164150646351916
+          },
+          "frame_00140": {
+            "dark cup": 0.5941752678982315,
+            "frog cup": 0.09943285543898936,
+            "plate": 0.6782455187398153,
+            "sink": 0.1308273910582909,
+            "spoon": 0.35369738339021617
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017935677256087075,
+            "red cup": 0.36037861686845885,
+            "sink": 0.036521479777159964
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5489801781097385,
+            "pred_pixels": 11021,
+            "gt_pixels": 10547,
+            "intersection_pixels": 7644,
+            "union_pixels": 13924,
+            "overselect_ratio": 1.0449416895799752,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4582672361195851,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7511,
+            "union_pixels": 16390,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5552240518675771,
+            "pred_pixels": 10197,
+            "gt_pixels": 16909,
+            "intersection_pixels": 9677,
+            "union_pixels": 17429,
+            "overselect_ratio": 0.603051629309835,
+            "selected_gaussians": 8152
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.2349557013001956,
+            "pred_pixels": 12282,
+            "gt_pixels": 9184,
+            "intersection_pixels": 4084,
+            "union_pixels": 17382,
+            "overselect_ratio": 1.3373257839721255,
+            "selected_gaussians": 9164
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 1962,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68323,
+            "overselect_ratio": 0.029565558083814288,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 7780
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15423479443688753,
+            "pred_pixels": 11112,
+            "gt_pixels": 72046,
+            "intersection_pixels": 11112,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15423479443688753,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.14438714795715984,
+            "pred_pixels": 423,
+            "gt_pixels": 2462,
+            "intersection_pixels": 364,
+            "union_pixels": 2521,
+            "overselect_ratio": 0.1718115353371243,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12211447536758571,
+            "pred_pixels": 33409,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13172,
+            "union_pixels": 107866,
+            "overselect_ratio": 0.38125506396284337,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.1708601521357519,
+            "pred_pixels": 1225,
+            "gt_pixels": 2777,
+            "intersection_pixels": 584,
+            "union_pixels": 3418,
+            "overselect_ratio": 0.44112351458408355,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.48164150646351916,
+            "pred_pixels": 51265,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27534,
+            "union_pixels": 57167,
+            "overselect_ratio": 1.5332276588108626,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.5941752678982315,
+            "pred_pixels": 42665,
+            "gt_pixels": 30082,
+            "intersection_pixels": 27114,
+            "union_pixels": 45633,
+            "overselect_ratio": 1.4182900073133435,
+            "selected_gaussians": 5854
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.09943285543898936,
+            "pred_pixels": 18570,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4085,
+            "union_pixels": 41083,
+            "overselect_ratio": 0.6981727949469885,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.6782455187398153,
+            "pred_pixels": 25067,
+            "gt_pixels": 36726,
+            "intersection_pixels": 24973,
+            "union_pixels": 36820,
+            "overselect_ratio": 0.6825409791428416,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.1308273910582909,
+            "pred_pixels": 73155,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57793,
+            "union_pixels": 441750,
+            "overselect_ratio": 0.17156908731014944,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.35369738339021617,
+            "pred_pixels": 7886,
+            "gt_pixels": 4013,
+            "intersection_pixels": 3109,
+            "union_pixels": 8790,
+            "overselect_ratio": 1.9651133815100923,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017935677256087075,
+            "pred_pixels": 1068,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122103,
+            "overselect_ratio": 0.008807956850908011,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.36037861686845885,
+            "pred_pixels": 15266,
+            "gt_pixels": 37767,
+            "intersection_pixels": 14049,
+            "union_pixels": 38984,
+            "overselect_ratio": 0.40421532025313106,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.036521479777159964,
+            "pred_pixels": 18919,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17143,
+            "union_pixels": 469395,
+            "overselect_ratio": 0.04045815075948582,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.23298805952072144,
+          "ci_low": 0.1413745641708374,
+          "ci_high": 0.3198473036289215,
+          "n": 22
+        }
+      },
+      "thr0p25": {
+        "miou": 0.24294376373291016,
+        "acc025": 0.4090909090909091,
+        "acc050": 0.18181818181818182,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.25,
+        "selection_tag": "thr0p25",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.5931477546691895,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 11599
+          },
+          "cabinet": {
+            "miou": 0.12221798300743103,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.7248547673225403,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 3708
+          },
+          "frog cup": {
+            "miou": 0.0997110903263092,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "ketchup": {
+            "miou": 0.17741934955120087,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.31391391158103943,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.5326161980628967,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 7873
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.32524073123931885,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 3459
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 11408
+          },
+          "red cup": {
+            "miou": 0.36073562502861023,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "refrigerator": {
+            "miou": 0.15218055248260498,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08377944678068161,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.1435917764902115,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 11416
+          },
+          "spoon": {
+            "miou": 0.38202106952667236,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 9825
+          },
+          "toaster": {
+            "miou": 0.2964845895767212,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 4621
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5931477516059958,
+            "knife": 0.4586232149395826,
+            "ottolenghi": 0.5326161988034974,
+            "pour-over vessel": 0.0,
+            "toaster": 0.29648460197559556,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.152180551314438,
+            "spatula": 0.14359177215189872
+          },
+          "frame_00089": {
+            "cabinet": 0.12221798532379721,
+            "ketchup": 0.1774193548387097,
+            "knife": 0.48311856346056337
+          },
+          "frame_00140": {
+            "dark cup": 0.7248547762478486,
+            "frog cup": 0.09971108791182112,
+            "plate": 0.64868681930525,
+            "sink": 0.131086718836656,
+            "spoon": 0.3820210787352759
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017946553688057757,
+            "red cup": 0.36073562982532636,
+            "sink": 0.03647216973193381
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5931477516059958,
+            "pred_pixels": 9541,
+            "gt_pixels": 10547,
+            "intersection_pixels": 7479,
+            "union_pixels": 12609,
+            "overselect_ratio": 0.9046174267564236,
+            "selected_gaussians": 11599
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4586232149395826,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7515,
+            "union_pixels": 16386,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5326161988034974,
+            "pred_pixels": 9734,
+            "gt_pixels": 16909,
+            "intersection_pixels": 9259,
+            "union_pixels": 17384,
+            "overselect_ratio": 0.5756697616653853,
+            "selected_gaussians": 7873
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 11408
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.29648460197559556,
+            "pred_pixels": 8666,
+            "gt_pixels": 9184,
+            "intersection_pixels": 4082,
+            "union_pixels": 13768,
+            "overselect_ratio": 0.9435975609756098,
+            "selected_gaussians": 4621
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 1959,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68320,
+            "overselect_ratio": 0.029520350808456775,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.152180551314438,
+            "pred_pixels": 10964,
+            "gt_pixels": 72046,
+            "intersection_pixels": 10964,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.152180551314438,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.14359177215189872,
+            "pred_pixels": 429,
+            "gt_pixels": 2462,
+            "intersection_pixels": 363,
+            "union_pixels": 2528,
+            "overselect_ratio": 0.17424857839155158,
+            "selected_gaussians": 11416
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12221798532379721,
+            "pred_pixels": 33033,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13141,
+            "union_pixels": 107521,
+            "overselect_ratio": 0.3769642469958575,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.1774193548387097,
+            "pred_pixels": 1165,
+            "gt_pixels": 2777,
+            "intersection_pixels": 594,
+            "union_pixels": 3348,
+            "overselect_ratio": 0.4195174648901692,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.48311856346056337,
+            "pred_pixels": 51388,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27631,
+            "union_pixels": 57193,
+            "overselect_ratio": 1.5369063285081948,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.7248547762478486,
+            "pred_pixels": 34055,
+            "gt_pixels": 30082,
+            "intersection_pixels": 26953,
+            "union_pixels": 37184,
+            "overselect_ratio": 1.132072335615983,
+            "selected_gaussians": 3708
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.09971108791182112,
+            "pred_pixels": 18698,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4107,
+            "union_pixels": 41189,
+            "overselect_ratio": 0.7029851868561546,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.64868681930525,
+            "pred_pixels": 23977,
+            "gt_pixels": 36726,
+            "intersection_pixels": 23884,
+            "union_pixels": 36819,
+            "overselect_ratio": 0.6528617328323258,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.131086718836656,
+            "pred_pixels": 73282,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57909,
+            "union_pixels": 441761,
+            "overselect_ratio": 0.1718669380939426,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.3820210787352759,
+            "pred_pixels": 7133,
+            "gt_pixels": 4013,
+            "intersection_pixels": 3081,
+            "union_pixels": 8065,
+            "overselect_ratio": 1.7774732120608023,
+            "selected_gaussians": 9825
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017946553688057757,
+            "pred_pixels": 994,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122029,
+            "overselect_ratio": 0.008197667705807644,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.36073562982532636,
+            "pred_pixels": 15284,
+            "gt_pixels": 37767,
+            "intersection_pixels": 14064,
+            "union_pixels": 38987,
+            "overselect_ratio": 0.4046919268144147,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.03647216973193381,
+            "pred_pixels": 18900,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17120,
+            "union_pixels": 469399,
+            "overselect_ratio": 0.04041751939078609,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.24294376373291016,
+          "ci_low": 0.14957547336816787,
+          "ci_high": 0.3339058630168438,
+          "n": 22
+        }
+      },
+      "thr0p3": {
+        "miou": 0.24634450674057007,
+        "acc025": 0.4090909090909091,
+        "acc050": 0.18181818181818182,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.3,
+        "selection_tag": "thr0p3",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.6115978956222534,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 9763
+          },
+          "cabinet": {
+            "miou": 0.12134618312120438,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.7595015168190002,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "frog cup": {
+            "miou": 0.09804297238588333,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "ketchup": {
+            "miou": 0.17747236788272858,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.3138240873813629,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.5254968404769897,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 7468
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.3246386647224426,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 3459
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 5524
+          },
+          "red cup": {
+            "miou": 0.35997331142425537,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "refrigerator": {
+            "miou": 0.15245814621448517,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.0840601772069931,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.1420023888349533,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 6120
+          },
+          "spoon": {
+            "miou": 0.38410502672195435,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 7640
+          },
+          "toaster": {
+            "miou": 0.32871192693710327,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.6115978683045795,
+            "knife": 0.4586232149395826,
+            "ottolenghi": 0.5254968238242321,
+            "pour-over vessel": 0.0,
+            "toaster": 0.3287119135901983,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15245815173639063,
+            "spatula": 0.14200239329876346
+          },
+          "frame_00089": {
+            "cabinet": 0.12134618423131617,
+            "ketchup": 0.17747236331042726,
+            "knife": 0.4828490965383337
+          },
+          "frame_00140": {
+            "dark cup": 0.7595015224991541,
+            "frog cup": 0.09804297314777109,
+            "plate": 0.6474822097886903,
+            "sink": 0.13155893708218105,
+            "spoon": 0.38410502540937325
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017950966811203371,
+            "red cup": 0.3599733258098438,
+            "sink": 0.03656141217975211
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.6115978683045795,
+            "pred_pixels": 7295,
+            "gt_pixels": 10547,
+            "intersection_pixels": 6771,
+            "union_pixels": 11071,
+            "overselect_ratio": 0.6916658765525742,
+            "selected_gaussians": 9763
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4586232149395826,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7515,
+            "union_pixels": 16386,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.5254968238242321,
+            "pred_pixels": 9267,
+            "gt_pixels": 16909,
+            "intersection_pixels": 9017,
+            "union_pixels": 17159,
+            "overselect_ratio": 0.5480513336093205,
+            "selected_gaussians": 7468
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 5524
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.3287119135901983,
+            "pred_pixels": 7300,
+            "gt_pixels": 9184,
+            "intersection_pixels": 4078,
+            "union_pixels": 12406,
+            "overselect_ratio": 0.7948606271777003,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 1962,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68323,
+            "overselect_ratio": 0.029565558083814288,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15245815173639063,
+            "pred_pixels": 10984,
+            "gt_pixels": 72046,
+            "intersection_pixels": 10984,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15245815173639063,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.14200239329876346,
+            "pred_pixels": 401,
+            "gt_pixels": 2462,
+            "intersection_pixels": 356,
+            "union_pixels": 2507,
+            "overselect_ratio": 0.1628757108042242,
+            "selected_gaussians": 6120
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12134618423131617,
+            "pred_pixels": 33020,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13056,
+            "union_pixels": 107593,
+            "overselect_ratio": 0.37681589428157347,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.17747236331042726,
+            "pred_pixels": 1164,
+            "gt_pixels": 2777,
+            "intersection_pixels": 594,
+            "union_pixels": 3347,
+            "overselect_ratio": 0.4191573640619373,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.4828490965383337,
+            "pred_pixels": 51337,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27604,
+            "union_pixels": 57169,
+            "overselect_ratio": 1.5353810264385692,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.7595015224991541,
+            "pred_pixels": 32324,
+            "gt_pixels": 30082,
+            "intersection_pixels": 26938,
+            "union_pixels": 35468,
+            "overselect_ratio": 1.0745296190412872,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.09804297314777109,
+            "pred_pixels": 19242,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4093,
+            "union_pixels": 41747,
+            "overselect_ratio": 0.7234378524701105,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.6474822097886903,
+            "pred_pixels": 23931,
+            "gt_pixels": 36726,
+            "intersection_pixels": 23839,
+            "union_pixels": 36818,
+            "overselect_ratio": 0.6516092141806894,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.13155893708218105,
+            "pred_pixels": 73623,
+            "gt_pixels": 426388,
+            "intersection_pixels": 58133,
+            "union_pixels": 441878,
+            "overselect_ratio": 0.17266667917483605,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.38410502540937325,
+            "pred_pixels": 5792,
+            "gt_pixels": 4013,
+            "intersection_pixels": 2721,
+            "union_pixels": 7084,
+            "overselect_ratio": 1.4433092449538998,
+            "selected_gaussians": 7640
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017950966811203371,
+            "pred_pixels": 964,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 121999,
+            "overselect_ratio": 0.007950253187523711,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.3599733258098438,
+            "pred_pixels": 15257,
+            "gt_pixels": 37767,
+            "intersection_pixels": 14035,
+            "union_pixels": 38989,
+            "overselect_ratio": 0.4039770169724892,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.03656141217975211,
+            "pred_pixels": 18945,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17162,
+            "union_pixels": 469402,
+            "overselect_ratio": 0.04051375157981177,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.24634450674057007,
+          "ci_low": 0.14972964189946653,
+          "ci_high": 0.33892043605446814,
+          "n": 22
+        }
+      },
+      "thr0p35": {
+        "miou": 0.2323227971792221,
+        "acc025": 0.4090909090909091,
+        "acc050": 0.13636363636363635,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.35,
+        "selection_tag": "thr0p35",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.5586729645729065,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 8122
+          },
+          "cabinet": {
+            "miou": 0.12333404272794724,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.7592472434043884,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "frog cup": {
+            "miou": 0.09828842431306839,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "ketchup": {
+            "miou": 0.17763157188892365,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.313580185174942,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.40311723947525024,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 6467
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.32553830742836,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 3459
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "red cup": {
+            "miou": 0.36070072650909424,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "refrigerator": {
+            "miou": 0.15268023312091827,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08343131840229034,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.0003988831304013729,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "spoon": {
+            "miou": 0.40981537103652954,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 5339
+          },
+          "toaster": {
+            "miou": 0.3085346221923828,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.5586729857819905,
+            "knife": 0.4582672361195851,
+            "ottolenghi": 0.4031172511512575,
+            "pour-over vessel": 0.0,
+            "toaster": 0.30853462157809985,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15268023207395276,
+            "spatula": 0.00039888312724371757
+          },
+          "frame_00089": {
+            "cabinet": 0.12333404637233657,
+            "ketchup": 0.17763157894736842,
+            "knife": 0.482473325170544
+          },
+          "frame_00140": {
+            "dark cup": 0.7592472603318591,
+            "frog cup": 0.09828842569056093,
+            "plate": 0.6492815038165866,
+            "sink": 0.1303390218008878,
+            "spoon": 0.40981537004891905
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017951113952687748,
+            "red cup": 0.36070072842926026,
+            "sink": 0.03652361017906028
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.5586729857819905,
+            "pred_pixels": 5897,
+            "gt_pixels": 10547,
+            "intersection_pixels": 5894,
+            "union_pixels": 10550,
+            "overselect_ratio": 0.5591163363989761,
+            "selected_gaussians": 8122
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4582672361195851,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7511,
+            "union_pixels": 16390,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.4031172511512575,
+            "pred_pixels": 6857,
+            "gt_pixels": 16909,
+            "intersection_pixels": 6828,
+            "union_pixels": 16938,
+            "overselect_ratio": 0.40552368561121294,
+            "selected_gaussians": 6467
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.30853462157809985,
+            "pred_pixels": 7068,
+            "gt_pixels": 9184,
+            "intersection_pixels": 3832,
+            "union_pixels": 12420,
+            "overselect_ratio": 0.7695993031358885,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 1962,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68323,
+            "overselect_ratio": 0.029565558083814288,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15268023207395276,
+            "pred_pixels": 11000,
+            "gt_pixels": 72046,
+            "intersection_pixels": 11000,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15268023207395276,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.00039888312724371757,
+            "pred_pixels": 46,
+            "gt_pixels": 2462,
+            "intersection_pixels": 1,
+            "union_pixels": 2507,
+            "overselect_ratio": 0.01868399675060926,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12333404637233657,
+            "pred_pixels": 33153,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13261,
+            "union_pixels": 107521,
+            "overselect_ratio": 0.37833365666617214,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.17763157894736842,
+            "pred_pixels": 1161,
+            "gt_pixels": 2777,
+            "intersection_pixels": 594,
+            "union_pixels": 3344,
+            "overselect_ratio": 0.4180770615772416,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.482473325170544,
+            "pred_pixels": 51317,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27583,
+            "union_pixels": 57170,
+            "overselect_ratio": 1.5347828687642062,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.7592472603318591,
+            "pred_pixels": 32366,
+            "gt_pixels": 30082,
+            "intersection_pixels": 26951,
+            "union_pixels": 35497,
+            "overselect_ratio": 1.0759258028056644,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.09828842569056093,
+            "pred_pixels": 18769,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4060,
+            "union_pixels": 41307,
+            "overselect_ratio": 0.7056545604932701,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.6492815038165866,
+            "pred_pixels": 23989,
+            "gt_pixels": 36726,
+            "intersection_pixels": 23902,
+            "union_pixels": 36813,
+            "overselect_ratio": 0.653188476828405,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.1303390218008878,
+            "pred_pixels": 72963,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57580,
+            "union_pixels": 441771,
+            "overselect_ratio": 0.17111879321181647,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.40981537004891905,
+            "pred_pixels": 4921,
+            "gt_pixels": 4013,
+            "intersection_pixels": 2597,
+            "union_pixels": 6337,
+            "overselect_ratio": 1.2262646399202592,
+            "selected_gaussians": 5339
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017951113952687748,
+            "pred_pixels": 963,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 121998,
+            "overselect_ratio": 0.007942006036914246,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.36070072842926026,
+            "pred_pixels": 15284,
+            "gt_pixels": 37767,
+            "intersection_pixels": 14063,
+            "union_pixels": 38988,
+            "overselect_ratio": 0.4046919268144147,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.03652361017906028,
+            "pred_pixels": 18920,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17144,
+            "union_pixels": 469395,
+            "overselect_ratio": 0.040460289252575284,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.2323227971792221,
+          "ci_low": 0.13545252792537213,
+          "ci_high": 0.32588637024164196,
+          "n": 22
+        }
+      },
+      "thr0p4": {
+        "miou": 0.2278115600347519,
+        "acc025": 0.4090909090909091,
+        "acc050": 0.09090909090909091,
+        "n": 22,
+        "selection_mode": "score_threshold",
+        "selection_value": 0.4,
+        "selection_tag": "thr0p4",
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.005,
+        "selection_max_ratio": 0.018,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "silhouette_threshold": 0.6,
+        "mask_refinement": "rgb_grabcut",
+        "mask_refinement_iters": 2,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "per_category": {
+          "Stainless steel pots": {
+            "miou": 0.48734235763549805,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 6359
+          },
+          "cabinet": {
+            "miou": 0.12286762148141861,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "dark cup": {
+            "miou": 0.7601230144500732,
+            "acc025": 1.0,
+            "acc050": 1.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "frog cup": {
+            "miou": 0.0986810177564621,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "ketchup": {
+            "miou": 0.17747236788272858,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "knife": {
+            "miou": 0.3130519688129425,
+            "acc025": 0.6666666666666666,
+            "acc050": 0.0,
+            "n": 3,
+            "selected_gaussians": 12451
+          },
+          "ottolenghi": {
+            "miou": 0.3367413282394409,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 5953
+          },
+          "plastic ladle": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "plate": {
+            "miou": 0.32461610436439514,
+            "acc025": 0.5,
+            "acc050": 0.5,
+            "n": 2,
+            "selected_gaussians": 3459
+          },
+          "pot": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "pour-over vessel": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "red cup": {
+            "miou": 0.3585747182369232,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "refrigerator": {
+            "miou": 0.15202787518501282,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 12451
+          },
+          "sink": {
+            "miou": 0.08336274325847626,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 2,
+            "selected_gaussians": 12451
+          },
+          "spatula": {
+            "miou": 0.00040241447277367115,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "spoon": {
+            "miou": 0.4537185728549957,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "toaster": {
+            "miou": 0.3087891638278961,
+            "acc025": 1.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          },
+          "yellow desk": {
+            "miou": 0.0,
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "n": 1,
+            "selected_gaussians": 3459
+          }
+        },
+        "per_frame": {
+          "frame_00053": {
+            "Stainless steel pots": 0.48734237223855126,
+            "knife": 0.4582672361195851,
+            "ottolenghi": 0.33674132734471957,
+            "pour-over vessel": 0.0,
+            "toaster": 0.30878917264158545,
+            "yellow desk": 0.0
+          },
+          "frame_00066": {
+            "plastic ladle": 0.0,
+            "pot": 0.0,
+            "refrigerator": 0.15202787108236404,
+            "spatula": 0.00040241448692152917
+          },
+          "frame_00089": {
+            "cabinet": 0.12286762118209264,
+            "ketchup": 0.17747236331042726,
+            "knife": 0.4808886556459372
+          },
+          "frame_00140": {
+            "dark cup": 0.760123028302153,
+            "frog cup": 0.09868102026961498,
+            "plate": 0.647437464352644,
+            "sink": 0.12997457958987801,
+            "spoon": 0.4537185660781166
+          },
+          "frame_00154": {
+            "knife": 0.0,
+            "plate": 0.0017947289057890252,
+            "red cup": 0.35857472442963345,
+            "sink": 0.03675092037087537
+          }
+        },
+        "query_details": [
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "Stainless steel pots",
+            "iou": 0.48734237223855126,
+            "pred_pixels": 5140,
+            "gt_pixels": 10547,
+            "intersection_pixels": 5140,
+            "union_pixels": 10547,
+            "overselect_ratio": 0.48734237223855126,
+            "selected_gaussians": 6359
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "knife",
+            "iou": 0.4582672361195851,
+            "pred_pixels": 14398,
+            "gt_pixels": 9503,
+            "intersection_pixels": 7511,
+            "union_pixels": 16390,
+            "overselect_ratio": 1.5151004945806588,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "ottolenghi",
+            "iou": 0.33674132734471957,
+            "pred_pixels": 5710,
+            "gt_pixels": 16909,
+            "intersection_pixels": 5698,
+            "union_pixels": 16921,
+            "overselect_ratio": 0.3376899875805784,
+            "selected_gaussians": 5953
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "pour-over vessel",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 7705,
+            "intersection_pixels": 0,
+            "union_pixels": 7705,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "toaster",
+            "iou": 0.30878917264158545,
+            "pred_pixels": 7062,
+            "gt_pixels": 9184,
+            "intersection_pixels": 3833,
+            "union_pixels": 12413,
+            "overselect_ratio": 0.7689459930313589,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00053",
+            "frame_id": 53,
+            "category": "yellow desk",
+            "iou": 0.0,
+            "pred_pixels": 1959,
+            "gt_pixels": 66361,
+            "intersection_pixels": 0,
+            "union_pixels": 68320,
+            "overselect_ratio": 0.029520350808456775,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "plastic ladle",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 3558,
+            "intersection_pixels": 0,
+            "union_pixels": 3558,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "pot",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 19457,
+            "intersection_pixels": 0,
+            "union_pixels": 19457,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "refrigerator",
+            "iou": 0.15202787108236404,
+            "pred_pixels": 10953,
+            "gt_pixels": 72046,
+            "intersection_pixels": 10953,
+            "union_pixels": 72046,
+            "overselect_ratio": 0.15202787108236404,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00066",
+            "frame_id": 66,
+            "category": "spatula",
+            "iou": 0.00040241448692152917,
+            "pred_pixels": 24,
+            "gt_pixels": 2462,
+            "intersection_pixels": 1,
+            "union_pixels": 2485,
+            "overselect_ratio": 0.00974817221770918,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "cabinet",
+            "iou": 0.12286762118209264,
+            "pred_pixels": 33616,
+            "gt_pixels": 87629,
+            "intersection_pixels": 13267,
+            "union_pixels": 107978,
+            "overselect_ratio": 0.38361729564413605,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "ketchup",
+            "iou": 0.17747236331042726,
+            "pred_pixels": 1164,
+            "gt_pixels": 2777,
+            "intersection_pixels": 594,
+            "union_pixels": 3347,
+            "overselect_ratio": 0.4191573640619373,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00089",
+            "frame_id": 89,
+            "category": "knife",
+            "iou": 0.4808886556459372,
+            "pred_pixels": 51219,
+            "gt_pixels": 33436,
+            "intersection_pixels": 27490,
+            "union_pixels": 57165,
+            "overselect_ratio": 1.5318518961598278,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "dark cup",
+            "iou": 0.760123028302153,
+            "pred_pixels": 32295,
+            "gt_pixels": 30082,
+            "intersection_pixels": 26938,
+            "union_pixels": 35439,
+            "overselect_ratio": 1.0735655873944552,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "frog cup",
+            "iou": 0.09868102026961498,
+            "pred_pixels": 18716,
+            "gt_pixels": 26598,
+            "intersection_pixels": 4070,
+            "union_pixels": 41244,
+            "overselect_ratio": 0.7036619294683811,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "plate",
+            "iou": 0.647437464352644,
+            "pred_pixels": 23931,
+            "gt_pixels": 36726,
+            "intersection_pixels": 23838,
+            "union_pixels": 36819,
+            "overselect_ratio": 0.6516092141806894,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "sink",
+            "iou": 0.12997457958987801,
+            "pred_pixels": 72802,
+            "gt_pixels": 426388,
+            "intersection_pixels": 57419,
+            "union_pixels": 441771,
+            "overselect_ratio": 0.17074120284811017,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00140",
+            "frame_id": 140,
+            "category": "spoon",
+            "iou": 0.4537185660781166,
+            "pred_pixels": 4138,
+            "gt_pixels": 4013,
+            "intersection_pixels": 2544,
+            "union_pixels": 5607,
+            "overselect_ratio": 1.0311487665088463,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "knife",
+            "iou": 0.0,
+            "pred_pixels": 0,
+            "gt_pixels": 4580,
+            "intersection_pixels": 0,
+            "union_pixels": 4580,
+            "overselect_ratio": 0.0,
+            "selected_gaussians": 12451
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "plate",
+            "iou": 0.0017947289057890252,
+            "pred_pixels": 989,
+            "gt_pixels": 121254,
+            "intersection_pixels": 219,
+            "union_pixels": 122024,
+            "overselect_ratio": 0.00815643195276032,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "red cup",
+            "iou": 0.35857472442963345,
+            "pred_pixels": 15231,
+            "gt_pixels": 37767,
+            "intersection_pixels": 13988,
+            "union_pixels": 39010,
+            "overselect_ratio": 0.40328858527285727,
+            "selected_gaussians": 3459
+          },
+          {
+            "frame": "frame_00154",
+            "frame_id": 154,
+            "category": "sink",
+            "iou": 0.03675092037087537,
+            "pred_pixels": 19007,
+            "gt_pixels": 467619,
+            "intersection_pixels": 17250,
+            "union_pixels": 469376,
+            "overselect_ratio": 0.04064633815135826,
+            "selected_gaussians": 12451
+          }
+        ],
+        "bootstrap_miou": {
+          "mean": 0.2278115600347519,
+          "ci_low": 0.13258210942149162,
+          "ci_high": 0.3217865027487278,
+          "n": 22
+        }
+      }
+    },
+    "best_by_miou": "thr0p3"
+  }
+}

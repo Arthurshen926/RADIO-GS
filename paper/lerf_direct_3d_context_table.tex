@@ -12,8 +12,7 @@
     CAGS~\cite{sun2025cags} & published context & 50.79 & 69.62 \\
     InstanceGaussian~\cite{li2025instancegaussian} & published context & 45.30 & 58.44 \\
     OpenGaFF~\cite{li2026opengaff} & arXiv context & 54.36 & 80.84 \\
-    \method{} + VPR & local, SigLIP2, mean+2.5std+floor0.005+cap0.018 & 42.27 & 69.06 \\
-    \method{} + VPR + RGB snap & local, optional GT-free rendered-mask boundary refinement & 45.54 & 70.14 \\
+    \method{} + VPR & local, SigLIP2, fixed \texttt{thr0p25} + RGB snap & 48.01 & 67.60 \\
     \method{} + direct field + SAM3 box & local, fixed global threshold, frozen official SAM3 readout & 57.05 & 68.35 \\
     \method{} + direct field + SAM3 box & local diagnostic, scene-locked thresholds & 59.72 & 70.09 \\
     \bottomrule

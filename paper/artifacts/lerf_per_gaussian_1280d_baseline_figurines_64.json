@@ -1,0 +1,240 @@
+{
+  "generated": "2026-05-16T17:45:50Z",
+  "protocol": {
+    "feature_source": "registered RADIO 1280-D teacher features",
+    "feature_dim": 1280,
+    "storage_dtype": "fp16",
+    "compact": false,
+    "3d_memory": true,
+    "novel_view_feature": true,
+    "direct_3d_query": "partial",
+    "registration_frame_mode": "train",
+    "registration_max_frames": 64,
+    "depth_tolerance": 0.08,
+    "relative_depth_tolerance": 0.02,
+    "alpha_threshold": 0.02,
+    "iou_threshold": 0.6,
+    "scoring": "softmax_scene",
+    "heatmap_upsample": 4,
+    "prompt_templates": [
+      "{query}"
+    ],
+    "text_cache_root": "/root/RADIO-GS/output/radio_gs/lerf_per_gaussian_1280d_baseline_20260517/text_cache",
+    "text_embedding_cache_map": {
+      "figurines": "output/radio_gs/lerf_nearest_view_cache_baseline_20260517/text_cache/figurines_siglip2_text_embeddings.pt"
+    }
+  },
+  "rows": [
+    {
+      "scene": "Figurines",
+      "loc_acc": 0.6429,
+      "miou": 0.2729,
+      "n": 56,
+      "total_gaussians": 168791,
+      "registered_gaussians": 18961,
+      "registered_fraction": 0.1123,
+      "storage_mib": 412.1
+    }
+  ],
+  "macro": {
+    "loc_acc": 0.6429,
+    "miou": 0.2729
+  },
+  "weighted": {
+    "loc_acc": 0.6429,
+    "miou": 0.2729
+  },
+  "mean_registered_fraction": 0.1123,
+  "mean_storage_mib": 412.1,
+  "scene_payloads": {
+    "figurines": {
+      "cache_path": "output/radio_gs/lerf_per_gaussian_1280d_baseline_20260517/per_gaussian_1280d/figurines/features.pt",
+      "registration_frame_ids": [
+        1,
+        6,
+        10,
+        14,
+        18,
+        22,
+        27,
+        33,
+        38,
+        42,
+        46,
+        50,
+        54,
+        59,
+        63,
+        68,
+        73,
+        77,
+        82,
+        88,
+        92,
+        98,
+        104,
+        108,
+        115,
+        120,
+        124,
+        130,
+        134,
+        138,
+        143,
+        147,
+        152,
+        156,
+        160,
+        165,
+        169,
+        174,
+        179,
+        183,
+        187,
+        191,
+        198,
+        204,
+        209,
+        213,
+        218,
+        223,
+        228,
+        232,
+        237,
+        242,
+        247,
+        252,
+        256,
+        261,
+        266,
+        272,
+        276,
+        280,
+        284,
+        289,
+        297,
+        301
+      ],
+      "metrics": {
+        "loc_acc": 0.6428571428571429,
+        "miou": 0.27286986467088437,
+        "loc_correct": 36,
+        "loc_total": 56,
+        "n_iou_samples": 56,
+        "per_category": {
+          "bag": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "green apple": {
+            "loc_acc": 0.75,
+            "miou": 0.3175878667203804,
+            "n_samples": 4
+          },
+          "green toy chair": {
+            "loc_acc": 0.5,
+            "miou": 0.405799056148622,
+            "n_samples": 2
+          },
+          "jake": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.009444757422707147,
+            "n_samples": 3
+          },
+          "miffy": {
+            "loc_acc": 1.0,
+            "miou": 0.3349435958331084,
+            "n_samples": 2
+          },
+          "old camera": {
+            "loc_acc": 1.0,
+            "miou": 0.46470415297054063,
+            "n_samples": 3
+          },
+          "pikachu": {
+            "loc_acc": 1.0,
+            "miou": 0.13356254444707835,
+            "n_samples": 2
+          },
+          "pink ice cream": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.3888897015442076,
+            "n_samples": 3
+          },
+          "pirate hat": {
+            "loc_acc": 0.5,
+            "miou": 0.14283330353417964,
+            "n_samples": 4
+          },
+          "porcelain hand": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.27170465070880007,
+            "n_samples": 3
+          },
+          "pumpkin": {
+            "loc_acc": 0.0,
+            "miou": 0.6568580920740389,
+            "n_samples": 1
+          },
+          "red apple": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.2547159781740166,
+            "n_samples": 3
+          },
+          "red toy chair": {
+            "loc_acc": 1.0,
+            "miou": 0.17475192943770673,
+            "n_samples": 1
+          },
+          "rubber duck with buoy": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.17189227804161397,
+            "n_samples": 3
+          },
+          "rubber duck with hat": {
+            "loc_acc": 0.5,
+            "miou": 0.2914244471554771,
+            "n_samples": 4
+          },
+          "rubics cube": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.34390768315835224,
+            "n_samples": 3
+          },
+          "spatula": {
+            "loc_acc": 1.0,
+            "miou": 0.1658774952243144,
+            "n_samples": 3
+          },
+          "tesla door handle": {
+            "loc_acc": 1.0,
+            "miou": 0.14219435646621995,
+            "n_samples": 2
+          },
+          "toy cat statue": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.25005705614334867,
+            "n_samples": 3
+          },
+          "toy elephant": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.3762811070960521,
+            "n_samples": 3
+          },
+          "waldo": {
+            "loc_acc": 1.0,
+            "miou": 0.4387654143919038,
+            "n_samples": 3
+          }
+        }
+      },
+      "registered_gaussians": 18961,
+      "total_gaussians": 168791,
+      "registered_fraction": 0.1123,
+      "storage_mib": 412.1,
+      "temperature": 50.0,
+      "text_embedding_cache": "output/radio_gs/lerf_nearest_view_cache_baseline_20260517/text_cache/figurines_siglip2_text_embeddings.pt"
+    }
+  }
+}

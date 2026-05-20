@@ -1,0 +1,451 @@
+{
+  "generated": "2026-05-16T16:15:07Z",
+  "protocol": {
+    "selection": "nearest_by_camera_center",
+    "feature_source": "cached RADIO 1280-D teacher features",
+    "target_frame_excluded": true,
+    "warp": "none",
+    "iou_threshold": 0.6,
+    "scoring": "softmax_scene",
+    "heatmap_upsample": 4,
+    "prompt_templates": [
+      "{query}"
+    ]
+  },
+  "rows": [
+    {
+      "scene": "Figurines",
+      "loc_acc": 0.1786,
+      "miou": 0.0755,
+      "n": 56,
+      "mean_nearest_distance": 0.2831
+    },
+    {
+      "scene": "Ramen",
+      "loc_acc": 0.2817,
+      "miou": 0.174,
+      "n": 71,
+      "mean_nearest_distance": 0.5443
+    },
+    {
+      "scene": "Teatime",
+      "loc_acc": 0.3559,
+      "miou": 0.2114,
+      "n": 59,
+      "mean_nearest_distance": 0.4266
+    },
+    {
+      "scene": "Waldo Kitchen",
+      "loc_acc": 0.2727,
+      "miou": 0.157,
+      "n": 22,
+      "mean_nearest_distance": 0.5787
+    }
+  ],
+  "macro": {
+    "loc_acc": 0.2722,
+    "miou": 0.1545
+  },
+  "weighted": {
+    "loc_acc": 0.274,
+    "miou": 0.1563
+  },
+  "mean_nearest_distance": 0.4582,
+  "scene_payloads": {
+    "figurines": {
+      "nearest_cache": "/root/RADIO-GS/output/radio_gs/lerf_nearest_view_cache_baseline_20260517/nearest_features/figurines",
+      "mapping_count": 4,
+      "mean_nearest_distance": 0.2831,
+      "metrics": {
+        "loc_acc": 0.17857142857142858,
+        "miou": 0.07552713700801435,
+        "loc_correct": 10,
+        "loc_total": 56,
+        "n_iou_samples": 56,
+        "per_category": {
+          "bag": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "green apple": {
+            "loc_acc": 0.25,
+            "miou": 0.13853339810224194,
+            "n_samples": 4
+          },
+          "green toy chair": {
+            "loc_acc": 0.0,
+            "miou": 0.015328607012837708,
+            "n_samples": 2
+          },
+          "jake": {
+            "loc_acc": 0.0,
+            "miou": 0.006725588540517823,
+            "n_samples": 3
+          },
+          "miffy": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 2
+          },
+          "old camera": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.07340894770006301,
+            "n_samples": 3
+          },
+          "pikachu": {
+            "loc_acc": 1.0,
+            "miou": 0.15031930333817126,
+            "n_samples": 2
+          },
+          "pink ice cream": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 3
+          },
+          "pirate hat": {
+            "loc_acc": 0.25,
+            "miou": 0.09438775510204081,
+            "n_samples": 4
+          },
+          "porcelain hand": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 3
+          },
+          "pumpkin": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "red apple": {
+            "loc_acc": 0.0,
+            "miou": 0.15040887559212165,
+            "n_samples": 3
+          },
+          "red toy chair": {
+            "loc_acc": 1.0,
+            "miou": 0.26944444444444443,
+            "n_samples": 1
+          },
+          "rubber duck with buoy": {
+            "loc_acc": 0.0,
+            "miou": 0.0015308075009567547,
+            "n_samples": 3
+          },
+          "rubber duck with hat": {
+            "loc_acc": 0.25,
+            "miou": 0.054365733113673806,
+            "n_samples": 4
+          },
+          "rubics cube": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.19884981198849813,
+            "n_samples": 3
+          },
+          "spatula": {
+            "loc_acc": 0.0,
+            "miou": 0.0003716090672612412,
+            "n_samples": 3
+          },
+          "tesla door handle": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 2
+          },
+          "toy cat statue": {
+            "loc_acc": 0.0,
+            "miou": 0.121750710334385,
+            "n_samples": 3
+          },
+          "toy elephant": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.1763782617225819,
+            "n_samples": 3
+          },
+          "waldo": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.097119341563786,
+            "n_samples": 3
+          }
+        }
+      },
+      "temperature": 50.0
+    },
+    "ramen": {
+      "nearest_cache": "/root/RADIO-GS/output/radio_gs/lerf_nearest_view_cache_baseline_20260517/nearest_features/ramen",
+      "mapping_count": 7,
+      "mean_nearest_distance": 0.5443,
+      "metrics": {
+        "loc_acc": 0.28169014084507044,
+        "miou": 0.17402070595547636,
+        "loc_correct": 20,
+        "loc_total": 71,
+        "n_iou_samples": 71,
+        "per_category": {
+          "bowl": {
+            "loc_acc": 0.2,
+            "miou": 0.08553981057139266,
+            "n_samples": 5
+          },
+          "chopsticks": {
+            "loc_acc": 0.0,
+            "miou": 0.07922983464010325,
+            "n_samples": 7
+          },
+          "corn": {
+            "loc_acc": 0.0,
+            "miou": 0.011881188118811881,
+            "n_samples": 5
+          },
+          "egg": {
+            "loc_acc": 0.42857142857142855,
+            "miou": 0.30535642152590886,
+            "n_samples": 7
+          },
+          "glass of water": {
+            "loc_acc": 1.0,
+            "miou": 0.14167138754859254,
+            "n_samples": 2
+          },
+          "hand": {
+            "loc_acc": 0.0,
+            "miou": 0.2925714285714286,
+            "n_samples": 1
+          },
+          "kamaboko": {
+            "loc_acc": 0.2857142857142857,
+            "miou": 0.18641583095950423,
+            "n_samples": 7
+          },
+          "napkin": {
+            "loc_acc": 0.0,
+            "miou": 0.07463744344738099,
+            "n_samples": 5
+          },
+          "nori": {
+            "loc_acc": 0.5,
+            "miou": 0.40127021790659284,
+            "n_samples": 6
+          },
+          "onion segments": {
+            "loc_acc": 0.42857142857142855,
+            "miou": 0.10391230205743576,
+            "n_samples": 7
+          },
+          "plate": {
+            "loc_acc": 0.5,
+            "miou": 0.3372238731486574,
+            "n_samples": 4
+          },
+          "sake cup": {
+            "loc_acc": 0.5,
+            "miou": 0.1395793577592337,
+            "n_samples": 6
+          },
+          "spoon": {
+            "loc_acc": 0.0,
+            "miou": 0.07739931676064163,
+            "n_samples": 2
+          },
+          "wavy noodles": {
+            "loc_acc": 0.14285714285714285,
+            "miou": 0.20658162915582073,
+            "n_samples": 7
+          }
+        }
+      },
+      "temperature": 40.0
+    },
+    "teatime": {
+      "nearest_cache": "/root/RADIO-GS/output/radio_gs/lerf_nearest_view_cache_baseline_20260517/nearest_features/teatime",
+      "mapping_count": 6,
+      "mean_nearest_distance": 0.4266,
+      "metrics": {
+        "loc_acc": 0.3559322033898305,
+        "miou": 0.21144476401172435,
+        "loc_correct": 21,
+        "loc_total": 59,
+        "n_iou_samples": 59,
+        "per_category": {
+          "apple": {
+            "loc_acc": 0.2,
+            "miou": 0.265876323262373,
+            "n_samples": 5
+          },
+          "bag of cookies": {
+            "loc_acc": 0.0,
+            "miou": 0.07480991600583774,
+            "n_samples": 5
+          },
+          "bear nose": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.11686100793602468,
+            "n_samples": 3
+          },
+          "coffee": {
+            "loc_acc": 0.5,
+            "miou": 0.11513595317620962,
+            "n_samples": 4
+          },
+          "coffee mug": {
+            "loc_acc": 0.2,
+            "miou": 0.25693764568764565,
+            "n_samples": 5
+          },
+          "dall-e brand": {
+            "loc_acc": 0.0,
+            "miou": 0.021875,
+            "n_samples": 2
+          },
+          "hooves": {
+            "loc_acc": 0.0,
+            "miou": 0.0037178909418657054,
+            "n_samples": 2
+          },
+          "paper napkin": {
+            "loc_acc": 0.6,
+            "miou": 0.39676260656238693,
+            "n_samples": 5
+          },
+          "plate": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.12446313977650225,
+            "n_samples": 6
+          },
+          "sheep": {
+            "loc_acc": 0.5,
+            "miou": 0.18703959474673781,
+            "n_samples": 4
+          },
+          "stuffed bear": {
+            "loc_acc": 0.6,
+            "miou": 0.5209441660236835,
+            "n_samples": 5
+          },
+          "tea in a glass": {
+            "loc_acc": 0.5,
+            "miou": 0.20394495578984614,
+            "n_samples": 6
+          },
+          "three cookies": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.20453080996321282,
+            "n_samples": 6
+          },
+          "yellow pouf": {
+            "loc_acc": 0.0,
+            "miou": 0.09048335842114066,
+            "n_samples": 1
+          }
+        }
+      },
+      "temperature": 25.0
+    },
+    "waldo_kitchen": {
+      "nearest_cache": "/root/RADIO-GS/output/radio_gs/lerf_nearest_view_cache_baseline_20260517/nearest_features/waldo_kitchen",
+      "mapping_count": 5,
+      "mean_nearest_distance": 0.5787,
+      "metrics": {
+        "loc_acc": 0.2727272727272727,
+        "miou": 0.15699256400030018,
+        "loc_correct": 6,
+        "loc_total": 22,
+        "n_iou_samples": 22,
+        "per_category": {
+          "Stainless steel pots": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "cabinet": {
+            "loc_acc": 1.0,
+            "miou": 0.6460469157254561,
+            "n_samples": 1
+          },
+          "dark cup": {
+            "loc_acc": 0.0,
+            "miou": 0.3471864656123575,
+            "n_samples": 1
+          },
+          "frog cup": {
+            "loc_acc": 1.0,
+            "miou": 0.03077783995523223,
+            "n_samples": 1
+          },
+          "ketchup": {
+            "loc_acc": 0.0,
+            "miou": 0.08512628624883069,
+            "n_samples": 1
+          },
+          "knife": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.054123159519928556,
+            "n_samples": 3
+          },
+          "ottolenghi": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "plastic ladle": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "plate": {
+            "loc_acc": 0.0,
+            "miou": 0.2657736548822365,
+            "n_samples": 2
+          },
+          "pot": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "pour-over vessel": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "red cup": {
+            "loc_acc": 1.0,
+            "miou": 0.3735563520509757,
+            "n_samples": 1
+          },
+          "refrigerator": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "sink": {
+            "loc_acc": 1.0,
+            "miou": 0.6155831565608035,
+            "n_samples": 2
+          },
+          "spatula": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "spoon": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          },
+          "toaster": {
+            "loc_acc": 0.0,
+            "miou": 0.046059446967885886,
+            "n_samples": 1
+          },
+          "yellow desk": {
+            "loc_acc": 0.0,
+            "miou": 0.0,
+            "n_samples": 1
+          }
+        }
+      },
+      "temperature": 25.0
+    }
+  }
+}

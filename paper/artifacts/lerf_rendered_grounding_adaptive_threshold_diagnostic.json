@@ -1,0 +1,34 @@
+{
+  "protocol": "GT-free rendered grounding adaptive threshold diagnostic: threshold_mode=mean_std, k=1.0, clamp=[0.50,0.70]. Same paper-facing checkpoints, temperatures, text embeddings, scoring and heatmap upsample as main table.",
+  "rows": [
+    {
+      "scene": "figurines",
+      "loc": 0.8214285714285714,
+      "miou": 0.4309228764565267,
+      "teacher_miou": 0.4308264750036483
+    },
+    {
+      "scene": "ramen",
+      "loc": 0.9014084507042254,
+      "miou": 0.5862752315436603,
+      "teacher_miou": 0.5882920233937886
+    },
+    {
+      "scene": "teatime",
+      "loc": 0.8983050847457628,
+      "miou": 0.5565368719956896,
+      "teacher_miou": 0.525456704312772
+    },
+    {
+      "scene": "waldo_kitchen",
+      "loc": 0.8636363636363636,
+      "miou": 0.4018519590344654,
+      "teacher_miou": 0.39247008031445263
+    }
+  ],
+  "macro": {
+    "loc": 0.8711946176287307,
+    "miou": 0.4938967347575855
+  },
+  "conclusion": "Negative diagnostic: adaptive mean+std does not beat the fixed threshold-0.60 calibrated main row (0.5243 macro mIoU). Keep fixed threshold-0.60 as paper-facing readout."
+}

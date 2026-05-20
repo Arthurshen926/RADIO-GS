@@ -1,0 +1,205 @@
+{
+  "generated": "2026-05-16T17:52:39Z",
+  "protocol": {
+    "feature_source": "registered RADIO 1280-D teacher features",
+    "feature_dim": 1280,
+    "storage_dtype": "fp16",
+    "compact": false,
+    "3d_memory": true,
+    "novel_view_feature": true,
+    "direct_3d_query": "partial",
+    "registration_frame_mode": "train",
+    "registration_max_frames": 64,
+    "depth_tolerance": 0.08,
+    "relative_depth_tolerance": 0.02,
+    "alpha_threshold": 0.02,
+    "iou_threshold": 0.6,
+    "scoring": "softmax_scene",
+    "heatmap_upsample": 4,
+    "prompt_templates": [
+      "{query}"
+    ],
+    "text_cache_root": "/root/RADIO-GS/output/radio_gs/lerf_per_gaussian_1280d_baseline_20260517/text_cache",
+    "text_embedding_cache_map": {
+      "teatime": "output/radio_gs/lerf_nearest_view_cache_baseline_20260517/text_cache/teatime_siglip2_text_embeddings.pt"
+    }
+  },
+  "rows": [
+    {
+      "scene": "Teatime",
+      "loc_acc": 0.5085,
+      "miou": 0.3541,
+      "n": 59,
+      "total_gaussians": 460157,
+      "registered_gaussians": 121795,
+      "registered_fraction": 0.2647,
+      "storage_mib": 1123.4
+    }
+  ],
+  "macro": {
+    "loc_acc": 0.5085,
+    "miou": 0.3541
+  },
+  "weighted": {
+    "loc_acc": 0.5085,
+    "miou": 0.3541
+  },
+  "mean_registered_fraction": 0.2647,
+  "mean_storage_mib": 1123.4,
+  "scene_payloads": {
+    "teatime": {
+      "cache_path": "output/radio_gs/lerf_per_gaussian_1280d_baseline_20260517/per_gaussian_1280d/teatime/features.pt",
+      "registration_frame_ids": [
+        1,
+        3,
+        7,
+        9,
+        12,
+        15,
+        17,
+        20,
+        23,
+        26,
+        29,
+        31,
+        33,
+        36,
+        38,
+        41,
+        44,
+        46,
+        49,
+        51,
+        53,
+        58,
+        60,
+        63,
+        66,
+        68,
+        74,
+        77,
+        80,
+        83,
+        85,
+        87,
+        90,
+        92,
+        95,
+        100,
+        102,
+        105,
+        107,
+        111,
+        114,
+        116,
+        119,
+        123,
+        126,
+        128,
+        131,
+        134,
+        138,
+        141,
+        143,
+        146,
+        149,
+        152,
+        157,
+        159,
+        161,
+        164,
+        166,
+        169,
+        171,
+        173,
+        178,
+        180
+      ],
+      "metrics": {
+        "loc_acc": 0.5084745762711864,
+        "miou": 0.35413974686455446,
+        "loc_correct": 30,
+        "loc_total": 59,
+        "n_iou_samples": 59,
+        "per_category": {
+          "apple": {
+            "loc_acc": 0.0,
+            "miou": 0.4286469829814886,
+            "n_samples": 5
+          },
+          "bag of cookies": {
+            "loc_acc": 0.6,
+            "miou": 0.43866044741794613,
+            "n_samples": 5
+          },
+          "bear nose": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.1694862484240094,
+            "n_samples": 3
+          },
+          "coffee": {
+            "loc_acc": 0.5,
+            "miou": 0.3231073671384205,
+            "n_samples": 4
+          },
+          "coffee mug": {
+            "loc_acc": 0.2,
+            "miou": 0.4060946262215214,
+            "n_samples": 5
+          },
+          "dall-e brand": {
+            "loc_acc": 1.0,
+            "miou": 0.0528328836370138,
+            "n_samples": 2
+          },
+          "hooves": {
+            "loc_acc": 0.5,
+            "miou": 0.08239360171488702,
+            "n_samples": 2
+          },
+          "paper napkin": {
+            "loc_acc": 0.6,
+            "miou": 0.19223743433958404,
+            "n_samples": 5
+          },
+          "plate": {
+            "loc_acc": 0.6666666666666666,
+            "miou": 0.3592180692792122,
+            "n_samples": 6
+          },
+          "sheep": {
+            "loc_acc": 0.75,
+            "miou": 0.4172750977604229,
+            "n_samples": 4
+          },
+          "stuffed bear": {
+            "loc_acc": 0.8,
+            "miou": 0.4423517088441792,
+            "n_samples": 5
+          },
+          "tea in a glass": {
+            "loc_acc": 0.3333333333333333,
+            "miou": 0.49408918804613494,
+            "n_samples": 6
+          },
+          "three cookies": {
+            "loc_acc": 0.5,
+            "miou": 0.4068669674645393,
+            "n_samples": 6
+          },
+          "yellow pouf": {
+            "loc_acc": 0.0,
+            "miou": 0.052802141674592275,
+            "n_samples": 1
+          }
+        }
+      },
+      "registered_gaussians": 121795,
+      "total_gaussians": 460157,
+      "registered_fraction": 0.2647,
+      "storage_mib": 1123.4,
+      "temperature": 25.0,
+      "text_embedding_cache": "output/radio_gs/lerf_nearest_view_cache_baseline_20260517/text_cache/teatime_siglip2_text_embeddings.pt"
+    }
+  }
+}

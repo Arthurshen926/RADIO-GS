@@ -1,0 +1,41 @@
+{
+  "figure": "paper/figures/lerf_sam3_box_direct_3d_qualitative_pad16.png",
+  "mask_root": "output/radio_gs/lerf_direct3d_sam3_box_pad16_qualitative_masks",
+  "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+  "selection": "sam3_box",
+  "protocol": "compact direct field + official SAM3 box readout, fixed pad16 boundary diagnostic",
+  "cases": [
+    {
+      "scene": "figurines",
+      "frame_id": "00152",
+      "query": "green apple",
+      "iou": 0.8516,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct3d_sam3_box_pad16_qualitative_masks/pred_masks/sam3_box/figurines/frame_00152_green apple.png"
+    },
+    {
+      "scene": "ramen",
+      "frame_id": "00024",
+      "query": "wavy noodles",
+      "iou": 0.9201,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct3d_sam3_box_pad16_qualitative_masks/pred_masks/sam3_box/ramen/frame_00024_wavy noodles.png"
+    },
+    {
+      "scene": "teatime",
+      "frame_id": "00025",
+      "query": "coffee mug",
+      "iou": 0.8094,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/teatime/frame_00025.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct3d_sam3_box_pad16_qualitative_masks/pred_masks/sam3_box/teatime/frame_00025_coffee mug.png"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "frame_id": "00089",
+      "query": "knife",
+      "iou": 0.8615,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00089.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct3d_sam3_box_pad16_qualitative_masks/pred_masks/sam3_box/waldo_kitchen/frame_00089_knife.png"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "root": "output/baselines/langsplat/lerf_compat_20260518",
+  "completed_rows": [
+    {
+      "scene": "figurines",
+      "locacc": 0.6607,
+      "miou": 0.3548,
+      "query_count": 56,
+      "log_path": "output/baselines/langsplat/lerf_compat_20260518/eval/figurines/20260519_215653.log"
+    },
+    {
+      "scene": "ramen",
+      "locacc": 0.7324,
+      "miou": 0.5037,
+      "query_count": 71,
+      "log_path": "output/baselines/langsplat/lerf_compat_20260518/eval/ramen/20260519_214718.log"
+    },
+    {
+      "scene": "teatime",
+      "locacc": 0.8136,
+      "miou": 0.546,
+      "query_count": 59,
+      "log_path": "output/baselines/langsplat/lerf_compat_20260518/eval/teatime/20260519_220213.log"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "locacc": 0.7273,
+      "miou": 0.3687,
+      "query_count": 22,
+      "log_path": "output/baselines/langsplat/lerf_compat_20260518/eval/waldo_kitchen/20260519_220746.log"
+    }
+  ],
+  "scene_mean": {
+    "locacc": 0.7335,
+    "miou": 0.4433
+  },
+  "object_weighted": {
+    "query_count": 208,
+    "locacc": 0.7355894230769231,
+    "miou": 0.4613312500000001
+  },
+  "caveat": "Classic LangSplat local LERF compatibility rerun after fp32 dim-3 feature conversion, chunked decoder eval, and split-aware train/test feature path fix. This is a compatibility rerun, not a strict released-checkpoint macro."
+}

@@ -1,0 +1,41 @@
+{
+  "figure": "paper/figures/lerf_vpr_direct_3d_qualitative.png",
+  "mask_root": "output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_masks_20260515",
+  "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+  "selection": "thr0p25",
+  "protocol": "128-view VPR + softmax score threshold 0.25 + RGB snap",
+  "cases": [
+    {
+      "scene": "figurines",
+      "frame_id": "00152",
+      "query": "green apple",
+      "iou": 0.7688,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00152.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_masks_20260515/pred_masks/thr0p25/figurines/frame_00152_green apple.png"
+    },
+    {
+      "scene": "ramen",
+      "frame_id": "00024",
+      "query": "wavy noodles",
+      "iou": 0.8878,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_masks_20260515/pred_masks/thr0p25/ramen/frame_00024_wavy noodles.png"
+    },
+    {
+      "scene": "teatime",
+      "frame_id": "00025",
+      "query": "coffee mug",
+      "iou": 0.7255,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/teatime/frame_00025.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_masks_20260515/pred_masks/thr0p25/teatime/frame_00025_coffee mug.png"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "frame_id": "00089",
+      "query": "knife",
+      "iou": 0.484,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00089.jpg",
+      "pred_mask": "output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_masks_20260515/pred_masks/thr0p25/waldo_kitchen/frame_00089_knife.png"
+    }
+  ]
+}

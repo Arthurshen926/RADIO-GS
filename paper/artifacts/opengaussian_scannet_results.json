@@ -1,0 +1,5382 @@
+{
+  "timestamp": "2026-05-03 22:41:23",
+  "method": "OpenGaussian reproduced",
+  "source": "OpenGaussian official ScanNet point-cloud protocol wrapper",
+  "args": {
+    "model_root": "output/baselines/opengaussian/scannet",
+    "data_root": "dataset/scannet_og",
+    "text_features": "/root/baselines/OpenGaussian/assets/text_features.json",
+    "output_dir": "output/baselines/opengaussian/scannet_eval",
+    "scenes": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0200_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00",
+      "scene0645_00"
+    ],
+    "iteration": 90000,
+    "opacity_threshold": 0.1,
+    "min_occu_count": 2
+  },
+  "macro": {
+    "19": {
+      "miou": 0.29780391569668796,
+      "macc": 0.450713247955609
+    },
+    "15": {
+      "miou": 0.32745661272678406,
+      "macc": 0.49636048983783054
+    },
+    "10": {
+      "miou": 0.4185511163180685,
+      "macc": 0.5846876201745324
+    }
+  },
+  "scenes": {
+    "scene0000_00": {
+      "scene": "scene0000_00",
+      "label_ply": "dataset/scannet_og/scene0000_00/scene0000_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0000_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0000_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0000_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 81369,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 26027,
+        "num_points": 81369
+      },
+      "splits": {
+        "19": {
+          "miou": 0.33354786188540225,
+          "macc": 0.5000746193080342,
+          "num_valid": 40791,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.21622416709568287,
+              "acc": 0.2986894239561109,
+              "intersection": 2940,
+              "union": 13597,
+              "gt_count": 9843,
+              "pred_count": 6694
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.46536412078152756,
+              "acc": 0.7803425167535368,
+              "intersection": 6288,
+              "union": 13512,
+              "gt_count": 8058,
+              "pred_count": 11742
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.43293261626067703,
+              "acc": 0.4360363230842759,
+              "intersection": 2737,
+              "union": 6322,
+              "gt_count": 6277,
+              "pred_count": 2782
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.06880941602535083,
+              "acc": 0.08025343189017951,
+              "intersection": 152,
+              "union": 2209,
+              "gt_count": 1894,
+              "pred_count": 467
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1054,
+              "gt_count": 0,
+              "pred_count": 1054
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.30852045524454014,
+              "acc": 0.31216931216931215,
+              "intersection": 1003,
+              "union": 3251,
+              "gt_count": 3213,
+              "pred_count": 1041
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.22586656727543794,
+              "acc": 0.23182861514919664,
+              "intersection": 606,
+              "union": 2683,
+              "gt_count": 2614,
+              "pred_count": 675
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.2897196261682243,
+              "acc": 0.8493150684931506,
+              "intersection": 744,
+              "union": 2568,
+              "gt_count": 876,
+              "pred_count": 2436
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.58207343412527,
+              "acc": 0.9013377926421404,
+              "intersection": 539,
+              "union": 926,
+              "gt_count": 598,
+              "pred_count": 867
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 16,
+              "gt_count": 0,
+              "pred_count": 16
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 6848,
+              "gt_count": 0,
+              "pred_count": 6848
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.06844106463878327,
+              "acc": 0.12121212121212122,
+              "intersection": 36,
+              "union": 526,
+              "gt_count": 297,
+              "pred_count": 265
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1279,
+              "gt_count": 1279,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.710446631339894,
+              "acc": 0.8510541827250057,
+              "intersection": 3754,
+              "union": 5284,
+              "gt_count": 4411,
+              "pred_count": 4627
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.4242738589211618,
+              "acc": 0.4255983350676379,
+              "intersection": 409,
+              "union": 964,
+              "gt_count": 961,
+              "pred_count": 412
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.5295404814004376,
+              "acc": 0.9132075471698113,
+              "intersection": 242,
+              "union": 457,
+              "gt_count": 265,
+              "pred_count": 434
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.3474576271186441,
+              "acc": 0.8,
+              "intersection": 164,
+              "union": 472,
+              "gt_count": 205,
+              "pred_count": 431
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.33062620969048745,
+          "macc": 0.546200760405502,
+          "num_valid": 39830,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4099329054842474,
+              "acc": 0.5710657319922787,
+              "intersection": 5621,
+              "union": 13712,
+              "gt_count": 9843,
+              "pred_count": 9490
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.4585219707057257,
+              "acc": 0.8546785802928767,
+              "intersection": 6887,
+              "union": 15020,
+              "gt_count": 8058,
+              "pred_count": 13849
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.4330011074197121,
+              "acc": 0.4360363230842759,
+              "intersection": 2737,
+              "union": 6321,
+              "gt_count": 6277,
+              "pred_count": 2781
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.05720737674068498,
+              "acc": 0.08025343189017951,
+              "intersection": 152,
+              "union": 2657,
+              "gt_count": 1894,
+              "pred_count": 915
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1259,
+              "gt_count": 0,
+              "pred_count": 1259
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.30852045524454014,
+              "acc": 0.31216931216931215,
+              "intersection": 1003,
+              "union": 3251,
+              "gt_count": 3213,
+              "pred_count": 1041
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.22586656727543794,
+              "acc": 0.23182861514919664,
+              "intersection": 606,
+              "union": 2683,
+              "gt_count": 2614,
+              "pred_count": 675
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.29005847953216374,
+              "acc": 0.8493150684931506,
+              "intersection": 744,
+              "union": 2565,
+              "gt_count": 876,
+              "pred_count": 2433
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.48778280542986424,
+              "acc": 0.9013377926421404,
+              "intersection": 539,
+              "union": 1105,
+              "gt_count": 598,
+              "pred_count": 1046
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 25,
+              "gt_count": 0,
+              "pred_count": 25
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.09580193756727665,
+              "acc": 0.2996632996632997,
+              "intersection": 89,
+              "union": 929,
+              "gt_count": 297,
+              "pred_count": 721
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1279,
+              "gt_count": 1279,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.710446631339894,
+              "acc": 0.8510541827250057,
+              "intersection": 3754,
+              "union": 5284,
+              "gt_count": 4411,
+              "pred_count": 4627
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.5401785714285714,
+              "acc": 0.9132075471698113,
+              "intersection": 242,
+              "union": 448,
+              "gt_count": 265,
+              "pred_count": 425
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.2808219178082192,
+              "acc": 0.8,
+              "intersection": 164,
+              "union": 584,
+              "gt_count": 205,
+              "pred_count": 543
+            }
+          }
+        },
+        "10": {
+          "miou": 0.34337806634292833,
+          "macc": 0.589703548512253,
+          "num_valid": 27361,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.47611384042012533,
+              "acc": 0.5710657319922787,
+              "intersection": 5621,
+              "union": 11806,
+              "gt_count": 9843,
+              "pred_count": 7584
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.5101301390121266,
+              "acc": 0.8561677835691238,
+              "intersection": 6899,
+              "union": 13524,
+              "gt_count": 8058,
+              "pred_count": 12365
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.05720737674068498,
+              "acc": 0.08025343189017951,
+              "intersection": 152,
+              "union": 2657,
+              "gt_count": 1894,
+              "pred_count": 915
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 791,
+              "gt_count": 0,
+              "pred_count": 791
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.30852045524454014,
+              "acc": 0.31216931216931215,
+              "intersection": 1003,
+              "union": 3251,
+              "gt_count": 3213,
+              "pred_count": 1041
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.21712647796488713,
+              "acc": 0.23182861514919664,
+              "intersection": 606,
+              "union": 2791,
+              "gt_count": 2614,
+              "pred_count": 783
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3297966401414677,
+              "acc": 0.8515981735159818,
+              "intersection": 746,
+              "union": 2262,
+              "gt_count": 876,
+              "pred_count": 2132
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.4301675977653631,
+              "acc": 0.9013377926421404,
+              "intersection": 539,
+              "union": 1253,
+              "gt_count": 598,
+              "pred_count": 1194
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.41796200345423146,
+              "acc": 0.9132075471698113,
+              "intersection": 242,
+              "union": 579,
+              "gt_count": 265,
+              "pred_count": 556
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0000_00"
+    },
+    "scene0062_00": {
+      "scene": "scene0062_00",
+      "label_ply": "dataset/scannet_og/scene0062_00/scene0062_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0062_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0062_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0062_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 51610,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 11437,
+        "num_points": 51610
+      },
+      "splits": {
+        "19": {
+          "miou": 0.34103875115016674,
+          "macc": 0.5543996739384692,
+          "num_valid": 35146,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5198475570590503,
+              "acc": 0.6699039841077143,
+              "intersection": 12140,
+              "union": 23353,
+              "gt_count": 18122,
+              "pred_count": 17371
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.6000456829602558,
+              "acc": 0.7758417011222681,
+              "intersection": 5254,
+              "union": 8756,
+              "gt_count": 6772,
+              "pred_count": 7238
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.44603312990409766,
+              "acc": 0.4693577981651376,
+              "intersection": 2558,
+              "union": 5735,
+              "gt_count": 5450,
+              "pred_count": 2843
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 112,
+              "gt_count": 0,
+              "pred_count": 112
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 424,
+              "gt_count": 0,
+              "pred_count": 424
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2446,
+              "gt_count": 2446,
+              "pred_count": 0
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 137,
+              "gt_count": 0,
+              "pred_count": 137
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.4360177221787855,
+              "acc": 0.8016291327264016,
+              "intersection": 1673,
+              "union": 3837,
+              "gt_count": 2087,
+              "pred_count": 3423
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.04428841479881177,
+              "acc": 0.6096654275092936,
+              "intersection": 164,
+              "union": 3703,
+              "gt_count": 269,
+              "pred_count": 3598
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.34345885135150933,
+          "macc": 0.5597673872320246,
+          "num_valid": 35146,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5251749445297832,
+              "acc": 0.6791744840525328,
+              "intersection": 12308,
+              "union": 23436,
+              "gt_count": 18122,
+              "pred_count": 17622
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.5884197558517191,
+              "acc": 0.7758417011222681,
+              "intersection": 5254,
+              "union": 8929,
+              "gt_count": 6772,
+              "pred_count": 7411
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.4668522707499565,
+              "acc": 0.49229357798165135,
+              "intersection": 2683,
+              "union": 5747,
+              "gt_count": 5450,
+              "pred_count": 2980
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 112,
+              "gt_count": 0,
+              "pred_count": 112
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2446,
+              "gt_count": 2446,
+              "pred_count": 0
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.4360177221787855,
+              "acc": 0.8016291327264016,
+              "intersection": 1673,
+              "union": 3837,
+              "gt_count": 2087,
+              "pred_count": 3423
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.04428841479881177,
+              "acc": 0.6096654275092936,
+              "intersection": 164,
+              "union": 3703,
+              "gt_count": 269,
+              "pred_count": 3598
+            }
+          }
+        },
+        "10": {
+          "miou": 0.4876877407430132,
+          "macc": 0.6937785938223127,
+          "num_valid": 32431,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5647043224608858,
+              "acc": 0.7050546297318177,
+              "intersection": 12777,
+              "union": 22626,
+              "gt_count": 18122,
+              "pred_count": 17281
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.5803246107982776,
+              "acc": 0.7761370348493798,
+              "intersection": 5256,
+              "union": 9057,
+              "gt_count": 6772,
+              "pred_count": 7541
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.4668522707499565,
+              "acc": 0.49229357798165135,
+              "intersection": 2683,
+              "union": 5747,
+              "gt_count": 5450,
+              "pred_count": 2980
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 106,
+              "gt_count": 0,
+              "pred_count": 106
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.338869758962933,
+              "acc": 0.8016291327264016,
+              "intersection": 1673,
+              "union": 4937,
+              "gt_count": 2087,
+              "pred_count": 4523
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0062_00"
+    },
+    "scene0070_00": {
+      "scene": "scene0070_00",
+      "label_ply": "dataset/scannet_og/scene0070_00/scene0070_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0070_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0070_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0070_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 109380,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 31112,
+        "num_points": 109380
+      },
+      "splits": {
+        "19": {
+          "miou": 0.2119418815561412,
+          "macc": 0.3259005383690779,
+          "num_valid": 60120,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.2747529074843712,
+              "acc": 0.4510118672246747,
+              "intersection": 7867,
+              "union": 28633,
+              "gt_count": 17443,
+              "pred_count": 19057
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.34611848154472613,
+              "acc": 0.39150137434068794,
+              "intersection": 5270,
+              "union": 15226,
+              "gt_count": 13461,
+              "pred_count": 7035
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.06505998054684967,
+              "acc": 0.06523623753792805,
+              "intersection": 602,
+              "union": 9253,
+              "gt_count": 9228,
+              "pred_count": 627
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.7172174840085288,
+              "acc": 0.7296637744034707,
+              "intersection": 2691,
+              "union": 3752,
+              "gt_count": 3688,
+              "pred_count": 2755
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2036,
+              "gt_count": 2036,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2158,
+              "gt_count": 2158,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 1178,
+              "gt_count": 922,
+              "pred_count": 256
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 521,
+              "gt_count": 0,
+              "pred_count": 521
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.08248269388712895,
+              "acc": 0.8521212121212122,
+              "intersection": 1406,
+              "union": 17046,
+              "gt_count": 1650,
+              "pred_count": 16802
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 5275,
+              "gt_count": 0,
+              "pred_count": 5275
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1601,
+              "gt_count": 0,
+              "pred_count": 1601
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.4218453865336658,
+              "acc": 0.4435703796937277,
+              "intersection": 4229,
+              "union": 10025,
+              "gt_count": 9534,
+              "pred_count": 4720
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 337,
+              "gt_count": 0,
+              "pred_count": 337
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1134,
+              "gt_count": 0,
+              "pred_count": 1134
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.26933313218227684,
+          "macc": 0.3241374410040462,
+          "num_valid": 58470,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.39254340457909664,
+              "acc": 0.6506908215329932,
+              "intersection": 11350,
+              "union": 28914,
+              "gt_count": 17443,
+              "pred_count": 22821
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.5113071933617718,
+              "acc": 0.6500260010400416,
+              "intersection": 8750,
+              "union": 17113,
+              "gt_count": 13461,
+              "pred_count": 12402
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.06505998054684967,
+              "acc": 0.06523623753792805,
+              "intersection": 602,
+              "union": 9253,
+              "gt_count": 9228,
+              "pred_count": 627
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.7172174840085288,
+              "acc": 0.7296637744034707,
+              "intersection": 2691,
+              "union": 3752,
+              "gt_count": 3688,
+              "pred_count": 2755
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2036,
+              "gt_count": 2036,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2158,
+              "gt_count": 2158,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 229,
+              "gt_count": 0,
+              "pred_count": 229
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 3296,
+              "gt_count": 922,
+              "pred_count": 2374
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 519,
+              "gt_count": 0,
+              "pred_count": 519
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 6459,
+              "gt_count": 0,
+              "pred_count": 6459
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1601,
+              "gt_count": 0,
+              "pred_count": 1601
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.4685369949619678,
+              "acc": 0.4974826935179358,
+              "intersection": 4743,
+              "union": 10123,
+              "gt_count": 9534,
+              "pred_count": 5332
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 392,
+              "gt_count": 0,
+              "pred_count": 392
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2959,
+              "gt_count": 0,
+              "pred_count": 2959
+            }
+          }
+        },
+        "10": {
+          "miou": 0.3683377933642824,
+          "macc": 0.49289919815248523,
+          "num_valid": 39708,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5032769462403685,
+              "acc": 0.6515507653499971,
+              "intersection": 11365,
+              "union": 22582,
+              "gt_count": 17443,
+              "pred_count": 16504
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.5649309368317633,
+              "acc": 0.7261719040190179,
+              "intersection": 9775,
+              "union": 17303,
+              "gt_count": 13461,
+              "pred_count": 13617
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.6931993817619784,
+              "acc": 0.7296637744034707,
+              "intersection": 2691,
+              "union": 3882,
+              "gt_count": 3688,
+              "pred_count": 2885
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2036,
+              "gt_count": 2036,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.32576082297471065,
+              "acc": 0.35217794253938833,
+              "intersection": 760,
+              "union": 2333,
+              "gt_count": 2158,
+              "pred_count": 935
+            },
+            "8": {
+              "name": "door",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 111,
+              "gt_count": 0,
+              "pred_count": 111
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.12285867237687366,
+              "acc": 0.49783080260303686,
+              "intersection": 459,
+              "union": 3736,
+              "gt_count": 922,
+              "pred_count": 3273
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 383,
+              "gt_count": 0,
+              "pred_count": 383
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2000,
+              "gt_count": 0,
+              "pred_count": 2000
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0070_00"
+    },
+    "scene0097_00": {
+      "scene": "scene0097_00",
+      "label_ply": "dataset/scannet_og/scene0097_00/scene0097_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0097_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0097_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0097_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 72007,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 10239,
+        "num_points": 72007
+      },
+      "splits": {
+        "19": {
+          "miou": 0.33326474342157,
+          "macc": 0.48526031085689564,
+          "num_valid": 53531,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.47402213148707023,
+              "acc": 0.6128452298982481,
+              "intersection": 16021,
+              "union": 33798,
+              "gt_count": 26142,
+              "pred_count": 23677
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.22259925347811332,
+              "acc": 0.2508604206500956,
+              "intersection": 2624,
+              "union": 11788,
+              "gt_count": 10460,
+              "pred_count": 3952
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.21318242343541943,
+              "acc": 0.21406605161117798,
+              "intersection": 1601,
+              "union": 7510,
+              "gt_count": 7479,
+              "pred_count": 1632
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.34496379196840027,
+              "acc": 0.643260495948932,
+              "intersection": 2620,
+              "union": 7595,
+              "gt_count": 4073,
+              "pred_count": 6142
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 11898,
+              "gt_count": 0,
+              "pred_count": 11898
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.04976303317535545,
+              "acc": 0.13070539419087138,
+              "intersection": 189,
+              "union": 3798,
+              "gt_count": 1446,
+              "pred_count": 2541
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.6522895125553915,
+              "acc": 0.6672710788757933,
+              "intersection": 2208,
+              "union": 3385,
+              "gt_count": 3309,
+              "pred_count": 2284
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 29,
+              "gt_count": 0,
+              "pred_count": 29
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.3760330578512397,
+              "acc": 0.8778135048231511,
+              "intersection": 546,
+              "union": 1452,
+              "gt_count": 622,
+              "pred_count": 1376
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.30970565081650875,
+          "macc": 0.5281761449286083,
+          "num_valid": 50222,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5767329578112427,
+              "acc": 0.7676535842705225,
+              "intersection": 20068,
+              "union": 34796,
+              "gt_count": 26142,
+              "pred_count": 28722
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3999856455896074,
+              "acc": 0.5327915869980879,
+              "intersection": 5573,
+              "union": 13933,
+              "gt_count": 10460,
+              "pred_count": 9046
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.2132108136902384,
+              "acc": 0.21406605161117798,
+              "intersection": 1601,
+              "union": 7509,
+              "gt_count": 7479,
+              "pred_count": 1631
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.34496379196840027,
+              "acc": 0.643260495948932,
+              "intersection": 2620,
+              "union": 7595,
+              "gt_count": 4073,
+              "pred_count": 6142
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.04979360165118679,
+              "acc": 0.1334716459197787,
+              "intersection": 193,
+              "union": 3876,
+              "gt_count": 1446,
+              "pred_count": 2623
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 138,
+              "gt_count": 0,
+              "pred_count": 138
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.27354709418837675,
+              "acc": 0.8778135048231511,
+              "intersection": 546,
+              "union": 1996,
+              "gt_count": 622,
+              "pred_count": 1920
+            }
+          }
+        },
+        "10": {
+          "miou": 0.47871363418119217,
+          "macc": 0.6555396037473651,
+          "num_valid": 40675,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.646749342352499,
+              "acc": 0.7899931145283452,
+              "intersection": 20652,
+              "union": 31932,
+              "gt_count": 26142,
+              "pred_count": 26442
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.44351697273233165,
+              "acc": 0.5333652007648183,
+              "intersection": 5579,
+              "union": 12579,
+              "gt_count": 10460,
+              "pred_count": 7698
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 183,
+              "gt_count": 0,
+              "pred_count": 183
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.3458745874587459,
+              "acc": 0.643260495948932,
+              "intersection": 2620,
+              "union": 7575,
+              "gt_count": 4073,
+              "pred_count": 6122
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 230,
+              "gt_count": 0,
+              "pred_count": 230
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0097_00"
+    },
+    "scene0140_00": {
+      "scene": "scene0140_00",
+      "label_ply": "dataset/scannet_og/scene0140_00/scene0140_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0140_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0140_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0140_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 372941,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 112054,
+        "num_points": 372941
+      },
+      "splits": {
+        "19": {
+          "miou": 0.22966786654443405,
+          "macc": 0.4066380603426668,
+          "num_valid": 221208,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.37219106306040367,
+              "acc": 0.525830835396846,
+              "intersection": 40347,
+              "union": 108404,
+              "gt_count": 76730,
+              "pred_count": 72021
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.12208600572740397,
+              "acc": 0.1612333562542977,
+              "intersection": 10317,
+              "union": 84506,
+              "gt_count": 63988,
+              "pred_count": 30835
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 4872,
+              "gt_count": 4872,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.4500203847151699,
+              "acc": 0.5138165968431297,
+              "intersection": 24284,
+              "union": 53962,
+              "gt_count": 47262,
+              "pred_count": 30984
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.19371289389557012,
+              "acc": 0.24457044013069382,
+              "intersection": 2545,
+              "union": 13138,
+              "gt_count": 10406,
+              "pred_count": 5277
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6715333716915995,
+              "acc": 0.9454232482786553,
+              "intersection": 9337,
+              "union": 13904,
+              "gt_count": 9876,
+              "pred_count": 13365
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 6361,
+              "gt_count": 6361,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.027799213265325327,
+              "acc": 0.8622300058377116,
+              "intersection": 1477,
+              "union": 53131,
+              "gt_count": 1713,
+              "pred_count": 52895
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2872,
+              "gt_count": 0,
+              "pred_count": 2872
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 5916,
+              "gt_count": 0,
+              "pred_count": 5916
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 3410,
+              "gt_count": 0,
+              "pred_count": 3410
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 789,
+              "gt_count": 0,
+              "pred_count": 789
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2844,
+              "gt_count": 0,
+              "pred_count": 2844
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.30100947404212386,
+          "macc": 0.4079424509549601,
+          "num_valid": 219495,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5397757116134204,
+              "acc": 0.7634171771145576,
+              "intersection": 58577,
+              "union": 108521,
+              "gt_count": 76730,
+              "pred_count": 90368
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.28122489164507114,
+              "acc": 0.3883696943176846,
+              "intersection": 24851,
+              "union": 88367,
+              "gt_count": 63988,
+              "pred_count": 49230
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 4872,
+              "gt_count": 4872,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.4500203847151699,
+              "acc": 0.5138165968431297,
+              "intersection": 24284,
+              "union": 53962,
+              "gt_count": 47262,
+              "pred_count": 30984
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.1645119586296057,
+              "acc": 0.24457044013069382,
+              "intersection": 2545,
+              "union": 15470,
+              "gt_count": 10406,
+              "pred_count": 7609
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6715333716915995,
+              "acc": 0.9454232482786553,
+              "intersection": 9337,
+              "union": 13904,
+              "gt_count": 9876,
+              "pred_count": 13365
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 6361,
+              "gt_count": 6361,
+              "pred_count": 0
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 5453,
+              "gt_count": 0,
+              "pred_count": 5453
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 10447,
+              "gt_count": 0,
+              "pred_count": 10447
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 3410,
+              "gt_count": 0,
+              "pred_count": 3410
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1970,
+              "gt_count": 0,
+              "pred_count": 1970
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 6659,
+              "gt_count": 0,
+              "pred_count": 6659
+            }
+          }
+        },
+        "10": {
+          "miou": 0.4264505664548695,
+          "macc": 0.5664551363771213,
+          "num_valid": 214623,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.570784091223603,
+              "acc": 0.8063208653720839,
+              "intersection": 61869,
+              "union": 108393,
+              "gt_count": 76730,
+              "pred_count": 93532
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.35437092829469946,
+              "acc": 0.5117522035381634,
+              "intersection": 32746,
+              "union": 92406,
+              "gt_count": 63988,
+              "pred_count": 61164
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.4418913820670823,
+              "acc": 0.5204392535229149,
+              "intersection": 24597,
+              "union": 55663,
+              "gt_count": 47262,
+              "pred_count": 32998
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.158261302157826,
+              "acc": 0.24457044013069382,
+              "intersection": 2545,
+              "union": 16081,
+              "gt_count": 10406,
+              "pred_count": 8220
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.6715333716915995,
+              "acc": 0.9454232482786553,
+              "intersection": 9337,
+              "union": 13904,
+              "gt_count": 9876,
+              "pred_count": 13365
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.3618623232944069,
+              "acc": 0.37022480742021696,
+              "intersection": 2355,
+              "union": 6508,
+              "gt_count": 6361,
+              "pred_count": 2502
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 2842,
+              "gt_count": 0,
+              "pred_count": 2842
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0140_00"
+    },
+    "scene0200_00": {
+      "scene": "scene0200_00",
+      "label_ply": "dataset/scannet_og/scene0200_00/scene0200_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0200_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0200_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0200_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 83291,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 19235,
+        "num_points": 83291
+      },
+      "splits": {
+        "19": {
+          "miou": 0.3752153476428027,
+          "macc": 0.52435543886411,
+          "num_valid": 56362,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4079477672094148,
+              "acc": 0.5754733071806243,
+              "intersection": 10122,
+              "union": 24812,
+              "gt_count": 17589,
+              "pred_count": 17345
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3548005344531399,
+              "acc": 0.6808292432788806,
+              "intersection": 9294,
+              "union": 26195,
+              "gt_count": 13651,
+              "pred_count": 21838
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.6625750136388434,
+              "acc": 0.7723370429252783,
+              "intersection": 2429,
+              "union": 3666,
+              "gt_count": 3145,
+              "pred_count": 2950
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.10331467929401636,
+              "acc": 0.16229923922231615,
+              "intersection": 960,
+              "union": 9292,
+              "gt_count": 5915,
+              "pred_count": 4337
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.5360710321864595,
+              "acc": 0.8341968911917098,
+              "intersection": 483,
+              "union": 901,
+              "gt_count": 579,
+              "pred_count": 805
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 372,
+              "gt_count": 0,
+              "pred_count": 372
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 7717,
+              "gt_count": 7717,
+              "pred_count": 0
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.41676453317674694,
+              "acc": 0.56985146527499,
+              "intersection": 2839,
+              "union": 6812,
+              "gt_count": 4982,
+              "pred_count": 4669
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 85,
+              "gt_count": 0,
+              "pred_count": 85
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1716,
+              "gt_count": 0,
+              "pred_count": 1716
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 149,
+              "gt_count": 0,
+              "pred_count": 149
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.5202492211838006,
+              "acc": 0.5998563218390804,
+              "intersection": 1670,
+              "union": 3210,
+              "gt_count": 2784,
+              "pred_count": 2096
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.37867483947544744,
+          "macc": 0.5330199473550612,
+          "num_valid": 56362,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4079477672094148,
+              "acc": 0.5754733071806243,
+              "intersection": 10122,
+              "union": 24812,
+              "gt_count": 17589,
+              "pred_count": 17345
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3879149712895007,
+              "acc": 0.747271262178595,
+              "intersection": 10201,
+              "union": 26297,
+              "gt_count": 13651,
+              "pred_count": 22847
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.6625750136388434,
+              "acc": 0.7723370429252783,
+              "intersection": 2429,
+              "union": 3666,
+              "gt_count": 3145,
+              "pred_count": 2950
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.09787617711881387,
+              "acc": 0.16517328825021133,
+              "intersection": 977,
+              "union": 9982,
+              "gt_count": 5915,
+              "pred_count": 5044
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.5360710321864595,
+              "acc": 0.8341968911917098,
+              "intersection": 483,
+              "union": 901,
+              "gt_count": 579,
+              "pred_count": 805
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 372,
+              "gt_count": 0,
+              "pred_count": 372
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 7717,
+              "gt_count": 7717,
+              "pred_count": 0
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.41676453317674694,
+              "acc": 0.56985146527499,
+              "intersection": 2839,
+              "union": 6812,
+              "gt_count": 4982,
+              "pred_count": 4669
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 85,
+              "gt_count": 0,
+              "pred_count": 85
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 149,
+              "gt_count": 0,
+              "pred_count": 149
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.5202492211838006,
+              "acc": 0.5998563218390804,
+              "intersection": 1670,
+              "union": 3210,
+              "gt_count": 2784,
+              "pred_count": 2096
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "10": {
+          "miou": 0.346166897619558,
+          "macc": 0.4830321440230661,
+          "num_valid": 50433,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4198780437217406,
+              "acc": 0.5754733071806243,
+              "intersection": 10122,
+              "union": 24107,
+              "gt_count": 17589,
+              "pred_count": 16640
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3948560460652591,
+              "acc": 0.7534979122408615,
+              "intersection": 10286,
+              "union": 26050,
+              "gt_count": 13651,
+              "pred_count": 22685
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.09787617711881387,
+              "acc": 0.16517328825021133,
+              "intersection": 977,
+              "union": 9982,
+              "gt_count": 5915,
+              "pred_count": 5044
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.7465224111282844,
+              "acc": 0.8341968911917098,
+              "intersection": 483,
+              "union": 647,
+              "gt_count": 579,
+              "pred_count": 551
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 776,
+              "gt_count": 0,
+              "pred_count": 776
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 7717,
+              "gt_count": 7717,
+              "pred_count": 0
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.4178687076832499,
+              "acc": 0.56985146527499,
+              "intersection": 2839,
+              "union": 6794,
+              "gt_count": 4982,
+              "pred_count": 4651
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 86,
+              "gt_count": 0,
+              "pred_count": 86
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0200_00"
+    },
+    "scene0347_00": {
+      "scene": "scene0347_00",
+      "label_ply": "dataset/scannet_og/scene0347_00/scene0347_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0347_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0347_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0347_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 67984,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 13532,
+        "num_points": 67984
+      },
+      "splits": {
+        "19": {
+          "miou": 0.32954615615184846,
+          "macc": 0.4441056077339058,
+          "num_valid": 42292,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.11987557824214388,
+              "acc": 0.1833597657679639,
+              "intersection": 3006,
+              "union": 25076,
+              "gt_count": 16394,
+              "pred_count": 11688
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.10831930752584756,
+              "acc": 0.20044493882091213,
+              "intersection": 901,
+              "union": 8318,
+              "gt_count": 4495,
+              "pred_count": 4724
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.4919965075669383,
+              "acc": 0.6431424766977364,
+              "intersection": 3381,
+              "union": 6872,
+              "gt_count": 5257,
+              "pred_count": 4996
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.4373155196520118,
+              "acc": 0.5032177332856632,
+              "intersection": 2815,
+              "union": 6437,
+              "gt_count": 5594,
+              "pred_count": 3658
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 778,
+              "gt_count": 0,
+              "pred_count": 778
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 11003,
+              "gt_count": 0,
+              "pred_count": 11003
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.02604491578290705,
+              "acc": 0.026835931222882855,
+              "intersection": 167,
+              "union": 6412,
+              "gt_count": 6223,
+              "pred_count": 356
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 28,
+              "gt_count": 0,
+              "pred_count": 28
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.6284259034683483,
+              "acc": 0.7759808325846062,
+              "intersection": 2591,
+              "union": 4123,
+              "gt_count": 3339,
+              "pred_count": 3375
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 356,
+              "gt_count": 0,
+              "pred_count": 356
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.4948453608247423,
+              "acc": 0.7757575757575758,
+              "intersection": 768,
+              "union": 1552,
+              "gt_count": 990,
+              "pred_count": 1330
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.3279803330816807,
+          "macc": 0.4899080253206756,
+          "num_valid": 38953,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.4365260585666787,
+              "acc": 0.6646944003903867,
+              "intersection": 10897,
+              "union": 24963,
+              "gt_count": 16394,
+              "pred_count": 19466
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.13118146079039933,
+              "acc": 0.282091212458287,
+              "intersection": 1268,
+              "union": 9666,
+              "gt_count": 4495,
+              "pred_count": 6439
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.49213973799126637,
+              "acc": 0.6431424766977364,
+              "intersection": 3381,
+              "union": 6870,
+              "gt_count": 5257,
+              "pred_count": 4994
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.4373155196520118,
+              "acc": 0.5032177332856632,
+              "intersection": 2815,
+              "union": 6437,
+              "gt_count": 5594,
+              "pred_count": 3658
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 754,
+              "gt_count": 0,
+              "pred_count": 754
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.06714591618231876,
+              "acc": 0.07054475333440463,
+              "intersection": 439,
+              "union": 6538,
+              "gt_count": 6223,
+              "pred_count": 754
+            },
+            "14": {
+              "name": "desk",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 28,
+              "gt_count": 0,
+              "pred_count": 28
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1179,
+              "gt_count": 0,
+              "pred_count": 1179
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.40357330530740937,
+              "acc": 0.7757575757575758,
+              "intersection": 768,
+              "union": 1903,
+              "gt_count": 990,
+              "pred_count": 1681
+            }
+          }
+        },
+        "10": {
+          "miou": 0.38321787904049637,
+          "macc": 0.49030515690573556,
+          "num_valid": 26483,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.49296539244514814,
+              "acc": 0.6646944003903867,
+              "intersection": 10897,
+              "union": 22105,
+              "gt_count": 16394,
+              "pred_count": 16608
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.16695268448149056,
+              "acc": 0.30300333704115684,
+              "intersection": 1362,
+              "union": 8158,
+              "gt_count": 4495,
+              "pred_count": 5025
+            },
+            "4": {
+              "name": "bed",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.4897355601948504,
+              "acc": 0.5032177332856632,
+              "intersection": 2815,
+              "union": 5748,
+              "gt_count": 5594,
+              "pred_count": 2969
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 692,
+              "gt_count": 0,
+              "pred_count": 692
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1189,
+              "gt_count": 0,
+              "pred_count": 1189
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0347_00"
+    },
+    "scene0400_00": {
+      "scene": "scene0400_00",
+      "label_ply": "dataset/scannet_og/scene0400_00/scene0400_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0400_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0400_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0400_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 155959,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 40696,
+        "num_points": 155959
+      },
+      "splits": {
+        "19": {
+          "miou": 0.23694417891120476,
+          "macc": 0.3972002264370977,
+          "num_valid": 78378,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5426061611949966,
+              "acc": 0.6595158433379256,
+              "intersection": 26808,
+              "union": 49406,
+              "gt_count": 40648,
+              "pred_count": 35566
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.5564125784592324,
+              "acc": 0.7134048686739269,
+              "intersection": 17818,
+              "union": 32023,
+              "gt_count": 24976,
+              "pred_count": 24865
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 134,
+              "gt_count": 0,
+              "pred_count": 134
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 5158,
+              "gt_count": 5158,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.11801242236024845,
+              "acc": 0.13606770833333334,
+              "intersection": 209,
+              "union": 1771,
+              "gt_count": 1536,
+              "pred_count": 444
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.09549945115257959,
+              "acc": 0.5631067961165048,
+              "intersection": 174,
+              "union": 1822,
+              "gt_count": 309,
+              "pred_count": 1687
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.0012315270935960591,
+              "acc": 0.0012630249447426586,
+              "intersection": 4,
+              "union": 3248,
+              "gt_count": 3167,
+              "pred_count": 85
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 63,
+              "gt_count": 0,
+              "pred_count": 63
+            },
+            "11": {
+              "name": "picture",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 10469,
+              "gt_count": 0,
+              "pred_count": 10469
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 524,
+              "gt_count": 0,
+              "pred_count": 524
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.3448471121177803,
+              "acc": 0.7070433436532507,
+              "intersection": 1827,
+              "union": 5298,
+              "gt_count": 2584,
+              "pred_count": 4541
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.3020498245360656,
+          "macc": 0.5363118428707403,
+          "num_valid": 78378,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5856946243523317,
+              "acc": 0.7119169454831726,
+              "intersection": 28938,
+              "union": 49408,
+              "gt_count": 40648,
+              "pred_count": 37698
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.538894265666586,
+              "acc": 0.7134048686739269,
+              "intersection": 17818,
+              "union": 33064,
+              "gt_count": 24976,
+              "pred_count": 25906
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 134,
+              "gt_count": 0,
+              "pred_count": 134
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 5158,
+              "gt_count": 5158,
+              "pred_count": 0
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.415929203539823,
+              "acc": 0.826171875,
+              "intersection": 1269,
+              "union": 3051,
+              "gt_count": 1536,
+              "pred_count": 2784
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.09549945115257959,
+              "acc": 0.5631067961165048,
+              "intersection": 174,
+              "union": 1822,
+              "gt_count": 309,
+              "pred_count": 1687
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.22577668409720086,
+              "acc": 0.23176507736027788,
+              "intersection": 734,
+              "union": 3251,
+              "gt_count": 3167,
+              "pred_count": 818
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 63,
+              "gt_count": 0,
+              "pred_count": 63
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1565,
+              "gt_count": 0,
+              "pred_count": 1565
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.25255454294393814,
+              "acc": 0.7078173374613003,
+              "intersection": 1829,
+              "union": 7242,
+              "gt_count": 2584,
+              "pred_count": 6487
+            },
+            "16": {
+              "name": "curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1236,
+              "gt_count": 0,
+              "pred_count": 1236
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "34": {
+              "name": "sink",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "10": {
+          "miou": 0.4107670255463554,
+          "macc": 0.6100087208811226,
+          "num_valid": 75794,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.630206313899149,
+              "acc": 0.7597421767368628,
+              "intersection": 30882,
+              "union": 49003,
+              "gt_count": 40648,
+              "pred_count": 39237
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.506460239268121,
+              "acc": 0.7203715566944267,
+              "intersection": 17992,
+              "union": 35525,
+              "gt_count": 24976,
+              "pred_count": 28541
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.16549763033175355,
+              "acc": 0.16925164792555253,
+              "intersection": 873,
+              "union": 5275,
+              "gt_count": 5158,
+              "pred_count": 990
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.46195850018201673,
+              "acc": 0.826171875,
+              "intersection": 1269,
+              "union": 2747,
+              "gt_count": 1536,
+              "pred_count": 2480
+            },
+            "6": {
+              "name": "sofa",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "7": {
+              "name": "table",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 742,
+              "gt_count": 0,
+              "pred_count": 742
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.09549945115257959,
+              "acc": 0.5631067961165048,
+              "intersection": 174,
+              "union": 1822,
+              "gt_count": 309,
+              "pred_count": 1687
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.6049800184445128,
+              "acc": 0.6214082728133881,
+              "intersection": 1968,
+              "union": 3253,
+              "gt_count": 3167,
+              "pred_count": 2054
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 63,
+              "gt_count": 0,
+              "pred_count": 63
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0400_00"
+    },
+    "scene0590_00": {
+      "scene": "scene0590_00",
+      "label_ply": "dataset/scannet_og/scene0590_00/scene0590_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0590_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0590_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0590_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 222957,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 52434,
+        "num_points": 222957
+      },
+      "splits": {
+        "19": {
+          "miou": 0.294530355975904,
+          "macc": 0.4097526166830705,
+          "num_valid": 137742,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.13730479310454502,
+              "acc": 0.17400943206094563,
+              "intersection": 8634,
+              "union": 62882,
+              "gt_count": 49618,
+              "pred_count": 21898
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.3809662398137369,
+              "acc": 0.4305779415150817,
+              "intersection": 13090,
+              "union": 34360,
+              "gt_count": 30401,
+              "pred_count": 17049
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2971,
+              "gt_count": 2971,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.3711456859971711,
+              "acc": 0.3787528868360277,
+              "intersection": 5248,
+              "union": 14140,
+              "gt_count": 13856,
+              "pred_count": 5532
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.49704810953397816,
+              "acc": 0.5962929475587704,
+              "intersection": 3957,
+              "union": 7961,
+              "gt_count": 6636,
+              "pred_count": 5282
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.8626446594574084,
+              "acc": 0.8848024907569566,
+              "intersection": 4547,
+              "union": 5271,
+              "gt_count": 5139,
+              "pred_count": 4679
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 4801,
+              "gt_count": 3033,
+              "pred_count": 1768
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5346272606969563,
+              "acc": 0.8576280781205774,
+              "intersection": 6060,
+              "union": 11335,
+              "gt_count": 7066,
+              "pred_count": 10329
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 1546,
+              "gt_count": 0,
+              "pred_count": 1546
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.04450580547790145,
+              "acc": 0.6589639410868461,
+              "intersection": 2595,
+              "union": 58307,
+              "gt_count": 3938,
+              "pred_count": 56964
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.04203913988886204,
+              "acc": 0.17846153846153845,
+              "intersection": 174,
+              "union": 4139,
+              "gt_count": 975,
+              "pred_count": 3338
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.12140641158221303,
+              "acc": 0.1601637107776262,
+              "intersection": 587,
+              "union": 4835,
+              "gt_count": 3665,
+              "pred_count": 1757
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.7093935538592027,
+              "acc": 0.727994777499728,
+              "intersection": 6691,
+              "union": 9432,
+              "gt_count": 9191,
+              "pred_count": 6932
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 803,
+              "gt_count": 803,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 74,
+              "gt_count": 0,
+              "pred_count": 74
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.4223433242506812,
+              "acc": 0.6888888888888889,
+              "intersection": 310,
+              "union": 734,
+              "gt_count": 450,
+              "pred_count": 594
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            }
+          }
+        },
+        "15": {
+          "miou": 0.39359196693628623,
+          "macc": 0.5286877932269671,
+          "num_valid": 133001,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5180702057755491,
+              "acc": 0.6641944455641098,
+              "intersection": 32956,
+              "union": 63613,
+              "gt_count": 49618,
+              "pred_count": 46951
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.471343146274149,
+              "acc": 0.6741225617578369,
+              "intersection": 20494,
+              "union": 43480,
+              "gt_count": 30401,
+              "pred_count": 33573
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2971,
+              "gt_count": 2971,
+              "pred_count": 0
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.5977691627559002,
+              "acc": 0.6343100461893765,
+              "intersection": 8789,
+              "union": 14703,
+              "gt_count": 13856,
+              "pred_count": 9636
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.5547785547785548,
+              "acc": 0.6814345991561181,
+              "intersection": 4522,
+              "union": 8151,
+              "gt_count": 6636,
+              "pred_count": 6037
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.8626446594574084,
+              "acc": 0.8848024907569566,
+              "intersection": 4547,
+              "union": 5271,
+              "gt_count": 5139,
+              "pred_count": 4679
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 4783,
+              "gt_count": 3033,
+              "pred_count": 1750
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5478594675790703,
+              "acc": 0.9290970846306256,
+              "intersection": 6565,
+              "union": 11983,
+              "gt_count": 7066,
+              "pred_count": 11482
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4168,
+              "gt_count": 0,
+              "pred_count": 4168
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": 0.043961238477901204,
+              "acc": 0.19076923076923077,
+              "intersection": 186,
+              "union": 4231,
+              "gt_count": 975,
+              "pred_count": 3442
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.12140641158221303,
+              "acc": 0.1601637107776262,
+              "intersection": 587,
+              "union": 4835,
+              "gt_count": 3665,
+              "pred_count": 1757
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.8057855570694896,
+              "acc": 0.8364704602328364,
+              "intersection": 7688,
+              "union": 9541,
+              "gt_count": 9191,
+              "pred_count": 8038
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 74,
+              "gt_count": 0,
+              "pred_count": 74
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.1994851994851995,
+              "acc": 0.6888888888888889,
+              "intersection": 310,
+              "union": 1554,
+              "gt_count": 450,
+              "pred_count": 1414
+            }
+          }
+        },
+        "10": {
+          "miou": 0.544879202221524,
+          "macc": 0.6821985544218773,
+          "num_valid": 115749,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5336312704426956,
+              "acc": 0.6641944455641098,
+              "intersection": 32956,
+              "union": 61758,
+              "gt_count": 49618,
+              "pred_count": 45096
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.4917330936442983,
+              "acc": 0.6838261899279628,
+              "intersection": 20789,
+              "union": 42277,
+              "gt_count": 30401,
+              "pred_count": 32665
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.5977691627559002,
+              "acc": 0.6343100461893765,
+              "intersection": 8789,
+              "union": 14703,
+              "gt_count": 13856,
+              "pred_count": 9636
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.5829573288642517,
+              "acc": 0.6814345991561181,
+              "intersection": 4522,
+              "union": 7757,
+              "gt_count": 6636,
+              "pred_count": 5643
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.86280834914611,
+              "acc": 0.8848024907569566,
+              "intersection": 4547,
+              "union": 5270,
+              "gt_count": 5139,
+              "pred_count": 4678
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.19885487778022462,
+              "acc": 0.29772502472799206,
+              "intersection": 903,
+              "union": 4541,
+              "gt_count": 3033,
+              "pred_count": 2411
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5464003329171868,
+              "acc": 0.9290970846306256,
+              "intersection": 6565,
+              "union": 12015,
+              "gt_count": 7066,
+              "pred_count": 11514
+            },
+            "9": {
+              "name": "window",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4032,
+              "gt_count": 0,
+              "pred_count": 4032
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 74,
+              "gt_count": 0,
+              "pred_count": 74
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0590_00"
+    },
+    "scene0645_00": {
+      "scene": "scene0645_00",
+      "label_ply": "dataset/scannet_og/scene0645_00/scene0645_00_vh_clean_2.labels.ply",
+      "model_path": "output/baselines/opengaussian/scannet/scene0645_00",
+      "mapping_file": "output/baselines/opengaussian/scannet/scene0645_00/cluster_lang.npz",
+      "gaussian_ply": "output/baselines/opengaussian/scannet/scene0645_00/point_cloud/iteration_90000/point_cloud.ply",
+      "num_points": 352477,
+      "opacity_filter": {
+        "enabled": true,
+        "threshold": 0.1,
+        "num_filtered": 101483,
+        "num_points": 352477
+      },
+      "splits": {
+        "19": {
+          "miou": 0.29234201372740576,
+          "macc": 0.45944538702276166,
+          "num_valid": 205448,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            14,
+            16,
+            24,
+            28,
+            33,
+            34,
+            36
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "picture",
+            "counter",
+            "desk",
+            "curtain",
+            "refrigerator",
+            "shower curtain",
+            "toilet",
+            "sink",
+            "bathtub"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.27093497049096454,
+              "acc": 0.3183408832306404,
+              "intersection": 29656,
+              "union": 109458,
+              "gt_count": 93158,
+              "pred_count": 45956
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.25712853642236577,
+              "acc": 0.35063159760018225,
+              "intersection": 13851,
+              "union": 53868,
+              "gt_count": 39503,
+              "pred_count": 28216
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.276282590412111,
+              "acc": 0.28278335724533715,
+              "intersection": 1971,
+              "union": 7134,
+              "gt_count": 6970,
+              "pred_count": 2135
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.445701213700197,
+              "acc": 0.48509578809046267,
+              "intersection": 7014,
+              "union": 15737,
+              "gt_count": 14459,
+              "pred_count": 8292
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.33057746120580006,
+              "acc": 0.35877967973495306,
+              "intersection": 2599,
+              "union": 7862,
+              "gt_count": 7244,
+              "pred_count": 3217
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.654878216595569,
+              "acc": 0.6917151162790698,
+              "intersection": 4759,
+              "union": 7267,
+              "gt_count": 6880,
+              "pred_count": 5146
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 3666,
+              "gt_count": 3666,
+              "pred_count": 0
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5533097524002021,
+              "acc": 0.6338639652677279,
+              "intersection": 4380,
+              "union": 7916,
+              "gt_count": 6910,
+              "pred_count": 5386
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.025491151160902743,
+              "acc": 0.05162775402828017,
+              "intersection": 157,
+              "union": 6159,
+              "gt_count": 3041,
+              "pred_count": 3275
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "11": {
+              "name": "picture",
+              "iou": 0.011966010941683156,
+              "acc": 0.9269612263300271,
+              "intersection": 1028,
+              "union": 85910,
+              "gt_count": 1109,
+              "pred_count": 85829
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 3183,
+              "gt_count": 0,
+              "pred_count": 3183
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2730,
+              "gt_count": 2730,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.38080495356037153,
+              "acc": 0.4411506368028107,
+              "intersection": 6027,
+              "union": 15827,
+              "gt_count": 13662,
+              "pred_count": 8192
+            },
+            "24": {
+              "name": "refrigerator",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "28": {
+              "name": "shower curtain",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2547,
+              "gt_count": 2547,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.4867894315452362,
+              "acc": 0.9477786438035853,
+              "intersection": 1216,
+              "union": 2498,
+              "gt_count": 1283,
+              "pred_count": 2431
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.10767160161507403,
+              "acc": 0.9411764705882353,
+              "intersection": 240,
+              "union": 2229,
+              "gt_count": 255,
+              "pred_count": 2214
+            },
+            "36": {
+              "name": "bathtub",
+              "iou": 0.8759363295880149,
+              "acc": 0.9212210733628754,
+              "intersection": 1871,
+              "union": 2136,
+              "gt_count": 2031,
+              "pred_count": 1976
+            }
+          }
+        },
+        "15": {
+          "miou": 0.3181358451554547,
+          "macc": 0.50945310507972,
+          "num_valid": 199761,
+          "class_ids": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            14,
+            16,
+            33,
+            34
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "cabinet",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "counter",
+            "desk",
+            "curtain",
+            "toilet",
+            "sink"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5531053659738477,
+              "acc": 0.6747246613280663,
+              "intersection": 62856,
+              "union": 113642,
+              "gt_count": 93158,
+              "pred_count": 83340
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.43500876943141104,
+              "acc": 0.7346024352580817,
+              "intersection": 29019,
+              "union": 66709,
+              "gt_count": 39503,
+              "pred_count": 56225
+            },
+            "3": {
+              "name": "cabinet",
+              "iou": 0.276282590412111,
+              "acc": 0.28278335724533715,
+              "intersection": 1971,
+              "union": 7134,
+              "gt_count": 6970,
+              "pred_count": 2135
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.36262392453159803,
+              "acc": 0.5742444152431012,
+              "intersection": 8303,
+              "union": 22897,
+              "gt_count": 14459,
+              "pred_count": 16741
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.5400526513726965,
+              "acc": 0.5946990612921038,
+              "intersection": 4308,
+              "union": 7977,
+              "gt_count": 7244,
+              "pred_count": 5041
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.654878216595569,
+              "acc": 0.6917151162790698,
+              "intersection": 4759,
+              "union": 7267,
+              "gt_count": 6880,
+              "pred_count": 5146
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.005352528608342562,
+              "acc": 0.007910529187124931,
+              "intersection": 29,
+              "union": 5418,
+              "gt_count": 3666,
+              "pred_count": 1781
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5562165377751338,
+              "acc": 0.6765557163531114,
+              "intersection": 4675,
+              "union": 8405,
+              "gt_count": 6910,
+              "pred_count": 6170
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.02521278304159306,
+              "acc": 0.05162775402828017,
+              "intersection": 157,
+              "union": 6227,
+              "gt_count": 3041,
+              "pred_count": 3343
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "12": {
+              "name": "counter",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 4448,
+              "gt_count": 0,
+              "pred_count": 4448
+            },
+            "14": {
+              "name": "desk",
+              "iou": 0.0,
+              "acc": 0.0,
+              "intersection": 0,
+              "union": 2730,
+              "gt_count": 2730,
+              "pred_count": 0
+            },
+            "16": {
+              "name": "curtain",
+              "iou": 0.38371426752403387,
+              "acc": 0.4411506368028107,
+              "intersection": 6027,
+              "union": 15707,
+              "gt_count": 13662,
+              "pred_count": 8072
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.24045877002175203,
+              "acc": 0.9477786438035853,
+              "intersection": 1216,
+              "union": 5057,
+              "gt_count": 1283,
+              "pred_count": 4990
+            },
+            "34": {
+              "name": "sink",
+              "iou": 0.10285958173282117,
+              "acc": 0.9450980392156862,
+              "intersection": 241,
+              "union": 2343,
+              "gt_count": 255,
+              "pred_count": 2329
+            }
+          }
+        },
+        "10": {
+          "miou": 0.3959123576664658,
+          "macc": 0.5829555449019846,
+          "num_valid": 176144,
+          "class_ids": [
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            33
+          ],
+          "class_names": [
+            "wall",
+            "floor",
+            "bed",
+            "chair",
+            "sofa",
+            "table",
+            "door",
+            "window",
+            "bookshelf",
+            "toilet"
+          ],
+          "per_class": {
+            "1": {
+              "name": "wall",
+              "iou": 0.5983007404594646,
+              "acc": 0.6765387835719959,
+              "intersection": 63025,
+              "union": 105340,
+              "gt_count": 93158,
+              "pred_count": 75207
+            },
+            "2": {
+              "name": "floor",
+              "iou": 0.448239190544195,
+              "acc": 0.7468799837986988,
+              "intersection": 29504,
+              "union": 65822,
+              "gt_count": 39503,
+              "pred_count": 55823
+            },
+            "4": {
+              "name": "bed",
+              "iou": 0.36402297338769785,
+              "acc": 0.5742444152431012,
+              "intersection": 8303,
+              "union": 22809,
+              "gt_count": 14459,
+              "pred_count": 16653
+            },
+            "5": {
+              "name": "chair",
+              "iou": 0.5437334343051874,
+              "acc": 0.5946990612921038,
+              "intersection": 4308,
+              "union": 7923,
+              "gt_count": 7244,
+              "pred_count": 4987
+            },
+            "6": {
+              "name": "sofa",
+              "iou": 0.6552388820046813,
+              "acc": 0.6917151162790698,
+              "intersection": 4759,
+              "union": 7263,
+              "gt_count": 6880,
+              "pred_count": 5142
+            },
+            "7": {
+              "name": "table",
+              "iou": 0.17739483020780536,
+              "acc": 0.2864157119476268,
+              "intersection": 1050,
+              "union": 5919,
+              "gt_count": 3666,
+              "pred_count": 3303
+            },
+            "8": {
+              "name": "door",
+              "iou": 0.5284212905413042,
+              "acc": 0.6767004341534009,
+              "intersection": 4676,
+              "union": 8849,
+              "gt_count": 6910,
+              "pred_count": 6615
+            },
+            "9": {
+              "name": "window",
+              "iou": 0.026768968456947997,
+              "acc": 0.05162775402828017,
+              "intersection": 157,
+              "union": 5865,
+              "gt_count": 3041,
+              "pred_count": 2981
+            },
+            "10": {
+              "name": "bookshelf",
+              "iou": null,
+              "acc": null,
+              "intersection": 0,
+              "union": 0,
+              "gt_count": 0,
+              "pred_count": 0
+            },
+            "33": {
+              "name": "toilet",
+              "iou": 0.2210909090909091,
+              "acc": 0.9477786438035853,
+              "intersection": 1216,
+              "union": 5500,
+              "gt_count": 1283,
+              "pred_count": 5433
+            }
+          }
+        }
+      },
+      "visualization_dir": "output/baselines/opengaussian/scannet_eval/visualizations/scene0645_00"
+    }
+  }
+}

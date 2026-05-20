@@ -1,0 +1,370 @@
+{
+  "generated": "2026-05-16T17:10:39Z",
+  "protocol_tag": "thr0p25",
+  "expected_scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "runs": [
+    {
+      "label": "pad16_geometry",
+      "source_root": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full",
+      "scene_count": 4,
+      "missing_scenes": [],
+      "protocol": {
+        "name": "OpenGaussian-style LERF-OVS direct 3D object selection",
+        "query_location": "3D Gaussian primitives",
+        "feature_source": "pre-refiner Gaussian-center compact features projected by VPR-trained point summary adapter",
+        "score_source": "direct",
+        "score_cache": "output/radio_gs/vpr_field_consistency_promptens_score_cache_20260515/figurines_promptens_scene_a05.pt",
+        "registered_feature_cache": "",
+        "compact_feature_key": "features",
+        "direct_readout_mode": "gaussian",
+        "direct_readout_k": 8,
+        "direct_readout_candidate_k": 0,
+        "text_head": "SigLIP2 summary/text-aligned head",
+        "canonical_embedding_cache": "",
+        "score_aggregation": "none",
+        "score_aggregation_resolution": 64,
+        "score_aggregation_blend": 0.0,
+        "selection_refinement": "none",
+        "selection_min_ratio": 0.003,
+        "selection_max_ratio": 0.06,
+        "component_support_ratio": 0.05,
+        "component_resolution": 64,
+        "component_keep": 1,
+        "component_min_size": 8,
+        "component_rank_by": "score_sum",
+        "registered_view_fallback": "direct",
+        "registration_frame_mode": "official",
+        "registration_max_frames": 0,
+        "registration_depth_tolerance": 0.08,
+        "registration_relative_depth_tolerance": 0.02,
+        "registration_alpha_threshold": 0.02,
+        "registration_assignment_mode": "center",
+        "registration_weight_mode": "uniform",
+        "registration_confidence_blend": 0.0,
+        "registration_confidence_mode": "log",
+        "disable_registered_refiner": false,
+        "use_point_summary_adapter": true,
+        "point_summary_adapter_blend_alpha": 0.5,
+        "point_summary_adapter_valid_mask": "teacher_cache",
+        "render_role": "render selected primitives only for mask evaluation",
+        "metrics": [
+          "mIoU",
+          "Acc@0.25",
+          "Acc@0.50",
+          "boundary_f",
+          "trimap_iou"
+        ],
+        "geometry_alignment_maps": true,
+        "silhouette_threshold": 0.55,
+        "mask_refinement": "sam3_box",
+        "mask_refinement_iters": 1,
+        "mask_refinement_dilate": 5,
+        "mask_refinement_erode": 2,
+        "sam3_checkpoint_path": "checkpoints/sam3_modelscope/sam3.pt",
+        "sam3_confidence_threshold": 0.0,
+        "sam3_resolution": 1008,
+        "sam3_box_padding": 16,
+        "sam3_min_initial_iou": 0.05
+      },
+      "fixed_global_threshold": {
+        "selection": "thr0p25",
+        "selector_policy": "fixed_global_threshold:thr0p25",
+        "scene_count": 4,
+        "macro_miou": 0.5705,
+        "macro_acc025": 0.6835,
+        "macro_acc050": 0.6081,
+        "macro_boundary_f": 0.6681,
+        "macro_trimap_iou": 0.3958,
+        "rows": [
+          {
+            "scene": "figurines",
+            "selection": "thr0p25",
+            "miou": 0.6136,
+            "acc025": 0.6964,
+            "acc050": 0.6607,
+            "boundary_f": 0.7116,
+            "trimap_iou": 0.3986,
+            "n": 56,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/figurines/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "ramen",
+            "selection": "thr0p25",
+            "miou": 0.6409,
+            "acc025": 0.7465,
+            "acc050": 0.6901,
+            "boundary_f": 0.7713,
+            "trimap_iou": 0.44,
+            "n": 71,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/ramen/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "teatime",
+            "selection": "thr0p25",
+            "miou": 0.613,
+            "acc025": 0.7458,
+            "acc050": 0.6271,
+            "boundary_f": 0.7255,
+            "trimap_iou": 0.4626,
+            "n": 59,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/teatime/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "waldo_kitchen",
+            "selection": "thr0p25",
+            "miou": 0.4142,
+            "acc025": 0.5455,
+            "acc050": 0.4545,
+            "boundary_f": 0.4638,
+            "trimap_iou": 0.282,
+            "n": 22,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/waldo_kitchen/lerf_direct_3d_selection_results.json"
+          }
+        ]
+      },
+      "best_fixed_macro_threshold": {
+        "selection": "thr0p18",
+        "selector_policy": "diagnostic_posthoc_best_fixed_threshold",
+        "scene_count": 4,
+        "macro_miou": 0.5863,
+        "macro_acc025": 0.7009,
+        "macro_acc050": 0.6364,
+        "macro_boundary_f": 0.6724,
+        "macro_trimap_iou": 0.4051,
+        "rows": [
+          {
+            "scene": "figurines",
+            "selection": "thr0p18",
+            "miou": 0.6244,
+            "acc025": 0.7321,
+            "acc050": 0.6607,
+            "boundary_f": 0.7088,
+            "trimap_iou": 0.4047,
+            "n": 56,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/figurines/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "ramen",
+            "selection": "thr0p18",
+            "miou": 0.6494,
+            "acc025": 0.7465,
+            "acc050": 0.7183,
+            "boundary_f": 0.7733,
+            "trimap_iou": 0.4422,
+            "n": 71,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/ramen/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "teatime",
+            "selection": "thr0p18",
+            "miou": 0.6528,
+            "acc025": 0.7797,
+            "acc050": 0.7119,
+            "boundary_f": 0.7482,
+            "trimap_iou": 0.4955,
+            "n": 59,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/teatime/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "waldo_kitchen",
+            "selection": "thr0p18",
+            "miou": 0.4185,
+            "acc025": 0.5455,
+            "acc050": 0.4545,
+            "boundary_f": 0.4594,
+            "trimap_iou": 0.2779,
+            "n": 22,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/waldo_kitchen/lerf_direct_3d_selection_results.json"
+          }
+        ]
+      },
+      "scene_locked_best": {
+        "selection": "scene_locked",
+        "selector_policy": "diagnostic_scene_locked_best_by_miou",
+        "scene_count": 4,
+        "macro_miou": 0.5972,
+        "macro_acc025": 0.7009,
+        "macro_acc050": 0.6522,
+        "macro_boundary_f": 0.6817,
+        "macro_trimap_iou": 0.4043,
+        "rows": [
+          {
+            "scene": "figurines",
+            "selection": "thr0p09",
+            "miou": 0.6422,
+            "acc025": 0.7321,
+            "acc050": 0.6786,
+            "boundary_f": 0.7263,
+            "trimap_iou": 0.4227,
+            "n": 56,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/figurines/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "ramen",
+            "selection": "thr0p18",
+            "miou": 0.6494,
+            "acc025": 0.7465,
+            "acc050": 0.7183,
+            "boundary_f": 0.7733,
+            "trimap_iou": 0.4422,
+            "n": 71,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/ramen/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "teatime",
+            "selection": "thr0p18",
+            "miou": 0.6528,
+            "acc025": 0.7797,
+            "acc050": 0.7119,
+            "boundary_f": 0.7482,
+            "trimap_iou": 0.4955,
+            "n": 59,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/teatime/lerf_direct_3d_selection_results.json"
+          },
+          {
+            "scene": "waldo_kitchen",
+            "selection": "thr0p55",
+            "miou": 0.4444,
+            "acc025": 0.5455,
+            "acc050": 0.5,
+            "boundary_f": 0.4791,
+            "trimap_iou": 0.2568,
+            "n": 22,
+            "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/waldo_kitchen/lerf_direct_3d_selection_results.json"
+          }
+        ]
+      },
+      "fixed_threshold_sweep": [
+        {
+          "selection": "thr0p05",
+          "macro_miou": 0.5127,
+          "macro_acc025": 0.6302,
+          "macro_acc050": 0.5404,
+          "macro_boundary_f": 0.5996,
+          "macro_trimap_iou": 0.3791
+        },
+        {
+          "selection": "thr0p07",
+          "macro_miou": 0.5387,
+          "macro_acc025": 0.6637,
+          "macro_acc050": 0.5766,
+          "macro_boundary_f": 0.6282,
+          "macro_trimap_iou": 0.3957
+        },
+        {
+          "selection": "thr0p09",
+          "macro_miou": 0.5532,
+          "macro_acc025": 0.684,
+          "macro_acc050": 0.5786,
+          "macro_boundary_f": 0.6477,
+          "macro_trimap_iou": 0.4079
+        },
+        {
+          "selection": "thr0p11",
+          "macro_miou": 0.5529,
+          "macro_acc025": 0.6882,
+          "macro_acc050": 0.578,
+          "macro_boundary_f": 0.6497,
+          "macro_trimap_iou": 0.4021
+        },
+        {
+          "selection": "thr0p13",
+          "macro_miou": 0.5688,
+          "macro_acc025": 0.7009,
+          "macro_acc050": 0.6027,
+          "macro_boundary_f": 0.6623,
+          "macro_trimap_iou": 0.408
+        },
+        {
+          "selection": "thr0p15",
+          "macro_miou": 0.5731,
+          "macro_acc025": 0.6896,
+          "macro_acc050": 0.6088,
+          "macro_boundary_f": 0.6677,
+          "macro_trimap_iou": 0.4031
+        },
+        {
+          "selection": "thr0p18",
+          "macro_miou": 0.5863,
+          "macro_acc025": 0.7009,
+          "macro_acc050": 0.6364,
+          "macro_boundary_f": 0.6724,
+          "macro_trimap_iou": 0.4051
+        },
+        {
+          "selection": "thr0p2",
+          "macro_miou": 0.5785,
+          "macro_acc025": 0.6922,
+          "macro_acc050": 0.6286,
+          "macro_boundary_f": 0.6733,
+          "macro_trimap_iou": 0.3991
+        },
+        {
+          "selection": "thr0p25",
+          "macro_miou": 0.5705,
+          "macro_acc025": 0.6835,
+          "macro_acc050": 0.6081,
+          "macro_boundary_f": 0.6681,
+          "macro_trimap_iou": 0.3958
+        },
+        {
+          "selection": "thr0p3",
+          "macro_miou": 0.5635,
+          "macro_acc025": 0.688,
+          "macro_acc050": 0.606,
+          "macro_boundary_f": 0.6673,
+          "macro_trimap_iou": 0.384
+        },
+        {
+          "selection": "thr0p35",
+          "macro_miou": 0.5548,
+          "macro_acc025": 0.6833,
+          "macro_acc050": 0.6037,
+          "macro_boundary_f": 0.6616,
+          "macro_trimap_iou": 0.3703
+        },
+        {
+          "selection": "thr0p4",
+          "macro_miou": 0.5459,
+          "macro_acc025": 0.6621,
+          "macro_acc050": 0.5745,
+          "macro_boundary_f": 0.6527,
+          "macro_trimap_iou": 0.3636
+        },
+        {
+          "selection": "thr0p45",
+          "macro_miou": 0.5385,
+          "macro_acc025": 0.6508,
+          "macro_acc050": 0.5788,
+          "macro_boundary_f": 0.6445,
+          "macro_trimap_iou": 0.3541
+        },
+        {
+          "selection": "thr0p5",
+          "macro_miou": 0.5261,
+          "macro_acc025": 0.6466,
+          "macro_acc050": 0.5547,
+          "macro_boundary_f": 0.6404,
+          "macro_trimap_iou": 0.3477
+        },
+        {
+          "selection": "thr0p55",
+          "macro_miou": 0.5269,
+          "macro_acc025": 0.6452,
+          "macro_acc050": 0.5722,
+          "macro_boundary_f": 0.6385,
+          "macro_trimap_iou": 0.3491
+        }
+      ],
+      "warnings": []
+    }
+  ],
+  "warnings": [
+    "best_fixed_macro_threshold and scene_locked_best are diagnostic/post-hoc readouts; fixed_global_threshold is the strict global-threshold protocol."
+  ]
+}
