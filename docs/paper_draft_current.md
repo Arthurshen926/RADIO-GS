@@ -24,10 +24,10 @@ View-to-Primitive Registration (VPR) bridge for primitive-level querying. The
 resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
 frozen RADIO-GS package reaches 0.8712 macro localization accuracy and 0.5243
-calibrated macro mIoU across four scenes. On a 10-scene ScanNet direct
-point-query protocol, RADIO-GS reaches 0.3538, 0.3573, and 0.4293 mIoU on the
-19-, 15-, and 10-class splits, while the contextual kNN readout raises them to
-0.3637, 0.3708, and 0.4512. A VPR-registered LERF direct 3D object-selection
+calibrated macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
+ScanNet direct point-query protocol, RADIO-GS reaches 0.3583, 0.3618, and
+0.4367 mIoU on the 19-, 15-, and 10-class splits, while the contextual kNN
+readout raises them to 0.3677, 0.3748, and 0.4562. A VPR-registered LERF direct 3D object-selection
 readout with a fixed global softmax-score threshold, 0.5% floor, 1.8% cap, and
 GT-free RGB boundary snap reaches 0.4801 macro mIoU / 0.6760 Acc@0.25. With
 frozen official SAM3 box-prompt boundary readout, the compact direct field
@@ -185,19 +185,20 @@ than causal proof.
 ### ScanNet Direct Point Query
 
 The current fair cross-domain table uses the v67 teacher-balanced direct
-point-query protocol. The 10-scene macro results are:
+point-query protocol on the VALA/OpenGaFF eight-scene ScanNet subset:
 
 | Split | mIoU | mAcc |
 |---|---:|---:|
-| 19 classes | 0.3538 | 0.6076 |
-| 15 classes | 0.3573 | 0.6203 |
-| 10 classes | 0.4293 | 0.7051 |
+| 19 classes | 0.3583 | 0.6006 |
+| 15 classes | 0.3618 | 0.6152 |
+| 10 classes | 0.4367 | 0.6998 |
 
 The stronger balanced support row uses contextual kNN point readout
 (`k=8`, `candidate_k=32`) plus label-free scene-mean calibration at alpha 0.5:
-0.3637/0.6033, 0.3708/0.6224, and 0.4512/0.7079 on the 19/15/10-class splits.
-This should be framed as cross-domain feature usability evidence, not as a fully
-standard ScanNet semantic segmentation leaderboard comparison. Older
+0.3677/0.5997, 0.3748/0.6181, and 0.4562/0.7008 on the 19/15/10-class splits.
+This should be framed as OpenGaFF/VALA split-aligned cross-domain feature
+usability evidence, not as a fully standard ScanNet semantic segmentation
+leaderboard comparison. Older
 label-informed ScanNet diagnostics must stay out of the main fair table.
 
 ### Efficiency Evidence
@@ -248,15 +249,15 @@ RADIO-GS currently depends on a pretrained Gaussian geometry backbone and does
 not claim to improve RGB reconstruction. Its open-vocabulary quality is limited
 by the resolution and alignment of the frozen RADIO features, which is most
 visible on small-object scenes such as Figurines. The ScanNet protocol used here
-is a fair direct point-query transfer test for the learned feature field, but it
-is not yet a full replacement for a standardized semantic segmentation benchmark
-with reproduced external baselines. The LERF direct 3D object-selection result
-now exceeds the OpenGaussian official macro reference, and the official SAM3 box
-readout also moves the compact direct field above most published-context mIoU
-rows; Acc@0.25 and Waldo Kitchen remain the main caution points.
-Finally, the current main LERF comparison has official-source baseline
-provenance, but strong SOTA-style claims still require local same-evaluator
-reruns of the external baselines.
+is the VALA/OpenGaFF eight-scene direct point-query transfer test for the
+learned feature field, using every-20-frame ScanNet training splits and mIoU/mAcc
+evaluation on GT semantic point clouds. It should still be framed as
+OpenGaFF/VALA protocol comparison rather than a full ScanNet leaderboard. The LERF
+direct 3D object-selection result exceeds
+OpenGaFF's reported mIoU context value with the fixed SAM3-box row, but trails
+OpenGaFF on Acc@0.25; Waldo Kitchen remains the main caution point. External
+comparison numbers should be cited from OpenGaFF or the original published
+tables, while our own rows stay fully auditable under the local evaluator.
 The training entry point is now explicitly audited in
 `output/radio_gs/reports/train_feature_field_audit.md`: manifest, split,
 checkpoint, metrics-history, and lock guards are present. Feature/text/cache

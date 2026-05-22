@@ -1,0 +1,189 @@
+{
+  "label": "CTF-GS ScanNet VALA8 Contextual kNN Scene-Mean a0.5",
+  "protocol": "VALA/OpenGaFF ScanNet-8 candidate split",
+  "scene_count": 8,
+  "scenes": [
+    "scene0000_00",
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00",
+    "scene0140_00",
+    "scene0347_00",
+    "scene0400_00",
+    "scene0590_00"
+  ],
+  "source_timestamp": "2026-05-21 15:55:32",
+  "source_args": {
+    "scene": "scene0000_00",
+    "scene_list": "scene0000_00,scene0062_00,scene0070_00,scene0097_00,scene0140_00,scene0347_00,scene0400_00,scene0590_00",
+    "prepared_root": "dataset/scannet_og",
+    "config": "radio_gs/configs/generated/scannet_og/scannet_og_hybrid_v67fair_teacherbalanced_gidx_labelpoint_dp080_pce10_tdist05_s32768_b4_long20_fromv63_{scene}.yaml",
+    "checkpoint": "output/radio_gs/scannet_og_{scene}_v67fair_teacherbalanced_gidx_labelpoint_dp080_pce10_tdist05_s32768_b4_long20_fromv63/checkpoints/best.pth",
+    "label_ply": "None",
+    "output_dir": "output/scannet_pointcloud_eval/vala8_v67_knn8_cand32_scene_mean_a05_20260521",
+    "class_splits": "19,15,10",
+    "k": "8",
+    "candidate_k": "32",
+    "chunk_size": "32768",
+    "max_points": "None",
+    "sample_seed": "42",
+    "opacity_threshold": "0.1",
+    "opacity_filter_mode": "auto",
+    "save_ply": "False",
+    "save_feature_rgb_ply": "False",
+    "save_language_features_npz": "False",
+    "feature_rgb_seed": "20260429",
+    "query_mode": "knn",
+    "save_logits_npz": "False",
+    "compact_feature_key": "features",
+    "logit_calibration": "scene_mean",
+    "logit_calibration_alpha": "0.5",
+    "class_aliases": "none",
+    "gaussian_index_position_mode": "label_point",
+    "prompt_templates": "{query}",
+    "text_embedding_cache": "checkpoints/siglip2_scannet_text_embeddings_v67_knn.pt",
+    "projection_weights": "checkpoints/siglip2_feat_projection.pth",
+    "summary_head_weights": "checkpoints/siglip2_summary_head.pth",
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False",
+    "point_summary_adapter_blend_alpha": "1.0",
+    "device": "cuda"
+  },
+  "macro": {
+    "19": {
+      "miou": 0.3677,
+      "macc": 0.5997
+    },
+    "15": {
+      "miou": 0.3748,
+      "macc": 0.6181
+    },
+    "10": {
+      "miou": 0.4562,
+      "macc": 0.7008
+    }
+  },
+  "rows": [
+    {
+      "scene": "scene0000_00",
+      "19": {
+        "miou": 0.3032691107581035,
+        "macc": 0.583583503765559
+      },
+      "15": {
+        "miou": 0.28619762144976657,
+        "macc": 0.5760304060687549
+      },
+      "10": {
+        "miou": 0.33770727557803315,
+        "macc": 0.6782052712495654
+      }
+    },
+    {
+      "scene": "scene0062_00",
+      "19": {
+        "miou": 0.3824410668935117,
+        "macc": 0.7183307107261389
+      },
+      "15": {
+        "miou": 0.3824410668935117,
+        "macc": 0.7183307107261389
+      },
+      "10": {
+        "miou": 0.5466958315736912,
+        "macc": 0.8274960660892082
+      }
+    },
+    {
+      "scene": "scene0070_00",
+      "19": {
+        "miou": 0.2156507446644177,
+        "macc": 0.3106323672082849
+      },
+      "15": {
+        "miou": 0.23420544297410495,
+        "macc": 0.3408221390714957
+      },
+      "10": {
+        "miou": 0.3510292290473948,
+        "macc": 0.5080155757263832
+      }
+    },
+    {
+      "scene": "scene0097_00",
+      "19": {
+        "miou": 0.4628856818589409,
+        "macc": 0.7615083296109403
+      },
+      "15": {
+        "miou": 0.4392371961561799,
+        "macc": 0.7483825088451682
+      },
+      "10": {
+        "miou": 0.48958785420399836,
+        "macc": 0.7076755579855608
+      }
+    },
+    {
+      "scene": "scene0140_00",
+      "19": {
+        "miou": 0.35259108034907766,
+        "macc": 0.5336546847770243
+      },
+      "15": {
+        "miou": 0.40466771210255903,
+        "macc": 0.6099070434947225
+      },
+      "10": {
+        "miou": 0.4272599152887415,
+        "macc": 0.6695848151790883
+      }
+    },
+    {
+      "scene": "scene0347_00",
+      "19": {
+        "miou": 0.5648462944994276,
+        "macc": 0.7236903554006281
+      },
+      "15": {
+        "miou": 0.5419006385184097,
+        "macc": 0.7127035688210209
+      },
+      "10": {
+        "miou": 0.6838590342764377,
+        "macc": 0.7803583005171942
+      }
+    },
+    {
+      "scene": "scene0400_00",
+      "19": {
+        "miou": 0.3985507415461821,
+        "macc": 0.7304060070455806
+      },
+      "15": {
+        "miou": 0.3985507415461821,
+        "macc": 0.7304060070455806
+      },
+      "10": {
+        "miou": 0.42379801588021443,
+        "macc": 0.7859232836601876
+      }
+    },
+    {
+      "scene": "scene0590_00",
+      "19": {
+        "miou": 0.26125888940510444,
+        "macc": 0.43595464786392046
+      },
+      "15": {
+        "miou": 0.31133439224148785,
+        "macc": 0.5082239258844753
+      },
+      "10": {
+        "miou": 0.3897518137693644,
+        "macc": 0.6488701963324993
+      }
+    }
+  ]
+}

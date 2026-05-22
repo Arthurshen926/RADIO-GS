@@ -61,6 +61,66 @@ def _select_visible_gaussian_indices(*args, **kwargs):
     )(*args, **kwargs)
 
 
+def _direct_point_view_count_weights(
+    view_counts: torch.Tensor,
+    *,
+    mode: str = "none",
+    min_weight: float = 0.0,
+    percentile_low: float = 5.0,
+    percentile_high: float = 95.0,
+) -> Optional[torch.Tensor]:
+    """Build normalized confidence weights from registration view counts."""
+    normalized_mode = str(mode or "none").lower()
+    if normalized_mode == "none":
+        return None
+    counts = view_counts.float().clamp_min(0.0)
+    active = counts > 0
+    if not active.any():
+        return torch.zeros_like(counts)
+    if normalized_mode not in {"log", "clipped_log"}:
+        raise ValueError("direct_point_view_count_weighting must be one of: none, log, clipped_log")
+    weights = torch.log1p(counts)
+    if normalized_mode == "clipped_log":
+        active_weights = weights[active]
+        lo_q = float(percentile_low) / 100.0
+        hi_q = float(percentile_high) / 100.0
+        lo = torch.quantile(active_weights, max(0.0, min(lo_q, 1.0)))
+        hi = torch.quantile(active_weights, max(0.0, min(hi_q, 1.0)))
+        if float(hi.detach().cpu()) > float(lo.detach().cpu()):
+            weights = (weights.clamp(min=lo, max=hi) - lo) / (hi - lo).clamp_min(1e-6)
+        else:
+            weights = torch.where(active, torch.ones_like(weights), torch.zeros_like(weights))
+    weights = torch.where(active, weights, torch.zeros_like(weights))
+    if min_weight > 0:
+        weights = torch.where(active, weights.clamp_min(float(min_weight)), weights)
+    mean = weights[active].mean().clamp_min(1e-6)
+    return weights / mean
+
+
+def _direct_point_weight_mask(point_map: torch.Tensor, sample_weights: Optional[torch.Tensor]) -> Optional[torch.Tensor]:
+    if sample_weights is None:
+        return None
+    weights = sample_weights.to(device=point_map.device, dtype=point_map.dtype)
+    if point_map.ndim != 4:
+        raise ValueError(f"Expected point map [B,C,H,W], got {tuple(point_map.shape)}")
+    if point_map.shape[0] == weights.numel() and point_map.shape[-2:] == (1, 1):
+        return weights.view(-1, 1, 1, 1)
+    if point_map.shape[0] == 1 and point_map.shape[2] == weights.numel() and point_map.shape[-1] == 1:
+        return weights.view(1, 1, -1, 1)
+    raise ValueError(
+        f"Cannot align {weights.numel()} sample weights with point map {tuple(point_map.shape)}"
+    )
+
+
+def _weighted_vector_mean(values: torch.Tensor, weights: Optional[torch.Tensor]) -> torch.Tensor:
+    if weights is None:
+        return values.mean()
+    weights = weights.to(device=values.device, dtype=values.dtype).view(-1)
+    if values.shape[0] != weights.numel():
+        raise ValueError(f"Expected {values.shape[0]} weights, got {weights.numel()}")
+    return (values * weights).sum() / weights.sum().clamp_min(1e-6)
+
+
 class FeatureSupervisionMixin:
     def _subsample_direct_point_indices(
         self,
@@ -264,6 +324,10 @@ class FeatureSupervisionMixin:
             "text_pseudo_ce_valid_ratio": zero,
             "text_pseudo_ce_teacher_conf": zero,
             "text_pseudo_ce_agreement": zero,
+            "text_contrast": zero,
+            "text_contrast_valid_ratio": zero,
+            "text_contrast_teacher_conf": zero,
+            "text_contrast_agreement": zero,
             "adapter_text_distill": zero,
             "adapter_text_distill_valid_ratio": zero,
             "adapter_text_distill_teacher_conf": zero,
@@ -273,6 +337,8 @@ class FeatureSupervisionMixin:
             "adapter_text_pseudo_ce_teacher_conf": zero,
             "adapter_text_pseudo_ce_agreement": zero,
             "adapter_decoder_anchor": zero,
+            "view_weight_mean": zero,
+            "view_weight_max": zero,
         }
         teacher_features = getattr(self, "direct_point_teacher_features", None)
         has_teacher_cache = teacher_features is not None
@@ -461,7 +527,22 @@ class FeatureSupervisionMixin:
             compact,
             point_targets[valid],
         )
-        distill = self.distill_loss_fn(decoded_points, target_map.float())
+        sample_weights = _direct_point_view_count_weights(
+            view_counts[valid],
+            mode=getattr(self, "direct_point_view_count_weighting", "none"),
+            min_weight=float(getattr(self, "direct_point_view_count_min_weight", 0.0)),
+            percentile_low=float(getattr(self, "direct_point_view_count_percentile_low", 5.0)),
+            percentile_high=float(getattr(self, "direct_point_view_count_percentile_high", 95.0)),
+        )
+        if sample_weights is not None:
+            sample_weights = sample_weights.to(device=self.device, dtype=torch.float32)
+            stats["view_weight_mean"] = sample_weights.mean().detach()
+            stats["view_weight_max"] = sample_weights.max().detach()
+        weight_mask = _direct_point_weight_mask(decoded_points, sample_weights)
+        if weight_mask is None:
+            distill = self.distill_loss_fn(decoded_points, target_map.float())
+        else:
+            distill = self.distill_loss_fn(decoded_points, target_map.float(), mask=weight_mask)
         summary_loss = decoded_points.sum() * 0.0
         pred_summary = None
         if (
@@ -471,7 +552,8 @@ class FeatureSupervisionMixin:
             pred_summary = self._project_summary_head_features(decoded_points)
             with torch.no_grad():
                 target_summary = self._project_summary_head_features(target_map.float())
-            summary_loss = 1.0 - (pred_summary * target_summary).sum(dim=1).mean()
+            summary_per_point = 1.0 - (pred_summary * target_summary).sum(dim=1)
+            summary_loss = _weighted_vector_mean(summary_per_point, sample_weights)
         else:
             target_summary = None
         adapter_loss = decoded_points.sum() * 0.0
@@ -488,7 +570,8 @@ class FeatureSupervisionMixin:
             with torch.no_grad():
                 target_summary_map = self._project_summary_head_features(target_map.float())
                 target_summary_points = self._direct_point_map_to_rows(target_summary_map)
-            adapter_loss = 1.0 - (pred_summary_points * target_summary_points).sum(dim=-1).mean()
+            adapter_per_point = 1.0 - (pred_summary_points * target_summary_points).sum(dim=-1)
+            adapter_loss = _weighted_vector_mean(adapter_per_point, sample_weights)
         text_loss = decoded_points.sum() * 0.0
         text_valid_ratio = text_loss.detach()
         text_acc = text_loss.detach()
@@ -531,6 +614,10 @@ class FeatureSupervisionMixin:
         text_pseudo_ce_valid_ratio = text_pseudo_ce_loss.detach()
         text_pseudo_ce_teacher_conf = text_pseudo_ce_loss.detach()
         text_pseudo_ce_agreement = text_pseudo_ce_loss.detach()
+        text_contrast_loss = decoded_points.sum() * 0.0
+        text_contrast_valid_ratio = text_contrast_loss.detach()
+        text_contrast_teacher_conf = text_contrast_loss.detach()
+        text_contrast_agreement = text_contrast_loss.detach()
         adapter_text_distill_loss = decoded_points.sum() * 0.0
         adapter_text_distill_valid_ratio = adapter_text_distill_loss.detach()
         adapter_text_distill_teacher_conf = adapter_text_distill_loss.detach()
@@ -559,6 +646,28 @@ class FeatureSupervisionMixin:
             ) = self._compute_direct_point_text_distill_kl(
                 pred_summary_points_for_distill,
                 target_summary_points,
+                sample_weights=sample_weights,
+            )
+        if (
+            getattr(self, "direct_point_text_contrast_weight", 0.0) > 0
+            and self.siglip_summary_head is not None
+        ):
+            if pred_summary is None:
+                pred_summary = self._project_summary_head_features(decoded_points)
+            pred_summary_points_for_contrast = self._direct_point_map_to_rows(pred_summary)
+            if target_summary is None:
+                with torch.no_grad():
+                    target_summary = self._project_summary_head_features(target_map.float())
+            target_summary_points = self._direct_point_map_to_rows(target_summary)
+            (
+                text_contrast_loss,
+                text_contrast_valid_ratio,
+                text_contrast_teacher_conf,
+                text_contrast_agreement,
+            ) = self._compute_direct_point_text_contrast(
+                pred_summary_points_for_contrast,
+                target_summary_points,
+                sample_weights=sample_weights,
             )
         if (
             getattr(self, "direct_point_text_pseudo_ce_weight", 0.0) > 0
@@ -614,6 +723,7 @@ class FeatureSupervisionMixin:
             ) = self._compute_direct_point_text_distill_kl(
                 pred_summary_points,
                 target_summary_points,
+                sample_weights=sample_weights,
             )
         if (
             getattr(self, "direct_point_adapter_text_pseudo_ce_weight", 0.0) > 0
@@ -689,6 +799,10 @@ class FeatureSupervisionMixin:
         stats["text_pseudo_ce_valid_ratio"] = text_pseudo_ce_valid_ratio
         stats["text_pseudo_ce_teacher_conf"] = text_pseudo_ce_teacher_conf
         stats["text_pseudo_ce_agreement"] = text_pseudo_ce_agreement
+        stats["text_contrast"] = text_contrast_loss
+        stats["text_contrast_valid_ratio"] = text_contrast_valid_ratio
+        stats["text_contrast_teacher_conf"] = text_contrast_teacher_conf
+        stats["text_contrast_agreement"] = text_contrast_agreement
         stats["adapter_text_distill"] = adapter_text_distill_loss
         stats["adapter_text_distill_valid_ratio"] = adapter_text_distill_valid_ratio
         stats["adapter_text_distill_teacher_conf"] = adapter_text_distill_teacher_conf
@@ -707,6 +821,8 @@ class FeatureSupervisionMixin:
             + getattr(self, "direct_point_text_distill_weight", 0.0) * text_distill_loss
             + getattr(self, "direct_point_text_pseudo_ce_weight", 0.0)
             * text_pseudo_ce_loss
+            + getattr(self, "direct_point_text_contrast_weight", 0.0)
+            * text_contrast_loss
             + getattr(self, "direct_point_adapter_text_distill_weight", 0.0)
             * adapter_text_distill_loss
             + getattr(self, "direct_point_adapter_text_pseudo_ce_weight", 0.0)
@@ -1133,6 +1249,7 @@ class FeatureSupervisionMixin:
         self,
         point_summary: torch.Tensor,
         teacher_summary: torch.Tensor,
+        sample_weights: Optional[torch.Tensor] = None,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         zero = point_summary.sum() * 0.0
         if (
@@ -1165,10 +1282,14 @@ class FeatureSupervisionMixin:
             return zero, valid_ratio.detach(), zero.detach(), zero.detach()
 
         log_probs = F.log_softmax(student_logits[valid] / temperature, dim=-1)
-        loss = F.kl_div(
+        per_point_kl = F.kl_div(
             log_probs,
             teacher_probs[valid],
-            reduction="batchmean",
+            reduction="none",
+        ).sum(dim=-1)
+        loss = _weighted_vector_mean(
+            per_point_kl,
+            sample_weights[valid] if sample_weights is not None else None,
         )
         if temperature != 1.0:
             loss = loss * (temperature ** 2)
@@ -1176,6 +1297,62 @@ class FeatureSupervisionMixin:
             student_pred = student_logits[valid].argmax(dim=-1)
             teacher_pred = teacher_probs[valid].argmax(dim=-1)
             agreement = (student_pred == teacher_pred).float().mean()
+            mean_conf = teacher_conf[valid].mean()
+        return loss, valid_ratio.detach(), mean_conf.detach(), agreement.detach()
+
+    def _compute_direct_point_text_contrast(
+        self,
+        point_summary: torch.Tensor,
+        teacher_summary: torch.Tensor,
+        sample_weights: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        zero = point_summary.sum() * 0.0
+        text_embeddings = getattr(self, "direct_point_text_embeddings", None)
+        if text_embeddings is None or not getattr(self, "direct_point_text_split_ids", []):
+            return zero, zero.detach(), zero.detach(), zero.detach()
+        if point_summary.shape != teacher_summary.shape:
+            raise ValueError(
+                "point_summary and teacher_summary must have the same shape, got "
+                f"{tuple(point_summary.shape)} vs {tuple(teacher_summary.shape)}"
+            )
+
+        text_embeddings = text_embeddings.to(point_summary.device).float()
+        with torch.no_grad():
+            teacher_logits = teacher_summary.float() @ text_embeddings.T
+            teacher_probs = F.softmax(teacher_logits, dim=-1)
+            teacher_conf, labels = teacher_probs.max(dim=-1)
+            threshold = float(
+                getattr(self, "direct_point_text_contrast_confidence_threshold", 0.0)
+            )
+            valid = teacher_conf >= threshold
+        valid_ratio = valid.float().mean()
+        if int(valid.sum().item()) < 3:
+            return zero, valid_ratio.detach(), zero.detach(), zero.detach()
+
+        labels = labels[valid]
+        z = F.normalize(point_summary[valid].float(), dim=-1)
+        logits = z @ z.T / max(
+            1e-6,
+            float(getattr(self, "direct_point_text_contrast_temperature", 0.1)),
+        )
+        self_mask = torch.eye(logits.shape[0], device=logits.device, dtype=torch.bool)
+        logits = logits.masked_fill(self_mask, -1e4)
+        positive = labels[:, None].eq(labels[None, :]) & ~self_mask
+        has_positive = positive.any(dim=1)
+        if not has_positive.any():
+            return zero, valid_ratio.detach(), teacher_conf[valid].mean().detach(), zero.detach()
+
+        log_denom = torch.logsumexp(logits[has_positive], dim=1)
+        log_pos = torch.logsumexp(
+            logits[has_positive].masked_fill(~positive[has_positive], -1e4),
+            dim=1,
+        )
+        per_point = -(log_pos - log_denom)
+        active_weights = sample_weights[valid][has_positive] if sample_weights is not None else None
+        loss = _weighted_vector_mean(per_point, active_weights)
+        with torch.no_grad():
+            nearest = logits.argmax(dim=-1)
+            agreement = labels.eq(labels[nearest]).float().mean()
             mean_conf = teacher_conf[valid].mean()
         return loss, valid_ratio.detach(), mean_conf.detach(), agreement.detach()
 

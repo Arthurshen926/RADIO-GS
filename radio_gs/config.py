@@ -232,6 +232,13 @@ class RadioGSConfig:
     direct_point_text_distill_weight: float = 0.0
     direct_point_text_distill_temperature: float = 1.0
     direct_point_text_distill_confidence_threshold: float = 0.0
+    direct_point_view_count_weighting: str = "none"  # "none", "log", or "clipped_log"
+    direct_point_view_count_min_weight: float = 0.0
+    direct_point_view_count_percentile_low: float = 5.0
+    direct_point_view_count_percentile_high: float = 95.0
+    direct_point_text_contrast_weight: float = 0.0
+    direct_point_text_contrast_temperature: float = 0.1
+    direct_point_text_contrast_confidence_threshold: float = 0.0
     point_summary_adapter_hidden_dim: int = 512
     point_summary_adapter_num_layers: int = 2
     point_summary_adapter_dropout: float = 0.0

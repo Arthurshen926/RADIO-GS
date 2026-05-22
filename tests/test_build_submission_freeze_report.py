@@ -47,6 +47,42 @@ def test_collect_scannet_v67_results_computes_macro(tmp_path: Path) -> None:
     assert not summary["warnings"]
 
 
+def test_collect_scannet_v67_can_filter_vala8_subset(tmp_path: Path) -> None:
+    root = tmp_path / "scannet"
+    for scene, vals in {
+        "scene0000_00": (0.2, 0.3, 0.4),
+        "scene0062_00": (0.4, 0.5, 0.6),
+        "scene0200_00": (0.9, 0.9, 0.9),
+    }.items():
+        out = root / f"{scene}_v67_teacherbalanced_fromv63_best_gidx_labelpoint"
+        out.mkdir(parents=True)
+        (out / "scannet_pointcloud_radio_gs_results.json").write_text(
+            json.dumps(
+                {
+                    "macro": {
+                        "19": {"miou": vals[0], "macc": 0.7},
+                        "15": {"miou": vals[1], "macc": 0.8},
+                        "10": {"miou": vals[2], "macc": 0.9},
+                    },
+                    "args": {
+                        "query_mode": "gaussian_index",
+                        "opacity_filter_mode": "label_index",
+                        "gaussian_index_position_mode": "label_point",
+                    },
+                }
+            )
+        )
+
+    summary = report.collect_scannet_v67(
+        root,
+        scene_subset=("scene0000_00", "scene0062_00"),
+    )
+
+    assert summary["scene_count"] == 2
+    assert summary["scene_subset"] == ["scene0000_00", "scene0062_00"]
+    assert summary["macro_miou"] == {"19": 0.3, "15": 0.4, "10": 0.5}
+
+
 def test_collect_lerf_best_row_reads_macro(tmp_path: Path) -> None:
     csv_path = tmp_path / "current_best_lerf_ovs_per_scene.csv"
     csv_path.write_text(

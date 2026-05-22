@@ -1335,6 +1335,13 @@ def _discover_scenes(prepared_root: Path) -> list[str]:
     return sorted(path.name for path in prepared_root.glob("scene*") if path.is_dir())
 
 
+def _parse_scene_list(raw: str | None) -> list[str] | None:
+    if raw is None:
+        return None
+    scenes = [part.strip() for part in str(raw).replace(";", ",").split(",") if part.strip()]
+    return list(dict.fromkeys(scenes))
+
+
 def _default_label_ply(prepared_root: Path, scene: str) -> str:
     scene_root = prepared_root / scene
     preferred = scene_root / f"{scene}_vh_clean_2.labels.ply"
@@ -1429,6 +1436,14 @@ def main() -> None:
         description="Direct RADIO-GS ScanNet point-cloud understanding evaluator"
     )
     parser.add_argument("--scene", default="scene0000_00", help="Scene id or 'all'")
+    parser.add_argument(
+        "--scene_list",
+        default=None,
+        help=(
+            "Optional comma- or semicolon-separated scene ids. Overrides --scene "
+            "and is useful for fixed published splits such as VALA/OpenGaFF ScanNet."
+        ),
+    )
     parser.add_argument("--prepared_root", default=str(DEFAULT_PREPARED_ROOT))
     parser.add_argument("--config", required=True, help="Config path; may contain {scene}")
     parser.add_argument("--checkpoint", required=True, help="Checkpoint path; may contain {scene}")
@@ -1512,7 +1527,10 @@ def main() -> None:
 
     device = torch.device(args.device if torch.cuda.is_available() else "cpu")
     prepared_root = Path(args.prepared_root)
-    scenes = _discover_scenes(prepared_root) if args.scene == "all" else [args.scene]
+    scene_list = _parse_scene_list(args.scene_list)
+    scenes = scene_list if scene_list is not None else (
+        _discover_scenes(prepared_root) if args.scene == "all" else [args.scene]
+    )
     if not scenes:
         raise FileNotFoundError(f"No prepared scenes found under {prepared_root}")
     split_names = _parse_splits(args.class_splits)

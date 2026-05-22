@@ -391,6 +391,28 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_text_distill_confidence_threshold = float(
             getattr(config, "direct_point_text_distill_confidence_threshold", 0.0)
         )
+        self.direct_point_view_count_weighting = str(
+            getattr(config, "direct_point_view_count_weighting", "none") or "none"
+        )
+        self.direct_point_view_count_min_weight = float(
+            getattr(config, "direct_point_view_count_min_weight", 0.0)
+        )
+        self.direct_point_view_count_percentile_low = float(
+            getattr(config, "direct_point_view_count_percentile_low", 5.0)
+        )
+        self.direct_point_view_count_percentile_high = float(
+            getattr(config, "direct_point_view_count_percentile_high", 95.0)
+        )
+        self.direct_point_text_contrast_weight = float(
+            getattr(config, "direct_point_text_contrast_weight", 0.0)
+        )
+        self.direct_point_text_contrast_temperature = max(
+            1e-6,
+            float(getattr(config, "direct_point_text_contrast_temperature", 0.1)),
+        )
+        self.direct_point_text_contrast_confidence_threshold = float(
+            getattr(config, "direct_point_text_contrast_confidence_threshold", 0.0)
+        )
         self.direct_point_text_split = str(
             getattr(config, "direct_point_text_split", "19")
         )
@@ -462,6 +484,17 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             raise ValueError(
                 "direct_point_text_ce_weighting must be one of: "
                 "none, inverse_batch, inverse_pool, sqrt_inverse_pool_capped"
+            )
+        if self.direct_point_view_count_weighting not in {"none", "log", "clipped_log"}:
+            raise ValueError(
+                "direct_point_view_count_weighting must be one of: none, log, clipped_log"
+            )
+        if self.direct_point_view_count_min_weight < 0:
+            raise ValueError("direct_point_view_count_min_weight must be non-negative")
+        if self.direct_point_view_count_percentile_high < self.direct_point_view_count_percentile_low:
+            raise ValueError(
+                "direct_point_view_count_percentile_high must be >= "
+                "direct_point_view_count_percentile_low"
             )
         if self.direct_point_text_ce_min_weight < 0:
             raise ValueError("direct_point_text_ce_min_weight must be non-negative")
@@ -1705,6 +1738,10 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "direct_point_text_pseudo_ce_valid": 0.0,
             "direct_point_text_pseudo_ce_teacher_conf": 0.0,
             "direct_point_text_pseudo_ce_agreement": 0.0,
+            "direct_point_text_contrast": 0.0,
+            "direct_point_text_contrast_valid": 0.0,
+            "direct_point_text_contrast_teacher_conf": 0.0,
+            "direct_point_text_contrast_agreement": 0.0,
             "direct_point_adapter_text_distill": 0.0,
             "direct_point_adapter_text_distill_valid": 0.0,
             "direct_point_adapter_text_distill_teacher_conf": 0.0,
@@ -1714,6 +1751,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "direct_point_adapter_text_pseudo_ce_teacher_conf": 0.0,
             "direct_point_adapter_text_pseudo_ce_agreement": 0.0,
             "direct_point_adapter_decoder_anchor": 0.0,
+            "direct_point_view_weight_mean": 0.0,
+            "direct_point_view_weight_max": 0.0,
             "siglip_align": 0.0,
             "summary_align": 0.0,
             "text_heatmaps": 0.0,
@@ -2013,6 +2052,10 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 direct_point_text_pseudo_ce_valid = torch.tensor(0.0, device=self.device)
                 direct_point_text_pseudo_ce_teacher_conf = torch.tensor(0.0, device=self.device)
                 direct_point_text_pseudo_ce_agreement = torch.tensor(0.0, device=self.device)
+                direct_point_text_contrast = torch.tensor(0.0, device=self.device)
+                direct_point_text_contrast_valid = torch.tensor(0.0, device=self.device)
+                direct_point_text_contrast_teacher_conf = torch.tensor(0.0, device=self.device)
+                direct_point_text_contrast_agreement = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_distill = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_distill_valid = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_distill_teacher_conf = torch.tensor(0.0, device=self.device)
@@ -2022,6 +2065,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 direct_point_adapter_text_pseudo_ce_teacher_conf = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_pseudo_ce_agreement = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_decoder_anchor = torch.tensor(0.0, device=self.device)
+                direct_point_view_weight_mean = torch.tensor(0.0, device=self.device)
+                direct_point_view_weight_max = torch.tensor(0.0, device=self.device)
                 l_ground_query = torch.tensor(0.0, device=self.device)
                 ground_query_acc = torch.tensor(0.0, device=self.device)
                 ground_query_valid = torch.tensor(0.0, device=self.device)
@@ -2128,6 +2173,22 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                         "text_pseudo_ce_agreement",
                         direct_point_text_pseudo_ce_agreement,
                     )
+                    direct_point_text_contrast = direct_point_stats.get(
+                        "text_contrast",
+                        direct_point_text_contrast,
+                    )
+                    direct_point_text_contrast_valid = direct_point_stats.get(
+                        "text_contrast_valid_ratio",
+                        direct_point_text_contrast_valid,
+                    )
+                    direct_point_text_contrast_teacher_conf = direct_point_stats.get(
+                        "text_contrast_teacher_conf",
+                        direct_point_text_contrast_teacher_conf,
+                    )
+                    direct_point_text_contrast_agreement = direct_point_stats.get(
+                        "text_contrast_agreement",
+                        direct_point_text_contrast_agreement,
+                    )
                     direct_point_adapter_text_distill = direct_point_stats.get(
                         "adapter_text_distill",
                         direct_point_adapter_text_distill,
@@ -2163,6 +2224,14 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     direct_point_adapter_decoder_anchor = direct_point_stats.get(
                         "adapter_decoder_anchor",
                         direct_point_adapter_decoder_anchor,
+                    )
+                    direct_point_view_weight_mean = direct_point_stats.get(
+                        "view_weight_mean",
+                        direct_point_view_weight_mean,
+                    )
+                    direct_point_view_weight_max = direct_point_stats.get(
+                        "view_weight_max",
+                        direct_point_view_weight_max,
                     )
 
                 adaptor_w = getattr(self.cfg, "adaptor_weight", 0.1)
@@ -2273,6 +2342,16 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             loss_accum["direct_point_text_pseudo_ce_agreement"] += (
                 direct_point_text_pseudo_ce_agreement.item()
             )
+            loss_accum["direct_point_text_contrast"] += direct_point_text_contrast.item()
+            loss_accum["direct_point_text_contrast_valid"] += (
+                direct_point_text_contrast_valid.item()
+            )
+            loss_accum["direct_point_text_contrast_teacher_conf"] += (
+                direct_point_text_contrast_teacher_conf.item()
+            )
+            loss_accum["direct_point_text_contrast_agreement"] += (
+                direct_point_text_contrast_agreement.item()
+            )
             loss_accum["direct_point_adapter_text_distill"] += direct_point_adapter_text_distill.item()
             loss_accum["direct_point_adapter_text_distill_valid"] += (
                 direct_point_adapter_text_distill_valid.item()
@@ -2298,6 +2377,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             loss_accum["direct_point_adapter_decoder_anchor"] += (
                 direct_point_adapter_decoder_anchor.item()
             )
+            loss_accum["direct_point_view_weight_mean"] += direct_point_view_weight_mean.item()
+            loss_accum["direct_point_view_weight_max"] += direct_point_view_weight_max.item()
             loss_accum["siglip_align"] += l_siglip.item()
             loss_accum["summary_align"] += l_summary.item()
             loss_accum["text_heatmaps"] += l_text_heatmaps.item()

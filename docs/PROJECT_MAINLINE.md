@@ -171,10 +171,12 @@ pad16 row; scene-locked and best-fixed variants remain diagnostics.
 | CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
 
 Published-context rows from newer primitive-/instance-aware methods are kept in
-a separate context table rather than the strict local table: Dr. Splat
-43.29/64.30, CAGS 50.79/69.62, InstanceGaussian 45.30/58.44, and OpenGaFF
-54.36/80.84 mIoU/Acc@0.25. These numbers show that CTF-GS + VPR is competitive
-with the OpenGaussian anchor but should not be claimed as global direct-3D SOTA.
+a separate context table rather than the strict local table and are now aligned
+to the OpenGaFF comparison route: Dr. Splat 43.29/64.30, InstanceGaussian
+45.30/58.44, and OpenGaFF 54.36/80.84 mIoU/Acc@0.25. CAGS is not used as a
+main comparison target. The strict direct-field + SAM3-box row is above
+OpenGaFF on mIoU but below it on Acc@0.25, so the paper should claim
+mIoU-competitive/stronger direct-3D evidence rather than universal dominance.
 
 The latest follow-up diagnostics show that rendered-feature registration is a
 strong primitive scoring path, while official SAM3 box-prompt readout fixes the
@@ -195,9 +197,10 @@ fixed top2% selector reached 0.3850 / 0.6428. Under the same 128-view VPR
 readout, the current reproducible mean+std selector with fixed 0.5% floor,
 1.8% cap, and RGB snap reaches 0.4461 / 0.6611; replacing it with a single
 global softmax-score threshold of 0.25 improves the paper-facing row to
-0.4801 / 0.6760. This exceeds the OpenGaussian official macro reference, but
-Waldo Kitchen remains below OpenGaussian and the table is still official-source
-context rather than a locally rerun same-evaluator SOTA comparison.
+0.4801 / 0.6760. This exceeds the OpenGaussian official macro reference. Under
+the OpenGaFF published-context route, the stronger fixed SAM3-box row also
+exceeds OpenGaFF's reported direct-3D mIoU while trailing its Acc@0.25; Waldo
+Kitchen remains the limiting scene.
 
 The Dr. Splat-inspired registration audit now includes both center-sampled
 weights and rasterizer-level Gaussian-pixel hit assignment. Under the same
@@ -348,15 +351,16 @@ propagation row remains below the teacher under the same readout
 (v9: 0.4805 vs. 0.5119 mIoU). Use it as qualitative/diagnostic evidence rather
 than as a main superiority claim.
 
-### ScanNet v67 Direct Point Query
+### ScanNet VALA/OpenGaFF-8 Direct Point Query
 
-Use `output/scannet_pointcloud_eval/*_v67_teacherbalanced_fromv63_best_gidx_labelpoint/`.
+Use `paper/artifacts/scannet_pointcloud_radio_gs_vala8_direct_point_query_results.json`
+and `paper/artifacts/scannet_pointcloud_radio_gs_vala8_contextual_knn_scene_mean_a05_results.json`.
 
 | Split | mIoU | mAcc |
 |---|---:|---:|
-| 19 classes | 0.3538 | 0.6076 |
-| 15 classes | 0.3573 | 0.6203 |
-| 10 classes | 0.4293 | 0.7051 |
+| 19 classes | 0.3583 | 0.6006 |
+| 15 classes | 0.3618 | 0.6152 |
+| 10 classes | 0.4367 | 0.6998 |
 
 The stronger direct point-readout support row uses the same v67 checkpoints but
 queries each ScanNet vertex through local Gaussian context:
@@ -365,28 +369,32 @@ queries each ScanNet vertex through local Gaussian context:
 
 | Split | contextual kNN mIoU | contextual kNN mAcc |
 |---|---:|---:|
-| 19 classes | 0.3637 | 0.6033 |
-| 15 classes | 0.3708 | 0.6224 |
-| 10 classes | 0.4512 | 0.7079 |
+| 19 classes | 0.3677 | 0.5997 |
+| 15 classes | 0.3748 | 0.6181 |
+| 10 classes | 0.4562 | 0.7008 |
 
 This is the current strongest balanced ScanNet evidence. A more aggressive
-`alpha=0.75` setting raises split10 mIoU to 0.4534 but lowers split19/15 mIoU
+`alpha=0.75` setting raises split10 mIoU to 0.4585 but lowers split19/15 mIoU
 and mAcc, so it stays diagnostic.
 
 Label-free ScanNet prompt/calibration ablations:
 
 | Variant | split19 | split15 | split10 | Use |
 |---|---:|---:|---:|---|
-| v67 baseline | 0.3538 / 0.6076 | 0.3573 / 0.6203 | 0.4293 / 0.7051 | Main conservative row |
+| v67 baseline | 0.3583 / 0.6006 | 0.3618 / 0.6152 | 0.4367 / 0.6998 | Main conservative row on VALA/OpenGaFF-8 |
 | scene-mean calibration, alpha=0.5 | 0.3575 / 0.6101 | 0.3604 / 0.6227 | 0.4353 / 0.7074 | Positive supporting ablation |
-| kNN contextual readout + scene-mean alpha=0.5 | 0.3637 / 0.6033 | 0.3708 / 0.6224 | 0.4512 / 0.7079 | Promoted balanced support row |
-| kNN contextual readout + scene-mean alpha=0.75 | 0.3620 / 0.5994 | 0.3692 / 0.6187 | 0.4534 / 0.7078 | Higher split10 mIoU, weaker balance |
+| kNN contextual readout + scene-mean alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 | Promoted balanced support row on VALA/OpenGaFF-8 |
+| kNN contextual readout + scene-mean alpha=0.75 | 0.3650 / 0.5944 | 0.3724 / 0.6132 | 0.4585 / 0.7004 | Higher split10 mIoU, weaker balance |
 | ScanNet aliases | 0.3592 / 0.6191 | 0.3561 / 0.6192 | 0.4234 / 0.7002 | Mixed; not promoted |
 | aliases + scene-mean alpha=0.5 | 0.3617 / 0.6180 | 0.3554 / 0.6174 | 0.4295 / 0.7026 | Mixed; not promoted |
 | scene-mean calibration, alpha=1.0 | 0.3528 / 0.5834 | 0.3541 / 0.5935 | 0.4386 / 0.7048 | Hurts 19/15 and mAcc |
 
-Targeted DINOv3 cross-view diagnostics are positive but not yet a 10-scene
-replacement:
+The DINOv3 cross-view branch is now also summarized on VALA/OpenGaFF-8:
+0.3704/0.6159, 0.3718/0.6268, and 0.4390/0.7020 for the 19/15/10 splits.
+It improves the conservative Gaussian-index row but remains a component
+ablation rather than replacing the stronger contextual kNN support row.
+
+Earlier targeted diagnostics:
 
 | Scene | Branch | split19 | split15 | split10 |
 |---|---|---:|---:|---:|

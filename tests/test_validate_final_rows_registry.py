@@ -5,6 +5,43 @@ from pathlib import Path
 import pytest
 import yaml
 
+VALA8_SCENES = [
+    "scene0000_00",
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00",
+    "scene0140_00",
+    "scene0347_00",
+    "scene0400_00",
+    "scene0590_00",
+]
+DIRECT_SOURCE_ARGS = {
+    "scene_list": ",".join(VALA8_SCENES),
+    "class_splits": "19,15,10",
+    "query_mode": "gaussian_index",
+    "candidate_k": "0",
+    "opacity_filter_mode": "label_index",
+    "logit_calibration": "none",
+    "logit_calibration_alpha": "1.0",
+    "gaussian_index_position_mode": "label_point",
+    "prompt_templates": "{query}",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False",
+}
+CONTEXTUAL_SOURCE_ARGS = {
+    "scene_list": ",".join(VALA8_SCENES),
+    "class_splits": "19,15,10",
+    "query_mode": "knn",
+    "k": "8",
+    "candidate_k": "32",
+    "opacity_filter_mode": "auto",
+    "logit_calibration": "scene_mean",
+    "logit_calibration_alpha": "0.5",
+    "prompt_templates": "{query}",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False",
+}
+
 
 def _load_validator():
     try:
@@ -13,17 +50,52 @@ def _load_validator():
         pytest.fail(f"missing validate_final_rows_registry module: {exc}")
 
 
-def _write_fixture(root: Path, *, split10_miou: float = 0.4512) -> Path:
+def _rows_from_macro(macro: dict[str, dict[str, float]]) -> list[dict[str, object]]:
+    return [
+        {
+            "scene": scene,
+            "19": dict(macro["19"]),
+            "15": dict(macro["15"]),
+            "10": dict(macro["10"]),
+        }
+        for scene in VALA8_SCENES
+    ]
+
+
+def _write_fixture(root: Path, *, split10_miou: float = 0.4562) -> Path:
+    direct_json = root / "output/scannet_pointcloud_eval/direct.json"
     scannet_json = root / "output/scannet_pointcloud_eval/support.json"
     scannet_json.parent.mkdir(parents=True)
+    direct_macro = {
+        "19": {"miou": 0.3583, "macc": 0.6006},
+        "15": {"miou": 0.3618, "macc": 0.6152},
+        "10": {"miou": 0.4367, "macc": 0.6998},
+    }
+    support_macro = {
+        "19": {"miou": 0.3677, "macc": 0.5997},
+        "15": {"miou": 0.3748, "macc": 0.6181},
+        "10": {"miou": 0.4562, "macc": 0.7008},
+    }
+    direct_json.write_text(
+        json.dumps(
+            {
+                "scene_count": 8,
+                "scenes": VALA8_SCENES,
+                "source_args": DIRECT_SOURCE_ARGS,
+                "macro": direct_macro,
+                "rows": _rows_from_macro(direct_macro),
+            }
+        ),
+        encoding="utf-8",
+    )
     scannet_json.write_text(
         json.dumps(
             {
-                "macro": {
-                    "19": {"miou": 0.36371452900495704, "macc": 0.6033427009400225},
-                    "15": {"miou": 0.3707500314798964, "macc": 0.6223689405029145},
-                    "10": {"miou": 0.45116889232218566, "macc": 0.7079086011594014},
-                }
+                "scene_count": 8,
+                "scenes": VALA8_SCENES,
+                "source_args": CONTEXTUAL_SOURCE_ARGS,
+                "macro": support_macro,
+                "rows": _rows_from_macro(support_macro),
             }
         ),
         encoding="utf-8",
@@ -105,14 +177,22 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4512) -> Path:
                 },
                 "tracks": {
                     "t3_scannet_ov_point_cloud_segmentation": {
+                        "radio_gs_source_json": (
+                            "output/scannet_pointcloud_eval/direct.json"
+                        ),
                         "radio_gs_contextual_support_json": (
                             "output/scannet_pointcloud_eval/support.json"
                         ),
                         "rows": {
+                            "radio_gs_v67_direct_point_query": {
+                                "split19": {"miou": 0.3583, "macc": 0.6006},
+                                "split15": {"miou": 0.3618, "macc": 0.6152},
+                                "split10": {"miou": 0.4367, "macc": 0.6998},
+                            },
                             "radio_gs_v67_contextual_knn_scene_mean_support": {
-                                "split19": {"miou": 0.3637, "macc": 0.6033},
-                                "split15": {"miou": 0.3708, "macc": 0.6224},
-                                "split10": {"miou": split10_miou, "macc": 0.7079},
+                                "split19": {"miou": 0.3677, "macc": 0.5997},
+                                "split15": {"miou": 0.3748, "macc": 0.6181},
+                                "split10": {"miou": split10_miou, "macc": 0.7008},
                                 "promoted": False,
                             }
                         },
@@ -198,6 +278,33 @@ def test_validate_registry_flags_scannet_metric_drift(tmp_path):
     issues = validator.validate_registry(final_rows, root=tmp_path)
 
     assert any("split10.miou" in issue for issue in issues)
+
+
+def test_validate_registry_flags_scannet_direct_metric_drift(tmp_path):
+    validator = _load_validator()
+    final_rows = _write_fixture(tmp_path)
+    payload = yaml.safe_load(final_rows.read_text(encoding="utf-8"))
+    payload["tracks"]["t3_scannet_ov_point_cloud_segmentation"]["rows"][
+        "radio_gs_v67_direct_point_query"
+    ]["split19"]["miou"] = 0.35
+    final_rows.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+
+    issues = validator.validate_registry(final_rows, root=tmp_path)
+
+    assert any("direct split19.miou" in issue for issue in issues)
+
+
+def test_validate_registry_flags_scannet_protocol_drift(tmp_path):
+    validator = _load_validator()
+    final_rows = _write_fixture(tmp_path)
+    support_json = tmp_path / "output/scannet_pointcloud_eval/support.json"
+    payload = json.loads(support_json.read_text(encoding="utf-8"))
+    payload["source_args"]["query_mode"] = "nearest"
+    support_json.write_text(json.dumps(payload), encoding="utf-8")
+
+    issues = validator.validate_registry(final_rows, root=tmp_path)
+
+    assert any("ScanNet contextual source_args.query_mode" in issue for issue in issues)
 
 
 def test_validate_registry_accepts_synced_external_summary_statuses(tmp_path):

@@ -86,8 +86,8 @@ tracks:
   t3_scannet_ov_point_cloud_segmentation:
     task_name: ScanNet-v2 open-vocabulary point-cloud semantic segmentation
     opengaussian_source_json: output/baselines/opengaussian/scannet_eval/opengaussian_scannet_results.json
-    radio_gs_source_json: output/scannet_pointcloud_eval/freeze_v67_all_eval_20260502/scannet_pointcloud_radio_gs_results.json
-    radio_gs_contextual_support_json: output/scannet_pointcloud_eval/v67_knn8_cand32_scene_mean_a05_20260514/scannet_pointcloud_radio_gs_results.json
+    radio_gs_source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_direct_point_query_results.json
+    radio_gs_contextual_support_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_contextual_knn_scene_mean_a05_results.json
     protocol:
       scenes:
       - scene0000_00
@@ -95,11 +95,9 @@ tracks:
       - scene0070_00
       - scene0097_00
       - scene0140_00
-      - scene0200_00
       - scene0347_00
       - scene0400_00
       - scene0590_00
-      - scene0645_00
       class_splits:
       - '19'
       - '15'
@@ -107,8 +105,8 @@ tracks:
       metrics:
       - mIoU
       - mAcc
-      caveat: RADIO-GS v67 row is a point-query feature-memory probe; the next benchmark
-        pass should keep all reproduced methods under the same point-cloud evaluator.
+      caveat: RADIO-GS v67 row is a VALA/OpenGaFF-8 point-query feature-memory
+        probe; external baselines are cited from OpenGaFF/VALA paper tables.
     rows:
       opengaussian_local_reproduction:
         source: local OpenGaussian reproduction through radio_gs/scripts/eval_opengaussian_scannet_baseline.py
@@ -122,30 +120,33 @@ tracks:
           miou: 0.4186
           macc: 0.5847
         reproduced_local: true
+        promoted: false
+        caveat: Historical local reproduction only; paper-facing external comparison
+          should cite OpenGaFF/VALA paper tables.
       radio_gs_v67_direct_point_query:
-        source: local RADIO-GS v67 row in OpenGaussian comparison report
+        source: local CTF-GS VALA/OpenGaFF-8 direct point-query report
         split19:
-          miou: 0.3538
-          macc: 0.6076
+          miou: 0.3583
+          macc: 0.6006
         split15:
-          miou: 0.3573
-          macc: 0.6203
+          miou: 0.3618
+          macc: 0.6152
         split10:
-          miou: 0.4293
-          macc: 0.7051
+          miou: 0.4367
+          macc: 0.6998
         reproduced_local: true
       radio_gs_v67_contextual_knn_scene_mean_support:
         source: local label-free contextual kNN support row; k=8, candidate_k=32,
           scene-mean calibration alpha=0.5
         split19:
-          miou: 0.3637
-          macc: 0.6033
+          miou: 0.3677
+          macc: 0.5997
         split15:
-          miou: 0.3708
-          macc: 0.6224
+          miou: 0.3748
+          macc: 0.6181
         split10:
-          miou: 0.4512
-          macc: 0.7079
+          miou: 0.4562
+          macc: 0.7008
         reproduced_local: true
         promoted: false
         caveat: Stronger support row for feature-memory utility; conservative Gaussian-index

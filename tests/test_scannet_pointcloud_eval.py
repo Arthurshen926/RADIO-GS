@@ -18,6 +18,7 @@ from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _fixed_rgb_project_features,
     _add_query_mode_args,
     _load_state_or_raise,
+    _parse_scene_list,
     _parse_splits,
     _blend_summary_features,
     _project_compact_with_summary_adapter,
@@ -61,6 +62,15 @@ def test_read_label_ply_reads_xyz_and_raw_labels(tmp_path):
 
     assert xyz.shape == (4, 3)
     assert labels.tolist() == [0, 1, 2, 33]
+
+
+def test_parse_scene_list_supports_vala_subset_and_dedupes():
+    scenes = _parse_scene_list(
+        "scene0000_00, scene0062_00;scene0000_00,scene0590_00"
+    )
+
+    assert scenes == ["scene0000_00", "scene0062_00", "scene0590_00"]
+    assert _parse_scene_list(None) is None
 
 
 def test_gaussian_index_eval_defaults_to_label_point_positions():

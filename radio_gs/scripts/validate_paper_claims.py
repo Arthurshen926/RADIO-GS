@@ -14,13 +14,21 @@ import yaml
 CONTEXT_TABLE = Path("paper/lerf_direct_3d_context_table.tex")
 VPR_PROTOCOL_CARD = Path("paper/vpr_protocol_card.tex")
 SELECTION_TABLE = Path("paper/lerf_direct_3d_selection_table.tex")
+SCANNET_CONTEXT_TABLE = Path("paper/scannet_published_context_table.tex")
 FINAL_ROWS = Path("paper/artifacts/final_rows.yaml")
 NARRATIVE_PATHS = (
     Path("paper/radio_gs_draft.tex"),
     Path("docs/paper_draft_current.md"),
     Path("docs/submission_status.md"),
 )
-DEFAULT_PATHS = (CONTEXT_TABLE, VPR_PROTOCOL_CARD, SELECTION_TABLE, FINAL_ROWS, *NARRATIVE_PATHS)
+DEFAULT_PATHS = (
+    CONTEXT_TABLE,
+    VPR_PROTOCOL_CARD,
+    SELECTION_TABLE,
+    SCANNET_CONTEXT_TABLE,
+    FINAL_ROWS,
+    *NARRATIVE_PATHS,
+)
 
 MEAN_STD_RE = re.compile(r"mean\s*\+\s*(?:2\.5\s*)?std", re.IGNORECASE)
 MEAN_2P5_STD_RE = re.compile(r"mean\s*\+\s*2\.5\s*std", re.IGNORECASE)
@@ -56,6 +64,17 @@ DANGEROUS_CLAIM_PATTERNS = (
         "primitive-level SOTA",
         re.compile(r"\bprimitive-level\b.{0,80}\bSOTA\b", re.IGNORECASE),
     ),
+    (
+        "exact OpenGaFF ScanNet reproduction",
+        re.compile(r"\bexact\s+OpenGaFF\s+ScanNet\s+reproduction\b", re.IGNORECASE),
+    ),
+    (
+        "OpenGaFF-style ScanNet setting without subset qualifier",
+        re.compile(
+            r"\bunder\s+the\s+OpenGaFF-style\s+point-cloud\s+understanding\s+setting\b",
+            re.IGNORECASE,
+        ),
+    ),
 )
 SAFE_CONTEXT_RE = re.compile(
     r"\b("
@@ -65,6 +84,7 @@ SAFE_CONTEXT_RE = re.compile(
     r")\b",
     re.IGNORECASE,
 )
+CAGS_CONTEXT_RE = re.compile(r"\bCAGS\b|\\cite\{sun2025cags\}")
 
 
 def _resolve(root: Path, path: str | Path) -> Path:
@@ -85,6 +105,8 @@ def _read_texts(root: Path, paths: Iterable[str | Path], issues: list[str]) -> d
 
 
 def _check_vpr_context_row(text: str, issues: list[str]) -> None:
+    if CAGS_CONTEXT_RE.search(text):
+        issues.append(f"{CONTEXT_TABLE}: CAGS must not be promoted in the OpenGaFF-aligned context table")
     vpr_rows = [line.strip() for line in text.splitlines() if r"\method{} + VPR" in line]
     if not vpr_rows:
         issues.append(f"{CONTEXT_TABLE}: missing VPR context row")
@@ -118,6 +140,19 @@ def _check_selection_table(text: str, issues: list[str]) -> None:
         issues.append(f"{SELECTION_TABLE}: missing CTF-GS thr0p25 mIoU row")
     if not re.search(r"CTF-GS\s*&\s*thr0p25\s+Acc@0\.25\b", text):
         issues.append(f"{SELECTION_TABLE}: missing CTF-GS thr0p25 Acc@0.25 row")
+
+
+def _check_scannet_context_table(text: str, issues: list[str]) -> None:
+    if CAGS_CONTEXT_RE.search(text):
+        issues.append(f"{SCANNET_CONTEXT_TABLE}: CAGS must not be promoted in the OpenGaFF-aligned ScanNet table")
+    required_snippets = (
+        "OpenGaFF & 36.55 & 50.57 & 42.78 & 72.85 & 57.85 & 77.93",
+        "\\method{} Gaussian-index & 35.83 & 60.06 & 36.18 & 61.52 & 43.67 & 69.98",
+        "\\method{} contextual kNN & 36.77 & 59.97 & 37.48 & 61.81 & 45.62 & 70.08",
+    )
+    for snippet in required_snippets:
+        if snippet not in text:
+            issues.append(f"{SCANNET_CONTEXT_TABLE}: missing synced row snippet: {snippet}")
 
 
 def _check_final_rows(text: str, issues: list[str]) -> None:
@@ -172,6 +207,8 @@ def validate_claims(
         _check_vpr_protocol_card(texts[VPR_PROTOCOL_CARD], issues)
     if SELECTION_TABLE in texts:
         _check_selection_table(texts[SELECTION_TABLE], issues)
+    if SCANNET_CONTEXT_TABLE in texts:
+        _check_scannet_context_table(texts[SCANNET_CONTEXT_TABLE], issues)
     if FINAL_ROWS in texts:
         _check_final_rows(texts[FINAL_ROWS], issues)
     for path, text in texts.items():

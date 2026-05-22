@@ -14,6 +14,7 @@ This sheet lists the published methods that should anchor the paper's comparison
 
 | Method | Paper | Venue | Best use in the paper | Source |
 |---|---|---|---|---|
+| OpenGaFF | OpenGaFF: Open-Vocabulary Gaussian Feature Field with Codebook Attention | arXiv 2026 | Primary recent published-context anchor for LERF direct 3D object selection and ScanNet point-cloud understanding; code is not public, so values are cited from the paper rather than locally reproduced. | https://arxiv.org/abs/2605.06088 |
 | Gaussian Grouping | Gaussian Grouping: Segment and Edit Anything in 3D Scenes | ECCV 2024 | Supplementary comparison for open-world 3D segmentation / editing | https://ymq2017.github.io/gaussian-grouping/ |
 | 3D Gaussian Splatting | 3D Gaussian Splatting for Real-Time Radiance Field Rendering | SIGGRAPH 2023 | Geometry / rendering efficiency upper-bound, not a grounding baseline | https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/ |
 
@@ -24,6 +25,6 @@ This sheet lists the published methods that should anchor the paper's comparison
 
 ## Next benchmark actions
 
-1. Keep the official-source four-scene LERF-OVS main table frozen unless new reproduced baselines are added.
-2. If making a strict SOTA claim, reproduce LERF/LangSplat/LEGaussians under the local evaluator instead of mixing paper protocols.
-3. Keep ScanNet v67 as direct-query transfer evidence rather than a full leaderboard claim.
+1. Keep the official-source four-scene LERF-OVS rendered-view main table frozen unless a new reproduced baseline is added.
+2. For direct 3D object selection, align the published-context comparison with OpenGaFF and cite external numbers from published tables instead of attempting local reruns.
+3. Keep ScanNet v67 on the VALA/OpenGaFF eight-scene split for direct point-query transfer evidence, not as a full semantic segmentation leaderboard claim.

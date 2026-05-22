@@ -12,6 +12,10 @@ from radio_gs.scripts.train_feature_field import (
     sample_multiview_radio_targets,
     select_visible_gaussian_indices,
 )
+from radio_gs.training.feature_supervision_mixin import (
+    _direct_point_view_count_weights,
+    _direct_point_weight_mask,
+)
 
 
 def test_sample_multiview_radio_targets_averages_valid_projected_features():
@@ -127,6 +131,29 @@ def test_select_visible_gaussian_indices_prefers_current_batch_frustum():
 
     assert indices.tolist() == [0, 1]
     assert visible.tolist() == [True, True, False, False]
+
+
+def test_direct_point_view_count_weights_are_normalized_and_monotonic():
+    weights = _direct_point_view_count_weights(
+        torch.tensor([0.0, 1.0, 10.0, 100.0]),
+        mode="log",
+        min_weight=0.1,
+    )
+
+    assert weights is not None
+    assert weights[0].item() == 0.0
+    assert torch.allclose(weights[1:].mean(), torch.tensor(1.0), atol=1e-6)
+    assert weights[1] < weights[2] < weights[3]
+
+
+def test_direct_point_weight_mask_matches_pointwise_and_legacy_shapes():
+    weights = torch.tensor([1.0, 2.0, 3.0])
+
+    pointwise = _direct_point_weight_mask(torch.zeros(3, 4, 1, 1), weights)
+    legacy = _direct_point_weight_mask(torch.zeros(1, 4, 3, 1), weights)
+
+    assert pointwise.shape == (3, 1, 1, 1)
+    assert legacy.shape == (1, 1, 3, 1)
 
 
 def test_read_ply_xyz_and_resolve_scannet_label_ply(tmp_path):

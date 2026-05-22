@@ -1,0 +1,188 @@
+{
+  "label": "CTF-GS ScanNet VALA8 DINO-CV 0.001",
+  "protocol": "VALA/OpenGaFF ScanNet-8 candidate split",
+  "scene_count": 8,
+  "scenes": [
+    "scene0000_00",
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00",
+    "scene0140_00",
+    "scene0347_00",
+    "scene0400_00",
+    "scene0590_00"
+  ],
+  "source_timestamp": "2026-05-10 00:20:23",
+  "source_args": {
+    "scene": "scene0000_00",
+    "prepared_root": "dataset/scannet_og",
+    "config": "radio_gs/configs/generated/scannet_dino_cv/scannet_og_hybrid_v67_dino_cv001_b2_s32768_ft20_scene0000_00.yaml",
+    "checkpoint": "output/radio_gs/scannet_og_scene0000_00_v67_dino_cv001_b2_s32768_ft20/checkpoints/best.pth",
+    "label_ply": "None",
+    "output_dir": "output/scannet_pointcloud_eval/scene0000_00_v67_dino_cv001_b2_s32768_ft20_gidx_labelpoint",
+    "class_splits": "19,15,10",
+    "k": "8",
+    "candidate_k": "0",
+    "chunk_size": "4096",
+    "max_points": "None",
+    "sample_seed": "42",
+    "opacity_threshold": "0.1",
+    "opacity_filter_mode": "label_index",
+    "save_ply": "True",
+    "save_feature_rgb_ply": "True",
+    "save_language_features_npz": "False",
+    "feature_rgb_seed": "20260429",
+    "query_mode": "gaussian_index",
+    "save_logits_npz": "True",
+    "compact_feature_key": "features",
+    "logit_calibration": "none",
+    "logit_calibration_alpha": "1.0",
+    "class_aliases": "none",
+    "gaussian_index_position_mode": "label_point",
+    "prompt_templates": "{query}|a photo of a {query}|a 3d scan of a {query}|a point cloud of a {query}|an indoor scene containing a {query}",
+    "text_embedding_cache": "checkpoints/siglip2_scannet_og_text_embeddings_ens5.pt",
+    "projection_weights": "checkpoints/siglip2_feat_projection.pth",
+    "summary_head_weights": "checkpoints/siglip2_summary_head.pth",
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False",
+    "point_summary_adapter_blend_alpha": "1.0",
+    "device": "cuda"
+  },
+  "macro": {
+    "19": {
+      "miou": 0.3704,
+      "macc": 0.6159
+    },
+    "15": {
+      "miou": 0.3718,
+      "macc": 0.6268
+    },
+    "10": {
+      "miou": 0.439,
+      "macc": 0.702
+    }
+  },
+  "rows": [
+    {
+      "scene": "scene0000_00",
+      "19": {
+        "miou": 0.2953268817262492,
+        "macc": 0.5962546376897336
+      },
+      "15": {
+        "miou": 0.27443279994980835,
+        "macc": 0.586341292844888
+      },
+      "10": {
+        "miou": 0.30789418908214594,
+        "macc": 0.6885632667309995
+      }
+    },
+    {
+      "scene": "scene0062_00",
+      "19": {
+        "miou": 0.37926093394420185,
+        "macc": 0.7273803995755453
+      },
+      "15": {
+        "miou": 0.37926093394420185,
+        "macc": 0.7273803995755453
+      },
+      "10": {
+        "miou": 0.5362108795291183,
+        "macc": 0.836054639490997
+      }
+    },
+    {
+      "scene": "scene0070_00",
+      "19": {
+        "miou": 0.22576599469737793,
+        "macc": 0.3269363262240403
+      },
+      "15": {
+        "miou": 0.23235166312768046,
+        "macc": 0.34331203316632564
+      },
+      "10": {
+        "miou": 0.323002065529693,
+        "macc": 0.49318059953340443
+      }
+    },
+    {
+      "scene": "scene0097_00",
+      "19": {
+        "miou": 0.4507734724378246,
+        "macc": 0.7666884594105488
+      },
+      "15": {
+        "miou": 0.43568646863946253,
+        "macc": 0.7521601785160067
+      },
+      "10": {
+        "miou": 0.4917686592407982,
+        "macc": 0.7153015098959928
+      }
+    },
+    {
+      "scene": "scene0140_00",
+      "19": {
+        "miou": 0.3145473263280429,
+        "macc": 0.5161993842686219
+      },
+      "15": {
+        "miou": 0.361277431914962,
+        "macc": 0.5903245892180279
+      },
+      "10": {
+        "miou": 0.3847671626283285,
+        "macc": 0.6629881166400567
+      }
+    },
+    {
+      "scene": "scene0347_00",
+      "19": {
+        "miou": 0.6040534404148377,
+        "macc": 0.766972673152598
+      },
+      "15": {
+        "miou": 0.586863955332643,
+        "macc": 0.7537682191460284
+      },
+      "10": {
+        "miou": 0.7058081894360825,
+        "macc": 0.8001016610273406
+      }
+    },
+    {
+      "scene": "scene0400_00",
+      "19": {
+        "miou": 0.4071245443158546,
+        "macc": 0.7615629929792209
+      },
+      "15": {
+        "miou": 0.4071245443158546,
+        "macc": 0.7615629929792209
+      },
+      "10": {
+        "miou": 0.3975317847099062,
+        "macc": 0.780064452171983
+      }
+    },
+    {
+      "scene": "scene0590_00",
+      "19": {
+        "miou": 0.28639577768252084,
+        "macc": 0.46524611434598706
+      },
+      "15": {
+        "miou": 0.29743171585514555,
+        "macc": 0.49983478995862524
+      },
+      "10": {
+        "miou": 0.3650931838633823,
+        "macc": 0.6399432231430551
+      }
+    }
+  ]
+}

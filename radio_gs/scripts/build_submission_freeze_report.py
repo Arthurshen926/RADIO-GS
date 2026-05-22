@@ -125,7 +125,18 @@ def _load_lerf_provenance_index(path: str | Path = LERF_PROVENANCE_JSON) -> dict
     return {str(scene): dict(value) for scene, value in scenes.items()}
 
 
-def collect_scannet_v67(eval_root: str | Path) -> dict[str, Any]:
+def _parse_scene_subset(raw: str | None) -> tuple[str, ...] | None:
+    if raw is None or not str(raw).strip():
+        return None
+    scenes = [part.strip() for part in str(raw).replace(";", ",").split(",") if part.strip()]
+    return tuple(dict.fromkeys(scenes))
+
+
+def collect_scannet_v67(
+    eval_root: str | Path,
+    *,
+    scene_subset: tuple[str, ...] | None = None,
+) -> dict[str, Any]:
     root = Path(eval_root)
     pattern = (
         "scene*_v67_teacherbalanced_fromv63_best_gidx_labelpoint/"
@@ -136,6 +147,8 @@ def collect_scannet_v67(eval_root: str | Path) -> dict[str, Any]:
     for path in sorted(root.glob(pattern)):
         payload = json.loads(path.read_text())
         scene = path.parent.name.split("_v67_")[0]
+        if scene_subset is not None and scene not in scene_subset:
+            continue
         args = payload.get("args", {})
         if args.get("query_mode") != "gaussian_index":
             warnings.append(f"{scene}: query_mode is {args.get('query_mode')}")
@@ -189,6 +202,7 @@ def collect_scannet_v67(eval_root: str | Path) -> dict[str, Any]:
     )
     return {
         "scene_count": len(rows),
+        "scene_subset": list(scene_subset) if scene_subset is not None else None,
         "rows": rows,
         "macro_miou": macro_miou,
         "macro_macc": macro_macc,
@@ -861,6 +875,11 @@ def main(argv: list[str] | None = None) -> dict[str, Path]:
         default="output/scannet_pointcloud_eval",
     )
     parser.add_argument(
+        "--scannet_scene_list",
+        default="",
+        help="Optional comma-separated fixed ScanNet scene subset for the report.",
+    )
+    parser.add_argument(
         "--profile_dirs",
         nargs="*",
         default=[],
@@ -903,7 +922,10 @@ def main(argv: list[str] | None = None) -> dict[str, Path]:
                 fixed_tag=fixed_tag,
             )
         )
-    scannet = collect_scannet_v67(args.scannet_eval_root)
+    scannet = collect_scannet_v67(
+        args.scannet_eval_root,
+        scene_subset=_parse_scene_subset(args.scannet_scene_list),
+    )
     profiles = collect_profile_runs(args.profile_dirs)
     paths = write_freeze_outputs(
         args.output_dir,

@@ -33,6 +33,12 @@ def _write_good_fixture(root: Path) -> None:
         "CTF-GS & SAM3 box fixed thr0p25 Acc@0.25 & 0.696 & 0.746 & 0.746 & 0.546 & 0.684 \\\\\n",
         encoding="utf-8",
     )
+    (root / "paper/scannet_published_context_table.tex").write_text(
+        "OpenGaFF & 36.55 & 50.57 & 42.78 & 72.85 & 57.85 & 77.93 \\\\\n"
+        "\\method{} Gaussian-index & 35.83 & 60.06 & 36.18 & 61.52 & 43.67 & 69.98 \\\\\n"
+        "\\method{} contextual kNN & 36.77 & 59.97 & 37.48 & 61.81 & 45.62 & 70.08 \\\\\n",
+        encoding="utf-8",
+    )
     (root / "paper/artifacts/final_rows.yaml").write_text(
         yaml.safe_dump(
             {
@@ -101,3 +107,46 @@ def test_validate_claims_flags_positive_scannet_leaderboard_claim(tmp_path):
     issues = validator.validate_claims(root=tmp_path)
 
     assert any("full ScanNet semantic segmentation leaderboard" in issue for issue in issues)
+
+
+def test_validate_claims_flags_cags_in_opengaff_context_table(tmp_path):
+    validator = _load_validator()
+    _write_good_fixture(tmp_path)
+    (tmp_path / "paper/lerf_direct_3d_context_table.tex").write_text(
+        "CAGS~\\cite{sun2025cags} & published context & 50.79 & 69.62 \\\\\n"
+        "\\method{} + VPR & local, SigLIP2, fixed \\texttt{thr0p25} + RGB snap & 48.01 & 67.60 \\\\\n",
+        encoding="utf-8",
+    )
+
+    issues = validator.validate_claims(root=tmp_path)
+
+    assert any("CAGS must not be promoted" in issue for issue in issues)
+
+
+def test_validate_claims_flags_cags_in_scannet_context_table(tmp_path):
+    validator = _load_validator()
+    _write_good_fixture(tmp_path)
+    (tmp_path / "paper/scannet_published_context_table.tex").write_text(
+        "CAGS & 35.00 & 50.00 & 37.00 & 55.00 & 47.00 & 66.00 \\\\\n"
+        "OpenGaFF & 36.55 & 50.57 & 42.78 & 72.85 & 57.85 & 77.93 \\\\\n"
+        "\\method{} Gaussian-index & 35.83 & 60.06 & 36.18 & 61.52 & 43.67 & 69.98 \\\\\n"
+        "\\method{} contextual kNN & 36.77 & 59.97 & 37.48 & 61.81 & 45.62 & 70.08 \\\\\n",
+        encoding="utf-8",
+    )
+
+    issues = validator.validate_claims(root=tmp_path)
+
+    assert any("ScanNet table" in issue and "CAGS" in issue for issue in issues)
+
+
+def test_validate_claims_flags_exact_opengaff_scannet_reproduction_claim(tmp_path):
+    validator = _load_validator()
+    _write_good_fixture(tmp_path)
+    (tmp_path / "paper/radio_gs_draft.tex").write_text(
+        "This is an exact OpenGaFF ScanNet reproduction.\n",
+        encoding="utf-8",
+    )
+
+    issues = validator.validate_claims(root=tmp_path)
+
+    assert any("exact OpenGaFF ScanNet reproduction" in issue for issue in issues)
