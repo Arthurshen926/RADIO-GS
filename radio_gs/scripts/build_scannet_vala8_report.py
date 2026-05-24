@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any
 
@@ -113,6 +114,65 @@ def _scene_split_metrics(scene_payload: dict[str, Any], split: str) -> dict[str,
     }
 
 
+def _class_stability(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    stability: dict[str, Any] = {}
+    for split in SCAN_SPLITS:
+        by_class: dict[str, list[dict[str, Any]]] = {}
+        for row in rows:
+            per_class = row.get("_per_class", {}).get(split, {})
+            for class_id, metrics in per_class.items():
+                gt_count = int(metrics.get("gt_count", 0))
+                if gt_count <= 0:
+                    continue
+                by_class.setdefault(str(class_id), []).append(
+                    {
+                        "scene": row["scene"],
+                        "name": str(metrics.get("name", class_id)),
+                        "iou": float(metrics.get("iou", 0.0)),
+                        "acc": float(metrics.get("acc", 0.0)),
+                        "gt_count": gt_count,
+                    }
+                )
+
+        class_rows: dict[str, Any] = {}
+        for class_id, values in sorted(by_class.items(), key=lambda item: int(item[0])):
+            ious = [item["iou"] for item in values]
+            accs = [item["acc"] for item in values]
+            mean_iou = sum(ious) / len(ious)
+            mean_acc = sum(accs) / len(accs)
+            std_iou = math.sqrt(sum((value - mean_iou) ** 2 for value in ious) / len(ious))
+            std_acc = math.sqrt(sum((value - mean_acc) ** 2 for value in accs) / len(accs))
+            class_rows[class_id] = {
+                "name": values[0]["name"],
+                "scene_count": len(values),
+                "mean_iou": _round4(mean_iou),
+                "std_iou": _round4(std_iou),
+                "min_iou": _round4(min(ious)),
+                "max_iou": _round4(max(ious)),
+                "mean_acc": _round4(mean_acc),
+                "std_acc": _round4(std_acc),
+                "min_acc": _round4(min(accs)),
+                "max_acc": _round4(max(accs)),
+                "total_gt_count": int(sum(item["gt_count"] for item in values)),
+            }
+
+        if class_rows:
+            mean_std = sum(item["std_iou"] for item in class_rows.values()) / len(class_rows)
+            worst = min(class_rows.values(), key=lambda item: item["mean_iou"])
+            unstable = max(class_rows.values(), key=lambda item: item["std_iou"])
+        else:
+            mean_std = 0.0
+            worst = {}
+            unstable = {}
+        stability[split] = {
+            "mean_iou_std": _round4(mean_std),
+            "worst_mean_iou_class": worst,
+            "most_unstable_iou_class": unstable,
+            "classes": class_rows,
+        }
+    return stability
+
+
 def build_vala8_summary(
     payload: dict[str, Any],
     *,
@@ -133,9 +193,10 @@ def build_vala8_summary(
     rows: list[dict[str, Any]] = []
     for scene in scenes:
         scene_payload = all_scenes[scene]
-        row = {"scene": scene}
+        row = {"scene": scene, "_per_class": {}}
         for split in SCAN_SPLITS:
             row[split] = _scene_split_metrics(scene_payload, split)
+            row["_per_class"][split] = scene_payload["splits"][split].get("per_class", {})
         rows.append(row)
 
     macro = {
@@ -160,7 +221,8 @@ def build_vala8_summary(
             "expected_source_args": expected_checks,
         },
         "macro": macro,
-        "rows": rows,
+        "category_macro_stability": _class_stability(rows),
+        "rows": [{key: value for key, value in row.items() if key != "_per_class"} for row in rows],
     }
 
 
@@ -190,6 +252,29 @@ def write_markdown(summary: dict[str, Any], path: str | Path) -> None:
                 a15=row["15"]["macc"],
                 m10=row["10"]["miou"],
                 a10=row["10"]["macc"],
+            )
+        )
+    lines.extend(
+        [
+            "",
+            "## Category Stability",
+            "",
+            "| Split | mean IoU std | worst class | most unstable class |",
+            "|---|---:|---|---|",
+        ]
+    )
+    for split in SCAN_SPLITS:
+        stability = summary.get("category_macro_stability", {}).get(split, {})
+        worst = stability.get("worst_mean_iou_class", {}) or {}
+        unstable = stability.get("most_unstable_iou_class", {}) or {}
+        lines.append(
+            "| {split} classes | {std:.4f} | {worst_name} {worst_iou:.4f} | {unstable_name} {unstable_std:.4f} |".format(
+                split=split,
+                std=float(stability.get("mean_iou_std", 0.0)),
+                worst_name=worst.get("name", "n/a"),
+                worst_iou=float(worst.get("mean_iou", 0.0)),
+                unstable_name=unstable.get("name", "n/a"),
+                unstable_std=float(unstable.get("std_iou", 0.0)),
             )
         )
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

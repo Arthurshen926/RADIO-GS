@@ -8,6 +8,8 @@ import torch
 
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     SelectionSpec,
+    Sam3AdaptorMaskRefiner,
+    apply_direct_primitive_confidence,
     _blend_point_summary_adapter_features,
     apply_registration_confidence,
     apply_selection_ratio_bounds,
@@ -15,7 +17,10 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     bootstrap_mean_ci,
     boundary_f_score,
     choose_sam3_box_refined_mask,
+    choose_sam3_box_refined_mask_with_report,
+    choose_refined_mask_by_geometry_with_report,
     choose_registration_refiner,
+    build_opacity_primitive_confidence,
     compute_geometry_boundary_alignment,
     compute_selection_ranking_scores,
     compute_raster_contribution_weights,
@@ -25,9 +30,13 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     accumulate_raster_contribution_features,
     keep_largest_mask_component,
     refine_mask_with_rgb_edges,
+    refine_mask_with_sam3_feature_grabcut,
     sample_registration_view_weights,
     save_score_cache,
+    choose_sam3_mask_head_refined_mask_with_report,
+    refine_mask_with_prompt_conditioned_sam3_head,
     refine_selection_by_voxel_components,
+    refine_mask_with_sam3_adaptor_features,
     score_text_aligned_embeddings,
     select_dominant_raster_hits,
     select_gaussians_from_scores,
@@ -60,6 +69,276 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert result.returncode == 0, result.stderr
     assert "--mask_refinement_erode" in result.stdout
     assert "--save_geometry_maps" in result.stdout
+
+
+def test_refine_mask_with_sam3_adaptor_features_snaps_overwide_boundary():
+    features = torch.zeros((2, 16, 16), dtype=torch.float32)
+    features[0].fill_(-1.0)
+    features[1].fill_(1.0)
+    target = np.zeros((32, 32), dtype=bool)
+    target[8:24, 10:22] = True
+    features[0, 4:12, 5:11] = 1.0
+    features[1, 4:12, 5:11] = -1.0
+    features = torch.nn.functional.normalize(features, dim=0)
+
+    initial = np.zeros((32, 32), dtype=bool)
+    initial[5:27, 7:25] = True
+    initial_iou = np.logical_and(initial, target).sum() / np.logical_or(initial, target).sum()
+
+    refined, report = refine_mask_with_sam3_adaptor_features(
+        features,
+        initial,
+        support_dilate_pixels=2,
+        inner_erode_pixels=2,
+        score_std_scale=0.0,
+        min_area_scale=0.30,
+        max_area_scale=1.05,
+        min_initial_iou=0.01,
+    )
+    refined_iou = np.logical_and(refined, target).sum() / np.logical_or(refined, target).sum()
+
+    assert report["attempted"] is True
+    assert report["accepted"] is True
+    assert refined_iou > initial_iou + 0.20
+
+
+def test_refine_mask_with_sam3_adaptor_features_empty_mask_falls_back():
+    features = torch.nn.functional.normalize(torch.rand((4, 8, 8)), dim=0)
+    initial = np.zeros((16, 16), dtype=bool)
+
+    refined, report = refine_mask_with_sam3_adaptor_features(features, initial)
+
+    assert not refined.any()
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "empty_initial_mask"
+
+
+def test_refine_mask_with_sam3_adaptor_features_can_skip_large_layout_masks():
+    features = torch.nn.functional.normalize(torch.rand((4, 8, 8)), dim=0)
+    initial = np.ones((16, 16), dtype=bool)
+
+    refined, report = refine_mask_with_sam3_adaptor_features(
+        features,
+        initial,
+        max_initial_area_fraction=0.5,
+    )
+
+    assert np.array_equal(refined, initial)
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "initial_mask_too_large"
+
+
+def test_refine_mask_with_sam3_adaptor_features_box_support_can_expand_inside_prompt_box():
+    features = torch.zeros((2, 16, 16), dtype=torch.float32)
+    features[0].fill_(-1.0)
+    features[1].fill_(1.0)
+    target = np.zeros((32, 32), dtype=bool)
+    target[8:24, 8:24] = True
+    features[0, 4:12, 4:12] = 1.0
+    features[1, 4:12, 4:12] = -1.0
+    features = torch.nn.functional.normalize(features, dim=0)
+
+    initial = np.zeros((32, 32), dtype=bool)
+    initial[10:22, 10:22] = True
+    initial_iou = np.logical_and(initial, target).sum() / np.logical_or(initial, target).sum()
+
+    refined, report = refine_mask_with_sam3_adaptor_features(
+        features,
+        initial,
+        support_mode="box",
+        prototype_mode="box",
+        support_dilate_pixels=4,
+        inner_erode_pixels=0,
+        score_std_scale=0.0,
+        min_area_scale=1.0,
+        max_area_scale=2.0,
+        background_weight=0.0,
+        min_initial_iou=0.01,
+    )
+    refined_iou = np.logical_and(refined, target).sum() / np.logical_or(refined, target).sum()
+
+    assert report["accepted"] is True
+    assert report["support_mode"] == "box"
+    assert refined_iou > initial_iou + 0.20
+
+
+def test_choose_sam3_mask_head_refined_mask_selects_candidate_by_initial_overlap():
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[4:12, 4:12] = True
+    logits = torch.full((3, 8, 8), -8.0)
+    logits[0, 1:3, 1:3] = 8.0
+    logits[1, 2:6, 2:6] = 8.0
+    logits[2, 5:8, 5:8] = 8.0
+
+    refined, report = choose_sam3_mask_head_refined_mask_with_report(
+        initial,
+        logits,
+        logit_threshold=0.0,
+        min_initial_iou=0.1,
+    )
+
+    assert report["attempted"] is True
+    assert report["accepted"] is True
+    assert report["selected_index"] == 1
+    assert refined.sum() == 64
+
+
+def test_choose_sam3_mask_head_refined_mask_falls_back_on_low_overlap():
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[0:3, 0:3] = True
+    logits = torch.full((1, 8, 8), -8.0)
+    logits[0, 5:8, 5:8] = 8.0
+
+    refined, report = choose_sam3_mask_head_refined_mask_with_report(
+        initial,
+        logits,
+        logit_threshold=0.0,
+        min_initial_iou=0.1,
+    )
+
+    assert np.array_equal(refined, initial)
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "low_initial_overlap"
+
+
+def test_choose_sam3_mask_head_refined_mask_rejects_area_shrinkage():
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[3:13, 3:13] = True
+    logits = torch.full((1, 8, 8), -8.0)
+    logits[0, 3:5, 3:5] = 8.0
+
+    refined, report = choose_sam3_mask_head_refined_mask_with_report(
+        initial,
+        logits,
+        logit_threshold=0.0,
+        min_initial_iou=0.01,
+        min_refined_area_ratio=0.5,
+    )
+
+    assert np.array_equal(refined, initial)
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "refined_mask_too_small"
+
+
+def test_choose_sam3_mask_head_refined_mask_clips_to_support_band():
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[4:10, 4:10] = True
+    logits = torch.full((1, 8, 8), -8.0)
+    logits[0, 2:5, 2:5] = 8.0
+    logits[0, 6:8, 6:8] = 8.0
+
+    refined, report = choose_sam3_mask_head_refined_mask_with_report(
+        initial,
+        logits,
+        logit_threshold=0.0,
+        min_initial_iou=0.01,
+        max_refined_area_ratio=2.0,
+        support_dilate=1,
+    )
+
+    assert report["accepted"] is True
+    assert refined[12:16, 12:16].sum() == 0
+
+
+def test_refine_mask_with_prompt_conditioned_sam3_head_uses_prompt_and_coarse_mask():
+    class FakePromptHead(torch.nn.Module):
+        def forward(self, features, prompts, coarse_masks):
+            logits = torch.full((1, 1, 8, 8), -8.0, device=features.device)
+            logits[:, :, 2:6, 2:6] = 8.0 + prompts.sum() * 0.0 + coarse_masks.sum() * 0.0
+            return logits
+
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[3:13, 3:13] = True
+    gt_like = np.zeros((16, 16), dtype=bool)
+    gt_like[4:12, 4:12] = True
+    initial_iou = np.logical_and(initial, gt_like).sum() / np.logical_or(initial, gt_like).sum()
+
+    refined, report = refine_mask_with_prompt_conditioned_sam3_head(
+        feature_map=torch.zeros(1, 4, 8, 8),
+        prompt_embedding=torch.ones(6),
+        coarse_mask=initial,
+        head=FakePromptHead(),
+        logit_threshold=0.0,
+        min_initial_iou=0.1,
+    )
+    refined_iou = np.logical_and(refined, gt_like).sum() / np.logical_or(refined, gt_like).sum()
+
+    assert report["attempted"] is True
+    assert report["accepted"] is True
+    assert refined_iou > initial_iou
+
+
+def test_refine_mask_with_sam3_feature_grabcut_uses_feature_boundaries():
+    features = torch.zeros((3, 16, 16), dtype=torch.float32)
+    features[0].fill_(0.0)
+    features[2].fill_(1.0)
+    target = np.zeros((32, 32), dtype=bool)
+    target[8:24, 8:24] = True
+    features[0, 4:12, 4:12] = 1.0
+    features[2, 4:12, 4:12] = 0.0
+
+    initial = np.zeros((32, 32), dtype=bool)
+    initial[5:27, 5:27] = True
+    initial_iou = np.logical_and(initial, target).sum() / np.logical_or(initial, target).sum()
+
+    refined, report = refine_mask_with_sam3_feature_grabcut(
+        features,
+        initial,
+        iterations=2,
+        dilate_pixels=2,
+        erode_pixels=2,
+    )
+    refined_iou = np.logical_and(refined, target).sum() / np.logical_or(refined, target).sum()
+
+    assert report["attempted"] is True
+    assert report["accepted"] is True
+    assert refined_iou > initial_iou + 0.20
+
+
+def test_sam3_adaptor_refiner_exposes_feature_grabcut_readout():
+    assert hasattr(Sam3AdaptorMaskRefiner, "refine_grabcut_from_state_with_report")
+
+
+def test_choose_refined_mask_by_geometry_accepts_boundary_aligned_candidate():
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[3:13, 3:13] = True
+    refined = np.zeros((16, 16), dtype=bool)
+    refined[4:12, 4:12] = True
+    alpha = np.zeros((16, 16), dtype=np.float32)
+    alpha[4:12, 4:12] = 1.0
+    depth = np.zeros_like(alpha)
+
+    chosen, report = choose_refined_mask_by_geometry_with_report(
+        initial,
+        refined,
+        alpha,
+        depth,
+        min_area_ratio=0.5,
+        max_area_ratio=1.5,
+        min_boundary_gain=-1e-6,
+    )
+
+    assert np.array_equal(chosen, refined)
+    assert report["geometry_gate_accepted"] is True
+
+
+def test_choose_refined_mask_by_geometry_rejects_area_outlier():
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[4:12, 4:12] = True
+    refined = np.ones((16, 16), dtype=bool)
+
+    chosen, report = choose_refined_mask_by_geometry_with_report(
+        initial,
+        refined,
+        np.zeros((16, 16), dtype=np.float32),
+        np.zeros((16, 16), dtype=np.float32),
+        min_area_ratio=0.5,
+        max_area_ratio=1.5,
+    )
+
+    assert np.array_equal(chosen, initial)
+    assert report["geometry_gate_accepted"] is False
+    assert report["geometry_gate_reason"] == "area_ratio_out_of_range"
 
 
 def test_select_registration_frame_ids_uses_official_available_frames():
@@ -254,6 +533,29 @@ def test_apply_registration_confidence_downweights_low_support_rows():
     counts = torch.tensor([0.0, 5.0, 10.0], dtype=torch.float32)
 
     calibrated = apply_registration_confidence(scores, counts, blend=0.5, mode="linear")
+
+    assert torch.allclose(calibrated[0], torch.full((2,), 0.5))
+    assert torch.allclose(calibrated[1], torch.full((2,), 0.75))
+    assert torch.allclose(calibrated[2], torch.ones(2))
+
+
+def test_opacity_primitive_confidence_thresholds_and_normalizes():
+    opacity = torch.tensor([[0.0], [0.02], [0.50], [1.00]])
+
+    confidence = build_opacity_primitive_confidence(
+        opacity,
+        mode="opacity",
+        threshold=0.05,
+    )
+
+    assert torch.allclose(confidence, torch.tensor([0.0, 0.0, 0.5, 1.0]))
+
+
+def test_apply_direct_primitive_confidence_scales_rows():
+    scores = torch.ones(3, 2, dtype=torch.float32)
+    confidence = torch.tensor([0.0, 0.5, 1.0], dtype=torch.float32)
+
+    calibrated = apply_direct_primitive_confidence(scores, confidence, blend=0.5)
 
     assert torch.allclose(calibrated[0], torch.full((2,), 0.5))
     assert torch.allclose(calibrated[1], torch.full((2,), 0.75))
@@ -801,6 +1103,28 @@ def test_choose_sam3_box_refined_mask_uses_initial_overlap_not_gt():
     assert np.array_equal(refined, good.astype(bool))
 
 
+def test_choose_sam3_box_refined_mask_reports_feature_prompt_acceptance():
+    initial = np.zeros((16, 16), dtype=np.uint8)
+    initial[4:12, 4:12] = 1
+    candidate = np.zeros_like(initial)
+    candidate[3:13, 3:13] = 1
+
+    refined, report = choose_sam3_box_refined_mask_with_report(
+        initial,
+        np.stack([candidate], axis=0),
+        scores=np.asarray([0.7], dtype=np.float32),
+        min_initial_iou=0.05,
+    )
+
+    assert np.array_equal(refined, candidate.astype(bool))
+    assert report["accepted"] is True
+    assert report["fallback_reason"] == "accepted"
+    assert report["candidate_count"] == 1
+    assert report["selected_index"] == 0
+    assert report["best_initial_overlap"] > 0.05
+    assert report["selected_score"] == pytest.approx(0.7)
+
+
 def test_choose_sam3_box_refined_mask_falls_back_when_overlap_is_too_low():
     initial = np.zeros((16, 16), dtype=np.uint8)
     initial[4:12, 4:12] = 1
@@ -815,6 +1139,26 @@ def test_choose_sam3_box_refined_mask_falls_back_when_overlap_is_too_low():
     )
 
     assert np.array_equal(refined, initial.astype(bool))
+
+
+def test_choose_sam3_box_refined_mask_reports_low_overlap_fallback():
+    initial = np.zeros((16, 16), dtype=np.uint8)
+    initial[4:12, 4:12] = 1
+    candidate = np.zeros_like(initial)
+    candidate[0:2, 0:2] = 1
+
+    refined, report = choose_sam3_box_refined_mask_with_report(
+        initial,
+        np.stack([candidate], axis=0),
+        scores=np.asarray([1.0], dtype=np.float32),
+        min_initial_iou=0.2,
+    )
+
+    assert np.array_equal(refined, initial.astype(bool))
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "low_initial_overlap"
+    assert report["candidate_count"] == 1
+    assert report["selected_index"] == 0
 
 
 def test_keep_largest_mask_component_removes_disconnected_fragments():

@@ -1712,3 +1712,547 @@ def test_direct_point_loss_can_anchor_adapter_to_decoder_summary(monkeypatch):
 
     assert torch.allclose(stats["adapter_decoder_anchor"], torch.tensor(1.0))
     assert torch.allclose(stats["loss"], torch.tensor(2.0))
+
+
+def test_direct_point_loss_can_align_direct_compact_to_rendered_compact(monkeypatch):
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_loss_weight = 1.0
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_summary_adapter_weight = 0.0
+    trainer.direct_point_text_loss_weight = 0.0
+    trainer.direct_point_adapter_text_loss_weight = 0.0
+    trainer.direct_point_text_distill_weight = 0.0
+    trainer.direct_point_adapter_text_distill_weight = 0.0
+    trainer.direct_point_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_decoder_anchor_weight = 0.0
+    trainer.direct_point_text_contrast_weight = 0.0
+    trainer.direct_point_render_consistency_weight = 2.0
+    trainer.direct_point_render_consistency_mode = "cosine"
+    trainer.direct_point_feature_key = "features"
+    trainer.direct_point_sample_count = 2
+    trainer.direct_point_query_mode = "knn"
+    trainer.direct_point_k = 1
+    trainer.direct_point_depth_tolerance = 0.08
+    trainer.direct_point_relative_depth_tolerance = 0.02
+    trainer.direct_point_alpha_threshold = 0.0
+    trainer.direct_point_view_count_weighting = "none"
+    trainer.direct_point_pool = torch.tensor(
+        [[0.0, 0.0, 1.0], [1.0, 0.0, 1.0]],
+        dtype=torch.float32,
+    )
+    trainer.direct_point_pool_labels = None
+    trainer.direct_point_text_split_ids = []
+    trainer.direct_point_text_embeddings = None
+    trainer._is_hybrid = True
+    trainer.renderer = SimpleNamespace(
+        K=torch.tensor(
+            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
+            dtype=torch.float32,
+        ),
+        image_height=1,
+        image_width=2,
+    )
+    trainer.siglip_summary_head = None
+    trainer.point_summary_adapter = None
+    trainer._canonicalize_spatial_map = MethodType(
+        lambda self, value, batch_size, spatial_size, add_channel_dim=False: None,
+        trainer,
+    )
+
+    class _Model:
+        def query_compact_points(self, points, k):
+            return torch.tensor([[1.0, 0.0], [0.0, 1.0]], dtype=torch.float32)
+
+    class _Codec:
+        def decode_points(self, compact):
+            return compact
+
+    class _ZeroDistill:
+        def __call__(self, decoded, target, mask=None):
+            return {"total": decoded.sum() * 0.0}
+
+    def fake_select_visible(points, poses, k, **kwargs):
+        return torch.arange(points.shape[0]), torch.ones(points.shape[0], dtype=torch.bool)
+
+    def fake_sample_targets(points, features, poses, k, **kwargs):
+        targets = torch.zeros(points.shape[0], 2)
+        valid = torch.ones(points.shape[0], dtype=torch.bool)
+        counts = torch.ones(points.shape[0], dtype=torch.long)
+        return targets, valid, counts
+
+    monkeypatch.setattr(
+        train_feature_field_module,
+        "select_visible_gaussian_indices",
+        fake_select_visible,
+    )
+    monkeypatch.setattr(
+        train_feature_field_module,
+        "sample_multiview_radio_targets",
+        fake_sample_targets,
+    )
+    monkeypatch.setattr(
+        torch,
+        "randperm",
+        lambda n, device=None: torch.arange(n, device=device),
+    )
+    trainer.model = _Model()
+    trainer.codec = _Codec()
+    trainer.distill_loss_fn = _ZeroDistill()
+
+    rendered_compact = torch.tensor(
+        [[[[0.0, 1.0]], [[1.0, 0.0]]]],
+        dtype=torch.float32,
+    )
+    stats = trainer._compute_direct_point_loss(
+        batch={"pose_w2c": torch.eye(4).unsqueeze(0)},
+        render_result={},
+        target_features=torch.zeros(1, 2, 1, 2),
+        rendered_compact=rendered_compact,
+    )
+
+    assert torch.allclose(stats["render_consistency"], torch.tensor(1.0))
+    assert torch.allclose(stats["render_consistency_valid_ratio"], torch.tensor(1.0))
+    assert torch.allclose(stats["loss"], torch.tensor(2.0))
+
+
+def test_cached_direct_point_loss_can_prioritize_current_view_visible_points(monkeypatch):
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_loss_weight = 1.0
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_summary_adapter_weight = 0.0
+    trainer.direct_point_text_loss_weight = 0.0
+    trainer.direct_point_adapter_text_loss_weight = 0.0
+    trainer.direct_point_text_distill_weight = 0.0
+    trainer.direct_point_adapter_text_distill_weight = 0.0
+    trainer.direct_point_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_decoder_anchor_weight = 0.0
+    trainer.direct_point_text_contrast_weight = 0.0
+    trainer.direct_point_render_consistency_weight = 1.0
+    trainer.direct_point_render_consistency_mode = "cosine"
+    trainer.direct_point_cached_visible_fraction = 1.0
+    trainer.direct_point_sample_strategy = "uniform"
+    trainer.direct_point_feature_key = "features"
+    trainer.direct_point_sample_count = 2
+    trainer.direct_point_query_mode = "gaussian_index"
+    trainer.direct_point_gaussian_position_mode = "label_point"
+    trainer.direct_point_depth_tolerance = 0.08
+    trainer.direct_point_relative_depth_tolerance = 0.02
+    trainer.direct_point_alpha_threshold = 0.0
+    trainer.direct_point_view_count_weighting = "none"
+    trainer.direct_point_pool = torch.tensor(
+        [
+            [0.0, 0.0, 1.0],
+            [1.0, 0.0, 1.0],
+            [2.0, 0.0, 1.0],
+            [3.0, 0.0, 1.0],
+        ],
+        dtype=torch.float32,
+    )
+    trainer.direct_point_teacher_features = torch.eye(4, 2, dtype=torch.float32)
+    trainer.direct_point_teacher_valid = None
+    trainer.direct_point_teacher_view_counts = torch.ones(4, dtype=torch.long)
+    trainer.direct_point_pool_labels = None
+    trainer.direct_point_text_split_ids = []
+    trainer.direct_point_text_embeddings = None
+    trainer._is_hybrid = True
+    trainer.renderer = SimpleNamespace(
+        K=torch.eye(3, dtype=torch.float32),
+        image_height=1,
+        image_width=4,
+    )
+    trainer.siglip_summary_head = None
+    trainer.point_summary_adapter = None
+    trainer._canonicalize_spatial_map = MethodType(
+        lambda self, value, batch_size, spatial_size, add_channel_dim=False: None,
+        trainer,
+    )
+
+    class _Model:
+        num_gaussians = 6
+
+        def __init__(self):
+            self.seen_indices = None
+
+        def num_gaussians(self):
+            return 4
+
+        def query_gaussian_points(self, indices, points_xyz=None):
+            self.seen_indices = indices.detach().clone()
+            return torch.eye(4, 2, dtype=torch.float32)[indices]
+
+    class _Codec:
+        def decode_points(self, compact):
+            return compact
+
+    class _ZeroDistill:
+        def __call__(self, decoded, target, mask=None):
+            return {"total": decoded.sum() * 0.0}
+
+    def fake_select_visible(points, poses, k, **kwargs):
+        return torch.tensor([2, 3], dtype=torch.long), torch.ones(points.shape[0], dtype=torch.bool)
+
+    def fake_sample_targets(points, features, poses, k, **kwargs):
+        targets = torch.ones(points.shape[0], 2)
+        valid = torch.ones(points.shape[0], dtype=torch.bool)
+        counts = torch.ones(points.shape[0], dtype=torch.long)
+        return targets, valid, counts
+
+    monkeypatch.setattr(
+        train_feature_field_module,
+        "select_visible_gaussian_indices",
+        fake_select_visible,
+    )
+    monkeypatch.setattr(
+        train_feature_field_module,
+        "sample_multiview_radio_targets",
+        fake_sample_targets,
+    )
+    monkeypatch.setattr(
+        torch,
+        "randperm",
+        lambda n, device=None: torch.arange(n, device=device),
+    )
+    trainer.model = _Model()
+    trainer.codec = _Codec()
+    trainer.distill_loss_fn = _ZeroDistill()
+
+    stats = trainer._compute_direct_point_loss(
+        batch={"pose_w2c": torch.eye(4).unsqueeze(0)},
+        render_result={},
+        target_features=None,
+        rendered_compact=torch.zeros(1, 2, 1, 4),
+    )
+
+    assert torch.equal(trainer.model.seen_indices, torch.tensor([2, 3]))
+    assert torch.allclose(stats["render_consistency_valid_ratio"], torch.tensor(1.0))
+
+
+def test_cached_visible_teacher_replay_can_balance_visible_candidates(monkeypatch):
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_loss_weight = 1.0
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_summary_adapter_weight = 0.0
+    trainer.direct_point_text_loss_weight = 0.0
+    trainer.direct_point_adapter_text_loss_weight = 0.0
+    trainer.direct_point_text_distill_weight = 0.0
+    trainer.direct_point_adapter_text_distill_weight = 0.0
+    trainer.direct_point_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_decoder_anchor_weight = 0.0
+    trainer.direct_point_text_contrast_weight = 0.0
+    trainer.direct_point_render_consistency_weight = 1.0
+    trainer.direct_point_render_consistency_mode = "cosine"
+    trainer.direct_point_cached_visible_fraction = 1.0
+    trainer.direct_point_cached_visible_candidate_multiplier = 3
+    trainer.direct_point_cached_visible_balance = True
+    trainer.direct_point_sample_strategy = "teacher_balanced"
+    trainer.direct_point_feature_key = "features"
+    trainer.direct_point_sample_count = 3
+    trainer.direct_point_query_mode = "gaussian_index"
+    trainer.direct_point_gaussian_position_mode = "label_point"
+    trainer.direct_point_depth_tolerance = 0.08
+    trainer.direct_point_relative_depth_tolerance = 0.02
+    trainer.direct_point_alpha_threshold = 0.0
+    trainer.direct_point_view_count_weighting = "none"
+    trainer.direct_point_pool = torch.tensor(
+        [[float(i), 0.0, 1.0] for i in range(6)],
+        dtype=torch.float32,
+    )
+    trainer.direct_point_teacher_features = torch.tensor(
+        [
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [0.0, 0.0, 1.0],
+        ],
+        dtype=torch.float32,
+    )
+    trainer.direct_point_teacher_valid = None
+    trainer.direct_point_teacher_view_counts = torch.ones(6, dtype=torch.long)
+    trainer.direct_point_pool_labels = None
+    trainer.direct_point_text_embeddings = torch.eye(3, dtype=torch.float32)
+    trainer.direct_point_text_split_ids = [1, 2, 3]
+    trainer.direct_point_text_pseudo_ce_banks = []
+    trainer.siglip_summary_head = object()
+    trainer.point_summary_adapter = None
+    trainer._is_hybrid = True
+    trainer.renderer = SimpleNamespace(
+        K=torch.eye(3, dtype=torch.float32),
+        image_height=1,
+        image_width=6,
+    )
+    trainer._canonicalize_spatial_map = MethodType(
+        lambda self, value, batch_size, spatial_size, add_channel_dim=False: None,
+        trainer,
+    )
+    trainer._project_summary_head_features = MethodType(
+        lambda self, features: F.normalize(features.float(), dim=1),
+        trainer,
+    )
+
+    class _Model:
+        num_gaussians = 6
+
+        def __init__(self):
+            self.seen_indices = None
+
+        def query_gaussian_points(self, indices, points_xyz=None):
+            self.seen_indices = indices.detach().clone()
+            return trainer.direct_point_teacher_features[indices]
+
+    class _Codec:
+        def decode_points(self, compact):
+            return compact
+
+    class _ZeroDistill:
+        def __call__(self, decoded, target, mask=None):
+            return {"total": decoded.sum() * 0.0}
+
+    def fake_select_visible(points, poses, k, **kwargs):
+        assert kwargs["sample_count"] == 6
+        return torch.arange(points.shape[0]), torch.ones(points.shape[0], dtype=torch.bool)
+
+    def fake_sample_targets(points, features, poses, k, **kwargs):
+        targets = torch.ones(points.shape[0], 3)
+        valid = torch.ones(points.shape[0], dtype=torch.bool)
+        counts = torch.ones(points.shape[0], dtype=torch.long)
+        return targets, valid, counts
+
+    monkeypatch.setattr(
+        train_feature_field_module,
+        "select_visible_gaussian_indices",
+        fake_select_visible,
+    )
+    monkeypatch.setattr(
+        train_feature_field_module,
+        "sample_multiview_radio_targets",
+        fake_sample_targets,
+    )
+    monkeypatch.setattr(
+        torch,
+        "randperm",
+        lambda n, device=None: torch.arange(n, device=device),
+    )
+    trainer.model = _Model()
+    trainer.codec = _Codec()
+    trainer.distill_loss_fn = _ZeroDistill()
+
+    trainer._compute_direct_point_loss(
+        batch={"pose_w2c": torch.eye(4).unsqueeze(0)},
+        render_result={},
+        target_features=None,
+        rendered_compact=torch.zeros(1, 3, 1, 6),
+    )
+
+    assert trainer.model.seen_indices.tolist() == [0, 3, 5]
+
+
+def test_direct_point_text_contrast_can_visibility_weight_pairs():
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_text_split_ids = [1, 2]
+    trainer.direct_point_text_embeddings = F.normalize(torch.eye(2), dim=-1)
+    trainer.direct_point_text_contrast_confidence_threshold = 0.0
+    trainer.direct_point_text_contrast_temperature = 0.1
+    trainer.direct_point_text_contrast_pair_weighting = "none"
+    point_summary = F.normalize(
+        torch.tensor(
+                [
+                    [1.0, 0.0],
+                    [0.9, 0.1],
+                    [1.0, 0.0],
+                    [0.0, 1.0],
+                    [0.0, 1.0],
+                ],
+                dtype=torch.float32,
+            ),
+        dim=-1,
+    )
+    teacher_summary = F.normalize(
+        torch.tensor(
+                [
+                    [1.0, 0.0],
+                    [1.0, 0.0],
+                    [0.0, 1.0],
+                    [0.0, 1.0],
+                    [0.0, 1.0],
+                ],
+                dtype=torch.float32,
+            ),
+        dim=-1,
+    )
+    weights = torch.tensor([1.0, 1.0, 0.02, 1.0, 1.0], dtype=torch.float32)
+
+    unweighted, *_ = trainer._compute_direct_point_text_contrast(
+        point_summary,
+        teacher_summary,
+        sample_weights=weights,
+    )
+    trainer.direct_point_text_contrast_pair_weighting = "visibility"
+    weighted, valid_ratio, mean_conf, agreement = trainer._compute_direct_point_text_contrast(
+        point_summary,
+        teacher_summary,
+        sample_weights=weights,
+    )
+
+    assert torch.allclose(valid_ratio, torch.tensor(1.0))
+    assert mean_conf > 0.5
+    assert agreement < 1.0
+    assert weighted < unweighted
+
+
+def test_direct_point_text_contrast_caps_pairwise_matrix(monkeypatch):
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_text_split_ids = [1, 2]
+    trainer.direct_point_text_embeddings = F.normalize(torch.eye(2), dim=-1)
+    trainer.direct_point_text_contrast_confidence_threshold = 0.0
+    trainer.direct_point_text_contrast_temperature = 0.5
+    trainer.direct_point_text_contrast_pair_weighting = "none"
+    trainer.direct_point_text_contrast_max_points = 6
+    point_summary = F.normalize(
+        torch.tensor(
+            [
+                [1.0, 0.0],
+                [0.9, 0.1],
+                [0.8, 0.2],
+                [0.0, 1.0],
+                [0.1, 0.9],
+                [0.2, 0.8],
+                [1.0, 0.0],
+                [0.0, 1.0],
+            ],
+            dtype=torch.float32,
+        ),
+        dim=-1,
+    )
+    teacher_summary = F.normalize(
+        torch.tensor(
+            [
+                [1.0, 0.0],
+                [1.0, 0.0],
+                [1.0, 0.0],
+                [0.0, 1.0],
+                [0.0, 1.0],
+                [0.0, 1.0],
+                [1.0, 0.0],
+                [0.0, 1.0],
+            ],
+            dtype=torch.float32,
+        ),
+        dim=-1,
+    )
+    monkeypatch.setattr(
+        torch,
+        "randperm",
+        lambda n, device=None: torch.arange(n, device=device),
+    )
+
+    capped, capped_valid, *_ = trainer._compute_direct_point_text_contrast(
+        point_summary,
+        teacher_summary,
+    )
+    trainer.direct_point_text_contrast_max_points = 0
+    expected, expected_valid, *_ = trainer._compute_direct_point_text_contrast(
+        point_summary[:6],
+        teacher_summary[:6],
+    )
+
+    assert torch.allclose(capped, expected)
+    assert torch.allclose(capped_valid, torch.tensor(1.0))
+    assert torch.allclose(expected_valid, torch.tensor(1.0))
+
+
+def test_direct_point_text_contrast_cap_prefers_visibility_weights(monkeypatch):
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_text_split_ids = [1, 2]
+    trainer.direct_point_text_embeddings = F.normalize(torch.eye(2), dim=-1)
+    trainer.direct_point_text_contrast_confidence_threshold = 0.0
+    trainer.direct_point_text_contrast_temperature = 0.5
+    trainer.direct_point_text_contrast_pair_weighting = "visibility"
+    trainer.direct_point_text_contrast_max_points = 3
+    point_summary = F.normalize(torch.eye(2).repeat(3, 1), dim=-1)
+    teacher_summary = point_summary.clone()
+    sample_weights = torch.tensor([0.1, 0.2, 4.0, 5.0, 6.0, 7.0], dtype=torch.float32)
+    calls = {}
+
+    def fake_multinomial(probs, num_samples, replacement=False):
+        calls["probs"] = probs.detach().clone()
+        calls["num_samples"] = num_samples
+        calls["replacement"] = replacement
+        return torch.tensor([3, 4, 5], device=probs.device)
+
+    monkeypatch.setattr(torch, "multinomial", fake_multinomial)
+
+    loss, valid_ratio, *_ = trainer._compute_direct_point_text_contrast(
+        point_summary,
+        teacher_summary,
+        sample_weights=sample_weights,
+    )
+
+    assert calls["num_samples"] == 3
+    assert calls["replacement"] is False
+    assert torch.equal(calls["probs"], sample_weights)
+    assert torch.isfinite(loss)
+    assert torch.allclose(valid_ratio, torch.tensor(1.0))
+
+
+def test_direct_point_text_contrast_can_center_teacher_logits():
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_text_split_ids = [1, 2]
+    trainer.direct_point_text_embeddings = F.normalize(torch.eye(2), dim=-1)
+    trainer.direct_point_text_contrast_confidence_threshold = 0.0
+    trainer.direct_point_text_contrast_temperature = 0.5
+    trainer.direct_point_text_contrast_pair_weighting = "none"
+    trainer.direct_point_text_contrast_max_points = 0
+    trainer.direct_point_text_contrast_center_logits = False
+    point_summary = F.normalize(
+        torch.tensor(
+            [
+                [1.0, 0.0],
+                [0.9, 0.1],
+                [0.8, 0.2],
+                [0.2, 0.8],
+                [0.1, 0.9],
+                [0.0, 1.0],
+            ],
+            dtype=torch.float32,
+        ),
+        dim=-1,
+    )
+    teacher_summary = torch.tensor(
+        [
+            [10.0, 0.0],
+            [10.0, 0.1],
+            [10.0, 0.2],
+            [10.0, 1.0],
+            [10.0, 1.1],
+            [10.0, 1.2],
+        ],
+        dtype=torch.float32,
+    )
+
+    collapsed, *_ = trainer._compute_direct_point_text_contrast(
+        point_summary,
+        teacher_summary,
+    )
+    trainer.direct_point_text_contrast_center_logits = True
+    centered, valid_ratio, mean_conf, agreement = trainer._compute_direct_point_text_contrast(
+        point_summary,
+        teacher_summary,
+    )
+
+    assert torch.allclose(collapsed, torch.tensor(0.0))
+    assert centered > 0.0
+    assert torch.allclose(valid_ratio, torch.tensor(1.0))
+    assert mean_conf > 0.5
+    assert agreement > 0.5

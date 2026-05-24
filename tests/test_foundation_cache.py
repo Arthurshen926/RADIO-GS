@@ -41,6 +41,8 @@ def test_load_foundation_cache_preserves_sam3_proposal_metadata():
                 "queries": ["cup", "plate"],
                 "scores": torch.tensor([0.9, 0.4]),
                 "boxes_xyxy": torch.tensor([[1.0, 2.0, 5.0, 6.0], [0.0, 1.0, 4.0, 7.0]]),
+                "mask_query_indices": torch.tensor([0, 1]),
+                "mask_query_ranks": torch.tensor([0, 0]),
             },
         },
     }
@@ -51,6 +53,33 @@ def test_load_foundation_cache_preserves_sam3_proposal_metadata():
     assert sam3.queries == ("cup", "plate")
     assert torch.allclose(sam3.scores, torch.tensor([0.9, 0.4]))
     assert sam3.boxes_xyxy.shape == (2, 4)
+    assert torch.equal(sam3.mask_query_indices, torch.tensor([0, 1]))
+    assert torch.equal(sam3.mask_query_ranks, torch.tensor([0, 0]))
+
+
+def test_load_foundation_cache_accepts_empty_sam3_query_mapping():
+    payload = {
+        "version": 1,
+        "frame_id": 107,
+        "heads": {
+            "sam3": {
+                "mask_logits": torch.empty(0, 8, 8),
+                "queries": ["cup", "plate"],
+                "scores": torch.empty(0),
+                "boxes_xyxy": torch.empty(0, 4),
+                "mask_query_indices": torch.empty(0, dtype=torch.long),
+                "mask_query_ranks": torch.empty(0, dtype=torch.long),
+                "producer": {"official": True, "backend": "facebookresearch/sam3"},
+            },
+        },
+    }
+
+    cache = load_foundation_cache(payload, require_official=True)
+    sam3 = cache.heads["sam3"]
+
+    assert sam3.mask_logits.shape == (0, 8, 8)
+    assert sam3.queries == ("cup", "plate")
+    assert sam3.mask_query_indices.numel() == 0
 
 
 def test_load_foundation_cache_requires_official_producer_when_strict():

@@ -132,6 +132,15 @@ def _mean(values: Iterable[float]) -> float:
     return float(sum(values) / max(len(values), 1))
 
 
+def _normalise_sam3_dtype_name(dtype: str) -> str:
+    aliases = {
+        "fp32": "float32",
+        "bf16": "bfloat16",
+        "none": "off",
+    }
+    return aliases.get(str(dtype), str(dtype))
+
+
 def pick_frames(
     *,
     scene: str,
@@ -155,6 +164,8 @@ def pick_frames(
 
 def train_bridge(args: argparse.Namespace) -> None:
     device = torch.device(args.device)
+    if device.type == "cuda":
+        torch.cuda.set_device(device)
     label_dir = resolve_lerf_label_dir(args.label_dir)
     frame_annotations, _, _, _ = load_lerf_ovs_labels(label_dir, args.scene)
     label_frames = sorted(frame_annotations)
@@ -171,10 +182,13 @@ def train_bridge(args: argparse.Namespace) -> None:
         checkpoint_path=args.sam3_checkpoint_path,
         device=str(device),
         confidence_threshold=args.sam3_confidence_threshold,
-        dtype=args.sam3_dtype,
+        dtype=_normalise_sam3_dtype_name(args.sam3_dtype),
         resolution=args.sam3_resolution,
     )
-    amp_dtype = resolve_sam3_amp_dtype(str(processor.device), args.sam3_amp_dtype)
+    amp_dtype = resolve_sam3_amp_dtype(
+        str(processor.device),
+        _normalise_sam3_dtype_name(args.sam3_amp_dtype),
+    )
     bridge = Sam3BackboneBridge(input_dim=args.input_dim, hidden_dim=args.hidden_dim).to(device)
     optimizer = torch.optim.AdamW(bridge.parameters(), lr=args.lr, weight_decay=args.weight_decay)
 
@@ -300,8 +314,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sam3_checkpoint_path", default="checkpoints/sam3_modelscope/sam3.pt")
     parser.add_argument("--sam3_resolution", type=int, default=1008)
     parser.add_argument("--sam3_confidence_threshold", type=float, default=0.5)
-    parser.add_argument("--sam3_dtype", choices=["auto", "fp32", "bf16", "fp16"], default="auto")
-    parser.add_argument("--sam3_amp_dtype", choices=["auto", "none", "bf16", "fp16"], default="auto")
+    parser.add_argument("--sam3_dtype", choices=["auto", "float32", "bfloat16", "fp32", "bf16"], default="auto")
+    parser.add_argument("--sam3_amp_dtype", choices=["auto", "off", "bfloat16", "none", "bf16"], default="auto")
     parser.add_argument("--input_dim", type=int, default=1280)
     parser.add_argument("--hidden_dim", type=int, default=256)
     parser.add_argument("--epochs", type=int, default=1)
@@ -321,4 +335,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

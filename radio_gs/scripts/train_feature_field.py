@@ -44,6 +44,7 @@ from radio_gs.artifact_paths import (
     resolve_siglip_text_embeddings_path,
 )
 from radio_gs.config import RadioGSConfig, load_config
+from radio_gs.scripts.audit_vpr_cache_alignment import audit_vpr_cache_payload_alignment
 from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.data.benchmark_paths import (
     extract_feature_frame_index,
@@ -130,6 +131,43 @@ try:
     _HAS_TB = True
 except ImportError:
     _HAS_TB = False
+
+
+def audit_direct_point_teacher_cache_alignment_for_training(
+    payload: Dict[str, Any],
+    model_xyz: torch.Tensor,
+    *,
+    direct_point_source: str,
+    direct_point_query_mode: str,
+    cache_path: str = "",
+    fail_max_l2: float = 1e-5,
+) -> Dict[str, Any]:
+    """Fail fast when a row-aligned Gaussian teacher cache is not geometry-aligned."""
+    if direct_point_source != "gaussian" or direct_point_query_mode != "gaussian_index":
+        return {
+            "cache_path": str(cache_path),
+            "status": "skipped",
+            "passed": True,
+            "message": (
+                "row-alignment audit is only required for "
+                "direct_point_source=gaussian and direct_point_query_mode=gaussian_index"
+            ),
+        }
+    report = audit_vpr_cache_payload_alignment(
+        payload,
+        model_xyz.detach().cpu(),
+        fail_max_l2=fail_max_l2,
+        cache_path=str(cache_path),
+    )
+    if not report.get("passed", False):
+        raise RuntimeError(
+            "direct_point_teacher_cache row-alignment audit failed: "
+            f"{report.get('message', '')}; "
+            f"cache={cache_path}; "
+            f"max_l2={report.get('max_l2', 'n/a')}; "
+            f"fail_max_l2={report.get('fail_max_l2', fail_max_l2)}"
+        )
+    return report
 
 
 
@@ -413,6 +451,39 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_text_contrast_confidence_threshold = float(
             getattr(config, "direct_point_text_contrast_confidence_threshold", 0.0)
         )
+        self.direct_point_text_contrast_pair_weighting = str(
+            getattr(config, "direct_point_text_contrast_pair_weighting", "none") or "none"
+        )
+        self.direct_point_text_contrast_max_points = max(
+            0,
+            int(getattr(config, "direct_point_text_contrast_max_points", 4096) or 0),
+        )
+        self.direct_point_text_contrast_center_logits = bool(
+            getattr(config, "direct_point_text_contrast_center_logits", False)
+        )
+        self.direct_point_render_consistency_weight = float(
+            getattr(config, "direct_point_render_consistency_weight", 0.0)
+        )
+        self.direct_point_render_consistency_mode = str(
+            getattr(config, "direct_point_render_consistency_mode", "cosine") or "cosine"
+        )
+        self.direct_point_cached_visible_fraction = float(
+            getattr(config, "direct_point_cached_visible_fraction", 0.0)
+        )
+        self.direct_point_cached_visible_candidate_multiplier = max(
+            1,
+            int(
+                getattr(
+                    config,
+                    "direct_point_cached_visible_candidate_multiplier",
+                    1,
+                )
+                or 1
+            ),
+        )
+        self.direct_point_cached_visible_balance = bool(
+            getattr(config, "direct_point_cached_visible_balance", False)
+        )
         self.direct_point_text_split = str(
             getattr(config, "direct_point_text_split", "19")
         )
@@ -489,6 +560,20 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             raise ValueError(
                 "direct_point_view_count_weighting must be one of: none, log, clipped_log"
             )
+        if self.direct_point_text_contrast_pair_weighting not in {"none", "visibility"}:
+            raise ValueError(
+                "direct_point_text_contrast_pair_weighting must be one of: none, visibility"
+            )
+        if self.direct_point_render_consistency_mode not in {"cosine", "mse"}:
+            raise ValueError(
+                "direct_point_render_consistency_mode must be one of: cosine, mse"
+            )
+        if self.direct_point_render_consistency_weight < 0:
+            raise ValueError("direct_point_render_consistency_weight must be non-negative")
+        if not 0.0 <= self.direct_point_cached_visible_fraction <= 1.0:
+            raise ValueError("direct_point_cached_visible_fraction must be between 0 and 1")
+        if self.direct_point_cached_visible_candidate_multiplier < 1:
+            raise ValueError("direct_point_cached_visible_candidate_multiplier must be >= 1")
         if self.direct_point_view_count_min_weight < 0:
             raise ValueError("direct_point_view_count_min_weight must be non-negative")
         if self.direct_point_view_count_percentile_high < self.direct_point_view_count_percentile_low:
@@ -517,6 +602,7 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_teacher_valid: Optional[torch.Tensor] = None
         self.direct_point_teacher_view_counts: Optional[torch.Tensor] = None
         self.direct_point_teacher_pseudo_label_cache: Optional[torch.Tensor] = None
+        self.direct_point_teacher_cache_alignment_report: Optional[Dict[str, Any]] = None
         self.point_summary_adapter_metadata: Dict[str, Any] = {}
         self.point_summary_adapter_epoch: Optional[int] = None
         self.point_summary_adapter_best_metric: Optional[float] = None
@@ -1485,6 +1571,26 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 f"Teacher cache features must be [N,C], got {tuple(features.shape)}"
             )
         num_points = int(features.shape[0])
+        if bool(getattr(config, "direct_point_teacher_cache_require_xyz_alignment", True)):
+            report = audit_direct_point_teacher_cache_alignment_for_training(
+                payload,
+                self.model.get_xyz().detach(),
+                direct_point_source=self.direct_point_source,
+                direct_point_query_mode=self.direct_point_query_mode,
+                cache_path=str(cache_path),
+                fail_max_l2=float(
+                    getattr(config, "direct_point_teacher_cache_fail_max_l2", 1e-5)
+                ),
+            )
+            self.direct_point_teacher_cache_alignment_report = report
+            if report.get("status") != "skipped":
+                self._log(
+                    "Direct point teacher cache row alignment: "
+                    f"status={report.get('status')} "
+                    f"max_l2={report.get('max_l2', 0.0):.3e} "
+                    f"mean_l2={report.get('mean_l2', 0.0):.3e} "
+                    f"hash_match={report.get('xyz_sha256_match')}"
+                )
         xyz_payload = payload.get("xyz")
         if xyz_payload is not None:
             xyz = torch.as_tensor(xyz_payload, dtype=torch.float32)
@@ -1742,6 +1848,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "direct_point_text_contrast_valid": 0.0,
             "direct_point_text_contrast_teacher_conf": 0.0,
             "direct_point_text_contrast_agreement": 0.0,
+            "direct_point_render_consistency": 0.0,
+            "direct_point_render_consistency_valid": 0.0,
             "direct_point_adapter_text_distill": 0.0,
             "direct_point_adapter_text_distill_valid": 0.0,
             "direct_point_adapter_text_distill_teacher_conf": 0.0,
@@ -2056,6 +2164,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 direct_point_text_contrast_valid = torch.tensor(0.0, device=self.device)
                 direct_point_text_contrast_teacher_conf = torch.tensor(0.0, device=self.device)
                 direct_point_text_contrast_agreement = torch.tensor(0.0, device=self.device)
+                direct_point_render_consistency = torch.tensor(0.0, device=self.device)
+                direct_point_render_consistency_valid = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_distill = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_distill_valid = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_distill_teacher_conf = torch.tensor(0.0, device=self.device)
@@ -2124,6 +2234,7 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                         batch=batch,
                         render_result=result,
                         target_features=gt_radio_rs,
+                        rendered_compact=rendered_compact,
                     )
                     l_direct_point = direct_point_stats["loss"]
                     direct_point_valid = direct_point_stats["valid_ratio"]
@@ -2188,6 +2299,14 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     direct_point_text_contrast_agreement = direct_point_stats.get(
                         "text_contrast_agreement",
                         direct_point_text_contrast_agreement,
+                    )
+                    direct_point_render_consistency = direct_point_stats.get(
+                        "render_consistency",
+                        direct_point_render_consistency,
+                    )
+                    direct_point_render_consistency_valid = direct_point_stats.get(
+                        "render_consistency_valid_ratio",
+                        direct_point_render_consistency_valid,
                     )
                     direct_point_adapter_text_distill = direct_point_stats.get(
                         "adapter_text_distill",
@@ -2351,6 +2470,12 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             )
             loss_accum["direct_point_text_contrast_agreement"] += (
                 direct_point_text_contrast_agreement.item()
+            )
+            loss_accum["direct_point_render_consistency"] += (
+                direct_point_render_consistency.item()
+            )
+            loss_accum["direct_point_render_consistency_valid"] += (
+                direct_point_render_consistency_valid.item()
             )
             loss_accum["direct_point_adapter_text_distill"] += direct_point_adapter_text_distill.item()
             loss_accum["direct_point_adapter_text_distill_valid"] += (
@@ -2550,6 +2675,16 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 self.writer.add_scalar(
                     "train/direct_point_adapter_text_distill",
                     direct_point_adapter_text_distill.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_render_consistency",
+                    direct_point_render_consistency.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_render_consistency_valid",
+                    direct_point_render_consistency_valid.item(),
                     self.global_step,
                 )
                 self.writer.add_scalar(
@@ -2926,24 +3061,6 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             f"cos_decoded={avg_cos_decoded:.4f} psnr={psnr:.2f}"
         )
         return metrics
-
-    # ------------------------------------------------------------------
-    # Checkpoint
-    # ------------------------------------------------------------------
-
-
-
-    @staticmethod
-
-    @staticmethod
-
-
-
-
-
-
-
-
 
     # ------------------------------------------------------------------
     # Main loop
@@ -3402,32 +3519,6 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         projected = self.siglip_projection(feat_flat)
         projected = projected.permute(0, 2, 1).reshape(B, -1, H, W)
         return F.normalize(projected, dim=1)
-
-
-
-
-
-
-    @staticmethod
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -16,6 +16,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+
 
 RADIO_ADAPTOR_ALIASES: dict[str, tuple[str, ...]] = {
     "dino_v3": ("dino_v3", "dino_v3_7b"),
@@ -124,7 +126,7 @@ def load_radio_adaptor_from_checkpoint(
     kind: str = "feature_projection",
 ) -> RadioMLPAdaptor:
     """Load a frozen RADIO MLP adaptor from a full RADIO checkpoint."""
-    checkpoint = torch.load(Path(checkpoint_path), map_location="cpu")
+    checkpoint = load_trusted_checkpoint(Path(checkpoint_path), map_location="cpu")
     adaptor_state = _extract_prefixed_state(_checkpoint_state_dict(checkpoint), name, kind)
     input_dim, hidden_dim, output_dim, num_blocks = _infer_mlp_shape(adaptor_state)
     adaptor = RadioMLPAdaptor(
@@ -159,4 +161,3 @@ def project_feature_map_with_adaptor(
     if normalize:
         projected = F.normalize(projected.float(), dim=1)
     return projected
-

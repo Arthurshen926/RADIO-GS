@@ -31,6 +31,8 @@ class FoundationHeadCache:
     queries: tuple[str, ...] = ()
     scores: torch.Tensor | None = None
     boxes_xyxy: torch.Tensor | None = None
+    mask_query_indices: torch.Tensor | None = None
+    mask_query_ranks: torch.Tensor | None = None
     producer: FoundationCacheProducer | None = None
 
 
@@ -88,6 +90,8 @@ def _parse_head_cache(
     feature_map = None
     scores = None
     boxes_xyxy = None
+    mask_query_indices = None
+    mask_query_ranks = None
     queries: tuple[str, ...] = ()
     if "mask_logits" in data:
         mask_logits = _require_tensor(name, "mask_logits", data["mask_logits"], 3)
@@ -101,6 +105,20 @@ def _parse_head_cache(
         boxes_xyxy = _require_tensor(name, "boxes_xyxy", data["boxes_xyxy"], 2)
         if boxes_xyxy.shape[-1] != 4:
             raise ValueError(f"{name}.boxes_xyxy must have shape [N,4]")
+    if "mask_query_indices" in data:
+        mask_query_indices = _require_tensor(
+            name,
+            "mask_query_indices",
+            data["mask_query_indices"],
+            1,
+        ).long()
+    if "mask_query_ranks" in data:
+        mask_query_ranks = _require_tensor(
+            name,
+            "mask_query_ranks",
+            data["mask_query_ranks"],
+            1,
+        ).long()
     if "queries" in data:
         queries_payload = data["queries"]
         if queries_payload is None:
@@ -119,6 +137,21 @@ def _parse_head_cache(
         and boxes_xyxy.shape[0] != mask_logits.shape[0]
     ):
         raise ValueError(f"{name}.boxes_xyxy must match mask_logits mask count")
+    if (
+        mask_query_indices is not None
+        and mask_logits is not None
+        and mask_query_indices.shape[0] != mask_logits.shape[0]
+    ):
+        raise ValueError(f"{name}.mask_query_indices must match mask_logits mask count")
+    if (
+        mask_query_ranks is not None
+        and mask_logits is not None
+        and mask_query_ranks.shape[0] != mask_logits.shape[0]
+    ):
+        raise ValueError(f"{name}.mask_query_ranks must match mask_logits mask count")
+    if mask_query_indices is not None and mask_query_indices.numel() > 0 and queries:
+        if int(mask_query_indices.min().item()) < 0 or int(mask_query_indices.max().item()) >= len(queries):
+            raise ValueError(f"{name}.mask_query_indices contains query ids outside queries")
     if mask_logits is None and tokens is None and feature_map is None:
         raise ValueError(f"{name} cache must include mask_logits, tokens, or feature_map")
     producer = _parse_producer(
@@ -133,6 +166,8 @@ def _parse_head_cache(
         queries=queries,
         scores=scores,
         boxes_xyxy=boxes_xyxy,
+        mask_query_indices=mask_query_indices,
+        mask_query_ranks=mask_query_ranks,
         producer=producer,
     )
 

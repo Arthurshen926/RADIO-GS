@@ -1,6 +1,7 @@
 import torch
 
 from radio_gs.models.sam3_decoder_bridge import Sam3BackboneBridge, sam3_backbone_bridge_loss
+from radio_gs.scripts.train_sam3_decoder_bridge import _normalise_sam3_dtype_name
 
 
 def test_sam3_backbone_bridge_matches_official_shapes():
@@ -33,3 +34,9 @@ def test_sam3_backbone_bridge_loss_is_finite():
     assert stats["total"] > 0
     assert "fpn0_mse" in stats
 
+
+def test_train_bridge_normalises_sam3_dtype_aliases():
+    assert _normalise_sam3_dtype_name("bf16") == "bfloat16"
+    assert _normalise_sam3_dtype_name("fp32") == "float32"
+    assert _normalise_sam3_dtype_name("none") == "off"
+    assert _normalise_sam3_dtype_name("auto") == "auto"

@@ -27,7 +27,8 @@ frozen RADIO-GS package reaches 0.8712 macro localization accuracy and 0.5243
 calibrated macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
 ScanNet direct point-query protocol, RADIO-GS reaches 0.3583, 0.3618, and
 0.4367 mIoU on the 19-, 15-, and 10-class splits, while the contextual kNN
-readout raises them to 0.3677, 0.3748, and 0.4562. A VPR-registered LERF direct 3D object-selection
+readout raises them to 0.3704, 0.3771, and 0.4585 with the DINO-CV compact
+field. A VPR-registered LERF direct 3D object-selection
 readout with a fixed global softmax-score threshold, 0.5% floor, 1.8% cap, and
 GT-free RGB boundary snap reaches 0.4801 macro mIoU / 0.6760 Acc@0.25. With
 frozen official SAM3 box-prompt boundary readout, the compact direct field
@@ -193,9 +194,10 @@ point-query protocol on the VALA/OpenGaFF eight-scene ScanNet subset:
 | 15 classes | 0.3618 | 0.6152 |
 | 10 classes | 0.4367 | 0.6998 |
 
-The stronger balanced support row uses contextual kNN point readout
+The stronger balanced support row uses the DINO-CV compact field with
+contextual kNN point readout
 (`k=8`, `candidate_k=32`) plus label-free scene-mean calibration at alpha 0.5:
-0.3677/0.5997, 0.3748/0.6181, and 0.4562/0.7008 on the 19/15/10-class splits.
+0.3704/0.6017, 0.3771/0.6198, and 0.4585/0.7032 on the 19/15/10-class splits.
 This should be framed as OpenGaFF/VALA split-aligned cross-domain feature
 usability evidence, not as a fully standard ScanNet semantic segmentation
 leaderboard comparison. Older

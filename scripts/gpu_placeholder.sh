@@ -16,7 +16,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 STATE_DIR="$ROOT_DIR/output/gpu_placeholder"
 VISIBLE_GPUS="${GPU_PLACEHOLDER_PHYSICAL_GPUS:-2,3}"
-WORKER_VISIBLE_GPUS="${GPU_PLACEHOLDER_VISIBLE_GPUS:-0,1}"
+WORKER_VISIBLE_GPUS="${GPU_PLACEHOLDER_VISIBLE_GPUS:-}"
 MEMORY_FRACTION="${GPU_PLACEHOLDER_MEMORY_FRACTION:-0.80}"
 MATRIX_SIZE="${GPU_PLACEHOLDER_MATRIX_SIZE:-8192}"
 CHUNK_MIB="${GPU_PLACEHOLDER_CHUNK_MIB:-512}"
@@ -50,6 +50,47 @@ configure_state_paths() {
   tag="${tag// /}"
   PID_FILE="$STATE_DIR/gpu${tag}.pid"
   LOG_FILE="$STATE_DIR/gpu${tag}.log"
+}
+
+default_worker_visible_gpus() {
+  local clean count ids i
+  clean="${VISIBLE_GPUS// /}"
+  if [[ -z "$clean" ]]; then
+    echo "0"
+    return 0
+  fi
+  IFS=',' read -r -a ids <<< "$clean"
+  count="${#ids[@]}"
+  local out=()
+  for ((i = 0; i < count; i++)); do
+    out+=("$i")
+  done
+  local joined
+  joined="$(IFS=,; echo "${out[*]}")"
+  echo "$joined"
+}
+
+normalise_worker_visible_gpus() {
+  local physical_clean count max_id id
+  physical_clean="${VISIBLE_GPUS// /}"
+  IFS=',' read -r -a _physical_ids <<< "$physical_clean"
+  count="${#_physical_ids[@]}"
+  if [[ -z "${WORKER_VISIBLE_GPUS// /}" ]]; then
+    WORKER_VISIBLE_GPUS="$(default_worker_visible_gpus)"
+    return 0
+  fi
+  max_id=$((count - 1))
+  IFS=',' read -r -a _worker_ids <<< "${WORKER_VISIBLE_GPUS// /}"
+  for id in "${_worker_ids[@]}"; do
+    if [[ -z "$id" ]]; then
+      continue
+    fi
+    if (( id < 0 || id > max_id )); then
+      echo "warning: --visible-gpus $WORKER_VISIBLE_GPUS is invalid for CUDA_VISIBLE_DEVICES=$VISIBLE_GPUS; using $(default_worker_visible_gpus)" >&2
+      WORKER_VISIBLE_GPUS="$(default_worker_visible_gpus)"
+      return 0
+    fi
+  done
 }
 
 parse_options() {
@@ -102,6 +143,7 @@ parse_options() {
         ;;
     esac
   done
+  normalise_worker_visible_gpus
   configure_state_paths
 }
 
@@ -150,7 +192,7 @@ stop_placeholder() {
   local pid
   pid="$(cat "$PID_FILE")"
   echo "stopping gpu-placeholder: pid=$pid"
-  kill "$pid" 2>/dev/null || true
+  kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
   for _ in $(seq 1 30); do
     if ! kill -0 "$pid" 2>/dev/null; then
       rm -f "$PID_FILE"
@@ -160,7 +202,7 @@ stop_placeholder() {
     sleep 1
   done
   echo "gpu-placeholder did not stop after 30s; sending SIGKILL"
-  kill -9 "$pid" 2>/dev/null || true
+  kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
   rm -f "$PID_FILE"
 }
 

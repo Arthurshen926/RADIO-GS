@@ -16,6 +16,7 @@ from radio_gs.scripts.build_sam3_foundation_cache import (
     resolve_sam3_amp_dtype,
     resolve_sam3_dtype,
     sam3_autocast_context,
+    set_requested_cuda_device,
     sha256_file,
     validate_sam3_resolution,
 )
@@ -34,6 +35,16 @@ def test_normalize_sam3_device_matches_official_builder_contract():
     assert normalize_sam3_device("cuda") == "cuda"
     assert normalize_sam3_device("cuda:0") == "cuda"
     assert normalize_sam3_device("cpu") == "cpu"
+
+
+def test_set_requested_cuda_device_preserves_explicit_cuda_index(monkeypatch):
+    calls = []
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: True)
+    monkeypatch.setattr(torch.cuda, "set_device", lambda device: calls.append(device))
+
+    set_requested_cuda_device("cuda:2")
+
+    assert calls == [torch.device("cuda:2")]
 
 
 def test_filter_images_by_frame_ids_accepts_numeric_and_stem_ids(tmp_path):
@@ -72,6 +83,8 @@ def test_make_sam3_cache_payload_is_strict_official_cache():
         masks=torch.ones(2, 8, 8),
         scores=torch.tensor([0.9, 0.7]),
         boxes=torch.zeros(2, 4),
+        mask_query_indices=torch.tensor([0, 0]),
+        mask_query_ranks=torch.tensor([0, 1]),
         image_path="/tmp/rgb_000001.png",
     )
 
@@ -79,6 +92,8 @@ def test_make_sam3_cache_payload_is_strict_official_cache():
 
     assert cache.frame_id == "rgb_000001"
     assert cache.heads["sam3"].mask_logits.shape == (2, 8, 8)
+    assert torch.equal(cache.heads["sam3"].mask_query_indices, torch.tensor([0, 0]))
+    assert torch.equal(cache.heads["sam3"].mask_query_ranks, torch.tensor([0, 1]))
     assert cache.heads["sam3"].producer is not None
     assert cache.heads["sam3"].producer.official is True
     assert cache.heads["sam3"].producer.backend == "facebookresearch/sam3"

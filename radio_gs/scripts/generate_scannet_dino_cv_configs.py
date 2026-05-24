@@ -48,6 +48,12 @@ def generate_config(
     epochs: int = 20,
     cross_view_downsample: int = 2,
     cross_view_max_tokens: int = 128,
+    direct_render_consistency_weight: float = 0.05,
+    direct_text_contrast_weight: float = 0.05,
+    direct_cached_visible_fraction: float = 0.5,
+    direct_cached_visible_candidate_multiplier: int = 1,
+    direct_cached_visible_balance: bool = False,
+    direct_text_contrast_center_logits: bool = False,
 ) -> Path:
     base_path = base_config_dir / f"scannet_og_hybrid_{BASE_VARIANT}_{scene}.yaml"
     cfg = _load_yaml(base_path)
@@ -79,6 +85,23 @@ def generate_config(
             "radio_adaptor_cross_view_downsample": int(cross_view_downsample),
             "radio_adaptor_cross_view_max_tokens": int(cross_view_max_tokens),
             "radio_adaptor_cross_view_temperature": 1.0,
+            "direct_point_view_count_weighting": "clipped_log",
+            "direct_point_view_count_min_weight": 0.25,
+            "direct_point_view_count_percentile_low": 5.0,
+            "direct_point_view_count_percentile_high": 95.0,
+            "direct_point_text_contrast_weight": float(direct_text_contrast_weight),
+            "direct_point_text_contrast_temperature": 0.1,
+            "direct_point_text_contrast_confidence_threshold": 0.05,
+            "direct_point_text_contrast_pair_weighting": "visibility",
+            "direct_point_text_contrast_max_points": 4096,
+            "direct_point_text_contrast_center_logits": bool(direct_text_contrast_center_logits),
+            "direct_point_render_consistency_weight": float(direct_render_consistency_weight),
+            "direct_point_render_consistency_mode": "cosine",
+            "direct_point_cached_visible_fraction": float(direct_cached_visible_fraction),
+            "direct_point_cached_visible_candidate_multiplier": int(
+                direct_cached_visible_candidate_multiplier
+            ),
+            "direct_point_cached_visible_balance": bool(direct_cached_visible_balance),
         }
     )
     output_path = output_config_dir / f"scannet_og_hybrid_{variant}_{scene}.yaml"
@@ -95,6 +118,12 @@ def generate_configs(
     cross_view_weight: float = 0.001,
     batch_size: int = 2,
     epochs: int = 20,
+    direct_render_consistency_weight: float = 0.05,
+    direct_text_contrast_weight: float = 0.05,
+    direct_cached_visible_fraction: float = 0.5,
+    direct_cached_visible_candidate_multiplier: int = 1,
+    direct_cached_visible_balance: bool = False,
+    direct_text_contrast_center_logits: bool = False,
 ) -> list[Path]:
     return [
         generate_config(
@@ -106,6 +135,12 @@ def generate_configs(
             cross_view_weight=cross_view_weight,
             batch_size=batch_size,
             epochs=epochs,
+            direct_render_consistency_weight=direct_render_consistency_weight,
+            direct_text_contrast_weight=direct_text_contrast_weight,
+            direct_cached_visible_fraction=direct_cached_visible_fraction,
+            direct_cached_visible_candidate_multiplier=direct_cached_visible_candidate_multiplier,
+            direct_cached_visible_balance=direct_cached_visible_balance,
+            direct_text_contrast_center_logits=direct_text_contrast_center_logits,
         )
         for scene in scenes
     ]
@@ -126,6 +161,12 @@ def write_launch_plan(
     *,
     batch_size: int,
     cross_view_weight: float,
+    direct_render_consistency_weight: float,
+    direct_text_contrast_weight: float,
+    direct_cached_visible_fraction: float,
+    direct_cached_visible_candidate_multiplier: int,
+    direct_cached_visible_balance: bool,
+    direct_text_contrast_center_logits: bool,
 ) -> None:
     gpu4 = [scene_from_config_path(p, variant) for p in paths[::2]]
     gpu5 = [scene_from_config_path(p, variant) for p in paths[1::2]]
@@ -137,6 +178,18 @@ def write_launch_plan(
         f"- Batch size: {batch_size}",
         "- Direct point samples: inherited from v67 configs (`32768`)",
         f"- Cross-view adaptor: `dino_v3`, weight `{cross_view_weight:g}`",
+        f"- Direct render consistency: weight `{direct_render_consistency_weight:g}`, mode `cosine`",
+        f"- Cached direct-point visible sampling: `{direct_cached_visible_fraction:g}` of samples",
+        f"- Cached visible candidate multiplier: `{direct_cached_visible_candidate_multiplier}`",
+        f"- Cached visible teacher-balanced replay: `{direct_cached_visible_balance}`",
+        f"- Visibility-weighted text contrast: weight `{direct_text_contrast_weight:g}`, pair weighting `visibility`",
+        "- Direct text contrast cap: `4096` points per batch",
+        "- Direct text contrast pseudo-labels: "
+        + (
+            "scene-centered teacher text logits"
+            if direct_text_contrast_center_logits
+            else "raw teacher text logits"
+        ),
         "",
         "## Suggested GPU Split",
         "",
@@ -161,6 +214,16 @@ def main() -> None:
     parser.add_argument("--cross_view_weight", type=float, default=0.001)
     parser.add_argument("--batch_size", type=int, default=2)
     parser.add_argument("--epochs", type=int, default=20)
+    parser.add_argument("--direct_render_consistency_weight", type=float, default=0.05)
+    parser.add_argument("--direct_text_contrast_weight", type=float, default=0.05)
+    parser.add_argument("--direct_cached_visible_fraction", type=float, default=0.5)
+    parser.add_argument("--direct_cached_visible_candidate_multiplier", type=int, default=1)
+    parser.add_argument("--direct_cached_visible_balance", action="store_true")
+    parser.add_argument(
+        "--direct_text_contrast_center_logits",
+        action="store_true",
+        help="Center teacher text logits for direct-point text contrast.",
+    )
     args = parser.parse_args()
 
     paths = generate_configs(
@@ -172,6 +235,12 @@ def main() -> None:
         cross_view_weight=args.cross_view_weight,
         batch_size=args.batch_size,
         epochs=args.epochs,
+        direct_render_consistency_weight=args.direct_render_consistency_weight,
+        direct_text_contrast_weight=args.direct_text_contrast_weight,
+        direct_cached_visible_fraction=args.direct_cached_visible_fraction,
+        direct_cached_visible_candidate_multiplier=args.direct_cached_visible_candidate_multiplier,
+        direct_cached_visible_balance=args.direct_cached_visible_balance,
+        direct_text_contrast_center_logits=args.direct_text_contrast_center_logits,
     )
     write_launch_plan(
         paths,
@@ -179,6 +248,12 @@ def main() -> None:
         Path(args.repo_root) / "output/radio_gs/reports/scannet_dino_cv_launch_plan.md",
         batch_size=args.batch_size,
         cross_view_weight=args.cross_view_weight,
+        direct_render_consistency_weight=args.direct_render_consistency_weight,
+        direct_text_contrast_weight=args.direct_text_contrast_weight,
+        direct_cached_visible_fraction=args.direct_cached_visible_fraction,
+        direct_cached_visible_candidate_multiplier=args.direct_cached_visible_candidate_multiplier,
+        direct_cached_visible_balance=args.direct_cached_visible_balance,
+        direct_text_contrast_center_logits=args.direct_text_contrast_center_logits,
     )
     for path in paths:
         print(path)

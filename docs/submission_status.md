@@ -144,15 +144,15 @@ Under that framing, the paper solves the following problem:
    diagnostic path. It can increase thresholded overlap on some LERF scenes
    (for example Waldo high-temperature mIoU), but it still lowers LocAcc, so it
    is not promoted to the main LERF table.
-10. ScanNet DINO cross-view is now a full 10-scene ablation at conservative
-    weight 0.001. It improves macro split19 mIoU from 0.3538 to 0.3640,
-    split15 from 0.3573 to 0.3662, and split10 from 0.4293 to 0.4308.
-    The strongest balanced ScanNet point-query support row now uses a
-    label-free contextual kNN readout (`k=8`, `candidate_k=32`) plus
-    scene-mean calibration at alpha 0.5, improving split19/15/10 mIoU to
-    0.3637/0.3708/0.4512 with mAcc 0.6033/0.6224/0.7079. Alpha 0.75 further
-    raises split10 mIoU to 0.4534 but weakens split19/15 and mAcc, and ScanNet
-    alias prompts remain mixed.
+10. ScanNet DINO cross-view is now evaluated on the fixed VALA/OpenGaFF-8
+    subset. It improves Gaussian-index split19/15/10 mIoU to
+    0.3704/0.3718/0.4390 with mAcc 0.6159/0.6268/0.7020. The strongest balanced
+    ScanNet point-query support row uses the DINO-CV compact field with a
+    label-free contextual kNN readout (`k=8`, `candidate_k=32`) plus scene-mean
+    calibration at alpha 0.5, reaching 0.3704/0.3771/0.4585 mIoU and
+    0.6017/0.6198/0.7032 mAcc. Alpha 0.75 further raises split10 mIoU to
+    0.4612 but weakens split19/15 balance, and ScanNet alias prompts remain
+    mixed.
 11. The LERF peak-preservation diagnostic is now positive on Figurines:
     DINO cross-view with `text_heatmap_distill_mode: spatial` keeps LocAcc at
     0.8214 and improves mIoU from 0.4308 to 0.4343.
@@ -375,22 +375,22 @@ clean framing: label-supervised and GT-label-balanced ScanNet diagnostics must
 stay out of the main fair table.
 
 The DINO cross-view branch has also been expanded from a two-scene diagnostic to
-a full 10-scene ScanNet ablation:
+a full VALA/OpenGaFF-8 ScanNet ablation:
 
 | Split | Base mIoU | DINO-CV mIoU | Delta | Base mAcc | DINO-CV mAcc | Delta |
 |---|---:|---:|---:|---:|---:|---:|
-| 19 classes | 0.3538 | 0.3640 | +0.0102 | 0.6076 | 0.6205 | +0.0128 |
-| 15 classes | 0.3573 | 0.3662 | +0.0089 | 0.6203 | 0.6313 | +0.0110 |
-| 10 classes | 0.4293 | 0.4308 | +0.0014 | 0.7051 | 0.7071 | +0.0020 |
+| 19 classes | 0.3583 | 0.3704 | +0.0121 | 0.6006 | 0.6159 | +0.0153 |
+| 15 classes | 0.3618 | 0.3718 | +0.0100 | 0.6152 | 0.6268 | +0.0116 |
+| 10 classes | 0.4367 | 0.4390 | +0.0023 | 0.6998 | 0.7020 | +0.0022 |
 
-The current strongest balanced ScanNet row is not the DINO branch but a
-contextual direct point readout on the same v67 checkpoints:
+The current strongest balanced ScanNet row combines the DINO-CV compact field
+with contextual direct point readout:
 
-| Split | Gaussian-index mIoU | kNN+calib mIoU | Delta | Gaussian-index mAcc | kNN+calib mAcc | Delta |
+| Split | Gaussian-index mIoU | DINO-CV kNN+calib mIoU | Delta | Gaussian-index mAcc | DINO-CV kNN+calib mAcc | Delta |
 |---|---:|---:|---:|---:|---:|---:|
-| 19 classes | 0.3538 | 0.3637 | +0.0099 | 0.6076 | 0.6033 | -0.0043 |
-| 15 classes | 0.3573 | 0.3708 | +0.0135 | 0.6203 | 0.6224 | +0.0021 |
-| 10 classes | 0.4293 | 0.4512 | +0.0219 | 0.7051 | 0.7079 | +0.0028 |
+| 19 classes | 0.3583 | 0.3704 | +0.0121 | 0.6006 | 0.6017 | +0.0011 |
+| 15 classes | 0.3618 | 0.3771 | +0.0153 | 0.6152 | 0.6198 | +0.0046 |
+| 10 classes | 0.4367 | 0.4585 | +0.0218 | 0.6998 | 0.7032 | +0.0034 |
 
 ### 3. Statistical confidence is improved, but still narrow
 

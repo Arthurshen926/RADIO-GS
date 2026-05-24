@@ -239,6 +239,14 @@ class RadioGSConfig:
     direct_point_text_contrast_weight: float = 0.0
     direct_point_text_contrast_temperature: float = 0.1
     direct_point_text_contrast_confidence_threshold: float = 0.0
+    direct_point_text_contrast_pair_weighting: str = "none"  # "none" or "visibility"
+    direct_point_text_contrast_max_points: int = 4096
+    direct_point_text_contrast_center_logits: bool = False
+    direct_point_render_consistency_weight: float = 0.0
+    direct_point_render_consistency_mode: str = "cosine"  # "cosine" or "mse"
+    direct_point_cached_visible_fraction: float = 0.0
+    direct_point_cached_visible_candidate_multiplier: int = 1
+    direct_point_cached_visible_balance: bool = False
     point_summary_adapter_hidden_dim: int = 512
     point_summary_adapter_num_layers: int = 2
     point_summary_adapter_dropout: float = 0.0

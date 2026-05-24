@@ -63,6 +63,9 @@ Use these files first:
 | Direct3D confidence/coverage analysis | `output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md` |
 | LERF direct 3D selection | `output/radio_gs/reports/lerf_direct_3d_selection.md` |
 | LERF direct 3D debug audit | `output/radio_gs/reports/lerf_direct_3d_debug_audit.md` |
+| LERF rendered internal SAM3 boundary readout | `paper/artifacts/sam3_prompt_mask_head_lerf2d_support_readout_20260523.md` |
+| LERF category-macro stability audit | `output/radio_gs/reports/lerf2d_activeC_category_macro_stability_20260524.md` |
+| Direct field joint 2D/3D optimization audit | `docs/experiments/2026-05-24-direct-field-joint2d3d-optimization.md` |
 | Latest expert follow-up audit | `docs/experiments/2026-05-16-expert-latest-followup-audit.md` |
 | Controlled evidence table | `output/radio_gs/reports/controlled_evidence_table.md` |
 | Nearest-view cache baseline | `output/radio_gs/reports/lerf_nearest_view_cache_baseline.md` |
@@ -88,6 +91,19 @@ historical default readout, not the paper-facing mask metric.
 The same calibrated readout gives a stronger same-evaluator teacher-vs-rendered
 comparison: frame-wise RADIO RGB is 0.7985 LocAcc / 0.4634 mIoU, while CTF-GS
 rendered features are 0.8712 / 0.5243.
+
+A feature-only prompt-conditioned SAM3 boundary readout has been implemented as
+a rendered-view ablation, trained from official SAM3 pseudo masks on unlabelled
+training views and evaluated without RGB SAM3 calls. The stable active-run
+support/area gate improves weighted sample mIoU from 0.5493 to 0.5666 while
+leaving LocAcc unchanged, and removes the previous Ramen negative delta. It is
+still positioned as a boundary-readout ablation rather than an unconditional
+replacement for the main category-macro LERF table. The stability audit reports
+0.8598/0.5511 scene-macro LocAcc/mIoU, 0.8702/0.5666 sample-weighted
+LocAcc/mIoU, and 0.8271/0.5141 scene-category-macro LocAcc/mIoU, with a
+category-minus-sample mIoU gap of -0.0525. See
+`paper/artifacts/sam3_prompt_mask_head_lerf2d_support_readout_20260523.md` and
+`output/radio_gs/reports/lerf2d_activeC_category_macro_stability_20260524.md`.
 
 The controlled evidence table also includes a measured nearest-view RADIO cache
 baseline. For each target annotation frame, it uses the closest cached RADIO
@@ -353,8 +369,9 @@ than as a main superiority claim.
 
 ### ScanNet VALA/OpenGaFF-8 Direct Point Query
 
-Use `paper/artifacts/scannet_pointcloud_radio_gs_vala8_direct_point_query_results.json`
-and `paper/artifacts/scannet_pointcloud_radio_gs_vala8_contextual_knn_scene_mean_a05_results.json`.
+Use `paper/artifacts/scannet_pointcloud_radio_gs_vala8_direct_point_query_results.json`,
+`paper/artifacts/scannet_pointcloud_radio_gs_vala8_contextual_knn_scene_mean_a05_results.json`,
+and `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn_scene_mean_a05_results.json`.
 
 | Split | mIoU | mAcc |
 |---|---:|---:|
@@ -362,20 +379,20 @@ and `paper/artifacts/scannet_pointcloud_radio_gs_vala8_contextual_knn_scene_mean
 | 15 classes | 0.3618 | 0.6152 |
 | 10 classes | 0.4367 | 0.6998 |
 
-The stronger direct point-readout support row uses the same v67 checkpoints but
-queries each ScanNet vertex through local Gaussian context:
+The stronger direct point-readout support row now uses the DINO-CV compact
+field with the same contextual kNN readout:
 `query_mode=knn`, `k=8`, `candidate_k=32`, `logit_calibration=scene_mean`,
-`alpha=0.5`.
+`alpha=0.5`, prompt template `{query}`.
 
 | Split | contextual kNN mIoU | contextual kNN mAcc |
 |---|---:|---:|
-| 19 classes | 0.3677 | 0.5997 |
-| 15 classes | 0.3748 | 0.6181 |
-| 10 classes | 0.4562 | 0.7008 |
+| 19 classes | 0.3704 | 0.6017 |
+| 15 classes | 0.3771 | 0.6198 |
+| 10 classes | 0.4585 | 0.7032 |
 
 This is the current strongest balanced ScanNet evidence. A more aggressive
-`alpha=0.75` setting raises split10 mIoU to 0.4585 but lowers split19/15 mIoU
-and mAcc, so it stays diagnostic.
+DINO-CV `alpha=0.75` setting raises split10 mIoU to 0.4612 but lowers split19/15
+mIoU and mAcc, so it stays diagnostic.
 
 Label-free ScanNet prompt/calibration ablations:
 
@@ -383,16 +400,28 @@ Label-free ScanNet prompt/calibration ablations:
 |---|---:|---:|---:|---|
 | v67 baseline | 0.3583 / 0.6006 | 0.3618 / 0.6152 | 0.4367 / 0.6998 | Main conservative row on VALA/OpenGaFF-8 |
 | scene-mean calibration, alpha=0.5 | 0.3575 / 0.6101 | 0.3604 / 0.6227 | 0.4353 / 0.7074 | Positive supporting ablation |
-| kNN contextual readout + scene-mean alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 | Promoted balanced support row on VALA/OpenGaFF-8 |
-| kNN contextual readout + scene-mean alpha=0.75 | 0.3650 / 0.5944 | 0.3724 / 0.6132 | 0.4585 / 0.7004 | Higher split10 mIoU, weaker balance |
+| v67 kNN contextual readout + scene-mean alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 | Previous strongest support row |
+| DINO-CV kNN contextual readout + scene-mean alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 | Promoted balanced support row on VALA/OpenGaFF-8 |
+| DINO-CV kNN contextual readout + scene-mean alpha=0.75 | 0.3683 / 0.5957 | 0.3746 / 0.6136 | 0.4612 / 0.7036 | Higher split10 mIoU, weaker balance |
 | ScanNet aliases | 0.3592 / 0.6191 | 0.3561 / 0.6192 | 0.4234 / 0.7002 | Mixed; not promoted |
 | aliases + scene-mean alpha=0.5 | 0.3617 / 0.6180 | 0.3554 / 0.6174 | 0.4295 / 0.7026 | Mixed; not promoted |
 | scene-mean calibration, alpha=1.0 | 0.3528 / 0.5834 | 0.3541 / 0.5935 | 0.4386 / 0.7048 | Hurts 19/15 and mAcc |
 
 The DINOv3 cross-view branch is now also summarized on VALA/OpenGaFF-8:
 0.3704/0.6159, 0.3718/0.6268, and 0.4390/0.7020 for the 19/15/10 splits.
-It improves the conservative Gaussian-index row but remains a component
-ablation rather than replacing the stronger contextual kNN support row.
+It improves the conservative Gaussian-index row. With contextual kNN readout and
+single-template text prompts, it also replaces the previous v67 contextual row
+as the strongest balanced direct-field support evidence.
+
+As of 2026-05-24, the training code also supports a stricter direct-field
+variant that jointly constrains rendered 2D compact features and direct
+3D primitive/point compact features, with visibility-weighted pair contrast from
+registration view counts and cached-visible direct-point sampling. Generated
+VALA/OpenGaFF-8 configs live under
+`radio_gs/configs/generated/scannet_dino_cv/scannet_og_hybrid_v70_cachedvisible_vc005_rc005_b2_s32768_ft20_{scene}.yaml`.
+The full eight-scene v70 run reaches 0.3571/0.5997, 0.3644/0.6178, and
+0.4419/0.7091 for the 19/15/10 splits. It improves split10 mAcc but hurts
+split19/15 mIoU, so it is kept as an ablation rather than promoted.
 
 Earlier targeted diagnostics:
 
@@ -446,6 +475,10 @@ The active ScanNet protocol is the generated v67 fair direct point-query config
 family under the ignored path:
 
 - `radio_gs/configs/generated/scannet_og/scannet_og_hybrid_v67fair_teacherbalanced_gidx_labelpoint_dp080_pce10_tdist05_s32768_b4_long20_fromv63_{scene}.yaml`
+
+The active next direct-field optimization candidate is:
+
+- `radio_gs/configs/generated/scannet_dino_cv/scannet_og_hybrid_v70_cachedvisible_vc005_rc005_b2_s32768_ft20_{scene}.yaml`
 
 Replica and room0 configs are supporting evidence only, not the main benchmark
 route.

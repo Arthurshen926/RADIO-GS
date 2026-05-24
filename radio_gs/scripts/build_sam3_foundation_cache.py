@@ -91,6 +91,14 @@ def normalize_sam3_device(device: str) -> str:
     raise ValueError("SAM3 device must be 'cuda', 'cuda:<index>', or 'cpu'")
 
 
+def set_requested_cuda_device(device: str) -> None:
+    """Select an explicit CUDA device before official SAM3 normalises to ``cuda``."""
+
+    requested = torch.device(str(device))
+    if requested.type == "cuda" and requested.index is not None and torch.cuda.is_available():
+        torch.cuda.set_device(requested)
+
+
 def _as_tensor(value: Any) -> torch.Tensor:
     if torch.is_tensor(value):
         return value.detach().cpu()
@@ -116,6 +124,8 @@ def make_sam3_cache_payload(
     scores: torch.Tensor,
     boxes: torch.Tensor,
     image_path: str,
+    mask_query_indices: torch.Tensor | None = None,
+    mask_query_ranks: torch.Tensor | None = None,
     backend: str = "facebookresearch/sam3",
     decoder: str = "Sam3Image+Sam3Processor",
     checkpoint_path: str = "",
@@ -124,26 +134,29 @@ def make_sam3_cache_payload(
 ) -> dict[str, Any]:
     if masks.dim() != 3:
         raise ValueError("SAM3 masks must be [M,H,W]")
+    head_payload: dict[str, Any] = {
+        "mask_logits": masks.float().contiguous(),
+        "producer": {
+            "official": True,
+            "backend": backend,
+            "decoder": decoder,
+            "source": image_path,
+            "checkpoint_path": checkpoint_path,
+            "checkpoint_source": checkpoint_source,
+            "checkpoint_sha256": checkpoint_sha256,
+        },
+        "queries": list(queries),
+        "scores": scores.float().contiguous(),
+        "boxes_xyxy": boxes.float().contiguous(),
+    }
+    if mask_query_indices is not None:
+        head_payload["mask_query_indices"] = mask_query_indices.long().contiguous()
+    if mask_query_ranks is not None:
+        head_payload["mask_query_ranks"] = mask_query_ranks.long().contiguous()
     return {
         "version": 1,
         "frame_id": frame_id,
-        "heads": {
-            "sam3": {
-                "mask_logits": masks.float().contiguous(),
-                "producer": {
-                    "official": True,
-                    "backend": backend,
-                    "decoder": decoder,
-                    "source": image_path,
-                    "checkpoint_path": checkpoint_path,
-                    "checkpoint_source": checkpoint_source,
-                    "checkpoint_sha256": checkpoint_sha256,
-                },
-                "queries": list(queries),
-                "scores": scores.float().contiguous(),
-                "boxes_xyxy": boxes.float().contiguous(),
-            }
-        },
+        "heads": {"sam3": head_payload},
     }
 
 
@@ -250,14 +263,17 @@ def run_sam3_on_image(
     *,
     max_masks_per_query: int,
     amp_dtype: torch.dtype | None = None,
-) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     image = Image.open(image_path).convert("RGB")
     with sam3_autocast_context(str(processor.device), amp_dtype):
         state = processor.set_image(image)
     masks: list[torch.Tensor] = []
     scores: list[torch.Tensor] = []
     boxes: list[torch.Tensor] = []
-    for query in queries:
+    query_indices: list[torch.Tensor] = []
+    query_ranks: list[torch.Tensor] = []
+    query_list = list(queries)
+    for query_idx, query in enumerate(query_list):
         query_state = dict(state)
         with sam3_autocast_context(str(processor.device), amp_dtype):
             output = processor.set_text_prompt(str(query), query_state)
@@ -273,11 +289,16 @@ def run_sam3_on_image(
         masks.append(query_masks)
         scores.append(query_scores)
         boxes.append(query_boxes)
+        kept = int(query_masks.shape[0])
+        query_indices.append(torch.full((kept,), int(query_idx), dtype=torch.long))
+        query_ranks.append(torch.arange(kept, dtype=torch.long))
     height, width = image.height, image.width
     all_masks = torch.cat(masks, dim=0) if masks else torch.empty(0, height, width)
     all_scores = torch.cat(scores, dim=0) if scores else torch.empty(0)
     all_boxes = torch.cat(boxes, dim=0) if boxes else torch.empty(0, 4)
-    return all_masks, all_scores, all_boxes
+    all_query_indices = torch.cat(query_indices, dim=0) if query_indices else torch.empty(0, dtype=torch.long)
+    all_query_ranks = torch.cat(query_ranks, dim=0) if query_ranks else torch.empty(0, dtype=torch.long)
+    return all_masks, all_scores, all_boxes, all_query_indices, all_query_ranks
 
 
 def main() -> None:
@@ -312,6 +333,7 @@ def main() -> None:
         args.resolution,
         allow_unsafe=args.allow_unsafe_resolution,
     )
+    set_requested_cuda_device(args.device)
     device = normalize_sam3_device(args.device)
     processor = _load_sam3_model(
         checkpoint_path=args.checkpoint_path,
@@ -332,7 +354,7 @@ def main() -> None:
         if args.skip_existing and output_path.exists():
             print(f"skip existing {output_path}")
             continue
-        masks, scores, boxes = run_sam3_on_image(
+        masks, scores, boxes, mask_query_indices, mask_query_ranks = run_sam3_on_image(
             processor,
             image_path,
             queries,
@@ -345,6 +367,8 @@ def main() -> None:
             masks=masks,
             scores=scores,
             boxes=boxes,
+            mask_query_indices=mask_query_indices,
+            mask_query_ranks=mask_query_ranks,
             image_path=str(image_path),
             checkpoint_path=str(args.checkpoint_path),
             checkpoint_source=str(args.checkpoint_source),

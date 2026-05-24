@@ -13,6 +13,33 @@ def _scene(miou19, miou15, miou10):
     }
 
 
+def _scene_with_classes(class_iou):
+    return {
+        "splits": {
+            "19": {
+                "miou": class_iou,
+                "macc": 0.6,
+                "per_class": {
+                    "1": {
+                        "name": "wall",
+                        "iou": class_iou,
+                        "acc": 0.5,
+                        "gt_count": 10,
+                    },
+                    "2": {
+                        "name": "floor",
+                        "iou": 0.5,
+                        "acc": 0.7,
+                        "gt_count": 20,
+                    },
+                },
+            },
+            "15": {"miou": class_iou, "macc": 0.7, "per_class": {}},
+            "10": {"miou": class_iou, "macc": 0.8, "per_class": {}},
+        }
+    }
+
+
 def test_build_vala8_summary_filters_fixed_scene_subset():
     payload = {
         "timestamp": "now",
@@ -36,6 +63,7 @@ def test_build_vala8_summary_filters_fixed_scene_subset():
     assert summary["macro"]["15"]["miou"] == 0.4
     assert summary["macro"]["10"]["miou"] == 0.5
     assert summary["source_args"]["query_mode"] == "gaussian_index"
+    assert "_per_class" not in summary["rows"][0]
 
 
 def test_build_vala8_summary_requires_all_split_scenes():
@@ -92,6 +120,28 @@ def test_build_vala8_summary_checks_expected_source_args():
             label="test",
             expected_source_args={"query_mode": "knn"},
         )
+
+
+def test_build_vala8_summary_reports_category_macro_stability():
+    payload = {
+        "scenes": {
+            "scene0000_00": _scene_with_classes(0.2),
+            "scene0062_00": _scene_with_classes(0.6),
+        }
+    }
+
+    summary = build_vala8_summary(
+        payload,
+        scenes=("scene0000_00", "scene0062_00"),
+        label="test",
+    )
+
+    split19 = summary["category_macro_stability"]["19"]
+    assert split19["classes"]["1"]["mean_iou"] == 0.4
+    assert split19["classes"]["1"]["std_iou"] == 0.2
+    assert split19["classes"]["1"]["scene_count"] == 2
+    assert split19["most_unstable_iou_class"]["name"] == "wall"
+    assert split19["worst_mean_iou_class"]["name"] == "wall"
 
 
 def test_multi_input_protocol_check_canonicalizes_scene_paths():

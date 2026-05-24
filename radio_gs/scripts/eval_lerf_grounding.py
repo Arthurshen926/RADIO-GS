@@ -63,6 +63,11 @@ from radio_gs.data.lerf_dataset import (
     _rasterize_polygons,
 )
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
+from radio_gs.models.prompt_conditioned_mask_head import PromptConditionedMaskHead
+from radio_gs.models.prompt_conditioned_mask_refinement import (
+    mask_overlap_stats,
+    refine_mask_with_prompt_conditioned_sam3_head,
+)
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 
 logger = logging.getLogger(__name__)
@@ -76,6 +81,14 @@ DEFAULT_LABEL_DIR = "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
 LEGACY_LABEL_DIR = "/mnt/pool/sqy/lerf_ovs/label"
 DEFAULT_GT_FEATURE_ROOT = "output/radio_features_lerf"
 DEFAULT_PROMPT_TEMPLATES = "{query}"
+DEFAULT_SAM3_PROMPT_MASK_HEAD_LOGIT_THRESHOLD = 0.0
+DEFAULT_SAM3_PROMPT_MASK_HEAD_MIN_INITIAL_IOU = 0.50
+DEFAULT_SAM3_PROMPT_MASK_HEAD_MAX_INITIAL_AREA_FRACTION = 1.0
+DEFAULT_SAM3_PROMPT_MASK_HEAD_MIN_REFINED_AREA_RATIO = 0.70
+DEFAULT_SAM3_PROMPT_MASK_HEAD_MAX_REFINED_AREA_RATIO = 1.30
+DEFAULT_SAM3_PROMPT_MASK_HEAD_SUPPORT_DILATE = 12
+DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_DILATE = 1
+DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_THRESHOLD = 0.5
 
 
 def canonical_lerf_mode(mode: str) -> str:
@@ -804,6 +817,31 @@ def compute_iou(
     return float(inter / union) if union > 0 else 0.0
 
 
+def load_prompt_conditioned_mask_head(
+    checkpoint_path: str | Path,
+    device: torch.device,
+) -> Tuple[PromptConditionedMaskHead, Tuple[int, int]]:
+    """Load a trained feature-only prompt-conditioned SAM mask head."""
+
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    state = ckpt.get("prompt_mask_head_state_dict")
+    if not isinstance(state, dict):
+        raise KeyError(
+            f"Checkpoint does not contain prompt_mask_head_state_dict: {checkpoint_path}"
+        )
+    head = PromptConditionedMaskHead(
+        feature_dim=int(ckpt.get("feature_dim", 1280)),
+        prompt_dim=int(ckpt.get("prompt_dim", 1536)),
+        hidden_dim=int(ckpt.get("hidden_dim", 128)),
+    ).to(device)
+    head.load_state_dict(state, strict=True)
+    head.eval()
+    target_size = tuple(int(v) for v in ckpt.get("target_size", (240, 320)))
+    if len(target_size) != 2:
+        raise ValueError(f"Invalid prompt mask head target size: {target_size}")
+    return head.float(), (int(target_size[0]), int(target_size[1]))
+
+
 # ---------------------------------------------------------------------------
 # Rendering pipeline (reuse eval_grounding helpers)
 # ---------------------------------------------------------------------------
@@ -1149,6 +1187,17 @@ def evaluate_scene(
     mask_refinement_iters: int = 1,
     mask_refinement_dilate: int = 5,
     mask_refinement_erode: int = 2,
+    sam3_prompt_mask_head: Optional[PromptConditionedMaskHead] = None,
+    sam3_prompt_mask_head_target_size: Tuple[int, int] = (240, 320),
+    sam3_prompt_mask_head_logit_threshold: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_LOGIT_THRESHOLD,
+    sam3_prompt_mask_head_min_initial_iou: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_MIN_INITIAL_IOU,
+    sam3_prompt_mask_head_max_initial_area_fraction: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_MAX_INITIAL_AREA_FRACTION,
+    sam3_prompt_mask_head_min_refined_area_ratio: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_MIN_REFINED_AREA_RATIO,
+    sam3_prompt_mask_head_max_refined_area_ratio: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_MAX_REFINED_AREA_RATIO,
+    sam3_prompt_mask_head_support_dilate: int = DEFAULT_SAM3_PROMPT_MASK_HEAD_SUPPORT_DILATE,
+    sam3_prompt_mask_head_coarse_dilate: int = DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_DILATE,
+    sam3_prompt_mask_head_coarse_threshold: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_THRESHOLD,
+    sam3_prompt_mask_head_apply_to: str = "rendered",
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -1174,6 +1223,8 @@ def evaluate_scene(
         loc_correct = 0
         loc_total = 0
         ious: List[float] = []
+        initial_ious: List[float] = []
+        refinement_reports: List[Dict[str, object]] = []
         per_cat_loc: Dict[str, List[bool]] = {c: [] for c in scene_categories}
         per_cat_iou: Dict[str, List[float]] = {c: [] for c in scene_categories}
 
@@ -1182,8 +1233,14 @@ def evaluate_scene(
             scene_root_hint = getattr(config, "scene_root", "")
         else:
             scene_root_hint = ""
-
         canonical_mode = canonical_lerf_mode(mode)
+        mode_mask_refinement = mask_refinement
+        if (
+            mask_refinement == "sam3_prompt_mask_head"
+            and sam3_prompt_mask_head_apply_to == "rendered"
+            and canonical_mode != "rendered"
+        ):
+            mode_mask_refinement = "none"
         for frame_id, frame_objects in tqdm(
             sorted(frame_annotations.items()),
             desc=f"  {scene}/{canonical_mode}",
@@ -1273,6 +1330,14 @@ def evaluate_scene(
                 ).squeeze(0)  # [K, fH*up, fW*up]
 
             fH, fW = heatmaps.shape[1], heatmaps.shape[2]
+            prompt_mask_feature = None
+            if mode_mask_refinement == "sam3_prompt_mask_head" and sam3_prompt_mask_head is not None:
+                prompt_mask_feature = F.interpolate(
+                    feat_1280.float(),
+                    size=tuple(int(v) for v in sam3_prompt_mask_head_target_size),
+                    mode="bilinear",
+                    align_corners=False,
+                )
 
             # Build GT masks at full image resolution
             gt_masks_full = build_gt_masks(frame_objects, active_cats, img_h, img_w)
@@ -1280,7 +1345,7 @@ def evaluate_scene(
             gt_masks_feat = build_gt_masks(frame_objects, active_cats, fH, fW,
                                            src_height=img_h, src_width=img_w)
             rgb_image_for_masks = None
-            if mask_refinement != "none" or save_overlay_vis:
+            if mode_mask_refinement != "none" or save_overlay_vis:
                 rgb_image_for_masks = load_lerf_rgb_frame(scene, frame_id, scene_root_hint)
 
             hm_vis: Dict[str, np.ndarray] = {}
@@ -1301,7 +1366,35 @@ def evaluate_scene(
 
                 # mIoU at feature resolution by default; optional RGB refinement
                 # evaluates the refined mask at image resolution without using GT.
-                if mask_refinement != "none" and rgb_image_for_masks is not None:
+                if mode_mask_refinement == "sam3_prompt_mask_head" and prompt_mask_feature is not None:
+                    initial_pred = heatmap_to_binary_mask(
+                        hm,
+                        threshold_ratio=iou_threshold,
+                        threshold_mode=threshold_mode,
+                        threshold_mean_std_k=threshold_mean_std_k,
+                        threshold_min_ratio=threshold_min_ratio,
+                        threshold_max_ratio=threshold_max_ratio,
+                        target_shape=(img_h, img_w),
+                    )
+                    initial_overlap = mask_overlap_stats(initial_pred, gt_full)
+                    pred, report = refine_mask_with_prompt_conditioned_sam3_head(
+                        feature_map=prompt_mask_feature,
+                        prompt_embedding=text_embeddings[cat_to_idx[cat]].detach().float(),
+                        coarse_mask=initial_pred,
+                        head=sam3_prompt_mask_head,
+                        logit_threshold=sam3_prompt_mask_head_logit_threshold,
+                        min_initial_iou=sam3_prompt_mask_head_min_initial_iou,
+                        max_initial_area_fraction=sam3_prompt_mask_head_max_initial_area_fraction,
+                        min_refined_area_ratio=sam3_prompt_mask_head_min_refined_area_ratio,
+                        max_refined_area_ratio=sam3_prompt_mask_head_max_refined_area_ratio,
+                        support_dilate=sam3_prompt_mask_head_support_dilate,
+                        coarse_dilate=sam3_prompt_mask_head_coarse_dilate,
+                        coarse_threshold=sam3_prompt_mask_head_coarse_threshold,
+                    )
+                    iou = float(mask_overlap_stats(pred, gt_full)["iou"])
+                    initial_ious.append(float(initial_overlap["iou"]))
+                    refinement_reports.append(report)
+                elif mode_mask_refinement != "none" and rgb_image_for_masks is not None:
                     iou = compute_iou(
                         hm,
                         gt_full,
@@ -1311,7 +1404,7 @@ def evaluate_scene(
                         threshold_min_ratio=threshold_min_ratio,
                         threshold_max_ratio=threshold_max_ratio,
                         rgb_image=rgb_image_for_masks,
-                        mask_refinement=mask_refinement,
+                        mask_refinement=mode_mask_refinement,
                         mask_refinement_iters=mask_refinement_iters,
                         mask_refinement_dilate=mask_refinement_dilate,
                         mask_refinement_erode=mask_refinement_erode,
@@ -1372,6 +1465,40 @@ def evaluate_scene(
             "n_iou_samples": len(ious),
             "per_category": per_cat_summary,
         }
+        if initial_ious:
+            accepted = sum(1 for report in refinement_reports if bool(report.get("accepted", False)))
+            attempted = sum(1 for report in refinement_reports if bool(report.get("attempted", True)))
+            initial_miou = float(np.mean(initial_ious))
+            mode_metrics.update(
+                {
+                    "initial_miou": initial_miou,
+                    "delta_miou": miou - initial_miou,
+                    "sam3_prompt_refinement_count": len(refinement_reports),
+                    "sam3_prompt_attempt_count": attempted,
+                    "sam3_prompt_accept_count": accepted,
+                    "sam3_prompt_accept_rate": float(accepted / max(attempted, 1)),
+                    "sam3_prompt_mean_initial_overlap": float(np.mean([
+                        float(report.get("best_initial_overlap", 0.0))
+                        for report in refinement_reports
+                    ])) if refinement_reports else 0.0,
+                    "sam3_prompt_mean_refined_area_ratio": float(np.mean([
+                        float(report.get("refined_area_ratio", 0.0))
+                        for report in refinement_reports
+                        if "refined_area_ratio" in report
+                    ])) if any("refined_area_ratio" in report for report in refinement_reports) else 0.0,
+                    "sam3_prompt_fallback_reasons": {
+                        str(reason): sum(
+                            1
+                            for report in refinement_reports
+                            if str(report.get("fallback_reason", "")) == str(reason)
+                        )
+                        for reason in sorted({
+                            str(report.get("fallback_reason", ""))
+                            for report in refinement_reports
+                        })
+                    },
+                }
+            )
         results[canonical_mode] = mode_metrics
         if canonical_mode == "teacher":
             # Backward-compatible JSON alias for existing sweep scripts/results.
@@ -1445,7 +1572,7 @@ def main() -> None:
                         help="Also write one visualisation PNG per frame/query. Enabled automatically with --save_overlay_vis")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
                         help="Upsample heatmaps by this factor before localization (default 4)")
-    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut"], default="none",
+    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut", "sam3_prompt_mask_head"], default="none",
                         help="Optional GT-free RGB boundary snapping after heatmap binarisation")
     parser.add_argument("--mask_refinement_iters", type=int, default=1,
                         help="GrabCut iterations for rgb_grabcut mask refinement")
@@ -1453,6 +1580,49 @@ def main() -> None:
                         help="Pixel dilation radius defining rgb_grabcut support band")
     parser.add_argument("--mask_refinement_erode", type=int, default=2,
                         help="Pixel erosion radius defining sure foreground for rgb_grabcut")
+    parser.add_argument("--sam3_prompt_mask_head_checkpoint", default="",
+                        help="Feature-only prompt-conditioned SAM mask head checkpoint. Supports {scene}.")
+    parser.add_argument(
+        "--sam3_prompt_mask_head_logit_threshold",
+        type=float,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_LOGIT_THRESHOLD,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_min_initial_iou",
+        type=float,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_MIN_INITIAL_IOU,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_max_initial_area_fraction",
+        type=float,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_MAX_INITIAL_AREA_FRACTION,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_min_refined_area_ratio",
+        type=float,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_MIN_REFINED_AREA_RATIO,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_max_refined_area_ratio",
+        type=float,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_MAX_REFINED_AREA_RATIO,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_support_dilate",
+        type=int,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_SUPPORT_DILATE,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_coarse_dilate",
+        type=int,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_DILATE,
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_coarse_threshold",
+        type=float,
+        default=DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_THRESHOLD,
+    )
+    parser.add_argument("--sam3_prompt_mask_head_apply_to", choices=["rendered", "all"], default="rendered")
     # Hardware
     parser.add_argument("--gpu", type=int, default=0,
                         help="GPU device id")
@@ -1469,6 +1639,8 @@ def main() -> None:
                 "or --gt_feature_dir (+ --gt_only) for GT-only evaluation."
             )
         args.gt_only = True
+    if args.mask_refinement == "sam3_prompt_mask_head" and not args.sam3_prompt_mask_head_checkpoint:
+        parser.error("--mask_refinement sam3_prompt_mask_head requires --sam3_prompt_mask_head_checkpoint")
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
@@ -1631,6 +1803,15 @@ def main() -> None:
                 logger.warning("GT feature dir not found: %s", gt_feat_dir)
                 gt_feat_dir = None
 
+        prompt_mask_head = None
+        prompt_mask_target_size = (240, 320)
+        if args.mask_refinement == "sam3_prompt_mask_head":
+            prompt_head_path = args.sam3_prompt_mask_head_checkpoint.format(scene=scene)
+            prompt_mask_head, prompt_mask_target_size = load_prompt_conditioned_mask_head(
+                prompt_head_path,
+                device,
+            )
+
         scene_results = evaluate_scene(
             scene=scene,
             label_dir=args.label_dir,
@@ -1657,6 +1838,17 @@ def main() -> None:
             mask_refinement_iters=args.mask_refinement_iters,
             mask_refinement_dilate=args.mask_refinement_dilate,
             mask_refinement_erode=args.mask_refinement_erode,
+            sam3_prompt_mask_head=prompt_mask_head,
+            sam3_prompt_mask_head_target_size=prompt_mask_target_size,
+            sam3_prompt_mask_head_logit_threshold=args.sam3_prompt_mask_head_logit_threshold,
+            sam3_prompt_mask_head_min_initial_iou=args.sam3_prompt_mask_head_min_initial_iou,
+            sam3_prompt_mask_head_max_initial_area_fraction=args.sam3_prompt_mask_head_max_initial_area_fraction,
+            sam3_prompt_mask_head_min_refined_area_ratio=args.sam3_prompt_mask_head_min_refined_area_ratio,
+            sam3_prompt_mask_head_max_refined_area_ratio=args.sam3_prompt_mask_head_max_refined_area_ratio,
+            sam3_prompt_mask_head_support_dilate=args.sam3_prompt_mask_head_support_dilate,
+            sam3_prompt_mask_head_coarse_dilate=args.sam3_prompt_mask_head_coarse_dilate,
+            sam3_prompt_mask_head_coarse_threshold=args.sam3_prompt_mask_head_coarse_threshold,
+            sam3_prompt_mask_head_apply_to=args.sam3_prompt_mask_head_apply_to,
         )
         all_results[scene] = scene_results
 
@@ -1750,8 +1942,22 @@ def main() -> None:
                 "miou": m["miou"],
                 "loc_correct": m["loc_correct"],
                 "loc_total": m["loc_total"],
+                "n_iou_samples": m.get("n_iou_samples"),
                 "per_category": per_cat_json,
             }
+            for key in (
+                "initial_miou",
+                "delta_miou",
+                "sam3_prompt_refinement_count",
+                "sam3_prompt_attempt_count",
+                "sam3_prompt_accept_count",
+                "sam3_prompt_accept_rate",
+                "sam3_prompt_mean_initial_overlap",
+                "sam3_prompt_mean_refined_area_ratio",
+                "sam3_prompt_fallback_reasons",
+            ):
+                if key in m:
+                    scene_report[mode][key] = m[key]
             if mode == "teacher":
                 scene_report["gt"] = scene_report[mode]
         report["scenes"][scene_name] = scene_report

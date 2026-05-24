@@ -135,22 +135,22 @@ tracks:
           miou: 0.4367
           macc: 0.6998
         reproduced_local: true
-      radio_gs_v67_contextual_knn_scene_mean_support:
-        source: local label-free contextual kNN support row; k=8, candidate_k=32,
-          scene-mean calibration alpha=0.5
+      radio_gs_dino_cv_contextual_knn_scene_mean_support:
+        source: local DINO-CV compact-field contextual kNN support row; k=8,
+          candidate_k=32, scene-mean calibration alpha=0.5, prompt={query}
         split19:
-          miou: 0.3677
-          macc: 0.5997
+          miou: 0.3704
+          macc: 0.6017
         split15:
-          miou: 0.3748
-          macc: 0.6181
+          miou: 0.3771
+          macc: 0.6198
         split10:
-          miou: 0.4562
-          macc: 0.7008
+          miou: 0.4585
+          macc: 0.7032
         reproduced_local: true
-        promoted: false
-        caveat: Stronger support row for feature-memory utility; conservative Gaussian-index
-          row remains the protocol anchor.
+        promoted: true
+        caveat: Stronger balanced support row for compact direct-field utility;
+          conservative Gaussian-index row remains the protocol anchor.
 external_reproduction_queue:
   verified_date: '2026-05-18'
   machine_audit:

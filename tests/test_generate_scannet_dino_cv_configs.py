@@ -45,6 +45,16 @@ def test_generate_config_preserves_v67_protocol_and_adds_dino_cv(tmp_path: Path)
     assert cfg["direct_point_gaussian_position_mode"] == "label_point"
     assert cfg["radio_adaptor_cross_view_names"] == "dino_v3"
     assert cfg["radio_adaptor_cross_view_weight"] == 0.001
+    assert cfg["direct_point_view_count_weighting"] == "clipped_log"
+    assert cfg["direct_point_text_contrast_weight"] == 0.05
+    assert cfg["direct_point_text_contrast_pair_weighting"] == "visibility"
+    assert cfg["direct_point_text_contrast_max_points"] == 4096
+    assert cfg["direct_point_text_contrast_center_logits"] is False
+    assert cfg["direct_point_render_consistency_weight"] == 0.05
+    assert cfg["direct_point_render_consistency_mode"] == "cosine"
+    assert cfg["direct_point_cached_visible_fraction"] == 0.5
+    assert cfg["direct_point_cached_visible_candidate_multiplier"] == 1
+    assert cfg["direct_point_cached_visible_balance"] is False
     assert cfg["warmstart_from"].endswith(f"scannet_og_{scene}_{gen.BASE_VARIANT}/checkpoints/best.pth")
     assert "v67_dino_cv001_b2_s32768_ft20" in cfg["output_dir"]
 

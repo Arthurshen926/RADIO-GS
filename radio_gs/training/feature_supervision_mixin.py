@@ -299,6 +299,7 @@ class FeatureSupervisionMixin:
         batch: Dict[str, torch.Tensor],
         render_result: Dict[str, torch.Tensor],
         target_features: Optional[torch.Tensor],
+        rendered_compact: Optional[torch.Tensor] = None,
     ) -> Dict[str, torch.Tensor]:
         zero = (
             target_features.sum() * 0.0
@@ -328,6 +329,8 @@ class FeatureSupervisionMixin:
             "text_contrast_valid_ratio": zero,
             "text_contrast_teacher_conf": zero,
             "text_contrast_agreement": zero,
+            "render_consistency": zero,
+            "render_consistency_valid_ratio": zero,
             "adapter_text_distill": zero,
             "adapter_text_distill_valid_ratio": zero,
             "adapter_text_distill_teacher_conf": zero,
@@ -375,10 +378,123 @@ class FeatureSupervisionMixin:
                 if source_indices.numel() == 0:
                     return stats
                 sample_count = min(sample_count, int(source_indices.numel()))
-                if source_indices.numel() > sample_count:
-                    order = torch.randperm(source_indices.numel(), device=self.device)
-                    source_indices = source_indices[order]
-                indices = self._subsample_direct_point_indices(source_indices, sample_count)
+                visible_indices = None
+                visible_fraction = float(
+                    getattr(self, "direct_point_cached_visible_fraction", 0.0) or 0.0
+                )
+                if (
+                    visible_fraction > 0.0
+                    and rendered_compact is not None
+                    and getattr(self, "direct_point_render_consistency_weight", 0.0) > 0
+                    and "pose_w2c" in batch
+                    and getattr(self, "renderer", None) is not None
+                ):
+                    spatial_size = rendered_compact.shape[-2:]
+                    depth_map = self._canonicalize_spatial_map(
+                        render_result.get("depth_map"),
+                        batch_size=rendered_compact.shape[0],
+                        spatial_size=spatial_size,
+                    )
+                    alpha_map = self._canonicalize_spatial_map(
+                        render_result.get("alpha_map"),
+                        batch_size=rendered_compact.shape[0],
+                        spatial_size=spatial_size,
+                    )
+                    K = self.renderer.K.float()
+                    if spatial_size != (self.renderer.image_height, self.renderer.image_width):
+                        scale_x = float(spatial_size[1]) / float(self.renderer.image_width)
+                        scale_y = float(spatial_size[0]) / float(self.renderer.image_height)
+                        K = K.clone()
+                        K[0, 0] *= scale_x
+                        K[0, 2] *= scale_x
+                        K[1, 1] *= scale_y
+                        K[1, 2] *= scale_y
+
+                    visible_quota = min(
+                        sample_count,
+                        max(1, int(round(float(sample_count) * visible_fraction))),
+                    )
+                    balance_visible = bool(
+                        getattr(self, "direct_point_cached_visible_balance", False)
+                    )
+                    visible_candidate_multiplier = max(
+                        1,
+                        int(
+                            getattr(
+                                self,
+                                "direct_point_cached_visible_candidate_multiplier",
+                                1,
+                            )
+                            or 1
+                        ),
+                    )
+                    candidate_count = min(
+                        int(source_indices.numel()),
+                        max(sample_count, visible_quota * 64),
+                    )
+                    if source_indices.numel() > candidate_count:
+                        order = torch.randperm(source_indices.numel(), device=self.device)[
+                            :candidate_count
+                        ]
+                        candidate_indices = source_indices[order]
+                    else:
+                        candidate_indices = source_indices
+                    visible_select_count = visible_quota
+                    if balance_visible:
+                        visible_select_count = min(
+                            candidate_count,
+                            max(visible_quota, visible_quota * visible_candidate_multiplier),
+                        )
+                    visible_rel, _ = _select_visible_gaussian_indices(
+                        points_all[candidate_indices],
+                        batch["pose_w2c"].to(self.device).float(),
+                        K,
+                        image_height=spatial_size[0],
+                        image_width=spatial_size[1],
+                        sample_count=visible_select_count,
+                        depth_map=depth_map,
+                        alpha_map=alpha_map,
+                        depth_tolerance=self.direct_point_depth_tolerance,
+                        relative_depth_tolerance=self.direct_point_relative_depth_tolerance,
+                        alpha_threshold=self.direct_point_alpha_threshold,
+                    )
+                    if visible_rel.numel() > 0:
+                        visible_candidates = candidate_indices[visible_rel]
+                        if (
+                            balance_visible
+                            and visible_candidates.numel() > visible_quota
+                        ):
+                            visible_indices = self._subsample_direct_point_indices(
+                                visible_candidates,
+                                visible_quota,
+                            )
+                        else:
+                            visible_indices = visible_candidates[:visible_quota]
+
+                if visible_indices is not None and visible_indices.numel() > 0:
+                    visible_indices = visible_indices[:sample_count]
+                    remaining_count = sample_count - int(visible_indices.numel())
+                    if remaining_count > 0:
+                        remaining_mask = ~torch.isin(source_indices, visible_indices)
+                        remaining_source = source_indices[remaining_mask]
+                        if remaining_source.numel() > remaining_count:
+                            order = torch.randperm(
+                                remaining_source.numel(),
+                                device=self.device,
+                            )
+                            remaining_source = remaining_source[order]
+                        remaining_indices = self._subsample_direct_point_indices(
+                            remaining_source,
+                            remaining_count,
+                        )
+                        indices = torch.cat([visible_indices, remaining_indices], dim=0)
+                    else:
+                        indices = visible_indices
+                else:
+                    if source_indices.numel() > sample_count:
+                        order = torch.randperm(source_indices.numel(), device=self.device)
+                        source_indices = source_indices[order]
+                    indices = self._subsample_direct_point_indices(source_indices, sample_count)
                 points = points_all[indices]
                 point_targets = teacher_features[indices].float()
                 valid = torch.ones(indices.shape[0], device=self.device, dtype=torch.bool)
@@ -618,6 +734,8 @@ class FeatureSupervisionMixin:
         text_contrast_valid_ratio = text_contrast_loss.detach()
         text_contrast_teacher_conf = text_contrast_loss.detach()
         text_contrast_agreement = text_contrast_loss.detach()
+        render_consistency_loss = decoded_points.sum() * 0.0
+        render_consistency_valid_ratio = render_consistency_loss.detach()
         adapter_text_distill_loss = decoded_points.sum() * 0.0
         adapter_text_distill_valid_ratio = adapter_text_distill_loss.detach()
         adapter_text_distill_teacher_conf = adapter_text_distill_loss.detach()
@@ -668,6 +786,20 @@ class FeatureSupervisionMixin:
                 pred_summary_points_for_contrast,
                 target_summary_points,
                 sample_weights=sample_weights,
+            )
+        if (
+            getattr(self, "direct_point_render_consistency_weight", 0.0) > 0
+            and rendered_compact is not None
+        ):
+            render_consistency_loss, render_consistency_valid_ratio = (
+                self._compute_direct_point_render_consistency(
+                    compact,
+                    points[valid],
+                    batch=batch,
+                    render_result=render_result,
+                    rendered_compact=rendered_compact,
+                    sample_weights=sample_weights,
+                )
             )
         if (
             getattr(self, "direct_point_text_pseudo_ce_weight", 0.0) > 0
@@ -803,6 +935,8 @@ class FeatureSupervisionMixin:
         stats["text_contrast_valid_ratio"] = text_contrast_valid_ratio
         stats["text_contrast_teacher_conf"] = text_contrast_teacher_conf
         stats["text_contrast_agreement"] = text_contrast_agreement
+        stats["render_consistency"] = render_consistency_loss
+        stats["render_consistency_valid_ratio"] = render_consistency_valid_ratio
         stats["adapter_text_distill"] = adapter_text_distill_loss
         stats["adapter_text_distill_valid_ratio"] = adapter_text_distill_valid_ratio
         stats["adapter_text_distill_teacher_conf"] = adapter_text_distill_teacher_conf
@@ -823,6 +957,8 @@ class FeatureSupervisionMixin:
             * text_pseudo_ce_loss
             + getattr(self, "direct_point_text_contrast_weight", 0.0)
             * text_contrast_loss
+            + getattr(self, "direct_point_render_consistency_weight", 0.0)
+            * render_consistency_loss
             + getattr(self, "direct_point_adapter_text_distill_weight", 0.0)
             * adapter_text_distill_loss
             + getattr(self, "direct_point_adapter_text_pseudo_ce_weight", 0.0)
@@ -831,6 +967,84 @@ class FeatureSupervisionMixin:
             * adapter_decoder_anchor_loss
         )
         return stats
+
+    def _compute_direct_point_render_consistency(
+        self,
+        direct_compact: torch.Tensor,
+        points_xyz: torch.Tensor,
+        *,
+        batch: Dict[str, torch.Tensor],
+        render_result: Dict[str, torch.Tensor],
+        rendered_compact: torch.Tensor,
+        sample_weights: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Align direct 3-D compact readout with the same field rendered in 2-D."""
+        zero = direct_compact.sum() * 0.0
+        if direct_compact.numel() == 0 or points_xyz.numel() == 0:
+            return zero, zero.detach()
+        if rendered_compact.ndim != 4:
+            raise ValueError(
+                f"rendered_compact must be [B,C,H,W], got {tuple(rendered_compact.shape)}"
+            )
+        if direct_compact.shape[1] != rendered_compact.shape[1]:
+            raise ValueError(
+                "direct compact feature dimension must match rendered compact map: "
+                f"{direct_compact.shape[1]} vs {rendered_compact.shape[1]}"
+            )
+
+        spatial_size = rendered_compact.shape[-2:]
+        depth_map = self._canonicalize_spatial_map(
+            render_result.get("depth_map"),
+            batch_size=rendered_compact.shape[0],
+            spatial_size=spatial_size,
+        )
+        alpha_map = self._canonicalize_spatial_map(
+            render_result.get("alpha_map"),
+            batch_size=rendered_compact.shape[0],
+            spatial_size=spatial_size,
+        )
+        K = self.renderer.K.float()
+        if spatial_size != (self.renderer.image_height, self.renderer.image_width):
+            scale_x = float(spatial_size[1]) / float(self.renderer.image_width)
+            scale_y = float(spatial_size[0]) / float(self.renderer.image_height)
+            K = K.clone()
+            K[0, 0] *= scale_x
+            K[0, 2] *= scale_x
+            K[1, 1] *= scale_y
+            K[1, 2] *= scale_y
+
+        rendered_targets, render_valid, _view_counts = _sample_multiview_radio_targets(
+            points_xyz,
+            rendered_compact.float(),
+            batch["pose_w2c"].to(self.device).float(),
+            K,
+            depth_map=depth_map,
+            alpha_map=alpha_map,
+            depth_tolerance=getattr(self, "direct_point_depth_tolerance", 0.08),
+            relative_depth_tolerance=getattr(
+                self, "direct_point_relative_depth_tolerance", 0.02
+            ),
+            alpha_threshold=getattr(self, "direct_point_alpha_threshold", 0.0),
+        )
+        valid_ratio = render_valid.float().mean()
+        if not render_valid.any():
+            return zero, valid_ratio.detach()
+
+        pred = direct_compact[render_valid].float()
+        target = rendered_targets[render_valid].float()
+        mode = str(getattr(self, "direct_point_render_consistency_mode", "cosine"))
+        if mode == "mse":
+            per_point = (pred - target).pow(2).mean(dim=-1)
+        elif mode == "cosine":
+            per_point = 1.0 - (
+                F.normalize(pred, dim=-1) * F.normalize(target, dim=-1)
+            ).sum(dim=-1)
+        else:
+            raise ValueError(
+                "direct_point_render_consistency_mode must be one of: cosine, mse"
+            )
+        active_weights = sample_weights[render_valid] if sample_weights is not None else None
+        return _weighted_vector_mean(per_point, active_weights), valid_ratio.detach()
 
     def _compute_siglip_alignment_loss(
         self,
@@ -1316,9 +1530,14 @@ class FeatureSupervisionMixin:
                 f"{tuple(point_summary.shape)} vs {tuple(teacher_summary.shape)}"
             )
 
-        text_embeddings = text_embeddings.to(point_summary.device).float()
+        text_embeddings = F.normalize(
+            text_embeddings.to(point_summary.device).float(),
+            dim=-1,
+        )
         with torch.no_grad():
             teacher_logits = teacher_summary.float() @ text_embeddings.T
+            if bool(getattr(self, "direct_point_text_contrast_center_logits", False)):
+                teacher_logits = teacher_logits - teacher_logits.mean(dim=0, keepdim=True)
             teacher_probs = F.softmax(teacher_logits, dim=-1)
             teacher_conf, labels = teacher_probs.max(dim=-1)
             threshold = float(
@@ -1331,6 +1550,28 @@ class FeatureSupervisionMixin:
 
         labels = labels[valid]
         z = F.normalize(point_summary[valid].float(), dim=-1)
+        active_sample_weights = (
+            sample_weights[valid].to(device=z.device, dtype=z.dtype)
+            if sample_weights is not None
+            else None
+        )
+        max_points = max(
+            0,
+            int(getattr(self, "direct_point_text_contrast_max_points", 4096) or 0),
+        )
+        if max_points > 0 and z.shape[0] > max_points:
+            if active_sample_weights is not None:
+                probs = active_sample_weights.float().clamp_min(0.0)
+                if float(probs.sum().item()) > 0:
+                    keep = torch.multinomial(probs, max_points, replacement=False)
+                else:
+                    keep = torch.randperm(z.shape[0], device=z.device)[:max_points]
+            else:
+                keep = torch.randperm(z.shape[0], device=z.device)[:max_points]
+            labels = labels[keep]
+            z = z[keep]
+            if active_sample_weights is not None:
+                active_sample_weights = active_sample_weights[keep]
         logits = z @ z.T / max(
             1e-6,
             float(getattr(self, "direct_point_text_contrast_temperature", 0.1)),
@@ -1342,13 +1583,34 @@ class FeatureSupervisionMixin:
         if not has_positive.any():
             return zero, valid_ratio.detach(), teacher_conf[valid].mean().detach(), zero.detach()
 
-        log_denom = torch.logsumexp(logits[has_positive], dim=1)
+        weighted_logits = logits
+        pair_weighting = str(
+            getattr(self, "direct_point_text_contrast_pair_weighting", "none") or "none"
+        )
+        if pair_weighting == "visibility" and active_sample_weights is not None:
+            active_weights = active_sample_weights.to(device=logits.device, dtype=logits.dtype)
+            pair_weights = torch.sqrt(
+                active_weights[:, None].clamp_min(1e-6)
+                * active_weights[None, :].clamp_min(1e-6)
+            )
+            weighted_logits = logits + pair_weights.log().clamp_min(-20.0)
+            weighted_logits = weighted_logits.masked_fill(self_mask, -1e4)
+        elif pair_weighting != "none":
+            raise ValueError(
+                "direct_point_text_contrast_pair_weighting must be one of: none, visibility"
+            )
+
+        log_denom = torch.logsumexp(weighted_logits[has_positive], dim=1)
         log_pos = torch.logsumexp(
-            logits[has_positive].masked_fill(~positive[has_positive], -1e4),
+            weighted_logits[has_positive].masked_fill(~positive[has_positive], -1e4),
             dim=1,
         )
         per_point = -(log_pos - log_denom)
-        active_weights = sample_weights[valid][has_positive] if sample_weights is not None else None
+        active_weights = (
+            active_sample_weights[has_positive]
+            if active_sample_weights is not None
+            else None
+        )
         loss = _weighted_vector_mean(per_point, active_weights)
         with torch.no_grad():
             nearest = logits.argmax(dim=-1)

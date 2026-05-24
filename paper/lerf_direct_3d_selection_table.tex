@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features, a fixed global threshold, and GT-free RGB snap. The SAM3-box fixed row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout selected by overlap with the rendered mask, not by ground truth. The scene-locked SAM3-box row is diagnostic.}
+  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features, a fixed global threshold, and GT-free RGB snap. The compact-field row uses deployed Gaussian-center primitive scores with an opacity-gated point adapter and does not read a VPR cache at inference. The SAM3-box fixed row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout selected by overlap with the rendered mask, not by ground truth. The scene-locked SAM3-box row is diagnostic.}
   \label{tab:lerf-direct-3d-selection}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccccc}
@@ -9,12 +9,14 @@
     \midrule
     OpenGaussian & mIoU & 0.393 & 0.310 & 0.604 & 0.227 & 0.384 \\
     CTF-GS & thr0p25 mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
+    CTF-GS compact & thr0p35 mIoU & 0.515 & 0.573 & 0.548 & 0.299 & 0.484 \\
     CTF-GS & SAM3 box fixed mIoU & 0.614 & 0.641 & 0.613 & 0.414 & 0.570 \\
     CTF-GS & SAM3 box scene-locked mIoU & 0.642 & 0.649 & 0.653 & 0.444 & 0.597 \\
     CTF-GS & diag. best mIoU & 0.533 & 0.582 & 0.566 & 0.246 & 0.482 \\
     \midrule
     OpenGaussian & Acc@0.25 & 0.554 & 0.422 & 0.763 & 0.318 & 0.514 \\
     CTF-GS & thr0p25 Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
+    CTF-GS compact & thr0p35 Acc@0.25 & 0.661 & 0.789 & 0.712 & 0.409 & 0.643 \\
     CTF-GS & SAM3 box fixed Acc@0.25 & 0.696 & 0.746 & 0.746 & 0.546 & 0.684 \\
     CTF-GS & SAM3 box scene-locked Acc@0.25 & 0.732 & 0.746 & 0.780 & 0.546 & 0.701 \\
     \bottomrule

@@ -1,4 +1,5 @@
 from pathlib import Path
+import argparse
 
 import torch
 
@@ -38,6 +39,20 @@ def test_load_radio_adaptor_from_checkpoint_supports_dino_v3_alias(tmp_path: Pat
     assert isinstance(adaptor, RadioMLPAdaptor)
     assert adaptor.input_dim == 4
     assert adaptor.output_dim == 3
+
+
+def test_load_radio_adaptor_from_checkpoint_supports_trusted_metadata(tmp_path: Path):
+    ckpt = {
+        "state_dict": _state("_feature_projections.sam3"),
+        "args": argparse.Namespace(model="c-radio"),
+    }
+    path = tmp_path / "radio_with_namespace.pth"
+    torch.save(ckpt, path)
+
+    adaptor = load_radio_adaptor_from_checkpoint(path, "sam3", kind="feature_projection")
+
+    assert isinstance(adaptor, RadioMLPAdaptor)
+    assert adaptor.input_dim == 4
 
 
 def test_project_feature_map_with_adaptor_preserves_spatial_shape():

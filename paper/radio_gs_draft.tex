@@ -42,8 +42,8 @@ compact direct field. On LERF-OVS, the current frozen \project{} package reaches
 calibrated macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
 ScanNet direct point-query protocol, a conservative Gaussian-index readout
 reaches 0.3583, 0.3618, and 0.4367 mIoU on the 19-, 15-, and 10-class splits;
-a contextual kNN point readout with label-free scene-mean calibration further
-improves them to 0.3677, 0.3748, and 0.4562. An
+the strongest DINO-CV contextual kNN point readout with label-free scene-mean
+calibration further improves them to 0.3704, 0.3771, and 0.4585. An
 OpenGaussian-style direct 3D object-selection evaluation shows that a
 rendered-feature-to-primitive registration readout with a fixed global
 softmax-score threshold, a 0.5\% selection floor, a 1.8\% selection cap, and
@@ -126,7 +126,9 @@ official SAM3 box-prompt readout can refine the rendered selection boundary
 after primitive scoring. Optional raster-contribution and proposal/OPR branches
 are implemented as audited diagnostics. Frozen RADIO/SigLIP2/DINOv3/SAM3 heads
 supervise feature, relation, geometry, and mask-logit consistency without
-training task-specific evaluators.}
+training task-specific evaluators; a feature-only prompt-conditioned SAM3
+boundary head is additionally trained from official SAM3 training-view pseudo
+masks and evaluated without RGB SAM3 calls.}
 \label{fig:framework}
 \end{figure*}
 
@@ -437,6 +439,18 @@ RGB boundary snap is more useful for direct 3D selection, where the rendered
 binary mask is only the final evaluation projection of already selected 3D
 primitives. An adaptive mean+std threshold diagnostic keeps LocAcc unchanged
 but lowers macro mIoU to 0.4939, so it is not promoted.
+We also implement a feature-only prompt-conditioned SAM3 boundary readout trained
+from official SAM3 pseudo masks on unlabelled training views. To avoid turning
+it into an RGB SAM3 evaluation-time oracle, the readout receives only rendered
+\method{} features, the SigLIP2 prompt, and the heatmap-threshold coarse mask.
+A query-support gate is required: the refined mask must substantially overlap
+the original heatmap support, obey bounded area change, and is clipped to a
+small dilation band around the query support. Under the current active-checkpoint
+run, the stable global gate raises weighted sample mIoU from 0.5493 to 0.5666
+without changing LocAcc and removes the previous Ramen regression. Because the
+scene-category macro remains lower at 0.5141 mIoU, compared with 0.5511
+scene-macro and 0.5666 sample-weighted mIoU, we keep it as a boundary-readout
+ablation rather than replacing Table~\ref{tab:lerf}.
 
 \subsection{LERF Direct 3D Object Selection}
 
@@ -855,9 +869,10 @@ diagnostic filter rather than a main quantitative claim.
 \begin{table}[t]
 \centering
 \caption{VALA/OpenGaFF ScanNet-8 teacher-balanced direct point-query results.
-The contextual row uses kNN point readout with $k=8$, 32 candidate Gaussians,
-and label-free scene-mean logit calibration with $\alpha=0.5$.}
+Contextual rows use kNN point readout with $k=8$, 32 candidate Gaussians, and
+label-free scene-mean logit calibration with $\alpha=0.5$.}
 \label{tab:scannet}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{llcc}
 \toprule
 Readout & Split & mIoU & mAcc \\
@@ -865,11 +880,18 @@ Readout & Split & mIoU & mAcc \\
 Gaussian-index & 19 classes & 0.3583 & 0.6006 \\
 Gaussian-index & 15 classes & 0.3618 & 0.6152 \\
 Gaussian-index & 10 classes & 0.4367 & 0.6998 \\
+DINO-CV Gaussian-index & 19 classes & 0.3704 & 0.6159 \\
+DINO-CV Gaussian-index & 15 classes & 0.3718 & 0.6268 \\
+DINO-CV Gaussian-index & 10 classes & 0.4390 & 0.7020 \\
 Contextual kNN & 19 classes & 0.3677 & 0.5997 \\
 Contextual kNN & 15 classes & 0.3748 & 0.6181 \\
 Contextual kNN & 10 classes & 0.4562 & 0.7008 \\
+DINO-CV contextual kNN & 19 classes & \textbf{0.3704} & 0.6017 \\
+DINO-CV contextual kNN & 15 classes & \textbf{0.3771} & 0.6198 \\
+DINO-CV contextual kNN & 10 classes & \textbf{0.4585} & \textbf{0.7032} \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
 
 \input{scannet_published_context_table}
@@ -886,18 +908,20 @@ and \texttt{label\_index} opacity filtering.
 This is not presented as a full ScanNet semantic segmentation leaderboard
 result; it is a fair direct probe of the learned feature field. We also evaluate
 a label-free contextual point readout that queries each ScanNet vertex from
-nearby Gaussians instead of the row-aligned Gaussian index. This kNN readout
-improves the three split mIoUs to
-0.3677, 0.3748, and 0.4562 while keeping mAcc comparable. Increasing the
-calibration scale to 0.75 further raises the 10-class mIoU to 0.4585 but lowers
-the 19-/15-class and mAcc averages, so we use $\alpha=0.5$ as the balanced
-setting. ScanNet alias prompts remain mixed and are kept as appendix evidence.
+nearby Gaussians instead of the row-aligned Gaussian index. On the original v67
+field this kNN readout improves the three split mIoUs to 0.3677, 0.3748, and
+0.4562 while keeping mAcc comparable. Combining the same readout with the
+DINO-CV compact field further improves the balanced row to 0.3704, 0.3771, and
+0.4585 mIoU, with 0.6017, 0.6198, and 0.7032 mAcc. Increasing the calibration
+scale to 0.75 raises the 10-class mIoU to 0.4612 but lowers the 19-/15-class
+and mAcc averages, so we use $\alpha=0.5$ as the balanced setting. ScanNet alias
+prompts remain mixed and are kept as appendix evidence.
 Table~\ref{tab:scannet_published_context} gives the corresponding
 published-context comparison against the external rows reported by OpenGaFF v2.
 These external numbers are cited from that paper rather than reproduced locally.
-Under this protocol, the contextual \method{} row slightly exceeds the OpenGaFF
-published 19-class mIoU and is stronger than prior pre-OpenGaFF rows on mAcc,
-but remains below OpenGaFF on the 15-/10-class mIoU and 10-class mAcc. We
+Under this protocol, the DINO-CV contextual \method{} row slightly exceeds the
+OpenGaFF published 19-class mIoU and is stronger than prior pre-OpenGaFF rows on
+mAcc, but remains below OpenGaFF on the 15-/10-class mIoU and 10-class mAcc. We
 therefore claim split-aligned transfer evidence rather than ScanNet leaderboard
 dominance.
 
@@ -921,13 +945,17 @@ Split & Base mIoU & DINO mIoU & $\Delta$ & Base mAcc & DINO mAcc & $\Delta$ \\
 \end{table}
 
 Table~\ref{tab:scannet_cross_view} upgrades the earlier two-scene diagnostic
-to the VALA/OpenGaFF ScanNet-8 subset. DINO cross-view affinity improves the macro
-19-class and 15-class probes more clearly than the 10-class probe, with
+to the VALA/OpenGaFF ScanNet-8 subset. DINO cross-view affinity improves the
+macro 19-class and 15-class probes more clearly than the 10-class probe, with
 positive macro mIoU and mAcc on all splits. The effect remains scene-dependent:
 the DINO branch improves 4/8, 5/8, and 5/8 scenes on the 19-, 15-, and
-10-class mIoU splits, respectively. We therefore report it as a
-compatibility/FAC ablation rather than replacing the conservative main ScanNet
-row in Table~\ref{tab:scannet}.
+10-class mIoU splits, respectively. With the contextual direct readout in
+Table~\ref{tab:scannet}, it becomes the strongest balanced ScanNet support row.
+We also evaluated a stricter joint-readout training variant that aligns direct
+point features with the current rendered compact map and applies
+visibility-weighted text contrast. Its full ScanNet-8 result improves split10
+mAcc but weakens split19/15 mIoU, so we keep it as an ablation rather than the
+main paper row.
 
 \subsection{Efficiency and Cost}
 
