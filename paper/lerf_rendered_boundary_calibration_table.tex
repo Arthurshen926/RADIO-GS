@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{GT-free rendered-mask boundary calibration on the paper-facing LERF-OVS checkpoints. All rows use the same checkpoints, text embeddings, temperatures, scoring, heatmap upsampling, and rendered heatmaps; only the peak-relative binary mask threshold changes. LocAcc is unchanged because it is measured from the heatmap argmax before binarization.}
+  \caption{GT-free rendered-mask boundary calibration on the paper-facing LERF-OVS checkpoints. Threshold rows change only the peak-relative binary mask threshold. The final row keeps threshold 0.60 and adds peak-connected-component filtering, which removes disconnected mask regions away from the query heatmap maximum. LocAcc is measured from the heatmap argmax before mask extraction.}
   \label{tab:rendered_boundary_calibration}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{lccccc}
@@ -10,8 +10,9 @@
     Threshold 0.50 & \textbf{0.431} & 0.586 & 0.549 & 0.411 & 0.494 \\
     Threshold 0.55 & 0.430 & 0.611 & 0.568 & 0.451 & 0.515 \\
     Threshold 0.60 & 0.424 & \textbf{0.620} & 0.576 & 0.477 & 0.524 \\
-    Threshold 0.65 & 0.415 & 0.619 & \textbf{0.578} & \textbf{0.490} & \textbf{0.525} \\
+    Threshold 0.65 & 0.415 & 0.619 & 0.578 & 0.490 & 0.525 \\
     Threshold 0.70 & 0.395 & 0.596 & 0.556 & 0.477 & 0.506 \\
+    Threshold 0.60 + peak comp. & \textbf{0.513} & \textbf{0.625} & \textbf{0.618} & \textbf{0.527} & \textbf{0.571} \\
     \bottomrule
   \end{tabular}
   }

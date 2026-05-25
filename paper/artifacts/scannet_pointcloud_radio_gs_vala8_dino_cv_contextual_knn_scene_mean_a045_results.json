@@ -1,0 +1,826 @@
+{
+  "label": "RADIO-GS VALA8 DINO-CV contextual kNN12 scene-mean alpha0.45",
+  "protocol": "VALA/OpenGaFF ScanNet-8 candidate split",
+  "scene_count": 8,
+  "scenes": [
+    "scene0000_00",
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00",
+    "scene0140_00",
+    "scene0347_00",
+    "scene0400_00",
+    "scene0590_00"
+  ],
+  "source_timestamp": "2026-05-24 19:56:56",
+  "source_args": {
+    "scene": "scene0000_00",
+    "scene_list": "scene0000_00,scene0062_00,scene0070_00,scene0097_00,scene0140_00,scene0347_00,scene0400_00,scene0590_00",
+    "prepared_root": "dataset/scannet_og",
+    "config": "radio_gs/configs/generated/scannet_dino_cv/scannet_og_hybrid_v67_dino_cv001_b2_s32768_ft20_{scene}.yaml",
+    "checkpoint": "output/radio_gs/scannet_og_{scene}_v67_dino_cv001_b2_s32768_ft20/checkpoints/best.pth",
+    "label_ply": "None",
+    "output_dir": "output/scannet_pointcloud_eval/vala8_dino_cv_knn12_cand48_scene_mean_a045_queryonly_20260524",
+    "class_splits": "19,15,10",
+    "k": "12",
+    "candidate_k": "48",
+    "chunk_size": "8192",
+    "max_points": "None",
+    "sample_seed": "42",
+    "opacity_threshold": "0.1",
+    "opacity_filter_mode": "auto",
+    "save_ply": "False",
+    "save_feature_rgb_ply": "False",
+    "save_language_features_npz": "False",
+    "feature_rgb_seed": "20260429",
+    "query_mode": "knn",
+    "save_logits_npz": "False",
+    "compact_feature_key": "features",
+    "logit_calibration": "scene_mean",
+    "logit_calibration_alpha": "0.45",
+    "class_aliases": "none",
+    "gaussian_index_position_mode": "label_point",
+    "prompt_templates": "{query}",
+    "text_embedding_cache": "checkpoints/siglip2_scannet_text_embeddings_v67_knn.pt",
+    "projection_weights": "checkpoints/siglip2_feat_projection.pth",
+    "summary_head_weights": "checkpoints/siglip2_summary_head.pth",
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False",
+    "point_summary_adapter_blend_alpha": "1.0",
+    "device": "cuda"
+  },
+  "source_protocol_checks": {
+    "require_exact_scene_set": true,
+    "protocol_signature": {
+      "prepared_root": "dataset/scannet_og",
+      "config": "radio_gs/configs/generated/scannet_dino_cv/scannet_og_hybrid_v67_dino_cv001_b2_s32768_ft20_{scene}.yaml",
+      "checkpoint": "output/radio_gs/scannet_og_{scene}_v67_dino_cv001_b2_s32768_ft20/checkpoints/best.pth",
+      "class_splits": "19,15,10",
+      "query_mode": "knn",
+      "k": "12",
+      "candidate_k": "48",
+      "max_points": "None",
+      "opacity_filter_mode": "auto",
+      "logit_calibration": "scene_mean",
+      "logit_calibration_alpha": "0.45",
+      "gaussian_index_position_mode": "label_point",
+      "prompt_templates": "{query}",
+      "compact_feature_key": "features",
+      "text_embedding_cache": "checkpoints/siglip2_scannet_text_embeddings_v67_knn.pt",
+      "projection_weights": "checkpoints/siglip2_feat_projection.pth",
+      "summary_head_weights": "checkpoints/siglip2_summary_head.pth",
+      "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "use_summary_head": "True",
+      "use_point_summary_adapter": "False",
+      "point_summary_adapter_blend_alpha": "1.0"
+    },
+    "expected_source_args": {
+      "query_mode": "knn",
+      "k": "12",
+      "candidate_k": "48",
+      "logit_calibration": "scene_mean",
+      "logit_calibration_alpha": "0.45",
+      "prompt_templates": "{query}",
+      "compact_feature_key": "features"
+    }
+  },
+  "macro": {
+    "19": {
+      "miou": 0.3715,
+      "macc": 0.6024
+    },
+    "15": {
+      "miou": 0.3784,
+      "macc": 0.6206
+    },
+    "10": {
+      "miou": 0.4585,
+      "macc": 0.7029
+    }
+  },
+  "category_macro_stability": {
+    "19": {
+      "mean_iou_std": 0.1502,
+      "worst_mean_iou_class": {
+        "name": "picture",
+        "scene_count": 3,
+        "mean_iou": 0.0248,
+        "std_iou": 0.035,
+        "min_iou": 0.0,
+        "max_iou": 0.0743,
+        "mean_acc": 0.0255,
+        "std_acc": 0.0361,
+        "min_acc": 0.0,
+        "max_acc": 0.0765,
+        "total_gt_count": 8626
+      },
+      "most_unstable_iou_class": {
+        "name": "refrigerator",
+        "scene_count": 4,
+        "mean_iou": 0.4416,
+        "std_iou": 0.263,
+        "min_iou": 0.0168,
+        "max_iou": 0.737,
+        "mean_acc": 0.6477,
+        "std_acc": 0.3634,
+        "min_acc": 0.0209,
+        "max_acc": 0.8875,
+        "total_gt_count": 10996
+      },
+      "classes": {
+        "1": {
+          "name": "wall",
+          "scene_count": 8,
+          "mean_iou": 0.4035,
+          "std_iou": 0.103,
+          "min_iou": 0.268,
+          "max_iou": 0.5947,
+          "mean_acc": 0.4126,
+          "std_acc": 0.1024,
+          "min_acc": 0.2789,
+          "max_acc": 0.6074,
+          "total_gt_count": 287311
+        },
+        "2": {
+          "name": "floor",
+          "scene_count": 8,
+          "mean_iou": 0.4903,
+          "std_iou": 0.1865,
+          "min_iou": 0.1559,
+          "max_iou": 0.7502,
+          "mean_acc": 0.5954,
+          "std_acc": 0.2694,
+          "min_acc": 0.1604,
+          "max_acc": 0.9009,
+          "total_gt_count": 183526
+        },
+        "3": {
+          "name": "cabinet",
+          "scene_count": 6,
+          "mean_iou": 0.3105,
+          "std_iou": 0.1953,
+          "min_iou": 0.0177,
+          "max_iou": 0.6236,
+          "mean_acc": 0.4035,
+          "std_acc": 0.2656,
+          "min_acc": 0.019,
+          "max_acc": 0.8193,
+          "total_gt_count": 49559
+        },
+        "4": {
+          "name": "bed",
+          "scene_count": 4,
+          "mean_iou": 0.3977,
+          "std_iou": 0.2297,
+          "min_iou": 0.0,
+          "max_iou": 0.537,
+          "mean_acc": 0.7358,
+          "std_acc": 0.425,
+          "min_acc": 0.0,
+          "max_acc": 0.9957,
+          "total_gt_count": 32517
+        },
+        "5": {
+          "name": "chair",
+          "scene_count": 4,
+          "mean_iou": 0.3538,
+          "std_iou": 0.0861,
+          "min_iou": 0.2391,
+          "max_iou": 0.4555,
+          "mean_acc": 0.9433,
+          "std_acc": 0.0699,
+          "min_acc": 0.8279,
+          "max_acc": 1.0,
+          "total_gt_count": 96966
+        },
+        "6": {
+          "name": "sofa",
+          "scene_count": 2,
+          "mean_iou": 0.4322,
+          "std_iou": 0.0005,
+          "min_iou": 0.4317,
+          "max_iou": 0.4328,
+          "mean_acc": 0.9098,
+          "std_acc": 0.0717,
+          "min_acc": 0.8381,
+          "max_acc": 0.9815,
+          "total_gt_count": 10586
+        },
+        "7": {
+          "name": "table",
+          "scene_count": 4,
+          "mean_iou": 0.1232,
+          "std_iou": 0.1386,
+          "min_iou": 0.0,
+          "max_iou": 0.3567,
+          "mean_acc": 0.2256,
+          "std_acc": 0.286,
+          "min_acc": 0.0,
+          "max_acc": 0.7165,
+          "total_gt_count": 26175
+        },
+        "8": {
+          "name": "door",
+          "scene_count": 7,
+          "mean_iou": 0.4626,
+          "std_iou": 0.2368,
+          "min_iou": 0.0143,
+          "max_iou": 0.7818,
+          "mean_acc": 0.8282,
+          "std_acc": 0.1407,
+          "min_acc": 0.5103,
+          "max_acc": 0.9626,
+          "total_gt_count": 39476
+        },
+        "9": {
+          "name": "window",
+          "scene_count": 4,
+          "mean_iou": 0.3161,
+          "std_iou": 0.2357,
+          "min_iou": 0.0,
+          "max_iou": 0.5885,
+          "mean_acc": 0.5043,
+          "std_acc": 0.3715,
+          "min_acc": 0.0,
+          "max_acc": 0.9671,
+          "total_gt_count": 14018
+        },
+        "11": {
+          "name": "picture",
+          "scene_count": 3,
+          "mean_iou": 0.0248,
+          "std_iou": 0.035,
+          "min_iou": 0.0,
+          "max_iou": 0.0743,
+          "mean_acc": 0.0255,
+          "std_acc": 0.0361,
+          "min_acc": 0.0,
+          "max_acc": 0.0765,
+          "total_gt_count": 8626
+        },
+        "12": {
+          "name": "counter",
+          "scene_count": 5,
+          "mean_iou": 0.2115,
+          "std_iou": 0.1386,
+          "min_iou": 0.0117,
+          "max_iou": 0.3532,
+          "mean_acc": 0.3642,
+          "std_acc": 0.242,
+          "min_acc": 0.0795,
+          "max_acc": 0.6846,
+          "total_gt_count": 14417
+        },
+        "14": {
+          "name": "desk",
+          "scene_count": 3,
+          "mean_iou": 0.2229,
+          "std_iou": 0.0701,
+          "min_iou": 0.1237,
+          "max_iou": 0.2737,
+          "mean_acc": 0.3385,
+          "std_acc": 0.0299,
+          "min_acc": 0.2997,
+          "max_acc": 0.3726,
+          "total_gt_count": 11571
+        },
+        "16": {
+          "name": "curtain",
+          "scene_count": 3,
+          "mean_iou": 0.6342,
+          "std_iou": 0.1409,
+          "min_iou": 0.4739,
+          "max_iou": 0.8168,
+          "mean_acc": 0.749,
+          "std_acc": 0.1562,
+          "min_acc": 0.5309,
+          "max_acc": 0.8889,
+          "total_gt_count": 31221
+        },
+        "24": {
+          "name": "refrigerator",
+          "scene_count": 4,
+          "mean_iou": 0.4416,
+          "std_iou": 0.263,
+          "min_iou": 0.0168,
+          "max_iou": 0.737,
+          "mean_acc": 0.6477,
+          "std_acc": 0.3634,
+          "min_acc": 0.0209,
+          "max_acc": 0.8875,
+          "total_gt_count": 10996
+        },
+        "33": {
+          "name": "toilet",
+          "scene_count": 2,
+          "mean_iou": 0.2618,
+          "std_iou": 0.1297,
+          "min_iou": 0.1321,
+          "max_iou": 0.3915,
+          "mean_acc": 1.0,
+          "std_acc": 0.0,
+          "min_acc": 1.0,
+          "max_acc": 1.0,
+          "total_gt_count": 3478
+        },
+        "34": {
+          "name": "sink",
+          "scene_count": 5,
+          "mean_iou": 0.2644,
+          "std_iou": 0.2135,
+          "min_iou": 0.0507,
+          "max_iou": 0.6261,
+          "mean_acc": 0.7695,
+          "std_acc": 0.3217,
+          "min_acc": 0.1552,
+          "max_acc": 0.9975,
+          "total_gt_count": 3230
+        }
+      }
+    },
+    "15": {
+      "mean_iou_std": 0.1497,
+      "worst_mean_iou_class": {
+        "name": "table",
+        "scene_count": 4,
+        "mean_iou": 0.1229,
+        "std_iou": 0.1387,
+        "min_iou": 0.0,
+        "max_iou": 0.3567,
+        "mean_acc": 0.2256,
+        "std_acc": 0.286,
+        "min_acc": 0.0,
+        "max_acc": 0.7165,
+        "total_gt_count": 26175
+      },
+      "most_unstable_iou_class": {
+        "name": "door",
+        "scene_count": 7,
+        "mean_iou": 0.4591,
+        "std_iou": 0.2396,
+        "min_iou": 0.0143,
+        "max_iou": 0.7818,
+        "mean_acc": 0.8284,
+        "std_acc": 0.1407,
+        "min_acc": 0.5103,
+        "max_acc": 0.9626,
+        "total_gt_count": 39476
+      },
+      "classes": {
+        "1": {
+          "name": "wall",
+          "scene_count": 8,
+          "mean_iou": 0.4116,
+          "std_iou": 0.1023,
+          "min_iou": 0.268,
+          "max_iou": 0.5951,
+          "mean_acc": 0.4164,
+          "std_acc": 0.1037,
+          "min_acc": 0.279,
+          "max_acc": 0.6074,
+          "total_gt_count": 287311
+        },
+        "2": {
+          "name": "floor",
+          "scene_count": 8,
+          "mean_iou": 0.4943,
+          "std_iou": 0.1889,
+          "min_iou": 0.1559,
+          "max_iou": 0.7502,
+          "mean_acc": 0.596,
+          "std_acc": 0.269,
+          "min_acc": 0.1604,
+          "max_acc": 0.9009,
+          "total_gt_count": 183526
+        },
+        "3": {
+          "name": "cabinet",
+          "scene_count": 6,
+          "mean_iou": 0.3131,
+          "std_iou": 0.1888,
+          "min_iou": 0.0177,
+          "max_iou": 0.609,
+          "mean_acc": 0.4072,
+          "std_acc": 0.2683,
+          "min_acc": 0.019,
+          "max_acc": 0.8321,
+          "total_gt_count": 49559
+        },
+        "4": {
+          "name": "bed",
+          "scene_count": 4,
+          "mean_iou": 0.3974,
+          "std_iou": 0.2296,
+          "min_iou": 0.0,
+          "max_iou": 0.5407,
+          "mean_acc": 0.7358,
+          "std_acc": 0.425,
+          "min_acc": 0.0,
+          "max_acc": 0.9957,
+          "total_gt_count": 32517
+        },
+        "5": {
+          "name": "chair",
+          "scene_count": 4,
+          "mean_iou": 0.3538,
+          "std_iou": 0.0861,
+          "min_iou": 0.2392,
+          "max_iou": 0.4555,
+          "mean_acc": 0.9433,
+          "std_acc": 0.0699,
+          "min_acc": 0.8279,
+          "max_acc": 1.0,
+          "total_gt_count": 96966
+        },
+        "6": {
+          "name": "sofa",
+          "scene_count": 2,
+          "mean_iou": 0.4328,
+          "std_iou": 0.0012,
+          "min_iou": 0.4316,
+          "max_iou": 0.434,
+          "mean_acc": 0.9098,
+          "std_acc": 0.0717,
+          "min_acc": 0.8381,
+          "max_acc": 0.9815,
+          "total_gt_count": 10586
+        },
+        "7": {
+          "name": "table",
+          "scene_count": 4,
+          "mean_iou": 0.1229,
+          "std_iou": 0.1387,
+          "min_iou": 0.0,
+          "max_iou": 0.3567,
+          "mean_acc": 0.2256,
+          "std_acc": 0.286,
+          "min_acc": 0.0,
+          "max_acc": 0.7165,
+          "total_gt_count": 26175
+        },
+        "8": {
+          "name": "door",
+          "scene_count": 7,
+          "mean_iou": 0.4591,
+          "std_iou": 0.2396,
+          "min_iou": 0.0143,
+          "max_iou": 0.7818,
+          "mean_acc": 0.8284,
+          "std_acc": 0.1407,
+          "min_acc": 0.5103,
+          "max_acc": 0.9626,
+          "total_gt_count": 39476
+        },
+        "9": {
+          "name": "window",
+          "scene_count": 4,
+          "mean_iou": 0.3165,
+          "std_iou": 0.236,
+          "min_iou": 0.0,
+          "max_iou": 0.5885,
+          "mean_acc": 0.5043,
+          "std_acc": 0.3715,
+          "min_acc": 0.0,
+          "max_acc": 0.9671,
+          "total_gt_count": 14018
+        },
+        "12": {
+          "name": "counter",
+          "scene_count": 5,
+          "mean_iou": 0.199,
+          "std_iou": 0.1295,
+          "min_iou": 0.0289,
+          "max_iou": 0.3608,
+          "mean_acc": 0.3959,
+          "std_acc": 0.216,
+          "min_acc": 0.0795,
+          "max_acc": 0.6846,
+          "total_gt_count": 14417
+        },
+        "14": {
+          "name": "desk",
+          "scene_count": 3,
+          "mean_iou": 0.2229,
+          "std_iou": 0.0701,
+          "min_iou": 0.1237,
+          "max_iou": 0.2737,
+          "mean_acc": 0.3385,
+          "std_acc": 0.0299,
+          "min_acc": 0.2997,
+          "max_acc": 0.3726,
+          "total_gt_count": 11571
+        },
+        "16": {
+          "name": "curtain",
+          "scene_count": 3,
+          "mean_iou": 0.6389,
+          "std_iou": 0.1383,
+          "min_iou": 0.4797,
+          "max_iou": 0.8168,
+          "mean_acc": 0.7547,
+          "std_acc": 0.1561,
+          "min_acc": 0.5357,
+          "max_acc": 0.8889,
+          "total_gt_count": 31221
+        },
+        "33": {
+          "name": "toilet",
+          "scene_count": 2,
+          "mean_iou": 0.2586,
+          "std_iou": 0.1329,
+          "min_iou": 0.1257,
+          "max_iou": 0.3915,
+          "mean_acc": 1.0,
+          "std_acc": 0.0,
+          "min_acc": 1.0,
+          "max_acc": 1.0,
+          "total_gt_count": 3478
+        },
+        "34": {
+          "name": "sink",
+          "scene_count": 5,
+          "mean_iou": 0.2537,
+          "std_iou": 0.2136,
+          "min_iou": 0.0508,
+          "max_iou": 0.6281,
+          "mean_acc": 0.7695,
+          "std_acc": 0.3217,
+          "min_acc": 0.1552,
+          "max_acc": 0.9975,
+          "total_gt_count": 3230
+        }
+      }
+    },
+    "10": {
+      "mean_iou_std": 0.1544,
+      "worst_mean_iou_class": {
+        "name": "toilet",
+        "scene_count": 2,
+        "mean_iou": 0.2199,
+        "std_iou": 0.1124,
+        "min_iou": 0.1076,
+        "max_iou": 0.3323,
+        "mean_acc": 1.0,
+        "std_acc": 0.0,
+        "min_acc": 1.0,
+        "max_acc": 1.0,
+        "total_gt_count": 3478
+      },
+      "most_unstable_iou_class": {
+        "name": "window",
+        "scene_count": 4,
+        "mean_iou": 0.5262,
+        "std_iou": 0.2555,
+        "min_iou": 0.1446,
+        "max_iou": 0.8599,
+        "mean_acc": 0.7367,
+        "std_acc": 0.239,
+        "min_acc": 0.3422,
+        "max_acc": 0.9671,
+        "total_gt_count": 14018
+      },
+      "classes": {
+        "1": {
+          "name": "wall",
+          "scene_count": 8,
+          "mean_iou": 0.4357,
+          "std_iou": 0.107,
+          "min_iou": 0.3139,
+          "max_iou": 0.6454,
+          "mean_acc": 0.4375,
+          "std_acc": 0.1068,
+          "min_acc": 0.3156,
+          "max_acc": 0.6471,
+          "total_gt_count": 287311
+        },
+        "2": {
+          "name": "floor",
+          "scene_count": 8,
+          "mean_iou": 0.5111,
+          "std_iou": 0.1983,
+          "min_iou": 0.1564,
+          "max_iou": 0.7561,
+          "mean_acc": 0.5993,
+          "std_acc": 0.2676,
+          "min_acc": 0.1609,
+          "max_acc": 0.9009,
+          "total_gt_count": 183526
+        },
+        "4": {
+          "name": "bed",
+          "scene_count": 4,
+          "mean_iou": 0.404,
+          "std_iou": 0.2336,
+          "min_iou": 0.0,
+          "max_iou": 0.5536,
+          "mean_acc": 0.7358,
+          "std_acc": 0.425,
+          "min_acc": 0.0,
+          "max_acc": 0.9957,
+          "total_gt_count": 32517
+        },
+        "5": {
+          "name": "chair",
+          "scene_count": 4,
+          "mean_iou": 0.3715,
+          "std_iou": 0.0878,
+          "min_iou": 0.2313,
+          "max_iou": 0.4644,
+          "mean_acc": 0.9585,
+          "std_acc": 0.0455,
+          "min_acc": 0.8886,
+          "max_acc": 1.0,
+          "total_gt_count": 96966
+        },
+        "6": {
+          "name": "sofa",
+          "scene_count": 2,
+          "mean_iou": 0.4504,
+          "std_iou": 0.0152,
+          "min_iou": 0.4352,
+          "max_iou": 0.4656,
+          "mean_acc": 0.9152,
+          "std_acc": 0.0771,
+          "min_acc": 0.8381,
+          "max_acc": 0.9923,
+          "total_gt_count": 10586
+        },
+        "7": {
+          "name": "table",
+          "scene_count": 4,
+          "mean_iou": 0.2834,
+          "std_iou": 0.1407,
+          "min_iou": 0.136,
+          "max_iou": 0.4726,
+          "mean_acc": 0.4878,
+          "std_acc": 0.1773,
+          "min_acc": 0.3007,
+          "max_acc": 0.7436,
+          "total_gt_count": 26175
+        },
+        "8": {
+          "name": "door",
+          "scene_count": 7,
+          "mean_iou": 0.459,
+          "std_iou": 0.239,
+          "min_iou": 0.0143,
+          "max_iou": 0.782,
+          "mean_acc": 0.831,
+          "std_acc": 0.1415,
+          "min_acc": 0.5103,
+          "max_acc": 0.9626,
+          "total_gt_count": 39476
+        },
+        "9": {
+          "name": "window",
+          "scene_count": 4,
+          "mean_iou": 0.5262,
+          "std_iou": 0.2555,
+          "min_iou": 0.1446,
+          "max_iou": 0.8599,
+          "mean_acc": 0.7367,
+          "std_acc": 0.239,
+          "min_acc": 0.3422,
+          "max_acc": 0.9671,
+          "total_gt_count": 14018
+        },
+        "33": {
+          "name": "toilet",
+          "scene_count": 2,
+          "mean_iou": 0.2199,
+          "std_iou": 0.1124,
+          "min_iou": 0.1076,
+          "max_iou": 0.3323,
+          "mean_acc": 1.0,
+          "std_acc": 0.0,
+          "min_acc": 1.0,
+          "max_acc": 1.0,
+          "total_gt_count": 3478
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "scene": "scene0000_00",
+      "19": {
+        "miou": 0.30552572188248883,
+        "macc": 0.5830229811125821
+      },
+      "15": {
+        "miou": 0.2861420521117558,
+        "macc": 0.5730474731338938
+      },
+      "10": {
+        "miou": 0.3408919897654307,
+        "macc": 0.6780600088348141
+      }
+    },
+    {
+      "scene": "scene0062_00",
+      "19": {
+        "miou": 0.40066542109009545,
+        "macc": 0.7334961500420004
+      },
+      "15": {
+        "miou": 0.40066542109009545,
+        "macc": 0.7334961500420004
+      },
+      "10": {
+        "miou": 0.5516602179375589,
+        "macc": 0.8311588620031952
+      }
+    },
+    {
+      "scene": "scene0070_00",
+      "19": {
+        "miou": 0.2177596050186107,
+        "macc": 0.31222419259731704
+      },
+      "15": {
+        "miou": 0.23576507711171957,
+        "macc": 0.34169112837629373
+      },
+      "10": {
+        "miou": 0.3597781892679402,
+        "macc": 0.5224279318625441
+      }
+    },
+    {
+      "scene": "scene0097_00",
+      "19": {
+        "miou": 0.4601488937451263,
+        "macc": 0.7601020211934438
+      },
+      "15": {
+        "miou": 0.4372003591196803,
+        "macc": 0.7471524983744553
+      },
+      "10": {
+        "miou": 0.48898868551194585,
+        "macc": 0.710089234091459
+      }
+    },
+    {
+      "scene": "scene0140_00",
+      "19": {
+        "miou": 0.34666768411095505,
+        "macc": 0.5356408529820426
+      },
+      "15": {
+        "miou": 0.3978250012261904,
+        "macc": 0.6121626769555879
+      },
+      "10": {
+        "miou": 0.4200314645035725,
+        "macc": 0.6690605975812125
+      }
+    },
+    {
+      "scene": "scene0347_00",
+      "19": {
+        "miou": 0.5764321678170597,
+        "macc": 0.7336843124943225
+      },
+      "15": {
+        "miou": 0.5546331095645561,
+        "macc": 0.7234515483405631
+      },
+      "10": {
+        "miou": 0.6819565800240531,
+        "macc": 0.7788827718129778
+      }
+    },
+    {
+      "scene": "scene0400_00",
+      "19": {
+        "miou": 0.39815854149450186,
+        "macc": 0.7185923102790943
+      },
+      "15": {
+        "miou": 0.39815854149450186,
+        "macc": 0.7185923102790943
+      },
+      "10": {
+        "miou": 0.4325184310212726,
+        "macc": 0.7814320816350356
+      }
+    },
+    {
+      "scene": "scene0590_00",
+      "19": {
+        "miou": 0.26688234992025667,
+        "macc": 0.44224646249939115
+      },
+      "15": {
+        "miou": 0.3166861191702917,
+        "macc": 0.5150132307730434
+      },
+      "10": {
+        "miou": 0.3924996430915876,
+        "macc": 0.6518083128125636
+      }
+    }
+  ]
+}

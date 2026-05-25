@@ -321,6 +321,51 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "controlled_evidence_table.json"),
                 "description": "Machine-readable controlled evidence table",
             },
+            "teacher_vs_ctfgs_2d_usability_20260525.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "teacher_vs_ctfgs_2d_usability_20260525.md"
+                ),
+                "description": "Consolidated 2D teacher-vs-CTF-GS feature-usability report with conservative DINO caveats",
+            },
+            "teacher_vs_ctfgs_2d_usability_20260525.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "teacher_vs_ctfgs_2d_usability_20260525.json"
+                ),
+                "description": "Machine-readable 2D teacher-vs-CTF-GS feature-usability manifest",
+            },
+            "unified_multi_head_feature_quality_field_20260525.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "unified_multi_head_feature_quality_field_20260525.md"
+                ),
+                "description": "Method-level implementation audit for explicit quality/visibility field readouts",
+            },
+            "unified_multi_head_feature_quality_field_20260525.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "unified_multi_head_feature_quality_field_20260525.json"
+                ),
+                "description": "Machine-readable unified multi-head feature-quality field manifest",
+            },
+            "paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "tables"
+                    / "teacher_vs_ctfgs_2d_usability_20260525.tex"
+                ),
+                "description": "Compact LaTeX table for 2D teacher-vs-CTF-GS feature usability",
+            },
             "lerf_nearest_view_cache_baseline.md": {
                 "path": rel(REPORT_DIR / "lerf_nearest_view_cache_baseline.md"),
                 "description": "Measured unwarped nearest-view RADIO cache baseline under the LERF evaluator",
@@ -412,6 +457,15 @@ def main() -> None:
             "build_lerf_per_gaussian_1280d_baseline.py": {
                 "path": rel(REPO_ROOT / "radio_gs" / "scripts" / "build_lerf_per_gaussian_1280d_baseline.py"),
                 "description": "Generator for the per-Gaussian 1280-D explicit RADIO-memory baseline",
+            },
+            "build_teacher_vs_ctfgs_2d_usability_report.py": {
+                "path": rel(
+                    REPO_ROOT
+                    / "radio_gs"
+                    / "scripts"
+                    / "build_teacher_vs_ctfgs_2d_usability_report.py"
+                ),
+                "description": "Generator for the 2D teacher-vs-CTF-GS feature-usability report",
             },
             "lerf_sam3_box_direct_3d_qualitative_manifest.json": {
                 "path": rel(REPORT_DIR / "lerf_sam3_box_direct_3d_qualitative_manifest.json"),

@@ -1,0 +1,31 @@
+{
+  "date": "2026-05-25",
+  "protocol": "Two-scene smoke test of DINO-CV trained checkpoints on frozen SAM3/DINO task probes",
+  "rows": [
+    {
+      "scene": "figurines",
+      "source": "output/lerf_sam_dino_tasks/p1_dino_cv_ckpt_bg110_peak_20260525/figurines/lerf_sam_dino_task_results.json",
+      "dense_rendered_hit": 0.65,
+      "dense_teacher_hit": 0.7058823529411765,
+      "dense_rendered_score": 0.908898736834526,
+      "dense_teacher_score": 0.8401563420015223,
+      "prop_rendered_miou": 0.4457652970223159,
+      "prop_teacher_miou": 0.5083884488114364,
+      "prop_rendered_loc": 0.6857142857142857,
+      "prop_teacher_loc": 0.6
+    },
+    {
+      "scene": "waldo_kitchen",
+      "source": "output/lerf_sam_dino_tasks/p1_dino_cv_ckpt_bg110_peak_20260525/waldo_kitchen/lerf_sam_dino_task_results.json",
+      "dense_rendered_hit": 0.625,
+      "dense_teacher_hit": 0.5882352941176471,
+      "dense_rendered_score": 0.9233607848485311,
+      "dense_teacher_score": 0.8466565416139715,
+      "prop_rendered_miou": 0.33373806236536013,
+      "prop_teacher_miou": 0.41133470296776753,
+      "prop_rendered_loc": 0.75,
+      "prop_teacher_loc": 0.75
+    }
+  ],
+  "conclusion": "DINO-CV checkpoints improve some dense-matching hit/score signals but still do not solve DINO mask propagation mIoU versus the frame-wise teacher; not promoted without a four-scene positive result."
+}

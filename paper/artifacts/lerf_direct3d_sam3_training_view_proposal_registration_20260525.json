@@ -1,0 +1,33 @@
+{
+  "protocol": "LERF Direct 3D Object Selection, no query-image official SAM3 readout, score fusion before primitive selection",
+  "sam3_cache_root": "output/radio_gs/foundation_cache_sam3_modelscope_mapped_trainviews",
+  "baseline": {
+    "macro_best_miou": 0.4488687441,
+    "macro_thr0p25_miou": 0.4379521012,
+    "scenes": {
+      "figurines": {"best": "thr0p35", "best_miou": 0.4260971248, "thr0p25_miou": 0.4219625890},
+      "ramen": {"best": "thr0p25", "best_miou": 0.5710821152, "thr0p25_miou": 0.5710821152},
+      "teatime": {"best": "thr0p5", "best_miou": 0.5226041079, "thr0p25_miou": 0.4990245700},
+      "waldo_kitchen": {"best": "thr0p4", "best_miou": 0.2756916285, "thr0p25_miou": 0.2597391307}
+    }
+  },
+  "sam3_proposal_alpha0p8_all": {
+    "macro_best_miou": 0.4308832884,
+    "macro_thr0p25_miou": 0.4135109857,
+    "delta_macro_best_miou": -0.0179854557,
+    "delta_macro_thr0p25_miou": -0.0244411156,
+    "scenes": {
+      "figurines": {"best": "thr0p3", "best_miou": 0.4433805346, "thr0p25_miou": 0.4316658378, "delta_best_miou": 0.0172834098},
+      "ramen": {"best": "thr0p25", "best_miou": 0.5099602938, "thr0p25_miou": 0.5099602938, "delta_best_miou": -0.0611218214},
+      "teatime": {"best": "thr0p4", "best_miou": 0.4819422364, "thr0p25_miou": 0.4356559217, "delta_best_miou": -0.0406618714},
+      "waldo_kitchen": {"best": "thr0p2", "best_miou": 0.2882500887, "thr0p25_miou": 0.2767618895, "delta_best_miou": 0.0125584602}
+    }
+  },
+  "query_conditioned_alpha0p8": {
+    "scenes": {
+      "figurines": {"best": "thr0p35", "best_miou": 0.3985427916, "delta_best_miou": -0.0275543332},
+      "teatime": {"best": "thr0p45", "best_miou": 0.4587238431, "delta_best_miou": -0.0638802648}
+    }
+  },
+  "conclusion": "Implemented but not promoted. Text-conditioned and class-agnostic SAM3 training-view proposal registration are unstable across scenes; the compact direct field remains the main direct primitive readout."
+}

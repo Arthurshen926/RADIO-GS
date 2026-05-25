@@ -1,0 +1,56 @@
+{
+  "protocol": "LERF rendered-view feature grounding with fixed 0.60 peak-component coarse mask and feature-only prompt-conditioned SAM3 boundary readout",
+  "no_rgb_sam3_at_eval": true,
+  "sam3_prompt_mask_head_initial_refinement": "peak_component",
+  "sam3_prompt_mask_head_min_heatmap_mean_ratio": 0.85,
+  "sam3_prompt_mask_head_min_heatmap_mass_ratio": 0.25,
+  "sam3_prompt_mask_head_require_peak_in_refined": true,
+  "scenes": {
+    "figurines": {
+      "loc_acc": 0.8214285714285714,
+      "miou": 0.5242913291828238,
+      "teacher_loc_acc": 0.75,
+      "teacher_miou": 0.4064881249866206,
+      "n": 56,
+      "source": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525/figurines_peakinit_T50/lerf_ovs_results.json"
+    },
+    "ramen": {
+      "loc_acc": 0.9014084507042254,
+      "miou": 0.6324911224961359,
+      "teacher_loc_acc": 0.9014084507042254,
+      "teacher_miou": 0.5232392277961819,
+      "n": 71,
+      "source": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525/ramen_peakinit_base_lerf2dcoarse/lerf_ovs_results.json"
+    },
+    "teatime": {
+      "loc_acc": 0.8983050847457628,
+      "miou": 0.6515058945335989,
+      "teacher_loc_acc": 0.847457627118644,
+      "teacher_miou": 0.5265344206527773,
+      "n": 59,
+      "source": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525/teatime_peakinit_T25/lerf_ovs_results.json"
+    },
+    "waldo_kitchen": {
+      "loc_acc": 0.8181818181818182,
+      "miou": 0.5474895184328693,
+      "teacher_loc_acc": 0.7272727272727273,
+      "teacher_miou": 0.41287418796064723,
+      "n": 22,
+      "source": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525/waldo_kitchen_peakinit_T25/lerf_ovs_results.json"
+    }
+  },
+  "macro": {
+    "loc_acc": 0.8598309812650944,
+    "miou": 0.588944466161357,
+    "teacher_loc_acc": 0.8065347012738993,
+    "teacher_miou": 0.46728399034905677
+  },
+  "weighted": {
+    "loc_acc": 0.8701923076923077,
+    "miou": 0.5997634678580251,
+    "teacher_loc_acc": 0.8269230769230769,
+    "teacher_miou": 0.4810677073385951,
+    "n": 208
+  },
+  "delta_vs_peak_component_macro_miou": 0.01822165929148763
+}

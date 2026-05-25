@@ -65,8 +65,8 @@
 | scannet_dino_cv_ablation.md | YES | `output/radio_gs/reports/scannet_dino_cv_ablation.md` |
 | scannet_dino_cv_ablation.md public snapshot | YES | `paper/artifacts/scannet_dino_cv_ablation.md` |
 | scannet_prompt_calibration_ablation.md public snapshot | YES | `paper/artifacts/scannet_prompt_calibration_ablation.md` |
-| ScanNet RADIO-GS v67 direct point-query JSON public snapshot | YES | `paper/artifacts/scannet_pointcloud_radio_gs_v67_direct_point_query_results.json` |
-| ScanNet RADIO-GS contextual kNN JSON public snapshot | YES | `paper/artifacts/scannet_pointcloud_radio_gs_v67_contextual_knn_scene_mean_a05_results.json` |
+| ScanNet DINO-CV contextual kNN VALA8 JSON public snapshot | YES | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_results.json` |
+| ScanNet older v67 direct point-query JSON public snapshot | LEGACY | `paper/artifacts/scannet_pointcloud_radio_gs_v67_direct_point_query_results.json` |
 | lerf_direct_3d_selection.md | YES | `output/radio_gs/reports/lerf_direct_3d_selection.md` |
 | lerf_direct_3d_published_context.md | YES | `output/radio_gs/reports/lerf_direct_3d_published_context.md` |
 | vpr_protocol_card.md | YES | `output/radio_gs/reports/vpr_protocol_card.md` |
@@ -169,8 +169,9 @@
 - external baselines are official-source context rows unless reproduced under the local evaluator.
 - ScanNet remains direct-query transfer evidence rather than a full leaderboard claim.
 - The conservative ScanNet Gaussian-index row remains the protocol anchor, while
-  the label-free contextual kNN + scene-mean alpha=0.5 row is registered only as
-  a stronger support readout: split19/15/10 mIoU 0.3637/0.3708/0.4512.
+  the label-free contextual kNN + scene-mean alpha=0.45, k16/cand80 row is
+  registered as the stronger support readout: split19/15/10 mIoU
+  0.3722/0.3791/0.4591.
 - LERF direct 3D selection separates primitive scoring, GT-free RGB snap, and frozen official SAM3 box-prompt boundary readout in the freeze manifest.
 - SAM3 box direct-3D readout now has a fixed-global-threshold padding sweep; post-hoc best fixed and scene-locked selectors remain diagnostic.
 - Dr. Splat-inspired alpha/alpha-depth registration weighting was implemented and tested, but is not promoted because it lowers the fixed-protocol VPR result.

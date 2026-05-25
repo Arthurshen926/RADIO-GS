@@ -1,0 +1,27 @@
+base_config: ../../lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep.yaml
+
+exp_name: "lerf_waldo_kitchen_unified_quality_ft12_gpu2"
+output_dir: "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_unified_quality_ft12_gpu2"
+seed: 42
+
+epochs: 12
+batch_size: 2
+eval_every: 3
+save_every: 3
+log_every: 10
+warmstart_from: "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/latest.pth"
+
+hybrid_quality_head: true
+hybrid_visibility_head: true
+quality_loss_weight: 0.05
+visibility_loss_weight: 0.02
+visibility_target_binary: false
+visibility_alpha_threshold: 0.02
+
+hybrid_semantic_adaptor_use_depth_guidance: false
+direct_point_view_count_weighting: "clipped_log"
+direct_point_view_count_min_weight: 0.25
+direct_point_text_contrast_weight: 0.05
+direct_point_text_contrast_pair_weighting: "visibility"
+direct_point_render_consistency_weight: 0.05
+direct_point_render_consistency_mode: "cosine"

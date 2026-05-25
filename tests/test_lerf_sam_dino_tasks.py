@@ -13,6 +13,7 @@ from radio_gs.scripts.eval_lerf_sam_dino_tasks import (
     mask_centroid_token,
     pooled_token_similarity,
     propagate_mask_by_dense_matches,
+    refine_propagated_mask_with_feature_boundary,
     scaled_bounded_area,
     topk_mask_from_scores,
 )
@@ -188,6 +189,111 @@ def test_propagate_mask_by_dense_matches_can_contrast_source_background():
     assert plain_scores[0, 0] == 0.0
     assert contrast_scores[0, 0] < plain_scores[0, 0]
     assert contrast_scores[1, 0] > contrast_scores[0, 0]
+
+
+def test_propagate_mask_by_dense_matches_can_use_reliable_target_seed_prior():
+    source = torch.zeros(2, 2, 2)
+    target = torch.zeros(2, 3, 3)
+    source[:, 0, 0] = torch.tensor([1.0, 0.0])
+    source[:, 0, 1] = torch.tensor([1.0, 0.0])
+    source[:, 1, 0] = torch.tensor([0.0, 1.0])
+    source[:, 1, 1] = torch.tensor([0.0, 1.0])
+    target[:, 0, 0] = torch.tensor([1.0, 0.0])
+    target[:, 0, 1] = torch.tensor([1.0, 0.0])
+    target[:, 2, 1] = torch.tensor([0.9, 0.1])
+    target[:, 2, 2] = torch.tensor([0.9, 0.1])
+    source_mask = np.array([[1, 1], [0, 0]], dtype=np.uint8)
+
+    plain, _ = propagate_mask_by_dense_matches(
+        source,
+        target,
+        source_mask,
+        target_area=2,
+    )
+    seeded, seeded_scores = propagate_mask_by_dense_matches(
+        source,
+        target,
+        source_mask,
+        target_area=2,
+        target_seed_points=[(2, 1), (2, 2)],
+        seed_prior_weight=2.0,
+        seed_prior_radius=0,
+    )
+
+    expected_seeded = np.zeros((3, 3), dtype=np.uint8)
+    expected_seeded[2, 1:3] = 1
+    assert not np.array_equal(plain, expected_seeded)
+    assert np.array_equal(seeded, expected_seeded)
+    assert seeded_scores[2, 1] > seeded_scores[0, 0]
+
+
+def test_refine_propagated_mask_with_feature_boundary_sharpens_object_region():
+    target = torch.zeros(2, 4, 4)
+    target[0, :, :] = 1.0
+    target[:, 1:3, 1:3] = torch.tensor([0.0, 1.0]).view(2, 1, 1)
+    initial = np.zeros((4, 4), dtype=np.uint8)
+    initial[0:4, 0:4] = 1
+    score_map = np.zeros((4, 4), dtype=np.float32)
+    score_map[1:3, 1:3] = 1.0
+
+    refined, report = refine_propagated_mask_with_feature_boundary(
+        target,
+        initial,
+        score_map,
+        background_weight=1.0,
+        min_area_ratio=0.20,
+        max_area_ratio=0.25,
+        require_peak=True,
+    )
+
+    expected = np.zeros((4, 4), dtype=np.uint8)
+    expected[1:3, 1:3] = 1
+    assert report["accepted"] is True
+    assert np.array_equal(refined, expected)
+
+
+def test_refine_propagated_mask_with_feature_boundary_rejects_peak_dropping_result():
+    target = torch.zeros(2, 4, 4)
+    target[0, :, :] = 1.0
+    target[:, 3, 3] = torch.tensor([0.0, 1.0])
+    initial = np.zeros((4, 4), dtype=np.uint8)
+    initial[0:2, 0:2] = 1
+    score_map = np.zeros((4, 4), dtype=np.float32)
+    score_map[0, 0] = 1.0
+
+    refined, report = refine_propagated_mask_with_feature_boundary(
+        target,
+        initial,
+        score_map,
+        background_weight=1.0,
+        min_area_ratio=0.10,
+        max_area_ratio=0.25,
+        require_peak=True,
+    )
+
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "score_peak_outside_refined"
+    assert np.array_equal(refined, initial)
+
+
+def test_refine_propagated_mask_with_feature_boundary_preserves_area_by_default():
+    target = torch.zeros(2, 4, 4)
+    target[0, :, :] = 1.0
+    target[:, 1:3, 1:3] = torch.tensor([0.0, 1.0]).view(2, 1, 1)
+    initial = np.ones((4, 4), dtype=np.uint8)
+    score_map = np.zeros((4, 4), dtype=np.float32)
+    score_map[1:3, 1:3] = 1.0
+
+    refined, report = refine_propagated_mask_with_feature_boundary(
+        target,
+        initial,
+        score_map,
+        background_weight=1.0,
+        require_peak=True,
+    )
+
+    assert report["accepted"] is True
+    assert int(refined.sum()) == int(initial.sum())
 
 
 def test_pooled_token_similarity_supports_topk_mean_pooling():

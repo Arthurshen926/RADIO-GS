@@ -1,0 +1,69 @@
+{
+  "protocol": "LERF rendered-view peak-connected-component mask readout. Heatmap scoring/checkpoints/temperatures match the paper LERF rendered protocol; binary masks use fixed peak-relative threshold 0.60, then keep only the connected component containing the query heatmap peak. No GT masks are used by the readout.",
+  "scenes": [
+    "figurines",
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "source_root": "output/radio_gs/lerf2d_peak_component_probe_20260524",
+  "threshold": 0.6,
+  "mask_refinement": "peak_component",
+  "macro": {
+    "loc_acc": 0.8598309812650944,
+    "miou": 0.5707228535534502,
+    "teacher_loc_acc": 0.8065347012738993,
+    "teacher_miou": 0.45971352764427553
+  },
+  "weighted": {
+    "loc_acc": 0.8701923076923077,
+    "miou": 0.5824858448204883,
+    "teacher_loc_acc": 0.8269230769230769,
+    "teacher_miou": 0.48042748969868304,
+    "n": 208
+  },
+  "rows": [
+    {
+      "scene": "figurines",
+      "loc_acc": 0.8214285714285714,
+      "miou": 0.5133817113404693,
+      "n": 56,
+      "teacher_loc_acc": 0.75,
+      "teacher_miou": 0.403083321493576,
+      "source_json": "output/radio_gs/lerf2d_peak_component_probe_20260524/figurines/lerf_ovs_results.json"
+    },
+    {
+      "scene": "ramen",
+      "loc_acc": 0.9014084507042254,
+      "miou": 0.6249419017338527,
+      "n": 71,
+      "teacher_loc_acc": 0.9014084507042254,
+      "teacher_miou": 0.5241447755945039,
+      "source_json": "output/radio_gs/lerf2d_peak_component_probe_20260524/ramen/lerf_ovs_results.json"
+    },
+    {
+      "scene": "teatime",
+      "loc_acc": 0.8983050847457628,
+      "miou": 0.6177381956600875,
+      "n": 59,
+      "teacher_loc_acc": 0.847457627118644,
+      "teacher_miou": 0.5428702835058797,
+      "source_json": "output/radio_gs/lerf2d_peak_component_probe_20260524/teatime/lerf_ovs_results.json"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "loc_acc": 0.8181818181818182,
+      "miou": 0.5268296054793912,
+      "n": 22,
+      "teacher_loc_acc": 0.7272727272727273,
+      "teacher_miou": 0.36875572998314254,
+      "source_json": "output/radio_gs/lerf2d_peak_component_probe_20260524/waldo_kitchen/lerf_ovs_results.json"
+    }
+  ],
+  "baseline_reference": {
+    "source_json": "output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json",
+    "threshold_0p60_macro_loc_acc": 0.8711946176287307,
+    "threshold_0p60_macro_miou": 0.524327870166592,
+    "note": "The peak-component readout is a new mask-quality readout. It improves macro mIoU substantially under current rerun artifacts, while the historical threshold-sweep heatmap row keeps the highest LocAcc."
+  }
+}

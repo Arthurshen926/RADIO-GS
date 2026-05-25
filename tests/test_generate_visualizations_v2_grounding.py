@@ -6,8 +6,11 @@ import torch
 
 from radio_gs.scripts import generate_visualizations_v2 as viz
 from radio_gs.scripts.eval_lerf_grounding import (
+    build_sam3_prompt_initial_mask,
     compute_iou,
     compute_relevancy_heatmap,
+    heatmap_peak_in_shape,
+    keep_peak_connected_component,
     project_to_siglip2,
     refine_mask_with_rgb_edges,
     resolve_heatmap_threshold_ratio,
@@ -117,6 +120,48 @@ def test_eval_compatible_grounding_heatmaps_match_formal_scene_softmax():
     assert heatmaps[0, 0, 0].item() < 0.25
 
 
+def test_adaptive_sam3_prompt_initial_mask_keeps_raw_when_peak_loses_heatmap_mass():
+    heatmap = torch.zeros(8, 8)
+    heatmap[1:3, 1:3] = 0.95
+    heatmap[5:7, 5:7] = 0.90
+    heatmap[1, 1] = 1.0
+
+    mask = build_sam3_prompt_initial_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="fixed",
+        threshold_mean_std_k=0.0,
+        threshold_min_ratio=0.0,
+        threshold_max_ratio=1.0,
+        target_shape=(8, 8),
+        initial_refinement="adaptive_peak",
+    )
+
+    assert mask[1:3, 1:3].all()
+    assert mask[5:7, 5:7].all()
+
+
+def test_adaptive_sam3_prompt_initial_mask_uses_peak_when_distractor_has_low_support():
+    heatmap = torch.zeros(8, 8)
+    heatmap[1:4, 1:4] = 0.95
+    heatmap[1, 1] = 1.0
+    heatmap[6, 6] = 0.51
+
+    mask = build_sam3_prompt_initial_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="fixed",
+        threshold_mean_std_k=0.0,
+        threshold_min_ratio=0.0,
+        threshold_max_ratio=1.0,
+        target_shape=(8, 8),
+        initial_refinement="adaptive_peak",
+    )
+
+    assert mask[1:4, 1:4].all()
+    assert not bool(mask[6, 6])
+
+
 def test_project_to_siglip2_accepts_half_features_on_cpu():
     projection = torch.nn.Linear(1280, 3).cpu().float()
     features = torch.zeros(1, 1280, 1, 1, dtype=torch.float16)
@@ -170,6 +215,38 @@ def test_compute_iou_can_use_rgb_edge_refinement():
         mask_refinement_erode=3,
     )
 
+    assert refined_iou > plain_iou
+
+
+def test_keep_peak_connected_component_removes_disconnected_heatmap_false_positive():
+    mask = np.zeros((16, 16), dtype=np.uint8)
+    mask[2:6, 2:6] = 1
+    mask[10:15, 10:15] = 1
+
+    kept = keep_peak_connected_component(mask, (3, 3))
+
+    assert kept.sum() == 16
+    assert kept[2:6, 2:6].all()
+    assert kept[10:15, 10:15].sum() == 0
+
+
+def test_compute_iou_peak_component_readout_keeps_query_peak_region():
+    heatmap = torch.zeros(16, 16)
+    heatmap[2:6, 2:6] = 1.0
+    heatmap[10:15, 10:15] = 0.8
+    gt = np.zeros((16, 16), dtype=np.uint8)
+    gt[2:6, 2:6] = 1
+
+    plain_iou = compute_iou(heatmap, gt, threshold_ratio=0.5)
+    refined_iou = compute_iou(
+        heatmap,
+        gt,
+        threshold_ratio=0.5,
+        mask_refinement="peak_component",
+    )
+
+    assert heatmap_peak_in_shape(heatmap, gt.shape) == (2, 2)
+    assert refined_iou == 1.0
     assert refined_iou > plain_iou
 
 

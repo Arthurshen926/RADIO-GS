@@ -17,7 +17,7 @@ import sys
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -448,6 +448,9 @@ def propagate_mask_by_dense_matches(
     component_cleanup: str = "none",
     component_keep_count: int = 1,
     component_seed_points: Optional[Iterable[Tuple[int, int]]] = None,
+    target_seed_points: Optional[Iterable[Tuple[int, int]]] = None,
+    seed_prior_weight: float = 0.0,
+    seed_prior_radius: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Propagate a source mask to the target view by dense DINO-style matching."""
     if source_feature.ndim != 3 or target_feature.ndim != 3:
@@ -483,6 +486,18 @@ def propagate_mask_by_dense_matches(
             )
             score_flat = score_flat - float(background_contrast) * background_scores
     score_map = score_flat.reshape(tgt_h, tgt_w)
+    if target_seed_points is not None and float(seed_prior_weight) > 0.0:
+        seed_prior = torch.zeros((tgt_h, tgt_w), dtype=score_map.dtype, device=score_map.device)
+        radius = max(int(seed_prior_radius), 0)
+        for seed_y, seed_x in target_seed_points:
+            y = min(max(int(seed_y), 0), tgt_h - 1)
+            x = min(max(int(seed_x), 0), tgt_w - 1)
+            y0 = max(y - radius, 0)
+            y1 = min(y + radius + 1, tgt_h)
+            x0 = max(x - radius, 0)
+            x1 = min(x + radius + 1, tgt_w)
+            seed_prior[y0:y1, x0:x1] = 1.0
+        score_map = score_map + float(seed_prior_weight) * seed_prior
     raw_area = int(target_area if target_area is not None else mask.sum())
     area = scaled_bounded_area(
         source_area=raw_area,
@@ -500,6 +515,101 @@ def propagate_mask_by_dense_matches(
         seed_points=component_seed_points,
     )
     return pred, score_map.detach().cpu().numpy().astype(np.float32)
+
+
+def refine_propagated_mask_with_feature_boundary(
+    target_feature: torch.Tensor,
+    initial_mask: np.ndarray,
+    score_map: np.ndarray,
+    *,
+    background_weight: float = 0.5,
+    seed_topk_ratio: float = 0.25,
+    min_area_ratio: float = 0.0,
+    max_area_ratio: float = 0.0,
+    require_peak: bool = True,
+    component_cleanup: str = "peak",
+) -> Tuple[np.ndarray, Dict[str, float]]:
+    """Sharpen a propagated DINO mask using only target feature structure.
+
+    The refinement is GT-free: confident target tokens from the propagated
+    score map define a foreground prototype, the remaining tokens define a
+    background prototype, and the resulting prototype contrast is accepted only
+    when it preserves the propagated heatmap peak and stays within area bounds.
+    """
+    if target_feature.ndim != 3:
+        raise ValueError(f"Expected target_feature [C,H,W], got {tuple(target_feature.shape)}")
+    channels, height, width = target_feature.shape
+    initial = cv2.resize(
+        (np.asarray(initial_mask) > 0).astype(np.uint8),
+        (width, height),
+        interpolation=cv2.INTER_NEAREST,
+    ).astype(bool)
+    scores = np.asarray(score_map, dtype=np.float32)
+    if scores.shape != (height, width):
+        scores = cv2.resize(scores, (width, height), interpolation=cv2.INTER_LINEAR)
+    report: Dict[str, Any] = {
+        "accepted": False,
+        "fallback_reason": "empty_initial",
+        "initial_area": float(initial.sum()),
+        "refined_area": 0.0,
+    }
+    if not initial.any():
+        return initial.astype(np.uint8), report
+
+    valid_scores = scores[initial]
+    seed_count = max(1, int(round(valid_scores.size * float(seed_topk_ratio))))
+    seed_count = min(seed_count, valid_scores.size)
+    seed_threshold = float(np.partition(valid_scores, valid_scores.size - seed_count)[valid_scores.size - seed_count])
+    seed_mask = initial & (scores >= seed_threshold)
+    if not seed_mask.any():
+        peak_y, peak_x = np.unravel_index(int(np.nanargmax(scores)), scores.shape)
+        if initial[peak_y, peak_x]:
+            seed_mask[peak_y, peak_x] = True
+        else:
+            seed_mask = initial.copy()
+
+    feat = F.normalize(target_feature.float().reshape(channels, height * width), dim=0)
+    seed_flat = torch.as_tensor(seed_mask.reshape(-1), dtype=torch.bool, device=target_feature.device)
+    bg_flat = ~seed_flat
+    fg_proto = F.normalize(feat[:, seed_flat].mean(dim=1), dim=0)
+    contrast = torch.matmul(feat.transpose(0, 1), fg_proto)
+    if float(background_weight) > 0 and bool(bg_flat.any().item()):
+        bg_proto = F.normalize(feat[:, bg_flat].mean(dim=1), dim=0)
+        contrast = contrast - float(background_weight) * torch.matmul(feat.transpose(0, 1), bg_proto)
+    contrast_map = contrast.reshape(height, width)
+
+    min_area = int(round(height * width * float(min_area_ratio))) if float(min_area_ratio) > 0 else 1
+    max_area = int(round(height * width * float(max_area_ratio))) if float(max_area_ratio) > 0 else height * width
+    target_area = int(initial.sum())
+    target_area = max(target_area, min_area)
+    target_area = min(target_area, max(max_area, 1), height * width)
+    refined = topk_mask_from_scores(contrast_map, k=max(target_area, 1))
+    refined = keep_component_by_score(
+        refined,
+        contrast_map.detach().cpu().numpy().astype(np.float32),
+        mode=component_cleanup,
+        keep_count=1,
+    ).astype(bool)
+    report.update(
+        {
+            "accepted": True,
+            "fallback_reason": "accepted",
+            "seed_area": float(seed_mask.sum()),
+            "refined_area": float(refined.sum()),
+            "target_area": float(target_area),
+        }
+    )
+    if not refined.any():
+        report["accepted"] = False
+        report["fallback_reason"] = "empty_refined"
+        return initial.astype(np.uint8), report
+    if require_peak:
+        peak_y, peak_x = np.unravel_index(int(np.nanargmax(scores)), scores.shape)
+        if not bool(refined[peak_y, peak_x]):
+            report["accepted"] = False
+            report["fallback_reason"] = "score_peak_outside_refined"
+            return initial.astype(np.uint8), report
+    return refined.astype(np.uint8), report
 
 
 def feature_token_to_image_xy(
@@ -711,6 +821,14 @@ def evaluate_scene_tasks(
     dino_match_ransac_model: str = "none",
     dino_match_ransac_threshold: float = 1.5,
     dino_match_ransac_min_inliers: int = 4,
+    dino_propagation_seed_prior: bool = False,
+    dino_propagation_seed_weight: float = 0.0,
+    dino_propagation_seed_radius: int = 0,
+    dino_feature_boundary_refinement: bool = False,
+    dino_feature_boundary_background_weight: float = 0.5,
+    dino_feature_boundary_seed_topk_ratio: float = 0.25,
+    dino_feature_boundary_min_area_ratio: float = 0.0,
+    dino_feature_boundary_max_area_ratio: float = 0.0,
 ) -> Dict:
     frame_annotations, _, img_h, img_w = load_lerf_ovs_labels(label_dir, scene)
     frame_ids = sorted(frame_annotations)
@@ -894,7 +1012,26 @@ def evaluate_scene_tasks(
                 component_cleanup=dino_component_cleanup,
                 component_keep_count=dino_component_keep_count,
                 component_seed_points=[(int(match["tgt_y"]), int(match["tgt_x"])) for match in matches],
+                target_seed_points=[
+                    (int(match["tgt_y"]), int(match["tgt_x"])) for match in matches
+                ]
+                if dino_propagation_seed_prior
+                else None,
+                seed_prior_weight=dino_propagation_seed_weight if dino_propagation_seed_prior else 0.0,
+                seed_prior_radius=dino_propagation_seed_radius,
             )
+            if dino_feature_boundary_refinement:
+                propagated_mask, _ = refine_propagated_mask_with_feature_boundary(
+                    target_feature,
+                    propagated_mask,
+                    propagation_scores,
+                    background_weight=dino_feature_boundary_background_weight,
+                    seed_topk_ratio=dino_feature_boundary_seed_topk_ratio,
+                    min_area_ratio=dino_feature_boundary_min_area_ratio,
+                    max_area_ratio=dino_feature_boundary_max_area_ratio,
+                    require_peak=True,
+                    component_cleanup=dino_component_cleanup if dino_component_cleanup != "none" else "peak",
+                )
             propagation_heatmap = torch.from_numpy(propagation_scores)
             loc = localization_accuracy(
                 propagation_heatmap,
@@ -1016,6 +1153,14 @@ def main() -> None:
     parser.add_argument("--dino_match_ransac_model", default="none", choices=["none", "homography", "fundamental"], help="Optional GT-free RANSAC outlier filtering for DINO dense-match diagnostics")
     parser.add_argument("--dino_match_ransac_threshold", type=float, default=1.5, help="Feature-grid reprojection threshold for DINO RANSAC match filtering")
     parser.add_argument("--dino_match_ransac_min_inliers", type=int, default=4, help="Minimum inliers required to accept DINO RANSAC filtering")
+    parser.add_argument("--dino_propagation_seed_prior", action="store_true", help="Add cycle/RANSAC-filtered DINO target matches as a soft prior for mask propagation")
+    parser.add_argument("--dino_propagation_seed_weight", type=float, default=0.0, help="Score boost for target match seeds when --dino_propagation_seed_prior is enabled")
+    parser.add_argument("--dino_propagation_seed_radius", type=int, default=0, help="Feature-token radius around target match seeds for DINO propagation seed prior")
+    parser.add_argument("--dino_feature_boundary_refinement", action="store_true", help="Sharpen DINO propagated masks with a GT-free target-feature foreground/background boundary readout")
+    parser.add_argument("--dino_feature_boundary_background_weight", type=float, default=0.5)
+    parser.add_argument("--dino_feature_boundary_seed_topk_ratio", type=float, default=0.25)
+    parser.add_argument("--dino_feature_boundary_min_area_ratio", type=float, default=0.0)
+    parser.add_argument("--dino_feature_boundary_max_area_ratio", type=float, default=0.0)
     parser.add_argument("--gt_only", action="store_true")
     parser.add_argument("--gpu", type=int, default=0)
     args = parser.parse_args()
@@ -1099,6 +1244,14 @@ def main() -> None:
             dino_match_ransac_model=args.dino_match_ransac_model,
             dino_match_ransac_threshold=args.dino_match_ransac_threshold,
             dino_match_ransac_min_inliers=args.dino_match_ransac_min_inliers,
+            dino_propagation_seed_prior=args.dino_propagation_seed_prior,
+            dino_propagation_seed_weight=args.dino_propagation_seed_weight,
+            dino_propagation_seed_radius=args.dino_propagation_seed_radius,
+            dino_feature_boundary_refinement=args.dino_feature_boundary_refinement,
+            dino_feature_boundary_background_weight=args.dino_feature_boundary_background_weight,
+            dino_feature_boundary_seed_topk_ratio=args.dino_feature_boundary_seed_topk_ratio,
+            dino_feature_boundary_min_area_ratio=args.dino_feature_boundary_min_area_ratio,
+            dino_feature_boundary_max_area_ratio=args.dino_feature_boundary_max_area_ratio,
         )
         scene_reports[scene] = scene_report
         for task, modes in scene_report["sam3"].items():
@@ -1148,7 +1301,15 @@ def main() -> None:
                 f"area_scale={args.dino_area_scale:g}, component_cleanup={args.dino_component_cleanup}, "
                 f"component_keep_count={args.dino_component_keep_count}; "
                 f"dense_match_mutual={bool(args.dino_match_mutual)}, "
-                f"ransac_model={args.dino_match_ransac_model}."
+                f"ransac_model={args.dino_match_ransac_model}, "
+                f"propagation_seed_prior={bool(args.dino_propagation_seed_prior)}, "
+                f"seed_weight={args.dino_propagation_seed_weight:g}, "
+                f"seed_radius={args.dino_propagation_seed_radius}, "
+                f"feature_boundary_refinement={bool(args.dino_feature_boundary_refinement)}, "
+                f"boundary_bg_weight={args.dino_feature_boundary_background_weight:g}, "
+                f"boundary_seed_topk={args.dino_feature_boundary_seed_topk_ratio:g}, "
+                f"boundary_min_area={args.dino_feature_boundary_min_area_ratio:g}, "
+                f"boundary_max_area={args.dino_feature_boundary_max_area_ratio:g}."
             ),
             "gt_usage": "GT masks are used to form prompts/support masks and for final evaluation only.",
         },

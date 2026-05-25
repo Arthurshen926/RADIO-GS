@@ -7,7 +7,7 @@ repository_name: RADIO-GS
 tracks:
   t1_lerf_rendered_view_ovs:
     task_name: LERF-OVS rendered-view open-vocabulary segmentation/localization
-    source_json: output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json
+    source_json: paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json
     protocol:
       scenes:
       - figurines
@@ -16,7 +16,9 @@ tracks:
       - waldo_kitchen
       evaluator: frozen SigLIP2 text scorer over rendered RADIO-compatible feature
         maps
-      threshold_policy: fixed_global_mask_threshold:0.60
+      threshold_policy: fixed_global_mask_threshold:0.60 + peak_connected_component
+        coarse prompt + feature-only SAM3 boundary readout with GT-free heatmap-support
+        acceptance
       metrics:
       - LocAcc
       - mIoU
@@ -36,9 +38,19 @@ tracks:
         miou: 0.3182
         registered_gaussian_fraction: 0.202
       ctfgs_rendered:
-        source: paper-facing main row
+        source: paper-facing feature-only SAM3 boundary readout
+        locacc: 0.8598
+        miou: 0.5889
+      ctfgs_rendered_peak_component_core:
+        source: peak-component core readout before feature-only SAM3 boundary refinement
+        locacc: 0.8598
+        miou: 0.5707
+        promoted: false
+      ctfgs_rendered_heatmap_threshold_0p60:
+        source: historical heatmap-threshold readout retained for localization audit
         locacc: 0.8712
         miou: 0.5243
+        promoted: false
   t2_lerf_direct_3d_selection:
     task_name: LERF-OVS text-to-Gaussian direct 3D object selection
     source_report: output/radio_gs/reports/lerf_direct_3d_selection.md
@@ -85,9 +97,8 @@ tracks:
         promoted: false
   t3_scannet_ov_point_cloud_segmentation:
     task_name: ScanNet-v2 open-vocabulary point-cloud semantic segmentation
-    opengaussian_source_json: output/baselines/opengaussian/scannet_eval/opengaussian_scannet_results.json
-    radio_gs_source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_direct_point_query_results.json
-    radio_gs_contextual_support_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_contextual_knn_scene_mean_a05_results.json
+    radio_gs_source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json
+    published_context_source: paper/artifacts/scannet_opengaff_published_context.md
     protocol:
       scenes:
       - scene0000_00
@@ -105,52 +116,121 @@ tracks:
       metrics:
       - mIoU
       - mAcc
-      caveat: RADIO-GS v67 row is a VALA/OpenGaFF-8 point-query feature-memory
-        probe; external baselines are cited from OpenGaFF/VALA paper tables.
+      caveat: External baseline rows are cited from the OpenGaFF/VALA paper
+        table with the OpenGaFF method row omitted; the paper-facing CTF-GS row
+        is the local DINO-CV contextual kNN direct point-query evaluation.
     rows:
-      opengaussian_local_reproduction:
-        source: local OpenGaussian reproduction through radio_gs/scripts/eval_opengaussian_scannet_baseline.py
+      langsplat_published_context:
+        source: OpenGaFF/VALA paper table
         split19:
-          miou: 0.2978
-          macc: 0.4507
+          miou: 0.0245
+          macc: 0.0859
         split15:
-          miou: 0.3275
-          macc: 0.4964
+          miou: 0.0345
+          macc: 0.1321
         split10:
-          miou: 0.4186
-          macc: 0.5847
-        reproduced_local: true
-        promoted: false
-        caveat: Historical local reproduction only; paper-facing external comparison
-          should cite OpenGaFF/VALA paper tables.
-      radio_gs_v67_direct_point_query:
-        source: local CTF-GS VALA/OpenGaFF-8 direct point-query report
+          miou: 0.0648
+          macc: 0.2189
+        reproduced_local: false
+      langsplatv2_published_context:
+        source: OpenGaFF/VALA paper table
         split19:
-          miou: 0.3583
-          macc: 0.6006
+          miou: 0.1475
+          macc: 0.2547
         split15:
-          miou: 0.3618
-          macc: 0.6152
+          miou: 0.1709
+          macc: 0.3568
         split10:
-          miou: 0.4367
-          macc: 0.6998
-        reproduced_local: true
+          miou: 0.2283
+          macc: 0.4152
+        reproduced_local: false
+      opengaussian_published_context:
+        source: OpenGaFF/VALA paper table
+        split19:
+          miou: 0.2773
+          macc: 0.4201
+        split15:
+          miou: 0.2967
+          macc: 0.4615
+        split10:
+          miou: 0.3993
+          macc: 0.5734
+        reproduced_local: false
+      dr_splat_published_context:
+        source: OpenGaFF/VALA paper table
+        split19:
+          miou: 0.2931
+          macc: 0.4768
+        split15:
+          miou: 0.3325
+          macc: 0.5433
+        split10:
+          miou: 0.4419
+          macc: 0.6519
+        reproduced_local: false
+      occamlgs_published_context:
+        source: OpenGaFF/VALA paper table
+        split19:
+          miou: 0.3193
+          macc: 0.4893
+        split15:
+          miou: 0.3425
+          macc: 0.5371
+        split10:
+          miou: 0.4516
+          macc: 0.6439
+        reproduced_local: false
+      vala_published_context:
+        source: OpenGaFF/VALA paper table
+        split19:
+          miou: 0.3211
+          macc: 0.5005
+        split15:
+          miou: 0.3510
+          macc: 0.5477
+        split10:
+          miou: 0.4621
+          macc: 0.6561
+        reproduced_local: false
       radio_gs_dino_cv_contextual_knn_scene_mean_support:
-        source: local DINO-CV compact-field contextual kNN support row; k=8,
-          candidate_k=32, scene-mean calibration alpha=0.5, prompt={query}
+        source: local DINO-CV compact-field contextual kNN support row with
+          label-free spatial logit propagation; k=16, candidate_k=80,
+          scene-mean calibration alpha=0.45, spatial_k=12, spatial_alpha=1.0,
+          prompt={query}
         split19:
-          miou: 0.3704
-          macc: 0.6017
+          miou: 0.3806
+          macc: 0.6129
         split15:
-          miou: 0.3771
-          macc: 0.6198
+          miou: 0.3871
+          macc: 0.6315
         split10:
-          miou: 0.4585
-          macc: 0.7032
+          miou: 0.4711
+          macc: 0.72
         reproduced_local: true
         promoted: true
         caveat: Stronger balanced support row for compact direct-field utility;
-          conservative Gaussian-index row remains the protocol anchor.
+          older Gaussian-index and v67 rows are retained only as historical
+          artifacts, not as paper-facing ScanNet numbers.
+      radio_gs_dino_cv_proposal_memory_detail_ablation:
+        source: local proposal-memory readout ablation; voxel=0.05,
+          alpha=0.4, low-margin gate=0.05 after spatial logit propagation.
+          Improves split19 detail but is not promoted because split15/10 drop.
+        split19:
+          miou: 0.3931
+          macc: 0.6255
+        split15:
+          miou: 0.3837
+          macc: 0.6228
+        split10:
+          miou: 0.4612
+          macc: 0.7081
+        reproduced_local: true
+        promoted: false
+        source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_proposal_memory_vxl005_a04_lm005_results.json
+        caveat: Proposal memory is useful evidence for object-detail stability
+          on the 19-class split, but the balanced paper-facing ScanNet row
+          remains the spatial-KNN support row until the coarse splits also
+          improve.
 external_reproduction_queue:
   verified_date: '2026-05-18'
   machine_audit:

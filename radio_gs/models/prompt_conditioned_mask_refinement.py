@@ -321,3 +321,82 @@ def refine_mask_with_prompt_conditioned_sam3_head(
     )
     report["coarse_dilate"] = int(coarse_dilate)
     return refined, report
+
+
+def filter_refined_mask_by_heatmap_support(
+    initial_mask: np.ndarray,
+    refined_mask: np.ndarray,
+    heatmap: np.ndarray | torch.Tensor,
+    *,
+    min_mean_ratio: float = 0.0,
+    min_mass_ratio: float = 0.0,
+    require_peak_in_refined: bool = False,
+) -> Tuple[np.ndarray, Dict[str, Any]]:
+    """Reject SAM-style refinements that discard the query heatmap evidence.
+
+    This is a GT-free guardrail: the refined mask may sharpen boundaries, but it
+    should not move away from the CTF/RADIO query response that produced the
+    coarse prompt.
+    """
+    initial = np.asarray(initial_mask).astype(bool)
+    refined = np.asarray(refined_mask).astype(bool)
+    if initial.ndim != 2 or refined.ndim != 2:
+        raise ValueError(
+            f"Expected 2D masks, got initial={initial.shape}, refined={refined.shape}"
+        )
+    if refined.shape != initial.shape:
+        refined = resize_bool_mask(refined, initial.shape)
+
+    heat = heatmap.detach().float().cpu().numpy() if isinstance(heatmap, torch.Tensor) else np.asarray(heatmap)
+    if heat.ndim == 3:
+        heat = heat[0]
+    if heat.ndim != 2:
+        raise ValueError(f"Expected 2D heatmap, got {heat.shape}")
+    heat = heat.astype(np.float32)
+    if heat.shape != initial.shape:
+        heat = cv2.resize(
+            heat,
+            (initial.shape[1], initial.shape[0]),
+            interpolation=cv2.INTER_LINEAR,
+        )
+    heat = heat - float(np.nanmin(heat))
+    heat_max = float(np.nanmax(heat))
+    if heat_max > 1e-8:
+        heat = heat / heat_max
+
+    initial_mass = float(heat[initial].sum()) if initial.any() else 0.0
+    refined_mass = float(heat[refined].sum()) if refined.any() else 0.0
+    initial_mean = float(heat[initial].mean()) if initial.any() else 0.0
+    refined_mean = float(heat[refined].mean()) if refined.any() else 0.0
+    mass_ratio = refined_mass / max(initial_mass, 1e-8)
+    mean_ratio = refined_mean / max(initial_mean, 1e-8)
+    peak_y, peak_x = np.unravel_index(int(np.nanargmax(heat)), heat.shape)
+    peak_in_refined = bool(refined[peak_y, peak_x])
+
+    report: Dict[str, Any] = {
+        "accepted": True,
+        "fallback_reason": "accepted",
+        "heatmap_initial_mass": initial_mass,
+        "heatmap_refined_mass": refined_mass,
+        "heatmap_initial_mean": initial_mean,
+        "heatmap_refined_mean": refined_mean,
+        "heatmap_mass_ratio": float(mass_ratio),
+        "heatmap_mean_ratio": float(mean_ratio),
+        "heatmap_peak_in_refined": peak_in_refined,
+        "min_heatmap_mean_ratio": float(min_mean_ratio),
+        "min_heatmap_mass_ratio": float(min_mass_ratio),
+        "require_peak_in_refined": bool(require_peak_in_refined),
+    }
+    if require_peak_in_refined and not peak_in_refined:
+        report["accepted"] = False
+        report["fallback_reason"] = "heatmap_peak_outside_refined"
+        return initial.copy(), report
+    if float(min_mean_ratio) > 0 and mean_ratio < float(min_mean_ratio):
+        report["accepted"] = False
+        report["fallback_reason"] = "low_heatmap_mean_ratio"
+        return initial.copy(), report
+    if float(min_mass_ratio) > 0 and mass_ratio < float(min_mass_ratio):
+        report["accepted"] = False
+        report["fallback_reason"] = "low_heatmap_mass_ratio"
+        return initial.copy(), report
+    return refined.copy(), report

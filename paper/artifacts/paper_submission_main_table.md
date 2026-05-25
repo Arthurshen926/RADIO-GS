@@ -33,6 +33,6 @@ This table packages the current LERF-OVS open-vocabulary grounding comparison th
 | Method implementation | 85% | Training, evaluation, and visualization all exist. |
 | Main grounding results | 80% | LERF-OVS evidence is already strong and now provenance-backed. |
 | Published baseline coverage | 75% | Primary external rows now use exact official-source table values. |
-| Statistical confidence | 75% | The four-scene n=3 seed summary and 10-scene ScanNet ablation are complete. |
-| Cross-domain generalization | 70% | ScanNet v67 direct-query evidence and DINO cross-view ablation are complete. |
+| Statistical confidence | 75% | The four-scene n=3 seed summary and VALA8 ScanNet stability analysis are complete. |
+| Cross-domain generalization | 70% | ScanNet DINO-CV contextual kNN direct-query evidence is complete; older v67 rows are historical diagnostics only. |
 | Submission packaging | 85% | Main tables, provenance, and efficiency evidence are frozen; venue-template polish remains. |

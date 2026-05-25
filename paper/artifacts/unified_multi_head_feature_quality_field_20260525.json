@@ -1,0 +1,37 @@
+{
+  "artifact": "unified_multi_head_feature_quality_field_20260525",
+  "status": "implemented_pending_full_retrain",
+  "implemented": {
+    "hybrid_quality_head": true,
+    "hybrid_visibility_head": true,
+    "rendered_readout_aux": ["quality_logit", "visibility_logit"],
+    "direct_point_readout_aux": ["quality_logit", "visibility_logit"],
+    "quality_target": "detached RADIO-space student-teacher cosine agreement mapped to [0,1]",
+    "visibility_target": "rendered alpha visibility, optionally binarized",
+    "config_preset": "radio_gs/configs/unified_feature_quality_base.yaml"
+  },
+  "current_promoted_rows": {
+    "lerf_rendered_view_ovs": {
+      "locacc": 0.8598,
+      "miou": 0.5707,
+      "source": "paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json"
+    },
+    "lerf_direct_3d_selection": {
+      "miou": 0.5705,
+      "acc025": 0.6835,
+      "boundary_f": 0.6681,
+      "source": "paper/artifacts/lerf_sam3_box_global_threshold_sweep_20260517_geometry.json"
+    },
+    "scannet_vala8_point_query": {
+      "split19": {"miou": 0.3806, "macc": 0.6129},
+      "split15": {"miou": 0.3871, "macc": 0.6315},
+      "split10": {"miou": 0.4711, "macc": 0.72},
+      "source": "paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json"
+    },
+    "teacher_vs_ctfgs_2d": {
+      "selected_primary_wins": "5/6",
+      "source": "paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.json"
+    }
+  },
+  "promotion_rule": "Promote retrained rows only after the same frozen protocols improve or match the current promoted metrics without per-scene tuning."
+}

@@ -30,6 +30,10 @@ from radio_gs.config import load_config
 from radio_gs.models.hcd_codec import HCDCodec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
+from radio_gs.models.proposal_memory import (
+    build_voxel_proposal_labels,
+    propagate_logits_with_proposals,
+)
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 from radio_gs.scannet_constants import (
@@ -48,6 +52,8 @@ FEATURE_RGB_PROJECTION_SEED = 20260429
 QUERY_MODES = ("knn", "nearest", "gaussian_index")
 COMPACT_FEATURE_KEYS = ("features", "fused", "semantic", "geometry")
 LOGIT_CALIBRATION_MODES = ("none", "scene_mean")
+LOGIT_SMOOTHING_MODES = ("none", "spatial_knn")
+PROPOSAL_SMOOTHING_MODES = ("none", "voxel")
 CLASS_ALIAS_MODES = ("none", "scannet")
 OPACITY_FILTER_MODES = ("auto", "label_index", "query_top1", "query_weighted", "off")
 GAUSSIAN_INDEX_POSITION_MODES = ("gaussian_center", "label_point")
@@ -636,6 +642,208 @@ def _apply_logit_calibration(
     return logits - float(alpha) * bias
 
 
+def _build_spatial_knn_graph(
+    xyz: np.ndarray | torch.Tensor,
+    *,
+    k: int,
+    sigma: float = 0.0,
+) -> tuple[np.ndarray, np.ndarray, dict[str, float]]:
+    xyz_np = xyz.detach().float().cpu().numpy() if isinstance(xyz, torch.Tensor) else np.asarray(xyz)
+    xyz_np = np.asarray(xyz_np, dtype=np.float32)
+    if xyz_np.ndim != 2 or xyz_np.shape[1] != 3:
+        raise ValueError(f"Expected xyz [N,3], got {tuple(xyz_np.shape)}")
+    num_points = int(xyz_np.shape[0])
+    if num_points == 0 or k <= 0:
+        return (
+            np.empty((num_points, 0), dtype=np.int64),
+            np.empty((num_points, 0), dtype=np.float32),
+            {
+                "enabled": False,
+                "k": int(k),
+                "sigma": float(sigma),
+                "mean_neighbor_distance": 0.0,
+            },
+        )
+
+    try:
+        from scipy.spatial import cKDTree
+    except Exception as exc:  # pragma: no cover - environment dependent
+        raise RuntimeError("spatial_knn logit smoothing requires scipy") from exc
+
+    query_k = min(num_points, int(k) + 1)
+    tree = cKDTree(xyz_np)
+    try:
+        distances, indices = tree.query(xyz_np, k=query_k, workers=-1)
+    except TypeError:  # scipy<1.6
+        distances, indices = tree.query(xyz_np, k=query_k)
+    distances = np.asarray(distances, dtype=np.float32)
+    indices = np.asarray(indices, dtype=np.int64)
+    if distances.ndim == 1:
+        distances = distances[:, None]
+        indices = indices[:, None]
+    if query_k > 1:
+        distances = distances[:, 1:]
+        indices = indices[:, 1:]
+
+    if indices.shape[1] == 0:
+        weights = np.empty((num_points, 0), dtype=np.float32)
+    elif sigma > 0:
+        weights = np.exp(-0.5 * np.square(distances / float(sigma))).astype(np.float32)
+    else:
+        weights = (1.0 / np.maximum(distances, 1e-4)).astype(np.float32)
+    if weights.size:
+        weights /= np.maximum(weights.sum(axis=1, keepdims=True), 1e-12)
+    stats = {
+        "enabled": bool(indices.shape[1] > 0),
+        "k": int(k),
+        "sigma": float(sigma),
+        "mean_neighbor_distance": float(distances.mean()) if distances.size else 0.0,
+    }
+    return indices, weights, stats
+
+
+def _apply_spatial_knn_smoothing(
+    logits: torch.Tensor,
+    indices: np.ndarray,
+    weights: np.ndarray,
+    *,
+    alpha: float,
+    iterations: int,
+) -> torch.Tensor:
+    if logits.ndim != 2:
+        raise ValueError(f"Expected logits [N,C], got {tuple(logits.shape)}")
+    if indices.shape[0] != logits.shape[0] or weights.shape != indices.shape:
+        raise ValueError(
+            "spatial KNN graph must be aligned with logits: "
+            f"indices={indices.shape}, weights={weights.shape}, logits={tuple(logits.shape)}"
+        )
+    if indices.shape[1] == 0 or alpha <= 0.0 or iterations <= 0:
+        return logits
+    if not 0.0 <= float(alpha) <= 1.0:
+        raise ValueError("logit_smoothing_alpha must be in [0, 1]")
+
+    values = logits.detach().float().cpu().numpy().astype(np.float32, copy=True)
+    residual = 1.0 - float(alpha)
+    blend = float(alpha)
+    for _ in range(int(iterations)):
+        neigh = values[indices]
+        propagated = (neigh * weights[..., None]).sum(axis=1)
+        values = residual * values + blend * propagated
+    return torch.from_numpy(values).to(device=logits.device, dtype=logits.dtype)
+
+
+def _smooth_logits_spatial_knn(
+    logits: torch.Tensor,
+    xyz: np.ndarray | torch.Tensor,
+    *,
+    k: int,
+    alpha: float,
+    iterations: int = 1,
+    sigma: float = 0.0,
+    graph: tuple[np.ndarray, np.ndarray, dict[str, float]] | None = None,
+) -> tuple[torch.Tensor, dict[str, float]]:
+    """Propagate text logits over a local 3D graph without using labels.
+
+    This is a readout-time consistency prior for ScanNet direct point queries:
+    nearby points should have compatible language scores, but the original
+    point logits remain in the residual path so thin structures are not fully
+    washed out.
+    """
+    if logits.ndim != 2:
+        raise ValueError(f"Expected logits [N,C], got {tuple(logits.shape)}")
+    num_points = int(logits.shape[0])
+    if num_points == 0 or k <= 0 or alpha <= 0.0 or iterations <= 0:
+        return logits, {
+            "enabled": False,
+            "k": int(k),
+            "alpha": float(alpha),
+            "iterations": int(iterations),
+            "sigma": float(sigma),
+            "mean_neighbor_distance": 0.0,
+        }
+    if graph is None:
+        graph = _build_spatial_knn_graph(xyz, k=k, sigma=sigma)
+    indices, weights, graph_stats = graph
+    if indices.shape[0] != num_points:
+        raise ValueError(
+            f"spatial KNN graph has {indices.shape[0]} points, expected {num_points}"
+        )
+    smoothed = _apply_spatial_knn_smoothing(
+        logits,
+        indices,
+        weights,
+        alpha=alpha,
+        iterations=iterations,
+    )
+    stats = dict(graph_stats)
+    stats.update({
+        "enabled": bool(indices.shape[1] > 0),
+        "k": int(k),
+        "alpha": float(alpha),
+        "iterations": int(iterations),
+        "sigma": float(sigma),
+    })
+    return smoothed, stats
+
+
+def _build_voxel_proposal_labels_for_points(
+    xyz: np.ndarray | torch.Tensor,
+    *,
+    voxel_size: float,
+) -> np.ndarray:
+    xyz_tensor = xyz.detach().float().cpu() if isinstance(xyz, torch.Tensor) else torch.as_tensor(xyz, dtype=torch.float32)
+    labels = build_voxel_proposal_labels(xyz_tensor, voxel_size=voxel_size)
+    return labels.detach().cpu().numpy().astype(np.int64, copy=False)
+
+
+def _smooth_logits_voxel_proposals(
+    logits: torch.Tensor,
+    xyz: np.ndarray | torch.Tensor,
+    *,
+    voxel_size: float,
+    alpha: float,
+    min_count: int = 2,
+    gate: str = "all",
+    margin_threshold: float = 0.0,
+    confidence_threshold: float = 0.0,
+) -> tuple[torch.Tensor, dict[str, float | int | bool]]:
+    """Pool logits inside deterministic 3D voxel proposals and blend them back."""
+    if logits.ndim != 2:
+        raise ValueError(f"Expected logits [N,C], got {tuple(logits.shape)}")
+    if logits.shape[0] == 0 or alpha <= 0.0:
+        return logits, {
+            "enabled": False,
+            "mode": "voxel",
+            "voxel_size": float(voxel_size),
+            "alpha": float(alpha),
+            "min_count": int(min_count),
+            "gate": gate,
+            "margin_threshold": float(margin_threshold),
+            "confidence_threshold": float(confidence_threshold),
+            "num_proposals": 0,
+            "num_assigned": 0,
+        }
+    xyz_tensor = xyz.detach().float().cpu() if isinstance(xyz, torch.Tensor) else torch.as_tensor(xyz, dtype=torch.float32)
+    labels = build_voxel_proposal_labels(xyz_tensor, voxel_size=voxel_size).to(logits.device)
+    smoothed, stats = propagate_logits_with_proposals(
+        logits,
+        labels,
+        alpha=alpha,
+        min_count=min_count,
+        gate=gate,
+        margin_threshold=margin_threshold,
+        confidence_threshold=confidence_threshold,
+    )
+    stats = dict(stats)
+    stats.update(
+        {
+            "mode": "voxel",
+            "voxel_size": float(voxel_size),
+        }
+    )
+    return smoothed, stats
+
+
 def _empty_query_diagnostics() -> dict:
     return {
         "num_points": 0,
@@ -913,6 +1121,18 @@ def evaluate_scene(
     opacity_filter_mode: str = "auto",
     logit_calibration: str = "none",
     logit_calibration_alpha: float = 1.0,
+    logit_smoothing: str = "none",
+    logit_smoothing_k: int = 8,
+    logit_smoothing_alpha: float = 0.0,
+    logit_smoothing_iterations: int = 1,
+    logit_smoothing_sigma: float = 0.0,
+    proposal_smoothing: str = "none",
+    proposal_voxel_size: float = 0.08,
+    proposal_smoothing_alpha: float = 0.0,
+    proposal_min_count: int = 2,
+    proposal_smoothing_gate: str = "all",
+    proposal_margin_threshold: float = 0.0,
+    proposal_confidence_threshold: float = 0.0,
 ) -> dict:
     if query_mode not in QUERY_MODES:
         raise ValueError(f"query_mode must be one of: {', '.join(QUERY_MODES)}")
@@ -921,6 +1141,14 @@ def evaluate_scene(
     if logit_calibration not in LOGIT_CALIBRATION_MODES:
         raise ValueError(
             f"logit_calibration must be one of: {', '.join(LOGIT_CALIBRATION_MODES)}"
+        )
+    if logit_smoothing not in LOGIT_SMOOTHING_MODES:
+        raise ValueError(
+            f"logit_smoothing must be one of: {', '.join(LOGIT_SMOOTHING_MODES)}"
+        )
+    if proposal_smoothing not in PROPOSAL_SMOOTHING_MODES:
+        raise ValueError(
+            f"proposal_smoothing must be one of: {', '.join(PROPOSAL_SMOOTHING_MODES)}"
         )
     if opacity_filter_mode not in OPACITY_FILTER_MODES:
         raise ValueError(
@@ -1031,6 +1259,42 @@ def evaluate_scene(
     language_feature_parts: list[np.ndarray] = []
     logit_bias_by_split: dict[str, torch.Tensor | None] = {
         split: None for split in split_ids
+    }
+    needs_logits_postprocess = (
+        (logit_smoothing != "none" and logit_smoothing_alpha > 0.0)
+        or (proposal_smoothing != "none" and proposal_smoothing_alpha > 0.0)
+    )
+    smooth_logits_parts: dict[str, list[torch.Tensor]] | None = (
+        {split: [] for split in split_ids}
+        if needs_logits_postprocess
+        else None
+    )
+    logit_smoothing_by_split: dict[str, dict[str, float]] = {
+        split: {
+            "enabled": False,
+            "mode": logit_smoothing,
+            "k": int(logit_smoothing_k),
+            "alpha": float(logit_smoothing_alpha),
+            "iterations": int(logit_smoothing_iterations),
+            "sigma": float(logit_smoothing_sigma),
+            "mean_neighbor_distance": 0.0,
+        }
+        for split in split_ids
+    }
+    proposal_smoothing_by_split: dict[str, dict[str, float | int | bool]] = {
+        split: {
+            "enabled": False,
+            "mode": proposal_smoothing,
+            "voxel_size": float(proposal_voxel_size),
+            "alpha": float(proposal_smoothing_alpha),
+            "min_count": int(proposal_min_count),
+            "gate": proposal_smoothing_gate,
+            "margin_threshold": float(proposal_margin_threshold),
+            "confidence_threshold": float(proposal_confidence_threshold),
+            "num_proposals": 0,
+            "num_assigned": 0,
+        }
+        for split in split_ids
     }
 
     if logit_calibration == "scene_mean":
@@ -1220,17 +1484,71 @@ def evaluate_scene(
                     logit_bias_by_split.get(split),
                     alpha=logit_calibration_alpha,
                 )
-                pred_idx = logits.argmax(dim=-1).detach().cpu().numpy()
-                raw_ids = np.asarray(ids, dtype=np.int32)
-                pred_ids = raw_ids[pred_idx]
-                pred_by_split[split][start:end] = pred_ids
-                _update_split_diagnostics(
-                    diagnostics_by_split[split],
+                if smooth_logits_parts is not None:
+                    smooth_logits_parts[split].append(logits.detach().float().cpu())
+                else:
+                    pred_idx = logits.argmax(dim=-1).detach().cpu().numpy()
+                    raw_ids = np.asarray(ids, dtype=np.int32)
+                    pred_ids = raw_ids[pred_idx]
+                    pred_by_split[split][start:end] = pred_ids
+                    _update_split_diagnostics(
+                        diagnostics_by_split[split],
+                        logits,
+                        labels_np[start:end],
+                        pred_ids,
+                        save_logits_npz=save_logits_npz,
+                    )
+
+    if smooth_logits_parts is not None:
+        smoothing_graph = None
+        if logit_smoothing == "spatial_knn":
+            smoothing_graph = _build_spatial_knn_graph(
+                xyz_np,
+                k=logit_smoothing_k,
+                sigma=logit_smoothing_sigma,
+            )
+        for split, ids in split_ids.items():
+            logits = torch.cat(smooth_logits_parts[split], dim=0)
+            if logit_smoothing == "spatial_knn":
+                logits, smoothing_stats = _smooth_logits_spatial_knn(
                     logits,
-                    labels_np[start:end],
-                    pred_ids,
-                    save_logits_npz=save_logits_npz,
+                    xyz_np,
+                    k=logit_smoothing_k,
+                    alpha=logit_smoothing_alpha,
+                    iterations=logit_smoothing_iterations,
+                    sigma=logit_smoothing_sigma,
+                    graph=smoothing_graph,
                 )
+            else:  # pragma: no cover - guarded above
+                smoothing_stats = logit_smoothing_by_split[split]
+            if logit_smoothing != "none":
+                smoothing_stats["mode"] = logit_smoothing
+                logit_smoothing_by_split[split] = smoothing_stats
+            if proposal_smoothing == "voxel" and proposal_smoothing_alpha > 0.0:
+                logits, proposal_stats = _smooth_logits_voxel_proposals(
+                    logits,
+                    xyz_np,
+                    voxel_size=proposal_voxel_size,
+                    alpha=proposal_smoothing_alpha,
+                    min_count=proposal_min_count,
+                    gate=proposal_smoothing_gate,
+                    margin_threshold=proposal_margin_threshold,
+                    confidence_threshold=proposal_confidence_threshold,
+                )
+                proposal_smoothing_by_split[split] = proposal_stats
+            elif proposal_smoothing != "none":  # pragma: no cover - guarded above
+                raise ValueError(f"Unsupported proposal_smoothing: {proposal_smoothing}")
+            pred_idx = logits.argmax(dim=-1).detach().cpu().numpy()
+            raw_ids = np.asarray(ids, dtype=np.int32)
+            pred_ids = raw_ids[pred_idx]
+            pred_by_split[split][:] = pred_ids
+            _update_split_diagnostics(
+                diagnostics_by_split[split],
+                logits,
+                labels_np,
+                pred_ids,
+                save_logits_npz=save_logits_npz,
+            )
 
     scene_results: dict[str, dict] = {}
     for split, pred_labels in pred_by_split.items():
@@ -1321,6 +1639,8 @@ def evaluate_scene(
                 for split, bias in logit_bias_by_split.items()
             },
         },
+        "logit_smoothing": logit_smoothing_by_split,
+        "proposal_smoothing": proposal_smoothing_by_split,
         "opacity_filter": opacity_filter,
         "query_diagnostics": _finalize_query_diagnostics(query_diagnostics),
         "language_feature_rgb_ply": str(feature_rgb_ply) if feature_rgb_ply is not None else None,
@@ -1413,6 +1733,87 @@ def _add_query_mode_args(parser: argparse.ArgumentParser) -> None:
         type=float,
         default=1.0,
         help="Scale factor for --logit_calibration scene_mean",
+    )
+    parser.add_argument(
+        "--logit_smoothing",
+        choices=LOGIT_SMOOTHING_MODES,
+        default="none",
+        help=(
+            "Optional label-free point-graph logit propagation. spatial_knn "
+            "averages text logits over local 3D neighbours before argmax."
+        ),
+    )
+    parser.add_argument(
+        "--logit_smoothing_k",
+        type=int,
+        default=8,
+        help="Neighbour count for --logit_smoothing spatial_knn",
+    )
+    parser.add_argument(
+        "--logit_smoothing_alpha",
+        type=float,
+        default=0.0,
+        help="Residual blend for spatial logit smoothing; 0 disables smoothing",
+    )
+    parser.add_argument(
+        "--logit_smoothing_iterations",
+        type=int,
+        default=1,
+        help="Number of spatial logit propagation iterations",
+    )
+    parser.add_argument(
+        "--logit_smoothing_sigma",
+        type=float,
+        default=0.0,
+        help="Gaussian distance sigma for smoothing; <=0 uses inverse-distance weights",
+    )
+    parser.add_argument(
+        "--proposal_smoothing",
+        choices=PROPOSAL_SMOOTHING_MODES,
+        default="none",
+        help=(
+            "Optional label-free object/proposal readout. voxel pools logits "
+            "inside deterministic 3D voxel proposals before argmax."
+        ),
+    )
+    parser.add_argument(
+        "--proposal_voxel_size",
+        type=float,
+        default=0.08,
+        help="Voxel size in scene units for --proposal_smoothing voxel",
+    )
+    parser.add_argument(
+        "--proposal_smoothing_alpha",
+        type=float,
+        default=0.0,
+        help="Residual blend for proposal-pooled logits; 0 disables proposal readout",
+    )
+    parser.add_argument(
+        "--proposal_min_count",
+        type=int,
+        default=2,
+        help="Minimum points per proposal before proposal smoothing is applied",
+    )
+    parser.add_argument(
+        "--proposal_smoothing_gate",
+        choices=["all", "low_margin", "low_confidence", "low_margin_or_low_confidence"],
+        default="all",
+        help=(
+            "Apply proposal smoothing to all rows, low-margin rows, "
+            "low-confidence rows, or either low-margin/low-confidence rows"
+        ),
+    )
+    parser.add_argument(
+        "--proposal_margin_threshold",
+        type=float,
+        default=0.0,
+        help="Top1-top2 logit margin threshold for --proposal_smoothing_gate low_margin",
+    )
+    parser.add_argument(
+        "--proposal_confidence_threshold",
+        type=float,
+        default=0.0,
+        help="Softmax top1 confidence threshold for low-confidence proposal smoothing gates",
     )
     parser.add_argument(
         "--class_aliases",
@@ -1582,6 +1983,27 @@ def main() -> None:
         )
     )
     print(
+        f"  Smoothing:   {args.logit_smoothing}"
+        + (
+            f" (k={args.logit_smoothing_k}, alpha={args.logit_smoothing_alpha:g}, "
+            f"iters={args.logit_smoothing_iterations}, sigma={args.logit_smoothing_sigma:g})"
+            if args.logit_smoothing != "none"
+            else ""
+        )
+    )
+    print(
+        f"  Proposal:    {args.proposal_smoothing}"
+        + (
+            f" (voxel={args.proposal_voxel_size:g}, "
+            f"alpha={args.proposal_smoothing_alpha:g}, "
+            f"min_count={args.proposal_min_count}, "
+            f"gate={args.proposal_smoothing_gate}, "
+            f"margin={args.proposal_margin_threshold:g})"
+            if args.proposal_smoothing != "none"
+            else ""
+        )
+    )
+    print(
         "  Projection:  "
         + (
             (
@@ -1629,6 +2051,18 @@ def main() -> None:
             opacity_filter_mode=args.opacity_filter_mode,
             logit_calibration=args.logit_calibration,
             logit_calibration_alpha=args.logit_calibration_alpha,
+            logit_smoothing=args.logit_smoothing,
+            logit_smoothing_k=args.logit_smoothing_k,
+            logit_smoothing_alpha=args.logit_smoothing_alpha,
+            logit_smoothing_iterations=args.logit_smoothing_iterations,
+            logit_smoothing_sigma=args.logit_smoothing_sigma,
+            proposal_smoothing=args.proposal_smoothing,
+            proposal_voxel_size=args.proposal_voxel_size,
+            proposal_smoothing_alpha=args.proposal_smoothing_alpha,
+            proposal_min_count=args.proposal_min_count,
+            proposal_smoothing_gate=args.proposal_smoothing_gate,
+            proposal_margin_threshold=args.proposal_margin_threshold,
+            proposal_confidence_threshold=args.proposal_confidence_threshold,
         )
         all_results[scene] = result
         for split in split_names:
@@ -1652,6 +2086,15 @@ def main() -> None:
         "prompt_templates": prompt_templates,
         "class_aliases": args.class_aliases,
         "gaussian_index_position_mode": args.gaussian_index_position_mode,
+        "proposal_smoothing": {
+            "mode": args.proposal_smoothing,
+            "voxel_size": float(args.proposal_voxel_size),
+            "alpha": float(args.proposal_smoothing_alpha),
+            "min_count": int(args.proposal_min_count),
+            "gate": args.proposal_smoothing_gate,
+            "margin_threshold": float(args.proposal_margin_threshold),
+            "confidence_threshold": float(args.proposal_confidence_threshold),
+        },
         "macro": macro,
         "scenes": all_results,
     }

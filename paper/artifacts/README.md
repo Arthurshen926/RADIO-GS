@@ -30,6 +30,9 @@ sha256sum -c paper/artifacts/checksums.txt
   rendered-view threshold sweep and main CTF-GS row source.
 - `lerf_rendered_grounding_paper_ckpt_threshold_sweep.md`: markdown summary
   for the same threshold sweep.
+- `lerf_rendered_grounding_peak_component_20260524.{md,json}`:
+  GT-free peak-connected-component rendered-mask readout promoted for mask
+  mIoU/boundary quality.
 - `lerf_rendered_grounding_adaptive_threshold_diagnostic.{md,json}`:
   diagnostic adaptive-threshold row.
 - `lerf_rendered_grounding_boundary_calibration_report.{md,json}`:
@@ -39,6 +42,15 @@ sha256sum -c paper/artifacts/checksums.txt
   explicit 1280-D memory, and full CTF-GS controlled evidence.
 - `controlled_evidence_table.md`: markdown summary for the same controlled
   evidence.
+- `teacher_vs_ctfgs_2d_usability_20260525.{md,json}`: consolidated 2D
+  teacher-vs-rendered CTF-GS feature-usability evidence across SigLIP2 text
+  grounding and frozen SAM3/DINOv3 task probes. The report supports selected
+  downstream improvements and records DINO caveats where the teacher remains
+  stronger.
+- `unified_multi_head_feature_quality_field_20260525.{md,json}`: method-level
+  implementation note for the explicit quality/visibility field readouts,
+  training targets, and current promoted rows before full retraining with the
+  new heads.
 - `lerf_nearest_view_cache_baseline.json`: nearest-view RADIO cache baseline.
 - `lerf_nearest_view_cache_baseline.md`: markdown summary for the cache
   baseline.
@@ -81,6 +93,12 @@ sha256sum -c paper/artifacts/checksums.txt
   SAM3-box sweep before the geometry-map rerun.
 - `lerf_direct_3d_published_context.md`: published/context rows that are not
   promoted as same-evaluator SOTA claims.
+- `lerf_direct3d_proposal_memory_ablation_20260524.{md,json}`:
+  proposal-memory score smoothing audit. The branch is retained as an ablation
+  because it did not beat the strict pad16 SAM3-box direct-3D row.
+- `lerf_direct3d_sam3_training_view_proposal_registration_20260525.{md,json}`:
+  official SAM3 training-view object-proposal registration audit. It is
+  implemented but not promoted because the four-scene macro mIoU drops.
 - `lerf_direct_3d_debug_audit.md`: direct-3D implementation/debug audit.
 - `lerf_query_breakdown.{md,json}`: per-query direct-3D diagnostics with
   object-weighted aggregates separated from the paper-facing scene-mean
@@ -100,14 +118,22 @@ sha256sum -c paper/artifacts/checksums.txt
 
 ## T3: ScanNet Point-Cloud Probe
 
-- `opengaussian_scannet_results.json`: local OpenGaussian ScanNet reproduction.
-- `scannet_pointcloud_radio_gs_v67_direct_point_query_results.json`: RADIO-GS
-  v67 conservative direct point-query row.
-- `scannet_pointcloud_radio_gs_v67_contextual_knn_scene_mean_a05_results.json`:
-  contextual kNN + scene-mean support row.
-- `scannet_dino_cv_ablation.md`: ScanNet DINO cross-view ablation.
-- `scannet_prompt_calibration_ablation.md`: ScanNet prompt calibration
-  ablation.
+- `scannet_opengaff_published_context.md`: paper-facing ScanNet comparison
+  table. External baseline rows are copied from the OpenGaFF/VALA paper table
+  with the OpenGaFF method row omitted.
+- `scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.{md,json}`:
+  promoted CTF-GS VALA/OpenGaFF-8 row with contextual kNN, scene-mean
+  calibration, and one-step spatial logit propagation.
+- `scannet_pointcloud_radio_gs_vala8_dino_cv_proposal_memory_vxl005_a04_lm005_results.{md,json}`:
+  proposal-memory readout ablation. It improves split19 detail metrics
+  (0.3931/0.6255) but is not promoted because split15/split10 decrease.
+- `scannet_contextual_knn12_alpha_sweep_20260524.md`: label-free calibration
+  sweep that promotes the k16/cand80 alpha=0.45 direct point-query readout.
+- `scannet_pointcloud_radio_gs_vala8_direct_point_query_results.{md,json}` and
+  older `v67` files: historical diagnostics only; do not use them as
+  paper-facing ScanNet numbers.
+- `scannet_dino_cv_ablation.md` and `scannet_prompt_calibration_ablation.md`:
+  ScanNet ablation records kept outside the compact main table.
 
 ## Baseline Reproduction
 

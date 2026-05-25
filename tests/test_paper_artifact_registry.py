@@ -76,6 +76,18 @@ def test_manifest_registers_nearest_view_cache_baseline(monkeypatch, tmp_path):
     assert tables["build_lerf_per_gaussian_1280d_baseline.py"]["path"].endswith(
         "radio_gs/scripts/build_lerf_per_gaussian_1280d_baseline.py"
     )
+    assert tables["teacher_vs_ctfgs_2d_usability_20260525.md"]["path"].endswith(
+        "paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md"
+    )
+    assert tables["teacher_vs_ctfgs_2d_usability_20260525.json"]["path"].endswith(
+        "paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.json"
+    )
+    assert tables["paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex"][
+        "path"
+    ].endswith("paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex")
+    assert tables["build_teacher_vs_ctfgs_2d_usability_report.py"][
+        "path"
+    ].endswith("radio_gs/scripts/build_teacher_vs_ctfgs_2d_usability_report.py")
     assert tables["alpha_depth_boundary_alignment_report.md"]["path"].endswith(
         "output/radio_gs/reports/alpha_depth_boundary_alignment_report.md"
     )

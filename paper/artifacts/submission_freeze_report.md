@@ -6,8 +6,8 @@ This generated report is the current paper-facing source of truth for the conser
 
 | Paper claim | Current status | Primary artifact | Paper use |
 |---|---|---|---|
-| LERF main result | Frozen | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` | Main open-vocabulary table |
-| ScanNet fair cross-domain result | Frozen | `output/scannet_pointcloud_eval/*_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` | Cross-domain table |
+| LERF main result | Current promoted | `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json` | Main open-vocabulary table |
+| ScanNet fair cross-domain result | Current promoted | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` | Cross-domain table |
 | Efficiency/profile evidence | Current eval profiles frozen | `output/radio_gs/profiles/freeze_*_20260502` | Runtime and memory table |
 | Qualitative figure shortlist | Frozen overlay candidates selected | `output/radio_gs/reports/submission_freeze_figure_shortlist.md` | Main qualitative figure |
 | External baseline comparison | Official-source provenance closed | `output/radio_gs/reports/baseline_source_verification.md` | Main comparison table with protocol caveat |
@@ -15,18 +15,18 @@ This generated report is the current paper-facing source of truth for the conser
 
 ## LERF-OVS
 
-- Protocol: rendered-feature readout from `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json`.
-- Mask readout: `threshold 0.60`.
-- Macro LocAcc: `0.8712`
-- Macro mIoU: `0.5243`
-- Weighted mIoU: `0.5397`
+- Protocol: rendered-feature readout from `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json`.
+- Mask readout: fixed global threshold `0.60` plus peak connected component.
+- Macro LocAcc: `0.8598`
+- Macro mIoU: `0.5707`
+- Historical heatmap-only readout: LocAcc `0.8712`, mIoU `0.5243`.
 
 | Scene | LocAcc | mIoU | Temp | Source summary |
 |---|---:|---:|---:|---|
-| figurines | 0.8214 | 0.4244 | 50.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
-| ramen | 0.9014 | 0.6201 | 40.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
-| teatime | 0.8983 | 0.5760 | 25.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
-| waldo_kitchen | 0.8636 | 0.4769 | 25.0 | `output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json` |
+| figurines | 0.8214 | 0.5134 | 50.0 | `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json` |
+| ramen | 0.9014 | 0.6249 | 40.0 | `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json` |
+| teatime | 0.8983 | 0.6177 | 25.0 | `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json` |
+| waldo_kitchen | 0.8182 | 0.5268 | 25.0 | `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json` |
 
 ## LERF Direct 3D Object Selection
 
@@ -89,23 +89,21 @@ This generated report is the current paper-facing source of truth for the conser
 
 ## ScanNet
 
-- Protocol: v67 teacher-balanced direct point query, `gaussian_index`, `label_point`, `label_index` opacity.
-- Scenes found: `10`
-- Macro mIoU: `19: 0.3538 / 15: 0.3573 / 10: 0.4293`
-- Macro mAcc: `19: 0.6076 / 15: 0.6203 / 10: 0.7051`
+- Protocol: VALA/OpenGaFF ScanNet-8 direct point query, DINO-CV contextual kNN16/candidate80, scene-mean calibration alpha 0.45, spatial logit smoothing k12/a1.
+- Scenes found: `8`
+- Macro mIoU: `19: 0.3806 / 15: 0.3871 / 10: 0.4711`
+- Macro mAcc: `19: 0.6129 / 15: 0.6315 / 10: 0.7200`
 
 | Scene | mIoU19 | mIoU15 | mIoU10 | Source JSON |
 |---|---:|---:|---:|---|
-| scene0000_00 | 0.2939 | 0.2739 | 0.3065 | `output/scannet_pointcloud_eval/scene0000_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0062_00 | 0.3794 | 0.3794 | 0.5266 | `output/scannet_pointcloud_eval/scene0062_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0070_00 | 0.2297 | 0.2405 | 0.3238 | `output/scannet_pointcloud_eval/scene0070_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0097_00 | 0.4533 | 0.4311 | 0.4851 | `output/scannet_pointcloud_eval/scene0097_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0140_00 | 0.3194 | 0.3671 | 0.3888 | `output/scannet_pointcloud_eval/scene0140_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0200_00 | 0.4335 | 0.4335 | 0.5132 | `output/scannet_pointcloud_eval/scene0200_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0347_00 | 0.5938 | 0.5754 | 0.7067 | `output/scannet_pointcloud_eval/scene0347_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0400_00 | 0.3299 | 0.3299 | 0.3908 | `output/scannet_pointcloud_eval/scene0400_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0590_00 | 0.2664 | 0.2963 | 0.3643 | `output/scannet_pointcloud_eval/scene0590_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
-| scene0645_00 | 0.2381 | 0.2458 | 0.2875 | `output/scannet_pointcloud_eval/scene0645_00_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` |
+| scene0000_00 | 0.3165 | 0.2965 | 0.3591 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0062_00 | 0.4080 | 0.4080 | 0.5504 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0070_00 | 0.2192 | 0.2400 | 0.3758 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0097_00 | 0.4661 | 0.4421 | 0.4933 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0140_00 | 0.3550 | 0.4076 | 0.4369 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0347_00 | 0.5939 | 0.5603 | 0.7097 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0400_00 | 0.3988 | 0.3988 | 0.4326 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
+| scene0590_00 | 0.2875 | 0.3432 | 0.4107 | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
 
 ## Profile Evidence
 
@@ -117,7 +115,7 @@ This generated report is the current paper-facing source of truth for the conser
 ## Warnings
 
 - External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.
-- ScanNet label-supervised or GT-label-balanced runs are diagnostic only and excluded from this fair v67 summary.
+- ScanNet label-supervised, GT-label-balanced, old v67, and non-VALA8 runs are diagnostic only and excluded from this paper-facing VALA/OpenGaFF-8 summary.
 - LERF direct 3D object selection is protocol-aligned; direct primitive scoring, RGB-snap cleanup, and official SAM3 box boundary readout are reported as separate readouts.
 - Direct-3D readout `direct field + official SAM3 box, pad16 scene-locked diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.
 - Direct-3D readout `direct field + official SAM3 box, pad0 legacy diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.

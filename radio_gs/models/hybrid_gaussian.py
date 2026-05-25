@@ -390,6 +390,8 @@ class DecoupledFusionHead(nn.Module):
         semantic_adaptor_use_geometry_guidance: bool = True,
         semantic_adaptor_use_depth_guidance: bool = False,
         semantic_adaptor_residual: bool = True,
+        use_quality_head: bool = False,
+        use_visibility_head: bool = False,
     ):
         super().__init__()
         in_dim = fine_dim + coarse_dim
@@ -427,6 +429,32 @@ class DecoupledFusionHead(nn.Module):
             nn.GELU(),
             nn.Conv2d(hidden_dim, output_dim, 1),
         )
+        self.quality_head = (
+            nn.Sequential(
+                nn.Conv2d(output_dim * 2 + 2, hidden_dim, 1),
+                nn.GELU(),
+                nn.Conv2d(hidden_dim, max(hidden_dim // 2, 32), 1),
+                nn.GELU(),
+                nn.Conv2d(max(hidden_dim // 2, 32), 1, 1),
+            )
+            if use_quality_head
+            else None
+        )
+        self.visibility_head = (
+            nn.Sequential(
+                nn.Conv2d(output_dim * 2 + 2, hidden_dim, 1),
+                nn.GELU(),
+                nn.Conv2d(hidden_dim, max(hidden_dim // 2, 32), 1),
+                nn.GELU(),
+                nn.Conv2d(max(hidden_dim // 2, 32), 1, 1),
+            )
+            if use_visibility_head
+            else None
+        )
+        for head in (self.quality_head, self.visibility_head):
+            if head is not None:
+                nn.init.normal_(head[-1].weight, mean=0.0, std=1e-3)
+                nn.init.zeros_(head[-1].bias)
         self.semantic_adaptor = (
             self.SemanticFilterAdaptor(
                 feat_dim=output_dim,
@@ -472,12 +500,21 @@ class DecoupledFusionHead(nn.Module):
 
         if return_aux:
             result = {
+                "features": fused,
                 "fused": fused,
                 "geometry": geometry_feat,
                 "semantic": semantic_feat,
                 "geometry_gate": geom_gate,
                 "semantic_gate": sem_gate,
             }
+            quality_input = torch.cat(
+                [geometry_feat, semantic_feat, geom_gate, sem_gate],
+                dim=1,
+            )
+            if self.quality_head is not None:
+                result["quality_logit"] = self.quality_head(quality_input)
+            if self.visibility_head is not None:
+                result["visibility_logit"] = self.visibility_head(quality_input)
             result.update(adaptor_aux)
             return result
         return fused
@@ -584,6 +621,8 @@ class HybridFeatureGaussian(nn.Module):
         semantic_adaptor_use_geometry_guidance: bool = True,
         semantic_adaptor_use_depth_guidance: bool = False,
         semantic_adaptor_residual: bool = True,
+        use_quality_head: bool = False,
+        use_visibility_head: bool = False,
     ):
         super().__init__()
         self._latent_dim = latent_dim
@@ -639,6 +678,8 @@ class HybridFeatureGaussian(nn.Module):
                 semantic_adaptor_use_geometry_guidance=semantic_adaptor_use_geometry_guidance,
                 semantic_adaptor_use_depth_guidance=semantic_adaptor_use_depth_guidance,
                 semantic_adaptor_residual=semantic_adaptor_residual,
+                use_quality_head=use_quality_head,
+                use_visibility_head=use_visibility_head,
             )
         else:
             self.fusion_head = FusionHead(fine_dim, coarse_dim, fusion_hidden_dim, output_dim)

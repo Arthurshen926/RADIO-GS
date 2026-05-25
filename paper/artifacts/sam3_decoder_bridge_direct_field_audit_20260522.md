@@ -72,13 +72,15 @@ The paper-facing ScanNet results cover the requested eight scenes:
 `scene0000_00`, `scene0062_00`, `scene0070_00`, `scene0097_00`,
 `scene0140_00`, `scene0347_00`, `scene0400_00`, `scene0590_00`.
 
-Current local macro results:
+Current local macro results. Only the DINO-CV contextual kNN row is
+paper-facing; the earlier Gaussian-index and non-DINO contextual rows are
+legacy diagnostics:
 
 | Row | Split 19 mIoU/mAcc | Split 15 mIoU/mAcc | Split 10 mIoU/mAcc |
 |---|---:|---:|---:|
-| Gaussian-index direct point-query | 0.3583 / 0.6006 | 0.3618 / 0.6152 | 0.4367 / 0.6998 |
-| Contextual kNN, scene-mean alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 |
-| DINO-CV support row | 0.3704 / 0.6159 | 0.3718 / 0.6268 | 0.4390 / 0.7020 |
+| Gaussian-index direct point-query (legacy) | 0.3583 / 0.6006 | 0.3618 / 0.6152 | 0.4367 / 0.6998 |
+| Contextual kNN, scene-mean alpha=0.5 (legacy) | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 |
+| DINO-CV contextual kNN, scene-mean alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 |
 
 Protocol hardening added:
 
@@ -94,4 +96,3 @@ Fresh verification:
 final_rows registry ok
 paper claims ok
 ```
-

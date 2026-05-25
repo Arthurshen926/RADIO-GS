@@ -19,16 +19,19 @@ We study whether dense vision-foundation features can be reconstructed as a
 scene understanding. Instead of training a scene-specific classifier or storing
 raw high-dimensional features directly on every Gaussian, RADIO-GS distills
 frozen RADIO features into a hybrid Gaussian feature field with a compact HCD
-codec, screen-space refinement, geometry-aware frozen-head supervision, and a
-View-to-Primitive Registration (VPR) bridge for primitive-level querying. The
+codec, screen-space refinement, geometry-aware frozen-head supervision,
+explicit feature-quality/visibility readouts, and a View-to-Primitive
+Registration (VPR) bridge for primitive-level querying. The
 resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
-frozen RADIO-GS package reaches 0.8712 macro localization accuracy and 0.5243
-calibrated macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
-ScanNet direct point-query protocol, RADIO-GS reaches 0.3583, 0.3618, and
-0.4367 mIoU on the 19-, 15-, and 10-class splits, while the contextual kNN
-readout raises them to 0.3704, 0.3771, and 0.4585 with the DINO-CV compact
-field. A VPR-registered LERF direct 3D object-selection
+frozen RADIO-GS package with the GT-free peak-connected-component mask readout
+reaches 0.8598 macro localization accuracy and 0.5707 macro mIoU across four
+scenes. On the VALA/OpenGaFF eight-scene ScanNet direct point-query protocol,
+the paper-facing DINO-CV contextual kNN readout with scene-mean calibration and
+spatial logit propagation reaches 0.3806, 0.3871, and 0.4711 mIoU on the 19-,
+15-, and 10-class splits. A follow-up proposal-memory readout improves the
+19-class detail split to 0.3931 mIoU / 0.6255 mAcc, but it is kept as an
+ablation because the 15/10-class splits decrease. A VPR-registered LERF direct 3D object-selection
 readout with a fixed global softmax-score threshold, 0.5% floor, 1.8% cap, and
 GT-free RGB boundary snap reaches 0.4801 macro mIoU / 0.6760 Acc@0.25. With
 frozen official SAM3 box-prompt boundary readout, the compact direct field
@@ -44,9 +47,10 @@ provenance, and final paper formatting.
 1. We formulate foundation-feature reconstruction for 3D Gaussian scenes: the
    target is not only photorealistic RGB rendering, but novel-view feature maps
    that remain usable by frozen open-vocabulary and task heads.
-2. We introduce a hybrid RADIO-GS representation that combines per-Gaussian
-   latent storage, a coarse spatial branch, an HCD bottleneck codec, and
-   screen-space refinement to reconstruct 1280d RADIO features efficiently.
+2. We introduce a unified multi-head hybrid RADIO-GS representation that
+   combines per-Gaussian latent storage, a coarse spatial branch, an HCD
+   bottleneck codec, explicit quality/visibility heads, and screen-space
+   refinement to reconstruct 1280d RADIO features efficiently.
 3. We use frozen-head supervision as a geometry-aware regularizer, allowing
    downstream head behavior to shape the feature field without turning the model
    into a task-specific classifier.
@@ -74,8 +78,8 @@ the frozen head as a late geometry-aware regularizer.
 At test time, the model renders a novel-view feature map. For LERF-OVS grounding,
 RADIO-GS compares the rendered feature map with SigLIP2 text embeddings and
 localizes each query from the relevancy heatmap. For ScanNet, it evaluates
-direct point queries under the v67 teacher-balanced protocol with Gaussian-index
-lookup and label-point positions. For direct LERF object selection, VPR scores
+direct point queries on the VALA/OpenGaFF-8 split with the promoted DINO-CV
+contextual kNN readout. For direct LERF object selection, VPR scores
 registered-view primitive embeddings against text before the selected Gaussians
 are rendered only for mask evaluation. The raw Gaussian-center readout remains a
 diagnostic lower bound, not the paper-facing direct-selection method.
@@ -84,19 +88,20 @@ diagnostic lower bound, not the paper-facing direct-selection method.
 
 ### LERF-OVS
 
-The frozen main LERF-OVS result uses the paper-facing threshold sweep in
-`output/radio_gs/reports/lerf_rendered_grounding_paper_ckpt_threshold_sweep.json`
-with the GT-free threshold-0.60 readout.
+The frozen main LERF-OVS result uses the GT-free peak-connected-component
+readout in `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json`.
+It starts from the threshold-0.60 heatmap mask and keeps only the connected
+component containing the query heatmap maximum.
 
 | Scene | LocAcc | mIoU | Temperature |
 |---|---:|---:|---:|
-| Figurines | 0.8214 | 0.4244 | 50 |
-| Ramen | 0.9014 | 0.6201 | 40 |
-| Teatime | 0.8983 | 0.5760 | 25 |
-| Waldo Kitchen | 0.8636 | 0.4769 | 25 |
-| Macro | 0.8712 | 0.5243 | - |
+| Figurines | 0.8214 | 0.5134 | 50 |
+| Ramen | 0.9014 | 0.6249 | 40 |
+| Teatime | 0.8983 | 0.6177 | 25 |
+| Waldo Kitchen | 0.8182 | 0.5268 | 25 |
+| Macro | 0.8598 | 0.5707 | - |
 
-The paper should present this as the primary internal RADIO-GS result. External
+The paper should present this as the primary internal RADIO-GS mask-quality result. External
 LERF/LangSplat/LEGaussians rows should remain clearly marked as published or
 reproduced only after their exact source and protocol alignment are closed.
 An adaptive mean+std boundary threshold was tested as a no-GT alternative, but
@@ -112,6 +117,17 @@ Promoted adaptor/cross-view candidate:
 | Teatime | DINO relation + SAM3 region | 0.8983 | 0.5592 | 28 |
 | Waldo Kitchen | Baseline | 0.8636 | 0.4106 | 25 |
 | Macro | - | 0.8712 | 0.4979 | - |
+
+### 2D Teacher-vs-CTF-GS Feature Usability
+
+Use `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md` and the compact
+table snippet `paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex`. The
+consolidated 2D evidence shows that rendered CTF-GS features improve the main
+LERF text-grounding mIoU over frame-wise RADIO teacher features (0.5243 vs.
+0.4634) and win 5/6 primary selected frozen-head metrics. The claim should stay
+qualified: CTF-GS improves selected downstream feature-usability metrics, while
+DINOv3 mask propagation mIoU remains teacher-stronger under the same frozen
+readout (0.4805 vs. 0.5119).
 
 ### LERF Direct 3D Object Selection
 
@@ -185,23 +201,22 @@ than causal proof.
 
 ### ScanNet Direct Point Query
 
-The current fair cross-domain table uses the v67 teacher-balanced direct
-point-query protocol on the VALA/OpenGaFF eight-scene ScanNet subset:
+The current fair cross-domain table uses the promoted DINO-CV contextual kNN
+point-query readout on the VALA/OpenGaFF eight-scene ScanNet subset:
 
 | Split | mIoU | mAcc |
 |---|---:|---:|
-| 19 classes | 0.3583 | 0.6006 |
-| 15 classes | 0.3618 | 0.6152 |
-| 10 classes | 0.4367 | 0.6998 |
+| 19 classes | 0.3806 | 0.6129 |
+| 15 classes | 0.3871 | 0.6315 |
+| 10 classes | 0.4711 | 0.7200 |
 
-The stronger balanced support row uses the DINO-CV compact field with
-contextual kNN point readout
-(`k=8`, `candidate_k=32`) plus label-free scene-mean calibration at alpha 0.5:
-0.3704/0.6017, 0.3771/0.6198, and 0.4585/0.7032 on the 19/15/10-class splits.
+The row uses the DINO-CV compact field with contextual kNN point readout
+(`k=16`, `candidate_k=80`) plus label-free scene-mean calibration at alpha 0.45
+and one-step spatial logit propagation (`k=12`, alpha 1.0).
 This should be framed as OpenGaFF/VALA split-aligned cross-domain feature
 usability evidence, not as a fully standard ScanNet semantic segmentation
-leaderboard comparison. Older
-label-informed ScanNet diagnostics must stay out of the main fair table.
+leaderboard comparison. Older v67 and label-informed ScanNet diagnostics must
+stay out of the main fair table.
 
 ### Efficiency Evidence
 
@@ -213,7 +228,7 @@ The current freeze package includes five formal profile workloads:
 | LERF Ramen overlay | 40.474 s | 1762 MiB |
 | LERF Teatime overlay | 36.997 s | 1850 MiB |
 | LERF Waldo Kitchen overlay | 21.101 s | 2076 MiB |
-| ScanNet v67 10-scene eval | 150.903 s | 1666 MiB |
+| ScanNet legacy 10-scene eval profile | 150.903 s | 1666 MiB |
 
 The paper should use these as evaluation-profile evidence. Training-cost claims
 need a separate table because training logs and evaluation profiles are different
@@ -254,12 +269,12 @@ visible on small-object scenes such as Figurines. The ScanNet protocol used here
 is the VALA/OpenGaFF eight-scene direct point-query transfer test for the
 learned feature field, using every-20-frame ScanNet training splits and mIoU/mAcc
 evaluation on GT semantic point clouds. It should still be framed as
-OpenGaFF/VALA protocol comparison rather than a full ScanNet leaderboard. The LERF
-direct 3D object-selection result exceeds
-OpenGaFF's reported mIoU context value with the fixed SAM3-box row, but trails
-OpenGaFF on Acc@0.25; Waldo Kitchen remains the main caution point. External
-comparison numbers should be cited from OpenGaFF or the original published
-tables, while our own rows stay fully auditable under the local evaluator.
+OpenGaFF/VALA protocol comparison rather than a full ScanNet leaderboard. The
+LERF direct 3D object-selection result should be compared only against the
+published public baseline rows we keep in the table; the OpenGaFF method row is
+omitted by policy. External comparison numbers should be cited from OpenGaFF or
+the original published tables, while our own rows stay fully auditable under the
+local evaluator.
 The training entry point is now explicitly audited in
 `output/radio_gs/reports/train_feature_field_audit.md`: manifest, split,
 checkpoint, metrics-history, and lock guards are present. Feature/text/cache

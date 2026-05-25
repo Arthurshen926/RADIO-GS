@@ -1,0 +1,257 @@
+{
+  "text_grounding_rows": [
+    {
+      "method": "Frame-wise RADIO teacher",
+      "loc_acc": 0.7985,
+      "miou": 0.4634,
+      "delta_loc_acc": 0.0,
+      "delta_miou": 0.0,
+      "source": "paper/radio_gs_draft.tex teacher-vs-rendered table",
+      "note": ""
+    },
+    {
+      "method": "Nearest-view RADIO cache",
+      "loc_acc": 0.2722,
+      "miou": 0.1545,
+      "delta_loc_acc": -0.5263,
+      "delta_miou": -0.30889999999999995,
+      "source": "lerf_nearest_view_cache_baseline.json",
+      "note": "unwarped nearest cached teacher frame; target frame excluded"
+    },
+    {
+      "method": "Per-Gaussian 1280-D RADIO memory",
+      "loc_acc": 0.5642,
+      "miou": 0.3182,
+      "delta_loc_acc": -0.23429999999999995,
+      "delta_miou": -0.1452,
+      "source": "lerf_per_gaussian_1280d_baseline.json",
+      "note": "registered fp16 RADIO teacher features attached to Gaussian primitives"
+    },
+    {
+      "method": "Full CTF-GS",
+      "loc_acc": 0.8712,
+      "miou": 0.5243,
+      "delta_loc_acc": 0.07269999999999999,
+      "delta_miou": 0.06090000000000001,
+      "source": "submission freeze manifest",
+      "note": "hybrid + HCD + refiner + FDH warm-start"
+    }
+  ],
+  "frozen_head_rows": [
+    {
+      "task": "SAM3 point prompt",
+      "primary_metric": "mIoU",
+      "teacher_primary": 0.3699577284181184,
+      "rendered_primary": 0.4169234361695647,
+      "delta_primary": 0.04696570775144626,
+      "secondary_metric": "LocAcc",
+      "teacher_secondary": 1.0,
+      "rendered_secondary": 1.0,
+      "delta_secondary": 0.0,
+      "n": 208,
+      "winner": "rendered"
+    },
+    {
+      "task": "SAM3 box prompt",
+      "primary_metric": "mIoU",
+      "teacher_primary": 0.6559515350873139,
+      "rendered_primary": 0.6638246448361674,
+      "delta_primary": 0.00787310974885358,
+      "secondary_metric": "LocAcc",
+      "teacher_secondary": 0.8701923076923077,
+      "rendered_secondary": 0.8221153846153846,
+      "delta_secondary": -0.04807692307692313,
+      "n": 208,
+      "winner": "rendered"
+    },
+    {
+      "task": "SAM3 mask propagation",
+      "primary_metric": "mIoU",
+      "teacher_primary": 0.3583351155873905,
+      "rendered_primary": 0.3756087108092492,
+      "delta_primary": 0.017273595221858673,
+      "secondary_metric": "LocAcc",
+      "teacher_secondary": 0.7872340425531915,
+      "rendered_secondary": 0.6666666666666666,
+      "delta_secondary": -0.12056737588652489,
+      "n": 141,
+      "winner": "rendered"
+    },
+    {
+      "task": "DINOv3 dense matching",
+      "primary_metric": "Mean score",
+      "teacher_primary": 0.8546752594953365,
+      "rendered_primary": 0.9047674793777749,
+      "delta_primary": 0.050092219882438394,
+      "secondary_metric": "HitRate",
+      "teacher_secondary": 0.5722599418040737,
+      "rendered_secondary": 0.539282250242483,
+      "delta_secondary": -0.032977691561590694,
+      "n": 3093,
+      "winner": "rendered"
+    },
+    {
+      "task": "DINOv3 mask propagation",
+      "primary_metric": "mIoU",
+      "teacher_primary": 0.5119243596355025,
+      "rendered_primary": 0.48053451352895904,
+      "delta_primary": -0.031389846106543495,
+      "secondary_metric": "LocAcc",
+      "teacher_secondary": 0.7659574468085106,
+      "rendered_secondary": 0.7943262411347518,
+      "delta_secondary": 0.028368794326241176,
+      "n": 141,
+      "winner": "teacher"
+    }
+  ],
+  "diagnostic_rows": {
+    "dino_homography_ransac": [
+      {
+        "task": "SAM3 point prompt",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.3699577284181184,
+        "rendered_primary": 0.4169234361695647,
+        "delta_primary": 0.04696570775144626,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 1.0,
+        "rendered_secondary": 1.0,
+        "delta_secondary": 0.0,
+        "n": 208,
+        "winner": "rendered",
+        "source_name": "formal_v8_mutual_homography_ransac_all_20260514"
+      },
+      {
+        "task": "SAM3 box prompt",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.6559515350873139,
+        "rendered_primary": 0.6638246448361674,
+        "delta_primary": 0.00787310974885358,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.8701923076923077,
+        "rendered_secondary": 0.8221153846153846,
+        "delta_secondary": -0.04807692307692313,
+        "n": 208,
+        "winner": "rendered",
+        "source_name": "formal_v8_mutual_homography_ransac_all_20260514"
+      },
+      {
+        "task": "SAM3 mask propagation",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.3583351155873905,
+        "rendered_primary": 0.3756087108092492,
+        "delta_primary": 0.017273595221858673,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.7872340425531915,
+        "rendered_secondary": 0.6666666666666666,
+        "delta_secondary": -0.12056737588652489,
+        "n": 141,
+        "winner": "rendered",
+        "source_name": "formal_v8_mutual_homography_ransac_all_20260514"
+      },
+      {
+        "task": "DINOv3 dense matching",
+        "primary_metric": "Mean score",
+        "teacher_primary": 0.8853764137147004,
+        "rendered_primary": 0.927717561409528,
+        "delta_primary": 0.04234114769482755,
+        "secondary_metric": "HitRate",
+        "teacher_secondary": 0.6796200345423143,
+        "rendered_secondary": 0.6444906444906445,
+        "delta_secondary": -0.03512939005166982,
+        "n": 962,
+        "winner": "rendered",
+        "source_name": "formal_v8_mutual_homography_ransac_all_20260514"
+      },
+      {
+        "task": "DINOv3 mask propagation",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.4805706241231169,
+        "rendered_primary": 0.4455568338359372,
+        "delta_primary": -0.035013790287179714,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.7801418439716312,
+        "rendered_secondary": 0.7730496453900709,
+        "delta_secondary": -0.007092198581560294,
+        "n": 141,
+        "winner": "teacher",
+        "source_name": "formal_v8_mutual_homography_ransac_all_20260514"
+      }
+    ],
+    "prototype_adaptor": [
+      {
+        "task": "SAM3 prototype segmentation",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.07573163906627622,
+        "rendered_primary": 0.056357942938678886,
+        "delta_primary": -0.019373696127597338,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.8404255319148937,
+        "rendered_secondary": 0.6648936170212766,
+        "delta_secondary": -0.17553191489361708,
+        "n": 188,
+        "winner": "teacher",
+        "source_name": "lerf_adaptor_downstream_mainline"
+      },
+      {
+        "task": "DINOv3 source-target matching",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.1032381571934964,
+        "rendered_primary": 0.10192385636357429,
+        "delta_primary": -0.0013143008299221076,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.5957446808510638,
+        "rendered_secondary": 0.5035460992907801,
+        "delta_secondary": -0.09219858156028371,
+        "n": 141,
+        "winner": "teacher",
+        "source_name": "lerf_adaptor_downstream_mainline"
+      },
+      {
+        "task": "DINOv3 prototype segmentation",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.09448950201380961,
+        "rendered_primary": 0.09367354701505413,
+        "delta_primary": -0.0008159549987554748,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.6542553191489362,
+        "rendered_secondary": 0.6276595744680851,
+        "delta_secondary": -0.02659574468085113,
+        "n": 188,
+        "winner": "teacher",
+        "source_name": "lerf_adaptor_downstream_mainline"
+      },
+      {
+        "task": "SAM3 source-target matching",
+        "primary_metric": "mIoU",
+        "teacher_primary": 0.09528953342642937,
+        "rendered_primary": 0.06870959276535275,
+        "delta_primary": -0.02657994066107662,
+        "secondary_metric": "LocAcc",
+        "teacher_secondary": 0.7872340425531915,
+        "rendered_secondary": 0.7092198581560284,
+        "delta_secondary": -0.07801418439716312,
+        "n": 141,
+        "winner": "teacher",
+        "source_name": "lerf_adaptor_downstream_mainline"
+      }
+    ]
+  },
+  "summary": {
+    "primary_rendered_wins": 5,
+    "primary_total": 6,
+    "universal_superiority": false,
+    "caveats": [
+      "SAM3 box prompt LocAcc remains teacher-stronger (0.8221 vs 0.8702).",
+      "SAM3 mask propagation LocAcc remains teacher-stronger (0.6667 vs 0.7872).",
+      "DINOv3 dense matching HitRate remains teacher-stronger (0.5393 vs 0.5723).",
+      "DINOv3 mask propagation mIoU remains teacher-stronger (0.4805 vs 0.5119)."
+    ],
+    "claim_sentence": "CTF-GS rendered features improve selected downstream feature-usability metrics over frame-wise RADIO teacher features, while DINOv3 caveats remain under the same frozen readout."
+  },
+  "sources": {
+    "controlled_evidence": "/root/RADIO-GS/paper/artifacts/controlled_evidence_table.json",
+    "sam_dino_formal": "/root/RADIO-GS/output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_aggregate.json",
+    "dino_homography_ransac": "/root/RADIO-GS/output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_aggregate.json",
+    "prototype_adaptor": "/root/RADIO-GS/output/lerf_adaptor_downstream/mainline/lerf_adaptor_downstream_aggregate.json"
+  }
+}

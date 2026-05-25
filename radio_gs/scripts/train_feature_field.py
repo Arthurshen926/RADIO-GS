@@ -85,6 +85,10 @@ from radio_gs.losses.text_heatmap_distill_loss import (
 )
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.featsharp_3d import FeatSharp3D
+from radio_gs.models.feature_quality import (
+    cosine_feature_quality_target,
+    visibility_target_from_alpha,
+)
 from radio_gs.models.foundation_cache import (
     FoundationCache,
     compute_foundation_cache_supervision_loss,
@@ -123,6 +127,40 @@ from radio_gs.training.feature_training_utils import (
     sample_multiview_radio_targets,
     select_visible_gaussian_indices,
 )
+
+
+def set_quality_visibility_heads_only_trainable(
+    model: nn.Module,
+    *,
+    extra_modules: Optional[List[nn.Module]] = None,
+) -> int:
+    """Freeze a feature field and leave only reliability heads trainable."""
+    for param in model.parameters():
+        param.requires_grad = False
+    for module in extra_modules or []:
+        if module is None:
+            continue
+        for param in module.parameters():
+            param.requires_grad = False
+
+    trainable = 0
+    fusion_head = getattr(model, "fusion_head", None)
+    for head_name in ("quality_head", "visibility_head"):
+        head = getattr(fusion_head, head_name, None) if fusion_head is not None else None
+        if head is None:
+            continue
+        for param in head.parameters():
+            param.requires_grad = True
+            trainable += int(param.numel())
+
+    if trainable <= 0:
+        raise ValueError(
+            "quality_visibility_heads_only requires hybrid_quality_head and/or "
+            "hybrid_visibility_head to be enabled"
+        )
+    return trainable
+
+
 from radio_gs.training.tensor_cache_io import load_training_tensor_cache
 
 try:
@@ -263,6 +301,14 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.hybrid_decoupled_heads = getattr(config, "hybrid_decoupled_heads", False)
         self.hybrid_semantic_adaptor_reg_weight = getattr(
             config, "hybrid_semantic_adaptor_reg_weight", 0.0
+        )
+        self.quality_loss_weight = float(getattr(config, "quality_loss_weight", 0.0))
+        self.visibility_loss_weight = float(getattr(config, "visibility_loss_weight", 0.0))
+        self.visibility_target_binary = bool(
+            getattr(config, "visibility_target_binary", False)
+        )
+        self.visibility_alpha_threshold = float(
+            getattr(config, "visibility_alpha_threshold", 0.02)
         )
 
         # Enable SH training if requested
@@ -1170,6 +1216,29 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     f"from {getattr(config, 'grounding_text_embeddings', '')}"
                 )
 
+        self.quality_visibility_heads_only = bool(
+            getattr(config, "quality_visibility_heads_only", False)
+        )
+        if self.quality_visibility_heads_only:
+            extra_modules: List[nn.Module] = [self.codec, self.sharpener]
+            for module in (
+                getattr(self, "refiner", None),
+                getattr(self, "depth_head", None),
+                getattr(self, "seg_head", None),
+                getattr(self, "point_summary_adapter", None),
+                getattr(self, "foundation_cache_projectors", None),
+            ):
+                if module is not None:
+                    extra_modules.append(module)
+            trainable_reliability_params = set_quality_visibility_heads_only_trainable(
+                self.model,
+                extra_modules=extra_modules,
+            )
+            self._log(
+                "Quality/visibility heads-only mode: froze feature field and "
+                f"left {trainable_reliability_params:,} reliability-head params trainable"
+            )
+
         # Feature norm regularization weight
         self.feat_norm_weight = getattr(config, "feat_norm_weight", 0.0)
 
@@ -1295,6 +1364,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 semantic_adaptor_residual=getattr(
                     config, "hybrid_semantic_adaptor_residual", True
                 ),
+                use_quality_head=getattr(config, "hybrid_quality_head", False),
+                use_visibility_head=getattr(config, "hybrid_visibility_head", False),
             )
         else:
             raise ValueError(f"Unknown architecture: {arch}")
@@ -1822,6 +1893,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "boundary": 0.0,
             "sem_aux": 0.0,
             "sem_adaptor_reg": 0.0,
+            "quality": 0.0,
+            "visibility": 0.0,
             "rgb": 0.0,
             "depth_gt": 0.0,
             "depth_geom": 0.0,
@@ -2144,6 +2217,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 l_geom_edge = torch.tensor(0.0, device=self.device)
                 l_semantic_aux = torch.tensor(0.0, device=self.device)
                 l_semantic_adaptor_reg = torch.tensor(0.0, device=self.device)
+                l_quality = torch.tensor(0.0, device=self.device)
+                l_visibility = torch.tensor(0.0, device=self.device)
                 l_direct_point = torch.tensor(0.0, device=self.device)
                 direct_point_valid = torch.tensor(0.0, device=self.device)
                 direct_point_text = torch.tensor(0.0, device=self.device)
@@ -2229,6 +2304,44 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     l_semantic_adaptor_reg = (
                         hybrid_aux["semantic_confidence"].float() - 1.0
                     ).pow(2).mean()
+                if (
+                    hybrid_aux is not None
+                    and self.train_mode != "latent"
+                    and self.quality_loss_weight > 0
+                    and "quality_logit" in hybrid_aux
+                    and decoded_for_depth is not None
+                ):
+                    quality_target = cosine_feature_quality_target(
+                        decoded_for_depth.detach(),
+                        gt_radio_rs.detach(),
+                    )
+                    if quality_target.shape[-2:] != hybrid_aux["quality_logit"].shape[-2:]:
+                        quality_target = F.interpolate(
+                            quality_target,
+                            size=hybrid_aux["quality_logit"].shape[-2:],
+                            mode="bilinear",
+                            align_corners=False,
+                        )
+                    l_quality = F.binary_cross_entropy_with_logits(
+                        hybrid_aux["quality_logit"].float(),
+                        quality_target.float(),
+                    )
+                if (
+                    hybrid_aux is not None
+                    and self.visibility_loss_weight > 0
+                    and "visibility_logit" in hybrid_aux
+                    and alpha_for_edges is not None
+                ):
+                    visibility_target = visibility_target_from_alpha(
+                        alpha_for_edges,
+                        hybrid_aux["visibility_logit"],
+                        threshold=self.visibility_alpha_threshold,
+                        binary=self.visibility_target_binary,
+                    )
+                    l_visibility = F.binary_cross_entropy_with_logits(
+                        hybrid_aux["visibility_logit"].float(),
+                        visibility_target.float(),
+                    )
                 if self.direct_point_loss_weight > 0 and self.train_mode != "latent":
                     direct_point_stats = self._compute_direct_point_loss(
                         batch=batch,
@@ -2368,6 +2481,10 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     loss = loss + self.hybrid_semantic_aux_weight * l_semantic_aux
                 if self.hybrid_semantic_adaptor_reg_weight > 0:
                     loss = loss + self.hybrid_semantic_adaptor_reg_weight * l_semantic_adaptor_reg
+                if self.quality_loss_weight > 0:
+                    loss = loss + self.quality_loss_weight * l_quality
+                if self.visibility_loss_weight > 0:
+                    loss = loss + self.visibility_loss_weight * l_visibility
                 if self.direct_point_loss_weight > 0:
                     loss = loss + self.direct_point_loss_weight * l_direct_point
                 if self.grounding_query_loss_weight > 0:
@@ -2427,6 +2544,8 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             loss_accum["boundary"] += l_boundary.item()
             loss_accum["sem_aux"] += l_semantic_aux.item()
             loss_accum["sem_adaptor_reg"] += l_semantic_adaptor_reg.item()
+            loss_accum["quality"] += l_quality.item()
+            loss_accum["visibility"] += l_visibility.item()
             loss_accum["rgb"] += l_rgb.item()
             loss_accum["depth_gt"] += depth_losses["depth_gt"].item()
             loss_accum["depth_geom"] += depth_losses["depth_geom"].item()
@@ -2554,6 +2673,12 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     "train/sem_adaptor_reg",
                     l_semantic_adaptor_reg.item(),
                     self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/quality", l_quality.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/visibility", l_visibility.item(), self.global_step
                 )
                 self.writer.add_scalar(
                     "train/cosine", cos_sim.item(), self.global_step

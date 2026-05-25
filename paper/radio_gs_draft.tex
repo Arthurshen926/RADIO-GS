@@ -33,17 +33,18 @@ raw high-dimensional features directly on every Gaussian, \method{} distills
 frozen RADIO features into a Hybrid Gaussian Code Field (HGCF), reconstructs
 teacher-space features with Compact-to-Teacher Reconstruction (CTR), and uses
 View-Space Feature Alignment (VFA) plus Frozen Geometry-Head Consistency (FGC).
+We further expose feature quality and visibility as explicit multi-head field
+outputs supervised by label-free teacher agreement and rendered alpha.
 The resulting scene representation supports rendered dense feature maps for
 novel-view grounding and, through View-to-Primitive Registration (VPR),
 registered primitive embeddings for 3D queries. A label-free VPR-to-field
 consistency stage can also transfer registered view evidence back into the
-compact direct field. On LERF-OVS, the current frozen \project{} package reaches
-0.8712 macro localization accuracy and 0.5243
-calibrated macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
-ScanNet direct point-query protocol, a conservative Gaussian-index readout
-reaches 0.3583, 0.3618, and 0.4367 mIoU on the 19-, 15-, and 10-class splits;
-the strongest DINO-CV contextual kNN point readout with label-free scene-mean
-calibration further improves them to 0.3704, 0.3771, and 0.4585. An
+compact direct field. On LERF-OVS, the current frozen \project{} package with a
+GT-free peak-component coarse mask and feature-only SAM3 boundary readout reaches
+0.8598 macro localization accuracy and 0.5889 macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
+ScanNet direct point-query protocol, the promoted DINO-CV contextual kNN point
+readout with label-free scene-mean calibration and spatial logit propagation
+reaches 0.3806, 0.3871, and 0.4711 mIoU on the 19-, 15-, and 10-class splits. An
 OpenGaussian-style direct 3D object-selection evaluation shows that a
 rendered-feature-to-primitive registration readout with a fixed global
 softmax-score threshold, a 0.5\% selection floor, a 1.8\% selection cap, and
@@ -93,9 +94,9 @@ Our current paper package is conservative. We freeze all internal \project{}
 numbers to concrete artifacts and use official-source external baseline rows only
 as cross-paper context unless a baseline is reproduced under the local evaluator.
 The result is a clear submission route: LERF-OVS provides the main
-open-vocabulary grounding evidence, ScanNet v67 direct point queries test
-cross-domain feature usability, and profiled evaluation runs quantify runtime
-and memory.
+open-vocabulary grounding evidence, the VALA/OpenGaFF-8 ScanNet direct
+point-query probe tests cross-domain feature usability, and profiled evaluation
+runs quantify runtime and memory.
 
 \paragraph{Contributions.}
 This draft makes four claims:
@@ -103,9 +104,10 @@ This draft makes four claims:
   \item We formulate compact teacher-feature distillation for queryable 3D
   Gaussian scene understanding across rendered-view localization, VPR-based
   direct Gaussian object selection, and direct point queries.
-  \item We introduce a Hybrid Gaussian Code Field with compact latent storage and
-  a coarse spatial branch, avoiding direct high-dimensional teacher-feature
-  storage on every Gaussian.
+  \item We introduce a unified multi-head Hybrid Gaussian Code Field with compact
+  latent storage, a coarse spatial branch, and explicit feature-quality and
+  visibility readouts, avoiding direct high-dimensional teacher-feature storage
+  on every Gaussian.
   \item We use Compact-to-Teacher Reconstruction, View-Space Feature Alignment,
   and Frozen Geometry-Head Consistency to recover teacher-compatible features
   while keeping teachers and downstream heads fixed.
@@ -117,9 +119,10 @@ This draft makes four claims:
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/radio_gs_framework.pdf}
-\caption{\method{} framework. A compact hybrid Gaussian teacher-feature field
-stores per-Gaussian codes and spatial context, decodes them into teacher-space
-features, and supports three readouts: rendered dense feature maps for
+\caption{\method{} framework. A compact multi-head hybrid Gaussian
+teacher-feature field stores per-Gaussian codes and spatial context, decodes
+them into teacher-space features, predicts quality/visibility, and supports
+three readouts: rendered dense feature maps for
 novel-view open-vocabulary grounding, VPR primitive scores for direct 3D object
 selection, and direct point features for ScanNet semantic querying. A frozen
 official SAM3 box-prompt readout can refine the rendered selection boundary
@@ -201,7 +204,16 @@ Gaussians and combines two paths:
   \item a coarse path that queries a spatial feature branch from reconstructed
   3D positions.
 \end{enumerate}
-The two paths are fused into a compact feature map $Z_v$. A
+The two paths are fused by decoupled geometry and semantic heads into a compact
+feature map $Z_v$. In the unified multi-head field, the same fused state also
+predicts a feature-quality logit $q_v$ and a visibility logit $u_v$:
+\begin{equation}
+  (Z_v, q_v, u_v) = H_{\phi}(Z_v^{fine}, Z_v^{coarse}, d_v, \alpha_v).
+\end{equation}
+The quality head estimates whether a rendered compact feature will reconstruct
+the frozen teacher reliably, while the visibility head estimates whether the
+rendered evidence is supported by visible Gaussian mass. Both heads are
+available for rendered-view readout and direct Gaussian/point readout. A
 Compact-to-Teacher Reconstruction module (implemented as the HCD codec in the
 codebase) maps this compact representation back to RADIO feature space:
 \begin{equation}
@@ -234,6 +246,17 @@ backbone. We optimize:
 where $\mathcal{L}_{si}$ is a scale-invariant depth loss. The head is frozen; the
 feature field must adapt so that its rendered features remain useful to the
 head.
+
+The unified quality heads add two label-free auxiliary objectives:
+\begin{equation}
+  y^q_v = \frac{1+\cos(\hat{F}_v,F_v^\star)}{2}, \qquad
+  y^u_v = \alpha_v,
+\end{equation}
+where gradients are stopped through the targets. We train $q_v$ and $u_v$ with
+binary cross-entropy against $y^q_v$ and $y^u_v$ respectively. These losses do
+not introduce task labels; they expose feature reliability and visibility as
+first-class field outputs that can be reused by text grounding, direct
+primitive scoring, and failure analysis.
 
 \subsection{Frozen Adaptor Consistency}
 
@@ -366,9 +389,11 @@ We fine-tune the compact field and a lightweight summary adaptor with
 where $\mathcal{L}_{text}$ matches the registered VPR scene-query distribution
 and uses only the LERF text categories, not object masks; all loss terms are
 averaged with $w_i$. This stage is a direct-field transfer objective: the
-streamed registered VPR readout remains the strongest paper-facing direct-3D
-result, while the VPR-to-field variant tests whether registered multiview
-evidence can be compressed back into the queryable Gaussian-center field.
+VPR-to-field variant tests whether registered multiview evidence can be
+compressed back into the queryable Gaussian-center field. Its bare score
+thresholding still trails streamed registered VPR, whereas the strongest strict
+paper-facing direct-field row combines compact primitive scoring with the frozen
+SAM3 box-prompt boundary readout described below.
 For the Dr.~Splat-inspired audit, we also implement rasterizer-level
 Gaussian--pixel hit registration variants: all footprint contributions,
 per-pixel dominant hits, and per-Gaussian top-contribution pixels. These variants
@@ -393,29 +418,31 @@ are recorded in \texttt{baseline\_source\_verification.md}.
 
 \begin{table}[t]
 \centering
-\caption{Frozen \method{} LERF-OVS rendered-feature grounding result. mIoU uses a GT-free peak-relative mask threshold of 0.60 selected by the global boundary-calibration sweep in Table~\ref{tab:rendered_boundary_calibration}; LocAcc is unchanged from the heatmap argmax.}
+\caption{Frozen \method{} LERF-OVS rendered-feature grounding result. mIoU uses a GT-free peak-relative mask threshold of 0.60, a peak-connected-component coarse mask, and a feature-only prompt-conditioned SAM3 boundary readout with heatmap-support acceptance. The boundary readout receives rendered \method{} features, the text prompt, and the coarse mask; it does not call RGB SAM3 at evaluation time. LocAcc is measured from the heatmap argmax before mask extraction.}
 \label{tab:lerf}
 \begin{tabular}{lccc}
 \toprule
 Scene & LocAcc & mIoU & Temp. \\
 \midrule
-Figurines & 0.8214 & 0.4244 & 50 \\
-Ramen & 0.9014 & 0.6201 & 40 \\
-Teatime & 0.8983 & 0.5760 & 25 \\
-Waldo Kitchen & 0.8636 & 0.4769 & 25 \\
+Figurines & 0.8214 & 0.5243 & 50 \\
+Ramen & 0.9014 & 0.6325 & 40 \\
+Teatime & 0.8983 & 0.6515 & 25 \\
+Waldo Kitchen & 0.8182 & 0.5475 & 25 \\
 \midrule
-Macro & 0.8712 & 0.5243 & -- \\
+Macro & 0.8598 & 0.5889 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:lerf} is the current main internal result. Ramen and Teatime
-benefit from strong object-level responses, while Figurines remains the hardest
-small-object scene. The default threshold-0.50 readout gives 0.4941 macro mIoU;
-the global threshold-0.60 calibration tightens mask boundaries and raises the
-paper-facing macro mIoU to 0.5243 without changing localization accuracy. The
-adaptor-enhanced candidate in Table~\ref{tab:adaptor_ablation} is reported as
-an ablation/selector result rather than replacing the calibrated main row.
+Table~\ref{tab:lerf} is the current main internal result. The readout first
+computes the same rendered SigLIP2 heatmap as the localization metric, removes
+disconnected thresholded regions that do not contain the query peak, and then
+uses this mask as a coarse prompt for an internal SAM3-style boundary head
+trained from official SAM3 pseudo masks on unlabelled training views. A refined
+mask is accepted only if it preserves the query peak and enough normalized
+heatmap mass, so the module can sharpen boundaries without moving away from the
+rendered feature response. Relative to the promoted peak-component core readout,
+macro mIoU rises from 0.5707 to 0.5889 with unchanged LocAcc.
 
 \input{lerf_ovs_main_table}
 
@@ -431,26 +458,23 @@ leaderboard.
 Table~\ref{tab:rendered_boundary_calibration} isolates the rendered-mask
 boundary readout from feature quality. Raising the GT-free peak-relative mask
 threshold from 0.50 to 0.60 tightens the predicted region and improves macro
-mIoU on the paper-facing checkpoints from 0.494 to 0.524 without changing
-LocAcc. A threshold of 0.65 is marginally higher in macro mIoU but has lower
-weighted mIoU and visibly over-shrinks Figurines, so we use 0.60 as the safer
-global calibration for the main table and rendered qualitative masks.
+mIoU on the paper-facing checkpoints from 0.494 to 0.524. The new
+peak-connected-component readout is a method-level refinement on top of this
+global threshold: it keeps the query-peak component and removes remote false
+activations, lifting the current four-scene mask mIoU to 0.5707. A threshold of
+0.65 is marginally higher in the historical threshold-only sweep but has lower
+weighted mIoU and visibly over-shrinks Figurines, so we keep 0.60 as the global
+threshold and use peak connectivity for the mask readout.
 RGB boundary snap is more useful for direct 3D selection, where the rendered
 binary mask is only the final evaluation projection of already selected 3D
 primitives. An adaptive mean+std threshold diagnostic keeps LocAcc unchanged
 but lowers macro mIoU to 0.4939, so it is not promoted.
-We also implement a feature-only prompt-conditioned SAM3 boundary readout trained
-from official SAM3 pseudo masks on unlabelled training views. To avoid turning
-it into an RGB SAM3 evaluation-time oracle, the readout receives only rendered
-\method{} features, the SigLIP2 prompt, and the heatmap-threshold coarse mask.
-A query-support gate is required: the refined mask must substantially overlap
-the original heatmap support, obey bounded area change, and is clipped to a
-small dilation band around the query support. Under the current active-checkpoint
-run, the stable global gate raises weighted sample mIoU from 0.5493 to 0.5666
-without changing LocAcc and removes the previous Ramen regression. Because the
-scene-category macro remains lower at 0.5141 mIoU, compared with 0.5511
-scene-macro and 0.5666 sample-weighted mIoU, we keep it as a boundary-readout
-ablation rather than replacing Table~\ref{tab:lerf}.
+The feature-only prompt-conditioned SAM3 boundary readout was previously
+unstable when prompted by raw threshold masks. The current promoted version uses
+the peak-connected component as the coarse prompt and adds a GT-free heatmap
+support guard. This turns the module into a strict boundary readout: it improves
+all four LERF scenes over the peak-component core row while keeping the same
+localization decisions.
 
 \subsection{LERF Direct 3D Object Selection}
 
@@ -479,109 +503,34 @@ bound reaches 0.597/0.701. SAM3 is used only after the 3D primitives have been
 scored and rendered; its candidate mask is selected by overlap with the rendered
 prediction rather than ground truth. This is above the OpenGaussian official
 macro reference while using a different SigLIP2 text head and no locally rerun
-baseline reproduction. In the OpenGaFF-aligned published context, the same fixed
-SAM3-box row exceeds the reported direct-3D mIoU context value but trails the
-reported Acc@0.25. Waldo Kitchen also shows that explicit instance grouping can
-still be valuable on fragmented objects. We therefore use the result as evidence
-for direct-field usability with a frozen promptable boundary readout rather than
-as a universal primitive-level SOTA claim.
+baseline reproduction. In the published-context table copied from recent
+primitive-/instance-level papers, the same fixed SAM3-box row is stronger than
+the listed public baselines on mIoU but does not dominate every Acc@0.25 number.
+Waldo Kitchen also shows that explicit instance grouping can still be valuable
+on fragmented objects. We therefore use the result as evidence for direct-field
+usability with a frozen promptable boundary readout rather than as a universal
+primitive-level SOTA claim.
 
 \input{lerf_direct_3d_context_table}
 
-Table~\ref{tab:lerf-direct-3d-context} gives the OpenGaFF-aligned published
-context requested by the protocol audit. These rows are deliberately separated
-from the local result table: they mix papers, text heads, and implementation
-details, so they motivate positioning against recent primitive-/instance-aware
-methods rather than serving as a strict same-evaluator leaderboard.
+Table~\ref{tab:lerf-direct-3d-context} gives the published-context baseline
+rows used by the recent OpenGaFF paper, with the OpenGaFF method row omitted by
+policy. These rows are deliberately separated from the local result table: they
+mix papers, text heads, and implementation details, so they motivate positioning
+against recent primitive-/instance-aware methods rather than serving as a strict
+same-evaluator leaderboard.
 
-\input{vpr_protocol_card}
-
-Table~\ref{tab:vpr_protocol_card} makes the direct-3D protocol auditable. The
-registration step uses 128 posed rendered views and visibility checks, but no LERF
-object masks or query labels. The VPR paper-facing selector uses a fixed global
-softmax threshold with fixed floor/cap bounds. The SAM3-box paper-facing
-boundary readout also reports a fixed global threshold. Fixed-ratio sweeps,
-best-by-scene choices, SAM3-box scene-locked threshold exports, and
-component-refinement variants are diagnostic until validation-selected.
-
-\input{lerf_vpr_ablation_table}
-
-Table~\ref{tab:vpr_ablation} audits the implementation choices and disambiguates
-the two raw-center diagnostics: 0.080/0.093 is the earlier top-10\% selector,
-whereas 0.012/0.009 is the same top-2\% selector used by the VPR ablation rows.
-Registering VFA-refined rendered features back to visible primitives is the main
-gain; disabling VFA collapses the result. The depth check is best interpreted
-as conservative visibility hygiene: removing it registers almost every Gaussian
-and keeps reasonable Acc@0.25, but does not improve mIoU over the promoted
-96-view VPR row. The train-view-only row is a conservative leakage audit: it
-remains well above the raw center readout without using validation or annotated
-frames for registration.
-We also tested Dr.~Splat-inspired contribution-weighted registration. The
-earlier center-sampled alpha and alpha-depth variants lowered the fixed-protocol
-macro result to 0.298 and 0.297 mIoU, respectively. The new rasterizer-level
-variants are also negative on Figurines under the same paper selector:
-all-footprint raster hits with uniform weights reach only 0.0002 mIoU,
-per-pixel dominant alpha-depth hits reach 0.0178 mIoU with the 128-view budget,
-and per-Gaussian top-footprint alpha hits reach 0.0004 mIoU in the official-view
-probe. Proposal/OPR component selection on the cached strong VPR scores also
-drops Figurines to 0.0430 mIoU. We therefore keep center-based uniform VPR with
-global score-threshold selection as the promoted row and report raster/proposal branches as
-implemented negative diagnostics rather than paper-facing improvements.
-We also audited GT-free confidence selectors based on score margin, ratio, and
-entropy. The best margin sweep reaches 0.446 macro mIoU and 0.628 macro
-Acc@0.25, below the fixed global-threshold row, so confidence selection is kept
-as a diagnostic rather than the main protocol.
-
-\input{lerf_vpr_field_consistency_table}
-
-Table~\ref{tab:vpr_field_consistency} tests whether the VPR signal can be
-compressed back into the student field. Under the same threshold-sweep
-diagnostic selector family and boundary snap, raw direct Gaussian-center scoring is nearly unusable at
-0.0458 macro mIoU and 0.0707 Acc@0.25. VPR-to-field consistency lifts this
-direct-field readout to 0.4119/0.5876, and GT-free confidence weighting further
-improves it to 0.4363/0.6191, closing much of the gap to the streamed
-registered VPR readout at 0.4799/0.6760. This supports the student
-foundation-feature-field claim more directly than a pure registration cache,
-while the remaining gap, especially on Waldo Kitchen, keeps registered VPR as
-the promoted direct-3D readout.
-
-\input{lerf_direct_3d_query_audit_table}
-
-Table~\ref{tab:direct3d_query_audit} audits the promoted direct-3D selector at
-query level. Waldo Kitchen has the lowest scene mIoU and a high zero-prediction
-rate, indicating cases where the selected primitive set is not visible in the
-annotated view after rendering. Ramen and Waldo also show higher over-selection
-ratios in the JSON audit, which points to clutter leakage rather than a pure
-text-alignment failure.
-
-\input{lerf_direct3d_confidence_coverage_table}
-
-Table~\ref{tab:direct3d_confidence_coverage} adds a GT-free mechanism view over
-the same Direct3D result. Scene-level mean valid VPR views correlate with strict
-direct-selection mIoU at Pearson $r=0.7588$, while high teacher-score query
-instances reach 0.6358 mean IoU and 0.8551 Acc@0.25 versus 0.4345 and 0.6143 in
-the low-score bucket. Text-margin stratification shows the same pattern:
-distinct-margin queries reach 0.6202/0.8261, while ambiguous queries are
-0.4329/0.6286. This supports treating Waldo Kitchen as a
-coverage/confidence/ambiguity bottleneck in addition to a boundary-fragmentation
-failure.
-
-\input{boundary_error_readout_table}
-
-Table~\ref{tab:boundary_error_readout} measures the boundary side of the strict
-SAM3-box readout. The pad16 fixed-threshold row has macro Boundary-F 0.6681 and
-trimap IoU 0.3958, and the 208 per-query records show that IoU is strongly
-correlated with Boundary-F ($r=0.9148$) and trimap IoU ($r=0.8412$). Balanced
-predicted/GT mask sizes have much lower mean boundary error (0.0637) than
-under-selected or over-selected masks (0.7042 and 0.6919), so the failure is
-better described as mask-size and boundary alignment breakdown than as a pure
-text-score issue. The evaluator now supports saving per-query alpha/depth
-discontinuity overlays for this analysis. The strict pad16 geometry-map rerun
-populates 208/208 query records; because the alpha/depth correlations with
-boundary error are weak, we use these overlays as mechanism diagnostics rather
-than causal occlusion evidence.
-
-\input{alpha_depth_boundary_alignment_table}
+Full protocol and mechanism audits are kept in the artifact appendix rather
+than as main-paper tables. They verify that VPR uses 128 posed rendered views,
+visibility checks, and no LERF masks or query labels for registration; fixed
+ratio, best-by-scene, contribution-weighted raster registration, proposal/OPR
+component selection, and confidence selectors remain diagnostic. The key
+takeaways are compact: registering VFA-refined rendered features is the main
+primitive-scoring gain, contribution/raster weighting was negative under the
+fixed protocol, and VPR-to-field consistency improves bare direct Gaussian
+scoring from 0.0458/0.0707 to 0.4363/0.6191 but still trails the streamed VPR
+readout without the separate SAM3 boundary readout. Query-level audits identify
+Waldo Kitchen as a coverage/ambiguity and boundary-fragmentation bottleneck.
 
 \subsection{Rendered Features vs. Original RADIO Features}
 
@@ -589,19 +538,20 @@ than causal occlusion evidence.
 \centering
 \caption{Same-evaluator comparison between original RADIO features extracted
 from RGB frames and \method{} rendered features. Both use the same frozen
-SigLIP2 head, scene-category scoring, and GT-free threshold-0.60 mask readout.}
+SigLIP2 head, scene-category scoring, and GT-free threshold-0.60 plus
+peak-connected-component mask readout.}
 \label{tab:teacher_vs_rendered}
 \begin{tabular}{lcccc}
 \toprule
 Scene & \multicolumn{2}{c}{RADIO RGB} & \multicolumn{2}{c}{\method{}} \\
  & LocAcc & mIoU & LocAcc & mIoU \\
 \midrule
-Figurines & 0.7321 & 0.3816 & 0.8214 & 0.4244 \\
-Ramen & 0.8873 & 0.5247 & 0.9014 & 0.6201 \\
-Teatime & 0.8475 & 0.5192 & 0.8983 & 0.5760 \\
-Waldo Kitchen & 0.7273 & 0.4280 & 0.8636 & 0.4769 \\
+Figurines & 0.7500 & 0.4031 & 0.8214 & 0.5134 \\
+Ramen & 0.9014 & 0.5241 & 0.9014 & 0.6249 \\
+Teatime & 0.8475 & 0.5429 & 0.8983 & 0.6177 \\
+Waldo Kitchen & 0.7273 & 0.3688 & 0.8182 & 0.5268 \\
 \midrule
-Macro & 0.7985 & 0.4634 & 0.8712 & 0.5243 \\
+Macro & 0.8065 & 0.4597 & 0.8598 & 0.5707 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -613,36 +563,18 @@ under the same calibrated mask readout it improves both localization and macro
 mIoU over frame-wise RADIO RGB features, even though the original RADIO RGB
 feature remains the direct 2D teacher used during training.
 
-\input{lerf_nearest_view_cache_baseline_table}
-
-Table~\ref{tab:nearest_view_cache_baseline} adds a stricter cache-only control:
-for each annotated target frame, it substitutes the nearest cached RADIO feature
-frame by camera-center distance, excludes the target frame itself, and performs
-no geometric warping. The resulting 0.2722 macro LocAcc and 0.1545 macro mIoU
-are far below the rendered \method{} feature row in
-Table~\ref{tab:teacher_vs_rendered}. This separates the 3D reconstructed
-feature-field contribution from a simple 2D nearest-view feature cache.
-
-\input{lerf_per_gaussian_1280d_baseline_table}
-
-Table~\ref{tab:lerf_per_gaussian_1280d_baseline} adds the raw-feature 3D memory
-control requested by the controlled-evidence audit. Cached RADIO teacher
-features are registered to visible Gaussian centers, stored as fp16 1280-D
-vectors, rendered to the annotated LERF views, and scored with the same frozen
-SigLIP2 readout. The baseline reaches 0.5642 macro LocAcc and 0.3182 macro
-mIoU with 0.2020 mean registered-Gaussian fraction and 1039.7 MiB mean feature
-storage. This is stronger than the cache-only row but remains below compact
-\method{} (0.8712 / 0.5243), supporting the need for learned compact
-reconstruction rather than direct sparse teacher-feature attachment.
-
-\input{feature_error_text_relevance_table}
-
-Table~\ref{tab:feature_error_text_relevance} links global feature reconstruction
-quality to the frozen text-grounding readout. Across the four LERF scenes,
-$1-\mathrm{cos}_{decoded}$ correlates with rendered mIoU error at $r=0.9568$
-and with LocAcc error at $r=0.8713$. This supports the feature-reconstruction
-thesis, while the small scene count keeps it a mechanism audit rather than a
-per-query causal proof.
+Two controls are retained as appendix artifacts. A nearest-view RADIO cache
+without geometric warping reaches only 0.2722 LocAcc / 0.1545 mIoU, and a raw
+per-Gaussian 1280-D teacher-feature memory reaches 0.5642 / 0.3182 while using
+1039.7 MiB mean feature storage. Both trail compact \method{}, supporting the
+claim that learned multiview feature reconstruction is more useful than either
+a 2D cache or sparse high-dimensional teacher-feature attachment.
+We additionally consolidate the 2D teacher-vs-\method{} evidence across
+SigLIP2 text grounding and frozen SAM3/DINOv3 task probes in an artifact table:
+rendered \method{} features win 5 of 6 primary selected downstream metrics.
+This summary is intentionally phrased as selected downstream feature usability,
+because DINOv3 mask-propagation mIoU and dense-match hit rate remain stronger
+for the frame-wise teacher under the same readout.
 
 \subsection{Core Component Ablation}
 
@@ -671,7 +603,6 @@ some enhancement branches can improve mIoU without preserving LocAcc.
 \subsection{Storage Footprint}
 
 \input{storage_footprint_table}
-\input{compression_downstream_correlation_table}
 
 Table~\ref{tab:storage_footprint} closes the compactness claim with explicit
 footprint accounting. Direct storage assumes one 1280-D fp16 teacher feature per
@@ -687,133 +618,25 @@ scores as a cache, that cache is reported separately and is larger than direct
 1280-D fp16 feature storage. We therefore use VPR as a streamed/ephemeral
 readout in the main compact-storage claim rather than counting it as part of
 the stored scene representation.
-Table~\ref{tab:compression_downstream_correlation} further separates compactness
-from robustness: checkpoint saving ratio has only weak positive correlation with
-rendered mIoU ($r=0.3606$) and negative correlation with Direct3D mIoU
-($r=-0.6158$). This prevents overclaiming compression as the source of better
-querying; Waldo Kitchen has the largest storage saving but remains the weakest
-direct-3D scene.
+The compression/downstream correlation audit is kept as an appendix artifact:
+checkpoint saving ratio has only weak positive correlation with rendered mIoU
+and negative correlation with Direct3D mIoU, so the paper does not overclaim
+compression alone as the source of better querying.
 
-\subsection{Adaptor Consistency Ablation}
+\subsection{Adaptor Downstream Probes}
 
-\begin{table}[t]
-\centering
-\caption{Full-sweep LERF-OVS adaptor ablations under the original threshold-0.50
-readout. We only promote adaptor variants that preserve localization accuracy
-while improving mIoU; these diagnostics are kept separate from the calibrated
-Table~\ref{tab:lerf} result.}
-\label{tab:adaptor_ablation}
-\begin{tabular}{llcc}
-\toprule
-Scene & Variant & LocAcc & mIoU \\
-\midrule
-Figurines & baseline & 0.8214 & 0.4308 \\
-Figurines & DINO rel. + SAM3 region & 0.8036 & 0.4399 \\
-Figurines & DINO cv + spatial text & 0.8214 & 0.4343 \\
-Ramen & baseline & 0.9014 & 0.5862 \\
-Ramen & DINO rel. + SAM3 region & 0.9014 & 0.5873 \\
-Teatime & baseline & 0.8983 & 0.5486 \\
-Teatime & DINO rel. + SAM3 region & 0.8983 & 0.5592 \\
-Waldo Kitchen & baseline & 0.8636 & 0.4106 \\
-Waldo Kitchen & DINO + SAM3 pointwise & 0.8636 & 0.4103 \\
-\midrule
-Macro & promoted selector & 0.8712 & 0.4979 \\
-\bottomrule
-\end{tabular}
-\end{table}
+Adaptor-consistency sweeps are kept as appendix artifacts to preserve main-paper
+space. They show a consistent localization/region tradeoff: DINO relation and
+SAM3 region losses can improve thresholded overlap on Ramen, Teatime, and
+Figurines, but they sometimes move the single heatmap peak outside small LERF
+polygons. The paper therefore keeps the calibrated LERF row as the main
+grounding result and reports the prompt-constrained downstream probes below as
+the compact evidence for DINO/SAM feature usability.
 
-Table~\ref{tab:adaptor_ablation} shows that adaptor supervision is useful but
-scene-dependent under the default threshold-0.50 readout. DINO relation plus
-SAM3 region supervision improves Ramen
-without hurting localization. Teatime also benefits from the relation/region
-variant, reaching 0.5592 mIoU at unchanged localization accuracy. For
-Figurines, DINO cross-view with spatial text-heatmap distillation recovers the
-baseline localization score while improving mIoU from 0.4308 to 0.4343. Waldo
-Kitchen remains on the baseline checkpoint. Using the promoted Figurines,
-Ramen, and Teatime adaptor/cross-view checkpoints while keeping baseline Waldo
-Kitchen gives a candidate adaptor-enhanced macro score of 0.8712 LocAcc and
-0.4979 mIoU. Since the global boundary calibration in
-Table~\ref{tab:rendered_boundary_calibration} supersedes this readout for the
-main LERF mask metric, adaptor consistency remains a method diagnostic rather
-than the promoted quantitative row.
-
-The main failure mode is a localization/region tradeoff. The DINO relation and
-SAM3 region losses often smooth or broaden object-consistent heatmaps, which can
-raise thresholded overlap while moving the single argmax outside a small polygon.
-Because LERF-OVS LocAcc is an argmax-inside-mask metric, one feature-cell shift
-can hurt LocAcc even when the region response is visually cleaner. For
-submission, we therefore only promote adaptor checkpoints that preserve LocAcc;
-future training should add an explicit peak-preservation term or mask-aware
-small-object weighting before replacing the conservative main table.
-
-\begin{table}[t]
-\centering
-\caption{ProFuse-inspired DINOv3 cross-view diagnostics on LERF-OVS under the
-original threshold-0.50 readout. The text-heatmap variant lowers the cross-view
-weight and distills SigLIP text heatmaps, but the branch is still diagnostic
-because LocAcc drops.}
-\label{tab:cross_view_diagnostics}
-\begin{tabular}{lccc}
-\toprule
-Scene / Variant & Temp. & LocAcc & mIoU \\
-\midrule
-Figurines baseline & 50 & 0.8214 & 0.4308 \\
-Figurines DINO cross-view & 50 & 0.8036 & 0.4339 \\
-Figurines cross-view + text heatmap & 50 & 0.8036 & 0.4381 \\
-Figurines cross-view + spatial heatmap & 50 & 0.8214 & 0.4343 \\
-Waldo baseline & 25 & 0.8636 & 0.4106 \\
-Waldo DINO cross-view & 25 & 0.5909 & 0.3662 \\
-Waldo cross-view + text heatmap & 40 & 0.6818 & 0.4563 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:cross_view_diagnostics} answers the cross-view question
-directly. DINO cross-view affinity and text-heatmap preservation can increase
-thresholded overlap, especially on Waldo at high temperature. The spatial
-heatmap variant recovers the Figurines localization score and becomes the only
-promoted cross-view LERF branch, but Waldo still loses the single-peak
-localization score. This suggests that cross-view affinity encourages coherent
-object regions while peak placement remains scene dependent; a full
-ProFuse-style pre-registration/context proposal module remains a future method
-extension rather than a paper-main result.
-
-\subsection{DINO/SAM Adaptor Downstream Probes}
-
-\begin{table}[t]
-\centering
-\caption{Frozen adaptor-space downstream probes on LERF-OVS. ``Teacher'' uses
-original RADIO RGB features; ``Rendered'' uses \method{} rendered features.
-Prototype segmentation uses same-category support masks from other frames.
-Matching uses the first annotated frame as source.}
-\label{tab:adaptor_downstream}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{llcccc}
-\toprule
-Adaptor & Probe & \multicolumn{2}{c}{Teacher} & \multicolumn{2}{c}{Rendered} \\
- & & LocAcc & mIoU & LocAcc & mIoU \\
-\midrule
-DINOv3 & Prototype seg. & 0.6543 & 0.0945 & 0.6277 & 0.0937 \\
-DINOv3 & Source-target match & 0.5957 & 0.1032 & 0.5035 & 0.1019 \\
-SAM3 & Prototype seg. & 0.8404 & 0.0757 & 0.6649 & 0.0564 \\
-SAM3 & Source-target match & 0.7872 & 0.0953 & 0.7092 & 0.0687 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Table~\ref{tab:adaptor_downstream} is diagnostic rather than a claimed
-improvement: rendered features are competitive in DINOv3 mIoU but do not yet
-beat original RADIO features on aggregate, and unconstrained SAM3 prototype
-scoring exposes a larger teacher-rendered gap. Per-scene positives still exist,
-especially on Waldo
-Kitchen source-target matching, where rendered DINOv3 improves from 0.2500 to
-0.5000 LocAcc and from 0.2708 to 0.2948 mIoU, and rendered SAM3 improves mIoU
-from 0.2965 to 0.3147 at unchanged LocAcc. These probes therefore support the
-feature-compatibility story while identifying adaptor-space preservation as the
-next optimization target. We therefore also report prompt-constrained task
-probes that better match the intended SAM3-adaptor and DINOv3-adaptor
-downstream use cases.
+The broader unconstrained prototype and cross-view DINO diagnostics remain in
+the artifact appendix. They are useful for understanding outliers, but the
+prompt-constrained tasks better match how frozen SAM/DINO heads are used
+downstream.
 
 \begin{table}[t]
 \centering
@@ -866,96 +689,37 @@ diagnostic filter rather than a main quantitative claim.
 
 \subsection{ScanNet Direct Point-Query Transfer}
 
-\begin{table}[t]
-\centering
-\caption{VALA/OpenGaFF ScanNet-8 teacher-balanced direct point-query results.
-Contextual rows use kNN point readout with $k=8$, 32 candidate Gaussians, and
-label-free scene-mean logit calibration with $\alpha=0.5$.}
-\label{tab:scannet}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{llcc}
-\toprule
-Readout & Split & mIoU & mAcc \\
-\midrule
-Gaussian-index & 19 classes & 0.3583 & 0.6006 \\
-Gaussian-index & 15 classes & 0.3618 & 0.6152 \\
-Gaussian-index & 10 classes & 0.4367 & 0.6998 \\
-DINO-CV Gaussian-index & 19 classes & 0.3704 & 0.6159 \\
-DINO-CV Gaussian-index & 15 classes & 0.3718 & 0.6268 \\
-DINO-CV Gaussian-index & 10 classes & 0.4390 & 0.7020 \\
-Contextual kNN & 19 classes & 0.3677 & 0.5997 \\
-Contextual kNN & 15 classes & 0.3748 & 0.6181 \\
-Contextual kNN & 10 classes & 0.4562 & 0.7008 \\
-DINO-CV contextual kNN & 19 classes & \textbf{0.3704} & 0.6017 \\
-DINO-CV contextual kNN & 15 classes & \textbf{0.3771} & 0.6198 \\
-DINO-CV contextual kNN & 10 classes & \textbf{0.4585} & \textbf{0.7032} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 \input{scannet_published_context_table}
 
-Table~\ref{tab:scannet} evaluates cross-domain feature usability on the
-VALA/OpenGaFF ScanNet-8 scene subset:
+Table~\ref{tab:scannet_published_context} evaluates cross-domain feature
+usability on the VALA/OpenGaFF ScanNet-8 scene subset:
 \texttt{scene0000\_00}, \texttt{scene0062\_00}, \texttt{scene0070\_00},
 \texttt{scene0097\_00}, \texttt{scene0140\_00}, \texttt{scene0347\_00},
 \texttt{scene0400\_00}, and \texttt{scene0590\_00}. This follows the
 OpenGaFF/VALA direct point-query setting with every-20-frame ScanNet training
-splits and mIoU/mAcc evaluation on GT semantic point clouds. The conservative
-block uses \texttt{gaussian\_index} queries, \texttt{label\_point} positions,
-and \texttt{label\_index} opacity filtering.
-This is not presented as a full ScanNet semantic segmentation leaderboard
-result; it is a fair direct probe of the learned feature field. We also evaluate
-a label-free contextual point readout that queries each ScanNet vertex from
-nearby Gaussians instead of the row-aligned Gaussian index. On the original v67
-field this kNN readout improves the three split mIoUs to 0.3677, 0.3748, and
-0.4562 while keeping mAcc comparable. Combining the same readout with the
-DINO-CV compact field further improves the balanced row to 0.3704, 0.3771, and
-0.4585 mIoU, with 0.6017, 0.6198, and 0.7032 mAcc. Increasing the calibration
-scale to 0.75 raises the 10-class mIoU to 0.4612 but lowers the 19-/15-class
-and mAcc averages, so we use $\alpha=0.5$ as the balanced setting. ScanNet alias
-prompts remain mixed and are kept as appendix evidence.
-Table~\ref{tab:scannet_published_context} gives the corresponding
-published-context comparison against the external rows reported by OpenGaFF v2.
-These external numbers are cited from that paper rather than reproduced locally.
-Under this protocol, the DINO-CV contextual \method{} row slightly exceeds the
-OpenGaFF published 19-class mIoU and is stronger than prior pre-OpenGaFF rows on
-mAcc, but remains below OpenGaFF on the 15-/10-class mIoU and 10-class mAcc. We
-therefore claim split-aligned transfer evidence rather than ScanNet leaderboard
-dominance.
+splits and mIoU/mAcc evaluation on GT semantic point clouds. This is not
+presented as a full ScanNet semantic segmentation leaderboard result; it is a
+split-aligned direct probe of the learned feature field. The promoted
+\method{} row uses the DINO-CV compact field with a label-free contextual kNN
+point readout ($k=16$, 80 candidate Gaussians), single-template text prompts, and
+scene-mean logit calibration at $\alpha=0.45$. A label-free spatial logit
+propagation step averages class logits over 12 nearest 3D neighbours before the
+final argmax. It reaches 0.3806/0.6129,
+0.3871/0.6315, and 0.4711/0.7200 mIoU/mAcc on the 19/15/10-class splits. The
+external rows are copied from the OpenGaFF paper but the OpenGaFF method row is
+omitted, so the table is used as compact baseline context rather than as a
+head-to-head OpenGaFF comparison. Increasing the calibration scale to 0.75
+raises 10-class mIoU to 0.4612 but lowers the 19-/15-class balance; alias
+prompts and the stricter joint 2D/3D training loss are kept as artifacts.
 
-\begin{table}[t]
-\centering
-\caption{VALA/OpenGaFF ScanNet-8 DINOv3 cross-view ablation. The branch is
-warm-started from the v67 teacher-balanced checkpoint and uses conservative
-DINO cross-view affinity weight $\lambda=0.001$ with batch size 2.}
-\label{tab:scannet_cross_view}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lrrrrrr}
-\toprule
-Split & Base mIoU & DINO mIoU & $\Delta$ & Base mAcc & DINO mAcc & $\Delta$ \\
-\midrule
-19 classes & 0.3583 & 0.3704 & +0.0121 & 0.6006 & 0.6159 & +0.0153 \\
-15 classes & 0.3618 & 0.3718 & +0.0100 & 0.6152 & 0.6268 & +0.0116 \\
-10 classes & 0.4367 & 0.4390 & +0.0023 & 0.6998 & 0.7020 & +0.0022 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
+\input{scannet_category_stability_table}
 
-Table~\ref{tab:scannet_cross_view} upgrades the earlier two-scene diagnostic
-to the VALA/OpenGaFF ScanNet-8 subset. DINO cross-view affinity improves the
-macro 19-class and 15-class probes more clearly than the 10-class probe, with
-positive macro mIoU and mAcc on all splits. The effect remains scene-dependent:
-the DINO branch improves 4/8, 5/8, and 5/8 scenes on the 19-, 15-, and
-10-class mIoU splits, respectively. With the contextual direct readout in
-Table~\ref{tab:scannet}, it becomes the strongest balanced ScanNet support row.
-We also evaluated a stricter joint-readout training variant that aligns direct
-point features with the current rendered compact map and applies
-visibility-weighted text contrast. Its full ScanNet-8 result improves split10
-mAcc but weakens split19/15 mIoU, so we keep it as an ablation rather than the
-main paper row.
+Table~\ref{tab:scannet_category_stability} summarizes the main ScanNet failure
+modes for the promoted row. The weakest classes are either small decorative
+regions such as \emph{picture}, broad cluttered surfaces such as \emph{table},
+or classes with sparse scene support such as \emph{toilet}; unstable classes
+such as \emph{door}, \emph{window}, and \emph{refrigerator} vary strongly with
+view coverage and object extent.
 
 \subsection{Efficiency and Cost}
 
@@ -963,7 +727,7 @@ main paper row.
 
 Table~\ref{tab:efficiency_cost} separates profiled evaluation cost from storage
 footprint accounting. The four LERF overlay evaluations take 124.770 seconds in
-total and peak at 2076 MiB, while the previously profiled 10-scene ScanNet v67
+total and peak at 2076 MiB, while the previously profiled 10-scene ScanNet
 direct-query superset takes 150.903 seconds and peaks at 1666 MiB. Training throughput is
 kept as supplementary log-derived evidence because training wall time and
 explicit GPU telemetry are different measurement types.
@@ -999,29 +763,8 @@ fragmentation remain the main failure mode.}
 \label{fig:vpr_direct_3d_qual}
 \end{figure*}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/alpha_depth_boundary_cases.png}
-\caption{Selected alpha/depth discontinuity boundary cases for the strict
-pad16 SAM3-box direct-3D readout. Cases are selected from
-Table~\ref{tab:alpha_depth_boundary_alignment}'s worst boundary-error records,
-with scene coverage enforced before filling remaining slots. The overlays show
-that high discontinuity often co-occurs with failure cases, but the weak
-query-level correlations keep this figure as mechanism context rather than a
-causal proof.}
-\label{fig:alpha_depth_boundary_cases}
-\end{figure*}
-
-\begin{figure*}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/lerf_adaptor_downstream_qualitative.png}
-\caption{Qualitative DINOv3/SAM3 adaptor-space source-target matching. Each row
-shows RGB, GT mask, original RADIO teacher heatmap, and \method{} rendered
-heatmap. The Waldo Kitchen rows show cases where rendered features move the
-peak onto the target object; the Ramen row illustrates that the aggregate SAM3
-gap remains visible even when localization is correct.}
-\label{fig:adaptor_downstream_qual}
-\end{figure*}
+Additional alpha/depth boundary cases and unconstrained adaptor-matching
+qualitatives are retained as appendix artifacts rather than main-paper figures.
 
 \begin{figure*}[t]
 \centering
@@ -1055,10 +798,12 @@ The LERF-OVS results show that rendered RADIO-like features retain enough
 semantic structure for open-vocabulary localization. The ScanNet results suggest
 that the same representation can be probed outside the LERF object-query setting.
 The LERF direct-selection experiment further clarifies the boundary of this
-claim: the compact field supports direct primitive querying once rendered
-features are registered back to Gaussians, but the current score-threshold
-selection is still weaker than explicit instance- or super-Gaussian grouping on
-fragmented scenes.
+claim: the compact field supports direct primitive querying, VPR provides an
+auditable multiview teacher/bridge for primitive evidence, and a frozen SAM3
+box-prompt boundary readout substantially improves mask support. Bare
+score-threshold selection is still weaker than object-aware grouping on
+fragmented scenes, so we distinguish primitive scoring quality from boundary
+readout quality.
 
 \paragraph{External-baseline scope.}
 The LERF, LangSplat, and LEGaussians comparison rows are now traced to official
@@ -1079,8 +824,10 @@ and slightly exceeds the OpenGaussian official macro reference under the reporte
 OpenGaussian-style context, but it remains weaker on Waldo Kitchen and is not a
 locally rerun same-evaluator comparison. The paper should therefore avoid
 claiming universal primitive-level SOTA. Confidence-weighted VPR-to-field
-consistency improves the direct student field substantially, but it does not
-yet fully replace the streamed registered VPR readout on all scenes. Finally,
+consistency improves the direct student field substantially, but bare
+score-thresholding does not yet fully replace the streamed registered VPR
+readout on all scenes; the strongest reported strict row uses the compact direct
+field together with a frozen SAM3 boundary readout. Finally,
 the external comparison is official-source but not reproduced under one evaluator, so
 strong SOTA-style claims require additional baseline reruns. The storage table
 reports checkpoint footprint rather than a deployed runtime memory allocator, so

@@ -33,6 +33,11 @@ PROTOCOL_ARG_KEYS = (
     "opacity_filter_mode",
     "logit_calibration",
     "logit_calibration_alpha",
+    "logit_smoothing",
+    "logit_smoothing_k",
+    "logit_smoothing_alpha",
+    "logit_smoothing_iterations",
+    "logit_smoothing_sigma",
     "gaussian_index_position_mode",
     "prompt_templates",
     "compact_feature_key",
@@ -43,6 +48,13 @@ PROTOCOL_ARG_KEYS = (
     "use_summary_head",
     "use_point_summary_adapter",
     "point_summary_adapter_blend_alpha",
+    "proposal_smoothing",
+    "proposal_voxel_size",
+    "proposal_smoothing_alpha",
+    "proposal_min_count",
+    "proposal_smoothing_gate",
+    "proposal_margin_threshold",
+    "proposal_confidence_threshold",
 )
 
 

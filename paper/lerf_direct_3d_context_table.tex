@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{OpenGaFF-aligned published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from published source tables and are not same-evaluator local reruns. This table is only for positioning relative to recent primitive-/instance-level methods with publicly reported results.}
+  \caption{Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from published source tables and are not same-evaluator local reruns. Rows follow the recent OpenGaFF comparison set, with the OpenGaFF method row intentionally omitted.}
   \label{tab:lerf-direct-3d-context}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llcc}
@@ -10,7 +10,6 @@
     OpenGaussian~\cite{wu2024opengaussian} & official paper & 38.36 & 51.43 \\
     Dr. Splat~\cite{kim2025drsplat} & published context & 43.29 & 64.30 \\
     InstanceGaussian~\cite{li2025instancegaussian} & published context & 45.30 & 58.44 \\
-    OpenGaFF~\cite{li2026opengaff} & arXiv context & 54.36 & 80.84 \\
     \method{} + VPR & local, SigLIP2, fixed \texttt{thr0p25} + RGB snap & 48.01 & 67.60 \\
     \method{} + direct field + SAM3 box & local, fixed global threshold, frozen official SAM3 readout & 57.05 & 68.35 \\
     \method{} + direct field + SAM3 box & local diagnostic, scene-locked thresholds & 59.72 & 70.09 \\

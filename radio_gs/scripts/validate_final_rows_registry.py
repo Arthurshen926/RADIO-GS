@@ -13,29 +13,19 @@ import yaml
 from radio_gs.scripts.build_scannet_vala8_report import SCAN_SPLITS, VALA8_SCENES
 
 
-DIRECT_SCANNET_SOURCE_ARGS = {
-    "scene_list": ",".join(VALA8_SCENES),
-    "class_splits": "19,15,10",
-    "query_mode": "gaussian_index",
-    "candidate_k": "0",
-    "opacity_filter_mode": "label_index",
-    "logit_calibration": "none",
-    "logit_calibration_alpha": "1.0",
-    "gaussian_index_position_mode": "label_point",
-    "prompt_templates": "{query}",
-    "use_summary_head": "True",
-    "use_point_summary_adapter": "False",
-}
-
-CONTEXTUAL_SCANNET_SOURCE_ARGS = {
+PROMOTED_SCANNET_SOURCE_ARGS = {
     "scene_list": ",".join(VALA8_SCENES),
     "class_splits": "19,15,10",
     "query_mode": "knn",
-    "k": "8",
-    "candidate_k": "32",
+    "k": "16",
+    "candidate_k": "80",
     "opacity_filter_mode": "auto",
     "logit_calibration": "scene_mean",
-    "logit_calibration_alpha": "0.5",
+    "logit_calibration_alpha": "0.45",
+    "logit_smoothing": "spatial_knn",
+    "logit_smoothing_k": "12",
+    "logit_smoothing_alpha": "1.0",
+    "logit_smoothing_iterations": "1",
     "prompt_templates": "{query}",
     "use_summary_head": "True",
     "use_point_summary_adapter": "False",
@@ -108,49 +98,7 @@ def _check_vala8_source_protocol(
             issues.append(f"{label} source_args.{key} mismatch: got {actual!r}, expected {expected!r}")
 
 
-def _check_contextual_scannet_row(
-    payload: dict[str, Any],
-    root: Path,
-    issues: list[str],
-) -> None:
-    try:
-        track = payload["tracks"]["t3_scannet_ov_point_cloud_segmentation"]
-        source_path = _resolve(root, track["radio_gs_contextual_support_json"])
-        row = track["rows"]["radio_gs_v67_contextual_knn_scene_mean_support"]
-    except KeyError as exc:
-        issues.append(f"missing ScanNet contextual registry field: {exc}")
-        return
-
-    if row.get("promoted") is not False:
-        issues.append("ScanNet contextual support row must remain promoted=false")
-
-    try:
-        source = _read_json(source_path)
-        macro = source["macro"]
-    except (OSError, KeyError, json.JSONDecodeError) as exc:
-        issues.append(f"cannot read ScanNet contextual source {source_path}: {exc}")
-        return
-
-    _check_vala8_source_protocol(
-        source,
-        label="ScanNet contextual",
-        expected_args=CONTEXTUAL_SCANNET_SOURCE_ARGS,
-        issues=issues,
-    )
-
-    for split in ("19", "15", "10"):
-        row_key = f"split{split}"
-        for metric in ("miou", "macc"):
-            expected = _rounded4(macro[split][metric])
-            actual = _rounded4(row[row_key][metric])
-            if actual != expected:
-                issues.append(
-                    f"ScanNet contextual {row_key}.{metric} drift: "
-                    f"registry={actual:.4f} source={expected:.4f}"
-                )
-
-
-def _check_direct_scannet_row(
+def _check_promoted_scannet_row(
     payload: dict[str, Any],
     root: Path,
     issues: list[str],
@@ -158,22 +106,25 @@ def _check_direct_scannet_row(
     try:
         track = payload["tracks"]["t3_scannet_ov_point_cloud_segmentation"]
         source_path = _resolve(root, track["radio_gs_source_json"])
-        row = track["rows"]["radio_gs_v67_direct_point_query"]
+        row = track["rows"]["radio_gs_dino_cv_contextual_knn_scene_mean_support"]
     except KeyError as exc:
-        issues.append(f"missing ScanNet direct registry field: {exc}")
+        issues.append(f"missing ScanNet promoted registry field: {exc}")
         return
+
+    if row.get("promoted") is not True:
+        issues.append("ScanNet promoted support row must be promoted=true")
 
     try:
         source = _read_json(source_path)
         macro = source["macro"]
     except (OSError, KeyError, json.JSONDecodeError) as exc:
-        issues.append(f"cannot read ScanNet direct source {source_path}: {exc}")
+        issues.append(f"cannot read ScanNet promoted source {source_path}: {exc}")
         return
 
     _check_vala8_source_protocol(
         source,
-        label="ScanNet direct",
-        expected_args=DIRECT_SCANNET_SOURCE_ARGS,
+        label="ScanNet promoted",
+        expected_args=PROMOTED_SCANNET_SOURCE_ARGS,
         issues=issues,
     )
 
@@ -184,7 +135,7 @@ def _check_direct_scannet_row(
             actual = _rounded4(row[row_key][metric])
             if actual != expected:
                 issues.append(
-                    f"ScanNet direct {row_key}.{metric} drift: "
+                    f"ScanNet promoted {row_key}.{metric} drift: "
                     f"registry={actual:.4f} source={expected:.4f}"
                 )
 
@@ -362,8 +313,7 @@ def validate_registry(final_rows_path: str | Path, *, root: str | Path = ".") ->
     root_path = Path(root)
     payload = _read_yaml(Path(final_rows_path))
     issues: list[str] = []
-    _check_direct_scannet_row(payload, root_path, issues)
-    _check_contextual_scannet_row(payload, root_path, issues)
+    _check_promoted_scannet_row(payload, root_path, issues)
     _check_opengaff_blocker(payload, root_path, issues)
     _check_completed_external_summaries(payload, root_path, issues)
     return issues

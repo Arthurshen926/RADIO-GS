@@ -65,6 +65,7 @@ from radio_gs.data.lerf_dataset import (
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.models.prompt_conditioned_mask_head import PromptConditionedMaskHead
 from radio_gs.models.prompt_conditioned_mask_refinement import (
+    filter_refined_mask_by_heatmap_support,
     mask_overlap_stats,
     refine_mask_with_prompt_conditioned_sam3_head,
 )
@@ -628,6 +629,56 @@ def compute_relevancy_heatmap(
     return sim.reshape(-1, H, W)
 
 
+def apply_readout_confidence_gate(
+    heatmaps: torch.Tensor,
+    aux_maps: Optional[Dict[str, torch.Tensor]],
+    *,
+    gate: str = "none",
+    gamma: float = 1.0,
+) -> torch.Tensor:
+    """Apply a rendered feature-field confidence map to query heatmaps.
+
+    The gate is GT-free and query-agnostic: it can only suppress locations that
+    the feature field itself predicts as low-quality or poorly visible.  This
+    keeps the text-query protocol unchanged while letting trained quality heads
+    affect the readout.
+    """
+    if gate == "none" or aux_maps is None or float(gamma) <= 0:
+        return heatmaps
+
+    gate_terms: List[torch.Tensor] = []
+    if gate in {"quality", "quality_visibility"} and "quality_logit" in aux_maps:
+        gate_terms.append(torch.sigmoid(aux_maps["quality_logit"].float()))
+    if gate in {"visibility", "quality_visibility"} and "visibility_logit" in aux_maps:
+        gate_terms.append(torch.sigmoid(aux_maps["visibility_logit"].float()))
+    if gate == "alpha" and "alpha_map" in aux_maps:
+        gate_terms.append(aux_maps["alpha_map"].float().clamp(0.0, 1.0))
+
+    if not gate_terms:
+        return heatmaps
+
+    gate_map = gate_terms[0]
+    for term in gate_terms[1:]:
+        gate_map = gate_map * term
+    if gate_map.dim() == 4:
+        gate_map = gate_map[0, 0]
+    elif gate_map.dim() == 3:
+        gate_map = gate_map[0]
+    if gate_map.shape[-2:] != heatmaps.shape[-2:]:
+        gate_map = F.interpolate(
+            gate_map.unsqueeze(0).unsqueeze(0),
+            size=tuple(int(v) for v in heatmaps.shape[-2:]),
+            mode="bilinear",
+            align_corners=False,
+        )[0, 0]
+
+    gate_map = gate_map.clamp(1e-6, 1.0).pow(float(gamma)).to(
+        device=heatmaps.device,
+        dtype=heatmaps.dtype,
+    )
+    return heatmaps * gate_map.unsqueeze(0)
+
+
 # ---------------------------------------------------------------------------
 # Metrics
 # ---------------------------------------------------------------------------
@@ -768,6 +819,52 @@ def refine_mask_with_rgb_edges(
     return refined & support
 
 
+def heatmap_peak_in_shape(
+    heatmap: torch.Tensor,
+    target_shape: Tuple[int, int],
+) -> Tuple[int, int]:
+    """Return the heatmap argmax coordinate scaled into ``target_shape``."""
+    H, W = heatmap.shape
+    flat_idx = heatmap.reshape(-1).argmax().item()
+    py, px = divmod(flat_idx, W)
+    target_h, target_w = int(target_shape[0]), int(target_shape[1])
+    py = min(max(int(py * target_h / max(H, 1)), 0), max(target_h - 1, 0))
+    px = min(max(int(px * target_w / max(W, 1)), 0), max(target_w - 1, 0))
+    return py, px
+
+
+def keep_peak_connected_component(
+    mask: np.ndarray,
+    peak_yx: Tuple[int, int],
+) -> np.ndarray:
+    """Keep only the predicted connected component containing the query peak."""
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    if not pred.any():
+        return pred.copy()
+    peak_y = min(max(int(peak_yx[0]), 0), pred.shape[0] - 1)
+    peak_x = min(max(int(peak_yx[1]), 0), pred.shape[1] - 1)
+    num_labels, labels = cv2.connectedComponents(pred.astype(np.uint8), connectivity=8)
+    if num_labels <= 1:
+        return pred.copy()
+    peak_label = int(labels[peak_y, peak_x])
+    if peak_label > 0:
+        return labels == peak_label
+
+    # If the argmax is just outside the thresholded support, snap to the nearest
+    # foreground component.  This keeps the readout peak-conditioned without
+    # silently falling back to a global largest-component heuristic.
+    ys, xs = np.nonzero(pred)
+    if ys.size == 0:
+        return pred.copy()
+    nearest_idx = int(np.argmin((ys - peak_y) ** 2 + (xs - peak_x) ** 2))
+    nearest_label = int(labels[int(ys[nearest_idx]), int(xs[nearest_idx])])
+    if nearest_label <= 0:
+        return pred.copy()
+    return labels == nearest_label
+
+
 def compute_iou(
     heatmap: torch.Tensor,
     gt_mask_np: np.ndarray,
@@ -801,7 +898,12 @@ def compute_iou(
     )
     if tuple(gt.shape) != tuple(pred.shape):
         gt = cv2.resize(gt, (pred.shape[1], pred.shape[0]), interpolation=cv2.INTER_NEAREST)
-    if mask_refinement == "rgb_grabcut" and rgb_image is not None:
+    if mask_refinement in {"peak_component", "peak_component_rgb_grabcut"}:
+        pred = keep_peak_connected_component(
+            pred,
+            heatmap_peak_in_shape(heatmap, tuple(pred.shape)),
+        ).astype(np.uint8)
+    if mask_refinement in {"rgb_grabcut", "peak_component_rgb_grabcut"} and rgb_image is not None:
         pred = refine_mask_with_rgb_edges(
             rgb_image,
             pred,
@@ -809,12 +911,74 @@ def compute_iou(
             dilate_pixels=mask_refinement_dilate,
             erode_pixels=mask_refinement_erode,
         ).astype(np.uint8)
-    elif mask_refinement != "none":
+    elif mask_refinement not in {"none", "peak_component"}:
         raise ValueError(f"Unsupported mask_refinement: {mask_refinement}")
 
     inter = (pred & gt).sum()
     union = (pred | gt).sum()
     return float(inter / union) if union > 0 else 0.0
+
+
+def build_sam3_prompt_initial_mask(
+    heatmap: torch.Tensor,
+    *,
+    threshold_ratio: float,
+    threshold_mode: str,
+    threshold_mean_std_k: float,
+    threshold_min_ratio: float,
+    threshold_max_ratio: float,
+    target_shape: Tuple[int, int],
+    initial_refinement: str = "none",
+) -> np.ndarray:
+    """Build the coarse mask that conditions the feature-only SAM3 readout."""
+    pred = heatmap_to_binary_mask(
+        heatmap,
+        threshold_ratio=threshold_ratio,
+        threshold_mode=threshold_mode,
+        threshold_mean_std_k=threshold_mean_std_k,
+        threshold_min_ratio=threshold_min_ratio,
+        threshold_max_ratio=threshold_max_ratio,
+        target_shape=target_shape,
+    ).astype(bool)
+    if initial_refinement == "none":
+        return pred
+    if initial_refinement == "peak_component":
+        return keep_peak_connected_component(
+            pred,
+            heatmap_peak_in_shape(heatmap, tuple(pred.shape)),
+        ).astype(bool)
+    if initial_refinement == "adaptive_peak":
+        peak = keep_peak_connected_component(
+            pred,
+            heatmap_peak_in_shape(heatmap, tuple(pred.shape)),
+        ).astype(bool)
+        if not pred.any() or not peak.any() or np.array_equal(pred, peak):
+            return pred
+        num_labels, _ = cv2.connectedComponents(pred.astype(np.uint8), connectivity=4)
+        if num_labels <= 2:
+            return pred
+        heat_np = heatmap.detach().float().cpu().numpy() if isinstance(heatmap, torch.Tensor) else np.asarray(heatmap)
+        if heat_np.ndim == 3:
+            heat_np = heat_np[0]
+        heat_np = heat_np.astype(np.float32)
+        if heat_np.shape != pred.shape:
+            heat_np = cv2.resize(
+                heat_np,
+                (pred.shape[1], pred.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            )
+        heat_np = heat_np - float(np.nanmin(heat_np))
+        heat_max = float(np.nanmax(heat_np))
+        if heat_max > 1e-8:
+            heat_np = heat_np / heat_max
+        raw_mass = float(heat_np[pred].sum()) if pred.any() else 0.0
+        peak_mass = float(heat_np[peak].sum()) if peak.any() else 0.0
+        mass_ratio = peak_mass / max(raw_mass, 1e-8)
+        area_ratio = float(peak.sum()) / max(float(pred.sum()), 1.0)
+        if mass_ratio >= 0.65 and area_ratio >= 0.05:
+            return peak
+        return pred
+    raise ValueError(f"Unsupported SAM3 prompt initial refinement: {initial_refinement}")
 
 
 def load_prompt_conditioned_mask_head(
@@ -910,6 +1074,8 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
             semantic_adaptor_residual=getattr(
                 config, "hybrid_semantic_adaptor_residual", True
             ),
+            use_quality_head=getattr(config, "hybrid_quality_head", False),
+            use_visibility_head=getattr(config, "hybrid_visibility_head", False),
         )
     else:
         latent_dim = getattr(config, "latent_dim", 64)
@@ -979,6 +1145,7 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
 def render_1280d(
     model, codec, renderer, sharpener, refiner, viewmat,
     *, is_hybrid=False, config=None, device=None, rgb_image=None,
+    return_aux: bool = False,
 ):
     """Render a single frame's decoded 1280-d features.
 
@@ -990,6 +1157,7 @@ def render_1280d(
 
     with torch.no_grad():
         result = renderer.render_features(model, viewmat.squeeze(0))
+        aux: Dict[str, torch.Tensor] = {}
         latent = result["feature_map"].unsqueeze(0)  # [1, D, H, W]
         latent = sharpener(latent)
 
@@ -1033,11 +1201,29 @@ def render_1280d(
             position_map = (
                 (position_map - lo.view(1, 3, 1, 1)) / extent.view(1, 3, 1, 1)
             ).clamp(0, 1)
-            latent = model.decode_screen_space(
-                latent.float(), position_map, depth_map=depth_map,
+            decoded_or_aux = model.decode_screen_space(
+                latent.float(), position_map, depth_map=depth_map, return_aux=return_aux,
             )
+            if return_aux and isinstance(decoded_or_aux, dict):
+                latent = decoded_or_aux["features"]
+                for key in ("quality_logit", "visibility_logit"):
+                    if key in decoded_or_aux:
+                        aux[key] = decoded_or_aux[key].detach()
+            else:
+                latent = decoded_or_aux
 
         decoded = codec.decode(latent)  # [1, 1280, H, W]
+        if return_aux:
+            alpha_map = result.get("alpha_map")
+            if alpha_map is not None:
+                if alpha_map.dim() == 2:
+                    aux["alpha_map"] = alpha_map.unsqueeze(0).unsqueeze(0).detach()
+                elif alpha_map.dim() == 3:
+                    aux["alpha_map"] = alpha_map.unsqueeze(0).detach()
+                else:
+                    aux["alpha_map"] = alpha_map.detach()
+    if return_aux:
+        return decoded, aux
     return decoded
 
 
@@ -1181,6 +1367,8 @@ def evaluate_scene(
     temperature: float = 50.0,
     scoring: str = "softmax_scene",
     heatmap_upsample: int = 1,
+    readout_confidence_gate: str = "none",
+    readout_confidence_gamma: float = 1.0,
     save_overlay_vis: bool = False,
     save_per_query_vis: bool = False,
     mask_refinement: str = "none",
@@ -1197,6 +1385,10 @@ def evaluate_scene(
     sam3_prompt_mask_head_support_dilate: int = DEFAULT_SAM3_PROMPT_MASK_HEAD_SUPPORT_DILATE,
     sam3_prompt_mask_head_coarse_dilate: int = DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_DILATE,
     sam3_prompt_mask_head_coarse_threshold: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_THRESHOLD,
+    sam3_prompt_mask_head_min_heatmap_mean_ratio: float = 0.0,
+    sam3_prompt_mask_head_min_heatmap_mass_ratio: float = 0.0,
+    sam3_prompt_mask_head_require_peak_in_refined: bool = False,
+    sam3_prompt_mask_head_initial_refinement: str = "none",
     sam3_prompt_mask_head_apply_to: str = "rendered",
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
@@ -1241,6 +1433,7 @@ def evaluate_scene(
             and canonical_mode != "rendered"
         ):
             mode_mask_refinement = "none"
+        mode_confidence_gate = readout_confidence_gate if canonical_mode == "rendered" else "none"
         for frame_id, frame_objects in tqdm(
             sorted(frame_annotations.items()),
             desc=f"  {scene}/{canonical_mode}",
@@ -1279,11 +1472,20 @@ def evaluate_scene(
                         from PIL import Image
                         rgb_pil = Image.open(img_path).convert("RGB")
                         rgb_tensor = TF.to_tensor(rgb_pil).unsqueeze(0).to(device)
-                feat_1280 = render_1280d(
-                    model, codec, renderer, sharpener, refiner, viewmat,
-                    is_hybrid=is_hybrid, config=config, device=device,
-                    rgb_image=rgb_tensor,
-                )
+                render_aux = None
+                if mode_confidence_gate != "none":
+                    feat_1280, render_aux = render_1280d(
+                        model, codec, renderer, sharpener, refiner, viewmat,
+                        is_hybrid=is_hybrid, config=config, device=device,
+                        rgb_image=rgb_tensor,
+                        return_aux=True,
+                    )
+                else:
+                    feat_1280 = render_1280d(
+                        model, codec, renderer, sharpener, refiner, viewmat,
+                        is_hybrid=is_hybrid, config=config, device=device,
+                        rgb_image=rgb_tensor,
+                    )
 
             # --- project to SigLIP2 ---
             siglip_feat = project_to_siglip2(feat_1280.half(), proj)  # [1, 1536, H, W]
@@ -1318,6 +1520,13 @@ def evaluate_scene(
                 all_scene_emb=all_scene_emb,
                 active_scene_indices=active_scene_idx,
             )
+            if mode_confidence_gate != "none":
+                heatmaps = apply_readout_confidence_gate(
+                    heatmaps,
+                    render_aux,
+                    gate=mode_confidence_gate,
+                    gamma=readout_confidence_gamma,
+                )
 
             # Sub-pixel localization via heatmap upsampling
             if heatmap_upsample > 1:
@@ -1367,7 +1576,7 @@ def evaluate_scene(
                 # mIoU at feature resolution by default; optional RGB refinement
                 # evaluates the refined mask at image resolution without using GT.
                 if mode_mask_refinement == "sam3_prompt_mask_head" and prompt_mask_feature is not None:
-                    initial_pred = heatmap_to_binary_mask(
+                    initial_pred = build_sam3_prompt_initial_mask(
                         hm,
                         threshold_ratio=iou_threshold,
                         threshold_mode=threshold_mode,
@@ -1375,6 +1584,7 @@ def evaluate_scene(
                         threshold_min_ratio=threshold_min_ratio,
                         threshold_max_ratio=threshold_max_ratio,
                         target_shape=(img_h, img_w),
+                        initial_refinement=sam3_prompt_mask_head_initial_refinement,
                     )
                     initial_overlap = mask_overlap_stats(initial_pred, gt_full)
                     pred, report = refine_mask_with_prompt_conditioned_sam3_head(
@@ -1391,6 +1601,26 @@ def evaluate_scene(
                         coarse_dilate=sam3_prompt_mask_head_coarse_dilate,
                         coarse_threshold=sam3_prompt_mask_head_coarse_threshold,
                     )
+                    if report.get("accepted", False) and (
+                        sam3_prompt_mask_head_require_peak_in_refined
+                        or sam3_prompt_mask_head_min_heatmap_mean_ratio > 0
+                        or sam3_prompt_mask_head_min_heatmap_mass_ratio > 0
+                    ):
+                        pred, support_report = filter_refined_mask_by_heatmap_support(
+                            initial_pred,
+                            pred,
+                            hm,
+                            min_mean_ratio=sam3_prompt_mask_head_min_heatmap_mean_ratio,
+                            min_mass_ratio=sam3_prompt_mask_head_min_heatmap_mass_ratio,
+                            require_peak_in_refined=sam3_prompt_mask_head_require_peak_in_refined,
+                        )
+                        report["heatmap_support"] = support_report
+                        if not support_report.get("accepted", False):
+                            report["accepted"] = False
+                            report["fallback_reason"] = support_report.get(
+                                "fallback_reason",
+                                "heatmap_support_rejected",
+                            )
                     iou = float(mask_overlap_stats(pred, gt_full)["iou"])
                     initial_ious.append(float(initial_overlap["iou"]))
                     refinement_reports.append(report)
@@ -1572,7 +1802,19 @@ def main() -> None:
                         help="Also write one visualisation PNG per frame/query. Enabled automatically with --save_overlay_vis")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
                         help="Upsample heatmaps by this factor before localization (default 4)")
-    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut", "sam3_prompt_mask_head"], default="none",
+    parser.add_argument(
+        "--readout_confidence_gate",
+        choices=["none", "quality", "visibility", "quality_visibility", "alpha"],
+        default="none",
+        help="GT-free rendered-readout confidence gating before mask thresholding.",
+    )
+    parser.add_argument(
+        "--readout_confidence_gamma",
+        type=float,
+        default=1.0,
+        help="Exponent for --readout_confidence_gate; 0 disables gating.",
+    )
+    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut", "peak_component", "peak_component_rgb_grabcut", "sam3_prompt_mask_head"], default="none",
                         help="Optional GT-free RGB boundary snapping after heatmap binarisation")
     parser.add_argument("--mask_refinement_iters", type=int, default=1,
                         help="GrabCut iterations for rgb_grabcut mask refinement")
@@ -1622,6 +1864,29 @@ def main() -> None:
         type=float,
         default=DEFAULT_SAM3_PROMPT_MASK_HEAD_COARSE_THRESHOLD,
     )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_min_heatmap_mean_ratio",
+        type=float,
+        default=0.0,
+        help="GT-free acceptance guard: require refined mask mean heatmap support / initial mean support to exceed this value.",
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_min_heatmap_mass_ratio",
+        type=float,
+        default=0.0,
+        help="GT-free acceptance guard: require refined mask total heatmap support / initial total support to exceed this value.",
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_require_peak_in_refined",
+        action="store_true",
+        help="Reject feature-only SAM refinements that drop the query heatmap peak.",
+    )
+    parser.add_argument(
+        "--sam3_prompt_mask_head_initial_refinement",
+        choices=["none", "peak_component", "adaptive_peak"],
+        default="none",
+        help="GT-free refinement applied to the heatmap coarse mask before feature-only SAM3 decoding.",
+    )
     parser.add_argument("--sam3_prompt_mask_head_apply_to", choices=["rendered", "all"], default="rendered")
     # Hardware
     parser.add_argument("--gpu", type=int, default=0,
@@ -1656,6 +1921,7 @@ def main() -> None:
     print(f"  IoU thresh: {args.iou_threshold}")
     print(f"  Thr mode:   {args.threshold_mode}")
     print(f"  Heatmap ↑:  {args.heatmap_upsample}×")
+    print(f"  Conf gate:  {args.readout_confidence_gate} (γ={args.readout_confidence_gamma})")
     print(f"  Mask ref.:  {args.mask_refinement}")
     print(f"  Prompts:    {len(prompt_templates)} template(s)")
     print()
@@ -1832,6 +2098,8 @@ def main() -> None:
             temperature=args.relevancy_temp,
             scoring=args.scoring,
             heatmap_upsample=args.heatmap_upsample,
+            readout_confidence_gate=args.readout_confidence_gate,
+            readout_confidence_gamma=args.readout_confidence_gamma,
             save_overlay_vis=args.save_overlay_vis,
             save_per_query_vis=args.save_per_query_vis or args.save_overlay_vis,
             mask_refinement=args.mask_refinement,
@@ -1848,6 +2116,10 @@ def main() -> None:
             sam3_prompt_mask_head_support_dilate=args.sam3_prompt_mask_head_support_dilate,
             sam3_prompt_mask_head_coarse_dilate=args.sam3_prompt_mask_head_coarse_dilate,
             sam3_prompt_mask_head_coarse_threshold=args.sam3_prompt_mask_head_coarse_threshold,
+            sam3_prompt_mask_head_min_heatmap_mean_ratio=args.sam3_prompt_mask_head_min_heatmap_mean_ratio,
+            sam3_prompt_mask_head_min_heatmap_mass_ratio=args.sam3_prompt_mask_head_min_heatmap_mass_ratio,
+            sam3_prompt_mask_head_require_peak_in_refined=args.sam3_prompt_mask_head_require_peak_in_refined,
+            sam3_prompt_mask_head_initial_refinement=args.sam3_prompt_mask_head_initial_refinement,
             sam3_prompt_mask_head_apply_to=args.sam3_prompt_mask_head_apply_to,
         )
         all_results[scene] = scene_results

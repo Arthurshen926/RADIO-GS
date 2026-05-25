@@ -10,12 +10,14 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     SelectionSpec,
     Sam3AdaptorMaskRefiner,
     apply_direct_primitive_confidence,
+    apply_sam3_prompt_heatmap_guard,
     _blend_point_summary_adapter_features,
     apply_registration_confidence,
     apply_selection_ratio_bounds,
     aggregate_scores_by_voxel,
     bootstrap_mean_ci,
     boundary_f_score,
+    build_direct3d_prompt_initial_mask,
     choose_sam3_box_refined_mask,
     choose_sam3_box_refined_mask_with_report,
     choose_refined_mask_by_geometry_with_report,
@@ -34,6 +36,8 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     sample_registration_view_weights,
     save_score_cache,
     choose_sam3_mask_head_refined_mask_with_report,
+    normalize_score_heatmap_features,
+    finalize_prompt_conditioned_sam3_mask,
     refine_mask_with_prompt_conditioned_sam3_head,
     refine_selection_by_voxel_components,
     refine_mask_with_sam3_adaptor_features,
@@ -45,6 +49,9 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     select_gaussians_with_seed_expand_components,
     select_registration_frame_ids,
     save_registered_feature_cache,
+    smooth_scores_with_voxel_proposals,
+    smooth_scores_with_sam3_training_view_proposals,
+    _project_points_to_image,
     trimap_iou,
     mask_to_sam3_box_prompt,
 )
@@ -69,6 +76,32 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert result.returncode == 0, result.stderr
     assert "--mask_refinement_erode" in result.stdout
     assert "--save_geometry_maps" in result.stdout
+    assert "--sam3_proposal_registration_dir" in result.stdout
+    assert "--sam3_proposal_registration_alpha" in result.stdout
+    assert "--sam3_proposal_registration_query_conditioned" in result.stdout
+    assert "--sam3_prompt_mask_head_initial_refinement" in result.stdout
+    assert "--sam3_prompt_mask_head_require_peak_in_refined" in result.stdout
+    assert "--sam3_prompt_mask_head_min_heatmap_mean_ratio" in result.stdout
+
+
+def test_project_points_to_image_uses_lerf_w2c_pose_and_intrinsics():
+    xyz = torch.tensor([[0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [0.0, 0.0, -1.0]])
+    pose = torch.eye(4)
+
+    pixels, visible = _project_points_to_image(
+        xyz,
+        pose,
+        fx=10.0,
+        fy=10.0,
+        cx=5.0,
+        cy=6.0,
+        image_width=32,
+        image_height=32,
+    )
+
+    assert torch.allclose(pixels[0], torch.tensor([5.0, 6.0]))
+    assert torch.allclose(pixels[1], torch.tensor([15.0, 6.0]))
+    assert visible.tolist() == [1.0, 1.0, 0.0]
 
 
 def test_refine_mask_with_sam3_adaptor_features_snaps_overwide_boundary():
@@ -100,6 +133,41 @@ def test_refine_mask_with_sam3_adaptor_features_snaps_overwide_boundary():
     assert report["attempted"] is True
     assert report["accepted"] is True
     assert refined_iou > initial_iou + 0.20
+
+
+def test_smooth_scores_with_voxel_proposals_recovers_noisy_object_member():
+    scores = torch.tensor(
+        [
+            [4.0, 0.0],
+            [0.2, 0.0],
+            [0.0, 3.0],
+        ],
+        dtype=torch.float32,
+    )
+    xyz = torch.tensor(
+        [
+            [0.01, 0.01, 0.01],
+            [0.09, 0.02, 0.01],
+            [0.30, 0.01, 0.01],
+        ],
+        dtype=torch.float32,
+    )
+
+    smoothed, stats = smooth_scores_with_voxel_proposals(
+        scores,
+        xyz,
+        voxel_size=0.1,
+        alpha=0.5,
+        min_count=2,
+        gate="low_margin",
+        margin_threshold=0.5,
+    )
+
+    assert stats["enabled"] is True
+    assert stats["num_proposals"] == 2
+    assert torch.allclose(smoothed[0], scores[0])
+    assert torch.allclose(smoothed[1], torch.tensor([1.15, 0.0]))
+    assert torch.allclose(smoothed[2], scores[2])
 
 
 def test_refine_mask_with_sam3_adaptor_features_empty_mask_falls_back():
@@ -266,6 +334,86 @@ def test_refine_mask_with_prompt_conditioned_sam3_head_uses_prompt_and_coarse_ma
     assert report["attempted"] is True
     assert report["accepted"] is True
     assert refined_iou > initial_iou
+
+
+def test_direct3d_prompt_initial_mask_can_keep_heatmap_peak_component():
+    coarse = np.zeros((8, 8), dtype=bool)
+    coarse[1:3, 1:3] = True
+    coarse[5:7, 5:7] = True
+    heatmap = torch.zeros((8, 8), dtype=torch.float32)
+    heatmap[5, 5] = 1.0
+
+    refined = build_direct3d_prompt_initial_mask(
+        coarse,
+        heatmap,
+        initial_refinement="peak_component",
+    )
+
+    expected = np.zeros_like(coarse)
+    expected[5:7, 5:7] = True
+    assert np.array_equal(refined, expected)
+
+
+def test_sam3_prompt_heatmap_guard_rejects_refinement_that_drops_peak():
+    initial = np.zeros((8, 8), dtype=bool)
+    initial[2:6, 2:6] = True
+    refined = initial.copy()
+    refined[4, 4] = False
+    heatmap = np.zeros((8, 8), dtype=np.float32)
+    heatmap[4, 4] = 1.0
+
+    guarded, report = apply_sam3_prompt_heatmap_guard(
+        initial,
+        refined,
+        heatmap,
+        min_mean_ratio=0.0,
+        min_mass_ratio=0.0,
+        require_peak_in_refined=True,
+    )
+
+    assert np.array_equal(guarded, initial)
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "heatmap_peak_outside_refined"
+
+
+def test_prompt_conditioned_sam3_fallback_keeps_original_coarse_mask():
+    coarse = np.zeros((8, 8), dtype=bool)
+    coarse[1:7, 1:7] = True
+    prompt_initial = np.zeros((8, 8), dtype=bool)
+    prompt_initial[3:5, 3:5] = True
+    rejected_candidate = np.zeros((8, 8), dtype=bool)
+    rejected_candidate[0:2, 0:2] = True
+
+    report = {"attempted": True, "accepted": True, "fallback_reason": ""}
+    heatmap_report = {"accepted": False, "fallback_reason": "missing_heatmap_peak"}
+
+    final, final_report = finalize_prompt_conditioned_sam3_mask(
+        coarse,
+        prompt_initial,
+        rejected_candidate,
+        report,
+        heatmap_guard_report=heatmap_report,
+    )
+
+    assert np.array_equal(final, coarse)
+    assert not np.array_equal(final, prompt_initial)
+    assert final_report["accepted"] is False
+    assert final_report["fallback_reason"] == "missing_heatmap_peak"
+
+
+def test_normalize_score_heatmap_features_scales_each_query_independently():
+    scores = torch.tensor(
+        [
+            [1.0, 10.0],
+            [3.0, 20.0],
+            [5.0, 20.0],
+        ]
+    )
+
+    norm = normalize_score_heatmap_features(scores)
+
+    assert torch.allclose(norm[:, 0], torch.tensor([0.0, 0.5, 1.0]))
+    assert torch.allclose(norm[:, 1], torch.tensor([0.0, 1.0, 1.0]))
 
 
 def test_refine_mask_with_sam3_feature_grabcut_uses_feature_boundaries():
@@ -1032,6 +1180,33 @@ def test_score_cache_accepts_legacy_center_assignment_metadata(tmp_path):
         expected_metadata={
             **legacy_metadata,
             "registration_assignment_mode": "center",
+        },
+    )
+
+    assert torch.equal(scores, torch.ones(2, 1))
+
+
+def test_score_cache_accepts_legacy_default_direct_confidence_metadata(tmp_path):
+    cache_path = tmp_path / "scores.pt"
+    legacy_metadata = {
+        "scene": "waldo_kitchen",
+        "score_source": "direct",
+        "registration_assignment_mode": "center",
+    }
+    save_score_cache(
+        cache_path,
+        torch.ones(2, 1),
+        metadata=legacy_metadata,
+        registration_stats={},
+    )
+
+    scores, _ = load_score_cache(
+        cache_path,
+        expected_metadata={
+            **legacy_metadata,
+            "direct_primitive_confidence_mode": "none",
+            "direct_primitive_confidence_blend": 0.0,
+            "direct_primitive_opacity_threshold": 0.02,
         },
     )
 

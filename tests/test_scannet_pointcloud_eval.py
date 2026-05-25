@@ -11,6 +11,7 @@ from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _apply_logit_calibration,
     _apply_opacity_label_filter,
     _apply_query_opacity_label_filter,
+    _build_voxel_proposal_labels_for_points,
     _decode_gaussian_indices_1280,
     _decode_points_1280,
     _empty_query_diagnostics,
@@ -26,6 +27,8 @@ from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _resolve_opacity_filter_mode,
     _resolve_class_aliases,
     _save_language_features_npz,
+    _smooth_logits_spatial_knn,
+    _smooth_logits_voxel_proposals,
     _subsample_points,
     _update_query_diagnostics,
 )
@@ -238,6 +241,55 @@ def test_query_mode_parser_accepts_logit_calibration_alpha():
     assert args.logit_calibration_alpha == 0.5
 
 
+def test_query_mode_parser_accepts_spatial_logit_smoothing():
+    parser = argparse.ArgumentParser()
+    _add_query_mode_args(parser)
+
+    args = parser.parse_args(
+        [
+            "--logit_smoothing",
+            "spatial_knn",
+            "--logit_smoothing_k",
+            "12",
+            "--logit_smoothing_alpha",
+            "0.25",
+        ]
+    )
+
+    assert args.logit_smoothing == "spatial_knn"
+    assert args.logit_smoothing_k == 12
+    assert args.logit_smoothing_alpha == 0.25
+
+
+def test_query_mode_parser_accepts_voxel_proposal_smoothing():
+    parser = argparse.ArgumentParser()
+    _add_query_mode_args(parser)
+
+    args = parser.parse_args(
+        [
+            "--proposal_smoothing",
+            "voxel",
+            "--proposal_voxel_size",
+            "0.08",
+            "--proposal_smoothing_alpha",
+            "0.4",
+            "--proposal_smoothing_gate",
+            "low_confidence",
+            "--proposal_margin_threshold",
+            "0.08",
+            "--proposal_confidence_threshold",
+            "0.6",
+        ]
+    )
+
+    assert args.proposal_smoothing == "voxel"
+    assert args.proposal_voxel_size == 0.08
+    assert args.proposal_smoothing_alpha == 0.4
+    assert args.proposal_smoothing_gate == "low_confidence"
+    assert args.proposal_margin_threshold == 0.08
+    assert args.proposal_confidence_threshold == 0.6
+
+
 def test_query_mode_parser_accepts_scannet_class_aliases():
     parser = argparse.ArgumentParser()
     _add_query_mode_args(parser)
@@ -267,6 +319,128 @@ def test_apply_logit_calibration_can_scale_class_bias():
     calibrated = _apply_logit_calibration(logits, bias, alpha=0.5)
 
     assert torch.allclose(calibrated, torch.tensor([[2.5, 1.75, 1.5]]))
+
+
+def test_smooth_logits_spatial_knn_propagates_neighbor_evidence():
+    logits = torch.tensor(
+        [
+            [4.0, 0.0],
+            [4.0, 0.0],
+            [0.0, 4.0],
+        ],
+        dtype=torch.float32,
+    )
+    xyz = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [0.1, 0.0, 0.0],
+            [10.0, 0.0, 0.0],
+        ],
+        dtype=np.float32,
+    )
+
+    smoothed, stats = _smooth_logits_spatial_knn(
+        logits,
+        xyz,
+        k=1,
+        alpha=0.5,
+        iterations=1,
+    )
+
+    assert stats["enabled"] is True
+    assert smoothed[0, 0] == pytest.approx(4.0)
+    assert smoothed[2, 0] > 0.0
+    assert smoothed[2, 1] < 4.0
+
+
+def test_build_voxel_proposal_labels_for_points_groups_local_points():
+    xyz = np.array(
+        [
+            [0.01, 0.01, 0.01],
+            [0.09, 0.02, 0.01],
+            [0.22, 0.01, 0.01],
+            [0.24, 0.08, 0.01],
+        ],
+        dtype=np.float32,
+    )
+
+    labels = _build_voxel_proposal_labels_for_points(xyz, voxel_size=0.1)
+
+    assert labels.shape == (4,)
+    assert labels[0] == labels[1]
+    assert labels[2] == labels[3]
+    assert labels[0] != labels[2]
+
+
+def test_smooth_logits_voxel_proposals_uses_label_free_object_memory():
+    logits = torch.tensor(
+        [
+            [4.0, 0.0],
+            [0.2, 0.0],
+            [0.0, 3.0],
+        ],
+        dtype=torch.float32,
+    )
+    xyz = np.array(
+        [
+            [0.01, 0.01, 0.01],
+            [0.09, 0.02, 0.01],
+            [0.30, 0.01, 0.01],
+        ],
+        dtype=np.float32,
+    )
+
+    smoothed, stats = _smooth_logits_voxel_proposals(
+        logits,
+        xyz,
+        voxel_size=0.1,
+        alpha=0.5,
+        min_count=2,
+        gate="low_margin",
+        margin_threshold=0.5,
+    )
+
+    assert stats["enabled"] is True
+    assert stats["num_proposals"] == 2
+    assert torch.allclose(smoothed[0], logits[0])
+    assert torch.allclose(smoothed[1], torch.tensor([1.15, 0.0]))
+    assert torch.allclose(smoothed[2], logits[2])
+
+
+def test_smooth_logits_voxel_proposals_can_gate_low_confidence_rows():
+    logits = torch.tensor(
+        [
+            [8.0, 0.0],
+            [0.2, 0.1],
+            [0.0, 4.0],
+        ],
+        dtype=torch.float32,
+    )
+    xyz = np.array(
+        [
+            [0.01, 0.01, 0.01],
+            [0.02, 0.02, 0.02],
+            [0.03, 0.03, 0.03],
+        ],
+        dtype=np.float32,
+    )
+
+    smoothed, stats = _smooth_logits_voxel_proposals(
+        logits,
+        xyz,
+        voxel_size=0.1,
+        alpha=1.0,
+        min_count=2,
+        gate="low_confidence",
+        confidence_threshold=0.60,
+    )
+
+    assert stats["enabled"] is True
+    assert stats["gate"] == "low_confidence"
+    assert stats["num_assigned"] == 1
+    assert torch.allclose(smoothed[0], logits[0])
+    assert torch.allclose(smoothed[1], logits.mean(dim=0))
+    assert torch.allclose(smoothed[2], logits[2])
 
 
 def test_resolve_class_aliases_can_expand_scannet_names():

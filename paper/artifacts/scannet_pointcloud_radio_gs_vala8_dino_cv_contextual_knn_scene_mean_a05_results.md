@@ -1,4 +1,7 @@
-# RADIO-GS VALA8 DINO-CV contextual kNN scene-mean alpha0.5
+# RADIO-GS VALA8 DINO-CV contextual kNN scene-mean alpha0.5 (Previous Diagnostic)
+
+This artifact is retained for provenance only. The current paper-facing ScanNet
+row is `scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn_scene_mean_a045_results`.
 
 Protocol: VALA/OpenGaFF ScanNet-8 candidate split
 Scenes: scene0000_00, scene0062_00, scene0070_00, scene0097_00, scene0140_00, scene0347_00, scene0400_00, scene0590_00

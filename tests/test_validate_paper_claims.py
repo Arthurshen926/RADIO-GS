@@ -34,9 +34,9 @@ def _write_good_fixture(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "paper/scannet_published_context_table.tex").write_text(
-        "OpenGaFF & 36.55 & 50.57 & 42.78 & 72.85 & 57.85 & 77.93 \\\\\n"
-        "\\method{} Gaussian-index & 35.83 & 60.06 & 36.18 & 61.52 & 43.67 & 69.98 \\\\\n"
-        "\\method{} contextual kNN & 36.77 & 59.97 & 37.48 & 61.81 & 45.62 & 70.08 \\\\\n",
+        "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52 \\\\\n"
+        "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\\\\n"
+        "\\method{} DINO-CV contextual kNN + spatial propagation & \\textbf{38.06} & \\textbf{61.29} & \\textbf{38.71} & \\textbf{63.15} & \\textbf{47.11} & \\textbf{72.00} \\\\\n",
         encoding="utf-8",
     )
     (root / "paper/artifacts/final_rows.yaml").write_text(
@@ -128,9 +128,9 @@ def test_validate_claims_flags_cags_in_scannet_context_table(tmp_path):
     _write_good_fixture(tmp_path)
     (tmp_path / "paper/scannet_published_context_table.tex").write_text(
         "CAGS & 35.00 & 50.00 & 37.00 & 55.00 & 47.00 & 66.00 \\\\\n"
-        "OpenGaFF & 36.55 & 50.57 & 42.78 & 72.85 & 57.85 & 77.93 \\\\\n"
-        "\\method{} Gaussian-index & 35.83 & 60.06 & 36.18 & 61.52 & 43.67 & 69.98 \\\\\n"
-        "\\method{} contextual kNN & 36.77 & 59.97 & 37.48 & 61.81 & 45.62 & 70.08 \\\\\n",
+        "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52 \\\\\n"
+        "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\\\\n"
+        "\\method{} DINO-CV contextual kNN + spatial propagation & \\textbf{38.06} & \\textbf{61.29} & \\textbf{38.71} & \\textbf{63.15} & \\textbf{47.11} & \\textbf{72.00} \\\\\n",
         encoding="utf-8",
     )
 

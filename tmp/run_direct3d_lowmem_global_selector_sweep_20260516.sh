@@ -118,6 +118,7 @@ run_scene() {
     --silhouette_threshold "$(scene_silhouette "$scene")" \
     --mask_refinement largest_component_rgb_grabcut \
     --chunk_size 2048 \
+    ${EXTRA_EVAL_ARGS:-} \
     --gpu 0 2>&1 | tee "$log_path"
 }
 

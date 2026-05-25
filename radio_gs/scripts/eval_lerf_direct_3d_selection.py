@@ -47,13 +47,24 @@ from radio_gs.data.benchmark_paths import (
 )
 from radio_gs.geometry_utils import resolve_use_2dgs
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
+from radio_gs.models.proposal_memory import (
+    build_voxel_proposal_labels,
+    propagate_logits_with_proposals,
+)
+from radio_gs.models.foundation_cache import load_foundation_cache
 from radio_gs.models.radio_adaptors import (
     load_radio_adaptor_from_checkpoint,
     project_feature_map_with_adaptor,
 )
+from radio_gs.models.sam3_proposal_registration import (
+    build_sam3_mask_memberships,
+    fuse_scores_with_query_sam3_proposals,
+    fuse_scores_with_sam3_proposals,
+)
 from radio_gs.models.prompt_conditioned_mask_head import PromptConditionedMaskHead
 from radio_gs.models.prompt_conditioned_mask_refinement import (
     choose_mask_candidate_by_initial_overlap,
+    filter_refined_mask_by_heatmap_support,
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
@@ -63,6 +74,8 @@ from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_PROMPT_TEMPLATES,
     LERF_OVS_SCENES,
     build_gt_masks,
+    heatmap_peak_in_shape,
+    keep_peak_connected_component,
     load_lerf_rgb_frame,
     load_lerf_ovs_labels,
     load_or_generate_prompt_ensemble_embeddings,
@@ -261,6 +274,14 @@ def load_score_cache(
         and expected.get("registration_assignment_mode") == "center"
     ):
         cached["registration_assignment_mode"] = "center"
+    default_compatible_keys = {
+        "direct_primitive_confidence_mode": "none",
+        "direct_primitive_confidence_blend": 0.0,
+        "direct_primitive_opacity_threshold": 0.02,
+    }
+    for key, default in default_compatible_keys.items():
+        if key in expected and key not in cached and expected.get(key) == default:
+            cached[key] = default
     if cached != expected:
         mismatched_keys = [
             key
@@ -943,6 +964,312 @@ def select_gaussians_by_proposal_components(
             selected[support_idx[torch.from_numpy(keep_mask)], query_idx] = 1.0
 
     return selected.to(device=device, dtype=torch.float32)
+
+
+def smooth_scores_with_voxel_proposals(
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    voxel_size: float,
+    alpha: float,
+    min_count: int = 2,
+    gate: str = "all",
+    margin_threshold: float = 0.0,
+    confidence_threshold: float = 0.0,
+) -> tuple[torch.Tensor, dict[str, float | int | bool]]:
+    """Blend primitive text scores with scores pooled over 3D voxel proposals."""
+    if scores.ndim != 2:
+        raise ValueError(f"Expected scores [N,K], got {tuple(scores.shape)}")
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or xyz.shape[0] != scores.shape[0]:
+        raise ValueError(
+            f"Expected xyz [N,3] aligned with scores [N,K], got "
+            f"{tuple(xyz.shape)} and {tuple(scores.shape)}"
+        )
+    if scores.shape[0] == 0 or alpha <= 0.0:
+        return scores, {
+            "enabled": False,
+            "mode": "voxel",
+            "voxel_size": float(voxel_size),
+            "alpha": float(alpha),
+            "min_count": int(min_count),
+            "gate": gate,
+            "margin_threshold": float(margin_threshold),
+            "confidence_threshold": float(confidence_threshold),
+            "num_proposals": 0,
+            "num_assigned": 0,
+        }
+
+    labels = build_voxel_proposal_labels(
+        xyz.detach().float().cpu(),
+        voxel_size=voxel_size,
+    ).to(scores.device)
+    smoothed, stats = propagate_logits_with_proposals(
+        scores,
+        labels,
+        alpha=alpha,
+        min_count=min_count,
+        gate=gate,
+        margin_threshold=margin_threshold,
+        confidence_threshold=confidence_threshold,
+    )
+    stats = dict(stats)
+    stats.update(
+        {
+            "mode": "voxel",
+            "voxel_size": float(voxel_size),
+        }
+    )
+    return smoothed, stats
+
+
+def _sam3_cache_frame_id(path: str | Path) -> int:
+    match = re.search(r"frame_(\d+)", Path(path).stem)
+    if not match:
+        raise ValueError(f"Cannot parse SAM3 cache frame id from {path}")
+    return int(match.group(1))
+
+
+def _resolve_sam3_proposal_cache_paths(cache_root: str | Path, scene: str) -> list[Path]:
+    root = Path(cache_root)
+    if not root.exists():
+        return []
+    scene_root = root / scene
+    base = scene_root if scene_root.exists() else root
+    return sorted(base.glob("frame_*.pt"), key=_sam3_cache_frame_id)
+
+
+def _camera_intrinsics_from_dataset(
+    dataset: LERFDataset,
+    *,
+    image_width: int,
+    image_height: int,
+) -> tuple[float, float, float, float]:
+    params = getattr(dataset, "camera_params", {}) or {}
+    width = float(params.get("w", image_width) or image_width)
+    height = float(params.get("h", image_height) or image_height)
+    fx = params.get("fl_x")
+    fy = params.get("fl_y")
+    if fx is None:
+        angle_x = float(params.get("camera_angle_x", 0.0) or 0.0)
+        fx = 0.5 * width / math.tan(0.5 * angle_x) if angle_x > 0 else width
+    if fy is None:
+        fy = fx
+    cx = float(params.get("cx", width * 0.5))
+    cy = float(params.get("cy", height * 0.5))
+    return float(fx), float(fy), cx, cy
+
+
+def _project_points_to_image(
+    xyz: torch.Tensor,
+    pose_w2c: torch.Tensor,
+    *,
+    fx: float,
+    fy: float,
+    cx: float,
+    cy: float,
+    image_width: int,
+    image_height: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Project world-space points to image pixels using a LERF world-to-camera pose."""
+    if xyz.ndim != 2 or xyz.shape[1] != 3:
+        raise ValueError(f"xyz must have shape [N,3], got {tuple(xyz.shape)}")
+    if pose_w2c.shape != (4, 4):
+        raise ValueError(f"pose_w2c must have shape [4,4], got {tuple(pose_w2c.shape)}")
+    device = xyz.device
+    pose = pose_w2c.to(device=device, dtype=torch.float32)
+    ones = torch.ones((xyz.shape[0], 1), dtype=torch.float32, device=device)
+    xyz_h = torch.cat([xyz.float(), ones], dim=-1)
+    cam = xyz_h @ pose.t()
+    z = cam[:, 2]
+    x = float(fx) * cam[:, 0] / z.clamp_min(1e-6) + float(cx)
+    y = float(fy) * cam[:, 1] / z.clamp_min(1e-6) + float(cy)
+    pixels = torch.stack([x, y], dim=-1)
+    visible = (
+        torch.isfinite(pixels).all(dim=-1)
+        & (z > 1e-6)
+        & (pixels[:, 0] >= 0)
+        & (pixels[:, 0] <= int(image_width) - 1)
+        & (pixels[:, 1] >= 0)
+        & (pixels[:, 1] <= int(image_height) - 1)
+    )
+    return pixels, visible.float()
+
+
+def smooth_scores_with_sam3_training_view_proposals(
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    cache_root: str | Path,
+    scene: str,
+    scene_categories: Sequence[str],
+    dataset: LERFDataset,
+    image_width: int,
+    image_height: int,
+    alpha: float,
+    min_probability: float,
+    max_masks_per_frame: int = 0,
+    gate: str = "low_margin",
+    margin_threshold: float = 0.05,
+    query_conditioned: bool = False,
+) -> tuple[torch.Tensor, Dict[str, Any]]:
+    """Fuse primitive scores with official SAM3 training-view proposal memory."""
+    stats: Dict[str, Any] = {
+        "enabled": False,
+        "mode": "sam3_trainview",
+        "cache_root": str(cache_root),
+        "alpha": float(alpha),
+        "min_probability": float(min_probability),
+        "max_masks_per_frame": int(max_masks_per_frame),
+        "gate": gate,
+        "margin_threshold": float(margin_threshold),
+        "query_conditioned": bool(query_conditioned),
+        "num_cache_frames": 0,
+        "num_used_frames": 0,
+        "num_proposals": 0,
+        "num_memberships": 0,
+        "num_assigned": 0,
+        "skipped_frames": 0,
+    }
+    if scores.ndim != 2:
+        raise ValueError(f"Expected scores [N,K], got {tuple(scores.shape)}")
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or xyz.shape[0] != scores.shape[0]:
+        raise ValueError(
+            f"Expected xyz [N,3] aligned with scores [N,K], got "
+            f"{tuple(xyz.shape)} and {tuple(scores.shape)}"
+        )
+    if not cache_root or float(alpha) <= 0.0:
+        return scores, stats
+
+    cache_paths = _resolve_sam3_proposal_cache_paths(cache_root, scene)
+    stats["num_cache_frames"] = len(cache_paths)
+    if not cache_paths:
+        return scores, stats
+
+    fx, fy, cx, cy = _camera_intrinsics_from_dataset(
+        dataset,
+        image_width=image_width,
+        image_height=image_height,
+    )
+    xyz_cpu = xyz.detach().float().cpu()
+    row_chunks: list[torch.Tensor] = []
+    proposal_chunks: list[torch.Tensor] = []
+    weight_chunks: list[torch.Tensor] = []
+    proposal_query_chunks: list[torch.Tensor] = []
+    proposal_offset = 0
+    used_frame_ids: list[int] = []
+    scene_query_lookup = {
+        str(query).strip().lower(): idx
+        for idx, query in enumerate(scene_categories)
+    }
+
+    for cache_path in cache_paths:
+        frame_id = _sam3_cache_frame_id(cache_path)
+        pose_np = getattr(dataset, "pose_by_frame_idx", {}).get(frame_id)
+        if pose_np is None and 0 <= frame_id < len(getattr(dataset, "poses_w2c", [])):
+            pose_np = dataset.poses_w2c[frame_id]
+        if pose_np is None and 1 <= frame_id <= len(getattr(dataset, "poses_w2c", [])):
+            pose_np = dataset.poses_w2c[frame_id - 1]
+        if pose_np is None:
+            stats["skipped_frames"] = int(stats["skipped_frames"]) + 1
+            continue
+
+        cache = load_foundation_cache(cache_path, require_official=True)
+        head = cache.heads.get("sam3")
+        if head is None or head.mask_logits is None or head.mask_logits.shape[0] == 0:
+            stats["skipped_frames"] = int(stats["skipped_frames"]) + 1
+            continue
+
+        mask_logits = head.mask_logits.detach().float().cpu()
+        mask_query_indices: torch.Tensor | None = None
+        if query_conditioned:
+            if head.mask_query_indices is None or not head.queries:
+                stats["skipped_frames"] = int(stats["skipped_frames"]) + 1
+                continue
+            cache_to_scene = torch.full(
+                (len(head.queries),),
+                -1,
+                dtype=torch.long,
+            )
+            for cache_idx, query in enumerate(head.queries):
+                cache_to_scene[cache_idx] = scene_query_lookup.get(
+                    str(query).strip().lower(),
+                    -1,
+                )
+            local_query = head.mask_query_indices.detach().long().cpu()
+            valid_local = (local_query >= 0) & (local_query < cache_to_scene.numel())
+            mask_query_indices = torch.full_like(local_query, -1)
+            mask_query_indices[valid_local] = cache_to_scene[local_query[valid_local]]
+        mask_h, mask_w = int(mask_logits.shape[-2]), int(mask_logits.shape[-1])
+        pixels, visibility = _project_points_to_image(
+            xyz_cpu,
+            torch.as_tensor(pose_np, dtype=torch.float32),
+            fx=fx,
+            fy=fy,
+            cx=cx,
+            cy=cy,
+            image_width=image_width,
+            image_height=image_height,
+        )
+        pixels_mask = pixels.clone()
+        pixels_mask[:, 0] *= (mask_w - 1) / max(int(image_width) - 1, 1)
+        pixels_mask[:, 1] *= (mask_h - 1) / max(int(image_height) - 1, 1)
+        memberships = build_sam3_mask_memberships(
+            mask_logits,
+            pixels_mask,
+            scores=head.scores.detach().float().cpu() if head.scores is not None else None,
+            mask_query_indices=mask_query_indices,
+            visibility=visibility,
+            min_probability=min_probability,
+            max_masks=max_masks_per_frame if max_masks_per_frame > 0 else None,
+            proposal_offset=proposal_offset,
+        )
+        proposal_offset += memberships.num_proposals
+        if memberships.row_indices.numel() == 0:
+            continue
+        row_chunks.append(memberships.row_indices)
+        proposal_chunks.append(memberships.proposal_indices)
+        weight_chunks.append(memberships.weights)
+        if query_conditioned:
+            if memberships.proposal_query_indices is None:
+                raise RuntimeError("query-conditioned SAM3 proposal registration missing query ids")
+            proposal_query_chunks.append(memberships.proposal_query_indices)
+        used_frame_ids.append(frame_id)
+
+    stats["num_used_frames"] = len(used_frame_ids)
+    stats["used_frame_ids"] = used_frame_ids
+    stats["num_proposals"] = int(proposal_offset)
+    if not row_chunks:
+        return scores, stats
+
+    if query_conditioned:
+        fused, fusion_stats = fuse_scores_with_query_sam3_proposals(
+            scores,
+            torch.cat(row_chunks).to(scores.device),
+            torch.cat(proposal_chunks).to(scores.device),
+            torch.cat(weight_chunks).to(scores.device),
+            torch.cat(proposal_query_chunks).to(scores.device),
+            alpha=alpha,
+            gate=gate,  # type: ignore[arg-type]
+            margin_threshold=margin_threshold,
+        )
+    else:
+        fused, fusion_stats = fuse_scores_with_sam3_proposals(
+            scores,
+            torch.cat(row_chunks).to(scores.device),
+            torch.cat(proposal_chunks).to(scores.device),
+            torch.cat(weight_chunks).to(scores.device),
+            alpha=alpha,
+            gate=gate,  # type: ignore[arg-type]
+            margin_threshold=margin_threshold,
+        )
+    stats.update(fusion_stats)
+    stats["mode"] = "sam3_trainview"
+    stats["cache_root"] = str(cache_root)
+    stats["num_cache_frames"] = len(cache_paths)
+    stats["num_used_frames"] = len(used_frame_ids)
+    stats["used_frame_ids"] = used_frame_ids
+    stats["skipped_frames"] = int(stats.get("skipped_frames", 0))
+    return fused, stats
 
 
 def refine_selection_by_voxel_components(
@@ -2584,6 +2911,109 @@ def save_geometry_alignment_overlay(
     cv2.imwrite(str(path), overlay)
 
 
+def normalize_score_heatmap_features(scores: torch.Tensor) -> torch.Tensor:
+    """Normalize primitive query scores to [0, 1] per query for score rendering."""
+    if scores.ndim != 2:
+        raise ValueError(f"Expected scores [N,Q], got {tuple(scores.shape)}")
+    values = scores.detach().float()
+    min_values = values.min(dim=0, keepdim=True).values
+    max_values = values.max(dim=0, keepdim=True).values
+    denom = (max_values - min_values).clamp_min(1e-8)
+    return ((values - min_values) / denom).clamp(0.0, 1.0)
+
+
+def build_direct3d_prompt_initial_mask(
+    coarse_mask: np.ndarray,
+    heatmap: np.ndarray | torch.Tensor,
+    *,
+    initial_refinement: str = "none",
+) -> np.ndarray:
+    """Build the feature-only SAM prompt mask for direct-3D projected masks."""
+    pred = np.asarray(coarse_mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D coarse mask, got {pred.shape}")
+    if initial_refinement == "none":
+        return pred.copy()
+    if initial_refinement == "peak_component":
+        heat = heatmap.detach().float().cpu() if isinstance(heatmap, torch.Tensor) else torch.as_tensor(heatmap)
+        if heat.ndim == 3:
+            heat = heat[0]
+        if heat.ndim != 2:
+            raise ValueError(f"Expected 2D heatmap, got {tuple(heat.shape)}")
+        return keep_peak_connected_component(
+            pred,
+            heatmap_peak_in_shape(heat, tuple(pred.shape)),
+        ).astype(bool)
+    raise ValueError(f"Unsupported direct-3D prompt initial refinement: {initial_refinement}")
+
+
+def apply_sam3_prompt_heatmap_guard(
+    initial_mask: np.ndarray,
+    refined_mask: np.ndarray,
+    heatmap: np.ndarray | torch.Tensor,
+    *,
+    min_mean_ratio: float = 0.0,
+    min_mass_ratio: float = 0.0,
+    require_peak_in_refined: bool = False,
+) -> tuple[np.ndarray, Dict[str, Any]]:
+    """GT-free guard for feature-only SAM prompt refinement in direct 3D."""
+    return filter_refined_mask_by_heatmap_support(
+        initial_mask,
+        refined_mask,
+        heatmap,
+        min_mean_ratio=min_mean_ratio,
+        min_mass_ratio=min_mass_ratio,
+        require_peak_in_refined=require_peak_in_refined,
+    )
+
+
+def finalize_prompt_conditioned_sam3_mask(
+    coarse_mask: np.ndarray,
+    prompt_initial_mask: np.ndarray,
+    candidate_mask: np.ndarray,
+    sam3_report: Dict[str, Any],
+    *,
+    heatmap_guard_report: Optional[Dict[str, Any]] = None,
+    geometry_gate_report: Optional[Dict[str, Any]] = None,
+) -> tuple[np.ndarray, Dict[str, Any]]:
+    """Choose the final prompt-SAM mask while preserving the coarse fallback.
+
+    The prompt mask can be a cleaned support such as a peak component, but it is
+    not the semantic fallback. If feature-only SAM or its GT-free guards reject
+    a candidate, the evaluator must keep the original direct-3D coarse mask.
+    """
+    coarse = np.asarray(coarse_mask).astype(bool)
+    prompt_initial = np.asarray(prompt_initial_mask).astype(bool)
+    candidate = np.asarray(candidate_mask).astype(bool)
+    report = dict(sam3_report)
+    accepted = bool(report.get("accepted", False))
+    fallback_reason = str(report.get("fallback_reason", "") or "")
+
+    if heatmap_guard_report is not None:
+        report["heatmap_support"] = dict(heatmap_guard_report)
+        if not bool(heatmap_guard_report.get("accepted", False)):
+            accepted = False
+            fallback_reason = str(
+                heatmap_guard_report.get("fallback_reason", fallback_reason)
+            )
+
+    if geometry_gate_report is not None:
+        report.update(geometry_gate_report)
+        if not bool(geometry_gate_report.get("geometry_gate_accepted", False)):
+            accepted = False
+            fallback_reason = str(
+                geometry_gate_report.get("geometry_gate_reason", fallback_reason)
+            )
+
+    report["accepted"] = bool(accepted)
+    report["prompt_initial_area"] = int(prompt_initial.sum())
+    report["coarse_fallback_area"] = int(coarse.sum())
+    if not accepted:
+        report["fallback_reason"] = fallback_reason or "candidate_rejected"
+        return coarse.copy(), report
+    return candidate.copy(), report
+
+
 def keep_largest_mask_component(mask: np.ndarray) -> np.ndarray:
     """Keep the largest 8-connected component in a predicted binary mask.
 
@@ -3899,6 +4329,10 @@ def evaluate_selection_spec(
     sam3_adaptor_refiner: Optional[Sam3AdaptorMaskRefiner],
     sam3_mask_head_refiner: Optional[Sam3MaskHeadRefiner],
     sam3_prompt_mask_head_refiner: Optional[PromptConditionedSam3MaskHeadRefiner],
+    sam3_prompt_mask_head_initial_refinement: str,
+    sam3_prompt_mask_head_min_heatmap_mean_ratio: float,
+    sam3_prompt_mask_head_min_heatmap_mass_ratio: float,
+    sam3_prompt_mask_head_require_peak_in_refined: bool,
     min_select: int,
     output_dir: Path,
     save_masks: bool,
@@ -3952,6 +4386,23 @@ def evaluate_selection_spec(
         )
     selected = selected.to(device=device, dtype=torch.float32)
     proxy = GaussianSelectionProxy(model, selected)
+    needs_prompt_heatmap = (
+        mask_refinement == "sam3_prompt_mask_head"
+        and (
+            sam3_prompt_mask_head_initial_refinement != "none"
+            or float(sam3_prompt_mask_head_min_heatmap_mean_ratio) > 0.0
+            or float(sam3_prompt_mask_head_min_heatmap_mass_ratio) > 0.0
+            or bool(sam3_prompt_mask_head_require_peak_in_refined)
+        )
+    )
+    score_heatmap_proxy = (
+        GaussianSelectionProxy(
+            model,
+            normalize_score_heatmap_features(ranking_scores).to(device=device, dtype=torch.float32),
+        )
+        if needs_prompt_heatmap
+        else None
+    )
 
     ious: List[float] = []
     boundary_fs: List[float] = []
@@ -3984,6 +4435,15 @@ def evaluate_selection_spec(
             silhouette = rendered["feature_map"].detach().float().cpu().numpy()
             alpha_np = rendered["alpha_map"].detach().float().cpu().numpy()
             depth_np = rendered["depth_map"].detach().float().cpu().numpy()
+            score_heatmaps = (
+                renderer.render_features(score_heatmap_proxy, viewmat)["feature_map"]
+                .detach()
+                .float()
+                .cpu()
+                .numpy()
+                if score_heatmap_proxy is not None
+                else None
+            )
         geometry_maps = geometry_discontinuity_maps(alpha_np, depth_np) if save_geometry_maps else None
         if save_geometry_maps and geometry_maps is not None:
             for map_name, map_value in geometry_maps.items():
@@ -4028,6 +4488,14 @@ def evaluate_selection_spec(
             cat_idx = scene_categories.index(cat)
             pred = silhouette[cat_idx] > float(silhouette_threshold)
             initial_pred = pred.copy()
+            prompt_initial_pred = pred.copy()
+            prompt_heatmap = score_heatmaps[cat_idx] if score_heatmaps is not None else silhouette[cat_idx]
+            if mask_refinement == "sam3_prompt_mask_head":
+                prompt_initial_pred = build_direct3d_prompt_initial_mask(
+                    pred,
+                    prompt_heatmap,
+                    initial_refinement=sam3_prompt_mask_head_initial_refinement,
+                )
             sam3_report: Optional[Dict[str, Any]] = None
             if mask_refinement in {"largest_component", "largest_component_rgb_grabcut"}:
                 pred = keep_largest_mask_component(pred)
@@ -4162,11 +4630,31 @@ def evaluate_selection_spec(
             ):
                 candidate_pred, sam3_report = sam3_prompt_mask_head_refiner.refine_from_state_with_report(
                     sam3_mask_head_state,
-                    pred,
+                    prompt_initial_pred,
                     cat,
                 )
-                if sam3_refinement_geometry_gate:
-                    pred, gate_report = choose_refined_mask_by_geometry_with_report(
+                heatmap_guard_report: Optional[Dict[str, Any]] = None
+                geometry_gate_report: Optional[Dict[str, Any]] = None
+                if (
+                    float(sam3_prompt_mask_head_min_heatmap_mean_ratio) > 0.0
+                    or float(sam3_prompt_mask_head_min_heatmap_mass_ratio) > 0.0
+                    or bool(sam3_prompt_mask_head_require_peak_in_refined)
+                ):
+                    candidate_pred, heatmap_guard_report = apply_sam3_prompt_heatmap_guard(
+                        prompt_initial_pred,
+                        candidate_pred,
+                        prompt_heatmap,
+                        min_mean_ratio=sam3_prompt_mask_head_min_heatmap_mean_ratio,
+                        min_mass_ratio=sam3_prompt_mask_head_min_heatmap_mass_ratio,
+                        require_peak_in_refined=sam3_prompt_mask_head_require_peak_in_refined,
+                    )
+                    if not bool(heatmap_guard_report.get("accepted", False)):
+                        sam3_report["fallback_reason"] = str(
+                            heatmap_guard_report.get("fallback_reason", "")
+                        )
+                        sam3_report["accepted"] = False
+                if sam3_refinement_geometry_gate and bool(sam3_report.get("accepted", False)):
+                    candidate_pred, geometry_gate_report = choose_refined_mask_by_geometry_with_report(
                         initial_pred,
                         candidate_pred,
                         alpha_np,
@@ -4175,14 +4663,15 @@ def evaluate_selection_spec(
                         max_area_ratio=sam3_refinement_gate_max_area_ratio,
                         min_boundary_gain=sam3_refinement_gate_min_boundary_gain,
                     )
-                    sam3_report.update(gate_report)
-                    sam3_report["accepted"] = bool(
-                        sam3_report.get("accepted", False)
-                        and gate_report.get("geometry_gate_accepted", False)
-                    )
-                    sam3_report["fallback_reason"] = str(gate_report.get("geometry_gate_reason", ""))
-                else:
-                    pred = candidate_pred
+                pred, sam3_report = finalize_prompt_conditioned_sam3_mask(
+                    initial_pred,
+                    prompt_initial_pred,
+                    candidate_pred,
+                    sam3_report,
+                    heatmap_guard_report=heatmap_guard_report,
+                    geometry_gate_report=geometry_gate_report,
+                )
+                sam3_report["initial_refinement"] = sam3_prompt_mask_head_initial_refinement
             elif mask_refinement == "sam3_prompt_mask_head":
                 sam3_report = {
                     "backend": "prompt_conditioned_ctf_sam3_mask_head_no_rgb",
@@ -4437,6 +4926,20 @@ def evaluate_scene(
     score_aggregation: str,
     score_aggregation_resolution: int,
     score_aggregation_blend: float,
+    proposal_smoothing: str,
+    proposal_voxel_size: float,
+    proposal_smoothing_alpha: float,
+    proposal_min_count: int,
+    proposal_smoothing_gate: str,
+    proposal_margin_threshold: float,
+    proposal_confidence_threshold: float,
+    sam3_proposal_registration_dir: str,
+    sam3_proposal_registration_alpha: float,
+    sam3_proposal_registration_min_probability: float,
+    sam3_proposal_registration_max_masks_per_frame: int,
+    sam3_proposal_registration_gate: str,
+    sam3_proposal_registration_margin_threshold: float,
+    sam3_proposal_registration_query_conditioned: bool,
     selection_refinement: str,
     selection_min_ratio: float,
     selection_max_ratio: float,
@@ -4504,6 +5007,10 @@ def evaluate_scene(
     sam3_prompt_mask_head_support_dilate: int,
     sam3_prompt_mask_head_coarse_dilate: int,
     sam3_prompt_mask_head_coarse_threshold: float,
+    sam3_prompt_mask_head_initial_refinement: str,
+    sam3_prompt_mask_head_min_heatmap_mean_ratio: float,
+    sam3_prompt_mask_head_min_heatmap_mass_ratio: float,
+    sam3_prompt_mask_head_require_peak_in_refined: bool,
     min_select: int,
     chunk_size: int,
     official_frames_only: bool,
@@ -4927,6 +5434,79 @@ def evaluate_scene(
             resolution=score_aggregation_resolution,
             blend=score_aggregation_blend,
         )
+    proposal_smoothing_stats: Dict[str, Any] = {
+        "enabled": False,
+        "mode": proposal_smoothing,
+        "voxel_size": float(proposal_voxel_size),
+        "alpha": float(proposal_smoothing_alpha),
+        "min_count": int(proposal_min_count),
+        "gate": proposal_smoothing_gate,
+        "margin_threshold": float(proposal_margin_threshold),
+        "confidence_threshold": float(proposal_confidence_threshold),
+        "num_proposals": 0,
+        "num_assigned": 0,
+    }
+    if proposal_smoothing == "voxel" and proposal_smoothing_alpha > 0:
+        print(
+            "  smoothing primitive scores with proposal memory "
+            f"(voxel={proposal_voxel_size:g}, alpha={proposal_smoothing_alpha:g}, "
+            f"min_count={proposal_min_count}, gate={proposal_smoothing_gate}, "
+            f"margin={proposal_margin_threshold:g}, "
+            f"confidence={proposal_confidence_threshold:g})"
+        )
+        scores, proposal_smoothing_stats = smooth_scores_with_voxel_proposals(
+            scores,
+            model.get_xyz().detach().cpu(),
+            voxel_size=proposal_voxel_size,
+            alpha=proposal_smoothing_alpha,
+            min_count=proposal_min_count,
+            gate=proposal_smoothing_gate,
+            margin_threshold=proposal_margin_threshold,
+            confidence_threshold=proposal_confidence_threshold,
+        )
+    elif proposal_smoothing != "none":
+        raise ValueError(f"Unsupported proposal_smoothing: {proposal_smoothing}")
+    sam3_proposal_registration_stats: Dict[str, Any] = {
+        "enabled": False,
+        "mode": "sam3_trainview",
+        "cache_root": str(sam3_proposal_registration_dir),
+        "alpha": float(sam3_proposal_registration_alpha),
+        "min_probability": float(sam3_proposal_registration_min_probability),
+        "max_masks_per_frame": int(sam3_proposal_registration_max_masks_per_frame),
+        "gate": sam3_proposal_registration_gate,
+        "margin_threshold": float(sam3_proposal_registration_margin_threshold),
+        "query_conditioned": bool(sam3_proposal_registration_query_conditioned),
+        "num_cache_frames": 0,
+        "num_used_frames": 0,
+        "num_proposals": 0,
+        "num_memberships": 0,
+        "num_assigned": 0,
+    }
+    if sam3_proposal_registration_dir and sam3_proposal_registration_alpha > 0:
+        print(
+            "  fusing primitive scores with SAM3 training-view proposal memory "
+            f"(alpha={sam3_proposal_registration_alpha:g}, "
+            f"prob>={sam3_proposal_registration_min_probability:g}, "
+            f"gate={sam3_proposal_registration_gate}, "
+            f"margin={sam3_proposal_registration_margin_threshold:g}, "
+            f"query_conditioned={sam3_proposal_registration_query_conditioned})"
+        )
+        scores, sam3_proposal_registration_stats = smooth_scores_with_sam3_training_view_proposals(
+            scores,
+            model.get_xyz().detach().cpu(),
+            cache_root=sam3_proposal_registration_dir,
+            scene=scene,
+            scene_categories=scene_categories,
+            dataset=dataset,
+            image_width=img_w,
+            image_height=img_h,
+            alpha=sam3_proposal_registration_alpha,
+            min_probability=sam3_proposal_registration_min_probability,
+            max_masks_per_frame=sam3_proposal_registration_max_masks_per_frame,
+            gate=sam3_proposal_registration_gate,
+            margin_threshold=sam3_proposal_registration_margin_threshold,
+            query_conditioned=sam3_proposal_registration_query_conditioned,
+        )
     if selection_refinement != "none":
         print(
             "  refining selections by voxel components "
@@ -4969,6 +5549,10 @@ def evaluate_scene(
             sam3_adaptor_refiner=sam3_adaptor_refiner,
             sam3_mask_head_refiner=sam3_mask_head_refiner,
             sam3_prompt_mask_head_refiner=sam3_prompt_mask_head_refiner,
+            sam3_prompt_mask_head_initial_refinement=sam3_prompt_mask_head_initial_refinement,
+            sam3_prompt_mask_head_min_heatmap_mean_ratio=sam3_prompt_mask_head_min_heatmap_mean_ratio,
+            sam3_prompt_mask_head_min_heatmap_mass_ratio=sam3_prompt_mask_head_min_heatmap_mass_ratio,
+            sam3_prompt_mask_head_require_peak_in_refined=sam3_prompt_mask_head_require_peak_in_refined,
             min_select=min_select,
             output_dir=output_dir,
             save_masks=save_masks,
@@ -4990,6 +5574,8 @@ def evaluate_scene(
         "compact_feature_key": compact_feature_key,
         "canonical_embedding_cache": canonical_embedding_cache if scoring == "relevancy" else "",
         "registration": registration_stats,
+        "proposal_smoothing": proposal_smoothing_stats,
+        "sam3_proposal_registration": sam3_proposal_registration_stats,
         "score_cache": score_cache_info,
         "direct_head_eval": direct_head_eval_status,
         "categories": scene_categories,
@@ -5056,6 +5642,30 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
             f"{protocol.get('score_aggregation')} "
             f"(res={protocol.get('score_aggregation_resolution')}, "
             f"blend={protocol.get('score_aggregation_blend')})."
+        )
+    if protocol.get("proposal_smoothing", "none") != "none":
+        rows.append(
+            "- Proposal memory: "
+            f"{protocol.get('proposal_smoothing')} "
+            f"(voxel={protocol.get('proposal_voxel_size')}, "
+            f"alpha={protocol.get('proposal_smoothing_alpha')}, "
+            f"min_count={protocol.get('proposal_min_count')}, "
+            f"gate={protocol.get('proposal_smoothing_gate')}, "
+            f"margin={protocol.get('proposal_margin_threshold')})."
+        )
+    if protocol.get("sam3_proposal_registration_dir") and float(
+        protocol.get("sam3_proposal_registration_alpha", 0.0) or 0.0
+    ) > 0:
+        sam3_stats = report.get("scene", {}).get("sam3_proposal_registration", {})
+        rows.append(
+            "- SAM3 training-view proposal registration: "
+            f"alpha={protocol.get('sam3_proposal_registration_alpha')}, "
+            f"prob>={protocol.get('sam3_proposal_registration_min_probability')}, "
+            f"gate={protocol.get('sam3_proposal_registration_gate')}, "
+            f"query_conditioned={protocol.get('sam3_proposal_registration_query_conditioned')}, "
+            f"frames={sam3_stats.get('num_used_frames', 0)}/"
+            f"{sam3_stats.get('num_cache_frames', 0)}, "
+            f"memberships={sam3_stats.get('num_memberships', 0)}."
         )
     if protocol.get("selection_refinement", "none") != "none":
         rows.append(
@@ -5134,6 +5744,25 @@ def main() -> None:
     parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max", "voxel_max_dilate"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
+    parser.add_argument("--proposal_smoothing", choices=["none", "voxel"], default="none", help="GT-free proposal-memory smoothing applied to primitive text scores before selection")
+    parser.add_argument("--proposal_voxel_size", type=float, default=0.08, help="Scene-space voxel size for --proposal_smoothing voxel")
+    parser.add_argument("--proposal_smoothing_alpha", type=float, default=0.0, help="Residual blend for proposal-memory score smoothing; 0 disables")
+    parser.add_argument("--proposal_min_count", type=int, default=2, help="Minimum primitives in a proposal before score smoothing is applied")
+    parser.add_argument(
+        "--proposal_smoothing_gate",
+        choices=["all", "low_margin", "low_confidence", "low_margin_or_low_confidence"],
+        default="all",
+        help="Apply proposal-memory smoothing to all, low-margin, low-confidence, or either low-margin/low-confidence primitives",
+    )
+    parser.add_argument("--proposal_margin_threshold", type=float, default=0.0, help="Top1-top2 score margin threshold for --proposal_smoothing_gate low_margin")
+    parser.add_argument("--proposal_confidence_threshold", type=float, default=0.0, help="Softmax top1 confidence threshold for low-confidence proposal smoothing gates")
+    parser.add_argument("--sam3_proposal_registration_dir", default="", help="Optional official SAM3 training-view cache root used as label-free object proposal memory")
+    parser.add_argument("--sam3_proposal_registration_alpha", type=float, default=0.0, help="Residual blend for SAM3 training-view proposal score fusion; 0 disables")
+    parser.add_argument("--sam3_proposal_registration_min_probability", type=float, default=0.55, help="Minimum sampled SAM3 proposal probability required for Gaussian membership")
+    parser.add_argument("--sam3_proposal_registration_max_masks_per_frame", type=int, default=0, help="Keep only top-N SAM3 masks per training view; 0 keeps all masks")
+    parser.add_argument("--sam3_proposal_registration_gate", choices=["all", "low_margin"], default="low_margin", help="Apply SAM3 proposal fusion to all assigned primitives or only low-margin primitives")
+    parser.add_argument("--sam3_proposal_registration_margin_threshold", type=float, default=0.05, help="Top1-top2 primitive score margin threshold for low-margin SAM3 proposal fusion")
+    parser.add_argument("--sam3_proposal_registration_query_conditioned", action="store_true", help="Use only SAM3 training-view masks generated by the same text query for each query score")
     parser.add_argument("--selection_refinement", choices=["none", "top_score_components", "largest_components", "seed_expand_components", "proposal_components"], default="none", help="GT-free connected-component filtering after score-based primitive selection")
     parser.add_argument("--component_support_ratio", type=float, default=0.05, help="Wider top-ratio support pool for seed_expand_components")
     parser.add_argument("--component_resolution", type=int, default=64, help="Voxel resolution for selection_refinement")
@@ -5223,6 +5852,10 @@ def main() -> None:
     parser.add_argument("--sam3_prompt_mask_head_support_dilate", type=int, default=-1, help="Clip prompt-conditioned SAM3 mask-head candidates to the coarse mask dilated by this pixel radius; <0 disables")
     parser.add_argument("--sam3_prompt_mask_head_coarse_dilate", type=int, default=0, help="Dilation radius applied to the rendered coarse mask before prompt-conditioned mask-head inference")
     parser.add_argument("--sam3_prompt_mask_head_coarse_threshold", type=float, default=0.5, help="Threshold used to binarize the coarse mask prompt")
+    parser.add_argument("--sam3_prompt_mask_head_initial_refinement", choices=["none", "peak_component"], default="none", help="GT-free cleanup for the direct-3D coarse prompt before feature-only SAM3 mask-head inference")
+    parser.add_argument("--sam3_prompt_mask_head_min_heatmap_mean_ratio", type=float, default=0.0, help="Reject prompt-mask-head refinements whose mean score-heatmap support falls below this ratio")
+    parser.add_argument("--sam3_prompt_mask_head_min_heatmap_mass_ratio", type=float, default=0.0, help="Reject prompt-mask-head refinements whose score-heatmap mass falls below this ratio")
+    parser.add_argument("--sam3_prompt_mask_head_require_peak_in_refined", action="store_true", help="Require feature-only SAM3 prompt-mask-head output to retain the direct score-heatmap peak")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
     parser.add_argument("--all_labeled_frames", action="store_true", help="Use all local labels instead of OpenGaussian official frames")
@@ -5258,6 +5891,26 @@ def main() -> None:
         )
     if args.score_source == "registered_view":
         print(f"VPR assign: {args.registration_assignment_mode}/{args.registration_weight_mode}")
+    if args.proposal_smoothing != "none":
+        print(
+            "Proposal:   "
+            f"{args.proposal_smoothing} "
+            f"(voxel={args.proposal_voxel_size:g}, "
+            f"alpha={args.proposal_smoothing_alpha:g}, "
+            f"min_count={args.proposal_min_count}, "
+            f"gate={args.proposal_smoothing_gate}, "
+            f"margin={args.proposal_margin_threshold:g}, "
+            f"confidence={args.proposal_confidence_threshold:g})"
+        )
+    if args.sam3_proposal_registration_dir and args.sam3_proposal_registration_alpha > 0:
+        print(
+            "SAM3 prop.: "
+            f"train-view memory alpha={args.sam3_proposal_registration_alpha:g}, "
+            f"prob>={args.sam3_proposal_registration_min_probability:g}, "
+            f"gate={args.sam3_proposal_registration_gate}, "
+            f"margin={args.sam3_proposal_registration_margin_threshold:g}, "
+            f"query_conditioned={args.sam3_proposal_registration_query_conditioned}"
+        )
     print(f"Silhouette: > {args.silhouette_threshold}")
     if args.mask_refinement != "none":
         print(f"Mask ref.:  {args.mask_refinement}")
@@ -5290,6 +5943,20 @@ def main() -> None:
         score_aggregation=args.score_aggregation,
         score_aggregation_resolution=args.score_aggregation_resolution,
         score_aggregation_blend=args.score_aggregation_blend,
+        proposal_smoothing=args.proposal_smoothing,
+        proposal_voxel_size=args.proposal_voxel_size,
+        proposal_smoothing_alpha=args.proposal_smoothing_alpha,
+        proposal_min_count=args.proposal_min_count,
+        proposal_smoothing_gate=args.proposal_smoothing_gate,
+        proposal_margin_threshold=args.proposal_margin_threshold,
+        proposal_confidence_threshold=args.proposal_confidence_threshold,
+        sam3_proposal_registration_dir=args.sam3_proposal_registration_dir,
+        sam3_proposal_registration_alpha=args.sam3_proposal_registration_alpha,
+        sam3_proposal_registration_min_probability=args.sam3_proposal_registration_min_probability,
+        sam3_proposal_registration_max_masks_per_frame=args.sam3_proposal_registration_max_masks_per_frame,
+        sam3_proposal_registration_gate=args.sam3_proposal_registration_gate,
+        sam3_proposal_registration_margin_threshold=args.sam3_proposal_registration_margin_threshold,
+        sam3_proposal_registration_query_conditioned=args.sam3_proposal_registration_query_conditioned,
         selection_refinement=args.selection_refinement,
         selection_min_ratio=args.selection_min_ratio,
         selection_max_ratio=args.selection_max_ratio,
@@ -5357,6 +6024,10 @@ def main() -> None:
         sam3_prompt_mask_head_support_dilate=args.sam3_prompt_mask_head_support_dilate,
         sam3_prompt_mask_head_coarse_dilate=args.sam3_prompt_mask_head_coarse_dilate,
         sam3_prompt_mask_head_coarse_threshold=args.sam3_prompt_mask_head_coarse_threshold,
+        sam3_prompt_mask_head_initial_refinement=args.sam3_prompt_mask_head_initial_refinement,
+        sam3_prompt_mask_head_min_heatmap_mean_ratio=args.sam3_prompt_mask_head_min_heatmap_mean_ratio,
+        sam3_prompt_mask_head_min_heatmap_mass_ratio=args.sam3_prompt_mask_head_min_heatmap_mass_ratio,
+        sam3_prompt_mask_head_require_peak_in_refined=args.sam3_prompt_mask_head_require_peak_in_refined,
         min_select=args.min_select,
         chunk_size=args.chunk_size,
         official_frames_only=not args.all_labeled_frames,
@@ -5395,6 +6066,20 @@ def main() -> None:
             "score_aggregation": args.score_aggregation,
             "score_aggregation_resolution": args.score_aggregation_resolution,
             "score_aggregation_blend": args.score_aggregation_blend,
+            "proposal_smoothing": args.proposal_smoothing,
+            "proposal_voxel_size": float(args.proposal_voxel_size),
+            "proposal_smoothing_alpha": float(args.proposal_smoothing_alpha),
+            "proposal_min_count": int(args.proposal_min_count),
+            "proposal_smoothing_gate": args.proposal_smoothing_gate,
+            "proposal_margin_threshold": float(args.proposal_margin_threshold),
+            "proposal_confidence_threshold": float(args.proposal_confidence_threshold),
+            "sam3_proposal_registration_dir": args.sam3_proposal_registration_dir,
+            "sam3_proposal_registration_alpha": float(args.sam3_proposal_registration_alpha),
+            "sam3_proposal_registration_min_probability": float(args.sam3_proposal_registration_min_probability),
+            "sam3_proposal_registration_max_masks_per_frame": int(args.sam3_proposal_registration_max_masks_per_frame),
+            "sam3_proposal_registration_gate": args.sam3_proposal_registration_gate,
+            "sam3_proposal_registration_margin_threshold": float(args.sam3_proposal_registration_margin_threshold),
+            "sam3_proposal_registration_query_conditioned": bool(args.sam3_proposal_registration_query_conditioned),
             "selection_refinement": args.selection_refinement,
             "selection_min_ratio": args.selection_min_ratio,
             "selection_max_ratio": args.selection_max_ratio,
@@ -5603,6 +6288,26 @@ def main() -> None:
                 args.sam3_prompt_mask_head_coarse_dilate
                 if args.mask_refinement == "sam3_prompt_mask_head"
                 else 0
+            ),
+            "sam3_prompt_mask_head_initial_refinement": (
+                args.sam3_prompt_mask_head_initial_refinement
+                if args.mask_refinement == "sam3_prompt_mask_head"
+                else "none"
+            ),
+            "sam3_prompt_mask_head_min_heatmap_mean_ratio": (
+                args.sam3_prompt_mask_head_min_heatmap_mean_ratio
+                if args.mask_refinement == "sam3_prompt_mask_head"
+                else 0.0
+            ),
+            "sam3_prompt_mask_head_min_heatmap_mass_ratio": (
+                args.sam3_prompt_mask_head_min_heatmap_mass_ratio
+                if args.mask_refinement == "sam3_prompt_mask_head"
+                else 0.0
+            ),
+            "sam3_prompt_mask_head_require_peak_in_refined": (
+                bool(args.sam3_prompt_mask_head_require_peak_in_refined)
+                if args.mask_refinement == "sam3_prompt_mask_head"
+                else False
             ),
             "sam3_prompt_format": "normalized_cxcywh" if args.mask_refinement == "sam3_box" else "",
             "sam3_candidate_selection": (

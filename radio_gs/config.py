@@ -64,6 +64,9 @@ class RadioGSConfig:
     hybrid_semantic_adaptor_use_depth_guidance: bool = False
     hybrid_semantic_adaptor_residual: bool = True
     hybrid_semantic_adaptor_reg_weight: float = 0.0
+    hybrid_quality_head: bool = False
+    hybrid_visibility_head: bool = False
+    quality_visibility_heads_only: bool = False
     grounding_query_loss_weight: float = 0.0
     grounding_query_temperature: float = 1.0
     grounding_query_loss_downsample: int = 1
@@ -193,6 +196,10 @@ class RadioGSConfig:
     boundary_aware_edge_threshold: float = 0.1
     channel_std_weight: float = 0.0
     hybrid_semantic_aux_weight: float = 0.0
+    quality_loss_weight: float = 0.0
+    visibility_loss_weight: float = 0.0
+    visibility_target_binary: bool = False
+    visibility_alpha_threshold: float = 0.02
     direct_point_loss_weight: float = 0.0
     direct_point_sample_count: int = 2048
     direct_point_sample_strategy: str = "uniform"  # "uniform" or "class_balanced"

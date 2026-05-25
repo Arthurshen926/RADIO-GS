@@ -173,13 +173,15 @@ update is instead the DINO-CV compact field evaluated with the same contextual
 | --- | ---: | ---: | ---: | --- |
 | v67 contextual kNN, alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 | previous strongest balanced support row |
 | DINO-CV contextual kNN, ens5, alpha=0.5 | 0.3674 / 0.5960 | 0.3716 / 0.6103 | 0.4533 / 0.6973 | ens5 text head hurts contextual readout |
-| DINO-CV contextual kNN, `{query}`, alpha=0.5 | **0.3704 / 0.6017** | **0.3771 / 0.6198** | **0.4585 / 0.7032** | promoted balanced direct-field support row |
+| DINO-CV contextual kNN, `{query}`, alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 | previous promoted support row |
+| DINO-CV contextual kNN, `{query}`, k12/cand48 alpha=0.45 | 0.3715 / 0.6024 | 0.3784 / 0.6206 | 0.4585 / 0.7029 | previous balanced direct-field support row |
+| DINO-CV contextual kNN, `{query}`, k16/cand80 alpha=0.45 + spatial k12/a1 | **0.3806 / 0.6129** | **0.3871 / 0.6315** | **0.4711 / 0.7200** | promoted balanced direct-field support row |
 | DINO-CV contextual kNN, `{query}`, alpha=0.75 | 0.3683 / 0.5957 | 0.3746 / 0.6136 | **0.4612 / 0.7036** | diagnostic: higher split10 mIoU, weaker 19/15 balance |
 
 The paper-facing artifact is
-`paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn_scene_mean_a05_results.json`.
+`paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json`.
 Its report includes category stability in
-`output/radio_gs/reports/scannet_vala8_dino_cv_contextual_knn_scene_mean_a05_20260524.md`.
+`paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.md`.
 
 Conclusion: the method-level joint 2D/3D losses are implemented and verified,
 but the full VALA8 evidence says they should remain an ablation/negative

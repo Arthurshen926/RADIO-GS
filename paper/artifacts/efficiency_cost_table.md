@@ -11,7 +11,7 @@ telemetry from log-derived training throughput.
 | Evidence | Scope | Wall Time / Cost | Peak VRAM | Source |
 |---|---|---:|---:|---|
 | LERF overlay evaluation | 4 scenes | 124.770 s total / 31.193 s per scene | 2076 MiB | `output/radio_gs/profiles/freeze_lerf_*_overlay_20260502` |
-| ScanNet v67 point-query evaluation | 10 scenes | 150.903 s total / 15.090 s per scene | 1666 MiB | `output/radio_gs/profiles/freeze_scannet_v67_all_eval_20260502` |
+| ScanNet legacy point-query evaluation profile | 10 scenes | 150.903 s total / 15.090 s per scene | 1666 MiB | `output/radio_gs/profiles/freeze_scannet_v67_all_eval_20260502` |
 | Feature-field footprint | 4 LERF scenes | 1.74x-4.04x storage saving | -- | `output/radio_gs/reports/storage_footprint_report.md` |
 
 ## Runtime Source Rows
@@ -22,7 +22,7 @@ telemetry from log-derived training throughput.
 | `freeze_lerf_ramen_overlay_20260502` | 40.474 s | 1762 MiB | frozen overlay evaluation |
 | `freeze_lerf_teatime_overlay_20260502` | 36.997 s | 1850 MiB | frozen overlay evaluation |
 | `freeze_lerf_waldo_overlay_20260502` | 21.101 s | 2076 MiB | frozen overlay evaluation |
-| `freeze_scannet_v67_all_eval_20260502` | 150.903 s | 1666 MiB | full 10-scene v67 direct point-query evaluation |
+| `freeze_scannet_v67_all_eval_20260502` | 150.903 s | 1666 MiB | legacy 10-scene direct point-query evaluation profile |
 
 ## Storage Source Rows
 

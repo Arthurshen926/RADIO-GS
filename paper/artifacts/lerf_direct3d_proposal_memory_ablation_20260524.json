@@ -1,0 +1,39 @@
+{
+  "date": "2026-05-24",
+  "conclusion": "Proposal-memory score smoothing is retained as an ablation only for LERF direct 3D: the uniform and gated variants did not beat the existing fixed-threshold SAM3-box row on figurines.",
+  "rows": [
+    {
+      "name": "direct3d_baseline_figurines_thr0p25",
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260517_geometry_pad16_full/figurines/lerf_direct_3d_selection_results.json",
+      "miou": 0.6136,
+      "acc025": 0.6964,
+      "boundary_f": 0.7116,
+      "proposal_smoothing": "none",
+      "proposal_gate": "",
+      "proposal_alpha": 0.0,
+      "proposal_voxel_size": 0.0
+    },
+    {
+      "name": "direct3d_propmem_all_figurines_thr0p25",
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260524_propmem_vxl008_a04_pad16/figurines/lerf_direct_3d_selection_results.json",
+      "miou": 0.5797,
+      "acc025": 0.6607,
+      "boundary_f": 0.6715,
+      "proposal_smoothing": "voxel",
+      "proposal_gate": "",
+      "proposal_alpha": 0.4,
+      "proposal_voxel_size": 0.08
+    },
+    {
+      "name": "direct3d_propmem_gated_figurines_thr0p25",
+      "source": "output/radio_gs/lerf_direct3d_sam3_box_pad16_propmem_gate_smoke_20260524/figurines/lerf_direct_3d_selection_results.json",
+      "miou": 0.6013,
+      "acc025": 0.6786,
+      "boundary_f": 0.6957,
+      "proposal_smoothing": "voxel",
+      "proposal_gate": "low_margin",
+      "proposal_alpha": 0.5,
+      "proposal_voxel_size": 0.04
+    }
+  ]
+}

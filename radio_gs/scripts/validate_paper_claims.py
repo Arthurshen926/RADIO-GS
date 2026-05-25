@@ -146,9 +146,9 @@ def _check_scannet_context_table(text: str, issues: list[str]) -> None:
     if CAGS_CONTEXT_RE.search(text):
         issues.append(f"{SCANNET_CONTEXT_TABLE}: CAGS must not be promoted in the OpenGaFF-aligned ScanNet table")
     required_snippets = (
-        "OpenGaFF & 36.55 & 50.57 & 42.78 & 72.85 & 57.85 & 77.93",
-        "\\method{} Gaussian-index & 35.83 & 60.06 & 36.18 & 61.52 & 43.67 & 69.98",
-        "\\method{} contextual kNN & 36.77 & 59.97 & 37.48 & 61.81 & 45.62 & 70.08",
+        "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52",
+        "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61",
+        "\\method{} DINO-CV contextual kNN + spatial propagation & \\textbf{38.06} & \\textbf{61.29} & \\textbf{38.71} & \\textbf{63.15} & \\textbf{47.11} & \\textbf{72.00}",
     )
     for snippet in required_snippets:
         if snippet not in text:

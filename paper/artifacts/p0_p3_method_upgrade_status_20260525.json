@@ -1,0 +1,79 @@
+{
+  "date": "2026-05-25",
+  "summary": "P0-P3 method upgrades were implemented or audited under fixed protocols. Only P2 is uniformly positive but very small. P1 and P3 produced useful interfaces but are not promoted because the full-scene metrics do not support a stronger claim. P0 is implemented in direct 3D but remains mixed and is kept as ablation/failure analysis.",
+  "p0_direct3d_feature_only_sam_boundary": {
+    "status": "implemented_not_promoted",
+    "code": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "artifact": "paper/artifacts/lerf_direct3d_feature_only_sam_boundary_readout_20260525.md",
+    "best_macro_miou": 0.4112764398256938,
+    "macro_delta_vs_no_rgb_baseline": 0.0031454860923604278,
+    "scene_deltas": {
+      "figurines": -0.006096333250317387,
+      "teatime": 0.027090907053613278,
+      "waldo_kitchen": -0.011558115526214607,
+      "ramen_weightedlog": -0.0596
+    },
+    "decision": "Do not promote as main direct-3D row. It improves Teatime and some boundaries but is not robust across scenes."
+  },
+  "p1_dino_feature_boundary_refinement": {
+    "status": "implemented_not_promoted",
+    "code": "radio_gs/scripts/eval_lerf_sam_dino_tasks.py",
+    "artifact": "output/lerf_sam_dino_tasks/formal_v10_dino_feature_boundary_20260525/lerf_sam_dino_task_report.md",
+    "baseline_artifact": "output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md",
+    "baseline_rendered": {
+      "loc_acc": 0.7943262411347518,
+      "miou": 0.48053451352895904
+    },
+    "feature_boundary_rendered": {
+      "loc_acc": 0.7872340425531915,
+      "miou": 0.48226069226422286
+    },
+    "feature_boundary_teacher": {
+      "loc_acc": 0.7659574468085106,
+      "miou": 0.5091895797356767
+    },
+    "delta_rendered_vs_baseline": {
+      "loc_acc": -0.007092198581560294,
+      "miou": 0.001726178735263817
+    },
+    "decision": "Keep the tested feature-boundary readout as an ablation/interface. The mIoU gain is too small and LocAcc drops, so the promoted DINO row remains formal_v9."
+  },
+  "p2_scannet_confidence_proposal_readout": {
+    "status": "implemented_small_positive",
+    "code": [
+      "radio_gs/models/proposal_memory.py",
+      "radio_gs/scripts/eval_scannet_pointcloud_radio_gs.py"
+    ],
+    "artifact": "paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_propconf_vxl005_a02_c060_results.md",
+    "baseline": {
+      "split19": {"miou": 0.3806, "macc": 0.6129},
+      "split15": {"miou": 0.3871, "macc": 0.6315},
+      "split10": {"miou": 0.4711, "macc": 0.7200}
+    },
+    "propconf": {
+      "split19": {"miou": 0.3809, "macc": 0.6134},
+      "split15": {"miou": 0.3874, "macc": 0.6321},
+      "split10": {"miou": 0.4715, "macc": 0.7207}
+    },
+    "decision": "Can be cited as a stability/control ablation, not a major method gain."
+  },
+  "p3_lerf_rendered_adaptive_coarse_prompt": {
+    "status": "implemented_not_promoted",
+    "code": "radio_gs/scripts/eval_lerf_grounding.py",
+    "artifact": "output/radio_gs/lerf2d_adaptive_prompt_sam3_20260525",
+    "promoted_baseline_artifact": "paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.md",
+    "promoted_heatguard": {
+      "macro_loc_acc": 0.8598309812650944,
+      "macro_miou": 0.588944466161357,
+      "weighted_loc_acc": 0.8701923076923077,
+      "weighted_miou": 0.5997634678580251
+    },
+    "adaptive_peak": {
+      "macro_loc_acc": 0.8598309812650944,
+      "macro_miou": 0.5705282021219347,
+      "weighted_loc_acc": 0.8701923076923077,
+      "weighted_miou": 0.5835357466766964
+    },
+    "decision": "Do not promote. Adaptive coarse prompt keeps LocAcc but reduces mIoU relative to heatmap-guard peak-init."
+  }
+}

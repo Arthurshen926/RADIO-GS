@@ -1,0 +1,183 @@
+{
+  "date": "2026-05-25",
+  "baseline": {
+    "figurines": {
+      "best_miou": 0.4260971248,
+      "thr0p25_miou": 0.421962589,
+      "source": "lerf_direct3d_sam3_training_view_proposal_registration_20260525 baseline/no-RGB"
+    },
+    "ramen": {
+      "best_miou": 0.5710821152,
+      "thr0p25_miou": 0.5710821152,
+      "source": "lerf_direct3d_sam3_training_view_proposal_registration_20260525 baseline/no-RGB"
+    },
+    "teatime": {
+      "best_miou": 0.5226041079,
+      "thr0p25_miou": 0.49902457,
+      "source": "lerf_direct3d_sam3_training_view_proposal_registration_20260525 baseline/no-RGB"
+    },
+    "waldo_kitchen": {
+      "best_miou": 0.2756916285,
+      "thr0p25_miou": 0.2597391307,
+      "source": "lerf_direct3d_sam3_training_view_proposal_registration_20260525 baseline/no-RGB"
+    }
+  },
+  "variants": {
+    "feature_sam3_heatguard": {
+      "scenes": {
+        "figurines": {
+          "best": {
+            "tag": "thr0p11",
+            "miou": 0.4200007915496826,
+            "acc025": 0.625,
+            "boundary_f": 0.5799922943115234,
+            "initial_miou": 0.3984127938747406,
+            "delta_miou": 0.021587999537587166,
+            "sam3_accept_rate": 0.23214285714285715
+          },
+          "thr0p25": {
+            "tag": "thr0p25",
+            "miou": 0.36600127816200256,
+            "acc025": 0.5357142857142857,
+            "boundary_f": 0.5590258240699768,
+            "initial_miou": 0.35002464056015015,
+            "delta_miou": 0.015976598486304283,
+            "sam3_accept_rate": 0.19642857142857142
+          },
+          "delta_best_vs_no_rgb_baseline": -0.006096333250317387,
+          "delta_thr0p25_vs_no_rgb_baseline": -0.055961310837997436,
+          "source": "output/radio_gs/lerf_direct3d_p0_feature_sam3_heatguard_directfield_exact_20260525/figurines/figurines/lerf_direct_3d_selection_results.json"
+        },
+        "teatime": {
+          "best": {
+            "tag": "thr0p5",
+            "miou": 0.5496950149536133,
+            "acc025": 0.7966101694915254,
+            "boundary_f": 0.7004895806312561,
+            "initial_miou": 0.5410711765289307,
+            "delta_miou": 0.008623833768069744,
+            "sam3_accept_rate": 0.2542372881355932
+          },
+          "thr0p25": {
+            "tag": "thr0p25",
+            "miou": 0.5245756506919861,
+            "acc025": 0.7627118644067796,
+            "boundary_f": 0.6549589037895203,
+            "initial_miou": 0.5129449367523193,
+            "delta_miou": 0.011630741879343987,
+            "sam3_accept_rate": 0.22033898305084745
+          },
+          "delta_best_vs_no_rgb_baseline": 0.027090907053613278,
+          "delta_thr0p25_vs_no_rgb_baseline": 0.025551080691986083,
+          "source": "output/radio_gs/lerf_direct3d_p0_feature_sam3_heatguard_directfield_exact_20260525/teatime/teatime/lerf_direct_3d_selection_results.json"
+        },
+        "waldo_kitchen": {
+          "best": {
+            "tag": "thr0p3",
+            "miou": 0.2641335129737854,
+            "acc025": 0.4090909090909091,
+            "boundary_f": 0.2950274646282196,
+            "initial_miou": 0.2620648741722107,
+            "delta_miou": 0.0020686627831310034,
+            "sam3_accept_rate": 0.09090909090909091
+          },
+          "thr0p25": {
+            "tag": "thr0p25",
+            "miou": 0.26347073912620544,
+            "acc025": 0.4090909090909091,
+            "boundary_f": 0.2813914716243744,
+            "initial_miou": 0.25376445055007935,
+            "delta_miou": 0.009706275537610054,
+            "sam3_accept_rate": 0.09090909090909091
+          },
+          "delta_best_vs_no_rgb_baseline": -0.011558115526214607,
+          "delta_thr0p25_vs_no_rgb_baseline": 0.003731608426205457,
+          "source": "output/radio_gs/lerf_direct3d_p0_feature_sam3_heatguard_directfield_exact_20260525/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json"
+        }
+      },
+      "macro_best_miou": 0.4112764398256938,
+      "macro_delta_best_vs_no_rgb_baseline": 0.0031454860923604278
+    },
+    "feature_sam3_strictgate": {
+      "scenes": {
+        "ramen": {
+          "best": {
+            "tag": "thr0p45",
+            "miou": 0.5077949166297913,
+            "acc025": 0.7183098591549296,
+            "boundary_f": 0.6405518054962158,
+            "initial_miou": 0.5077949166297913,
+            "delta_miou": 0.0,
+            "sam3_accept_rate": 0.0
+          },
+          "thr0p25": {
+            "tag": "thr0p25",
+            "miou": 0.4827926456928253,
+            "acc025": 0.704225352112676,
+            "boundary_f": 0.6120907068252563,
+            "initial_miou": 0.4827926456928253,
+            "delta_miou": 0.0,
+            "sam3_accept_rate": 0.0
+          },
+          "delta_best_vs_no_rgb_baseline": -0.0632871985702087,
+          "delta_thr0p25_vs_no_rgb_baseline": -0.08828946950717464,
+          "source": "output/radio_gs/lerf_direct3d_p0_feature_sam3_strictgate_directfield_20260525/ramen/ramen/lerf_direct_3d_selection_results.json"
+        },
+        "waldo_kitchen": {
+          "best": {
+            "tag": "thr0p3",
+            "miou": 0.2620648741722107,
+            "acc025": 0.4090909090909091,
+            "boundary_f": 0.29366615414619446,
+            "initial_miou": 0.2620648741722107,
+            "delta_miou": 0.0,
+            "sam3_accept_rate": 0.0
+          },
+          "thr0p25": {
+            "tag": "thr0p25",
+            "miou": 0.25376445055007935,
+            "acc025": 0.4090909090909091,
+            "boundary_f": 0.27012908458709717,
+            "initial_miou": 0.25376445055007935,
+            "delta_miou": 0.0,
+            "sam3_accept_rate": 0.0
+          },
+          "delta_best_vs_no_rgb_baseline": -0.013626754327789314,
+          "delta_thr0p25_vs_no_rgb_baseline": -0.0059746801499206414,
+          "source": "output/radio_gs/lerf_direct3d_p0_feature_sam3_strictgate_directfield_20260525/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json"
+        }
+      },
+      "macro_best_miou": 0.384929895401001,
+      "macro_delta_best_vs_no_rgb_baseline": -0.03845697644899901
+    },
+    "feature_sam3_ramen_weightedlog": {
+      "scenes": {
+        "ramen": {
+          "best": {
+            "tag": "thr0p45",
+            "miou": 0.5114719867706299,
+            "acc025": 0.7183098591549296,
+            "boundary_f": 0.6371799111366272,
+            "initial_miou": 0.5077949166297913,
+            "delta_miou": 0.003677086206153035,
+            "sam3_accept_rate": 0.11267605633802817
+          },
+          "thr0p25": {
+            "tag": "thr0p25",
+            "miou": 0.4848688244819641,
+            "acc025": 0.704225352112676,
+            "boundary_f": 0.6158013939857483,
+            "initial_miou": 0.4827926456928253,
+            "delta_miou": 0.002076156437397003,
+            "sam3_accept_rate": 0.04225352112676056
+          },
+          "delta_best_vs_no_rgb_baseline": -0.05961012842937008,
+          "delta_thr0p25_vs_no_rgb_baseline": -0.08621329071803585,
+          "source": "output/radio_gs/lerf_direct3d_p0_feature_sam3_heatguard_directfield_20260525/ramen/ramen/lerf_direct_3d_selection_results.json"
+        }
+      },
+      "macro_best_miou": 0.5114719867706299,
+      "macro_delta_best_vs_no_rgb_baseline": -0.05961012842937008
+    }
+  }
+}

@@ -13,7 +13,8 @@ repository to a top-conference paper package?
   CTF-GS paper after the registered LERF direct-selection upgrade
 
 The repository now contains a coherent method, a strong LERF-OVS result,
-repeatable evaluation code, and a completed 10-scene fair ScanNet v67 aggregate.
+repeatable evaluation code, and a promoted VALA/OpenGaFF-8 ScanNet DINO-CV
+contextual kNN aggregate.
 The remaining conservative-route work is mostly presentation: venue-formatted
 manuscript prose, related-work tightening, and deciding which diagnostic tables
 belong in the appendix. A stricter 2025-style primitive-level paper is now
@@ -54,8 +55,8 @@ The current generated freeze package is:
 - [train feature-field audit public snapshot](../paper/artifacts/train_feature_field_audit.md)
 - [efficiency/cost public snapshot](../paper/artifacts/efficiency_cost_table.md)
 - [storage footprint public snapshot](../paper/artifacts/storage_footprint_report.md)
-- [ScanNet RADIO-GS v67 direct point-query JSON snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_v67_direct_point_query_results.json)
-- [ScanNet RADIO-GS contextual kNN JSON snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_v67_contextual_knn_scene_mean_a05_results.json)
+- [ScanNet DINO-CV contextual kNN VALA8 snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json)
+- [ScanNet category stability / failure analysis](../paper/artifacts/scannet_category_stability_failure_analysis.md)
 - [LangSplatV2 LERF summary snapshot](../paper/artifacts/langsplatv2_lerf_summary.md)
 - [submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
 - [submission_freeze_figure_shortlist.md](../output/radio_gs/reports/submission_freeze_figure_shortlist.md)
@@ -115,9 +116,9 @@ Under that framing, the paper solves the following problem:
 2. The project has a technically non-trivial unified pipeline: HGCF compact
    code storage, CTR/HCD reconstruction, VFA/screen refinement, FGC/FDH
    supervision, and ws240 warm-start training.
-3. The project now has a paper-facing **ScanNet direct point-query** cross-domain result under the v67 teacher-balanced fair protocol.
+3. The project now has a paper-facing **ScanNet direct point-query** cross-domain result under the VALA/OpenGaFF-8 DINO-CV contextual kNN protocol.
 4. The project has credible auxiliary evidence that the learned feature field is useful beyond grounding, especially on Replica room_0 depth and segmentation.
-5. The freeze package now includes formal LERF overlay/profile runs for all four main scenes plus one full ScanNet v67 evaluation profile.
+5. The freeze package now includes formal LERF overlay/profile runs for all four main scenes plus one legacy ScanNet evaluation profile.
 6. The LERF evaluator already includes a same-protocol feature-source check:
    rendered RADIO-GS features outperform original RADIO RGB features on macro
    localization accuracy (0.8712 vs. 0.7985) and improve calibrated macro mIoU
@@ -148,9 +149,9 @@ Under that framing, the paper solves the following problem:
     subset. It improves Gaussian-index split19/15/10 mIoU to
     0.3704/0.3718/0.4390 with mAcc 0.6159/0.6268/0.7020. The strongest balanced
     ScanNet point-query support row uses the DINO-CV compact field with a
-    label-free contextual kNN readout (`k=8`, `candidate_k=32`) plus scene-mean
-    calibration at alpha 0.5, reaching 0.3704/0.3771/0.4585 mIoU and
-    0.6017/0.6198/0.7032 mAcc. Alpha 0.75 further raises split10 mIoU to
+    label-free contextual kNN readout (`k=16`, `candidate_k=80`) plus scene-mean
+    calibration at alpha 0.45 and one-step spatial logit propagation, reaching
+    0.3806/0.3871/0.4711 mIoU and 0.6129/0.6315/0.7200 mAcc. Alpha 0.75 further raises split10 mIoU to
     0.4612 but weakens split19/15 balance, and ScanNet alias prompts remain
     mixed.
 11. The LERF peak-preservation diagnostic is now positive on Figurines:
@@ -369,28 +370,16 @@ Critical guards are present and feature/text/cache tensor loads now go through
 
 ### 2. Cross-domain generalization is improved, but needs paper-safe framing
 
-The ScanNet v67 teacher-balanced direct point-query run now provides a 10-scene
-cross-domain table. The remaining risk is not lack of ScanNet evidence, but
-clean framing: label-supervised and GT-label-balanced ScanNet diagnostics must
-stay out of the main fair table.
-
-The DINO cross-view branch has also been expanded from a two-scene diagnostic to
-a full VALA/OpenGaFF-8 ScanNet ablation:
-
-| Split | Base mIoU | DINO-CV mIoU | Delta | Base mAcc | DINO-CV mAcc | Delta |
-|---|---:|---:|---:|---:|---:|---:|
-| 19 classes | 0.3583 | 0.3704 | +0.0121 | 0.6006 | 0.6159 | +0.0153 |
-| 15 classes | 0.3618 | 0.3718 | +0.0100 | 0.6152 | 0.6268 | +0.0116 |
-| 10 classes | 0.4367 | 0.4390 | +0.0023 | 0.6998 | 0.7020 | +0.0022 |
-
 The current strongest balanced ScanNet row combines the DINO-CV compact field
-with contextual direct point readout:
+with contextual direct point readout on the VALA/OpenGaFF-8 subset. Older v67
+Gaussian-index and non-DINO contextual rows are now historical diagnostics, not
+paper-facing ScanNet numbers.
 
-| Split | Gaussian-index mIoU | DINO-CV kNN+calib mIoU | Delta | Gaussian-index mAcc | DINO-CV kNN+calib mAcc | Delta |
-|---|---:|---:|---:|---:|---:|---:|
-| 19 classes | 0.3583 | 0.3704 | +0.0121 | 0.6006 | 0.6017 | +0.0011 |
-| 15 classes | 0.3618 | 0.3771 | +0.0153 | 0.6152 | 0.6198 | +0.0046 |
-| 10 classes | 0.4367 | 0.4585 | +0.0218 | 0.6998 | 0.7032 | +0.0034 |
+| Split | DINO-CV kNN+calib mIoU | DINO-CV kNN+calib mAcc |
+|---|---:|---:|
+| 19 classes | 0.3806 | 0.6129 |
+| 15 classes | 0.3871 | 0.6315 |
+| 10 classes | 0.4711 | 0.7200 |
 
 ### 3. Statistical confidence is improved, but still narrow
 
@@ -409,7 +398,7 @@ the current table is enough to support a limitations/discussion section.
 ### 5. Efficiency and cost now have a paper-facing table
 
 The paper now has formal wall-clock and peak-VRAM profiles for all four frozen
-LERF overlay evaluations and the full 10-scene ScanNet v67 point-query
+LERF overlay evaluations and a legacy 10-scene ScanNet point-query
 evaluation. `efficiency_cost_table.md` and `paper/efficiency_cost_table.tex`
 convert those profiles plus the storage-footprint accounting into a main-paper
 efficiency/cost table. Training throughput remains supplementary because it is
