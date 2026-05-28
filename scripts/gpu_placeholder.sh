@@ -22,6 +22,7 @@ MATRIX_SIZE="${GPU_PLACEHOLDER_MATRIX_SIZE:-8192}"
 CHUNK_MIB="${GPU_PLACEHOLDER_CHUNK_MIB:-512}"
 HEARTBEAT_SEC="${GPU_PLACEHOLDER_HEARTBEAT_SEC:-60}"
 SAFETY_FREE_MIB="${GPU_PLACEHOLDER_SAFETY_FREE_MIB:-3072}"
+MAX_EXISTING_MEM_MIB="${GPU_PLACEHOLDER_MAX_EXISTING_MEM_MIB:-1024}"
 SYNC_EVERY="${GPU_PLACEHOLDER_SYNC_EVERY:-16}"
 SLEEP_MS="${GPU_PLACEHOLDER_SLEEP_MS:-70}"
 PID_FILE=""
@@ -39,6 +40,8 @@ Options:
   --sleep-ms X            Sleep after each sync window; default 70 for ~300W on 4090
   --sync-every N          GEMM iterations per sync/sleep window; default 16
   --safety-free-mib N     Minimum free MiB left per GPU; default 3072
+  --max-existing-mem-mib N
+                          Skip start if target GPU already uses more than N MiB; default 1024
   --heartbeat-sec X       Worker log heartbeat interval; default 60
   --chunk-mib N           Memory reservation chunk size; default 512
 USAGE
@@ -124,6 +127,10 @@ parse_options() {
         SAFETY_FREE_MIB="$2"
         shift 2
         ;;
+      --max-existing-mem-mib)
+        MAX_EXISTING_MEM_MIB="$2"
+        shift 2
+        ;;
       --heartbeat-sec)
         HEARTBEAT_SEC="$2"
         shift 2
@@ -151,17 +158,88 @@ is_running() {
   [[ -f "$PID_FILE" ]] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null
 }
 
+orphan_placeholder_pids() {
+  local pid env_gpus physical_env
+  for pid in $(pgrep -f "radio_gs/scripts/gpu_placeholder_worker.py" 2>/dev/null || true); do
+    env_gpus="$(
+      tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null \
+        | awk -F= '$1 == "CUDA_VISIBLE_DEVICES" {print $2; exit}'
+    )"
+    physical_env="$(
+      tr '\0' '\n' <"/proc/$pid/environ" 2>/dev/null \
+        | awk -F= '$1 == "GPU_PLACEHOLDER_PHYSICAL_GPUS" {print $2; exit}'
+    )"
+    if [[ "$env_gpus" == "$VISIBLE_GPUS" || "$physical_env" == "$VISIBLE_GPUS" ]]; then
+      echo "$pid"
+    fi
+  done
+}
+
+stop_placeholder_pids() {
+  local pid pgid
+  for pid in "$@"; do
+    [[ -n "$pid" ]] || continue
+    pgid="$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ' || true)"
+    if [[ -n "$pgid" ]]; then
+      kill -TERM -- "-$pgid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+    else
+      kill -TERM "$pid" 2>/dev/null || true
+    fi
+  done
+}
+
+active_non_placeholder_gpu_processes() {
+  local raw pid cmd
+  while IFS= read -r raw; do
+    pid="${raw%%,*}"
+    pid="${pid// /}"
+    [[ "$pid" =~ ^[0-9]+$ ]] || continue
+    cmd="$(tr '\0' ' ' <"/proc/$pid/cmdline" 2>/dev/null || true)"
+    if [[ "$cmd" != *"gpu_placeholder_worker.py"* ]]; then
+      echo "$pid ${cmd:-unknown}"
+    fi
+  done < <(
+    nvidia-smi -i "$VISIBLE_GPUS" --query-compute-apps=pid,process_name \
+      --format=csv,noheader,nounits 2>/dev/null || true
+  )
+}
+
+existing_gpu_memory_exceeds_limit() {
+  local used
+  while IFS= read -r used; do
+    used="${used// /}"
+    [[ "$used" =~ ^[0-9]+$ ]] || continue
+    if (( used > MAX_EXISTING_MEM_MIB )); then
+      return 0
+    fi
+  done < <(
+    nvidia-smi -i "$VISIBLE_GPUS" --query-gpu=memory.used \
+      --format=csv,noheader,nounits 2>/dev/null || true
+  )
+  return 1
+}
+
 start_placeholder() {
   mkdir -p "$STATE_DIR"
   if is_running; then
     echo "gpu-placeholder already running: pid=$(cat "$PID_FILE")"
     return 0
   fi
+  if existing_gpu_memory_exceeds_limit; then
+    echo "gpu-placeholder skipped: GPU memory already in use on $VISIBLE_GPUS (limit ${MAX_EXISTING_MEM_MIB} MiB)" | tee -a "$LOG_FILE"
+    return 0
+  fi
+  mapfile -t active_gpu_processes < <(active_non_placeholder_gpu_processes)
+  if [[ ${#active_gpu_processes[@]} -gt 0 ]]; then
+    echo "gpu-placeholder skipped: non-placeholder GPU process(es) already active on $VISIBLE_GPUS" | tee -a "$LOG_FILE"
+    printf '%s\n' "${active_gpu_processes[@]}" | tee -a "$LOG_FILE"
+    return 0
+  fi
   rm -f "$PID_FILE"
   echo "starting gpu-placeholder on physical GPUs $VISIBLE_GPUS" | tee -a "$LOG_FILE"
   (
     cd "$ROOT_DIR"
-    nohup setsid env CUDA_VISIBLE_DEVICES="$VISIBLE_GPUS" bash radio_gs/scripts/run_repo_python.sh \
+    nohup setsid env CUDA_VISIBLE_DEVICES="$VISIBLE_GPUS" GPU_PLACEHOLDER_PHYSICAL_GPUS="$VISIBLE_GPUS" bash radio_gs/scripts/run_repo_python.sh \
       radio_gs/scripts/gpu_placeholder_worker.py \
       --gpus "$WORKER_VISIBLE_GPUS" \
       --memory_fraction "$MEMORY_FRACTION" \
@@ -185,14 +263,20 @@ start_placeholder() {
 
 stop_placeholder() {
   if ! is_running; then
-    echo "gpu-placeholder not running"
+    mapfile -t orphan_pids < <(orphan_placeholder_pids)
+    if [[ ${#orphan_pids[@]} -eq 0 ]]; then
+      echo "gpu-placeholder not running"
+    else
+      echo "stopping orphan gpu-placeholder process(es): ${orphan_pids[*]}"
+      stop_placeholder_pids "${orphan_pids[@]}"
+    fi
     rm -f "$PID_FILE"
     return 0
   fi
   local pid
   pid="$(cat "$PID_FILE")"
   echo "stopping gpu-placeholder: pid=$pid"
-  kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+  stop_placeholder_pids "$pid"
   for _ in $(seq 1 30); do
     if ! kill -0 "$pid" 2>/dev/null; then
       rm -f "$PID_FILE"
@@ -202,7 +286,13 @@ stop_placeholder() {
     sleep 1
   done
   echo "gpu-placeholder did not stop after 30s; sending SIGKILL"
-  kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+  local pgid
+  pgid="$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ' || true)"
+  if [[ -n "$pgid" ]]; then
+    kill -KILL -- "-$pgid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null || true
+  else
+    kill -KILL "$pid" 2>/dev/null || true
+  fi
   rm -f "$PID_FILE"
 }
 
@@ -237,7 +327,7 @@ if [[ "$COMMAND" == "run" ]]; then
       break
     fi
     case "$1" in
-      --gpus|--visible-gpus|--memory-fraction|--matrix-size|--sleep-ms|--sync-every|--safety-free-mib|--heartbeat-sec|--chunk-mib)
+      --gpus|--visible-gpus|--memory-fraction|--matrix-size|--sleep-ms|--sync-every|--safety-free-mib|--max-existing-mem-mib|--heartbeat-sec|--chunk-mib)
         parse_options "$1" "$2"
         shift 2
         ;;

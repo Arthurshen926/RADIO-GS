@@ -4,6 +4,7 @@ import torch
 from radio_gs.models.proposal_memory import (
     build_proposal_memory_from_labels,
     build_voxel_proposal_labels,
+    compute_region_prototype_contrast_loss,
     propagate_logits_with_proposals,
 )
 
@@ -107,6 +108,38 @@ def test_propagate_logits_with_proposals_can_gate_low_confidence_rows():
     assert torch.allclose(propagated[2], logits[2])
 
 
+def test_propagate_logits_with_proposals_can_require_proposal_consensus():
+    logits = torch.tensor(
+        [
+            [8.0, 0.0],
+            [0.2, 0.1],
+            [0.0, 4.0],
+            [3.0, 0.0],
+            [2.0, 0.0],
+            [0.1, 0.0],
+        ]
+    )
+    labels = torch.tensor([0, 0, 0, 1, 1, 1])
+
+    propagated, stats = propagate_logits_with_proposals(
+        logits,
+        labels,
+        alpha=1.0,
+        gate="low_confidence_and_proposal_consensus",
+        confidence_threshold=0.60,
+        proposal_consensus_threshold=0.80,
+    )
+
+    proposal_one_mean = logits[3:].mean(dim=0)
+    assert stats["gate"] == "low_confidence_and_proposal_consensus"
+    assert stats["proposal_consensus_threshold"] == 0.80
+    assert stats["num_assigned"] == 1
+    assert torch.allclose(propagated[0], logits[0])
+    assert torch.allclose(propagated[1], logits[1])
+    assert torch.allclose(propagated[2], logits[2])
+    assert torch.allclose(propagated[5], proposal_one_mean)
+
+
 def test_build_voxel_proposal_labels_groups_points_by_voxel():
     xyz = torch.tensor(
         [
@@ -124,6 +157,52 @@ def test_build_voxel_proposal_labels_groups_points_by_voxel():
     assert labels[0].item() == labels[1].item()
     assert labels[2].item() == labels[3].item()
     assert labels[0].item() != labels[2].item()
+
+
+def test_region_prototype_contrast_loss_penalizes_cross_proposal_confusion():
+    labels = torch.tensor([0, 0, 1, 1])
+    separated = torch.tensor(
+        [
+            [1.0, 0.0],
+            [1.0, 0.1],
+            [0.0, 1.0],
+            [0.1, 1.0],
+        ]
+    )
+    confused = torch.tensor(
+        [
+            [1.0, 0.0],
+            [0.0, 1.0],
+            [1.0, 0.0],
+            [0.0, 1.0],
+        ]
+    )
+
+    separated_loss, separated_stats = compute_region_prototype_contrast_loss(
+        separated,
+        labels,
+        temperature=0.1,
+    )
+    confused_loss, confused_stats = compute_region_prototype_contrast_loss(
+        confused,
+        labels,
+        temperature=0.1,
+    )
+
+    assert separated_stats["valid_ratio"].item() == 1.0
+    assert confused_stats["num_proposals"].item() == 2
+    assert separated_loss < confused_loss
+
+
+def test_region_prototype_contrast_loss_returns_zero_without_negatives():
+    values = torch.tensor([[1.0, 0.0], [1.0, 0.1]])
+    labels = torch.tensor([0, 0])
+
+    loss, stats = compute_region_prototype_contrast_loss(values, labels)
+
+    assert loss.item() == 0.0
+    assert stats["num_proposals"].item() == 1
+    assert stats["valid_ratio"].item() == 0.0
 
 
 def test_proposal_memory_rejects_length_mismatch():

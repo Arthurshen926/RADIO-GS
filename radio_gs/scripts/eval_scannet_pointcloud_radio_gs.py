@@ -806,6 +806,7 @@ def _smooth_logits_voxel_proposals(
     gate: str = "all",
     margin_threshold: float = 0.0,
     confidence_threshold: float = 0.0,
+    proposal_consensus_threshold: float = 0.0,
 ) -> tuple[torch.Tensor, dict[str, float | int | bool]]:
     """Pool logits inside deterministic 3D voxel proposals and blend them back."""
     if logits.ndim != 2:
@@ -820,6 +821,7 @@ def _smooth_logits_voxel_proposals(
             "gate": gate,
             "margin_threshold": float(margin_threshold),
             "confidence_threshold": float(confidence_threshold),
+            "proposal_consensus_threshold": float(proposal_consensus_threshold),
             "num_proposals": 0,
             "num_assigned": 0,
         }
@@ -833,6 +835,7 @@ def _smooth_logits_voxel_proposals(
         gate=gate,
         margin_threshold=margin_threshold,
         confidence_threshold=confidence_threshold,
+        proposal_consensus_threshold=proposal_consensus_threshold,
     )
     stats = dict(stats)
     stats.update(
@@ -1133,6 +1136,7 @@ def evaluate_scene(
     proposal_smoothing_gate: str = "all",
     proposal_margin_threshold: float = 0.0,
     proposal_confidence_threshold: float = 0.0,
+    proposal_consensus_threshold: float = 0.0,
 ) -> dict:
     if query_mode not in QUERY_MODES:
         raise ValueError(f"query_mode must be one of: {', '.join(QUERY_MODES)}")
@@ -1291,6 +1295,7 @@ def evaluate_scene(
             "gate": proposal_smoothing_gate,
             "margin_threshold": float(proposal_margin_threshold),
             "confidence_threshold": float(proposal_confidence_threshold),
+            "proposal_consensus_threshold": float(proposal_consensus_threshold),
             "num_proposals": 0,
             "num_assigned": 0,
         }
@@ -1534,6 +1539,7 @@ def evaluate_scene(
                     gate=proposal_smoothing_gate,
                     margin_threshold=proposal_margin_threshold,
                     confidence_threshold=proposal_confidence_threshold,
+                    proposal_consensus_threshold=proposal_consensus_threshold,
                 )
                 proposal_smoothing_by_split[split] = proposal_stats
             elif proposal_smoothing != "none":  # pragma: no cover - guarded above
@@ -1796,11 +1802,20 @@ def _add_query_mode_args(parser: argparse.ArgumentParser) -> None:
     )
     parser.add_argument(
         "--proposal_smoothing_gate",
-        choices=["all", "low_margin", "low_confidence", "low_margin_or_low_confidence"],
+        choices=[
+            "all",
+            "low_margin",
+            "low_confidence",
+            "low_margin_or_low_confidence",
+            "proposal_consensus",
+            "low_margin_and_proposal_consensus",
+            "low_confidence_and_proposal_consensus",
+        ],
         default="all",
         help=(
             "Apply proposal smoothing to all rows, low-margin rows, "
-            "low-confidence rows, or either low-margin/low-confidence rows"
+            "low-confidence rows, either low-margin/low-confidence rows, "
+            "or rows inside high-consensus proposals"
         ),
     )
     parser.add_argument(
@@ -1814,6 +1829,12 @@ def _add_query_mode_args(parser: argparse.ArgumentParser) -> None:
         type=float,
         default=0.0,
         help="Softmax top1 confidence threshold for low-confidence proposal smoothing gates",
+    )
+    parser.add_argument(
+        "--proposal_consensus_threshold",
+        type=float,
+        default=0.0,
+        help="Minimum proposal top-1 agreement for proposal-consensus smoothing gates",
     )
     parser.add_argument(
         "--class_aliases",
@@ -1998,7 +2019,9 @@ def main() -> None:
             f"alpha={args.proposal_smoothing_alpha:g}, "
             f"min_count={args.proposal_min_count}, "
             f"gate={args.proposal_smoothing_gate}, "
-            f"margin={args.proposal_margin_threshold:g})"
+            f"margin={args.proposal_margin_threshold:g}, "
+            f"conf={args.proposal_confidence_threshold:g}, "
+            f"consensus={args.proposal_consensus_threshold:g})"
             if args.proposal_smoothing != "none"
             else ""
         )
@@ -2063,6 +2086,7 @@ def main() -> None:
             proposal_smoothing_gate=args.proposal_smoothing_gate,
             proposal_margin_threshold=args.proposal_margin_threshold,
             proposal_confidence_threshold=args.proposal_confidence_threshold,
+            proposal_consensus_threshold=args.proposal_consensus_threshold,
         )
         all_results[scene] = result
         for split in split_names:
@@ -2094,6 +2118,7 @@ def main() -> None:
             "gate": args.proposal_smoothing_gate,
             "margin_threshold": float(args.proposal_margin_threshold),
             "confidence_threshold": float(args.proposal_confidence_threshold),
+            "proposal_consensus_threshold": float(args.proposal_consensus_threshold),
         },
         "macro": macro,
         "scenes": all_results,

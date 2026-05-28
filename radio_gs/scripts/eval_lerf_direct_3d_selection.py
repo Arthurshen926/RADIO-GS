@@ -27,7 +27,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import cv2
 import numpy as np
@@ -46,7 +46,11 @@ from radio_gs.data.benchmark_paths import (
     resolve_split_feature_dir,
 )
 from radio_gs.geometry_utils import resolve_use_2dgs
-from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
+from radio_gs.models.point_summary_adapter import (
+    CompactToSummaryAdapter,
+    append_point_summary_context,
+    point_summary_context_dim,
+)
 from radio_gs.models.proposal_memory import (
     build_voxel_proposal_labels,
     propagate_logits_with_proposals,
@@ -123,6 +127,61 @@ def sha256_file_if_exists(path: str | Path) -> str:
     return sha256_file(path_obj)
 
 
+def tensor_sha256_float32(tensor: torch.Tensor) -> str:
+    """Stable SHA256 hash for a float32 tensor payload."""
+    arr = tensor.detach().cpu().float().contiguous().numpy()
+    return hashlib.sha256(arr.tobytes()).hexdigest()
+
+
+def xyz_geometry_fingerprint(xyz: torch.Tensor) -> Dict[str, Any]:
+    """Compact provenance for row-aligned Gaussian primitive caches."""
+    xyz_cpu = xyz.detach().cpu().float()
+    if xyz_cpu.ndim != 2 or xyz_cpu.shape[-1] != 3:
+        raise ValueError(f"Expected xyz [N,3], got {tuple(xyz_cpu.shape)}")
+    if xyz_cpu.numel() == 0:
+        xyz_min = xyz_max = xyz_mean = [0.0, 0.0, 0.0]
+    else:
+        xyz_min = [float(v) for v in xyz_cpu.min(dim=0).values.tolist()]
+        xyz_max = [float(v) for v in xyz_cpu.max(dim=0).values.tolist()]
+        xyz_mean = [float(v) for v in xyz_cpu.mean(dim=0).tolist()]
+    return {
+        "num_gaussians": int(xyz_cpu.shape[0]),
+        "xyz_sha256": tensor_sha256_float32(xyz_cpu),
+        "xyz_min": xyz_min,
+        "xyz_max": xyz_max,
+        "xyz_mean": xyz_mean,
+    }
+
+
+def gaussian_geometry_fingerprint(
+    xyz: torch.Tensor,
+    *,
+    scales: Optional[torch.Tensor] = None,
+    rotations: Optional[torch.Tensor] = None,
+    opacities: Optional[torch.Tensor] = None,
+) -> Dict[str, Any]:
+    """Fingerprint Gaussian rows and footprint tensors used by VPR caches."""
+    fingerprint = xyz_geometry_fingerprint(xyz)
+    n_gaussians = int(fingerprint["num_gaussians"])
+    optional_tensors = {
+        "scales": scales,
+        "rotations": rotations,
+        "opacities": opacities,
+    }
+    for name, tensor in optional_tensors.items():
+        if tensor is None:
+            continue
+        tensor_cpu = tensor.detach().cpu().float()
+        if tensor_cpu.ndim == 0 or int(tensor_cpu.shape[0]) != n_gaussians:
+            raise ValueError(
+                f"Expected {name} first dimension {n_gaussians}, "
+                f"got {tuple(tensor_cpu.shape)}"
+            )
+        fingerprint[f"{name}_shape"] = [int(v) for v in tensor_cpu.shape]
+        fingerprint[f"{name}_sha256"] = tensor_sha256_float32(tensor_cpu)
+    return fingerprint
+
+
 @dataclass(frozen=True)
 class SelectionSpec:
     mode: str
@@ -194,19 +253,28 @@ def save_score_cache(
     *,
     metadata: Dict[str, Any],
     registration_stats: Dict[str, Any],
+    xyz: Optional[torch.Tensor] = None,
 ) -> None:
     """Persist pre-aggregation primitive text scores with protocol metadata."""
     cache_path = Path(path)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(
-        {
-            "version": SCORE_CACHE_VERSION,
-            "metadata": canonical_score_cache_metadata(metadata),
-            "registration_stats": _canonical_cache_value(registration_stats),
-            "scores": scores.detach().cpu(),
-        },
-        cache_path,
-    )
+    payload = {
+        "version": SCORE_CACHE_VERSION,
+        "metadata": canonical_score_cache_metadata(metadata),
+        "registration_stats": _canonical_cache_value(registration_stats),
+        "scores": scores.detach().cpu(),
+    }
+    if xyz is not None:
+        if xyz.ndim != 2 or xyz.shape[-1] != 3:
+            raise ValueError(f"Expected xyz [N,3], got {tuple(xyz.shape)}")
+        if int(xyz.shape[0]) != int(scores.shape[0]):
+            raise ValueError(
+                "score cache xyz row count must match scores: "
+                f"{int(xyz.shape[0])} vs {int(scores.shape[0])}"
+            )
+        payload["geometry_fingerprint"] = xyz_geometry_fingerprint(xyz)
+        payload["xyz"] = xyz.detach().cpu().float()
+    torch.save(payload, cache_path)
 
 
 def save_registered_feature_cache(
@@ -217,6 +285,9 @@ def save_registered_feature_cache(
     valid: torch.Tensor,
     view_counts: torch.Tensor,
     metadata: Dict[str, Any],
+    scales: Optional[torch.Tensor] = None,
+    rotations: Optional[torch.Tensor] = None,
+    opacities: Optional[torch.Tensor] = None,
 ) -> None:
     """Persist VPR-registered primitive summary features for distillation.
 
@@ -244,6 +315,14 @@ def save_registered_feature_cache(
         {
             "version": REGISTERED_FEATURE_CACHE_VERSION,
             "metadata": canonical_score_cache_metadata(metadata),
+            "feature_space": "siglip_summary",
+            "feature_key": "summary_features",
+            "geometry_fingerprint": gaussian_geometry_fingerprint(
+                xyz,
+                scales=scales,
+                rotations=rotations,
+                opacities=opacities,
+            ),
             "xyz": xyz.detach().cpu().float(),
             "summary_features": summary_features.detach().cpu().float(),
             "valid": valid.detach().cpu().bool(),
@@ -257,6 +336,7 @@ def load_score_cache(
     path: str | Path,
     *,
     expected_metadata: Dict[str, Any],
+    expected_xyz: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.Tensor, Dict[str, Any]]:
     """Load cached primitive text scores after exact protocol matching."""
     cache_path = Path(path)
@@ -296,6 +376,21 @@ def load_score_cache(
     scores = payload.get("scores")
     if not isinstance(scores, torch.Tensor) or scores.ndim != 2:
         raise ValueError("score cache payload must contain a 2D tensor under 'scores'")
+    if expected_xyz is not None:
+        fingerprint = payload.get("geometry_fingerprint")
+        if not isinstance(fingerprint, dict):
+            raise ValueError("score cache missing geometry_fingerprint")
+        expected_fingerprint = xyz_geometry_fingerprint(expected_xyz)
+        cached_hash = str(fingerprint.get("xyz_sha256", ""))
+        expected_hash = str(expected_fingerprint.get("xyz_sha256", ""))
+        cached_count = int(fingerprint.get("num_gaussians", -1))
+        expected_count = int(expected_fingerprint["num_gaussians"])
+        if cached_hash != expected_hash or cached_count != expected_count:
+            raise ValueError(
+                "score cache geometry mismatch: "
+                f"cached_count={cached_count} expected_count={expected_count} "
+                f"cached_xyz_sha256={cached_hash} expected_xyz_sha256={expected_hash}"
+            )
     registration_stats = payload.get("registration_stats", {})
     if not isinstance(registration_stats, dict):
         raise ValueError("score cache payload registration_stats must be a dict")
@@ -560,6 +655,49 @@ def choose_refined_mask_by_geometry_with_report(
     return refined.copy(), report
 
 
+def apply_geometry_gate_to_sam3_report(
+    initial_mask: np.ndarray,
+    candidate_mask: np.ndarray,
+    sam3_report: Mapping[str, Any],
+    alpha_map: np.ndarray | torch.Tensor,
+    depth_map: np.ndarray | torch.Tensor,
+    *,
+    min_area_ratio: float,
+    max_area_ratio: float,
+    min_boundary_gain: float,
+) -> Tuple[np.ndarray, Dict[str, Any]]:
+    """Apply a GT-free geometry gate while preserving upstream SAM report fields."""
+
+    initial = np.asarray(initial_mask).astype(bool)
+    candidate = np.asarray(candidate_mask).astype(bool)
+    report = dict(sam3_report)
+    upstream_accepted = bool(report.get("accepted", False))
+    if not upstream_accepted:
+        report.update(
+            {
+                "geometry_gate_enabled": True,
+                "geometry_gate_accepted": False,
+                "geometry_gate_reason": "upstream_rejected",
+            }
+        )
+        return initial.copy(), report
+    gated, gate_report = choose_refined_mask_by_geometry_with_report(
+        initial,
+        candidate,
+        alpha_map,
+        depth_map,
+        min_area_ratio=min_area_ratio,
+        max_area_ratio=max_area_ratio,
+        min_boundary_gain=min_boundary_gain,
+    )
+    report.update(gate_report)
+    gate_accepted = bool(gate_report.get("geometry_gate_accepted", False))
+    report["accepted"] = bool(upstream_accepted and gate_accepted)
+    if not gate_accepted:
+        report["fallback_reason"] = str(gate_report.get("geometry_gate_reason", ""))
+    return gated, report
+
+
 def summarize_ious(ious: Sequence[float]) -> Dict[str, float | int]:
     if not ious:
         return {"miou": 0.0, "acc025": 0.0, "acc050": 0.0, "n": 0}
@@ -570,6 +708,56 @@ def summarize_ious(ious: Sequence[float]) -> Dict[str, float | int]:
         "acc050": float((arr > 0.50).mean()),
         "n": int(arr.size),
     }
+
+
+INITIAL_IOU_BUCKETS: tuple[tuple[str, float, float], ...] = (
+    ("lt_0p25", float("-inf"), 0.25),
+    ("0p25_0p50", 0.25, 0.50),
+    ("0p50_0p75", 0.50, 0.75),
+    ("gte_0p75", 0.75, float("inf")),
+)
+
+
+def summarize_initial_iou_buckets(
+    query_details: Sequence[Mapping[str, Any]],
+) -> Dict[str, Dict[str, float | int]]:
+    """Summarize refinement deltas by initial coarse-mask IoU buckets."""
+
+    summary: Dict[str, Dict[str, float | int]] = {}
+    for label, low, high in INITIAL_IOU_BUCKETS:
+        rows = [
+            row
+            for row in query_details
+            if float(row.get("initial_iou", 0.0)) >= low
+            and float(row.get("initial_iou", 0.0)) < high
+        ]
+        if not rows:
+            summary[label] = {
+                "n": 0,
+                "initial_miou": 0.0,
+                "miou": 0.0,
+                "delta_miou": 0.0,
+                "delta_boundary_f": 0.0,
+                "delta_trimap_iou": 0.0,
+                "sam3_accept_rate": 0.0,
+            }
+            continue
+        summary[label] = {
+            "n": len(rows),
+            "initial_miou": float(np.mean([float(row.get("initial_iou", 0.0)) for row in rows])),
+            "miou": float(np.mean([float(row.get("iou", 0.0)) for row in rows])),
+            "delta_miou": float(np.mean([float(row.get("delta_iou", 0.0)) for row in rows])),
+            "delta_boundary_f": float(
+                np.mean([float(row.get("delta_boundary_f", 0.0)) for row in rows])
+            ),
+            "delta_trimap_iou": float(
+                np.mean([float(row.get("delta_trimap_iou", 0.0)) for row in rows])
+            ),
+            "sam3_accept_rate": float(
+                np.mean([1.0 if bool(row.get("sam3_accepted", False)) else 0.0 for row in rows])
+            ),
+        }
+    return summary
 
 
 def bootstrap_mean_ci(
@@ -976,6 +1164,7 @@ def smooth_scores_with_voxel_proposals(
     gate: str = "all",
     margin_threshold: float = 0.0,
     confidence_threshold: float = 0.0,
+    proposal_consensus_threshold: float = 0.0,
 ) -> tuple[torch.Tensor, dict[str, float | int | bool]]:
     """Blend primitive text scores with scores pooled over 3D voxel proposals."""
     if scores.ndim != 2:
@@ -995,6 +1184,7 @@ def smooth_scores_with_voxel_proposals(
             "gate": gate,
             "margin_threshold": float(margin_threshold),
             "confidence_threshold": float(confidence_threshold),
+            "proposal_consensus_threshold": float(proposal_consensus_threshold),
             "num_proposals": 0,
             "num_assigned": 0,
         }
@@ -1011,6 +1201,7 @@ def smooth_scores_with_voxel_proposals(
         gate=gate,
         margin_threshold=margin_threshold,
         confidence_threshold=confidence_threshold,
+        proposal_consensus_threshold=proposal_consensus_threshold,
     )
     stats = dict(stats)
     stats.update(
@@ -1953,6 +2144,25 @@ def accumulate_raster_contribution_features(
     return sums, counts
 
 
+def normalize_registered_feature_sums(
+    registered_sum: torch.Tensor,
+    registered_counts: torch.Tensor,
+) -> torch.Tensor:
+    """Return L2-normalized weighted primitive features from accumulated VPR sums."""
+    sums = torch.as_tensor(registered_sum).float()
+    counts = torch.as_tensor(registered_counts).float().to(device=sums.device)
+    if sums.ndim != 2 or counts.ndim != 1 or int(sums.shape[0]) != int(counts.shape[0]):
+        raise ValueError(
+            "registered_sum must be [N,D] and registered_counts must be [N] with matching N"
+        )
+    normalized = torch.zeros_like(sums)
+    valid = counts > 0
+    if bool(valid.any()):
+        mean = sums[valid] / counts[valid].clamp_min(1e-8).unsqueeze(1)
+        normalized[valid] = F.normalize(mean, dim=-1)
+    return normalized
+
+
 def select_dominant_raster_hits(
     pixel_ids: torch.Tensor,
     weights: torch.Tensor,
@@ -2149,6 +2359,118 @@ def rasterize_registered_view_features(
     return sums, counts
 
 
+def raster_adjoint_registered_view_features(
+    *,
+    model: torch.nn.Module,
+    renderer: FeatureFieldRenderer,
+    viewmat: torch.Tensor,
+    siglip_feat: torch.Tensor,
+    alpha_map: Optional[torch.Tensor] = None,
+    alpha_threshold: float = 0.0,
+    channel_chunk_size: Optional[int] = None,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Lift rendered features to primitives with the rasterizer's color adjoint.
+
+    For each rendered pixel feature ``F(u)``, the gradient of
+    ``sum_u rendered_color(u) * F(u)`` with respect to per-Gaussian colors is the
+    compositing-weighted primitive contribution ``sum_u w_ui F(u)``. A second
+    one-channel adjoint pass yields ``sum_u w_ui`` for normalization. This keeps
+    the VPR registration label-free while using true alpha-compositing
+    contributions instead of center or footprint proxy assignments.
+    """
+    if getattr(renderer, "use_2dgs", False):
+        raise RuntimeError("raster_adjoint registration currently supports 3DGS rasterization only")
+    if siglip_feat.dim() != 4 or int(siglip_feat.shape[0]) != 1:
+        raise ValueError(f"Expected siglip_feat [1,C,H,W], got {tuple(siglip_feat.shape)}")
+
+    from gsplat import rasterization
+
+    device = siglip_feat.device
+    target = siglip_feat.detach().float()
+    _, channels, height, width = target.shape
+    n_gaussians = int(model.get_xyz().shape[0])
+    if n_gaussians == 0:
+        return (
+            torch.empty(0, int(channels), dtype=torch.float32, device=device),
+            torch.empty(0, dtype=torch.float32, device=device),
+        )
+
+    if viewmat.dim() == 2:
+        viewmats = viewmat.to(device=device, dtype=torch.float32).unsqueeze(0)
+    elif viewmat.dim() == 3 and int(viewmat.shape[0]) == 1:
+        viewmats = viewmat.to(device=device, dtype=torch.float32)
+    else:
+        raise ValueError(f"Expected single view matrix, got {tuple(viewmat.shape)}")
+
+    means = model.get_xyz().detach().to(device=device, dtype=torch.float32)
+    quats = model.get_rotation().detach().to(device=device, dtype=torch.float32)
+    scales = model.get_scaling().detach().to(device=device, dtype=torch.float32)
+    opacities = model.get_opacity().detach().to(device=device, dtype=torch.float32)
+    if opacities.dim() == 2 and int(opacities.shape[1]) == 1:
+        opacities = opacities[:, 0]
+    Ks = renderer.K.detach().to(device=device, dtype=torch.float32).unsqueeze(0)
+
+    pixel_weight = None
+    if alpha_threshold > 0.0 and alpha_map is not None:
+        alpha = _normalize_single_view_image(
+            alpha_map.to(device=device),
+            image_height=int(height),
+            image_width=int(width),
+        )
+        pixel_weight = (alpha >= float(alpha_threshold)).to(dtype=torch.float32)
+
+    def _render_color_adjoint(color_dim: int, pixel_target: torch.Tensor) -> torch.Tensor:
+        colors = torch.zeros(
+            n_gaussians,
+            int(color_dim),
+            dtype=torch.float32,
+            device=device,
+            requires_grad=True,
+        )
+        backgrounds = torch.zeros(1, int(color_dim), dtype=torch.float32, device=device)
+        renders, _alphas, _info = rasterization(
+            means=means,
+            quats=quats,
+            scales=scales,
+            opacities=opacities,
+            colors=colors,
+            viewmats=viewmats,
+            Ks=Ks,
+            width=int(width),
+            height=int(height),
+            near_plane=renderer.near_plane,
+            far_plane=renderer.far_plane,
+            backgrounds=backgrounds,
+            render_mode="RGB",
+            packed=False,
+        )
+        loss = (renders[0].float() * pixel_target.float()).sum()
+        grad = torch.autograd.grad(loss, colors, retain_graph=False, create_graph=False)[0]
+        return grad.detach().float()
+
+    chunk = int(channel_chunk_size or getattr(renderer, "max_channels_per_chunk", 32) or 32)
+    chunk = max(1, chunk)
+    sums = torch.zeros(n_gaussians, int(channels), dtype=torch.float32, device=device)
+
+    with torch.enable_grad():
+        denom_target = torch.ones(int(height), int(width), 1, dtype=torch.float32, device=device)
+        if pixel_weight is not None:
+            denom_target = denom_target * pixel_weight.unsqueeze(-1)
+        counts = _render_color_adjoint(1, denom_target).squeeze(-1).clamp_min(0.0)
+
+        for start in range(0, int(channels), chunk):
+            end = min(start + chunk, int(channels))
+            chunk_target = target[0, start:end].permute(1, 2, 0).contiguous()
+            if pixel_weight is not None:
+                chunk_target = chunk_target * pixel_weight.unsqueeze(-1)
+            sums[:, start:end] = _render_color_adjoint(end - start, chunk_target)
+
+    invalid = counts <= 0
+    if bool(invalid.any()):
+        sums[invalid] = 0.0
+    return sums, counts
+
+
 def aggregate_scores_by_voxel(
     scores: torch.Tensor,
     xyz: torch.Tensor,
@@ -2318,14 +2640,27 @@ def _build_point_summary_adapter(
     checkpoint_path: str,
     device: torch.device,
 ) -> torch.nn.Module:
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+    metadata = ckpt.get("point_summary_adapter_metadata") or {}
+    contract = metadata.get("direct_head_contract") if isinstance(metadata, dict) else {}
+    context_features = str(
+        (contract or {}).get(
+            "point_summary_adapter_context_features",
+            metadata.get(
+                "point_summary_adapter_context_features",
+                getattr(config, "point_summary_adapter_context_features", ""),
+            ),
+        )
+        or ""
+    )
     adapter = CompactToSummaryAdapter(
-        input_dim=getattr(config, "bottleneck_dim", getattr(config, "hybrid_output_dim", 128)),
+        input_dim=getattr(config, "bottleneck_dim", getattr(config, "hybrid_output_dim", 128))
+        + point_summary_context_dim(context_features),
         output_dim=1536,
         hidden_dim=getattr(config, "point_summary_adapter_hidden_dim", 512),
         num_layers=getattr(config, "point_summary_adapter_num_layers", 2),
         dropout=getattr(config, "point_summary_adapter_dropout", 0.0),
     ).to(device)
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     state = ckpt.get("point_summary_adapter_state_dict")
     if state is None:
         raise KeyError(
@@ -2342,21 +2677,87 @@ def build_direct_head_eval_status(
     score_source: str,
     use_point_summary_adapter: bool,
     adapter_loaded: bool,
+    compact_feature_key: str = "features",
+    direct_readout_mode: str = "gaussian",
+    point_summary_adapter_blend_alpha: float = 1.0,
+    point_summary_adapter_valid_mask_mode: str = "none",
+    point_summary_adapter_context_features: str = "",
+    teacher_feature_space: str = "",
+    teacher_cache_feature_key: str = "",
+    direct_point_query_mode: str = "",
+    direct_point_gaussian_position_mode: str = "",
 ) -> Dict[str, Any]:
     """Describe direct-head eval settings that can silently change direct-field rows."""
     has_adapter = "point_summary_adapter_state_dict" in checkpoint
+    metadata = checkpoint.get("point_summary_adapter_metadata") or {}
+    contract = metadata.get("direct_head_contract") if isinstance(metadata, dict) else None
+    if not isinstance(contract, dict):
+        contract = {}
     warnings: list[str] = []
     if score_source == "direct":
         if has_adapter and not use_point_summary_adapter:
             warnings.append("checkpoint_has_point_summary_adapter_but_eval_disabled")
         if use_point_summary_adapter and not adapter_loaded:
             warnings.append("use_point_summary_adapter_true_but_adapter_not_loaded")
+        if has_adapter and use_point_summary_adapter and not contract:
+            warnings.append("checkpoint_has_point_summary_adapter_but_missing_direct_head_contract")
+        if contract:
+            expected_feature_key = str(contract.get("compact_feature_key", "features"))
+            if str(compact_feature_key) != expected_feature_key:
+                warnings.append(
+                    f"compact_feature_key_mismatch: expected={expected_feature_key} "
+                    f"got={compact_feature_key}"
+                )
+            expected_readout = str(contract.get("direct_readout_mode", "gaussian"))
+            if str(direct_readout_mode) != expected_readout:
+                warnings.append(
+                    f"direct_readout_mode_mismatch: expected={expected_readout} "
+                    f"got={direct_readout_mode}"
+                )
+            expected_alpha = float(contract.get("point_summary_adapter_blend_alpha", 1.0))
+            if abs(float(point_summary_adapter_blend_alpha) - expected_alpha) > 1e-6:
+                warnings.append(
+                    "point_summary_adapter_blend_alpha_mismatch: "
+                    f"expected={expected_alpha:g} got={float(point_summary_adapter_blend_alpha):g}"
+                )
+            expected_mask = str(contract.get("point_summary_adapter_valid_mask_mode", "none"))
+            if str(point_summary_adapter_valid_mask_mode) != expected_mask:
+                warnings.append(
+                    f"point_summary_adapter_valid_mask_mode_mismatch: "
+                    f"expected={expected_mask} got={point_summary_adapter_valid_mask_mode}"
+                )
+            expected_context = str(contract.get("point_summary_adapter_context_features", ""))
+            if str(point_summary_adapter_context_features or "") != expected_context:
+                warnings.append(
+                    "point_summary_adapter_context_features_mismatch: "
+                    f"expected={expected_context!r} got={point_summary_adapter_context_features!r}"
+                )
+            contract_checks = {
+                "teacher_feature_space": str(teacher_feature_space or ""),
+                "teacher_cache_feature_key": str(teacher_cache_feature_key or ""),
+                "direct_point_query_mode": str(direct_point_query_mode or ""),
+                "direct_point_gaussian_position_mode": str(direct_point_gaussian_position_mode or ""),
+            }
+            for name, actual in contract_checks.items():
+                expected = str(contract.get(name, ""))
+                if expected and actual and actual != expected:
+                    warnings.append(f"{name}_mismatch: expected={expected} got={actual}")
     return {
         "score_source": score_source,
         "checkpoint_has_point_summary_adapter": bool(has_adapter),
         "use_point_summary_adapter": bool(use_point_summary_adapter),
         "adapter_loaded": bool(adapter_loaded),
-        "point_summary_adapter_metadata": checkpoint.get("point_summary_adapter_metadata") or {},
+        "compact_feature_key": str(compact_feature_key),
+        "direct_readout_mode": str(direct_readout_mode),
+        "point_summary_adapter_blend_alpha": float(point_summary_adapter_blend_alpha),
+        "point_summary_adapter_valid_mask_mode": str(point_summary_adapter_valid_mask_mode),
+        "point_summary_adapter_context_features": str(point_summary_adapter_context_features or ""),
+        "teacher_feature_space": str(teacher_feature_space or ""),
+        "teacher_cache_feature_key": str(teacher_cache_feature_key or ""),
+        "direct_point_query_mode": str(direct_point_query_mode or ""),
+        "direct_point_gaussian_position_mode": str(direct_point_gaussian_position_mode or ""),
+        "point_summary_adapter_metadata": metadata,
+        "direct_head_contract": contract,
         "warnings": warnings,
     }
 
@@ -2370,15 +2771,41 @@ def enforce_direct_head_eval_consistency(status: Dict[str, Any], *, strict: bool
         )
 
 
+def _validate_teacher_cache_geometry(
+    payload: Dict[str, Any],
+    *,
+    expected_xyz: Optional[torch.Tensor],
+    cache_path: Path,
+) -> None:
+    if expected_xyz is None:
+        return
+    fingerprint = payload.get("geometry_fingerprint")
+    if not isinstance(fingerprint, dict):
+        raise ValueError(f"teacher cache missing geometry_fingerprint: {cache_path}")
+    expected_fingerprint = xyz_geometry_fingerprint(expected_xyz)
+    cached_hash = str(fingerprint.get("xyz_sha256", ""))
+    expected_hash = str(expected_fingerprint.get("xyz_sha256", ""))
+    cached_count = int(fingerprint.get("num_gaussians", -1))
+    expected_count = int(expected_fingerprint["num_gaussians"])
+    if cached_hash != expected_hash or cached_count != expected_count:
+        raise ValueError(
+            "teacher cache geometry mismatch: "
+            f"{cache_path} cached_count={cached_count} expected_count={expected_count} "
+            f"cached_xyz_sha256={cached_hash} expected_xyz_sha256={expected_hash}"
+        )
+
+
 def _load_point_summary_adapter_valid_mask(
     checkpoint_path: str,
     *,
     expected_count: int,
     device: torch.device,
+    fallback_teacher_cache: str = "",
+    expected_xyz: Optional[torch.Tensor] = None,
 ) -> Optional[torch.Tensor]:
     ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
     metadata = ckpt.get("point_summary_adapter_metadata") or {}
-    teacher_cache = metadata.get("teacher_cache")
+    teacher_cache = metadata.get("teacher_cache") or fallback_teacher_cache
     if not teacher_cache:
         return None
     cache_path = Path(str(teacher_cache))
@@ -2386,6 +2813,7 @@ def _load_point_summary_adapter_valid_mask(
         logger.warning("Point summary adapter teacher cache not found: %s", cache_path)
         return None
     payload = torch.load(cache_path, map_location="cpu")
+    _validate_teacher_cache_geometry(payload, expected_xyz=expected_xyz, cache_path=cache_path)
     valid = payload.get("valid")
     if not isinstance(valid, torch.Tensor):
         logger.warning("Point summary adapter teacher cache has no valid mask: %s", cache_path)
@@ -2398,6 +2826,39 @@ def _load_point_summary_adapter_valid_mask(
         )
         return None
     return valid.bool().to(device=device)
+
+
+def _load_point_summary_adapter_view_counts(
+    checkpoint_path: str,
+    *,
+    expected_count: int,
+    device: torch.device,
+    fallback_teacher_cache: str = "",
+    expected_xyz: Optional[torch.Tensor] = None,
+) -> Optional[torch.Tensor]:
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    metadata = ckpt.get("point_summary_adapter_metadata") or {}
+    teacher_cache = metadata.get("teacher_cache") or fallback_teacher_cache
+    if not teacher_cache:
+        return None
+    cache_path = Path(str(teacher_cache))
+    if not cache_path.exists():
+        logger.warning("Point summary adapter teacher cache not found: %s", cache_path)
+        return None
+    payload = torch.load(cache_path, map_location="cpu")
+    _validate_teacher_cache_geometry(payload, expected_xyz=expected_xyz, cache_path=cache_path)
+    counts = payload.get("view_counts")
+    if not isinstance(counts, torch.Tensor):
+        logger.warning("Point summary adapter teacher cache has no view_counts: %s", cache_path)
+        return None
+    if int(counts.numel()) != int(expected_count):
+        logger.warning(
+            "Point summary adapter view_counts size mismatch: got %d, expected %d",
+            int(counts.numel()),
+            int(expected_count),
+        )
+        return None
+    return counts.float().to(device=device)
 
 
 def _blend_point_summary_adapter_features(
@@ -2452,6 +2913,9 @@ def compute_gaussian_text_scores(
     point_summary_adapter: Optional[torch.nn.Module] = None,
     point_summary_adapter_blend_alpha: float = 1.0,
     point_summary_adapter_valid_mask: Optional[torch.Tensor] = None,
+    point_summary_adapter_context_features: str = "",
+    point_summary_adapter_view_counts: Optional[torch.Tensor] = None,
+    point_summary_adapter_view_count_max: Optional[float] = None,
 ) -> torch.Tensor:
     """Decode Gaussian-center features and score them against scene text queries."""
     if not 0.0 <= float(point_summary_adapter_blend_alpha) <= 1.0:
@@ -2550,7 +3014,26 @@ def compute_gaussian_text_scores(
             compact = compact_result
         adapter_siglip = None
         if point_summary_adapter is not None:
-            adapter_siglip = F.normalize(point_summary_adapter(compact.float()).float(), dim=-1)
+            opacity = None
+            scales = None
+            if "opacity" in point_summary_adapter_context_features:
+                opacity = model.get_opacity()[idx].to(device=device)
+            if "scale_log" in point_summary_adapter_context_features:
+                scales = model.get_scaling()[idx].to(device=device)
+            view_counts = (
+                point_summary_adapter_view_counts[idx].to(device=device)
+                if point_summary_adapter_view_counts is not None
+                else None
+            )
+            adapter_input = append_point_summary_context(
+                compact.float(),
+                context_features=point_summary_adapter_context_features,
+                opacity=opacity,
+                scales=scales,
+                view_counts=view_counts,
+                view_count_max=point_summary_adapter_view_count_max,
+            )
+            adapter_siglip = F.normalize(point_summary_adapter(adapter_input).float(), dim=-1)
 
         valid_mask_chunk = None
         if point_summary_adapter_valid_mask is not None:
@@ -2667,7 +3150,7 @@ def compute_registered_view_text_scores(
     on Gaussian primitives, while rendered views provide the language-aligned
     registration signal without using LERF labels or masks for training/scoring.
     """
-    if registration_assignment_mode not in {"center", "raster_contrib", "raster_dominant", "raster_gaussian_top1"}:
+    if registration_assignment_mode not in {"center", "raster_contrib", "raster_dominant", "raster_gaussian_top1", "raster_adjoint"}:
         raise ValueError(f"Unsupported registration assignment mode: {registration_assignment_mode}")
     frame_ids = select_registration_frame_ids(
         available_pose_ids=dataset.pose_by_frame_idx.keys(),
@@ -2727,7 +3210,21 @@ def compute_registered_view_text_scores(
         depth_map = aux["depth_map"].detach().float().unsqueeze(0)
         alpha_map = aux["alpha_map"].detach().float().unsqueeze(0)
 
-        if registration_assignment_mode in {"raster_contrib", "raster_dominant", "raster_gaussian_top1"}:
+        if registration_assignment_mode == "raster_adjoint":
+            frame_sum, frame_counts = raster_adjoint_registered_view_features(
+                model=model,
+                renderer=renderer,
+                viewmat=viewmat,
+                siglip_feat=siglip_feat,
+                alpha_map=alpha_map,
+                alpha_threshold=registration_alpha_threshold,
+            )
+            frame_counts_cpu = frame_counts.detach().float().cpu()
+            valid_cpu = frame_counts_cpu > 0
+            if valid_cpu.any():
+                registered_sum[valid_cpu] += frame_sum.detach().float().cpu()[valid_cpu]
+                registered_counts[valid_cpu] += frame_counts_cpu[valid_cpu]
+        elif registration_assignment_mode in {"raster_contrib", "raster_dominant", "raster_gaussian_top1"}:
             frame_sum, frame_counts = rasterize_registered_view_features(
                 model=model,
                 renderer=renderer,
@@ -2795,13 +3292,10 @@ def compute_registered_view_text_scores(
 
     valid_all = registered_counts > 0
     if registered_feature_cache_path:
-        summary_features = torch.zeros_like(registered_sum)
-        if bool(valid_all.any()):
-            summary_features[valid_all] = F.normalize(
-                registered_sum[valid_all]
-                / registered_counts[valid_all].clamp_min(1.0).unsqueeze(1),
-                dim=-1,
-            )
+        summary_features = normalize_registered_feature_sums(
+            registered_sum,
+            registered_counts,
+        )
         save_registered_feature_cache(
             registered_feature_cache_path,
             xyz=xyz_cpu,
@@ -2809,14 +3303,18 @@ def compute_registered_view_text_scores(
             valid=valid_all,
             view_counts=registered_counts,
             metadata=registered_feature_cache_metadata or {},
+            scales=model.get_scaling().detach().cpu().float(),
+            rotations=model.get_rotation().detach().cpu().float(),
+            opacities=model.get_opacity().detach().cpu().float(),
         )
 
     all_scores: List[torch.Tensor] = []
     for start in tqdm(range(0, n_gaussians, chunk_size), desc="  score registered", leave=False):
         end = min(start + chunk_size, n_gaussians)
-        counts = registered_counts[start:end].clamp_min(1.0).unsqueeze(1)
-        registered = registered_sum[start:end] / counts
-        registered = F.normalize(registered, dim=-1).to(device)
+        registered = normalize_registered_feature_sums(
+            registered_sum[start:end],
+            registered_counts[start:end],
+        ).to(device)
         fallback_chunk = None
         if fallback_scores is not None:
             fallback_chunk = fallback_scores[start:end]
@@ -2945,6 +3443,33 @@ def build_direct3d_prompt_initial_mask(
             heatmap_peak_in_shape(heat, tuple(pred.shape)),
         ).astype(bool)
     raise ValueError(f"Unsupported direct-3D prompt initial refinement: {initial_refinement}")
+
+
+def build_direct3d_oracle_prompt_initial_mask(
+    coarse_mask: np.ndarray,
+    gt_mask: np.ndarray,
+    *,
+    mode: str = "none",
+) -> np.ndarray:
+    """Diagnostic-only oracle prompt for measuring feature-only SAM head ceiling."""
+    coarse = np.asarray(coarse_mask).astype(bool)
+    gt = np.asarray(gt_mask).astype(bool)
+    if coarse.ndim != 2:
+        raise ValueError(f"Expected 2D coarse mask, got {coarse.shape}")
+    if gt.shape != coarse.shape:
+        raise ValueError(f"gt_mask shape {gt.shape} does not match coarse mask {coarse.shape}")
+    if mode == "none":
+        return coarse.copy()
+    if not bool(gt.any()):
+        return coarse.copy()
+    if mode == "gt_mask":
+        return gt.copy()
+    if mode == "gt_box":
+        ys, xs = np.where(gt)
+        box = np.zeros_like(coarse, dtype=bool)
+        box[int(ys.min()) : int(ys.max()) + 1, int(xs.min()) : int(xs.max()) + 1] = True
+        return box
+    raise ValueError(f"Unsupported direct-3D oracle prompt mode: {mode}")
 
 
 def apply_sam3_prompt_heatmap_guard(
@@ -3385,6 +3910,9 @@ def refine_mask_with_sam3_feature_grabcut(
     iterations: int = 1,
     dilate_pixels: int = 5,
     erode_pixels: int = 2,
+    min_initial_iou: float = 0.05,
+    min_refined_area_ratio: float = 0.0,
+    max_refined_area_ratio: float = 0.0,
 ) -> Tuple[np.ndarray, Dict[str, Any]]:
     """Snap a coarse mask to SAM3-adaptor feature boundaries without RGB input."""
     initial = np.asarray(initial_mask).astype(bool)
@@ -3403,6 +3931,10 @@ def refine_mask_with_sam3_feature_grabcut(
         "iterations": int(iterations),
         "dilate_pixels": int(dilate_pixels),
         "erode_pixels": int(erode_pixels),
+        "min_initial_iou": float(min_initial_iou),
+        "min_refined_area_ratio": float(min_refined_area_ratio),
+        "max_refined_area_ratio": float(max_refined_area_ratio),
+        "refined_area_ratio": 0.0,
     }
     if initial.ndim != 2:
         raise ValueError(f"Expected 2D initial mask, got {initial.shape}")
@@ -3459,10 +3991,22 @@ def refine_mask_with_sam3_feature_grabcut(
         return initial.copy(), report
     refined = _resize_bool_mask(refined_low, initial.shape)
     overlap = mask_overlap_stats(refined, initial)
-    report["best_initial_overlap"] = float(overlap["iou"])
-    report["selected_score"] = float(overlap["iou"])
+    overlap_iou = float(overlap["iou"])
+    area_ratio = float(refined.sum()) / float(max(initial.sum(), 1))
+    report["best_initial_overlap"] = overlap_iou
+    report["selected_score"] = overlap_iou
+    report["refined_area_ratio"] = area_ratio
     report["low_refined_pixels"] = int(refined_low.sum())
     report["pred_pixels"] = int(refined.sum())
+    if overlap_iou < float(min_initial_iou):
+        report["fallback_reason"] = "insufficient_initial_overlap"
+        return initial.copy(), report
+    if float(min_refined_area_ratio) > 0.0 and area_ratio < float(min_refined_area_ratio):
+        report["fallback_reason"] = "refined_area_too_small"
+        return initial.copy(), report
+    if float(max_refined_area_ratio) > 0.0 and area_ratio > float(max_refined_area_ratio):
+        report["fallback_reason"] = "refined_area_too_large"
+        return initial.copy(), report
     report["accepted"] = True
     report["fallback_reason"] = "accepted"
     return refined, report
@@ -3708,6 +4252,7 @@ def refine_mask_with_prompt_conditioned_sam3_head(
     support_dilate: int = -1,
     coarse_dilate: int = 0,
     coarse_threshold: float = 0.5,
+    min_quality: float = 0.0,
 ) -> Tuple[np.ndarray, Dict[str, Any]]:
     """Refine a coarse mask using rendered features and a text-conditioned mask head."""
 
@@ -3731,6 +4276,8 @@ def refine_mask_with_prompt_conditioned_sam3_head(
         "max_refined_area_ratio": float(max_refined_area_ratio),
         "support_dilate": int(support_dilate),
         "coarse_dilate": int(coarse_dilate),
+        "min_quality": float(min_quality),
+        "predicted_quality": None,
     }
     if initial.ndim != 2:
         raise ValueError(f"Expected 2D coarse mask, got {initial.shape}")
@@ -3747,10 +4294,26 @@ def refine_mask_with_prompt_conditioned_sam3_head(
         feature_map = feature_map.unsqueeze(0)
     if feature_map.ndim != 4:
         raise ValueError(f"Expected feature_map [B,C,H,W] or [C,H,W], got {tuple(feature_map.shape)}")
+    prompt_shape = (int(feature_map.shape[-2]), int(feature_map.shape[-1]))
     prompt = prompt_embedding.detach().float()
     if prompt.ndim != 1:
         raise ValueError(f"Expected prompt embedding [D], got {tuple(prompt.shape)}")
-    coarse_tensor = torch.from_numpy(initial.astype(np.float32)).unsqueeze(0)
+    prompt_initial = initial
+    report["coarse_prompt_input_shape"] = [int(initial.shape[0]), int(initial.shape[1])]
+    report["coarse_prompt_shape"] = [prompt_shape[0], prompt_shape[1]]
+    report["coarse_prompt_resized"] = tuple(initial.shape) != prompt_shape
+    if tuple(initial.shape) != prompt_shape:
+        prompt_tensor = torch.from_numpy(initial.astype(np.float32)).view(1, 1, *initial.shape)
+        prompt_tensor = F.interpolate(
+            prompt_tensor,
+            size=prompt_shape,
+            mode="nearest",
+        )
+        prompt_initial = (prompt_tensor[0, 0].cpu().numpy() > float(coarse_threshold))
+        if not prompt_initial.any():
+            report["fallback_reason"] = "empty_prompt_after_resize"
+            return initial.copy(), report
+    coarse_tensor = torch.from_numpy(prompt_initial.astype(np.float32)).unsqueeze(0)
     coarse_tensor = build_coarse_prompt_from_target(
         coarse_tensor,
         dilate=int(coarse_dilate),
@@ -3761,11 +4324,25 @@ def refine_mask_with_prompt_conditioned_sam3_head(
     except StopIteration:
         device = feature_map.device
     with torch.no_grad():
-        logits = head(
-            feature_map.to(device=device),
-            prompt.to(device=device).view(1, 1, -1),
-            coarse_tensor.to(device=device).unsqueeze(0),
-        )
+        if hasattr(head, "forward_with_quality"):
+            logits, quality_logits = head.forward_with_quality(
+                feature_map.to(device=device),
+                prompt.to(device=device).view(1, 1, -1),
+                coarse_tensor.to(device=device).unsqueeze(0),
+            )
+        else:
+            logits = head(
+                feature_map.to(device=device),
+                prompt.to(device=device).view(1, 1, -1),
+                coarse_tensor.to(device=device).unsqueeze(0),
+            )
+            quality_logits = None
+    if quality_logits is not None:
+        quality = float(torch.sigmoid(quality_logits.detach().float()).reshape(-1)[0].cpu())
+        report["predicted_quality"] = quality
+        if float(min_quality) > 0.0 and quality < float(min_quality):
+            report["fallback_reason"] = "low_predicted_quality"
+            return initial.copy(), report
     refined, choose_report = choose_sam3_mask_head_refined_mask_with_report(
         initial,
         logits,
@@ -3780,6 +4357,7 @@ def refine_mask_with_prompt_conditioned_sam3_head(
     report["backend"] = "prompt_conditioned_ctf_sam3_mask_head_no_rgb"
     report["attempted"] = True
     report["coarse_dilate"] = int(coarse_dilate)
+    report["min_quality"] = float(min_quality)
     return refined, report
 
 
@@ -4034,6 +4612,9 @@ class Sam3AdaptorMaskRefiner:
             iterations=iterations,
             dilate_pixels=dilate_pixels,
             erode_pixels=erode_pixels,
+            min_initial_iou=self.min_initial_iou,
+            min_refined_area_ratio=self.min_area_scale,
+            max_refined_area_ratio=self.max_area_scale,
         )
 
 
@@ -4182,6 +4763,7 @@ class PromptConditionedSam3MaskHeadRefiner:
         support_dilate: int,
         coarse_dilate: int,
         coarse_threshold: float,
+        min_quality: float,
     ) -> None:
         self.model = model
         self.codec = codec
@@ -4208,6 +4790,7 @@ class PromptConditionedSam3MaskHeadRefiner:
             feature_dim=feature_dim,
             prompt_dim=prompt_dim,
             hidden_dim=hidden_dim,
+            predict_quality=bool(ckpt.get("predict_quality", False)),
         ).to(device)
         self.head.load_state_dict(state, strict=True)
         self.head = self.head.float()
@@ -4220,6 +4803,7 @@ class PromptConditionedSam3MaskHeadRefiner:
         self.support_dilate = int(support_dilate)
         self.coarse_dilate = int(coarse_dilate)
         self.coarse_threshold = float(coarse_threshold)
+        self.min_quality = float(min_quality)
         self._normalised_text = {
             re.sub(r"\s+", " ", key.strip().lower()): value
             for key, value in self.text_embeddings.items()
@@ -4229,6 +4813,13 @@ class PromptConditionedSam3MaskHeadRefiner:
         if category in self.text_embeddings:
             return self.text_embeddings[category]
         return self._normalised_text.get(re.sub(r"\s+", " ", str(category).strip().lower()))
+
+    def missing_categories(self, categories: Iterable[str]) -> List[str]:
+        return [
+            str(category)
+            for category in categories
+            if self._prompt_for_category(str(category)) is None
+        ]
 
     def set_frame(self, viewmat: torch.Tensor) -> Dict[str, Any]:
         with torch.no_grad():
@@ -4293,6 +4884,7 @@ class PromptConditionedSam3MaskHeadRefiner:
             support_dilate=self.support_dilate,
             coarse_dilate=self.coarse_dilate,
             coarse_threshold=self.coarse_threshold,
+            min_quality=self.min_quality,
         )
 
 
@@ -4330,6 +4922,7 @@ def evaluate_selection_spec(
     sam3_mask_head_refiner: Optional[Sam3MaskHeadRefiner],
     sam3_prompt_mask_head_refiner: Optional[PromptConditionedSam3MaskHeadRefiner],
     sam3_prompt_mask_head_initial_refinement: str,
+    sam3_prompt_mask_head_oracle_prompt: str,
     sam3_prompt_mask_head_min_heatmap_mean_ratio: float,
     sam3_prompt_mask_head_min_heatmap_mass_ratio: float,
     sam3_prompt_mask_head_require_peak_in_refined: bool,
@@ -4486,6 +5079,9 @@ def evaluate_selection_spec(
             if cat not in per_category:
                 continue
             cat_idx = scene_categories.index(cat)
+            gt = gt_masks[cat]
+            if gt.sum() == 0:
+                continue
             pred = silhouette[cat_idx] > float(silhouette_threshold)
             initial_pred = pred.copy()
             prompt_initial_pred = pred.copy()
@@ -4495,6 +5091,11 @@ def evaluate_selection_spec(
                     pred,
                     prompt_heatmap,
                     initial_refinement=sam3_prompt_mask_head_initial_refinement,
+                )
+                prompt_initial_pred = build_direct3d_oracle_prompt_initial_mask(
+                    prompt_initial_pred,
+                    gt,
+                    mode=sam3_prompt_mask_head_oracle_prompt,
                 )
             sam3_report: Optional[Dict[str, Any]] = None
             if mask_refinement in {"largest_component", "largest_component_rgb_grabcut"}:
@@ -4538,10 +5139,23 @@ def evaluate_selection_spec(
                 and sam3_adaptor_state is not None
                 and sam3_adaptor_refiner is not None
             ):
-                pred, sam3_report = sam3_adaptor_refiner.refine_from_state_with_report(
+                candidate_pred, sam3_report = sam3_adaptor_refiner.refine_from_state_with_report(
                     sam3_adaptor_state,
                     pred,
                 )
+                if sam3_refinement_geometry_gate:
+                    pred, sam3_report = apply_geometry_gate_to_sam3_report(
+                        initial_pred,
+                        candidate_pred,
+                        sam3_report,
+                        alpha_np,
+                        depth_np,
+                        min_area_ratio=sam3_refinement_gate_min_area_ratio,
+                        max_area_ratio=sam3_refinement_gate_max_area_ratio,
+                        min_boundary_gain=sam3_refinement_gate_min_boundary_gain,
+                    )
+                else:
+                    pred = candidate_pred
             elif mask_refinement == "sam3_adaptor_boundary":
                 sam3_report = {
                     "backend": "radio_sam3_adaptor_feature_prototype",
@@ -4569,21 +5183,16 @@ def evaluate_selection_spec(
                     erode_pixels=mask_refinement_erode,
                 )
                 if sam3_refinement_geometry_gate:
-                    pred, gate_report = choose_refined_mask_by_geometry_with_report(
+                    pred, sam3_report = apply_geometry_gate_to_sam3_report(
                         initial_pred,
                         candidate_pred,
+                        sam3_report,
                         alpha_np,
                         depth_np,
                         min_area_ratio=sam3_refinement_gate_min_area_ratio,
                         max_area_ratio=sam3_refinement_gate_max_area_ratio,
                         min_boundary_gain=sam3_refinement_gate_min_boundary_gain,
                     )
-                    sam3_report.update(gate_report)
-                    sam3_report["accepted"] = bool(
-                        sam3_report.get("accepted", False)
-                        and gate_report.get("geometry_gate_accepted", False)
-                    )
-                    sam3_report["fallback_reason"] = str(gate_report.get("geometry_gate_reason", ""))
                 else:
                     pred = candidate_pred
             elif mask_refinement == "sam3_adaptor_grabcut":
@@ -4605,10 +5214,23 @@ def evaluate_selection_spec(
                 and sam3_mask_head_state is not None
                 and sam3_mask_head_refiner is not None
             ):
-                pred, sam3_report = sam3_mask_head_refiner.refine_from_state_with_report(
+                candidate_pred, sam3_report = sam3_mask_head_refiner.refine_from_state_with_report(
                     sam3_mask_head_state,
                     pred,
                 )
+                if sam3_refinement_geometry_gate:
+                    pred, sam3_report = apply_geometry_gate_to_sam3_report(
+                        initial_pred,
+                        candidate_pred,
+                        sam3_report,
+                        alpha_np,
+                        depth_np,
+                        min_area_ratio=sam3_refinement_gate_min_area_ratio,
+                        max_area_ratio=sam3_refinement_gate_max_area_ratio,
+                        min_boundary_gain=sam3_refinement_gate_min_boundary_gain,
+                    )
+                else:
+                    pred = candidate_pred
             elif mask_refinement == "sam3_mask_head":
                 sam3_report = {
                     "backend": "ctf_sam3_mask_logit_projector",
@@ -4672,6 +5294,7 @@ def evaluate_selection_spec(
                     geometry_gate_report=geometry_gate_report,
                 )
                 sam3_report["initial_refinement"] = sam3_prompt_mask_head_initial_refinement
+                sam3_report["oracle_prompt_mode"] = sam3_prompt_mask_head_oracle_prompt
             elif mask_refinement == "sam3_prompt_mask_head":
                 sam3_report = {
                     "backend": "prompt_conditioned_ctf_sam3_mask_head_no_rgb",
@@ -4685,10 +5308,8 @@ def evaluate_selection_spec(
                     "box_prompt_format": "",
                     "box_prompt_cxcywh_norm": None,
                     "box_prompt_xyxy_pixels": None,
+                    "oracle_prompt_mode": sam3_prompt_mask_head_oracle_prompt,
                 }
-            gt = gt_masks[cat]
-            if gt.sum() == 0:
-                continue
             initial_overlap = mask_overlap_stats(initial_pred, gt)
             initial_iou = float(initial_overlap["iou"])
             initial_boundary_f = boundary_f_score(initial_pred, gt)
@@ -4746,6 +5367,9 @@ def evaluate_selection_spec(
                             sam3_report.get("best_initial_overlap", 0.0)
                         ),
                         "sam3_selected_score": float(sam3_report.get("selected_score", 0.0)),
+                        "sam3_oracle_prompt_mode": str(
+                            sam3_report.get("oracle_prompt_mode", "")
+                        ),
                         "sam3_box_prompt_format": str(
                             sam3_report.get("box_prompt_format", "")
                         ),
@@ -4887,6 +5511,7 @@ def evaluate_selection_spec(
             "per_category": per_cat_summary,
             "per_frame": per_frame,
             "query_details": query_details,
+            "initial_iou_buckets": summarize_initial_iou_buckets(query_details),
             "bootstrap_miou": bootstrap_mean_ci(ious),
             "bootstrap_boundary_f": boundary_summary,
             "bootstrap_trimap_iou": trimap_summary,
@@ -4933,6 +5558,7 @@ def evaluate_scene(
     proposal_smoothing_gate: str,
     proposal_margin_threshold: float,
     proposal_confidence_threshold: float,
+    proposal_consensus_threshold: float,
     sam3_proposal_registration_dir: str,
     sam3_proposal_registration_alpha: float,
     sam3_proposal_registration_min_probability: float,
@@ -5007,10 +5633,13 @@ def evaluate_scene(
     sam3_prompt_mask_head_support_dilate: int,
     sam3_prompt_mask_head_coarse_dilate: int,
     sam3_prompt_mask_head_coarse_threshold: float,
+    sam3_prompt_mask_head_min_quality: float,
     sam3_prompt_mask_head_initial_refinement: str,
+    sam3_prompt_mask_head_oracle_prompt: str,
     sam3_prompt_mask_head_min_heatmap_mean_ratio: float,
     sam3_prompt_mask_head_min_heatmap_mass_ratio: float,
     sam3_prompt_mask_head_require_peak_in_refined: bool,
+    allow_missing_sam3_prompt_text_embeddings: bool,
     min_select: int,
     chunk_size: int,
     official_frames_only: bool,
@@ -5040,16 +5669,40 @@ def evaluate_scene(
     )
     if not is_hybrid:
         logger.warning("Model architecture is explicit; direct readout will use per-Gaussian compact codes")
+    checkpoint_for_status = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+    ps_metadata = checkpoint_for_status.get("point_summary_adapter_metadata") or {}
+    ps_contract = ps_metadata.get("direct_head_contract") if isinstance(ps_metadata, dict) else {}
+    point_summary_adapter_context_features = str(
+        (ps_contract or {}).get(
+            "point_summary_adapter_context_features",
+            ps_metadata.get(
+                "point_summary_adapter_context_features",
+                getattr(config, "point_summary_adapter_context_features", ""),
+            ),
+        )
+        or ""
+    )
     point_summary_adapter = (
         _build_point_summary_adapter(config, checkpoint_path, device)
         if use_point_summary_adapter
         else None
     )
     direct_head_eval_status = build_direct_head_eval_status(
-        load_trusted_checkpoint(checkpoint_path, map_location="cpu"),
+        checkpoint_for_status,
         score_source=score_source,
         use_point_summary_adapter=use_point_summary_adapter,
         adapter_loaded=point_summary_adapter is not None,
+        compact_feature_key=compact_feature_key,
+        direct_readout_mode=direct_readout_mode,
+        point_summary_adapter_blend_alpha=point_summary_adapter_blend_alpha,
+        point_summary_adapter_valid_mask_mode=point_summary_adapter_valid_mask_mode,
+        point_summary_adapter_context_features=point_summary_adapter_context_features,
+        teacher_feature_space=str(getattr(config, "direct_point_teacher_cache_feature_space", "") or ""),
+        teacher_cache_feature_key=str(getattr(config, "direct_point_teacher_cache_feature_key", "") or ""),
+        direct_point_query_mode=str(getattr(config, "direct_point_query_mode", "") or ""),
+        direct_point_gaussian_position_mode=str(
+            getattr(config, "direct_point_gaussian_position_mode", "") or ""
+        ),
     )
     if direct_head_eval_status.get("warnings"):
         logger.warning(
@@ -5060,19 +5713,82 @@ def evaluate_scene(
         direct_head_eval_status,
         strict=strict_direct_head_consistency,
     )
+    needs_point_summary_valid_mask = (
+        use_point_summary_adapter and point_summary_adapter_valid_mask_mode == "teacher_cache"
+    ) or direct_primitive_confidence_mode == "teacher_cache_valid"
     if point_summary_adapter_valid_mask_mode not in {"teacher_cache", "opacity", "none"}:
         raise ValueError("point_summary_adapter_valid_mask_mode must be 'teacher_cache', 'opacity', or 'none'")
+    fallback_point_summary_teacher_cache = ""
+    if needs_point_summary_valid_mask:
+        cache_raw = str(getattr(config, "direct_point_teacher_cache", "") or "")
+        if cache_raw:
+            try:
+                cache_raw = cache_raw.format(scene=scene)
+            except Exception:
+                pass
+            cache_path = Path(cache_raw)
+            if not cache_path.is_absolute():
+                cache_path = Path.cwd() / cache_path
+            fallback_point_summary_teacher_cache = str(cache_path)
     point_summary_adapter_valid_mask = (
         _load_point_summary_adapter_valid_mask(
             checkpoint_path,
             expected_count=int(model.get_xyz().shape[0]),
             device=device,
+            fallback_teacher_cache=fallback_point_summary_teacher_cache,
+            expected_xyz=model.get_xyz().detach().cpu(),
         )
-        if use_point_summary_adapter and point_summary_adapter_valid_mask_mode == "teacher_cache"
+        if needs_point_summary_valid_mask
         else None
     )
+    point_summary_adapter_view_counts = (
+        _load_point_summary_adapter_view_counts(
+            checkpoint_path,
+            expected_count=int(model.get_xyz().shape[0]),
+            device=device,
+            fallback_teacher_cache=fallback_point_summary_teacher_cache,
+            expected_xyz=model.get_xyz().detach().cpu(),
+        )
+        if use_point_summary_adapter and "view_count" in point_summary_adapter_context_features
+        else None
+    )
+    if (
+        use_point_summary_adapter
+        and point_summary_adapter_valid_mask_mode == "teacher_cache"
+        and point_summary_adapter_valid_mask is None
+    ):
+        raise RuntimeError(
+            "point_summary_adapter_valid_mask_mode=teacher_cache requires an "
+            "aligned teacher-cache valid mask"
+        )
+    if (
+        use_point_summary_adapter
+        and "view_count" in point_summary_adapter_context_features
+        and point_summary_adapter_view_counts is None
+    ):
+        raise RuntimeError(
+            "point_summary_adapter_context_features includes view_count but no "
+            "teacher-cache view_counts could be loaded"
+        )
+    raw_view_count_max = ps_metadata.get("point_summary_adapter_view_count_max")
+    point_summary_adapter_view_count_max = (
+        float(raw_view_count_max)
+        if raw_view_count_max is not None
+        else (
+            float(point_summary_adapter_view_counts.max().detach().cpu())
+            if point_summary_adapter_view_counts is not None
+            else None
+        )
+    )
     direct_primitive_confidence: Optional[torch.Tensor] = None
-    if direct_primitive_confidence_mode != "none" or (
+    if direct_primitive_confidence_mode == "teacher_cache_valid":
+        if point_summary_adapter_valid_mask is None:
+            raise RuntimeError(
+                "direct_primitive_confidence_mode=teacher_cache_valid requires "
+                "a valid direct_point_teacher_cache mask"
+            )
+        direct_primitive_confidence = point_summary_adapter_valid_mask.float()
+    elif direct_primitive_confidence_mode != "none" or (
         use_point_summary_adapter and point_summary_adapter_valid_mask_mode == "opacity"
     ):
         opacity_confidence = build_opacity_primitive_confidence(
@@ -5225,7 +5941,21 @@ def evaluate_scene(
             support_dilate=sam3_prompt_mask_head_support_dilate,
             coarse_dilate=sam3_prompt_mask_head_coarse_dilate,
             coarse_threshold=sam3_prompt_mask_head_coarse_threshold,
+            min_quality=sam3_prompt_mask_head_min_quality,
         )
+        missing_prompts = sam3_prompt_mask_head_refiner.missing_categories(scene_categories)
+        if missing_prompts:
+            message = (
+                "Prompt-conditioned SAM3 mask head is missing text embeddings for "
+                f"{len(missing_prompts)} categories: {missing_prompts[:12]}"
+            )
+            if allow_missing_sam3_prompt_text_embeddings:
+                logger.warning(message)
+            else:
+                raise ValueError(
+                    message
+                    + "; pass --allow_missing_sam3_prompt_text_embeddings to permit per-query fallback"
+                )
 
     scene_text: Optional[torch.Tensor] = None
     canonical_text: Optional[torch.Tensor] = None
@@ -5287,6 +6017,7 @@ def evaluate_scene(
             scores, registration_stats = load_score_cache(
                 cache_path,
                 expected_metadata=score_cache_metadata,
+                expected_xyz=model.get_xyz().detach().cpu(),
             )
             score_cache_info["status"] = "hit"
             if tuple(scores.shape) != (int(model.get_xyz().shape[0]), len(scene_categories)):
@@ -5345,6 +6076,9 @@ def evaluate_scene(
             point_summary_adapter=point_summary_adapter,
             point_summary_adapter_blend_alpha=point_summary_adapter_blend_alpha,
             point_summary_adapter_valid_mask=point_summary_adapter_valid_mask,
+            point_summary_adapter_context_features=point_summary_adapter_context_features,
+            point_summary_adapter_view_counts=point_summary_adapter_view_counts,
+            point_summary_adapter_view_count_max=point_summary_adapter_view_count_max,
         )
 
     if scores is not None:
@@ -5418,6 +6152,7 @@ def evaluate_scene(
             scores,
             metadata=score_cache_metadata,
             registration_stats=registration_stats,
+            xyz=model.get_xyz().detach().cpu(),
         )
         score_cache_info["status"] = "written"
 
@@ -5443,6 +6178,7 @@ def evaluate_scene(
         "gate": proposal_smoothing_gate,
         "margin_threshold": float(proposal_margin_threshold),
         "confidence_threshold": float(proposal_confidence_threshold),
+        "proposal_consensus_threshold": float(proposal_consensus_threshold),
         "num_proposals": 0,
         "num_assigned": 0,
     }
@@ -5452,7 +6188,8 @@ def evaluate_scene(
             f"(voxel={proposal_voxel_size:g}, alpha={proposal_smoothing_alpha:g}, "
             f"min_count={proposal_min_count}, gate={proposal_smoothing_gate}, "
             f"margin={proposal_margin_threshold:g}, "
-            f"confidence={proposal_confidence_threshold:g})"
+            f"confidence={proposal_confidence_threshold:g}, "
+            f"consensus={proposal_consensus_threshold:g})"
         )
         scores, proposal_smoothing_stats = smooth_scores_with_voxel_proposals(
             scores,
@@ -5463,6 +6200,7 @@ def evaluate_scene(
             gate=proposal_smoothing_gate,
             margin_threshold=proposal_margin_threshold,
             confidence_threshold=proposal_confidence_threshold,
+            proposal_consensus_threshold=proposal_consensus_threshold,
         )
     elif proposal_smoothing != "none":
         raise ValueError(f"Unsupported proposal_smoothing: {proposal_smoothing}")
@@ -5550,6 +6288,7 @@ def evaluate_scene(
             sam3_mask_head_refiner=sam3_mask_head_refiner,
             sam3_prompt_mask_head_refiner=sam3_prompt_mask_head_refiner,
             sam3_prompt_mask_head_initial_refinement=sam3_prompt_mask_head_initial_refinement,
+            sam3_prompt_mask_head_oracle_prompt=sam3_prompt_mask_head_oracle_prompt,
             sam3_prompt_mask_head_min_heatmap_mean_ratio=sam3_prompt_mask_head_min_heatmap_mean_ratio,
             sam3_prompt_mask_head_min_heatmap_mass_ratio=sam3_prompt_mask_head_min_heatmap_mass_ratio,
             sam3_prompt_mask_head_require_peak_in_refined=sam3_prompt_mask_head_require_peak_in_refined,
@@ -5750,12 +6489,24 @@ def main() -> None:
     parser.add_argument("--proposal_min_count", type=int, default=2, help="Minimum primitives in a proposal before score smoothing is applied")
     parser.add_argument(
         "--proposal_smoothing_gate",
-        choices=["all", "low_margin", "low_confidence", "low_margin_or_low_confidence"],
+        choices=[
+            "all",
+            "low_margin",
+            "low_confidence",
+            "low_margin_or_low_confidence",
+            "proposal_consensus",
+            "low_margin_and_proposal_consensus",
+            "low_confidence_and_proposal_consensus",
+        ],
         default="all",
-        help="Apply proposal-memory smoothing to all, low-margin, low-confidence, or either low-margin/low-confidence primitives",
+        help=(
+            "Apply proposal-memory smoothing to all, low-margin, low-confidence, "
+            "or high-consensus proposal primitives"
+        ),
     )
     parser.add_argument("--proposal_margin_threshold", type=float, default=0.0, help="Top1-top2 score margin threshold for --proposal_smoothing_gate low_margin")
     parser.add_argument("--proposal_confidence_threshold", type=float, default=0.0, help="Softmax top1 confidence threshold for low-confidence proposal smoothing gates")
+    parser.add_argument("--proposal_consensus_threshold", type=float, default=0.0, help="Minimum proposal top-1 agreement for proposal-consensus smoothing gates")
     parser.add_argument("--sam3_proposal_registration_dir", default="", help="Optional official SAM3 training-view cache root used as label-free object proposal memory")
     parser.add_argument("--sam3_proposal_registration_alpha", type=float, default=0.0, help="Residual blend for SAM3 training-view proposal score fusion; 0 disables")
     parser.add_argument("--sam3_proposal_registration_min_probability", type=float, default=0.55, help="Minimum sampled SAM3 proposal probability required for Gaussian membership")
@@ -5776,12 +6527,21 @@ def main() -> None:
     parser.add_argument("--registration_depth_tolerance", type=float, default=0.08, help="Absolute depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_relative_depth_tolerance", type=float, default=0.02, help="Relative depth tolerance for rendered-view primitive registration")
     parser.add_argument("--registration_alpha_threshold", type=float, default=0.02, help="Minimum rendered alpha for rendered-view primitive registration")
-    parser.add_argument("--registration_assignment_mode", choices=["center", "raster_contrib", "raster_dominant", "raster_gaussian_top1"], default="center", help="Primitive assignment for registered-view scoring; raster_contrib uses gsplat Gaussian-pixel intersections, raster_dominant keeps the strongest hit per pixel, raster_gaussian_top1 keeps the strongest hit per Gaussian")
+    parser.add_argument("--registration_assignment_mode", choices=["center", "raster_contrib", "raster_dominant", "raster_gaussian_top1", "raster_adjoint"], default="center", help="Primitive assignment for registered-view scoring; raster_contrib uses gsplat Gaussian-pixel intersections, raster_dominant keeps the strongest hit per pixel, raster_gaussian_top1 keeps the strongest hit per Gaussian, raster_adjoint uses the rasterizer color adjoint as true compositing contribution")
     parser.add_argument("--registration_weight_mode", choices=["uniform", "alpha", "alpha_depth"], default="uniform", help="Contribution-style weighting for VPR registered samples")
     parser.add_argument("--registration_confidence_blend", type=float, default=0.0, help="Blend weight for GT-free registration-count confidence calibration")
     parser.add_argument("--registration_confidence_mode", choices=["log", "linear"], default="log", help="How registration counts are mapped to confidence")
     parser.add_argument("--disable_registered_refiner", action="store_true", help="Disable VFA/screen refiner only for registered-view primitive scoring")
-    parser.add_argument("--direct_primitive_confidence_mode", choices=["none", "opacity", "opacity_log"], default="none", help="GT-free confidence used to downweight weak direct primitive rows before selection")
+    parser.add_argument(
+        "--direct_primitive_confidence_mode",
+        choices=["none", "opacity", "opacity_log", "teacher_cache_valid"],
+        default="none",
+        help=(
+            "GT-free confidence used to downweight weak direct primitive rows before "
+            "selection. teacher_cache_valid uses only the row support mask from the "
+            "training VPR/raster teacher cache, not teacher features."
+        ),
+    )
     parser.add_argument("--direct_primitive_confidence_blend", type=float, default=0.0, help="Blend weight for direct primitive confidence calibration")
     parser.add_argument("--direct_primitive_opacity_threshold", type=float, default=0.02, help="Opacity threshold used by direct primitive confidence and opacity adapter gating")
     parser.add_argument("--use_point_summary_adapter", action="store_true", help="Use checkpoint point_summary_adapter_state_dict for direct Gaussian text scoring")
@@ -5852,10 +6612,14 @@ def main() -> None:
     parser.add_argument("--sam3_prompt_mask_head_support_dilate", type=int, default=-1, help="Clip prompt-conditioned SAM3 mask-head candidates to the coarse mask dilated by this pixel radius; <0 disables")
     parser.add_argument("--sam3_prompt_mask_head_coarse_dilate", type=int, default=0, help="Dilation radius applied to the rendered coarse mask before prompt-conditioned mask-head inference")
     parser.add_argument("--sam3_prompt_mask_head_coarse_threshold", type=float, default=0.5, help="Threshold used to binarize the coarse mask prompt")
+    parser.add_argument("--sam3_prompt_mask_head_min_quality", type=float, default=0.0, help="Fallback to the coarse direct-3D mask when the learned prompt-mask quality score is below this threshold; <=0 disables")
     parser.add_argument("--sam3_prompt_mask_head_initial_refinement", choices=["none", "peak_component"], default="none", help="GT-free cleanup for the direct-3D coarse prompt before feature-only SAM3 mask-head inference")
+    parser.add_argument("--sam3_prompt_mask_head_oracle_prompt", choices=["none", "gt_mask", "gt_box"], default="none", help="Diagnostic-only oracle prompt for feature-only SAM3 mask-head ceiling; not a valid main-protocol setting")
+    parser.add_argument("--allow_sam3_prompt_mask_head_oracle_diagnostic", action="store_true", help="Explicitly allow GT oracle prompts for diagnostic-only SAM3 prompt-mask-head ceiling runs")
     parser.add_argument("--sam3_prompt_mask_head_min_heatmap_mean_ratio", type=float, default=0.0, help="Reject prompt-mask-head refinements whose mean score-heatmap support falls below this ratio")
     parser.add_argument("--sam3_prompt_mask_head_min_heatmap_mass_ratio", type=float, default=0.0, help="Reject prompt-mask-head refinements whose score-heatmap mass falls below this ratio")
     parser.add_argument("--sam3_prompt_mask_head_require_peak_in_refined", action="store_true", help="Require feature-only SAM3 prompt-mask-head output to retain the direct score-heatmap peak")
+    parser.add_argument("--allow_missing_sam3_prompt_text_embeddings", action="store_true", help="Permit prompt-conditioned SAM3 mask-head fallback when a query category has no text embedding")
     parser.add_argument("--min_select", type=int, default=1, help="Minimum selected Gaussians per query")
     parser.add_argument("--chunk_size", type=int, default=8192, help="Gaussian decode/projection chunk size")
     parser.add_argument("--all_labeled_frames", action="store_true", help="Use all local labels instead of OpenGaussian official frames")
@@ -5867,6 +6631,14 @@ def main() -> None:
     )
     parser.add_argument("--gpu", type=int, default=0, help="GPU id")
     args = parser.parse_args()
+    if (
+        args.sam3_prompt_mask_head_oracle_prompt != "none"
+        and not args.allow_sam3_prompt_mask_head_oracle_diagnostic
+    ):
+        parser.error(
+            "--sam3_prompt_mask_head_oracle_prompt is diagnostic-only; pass "
+            "--allow_sam3_prompt_mask_head_oracle_diagnostic to run a GT oracle prompt ceiling check"
+        )
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
@@ -5900,7 +6672,8 @@ def main() -> None:
             f"min_count={args.proposal_min_count}, "
             f"gate={args.proposal_smoothing_gate}, "
             f"margin={args.proposal_margin_threshold:g}, "
-            f"confidence={args.proposal_confidence_threshold:g})"
+            f"confidence={args.proposal_confidence_threshold:g}, "
+            f"consensus={args.proposal_consensus_threshold:g})"
         )
     if args.sam3_proposal_registration_dir and args.sam3_proposal_registration_alpha > 0:
         print(
@@ -5950,6 +6723,7 @@ def main() -> None:
         proposal_smoothing_gate=args.proposal_smoothing_gate,
         proposal_margin_threshold=args.proposal_margin_threshold,
         proposal_confidence_threshold=args.proposal_confidence_threshold,
+        proposal_consensus_threshold=args.proposal_consensus_threshold,
         sam3_proposal_registration_dir=args.sam3_proposal_registration_dir,
         sam3_proposal_registration_alpha=args.sam3_proposal_registration_alpha,
         sam3_proposal_registration_min_probability=args.sam3_proposal_registration_min_probability,
@@ -6024,10 +6798,13 @@ def main() -> None:
         sam3_prompt_mask_head_support_dilate=args.sam3_prompt_mask_head_support_dilate,
         sam3_prompt_mask_head_coarse_dilate=args.sam3_prompt_mask_head_coarse_dilate,
         sam3_prompt_mask_head_coarse_threshold=args.sam3_prompt_mask_head_coarse_threshold,
+        sam3_prompt_mask_head_min_quality=args.sam3_prompt_mask_head_min_quality,
         sam3_prompt_mask_head_initial_refinement=args.sam3_prompt_mask_head_initial_refinement,
+        sam3_prompt_mask_head_oracle_prompt=args.sam3_prompt_mask_head_oracle_prompt,
         sam3_prompt_mask_head_min_heatmap_mean_ratio=args.sam3_prompt_mask_head_min_heatmap_mean_ratio,
         sam3_prompt_mask_head_min_heatmap_mass_ratio=args.sam3_prompt_mask_head_min_heatmap_mass_ratio,
         sam3_prompt_mask_head_require_peak_in_refined=args.sam3_prompt_mask_head_require_peak_in_refined,
+        allow_missing_sam3_prompt_text_embeddings=args.allow_missing_sam3_prompt_text_embeddings,
         min_select=args.min_select,
         chunk_size=args.chunk_size,
         official_frames_only=not args.all_labeled_frames,
@@ -6073,6 +6850,7 @@ def main() -> None:
             "proposal_smoothing_gate": args.proposal_smoothing_gate,
             "proposal_margin_threshold": float(args.proposal_margin_threshold),
             "proposal_confidence_threshold": float(args.proposal_confidence_threshold),
+            "proposal_consensus_threshold": float(args.proposal_consensus_threshold),
             "sam3_proposal_registration_dir": args.sam3_proposal_registration_dir,
             "sam3_proposal_registration_alpha": float(args.sam3_proposal_registration_alpha),
             "sam3_proposal_registration_min_probability": float(args.sam3_proposal_registration_min_probability),
@@ -6155,6 +6933,11 @@ def main() -> None:
                 sha256_file_if_exists(args.sam3_prompt_mask_head_checkpoint)
                 if args.mask_refinement == "sam3_prompt_mask_head"
                 else ""
+            ),
+            "diagnostic_oracle_prompt": bool(
+                args.mask_refinement == "sam3_prompt_mask_head"
+                and args.sam3_prompt_mask_head_oracle_prompt != "none"
+                and args.allow_sam3_prompt_mask_head_oracle_diagnostic
             ),
             "config_sha256": sha256_file_if_exists(args.config),
             "checkpoint_sha256": sha256_file_if_exists(args.checkpoint),
@@ -6289,8 +7072,18 @@ def main() -> None:
                 if args.mask_refinement == "sam3_prompt_mask_head"
                 else 0
             ),
+            "sam3_prompt_mask_head_min_quality": (
+                args.sam3_prompt_mask_head_min_quality
+                if args.mask_refinement == "sam3_prompt_mask_head"
+                else 0.0
+            ),
             "sam3_prompt_mask_head_initial_refinement": (
                 args.sam3_prompt_mask_head_initial_refinement
+                if args.mask_refinement == "sam3_prompt_mask_head"
+                else "none"
+            ),
+            "sam3_prompt_mask_head_oracle_prompt": (
+                args.sam3_prompt_mask_head_oracle_prompt
                 if args.mask_refinement == "sam3_prompt_mask_head"
                 else "none"
             ),

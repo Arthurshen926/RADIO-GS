@@ -10,12 +10,30 @@ def test_radio_adaptor_config_defaults_are_disabled():
     assert cfg.radio_adaptor_alignment_names == ""
     assert cfg.radio_adaptor_relation_weight == 0.0
     assert cfg.radio_adaptor_relation_names == ""
+    assert cfg.radio_adaptor_local_affinity_weight == 0.0
+    assert cfg.radio_adaptor_local_affinity_names == ""
+    assert cfg.radio_adaptor_local_affinity_downsample == 1
+    assert cfg.radio_adaptor_local_affinity_radius == 1
     assert cfg.radio_adaptor_region_weight == 0.0
     assert cfg.radio_adaptor_region_names == ""
     assert cfg.radio_adaptor_mask_logit_weight == 0.0
     assert cfg.radio_adaptor_mask_logit_names == ""
     assert cfg.radio_adaptor_cross_view_weight == 0.0
     assert cfg.radio_adaptor_cross_view_names == ""
+    assert cfg.radio_adaptor_cross_view_objective == "mse"
+    assert cfg.radio_adaptor_cross_view_propagation_weight == 0.0
+    assert cfg.radio_adaptor_cross_view_propagation_anchor_strategy == "linspace"
+    assert cfg.point_summary_adapter_context_features == ""
+    assert cfg.direct_point_query_logit_distill_weight == 0.0
+    assert cfg.radio_adaptor_cross_view_propagation_names == ""
+    assert cfg.radio_adaptor_cross_view_mask_propagation_weight == 0.0
+    assert cfg.radio_adaptor_cross_view_mask_propagation_names == ""
+    assert cfg.radio_adaptor_cross_view_mask_propagation_anchor_strategy == "linspace"
+    assert cfg.radio_adaptor_token_contrast_weight == 0.0
+    assert cfg.radio_adaptor_token_contrast_names == ""
+    assert cfg.radio_adaptor_peak_background_weight == 0.0
+    assert cfg.radio_adaptor_peak_background_names == ""
+    assert cfg.radio_adaptor_peak_background_anchor_strategy == "linspace"
     assert cfg.text_heatmap_distill_weight == 0.0
     assert cfg.text_heatmap_distill_embeddings == ""
     assert cfg.text_heatmap_distill_downsample == 2

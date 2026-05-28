@@ -40,6 +40,7 @@ def test_generate_config_preserves_v67_protocol_and_adds_dino_cv(tmp_path: Path)
 
     cfg = yaml.safe_load(output.read_text(encoding="utf-8"))
     assert cfg["batch_size"] == 2
+    assert cfg["train_shuffle"] is False
     assert cfg["direct_point_sample_count"] == 32768
     assert cfg["direct_point_query_mode"] == "gaussian_index"
     assert cfg["direct_point_gaussian_position_mode"] == "label_point"

@@ -21,6 +21,7 @@ class PromptConditionedMaskHead(nn.Module):
         feature_dim: int = 1280,
         prompt_dim: int = 1536,
         hidden_dim: int = 128,
+        predict_quality: bool = False,
     ) -> None:
         super().__init__()
         if feature_dim <= 0:
@@ -32,6 +33,7 @@ class PromptConditionedMaskHead(nn.Module):
         self.feature_dim = int(feature_dim)
         self.prompt_dim = int(prompt_dim)
         self.hidden_dim = int(hidden_dim)
+        self.predict_quality = bool(predict_quality)
         self.visual = nn.Sequential(
             nn.Conv2d(self.feature_dim, self.hidden_dim, kernel_size=1),
             nn.GroupNorm(num_groups=min(32, self.hidden_dim), num_channels=self.hidden_dim),
@@ -53,13 +55,23 @@ class PromptConditionedMaskHead(nn.Module):
             nn.GELU(),
             nn.Conv2d(self.hidden_dim, 1, kernel_size=1),
         )
+        if self.predict_quality:
+            self.quality = nn.Sequential(
+                nn.AdaptiveAvgPool2d(1),
+                nn.Flatten(),
+                nn.Linear(self.hidden_dim, self.hidden_dim),
+                nn.GELU(),
+                nn.Linear(self.hidden_dim, 1),
+            )
+        else:
+            self.quality = None
 
-    def forward(
+    def _fused_query_features(
         self,
         features: torch.Tensor,
         prompts: torch.Tensor,
         coarse_masks: torch.Tensor,
-    ) -> torch.Tensor:
+    ) -> tuple[torch.Tensor, int, int, int, int]:
         if features.ndim != 4:
             raise ValueError(f"features must be [B,C,H,W], got {tuple(features.shape)}")
         if prompts.ndim == 2:
@@ -102,6 +114,35 @@ class PromptConditionedMaskHead(nn.Module):
         coarse = coarse_masks.reshape(batch * query_count, 1, *coarse_masks.shape[-2:]).float()
         coarse_feat = self.coarse(coarse)
         fused = visual * (1.0 + scale) + bias + coarse_feat
+        return fused, batch, query_count, height, width
+
+    def forward(
+        self,
+        features: torch.Tensor,
+        prompts: torch.Tensor,
+        coarse_masks: torch.Tensor,
+    ) -> torch.Tensor:
+        fused, batch, query_count, height, width = self._fused_query_features(
+            features,
+            prompts,
+            coarse_masks,
+        )
         logits = self.out(fused)
         return logits.reshape(batch, query_count, height, width)
 
+    def forward_with_quality(
+        self,
+        features: torch.Tensor,
+        prompts: torch.Tensor,
+        coarse_masks: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
+        fused, batch, query_count, height, width = self._fused_query_features(
+            features,
+            prompts,
+            coarse_masks,
+        )
+        logits = self.out(fused).reshape(batch, query_count, height, width)
+        if self.quality is None:
+            return logits, None
+        quality_logits = self.quality(fused).reshape(batch, query_count)
+        return logits, quality_logits

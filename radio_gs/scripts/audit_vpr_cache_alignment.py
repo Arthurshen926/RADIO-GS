@@ -22,6 +22,12 @@ def xyz_sha256(xyz: torch.Tensor) -> str:
     return hashlib.sha256(arr.tobytes()).hexdigest()
 
 
+def tensor_sha256_float32(tensor: torch.Tensor) -> str:
+    """Stable SHA256 hash for a float32 tensor payload."""
+    arr = torch.as_tensor(tensor, dtype=torch.float32).detach().cpu().contiguous().numpy()
+    return hashlib.sha256(arr.tobytes()).hexdigest()
+
+
 def compute_xyz_alignment_stats(cache_xyz: torch.Tensor, model_xyz: torch.Tensor) -> dict[str, Any]:
     """Return row-wise xyz alignment statistics."""
     cache = torch.as_tensor(cache_xyz, dtype=torch.float32).detach().cpu()
@@ -94,6 +100,9 @@ def audit_vpr_cache_payload_alignment(
     payload: dict[str, Any],
     model_xyz: torch.Tensor,
     *,
+    model_scales: torch.Tensor | None = None,
+    model_rotations: torch.Tensor | None = None,
+    model_opacities: torch.Tensor | None = None,
     fail_max_l2: float = 1e-5,
     cache_path: str = "",
 ) -> dict[str, Any]:
@@ -114,6 +123,18 @@ def audit_vpr_cache_payload_alignment(
         valid = payload["valid"].bool()
         report["valid_count"] = int(valid.sum().item())
         report["total_count"] = int(valid.numel())
+    fingerprint = payload.get("geometry_fingerprint")
+    if isinstance(fingerprint, dict):
+        report["geometry_fingerprint"] = {
+            "num_gaussians": fingerprint.get("num_gaussians"),
+            "xyz_sha256": fingerprint.get("xyz_sha256", ""),
+        }
+        for key in ("scales", "rotations", "opacities"):
+            hash_key = f"{key}_sha256"
+            shape_key = f"{key}_shape"
+            if hash_key in fingerprint:
+                report["geometry_fingerprint"][hash_key] = fingerprint.get(hash_key, "")
+                report["geometry_fingerprint"][shape_key] = fingerprint.get(shape_key, [])
     if "xyz" not in payload:
         report.update(
             {
@@ -125,14 +146,61 @@ def audit_vpr_cache_payload_alignment(
         return report
     stats = compute_xyz_alignment_stats(torch.as_tensor(payload["xyz"]), model_xyz)
     report.update(stats)
+    cached_fingerprint_hash = (
+        str(fingerprint.get("xyz_sha256", ""))
+        if isinstance(fingerprint, dict)
+        else ""
+    )
+    if cached_fingerprint_hash:
+        report["geometry_fingerprint_xyz_sha256_match"] = (
+            cached_fingerprint_hash == stats.get("cache_xyz_sha256", "")
+        )
     passed = bool(stats["count_match"]) and float(stats["max_l2"]) <= float(fail_max_l2)
+    optional_mismatches: list[str] = []
+    optional_model_tensors = {
+        "scales": model_scales,
+        "rotations": model_rotations,
+        "opacities": model_opacities,
+    }
+    if isinstance(fingerprint, dict):
+        optional_checks: dict[str, Any] = {}
+        for key, tensor in optional_model_tensors.items():
+            expected_hash = str(fingerprint.get(f"{key}_sha256", ""))
+            if not expected_hash:
+                continue
+            if tensor is None:
+                optional_checks[key] = {
+                    "checked": False,
+                    "cached_sha256": expected_hash,
+                    "message": "model tensor was not provided for audit",
+                }
+                continue
+            model_hash = tensor_sha256_float32(torch.as_tensor(tensor))
+            matches = model_hash == expected_hash
+            optional_checks[key] = {
+                "checked": True,
+                "cached_sha256": expected_hash,
+                "model_sha256": model_hash,
+                "match": bool(matches),
+            }
+            if not matches:
+                optional_mismatches.append(key)
+        if optional_checks:
+            report["geometry_fingerprint_optional_checks"] = optional_checks
+    if optional_mismatches:
+        passed = False
     report["fail_max_l2"] = float(fail_max_l2)
     report["passed"] = passed
     report["status"] = "passed" if passed else "failed"
     report["message"] = (
         "cache xyz rows align with model geometry"
         if passed
-        else "cache xyz rows do not align with model geometry"
+        else (
+            "cache Gaussian footprint tensors do not align with model geometry: "
+            + ", ".join(optional_mismatches)
+            if optional_mismatches
+            else "cache xyz rows do not align with model geometry"
+        )
     )
     return report
 
@@ -147,6 +215,9 @@ def run_audit(args: argparse.Namespace) -> dict[str, Any]:
     report = audit_vpr_cache_payload_alignment(
         payload,
         model.get_xyz().detach().cpu(),
+        model_scales=model.get_scaling().detach().cpu(),
+        model_rotations=model.get_rotation().detach().cpu(),
+        model_opacities=model.get_opacity().detach().cpu(),
         fail_max_l2=args.fail_max_l2,
         cache_path=args.teacher_cache,
     )

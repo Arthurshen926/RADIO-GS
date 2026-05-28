@@ -623,7 +623,7 @@ def build_benchmark_sheet(records: list[MethodRecord]) -> str:
     lines.append("")
     lines.append("1. Keep the official-source four-scene LERF-OVS main table frozen unless new reproduced baselines are added.")
     lines.append("2. If making a strict SOTA claim, reproduce LERF/LangSplat/LEGaussians under the local evaluator instead of mixing paper protocols.")
-    lines.append("3. Keep ScanNet v67 as direct-query transfer evidence rather than a full leaderboard claim.")
+    lines.append("3. Keep ScanNet paper-facing results restricted to the VALA8/OpenGaFF-aligned scene set; archive legacy v67/10-scene numbers as internal diagnostics only.")
     return "\n".join(lines) + "\n"
 
 

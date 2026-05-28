@@ -290,10 +290,33 @@ def refine_mask_with_prompt_conditioned_sam3_head(
         feature_map = feature_map.unsqueeze(0)
     if feature_map.ndim != 4:
         raise ValueError(f"Expected feature_map [B,C,H,W] or [C,H,W], got {tuple(feature_map.shape)}")
+    prompt_shape = (int(feature_map.shape[-2]), int(feature_map.shape[-1]))
     prompt = prompt_embedding.detach().float()
     if prompt.ndim != 1:
         raise ValueError(f"Expected prompt embedding [D], got {tuple(prompt.shape)}")
-    coarse_tensor = torch.from_numpy(initial.astype(np.float32)).unsqueeze(0)
+    report: Dict[str, Any] = {
+        "backend": "prompt_conditioned_ctf_sam3_mask_head_no_rgb",
+        "attempted": True,
+        "accepted": False,
+        "fallback_reason": "",
+        "coarse_prompt_input_shape": [int(initial.shape[0]), int(initial.shape[1])],
+        "coarse_prompt_shape": [prompt_shape[0], prompt_shape[1]],
+        "coarse_prompt_resized": tuple(initial.shape) != prompt_shape,
+        "coarse_dilate": int(coarse_dilate),
+    }
+    prompt_initial = initial
+    if tuple(initial.shape) != prompt_shape:
+        prompt_tensor = torch.from_numpy(initial.astype(np.float32)).view(1, 1, *initial.shape)
+        prompt_tensor = F.interpolate(
+            prompt_tensor,
+            size=prompt_shape,
+            mode="nearest",
+        )
+        prompt_initial = prompt_tensor[0, 0].cpu().numpy() > float(coarse_threshold)
+        if not prompt_initial.any():
+            report["fallback_reason"] = "empty_prompt_after_resize"
+            return initial.copy(), report
+    coarse_tensor = torch.from_numpy(prompt_initial.astype(np.float32)).unsqueeze(0)
     coarse_tensor = build_coarse_prompt_from_mask(
         coarse_tensor,
         dilate=int(coarse_dilate),
@@ -309,7 +332,7 @@ def refine_mask_with_prompt_conditioned_sam3_head(
             prompt.to(device=device).view(1, 1, -1),
             coarse_tensor.to(device=device).unsqueeze(0),
         )
-    refined, report = choose_prompt_head_refined_mask_with_report(
+    refined, choose_report = choose_prompt_head_refined_mask_with_report(
         initial,
         logits,
         logit_threshold=logit_threshold,
@@ -319,6 +342,9 @@ def refine_mask_with_prompt_conditioned_sam3_head(
         max_refined_area_ratio=max_refined_area_ratio,
         support_dilate=support_dilate,
     )
+    report.update(choose_report)
+    report["backend"] = "prompt_conditioned_ctf_sam3_mask_head_no_rgb"
+    report["attempted"] = True
     report["coarse_dilate"] = int(coarse_dilate)
     return refined, report
 

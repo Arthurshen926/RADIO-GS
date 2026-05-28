@@ -76,9 +76,14 @@ from radio_gs.losses.distillation_loss import (
 from radio_gs.losses.radio_adaptor_loss import (
     compute_radio_adaptor_alignment_loss,
     compute_radio_adaptor_cross_view_loss,
+    compute_radio_adaptor_cross_view_mask_propagation_loss,
+    compute_radio_adaptor_cross_view_propagation_loss,
+    compute_radio_adaptor_local_affinity_loss,
     compute_radio_adaptor_mask_logit_loss,
+    compute_radio_adaptor_peak_background_loss,
     compute_radio_adaptor_region_loss,
     compute_radio_adaptor_relation_loss,
+    compute_radio_adaptor_token_contrast_loss,
 )
 from radio_gs.losses.text_heatmap_distill_loss import (
     compute_text_heatmap_distill_loss,
@@ -96,7 +101,11 @@ from radio_gs.models.foundation_cache import (
 )
 from radio_gs.models.hcd_codec import build_feature_codec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
-from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
+from radio_gs.models.point_summary_adapter import (
+    CompactToSummaryAdapter,
+    append_point_summary_context,
+    point_summary_context_dim,
+)
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.models.screen_refiner import (
@@ -175,6 +184,9 @@ def audit_direct_point_teacher_cache_alignment_for_training(
     payload: Dict[str, Any],
     model_xyz: torch.Tensor,
     *,
+    model_scales: Optional[torch.Tensor] = None,
+    model_rotations: Optional[torch.Tensor] = None,
+    model_opacities: Optional[torch.Tensor] = None,
     direct_point_source: str,
     direct_point_query_mode: str,
     cache_path: str = "",
@@ -194,6 +206,9 @@ def audit_direct_point_teacher_cache_alignment_for_training(
     report = audit_vpr_cache_payload_alignment(
         payload,
         model_xyz.detach().cpu(),
+        model_scales=model_scales.detach().cpu() if model_scales is not None else None,
+        model_rotations=model_rotations.detach().cpu() if model_rotations is not None else None,
+        model_opacities=model_opacities.detach().cpu() if model_opacities is not None else None,
         fail_max_l2=fail_max_l2,
         cache_path=str(cache_path),
     )
@@ -387,6 +402,13 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_teacher_cache = str(
             getattr(config, "direct_point_teacher_cache", "") or ""
         )
+        self.direct_point_teacher_cache_feature_key = str(
+            getattr(config, "direct_point_teacher_cache_feature_key", "") or ""
+        )
+        self.direct_point_teacher_cache_feature_space = str(
+            getattr(config, "direct_point_teacher_cache_feature_space", "") or ""
+        )
+        self.direct_point_teacher_feature_space = "radio"
         self.direct_point_feature_key = getattr(config, "direct_point_feature_key", "features")
         self.direct_point_k = max(1, int(getattr(config, "direct_point_k", 8)))
         self.direct_point_candidate_k = max(
@@ -487,6 +509,13 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_view_count_percentile_high = float(
             getattr(config, "direct_point_view_count_percentile_high", 95.0)
         )
+        self.point_summary_adapter_context_features = str(
+            getattr(config, "point_summary_adapter_context_features", "") or ""
+        )
+        self.point_summary_adapter_context_dim = point_summary_context_dim(
+            self.point_summary_adapter_context_features
+        )
+        self.point_summary_adapter_view_count_max: Optional[torch.Tensor] = None
         self.direct_point_text_contrast_weight = float(
             getattr(config, "direct_point_text_contrast_weight", 0.0)
         )
@@ -507,6 +536,35 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_text_contrast_center_logits = bool(
             getattr(config, "direct_point_text_contrast_center_logits", False)
         )
+        self.direct_point_query_logit_distill_weight = float(
+            getattr(config, "direct_point_query_logit_distill_weight", 0.0)
+        )
+        self.direct_point_query_logit_distill_embeddings_path = str(
+            getattr(config, "direct_point_query_logit_distill_embeddings", "") or ""
+        )
+        self.direct_point_query_logit_distill_temperature = float(
+            getattr(config, "direct_point_query_logit_distill_temperature", 1.0)
+        )
+        self.direct_point_query_logit_distill_confidence_threshold = float(
+            getattr(config, "direct_point_query_logit_distill_confidence_threshold", 0.0)
+        )
+        self.direct_point_query_logit_distill_embeddings: Optional[torch.Tensor] = None
+        self.direct_point_query_support_distill_weight = float(
+            getattr(config, "direct_point_query_support_distill_weight", 0.0)
+        )
+        self.direct_point_query_support_distill_embeddings_path = str(
+            getattr(config, "direct_point_query_support_distill_embeddings", "") or ""
+        )
+        self.direct_point_query_support_distill_temperature = float(
+            getattr(config, "direct_point_query_support_distill_temperature", 0.25)
+        )
+        self.direct_point_query_support_distill_confidence_threshold = float(
+            getattr(config, "direct_point_query_support_distill_confidence_threshold", 0.0)
+        )
+        self.direct_point_query_support_distill_logit_norm = str(
+            getattr(config, "direct_point_query_support_distill_logit_norm", "none") or "none"
+        ).lower()
+        self.direct_point_query_support_distill_embeddings: Optional[torch.Tensor] = None
         self.direct_point_render_consistency_weight = float(
             getattr(config, "direct_point_render_consistency_weight", 0.0)
         )
@@ -529,6 +587,24 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         )
         self.direct_point_cached_visible_balance = bool(
             getattr(config, "direct_point_cached_visible_balance", False)
+        )
+        self.direct_point_proposal_consistency_weight = float(
+            getattr(config, "direct_point_proposal_consistency_weight", 0.0)
+        )
+        self.direct_point_proposal_contrast_weight = float(
+            getattr(config, "direct_point_proposal_contrast_weight", 0.0)
+        )
+        self.direct_point_proposal_contrast_temperature = float(
+            getattr(config, "direct_point_proposal_contrast_temperature", 0.07)
+        )
+        self.direct_point_proposal_voxel_size = float(
+            getattr(config, "direct_point_proposal_voxel_size", 0.05)
+        )
+        self.direct_point_proposal_min_count = max(
+            1, int(getattr(config, "direct_point_proposal_min_count", 2) or 1)
+        )
+        self.direct_point_proposal_space = str(
+            getattr(config, "direct_point_proposal_space", "auto") or "auto"
         )
         self.direct_point_text_split = str(
             getattr(config, "direct_point_text_split", "19")
@@ -616,6 +692,24 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             )
         if self.direct_point_render_consistency_weight < 0:
             raise ValueError("direct_point_render_consistency_weight must be non-negative")
+        if self.direct_point_query_support_distill_weight < 0:
+            raise ValueError("direct_point_query_support_distill_weight must be non-negative")
+        if self.direct_point_query_support_distill_temperature <= 0:
+            raise ValueError("direct_point_query_support_distill_temperature must be positive")
+        if self.direct_point_query_support_distill_logit_norm not in {"none", "center", "zscore"}:
+            raise ValueError(
+                "direct_point_query_support_distill_logit_norm must be one of: none, center, zscore"
+            )
+        if self.direct_point_proposal_consistency_weight < 0:
+            raise ValueError("direct_point_proposal_consistency_weight must be non-negative")
+        if self.direct_point_proposal_contrast_weight < 0:
+            raise ValueError("direct_point_proposal_contrast_weight must be non-negative")
+        if self.direct_point_proposal_contrast_temperature <= 0:
+            raise ValueError("direct_point_proposal_contrast_temperature must be positive")
+        if self.direct_point_proposal_voxel_size <= 0:
+            raise ValueError("direct_point_proposal_voxel_size must be positive")
+        if self.direct_point_proposal_space not in {"auto", "adapter", "decoder"}:
+            raise ValueError("direct_point_proposal_space must be one of: auto, adapter, decoder")
         if not 0.0 <= self.direct_point_cached_visible_fraction <= 1.0:
             raise ValueError("direct_point_cached_visible_fraction must be between 0 and 1")
         if self.direct_point_cached_visible_candidate_multiplier < 1:
@@ -663,6 +757,7 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             or self.direct_point_adapter_text_distill_weight > 0
             or self.direct_point_adapter_text_pseudo_ce_weight > 0
             or self.direct_point_adapter_decoder_anchor_weight > 0
+            or self.direct_point_query_support_distill_weight > 0
         ):
             if not self._is_hybrid:
                 self._log("direct point summary adapter losses require hybrid models; disabling")
@@ -671,13 +766,15 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 self.direct_point_adapter_text_distill_weight = 0.0
                 self.direct_point_adapter_text_pseudo_ce_weight = 0.0
                 self.direct_point_adapter_decoder_anchor_weight = 0.0
+                self.direct_point_query_support_distill_weight = 0.0
             else:
                 self.point_summary_adapter = CompactToSummaryAdapter(
                     input_dim=getattr(
                         config,
                         "bottleneck_dim",
                         getattr(config, "hybrid_output_dim", 128),
-                    ),
+                    )
+                    + self.point_summary_adapter_context_dim,
                     output_dim=1536,
                     hidden_dim=getattr(config, "point_summary_adapter_hidden_dim", 512),
                     num_layers=getattr(config, "point_summary_adapter_num_layers", 2),
@@ -816,6 +913,67 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.radio_adaptor_relation_temperature = float(
             getattr(config, "radio_adaptor_relation_temperature", 1.0)
         )
+        self.radio_adaptor_local_affinity_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_local_affinity_names", "")
+        )
+        self.radio_adaptor_local_affinity_weight = float(
+            getattr(config, "radio_adaptor_local_affinity_weight", 0.0)
+        )
+        self.radio_adaptor_local_affinity_downsample = max(
+            1, int(getattr(config, "radio_adaptor_local_affinity_downsample", 1))
+        )
+        self.radio_adaptor_local_affinity_radius = max(
+            1, int(getattr(config, "radio_adaptor_local_affinity_radius", 1))
+        )
+        self.radio_adaptor_token_contrast_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_token_contrast_names", "")
+        )
+        self.radio_adaptor_token_contrast_weight = float(
+            getattr(config, "radio_adaptor_token_contrast_weight", 0.0)
+        )
+        self.radio_adaptor_token_contrast_downsample = max(
+            1, int(getattr(config, "radio_adaptor_token_contrast_downsample", 1))
+        )
+        self.radio_adaptor_token_contrast_max_tokens = int(
+            getattr(config, "radio_adaptor_token_contrast_max_tokens", 512)
+        )
+        self.radio_adaptor_token_contrast_temperature = float(
+            getattr(config, "radio_adaptor_token_contrast_temperature", 0.07)
+        )
+        self.radio_adaptor_peak_background_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_peak_background_names", "")
+        )
+        self.radio_adaptor_peak_background_weight = float(
+            getattr(config, "radio_adaptor_peak_background_weight", 0.0)
+        )
+        self.radio_adaptor_peak_background_downsample = max(
+            1, int(getattr(config, "radio_adaptor_peak_background_downsample", 1))
+        )
+        self.radio_adaptor_peak_background_max_tokens = int(
+            getattr(config, "radio_adaptor_peak_background_max_tokens", 512)
+        )
+        self.radio_adaptor_peak_background_num_anchors = int(
+            getattr(config, "radio_adaptor_peak_background_num_anchors", 16)
+        )
+        self.radio_adaptor_peak_background_temperature = float(
+            getattr(config, "radio_adaptor_peak_background_temperature", 0.2)
+        )
+        self.radio_adaptor_peak_background_anchor_strategy = str(
+            getattr(
+                config,
+                "radio_adaptor_peak_background_anchor_strategy",
+                "linspace",
+            )
+            or "linspace"
+        )
+        if self.radio_adaptor_peak_background_anchor_strategy not in {
+            "linspace",
+            "distinctive",
+        }:
+            raise ValueError(
+                "radio_adaptor_peak_background_anchor_strategy must be "
+                "'linspace' or 'distinctive'"
+            )
         self.radio_adaptor_region_names = parse_radio_adaptor_names(
             getattr(config, "radio_adaptor_region_names", "")
         )
@@ -867,6 +1025,84 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.radio_adaptor_cross_view_temperature = float(
             getattr(config, "radio_adaptor_cross_view_temperature", 1.0)
         )
+        self.radio_adaptor_cross_view_objective = str(
+            getattr(config, "radio_adaptor_cross_view_objective", "mse")
+        )
+        if self.radio_adaptor_cross_view_objective not in {"mse", "transport_cycle"}:
+            raise ValueError(
+                "radio_adaptor_cross_view_objective must be 'mse' or "
+                f"'transport_cycle', got {self.radio_adaptor_cross_view_objective!r}"
+            )
+        self.radio_adaptor_cross_view_propagation_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_cross_view_propagation_names", "")
+        )
+        self.radio_adaptor_cross_view_propagation_weight = float(
+            getattr(config, "radio_adaptor_cross_view_propagation_weight", 0.0)
+        )
+        self.radio_adaptor_cross_view_propagation_downsample = max(
+            1,
+            int(getattr(config, "radio_adaptor_cross_view_propagation_downsample", 2)),
+        )
+        self.radio_adaptor_cross_view_propagation_max_tokens = int(
+            getattr(config, "radio_adaptor_cross_view_propagation_max_tokens", 256)
+        )
+        self.radio_adaptor_cross_view_propagation_num_anchors = int(
+            getattr(config, "radio_adaptor_cross_view_propagation_num_anchors", 16)
+        )
+        self.radio_adaptor_cross_view_propagation_temperature = float(
+            getattr(config, "radio_adaptor_cross_view_propagation_temperature", 0.2)
+        )
+        self.radio_adaptor_cross_view_propagation_anchor_strategy = str(
+            getattr(
+                config,
+                "radio_adaptor_cross_view_propagation_anchor_strategy",
+                "linspace",
+            )
+            or "linspace"
+        )
+        if self.radio_adaptor_cross_view_propagation_anchor_strategy not in {
+            "linspace",
+            "distinctive",
+        }:
+            raise ValueError(
+                "radio_adaptor_cross_view_propagation_anchor_strategy must be "
+                "'linspace' or 'distinctive'"
+            )
+        self.radio_adaptor_cross_view_mask_propagation_names = parse_radio_adaptor_names(
+            getattr(config, "radio_adaptor_cross_view_mask_propagation_names", "")
+        )
+        self.radio_adaptor_cross_view_mask_propagation_weight = float(
+            getattr(config, "radio_adaptor_cross_view_mask_propagation_weight", 0.0)
+        )
+        self.radio_adaptor_cross_view_mask_propagation_downsample = max(
+            1,
+            int(getattr(config, "radio_adaptor_cross_view_mask_propagation_downsample", 2)),
+        )
+        self.radio_adaptor_cross_view_mask_propagation_max_tokens = int(
+            getattr(config, "radio_adaptor_cross_view_mask_propagation_max_tokens", 256)
+        )
+        self.radio_adaptor_cross_view_mask_propagation_num_anchors = int(
+            getattr(config, "radio_adaptor_cross_view_mask_propagation_num_anchors", 16)
+        )
+        self.radio_adaptor_cross_view_mask_propagation_temperature = float(
+            getattr(config, "radio_adaptor_cross_view_mask_propagation_temperature", 0.2)
+        )
+        self.radio_adaptor_cross_view_mask_propagation_anchor_strategy = str(
+            getattr(
+                config,
+                "radio_adaptor_cross_view_mask_propagation_anchor_strategy",
+                "linspace",
+            )
+            or "linspace"
+        )
+        if self.radio_adaptor_cross_view_mask_propagation_anchor_strategy not in {
+            "linspace",
+            "distinctive",
+        }:
+            raise ValueError(
+                "radio_adaptor_cross_view_mask_propagation_anchor_strategy must be "
+                "'linspace' or 'distinctive'"
+            )
         self.foundation_cache_root = str(getattr(config, "foundation_cache_root", "") or "")
         self.foundation_cache_weight = float(getattr(config, "foundation_cache_weight", 0.0))
         self.foundation_cache_heads = parse_radio_adaptor_names(
@@ -976,6 +1212,15 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             self.radio_adaptor_relation_names
             if self.radio_adaptor_relation_weight > 0
             else [],
+            self.radio_adaptor_local_affinity_names
+            if self.radio_adaptor_local_affinity_weight > 0
+            else [],
+            self.radio_adaptor_token_contrast_names
+            if self.radio_adaptor_token_contrast_weight > 0
+            else [],
+            self.radio_adaptor_peak_background_names
+            if self.radio_adaptor_peak_background_weight > 0
+            else [],
             self.radio_adaptor_region_names
             if self.radio_adaptor_region_weight > 0
             else [],
@@ -984,6 +1229,12 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             else [],
             self.radio_adaptor_cross_view_names
             if self.radio_adaptor_cross_view_weight > 0
+            else [],
+            self.radio_adaptor_cross_view_propagation_names
+            if self.radio_adaptor_cross_view_propagation_weight > 0
+            else [],
+            self.radio_adaptor_cross_view_mask_propagation_names
+            if self.radio_adaptor_cross_view_mask_propagation_weight > 0
             else [],
             [
                 name
@@ -1023,9 +1274,19 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 f"kind={self.radio_adaptor_alignment_kind} "
                 f"alignment_weight={self.radio_adaptor_alignment_weight:g} "
                 f"relation_weight={self.radio_adaptor_relation_weight:g} "
+                f"local_affinity_weight={self.radio_adaptor_local_affinity_weight:g} "
+                f"token_contrast_weight={self.radio_adaptor_token_contrast_weight:g} "
+                f"peak_background_weight={self.radio_adaptor_peak_background_weight:g} "
+                f"peak_background_anchor_strategy="
+                f"{self.radio_adaptor_peak_background_anchor_strategy} "
                 f"region_weight={self.radio_adaptor_region_weight:g} "
                 f"mask_logit_weight={self.radio_adaptor_mask_logit_weight:g} "
-                f"cross_view_weight={self.radio_adaptor_cross_view_weight:g}"
+                f"cross_view_weight={self.radio_adaptor_cross_view_weight:g} "
+                f"cross_view_objective={self.radio_adaptor_cross_view_objective} "
+                f"cross_view_propagation_weight="
+                f"{self.radio_adaptor_cross_view_propagation_weight:g} "
+                f"cross_view_mask_propagation_weight="
+                f"{self.radio_adaptor_cross_view_mask_propagation_weight:g}"
             )
         if self.foundation_cache_weight > 0:
             foundation_uses_mask_logits = (
@@ -1126,6 +1387,45 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 f"T={self.text_heatmap_distill_temperature:g} "
                 f"mode={self.text_heatmap_distill_mode} "
                 f"weight={self.text_heatmap_distill_weight:g}"
+            )
+
+        if self.direct_point_query_logit_distill_weight > 0:
+            if self.siglip_summary_head is None:
+                raise RuntimeError(
+                    "direct point query-logit distillation requires SigLIP2SummaryHead; "
+                    "set siglip_summary_head_weights"
+                )
+            self.direct_point_query_logit_distill_embeddings = (
+                self._load_direct_point_query_logit_distill_embeddings(config)
+            )
+            self._log(
+                "Loaded direct point query-logit distillation bank: "
+                f"{self.direct_point_query_logit_distill_embeddings.shape[0]} queries "
+                f"T={self.direct_point_query_logit_distill_temperature:g} "
+                f"weight={self.direct_point_query_logit_distill_weight:g}"
+            )
+        if self.direct_point_query_support_distill_weight > 0:
+            if self.siglip_summary_head is None:
+                raise RuntimeError(
+                    "direct point query-support distillation requires SigLIP2SummaryHead; "
+                    "set siglip_summary_head_weights"
+                )
+            support_path = (
+                self.direct_point_query_support_distill_embeddings_path
+                or self.direct_point_query_logit_distill_embeddings_path
+            )
+            self.direct_point_query_support_distill_embeddings = (
+                self._load_direct_point_query_logit_distill_embeddings(
+                    config,
+                    raw_path=support_path,
+                    purpose="direct point query-support distillation embeddings",
+                )
+            )
+            self._log(
+                "Loaded direct point query-support distillation bank: "
+                f"{self.direct_point_query_support_distill_embeddings.shape[0]} queries "
+                f"T={self.direct_point_query_support_distill_temperature:g} "
+                f"weight={self.direct_point_query_support_distill_weight:g}"
             )
 
         direct_point_text_bank_needed = (
@@ -1252,7 +1552,7 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.train_loader = DataLoader(
             self.train_dataset,
             batch_size=getattr(config, "batch_size", 4),
-            shuffle=True,
+            shuffle=bool(getattr(config, "train_shuffle", True)),
             num_workers=getattr(config, "num_workers", 4),
             pin_memory=True,
             drop_last=True,
@@ -1312,6 +1612,11 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 f"Point summary adapter params: "
                 f"{self._count_params(self.point_summary_adapter):.2f}M"
             )
+            if self.point_summary_adapter_context_features:
+                self._log(
+                    "Point summary adapter context: "
+                    f"{self.point_summary_adapter_context_features}"
+                )
         self._log(
             f"Best checkpoint metric: {self.best_metric_name} "
             f"(mode={self.best_metric_mode})"
@@ -1530,7 +1835,9 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "summary_align",
             "radio_adaptors",
             "radio_relations",
+            "radio_local_affinity",
             "radio_regions",
+            "radio_cross_view_propagation",
             "ground_query",
             "seg_aux",
             "frozen_seg",
@@ -1633,19 +1940,97 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         )
         if not isinstance(payload, dict):
             raise ValueError(f"Teacher cache must be a dict payload: {cache_path}")
-        if "features" not in payload:
-            raise KeyError(f"Teacher cache missing 'features': {cache_path}")
+        requested_key = str(
+            getattr(config, "direct_point_teacher_cache_feature_key", "")
+            or self.direct_point_teacher_cache_feature_key
+            or ""
+        )
+        if requested_key:
+            if requested_key not in payload:
+                raise KeyError(
+                    f"Teacher cache missing requested feature key '{requested_key}': "
+                    f"{cache_path}"
+                )
+            feature_key = requested_key
+        elif "features" in payload:
+            feature_key = "features"
+        elif "summary_features" in payload:
+            feature_key = "summary_features"
+        else:
+            raise KeyError(
+                "Teacher cache missing feature tensor: expected 'features' or "
+                f"'summary_features' in {cache_path}"
+            )
 
-        features = torch.as_tensor(payload["features"], dtype=torch.float32)
+        requested_space = str(
+            getattr(config, "direct_point_teacher_cache_feature_space", "")
+            or self.direct_point_teacher_cache_feature_space
+            or ""
+        )
+        metadata = payload.get("metadata") or {}
+        payload_space = str(payload.get("feature_space") or metadata.get("feature_space") or "")
+        if requested_space:
+            feature_space = requested_space
+        elif payload_space:
+            feature_space = payload_space
+        elif feature_key == "summary_features":
+            feature_space = "siglip_summary"
+        else:
+            feature_space = "radio"
+        aliases = {
+            "": "radio",
+            "radio": "radio",
+            "teacher": "radio",
+            "teacher_1280": "radio",
+            "siglip": "siglip_summary",
+            "siglip2": "siglip_summary",
+            "siglip_summary": "siglip_summary",
+            "summary": "siglip_summary",
+        }
+        feature_space = aliases.get(feature_space.lower(), feature_space.lower())
+        if feature_space not in {"radio", "siglip_summary"}:
+            raise ValueError(
+                "direct_point_teacher_cache_feature_space must be 'radio' or "
+                f"'siglip_summary', got {feature_space!r}"
+            )
+        if feature_space == "siglip_summary":
+            summary_losses_enabled = any(
+                float(value) > 0.0
+                for value in (
+                    self.direct_point_summary_alignment_weight,
+                    self.direct_point_summary_adapter_weight,
+                    self.direct_point_text_distill_weight,
+                    self.direct_point_text_pseudo_ce_weight,
+                    self.direct_point_text_contrast_weight,
+                    self.direct_point_adapter_text_distill_weight,
+                    self.direct_point_adapter_text_pseudo_ce_weight,
+                    self.direct_point_adapter_text_loss_weight,
+                    self.direct_point_adapter_decoder_anchor_weight,
+                )
+            )
+            if not summary_losses_enabled:
+                raise ValueError(
+                    "direct_point_teacher_cache is in SigLIP summary space but no "
+                    "direct-point summary/text/adapter loss is enabled; this would "
+                    "make direct point supervision a no-op."
+                )
+
+        features = torch.as_tensor(payload[feature_key], dtype=torch.float32)
         if features.dim() != 2:
             raise ValueError(
-                f"Teacher cache features must be [N,C], got {tuple(features.shape)}"
+                f"Teacher cache {feature_key} must be [N,C], got {tuple(features.shape)}"
             )
         num_points = int(features.shape[0])
         if bool(getattr(config, "direct_point_teacher_cache_require_xyz_alignment", True)):
+            get_scaling = getattr(self.model, "get_scaling", None)
+            get_rotation = getattr(self.model, "get_rotation", None)
+            get_opacity = getattr(self.model, "get_opacity", None)
             report = audit_direct_point_teacher_cache_alignment_for_training(
                 payload,
                 self.model.get_xyz().detach(),
+                model_scales=get_scaling().detach() if callable(get_scaling) else None,
+                model_rotations=get_rotation().detach() if callable(get_rotation) else None,
+                model_opacities=get_opacity().detach() if callable(get_opacity) else None,
                 direct_point_source=self.direct_point_source,
                 direct_point_query_mode=self.direct_point_query_mode,
                 cache_path=str(cache_path),
@@ -1699,9 +2084,9 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 )
         counts_payload = payload.get("view_counts")
         if counts_payload is None:
-            view_counts = valid.long()
+            view_counts = valid.float()
         else:
-            view_counts = torch.as_tensor(counts_payload, dtype=torch.long)
+            view_counts = torch.as_tensor(counts_payload, dtype=torch.float32)
             if view_counts.shape[0] != num_points:
                 raise ValueError(
                     "Teacher cache view_counts length "
@@ -1709,11 +2094,66 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 )
 
         self.direct_point_teacher_features = features.to(self.device).contiguous()
+        self.direct_point_teacher_cache_feature_key = feature_key
+        self.direct_point_teacher_feature_space = feature_space
         self.direct_point_teacher_valid = valid.to(self.device).contiguous()
         self.direct_point_teacher_view_counts = view_counts.to(self.device).contiguous()
+        positive_counts = self.direct_point_teacher_view_counts[
+            self.direct_point_teacher_view_counts > 0
+        ]
+        self.point_summary_adapter_view_count_max = (
+            positive_counts.max().detach()
+            if positive_counts.numel() > 0
+            else torch.tensor(1.0, device=self.device)
+        )
+        direct_readout_mode = (
+            "gaussian"
+            if self.direct_point_query_mode == "gaussian_index"
+            else str(self.direct_point_query_mode)
+        )
+        valid_mask_mode = "teacher_cache"
+        context_features = str(
+            getattr(self, "point_summary_adapter_context_features", "") or ""
+        )
+        self.point_summary_adapter_metadata.update(
+            {
+                "teacher_cache": str(cache_path),
+                "teacher_cache_feature_key": feature_key,
+                "teacher_feature_space": feature_space,
+                "teacher_cache_num_points": int(num_points),
+                "teacher_cache_feature_dim": int(features.shape[1]),
+                "teacher_cache_valid_count": int(valid.sum().item()),
+                "direct_point_source": str(self.direct_point_source),
+                "direct_point_query_mode": str(self.direct_point_query_mode),
+                "direct_point_gaussian_position_mode": str(
+                    self.direct_point_gaussian_position_mode
+                ),
+                "compact_feature_key": str(self.direct_point_feature_key),
+                "point_summary_adapter_context_features": context_features,
+                "point_summary_adapter_view_count_max": float(
+                    self.point_summary_adapter_view_count_max.detach().cpu()
+                ),
+                "direct_head_contract": {
+                    "compact_feature_key": str(self.direct_point_feature_key),
+                    "direct_readout_mode": direct_readout_mode,
+                    "point_summary_adapter_blend_alpha": 1.0,
+                    "point_summary_adapter_valid_mask_mode": valid_mask_mode,
+                    "point_summary_adapter_context_features": context_features,
+                    "teacher_feature_space": feature_space,
+                    "teacher_cache_feature_key": feature_key,
+                    "teacher_cache": str(cache_path),
+                    "direct_point_source": str(self.direct_point_source),
+                    "direct_point_query_mode": str(self.direct_point_query_mode),
+                    "direct_point_gaussian_position_mode": str(
+                        self.direct_point_gaussian_position_mode
+                    ),
+                },
+            }
+        )
         self._log(
             "Loaded direct point teacher cache: "
             f"{cache_path} ({num_points} points, dim={features.shape[1]}, "
+            f"feature_key={feature_key}, feature_space={feature_space}, "
             f"valid={int(valid.sum())}/{num_points})"
         )
 
@@ -1932,6 +2372,15 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "direct_point_adapter_text_pseudo_ce_teacher_conf": 0.0,
             "direct_point_adapter_text_pseudo_ce_agreement": 0.0,
             "direct_point_adapter_decoder_anchor": 0.0,
+            "direct_point_query_support_distill": 0.0,
+            "direct_point_query_support_distill_valid": 0.0,
+            "direct_point_query_support_distill_teacher_conf": 0.0,
+            "direct_point_query_support_distill_top1": 0.0,
+            "direct_point_proposal_consistency": 0.0,
+            "direct_point_proposal_consistency_valid": 0.0,
+            "direct_point_proposal_contrast": 0.0,
+            "direct_point_proposal_contrast_valid": 0.0,
+            "direct_point_proposal_contrast_num_proposals": 0.0,
             "direct_point_view_weight_mean": 0.0,
             "direct_point_view_weight_max": 0.0,
             "siglip_align": 0.0,
@@ -1939,9 +2388,13 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "text_heatmaps": 0.0,
             "radio_adaptors": 0.0,
             "radio_relations": 0.0,
+            "radio_local_affinity": 0.0,
+            "radio_token_contrast": 0.0,
             "radio_regions": 0.0,
             "radio_mask_logits": 0.0,
             "radio_cross_views": 0.0,
+            "radio_cross_view_propagation": 0.0,
+            "radio_cross_view_mask_propagation": 0.0,
             "foundation_cache": 0.0,
             "ground_query": 0.0,
             "ground_query_acc": 0.0,
@@ -2150,6 +2603,22 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
                 )
+                l_radio_local_affinity = (
+                    self._compute_radio_adaptor_local_affinity_loss(
+                        decoded=decoded_for_depth
+                        if self.train_mode != "latent"
+                        else None,
+                        target=gt_radio_rs if self.train_mode != "latent" else None,
+                    )
+                )
+                l_radio_token_contrast = self._compute_radio_adaptor_token_contrast_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
+                l_radio_peak_background = self._compute_radio_adaptor_peak_background_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
                 l_radio_regions = self._compute_radio_adaptor_region_loss(
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
@@ -2161,6 +2630,18 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 l_radio_cross_views = self._compute_radio_adaptor_cross_view_loss(
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                     target=gt_radio_rs if self.train_mode != "latent" else None,
+                )
+                l_radio_cross_view_propagation = (
+                    self._compute_radio_adaptor_cross_view_propagation_loss(
+                        decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                        target=gt_radio_rs if self.train_mode != "latent" else None,
+                    )
+                )
+                l_radio_cross_view_mask_propagation = (
+                    self._compute_radio_adaptor_cross_view_mask_propagation_loss(
+                        decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                        target=gt_radio_rs if self.train_mode != "latent" else None,
+                    )
                 )
                 foundation_cache_stats = self._compute_foundation_cache_loss(
                     batch=batch,
@@ -2250,6 +2731,15 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 direct_point_adapter_text_pseudo_ce_teacher_conf = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_text_pseudo_ce_agreement = torch.tensor(0.0, device=self.device)
                 direct_point_adapter_decoder_anchor = torch.tensor(0.0, device=self.device)
+                direct_point_query_support_distill = torch.tensor(0.0, device=self.device)
+                direct_point_query_support_distill_valid = torch.tensor(0.0, device=self.device)
+                direct_point_query_support_distill_teacher_conf = torch.tensor(0.0, device=self.device)
+                direct_point_query_support_distill_top1 = torch.tensor(0.0, device=self.device)
+                direct_point_proposal_consistency = torch.tensor(0.0, device=self.device)
+                direct_point_proposal_consistency_valid = torch.tensor(0.0, device=self.device)
+                direct_point_proposal_contrast = torch.tensor(0.0, device=self.device)
+                direct_point_proposal_contrast_valid = torch.tensor(0.0, device=self.device)
+                direct_point_proposal_contrast_num_proposals = torch.tensor(0.0, device=self.device)
                 direct_point_view_weight_mean = torch.tensor(0.0, device=self.device)
                 direct_point_view_weight_max = torch.tensor(0.0, device=self.device)
                 l_ground_query = torch.tensor(0.0, device=self.device)
@@ -2457,6 +2947,42 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                         "adapter_decoder_anchor",
                         direct_point_adapter_decoder_anchor,
                     )
+                    direct_point_query_support_distill = direct_point_stats.get(
+                        "query_support_distill",
+                        direct_point_query_support_distill,
+                    )
+                    direct_point_query_support_distill_valid = direct_point_stats.get(
+                        "query_support_distill_valid_ratio",
+                        direct_point_query_support_distill_valid,
+                    )
+                    direct_point_query_support_distill_teacher_conf = direct_point_stats.get(
+                        "query_support_distill_teacher_conf",
+                        direct_point_query_support_distill_teacher_conf,
+                    )
+                    direct_point_query_support_distill_top1 = direct_point_stats.get(
+                        "query_support_distill_top1_agreement",
+                        direct_point_query_support_distill_top1,
+                    )
+                    direct_point_proposal_consistency = direct_point_stats.get(
+                        "proposal_consistency",
+                        direct_point_proposal_consistency,
+                    )
+                    direct_point_proposal_consistency_valid = direct_point_stats.get(
+                        "proposal_consistency_valid_ratio",
+                        direct_point_proposal_consistency_valid,
+                    )
+                    direct_point_proposal_contrast = direct_point_stats.get(
+                        "proposal_contrast",
+                        direct_point_proposal_contrast,
+                    )
+                    direct_point_proposal_contrast_valid = direct_point_stats.get(
+                        "proposal_contrast_valid_ratio",
+                        direct_point_proposal_contrast_valid,
+                    )
+                    direct_point_proposal_contrast_num_proposals = direct_point_stats.get(
+                        "proposal_contrast_num_proposals",
+                        direct_point_proposal_contrast_num_proposals,
+                    )
                     direct_point_view_weight_mean = direct_point_stats.get(
                         "view_weight_mean",
                         direct_point_view_weight_mean,
@@ -2504,9 +3030,14 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     + l_text_heatmaps
                     + l_radio_adaptors
                     + l_radio_relations
+                    + l_radio_local_affinity
+                    + l_radio_token_contrast
+                    + l_radio_peak_background
                     + l_radio_regions
                     + l_radio_mask_logits
                     + l_radio_cross_views
+                    + l_radio_cross_view_propagation
+                    + l_radio_cross_view_mask_propagation
                     + l_foundation_cache
                 )
 
@@ -2621,6 +3152,33 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             loss_accum["direct_point_adapter_decoder_anchor"] += (
                 direct_point_adapter_decoder_anchor.item()
             )
+            loss_accum["direct_point_query_support_distill"] += (
+                direct_point_query_support_distill.item()
+            )
+            loss_accum["direct_point_query_support_distill_valid"] += (
+                direct_point_query_support_distill_valid.item()
+            )
+            loss_accum["direct_point_query_support_distill_teacher_conf"] += (
+                direct_point_query_support_distill_teacher_conf.item()
+            )
+            loss_accum["direct_point_query_support_distill_top1"] += (
+                direct_point_query_support_distill_top1.item()
+            )
+            loss_accum["direct_point_proposal_consistency"] += (
+                direct_point_proposal_consistency.item()
+            )
+            loss_accum["direct_point_proposal_consistency_valid"] += (
+                direct_point_proposal_consistency_valid.item()
+            )
+            loss_accum["direct_point_proposal_contrast"] += (
+                direct_point_proposal_contrast.item()
+            )
+            loss_accum["direct_point_proposal_contrast_valid"] += (
+                direct_point_proposal_contrast_valid.item()
+            )
+            loss_accum["direct_point_proposal_contrast_num_proposals"] += (
+                direct_point_proposal_contrast_num_proposals.item()
+            )
             loss_accum["direct_point_view_weight_mean"] += direct_point_view_weight_mean.item()
             loss_accum["direct_point_view_weight_max"] += direct_point_view_weight_max.item()
             loss_accum["siglip_align"] += l_siglip.item()
@@ -2628,9 +3186,17 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             loss_accum["text_heatmaps"] += l_text_heatmaps.item()
             loss_accum["radio_adaptors"] += l_radio_adaptors.item()
             loss_accum["radio_relations"] += l_radio_relations.item()
+            loss_accum["radio_local_affinity"] += l_radio_local_affinity.item()
+            loss_accum["radio_token_contrast"] += l_radio_token_contrast.item()
             loss_accum["radio_regions"] += l_radio_regions.item()
             loss_accum["radio_mask_logits"] += l_radio_mask_logits.item()
             loss_accum["radio_cross_views"] += l_radio_cross_views.item()
+            loss_accum["radio_cross_view_propagation"] += (
+                l_radio_cross_view_propagation.item()
+            )
+            loss_accum["radio_cross_view_mask_propagation"] += (
+                l_radio_cross_view_mask_propagation.item()
+            )
             loss_accum["foundation_cache"] += l_foundation_cache.item()
             loss_accum["ground_query"] += l_ground_query.item()
             loss_accum["ground_query_acc"] += ground_query_acc.item()
@@ -2708,6 +3274,16 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     "train/radio_relations", l_radio_relations.item(), self.global_step
                 )
                 self.writer.add_scalar(
+                    "train/radio_local_affinity",
+                    l_radio_local_affinity.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/radio_token_contrast",
+                    l_radio_token_contrast.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
                     "train/radio_regions", l_radio_regions.item(), self.global_step
                 )
                 self.writer.add_scalar(
@@ -2717,6 +3293,16 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 )
                 self.writer.add_scalar(
                     "train/radio_cross_views", l_radio_cross_views.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/radio_cross_view_propagation",
+                    l_radio_cross_view_propagation.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/radio_cross_view_mask_propagation",
+                    l_radio_cross_view_mask_propagation.item(),
+                    self.global_step,
                 )
                 self.writer.add_scalar(
                     "train/foundation_cache",
@@ -2853,6 +3439,41 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     self.global_step,
                 )
                 self.writer.add_scalar(
+                    "train/direct_point_query_support_distill",
+                    direct_point_query_support_distill.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_query_support_distill_top1",
+                    direct_point_query_support_distill_top1.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_proposal_consistency",
+                    direct_point_proposal_consistency.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_proposal_consistency_valid",
+                    direct_point_proposal_consistency_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_proposal_contrast",
+                    direct_point_proposal_contrast.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_proposal_contrast_valid",
+                    direct_point_proposal_contrast_valid.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/direct_point_proposal_contrast_num_proposals",
+                    direct_point_proposal_contrast_num_proposals.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
                     "train/siglip_align", l_siglip.item(), self.global_step
                 )
                 self.writer.add_scalar(
@@ -2919,9 +3540,14 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         text_heatmap_accum = 0.0
         radio_adaptor_align_accum = 0.0
         radio_adaptor_relation_accum = 0.0
+        radio_adaptor_local_affinity_accum = 0.0
+        radio_adaptor_token_contrast_accum = 0.0
+        radio_adaptor_peak_background_accum = 0.0
         radio_adaptor_region_accum = 0.0
         radio_adaptor_mask_logit_accum = 0.0
         radio_adaptor_cross_view_accum = 0.0
+        radio_adaptor_cross_view_propagation_accum = 0.0
+        radio_adaptor_cross_view_mask_propagation_accum = 0.0
         ground_query_accum = 0.0
         ground_query_acc_metric = 0.0
         ground_query_valid_accum = 0.0
@@ -3092,6 +3718,20 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
             ).item()
+            radio_adaptor_local_affinity_accum += (
+                self._compute_radio_adaptor_local_affinity_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio if self.train_mode != "latent" else None,
+                ).item()
+            )
+            radio_adaptor_token_contrast_accum += self._compute_radio_adaptor_token_contrast_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
+            radio_adaptor_peak_background_accum += self._compute_radio_adaptor_peak_background_loss(
+                decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                target=gt_radio if self.train_mode != "latent" else None,
+            ).item()
             radio_adaptor_region_accum += self._compute_radio_adaptor_region_loss(
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
@@ -3104,6 +3744,18 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 target=gt_radio if self.train_mode != "latent" else None,
             ).item()
+            radio_adaptor_cross_view_propagation_accum += (
+                self._compute_radio_adaptor_cross_view_propagation_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio if self.train_mode != "latent" else None,
+                ).item()
+            )
+            radio_adaptor_cross_view_mask_propagation_accum += (
+                self._compute_radio_adaptor_cross_view_mask_propagation_loss(
+                    decoded=decoded_for_depth if self.train_mode != "latent" else None,
+                    target=gt_radio if self.train_mode != "latent" else None,
+                ).item()
+            )
             semantic_decoded = None
             if (
                 hybrid_aux is not None
@@ -3149,9 +3801,16 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "text_heatmaps": text_heatmap_accum / n,
             "radio_adaptors": radio_adaptor_align_accum / n,
             "radio_relations": radio_adaptor_relation_accum / n,
+            "radio_local_affinity": radio_adaptor_local_affinity_accum / n,
+            "radio_token_contrast": radio_adaptor_token_contrast_accum / n,
+            "radio_peak_background": radio_adaptor_peak_background_accum / n,
             "radio_regions": radio_adaptor_region_accum / n,
             "radio_mask_logits": radio_adaptor_mask_logit_accum / n,
             "radio_cross_views": radio_adaptor_cross_view_accum / n,
+            "radio_cross_view_propagation": radio_adaptor_cross_view_propagation_accum / n,
+            "radio_cross_view_mask_propagation": (
+                radio_adaptor_cross_view_mask_propagation_accum / n
+            ),
             "ground_query": ground_query_accum / n,
             "ground_query_acc": ground_query_acc_metric / n,
             "ground_query_valid": ground_query_valid_accum / n,
@@ -3172,9 +3831,29 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             self.writer.add_scalar("val/text_heatmaps", metrics["text_heatmaps"], epoch)
             self.writer.add_scalar("val/radio_adaptors", metrics["radio_adaptors"], epoch)
             self.writer.add_scalar("val/radio_relations", metrics["radio_relations"], epoch)
+            self.writer.add_scalar(
+                "val/radio_local_affinity",
+                metrics["radio_local_affinity"],
+                epoch,
+            )
+            self.writer.add_scalar(
+                "val/radio_token_contrast",
+                metrics["radio_token_contrast"],
+                epoch,
+            )
             self.writer.add_scalar("val/radio_regions", metrics["radio_regions"], epoch)
             self.writer.add_scalar("val/radio_mask_logits", metrics["radio_mask_logits"], epoch)
             self.writer.add_scalar("val/radio_cross_views", metrics["radio_cross_views"], epoch)
+            self.writer.add_scalar(
+                "val/radio_cross_view_propagation",
+                metrics["radio_cross_view_propagation"],
+                epoch,
+            )
+            self.writer.add_scalar(
+                "val/radio_cross_view_mask_propagation",
+                metrics["radio_cross_view_mask_propagation"],
+                epoch,
+            )
             self.writer.add_scalar("val/ground_query", metrics["ground_query"], epoch)
             self.writer.add_scalar("val/ground_query_acc", metrics["ground_query_acc"], epoch)
             self.writer.add_scalar("val/ground_query_valid", metrics["ground_query_valid"], epoch)

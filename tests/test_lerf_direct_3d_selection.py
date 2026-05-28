@@ -12,12 +12,15 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     apply_direct_primitive_confidence,
     apply_sam3_prompt_heatmap_guard,
     _blend_point_summary_adapter_features,
+    _load_point_summary_adapter_valid_mask,
     apply_registration_confidence,
     apply_selection_ratio_bounds,
     aggregate_scores_by_voxel,
     bootstrap_mean_ci,
     boundary_f_score,
+    build_direct3d_oracle_prompt_initial_mask,
     build_direct3d_prompt_initial_mask,
+    build_direct_head_eval_status,
     choose_sam3_box_refined_mask,
     choose_sam3_box_refined_mask_with_report,
     choose_refined_mask_by_geometry_with_report,
@@ -29,6 +32,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     geometry_discontinuity_maps,
     load_score_cache,
     merge_registered_scores,
+    normalize_registered_feature_sums,
     accumulate_raster_contribution_features,
     keep_largest_mask_component,
     refine_mask_with_rgb_edges,
@@ -38,6 +42,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     choose_sam3_mask_head_refined_mask_with_report,
     normalize_score_heatmap_features,
     finalize_prompt_conditioned_sam3_mask,
+    enforce_direct_head_eval_consistency,
     refine_mask_with_prompt_conditioned_sam3_head,
     refine_selection_by_voxel_components,
     refine_mask_with_sam3_adaptor_features,
@@ -51,6 +56,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     save_registered_feature_cache,
     smooth_scores_with_voxel_proposals,
     smooth_scores_with_sam3_training_view_proposals,
+    summarize_initial_iou_buckets,
     _project_points_to_image,
     trimap_iou,
     mask_to_sam3_box_prompt,
@@ -82,6 +88,40 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert "--sam3_prompt_mask_head_initial_refinement" in result.stdout
     assert "--sam3_prompt_mask_head_require_peak_in_refined" in result.stdout
     assert "--sam3_prompt_mask_head_min_heatmap_mean_ratio" in result.stdout
+    assert "--sam3_prompt_mask_head_oracle_prompt" in result.stdout
+    assert "--allow_sam3_prompt_mask_head_oracle_diagnostic" in result.stdout
+    assert "low_confidence_and_proposal_consensus" in result.stdout
+    assert "--proposal_consensus_threshold" in result.stdout
+    assert "raster_adjoint" in result.stdout
+
+
+def test_direct_3d_cli_rejects_oracle_prompt_without_diagnostic_flag():
+    repo_root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+            "--config",
+            "missing.yaml",
+            "--checkpoint",
+            "missing.pth",
+            "--scene",
+            "ramen",
+            "--mask_refinement",
+            "sam3_prompt_mask_head",
+            "--sam3_prompt_mask_head_oracle_prompt",
+            "gt_mask",
+        ],
+        cwd=repo_root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=30,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "allow_sam3_prompt_mask_head_oracle_diagnostic" in result.stderr
 
 
 def test_project_points_to_image_uses_lerf_w2c_pose_and_intrinsics():
@@ -168,6 +208,44 @@ def test_smooth_scores_with_voxel_proposals_recovers_noisy_object_member():
     assert torch.allclose(smoothed[0], scores[0])
     assert torch.allclose(smoothed[1], torch.tensor([1.15, 0.0]))
     assert torch.allclose(smoothed[2], scores[2])
+
+
+def test_smooth_scores_with_voxel_proposals_can_require_consensus():
+    scores = torch.tensor(
+        [
+            [4.0, 0.0],
+            [0.0, 4.0],
+            [3.0, 0.0],
+            [1.0, 0.0],
+        ],
+        dtype=torch.float32,
+    )
+    xyz = torch.tensor(
+        [
+            [0.01, 0.01, 0.01],
+            [0.02, 0.01, 0.01],
+            [0.30, 0.01, 0.01],
+            [0.31, 0.01, 0.01],
+        ],
+        dtype=torch.float32,
+    )
+
+    smoothed, stats = smooth_scores_with_voxel_proposals(
+        scores,
+        xyz,
+        voxel_size=0.1,
+        alpha=0.5,
+        min_count=2,
+        gate="proposal_consensus",
+        proposal_consensus_threshold=0.75,
+    )
+
+    assert stats["num_consensus_proposals"] == 1
+    assert stats["num_assigned"] == 2
+    assert torch.allclose(smoothed[0], scores[0])
+    assert torch.allclose(smoothed[1], scores[1])
+    assert torch.allclose(smoothed[2], torch.tensor([2.5, 0.0]))
+    assert torch.allclose(smoothed[3], torch.tensor([1.5, 0.0]))
 
 
 def test_refine_mask_with_sam3_adaptor_features_empty_mask_falls_back():
@@ -336,6 +414,36 @@ def test_refine_mask_with_prompt_conditioned_sam3_head_uses_prompt_and_coarse_ma
     assert refined_iou > initial_iou
 
 
+def test_prompt_conditioned_sam3_head_quality_gate_falls_back_on_low_quality():
+    class LowQualityPromptHead(torch.nn.Module):
+        def forward(self, features, prompts, coarse_masks):
+            logits = torch.full((1, 1, 8, 8), -8.0, device=features.device)
+            logits[:, :, 2:6, 2:6] = 8.0 + prompts.sum() * 0.0 + coarse_masks.sum() * 0.0
+            return logits
+
+        def forward_with_quality(self, features, prompts, coarse_masks):
+            logits = self.forward(features, prompts, coarse_masks)
+            quality = torch.full((1, 1), -6.0, device=features.device)
+            return logits, quality
+
+    initial = np.zeros((16, 16), dtype=bool)
+    initial[3:13, 3:13] = True
+
+    refined, report = refine_mask_with_prompt_conditioned_sam3_head(
+        feature_map=torch.zeros(1, 4, 8, 8),
+        prompt_embedding=torch.ones(6),
+        coarse_mask=initial,
+        head=LowQualityPromptHead(),
+        logit_threshold=0.0,
+        min_initial_iou=0.1,
+        min_quality=0.8,
+    )
+
+    assert np.array_equal(refined, initial)
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "low_predicted_quality"
+
+
 def test_direct3d_prompt_initial_mask_can_keep_heatmap_peak_component():
     coarse = np.zeros((8, 8), dtype=bool)
     coarse[1:3, 1:3] = True
@@ -352,6 +460,24 @@ def test_direct3d_prompt_initial_mask_can_keep_heatmap_peak_component():
     expected = np.zeros_like(coarse)
     expected[5:7, 5:7] = True
     assert np.array_equal(refined, expected)
+
+
+def test_direct3d_oracle_prompt_initial_mask_supports_gt_mask_and_box():
+    coarse = np.zeros((8, 8), dtype=bool)
+    coarse[0:2, 0:2] = True
+    gt = np.zeros((8, 8), dtype=bool)
+    gt[2:5, 3] = True
+    gt[4, 3:7] = True
+
+    gt_prompt = build_direct3d_oracle_prompt_initial_mask(coarse, gt, mode="gt_mask")
+    box_prompt = build_direct3d_oracle_prompt_initial_mask(coarse, gt, mode="gt_box")
+    no_oracle = build_direct3d_oracle_prompt_initial_mask(coarse, gt, mode="none")
+
+    expected_box = np.zeros_like(gt)
+    expected_box[2:5, 3:7] = True
+    assert np.array_equal(gt_prompt, gt)
+    assert np.array_equal(box_prompt, expected_box)
+    assert np.array_equal(no_oracle, coarse)
 
 
 def test_sam3_prompt_heatmap_guard_rejects_refinement_that_drops_peak():
@@ -441,6 +567,29 @@ def test_refine_mask_with_sam3_feature_grabcut_uses_feature_boundaries():
     assert report["attempted"] is True
     assert report["accepted"] is True
     assert refined_iou > initial_iou + 0.20
+
+
+def test_refine_mask_with_sam3_feature_grabcut_rejects_unstable_area_ratio():
+    features = torch.zeros((3, 16, 16), dtype=torch.float32)
+    features[0].fill_(0.0)
+    features[2].fill_(1.0)
+    features[0, 4:12, 4:12] = 1.0
+    features[2, 4:12, 4:12] = 0.0
+    initial = np.zeros((32, 32), dtype=bool)
+    initial[5:27, 5:27] = True
+
+    refined, report = refine_mask_with_sam3_feature_grabcut(
+        features,
+        initial,
+        iterations=2,
+        dilate_pixels=2,
+        erode_pixels=2,
+        max_refined_area_ratio=0.4,
+    )
+
+    assert np.array_equal(refined, initial)
+    assert report["accepted"] is False
+    assert report["fallback_reason"] == "refined_area_too_large"
 
 
 def test_sam3_adaptor_refiner_exposes_feature_grabcut_readout():
@@ -603,6 +752,9 @@ def test_score_margin_selection_uses_confidence_for_floor_and_cap():
 
 def test_save_registered_feature_cache_persists_summary_teacher(tmp_path):
     xyz = torch.tensor([[0.0, 1.0, 2.0], [3.0, 4.0, 5.0]])
+    scales = torch.tensor([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+    rotations = torch.tensor([[1.0, 0.0, 0.0, 0.0], [0.9, 0.1, 0.0, 0.0]])
+    opacities = torch.tensor([[0.8], [0.2]])
     summary = torch.nn.functional.normalize(
         torch.tensor([[1.0, 2.0], [3.0, 4.0]]),
         dim=-1,
@@ -618,10 +770,24 @@ def test_save_registered_feature_cache_persists_summary_teacher(tmp_path):
         valid=valid,
         view_counts=view_counts,
         metadata={"scene": "toy", "prompt_templates": ["{query}"]},
+        scales=scales,
+        rotations=rotations,
+        opacities=opacities,
     )
 
     payload = torch.load(cache_path, map_location="cpu")
     assert payload["version"] == 1
+    assert payload["feature_space"] == "siglip_summary"
+    assert payload["feature_key"] == "summary_features"
+    assert payload["geometry_fingerprint"]["num_gaussians"] == 2
+    assert isinstance(payload["geometry_fingerprint"]["xyz_sha256"], str)
+    assert len(payload["geometry_fingerprint"]["xyz_sha256"]) == 64
+    assert payload["geometry_fingerprint"]["scales_shape"] == [2, 3]
+    assert len(payload["geometry_fingerprint"]["scales_sha256"]) == 64
+    assert payload["geometry_fingerprint"]["rotations_shape"] == [2, 4]
+    assert len(payload["geometry_fingerprint"]["rotations_sha256"]) == 64
+    assert payload["geometry_fingerprint"]["opacities_shape"] == [2, 1]
+    assert len(payload["geometry_fingerprint"]["opacities_sha256"]) == 64
     assert torch.equal(payload["xyz"], xyz)
     assert torch.allclose(payload["summary_features"], summary)
     assert torch.equal(payload["valid"], valid)
@@ -648,6 +814,190 @@ def test_point_summary_adapter_valid_mask_falls_back_to_base_summary():
 
     assert torch.allclose(blended[0], adapter[0])
     assert torch.allclose(blended[1], base[1])
+
+
+def test_point_summary_adapter_valid_mask_uses_fallback_teacher_cache(tmp_path):
+    ckpt_path = tmp_path / "checkpoint.pth"
+    teacher_cache_path = tmp_path / "teacher_cache.pt"
+    valid = torch.tensor([True, False, True])
+
+    torch.save({}, ckpt_path)
+    torch.save({"valid": valid}, teacher_cache_path)
+
+    loaded = _load_point_summary_adapter_valid_mask(
+        str(ckpt_path),
+        expected_count=3,
+        device=torch.device("cpu"),
+        fallback_teacher_cache=str(teacher_cache_path),
+    )
+
+    assert loaded is not None
+    assert torch.equal(loaded.cpu(), valid)
+
+
+def test_point_summary_adapter_valid_mask_rejects_misaligned_teacher_cache(tmp_path):
+    ckpt_path = tmp_path / "checkpoint.pth"
+    teacher_cache_path = tmp_path / "teacher_cache.pt"
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=torch.float32)
+
+    torch.save({}, ckpt_path)
+    save_registered_feature_cache(
+        teacher_cache_path,
+        xyz=xyz,
+        summary_features=torch.nn.functional.normalize(torch.ones(2, 3), dim=-1),
+        valid=torch.tensor([True, False]),
+        view_counts=torch.tensor([1.0, 0.0]),
+        metadata={"scene": "toy"},
+    )
+
+    with pytest.raises(ValueError, match="teacher cache geometry mismatch"):
+        _load_point_summary_adapter_valid_mask(
+            str(ckpt_path),
+            expected_count=2,
+            device=torch.device("cpu"),
+            fallback_teacher_cache=str(teacher_cache_path),
+            expected_xyz=torch.flip(xyz, dims=[0]),
+        )
+
+
+def test_prompt_conditioned_sam3_head_resizes_coarse_prompt_before_dilation():
+    seen: dict[str, torch.Tensor] = {}
+
+    class _Head(torch.nn.Module):
+        def forward(self, feature_map, prompt_embedding, coarse_prompt):
+            seen["coarse"] = coarse_prompt.detach().cpu()
+            return coarse_prompt[:, :1].float() * 2.0 - 1.0
+
+    coarse = np.array([[1, 0], [0, 0]], dtype=bool)
+    refined, report = refine_mask_with_prompt_conditioned_sam3_head(
+        feature_map=torch.zeros(1, 4, 4, 4),
+        prompt_embedding=torch.zeros(3),
+        coarse_mask=coarse,
+        head=_Head(),
+        logit_threshold=0.0,
+        min_initial_iou=0.0,
+        coarse_dilate=1,
+        coarse_threshold=0.0,
+    )
+
+    assert report["coarse_prompt_resized"] is True
+    assert report["coarse_prompt_input_shape"] == [2, 2]
+    assert report["coarse_prompt_shape"] == [4, 4]
+    assert tuple(seen["coarse"].shape[-2:]) == (4, 4)
+    assert refined.shape == coarse.shape
+
+
+def test_prompt_conditioned_sam3_resize_uses_nearest_without_halo():
+    seen: dict[str, torch.Tensor] = {}
+
+    class _CaptureHead(torch.nn.Module):
+        def forward(self, feature_map, prompt_embedding, coarse_prompt):
+            seen["coarse"] = coarse_prompt.detach().cpu()
+            return torch.zeros((1, 1, *feature_map.shape[-2:]), device=feature_map.device)
+
+    coarse = np.zeros((4, 4), dtype=bool)
+    coarse[1, 1] = True
+    refine_mask_with_prompt_conditioned_sam3_head(
+        feature_map=torch.zeros(1, 2, 8, 8),
+        prompt_embedding=torch.zeros(3),
+        coarse_mask=coarse,
+        head=_CaptureHead(),
+        logit_threshold=0.0,
+        min_initial_iou=0.0,
+        coarse_dilate=0,
+        coarse_threshold=0.5,
+    )
+
+    assert tuple(seen["coarse"].shape[-2:]) == (8, 8)
+    assert int(seen["coarse"].sum().item()) == 4
+
+
+def test_initial_iou_bucket_summary_reports_delta_by_support_quality():
+    details = [
+        {"initial_iou": 0.10, "iou": 0.20, "delta_iou": 0.10, "sam3_accepted": True},
+        {"initial_iou": 0.40, "iou": 0.35, "delta_iou": -0.05, "sam3_accepted": False},
+        {"initial_iou": 0.80, "iou": 0.82, "delta_iou": 0.02, "sam3_accepted": True},
+    ]
+
+    summary = summarize_initial_iou_buckets(details)
+
+    assert summary["lt_0p25"]["n"] == 1
+    assert summary["lt_0p25"]["delta_miou"] == pytest.approx(0.10)
+    assert summary["0p25_0p50"]["sam3_accept_rate"] == pytest.approx(0.0)
+    assert summary["0p50_0p75"]["n"] == 0
+    assert summary["gte_0p75"]["miou"] == pytest.approx(0.82)
+
+
+def test_direct_head_contract_rejects_valid_mask_mismatch():
+    checkpoint = {
+        "point_summary_adapter_state_dict": {},
+        "point_summary_adapter_metadata": {
+            "direct_head_contract": {
+                "compact_feature_key": "features",
+                "direct_readout_mode": "gaussian",
+                "point_summary_adapter_blend_alpha": 1.0,
+                "point_summary_adapter_valid_mask_mode": "teacher_cache",
+            }
+        },
+    }
+
+    status = build_direct_head_eval_status(
+        checkpoint,
+        score_source="direct",
+        use_point_summary_adapter=True,
+        adapter_loaded=True,
+        compact_feature_key="features",
+        direct_readout_mode="gaussian",
+        point_summary_adapter_blend_alpha=1.0,
+        point_summary_adapter_valid_mask_mode="opacity",
+    )
+
+    assert any("valid_mask_mode_mismatch" in warning for warning in status["warnings"])
+    with pytest.raises(ValueError, match="valid_mask_mode_mismatch"):
+        enforce_direct_head_eval_consistency(status, strict=True)
+
+
+def test_direct_head_contract_rejects_teacher_space_and_query_mode_mismatch():
+    checkpoint = {
+        "point_summary_adapter_state_dict": {},
+        "point_summary_adapter_metadata": {
+            "direct_head_contract": {
+                "compact_feature_key": "features",
+                "direct_readout_mode": "gaussian",
+                "point_summary_adapter_blend_alpha": 1.0,
+                "point_summary_adapter_valid_mask_mode": "teacher_cache",
+                "point_summary_adapter_context_features": "opacity view_count",
+                "teacher_feature_space": "siglip_summary",
+                "teacher_cache_feature_key": "summary_features",
+                "direct_point_query_mode": "gaussian_index",
+                "direct_point_gaussian_position_mode": "gaussian_center",
+            }
+        },
+    }
+
+    status = build_direct_head_eval_status(
+        checkpoint,
+        score_source="direct",
+        use_point_summary_adapter=True,
+        adapter_loaded=True,
+        compact_feature_key="features",
+        direct_readout_mode="gaussian",
+        point_summary_adapter_blend_alpha=1.0,
+        point_summary_adapter_valid_mask_mode="teacher_cache",
+        point_summary_adapter_context_features="opacity view_count",
+        teacher_feature_space="radio",
+        teacher_cache_feature_key="features",
+        direct_point_query_mode="knn",
+        direct_point_gaussian_position_mode="label_point",
+    )
+
+    warnings = " ".join(status["warnings"])
+    assert "teacher_feature_space_mismatch" in warnings
+    assert "teacher_cache_feature_key_mismatch" in warnings
+    assert "direct_point_query_mode_mismatch" in warnings
+    assert "direct_point_gaussian_position_mode_mismatch" in warnings
+    with pytest.raises(ValueError, match="teacher_feature_space_mismatch"):
+        enforce_direct_head_eval_consistency(status, strict=True)
 
 
 def test_merge_registered_scores_uses_fallback_for_unregistered_gaussians():
@@ -816,6 +1166,22 @@ def test_accumulate_raster_contribution_features_normalizes_by_weight():
     assert torch.allclose(sums[0], expected0)
     assert torch.allclose(sums[1], expected1)
     assert torch.allclose(counts, torch.tensor([4.0, 2.0]))
+
+
+def test_normalize_registered_feature_sums_uses_subunit_weights():
+    registered_sum = torch.tensor(
+        [
+            [0.2, 0.0],
+            [0.0, 0.0],
+        ],
+        dtype=torch.float32,
+    )
+    registered_counts = torch.tensor([0.2, 0.0], dtype=torch.float32)
+
+    normalized = normalize_registered_feature_sums(registered_sum, registered_counts)
+
+    assert torch.allclose(normalized[0], torch.tensor([1.0, 0.0]))
+    assert torch.allclose(normalized[1], torch.zeros(2))
 
 
 def test_select_dominant_raster_hits_keeps_strongest_hit_per_pixel():
@@ -1132,6 +1498,50 @@ def test_score_cache_rejects_mismatched_protocol(tmp_path):
                 **metadata,
                 "registration_max_frames": 96,
             },
+        )
+
+
+def test_score_cache_rejects_mismatched_geometry_fingerprint(tmp_path):
+    cache_path = tmp_path / "scores.pt"
+    metadata = {
+        "scene": "figurines",
+        "score_source": "registered_view",
+    }
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], dtype=torch.float32)
+    save_score_cache(
+        cache_path,
+        torch.ones(2, 1),
+        metadata=metadata,
+        registration_stats={},
+        xyz=xyz,
+    )
+
+    with pytest.raises(ValueError, match="score cache geometry mismatch"):
+        load_score_cache(
+            cache_path,
+            expected_metadata=metadata,
+            expected_xyz=torch.flip(xyz, dims=[0]),
+        )
+
+
+def test_score_cache_requires_geometry_when_expected(tmp_path):
+    cache_path = tmp_path / "legacy_scores.pt"
+    metadata = {
+        "scene": "figurines",
+        "score_source": "registered_view",
+    }
+    save_score_cache(
+        cache_path,
+        torch.ones(2, 1),
+        metadata=metadata,
+        registration_stats={},
+    )
+
+    with pytest.raises(ValueError, match="missing geometry_fingerprint"):
+        load_score_cache(
+            cache_path,
+            expected_metadata=metadata,
+            expected_xyz=torch.zeros(2, 3),
         )
 
 

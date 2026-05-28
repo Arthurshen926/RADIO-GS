@@ -451,6 +451,9 @@ def propagate_mask_by_dense_matches(
     target_seed_points: Optional[Iterable[Tuple[int, int]]] = None,
     seed_prior_weight: float = 0.0,
     seed_prior_radius: int = 0,
+    transport_matches: Optional[Iterable[Mapping[str, float]]] = None,
+    transport_weight: float = 0.0,
+    transport_radius: int = 0,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Propagate a source mask to the target view by dense DINO-style matching."""
     if source_feature.ndim != 3 or target_feature.ndim != 3:
@@ -498,6 +501,15 @@ def propagate_mask_by_dense_matches(
             x1 = min(x + radius + 1, tgt_w)
             seed_prior[y0:y1, x0:x1] = 1.0
         score_map = score_map + float(seed_prior_weight) * seed_prior
+    if transport_matches is not None and float(transport_weight) > 0.0:
+        transport = transported_match_score_map(
+            transport_matches,
+            target_shape=(tgt_h, tgt_w),
+            radius=int(transport_radius),
+            device=score_map.device,
+            dtype=score_map.dtype,
+        )
+        score_map = score_map + float(transport_weight) * transport
     raw_area = int(target_area if target_area is not None else mask.sum())
     area = scaled_bounded_area(
         source_area=raw_area,
@@ -515,6 +527,39 @@ def propagate_mask_by_dense_matches(
         seed_points=component_seed_points,
     )
     return pred, score_map.detach().cpu().numpy().astype(np.float32)
+
+
+def transported_match_score_map(
+    matches: Iterable[Mapping[str, float]],
+    *,
+    target_shape: Tuple[int, int],
+    radius: int = 0,
+    device: Optional[torch.device] = None,
+    dtype: torch.dtype = torch.float32,
+) -> torch.Tensor:
+    """Convert cycle/RANSAC-filtered point matches into a target evidence map."""
+
+    height, width = int(target_shape[0]), int(target_shape[1])
+    score = torch.zeros((height, width), device=device, dtype=dtype)
+    radius = max(int(radius), 0)
+    for match in matches:
+        if "tgt_y" not in match or "tgt_x" not in match:
+            continue
+        y = min(max(int(round(float(match["tgt_y"]))), 0), height - 1)
+        x = min(max(int(round(float(match["tgt_x"]))), 0), width - 1)
+        weight = max(float(match.get("score", 1.0)), 0.0)
+        y0 = max(y - radius, 0)
+        y1 = min(y + radius + 1, height)
+        x0 = max(x - radius, 0)
+        x1 = min(x + radius + 1, width)
+        score[y0:y1, x0:x1] = torch.maximum(
+            score[y0:y1, x0:x1],
+            torch.as_tensor(weight, device=score.device, dtype=score.dtype),
+        )
+    max_value = score.max()
+    if bool(max_value > 0):
+        score = score / max_value.clamp_min(1e-6)
+    return score
 
 
 def refine_propagated_mask_with_feature_boundary(
@@ -824,6 +869,8 @@ def evaluate_scene_tasks(
     dino_propagation_seed_prior: bool = False,
     dino_propagation_seed_weight: float = 0.0,
     dino_propagation_seed_radius: int = 0,
+    dino_transport_match_weight: float = 0.0,
+    dino_transport_match_radius: int = 0,
     dino_feature_boundary_refinement: bool = False,
     dino_feature_boundary_background_weight: float = 0.5,
     dino_feature_boundary_seed_topk_ratio: float = 0.25,
@@ -1019,6 +1066,9 @@ def evaluate_scene_tasks(
                 else None,
                 seed_prior_weight=dino_propagation_seed_weight if dino_propagation_seed_prior else 0.0,
                 seed_prior_radius=dino_propagation_seed_radius,
+                transport_matches=matches if dino_transport_match_weight > 0.0 else None,
+                transport_weight=dino_transport_match_weight,
+                transport_radius=dino_transport_match_radius,
             )
             if dino_feature_boundary_refinement:
                 propagated_mask, _ = refine_propagated_mask_with_feature_boundary(
@@ -1156,6 +1206,8 @@ def main() -> None:
     parser.add_argument("--dino_propagation_seed_prior", action="store_true", help="Add cycle/RANSAC-filtered DINO target matches as a soft prior for mask propagation")
     parser.add_argument("--dino_propagation_seed_weight", type=float, default=0.0, help="Score boost for target match seeds when --dino_propagation_seed_prior is enabled")
     parser.add_argument("--dino_propagation_seed_radius", type=int, default=0, help="Feature-token radius around target match seeds for DINO propagation seed prior")
+    parser.add_argument("--dino_transport_match_weight", type=float, default=0.0, help="Fuse cycle/RANSAC-filtered DINO match evidence directly into propagation scores")
+    parser.add_argument("--dino_transport_match_radius", type=int, default=0, help="Feature-token splat radius for --dino_transport_match_weight")
     parser.add_argument("--dino_feature_boundary_refinement", action="store_true", help="Sharpen DINO propagated masks with a GT-free target-feature foreground/background boundary readout")
     parser.add_argument("--dino_feature_boundary_background_weight", type=float, default=0.5)
     parser.add_argument("--dino_feature_boundary_seed_topk_ratio", type=float, default=0.25)
@@ -1247,6 +1299,8 @@ def main() -> None:
             dino_propagation_seed_prior=args.dino_propagation_seed_prior,
             dino_propagation_seed_weight=args.dino_propagation_seed_weight,
             dino_propagation_seed_radius=args.dino_propagation_seed_radius,
+            dino_transport_match_weight=args.dino_transport_match_weight,
+            dino_transport_match_radius=args.dino_transport_match_radius,
             dino_feature_boundary_refinement=args.dino_feature_boundary_refinement,
             dino_feature_boundary_background_weight=args.dino_feature_boundary_background_weight,
             dino_feature_boundary_seed_topk_ratio=args.dino_feature_boundary_seed_topk_ratio,
@@ -1305,6 +1359,8 @@ def main() -> None:
                 f"propagation_seed_prior={bool(args.dino_propagation_seed_prior)}, "
                 f"seed_weight={args.dino_propagation_seed_weight:g}, "
                 f"seed_radius={args.dino_propagation_seed_radius}, "
+                f"transport_weight={args.dino_transport_match_weight:g}, "
+                f"transport_radius={args.dino_transport_match_radius}, "
                 f"feature_boundary_refinement={bool(args.dino_feature_boundary_refinement)}, "
                 f"boundary_bg_weight={args.dino_feature_boundary_background_weight:g}, "
                 f"boundary_seed_topk={args.dino_feature_boundary_seed_topk_ratio:g}, "

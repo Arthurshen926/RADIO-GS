@@ -46,6 +46,72 @@ def _flatten_projected_tokens(
     return F.normalize(tokens, dim=-1)
 
 
+def _select_cross_view_anchor_indices(
+    ref_source: torch.Tensor,
+    ref_target: torch.Tensor,
+    *,
+    num_anchors: int,
+    temperature: float,
+    strategy: str,
+) -> torch.Tensor:
+    anchors = min(int(num_anchors), int(ref_source.shape[0]))
+    if anchors <= 0:
+        raise ValueError("num_anchors must be positive")
+    if strategy == "linspace":
+        return torch.linspace(
+            0,
+            ref_source.shape[0] - 1,
+            steps=anchors,
+            device=ref_source.device,
+        ).round().long()
+    if strategy != "distinctive":
+        raise ValueError("anchor_strategy must be 'linspace' or 'distinctive'")
+
+    with torch.no_grad():
+        logits = (ref_source @ ref_target.transpose(0, 1)) / temperature
+        prob = F.softmax(logits, dim=-1)
+        topk = prob.topk(k=min(2, prob.shape[-1]), dim=-1).values
+        if topk.shape[-1] == 1:
+            score = topk[:, 0]
+        else:
+            score = topk[:, 0] - topk[:, 1]
+        _, indices = score.topk(k=anchors, largest=True, sorted=False)
+    return indices.sort().values
+
+
+def _select_batched_self_anchor_indices(
+    ref_tokens: torch.Tensor,
+    *,
+    num_anchors: int,
+    temperature: float,
+    strategy: str,
+) -> torch.Tensor:
+    anchors = min(int(num_anchors), int(ref_tokens.shape[1]))
+    if anchors <= 0:
+        raise ValueError("num_anchors must be positive")
+    if strategy == "linspace":
+        return torch.linspace(
+            0,
+            ref_tokens.shape[1] - 1,
+            steps=anchors,
+            device=ref_tokens.device,
+        ).round().long()
+    if strategy != "distinctive":
+        raise ValueError("anchor_strategy must be 'linspace' or 'distinctive'")
+
+    with torch.no_grad():
+        logits = torch.matmul(ref_tokens, ref_tokens.transpose(1, 2)) / temperature
+        prob = F.softmax(logits, dim=-1)
+        topk = prob.topk(k=min(2, prob.shape[-1]), dim=-1).values
+        if topk.shape[-1] == 1:
+            score = topk[..., 0]
+        else:
+            score = topk[..., 0] - topk[..., 1]
+        score = score.mean(dim=0)
+        _, indices = score.topk(k=anchors, largest=True, sorted=False)
+    return indices.sort().values
+
+
 def compute_radio_adaptor_alignment_loss(
     decoded: torch.Tensor,
     target: torch.Tensor,
@@ -65,6 +131,180 @@ def compute_radio_adaptor_alignment_loss(
         with torch.no_grad():
             ref = project_feature_map_with_adaptor(target, adaptor)
         losses[name] = 1.0 - (pred * ref).sum(dim=1).mean()
+
+    total = torch.stack(list(losses.values())).mean()
+    return total, losses
+
+
+def compute_radio_adaptor_cross_view_propagation_loss(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    *,
+    downsample: int = 1,
+    max_tokens: int = 256,
+    num_anchors: int = 16,
+    temperature: float = 0.2,
+    anchor_strategy: str = "linspace",
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Distill DINO-style cross-view soft mask propagation.
+
+    The frozen teacher picks source-view anchor tokens and propagates each
+    anchor to the paired target view as a soft token map.  ``linspace`` keeps
+    the historical deterministic anchors; ``distinctive`` selects teacher
+    tokens with the clearest cross-view top-1 margin so the loss focuses on
+    reliable DINO correspondences instead of arbitrary background patches.
+    """
+    if not adaptors:
+        return _zero_like_features(decoded), {}
+    if decoded.shape[0] < 2:
+        return _zero_like_features(decoded), {}
+    if num_anchors <= 0:
+        raise ValueError("num_anchors must be positive")
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+
+    pair_count = decoded.shape[0] // 2
+    losses: dict[str, torch.Tensor] = {}
+    for name, adaptor in adaptors.items():
+        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred_tokens = _flatten_projected_tokens(
+            pred, downsample=downsample, max_tokens=max_tokens
+        )
+        with torch.no_grad():
+            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref_tokens = _flatten_projected_tokens(
+                ref, downsample=downsample, max_tokens=max_tokens
+            )
+
+        per_pair: list[torch.Tensor] = []
+        for pair_idx in range(pair_count):
+            a = 2 * pair_idx
+            b = a + 1
+            ref_source = ref_tokens[a]
+            ref_target = ref_tokens[b]
+            anchor_idx = _select_cross_view_anchor_indices(
+                ref_source,
+                ref_target,
+                num_anchors=num_anchors,
+                temperature=temperature,
+                strategy=anchor_strategy,
+            )
+
+            pred_anchor = pred_tokens[a].index_select(0, anchor_idx)
+            pred_target = pred_tokens[b]
+            pred_logits = (pred_anchor @ pred_target.transpose(0, 1)) / temperature
+            pred_log_prob = F.log_softmax(pred_logits, dim=-1)
+
+            with torch.no_grad():
+                ref_anchor = ref_source.index_select(0, anchor_idx)
+                ref_logits = (ref_anchor @ ref_target.transpose(0, 1)) / temperature
+                ref_log_prob = F.log_softmax(ref_logits, dim=-1)
+                ref_prob = ref_log_prob.exp()
+
+            per_pair.append((ref_prob * (ref_log_prob - pred_log_prob)).sum(dim=-1).mean())
+        losses[name] = torch.stack(per_pair).mean()
+
+    total = torch.stack(list(losses.values())).mean()
+    return total, losses
+
+
+def compute_radio_adaptor_cross_view_mask_propagation_loss(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    *,
+    downsample: int = 1,
+    max_tokens: int = 256,
+    num_anchors: int = 16,
+    temperature: float = 0.2,
+    anchor_strategy: str = "linspace",
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Distill teacher soft-mask transport across paired views.
+
+    Unlike point-anchor propagation, the frozen teacher first builds a soft
+    source mask around each source anchor, transports that mask to the paired
+    target view with teacher DINO affinities, and then supervises the student's
+    target transport distribution.  ``distinctive`` anchors focus this objective
+    on teacher-stable correspondences.
+    """
+    if not adaptors:
+        return _zero_like_features(decoded), {}
+    if decoded.shape[0] < 2:
+        return _zero_like_features(decoded), {}
+    if num_anchors <= 0:
+        raise ValueError("num_anchors must be positive")
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+
+    pair_count = decoded.shape[0] // 2
+    losses: dict[str, torch.Tensor] = {}
+    for name, adaptor in adaptors.items():
+        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred_tokens = _flatten_projected_tokens(
+            pred, downsample=downsample, max_tokens=max_tokens
+        )
+        with torch.no_grad():
+            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref_tokens = _flatten_projected_tokens(
+                ref, downsample=downsample, max_tokens=max_tokens
+            )
+
+        per_pair: list[torch.Tensor] = []
+        for pair_idx in range(pair_count):
+            a = 2 * pair_idx
+            b = a + 1
+
+            pred_source = pred_tokens[a]
+            pred_target = pred_tokens[b]
+            pred_transport = F.softmax(
+                (pred_source @ pred_target.transpose(0, 1)) / temperature,
+                dim=-1,
+            )
+            pred_target_prob = pred_transport
+
+            with torch.no_grad():
+                ref_source = ref_tokens[a]
+                ref_target = ref_tokens[b]
+                anchor_idx = _select_cross_view_anchor_indices(
+                    ref_source,
+                    ref_target,
+                    num_anchors=num_anchors,
+                    temperature=temperature,
+                    strategy=anchor_strategy,
+                )
+                ref_anchors = ref_source.index_select(0, anchor_idx)
+                source_mask = F.softmax(
+                    (ref_anchors @ ref_source.transpose(0, 1)) / temperature,
+                    dim=-1,
+                )
+                ref_transport = F.softmax(
+                    (ref_source @ ref_target.transpose(0, 1)) / temperature,
+                    dim=-1,
+                )
+                ref_target_prob = source_mask @ ref_transport
+                ref_target_prob = ref_target_prob / ref_target_prob.sum(
+                    dim=-1,
+                    keepdim=True,
+                ).clamp_min(1e-8)
+
+            pred_mask_prob = source_mask @ pred_target_prob
+            pred_mask_prob = pred_mask_prob / pred_mask_prob.sum(
+                dim=-1,
+                keepdim=True,
+            ).clamp_min(1e-8)
+            per_pair.append(
+                (
+                    ref_target_prob
+                    * (
+                        ref_target_prob.clamp_min(1e-8).log()
+                        - pred_mask_prob.clamp_min(1e-8).log()
+                    )
+                )
+                .sum(dim=-1)
+                .mean()
+            )
+        losses[name] = torch.stack(per_pair).mean()
 
     total = torch.stack(list(losses.values())).mean()
     return total, losses
@@ -104,6 +344,198 @@ def compute_radio_adaptor_relation_loss(
             ref_sim = torch.matmul(ref_tokens, ref_tokens.transpose(1, 2)) / temperature
         pred_sim = torch.matmul(pred_tokens, pred_tokens.transpose(1, 2)) / temperature
         losses[name] = F.mse_loss(pred_sim, ref_sim)
+
+    total = torch.stack(list(losses.values())).mean()
+    return total, losses
+
+
+def _local_affinity_values(features: torch.Tensor, *, radius: int) -> torch.Tensor:
+    if radius <= 0:
+        raise ValueError("radius must be positive")
+    features = F.normalize(features, dim=1)
+    _, _, height, width = features.shape
+    values: list[torch.Tensor] = []
+    for dy in range(0, radius + 1):
+        for dx in range(-radius, radius + 1):
+            if dy == 0 and dx <= 0:
+                continue
+            if dy * dy + dx * dx > radius * radius:
+                continue
+
+            src_y0 = max(0, -dy)
+            src_y1 = min(height, height - dy)
+            dst_y0 = max(0, dy)
+            dst_y1 = min(height, height + dy)
+            src_x0 = max(0, -dx)
+            src_x1 = min(width, width - dx)
+            dst_x0 = max(0, dx)
+            dst_x1 = min(width, width + dx)
+            if src_y1 <= src_y0 or src_x1 <= src_x0:
+                continue
+
+            src = features[:, :, src_y0:src_y1, src_x0:src_x1]
+            dst = features[:, :, dst_y0:dst_y1, dst_x0:dst_x1]
+            values.append((src * dst).sum(dim=1).flatten(1))
+    if not values:
+        return features.sum(dim=(1, 2, 3), keepdim=False)[:, None] * 0.0
+    return torch.cat(values, dim=1)
+
+
+def compute_radio_adaptor_local_affinity_loss(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    *,
+    downsample: int = 1,
+    radius: int = 1,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Preserve local DINO-style neighborhood topology.
+
+    Full pairwise relation loss captures global token structure, but DINO mask
+    propagation is especially sensitive to local patch neighborhoods.  This
+    loss matches frozen-adaptor cosine affinities for nearby spatial offsets,
+    keeping local part boundaries and same-object continuity intact.
+    """
+    if not adaptors:
+        return _zero_like_features(decoded), {}
+    if radius <= 0:
+        raise ValueError("radius must be positive")
+
+    losses: dict[str, torch.Tensor] = {}
+    for name, adaptor in adaptors.items():
+        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred = _maybe_downsample_projected(pred, downsample)
+        with torch.no_grad():
+            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref = _maybe_downsample_projected(ref, downsample)
+            ref_affinity = _local_affinity_values(ref, radius=radius)
+
+        pred_affinity = _local_affinity_values(pred, radius=radius)
+        losses[name] = F.mse_loss(pred_affinity, ref_affinity)
+
+    total = torch.stack(list(losses.values())).mean()
+    return total, losses
+
+
+def compute_radio_adaptor_token_contrast_loss(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    *,
+    downsample: int = 1,
+    max_tokens: int = 512,
+    temperature: float = 0.07,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Distill token-level hard-negative structure in frozen adaptor spaces.
+
+    Each predicted token is contrasted against all teacher tokens from the same
+    view, with its same-location teacher token as the positive.  The loss is
+    teacher-relative: subtracting the frozen teacher self-contrast makes
+    identical predicted/teacher features exactly zero even when teacher tokens
+    are visually ambiguous.
+    """
+    if not adaptors:
+        return _zero_like_features(decoded), {}
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+
+    losses: dict[str, torch.Tensor] = {}
+    for name, adaptor in adaptors.items():
+        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred_tokens = _flatten_projected_tokens(
+            pred, downsample=downsample, max_tokens=max_tokens
+        )
+        with torch.no_grad():
+            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref_tokens = _flatten_projected_tokens(
+                ref, downsample=downsample, max_tokens=max_tokens
+            )
+            labels = torch.arange(ref_tokens.shape[1], device=ref_tokens.device)
+            ref_logits = torch.matmul(
+                ref_tokens, ref_tokens.transpose(1, 2)
+            ) / temperature
+            ref_loss = F.cross_entropy(
+                ref_logits.reshape(-1, ref_logits.shape[-1]),
+                labels.repeat(ref_logits.shape[0]),
+            )
+
+        pred_logits = torch.matmul(
+            pred_tokens, ref_tokens.transpose(1, 2)
+        ) / temperature
+        pred_loss = F.cross_entropy(
+            pred_logits.reshape(-1, pred_logits.shape[-1]),
+            labels.repeat(pred_logits.shape[0]),
+        )
+        losses[name] = (pred_loss - ref_loss).clamp_min(0.0)
+
+    total = torch.stack(list(losses.values())).mean()
+    return total, losses
+
+
+def compute_radio_adaptor_peak_background_loss(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    *,
+    downsample: int = 1,
+    max_tokens: int = 512,
+    num_anchors: int = 16,
+    temperature: float = 0.2,
+    anchor_strategy: str = "linspace",
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Preserve DINO-style peak/background margins around teacher anchors.
+
+    Dense propagation fails when a rendered feature keeps the coarse match but
+    flattens the target peak or raises visually similar background tokens.  For
+    deterministic teacher anchors, this loss compares the teacher's strongest
+    token against its hardest non-peak token and only penalizes student margins
+    that fall below the frozen teacher margin.
+    """
+    if not adaptors:
+        return _zero_like_features(decoded), {}
+    if num_anchors <= 0:
+        raise ValueError("num_anchors must be positive")
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+
+    losses: dict[str, torch.Tensor] = {}
+    for name, adaptor in adaptors.items():
+        pred = project_feature_map_with_adaptor(decoded, adaptor)
+        pred_tokens = _flatten_projected_tokens(
+            pred, downsample=downsample, max_tokens=max_tokens
+        )
+        with torch.no_grad():
+            ref = project_feature_map_with_adaptor(target, adaptor)
+            ref_tokens = _flatten_projected_tokens(
+                ref, downsample=downsample, max_tokens=max_tokens
+            )
+            anchor_idx = _select_batched_self_anchor_indices(
+                num_anchors=int(num_anchors),
+                temperature=temperature,
+                strategy=anchor_strategy,
+                ref_tokens=ref_tokens,
+            )
+            ref_anchor = ref_tokens.index_select(1, anchor_idx)
+            ref_logits = torch.matmul(ref_anchor, ref_tokens.transpose(1, 2)) / temperature
+            peak_idx = ref_logits.argmax(dim=-1)
+            if ref_logits.shape[-1] > 1:
+                hard_negative_logits = ref_logits.masked_fill(
+                    F.one_hot(peak_idx, num_classes=ref_logits.shape[-1]).bool(),
+                    -torch.inf,
+                )
+                background_idx = hard_negative_logits.argmax(dim=-1)
+            else:
+                background_idx = peak_idx
+            ref_peak = ref_logits.gather(-1, peak_idx.unsqueeze(-1)).squeeze(-1)
+            ref_background = ref_logits.gather(-1, background_idx.unsqueeze(-1)).squeeze(-1)
+            ref_margin_loss = F.softplus(-(ref_peak - ref_background))
+
+        pred_anchor = pred_tokens.index_select(1, anchor_idx)
+        pred_logits = torch.matmul(pred_anchor, pred_tokens.transpose(1, 2)) / temperature
+        pred_peak = pred_logits.gather(-1, peak_idx.unsqueeze(-1)).squeeze(-1)
+        pred_background = pred_logits.gather(-1, background_idx.unsqueeze(-1)).squeeze(-1)
+        pred_margin_loss = F.softplus(-(pred_peak - pred_background))
+        losses[name] = (pred_margin_loss - ref_margin_loss).clamp_min(0.0).mean()
 
     total = torch.stack(list(losses.values())).mean()
     return total, losses
@@ -230,6 +662,7 @@ def compute_radio_adaptor_cross_view_loss(
     downsample: int = 1,
     max_tokens: int = 256,
     temperature: float = 1.0,
+    objective: str = "mse",
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
     """Match ProFuse-style cross-view DINO token relations.
 
@@ -245,6 +678,8 @@ def compute_radio_adaptor_cross_view_loss(
         return _zero_like_features(decoded), {}
     if temperature <= 0:
         raise ValueError("temperature must be positive")
+    if objective not in {"mse", "transport_cycle"}:
+        raise ValueError("objective must be 'mse' or 'transport_cycle'")
 
     pair_count = decoded.shape[0] // 2
     losses: dict[str, torch.Tensor] = {}
@@ -270,7 +705,24 @@ def compute_radio_adaptor_cross_view_loss(
                 ref_sim = (
                     ref_tokens[a] @ ref_tokens[b].transpose(0, 1)
                 ) / temperature
-            per_pair.append(F.mse_loss(pred_sim, ref_sim))
+            if objective == "mse":
+                per_pair.append(F.mse_loss(pred_sim, ref_sim))
+                continue
+
+            pred_ab_log = F.log_softmax(pred_sim, dim=-1)
+            pred_ba_log = F.log_softmax(pred_sim.transpose(0, 1), dim=-1)
+            pred_ab = pred_ab_log.exp()
+            pred_ba = pred_ba_log.exp()
+            with torch.no_grad():
+                ref_ab_log = F.log_softmax(ref_sim, dim=-1)
+                ref_ba_log = F.log_softmax(ref_sim.transpose(0, 1), dim=-1)
+                ref_ab = ref_ab_log.exp()
+                ref_ba = ref_ba_log.exp()
+                ref_cycle = ref_ab @ ref_ba
+            kl_ab = (ref_ab * (ref_ab_log - pred_ab_log)).sum(dim=-1).mean()
+            kl_ba = (ref_ba * (ref_ba_log - pred_ba_log)).sum(dim=-1).mean()
+            cycle = F.mse_loss(pred_ab @ pred_ba, ref_cycle)
+            per_pair.append(0.5 * (kl_ab + kl_ba) + 0.1 * cycle)
         losses[name] = torch.stack(per_pair).mean()
 
     total = torch.stack(list(losses.values())).mean()

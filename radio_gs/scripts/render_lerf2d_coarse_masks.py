@@ -88,7 +88,7 @@ def _build_lerf_dataset(scene: str, config: object, label_dir: str | Path) -> LE
 def render_lerf2d_coarse_masks(args: argparse.Namespace) -> dict[str, object]:
     device = torch.device(f"cuda:{int(args.gpu)}" if torch.cuda.is_available() else "cpu")
     if device.type == "cuda":
-        torch.cuda.set_device(device)
+        torch.cuda.set_device(device.index if device.index is not None else 0)
 
     label_dir = resolve_lerf_label_dir(args.label_dir)
     frame_annotations, scene_categories, img_h, img_w = load_lerf_ovs_labels(label_dir, args.scene)

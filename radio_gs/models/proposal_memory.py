@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import torch
+import torch.nn.functional as F
 
 
 @dataclass(frozen=True)
@@ -99,6 +100,65 @@ def build_proposal_memory_from_labels(
     )
 
 
+def compute_region_prototype_contrast_loss(
+    values: torch.Tensor,
+    proposal_labels: torch.Tensor,
+    *,
+    confidence: torch.Tensor | None = None,
+    min_count: int = 1,
+    temperature: float = 0.07,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Contrast rows against label-free region prototypes.
+
+    Rows inside the same proposal use their pooled prototype as the positive;
+    other proposal prototypes are negatives. This turns proposal memory from a
+    readout smoother into a training-time feature-topology objective.
+    """
+
+    _validate_values_and_labels(values, proposal_labels)
+    if temperature <= 0:
+        raise ValueError("temperature must be positive")
+    zero = values.sum() * 0.0
+    memory = build_proposal_memory_from_labels(
+        values,
+        proposal_labels,
+        confidence=confidence,
+    )
+    num_rows = values.shape[0]
+    num_proposals = int(memory.proposal_ids.numel())
+    assigned = memory.row_to_proposal >= 0
+    if int(min_count) > 1 and bool(assigned.any()):
+        assigned_rows = memory.row_to_proposal[assigned]
+        keep = memory.counts[assigned_rows] >= int(min_count)
+        full = torch.zeros_like(assigned)
+        full[assigned] = keep
+        assigned = full
+    valid_ratio = assigned.float().mean() if num_rows else values.new_tensor(0.0)
+    if num_proposals < 2 or not bool(assigned.any()):
+        active_valid_ratio = values.new_tensor(0.0)
+        return zero, {
+            "valid_ratio": active_valid_ratio.detach(),
+            "num_proposals": values.new_tensor(float(num_proposals)),
+            "num_valid": values.new_tensor(float(int(assigned.sum().item()))),
+        }
+
+    row_values = F.normalize(values[assigned].float(), dim=-1)
+    prototypes = F.normalize(memory.pooled_values.float().detach(), dim=-1)
+    logits = row_values @ prototypes.T / float(temperature)
+    targets = memory.row_to_proposal[assigned].to(device=logits.device, dtype=torch.long)
+    per_row = F.cross_entropy(logits, targets, reduction="none")
+    if confidence is not None:
+        weights = confidence.to(device=values.device, dtype=per_row.dtype).reshape(-1)[assigned]
+        loss = (per_row * weights).sum() / weights.sum().clamp_min(1e-6)
+    else:
+        loss = per_row.mean()
+    return loss, {
+        "valid_ratio": valid_ratio.detach(),
+        "num_proposals": values.new_tensor(float(num_proposals)),
+        "num_valid": values.new_tensor(float(int(assigned.sum().item()))),
+    }
+
+
 def propagate_logits_with_proposals(
     logits: torch.Tensor,
     proposal_labels: torch.Tensor,
@@ -109,15 +169,25 @@ def propagate_logits_with_proposals(
     gate: str = "all",
     margin_threshold: float = 0.0,
     confidence_threshold: float = 0.0,
+    proposal_consensus_threshold: float = 0.0,
 ) -> tuple[torch.Tensor, dict[str, float | int | bool]]:
     """Blend point/primitive logits with logits pooled over proposals."""
 
     if logits.ndim != 2:
         raise ValueError(f"logits must have shape [N,C], got {tuple(logits.shape)}")
-    if gate not in {"all", "low_margin", "low_confidence", "low_margin_or_low_confidence"}:
+    if gate not in {
+        "all",
+        "low_margin",
+        "low_confidence",
+        "low_margin_or_low_confidence",
+        "proposal_consensus",
+        "low_margin_and_proposal_consensus",
+        "low_confidence_and_proposal_consensus",
+    }:
         raise ValueError(
             "gate must be one of: all, low_margin, low_confidence, "
-            "low_margin_or_low_confidence"
+            "low_margin_or_low_confidence, proposal_consensus, "
+            "low_margin_and_proposal_consensus, low_confidence_and_proposal_consensus"
         )
     alpha_f = float(alpha)
     if not 0.0 <= alpha_f <= 1.0:
@@ -134,6 +204,7 @@ def propagate_logits_with_proposals(
             "gate": gate,
             "margin_threshold": float(margin_threshold),
             "confidence_threshold": float(confidence_threshold),
+            "proposal_consensus_threshold": float(proposal_consensus_threshold),
         }
 
     memory = build_proposal_memory_from_labels(
@@ -151,6 +222,7 @@ def propagate_logits_with_proposals(
             "gate": gate,
             "margin_threshold": float(margin_threshold),
             "confidence_threshold": float(confidence_threshold),
+            "proposal_consensus_threshold": float(proposal_consensus_threshold),
         }
 
     mapped = logits.clone()
@@ -160,7 +232,11 @@ def propagate_logits_with_proposals(
         valid_indices = memory.row_to_proposal[assigned]
         valid_prop[assigned] = memory.counts[valid_indices] >= int(min_count)
         assigned = valid_prop
-    if gate in {"low_margin", "low_margin_or_low_confidence"}:
+    if gate in {
+        "low_margin",
+        "low_margin_or_low_confidence",
+        "low_margin_and_proposal_consensus",
+    }:
         if logits.shape[1] <= 1:
             margins = logits[:, 0].abs()
         else:
@@ -169,7 +245,11 @@ def propagate_logits_with_proposals(
         low_margin = margins <= float(margin_threshold)
     else:
         low_margin = torch.zeros_like(assigned)
-    if gate in {"low_confidence", "low_margin_or_low_confidence"}:
+    if gate in {
+        "low_confidence",
+        "low_margin_or_low_confidence",
+        "low_confidence_and_proposal_consensus",
+    }:
         if confidence is not None:
             row_confidence = confidence.to(device=logits.device, dtype=torch.float32).reshape(-1)
         elif logits.shape[1] <= 1:
@@ -179,12 +259,47 @@ def propagate_logits_with_proposals(
         low_confidence = row_confidence <= float(confidence_threshold)
     else:
         low_confidence = torch.zeros_like(assigned)
+    if "proposal_consensus" in gate:
+        if logits.shape[1] <= 1:
+            row_top1 = (logits.float().reshape(-1) >= 0).long()
+            proposal_top1 = (memory.pooled_values.float().reshape(-1) >= 0).long()
+        else:
+            row_top1 = logits.float().argmax(dim=-1)
+            proposal_top1 = memory.pooled_values.float().argmax(dim=-1)
+        proposal_consensus = logits.new_zeros((memory.proposal_ids.numel(),), dtype=torch.float32)
+        assigned_rows = memory.row_to_proposal >= 0
+        assigned_prop = memory.row_to_proposal[assigned_rows]
+        row_agrees = (
+            row_top1[assigned_rows]
+            == proposal_top1[assigned_prop].to(device=row_top1.device)
+        ).to(dtype=torch.float32)
+        proposal_consensus.index_add_(0, assigned_prop, row_agrees)
+        proposal_consensus = proposal_consensus / memory.counts.to(
+            device=proposal_consensus.device,
+            dtype=proposal_consensus.dtype,
+        ).clamp_min(1)
+        high_consensus = torch.zeros_like(assigned)
+        high_consensus[assigned_rows] = (
+            proposal_consensus[assigned_prop] >= float(proposal_consensus_threshold)
+        )
+        num_consensus_proposals = int(
+            (proposal_consensus >= float(proposal_consensus_threshold)).sum().item()
+        )
+    else:
+        high_consensus = torch.zeros_like(assigned)
+        num_consensus_proposals = 0
     if gate == "low_margin":
         assigned &= low_margin
     elif gate == "low_confidence":
         assigned &= low_confidence
     elif gate == "low_margin_or_low_confidence":
         assigned &= low_margin | low_confidence
+    elif gate == "proposal_consensus":
+        assigned &= high_consensus
+    elif gate == "low_margin_and_proposal_consensus":
+        assigned &= low_margin & high_consensus
+    elif gate == "low_confidence_and_proposal_consensus":
+        assigned &= low_confidence & high_consensus
     if bool(assigned.any()):
         pooled_rows = memory.pooled_values[memory.row_to_proposal[assigned]]
         mapped[assigned] = (1.0 - alpha_f) * logits[assigned] + alpha_f * pooled_rows
@@ -198,6 +313,8 @@ def propagate_logits_with_proposals(
         "gate": gate,
         "margin_threshold": float(margin_threshold),
         "confidence_threshold": float(confidence_threshold),
+        "proposal_consensus_threshold": float(proposal_consensus_threshold),
+        "num_consensus_proposals": int(num_consensus_proposals),
     }
 
 

@@ -1,0 +1,67 @@
+{
+  "adapter_status": {
+    "adapter_loaded": true,
+    "checkpoint_has_point_summary_adapter": true,
+    "eval_adapter_disabled_with_checkpoint_adapter": false,
+    "metadata_warnings": [],
+    "point_summary_adapter_metadata": {
+      "compact_feature_key": "features",
+      "direct_head_contract": {
+        "compact_feature_key": "features",
+        "direct_point_gaussian_position_mode": "gaussian_center",
+        "direct_point_query_mode": "gaussian_index",
+        "direct_point_source": "gaussian",
+        "direct_readout_mode": "gaussian",
+        "point_summary_adapter_blend_alpha": 1.0,
+        "point_summary_adapter_valid_mask_mode": "teacher_cache",
+        "teacher_cache": "/root/RADIO-GS/output/radio_gs/vpr_feature_cache/raster_contrib_alpha_depth_20260527/figurines.pt",
+        "teacher_cache_feature_key": "summary_features",
+        "teacher_feature_space": "siglip_summary"
+      },
+      "direct_point_gaussian_position_mode": "gaussian_center",
+      "direct_point_query_mode": "gaussian_index",
+      "direct_point_source": "gaussian",
+      "teacher_cache": "/root/RADIO-GS/output/radio_gs/vpr_feature_cache/raster_contrib_alpha_depth_20260527/figurines.pt",
+      "teacher_cache_feature_dim": 1536,
+      "teacher_cache_feature_key": "summary_features",
+      "teacher_cache_num_points": 168791,
+      "teacher_cache_valid_count": 42709,
+      "teacher_feature_space": "siglip_summary"
+    }
+  },
+  "adapter_summary": {
+    "count": 4096,
+    "max": 0.9953396320343018,
+    "mean_cos_to_vpr": 0.8687317967414856,
+    "min": 0.4554973542690277,
+    "p10": 0.7407481670379639,
+    "p50": 0.8905487656593323,
+    "p90": 0.9578151702880859
+  },
+  "checkpoint": "output/radio_gs/lerf_figurines_raster_vpr_summary_rendercons_p0_ft20_20260527/checkpoints/best.pth",
+  "compact_feature_key": "features",
+  "config": "tmp/lerf_raster_vpr_summary_rendercons_p0_ft20_20260527/lerf_figurines_raster_vpr_summary_rendercons_p0_ft20_20260527.yaml",
+  "decoded_summary": {
+    "count": 4096,
+    "max": 0.8638949990272522,
+    "mean_cos_to_vpr": 0.6609368324279785,
+    "min": 0.4782409071922302,
+    "p10": 0.5783687233924866,
+    "p50": 0.6503553986549377,
+    "p90": 0.762326717376709
+  },
+  "final_summary": {
+    "count": 4096,
+    "max": 0.9953396320343018,
+    "mean_cos_to_vpr": 0.8687317967414856,
+    "min": 0.4554973542690277,
+    "p10": 0.7407481670379639,
+    "p50": 0.8905487656593323,
+    "p90": 0.9578151702880859
+  },
+  "indices_sha256": "0baa4b2be0cb2b2fda671a70503d9dab632832f0bc1154ca437568d816d1e785",
+  "point_summary_adapter_blend_alpha": 1.0,
+  "sample_count": 4096,
+  "teacher_cache": "output/radio_gs/vpr_feature_cache/raster_contrib_alpha_depth_20260527/figurines.pt",
+  "use_point_summary_adapter": true
+}

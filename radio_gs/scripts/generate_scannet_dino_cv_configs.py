@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Generate ScanNet v67 DINO cross-view fine-tuning configs."""
+"""Generate ScanNet VALA8 DINO cross-view fine-tuning configs.
+
+The base checkpoints may still come from historical v67-named runs, but this
+generator's default scene set is paper-facing VALA8 only.
+"""
 
 from __future__ import annotations
 
@@ -18,11 +22,9 @@ SCENES = [
     "scene0070_00",
     "scene0097_00",
     "scene0140_00",
-    "scene0200_00",
     "scene0347_00",
     "scene0400_00",
     "scene0590_00",
-    "scene0645_00",
 ]
 
 
@@ -71,6 +73,7 @@ def generate_config(
             "exp_name": f"radio_gs_scannet_og_{scene}_{variant}",
             "output_dir": str(output_dir),
             "batch_size": int(batch_size),
+            "train_shuffle": False,
             "epochs": int(epochs),
             "warmup_epochs": min(int(cfg.get("warmup_epochs", 4)), 2),
             "lr_features": min(float(cfg.get("lr_features", 1e-4)), 2e-5),
@@ -174,7 +177,7 @@ def write_launch_plan(
         "# ScanNet DINO Cross-View Launch Plan",
         "",
         f"- Variant: `{variant}`",
-        "- Protocol: v67 teacher-balanced, gaussian_index, label_point, label_index",
+        "- Protocol: paper-facing VALA8, teacher-balanced, gaussian_index, label_point, label_index",
         f"- Batch size: {batch_size}",
         "- Direct point samples: inherited from v67 configs (`32768`)",
         f"- Cross-view adaptor: `dino_v3`, weight `{cross_view_weight:g}`",

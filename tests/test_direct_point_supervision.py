@@ -688,6 +688,218 @@ def test_direct_point_loss_can_train_compact_to_summary_adapter(monkeypatch):
     assert torch.allclose(stats["loss"], torch.tensor(2.0))
 
 
+def test_load_direct_point_teacher_cache_accepts_vpr_summary_features(tmp_path):
+    xyz = torch.tensor([[0.0, 0.0, 1.0], [1.0, 0.0, 1.0]], dtype=torch.float32)
+    summary = F.normalize(torch.tensor([[1.0, 0.0], [0.0, 1.0]]), dim=-1)
+    cache_path = tmp_path / "vpr_summary_cache.pt"
+    torch.save(
+        {
+            "feature_space": "siglip_summary",
+            "xyz": xyz,
+            "summary_features": summary,
+            "valid": torch.tensor([True, False]),
+            "view_counts": torch.tensor([3.5, 0.0]),
+        },
+        cache_path,
+    )
+
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_source = "gaussian"
+    trainer.direct_point_query_mode = "gaussian_index"
+    trainer.direct_point_gaussian_position_mode = "gaussian_center"
+    trainer.direct_point_feature_key = "features"
+    trainer.direct_point_teacher_cache_feature_key = ""
+    trainer.direct_point_teacher_cache_feature_space = ""
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_summary_adapter_weight = 1.0
+    trainer.direct_point_text_distill_weight = 0.0
+    trainer.direct_point_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_text_contrast_weight = 0.0
+    trainer.direct_point_adapter_text_distill_weight = 0.0
+    trainer.direct_point_adapter_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_text_loss_weight = 0.0
+    trainer.direct_point_adapter_decoder_anchor_weight = 0.0
+    trainer.direct_point_pool = None
+    trainer.direct_point_pool_labels = None
+    trainer.point_summary_adapter_metadata = {}
+    trainer.model = SimpleNamespace(get_xyz=lambda: xyz.clone())
+    trainer._log = lambda *_args, **_kwargs: None
+
+    config = SimpleNamespace(
+        direct_point_teacher_cache=str(cache_path),
+        scene="toy",
+        scene_root=str(tmp_path),
+        direct_point_teacher_cache_require_xyz_alignment=True,
+        direct_point_teacher_cache_fail_max_l2=1.0e-5,
+    )
+
+    trainer._load_direct_point_teacher_cache(config)
+
+    assert trainer.direct_point_teacher_cache_feature_key == "summary_features"
+    assert trainer.direct_point_teacher_feature_space == "siglip_summary"
+    assert torch.allclose(trainer.direct_point_teacher_features, summary)
+    assert torch.equal(trainer.direct_point_teacher_valid, torch.tensor([True, False]))
+    assert torch.allclose(
+        trainer.direct_point_teacher_view_counts,
+        torch.tensor([3.5, 0.0]),
+    )
+
+
+def test_direct_point_loss_uses_summary_teacher_without_radio_distill():
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_loss_weight = 1.0
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_summary_adapter_weight = 1.0
+    trainer.direct_point_text_loss_weight = 0.0
+    trainer.direct_point_adapter_text_loss_weight = 0.0
+    trainer.direct_point_text_distill_weight = 0.0
+    trainer.direct_point_adapter_text_distill_weight = 0.0
+    trainer.direct_point_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_decoder_anchor_weight = 0.0
+    trainer.direct_point_text_contrast_weight = 0.0
+    trainer.direct_point_teacher_feature_space = "siglip_summary"
+    trainer.direct_point_feature_key = "features"
+    trainer.direct_point_sample_count = 2
+    trainer.direct_point_sample_strategy = "uniform"
+    trainer.direct_point_query_mode = "knn"
+    trainer.direct_point_k = 1
+    trainer.direct_point_candidate_k = 0
+    trainer.direct_point_cached_visible_fraction = 0.0
+    trainer.direct_point_view_count_weighting = "none"
+    trainer.direct_point_view_count_min_weight = 0.0
+    trainer.direct_point_view_count_percentile_low = 5.0
+    trainer.direct_point_view_count_percentile_high = 95.0
+    trainer.direct_point_pool = torch.tensor(
+        [[0.0, 0.0, 1.0], [1.0, 0.0, 1.0]],
+        dtype=torch.float32,
+    )
+    trainer.direct_point_pool_labels = None
+    trainer.direct_point_teacher_features = F.normalize(
+        torch.tensor([[0.0, 1.0], [1.0, 0.0]], dtype=torch.float32),
+        dim=-1,
+    )
+    trainer.direct_point_teacher_valid = torch.tensor([True, True])
+    trainer.direct_point_teacher_view_counts = torch.tensor([1, 1])
+    trainer._is_hybrid = True
+    trainer.siglip_summary_head = None
+
+    class _Model:
+        def query_compact_points(self, points, k):
+            return F.normalize(
+                torch.tensor([[1.0, 0.0], [0.0, 1.0]], dtype=torch.float32),
+                dim=-1,
+            )
+
+    class _Codec:
+        def decode_points(self, compact):
+            return compact
+
+    class _RaisingDistill:
+        def __call__(self, *_args, **_kwargs):
+            raise AssertionError("RADIO-space distillation should be skipped")
+
+    class _Adapter(torch.nn.Module):
+        def forward(self, compact):
+            return compact
+
+    trainer.model = _Model()
+    trainer.codec = _Codec()
+    trainer.distill_loss_fn = _RaisingDistill()
+    trainer.point_summary_adapter = _Adapter()
+
+    stats = trainer._compute_direct_point_loss(
+        batch={},
+        render_result={},
+        target_features=None,
+    )
+
+    assert torch.allclose(stats["summary_adapter"], torch.tensor(1.0))
+    assert torch.allclose(stats["loss"], torch.tensor(1.0))
+
+
+def test_direct_point_loss_can_apply_label_free_proposal_consistency():
+    trainer = object.__new__(RadioGSTrainer)
+    trainer.device = torch.device("cpu")
+    trainer.direct_point_loss_weight = 1.0
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_summary_adapter_weight = 0.0
+    trainer.direct_point_text_loss_weight = 0.0
+    trainer.direct_point_adapter_text_loss_weight = 0.0
+    trainer.direct_point_text_distill_weight = 0.0
+    trainer.direct_point_adapter_text_distill_weight = 0.0
+    trainer.direct_point_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_text_pseudo_ce_weight = 0.0
+    trainer.direct_point_adapter_decoder_anchor_weight = 0.0
+    trainer.direct_point_text_contrast_weight = 0.0
+    trainer.direct_point_proposal_consistency_weight = 1.0
+    trainer.direct_point_proposal_voxel_size = 10.0
+    trainer.direct_point_proposal_min_count = 2
+    trainer.direct_point_proposal_space = "adapter"
+    trainer.direct_point_teacher_feature_space = "siglip_summary"
+    trainer.direct_point_feature_key = "features"
+    trainer.direct_point_sample_count = 2
+    trainer.direct_point_sample_strategy = "uniform"
+    trainer.direct_point_query_mode = "knn"
+    trainer.direct_point_k = 1
+    trainer.direct_point_candidate_k = 0
+    trainer.direct_point_cached_visible_fraction = 0.0
+    trainer.direct_point_view_count_weighting = "none"
+    trainer.direct_point_view_count_min_weight = 0.0
+    trainer.direct_point_view_count_percentile_low = 5.0
+    trainer.direct_point_view_count_percentile_high = 95.0
+    trainer.direct_point_pool = torch.tensor(
+        [[0.0, 0.0, 1.0], [1.0, 0.0, 1.0]],
+        dtype=torch.float32,
+    )
+    trainer.direct_point_pool_labels = None
+    trainer.direct_point_teacher_features = F.normalize(
+        torch.tensor([[1.0, 0.0], [0.0, 1.0]], dtype=torch.float32),
+        dim=-1,
+    )
+    trainer.direct_point_teacher_valid = torch.tensor([True, True])
+    trainer.direct_point_teacher_view_counts = torch.tensor([1, 1])
+    trainer._is_hybrid = True
+    trainer.siglip_summary_head = None
+
+    class _Model:
+        def query_compact_points(self, points, k):
+            return F.normalize(
+                torch.tensor([[1.0, 0.0], [0.0, 1.0]], dtype=torch.float32),
+                dim=-1,
+            )
+
+    class _Codec:
+        def decode_points(self, compact):
+            return compact
+
+    class _ZeroDistill:
+        def __call__(self, *_args, **_kwargs):
+            return {"total": torch.tensor(0.0)}
+
+    class _Adapter(torch.nn.Module):
+        def forward(self, compact):
+            return compact
+
+    trainer.model = _Model()
+    trainer.codec = _Codec()
+    trainer.distill_loss_fn = _ZeroDistill()
+    trainer.point_summary_adapter = _Adapter()
+
+    stats = trainer._compute_direct_point_loss(
+        batch={},
+        render_result={},
+        target_features=None,
+    )
+
+    expected = 1.0 - (0.5 ** 0.5)
+    assert torch.allclose(stats["proposal_consistency"], torch.tensor(expected), atol=1e-5)
+    assert torch.allclose(stats["proposal_consistency_valid_ratio"], torch.tensor(1.0))
+    assert torch.allclose(stats["loss"], torch.tensor(expected), atol=1e-5)
+
+
 def test_direct_point_loss_can_apply_text_ce_from_label_ply_labels(monkeypatch):
     trainer = object.__new__(RadioGSTrainer)
     trainer.device = torch.device("cpu")

@@ -165,7 +165,7 @@ def pick_frames(
 def train_bridge(args: argparse.Namespace) -> None:
     device = torch.device(args.device)
     if device.type == "cuda":
-        torch.cuda.set_device(device)
+        torch.cuda.set_device(device.index if device.index is not None else 0)
     label_dir = resolve_lerf_label_dir(args.label_dir)
     frame_annotations, _, _, _ = load_lerf_ovs_labels(label_dir, args.scene)
     label_frames = sorted(frame_annotations)

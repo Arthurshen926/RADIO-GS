@@ -231,6 +231,110 @@ def _boundary_loss(logits: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     return torch.abs(grad_pred_h - grad_tgt_h) + torch.abs(grad_pred_w - grad_tgt_w)
 
 
+def _support_outside_loss(
+    logits: torch.Tensor,
+    coarse: torch.Tensor,
+    *,
+    dilate: int = 0,
+) -> torch.Tensor:
+    """Penalize prompt-mask probability that leaks outside the coarse support."""
+
+    if logits.ndim != 3:
+        raise ValueError(f"logits must be [Q,H,W], got {tuple(logits.shape)}")
+    if coarse.ndim != 3:
+        raise ValueError(f"coarse must be [Q,H,W], got {tuple(coarse.shape)}")
+    support = coarse.float()
+    if support.shape != logits.shape:
+        support = F.interpolate(
+            support.unsqueeze(1),
+            size=tuple(logits.shape[-2:]),
+            mode="nearest",
+        ).squeeze(1)
+    radius = int(dilate)
+    if radius > 0 and support.numel() > 0:
+        support = F.max_pool2d(
+            support.unsqueeze(1),
+            kernel_size=radius * 2 + 1,
+            stride=1,
+            padding=radius,
+        ).squeeze(1)
+    outside = (1.0 - (support > 0.5).float()).clamp(0.0, 1.0)
+    denom = outside.flatten(1).sum(dim=1).clamp_min(1.0)
+    leak = (torch.sigmoid(logits.float()) * outside).flatten(1).sum(dim=1) / denom
+    return leak.mean()
+
+
+def mask_quality_targets_from_logits(
+    logits: torch.Tensor,
+    targets: torch.Tensor,
+    *,
+    threshold: float = 0.0,
+) -> torch.Tensor:
+    """Build detached IoU targets for the learned mask-acceptance head."""
+
+    if logits.shape != targets.shape:
+        raise ValueError(
+            f"logits and targets must have the same shape, got {tuple(logits.shape)} "
+            f"vs {tuple(targets.shape)}"
+        )
+    pred = logits.detach().float() > float(threshold)
+    target = targets.detach().float() > 0.5
+    inter = torch.logical_and(pred, target).flatten(1).sum(dim=1).float()
+    union = torch.logical_or(pred, target).flatten(1).sum(dim=1).float()
+    return torch.where(union > 0, inter / union.clamp_min(1.0), torch.ones_like(union))
+
+
+def augment_direct_coarse_prompt(
+    coarse: torch.Tensor,
+    *,
+    dropout_prob: float = 0.0,
+    false_positive_prob: float = 0.0,
+    erode_radius: int = 0,
+    dilate_radius: int = 0,
+    generator: torch.Generator | None = None,
+) -> torch.Tensor:
+    """Simulate direct-3D coarse-mask support noise during prompt-head training."""
+
+    if coarse.ndim != 3:
+        raise ValueError(f"coarse must be [Q,H,W], got {tuple(coarse.shape)}")
+    aug = (coarse.float() > 0.5).float()
+    drop_p = float(dropout_prob)
+    if drop_p > 0.0:
+        keep = torch.rand(
+            aug.shape,
+            dtype=aug.dtype,
+            device=aug.device,
+            generator=generator,
+        ) >= min(drop_p, 1.0)
+        aug = aug * keep.float()
+    fp_p = float(false_positive_prob)
+    if fp_p > 0.0:
+        fp = torch.rand(
+            aug.shape,
+            dtype=aug.dtype,
+            device=aug.device,
+            generator=generator,
+        ) < min(fp_p, 1.0)
+        aug = torch.maximum(aug, fp.float())
+    erode = int(erode_radius)
+    if erode > 0 and aug.numel() > 0:
+        aug = 1.0 - F.max_pool2d(
+            (1.0 - aug).unsqueeze(1),
+            kernel_size=erode * 2 + 1,
+            stride=1,
+            padding=erode,
+        ).squeeze(1)
+    dilate = int(dilate_radius)
+    if dilate > 0 and aug.numel() > 0:
+        aug = F.max_pool2d(
+            aug.unsqueeze(1),
+            kernel_size=dilate * 2 + 1,
+            stride=1,
+            padding=dilate,
+        ).squeeze(1)
+    return (aug > 0.5).float()
+
+
 def _target_for_loss(targets: torch.Tensor, mode: str, *, threshold: float = 0.5) -> torch.Tensor:
     mode = str(mode).lower()
     if mode == "raw":
@@ -347,7 +451,7 @@ def _resize_feature(feature: torch.Tensor, size: tuple[int, int]) -> torch.Tenso
 def train_prompt_mask_head(args: argparse.Namespace) -> dict[str, object]:
     device = torch.device(args.device)
     if device.type == "cuda":
-        torch.cuda.set_device(device)
+        torch.cuda.set_device(device.index if device.index is not None else 0)
 
     cache_root = Path(args.sam3_cache_root)
     text_embeddings = _load_text_embedding_map(args.text_embedding_cache)
@@ -383,6 +487,7 @@ def train_prompt_mask_head(args: argparse.Namespace) -> dict[str, object]:
         feature_dim=int(args.feature_dim),
         prompt_dim=prompt_dim,
         hidden_dim=int(args.hidden_dim),
+        predict_quality=float(args.quality_weight) > 0.0,
     ).to(device)
     optimizer = torch.optim.AdamW(head.parameters(), lr=float(args.lr), weight_decay=float(args.weight_decay))
 
@@ -501,13 +606,51 @@ def train_prompt_mask_head(args: argparse.Namespace) -> dict[str, object]:
             prompts = batch.prompts.to(device=device, non_blocking=True)
             targets = batch.targets.to(device=device, non_blocking=True)
             coarse = batch.coarse.to(device=device, non_blocking=True)
+            coarse_for_head = augment_direct_coarse_prompt(
+                coarse,
+                dropout_prob=float(args.coarse_aug_dropout_prob),
+                false_positive_prob=float(args.coarse_aug_false_positive_prob),
+                erode_radius=int(args.coarse_aug_erode_radius),
+                dilate_radius=int(args.coarse_aug_dilate_radius),
+            )
 
             optimizer.zero_grad(set_to_none=True)
-            logits = head(feature, prompts.unsqueeze(0), coarse.unsqueeze(0)).squeeze(0)
+            quality_loss = feature.new_tensor(0.0)
+            if float(args.quality_weight) > 0.0:
+                logits_batched, quality_logits = head.forward_with_quality(
+                    feature,
+                    prompts.unsqueeze(0),
+                    coarse_for_head.unsqueeze(0),
+                )
+                logits = logits_batched.squeeze(0)
+                if quality_logits is None:
+                    raise RuntimeError("quality_weight requires a quality-enabled prompt mask head")
+                quality_targets = mask_quality_targets_from_logits(
+                    logits,
+                    targets,
+                    threshold=float(args.quality_mask_threshold),
+                ).to(device=device, dtype=quality_logits.dtype)
+                quality_loss = F.binary_cross_entropy_with_logits(
+                    quality_logits.squeeze(0),
+                    quality_targets,
+                )
+            else:
+                logits = head(feature, prompts.unsqueeze(0), coarse_for_head.unsqueeze(0)).squeeze(0)
             bce = F.binary_cross_entropy_with_logits(logits, targets)
             dice = _soft_dice_loss(logits, targets)
             boundary = _boundary_loss(logits, targets)
-            loss = bce + float(args.dice_weight) * dice + float(args.boundary_weight) * boundary
+            support_outside = _support_outside_loss(
+                logits,
+                coarse_for_head,
+                dilate=int(args.support_outside_dilate),
+            )
+            loss = (
+                bce
+                + float(args.dice_weight) * dice
+                + float(args.boundary_weight) * boundary
+                + float(args.support_outside_weight) * support_outside
+                + float(args.quality_weight) * quality_loss
+            )
             loss.backward()
             optimizer.step()
             history.append(
@@ -518,10 +661,12 @@ def train_prompt_mask_head(args: argparse.Namespace) -> dict[str, object]:
                     "bce": float(bce.detach().cpu()),
                     "dice": float(dice.detach().cpu()),
                     "boundary": float(boundary.detach().cpu()),
+                    "support_outside": float(support_outside.detach().cpu()),
+                    "quality": float(quality_loss.detach().cpu()),
                     "queries": float(len(batch.categories)),
                 }
             )
-            del feature, prompts, targets, coarse, logits, loss
+            del feature, prompts, targets, coarse, coarse_for_head, logits, loss
             if device.type == "cuda":
                 torch.cuda.empty_cache()
 
@@ -534,6 +679,7 @@ def train_prompt_mask_head(args: argparse.Namespace) -> dict[str, object]:
         "feature_dim": int(args.feature_dim),
         "prompt_dim": prompt_dim,
         "hidden_dim": int(args.hidden_dim),
+        "predict_quality": bool(float(args.quality_weight) > 0.0),
         "target_size": target_size,
         "train_frames": [batch.frame_id for batch in batches],
         "loss_history": history,
@@ -578,8 +724,16 @@ def build_argparser() -> argparse.ArgumentParser:
     parser.add_argument("--weight_decay", type=float, default=1e-4)
     parser.add_argument("--dice_weight", type=float, default=0.5)
     parser.add_argument("--boundary_weight", type=float, default=0.25)
+    parser.add_argument("--support_outside_weight", type=float, default=0.0, help="Penalize prompt-head mask probability outside the coarse direct support")
+    parser.add_argument("--support_outside_dilate", type=int, default=0, help="Dilation radius for the coarse support used by --support_outside_weight")
+    parser.add_argument("--quality_weight", type=float, default=0.0, help="Train a learned mask-quality/acceptance head with this loss weight")
+    parser.add_argument("--quality_mask_threshold", type=float, default=0.0, help="Logit threshold used to binarize predicted masks for quality IoU targets")
     parser.add_argument("--coarse_dilate", type=int, default=3)
     parser.add_argument("--coarse_threshold", type=float, default=0.5)
+    parser.add_argument("--coarse_aug_dropout_prob", type=float, default=0.0, help="Randomly drop foreground support pixels to simulate fragmented direct-3D coarse masks")
+    parser.add_argument("--coarse_aug_false_positive_prob", type=float, default=0.0, help="Randomly add sparse false-positive support pixels during prompt-head training")
+    parser.add_argument("--coarse_aug_erode_radius", type=int, default=0, help="Apply erosion radius to the training coarse prompt after random perturbations")
+    parser.add_argument("--coarse_aug_dilate_radius", type=int, default=0, help="Apply dilation radius to the training coarse prompt after random perturbations")
     parser.add_argument("--score_threshold", type=float, default=-float("inf"))
     parser.add_argument("--target_activation", choices=("binary", "sigmoid", "raw"), default="binary")
     parser.add_argument("--target_threshold", type=float, default=0.5, help="Probability/logit threshold for binary pseudo masks")

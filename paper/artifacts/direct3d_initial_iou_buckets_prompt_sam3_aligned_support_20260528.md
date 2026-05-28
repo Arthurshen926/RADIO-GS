@@ -1,0 +1,12 @@
+# Direct-3D Initial-IoU Bucket Diagnostic
+
+| Source | Scene | Selection | Bucket | n | Initial mIoU | Final mIoU | Delta | Initial BF | Final BF | Delta BF | SAM accept |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| output/radio_gs/lerf_figurines_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/figurines/lerf_direct_3d_selection_results.json | figurines | top0p02 | lt_025 | 33 | 0.0932 | 0.1086 | +0.0154 | 0.2473 | 0.2622 | +0.0149 | 0.061 |
+| output/radio_gs/lerf_figurines_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/figurines/lerf_direct_3d_selection_results.json | figurines | top0p02 | 025_050 | 18 | 0.3552 | 0.3744 | +0.0192 | 0.4717 | 0.4996 | +0.0278 | 0.056 |
+| output/radio_gs/lerf_figurines_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/figurines/lerf_direct_3d_selection_results.json | figurines | top0p02 | 050_075 | 5 | 0.6160 | 0.6863 | +0.0703 | 0.6591 | 0.7327 | +0.0736 | 0.400 |
+| output/radio_gs/lerf_figurines_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/figurines/lerf_direct_3d_selection_results.json | figurines | top0p02 | gte_075 | 0 | 0.0000 | 0.0000 | +0.0000 | 0.0000 | 0.0000 | +0.0000 | 0.000 |
+| output/radio_gs/lerf_ramen_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/ramen/lerf_direct_3d_selection_results.json | ramen | top0p04 | lt_025 | 31 | 0.1103 | 0.1073 | -0.0030 | 0.3611 | 0.3361 | -0.0250 | 0.065 |
+| output/radio_gs/lerf_ramen_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/ramen/lerf_direct_3d_selection_results.json | ramen | top0p04 | 025_050 | 19 | 0.3725 | 0.4122 | +0.0397 | 0.5187 | 0.5812 | +0.0625 | 0.158 |
+| output/radio_gs/lerf_ramen_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/ramen/lerf_direct_3d_selection_results.json | ramen | top0p04 | 050_075 | 15 | 0.6010 | 0.5996 | -0.0014 | 0.7015 | 0.6908 | -0.0107 | 0.067 |
+| output/radio_gs/lerf_ramen_direct_prompt_sam3_trainviews_directcoarse_quality_aligned_support_w020w030_e70_20260528_topratio_eval/ramen/lerf_direct_3d_selection_results.json | ramen | top0p04 | gte_075 | 6 | 0.8110 | 0.8110 | +0.0000 | 0.7707 | 0.7707 | +0.0000 | 0.000 |

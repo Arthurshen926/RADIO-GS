@@ -18,15 +18,30 @@ from radio_gs.config import RadioGSConfig
 from radio_gs.losses.radio_adaptor_loss import (
     compute_radio_adaptor_alignment_loss,
     compute_radio_adaptor_cross_view_loss,
+    compute_radio_adaptor_cross_view_mask_propagation_loss,
+    compute_radio_adaptor_cross_view_propagation_loss,
+    compute_radio_adaptor_local_affinity_loss,
     compute_radio_adaptor_mask_logit_loss,
+    compute_radio_adaptor_peak_background_loss,
     compute_radio_adaptor_region_loss,
     compute_radio_adaptor_relation_loss,
+    compute_radio_adaptor_token_contrast_loss,
+)
+from radio_gs.losses.direct_point_query_logit_distill_loss import (
+    compute_direct_point_query_logit_distill_loss,
+    compute_direct_point_query_support_distill_loss,
 )
 from radio_gs.losses.text_heatmap_distill_loss import compute_text_heatmap_distill_loss
 from radio_gs.models.foundation_cache import (
     compute_foundation_cache_supervision_loss,
     load_foundation_cache,
 )
+from radio_gs.models.proposal_memory import (
+    build_proposal_memory_from_labels,
+    build_voxel_proposal_labels,
+    compute_region_prototype_contrast_loss,
+)
+from radio_gs.models.point_summary_adapter import append_point_summary_context
 from radio_gs.replica_constants import GROUNDING_QUERIES
 from radio_gs.scannet_constants import (
     NYU40_ID_TO_NAME,
@@ -122,6 +137,47 @@ def _weighted_vector_mean(values: torch.Tensor, weights: Optional[torch.Tensor])
 
 
 class FeatureSupervisionMixin:
+    def _point_summary_adapter_input(
+        self,
+        compact: torch.Tensor,
+        gaussian_indices: torch.Tensor,
+        view_counts: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        context_features = str(
+            getattr(self, "point_summary_adapter_context_features", "") or ""
+        )
+        if not context_features:
+            return compact.float()
+        if gaussian_indices.ndim != 1:
+            gaussian_indices = gaussian_indices.reshape(-1)
+        opacity = None
+        scales = None
+        if "opacity" in context_features:
+            opacity = self.model.get_opacity()[gaussian_indices].to(compact.device)
+        if "scale_log" in context_features:
+            scales = self.model.get_scaling()[gaussian_indices].to(compact.device)
+        return append_point_summary_context(
+            compact,
+            context_features=context_features,
+            opacity=opacity,
+            scales=scales,
+            view_counts=view_counts.to(compact.device) if view_counts is not None else None,
+            view_count_max=getattr(self, "point_summary_adapter_view_count_max", None),
+        )
+
+    def _project_point_summary_adapter(
+        self,
+        compact: torch.Tensor,
+        gaussian_indices: torch.Tensor,
+        view_counts: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adapter_input = self._point_summary_adapter_input(
+            compact,
+            gaussian_indices,
+            view_counts,
+        )
+        return F.normalize(self.point_summary_adapter(adapter_input), dim=-1)
+
     def _subsample_direct_point_indices(
         self,
         source_indices: torch.Tensor,
@@ -340,6 +396,19 @@ class FeatureSupervisionMixin:
             "adapter_text_pseudo_ce_teacher_conf": zero,
             "adapter_text_pseudo_ce_agreement": zero,
             "adapter_decoder_anchor": zero,
+            "query_logit_distill": zero,
+            "query_logit_distill_valid_ratio": zero,
+            "query_logit_distill_teacher_conf": zero,
+            "query_logit_distill_agreement": zero,
+            "query_support_distill": zero,
+            "query_support_distill_valid_ratio": zero,
+            "query_support_distill_teacher_conf": zero,
+            "query_support_distill_top1_agreement": zero,
+            "proposal_consistency": zero,
+            "proposal_consistency_valid_ratio": zero,
+            "proposal_contrast": zero,
+            "proposal_contrast_valid_ratio": zero,
+            "proposal_contrast_num_proposals": zero,
             "view_weight_mean": zero,
             "view_weight_max": zero,
         }
@@ -500,9 +569,9 @@ class FeatureSupervisionMixin:
                 valid = torch.ones(indices.shape[0], device=self.device, dtype=torch.bool)
                 view_counts_all = getattr(self, "direct_point_teacher_view_counts", None)
                 if view_counts_all is None:
-                    view_counts = valid.long()
+                    view_counts = valid.float()
                 else:
-                    view_counts = view_counts_all[indices].long()
+                    view_counts = view_counts_all[indices].float()
         else:
             assert target_features is not None
             target = target_features.detach()
@@ -639,10 +708,41 @@ class FeatureSupervisionMixin:
                         f"available={sorted(compact_aux.keys())}"
                     )
                 compact = compact_aux[direct_point_feature_key]
+        point_target_rows = point_targets[valid].float()
+        teacher_feature_space = str(
+            getattr(self, "direct_point_teacher_feature_space", "radio") or "radio"
+        ).lower()
+        summary_teacher_points = None
+        if teacher_feature_space in {"siglip", "siglip2", "summary", "siglip_summary"}:
+            teacher_feature_space = "siglip_summary"
+            summary_teacher_points = F.normalize(point_target_rows, dim=-1)
+        elif teacher_feature_space not in {"radio", "teacher", "teacher_1280"}:
+            raise ValueError(
+                "direct_point_teacher_feature_space must be 'radio' or "
+                f"'siglip_summary', got {teacher_feature_space!r}"
+            )
         decoded_points, target_map = self._decode_direct_point_map(
             compact,
-            point_targets[valid],
+            point_target_rows,
         )
+        target_summary = None
+        target_summary_points_for_losses = summary_teacher_points
+
+        def _target_summary_points() -> torch.Tensor:
+            nonlocal target_summary, target_summary_points_for_losses
+            if target_summary_points_for_losses is not None:
+                return target_summary_points_for_losses
+            if self.siglip_summary_head is None:
+                raise RuntimeError(
+                    "SigLIP summary projection is required for RADIO-space direct "
+                    "point targets"
+                )
+            if target_summary is None:
+                with torch.no_grad():
+                    target_summary = self._project_summary_head_features(target_map.float())
+            target_summary_points_for_losses = self._direct_point_map_to_rows(target_summary)
+            return target_summary_points_for_losses
+
         sample_weights = _direct_point_view_count_weights(
             view_counts[valid],
             mode=getattr(self, "direct_point_view_count_weighting", "none"),
@@ -655,7 +755,9 @@ class FeatureSupervisionMixin:
             stats["view_weight_mean"] = sample_weights.mean().detach()
             stats["view_weight_max"] = sample_weights.max().detach()
         weight_mask = _direct_point_weight_mask(decoded_points, sample_weights)
-        if weight_mask is None:
+        if teacher_feature_space == "siglip_summary":
+            distill = {"total": decoded_points.sum() * 0.0}
+        elif weight_mask is None:
             distill = self.distill_loss_fn(decoded_points, target_map.float())
         else:
             distill = self.distill_loss_fn(decoded_points, target_map.float(), mask=weight_mask)
@@ -666,26 +768,25 @@ class FeatureSupervisionMixin:
             and self.siglip_summary_head is not None
         ):
             pred_summary = self._project_summary_head_features(decoded_points)
-            with torch.no_grad():
-                target_summary = self._project_summary_head_features(target_map.float())
-            summary_per_point = 1.0 - (pred_summary * target_summary).sum(dim=1)
+            pred_summary_points = self._direct_point_map_to_rows(pred_summary)
+            target_summary_points = _target_summary_points()
+            summary_per_point = 1.0 - (pred_summary_points * target_summary_points).sum(dim=1)
             summary_loss = _weighted_vector_mean(summary_per_point, sample_weights)
-        else:
-            target_summary = None
         adapter_loss = decoded_points.sum() * 0.0
         pred_summary_points = None
         if (
             getattr(self, "direct_point_summary_adapter_weight", 0.0) > 0
             and getattr(self, "point_summary_adapter", None) is not None
-            and self.siglip_summary_head is not None
+            and (
+                self.siglip_summary_head is not None
+                or summary_teacher_points is not None
+            )
         ):
             pred_summary_points = F.normalize(
-                self.point_summary_adapter(compact.float()),
+                self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
                 dim=-1,
             )
-            with torch.no_grad():
-                target_summary_map = self._project_summary_head_features(target_map.float())
-                target_summary_points = self._direct_point_map_to_rows(target_summary_map)
+            target_summary_points = _target_summary_points()
             adapter_per_point = 1.0 - (pred_summary_points * target_summary_points).sum(dim=-1)
             adapter_loss = _weighted_vector_mean(adapter_per_point, sample_weights)
         text_loss = decoded_points.sum() * 0.0
@@ -711,7 +812,7 @@ class FeatureSupervisionMixin:
         ):
             if pred_summary_points is None:
                 pred_summary_points = F.normalize(
-                    self.point_summary_adapter(compact.float()),
+                    self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
                     dim=-1,
                 )
             (
@@ -745,6 +846,19 @@ class FeatureSupervisionMixin:
         adapter_text_pseudo_ce_teacher_conf = adapter_text_pseudo_ce_loss.detach()
         adapter_text_pseudo_ce_agreement = adapter_text_pseudo_ce_loss.detach()
         adapter_decoder_anchor_loss = decoded_points.sum() * 0.0
+        query_logit_distill_loss = decoded_points.sum() * 0.0
+        query_logit_distill_valid_ratio = query_logit_distill_loss.detach()
+        query_logit_distill_teacher_conf = query_logit_distill_loss.detach()
+        query_logit_distill_agreement = query_logit_distill_loss.detach()
+        query_support_distill_loss = decoded_points.sum() * 0.0
+        query_support_distill_valid_ratio = query_support_distill_loss.detach()
+        query_support_distill_teacher_conf = query_support_distill_loss.detach()
+        query_support_distill_top1_agreement = query_support_distill_loss.detach()
+        proposal_consistency_loss = decoded_points.sum() * 0.0
+        proposal_consistency_valid_ratio = proposal_consistency_loss.detach()
+        proposal_contrast_loss = decoded_points.sum() * 0.0
+        proposal_contrast_valid_ratio = proposal_contrast_loss.detach()
+        proposal_contrast_num_proposals = proposal_contrast_loss.detach()
         if (
             getattr(self, "direct_point_text_distill_weight", 0.0) > 0
             and self.siglip_summary_head is not None
@@ -753,9 +867,9 @@ class FeatureSupervisionMixin:
                 pred_summary = self._project_summary_head_features(decoded_points)
             pred_summary_points_for_distill = self._direct_point_map_to_rows(pred_summary)
             if target_summary is None:
-                with torch.no_grad():
-                    target_summary = self._project_summary_head_features(target_map.float())
-            target_summary_points = self._direct_point_map_to_rows(target_summary)
+                target_summary_points = _target_summary_points()
+            else:
+                target_summary_points = self._direct_point_map_to_rows(target_summary)
             (
                 text_distill_loss,
                 text_distill_valid_ratio,
@@ -774,9 +888,9 @@ class FeatureSupervisionMixin:
                 pred_summary = self._project_summary_head_features(decoded_points)
             pred_summary_points_for_contrast = self._direct_point_map_to_rows(pred_summary)
             if target_summary is None:
-                with torch.no_grad():
-                    target_summary = self._project_summary_head_features(target_map.float())
-            target_summary_points = self._direct_point_map_to_rows(target_summary)
+                target_summary_points = _target_summary_points()
+            else:
+                target_summary_points = self._direct_point_map_to_rows(target_summary)
             (
                 text_contrast_loss,
                 text_contrast_valid_ratio,
@@ -809,9 +923,9 @@ class FeatureSupervisionMixin:
                 pred_summary = self._project_summary_head_features(decoded_points)
             pred_summary_points_for_pseudo_ce = self._direct_point_map_to_rows(pred_summary)
             if target_summary is None:
-                with torch.no_grad():
-                    target_summary = self._project_summary_head_features(target_map.float())
-            target_summary_points = self._direct_point_map_to_rows(target_summary)
+                target_summary_points = _target_summary_points()
+            else:
+                target_summary_points = self._direct_point_map_to_rows(target_summary)
             (
                 text_pseudo_ce_loss,
                 text_pseudo_ce_valid_ratio,
@@ -836,17 +950,20 @@ class FeatureSupervisionMixin:
         if (
             getattr(self, "direct_point_adapter_text_distill_weight", 0.0) > 0
             and getattr(self, "point_summary_adapter", None) is not None
-            and self.siglip_summary_head is not None
+            and (
+                self.siglip_summary_head is not None
+                or summary_teacher_points is not None
+            )
         ):
             if pred_summary_points is None:
                 pred_summary_points = F.normalize(
-                    self.point_summary_adapter(compact.float()),
+                    self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
                     dim=-1,
                 )
             if target_summary is None:
-                with torch.no_grad():
-                    target_summary = self._project_summary_head_features(target_map.float())
-            target_summary_points = self._direct_point_map_to_rows(target_summary)
+                target_summary_points = _target_summary_points()
+            else:
+                target_summary_points = self._direct_point_map_to_rows(target_summary)
             (
                 adapter_text_distill_loss,
                 adapter_text_distill_valid_ratio,
@@ -860,17 +977,20 @@ class FeatureSupervisionMixin:
         if (
             getattr(self, "direct_point_adapter_text_pseudo_ce_weight", 0.0) > 0
             and getattr(self, "point_summary_adapter", None) is not None
-            and self.siglip_summary_head is not None
+            and (
+                self.siglip_summary_head is not None
+                or summary_teacher_points is not None
+            )
         ):
             if pred_summary_points is None:
                 pred_summary_points = F.normalize(
-                    self.point_summary_adapter(compact.float()),
+                    self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
                     dim=-1,
                 )
             if target_summary is None:
-                with torch.no_grad():
-                    target_summary = self._project_summary_head_features(target_map.float())
-            target_summary_points = self._direct_point_map_to_rows(target_summary)
+                target_summary_points = _target_summary_points()
+            else:
+                target_summary_points = self._direct_point_map_to_rows(target_summary)
             (
                 adapter_text_pseudo_ce_loss,
                 adapter_text_pseudo_ce_valid_ratio,
@@ -903,7 +1023,7 @@ class FeatureSupervisionMixin:
         ):
             if pred_summary_points is None:
                 pred_summary_points = F.normalize(
-                    self.point_summary_adapter(compact.float()),
+                    self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
                     dim=-1,
                 )
             if pred_summary is None:
@@ -915,6 +1035,172 @@ class FeatureSupervisionMixin:
             adapter_decoder_anchor_loss = (
                 1.0 - (pred_summary_points * decoder_anchor_points).sum(dim=-1).mean()
             )
+        if (
+            getattr(self, "direct_point_query_logit_distill_weight", 0.0) > 0
+            and getattr(self, "direct_point_query_logit_distill_embeddings", None) is not None
+        ):
+            if pred_summary_points is None:
+                if (
+                    getattr(self, "point_summary_adapter", None) is not None
+                    and (
+                        self.siglip_summary_head is not None
+                        or summary_teacher_points is not None
+                    )
+                ):
+                    pred_summary_points = F.normalize(
+                        self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
+                        dim=-1,
+                    )
+                else:
+                    if pred_summary is None:
+                        pred_summary = self._project_summary_head_features(decoded_points)
+                    pred_summary_points = self._direct_point_map_to_rows(pred_summary)
+            teacher_query_summary = _target_summary_points()
+            query_loss, query_stats = compute_direct_point_query_logit_distill_loss(
+                pred_summary_points,
+                teacher_query_summary,
+                self.direct_point_query_logit_distill_embeddings,
+                temperature=getattr(self, "direct_point_query_logit_distill_temperature", 1.0),
+                confidence_threshold=getattr(
+                    self,
+                    "direct_point_query_logit_distill_confidence_threshold",
+                    0.0,
+                ),
+                sample_weights=sample_weights,
+            )
+            query_logit_distill_loss = query_loss
+            query_logit_distill_valid_ratio = query_stats["valid_ratio"]
+            query_logit_distill_teacher_conf = query_stats["teacher_conf"]
+            query_logit_distill_agreement = query_stats["agreement"]
+        if (
+            getattr(self, "direct_point_query_support_distill_weight", 0.0) > 0
+            and getattr(self, "direct_point_query_support_distill_embeddings", None) is not None
+        ):
+            if pred_summary_points is None:
+                if (
+                    getattr(self, "point_summary_adapter", None) is not None
+                    and (
+                        self.siglip_summary_head is not None
+                        or summary_teacher_points is not None
+                    )
+                ):
+                    pred_summary_points = F.normalize(
+                        self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
+                        dim=-1,
+                    )
+                else:
+                    if pred_summary is None:
+                        pred_summary = self._project_summary_head_features(decoded_points)
+                    pred_summary_points = self._direct_point_map_to_rows(pred_summary)
+            teacher_query_summary = _target_summary_points()
+            support_loss, support_stats = compute_direct_point_query_support_distill_loss(
+                pred_summary_points,
+                teacher_query_summary,
+                self.direct_point_query_support_distill_embeddings,
+                temperature=getattr(self, "direct_point_query_support_distill_temperature", 0.25),
+                confidence_threshold=getattr(
+                    self,
+                    "direct_point_query_support_distill_confidence_threshold",
+                    0.0,
+                ),
+                sample_weights=sample_weights,
+                support_logit_norm=getattr(
+                    self,
+                    "direct_point_query_support_distill_logit_norm",
+                    "none",
+                ),
+            )
+            query_support_distill_loss = support_loss
+            query_support_distill_valid_ratio = support_stats["valid_ratio"]
+            query_support_distill_teacher_conf = support_stats["teacher_conf"]
+            query_support_distill_top1_agreement = support_stats["top1_agreement"]
+        if (
+            getattr(self, "direct_point_proposal_consistency_weight", 0.0) > 0
+            or getattr(self, "direct_point_proposal_contrast_weight", 0.0) > 0
+        ):
+            proposal_space = str(
+                getattr(self, "direct_point_proposal_space", "auto") or "auto"
+            )
+            proposal_summary = None
+            if proposal_space not in {"auto", "adapter", "decoder"}:
+                raise ValueError(
+                    "direct_point_proposal_space must be one of: auto, adapter, decoder"
+                )
+            if (
+                proposal_space in {"auto", "adapter"}
+                and getattr(self, "point_summary_adapter", None) is not None
+            ):
+                if pred_summary_points is None:
+                    pred_summary_points = F.normalize(
+                        self._project_point_summary_adapter(compact, valid_indices, view_counts[valid]),
+                        dim=-1,
+                    )
+                proposal_summary = pred_summary_points
+            elif self.siglip_summary_head is not None:
+                if pred_summary is None:
+                    pred_summary = self._project_summary_head_features(decoded_points)
+                proposal_summary = self._direct_point_map_to_rows(pred_summary)
+            if proposal_summary is not None:
+                proposal_labels = build_voxel_proposal_labels(
+                    points[valid],
+                    voxel_size=float(
+                        getattr(self, "direct_point_proposal_voxel_size", 0.05)
+                    ),
+                )
+                memory = build_proposal_memory_from_labels(
+                    proposal_summary,
+                    proposal_labels,
+                    confidence=sample_weights,
+                )
+                assigned = memory.row_to_proposal >= 0
+                min_count = max(
+                    1, int(getattr(self, "direct_point_proposal_min_count", 2) or 1)
+                )
+                if min_count > 1 and bool(assigned.any()):
+                    assigned_indices = memory.row_to_proposal[assigned]
+                    count_mask = memory.counts[assigned_indices] >= min_count
+                    full_mask = torch.zeros_like(assigned)
+                    full_mask[assigned] = count_mask
+                    assigned = full_mask
+                proposal_consistency_valid_ratio = assigned.float().mean().detach()
+                if bool(assigned.any()):
+                    prototypes = F.normalize(
+                        memory.pooled_values[memory.row_to_proposal[assigned]].detach(),
+                        dim=-1,
+                    )
+                    per_point = 1.0 - (
+                        F.normalize(proposal_summary[assigned].float(), dim=-1)
+                        * prototypes.float()
+                    ).sum(dim=-1)
+                    proposal_weights = (
+                        sample_weights[assigned] if sample_weights is not None else None
+                    )
+                    proposal_consistency_loss = _weighted_vector_mean(
+                        per_point,
+                        proposal_weights,
+                    )
+                if getattr(self, "direct_point_proposal_contrast_weight", 0.0) > 0:
+                    proposal_contrast_loss, proposal_contrast_stats = (
+                        compute_region_prototype_contrast_loss(
+                            proposal_summary,
+                            proposal_labels,
+                            confidence=sample_weights,
+                            min_count=min_count,
+                            temperature=float(
+                                getattr(
+                                    self,
+                                    "direct_point_proposal_contrast_temperature",
+                                    0.07,
+                                )
+                            ),
+                        )
+                    )
+                    proposal_contrast_valid_ratio = proposal_contrast_stats[
+                        "valid_ratio"
+                    ]
+                    proposal_contrast_num_proposals = proposal_contrast_stats[
+                        "num_proposals"
+                    ]
         stats["summary"] = summary_loss
         stats["summary_adapter"] = adapter_loss
         stats["text"] = text_loss
@@ -946,6 +1232,19 @@ class FeatureSupervisionMixin:
         stats["adapter_text_pseudo_ce_teacher_conf"] = adapter_text_pseudo_ce_teacher_conf
         stats["adapter_text_pseudo_ce_agreement"] = adapter_text_pseudo_ce_agreement
         stats["adapter_decoder_anchor"] = adapter_decoder_anchor_loss
+        stats["query_logit_distill"] = query_logit_distill_loss
+        stats["query_logit_distill_valid_ratio"] = query_logit_distill_valid_ratio
+        stats["query_logit_distill_teacher_conf"] = query_logit_distill_teacher_conf
+        stats["query_logit_distill_agreement"] = query_logit_distill_agreement
+        stats["query_support_distill"] = query_support_distill_loss
+        stats["query_support_distill_valid_ratio"] = query_support_distill_valid_ratio
+        stats["query_support_distill_teacher_conf"] = query_support_distill_teacher_conf
+        stats["query_support_distill_top1_agreement"] = query_support_distill_top1_agreement
+        stats["proposal_consistency"] = proposal_consistency_loss
+        stats["proposal_consistency_valid_ratio"] = proposal_consistency_valid_ratio
+        stats["proposal_contrast"] = proposal_contrast_loss
+        stats["proposal_contrast_valid_ratio"] = proposal_contrast_valid_ratio
+        stats["proposal_contrast_num_proposals"] = proposal_contrast_num_proposals
         stats["loss"] = (
             distill["total"]
             + self.direct_point_summary_alignment_weight * summary_loss
@@ -965,6 +1264,14 @@ class FeatureSupervisionMixin:
             * adapter_text_pseudo_ce_loss
             + getattr(self, "direct_point_adapter_decoder_anchor_weight", 0.0)
             * adapter_decoder_anchor_loss
+            + getattr(self, "direct_point_query_logit_distill_weight", 0.0)
+            * query_logit_distill_loss
+            + getattr(self, "direct_point_query_support_distill_weight", 0.0)
+            * query_support_distill_loss
+            + getattr(self, "direct_point_proposal_consistency_weight", 0.0)
+            * proposal_consistency_loss
+            + getattr(self, "direct_point_proposal_contrast_weight", 0.0)
+            * proposal_contrast_loss
         )
         return stats
 
@@ -1205,6 +1512,85 @@ class FeatureSupervisionMixin:
         )
         return self.radio_adaptor_relation_weight * relation_loss
 
+    def _compute_radio_adaptor_local_affinity_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_local_affinity_names)
+        if (
+            self.radio_adaptor_local_affinity_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        local_loss, _ = compute_radio_adaptor_local_affinity_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_local_affinity_downsample,
+            radius=self.radio_adaptor_local_affinity_radius,
+        )
+        return self.radio_adaptor_local_affinity_weight * local_loss
+
+    def _compute_radio_adaptor_token_contrast_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_token_contrast_names)
+        if (
+            self.radio_adaptor_token_contrast_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        token_contrast_loss, _ = compute_radio_adaptor_token_contrast_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_token_contrast_downsample,
+            max_tokens=self.radio_adaptor_token_contrast_max_tokens,
+            temperature=self.radio_adaptor_token_contrast_temperature,
+        )
+        return self.radio_adaptor_token_contrast_weight * token_contrast_loss
+
+    def _compute_radio_adaptor_peak_background_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(self.radio_adaptor_peak_background_names)
+        if (
+            self.radio_adaptor_peak_background_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        peak_loss, _ = compute_radio_adaptor_peak_background_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_peak_background_downsample,
+            max_tokens=self.radio_adaptor_peak_background_max_tokens,
+            num_anchors=self.radio_adaptor_peak_background_num_anchors,
+            temperature=self.radio_adaptor_peak_background_temperature,
+            anchor_strategy=self.radio_adaptor_peak_background_anchor_strategy,
+        )
+        return self.radio_adaptor_peak_background_weight * peak_loss
+
     def _compute_radio_adaptor_region_loss(
         self,
         decoded: Optional[torch.Tensor],
@@ -1283,8 +1669,71 @@ class FeatureSupervisionMixin:
             downsample=self.radio_adaptor_cross_view_downsample,
             max_tokens=self.radio_adaptor_cross_view_max_tokens,
             temperature=self.radio_adaptor_cross_view_temperature,
+            objective=self.radio_adaptor_cross_view_objective,
         )
         return self.radio_adaptor_cross_view_weight * cross_view_loss
+
+    def _compute_radio_adaptor_cross_view_propagation_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(
+            self.radio_adaptor_cross_view_propagation_names
+        )
+        if (
+            self.radio_adaptor_cross_view_propagation_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+            or decoded.shape[0] < 2
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        propagation_loss, _ = compute_radio_adaptor_cross_view_propagation_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_cross_view_propagation_downsample,
+            max_tokens=self.radio_adaptor_cross_view_propagation_max_tokens,
+            num_anchors=self.radio_adaptor_cross_view_propagation_num_anchors,
+            temperature=self.radio_adaptor_cross_view_propagation_temperature,
+            anchor_strategy=self.radio_adaptor_cross_view_propagation_anchor_strategy,
+        )
+        return self.radio_adaptor_cross_view_propagation_weight * propagation_loss
+
+    def _compute_radio_adaptor_cross_view_mask_propagation_loss(
+        self,
+        decoded: Optional[torch.Tensor],
+        target: Optional[torch.Tensor],
+    ) -> torch.Tensor:
+        adaptors = self._radio_adaptor_subset(
+            self.radio_adaptor_cross_view_mask_propagation_names
+        )
+        if (
+            self.radio_adaptor_cross_view_mask_propagation_weight <= 0
+            or not adaptors
+            or decoded is None
+            or target is None
+            or decoded.shape[0] < 2
+        ):
+            device = decoded.device if decoded is not None else self.device
+            return torch.tensor(0.0, device=device)
+        if decoded.shape[-2:] != target.shape[-2:]:
+            target = self._resize_map(target, decoded.shape[-2:])
+        propagation_loss, _ = compute_radio_adaptor_cross_view_mask_propagation_loss(
+            decoded.float(),
+            target.float(),
+            adaptors,
+            downsample=self.radio_adaptor_cross_view_mask_propagation_downsample,
+            max_tokens=self.radio_adaptor_cross_view_mask_propagation_max_tokens,
+            num_anchors=self.radio_adaptor_cross_view_mask_propagation_num_anchors,
+            temperature=self.radio_adaptor_cross_view_mask_propagation_temperature,
+            anchor_strategy=self.radio_adaptor_cross_view_mask_propagation_anchor_strategy,
+        )
+        return self.radio_adaptor_cross_view_mask_propagation_weight * propagation_loss
 
     def _project_summary_head_features(self, features: torch.Tensor) -> torch.Tensor:
         """Project [B, C, H, W] features through frozen SigLIP2SummaryHead to text-aligned space."""
@@ -1866,6 +2315,39 @@ class FeatureSupervisionMixin:
         if embeddings.ndim != 2:
             raise ValueError(
                 f"Expected text heatmap embeddings [Q, C], got {tuple(embeddings.shape)}"
+            )
+        return embeddings.to(self.device)
+
+    def _load_direct_point_query_logit_distill_embeddings(
+        self,
+        config: RadioGSConfig,
+        raw_path: str = "",
+        purpose: str = "direct point query-logit distillation embeddings",
+    ) -> torch.Tensor:
+        raw_path = raw_path or getattr(self, "direct_point_query_logit_distill_embeddings_path", "") or getattr(
+            config,
+            "direct_point_query_logit_distill_embeddings",
+            "",
+        )
+        if not raw_path:
+            raw_path = getattr(config, "text_heatmap_distill_embeddings", "") or DEFAULT_SIGLIP2_TEXT_EMBEDDINGS
+        text_path = resolve_siglip_text_embeddings_path(raw_path)
+        if not text_path.exists():
+            raise FileNotFoundError(
+                f"{purpose} not found: {text_path}"
+            )
+        data = load_training_tensor_cache(
+            text_path,
+            map_location="cpu",
+            purpose=purpose,
+        )
+        embeddings = data.get("embeddings")
+        if embeddings is None:
+            raise ValueError(f"Missing 'embeddings' tensor in {text_path}")
+        embeddings = F.normalize(embeddings.float(), dim=1)
+        if embeddings.ndim != 2:
+            raise ValueError(
+                f"Expected query-logit embeddings [Q, C], got {tuple(embeddings.shape)}"
             )
         return embeddings.to(self.device)
 

@@ -3,6 +3,7 @@ import torch
 
 from radio_gs.models.prompt_conditioned_mask_refinement import (
     filter_refined_mask_by_heatmap_support,
+    refine_mask_with_prompt_conditioned_sam3_head,
 )
 from radio_gs.scripts.eval_lerf_grounding import build_sam3_prompt_initial_mask
 
@@ -68,3 +69,33 @@ def test_sam3_prompt_initial_mask_can_keep_peak_component():
 
     assert pred[1, 1]
     assert not pred[3, 3]
+
+
+def test_model_prompt_conditioned_sam3_head_resizes_coarse_prompt_to_feature_shape():
+    seen: dict[str, torch.Tensor] = {}
+
+    class _CaptureHead(torch.nn.Module):
+        def forward(self, feature_map, prompt_embedding, coarse_prompt):
+            seen["coarse"] = coarse_prompt.detach().cpu()
+            return torch.zeros((1, 1, *feature_map.shape[-2:]), device=feature_map.device)
+
+    coarse = np.zeros((4, 4), dtype=bool)
+    coarse[1, 1] = True
+
+    refined, report = refine_mask_with_prompt_conditioned_sam3_head(
+        feature_map=torch.zeros(1, 2, 8, 8),
+        prompt_embedding=torch.zeros(3),
+        coarse_mask=coarse,
+        head=_CaptureHead(),
+        logit_threshold=0.0,
+        min_initial_iou=0.0,
+        coarse_dilate=0,
+        coarse_threshold=0.5,
+    )
+
+    assert refined.shape == coarse.shape
+    assert report["coarse_prompt_resized"] is True
+    assert report["coarse_prompt_input_shape"] == [4, 4]
+    assert report["coarse_prompt_shape"] == [8, 8]
+    assert tuple(seen["coarse"].shape[-2:]) == (8, 8)
+    assert int(seen["coarse"].sum().item()) == 4

@@ -5,9 +5,12 @@ from PIL import Image
 from radio_gs.models.foundation_cache import load_foundation_cache
 from radio_gs.scripts.train_prompt_conditioned_sam3_mask_head import (
     _target_for_loss,
+    _support_outside_loss,
+    augment_direct_coarse_prompt,
     build_coarse_prompt_from_target,
     categories_for_training_frame,
     load_coarse_prompt_mask,
+    mask_quality_targets_from_logits,
     resolve_feature_dir_for_scene,
     select_prompt_mask_targets,
 )
@@ -94,6 +97,58 @@ def test_target_for_loss_binary_uses_probability_threshold():
     binary = _target_for_loss(targets, "binary", threshold=0.5)
 
     assert torch.equal(binary, torch.tensor([[[0.0, 1.0], [0.0, 1.0]]]))
+
+
+def test_support_outside_loss_penalizes_probability_outside_prompt():
+    logits = torch.full((1, 4, 4), -6.0)
+    logits[:, 1:3, 1:3] = 6.0
+    coarse = torch.zeros(1, 4, 4)
+    coarse[:, 1:3, 1:3] = 1.0
+
+    inside_loss = _support_outside_loss(logits, coarse, dilate=0)
+    outside = logits.clone()
+    outside[:, 0, :] = 6.0
+    outside[:, :, 0] = 6.0
+    outside_loss = _support_outside_loss(outside, coarse, dilate=0)
+
+    assert inside_loss.item() < 0.01
+    assert outside_loss.item() > inside_loss.item() + 0.2
+
+
+def test_mask_quality_targets_from_logits_matches_binary_iou():
+    logits = torch.full((2, 4, 4), -8.0)
+    logits[0, 1:3, 1:3] = 8.0
+    logits[1, :2, :2] = 8.0
+    targets = torch.zeros(2, 4, 4)
+    targets[0, 1:3, 1:3] = 1.0
+    targets[1, 1:3, 1:3] = 1.0
+
+    quality = mask_quality_targets_from_logits(logits, targets, threshold=0.0)
+
+    assert quality.tolist() == pytest.approx([1.0, 1.0 / 7.0])
+
+
+def test_augment_direct_coarse_prompt_simulates_fragmentation_and_support_noise():
+    coarse = torch.zeros(1, 5, 5)
+    coarse[:, 2, 2] = 1.0
+
+    dropped = augment_direct_coarse_prompt(coarse, dropout_prob=1.0)
+    noisy = augment_direct_coarse_prompt(coarse, false_positive_prob=1.0)
+    dilated = augment_direct_coarse_prompt(coarse, dilate_radius=1)
+
+    assert dropped.sum().item() == 0
+    assert noisy.sum().item() == 25
+    assert dilated.sum().item() == 9
+
+
+def test_augment_direct_coarse_prompt_erodes_support():
+    coarse = torch.ones(1, 5, 5)
+    coarse[:, 0, :] = 0.0
+
+    eroded = augment_direct_coarse_prompt(coarse, erode_radius=1)
+
+    assert eroded[:, 0:2, :].sum().item() == 0
+    assert eroded.sum().item() < coarse.sum().item()
 
 
 def test_resolve_feature_dir_for_scene_accepts_root_or_scene_dir(tmp_path):

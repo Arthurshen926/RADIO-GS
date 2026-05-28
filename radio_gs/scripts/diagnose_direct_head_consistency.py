@@ -19,6 +19,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     load_summary_head,
 )
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import _build_hybrid_model
+from radio_gs.models.point_summary_adapter import append_point_summary_context
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 
 
@@ -58,6 +59,26 @@ def compute_rank_agreement(student_scores: torch.Tensor, teacher_scores: torch.T
         return {"text_rank_agreement": 1.0, "text_rank_pairs": 0}
     agree = ((student_diff > 0) == mask)[mask].float().mean()
     return {"text_rank_agreement": float(agree.item()), "text_rank_pairs": pairs}
+
+
+def build_diagnostic_adapter_input(
+    compact: torch.Tensor,
+    *,
+    context_features: str = "",
+    opacity: torch.Tensor | None = None,
+    scales: torch.Tensor | None = None,
+    view_counts: torch.Tensor | None = None,
+    view_count_max: float | torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Build the same compact+context vector used by direct 3D eval/training."""
+    return append_point_summary_context(
+        compact,
+        context_features=context_features,
+        opacity=opacity,
+        scales=scales,
+        view_counts=view_counts,
+        view_count_max=view_count_max,
+    )
 
 
 def build_adapter_metadata_status(
@@ -148,8 +169,40 @@ def run_diagnostic(args: argparse.Namespace) -> dict[str, Any]:
     if args.use_point_summary_adapter:
         adapter = _build_point_summary_adapter(config, args.checkpoint, device)
         adapter_loaded = True
+        metadata = checkpoint.get("point_summary_adapter_metadata") or {}
+        context_features = str(
+            metadata.get(
+                "point_summary_adapter_context_features",
+                getattr(config, "point_summary_adapter_context_features", ""),
+            )
+            or ""
+        )
+        view_count_max = metadata.get("point_summary_adapter_view_count_max")
+        opacity = None
+        scales = None
+        view_counts = None
+        if "opacity" in context_features:
+            opacity = model.get_opacity()[indices].to(device=device)
+        if "scale_log" in context_features:
+            scales = model.get_scaling()[indices].to(device=device)
+        if "view_count" in context_features:
+            raw_view_counts = teacher.get("view_counts")
+            if not isinstance(raw_view_counts, torch.Tensor):
+                raise KeyError(
+                    "point_summary_adapter_context_features includes view_count, "
+                    "but the teacher cache has no view_counts tensor"
+                )
+            view_counts = raw_view_counts[indices_cpu].to(device=device)
+        adapter_input = build_diagnostic_adapter_input(
+            compact.float(),
+            context_features=context_features,
+            opacity=opacity,
+            scales=scales,
+            view_counts=view_counts,
+            view_count_max=view_count_max,
+        )
         with torch.no_grad():
-            adapter_summary = _normalize(adapter(compact.float()).float())
+            adapter_summary = _normalize(adapter(adapter_input).float())
         final_summary = _blend_point_summary_adapter_features(
             decoded_summary,
             adapter_summary,
@@ -166,6 +219,13 @@ def run_diagnostic(args: argparse.Namespace) -> dict[str, Any]:
         "compact_feature_key": args.compact_feature_key,
         "use_point_summary_adapter": bool(args.use_point_summary_adapter),
         "point_summary_adapter_blend_alpha": float(args.point_summary_adapter_blend_alpha),
+        "point_summary_adapter_context_features": str(
+            (checkpoint.get("point_summary_adapter_metadata") or {}).get(
+                "point_summary_adapter_context_features",
+                getattr(config, "point_summary_adapter_context_features", ""),
+            )
+            or ""
+        ),
         "decoded_summary": compute_cosine_stats(decoded_summary, target_summary),
         "final_summary": compute_cosine_stats(final_summary, target_summary),
     }

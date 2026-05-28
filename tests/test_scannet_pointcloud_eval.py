@@ -279,6 +279,8 @@ def test_query_mode_parser_accepts_voxel_proposal_smoothing():
             "0.08",
             "--proposal_confidence_threshold",
             "0.6",
+            "--proposal_consensus_threshold",
+            "0.8",
         ]
     )
 
@@ -288,6 +290,7 @@ def test_query_mode_parser_accepts_voxel_proposal_smoothing():
     assert args.proposal_smoothing_gate == "low_confidence"
     assert args.proposal_margin_threshold == 0.08
     assert args.proposal_confidence_threshold == 0.6
+    assert args.proposal_consensus_threshold == 0.8
 
 
 def test_query_mode_parser_accepts_scannet_class_aliases():
@@ -441,6 +444,46 @@ def test_smooth_logits_voxel_proposals_can_gate_low_confidence_rows():
     assert torch.allclose(smoothed[0], logits[0])
     assert torch.allclose(smoothed[1], logits.mean(dim=0))
     assert torch.allclose(smoothed[2], logits[2])
+
+
+def test_smooth_logits_voxel_proposals_can_require_consensus():
+    logits = torch.tensor(
+        [
+            [8.0, 0.0],
+            [0.2, 0.1],
+            [0.0, 4.0],
+            [3.0, 0.0],
+            [2.0, 0.0],
+            [0.1, 0.0],
+        ],
+        dtype=torch.float32,
+    )
+    xyz = np.array(
+        [
+            [0.01, 0.01, 0.01],
+            [0.02, 0.02, 0.02],
+            [0.03, 0.03, 0.03],
+            [0.21, 0.01, 0.01],
+            [0.22, 0.02, 0.02],
+            [0.23, 0.03, 0.03],
+        ],
+        dtype=np.float32,
+    )
+
+    smoothed, stats = _smooth_logits_voxel_proposals(
+        logits,
+        xyz,
+        voxel_size=0.1,
+        alpha=1.0,
+        min_count=2,
+        gate="low_confidence_and_proposal_consensus",
+        confidence_threshold=0.60,
+        proposal_consensus_threshold=0.80,
+    )
+
+    assert stats["num_assigned"] == 1
+    assert torch.allclose(smoothed[1], logits[1])
+    assert torch.allclose(smoothed[5], logits[3:].mean(dim=0))
 
 
 def test_resolve_class_aliases_can_expand_scannet_names():

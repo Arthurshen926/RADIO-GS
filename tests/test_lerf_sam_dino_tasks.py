@@ -16,6 +16,7 @@ from radio_gs.scripts.eval_lerf_sam_dino_tasks import (
     refine_propagated_mask_with_feature_boundary,
     scaled_bounded_area,
     topk_mask_from_scores,
+    transported_match_score_map,
 )
 
 
@@ -225,6 +226,52 @@ def test_propagate_mask_by_dense_matches_can_use_reliable_target_seed_prior():
     assert not np.array_equal(plain, expected_seeded)
     assert np.array_equal(seeded, expected_seeded)
     assert seeded_scores[2, 1] > seeded_scores[0, 0]
+
+
+def test_transported_match_score_map_splats_reliable_cycle_matches():
+    matches = [
+        {"tgt_y": 1, "tgt_x": 1, "score": 0.5},
+        {"tgt_y": 2, "tgt_x": 3, "score": 1.0},
+    ]
+
+    score = transported_match_score_map(matches, target_shape=(4, 5), radius=1)
+
+    assert torch.isclose(score[2, 3], torch.tensor(1.0))
+    assert score[1, 1] > 0.0
+    assert score[0, 0] > 0.0
+    assert score[3, 4] > 0.0
+
+
+def test_propagate_mask_by_dense_matches_can_use_transported_match_evidence():
+    source = torch.zeros(2, 2, 2)
+    target = torch.zeros(2, 3, 3)
+    source[:, 0, 0] = torch.tensor([1.0, 0.0])
+    source[:, 0, 1] = torch.tensor([1.0, 0.0])
+    source[:, 1, 0] = torch.tensor([0.0, 1.0])
+    source[:, 1, 1] = torch.tensor([0.0, 1.0])
+    target[:, 0, 0] = torch.tensor([1.0, 0.0])
+    target[:, 0, 1] = torch.tensor([1.0, 0.0])
+    target[:, 2, 1] = torch.tensor([0.9, 0.1])
+    target[:, 2, 2] = torch.tensor([0.9, 0.1])
+    source_mask = np.array([[1, 1], [0, 0]], dtype=np.uint8)
+    matches = [
+        {"tgt_y": 2, "tgt_x": 1, "score": 0.9},
+        {"tgt_y": 2, "tgt_x": 2, "score": 0.9},
+    ]
+
+    propagated, scores = propagate_mask_by_dense_matches(
+        source,
+        target,
+        source_mask,
+        target_area=2,
+        transport_matches=matches,
+        transport_weight=2.0,
+    )
+
+    expected = np.zeros((3, 3), dtype=np.uint8)
+    expected[2, 1:3] = 1
+    assert np.array_equal(propagated, expected)
+    assert scores[2, 1] > scores[0, 0]
 
 
 def test_refine_propagated_mask_with_feature_boundary_sharpens_object_region():

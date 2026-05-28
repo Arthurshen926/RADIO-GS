@@ -55,6 +55,7 @@ PROTOCOL_ARG_KEYS = (
     "proposal_smoothing_gate",
     "proposal_margin_threshold",
     "proposal_confidence_threshold",
+    "proposal_consensus_threshold",
 )
 
 

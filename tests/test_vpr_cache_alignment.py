@@ -4,6 +4,7 @@ import torch
 from radio_gs.scripts.audit_vpr_cache_alignment import (
     audit_vpr_cache_payload_alignment,
     compute_xyz_alignment_stats,
+    tensor_sha256_float32,
     xyz_sha256,
 )
 from radio_gs.scripts.train_feature_field import (
@@ -104,6 +105,66 @@ def test_audit_vpr_cache_payload_alignment_threshold_pass_and_fail():
     assert failed["xyz_sha256_match"] is False
 
 
+def test_audit_vpr_cache_payload_alignment_checks_saved_geometry_fingerprint():
+    model_xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    model_scales = torch.tensor([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+    model_rotations = torch.tensor([[1.0, 0.0, 0.0, 0.0], [0.9, 0.1, 0.0, 0.0]])
+    model_opacities = torch.tensor([[0.8], [0.2]])
+    payload = {
+        "xyz": model_xyz.clone(),
+        "summary_features": torch.zeros(2, 4),
+        "geometry_fingerprint": {
+            "num_gaussians": 2,
+            "xyz_sha256": xyz_sha256(model_xyz),
+            "scales_sha256": tensor_sha256_float32(model_scales),
+            "rotations_sha256": tensor_sha256_float32(model_rotations),
+            "opacities_sha256": tensor_sha256_float32(model_opacities),
+        },
+    }
+
+    report = audit_vpr_cache_payload_alignment(
+        payload,
+        model_xyz,
+        model_scales=model_scales,
+        model_rotations=model_rotations,
+        model_opacities=model_opacities,
+    )
+
+    assert report["status"] == "passed"
+    assert report["geometry_fingerprint"]["num_gaussians"] == 2
+    assert report["geometry_fingerprint_xyz_sha256_match"] is True
+    assert report["geometry_fingerprint_optional_checks"]["scales"]["match"] is True
+    assert report["geometry_fingerprint_optional_checks"]["rotations"]["match"] is True
+    assert report["geometry_fingerprint_optional_checks"]["opacities"]["match"] is True
+
+
+def test_audit_vpr_cache_payload_alignment_rejects_footprint_mismatch():
+    model_xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    cached_scales = torch.tensor([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+    model_scales = cached_scales.clone()
+    model_scales[1, 0] += 0.01
+    payload = {
+        "xyz": model_xyz.clone(),
+        "summary_features": torch.zeros(2, 4),
+        "geometry_fingerprint": {
+            "num_gaussians": 2,
+            "xyz_sha256": xyz_sha256(model_xyz),
+            "scales_sha256": tensor_sha256_float32(cached_scales),
+        },
+    }
+
+    report = audit_vpr_cache_payload_alignment(
+        payload,
+        model_xyz,
+        model_scales=model_scales,
+    )
+
+    assert report["status"] == "failed"
+    assert report["passed"] is False
+    assert "footprint" in report["message"]
+    assert report["geometry_fingerprint_optional_checks"]["scales"]["match"] is False
+
+
 def test_training_direct_point_cache_alignment_raises_for_row_mismatch():
     model_xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
     payload = {
@@ -120,6 +181,33 @@ def test_training_direct_point_cache_alignment_raises_for_row_mismatch():
             direct_point_query_mode="gaussian_index",
             cache_path="toy.pt",
             fail_max_l2=1.0e-5,
+        )
+
+
+def test_training_direct_point_cache_alignment_raises_for_footprint_mismatch():
+    model_xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    cached_scales = torch.tensor([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+    model_scales = cached_scales.clone()
+    model_scales[0, 1] += 0.02
+    payload = {
+        "xyz": model_xyz.clone(),
+        "features": torch.zeros(2, 4),
+        "valid": torch.tensor([True, True]),
+        "geometry_fingerprint": {
+            "num_gaussians": 2,
+            "xyz_sha256": xyz_sha256(model_xyz),
+            "scales_sha256": tensor_sha256_float32(cached_scales),
+        },
+    }
+
+    with pytest.raises(RuntimeError, match="footprint"):
+        audit_direct_point_teacher_cache_alignment_for_training(
+            payload,
+            model_xyz,
+            model_scales=model_scales,
+            direct_point_source="gaussian",
+            direct_point_query_mode="gaussian_index",
+            cache_path="toy.pt",
         )
 
 

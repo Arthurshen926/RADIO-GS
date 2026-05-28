@@ -40,3 +40,20 @@ def test_prompt_conditioned_mask_head_uses_coarse_mask_spatial_prompt():
 
     assert not torch.allclose(logits_a, logits_b)
 
+
+def test_prompt_conditioned_mask_head_can_predict_query_quality():
+    head = PromptConditionedMaskHead(
+        feature_dim=8,
+        prompt_dim=6,
+        hidden_dim=12,
+        predict_quality=True,
+    )
+    features = torch.randn(2, 8, 5, 7)
+    prompts = torch.randn(2, 3, 6)
+    coarse = torch.zeros(2, 3, 5, 7)
+
+    logits, quality_logits = head.forward_with_quality(features, prompts, coarse)
+
+    assert logits.shape == (2, 3, 5, 7)
+    assert quality_logits.shape == (2, 3)
+    assert torch.isfinite(quality_logits).all()
