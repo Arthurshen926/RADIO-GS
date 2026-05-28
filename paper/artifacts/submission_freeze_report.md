@@ -41,6 +41,9 @@ This generated report is the current paper-facing source of truth for the conser
 | Readout | Text head | Selector policy | Macro mIoU | Macro Acc@0.25 | Boundary-F | Trimap IoU | Source root |
 |---|---|---|---:|---:|---:|---:|---|
 | VPR fixed threshold + RGB snap | SigLIP2 | `fixed:thr0p25` | 0.4801 | 0.6760 | 0.0000 | 0.0000 | `output/radio_gs/lerf_direct_3d_selection_threshold_grabcut_20260515` |
+| compact prompt ensemble, pure one-map | SigLIP2 | `fixed:thr0p70` | 0.4570 | 0.6851 | 0.6166 | 0.2771 | `output/radio_gs/lerf_direct3d_prompt_ensemble_pure_onemap_20260528` |
+| compact prompt-ensemble + RGB area component guard | SigLIP2 | `fixed:thr0p65` | 0.5000 | 0.7051 | 0.6345 | 0.3213 | `output/radio_gs/lerf_direct3d_prompt_ensemble_policy_sweep_20260528` |
+| compact prompt-ensemble + RGB score-component guard | SigLIP2 | `fixed:thr0p55` | 0.5014 | 0.7044 | 0.6305 | 0.3225 | `output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528` |
 | direct field + official SAM3 box, pad16 fixed global threshold | SigLIP2+SAM3 | `fixed:thr0p25` | 0.5705 | 0.6835 | 0.6681 | 0.3958 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5` |
 | direct field + official SAM3 box, pad16 scene-locked diagnostic | SigLIP2+SAM3 | `best_by_miou` | 0.5972 | 0.7009 | 0.6817 | 0.4043 | `output/radio_gs/lerf_direct3d_sam3_box_pad16_global_selector_20260516_205200_pad16_gpu5` |
 | direct field + official SAM3 box, pad0 legacy diagnostic | SigLIP2+SAM3 | `best_by_miou` | 0.5815 | 0.7150 | 0.6731 | 0.3777 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516` |
@@ -116,6 +119,6 @@ This generated report is the current paper-facing source of truth for the conser
 
 - External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.
 - ScanNet label-supervised, GT-label-balanced, old v67, and non-VALA8 runs are diagnostic only and excluded from this paper-facing VALA/OpenGaFF-8 summary.
-- LERF direct 3D object selection is protocol-aligned; direct primitive scoring, RGB-snap cleanup, and official SAM3 box boundary readout are reported as separate readouts.
+- LERF direct 3D object selection is protocol-aligned; direct primitive scoring, strict no-RGB one-map, RGB-snap/component cleanup, and official SAM3 box boundary readout are reported as separate readouts.
 - Direct-3D readout `direct field + official SAM3 box, pad16 scene-locked diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.
 - Direct-3D readout `direct field + official SAM3 box, pad0 legacy diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.

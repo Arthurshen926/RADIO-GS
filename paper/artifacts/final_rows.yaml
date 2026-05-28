@@ -64,10 +64,10 @@ tracks:
       metrics:
       - mIoU
       - Acc@0.25
-      main_selector_policy: fixed_global_softmax_threshold:thr0p25
+      main_selector_policy: compact_prompt_ensemble_score_component_guard:thr0p55
       vpr_registration_views: 128
       selection_floor: 0.005
-      selection_cap: 0.018
+      selection_cap: 0.05
       caveat: OpenGaussian is still an official-source context row for LERF; four-scene
         compatibility language_features assets are now available, but a strict official-policy
         rerun is still pending.
@@ -82,6 +82,56 @@ tracks:
         miou: 0.4801
         acc025: 0.676
         reproduced_local: true
+      ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55:
+        source: local compact direct-field run; frozen SigLIP2 prompt ensemble,
+          opacity-gated point summary adapter, RGB/GrabCut boundary snapping,
+          and GT-free score-heatmap component support policy
+        miou: 0.501373864710331
+        acc025: 0.7044309383271872
+        boundary_f: 0.63053347915411
+        trimap_iou: 0.3224659077823162
+        uses_vpr_cache: false
+        uses_official_rgb_sam_readout: false
+        uses_rgb_postprocess: true
+        rgb_postprocess: rgb_grabcut_score_component_guard
+        reproduced_local: true
+        promoted: true
+        caveat: Fixed global threshold selected from a global sweep; no per-scene
+          or per-query threshold and no VPR cache or official RGB SAM readout at
+          inference. This row uses GT-free RGB/GrabCut boundary snapping plus
+          compact score-heatmap component filtering, so it should not be described
+          as a strict no-RGB one-map row.
+      ctfgs_compact_prompt_ensemble_area_guard_acc_best_thr0p65:
+        source: previous local compact direct-field run; frozen SigLIP2 prompt
+          ensemble, opacity-gated point summary adapter, and GT-free area
+          component support policy
+        miou: 0.49997589737176895
+        acc025: 0.7051470998564577
+        boundary_f: 0.634491816163063
+        trimap_iou: 0.32125306501984596
+        uses_vpr_cache: false
+        uses_official_rgb_sam_readout: false
+        uses_rgb_postprocess: true
+        rgb_postprocess: rgb_grabcut_component_guard
+        reproduced_local: true
+        promoted: false
+        caveat: Acc-best guarded compact ablation; exact macro mIoU is just below
+          0.50.
+      ctfgs_compact_prompt_ensemble_pure_onemap_thr0p70:
+        source: local compact direct-field ablation; frozen SigLIP2 prompt ensemble,
+          opacity-gated point summary adapter, and no RGB/SAM/VPR postprocess
+        miou: 0.45702792704105377
+        acc025: 0.6850818896429425
+        boundary_f: 0.6165698766708374
+        trimap_iou: 0.27713826671242714
+        uses_vpr_cache: false
+        uses_official_rgb_sam_readout: false
+        uses_rgb_postprocess: false
+        reproduced_local: true
+        promoted: false
+        caveat: Strict pure one-map ablation. It improves Acc@0.25 over the
+          older compact direct baseline, but the RGB component guard is needed
+          for the current best macro mIoU and Waldo recovery.
       ctfgs_sam3_box_fixed_pad16_thr0p25:
         source: local frozen official SAM3 box readout
         miou: 0.5705

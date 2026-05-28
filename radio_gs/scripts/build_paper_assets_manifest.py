@@ -73,7 +73,7 @@ def main() -> None:
         REPO_ROOT
         / "output"
         / "lerf_sam_dino_tasks"
-        / "formal_v9_dino_topk_area200_bg110_peak_20260514"
+        / "formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528"
         / "lerf_sam_dino_task_report.md"
     )
     sam_dino_sweep = (
@@ -123,7 +123,7 @@ def main() -> None:
             },
             "lerf_sam_dino_task_report.md": {
                 "path": rel(sam_dino_tasks),
-                "description": "Formal SAM3/DINOv3 downstream task sweep with bg-suppressed DINO propagation readout",
+                "description": "Formal SAM3/DINOv3 downstream task sweep with multi-head DINO support and SAM-adaptor boundary readout",
             },
             "formal_v9_dino_readout_sweep_20260514.md": {
                 "path": rel(sam_dino_sweep),
@@ -289,6 +289,69 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "lerf_vpr_direct_3d_qualitative_manifest.json"),
                 "description": "Manifest for VPR direct 3D qualitative cases",
             },
+            "lerf_main_qualitative_comparison_manifest.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_main_qualitative_comparison_manifest.json"
+                ),
+                "description": "Manifest for the main-paper direct-3D qualitative comparison",
+            },
+            "lerf_direct3d_prompt_ensemble_support_policy_20260528.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_direct3d_prompt_ensemble_support_policy_20260528.md"
+                ),
+                "description": "Guarded compact Direct3D prompt-ensemble support-policy result",
+            },
+            "lerf_direct3d_compact_readout_ablation_20260528.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_direct3d_compact_readout_ablation_20260528.md"
+                ),
+                "description": "Strict pure one-map versus guarded compact Direct3D ablation",
+            },
+            "lerf_direct3d_compact_readout_ablation_20260528.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_direct3d_compact_readout_ablation_20260528.json"
+                ),
+                "description": "Machine-readable strict pure one-map versus guarded compact Direct3D ablation",
+            },
+            "lerf_direct3d_score_component_guard_20260528.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_direct3d_score_component_guard_20260528.md"
+                ),
+                "description": "Promoted compact Direct3D score-component support guard result",
+            },
+            "lerf_direct3d_score_component_guard_20260528.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_direct3d_score_component_guard_20260528.json"
+                ),
+                "description": "Machine-readable compact Direct3D score-component support guard result",
+            },
+            "compose_lerf_main_qualitative.py": {
+                "path": rel(
+                    REPO_ROOT
+                    / "radio_gs"
+                    / "scripts"
+                    / "compose_lerf_main_qualitative.py"
+                ),
+                "description": "Generator for the main-paper LERF qualitative comparison",
+            },
             "2026-05-16-sam3-box-readout-results.md": {
                 "path": rel(sam3_box_results),
                 "description": "Official SAM3 box-prompt direct-3D readout results and protocol note",
@@ -328,7 +391,7 @@ def main() -> None:
                     / "artifacts"
                     / "teacher_vs_ctfgs_2d_usability_20260525.md"
                 ),
-                "description": "Consolidated 2D teacher-vs-CTF-GS feature-usability report with conservative DINO caveats",
+                "description": "Consolidated 2D teacher-vs-CTF-GS feature-usability report with 6/6 selected primary downstream wins and secondary caveats",
             },
             "teacher_vs_ctfgs_2d_usability_20260525.json": {
                 "path": rel(
@@ -507,6 +570,7 @@ def main() -> None:
                 "size_mb": size_mb(path),
             }
     paper_figure_descriptions = {
+        "lerf_main_qualitative_comparison.png": "Main-paper LERF direct-3D qualitative comparison",
         "lerf_adaptor_downstream_qualitative.png": "DINOv3/SAM3 adaptor qualitative probes",
         "lerf_sam_dino_tasks_qualitative.png": "Formal SAM/DINO downstream task qualitative probes",
         "lerf_vpr_direct_3d_qualitative.png": "VPR direct 3D object-selection qualitative grid",

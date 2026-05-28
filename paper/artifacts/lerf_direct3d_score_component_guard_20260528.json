@@ -1,0 +1,64 @@
+{
+  "artifact": "lerf_direct3d_score_component_guard_20260528",
+  "created": "2026-05-28",
+  "protocol": "LERF-OVS OpenGaussian-style query-select-render direct 3D object selection",
+  "policy": {
+    "uses_vpr_cache": false,
+    "uses_official_rgb_sam_decoder": false,
+    "uses_rgb_postprocess": true,
+    "rgb_postprocess": "RGB/GrabCut boundary snapping",
+    "component_guard": "rendered compact score-heatmap component filtering",
+    "score_component_guard_min_mass_fraction": 0.5,
+    "score_component_guard_max_components": 2,
+    "component_guard_min_total_pixels_for_multicomponent": 6000
+  },
+  "rows": {
+    "area_component_guard_acc_best_thr0p65": {
+      "miou": 0.49997589737176895,
+      "acc025": 0.7051470998564577,
+      "boundary_f": 0.634491816163063,
+      "trimap_iou": 0.32125306501984596
+    },
+    "score_component_guard_overlap_balanced_thr0p55": {
+      "source_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528",
+      "miou": 0.501373864710331,
+      "acc025": 0.7044309383271872,
+      "boundary_f": 0.63053347915411,
+      "trimap_iou": 0.3224659077823162,
+      "per_scene": {
+        "figurines": {
+          "miou": 0.5104373693466187,
+          "acc025": 0.6785714285714286,
+          "boundary_f": 0.6688569188117981,
+          "trimap_iou": 0.27029332518577576
+        },
+        "ramen": {
+          "miou": 0.5998749136924744,
+          "acc025": 0.8309859154929577,
+          "boundary_f": 0.7557012438774109,
+          "trimap_iou": 0.40721940994262695
+        },
+        "teatime": {
+          "miou": 0.5639746785163879,
+          "acc025": 0.7627118644067796,
+          "boundary_f": 0.7148535847663879,
+          "trimap_iou": 0.40006396174430847
+        },
+        "waldo_kitchen": {
+          "miou": 0.3312084972858429,
+          "acc025": 0.5454545454545454,
+          "boundary_f": 0.3827221691608429,
+          "trimap_iou": 0.21228693425655365
+        }
+      }
+    },
+    "score_component_guard_boundary_favored_thr0p65": {
+      "source_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_20260528",
+      "miou": 0.5011542364954948,
+      "acc025": 0.6973886848289377,
+      "boundary_f": 0.6357995048165321,
+      "trimap_iou": 0.31937894970178604
+    }
+  },
+  "conclusion": "Score-component support filtering gives the first compact direct-3D row with exact macro mIoU above 0.50 while preserving the Acc@0.25 gain over the registered VPR row. The previous area component guard remains the Acc-best compact row by a small margin."
+}

@@ -29,11 +29,11 @@
     },
     {
       "method": "Full CTF-GS",
-      "loc_acc": 0.8712,
-      "miou": 0.5243,
-      "delta_loc_acc": 0.07269999999999999,
-      "delta_miou": 0.06090000000000001,
-      "source": "submission freeze manifest",
+      "loc_acc": 0.8598,
+      "miou": 0.5707,
+      "delta_loc_acc": 0.06130000000000002,
+      "delta_miou": 0.1073,
+      "source": "peak-component LERF artifact + direct-3D registry",
       "note": "hybrid + HCD + refiner + FDH warm-start"
     }
   ],
@@ -42,8 +42,8 @@
       "task": "SAM3 point prompt",
       "primary_metric": "mIoU",
       "teacher_primary": 0.3699577284181184,
-      "rendered_primary": 0.4169234361695647,
-      "delta_primary": 0.04696570775144626,
+      "rendered_primary": 0.41730454774458614,
+      "delta_primary": 0.047346819326467726,
       "secondary_metric": "LocAcc",
       "teacher_secondary": 1.0,
       "rendered_secondary": 1.0,
@@ -55,8 +55,8 @@
       "task": "SAM3 box prompt",
       "primary_metric": "mIoU",
       "teacher_primary": 0.6559515350873139,
-      "rendered_primary": 0.6638246448361674,
-      "delta_primary": 0.00787310974885358,
+      "rendered_primary": 0.6638370718617169,
+      "delta_primary": 0.007885536774403068,
       "secondary_metric": "LocAcc",
       "teacher_secondary": 0.8701923076923077,
       "rendered_secondary": 0.8221153846153846,
@@ -68,40 +68,40 @@
       "task": "SAM3 mask propagation",
       "primary_metric": "mIoU",
       "teacher_primary": 0.3583351155873905,
-      "rendered_primary": 0.3756087108092492,
-      "delta_primary": 0.017273595221858673,
+      "rendered_primary": 0.37564451380639063,
+      "delta_primary": 0.017309398219000127,
       "secondary_metric": "LocAcc",
       "teacher_secondary": 0.7872340425531915,
-      "rendered_secondary": 0.6666666666666666,
-      "delta_secondary": -0.12056737588652489,
+      "rendered_secondary": 0.6595744680851063,
+      "delta_secondary": -0.12765957446808518,
       "n": 141,
       "winner": "rendered"
     },
     {
       "task": "DINOv3 dense matching",
       "primary_metric": "Mean score",
-      "teacher_primary": 0.8546752594953365,
-      "rendered_primary": 0.9047674793777749,
-      "delta_primary": 0.050092219882438394,
+      "teacher_primary": 0.854675256026589,
+      "rendered_primary": 0.9047662958603941,
+      "delta_primary": 0.05009103983380514,
       "secondary_metric": "HitRate",
       "teacher_secondary": 0.5722599418040737,
-      "rendered_secondary": 0.539282250242483,
-      "delta_secondary": -0.032977691561590694,
+      "rendered_secondary": 0.5396055609440672,
+      "delta_secondary": -0.03265438086000649,
       "n": 3093,
       "winner": "rendered"
     },
     {
       "task": "DINOv3 mask propagation",
       "primary_metric": "mIoU",
-      "teacher_primary": 0.5119243596355025,
-      "rendered_primary": 0.48053451352895904,
-      "delta_primary": -0.031389846106543495,
+      "teacher_primary": 0.4605767391288183,
+      "rendered_primary": 0.4676853411424829,
+      "delta_primary": 0.007108602013664589,
       "secondary_metric": "LocAcc",
       "teacher_secondary": 0.7659574468085106,
-      "rendered_secondary": 0.7943262411347518,
-      "delta_secondary": 0.028368794326241176,
+      "rendered_secondary": 0.7872340425531915,
+      "delta_secondary": 0.021276595744680882,
       "n": 141,
-      "winner": "teacher"
+      "winner": "rendered"
     }
   ],
   "diagnostic_rows": {
@@ -237,20 +237,19 @@
     ]
   },
   "summary": {
-    "primary_rendered_wins": 5,
+    "primary_rendered_wins": 6,
     "primary_total": 6,
     "universal_superiority": false,
     "caveats": [
       "SAM3 box prompt LocAcc remains teacher-stronger (0.8221 vs 0.8702).",
-      "SAM3 mask propagation LocAcc remains teacher-stronger (0.6667 vs 0.7872).",
-      "DINOv3 dense matching HitRate remains teacher-stronger (0.5393 vs 0.5723).",
-      "DINOv3 mask propagation mIoU remains teacher-stronger (0.4805 vs 0.5119)."
+      "SAM3 mask propagation LocAcc remains teacher-stronger (0.6596 vs 0.7872).",
+      "DINOv3 dense matching HitRate remains teacher-stronger (0.5396 vs 0.5723)."
     ],
-    "claim_sentence": "CTF-GS rendered features improve selected downstream feature-usability metrics over frame-wise RADIO teacher features, while DINOv3 caveats remain under the same frozen readout."
+    "claim_sentence": "CTF-GS rendered features outperform the frame-wise RADIO teacher on all selected primary downstream feature-usability metrics; secondary LocAcc/HitRate caveats are reported separately."
   },
   "sources": {
     "controlled_evidence": "/root/RADIO-GS/paper/artifacts/controlled_evidence_table.json",
-    "sam_dino_formal": "/root/RADIO-GS/output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_aggregate.json",
+    "sam_dino_formal": "/root/RADIO-GS/output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_aggregate.json",
     "dino_homography_ransac": "/root/RADIO-GS/output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_aggregate.json",
     "prototype_adaptor": "/root/RADIO-GS/output/lerf_adaptor_downstream/mainline/lerf_adaptor_downstream_aggregate.json"
   }

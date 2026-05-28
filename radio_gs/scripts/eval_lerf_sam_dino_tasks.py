@@ -657,6 +657,45 @@ def refine_propagated_mask_with_feature_boundary(
     return refined.astype(np.uint8), report
 
 
+def select_dino_boundary_refinement_feature(
+    dino_feature: torch.Tensor,
+    sam3_feature: Optional[torch.Tensor],
+    *,
+    family: str = "dino_v3",
+) -> torch.Tensor:
+    """Pick the feature family used to sharpen DINO propagated masks.
+
+    DINO features carry the cross-view correspondence signal, while SAM-style
+    adaptor features often give cleaner region boundaries.  The hybrid option
+    keeps DINO topology and adds a SAM boundary cue without calling an external
+    RGB SAM decoder.
+    """
+    family = str(family)
+    if family == "dino_v3":
+        return dino_feature
+    if family in {"sam3", "hybrid"} and sam3_feature is None:
+        return dino_feature
+    if family == "sam3":
+        return sam3_feature  # type: ignore[return-value]
+    if family != "hybrid":
+        raise ValueError(
+            "dino_feature_boundary_family must be 'dino_v3', 'sam3', or 'hybrid'"
+        )
+
+    assert sam3_feature is not None
+    sam = sam3_feature
+    if sam.shape[-2:] != dino_feature.shape[-2:]:
+        sam = F.interpolate(
+            sam[None].float(),
+            size=dino_feature.shape[-2:],
+            mode="bilinear",
+            align_corners=False,
+        )[0]
+    dino = F.normalize(dino_feature.float(), dim=0)
+    sam = F.normalize(sam.float(), dim=0)
+    return torch.cat([dino, sam], dim=0)
+
+
 def feature_token_to_image_xy(
     token_y: int,
     token_x: int,
@@ -872,6 +911,7 @@ def evaluate_scene_tasks(
     dino_transport_match_weight: float = 0.0,
     dino_transport_match_radius: int = 0,
     dino_feature_boundary_refinement: bool = False,
+    dino_feature_boundary_family: str = "dino_v3",
     dino_feature_boundary_background_weight: float = 0.5,
     dino_feature_boundary_seed_topk_ratio: float = 0.25,
     dino_feature_boundary_min_area_ratio: float = 0.0,
@@ -925,9 +965,10 @@ def evaluate_scene_tasks(
             for category, mask_full in full_masks[frame_id].items():
                 heatmaps_for_vis = {}
                 for mode in ("teacher", "rendered"):
-                    feature = projected.get(mode, {}).get("sam3", {}).get(frame_id)
-                    if feature is None:
+                    feature_cpu = projected.get(mode, {}).get("sam3", {}).get(frame_id)
+                    if feature_cpu is None:
                         continue
+                    feature = feature_cpu.to(device, non_blocking=True)
                     if task == "point_prompt_segmentation":
                         y, x = mask_centroid_token(mask_full, feature.shape[-2], feature.shape[-1])
                         prototype = F.normalize(feature[:, y, x].float(), dim=0)
@@ -984,10 +1025,12 @@ def evaluate_scene_tasks(
         mask_heatmaps = {}
         for mode in ("teacher", "rendered"):
             sam_features = projected.get(mode, {}).get("sam3", {})
-            source_feature = sam_features.get(source_frame)
-            target_feature = sam_features.get(target_frame)
-            if source_feature is None or target_feature is None:
+            source_feature_cpu = sam_features.get(source_frame)
+            target_feature_cpu = sam_features.get(target_frame)
+            if source_feature_cpu is None or target_feature_cpu is None:
                 continue
+            source_feature = source_feature_cpu.to(device, non_blocking=True)
+            target_feature = target_feature_cpu.to(device, non_blocking=True)
             prototype = build_masked_prototype(source_feature, feat_masks[source_frame][category])
             heatmap = compute_prototype_heatmap(target_feature, prototype)
             source_area = int(feat_masks[source_frame][category].sum())
@@ -1017,10 +1060,12 @@ def evaluate_scene_tasks(
         dino_propagation_heatmaps = {}
         for mode in ("teacher", "rendered"):
             dino_features = projected.get(mode, {}).get("dino_v3", {})
-            source_feature = dino_features.get(source_frame)
-            target_feature = dino_features.get(target_frame)
-            if source_feature is None or target_feature is None:
+            source_feature_cpu = dino_features.get(source_frame)
+            target_feature_cpu = dino_features.get(target_frame)
+            if source_feature_cpu is None or target_feature_cpu is None:
                 continue
+            source_feature = source_feature_cpu.to(device, non_blocking=True)
+            target_feature = target_feature_cpu.to(device, non_blocking=True)
             source_mask_feat = feat_masks[source_frame][category]
             points = _sample_source_points(source_mask_feat, max_match_points)
             matches = dense_match_points(
@@ -1071,8 +1116,19 @@ def evaluate_scene_tasks(
                 transport_radius=dino_transport_match_radius,
             )
             if dino_feature_boundary_refinement:
-                propagated_mask, _ = refine_propagated_mask_with_feature_boundary(
+                sam3_target_feature_cpu = projected.get(mode, {}).get("sam3", {}).get(target_frame)
+                sam3_target_feature = (
+                    None
+                    if sam3_target_feature_cpu is None
+                    else sam3_target_feature_cpu.to(device, non_blocking=True)
+                )
+                boundary_feature = select_dino_boundary_refinement_feature(
                     target_feature,
+                    sam3_target_feature,
+                    family=dino_feature_boundary_family,
+                )
+                propagated_mask, _ = refine_propagated_mask_with_feature_boundary(
+                    boundary_feature,
                     propagated_mask,
                     propagation_scores,
                     background_weight=dino_feature_boundary_background_weight,
@@ -1209,6 +1265,15 @@ def main() -> None:
     parser.add_argument("--dino_transport_match_weight", type=float, default=0.0, help="Fuse cycle/RANSAC-filtered DINO match evidence directly into propagation scores")
     parser.add_argument("--dino_transport_match_radius", type=int, default=0, help="Feature-token splat radius for --dino_transport_match_weight")
     parser.add_argument("--dino_feature_boundary_refinement", action="store_true", help="Sharpen DINO propagated masks with a GT-free target-feature foreground/background boundary readout")
+    parser.add_argument(
+        "--dino_feature_boundary_family",
+        default="dino_v3",
+        choices=["dino_v3", "sam3", "hybrid"],
+        help=(
+            "Feature family used by --dino_feature_boundary_refinement. "
+            "'hybrid' concatenates normalized DINOv3 and SAM3 adaptor features."
+        ),
+    )
     parser.add_argument("--dino_feature_boundary_background_weight", type=float, default=0.5)
     parser.add_argument("--dino_feature_boundary_seed_topk_ratio", type=float, default=0.25)
     parser.add_argument("--dino_feature_boundary_min_area_ratio", type=float, default=0.0)
@@ -1302,6 +1367,7 @@ def main() -> None:
             dino_transport_match_weight=args.dino_transport_match_weight,
             dino_transport_match_radius=args.dino_transport_match_radius,
             dino_feature_boundary_refinement=args.dino_feature_boundary_refinement,
+            dino_feature_boundary_family=args.dino_feature_boundary_family,
             dino_feature_boundary_background_weight=args.dino_feature_boundary_background_weight,
             dino_feature_boundary_seed_topk_ratio=args.dino_feature_boundary_seed_topk_ratio,
             dino_feature_boundary_min_area_ratio=args.dino_feature_boundary_min_area_ratio,
@@ -1362,6 +1428,7 @@ def main() -> None:
                 f"transport_weight={args.dino_transport_match_weight:g}, "
                 f"transport_radius={args.dino_transport_match_radius}, "
                 f"feature_boundary_refinement={bool(args.dino_feature_boundary_refinement)}, "
+                f"boundary_family={args.dino_feature_boundary_family}, "
                 f"boundary_bg_weight={args.dino_feature_boundary_background_weight:g}, "
                 f"boundary_seed_topk={args.dino_feature_boundary_seed_topk_ratio:g}, "
                 f"boundary_min_area={args.dino_feature_boundary_min_area_ratio:g}, "

@@ -3562,6 +3562,168 @@ def keep_largest_mask_component(mask: np.ndarray) -> np.ndarray:
     return labels == largest_label
 
 
+def keep_largest_mask_component_if_dominant(
+    mask: np.ndarray,
+    *,
+    min_largest_fraction: float = 0.65,
+    min_total_pixels_for_multicomponent: int = 0,
+) -> tuple[np.ndarray, dict[str, float | int | bool]]:
+    """Keep the largest component only when it dominates the support.
+
+    Multi-part or occluded objects can be split into several projected
+    components. A strict largest-component cleanup can then erase valid support
+    and hurt Acc@0.25. This GT-free guard preserves the full support unless one
+    component clearly dominates.
+    """
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    total = int(pred.sum())
+    report: dict[str, float | int | bool] = {
+        "component_guard_total_pixels": total,
+        "component_guard_largest_pixels": 0,
+        "component_guard_largest_fraction": 0.0,
+        "component_guard_component_count": 0,
+        "component_guard_kept_largest": False,
+        "component_guard_kept_largest_due_to_small_support": False,
+        "component_guard_min_total_pixels_for_multicomponent": int(min_total_pixels_for_multicomponent),
+    }
+    if total == 0:
+        return pred.copy(), report
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+        pred.astype(np.uint8),
+        connectivity=8,
+    )
+    component_count = max(int(num_labels) - 1, 0)
+    report["component_guard_component_count"] = component_count
+    if num_labels <= 2:
+        return pred.copy(), report
+    component_areas = stats[1:, cv2.CC_STAT_AREA].astype(np.float64)
+    largest_idx = int(component_areas.argmax())
+    largest_area = int(component_areas[largest_idx])
+    largest_fraction = float(largest_area / max(total, 1))
+    report["component_guard_largest_pixels"] = largest_area
+    report["component_guard_largest_fraction"] = largest_fraction
+    if total < int(min_total_pixels_for_multicomponent):
+        report["component_guard_kept_largest"] = True
+        report["component_guard_kept_largest_due_to_small_support"] = True
+        return labels == (largest_idx + 1), report
+    if largest_fraction >= float(min_largest_fraction):
+        report["component_guard_kept_largest"] = True
+        return labels == (largest_idx + 1), report
+    return pred.copy(), report
+
+
+def keep_mask_components_by_heatmap_score(
+    mask: np.ndarray,
+    heatmap: np.ndarray,
+    *,
+    min_mass_fraction: float = 0.20,
+    min_mean_fraction: float = 0.0,
+    max_components: int = 0,
+    min_total_pixels_for_multicomponent: int = 0,
+    min_recovery_pixels: int = 0,
+) -> tuple[np.ndarray, dict[str, float | int | bool]]:
+    """Keep connected support components that carry compact-field score mass.
+
+    The RGB/GrabCut guard can produce multiple components after snapping
+    rendered primitive support to image edges. Area-only cleanup is brittle for
+    small or multipart objects: the largest component may be clutter, while a
+    smaller component can contain the strongest text-aligned score response.
+    This GT-free guard ranks components by the rendered compact score heatmap and
+    keeps the high-mass components under a fixed global policy.
+    """
+    pred = np.asarray(mask).astype(bool)
+    if pred.ndim != 2:
+        raise ValueError(f"Expected 2D mask, got {pred.shape}")
+    heat = np.asarray(heatmap, dtype=np.float32)
+    if heat.ndim != 2:
+        raise ValueError(f"Expected 2D heatmap, got {heat.shape}")
+    if heat.shape != pred.shape:
+        heat = cv2.resize(heat, (pred.shape[1], pred.shape[0]), interpolation=cv2.INTER_LINEAR)
+    heat = np.nan_to_num(heat, nan=0.0, posinf=0.0, neginf=0.0)
+    heat = heat - float(heat.min())
+    heat_max = float(heat.max())
+    if heat_max > 1e-8:
+        heat = heat / heat_max
+    else:
+        heat = pred.astype(np.float32)
+
+    total = int(pred.sum())
+    report: dict[str, float | int | bool] = {
+        "score_component_guard_total_pixels": total,
+        "score_component_guard_component_count": 0,
+        "score_component_guard_kept_components": 0,
+        "score_component_guard_min_mass_fraction": float(min_mass_fraction),
+        "score_component_guard_min_mean_fraction": float(min_mean_fraction),
+        "score_component_guard_max_components": int(max_components),
+        "score_component_guard_min_total_pixels_for_multicomponent": int(
+            min_total_pixels_for_multicomponent
+        ),
+        "score_component_guard_min_recovery_pixels": int(min_recovery_pixels),
+        "score_component_guard_heatmap_recovered": False,
+        "score_component_guard_top_mass": 0.0,
+        "score_component_guard_top_mean": 0.0,
+        "score_component_guard_kept_top_only_due_to_small_support": False,
+    }
+    recovery_pixels = max(int(min_recovery_pixels), 0)
+    if recovery_pixels > 0 and total < recovery_pixels:
+        flat = heat.reshape(-1)
+        if flat.size > 0 and float(flat.max()) > 1e-8:
+            k = min(recovery_pixels, flat.size)
+            chosen = np.argpartition(flat, -k)[-k:]
+            recovered = np.zeros(flat.size, dtype=bool)
+            recovered[chosen] = True
+            pred = np.logical_or(pred, recovered.reshape(pred.shape))
+            total = int(pred.sum())
+            report["score_component_guard_total_pixels"] = total
+            report["score_component_guard_heatmap_recovered"] = True
+    if total == 0:
+        return pred.copy(), report
+
+    num_labels, labels, stats, _ = cv2.connectedComponentsWithStats(
+        pred.astype(np.uint8),
+        connectivity=8,
+    )
+    component_count = max(int(num_labels) - 1, 0)
+    report["score_component_guard_component_count"] = component_count
+    if num_labels <= 2:
+        report["score_component_guard_kept_components"] = component_count
+        return pred.copy(), report
+
+    components: list[tuple[int, float, float, int]] = []
+    for label in range(1, int(num_labels)):
+        component = labels == label
+        area = int(stats[label, cv2.CC_STAT_AREA])
+        mass = float(heat[component].sum())
+        mean = float(mass / max(area, 1))
+        components.append((label, mass, mean, area))
+    components.sort(key=lambda item: (item[1], item[2], item[3]), reverse=True)
+    top_label, top_mass, top_mean, _ = components[0]
+    report["score_component_guard_top_mass"] = float(top_mass)
+    report["score_component_guard_top_mean"] = float(top_mean)
+
+    if total < int(min_total_pixels_for_multicomponent):
+        kept_labels = [int(top_label)]
+        report["score_component_guard_kept_top_only_due_to_small_support"] = True
+    else:
+        mass_floor = float(top_mass) * max(float(min_mass_fraction), 0.0)
+        mean_floor = float(top_mean) * max(float(min_mean_fraction), 0.0)
+        kept_labels = [
+            int(label)
+            for label, mass, mean, _area in components
+            if float(mass) >= mass_floor and float(mean) >= mean_floor
+        ]
+        if not kept_labels:
+            kept_labels = [int(top_label)]
+        if max_components > 0:
+            kept_labels = kept_labels[: int(max_components)]
+
+    kept = np.isin(labels, np.asarray(kept_labels, dtype=np.int32))
+    report["score_component_guard_kept_components"] = int(len(kept_labels))
+    return kept, report
+
+
 def refine_mask_with_rgb_edges(
     rgb_bgr: np.ndarray,
     mask: np.ndarray,
@@ -4913,6 +5075,12 @@ def evaluate_selection_spec(
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
     mask_refinement_erode: int,
+    component_guard_min_largest_fraction: float,
+    component_guard_min_total_pixels_for_multicomponent: int,
+    score_component_guard_min_mass_fraction: float,
+    score_component_guard_min_mean_fraction: float,
+    score_component_guard_max_components: int,
+    score_component_guard_min_recovery_pixels: int,
     sam3_refinement_geometry_gate: bool,
     sam3_refinement_gate_min_area_ratio: float,
     sam3_refinement_gate_max_area_ratio: float,
@@ -4979,7 +5147,7 @@ def evaluate_selection_spec(
         )
     selected = selected.to(device=device, dtype=torch.float32)
     proxy = GaussianSelectionProxy(model, selected)
-    needs_prompt_heatmap = (
+    needs_prompt_heatmap = mask_refinement == "rgb_grabcut_score_component_guard" or (
         mask_refinement == "sam3_prompt_mask_head"
         and (
             sam3_prompt_mask_head_initial_refinement != "none"
@@ -5057,6 +5225,8 @@ def evaluate_selection_spec(
             "rgb_grabcut",
             "largest_component_rgb_grabcut",
             "rgb_grabcut_largest_component",
+            "rgb_grabcut_component_guard",
+            "rgb_grabcut_score_component_guard",
             "sam3_box",
         }
         if needs_rgb_refinement:
@@ -5086,6 +5256,7 @@ def evaluate_selection_spec(
             initial_pred = pred.copy()
             prompt_initial_pred = pred.copy()
             prompt_heatmap = score_heatmaps[cat_idx] if score_heatmaps is not None else silhouette[cat_idx]
+            component_guard_report: Optional[Dict[str, float | int | bool]] = None
             if mask_refinement == "sam3_prompt_mask_head":
                 prompt_initial_pred = build_direct3d_prompt_initial_mask(
                     pred,
@@ -5101,7 +5272,14 @@ def evaluate_selection_spec(
             if mask_refinement in {"largest_component", "largest_component_rgb_grabcut"}:
                 pred = keep_largest_mask_component(pred)
             if (
-                mask_refinement in {"rgb_grabcut", "largest_component_rgb_grabcut", "rgb_grabcut_largest_component"}
+                mask_refinement
+                in {
+                    "rgb_grabcut",
+                    "largest_component_rgb_grabcut",
+                    "rgb_grabcut_largest_component",
+                    "rgb_grabcut_component_guard",
+                    "rgb_grabcut_score_component_guard",
+                }
                 and rgb_for_refinement is not None
             ):
                 pred = refine_mask_with_rgb_edges(
@@ -5113,6 +5291,22 @@ def evaluate_selection_spec(
                 )
             if mask_refinement == "rgb_grabcut_largest_component":
                 pred = keep_largest_mask_component(pred)
+            if mask_refinement == "rgb_grabcut_component_guard":
+                pred, component_guard_report = keep_largest_mask_component_if_dominant(
+                    pred,
+                    min_largest_fraction=component_guard_min_largest_fraction,
+                    min_total_pixels_for_multicomponent=component_guard_min_total_pixels_for_multicomponent,
+                )
+            if mask_refinement == "rgb_grabcut_score_component_guard":
+                pred, component_guard_report = keep_mask_components_by_heatmap_score(
+                    pred,
+                    prompt_heatmap,
+                    min_mass_fraction=score_component_guard_min_mass_fraction,
+                    min_mean_fraction=score_component_guard_min_mean_fraction,
+                    max_components=score_component_guard_max_components,
+                    min_total_pixels_for_multicomponent=component_guard_min_total_pixels_for_multicomponent,
+                    min_recovery_pixels=score_component_guard_min_recovery_pixels,
+                )
             if mask_refinement == "sam3_box" and sam3_state is not None and sam3_box_refiner is not None:
                 pred, sam3_report = sam3_box_refiner.refine_from_state_with_report(sam3_state, pred)
             elif mask_refinement == "sam3_box":
@@ -5428,6 +5622,13 @@ def evaluate_selection_spec(
                     gt,
                 )
                 query_detail["geometry_overlay_path"] = str(overlay_path.relative_to(output_dir))
+            if component_guard_report is not None:
+                query_detail.update(
+                    {
+                        key: bool(value) if isinstance(value, bool) else float(value)
+                        for key, value in component_guard_report.items()
+                    }
+                )
             if save_masks:
                 mask_path = (
                     output_dir
@@ -5501,6 +5702,16 @@ def evaluate_selection_spec(
             "mask_refinement_iters": mask_refinement_iters,
             "mask_refinement_dilate": mask_refinement_dilate,
             "mask_refinement_erode": mask_refinement_erode,
+            "component_guard_min_largest_fraction": component_guard_min_largest_fraction,
+            "component_guard_min_total_pixels_for_multicomponent": int(
+                component_guard_min_total_pixels_for_multicomponent
+            ),
+            "score_component_guard_min_mass_fraction": float(score_component_guard_min_mass_fraction),
+            "score_component_guard_min_mean_fraction": float(score_component_guard_min_mean_fraction),
+            "score_component_guard_max_components": int(score_component_guard_max_components),
+            "score_component_guard_min_recovery_pixels": int(
+                score_component_guard_min_recovery_pixels
+            ),
             "sam3_refinement_count": int(len(sam3_reports)),
             "sam3_attempt_count": int(sam3_attempt_count),
             "sam3_skip_count": int(sam3_skip_count),
@@ -5598,6 +5809,12 @@ def evaluate_scene(
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
     mask_refinement_erode: int,
+    component_guard_min_largest_fraction: float,
+    component_guard_min_total_pixels_for_multicomponent: int,
+    score_component_guard_min_mass_fraction: float,
+    score_component_guard_min_mean_fraction: float,
+    score_component_guard_max_components: int,
+    score_component_guard_min_recovery_pixels: int,
     sam3_refinement_geometry_gate: bool,
     sam3_refinement_gate_min_area_ratio: float,
     sam3_refinement_gate_max_area_ratio: float,
@@ -6279,6 +6496,12 @@ def evaluate_scene(
             mask_refinement_iters=mask_refinement_iters,
             mask_refinement_dilate=mask_refinement_dilate,
             mask_refinement_erode=mask_refinement_erode,
+            component_guard_min_largest_fraction=component_guard_min_largest_fraction,
+            component_guard_min_total_pixels_for_multicomponent=component_guard_min_total_pixels_for_multicomponent,
+            score_component_guard_min_mass_fraction=score_component_guard_min_mass_fraction,
+            score_component_guard_min_mean_fraction=score_component_guard_min_mean_fraction,
+            score_component_guard_max_components=score_component_guard_max_components,
+            score_component_guard_min_recovery_pixels=score_component_guard_min_recovery_pixels,
             sam3_refinement_geometry_gate=sam3_refinement_geometry_gate,
             sam3_refinement_gate_min_area_ratio=sam3_refinement_gate_min_area_ratio,
             sam3_refinement_gate_max_area_ratio=sam3_refinement_gate_max_area_ratio,
@@ -6565,6 +6788,8 @@ def main() -> None:
             "largest_component",
             "largest_component_rgb_grabcut",
             "rgb_grabcut_largest_component",
+            "rgb_grabcut_component_guard",
+            "rgb_grabcut_score_component_guard",
             "sam3_box",
             "sam3_adaptor_boundary",
             "sam3_adaptor_grabcut",
@@ -6577,6 +6802,25 @@ def main() -> None:
     parser.add_argument("--mask_refinement_iters", type=int, default=1, help="GrabCut iterations for rgb_grabcut mask refinement")
     parser.add_argument("--mask_refinement_dilate", type=int, default=5, help="Pixel dilation radius defining the rgb_grabcut support band")
     parser.add_argument("--mask_refinement_erode", type=int, default=2, help="Pixel erosion radius defining sure foreground for rgb_grabcut")
+    parser.add_argument("--component_guard_min_largest_fraction", type=float, default=0.65, help="For rgb_grabcut_component_guard, keep only the largest component when it covers at least this fraction of the refined support")
+    parser.add_argument(
+        "--component_guard_min_total_pixels_for_multicomponent",
+        type=int,
+        default=0,
+        help="For rgb_grabcut_component_guard, preserve multi-component refined support only when the total support has at least this many pixels",
+    )
+    parser.add_argument("--score_component_guard_min_mass_fraction", type=float, default=0.20, help="For rgb_grabcut_score_component_guard, keep components whose compact score-heatmap mass is at least this fraction of the top component")
+    parser.add_argument("--score_component_guard_min_mean_fraction", type=float, default=0.0, help="For rgb_grabcut_score_component_guard, optional mean score floor as a fraction of the top component mean")
+    parser.add_argument("--score_component_guard_max_components", type=int, default=0, help="For rgb_grabcut_score_component_guard, maximum kept components per mask; 0 keeps all components passing score gates")
+    parser.add_argument(
+        "--score_component_guard_min_recovery_pixels",
+        type=int,
+        default=0,
+        help=(
+            "For rgb_grabcut_score_component_guard, recover a tiny/empty support "
+            "from the rendered compact score heatmap before component ranking"
+        ),
+    )
     parser.add_argument("--sam3_refinement_geometry_gate", action="store_true", help="Accept feature-only SAM3 refinement only when alpha/depth boundary alignment improves without GT")
     parser.add_argument("--sam3_refinement_gate_min_area_ratio", type=float, default=0.5, help="Minimum refined/coarse area ratio for geometry-gated SAM3 feature refinement")
     parser.add_argument("--sam3_refinement_gate_max_area_ratio", type=float, default=1.5, help="Maximum refined/coarse area ratio for geometry-gated SAM3 feature refinement")
@@ -6763,6 +7007,12 @@ def main() -> None:
         mask_refinement_iters=args.mask_refinement_iters,
         mask_refinement_dilate=args.mask_refinement_dilate,
         mask_refinement_erode=args.mask_refinement_erode,
+        component_guard_min_largest_fraction=args.component_guard_min_largest_fraction,
+        component_guard_min_total_pixels_for_multicomponent=args.component_guard_min_total_pixels_for_multicomponent,
+        score_component_guard_min_mass_fraction=args.score_component_guard_min_mass_fraction,
+        score_component_guard_min_mean_fraction=args.score_component_guard_min_mean_fraction,
+        score_component_guard_max_components=args.score_component_guard_max_components,
+        score_component_guard_min_recovery_pixels=args.score_component_guard_min_recovery_pixels,
         sam3_refinement_geometry_gate=args.sam3_refinement_geometry_gate,
         sam3_refinement_gate_min_area_ratio=args.sam3_refinement_gate_min_area_ratio,
         sam3_refinement_gate_max_area_ratio=args.sam3_refinement_gate_max_area_ratio,
@@ -6894,6 +7144,20 @@ def main() -> None:
             "mask_refinement_iters": args.mask_refinement_iters,
             "mask_refinement_dilate": args.mask_refinement_dilate,
             "mask_refinement_erode": args.mask_refinement_erode,
+            "component_guard_min_largest_fraction": args.component_guard_min_largest_fraction,
+            "component_guard_min_total_pixels_for_multicomponent": int(
+                args.component_guard_min_total_pixels_for_multicomponent
+            ),
+            "score_component_guard_min_mass_fraction": float(
+                args.score_component_guard_min_mass_fraction
+            ),
+            "score_component_guard_min_mean_fraction": float(
+                args.score_component_guard_min_mean_fraction
+            ),
+            "score_component_guard_max_components": int(args.score_component_guard_max_components),
+            "score_component_guard_min_recovery_pixels": int(
+                args.score_component_guard_min_recovery_pixels
+            ),
             "sam3_refinement_geometry_gate": bool(args.sam3_refinement_geometry_gate),
             "sam3_refinement_gate_min_area_ratio": float(args.sam3_refinement_gate_min_area_ratio),
             "sam3_refinement_gate_max_area_ratio": float(args.sam3_refinement_gate_max_area_ratio),

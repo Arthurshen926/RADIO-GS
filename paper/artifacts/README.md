@@ -44,9 +44,14 @@ sha256sum -c paper/artifacts/checksums.txt
   evidence.
 - `teacher_vs_ctfgs_2d_usability_20260525.{md,json}`: consolidated 2D
   teacher-vs-rendered CTF-GS feature-usability evidence across SigLIP2 text
-  grounding and frozen SAM3/DINOv3 task probes. The report supports selected
-  downstream improvements and records DINO caveats where the teacher remains
-  stronger.
+  grounding and frozen SAM3/DINOv3 task probes. The current report records
+  6/6 selected primary downstream wins for rendered CTF-GS features, while
+  keeping secondary SAM LocAcc and DINO dense-HitRate caveats separate.
+- `dino_sam_boundary_and_waldo_recovery_20260528.{md,json}`: traceable
+  record for the DINO multi-head SAM-boundary readout that flips DINO mask
+  propagation mIoU in favor of the student field, plus the Waldo small-object
+  heatmap-recovery diagnostic that improves Waldo Acc but is not promoted
+  globally because a fixed pixel floor regresses Ramen.
 - `unified_multi_head_feature_quality_field_20260525.{md,json}`: method-level
   implementation note for the explicit quality/visibility field readouts,
   training targets, and current promoted rows before full retraining with the
@@ -106,6 +111,20 @@ sha256sum -c paper/artifacts/checksums.txt
 - `vpr_contribution_weighting_ablation.md`,
   `vpr_field_confidence_weighting_20260515.md`, and
   `vpr_field_consistency_20260515.md`: VPR diagnostic ablations.
+- `lerf_main_qualitative_comparison.{md,json}`: main-paper direct-3D
+  qualitative comparison manifest; the promoted panels use compact direct-field
+  masks without VPR-cache or official RGB SAM3 readout at evaluation.
+- `lerf_direct3d_prompt_ensemble_support_policy_20260528.{md,json}`:
+  compact direct-3D support-policy result. This is the promoted no-VPR,
+  no-official-RGB-SAM readout for the Direct3D table, but it uses a GT-free
+  RGB/GrabCut component-support guard and is not the strict no-RGB one-map row.
+- `lerf_direct3d_compact_readout_ablation_20260528.{md,json}`:
+  strict compact one-map versus guarded compact readout ablation. The strict
+  one-map row disables VPR cache, official RGB SAM, and RGB postprocess.
+- `lerf_direct3d_score_component_guard_20260528.{md,json}`:
+  promoted compact direct-3D score-component support guard. It ranks RGB/GrabCut
+  components by rendered compact score-heatmap mass and gives the current
+  overlap-balanced direct-3D row.
 - `lerf_vpr_direct_3d_qualitative_manifest.json`,
   `lerf_sam3_box_direct_3d_qualitative_manifest.json`, and
   `lerf_sam3_box_direct_3d_qualitative_pad16_manifest.json`: qualitative

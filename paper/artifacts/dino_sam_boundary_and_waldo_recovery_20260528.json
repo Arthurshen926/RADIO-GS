@@ -1,0 +1,84 @@
+{
+  "dino_multi_head_readout": {
+    "source": "output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_aggregate.json",
+    "uses_official_rgb_sam_decoder": false,
+    "readout": "DINOv3 adaptor support with feature-only SAM3-adaptor boundary refinement",
+    "mask_propagation": {
+      "teacher": {
+        "loc_acc": 0.7659574468085106,
+        "miou": 0.4605767391288183,
+        "n_samples": 141
+      },
+      "rendered": {
+        "loc_acc": 0.7872340425531915,
+        "miou": 0.4676853411424829,
+        "n_samples": 141
+      },
+      "delta": {
+        "loc_acc": 0.021276595744680882,
+        "miou": 0.007108602013664599
+      }
+    },
+    "dense_matching": {
+      "teacher": {
+        "hit_rate": 0.5722599418040737,
+        "mean_score": 0.854675256026589,
+        "n_matches": 3093
+      },
+      "rendered": {
+        "hit_rate": 0.5396055609440672,
+        "mean_score": 0.9047662958603941,
+        "n_matches": 3093
+      },
+      "delta": {
+        "hit_rate": -0.03265438086000651,
+        "mean_score": 0.05009103983380511
+      }
+    },
+    "rejected_topology_candidates": [
+      {
+        "name": "dino_topology_relcv_textheat_ft40_20260527",
+        "rendered_mask_miou": 0.44457172967665715,
+        "teacher_mask_miou": 0.501130529816693,
+        "decision": "diagnostic_only"
+      },
+      {
+        "name": "dino_maskprop_relcv_textheat_ft35_b4_20260528_bestreadout",
+        "rendered_mask_miou": 0.4041857519490698,
+        "teacher_mask_miou": 0.5082044851547619,
+        "decision": "diagnostic_only"
+      },
+      {
+        "name": "dino_maskprop_strongtopo_ft25_b4_ramenteatime_20260528",
+        "rendered_mask_miou": 0.47296340489224015,
+        "teacher_mask_miou": 0.5088143283878205,
+        "decision": "two-scene diagnostic only; not a four-scene promoted row"
+      }
+    ],
+    "claim_safe_conclusion": "DINO mask propagation and mean-score metrics favor rendered CTF-GS; dense HitRate remains a secondary teacher-stronger caveat."
+  },
+  "waldo_small_object_recovery": {
+    "baseline_source": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528/waldo_kitchen/lerf_direct_3d_selection_results.json",
+    "diagnostic_source": "output/radio_gs/waldo_recovery_heatmap_support_pix8000_thr060_20260528/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json",
+    "baseline": {
+      "miou": 0.3312084972858429,
+      "acc025": 0.5454545454545454,
+      "boundary_f": 0.3827221691608429,
+      "trimap_iou": 0.21228693425655365
+    },
+    "heatmap_recovery_pix8000": {
+      "miou": 0.34137094020843506,
+      "acc025": 0.5909090909090909,
+      "boundary_f": 0.45346173644065857,
+      "trimap_iou": 0.23393182456493378
+    },
+    "delta": {
+      "miou": 0.010162442922592163,
+      "acc025": 0.045454545454545525,
+      "boundary_f": 0.07073956727981567,
+      "trimap_iou": 0.021644890308380127
+    },
+    "promoted_globally": false,
+    "not_promoted_reason": "A fixed 8000-pixel recovery floor improves Waldo but regresses Ramen in a four-scene smoke test; the mechanism needs an adaptive low-support trigger before promotion."
+  }
+}

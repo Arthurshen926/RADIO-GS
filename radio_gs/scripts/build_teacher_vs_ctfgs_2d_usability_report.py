@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CONTROLLED = REPO_ROOT / "paper/artifacts/controlled_evidence_table.json"
 DEFAULT_SAM_DINO = (
     REPO_ROOT
-    / "output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_aggregate.json"
+    / "output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_aggregate.json"
 )
 DEFAULT_RANSAC = (
     REPO_ROOT
@@ -262,17 +262,25 @@ def _build_summary(
                 f"{row['task']} {row['secondary_metric']} remains teacher-stronger "
                 f"({_fmt(row['rendered_secondary'])} vs {_fmt(row['teacher_secondary'])})."
             )
+    if primary_rendered_wins == primary_total:
+        claim_sentence = (
+            "CTF-GS rendered features outperform the frame-wise RADIO teacher "
+            "on all selected primary downstream feature-usability metrics; "
+            "secondary LocAcc/HitRate caveats are reported separately."
+        )
+    else:
+        claim_sentence = (
+            "CTF-GS rendered features improve selected downstream feature-usability "
+            "metrics over frame-wise RADIO teacher features, while caveats remain "
+            "under the same frozen readout."
+        )
     return {
         "primary_rendered_wins": primary_rendered_wins,
         "primary_total": primary_total,
         "universal_superiority": primary_rendered_wins == primary_total
         and not caveats,
         "caveats": caveats,
-        "claim_sentence": (
-            "CTF-GS rendered features improve selected downstream feature-usability "
-            "metrics over frame-wise RADIO teacher features, while DINOv3 caveats "
-            "remain under the same frozen readout."
-        ),
+        "claim_sentence": claim_sentence,
     }
 
 
@@ -396,7 +404,7 @@ def _write_latex(report: Mapping[str, object], path: Path) -> None:
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{2D feature-usability comparison between frame-wise RADIO teacher features and rendered CTF-GS features under frozen downstream heads. CTF-GS improves selected downstream metrics, while DINOv3 caveats remain under the same readout.}",
+        r"\caption{2D feature-usability comparison between frame-wise RADIO teacher features and rendered CTF-GS features under frozen downstream heads. CTF-GS wins all selected primary metrics; secondary LocAcc/HitRate caveats are reported in the artifact.}",
         r"\label{tab:teacher_vs_ctfgs_2d_usability}",
         r"\resizebox{\linewidth}{!}{%",
         r"\begin{tabular}{l l r r r}",

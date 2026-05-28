@@ -1,0 +1,60 @@
+{
+  "figure": "paper/figures/lerf_main_qualitative_comparison.png",
+  "script": "radio_gs/scripts/compose_lerf_main_qualitative.py",
+  "baseline": "Dr. Splat (repro.)",
+  "baseline_root": "output/baselines/dr_splat/lerf_compat_20260519",
+  "ours": "CTF-GS compact",
+  "ours_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528",
+  "ours_selection": "thr0p65",
+  "ours_protocol": "compact direct-field primitive scores; frozen SigLIP2 prompt ensemble; opacity-gated point-adapter valid mask; support-aware component guard; no VPR feature cache or official RGB SAM3 readout at evaluation",
+  "cases": [
+    {
+      "scene": "figurines",
+      "frame_id": "00041",
+      "query": "old camera",
+      "baseline": "Dr. Splat (repro.)",
+      "baseline_iou": 0.034,
+      "ours_iou": 0.9092,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/figurines/frame_00041.json",
+      "baseline_mask": "output/baselines/dr_splat/lerf_compat_20260519/figurines_1_lerfcompat_topk45_weight_128/predictions_mask_0.4/renders_silhouette/frame_00041/old camera.png",
+      "ours_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/figurines/frame_00041_old camera.png"
+    },
+    {
+      "scene": "ramen",
+      "frame_id": "00024",
+      "query": "onion segments",
+      "baseline": "Dr. Splat (repro.)",
+      "baseline_iou": 0.0549,
+      "ours_iou": 0.7712,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.json",
+      "baseline_mask": "output/baselines/dr_splat/lerf_compat_20260519/ramen_1_lerfcompat_topk45_weight_128/predictions_mask_0.4/renders_silhouette/frame_00024/onion segments.png",
+      "ours_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/ramen/frame_00024_onion segments.png"
+    },
+    {
+      "scene": "teatime",
+      "frame_id": "00140",
+      "query": "bag of cookies",
+      "baseline": "Dr. Splat (repro.)",
+      "baseline_iou": 0.3696,
+      "ours_iou": 0.9743,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/teatime/frame_00140.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/teatime/frame_00140.json",
+      "baseline_mask": "output/baselines/dr_splat/lerf_compat_20260519/teatime_1_lerfcompat_topk45_weight_128/predictions_mask_0.4/renders_silhouette/frame_00140/bag of cookies.png",
+      "ours_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/teatime/frame_00140_bag of cookies.png"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "frame_id": "00140",
+      "query": "plate",
+      "baseline": "Dr. Splat (repro.)",
+      "baseline_iou": 0.0768,
+      "ours_iou": 0.683,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00140.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00140.json",
+      "baseline_mask": "output/baselines/dr_splat/lerf_compat_20260519/waldo_kitchen_1_lerfcompat_topk45_weight_128/predictions_mask_0.4/renders_silhouette/frame_00140/plate.png",
+      "ours_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/waldo_kitchen/frame_00140_plate.png"
+    }
+  ]
+}

@@ -374,9 +374,6 @@
 \@LN{300}{3}
 \@LN{301}{3}
 \@LN@col{1}
-\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Frozen CTF-GS{} LERF-OVS rendered-feature grounding result. mIoU uses a GT-free peak-relative mask threshold of 0.60, a peak-connected-component coarse mask, and a feature-only prompt-conditioned SAM3 boundary readout with heatmap-support acceptance. The boundary readout receives rendered CTF-GS{} features, the text prompt, and the coarse mask; it does not call RGB SAM3 at evaluation time. LocAcc is measured from the heatmap argmax before mask extraction.\relax }}{5}{table.caption.7}\protected@file@percent }
-\newlabel{tab:lerf}{{1}{5}{Frozen \method {} LERF-OVS rendered-feature grounding result. mIoU uses a GT-free peak-relative mask threshold of 0.60, a peak-connected-component coarse mask, and a feature-only prompt-conditioned SAM3 boundary readout with heatmap-support acceptance. The boundary readout receives rendered \method {} features, the text prompt, and the coarse mask; it does not call RGB SAM3 at evaluation time. LocAcc is measured from the heatmap argmax before mask extraction.\relax }{table.caption.7}{}}
-\newlabel{tab:lerf@cref}{{[table][1][]1}{[1][5][]5}}
 \@LN{302}{4}
 \@LN{303}{4}
 \@LN{304}{4}
@@ -395,12 +392,12 @@
 \@LN{317}{4}
 \@LN{318}{4}
 \@LN{319}{4}
-\@writefile{toc}{\contentsline {section}{\numberline {4}\hskip -1em.\nobreakspace  {}Experiments}{5}{section.4}\protected@file@percent }
 \@LN{320}{4}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}\hskip -1em.\nobreakspace  {}Submission-Freeze Protocol}{5}{subsection.4.1}\protected@file@percent }
 \@LN{321}{4}
 \@LN{322}{4}
+\@writefile{toc}{\contentsline {section}{\numberline {4}\hskip -1em.\nobreakspace  {}Experiments}{5}{section.4}\protected@file@percent }
 \@LN{323}{4}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}\hskip -1em.\nobreakspace  {}Submission-Freeze Protocol}{5}{subsection.4.1}\protected@file@percent }
 \@LN{324}{4}
 \@LN{325}{4}
 \@LN{326}{4}
@@ -409,17 +406,10 @@
 \@LN{329}{4}
 \@LN{330}{4}
 \@LN{331}{4}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}\hskip -1em.\nobreakspace  {}LERF-OVS Main Result}{5}{subsection.4.2}\protected@file@percent }
 \@LN{332}{4}
 \@LN{333}{4}
 \@LN{334}{4}
-\@LN@col{2}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces LERF-OVS open-vocabulary grounding comparison. External rows are official-source LocAcc values converted to decimals; CTF-GS{} is the local rendered-feature result. Best per column is in \textbf  {bold}.\relax }}{5}{table.caption.8}\protected@file@percent }
-\newlabel{tab:lerf_ovs_main}{{2}{5}{LERF-OVS open-vocabulary grounding comparison. External rows are official-source LocAcc values converted to decimals; \method {} is the local rendered-feature result. Best per column is in \textbf {bold}.\relax }{table.caption.8}{}}
-\newlabel{tab:lerf_ovs_main@cref}{{[table][2][]2}{[1][5][]5}}
-\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces GT-free rendered-mask boundary calibration on the paper-facing LERF-OVS checkpoints. Threshold rows change only the peak-relative binary mask threshold. The final row keeps threshold 0.60 and adds peak-connected-component filtering, which removes disconnected mask regions away from the query heatmap maximum. LocAcc is measured from the heatmap argmax before mask extraction.\relax }}{5}{table.caption.9}\protected@file@percent }
-\newlabel{tab:rendered_boundary_calibration}{{3}{5}{GT-free rendered-mask boundary calibration on the paper-facing LERF-OVS checkpoints. Threshold rows change only the peak-relative binary mask threshold. The final row keeps threshold 0.60 and adds peak-connected-component filtering, which removes disconnected mask regions away from the query heatmap maximum. LocAcc is measured from the heatmap argmax before mask extraction.\relax }{table.caption.9}{}}
-\newlabel{tab:rendered_boundary_calibration@cref}{{[table][3][]3}{[1][5][]5}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}\hskip -1em.\nobreakspace  {}LERF-OVS Main Result}{5}{subsection.4.2}\protected@file@percent }
 \@LN{335}{4}
 \@LN{336}{4}
 \@LN{337}{4}
@@ -436,6 +426,16 @@
 \@LN{348}{4}
 \@LN{349}{4}
 \@LN{350}{4}
+\@LN@col{2}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Frozen CTF-GS{} LERF-OVS rendered-feature grounding result. mIoU uses a GT-free peak-relative mask threshold of 0.60, a peak-connected-component coarse mask, and a feature-only prompt-conditioned SAM3 boundary readout with heatmap-support acceptance. The boundary readout receives rendered CTF-GS{} features, the text prompt, and the coarse mask; it does not call RGB SAM3 at evaluation time. LocAcc is measured from the heatmap argmax before mask extraction.\relax }}{5}{table.caption.7}\protected@file@percent }
+\newlabel{tab:lerf}{{1}{5}{Frozen \method {} LERF-OVS rendered-feature grounding result. mIoU uses a GT-free peak-relative mask threshold of 0.60, a peak-connected-component coarse mask, and a feature-only prompt-conditioned SAM3 boundary readout with heatmap-support acceptance. The boundary readout receives rendered \method {} features, the text prompt, and the coarse mask; it does not call RGB SAM3 at evaluation time. LocAcc is measured from the heatmap argmax before mask extraction.\relax }{table.caption.7}{}}
+\newlabel{tab:lerf@cref}{{[table][1][]1}{[1][5][]5}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces LERF-OVS open-vocabulary grounding comparison. External rows are official-source LocAcc values converted to decimals; CTF-GS{} is the local rendered-feature result. Best per column is in \textbf  {bold}.\relax }}{5}{table.caption.8}\protected@file@percent }
+\newlabel{tab:lerf_ovs_main}{{2}{5}{LERF-OVS open-vocabulary grounding comparison. External rows are official-source LocAcc values converted to decimals; \method {} is the local rendered-feature result. Best per column is in \textbf {bold}.\relax }{table.caption.8}{}}
+\newlabel{tab:lerf_ovs_main@cref}{{[table][2][]2}{[1][5][]5}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces GT-free rendered-mask boundary calibration on the paper-facing LERF-OVS checkpoints. Threshold rows change only the peak-relative binary mask threshold. The final row keeps threshold 0.60 and adds peak-connected-component filtering, which removes disconnected mask regions away from the query heatmap maximum. LocAcc is measured from the heatmap argmax before mask extraction.\relax }}{5}{table.caption.9}\protected@file@percent }
+\newlabel{tab:rendered_boundary_calibration}{{3}{5}{GT-free rendered-mask boundary calibration on the paper-facing LERF-OVS checkpoints. Threshold rows change only the peak-relative binary mask threshold. The final row keeps threshold 0.60 and adds peak-connected-component filtering, which removes disconnected mask regions away from the query heatmap maximum. LocAcc is measured from the heatmap argmax before mask extraction.\relax }{table.caption.9}{}}
+\newlabel{tab:rendered_boundary_calibration@cref}{{[table][3][]3}{[1][5][]5}}
 \@LN{351}{4}
 \@LN{352}{4}
 \@LN{353}{4}
@@ -446,14 +446,14 @@
 \@LN{358}{4}
 \@LN{359}{4}
 \@LN{360}{4}
-\@LN{361}{4}
 \citation{wu2024opengaussian}
 \citation{kim2025drsplat}
 \citation{li2025instancegaussian}
 \@LN@col{1}
-\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features, a fixed global threshold, and GT-free RGB snap. The compact-field row uses deployed Gaussian-center primitive scores with an opacity-gated point adapter and does not read a VPR cache at inference. The SAM3-box fixed row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout selected by overlap with the rendered mask, not by ground truth. The scene-locked SAM3-box row is diagnostic.\relax }}{6}{table.caption.10}\protected@file@percent }
-\newlabel{tab:lerf-direct-3d-selection}{{4}{6}{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers. The VPR row uses registered primitive features, a fixed global threshold, and GT-free RGB snap. The compact-field row uses deployed Gaussian-center primitive scores with an opacity-gated point adapter and does not read a VPR cache at inference. The SAM3-box fixed row scores compact direct-field primitives, renders the selected 3D primitives, and uses an official SAM3 box-prompt readout selected by overlap with the rendered mask, not by ground truth. The scene-locked SAM3-box row is diagnostic.\relax }{table.caption.10}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are OpenGaussian official paper numbers. The VPR row uses registered primitive features. The compact-field row uses Gaussian-center primitive scores with an opacity-gated point adapter, a frozen SigLIP2 prompt ensemble, and a GT-free RGB/score-component support policy; it does not read a VPR cache or official RGB SAM readout at inference, but it is not the strict no-RGB one-map ablation. The SAM3-box row is a frozen boundary-readout diagnostic after compact 3D primitive selection.\relax }}{6}{table.caption.10}\protected@file@percent }
+\newlabel{tab:lerf-direct-3d-selection}{{4}{6}{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are OpenGaussian official paper numbers. The VPR row uses registered primitive features. The compact-field row uses Gaussian-center primitive scores with an opacity-gated point adapter, a frozen SigLIP2 prompt ensemble, and a GT-free RGB/score-component support policy; it does not read a VPR cache or official RGB SAM readout at inference, but it is not the strict no-RGB one-map ablation. The SAM3-box row is a frozen boundary-readout diagnostic after compact 3D primitive selection.\relax }{table.caption.10}{}}
 \newlabel{tab:lerf-direct-3d-selection@cref}{{[table][4][]4}{[1][6][]6}}
+\@LN{361}{5}
 \@LN{362}{5}
 \@LN{363}{5}
 \@LN{364}{5}
@@ -469,10 +469,10 @@
 \@LN{374}{5}
 \@LN{375}{5}
 \@LN{376}{5}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}\hskip -1em.\nobreakspace  {}LERF Direct 3D Object Selection}{6}{subsection.4.3}\protected@file@percent }
 \@LN{377}{5}
 \@LN{378}{5}
 \@LN{379}{5}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}\hskip -1em.\nobreakspace  {}LERF Direct 3D Object Selection}{6}{subsection.4.3}\protected@file@percent }
 \@LN{380}{5}
 \@LN{381}{5}
 \@LN{382}{5}
@@ -487,6 +487,7 @@
 \@LN{391}{5}
 \@LN{392}{5}
 \@LN{393}{5}
+\@LN{394}{5}
 \@LN@col{2}
 \@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from published source tables and are not same-evaluator local reruns. Rows follow the recent OpenGaFF comparison set, with the OpenGaFF method row intentionally omitted.\relax }}{6}{table.caption.11}\protected@file@percent }
 \newlabel{tab:lerf-direct-3d-context}{{5}{6}{Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from published source tables and are not same-evaluator local reruns. Rows follow the recent OpenGaFF comparison set, with the OpenGaFF method row intentionally omitted.\relax }{table.caption.11}{}}
@@ -494,7 +495,6 @@
 \@writefile{brf}{\backcite{wu2024opengaussian}{{6}{5}{table.caption.11}}}
 \@writefile{brf}{\backcite{kim2025drsplat}{{6}{5}{table.caption.11}}}
 \@writefile{brf}{\backcite{li2025instancegaussian}{{6}{5}{table.caption.11}}}
-\@LN{394}{5}
 \@LN{395}{5}
 \@LN{396}{5}
 \@LN{397}{5}
@@ -536,15 +536,14 @@
 \@LN{433}{5}
 \@LN{434}{5}
 \@LN{435}{5}
+\@LN{436}{5}
 \@LN@col{1}
 \@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Same-evaluator comparison between original RADIO features extracted from RGB frames and CTF-GS{} rendered features. Both use the same frozen SigLIP2 head, scene-category scoring, and GT-free threshold-0.60 plus peak-connected-component mask readout.\relax }}{7}{table.caption.12}\protected@file@percent }
 \newlabel{tab:teacher_vs_rendered}{{6}{7}{Same-evaluator comparison between original RADIO features extracted from RGB frames and \method {} rendered features. Both use the same frozen SigLIP2 head, scene-category scoring, and GT-free threshold-0.60 plus peak-connected-component mask readout.\relax }{table.caption.12}{}}
 \newlabel{tab:teacher_vs_rendered@cref}{{[table][6][]6}{[1][7][]7}}
-\@LN{436}{6}
 \@LN{437}{6}
 \@LN{438}{6}
 \@LN{439}{6}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}\hskip -1em.\nobreakspace  {}Rendered Features vs. Original RADIO Features}{7}{subsection.4.4}\protected@file@percent }
 \@LN{440}{6}
 \@LN{441}{6}
 \@LN{442}{6}
@@ -559,6 +558,7 @@
 \@LN{451}{6}
 \@LN{452}{6}
 \@LN{453}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}\hskip -1em.\nobreakspace  {}Rendered Features vs. Original RADIO Features}{7}{subsection.4.4}\protected@file@percent }
 \@LN{454}{6}
 \@LN{455}{6}
 \@LN{456}{6}
@@ -570,7 +570,6 @@
 \@LN{462}{6}
 \@LN{463}{6}
 \@LN{464}{6}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}\hskip -1em.\nobreakspace  {}Core Component Ablation}{7}{subsection.4.5}\protected@file@percent }
 \@LN{465}{6}
 \@LN{466}{6}
 \@LN{467}{6}
@@ -578,20 +577,18 @@
 \@LN{469}{6}
 \@LN{470}{6}
 \@LN{471}{6}
+\@LN{472}{6}
+\@LN{473}{6}
 \@LN@col{2}
 \@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU.\relax }}{7}{table.caption.13}\protected@file@percent }
 \newlabel{tab:component_ablation}{{7}{7}{Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU.\relax }{table.caption.13}{}}
 \newlabel{tab:component_ablation@cref}{{[table][7][]7}{[1][7][]7}}
-\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Storage footprint accounting for compact teacher-feature fields and optional VPR caches. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Compact ckpt counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors. VPR caches are inference-time artifacts, not persistent trained state.\relax }}{7}{table.caption.14}\protected@file@percent }
-\newlabel{tab:storage_footprint}{{8}{7}{Storage footprint accounting for compact teacher-feature fields and optional VPR caches. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Compact ckpt counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors. VPR caches are inference-time artifacts, not persistent trained state.\relax }{table.caption.14}{}}
-\newlabel{tab:storage_footprint@cref}{{[table][8][]8}{[1][7][]7}}
-\@LN{472}{6}
-\@LN{473}{6}
 \@LN{474}{6}
 \@LN{475}{6}
 \@LN{476}{6}
 \@LN{477}{6}
 \@LN{478}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}\hskip -1em.\nobreakspace  {}Core Component Ablation}{7}{subsection.4.5}\protected@file@percent }
 \@LN{479}{6}
 \@LN{480}{6}
 \@LN{481}{6}
@@ -602,7 +599,6 @@
 \@LN{486}{6}
 \@LN{487}{6}
 \@LN{488}{6}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}\hskip -1em.\nobreakspace  {}Storage Footprint}{7}{subsection.4.6}\protected@file@percent }
 \@LN{489}{6}
 \@LN{490}{6}
 \@LN{491}{6}
@@ -615,23 +611,23 @@
 \@LN{498}{6}
 \@LN{499}{6}
 \@LN{500}{6}
+\@LN{501}{6}
+\@LN{502}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}\hskip -1em.\nobreakspace  {}Storage Footprint}{7}{subsection.4.6}\protected@file@percent }
+\@LN{503}{6}
+\@LN{504}{6}
+\@LN{505}{6}
+\@LN{506}{6}
+\@LN{507}{6}
+\@LN{508}{6}
+\@LN{509}{6}
+\@LN{510}{6}
+\@LN{511}{6}
+\@LN{512}{6}
 \@LN@col{1}
-\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Promptable SAM3-adaptor and dense DINOv3-adaptor tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences. SAM3 point/box prompts are prompt-constrained, mask propagation uses source-view support only, and no external SAM3 mask decoder is called. DINO mask propagation uses source-background contrast 1.10 plus GT-free robust readout: top-$k$ foreground pooling, 2.0$\times $ propagated-area scaling, and peak-component cleanup.\relax }}{8}{table.caption.15}\protected@file@percent }
-\newlabel{tab:sam_dino_tasks}{{9}{8}{Promptable SAM3-adaptor and dense DINOv3-adaptor tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences. SAM3 point/box prompts are prompt-constrained, mask propagation uses source-view support only, and no external SAM3 mask decoder is called. DINO mask propagation uses source-background contrast 1.10 plus GT-free robust readout: top-$k$ foreground pooling, 2.0$\times $ propagated-area scaling, and peak-component cleanup.\relax }{table.caption.15}{}}
-\newlabel{tab:sam_dino_tasks@cref}{{[table][9][]9}{[1][8][]8}}
-\@LN{501}{7}
-\@LN{502}{7}
-\@LN{503}{7}
-\@LN{504}{7}
-\@LN{505}{7}
-\@LN{506}{7}
-\@LN{507}{7}
-\@LN{508}{7}
-\@LN{509}{7}
-\@LN{510}{7}
-\@LN{511}{7}
-\@LN{512}{7}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}\hskip -1em.\nobreakspace  {}Adaptor Downstream Probes}{8}{subsection.4.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Storage footprint accounting for compact teacher-feature fields and optional VPR caches. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Compact ckpt counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors. VPR caches are inference-time artifacts, not persistent trained state.\relax }}{8}{table.caption.14}\protected@file@percent }
+\newlabel{tab:storage_footprint}{{8}{8}{Storage footprint accounting for compact teacher-feature fields and optional VPR caches. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Compact ckpt counts the stored feature-field model, CTR/HCD codec, and VFA/refiner tensors. VPR caches are inference-time artifacts, not persistent trained state.\relax }{table.caption.14}{}}
+\newlabel{tab:storage_footprint@cref}{{[table][8][]8}{[1][7][]8}}
 \@LN{513}{7}
 \@LN{514}{7}
 \@LN{515}{7}
@@ -646,6 +642,7 @@
 \@LN{524}{7}
 \@LN{525}{7}
 \@LN{526}{7}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.7}\hskip -1em.\nobreakspace  {}Adaptor Downstream Probes}{8}{subsection.4.7}\protected@file@percent }
 \@LN{527}{7}
 \@LN{528}{7}
 \@LN{529}{7}
@@ -657,7 +654,6 @@
 \@LN{535}{7}
 \@LN{536}{7}
 \@LN{537}{7}
-\@LN@col{2}
 \@LN{538}{7}
 \@LN{539}{7}
 \@LN{540}{7}
@@ -673,10 +669,13 @@
 \@LN{550}{7}
 \@LN{551}{7}
 \@LN{552}{7}
+\@LN@col{2}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Promptable SAM3-adaptor and dense DINOv3-adaptor tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences. SAM3 point/box prompts are prompt-constrained, mask propagation uses source-view support only, and no external SAM3 mask decoder is called. DINO mask propagation uses source-background contrast 1.10 plus GT-free robust readout: top-$k$ foreground pooling, 2.0$\times $ propagated-area scaling, and peak-component cleanup.\relax }}{8}{table.caption.15}\protected@file@percent }
+\newlabel{tab:sam_dino_tasks}{{9}{8}{Promptable SAM3-adaptor and dense DINOv3-adaptor tasks on LERF-OVS. These probes use the same annotations as the grounding benchmark but replace text queries with adaptor-space prompts or source-target correspondences. SAM3 point/box prompts are prompt-constrained, mask propagation uses source-view support only, and no external SAM3 mask decoder is called. DINO mask propagation uses source-background contrast 1.10 plus GT-free robust readout: top-$k$ foreground pooling, 2.0$\times $ propagated-area scaling, and peak-component cleanup.\relax }{table.caption.15}{}}
+\newlabel{tab:sam_dino_tasks@cref}{{[table][9][]9}{[1][8][]8}}
 \@LN{553}{7}
 \@LN{554}{7}
 \@LN{555}{7}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}\hskip -1em.\nobreakspace  {}ScanNet Direct Point-Query Transfer}{8}{subsection.4.8}\protected@file@percent }
 \@LN{556}{7}
 \@LN{557}{7}
 \@LN{558}{7}
@@ -691,6 +690,7 @@
 \@LN{567}{7}
 \@LN{568}{7}
 \@LN{569}{7}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.8}\hskip -1em.\nobreakspace  {}ScanNet Direct Point-Query Transfer}{8}{subsection.4.8}\protected@file@percent }
 \@LN{570}{7}
 \@LN{571}{7}
 \@LN{572}{7}
@@ -708,20 +708,19 @@
 \@LN{584}{7}
 \@LN{585}{7}
 \@LN{586}{7}
+\@LN{587}{7}
+\@LN{588}{7}
+\@LN{589}{7}
 \@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces ScanNet-v2 open-vocabulary point-cloud understanding under the OpenGaFF/VALA protocol. External baseline rows are copied from the OpenGaFF v2 paper table and reported in percent; the OpenGaFF method row is intentionally omitted. The CTF-GS{} row is our local VALA/OpenGaFF-8 evaluation on the same eight scene ids.\relax }}{9}{table.caption.16}\protected@file@percent }
 \newlabel{tab:scannet_published_context}{{10}{9}{ScanNet-v2 open-vocabulary point-cloud understanding under the OpenGaFF/VALA protocol. External baseline rows are copied from the OpenGaFF v2 paper table and reported in percent; the OpenGaFF method row is intentionally omitted. The \method {} row is our local VALA/OpenGaFF-8 evaluation on the same eight scene ids.\relax }{table.caption.16}{}}
 \newlabel{tab:scannet_published_context@cref}{{[table][10][]10}{[1][8][]9}}
 \@LN@col{1}
 \@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces ScanNet VALA8 category stability for the promoted DINO-CV contextual kNN readout with spatial logit propagation. Statistics are per-class IoU across scenes where the class appears; ``range'' is min--max IoU.\relax }}{9}{table.caption.17}\protected@file@percent }
 \newlabel{tab:scannet_category_stability}{{11}{9}{ScanNet VALA8 category stability for the promoted DINO-CV contextual kNN readout with spatial logit propagation. Statistics are per-class IoU across scenes where the class appears; ``range'' is min--max IoU.\relax }{table.caption.17}{}}
-\newlabel{tab:scannet_category_stability@cref}{{[table][11][]11}{[1][8][]9}}
+\newlabel{tab:scannet_category_stability@cref}{{[table][11][]11}{[1][9][]9}}
 \@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces Submission efficiency and cost evidence. Runtime rows use explicit freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16 teacher features against the stored compact feature-field footprint.\relax }}{9}{table.caption.18}\protected@file@percent }
 \newlabel{tab:efficiency_cost}{{12}{9}{Submission efficiency and cost evidence. Runtime rows use explicit freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16 teacher features against the stored compact feature-field footprint.\relax }{table.caption.18}{}}
-\newlabel{tab:efficiency_cost@cref}{{[table][12][]12}{[1][8][]9}}
-\@LN{587}{8}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}\hskip -1em.\nobreakspace  {}Efficiency and Cost}{9}{subsection.4.9}\protected@file@percent }
-\@LN{588}{8}
-\@LN{589}{8}
+\newlabel{tab:efficiency_cost@cref}{{[table][12][]12}{[1][9][]9}}
 \@LN{590}{8}
 \@LN{591}{8}
 \@LN{592}{8}
@@ -729,26 +728,26 @@
 \@LN{594}{8}
 \@LN{595}{8}
 \@LN{596}{8}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.10}\hskip -1em.\nobreakspace  {}Qualitative Results}{9}{subsection.4.10}\protected@file@percent }
 \@LN{597}{8}
 \@LN{598}{8}
 \@LN{599}{8}
 \@LN{600}{8}
 \@LN{601}{8}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.9}\hskip -1em.\nobreakspace  {}Efficiency and Cost}{9}{subsection.4.9}\protected@file@percent }
 \@LN{602}{8}
 \@LN{603}{8}
 \@LN{604}{8}
 \@LN{605}{8}
-\@LN@col{2}
-\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off.\relax }}{9}{table.caption.22}\protected@file@percent }
-\newlabel{tab:failure_analysis}{{13}{9}{Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off.\relax }{table.caption.22}{}}
-\newlabel{tab:failure_analysis@cref}{{[table][13][]13}{[1][9][]9}}
 \@LN{606}{8}
-\@writefile{toc}{\contentsline {subsection}{\numberline {4.11}\hskip -1em.\nobreakspace  {}Failure Analysis}{9}{subsection.4.11}\protected@file@percent }
 \@LN{607}{8}
 \@LN{608}{8}
+\@LN@col{2}
+\@writefile{lot}{\contentsline {table}{\numberline {13}{\ignorespaces Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off.\relax }}{9}{table.caption.20}\protected@file@percent }
+\newlabel{tab:failure_analysis}{{13}{9}{Representative fragile LERF-OVS categories from the frozen rendered-feature evaluation. Low LocAcc with nonzero mIoU highlights the peak-vs-region trade-off.\relax }{table.caption.20}{}}
+\newlabel{tab:failure_analysis@cref}{{[table][13][]13}{[1][9][]9}}
 \@LN{609}{8}
 \@LN{610}{8}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.10}\hskip -1em.\nobreakspace  {}Qualitative Results}{9}{subsection.4.10}\protected@file@percent }
 \@LN{611}{8}
 \@LN{612}{8}
 \@LN{613}{8}
@@ -757,8 +756,6 @@
 \@LN{616}{8}
 \@LN{617}{8}
 \@LN{618}{8}
-\@writefile{toc}{\contentsline {section}{\numberline {5}\hskip -1em.\nobreakspace  {}Discussion}{9}{section.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Why feature reconstruction matters.}{9}{section*.23}\protected@file@percent }
 \@LN{619}{8}
 \@LN{620}{8}
 \@LN{621}{8}
@@ -766,39 +763,41 @@
 \@LN{623}{8}
 \@LN{624}{8}
 \@LN{625}{8}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.11}\hskip -1em.\nobreakspace  {}Failure Analysis}{9}{subsection.4.11}\protected@file@percent }
 \@LN{626}{8}
 \@LN{627}{8}
-\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Qualitative open-vocabulary grounding examples from the calibrated LERF overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen C-RADIOv4-H{} teacher heatmap, and rendered CTF-GS{} heatmap for a representative query. Rendered masks use the same GT-free threshold-0.60 boundary calibration as Table\nobreakspace  {}\ref  {tab:lerf}.\relax }}{10}{figure.caption.19}\protected@file@percent }
-\newlabel{fig:qualitative}{{2}{10}{Qualitative open-vocabulary grounding examples from the calibrated LERF overlay runs. Each row shows the RGB image, ground-truth mask overlay, frozen \radio {} teacher heatmap, and rendered \method {} heatmap for a representative query. Rendered masks use the same GT-free threshold-0.60 boundary calibration as Table~\ref {tab:lerf}.\relax }{figure.caption.19}{}}
+\@LN{628}{8}
+\@LN{629}{8}
+\@LN{630}{8}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Main LERF qualitative comparison under the direct-3D object-selection protocol. Each row fixes a scene, annotated frame, and text query, then shows the RGB input, ground-truth mask, a reproduced Dr. Splat mask, and our compact direct-field mask. IoU is shown per panel for auditability. CTF-GS{} queries the compact foundation-feature Gaussian map directly; VPR is used only as a training teacher and no official RGB SAM3 boundary readout is used for these predictions.\relax }}{10}{figure.caption.19}\protected@file@percent }
+\newlabel{fig:qualitative}{{2}{10}{Main LERF qualitative comparison under the direct-3D object-selection protocol. Each row fixes a scene, annotated frame, and text query, then shows the RGB input, ground-truth mask, a reproduced Dr. Splat mask, and our compact direct-field mask. IoU is shown per panel for auditability. \method {} queries the compact foundation-feature Gaussian map directly; VPR is used only as a training teacher and no official RGB SAM3 boundary readout is used for these predictions.\relax }{figure.caption.19}{}}
 \newlabel{fig:qualitative@cref}{{[figure][2][]2}{[1][9][]10}}
 \@LN@col{1}
-\@LN{628}{9}
-\@LN{629}{9}
-\@LN{630}{9}
 \@LN{631}{9}
 \@LN{632}{9}
-\@writefile{toc}{\contentsline {paragraph}{External-baseline scope.}{10}{section*.24}\protected@file@percent }
 \@LN{633}{9}
 \@LN{634}{9}
 \@LN{635}{9}
 \@LN{636}{9}
 \@LN{637}{9}
+\@writefile{toc}{\contentsline {section}{\numberline {5}\hskip -1em.\nobreakspace  {}Discussion}{10}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why feature reconstruction matters.}{10}{section*.21}\protected@file@percent }
 \@LN{638}{9}
 \@LN{639}{9}
 \@LN{640}{9}
-\@writefile{toc}{\contentsline {section}{\numberline {6}\hskip -1em.\nobreakspace  {}Limitations}{10}{section.6}\protected@file@percent }
 \@LN{641}{9}
 \@LN{642}{9}
 \@LN{643}{9}
 \@LN{644}{9}
-\@LN{645}{9}
 \@LN@col{2}
+\@LN{645}{9}
 \@LN{646}{9}
 \@LN{647}{9}
 \@LN{648}{9}
 \@LN{649}{9}
 \@LN{650}{9}
 \@LN{651}{9}
+\@writefile{toc}{\contentsline {paragraph}{External-baseline scope.}{10}{section*.22}\protected@file@percent }
 \@LN{652}{9}
 \@LN{653}{9}
 \@LN{654}{9}
@@ -806,40 +805,9 @@
 \@LN{656}{9}
 \@LN{657}{9}
 \@LN{658}{9}
-\@LN{659}{9}
-\@LN{660}{9}
-\@LN{661}{9}
-\@LN{662}{9}
-\@LN{663}{9}
-\@LN{664}{9}
-\@LN{665}{9}
 \bibstyle{ieeenat_fullname}
 \bibdata{radio_gs_refs}
 \bibcite{cen2023saga}{{1}{2023}{{Cen et~al.}}{{Cen, Fang, Yang, Xie, Zhang, Shen, and Tian}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Qualitative LERF direct 3D object selection with compact direct-field scores and frozen official SAM3 box-prompt readout. Each row fixes a scene, annotated frame, and query, then shows RGB, ground-truth mask, the rendered direct-field selection refined by the SAM3 box readout, and an error map. Green is true positive, red is false positive, and blue is false negative. The Waldo Kitchen row illustrates that boundary quality improves but clutter and fragmentation remain the main failure mode.\relax }}{11}{figure.caption.20}\protected@file@percent }
-\newlabel{fig:vpr_direct_3d_qual}{{3}{11}{Qualitative LERF direct 3D object selection with compact direct-field scores and frozen official SAM3 box-prompt readout. Each row fixes a scene, annotated frame, and query, then shows RGB, ground-truth mask, the rendered direct-field selection refined by the SAM3 box readout, and an error map. Green is true positive, red is false positive, and blue is false negative. The Waldo Kitchen row illustrates that boundary quality improves but clutter and fragmentation remain the main failure mode.\relax }{figure.caption.20}{}}
-\newlabel{fig:vpr_direct_3d_qual@cref}{{[figure][3][]3}{[1][9][]11}}
-\@LN@col{1}
-\@LN{666}{10}
-\@LN{667}{10}
-\@LN{668}{10}
-\@LN{669}{10}
-\@LN{670}{10}
-\@LN{671}{10}
-\@writefile{toc}{\contentsline {section}{\numberline {7}\hskip -1em.\nobreakspace  {}Conclusion}{11}{section.7}\protected@file@percent }
-\@LN{672}{10}
-\@LN{673}{10}
-\@LN{674}{10}
-\@LN@col{2}
-\@LN{675}{10}
-\@LN{676}{10}
-\@LN{677}{10}
-\@LN{678}{10}
-\@LN{679}{10}
-\@LN{680}{10}
-\@LN{681}{10}
-\@LN{682}{10}
-\@LN{683}{10}
 \bibcite{chiou2026profuse}{{2}{2026}{{Chiou et~al.}}{{Chiou, Cheng, and Yang}}}
 \bibcite{huang2025openinsgaussian}{{3}{2025}{{Huang et~al.}}{{Huang, Chen, Hu, Huang, Gong, and Liu}}}
 \bibcite{kerbl2023gaussians}{{4}{2023}{{Kerbl et~al.}}{{Kerbl, Kopanas, Leimkuehler, and Drettakis}}}
@@ -852,87 +820,134 @@
 \bibcite{piekenbrinck2025opensplat3d}{{11}{2025}{{Piekenbrinck et~al.}}{{Piekenbrinck, Schmidt, Hermans, Vaskevicius, Linder, and Leibe}}}
 \bibcite{qin2024langsplat}{{12}{2024}{{Qin et~al.}}{{Qin, Li, Zhou, Wang, and Pfister}}}
 \bibcite{ranzinger2024radio}{{13}{2024}{{Ranzinger et~al.}}{{Ranzinger, Heinrich, Kautz, and Molchanov}}}
-\bibcite{shi2024legaussians}{{14}{2024}{{Shi et~al.}}{{Shi, Wang, Duan, and Guan}}}
-\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Qualitative promptable downstream probes from reconstructed features. Top: SAM3 mask-prompt propagation from a source annotation to a target view. Bottom: DINOv3 source-mask propagation with the promoted background-suppressed readout. Dense correspondences and homography-RANSAC filtering are kept as diagnostic visualizations rather than the main quantitative DINO evidence.\relax }}{12}{figure.caption.21}\protected@file@percent }
-\newlabel{fig:sam_dino_tasks_qual}{{4}{12}{Qualitative promptable downstream probes from reconstructed features. Top: SAM3 mask-prompt propagation from a source annotation to a target view. Bottom: DINOv3 source-mask propagation with the promoted background-suppressed readout. Dense correspondences and homography-RANSAC filtering are kept as diagnostic visualizations rather than the main quantitative DINO evidence.\relax }{figure.caption.21}{}}
-\newlabel{fig:sam_dino_tasks_qual@cref}{{[figure][4][]4}{[1][9][]12}}
 \@LN@col{1}
-\@LN{684}{11}
-\@LN{685}{11}
-\@LN{686}{11}
-\@LN{687}{11}
-\@LN{688}{11}
-\@LN{689}{11}
-\@LN{690}{11}
-\@LN{691}{11}
-\@LN{692}{11}
-\@LN{693}{11}
-\@LN{694}{11}
-\@LN{695}{11}
-\@LN{696}{11}
-\@LN{697}{11}
-\@LN{698}{11}
-\@LN{699}{11}
-\@LN{700}{11}
-\@LN{701}{11}
-\@LN{702}{11}
-\@LN{703}{11}
-\@LN{704}{11}
-\@LN{705}{11}
-\@LN{706}{11}
-\@LN{707}{11}
-\@LN{708}{11}
-\@LN{709}{11}
-\@LN{710}{11}
-\@LN{711}{11}
-\@LN{712}{11}
-\@LN{713}{11}
+\@LN{659}{10}
+\@writefile{toc}{\contentsline {section}{\numberline {6}\hskip -1em.\nobreakspace  {}Limitations}{11}{section.6}\protected@file@percent }
+\@LN{660}{10}
+\@LN{661}{10}
+\@LN{662}{10}
+\@LN{663}{10}
+\@LN{664}{10}
+\@LN{665}{10}
+\@LN{666}{10}
+\@LN{667}{10}
+\@LN{668}{10}
+\@LN{669}{10}
+\@LN{670}{10}
+\@LN{671}{10}
+\@LN{672}{10}
+\@LN{673}{10}
+\@LN{674}{10}
+\@LN{675}{10}
+\@LN{676}{10}
+\@LN{677}{10}
+\@LN{678}{10}
+\@LN{679}{10}
+\@LN{680}{10}
+\@LN{681}{10}
+\@LN{682}{10}
+\@LN{683}{10}
+\@LN{684}{10}
+\@LN{685}{10}
+\@LN{686}{10}
+\@LN{687}{10}
+\@LN{688}{10}
+\@LN{689}{10}
+\@LN{690}{10}
+\@LN{691}{10}
+\@LN{692}{10}
+\@LN{693}{10}
+\@LN{694}{10}
+\@writefile{toc}{\contentsline {section}{\numberline {7}\hskip -1em.\nobreakspace  {}Conclusion}{11}{section.7}\protected@file@percent }
+\@LN{695}{10}
+\@LN{696}{10}
+\@LN{697}{10}
+\@LN{698}{10}
+\@LN{699}{10}
+\@LN{700}{10}
+\@LN{701}{10}
+\@LN{702}{10}
+\@LN{703}{10}
+\@LN{704}{10}
+\@LN{705}{10}
+\@LN{706}{10}
+\@LN{707}{10}
+\@LN{708}{10}
 \@LN@col{2}
-\@LN{714}{11}
-\@LN{715}{11}
-\@LN{716}{11}
-\@LN{717}{11}
-\@LN{718}{11}
-\@LN{719}{11}
-\@LN{720}{11}
-\@LN{721}{11}
-\@LN{722}{11}
-\@LN{723}{11}
-\@LN{724}{11}
-\@LN{725}{11}
-\@LN{726}{11}
-\@LN{727}{11}
-\@LN{728}{11}
-\@LN{729}{11}
-\@LN{730}{11}
-\@LN{731}{11}
-\@LN{732}{11}
-\@LN{733}{11}
-\@LN{734}{11}
-\@LN{735}{11}
-\@LN{736}{11}
-\@LN{737}{11}
-\@LN{738}{11}
-\@LN{739}{11}
-\@LN{740}{11}
-\@LN{741}{11}
-\@LN{742}{11}
-\@LN{743}{11}
+\@LN{709}{10}
+\@LN{710}{10}
+\@LN{711}{10}
+\@LN{712}{10}
+\@LN{713}{10}
+\@LN{714}{10}
+\@LN{715}{10}
+\@LN{716}{10}
+\@LN{717}{10}
+\@LN{718}{10}
+\@LN{719}{10}
+\@LN{720}{10}
+\@LN{721}{10}
+\@LN{722}{10}
+\@LN{723}{10}
+\@LN{724}{10}
+\@LN{725}{10}
+\@LN{726}{10}
+\@LN{727}{10}
+\@LN{728}{10}
+\@LN{729}{10}
+\@LN{730}{10}
+\@LN{731}{10}
+\@LN{732}{10}
+\@LN{733}{10}
+\@LN{734}{10}
+\@LN{735}{10}
+\@LN{736}{10}
+\@LN{737}{10}
+\@LN{738}{10}
+\@LN{739}{10}
+\@LN{740}{10}
+\@LN{741}{10}
+\@LN{742}{10}
+\@LN{743}{10}
+\@LN{744}{10}
+\@LN{745}{10}
+\@LN{746}{10}
+\@LN{747}{10}
+\@LN{748}{10}
+\@LN{749}{10}
+\@LN{750}{10}
+\@LN{751}{10}
+\@LN{752}{10}
+\@LN{753}{10}
+\@LN{754}{10}
+\@LN{755}{10}
+\@LN{756}{10}
+\@LN{757}{10}
+\@LN{758}{10}
+\@LN{759}{10}
+\@LN{760}{10}
+\bibcite{shi2024legaussians}{{14}{2024}{{Shi et~al.}}{{Shi, Wang, Duan, and Guan}}}
 \bibcite{wu2024opengaussian}{{15}{2024}{{Wu et~al.}}{{Wu, Meng, Li, Wu, Shi, Cheng, Zhao, Feng, Ding, Wang, and Zhang}}}
 \bibcite{liu2024fmgs}{{16}{2024}{{Zuo et~al.}}{{Zuo, Samangouei, Zhou, Di, and Li}}}
 \@LN@col{1}
-\@LN{744}{12}
-\@LN{745}{12}
-\@LN{746}{12}
-\@LN{747}{12}
-\@LN{748}{12}
-\@LN{749}{12}
-\@LN{750}{12}
-\@LN{751}{12}
-\@LN{752}{12}
-\@LN{753}{12}
-\@LN{754}{12}
-\@LN{755}{12}
-\@LN{756}{12}
-\@LN{757}{12}
+\@LN{761}{11}
+\@LN{762}{11}
+\@LN{763}{11}
+\@LN{764}{11}
+\@LN{765}{11}
+\@LN{766}{11}
+\@LN{767}{11}
+\@LN{768}{11}
+\@LN{769}{11}
+\@LN{770}{11}
+\@LN{771}{11}
+\@LN{772}{11}
+\@LN{773}{11}
+\@LN{774}{11}
+\@LN{775}{11}
+\@LN{776}{11}
+\@LN{777}{11}
+\@LN{778}{11}
+\@LN{779}{11}
+\@LN{780}{11}
 \@LN@col{2}

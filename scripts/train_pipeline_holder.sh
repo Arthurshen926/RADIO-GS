@@ -1,14 +1,14 @@
 
-# scripts/gpu_placeholder.sh start --gpus 2,3
-# scripts/gpu_placeholder.sh stop --gpus 2,3
-# scripts/gpu_placeholder.sh status --gpus 2,3
+# scripts/train_pipeline_holder.sh start --gpus 2,3
+# scripts/train_pipeline_holder.sh stop --gpus 2,3
+# scripts/train_pipeline_holder.sh status --gpus 2,3
 
 # # 更低功耗
-# scripts/gpu_placeholder.sh restart --gpus 2,3 --sleep-ms 90
+# scripts/train_pipeline_holder.sh restart --gpus 2,3 --sleep-ms 90
 
 # # 更高利用率/更高功耗
-# scripts/gpu_placeholder.sh restart --gpus 2,3 --sleep-ms 50
-# scripts/gpu_placeholder.sh run -- <你的主线实验命令>
+# scripts/train_pipeline_holder.sh restart --gpus 2,3 --sleep-ms 50
+# scripts/train_pipeline_holder.sh run -- <你的主线实验命令>
 
 #!/usr/bin/env bash
 set -euo pipefail

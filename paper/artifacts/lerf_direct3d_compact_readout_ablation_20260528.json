@@ -1,0 +1,122 @@
+{
+  "artifact": "lerf_direct3d_compact_readout_ablation_20260528",
+  "created": "2026-05-28",
+  "protocol": "LERF-OVS OpenGaussian-style query-select-render direct 3D object selection",
+  "definitions": {
+    "pure_one_map": {
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": false,
+      "notes": "Compact Gaussian-center primitive scores only. The score cache is an evaluation-speed cache of compact-field primitive scores, not a VPR cache."
+    },
+    "guarded_compact": {
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": true,
+      "rgb_postprocess": "GT-free RGB/GrabCut component-support guard"
+    }
+  },
+  "rows": {
+    "compact_direct_previous_promoted_baseline": {
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": true,
+      "uses_prompt_ensemble": false,
+      "miou": 0.4836,
+      "acc025": 0.6426,
+      "boundary_f": 0.5983
+    },
+    "compact_prompt_ensemble_pure_onemap_thr0p70": {
+      "source_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_pure_onemap_20260528",
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": false,
+      "uses_prompt_ensemble": true,
+      "mask_refinement": "none",
+      "global_threshold": "thr0p70",
+      "miou": 0.45702792704105377,
+      "acc025": 0.6850818896429425,
+      "boundary_f": 0.6165698766708374,
+      "trimap_iou": 0.27713826671242714,
+      "per_scene": {
+        "figurines": {
+          "miou": 0.4213467538356781,
+          "acc025": 0.6607142857142857,
+          "boundary_f": 0.6223722696304321,
+          "trimap_iou": 0.1659810096025467
+        },
+        "ramen": {
+          "miou": 0.5796207785606384,
+          "acc025": 0.8169014084507042,
+          "boundary_f": 0.7545341849327087,
+          "trimap_iou": 0.38483715057373047
+        },
+        "teatime": {
+          "miou": 0.5286667943000793,
+          "acc025": 0.7627118644067796,
+          "boundary_f": 0.7017290592193604,
+          "trimap_iou": 0.375980406999588
+        },
+        "waldo_kitchen": {
+          "miou": 0.2984773814678192,
+          "acc025": 0.5,
+          "boundary_f": 0.3876439929008484,
+          "trimap_iou": 0.18175449967384338
+        }
+      }
+    },
+    "compact_prompt_ensemble_rgb_component_guard_thr0p65": {
+      "source_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_sweep_20260528",
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": true,
+      "rgb_postprocess": "GT-free RGB/GrabCut component-support guard",
+      "uses_prompt_ensemble": true,
+      "global_threshold": "thr0p65",
+      "miou": 0.49997589737176895,
+      "acc025": 0.7051470998564577,
+      "boundary_f": 0.634491816163063,
+      "trimap_iou": 0.32125306501984596,
+      "per_scene": {
+        "figurines": {
+          "miou": 0.5095821622865549,
+          "acc025": 0.6785714285714286,
+          "boundary_f": 0.6692432761192322,
+          "trimap_iou": 0.26777809858322144
+        },
+        "ramen": {
+          "miou": 0.5903075933456421,
+          "acc025": 0.8169014084507042,
+          "boundary_f": 0.7473185658454895,
+          "trimap_iou": 0.40479591488838196
+        },
+        "teatime": {
+          "miou": 0.5693758726119995,
+          "acc025": 0.7796610169491526,
+          "boundary_f": 0.7198487517312368,
+          "trimap_iou": 0.40475836396217346
+        },
+        "waldo_kitchen": {
+          "miou": 0.33063796124362883,
+          "acc025": 0.5454545454545454,
+          "boundary_f": 0.40155667095629376,
+          "trimap_iou": 0.20767988264560698
+        }
+      }
+    },
+    "compact_prompt_ensemble_rgb_score_component_guard_thr0p55": {
+      "source_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528",
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": true,
+      "rgb_postprocess": "GT-free RGB/GrabCut boundary snapping plus compact score-heatmap component filtering",
+      "uses_prompt_ensemble": true,
+      "global_threshold": "thr0p55",
+      "miou": 0.501373864710331,
+      "acc025": 0.7044309383271872,
+      "boundary_f": 0.63053347915411,
+      "trimap_iou": 0.3224659077823162
+    }
+  },
+  "conclusion": "The latest overlap-balanced direct-3D row is no-VPR-cache and no-official-SAM, but it is not the strict no-RGB one-map row. The strict pure one-map row reaches 0.4570 mIoU / 0.6851 Acc@0.25; the deployed score-component guarded compact readout reaches 0.5014 mIoU / 0.7044 Acc@0.25."
+}

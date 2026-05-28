@@ -35,6 +35,8 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     normalize_registered_feature_sums,
     accumulate_raster_contribution_features,
     keep_largest_mask_component,
+    keep_largest_mask_component_if_dominant,
+    keep_mask_components_by_heatmap_score,
     refine_mask_with_rgb_edges,
     refine_mask_with_sam3_feature_grabcut,
     sample_registration_view_weights,
@@ -93,6 +95,8 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert "low_confidence_and_proposal_consensus" in result.stdout
     assert "--proposal_consensus_threshold" in result.stdout
     assert "raster_adjoint" in result.stdout
+    assert "rgb_grabcut_score_component_guard" in result.stdout
+    assert "--score_component_guard_min_mass_fraction" in result.stdout
 
 
 def test_direct_3d_cli_rejects_oracle_prompt_without_diagnostic_flag():
@@ -173,6 +177,110 @@ def test_refine_mask_with_sam3_adaptor_features_snaps_overwide_boundary():
     assert report["attempted"] is True
     assert report["accepted"] is True
     assert refined_iou > initial_iou + 0.20
+
+
+def test_keep_largest_mask_component_if_dominant_preserves_multicomponent_support():
+    mask = np.zeros((8, 8), dtype=bool)
+    mask[1:3, 1:3] = True
+    mask[5:7, 5:7] = True
+
+    guarded, report = keep_largest_mask_component_if_dominant(
+        mask,
+        min_largest_fraction=0.65,
+    )
+
+    assert guarded.tolist() == mask.tolist()
+    assert report["component_guard_kept_largest"] is False
+    assert report["component_guard_component_count"] == 2
+    assert report["component_guard_largest_fraction"] == 0.5
+
+
+def test_keep_largest_mask_component_if_dominant_removes_small_fragments():
+    mask = np.zeros((10, 10), dtype=bool)
+    mask[1:7, 1:7] = True
+    mask[8:10, 8:10] = True
+
+    guarded, report = keep_largest_mask_component_if_dominant(
+        mask,
+        min_largest_fraction=0.65,
+    )
+
+    assert int(guarded.sum()) == 36
+    assert report["component_guard_kept_largest"] is True
+    assert report["component_guard_component_count"] == 2
+    assert report["component_guard_largest_fraction"] >= 0.9
+
+
+def test_keep_largest_mask_component_if_dominant_uses_small_support_floor():
+    mask = np.zeros((8, 8), dtype=bool)
+    mask[1:3, 1:3] = True
+    mask[5:7, 5:7] = True
+
+    guarded, report = keep_largest_mask_component_if_dominant(
+        mask,
+        min_largest_fraction=0.65,
+        min_total_pixels_for_multicomponent=12,
+    )
+
+    assert int(guarded.sum()) == 4
+    assert report["component_guard_kept_largest"] is True
+    assert report["component_guard_kept_largest_due_to_small_support"] is True
+    assert report["component_guard_min_total_pixels_for_multicomponent"] == 12
+
+
+def test_keep_mask_components_by_heatmap_score_keeps_high_score_support():
+    mask = np.zeros((10, 10), dtype=bool)
+    mask[1:7, 1:7] = True
+    mask[8:10, 8:10] = True
+    heatmap = np.zeros((10, 10), dtype=np.float32)
+    heatmap[1:7, 1:7] = 0.02
+    heatmap[8:10, 8:10] = 1.0
+
+    guarded, report = keep_mask_components_by_heatmap_score(
+        mask,
+        heatmap,
+        min_mass_fraction=0.5,
+    )
+
+    assert int(guarded.sum()) == 4
+    assert guarded[8:10, 8:10].all()
+    assert report["score_component_guard_component_count"] == 2
+    assert report["score_component_guard_kept_components"] == 1
+
+
+def test_keep_mask_components_by_heatmap_score_can_preserve_multiple_components():
+    mask = np.zeros((10, 10), dtype=bool)
+    mask[1:4, 1:4] = True
+    mask[6:9, 6:9] = True
+    heatmap = np.zeros((10, 10), dtype=np.float32)
+    heatmap[1:4, 1:4] = 1.0
+    heatmap[6:9, 6:9] = 0.8
+
+    guarded, report = keep_mask_components_by_heatmap_score(
+        mask,
+        heatmap,
+        min_mass_fraction=0.5,
+        min_total_pixels_for_multicomponent=0,
+    )
+
+    assert guarded.tolist() == mask.tolist()
+    assert report["score_component_guard_kept_components"] == 2
+
+
+def test_keep_mask_components_by_heatmap_score_can_recover_tiny_support_from_heatmap():
+    mask = np.zeros((8, 8), dtype=bool)
+    heatmap = np.zeros((8, 8), dtype=np.float32)
+    heatmap[3:5, 3:5] = 1.0
+
+    guarded, report = keep_mask_components_by_heatmap_score(
+        mask,
+        heatmap,
+        min_recovery_pixels=4,
+    )
+
+    assert int(guarded.sum()) == 4
+    assert guarded[3:5, 3:5].all()
+    assert report["score_component_guard_heatmap_recovered"] is True
 
 
 def test_smooth_scores_with_voxel_proposals_recovers_noisy_object_member():

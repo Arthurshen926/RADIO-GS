@@ -486,13 +486,13 @@ def build_deck() -> None:
         ["SAM3 point prompt", "1.000 / 0.370", "1.000 / 0.417", "mask mIoU win"],
         ["SAM3 box prompt", "0.870 / 0.656", "0.822 / 0.664", "mask mIoU win"],
         ["DINO dense matching", "0.572 / 0.855", "0.539 / 0.905", "smooth similarity"],
-        ["DINO mask prop.", "0.780 / 0.481", "0.773 / 0.446", "gap narrowed"],
+        ["DINO mask prop.", "0.766 / 0.461", "0.787 / 0.468", "multi-head win"],
     ]
     deck.table(slide, 0.55, 1.25, 6.3, 2.35, rows, font_size=9, emphasize_rows=[3])
     deck.image(slide, "paper/figures/lerf_sam_dino_tasks_qualitative.png", 7.15, 1.25, 5.4, 2.75)
     deck.bullets(slide, 0.9, 4.4, 11.1, 1.45, [
         "Rendered features 在 SAM3-adaptor prompt mask mIoU 上超过 frame-wise teacher。",
-        "DINO robust propagation 进一步提升 rendered mIoU，但同一读出下仍未完全追平 teacher。"
+        "DINO support + SAM-adaptor boundary readout 让 mask propagation mIoU 也超过同一读出下的 teacher。"
     ], 15)
 
     slide = deck.add_slide("ScanNet v67：跨域 direct point-query", "Results")

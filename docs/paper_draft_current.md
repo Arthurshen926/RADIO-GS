@@ -123,11 +123,12 @@ Promoted adaptor/cross-view candidate:
 Use `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md` and the compact
 table snippet `paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex`. The
 consolidated 2D evidence shows that rendered CTF-GS features improve the main
-LERF text-grounding mIoU over frame-wise RADIO teacher features (0.5243 vs.
-0.4634) and win 5/6 primary selected frozen-head metrics. The claim should stay
-qualified: CTF-GS improves selected downstream feature-usability metrics, while
-DINOv3 mask propagation mIoU remains teacher-stronger under the same frozen
-readout (0.4805 vs. 0.5119).
+LERF text-grounding mIoU over frame-wise RADIO teacher features (0.5707 vs.
+0.4634) and win 6/6 primary selected frozen-head metrics. The claim should stay
+qualified to primary feature-usability metrics: the DINOv3 mask-propagation row
+now favors CTF-GS with the multi-head DINO-support/SAM-boundary readout
+(0.4677 vs. 0.4606 mIoU), while secondary SAM LocAcc and DINO dense HitRate
+caveats remain.
 
 ### LERF Direct 3D Object Selection
 
@@ -242,7 +243,7 @@ The feature-error/text-relevance audit supports the reconstruction thesis:
 r=0.9568 and with LocAcc error at r=0.8713 across the four frozen LERF scenes.
 The nearest-view cache baseline is now measured under the same LERF evaluator:
 an unwarped nearest cached RADIO frame reaches only 0.2722 macro LocAcc /
-0.1545 macro mIoU, versus 0.8712 / 0.5243 for rendered CTF-GS features. This
+0.1545 macro mIoU, versus 0.8598 / 0.5707 for rendered CTF-GS features. This
 should be used as a cache-only control, not a 3D scene-memory baseline.
 The full per-Gaussian 1280-D explicit RADIO-memory baseline is also now
 measured under the same evaluator: it registers cached teacher features to

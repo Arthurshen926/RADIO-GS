@@ -15,6 +15,7 @@ from radio_gs.scripts.eval_lerf_sam_dino_tasks import (
     propagate_mask_by_dense_matches,
     refine_propagated_mask_with_feature_boundary,
     scaled_bounded_area,
+    select_dino_boundary_refinement_feature,
     topk_mask_from_scores,
     transported_match_score_map,
 )
@@ -297,6 +298,21 @@ def test_refine_propagated_mask_with_feature_boundary_sharpens_object_region():
     expected[1:3, 1:3] = 1
     assert report["accepted"] is True
     assert np.array_equal(refined, expected)
+
+
+def test_select_dino_boundary_refinement_feature_can_use_sam_or_hybrid():
+    dino = torch.zeros(2, 3, 3)
+    dino[0] = 1.0
+    sam = torch.zeros(3, 6, 6)
+    sam[1] = 1.0
+
+    sam_selected = select_dino_boundary_refinement_feature(dino, sam, family="sam3")
+    hybrid = select_dino_boundary_refinement_feature(dino, sam, family="hybrid")
+    fallback = select_dino_boundary_refinement_feature(dino, None, family="sam3")
+
+    assert sam_selected.shape == sam.shape
+    assert hybrid.shape == (5, 3, 3)
+    assert fallback is dino
 
 
 def test_refine_propagated_mask_with_feature_boundary_rejects_peak_dropping_result():

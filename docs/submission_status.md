@@ -120,27 +120,24 @@ Under that framing, the paper solves the following problem:
 4. The project has credible auxiliary evidence that the learned feature field is useful beyond grounding, especially on Replica room_0 depth and segmentation.
 5. The freeze package now includes formal LERF overlay/profile runs for all four main scenes plus one legacy ScanNet evaluation profile.
 6. The LERF evaluator already includes a same-protocol feature-source check:
-   rendered RADIO-GS features outperform original RADIO RGB features on macro
-   localization accuracy (0.8712 vs. 0.7985) and improve calibrated macro mIoU
-   (0.5243 vs. 0.4634) under the frozen SigLIP2 scoring setup.
+   rendered CTF-GS features outperform original RADIO RGB features on macro
+   localization accuracy (0.8598 vs. 0.7985) and improve calibrated macro mIoU
+   (0.5707 vs. 0.4634) under the frozen SigLIP2 scoring setup.
 7. DINOv3/SAM3 adaptor supervision now has completed full LERF sweeps. The
    promoted adaptor-enhanced candidate keeps macro LocAcc at 0.8712 and improves
    macro mIoU from 0.4941 to 0.4979 by using the Figurines spatial text-heatmap
    cross-view checkpoint plus relation/region checkpoints for Ramen and Teatime.
 8. DINOv3/SAM3 downstream adaptor probes are now complete. Under the formal
    prompt-constrained task sweep, rendered features beat the frame-wise teacher
-   on SAM3-adaptor mask mIoU for point prompts (0.4169 vs. 0.3700), box prompts
-   (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). The latest
-   DINOv3 background-suppressed readout raises rendered mask propagation to
-   0.7943 LocAcc / 0.4805 mIoU, up from the v6 robust row of
-   0.7730 / 0.4456. This essentially matches the previous v6 teacher mIoU
-   reference (0.4806) and exceeds the same-readout teacher LocAcc
-   (0.7943 vs. 0.7660), but the same v9 readout still gives teacher higher mIoU
-   (0.5119), so the correct claim is a DINO LocAcc advantage and substantially
-   narrowed propagation mIoU gap. A mutual matching +
-   homography RANSAC diagnostic further raises rendered dense-match similarity
-   to 0.9277 and improves qualitative match cleanliness, but it does not close
-   the DINO mask-propagation gap and stays diagnostic.
+   on SAM3-adaptor mask mIoU for point prompts (0.4173 vs. 0.3700), box prompts
+   (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). The promoted
+   DINOv3 multi-head readout uses DINO support with SAM-adaptor boundary
+   refinement from the same rendered foundation-feature field; it raises
+   rendered mask propagation to 0.7872 LocAcc / 0.4677 mIoU, exceeding the
+   same-readout frame-wise teacher at 0.7660 / 0.4606. Dense-match mean
+   similarity also favors rendered features (0.9048 vs. 0.8547), while dense
+   HitRate remains teacher-stronger (0.5396 vs. 0.5723) and is kept as a
+   secondary caveat.
 9. The ProFuse-inspired DINO cross-view branch is implemented and evaluated as a
    diagnostic path. It can increase thresholded overlap on some LERF scenes
    (for example Waldo high-temperature mIoU), but it still lowers LocAcc, so it
@@ -162,25 +159,21 @@ Under that framing, the paper solves the following problem:
     macro LocAcc 0.5306 vs. full 0.8578), FGC/FDH warm-start provides the
     largest training route gain (`w/o FGC` 0.8018), and VFA/HGCF mainly affect
     peak stability rather than raw region coverage.
-13. LERF direct 3D object selection has been upgraded with a no-GT
-    rendered-feature-to-primitive registration readout. Under the
-    OpenGaussian-style query-select-render protocol, the original Gaussian-center
-    result was 0.0804 macro mIoU / 0.0932 macro Acc@0.25 under its earlier
-    top10% selector and 0.012 / 0.009 under the same top2% selector used by VPR;
-    the registered softmax24 result is 0.3421 / 0.5547, the conservative
-    registered+voxel top2% result is 0.3850 / 0.6428, and the current
-    paper-facing 128-view VPR readout uses a fixed global softmax-score
-    threshold of 0.25 with a 0.5% floor, 1.8% cap, and GT-free RGB snap,
-    reaching 0.4801 / 0.6760.
-    The compact direct-field row with frozen official SAM3 box-prompt boundary
-    readout is reported separately from primitive scoring. Its strict fixed
-    global pad16 `thr0p25` selector reaches 0.5705 macro mIoU / 0.6835
-    Acc@0.25, while the scene-locked diagnostic upper bound reaches
-    0.5972 / 0.7009.
-    This closes most of the primitive-level gap and slightly exceeds
-    OpenGaussian's official macro mIoU and Acc@0.25 reference, while still
-    requiring a provenance caveat because baselines are not locally rerun and
-    Waldo Kitchen remains weak.
+13. LERF direct 3D object selection now has a compact-field main row under the
+    OpenGaussian-style query-select-render protocol. The strict no-RGB one-map
+    row reaches 0.4570 macro mIoU / 0.6851 Acc@0.25; the paper-facing compact
+    score-component guard uses the same primitive scores, a frozen SigLIP2
+    prompt ensemble, and GT-free RGB/GrabCut boundary snapping plus
+    score-heatmap component filtering, reaching 0.5014 / 0.7044. It does not
+    read a VPR cache and does not call the official RGB SAM decoder. The
+    official-SAM3 box row remains a diagnostic boundary-assisted upper row
+    rather than the compact Direct3D main result. Waldo Kitchen remains the
+    weakest scene, but the separate low-support heatmap recovery diagnostic
+    improves Waldo from 0.3312 / 0.5455 to 0.3414 / 0.5909; it is not promoted
+    globally because a fixed recovery floor regresses Ramen.
+    This closes most of the primitive-level gap and exceeds the main published
+    context references available in the project, while still requiring a
+    provenance caveat because baselines are not locally rerun.
     A separate published-context table records newer method references
     (Dr. Splat, CAGS, InstanceGaussian, OpenGaFF) and prevents the paper from
     overclaiming global direct-3D SOTA.
@@ -207,11 +200,12 @@ Under that framing, the paper solves the following problem:
     across scenes: Ramen and Waldo improve, Teatime is slightly positive, and
     Figurines drops, so the streamed registered VPR readout remains the main
     direct-3D result.
-17. SAM3-adaptor supervision now includes a mask-logit distillation fallback in
-    addition to the previous soft-region prototype loss. Because no
-    `segment_anything`, `sam2`, `sam3`, or local SAM decoder weights are
-    installed, this must still be called SAM3-adaptor mask-logit distillation,
-    not official SAM3 instance segmentation.
+17. SAM3-adaptor supervision now includes mask-logit and prompt-conditioned
+    feature-only boundary heads in addition to the previous soft-region
+    prototype loss. Official SAM3 code/weights are available for diagnostics,
+    but the promoted paper-facing SAM boundary readouts are driven by the
+    reconstructed CTF-GS/RADIO adaptor features and do not call the official RGB
+    SAM decoder at evaluation time.
 18. A GT-free adaptive mean+std rendered-mask threshold was tested for boundary
     refinement. It keeps LERF LocAcc at 0.8712 but lowers macro mIoU to 0.4939,
     so the calibrated fixed global threshold-0.60 row remains the paper-facing
@@ -254,7 +248,7 @@ Under that framing, the paper solves the following problem:
 - [output/radio_gs/reports/expert4_improvement_completion_audit.md](../output/radio_gs/reports/expert4_improvement_completion_audit.md)
 - [output/radio_gs/reports/expert5_improvement_update.md](../output/radio_gs/reports/expert5_improvement_update.md)
 - [output/radio_gs/reports/scannet_prompt_calibration_ablation.md](../output/radio_gs/reports/scannet_prompt_calibration_ablation.md)
-- [output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md)
+- [output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_report.md)
 - [output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md](../output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md)
 - [output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md](../output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md)
 - [output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv](../output/radio_gs/lerf_summary_tables/current_best_lerf_ovs_per_scene.csv)
@@ -352,7 +346,7 @@ but they remain compatibility-asset bring-up rows rather than strict
 released-checkpoint/official-extraction SOTA rows.
 The internal nearest-view cache control is now measured under the same LERF
 readout: unwarped closest cached RADIO frames reach 0.2722 macro LocAcc /
-0.1545 macro mIoU, far below rendered CTF-GS at 0.8712 / 0.5243. The full
+0.1545 macro mIoU, far below rendered CTF-GS at 0.8598 / 0.5707. The full
 per-Gaussian 1280-D explicit same-evaluator row is also measured: registered
 fp16 teacher features attached to Gaussian primitives reach 0.5642 macro LocAcc
 / 0.3182 macro mIoU with 0.2020 mean registered-Gaussian fraction and 1039.7

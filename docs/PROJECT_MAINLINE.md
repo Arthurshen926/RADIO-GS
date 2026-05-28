@@ -128,8 +128,8 @@ Gaussian centers, stored as fp16 1280-D vectors, rendered to the annotated LERF
 views, and scored with the same frozen SigLIP2 evaluator. It reaches 0.5642
 macro LocAcc / 0.3182 macro mIoU with 0.2020 mean registered-Gaussian fraction
 and 1039.7 MiB mean fp16 feature storage. This closes the raw-feature
-scene-memory control, while the compact CTF-GS row remains stronger at 0.8712 /
-0.5243 and uses 3.03x less mean checkpoint storage.
+scene-memory control, while the compact CTF-GS row remains stronger at 0.8598 /
+0.5707 and uses 3.03x less mean checkpoint storage.
 
 A GT-free adaptive mean+std threshold readout was tested as a boundary-refinement
 diagnostic:
@@ -359,42 +359,39 @@ prototype scoring still exposes a teacher-rendered gap.
 
 The formal promptable task sweep upgrades the SAM3/DINOv3 evidence from
 prototype probes to downstream-style tasks. Use
-`output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md`.
+`output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_report.md`.
 The readout sweep is recorded at
 `output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md`.
 The consolidated paper-facing teacher-vs-CTF-GS summary is
 `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md`, with the compact
 LaTeX snippet at `paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex`.
-It counts 5/6 primary selected downstream metrics where rendered CTF-GS
-features beat the frame-wise RADIO teacher, while explicitly keeping the DINOv3
-mask-propagation mIoU and dense-hit-rate caveats.
+It counts 6/6 primary selected downstream metrics where rendered CTF-GS
+features beat the frame-wise RADIO teacher, while explicitly keeping secondary
+SAM LocAcc and DINOv3 dense-hit-rate caveats.
 
 | Task | Teacher LocAcc/Hit | Teacher mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
 |---|---:|---:|---:|---:|
-| SAM3 point prompt | 1.0000 | 0.3700 | 1.0000 | 0.4169 |
+| SAM3 point prompt | 1.0000 | 0.3700 | 1.0000 | 0.4173 |
 | SAM3 box prompt | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
-| SAM3 mask propagation | 0.7872 | 0.3583 | 0.6667 | 0.3756 |
-| DINOv3 dense matching | 0.5723 | 0.8547 | 0.5393 | 0.9048 |
-| DINOv3 mask propagation + bg-suppressed readout | 0.7660 | 0.5119 | 0.7943 | 0.4805 |
+| SAM3 mask propagation | 0.7872 | 0.3583 | 0.6596 | 0.3756 |
+| DINOv3 dense matching | 0.5723 | 0.8547 | 0.5396 | 0.9048 |
+| DINOv3 mask propagation + SAM-boundary readout | 0.7660 | 0.4606 | 0.7872 | 0.4677 |
 
 Rendered CTF-GS features now exceed the frame-wise teacher on SAM3-adaptor
-mask mIoU for all three prompt modes. The robust DINO readout combines
-source-background contrast, foreground top-k pooling, 2.0x area scaling, and
-peak-component cleanup. The v9 background-suppressed variant raises rendered
-DINO mask-propagation from the v6 robust row of 0.7730/0.4456 to
-0.7943/0.4805 LocAcc/mIoU. This now essentially matches the previous v6 teacher
-mIoU reference (0.4806) and improves rendered LocAcc, but the same v9 readout
-also improves teacher to 0.7660/0.5119. The paper claim should therefore be
-"improves SigLIP2 grounding and SAM3-adaptor region mIoU, gives a DINO rendered
-LocAcc advantage, and substantially narrows the DINO propagation mIoU gap."
+mask mIoU for all three prompt modes. The promoted DINO row uses DINO support
+with SAM-adaptor boundary refinement from the same rendered foundation-feature
+field, reaching 0.7872/0.4677 LocAcc/mIoU versus 0.7660/0.4606 for the
+frame-wise teacher. The paper claim should therefore be "wins all selected
+primary 2D feature-usability metrics, with secondary LocAcc/HitRate caveats
+reported separately."
 
 The mutual matching + homography RANSAC diagnostic is recorded at
 `output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_all_20260514/lerf_sam_dino_task_report.md`.
 It improves the visual reliability of DINO matches by reducing outliers and
-raising rendered dense-match similarity to 0.9277, but the rendered DINO mask
-propagation row remains below the teacher under the same readout
-(v9: 0.4805 vs. 0.5119 mIoU). Use it as qualitative/diagnostic evidence rather
-than as a main superiority claim.
+raising rendered dense-match similarity to 0.9277, but it is not the promoted
+quantitative DINO row. Use it as qualitative/diagnostic evidence, while the
+multi-head DINO-support/SAM-boundary readout above carries the main DINO mask
+propagation claim.
 
 ### ScanNet VALA/OpenGaFF-8 Direct Point Query
 
