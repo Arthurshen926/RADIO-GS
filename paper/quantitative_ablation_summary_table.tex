@@ -1,0 +1,21 @@
+\begin{table*}[t]
+\centering
+\caption{Unified quantitative contribution ranking. Each row compares a reference and an enabled variant under the same local protocol unless marked diagnostic. Score is the mean positive delta over the listed metrics; secondary regressions are kept in the metric-delta column.}
+\label{tab:quantitative_ablation_summary}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{p{0.20\linewidth}p{0.16\linewidth}p{0.20\linewidth}p{0.20\linewidth}cc}
+\toprule
+Contribution & Task & Reference $\rightarrow$ Variant & Metric deltas & Score & Status \\
+\midrule
+VPR-to-field primitive feature registration & LERF Direct3D & raw Gaussian-center score -> VPR-to-field compact primitive score & mIoU: 0.0460->0.4120 (+0.3660); Acc@0.25: 0.0710->0.5880 (+0.5170) & 0.442 & core direct-field evidence \\
+CTR/HCD compact-to-teacher codec & LERF rendered architecture & w/o CTR -> full CTF-GS seed-7 model & LocAcc: 0.5310->0.8580 (+0.3270); mIoU: 0.2600->0.4850 (+0.2250) & 0.276 & core architecture \\
+Final rendered-view readout vs frame-wise RADIO & 2D teacher-vs-student feature usability & frame-wise RADIO teacher -> CTF-GS rendered field + feature-only boundary readout & LocAcc: 0.7985->0.8598 (+0.0613); mIoU: 0.4634->0.5889 (+0.1255) & 0.093 & main claim evidence \\
+FGC/FDH geometry-aware warm-start & LERF rendered architecture & w/o FGC warm-start -> full CTF-GS seed-7 model & LocAcc: 0.8020->0.8580 (+0.0560); mIoU: 0.4240->0.4850 (+0.0610) & 0.058 & core architecture \\
+Direct3D prompt ensemble + component support policy & LERF Direct3D & strict single-prompt pure one-map -> score-component guarded compact readout & mIoU: 0.4489->0.5014 (+0.0525); Acc@0.25: 0.6724->0.7044 (+0.0321); Boundary-F: 0.6124->0.6305 (+0.0181) & 0.034 & main compact direct readout \\
+DINOv3 dense matching feature readout & 2D frozen-head downstream & frame-wise RADIO teacher -> CTF-GS rendered field & Mean score: 0.8547->0.9048 (+0.0501); HitRate: 0.5723->0.5396 (-0.0327) & 0.025 & downstream readout evidence with caveat \\
+SAM3 point-prompt feature readout & 2D frozen-head downstream & frame-wise RADIO teacher -> CTF-GS rendered field & mIoU: 0.3700->0.4173 (+0.0473); LocAcc: 1.0000->1.0000 (+0.0000) & 0.024 & downstream readout evidence \\
+Peak-component rendered mask readout & LERF rendered-view grounding & threshold 0.60 mask -> threshold 0.60 + peak component & mIoU: 0.5243->0.5707 (+0.0464); LocAcc: 0.8712->0.8598 (-0.0114) & 0.023 & readout policy \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}

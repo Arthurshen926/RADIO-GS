@@ -18,10 +18,26 @@ Definitions:
 
 | Row | VPR cache | Official RGB SAM | RGB postprocess | Prompt ensemble | Threshold | mIoU | Acc@0.25 | Boundary-F | Trimap IoU |
 | --- | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: |
+| Compact single prompt, pure one-map | no | no | no | no | thr0p70 | 0.448897 | 0.672370 | 0.612399 | 0.266532 |
 | Compact direct, previous promoted baseline | no | no | yes | no | fixed | 0.4836 | 0.6426 | 0.5983 | - |
 | Compact prompt ensemble, pure one-map | no | no | no | yes | thr0p70 | 0.457028 | 0.685082 | 0.616570 | 0.277138 |
 | Compact prompt ensemble + RGB component guard | no | no | yes | yes | thr0p65 | 0.499976 | 0.705147 | 0.634492 | 0.321253 |
 | Compact prompt ensemble + RGB/score-component guard | no | no | yes | yes | thr0p55 | 0.501374 | 0.704431 | 0.630533 | 0.322466 |
+
+## Single-Prompt Pure One-Map Per-Scene Metrics
+
+This row was rerun on 2026-05-30 from the single-prompt compact-score caches
+using the cache-matched checkpoint provenance and official-frame setting. It
+uses no VPR cache, no official SAM decoder, no RGB postprocess, and no prompt
+ensemble. The best global threshold in the evaluated sweep is `thr0p70`.
+
+| Scene | mIoU | Acc@0.25 | Boundary-F | Trimap IoU |
+| --- | ---: | ---: | ---: | ---: |
+| figurines | 0.418006 | 0.660714 | 0.608767 | 0.164607 |
+| ramen | 0.600002 | 0.816901 | 0.756113 | 0.398472 |
+| teatime | 0.519715 | 0.711864 | 0.718381 | 0.321810 |
+| waldo_kitchen | 0.257866 | 0.500000 | 0.366335 | 0.181238 |
+| Macro | 0.448897 | 0.672370 | 0.612399 | 0.266532 |
 
 ## Pure One-Map Per-Scene Metrics
 
@@ -49,6 +65,9 @@ The guarded row uses the global threshold `thr0p65`.
 | Macro | 0.499976 | 0.705147 | 0.634492 | 0.321253 |
 
 Conclusion: the latest overlap-balanced direct-3D row is no-VPR-cache and
-no-official-SAM, but it is not the strict no-RGB one-map row. The strict pure
-one-map row reaches 0.4570 mIoU / 0.6851 Acc@0.25; the deployed
-score-component guarded compact readout reaches 0.5014 mIoU / 0.7044 Acc@0.25.
+no-official-SAM, but it is not the strict no-RGB one-map row. The strict
+single-prompt pure one-map row reaches 0.4489 mIoU / 0.6724 Acc@0.25; adding
+the frozen SigLIP2 prompt ensemble improves it to 0.4570 / 0.6851. The deployed
+score-component guarded compact readout reaches 0.5014 mIoU / 0.7044 Acc@0.25,
+so the largest Direct3D readout-policy gain comes from support recovery rather
+than prompt wording alone.

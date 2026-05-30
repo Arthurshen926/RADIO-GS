@@ -17,6 +17,45 @@
     }
   },
   "rows": {
+    "compact_single_prompt_pure_onemap_thr0p70": {
+      "source_root": "output/radio_gs/lerf_direct3d_single_prompt_pure_onemap_20260530",
+      "uses_vpr_cache": false,
+      "uses_official_rgb_sam_decoder": false,
+      "uses_rgb_postprocess": false,
+      "uses_prompt_ensemble": false,
+      "mask_refinement": "none",
+      "global_threshold": "thr0p70",
+      "miou": 0.44889714776724577,
+      "acc025": 0.6723696398925512,
+      "boundary_f": 0.6123990630730987,
+      "trimap_iou": 0.26653177477419376,
+      "per_scene": {
+        "figurines": {
+          "miou": 0.4180055558681488,
+          "acc025": 0.6607142857142857,
+          "boundary_f": 0.6087674498558044,
+          "trimap_iou": 0.16460679471492767
+        },
+        "ramen": {
+          "miou": 0.6000020503997803,
+          "acc025": 0.8169014084507042,
+          "boundary_f": 0.7561132907867432,
+          "trimap_iou": 0.3984718918800354
+        },
+        "teatime": {
+          "miou": 0.5197150707244873,
+          "acc025": 0.711864406779661,
+          "boundary_f": 0.7183808088302612,
+          "trimap_iou": 0.32181012630462646
+        },
+        "waldo_kitchen": {
+          "miou": 0.25786614418056666,
+          "acc025": 0.5,
+          "boundary_f": 0.3663347028195858,
+          "trimap_iou": 0.18123828619718552
+        }
+      }
+    },
     "compact_direct_previous_promoted_baseline": {
       "uses_vpr_cache": false,
       "uses_official_rgb_sam_decoder": false,

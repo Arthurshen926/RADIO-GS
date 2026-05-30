@@ -109,9 +109,25 @@ def main() -> None:
                 "path": rel(REPORT_DIR / "lerf_component_ablation.md"),
                 "description": "LERF component ablation report",
             },
+            "quantitative_ablation_suite.md": {
+                "path": rel(REPO_ROOT / "paper" / "artifacts" / "quantitative_ablation_suite.md"),
+                "description": "Unified quantitative ablation contribution ranking across paper-facing tasks",
+            },
+            "quantitative_ablation_suite.json": {
+                "path": rel(REPO_ROOT / "paper" / "artifacts" / "quantitative_ablation_suite.json"),
+                "description": "Machine-readable unified quantitative ablation contribution ranking",
+            },
             "paper/lerf_component_ablation_table.tex": {
                 "path": rel(REPO_ROOT / "paper" / "lerf_component_ablation_table.tex"),
                 "description": "LaTeX component ablation table",
+            },
+            "paper/quantitative_ablation_summary_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "quantitative_ablation_summary_table.tex"),
+                "description": "LaTeX unified quantitative ablation contribution-ranking table",
+            },
+            "paper/lerf_direct3d_compact_readout_ablation_table.tex": {
+                "path": rel(REPO_ROOT / "paper" / "lerf_direct3d_compact_readout_ablation_table.tex"),
+                "description": "LaTeX compact Direct3D prompt/component-support readout ablation table",
             },
             "scannet_dino_cv_ablation.md": {
                 "path": rel(REPORT_DIR / "scannet_dino_cv_ablation.md"),
@@ -298,6 +314,33 @@ def main() -> None:
                 ),
                 "description": "Manifest for the main-paper direct-3D qualitative comparison",
             },
+            "lerf_2d3d_ovs_qualitative_manifest.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_2d3d_ovs_qualitative_manifest.json"
+                ),
+                "description": "Manifest for the main-paper LERF 2D/3D OVS qualitative comparison",
+            },
+            "scannet_openvocab_3d_query_qualitative_manifest.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "scannet_openvocab_3d_query_qualitative_manifest.json"
+                ),
+                "description": "Manifest for the main-paper ScanNet binary open-vocabulary 3D query qualitative comparison",
+            },
+            "lerf_direct3d_support_policy_ablation_qualitative_manifest.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_direct3d_support_policy_ablation_qualitative_manifest.json"
+                ),
+                "description": "Manifest for the main-paper direct-3D support-policy ablation qualitative figure",
+            },
             "lerf_direct3d_prompt_ensemble_support_policy_20260528.md": {
                 "path": rel(
                     REPO_ROOT
@@ -342,6 +385,15 @@ def main() -> None:
                     / "lerf_direct3d_score_component_guard_20260528.json"
                 ),
                 "description": "Machine-readable compact Direct3D score-component support guard result",
+            },
+            "direct3d_compact_readout_factorial_summary.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "direct3d_compact_readout_factorial_summary.md"
+                ),
+                "description": "Generated compact Direct3D readout factorial summary used by the LaTeX ablation table",
             },
             "compose_lerf_main_qualitative.py": {
                 "path": rel(
@@ -570,6 +622,9 @@ def main() -> None:
                 "size_mb": size_mb(path),
             }
     paper_figure_descriptions = {
+        "lerf_2d3d_ovs_qualitative.png": "Main-paper LERF 2D/3D open-vocabulary query qualitative comparison",
+        "scannet_openvocab_3d_query_qualitative.png": "Main-paper ScanNet binary open-vocabulary 3D query qualitative comparison",
+        "lerf_direct3d_support_policy_ablation_qualitative.png": "Main-paper LERF direct-3D support-policy ablation qualitative comparison",
         "lerf_main_qualitative_comparison.png": "Main-paper LERF direct-3D qualitative comparison",
         "lerf_adaptor_downstream_qualitative.png": "DINOv3/SAM3 adaptor qualitative probes",
         "lerf_sam_dino_tasks_qualitative.png": "Formal SAM/DINO downstream task qualitative probes",

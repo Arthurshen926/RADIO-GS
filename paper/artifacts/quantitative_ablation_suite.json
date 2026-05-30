@@ -1,0 +1,407 @@
+{
+  "generated": "2026-05-30T11:05:02Z",
+  "purpose": "Unified quantitative ablation and contribution ranking for CTF-GS paper writing.",
+  "ranking_note": "score is the mean positive delta over listed metrics; negative secondary deltas are retained in each metric record.",
+  "sources": [
+    "paper/artifacts/final_rows.yaml",
+    "paper/lerf_component_ablation_table.tex",
+    "paper/lerf_vpr_field_consistency_table.tex",
+    "paper/lerf_direct_3d_selection_table.tex",
+    "paper/artifacts/lerf_direct3d_compact_readout_ablation_20260528.md",
+    "paper/artifacts/lerf_direct3d_compact_readout_ablation_20260528.json",
+    "paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md",
+    "docs/experiments/2026-05-24-direct-field-joint2d3d-optimization.md"
+  ],
+  "contributions": [
+    {
+      "contribution": "VPR-to-field primitive feature registration",
+      "task": "LERF Direct3D",
+      "reference": "raw Gaussian-center score",
+      "variant": "VPR-to-field compact primitive score",
+      "status": "core direct-field evidence",
+      "metrics": [
+        {
+          "name": "mIoU",
+          "before": 0.046,
+          "after": 0.412,
+          "higher_is_better": true
+        },
+        {
+          "name": "Acc@0.25",
+          "before": 0.071,
+          "after": 0.588,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/lerf_vpr_field_consistency_table.tex",
+      "interpretation": "Largest direct-3D jump; primitive features need multiview registered support before selection is meaningful.",
+      "score": 0.4415,
+      "primary_metric": "mIoU",
+      "primary_delta": 0.366
+    },
+    {
+      "contribution": "CTR/HCD compact-to-teacher codec",
+      "task": "LERF rendered architecture",
+      "reference": "w/o CTR",
+      "variant": "full CTF-GS seed-7 model",
+      "status": "core architecture",
+      "metrics": [
+        {
+          "name": "LocAcc",
+          "before": 0.531,
+          "after": 0.858,
+          "higher_is_better": true
+        },
+        {
+          "name": "mIoU",
+          "before": 0.26,
+          "after": 0.485,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/lerf_component_ablation_table.tex",
+      "interpretation": "Dominant architectural dependency; direct 1x1 projection cannot recover teacher-compatible features.",
+      "score": 0.276,
+      "primary_metric": "LocAcc",
+      "primary_delta": 0.327
+    },
+    {
+      "contribution": "Final rendered-view readout vs frame-wise RADIO",
+      "task": "2D teacher-vs-student feature usability",
+      "reference": "frame-wise RADIO teacher",
+      "variant": "CTF-GS rendered field + feature-only boundary readout",
+      "status": "main claim evidence",
+      "metrics": [
+        {
+          "name": "LocAcc",
+          "before": 0.7985,
+          "after": 0.8598,
+          "higher_is_better": true
+        },
+        {
+          "name": "mIoU",
+          "before": 0.4634,
+          "after": 0.5889,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/artifacts/final_rows.yaml",
+      "interpretation": "Shows the student field improves text-grounding usability over frame-wise teacher features under the same evaluator.",
+      "score": 0.0934,
+      "primary_metric": "LocAcc",
+      "primary_delta": 0.0613
+    },
+    {
+      "contribution": "FGC/FDH geometry-aware warm-start",
+      "task": "LERF rendered architecture",
+      "reference": "w/o FGC warm-start",
+      "variant": "full CTF-GS seed-7 model",
+      "status": "core architecture",
+      "metrics": [
+        {
+          "name": "LocAcc",
+          "before": 0.802,
+          "after": 0.858,
+          "higher_is_better": true
+        },
+        {
+          "name": "mIoU",
+          "before": 0.424,
+          "after": 0.485,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/lerf_component_ablation_table.tex",
+      "interpretation": "Second largest controlled architecture contribution after CTR/HCD.",
+      "score": 0.0585,
+      "primary_metric": "LocAcc",
+      "primary_delta": 0.056
+    },
+    {
+      "contribution": "Official SAM3 box boundary diagnostic",
+      "task": "LERF Direct3D",
+      "reference": "score-component guarded compact readout",
+      "variant": "frozen official SAM3 box readout",
+      "status": "diagnostic, not core method",
+      "metrics": [
+        {
+          "name": "mIoU",
+          "before": 0.501373864710331,
+          "after": 0.5705,
+          "higher_is_better": true
+        },
+        {
+          "name": "Acc@0.25",
+          "before": 0.7044309383271872,
+          "after": 0.6835,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/lerf_direct_3d_selection_table.tex",
+      "interpretation": "Shows remaining boundary headroom, but it uses an external RGB SAM3 decoder and should not be counted as compact-field evidence.",
+      "score": 0.034563,
+      "primary_metric": "mIoU",
+      "primary_delta": 0.069126
+    },
+    {
+      "contribution": "Direct3D prompt ensemble + component support policy",
+      "task": "LERF Direct3D",
+      "reference": "strict single-prompt pure one-map",
+      "variant": "score-component guarded compact readout",
+      "status": "main compact direct readout",
+      "metrics": [
+        {
+          "name": "mIoU",
+          "before": 0.44889714776724576,
+          "after": 0.501373864710331,
+          "higher_is_better": true
+        },
+        {
+          "name": "Acc@0.25",
+          "before": 0.6723696398925512,
+          "after": 0.7044309383271872,
+          "higher_is_better": true
+        },
+        {
+          "name": "Boundary-F",
+          "before": 0.6123990630730987,
+          "after": 0.63053347915411,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/artifacts/lerf_direct3d_compact_readout_ablation_20260528.md",
+      "interpretation": "Primary Waldo/small-object recovery mechanism for the compact direct row.",
+      "score": 0.034224,
+      "primary_metric": "mIoU",
+      "primary_delta": 0.052477
+    },
+    {
+      "contribution": "DINOv3 dense matching feature readout",
+      "task": "2D frozen-head downstream",
+      "reference": "frame-wise RADIO teacher",
+      "variant": "CTF-GS rendered field",
+      "status": "downstream readout evidence with caveat",
+      "metrics": [
+        {
+          "name": "Mean score",
+          "before": 0.8547,
+          "after": 0.9048,
+          "higher_is_better": true
+        },
+        {
+          "name": "HitRate",
+          "before": 0.5723,
+          "after": 0.5396,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md",
+      "interpretation": "Feature similarity improves, but hit-rate caveat shows DINO topology remains a separate concern.",
+      "score": 0.02505,
+      "primary_metric": "Mean score",
+      "primary_delta": 0.0501
+    },
+    {
+      "contribution": "SAM3 point-prompt feature readout",
+      "task": "2D frozen-head downstream",
+      "reference": "frame-wise RADIO teacher",
+      "variant": "CTF-GS rendered field",
+      "status": "downstream readout evidence",
+      "metrics": [
+        {
+          "name": "mIoU",
+          "before": 0.37,
+          "after": 0.4173,
+          "higher_is_better": true
+        },
+        {
+          "name": "LocAcc",
+          "before": 1.0,
+          "after": 1.0,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md",
+      "interpretation": "Strongest SAM3-adaptor primary-metric improvement with no point-prompt localization loss.",
+      "score": 0.02365,
+      "primary_metric": "mIoU",
+      "primary_delta": 0.0473
+    },
+    {
+      "contribution": "Peak-component rendered mask readout",
+      "task": "LERF rendered-view grounding",
+      "reference": "threshold 0.60 mask",
+      "variant": "threshold 0.60 + peak component",
+      "status": "readout policy",
+      "metrics": [
+        {
+          "name": "mIoU",
+          "before": 0.5243,
+          "after": 0.5707,
+          "higher_is_better": true
+        },
+        {
+          "name": "LocAcc",
+          "before": 0.8712,
+          "after": 0.8598,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/artifacts/final_rows.yaml",
+      "interpretation": "Large boundary/support gain; it trades a small heatmap-peak drop for much better connected mask support.",
+      "score": 0.0232,
+      "primary_metric": "mIoU",
+      "primary_delta": 0.0464
+    },
+    {
+      "contribution": "ScanNet contextual kNN + spatial logit propagation",
+      "task": "ScanNet VALA8 direct point-query",
+      "reference": "DINO-CV contextual kNN alpha=0.5",
+      "variant": "k16/cand80 + scene alpha 0.45 + spatial k12/a1",
+      "status": "promoted ScanNet readout",
+      "metrics": [
+        {
+          "name": "split19 mIoU",
+          "before": 0.3704,
+          "after": 0.3806,
+          "higher_is_better": true
+        },
+        {
+          "name": "split19 mAcc",
+          "before": 0.6017,
+          "after": 0.6129,
+          "higher_is_better": true
+        },
+        {
+          "name": "split15 mIoU",
+          "before": 0.3771,
+          "after": 0.3871,
+          "higher_is_better": true
+        },
+        {
+          "name": "split15 mAcc",
+          "before": 0.6198,
+          "after": 0.6315,
+          "higher_is_better": true
+        },
+        {
+          "name": "split10 mIoU",
+          "before": 0.4585,
+          "after": 0.4711,
+          "higher_is_better": true
+        },
+        {
+          "name": "split10 mAcc",
+          "before": 0.7032,
+          "after": 0.72,
+          "higher_is_better": true
+        }
+      ],
+      "source": "docs/experiments/2026-05-24-direct-field-joint2d3d-optimization.md",
+      "interpretation": "Small but consistent VALA8 gains across all reported ScanNet splits.",
+      "score": 0.012083,
+      "primary_metric": "split19 mIoU",
+      "primary_delta": 0.0102
+    },
+    {
+      "contribution": "VFA view-space aligner",
+      "task": "LERF rendered architecture",
+      "reference": "w/o VFA",
+      "variant": "full CTF-GS seed-7 model",
+      "status": "core architecture",
+      "metrics": [
+        {
+          "name": "LocAcc",
+          "before": 0.84,
+          "after": 0.858,
+          "higher_is_better": true
+        },
+        {
+          "name": "mIoU",
+          "before": 0.48,
+          "after": 0.485,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/lerf_component_ablation_table.tex",
+      "interpretation": "Moderate localization gain; smaller region-overlap effect than CTR or FGC.",
+      "score": 0.0115,
+      "primary_metric": "LocAcc",
+      "primary_delta": 0.018
+    },
+    {
+      "contribution": "Hybrid Gaussian code field",
+      "task": "LERF rendered architecture",
+      "reference": "w/o HGCF",
+      "variant": "full CTF-GS seed-7 model",
+      "status": "core architecture with tradeoff",
+      "metrics": [
+        {
+          "name": "LocAcc",
+          "before": 0.839,
+          "after": 0.858,
+          "higher_is_better": true
+        },
+        {
+          "name": "mIoU",
+          "before": 0.507,
+          "after": 0.485,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/lerf_component_ablation_table.tex",
+      "interpretation": "Improves peak stability but not raw mIoU in this controlled table; keep as a tradeoff rather than a universal gain.",
+      "score": 0.0095,
+      "primary_metric": "LocAcc",
+      "primary_delta": 0.019
+    },
+    {
+      "contribution": "Feature-only SAM3 boundary readout",
+      "task": "LERF rendered-view grounding",
+      "reference": "peak-component core",
+      "variant": "feature-only SAM3 boundary readout",
+      "status": "readout policy",
+      "metrics": [
+        {
+          "name": "mIoU",
+          "before": 0.5707,
+          "after": 0.5889,
+          "higher_is_better": true
+        },
+        {
+          "name": "LocAcc",
+          "before": 0.8598,
+          "after": 0.8598,
+          "higher_is_better": true
+        }
+      ],
+      "source": "paper/artifacts/final_rows.yaml",
+      "interpretation": "Boundary refinement improves region overlap without changing heatmap localization.",
+      "score": 0.0091,
+      "primary_metric": "mIoU",
+      "primary_delta": 0.0182
+    }
+  ],
+  "missing_followups": [
+    {
+      "priority": "P0",
+      "item": "optional full 2x2 Direct3D factorial for no-prompt + RGB/score guard",
+      "reason": "the strict no-prompt/no-RGB cell is now filled; the remaining optional cell would isolate whether RGB/score support still helps without the prompt ensemble."
+    },
+    {
+      "priority": "P1",
+      "item": "ScanNet module-removal training ablation on all VALA8 scenes",
+      "reason": "readout ablations are complete enough for the paper, but full training-time removals for DINO-CV/context losses are not all positive or promoted."
+    },
+    {
+      "priority": "P1",
+      "item": "multi-head DINO/SAM/SigLIP2 removal under the 2D frozen-head benchmark",
+      "reason": "teacher-vs-student downstream wins are recorded, but per-head removal deltas are not yet a clean single-table factorial."
+    },
+    {
+      "priority": "P2",
+      "item": "LERF final-row architecture ablation after feature-only SAM3 boundary readout",
+      "reason": "core architecture table uses controlled seed-7 rendered features; final boundary readout is measured separately."
+    }
+  ]
+}

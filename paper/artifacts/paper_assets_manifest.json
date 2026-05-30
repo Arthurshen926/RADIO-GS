@@ -1,5 +1,5 @@
 {
-  "generated": "2026-05-28T13:41:23Z",
+  "generated": "2026-05-30T11:05:02Z",
   "route": "conservative_submission",
   "main_tables": {
     "paper_submission_main_table.md": {
@@ -19,9 +19,25 @@
       "path": "output/radio_gs/reports/lerf_component_ablation.md",
       "description": "LERF component ablation report"
     },
+    "quantitative_ablation_suite.md": {
+      "path": "paper/artifacts/quantitative_ablation_suite.md",
+      "description": "Unified quantitative ablation contribution ranking across paper-facing tasks"
+    },
+    "quantitative_ablation_suite.json": {
+      "path": "paper/artifacts/quantitative_ablation_suite.json",
+      "description": "Machine-readable unified quantitative ablation contribution ranking"
+    },
     "paper/lerf_component_ablation_table.tex": {
       "path": "paper/lerf_component_ablation_table.tex",
       "description": "LaTeX component ablation table"
+    },
+    "paper/quantitative_ablation_summary_table.tex": {
+      "path": "paper/quantitative_ablation_summary_table.tex",
+      "description": "LaTeX unified quantitative ablation contribution-ranking table"
+    },
+    "paper/lerf_direct3d_compact_readout_ablation_table.tex": {
+      "path": "paper/lerf_direct3d_compact_readout_ablation_table.tex",
+      "description": "LaTeX compact Direct3D prompt/component-support readout ablation table"
     },
     "scannet_dino_cv_ablation.md": {
       "path": "output/radio_gs/reports/scannet_dino_cv_ablation.md",
@@ -203,6 +219,18 @@
       "path": "paper/artifacts/lerf_main_qualitative_comparison_manifest.json",
       "description": "Manifest for the main-paper direct-3D qualitative comparison"
     },
+    "lerf_2d3d_ovs_qualitative_manifest.json": {
+      "path": "paper/artifacts/lerf_2d3d_ovs_qualitative_manifest.json",
+      "description": "Manifest for the main-paper LERF 2D/3D OVS qualitative comparison"
+    },
+    "scannet_openvocab_3d_query_qualitative_manifest.json": {
+      "path": "paper/artifacts/scannet_openvocab_3d_query_qualitative_manifest.json",
+      "description": "Manifest for the main-paper ScanNet binary open-vocabulary 3D query qualitative comparison"
+    },
+    "lerf_direct3d_support_policy_ablation_qualitative_manifest.json": {
+      "path": "paper/artifacts/lerf_direct3d_support_policy_ablation_qualitative_manifest.json",
+      "description": "Manifest for the main-paper direct-3D support-policy ablation qualitative figure"
+    },
     "lerf_direct3d_prompt_ensemble_support_policy_20260528.md": {
       "path": "paper/artifacts/lerf_direct3d_prompt_ensemble_support_policy_20260528.md",
       "description": "Guarded compact Direct3D prompt-ensemble support-policy result"
@@ -222,6 +250,10 @@
     "lerf_direct3d_score_component_guard_20260528.json": {
       "path": "paper/artifacts/lerf_direct3d_score_component_guard_20260528.json",
       "description": "Machine-readable compact Direct3D score-component support guard result"
+    },
+    "direct3d_compact_readout_factorial_summary.md": {
+      "path": "paper/artifacts/direct3d_compact_readout_factorial_summary.md",
+      "description": "Generated compact Direct3D readout factorial summary used by the LaTeX ablation table"
     },
     "compose_lerf_main_qualitative.py": {
       "path": "radio_gs/scripts/compose_lerf_main_qualitative.py",
@@ -413,6 +445,21 @@
       "path": "output/radio_gs/paper_figures/fig_room0_pipeline_comparison.png",
       "description": "Room0 pipeline comparison",
       "size_mb": 10.3
+    },
+    "lerf_2d3d_ovs_qualitative.png": {
+      "path": "paper/figures/lerf_2d3d_ovs_qualitative.png",
+      "description": "Main-paper LERF 2D/3D open-vocabulary query qualitative comparison",
+      "size_mb": 1.2
+    },
+    "scannet_openvocab_3d_query_qualitative.png": {
+      "path": "paper/figures/scannet_openvocab_3d_query_qualitative.png",
+      "description": "Main-paper ScanNet binary open-vocabulary 3D query qualitative comparison",
+      "size_mb": 0.2
+    },
+    "lerf_direct3d_support_policy_ablation_qualitative.png": {
+      "path": "paper/figures/lerf_direct3d_support_policy_ablation_qualitative.png",
+      "description": "Main-paper LERF direct-3D support-policy ablation qualitative comparison",
+      "size_mb": 1.6
     },
     "lerf_main_qualitative_comparison.png": {
       "path": "paper/figures/lerf_main_qualitative_comparison.png",

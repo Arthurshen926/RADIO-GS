@@ -1,0 +1,45 @@
+{
+  "output": "paper/figures/scannet_openvocab_3d_query_qualitative.png",
+  "opengaussian_eval": "output/baselines/opengaussian/scannet_eval",
+  "ours_root": "output/scannet_pointcloud_eval",
+  "split": "19",
+  "layout": "overview | GT binary query | OpenGaussian reproduced prediction | CTF-GS prediction",
+  "cases": [
+    {
+      "scene": "scene0097_00",
+      "query": "cabinet",
+      "nyu40_id": 3,
+      "split": "19",
+      "opengaussian_iou": 0.2097,
+      "ctf_gs_iou": 0.481,
+      "overview_ply": "dataset/scannet_og/scene0097_00/scene0097_00_vh_clean_2.labels.ply",
+      "gt_ply": "output/baselines/opengaussian/scannet_eval/visualizations/scene0097_00/gt_split_19.ply",
+      "opengaussian_ply": "output/baselines/opengaussian/scannet_eval/visualizations/scene0097_00/pred_split_19.ply",
+      "ctf_gs_ply": "output/scannet_pointcloud_eval/scene0097_00_v67_dino_cv001_b2_s32768_ft20_gidx_labelpoint/visualizations/scene0097_00/pred_split_19.ply"
+    },
+    {
+      "scene": "scene0062_00",
+      "query": "door",
+      "nyu40_id": 8,
+      "split": "19",
+      "opengaussian_iou": 0.4116,
+      "ctf_gs_iou": 0.5746,
+      "overview_ply": "dataset/scannet_og/scene0062_00/scene0062_00_vh_clean_2.labels.ply",
+      "gt_ply": "output/baselines/opengaussian/scannet_eval/visualizations/scene0062_00/gt_split_19.ply",
+      "opengaussian_ply": "output/baselines/opengaussian/scannet_eval/visualizations/scene0062_00/pred_split_19.ply",
+      "ctf_gs_ply": "output/scannet_pointcloud_eval/scene0062_00_v67_dino_cv001_b2_s32768_ft20_gidx_labelpoint/visualizations/scene0062_00/pred_split_19.ply"
+    },
+    {
+      "scene": "scene0590_00",
+      "query": "picture",
+      "nyu40_id": 11,
+      "split": "19",
+      "opengaussian_iou": 0.0321,
+      "ctf_gs_iou": 0.4206,
+      "overview_ply": "dataset/scannet_og/scene0590_00/scene0590_00_vh_clean_2.labels.ply",
+      "gt_ply": "output/baselines/opengaussian/scannet_eval/visualizations/scene0590_00/gt_split_19.ply",
+      "opengaussian_ply": "output/baselines/opengaussian/scannet_eval/visualizations/scene0590_00/pred_split_19.ply",
+      "ctf_gs_ply": "output/scannet_pointcloud_eval/scene0590_00_v67_dino_cv001_b2_s32768_ft20_gidx_labelpoint/visualizations/scene0590_00/pred_split_19.ply"
+    }
+  ]
+}

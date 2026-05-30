@@ -1,0 +1,56 @@
+{
+  "output": "paper/figures/lerf_direct3d_support_policy_ablation_qualitative.png",
+  "base_root": "output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p25",
+  "full_root": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65",
+  "layout": "RGB/query | GT | base compact direct field | prompt-ensemble support policy | rendered selected support",
+  "cases": [
+    {
+      "scene": "waldo_kitchen",
+      "frame_id": "00053",
+      "query": "knife",
+      "base_iou": 0.14,
+      "full_iou": 0.4135,
+      "delta_iou": 0.2736,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00053.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00053.json",
+      "base_mask": "output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p25/waldo_kitchen/frame_00053_knife.png",
+      "full_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/waldo_kitchen/frame_00053_knife.png"
+    },
+    {
+      "scene": "waldo_kitchen",
+      "frame_id": "00140",
+      "query": "spoon",
+      "base_iou": 0.068,
+      "full_iou": 0.3373,
+      "delta_iou": 0.2693,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00140.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/waldo_kitchen/frame_00140.json",
+      "base_mask": "output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p25/waldo_kitchen/frame_00140_spoon.png",
+      "full_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/waldo_kitchen/frame_00140_spoon.png"
+    },
+    {
+      "scene": "ramen",
+      "frame_id": "00024",
+      "query": "wavy noodles",
+      "base_iou": 0.0,
+      "full_iou": 0.4981,
+      "delta_iou": 0.4981,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/ramen/frame_00024.json",
+      "base_mask": "output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p25/ramen/frame_00024_wavy noodles.png",
+      "full_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/ramen/frame_00024_wavy noodles.png"
+    },
+    {
+      "scene": "teatime",
+      "frame_id": "00140",
+      "query": "plate",
+      "base_iou": 0.3524,
+      "full_iou": 0.5072,
+      "delta_iou": 0.1549,
+      "rgb": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/teatime/frame_00140.jpg",
+      "label_json": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label/teatime/frame_00140.json",
+      "base_mask": "output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p25/teatime/frame_00140_plate.png",
+      "full_mask": "output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528/pred_masks/thr0p65/teatime/frame_00140_plate.png"
+    }
+  ]
+}

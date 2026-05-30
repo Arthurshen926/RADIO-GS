@@ -491,6 +491,8 @@ views, and metrics are mIoU and Acc@0.25. This protocol is not the same as the
 rendered-view heatmap evaluation in Table~\ref{tab:lerf}; the query is performed
 in 3D and rendering is used only to compare selected primitives with 2D masks.
 
+\input{lerf_direct3d_compact_readout_ablation_table}
+
 The original Gaussian-center readout reached 0.080 macro mIoU and 0.093 macro
 Acc@0.25 under an earlier top-10\% selector, but only 0.012/0.009 under the same
 fixed top-2\% selector used by the VPR ablation rows. The registration readout closes
@@ -502,9 +504,13 @@ improves the promoted row to 0.480 macro mIoU and 0.676 macro Acc@0.25.
 The compact direct field now closes this gap without reading the VPR cache:
 using the prompt-ensemble readout with a GT-free RGB/score-component support
 guard, the direct Gaussian-center row reaches 0.501 macro mIoU and 0.704 macro
-Acc@0.25. A strict no-RGB one-map ablation reaches 0.457 macro
-mIoU and 0.685 macro Acc@0.25, showing that the strongest deployed row owes its
-boundary/support recovery to the guard rather than to VPR or official SAM3. The
+Acc@0.25. A strict no-prompt/no-RGB one-map ablation reaches 0.449 macro
+mIoU and 0.672 macro Acc@0.25, and adding only the frozen prompt ensemble
+raises it to 0.457/0.685. This shows that the strongest deployed row owes most
+of its boundary/support recovery to the guard rather than to VPR, official
+SAM3, or prompt wording alone.
+Table~\ref{tab:direct3d_compact_readout_ablation} makes this separation
+explicit across prompt and component-support policies. The
 previous area-component guard remains the Acc-best compact ablation at
 0.500/0.705 when rounded. The promoted score-component row is above the
 registered VPR row in Acc@0.25 and improves Waldo
@@ -592,6 +598,8 @@ frame-wise teacher under the same readout.
 
 \input{lerf_component_ablation_table}
 
+\input{quantitative_ablation_summary_table}
+
 Table~\ref{tab:component_ablation} isolates the main architectural choices on
 LERF-OVS with a controlled seed-7 protocol. Unlike Table~\ref{tab:lerf}, which
 reports the conservative current best per scene, this table keeps the same seed
@@ -611,6 +619,15 @@ mainly affects peak stability: the explicit non-hybrid variant reaches higher
 macro mIoU (0.507) but lower macro LocAcc (0.839), improving region overlap on
 Figurines/Teatime while losing peak accuracy on Ramen/Waldo. This explains why
 some enhancement branches can improve mIoU without preserving LocAcc.
+
+Table~\ref{tab:quantitative_ablation_summary} consolidates the main quantitative
+ablation evidence across tasks. The largest gains come from making primitive
+features queryable through multiview VPR-to-field support and from the CTR/HCD
+teacher codec. Readout policies such as peak-component filtering, feature-only
+SAM3 boundary refinement, and direct-3D component support are still useful, but
+their deltas are smaller than the core feature-quality modules. The complete
+artifact also records diagnostic rows such as frozen official SAM3 box readout
+and the missing same-protocol follow-up runs.
 
 \subsection{Storage Footprint}
 
@@ -742,32 +759,64 @@ explicit GPU telemetry are different measurement types.
 
 \subsection{Qualitative Results}
 
-The main qualitative comparison in Fig.~\ref{fig:qualitative} uses one fixed
-annotated view from each LERF scene and follows the same direct-3D query
-interface as Table~\ref{tab:lerf-direct-3d-selection}: the query is evaluated on Gaussian
-primitives and rendering is used only to visualize and score the selected 3D
-objects. We compare against our local Dr. Splat reproduction because it is a
-representative registration-style baseline for direct 3D object selection. The
-\method{} panels use the deployed compact field only; they do not read a VPR
-feature cache and do not call the official RGB SAM3 readout at evaluation time.
+The main qualitative comparison in Fig.~\ref{fig:qualitative} follows the
+LERF-OVS taxonomy used in recent open-vocabulary Gaussian-field work: rendered
+2D querying and direct 3D primitive querying are shown side by side on the same
+annotated view and text query. The 2D prior panels use our local LangSplat
+reproduction, while the 3D prior panels use our local Dr. Splat reproduction.
+The \method{} 3D panels use the deployed compact field only; they do not read a
+VPR feature cache and do not call the official RGB SAM3 readout at evaluation
+time.
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/lerf_main_qualitative_comparison.png}
-\caption{Main LERF qualitative comparison under the direct-3D object-selection
-protocol. Each row fixes a scene, annotated frame, and text query, then shows
-the RGB input, ground-truth mask, a reproduced Dr. Splat mask, and our compact
-direct-field mask. IoU is shown per panel for auditability. \method{} queries
-the compact foundation-feature Gaussian map directly; VPR is used only as a
-training teacher and no official RGB SAM3 boundary readout is used for these
-predictions.}
+\includegraphics[width=\linewidth]{figures/lerf_2d3d_ovs_qualitative.png}
+\caption{Qualitative comparison of 2D and 3D open-vocabulary querying on
+LERF-OVS. For each text query, the 2D columns visualize rendered-view
+mask/heatmap outputs on RGB, while the 3D columns visualize direct
+Gaussian-level selection rendered on a white background with local zoom. The
+prior row uses reproduced protocol-matched baselines: LangSplat for 2D OVS and
+Dr. Splat for 3D OVS. \method{} uses one compact foundation-feature Gaussian
+map for both readouts; the 3D panels do not use a VPR cache or official RGB
+SAM3 readout.}
 \label{fig:qualitative}
+\end{figure*}
+
+Fig.~\ref{fig:scannet_qualitative} gives the corresponding direct point-query
+visualization on ScanNet. We use binary class-query point clouds rather than
+full semantic coloring, because the evaluation protocol asks whether a frozen
+text query retrieves a target class under the VALA/OpenGaFF split.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/scannet_openvocab_3d_query_qualitative.png}
+\caption{ScanNet open-vocabulary 3D query qualitative comparison. Each row
+shows a binary text-class query on a VALA/OpenGaFF-8 scene: scene overview, GT
+class points, our local OpenGaussian reproduction, and \method{} direct
+point-query prediction. Gray points are non-query classes.}
+\label{fig:scannet_qualitative}
+\end{figure*}
+
+Fig.~\ref{fig:direct3d_ablation_qualitative} visualizes the direct-3D support
+policy ablation on small or fragmented LERF queries. The base compact readout
+uses primitive scores from the compact field, while the final readout adds the
+prompt ensemble and GT-free component-support policy used by the deployed
+compact direct row.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/lerf_direct3d_support_policy_ablation_qualitative.png}
+\caption{Qualitative ablation of the compact direct-3D support policy. The
+support policy recovers small or fragmented object support without a VPR feature
+cache or official RGB SAM3 readout; rendering is used only to visualize and
+evaluate the selected 3D primitives.}
+\label{fig:direct3d_ablation_qualitative}
 \end{figure*}
 
 Rendered-view heatmap examples, alpha/depth boundary cases, and
 SAM/DINO-adaptor diagnostics are kept as appendix artifacts rather than
-main-paper figures, since their protocols differ from direct 3D object
-selection.
+additional main-paper figures, since their protocols differ from direct 3D
+object selection.
 
 \subsection{Failure Analysis}
 
