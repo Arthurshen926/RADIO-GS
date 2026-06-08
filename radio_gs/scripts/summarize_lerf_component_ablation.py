@@ -256,6 +256,8 @@ def build_latex(data: dict[str, dict[str, dict[str, Any] | None]]) -> str:
         r"\centering",
         r"\caption{Controlled LERF-OVS component ablation on seed 7. The table reports rendered-feature LocAcc per scene plus macro LocAcc and mIoU.}",
         r"\label{tab:component_ablation}",
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{2.5pt}",
         r"\begin{tabular}{lcccccc}",
         r"\toprule",
         r"Variant & Fig. & Ramen & Tea. & Waldo & LocAcc & mIoU \\",
@@ -271,8 +273,9 @@ def build_latex(data: dict[str, dict[str, dict[str, Any] | None]]) -> str:
         miou = _macro(rows, "miou")
         loc_cell = _fmt(loc, 3) if loc is not None else r"\textemdash"
         miou_cell = _fmt(miou, 3) if miou is not None else r"\textemdash"
+        label = r"Full \method{}" if variant.label == "Full CTF-GS" else variant.label
         lines.append(
-            f"{variant.label} & "
+            f"{label} & "
             + " & ".join(scene_cells)
             + f" & {loc_cell}"
             + f" & {miou_cell} \\\\"

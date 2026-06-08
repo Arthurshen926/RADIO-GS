@@ -1,295 +1,409 @@
 #!/usr/bin/env python3
-"""Draw the paper framework figure for CTF-GS."""
+"""Draw the paper framework figure for CTF-GS.
+
+The figure is intentionally vector-first and compact: it separates training-only
+supervision from inference-time readouts and makes the "one compact map" claim
+visually explicit.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Iterable
 
 import matplotlib.pyplot as plt
-from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
+import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch, Rectangle
 
 
 COLORS = {
+    "bg": "#FFFFFF",
+    "ink": "#16212C",
+    "muted": "#5B6673",
+    "edge": "#2E3A45",
     "input": "#DCEBFF",
-    "field": "#E7F6EC",
-    "loss": "#FFF3D8",
-    "readout": "#F0E8FF",
-    "eval": "#F4F4F4",
-    "edge": "#2F3A45",
-    "text": "#17212B",
+    "teacher": "#EDF4FF",
+    "field": "#E3F6EA",
+    "field_deep": "#BFE8D0",
+    "head": "#EEE8FF",
+    "train": "#FFF1D4",
+    "eval": "#F7F8FA",
+    "blue": "#316BE6",
+    "green": "#20A386",
+    "purple": "#7556D9",
+    "orange": "#E66B3D",
+    "yellow": "#E7B52E",
+    "gray": "#D7DBDF",
 }
 
 
-def box(ax, xy, wh, text, *, color, fontsize=10, lw=1.2):
+def add_box(
+    ax,
+    xy: tuple[float, float],
+    wh: tuple[float, float],
+    text: str = "",
+    *,
+    color: str,
+    fontsize: float = 8.5,
+    weight: str = "normal",
+    lw: float = 1.05,
+    radius: float = 0.018,
+    align: str = "center",
+    alpha: float = 1.0,
+) -> FancyBboxPatch:
     x, y = xy
     w, h = wh
     patch = FancyBboxPatch(
         (x, y),
         w,
         h,
-        boxstyle="round,pad=0.02,rounding_size=0.035",
+        boxstyle=f"round,pad=0.010,rounding_size={radius}",
         linewidth=lw,
         edgecolor=COLORS["edge"],
         facecolor=color,
-        mutation_aspect=1,
-    )
-    ax.add_patch(patch)
-    ax.text(
-        x + w / 2,
-        y + h / 2,
-        text,
-        ha="center",
-        va="center",
-        fontsize=fontsize,
-        color=COLORS["text"],
-        linespacing=1.15,
-    )
-    return patch
-
-
-def arrow(ax, start, end, *, text="", rad=0.0, color="#2F3A45"):
-    patch = FancyArrowPatch(
-        start,
-        end,
-        arrowstyle="-|>",
-        mutation_scale=12,
-        linewidth=1.25,
-        color=color,
-        connectionstyle=f"arc3,rad={rad}",
+        alpha=alpha,
     )
     ax.add_patch(patch)
     if text:
+        tx = x + w / 2 if align == "center" else x + 0.014
+        ha = "center" if align == "center" else "left"
+        ax.text(
+            tx,
+            y + h / 2,
+            text,
+            ha=ha,
+            va="center",
+            fontsize=fontsize,
+            fontweight=weight,
+            color=COLORS["ink"],
+            linespacing=1.10,
+        )
+    return patch
+
+
+def add_arrow(
+    ax,
+    start: tuple[float, float],
+    end: tuple[float, float],
+    *,
+    label: str = "",
+    style: str = "solid",
+    color: str = COLORS["edge"],
+    rad: float = 0.0,
+    lw: float = 1.35,
+    scale: float = 12.5,
+    label_offset: float = 0.015,
+) -> None:
+    arrow = FancyArrowPatch(
+        start,
+        end,
+        arrowstyle="-|>",
+        mutation_scale=scale,
+        linewidth=lw,
+        linestyle=style,
+        color=color,
+        connectionstyle=f"arc3,rad={rad}",
+        shrinkA=4,
+        shrinkB=4,
+    )
+    ax.add_patch(arrow)
+    if label:
         mx = (start[0] + end[0]) / 2
         my = (start[1] + end[1]) / 2
         ax.text(
             mx,
-            my + 0.035,
-            text,
+            my + label_offset,
+            label,
             ha="center",
             va="bottom",
-            fontsize=8.5,
+            fontsize=7.0,
             color=color,
         )
+
+
+def add_elbow_arrow(
+    ax,
+    points: list[tuple[float, float]],
+    *,
+    label: str = "",
+    color: str = COLORS["edge"],
+    style: str = "solid",
+    lw: float = 1.25,
+) -> None:
+    """Draw an orthogonal route with an arrowhead on the last segment."""
+    if len(points) < 2:
+        return
+    xs, ys = zip(*points[:-1])
+    ax.plot(xs, ys, color=color, linestyle=style, linewidth=lw, solid_capstyle="round")
+    arrow = FancyArrowPatch(
+        points[-2],
+        points[-1],
+        arrowstyle="-|>",
+        mutation_scale=12,
+        linewidth=lw,
+        linestyle=style,
+        color=color,
+        shrinkA=1,
+        shrinkB=4,
+    )
+    ax.add_patch(arrow)
+    if label:
+        mid = points[len(points) // 2]
+        ax.text(mid[0], mid[1] + 0.014, label, ha="center", va="bottom", fontsize=7.0, color=color)
+
+
+def add_panel_label(ax, x: float, y: float, text: str) -> None:
+    ax.text(
+        x,
+        y,
+        text,
+        ha="left",
+        va="center",
+        fontsize=10.3,
+        fontweight="bold",
+        color=COLORS["ink"],
+    )
+
+
+def add_tag(ax, x: float, y: float, text: str, color: str) -> None:
+    ax.add_patch(Rectangle((x, y), 0.006, 0.046, facecolor=color, edgecolor="none"))
+    ax.text(x + 0.012, y + 0.023, text, ha="left", va="center", fontsize=7.2, color=COLORS["muted"])
+
+
+def add_gaussian_cloud(ax, x: float, y: float, w: float, h: float) -> None:
+    rng = np.random.default_rng(7)
+    palette = [COLORS["blue"], COLORS["green"], COLORS["purple"], COLORS["orange"], COLORS["yellow"]]
+    for i in range(28):
+        px = x + 0.06 * w + rng.random() * 0.88 * w
+        py = y + 0.08 * h + rng.random() * 0.76 * h
+        r = (0.010 + 0.012 * rng.random()) * min(w / 0.22, h / 0.16)
+        ax.add_patch(
+            Circle(
+                (px, py),
+                r,
+                facecolor=palette[i % len(palette)],
+                edgecolor="white",
+                linewidth=0.7,
+                alpha=0.74,
+            )
+        )
+    ax.text(
+        x + w / 2,
+        y + 0.055 * h,
+        "compact codes + spatial context",
+        ha="center",
+        va="bottom",
+        fontsize=7.0,
+        color=COLORS["muted"],
+    )
+
+
+def add_heatmap_icon(ax, x: float, y: float, w: float, h: float) -> None:
+    nx, ny = 18, 12
+    xs = np.linspace(-1.0, 1.0, nx)
+    ys = np.linspace(-1.0, 1.0, ny)
+    xx, yy = np.meshgrid(xs, ys)
+    z = np.exp(-((xx - 0.25) ** 2 / 0.18 + (yy + 0.15) ** 2 / 0.24))
+    z += 0.45 * np.exp(-((xx + 0.55) ** 2 / 0.05 + (yy - 0.45) ** 2 / 0.08))
+    for iy in range(ny):
+        for ix in range(nx):
+            c = plt.cm.turbo(float(z[iy, ix] / z.max()))
+            ax.add_patch(
+                Rectangle(
+                    (x + ix * w / nx, y + iy * h / ny),
+                    w / nx,
+                    h / ny,
+                    facecolor=c,
+                    edgecolor="none",
+                    alpha=0.92,
+                )
+            )
+    ax.add_patch(Rectangle((x, y), w, h, fill=False, edgecolor=COLORS["edge"], linewidth=0.8))
+
+
+def add_selection_icon(ax, x: float, y: float, w: float, h: float) -> None:
+    ax.add_patch(Rectangle((x, y), w, h, facecolor="#FFFFFF", edgecolor=COLORS["edge"], linewidth=0.8))
+    rng = np.random.default_rng(12)
+    for _ in range(20):
+        ax.add_patch(
+            Circle(
+                (x + rng.random() * w, y + rng.random() * h),
+                0.004,
+                facecolor="#DDE2E6",
+                edgecolor="none",
+                alpha=0.8,
+            )
+        )
+    for px, py, rw, rh in [(0.42, 0.50, 0.070, 0.045), (0.60, 0.60, 0.050, 0.035), (0.72, 0.38, 0.035, 0.030)]:
+        ax.add_patch(
+            FancyBboxPatch(
+                (x + px * w, y + py * h),
+                rw,
+                rh,
+                boxstyle="round,pad=0.002,rounding_size=0.010",
+                facecolor=COLORS["orange"],
+                edgecolor=COLORS["orange"],
+                alpha=0.72,
+            )
+        )
+
+
+def add_point_icon(ax, x: float, y: float, w: float, h: float) -> None:
+    rng = np.random.default_rng(21)
+    pts = rng.random((90, 2))
+    pts[:, 0] = x + pts[:, 0] * w
+    pts[:, 1] = y + pts[:, 1] * h
+    ax.scatter(pts[:, 0], pts[:, 1], s=2.1, c="#CCD2D8", linewidths=0)
+    sel = pts[(pts[:, 0] > x + 0.56 * w) & (pts[:, 1] > y + 0.30 * h)]
+    ax.scatter(sel[:, 0], sel[:, 1], s=3.2, c=COLORS["green"], linewidths=0)
+    ax.add_patch(Rectangle((x, y), w, h, fill=False, edgecolor=COLORS["edge"], linewidth=0.8))
+
+
+def label_list(ax, x: float, y: float, lines: Iterable[str], *, color: str = COLORS["muted"]) -> None:
+    for i, line in enumerate(lines):
+        ax.text(x, y - 0.026 * i, line, ha="left", va="top", fontsize=7.6, color=color)
 
 
 def main() -> None:
     out_dir = Path("paper/figures")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(16, 7.2), dpi=240)
+    plt.rcParams.update(
+        {
+            "font.family": "DejaVu Sans",
+            "pdf.fonttype": 42,
+            "ps.fonttype": 42,
+        }
+    )
+
+    fig, ax = plt.subplots(figsize=(15.8, 6.9), dpi=260)
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
     ax.axis("off")
+    fig.patch.set_facecolor(COLORS["bg"])
 
     ax.text(
-        0.03,
+        0.035,
         0.955,
-        "CTF-GS: Dual-Readout Compact Teacher Feature Field",
-        fontsize=17,
-        fontweight="bold",
-        color=COLORS["text"],
+        "CTF-GS: one compact foundation-feature Gaussian map",
+        ha="left",
         va="top",
+        fontsize=17.0,
+        fontweight="bold",
+        color=COLORS["ink"],
     )
     ax.text(
-        0.03,
-        0.908,
-        "One compact Gaussian feature memory supports rendered-view grounding and direct primitive/point-level querying.",
-        fontsize=10.5,
-        color="#4B5563",
+        0.035,
+        0.917,
+        "Frozen foundation heads supervise training; the deployed scene reads the same compact map as 2D features, 3D primitives, and 3D points.",
+        ha="left",
         va="top",
+        fontsize=9.4,
+        color=COLORS["muted"],
     )
 
-    # Inputs.
-    box(
+    add_panel_label(ax, 0.045, 0.840, "Offline supervision")
+    add_panel_label(ax, 0.300, 0.840, "Stored compact map")
+    add_panel_label(ax, 0.600, 0.840, "Global readout heads")
+    add_panel_label(ax, 0.800, 0.840, "Protocol evidence")
+
+    # Left column.
+    add_box(ax, (0.045, 0.690), (0.195, 0.092), "posed RGB views\n+ 3DGS geometry", color=COLORS["input"], fontsize=8.8, weight="bold")
+    add_box(ax, (0.045, 0.560), (0.195, 0.092), "dense RADIO teacher\n1280-D features", color=COLORS["teacher"], fontsize=8.4)
+    add_box(ax, (0.045, 0.430), (0.195, 0.092), "frozen task heads\nSigLIP2 / DINO / SAM3", color=COLORS["teacher"], fontsize=8.0)
+    add_box(ax, (0.045, 0.300), (0.195, 0.092), "registered multiview\nsupport teacher (VPR)", color=COLORS["teacher"], fontsize=8.1)
+
+    # Central compact map.
+    field = add_box(ax, (0.300, 0.365), (0.245, 0.390), "", color=COLORS["field"], lw=1.35, radius=0.026)
+    ax.text(0.4225, 0.722, "Hybrid Gaussian Code Field", ha="center", va="center", fontsize=11.2, fontweight="bold", color=COLORS["ink"])
+    ax.text(0.4225, 0.694, "stored once per scene", ha="center", va="center", fontsize=7.8, color=COLORS["muted"])
+    add_gaussian_cloud(ax, 0.335, 0.505, 0.175, 0.150)
+    add_box(ax, (0.325, 0.440), (0.195, 0.038), r"$z_i$: compact per-Gaussian code", color="#F8FCFA", fontsize=7.7, radius=0.012, lw=0.75)
+    add_box(ax, (0.325, 0.392), (0.195, 0.038), r"$h(x)$: voxel / spatial context", color="#F8FCFA", fontsize=7.7, radius=0.012, lw=0.75)
+
+    # Shared heads.
+    add_box(ax, (0.600, 0.665), (0.145, 0.078), "Compact-to-Teacher\nDecoder", color=COLORS["field"], fontsize=8.4, weight="bold")
+    add_box(ax, (0.600, 0.535), (0.145, 0.078), "View-Space\nAligner", color=COLORS["field"], fontsize=8.3)
+    add_box(ax, (0.600, 0.405), (0.145, 0.078), "Support-Aware\nPrimitive Policy", color=COLORS["field_deep"], fontsize=8.2)
+    add_box(ax, (0.600, 0.275), (0.145, 0.078), "Frozen-Head\nAdaptors", color=COLORS["field"], fontsize=8.2)
+
+    # Right column with visual output icons.
+    readouts = [
+        (0.805, 0.670, COLORS["blue"], "LERF rendered-view OVS", "2D heatmap / mask"),
+        (0.805, 0.515, COLORS["green"], "LERF direct 3D OVS", "primitive support"),
+        (0.805, 0.360, COLORS["purple"], "ScanNet point query", "open-vocabulary points"),
+        (0.805, 0.205, COLORS["orange"], "Frozen-head probes", "SigLIP2 / DINO / SAM3"),
+    ]
+    for x, y, c, title, subtitle in readouts:
+        add_box(ax, (x, y), (0.155, 0.100), "", color=COLORS["head"], lw=1.05)
+        ax.add_patch(Rectangle((x + 0.010, y + 0.017), 0.006, 0.066, facecolor=c, edgecolor="none"))
+        ax.text(x + 0.024, y + 0.065, title, ha="left", va="center", fontsize=7.9, fontweight="bold", color=COLORS["ink"])
+        ax.text(x + 0.024, y + 0.037, subtitle, ha="left", va="center", fontsize=7.1, color=COLORS["muted"])
+
+    add_heatmap_icon(ax, 0.966, 0.685, 0.030, 0.064)
+    add_selection_icon(ax, 0.966, 0.530, 0.030, 0.064)
+    add_point_icon(ax, 0.966, 0.375, 0.030, 0.064)
+    add_heatmap_icon(ax, 0.966, 0.220, 0.030, 0.064)
+
+    # Training-only band.
+    add_box(ax, (0.300, 0.095), (0.445, 0.135), "", color=COLORS["train"], lw=1.0, radius=0.020)
+    ax.text(0.320, 0.195, "Training-only constraints", ha="left", va="center", fontsize=9.0, fontweight="bold", color=COLORS["ink"])
+    label_list(
         ax,
-        (0.035, 0.70),
-        (0.17, 0.13),
-        "Posed RGB views\n+ 3DGS geometry",
-        color=COLORS["input"],
-    )
-    box(
-        ax,
-        (0.035, 0.52),
-        (0.17, 0.13),
-        "Frozen RADIO teacher\n1280d dense features",
-        color=COLORS["input"],
-    )
-    box(
-        ax,
-        (0.035, 0.34),
-        (0.17, 0.13),
-        "Frozen heads\nSigLIP2 / DINOv3 /\nSAM3 adaptor",
-        color=COLORS["input"],
-        fontsize=9.2,
+        0.320,
+        0.166,
+        [
+            "feature reconstruction + frozen-head consistency",
+            "visibility-aware support distillation from registered VPR",
+            "geometry regularization + SAM3 mask-logit/boundary supervision",
+        ],
+        color=COLORS["ink"],
     )
 
-    # Field and decoder.
-    box(
+    # Inference arrows.
+    add_arrow(ax, (0.240, 0.735), (0.300, 0.615), label="initialize", lw=1.25)
+    add_arrow(ax, (0.545, 0.650), (0.600, 0.705), label="decode", lw=1.25)
+    add_arrow(ax, (0.672, 0.665), (0.672, 0.613), label="align", lw=1.15, label_offset=0.006)
+    add_arrow(ax, (0.745, 0.704), (0.805, 0.720), lw=1.35)
+    add_arrow(ax, (0.745, 0.444), (0.805, 0.565), lw=1.35)
+    add_arrow(ax, (0.545, 0.500), (0.600, 0.445), label="score", lw=1.15, label_offset=0.006)
+    add_elbow_arrow(
         ax,
-        (0.27, 0.63),
-        (0.18, 0.15),
-        "Hybrid Gaussian\nCode Field\nper-Gaussian z_i",
-        color=COLORS["field"],
+        [(0.545, 0.392), (0.575, 0.372), (0.780, 0.372), (0.805, 0.410)],
+        label="point query",
+        lw=1.15,
     )
-    box(
-        ax,
-        (0.27, 0.41),
-        (0.18, 0.15),
-        "Voxel / spatial\ncontext branch\nh(x)",
-        color=COLORS["field"],
-    )
-    box(
-        ax,
-        (0.50, 0.55),
-        (0.16, 0.16),
-        "CTR / HCD\nteacher decoder\ncompact -> 1280d",
-        color=COLORS["field"],
-    )
-    box(
-        ax,
-        (0.50, 0.31),
-        (0.16, 0.14),
-        "VFA\nview-space feature\nalignment",
-        color=COLORS["field"],
-    )
+    add_arrow(ax, (0.745, 0.314), (0.805, 0.255), lw=1.25)
 
-    # Losses.
-    box(
-        ax,
-        (0.27, 0.16),
-        (0.18, 0.14),
-        "Training constraints\nteacher feature\n+ FGC geometry",
-        color=COLORS["loss"],
-        fontsize=9.3,
-    )
-    box(
-        ax,
-        (0.50, 0.10),
-        (0.18, 0.14),
-        "Adaptor supervision\nDINO relation\nSAM3 mask logits",
-        color=COLORS["loss"],
-        fontsize=9.3,
-    )
+    # Training arrows.
+    dashed = dict(style="dashed", color=COLORS["muted"], lw=1.10, scale=11.0)
+    add_arrow(ax, (0.240, 0.606), (0.300, 0.170), label="teacher loss", rad=-0.18, **dashed)
+    add_arrow(ax, (0.240, 0.476), (0.300, 0.150), label="head loss", rad=-0.10, **dashed)
+    add_arrow(ax, (0.240, 0.346), (0.300, 0.128), label="support loss", rad=-0.02, **dashed)
+    add_arrow(ax, (0.522, 0.230), (0.430, 0.365), label="", rad=0.10, **dashed)
+    add_arrow(ax, (0.708, 0.230), (0.674, 0.405), label="", rad=-0.05, **dashed)
 
-    # Readouts.
-    box(
-        ax,
-        (0.73, 0.68),
-        (0.19, 0.13),
-        "Rendered-view readout\nsplat compact codes\n-> dense feature map",
-        color=COLORS["readout"],
-        fontsize=9.2,
-    )
-    box(
-        ax,
-        (0.73, 0.47),
-        (0.19, 0.14),
-        "Raster VPR readout\nGaussian-pixel hits\n-> primitive scores",
-        color=COLORS["readout"],
-        fontsize=9.2,
-    )
-    box(
-        ax,
-        (0.73, 0.25),
-        (0.19, 0.14),
-        "Direct point readout\nquery 3D points\n-> teacher-space features",
-        color=COLORS["readout"],
-        fontsize=9.2,
-    )
-    box(
-        ax,
-        (0.73, 0.06),
-        (0.19, 0.12),
-        "Proposal / OPR\nconnected 3D support\nobject-aware masks",
-        color=COLORS["readout"],
-        fontsize=9.2,
-    )
-
-    # Outputs.
-    box(
-        ax,
-        (0.955, 0.68),
-        (0.03, 0.13),
-        "2D\nOVG",
-        color=COLORS["eval"],
-        fontsize=8,
-    )
-    box(
-        ax,
-        (0.955, 0.47),
-        (0.03, 0.14),
-        "3D\nOVS",
-        color=COLORS["eval"],
-        fontsize=8,
-    )
-    box(
-        ax,
-        (0.955, 0.25),
-        (0.03, 0.14),
-        "ScanNet\npoint",
-        color=COLORS["eval"],
-        fontsize=7.5,
-    )
-    box(
-        ax,
-        (0.955, 0.06),
-        (0.03, 0.12),
-        "SAM\nDINO",
-        color=COLORS["eval"],
-        fontsize=7.5,
-    )
-
-    # Arrows from inputs to field/losses.
-    arrow(ax, (0.205, 0.765), (0.27, 0.705), text="initialize / render")
-    arrow(ax, (0.205, 0.585), (0.27, 0.705), text="distill")
-    arrow(ax, (0.205, 0.405), (0.27, 0.23), text="frozen probes", rad=-0.12)
-    arrow(ax, (0.36, 0.63), (0.50, 0.63), text="fuse")
-    arrow(ax, (0.45, 0.485), (0.50, 0.61), rad=-0.08)
-    arrow(ax, (0.58, 0.55), (0.58, 0.45), text="screen refine")
-    arrow(ax, (0.36, 0.30), (0.36, 0.41), rad=-0.08)
-    arrow(ax, (0.59, 0.24), (0.58, 0.31), rad=0.05)
-
-    # Arrows from decoder to readouts.
-    arrow(ax, (0.66, 0.64), (0.73, 0.745), text="rasterize")
-    arrow(ax, (0.66, 0.61), (0.73, 0.54), text="register")
-    arrow(ax, (0.66, 0.58), (0.73, 0.32), text="query")
-    arrow(ax, (0.66, 0.39), (0.73, 0.12), text="group")
-
-    # Readout outputs.
-    arrow(ax, (0.92, 0.745), (0.955, 0.745))
-    arrow(ax, (0.92, 0.54), (0.955, 0.54))
-    arrow(ax, (0.92, 0.32), (0.955, 0.32))
-    arrow(ax, (0.92, 0.12), (0.955, 0.12))
-
+    # Protocol note kept short; details live in the figure caption.
     ax.text(
-        0.742,
-        0.90,
-        "Evaluation interfaces",
-        fontsize=11,
-        fontweight="bold",
-        color=COLORS["text"],
+        0.800,
+        0.122,
+        "Dashed paths supervise training only; deployed readouts share the stored compact map.",
+        ha="left",
         va="center",
-    )
-    ax.text(
-        0.275,
-        0.86,
-        "Compact feature memory",
-        fontsize=11,
-        fontweight="bold",
-        color=COLORS["text"],
-        va="center",
-    )
-    ax.text(
-        0.275,
-        0.08,
-        "GT-free method additions: raster contribution registration + proposal-level object readout.",
-        fontsize=9.2,
-        color="#4B5563",
-        va="center",
+        fontsize=7.4,
+        color=COLORS["muted"],
     )
 
-    fig.savefig(out_dir / "radio_gs_framework.png", bbox_inches="tight", pad_inches=0.03)
-    fig.savefig(out_dir / "radio_gs_framework.pdf", bbox_inches="tight", pad_inches=0.03)
+    handles = [
+        Line2D([0], [0], color=COLORS["edge"], lw=1.5, linestyle="solid", label="inference"),
+        Line2D([0], [0], color=COLORS["muted"], lw=1.2, linestyle="dashed", label="training only"),
+    ]
+    ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0.045, 0.095), frameon=False, fontsize=8.0, handlelength=2.6)
+
+    field.set_linewidth(1.55)
+    fig.savefig(out_dir / "radio_gs_framework.png", bbox_inches="tight", pad_inches=0.025)
+    fig.savefig(out_dir / "radio_gs_framework.pdf", bbox_inches="tight", pad_inches=0.025)
 
 
 if __name__ == "__main__":

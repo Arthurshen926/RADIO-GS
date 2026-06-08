@@ -14,6 +14,12 @@ caches remain outside this snapshot.
   current evidence, in-flight rows, and remaining blocking gaps.
 - `provenance_report.md`, `paper_assets_manifest.json`, and
   `submission_freeze_manifest.json` preserve the freeze/provenance context.
+- `tpami_reproducibility_package_20260601.md` is the submission-level entry
+  point for integrity checks, canonical rows, table/figure regeneration, and
+  data-dependent rerun templates.
+- `tpami_large_asset_release_manifest_20260601.md` lists the large checkpoints,
+  datasets, evaluation outputs, and optional diagnostic caches that must be
+  staged outside the small artifact snapshot for a public release.
 - All small generated `output/radio_gs/reports/*.md` and `*.json` files that
   support the paper package are snapshotted here, excluding launch logs and
   LaTeX duplicates.

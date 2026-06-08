@@ -8,7 +8,7 @@
 | Scene | Frame | Query | Prior 2D IoU | Prior 3D IoU | Ours 3D IoU |
 | --- | --- | --- | ---: | ---: | ---: |
 | figurines | 00105 | `old camera` | 0.4207 | 0.1843 | 0.9649 |
-| figurines | 00105 | `green toy chair` | 0.4764 | 0.0465 | 0.4062 |
+| figurines | 00105 | `green apple` | 0.6742 | 0.7201 | 0.9690 |
 | figurines | 00105 | `pumpkin` | 0.5966 | 0.1740 | 0.9786 |
 | teatime | 00140 | `tea in a glass` | 0.6358 | 0.2474 | 0.7435 |
 | teatime | 00140 | `apple` | 0.8086 | 0.1086 | 0.9509 |

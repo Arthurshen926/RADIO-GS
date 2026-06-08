@@ -1,0 +1,144 @@
+\documentclass[10pt,journal,onecolumn]{IEEEtran}
+
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\method}{CTF-GS}
+\newcommand{\project}{RADIO-GS}
+\newcommand{\radio}{C-RADIOv4-H}
+
+\title{Supplementary Material for ``\method{}: Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding''}
+\author{Anonymous Authors}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+
+This supplementary material records additional calibration, protocol controls,
+and qualitative examples for the main paper. The main paper keeps the narrative
+focused on the deployed compact field: rendered-view LERF-OVS grounding,
+OpenGaussian-style direct 3D object selection, VALA/OpenGaFF-8 ScanNet direct
+point querying, and frozen-head teacher comparisons. The tables below provide
+the supporting controls behind those claims.
+
+Unless otherwise stated, all LERF-OVS numbers are evaluated on the same four
+annotated scenes used in the main paper. Direct 3D object-selection controls
+render selected Gaussian primitives only for mask evaluation; the text query is
+applied before rendering.
+
+\section{Rendered-View Boundary Calibration}
+
+Table~\ref{tab:rendered_boundary_calibration} expands the rendered-view mask
+calibration summarized in the main paper. The fixed threshold and
+peak-connected-component readout are GT-free and use the heatmap argmax only to
+remove disconnected regions far from the queried peak.
+
+\input{lerf_rendered_boundary_calibration_table}
+
+\section{Direct 3D Protocol Controls}
+
+Tables~\ref{tab:vpr_ablation}--\ref{tab:direct3d_query_audit} document the
+registration and confidence controls used to understand direct 3D primitive
+querying. VPR is treated as a registered multiview supervision and analysis
+bridge, while the main compact direct row in the paper uses Gaussian-center
+primitive scores with a fixed support-aware policy and does not read a VPR
+feature cache at inference.
+
+\input{lerf_vpr_ablation_table}
+
+\input{lerf_vpr_field_consistency_table}
+
+\input{lerf_direct3d_confidence_coverage_table}
+
+\input{lerf_direct_3d_query_audit_table}
+
+\clearpage
+\section{Feature-Memory and Compression Controls}
+
+Tables~\ref{tab:nearest_view_cache_baseline}--\ref{tab:feature_error_text_relevance}
+compare the compact field against simple feature-memory alternatives and relate
+feature reconstruction quality to downstream relevance. These controls support
+the central design choice of reconstructing compact teacher-compatible features
+rather than storing a raw high-dimensional teacher vector per primitive.
+
+\input{lerf_nearest_view_cache_baseline_table}
+
+\input{lerf_per_gaussian_1280d_baseline_table}
+
+\input{compression_downstream_correlation_table}
+
+\input{feature_error_text_relevance_table}
+
+\section{Boundary and Geometry Controls}
+
+Tables~\ref{tab:boundary_error_readout} and
+\ref{tab:alpha_depth_boundary_alignment} record boundary-oriented metrics for
+the SAM3-box boundary readout. This readout is reported as a boundary-assisted
+control rather than the core compact direct row.
+
+\input{boundary_error_readout_table}
+
+\input{alpha_depth_boundary_alignment_table}
+
+\section{Training Auditability}
+
+Table~\ref{tab:train_feature_field_audit} records checks for the training entry
+point. The paper artifact manifest and checksum file provide the corresponding
+source-level provenance for tables, figures, and result registries.
+
+\input{train_feature_field_audit_table}
+
+\clearpage
+\section{Additional Qualitative Results}
+
+Figure~\ref{fig:supp_sam_dino} shows frozen-head adaptor examples. These
+examples are useful for interpreting the teacher-vs-student benchmark, but the
+main paper keeps the LERF qualitative figure focused on the cleaner 2D/3D
+open-vocabulary query taxonomy.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/lerf_sam_dino_tasks_qualitative.png}
+\caption{Additional frozen-head qualitative examples. The SAM3-adaptor and
+DINOv3-adaptor panels are driven by reconstructed \method{} features rather than
+an official RGB SAM decoder.}
+\label{fig:supp_sam_dino}
+\end{figure}
+
+Figure~\ref{fig:supp_vpr_direct3d} shows the registered VPR direct-3D control.
+It is included as an analysis readout because VPR transfers registered multiview
+support to primitives, whereas the main compact direct row uses the deployed
+compact Gaussian-center field.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/lerf_vpr_direct_3d_qualitative.png}
+\caption{Registered VPR direct-3D control examples. VPR is used as an analysis
+and training bridge, not as the main compact-field inference cache.}
+\label{fig:supp_vpr_direct3d}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.86\linewidth]{figures/lerf_sam3_box_direct_3d_qualitative_pad16.png}
+\caption{Boundary-assisted direct-3D examples using the SAM3-box control. This
+row illustrates a boundary readout after compact primitive selection and is
+separate from the strict compact one-map ablation.}
+\label{fig:supp_sam3_box}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.92\linewidth]{figures/alpha_depth_boundary_cases.png}
+\caption{Alpha/depth boundary cases used for geometric boundary analysis. These
+cases expose failure modes where low object support or depth discontinuities
+limit mask overlap.}
+\label{fig:supp_alpha_depth}
+\end{figure}
+
+\end{document}

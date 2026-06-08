@@ -39,7 +39,7 @@ DEFAULT_CASES = [
 DEFAULT_OVS_2D3D_GROUPS = [
     [
         QualCase("figurines", "00105", "old camera"),
-        QualCase("figurines", "00105", "green toy chair"),
+        QualCase("figurines", "00105", "green apple"),
         QualCase("figurines", "00105", "pumpkin"),
     ],
     [

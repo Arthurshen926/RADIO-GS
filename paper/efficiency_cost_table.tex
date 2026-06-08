@@ -4,13 +4,14 @@
 freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16
 teacher features against the stored compact feature-field footprint.}
 \label{tab:efficiency_cost}
-\small
+\footnotesize
+\setlength{\tabcolsep}{3.0pt}
 \begin{tabular}{llcc}
 \toprule
-Evidence & Scope & Cost & Peak VRAM \\
+Evidence & Scope & Cost & VRAM \\
 \midrule
-LERF eval & 4 scenes & 124.770 s / 31.193 s-scene & 2076 MiB \\
-ScanNet eval & 10-scene superset & 150.903 s / 15.090 s-scene & 1666 MiB \\
+LERF eval & 4 scenes & 124.77 s / 31.19 s-scene & 2076 MiB \\
+ScanNet eval & 10-scene superset & 150.90 s / 15.09 s-scene & 1666 MiB \\
 Storage & 4 scenes & 1.74$\times$--4.04$\times$ saving & -- \\
 \bottomrule
 \end{tabular}

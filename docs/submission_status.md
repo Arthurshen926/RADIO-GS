@@ -1,25 +1,89 @@
 # RADIO-GS Submission Status
 
 This document turns the current experiment inventory into a concrete submission
-status note. It is meant to answer a narrow question: how close is the current
-repository to a top-conference paper package?
+status note. It is meant to answer how close the current repository is to a
+top-tier journal submission package.
 
 ## Current level
 
 - **Method maturity**: mature research prototype with paper-facing automation and archive discipline in place
-- **Current submission maturity**: conservative paper package with LaTeX draft
-- **Estimated top-conference completion**: about 92% for the conservative
-  RADIO-GS package, and about 87% for a stricter VPR-backed primitive-level
-  CTF-GS paper after the registered LERF direct-selection upgrade
+- **Current submission maturity**: TPAMI-format journal draft and supplementary
+  material with compiled PDFs, figure shortlist, paper manifest, claim
+  validator, and provenance artifacts
+- **Estimated journal-submission completion**: about 96--98% for the current
+  CTF-GS package. The main paper and supplementary material now compile cleanly
+  and use a journal-style narrative; the remaining work is mostly final human
+  proofreading, optional staging of the large-asset release package, and
+  optional external-baseline reruns if a strict leaderboard claim is desired.
 
-The repository now contains a coherent method, a strong LERF-OVS result,
-repeatable evaluation code, and a promoted VALA/OpenGaFF-8 ScanNet DINO-CV
-contextual kNN aggregate.
-The remaining conservative-route work is mostly presentation: venue-formatted
-manuscript prose, related-work tightening, and deciding which diagnostic tables
-belong in the appendix. A stricter 2025-style primitive-level paper is now
-credible if framed as VPR-backed direct selection, but still needs careful
-discussion around Waldo Kitchen and protocol provenance.
+## 2026-06-01 TPAMI Paper Polish
+
+- Rewrote the TPAMI evaluation/provenance section from freeze-report language
+  into formal journal language.
+- Removed remaining `current/promoted/paper-facing/diagnostic/artifact appendix`
+  wording from the TPAMI main text and table captions.
+- Synchronized the claim validator with the compact Direct3D score-component
+  main row while still guarding the fixed-threshold VPR row and overclaim risks.
+- Added a standalone IEEE-style supplementary PDF at
+  [paper/radio_gs_tpami_supplement.tex](../paper/radio_gs_tpami_supplement.tex)
+  / [paper/radio_gs_tpami_supplement.pdf](../paper/radio_gs_tpami_supplement.pdf),
+  containing rendered-mask calibration, Direct3D controls, feature-memory
+  baselines, boundary/geometry controls, training auditability, and additional
+  qualitative figures.
+- Added a submission-level reproducibility entry point at
+  [tpami_reproducibility_package_20260601.md](../paper/artifacts/tpami_reproducibility_package_20260601.md),
+  covering integrity checks, canonical `final_rows.yaml` entries, table/figure
+  regeneration, and data-dependent rerun templates for all three benchmark
+  tracks.
+- Added a large-asset release manifest at
+  [tpami_large_asset_release_manifest_20260601.md](../paper/artifacts/tpami_large_asset_release_manifest_20260601.md),
+  separating required LERF/ScanNet checkpoints, frozen foundation weights,
+  evaluation outputs, optional VPR/SAM3 diagnostics, and release checksum
+  commands from the small paper-artifact snapshot.
+- Verified the TPAMI main/supplement PDF builds, claim validator, checksum
+  manifest, and whitespace checks after the paper-polish pass.
+- Ran a final figure-quality pass: replaced the weaker LERF 2D/3D `green toy
+  chair` example with `green apple`, regenerated
+  [lerf_2d3d_ovs_qualitative.png](../paper/figures/lerf_2d3d_ovs_qualitative.png),
+  and redrew [radio_gs_framework.pdf](../paper/figures/radio_gs_framework.pdf)
+  as a cleaner claim-first TPAMI Figure 1.
+- Added upload-facing materials:
+  [tpami_cover_letter_draft.md](../paper/tpami_cover_letter_draft.md),
+  [tpami_submission_checklist.md](../paper/tpami_submission_checklist.md), and
+  [tpami_submission_mode_guide.md](../paper/tpami_submission_mode_guide.md).
+  The current PDFs remain anonymous review drafts; the guide records how to
+  switch to author-visible manuscripts if the TPAMI portal requests them.
+
+## 2026-05-31 TPAMI Draft Update
+
+- Added the TPAMI/IEEEtran draft at
+  [paper/radio_gs_tpami.tex](../paper/radio_gs_tpami.tex), with compiled PDF at
+  [paper/radio_gs_tpami.pdf](../paper/radio_gs_tpami.pdf).
+- Replaced the framework figure with a journal-style diagram centered on one
+  compact foundation-feature Gaussian map and three inference readouts. VPR is
+  now shown as a training-only registered teacher/bridge, not as the direct-3D
+  inference cache.
+- Audited qualitative figures in
+  [figure_quality_audit_tpami_20260531.md](../paper/artifacts/figure_quality_audit_tpami_20260531.md):
+  keep the LERF 2D/3D OVS figure, ScanNet binary query figure, and direct-3D
+  support-policy ablation in the main paper; move DINO/SAM/VPR control figures
+  to the supplement.
+- Compressed the widest main-paper tables (`lerf_ovs_main_table.tex`,
+  `lerf_component_ablation_table.tex`, and `efficiency_cost_table.tex`). The
+  TPAMI compile now has no undefined references/citations and no overfull hbox
+  warnings after the current pass.
+- Polished the TPAMI abstract, introduction, contribution list, method setup,
+  inference-readout description, discussion, and limitations to remove
+  internal draft wording and make the claim boundaries explicit: VPR is a
+  training bridge, RGB/GrabCut is a GT-free classical support policy, and
+  official SAM3 box readout is separate from the core direct-field claim.
+
+The repository now contains a coherent TPAMI-format method paper, compiled
+supplementary material, a curated main-figure set, repeatable evaluation code,
+and a VALA/OpenGaFF-8 ScanNet DINO-CV contextual kNN aggregate. Remaining work
+before an actual upload is non-blocking operational work: final human
+proofreading, author metadata, and optional external-baseline reruns only if a
+strict same-evaluator leaderboard claim is desired.
 
 ## Current source of truth
 
@@ -77,6 +141,11 @@ The current generated freeze package is:
 - [paper_draft_current.md](paper_draft_current.md)
 - [PROJECT_MAINLINE.md](PROJECT_MAINLINE.md)
 - [radio_gs_draft.tex](../paper/radio_gs_draft.tex)
+- [radio_gs_tpami.tex](../paper/radio_gs_tpami.tex)
+- [TPAMI submission strategy](../paper/artifacts/tpami_submission_strategy.md)
+- [TPAMI figure quality audit](../paper/artifacts/figure_quality_audit_tpami_20260531.md)
+- [TPAMI reproducibility package](../paper/artifacts/tpami_reproducibility_package_20260601.md)
+- [TPAMI large-asset release manifest](../paper/artifacts/tpami_large_asset_release_manifest_20260601.md)
 
 These generated files supersede older manually edited status notes when numbers
 conflict.

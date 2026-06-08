@@ -136,10 +136,14 @@ def _check_vpr_protocol_card(text: str, issues: list[str]) -> None:
 def _check_selection_table(text: str, issues: list[str]) -> None:
     if MEAN_2P5_STD_RE.search(text):
         issues.append(f"{SELECTION_TABLE}: promoted selection table must not cite mean+2.5std")
-    if not re.search(r"CTF-GS\s*&\s*thr0p25\s+mIoU\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing CTF-GS thr0p25 mIoU row")
-    if not re.search(r"CTF-GS\s*&\s*thr0p25\s+Acc@0\.25\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing CTF-GS thr0p25 Acc@0.25 row")
+    if not re.search(r"CTF-GS\s+VPR\s*&\s*thr0p25\s+mIoU\b", text):
+        issues.append(f"{SELECTION_TABLE}: missing CTF-GS VPR fixed-thr0p25 mIoU row")
+    if not re.search(r"CTF-GS\s+VPR\s*&\s*thr0p25\s+Acc@0\.25\b", text):
+        issues.append(f"{SELECTION_TABLE}: missing CTF-GS VPR fixed-thr0p25 Acc@0.25 row")
+    if not re.search(r"CTF-GS\s+compact\s*&\s*score-component\s+mIoU\b", text):
+        issues.append(f"{SELECTION_TABLE}: missing compact score-component mIoU row")
+    if not re.search(r"CTF-GS\s+compact\s*&\s*score-component\s+Acc@0\.25\b", text):
+        issues.append(f"{SELECTION_TABLE}: missing compact score-component Acc@0.25 row")
 
 
 def _check_scannet_context_table(text: str, issues: list[str]) -> None:
@@ -158,14 +162,23 @@ def _check_scannet_context_table(text: str, issues: list[str]) -> None:
 def _check_final_rows(text: str, issues: list[str]) -> None:
     try:
         payload = yaml.safe_load(text)
-        policy = payload["tracks"]["t2_lerf_direct_3d_selection"]["protocol"][
-            "main_selector_policy"
-        ]
+        track = payload["tracks"]["t2_lerf_direct_3d_selection"]
+        policy = track["protocol"]["main_selector_policy"]
+        compact_row = track["rows"]["ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55"]
     except (KeyError, TypeError, yaml.YAMLError) as exc:
         issues.append(f"{FINAL_ROWS}: cannot read T2 main_selector_policy: {exc}")
         return
-    if "thr0p25" not in str(policy) or MEAN_STD_RE.search(str(policy)):
-        issues.append(f"{FINAL_ROWS}: T2 main_selector_policy must remain fixed thr0p25: {policy}")
+    policy_text = str(policy)
+    if "compact_prompt_ensemble_score_component_guard" not in policy_text or "thr0p55" not in policy_text:
+        issues.append(
+            f"{FINAL_ROWS}: T2 main_selector_policy must point to compact score-component thr0p55: {policy}"
+        )
+    if MEAN_STD_RE.search(policy_text):
+        issues.append(f"{FINAL_ROWS}: T2 main_selector_policy must not promote mean+std: {policy}")
+    if compact_row.get("uses_vpr_cache") is not False:
+        issues.append(f"{FINAL_ROWS}: compact Direct3D row must not use VPR cache")
+    if compact_row.get("uses_official_rgb_sam_readout") is not False:
+        issues.append(f"{FINAL_ROWS}: compact Direct3D row must not use official RGB SAM readout")
 
 
 def _line_window(lines: list[str], index: int) -> str:

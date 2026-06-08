@@ -1,13 +1,13 @@
 \begin{table}[t]
   \centering
-  \caption{VPR diagnostics for LERF-OVS direct 3D object selection. Except for the explicitly marked historical raw-center row, rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}
+  \caption{VPR controls for LERF-OVS direct 3D object selection. Except for the explicitly marked earlier raw-center row, rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}
   \label{tab:vpr_ablation}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccc}
     \toprule
     Variant & Selector / views & Reg. & mIoU & Acc@0.25 \\
     \midrule
-    Raw Gaussian-center & top10\%, previous & -- & 0.080 & 0.093 \\
+    Raw Gaussian-center & top10\%, earlier & -- & 0.080 & 0.093 \\
     Raw Gaussian-center & top2\%, VPR protocol & -- & 0.012 & 0.009 \\
     VPR, cosine & top2\%, all poses 24 & 0.385 & 0.312 & 0.547 \\
     VPR, softmax & top2\%, all poses 24 & 0.385 & 0.342 & 0.555 \\

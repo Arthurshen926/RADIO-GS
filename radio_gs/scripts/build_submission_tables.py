@@ -555,10 +555,12 @@ def build_main_latex(records: list[MethodRecord]) -> str:
         r"the local rendered-feature result. Best per column is in \textbf{bold}.}"
     )
     lines.append(r"  \label{tab:lerf_ovs_main}")
+    lines.append(r"  \footnotesize")
+    lines.append(r"  \setlength{\tabcolsep}{3.0pt}")
     lines.append(r"  \begin{tabular}{lccccc}")
     lines.append(r"    \toprule")
     lines.append(
-        r"    Method & Figurines & Ramen & Teatime & Waldo Kitchen & Macro \\" 
+        r"    Method & Fig. & Ramen & Tea. & Waldo & Macro \\"
     )
     lines.append(r"    \midrule")
     for record in records:
@@ -572,7 +574,8 @@ def build_main_latex(records: list[MethodRecord]) -> str:
         if record.macro == best_macro:
             macro = rf"\textbf{{{macro}}}"
         values.append(macro)
-        lines.append(f"    {record.name} & " + " & ".join(values) + r" \\")
+        name = r"\method{}" if record.name == "RADIO-GS" else record.name
+        lines.append(f"    {name} & " + " & ".join(values) + r" \\")
     lines.append(r"    \bottomrule")
     lines.append(r"  \end{tabular}")
     lines.append(r"\end{table}")

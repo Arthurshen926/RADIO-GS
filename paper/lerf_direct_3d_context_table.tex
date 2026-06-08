@@ -11,8 +11,8 @@
     Dr. Splat~\cite{kim2025drsplat} & published context & 43.29 & 64.30 \\
     InstanceGaussian~\cite{li2025instancegaussian} & published context & 45.30 & 58.44 \\
     \method{} + VPR & local, SigLIP2, fixed \texttt{thr0p25} + RGB snap & 48.01 & 67.60 \\
-    \method{} + direct field + SAM3 box & local, fixed global threshold, frozen official SAM3 readout & 57.05 & 68.35 \\
-    \method{} + direct field + SAM3 box & local diagnostic, scene-locked thresholds & 59.72 & 70.09 \\
+    \method{} compact direct field & local, no VPR/SAM cache, score-component guard & 50.14 & 70.44 \\
+    \method{} + SAM3 box & local boundary readout, frozen official SAM3 & 57.05 & 68.35 \\
     \bottomrule
   \end{tabular}
   }
