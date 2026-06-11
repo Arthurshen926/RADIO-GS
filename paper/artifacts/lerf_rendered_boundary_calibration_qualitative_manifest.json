@@ -1,0 +1,51 @@
+{
+  "figure": "paper/figures/lerf_rendered_boundary_calibration_qualitative.png",
+  "mask_root": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks",
+  "cases": [
+    {
+      "scene": "ramen",
+      "query": "bowl",
+      "stem": "frame_00065_bowl",
+      "initial_iou": 0.4374992804098785,
+      "final_iou": 0.6359625460082245,
+      "delta_iou": 0.19846326559834604,
+      "gt": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00065_bowl_gt.png",
+      "initial": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00065_bowl_initial.png",
+      "final": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00065_bowl_final.png"
+    },
+    {
+      "scene": "ramen",
+      "query": "bowl",
+      "stem": "frame_00006_bowl",
+      "initial_iou": 0.4469368811881188,
+      "final_iou": 0.6108761224560552,
+      "delta_iou": 0.16393924126793635,
+      "gt": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00006_bowl_gt.png",
+      "initial": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00006_bowl_initial.png",
+      "final": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00006_bowl_final.png"
+    },
+    {
+      "scene": "ramen",
+      "query": "onion segments",
+      "stem": "frame_00081_onion_segments",
+      "initial_iou": 0.42678695350451074,
+      "final_iou": 0.5714874330449115,
+      "delta_iou": 0.14470047954040072,
+      "gt": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00081_onion_segments_gt.png",
+      "initial": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00081_onion_segments_initial.png",
+      "final": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00081_onion_segments_final.png"
+    },
+    {
+      "scene": "ramen",
+      "query": "spoon",
+      "stem": "frame_00128_spoon",
+      "initial_iou": 0.5731136790755328,
+      "final_iou": 0.6831833254381809,
+      "delta_iou": 0.11006964636264815,
+      "gt": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00128_spoon_gt.png",
+      "initial": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00128_spoon_initial.png",
+      "final": "output/radio_gs/lerf2d_heatmap_guard_sam3_20260525_masks/ramen_peakinit_base_lerf2dcoarse/pred_masks/ramen/rendered/frame_00128_spoon_final.png"
+    }
+  ],
+  "notes": "The figure uses masks exported by eval_lerf_grounding --save_pred_masks. The feature-only boundary head is driven by reconstructed RADIO/CTF-GS features and prompt embeddings; it does not call the official RGB SAM3 decoder."
+}

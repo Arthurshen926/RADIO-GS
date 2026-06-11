@@ -1325,6 +1325,53 @@ def save_heatmap_vis(
     cv2.imwrite(str(out_dir / f"lerf_grounding_frame_{frame_id:05d}{suffix}.png"), add_header(rows))
 
 
+def save_prediction_masks(
+    *,
+    out_dir: Path,
+    scene: str,
+    mode: str,
+    frame_id: int,
+    query: str,
+    gt_mask: np.ndarray,
+    final_mask: np.ndarray,
+    initial_mask: Optional[np.ndarray] = None,
+    rgb_image: Optional[np.ndarray] = None,
+) -> None:
+    """Save per-query binary masks and lightweight RGB overlays for qualitative figures."""
+    query_slug = _slugify_vis_name(query)
+    target_dir = out_dir / scene / mode
+    target_dir.mkdir(parents=True, exist_ok=True)
+    stem = f"frame_{frame_id:05d}_{query_slug}"
+
+    masks: dict[str, np.ndarray] = {
+        "gt": gt_mask,
+        "final": final_mask,
+    }
+    if initial_mask is not None:
+        masks["initial"] = initial_mask
+
+    for name, mask in masks.items():
+        mask_u8 = (np.asarray(mask) > 0).astype(np.uint8) * 255
+        cv2.imwrite(str(target_dir / f"{stem}_{name}.png"), mask_u8)
+
+    if rgb_image is None:
+        return
+    rgb = rgb_image
+    for name in ("initial", "final"):
+        if name not in masks:
+            continue
+        mask_u8 = (np.asarray(masks[name]) > 0).astype(np.uint8)
+        if mask_u8.shape[:2] != rgb.shape[:2]:
+            mask_u8 = cv2.resize(mask_u8, (rgb.shape[1], rgb.shape[0]), interpolation=cv2.INTER_NEAREST)
+        overlay = (rgb.astype(np.float32) * 0.35).astype(np.uint8)
+        color = np.zeros_like(rgb, dtype=np.uint8)
+        color[:, :, 1] = mask_u8 * 255
+        blended = cv2.addWeighted(overlay, 1.0, color, 0.65, 0.0)
+        contours, _ = cv2.findContours(mask_u8, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cv2.drawContours(blended, contours, -1, (0, 255, 255), 2)
+        cv2.imwrite(str(target_dir / f"{stem}_{name}_overlay.png"), blended)
+
+
 def load_lerf_rgb_frame(scene: str, frame_id: int, scene_root_hint: str | Path = "") -> Optional[np.ndarray]:
     """Load an RGB frame as an OpenCV BGR image for visual overlays."""
     scene_root = resolve_lerf_scene_root(scene, scene_root_hint)
@@ -1371,6 +1418,7 @@ def evaluate_scene(
     readout_confidence_gamma: float = 1.0,
     save_overlay_vis: bool = False,
     save_per_query_vis: bool = False,
+    pred_mask_dir: Optional[Path] = None,
     mask_refinement: str = "none",
     mask_refinement_iters: int = 1,
     mask_refinement_dilate: int = 5,
@@ -1563,6 +1611,8 @@ def evaluate_scene(
                 hm = heatmaps[ki]  # [fH, fW]
                 gt_full = gt_masks_full[cat]
                 gt_feat = gt_masks_feat[cat]
+                initial_pred_for_save: Optional[np.ndarray] = None
+                pred_for_save: Optional[np.ndarray] = None
 
                 if gt_full.sum() == 0:
                     continue
@@ -1586,6 +1636,7 @@ def evaluate_scene(
                         target_shape=(img_h, img_w),
                         initial_refinement=sam3_prompt_mask_head_initial_refinement,
                     )
+                    initial_pred_for_save = initial_pred
                     initial_overlap = mask_overlap_stats(initial_pred, gt_full)
                     pred, report = refine_mask_with_prompt_conditioned_sam3_head(
                         feature_map=prompt_mask_feature,
@@ -1622,6 +1673,7 @@ def evaluate_scene(
                                 "heatmap_support_rejected",
                             )
                     iou = float(mask_overlap_stats(pred, gt_full)["iou"])
+                    pred_for_save = pred
                     initial_ious.append(float(initial_overlap["iou"]))
                     refinement_reports.append(report)
                 elif mode_mask_refinement != "none" and rgb_image_for_masks is not None:
@@ -1651,6 +1703,34 @@ def evaluate_scene(
                     )
                 ious.append(iou)
                 per_cat_iou[cat].append(iou)
+
+                if pred_mask_dir is not None:
+                    if pred_for_save is None:
+                        target_shape = tuple(gt_full.shape)
+                        initial_pred_for_save = build_sam3_prompt_initial_mask(
+                            hm,
+                            threshold_ratio=iou_threshold,
+                            threshold_mode=threshold_mode,
+                            threshold_mean_std_k=threshold_mean_std_k,
+                            threshold_min_ratio=threshold_min_ratio,
+                            threshold_max_ratio=threshold_max_ratio,
+                            target_shape=target_shape,
+                            initial_refinement="peak_component"
+                            if mode_mask_refinement == "peak_component"
+                            else "none",
+                        )
+                        pred_for_save = initial_pred_for_save
+                    save_prediction_masks(
+                        out_dir=pred_mask_dir,
+                        scene=scene,
+                        mode=lerf_mode_tag(mode),
+                        frame_id=frame_id,
+                        query=cat,
+                        gt_mask=gt_full,
+                        initial_mask=initial_pred_for_save,
+                        final_mask=pred_for_save,
+                        rgb_image=rgb_image_for_masks,
+                    )
 
                 if vis_dir is not None:
                     hm_vis[cat] = hm.cpu().numpy()
@@ -1800,6 +1880,8 @@ def main() -> None:
                         help="When saving heatmaps, append RGB, GT/RGB, and heatmap/RGB overlay columns")
     parser.add_argument("--save_per_query_vis", action="store_true",
                         help="Also write one visualisation PNG per frame/query. Enabled automatically with --save_overlay_vis")
+    parser.add_argument("--save_pred_masks", action="store_true",
+                        help="Save per-query GT, initial, and final binary masks/overlays for qualitative figures")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
                         help="Upsample heatmaps by this factor before localization (default 4)")
     parser.add_argument(
@@ -2102,6 +2184,7 @@ def main() -> None:
             readout_confidence_gamma=args.readout_confidence_gamma,
             save_overlay_vis=args.save_overlay_vis,
             save_per_query_vis=args.save_per_query_vis or args.save_overlay_vis,
+            pred_mask_dir=Path(args.output_dir) / "pred_masks" if args.save_pred_masks else None,
             mask_refinement=args.mask_refinement,
             mask_refinement_iters=args.mask_refinement_iters,
             mask_refinement_dilate=args.mask_refinement_dilate,

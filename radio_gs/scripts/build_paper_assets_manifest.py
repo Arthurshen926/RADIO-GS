@@ -202,6 +202,24 @@ def main() -> None:
                 ),
                 "description": "Requirement-level completion audit for the TPAMI manuscript package",
             },
+            "tpami_terminology_audit_20260609.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "tpami_terminology_audit_20260609.md"
+                ),
+                "description": "Terminology audit for converting teacher-centric wording into foundation-feature scene-memory wording",
+            },
+            "tpami_storyline_outline_20260609.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "tpami_storyline_outline_20260609.md"
+                ),
+                "description": "Post-migration TPAMI storyline, section outline, figure/table placement, and terminology rules",
+            },
             "tpami_cover_letter_draft.md": {
                 "path": rel(REPO_ROOT / "paper" / "tpami_cover_letter_draft.md"),
                 "description": "Cover-letter draft with technical contribution summary and author-specific fields to fill before upload",
@@ -425,6 +443,42 @@ def main() -> None:
                     / "lerf_direct3d_support_policy_ablation_qualitative_manifest.json"
                 ),
                 "description": "Manifest for the main-paper direct-3D support-policy ablation qualitative figure",
+            },
+            "lerf_rendered_boundary_calibration_qualitative_manifest.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_rendered_boundary_calibration_qualitative_manifest.json"
+                ),
+                "description": "Manifest for the rendered-view feature-only boundary calibration qualitative figure",
+            },
+            "lerf_sam_dino_tasks_qualitative_manifest.json": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "lerf_sam_dino_tasks_qualitative_manifest.json"
+                ),
+                "description": "Manifest for reconstructed scene features versus frame-wise RADIO downstream qualitative figure",
+            },
+            "baseline_reproduction_qualitative_audit_20260610.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "baseline_reproduction_qualitative_audit_20260610.md"
+                ),
+                "description": "Audit of LangSplatV2 and Dr. Splat local reproduction assets for qualitative comparisons",
+            },
+            "boundary_direct3d_interaction_audit_20260610.md": {
+                "path": rel(
+                    REPO_ROOT
+                    / "paper"
+                    / "artifacts"
+                    / "boundary_direct3d_interaction_audit_20260610.md"
+                ),
+                "description": "Audit of rendered boundary calibration and Direct3D support calibration interaction evidence",
             },
             "lerf_direct3d_prompt_ensemble_support_policy_20260528.md": {
                 "path": rel(
@@ -711,10 +765,11 @@ def main() -> None:
         "radio_gs_framework.png": "Raster preview of the main-paper framework figure",
         "lerf_2d3d_ovs_qualitative.png": "Main-paper LERF 2D/3D open-vocabulary query qualitative comparison",
         "scannet_openvocab_3d_query_qualitative.png": "Main-paper ScanNet binary open-vocabulary 3D query qualitative comparison",
-        "lerf_direct3d_support_policy_ablation_qualitative.png": "Main-paper LERF direct-3D support-policy ablation qualitative comparison",
+        "lerf_direct3d_support_policy_ablation_qualitative.png": "Main-paper LERF direct-3D support-calibration ablation qualitative comparison",
+        "lerf_rendered_boundary_calibration_qualitative.png": "Rendered-view feature-only boundary calibration qualitative comparison",
         "lerf_main_qualitative_comparison.png": "Main-paper LERF direct-3D qualitative comparison",
         "lerf_adaptor_downstream_qualitative.png": "DINOv3/SAM3 adaptor qualitative probes",
-        "lerf_sam_dino_tasks_qualitative.png": "Formal SAM/DINO downstream task qualitative probes",
+        "lerf_sam_dino_tasks_qualitative.png": "Reconstructed scene features versus frame-wise RADIO qualitative probes",
         "lerf_vpr_direct_3d_qualitative.png": "VPR direct 3D object-selection qualitative grid",
         "lerf_sam3_box_direct_3d_qualitative_pad16.png": "SAM3 box direct-3D boundary diagnostic qualitative grid",
         "alpha_depth_boundary_cases.png": "Selected alpha/depth boundary-case montage for SAM3-box diagnostics",

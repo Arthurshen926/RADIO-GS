@@ -6,7 +6,7 @@ Figure: `paper/figures/lerf_direct3d_support_policy_ablation_qualitative.png`
 
 | Scene | Frame | Query | Base IoU | Support-policy IoU | Delta |
 | --- | --- | --- | ---: | ---: | ---: |
-| waldo_kitchen | 00053 | knife | 0.1400 | 0.4135 | +0.2736 |
-| waldo_kitchen | 00140 | spoon | 0.0680 | 0.3373 | +0.2693 |
-| ramen | 00024 | wavy noodles | 0.0000 | 0.4981 | +0.4981 |
-| teatime | 00140 | plate | 0.3524 | 0.5072 | +0.1549 |
+| ramen | 00006 | nori | 0.6614 | 0.8227 | +0.1613 |
+| ramen | 00081 | bowl | 0.4408 | 0.6665 | +0.2257 |
+| teatime | 00025 | plate | 0.5192 | 0.6152 | +0.0960 |
+| waldo_kitchen | 00140 | dark cup | 0.7229 | 0.8073 | +0.0845 |

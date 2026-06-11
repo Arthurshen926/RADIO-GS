@@ -15,14 +15,14 @@ artifacts.
 | Supplementary material | Covered | `paper/radio_gs_tpami_supplement.tex` compiles to `paper/radio_gs_tpami_supplement.pdf` with calibration tables, protocol controls, and additional qualitative figures. |
 | Central thesis | Covered | The paper consistently frames CTF-GS as one compact foundation-feature Gaussian map with rendered-view, direct-primitive, and direct-point readouts. |
 | Figure 1 | Covered | `paper/figures/radio_gs_framework.pdf` is a vector-first journal figure with offline supervision, a central stored compact map, global readout heads, and protocol evidence. |
-| Main qualitative figures | Covered | Main paper uses LERF 2D/3D OVS, ScanNet binary query, and Direct3D support-policy ablation; weaker DINO/SAM/VPR visuals are kept for supplement. The LERF 2D/3D figure uses high-quality cases (`old camera`, `green apple`, `pumpkin`, `tea in a glass`, `apple`, `bag of cookies`). |
+| Main qualitative figures | Covered | Main paper uses LERF 2D/3D OVS, ScanNet binary query, and Direct3D support-calibration ablation; weaker DINO/SAM/multiview-registration visuals are kept for supplement. The LERF 2D/3D figure uses high-quality cases (`old camera`, `green apple`, `pumpkin`, `tea in a glass`, `apple`, `bag of cookies`). |
 | Reproducibility package | Covered | `paper/artifacts/tpami_reproducibility_package_20260601.md` lists paper integrity checks, canonical rows, table/figure regeneration commands, and data-dependent evaluation templates. |
 | Large-asset release plan | Covered | `paper/artifacts/tpami_large_asset_release_manifest_20260601.md` lists required checkpoints, datasets, evaluation outputs, optional diagnostics, and release verification commands. |
 | LERF rendered-view result | Covered | Table reports 0.8598 LocAcc / 0.5889 mIoU with feature-only SAM3-adaptor boundary readout and no official RGB SAM decoder. |
-| LERF direct 3D result | Covered with protocol caveat | Compact row reports 0.5014 mIoU / 0.7044 Acc@0.25 without VPR cache or official SAM readout; RGB/GrabCut is disclosed as a GT-free support policy. |
+| LERF direct 3D result | Covered with protocol caveat | The deployed compact readout reports 0.5014 mIoU / 0.7044 Acc@0.25 without a multiview-registration cache or official SAM readout; label-free color-edge support calibration is disclosed. |
 | ScanNet direct point query | Covered with scope caveat | VALA/OpenGaFF-8 rows report split-19/15/10 results and are framed as direct point-query feature probes, not a full ScanNet segmentation leaderboard. |
-| Teacher-vs-student claim | Covered but bounded | Main table and SAM/DINO/SigLIP probes support selected downstream usability over frame-wise RADIO; text avoids universal superiority language. |
-| Storage/efficiency | Covered | Storage footprint and efficiency/cost tables are included and separated from optional VPR caches and runtime buffers. |
+| Frame-wise foundation-feature comparison | Covered but bounded | Main table and SAM/DINO/SigLIP probes support selected downstream usability over frame-wise RADIO; text avoids universal superiority language. |
+| Storage/efficiency | Covered | Storage footprint and efficiency/cost tables are included and separated from optional multiview-registration caches and runtime buffers. |
 | Failure analysis | Covered | LERF small-object failures and ScanNet category instability are included as main-paper analysis. |
 | External baselines | Bounded | External rows are source-anchored context numbers; the paper avoids strict same-evaluator SOTA claims. |
 

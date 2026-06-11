@@ -450,7 +450,7 @@ def compute_foundation_cache_supervision_loss(
         if selected_heads is not None and name not in selected_heads:
             continue
         stats["heads"] += 1
-        projector = projectors.get(name)
+        projector = projectors[name] if name in projectors else None
         used_head = False
         try:
             if projector is not None:

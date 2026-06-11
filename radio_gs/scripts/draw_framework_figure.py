@@ -296,7 +296,7 @@ def main() -> None:
     ax.text(
         0.035,
         0.917,
-        "Frozen foundation heads supervise training; the deployed scene reads the same compact map as 2D features, 3D primitives, and 3D points.",
+        "Frozen foundation heads supervise training; deployed readouts query the same compact scene memory as 2D features, 3D primitives, and 3D points.",
         ha="left",
         va="top",
         fontsize=9.4,
@@ -312,21 +312,21 @@ def main() -> None:
     add_box(ax, (0.045, 0.690), (0.195, 0.092), "posed RGB views\n+ 3DGS geometry", color=COLORS["input"], fontsize=8.8, weight="bold")
     add_box(ax, (0.045, 0.560), (0.195, 0.092), "dense RADIO teacher\n1280-D features", color=COLORS["teacher"], fontsize=8.4)
     add_box(ax, (0.045, 0.430), (0.195, 0.092), "frozen task heads\nSigLIP2 / DINO / SAM3", color=COLORS["teacher"], fontsize=8.0)
-    add_box(ax, (0.045, 0.300), (0.195, 0.092), "registered multiview\nsupport teacher (VPR)", color=COLORS["teacher"], fontsize=8.1)
+    add_box(ax, (0.045, 0.300), (0.195, 0.092), "multiview primitive\nregistration", color=COLORS["teacher"], fontsize=8.1)
 
     # Central compact map.
     field = add_box(ax, (0.300, 0.365), (0.245, 0.390), "", color=COLORS["field"], lw=1.35, radius=0.026)
-    ax.text(0.4225, 0.722, "Hybrid Gaussian Code Field", ha="center", va="center", fontsize=11.2, fontweight="bold", color=COLORS["ink"])
+    ax.text(0.4225, 0.722, "Contextual Gaussian Feature Field", ha="center", va="center", fontsize=10.7, fontweight="bold", color=COLORS["ink"])
     ax.text(0.4225, 0.694, "stored once per scene", ha="center", va="center", fontsize=7.8, color=COLORS["muted"])
     add_gaussian_cloud(ax, 0.335, 0.505, 0.175, 0.150)
     add_box(ax, (0.325, 0.440), (0.195, 0.038), r"$z_i$: compact per-Gaussian code", color="#F8FCFA", fontsize=7.7, radius=0.012, lw=0.75)
     add_box(ax, (0.325, 0.392), (0.195, 0.038), r"$h(x)$: voxel / spatial context", color="#F8FCFA", fontsize=7.7, radius=0.012, lw=0.75)
 
     # Shared heads.
-    add_box(ax, (0.600, 0.665), (0.145, 0.078), "Compact-to-Teacher\nDecoder", color=COLORS["field"], fontsize=8.4, weight="bold")
-    add_box(ax, (0.600, 0.535), (0.145, 0.078), "View-Space\nAligner", color=COLORS["field"], fontsize=8.3)
-    add_box(ax, (0.600, 0.405), (0.145, 0.078), "Support-Aware\nPrimitive Policy", color=COLORS["field_deep"], fontsize=8.2)
-    add_box(ax, (0.600, 0.275), (0.145, 0.078), "Frozen-Head\nAdaptors", color=COLORS["field"], fontsize=8.2)
+    add_box(ax, (0.600, 0.665), (0.145, 0.078), "Foundation-Space\nReconstruction", color=COLORS["field"], fontsize=8.2, weight="bold")
+    add_box(ax, (0.600, 0.535), (0.145, 0.078), "View-Conditioned\nCalibration", color=COLORS["field"], fontsize=8.1)
+    add_box(ax, (0.600, 0.405), (0.145, 0.078), "Support-Calibrated\nPrimitive Readout", color=COLORS["field_deep"], fontsize=7.9)
+    add_box(ax, (0.600, 0.275), (0.145, 0.078), "Multi-Head\nFoundation Consistency", color=COLORS["field"], fontsize=7.7)
 
     # Right column with visual output icons.
     readouts = [
@@ -354,8 +354,8 @@ def main() -> None:
         0.320,
         0.166,
         [
-            "feature reconstruction + frozen-head consistency",
-            "visibility-aware support distillation from registered VPR",
+            "foundation-space reconstruction + frozen-head consistency",
+            "visibility-aware support distillation from multiview registration",
             "geometry regularization + SAM3 mask-logit/boundary supervision",
         ],
         color=COLORS["ink"],

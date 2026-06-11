@@ -91,6 +91,9 @@ def resolve_foundation_cache_path(root: str | Path, frame_id: int | str) -> Opti
     if frame_int is not None:
         candidates.extend(
             [
+                f"{frame_int:05d}.pt",
+                f"frame_{frame_int:05d}.pt",
+                f"rgb_{frame_int:05d}.pt",
                 f"{frame_int:06d}.pt",
                 f"frame_{frame_int:06d}.pt",
                 f"rgb_{frame_int:06d}.pt",

@@ -2,30 +2,30 @@
 
 Dear Editor-in-Chief and Associate Editors,
 
-We are pleased to submit our manuscript, **"CTF-GS: Compact Teacher Feature
+We are pleased to submit our manuscript, **"CTF-GS: Compact Foundation-Feature
 Fields for Open-Vocabulary 3D Gaussian Scene Understanding"**, for consideration
 in *IEEE Transactions on Pattern Analysis and Machine Intelligence*.
 
 This work studies a compact foundation-feature representation for 3D Gaussian
 scenes. Instead of storing raw high-dimensional teacher features per Gaussian or
 training a scene-specific classifier, CTF-GS reconstructs frozen RADIO features
-from a Hybrid Gaussian Code Field and exposes the same compact scene memory
+from a Contextual Gaussian Feature Field and exposes the same compact scene memory
 through three readouts: rendered-view open-vocabulary localization, direct
 Gaussian primitive selection, and direct point-query transfer.
 
 The submission makes the following contributions:
 
-1. A compact teacher-feature field for 3D Gaussian scenes that supports both
+1. A compact foundation-feature field for 3D Gaussian scenes that supports both
    rendered 2D feature maps and direct 3D primitive/point queries.
-2. A unified multi-head architecture with compact-to-teacher reconstruction,
-   view-space feature alignment, feature-quality/visibility heads, and
-   frozen-head adaptor consistency.
-3. A View-to-Primitive Registration training bridge that transfers registered
-   multiview evidence into the compact field while avoiding a VPR feature cache
+2. A unified multi-head architecture with foundation-space reconstruction,
+   view-conditioned feature calibration, feature-quality/visibility heads, and
+   multi-head foundation consistency.
+3. A Multiview Primitive Registration training bridge that transfers registered
+   multiview evidence into the compact field while avoiding a registration cache
    at inference for the main direct-3D readout.
 4. A protocol-separated evaluation on LERF-OVS rendered-view grounding,
    OpenGaussian-style direct 3D object selection, VALA/OpenGaFF-8 ScanNet direct
-   point queries, storage/efficiency analysis, teacher-vs-student probes, and
+   point queries, storage/efficiency analysis, frame-wise foundation-feature comparisons, and
    failure analysis.
 
 The manuscript is intended for TPAMI because it addresses a central problem in

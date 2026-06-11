@@ -1,0 +1,66 @@
+base_config: ../../lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml
+
+exp_name: "lerf_ramen_mutual_calib_11_both_ft12"
+output_dir: "/root/RADIO-GS/output/radio_gs/lerf_ramen_mutual_calib_11_both_ft12"
+seed: 42
+scene_root: "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen"
+
+epochs: 12
+batch_size: 1
+warmup_epochs: 1
+eval_every: 4
+save_every: 4
+log_every: 20
+num_workers: 2
+warmstart_from: "/root/RADIO-GS/output/radio_gs/vpr_field_consistency_weighted_log_20260515/ramen/checkpoints/best.pth"
+
+direct_point_loss_weight: 0.75
+direct_point_sample_count: 32768
+direct_point_sample_strategy: "uniform"
+direct_point_query_mode: "gaussian_index"
+direct_point_gaussian_position_mode: "gaussian_center"
+direct_point_source: "gaussian"
+direct_point_teacher_cache: "/root/RADIO-GS/output/radio_gs/vpr_feature_cache/raster_adjoint_alpha_20260527/ramen_mf16.pt"
+direct_point_teacher_cache_feature_key: "summary_features"
+direct_point_teacher_cache_feature_space: "siglip_summary"
+direct_point_feature_key: "features"
+direct_point_k: 8
+direct_point_candidate_k: 0
+direct_point_summary_adapter_weight: 0.75
+direct_point_view_count_weighting: "clipped_log"
+direct_point_view_count_min_weight: 0.25
+direct_point_query_logit_distill_weight: 0.02
+direct_point_query_logit_distill_embeddings: "checkpoints/siglip2_lerf_text_embeddings.pt"
+direct_point_query_logit_distill_temperature: 0.5
+direct_point_cached_visible_fraction: 0.5
+direct_point_cached_visible_candidate_multiplier: 2
+direct_point_cached_visible_balance: true
+
+# Factor A: rendered boundary calibration on.
+foundation_cache_root: "/root/RADIO-GS/output/radio_gs/foundation_cache_sam3_modelscope/ramen"
+foundation_cache_weight: 0.12
+foundation_cache_heads: "sam3"
+foundation_cache_mask_logit_weight: 0.01
+foundation_cache_mask_boundary_weight: 0.03
+foundation_cache_token_weight: 0.0
+foundation_cache_region_consistency_weight: 0.06
+foundation_cache_region_separation_weight: 0.02
+foundation_cache_feature_boundary_weight: 0.08
+foundation_cache_region_score_threshold: 0.35
+foundation_cache_region_max_masks: 16
+foundation_cache_region_separation_margin: 0.25
+foundation_cache_require_official: true
+foundation_cache_mask_projector_hidden_dim: 256
+foundation_cache_mask_projector_masks: 24
+
+# Factor B: Direct3D support calibration on.
+direct_point_query_support_distill_weight: 0.10
+direct_point_query_support_distill_embeddings: "checkpoints/siglip2_lerf_text_embeddings.pt"
+direct_point_query_support_distill_temperature: 0.5
+direct_point_query_support_distill_logit_norm: "zscore"
+direct_point_render_consistency_weight: 0.15
+direct_point_render_consistency_mode: "cosine"
+direct_point_proposal_consistency_weight: 0.05
+direct_point_proposal_voxel_size: 0.05
+direct_point_proposal_min_count: 2
+direct_point_proposal_space: "adapter"

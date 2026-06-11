@@ -16,14 +16,14 @@ forms.
 | Main manuscript exists and compiles | `paper/radio_gs_tpami.tex` -> `paper/radio_gs_tpami.pdf` | Covered. |
 | Supplementary material exists and compiles | `paper/radio_gs_tpami_supplement.tex` -> `paper/radio_gs_tpami_supplement.pdf` | Covered. |
 | Central logic chain is explicit | Abstract, Introduction, Method, Experiments, Discussion, Limitations, and Figure 1 all frame one compact foundation-feature Gaussian map with rendered-view, direct-primitive, and point-query readouts. | Covered. |
-| Method claims are protocol-bounded | `radio_gs/scripts/validate_paper_claims.py`; main text distinguishes VPR training bridge, RGB/GrabCut support policy, official SAM3 control, and external published-context rows. | Covered. |
+| Method claims are protocol-bounded | `radio_gs/scripts/validate_paper_claims.py`; main text distinguishes Multiview Primitive Registration as a training bridge, label-free color-edge support calibration, official SAM3 control, and external published-context results. | Covered. |
 | Three benchmark tracks are represented | LERF rendered-view OVS, LERF direct 3D OVS, and VALA/OpenGaFF-8 ScanNet point query appear in main tables and `paper/artifacts/final_rows.yaml`. | Covered. |
-| Teacher-vs-student feature usability is represented | Main Table `tab:teacher_vs_rendered`, `tab:sam_dino_tasks`, and `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.{md,json}`. | Covered with bounded wording. |
+| Frame-wise foundation-feature comparisons are represented | Main Table `tab:teacher_vs_rendered`, `tab:sam_dino_tasks`, and `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.{md,json}`. | Covered with bounded wording. |
 | Component and quantitative ablations are represented | `paper/lerf_component_ablation_table.tex`, `paper/quantitative_ablation_summary_table.tex`, and supplementary protocol controls. | Covered. |
 | Storage and efficiency are represented | `paper/storage_footprint_table.tex`, `paper/efficiency_cost_table.tex`, and supporting artifacts. | Covered. |
 | Failure analysis is represented | `paper/lerf_failure_analysis_table.tex`, `paper/scannet_category_stability_table.tex`, and supporting artifacts. | Covered. |
 | Main qualitative figures are curated | `paper/figures/radio_gs_framework.pdf`, `lerf_2d3d_ovs_qualitative.png`, `scannet_openvocab_3d_query_qualitative.png`, and `lerf_direct3d_support_policy_ablation_qualitative.png`; `paper/artifacts/figure_quality_audit_tpami_20260531.md`. | Covered. |
-| Weaker diagnostic visuals are not overused in the main paper | SAM/DINO, VPR, SAM3-box, and alpha/depth visuals are kept in the supplementary material. | Covered. |
+| Weaker diagnostic visuals are not overused in the main paper | SAM/DINO, multiview-registration, SAM3-box, and alpha/depth visuals are kept in the supplementary material. | Covered. |
 | Reproducibility entry point exists | `paper/artifacts/tpami_reproducibility_package_20260601.md`. | Covered. |
 | Large-asset release plan exists | `paper/artifacts/tpami_large_asset_release_manifest_20260601.md`. | Covered. |
 | Upload-facing materials exist | `paper/tpami_cover_letter_draft.md`, `paper/tpami_submission_checklist.md`, and `paper/tpami_submission_mode_guide.md`. | Covered except human-specific fields. |

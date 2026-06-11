@@ -8,7 +8,7 @@ Rationale:
 
 - The paper is primarily a computer-vision and scene-understanding contribution, not only a graphics rendering paper.
 - The main claims match TPAMI scope: vision foundation features, open-vocabulary recognition, 3D scene representation, and cross-dataset semantic querying.
-- The work already has a journal-style workload: rendered-view LERF grounding, LERF direct 3D object selection, ScanNet direct point-query transfer, teacher-vs-student feature usability, storage/runtime accounting, qualitative comparison, and failure analysis.
+- The work already has a journal-style workload: rendered-view LERF grounding, LERF direct 3D object selection, ScanNet direct point-query transfer, frame-wise foundation-feature comparisons, storage/runtime accounting, qualitative comparison, and failure analysis.
 
 Secondary venues:
 
@@ -24,16 +24,16 @@ Template decision:
 
 ## Core Paper Thesis
 
-**CTF-GS learns a compact, teacher-compatible 3D Gaussian foundation-feature memory that supports both rendered-view 2D open-vocabulary localization and direct 3D primitive/point querying.**
+**CTF-GS learns a compact foundation-feature scene memory for 3D Gaussian scenes that supports rendered-view open-vocabulary localization, direct 3D primitive selection, and direct point querying.**
 
 The strongest defensible version:
 
-- One compact feature field is trained from frozen RADIO teacher features.
+- One compact feature field is trained from frozen RADIO foundation features.
 - The field has dual readouts:
   - rendered dense feature maps for LERF-OVS 2D localization;
   - direct compact Gaussian/point features for LERF direct 3D selection and ScanNet direct point-query transfer.
-- VPR is positioned as an auditable multiview registration bridge and training/diagnostic teacher, not as the deployed compact direct-field cache.
-- RGB/GrabCut component guard is a GT-free support policy, not an external feature extractor or learned network.
+- Multiview Primitive Registration is positioned as an auditable registration bridge and training/diagnostic signal, not as the deployed compact direct-field cache.
+- Label-free color-edge component calibration is a classical support calibration step, not an external feature extractor or learned network.
 - Official SAM3 box readout remains diagnostic; feature-only SAM3-adaptor boundary readout is the promoted internal boundary readout for rendered-view masks.
 
 Avoid overclaiming:
@@ -78,7 +78,7 @@ What to borrow:
 
 What to improve:
 
-- CTF-GS should stress compact teacher-feature reconstruction and dual downstream readouts, not only object-level instance consistency.
+- CTF-GS should stress compact foundation-feature reconstruction and multiple downstream readouts, not only object-level instance consistency.
 
 ### Dr. Splat
 
@@ -90,7 +90,7 @@ Writing pattern:
 
 What to borrow:
 
-- Position VPR as a principled multiview registration bridge inspired by direct Gaussian assignment.
+- Position Multiview Primitive Registration as a principled registration bridge inspired by direct Gaussian assignment.
 - Explain why direct Gaussian querying matters for holistic 3D scene understanding.
 
 What to avoid:
@@ -116,15 +116,15 @@ What to borrow:
 
 What to differentiate:
 
-- CTF-GS is not a codebook-attention field; its novelty is compact teacher-feature reconstruction with dual readouts and frozen-head downstream usability.
+- CTF-GS is not a codebook-attention field; its novelty is compact foundation-feature reconstruction with multi-protocol readouts and frozen-head downstream usability.
 
 ## Recommended TPAMI Structure
 
 1. **Introduction**
    - Motivation: foundation features are strong in 2D but hard to reuse from 3D scenes.
-   - Problem: avoid storing raw teacher features or training task-specific classifiers.
-   - Method preview: compact teacher-feature field with dual readout.
-   - Evidence preview: LERF 2D, LERF direct 3D, ScanNet, teacher-vs-student, storage/runtime.
+   - Problem: avoid storing raw high-dimensional foundation features or training task-specific classifiers.
+   - Method preview: compact foundation-feature scene memory with rendered, primitive, and point readouts.
+   - Evidence preview: LERF 2D, LERF direct 3D, ScanNet, frame-wise foundation-feature comparisons, storage/runtime.
 
 2. **Related Work**
    - Language fields and open-vocabulary 3DGS: LERF, LangSplat, LEGaussians.
@@ -133,12 +133,12 @@ What to differentiate:
    - Compact feature fields and storage-efficient 3D semantics.
 
 3. **Method**
-   - Problem setup and teacher-feature target.
-   - Hybrid Gaussian Code Field.
-   - Compact-to-Teacher Reconstruction and View-Space Feature Alignment.
-   - Frozen Geometry-Head Consistency and adaptor consistency.
+   - Problem setup and foundation-feature target.
+   - Contextual Gaussian Feature Field.
+   - Foundation-Space Reconstruction and View-Conditioned Feature Calibration.
+   - Frozen-Head Geometry Consistency and Multi-Head Foundation Consistency.
    - Direct Gaussian/point readout.
-   - VPR-to-field transfer and support-aware Direct3D selection policy.
+   - Multiview-registration-to-field transfer and Support-Calibrated Primitive Readout.
    - Boundary readouts: internal feature-only SAM3 boundary head versus diagnostic official SAM3 box.
 
 4. **Experiments**
@@ -146,16 +146,16 @@ What to differentiate:
    - LERF rendered-view 2D OVS.
    - LERF direct 3D OVS.
    - ScanNet VALA8 direct point-query.
-   - Teacher-vs-student frozen-head usability.
+   - Frame-wise foundation features vs. reconstructed scene field.
    - Ablations and contribution ranking.
    - Storage/runtime.
    - Qualitative results.
    - Failure analysis.
 
 5. **Discussion**
-   - Why rendered features can outperform frame-wise teacher under task readouts.
-   - Why Direct3D needs support-aware selection, not only feature cosine.
-   - Where VPR fits as teacher/bridge rather than cache.
+   - Why rendered features can outperform frame-wise foundation features under task readouts.
+   - Why Direct3D needs support-calibrated readout, not only feature cosine.
+   - Where Multiview Primitive Registration fits as bridge rather than cache.
 
 6. **Limitations**
    - Small/fragmented objects, Waldo Kitchen.
@@ -170,7 +170,7 @@ What to differentiate:
 1. **Fig. 1 Framework**
    - Use `paper/figures/radio_gs_framework.pdf`.
    - Must emphasize one compact field, rendered/primitive/point readouts,
-     VPR as a training-only registered teacher/bridge, and frozen downstream
+     Multiview Primitive Registration as a training-only registered bridge, and frozen downstream
      heads as supervision/probe interfaces.
    - Current visual audit: `paper/artifacts/figure_quality_audit_tpami_20260531.md`.
 
@@ -183,7 +183,7 @@ What to differentiate:
    - Use `paper/figures/scannet_openvocab_3d_query_qualitative.png`.
    - Binary query point cloud is better for main paper than full 19-class coloring.
 
-4. **Fig. 4 Direct3D support-policy ablation**
+4. **Fig. 4 Direct3D support-calibration ablation**
    - Use `paper/figures/lerf_direct3d_support_policy_ablation_qualitative.png`.
    - If page pressure is high, move this to appendix.
 
@@ -194,20 +194,20 @@ What to differentiate:
    - External LangSplat/LERF/LEGaussians context table may follow or move to appendix if too much.
 
 2. **Table 2 LERF direct 3D object selection**
-   - Include OpenGaussian context, CTF-GS VPR, CTF-GS compact, and SAM3 diagnostic.
-   - Caption must distinguish compact row from official SAM3 diagnostic.
+   - Include OpenGaussian context, CTF-GS registered multiview analysis, CTF-GS compact, and SAM3 diagnostic.
+   - Caption must distinguish compact readout from official SAM3 diagnostic.
 
 3. **Table 3 Direct3D compact-readout ablation**
-   - Shows strict one-map, prompt ensemble, RGB component guard, RGB/score guard.
+   - Shows strict one-map, prompt ensemble, color-edge component guard, and score-component guard.
    - This protects the claim boundary.
 
 4. **Table 4 ScanNet VALA8 direct point-query**
    - Use OpenGaFF/VALA published context rows but omit OpenGaFF method row by policy.
    - Report split19/split15/split10 mIoU/mAcc.
 
-5. **Table 5 Teacher-vs-CTF-GS**
+5. **Table 5 Frame-wise RADIO vs CTF-GS**
    - Same-evaluator RADIO RGB vs CTF-GS rendered features.
-   - This is central for the "student feature field improves downstream usability" claim.
+   - This is central for the reconstructed scene-field downstream-usability claim.
 
 6. **Table 6 Quantitative ablation summary**
    - Keep only top contribution rows in main paper.

@@ -1,18 +1,17 @@
 \begin{table}[t]
 \centering
-\caption{Submission efficiency and cost evidence. Runtime rows use explicit
-freeze-profile telemetry; storage rows compare direct per-Gaussian 1280-D fp16
-teacher features against the stored compact feature-field footprint.}
+\caption{Single-query latency evidence. Lower is better. Values are derived from frozen profile artifacts and are conservative because the profiled commands include evaluator overhead and, for LERF rendered-view runs, visualization/teacher branches. Direct 3D latency includes query-select-render mask generation.}
 \label{tab:efficiency_cost}
 \footnotesize
 \setlength{\tabcolsep}{3.0pt}
-\begin{tabular}{llcc}
+\begin{tabular}{llrrr}
 \toprule
-Evidence & Scope & Cost & VRAM \\
+Task & Unit & Queries & Latency & Peak VRAM \\
+ &  &  & ms/query & MiB \\
 \midrule
-LERF eval & 4 scenes & 124.77 s / 31.19 s-scene & 2076 MiB \\
-ScanNet eval & 10-scene superset & 150.90 s / 15.09 s-scene & 1666 MiB \\
-Storage & 4 scenes & 1.74$\times$--4.04$\times$ saving & -- \\
+LERF rendered-view OVS & view-query & 356 & 350.5 & 2076 \\
+LERF direct 3D OVS & object-query & 208 & 2367.7 & -- \\
+ScanNet point query & class-query & 389 & 387.9 & 1666 \\
 \bottomrule
 \end{tabular}
 \end{table}

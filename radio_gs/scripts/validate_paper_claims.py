@@ -18,6 +18,7 @@ SCANNET_CONTEXT_TABLE = Path("paper/scannet_published_context_table.tex")
 FINAL_ROWS = Path("paper/artifacts/final_rows.yaml")
 NARRATIVE_PATHS = (
     Path("paper/radio_gs_draft.tex"),
+    Path("paper/radio_gs_tpami.tex"),
     Path("docs/paper_draft_current.md"),
     Path("docs/submission_status.md"),
 )
@@ -107,15 +108,19 @@ def _read_texts(root: Path, paths: Iterable[str | Path], issues: list[str]) -> d
 def _check_vpr_context_row(text: str, issues: list[str]) -> None:
     if CAGS_CONTEXT_RE.search(text):
         issues.append(f"{CONTEXT_TABLE}: CAGS must not be promoted in the OpenGaFF-aligned context table")
-    vpr_rows = [line.strip() for line in text.splitlines() if r"\method{} + VPR" in line]
+    vpr_rows = [
+        line.strip()
+        for line in text.splitlines()
+        if r"\method{} + VPR" in line or r"\method{} + MPR" in line
+    ]
     if not vpr_rows:
-        issues.append(f"{CONTEXT_TABLE}: missing VPR context row")
+        issues.append(f"{CONTEXT_TABLE}: missing registered multiview context row")
         return
     for line in vpr_rows:
         if "thr0p25" not in line:
-            issues.append(f"{CONTEXT_TABLE}: VPR context row must use fixed thr0p25: {line}")
+            issues.append(f"{CONTEXT_TABLE}: registered multiview context row must use fixed thr0p25: {line}")
         if MEAN_STD_RE.search(line):
-            issues.append(f"{CONTEXT_TABLE}: VPR context row must not promote mean+std: {line}")
+            issues.append(f"{CONTEXT_TABLE}: registered multiview context row must not promote mean+std: {line}")
 
 
 def _check_vpr_protocol_card(text: str, issues: list[str]) -> None:
@@ -136,10 +141,10 @@ def _check_vpr_protocol_card(text: str, issues: list[str]) -> None:
 def _check_selection_table(text: str, issues: list[str]) -> None:
     if MEAN_2P5_STD_RE.search(text):
         issues.append(f"{SELECTION_TABLE}: promoted selection table must not cite mean+2.5std")
-    if not re.search(r"CTF-GS\s+VPR\s*&\s*thr0p25\s+mIoU\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing CTF-GS VPR fixed-thr0p25 mIoU row")
-    if not re.search(r"CTF-GS\s+VPR\s*&\s*thr0p25\s+Acc@0\.25\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing CTF-GS VPR fixed-thr0p25 Acc@0.25 row")
+    if not re.search(r"CTF-GS\s+(?:VPR|MPR)\s*&\s*thr0p25\s+mIoU\b", text):
+        issues.append(f"{SELECTION_TABLE}: missing CTF-GS registered multiview fixed-thr0p25 mIoU row")
+    if not re.search(r"CTF-GS\s+(?:VPR|MPR)\s*&\s*thr0p25\s+Acc@0\.25\b", text):
+        issues.append(f"{SELECTION_TABLE}: missing CTF-GS registered multiview fixed-thr0p25 Acc@0.25 row")
     if not re.search(r"CTF-GS\s+compact\s*&\s*score-component\s+mIoU\b", text):
         issues.append(f"{SELECTION_TABLE}: missing compact score-component mIoU row")
     if not re.search(r"CTF-GS\s+compact\s*&\s*score-component\s+Acc@0\.25\b", text):

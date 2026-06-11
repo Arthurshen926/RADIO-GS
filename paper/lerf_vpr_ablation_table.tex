@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{VPR controls for LERF-OVS direct 3D object selection. Except for the explicitly marked earlier raw-center row, rows use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}
+  \caption{Multiview Primitive Registration controls for LERF-OVS direct 3D object selection. Except for the explicitly marked earlier raw-center variant, results use the same fixed top-2\% primitive selector. ``Reg.'' is the mean fraction of Gaussians receiving registered rendered-view features; unregistered primitives use the direct Gaussian-center fallback unless disabled by the ablation.}
   \label{tab:vpr_ablation}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccc}
@@ -8,16 +8,16 @@
     Variant & Selector / views & Reg. & mIoU & Acc@0.25 \\
     \midrule
     Raw Gaussian-center & top10\%, earlier & -- & 0.080 & 0.093 \\
-    Raw Gaussian-center & top2\%, VPR protocol & -- & 0.012 & 0.009 \\
-    VPR, cosine & top2\%, all poses 24 & 0.385 & 0.312 & 0.547 \\
-    VPR, softmax & top2\%, all poses 24 & 0.385 & 0.342 & 0.555 \\
-    VPR + voxel & top2\%, train views 24 & 0.369 & 0.349 & 0.595 \\
-    VPR + voxel & top2\%, all poses 8 & 0.240 & 0.277 & 0.487 \\
-    VPR + voxel & top2\%, all poses 48 & 0.448 & 0.380 & 0.653 \\
-    VPR + voxel & top2\%, all poses 96 & 0.485 & 0.385 & 0.643 \\
-    VPR + voxel, lower blend & top2\%, all poses 96 & 0.485 & 0.385 & 0.631 \\
-    VPR + voxel, w/o VFA & top10\%, all poses 24 & 0.385 & 0.070 & 0.099 \\
-    VPR + voxel, w/o depth check & top2\%, all poses 24 & 0.972 & 0.347 & 0.615 \\
+    Raw Gaussian-center & top2\%, MPR protocol & -- & 0.012 & 0.009 \\
+    MPR, cosine & top2\%, all poses 24 & 0.385 & 0.312 & 0.547 \\
+    MPR, softmax & top2\%, all poses 24 & 0.385 & 0.342 & 0.555 \\
+    MPR + voxel & top2\%, train views 24 & 0.369 & 0.349 & 0.595 \\
+    MPR + voxel & top2\%, all poses 8 & 0.240 & 0.277 & 0.487 \\
+    MPR + voxel & top2\%, all poses 48 & 0.448 & 0.380 & 0.653 \\
+    MPR + voxel & top2\%, all poses 96 & 0.485 & 0.385 & 0.643 \\
+    MPR + voxel, lower blend & top2\%, all poses 96 & 0.485 & 0.385 & 0.631 \\
+    MPR + voxel, w/o calibration & top10\%, all poses 24 & 0.385 & 0.070 & 0.099 \\
+    MPR + voxel, w/o depth check & top2\%, all poses 24 & 0.972 & 0.347 & 0.615 \\
     \bottomrule
   \end{tabular}
   }

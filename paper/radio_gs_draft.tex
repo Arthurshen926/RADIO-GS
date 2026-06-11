@@ -632,18 +632,20 @@ and the missing same-protocol follow-up runs.
 
 Table~\ref{tab:storage_footprint} closes the compactness claim with explicit
 footprint accounting. Direct storage assumes one 1280-D fp16 teacher feature per
-Gaussian and excludes ordinary RGB/geometry attributes. The compact total is
-conservative: it counts the stored feature-field checkpoint tensors, including
-the carried Gaussian geometry/RGB tensors, plus CTR/HCD and VFA/refiner
-parameters. Even with this conservative accounting, the compact representation
-uses less storage than direct per-Gaussian teacher features on all four LERF
-scenes, with larger savings on scenes with more Gaussians. VPR itself is an
-inference-time readout and does not add trained persistent parameters; if one
-materializes registered 1536-D SigLIP2 primitive embeddings and per-query voxel
-scores as a cache, that cache is reported separately and is larger than direct
-1280-D fp16 feature storage. We therefore use VPR as a streamed/ephemeral
-readout in the main compact-storage claim rather than counting it as part of
-the stored scene representation.
+Gaussian and excludes ordinary RGB/geometry attributes. The latent payload is
+the scale-dependent semantic memory stored per Gaussian, while the feature
+package additionally counts scene-global heads, CTR/HCD, and VFA/refiner tensors
+whose fixed overhead is amortized as scene scale grows. The full checkpoint is
+conservative: it also includes carried Gaussian geometry/RGB tensors. Even with
+this accounting, the compact representation uses less storage than direct
+per-Gaussian teacher features on all four LERF scenes, with larger savings on
+scenes with more Gaussians. Multiview Primitive Registration itself is a
+training and analysis bridge and does not add trained persistent parameters; if
+one materializes registered 1536-D SigLIP2 primitive embeddings and per-query
+voxel scores as a cache, that cache is reported separately and is larger than
+direct 1280-D fp16 feature storage. We therefore use multiview registration as
+streamed evidence in the main compact-storage claim rather than counting it as
+part of the stored scene representation.
 The compression/downstream correlation audit is kept as an appendix artifact:
 checkpoint saving ratio has only weak positive correlation with rendered mIoU
 and negative correlation with Direct3D mIoU, so the paper does not overclaim
@@ -747,12 +749,17 @@ view coverage and object extent.
 
 \input{efficiency_cost_table}
 
-Table~\ref{tab:efficiency_cost} separates profiled evaluation cost from storage
-footprint accounting. The four LERF overlay evaluations take 124.770 seconds in
-total and peak at 2076 MiB, while the previously profiled 10-scene ScanNet
-direct-query superset takes 150.903 seconds and peaks at 1666 MiB. Training throughput is
-kept as supplementary log-derived evidence because training wall time and
-explicit GPU telemetry are different measurement types.
+Table~\ref{tab:efficiency_cost} reports lower-is-better single-query latency
+derived from frozen profile artifacts, separate from storage footprint
+accounting. The reported units match each protocol: rendered-view LERF uses
+view-query latency, direct 3D LERF uses object-query latency after
+query-select-render mask generation, and ScanNet uses class-query latency.
+These values are conservative because the frozen profiles include evaluator
+work and, for rendered-view LERF, visualization/teacher branches; clean
+warm-GPU microbenchmarks are kept out of the main claim until run under a
+single instrumentation harness. Training throughput remains supplementary
+log-derived evidence because training wall time and explicit GPU telemetry are
+different measurement types.
 
 \subsection{Qualitative Results}
 
@@ -789,7 +796,7 @@ text query retrieves a target class under the VALA/OpenGaFF split.
 \includegraphics[width=\linewidth]{figures/scannet_openvocab_3d_query_qualitative.png}
 \caption{ScanNet open-vocabulary 3D query qualitative comparison. Each row
 shows a binary text-class query on a VALA/OpenGaFF-8 scene: scene overview, GT
-class points, our local OpenGaussian reproduction, and \method{} direct
+class points, our local VALA compatibility reproduction, and \method{} direct
 point-query prediction. Gray points are non-query classes.}
 \label{fig:scannet_qualitative}
 \end{figure*}
@@ -810,10 +817,42 @@ evaluate the selected 3D primitives.}
 \label{fig:direct3d_ablation_qualitative}
 \end{figure*}
 
-Rendered-view heatmap examples, alpha/depth boundary cases, and
-SAM/DINO-adaptor diagnostics are kept as appendix artifacts rather than
-additional main-paper figures, since their protocols differ from direct 3D
-object selection.
+Fig.~\ref{fig:rendered_boundary_qualitative} isolates the rendered-view
+boundary calibration used by the feature-only SAM3-adaptor readout. Unlike the
+frozen official SAM3 diagnostic, this readout is conditioned on reconstructed
+CTF-GS/RADIO features and prompt embeddings; it does not call the official RGB
+SAM3 decoder at evaluation time.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/lerf_rendered_boundary_calibration_qualitative.png}
+\caption{Rendered-view boundary calibration qualitative examples. The coarse
+heatmap support is converted into a feature-only boundary mask using the
+prompt-conditioned SAM3-adaptor head. The examples show per-query IoU gains
+without invoking an external RGB SAM3 decoder.}
+\label{fig:rendered_boundary_qualitative}
+\end{figure*}
+
+Fig.~\ref{fig:teacher_field_qualitative} compares reconstructed scene features
+with frame-wise RADIO features under the frozen downstream probes used in
+Table~\ref{tab:sam_dino_tasks}. These examples visualize the same claim as the
+quantitative probe table: the compact scene field is not merely a compressed
+copy of a single view, but a multiview feature memory that can produce more
+stable downstream responses.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/lerf_sam_dino_tasks_qualitative.png}
+\caption{Reconstructed scene features versus frame-wise RADIO under frozen-head
+tasks. Columns compare the task input/GT, frame-wise RADIO response, and
+\method{} reconstructed field response for SigLIP2 grounding, SAM3-adaptor mask
+propagation, DINOv3 mask propagation, and DINOv3 dense matching.}
+\label{fig:teacher_field_qualitative}
+\end{figure*}
+
+Additional rendered heatmap examples, alpha/depth boundary cases, and extended
+SAM/DINO-adaptor controls are kept in the supplementary material so the main
+paper focuses on one representative figure per claim.
 
 \subsection{Failure Analysis}
 

@@ -11,7 +11,7 @@
 \newcommand{\project}{RADIO-GS}
 \newcommand{\radio}{C-RADIOv4-H}
 
-\title{Supplementary Material for ``\method{}: Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding''}
+\title{Supplementary Material for ``\method{}: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding''}
 \author{Anonymous Authors}
 
 \begin{document}
@@ -23,7 +23,7 @@ This supplementary material records additional calibration, protocol controls,
 and qualitative examples for the main paper. The main paper keeps the narrative
 focused on the deployed compact field: rendered-view LERF-OVS grounding,
 OpenGaussian-style direct 3D object selection, VALA/OpenGaFF-8 ScanNet direct
-point querying, and frozen-head teacher comparisons. The tables below provide
+point querying, and frame-wise foundation-feature comparisons. The tables below provide
 the supporting controls behind those claims.
 
 Unless otherwise stated, all LERF-OVS numbers are evaluated on the same four
@@ -35,7 +35,7 @@ applied before rendering.
 
 Table~\ref{tab:rendered_boundary_calibration} expands the rendered-view mask
 calibration summarized in the main paper. The fixed threshold and
-peak-connected-component readout are GT-free and use the heatmap argmax only to
+peak-connected-component readout are label-free and use the heatmap argmax only to
 remove disconnected regions far from the queried peak.
 
 \input{lerf_rendered_boundary_calibration_table}
@@ -44,10 +44,11 @@ remove disconnected regions far from the queried peak.
 
 Tables~\ref{tab:vpr_ablation}--\ref{tab:direct3d_query_audit} document the
 registration and confidence controls used to understand direct 3D primitive
-querying. VPR is treated as a registered multiview supervision and analysis
-bridge, while the main compact direct row in the paper uses Gaussian-center
-primitive scores with a fixed support-aware policy and does not read a VPR
-feature cache at inference.
+querying. Multiview Primitive Registration is treated as a registered
+supervision and analysis bridge, while the main compact direct readout in the
+paper uses Gaussian-center primitive scores with fixed Support-Calibrated
+Primitive Readout and does not read a multiview-registration feature cache at
+inference.
 
 \input{lerf_vpr_ablation_table}
 
@@ -63,7 +64,7 @@ feature cache at inference.
 Tables~\ref{tab:nearest_view_cache_baseline}--\ref{tab:feature_error_text_relevance}
 compare the compact field against simple feature-memory alternatives and relate
 feature reconstruction quality to downstream relevance. These controls support
-the central design choice of reconstructing compact teacher-compatible features
+the central design choice of reconstructing compact foundation-space features
 rather than storing a raw high-dimensional teacher vector per primitive.
 
 \input{lerf_nearest_view_cache_baseline_table}
@@ -79,7 +80,7 @@ rather than storing a raw high-dimensional teacher vector per primitive.
 Tables~\ref{tab:boundary_error_readout} and
 \ref{tab:alpha_depth_boundary_alignment} record boundary-oriented metrics for
 the SAM3-box boundary readout. This readout is reported as a boundary-assisted
-control rather than the core compact direct row.
+control rather than the core compact direct readout.
 
 \input{boundary_error_readout_table}
 
@@ -97,7 +98,7 @@ source-level provenance for tables, figures, and result registries.
 \section{Additional Qualitative Results}
 
 Figure~\ref{fig:supp_sam_dino} shows frozen-head adaptor examples. These
-examples are useful for interpreting the teacher-vs-student benchmark, but the
+examples are useful for interpreting the frame-wise foundation-feature comparison, but the
 main paper keeps the LERF qualitative figure focused on the cleaner 2D/3D
 open-vocabulary query taxonomy.
 
@@ -110,16 +111,17 @@ an official RGB SAM decoder.}
 \label{fig:supp_sam_dino}
 \end{figure}
 
-Figure~\ref{fig:supp_vpr_direct3d} shows the registered VPR direct-3D control.
-It is included as an analysis readout because VPR transfers registered multiview
-support to primitives, whereas the main compact direct row uses the deployed
+Figure~\ref{fig:supp_vpr_direct3d} shows the registered multiview direct-3D
+control. It is included as an analysis readout because Multiview Primitive
+Registration transfers registered multiview support to primitives, whereas the main compact direct readout uses the deployed
 compact Gaussian-center field.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.86\linewidth]{figures/lerf_vpr_direct_3d_qualitative.png}
-\caption{Registered VPR direct-3D control examples. VPR is used as an analysis
-and training bridge, not as the main compact-field inference cache.}
+\caption{Registered multiview direct-3D control examples. Multiview Primitive
+Registration is used as an analysis and training bridge, not as the main
+compact-field inference cache.}
 \label{fig:supp_vpr_direct3d}
 \end{figure}
 
@@ -127,7 +129,7 @@ and training bridge, not as the main compact-field inference cache.}
 \centering
 \includegraphics[width=0.86\linewidth]{figures/lerf_sam3_box_direct_3d_qualitative_pad16.png}
 \caption{Boundary-assisted direct-3D examples using the SAM3-box control. This
-row illustrates a boundary readout after compact primitive selection and is
+variant illustrates a boundary readout after compact primitive selection and is
 separate from the strict compact one-map ablation.}
 \label{fig:supp_sam3_box}
 \end{figure}

@@ -1,11 +1,11 @@
 \begin{table}[t]
 \centering
-\caption{Compact Direct3D readout ablation. All rows use compact Gaussian-center primitive scores and the OpenGaussian-style query-select-render evaluation. The pure one-map row is the strict no-VPR/no-RGB/no-SAM readout; guarded rows add GT-free component support policies but still avoid a VPR cache and official RGB SAM decoder.}
+\caption{Compact Direct3D readout ablation. All variants use compact Gaussian-center primitive scores and the OpenGaussian-style query-select-render evaluation. The pure one-map variant is the strict no-registration-cache/no-RGB/no-SAM readout; guarded variants add label-free component support calibration but still avoid a multiview-registration cache and official RGB SAM decoder.}
 \label{tab:direct3d_compact_readout_ablation}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccccc}
 \toprule
-Readout & VPR & SAM3 & RGB & Prompt & mIoU & Acc@0.25 \\
+Readout & MPR cache & SAM3 & RGB & Prompt & mIoU & Acc@0.25 \\
 \midrule
 Compact single prompt, pure one-map & no & no & no & no & 0.449 & 0.672 \\
 Compact direct, base guarded readout & no & no & yes & no & 0.484 & 0.643 \\

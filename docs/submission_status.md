@@ -16,6 +16,27 @@ top-tier journal submission package.
   proofreading, optional staging of the large-asset release package, and
   optional external-baseline reruns if a strict leaderboard claim is desired.
 
+## 2026-06-09 Terminology and Storyline Migration
+
+- Migrated the TPAMI paper-facing title from **Compact Teacher Feature Fields**
+  to **Compact Foundation-Feature Fields** to emphasize the reusable scene
+  representation rather than a narrow teacher-student compression story.
+- Reframed the core object as a compact foundation-feature scene memory with
+  multi-protocol readouts: rendered-view, direct primitive, and direct
+  point-query.
+- Updated the main-paper vocabulary:
+  `Contextual Gaussian Feature Field`, `Foundation-Space Reconstruction`,
+  `View-Conditioned Feature Calibration`, `Multi-Head Foundation Consistency`,
+  `Multiview Primitive Registration`, and
+  `Support-Calibrated Primitive Readout`.
+- Replaced top-level `RGB/GrabCut` wording with label-free color-edge support
+  calibration. The implementation remains a classical support refinement, not a
+  learned RGB segmentation network or official RGB SAM decoder.
+- Added [tpami_terminology_audit_20260609.md](../paper/artifacts/tpami_terminology_audit_20260609.md)
+  and [tpami_storyline_outline_20260609.md](../paper/artifacts/tpami_storyline_outline_20260609.md)
+  as paper-facing guides for terminology, outline, figure/table placement, and
+  claim boundaries.
+
 ## 2026-06-01 TPAMI Paper Polish
 
 - Rewrote the TPAMI evaluation/provenance section from freeze-report language
@@ -23,7 +44,8 @@ top-tier journal submission package.
 - Removed remaining `current/promoted/paper-facing/diagnostic/artifact appendix`
   wording from the TPAMI main text and table captions.
 - Synchronized the claim validator with the compact Direct3D score-component
-  main row while still guarding the fixed-threshold VPR row and overclaim risks.
+  readout while still guarding the fixed-threshold multiview-registration
+  result and overclaim risks.
 - Added a standalone IEEE-style supplementary PDF at
   [paper/radio_gs_tpami_supplement.tex](../paper/radio_gs_tpami_supplement.tex)
   / [paper/radio_gs_tpami_supplement.pdf](../paper/radio_gs_tpami_supplement.pdf),
@@ -38,7 +60,7 @@ top-tier journal submission package.
 - Added a large-asset release manifest at
   [tpami_large_asset_release_manifest_20260601.md](../paper/artifacts/tpami_large_asset_release_manifest_20260601.md),
   separating required LERF/ScanNet checkpoints, frozen foundation weights,
-  evaluation outputs, optional VPR/SAM3 diagnostics, and release checksum
+  evaluation outputs, optional multiview-registration/SAM3 diagnostics, and release checksum
   commands from the small paper-artifact snapshot.
 - Verified the TPAMI main/supplement PDF builds, claim validator, checksum
   manifest, and whitespace checks after the paper-polish pass.
@@ -60,13 +82,13 @@ top-tier journal submission package.
   [paper/radio_gs_tpami.tex](../paper/radio_gs_tpami.tex), with compiled PDF at
   [paper/radio_gs_tpami.pdf](../paper/radio_gs_tpami.pdf).
 - Replaced the framework figure with a journal-style diagram centered on one
-  compact foundation-feature Gaussian map and three inference readouts. VPR is
-  now shown as a training-only registered teacher/bridge, not as the direct-3D
-  inference cache.
+  compact foundation-feature Gaussian map and three inference readouts.
+  Multiview Primitive Registration is now shown as a training-only registered
+  bridge, not as the direct-3D inference cache.
 - Audited qualitative figures in
   [figure_quality_audit_tpami_20260531.md](../paper/artifacts/figure_quality_audit_tpami_20260531.md):
   keep the LERF 2D/3D OVS figure, ScanNet binary query figure, and direct-3D
-  support-policy ablation in the main paper; move DINO/SAM/VPR control figures
+  support-calibration ablation in the main paper; move DINO/SAM/MPR control figures
   to the supplement.
 - Compressed the widest main-paper tables (`lerf_ovs_main_table.tex`,
   `lerf_component_ablation_table.tex`, and `efficiency_cost_table.tex`). The
@@ -74,8 +96,9 @@ top-tier journal submission package.
   warnings after the current pass.
 - Polished the TPAMI abstract, introduction, contribution list, method setup,
   inference-readout description, discussion, and limitations to remove
-  internal draft wording and make the claim boundaries explicit: VPR is a
-  training bridge, RGB/GrabCut is a GT-free classical support policy, and
+  internal draft wording and make the claim boundaries explicit: Multiview
+  Primitive Registration is a training bridge, label-free color-edge support
+  calibration is a classical support refinement, and
   official SAM3 box readout is separate from the core direct-field claim.
 
 The repository now contains a coherent TPAMI-format method paper, compiled
@@ -161,17 +184,19 @@ bash radio_gs/scripts/run_repo_python.sh radio_gs/scripts/verify_submission_prov
 
 The cleanest current framing is now:
 
-> **Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding.**
+> **Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding.**
 
 The paper-facing method name is **CTF-GS**. `RADIO-GS` remains the repository and
 implementation name. The current module names should be mapped as:
 
 | Implementation name | Paper-facing name |
 |---|---|
-| Hybrid Gaussian feature field | HGCF: Hybrid Gaussian Code Field |
-| HCD codec | CTR: Compact-to-Teacher Reconstruction |
-| Screen-space refiner | VFA: View-Space Feature Aligner |
-| FDH warm-start | FGC: Frozen Geometry-Head Consistency |
+| Hybrid Gaussian feature field | Contextual Gaussian Feature Field |
+| HCD codec | Foundation-Space Reconstruction |
+| Screen-space refiner | View-Conditioned Feature Calibration |
+| FDH warm-start | Frozen-Head Geometry Consistency |
+| VPR support transfer | Multiview Primitive Registration |
+| Component/RGB support refinement | Support-Calibrated Primitive Readout with label-free color-edge calibration |
 
 Under that framing, the paper solves the following problem:
 

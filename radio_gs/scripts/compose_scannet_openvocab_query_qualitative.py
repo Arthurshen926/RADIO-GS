@@ -267,7 +267,8 @@ def make_case_row(
     case: QueryCase,
     *,
     scannet_root: Path,
-    opengaussian_eval: Path,
+    baseline_eval: Path,
+    baseline_name: str,
     ours_root: Path,
     ours_pattern: str,
     split: str,
@@ -276,9 +277,9 @@ def make_case_row(
     pitch: float,
 ) -> tuple[list[Image.Image], dict[str, object]]:
     class_id = NYU40_NAME_TO_ID[case.query]
-    scene_dir = opengaussian_eval / "visualizations" / case.scene
+    scene_dir = baseline_eval / "visualizations" / case.scene
     gt_ply = scene_dir / f"gt_split_{split}.ply"
-    og_ply = scene_dir / f"pred_split_{split}.ply"
+    baseline_ply = scene_dir / f"pred_split_{split}.ply"
     ours_ply = find_ours_ply(ours_root, case.scene, split, ours_pattern)
     overview_ply = scannet_root / case.scene / f"{case.scene}_vh_clean_2.labels.ply"
     if not overview_ply.exists():
@@ -286,9 +287,9 @@ def make_case_row(
 
     overview = read_ply_fields(overview_ply)
     gt = read_ply_fields(gt_ply)
-    og = read_ply_fields(og_ply)
+    baseline = read_ply_fields(baseline_ply)
     ours = read_ply_fields(ours_ply)
-    for name, payload in {"gt": gt, "opengaussian": og, "ours": ours}.items():
+    for name, payload in {"gt": gt, "baseline": baseline, "ours": ours}.items():
         if "label" not in payload:
             raise ValueError(f"{name} PLY for {case.scene} has no label field")
         if name != "gt" and "pred_label" not in payload:
@@ -311,11 +312,11 @@ def make_case_row(
         image_size=image_size,
         radius=1,
     )
-    og_iou = iou_for_class(gt["label"], og["pred_label"], class_id)
+    baseline_iou = iou_for_class(gt["label"], baseline["pred_label"], class_id)
     ours_iou = iou_for_class(gt["label"], ours["pred_label"], class_id)
-    og_panel = draw_points(
+    baseline_panel = draw_points(
         gt["xyz"],
-        binary_colors(og["pred_label"], class_id, (65, 120, 220)),
+        binary_colors(baseline["pred_label"], class_id, (65, 120, 220)),
         params,
         image_size=image_size,
         radius=1,
@@ -332,7 +333,7 @@ def make_case_row(
     panels = [
         add_panel_header(overview_panel, scene_title, f'query: "{case.query}"'),
         add_panel_header(gt_panel, "GT binary mask", f"NYU40 id {class_id}"),
-        add_panel_header(og_panel, "OpenGaussian", f"IoU {og_iou:.3f}"),
+        add_panel_header(baseline_panel, baseline_name, f"IoU {baseline_iou:.3f}"),
         add_panel_header(ours_panel, "CTF-GS", f"IoU {ours_iou:.3f}"),
     ]
     manifest = {
@@ -340,11 +341,12 @@ def make_case_row(
         "query": case.query,
         "nyu40_id": class_id,
         "split": split,
-        "opengaussian_iou": round(og_iou, 4),
+        "baseline": baseline_name,
+        "baseline_iou": round(baseline_iou, 4),
         "ctf_gs_iou": round(ours_iou, 4),
         "overview_ply": rel_or_str(overview_ply),
         "gt_ply": rel_or_str(gt_ply),
-        "opengaussian_ply": rel_or_str(og_ply),
+        "baseline_ply": rel_or_str(baseline_ply),
         "ctf_gs_ply": rel_or_str(ours_ply),
     }
     return panels, manifest
@@ -355,16 +357,16 @@ def write_markdown(path: Path, manifest: dict[str, object]) -> None:
         "# ScanNet Open-Vocabulary 3D Query Qualitative",
         "",
         "Binary query point-cloud visualization for the VALA/OpenGaFF-style direct point-query protocol.",
-        "The baseline is the local OpenGaussian reproduction; CTF-GS panels use saved ScanNet direct point-query predictions.",
+        f"The baseline is `{manifest['baseline_name']}`; CTF-GS panels use saved ScanNet direct point-query predictions.",
         "",
         f"Figure: `{manifest['output']}`",
         "",
-        "| Scene | Query | OpenGaussian IoU | CTF-GS IoU | CTF-GS source |",
+        f"| Scene | Query | {manifest['baseline_name']} IoU | CTF-GS IoU | CTF-GS source |",
         "| --- | --- | ---: | ---: | --- |",
     ]
     for case in manifest["cases"]:
         lines.append(
-            "| {scene} | {query} | {opengaussian_iou:.4f} | {ctf_gs_iou:.4f} | `{ctf_gs_ply}` |".format(
+            "| {scene} | {query} | {baseline_iou:.4f} | {ctf_gs_iou:.4f} | `{ctf_gs_ply}` |".format(
                 **case
             )
         )
@@ -375,7 +377,13 @@ def write_markdown(path: Path, manifest: dict[str, object]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scannet-root", default="dataset/scannet_og")
-    parser.add_argument("--opengaussian-eval", default="output/baselines/opengaussian/scannet_eval")
+    parser.add_argument("--baseline-eval", default="output/baselines/vala/scannet_vala8_compat_20260611_res2")
+    parser.add_argument("--baseline-name", default="VALA")
+    parser.add_argument(
+        "--opengaussian-eval",
+        default=None,
+        help="Deprecated alias for --baseline-eval, kept for old reproduction commands.",
+    )
     parser.add_argument("--ours-root", default="output/scannet_pointcloud_eval")
     parser.add_argument(
         "--ours-pattern",
@@ -392,6 +400,7 @@ def main() -> None:
     parser.add_argument("--pitch", type=float, default=58.0)
     args = parser.parse_args()
 
+    baseline_eval = Path(args.opengaussian_eval) if args.opengaussian_eval else Path(args.baseline_eval)
     cases = parse_cases(args.cases) if args.cases else DEFAULT_CASES
     rows: list[list[Image.Image]] = []
     case_manifests: list[dict[str, object]] = []
@@ -399,7 +408,8 @@ def main() -> None:
         row, case_manifest = make_case_row(
             case,
             scannet_root=Path(args.scannet_root),
-            opengaussian_eval=Path(args.opengaussian_eval),
+            baseline_eval=baseline_eval,
+            baseline_name=args.baseline_name,
             ours_root=Path(args.ours_root),
             ours_pattern=args.ours_pattern,
             split=args.split,
@@ -417,10 +427,11 @@ def main() -> None:
 
     manifest = {
         "output": rel_or_str(output),
-        "opengaussian_eval": rel_or_str(Path(args.opengaussian_eval)),
+        "baseline_name": args.baseline_name,
+        "baseline_eval": rel_or_str(baseline_eval),
         "ours_root": rel_or_str(Path(args.ours_root)),
         "split": args.split,
-        "layout": "overview | GT binary query | OpenGaussian reproduced prediction | CTF-GS prediction",
+        "layout": f"overview | GT binary query | {args.baseline_name} prediction | CTF-GS prediction",
         "cases": case_manifests,
     }
     manifest_path = Path(args.manifest)

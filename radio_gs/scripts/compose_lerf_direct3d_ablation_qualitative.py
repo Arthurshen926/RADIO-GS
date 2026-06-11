@@ -14,11 +14,11 @@ import numpy as np
 
 from radio_gs.scripts.compose_lerf_main_qualitative import (
     REPO_ROOT,
-    add_zoom_inset,
     build_gt_mask,
     compute_iou,
     fit_panel,
     load_binary_mask,
+    mask_bbox,
     overlay_mask,
     put_text_box,
     read_image,
@@ -35,11 +35,15 @@ class AblationCase:
 
 
 DEFAULT_CASES = [
-    AblationCase("waldo_kitchen", "00053", "knife"),
-    AblationCase("waldo_kitchen", "00140", "spoon"),
-    AblationCase("ramen", "00024", "wavy noodles"),
-    AblationCase("teatime", "00140", "plate"),
+    AblationCase("ramen", "00006", "nori"),
+    AblationCase("ramen", "00081", "bowl"),
+    AblationCase("teatime", "00025", "plate"),
+    AblationCase("waldo_kitchen", "00140", "dark cup"),
 ]
+
+GREEN = (70, 185, 80)
+BASELINE = (224, 122, 58)
+OURS = (54, 118, 224)
 
 
 def parse_cases(items: Iterable[str]) -> list[AblationCase]:
@@ -54,6 +58,51 @@ def parse_cases(items: Iterable[str]) -> list[AblationCase]:
 
 def mask_path(root: Path, case: AblationCase) -> Path:
     return root / case.scene / f"frame_{case.frame_id}_{case.query}.png"
+
+
+def dimmed_overlay(
+    image: np.ndarray,
+    mask: np.ndarray,
+    color: tuple[int, int, int],
+    *,
+    alpha: float = 0.72,
+) -> np.ndarray:
+    out = (0.30 * image.astype(np.float32) + 0.70 * 255.0).astype(np.uint8)
+    color_arr = np.asarray(color, dtype=np.float32).reshape(1, 1, 3)
+    out[mask] = ((1.0 - alpha) * out[mask].astype(np.float32) + alpha * color_arr).astype(np.uint8)
+    contours, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(out, contours, -1, color, 4, cv2.LINE_AA)
+    return out
+
+
+def union_bbox(masks: list[np.ndarray], *, pad: int = 24) -> tuple[int, int, int, int] | None:
+    valid = [mask for mask in masks if mask is not None and np.any(mask)]
+    if not valid:
+        return None
+    merged = np.zeros_like(valid[0], dtype=bool)
+    for mask in valid:
+        merged |= mask.astype(bool)
+    return mask_bbox(merged, pad=pad)
+
+
+def projected_support_panel(
+    image: np.ndarray,
+    pred: np.ndarray,
+    gt: np.ndarray,
+    *,
+    color: tuple[int, int, int],
+    width: int,
+    height: int,
+) -> np.ndarray:
+    canvas = np.full_like(image, 255)
+    canvas[pred] = image[pred]
+    contours, _ = cv2.findContours(pred.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(canvas, contours, -1, color, 4, cv2.LINE_AA)
+    gt_contours, _ = cv2.findContours(gt.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(canvas, gt_contours, -1, GREEN, 2, cv2.LINE_AA)
+    panel = fit_panel(canvas, width=width, height=height)
+    cv2.rectangle(panel, (2, 2), (width - 3, height - 3), color, 2, cv2.LINE_AA)
+    return panel
 
 
 def make_panel_title(panel: np.ndarray, title: str, subtitle: str = "") -> np.ndarray:
@@ -87,30 +136,25 @@ def make_row(
         f'"{case.query}"',
     )
     gt_panel = make_panel_title(
-        fit_panel(overlay_mask(rgb, gt, (65, 185, 85)), width=panel_width, height=panel_height),
+        fit_panel(dimmed_overlay(rgb, gt, GREEN), width=panel_width, height=panel_height),
         "GT",
     )
     base_panel = make_panel_title(
-        fit_panel(overlay_mask(rgb, base, (225, 125, 65)), width=panel_width, height=panel_height),
+        fit_panel(dimmed_overlay(rgb, base, BASELINE), width=panel_width, height=panel_height),
         "Base compact",
         f"IoU {base_iou:.3f}",
     )
     full_panel = make_panel_title(
-        fit_panel(overlay_mask(rgb, full, (55, 115, 225)), width=panel_width, height=panel_height),
+        fit_panel(dimmed_overlay(rgb, full, OURS), width=panel_width, height=panel_height),
         "+ support policy",
         f"IoU {full_iou:.3f}",
     )
-    cutout = np.full_like(rgb, 255)
-    cutout[full] = rgb[full]
-    contours, _ = cv2.findContours(full.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(cutout, contours, -1, (55, 115, 225), 3, cv2.LINE_AA)
-    cutout = add_zoom_inset(cutout, full)
-    cutout_panel = make_panel_title(
-        fit_panel(cutout, width=panel_width, height=panel_height),
-        "Selected 3D support",
-        "rendered mask",
+    support_panel = make_panel_title(
+        projected_support_panel(rgb, full, gt, color=OURS, width=panel_width, height=panel_height),
+        "Projected support",
+        "selected primitives",
     )
-    row = np.hstack([rgb_panel, gt_panel, base_panel, full_panel, cutout_panel])
+    row = np.hstack([rgb_panel, gt_panel, base_panel, full_panel, support_panel])
     manifest = {
         "scene": case.scene,
         "frame_id": case.frame_id,
@@ -163,7 +207,7 @@ def main() -> None:
     parser.add_argument("--label-root", default="/mnt/pool/sqy/3d_understanding/lerf_ovs/label")
     parser.add_argument(
         "--base-root",
-        default="output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p25",
+        default="output/radio_gs/lerf_direct3d_deployed_opacity_gate_masks_20260528/pred_masks/thr0p35",
     )
     parser.add_argument(
         "--full-root",
@@ -202,7 +246,7 @@ def main() -> None:
         y += row.shape[0] + gutter
     figure = add_column_header(
         figure,
-        ["RGB/query", "GT", "Base compact", "Ours w/ support", "3D support"],
+        ["RGB/query", "GT", "Base compact", "Ours w/ support", "Projected support"],
         panel_width=args.panel_width,
     )
 
@@ -213,7 +257,7 @@ def main() -> None:
         "output": rel_or_str(output),
         "base_root": rel_or_str(Path(args.base_root)),
         "full_root": rel_or_str(Path(args.full_root)),
-        "layout": "RGB/query | GT | base compact direct field | prompt-ensemble support policy | rendered selected support",
+        "layout": "RGB/query | GT | base compact direct field | prompt-ensemble support policy | selected 3D primitives projected to the same evaluation camera",
         "cases": manifests,
     }
     manifest_path = Path(args.manifest)

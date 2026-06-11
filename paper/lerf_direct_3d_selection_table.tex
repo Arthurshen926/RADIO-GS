@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are OpenGaussian official paper numbers. The VPR row uses registered primitive features. The compact-field row uses Gaussian-center primitive scores with an opacity-gated point adapter, a frozen SigLIP2 prompt ensemble, and a GT-free RGB/score-component support policy; it does not read a VPR cache or official RGB SAM readout at inference, but it is not the strict no-RGB one-map ablation. The SAM3-box row is a frozen boundary readout after compact 3D primitive selection.}
+  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are OpenGaussian official paper numbers. The registered multiview result uses primitive features transferred from posed rendered views. The compact-field result uses Gaussian-center primitive scores with an opacity-gated point adapter, a frozen SigLIP2 prompt ensemble, and label-free color-edge/score-component support calibration; it does not read a multiview-registration cache or official RGB SAM readout at inference, but it is not the strict no-RGB one-map ablation. The SAM3-box result is a frozen boundary readout after compact 3D primitive selection.}
   \label{tab:lerf-direct-3d-selection}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccccc}
@@ -8,12 +8,12 @@
     Method & Protocol & Fig. & Ramen & Tea. & Waldo & Macro \\
     \midrule
     OpenGaussian & mIoU & 0.393 & 0.310 & 0.604 & 0.227 & 0.384 \\
-    CTF-GS VPR & thr0p25 mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
+    CTF-GS MPR & thr0p25 mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
     CTF-GS compact & score-component mIoU & 0.510 & 0.600 & 0.564 & 0.331 & 0.501 \\
     CTF-GS & SAM3 box fixed mIoU & 0.614 & 0.641 & 0.613 & 0.414 & 0.570 \\
     \midrule
     OpenGaussian & Acc@0.25 & 0.554 & 0.422 & 0.763 & 0.318 & 0.514 \\
-    CTF-GS VPR & thr0p25 Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
+    CTF-GS MPR & thr0p25 Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
     CTF-GS compact & score-component Acc@0.25 & 0.679 & 0.831 & 0.763 & 0.545 & 0.704 \\
     CTF-GS & SAM3 box fixed Acc@0.25 & 0.696 & 0.746 & 0.746 & 0.546 & 0.684 \\
     \bottomrule

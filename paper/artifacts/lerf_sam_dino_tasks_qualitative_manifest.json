@@ -1,7 +1,24 @@
 {
   "figure": "paper/figures/lerf_sam_dino_tasks_qualitative.png",
-  "width": 2400,
-  "sam_visual": "output/lerf_sam_dino_tasks/mainline_fixed_vis/waldo_kitchen/visualizations/waldo_kitchen/waldo_kitchen_sam3_mask_prompt_propagation_00154_plate.png",
-  "dino_visual": "output/lerf_sam_dino_tasks/formal_v9_dino_bg110_vis/ramen/visualizations/ramen/ramen_dino_v3_mask_propagation_00024_bowl.png",
-  "notes": "DINO panel uses the formal v9 background-suppressed mask-propagation readout rather than raw nearest-neighbor match lines; raw dense matching remains a diagnostic."
+  "rows": [
+    {
+      "task": "SigLIP2 grounding",
+      "teacher_panel": "output/radio_gs/freeze_eval/lerf_ramen_overlay_calibrated_thr0p60_vis_20260514/visualisations/ramen/lerf_grounding_frame_00024_teacher_wavy_noodles.png",
+      "rendered_panel": "output/radio_gs/freeze_eval/lerf_ramen_overlay_calibrated_thr0p60_vis_20260514/visualisations/ramen/lerf_grounding_frame_00024_rendered_wavy_noodles.png"
+    },
+    {
+      "task": "SAM3 mask propagation",
+      "panel": "output/lerf_sam_dino_tasks/mainline_fixed_vis/waldo_kitchen/visualizations/waldo_kitchen/waldo_kitchen_sam3_mask_prompt_propagation_00154_plate.png"
+    },
+    {
+      "task": "DINO mask propagation",
+      "panel": "output/lerf_sam_dino_tasks/formal_v9_dino_bg110_vis/ramen/visualizations/ramen/ramen_dino_v3_mask_propagation_00024_bowl.png"
+    },
+    {
+      "task": "DINO dense matching",
+      "teacher_panel": "output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_vis/ramen/visualizations/ramen/ramen_dino_v3_dense_matching_teacher_00006_00024_bowl.png",
+      "rendered_panel": "output/lerf_sam_dino_tasks/formal_v8_mutual_homography_ransac_vis/ramen/visualizations/ramen/ramen_dino_v3_dense_matching_rendered_00006_00024_bowl.png"
+    }
+  ],
+  "notes": "Rows are qualitative examples for the same quantitative frozen-head probes. The CTF-GS field columns are reconstructed from the compact scene feature field; the frame-wise RADIO columns are per-image foundation features under the same task heads."
 }
