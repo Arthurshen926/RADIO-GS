@@ -1,0 +1,27 @@
+\begin{table*}[t]
+\centering
+\caption{Paper-facing benchmark provenance. The main tables use the reproduced protocols reported in this manuscript; historical compatibility and source-context audits are retained only as supplementary traceability material.}
+\label{tab:benchmark_provenance}
+\footnotesize
+\setlength{\tabcolsep}{3.0pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{0.18\linewidth}p{0.26\linewidth}p{0.25\linewidth}p{0.22\linewidth}}
+\toprule
+Benchmark & Protocol basis & Main result source & Baseline/result provenance \\
+\midrule
+LERF-OVS 2D query &
+Four LERF-OVS scenes; rendered-view query masks; mIoU and Acc in percent &
+\texttt{final\_rows.yaml}; \texttt{reproduced\_benchmark\_update\_20260615.md} &
+Same protocol table in \texttt{lerf\_ovs\_main\_table.tex}; method-level reproduction notes in \texttt{external\_baseline\_audit.md} \\
+LERF-OVS direct 3D query &
+Text-to-Gaussian primitive selection; selected support rendered only for mask evaluation &
+\texttt{final\_rows.yaml}; compact support-calibration audit artifacts &
+Same protocol table in \texttt{lerf\_ovs\_main\_table.tex}; Direct3D mechanism audits kept separate from ranking table \\
+ScanNet VALA-aligned point query &
+Eight-scene VALA-aligned split; split19/15/10 point-query mIoU/mAcc &
+\texttt{final\_rows.yaml}; ScanNet VALA8 result artifacts &
+Same reproduced VALA-aligned protocol table in \texttt{scannet\_published\_context\_table.tex}; the table is treated as protocol-aligned transfer evidence rather than a full semantic-segmentation leaderboard \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}

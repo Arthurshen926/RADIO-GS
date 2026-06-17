@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{Multiview-registration-to-field consistency for LERF-OVS direct 3D object selection. All variants use the same softmax-threshold selector family, 0.5\% floor, 1.8\% cap, and label-free color-edge boundary calibration. Raw and registration-to-field variants report per-scene sweep-best thresholds; registered MPR reports the fixed \texttt{thr0p25} paper result. Registration-to-field distills cached registered summary features into the compact direct field and evaluates the direct Gaussian-center readout with a 0.5 residual blend to the original field. The confidence-weighted variant uses label-free log view-count weights from multiview registration.}
+  \caption{Multiview-registration-to-field consistency for LERF-OVS direct 3D object selection. All variants use the same softmax-threshold selector family, 0.5\% floor, 1.8\% cap, and label-free color-edge boundary calibration. Raw and registration-to-field variants report per-scene sweep-best thresholds; registered MPR reports the fixed \texttt{thr0p25} paper result. Registration-to-field distills registered summary targets into the compact direct field and evaluates direct Gaussian-center scoring with a 0.5 residual blend to the original field. The confidence-weighted variant uses label-free log view-count weights from multiview registration.}
   \label{tab:vpr_field_consistency}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llccccc}
@@ -10,12 +10,12 @@
     Raw Gaussian-center & mIoU & 0.001 & 0.006 & 0.158 & 0.019 & 0.046 \\
     MPR-to-field consistency & mIoU & 0.488 & 0.438 & 0.510 & 0.212 & 0.412 \\
     MPR-to-field + conf. weights & mIoU & 0.404 & 0.598 & 0.520 & 0.225 & 0.436 \\
-    Registered MPR readout & mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
+    Registered MPR control & mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\
     \midrule
     Raw Gaussian-center & Acc@0.25 & 0.000 & 0.000 & 0.237 & 0.045 & 0.071 \\
     MPR-to-field consistency & Acc@0.25 & 0.714 & 0.578 & 0.695 & 0.364 & 0.588 \\
     MPR-to-field + conf. weights & Acc@0.25 & 0.643 & 0.746 & 0.678 & 0.409 & 0.619 \\
-    Registered MPR readout & Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
+    Registered MPR control & Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\
     \bottomrule
   \end{tabular}
   }

@@ -1,9 +1,10 @@
 \begin{table}[t]
 \centering
-\caption{Single-query latency evidence. Lower is better. Values are derived from frozen profile artifacts and are conservative because the profiled commands include evaluator overhead and, for LERF rendered-view runs, visualization/teacher branches. Direct 3D latency includes query-select-render mask generation.}
+\caption{Single-query latency evidence. Lower is better. Values are derived from frozen profile artifacts and are conservative because the profiled commands include evaluator overhead and, for LERF rendered-view runs, visualization/RADIO-target branches. Direct 3D latency includes query-select-render mask generation.}
 \label{tab:efficiency_cost}
 \footnotesize
 \setlength{\tabcolsep}{3.0pt}
+\resizebox{\linewidth}{!}{%
 \begin{tabular}{llrrr}
 \toprule
 Task & Unit & Queries & Latency & Peak VRAM \\
@@ -14,4 +15,5 @@ LERF direct 3D OVS & object-query & 208 & 2367.7 & -- \\
 ScanNet point query & class-query & 389 & 387.9 & 1666 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}

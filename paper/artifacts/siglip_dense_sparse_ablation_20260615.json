@@ -1,0 +1,158 @@
+{
+  "artifact": "siglip_dense_sparse_ablation_20260615",
+  "created_at": "2026-06-15",
+  "purpose": "Directional Ramen short-finetune ablation for separating dense rendered supervision from sparse primitive SigLIP/MPR regularization.",
+  "scene": "ramen",
+  "training": {
+    "epochs": 8,
+    "warmstart": "/root/RADIO-GS/output/radio_gs/vpr_field_consistency_weighted_log_20260515/ramen/checkpoints/best.pth",
+    "base_config": "/root/RADIO-GS/radio_gs/configs/lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml",
+    "shared_dense_structural_supervision": {
+      "foundation_cache_heads": "sam3",
+      "foundation_cache_weight": 0.12,
+      "foundation_cache_mask_logit_weight": 0.01,
+      "foundation_cache_mask_boundary_weight": 0.03,
+      "foundation_cache_region_consistency_weight": 0.06,
+      "foundation_cache_region_separation_weight": 0.02,
+      "foundation_cache_feature_boundary_weight": 0.08
+    }
+  },
+  "evaluation": {
+    "direct3d": {
+      "protocol": "LERF-OVS direct 3D object selection, score_source=direct, score_threshold sweep, softmax_scene scoring, prompt ensemble, rgb_grabcut_score_component_guard.",
+      "threshold_sweep": [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.65]
+    },
+    "lerf2d": {
+      "protocol": "LERF rendered-view grounding, softmax_scene scoring, fixed threshold 0.60, peak_component_rgb_grabcut refinement, prompt ensemble."
+    }
+  },
+  "variants": {
+    "dense0_sparse0": {
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/siglip_dense_sparse_ablation/lerf_ramen_siglip_dense0_sparse0_ft8.yaml",
+      "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_siglip_dense0_sparse0_ft8/checkpoints/best.pth",
+      "dense_rendered_siglip_text": false,
+      "sparse_primitive_siglip_mpr": false,
+      "train_best": {
+        "best_epoch": 8,
+        "best_metric_name": "cosine",
+        "best_selection_value": 0.7871338963508606,
+        "last_train_total": 10.196359986657495,
+        "last_train_direct_point": 0.0,
+        "last_train_summary_align": 0.0,
+        "last_train_text_heatmaps": 0.0
+      },
+      "direct3d_best_by_miou": {
+        "threshold_tag": "thr0p1",
+        "miou": 0.23887239396572113,
+        "acc025": 0.30985915492957744,
+        "acc050": 0.2535211267605634,
+        "boundary_f": 0.3630727529525757,
+        "fixed_thr0p65_miou": 0.11857916414737701
+      },
+      "lerf2d": {
+        "teacher_loc_acc": 0.8873239436619719,
+        "teacher_miou": 0.5937379611535527,
+        "rendered_loc_acc": 0.9014084507042254,
+        "rendered_miou": 0.6388934889573878
+      }
+    },
+    "dense1_sparse0": {
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/siglip_dense_sparse_ablation/lerf_ramen_siglip_dense1_sparse0_ft8.yaml",
+      "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_siglip_dense1_sparse0_ft8/checkpoints/best.pth",
+      "dense_rendered_siglip_text": true,
+      "sparse_primitive_siglip_mpr": false,
+      "train_best": {
+        "best_epoch": 8,
+        "best_metric_name": "cosine",
+        "best_selection_value": 0.783397376537323,
+        "last_train_total": 15.050252877377176,
+        "last_train_direct_point": 0.0,
+        "last_train_summary_align": 0.0035911081358790398,
+        "last_train_text_heatmaps": 0.11864986686824679
+      },
+      "direct3d_best_by_miou": {
+        "threshold_tag": "thr0p1",
+        "miou": 0.22386105358600616,
+        "acc025": 0.323943661971831,
+        "acc050": 0.2535211267605634,
+        "boundary_f": 0.3511362671852112,
+        "fixed_thr0p65_miou": 0.10174380987882614
+      },
+      "lerf2d": {
+        "teacher_loc_acc": 0.8873239436619719,
+        "teacher_miou": 0.5937379611535527,
+        "rendered_loc_acc": 0.8732394366197183,
+        "rendered_miou": 0.6416290098605901
+      }
+    },
+    "dense0_sparse1": {
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/siglip_dense_sparse_ablation/lerf_ramen_siglip_dense0_sparse1_ft8.yaml",
+      "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_siglip_dense0_sparse1_ft8/checkpoints/best.pth",
+      "dense_rendered_siglip_text": false,
+      "sparse_primitive_siglip_mpr": true,
+      "train_best": {
+        "best_epoch": 8,
+        "best_metric_name": "cosine",
+        "best_selection_value": 0.7799450606107712,
+        "last_train_total": 16.375265058096463,
+        "last_train_direct_point": 0.09385536040540214,
+        "last_train_summary_align": 0.0,
+        "last_train_text_heatmaps": 0.0
+      },
+      "direct3d_best_by_miou": {
+        "threshold_tag": "thr0p05",
+        "miou": 0.3129115700721741,
+        "acc025": 0.4225352112676056,
+        "acc050": 0.30985915492957744,
+        "boundary_f": 0.49978986382484436,
+        "fixed_thr0p65_miou": 0.0659826323390007
+      },
+      "lerf2d": {
+        "teacher_loc_acc": 0.8873239436619719,
+        "teacher_miou": 0.5937379611535527,
+        "rendered_loc_acc": 0.8450704225352113,
+        "rendered_miou": 0.5953911408370859
+      }
+    },
+    "dense1_sparse1": {
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/siglip_dense_sparse_ablation/lerf_ramen_siglip_dense1_sparse1_ft8.yaml",
+      "checkpoint": "/root/RADIO-GS/output/radio_gs/lerf_ramen_siglip_dense1_sparse1_ft8/checkpoints/best.pth",
+      "dense_rendered_siglip_text": true,
+      "sparse_primitive_siglip_mpr": true,
+      "train_best": {
+        "best_epoch": 8,
+        "best_metric_name": "cosine",
+        "best_selection_value": 0.7822060793638229,
+        "last_train_total": 16.102659081553554,
+        "last_train_direct_point": 0.09732703810876554,
+        "last_train_summary_align": 0.0036683307587261405,
+        "last_train_text_heatmaps": 0.12206287930409114
+      },
+      "direct3d_best_by_miou": {
+        "threshold_tag": "thr0p05",
+        "miou": 0.2912754714488983,
+        "acc025": 0.4084507042253521,
+        "acc050": 0.28169014084507044,
+        "boundary_f": 0.4626502990722656,
+        "fixed_thr0p65_miou": 0.06622123718261719
+      },
+      "lerf2d": {
+        "teacher_loc_acc": 0.8873239436619719,
+        "teacher_miou": 0.5937379611535527,
+        "rendered_loc_acc": 0.8450704225352113,
+        "rendered_miou": 0.6142105673321564
+      }
+    }
+  },
+  "interpretation": {
+    "direct3d": "Sparse primitive SigLIP/MPR improves Ramen direct-3D selection substantially over no sparse regularization. Dense rendered SigLIP/text loss does not substitute for sparse primitive supervision and reduces the sparse-only direct3D result in this short-finetune setting.",
+    "rendered2d": "Rendered-view performance remains strong without dense SigLIP/text loss. Sparse primitive regularization at the tested weight creates a 2D tradeoff, so the final method should keep sparse primitive semantic regularization controlled or staged instead of presenting SigLIP as a dense rendered reconstruction loss.",
+    "paper_story": "The ablation supports separating dense rendered RADIO/structural reconstruction from sparse primitive semantic usability regularization. SigLIP should be described as a sparse primitive semantic anchor in MPR, while dense SAM/DINO-style structural signals belong to rendered-view feature reconstruction/regularization."
+  },
+  "limitations": [
+    "Single-scene Ramen ablation.",
+    "Short 8-epoch finetune from an existing warmstart.",
+    "Direct3D uses best threshold over a global threshold sweep because short-finetune checkpoints are not calibrated for the final promoted thr0p65 setting.",
+    "This artifact validates directionality and wording, not final four-scene leaderboard numbers."
+  ]
+}

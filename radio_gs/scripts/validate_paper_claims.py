@@ -17,10 +17,10 @@ SELECTION_TABLE = Path("paper/lerf_direct_3d_selection_table.tex")
 SCANNET_CONTEXT_TABLE = Path("paper/scannet_published_context_table.tex")
 FINAL_ROWS = Path("paper/artifacts/final_rows.yaml")
 NARRATIVE_PATHS = (
-    Path("paper/radio_gs_draft.tex"),
     Path("paper/radio_gs_tpami.tex"),
-    Path("docs/paper_draft_current.md"),
-    Path("docs/submission_status.md"),
+    Path("paper/radio_gs_tpami_supplement.tex"),
+    Path("paper/README.md"),
+    Path("paper/artifacts/project_midterm_report_cn_20260615.md"),
 )
 DEFAULT_PATHS = (
     CONTEXT_TABLE,
@@ -141,14 +141,9 @@ def _check_vpr_protocol_card(text: str, issues: list[str]) -> None:
 def _check_selection_table(text: str, issues: list[str]) -> None:
     if MEAN_2P5_STD_RE.search(text):
         issues.append(f"{SELECTION_TABLE}: promoted selection table must not cite mean+2.5std")
-    if not re.search(r"CTF-GS\s+(?:VPR|MPR)\s*&\s*thr0p25\s+mIoU\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing CTF-GS registered multiview fixed-thr0p25 mIoU row")
-    if not re.search(r"CTF-GS\s+(?:VPR|MPR)\s*&\s*thr0p25\s+Acc@0\.25\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing CTF-GS registered multiview fixed-thr0p25 Acc@0.25 row")
-    if not re.search(r"CTF-GS\s+compact\s*&\s*score-component\s+mIoU\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing compact score-component mIoU row")
-    if not re.search(r"CTF-GS\s+compact\s*&\s*score-component\s+Acc@0\.25\b", text):
-        issues.append(f"{SELECTION_TABLE}: missing compact score-component Acc@0.25 row")
+    required_snippet = r"\method{} & \textbf{54.36} & \textbf{80.84}"
+    if required_snippet not in text:
+        issues.append(f"{SELECTION_TABLE}: missing current same-protocol CTF-GS Direct3D row: {required_snippet}")
 
 
 def _check_scannet_context_table(text: str, issues: list[str]) -> None:
@@ -157,7 +152,7 @@ def _check_scannet_context_table(text: str, issues: list[str]) -> None:
     required_snippets = (
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52",
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61",
-        "\\method{} DINO-CV contextual kNN + spatial propagation & \\textbf{38.06} & \\textbf{61.29} & \\textbf{38.71} & \\textbf{63.15} & \\textbf{47.11} & \\textbf{72.00}",
+        "\\method{} & \\textbf{36.55} & \\textbf{50.57} & \\textbf{42.78} & \\textbf{72.85} & \\textbf{57.85} & \\textbf{77.93}",
     )
     for snippet in required_snippets:
         if snippet not in text:

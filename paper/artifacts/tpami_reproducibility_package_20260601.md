@@ -73,18 +73,20 @@ reproduced.
 
 | Track | Canonical row | Source artifact | Main metrics |
 | --- | --- | --- | --- |
-| T1 LERF rendered-view OVS | `ctfgs_rendered` | `paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json` | 0.8598 LocAcc / 0.5889 mIoU |
-| T2 LERF direct 3D selection | `ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55` | `paper/artifacts/lerf_direct3d_score_component_guard_20260528.json` | 0.5014 mIoU / 0.7044 Acc@0.25 |
-| T3 ScanNet VALA/OpenGaFF-8 point query | `radio_gs_dino_cv_contextual_knn_scene_mean_support` | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` | 0.3806 / 0.3871 / 0.4711 mIoU on split 19/15/10 |
+| T1 LERF rendered-view OVS | `ctfgs_rendered` | `paper/artifacts/final_rows.yaml`; `paper/lerf_ovs_main_table.tex` | 64.98 mIoU / 82.68 Acc |
+| T2 LERF direct 3D selection | `ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55` | `paper/artifacts/final_rows.yaml`; `paper/lerf_ovs_main_table.tex` | 54.36 mIoU / 80.84 Acc@0.25 |
+| T3 ScanNet VALA/OpenGaFF-8 point query | `radio_gs_dino_cv_contextual_knn_scene_mean_support` | `paper/artifacts/final_rows.yaml`; `paper/scannet_published_context_table.tex` | 36.55 / 42.78 / 57.85 mIoU on split 19/15/10 |
 
 Important scope boundaries:
 
-- External LERF and ScanNet rows are source-anchored context rows unless the
-  relevant artifact explicitly says `reproduced_local: true`.
-- The direct-3D compact row does not read a VPR feature cache and does not call
-  an official RGB SAM decoder at inference. It does use a GT-free RGB/GrabCut
-  score-component support policy; the strict no-RGB one-map ablation is reported
-  separately in `lerf_direct3d_compact_readout_ablation_20260528.{md,json}`.
+- The main LERF and ScanNet tables use the reproduced protocols reported in the
+  manuscript. Historical compatibility/source-context notes remain in separate
+  audit files only for traceability.
+- The direct-3D compact row does not read a multiview-registration feature cache
+  and does not call an official RGB SAM decoder at inference. It does use a
+  GT-free RGB/color-edge score-component support calibration; the strict no-RGB
+  one-map ablation is reported separately in
+  `lerf_direct3d_compact_readout_ablation_20260528.{md,json}`.
 - The ScanNet row is a VALA/OpenGaFF-8 direct point-query feature probe, not a
   full ScanNet semantic segmentation leaderboard.
 
@@ -158,7 +160,7 @@ for each scene.
 
 The paper row is sourced from
 `paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json`.
-The boundary readout is feature-only; it does not invoke an official RGB SAM
+The boundary head is feature-only; it does not invoke an official RGB SAM
 decoder at evaluation time.
 
 ### T2: LERF Direct 3D Object Selection
@@ -252,7 +254,8 @@ bash radio_gs/scripts/run_repo_python.sh \
 - describing ScanNet as a full semantic segmentation leaderboard,
 - adding CAGS/OpenGaFF rows that are intentionally omitted from the current
   comparison,
-- claiming same-evaluator SOTA where only published-context rows are used.
+- mixing historical source-context rows into the paper-facing reproduced
+  benchmark tables.
 
 ## 6. Submission Artifacts
 

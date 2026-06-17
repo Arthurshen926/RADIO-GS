@@ -1,15 +1,15 @@
 \begin{table}[t]
 \centering
-\caption{Compression ratio versus downstream mIoU. Saving ratio compares direct per-Gaussian 1280-D fp16 teacher-feature storage with the compact checkpoint footprint; downstream metrics use the frozen rendered-grounding and Direct3D readouts.}
+\caption{Compression ratio versus downstream mIoU. Saving ratio compares direct per-Gaussian 1280-D fp16 RADIO-feature storage with the compact checkpoint footprint; downstream metrics use the final rendered-view and Direct3D compact-memory query protocols.}
 \label{tab:compression_downstream_correlation}
 \begin{tabular}{lrrrr}
 \toprule
 Scene & Saving & Rendered mIoU & Direct3D mIoU & Direct3D Acc@0.25 \\
 \midrule
-Figurines & 1.74$\times$ & 0.4244 & 0.5309 & 0.7857 \\
-Ramen & 3.00$\times$ & 0.6201 & 0.5805 & 0.7465 \\
-Teatime & 3.32$\times$ & 0.5760 & 0.5662 & 0.7627 \\
-Waldo Kitchen & 4.04$\times$ & 0.4769 & 0.2429 & 0.4091 \\
+Figurines & 1.74$\times$ & 0.6429 & 0.5936 & 0.9286 \\
+Ramen & 3.00$\times$ & 0.5378 & 0.3843 & 0.6338 \\
+Teatime & 3.32$\times$ & 0.7609 & 0.7104 & 0.8983 \\
+Waldo Kitchen & 4.04$\times$ & 0.6576 & 0.4861 & 0.7727 \\
 \bottomrule
 \end{tabular}
 \end{table}

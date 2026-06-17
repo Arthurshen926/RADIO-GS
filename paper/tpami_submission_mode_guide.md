@@ -52,7 +52,9 @@ IEEE policy>.
 3. If the portal accepts source files at initial submission, inspect source
    metadata and comments before upload. The anonymous PDFs are clean, but source
    packages may contain filesystem paths, comments, or repository names that
-   reveal authorship or environment details.
+   reveal authorship or environment details. Do not include `paper/archive/` in
+   the uploaded source package; it contains legacy working drafts retained only
+   for project traceability.
 
 ## Review-PDF Anonymity Checks
 

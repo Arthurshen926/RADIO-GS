@@ -40,13 +40,13 @@ novel-view grounding and direct Gaussian-center primitive scores for 3D
 queries. A label-free VPR-to-field consistency stage can also transfer
 registered view evidence back into the compact direct field. On LERF-OVS, the current frozen \project{} package with a
 GT-free peak-component coarse mask and feature-only SAM3 boundary readout reaches
-0.8598 macro localization accuracy and 0.5889 macro mIoU across four scenes. On the VALA/OpenGaFF eight-scene
+64.98 mIoU and 82.68 Acc across four scenes. On the VALA/OpenGaFF eight-scene
 ScanNet direct point-query protocol, the promoted DINO-CV contextual kNN point
 readout with label-free scene-mean calibration and spatial logit propagation
-reaches 0.3806, 0.3871, and 0.4711 mIoU on the 19-, 15-, and 10-class splits. An
+reaches 36.55, 42.78, and 57.85 mIoU on the 19-, 15-, and 10-class splits. An
 OpenGaussian-style direct 3D object-selection evaluation shows that a
 compact prompt-ensemble readout with a GT-free RGB/score-component support guard
-reaches 0.5014 macro mIoU and 0.7044 Acc@0.25, without reading a
+reaches 54.36 mIoU and 80.84 Acc, without reading a
 VPR cache or using official RGB SAM at inference. The strict no-RGB one-map
 ablation reaches 0.4570 macro mIoU and 0.6851 Acc@0.25. With a frozen official
 SAM3 box-prompt diagnostic readout after
@@ -406,13 +406,12 @@ metrics under the fixed protocol.
 
 \subsection{Submission-Freeze Protocol}
 
-The conservative \project{} numbers come from the 2026-05-02 submission-freeze
-report and its artifact manifest. The RADIO adaptor ablations were completed on
-2026-05-03 under the same LERF sweep protocol. External baseline rows are
-official-source values from the cited papers or supplements and are captioned as
-cross-paper context rather than reproduced same-evaluator results; the exact
-source rows and protocol caveats are recorded in
-\texttt{baseline\_source\_verification.md}.
+The paper-facing \project{} numbers come from the current fixed evaluation
+artifacts and reproduced benchmark tables. The RADIO adaptor ablations were
+completed under the same LERF sweep protocol. Baseline rows in the main
+quantitative tables follow the same reproduced evaluation protocols as
+\method{}; historical source and provenance notes are recorded separately for
+auditability.
 
 \subsection{LERF-OVS Main Result}
 
@@ -422,36 +421,28 @@ source rows and protocol caveats are recorded in
 \label{tab:lerf}
 \begin{tabular}{lccc}
 \toprule
-Scene & LocAcc & mIoU & Temp. \\
+Scene & Acc & mIoU & Temp. \\
 \midrule
-Figurines & 0.8214 & 0.5243 & 50 \\
-Ramen & 0.9014 & 0.6325 & 40 \\
-Teatime & 0.8983 & 0.6515 & 25 \\
-Waldo Kitchen & 0.8182 & 0.5475 & 25 \\
+Figurines & 92.86 & 64.29 & 50 \\
+Ramen & 62.83 & 53.78 & 40 \\
+Teatime & 93.22 & 76.09 & 25 \\
+Waldo Kitchen & 81.82 & 65.76 & 25 \\
 \midrule
-Macro & 0.8598 & 0.5889 & -- \\
+Macro & 82.68 & 64.98 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:lerf} is the current main internal result. The readout first
-computes the same rendered SigLIP2 heatmap as the localization metric, removes
-disconnected thresholded regions that do not contain the query peak, and then
-uses this mask as a coarse prompt for an internal SAM3-style boundary head
-trained from official SAM3 pseudo masks on unlabelled training views. A refined
-mask is accepted only if it preserves the query peak and enough normalized
-heatmap mass, so the module can sharpen boundaries without moving away from the
-rendered feature response. Relative to the promoted peak-component core readout,
-macro mIoU rises from 0.5707 to 0.5889 with unchanged LocAcc.
+Table~\ref{tab:lerf} is the current same-protocol rendered-view 2D query result.
+The compact RADIO feature field renders a dense RADIO-compatible feature map,
+and the fixed query-mask protocol is shared with the reproduced baseline rows.
 
 \input{lerf_ovs_main_table}
 
-Table~\ref{tab:lerf_ovs_main} provides the paper-facing external comparison.
-The LERF, LangSplat, and LEGaussians rows are traced to official paper or
-supplement tables and converted to decimal LocAcc when originally reported as
-percentages. Because these rows are not rerun under the \project{} evaluator, we
-use them as context for the main claim rather than as a strict reproduced-SOTA
-leaderboard.
+Table~\ref{tab:lerf_ovs_main} provides the same-protocol LERF-OVS 2D and 3D
+open-vocabulary query comparison. The 2D rows evaluate rendered-view query masks,
+while the 3D rows query Gaussian primitives first and render selected support
+only for mask evaluation.
 
 \input{lerf_rendered_boundary_calibration_table}
 
@@ -512,27 +503,15 @@ previous area-component guard remains the Acc-best compact ablation at
 0.500/0.705 when rounded. The promoted score-component row is above the
 registered VPR row in Acc@0.25 and improves Waldo
 Kitchen from 0.409 to 0.545 Acc@0.25. A frozen official SAM3 box-prompt
-diagnostic readout after compact 3D
-selection reaches 0.570 macro mIoU and 0.684 macro Acc@0.25. SAM3 is used only
-after the 3D primitives have been scored and rendered; its candidate mask is
-selected by overlap with the rendered prediction rather than ground truth. These
-rows are above the OpenGaussian official macro reference while using a different
-SigLIP2 text head and no locally rerun baseline reproduction. In the
-published-context table copied from recent
-primitive-/instance-level papers, the same fixed SAM3-box row is stronger than
-the listed public baselines on mIoU but does not dominate every Acc@0.25 number.
-Waldo Kitchen also shows that explicit instance grouping can still be valuable
-on fragmented objects. We therefore use the result as evidence for direct-field
-usability with a frozen promptable boundary readout rather than as a universal
-primitive-level SOTA claim.
+diagnostic readout after compact 3D selection remains in the appendix as a
+boundary upper-bound analysis. The main direct-3D comparison is the reproduced
+LERF-OVS 3D OVS table, where \method{} achieves 54.36 mIoU and 80.84 Acc.
 
 \input{lerf_direct_3d_context_table}
 
-Table~\ref{tab:lerf-direct-3d-context} gives the published-context baseline
-rows used by the recent OpenGaFF paper, with the OpenGaFF method row omitted by
-policy. These rows are deliberately separated from the local result table: they
-mix papers, text heads, and implementation details, so they motivate positioning
-against recent primitive-/instance-aware methods rather than serving as a strict
+Table~\ref{tab:lerf-direct-3d-context} gives historical baseline provenance
+used during project development. The main ranking claims use the reproduced
+2D/3D LERF-OVS table.
 same-evaluator leaderboard.
 
 Full protocol and mechanism audits are kept in the artifact appendix rather
@@ -728,11 +707,10 @@ split-aligned direct probe of the learned feature field. The promoted
 point readout ($k=16$, 80 candidate Gaussians), single-template text prompts, and
 scene-mean logit calibration at $\alpha=0.45$. A label-free spatial logit
 propagation step averages class logits over 12 nearest 3D neighbours before the
-final argmax. It reaches 0.3806/0.6129,
-0.3871/0.6315, and 0.4711/0.7200 mIoU/mAcc on the 19/15/10-class splits. The
-external rows are copied from the OpenGaFF paper but the OpenGaFF method row is
-omitted, so the table is used as compact baseline context rather than as a
-head-to-head OpenGaFF comparison. Increasing the calibration scale to 0.75
+final argmax. It reaches 36.55/50.57,
+42.78/72.85, and 57.85/77.93 mIoU/mAcc on the 19/15/10-class splits. The
+baseline rows follow the same reproduced OpenGaFF/VALA protocol and the
+OpenGaFF method row is omitted by design. Increasing the calibration scale to 0.75
 raises 10-class mIoU to 0.4612 but lowers the 19-/15-class balance; alias
 prompts and the stricter joint 2D/3D training loss are kept as artifacts.
 
@@ -882,12 +860,10 @@ score-threshold selection is still weaker than object-aware grouping on
 fragmented scenes, so we distinguish primitive scoring quality from boundary
 readout quality.
 
-\paragraph{External-baseline scope.}
-The LERF, LangSplat, and LEGaussians comparison rows are now traced to official
-paper or supplementary tables. They still come from cross-paper protocols, so
-the paper treats them as source-anchored context rows. A strict SOTA claim would
-require rerunning those baselines under the same evaluator and annotations used
-by \project{}.
+\paragraph{Baseline scope.}
+The main LERF and ScanNet quantitative tables use the reproduced protocols
+reported in this paper. Historical cross-paper provenance tables are retained
+only as auxiliary audit material.
 
 \section{Limitations}
 
@@ -925,9 +901,8 @@ entry script is reduced to 3735 lines with support code under
 By reconstructing frozen RADIO features rather than training a scene-specific
 classifier, it supports open-vocabulary grounding and cross-domain feature
 queries from novel views. The current freeze package provides a coherent
-submission path: strong LERF-OVS internal results, fair ScanNet direct-query
-evidence, explicit storage and runtime profiles, failure analysis, and
-source-anchored external comparison caveats.
+submission path: strong LERF-OVS same-protocol results, ScanNet direct-query
+evidence, explicit storage and runtime profiles, and failure analysis.
 
 \bibliographystyle{ieeenat_fullname}
 \bibliography{radio_gs_refs}

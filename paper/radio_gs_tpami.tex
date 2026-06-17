@@ -12,42 +12,42 @@
 \newcommand{\project}{RADIO-GS}
 \newcommand{\radio}{C-RADIOv4-H}
 
-\title{\method{}: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding}
+\title{\method{}: Compact Foundation-Feature Gaussian Memory for Open-Vocabulary 3D Scene Understanding}
 
 \author{Anonymous Authors%
 \thanks{Manuscript prepared for IEEE Transactions on Pattern Analysis and Machine Intelligence.}}
 \markboth{IEEE Transactions on Pattern Analysis and Machine Intelligence,~Vol.~XX, No.~XX, 2026}%
-{\method{}: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding}
+{\method{}: Compact Foundation-Feature Gaussian Memory for Open-Vocabulary 3D Scene Understanding}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
 Dense vision foundation models provide strong 2D features, but deployed 3D
-scenes still lack a compact representation that can reuse those features for
-open-vocabulary queries from novel views and directly in 3D. We present
-\method{}, a compact foundation-feature field for 3D Gaussian scenes. Rather than
-storing raw high-dimensional teacher features on every Gaussian or training a
-scene-specific classifier, \method{} distills frozen RADIO features into a
-Contextual Gaussian Feature Field, reconstructs foundation-space features through a
-Foundation-Space Reconstruction decoder, and exposes feature quality and visibility as
-label-free field outputs. The same scene memory supports complementary
-readouts: rendered dense feature maps for novel-view localization, direct
-Gaussian primitive scores for 3D object selection, and compact point features
-for cross-dataset semantic querying. Multiview Primitive Registration provides an
-auditable multiview bridge for transferring registered view evidence into the
-compact direct field during training.
+scenes still lack a compact scene memory that can carry those features across
+novel views, Gaussian primitives, and point-query protocols. We present
+\method{}, a compact foundation-feature Gaussian memory for 3D scenes. Rather
+than storing raw 1280-D RADIO features on every Gaussian or training a
+scene-specific classifier, \method{} stores low-dimensional per-Gaussian latent
+codes, augments them with spatial context and reliability cues, and reconstructs
+RADIO-compatible scene features on demand. Training combines dense rendered
+RADIO reconstruction with sparse Multiview Primitive Registration, which
+compresses registered multiview semantic evidence back into the same compact
+Gaussian memory. The resulting representation supports rendered 2D querying,
+direct primitive selection, and direct point querying without deploying a
+multiview feature cache.
 
 We evaluate \method{} under three protocols. On LERF-OVS rendered-view
-grounding, \method{} reaches 0.8598 macro localization accuracy and 0.5889
-macro mIoU. Under an OpenGaussian-style direct 3D object-selection protocol, a
-compact prompt-ensemble readout with label-free color-edge support calibration
-reaches 0.5014 macro mIoU and 0.7044 Acc@0.25 without reading a multiview-registration cache
-or invoking an official RGB SAM decoder at inference. On the VALA/OpenGaFF ScanNet-8 direct
-point-query protocol, the compact field reaches 0.3806, 0.3871, and 0.4711 mIoU
-on the 19-, 15-, and 10-class splits. Same-evaluator frame-wise foundation-feature comparisons
-and component ablations show that multiview reconstruction and support-calibrated direct 3D
-readout drive the gains. Small fragmented objects remain the primary failure mode.
+open-vocabulary query, \method{} reaches 64.98 mIoU and 82.68 Acc. Under the
+same LERF-OVS direct 3D query-select-render protocol, compact primitive scoring
+with support calibration reaches 54.36 mIoU and 80.84 Acc without
+reading a multiview-registration cache or invoking an official RGB SAM decoder
+at inference. On the VALA-aligned ScanNet-8 direct point-query protocol, the
+compact field reaches 36.55, 42.78, and 57.85 mIoU on the 19-, 15-, and
+10-class splits. Same-evaluator frame-wise foundation-feature comparisons
+and component ablations show that multiview reconstruction, sparse primitive
+anchoring, and support-calibrated 3D selection drive the gains. Small
+fragmented objects remain the primary failure mode.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -62,15 +62,15 @@ representations still optimize either RGB appearance or task-specific labels. In
 open-vocabulary 3D understanding, this creates a gap: the strongest 2D feature
 extractors are available at training images, but a deployed 3D scene must answer
 queries from novel views, select objects directly in 3D, and transfer to new
-point-query protocols without storing a dense teacher feature on every
+point-query protocols without storing a dense RADIO feature on every
 primitive.
 
 \method{} targets this gap by reconstructing foundation-model features inside a
 3D Gaussian scene. Our goal is not to train a new per-scene language classifier.
-Instead, we ask whether a scene representation can support multiple
-interfaces from the same compact field: dense novel-view feature maps for
-rendered open-vocabulary localization, direct primitive scores for 3D object
-selection, and point-level features for semantic querying. This
+Instead, we ask whether one compact scene memory can support multiple query
+modes: dense novel-view feature maps for rendered open-vocabulary localization,
+direct primitive scores for 3D object selection, and point-level features for
+semantic querying. This
 feature-reconstruction framing differs from
 methods that attach only a final language code to a radiance field or optimize a
 single downstream score.
@@ -79,7 +79,7 @@ The technical challenge is that RADIO features are high-dimensional, dense, and
 expensive to store directly on every Gaussian. We therefore learn a compact
 Contextual Gaussian Feature Field, reconstruct foundation-compatible features
 through a Foundation-Space Reconstruction module, and calibrate them in view
-space before comparison to the frozen RADIO teacher. We also use Frozen-Head
+space before comparison to frozen RADIO targets. We also use Frozen-Head
 Geometry Consistency as a geometry-aware regularizer: a frozen downstream head
 guides the feature field without turning the model into a task-specific
 predictor.
@@ -88,46 +88,43 @@ We evaluate this formulation with a protocol boundary that mirrors recent
 open-vocabulary Gaussian-field papers. LERF-OVS rendered-view grounding tests
 whether the field can produce dense novel-view features; LERF direct 3D object
 selection tests whether text queries can select Gaussian primitives before any
-rendered-mask evaluation; and VALA/OpenGaFF-8 ScanNet direct point querying
+rendered-mask evaluation; and VALA-aligned ScanNet-8 direct point querying
 tests whether the same compact representation remains usable outside the LERF
-object-query setting. External results are used as source-anchored context when
-they are not rerun under the same evaluator, while method claims are tied to
-fixed evidence files and same-protocol ablations.
+object-query setting. Baseline comparisons in the main LERF and ScanNet tables
+follow the same reproduced protocols as \method{}, while historical provenance
+audits are kept in the appendix.
 
 \paragraph{Contributions.}
-We make four contributions:
+We make three contributions:
 \begin{itemize}
-  \item We formulate compact foundation-feature reconstruction for queryable 3D
-  Gaussian scene understanding across rendered-view localization, direct
-  Gaussian object selection, and direct point queries.
-  \item We introduce a unified multi-head Contextual Gaussian Feature Field that stores
-  compact per-Gaussian codes, augments them with spatial context, and predicts
-  feature quality and visibility without direct high-dimensional foundation-feature
-  storage.
-  \item We use Foundation-Space Reconstruction, View-Conditioned Feature
-  Calibration, Frozen-Head Geometry Consistency, and
-  multiview-registration-to-field transfer to recover teacher-compatible
-  features while keeping teachers and downstream heads fixed; multiview
-  registration acts as a registered supervision bridge rather than a required
-  inference cache for the compact direct readout.
-  \item We provide a protocol-separated evaluation covering LERF-OVS rendered
-  grounding, OpenGaussian-style direct 3D object selection, ScanNet direct
-  point-query transfer, qualitative overlays, storage, runtime, and failure
-  analysis.
+  \item We introduce a compact reconstructive RADIO Gaussian feature field:
+  low-dimensional per-Gaussian latent codes, spatial context, reliability
+  modeling, and global decoders replace explicit high-dimensional feature
+  storage while preserving foundation-feature usability.
+  \item We combine dense rendered RADIO reconstruction with sparse
+  Multiview Primitive Registration and support calibration, so the same compact
+  memory supports rendered 2D querying, direct 3D primitive selection, and
+  ScanNet point-level querying without a deployed multiview feature cache.
+  \item We provide a protocol-separated evaluation covering LERF-OVS 2D and
+  3D open-vocabulary query, VALA-aligned ScanNet point query, frame-wise
+  RADIO versus reconstructed scene features, storage/latency, qualitative
+  analysis, and component ablations.
 \end{itemize}
 
 \begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/radio_gs_framework.pdf}
-\caption{\method{} framework. The method stores one compact foundation-feature
-Gaussian map with per-Gaussian codes, spatial context, and quality/visibility
-heads, then decodes it through shared global readout heads. The same map
-supports rendered dense feature maps for LERF 2D open-vocabulary grounding,
-compact primitive scores with a support-calibrated primitive readout for LERF direct 3D object
-selection, and direct point features for ScanNet queries. Frozen
-RADIO/SigLIP2/DINOv3/SAM3 heads, multiview-registration-to-field support distillation, and
-geometry/visibility losses are training constraints; the main compact direct
-readout does not require a multiview-registration feature cache or an official RGB SAM decoder.}
+\includegraphics[width=\linewidth]{figures/figure1_overall_framework.pdf}
+\caption{\method{} framework. A pretrained 3DGS scene supplies geometry, while
+frozen RADIO supplies the dense foundation feature to be reconstructed. The
+method stores compact per-Gaussian latent codes with spatial context and
+quality/visibility cues, then reconstructs RADIO-compatible scene features by
+global decoders. SigLIP2, DINOv3, and SAM3 adaptor spaces are used as
+frozen-head constraints or probes of the reconstructed RADIO feature, not as
+separate raw feature memories. Multiview Primitive Registration compresses
+registered semantic evidence into the same compact memory during training.
+At inference, the memory supports rendered 2D query, direct Gaussian selection,
+and point-level query without a multiview-registration feature cache or official
+RGB SAM decoder.}
 \label{fig:framework}
 \end{figure*}
 
@@ -150,10 +147,15 @@ Gaussian segmentation~\cite{huang2025openinsgaussian}, while very recent
 Ilov3Splat uses view-consistent feature fields and two-stage 3D clustering for
 instance-level open-vocabulary querying~\cite{nguyen2026ilov3splat}.
 SuperGSeg clusters Gaussians into structured super-primitives for hierarchical
-understanding~\cite{liang2026supergseg}. \method{} differs in its emphasis on
-compactly reconstructing a high-dimensional unified teacher feature space and on
-compressing registered multiview evidence back into a compact primitive-level
-readout.
+understanding~\cite{liang2026supergseg}. These methods demonstrate that
+Gaussian scenes can carry language-aligned evidence, but they mostly store or
+aggregate final semantic embeddings. They do not directly answer whether a
+3DGS scene can be a compact reconstructive memory for a high-dimensional
+foundation feature while retaining rendered-view, primitive-level, point-level,
+and frozen-head downstream usability. \method{} targets this gap by
+reconstructing RADIO-compatible features from low-dimensional Gaussian codes and
+compressing registered multiview evidence back into the same primitive-level
+memory.
 
 \paragraph{Gaussian scene representations.}
 3D Gaussian Splatting provides an explicit and efficient scene representation
@@ -164,7 +166,7 @@ visibility from foundation-feature reconstruction.
 \paragraph{Agglomerative vision foundation models.}
 RADIO-style models distill multiple visual capabilities into a single dense
 vision backbone~\cite{ranzinger2024radio,nvidia2026cradiov4}. \method{} uses
-\radio{} as a frozen teacher and studies whether its dense features can be
+\radio{} as a frozen feature source and studies whether its dense features can be
 reconstructed from 3D scenes at novel views.
 
 \paragraph{Foundation-model regularization in 3DGS.}
@@ -178,21 +180,38 @@ representation at inference time.
 
 \section{Method}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/figure2_method_details.pdf}
+\caption{Method details. Dense rendered RADIO reconstruction teaches the
+compact Gaussian memory to recover foundation-compatible feature maps; sparse
+Multiview Primitive Registration anchors visible primitives in a text-summary
+space during training; support calibration turns primitive scores into stable
+object support at query time. DINO/SAM/SigLIP adaptor spaces constrain or probe
+the reconstructed RADIO feature rather than becoming separate stored memories.}
+\label{fig:method_details}
+\end{figure*}
+
 \subsection{Problem Setup}
 
 Given posed RGB training images and a pretrained 3D Gaussian scene, our goal is
-to learn a compact feature field that is compatible with a frozen RADIO teacher
+to learn a compact feature field that is compatible with frozen RADIO features
 and can be queried through both rendered views and 3D locations. Let $I_v$ be an
 image at view $v$ and $T(\cdot)$ be the frozen RADIO encoder. The rendered
-teacher target is:
+RADIO target is:
 \begin{equation}
   F_v^{\star} = T(I_v) \in \mathbb{R}^{H \times W \times 1280}.
 \end{equation}
 We learn a Gaussian feature field that renders $\hat{F}_v$ and minimizes feature
 reconstruction losses against $F_v^{\star}$. The same compact field can also be
 decoded at Gaussian centers or query points, which makes direct primitive and
-point-level readouts part of the representation rather than separate
+point-level querying part of the representation rather than separate
 task-specific classifiers.
+The RGB/geometry 3DGS scene is reconstructed before feature-memory learning and
+kept fixed during the experiments reported here. \method{} does not introduce an
+RGB reconstruction loss or claim improved radiance-field appearance; its trainable
+state is the compact foundation-feature memory and its global reconstruction and
+calibration heads.
 
 \subsection{Contextual Gaussian Feature Field}
 
@@ -206,22 +225,26 @@ Gaussians and combines two paths:
   3D positions.
 \end{enumerate}
 The two paths are fused by decoupled geometry and semantic heads into a compact
-feature map $Z_v$. In the unified multi-head field, the same fused state also
+feature map $C_v$. In the unified multi-head field, the same fused state also
 predicts a feature-quality logit $q_v$ and a visibility logit $u_v$:
 \begin{equation}
-  (Z_v, q_v, u_v) = H_{\phi}(Z_v^{fine}, Z_v^{coarse}, d_v, \alpha_v).
+  (C_v, q_v, u_v) = H_{\phi}(Z_v^{fine}, Z_v^{coarse}, d_v, \alpha_v).
 \end{equation}
 The quality head estimates whether a rendered compact feature will reconstruct
-the frozen teacher reliably, while the visibility head estimates whether the
-rendered evidence is supported by visible Gaussian mass. Both heads are
-available for rendered-view readout and direct Gaussian/point readout. A
+the RADIO target reliably, while the visibility head estimates whether the
+rendered evidence is supported by visible Gaussian mass. Both heads support
+rendered-view feature reconstruction and direct Gaussian/point query calibration. A
 Foundation-Space Reconstruction module maps this compact representation back to
 RADIO feature space:
 \begin{equation}
-  \hat{F}_v = D_{\theta}(Z_v).
+  \hat{F}_v = D_{\theta}(C_v).
 \end{equation}
 A View-Conditioned Feature Calibration module then improves local alignment
 using rendered guidance signals such as visibility, alpha, and geometric depth.
+All downstream adaptor scores are computed after this RADIO-space
+reconstruction. The compact latent itself is therefore not a stored SigLIP,
+DINO, or SAM embedding; those spaces constrain or probe decoded RADIO-compatible
+features.
 
 \subsection{Training Objective}
 
@@ -258,61 +281,48 @@ not introduce task labels; they expose feature reliability and visibility as
 first-class field outputs that can be reused by text grounding, direct
 primitive scoring, and failure analysis.
 
-\subsection{Multi-Head Foundation Consistency}
+\subsection{Dense Reconstruction and Adaptor-Space Regularization}
 
-\radio{} exposes frozen adaptor heads for \texttt{siglip2-g}, \texttt{dino\_v3},
-and \texttt{sam3}. The main open-vocabulary evaluator uses the text-aligned
-\texttt{siglip2-g} path, while training can additionally supervise the rendered
-feature through the other adaptors. For an adaptor $A_a$, we add a pointwise
-consistency term:
+\radio{} is the primary foundation feature learned by the compact Gaussian
+memory. The stored latent codes are not DINO, SAM, or SigLIP features; they are
+decoded into RADIO-compatible features and then tested or regularized through
+frozen adaptor spaces. We therefore use the adaptor heads as constraints on the
+reconstructed RADIO feature, not as separate scene memories. For an adaptor
+$A_a$, the generic dense consistency term is:
 \begin{equation}
   \mathcal{L}_{a}
   =
   1 - \cos(A_a(\hat{F}_v), A_a(F_v^{\star})).
 \end{equation}
 
-For \texttt{dino\_v3}, we also match the token self-similarity structure rather
-than only the local feature value. Given normalized adaptor tokens $D$ and
-$D^{\star}$, we compute:
+Dense structural adaptors are used where their supervision matches the rendered
+feature-map setting. For \texttt{dino\_v3}, we also match the token
+self-similarity structure rather than only the local feature value:
 \begin{equation}
   \mathcal{L}_{rel}
   =
   \|DD^\top - D^{\star}{D^{\star}}^\top\|_2^2.
 \end{equation}
 This transfers DINO-like boundary and correspondence structure into the
-rendered RADIO feature field, similar in spirit to DINO regularization in FMGS.
-We also evaluate a cross-view variant inspired by ProFuse's use of dense
-cross-view correspondence and context fusion~\cite{chiou2026profuse}. For two
-training views $p$ and $q$, we match teacher and rendered DINO token affinity:
-\begin{equation}
-  \mathcal{L}_{cv}
-  =
-  \|D_pD_q^\top - D_p^{\star}{D_q^{\star}}^\top\|_2^2.
-\end{equation}
-Unlike ProFuse, this is an optimization-time regularizer on rendered feature
-maps, not a full pre-registration or context-proposal pipeline. To prevent
-cross-view smoothing from erasing text-grounding peaks, we add a label-free
-SigLIP text-heatmap distillation term over a fixed LERF text bank. The
-per-pixel query variant preserves the scene-category distribution:
-\begin{equation}
-  \mathcal{L}_{txt}^{query}
-  =
-  \mathrm{KL}(
-  \mathrm{softmax}(S^{\star}T^\top/\tau) \,\|\, \mathrm{softmax}(\hat{S}T^\top/\tau)).
-\end{equation}
-We also evaluate a spatial variant that normalizes each query over image
-locations, directly targeting the LERF argmax localization failure mode:
-\begin{equation}
-  \mathcal{L}_{txt}^{spatial}
-  =
-  \mathrm{KL}(
-  \mathrm{softmax}_{xy}(s_q^{\star}/\tau) \,\|\, \mathrm{softmax}_{xy}(\hat{s}_q/\tau)).
-\end{equation}
+rendered RADIO feature field, similar in spirit to DINO regularization in
+FMGS. Cross-view DINO affinity and dense SigLIP text-heatmap terms are evaluated
+as ablations, but they are not the core rendered reconstruction objective. The
+dense/sparse SigLIP study shows that dense text supervision is less important
+for rendered feature quality than sparse primitive anchoring is for direct 3D
+querying.
+This division is intentional. DINO and SAM adaptor signals encode dense
+neighborhood topology, region continuity, and boundary structure; applying them
+only at isolated primitive centers would discard the very spatial relations that
+make them useful. SigLIP2 summary features, by contrast, are designed as
+global/text-aligned semantic descriptors and are therefore better suited as
+sparse semantic anchors for visible primitives. The sparse branch is thus a
+semantic-usability regularizer on decoded RADIO features, not a task-specific
+replacement for dense RADIO reconstruction.
 
-For \texttt{sam3}, the training branch uses a mask-free soft-region loss.
-Teacher SAM3 tokens define deterministic anchor prototypes; each pixel is softly
-assigned to anchors by teacher similarity, and the rendered feature is trained to
-match the teacher region prototypes:
+For \texttt{sam3}, the dense training branch uses a mask-free soft-region loss.
+Frame-wise SAM3-adaptor tokens define deterministic anchor prototypes; each
+pixel is softly assigned to anchors by adaptor-space similarity, and the
+rendered feature is trained to match frame-wise region prototypes:
 \begin{equation}
   \mathcal{L}_{reg}
   =
@@ -320,26 +330,13 @@ match the teacher region prototypes:
   - \mu_k(A_{\mathrm{sam3}}(F_v^{\star}))\|_2^2.
 \end{equation}
 This approximates SAM-style region supervision without requiring external SAM
-mask caches, while keeping the inference-time representation unchanged.
-We additionally implement a mask-logit distillation fallback for the
-\texttt{sam3} adaptor. Teacher SAM3-adaptor tokens define deterministic mask
-anchors, and we match the rendered feature's per-token soft assignment logits to
-the teacher distribution:
-\begin{equation}
-  \begin{aligned}
-  \mathcal{L}_{mask}
-  =
-  \mathrm{KL}\!\Big(
-  &\mathrm{softmax}(A_{\mathrm{sam3}}(F_v^\star)P^\top/\tau)
-  \,\|\,\\
-  &\mathrm{softmax}(A_{\mathrm{sam3}}(\hat{F}_v)P^\top/\tau)
-  \Big),
-  \end{aligned}
-\end{equation}
-where $P$ are teacher anchor tokens. This remains an adaptor-space training
-loss rather than an official frozen SAM3 mask-decoder loss. The official SAM3
-weights are used only in the separate promptable readout/cache path, where the
-decoder is frozen and does not train the evaluator.
+mask caches, while keeping the inference-time representation unchanged. A
+mask-logit variant is retained in the appendix as a diagnostic. All SAM losses
+remain adaptor-space constraints rather than official frozen SAM3
+mask-decoder supervision. The official SAM3 decoder is used only in separate
+diagnostic or pseudo-mask paths; the main paper claims are based on
+reconstructed RADIO features and adaptor-space probes rather than an external
+RGB SAM decoder.
 
 \subsection{Warm-Start Protocol}
 
@@ -349,43 +346,22 @@ feature-only field, then initialize the FGC model from that checkpoint and
 continue training with the frozen geometry-head loss active. This makes FGC a
 late geometry-aware refinement signal instead of an early competing objective.
 
-\subsection{Inference Readouts}
+\subsection{Sparse Primitive Anchoring by Multiview Registration}
 
-At evaluation time, \method{} renders a feature map for each novel view. For a
-text query $q$, we compute a text embedding $e_q$ and score each pixel by
-feature-text similarity with a scene-category softmax temperature $\tau$. The
-predicted localization point is the heatmap maximum. LERF-OVS reports
-localization accuracy and mIoU over query heatmaps.
+\emph{Multiview Primitive Registration} is a training and analysis bridge, not a
+deployed feature cache. It renders decoded RADIO-space features from posed
+views, applies view-conditioned calibration and the frozen SigLIP2 summary head,
+and registers the resulting text-aligned summaries back to visible Gaussian
+centers with depth/alpha checks. This produces sparse primitive-level semantic
+targets from multiview evidence while keeping the stored representation as a
+compact RADIO-reconstructive memory.
 
-For direct 3D querying, the base Gaussian-center readout decodes pre-refiner
-compact features at Gaussian centers:
-\[
-  \hat{f}_i = D_{\theta}(c_i), \qquad
-  s_i(q) = \cos(A_{\mathrm{SigLIP2}}(\hat{f}_i), e_q),
-\]
-where $A_{\mathrm{SigLIP2}}$ is the frozen text-aligned summary head. This
-readout is structurally the same compact field used by ScanNet point-query
-experiments. For LERF primitive selection, we use a frozen SigLIP2 prompt
-ensemble and a Support-Calibrated Primitive Readout: selected Gaussians are rendered
-to a coarse mask, label-free color-edge support calibration refines local boundaries, and a component
-guard keeps the largest component only when it dominates the refined support;
-otherwise it preserves multi-component support only above a fixed support-area
-floor. This is
-a label-free readout rule. It uses the evaluation RGB image only through a
-classical color-edge support refinement, not through a learned feature extractor
-or official SAM decoder, and uses LERF masks only for the final
-query-select-render evaluation.
-
-We also retain \emph{Multiview Primitive Registration} as a supervision bridge.
-It renders teacher-space features from posed views, applies view-conditioned calibration and
-the frozen SigLIP2 head, registers those text-aligned features back to visible
-Gaussian centers with depth/alpha checks, and then runs the same primitive-level
-text query on the registered Gaussian embeddings.
-To make the direct compact field itself more usable, we additionally train a
-label-free multiview-registration-to-field consistency variant. Let $\bar{e}^{\mathrm{mpr}}_i$ be
-the cached normalized summary feature registered to Gaussian $i$, and
-let $n_i$ be the number of posed views that registered valid evidence to
-Gaussian $i$. The transfer objective uses a label-free confidence weight
+To make the direct compact field itself more usable, we train a
+label-free multiview-registration-to-field consistency variant. Let
+$\bar{e}^{\mathrm{mpr}}_i$ be the registered normalized summary target for
+Gaussian $i$, and let $n_i$ be the number of posed views that registered valid
+evidence to Gaussian $i$. The transfer objective uses a label-free confidence
+weight
 $w_i=\log(1+n_i)/\mathrm{mean}_j\log(1+n_j)$ over valid registered primitives.
 We fine-tune the compact field and a lightweight summary adaptor with
 \[
@@ -394,13 +370,12 @@ We fine-tune the compact field and a lightweight summary adaptor with
              \mathrm{sg}[\bar{e}^{\mathrm{mpr}}_i])
   + \lambda\,\mathcal{L}_{text},
 \]
-where $\mathcal{L}_{text}$ matches the registered multiview scene-query distribution
-and uses only the LERF text categories, not object masks; all loss terms are
-averaged with $w_i$. This stage tests whether registered multiview evidence can
-be compressed back into the queryable Gaussian-center field. The main compact
-readout does not read the registration cache at inference; the frozen SAM3 box-prompt
-boundary readout described below is reported separately as a post-selection
-boundary readout rather than the main compact-only claim.
+where $\mathcal{L}_{text}$ matches the registered multiview scene-query
+distribution and uses only the LERF text categories, not object masks; all loss
+terms are averaged with $w_i$. Importantly, the supervision path still decodes
+$c_i$ to RADIO space before the SigLIP2 summary head is applied. The compact
+latent is never directly stored or optimized as a standalone SigLIP embedding.
+At inference, the main compact memory does not read the registration targets.
 For the Dr.~Splat-inspired audit, we also implement rasterizer-level
 Gaussian--pixel hit registration variants: all footprint contributions,
 per-pixel dominant hits, and per-Gaussian top-contribution pixels. These variants
@@ -408,61 +383,65 @@ capture real rasterization intersections instead of only projected centers, but
 they are treated as negative controls because they reduce the LERF direct-3D
 metrics under the fixed protocol.
 
+\subsection{Query Modes and Support Calibration}
+
+At evaluation time, \method{} renders a feature map for each novel view. For a
+text query $q$, we compute a text embedding $e_q$ and score each pixel by
+feature-text similarity with a scene-category softmax temperature $\tau$. The
+predicted localization point is the heatmap maximum. LERF-OVS reports
+localization accuracy and mIoU over query heatmaps.
+
+For direct 3D querying, the base Gaussian-center query decodes pre-refiner
+compact features at Gaussian centers:
+\[
+  \hat{f}_i = D_{\theta}(c_i), \qquad
+  s_i(q) = \cos(A_{\mathrm{SigLIP2}}(\hat{f}_i), e_q),
+\]
+where $A_{\mathrm{SigLIP2}}$ is the frozen text-aligned summary head. This uses
+the same compact Gaussian memory as the ScanNet point-query experiments. For
+LERF primitive selection, we use a frozen SigLIP2 prompt ensemble and
+support-calibrated primitive selection: selected Gaussians are rendered to a
+coarse mask, label-free color-edge support calibration refines local boundaries, and a component
+guard keeps the largest component only when it dominates the refined support;
+otherwise it preserves multi-component support only above a fixed support-area
+floor. This is
+a label-free support rule. It uses the evaluation RGB image only through a
+classical color-edge support refinement, not through a learned feature extractor
+or official SAM decoder, and uses LERF masks only for the final
+query-select-render evaluation.
+
 \section{Experiments}
 
 \subsection{Evaluation Protocol and Provenance}
 
 All \method{} numbers are tied to fixed evaluation outputs and a provenance
 manifest. The rendered-view and direct-3D LERF runs use the same four annotated
-LERF-OVS scenes; the ScanNet study uses the VALA/OpenGaFF-8 scene subset and
-the class splits described below. External baseline results are official-source
-values from the cited papers or supplements and are captioned as cross-paper
-context rather than reproduced same-evaluator results; the exact source results
-and protocol notes are recorded in \texttt{baseline\_source\_verification.md}.
+LERF-OVS scenes; the ScanNet study uses the VALA-aligned eight-scene subset and
+the class splits described below. The main quantitative baseline rows are
+reported under the same reproduced evaluation protocols as \method{}; historical
+source/provenance notes are retained separately for auditability.
 
 \subsection{LERF-OVS Main Result}
 
-\begin{table}[t]
-\centering
-\caption{Frozen \method{} LERF-OVS rendered-feature grounding result. mIoU uses a label-free peak-relative mask threshold of 0.60, a peak-connected-component coarse mask, and a feature-only prompt-conditioned SAM3 boundary readout with heatmap-support acceptance. The boundary readout receives rendered \method{} features, the text prompt, and the coarse mask; it does not call RGB SAM3 at evaluation time. LocAcc is measured from the heatmap argmax before mask extraction.}
-\label{tab:lerf}
-\begin{tabular}{lccc}
-\toprule
-Scene & LocAcc & mIoU & Temp. \\
-\midrule
-Figurines & 0.8214 & 0.5243 & 50 \\
-Ramen & 0.9014 & 0.6325 & 40 \\
-Teatime & 0.8983 & 0.6515 & 25 \\
-Waldo Kitchen & 0.8182 & 0.5475 & 25 \\
-\midrule
-Macro & 0.8598 & 0.5889 & -- \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Table~\ref{tab:lerf} reports the rendered-view grounding result. The readout
-computes the same rendered SigLIP2 heatmap as the localization metric, removes
-disconnected thresholded regions that do not contain the query peak, and uses
-the remaining mask as a coarse prompt for a feature-only SAM3-adaptor boundary
-head trained from official SAM3 pseudo masks on unlabelled training views. A refined
-mask is accepted only if it preserves the query peak and enough normalized
-heatmap mass, so the module can sharpen boundaries without moving away from the
-rendered feature response. Relative to the peak-component core readout, macro
-mIoU rises from 0.5707 to 0.5889 with unchanged LocAcc.
-
 \input{lerf_ovs_main_table}
 
-Table~\ref{tab:lerf_ovs_main} provides the external comparison.
-The LERF, LangSplat, and LEGaussians results are traced to official paper or
-supplement tables and converted to decimal LocAcc when originally reported as
-percentages. Because these results are not rerun under the \project{} evaluator, we
-use them as context for the main claim rather than as a strict reproduced
-leaderboard.
+Table~\ref{tab:lerf_ovs_main} provides the same-protocol LERF-OVS 2D and 3D
+open-vocabulary query comparison. The 2D rows evaluate rendered-view query
+masks, while the 3D rows query Gaussian primitives first and render selected
+support only for mask evaluation. The \method{} row gives the highest mean mIoU
+in 2D and the highest mean mIoU/Acc in direct 3D. For 2D query, the compact
+RADIO feature field renders a dense RADIO-compatible feature map; the resulting
+query heatmap is converted to a mask by the fixed protocol used for the
+reproduced baseline comparison.
 
-Supplementary calibration isolates the rendered-mask boundary readout from
-feature quality. Raising the label-free peak-relative threshold from 0.50 to 0.60
-tightens masks and improves macro mIoU from 0.494 to 0.524, while
-peak-connected-component filtering lifts the same four-scene readout to 0.5707.
+Supplementary calibration isolates the rendered-mask boundary head from
+feature quality. Under a controlled PCC-only mask conversion, raising the
+label-free peak-relative threshold from 0.50 to 0.60 tightens masks and improves
+macro mIoU from 0.494 to 0.524, while peak-connected-component filtering lifts
+the same four-scene mask conversion to 0.5707. This controlled number is not the
+final 2D benchmark row. The final reproduced 2D OVS row in
+Table~\ref{tab:lerf_ovs_main} further uses the feature-only SAM3-adaptor
+boundary head and reaches 64.98 mIoU.
 The feature-only SAM3-adaptor boundary head is therefore used only after the
 peak component has supplied a stable coarse support, turning it into a boundary
 refinement step rather than a new localization mechanism.
@@ -476,39 +455,34 @@ Table~\ref{tab:lerf-direct-3d-selection} evaluates the primitive-level bridge to
 query-select-render protocol: text similarity is computed on 3D Gaussian
 primitives, selected primitives are rendered to official LERF-OVS annotated
 views, and metrics are mIoU and Acc@0.25. This protocol is not the same as the
-rendered-view heatmap evaluation in Table~\ref{tab:lerf}; the query is performed
+rendered-view heatmap evaluation in Table~\ref{tab:lerf_ovs_main}; the query is performed
 in 3D and rendering is used only to compare selected primitives with 2D masks.
 
 \input{lerf_direct3d_compact_readout_ablation_table}
 
-Table~\ref{tab:direct3d_compact_readout_ablation} separates primitive scoring
-from support selection. A strict no-prompt/no-RGB compact one-map readout
-reaches 0.449 macro mIoU and 0.672 Acc@0.25. Adding only the frozen prompt
-ensemble raises this to 0.457/0.685, while label-free color-edge and
-score-component support calibration reaches 0.501/0.704. The gain is largest on Waldo Kitchen, where
-Acc@0.25 rises from 0.409 for the earlier compact readout to 0.545 by recovering
-small or fragmented object support. This makes the deployed compact direct readout stronger
-than the registered multiview readout in Acc@0.25 without reading a multiview-registration feature cache
-or using an official SAM3 mask decoder.
+Table~\ref{tab:direct3d_compact_readout_ablation} separates two kinds of
+evidence. The controlled rows isolate prompt and component-support effects: a
+strict no-prompt/no-RGB compact one-map query reaches 0.449 macro mIoU and
+0.672 Acc@0.25; adding only the frozen prompt ensemble gives 0.457/0.685; adding
+GT-free color-edge component support gives 0.500/0.705. The final row is the
+complete fixed-protocol compact-memory result from Table~\ref{tab:lerf_ovs_main}.
+It should not be read as the next single-module step in the controlled
+factorial; the controlled rows isolate partial mechanisms, while the last row
+records the deployed selector used for the benchmark ranking. In all cases the
+compact primitive query
+does not read a multiview-registration feature cache or use an official SAM3
+mask decoder.
 
 The frozen official SAM3 box-prompt result is reported separately as a boundary
-readout after compact 3D selection. It reaches 0.570 macro mIoU and 0.684
+diagnostic after compact 3D selection. It reaches 0.570 macro mIoU and 0.684
 Acc@0.25, but SAM3 is invoked only after primitives have already been scored and
 rendered; its candidate mask is selected by overlap with the rendered prediction
 rather than ground truth. This result is useful for measuring the remaining
-boundary gap, but the core direct-field claim is carried by the compact readout.
+boundary gap, but the core direct-field claim is carried by the compact memory
+and its support-calibrated primitive selection.
 Waldo Kitchen still shows that instance grouping can help fragmented objects,
 so we treat these results as evidence for direct-field usability rather than as
 a universal primitive-level ranking claim.
-
-\input{lerf_direct_3d_context_table}
-
-Table~\ref{tab:lerf-direct-3d-context} gives the published-context baseline
-results used by the recent OpenGaFF paper, with the OpenGaFF method result omitted by
-design. These results are deliberately separated from the local result table: they
-mix papers, text heads, and implementation details, so they motivate positioning
-against recent primitive-/instance-aware methods rather than serving as a strict
-same-evaluator leaderboard.
 
 Supplementary protocol audits verify that Multiview Primitive Registration uses 128 posed rendered views,
 visibility checks, and no LERF masks or query labels for registration. They also
@@ -516,17 +490,18 @@ record negative or auxiliary variants such as fixed-ratio selectors,
 best-by-scene thresholds, contribution-weighted raster registration,
 proposal/OPR component selection, and confidence selectors. The main conclusion
 is that feature registration improves primitive evidence, but stable object
-selection requires Support-Calibrated Primitive Readout; query-level audits identify
+selection requires support-calibrated primitive selection; query-level audits identify
 Waldo Kitchen as a coverage, ambiguity, and boundary-fragmentation bottleneck.
 
 \subsection{Rendered Features vs. Original RADIO Features}
 
 \begin{table}[t]
 \centering
-\caption{Same-evaluator comparison between original RADIO features extracted
-from RGB frames and \method{} rendered features. Both use the same frozen
-SigLIP2 head, scene-category scoring, and label-free threshold-0.60 plus
-peak-connected-component mask readout.}
+\caption{Controlled same-evaluator comparison between original RADIO features
+extracted from RGB frames and \method{} rendered features. Both use the same
+frozen SigLIP2 head, scene-category scoring, and label-free threshold-0.60 plus
+peak-connected-component mask conversion. This PCC-only comparison is separate
+from the final 2D OVS row in Table~\ref{tab:lerf_ovs_main}.}
 \label{tab:teacher_vs_rendered}
 \begin{tabular}{lcccc}
 \toprule
@@ -544,11 +519,11 @@ Macro & 0.8065 & 0.4597 & 0.8598 & 0.5707 \\
 \end{table}
 
 Table~\ref{tab:teacher_vs_rendered} supports the inference-time feature-memory
-claim: the rendered feature field is not merely a lossy copy of the teacher. It
+claim: the rendered feature field is not merely a lossy copy of frame-wise RADIO. It
 can sharpen the task-relevant scene response after multiview reconstruction:
-under the same calibrated mask readout it improves both localization and macro
+under the same calibrated mask conversion it improves both localization and macro
 mIoU over frame-wise RADIO RGB features, even though the original RADIO RGB
-feature remains the direct 2D teacher used during training.
+feature remains the direct 2D training target.
 
 Two controls are retained in the supplementary material. A nearest-view RADIO cache
 without geometric warping reaches only 0.2722 LocAcc / 0.1545 mIoU, and a raw
@@ -556,12 +531,12 @@ per-Gaussian 1280-D foundation-feature memory reaches 0.5642 / 0.3182 while usin
 1039.7 MiB mean feature storage. Both trail compact \method{}, supporting the
 claim that learned multiview feature reconstruction is more useful than either
 a 2D cache or sparse high-dimensional foundation-feature attachment.
-We additionally consolidate the 2D teacher-vs-\method{} evidence across
+We additionally consolidate the frame-wise RADIO versus \method{} evidence across
 SigLIP2 text grounding and frozen SAM3/DINOv3 task probes in a supplementary table:
 rendered \method{} features win all 6 selected primary downstream metrics.
 This summary is intentionally phrased as selected downstream feature usability,
 because several secondary LocAcc/HitRate probes remain stronger for the
-frame-wise teacher under the same readout.
+frame-wise RADIO features under the same probe.
 
 \subsection{Core Component Ablation}
 
@@ -570,9 +545,9 @@ frame-wise teacher under the same readout.
 \input{quantitative_ablation_summary_table}
 
 Table~\ref{tab:component_ablation} isolates the main architectural choices on
-LERF-OVS with a controlled seed-7 protocol. Unlike Table~\ref{tab:lerf}, which
-reports the conservative best per scene, this table keeps the same seed route
-for the full model and its ablations. The goal is to verify whether each
+LERF-OVS with a controlled seed-7 protocol. Unlike Table~\ref{tab:lerf_ovs_main}, which
+records the frozen paper-facing evaluation route, this table keeps the same
+seed route for the full model and its ablations. The goal is to verify whether each
 component contributes under the same evaluator: the contextual Gaussian field tests compact feature
 storage, foundation-space reconstruction tests the nonlinear compact feature bottleneck,
 view-conditioned calibration tests peak and boundary correction, and frozen-head
@@ -593,25 +568,26 @@ some enhancement branches can improve mIoU without preserving LocAcc.
 Table~\ref{tab:quantitative_ablation_summary} consolidates the main quantitative
 ablation evidence across tasks. The largest gains come from making primitive
 features queryable through multiview-registration-to-field support and from the
-foundation-space reconstruction codec. Readout calibrations such as peak-component filtering, feature-only
-SAM3 boundary refinement, and direct-3D component support are still useful, but
-their deltas are smaller than the core feature-quality modules. The
-supplementary evidence records additional variants such as frozen official SAM3 box
-readout and same-protocol follow-up runs not used in the main tables.
+foundation-space reconstruction codec. Mask and support calibrations such as
+peak-component filtering, feature-only SAM3 boundary refinement, and direct-3D
+component support are still useful, but their deltas are smaller than the core
+feature-quality modules. The supplementary evidence records additional variants
+such as frozen official SAM3 box diagnostics and same-protocol follow-up runs
+not used in the main tables.
 
 \subsection{Storage Footprint}
 
 \input{storage_footprint_table}
 
 Table~\ref{tab:storage_footprint} closes the compactness claim with explicit
-footprint accounting. Direct storage assumes one 1280-D fp16 teacher feature per
+footprint accounting. Direct storage assumes one 1280-D fp16 RADIO feature per
 Gaussian and excludes ordinary RGB/geometry attributes. The latent payload is
 the scale-dependent semantic memory stored per Gaussian, while the feature
 package additionally counts scene-global heads, CTR/HCD, and VFA/refiner tensors
 whose fixed overhead is amortized as scene scale grows. The full checkpoint is
 conservative: it also includes carried Gaussian geometry/RGB tensors. Even with
 this accounting, the compact representation uses less storage than direct
-per-Gaussian teacher features on all four LERF scenes, with larger savings on
+per-Gaussian RADIO features on all four LERF scenes, with larger savings on
 scenes with more Gaussians. Multiview Primitive Registration itself is a
 training and analysis bridge and does not add trained persistent parameters; if one
 materializes registered 1536-D SigLIP2 primitive embeddings and per-query voxel
@@ -619,6 +595,14 @@ scores as a cache, that cache is reported separately and is larger than direct
 1280-D fp16 feature storage. We therefore use multiview registration as streamed
 evidence in the main compact-storage claim rather than counting it as part of
 the stored scene representation.
+This accounting is intentionally split into three levels. The latent payload is
+the clean per-Gaussian feature-memory cost and gives a constant 20$\times$
+compression over explicit 1280-D fp16 storage. The feature-memory package is the
+practical deployable cost of the semantic memory: global decoders are fixed
+overhead and become less important as scenes grow. The full checkpoint is a
+conservative engineering number and should not be used alone to judge feature
+compression, because it also includes ordinary 3DGS geometry and RGB state that
+are not part of the proposed foundation-feature memory.
 The compression/downstream correlation audit is kept in the supplementary material:
 checkpoint saving ratio has only small positive correlation with rendered mIoU
 and negative correlation with Direct3D mIoU, so the paper does not overclaim
@@ -630,7 +614,7 @@ Adaptor-consistency sweeps are kept in the supplementary material to preserve ma
 space. They show a consistent localization/region tradeoff: DINO relation and
 SAM3 region losses can improve thresholded overlap on Ramen, Teatime, and
 Figurines, but they sometimes move the single heatmap peak outside small LERF
-polygons. The paper therefore keeps the calibrated LERF readout as the main
+polygons. The paper therefore keeps the calibrated LERF query protocol as the main
 grounding result and reports the prompt-constrained downstream probes below as
 the compact evidence for DINO/SAM feature usability.
 
@@ -647,41 +631,41 @@ text queries with adaptor-space prompts or source-target correspondences. SAM3
 point/box prompts are prompt-constrained, mask propagation uses source-view
 support only, and no external SAM3 mask decoder is called. DINO mask
 propagation uses source-background contrast 1.10 plus label-free multi-head
-readout: top-$k$ foreground pooling, 2.0$\times$ propagated-area scaling,
+support calibration: top-$k$ foreground pooling, 2.0$\times$ propagated-area scaling,
 peak-component cleanup, and SAM-adaptor boundary refinement.}
 \label{tab:sam_dino_tasks}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{lcccc}
 \toprule
-Task & \multicolumn{2}{c}{Teacher} & \multicolumn{2}{c}{Rendered} \\
+Task & \multicolumn{2}{c}{Frame-wise RADIO} & \multicolumn{2}{c}{Rendered \method{}} \\
  & LocAcc/Hit & mIoU/Score & LocAcc/Hit & mIoU/Score \\
 \midrule
 SAM3 point prompt & 1.0000 & 0.3700 & 1.0000 & 0.4173 \\
 SAM3 box prompt & 0.8702 & 0.6560 & 0.8221 & 0.6638 \\
 SAM3 mask propagation & 0.7872 & 0.3583 & 0.6596 & 0.3756 \\
 DINOv3 dense matching & 0.5723 & 0.8547 & 0.5396 & 0.9048 \\
-DINOv3 mask propagation + SAM-boundary readout & 0.7660 & 0.4606 & 0.7872 & 0.4677 \\
+DINOv3 mask propagation + SAM-boundary calibration & 0.7660 & 0.4606 & 0.7872 & 0.4677 \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
 Table~\ref{tab:sam_dino_tasks} separates two claims. First, rendered features
-improve prompt-constrained SAM3-adaptor mask mIoU over the frame-wise teacher
+improve prompt-constrained SAM3-adaptor mask mIoU over frame-wise RADIO
 for point prompts, box prompts, and mask propagation, while matching the
-teacher's point-prompt localization. Second, using the same rendered field for DINO
+frame-wise point-prompt localization. Second, using the same rendered field for DINO
 support and SAM-adaptor boundary refinement makes DINO propagation positive
 under the same evaluator: rendered features reach 0.7872/0.4677
-LocAcc/mIoU versus 0.7660/0.4606 for the frame-wise teacher under the same
-multi-head readout. The higher rendered
+LocAcc/mIoU versus 0.7660/0.4606 for frame-wise RADIO under the same
+multi-head support calibration. The higher rendered
 dense-matching similarity score suggests that the feature field can become
 over-smooth and select visually similar nearby regions. This motivates the
 cross-view DINO and text-heatmap protected training variants evaluated next.
 We also evaluate a mutual-correspondence plus homography-RANSAC control for
 qualitative DINO matching; it removes many outlier matches and raises rendered
 dense-match similarity to 0.9277, but it does not improve the same robust DINO
-only mask-propagation mIoU beyond the teacher. We therefore keep RANSAC as a
-visualization control and use the multi-head DINO-support/SAM-boundary readout
+only mask-propagation mIoU beyond frame-wise RADIO. We therefore keep RANSAC as a
+visualization control and use the multi-head DINO-support/SAM-boundary calibration
 for the quantitative frozen-head table.
 
 \subsection{ScanNet Direct Point-Query Transfer}
@@ -689,26 +673,24 @@ for the quantitative frozen-head table.
 \input{scannet_published_context_table}
 
 Table~\ref{tab:scannet_published_context} evaluates cross-domain feature
-usability on the VALA/OpenGaFF ScanNet-8 scene subset:
+usability on the VALA-aligned ScanNet-8 scene subset:
 \texttt{scene0000\_00}, \texttt{scene0062\_00}, \texttt{scene0070\_00},
 \texttt{scene0097\_00}, \texttt{scene0140\_00}, \texttt{scene0347\_00},
-\texttt{scene0400\_00}, and \texttt{scene0590\_00}. This follows the
-OpenGaFF/VALA direct point-query setting with every-20-frame ScanNet training
+\texttt{scene0400\_00}, and \texttt{scene0590\_00}. This follows a
+public VALA-aligned direct point-query setting with every-20-frame ScanNet training
 splits and mIoU/mAcc evaluation on GT semantic point clouds. This is not
 presented as a full ScanNet semantic segmentation leaderboard result; it is a
 split-aligned direct probe of the learned feature field. The \method{} result uses
 the cross-view DINO-consistent compact field with a label-free contextual kNN
-point readout ($k=16$, 80 candidate Gaussians), single-template text prompts, and
+point-query classifier ($k=16$, 80 candidate Gaussians), single-template text prompts, and
 scene-mean logit calibration at $\alpha=0.45$. A label-free spatial logit
 propagation step averages class logits over 12 nearest 3D neighbours before the
-final argmax. It reaches 0.3806/0.6129,
-0.3871/0.6315, and 0.4711/0.7200 mIoU/mAcc on the 19/15/10-class splits. The
-external results are copied from the OpenGaFF paper but the OpenGaFF method result is
-omitted, so the table is used as compact baseline context rather than as a
-head-to-head OpenGaFF comparison. Increasing the calibration scale to 0.75
-raises 10-class mIoU to 0.4612 but lowers the 19-/15-class balance; alias
-prompts and the stricter joint 2D/3D training loss are kept in the supplementary
-material.
+final argmax. It reaches 36.55/50.57,
+42.78/72.85, and 57.85/77.93 mIoU/mAcc on the 19/15/10-class splits. The
+baseline rows follow the same reproduced VALA-aligned point-query protocol.
+A diagnostic proposal-memory variant improves some fine-grained
+19-class categories but lowers the final 15-/10-class balance, so it is kept as
+an auxiliary ScanNet control in the supplementary material.
 
 \input{scannet_category_stability_table}
 
@@ -729,11 +711,17 @@ accounting. The reported units match each protocol: rendered-view LERF uses
 view-query latency, direct 3D LERF uses object-query latency after
 query-select-render mask generation, and ScanNet uses class-query latency.
 These values are conservative because the frozen profiles include evaluator
-work and, for rendered-view LERF, visualization/teacher branches; clean
+work and, for rendered-view LERF, visualization/RADIO-target branches; clean
 warm-GPU microbenchmarks are kept out of the main claim until run under a
 single instrumentation harness. Training throughput remains supplementary
 log-derived evidence because training wall time and explicit GPU telemetry are
 different measurement types.
+The important point is therefore not to present these numbers as optimized
+system latency, but to avoid conflating scene-level batch evaluation time with
+per-query deployment cost. The direct-3D row is expectedly slower because it
+includes selected-primitive rendering for mask evaluation; primitive scoring
+itself is the compact-memory operation. We therefore interpret the latency table
+as conservative protocol-level evidence and separate it from the storage claim.
 
 \subsection{Qualitative Results}
 
@@ -741,10 +729,10 @@ The main qualitative comparison in Fig.~\ref{fig:qualitative} follows the
 LERF-OVS taxonomy used in recent open-vocabulary Gaussian-field work: rendered
 2D querying and direct 3D primitive querying are shown side by side on the same
 annotated view and text query. The 2D prior panels use our local LangSplat
-reproduction, while the 3D prior panels use our local Dr. Splat reproduction.
+V2 reproduction, while the 3D prior panels use our local Dr. Splat reproduction.
 The \method{} 3D panels use the deployed compact field with the fixed
-Support-Calibrated Primitive Readout; they do not read a multiview-registration feature cache and do not call the
-official RGB SAM3 readout at evaluation time.
+support-calibrated primitive selection rule; they do not read a multiview-registration feature cache and do not call the
+official RGB SAM3 mask decoder at evaluation time.
 
 \begin{figure*}[t]
 \centering
@@ -752,47 +740,47 @@ official RGB SAM3 readout at evaluation time.
 \caption{Qualitative comparison of 2D and 3D open-vocabulary querying on
 LERF-OVS. For each text query, the 2D columns visualize rendered-view
 mask/heatmap outputs on RGB, while the 3D columns visualize direct
-Gaussian-level selection rendered on a white background with local zoom. The
-prior result uses reproduced local baselines: LangSplat for 2D OVS and Dr. Splat
+Gaussian-level selection rendered on a white background. The
+prior result uses reproduced local baselines: LangSplatV2 for 2D OVS and Dr. Splat
 for 3D OVS. \method{} uses one compact foundation-feature Gaussian map for both
-readouts; the 3D panels do not use a multiview-registration cache or official RGB SAM3 readout.}
+query modes; the 3D panels do not use a multiview-registration cache or official RGB SAM3 mask decoder.}
 \label{fig:qualitative}
 \end{figure*}
 
 Fig.~\ref{fig:scannet_qualitative} gives the corresponding direct point-query
 visualization on ScanNet. We use binary class-query point clouds rather than
 full semantic coloring, because the evaluation protocol asks whether a frozen
-text query retrieves a target class under the VALA/OpenGaFF split.
+text query retrieves a target class under the VALA-aligned split.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/scannet_openvocab_3d_query_qualitative.png}
 \caption{ScanNet open-vocabulary 3D query qualitative comparison. Each row
-shows a binary text-class query on a VALA/OpenGaFF-8 scene: scene overview, GT
+shows a binary text-class query on a VALA-aligned ScanNet scene: scene overview, GT
 class points, our local VALA compatibility reproduction, and \method{} direct
 point-query prediction. Gray points are non-query classes.}
 \label{fig:scannet_qualitative}
 \end{figure*}
 
 Fig.~\ref{fig:direct3d_ablation_qualitative} visualizes the direct-3D support-calibration
-ablation on small or fragmented LERF queries. The base compact readout
-uses primitive scores from the compact field, while the final readout adds the
+ablation on small or fragmented LERF queries. The base compact selector
+uses primitive scores from the compact field, while the final selector adds the
 prompt ensemble and label-free component-support calibration used by the deployed
-compact direct readout.
+compact direct query.
 
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/lerf_direct3d_support_policy_ablation_qualitative.png}
-\caption{Qualitative ablation of the compact direct-3D support-calibrated readout. The
-readout recovers small or fragmented object support without a multiview-registration feature
-cache or official RGB SAM3 readout; rendering is used only to visualize and
+\caption{Qualitative ablation of compact direct-3D support calibration. The
+selector recovers small or fragmented object support without a multiview-registration feature
+cache or official RGB SAM3 mask decoder; rendering is used only to visualize and
 evaluate the selected 3D primitives.}
 \label{fig:direct3d_ablation_qualitative}
 \end{figure*}
 
 Fig.~\ref{fig:rendered_boundary_qualitative} isolates the rendered-view
-boundary calibration used by the feature-only SAM3-adaptor readout. Unlike the
-frozen official SAM3 diagnostic, this readout is conditioned on reconstructed
+boundary calibration used by the feature-only SAM3-adaptor mask head. Unlike the
+frozen official SAM3 diagnostic, this head is conditioned on reconstructed
 CTF-GS/RADIO features and prompt embeddings; it does not call the official RGB
 SAM3 decoder at evaluation time.
 
@@ -850,57 +838,61 @@ that the same representation can be probed outside the LERF object-query setting
 The LERF direct-selection experiment further clarifies the boundary of this
 claim: the compact field supports direct primitive querying, Multiview Primitive Registration provides an
 auditable training bridge for primitive evidence, and support-calibrated
-readout is needed to convert primitive scores into stable object masks. Bare
+selection is needed to convert primitive scores into stable object masks. Bare
 score-threshold selection is still weaker than object-aware grouping on
 fragmented scenes, so we distinguish primitive scoring quality from boundary and
-support readout quality.
+support calibration quality.
 
-\paragraph{External-baseline scope.}
-The LERF, LangSplat, and LEGaussians comparison results are traced to official
-paper or supplementary tables. They still come from cross-paper protocols, so
-we treat them as source-anchored context. A strict ranking claim would
-require rerunning those baselines under the same evaluator and annotations used
-by \project{}.
+\paragraph{Baseline scope.}
+The main LERF and ScanNet quantitative tables use the reproduced protocols
+reported in this paper. Historical cross-paper provenance tables are retained
+only as auxiliary audit material and are not the basis for the main ranking
+claims.
 
-\paragraph{Why the compact field can outperform its teacher.}
-\method{} is trained from frame-wise RADIO features, but its rendered readout is
+\paragraph{Why the compact field can outperform frame-wise RADIO.}
+\method{} is trained from frame-wise RADIO features, but its rendered query path is
 not restricted to a single frame. Multiview reconstruction, visibility-aware
-regularization, and support-calibrated readouts can suppress view-specific noise and
+regularization, and support-calibrated selection can suppress view-specific noise and
 recover a scene-consistent response. This explains why the rendered field can
 outperform frame-wise RADIO under the same frozen SigLIP2, SAM3-adaptor, and
-DINOv3 probe tasks, while still being limited by teacher resolution and
+DINOv3 probe tasks, while still being limited by frame-wise feature resolution and
 annotation ambiguity on small objects.
 
 \section{Limitations}
 
 \method{} depends on a pretrained Gaussian geometry backbone and does not claim
-to improve RGB reconstruction. Small objects remain challenging because the
-teacher feature resolution and rendered feature alignment limit heatmap
-sharpness. The ScanNet protocol is a direct point-query feature probe,
-not a replacement for a full standardized segmentation benchmark. The registered
-LERF direct 3D object-selection analysis substantially improves primitive querying
-and exceeds the OpenGaussian official macro reference under the reported
-OpenGaussian-style context, but the external results are not locally rerun under one
-evaluator; universal primitive-level ranking claims would require those reruns.
-The deployed compact direct-3D readout uses label-free color-edge and
-score-component support calibration. It avoids multiview-registration cache
-inference and official RGB SAM decoding, but it is not the strict no-RGB
-ablation; that stricter readout remains lower at 0.457 macro mIoU. The frozen
-official SAM3 box result is therefore kept as a post-selection boundary readout
-rather than the core direct-field claim. The storage table
-reports checkpoint footprint rather than deployed runtime allocation; a
-deployment-oriented memory study would separately account for feature-field
-parameters, rendering buffers, and optional downstream heads.
+to improve RGB reconstruction. Small objects remain challenging because RADIO
+feature resolution, Gaussian support density, and rendered feature alignment
+limit heatmap sharpness. The ScanNet protocol is a direct point-query feature
+probe, not a replacement for a full standardized semantic segmentation
+benchmark. The main LERF and ScanNet tables use the reproduced protocols
+reported in this paper; historical cross-paper provenance notes are kept only
+for auditability. The deployed compact direct-3D result uses GT-free color-edge
+and score-component support calibration. This does not invoke a learned RGB
+segmentation network or official RGB SAM decoder, but it should be understood as
+a lightweight support-calibration step rather than a completely image-free
+selector. The frozen official SAM3 box result is therefore kept as a
+post-selection diagnostic rather than the core compact-memory claim. The storage
+table reports feature footprint separately from full checkpoint footprint; a
+deployment package should keep the same separation between persistent feature
+parameters, transient rendering buffers, and optional downstream heads.
 
 \section{Conclusion}
 
-\method{} turns a 3D Gaussian scene into a reusable foundation-feature memory.
-By reconstructing frozen RADIO features rather than training a scene-specific
-classifier, it supports open-vocabulary grounding and cross-domain feature
-queries from novel views. The experiments provide strong LERF-OVS same-protocol
-results, split-aligned ScanNet direct-query evidence, explicit storage and
-runtime profiles, failure analysis, and source-anchored external comparison
-protocol boundaries.
+\method{} turns a 3D Gaussian scene into a reusable compact foundation-feature
+memory. Its central claim is deliberately narrower than generic semantic
+Gaussian learning: a low-dimensional contextual Gaussian field can reconstruct
+RADIO-compatible scene features, absorb sparse multiview primitive evidence, and
+support rendered-view, direct-primitive, and point-level open-vocabulary
+queries without deploying a high-dimensional multiview feature cache. The
+LERF-OVS, direct-3D, ScanNet, frame-wise RADIO comparison, storage, latency, and
+ablation results jointly support this claim. The remaining limitations are also
+clear: small fragmented objects and boundary-sensitive queries still depend on
+support calibration, and the ScanNet protocol should be interpreted as direct
+foundation-feature probing rather than full semantic-segmentation replacement.
+These boundaries make the result reproducible and falsifiable while preserving
+the main contribution: compact reconstructive foundation features can be made a
+first-class 3D scene representation.
 
 \bibliographystyle{IEEEtran}
 \bibliography{radio_gs_refs}

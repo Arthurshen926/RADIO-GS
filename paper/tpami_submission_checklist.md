@@ -11,7 +11,11 @@ CTF-GS manuscript package.
 - [x] Supplement PDF: `paper/radio_gs_tpami_supplement.pdf`
 - [x] Bibliography: `paper/radio_gs_refs.bib`
 - [x] IEEEtran class/style files: `paper/IEEEtran.cls`, `paper/IEEEtran.bst`
-- [x] Main figures: `paper/figures/radio_gs_framework.pdf`,
+- [x] Legacy CVPR draft moved out of the active root:
+  `paper/archive/radio_gs_draft_legacy_cvpr.tex` is traceability-only and must
+  not be uploaded as an active source file.
+- [x] Main figures: `paper/figures/figure1_overall_framework.pdf`,
+  `paper/figures/figure2_method_details.pdf`,
   `paper/figures/lerf_2d3d_ovs_qualitative.png`,
   `paper/figures/scannet_openvocab_3d_query_qualitative.png`,
   `paper/figures/lerf_direct3d_support_policy_ablation_qualitative.png`
@@ -25,6 +29,8 @@ CTF-GS manuscript package.
 - [x] Artifact checksum manifest: `paper/artifacts/checksums.txt`
 - [x] Reproducibility entry point:
   `paper/artifacts/tpami_reproducibility_package_20260601.md`
+- [x] Optional benchmark provenance audit:
+  `paper/benchmark_provenance_table.tex` (retained outside the main manuscript)
 - [x] Large-asset release manifest:
   `paper/artifacts/tpami_large_asset_release_manifest_20260601.md`
 - [x] Readiness audit: `paper/artifacts/tpami_readiness_audit_20260601.md`
@@ -44,6 +50,8 @@ cd /root/RADIO-GS
 rg -n -F "undefined" paper/radio_gs_tpami.log paper/radio_gs_tpami_supplement.log
 rg -n -F "Overfull \\hbox" paper/radio_gs_tpami.log paper/radio_gs_tpami_supplement.log
 rg -n "LaTeX Warning|Package .* Warning|Warning:" paper/radio_gs_tpami.log paper/radio_gs_tpami_supplement.log
+
+test ! -f paper/radio_gs_draft.tex
 
 /root/miniconda3/envs/cybersim_agent/bin/python \
   radio_gs/scripts/validate_paper_claims.py --root /root/RADIO-GS

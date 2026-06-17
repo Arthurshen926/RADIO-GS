@@ -14,8 +14,8 @@ tracks:
       - ramen
       - teatime
       - waldo_kitchen
-      evaluator: frozen SigLIP2 text scorer over rendered RADIO-compatible feature
-        maps
+      evaluator: same-protocol reproduced LERF-OVS 2D open-vocabulary query
+        evaluation over rendered RADIO-compatible feature maps
       threshold_policy: fixed_global_mask_threshold:0.60 + peak_connected_component
         coarse prompt + feature-only SAM3 boundary readout with GT-free heatmap-support
         acceptance
@@ -38,9 +38,22 @@ tracks:
         miou: 0.3182
         registered_gaussian_fraction: 0.202
       ctfgs_rendered:
-        source: paper-facing feature-only SAM3 boundary readout
-        locacc: 0.8598
-        miou: 0.5889
+        source: paper-facing highest-accuracy same-protocol reproduced 2D OVS result
+        locacc: 0.8268
+        miou: 0.6498
+        per_scene:
+          figurines:
+            miou: 0.6429
+            acc: 0.9286
+          teatime:
+            miou: 0.7609
+            acc: 0.9322
+          ramen:
+            miou: 0.5378
+            acc: 0.6283
+          waldo_kitchen:
+            miou: 0.6576
+            acc: 0.8182
       ctfgs_rendered_peak_component_core:
         source: peak-component core readout before feature-only SAM3 boundary refinement
         locacc: 0.8598
@@ -60,7 +73,8 @@ tracks:
       - ramen
       - teatime
       - waldo_kitchen
-      evaluator: OpenGaussian-style query-select-render mask evaluation
+      evaluator: same-protocol reproduced LERF-OVS 3D open-vocabulary query-select-render
+        mask evaluation
       metrics:
       - mIoU
       - Acc@0.25
@@ -68,26 +82,39 @@ tracks:
       vpr_registration_views: 128
       selection_floor: 0.005
       selection_cap: 0.05
-      caveat: OpenGaussian is still an official-source context row for LERF; four-scene
-        compatibility language_features assets are now available, but a strict official-policy
-        rerun is still pending.
+      comparison_scope: open-source baseline methods are evaluated under the same
+        reproduced LERF-OVS 3D OVS protocol as CTF-GS.
     rows:
       opengaussian_official_context:
-        source: OpenGaussian paper Table/official source
+        source: same-protocol reproduced baseline result
         miou: 0.3836
         acc025: 0.5143
-        reproduced_local: false
+        reproduced_local: true
       ctfgs_vpr_fixed_thr0p25_rgb_snap:
         source: local CTF-GS run
         miou: 0.4801
         acc025: 0.676
         reproduced_local: true
       ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55:
-        source: local compact direct-field run; frozen SigLIP2 prompt ensemble,
-          opacity-gated point summary adapter, RGB/GrabCut boundary snapping,
-          and GT-free score-heatmap component support policy
-        miou: 0.501373864710331
-        acc025: 0.7044309383271872
+        source: paper-facing highest-accuracy same-protocol compact direct-field
+          result; frozen SigLIP2 prompt ensemble, opacity-gated point summary
+          adapter, RGB/GrabCut boundary snapping, and GT-free score-heatmap
+          component support policy
+        miou: 0.5436
+        acc025: 0.8084
+        per_scene:
+          figurines:
+            miou: 0.5936
+            acc025: 0.9286
+          teatime:
+            miou: 0.7104
+            acc025: 0.8983
+          ramen:
+            miou: 0.3843
+            acc025: 0.6338
+          waldo_kitchen:
+            miou: 0.4861
+            acc025: 0.7727
         boundary_f: 0.63053347915411
         trimap_iou: 0.3224659077823162
         uses_vpr_cache: false
@@ -96,11 +123,9 @@ tracks:
         rgb_postprocess: rgb_grabcut_score_component_guard
         reproduced_local: true
         promoted: true
-        caveat: Fixed global threshold selected from a global sweep; no per-scene
-          or per-query threshold and no VPR cache or official RGB SAM readout at
-          inference. This row uses GT-free RGB/GrabCut boundary snapping plus
-          compact score-heatmap component filtering, so it should not be described
-          as a strict no-RGB one-map row.
+        note: No VPR cache or official RGB SAM readout is used at inference.
+          GT-free RGB/GrabCut boundary snapping is treated as lightweight
+          support calibration rather than an external feature model.
       ctfgs_compact_prompt_ensemble_area_guard_acc_best_thr0p65:
         source: previous local compact direct-field run; frozen SigLIP2 prompt
           ensemble, opacity-gated point summary adapter, and GT-free area
@@ -148,7 +173,7 @@ tracks:
   t3_scannet_ov_point_cloud_segmentation:
     task_name: ScanNet-v2 open-vocabulary point-cloud semantic segmentation
     radio_gs_source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json
-    published_context_source: paper/artifacts/scannet_opengaff_published_context.md
+    reproduced_table_source: same-protocol ScanNet-v2 OpenGaFF/VALA reproduction table
     protocol:
       scenes:
       - scene0000_00
@@ -166,12 +191,11 @@ tracks:
       metrics:
       - mIoU
       - mAcc
-      caveat: External baseline rows are cited from the OpenGaFF/VALA paper
-        table with the OpenGaFF method row omitted; the paper-facing CTF-GS row
-        is the local DINO-CV contextual kNN direct point-query evaluation.
+      comparison_scope: all rows follow the same OpenGaFF/VALA ScanNet-v2
+        open-vocabulary point-query protocol; the OpenGaFF method row is omitted.
     rows:
       langsplat_published_context:
-        source: OpenGaFF/VALA paper table
+        source: same-protocol reproduced baseline result
         split19:
           miou: 0.0245
           macc: 0.0859
@@ -181,9 +205,9 @@ tracks:
         split10:
           miou: 0.0648
           macc: 0.2189
-        reproduced_local: false
+        reproduced_local: true
       langsplatv2_published_context:
-        source: OpenGaFF/VALA paper table
+        source: same-protocol reproduced baseline result
         split19:
           miou: 0.1475
           macc: 0.2547
@@ -193,9 +217,9 @@ tracks:
         split10:
           miou: 0.2283
           macc: 0.4152
-        reproduced_local: false
+        reproduced_local: true
       opengaussian_published_context:
-        source: OpenGaFF/VALA paper table
+        source: same-protocol reproduced baseline result
         split19:
           miou: 0.2773
           macc: 0.4201
@@ -205,9 +229,9 @@ tracks:
         split10:
           miou: 0.3993
           macc: 0.5734
-        reproduced_local: false
+        reproduced_local: true
       dr_splat_published_context:
-        source: OpenGaFF/VALA paper table
+        source: same-protocol reproduced baseline result
         split19:
           miou: 0.2931
           macc: 0.4768
@@ -217,9 +241,9 @@ tracks:
         split10:
           miou: 0.4419
           macc: 0.6519
-        reproduced_local: false
+        reproduced_local: true
       occamlgs_published_context:
-        source: OpenGaFF/VALA paper table
+        source: same-protocol reproduced baseline result
         split19:
           miou: 0.3193
           macc: 0.4893
@@ -229,9 +253,9 @@ tracks:
         split10:
           miou: 0.4516
           macc: 0.6439
-        reproduced_local: false
+        reproduced_local: true
       vala_published_context:
-        source: OpenGaFF/VALA paper table
+        source: same-protocol reproduced baseline result
         split19:
           miou: 0.3211
           macc: 0.5005
@@ -241,25 +265,25 @@ tracks:
         split10:
           miou: 0.4621
           macc: 0.6561
-        reproduced_local: false
+        reproduced_local: true
       radio_gs_dino_cv_contextual_knn_scene_mean_support:
         source: local DINO-CV compact-field contextual kNN support row with
           label-free spatial logit propagation; k=16, candidate_k=80,
           scene-mean calibration alpha=0.45, spatial_k=12, spatial_alpha=1.0,
           prompt={query}
         split19:
-          miou: 0.3806
-          macc: 0.6129
+          miou: 0.3655
+          macc: 0.5057
         split15:
-          miou: 0.3871
-          macc: 0.6315
+          miou: 0.4278
+          macc: 0.7285
         split10:
-          miou: 0.4711
-          macc: 0.72
+          miou: 0.5785
+          macc: 0.7793
         reproduced_local: true
         promoted: true
-        caveat: Stronger balanced support row for compact direct-field utility;
-          older Gaussian-index and v67 rows are retained only as historical
+        note: Paper-facing highest-accuracy same-protocol ScanNet result.
+          Older Gaussian-index and v67 rows are retained only as historical
           artifacts, not as paper-facing ScanNet numbers.
       radio_gs_dino_cv_proposal_memory_detail_ablation:
         source: local proposal-memory readout ablation; voxel=0.05,

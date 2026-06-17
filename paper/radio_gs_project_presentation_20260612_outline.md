@@ -40,8 +40,8 @@
 ## 12. 主结果二：LERF direct 3D object selection
 - 这里要准确讲：compact row 是主线，但 strict no-RGB one-map ablation 另有数值；当前最佳使用轻量 RGB support guard。
 
-## 13. 主结果三：ScanNet VALA/OpenGaFF-8 direct point-query
-- 这页按用户要求直接使用 OpenGaFF/VALA 论文里的对比数字，去掉 OpenGaFF row。
+## 13. 主结果三：VALA-aligned ScanNet-8 direct point-query
+- 这页按用户要求使用与公开 VALA 协议一致的 direct point-query 设置，不在论文中暴露未发表方法名。
 
 ## 14. 重建 Scene Features vs. 原始 frame-wise RADIO
 - 这里直接支撑用户关心的：student field 全面强于 frame-wise RADIO 的 selected frozen-head tasks。

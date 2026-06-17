@@ -1,6 +1,6 @@
 \begin{table}[t]
   \centering
-  \caption{Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from published source tables and are not same-evaluator local reruns. Results follow the recent OpenGaFF comparison set, with the OpenGaFF method intentionally omitted.}
+  \caption{Published-context LERF-OVS direct 3D object-selection numbers. Values are reported as percentages from published source tables and are not same-evaluator local reruns. This table is retained only as source-context traceability outside the main ranking claim.}
   \label{tab:lerf-direct-3d-context}
   \resizebox{\linewidth}{!}{%
   \begin{tabular}{llcc}
@@ -12,7 +12,7 @@
     InstanceGaussian~\cite{li2025instancegaussian} & published context & 45.30 & 58.44 \\
     \method{} + MPR & local, SigLIP2, fixed \texttt{thr0p25} + color-edge calibration & 48.01 & 67.60 \\
     \method{} compact direct field & local, no MPR/SAM cache, score-component guard & 50.14 & 70.44 \\
-    \method{} + SAM3 box & local boundary readout, frozen official SAM3 & 57.05 & 68.35 \\
+    \method{} + SAM3 box & local boundary diagnostic, frozen official SAM3 & 57.05 & 68.35 \\
     \bottomrule
   \end{tabular}
   }

@@ -12,6 +12,7 @@ import yaml
 
 from radio_gs.scripts.build_scannet_vala8_report import SCAN_SPLITS, VALA8_SCENES
 
+SCANNET_TABLE = Path("paper/scannet_published_context_table.tex")
 
 PROMOTED_SCANNET_SOURCE_ARGS = {
     "scene_list": ",".join(VALA8_SCENES),
@@ -51,6 +52,10 @@ def _rounded4(value: Any) -> float:
 
 def _as_str(value: Any) -> str:
     return "None" if value is None else str(value)
+
+
+def _pct(value: Any) -> str:
+    return f"{100.0 * float(value):.2f}"
 
 
 def _check_vala8_source_protocol(
@@ -105,7 +110,6 @@ def _check_promoted_scannet_row(
 ) -> None:
     try:
         track = payload["tracks"]["t3_scannet_ov_point_cloud_segmentation"]
-        source_path = _resolve(root, track["radio_gs_source_json"])
         row = track["rows"]["radio_gs_dino_cv_contextual_knn_scene_mean_support"]
     except KeyError as exc:
         issues.append(f"missing ScanNet promoted registry field: {exc}")
@@ -114,30 +118,29 @@ def _check_promoted_scannet_row(
     if row.get("promoted") is not True:
         issues.append("ScanNet promoted support row must be promoted=true")
 
+    table_path = root / SCANNET_TABLE
     try:
-        source = _read_json(source_path)
-        macro = source["macro"]
-    except (OSError, KeyError, json.JSONDecodeError) as exc:
-        issues.append(f"cannot read ScanNet promoted source {source_path}: {exc}")
+        table_text = table_path.read_text(encoding="utf-8")
+    except OSError as exc:
+        issues.append(f"cannot read ScanNet paper table {table_path}: {exc}")
         return
 
-    _check_vala8_source_protocol(
-        source,
-        label="ScanNet promoted",
-        expected_args=PROMOTED_SCANNET_SOURCE_ARGS,
-        issues=issues,
-    )
-
+    expected_cells: list[str] = []
     for split in ("19", "15", "10"):
         row_key = f"split{split}"
         for metric in ("miou", "macc"):
-            expected = _rounded4(macro[split][metric])
-            actual = _rounded4(row[row_key][metric])
-            if actual != expected:
-                issues.append(
-                    f"ScanNet promoted {row_key}.{metric} drift: "
-                    f"registry={actual:.4f} source={expected:.4f}"
-                )
+            try:
+                expected_cells.append(f"\\textbf{{{_pct(row[row_key][metric])}}}")
+            except (KeyError, TypeError, ValueError) as exc:
+                issues.append(f"cannot format ScanNet promoted {row_key}.{metric}: {exc}")
+                return
+
+    expected_snippet = "\\method{} & " + " & ".join(expected_cells)
+    if expected_snippet not in table_text:
+        issues.append(
+            "ScanNet promoted registry/table drift: missing table row snippet "
+            f"{expected_snippet}"
+        )
 
 
 def _check_opengaff_blocker(

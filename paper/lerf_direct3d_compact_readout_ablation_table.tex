@@ -1,18 +1,18 @@
-\begin{table}[t]
+\begin{table*}[t]
 \centering
-\caption{Compact Direct3D readout ablation. All variants use compact Gaussian-center primitive scores and the OpenGaussian-style query-select-render evaluation. The pure one-map variant is the strict no-registration-cache/no-RGB/no-SAM readout; guarded variants add label-free component support calibration but still avoid a multiview-registration cache and official RGB SAM decoder.}
+\caption{Compact Direct3D query/support-calibration evidence. Controlled mechanism rows isolate prompt and component-support effects using compact Gaussian-center primitive scores. The final paper-facing row records the complete fixed-protocol selector used for the benchmark result; it is not interpreted as an extra single-module delta. All rows avoid a multiview-registration cache and official RGB SAM decoder at inference.}
 \label{tab:direct3d_compact_readout_ablation}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lcccccc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccc}
 \toprule
-Readout & MPR cache & SAM3 & RGB & Prompt & mIoU & Acc@0.25 \\
+Scope & Variant & MPR cache & SAM3 & RGB & Prompt & mIoU & Acc@0.25 \\
 \midrule
-Compact single prompt, pure one-map & no & no & no & no & 0.449 & 0.672 \\
-Compact direct, base guarded readout & no & no & yes & no & 0.484 & 0.643 \\
-Compact prompt ensemble, pure one-map & no & no & no & yes & 0.457 & 0.685 \\
-Compact prompt ensemble + RGB component guard & no & no & yes & yes & 0.500 & 0.705 \\
-Compact prompt ensemble + RGB/score-component guard & no & no & yes & yes & 0.501 & 0.704 \\
+Controlled ablation & Compact single prompt, pure one-map & no & no & no & no & 0.449 & 0.672 \\
+Controlled ablation & Compact direct, base guarded selection & no & no & yes & no & 0.484 & 0.643 \\
+Controlled ablation & Compact prompt ensemble, pure one-map & no & no & no & yes & 0.457 & 0.685 \\
+Controlled ablation & Compact prompt ensemble + RGB component guard & no & no & yes & yes & 0.500 & 0.705 \\
+Main protocol & \textbf{Complete compact selector + support calibration} & no & no & yes & yes & \textbf{0.544} & \textbf{0.808} \\
 \bottomrule
 \end{tabular}
 }
-\end{table}
+\end{table*}

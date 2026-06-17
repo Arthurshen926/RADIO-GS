@@ -10,7 +10,7 @@
     Query target & 3D Gaussian primitives; rendering is used only after selection for mask evaluation \\
     Registration feature & Rendered RADIO-compatible features after view-conditioned calibration, projected by frozen SigLIP2 summary head \\
     Registration views & Posed RGB/render views selected from all COLMAP poses; main result uses 128 evenly spaced views \\
-    Leakage audit & Train-view-only 24-view result is reported separately and remains above raw center readout \\
+    Leakage audit & Train-view-only 24-view result is reported separately and remains above raw center scoring \\
     Visibility hygiene & Depth and alpha checks; no LERF masks or text labels are used during registration \\
     Text scoring & Frozen SigLIP2 text/query embeddings with scene-wise softmax scoring \\
     Selection & Fixed global softmax-score threshold \texttt{thr0p25} with 0.5\% floor and 1.8\% cap; mean+std and fixed-ratio sweeps are diagnostic only \\

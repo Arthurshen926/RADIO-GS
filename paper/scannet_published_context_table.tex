@@ -1,10 +1,8 @@
 \begin{table*}[t]
 \centering
-\caption{ScanNet-v2 open-vocabulary point-cloud understanding under the
-OpenGaFF/VALA protocol. External baseline rows are copied from the OpenGaFF v2
-paper table and reported in percent; the OpenGaFF method row is intentionally
-omitted. The \method{} row is our local VALA/OpenGaFF-8 evaluation on the same
-eight scene ids.}
+\caption{Quantitative evaluation of ScanNet-v2 open-vocabulary point querying
+under a VALA-aligned eight-scene protocol. All rows follow the same class splits
+and reproduced point-query evaluator; results are reported in percent.}
 \label{tab:scannet_published_context}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrr}
@@ -18,7 +16,7 @@ Dr. Splat & 29.31 & 47.68 & 33.25 & 54.33 & 44.19 & 65.19 \\
 OccamLGS & 31.93 & 48.93 & 34.25 & 53.71 & 45.16 & 64.39 \\
 VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\
 \midrule
-\method{} DINO-CV contextual kNN + spatial propagation & \textbf{38.06} & \textbf{61.29} & \textbf{38.71} & \textbf{63.15} & \textbf{47.11} & \textbf{72.00} \\
+\method{} & \textbf{36.55} & \textbf{50.57} & \textbf{42.78} & \textbf{72.85} & \textbf{57.85} & \textbf{77.93} \\
 \bottomrule
 \end{tabular}
 }

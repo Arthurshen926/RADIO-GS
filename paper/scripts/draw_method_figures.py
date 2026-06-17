@@ -262,7 +262,7 @@ def draw_figure1(assets: dict[str, np.ndarray | None]) -> None:
     ax.set_facecolor("#fbfbf7")
 
     label(ax, 0.03, 0.955, "CTF-GS: Compact Foundation-Feature Gaussian Memory", size=14.5, weight="bold")
-    label(ax, 0.03, 0.918, "Multiview evidence is compressed into a compact 3D memory, then query-conditioned feature/support reconstruction serves 2D and 3D open-vocabulary tasks.", size=8.5, color=COLORS["muted"])
+    label(ax, 0.03, 0.918, "Frozen RADIO evidence is compressed into a compact 3D memory, then reconstructed features support 2D, 3D, and point queries.", size=8.5, color=COLORS["muted"])
 
     label(ax, 0.045, 0.860, "A. Multiview Evidence", size=10.5, weight="bold")
     rounded_box(ax, 0.025, 0.105, 0.270, 0.720, fc="#f4f8fd", ec="#9fb4cc", lw=1.0, radius=0.014)
@@ -270,7 +270,7 @@ def draw_figure1(assets: dict[str, np.ndarray | None]) -> None:
     draw_image(ax, assets["rgb_t"], 0.095, 0.570, 0.105, 0.110, border="#ffffff", lw=1.0)
     draw_image(ax, assets["rgb"], 0.140, 0.525, 0.105, 0.110, border="#ffffff", lw=1.0)
     label(ax, 0.052, 0.492, "posed RGB views + 3DGS geometry", size=8.5, weight="bold")
-    text_box(ax, 0.050, 0.400, 0.210, 0.070, "Frame-wise foundation features", "RADIO / SigLIP2 / DINO / SAM", fc="#ffffff", stripe=COLORS["blue"])
+    text_box(ax, 0.050, 0.400, 0.210, 0.070, "Frame-wise RADIO features", "frozen 1280-D dense target", fc="#ffffff", stripe=COLORS["blue"])
     text_box(ax, 0.050, 0.302, 0.210, 0.070, "Multiview primitive registration", "visibility, contribution, confidence", fc="#ffffff", stripe=COLORS["teal"])
     text_box(ax, 0.050, 0.205, 0.210, 0.070, "Training constraints", "feature, support, boundary, topology", fc="#fff8e8", stripe=COLORS["orange"])
 
@@ -285,9 +285,9 @@ def draw_figure1(assets: dict[str, np.ndarray | None]) -> None:
     draw_image(ax, assets["direct"], 0.865, 0.530, 0.085, 0.075)
     text_box(ax, 0.685, 0.340, 0.280, 0.120, "ScanNet point query", "open-vocabulary points", fc="#f4f1ff", stripe=COLORS["blue"])
     draw_image(ax, assets["scannet"], 0.865, 0.355, 0.085, 0.075)
-    text_box(ax, 0.685, 0.165, 0.280, 0.120, "Frozen-head probes", "SigLIP2 / SAM / DINO probes", fc="#fff4ed", stripe=COLORS["orange"])
+    text_box(ax, 0.685, 0.165, 0.280, 0.120, "Frozen-head probes", "adaptor-space usability tests", fc="#fff4ed", stripe=COLORS["orange"])
     draw_image(ax, assets["downstream"], 0.865, 0.180, 0.085, 0.075)
-    label(ax, 0.705, 0.860, "C. Query-Conditioned Tasks", size=10.5, weight="bold")
+    label(ax, 0.705, 0.860, "C. Open-Vocabulary Queries", size=10.5, weight="bold")
 
     arrow(ax, (0.650, 0.575), (0.685, 0.750), color=COLORS["purple"], text="reconstruct")
     arrow(ax, (0.650, 0.515), (0.685, 0.575), color=COLORS["teal"], text="calibrate")
@@ -316,7 +316,7 @@ def draw_figure2(assets: dict[str, np.ndarray | None]) -> None:
     fig.patch.set_facecolor("#fbfbf7")
     ax.set_facecolor("#fbfbf7")
     label(ax, 0.03, 0.955, "Method Details", size=15, weight="bold")
-    label(ax, 0.03, 0.920, "The same compact memory is trained by multiview primitive evidence, reconstructed into foundation-feature spaces, and calibrated into stable object support.", size=8.5, color=COLORS["muted"])
+    label(ax, 0.03, 0.920, "Dense RADIO reconstruction, sparse primitive anchoring, and support calibration train the same compact memory.", size=8.5, color=COLORS["muted"])
 
     draw_panel_frame(ax, 0.030, 0.090, 0.435, 0.790, "(a) Multiview Primitive Registration")
     draw_image(ax, assets["rgb_w"], 0.060, 0.685, 0.100, 0.100)
@@ -334,22 +334,22 @@ def draw_figure2(assets: dict[str, np.ndarray | None]) -> None:
     arrow(ax, (0.285, 0.300), (0.330, 0.255), color=COLORS["orange"], dashed=True)
     label(ax, 0.060, 0.130, "Training only: multiview evidence is distilled into compact codes; no VPR cache is read at inference.", size=7.5, color=COLORS["muted"])
 
-    draw_panel_frame(ax, 0.515, 0.540, 0.455, 0.340, "(b) Query-Conditioned Feature Reconstruction")
+    draw_panel_frame(ax, 0.515, 0.540, 0.455, 0.340, "(b) RADIO Feature Reconstruction")
     rounded_box(ax, 0.550, 0.655, 0.135, 0.105, fc="#eaf6ef", ec="#24473d", lw=1.0)
     label(ax, 0.570, 0.725, "compact z_i", size=8.5, weight="bold")
     label(ax, 0.570, 0.690, "+ context h(x)", size=7.7, color=COLORS["muted"])
-    text_box(ax, 0.735, 0.690, 0.180, 0.060, "feature decoder", "reconstruct task space", fc="#f6fbff", stripe=COLORS["blue"])
+    text_box(ax, 0.735, 0.690, 0.180, 0.060, "feature decoder", "RADIO-compatible feature", fc="#f6fbff", stripe=COLORS["blue"])
     arrow(ax, (0.685, 0.707), (0.735, 0.720), color=COLORS["blue"], text="decode")
-    for idx, (name, col) in enumerate([("SigLIP2", COLORS["purple"]), ("SAM", COLORS["green"]), ("DINO", COLORS["orange"])]):
+    for idx, (name, col) in enumerate([("SigLIP2 probe", COLORS["purple"]), ("SAM region probe", COLORS["green"]), ("DINO structure probe", COLORS["orange"])]):
         y = 0.620 - idx * 0.048
-        text_box(ax, 0.735, y, 0.180, 0.038, name + " consistency", "", fc="#ffffff", stripe=col, size=7.6)
+        text_box(ax, 0.735, y, 0.180, 0.038, name, "", fc="#ffffff", stripe=col, size=7.6)
     text_box(ax, 0.550, 0.565, 0.135, 0.055, "text/query q", "open vocabulary", fc="#fff4ed", stripe=COLORS["orange"], size=7.8)
     arrow(ax, (0.685, 0.593), (0.735, 0.640), color=COLORS["orange"], lw=1.1)
-    label(ax, 0.550, 0.815, "A low-dimensional memory reconstructs features only when a query/task needs them.", size=7.7, color=COLORS["muted"])
+    label(ax, 0.550, 0.815, "A low-dimensional memory reconstructs RADIO features; adaptors only constrain or probe usability.", size=7.7, color=COLORS["muted"])
 
     draw_panel_frame(ax, 0.515, 0.090, 0.455, 0.395, "(c) Support-Calibrated Selection")
     text_box(ax, 0.545, 0.365, 0.135, 0.055, "score primitives", "cos(f_i, t_q)", fc="#ffffff", stripe=COLORS["purple"], size=7.8)
-    text_box(ax, 0.545, 0.280, 0.135, 0.055, "support policy", "visibility + confidence", fc="#f4fbfa", stripe=COLORS["teal"], size=7.8)
+    text_box(ax, 0.545, 0.280, 0.135, 0.055, "support calibration", "visibility + confidence", fc="#f4fbfa", stripe=COLORS["teal"], size=7.8)
     text_box(ax, 0.545, 0.195, 0.135, 0.055, "component guard", "complete object support", fc="#fff8e8", stripe=COLORS["orange"], size=7.8)
     arrow(ax, (0.612, 0.365), (0.612, 0.335), color=COLORS["ink"])
     arrow(ax, (0.612, 0.280), (0.612, 0.250), color=COLORS["ink"])
@@ -363,8 +363,8 @@ def draw_figure2(assets: dict[str, np.ndarray | None]) -> None:
     label(ax, 0.715, 0.245, "2D score map", size=7.5, weight="bold")
     draw_image(ax, assets["direct"], 0.840, 0.150, 0.100, 0.080)
     label(ax, 0.840, 0.245, "3D selected support", size=7.5, weight="bold")
-    arrow(ax, (0.680, 0.308), (0.735, 0.228), color=COLORS["purple"], text="render")
-    arrow(ax, (0.680, 0.225), (0.855, 0.228), color=COLORS["teal"], text="select")
+    arrow(ax, (0.680, 0.308), (0.735, 0.228), color=COLORS["purple"])
+    arrow(ax, (0.680, 0.225), (0.855, 0.228), color=COLORS["teal"])
     label(ax, 0.720, 0.115, "The calibration acts on support, not just feature cosine, reducing fragmented or low-visibility selections.", size=7.4, color=COLORS["muted"])
 
     save_all(fig, "figure2_method_details")

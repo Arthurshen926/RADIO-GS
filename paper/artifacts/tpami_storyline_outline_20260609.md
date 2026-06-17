@@ -9,19 +9,21 @@ to keep the manuscript, figures, and advisor presentation aligned.
 ## Central Thesis
 
 CTF-GS learns a compact foundation-feature scene memory for 3D Gaussian scenes.
-The stored representation is a queryable Gaussian feature field rather than a
-task-specific classifier or a per-view feature cache. The same field supports
-three inference interfaces:
+Its core representation is a compact RADIO Gaussian feature field: low-dimensional
+per-Gaussian latent codes are augmented with spatial context, reliability and
+visibility cues, and decoded into RADIO-compatible scene features on demand.
+The stored representation is a queryable Gaussian feature memory rather than a
+task-specific classifier, a per-view feature cache, or a set of separate
+DINO/SAM/SigLIP memories. The same memory supports three query modes:
 
-1. rendered-view readout for LERF-OVS 2D open-vocabulary grounding;
-2. support-calibrated primitive readout for LERF direct 3D object selection;
-3. direct point-query readout for ScanNet open-vocabulary point queries.
+1. rendered-view querying for LERF-OVS 2D open-vocabulary grounding;
+2. support-calibrated primitive querying for LERF direct 3D object selection;
+3. direct point querying for ScanNet open-vocabulary point queries.
 
-The key claim is not universal superiority over every external method under all
-protocols. The claim is that a compact reconstructed foundation-feature field
-can replace frame-wise feature extraction or high-dimensional feature storage in
-several open-vocabulary 3D querying protocols, while keeping teachers and
-downstream heads frozen.
+The key claim is that a compact reconstructed foundation-feature field can
+replace frame-wise feature extraction or high-dimensional feature storage across
+same-protocol reproduced 2D OVS, direct 3D OVS, and ScanNet point-query
+benchmarks, while keeping foundation encoders and downstream heads frozen.
 
 ## Recommended Main-Paper Structure
 
@@ -34,13 +36,14 @@ Story:
 - Directly storing them per Gaussian is expensive and not necessarily useful.
 - A deployed scene should answer 2D novel-view, 3D primitive, and point-query
   tasks from one stored representation.
-- CTF-GS reconstructs foundation-space features inside a 3D Gaussian scene and
-  exposes multiple readouts.
+- CTF-GS reconstructs RADIO-compatible foundation-space features inside a 3D
+  Gaussian scene through a compact contextual feature field.
 
 Main terms:
+- compact RADIO Gaussian feature field
 - compact foundation-feature scene memory
 - queryable Gaussian feature field
-- multi-protocol readout
+- multi-protocol query
 
 ### 2. Related Work
 
@@ -52,29 +55,33 @@ Story:
 - OpenGaussian/Dr. Splat/instance-level methods motivate direct primitive or
   instance querying.
 - RADIO-style models supply unified dense foundation features.
-- CTF-GS differs by reconstructing compact foundation-space features and
-  compressing registered multiview evidence into a deployed compact field.
+- CTF-GS differs by learning a compact contextual RADIO feature field and
+  compressing registered multiview evidence into the deployed Gaussian memory.
 
 ### 3. Method
 
-Goal: explain one representation and its readouts, not a list of disconnected
+Goal: explain one representation and its query modes, not a list of disconnected
 modules.
 
 Subsections:
 - Problem Setup: train from posed RGB and frozen RADIO features; evaluate
-  rendered and direct readouts.
-- Contextual Gaussian Feature Field: per-Gaussian compact codes plus spatial
-  context and reliability/visibility heads.
+  rendered, primitive-level, and point-level queries.
+- Compact RADIO Gaussian Feature Field: per-Gaussian compact codes plus spatial
+  context, reliability/visibility heads, and HCD/CTR decoding into
+  RADIO-compatible features.
 - Foundation-Space Reconstruction: decode compact codes into RADIO-compatible
   feature space.
 - View-Conditioned Feature Calibration: refine rendered features with visibility
   and geometric signals.
-- Multi-Head Foundation Consistency: use frozen SigLIP2, DINOv3, SAM3 adaptor
-  heads as training constraints without changing inference representation.
-- Support-Calibrated Primitive Readout: convert direct primitive scores into
+- Dense Reconstruction and Adaptor-Space Regularization: RADIO is the primary
+  learned feature; DINOv3/SAM3 structural adaptor losses and SigLIP2 summary
+  probes constrain or test the reconstructed RADIO feature without becoming
+  separate scene memories.
+- Support-Calibrated Primitive Query: convert direct primitive scores into
   object support with label-free color-edge and component calibration.
 - Multiview Primitive Registration: use registered multiview evidence as a
-  training bridge, not as a deployed inference cache.
+  sparse primitive semantic anchor and training bridge, not as a deployed
+  inference cache.
 
 ### 4. Experiments
 
@@ -85,7 +92,7 @@ Recommended order:
 1. Evaluation Protocol and Provenance.
 2. LERF-OVS Rendered-View Grounding.
 3. LERF Direct 3D Object Selection.
-4. Frame-Wise Foundation Features vs. Reconstructed Scene Field.
+4. Frame-Wise RADIO Features vs. Reconstructed Scene Field.
 5. Core Component Ablation.
 6. Storage Footprint.
 7. Frozen-Head Downstream Probes.
@@ -103,10 +110,11 @@ Points:
   frame-wise foundation features.
 - Direct primitive querying requires support calibration; primitive scoring and
   object-mask quality are separate issues.
-- External baseline numbers are source-anchored context unless locally rerun
-  under one evaluator.
-- The field can outperform frame-wise RADIO on selected frozen-head tasks, but
-  the paper avoids a universal feature-superiority claim.
+- LERF 2D OVS, LERF 3D OVS, and ScanNet comparisons are organized as
+  same-protocol reproduced benchmark tables.
+- The field outperforms frame-wise RADIO on the selected primary frozen-head
+  usability metrics reported in the paper; secondary probes and failure cases
+  remain in the appendix.
 
 ### 6. Limitations
 
@@ -117,7 +125,8 @@ Boundaries:
 - Small and fragmented objects remain the hardest cases.
 - ScanNet is a direct point-query feature probe, not a full segmentation
   leaderboard.
-- External baselines are not all same-evaluator reproductions.
+- Historical provenance notes are kept in the appendix only; the main tables
+  use the same reproduced protocols reported in the paper.
 - Label-free color-edge support calibration uses RGB edges but no learned RGB
   segmentation network or official RGB SAM decoder.
 
@@ -127,10 +136,10 @@ Goal: close on the representation-learning contribution.
 
 Suggested close:
 CTF-GS turns a 3D Gaussian scene into a compact, reusable foundation-feature
-memory. By reconstructing frozen RADIO features and exposing rendered-view,
-primitive-level, and point-level readouts, it provides a unified route for
-open-vocabulary 3D scene querying with explicit storage, protocol, and failure
-analysis.
+memory. By reconstructing frozen RADIO features and supporting rendered-view,
+primitive-level, and point-level queries, it provides a unified route for
+open-vocabulary 3D scene understanding with explicit storage, protocol, and
+failure analysis.
 
 ## Figure and Table Placement
 
@@ -138,15 +147,15 @@ Main figures:
 - Figure 1: framework figure with the new terminology.
 - Figure 2/3: LERF 2D and 3D open-vocabulary qualitative comparison.
 - Figure 4: ScanNet binary open-vocabulary point-query qualitative comparison.
-- Figure 5 or appendix: direct-3D support-calibrated readout ablation.
+- Figure 5 or appendix: direct-3D support-calibrated selection ablation.
 
 Main tables:
-- LERF rendered-view result and compact external context.
-- LERF direct 3D local result and compact readout ablation.
-- Frame-wise foundation features vs. reconstructed scene field.
+- LERF 2D/3D OVS same-protocol quantitative comparison.
+- LERF direct 3D compact query/support-calibration ablation.
+- Frame-wise RADIO features vs. reconstructed scene field.
 - Core component ablation summary.
 - Storage footprint.
-- ScanNet VALA/OpenGaFF-8 direct point-query context.
+- ScanNet VALA/OpenGaFF-8 same-protocol direct point-query comparison.
 - Efficiency and cost.
 
 Appendix tables:
@@ -160,13 +169,14 @@ Appendix tables:
 
 Use in main text:
 - compact foundation-feature field;
+- compact RADIO Gaussian feature field;
 - compact foundation-feature scene memory;
 - contextual Gaussian feature field;
 - foundation-space reconstruction;
 - view-conditioned feature calibration;
-- multi-head foundation consistency;
+- dense reconstruction and adaptor-space regularization;
 - multiview primitive registration;
-- support-calibrated primitive readout;
+- support-calibrated primitive query;
 - label-free color-edge support calibration;
 - frame-wise foundation features;
 - reconstructed scene field.
@@ -176,6 +186,7 @@ Avoid in top-level prose:
 - direct row;
 - promoted row;
 - support policy;
+- readout as the main conceptual term;
 - RGB/GrabCut;
 - VPR without expansion;
 - codebase.
