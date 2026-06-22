@@ -1,7 +1,7 @@
 # Paper Artifact Snapshot
 
 This directory contains the small, paper-facing result files that make the
-current RADIO-GS/CTF-GS evidence package auditable without following the local
+current RADIO-GS/GaussFM evidence package auditable without following the local
 `output/` symlink. Large checkpoints, rendered images, datasets, and feature
 caches remain outside this snapshot.
 
@@ -33,7 +33,7 @@ sha256sum -c paper/artifacts/checksums.txt
 ## T1: LERF Rendered-View OVS
 
 - `lerf_rendered_grounding_paper_ckpt_threshold_sweep.json`: paper-facing
-  rendered-view threshold sweep and main CTF-GS row source.
+  rendered-view threshold sweep and main GaussFM row source.
 - `lerf_rendered_grounding_paper_ckpt_threshold_sweep.md`: markdown summary
   for the same threshold sweep.
 - `lerf_rendered_grounding_peak_component_20260524.{md,json}`:
@@ -44,18 +44,18 @@ sha256sum -c paper/artifacts/checksums.txt
 - `lerf_rendered_grounding_boundary_calibration_report.{md,json}`:
   rendered-view boundary calibration diagnostic.
 - `lerf_rendered_grounding_rgb_snap_report.{md,json}`: RGB-snap diagnostic.
-- `controlled_evidence_table.json`: frame-wise teacher, nearest-view cache,
-  explicit 1280-D memory, and full CTF-GS controlled evidence.
+- `controlled_evidence_table.json`: frame-wise RADIO reference, nearest-view cache,
+  explicit 1280-D memory, and full GaussFM controlled evidence.
 - `controlled_evidence_table.md`: markdown summary for the same controlled
   evidence.
 - `teacher_vs_ctfgs_2d_usability_20260525.{md,json}`: consolidated 2D
-  teacher-vs-rendered CTF-GS feature-usability evidence across SigLIP2 text
+  frame-wise-RADIO-vs-rendered GaussFM feature-usability evidence across SigLIP2 text
   grounding and frozen SAM3/DINOv3 task probes. The current report records
-  6/6 selected primary downstream wins for rendered CTF-GS features, while
+  6/6 selected primary downstream wins for rendered GaussFM features, while
   keeping secondary SAM LocAcc and DINO dense-HitRate caveats separate.
 - `dino_sam_boundary_and_waldo_recovery_20260528.{md,json}`: traceable
   record for the DINO multi-head SAM-boundary readout that flips DINO mask
-  propagation mIoU in favor of the student field, plus the Waldo small-object
+  propagation mIoU in favor of the rendered field, plus the Waldo small-object
   heatmap-recovery diagnostic that improves Waldo Acc but is not promoted
   globally because a fixed pixel floor regresses Ramen.
 - `unified_multi_head_feature_quality_field_20260525.{md,json}`: method-level
@@ -143,12 +143,15 @@ sha256sum -c paper/artifacts/checksums.txt
 
 ## T3: ScanNet Point-Cloud Probe
 
-- `scannet_opengaff_published_context.md`: paper-facing ScanNet comparison
-  table. External baseline rows are copied from the OpenGaFF/VALA paper table
-  with the OpenGaFF method row omitted.
+- `scannet_published_context_table.tex`: paper-facing ScanNet comparison
+  table under the VALA-aligned point-query protocol.
+- `scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json`:
+  canonical paper-facing GaussFM VALA-aligned ScanNet-8 reproduced benchmark
+  summary mirrored by `final_rows.yaml` and `paper/scannet_published_context_table.tex`.
 - `scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.{md,json}`:
-  promoted CTF-GS VALA/OpenGaFF-8 row with contextual kNN, scene-mean
-  calibration, and one-step spatial logit propagation.
+  supporting contextual-kNN diagnostic with scene-mean calibration and one-step
+  spatial logit propagation. It is retained for provenance, not as the final
+  paper table source.
 - `scannet_pointcloud_radio_gs_vala8_dino_cv_proposal_memory_vxl005_a04_lm005_results.{md,json}`:
   proposal-memory readout ablation. It improves split19 detail metrics
   (0.3931/0.6255) but is not promoted because split15/split10 decrease.
@@ -164,7 +167,7 @@ sha256sum -c paper/artifacts/checksums.txt
 
 - `external_baseline_audit.{md,json}`: local clone/build/reproduction status for
   OpenGaussian, LangSplatV2, OccamLGS, GAGS, Dr. Splat, LangSplat,
-  LEGaussians, CAGS, Semantic Gaussians, LaGa, and OpenGaFF.
+  LEGaussians, CAGS, Semantic Gaussians, and LaGa.
 - `baseline_source_verification.md`: earlier paper baseline source
   verification snapshot.
 - `langsplatv2_lerf_summary.{md,json}`: current LangSplatV2 compatibility

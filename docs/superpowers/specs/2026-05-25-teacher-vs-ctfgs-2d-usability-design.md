@@ -1,9 +1,9 @@
-# Teacher vs CTF-GS 2D Usability Design
+# Frame-wise RADIO vs GaussFM 2D Usability Design
 
 ## Goal
 
 Add a reproducible, paper-facing 2D feature-usability artifact that compares
-frame-wise RADIO teacher features against rendered CTF-GS features under the
+frame-wise RADIO features against rendered GaussFM features under the
 same frozen downstream heads. This supports the broader claim that the compact
 Gaussian foundation-feature field can be more useful than raw frame-wise teacher
 features in selected novel-view downstream tasks, without claiming universal
@@ -37,10 +37,10 @@ and updates the paper-facing documentation to reference those outputs.
 
 The report must separate three levels of evidence:
 
-1. Main text grounding/feature-memory evidence: CTF-GS rendered features beat
-   frame-wise RADIO teacher, nearest-view cache, and explicit 1280-D Gaussian
+1. Main text grounding/feature-memory evidence: GaussFM rendered features beat
+   frame-wise RADIO reference, nearest-view cache, and explicit 1280-D Gaussian
    memory on LERF rendered-view localization and mIoU.
-2. Frozen-head task evidence: CTF-GS rendered features beat the teacher on
+2. Frozen-head task evidence: GaussFM rendered features beat the teacher on
    SAM3-adaptor mIoU for point, box, and mask propagation tasks, and on DINOv3
    dense-match similarity plus DINOv3 mask-propagation localization accuracy.
 3. Caveat evidence: the teacher remains stronger on DINOv3 dense-match hit rate

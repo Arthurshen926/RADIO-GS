@@ -24,11 +24,11 @@ Paper-facing fixed selection: `thr0p25`. The complete selector sweep below is di
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| CTF-GS | SigLIP2 | fixed thr0p25 mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
-| CTF-GS | SigLIP2 | diagnostic best-by-scene mIoU | 0.5327 | 0.5822 | 0.5662 | 0.2463 | 0.4819 |
+| GaussFM | SigLIP2 | fixed thr0p25 mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
+| GaussFM | SigLIP2 | diagnostic best-by-scene mIoU | 0.5327 | 0.5822 | 0.5662 | 0.2463 | 0.4819 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| CTF-GS | SigLIP2 | fixed thr0p25 Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
-| CTF-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.7679 | 0.7465 | 0.7627 | 0.4091 | 0.6715 |
+| GaussFM | SigLIP2 | fixed thr0p25 Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
+| GaussFM | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.7679 | 0.7465 | 0.7627 | 0.4091 | 0.6715 |
 
 Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. The promoted fixed-threshold selector reduces primitive-level clutter under the same global rule; Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.
 

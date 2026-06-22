@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build paper-facing storage footprint evidence for RADIO-GS/CTF-GS."""
+"""Build paper-facing storage footprint evidence for RADIO-GS/GaussFM."""
 
 from __future__ import annotations
 
@@ -200,7 +200,7 @@ def write_markdown(rows: Iterable[StorageRow], path: Path) -> None:
         "",
         "This report separates three storage accounting levels so that the compact "
         "feature-memory claim is not hidden by carried 3DGS geometry/RGB tensors. "
-        "Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. "
+        "Direct storage assumes one 1280-D fp16 RADIO reference feature per Gaussian. "
         "Latent payload counts only the stored compact per-Gaussian semantic code. "
         "Feature-memory package counts the latent payload plus global field heads, "
         "CTR/HCD codec, and VFA/refiner tensors. Full checkpoint is a conservative "
@@ -239,11 +239,11 @@ def write_markdown(rows: Iterable[StorageRow], path: Path) -> None:
             "",
             "## Notes",
             "",
-            "- Direct storage assumes storing only the 1280-D teacher feature as fp16 "
+            "- Direct storage assumes storing only the 1280-D RADIO reference feature as fp16 "
             "per Gaussian; it excludes ordinary 3DGS RGB/geometry attributes.",
             "- The latent payload is the clean per-Gaussian semantic storage number. "
             "It is approximately the 64-D compact code and gives the expected "
-            "20x reduction relative to 1280-D fp16 teacher features.",
+            "20x reduction relative to 1280-D fp16 RADIO reference features.",
             "- The feature-memory package adds scene-global heads and decoders. "
             "Those fixed tensors do not scale with the number of Gaussians, so "
             "their overhead is amortized more strongly on larger indoor/outdoor "
@@ -278,7 +278,7 @@ def write_latex(rows: Iterable[StorageRow], path: Path) -> None:
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{Storage footprint accounting. Direct stores one 1280-D fp16 teacher feature per Gaussian. Latent is the compact per-Gaussian semantic payload. Feature package adds scene-global heads, CTR/HCD, and VFA/refiner tensors; these fixed tensors are amortized as scene scale grows. Full checkpoint additionally counts carried 3DGS geometry/RGB state. Lower is better for storage; higher saving ratios are better.}",
+        r"\caption{Storage footprint accounting. Direct stores one 1280-D fp16 RADIO reference feature per Gaussian. Latent is the compact per-Gaussian semantic payload. Feature package adds scene-global heads, CTR/HCD, and VFA/refiner tensors; these fixed tensors are amortized as scene scale grows. Full checkpoint additionally counts carried 3DGS geometry/RGB state. Lower is better for storage; higher saving ratios are better.}",
         r"\label{tab:storage_footprint}",
         r"\resizebox{\linewidth}{!}{%",
         r"\begin{tabular}{lrrrrrrrr}",

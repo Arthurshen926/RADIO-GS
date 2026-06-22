@@ -4,7 +4,7 @@
 
 **Goal:** Add low-risk C-RADIOv4 adaptor supervision for `dino_v3` and `sam3`, plus a paper-facing SAM3/FMGS design note.
 
-**Architecture:** Keep RADIO-GS output as reconstructed 1280d RADIO backbone features. Add frozen adaptor losses by projecting both decoded RADIO-GS features and RADIO teacher features through frozen RADIO adaptor heads, then matching them in adaptor space. Treat FMGS-style DINO/SAM alignment as auxiliary supervision rather than a replacement for the main 1280d reconstruction objective.
+**Architecture:** Keep RADIO-GS output as reconstructed 1280d RADIO backbone features. Add frozen adaptor losses by projecting both decoded RADIO-GS features and frame-wise RADIO features through frozen RADIO adaptor heads, then matching them in adaptor space. Treat FMGS-style DINO/SAM alignment as auxiliary supervision rather than a replacement for the main 1280d reconstruction objective.
 
 **Tech Stack:** PyTorch, RADIO checkpoint state dict, existing `RadioGSConfig`, existing `train_feature_field.py`, pytest.
 

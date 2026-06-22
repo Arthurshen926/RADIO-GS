@@ -5,7 +5,7 @@ Date: 2026-05-23
 This run upgrades the earlier Figurines-only diagnostic into a training-view
 pseudo-mask experiment. Official SAM3 masks are generated on unlabelled
 training views and used only as pseudo supervision. Evaluation does not call
-the official SAM3 RGB readout; it uses rendered CTF-GS features, SigLIP2 text
+the official SAM3 RGB readout; it uses rendered GaussFM features, SigLIP2 text
 prompts, and the method's coarse mask.
 
 ## Implementation Notes
@@ -56,7 +56,7 @@ coarse masks, whose distribution differs from heatmap-threshold masks.
 Rendered/student-only application gives a small weighted mIoU increase:
 `0.0281 -> 0.0307` (`+0.0027`, 187/208 accepted). Teacher features are left
 unmodified by default because applying this rendered/direct-coarse head to
-frame-wise teacher features degraded teacher mIoU in a diagnostic run.
+frame-wise RADIO reference features degraded teacher mIoU in a diagnostic run.
 
 Artifacts:
 

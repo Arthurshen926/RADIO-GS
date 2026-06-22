@@ -73,7 +73,7 @@
    benchmark_paths.py 负责兼容 Replica / ScanNet / LERF 的 pose、frame id、rgb/depth/semantics、feature 路径。
 4. 组装训练样本
    train_feature_field.py 里的 SimpleRadioDataset 读取：
-   - teacher features
+   - RADIO reference features
    - pose
    - optional depth
    - optional semantics

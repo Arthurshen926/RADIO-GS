@@ -5,7 +5,7 @@ Date: 2026-05-23
 This artifact records the rendered-view variant of the prompt-conditioned
 internal SAM3 boundary readout. Official SAM3 masks are used only on unlabelled
 training views as pseudo supervision. At evaluation time, the readout uses only
-CTF-GS rendered features, the SigLIP2 text prompt, and the CTF-GS heatmap mask.
+GaussFM rendered features, the SigLIP2 text prompt, and the GaussFM heatmap mask.
 
 ## Method Update
 
@@ -23,7 +23,7 @@ The support constraint is important. A direct-coarse-trained head degraded LERF
 rendered grounding because direct-3D selected-primitive masks and 2D heatmap
 masks have different prompt distributions. The rendered-view head fixes that
 distribution mismatch, and the support gate prevents SAM-style pseudo masks from
-moving the query result away from the CTF-GS heatmap support.
+moving the query result away from the GaussFM heatmap support.
 
 ## Active-Checkpoint Result
 
@@ -89,7 +89,7 @@ The safe claim is:
 
 > A prompt-conditioned internal SAM3 boundary readout distilled from official
 > SAM3 training-view pseudo masks can improve rendered-view mask quality from
-> CTF-GS features without invoking the official RGB SAM3 readout at evaluation
+> GaussFM features without invoking the official RGB SAM3 readout at evaluation
 > time. A query-support and bounded-area gate is necessary for stability.
 
 The strongest current quantitative claim is weighted-sample improvement with no

@@ -447,7 +447,7 @@ FDH 确实有效，但它的主要贡献更像是：
 
 1. 从数据集读入：
    - pose
-   - teacher feature
+   - RADIO reference feature
    - depth
    - semantics
    - 可选 RGB

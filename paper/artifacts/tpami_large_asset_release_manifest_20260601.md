@@ -3,7 +3,7 @@
 Date: 2026-06-01
 
 This manifest lists the large files and external datasets needed to rerun the
-paper-facing CTF-GS results. These assets are intentionally not stored under
+paper-facing GaussFM results. These assets are intentionally not stored under
 `paper/artifacts/`, which only snapshots small result files, tables, manifests,
 and provenance reports.
 
@@ -14,10 +14,10 @@ and provenance reports.
 | Paper source package | manuscript/supplement build | in repository | `paper/radio_gs_tpami.tex`, `paper/radio_gs_tpami_supplement.tex`, `paper/radio_gs_refs.bib`, `paper/IEEEtran.*`, `paper/figures/` |
 | Small result artifacts | claim/provenance audit | in repository | `paper/artifacts/final_rows.yaml`, `paper/artifacts/checksums.txt`, `paper/artifacts/paper_assets_manifest.json` |
 | LERF-OVS labels | T1/T2 evaluation | external dataset mirror required | Current local root: `/mnt/pool/sqy/3d_understanding/lerf_ovs/label` |
-| LERF CTF-GS checkpoints | T1/T2 feature rendering and direct primitive scoring | large-asset upload required | Four scene checkpoints listed below |
+| LERF GaussFM checkpoints | T1/T2 feature rendering and direct primitive scoring | large-asset upload required | Four scene checkpoints listed below |
 | Feature-only SAM3-adaptor mask heads | T1 rendered-view boundary readout | large-asset upload required | Four scene mask-head checkpoints listed below |
-| ScanNet VALA/OpenGaFF-8 prepared data | T3 point-query evaluation | external dataset mirror required | Current local root: `dataset/scannet_og` |
-| ScanNet CTF-GS checkpoints | T3 point-query evaluation | large-asset upload required | Eight scene checkpoints follow the pattern listed below |
+| VALA-aligned ScanNet-8 prepared data | T3 point-query evaluation | external dataset mirror required | Current local root: `dataset/scannet_og` |
+| ScanNet GaussFM checkpoints | T3 point-query evaluation | large-asset upload required | Eight scene checkpoints follow the pattern listed below |
 | Frozen RADIO/SigLIP2 assets | T1/T2/T3 text-aligned feature scoring | redistribute if license permits, otherwise document download | Projection/head/text-cache files listed below |
 | Official SAM3 checkpoint | supplementary SAM3-box controls only | optional large-asset upload or download instruction | Not required for the core compact direct-field row |
 | Evaluation outputs/masks | figure regeneration and paper audit | optional large-asset upload | Useful for exact figure regeneration without rerunning evaluation |
@@ -34,13 +34,14 @@ These files are part of the repository snapshot and are verified by
 - `paper/artifacts/figure_quality_audit_tpami_20260531.md`
 - `paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json`
 - `paper/artifacts/lerf_direct3d_score_component_guard_20260528.json`
+- `paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json`
 - `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json`
 
 ## Frozen Foundation Assets
 
 | Asset | Current path | Use |
 | --- | --- | --- |
-| C-RADIOv4-H checkpoint | `/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar` | RADIO teacher and adaptor features |
+| C-RADIOv4-H checkpoint | `/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar` | RADIO reference and adaptor features |
 | SigLIP2 feature projection | `checkpoints/siglip2_feat_projection.pth` | Map reconstructed RADIO features to text-aligned summary space |
 | SigLIP2 summary head | `checkpoints/siglip2_summary_head.pth` | Text-aligned feature summary head |
 | LERF text embedding cache | `checkpoints/siglip2_lerf_text_embeddings.pt` | T1 rendered-view text queries |
@@ -58,7 +59,7 @@ The promoted T1 result is registered in
 `paper/artifacts/final_rows.yaml` as `ctfgs_rendered` and is sourced from
 `paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json`.
 
-| Scene | Config | CTF-GS checkpoint | Feature-only SAM3-adaptor mask head |
+| Scene | Config | GaussFM checkpoint | Feature-only SAM3-adaptor mask head |
 | --- | --- | --- | --- |
 | Figurines | `radio_gs/configs/lerf_hybrid_v14_figurines_fdh_ws240_240ep.yaml` | `output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/latest.pth` | `output/radio_gs/prompt_sam3_mask_head_20260523/figurines_trainviews_lerf2dcoarse_e60_cache/prompt_conditioned_sam3_mask_head.pth` |
 | Ramen | `radio_gs/configs/lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml` | `output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/latest.pth` | `output/radio_gs/prompt_sam3_mask_head_20260523/ramen_trainviews_lerf2dcoarse_e60_cache/prompt_conditioned_sam3_mask_head.pth` |
@@ -76,7 +77,7 @@ The exact per-scene evaluation outputs used by the registry are:
 
 The promoted T2 compact direct row is
 `ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55`. It uses the same
-LERF CTF-GS checkpoints above, direct Gaussian-center primitive scores, a frozen
+LERF GaussFM checkpoints above, direct Gaussian-center primitive scores, a frozen
 SigLIP2 prompt ensemble, and a GT-free RGB/score-component support policy. It
 does not read a VPR feature cache and does not invoke an official RGB SAM
 decoder at inference.
@@ -97,7 +98,7 @@ supplementary VPR/SAM3-box controls:
 These optional VPR caches can be several GiB per scene and are not needed for
 the core compact direct-field row.
 
-## T3 ScanNet VALA/OpenGaFF-8 Assets
+## T3 VALA-Aligned ScanNet-8 Assets
 
 The promoted T3 result is registered as
 `radio_gs_dino_cv_contextual_knn_scene_mean_support`. Required local dataset

@@ -11,7 +11,7 @@ def test_build_report_marks_selected_task_wins_and_caveats(tmp_path: Path) -> No
             {
                 "rows": [
                     {
-                        "method": "Frame-wise RADIO teacher",
+                        "method": "Frame-wise RADIO",
                         "lerf_loc_acc": 0.80,
                         "lerf_miou": 0.46,
                     },
@@ -26,7 +26,7 @@ def test_build_report_marks_selected_task_wins_and_caveats(tmp_path: Path) -> No
                         "lerf_miou": 0.32,
                     },
                     {
-                        "method": "Full CTF-GS",
+                        "method": "Full GaussFM",
                         "lerf_loc_acc": 0.87,
                         "lerf_miou": 0.52,
                     },
@@ -93,14 +93,14 @@ def test_write_report_outputs_markdown_json_and_latex(tmp_path: Path) -> None:
     built = {
         "text_grounding_rows": [
             {
-                "method": "Frame-wise RADIO teacher",
+                "method": "Frame-wise RADIO",
                 "loc_acc": 0.8,
                 "miou": 0.46,
                 "delta_loc_acc": 0.0,
                 "delta_miou": 0.0,
             },
             {
-                "method": "Full CTF-GS",
+                "method": "Full GaussFM",
                 "loc_acc": 0.87,
                 "miou": 0.52,
                 "delta_loc_acc": 0.07,
@@ -139,7 +139,7 @@ def test_write_report_outputs_markdown_json_and_latex(tmp_path: Path) -> None:
             "primary_rendered_wins": 1,
             "primary_total": 2,
             "universal_superiority": False,
-            "caveats": ["DINOv3 mask propagation mIoU remains teacher-stronger."],
+            "caveats": ["DINOv3 mask propagation mIoU remains frame-wise-RADIO-stronger."],
         },
         "sources": {},
     }
@@ -172,7 +172,7 @@ def test_build_report_accepts_optional_prototype_schema(tmp_path: Path) -> None:
             {
                 "rows": [
                     {
-                        "method": "Frame-wise RADIO teacher",
+                        "method": "Frame-wise RADIO",
                         "lerf_loc_acc": 0.80,
                         "lerf_miou": 0.46,
                     },
@@ -187,7 +187,7 @@ def test_build_report_accepts_optional_prototype_schema(tmp_path: Path) -> None:
                         "lerf_miou": 0.32,
                     },
                     {
-                        "method": "Full CTF-GS",
+                        "method": "Full GaussFM",
                         "lerf_loc_acc": 0.87,
                         "lerf_miou": 0.52,
                     },

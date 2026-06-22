@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw paper-ready method figures for CTF-GS.
+"""Draw paper-ready method figures for GaussFM.
 
 The script intentionally mixes vector structure with real qualitative
 thumbnails. This avoids a box-only framework figure while keeping labels,
@@ -261,7 +261,7 @@ def draw_figure1(assets: dict[str, np.ndarray | None]) -> None:
     fig.patch.set_facecolor("#fbfbf7")
     ax.set_facecolor("#fbfbf7")
 
-    label(ax, 0.03, 0.955, "CTF-GS: Compact Foundation-Feature Gaussian Memory", size=14.5, weight="bold")
+    label(ax, 0.03, 0.955, "GaussFM: Compact Foundation-Feature Gaussian Memory", size=14.5, weight="bold")
     label(ax, 0.03, 0.918, "Frozen RADIO evidence is compressed into a compact 3D memory, then reconstructed features support 2D, 3D, and point queries.", size=8.5, color=COLORS["muted"])
 
     label(ax, 0.045, 0.860, "A. Multiview Evidence", size=10.5, weight="bold")

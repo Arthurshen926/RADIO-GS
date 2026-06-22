@@ -181,7 +181,7 @@ def build_markdown(summary: dict[str, Any]) -> str:
     lines = [
         "# LERF Per-Gaussian 1280-D Explicit Baseline",
         "",
-        "Protocol: Per-Gaussian 1280-D explicit RADIO memory. Cached RADIO teacher feature maps are registered to visible Gaussian centers, stored as fp16 1280-D vectors, rendered back to LERF views, and evaluated with the same frozen SigLIP2 text scorer.",
+        "Protocol: Per-Gaussian 1280-D explicit RADIO memory. Cached frame-wise RADIO feature maps are registered to visible Gaussian centers, stored as fp16 1280-D vectors, rendered back to LERF views, and evaluated with the same frozen SigLIP2 text scorer.",
         "",
         "| Scene | LocAcc | mIoU | N | Registered | Fraction | Storage MiB |",
         "|---|---:|---:|---:|---:|---:|---:|",
@@ -234,7 +234,7 @@ def build_latex_table(summary: dict[str, Any]) -> str:
     lines = [
         "\\begin{table}[t]",
         "\\centering",
-        "\\caption{Per-Gaussian 1280-D explicit RADIO-memory baseline on LERF-OVS. Cached teacher features are registered to Gaussian centers, stored as fp16 vectors, rendered to annotated views, and evaluated with the same frozen SigLIP2 scorer.}",
+        "\\caption{Per-Gaussian 1280-D explicit RADIO-memory baseline on LERF-OVS. Cached RADIO reference features are registered to Gaussian centers, stored as fp16 vectors, rendered to annotated views, and evaluated with the same frozen SigLIP2 scorer.}",
         "\\label{tab:lerf_per_gaussian_1280d_baseline}",
         "\\begin{tabular}{lrrrr}",
         "\\toprule",
@@ -750,7 +750,7 @@ def evaluate_baseline(
         scene_payloads[scene] = payload
 
     protocol = {
-        "feature_source": "registered RADIO 1280-D teacher features",
+        "feature_source": "registered RADIO 1280-D RADIO reference features",
         "feature_dim": 1280,
         "storage_dtype": "fp16",
         "compact": False,

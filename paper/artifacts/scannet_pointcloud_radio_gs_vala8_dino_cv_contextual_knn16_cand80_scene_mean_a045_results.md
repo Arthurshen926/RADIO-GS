@@ -1,6 +1,6 @@
 # RADIO-GS VALA8 DINO-CV contextual kNN16/cand80 scene-mean alpha0.45
 
-Protocol: VALA/OpenGaFF ScanNet-8 candidate split
+Protocol: VALA-aligned ScanNet-8 candidate split
 Scenes: scene0000_00, scene0062_00, scene0070_00, scene0097_00, scene0140_00, scene0347_00, scene0400_00, scene0590_00
 
 | Split | mIoU | mAcc |

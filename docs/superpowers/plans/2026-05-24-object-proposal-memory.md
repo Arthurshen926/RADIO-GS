@@ -104,7 +104,7 @@ Use the strongest current direct-field score caches and compare no proposal smoo
 
 - [ ] **Step 2: Run ScanNet VALA8 proposal smoothing on GPU4/GPU5**
 
-Run the same VALA/OpenGaFF 8-scene split as the current paper row. Compare the macro split19/split15/split10 rows against the current spatial-KNN result.
+Run the same VALA-aligned 8-scene split as the current paper row. Compare the macro split19/split15/split10 rows against the current spatial-KNN result.
 
 - [ ] **Step 3: Promote only positive evidence**
 

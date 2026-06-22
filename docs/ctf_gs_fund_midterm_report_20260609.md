@@ -1,8 +1,8 @@
-# CTF-GS 项目基金申请书式中期汇报材料
+# GaussFM 项目基金申请书式中期汇报材料
 
 日期：2026-06-09  
 项目名称建议：**面向开放词汇三维场景理解的紧凑基础特征高斯场研究**  
-论文名称建议：**CTF-GS: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding**
+论文名称建议：**GaussFM: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding**
 
 ## 一、汇报定位
 
@@ -21,14 +21,14 @@
 
 近年来，以 RADIO、DINO、SAM、SigLIP 等为代表的视觉基础模型在二维图像理解中表现突出，能够提供密集语义、区域边界、跨视角匹配和开放词汇对齐能力。然而，现有三维场景表示大多仍围绕 RGB 重建、几何可视化或单一语义标签优化展开，难以直接承载高维基础模型特征。若直接在每个 3D Gaussian 上存储原始高维特征，会带来显著存储开销；若只训练特定任务头，又会损失基础模型的泛化能力和多任务可用性。
 
-本项目提出 **CTF-GS：紧凑基础特征高斯场**。其核心思想是：不直接保存每帧或每个 Gaussian 的完整基础特征，而是在 3D Gaussian 场景中学习一个紧凑的 foundation-feature field，通过全局解码与校准模块重建 RADIO-compatible 特征，并提供多个下游读出接口。该表示同时支持：
+本项目提出 **GaussFM：紧凑基础特征高斯场**。其核心思想是：不直接保存每帧或每个 Gaussian 的完整基础特征，而是在 3D Gaussian 场景中学习一个紧凑的 foundation-feature field，通过全局解码与校准模块重建 RADIO-compatible 特征，并提供多个下游读出接口。该表示同时支持：
 
 - **二维新视角开放词汇定位**：渲染 dense feature map，在像素层面进行文本查询；
 - **三维直接对象选择**：在 Gaussian primitive 层面计算文本相似度，选择三维对象支持区域；
 - **跨数据集点级语义查询**：在 ScanNet 点云上进行 direct point-query open-vocabulary evaluation；
-- **冻结头下游能力验证**：在 SigLIP2、SAM3 adaptor、DINOv3 等 frozen-head tasks 中比较重建场与帧级 teacher 特征的可用性。
+- **冻结头下游能力验证**：在 SigLIP2、SAM3 adaptor、DINOv3 等 frozen-head tasks 中比较重建场与帧级 RADIO 参考特征的可用性。
 
-当前项目已形成 TPAMI 方向投稿包。主文、补充材料、框架图、定量表格、定性图、provenance、checksum 和 submission checklist 均已整理。实验结果显示，CTF-GS 在 LERF-OVS rendered-view grounding、LERF direct 3D object selection 和 ScanNet VALA8 direct point-query 三个协议上形成了完整证据链。
+当前项目已形成 TPAMI 方向投稿包。主文、补充材料、框架图、定量表格、定性图、provenance、checksum 和 submission checklist 均已整理。实验结果显示，GaussFM 在 LERF-OVS rendered-view grounding、LERF direct 3D object selection 和 ScanNet VALA8 direct point-query 三个协议上形成了完整证据链。
 
 ## 三、立项依据与研究背景
 
@@ -48,7 +48,7 @@
 
 已有 LERF、LangSplat、LEGaussians 等工作验证了在三维场景中嵌入语言特征并进行 rendered-view open-vocabulary querying 的可行性。这类方法的典型输出是二维渲染视角上的 heatmap 或 mask。
 
-近两年 OpenGaussian、Dr. Splat、InstanceGaussian、OpenGaFF 等工作进一步强调：开放词汇三维理解不应只停留在二维 rendered pixel-level parsing，还应支持 **3D Gaussian / point / instance-level querying**。也就是说，查询对象应从“渲染图像上的像素”进一步移动到“三维场景中的 primitive 或 object support”。
+近两年 OpenGaussian、Dr. Splat、InstanceGaussian、the unpublished protocol source 等工作进一步强调：开放词汇三维理解不应只停留在二维 rendered pixel-level parsing，还应支持 **3D Gaussian / point / instance-level querying**。也就是说，查询对象应从“渲染图像上的像素”进一步移动到“三维场景中的 primitive 或 object support”。
 
 本项目正处于这条研究主线中，但关注点有所不同：
 
@@ -67,7 +67,7 @@
 
 需要解决的问题是：
 
-> 如何设计一种紧凑的 Gaussian feature field，使其既能保存多视角基础特征中的稳定语义，又能在渲染和直接查询时恢复 teacher-compatible feature？
+> 如何设计一种紧凑的 Gaussian feature field，使其既能保存多视角基础特征中的稳定语义，又能在渲染和直接查询时恢复 RADIO-compatible feature？
 
 ### 问题二：同一个三维特征场能否同时支持二维和三维查询？
 
@@ -80,9 +80,9 @@
 
 > 一个 compact foundation-feature field 能否同时支持 rendered-view readout 和 direct primitive readout，而不是为每个任务单独训练一个模块？
 
-### 问题三：重建后的三维特征是否只是 teacher 的近似复制，还是能提升下游可用性？
+### 问题三：重建后的三维特征是否只是帧级参考特征的近似复制，还是能提升下游可用性？
 
-如果 CTF-GS 只是低维压缩 RADIO 特征，那么贡献会偏工程压缩。更强的主张是：多视角重建、可见性约束和支持区域校准可以削弱单帧噪声，使 reconstructed scene field 在某些 frozen-head downstream tasks 中优于 frame-wise foundation features。
+如果 GaussFM 只是低维压缩 RADIO 特征，那么贡献会偏工程压缩。更强的主张是：多视角重建、可见性约束和支持区域校准可以削弱单帧噪声，使 reconstructed scene field 在某些 frozen-head downstream tasks 中优于 frame-wise foundation features。
 
 需要验证：
 
@@ -99,7 +99,7 @@
 1. **紧凑表示**：避免直接存储每个 Gaussian 的原始高维 foundation feature；
 2. **特征重建**：从 compact codes 重建 RADIO-compatible foundation-space features；
 3. **多协议读出**：支持 rendered-view、direct primitive、direct point-query 三种查询接口；
-4. **证据闭环**：通过 LERF、ScanNet、teacher-vs-field、storage/efficiency、ablation、qualitative 和 failure analysis 形成投稿级证据链。
+4. **证据闭环**：通过 LERF、ScanNet、frame-wise-RADIO-vs-field、storage/efficiency、ablation、qualitative 和 failure analysis 形成投稿级证据链。
 
 ### 5.2 研究内容一：Contextual Gaussian Feature Field
 
@@ -128,7 +128,7 @@
 
 ### 5.4 研究内容三：Multi-Head Foundation Consistency
 
-该部分解决“基础特征不仅要像 teacher，还要保留下游结构”的问题。
+该部分解决“基础特征不仅要重建 RADIO-space 语义，还要保留下游结构”的问题。
 
 仅用 feature cosine reconstruction 可能不足以保留 DINO 的 matching topology、SAM 的 region sensitivity 和 SigLIP 的 text alignment。因此项目引入 **Multi-Head Foundation Consistency**，利用冻结的 SigLIP2、DINOv3、SAM3 adaptor heads 对重建特征施加辅助约束。
 
@@ -184,7 +184,7 @@
 - quality/visibility heads；
 - global decoder/calibration heads。
 
-不直接持久化每个 Gaussian 的完整 1280-D teacher feature，也不把 MPR feature cache 计入 compact scene memory。
+不直接持久化每个 Gaussian 的完整 1280-D RADIO reference feature，也不把 MPR feature cache 计入 compact scene memory。
 
 ### 6.3 读出层
 
@@ -207,9 +207,9 @@
 
 ## 七、主要创新点
 
-### 创新点一：从 teacher-feature compression 升级为 compact foundation-feature scene memory
+### 创新点一：从特征压缩升级为 compact foundation-feature scene memory
 
-本文不是简单压缩 teacher 特征，而是把二维基础模型能力转化为三维场景中的紧凑、可查询、可部署记忆。该记忆既能在新视角渲染出 dense foundation-space features，也能在三维 primitive/point 层面直接查询。
+本文不是简单压缩帧级 RADIO 特征，而是把二维基础模型能力转化为三维场景中的紧凑、可查询、可部署记忆。该记忆既能在新视角渲染出 dense foundation-space features，也能在三维 primitive/point 层面直接查询。
 
 ### 创新点二：Contextual Gaussian Feature Field 同时兼顾 per-primitive 细节和 scene-level context
 
@@ -237,7 +237,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 - 补充材料：`paper/radio_gs_tpami_supplement.tex`，已编译为 9 页 PDF；
 - 框架图：`paper/figures/radio_gs_framework.pdf`；
 - 主定性图：LERF 2D/3D OVS、ScanNet binary query、direct3D support calibration ablation；
-- 结果表：LERF 2D、LERF direct 3D、ScanNet VALA8、teacher-vs-field、ablation、storage、efficiency；
+- 结果表：LERF 2D、LERF direct 3D、ScanNet VALA8、frame-wise-RADIO-vs-field、ablation、storage、efficiency；
 - provenance：`paper/artifacts/final_rows.yaml`、`checksums.txt`、`paper_assets_manifest.json`、claim validator。
 
 ### 8.2 LERF-OVS rendered-view grounding
@@ -246,7 +246,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 主结果：
 
-| 指标 | CTF-GS |
+| 指标 | GaussFM |
 | --- | ---: |
 | Macro LocAcc | 0.8598 |
 | Macro mIoU | 0.5889 |
@@ -257,7 +257,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 - LocAcc 说明文本查询峰值位置稳定；
 - mIoU 说明 rendered feature response 能形成可用 mask support；
-- 相比 frame-wise RADIO RGB feature，CTF-GS rendered field 在同一 evaluator 下提升了 both LocAcc and mIoU。
+- 相比 frame-wise RADIO RGB feature，GaussFM rendered field 在同一 evaluator 下提升了 both LocAcc and mIoU。
 
 ### 8.3 LERF direct 3D object selection
 
@@ -267,8 +267,8 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 | Readout | mIoU | Acc@0.25 |
 | --- | ---: | ---: |
-| CTF-GS MPR analysis | 0.480 | 0.676 |
-| CTF-GS compact direct field | 0.501 | 0.704 |
+| GaussFM MPR analysis | 0.480 | 0.676 |
+| GaussFM compact direct field | 0.501 | 0.704 |
 | Official SAM3 box diagnostic | 0.570 | 0.684 |
 
 关键结论：
@@ -295,7 +295,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 实验口径：
 
-- follow VALA/OpenGaFF ScanNet-8 scene subset；
+- follow VALA-aligned ScanNet-8 scene subset；
 - every-20-frame ScanNet training split；
 - direct point-query feature probe；
 - 不是 full ScanNet semantic segmentation leaderboard。
@@ -306,34 +306,34 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 ### 8.5 Frame-wise foundation features vs reconstructed scene field
 
-任务目标：证明 CTF-GS 不是 teacher 的低质量近似复制，而是通过多视角重建形成更稳定的场景级特征。
+任务目标：证明 GaussFM 不是帧级 RADIO 参考特征的低质量近似复制，而是通过多视角重建形成更稳定的场景级特征。
 
 主结果：
 
 | Feature Source | Macro LocAcc | Macro mIoU |
 | --- | ---: | ---: |
 | RADIO RGB frame-wise features | 0.8065 | 0.4597 |
-| CTF-GS rendered field | 0.8598 | 0.5707 |
+| GaussFM rendered field | 0.8598 | 0.5707 |
 
 解释：
 
-- CTF-GS 由 RADIO supervision 训练，但 inference 时利用了三维场景中的多视角聚合；
+- GaussFM 由 RADIO supervision 训练，但 inference 时利用了三维场景中的多视角聚合；
 - 同一 frozen evaluator 下，reconstructed scene field 能削弱单帧噪声；
-- 因此可以谨慎表述为：CTF-GS improves selected downstream usability over frame-wise foundation features。
+- 因此可以谨慎表述为：GaussFM improves selected downstream usability over frame-wise foundation features。
 
 ### 8.6 Frozen-head downstream probes
 
 在 SAM3 adaptor 和 DINOv3 task probes 上，项目验证了 rendered field 的 selected downstream usability：
 
-- SAM3 point prompt mIoU：0.4173 vs teacher 0.3700；
-- SAM3 box prompt mIoU：0.6638 vs teacher 0.6560；
-- SAM3 mask propagation mIoU：0.3756 vs teacher 0.3583；
-- DINOv3 mask propagation + SAM-boundary readout：0.4677 vs teacher 0.4606；
-- DINO dense matching score：0.9048 vs teacher 0.8547。
+- SAM3 point prompt mIoU：0.4173 vs frame-wise RADIO 0.3700；
+- SAM3 box prompt mIoU：0.6638 vs frame-wise RADIO 0.6560；
+- SAM3 mask propagation mIoU：0.3756 vs frame-wise RADIO 0.3583；
+- DINOv3 mask propagation + SAM-boundary readout：0.4677 vs frame-wise RADIO 0.4606；
+- DINO dense matching score：0.9048 vs frame-wise RADIO 0.8547。
 
 这里建议汇报时保持边界：
 
-> 这些结果支持 selected frozen-head downstream tasks 上的下游可用性提升，但不应写成所有 DINO/SAM 指标都全面超越 teacher。
+> 这些结果支持 selected frozen-head downstream tasks 上的下游可用性提升，但不应写成所有 DINO/SAM 指标都全面超越帧级 RADIO 参考。
 
 ### 8.7 存储和效率
 
@@ -351,7 +351,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 1. **Multiview-registration-to-field primitive feature transfer**：direct 3D 中最大幅度提升，说明 primitive feature 需要多视角 registered evidence；
 2. **Foundation-Space Reconstruction codec**：rendered architecture 中最核心模块，去掉后 LocAcc 和 mIoU 大幅下降；
-3. **Frame-wise RADIO vs CTF-GS rendered field**：证明重建场不是低质量复制，而是有下游任务收益；
+3. **Frame-wise RADIO vs GaussFM rendered field**：证明重建场不是低质量复制，而是有下游任务收益；
 4. **Frozen-Head Geometry Consistency warm-start**：提升 feature geometry compatibility；
 5. **Support-Calibrated Primitive Readout**：显著改善 direct 3D small/fragmented object support；
 6. **Feature-only SAM3 boundary readout / peak-component readout**：主要改善 mask boundary 和 region support。
@@ -371,7 +371,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 | 2D 协议 | 已闭环 | LERF rendered-view LocAcc/mIoU |
 | 3D primitive 协议 | 已闭环 | LERF direct 3D mIoU / Acc@0.25 |
 | 点云 transfer 协议 | 已闭环 | ScanNet VALA8 direct point-query |
-| teacher-vs-field | 基本闭环 | selected frozen-head tasks 显示 reconstructed field 优于 frame-wise features |
+| frame-wise-RADIO-vs-field | 基本闭环 | selected frozen-head tasks 显示 reconstructed field 优于 frame-wise features |
 | 存储效率 | 已闭环 | direct 1280-D storage vs compact checkpoint |
 | 定性展示 | 已闭环 | LERF 2D/3D OVS、ScanNet binary query、direct3D ablation |
 | 风险边界 | 已明确 | external baselines、small objects、ScanNet scope、SAM3 diagnostic 分开表述 |
@@ -384,7 +384,7 @@ Multiview Primitive Registration 借鉴 direct Gaussian registration 类工作�
 
 风险：
 
-LERF、OpenGaussian、Dr. Splat、OpenGaFF context 等外部数字来自 published context 或 official-source rows，不一定与本项目本地 evaluator 完全一致。
+LERF、OpenGaussian、Dr. Splat、the unpublished protocol source context 等外部数字来自 published context 或 official-source rows，不一定与本项目本地 evaluator 完全一致。
 
 应对：
 
@@ -408,7 +408,7 @@ Waldo Kitchen、细长物体、小物体、多实例对象仍容易出现 suppor
 
 风险：
 
-如果写成“官方 SAM3 decoder 直接由 CTF features 驱动”或“所有 DINO 指标全面超过 teacher”，容易被审稿人质疑。
+如果写成“官方 SAM3 decoder 直接由 compact features 驱动”或“所有 DINO 指标全面超过帧级 RADIO 参考”，容易被审稿人质疑。
 
 应对：
 
@@ -420,7 +420,7 @@ Waldo Kitchen、细长物体、小物体、多实例对象仍容易出现 suppor
 
 风险：
 
-ScanNet 当前是 VALA/OpenGaFF-8 direct point-query feature probe，不是完整 ScanNet semantic segmentation benchmark。
+ScanNet 当前是 VALA-aligned ScanNet-8 direct point-query feature probe，不是完整 ScanNet semantic segmentation benchmark。
 
 应对：
 
@@ -459,14 +459,14 @@ ScanNet 当前是 VALA/OpenGaFF-8 direct point-query feature probe，不是完�
 
 1. **题目页**：面向开放词汇三维场景理解的紧凑基础特征高斯场研究；
 2. **一句话问题**：二维基础模型很强，但三维场景缺少可部署的 foundation-feature memory；
-3. **研究背景**：LERF/LangSplat/OpenGaussian/Dr. Splat/OpenGaFF 的发展趋势；
-4. **科学问题**：如何紧凑存储、如何多协议读出、如何超过 frame-wise teacher；
+3. **研究背景**：LERF/LangSplat/OpenGaussian/Dr. Splat/the unpublished protocol source 的发展趋势；
+4. **科学问题**：如何紧凑存储、如何多协议读出、如何超过 frame-wise RADIO 参考；
 5. **总体思路**：one compact foundation-feature Gaussian map；
 6. **框架图**：使用 `paper/figures/radio_gs_framework.pdf`；
 7. **方法一**：Contextual Gaussian Feature Field；
 8. **方法二**：Foundation-Space Reconstruction + View-Conditioned Calibration；
 9. **方法三**：MPR + Support-Calibrated Primitive Readout；
-10. **实验协议**：LERF 2D、LERF 3D、ScanNet point-query、teacher-vs-field；
+10. **实验协议**：LERF 2D、LERF 3D、ScanNet point-query、frame-wise-RADIO-vs-field；
 11. **主结果**：三张核心定量表合并讲；
 12. **定性结果**：LERF 2D/3D OVS + ScanNet query；
 13. **消融与机制分析**：哪些模块贡献最大；
@@ -477,7 +477,7 @@ ScanNet 当前是 VALA/OpenGaFF-8 direct point-query feature probe，不是完�
 
 可以这样开场：
 
-> 本项目关注的问题是：二维视觉基础模型已经很强，但它们的特征主要存在于离散图像帧中，难以直接作为三维场景的可部署记忆。我们希望把这些基础特征压缩并重建到 3D Gaussian 场景中，使同一个 compact field 同时支持新视角二维开放词汇定位、三维 primitive-level object selection 和 ScanNet 点级语义查询。当前我们已经完成 TPAMI 方向投稿包，并通过三类 benchmark、teacher-vs-field 对比、存储效率和消融实验形成了较完整的证据链。
+> 本项目关注的问题是：二维视觉基础模型已经很强，但它们的特征主要存在于离散图像帧中，难以直接作为三维场景的可部署记忆。我们希望把这些基础特征压缩并重建到 3D Gaussian 场景中，使同一个 compact field 同时支持新视角二维开放词汇定位、三维 primitive-level object selection 和 ScanNet 点级语义查询。当前我们已经完成 TPAMI 方向投稿包，并通过三类 benchmark、frame-wise-RADIO-vs-field 对比、存储效率和消融实验形成了较完整的证据链。
 
 ## 十五、导师可能会问的问题与回答口径
 
@@ -485,7 +485,7 @@ ScanNet 当前是 VALA/OpenGaFF-8 direct point-query feature probe，不是完�
 
 回答：
 
-不是。压缩只是必要条件，核心是把 view-local foundation features 转换成 scene-level queryable memory。实验上，CTF-GS rendered field 在同一 frozen evaluator 下超过 frame-wise RADIO RGB features，说明多视角重建和支持校准带来了下游可用性提升。
+不是。压缩只是必要条件，核心是把 view-local foundation features 转换成 scene-level queryable memory。实验上，GaussFM rendered field 在同一 frozen evaluator 下超过 frame-wise RADIO RGB features，说明多视角重建和支持校准带来了下游可用性提升。
 
 ### 问题二：为什么要做 direct 3D object selection？
 
@@ -509,7 +509,7 @@ ScanNet 当前是 VALA/OpenGaFF-8 direct point-query feature probe，不是完�
 
 回答：
 
-建议不做无边界 universal SOTA claim。可以说：在本地固定协议和 source-anchored context 下，CTF-GS compact direct readout 具有竞争力，并在三类任务上形成了完整证据链。若要做严格 leaderboard claim，需要对外部方法进行 same-evaluator rerun。
+建议不做无边界 universal SOTA claim。可以说：在本地固定协议和 source-anchored context 下，GaussFM compact direct readout 具有竞争力，并在三类任务上形成了完整证据链。若要做严格 leaderboard claim，需要对外部方法进行 same-evaluator rerun。
 
 ## 十六、最终一句话总结
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Diagnose CTF-GS direct primitive readout against a VPR summary cache."""
+"""Diagnose GaussFM direct primitive readout against a VPR summary cache."""
 
 from __future__ import annotations
 

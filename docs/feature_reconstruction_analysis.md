@@ -29,7 +29,7 @@ RADIO-GS 的核心不是直接做像素重建，而是做“特征重建”。�
 ```text
 RGB frame
   -> frozen RADIO encoder
-  -> 1280d teacher feature
+  -> 1280-D frame-wise RADIO feature
   -> Gaussian scene backbone + learnable feature field
   -> render compact feature map
   -> HCD codec / screen-space refiner / hybrid fusion

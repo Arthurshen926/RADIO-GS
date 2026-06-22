@@ -7,7 +7,7 @@ Push two paper-level optimization directions for LERF-OVS direct 3D object selec
 1. label-free confidence-based primitive selection, intended to improve mask boundaries without using GT masks;
 2. VPR-to-field consistency, intended to compress registered multiview VPR evidence back into the compact direct Gaussian-center field.
 
-Both directions keep the existing CTF-GS framework and avoid per-scene object-mask tuning.
+Both directions keep the existing GaussFM framework and avoid per-scene object-mask tuning.
 
 ## Implementation changes
 
@@ -44,4 +44,4 @@ All direct-3D rows below use the same softmax-threshold selector family, 0.5% se
 
 The strongest defensible claim is:
 
-> CTF-GS supports a strong registered primitive-level direct-3D readout via VPR, and a label-free VPR-to-field consistency stage substantially improves the direct student field itself. This strengthens the reusable foundation-feature-field claim, while the remaining gap to streamed VPR and the Waldo failure mode argue against claiming universal primitive-level SOTA without same-evaluator baseline reruns.
+> GaussFM supports a strong registered primitive-level direct-3D readout via VPR, and a label-free VPR-to-field consistency stage substantially improves the direct student field itself. This strengthens the reusable foundation-feature-field claim, while the remaining gap to streamed VPR and the Waldo failure mode argue against claiming universal primitive-level SOTA without same-evaluator baseline reruns.

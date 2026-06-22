@@ -26,7 +26,7 @@ Key distinction from prior work:
 | Component | Status | Notes |
 |-----------|--------|-------|
 | 3DGS geometry backbone | ✅ Complete | Replica (depth-init), LERF (COLMAP), ScanNet pipelines |
-| RADIO teacher feature extraction | ✅ Complete | `extract_radio_features.py`, 1280d, frame_manifest |
+| frame-wise RADIO feature extraction | ✅ Complete | `extract_radio_features.py`, 1280d, frame_manifest |
 | Hybrid feature field | ✅ Complete | fine (per-Gaussian latent) + coarse (hash grid) + decoupled fusion |
 | HCD codec | ✅ Complete | 1x1 conv, dual-stream, symmetric decoder option, 192d bottleneck |
 | Screen-space refiner | ✅ Complete | 8-block residual CNN, 6 guide channels |

@@ -37,8 +37,8 @@ OpenGaussian reports LeRF as 3D object selection mIoU and mAcc@0.25. RADIO-GS re
 | OpenGaussian | paper object-selection mAcc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
 | RADIO-GS | rendered-feature LocAcc | 0.8214 | 0.9014 | 0.8983 | 0.8636 | 0.8712 |
 | RADIO-GS | rendered-feature heatmap mIoU | 0.4244 | 0.6201 | 0.5760 | 0.4769 | 0.5243 |
-| RADIO-GS/CTF-GS | VPR direct 3D selection mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
-| RADIO-GS/CTF-GS | VPR direct 3D selection Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
+| RADIO-GS/GaussFM | VPR direct 3D selection mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
+| RADIO-GS/GaussFM | VPR direct 3D selection Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
 
 ### Local OpenGaussian LeRF Asset Check
 

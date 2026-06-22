@@ -11,16 +11,16 @@ top-tier journal submission package.
   material with compiled PDFs, figure shortlist, paper manifest, claim
   validator, and provenance artifacts
 - **Estimated journal-submission completion**: about 96--98% for the current
-  CTF-GS package. The main paper and supplementary material now compile cleanly
+  GaussFM package. The main paper and supplementary material now compile cleanly
   and use a journal-style narrative; the remaining work is mostly final human
   proofreading, optional staging of the large-asset release package, and
   optional external-baseline reruns if a strict leaderboard claim is desired.
 
 ## 2026-06-09 Terminology and Storyline Migration
 
-- Migrated the TPAMI paper-facing title from **Compact Teacher Feature Fields**
-  to **Compact Foundation-Feature Fields** to emphasize the reusable scene
-  representation rather than a narrow teacher-student compression story.
+- Migrated the TPAMI paper-facing title to **GaussFM: Compact
+  Foundation-Feature Gaussian Memory** to emphasize the reusable scene
+  representation rather than a narrow distillation story.
 - Reframed the core object as a compact foundation-feature scene memory with
   multi-protocol readouts: rendered-view, direct primitive, and direct
   point-query.
@@ -103,7 +103,7 @@ top-tier journal submission package.
 
 The repository now contains a coherent TPAMI-format method paper, compiled
 supplementary material, a curated main-figure set, repeatable evaluation code,
-and a VALA/OpenGaFF-8 ScanNet DINO-CV contextual kNN aggregate. Remaining work
+and a VALA-aligned ScanNet-8 ScanNet DINO-CV contextual kNN aggregate. Remaining work
 before an actual upload is non-blocking operational work: final human
 proofreading, author metadata, and optional external-baseline reruns only if a
 strict same-evaluator leaderboard claim is desired.
@@ -142,7 +142,8 @@ The current generated freeze package is:
 - [train feature-field audit public snapshot](../paper/artifacts/train_feature_field_audit.md)
 - [efficiency/cost public snapshot](../paper/artifacts/efficiency_cost_table.md)
 - [storage footprint public snapshot](../paper/artifacts/storage_footprint_report.md)
-- [ScanNet DINO-CV contextual kNN VALA8 snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json)
+- [ScanNet paper-facing VALA8 reproduced benchmark snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json)
+- [ScanNet DINO-CV contextual kNN VALA8 diagnostic snapshot](../paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json)
 - [ScanNet category stability / failure analysis](../paper/artifacts/scannet_category_stability_failure_analysis.md)
 - [LangSplatV2 LERF summary snapshot](../paper/artifacts/langsplatv2_lerf_summary.md)
 - [submission_freeze_profile_summary.md](../output/radio_gs/reports/submission_freeze_profile_summary.md)
@@ -186,7 +187,7 @@ The cleanest current framing is now:
 
 > **Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding.**
 
-The paper-facing method name is **CTF-GS**. `RADIO-GS` remains the repository and
+The paper-facing method name is **GaussFM**. `RADIO-GS` remains the repository and
 implementation name. The current module names should be mapped as:
 
 | Implementation name | Paper-facing name |
@@ -210,11 +211,11 @@ Under that framing, the paper solves the following problem:
 2. The project has a technically non-trivial unified pipeline: HGCF compact
    code storage, CTR/HCD reconstruction, VFA/screen refinement, FGC/FDH
    supervision, and ws240 warm-start training.
-3. The project now has a paper-facing **ScanNet direct point-query** cross-domain result under the VALA/OpenGaFF-8 DINO-CV contextual kNN protocol.
+3. The project now has a paper-facing **ScanNet direct point-query** cross-domain result under the VALA-aligned ScanNet-8 DINO-CV contextual kNN protocol.
 4. The project has credible auxiliary evidence that the learned feature field is useful beyond grounding, especially on Replica room_0 depth and segmentation.
 5. The freeze package now includes formal LERF overlay/profile runs for all four main scenes plus one legacy ScanNet evaluation profile.
 6. The LERF evaluator already includes a same-protocol feature-source check:
-   rendered CTF-GS features outperform original RADIO RGB features on macro
+   rendered GaussFM features outperform original RADIO RGB features on macro
    localization accuracy (0.8598 vs. 0.7985) and improve calibrated macro mIoU
    (0.5707 vs. 0.4634) under the frozen SigLIP2 scoring setup.
 7. DINOv3/SAM3 adaptor supervision now has completed full LERF sweeps. The
@@ -222,21 +223,21 @@ Under that framing, the paper solves the following problem:
    macro mIoU from 0.4941 to 0.4979 by using the Figurines spatial text-heatmap
    cross-view checkpoint plus relation/region checkpoints for Ramen and Teatime.
 8. DINOv3/SAM3 downstream adaptor probes are now complete. Under the formal
-   prompt-constrained task sweep, rendered features beat the frame-wise teacher
+   prompt-constrained task sweep, rendered features beat the frame-wise RADIO reference
    on SAM3-adaptor mask mIoU for point prompts (0.4173 vs. 0.3700), box prompts
    (0.6638 vs. 0.6560), and mask propagation (0.3756 vs. 0.3583). The promoted
    DINOv3 multi-head readout uses DINO support with SAM-adaptor boundary
    refinement from the same rendered foundation-feature field; it raises
    rendered mask propagation to 0.7872 LocAcc / 0.4677 mIoU, exceeding the
-   same-readout frame-wise teacher at 0.7660 / 0.4606. Dense-match mean
+   same-readout frame-wise RADIO reference at 0.7660 / 0.4606. Dense-match mean
    similarity also favors rendered features (0.9048 vs. 0.8547), while dense
-   HitRate remains teacher-stronger (0.5396 vs. 0.5723) and is kept as a
+   HitRate remains frame-wise-RADIO-stronger (0.5396 vs. 0.5723) and is kept as a
    secondary caveat.
 9. The ProFuse-inspired DINO cross-view branch is implemented and evaluated as a
    diagnostic path. It can increase thresholded overlap on some LERF scenes
    (for example Waldo high-temperature mIoU), but it still lowers LocAcc, so it
    is not promoted to the main LERF table.
-10. ScanNet DINO cross-view is now evaluated on the fixed VALA/OpenGaFF-8
+10. ScanNet DINO cross-view is now evaluated on the fixed VALA-aligned ScanNet-8
     subset. It improves Gaussian-index split19/15/10 mIoU to
     0.3704/0.3718/0.4390 with mAcc 0.6159/0.6268/0.7020. The strongest balanced
     ScanNet point-query support row uses the DINO-CV compact field with a
@@ -269,7 +270,7 @@ Under that framing, the paper solves the following problem:
     context references available in the project, while still requiring a
     provenance caveat because baselines are not locally rerun.
     A separate published-context table records newer method references
-    (Dr. Splat, CAGS, InstanceGaussian, OpenGaFF) and prevents the paper from
+    (Dr. Splat, CAGS, InstanceGaussian, the unpublished protocol source) and prevents the paper from
     overclaiming global direct-3D SOTA.
 14. The VPR protocol is now explicitly auditable: the paper includes a protocol
     card, separates rendered-view grounding from 3D primitive querying, and
@@ -298,7 +299,7 @@ Under that framing, the paper solves the following problem:
     feature-only boundary heads in addition to the previous soft-region
     prototype loss. Official SAM3 code/weights are available for diagnostics,
     but the promoted paper-facing SAM boundary readouts are driven by the
-    reconstructed CTF-GS/RADIO adaptor features and do not call the official RGB
+    reconstructed GaussFM/RADIO adaptor features and do not call the official RGB
     SAM decoder at evaluation time.
 18. A GT-free adaptive mean+std rendered-mask threshold was tested for boundary
     refinement. It keeps LERF LocAcc at 0.8712 but lowers macro mIoU to 0.4939,
@@ -424,7 +425,7 @@ successfully. Strict ScanNet export is still blocked by
 `MinkowskiEngine==0.5.4` failing to compile against the host PyTorch
 2.7.1/CUDA headers at `spmm.cu`, and the LSeg visualizer path still needs
 PyTorch-Encoding (`encoding`).
-OpenGaFF is tracked as a published context row only: its 2026-05-07 arXiv source
+the unpublished protocol source is tracked as a published context row only: its 2026-05-07 arXiv source
 states that code will be publicly released upon acceptance, and no public
 implementation was found in arXiv metadata/source or web search on 2026-05-18.
 The detailed status is recorded in
@@ -440,9 +441,9 @@ but they remain compatibility-asset bring-up rows rather than strict
 released-checkpoint/official-extraction SOTA rows.
 The internal nearest-view cache control is now measured under the same LERF
 readout: unwarped closest cached RADIO frames reach 0.2722 macro LocAcc /
-0.1545 macro mIoU, far below rendered CTF-GS at 0.8598 / 0.5707. The full
+0.1545 macro mIoU, far below rendered GaussFM at 0.8598 / 0.5707. The full
 per-Gaussian 1280-D explicit same-evaluator row is also measured: registered
-fp16 teacher features attached to Gaussian primitives reach 0.5642 macro LocAcc
+fp16 RADIO reference features attached to Gaussian primitives reach 0.5642 macro LocAcc
 / 0.3182 macro mIoU with 0.2020 mean registered-Gaussian fraction and 1039.7
 MiB mean fp16 feature storage. This closes the controlled raw-feature baseline
 gap.
@@ -459,7 +460,7 @@ Critical guards are present and feature/text/cache tensor loads now go through
 ### 2. Cross-domain generalization is improved, but needs paper-safe framing
 
 The current strongest balanced ScanNet row combines the DINO-CV compact field
-with contextual direct point readout on the VALA/OpenGaFF-8 subset. Older v67
+with contextual direct point readout on the VALA-aligned ScanNet-8 subset. Older v67
 Gaussian-index and non-DINO contextual rows are now historical diagnostics, not
 paper-facing ScanNet numbers.
 

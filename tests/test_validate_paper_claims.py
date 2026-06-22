@@ -28,15 +28,13 @@ def _write_good_fixture(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "paper/lerf_direct_3d_selection_table.tex").write_text(
-        "CTF-GS & thr0p25 mIoU & 0.531 & 0.580 & 0.566 & 0.243 & 0.480 \\\\\n"
-        "CTF-GS & thr0p25 Acc@0.25 & 0.786 & 0.746 & 0.763 & 0.409 & 0.676 \\\\\n"
-        "CTF-GS & SAM3 box fixed thr0p25 Acc@0.25 & 0.696 & 0.746 & 0.746 & 0.546 & 0.684 \\\\\n",
+        "\\method{} & \\textbf{54.36} & \\textbf{80.84} \\\\\n",
         encoding="utf-8",
     )
     (root / "paper/scannet_published_context_table.tex").write_text(
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52 \\\\\n"
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\\\\n"
-        "\\method{} DINO-CV contextual kNN + spatial propagation & \\textbf{38.06} & \\textbf{61.29} & \\textbf{38.71} & \\textbf{63.15} & \\textbf{47.11} & \\textbf{72.00} \\\\\n",
+        "\\method{} & \\textbf{36.55} & \\textbf{50.57} & \\textbf{42.78} & \\textbf{72.85} & \\textbf{57.85} & \\textbf{77.93} \\\\\n",
         encoding="utf-8",
     )
     (root / "paper/artifacts/final_rows.yaml").write_text(
@@ -46,26 +44,39 @@ def _write_good_fixture(root: Path) -> None:
                     "t2_lerf_direct_3d_selection": {
                         "protocol": {
                             "main_selector_policy": (
-                                "fixed_global_softmax_threshold:thr0p25"
+                                "compact_prompt_ensemble_score_component_guard:thr0p55"
                             )
-                        }
+                        },
+                        "rows": {
+                            "ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55": {
+                                "uses_vpr_cache": False,
+                                "uses_official_rgb_sam_readout": False,
+                            }
+                        },
                     }
                 }
             }
         ),
         encoding="utf-8",
     )
-    (root / "paper/radio_gs_draft.tex").write_text(
+    safe_narrative = (
         "This is not presented as a full ScanNet semantic segmentation leaderboard result.\n"
         "We use the result as evidence rather than as a universal primitive-level SOTA claim.\n",
+    )
+    (root / "paper/radio_gs_tpami.tex").write_text(
+        "".join(safe_narrative),
         encoding="utf-8",
     )
-    (root / "docs/paper_draft_current.md").write_text(
-        "This should be framed as feature usability evidence, not as a fully standard "
-        "ScanNet semantic segmentation leaderboard comparison.\n"
-        "The paper should still avoid implying raw Gaussian-center\n"
-        "superiority or global direct-3D SOTA.\n"
-        "The direct compact field has a confidence-weighted transfer row.\n",
+    (root / "paper/radio_gs_tpami_supplement.tex").write_text(
+        "Supplementary controls are diagnostic and not presented as global SOTA.\n",
+        encoding="utf-8",
+    )
+    (root / "paper/README.md").write_text(
+        "GaussFM TPAMI draft notes avoid overclaiming.\n",
+        encoding="utf-8",
+    )
+    (root / "paper/artifacts/project_midterm_report_cn_20260615.md").write_text(
+        "该材料把 ScanNet 结果表述为 direct point-query evidence，不作为完整 leaderboard。\n",
         encoding="utf-8",
     )
     (root / "docs/submission_status.md").write_text(
@@ -93,13 +104,13 @@ def test_validate_claims_flags_mean_plus_2p5std_vpr_promotion(tmp_path):
 
     issues = validator.validate_claims(root=tmp_path)
 
-    assert any("VPR context row" in issue and "thr0p25" in issue for issue in issues)
+    assert any("registered multiview context row" in issue and "thr0p25" in issue for issue in issues)
 
 
 def test_validate_claims_flags_positive_scannet_leaderboard_claim(tmp_path):
     validator = _load_validator()
     _write_good_fixture(tmp_path)
-    (tmp_path / "paper/radio_gs_draft.tex").write_text(
+    (tmp_path / "paper/radio_gs_tpami.tex").write_text(
         "This is presented as a full ScanNet semantic segmentation leaderboard result.\n",
         encoding="utf-8",
     )
@@ -130,7 +141,7 @@ def test_validate_claims_flags_cags_in_scannet_context_table(tmp_path):
         "CAGS & 35.00 & 50.00 & 37.00 & 55.00 & 47.00 & 66.00 \\\\\n"
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52 \\\\\n"
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\\\\n"
-        "\\method{} DINO-CV contextual kNN + spatial propagation & \\textbf{38.06} & \\textbf{61.29} & \\textbf{38.71} & \\textbf{63.15} & \\textbf{47.11} & \\textbf{72.00} \\\\\n",
+        "\\method{} & \\textbf{36.55} & \\textbf{50.57} & \\textbf{42.78} & \\textbf{72.85} & \\textbf{57.85} & \\textbf{77.93} \\\\\n",
         encoding="utf-8",
     )
 
@@ -139,14 +150,14 @@ def test_validate_claims_flags_cags_in_scannet_context_table(tmp_path):
     assert any("ScanNet table" in issue and "CAGS" in issue for issue in issues)
 
 
-def test_validate_claims_flags_exact_opengaff_scannet_reproduction_claim(tmp_path):
+def test_validate_claims_flags_exact_unpublished_scannet_reproduction_claim(tmp_path):
     validator = _load_validator()
     _write_good_fixture(tmp_path)
-    (tmp_path / "paper/radio_gs_draft.tex").write_text(
-        "This is an exact OpenGaFF ScanNet reproduction.\n",
+    (tmp_path / "paper/radio_gs_tpami.tex").write_text(
+        "This is an exact unpublished ScanNet protocol-source reproduction.\n",
         encoding="utf-8",
     )
 
     issues = validator.validate_claims(root=tmp_path)
 
-    assert any("exact OpenGaFF ScanNet reproduction" in issue for issue in issues)
+    assert any("exact unpublished ScanNet protocol-source reproduction" in issue for issue in issues)

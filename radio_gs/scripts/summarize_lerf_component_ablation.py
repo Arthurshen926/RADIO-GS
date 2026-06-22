@@ -273,7 +273,7 @@ def build_latex(data: dict[str, dict[str, dict[str, Any] | None]]) -> str:
         miou = _macro(rows, "miou")
         loc_cell = _fmt(loc, 3) if loc is not None else r"\textemdash"
         miou_cell = _fmt(miou, 3) if miou is not None else r"\textemdash"
-        label = r"Full \method{}" if variant.label == "Full CTF-GS" else variant.label
+        label = r"Full \method{}" if variant.label == "Full GaussFM" else variant.label
         lines.append(
             f"{label} & "
             + " & ".join(scene_cells)

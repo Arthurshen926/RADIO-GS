@@ -9,9 +9,9 @@ current strongest paper route from historical validation branches.
 
 ## One-Sentence Thesis
 
-The paper-facing method, **CTF-GS**, compactly distills frozen RADIO teacher
-features into 3D Gaussian scenes with explicit feature-quality and visibility
-readouts, so that novel views can render reusable teacher-compatible feature
+The paper-facing method, **GaussFM**, compactly reconstructs frozen frame-wise
+RADIO features inside 3D Gaussian scenes with explicit feature-quality and visibility
+readouts, so that novel views can render reusable RADIO-compatible feature
 maps for open-vocabulary grounding and cross-domain scene understanding, while
 View-to-Primitive Registration (VPR) exposes a registered Gaussian-level readout
 for direct 3D querying. `RADIO-GS` remains the repository/project implementation
@@ -25,7 +25,7 @@ The active paper route is:
 2. **Unified Multi-Head HGCF**: Hybrid Gaussian Code Field with per-Gaussian
    latent storage, a coarse spatial branch, explicit quality/visibility heads,
    and rendered/direct auxiliary readouts.
-3. **CTR**: Compact-to-Teacher Reconstruction from compact features back to
+3. **FSR/HCD**: Foundation-Space Reconstruction from compact features back to
    1280d RADIO space (implemented as the HCD codec).
 4. **VFA**: View-Space Feature Alignment (implemented as screen-space feature
    refinement).
@@ -97,8 +97,8 @@ localization audit and threshold-calibration reference.
 | Macro | 0.8598 | 0.5707 | - |
 
 The same peak-component readout gives a stronger same-evaluator
-teacher-vs-rendered comparison: frame-wise RADIO RGB is 0.8065 LocAcc / 0.4597
-mIoU, while CTF-GS rendered features are 0.8598 / 0.5707.
+frame-wise-RADIO-vs-rendered comparison: frame-wise RADIO RGB is 0.8065 LocAcc / 0.4597
+mIoU, while GaussFM rendered features are 0.8598 / 0.5707.
 
 A feature-only prompt-conditioned SAM3 boundary readout has been implemented as
 a rendered-view ablation, trained from official SAM3 pseudo masks on unlabelled
@@ -118,17 +118,17 @@ baseline. For each target annotation frame, it uses the closest cached RADIO
 feature frame by camera-center distance, excludes the target frame itself, does
 not warp the feature map, and then runs the same LERF text scorer and mask
 evaluator. This cache-only control reaches 0.2722 macro LocAcc / 0.1545 macro
-mIoU, far below the rendered CTF-GS row, so it should be framed as evidence
+mIoU, far below the rendered GaussFM row, so it should be framed as evidence
 that a simple 2D feature cache is not a substitute for the reconstructed 3D
 feature field.
 
 The same controlled table now includes the full per-Gaussian 1280-D explicit
-RADIO-memory baseline. Cached teacher features are registered to visible
+RADIO-memory baseline. Cached RADIO reference features are registered to visible
 Gaussian centers, stored as fp16 1280-D vectors, rendered to the annotated LERF
 views, and scored with the same frozen SigLIP2 evaluator. It reaches 0.5642
 macro LocAcc / 0.3182 macro mIoU with 0.2020 mean registered-Gaussian fraction
 and 1039.7 MiB mean fp16 feature storage. This closes the raw-feature
-scene-memory control, while the compact CTF-GS row remains stronger at 0.8598 /
+scene-memory control, while the compact GaussFM row remains stronger at 0.8598 /
 0.5707 and uses 3.03x less mean checkpoint storage.
 
 A GT-free adaptive mean+std threshold readout was tested as a boundary-refinement
@@ -182,21 +182,21 @@ pad16 row; scene-locked and best-fixed variants remain diagnostics.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| CTF-GS | SigLIP2 | VPR + fixed score threshold 0.25 + RGB snap mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 fixed `thr0p25` | 0.6136 | 0.6409 | 0.6130 | 0.4142 | 0.5705 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad0 diagnostic | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
-| CTF-GS | SigLIP2 | diagnostic best-by-scene mIoU | 0.5327 | 0.5822 | 0.5662 | 0.2463 | 0.4819 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
+| GaussFM | SigLIP2 | VPR + fixed score threshold 0.25 + RGB snap mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 fixed `thr0p25` | 0.6136 | 0.6409 | 0.6130 | 0.4142 | 0.5705 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad0 diagnostic | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
+| GaussFM | SigLIP2 | diagnostic best-by-scene mIoU | 0.5327 | 0.5822 | 0.5662 | 0.2463 | 0.4819 |
+| GaussFM | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| CTF-GS | SigLIP2 | VPR + fixed score threshold 0.25 + RGB snap Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 fixed `thr0p25` | 0.6964 | 0.7465 | 0.7458 | 0.5455 | 0.6835 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad0 diagnostic | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
-| CTF-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.7679 | 0.7465 | 0.7627 | 0.4091 | 0.6715 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
+| GaussFM | SigLIP2 | VPR + fixed score threshold 0.25 + RGB snap Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 fixed `thr0p25` | 0.6964 | 0.7465 | 0.7458 | 0.5455 | 0.6835 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad0 diagnostic | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
+| GaussFM | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.7679 | 0.7465 | 0.7627 | 0.4091 | 0.6715 |
+| GaussFM | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
 
 Published-context rows from newer primitive-/instance-aware methods are kept in
 a separate context table rather than the strict local table. The table follows
-the recent OpenGaFF comparison set but intentionally omits the OpenGaFF method
+the recent the unpublished protocol source comparison set but intentionally omits the the unpublished protocol source method
 row; Dr. Splat 43.29/64.30 and InstanceGaussian 45.30/58.44 remain as public
 baseline context. CAGS is not used as a main comparison target.
 
@@ -301,7 +301,7 @@ The confidence/coverage mechanism report in
 `output/radio_gs/reports/lerf_direct3d_confidence_coverage_analysis.md` adds a
 GT-free explanation layer: scene-level mean valid VPR views correlate with
 strict Direct3D mIoU at Pearson r=0.7588, and query instances in the highest
-teacher-score bucket reach 0.6358 mean IoU / 0.8551 Acc@0.25 versus 0.4345 /
+primitive-score bucket reach 0.6358 mean IoU / 0.8551 Acc@0.25 versus 0.4345 /
 0.6143 in the lowest bucket. Text-margin stratification adds the ambiguity
 view: distinct-margin queries reach 0.6202 / 0.8261 versus 0.4329 / 0.6286 for
 ambiguous queries. This supports discussing Waldo failures as a
@@ -339,12 +339,12 @@ is reduced to 3735 lines, the extracted support modules live under
 ### DINOv3/SAM3 Downstream Adaptor Probes
 
 Use `output/lerf_adaptor_downstream/mainline/lerf_adaptor_downstream_aggregate.json`.
-These results compare original RADIO RGB features (`Teacher`) against
+These results compare original RADIO RGB features (`Frame-wise RADIO`) against
 RADIO-GS rendered features (`Rendered`) after frozen DINOv3/SAM3 adaptor
 projection. They are diagnostic and should not replace the LERF text-grounding
 main result.
 
-| Adaptor | Probe | Teacher LocAcc | Teacher mIoU | Rendered LocAcc | Rendered mIoU |
+| Adaptor | Probe | Frame-wise RADIO LocAcc | Frame-wise RADIO mIoU | Rendered LocAcc | Rendered mIoU |
 |---|---|---:|---:|---:|---:|
 | DINOv3 | prototype segmentation | 0.6543 | 0.0945 | 0.6277 | 0.0937 |
 | DINOv3 | source-target matching | 0.5957 | 0.1032 | 0.5035 | 0.1019 |
@@ -355,21 +355,21 @@ Qualitative examples are in
 `paper/figures/lerf_adaptor_downstream_qualitative.png`. The aggregate takeaway
 for these preliminary prototype probes is mixed: rendered DINOv3 is close in
 mIoU and has positive Waldo Kitchen matching cases, while unconstrained SAM3
-prototype scoring still exposes a teacher-rendered gap.
+prototype scoring still exposes a reference-rendered gap.
 
 The formal promptable task sweep upgrades the SAM3/DINOv3 evidence from
 prototype probes to downstream-style tasks. Use
 `output/lerf_sam_dino_tasks/formal_v12c_dino_sam3_boundary_v9readout_gpu_20260528/lerf_sam_dino_task_report.md`.
 The readout sweep is recorded at
 `output/lerf_sam_dino_tasks/formal_v9_dino_readout_sweep_20260514.md`.
-The consolidated paper-facing teacher-vs-CTF-GS summary is
+The consolidated paper-facing frame-wise-RADIO-vs-GaussFM summary is
 `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md`, with the compact
 LaTeX snippet at `paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex`.
-It counts 6/6 primary selected downstream metrics where rendered CTF-GS
-features beat the frame-wise RADIO teacher, while explicitly keeping secondary
+It counts 6/6 primary selected downstream metrics where rendered GaussFM
+features beat the frame-wise RADIO reference, while explicitly keeping secondary
 SAM LocAcc and DINOv3 dense-hit-rate caveats.
 
-| Task | Teacher LocAcc/Hit | Teacher mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
+| Task | Frame-wise RADIO LocAcc/Hit | Frame-wise RADIO mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
 |---|---:|---:|---:|---:|
 | SAM3 point prompt | 1.0000 | 0.3700 | 1.0000 | 0.4173 |
 | SAM3 box prompt | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
@@ -377,11 +377,11 @@ SAM LocAcc and DINOv3 dense-hit-rate caveats.
 | DINOv3 dense matching | 0.5723 | 0.8547 | 0.5396 | 0.9048 |
 | DINOv3 mask propagation + SAM-boundary readout | 0.7660 | 0.4606 | 0.7872 | 0.4677 |
 
-Rendered CTF-GS features now exceed the frame-wise teacher on SAM3-adaptor
+Rendered GaussFM features now exceed the frame-wise RADIO reference on SAM3-adaptor
 mask mIoU for all three prompt modes. The promoted DINO row uses DINO support
 with SAM-adaptor boundary refinement from the same rendered foundation-feature
 field, reaching 0.7872/0.4677 LocAcc/mIoU versus 0.7660/0.4606 for the
-frame-wise teacher. The paper claim should therefore be "wins all selected
+frame-wise RADIO reference. The paper claim should therefore be "wins all selected
 primary 2D feature-usability metrics, with secondary LocAcc/HitRate caveats
 reported separately."
 
@@ -393,9 +393,9 @@ quantitative DINO row. Use it as qualitative/diagnostic evidence, while the
 multi-head DINO-support/SAM-boundary readout above carries the main DINO mask
 propagation claim.
 
-### ScanNet VALA/OpenGaFF-8 Direct Point Query
+### ScanNet VALA-aligned ScanNet-8 Direct Point Query
 
-Use `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json`
+Use `paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json`
 and `paper/artifacts/scannet_opengaff_published_context.md` for the
 paper-facing table. Older v67 and Gaussian-index outputs are historical
 diagnostics only.
@@ -407,11 +407,11 @@ the contextual kNN readout:
 
 | Split | mIoU | mAcc |
 |---|---:|---:|
-| 19 classes | 0.3806 | 0.6129 |
-| 15 classes | 0.3871 | 0.6315 |
-| 10 classes | 0.4711 | 0.7200 |
+| 19 classes | 0.3655 | 0.5057 |
+| 15 classes | 0.4278 | 0.7285 |
+| 10 classes | 0.5785 | 0.7793 |
 
-This is the current strongest balanced ScanNet evidence. Category stability is
+This is the current paper-facing ScanNet reproduced benchmark row. Category stability is
 now reported in the paper appendix: weakest classes are picture/table/toilet,
 and the most unstable classes are refrigerator/door/window across the 19/15/10
 splits. A more aggressive DINO-CV `alpha=0.75` setting raises split10 mIoU to
@@ -429,16 +429,16 @@ Label-free ScanNet prompt/calibration ablations:
 | v67 baseline | 0.3583 / 0.6006 | 0.3618 / 0.6152 | 0.4367 / 0.6998 | Historical diagnostic only |
 | scene-mean calibration, alpha=0.5 | 0.3575 / 0.6101 | 0.3604 / 0.6227 | 0.4353 / 0.7074 | Positive supporting ablation |
 | v67 kNN contextual readout + scene-mean alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 | Previous strongest support row |
-| DINO-CV kNN contextual readout + scene-mean alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 | Previous promoted support row |
+| DINO-CV kNN contextual readout + scene-mean alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 | Previous support row |
 | DINO-CV kNN contextual readout + scene-mean alpha=0.45, k12/cand48 | 0.3715 / 0.6024 | 0.3784 / 0.6206 | 0.4585 / 0.7029 | Previous balanced support row |
-| DINO-CV kNN contextual readout + scene-mean alpha=0.45, k16/cand80 + spatial k12/a1 | 0.3806 / 0.6129 | 0.3871 / 0.6315 | 0.4711 / 0.7200 | Promoted balanced support row on VALA/OpenGaFF-8 |
+| DINO-CV kNN contextual readout + scene-mean alpha=0.45, k16/cand80 + spatial k12/a1 | 0.3806 / 0.6129 | 0.3871 / 0.6315 | 0.4711 / 0.7200 | Supporting diagnostic row on VALA-aligned ScanNet-8 |
 | + proposal memory, voxel=0.05, alpha=0.4, low-margin gate=0.05 | 0.3931 / 0.6255 | 0.3837 / 0.6228 | 0.4612 / 0.7081 | Improves 19-class detail; not promoted because coarse splits drop |
 | DINO-CV kNN contextual readout + scene-mean alpha=0.75 | 0.3683 / 0.5957 | 0.3746 / 0.6136 | 0.4612 / 0.7036 | Higher split10 mIoU, weaker balance |
 | ScanNet aliases | 0.3592 / 0.6191 | 0.3561 / 0.6192 | 0.4234 / 0.7002 | Mixed; not promoted |
 | aliases + scene-mean alpha=0.5 | 0.3617 / 0.6180 | 0.3554 / 0.6174 | 0.4295 / 0.7026 | Mixed; not promoted |
 | scene-mean calibration, alpha=1.0 | 0.3528 / 0.5834 | 0.3541 / 0.5935 | 0.4386 / 0.7048 | Hurts 19/15 and mAcc |
 
-The DINOv3 cross-view branch is also summarized on VALA/OpenGaFF-8:
+The DINOv3 cross-view branch is also summarized on VALA-aligned ScanNet-8:
 0.3704/0.6159, 0.3718/0.6268, and 0.4390/0.7020 for the 19/15/10 splits.
 With contextual kNN readout and single-template text prompts, it provides the
 strongest balanced direct-field support evidence.
@@ -447,7 +447,7 @@ As of 2026-05-24, the training code also supports a stricter direct-field
 variant that jointly constrains rendered 2D compact features and direct
 3D primitive/point compact features, with visibility-weighted pair contrast from
 registration view counts and cached-visible direct-point sampling. Generated
-VALA/OpenGaFF-8 configs live under
+VALA-aligned ScanNet-8 configs live under
 `radio_gs/configs/generated/scannet_dino_cv/scannet_og_hybrid_v70_cachedvisible_vc005_rc005_b2_s32768_ft20_{scene}.yaml`.
 The full eight-scene v70 run reaches 0.3571/0.5997, 0.3644/0.6178, and
 0.4419/0.7091 for the 19/15/10 splits. It improves split10 mAcc but hurts

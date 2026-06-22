@@ -1,12 +1,12 @@
 {
   "text_grounding_rows": [
     {
-      "method": "Frame-wise RADIO teacher",
+      "method": "Frame-wise RADIO",
       "loc_acc": 0.7985,
       "miou": 0.4634,
       "delta_loc_acc": 0.0,
       "delta_miou": 0.0,
-      "source": "paper/radio_gs_draft.tex teacher-vs-rendered table",
+      "source": "paper/radio_gs_draft.tex frame-wise-RADIO-vs-rendered table",
       "note": ""
     },
     {
@@ -25,10 +25,10 @@
       "delta_loc_acc": -0.23429999999999995,
       "delta_miou": -0.1452,
       "source": "lerf_per_gaussian_1280d_baseline.json",
-      "note": "registered fp16 RADIO teacher features attached to Gaussian primitives"
+      "note": "registered fp16 frame-wise RADIO features attached to Gaussian primitives"
     },
     {
-      "method": "Full CTF-GS",
+      "method": "Full GaussFM",
       "loc_acc": 0.8598,
       "miou": 0.5707,
       "delta_loc_acc": 0.06130000000000002,
@@ -241,11 +241,11 @@
     "primary_total": 6,
     "universal_superiority": false,
     "caveats": [
-      "SAM3 box prompt LocAcc remains teacher-stronger (0.8221 vs 0.8702).",
-      "SAM3 mask propagation LocAcc remains teacher-stronger (0.6596 vs 0.7872).",
-      "DINOv3 dense matching HitRate remains teacher-stronger (0.5396 vs 0.5723)."
+      "SAM3 box prompt LocAcc remains frame-wise-RADIO-stronger (0.8221 vs 0.8702).",
+      "SAM3 mask propagation LocAcc remains frame-wise-RADIO-stronger (0.6596 vs 0.7872).",
+      "DINOv3 dense matching HitRate remains frame-wise-RADIO-stronger (0.5396 vs 0.5723)."
     ],
-    "claim_sentence": "CTF-GS rendered features outperform the frame-wise RADIO teacher on all selected primary downstream feature-usability metrics; secondary LocAcc/HitRate caveats are reported separately."
+    "claim_sentence": "GaussFM rendered features outperform the frame-wise RADIO reference on all selected primary downstream feature-usability metrics; secondary LocAcc/HitRate caveats are reported separately."
   },
   "sources": {
     "controlled_evidence": "/root/RADIO-GS/paper/artifacts/controlled_evidence_table.json",

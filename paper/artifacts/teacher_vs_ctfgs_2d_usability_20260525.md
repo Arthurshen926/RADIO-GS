@@ -1,19 +1,19 @@
-# Teacher vs CTF-GS 2D Feature Usability
+# Frame-wise RADIO vs GaussFM 2D Feature Usability
 
 This report consolidates same-evaluator 2D evidence for selected downstream tasks. It supports a selected downstream tasks claim rather than universal feature superiority.
 
 ## LERF Rendered-View Text Grounding and Feature Memory
 
-| Method | LocAcc | mIoU | Delta LocAcc vs teacher | Delta mIoU vs teacher |
+| Method | LocAcc | mIoU | Delta LocAcc vs frame-wise RADIO | Delta mIoU vs frame-wise RADIO |
 |---|---:|---:|---:|---:|
-| Frame-wise RADIO teacher | 0.7985 | 0.4634 | +0.0000 | +0.0000 |
+| Frame-wise RADIO | 0.7985 | 0.4634 | +0.0000 | +0.0000 |
 | Nearest-view RADIO cache | 0.2722 | 0.1545 | -0.5263 | -0.3089 |
 | Per-Gaussian 1280-D RADIO memory | 0.5642 | 0.3182 | -0.2343 | -0.1452 |
-| Full CTF-GS | 0.8598 | 0.5707 | +0.0613 | +0.1073 |
+| Full GaussFM | 0.8598 | 0.5707 | +0.0613 | +0.1073 |
 
 ## Frozen-Head Downstream Tasks
 
-| Task | Primary | Teacher | CTF-GS rendered | Delta | Secondary | Teacher | CTF-GS rendered | Delta | N | Winner |
+| Task | Primary | Frame-wise RADIO | GaussFM rendered | Delta | Secondary | Frame-wise RADIO | GaussFM rendered | Delta | N | Winner |
 |---|---|---:|---:|---:|---|---:|---:|---:|---:|---|
 | SAM3 point prompt | mIoU | 0.3700 | 0.4173 | +0.0473 | LocAcc | 1.0000 | 1.0000 | +0.0000 | 208 | rendered |
 | SAM3 box prompt | mIoU | 0.6560 | 0.6638 | +0.0079 | LocAcc | 0.8702 | 0.8221 | -0.0481 | 208 | rendered |
@@ -25,13 +25,13 @@ This report consolidates same-evaluator 2D evidence for selected downstream task
 
 - Primary rendered wins: 6 / 6.
 - Universal superiority claim allowed: False.
-- Recommended wording: CTF-GS rendered features outperform the frame-wise RADIO teacher on all selected primary downstream feature-usability metrics; secondary LocAcc/HitRate caveats are reported separately.
+- Recommended wording: GaussFM rendered features outperform the frame-wise RADIO reference on all selected primary downstream feature-usability metrics; secondary LocAcc/HitRate caveats are reported separately.
 
 ## Caveats
 
-- SAM3 box prompt LocAcc remains teacher-stronger (0.8221 vs 0.8702).
-- SAM3 mask propagation LocAcc remains teacher-stronger (0.6596 vs 0.7872).
-- DINOv3 dense matching HitRate remains teacher-stronger (0.5396 vs 0.5723).
+- SAM3 box prompt LocAcc remains frame-wise-RADIO-stronger (0.8221 vs 0.8702).
+- SAM3 mask propagation LocAcc remains frame-wise-RADIO-stronger (0.6596 vs 0.7872).
+- DINOv3 dense matching HitRate remains frame-wise-RADIO-stronger (0.5396 vs 0.5723).
 
 ## Sources
 

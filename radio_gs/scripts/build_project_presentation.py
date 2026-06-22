@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a Chinese project presentation deck for CTF-GS / RADIO-GS.
+"""Build a Chinese project presentation deck for GaussFM / RADIO-GS.
 
 The deck is intentionally generated from a small script so the paper-facing
 numbers, figure paths, and terminology stay reproducible.
@@ -60,7 +60,7 @@ class Deck:
         OUT_PPTX.parent.mkdir(parents=True, exist_ok=True)
         self.prs.save(OUT_PPTX)
         lines = [
-            "# CTF-GS / RADIO-GS 项目汇报 PPT 大纲",
+            "# GaussFM / RADIO-GS 项目汇报 PPT 大纲",
             "",
             f"- 输出文件：`{OUT_PPTX}`",
             "- 口径：导师/项目中期汇报 + 顶刊投稿准备",
@@ -90,7 +90,7 @@ class Deck:
 
     def footer(self, s: object) -> None:
         idx = len(self.prs.slides)
-        self.text(s, 0.50, 7.08, 4.0, 0.18, "CTF-GS / RADIO-GS Project Presentation", 7, COLORS["muted"])
+        self.text(s, 0.50, 7.08, 4.0, 0.18, "GaussFM / RADIO-GS Project Presentation", 7, COLORS["muted"])
         self.text(s, 12.15, 7.08, 0.55, 0.18, str(idx), 7, COLORS["muted"], align=PP_ALIGN.RIGHT)
 
     def text(
@@ -292,7 +292,7 @@ def build() -> None:
     s = d.prs.slides.add_slide(d.blank)
     s.background.fill.solid()
     s.background.fill.fore_color.rgb = COLORS["paper"]
-    d.text(s, 0.62, 0.62, 11.8, 0.42, "CTF-GS：紧凑基础特征 Gaussian 记忆", 26, COLORS["ink"], bold=True)
+    d.text(s, 0.62, 0.62, 11.8, 0.42, "GaussFM：紧凑基础特征 Gaussian 记忆", 26, COLORS["ink"], bold=True)
     d.text(
         s,
         0.62,
@@ -456,7 +456,7 @@ def build() -> None:
         3.25,
         [
             ["目标", "作用", "是否主干"],
-            ["RADIO feature reconstruction", "重建 frozen RADIO 1280-D feature，形成 teacher-compatible scene memory", "是"],
+            ["RADIO feature reconstruction", "重建 frozen RADIO 1280-D feature，形成 RADIO-compatible scene memory", "是"],
             ["Compact HCD target", "让低维 code 保留可解码的高维语义结构", "是"],
             ["Visibility / boundary / depth guides", "修正 splatting 与边界混合带来的 feature artifacts", "辅助"],
             ["SigLIP2 / SAM / DINO adaptor-space consistency", "验证/约束 RADIO-derived feature 对 frozen-head tasks 的可用性", "辅助"],
@@ -510,7 +510,7 @@ def build() -> None:
             ["证据链", "数据 / 协议", "证明什么", "主指标"],
             ["LERF rendered-view OVS", "4 scenes, 2D rendered feature maps", "重建 feature map 的开放词汇定位能力", "LocAcc / mIoU"],
             ["LERF direct 3D OVS", "OpenGaussian-style query-select-render", "primitive-level 直接查询与 object support", "mIoU / Acc@0.25"],
-            ["ScanNet VALA8 point query", "OpenGaFF/VALA 8 scenes", "跨数据集点云开放词汇理解", "mIoU / mAcc"],
+            ["ScanNet VALA8 point query", "VALA-aligned 8 scenes", "跨数据集点云开放词汇理解", "mIoU / mAcc"],
             ["Feature usability probes", "frozen SAM/DINO/SigLIP2 task heads", "重建特征是否优于 frame-wise RADIO", "mIoU / score"],
         ],
         font_size=10,
@@ -532,12 +532,12 @@ def build() -> None:
             ["LERF", "0.795", "0.625", "0.938", "0.815", "0.793"],
             ["LangSplat", "0.804", "0.732", "0.881", "0.955", "0.843"],
             ["LEGaussians", "0.767", "0.737", "0.683", "0.523", "0.678"],
-            ["CTF-GS", "0.821", "0.901", "0.898", "0.818", "0.860"],
+            ["GaussFM", "0.821", "0.901", "0.898", "0.818", "0.860"],
         ],
         font_size=10,
         emphasize_rows=[4],
     )
-    d.card(s, 8.35, 1.34, 3.85, 1.05, "补充控制", "Frame-wise RADIO mIoU 0.4634\nCTF-GS rendered mIoU 0.5889", COLORS["teal"], 17)
+    d.card(s, 8.35, 1.34, 3.85, 1.05, "补充控制", "Frame-wise RADIO mIoU 0.4634\nGaussFM rendered mIoU 0.5889", COLORS["teal"], 17)
     d.card(s, 8.35, 2.72, 3.85, 1.05, "结论", "多视角 compact memory 不只是复现 RADIO，而是提升 rendered-view 下游可用性", COLORS["blue"], 15)
     d.image(s, FIG_DIR / "lerf_rendered_grounding_qualitative.png", 0.90, 4.20, 11.55, 1.95, "Rendered-view grounding qualitative")
     d.note("这里先放 LERF rendered 主表，说明 2D 查询能力。")
@@ -554,9 +554,9 @@ def build() -> None:
             ["Method", "mIoU", "Acc@0.25", "备注"],
             ["OpenGaussian", "0.384", "0.514", "official context"],
             ["Dr. Splat", "0.433", "0.643", "published context"],
-            ["CTF-GS MPR", "0.480", "0.676", "registered evidence diagnostic"],
-            ["CTF-GS compact", "0.501", "0.704", "no VPR cache / no official SAM readout"],
-            ["CTF-GS + SAM3 box", "0.570", "0.684", "assisted boundary readout"],
+            ["GaussFM MPR", "0.480", "0.676", "registered evidence diagnostic"],
+            ["GaussFM compact", "0.501", "0.704", "no VPR cache / no official SAM readout"],
+            ["GaussFM + SAM3 box", "0.570", "0.684", "assisted boundary readout"],
         ],
         font_size=10,
         emphasize_rows=[4],
@@ -567,7 +567,7 @@ def build() -> None:
     d.note("这里要准确讲：compact row 是主线，但 strict no-RGB one-map ablation 另有数值；当前最佳使用轻量 RGB support guard。")
 
     # 13
-    s = d.slide("主结果三：ScanNet VALA/OpenGaFF-8 direct point-query", "Results")
+    s = d.slide("主结果三：ScanNet VALA-aligned direct point-query", "Results")
     d.table(
         s,
         0.60,
@@ -580,13 +580,13 @@ def build() -> None:
             ["OpenGaussian", "27.73", "42.01", "29.67", "46.15", "39.93", "57.34"],
             ["Dr. Splat", "29.31", "47.68", "33.25", "54.33", "44.19", "65.19"],
             ["VALA", "32.11", "50.05", "35.10", "54.77", "46.21", "65.61"],
-            ["CTF-GS", "38.06", "61.29", "38.71", "63.15", "47.11", "72.00"],
+            ["GaussFM", "38.06", "61.29", "38.71", "63.15", "47.11", "72.00"],
         ],
         font_size=9,
         emphasize_rows=[5],
     )
     d.image(s, FIG_DIR / "scannet_openvocab_3d_query_qualitative.png", 0.95, 5.05, 11.20, 1.45, "ScanNet open-vocabulary 3D query qualitative")
-    d.note("这页按用户要求直接使用 OpenGaFF/VALA 论文里的对比数字，去掉 OpenGaFF row。")
+    d.note("这页只按 VALA-aligned 协议说明对比来源，不出现未发表方法名称。")
 
     # 14
     s = d.slide("重建 Scene Features vs. 原始 frame-wise RADIO", "Results")
@@ -597,7 +597,7 @@ def build() -> None:
         7.55,
         3.35,
         [
-            ["Task", "Metric", "Frame-wise RADIO", "CTF-GS", "Delta"],
+            ["Task", "Metric", "Frame-wise RADIO", "GaussFM", "Delta"],
             ["LERF text grounding", "mIoU", "0.4634", "0.5707", "+0.1073"],
             ["SAM3 point prompt", "mIoU", "0.3700", "0.4173", "+0.0473"],
             ["SAM3 box prompt", "mIoU", "0.6560", "0.6638", "+0.0079"],
@@ -654,7 +654,7 @@ def build() -> None:
             ["Contribution", "Task", "Delta", "结论"],
             ["MPR-to-field registration", "Direct3D", "mIoU +0.366 / Acc +0.517", "最大直接收益"],
             ["Foundation-space codec", "Rendered", "LocAcc +0.327 / mIoU +0.225", "核心架构"],
-            ["CTF-GS vs RADIO", "2D usability", "mIoU +0.126", "主 claim 证据"],
+            ["GaussFM vs RADIO", "2D usability", "mIoU +0.126", "主 claim 证据"],
             ["Geometry warm-start", "Rendered", "LocAcc +0.056 / mIoU +0.061", "稳定训练"],
             ["Support calibration", "Direct3D", "mIoU +0.053 / Acc +0.032", "解决小物体/碎片"],
             ["DINO/SAM probes", "2D probes", "selected metrics positive", "辅助支撑"],

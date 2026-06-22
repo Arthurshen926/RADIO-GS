@@ -92,7 +92,7 @@ def test_build_audit_includes_p1_reproduction_queue(tmp_path):
     rows = {row["method"]: row for row in payload["baselines"]}
 
     assert {"LangSplat", "LEGaussians", "CAGS", "LaGa", "Semantic Gaussians"} <= methods
-    assert "OpenGaFF" in methods
+    assert "Unpublished protocol source" in methods
     assert rows["CAGS"]["url"] == "https://github.com/Wistzz/CAGS"
     assert "OpenGaussian-compatible LERF" in rows["CAGS"]["blocker"]
     assert "rasterizer ABI" in rows["CAGS"]["blocker"]
@@ -101,9 +101,9 @@ def test_build_audit_includes_p1_reproduction_queue(tmp_path):
     assert rows["LaGa"]["url"] == "https://github.com/SJTU-DeepVisionLab/LaGa"
     assert "view-dependent semantics" in rows["LaGa"]["blocker"]
     assert "kmeans_pytorch" in rows["LaGa"]["blocker"]
-    assert rows["OpenGaFF"]["exists"] is False
-    assert rows["OpenGaFF"]["url"] == "https://arxiv.org/abs/2605.06088"
-    assert "code will be publicly released upon acceptance" in rows["OpenGaFF"]["blocker"]
+    assert rows["Unpublished protocol source"]["exists"] is False
+    assert rows["Unpublished protocol source"]["url"] == "https://arxiv.org/abs/2605.06088"
+    assert "code will be publicly released upon acceptance" in rows["Unpublished protocol source"]["blocker"]
 
 
 def test_inspect_repo_updates_laga_blocker_when_kmeans_submodule_is_available(tmp_path):

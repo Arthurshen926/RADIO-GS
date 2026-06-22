@@ -12,7 +12,7 @@
    这是合格投稿前必须处理的问题。旧草稿中残留 VPR/readout/teacher/旧数值/旧 CVPR 模板口径。如果 source package 或人工检查误扫到它，会直接制造“作者自己都没统一版本”的印象。
 
 2. **ScanNet 表述仍有回避强对比方法的语气。**  
-   “OpenGaFF method row omitted by design” 这句话过于生硬，容易被审稿人理解成故意回避。正确写法应是：OpenGaFF/VALA 是 protocol source，不作为 reproduced baseline row。
+   “unpublished protocol-source method row omitted by design” 这句话过于生硬，容易被审稿人理解成故意回避。正确写法应是：VALA-aligned 是 protocol source，不作为 reproduced baseline row。
 
 3. **Efficiency 段落仍像未完成计划。**  
    “A future deployment study should...” 放在主文会削弱合格投稿状态，像作者承认关键效率证据未完成。应改为当前 submission 对 latency 的解释边界：protocol-level conservative evidence，不和 storage claim 混淆。
@@ -41,12 +41,12 @@ paper/archive/radio_gs_draft_legacy_cvpr.tex
 **验证：**  
 `test ! -f paper/radio_gs_draft.tex && test -f paper/archive/radio_gs_draft_legacy_cvpr.tex`
 
-### 2. OpenGaFF/VALA 表述修正
+### 2. VALA-aligned 表述修正
 
 **修正：**  
-主文和 provenance table 中将 “OpenGaFF method row omitted by design” 改为：
+主文和 provenance table 中将 “unpublished protocol-source method row omitted by design” 改为：
 
-> OpenGaFF/VALA split is used as the protocol source rather than as a reproduced baseline row.
+> VALA-aligned split is used as the protocol source rather than as a reproduced baseline row.
 
 这仍然符合当前比较策略，但语气不再像回避。
 

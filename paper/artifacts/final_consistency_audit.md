@@ -97,7 +97,7 @@
 - ScanNet remains direct-query transfer evidence rather than a full leaderboard claim.
 - LERF direct 3D selection now promotes the compact score-component guard row: no VPR cache, no official RGB SAM decoder, with GT-free RGB/GrabCut support snapping reported as a lightweight support policy.
 - Strict no-RGB one-map Direct3D and frozen official SAM3-box rows remain ablations/diagnostics rather than the promoted compact score-component row.
-- The DINO/SAM downstream task artifact now records 6/6 selected primary wins for rendered CTF-GS features, while keeping secondary SAM LocAcc and DINO dense-HitRate caveats separate.
+- The DINO/SAM downstream task artifact now records 6/6 selected primary wins for rendered GaussFM features, while keeping secondary SAM LocAcc and DINO dense-HitRate caveats separate.
 - SAM3 box direct-3D readout now has a fixed-global-threshold padding sweep; post-hoc best fixed and scene-locked selectors remain diagnostic.
 - Dr. Splat-inspired alpha/alpha-depth registration weighting was implemented and tested, but is not promoted because it lowers the fixed-protocol VPR result.
 - VPR cache memory is reported separately from persistent compact checkpoint storage.
@@ -127,7 +127,7 @@
 
 - Strict LERF same-evaluator SOTA claims still require locally rerun external direct-3D baselines; OpenGaussian is locally reproduced for ScanNet, but its LERF recipe is blocked by the missing official LangSplat-reannotated language-feature package.
 - True Dr. Splat-style rasterizer contribution assignment remains future work; the implemented center-sampled alpha/alpha-depth approximation regressed.
-- Official SAM3 code/weights are diagnostic support only. The promoted SAM boundary readouts are feature-only CTF-GS/RADIO adaptor readouts and do not call the official RGB SAM decoder at evaluation time.
+- Official SAM3 code/weights are diagnostic support only. The promoted SAM boundary readouts are feature-only GaussFM/RADIO adaptor readouts and do not call the official RGB SAM decoder at evaluation time.
 - Waldo low-support heatmap recovery is positive as a diagnostic but not promoted globally until the recovery floor is adaptive; the fixed 8000-pixel floor regresses Ramen.
 - Component-aware VPR was tested with reusable per-Gaussian score caches and did not beat voxel-max; stronger GT-free object proposals remain future work.
 - Nearest-view cached RADIO features are not a 3D scene memory; the measured per-Gaussian 1280-D explicit row is the controlled raw-feature scene-memory comparison.

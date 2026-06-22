@@ -1,7 +1,7 @@
 {
   "rows": [
     {
-      "method": "Frame-wise RADIO teacher",
+      "method": "Frame-wise RADIO",
       "compact": "no",
       "3d_memory": "no",
       "novel_view_feature": "no",
@@ -11,7 +11,7 @@
       "direct3d": "not applicable",
       "storage": "per-frame feature cache",
       "runtime": "not profiled here",
-      "source": "paper/radio_gs_draft.tex teacher-vs-rendered table"
+      "source": "paper/radio_gs_draft.tex frame-wise-RADIO-vs-rendered table"
     },
     {
       "method": "Nearest-view RADIO cache",
@@ -39,10 +39,10 @@
       "storage": "1039.7 MiB mean fp16 feature storage",
       "runtime": "registered fraction 0.2020",
       "source": "lerf_per_gaussian_1280d_baseline.json",
-      "note": "registered fp16 RADIO teacher features attached to Gaussian primitives"
+      "note": "registered fp16 frame-wise RADIO features attached to Gaussian primitives"
     },
     {
-      "method": "Full CTF-GS",
+      "method": "Full GaussFM",
       "compact": "yes",
       "3d_memory": "yes",
       "novel_view_feature": "yes",

@@ -41,7 +41,7 @@ keeping the correct same-protocol caveat.
 
 ## Paper-Facing Recommendation
 
-Keep the main method framing unchanged: CTF-GS learns a compact teacher-feature
+Keep the main method framing unchanged: GaussFM learns a compact teacher-feature
 field with rendered-view and direct-3D readouts. Promote the formal_v6 DINO
 robust readout as the latest downstream task result, keep 128-view VPR +
 voxel-max + meanstd2p5 floor/cap as the direct-3D mainline, and report ScanNet contextual

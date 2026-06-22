@@ -2,7 +2,7 @@
 
 LERF rendered-view peak-connected-component mask readout. Heatmap scoring/checkpoints/temperatures match the paper LERF rendered protocol; binary masks use fixed peak-relative threshold 0.60, then keep only the connected component containing the query heatmap peak. No GT masks are used by the readout.
 
-| Scene | LocAcc | mIoU | Teacher LocAcc | Teacher mIoU | N | Source |
+| Scene | LocAcc | mIoU | Frame-wise RADIO LocAcc | Frame-wise RADIO mIoU | N | Source |
 |---|---:|---:|---:|---:|---:|---|
 | figurines | 0.8214 | 0.5134 | 0.7500 | 0.4031 | 56 | `output/radio_gs/lerf2d_peak_component_probe_20260524/figurines/lerf_ovs_results.json` |
 | ramen | 0.9014 | 0.6249 | 0.9014 | 0.5241 | 71 | `output/radio_gs/lerf2d_peak_component_probe_20260524/ramen/lerf_ovs_results.json` |

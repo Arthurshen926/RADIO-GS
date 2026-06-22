@@ -6,10 +6,10 @@ This audit separates three SAM3-related boundary readouts:
 
 1. Official SAM3 RGB readout: feature-derived coarse mask prompts frozen SAM3 on
    the evaluation RGB image. This is the strong assisted upper bound.
-2. CTF-GS SAM3 mask-logit head: existing rendered features produce fixed
+2. GaussFM SAM3 mask-logit head: existing rendered features produce fixed
    feature-only mask candidates through a trained `foundation_cache_projectors`
    SAM3 projector.
-3. RADIO/CTF-GS to official SAM3 decoder-state bridge: reconstructed features
+3. RADIO/GaussFM to official SAM3 decoder-state bridge: reconstructed features
    are projected into the official SAM3 `backbone_out` tensors, then the frozen
    official decoder is called without RGB image features.
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a VALA ScanNet baseline on the fixed VALA/OpenGaFF-8 split.
+"""Run a VALA ScanNet baseline on the fixed VALA-aligned ScanNet-8 split.
 
 The public VALA ScanNet shell script is not directly usable with the prepared
 RADIO-GS ScanNet assets: it expects ``transforms_train.json`` and a GraphDECO
@@ -454,7 +454,7 @@ def _write_reports(output_root: Path, payload: dict[str, object]) -> None:
     lines = [
         "# VALA ScanNet VALA8 Local Reproduction",
         "",
-        "Protocol: VALA/OpenGaFF-8 scenes, point-level open-vocabulary querying.",
+        "Protocol: VALA-aligned ScanNet-8 scenes, point-level open-vocabulary querying.",
         "",
         "| Split | mIoU | mAcc | Overall Acc |",
         "| --- | ---: | ---: | ---: |",

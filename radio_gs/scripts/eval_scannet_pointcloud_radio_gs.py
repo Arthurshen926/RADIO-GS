@@ -1863,7 +1863,7 @@ def main() -> None:
         default=None,
         help=(
             "Optional comma- or semicolon-separated scene ids. Overrides --scene "
-            "and is useful for fixed published splits such as VALA/OpenGaFF ScanNet."
+            "and is useful for fixed published splits such as VALA-aligned ScanNet."
         ),
     )
     parser.add_argument("--prepared_root", default=str(DEFAULT_PREPARED_ROOT))

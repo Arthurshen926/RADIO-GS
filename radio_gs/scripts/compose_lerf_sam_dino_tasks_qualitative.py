@@ -180,10 +180,10 @@ def build_rows(args: argparse.Namespace) -> tuple[list[np.ndarray], list[dict[st
         gt_cell = add_cell_label(resize_crop(gt_img, cell_w, cell_h), "GT / target")
         if "matching" in task.lower():
             teacher_cell = add_cell_label(resize_fit(teacher_img, cell_w, cell_h), "Frame-wise RADIO")
-            rendered_cell = add_cell_label(resize_fit(rendered_img, cell_w, cell_h), "CTF-GS field")
+            rendered_cell = add_cell_label(resize_fit(rendered_img, cell_w, cell_h), "GaussFM field")
         else:
             teacher_cell = add_cell_label(resize_crop(teacher_img, cell_w, cell_h), "Frame-wise RADIO")
-            rendered_cell = add_cell_label(resize_crop(rendered_img, cell_w, cell_h), "CTF-GS field")
+            rendered_cell = add_cell_label(resize_crop(rendered_img, cell_w, cell_h), "GaussFM field")
         rows.append(np.hstack([task_cell, input_cell, gt_cell, teacher_cell, rendered_cell]))
         manifest.append(meta)
     return rows, manifest
@@ -276,7 +276,7 @@ def main() -> None:
         "rows": entries,
         "notes": (
             "Rows are qualitative examples for the same quantitative frozen-head probes. "
-            "The CTF-GS field columns are reconstructed from the compact scene feature field; "
+            "The GaussFM field columns are reconstructed from the compact scene feature field; "
             "the frame-wise RADIO columns are per-image foundation features under the same task heads."
         ),
     }

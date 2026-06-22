@@ -75,10 +75,10 @@ BASELINES = (
         "blocker": "Official implementation targets view-dependent semantics through object decomposition and descriptors; upstream gitlinks include a third_party/kmeans_pytorch path without a .gitmodules mapping on the current clone. Strict comparison needs affinity-feature training/inference notebook adaptation and same-evaluator exports.",
     },
     {
-        "method": "OpenGaFF",
-        "repo_dir": "OpenGaFF",
+        "method": "Unpublished protocol source",
+        "repo_dir": "unpublished_protocol_source",
         "url": "https://arxiv.org/abs/2605.06088",
-        "blocker": "The arXiv paper reports state-of-the-art LERF-OVS and ScanNet context numbers, but its source states that code will be publicly released upon acceptance; no public implementation was found in the arXiv metadata/source or web search on 2026-05-18. Keep as published context, not a reproducible local baseline.",
+        "blocker": "The unpublished protocol source reports LERF-OVS and ScanNet context numbers, but its source states that code will be publicly released upon acceptance; no public implementation was found in the arXiv metadata/source or web search on 2026-05-18. Keep as protocol context, not a reproducible local baseline.",
     },
 )
 

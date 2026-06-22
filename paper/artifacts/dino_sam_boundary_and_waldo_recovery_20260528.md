@@ -12,7 +12,7 @@ The promoted DINO readout keeps DINOv3 adaptor features for correspondence
 support, then uses the rendered SAM3-adaptor feature family for feature-only
 boundary refinement. It does not call the official RGB SAM decoder.
 
-| Task | Teacher | CTF-GS rendered | Delta | Winner |
+| Task | Frame-wise RADIO | GaussFM rendered | Delta | Winner |
 | --- | ---: | ---: | ---: | --- |
 | DINOv3 mask propagation LocAcc | 0.7660 | 0.7872 | +0.0213 | rendered |
 | DINOv3 mask propagation mIoU | 0.4606 | 0.4677 | +0.0071 | rendered |

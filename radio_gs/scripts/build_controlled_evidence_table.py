@@ -35,7 +35,7 @@ def _yes_no(value: bool) -> str:
 
 def teacher_row(teacher_loc_acc: float, teacher_miou: float) -> dict[str, Any]:
     return {
-        "method": "Frame-wise RADIO teacher",
+        "method": "Frame-wise RADIO",
         "compact": "no",
         "3d_memory": "no",
         "novel_view_feature": "no",
@@ -45,7 +45,7 @@ def teacher_row(teacher_loc_acc: float, teacher_miou: float) -> dict[str, Any]:
         "direct3d": "not applicable",
         "storage": "per-frame feature cache",
         "runtime": "not profiled here",
-        "source": "paper/radio_gs_draft.tex teacher-vs-rendered table",
+        "source": "paper/radio_gs_draft.tex frame-wise-RADIO-vs-rendered table",
     }
 
 
@@ -107,7 +107,7 @@ def per_gaussian_1280d_row(path: str | Path) -> dict[str, Any] | None:
         "storage": storage_note,
         "runtime": runtime_note,
         "source": "lerf_per_gaussian_1280d_baseline.json",
-        "note": "registered fp16 RADIO teacher features attached to Gaussian primitives",
+        "note": "registered fp16 frame-wise RADIO features attached to Gaussian primitives",
     }
 
 
@@ -208,7 +208,7 @@ def build_rows(
         is_full = key == "full"
         rows.append(
             {
-                "method": str(variant["label"]).replace("RADIO-GS", "CTF-GS"),
+                "method": str(variant["label"]).replace("RADIO-GS", "GaussFM"),
                 "compact": "yes",
                 "3d_memory": "yes",
                 "novel_view_feature": "yes",

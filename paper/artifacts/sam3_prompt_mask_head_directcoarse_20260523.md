@@ -4,7 +4,7 @@ Date: 2026-05-23
 
 This experiment implements a feature-only prompt-conditioned SAM-adaptor mask
 head. Official SAM3 RGB masks are used only as training-view pseudo masks. At
-evaluation time the readout uses rendered CTF-GS foundation features, SigLIP2
+evaluation time the readout uses rendered GaussFM foundation features, SigLIP2
 text embeddings, and the direct-3D coarse mask; it does not call the official
 SAM3 RGB image encoder/decoder.
 

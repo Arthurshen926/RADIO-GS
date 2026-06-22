@@ -14,7 +14,7 @@ Foundation Feature Reconstruction in 3D Gaussian Scenes for Open-Vocabulary Scen
 
 ## Abstract draft
 
-We study how to reconstruct foundation-model spatial features inside a 3D Gaussian scene representation so that a single trained scene can support open-vocabulary grounding, depth prediction, and semantic transfer at novel views. Our method distills frozen RADIO teacher features into a hybrid Gaussian feature field that combines per-Gaussian latent storage with a coarse spatial branch, and supervises the reconstruction through a feature codec and frozen downstream heads instead of task-specific finetuning. This design turns the 3D scene itself into a reusable feature memory rather than a scene-specific classifier. Across LERF-OVS scenes, the current system already shows strong open-vocabulary grounding performance, while auxiliary experiments on Replica indicate that the reconstructed field also preserves geometric and semantic utility. The main remaining challenge before submission is not core method capability, but result freezing: broader public comparisons, cross-domain evidence, and exact provenance for every reported number.
+We study how to reconstruct foundation-model spatial features inside a 3D Gaussian scene representation so that a single trained scene can support open-vocabulary grounding, depth prediction, and semantic transfer at novel views. Our method distills frozen frame-wise RADIO features into a hybrid Gaussian feature field that combines per-Gaussian latent storage with a coarse spatial branch, and supervises the reconstruction through a feature codec and frozen downstream heads instead of task-specific finetuning. This design turns the 3D scene itself into a reusable feature memory rather than a scene-specific classifier. Across LERF-OVS scenes, the current system already shows strong open-vocabulary grounding performance, while auxiliary experiments on Replica indicate that the reconstructed field also preserves geometric and semantic utility. The main remaining challenge before submission is not core method capability, but result freezing: broader public comparisons, cross-domain evidence, and exact provenance for every reported number.
 
 ## Introduction skeleton
 
@@ -22,7 +22,7 @@ Paragraph 1:
 Large vision-language models expose rich dense features, but most 3D pipelines still optimize either RGB appearance or narrowly task-specific scene embeddings. This leaves a gap between 2D foundation features and reusable 3D scene representations.
 
 Paragraph 2:
-The paper targets feature reconstruction rather than direct task fitting. The core question is whether a 3D Gaussian scene can preserve high-dimensional teacher features well enough that novel rendered views remain useful for open-vocabulary grounding and other downstream probes.
+The paper targets feature reconstruction rather than direct task fitting. The core question is whether a 3D Gaussian scene can preserve high-dimensional RADIO reference features well enough that novel rendered views remain useful for open-vocabulary grounding and other downstream probes.
 
 Paragraph 3:
 The technical challenge is that dense foundation features are high-dimensional, view-dependent, and expensive to store directly on every Gaussian. RADIO-GS addresses this with a hybrid feature field, an HCD-style bottleneck codec, screen-space refinement, and frozen depth-head supervision.
@@ -32,13 +32,13 @@ The current empirical story should be framed around LERF-OVS as the main benchma
 
 ## Contributions draft
 
-1. We formulate 3D Gaussian feature reconstruction as a scene-level distillation problem from frozen RADIO teacher features, instead of learning scene-specific open-vocabulary heads from scratch.
+1. We formulate 3D Gaussian feature reconstruction as a scene-level distillation problem from frozen frame-wise RADIO features, instead of learning scene-specific open-vocabulary heads from scratch.
 2. We introduce a hybrid Gaussian feature representation with compressed latent decoding and auxiliary frozen-head supervision, which improves the usability of reconstructed features for downstream tasks.
 3. We show that one reconstructed feature field can support multiple outputs, with LERF-OVS grounding as the primary benchmark and Replica depth and segmentation as supporting evidence.
 
 ## Method section outline
 
-1. Problem setup: frozen teacher feature extraction, Gaussian scene representation, and novel-view feature rendering.
+1. Problem setup: frozen RADIO reference feature extraction, Gaussian scene representation, and novel-view feature rendering.
 2. Hybrid feature field: per-Gaussian latent branch, coarse spatial branch, feature fusion.
 3. HCD codec and rendering path: bottleneck compression, decoding, screen-space refiner.
 4. Supervision: decoded-feature loss, reconstruction loss, FDH auxiliary loss, optional semantic heads.

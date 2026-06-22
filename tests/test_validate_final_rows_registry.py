@@ -80,7 +80,7 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
             {
                 "baselines": [
                     {
-                        "method": "OpenGaFF",
+                        "method": "Unpublished protocol source",
                         "exists": False,
                         "blocker": "code will be publicly released upon acceptance",
                     }
@@ -143,7 +143,7 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
                     ],
                     "p2": [
                         {
-                            "method": "OpenGaFF",
+                            "method": "Unpublished protocol source",
                             "status": "no public implementation was found",
                         }
                     ],
@@ -166,6 +166,14 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
             },
             sort_keys=False,
         ),
+        encoding="utf-8",
+    )
+    scannet_table = root / "paper/scannet_published_context_table.tex"
+    scannet_table.parent.mkdir(parents=True, exist_ok=True)
+    scannet_table.write_text(
+        "\\method{} & \\textbf{38.06} & \\textbf{61.29} & "
+        "\\textbf{38.71} & \\textbf{63.15} & "
+        f"\\textbf{{{100.0 * split10_miou:.2f}}} & \\textbf{{72.00}} \\\\\n",
         encoding="utf-8",
     )
     return final_rows

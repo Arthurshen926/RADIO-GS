@@ -1,4 +1,4 @@
-# CTF-GS / RADIO-GS LaTeX Draft
+# GaussFM / RADIO-GS LaTeX Draft
 
 Active TPAMI manuscript entry points:
 

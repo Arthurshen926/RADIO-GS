@@ -3,12 +3,12 @@
 Date: 2026-06-09
 
 This outline records the paper-facing story after the terminology migration from
-teacher-centric wording to foundation-feature scene-memory wording. It is meant
+legacy distillation-centric wording to foundation-feature scene-memory wording. It is meant
 to keep the manuscript, figures, and advisor presentation aligned.
 
 ## Central Thesis
 
-CTF-GS learns a compact foundation-feature scene memory for 3D Gaussian scenes.
+GaussFM learns a compact foundation-feature scene memory for 3D Gaussian scenes.
 Its core representation is a compact RADIO Gaussian feature field: low-dimensional
 per-Gaussian latent codes are augmented with spatial context, reliability and
 visibility cues, and decoded into RADIO-compatible scene features on demand.
@@ -36,7 +36,7 @@ Story:
 - Directly storing them per Gaussian is expensive and not necessarily useful.
 - A deployed scene should answer 2D novel-view, 3D primitive, and point-query
   tasks from one stored representation.
-- CTF-GS reconstructs RADIO-compatible foundation-space features inside a 3D
+- GaussFM reconstructs RADIO-compatible foundation-space features inside a 3D
   Gaussian scene through a compact contextual feature field.
 
 Main terms:
@@ -47,7 +47,7 @@ Main terms:
 
 ### 2. Related Work
 
-Goal: position CTF-GS against language fields, open-vocabulary 3DGS methods,
+Goal: position GaussFM against language fields, open-vocabulary 3DGS methods,
 Gaussian scene representations, and foundation-model regularization.
 
 Story:
@@ -55,7 +55,7 @@ Story:
 - OpenGaussian/Dr. Splat/instance-level methods motivate direct primitive or
   instance querying.
 - RADIO-style models supply unified dense foundation features.
-- CTF-GS differs by learning a compact contextual RADIO feature field and
+- GaussFM differs by learning a compact contextual RADIO feature field and
   compressing registered multiview evidence into the deployed Gaussian memory.
 
 ### 3. Method
@@ -135,7 +135,7 @@ Boundaries:
 Goal: close on the representation-learning contribution.
 
 Suggested close:
-CTF-GS turns a 3D Gaussian scene into a compact, reusable foundation-feature
+GaussFM turns a 3D Gaussian scene into a compact, reusable foundation-feature
 memory. By reconstructing frozen RADIO features and supporting rendered-view,
 primitive-level, and point-level queries, it provides a unified route for
 open-vocabulary 3D scene understanding with explicit storage, protocol, and
@@ -155,7 +155,7 @@ Main tables:
 - Frame-wise RADIO features vs. reconstructed scene field.
 - Core component ablation summary.
 - Storage footprint.
-- ScanNet VALA/OpenGaFF-8 same-protocol direct point-query comparison.
+- VALA-aligned ScanNet-8 same-protocol direct point-query comparison.
 - Efficiency and cost.
 
 Appendix tables:
@@ -182,7 +182,7 @@ Use in main text:
 - reconstructed scene field.
 
 Avoid in top-level prose:
-- student;
+- learner-field phrasing;
 - direct row;
 - promoted row;
 - support policy;

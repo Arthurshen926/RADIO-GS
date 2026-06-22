@@ -243,11 +243,11 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['teatime']['miou'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['miou'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['macro']['miou'])} |",
-            f"| CTF-GS | SigLIP2 | fixed {fixed_tag} mIoU | "
+            f"| GaussFM | SigLIP2 | fixed {fixed_tag} mIoU | "
             f"{fmt(fixed_miou['figurines'])} | {fmt(fixed_miou['ramen'])} | "
             f"{fmt(fixed_miou['teatime'])} | {fmt(fixed_miou['waldo_kitchen'])} | "
             f"{fmt(fixed_miou['macro'])} |",
-            "| CTF-GS | SigLIP2 | diagnostic best-by-scene mIoU | "
+            "| GaussFM | SigLIP2 | diagnostic best-by-scene mIoU | "
             f"{fmt(best_miou['figurines'])} | {fmt(best_miou['ramen'])} | "
             f"{fmt(best_miou['teatime'])} | {fmt(best_miou['waldo_kitchen'])} | "
             f"{fmt(best_miou['macro'])} |",
@@ -257,11 +257,11 @@ def make_markdown(results: Dict[str, dict], root: Path, fixed_tag: str) -> str:
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['teatime']['macc025'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['macc025'])} | "
             f"{fmt(OPENGAUSSIAN_PAPER_LERF['macro']['macc025'])} |",
-            f"| CTF-GS | SigLIP2 | fixed {fixed_tag} Acc@0.25 | "
+            f"| GaussFM | SigLIP2 | fixed {fixed_tag} Acc@0.25 | "
             f"{fmt(fixed_acc['figurines'])} | {fmt(fixed_acc['ramen'])} | "
             f"{fmt(fixed_acc['teatime'])} | {fmt(fixed_acc['waldo_kitchen'])} | "
             f"{fmt(fixed_acc['macro'])} |",
-            "| CTF-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | "
+            "| GaussFM | SigLIP2 | diagnostic best-by-scene Acc@0.25 | "
             f"{fmt(best_acc['figurines'])} | {fmt(best_acc['ramen'])} | "
             f"{fmt(best_acc['teatime'])} | {fmt(best_acc['waldo_kitchen'])} | "
             f"{fmt(best_acc['macro'])} |",
@@ -332,7 +332,7 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
     rows = [
         r"\begin{table}[t]",
         r"  \centering",
-        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; CTF-GS uses "
+        r"  \caption{LERF-OVS direct 3D object selection under an OpenGaussian-style query-select-render protocol. External values are the OpenGaussian official paper numbers; GaussFM uses "
         + direct_caption_feature_source(results)
         + r" and a SigLIP2 text head.}",
         r"  \label{tab:lerf-direct-3d-selection}",
@@ -347,11 +347,11 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['teatime']['miou'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['miou'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['macro']['miou'])} \\\\",
-        f"    CTF-GS & {fixed_tag} mIoU & "
+        f"    GaussFM & {fixed_tag} mIoU & "
         f"{texfmt(fixed_miou['figurines'])} & {texfmt(fixed_miou['ramen'])} & "
         f"{texfmt(fixed_miou['teatime'])} & {texfmt(fixed_miou['waldo_kitchen'])} & "
         f"{texfmt(fixed_miou['macro'])} \\\\",
-        f"    CTF-GS & diag. best mIoU & "
+        f"    GaussFM & diag. best mIoU & "
         f"{texfmt(best_miou['figurines'])} & {texfmt(best_miou['ramen'])} & "
         f"{texfmt(best_miou['teatime'])} & {texfmt(best_miou['waldo_kitchen'])} & "
         f"{texfmt(best_miou['macro'])} \\\\",
@@ -362,7 +362,7 @@ def make_tex(results: Dict[str, dict], fixed_tag: str) -> str:
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['teatime']['macc025'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['waldo_kitchen']['macc025'])} & "
         f"{texfmt(OPENGAUSSIAN_PAPER_LERF['macro']['macc025'])} \\\\",
-        f"    CTF-GS & {fixed_tag} Acc@0.25 & "
+        f"    GaussFM & {fixed_tag} Acc@0.25 & "
         f"{texfmt(fixed_acc['figurines'])} & {texfmt(fixed_acc['ramen'])} & "
         f"{texfmt(fixed_acc['teatime'])} & {texfmt(fixed_acc['waldo_kitchen'])} & "
         f"{texfmt(fixed_acc['macro'])} \\\\",

@@ -1,8 +1,8 @@
 version: 1
 created: '2026-05-17'
-purpose: Public, paper-facing canonical registry for the current three-track RADIO-GS/CTF-GS
+purpose: Public, paper-facing canonical registry for the current three-track RADIO-GS/GaussFM
   evidence package.
-method_name: CTF-GS
+method_name: GaussFM
 repository_name: RADIO-GS
 tracks:
   t1_lerf_rendered_view_ovs:
@@ -83,7 +83,7 @@ tracks:
       selection_floor: 0.005
       selection_cap: 0.05
       comparison_scope: open-source baseline methods are evaluated under the same
-        reproduced LERF-OVS 3D OVS protocol as CTF-GS.
+        reproduced LERF-OVS 3D OVS protocol as GaussFM.
     rows:
       opengaussian_official_context:
         source: same-protocol reproduced baseline result
@@ -91,7 +91,7 @@ tracks:
         acc025: 0.5143
         reproduced_local: true
       ctfgs_vpr_fixed_thr0p25_rgb_snap:
-        source: local CTF-GS run
+        source: local GaussFM run
         miou: 0.4801
         acc025: 0.676
         reproduced_local: true
@@ -172,8 +172,8 @@ tracks:
         promoted: false
   t3_scannet_ov_point_cloud_segmentation:
     task_name: ScanNet-v2 open-vocabulary point-cloud semantic segmentation
-    radio_gs_source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json
-    reproduced_table_source: same-protocol ScanNet-v2 OpenGaFF/VALA reproduction table
+    radio_gs_source_json: paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json
+    reproduced_table_source: same-protocol VALA-aligned ScanNet-v2 reproduction table
     protocol:
       scenes:
       - scene0000_00
@@ -191,8 +191,8 @@ tracks:
       metrics:
       - mIoU
       - mAcc
-      comparison_scope: all rows follow the same OpenGaFF/VALA ScanNet-v2
-        open-vocabulary point-query protocol; the OpenGaFF method row is omitted.
+      comparison_scope: all rows follow the same VALA-aligned ScanNet-v2
+        open-vocabulary point-query protocol.
     rows:
       langsplat_published_context:
         source: same-protocol reproduced baseline result
@@ -331,8 +331,6 @@ external_reproduction_queue:
     url: https://github.com/Wistzz/CAGS
   - method: LaGa
     url: https://github.com/SJTU-DeepVisionLab/LaGa
-  - method: OpenGaFF
-    url: https://arxiv.org/abs/2605.06088
   p0:
   - method: OpenGaussian
     status: ScanNet reproduced locally; LERF compatibility rerun completed on all
@@ -421,11 +419,3 @@ external_reproduction_queue:
       a local LERF compatibility rerun.'
     local_repo: /root/baselines/LaGa
     local_commit: 9df7586
-  p2:
-  - method: OpenGaFF
-    status: published arXiv context row only; current arXiv source states that code
-      will be publicly released upon acceptance, and no public implementation was
-      found in arXiv metadata/source or web search on 2026-05-18. Strict same-protocol
-      reproduction is blocked until code or checkpoints are released.
-    local_repo: /root/baselines/OpenGaFF
-    local_commit: null

@@ -41,7 +41,7 @@ Per scene:
 - Ramen: 38.43 / 63.38
 - Waldo Kitchen: 48.61 / 77.27
 
-### ScanNet-v2 OpenGaFF/VALA protocol
+### VALA-aligned ScanNet-v2 protocol
 
 Ours:
 

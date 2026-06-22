@@ -75,6 +75,6 @@ For the main paper, the safe claim remains:
 > The compact direct field provides the 3D evidence. Frozen official SAM3 can be
 > used as an image-assisted boundary readout when sharp masks are required.
 
-The stronger claim that existing CTF-GS/RADIO features can directly emulate
+The stronger claim that existing GaussFM/RADIO features can directly emulate
 official SAM3 mask decoding is not supported by this grid.
 

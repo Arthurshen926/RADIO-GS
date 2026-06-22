@@ -24,7 +24,7 @@ Template decision:
 
 ## Core Paper Thesis
 
-**CTF-GS learns a compact foundation-feature scene memory for 3D Gaussian scenes that supports rendered-view open-vocabulary localization, direct 3D primitive selection, and direct point querying.**
+**GaussFM learns a compact foundation-feature scene memory for 3D Gaussian scenes that supports rendered-view open-vocabulary localization, direct 3D primitive selection, and direct point querying.**
 
 The strongest defensible version:
 
@@ -60,7 +60,7 @@ What to borrow:
 
 What not to borrow:
 
-- Do not make rendered-view querying the only claim; CTF-GS now has a stronger dual-readout story.
+- Do not make rendered-view querying the only claim; GaussFM now has a stronger dual-readout story.
 
 ### OpenGaussian
 
@@ -78,7 +78,7 @@ What to borrow:
 
 What to improve:
 
-- CTF-GS should stress compact foundation-feature reconstruction and multiple downstream readouts, not only object-level instance consistency.
+- GaussFM should stress compact foundation-feature reconstruction and multiple downstream readouts, not only object-level instance consistency.
 
 ### Dr. Splat
 
@@ -95,9 +95,9 @@ What to borrow:
 
 What to avoid:
 
-- Do not imply CTF-GS uses Dr. Splat's exact dominant-ray protocol unless the raster-contribution registration row is promoted. Current raster-level variants are diagnostics.
+- Do not imply GaussFM uses Dr. Splat's exact dominant-ray protocol unless the raster-contribution registration row is promoted. Current raster-level variants are diagnostics.
 
-### OpenGaFF
+### the unpublished protocol source
 
 Writing pattern:
 
@@ -116,7 +116,7 @@ What to borrow:
 
 What to differentiate:
 
-- CTF-GS is not a codebook-attention field; its novelty is compact foundation-feature reconstruction with multi-protocol readouts and frozen-head downstream usability.
+- GaussFM is not a codebook-attention field; its novelty is compact foundation-feature reconstruction with multi-protocol readouts and frozen-head downstream usability.
 
 ## Recommended TPAMI Structure
 
@@ -128,7 +128,7 @@ What to differentiate:
 
 2. **Related Work**
    - Language fields and open-vocabulary 3DGS: LERF, LangSplat, LEGaussians.
-   - Primitive/instance-level 3DGS understanding: OpenGaussian, Dr. Splat, OpenGaFF, InstanceGaussian, SuperGSeg.
+   - Primitive/instance-level 3DGS understanding: OpenGaussian, Dr. Splat, the unpublished protocol source, InstanceGaussian, SuperGSeg.
    - Foundation-feature distillation and RADIO/DINO/SAM feature spaces.
    - Compact feature fields and storage-efficient 3D semantics.
 
@@ -176,7 +176,7 @@ What to differentiate:
 
 2. **Fig. 2 LERF 2D/3D OVS qualitative**
    - Use `paper/figures/lerf_2d3d_ovs_qualitative.png`.
-   - Layout: scene/query, GT, reproduced baseline, CTF-GS 2D, CTF-GS 3D.
+   - Layout: scene/query, GT, reproduced baseline, GaussFM 2D, GaussFM 3D.
    - Caption must state 2D query occurs on rendered feature map, while 3D query occurs on Gaussian primitives.
 
 3. **Fig. 3 ScanNet direct point-query qualitative**
@@ -194,7 +194,7 @@ What to differentiate:
    - External LangSplat/LERF/LEGaussians context table may follow or move to appendix if too much.
 
 2. **Table 2 LERF direct 3D object selection**
-   - Include OpenGaussian context, CTF-GS registered multiview analysis, CTF-GS compact, and SAM3 diagnostic.
+   - Include OpenGaussian context, GaussFM registered multiview analysis, GaussFM compact, and SAM3 diagnostic.
    - Caption must distinguish compact readout from official SAM3 diagnostic.
 
 3. **Table 3 Direct3D compact-readout ablation**
@@ -202,11 +202,11 @@ What to differentiate:
    - This protects the claim boundary.
 
 4. **Table 4 ScanNet VALA8 direct point-query**
-   - Use OpenGaFF/VALA published context rows but omit OpenGaFF method row by policy.
+   - Use VALA-aligned published context rows but omit unpublished protocol-source method row by policy.
    - Report split19/split15/split10 mIoU/mAcc.
 
-5. **Table 5 Frame-wise RADIO vs CTF-GS**
-   - Same-evaluator RADIO RGB vs CTF-GS rendered features.
+5. **Table 5 Frame-wise RADIO vs GaussFM**
+   - Same-evaluator RADIO RGB vs GaussFM rendered features.
    - This is central for the reconstructed scene-field downstream-usability claim.
 
 6. **Table 6 Quantitative ablation summary**
@@ -228,7 +228,7 @@ What to differentiate:
 ## Immediate Writing Priorities
 
 1. Convert the TPAMI draft from "CVPR freeze report" language to journal language.
-2. Expand related work with explicit categories and sharper positioning versus OpenGaFF, OpenGaussian, and Dr. Splat.
+2. Expand related work with explicit categories and sharper positioning versus the unpublished protocol source, OpenGaussian, and Dr. Splat.
 3. Merge redundant tables in the main paper; move diagnostics to appendix.
 4. Rewrite method section around a clean dual-readout pipeline.
 5. Make all claim boundaries explicit in captions, not only in prose.

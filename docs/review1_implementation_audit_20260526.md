@@ -113,7 +113,7 @@ CUDA_VISIBLE_DEVICES= bash radio_gs/scripts/run_repo_python.sh -m py_compile \
    `direct_point_proposal_consistency_weight>0`.
 3. Re-evaluate LERF direct 3D without VPR inference and compare against the current
    VPR row.
-4. Re-run the DINO Teacher-vs-Ours benchmark with
+4. Re-run the DINO frame-wise-RADIO-vs-Ours benchmark with
    `--dino_match_mutual --dino_transport_match_weight {0.25,0.5,1.0}` and the
    existing feature-boundary refinement.
 5. Re-run ScanNet VALA8 with the proposal-consistency trained checkpoints and

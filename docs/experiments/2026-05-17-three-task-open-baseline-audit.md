@@ -7,9 +7,9 @@ Source recommendation file: `ChatGPT-RADIO模型多视角重建优化 (1).md`.
 The latest expert request changes the work from a single-paper polishing pass
 into a stricter benchmark package:
 
-| Track | Task | Required metrics | Current RADIO-GS/CTF-GS evidence |
+| Track | Task | Required metrics | Current RADIO-GS/GaussFM evidence |
 |---|---|---|---|
-| T1 | LERF-OVS rendered-view open-vocabulary localization/segmentation | LocAcc, mIoU | CTF-GS rendered feature maps: 0.8712 LocAcc / 0.5243 mIoU |
+| T1 | LERF-OVS rendered-view open-vocabulary localization/segmentation | LocAcc, mIoU | GaussFM rendered feature maps: 0.8712 LocAcc / 0.5243 mIoU |
 | T2 | LERF-OVS text-to-Gaussian direct 3D object selection | mIoU, Acc@0.25 | VPR fixed `thr0p25` + RGB snap: 0.4801 / 0.6760; SAM3-box strict readout: 0.5705 / 0.6835 |
 | T3 | ScanNet-v2 open-vocabulary point-cloud semantic segmentation | mIoU, mAcc on 19/15/10 splits | RADIO-GS v67: 0.3538/0.6076, 0.3573/0.6203, 0.4293/0.7051 |
 
@@ -31,11 +31,11 @@ context rows until rerun through the local benchmark.
 | CAGS | `/root/baselines/CAGS` | `9136592` | Public repo cloned. README provides OpenGaussian-compatible LERF training, text-rendering, and IoU scripts. The stale global `ashawkey_diff_gaussian_rasterization` ABI issue was cleared by rebuilding the bundled rasterizer zip into `output/baselines/cags/local_site`; incompatible prebuilt PyG wheels were replaced with local `torch-scatter`/`torch-cluster` source builds, and `hdbscan` was installed into the same local site. `gaussian_renderer`, `train.py --help`, and `render_lerf_by_text.py --help` now import successfully under that local site path. Strict local reproduction still needs data-path setup and same-evaluator metric export. ScanNet evaluation is marked TODO upstream. |
 | Semantic Gaussians | `/root/baselines/semantic-gaussians` | `ae53137` | Public repo cloned with submodules. The vendored `simple_knn`, `rgbd-rasterization`, `channel-rasterization`, and `segment-anything` packages are built into `output/baselines/semantic_gaussians/local_site`, with compatible NumPy/scikit-image/viser/TensorFlow imports; `train.py` and `fusion.py` import successfully. Strict eval remains blocked because `eval_segmentation.py` and `distill.py` require MinkowskiEngine, and `MinkowskiEngine==0.5.4` fails to build against the host PyTorch 2.7.1/CUDA headers at `spmm.cu`; `view_viser.py` additionally needs PyTorch-Encoding (`encoding`) for LSeg. |
 | LaGa | `/root/baselines/LaGa` | `9df7586` | Public repo cloned. README targets view-dependent semantics through object decomposition and semantic descriptors, with LERF-OVS and ScanNet data entry points. A local `.gitmodules` mapping restores `third_party/kmeans_pytorch`, recursive submodule status is clean, `simple_knn` plus both diff rasterizers are built into `output/baselines/laga/local_site`, and `train_scene.py --help` plus `train_affinity_features.py --help` reach CLI help with a chunked `torch.cdist` fallback replacing the incompatible PyTorch3D KNN import. Strict comparison still needs affinity-feature training plus adaptation of `inference.ipynb` to export same-evaluator masks. |
-| OpenGaFF | `/root/baselines/OpenGaFF` | `-` | Published arXiv context row only. Current arXiv source says the code will be publicly released upon acceptance, and no public implementation was found in arXiv metadata/source or web search on 2026-05-18. Strict same-protocol reproduction is blocked until code or checkpoints are released. |
+| the unpublished protocol source | `/root/baselines/the unpublished protocol source` | `-` | Published arXiv context row only. Current arXiv source says the code will be publicly released upon acceptance, and no public implementation was found in arXiv metadata/source or web search on 2026-05-18. Strict same-protocol reproduction is blocked until code or checkpoints are released. |
 
 Public source verification was done against the official GitHub pages:
 OpenGaussian, LangSplatV2, OccamLGS, GAGS, Dr. Splat, LangSplat,
-LEGaussians, CAGS, Semantic Gaussians, and LaGa, plus the OpenGaFF arXiv source.
+LEGaussians, CAGS, Semantic Gaussians, and LaGa, plus the the unpublished protocol source arXiv source.
 
 The local state is now also machine-audited by
 `radio_gs/scripts/audit_external_baselines.py`, with generated outputs at
@@ -216,7 +216,7 @@ and object-weighted LocAcc 0.7356 / mIoU 0.4613 over 208 queries.
   rows and external reproduction status.
 - `radio_gs/scripts/validate_final_rows_registry.py` now checks the registry
   against source artifacts for the contextual ScanNet support row and the
-  OpenGaFF no-code blocker.
+  the unpublished protocol source no-code blocker.
 - `radio_gs/scripts/validate_paper_claims.py` now guards the paper-facing
   VPR rows against `mean+2.5std` selector promotion and flags unqualified
   ScanNet/global-SOTA leaderboard language.
@@ -329,7 +329,7 @@ current PyTorch/CUDA host:
 5. For Semantic Gaussians, use a PyTorch/MinkowskiEngine-compatible environment
    or patch the sparse-convolution dependency before attempting ScanNet export
    under the local 19/15/10 evaluator.
-6. Re-check OpenGaFF code availability before any strict SOTA comparison; as of
+6. Re-check the unpublished protocol source code availability before any strict SOTA comparison; as of
    2026-05-18 it is a no-code arXiv context row, not a reproducible baseline.
 7. Do not promote global SOTA language until the P0 methods have local rows
    under the same T1/T2/T3 protocols.

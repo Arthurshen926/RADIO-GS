@@ -1,0 +1,55 @@
+{
+  "label": "GaussFM VALA-aligned ScanNet-v2 reproduced benchmark row",
+  "artifact_type": "paper-facing summary",
+  "protocol": "VALA-aligned ScanNet-v2 direct point-query protocol",
+  "scene_count": 8,
+  "scenes": [
+    "scene0000_00",
+    "scene0062_00",
+    "scene0070_00",
+    "scene0097_00",
+    "scene0140_00",
+    "scene0347_00",
+    "scene0400_00",
+    "scene0590_00"
+  ],
+  "source_timestamp": "2026-06-15",
+  "source_artifacts": [
+    "paper/artifacts/reproduced_benchmark_update_20260615.md",
+    "paper/scannet_published_context_table.tex",
+    "paper/artifacts/final_rows.yaml"
+  ],
+  "source_args": {
+    "scene_list": "scene0000_00,scene0062_00,scene0070_00,scene0097_00,scene0140_00,scene0347_00,scene0400_00,scene0590_00",
+    "class_splits": "19,15,10",
+    "query_mode": "knn",
+    "k": "16",
+    "candidate_k": "80",
+    "opacity_filter_mode": "auto",
+    "logit_calibration": "scene_mean",
+    "logit_calibration_alpha": "0.45",
+    "logit_smoothing": "spatial_knn",
+    "logit_smoothing_k": "12",
+    "logit_smoothing_alpha": "1.0",
+    "logit_smoothing_iterations": "1",
+    "prompt_templates": "{query}",
+    "use_summary_head": "True",
+    "use_point_summary_adapter": "False"
+  },
+  "macro": {
+    "19": {
+      "miou": 0.3655,
+      "macc": 0.5057
+    },
+    "15": {
+      "miou": 0.4278,
+      "macc": 0.7285
+    },
+    "10": {
+      "miou": 0.5785,
+      "macc": 0.7793
+    }
+  },
+  "rows": [],
+  "note": "This summary is the canonical paper-facing ScanNet row used by final_rows.yaml and the TPAMI ScanNet table. Per-scene contextual-kNN diagnostic JSON files are retained separately as support artifacts and are not the final table source."
+}

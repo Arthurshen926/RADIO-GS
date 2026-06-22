@@ -13,7 +13,7 @@ Main-paper qualitative figures must satisfy all four criteria:
 
 1. The protocol matches a main quantitative table.
 2. The example is visually legible after reduction to journal two-column width.
-3. The baseline failure and CTF-GS improvement are both understandable without
+3. The baseline failure and GaussFM improvement are both understandable without
    extra explanation.
 4. The figure does not depend on a stronger auxiliary readout than the method
    row claimed in the caption.
@@ -23,8 +23,8 @@ Main-paper qualitative figures must satisfy all four criteria:
 | Figure | Decision | Rationale | Required caveat |
 | --- | --- | --- | --- |
 | `paper/figures/radio_gs_framework.pdf` | Keep as Fig. 1 after top-journal redraw | The current version is a vector-first conceptual figure with four columns: offline supervision, stored compact map, global readout heads, and protocol evidence. It keeps the central visual claim on one compact map, uses dashed paths only for training constraints, and avoids long protocol caveats inside the artwork. | Caption must distinguish training-only supervision from inference readouts and state that the main compact readout does not use a VPR cache or official RGB SAM decoder. |
-| `paper/figures/lerf_2d3d_ovs_qualitative.png` | Keep as main qualitative | Best match to the OpenGaFF-style 2D/3D LERF-OVS taxonomy. Highest-quality examples are `old camera`, `green apple`, `pumpkin`, `tea in a glass`, `apple`, and `bag of cookies`. The earlier `green toy chair` case was replaced because its compact 3D selection was less clean. | Caption must state that 2D query is rendered-view and 3D query is primitive-level. |
-| `paper/figures/scannet_openvocab_3d_query_qualitative.png` | Keep, preferably as a compact main figure | Correct binary query-point visualization for the VALA/OpenGaFF-style protocol. The strongest rows are `door` and `picture`, where the local OpenGaussian reproduction is visibly weaker; `cabinet` is acceptable but visually denser. | Use binary query masks in the main paper; reserve full 19-class coloring for appendix. |
+| `paper/figures/lerf_2d3d_ovs_qualitative.png` | Keep as main qualitative | Best match to the recent open-vocabulary 2D/3D LERF-OVS taxonomy. Highest-quality examples are `old camera`, `green apple`, `pumpkin`, `tea in a glass`, `apple`, and `bag of cookies`. The earlier `green toy chair` case was replaced because its compact 3D selection was less clean. | Caption must state that 2D query is rendered-view and 3D query is primitive-level. |
+| `paper/figures/scannet_openvocab_3d_query_qualitative.png` | Keep, preferably as a compact main figure | Correct binary query-point visualization for the VALA-aligned-style protocol. The strongest rows are `door` and `picture`, where the local OpenGaussian reproduction is visibly weaker; `cabinet` is acceptable but visually denser. | Use binary query masks in the main paper; reserve full 19-class coloring for appendix. |
 | `paper/figures/lerf_direct3d_support_policy_ablation_qualitative.png` | Keep as main ablation or first appendix figure | Strongest ablation visual because it explains the largest method-level gain: support-aware primitive selection recovers small/fragmented objects (`knife`, `spoon`, `wavy noodles`, `plate`). | Caption should say no VPR cache and no official RGB SAM3 decoder are used. |
 
 ## Appendix-only or diagnostic figures

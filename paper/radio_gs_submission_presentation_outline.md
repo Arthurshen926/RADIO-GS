@@ -32,7 +32,7 @@
 - 注意主表是 current-best freeze，不和 seed-7 ablation 混为一谈。
 
 ## 12. Rendered Features vs. Original RADIO RGB
-- 这页是最强 story 页之一：为什么重建的 feature 可能比单帧 teacher 更适合 novel-view grounding。
+- 这页是最强 story 页之一：为什么重建的 feature 可能比单帧 RADIO 参考更适合 novel-view grounding。
 
 ## 13. 定性结果：LERF grounding overlays
 - 用这页展示四个场景的 rendered feature heatmap 和视觉质量，强调来自 frozen shortlist。

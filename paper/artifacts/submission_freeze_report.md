@@ -7,7 +7,7 @@ This generated report is the current paper-facing source of truth for the conser
 | Paper claim | Current status | Primary artifact | Paper use |
 |---|---|---|---|
 | LERF main result | Current promoted | `paper/artifacts/lerf_rendered_grounding_peak_component_20260524.json` | Main open-vocabulary table |
-| ScanNet fair cross-domain result | Current promoted | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` | Cross-domain table |
+| ScanNet fair cross-domain result | Current promoted | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json` | Cross-domain table |
 | Efficiency/profile evidence | Current eval profiles frozen | `output/radio_gs/profiles/freeze_*_20260502` | Runtime and memory table |
 | Qualitative figure shortlist | Frozen overlay candidates selected | `output/radio_gs/reports/submission_freeze_figure_shortlist.md` | Main qualitative figure |
 | External baseline comparison | Official-source provenance closed | `output/radio_gs/reports/baseline_source_verification.md` | Main comparison table with protocol caveat |
@@ -33,7 +33,7 @@ This generated report is the current paper-facing source of truth for the conser
 - Protocol: OpenGaussian-style direct primitive query, selected-Gaussian rendering, and LERF-OVS mask evaluation.
 - The registry below separates primitive scoring, GT-free RGB boundary cleanup, and frozen official SAM3 box-prompt boundary readout.
 - VPR readouts compute text scores on Gaussian primitives; SAM3 box readout refines only the rendered selection boundary and does not use GT masks for candidate selection.
-- CTF-GS + RGB snap silhouette 0.60: macro mIoU `0.4554`, macro Acc@0.25 `0.7014`, macro Acc@0.50 `0.4663`.
+- GaussFM + RGB snap silhouette 0.60: macro mIoU `0.4554`, macro Acc@0.25 `0.7014`, macro Acc@0.50 `0.4663`.
 - Direct-3D silhouette sweep source: `output/radio_gs/reports/lerf_direct_3d_silhouette_sweep_report.json`.
 
 ## Direct-3D Readout Registry
@@ -83,16 +83,18 @@ This generated report is the current paper-facing source of truth for the conser
 | ramen | `thr0p16` | 0.6830 | 0.8028 | 0.7970 | 0.4326 | 71 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/ramen/ramen/lerf_direct_3d_selection_results.json` |
 | teatime | `thr0p38` | 0.6556 | 0.7797 | 0.7530 | 0.4707 | 59 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/teatime/teatime/lerf_direct_3d_selection_results.json` |
 | waldo_kitchen | `thr0p3` | 0.3949 | 0.5455 | 0.4613 | 0.2552 | 22 | `output/radio_gs/lerf_direct3d_sam3_box_pad0_best_masks_20260516/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json` |
-- CTF-GS accuracy-oriented cap0.015 diagnostic: macro mIoU `0.4184`, macro Acc@0.25 `0.7013`.
-- CTF-GS fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.
-- CTF-GS previous cap0.02 diagnostic: macro mIoU `0.4185`, macro Acc@0.25 `0.6899`.
+- GaussFM accuracy-oriented cap0.015 diagnostic: macro mIoU `0.4184`, macro Acc@0.25 `0.7013`.
+- GaussFM fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.
+- GaussFM previous cap0.02 diagnostic: macro mIoU `0.4185`, macro Acc@0.25 `0.6899`.
 - OpenGaussian official context: macro mIoU `0.3836`, macro Acc@0.25 `0.5143`.
 - Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`, GT-free score-distribution selection improves it to `0.3934`, adding the fixed 2% cap improves it to `0.4072`, adding the fixed 0.5% floor improves it to `0.4133`, increasing the all-pose registration budget to 128 views improves the fixed paper selector to `0.4185`, tightening the global cap to `0.0175` improves it to `0.4226`, and a cache-backed fixed `0.018` cap slightly improves it to `0.4227` with `0.6906` Acc@0.25.
 - Paper use: VPR-backed primitive-level evidence with an explicit Waldo/provenance caveat.
 
-## ScanNet
+## ScanNet Supporting Diagnostic
 
-- Protocol: VALA/OpenGaFF ScanNet-8 direct point query, DINO-CV contextual kNN16/candidate80, scene-mean calibration alpha 0.45, spatial logit smoothing k12/a1.
+- Protocol: VALA-aligned ScanNet-8 direct point query, DINO-CV contextual kNN16/candidate80, scene-mean calibration alpha 0.45, spatial logit smoothing k12/a1.
+- Paper-facing summary source: `paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json`.
+- The per-scene table below is retained as supporting diagnostic evidence for the contextual-kNN readout; it is not the final ScanNet table source.
 - Scenes found: `8`
 - Macro mIoU: `19: 0.3806 / 15: 0.3871 / 10: 0.4711`
 - Macro mAcc: `19: 0.6129 / 15: 0.6315 / 10: 0.7200`
@@ -118,7 +120,7 @@ This generated report is the current paper-facing source of truth for the conser
 ## Warnings
 
 - External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.
-- ScanNet label-supervised, GT-label-balanced, old v67, and non-VALA8 runs are diagnostic only and excluded from this paper-facing VALA/OpenGaFF-8 summary.
+- ScanNet label-supervised, GT-label-balanced, old v67, and non-VALA8 runs are diagnostic only and excluded from this paper-facing VALA-aligned ScanNet-8 summary.
 - LERF direct 3D object selection is protocol-aligned; direct primitive scoring, strict no-RGB one-map, RGB-snap/component cleanup, and official SAM3 box boundary readout are reported as separate readouts.
 - Direct-3D readout `direct field + official SAM3 box, pad16 scene-locked diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.
 - Direct-3D readout `direct field + official SAM3 box, pad0 legacy diagnostic` uses best_by_miou scene selectors; treat it as diagnostic until a validation-selected or global threshold rule is added.

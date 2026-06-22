@@ -1,6 +1,6 @@
 # ScanNet VALA8 Contextual kNN Calibration Sweep
 
-Protocol: VALA/OpenGaFF-8 ScanNet direct point-query evaluator, DINO-CV compact
+Protocol: VALA-aligned ScanNet-8 ScanNet direct point-query evaluator, DINO-CV compact
 field, `query_mode=knn`, prompt `{query}`, and label-free scene-mean
 calibration. No ScanNet labels are used for calibration or row selection beyond
 final metric reporting.

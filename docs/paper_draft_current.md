@@ -9,7 +9,7 @@ The active LaTeX draft is `paper/radio_gs_draft.tex`.
 
 ## Working Title
 
-CTF-GS: Compact Teacher Feature Fields with View-to-Primitive Registration for
+GaussFM: Compact Foundation-Feature Gaussian Memory for
 Open-Vocabulary 3D Gaussian Scene Understanding
 
 ## Abstract
@@ -26,7 +26,7 @@ resulting scene representation renders feature maps that remain compatible with
 text grounding and other frozen downstream probes. On LERF-OVS, the current
 frozen RADIO-GS package with the GT-free peak-connected-component mask readout
 reaches 0.8598 macro localization accuracy and 0.5707 macro mIoU across four
-scenes. On the VALA/OpenGaFF eight-scene ScanNet direct point-query protocol,
+scenes. On the VALA-aligned eight-scene ScanNet direct point-query protocol,
 the paper-facing DINO-CV contextual kNN readout with scene-mean calibration and
 spatial logit propagation reaches 0.3806, 0.3871, and 0.4711 mIoU on the 19-,
 15-, and 10-class splits. A follow-up proposal-memory readout improves the
@@ -62,7 +62,7 @@ provenance, and final paper formatting.
 
 Given a pretrained 3DGS scene, RADIO-GS keeps the Gaussian geometry fixed and
 learns a feature field attached to that geometry. Training views are first passed
-through a frozen RADIO C-RADIOv4-H teacher to produce 1280d dense target
+through frozen RADIO C-RADIOv4-H to produce 1280d dense target
 features. The feature field renders compact latent maps from Gaussian splats and
 fuses them with a coarse spatial branch queried from 3D positions. An HCD decoder
 maps the compact representation back into the RADIO feature space, after which a
@@ -78,7 +78,7 @@ the frozen head as a late geometry-aware regularizer.
 At test time, the model renders a novel-view feature map. For LERF-OVS grounding,
 RADIO-GS compares the rendered feature map with SigLIP2 text embeddings and
 localizes each query from the relevancy heatmap. For ScanNet, it evaluates
-direct point queries on the VALA/OpenGaFF-8 split with the promoted DINO-CV
+direct point queries on the VALA-aligned ScanNet-8 split with the promoted DINO-CV
 contextual kNN readout. For direct LERF object selection, VPR scores
 registered-view primitive embeddings against text before the selected Gaussians
 are rendered only for mask evaluation. The raw Gaussian-center readout remains a
@@ -118,15 +118,15 @@ Promoted adaptor/cross-view candidate:
 | Waldo Kitchen | Baseline | 0.8636 | 0.4106 | 25 |
 | Macro | - | 0.8712 | 0.4979 | - |
 
-### 2D Teacher-vs-CTF-GS Feature Usability
+### 2D Frame-wise RADIO-vs-GaussFM Feature Usability
 
 Use `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.md` and the compact
 table snippet `paper/tables/teacher_vs_ctfgs_2d_usability_20260525.tex`. The
-consolidated 2D evidence shows that rendered CTF-GS features improve the main
-LERF text-grounding mIoU over frame-wise RADIO teacher features (0.5707 vs.
+consolidated 2D evidence shows that rendered GaussFM features improve the main
+LERF text-grounding mIoU over frame-wise RADIO features (0.5707 vs.
 0.4634) and win 6/6 primary selected frozen-head metrics. The claim should stay
 qualified to primary feature-usability metrics: the DINOv3 mask-propagation row
-now favors CTF-GS with the multi-head DINO-support/SAM-boundary readout
+now favors GaussFM with the multi-head DINO-support/SAM-boundary readout
 (0.4677 vs. 0.4606 mIoU), while secondary SAM LocAcc and DINO dense HitRate
 caveats remain.
 
@@ -144,17 +144,17 @@ thresholds are post-hoc or scene-specific.
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| CTF-GS | SigLIP2 | VPR + fixed threshold 0.25 + RGB snap mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 fixed `thr0p25` | 0.6136 | 0.6409 | 0.6130 | 0.4142 | 0.5705 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 scene-locked diagnostic | 0.6422 | 0.6494 | 0.6528 | 0.4444 | 0.5972 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad0 legacy diagnostic | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
+| GaussFM | SigLIP2 | VPR + fixed threshold 0.25 + RGB snap mIoU | 0.5309 | 0.5805 | 0.5662 | 0.2429 | 0.4801 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 fixed `thr0p25` | 0.6136 | 0.6409 | 0.6130 | 0.4142 | 0.5705 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad16 scene-locked diagnostic | 0.6422 | 0.6494 | 0.6528 | 0.4444 | 0.5972 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout mIoU, pad0 legacy diagnostic | 0.5924 | 0.6830 | 0.6556 | 0.3949 | 0.5815 |
+| GaussFM | SigLIP2 | VPR + voxel context fixed top0p02 mIoU | 0.4055 | 0.4491 | 0.4862 | 0.1991 | 0.3850 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| CTF-GS | SigLIP2 | VPR + fixed threshold 0.25 + RGB snap Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 fixed `thr0p25` | 0.6964 | 0.7465 | 0.7458 | 0.5455 | 0.6835 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 scene-locked diagnostic | 0.7321 | 0.7465 | 0.7797 | 0.5455 | 0.7009 |
-| CTF-GS | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad0 legacy diagnostic | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
-| CTF-GS | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
+| GaussFM | SigLIP2 | VPR + fixed threshold 0.25 + RGB snap Acc@0.25 | 0.7857 | 0.7465 | 0.7627 | 0.4091 | 0.6760 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 fixed `thr0p25` | 0.6964 | 0.7465 | 0.7458 | 0.5455 | 0.6835 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad16 scene-locked diagnostic | 0.7321 | 0.7465 | 0.7797 | 0.5455 | 0.7009 |
+| GaussFM | SigLIP2+SAM3 | compact direct field + official SAM3 box readout Acc@0.25, pad0 legacy diagnostic | 0.7321 | 0.8028 | 0.7797 | 0.5455 | 0.7150 |
+| GaussFM | SigLIP2 | VPR + voxel context fixed top0p02 Acc@0.25 | 0.6786 | 0.7324 | 0.7966 | 0.3636 | 0.6428 |
 
 This result should not be mixed with rendered-view LERF mIoU. It is best used
 to show dual readout usability: direct primitive scores give the 3D selection,
@@ -185,7 +185,7 @@ because of zero-prediction and primitive fragmentation: 0.2429 mIoU, 0.4091
 Acc@0.25, and 0.1818 zero-prediction rate.
 The confidence/coverage mechanism table adds a GT-free explanation: scene-level
 mean valid VPR views correlate with strict Direct3D mIoU at Pearson r=0.7588,
-and the high teacher-score bucket reaches 0.6358 mean IoU / 0.8551 Acc@0.25
+and the high primitive-score bucket reaches 0.6358 mean IoU / 0.8551 Acc@0.25
 versus 0.4345 / 0.6143 for the low bucket. Text-margin stratification gives a
 matching ambiguity trend: distinct-margin queries reach 0.6202 / 0.8261 while
 ambiguous queries are 0.4329 / 0.6286.
@@ -203,7 +203,7 @@ than causal proof.
 ### ScanNet Direct Point Query
 
 The current fair cross-domain table uses the promoted DINO-CV contextual kNN
-point-query readout on the VALA/OpenGaFF eight-scene ScanNet subset:
+point-query readout on the VALA-aligned eight-scene ScanNet subset:
 
 | Split | mIoU | mAcc |
 |---|---:|---:|
@@ -214,7 +214,7 @@ point-query readout on the VALA/OpenGaFF eight-scene ScanNet subset:
 The row uses the DINO-CV compact field with contextual kNN point readout
 (`k=16`, `candidate_k=80`) plus label-free scene-mean calibration at alpha 0.45
 and one-step spatial logit propagation (`k=12`, alpha 1.0).
-This should be framed as OpenGaFF/VALA split-aligned cross-domain feature
+This should be framed as VALA-aligned split-aligned cross-domain feature
 usability evidence, not as a fully standard ScanNet semantic segmentation
 leaderboard comparison. Older v67 and label-informed ScanNet diagnostics must
 stay out of the main fair table.
@@ -243,13 +243,13 @@ The feature-error/text-relevance audit supports the reconstruction thesis:
 r=0.9568 and with LocAcc error at r=0.8713 across the four frozen LERF scenes.
 The nearest-view cache baseline is now measured under the same LERF evaluator:
 an unwarped nearest cached RADIO frame reaches only 0.2722 macro LocAcc /
-0.1545 macro mIoU, versus 0.8598 / 0.5707 for rendered CTF-GS features. This
+0.1545 macro mIoU, versus 0.8598 / 0.5707 for rendered GaussFM features. This
 should be used as a cache-only control, not a 3D scene-memory baseline.
 The full per-Gaussian 1280-D explicit RADIO-memory baseline is also now
-measured under the same evaluator: it registers cached teacher features to
+measured under the same evaluator: it registers cached frame-wise RADIO features to
 Gaussian centers and reaches 0.5642 macro LocAcc / 0.3182 macro mIoU, with
 0.2020 mean registered-Gaussian fraction and 1039.7 MiB mean fp16 feature
-storage. This closes the raw-feature controlled row; the compact CTF-GS row
+storage. This closes the raw-feature controlled row; the compact GaussFM row
 remains substantially stronger and should be framed as the main 3D feature
 field result.
 The boundary-error audit supports the SAM3-box readout framing: boundary-F and
@@ -267,14 +267,14 @@ RADIO-GS currently depends on a pretrained Gaussian geometry backbone and does
 not claim to improve RGB reconstruction. Its open-vocabulary quality is limited
 by the resolution and alignment of the frozen RADIO features, which is most
 visible on small-object scenes such as Figurines. The ScanNet protocol used here
-is the VALA/OpenGaFF eight-scene direct point-query transfer test for the
+is the VALA-aligned eight-scene direct point-query transfer test for the
 learned feature field, using every-20-frame ScanNet training splits and mIoU/mAcc
 evaluation on GT semantic point clouds. It should still be framed as
-OpenGaFF/VALA protocol comparison rather than a full ScanNet leaderboard. The
+VALA-aligned protocol comparison rather than a full ScanNet leaderboard. The
 LERF direct 3D object-selection result should be compared only against the
-published public baseline rows we keep in the table; the OpenGaFF method row is
-omitted by policy. External comparison numbers should be cited from OpenGaFF or
-the original published tables, while our own rows stay fully auditable under the
+published public baseline rows we keep in the table; the unpublished
+protocol-source method row is excluded from the comparison. External comparison
+numbers should be cited from the original published tables, while our own rows stay fully auditable under the
 local evaluator.
 The training entry point is now explicitly audited in
 `output/radio_gs/reports/train_feature_field_audit.md`: manifest, split,

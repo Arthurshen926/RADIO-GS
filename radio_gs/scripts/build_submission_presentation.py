@@ -307,7 +307,7 @@ def build_deck() -> None:
     slide = deck.add_slide("一句话主张", "Story")
     deck.text(slide, 0.75, 1.45, 11.5, 0.55, "3D Gaussian scene 可以成为 reusable foundation-feature memory。", 26, COLORS["blue"], bold=True)
     deck.bullets(slide, 1.0, 2.35, 11.1, 2.4, [
-        "输入：已有 3DGS 几何 + 多视角 RGB + 冻结 RADIO teacher features。",
+        "输入：已有 3DGS 几何 + 多视角 RGB + 冻结 frame-wise RADIO features。",
         "训练：学习 hybrid Gaussian feature field，重建 novel-view RADIO-compatible feature maps。",
         "推理：不用重新跑 teacher，也不用训练任务分类器；渲染出的 feature 可以做 text grounding、ScanNet point query、SAM/DINO probes。",
         "投稿角度：方法创新、主结果、消融、定性和失败分析已经形成闭合逻辑。"
@@ -559,7 +559,7 @@ def build_deck() -> None:
     deck.card(slide, 4.25, 1.35, 3.2, 1.25, "Mainline", "LERF-OVS + ScanNet v67\nfeature memory story", COLORS["blue"], body_size=17)
     deck.card(slide, 7.75, 1.35, 3.8, 1.25, "Risks", "external baseline / final cost table / venue polish", COLORS["amber"], body_size=16)
     deck.bullets(slide, 1.0, 3.35, 10.8, 2.5, [
-        "主线只保留：full RADIO-GS、same-evaluator teacher-vs-rendered、核心组件消融、ScanNet v67、qualitative + profile。",
+        "主线只保留：full RADIO-GS、same-evaluator frame-wise-RADIO-vs-rendered、核心组件消融、ScanNet v67、qualitative + profile。",
         "DINO/SAM/ProFuse branches 放入 ablation/diagnostic，不抢主贡献。",
         "历史分支归档，仅用于解释设计选择和 failure analysis。"
     ], 15)
@@ -570,7 +570,7 @@ def build_deck() -> None:
         ["Introduction", "3DGS as reusable foundation-feature memory"],
         ["Related Work", "language fields / 3DGS / RADIO / SAM-DINO regularization"],
         ["Method", "hybrid field + HCD + refiner + FDH + adaptor consistency"],
-        ["Experiments", "LERF main, teacher-vs-rendered, ablations, ScanNet, efficiency"],
+        ["Experiments", "LERF main, frame-wise-RADIO-vs-rendered, ablations, ScanNet, efficiency"],
         ["Failure Analysis", "Figurines, feature resolution, peak-vs-region tradeoff"],
         ["Limitations", "baseline provenance, SAM gap, full ScanNet leaderboard not claimed"],
     ]
@@ -589,7 +589,7 @@ def build_deck() -> None:
     deck.text(slide, 0.8, 1.4, 11.5, 0.5, "RADIO-GS 的投稿主张已经自洽：", 24, COLORS["blue"], bold=True)
     deck.bullets(slide, 1.0, 2.25, 10.8, 3.1, [
         "方法上：将 RADIO foundation features 重建进 3D Gaussian scene，形成可渲染 feature memory。",
-        "实验上：LERF main result、teacher-vs-rendered、ScanNet transfer 和 component ablations 已经闭合。",
+        "实验上：LERF main result、frame-wise-RADIO-vs-rendered、ScanNet transfer 和 component ablations 已经闭合。",
         "消融上：HCD / FDH / refiner / hybrid 的作用可以用同一 LERF seed-7 protocol 解释。",
         "投稿上：剩余风险主要是外部 baseline provenance 和最终写作/版式，而不是核心方法完成度。"
     ], 17)

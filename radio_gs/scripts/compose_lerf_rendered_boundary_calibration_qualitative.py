@@ -199,7 +199,7 @@ def main() -> None:
         "cases": entries,
         "notes": (
             "The figure uses masks exported by eval_lerf_grounding --save_pred_masks. "
-            "The feature-only boundary head is driven by reconstructed RADIO/CTF-GS "
+            "The feature-only boundary head is driven by reconstructed RADIO/GaussFM "
             "features and prompt embeddings; it does not call the official RGB SAM3 decoder."
         ),
     }

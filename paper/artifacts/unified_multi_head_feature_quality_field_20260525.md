@@ -9,7 +9,7 @@ Status: implemented as a method-level training upgrade on 2026-05-25.
 - Both rendered-view decoding and direct Gaussian/point querying now expose
   `quality_logit` and `visibility_logit` when the heads are enabled.
 - Added shared targets:
-  - feature quality: detached student-teacher cosine agreement in RADIO space.
+  - feature quality: detached reconstruction agreement in RADIO space.
   - visibility: rendered alpha visibility, optionally binarized.
 - Added trainer losses controlled by `quality_loss_weight` and
   `visibility_loss_weight`.
@@ -31,12 +31,12 @@ clean method hook for later using the same compact Gaussian map for:
 
 ## Current Evidence Rows
 
-| Track | Current promoted result | Source |
+| Track | Current registered result | Source |
 |---|---:|---|
 | LERF rendered-view OVS | LocAcc 0.8598 / mIoU 0.5707 | `lerf_rendered_grounding_peak_component_20260524.json` |
 | LERF direct 3D selection | mIoU 0.5705 / Acc@0.25 0.6835 / Boundary-F 0.6681 | `lerf_sam3_box_global_threshold_sweep_20260517_geometry.json` |
-| ScanNet VALA8 point query | 19 mIoU/mAcc 0.3806/0.6129; 15 0.3871/0.6315; 10 0.4711/0.7200 | `scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` |
-| 2D Teacher-vs-CTF-GS | CTF-GS wins 5/6 selected primary metrics | `teacher_vs_ctfgs_2d_usability_20260525.json` |
+| ScanNet VALA8 point query | 19 mIoU/mAcc 0.3655/0.5057; 15 0.4278/0.7285; 10 0.5785/0.7793 | `scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json` |
+| 2D Frame-wise RADIO-vs-GaussFM | GaussFM wins 5/6 selected primary metrics | `teacher_vs_ctfgs_2d_usability_20260525.json` |
 
 ## Caveat
 

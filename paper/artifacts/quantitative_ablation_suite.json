@@ -1,6 +1,6 @@
 {
-  "generated": "2026-05-30T11:05:02Z",
-  "purpose": "Unified quantitative ablation and contribution ranking for CTF-GS paper writing.",
+  "generated": "2026-06-18T14:19:24Z",
+  "purpose": "Unified quantitative ablation and contribution ranking for GaussFM paper writing.",
   "ranking_note": "score is the mean positive delta over listed metrics; negative secondary deltas are retained in each metric record.",
   "sources": [
     "paper/artifacts/final_rows.yaml",
@@ -40,10 +40,10 @@
       "primary_delta": 0.366
     },
     {
-      "contribution": "CTR/HCD compact-to-teacher codec",
+      "contribution": "Foundation-space reconstruction codec",
       "task": "LERF rendered architecture",
       "reference": "w/o CTR",
-      "variant": "full CTF-GS seed-7 model",
+      "variant": "full GaussFM seed-7 model",
       "status": "core architecture",
       "metrics": [
         {
@@ -60,16 +60,16 @@
         }
       ],
       "source": "paper/lerf_component_ablation_table.tex",
-      "interpretation": "Dominant architectural dependency; direct 1x1 projection cannot recover teacher-compatible features.",
+      "interpretation": "Dominant architectural dependency; direct 1x1 projection cannot recover RADIO-compatible features.",
       "score": 0.276,
       "primary_metric": "LocAcc",
       "primary_delta": 0.327
     },
     {
       "contribution": "Final rendered-view readout vs frame-wise RADIO",
-      "task": "2D teacher-vs-student feature usability",
-      "reference": "frame-wise RADIO teacher",
-      "variant": "CTF-GS rendered field + feature-only boundary readout",
+      "task": "2D frame-wise-RADIO-vs-field feature usability",
+      "reference": "frame-wise RADIO reference",
+      "variant": "GaussFM rendered field + feature-only boundary readout",
       "status": "main claim evidence",
       "metrics": [
         {
@@ -86,7 +86,7 @@
         }
       ],
       "source": "paper/artifacts/final_rows.yaml",
-      "interpretation": "Shows the student field improves text-grounding usability over frame-wise teacher features under the same evaluator.",
+      "interpretation": "Shows the reconstructed scene field improves text-grounding usability over frame-wise RADIO features under the same evaluator.",
       "score": 0.0934,
       "primary_metric": "LocAcc",
       "primary_delta": 0.0613
@@ -95,7 +95,7 @@
       "contribution": "FGC/FDH geometry-aware warm-start",
       "task": "LERF rendered architecture",
       "reference": "w/o FGC warm-start",
-      "variant": "full CTF-GS seed-7 model",
+      "variant": "full GaussFM seed-7 model",
       "status": "core architecture",
       "metrics": [
         {
@@ -178,8 +178,8 @@
     {
       "contribution": "DINOv3 dense matching feature readout",
       "task": "2D frozen-head downstream",
-      "reference": "frame-wise RADIO teacher",
-      "variant": "CTF-GS rendered field",
+      "reference": "frame-wise RADIO reference",
+      "variant": "GaussFM rendered field",
       "status": "downstream readout evidence with caveat",
       "metrics": [
         {
@@ -204,8 +204,8 @@
     {
       "contribution": "SAM3 point-prompt feature readout",
       "task": "2D frozen-head downstream",
-      "reference": "frame-wise RADIO teacher",
-      "variant": "CTF-GS rendered field",
+      "reference": "frame-wise RADIO reference",
+      "variant": "GaussFM rendered field",
       "status": "downstream readout evidence",
       "metrics": [
         {
@@ -258,7 +258,7 @@
       "task": "ScanNet VALA8 direct point-query",
       "reference": "DINO-CV contextual kNN alpha=0.5",
       "variant": "k16/cand80 + scene alpha 0.45 + spatial k12/a1",
-      "status": "promoted ScanNet readout",
+      "status": "supporting ScanNet diagnostic readout",
       "metrics": [
         {
           "name": "split19 mIoU",
@@ -307,7 +307,7 @@
       "contribution": "VFA view-space aligner",
       "task": "LERF rendered architecture",
       "reference": "w/o VFA",
-      "variant": "full CTF-GS seed-7 model",
+      "variant": "full GaussFM seed-7 model",
       "status": "core architecture",
       "metrics": [
         {
@@ -333,7 +333,7 @@
       "contribution": "Hybrid Gaussian code field",
       "task": "LERF rendered architecture",
       "reference": "w/o HGCF",
-      "variant": "full CTF-GS seed-7 model",
+      "variant": "full GaussFM seed-7 model",
       "status": "core architecture with tradeoff",
       "metrics": [
         {
@@ -396,7 +396,7 @@
     {
       "priority": "P1",
       "item": "multi-head DINO/SAM/SigLIP2 removal under the 2D frozen-head benchmark",
-      "reason": "teacher-vs-student downstream wins are recorded, but per-head removal deltas are not yet a clean single-table factorial."
+      "reason": "frame-wise-RADIO-vs-field downstream wins are recorded, but per-head removal deltas are not yet a clean single-table factorial."
     },
     {
       "priority": "P2",

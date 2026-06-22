@@ -3,7 +3,7 @@
 Date: 2026-06-01
 
 This matrix audits whether the repository currently contains a journal-ready
-CTF-GS manuscript package. It separates manuscript/content readiness from
+GaussFM manuscript package. It separates manuscript/content readiness from
 human-only upload metadata such as author names, conflicts, funding, and portal
 forms.
 
@@ -17,7 +17,7 @@ forms.
 | Supplementary material exists and compiles | `paper/radio_gs_tpami_supplement.tex` -> `paper/radio_gs_tpami_supplement.pdf` | Covered. |
 | Central logic chain is explicit | Abstract, Introduction, Method, Experiments, Discussion, Limitations, and Figure 1 all frame one compact foundation-feature Gaussian map with rendered-view, direct-primitive, and point-query readouts. | Covered. |
 | Method claims are protocol-bounded | `radio_gs/scripts/validate_paper_claims.py`; main text distinguishes Multiview Primitive Registration as a training bridge, label-free color-edge support calibration, official SAM3 control, and external published-context results. | Covered. |
-| Three benchmark tracks are represented | LERF rendered-view OVS, LERF direct 3D OVS, and VALA/OpenGaFF-8 ScanNet point query appear in main tables and `paper/artifacts/final_rows.yaml`. | Covered. |
+| Three benchmark tracks are represented | LERF rendered-view OVS, LERF direct 3D OVS, and VALA-aligned ScanNet-8 ScanNet point query appear in main tables and `paper/artifacts/final_rows.yaml`. | Covered. |
 | Frame-wise foundation-feature comparisons are represented | Main Table `tab:teacher_vs_rendered`, `tab:sam_dino_tasks`, and `paper/artifacts/teacher_vs_ctfgs_2d_usability_20260525.{md,json}`. | Covered with bounded wording. |
 | Component and quantitative ablations are represented | `paper/lerf_component_ablation_table.tex`, `paper/quantitative_ablation_summary_table.tex`, and supplementary protocol controls. | Covered. |
 | Storage and efficiency are represented | `paper/storage_footprint_table.tex`, `paper/efficiency_cost_table.tex`, and supporting artifacts. | Covered. |

@@ -28,7 +28,7 @@ Teacher RADIO on this exact Ramen rendered-view protocol is 0.8873 LocAcc / 0.59
 
 The Direct3D result is the clearest signal. Turning on sparse SigLIP/MPR improves direct-3D mIoU from 0.2389 to 0.3129 and Acc@0.25 from 0.3099 to 0.4225. Dense rendered SigLIP/text supervision alone does not reproduce this gain.
 
-The rendered-view result remains strong without dense SigLIP/text losses: dense0_sparse0 reaches 0.9014 LocAcc / 0.6389 mIoU, above frame-wise RADIO teacher under the same evaluation. Adding dense rendered SigLIP/text does not improve localization in this short run.
+The rendered-view result remains strong without dense SigLIP/text losses: dense0_sparse0 reaches 0.9014 LocAcc / 0.6389 mIoU, above frame-wise RADIO reference under the same evaluation. Adding dense rendered SigLIP/text does not improve localization in this short run.
 
 The sparse primitive regularizer has a visible 2D tradeoff at the tested weight. The sparse-only variant gives the best Direct3D result but lowers rendered-view grounding to 0.8451 / 0.5954. Adding dense SigLIP/text recovers some 2D mIoU but still underperforms the no-sparse 2D variants and reduces the Direct3D gain.
 

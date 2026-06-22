@@ -133,7 +133,7 @@ the better of the two fixed thresholds (`thr0p60`, `thr0p65`) by mIoU.
 The rendered-view Ramen grounding counterpart used the same prompt ensemble,
 `softmax_scene`, and fixed `iou_threshold=0.6`, without mask refinement:
 
-| Training variant | Rendered LocAcc | Rendered mIoU | Teacher LocAcc | Teacher mIoU |
+| Training variant | Rendered LocAcc | Rendered mIoU | Frame-wise RADIO LocAcc | Frame-wise RADIO mIoU |
 |---|---:|---:|---:|---:|
 | `00_none_ft12` | 0.8873 | 0.5934 | 0.8873 | 0.5450 |
 | `01_support_ft12` | 0.9014 | 0.5965 | 0.8873 | 0.5450 |

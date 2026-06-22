@@ -1,4 +1,4 @@
-# CTF-GS 投稿项目阶段汇报材料
+# GaussFM 投稿项目阶段汇报材料
 
 日期：2026-06-09
 
@@ -6,7 +6,7 @@
 
 ## 一、项目名称与总体定位
 
-**项目名称：** CTF-GS：面向开放词汇三维场景理解的紧凑基础特征高斯场
+**项目名称：** GaussFM：面向开放词汇三维场景理解的紧凑基础特征高斯场
 
 **一句话概括：** 本项目希望把二维基础视觉模型中的高维语义特征，编码为三维高斯场上的紧凑隐变量，并在查询时按需重建出可用于开放词汇理解的 foundation feature，使同一个紧凑三维特征记忆同时具备二维新视角定位、三维 primitive 级选择和跨数据集点级查询能力。
 
@@ -18,7 +18,7 @@
 
 第一，**二维基础特征强，但视角局部且存储昂贵。** 逐帧提取或缓存高维特征虽然可以保留强语义信息，但无法自然形成一个可部署、可复用的三维场景表示。若把 1280 维甚至更高维的 dense feature 直接存到每个 Gaussian 或每个点上，存储和训练成本很高，也不一定带来稳定的三维查询能力。
 
-第二，**开放词汇三维理解需要同时服务二维和三维接口。** LERF/LangSplat 类任务重视 rendered-view heatmap；OpenGaussian、Dr. Splat、OpenGaFF/VALA 等方向逐渐强调直接在 Gaussian、primitive 或 point level 查询目标对象。只解决 rendered 2D heatmap 并不足以支撑新一代 open-vocabulary 3D scene understanding。
+第二，**开放词汇三维理解需要同时服务二维和三维接口。** LERF/LangSplat 类任务重视 rendered-view heatmap；OpenGaussian、Dr. Splat、VALA-aligned 等方向逐渐强调直接在 Gaussian、primitive 或 point level 查询目标对象。只解决 rendered 2D heatmap 并不足以支撑新一代 open-vocabulary 3D scene understanding。
 
 第三，**三维表示不能退化成特定任务的分类器。** 如果每个下游任务都单独训练一个 head 或缓存一个特征库，方法就难以成为通用场景记忆。理想形式应是：一个紧凑三维特征场，在统一的查询执行层中按需完成特征重建、文本匹配、几何投影和对象支持形成，而不是为 2D/3D benchmark 拼接互不相关的分支。
 
@@ -34,7 +34,7 @@ LERF、LangSplat 等工作证明，利用 CLIP 或其他视觉语言特征可以
 
 ### 3.2 三维 Gaussian 开放词汇理解
 
-OpenGaussian、Dr. Splat、OpenGaFF/VALA 等工作进一步强调 Gaussian-level、point-level 或 instance-level querying。特别是 OpenGaFF 已经明确把 LERF-OVS 的 2D 和 3D open-vocabulary query 作为共同实验口径。因此，本文不能把“同时展示 2D/3D 查询”作为独占新意，而应把它视为领域正在形成的标准评价维度。本文的差异应落在：如何用紧凑隐变量表示高维 foundation features，如何在查询时按需重建可用特征，如何同时获得存储压缩和下游质量提升，以及如何把多视角注册、边界支持和多头一致性内化为一个统一三维特征记忆。
+OpenGaussian、Dr. Splat、VALA-aligned 等工作进一步强调 Gaussian-level、point-level 或 instance-level querying。特别是 the unpublished protocol source 已经明确把 LERF-OVS 的 2D 和 3D open-vocabulary query 作为共同实验口径。因此，本文不能把“同时展示 2D/3D 查询”作为独占新意，而应把它视为领域正在形成的标准评价维度。本文的差异应落在：如何用紧凑隐变量表示高维 foundation features，如何在查询时按需重建可用特征，如何同时获得存储压缩和下游质量提升，以及如何把多视角注册、边界支持和多头一致性内化为一个统一三维特征记忆。
 
 ### 3.3 基础模型蒸馏与多头下游可用性
 
@@ -66,19 +66,19 @@ Rendered-view grounding 查询的是像素级特征图，direct 3D object select
 
 ## 五、研究目标
 
-本项目的总体目标是形成一篇可投稿顶刊的完整论文，围绕 CTF-GS 建立一个逻辑闭环：
+本项目的总体目标是形成一篇可投稿顶刊的完整论文，围绕 GaussFM 建立一个逻辑闭环：
 
 1. 提出 compact foundation-feature Gaussian field 的统一表示；
 2. 支持 LERF rendered-view 2D open-vocabulary grounding；
 3. 支持 LERF direct 3D primitive-level object selection；
-4. 支持 ScanNet VALA/OpenGaFF-8 direct point-query；
+4. 支持 ScanNet VALA-aligned ScanNet-8 direct point-query；
 5. 证明相对原始逐帧 RADIO 特征和显式高维 memory 的下游可用性与存储优势；
 6. 给出系统消融、存储效率、失败案例、定性结果和协议边界；
 7. 将论文整理为 TPAMI 期刊投稿格式。
 
 ## 六、总体技术路线
 
-CTF-GS 的核心思想可以分成四层。
+GaussFM 的核心思想可以分成四层。
 
 ### 6.1 离线基础特征监督
 
@@ -90,7 +90,7 @@ CTF-GS 的核心思想可以分成四层。
 
 ### 6.3 Foundation-space reconstruction
 
-通过 compact-to-feature decoder 将紧凑 code 解码回 RADIO-compatible feature space。这样文本相似度、DINO matching、SAM adaptor 等下游 head 可以继续使用冻结基础模型接口，而不需要重新定义任务特定类别空间。更准确地说，CTF-GS 是一个**按需重建的特征记忆**：离线存储的是 compact latent memory，查询时才根据视角、点位置或 primitive 位置重建所需特征。
+通过 compact-to-feature decoder 将紧凑 code 解码回 RADIO-compatible feature space。这样文本相似度、DINO matching、SAM adaptor 等下游 head 可以继续使用冻结基础模型接口，而不需要重新定义任务特定类别空间。更准确地说，GaussFM 是一个**按需重建的特征记忆**：离线存储的是 compact latent memory，查询时才根据视角、点位置或 primitive 位置重建所需特征。
 
 ### 6.4 统一查询执行层
 
@@ -116,7 +116,7 @@ CTF-GS 的核心思想可以分成四层。
 
 ### 贡献三：完整的多协议实验闭环，证明“又小又好”
 
-本文在 LERF rendered-view OVS、LERF direct 3D object selection、ScanNet VALA/OpenGaFF-8 point-query 三类协议上与公开 SOTA 结果对比，同时提供原始逐帧 RADIO 特征 vs. 重建场景特征、多任务 frozen-head usability、核心模块消融、storage / efficiency 和定性分析。实验目标不是只证明某个指标高，而是证明 compact memory 在存储占用和下游质量上同时成立。
+本文在 LERF rendered-view OVS、LERF direct 3D object selection、ScanNet VALA-aligned ScanNet-8 point-query 三类协议上与公开 SOTA 结果对比，同时提供原始逐帧 RADIO 特征 vs. 重建场景特征、多任务 frozen-head usability、核心模块消融、storage / efficiency 和定性分析。实验目标不是只证明某个指标高，而是证明 compact memory 在存储占用和下游质量上同时成立。
 
 如果导师希望贡献更细，也可以拆成 4 条：把“重建场景特征强于原始 RADIO + storage/efficiency”单独作为第四条实验贡献。但正式论文主文建议优先采用 3 条，叙事更凝练。
 
@@ -133,9 +133,9 @@ CTF-GS 的核心思想可以分成四层。
 | LERF | 0.795 | 0.625 | **0.938** | 0.815 | 0.793 |
 | LangSplat | 0.804 | 0.732 | 0.881 | **0.955** | 0.843 |
 | LEGaussians | 0.767 | 0.737 | 0.683 | 0.523 | 0.678 |
-| CTF-GS | **0.821** | **0.901** | 0.898 | 0.818 | **0.860** |
+| GaussFM | **0.821** | **0.901** | 0.898 | 0.818 | **0.860** |
 
-同时，CTF-GS 的主图像域 mask 结果达到 0.8598 LocAcc / 0.5889 mIoU。汇报时要把这张表作为主结果，而不是把原始 RADIO 对比表当成主结果；原始 RADIO 对比更适合放在“重建特征质量分析”一节。
+同时，GaussFM 的主图像域 mask 结果达到 0.8598 LocAcc / 0.5889 mIoU。汇报时要把这张表作为主结果，而不是把原始 RADIO 对比表当成主结果；原始 RADIO 对比更适合放在“重建特征质量分析”一节。
 
 ### 8.2 LERF direct 3D object selection
 
@@ -148,15 +148,15 @@ CTF-GS 的核心思想可以分成四层。
 | OpenGaussian | 38.36 | 51.43 |
 | Dr. Splat | 43.29 | 64.30 |
 | InstanceGaussian | 45.30 | 58.44 |
-| CTF-GS + MPR diagnostic | 48.01 | 67.60 |
-| CTF-GS compact support-calibrated query | **50.14** | **70.44** |
-| CTF-GS + official SAM3 box control | 57.05 | 68.35 |
+| GaussFM + MPR diagnostic | 48.01 | 67.60 |
+| GaussFM compact support-calibrated query | **50.14** | **70.44** |
+| GaussFM + official SAM3 box control | 57.05 | 68.35 |
 
-结论：CTF-GS compact support-calibrated query 在不使用 official SAM3 decoder 作为主结果的情况下，达到 50.14 mIoU / 70.44 Acc@0.25。官方 SAM3 box control 可以作为边界辅助上限分析，不应作为核心方法主结果。
+结论：GaussFM compact support-calibrated query 在不使用 official SAM3 decoder 作为主结果的情况下，达到 50.14 mIoU / 70.44 Acc@0.25。官方 SAM3 box control 可以作为边界辅助上限分析，不应作为核心方法主结果。
 
-### 8.3 ScanNet VALA/OpenGaFF-8 direct point-query
+### 8.3 ScanNet VALA-aligned ScanNet-8 direct point-query
 
-任务：在 ScanNet VALA/OpenGaFF-8 场景上做开放词汇点级查询，验证 compact field 的跨数据集 3D usability。
+任务：在 ScanNet VALA-aligned ScanNet-8 场景上做开放词汇点级查询，验证 compact field 的跨数据集 3D usability。
 
 主定量对比：
 
@@ -168,15 +168,15 @@ CTF-GS 的核心思想可以分成四层。
 | Dr. Splat | 29.31 | 47.68 | 33.25 | 54.33 | 44.19 | 65.19 |
 | OccamLGS | 31.93 | 48.93 | 34.25 | 53.71 | 45.16 | 64.39 |
 | VALA | 32.11 | 50.05 | 35.10 | 54.77 | 46.21 | 65.61 |
-| CTF-GS | **38.06** | **61.29** | **38.71** | **63.15** | **47.11** | **72.00** |
+| GaussFM | **38.06** | **61.29** | **38.71** | **63.15** | **47.11** | **72.00** |
 
-结论：在 OpenGaFF/VALA 8-scene point-query protocol 下，CTF-GS 在 19/15/10 class split 上均取得最优结果。汇报和论文中可以写“we compare with reported results under the same OpenGaFF/VALA protocol”，无需把这张表讲成不可靠的外部协议；但数据来源仍应在 caption 或脚注中标明为 prior-paper reported numbers。
+结论：在 VALA-aligned 8-scene point-query protocol 下，GaussFM 在 19/15/10 class split 上均取得最优结果。汇报和论文中可以写“we compare with reported results under the same VALA-aligned protocol”，无需把这张表讲成不可靠的外部协议；但数据来源仍应在 caption 或脚注中标明为 prior-paper reported numbers。
 
 ### 8.4 重建场景特征 vs. 原始逐帧 RADIO 特征
 
 这一节建议单独作为全文实验的一节，**不要混进消融实验**。原因是它回答的是“本文学到的 compact reconstructed feature 是否真的比原始基础特征更有用”，属于核心 claim 验证，而不是某个模块是否有效。
 
-| Task | Metric | 原始逐帧 RADIO | CTF-GS | Δ |
+| Task | Metric | 原始逐帧 RADIO | GaussFM | Δ |
 | --- | --- | ---: | ---: | ---: |
 | LERF text grounding | mIoU | 0.4634 | 0.5707 | +0.1073 |
 | SAM3 point prompt | mIoU | 0.3700 | 0.4173 | +0.0473 |
@@ -241,7 +241,7 @@ CTF-GS 的核心思想可以分成四层。
 
 | Variant | Macro LocAcc | Macro mIoU | 说明 |
 | --- | ---: | ---: | --- |
-| Full CTF-GS | 0.858 | 0.485 | 完整架构 |
+| Full GaussFM | 0.858 | 0.485 | 完整架构 |
 | w/o FGC warm-start | 0.802 | 0.424 | 几何/基础特征 warm-start 重要 |
 | w/o VFA | 0.840 | 0.480 | 视角校准影响定位 |
 | w/o HGCF | 0.839 | 0.507 | region overlap 有时上升，但 peak stability 下降 |
@@ -379,7 +379,7 @@ RGB + query | GT | compact score only | + prompt ensemble | + support calibratio
 这一张也建议加入，至少放 appendix，如果版面允许可以做成主文小图。它对应贡献三中的“重建特征不是低维退化，而是 selected downstream tasks 更好”。建议做成 2--3 行小图：
 
 ```text
-Task | RGB/GT | frame-wise RADIO | CTF-GS reconstructed feature
+Task | RGB/GT | frame-wise RADIO | GaussFM reconstructed feature
 LERF text grounding | mask/heatmap | teacher heatmap/mask | ours heatmap/mask
 SAM3 adaptor prompt | GT | teacher mask | ours mask
 DINO dense matching | source-target pairs | teacher matches | ours matches
@@ -418,7 +418,7 @@ DINO 可以保留少量错误匹配，但要选择 ours 正确匹配明显更多
 
 ### 风险一：公开对比数字的来源表述
 
-应对：如果对比数字来自 OpenGaFF/VALA 或相关论文中同一 benchmark protocol 的表格，主文可以写“reported under the same benchmark protocol”，不要在汇报里主动弱化成“协议不完全同源”。但论文 caption 仍应标明数据来源，例如“prior reported results under the OpenGaFF/VALA protocol; OpenGaFF row omitted”。这比“external baseline protocol 不可靠”更适合投稿叙事，也不会误导为我们本地复现了所有方法。
+应对：如果对比数字来自 VALA-aligned 或相关论文中同一 benchmark protocol 的表格，主文可以写“reported under the same benchmark protocol”，不要在汇报里主动弱化成“协议不完全同源”。但论文 caption 仍应标明数据来源，例如“prior reported results under the VALA-aligned protocol; unpublished protocol-source row omitted”。这比“external baseline protocol 不可靠”更适合投稿叙事，也不会误导为我们本地复现了所有方法。
 
 ### 风险二：RGB/GrabCut support calibration 可能被质疑为后处理
 
@@ -485,7 +485,7 @@ DINO 可以保留少量错误匹配，但要选择 ours 正确匹配明显更多
 
 建议控制在 15 页左右。
 
-1. 标题页：CTF-GS 与一句话 claim；
+1. 标题页：GaussFM 与一句话 claim；
 2. 背景：二维 foundation features 很强，但三维部署缺紧凑 scene memory；
 3. 痛点：feature cache 昂贵、rendered-only 不够、direct 3D support 不稳；
 4. 核心科学问题：如何把 foundation feature 压缩成可查询三维场；
@@ -527,7 +527,7 @@ DINO 可以保留少量错误匹配，但要选择 ours 正确匹配明显更多
 
 ### 问：对比方法数字如何组织，是否能直接作为 SOTA 对比？
 
-答：主文应该按 benchmark protocol 组织 SOTA 对比表。对于 OpenGaFF/VALA 或相关论文中已经按同一 protocol 报告的结果，可以作为 prior reported results under the same benchmark protocol 放入主表；caption 标明来源即可，不需要在汇报中主动弱化为“协议不一致”。但也不要写成我们本地完整复现了所有方法，除非确实本地复现。
+答：主文应该按 benchmark protocol 组织 SOTA 对比表。对于 VALA-aligned 或相关论文中已经按同一 protocol 报告的结果，可以作为 prior reported results under the same benchmark protocol 放入主表；caption 标明来源即可，不需要在汇报中主动弱化为“协议不一致”。但也不要写成我们本地完整复现了所有方法，除非确实本地复现。
 
 ### 问：最大风险是什么？
 
@@ -537,7 +537,7 @@ DINO 可以保留少量错误匹配，但要选择 ours 正确匹配明显更多
 
 汇报时不要把重心放在“我试了很多模块”，而要始终围绕一条主线：
 
-> 二维基础模型特征很强，但不能直接成为可部署三维场景记忆；CTF-GS 把高维 foundation features 编码成 compact Gaussian latent memory，并在查询时按需重建特征，使同一个三维 map 支持二维、三维和点级开放词汇查询。
+> 二维基础模型特征很强，但不能直接成为可部署三维场景记忆；GaussFM 把高维 foundation features 编码成 compact Gaussian latent memory，并在查询时按需重建特征，使同一个三维 map 支持二维、三维和点级开放词汇查询。
 
 所有实验都服务于这条逻辑：
 

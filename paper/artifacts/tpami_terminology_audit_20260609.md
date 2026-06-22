@@ -2,7 +2,7 @@
 
 Date: 2026-06-09
 
-This note audits the current CTF-GS terminology from the perspective of a
+This note audits the current GaussFM terminology from the perspective of a
 self-contained top-journal paper. The goal is to make the vocabulary easy to
 understand, theoretically grounded, and better aligned with the paper's story:
 turning view-local foundation-model features into a compact, queryable 3D scene
@@ -25,11 +25,11 @@ terms should appear only when needed to prevent overclaiming.
 
 | Current term | Issue | Suggested main-paper term | Where to keep current term |
 | --- | --- | --- | --- |
-| `Compact Teacher Feature Field` | Clear but too training-mechanistic; makes the title sound like distillation rather than a reusable scene representation. | `Compact Foundation-Feature Field` or `Compact Foundation-Feature Gaussian Field` | Use `teacher` only in the training objective. |
-| `teacher feature` in title/abstract | Suggests the output is only a copy of RADIO; weakens the stronger claim that multiview reconstruction improves usability. | `foundation feature`, `foundation-feature scene memory` | Keep `teacher` in losses and teacher-vs-field comparisons. |
+| Historical teacher-centric title | Too training-mechanistic and makes the title sound like distillation rather than a reusable scene representation. | `Compact Foundation-Feature Gaussian Memory` | Avoid in paper-facing titles and summaries. |
+| `RADIO reference feature` in title/abstract | Suggests the output is only a copy of RADIO; weakens the stronger claim that multiview reconstruction improves usability. | `foundation feature`, `foundation-feature scene memory` | Keep reference/source wording only in protocol controls. |
 | `student` | Invites a narrow teacher-student framing and makes the method sound like a model-compression paper. | `reconstructed scene field`, `rendered field`, `compact field` | Use only if discussing distillation mechanics. |
 | `Hybrid Gaussian Code Field` | `Hybrid` is vague; `Code` sounds low-level. The actual idea is per-Gaussian latent memory plus spatial context. | `Contextual Gaussian Feature Field` or `Contextual Gaussian Code Field` | `Hybrid` can remain in implementation artifacts if changing code names is costly. |
-| `Compact-to-Teacher Reconstruction` | Understandable, but still teacher-centric. | `Foundation-Space Reconstruction` or `Compact Feature Lifting` | Use `Compact-to-Teacher` in equations if the decoder explicitly maps to RADIO teacher space. |
+| `Foundation-Space Reconstruction` | Clearer than the old teacher-centric wording. | `Foundation-Space Reconstruction` or `Compact Feature Lifting` | Use only after defining that RADIO is the frozen foundation-feature reference. |
 | `View-Space Feature Aligner` | Fine, but `aligner` is slightly mechanical. | `View-Conditioned Feature Calibration` | `VFA` can remain as a module acronym if already embedded in tables. |
 | `Frozen Geometry-Head Consistency` | Awkward word order; may sound like the geometry head is frozen rather than the consistency target. | `Frozen-Head Geometry Consistency` or `Geometry-Head Consistency` | Keep acronym only after definition. |
 | `Frozen Adaptor Consistency` | `Adaptor` is implementation-specific and easy to confuse with official model decoders. | `Frozen-Head Consistency` or `Foundation-Head Consistency` | Use `adaptor` only for RADIO's named adaptor heads. |
@@ -47,14 +47,14 @@ terms should appear only when needed to prevent overclaiming.
 
 The current title:
 
-> CTF-GS: Compact Teacher Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding
+> GaussFM: Compact Foundation-Feature Gaussian Memory for Open-Vocabulary 3D Scene Understanding
 
 is understandable but too teacher-centric. Better top-journal alternatives:
 
 1. **Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding**
    - Best balance of clarity and theory.
    - Keeps the core claim in the title.
-   - If keeping acronym `CTF-GS`, define it as a legacy method name rather than
+   - If keeping acronym `GaussFM`, define it as a legacy method name rather than
      deriving every word from the title.
 
 2. **Queryable Foundation-Feature Gaussian Fields for Open-Vocabulary 3D Scene Understanding**
@@ -67,7 +67,7 @@ is understandable but too teacher-centric. Better top-journal alternatives:
 
 Recommended title:
 
-> **CTF-GS: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding**
+> **GaussFM: Compact Foundation-Feature Fields for Open-Vocabulary 3D Gaussian Scene Understanding**
 
 This keeps the existing method brand while moving the title from `teacher copy`
 to `foundation-feature scene representation`.
@@ -79,7 +79,7 @@ Recommended main-paper module names:
 | Concept | Recommended name | Rationale |
 | --- | --- | --- |
 | Stored scene representation | `Contextual Gaussian Feature Field` | Explains per-primitive + spatial-context storage better than `hybrid code`. |
-| Decoder from compact codes to RADIO space | `Foundation-Space Reconstruction` | More theoretical than `compact-to-teacher`; still precise. |
+| Decoder from compact codes to RADIO space | `Foundation-Space Reconstruction` | More theoretical than `foundation-space reconstruction`; still precise. |
 | View-space correction | `View-Conditioned Feature Calibration` | Connects alignment to view-dependent rendering rather than a black-box refiner. |
 | Feature quality and visibility | `Reliability-Visibility Heads` | More interpretable than `quality heads`. |
 | Frozen geometry regularizer | `Frozen-Head Geometry Consistency` | Cleaner syntax and better causal meaning. |
@@ -92,14 +92,14 @@ Recommended main-paper module names:
 
 Prefer:
 
-> CTF-GS learns a compact foundation-feature scene memory that supports
+> GaussFM learns a compact foundation-feature scene memory that supports
 > complementary readouts: rendered feature maps for novel-view grounding,
 > support-calibrated primitive scores for direct 3D object selection, and point
 > features for cross-dataset semantic queries.
 
 Avoid:
 
-> CTF-GS stores teacher features and uses a support-aware policy to make the
+> GaussFM stores RADIO reference features and uses a support-aware policy to make the
 > direct row stronger.
 
 Prefer:
@@ -123,8 +123,9 @@ Avoid:
 ## 6. Where The Current Paper Most Needs Wording Cleanup
 
 1. **Title and abstract**
-   - Replace title-level `Teacher Feature` with `Foundation-Feature`.
-   - Keep `teacher` only when discussing frozen RADIO supervision.
+   - Use `GaussFM: Compact Foundation-Feature Gaussian Memory...`.
+   - Describe RADIO as a frozen foundation-feature reference, not as the name
+     source of the method.
 
 2. **Introduction**
    - Present the central object as `compact foundation-feature scene memory`.
@@ -143,7 +144,7 @@ Avoid:
    - Replace `RGB/GrabCut` in main prose with `label-free color-edge support
      calibration`; put `GrabCut` in a footnote/table note/supplement.
 
-5. **Teacher-vs-student section**
+5. **Frame-wise reference comparison**
    - Rename to `Scene Field vs. Frame-Wise Foundation Features`.
    - This better supports the claim that the 3D field can improve downstream
      usability through multiview aggregation.
@@ -192,16 +193,15 @@ Avoid in top-level prose:
 If a full rename is too risky close to submission, apply only these high-impact
 changes:
 
-1. Change title to **Compact Foundation-Feature Fields...**
+1. Change title to **GaussFM: Compact Foundation-Feature Gaussian Memory...**
 2. Change `Hybrid Gaussian Code Field` in prose and Figure 1 to
    **Contextual Gaussian Feature Field**.
-3. Change `Compact-to-Teacher Reconstruction` to
-   **Foundation-Space Reconstruction**.
+3. Keep **Foundation-Space Reconstruction** as the decoder-level term.
 4. Change `support-aware primitive policy` to
    **support-calibrated primitive readout**.
 5. Change `RGB/GrabCut support policy` to
    **label-free color-edge support calibration** in main text.
-6. Change `Teacher vs. Student` wording to
+6. Change old teacher/student comparison wording to
    **Frame-wise Foundation Features vs. Reconstructed Scene Field**.
 
 These edits would make the paper read less like an experiment report and more

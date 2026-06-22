@@ -6,7 +6,7 @@
 
 **Architecture:** Diagnose implementation risks first, then promote only method changes that improve validated metrics. SAM3 work is split into official state diagnostics, official-decoder bridge upper bounds, and method-internal SAM-style readout. Direct-field work is split into cache alignment, head consistency, one-scene overfit, and deployable primitive readout improvements.
 
-**Tech Stack:** PyTorch, official SAM3 processor, CTF-GS/HCD model checkpoints, VPR feature caches, LERF-OVS direct-3D evaluator, pytest.
+**Tech Stack:** PyTorch, official SAM3 processor, GaussFM/HCD model checkpoints, VPR feature caches, LERF-OVS direct-3D evaluator, pytest.
 
 ---
 

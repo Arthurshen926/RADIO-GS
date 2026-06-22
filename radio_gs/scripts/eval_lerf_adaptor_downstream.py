@@ -193,7 +193,7 @@ def _load_teacher_feature(gt_feature_dir: Path, frame_id: int, device: torch.dev
             if feature.ndim != 4:
                 raise ValueError(f"Expected feature tensor [1,C,H,W] in {path}, got {tuple(feature.shape)}")
             return feature
-    raise FileNotFoundError(f"Missing teacher feature for frame {frame_id} in {gt_feature_dir}")
+    raise FileNotFoundError(f"Missing RADIO reference feature for frame {frame_id} in {gt_feature_dir}")
 
 
 def _load_rgb_tensor(scene: str, frame_id: int, scene_root_hint: str | Path, device: torch.device) -> Optional[torch.Tensor]:

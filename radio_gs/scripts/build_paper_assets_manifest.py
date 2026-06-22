@@ -569,7 +569,7 @@ def main() -> None:
             },
             "controlled_evidence_table.md": {
                 "path": rel(REPORT_DIR / "controlled_evidence_table.md"),
-                "description": "Controlled evidence table combining teacher, full CTF-GS, ablations, direct-3D readouts, storage, and runtime",
+                "description": "Controlled evidence table combining teacher, full GaussFM, ablations, direct-3D readouts, storage, and runtime",
             },
             "controlled_evidence_table.json": {
                 "path": rel(REPORT_DIR / "controlled_evidence_table.json"),
@@ -582,7 +582,7 @@ def main() -> None:
                     / "artifacts"
                     / "teacher_vs_ctfgs_2d_usability_20260525.md"
                 ),
-                "description": "Consolidated 2D teacher-vs-CTF-GS feature-usability report with 6/6 selected primary downstream wins and secondary caveats",
+                "description": "Consolidated 2D frame-wise-RADIO-vs-GaussFM feature-usability report with 6/6 selected primary downstream wins and secondary caveats",
             },
             "teacher_vs_ctfgs_2d_usability_20260525.json": {
                 "path": rel(
@@ -591,7 +591,7 @@ def main() -> None:
                     / "artifacts"
                     / "teacher_vs_ctfgs_2d_usability_20260525.json"
                 ),
-                "description": "Machine-readable 2D teacher-vs-CTF-GS feature-usability manifest",
+                "description": "Machine-readable 2D frame-wise-RADIO-vs-GaussFM feature-usability manifest",
             },
             "unified_multi_head_feature_quality_field_20260525.md": {
                 "path": rel(
@@ -618,7 +618,7 @@ def main() -> None:
                     / "tables"
                     / "teacher_vs_ctfgs_2d_usability_20260525.tex"
                 ),
-                "description": "Compact LaTeX table for 2D teacher-vs-CTF-GS feature usability",
+                "description": "Compact LaTeX table for 2D frame-wise-RADIO-vs-GaussFM feature usability",
             },
             "lerf_nearest_view_cache_baseline.md": {
                 "path": rel(REPORT_DIR / "lerf_nearest_view_cache_baseline.md"),
@@ -719,7 +719,7 @@ def main() -> None:
                     / "scripts"
                     / "build_teacher_vs_ctfgs_2d_usability_report.py"
                 ),
-                "description": "Generator for the 2D teacher-vs-CTF-GS feature-usability report",
+                "description": "Generator for the 2D frame-wise-RADIO-vs-GaussFM feature-usability report",
             },
             "lerf_sam3_box_direct_3d_qualitative_manifest.json": {
                 "path": rel(REPORT_DIR / "lerf_sam3_box_direct_3d_qualitative_manifest.json"),

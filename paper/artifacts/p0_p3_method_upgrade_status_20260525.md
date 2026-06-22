@@ -25,7 +25,7 @@ Status: implemented, not promoted.
 - New run: `output/lerf_sam_dino_tasks/formal_v10_dino_feature_boundary_20260525/lerf_sam_dino_task_report.md`
 - Baseline promoted run: `output/lerf_sam_dino_tasks/formal_v9_dino_topk_area200_bg110_peak_20260514/lerf_sam_dino_task_report.md`
 
-| Row | Rendered LocAcc | Rendered mIoU | Teacher LocAcc | Teacher mIoU |
+| Row | Rendered LocAcc | Rendered mIoU | Frame-wise RADIO LocAcc | Frame-wise RADIO mIoU |
 |---|---:|---:|---:|---:|
 | formal_v9 bg110 peak | 0.7943 | 0.4805 | 0.7660 | 0.5119 |
 | formal_v10 feature-boundary | 0.7872 | 0.4823 | 0.7660 | 0.5092 |
@@ -76,5 +76,5 @@ The strongest current paper rows remain:
   direct-3D as ablation rather than main result.
 - ScanNet VALA8: spatial contextual DINO-CV row, optionally reporting the
   propconf variant as a small stability gain.
-- 2D Teacher-vs-Ours DINO: formal_v9 bg110 peak remains the promoted DINO row;
+- 2D Frame-wise-RADIO-vs-Ours DINO: formal_v9 bg110 peak remains the promoted DINO row;
   it supports rendered LocAcc and narrowed mIoU gap, not DINO mIoU superiority.

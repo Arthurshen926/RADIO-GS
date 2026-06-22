@@ -21,8 +21,8 @@ unqualified global SOTA or ScanNet leaderboard claim.
 | Use a canonical paper-facing registry | `paper/artifacts/final_rows.yaml`; guarded by `radio_gs/scripts/validate_final_rows_registry.py` | Covered |
 | Prevent overclaiming global SOTA or ScanNet leaderboard status | `radio_gs/scripts/validate_paper_claims.py`; final consistency/claim constraints in `paper/artifacts/` | Covered |
 | Public artifact snapshot rather than private `output/` symlink only | `paper/artifacts/README.md`, `checksums.txt`, source JSONs, reports, manifests, audits, and per-method summaries | Covered |
-| T1 RADIO-GS/CTF-GS main evidence | LERF rendered grounding threshold sweeps, controlled evidence table, cache and explicit-memory baselines | Covered |
-| T2 direct-3D evidence | `lerf_direct_3d_selection.md`, per-scene direct-3D JSONs, query breakdowns, query audit, VPR protocol card, and SAM3-box geometry sweep | Covered for CTF-GS rows |
+| T1 RADIO-GS/GaussFM main evidence | LERF rendered grounding threshold sweeps, controlled evidence table, cache and explicit-memory baselines | Covered |
+| T2 direct-3D evidence | `lerf_direct_3d_selection.md`, per-scene direct-3D JSONs, query breakdowns, query audit, VPR protocol card, and SAM3-box geometry sweep | Covered for GaussFM rows |
 | T3 ScanNet evidence | OpenGaussian and RADIO-GS ScanNet JSON snapshots, contextual kNN/probe rows, and Semantic Gaussians compatibility eval | Covered as contextual/probe evidence, not leaderboard SOTA |
 | OpenGaussian reproduction | ScanNet local reproduction and all-four-scene LERF compatibility readout; caveated in `external_baseline_audit.{md,json}` and registry | Covered |
 | OccamLGS reproduction | All-four-scene LERF compatibility readout documented in `external_baseline_audit.{md,json}` and registry | Covered |
@@ -34,9 +34,9 @@ unqualified global SOTA or ScanNet leaderboard claim.
 | CAGS reproduction | `cags_lerf_summary.{md,json}` reports all four local compatibility scenes; scene-mean mIoU 0.2627 / Acc@0.25 0.3997, caveated by missing rendered masks | Covered with caveat |
 | Semantic Gaussians reproduction | `semantic_gaussians_eval_metrics.{json,csv}` reports four ScanNet label-PLY compatibility scenes; mean IoU 0.0280 | Covered with compatibility caveat |
 | LaGa reproduction | Affinity, descriptor, mask export, and nested-mask eval completed for all four LERF scenes; `laga_lerf_summary.{md,json}` reports macro mIoU 0.2337, Acc@0.25 0.3660, Acc@0.5 0.1535, 208 objects, 0 missing masks | Covered with descriptor-setting caveat |
-| OpenGaFF | No public code/checkpoints found; tracked only as upstream-blocked published-context row | Blocked upstream |
+| the unpublished protocol source | No public code/checkpoints found; tracked only as upstream-blocked published-context row | Blocked upstream |
 | Parallel GPU utilization | Long-running reproduction chains used the available GPUs across GAGS, Dr. Splat, Semantic Gaussians, LEGaussians, and LaGa; completion artifacts and logs are under `output/baselines/**/logs/` | Covered |
-| Improve CTF-GS/RADIO-GS evidence package | Main-task metrics, external rows, provenance, checksums, mechanism/failure analysis, and validators are present | Covered for paper package |
+| Improve GaussFM/RADIO-GS evidence package | Main-task metrics, external rows, provenance, checksums, mechanism/failure analysis, and validators are present | Covered for paper package |
 | Top-journal-ready claim discipline | The package is stronger and auditable, but global SOTA wording remains disallowed unless future strict leaderboard evidence supports it | Covered by caveat |
 
 ## Completed Baseline Rows
@@ -63,7 +63,7 @@ unqualified global SOTA or ScanNet leaderboard claim.
 1. Several promoted rows are local compatibility reruns rather than strict
    released-checkpoint leaderboard submissions. The registry and external
    audits label these rows accordingly.
-2. OpenGaFF remains upstream-blocked because no public code/checkpoints were
+2. the unpublished protocol source remains upstream-blocked because no public code/checkpoints were
    available during this run.
 3. LaGa descriptor construction was made tractable with the compatibility
    settings `max_views=32` and `num_per_cluster_features=5`; the exported

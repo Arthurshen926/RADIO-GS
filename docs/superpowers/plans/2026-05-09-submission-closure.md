@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Close the paper-facing gaps identified from `ChatGPT-项目总结与优化.md`: storage evidence, failure analysis, baseline-safe framing, CTF-GS naming, and GPU experiment launch discipline.
+**Goal:** Close the paper-facing gaps identified from `ChatGPT-项目总结与优化.md`: storage evidence, failure analysis, baseline-safe framing, GaussFM naming, and GPU experiment launch discipline.
 
 **Architecture:** Add small report-generation scripts with focused tests, then wire their outputs into the LaTeX draft and project status documents. GPU experiments are launched through explicit generated configs and queue scripts that write to new output directories, never overwriting frozen mainline artifacts.
 
@@ -98,7 +98,7 @@ Expected outputs:
 
 - [ ] **Step 1: Update method naming**
 
-Use `CTF-GS` as the paper method name while preserving `RADIO-GS` as the repository/project implementation name. Rename module prose to `HGCF`, `CTR`, `VFA`, and `FGC`.
+Use `GaussFM` as the paper method name while preserving `RADIO-GS` as the repository/project implementation name. Rename module prose to `HGCF`, `CTR`, `VFA`, and `FGC`.
 
 - [ ] **Step 2: Add storage table**
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build fixed VALA/OpenGaFF ScanNet-8 aggregate reports from evaluator JSON."""
+"""Build fixed VALA-aligned ScanNet-8 aggregate reports from evaluator JSON."""
 
 from __future__ import annotations
 
@@ -223,7 +223,7 @@ def build_vala8_summary(
     expected_checks = _validate_expected_args(source_args, expected_source_args or {})
     return {
         "label": label,
-        "protocol": "VALA/OpenGaFF ScanNet-8 candidate split",
+        "protocol": "VALA-aligned ScanNet-8 candidate split",
         "scene_count": len(rows),
         "scenes": list(scenes),
         "source_timestamp": payload.get("timestamp"),
@@ -307,7 +307,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--require_exact_scene_set",
         action="store_true",
-        help="Fail if the input JSON contains scenes outside the fixed VALA/OpenGaFF-8 list.",
+        help="Fail if the input JSON contains scenes outside the fixed VALA-aligned ScanNet-8 list.",
     )
     parser.add_argument(
         "--expect_arg",

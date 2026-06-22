@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Evaluate multiview RADIO teacher features on ScanNet label points.
+"""Evaluate multiview frame-wise RADIO features on ScanNet label points.
 
 This is a diagnostic baseline for Open-Vocabulary Point Cloud Understanding:
 it bypasses RADIO-GS parameters entirely, samples extracted 2-D RADIO feature
 maps at 3-D label-PLY vertices through known camera poses, projects the
-aggregated teacher feature into SigLIP text space, then runs the same
+aggregated RADIO reference feature into SigLIP text space, then runs the same
 OpenGaussian NYU40 19/15/10 metrics as the direct RADIO-GS evaluator.
 """
 
@@ -120,7 +120,7 @@ def _accumulate_multiview_targets(
     view_chunk_size: int,
     normalize_features: bool = False,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    """Aggregate RADIO teacher features over view chunks for one point chunk."""
+    """Aggregate frame-wise RADIO features over view chunks for one point chunk."""
     if not feature_paths:
         raise ValueError("feature_paths must not be empty")
     if view_chunk_size <= 0:
@@ -180,7 +180,7 @@ def _save_teacher_feature_cache(
     sample_indices: Optional[np.ndarray],
     metadata: dict,
 ) -> str:
-    """Save point-aligned multiview RADIO teacher features for training."""
+    """Save point-aligned multiview frame-wise RADIO features for training."""
     out_path = Path(path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     xyz_t = torch.as_tensor(np.asarray(xyz, dtype=np.float32), dtype=torch.float32).cpu()
@@ -579,7 +579,7 @@ def main() -> None:
     parser.add_argument(
         "--save_teacher_cache",
         action="store_true",
-        help="Save point-aligned multiview RADIO teacher features as a training cache.",
+        help="Save point-aligned multiview frame-wise RADIO features as a training cache.",
     )
     parser.add_argument(
         "--teacher_cache_path",

@@ -18,11 +18,11 @@ Paper-facing fixed selection: `meanstd2p5`. The complete ratio sweep below is di
 | Method | Text head | Protocol | Figurines | Ramen | Teatime | Waldo Kitchen | Macro |
 |---|---|---|---:|---:|---:|---:|---:|
 | OpenGaussian | CLIP | official paper mIoU | 0.3929 | 0.3101 | 0.6044 | 0.2270 | 0.3836 |
-| CTF-GS | SigLIP2 | fixed meanstd2p5 mIoU | 0.4829 | 0.4615 | 0.4965 | 0.2328 | 0.4184 |
-| CTF-GS | SigLIP2 | diagnostic best-by-scene mIoU | 0.4835 | 0.4616 | 0.4978 | 0.2328 | 0.4189 |
+| GaussFM | SigLIP2 | fixed meanstd2p5 mIoU | 0.4829 | 0.4615 | 0.4965 | 0.2328 | 0.4184 |
+| GaussFM | SigLIP2 | diagnostic best-by-scene mIoU | 0.4835 | 0.4616 | 0.4978 | 0.2328 | 0.4189 |
 | OpenGaussian | CLIP | official paper Acc@0.25 | 0.5536 | 0.4225 | 0.7627 | 0.3182 | 0.5143 |
-| CTF-GS | SigLIP2 | fixed meanstd2p5 Acc@0.25 | 0.8214 | 0.7042 | 0.7797 | 0.5000 | 0.7013 |
-| CTF-GS | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.8036 | 0.7042 | 0.7797 | 0.5000 | 0.6969 |
+| GaussFM | SigLIP2 | fixed meanstd2p5 Acc@0.25 | 0.8214 | 0.7042 | 0.7797 | 0.5000 | 0.7013 |
+| GaussFM | SigLIP2 | diagnostic best-by-scene Acc@0.25 | 0.8036 | 0.7042 | 0.7797 | 0.5000 | 0.6969 |
 
 Interpretation: the registration readout substantially closes the primitive-level gap versus the original Gaussian-center readout while keeping the OpenGaussian-style query-select-render-evaluate protocol. GT-free voxel context aggregation further improves fixed-ratio direct selection by reducing primitive-level fragmentation, though Waldo Kitchen remains the weakest scene and should be discussed as a remaining object-fragmentation/registration-coverage limitation.
 

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build a unified quantitative ablation suite that ranks the largest CTF-GS contributions across LERF rendered grounding, LERF direct 3D selection, ScanNet point-query transfer, and 2D frozen-head feature usability.
+**Goal:** Build a unified quantitative ablation suite that ranks the largest GaussFM contributions across LERF rendered grounding, LERF direct 3D selection, ScanNet point-query transfer, and 2D frozen-head feature usability.
 
 **Architecture:** Add one focused report builder that reads the current paper-facing artifacts and emits JSON, Markdown, and LaTeX tables. The generated outputs separate same-protocol contribution ranking from diagnostic or protocol-mixed rows, so the paper can explain which modules matter without overstating incomparable experiments.
 

@@ -109,7 +109,7 @@ def find_ours_ply(root: Path, scene: str, split: str, pattern: str) -> Path:
     candidates = sorted(root.glob(f"{scene}_*v67*/visualizations/{scene}/pred_split_{split}.ply"))
     if candidates:
         return candidates[-1]
-    raise FileNotFoundError(f"No CTF-GS pred_split_{split}.ply found for {scene} under {root}")
+    raise FileNotFoundError(f"No GaussFM pred_split_{split}.ply found for {scene} under {root}")
 
 
 def rotation_matrix(yaw_deg: float, pitch_deg: float) -> np.ndarray:
@@ -334,7 +334,7 @@ def make_case_row(
         add_panel_header(overview_panel, scene_title, f'query: "{case.query}"'),
         add_panel_header(gt_panel, "GT binary mask", f"NYU40 id {class_id}"),
         add_panel_header(baseline_panel, baseline_name, f"IoU {baseline_iou:.3f}"),
-        add_panel_header(ours_panel, "CTF-GS", f"IoU {ours_iou:.3f}"),
+        add_panel_header(ours_panel, "GaussFM", f"IoU {ours_iou:.3f}"),
     ]
     manifest = {
         "scene": case.scene,
@@ -356,12 +356,12 @@ def write_markdown(path: Path, manifest: dict[str, object]) -> None:
     lines = [
         "# ScanNet Open-Vocabulary 3D Query Qualitative",
         "",
-        "Binary query point-cloud visualization for the VALA/OpenGaFF-style direct point-query protocol.",
-        f"The baseline is `{manifest['baseline_name']}`; CTF-GS panels use saved ScanNet direct point-query predictions.",
+        "Binary query point-cloud visualization for the VALA-aligned direct point-query protocol.",
+        f"The baseline is `{manifest['baseline_name']}`; GaussFM panels use saved ScanNet direct point-query predictions.",
         "",
         f"Figure: `{manifest['output']}`",
         "",
-        f"| Scene | Query | {manifest['baseline_name']} IoU | CTF-GS IoU | CTF-GS source |",
+        f"| Scene | Query | {manifest['baseline_name']} IoU | GaussFM IoU | GaussFM source |",
         "| --- | --- | ---: | ---: | --- |",
     ]
     for case in manifest["cases"]:
@@ -431,7 +431,7 @@ def main() -> None:
         "baseline_eval": rel_or_str(baseline_eval),
         "ours_root": rel_or_str(Path(args.ours_root)),
         "split": args.split,
-        "layout": f"overview | GT binary query | {args.baseline_name} prediction | CTF-GS prediction",
+        "layout": f"overview | GT binary query | {args.baseline_name} prediction | GaussFM prediction",
         "cases": case_manifests,
     }
     manifest_path = Path(args.manifest)

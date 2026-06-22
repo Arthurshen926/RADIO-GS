@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Draw the paper framework figure for CTF-GS.
+"""Draw the paper framework figure for GaussFM.
 
 The figure is intentionally vector-first and compact: it separates training-only
 supervision from inference-time readouts and makes the "one compact map" claim
@@ -286,7 +286,7 @@ def main() -> None:
     ax.text(
         0.035,
         0.955,
-        "CTF-GS: one compact foundation-feature Gaussian map",
+        "GaussFM: one compact foundation-feature Gaussian map",
         ha="left",
         va="top",
         fontsize=17.0,

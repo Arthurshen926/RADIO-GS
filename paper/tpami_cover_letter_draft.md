@@ -2,13 +2,13 @@
 
 Dear Editor-in-Chief and Associate Editors,
 
-We are pleased to submit our manuscript, **"CTF-GS: Compact Foundation-Feature
+We are pleased to submit our manuscript, **"GaussFM: Compact Foundation-Feature
 Gaussian Memory for Open-Vocabulary 3D Scene Understanding"**, for consideration
 in *IEEE Transactions on Pattern Analysis and Machine Intelligence*.
 
 This work studies a compact reconstructive foundation-feature memory for 3D
 Gaussian scenes. Instead of storing raw high-dimensional RADIO features per
-Gaussian or training a scene-specific classifier, CTF-GS stores low-dimensional
+Gaussian or training a scene-specific classifier, GaussFM stores low-dimensional
 Gaussian latent codes with spatial context and reliability cues, reconstructs
 RADIO-compatible scene features on demand, and uses the same compact memory for
 rendered-view open-vocabulary localization, direct Gaussian primitive selection,

@@ -3,7 +3,7 @@
 Use this prompt for GPT-image-2, another image model, or manual drawing.
 
 ```text
-Create a clean academic framework diagram for a TPAMI-style paper titled "CTF-GS: Compact Foundation-Feature Gaussian Memory for Open-Vocabulary 3D Scene Understanding".
+Create a clean academic framework diagram for a TPAMI-style paper titled "GaussFM: Compact Foundation-Feature Gaussian Memory for Open-Vocabulary 3D Scene Understanding".
 
 Canvas and style:
 - Wide landscape figure, white background, vector-like flat design, crisp readable labels, no decorative gradients, no 3D clipart, no fake quantitative numbers.
@@ -18,15 +18,15 @@ Main layout:
    Show RGB frames and camera frustums feeding into RADIO feature extraction and the Gaussian scene.
 
 2. Training row:
-   - Frozen C-RADIOv4-H extracts dense 1280-D teacher features from posed RGB frames.
-   - CTF-GS stores a compact RADIO Gaussian memory with:
+   - Frozen C-RADIOv4-H extracts dense 1280-D RADIO reference features from posed RGB frames.
+   - GaussFM stores a compact RADIO Gaussian memory with:
      a) "Per-Gaussian compact latent"
      b) "Spatial context branch"
      c) "visibility / confidence cues"
    - These feed into "HCD/CTR bottleneck + RADIO decoder".
    - The Gaussian renderer produces a "Rendered RADIO-like feature map".
    - A "View-conditioned calibration" module improves the rendered latent/feature map using rendered geometry cues.
-   - Loss arrows compare rendered features against teacher features:
+   - Loss arrows compare rendered features against RADIO reference features:
      "dense RADIO reconstruction"
      "FDH frozen depth-head consistency"
      "DINO/SAM adaptor-space structural regularization"

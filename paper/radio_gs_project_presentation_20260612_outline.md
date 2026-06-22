@@ -1,4 +1,4 @@
-# CTF-GS / RADIO-GS 项目汇报 PPT 大纲
+# GaussFM / RADIO-GS 项目汇报 PPT 大纲
 
 - 输出文件：`/root/RADIO-GS/paper/radio_gs_project_presentation_20260612.pptx`
 - 口径：导师/项目中期汇报 + 顶刊投稿准备
@@ -44,7 +44,7 @@
 - 这页按用户要求使用与公开 VALA 协议一致的 direct point-query 设置，不在论文中暴露未发表方法名。
 
 ## 14. 重建 Scene Features vs. 原始 frame-wise RADIO
-- 这里直接支撑用户关心的：student field 全面强于 frame-wise RADIO 的 selected frozen-head tasks。
+- 这里直接支撑用户关心的：rendered field 在 selected frozen-head tasks 上强于 frame-wise RADIO。
 
 ## 15. 定性一：LERF 2D + 3D Open-Vocabulary Query
 - 主文定性图应选我们强、baseline 弱但合理的样本；2D baseline 建议 LangSplatV2，3D baseline 建议 Dr. Splat。

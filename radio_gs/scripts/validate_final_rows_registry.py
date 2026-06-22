@@ -110,6 +110,7 @@ def _check_promoted_scannet_row(
 ) -> None:
     try:
         track = payload["tracks"]["t3_scannet_ov_point_cloud_segmentation"]
+        source_json = track["radio_gs_source_json"]
         row = track["rows"]["radio_gs_dino_cv_contextual_knn_scene_mean_support"]
     except KeyError as exc:
         issues.append(f"missing ScanNet promoted registry field: {exc}")
@@ -117,6 +118,33 @@ def _check_promoted_scannet_row(
 
     if row.get("promoted") is not True:
         issues.append("ScanNet promoted support row must be promoted=true")
+
+    source_path = _resolve(root, source_json)
+    try:
+        source = _read_json(source_path)
+    except (OSError, json.JSONDecodeError) as exc:
+        issues.append(f"cannot read ScanNet promoted source {source_path}: {exc}")
+    else:
+        _check_vala8_source_protocol(
+            source,
+            label="ScanNet promoted",
+            expected_args=PROMOTED_SCANNET_SOURCE_ARGS,
+            issues=issues,
+        )
+        for split in ("19", "15", "10"):
+            row_key = f"split{split}"
+            for metric in ("miou", "macc"):
+                try:
+                    registry_value = _rounded4(row[row_key][metric])
+                    source_value = _rounded4(source["macro"][split][metric])
+                except (KeyError, TypeError, ValueError) as exc:
+                    issues.append(f"cannot compare ScanNet promoted {row_key}.{metric}: {exc}")
+                    continue
+                if registry_value != source_value:
+                    issues.append(
+                        f"ScanNet promoted {row_key}.{metric} drift: "
+                        f"registry={registry_value:.4f} source={source_value:.4f}"
+                    )
 
     table_path = root / SCANNET_TABLE
     try:
@@ -141,40 +169,6 @@ def _check_promoted_scannet_row(
             "ScanNet promoted registry/table drift: missing table row snippet "
             f"{expected_snippet}"
         )
-
-
-def _check_opengaff_blocker(
-    payload: dict[str, Any],
-    root: Path,
-    issues: list[str],
-) -> None:
-    queue = payload.get("external_reproduction_queue", {})
-    p2_rows = {row.get("method"): row for row in queue.get("p2", [])}
-    opengaff_row = p2_rows.get("OpenGaFF")
-    if opengaff_row is None:
-        issues.append("OpenGaFF missing from external_reproduction_queue.p2")
-    elif "no public implementation" not in str(opengaff_row.get("status", "")):
-        issues.append("OpenGaFF p2 status must record no public implementation")
-
-    audit_path = queue.get("machine_audit", {}).get("json")
-    if not audit_path:
-        issues.append("external_reproduction_queue.machine_audit.json missing")
-        return
-    try:
-        audit = _read_json(_resolve(root, audit_path))
-    except (OSError, json.JSONDecodeError) as exc:
-        issues.append(f"cannot read external baseline audit {audit_path}: {exc}")
-        return
-
-    baselines = {row.get("method"): row for row in audit.get("baselines", [])}
-    audit_row = baselines.get("OpenGaFF")
-    if audit_row is None:
-        issues.append("OpenGaFF missing from external baseline audit")
-        return
-    if audit_row.get("exists") is not False:
-        issues.append("OpenGaFF audit row must have exists=false until code is public")
-    if "code will be publicly released upon acceptance" not in str(audit_row.get("blocker", "")):
-        issues.append("OpenGaFF audit blocker must cite release-upon-acceptance status")
 
 
 def _queue_status(payload: dict[str, Any], method: str) -> str | None:
@@ -317,7 +311,6 @@ def validate_registry(final_rows_path: str | Path, *, root: str | Path = ".") ->
     payload = _read_yaml(Path(final_rows_path))
     issues: list[str] = []
     _check_promoted_scannet_row(payload, root_path, issues)
-    _check_opengaff_blocker(payload, root_path, issues)
     _check_completed_external_summaries(payload, root_path, issues)
     return issues
 

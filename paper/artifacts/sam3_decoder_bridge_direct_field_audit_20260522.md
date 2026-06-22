@@ -2,7 +2,7 @@
 
 This audit records the outcome of the 2026-05-22 method-level checks for three
 paper-facing risks: official SAM3 decoder usage, compact direct-field strength,
-and ScanNet VALA/OpenGaFF-8 protocol completeness.
+and ScanNet VALA-aligned ScanNet-8 protocol completeness.
 
 ## Official SAM3 Decoder Bridge
 
@@ -22,8 +22,8 @@ Smoke results on `figurines`:
 
 | Run | Source | Train frames | Eval frames | Official RGB SAM3 mIoU | Bridge mIoU |
 |---|---|---:|---:|---:|---:|
-| `figurines_teacher_smoke` | frame-wise RADIO teacher | 4 | 1 | 0.4349 | 0.0000 |
-| `figurines_teacher_thr0_train8_e4` | frame-wise RADIO teacher | 8 | 1 | 0.7489 | 0.0010 |
+| `figurines_teacher_smoke` | frame-wise RADIO reference | 4 | 1 | 0.4349 | 0.0000 |
+| `figurines_teacher_thr0_train8_e4` | frame-wise RADIO reference | 8 | 1 | 0.7489 | 0.0010 |
 
 Conclusion: the official decoder bridge is executable and tested, but the
 current simple backbone-output regression is a negative result. It should not be
@@ -65,7 +65,7 @@ strongly negative. The paper should keep the existing stronger compact-field
 evidence and should not demote VPR from the main direct-3D readout based on this
 round alone.
 
-## ScanNet VALA/OpenGaFF-8 Protocol Check
+## ScanNet VALA-aligned ScanNet-8 Protocol Check
 
 The paper-facing ScanNet results cover the requested eight scenes:
 

@@ -2,7 +2,7 @@
 
 - Figure: `paper/figures/lerf_main_qualitative_comparison.png`
 - Baseline: `Dr. Splat (repro.)`
-- Ours: `CTF-GS compact`
+- Ours: `GaussFM compact`
 - Ours source root: `output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528`
 
 | Scene | Frame | Query | Baseline IoU | Ours IoU |

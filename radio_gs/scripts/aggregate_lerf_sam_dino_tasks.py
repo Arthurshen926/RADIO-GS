@@ -159,7 +159,7 @@ def write_markdown_report(report: Mapping[str, object], output_path: Path, *, ti
         "",
         note,
         "",
-        "| Task | Teacher Loc/Hit | Teacher mIoU/Score | Rendered Loc/Hit | Rendered mIoU/Score | N |",
+        "| Task | Teacher Loc/Hit | Frame-wise RADIO mIoU/Score | Rendered Loc/Hit | Rendered mIoU/Score | N |",
         "|---|---:|---:|---:|---:|---:|",
     ]
     for task, metrics, loc_key, score_key, n_key in rows:

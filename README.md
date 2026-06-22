@@ -38,7 +38,7 @@ The current pipeline supports:
 ```text
 RGB images
   -> RADIO encoder (frozen)
-  -> 1280d teacher features
+  -> 1280-D frame-wise RADIO features
                   |
                   v
 3DGS geometry + learnable feature field
@@ -59,7 +59,7 @@ RGB images
    - supports Replica-style RGB/depth/pose inputs
 
 2. `radio_gs/scripts/extract_radio_features.py`
-   - extracts and stores RADIO teacher features for all frames
+   - extracts and stores frame-wise RADIO features for all frames
    - now saves a `frame_manifest.json` and uses numeric frame ordering
 
 3. `radio_gs/scripts/train_feature_field.py`
@@ -208,7 +208,7 @@ bash radio_gs/scripts/rebuild_3dgs_assets.sh all
 
 This writes the geometry backbone that later configs reference through `ply_path`.
 
-### 2. Extract RADIO teacher features
+### 2. Extract frame-wise RADIO features
 
 Training split:
 
@@ -335,9 +335,9 @@ The current research line mainly uses the hybrid family.
 
 ### Important scientific caveat
 
-Fresh teacher features can fix evaluation / visualization correctness, but old checkpoints trained against contaminated teacher supervision are still only diagnostic.
+Fresh RADIO reference features can fix evaluation / visualization correctness, but old checkpoints trained against contaminated RADIO supervision are still only diagnostic.
 
-For final claims, retrain the feature field with clean teacher features first, then re-run:
+For final claims, retrain the feature field with clean RADIO reference features first, then re-run:
 
 - `train_feature_field.py`
 - `eval_rendered.py`

@@ -285,13 +285,13 @@ def _lerf_lines(
         )
     if direct is not None:
         lines.append(
-            "| RADIO-GS/CTF-GS | VPR direct 3D selection mIoU | "
+            "| RADIO-GS/GaussFM | VPR direct 3D selection mIoU | "
             f"{_fmt(direct['figurines']['miou'])} | {_fmt(direct['ramen']['miou'])} | "
             f"{_fmt(direct['teatime']['miou'])} | {_fmt(direct['waldo_kitchen']['miou'])} | "
             f"{_fmt(direct['macro']['miou'])} |"
         )
         lines.append(
-            "| RADIO-GS/CTF-GS | VPR direct 3D selection Acc@0.25 | "
+            "| RADIO-GS/GaussFM | VPR direct 3D selection Acc@0.25 | "
             f"{_fmt(direct['figurines']['acc025'])} | {_fmt(direct['ramen']['acc025'])} | "
             f"{_fmt(direct['teatime']['acc025'])} | {_fmt(direct['waldo_kitchen']['acc025'])} | "
             f"{_fmt(direct['macro']['acc025'])} |"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Train a prompt-conditioned SAM-adaptor mask head from official SAM3 caches.
 
-The head is feature-only at inference time: rendered CTF-GS/RADIO features,
+The head is feature-only at inference time: rendered GaussFM/RADIO features,
 text-prompt embeddings, and a coarse mask are used to predict a refined mask.
 Official SAM3 RGB masks are used only as training-view pseudo labels.
 """

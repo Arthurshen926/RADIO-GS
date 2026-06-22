@@ -21,7 +21,7 @@ radio_adaptor_alignment_checkpoint: /root/.cache/torch/hub/checkpoints/c-radio_v
 ```
 
 When enabled, RADIO-GS projects both decoded rendered features and frozen RADIO
-teacher features through the selected adaptor projections, then minimizes
+RADIO reference features through the selected adaptor projections, then minimizes
 cosine distance in adaptor space. The feature remains a 1280d RADIO-like map at
 inference time.
 
@@ -318,7 +318,7 @@ LERF-OVS scenes:
 
 Macro results:
 
-| Adaptor | Probe | Teacher LocAcc | Teacher mIoU | Rendered LocAcc | Rendered mIoU |
+| Adaptor | Probe | Frame-wise RADIO LocAcc | Frame-wise RADIO mIoU | Rendered LocAcc | Rendered mIoU |
 |---|---|---:|---:|---:|---:|
 | DINOv3 | prototype segmentation | 0.6543 | 0.0945 | 0.6277 | 0.0937 |
 | DINOv3 | source-target matching | 0.5957 | 0.1032 | 0.5035 | 0.1019 |
@@ -327,7 +327,7 @@ Macro results:
 
 Additional promptable task probes:
 
-| Task | Teacher LocAcc/Hit | Teacher mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
+| Task | Frame-wise RADIO LocAcc/Hit | Frame-wise RADIO mIoU/Score | Rendered LocAcc/Hit | Rendered mIoU/Score |
 |---|---:|---:|---:|---:|
 | SAM3 point prompt segmentation | 1.0000 | 0.3700 | 1.0000 | 0.4169 |
 | SAM3 box prompt segmentation | 0.8702 | 0.6560 | 0.8221 | 0.6638 |
@@ -348,7 +348,7 @@ Interpretation:
   multi-head propagation readout keeps DINO support but uses feature-only
   SAM-adaptor boundary refinement from the same rendered field, reaching
   0.7872 LocAcc / 0.4677 mIoU versus 0.7660 / 0.4606 for the frame-wise
-  teacher. Dense HitRate remains teacher-stronger, so that metric stays a
+  teacher. Dense HitRate remains frame-wise-RADIO-stronger, so that metric stays a
   secondary caveat.
 - Waldo Kitchen follows the aggregate pattern in the formal task sweep:
   rendered SAM3 point/box mIoU improves, while DINO hit rate and propagation

@@ -1,11 +1,11 @@
 \begin{table}[t]
 \centering
-\caption{2D feature-usability comparison between frame-wise RADIO teacher features and rendered CTF-GS features under frozen downstream heads. CTF-GS wins all selected primary metrics; secondary LocAcc/HitRate caveats are reported in the artifact.}
+\caption{2D feature-usability comparison between frame-wise RADIO features and rendered GaussFM features under frozen downstream heads. GaussFM wins all selected primary metrics; secondary LocAcc/HitRate caveats are reported in the artifact.}
 \label{tab:teacher_vs_ctfgs_2d_usability}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{l l r r r}
 \toprule
-Task & Metric & Teacher & CTF-GS & $\Delta$ \\
+Task & Metric & Frame-wise RADIO & GaussFM & $\Delta$ \\
 \midrule
 LERF text grounding & mIoU & 0.4634 & 0.5707 & +0.1073 \\
 SAM3 point prompt & mIoU & 0.3700 & 0.4173 & +0.0473 \\

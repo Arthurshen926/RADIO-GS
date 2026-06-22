@@ -14,7 +14,7 @@ This sheet lists the published methods that should anchor the paper's comparison
 
 | Method | Paper | Venue | Best use in the paper | Source |
 |---|---|---|---|---|
-| OpenGaFF | OpenGaFF: Open-Vocabulary Gaussian Feature Field with Codebook Attention | arXiv 2026 | Source for the recent published baseline rows used in the LERF direct-3D and ScanNet context tables; the OpenGaFF method row itself is omitted from the current comparison. | https://arxiv.org/abs/2605.06088 |
+| the unpublished protocol source | the unpublished protocol source: Open-Vocabulary Gaussian Feature Field with Codebook Attention | arXiv 2026 | Source for the recent published baseline rows used in the LERF direct-3D and ScanNet context tables; the unpublished protocol-source method row itself is omitted from the current comparison. | https://arxiv.org/abs/2605.06088 |
 | Gaussian Grouping | Gaussian Grouping: Segment and Edit Anything in 3D Scenes | ECCV 2024 | Supplementary comparison for open-world 3D segmentation / editing | https://ymq2017.github.io/gaussian-grouping/ |
 | 3D Gaussian Splatting | 3D Gaussian Splatting for Real-Time Radiance Field Rendering | SIGGRAPH 2023 | Geometry / rendering efficiency upper-bound, not a grounding baseline | https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/ |
 
@@ -26,5 +26,5 @@ This sheet lists the published methods that should anchor the paper's comparison
 ## Next benchmark actions
 
 1. Keep the official-source four-scene LERF-OVS rendered-view main table frozen unless a new reproduced baseline is added.
-2. For direct 3D object selection, cite the published public-baseline rows used by OpenGaFF instead of attempting local reruns.
-3. Use the DINO-CV contextual kNN VALA/OpenGaFF eight-scene ScanNet row as the paper-facing direct point-query transfer evidence, not the older v67 row.
+2. For direct 3D object selection, cite the published public-baseline rows used by the unpublished protocol source instead of attempting local reruns.
+3. Use the DINO-CV contextual kNN VALA-aligned eight-scene ScanNet row as the paper-facing direct point-query transfer evidence, not the older v67 row.

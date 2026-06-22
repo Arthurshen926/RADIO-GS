@@ -4,12 +4,12 @@ Protocol: same LERF rendered-view feature grounding protocol as the promoted
 peak-component row. The rendered SigLIP2 heatmap is thresholded at the fixed
 peak-relative ratio 0.60, reduced to the peak-connected component, and used as
 the coarse prompt for a prompt-conditioned internal SAM3 mask head. The SAM3
-readout receives only rendered CTF-GS/RADIO-compatible features, the SigLIP2
+readout receives only rendered GaussFM/RADIO-compatible features, the SigLIP2
 text prompt, and the coarse mask. It does not call the official RGB SAM3 decoder
 at evaluation time. Refined masks are accepted only if they preserve the query
 heatmap peak and pass GT-free heatmap-support checks.
 
-| Scene | LocAcc | mIoU | Teacher LocAcc | Teacher mIoU | N | Source |
+| Scene | LocAcc | mIoU | Frame-wise RADIO LocAcc | Frame-wise RADIO mIoU | N | Source |
 |---|---:|---:|---:|---:|---:|---|
 | figurines | 0.8214 | 0.5243 | 0.7500 | 0.4065 | 56 | `output/radio_gs/lerf2d_heatmap_guard_sam3_20260525/figurines_peakinit_T50/lerf_ovs_results.json` |
 | ramen | 0.9014 | 0.6325 | 0.9014 | 0.5232 | 71 | `output/radio_gs/lerf2d_heatmap_guard_sam3_20260525/ramen_peakinit_base_lerf2dcoarse/lerf_ovs_results.json` |

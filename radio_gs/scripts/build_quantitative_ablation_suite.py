@@ -136,36 +136,36 @@ def build_contributions() -> list[ContributionRow]:
             interpretation="Largest direct-3D jump; primitive features need multiview registered support before selection is meaningful.",
         ),
         ContributionRow(
-            contribution="CTR/HCD compact-to-teacher codec",
+            contribution="Foundation-space reconstruction codec",
             task="LERF rendered architecture",
             reference="w/o CTR",
-            variant="full CTF-GS seed-7 model",
+            variant="full GaussFM seed-7 model",
             status="core architecture",
             metrics=(
                 MetricDelta("LocAcc", 0.531, 0.858),
                 MetricDelta("mIoU", 0.260, 0.485),
             ),
             source="paper/lerf_component_ablation_table.tex",
-            interpretation="Dominant architectural dependency; direct 1x1 projection cannot recover teacher-compatible features.",
+            interpretation="Dominant architectural dependency; direct 1x1 projection cannot recover RADIO-compatible features.",
         ),
         ContributionRow(
             contribution="Final rendered-view readout vs frame-wise RADIO",
-            task="2D teacher-vs-student feature usability",
-            reference="frame-wise RADIO teacher",
-            variant="CTF-GS rendered field + feature-only boundary readout",
+            task="2D frame-wise-RADIO-vs-field feature usability",
+            reference="frame-wise RADIO reference",
+            variant="GaussFM rendered field + feature-only boundary readout",
             status="main claim evidence",
             metrics=(
                 MetricDelta("LocAcc", 0.7985, 0.8598),
                 MetricDelta("mIoU", 0.4634, 0.5889),
             ),
             source="paper/artifacts/final_rows.yaml",
-            interpretation="Shows the student field improves text-grounding usability over frame-wise teacher features under the same evaluator.",
+            interpretation="Shows the reconstructed scene field improves text-grounding usability over frame-wise RADIO features under the same evaluator.",
         ),
         ContributionRow(
             contribution="FGC/FDH geometry-aware warm-start",
             task="LERF rendered architecture",
             reference="w/o FGC warm-start",
-            variant="full CTF-GS seed-7 model",
+            variant="full GaussFM seed-7 model",
             status="core architecture",
             metrics=(
                 MetricDelta("LocAcc", 0.802, 0.858),
@@ -204,8 +204,8 @@ def build_contributions() -> list[ContributionRow]:
         ContributionRow(
             contribution="SAM3 point-prompt feature readout",
             task="2D frozen-head downstream",
-            reference="frame-wise RADIO teacher",
-            variant="CTF-GS rendered field",
+            reference="frame-wise RADIO reference",
+            variant="GaussFM rendered field",
             status="downstream readout evidence",
             metrics=(
                 MetricDelta("mIoU", 0.3700, 0.4173),
@@ -217,8 +217,8 @@ def build_contributions() -> list[ContributionRow]:
         ContributionRow(
             contribution="DINOv3 dense matching feature readout",
             task="2D frozen-head downstream",
-            reference="frame-wise RADIO teacher",
-            variant="CTF-GS rendered field",
+            reference="frame-wise RADIO reference",
+            variant="GaussFM rendered field",
             status="downstream readout evidence with caveat",
             metrics=(
                 MetricDelta("Mean score", 0.8547, 0.9048),
@@ -245,7 +245,7 @@ def build_contributions() -> list[ContributionRow]:
             task="ScanNet VALA8 direct point-query",
             reference="DINO-CV contextual kNN alpha=0.5",
             variant="k16/cand80 + scene alpha 0.45 + spatial k12/a1",
-            status="promoted ScanNet readout",
+            status="supporting ScanNet diagnostic readout",
             metrics=(
                 MetricDelta("split19 mIoU", 0.3704, 0.3806),
                 MetricDelta("split19 mAcc", 0.6017, 0.6129),
@@ -261,7 +261,7 @@ def build_contributions() -> list[ContributionRow]:
             contribution="VFA view-space aligner",
             task="LERF rendered architecture",
             reference="w/o VFA",
-            variant="full CTF-GS seed-7 model",
+            variant="full GaussFM seed-7 model",
             status="core architecture",
             metrics=(
                 MetricDelta("LocAcc", 0.840, 0.858),
@@ -274,7 +274,7 @@ def build_contributions() -> list[ContributionRow]:
             contribution="Hybrid Gaussian code field",
             task="LERF rendered architecture",
             reference="w/o HGCF",
-            variant="full CTF-GS seed-7 model",
+            variant="full GaussFM seed-7 model",
             status="core architecture with tradeoff",
             metrics=(
                 MetricDelta("LocAcc", 0.839, 0.858),
@@ -314,7 +314,7 @@ def build_missing_followups() -> list[dict[str, str]]:
         {
             "priority": "P1",
             "item": "multi-head DINO/SAM/SigLIP2 removal under the 2D frozen-head benchmark",
-            "reason": "teacher-vs-student downstream wins are recorded, but per-head removal deltas are not yet a clean single-table factorial.",
+            "reason": "frame-wise-RADIO-vs-field downstream wins are recorded, but per-head removal deltas are not yet a clean single-table factorial.",
         },
         {
             "priority": "P2",
@@ -327,7 +327,7 @@ def build_missing_followups() -> list[dict[str, str]]:
 def write_json(path: Path, rows: list[ContributionRow], sources: list[str]) -> None:
     payload = {
         "generated": datetime.utcnow().isoformat(timespec="seconds") + "Z",
-        "purpose": "Unified quantitative ablation and contribution ranking for CTF-GS paper writing.",
+        "purpose": "Unified quantitative ablation and contribution ranking for GaussFM paper writing.",
         "ranking_note": "score is the mean positive delta over listed metrics; negative secondary deltas are retained in each metric record.",
         "sources": sources,
         "contributions": [md(row) for row in sorted(rows, key=lambda item: item.positive_score, reverse=True)],

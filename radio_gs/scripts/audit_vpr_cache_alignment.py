@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit VPR primitive-feature cache alignment against a CTF-GS checkpoint."""
+"""Audit VPR primitive-feature cache alignment against a GaussFM checkpoint."""
 
 from __future__ import annotations
 

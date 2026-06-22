@@ -9,7 +9,7 @@ def _write_component_json(path: Path) -> None:
         json.dumps(
             {
                 "variants": [
-                    {"key": "full", "label": "Full CTF-GS", "note": "hybrid + HCD"},
+                    {"key": "full", "label": "Full GaussFM", "note": "hybrid + HCD"},
                     {"key": "no_fdh", "label": "w/o FGC", "note": "no frozen head"},
                 ],
                 "results": {
@@ -62,7 +62,7 @@ def test_build_rows_keeps_ablation_direct3d_unmeasured(tmp_path: Path) -> None:
 
     full = rows[1]
     no_fdh = rows[2]
-    assert full["method"] == "Full CTF-GS"
+    assert full["method"] == "Full GaussFM"
     assert full["lerf_loc_acc"] == 0.8712
     assert full["lerf_miou"] == 0.5243
     assert full["direct3d"] == "VPR 0.4801/0.6760; SAM3-box 0.5705/0.6835"
@@ -118,7 +118,7 @@ def test_build_rows_includes_measured_per_gaussian_1280d_baseline(tmp_path: Path
                 "mean_registered_fraction": 0.82,
                 "mean_storage_mib": 980.0,
                 "protocol": {
-                    "feature_source": "registered RADIO 1280-D teacher features",
+                    "feature_source": "registered RADIO 1280-D RADIO reference features",
                     "feature_dim": 1280,
                 },
             }
@@ -155,7 +155,7 @@ def test_build_markdown_marks_external_teacher_not_3d_memory() -> None:
         ]
     )
 
-    assert "Frame-wise RADIO teacher" in markdown
+    assert "Frame-wise RADIO" in markdown
     assert "| no | no | no | no |" in markdown
     assert "0.7985" in markdown
 
@@ -167,4 +167,4 @@ def test_write_outputs_records_markdown_and_json(tmp_path: Path) -> None:
 
     assert paths["markdown"].read_text().startswith("# Controlled Evidence Table")
     payload = json.loads(paths["json"].read_text())
-    assert payload["rows"][0]["method"] == "Frame-wise RADIO teacher"
+    assert payload["rows"][0]["method"] == "Frame-wise RADIO"

@@ -67,15 +67,15 @@ qualitative replacement:
 
 | Candidate | Local status | Decision |
 |---|---|---|
-| VALA | Completed a local VALA/OpenGaFF-8 compatibility run at resolution 2 for all eight scenes; prediction PLY assets are available under `output/baselines/vala/scannet_vala8_compat_20260611_res2/visualizations/*/` | Use as the ScanNet qualitative baseline |
+| VALA | Completed a local VALA-aligned ScanNet-8 compatibility run at resolution 2 for all eight scenes; prediction PLY assets are available under `output/baselines/vala/scannet_vala8_compat_20260611_res2/visualizations/*/` | Use as the ScanNet qualitative baseline |
 | Semantic Gaussians | Partial ScanNet outputs exist at `output/baselines/semantic_gaussians/scannet_compat_20260520`, but only four scenes were found and the local macro mIoU is weak (`0.0280`) | Not suitable as a stronger qualitative baseline |
 | OpenGaussian | Local reproduced assets are available, but VALA is newer and now has complete VALA8 qualitative assets | Replaced by VALA in the main ScanNet qualitative figure |
 
-The completed VALA compatibility run uses all eight VALA/OpenGaFF scenes:
+The completed VALA compatibility run uses all eight VALA-aligned scenes:
 `scene0000_00`, `scene0062_00`, `scene0070_00`, `scene0097_00`,
 `scene0140_00`, `scene0347_00`, `scene0400_00`, and `scene0590_00`.
 It is a full-scene/view qualitative reproduction, but the local compatibility
-numbers are weak and should not replace the published VALA/OpenGaFF quantitative
+numbers are weak and should not replace the published VALA-aligned quantitative
 rows:
 
 | Split | mIoU | mAcc | Overall Acc |

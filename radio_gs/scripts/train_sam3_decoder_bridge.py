@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Train/evaluate a RADIO -> official SAM3 decoder bridge on LERF frames.
 
-This is the feature-to-decoder experiment: RADIO or CTF-GS rendered 1280-d
+This is the feature-to-decoder experiment: RADIO or GaussFM rendered 1280-d
 features are projected into the official SAM3 ``backbone_out`` tensors, then the
 frozen official SAM3 grounding decoder is called without using SAM3 RGB features
 as the mask readout.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build 2D teacher-vs-CTF-GS feature-usability evidence tables."""
+"""Build 2D frame-wise-RADIO-vs-GaussFM feature-usability evidence tables."""
 
 from __future__ import annotations
 
@@ -90,14 +90,14 @@ def _metric_pair(
 
 def _build_text_grounding_rows(controlled: Mapping[str, object]) -> list[dict[str, object]]:
     rows = [dict(row) for row in controlled["rows"]]  # type: ignore[index]
-    teacher = _find_method(rows, "Frame-wise RADIO teacher")
+    teacher = _find_method(rows, "Frame-wise RADIO")
     teacher_loc = _float(teacher["lerf_loc_acc"])
     teacher_miou = _float(teacher["lerf_miou"])
     methods = [
-        "Frame-wise RADIO teacher",
+        "Frame-wise RADIO",
         "Nearest-view RADIO cache",
         "Per-Gaussian 1280-D RADIO memory",
-        "Full CTF-GS",
+        "Full GaussFM",
     ]
     output = []
     for method in methods:
@@ -246,7 +246,7 @@ def _build_summary(
     text_rows: list[dict[str, object]],
     frozen_rows: list[dict[str, object]],
 ) -> dict[str, object]:
-    full = next(row for row in text_rows if row["method"] == "Full CTF-GS")
+    full = next(row for row in text_rows if row["method"] == "Full GaussFM")
     primary_total = 1 + len(frozen_rows)
     primary_rendered_wins = int(full["delta_miou"] > 0)
     primary_rendered_wins += sum(1 for row in frozen_rows if row["delta_primary"] > 0)
@@ -254,24 +254,24 @@ def _build_summary(
     for row in frozen_rows:
         if row["delta_primary"] < 0:
             caveats.append(
-                f"{row['task']} {row['primary_metric']} remains teacher-stronger "
+                f"{row['task']} {row['primary_metric']} remains frame-wise-RADIO-stronger "
                 f"({_fmt(row['rendered_primary'])} vs {_fmt(row['teacher_primary'])})."
             )
         if row["delta_secondary"] < 0:
             caveats.append(
-                f"{row['task']} {row['secondary_metric']} remains teacher-stronger "
+                f"{row['task']} {row['secondary_metric']} remains frame-wise-RADIO-stronger "
                 f"({_fmt(row['rendered_secondary'])} vs {_fmt(row['teacher_secondary'])})."
             )
     if primary_rendered_wins == primary_total:
         claim_sentence = (
-            "CTF-GS rendered features outperform the frame-wise RADIO teacher "
+            "GaussFM rendered features outperform the frame-wise RADIO reference "
             "on all selected primary downstream feature-usability metrics; "
             "secondary LocAcc/HitRate caveats are reported separately."
         )
     else:
         claim_sentence = (
-            "CTF-GS rendered features improve selected downstream feature-usability "
-            "metrics over frame-wise RADIO teacher features, while caveats remain "
+            "GaussFM rendered features improve selected downstream feature-usability "
+            "metrics over frame-wise RADIO features, while caveats remain "
             "under the same frozen readout."
         )
     return {
@@ -322,14 +322,14 @@ def build_report(
 
 def _write_markdown(report: Mapping[str, object], path: Path) -> None:
     lines = [
-        "# Teacher vs CTF-GS 2D Feature Usability",
+        "# Frame-wise RADIO vs GaussFM 2D Feature Usability",
         "",
         "This report consolidates same-evaluator 2D evidence for selected downstream tasks. "
         "It supports a selected downstream tasks claim rather than universal feature superiority.",
         "",
         "## LERF Rendered-View Text Grounding and Feature Memory",
         "",
-        "| Method | LocAcc | mIoU | Delta LocAcc vs teacher | Delta mIoU vs teacher |",
+        "| Method | LocAcc | mIoU | Delta LocAcc vs frame-wise RADIO | Delta mIoU vs frame-wise RADIO |",
         "|---|---:|---:|---:|---:|",
     ]
     for row in report["text_grounding_rows"]:  # type: ignore[index]
@@ -347,7 +347,7 @@ def _write_markdown(report: Mapping[str, object], path: Path) -> None:
             "",
             "## Frozen-Head Downstream Tasks",
             "",
-            "| Task | Primary | Teacher | CTF-GS rendered | Delta | Secondary | Teacher | CTF-GS rendered | Delta | N | Winner |",
+            "| Task | Primary | Frame-wise RADIO | GaussFM rendered | Delta | Secondary | Frame-wise RADIO | GaussFM rendered | Delta | N | Winner |",
             "|---|---|---:|---:|---:|---|---:|---:|---:|---:|---|",
         ]
     )
@@ -370,8 +370,8 @@ def _write_markdown(report: Mapping[str, object], path: Path) -> None:
     summary = report["summary"]  # type: ignore[index]
     claim_sentence = summary.get(  # type: ignore[union-attr]
         "claim_sentence",
-        "CTF-GS rendered features improve selected downstream tasks, with "
-        "explicit caveats where the frame-wise teacher remains stronger.",
+        "GaussFM rendered features improve selected downstream tasks, with "
+        "explicit caveats where the frame-wise RADIO reference remains stronger.",
     )
     lines.extend(
         [
@@ -391,7 +391,7 @@ def _write_markdown(report: Mapping[str, object], path: Path) -> None:
     if caveats:
         lines.extend(f"- {item}" for item in caveats)
     else:
-        lines.append("- No teacher-stronger frozen-head metrics in the selected primary/secondary set.")
+        lines.append("- No frame-wise-RADIO-stronger frozen-head metrics in the selected primary/secondary set.")
     lines.extend(["", "## Sources", ""])
     for key, value in report["sources"].items():  # type: ignore[index]
         if value:
@@ -404,23 +404,23 @@ def _write_latex(report: Mapping[str, object], path: Path) -> None:
     lines = [
         r"\begin{table}[t]",
         r"\centering",
-        r"\caption{2D feature-usability comparison between frame-wise RADIO teacher features and rendered CTF-GS features under frozen downstream heads. CTF-GS wins all selected primary metrics; secondary LocAcc/HitRate caveats are reported in the artifact.}",
+        r"\caption{2D feature-usability comparison between frame-wise RADIO features and rendered GaussFM features under frozen downstream heads. GaussFM wins all selected primary metrics; secondary LocAcc/HitRate caveats are reported in the artifact.}",
         r"\label{tab:teacher_vs_ctfgs_2d_usability}",
         r"\resizebox{\linewidth}{!}{%",
         r"\begin{tabular}{l l r r r}",
         r"\toprule",
-        r"Task & Metric & Teacher & CTF-GS & $\Delta$ \\",
+        r"Task & Metric & Frame-wise RADIO & GaussFM & $\Delta$ \\",
         r"\midrule",
     ]
     full = next(
         row
         for row in report["text_grounding_rows"]  # type: ignore[index]
-        if row["method"] == "Full CTF-GS"
+        if row["method"] == "Full GaussFM"
     )
     teacher = next(
         row
         for row in report["text_grounding_rows"]  # type: ignore[index]
-        if row["method"] == "Frame-wise RADIO teacher"
+        if row["method"] == "Frame-wise RADIO"
     )
     lines.append(
         "LERF text grounding & mIoU & "

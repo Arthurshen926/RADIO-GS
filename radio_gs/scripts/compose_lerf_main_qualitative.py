@@ -657,7 +657,7 @@ def write_ovs_2d3d_markdown(path: Path, manifest: dict[str, object]) -> None:
             "",
             "Protocol note: 2D panels visualize rendered-view OVS masks/heatmaps on RGB, "
             "while 3D panels visualize primitives selected by direct Gaussian-level query "
-            "and rendered/cut out on a white background. The CTF-GS 3D panels use the "
+            "and rendered/cut out on a white background. The GaussFM 3D panels use the "
             "compact direct-field mask source only; no VPR cache or official RGB SAM3 "
             "decoder is called when producing these panels.",
         ]
@@ -709,7 +709,7 @@ def main() -> None:
     parser.add_argument("--ours_2d_root", default="output/radio_gs/freeze_eval")
     parser.add_argument("--ours_root", default="output/radio_gs/lerf_direct3d_prompt_ensemble_policy_masks_20260528")
     parser.add_argument("--ours_selection", default="thr0p65")
-    parser.add_argument("--ours_label", default="CTF-GS compact")
+    parser.add_argument("--ours_label", default="GaussFM compact")
     parser.add_argument("--case", action="append", default=[], help="Override/add case as scene:frame:query")
     parser.add_argument("--panel_width", type=int, default=300)
     parser.add_argument("--panel_height", type=int, default=214)
@@ -757,7 +757,7 @@ def main() -> None:
             "baseline_2d_root": rel_or_str(Path(args.baseline_2d_root)),
             "baseline_3d": "Dr. Splat (repro.)",
             "baseline_3d_root": rel_or_str(Path(args.baseline_3d_root)),
-            "ours_2d": "CTF-GS rendered-view heatmap/RGB",
+            "ours_2d": "GaussFM rendered-view heatmap/RGB",
             "ours_2d_root": rel_or_str(Path(args.ours_2d_root)),
             "ours_3d": args.ours_label,
             "ours_3d_root": rel_or_str(ours_root),

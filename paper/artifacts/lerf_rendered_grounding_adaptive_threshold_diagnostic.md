@@ -2,7 +2,7 @@
 
 GT-free rendered grounding adaptive threshold diagnostic: threshold_mode=mean_std, k=1.0, clamp=[0.50,0.70]. Same paper-facing checkpoints, temperatures, text embeddings, scoring and heatmap upsample as main table.
 
-| Scene | LocAcc | mIoU | Teacher mIoU |
+| Scene | LocAcc | mIoU | Frame-wise RADIO mIoU |
 |---|---:|---:|---:|
 | figurines | 0.8214 | 0.4309 | 0.4308 |
 | ramen | 0.9014 | 0.5863 | 0.5883 |

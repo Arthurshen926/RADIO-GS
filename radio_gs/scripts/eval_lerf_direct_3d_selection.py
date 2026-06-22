@@ -10,7 +10,7 @@ This script implements an OpenGaussian-style protocol for RADIO-GS:
 4. Report mIoU, Acc@0.25, and Acc@0.50 against LERF-OVS masks.
 
 The registered-view path is View-to-Primitive Registration (VPR): text queries
-still operate on Gaussian primitives, while rendered teacher-compatible features
+still operate on Gaussian primitives, while rendered RADIO-compatible features
 provide the registration signal.
 """
 
@@ -6762,7 +6762,7 @@ def main() -> None:
         help=(
             "GT-free confidence used to downweight weak direct primitive rows before "
             "selection. teacher_cache_valid uses only the row support mask from the "
-            "training VPR/raster teacher cache, not teacher features."
+            "training VPR/raster teacher cache, not RADIO reference features."
         ),
     )
     parser.add_argument("--direct_primitive_confidence_blend", type=float, default=0.0, help="Blend weight for direct primitive confidence calibration")

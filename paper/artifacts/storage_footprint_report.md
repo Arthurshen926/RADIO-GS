@@ -1,6 +1,6 @@
 # Storage Footprint Report
 
-This report separates three storage accounting levels so that the compact feature-memory claim is not hidden by carried 3DGS geometry/RGB tensors. Direct storage assumes one 1280-D fp16 teacher feature per Gaussian. Latent payload counts only the stored compact per-Gaussian semantic code. Feature-memory package counts the latent payload plus global field heads, CTR/HCD codec, and VFA/refiner tensors. Full checkpoint is a conservative deployable accounting that also includes ordinary 3DGS geometry/RGB and appearance tensors carried inside the model state dict. VPR caches are reported separately because they are optional inference artifacts, not persistent trained state.
+This report separates three storage accounting levels so that the compact feature-memory claim is not hidden by carried 3DGS geometry/RGB tensors. Direct storage assumes one 1280-D fp16 RADIO reference feature per Gaussian. Latent payload counts only the stored compact per-Gaussian semantic code. Feature-memory package counts the latent payload plus global field heads, CTR/HCD codec, and VFA/refiner tensors. Full checkpoint is a conservative deployable accounting that also includes ordinary 3DGS geometry/RGB and appearance tensors carried inside the model state dict. VPR caches are reported separately because they are optional inference artifacts, not persistent trained state.
 
 | Scene | #Gaussians | Direct 1280-D fp16 | Latent payload | Latent saving | Feature-memory package | Package saving | Full checkpoint | Full saving | Optional VPR emb. cache | Voxel score cache |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -11,8 +11,8 @@ This report separates three storage accounting levels so that the compact featur
 
 ## Notes
 
-- Direct storage assumes storing only the 1280-D teacher feature as fp16 per Gaussian; it excludes ordinary 3DGS RGB/geometry attributes.
-- The latent payload is the clean per-Gaussian semantic storage number. It is approximately the 64-D compact code and gives the expected 20x reduction relative to 1280-D fp16 teacher features.
+- Direct storage assumes storing only the 1280-D RADIO reference feature as fp16 per Gaussian; it excludes ordinary 3DGS RGB/geometry attributes.
+- The latent payload is the clean per-Gaussian semantic storage number. It is approximately the 64-D compact code and gives the expected 20x reduction relative to 1280-D fp16 RADIO reference features.
 - The feature-memory package adds scene-global heads and decoders. Those fixed tensors do not scale with the number of Gaussians, so their overhead is amortized more strongly on larger indoor/outdoor scenes; the per-scene growing term remains the compact latent payload.
 - Full checkpoint is intentionally conservative because it counts the whole feature-field model state dict, including existing 3DGS geometry/RGB tensors carried inside the checkpoint, plus decoder and refiner tensors. Use it for deployable footprint, not for pure feature-memory compression.
 - VPR does not add persistent trained parameters. If one persists the registered 1536-D SigLIP2 primitive embeddings and scene-query voxel scores instead of streaming them during evaluation, that optional cache is larger than direct 1280-D feature storage on these scenes; the paper therefore separates stored compact checkpoint footprint from optional VPR inference cache footprint.

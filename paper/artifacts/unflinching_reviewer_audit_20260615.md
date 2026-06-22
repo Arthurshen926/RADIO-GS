@@ -9,7 +9,7 @@
 ## 第一轮：核心缺陷诊断
 
 1. **致命风险：方法叙事一度像“模块堆叠”，而不是一个凝练的科学问题。**  
-   主文已有 strong results，但如果 Related Work 只罗列 LERF、LangSplat、OpenGaussian、Dr. Splat 等工作，而不正面回答“这些方法是否已经支持 2D/3D query”以及“本文到底新在哪里”，审稿人会把 CTF-GS 解读为又一个 Gaussian language feature variant。
+   主文已有 strong results，但如果 Related Work 只罗列 LERF、LangSplat、OpenGaussian、Dr. Splat 等工作，而不正面回答“这些方法是否已经支持 2D/3D query”以及“本文到底新在哪里”，审稿人会把 GaussFM 解读为又一个 Gaussian language feature variant。
 
 2. **概念风险：`teacher` 和 `readout` 残留会削弱“compact memory”主线。**  
    `teacher` 容易让人误解为本文只是模仿 frame-wise RADIO；`readout` 容易让人觉得 2D/3D/SAM/DINO 是为 benchmark 外挂的接口。顶刊审稿人会追问：统一表示在哪里？为什么不是任务特化？
@@ -133,7 +133,7 @@ Direct3D 主结果应声明“不使用 MPR cache / official RGB SAM decoder”�
    必须继续坚持：存储的是 RADIO-compatible compact memory；DINO/SAM/SigLIP 是 adaptor/probe spaces，不是并列 raw feature memories。
 
 3. **ScanNet 是否等同 full semantic segmentation benchmark？**  
-   不能。必须保持 “OpenGaFF/VALA direct point-query feature probe” 的边界。
+   不能。必须保持 “VALA-aligned direct point-query feature probe” 的边界。
 
 4. **Storage 是否在超大场景上更有优势？**  
    目前主表已有 LERF 场景证据，论证 fixed decoder overhead amortization 合理；但如果投顶刊长周期版本，建议补一个大规模室外/室内场景 memory scaling appendix。
@@ -147,6 +147,6 @@ Direct3D 主结果应声明“不使用 MPR cache / official RGB SAM decoder”�
 
 修正前，论文最大问题不是结果，而是叙事和协议边界会被顶刊审稿人抓住。修正后，主线更清楚：
 
-> CTF-GS 是一个 compact reconstructive RADIO Gaussian feature memory。它通过 dense rendered RADIO reconstruction 和 sparse MPR semantic anchoring 学习三维基础特征记忆，并通过 support-calibrated primitive selection 将 primitive scores 转成稳定对象支持。
+> GaussFM 是一个 compact reconstructive RADIO Gaussian feature memory。它通过 dense rendered RADIO reconstruction 和 sparse MPR semantic anchoring 学习三维基础特征记忆，并通过 support-calibrated primitive selection 将 primitive scores 转成稳定对象支持。
 
 当前版本更接近顶刊投稿状态，但仍应在最终提交前进行一次全 PDF 人工排版审查，尤其检查 figure readability、caption 长度、表格拥挤度和补充材料中的旧术语残留。

@@ -8,7 +8,7 @@
 \usepackage{cite}
 \usepackage[hidelinks]{hyperref}
 
-\newcommand{\method}{CTF-GS}
+\newcommand{\method}{GaussFM}
 \newcommand{\project}{RADIO-GS}
 \newcommand{\radio}{C-RADIOv4-H}
 
@@ -502,7 +502,7 @@ extracted from RGB frames and \method{} rendered features. Both use the same
 frozen SigLIP2 head, scene-category scoring, and label-free threshold-0.60 plus
 peak-connected-component mask conversion. This PCC-only comparison is separate
 from the final 2D OVS row in Table~\ref{tab:lerf_ovs_main}.}
-\label{tab:teacher_vs_rendered}
+\label{tab:framewise_radio_vs_rendered}
 \begin{tabular}{lcccc}
 \toprule
 Scene & \multicolumn{2}{c}{RADIO RGB} & \multicolumn{2}{c}{\method{}} \\
@@ -518,7 +518,7 @@ Macro & 0.8065 & 0.4597 & 0.8598 & 0.5707 \\
 \end{tabular}
 \end{table}
 
-Table~\ref{tab:teacher_vs_rendered} supports the inference-time feature-memory
+Table~\ref{tab:framewise_radio_vs_rendered} supports the inference-time feature-memory
 claim: the rendered feature field is not merely a lossy copy of frame-wise RADIO. It
 can sharpen the task-relevant scene response after multiview reconstruction:
 under the same calibrated mask conversion it improves both localization and macro
@@ -781,7 +781,7 @@ evaluate the selected 3D primitives.}
 Fig.~\ref{fig:rendered_boundary_qualitative} isolates the rendered-view
 boundary calibration used by the feature-only SAM3-adaptor mask head. Unlike the
 frozen official SAM3 diagnostic, this head is conditioned on reconstructed
-CTF-GS/RADIO features and prompt embeddings; it does not call the official RGB
+\method{} RADIO-compatible features and prompt embeddings; it does not call the official RGB
 SAM3 decoder at evaluation time.
 
 \begin{figure*}[t]
@@ -794,7 +794,7 @@ without invoking an external RGB SAM3 decoder.}
 \label{fig:rendered_boundary_qualitative}
 \end{figure*}
 
-Fig.~\ref{fig:teacher_field_qualitative} compares reconstructed scene features
+Fig.~\ref{fig:framewise_radio_field_qualitative} compares reconstructed scene features
 with frame-wise RADIO features under the frozen downstream probes used in
 Table~\ref{tab:sam_dino_tasks}. These examples visualize the same claim as the
 quantitative probe table: the compact scene field is not merely a compressed
@@ -808,7 +808,7 @@ stable downstream responses.
 tasks. Columns compare the task input/GT, frame-wise RADIO response, and
 \method{} reconstructed field response for SigLIP2 grounding, SAM3-adaptor mask
 propagation, DINOv3 mask propagation, and DINOv3 dense matching.}
-\label{fig:teacher_field_qualitative}
+\label{fig:framewise_radio_field_qualitative}
 \end{figure*}
 
 Additional rendered heatmap examples, alpha/depth boundary cases, and extended

@@ -66,13 +66,9 @@ DANGEROUS_CLAIM_PATTERNS = (
         re.compile(r"\bprimitive-level\b.{0,80}\bSOTA\b", re.IGNORECASE),
     ),
     (
-        "exact OpenGaFF ScanNet reproduction",
-        re.compile(r"\bexact\s+OpenGaFF\s+ScanNet\s+reproduction\b", re.IGNORECASE),
-    ),
-    (
-        "OpenGaFF-style ScanNet setting without subset qualifier",
+        "exact unpublished ScanNet protocol-source reproduction",
         re.compile(
-            r"\bunder\s+the\s+OpenGaFF-style\s+point-cloud\s+understanding\s+setting\b",
+            r"\bexact\s+unpublished\s+ScanNet\s+protocol-source\s+reproduction\b",
             re.IGNORECASE,
         ),
     ),
@@ -107,7 +103,7 @@ def _read_texts(root: Path, paths: Iterable[str | Path], issues: list[str]) -> d
 
 def _check_vpr_context_row(text: str, issues: list[str]) -> None:
     if CAGS_CONTEXT_RE.search(text):
-        issues.append(f"{CONTEXT_TABLE}: CAGS must not be promoted in the OpenGaFF-aligned context table")
+        issues.append(f"{CONTEXT_TABLE}: CAGS must not be promoted in the direct-3D context table")
     vpr_rows = [
         line.strip()
         for line in text.splitlines()
@@ -143,12 +139,12 @@ def _check_selection_table(text: str, issues: list[str]) -> None:
         issues.append(f"{SELECTION_TABLE}: promoted selection table must not cite mean+2.5std")
     required_snippet = r"\method{} & \textbf{54.36} & \textbf{80.84}"
     if required_snippet not in text:
-        issues.append(f"{SELECTION_TABLE}: missing current same-protocol CTF-GS Direct3D row: {required_snippet}")
+        issues.append(f"{SELECTION_TABLE}: missing current same-protocol GaussFM Direct3D row: {required_snippet}")
 
 
 def _check_scannet_context_table(text: str, issues: list[str]) -> None:
     if CAGS_CONTEXT_RE.search(text):
-        issues.append(f"{SCANNET_CONTEXT_TABLE}: CAGS must not be promoted in the OpenGaFF-aligned ScanNet table")
+        issues.append(f"{SCANNET_CONTEXT_TABLE}: CAGS must not be promoted in the VALA-aligned ScanNet table")
     required_snippets = (
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52",
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61",

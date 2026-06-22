@@ -18,12 +18,12 @@ direct-point loss family:
    pair weights, reducing the effect of low-confidence positives and negatives.
 
 These changes keep the existing method framing: VPR remains a label-free
-multiview teacher/registration source, while the compact field remains the
-student representation used by both rendered and direct readouts.
+multiview registration source, while the compact field remains the deployed
+representation used by both rendered and direct readouts.
 
 Follow-up diagnostics showed that v68's render-consistency term was limited by
-scene-global cached-teacher sampling. The promoted v70 variant therefore adds
-cached-visible direct-point sampling: when a cached teacher and rendered compact
+scene-global cached-reference sampling. The promoted v70 variant therefore adds
+cached-visible direct-point sampling: when cached reference features and rendered compact
 map are both available, a configurable fraction of direct samples is drawn from
 primitives visible in the current training views.
 
@@ -33,7 +33,7 @@ primitives visible in the current training views.
   - Added `rendered_compact` support to `_compute_direct_point_loss`.
   - Added `_compute_direct_point_render_consistency`.
   - Added pair-level `direct_point_text_contrast_pair_weighting=visibility`.
-  - Added cached-visible direct-point sampling for teacher-cache supervision.
+  - Added cached-visible direct-point sampling for reference-cache supervision.
 - `radio_gs/scripts/train_feature_field.py`
   - Passes the current rendered compact map into direct-point supervision.
   - Logs `direct_point_render_consistency` and its valid ratio.
@@ -48,11 +48,11 @@ primitives visible in the current training views.
     - `direct_point_cached_visible_candidate_multiplier`
     - `direct_point_cached_visible_balance`
 - `radio_gs/scripts/generate_scannet_dino_cv_configs.py`
-  - Generated VALA/OpenGaFF-8 configs for the cached-visible joint2D3D
+  - Generated VALA-aligned ScanNet-8 configs for the cached-visible joint2D3D
     variant.
-  - Exposes visible-candidate oversampling and teacher-balanced visible replay.
+  - Exposes visible-candidate oversampling and reference-balanced visible replay.
 - `radio_gs/scripts/build_scannet_vala8_report.py`
-  - Adds category-macro stability to VALA/OpenGaFF-8 reports: per-class
+  - Adds category-macro stability to VALA-aligned ScanNet-8 reports: per-class
     cross-scene mean/std/min/max IoU and accuracy, plus worst/unstable class
     summaries.
 
@@ -142,7 +142,7 @@ Result: 42 tests passed.
 
 ## Training Status
 
-The full VALA/OpenGaFF-8 v70 run is complete. It is not promoted as the main
+The full VALA-aligned ScanNet-8 v70 run is complete. It is not promoted as the main
 ScanNet row because the cached-visible joint2D/3D training objective improves
 split10 mAcc but weakens split19/15 mIoU. The cleanest positive direct-field
 update is instead the DINO-CV compact field evaluated with the same contextual
@@ -154,11 +154,11 @@ update is instead the DINO-CV compact field evaluated with the same contextual
 | --- | --- | ---: | ---: | ---: | --- |
 | v67 | DINO-CV baseline | 0.2953 / 0.5963 | 0.2744 / 0.5863 | 0.3079 / 0.6886 | prior fair mainline |
 | v68 | joint render + direct, random cached points | 0.2958 / 0.5994 | 0.2763 / 0.5922 | 0.3068 / 0.6872 | small positive on 19/15 |
-| v69 | centered teacher contrast | 0.2951 / 0.5987 | 0.2763 / 0.5919 | 0.3044 / 0.6864 | not promoted |
+| v69 | centered reference contrast | 0.2951 / 0.5987 | 0.2763 / 0.5919 | 0.3044 / 0.6864 | not promoted |
 | v70 | cached-visible fraction 0.5 | **0.2969 / 0.5998** | **0.2777 / 0.5933** | **0.3079 / 0.6876** | current promoted fair label-free variant |
 | v71 | cached-visible fraction 1.0 | 0.2968 / 0.5997 | 0.2775 / 0.5933 | 0.3079 / 0.6876 | no gain over v70 |
 
-### VALA/OpenGaFF-8 training variants
+### VALA-aligned ScanNet-8 training variants
 
 | Variant | split19 mIoU / mAcc | split15 mIoU / mAcc | split10 mIoU / mAcc | Conclusion |
 | --- | ---: | ---: | ---: | --- |
@@ -167,18 +167,18 @@ update is instead the DINO-CV compact field evaluated with the same contextual
 | v72 visible-balanced pilot | 0.2649 / 0.4681 | 0.2875 / 0.5027 | 0.3674 / 0.6544 | 3-scene pilot matches v70 failure mode; stopped |
 | v73 view-count-only pilot | 0.2224 / 0.3223 | 0.2411 / 0.3529 | 0.3216 / 0.4917 | first-scene negative; stopped |
 
-### VALA/OpenGaFF-8 contextual direct readout
+### VALA-aligned ScanNet-8 contextual direct readout
 
 | Variant | split19 mIoU / mAcc | split15 mIoU / mAcc | split10 mIoU / mAcc | Conclusion |
 | --- | ---: | ---: | ---: | --- |
 | v67 contextual kNN, alpha=0.5 | 0.3677 / 0.5997 | 0.3748 / 0.6181 | 0.4562 / 0.7008 | previous strongest balanced support row |
 | DINO-CV contextual kNN, ens5, alpha=0.5 | 0.3674 / 0.5960 | 0.3716 / 0.6103 | 0.4533 / 0.6973 | ens5 text head hurts contextual readout |
-| DINO-CV contextual kNN, `{query}`, alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 | previous promoted support row |
+| DINO-CV contextual kNN, `{query}`, alpha=0.5 | 0.3704 / 0.6017 | 0.3771 / 0.6198 | 0.4585 / 0.7032 | previous support row |
 | DINO-CV contextual kNN, `{query}`, k12/cand48 alpha=0.45 | 0.3715 / 0.6024 | 0.3784 / 0.6206 | 0.4585 / 0.7029 | previous balanced direct-field support row |
-| DINO-CV contextual kNN, `{query}`, k16/cand80 alpha=0.45 + spatial k12/a1 | **0.3806 / 0.6129** | **0.3871 / 0.6315** | **0.4711 / 0.7200** | promoted balanced direct-field support row |
+| DINO-CV contextual kNN, `{query}`, k16/cand80 alpha=0.45 + spatial k12/a1 | **0.3806 / 0.6129** | **0.3871 / 0.6315** | **0.4711 / 0.7200** | supporting balanced direct-field diagnostic row |
 | DINO-CV contextual kNN, `{query}`, alpha=0.75 | 0.3683 / 0.5957 | 0.3746 / 0.6136 | **0.4612 / 0.7036** | diagnostic: higher split10 mIoU, weaker 19/15 balance |
 
-The paper-facing artifact is
+The supporting diagnostic artifact is
 `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json`.
 Its report includes category stability in
 `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.md`.
@@ -189,4 +189,4 @@ diagnostic. The stronger paper claim is now supported by a positive pairing of
 DINO cross-view compact-field training and contextual direct 3D point readout:
 one compact Gaussian feature map supports rendered queries and direct 3D
 queries, with the direct readout improving over the previous strongest v67
-contextual row under the same VALA/OpenGaFF-8 evaluator.
+contextual row under the same VALA-aligned ScanNet-8 evaluator.

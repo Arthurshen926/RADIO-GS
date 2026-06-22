@@ -571,7 +571,7 @@ def build_markdown(
     direct3d_readouts = direct3d_readouts or []
     warnings = [
         "External LERF/LangSplat/LEGaussians rows are official-source context rows, not reproduced local-evaluator baselines.",
-        "ScanNet label-supervised or GT-label-balanced runs are diagnostic only and excluded from this fair v67 summary.",
+        "ScanNet label-supervised, GT-label-balanced, old v67, and non-VALA8 runs are diagnostic only and excluded from this VALA-aligned ScanNet-8 summary.",
         "LERF direct 3D object selection is protocol-aligned; direct primitive scoring, RGB-snap cleanup, and official SAM3 box boundary readout are reported as separate readouts.",
     ]
     warnings.extend(lerf.get("warnings", []))
@@ -601,7 +601,7 @@ def build_markdown(
         ),
         (
             "| ScanNet fair cross-domain result | Frozen | "
-            "`output/scannet_pointcloud_eval/*_v67_teacherbalanced_fromv63_best_gidx_labelpoint/scannet_pointcloud_radio_gs_results.json` | Cross-domain table |"
+            "`paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json` | Cross-domain table |"
         ),
         (
             "| Efficiency/profile evidence | Current eval profiles frozen | "
@@ -655,7 +655,7 @@ def build_markdown(
             direct_lines.extend(
                 [
                     (
-                        f"- CTF-GS + RGB snap silhouette {direct3d['silhouette']}: "
+                        f"- GaussFM + RGB snap silhouette {direct3d['silhouette']}: "
                         f"macro mIoU `{direct3d['macro_miou']:.4f}`, "
                         f"macro Acc@0.25 `{direct3d['macro_acc025']:.4f}`, "
                         f"macro Acc@0.50 `{direct3d['macro_acc050']:.4f}`."
@@ -712,9 +712,9 @@ def build_markdown(
         lines.extend(
             direct_lines
             + [
-                "- CTF-GS accuracy-oriented cap0.015 diagnostic: macro mIoU `0.4184`, macro Acc@0.25 `0.7013`.",
-                "- CTF-GS fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.",
-                "- CTF-GS previous cap0.02 diagnostic: macro mIoU `0.4185`, macro Acc@0.25 `0.6899`.",
+                "- GaussFM accuracy-oriented cap0.015 diagnostic: macro mIoU `0.4184`, macro Acc@0.25 `0.7013`.",
+                "- GaussFM fixed `top0p02` conservative audit: macro mIoU `0.3850`, macro Acc@0.25 `0.6428`.",
+                "- GaussFM previous cap0.02 diagnostic: macro mIoU `0.4185`, macro Acc@0.25 `0.6899`.",
                 "- OpenGaussian official context: macro mIoU `0.3836`, macro Acc@0.25 `0.5143`.",
                 "- Diagnostics: original Gaussian-center readout is `0.0804` macro mIoU; registered softmax24 without aggregation is `0.3421`; 96-view VPR with voxel aggregation improves fixed-ratio macro mIoU to `0.3850`, GT-free score-distribution selection improves it to `0.3934`, adding the fixed 2% cap improves it to `0.4072`, adding the fixed 0.5% floor improves it to `0.4133`, increasing the all-pose registration budget to 128 views improves the fixed paper selector to `0.4185`, tightening the global cap to `0.0175` improves it to `0.4226`, and a cache-backed fixed `0.018` cap slightly improves it to `0.4227` with `0.6906` Acc@0.25.",
                 "- Paper use: VPR-backed primitive-level evidence with an explicit Waldo/provenance caveat.",

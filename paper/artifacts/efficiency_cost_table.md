@@ -1,6 +1,6 @@
 # Single-Query Latency Evidence
 
-Lower is better. The current table converts frozen evaluation profiles into single-query latency units. These are conservative profile-derived values, not a clean warm-GPU microbenchmark: the LERF rendered profile includes teacher/evaluator work and visualization I/O, and the direct-3D profile includes query-select-render mask generation.
+Lower is better. The current table converts frozen evaluation profiles into single-query latency units. These are conservative profile-derived values, not a clean warm-GPU microbenchmark: the LERF rendered profile includes frame-wise RADIO/evaluator work and visualization I/O, and the direct-3D profile includes query-select-render mask generation.
 
 | Task | Unit | #Queries | Total time | Latency / query | Peak VRAM | Source |
 |---|---|---:|---:|---:|---:|---|
@@ -10,6 +10,6 @@ Lower is better. The current table converts frozen evaluation profiles into sing
 
 ## Notes
 
-- LERF rendered-view OVS: conservative profile; includes teacher branch, all queries, and visualization I/O.
+- LERF rendered-view OVS: conservative profile; includes frame-wise RADIO branch, all queries, and visualization I/O.
 - LERF direct 3D OVS: query-select-render evaluation; includes selected-primitive rendering and mask writing.
 - ScanNet point query: legacy 10-scene profile; reports point-query class scoring throughput.

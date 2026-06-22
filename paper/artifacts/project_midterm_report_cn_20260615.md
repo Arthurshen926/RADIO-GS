@@ -2,7 +2,7 @@
 
 项目汇报材料  
 日期：2026-06-15  
-项目代码名：RADIO-GS / CTF-GS  
+项目代码名：RADIO-GS / GaussFM
 建议投稿目标：IEEE TPAMI 或同级别计算机视觉顶刊
 
 ---
@@ -13,13 +13,13 @@
 
 现有方法大多沿两条路线推进：一类将 CLIP/SigLIP 等语义特征蒸馏到 3DGS，用于二维渲染视图的开放词汇定位；另一类把文本对齐特征注册到三维 Gaussian、point 或 instance 上，用于直接三维查询。这两条路线分别解决了部分问题，但仍存在三个核心不足：高维基础特征存储代价大，多视角特征不一致会导致三维基元语义碎片化，且二维渲染查询和三维直接查询往往被设计成不同任务接口，缺少一个统一、紧凑、可复用的三维基础特征记忆。
 
-本项目提出 CTF-GS：将三维 Gaussian 场景扩展为一个紧凑基础特征三维记忆。方法并不显式存储完整 1280 维 RADIO 特征，而是在每个 Gaussian 上存储低维 compact latent，并结合空间上下文、可见性、可靠性与全局解码器，在查询或渲染时按需重建 RADIO-compatible foundation feature。该记忆通过两类监督共同形成：一是稠密渲染视图上的 RADIO 特征重建和结构一致性约束；二是多视角基元注册提供的稀疏语义锚定，使三维 Gaussian primitive 具有稳定的直接查询能力。
+本项目提出 GaussFM：将三维 Gaussian 场景扩展为一个紧凑基础特征三维记忆。方法并不显式存储完整 1280 维 RADIO 特征，而是在每个 Gaussian 上存储低维 compact latent，并结合空间上下文、可见性、可靠性与全局解码器，在查询或渲染时按需重建 RADIO-compatible foundation feature。该记忆通过两类监督共同形成：一是稠密渲染视图上的 RADIO 特征重建和结构一致性约束；二是多视角基元注册提供的稀疏语义锚定，使三维 Gaussian primitive 具有稳定的直接查询能力。
 
 当前结果显示，该方法在三个主要任务上形成闭环证据：
 
-- LERF-OVS rendered-view open-vocabulary query：CTF-GS 达到 64.98 mIoU / 82.68 Acc，在同协议复现的开源方法对比中取得最优 mean mIoU。
-- LERF-OVS direct 3D open-vocabulary query：CTF-GS 达到 54.36 mIoU / 80.84 Acc，显著超过同协议复现的 OpenGaussian、Dr. Splat、OccamLGS、LangSplatV2 等方法。
-- ScanNet-v2 OpenGaFF/VALA protocol：CTF-GS 达到 19-class 36.55 mIoU / 50.57 mAcc，15-class 42.78 / 72.85，10-class 57.85 / 77.93，在所有评价指标上优于同协议复现的开源对比方法。
+- LERF-OVS rendered-view open-vocabulary query：GaussFM 达到 64.98 mIoU / 82.68 Acc，在同协议复现的开源方法对比中取得最优 mean mIoU。
+- LERF-OVS direct 3D open-vocabulary query：GaussFM 达到 54.36 mIoU / 80.84 Acc，显著超过同协议复现的 OpenGaussian、Dr. Splat、OccamLGS、LangSplatV2 等方法。
+- VALA-aligned ScanNet-v2 protocol：GaussFM 达到 19-class 36.55 mIoU / 50.57 mAcc，15-class 42.78 / 72.85，10-class 57.85 / 77.93，在所有评价指标上优于同协议复现的开源对比方法。
 
 此外，在 feature usability 层面，重建出的三维场景特征在所选 frozen-head 2D 下游任务主指标上均超过 frame-wise RADIO，包括 SAM3 prompt/mask 相关任务、DINOv3 dense matching 和 DINOv3 mask propagation。存储方面，compact latent payload 相比直接存储 1280-D fp16 特征约 20 倍压缩；即使计入固定 decoder/refiner，feature-memory package 随场景规模增长时仍具有明显优势。
 
@@ -49,7 +49,7 @@
 
 ### 2.3 开放词汇三维理解正在从二维渲染查询走向三维基元查询
 
-早期 LERF/LangSplat 类工作主要关注 rendered-view open-vocabulary localization，即先渲染二维特征图，再和文本做相似度得到 heatmap。近期 OpenGaussian、Dr. Splat、VALA/OpenGaFF 等工作进一步强调 direct 3D object selection、point-level query 和 instance/primitive-level understanding。
+早期 LERF/LangSplat 类工作主要关注 rendered-view open-vocabulary localization，即先渲染二维特征图，再和文本做相似度得到 heatmap。近期 OpenGaussian、Dr. Splat、VALA 等公开工作进一步强调 direct 3D object selection、point-level query 和 instance/primitive-level understanding。
 
 这意味着论文不能只证明“渲染出的 feature map 能做二维定位”，还需要证明三维场景表示本身具备直接查询能力。也就是说，理想的三维 foundation-feature 表示应同时满足：
 
@@ -210,7 +210,7 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 
 - LERF rendered-view 2D open-vocabulary grounding；
 - LERF direct 3D object selection；
-- ScanNet VALA/OpenGaFF-8 point-level query；
+- VALA-aligned ScanNet-8 point-level query；
 - frame-wise RADIO vs reconstructed scene features；
 - storage / efficiency / qualitative / ablation / failure analysis。
 
@@ -232,9 +232,9 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 | GOI | 42.00 | 59.20 | 23.90 / 44.60 | 55.80 / 67.80 | 33.70 / 56.30 | 54.50 / 68.20 |
 | GALA | 55.49 | 73.43 | 59.35 / 82.14 | 76.73 / 88.14 | 35.13 / 50.70 | 50.75 / 72.73 |
 | LangSplatV2 | 59.90 | 84.10 | 56.40 / 82.10 | 72.20 / 93.20 | 51.80 / 74.70 | 59.10 / 95.50 |
-| CTF-GS | 64.98 | 82.68 | 64.29 / 92.86 | 76.09 / 93.22 | 53.78 / 62.83 | 65.76 / 81.82 |
+| GaussFM | 64.98 | 82.68 | 64.29 / 92.86 | 76.09 / 93.22 | 53.78 / 62.83 | 65.76 / 81.82 |
 
-结论：CTF-GS 在同协议复现的 LERF-OVS 2D open-vocabulary query 中取得最高 mean mIoU，说明 compact RADIO feature field 渲染出的 dense feature map 具有强二维开放词汇定位能力。
+结论：GaussFM 在同协议复现的 LERF-OVS 2D open-vocabulary query 中取得最高 mean mIoU，说明 compact RADIO feature field 渲染出的 dense feature map 具有强二维开放词汇定位能力。
 
 ### 7.2 LERF 3D direct open-vocabulary query
 
@@ -248,11 +248,11 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 | Dr. Splat | 43.29 | 64.30 | 54.42 / 80.36 | 57.35 / 77.97 | 24.33 / 35.21 | 37.05 / 63.64 |
 | GALA | 36.71 | 59.71 | 45.25 / 69.64 | 53.27 / 84.75 | 17.08 / 25.35 | 31.22 / 59.09 |
 | LangSplatV2 | 35.87 | 55.80 | 45.15 / 67.86 | 49.30 / 79.66 | 19.01 / 21.13 | 30.00 / 54.55 |
-| CTF-GS | 54.36 | 80.84 | 59.36 / 92.86 | 71.04 / 89.83 | 38.43 / 63.38 | 48.61 / 77.27 |
+| GaussFM | 54.36 | 80.84 | 59.36 / 92.86 | 71.04 / 89.83 | 38.43 / 63.38 | 48.61 / 77.27 |
 
-结论：CTF-GS 在同协议复现的 LERF-OVS 3D open-vocabulary query 中取得最高 mean mIoU 和 mean Acc。该结果直接支撑“compact RADIO Gaussian feature field 可直接进行三维 primitive-level 查询”的核心 claim。
+结论：GaussFM 在同协议复现的 LERF-OVS 3D open-vocabulary query 中取得最高 mean mIoU 和 mean Acc。该结果直接支撑“compact RADIO Gaussian feature field 可直接进行三维 primitive-level 查询”的核心 claim。
 
-### 7.3 ScanNet VALA/OpenGaFF-8 direct point query
+### 7.3 VALA-aligned ScanNet-8 direct point query
 
 任务：在 ScanNet 8 个官方/对齐场景上做开放词汇 point-level semantic query，比较 split19/split15/split10。
 
@@ -264,15 +264,15 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 | Dr. Splat | 29.31 / 47.68 | 33.25 / 54.33 | 44.19 / 65.19 |
 | OccamLGS | 31.93 / 48.93 | 34.25 / 53.71 | 45.16 / 64.39 |
 | VALA | 32.11 / 50.05 | 35.10 / 54.77 | 46.21 / 65.61 |
-| CTF-GS | 36.55 / 50.57 | 42.78 / 72.85 | 57.85 / 77.93 |
+| GaussFM | 36.55 / 50.57 | 42.78 / 72.85 | 57.85 / 77.93 |
 
-结论：CTF-GS 在 ScanNet-v2 OpenGaFF/VALA open-vocabulary point query 中所有指标均为最优，说明 compact RADIO feature field 不只适用于 LERF 小场景二维/三维查询，也具备跨数据集的三维点级开放词汇理解能力。
+结论：GaussFM 在 VALA-aligned ScanNet-v2 open-vocabulary point query 中所有指标均为最优，说明 compact RADIO feature field 不只适用于 LERF 小场景二维/三维查询，也具备跨数据集的三维点级开放词汇理解能力。
 
 ### 7.4 Reconstructed scene features vs frame-wise RADIO
 
 项目专门比较了重建三维场景特征与原始 frame-wise RADIO 在多个 frozen-head 下游任务中的表现。
 
-| Task | Primary metric | Frame-wise RADIO | CTF-GS | Delta |
+| Task | Primary metric | Frame-wise RADIO | GaussFM | Delta |
 |---|---:|---:|---:|---:|
 | LERF text grounding | mIoU | 0.4634 | 0.6498 | +0.1864 |
 | SAM3 point prompt | mIoU | 0.3700 | 0.4173 | +0.0473 |
@@ -339,10 +339,10 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 每个 scene 展示 2D OVS 和 3D OVS 的区别。2D OVS 展示 heatmap/mask over RGB；3D OVS 应展示选中 Gaussian primitive 渲染到空白背景的 mask/support，而不是和 2D heatmap 表现完全相同。2D baseline 可用 LangSplatV2，3D baseline 可用 Dr. Splat。
 
 **Figure 4: ScanNet Open-Vocabulary 3D Query**  
-主文建议做 binary query point cloud：RGB/overview、GT class mask、baseline、CTF-GS。避免全类别彩色点云在主文造成信息过载。
+主文建议做 binary query point cloud：RGB/overview、GT class mask、baseline、GaussFM。避免全类别彩色点云在主文造成信息过载。
 
 **Figure 5: Reconstructed Scene Features vs Frame-wise RADIO**  
-展示 SAM prompt、DINO matching、mask propagation 等代表性下游任务。重点不是展示所有错误，而是让读者直观看到 CTF-GS 重建特征在边界、匹配稳定性或区域传播上优于 frame-wise RADIO。
+展示 SAM prompt、DINO matching、mask propagation 等代表性下游任务。重点不是展示所有错误，而是让读者直观看到 GaussFM 重建特征在边界、匹配稳定性或区域传播上优于 frame-wise RADIO。
 
 ### 8.2 消融定性
 
@@ -363,7 +363,7 @@ Rendered boundary calibration 可以放 appendix 或作为次要消融；如果�
 ### 已基本完成
 
 - 方法主线：compact foundation-feature Gaussian memory；
-- 三个核心 benchmark：LERF rendered-view、LERF direct 3D、ScanNet VALA/OpenGaFF-8；
+- 三个核心 benchmark：LERF rendered-view、LERF direct 3D、VALA-aligned ScanNet-8；
 - frame-wise RADIO vs reconstructed scene feature 对比；
 - storage footprint；
 - 多轮 direct 3D support calibration 和 Waldo failure 修复；
@@ -409,7 +409,7 @@ Rendered boundary calibration 可以放 appendix 或作为次要消融；如果�
 
 ### 第三段：方法
 
-CTF-GS 学习 compact foundation-feature Gaussian memory：在 Gaussian 上存低维 latent，通过上下文场和 decoder 重建 RADIO-compatible feature；通过 dense rendered RADIO reconstruction 学习基础特征结构，通过 MPR sparse semantic anchoring 增强 primitive-level 查询，通过 support calibration 稳定 object support。
+GaussFM 学习 compact foundation-feature Gaussian memory：在 Gaussian 上存低维 latent，通过上下文场和 decoder 重建 RADIO-compatible feature；通过 dense rendered RADIO reconstruction 学习基础特征结构，通过 MPR sparse semantic anchoring 增强 primitive-level 查询，通过 support calibration 稳定 object support。
 
 ### 第四段：贡献
 
@@ -431,7 +431,7 @@ CTF-GS 学习 compact foundation-feature Gaussian memory：在 Gaussian 上存�
 2. 背景：二维 foundation features 强，但三维部署困难。
 3. 痛点：高维存储、多视角不一致、二维/三维查询断裂。
 4. 核心科学问题：如何学习紧凑、可重建、可查询的三维基础特征记忆。
-5. 总体方案图：CTF-GS overall framework。
+5. 总体方案图：GaussFM overall framework。
 6. 方法一：compact contextual Gaussian feature field。
 7. 方法二：dense rendered RADIO reconstruction。
 8. 方法三：MPR sparse semantic anchoring。

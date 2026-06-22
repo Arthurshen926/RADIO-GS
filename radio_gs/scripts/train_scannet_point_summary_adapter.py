@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Train a point-summary adapter on cached ScanNet RADIO teacher features.
+"""Train a point-summary adapter on cached ScanNet frame-wise RADIO features.
 
 This is a point-native fine-tune path: the RADIO-GS field is loaded from an
 existing checkpoint and kept frozen, compact point features are queried directly

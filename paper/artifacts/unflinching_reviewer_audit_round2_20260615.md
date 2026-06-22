@@ -74,10 +74,10 @@ MPR 若被看作 query-time readout/cache，论文最重要的部署主张会变
 ### 4. RGB/geometry reconstruction 边界
 
 **破坏性影响：**  
-如果不写清楚，读者可能以为 CTF-GS 同时优化 RGB/geometry/feature，导致贡献和 storage accounting 全部变模糊。
+如果不写清楚，读者可能以为 GaussFM 同时优化 RGB/geometry/feature，导致贡献和 storage accounting 全部变模糊。
 
 **修正：**  
-Problem Setup 增加说明：RGB/geometry 3DGS scene is reconstructed before feature-memory learning and kept fixed；CTF-GS does not introduce RGB reconstruction loss or claim improved radiance-field appearance。
+Problem Setup 增加说明：RGB/geometry 3DGS scene is reconstructed before feature-memory learning and kept fixed；GaussFM does not introduce RGB reconstruction loss or claim improved radiance-field appearance。
 
 **修改位置：**  
 `paper/radio_gs_tpami.tex` Problem Setup。

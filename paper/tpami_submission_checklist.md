@@ -1,7 +1,7 @@
 # TPAMI Submission Checklist
 
 This checklist tracks the final non-experimental items before uploading the
-CTF-GS manuscript package.
+GaussFM manuscript package.
 
 ## Manuscript Files
 
