@@ -36,6 +36,7 @@ from radio_gs.models.proposal_memory import (
 )
 from radio_gs.models.siglip_projection import SigLIP2FeatureProjection, SigLIP2SummaryHead
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.evaluation.openclip_readout import load_or_generate_openclip_prompt_ensemble_embeddings
 from radio_gs.scannet_constants import (
     NYU40_ID_TO_NAME,
     OPENGAUSSIAN_NYU40_CLASS_SPLITS,
@@ -118,9 +119,21 @@ def _load_or_generate_class_text_embeddings(
     cache_path: Optional[str],
     prompt_templates: list[str],
     class_aliases: str,
+    text_encoder: str,
+    openclip_model: str,
+    openclip_pretrained: str,
 ) -> torch.Tensor:
     alias_groups = _resolve_class_aliases(class_names, class_aliases)
     if class_aliases == "none":
+        if text_encoder == "openclip":
+            return load_or_generate_openclip_prompt_ensemble_embeddings(
+                class_names,
+                device,
+                cache_path=cache_path,
+                prompt_templates=prompt_templates,
+                model_name=openclip_model,
+                pretrained=openclip_pretrained,
+            )
         return load_or_generate_prompt_ensemble_embeddings(
             class_names,
             device,
@@ -138,6 +151,9 @@ def _load_or_generate_class_text_embeddings(
             == alias_groups
             and [str(t) for t in data.get("prompt_templates", [])] == list(prompt_templates)
             and str(data.get("class_aliases", "none")) == class_aliases
+            and str(data.get("text_encoder", "siglip2")) == text_encoder
+            and str(data.get("openclip_model", openclip_model)) == openclip_model
+            and str(data.get("openclip_pretrained", openclip_pretrained)) == openclip_pretrained
         ):
             return F.normalize(data["embeddings"].float(), dim=-1).to(device)
         return None
@@ -147,12 +163,22 @@ def _load_or_generate_class_text_embeddings(
         return cached
 
     flat_aliases = [alias for group in alias_groups for alias in group]
-    alias_emb = load_or_generate_prompt_ensemble_embeddings(
-        flat_aliases,
-        device,
-        cache_path=None,
-        prompt_templates=prompt_templates,
-    )
+    if text_encoder == "openclip":
+        alias_emb = load_or_generate_openclip_prompt_ensemble_embeddings(
+            flat_aliases,
+            device,
+            cache_path=None,
+            prompt_templates=prompt_templates,
+            model_name=openclip_model,
+            pretrained=openclip_pretrained,
+        )
+    else:
+        alias_emb = load_or_generate_prompt_ensemble_embeddings(
+            flat_aliases,
+            device,
+            cache_path=None,
+            prompt_templates=prompt_templates,
+        )
     class_emb_parts: list[torch.Tensor] = []
     offset = 0
     for group in alias_groups:
@@ -168,6 +194,9 @@ def _load_or_generate_class_text_embeddings(
                 "alias_groups": alias_groups,
                 "prompt_templates": prompt_templates,
                 "class_aliases": class_aliases,
+                "text_encoder": text_encoder,
+                "openclip_model": openclip_model,
+                "openclip_pretrained": openclip_pretrained,
                 "embeddings": embeddings.detach().cpu(),
             },
             cache_path,
@@ -511,6 +540,8 @@ def _build_point_summary_adapter(config, checkpoint_path: str, device: torch.dev
 
 
 def _load_projection(args, device: torch.device):
+    if args.text_encoder == "openclip":
+        return torch.nn.Identity().to(device).eval()
     if args.use_summary_head:
         head_path = Path(args.summary_head_weights)
         if head_path.exists():
@@ -1925,6 +1956,9 @@ def main() -> None:
     _add_query_mode_args(parser)
     parser.add_argument("--prompt_templates", default="{query}")
     parser.add_argument("--text_embedding_cache", default=None)
+    parser.add_argument("--text_encoder", choices=("siglip2", "openclip"), default="siglip2")
+    parser.add_argument("--openclip_model", default="ViT-B-16")
+    parser.add_argument("--openclip_pretrained", default="laion2b_s34b_b88k")
     parser.add_argument("--projection_weights", default=DEFAULT_SIGLIP2_PROJECTION_WEIGHTS)
     parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth")
     parser.add_argument("--radio_checkpoint", default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar")
@@ -1980,6 +2014,9 @@ def main() -> None:
             cache_path=cache_path,
             prompt_templates=prompt_templates,
             class_aliases=args.class_aliases,
+            text_encoder=args.text_encoder,
+            openclip_model=args.openclip_model,
+            openclip_pretrained=args.openclip_pretrained,
         )
 
     print("=" * 72)
@@ -2035,7 +2072,11 @@ def main() -> None:
                 else "compact-to-summary adapter"
             )
             if args.use_point_summary_adapter
-            else "HCD decoder + SigLIP summary head"
+            else (
+                "HCD decoder + OpenCLIP identity readout"
+                if args.text_encoder == "openclip"
+                else "HCD decoder + SigLIP summary head"
+            )
         )
     )
     print(f"  Chunk size:  {args.chunk_size}")

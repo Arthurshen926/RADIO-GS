@@ -72,6 +72,9 @@ from radio_gs.models.prompt_conditioned_mask_refinement import (
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.evaluation.openclip_readout import (
+    load_or_generate_openclip_prompt_ensemble_embeddings,
+)
 from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_GT_FEATURE_ROOT,
     DEFAULT_LABEL_DIR,
@@ -2605,6 +2608,19 @@ def load_summary_head(weights_path: str, device: torch.device) -> SigLIP2Summary
     head = head.to(device)
     head = head.half() if device.type == "cuda" else head.float()
     return head.eval()
+
+
+def load_text_projection_head(
+    *,
+    text_encoder: str,
+    summary_head_weights: str,
+    device: torch.device,
+) -> torch.nn.Module:
+    if text_encoder == "openclip":
+        return torch.nn.Identity().to(device).eval()
+    if text_encoder == "siglip2":
+        return load_summary_head(summary_head_weights, device)
+    raise ValueError("text_encoder must be 'siglip2' or 'openclip'")
 
 
 def build_mask_renderer(
@@ -5748,6 +5764,9 @@ def evaluate_scene(
     summary_head_weights: str,
     text_embedding_cache: Optional[str],
     canonical_embedding_cache: Optional[str],
+    text_encoder: str,
+    openclip_model: str,
+    openclip_pretrained: str,
     score_cache_path: Optional[str],
     registered_feature_cache_path: Optional[str],
     prompt_templates: List[str],
@@ -6189,6 +6208,9 @@ def evaluate_scene(
         "canonical_embedding_cache": str(canonical_embedding_cache or "")
         if scoring == "relevancy"
         else "",
+        "text_encoder": text_encoder,
+        "openclip_model": openclip_model if text_encoder == "openclip" else "",
+        "openclip_pretrained": openclip_pretrained if text_encoder == "openclip" else "",
         "prompt_templates": list(prompt_templates),
         "categories": list(scene_categories),
         "image_height": int(img_h),
@@ -6247,13 +6269,24 @@ def evaluate_scene(
             score_cache_info["status"] = "miss"
 
     if scores is None:
-        print("  loading SigLIP2 text embeddings")
-        scene_text = load_or_generate_prompt_ensemble_embeddings(
-            scene_categories,
-            device,
-            cache_path=text_embedding_cache,
-            prompt_templates=prompt_templates,
-        )
+        if text_encoder == "openclip":
+            print("  loading OpenCLIP text embeddings")
+            scene_text = load_or_generate_openclip_prompt_ensemble_embeddings(
+                scene_categories,
+                device,
+                cache_path=text_embedding_cache,
+                prompt_templates=prompt_templates,
+                model_name=openclip_model,
+                pretrained=openclip_pretrained,
+            )
+        else:
+            print("  loading SigLIP2 text embeddings")
+            scene_text = load_or_generate_prompt_ensemble_embeddings(
+                scene_categories,
+                device,
+                cache_path=text_embedding_cache,
+                prompt_templates=prompt_templates,
+            )
         scene_text = F.normalize(scene_text.float(), dim=-1)
         if scoring == "relevancy":
             if not canonical_embedding_cache or not Path(canonical_embedding_cache).exists():
@@ -6646,7 +6679,7 @@ def write_scene_report(output_dir: Path, scene: str, report: Dict) -> None:
             f"floor={protocol.get('selection_min_ratio')}, "
             f"cap={protocol.get('selection_max_ratio')}."
         )
-    rows.append("- Text head: SigLIP2 summary/text space.")
+    rows.append(f"- Text head: {protocol.get('text_head', 'SigLIP2 summary/text space')}.")
     rows.append("")
     rows.append("| Selection | mIoU | Acc@0.25 | Acc@0.50 | N |")
     rows.append("|---|---:|---:|---:|---:|")
@@ -6677,6 +6710,9 @@ def main() -> None:
     parser.add_argument("--output_dir", default="output/radio_gs/lerf_direct_3d_selection", help="Output root")
     parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth", help="SigLIP2 summary head weights")
     parser.add_argument("--text_embedding_cache", default="checkpoints/siglip2_lerf_text_embeddings.pt", help="SigLIP2 text embedding cache")
+    parser.add_argument("--text_encoder", choices=["siglip2", "openclip"], default="siglip2", help="Text/readout space for primitive scores")
+    parser.add_argument("--openclip_model", default="ViT-B-16", help="OpenCLIP model used when --text_encoder openclip")
+    parser.add_argument("--openclip_pretrained", default="laion2b_s34b_b88k", help="OpenCLIP pretrained tag used when --text_encoder openclip")
     parser.add_argument("--score_cache", default="", help="Optional primitive text-score cache path; loaded if metadata matches, written when missing")
     parser.add_argument("--registered_feature_cache", default="", help="Optional VPR-registered primitive summary-feature cache path written when registered-view scores are computed")
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES, help="Prompt templates separated by '|'; use {query}")
@@ -6885,6 +6921,8 @@ def main() -> None:
         )
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    if args.text_encoder == "openclip" and args.scoring == "relevancy":
+        parser.error("--text_encoder openclip currently supports --scoring cosine or softmax_scene")
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
     prompt_templates = parse_prompt_templates(args.prompt_templates)
     specs = build_selection_specs(args)
@@ -6898,6 +6936,7 @@ def main() -> None:
     print(f"Selection:  {', '.join(spec.tag for spec in specs)}")
     print(f"Score src:  {args.score_source}")
     print(f"Scoring:    {args.scoring}")
+    print(f"Text enc.:  {args.text_encoder}")
     if args.score_source == "direct" and args.direct_primitive_confidence_mode != "none":
         print(
             "Direct conf: "
@@ -6933,7 +6972,11 @@ def main() -> None:
         print(f"Mask ref.:  {args.mask_refinement}")
     print()
 
-    summary_head = load_summary_head(args.summary_head_weights, device)
+    summary_head = load_text_projection_head(
+        text_encoder=args.text_encoder,
+        summary_head_weights=args.summary_head_weights,
+        device=device,
+    )
     out_root = Path(args.output_dir)
     t0 = time.time()
     scene_report = evaluate_scene(
@@ -6946,6 +6989,9 @@ def main() -> None:
         summary_head_weights=args.summary_head_weights,
         text_embedding_cache=args.text_embedding_cache,
         canonical_embedding_cache=args.canonical_embedding_cache,
+        text_encoder=args.text_encoder,
+        openclip_model=args.openclip_model,
+        openclip_pretrained=args.openclip_pretrained,
         score_cache_path=args.score_cache or None,
         registered_feature_cache_path=args.registered_feature_cache or None,
         prompt_templates=prompt_templates,
@@ -7078,7 +7124,11 @@ def main() -> None:
                 else (
                     "pre-refiner Gaussian-center compact features projected by VPR-trained point summary adapter"
                     if args.use_point_summary_adapter
-                    else "pre-refiner Gaussian-center decoded RADIO-compatible features"
+                    else (
+                        "pre-refiner Gaussian-center decoded OpenCLIP/SAM-CLIP features"
+                        if args.text_encoder == "openclip"
+                        else "pre-refiner Gaussian-center decoded RADIO-compatible features"
+                    )
                 )
             ),
             "score_source": args.score_source,
@@ -7088,7 +7138,16 @@ def main() -> None:
             "direct_readout_mode": args.direct_readout_mode,
             "direct_readout_k": args.direct_readout_k,
             "direct_readout_candidate_k": args.direct_readout_candidate_k,
-            "text_head": "SigLIP2 summary/text-aligned head",
+            "text_encoder": args.text_encoder,
+            "text_head": (
+                "OpenCLIP identity readout"
+                if args.text_encoder == "openclip"
+                else "SigLIP2 summary/text-aligned head"
+            ),
+            "openclip_model": args.openclip_model if args.text_encoder == "openclip" else "",
+            "openclip_pretrained": (
+                args.openclip_pretrained if args.text_encoder == "openclip" else ""
+            ),
             "canonical_embedding_cache": args.canonical_embedding_cache if args.scoring == "relevancy" else "",
             "score_aggregation": args.score_aggregation,
             "score_aggregation_resolution": args.score_aggregation_resolution,

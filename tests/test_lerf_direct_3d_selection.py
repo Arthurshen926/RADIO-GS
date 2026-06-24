@@ -30,6 +30,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     compute_selection_ranking_scores,
     compute_raster_contribution_weights,
     geometry_discontinuity_maps,
+    load_text_projection_head,
     load_score_cache,
     merge_registered_scores,
     normalize_registered_feature_sums,
@@ -97,6 +98,22 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert "raster_adjoint" in result.stdout
     assert "rgb_grabcut_score_component_guard" in result.stdout
     assert "--score_component_guard_min_mass_fraction" in result.stdout
+    assert "--text_encoder" in result.stdout
+    assert "openclip" in result.stdout
+
+
+def test_openclip_text_projection_head_is_identity():
+    head = load_text_projection_head(
+        text_encoder="openclip",
+        summary_head_weights="missing-does-not-matter.pth",
+        device=torch.device("cpu"),
+    )
+    x = torch.randn(2, 3, 4)
+
+    y = head(x)
+
+    assert isinstance(head, torch.nn.Identity)
+    assert torch.equal(y, x)
 
 
 def test_direct_3d_cli_rejects_oracle_prompt_without_diagnostic_flag():

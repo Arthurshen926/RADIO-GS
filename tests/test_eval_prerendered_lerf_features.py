@@ -65,6 +65,35 @@ def test_evaluate_relevance_maps_computes_iou_and_localization():
     assert result["frames"]["frame_00002"]["objects"][0]["chosen_level"] == 1
 
 
+def test_evaluate_relevance_maps_upsamples_feature_grid_to_mask_size():
+    obj = eval_features.LerfObject(
+        frame="frame_00002",
+        query="cup",
+        mask=eval_features.np.array(
+            [
+                [1, 1, 0, 0],
+                [1, 1, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+            ],
+            dtype=bool,
+        ),
+        bboxes=[(0.0, 0.0, 1.0, 1.0)],
+    )
+    relevance = eval_features.np.array([[[[1.0, 0.0], [0.0, 0.0]]]], dtype=eval_features.np.float32)
+
+    result = eval_features.evaluate_relevance_maps(
+        {"frame_00002": [obj]},
+        {"frame_00002": relevance},
+        mask_thresh=0.4,
+        activation_kernel=1,
+        smooth_kernel=1,
+    )
+
+    assert result["macro"]["objects"] == 1
+    assert result["macro"]["loc_acc"] == pytest.approx(1.0)
+
+
 def test_evaluate_relevance_maps_reports_missing_frame_as_error():
     with pytest.raises(FileNotFoundError):
         eval_features.evaluate_relevance_maps(

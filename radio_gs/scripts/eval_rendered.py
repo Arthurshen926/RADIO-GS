@@ -52,6 +52,7 @@ from radio_gs.models.screen_refiner import (
     compute_refiner_extra_channels,
 )
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 
 device = torch.device("cuda")
 
@@ -195,7 +196,7 @@ def load_model_and_render(config_path, checkpoint_path):
         ).to(device).eval()
     
     # Load checkpoint
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     model.load_state_dict(ckpt["model_state_dict"], strict=False)
     codec.load_state_dict(ckpt["codec_state_dict"], strict=False)
     if "sharpener_state_dict" in ckpt:
@@ -1221,7 +1222,7 @@ def eval_depth_indexed(train_feats, train_idx, depth_dir, val_feats, val_idx, va
 
 
 def load_depth_head_checkpoint(checkpoint_path, fallback_config=None):
-    ckpt = torch.load(checkpoint_path, map_location=device)
+    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     state = ckpt.get("state_dict", ckpt)
     head_cfg = ckpt.get("config", {})
     if fallback_config is not None:

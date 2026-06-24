@@ -14,14 +14,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from radio_gs.evaluation.openclip_readout import NEGATIVE_PROMPTS, OpenCLIPTextScorer
 from radio_gs.scripts.eval_opengaussian_lerf_baseline import (
     SCENE_GT_FRAMES,
     _coerce_polygons,
     _rasterize_polygons,
 )
-
-
-NEGATIVE_PROMPTS = ("object", "things", "stuff", "texture")
 
 
 @dataclass(frozen=True)
@@ -116,6 +114,19 @@ def _mask_iou(mask_gt: torch.Tensor, mask_pred: torch.Tensor) -> float:
     return float((intersection.float() / union.float()).item())
 
 
+def _resize_relevance_to_mask(relevance: torch.Tensor, mask_shape: tuple[int, int]) -> torch.Tensor:
+    if tuple(relevance.shape[-2:]) == mask_shape:
+        return relevance.float()
+    levels, prompts, height, width = relevance.shape
+    resized = F.interpolate(
+        relevance.float().reshape(levels * prompts, 1, height, width),
+        size=mask_shape,
+        mode="bilinear",
+        align_corners=False,
+    )
+    return resized.reshape(levels, prompts, mask_shape[0], mask_shape[1])
+
+
 def _localization_hit(coords: torch.Tensor, bboxes: Sequence[tuple[float, float, float, float]]) -> bool:
     for x1, y1, x2, y2 in bboxes:
         x_min, x_max = min(x1, x2), max(x1, x2)
@@ -147,6 +158,8 @@ def evaluate_relevance_maps(
             raise ValueError(f"{frame}: expected [levels, prompts, H, W], got {tuple(relevance.shape)}")
         if relevance.shape[1] != len(objects):
             raise ValueError(f"{frame}: prompt count {relevance.shape[1]} != object count {len(objects)}")
+        if objects:
+            relevance = _resize_relevance_to_mask(relevance, objects[0].mask.shape)
 
         object_results: list[dict[str, object]] = []
         for object_idx, obj in enumerate(objects):
@@ -198,45 +211,6 @@ def evaluate_relevance_maps(
             "objects": total_objects,
         },
     }
-
-
-class OpenCLIPTextScorer:
-    def __init__(self, device: torch.device, *, model_name: str, pretrained: str):
-        import open_clip
-
-        model, _, _ = open_clip.create_model_and_transforms(model_name, pretrained=pretrained, precision="fp16")
-        model.eval()
-        self.device = device
-        self.model = model.to(device)
-        self.tokenizer = open_clip.get_tokenizer(model_name)
-        with torch.inference_mode():
-            tokens = torch.cat([self.tokenizer(prompt) for prompt in NEGATIVE_PROMPTS]).to(device)
-            self.neg_embeds = self.model.encode_text(tokens)
-            self.neg_embeds /= self.neg_embeds.norm(dim=-1, keepdim=True)
-
-    @torch.inference_mode()
-    def _positive_embeds(self, prompts: Sequence[str]) -> torch.Tensor:
-        tokens = torch.cat([self.tokenizer(prompt) for prompt in prompts]).to(self.device)
-        embeds = self.model.encode_text(tokens)
-        return embeds / embeds.norm(dim=-1, keepdim=True)
-
-    @torch.inference_mode()
-    def relevance(self, sem_map: torch.Tensor, prompts: Sequence[str]) -> torch.Tensor:
-        pos_embeds = self._positive_embeds(prompts)
-        phrase_embeds = torch.cat([pos_embeds, self.neg_embeds], dim=0).to(sem_map.dtype).to(self.device)
-        n_levels, height, width, channels = sem_map.shape
-        n_prompts = len(prompts)
-        n_negatives = len(NEGATIVE_PROMPTS)
-        sem_flat = sem_map.permute(0, 3, 1, 2).reshape(n_levels, channels, -1).permute(0, 2, 1).contiguous()
-        sim = torch.einsum("nqc,pc->nqp", sem_flat, phrase_embeds)
-        pos_vals = sim[:, :, :n_prompts]
-        neg_vals = sim[:, :, n_prompts:]
-        repeated_pos = pos_vals.unsqueeze(-1).repeat(1, 1, 1, n_negatives)
-        repeated_neg = neg_vals.unsqueeze(2).repeat(1, 1, n_prompts, 1)
-        sims = torch.stack([repeated_pos, repeated_neg], dim=-1)
-        softmax = torch.softmax(10 * sims, dim=-1)
-        min_pos_prob, _ = softmax[..., 0].min(dim=-1)
-        return min_pos_prob.permute(0, 2, 1).reshape(n_levels, n_prompts, height, width)
 
 
 def _load_feature_tensor(
