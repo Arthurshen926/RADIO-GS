@@ -165,7 +165,7 @@ def _protocol_exclusions(
     normalized_scene: Mapping[str, Any],
     raw_scene: Mapping[str, Any],
 ) -> tuple[str, ...]:
-    if benchmark == "spin_nerf":
+    if benchmark in {"spin_nerf", "spin_nerf_diagnostic_9scene"}:
         return ()
     if benchmark != "nvos":
         raise QueuePreparationError(f"Unsupported benchmark: {benchmark!r}")
@@ -194,7 +194,7 @@ def _track_metadata(benchmark: str, prompt_type: str) -> dict[str, Any]:
                 "their own target-view/training-policy provenance before same-protocol labeling."
             ),
         }
-    if benchmark == "spin_nerf" and prompt_type == "single_reference_binary_mask":
+    if benchmark in {"spin_nerf", "spin_nerf_diagnostic_9scene"} and prompt_type == "single_reference_binary_mask":
         return {
             "id": SPIN_FULL_MASK_TRACK,
             "prompt": "full_binary_mask_on_first_reference_frame",
@@ -206,6 +206,10 @@ def _track_metadata(benchmark: str, prompt_type: str) -> dict[str, Any]:
                 "exact Appendix-A.2 point set is separately frozen."
             ),
             "required_for_point_prompt_track": "frozen_exact_positive_negative_point_coordinates",
+            "formal_10scene_eligible": benchmark == "spin_nerf",
+            "diagnostic_missing_scenes": (
+                ["fork"] if benchmark == "spin_nerf_diagnostic_9scene" else []
+            ),
         }
     raise QueuePreparationError(
         f"No queue track is registered for benchmark={benchmark!r}, prompt_type={prompt_type!r}"

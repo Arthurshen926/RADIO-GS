@@ -17,6 +17,7 @@ from typing import Sequence
 from radio_gs.data.promptable_nvs_manifest import (
     ManifestError,
     SPIN_SCENES,
+    SPIN_DIAGNOSTIC_SCENES,
     build_nvos_manifest,
     build_spin_manifest,
     load_scene_rgb_map,
@@ -46,7 +47,10 @@ def _scene_assignment(value: str) -> tuple[str, str]:
 
 
 def _merge_spin_rgb_map(
-    map_path: str | None, assignments: Sequence[tuple[str, str]]
+    map_path: str | None,
+    assignments: Sequence[tuple[str, str]],
+    *,
+    allow_missing_fork_diagnostic: bool = False,
 ) -> dict[str, str]:
     merged = load_scene_rgb_map(map_path) if map_path else {}
     for scene, path in assignments:
@@ -56,13 +60,14 @@ def _merge_spin_rgb_map(
                 f"{merged[scene]} versus {path}"
             )
         merged[scene] = path
-    missing = sorted(set(SPIN_SCENES) - set(merged))
-    unknown = sorted(set(merged) - set(SPIN_SCENES))
+    expected = SPIN_DIAGNOSTIC_SCENES if allow_missing_fork_diagnostic else SPIN_SCENES
+    missing = sorted(set(expected) - set(merged))
+    unknown = sorted(set(merged) - set(expected))
     if missing or unknown:
         raise ManifestError(
-            "SPIn-NeRF requires an explicit RGB directory for every canonical scene; "
+            "SPIn-NeRF requires an explicit RGB directory for every requested scene; "
             f"missing={missing}, unknown={unknown}. Provide --spin-rgb-map or "
-            "ten --spin-rgb SCENE=PATH arguments."
+            "the matching --spin-rgb SCENE=PATH arguments."
         )
     return merged
 
@@ -74,6 +79,14 @@ def build_parser() -> argparse.ArgumentParser:
         choices=("nvos", "spin", "all"),
         default="all",
         help="Manifest(s) to build (default: all).",
+    )
+    parser.add_argument(
+        "--allow-incomplete-spin-diagnostic",
+        action="store_true",
+        help=(
+            "Build only the nine available non-Fork scenes. The output is labelled "
+            "diagnostic and is never eligible for a formal ten-scene result."
+        ),
     )
     parser.add_argument("--data-root", type=Path, default=DEFAULT_DATA_ROOT)
     parser.add_argument("--output-dir", type=Path)
@@ -123,18 +136,28 @@ def main(argv: Sequence[str] | None = None) -> int:
         annotation_root = args.spin_annotation_root or (
             data_root / "SPIn-NeRF" / "multiview_annotations"
         )
-        scene_rgb_dirs = _merge_spin_rgb_map(args.spin_rgb_map, args.spin_rgb)
+        scene_rgb_dirs = _merge_spin_rgb_map(
+            args.spin_rgb_map,
+            args.spin_rgb,
+            allow_missing_fork_diagnostic=args.allow_incomplete_spin_diagnostic,
+        )
         manifest = build_spin_manifest(
             annotation_root,
             scene_rgb_dirs,
             threshold=args.threshold,
+            diagnostic_missing_fork=args.allow_incomplete_spin_diagnostic,
         )
         validate_manifest(manifest, check_files=True)
         built.append(
             (
                 "SPIn-NeRF full-reference-mask diagnostic",
                 manifest,
-                output_dir / "spin_nerf_full_reference_mask_10scene_v1.json",
+                output_dir
+                / (
+                    "spin_nerf_full_reference_mask_9scene_diagnostic_v1.json"
+                    if args.allow_incomplete_spin_diagnostic
+                    else "spin_nerf_full_reference_mask_10scene_v1.json"
+                ),
             )
         )
 

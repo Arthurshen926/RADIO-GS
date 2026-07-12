@@ -39,6 +39,7 @@ from radio_gs.scannet_constants import (
     OPENGAUSSIAN_NYU40_CLASS_SPLITS,
 )
 from radio_gs.scripts.eval_lerf_grounding import parse_prompt_templates
+from radio_gs.querying.unified_query import cosine_bank_torch
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _build_hybrid_model,
     _decode_gaussian_indices_1280,
@@ -351,7 +352,9 @@ def _predict_gaussian_labels(
                 class_ids = np.asarray(
                     OPENGAUSSIAN_NYU40_CLASS_SPLITS[split], dtype=np.int32
                 )
-                logits = visual @ split_text_embeddings[split].to(device).T
+                logits = cosine_bank_torch(
+                    visual, split_text_embeddings[split].to(device)
+                )
                 predictions[split][start:end] = class_ids[
                     logits.argmax(dim=-1).cpu().numpy()
                 ]

@@ -18,7 +18,6 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-import math
 import os
 from pathlib import Path
 from typing import Any, Mapping, MutableMapping, Sequence
@@ -34,6 +33,13 @@ from radio_gs.evaluation.promptable_segmentation import (
     validate_manifest,
 )
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
+from radio_gs.querying.unified_query import (
+    QueryKind,
+    QuerySpace,
+    QuerySpec,
+    mean_prototype,
+    score_feature_map,
+)
 
 
 FEATURE_LAYOUTS = ("auto", "chw", "hwc")
@@ -268,14 +274,10 @@ def _normalized_pixels(features: np.ndarray) -> np.ndarray:
 
 
 def _prototype(normalized: np.ndarray, mask: np.ndarray, *, role: str) -> np.ndarray:
-    selected = normalized[:, mask.reshape(-1)]
-    if selected.shape[1] == 0:
-        raise FeatureReadoutError(f"Prompt {role} mask selects no feature pixels")
-    prototype = selected.mean(axis=1)
-    norm = float(np.linalg.norm(prototype))
-    if not math.isfinite(norm) or norm <= 1e-12:
-        raise FeatureReadoutError(f"Prompt {role} prototype has zero/invalid norm")
-    return prototype / norm
+    try:
+        return mean_prototype(normalized.T, mask.reshape(-1))
+    except ValueError as error:
+        raise FeatureReadoutError(f"Invalid prompt {role} prototype: {error}") from error
 
 
 def _resize_prompt(mask: np.ndarray, shape: tuple[int, int]) -> np.ndarray:
@@ -357,9 +359,16 @@ def cosine_margin_scores(
     channels, height, width = features.shape
     if foreground_prototype.shape != (channels,) or background_prototype.shape != (channels,):
         raise FeatureReadoutError("Feature/prototype channel dimensions differ")
-    normalized = _normalized_pixels(features)
-    scores = foreground_prototype @ normalized - background_prototype @ normalized
-    scores = scores.reshape(height, width).astype(np.float32, copy=False)
+    query = QuerySpec(
+        kind=QueryKind.REGISTERED_2D,
+        space=QuerySpace.REGION,
+        positive_prototypes=foreground_prototype,
+        negative_prototypes=background_prototype,
+    )
+    try:
+        scores = score_feature_map(features, query)
+    except ValueError as error:
+        raise FeatureReadoutError(str(error)) from error
     if not bool(np.isfinite(scores).all()):
         raise FeatureReadoutError("Cosine margin scores contain NaN or infinity")
     return scores

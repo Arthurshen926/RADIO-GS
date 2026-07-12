@@ -75,6 +75,7 @@ from radio_gs.evaluation.openclip_readout import (
     load_or_generate_openclip_prompt_ensemble_embeddings,
 )
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.querying.unified_query import cosine_relevancy_torch
 
 logger = logging.getLogger(__name__)
 
@@ -739,15 +740,13 @@ def compute_relevancy_heatmap(
     sim = text_emb @ vis_flat  # [N, HW]
 
     if scoring == "relevancy" and canonical_emb is not None and canonical_emb.shape[0] > 0:
-        canon_sim = canonical_emb @ vis_flat  # [M, HW]
-        canon_max = canon_sim.max(dim=0, keepdim=True).values  # [1, HW]
-        sim_scaled = sim / temperature
-        canon_scaled = canon_max.expand_as(sim) / temperature
-        max_val = torch.maximum(sim_scaled, canon_scaled)
-        relevancy = torch.exp(sim_scaled - max_val) / (
-            torch.exp(sim_scaled - max_val) + torch.exp(canon_scaled - max_val) + 1e-8
-        )
-        heatmaps = relevancy.reshape(-1, H, W)
+        heatmaps = cosine_relevancy_torch(
+            vis_flat.T,
+            text_emb,
+            canonical_emb,
+            logit_scale=1.0 / float(temperature),
+            assume_normalized=True,
+        ).T.reshape(-1, H, W)
         if not bool(torch.isfinite(heatmaps).all()):
             raise FloatingPointError("Non-finite relevancy heatmap")
         return heatmaps

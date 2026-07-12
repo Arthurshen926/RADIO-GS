@@ -65,6 +65,7 @@ SPIN_SCENE_FOLDERS = (
     ("lego", "lego_real_night_radial"),
 )
 SPIN_SCENES = tuple(scene_id for scene_id, _ in SPIN_SCENE_FOLDERS)
+SPIN_DIAGNOSTIC_SCENES = tuple(scene_id for scene_id in SPIN_SCENES if scene_id != "fork")
 SPIN_EXPECTED_MASK_COUNTS = {
     "orchids": 24,
     "leaves": 26,
@@ -533,21 +534,24 @@ def _map_spin_rgb(
 
 def _normalize_spin_rgb_dirs(
     scene_rgb_dirs: Mapping[str, str | Path],
+    *,
+    expected_scenes: Sequence[str] = SPIN_SCENES,
 ) -> dict[str, Path]:
     if not isinstance(scene_rgb_dirs, Mapping):
         raise ManifestError("scene_rgb_dirs must be a mapping of scene id to image directory")
-    unknown = sorted(set(scene_rgb_dirs) - set(SPIN_SCENES))
-    missing = sorted(set(SPIN_SCENES) - set(scene_rgb_dirs))
+    expected = tuple(str(scene_id) for scene_id in expected_scenes)
+    unknown = sorted(set(scene_rgb_dirs) - set(expected))
+    missing = sorted(set(expected) - set(scene_rgb_dirs))
     if unknown or missing:
         raise ManifestError(
-            "SPIn-NeRF RGB mapping must explicitly cover the canonical ten scenes; "
+            "SPIn-NeRF RGB mapping must explicitly cover the requested cohort; "
             f"missing={missing}, unknown={unknown}"
         )
     return {
         scene_id: _resolve_exact_image_dir(
             scene_rgb_dirs[scene_id], label=f"SPIn-NeRF {scene_id}"
         )
-        for scene_id in SPIN_SCENES
+        for scene_id in expected
     }
 
 
@@ -557,17 +561,21 @@ def build_spin_manifest(
     *,
     threshold: float = 0.0,
     enforce_official_counts: bool = True,
+    diagnostic_missing_fork: bool = False,
     validate: bool = True,
 ) -> dict[str, Any]:
-    """Build the canonical ten-scene SPIn-NeRF segmentation manifest."""
+    """Build the formal ten-scene or explicitly labelled nine-scene diagnostic."""
 
     annotations = _absolute(annotation_root)
     expected_folders = tuple(folder for _, folder in SPIN_SCENE_FOLDERS)
     _require_cohort(annotations, expected_folders, "SPIn-NeRF multiview-segmentation")
-    rgb_dirs = _normalize_spin_rgb_dirs(scene_rgb_dirs)
+    cohort = SPIN_DIAGNOSTIC_SCENES if diagnostic_missing_fork else SPIN_SCENES
+    rgb_dirs = _normalize_spin_rgb_dirs(scene_rgb_dirs, expected_scenes=cohort)
 
     scenes: list[dict[str, Any]] = []
     for scene_id, annotation_folder in SPIN_SCENE_FOLDERS:
+        if scene_id not in cohort:
+            continue
         scene_dir = annotations / annotation_folder
         masks = _base_spin_masks(scene_dir)
         if len(masks) < 2:
@@ -678,7 +686,7 @@ def build_spin_manifest(
     )
     protocol.update(
         {
-            "cohort": list(SPIN_SCENES),
+            "cohort": list(cohort),
             "protocol_role": "full_reference_mask_support_diagnostic",
             "canonical_paper_interaction": "sparse_positive_negative_point_prompts",
             "exactly_comparable_to_published_saga": False,
@@ -692,12 +700,20 @@ def build_spin_manifest(
             "target_rgb_at_query": "forbidden_for_reusable_feature_field_track",
             "target_mask_use": "scoring_only",
             "within_scene_aggregation": "unweighted_frame_mean",
-            "dataset_aggregation": "unweighted_macro_over_10_scenes",
+            "dataset_aggregation": (
+                "unweighted_macro_over_9_available_scenes_diagnostic"
+                if diagnostic_missing_fork
+                else "unweighted_macro_over_10_scenes"
+            ),
+            "formal_10scene_eligible": not diagnostic_missing_fork,
+            "missing_scenes": ["fork"] if diagnostic_missing_fork else [],
         }
     )
     manifest: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        "benchmark": "spin_nerf",
+        "benchmark": (
+            "spin_nerf_diagnostic_9scene" if diagnostic_missing_fork else "spin_nerf"
+        ),
         "annotation_root": str(annotations),
         "scene_rgb_dirs": {key: str(value) for key, value in rgb_dirs.items()},
         "protocol": protocol,
@@ -721,7 +737,15 @@ def validate_manifest(
 
     normalized = validate_evaluation_manifest(manifest)
     benchmark = str(manifest.get("benchmark", ""))
-    expected = NVOS_TASKS if benchmark == "nvos" else SPIN_SCENES if benchmark == "spin_nerf" else None
+    expected = (
+        NVOS_TASKS
+        if benchmark == "nvos"
+        else SPIN_SCENES
+        if benchmark == "spin_nerf"
+        else SPIN_DIAGNOSTIC_SCENES
+        if benchmark == "spin_nerf_diagnostic_9scene"
+        else None
+    )
     if expected is None:
         raise ManifestError(f"Unsupported benchmark metadata: {benchmark!r}")
     scene_ids = [scene["scene_id"] for scene in normalized["scenes"]]
@@ -739,6 +763,7 @@ def validate_manifest(
     expected_protocol_prompt = {
         "nvos": "fixed_positive_negative_scribbles",
         "spin_nerf": "single_reference_binary_mask",
+        "spin_nerf_diagnostic_9scene": "single_reference_binary_mask",
     }[benchmark]
     if protocol.get("prompt_type") != expected_protocol_prompt:
         raise ManifestError(
@@ -904,6 +929,7 @@ __all__ = [
     "NVOS_TASKS",
     "SCHEMA_VERSION",
     "SPIN_EXPECTED_MASK_COUNTS",
+    "SPIN_DIAGNOSTIC_SCENES",
     "SPIN_SCENE_FOLDERS",
     "SPIN_SCENES",
     "build_nvos_manifest",

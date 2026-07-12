@@ -11,6 +11,7 @@ from radio_gs.data.promptable_nvs_manifest import (
     ManifestError,
     NVOS_TASKS,
     SPIN_SCENE_FOLDERS,
+    SPIN_DIAGNOSTIC_SCENES,
     SPIN_SCENES,
     build_nvos_manifest,
     build_spin_manifest,
@@ -143,6 +144,24 @@ def test_spin_requires_explicit_complete_rgb_map(tmp_path: Path) -> None:
     del rgb_map["lego"]
     with pytest.raises(ManifestError, match=r"missing=\['lego'\]"):
         build_spin_manifest(annotations, rgb_map, enforce_official_counts=False)
+
+
+def test_spin_missing_fork_can_only_build_labelled_nine_scene_diagnostic(tmp_path: Path) -> None:
+    annotations, rgb_map = _make_spin(tmp_path)
+    del rgb_map["fork"]
+    manifest = build_spin_manifest(
+        annotations,
+        rgb_map,
+        enforce_official_counts=False,
+        diagnostic_missing_fork=True,
+    )
+    assert manifest["benchmark"] == "spin_nerf_diagnostic_9scene"
+    assert [scene["scene_id"] for scene in manifest["scenes"]] == list(
+        SPIN_DIAGNOSTIC_SCENES
+    )
+    assert manifest["protocol"]["formal_10scene_eligible"] is False
+    assert manifest["protocol"]["missing_scenes"] == ["fork"]
+    validate_manifest(manifest, check_files=True)
 
 
 def test_spin_exact_mapping_failure_names_scene_and_mask(tmp_path: Path) -> None:

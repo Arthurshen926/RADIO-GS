@@ -76,6 +76,7 @@ from radio_gs.evaluation.openclip_readout import (
     NEGATIVE_PROMPTS,
     load_or_generate_openclip_prompt_ensemble_embeddings,
 )
+from radio_gs.querying.unified_query import cosine_relevancy_torch
 from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_GT_FEATURE_ROOT,
     DEFAULT_LABEL_DIR,
@@ -1722,16 +1723,12 @@ def score_text_aligned_embeddings(
         if canonical_embeddings is None or canonical_embeddings.numel() == 0:
             raise ValueError("scoring='relevancy' requires canonical embeddings")
         canonical = F.normalize(canonical_embeddings.float(), dim=-1).to(visual.device)
-        sim = visual @ text.T
-        canon = visual @ canonical.T
-        canon_max = canon.max(dim=1, keepdim=True).values
-        sim_scaled = sim * float(softmax_temperature)
-        canon_scaled = canon_max.expand_as(sim) * float(softmax_temperature)
-        max_val = torch.maximum(sim_scaled, canon_scaled)
-        return torch.exp(sim_scaled - max_val) / (
-            torch.exp(sim_scaled - max_val)
-            + torch.exp(canon_scaled - max_val)
-            + 1e-8
+        return cosine_relevancy_torch(
+            visual,
+            text,
+            canonical,
+            logit_scale=float(softmax_temperature),
+            assume_normalized=True,
         )
 
     raise ValueError(f"Unsupported scoring mode: {scoring}")
@@ -3171,27 +3168,13 @@ def compute_gaussian_text_scores(
                     valid_mask=valid_mask_chunk,
                 )
 
-        if scoring == "softmax_scene":
-            logits = siglip @ text.float().T
-            scores = torch.softmax(logits * float(softmax_temperature), dim=-1)
-        elif scoring == "cosine":
-            scores = siglip @ text.float().T
-        elif scoring == "relevancy":
-            if canonical is None or canonical.numel() == 0:
-                raise ValueError("scoring='relevancy' requires canonical embeddings")
-            sim = siglip @ text.float().T
-            canon = siglip @ canonical.float().T
-            canon_max = canon.max(dim=1, keepdim=True).values
-            sim_scaled = sim * float(softmax_temperature)
-            canon_scaled = canon_max.expand_as(sim) * float(softmax_temperature)
-            max_val = torch.maximum(sim_scaled, canon_scaled)
-            scores = torch.exp(sim_scaled - max_val) / (
-                torch.exp(sim_scaled - max_val)
-                + torch.exp(canon_scaled - max_val)
-                + 1e-8
-            )
-        else:
-            raise ValueError(f"Unsupported scoring mode: {scoring}")
+        scores = score_text_aligned_embeddings(
+            siglip,
+            text,
+            canonical_embeddings=canonical,
+            scoring=scoring,
+            softmax_temperature=softmax_temperature,
+        )
         all_scores.append(scores.cpu())
 
         del compact, siglip, scores
