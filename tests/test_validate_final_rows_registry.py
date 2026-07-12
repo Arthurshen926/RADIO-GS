@@ -54,6 +54,30 @@ def _rows_from_macro(macro: dict[str, dict[str, float]]) -> list[dict[str, objec
 
 
 def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
+    lerf2d_json = root / "paper/artifacts/lerf2d.json"
+    lerf2d_json.parent.mkdir(parents=True)
+    lerf2d_macro = {"miou": 0.588944466161357, "loc_acc": 0.8598309812650944}
+    lerf2d_scenes = {
+        scene: {"miou": lerf2d_macro["miou"], "loc_acc": lerf2d_macro["loc_acc"]}
+        for scene in ("figurines", "ramen", "teatime", "waldo_kitchen")
+    }
+    lerf2d_json.write_text(
+        json.dumps({"macro": lerf2d_macro, "scenes": lerf2d_scenes}),
+        encoding="utf-8",
+    )
+    direct3d_json = root / "paper/artifacts/direct3d.json"
+    direct3d_source_row = {
+        "miou": 0.501373864710331,
+        "acc025": 0.7044309383271872,
+        "per_scene": {
+            scene: {"miou": 0.501373864710331, "acc025": 0.7044309383271872}
+            for scene in ("figurines", "ramen", "teatime", "waldo_kitchen")
+        },
+    }
+    direct3d_json.write_text(
+        json.dumps({"rows": {"promoted": direct3d_source_row}}),
+        encoding="utf-8",
+    )
     scannet_json = root / "output/scannet_pointcloud_eval/support.json"
     scannet_json.parent.mkdir(parents=True)
     support_macro = {
@@ -74,7 +98,7 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
         encoding="utf-8",
     )
     audit_json = root / "paper/artifacts/external_baseline_audit.json"
-    audit_json.parent.mkdir(parents=True)
+    audit_json.parent.mkdir(parents=True, exist_ok=True)
     audit_json.write_text(
         json.dumps(
             {
@@ -149,6 +173,35 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
                     ],
                 },
                 "tracks": {
+                    "t1_lerf_rendered_view_ovs": {
+                        "source_json": "paper/artifacts/lerf2d.json",
+                        "rows": {
+                            "ctfgs_rendered": {
+                                "miou": lerf2d_macro["miou"],
+                                "locacc": lerf2d_macro["loc_acc"],
+                                "per_scene": {
+                                    scene: {
+                                        "miou": values["miou"],
+                                        "acc": values["loc_acc"],
+                                    }
+                                    for scene, values in lerf2d_scenes.items()
+                                },
+                                "promoted": True,
+                            }
+                        },
+                    },
+                    "t2_lerf_direct_3d_selection": {
+                        "source_json": "paper/artifacts/direct3d.json",
+                        "rows": {
+                            "ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55": {
+                                "source_row": "promoted",
+                                "miou": direct3d_source_row["miou"],
+                                "acc025": direct3d_source_row["acc025"],
+                                "per_scene": direct3d_source_row["per_scene"],
+                                "promoted": True,
+                            }
+                        },
+                    },
                     "t3_scannet_ov_point_cloud_segmentation": {
                         "radio_gs_source_json": (
                             "output/scannet_pointcloud_eval/support.json"
@@ -158,6 +211,14 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
                                 "split19": {"miou": 0.3806, "macc": 0.6129},
                                 "split15": {"miou": 0.3871, "macc": 0.6315},
                                 "split10": {"miou": split10_miou, "macc": 0.7200},
+                                "per_scene": {
+                                    scene: {
+                                        "split19": dict(support_macro["19"]),
+                                        "split15": dict(support_macro["15"]),
+                                        "split10": dict(support_macro["10"]),
+                                    }
+                                    for scene in VALA8_SCENES
+                                },
                                 "promoted": True,
                             }
                         },
@@ -171,9 +232,8 @@ def _write_fixture(root: Path, *, split10_miou: float = 0.4711) -> Path:
     scannet_table = root / "paper/scannet_published_context_table.tex"
     scannet_table.parent.mkdir(parents=True, exist_ok=True)
     scannet_table.write_text(
-        "\\method{} & \\textbf{38.06} & \\textbf{61.29} & "
-        "\\textbf{38.71} & \\textbf{63.15} & "
-        f"\\textbf{{{100.0 * split10_miou:.2f}}} & \\textbf{{72.00}} \\\\\n",
+        "\\method{} & 38.06 & 61.29 & 38.71 & 63.15 & "
+        f"{100.0 * split10_miou:.2f} & 72.00 \\\\\n",
         encoding="utf-8",
     )
     return final_rows
@@ -278,6 +338,19 @@ def test_validate_registry_flags_scannet_protocol_drift(tmp_path):
     issues = validator.validate_registry(final_rows, root=tmp_path)
 
     assert any("ScanNet promoted source_args.query_mode" in issue for issue in issues)
+
+
+def test_validate_registry_rejects_scannet_source_without_eight_rows(tmp_path):
+    validator = _load_validator()
+    final_rows = _write_fixture(tmp_path)
+    support_json = tmp_path / "output/scannet_pointcloud_eval/support.json"
+    payload = json.loads(support_json.read_text(encoding="utf-8"))
+    payload["rows"] = []
+    support_json.write_text(json.dumps(payload), encoding="utf-8")
+
+    issues = validator.validate_registry(final_rows, root=tmp_path)
+
+    assert any("exactly 8 per-scene rows" in issue for issue in issues)
 
 
 def test_validate_registry_accepts_synced_external_summary_statuses(tmp_path):

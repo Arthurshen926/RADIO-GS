@@ -93,8 +93,8 @@ This generated report is the current paper-facing source of truth for the conser
 ## ScanNet Supporting Diagnostic
 
 - Protocol: VALA-aligned ScanNet-8 direct point query, DINO-CV contextual kNN16/candidate80, scene-mean calibration alpha 0.45, spatial logit smoothing k12/a1.
-- Paper-facing summary source: `paper/artifacts/scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json`.
-- The per-scene table below is retained as supporting diagnostic evidence for the contextual-kNN readout; it is not the final ScanNet table source.
+- Canonical local source: `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json`.
+- The derivative paper-facing summary mirrors the macro and all eight rows from this source; the published baseline rows remain external context.
 - Scenes found: `8`
 - Macro mIoU: `19: 0.3806 / 15: 0.3871 / 10: 0.4711`
 - Macro mAcc: `19: 0.6129 / 15: 0.6315 / 10: 0.7200`

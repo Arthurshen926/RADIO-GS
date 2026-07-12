@@ -154,7 +154,29 @@
       "miou": 0.501373864710331,
       "acc025": 0.7044309383271872,
       "boundary_f": 0.63053347915411,
-      "trimap_iou": 0.3224659077823162
+      "trimap_iou": 0.3224659077823162,
+      "per_scene": {
+        "figurines": {
+          "miou": 0.5104373693466187,
+          "acc025": 0.6785714285714286,
+          "source": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528/figurines/lerf_direct_3d_selection_results.json#thr0p55"
+        },
+        "ramen": {
+          "miou": 0.5998749136924744,
+          "acc025": 0.8309859154929577,
+          "source": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528/ramen/lerf_direct_3d_selection_results.json#thr0p55"
+        },
+        "teatime": {
+          "miou": 0.5639746785163879,
+          "acc025": 0.7627118644067796,
+          "source": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528/teatime/lerf_direct_3d_selection_results.json#thr0p55"
+        },
+        "waldo_kitchen": {
+          "miou": 0.3312084972858429,
+          "acc025": 0.5454545454545454,
+          "source": "output/radio_gs/lerf_direct3d_prompt_ensemble_score_component_guard_m050_k2_lowthr_20260528/waldo_kitchen/lerf_direct_3d_selection_results.json#thr0p55"
+        }
+      }
     }
   },
   "conclusion": "The latest overlap-balanced direct-3D row is no-VPR-cache and no-official-SAM, but it is not the strict no-RGB one-map row. The strict pure one-map row reaches 0.4570 mIoU / 0.6851 Acc@0.25; the deployed score-component guarded compact readout reaches 0.5014 mIoU / 0.7044 Acc@0.25."

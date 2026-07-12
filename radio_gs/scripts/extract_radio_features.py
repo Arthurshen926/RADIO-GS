@@ -32,8 +32,13 @@ from tqdm import tqdm
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from radio_gs.data.benchmark_paths import extract_feature_frame_index
+from radio_gs.data.view_split import (
+    load_excluded_image_stems,
+    select_image_indices,
+)
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
+FRAME_ID_MODES = ("auto", "source_rank")
 
 
 # ---- image loading helpers ------------------------------------------------
@@ -56,10 +61,13 @@ def _collect_image_paths(image_dir: str) -> tuple[list[Path], str]:
             break
 
     if indexed:
-        indexed.sort(key=lambda item: item[0])
-        return [path for _, path in indexed], "numeric"
+        # Numeric suffixes are not unique in several NVOS captures (for
+        # example multiple Horns filenames end in ``_427``).  A filename
+        # tiebreaker makes source_rank stable across processes/filesystems.
+        indexed.sort(key=lambda item: (item[0], item[1].name))
+        return [path for _, path in indexed], "numeric_then_exact_filename"
 
-    return sorted(paths), "lexicographic"
+    return sorted(paths, key=lambda path: path.name), "lexicographic_filename"
 
 
 def _apply_subsampling(
@@ -71,6 +79,35 @@ def _apply_subsampling(
     if max_frames is not None:
         sampled = sampled[:max_frames]
     return sampled
+
+
+def _saved_frame_indices(
+    image_paths: list[Path],
+    *,
+    mode: str,
+) -> list[int]:
+    """Resolve output ids once and reject any would-be cache overwrite."""
+    if mode not in FRAME_ID_MODES:
+        raise ValueError(f"frame_id_mode must be one of {FRAME_ID_MODES}")
+    frame_indices: list[int] = []
+    by_index: dict[int, Path] = {}
+    for source_rank, source_path in enumerate(image_paths):
+        if mode == "source_rank":
+            frame_idx = source_rank
+        else:
+            try:
+                frame_idx = extract_feature_frame_index(source_path)
+            except ValueError:
+                frame_idx = source_rank
+        if frame_idx in by_index:
+            raise ValueError(
+                f"Feature output collision at rgb_{frame_idx}.pt: "
+                f"{by_index[frame_idx].name} and {source_path.name}. "
+                "Use --frame-id-mode source_rank for a unique dense index."
+            )
+        by_index[frame_idx] = source_path
+        frame_indices.append(frame_idx)
+    return frame_indices
 
 
 def _nearest_radio_resolution(h: int, w: int, patch_size: int = 16) -> tuple[int, int]:
@@ -399,13 +436,34 @@ def extract(args: argparse.Namespace) -> None:
 
     # Collect images
     image_paths, image_sort_mode = _collect_image_paths(args.image_dir)
+    source_image_count = len(image_paths)
+    excluded_image_stems = load_excluded_image_stems(
+        args.exclude_image_stem,
+        args.exclude_image_stems_file,
+    )
+    retained_indices, excluded_image_names = select_image_indices(
+        image_paths,
+        excluded_image_stems,
+        min_remaining=1,
+    )
+    image_paths = [image_paths[index] for index in retained_indices]
     image_paths = _apply_subsampling(
         image_paths,
         frame_stride=args.frame_stride,
         max_frames=args.max_frames,
     )
+    frame_id_mode = getattr(args, "frame_id_mode", "auto")
+    saved_frame_indices = _saved_frame_indices(
+        image_paths,
+        mode=frame_id_mode,
+    )
     print(f"[RADIO] Found {len(image_paths)} images in {args.image_dir}")
     print(f"[RADIO] Image ordering: {image_sort_mode}")
+    if excluded_image_names:
+        print(
+            "[RADIO] Excluded RGB feature views: "
+            + ", ".join(excluded_image_names)
+        )
 
     # Probe resolution from first image
     probe_img = Image.open(image_paths[0])
@@ -476,10 +534,7 @@ def extract(args: argparse.Namespace) -> None:
         for i in range(B):
             source_path = batch_paths[i]
             source_rank = start + i
-            try:
-                frame_idx = extract_feature_frame_index(source_path)
-            except ValueError:
-                frame_idx = source_rank
+            frame_idx = saved_frame_indices[source_rank]
             stem = f"rgb_{frame_idx}"
             frame_manifest.append(
                 {
@@ -527,8 +582,19 @@ def extract(args: argparse.Namespace) -> None:
         json.dumps(
             {
                 "scene": args.scene,
+                "radio": {
+                    "version": args.radio_version,
+                    "repo": str(Path(args.radio_repo).expanduser().resolve()),
+                    "requested_adaptors": list(adaptor_names or []),
+                },
                 "image_dir": str(Path(args.image_dir).resolve()),
                 "image_sort_mode": image_sort_mode,
+                "frame_id_mode": frame_id_mode,
+                "resolution_scale": float(args.resolution_scale),
+                "radio_input_resolution_hw": [int(target_h), int(target_w)],
+                "source_image_count_before_exclusion": source_image_count,
+                "excluded_image_stems": list(excluded_image_stems),
+                "excluded_image_names": excluded_image_names,
                 "num_frames": len(frame_manifest),
                 "features": {
                     "backbone": {
@@ -623,6 +689,29 @@ def main() -> None:
         type=int,
         default=None,
         help="Optional cap on the number of images to extract",
+    )
+    parser.add_argument(
+        "--frame-id-mode",
+        choices=FRAME_ID_MODES,
+        default="auto",
+        help=(
+            "Output feature id policy. 'auto' preserves legacy numeric suffixes; "
+            "'source_rank' assigns a unique dense id after exclusion/subsampling."
+        ),
+    )
+    parser.add_argument(
+        "--exclude-image-stem",
+        action="append",
+        default=[],
+        help=(
+            "Exact case-sensitive image basename stem to exclude before feature "
+            "extraction; repeat for multiple held-out views"
+        ),
+    )
+    parser.add_argument(
+        "--exclude-image-stems-file",
+        default="",
+        help="Optional JSON/text file of exact image stems to exclude",
     )
     parser.add_argument(
         "--extract_adaptors",

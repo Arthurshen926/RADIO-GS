@@ -1,0 +1,217 @@
+schema_version: 1
+created: 2026-07-12
+purpose: >-
+  Fail-closed registry for NVOS and SPIn-NeRF promptable novel-view
+  segmentation. Published values are context only until a row has the same
+  protocol fingerprint and, for reproduced rows, has been scored by the local
+  evaluator.
+
+protocols:
+  nvos_strict_unseen_v1:
+    dataset: NVOS
+    tasks:
+      - fern
+      - flower
+      - fortress
+      - horns_center
+      - horns_left
+      - leaves
+      - orchids
+      - trex
+    prompt:
+      frame_role: reference
+      type: fixed_positive_and_negative_scribbles
+      source: official_nvos_release
+    evaluation:
+      frames_per_task: 1
+      reference_scored: false
+      metrics: [foreground_iou, binary_pixel_accuracy]
+      aggregation: equal_weight_macro_over_8_tasks
+      mask_resize: nearest
+      prediction_representation: continuous_cosine_margin
+      threshold: {comparison: greater_or_equal, value: 0.0}
+    visibility:
+      target_rgb_allowed_during_field_training: false
+      target_rgb_allowed_at_query: false
+      target_mask_use: scoring_only
+      sparse_initialization: drop_any_point_observed_by_target_camera
+      shared_upstream_camera_calibration_exception: true
+    calibration:
+      target_mask: forbidden
+      allowed: fixed_on_external_development_scenes
+    combine_with_other_dataset_overall: false
+
+  spin_nerf_full_reference_mask_10scene_v1:
+    dataset: SPIn-NeRF multiview segmentation
+    scenes:
+      - orchids
+      - leaves
+      - fern
+      - room
+      - horns
+      - fortress
+      - fork
+      - pinecone
+      - truck
+      - lego
+    prompt:
+      frame_role: first_official_annotated_frame_after_canonical_mapping
+      type: complete_binary_mask
+      source: official_spin_nerf_multiview_segmentation_release
+      track_role: full_mask_support_diagnostic
+      canonical_paper_task: sparse_positive_and_negative_points_on_one_source_view
+      published_saga_protocol: random_subset_of_positive_and_negative_mask_points
+      published_saga_point_count_and_seed_disclosed: false
+    evaluation:
+      reference_scored: false
+      metrics: [foreground_iou, binary_pixel_accuracy]
+      aggregation: frame_mean_then_equal_weight_macro_over_10_scenes
+      mask_resize: nearest
+      prediction_representation: continuous_cosine_margin
+      threshold: {comparison: greater_or_equal, value: 0.0}
+    visibility:
+      all_rgb_and_poses_allowed_during_field_training: true
+      target_masks_during_training_or_selection: forbidden
+      target_mask_use: scoring_only
+    calibration:
+      reference_mask: allowed_because_it_is_the_task_input
+      target_masks: forbidden
+    combine_with_other_dataset_overall: false
+    published_point_prompt_rows_exactly_comparable: false
+
+  spin_nerf_point_prompt_10scene_v1:
+    dataset: SPIn-NeRF multiview segmentation
+    status: pending_prompt_sampler_freeze
+    reason: >-
+      The SAGA supplement says that a random subset of points inside and
+      outside the reference mask is used, but does not disclose the subset
+      size or random seed. A deterministic point budget/seed must be frozen
+      before GaussFM and reproduced baselines can share this row.
+    target_masks: scoring_only_except_reference_mask_used_to_generate_prompts
+    eligible_published_rows_without_reproduction: false
+
+tracks:
+  reusable_feature_field:
+    definition: >-
+      A scene-level field is trained before the object query. At query time
+      only the reference prompt and the frozen field may be used. No 2D model
+      is run on target RGB and one fixed 3D selection must be rendered into all
+      target views.
+    target_view_2d_model_at_query: forbidden
+    prompt_specific_scene_optimization: forbidden
+    methods: [GaussFM, SAGA, OmniSeg3D]
+
+  online_multiview_propagation:
+    definition: >-
+      Prompt-specific methods may call a declared 2D foundation model on
+      additional RGB views. Their end-to-end masks share the benchmark target,
+      but do not demonstrate a reusable feature field.
+    report_2d_model_calls_and_query_cost: required_for_reproduced_rows
+    methods: [SA3D-GS, SA-GS/SAGD, LUDVIG-SAM, LUDVIG-SAM2]
+
+reported_context:
+  - method: SAGA
+    method_id: cen_et_al_aaai_2025_segment_any_3d_gaussians
+    track: reusable_feature_field
+    source: https://ojs.aaai.org/index.php/AAAI/article/view/32193
+    values:
+      nvos: {miou: 92.6, macc: 98.6}
+      spin_nerf: {miou: 93.4, macc: 99.2}
+    final_published_version: true
+    local_reproduction: false
+    exact_local_evaluator: false
+    cautions:
+      - NVOS target-RGB exclusion is not verifiable from the released evaluator.
+      - The supplement randomly samples positive/negative prompt points but does not disclose their count or seed.
+      - SPIn-NeRF SAGA is not exactly comparable to the full-reference-mask GaussFM diagnostic.
+      - Do not use the older project-PDF values 90.9/88.0.
+
+  - method: SA3D-GS
+    method_id: cen_et_al_ijcv_2024_segment_anything_in_3d
+    track: online_multiview_propagation
+    source: https://arxiv.org/abs/2304.12308
+    values:
+      nvos: {miou: 92.2, macc: 98.5}
+      spin_nerf: {miou: 93.2, macc: 99.1}
+    final_published_version: true
+    local_reproduction: false
+    exact_local_evaluator: false
+    cautions:
+      - Prompt-specific propagation repeatedly invokes SAM on multiple views.
+      - Keep as paper-reported context until the prompt points and interaction budget are reproduced locally.
+
+  - method: OmniSeg3D
+    method_id: ying_et_al_cvpr_2024_omniseg3d
+    track: reusable_feature_field
+    source: >-
+      https://openaccess.thecvf.com/content/CVPR2024/papers/Ying_OmniSeg3D_Omniversal_3D_Segmentation_via_Hierarchical_Contrastive_Learning_CVPR_2024_paper.pdf
+    values:
+      nvos: {miou: 91.7, macc: 98.4}
+      spin_nerf: {miou: 94.3, macc: 99.3}
+    final_published_version: true
+    local_reproduction: false
+    exact_local_evaluator: false
+    cautions:
+      - Do not use the older arXiv-v1 SPIn-NeRF value 95.2.
+      - Keep as paper-reported context; the local full-reference-mask prototype readout is a different query interface.
+
+  - method: LUDVIG-SAM
+    method_id: marrie_et_al_iccv_2025_ludvig_sam
+    track: online_multiview_propagation
+    source: https://www.openaccess.thecvf.com/content/ICCV2025/papers/Marrie_LUDVIG_Learning-Free_Uplifting_of_2D_Visual_Features_to_Gaussian_Splatting_ICCV_2025_paper.pdf
+    values:
+      nvos: {miou: 91.3, macc: null}
+      spin_nerf: {miou: 93.8, macc: null}
+    final_published_version: true
+    local_reproduction: false
+    exact_local_evaluator: false
+    cautions:
+      - NVOS uplifting traverses all COLMAP cameras and therefore sees target RGB.
+      - Uses per-view SAM image prediction and is not a reusable SAM feature field.
+      - Its source-mask/SAM candidate selection is not the same input as SAGA's undisclosed random point subset.
+
+  - method: LUDVIG-SAM2
+    method_id: marrie_et_al_iccv_2025_ludvig_sam2
+    track: online_multiview_propagation
+    source: https://www.openaccess.thecvf.com/content/ICCV2025/papers/Marrie_LUDVIG_Learning-Free_Uplifting_of_2D_Visual_Features_to_Gaussian_Splatting_ICCV_2025_paper.pdf
+    values:
+      nvos: {miou: 91.3, macc: null}
+      spin_nerf: {miou: 93.8, macc: null}
+    final_published_version: true
+    local_reproduction: false
+    exact_local_evaluator: false
+    cautions:
+      - SAM2 image predictor, not SAM2-Video.
+      - NVOS uplifting traverses all COLMAP cameras and therefore sees target RGB.
+      - Its source-mask/SAM candidate selection is not the same input as SAGA's undisclosed random point subset.
+
+  - method: SA-GS/SAGD
+    method_id: hu_et_al_2024_sagd
+    aliases: [SA-GS, SAGS, SAGD]
+    track: online_multiview_propagation
+    source: https://arxiv.org/abs/2401.17857
+    values:
+      nvos: {miou: null, macc: null}
+      spin_nerf_9scene_without_leaves: {miou: 90.0, macc: 98.7}
+    final_published_version: true
+    local_reproduction: false
+    exact_local_evaluator: false
+    eligible_for_spin_nerf_10scene_table: false
+    cautions:
+      - Official quantitative table omits Leaves.
+      - Click count is not fixed, so the interaction budget is not controlled.
+      - This is Hu et al.'s segmentation method, not the unrelated anti-aliasing SA-GS.
+
+gaussfm_rows:
+  nvos_strict_unseen_v1:
+    status: pending_scene_training_and_evaluation
+    values: {miou: null, macc: null}
+    target_view_rgb_2d_refinement: false
+  spin_nerf_full_reference_mask_10scene_v1:
+    status: pending_scene_training_and_evaluation_auxiliary
+    values: {miou: null, macc: null}
+    target_view_rgb_2d_refinement: false
+    eligible_for_direct_saga_table: false
+  spin_nerf_point_prompt_10scene_v1:
+    status: blocked_on_prompt_budget_freeze_then_reproduction
+    values: {miou: null, macc: null}

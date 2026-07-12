@@ -73,12 +73,14 @@ from radio_gs.models.prompt_conditioned_mask_refinement import (
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 from radio_gs.evaluation.openclip_readout import (
+    NEGATIVE_PROMPTS,
     load_or_generate_openclip_prompt_ensemble_embeddings,
 )
 from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_GT_FEATURE_ROOT,
     DEFAULT_LABEL_DIR,
     DEFAULT_PROMPT_TEMPLATES,
+    _SIGLIP2_MODEL_NAME,
     LERF_OVS_SCENES,
     build_gt_masks,
     heatmap_peak_in_shape,
@@ -92,6 +94,7 @@ from radio_gs.scripts.eval_lerf_grounding import (
     render_1280d,
     resolve_lerf_label_dir,
     resolve_lerf_scene_root,
+    validate_text_embedding_cache_contract,
 )
 from radio_gs.scripts.train_feature_field import sample_multiview_radio_targets
 from radio_gs.scripts.train_prompt_conditioned_sam3_mask_head import (
@@ -228,6 +231,40 @@ class GaussianSelectionProxy:
 
     def get_features(self) -> torch.Tensor:
         return self.features
+
+
+class GaussianSubsetAlphaProxy:
+    """Physically subset primitives for exact selected-only alpha rendering."""
+
+    def __init__(self, base_model: torch.nn.Module, selected: torch.Tensor) -> None:
+        mask = selected.detach().bool().reshape(-1)
+        if int(mask.numel()) != int(base_model.get_xyz().shape[0]):
+            raise ValueError(
+                f"Selection size {int(mask.numel())} does not match "
+                f"Gaussian count {int(base_model.get_xyz().shape[0])}"
+            )
+        self.base_model = base_model
+        self.mask = mask.to(device=base_model.get_xyz().device)
+
+    def get_xyz(self) -> torch.Tensor:
+        return self.base_model.get_xyz()[self.mask]
+
+    def get_rotation(self) -> torch.Tensor:
+        return self.base_model.get_rotation()[self.mask]
+
+    def get_scaling(self) -> torch.Tensor:
+        return self.base_model.get_scaling()[self.mask]
+
+    def get_opacity(self) -> torch.Tensor:
+        return self.base_model.get_opacity()[self.mask]
+
+    def get_features(self) -> torch.Tensor:
+        count = int(self.mask.sum().item())
+        return torch.ones(
+            (count, 1),
+            device=self.base_model.get_xyz().device,
+            dtype=self.base_model.get_xyz().dtype,
+        )
 
 
 def _canonical_cache_value(value: Any) -> Any:
@@ -2595,6 +2632,63 @@ def aggregate_scores_by_voxel(
     return scores_f * (1.0 - blend) + voxel_scores[inverse] * blend
 
 
+def vala_knn_minmax_scores(
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    k: int = 10,
+    chunk_size: int = 65536,
+) -> torch.Tensor:
+    """Apply the released VALA/LangSplat 3D relevance readout.
+
+    For every primitive and query, VALA averages the raw response with the
+    mean response of its k nearest Gaussian centers, then independently
+    min-max normalizes each query over the full scene.  This function is
+    deliberately GT-free; the subsequent fixed 0.6 threshold is applied by
+    ``SelectionSpec('score_threshold', 0.6)``.
+    """
+    values = scores.detach().float().cpu()
+    points = xyz.detach().float().cpu()
+    if values.ndim != 2:
+        raise ValueError(f"Expected scores [N,Q], got {tuple(values.shape)}")
+    if points.ndim != 2 or points.shape[1] != 3 or points.shape[0] != values.shape[0]:
+        raise ValueError(
+            f"Expected xyz [{values.shape[0]},3], got {tuple(points.shape)}"
+        )
+    count = int(values.shape[0])
+    if count == 0:
+        return values
+
+    from sklearn.neighbors import NearestNeighbors
+
+    neighbors = max(1, min(int(k), count))
+    indices = NearestNeighbors(n_neighbors=neighbors).fit(points.numpy()).kneighbors(
+        points.numpy(),
+        return_distance=False,
+    )
+    smoothed = torch.empty_like(values)
+    step = max(1, int(chunk_size))
+    for start in range(0, count, step):
+        end = min(start + step, count)
+        neighbor_idx = torch.from_numpy(indices[start:end]).long()
+        neighbor_mean = values[neighbor_idx].mean(dim=1)
+        smoothed[start:end] = 0.5 * (values[start:end] + neighbor_mean)
+
+    low = smoothed.amin(dim=0, keepdim=True)
+    high = smoothed.amax(dim=0, keepdim=True)
+    span = high - low
+    normalized = torch.where(
+        span > 1e-9,
+        (smoothed - low) / span.clamp_min(1e-9),
+        torch.zeros_like(smoothed),
+    )
+    # Released code then maps [0,1] -> [-1,1] and clips back to [0,1]
+    # before applying mask_thresh=0.6.  Consequently the effective threshold
+    # on the pre-remap min-max score is 0.8; retain the literal transformation
+    # here so result metadata remains faithful to the implementation.
+    return (2.0 * normalized - 1.0).clamp_(0.0, 1.0)
+
+
 def load_summary_head(weights_path: str, device: torch.device) -> SigLIP2SummaryHead:
     path = Path(weights_path)
     if path.exists():
@@ -3392,6 +3486,7 @@ def build_lerf_dataset_for_scene(
         annotation_dir=str(Path(label_dir) / scene),
         feature_height=feature_height,
         feature_width=feature_width,
+        allow_empty_features=True,
     )
 
 
@@ -5087,6 +5182,8 @@ def evaluate_selection_spec(
     component_min_size: int,
     component_rank_by: str,
     silhouette_threshold: float,
+    projection_mode: str,
+    alpha_binarization: str,
     mask_refinement: str,
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
@@ -5268,7 +5365,24 @@ def evaluate_selection_spec(
             gt = gt_masks[cat]
             if gt.sum() == 0:
                 continue
-            pred = silhouette[cat_idx] > float(silhouette_threshold)
+            if projection_mode == "selected_only_alpha":
+                subset_proxy = GaussianSubsetAlphaProxy(model, selected[:, cat_idx])
+                with torch.no_grad():
+                    subset_rendered = renderer.render_features(subset_proxy, viewmat)
+                subset_alpha = subset_rendered["alpha_map"].detach().float().cpu().numpy()
+                if alpha_binarization == "png_uint8_gt10":
+                    alpha_u8 = np.clip(
+                        np.floor(subset_alpha * 255.0 + 0.5), 0, 255
+                    ).astype(np.uint8)
+                    pred = alpha_u8 > 10
+                elif alpha_binarization == "float_threshold":
+                    pred = subset_alpha > float(silhouette_threshold)
+                else:
+                    raise ValueError(f"Unsupported alpha_binarization: {alpha_binarization}")
+            elif projection_mode == "feature_composite":
+                pred = silhouette[cat_idx] > float(silhouette_threshold)
+            else:
+                raise ValueError(f"Unsupported projection_mode: {projection_mode}")
             initial_pred = pred.copy()
             prompt_initial_pred = pred.copy()
             prompt_heatmap = score_heatmaps[cat_idx] if score_heatmaps is not None else silhouette[cat_idx]
@@ -5656,6 +5770,13 @@ def evaluate_selection_spec(
                 save_pred_mask(mask_path, pred)
         per_frame[f"frame_{frame_id:05d}"] = frame_scores
 
+    if not ious:
+        raise RuntimeError(
+            f"Zero-sample Direct3D evaluation for scene={scene!r}, selection={spec.tag!r}. "
+            "Check official labeled frame IDs and camera-pose mapping; refusing "
+            "to write a misleading all-zero result."
+        )
+
     per_cat_summary = {
         cat: {
             **summarize_ious(vals),
@@ -5714,6 +5835,8 @@ def evaluate_selection_spec(
             "component_min_size": component_min_size,
             "component_rank_by": component_rank_by,
             "silhouette_threshold": silhouette_threshold,
+            "projection_mode": projection_mode,
+            "alpha_binarization": alpha_binarization,
             "mask_refinement": mask_refinement,
             "mask_refinement_iters": mask_refinement_iters,
             "mask_refinement_dilate": mask_refinement_dilate,
@@ -5781,6 +5904,9 @@ def evaluate_scene(
     score_aggregation: str,
     score_aggregation_resolution: int,
     score_aggregation_blend: float,
+    score_postprocess: str,
+    vala_knn_k: int,
+    vala_knn_chunk_size: int,
     proposal_smoothing: str,
     proposal_voxel_size: float,
     proposal_smoothing_alpha: float,
@@ -5820,10 +5946,13 @@ def evaluate_scene(
     point_summary_adapter_blend_alpha: float,
     point_summary_adapter_valid_mask_mode: str,
     strict_direct_head_consistency: bool,
+    strict_checkpoint_contract: bool,
     direct_primitive_confidence_mode: str,
     direct_primitive_confidence_blend: float,
     direct_primitive_opacity_threshold: float,
     silhouette_threshold: float,
+    projection_mode: str,
+    alpha_binarization: str,
     mask_refinement: str,
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
@@ -5902,6 +6031,7 @@ def evaluate_scene(
         config_path,
         checkpoint_path,
         device,
+        strict_checkpoint_contract=strict_checkpoint_contract,
     )
     if not is_hybrid:
         logger.warning("Model architecture is explicit; direct readout will use per-Gaussian compact codes")
@@ -6048,6 +6178,11 @@ def evaluate_scene(
         feature_height=img_h,
         feature_width=img_w,
     )
+    missing_pose_frames = sorted(set(frame_annotations) - set(dataset.pose_by_frame_idx))
+    if missing_pose_frames:
+        raise RuntimeError(
+            f"Missing camera poses for official labeled {scene} frames: {missing_pose_frames}"
+        )
     renderer = build_mask_renderer(config, height=img_h, width=img_w, device=device)
     sam3_box_refiner: Optional[Sam3BoxMaskRefiner] = None
     sam3_adaptor_refiner: Optional[Sam3AdaptorMaskRefiner] = None
@@ -6224,6 +6359,8 @@ def evaluate_scene(
         "direct_readout_k": int(direct_readout_k),
         "direct_readout_candidate_k": int(direct_readout_candidate_k),
         "softmax_temperature": float(softmax_temperature),
+        "score_postprocess": str(score_postprocess),
+        "vala_knn_k": int(vala_knn_k),
         "registered_view_fallback": registered_view_fallback,
         "registration_frame_mode": registration_frame_mode,
         "registration_max_frames": int(registration_max_frames),
@@ -6419,6 +6556,19 @@ def evaluate_scene(
             resolution=score_aggregation_resolution,
             blend=score_aggregation_blend,
         )
+    if score_postprocess == "vala_knn_minmax":
+        print(
+            "  applying released VALA 3D score readout "
+            f"(kNN={vala_knn_k}, blend=0.5, per-query scene min-max, 2x-1 clip)"
+        )
+        scores = vala_knn_minmax_scores(
+            scores,
+            model.get_xyz().detach().cpu(),
+            k=vala_knn_k,
+            chunk_size=vala_knn_chunk_size,
+        )
+    elif score_postprocess != "none":
+        raise ValueError(f"Unsupported score_postprocess: {score_postprocess}")
     proposal_smoothing_stats: Dict[str, Any] = {
         "enabled": False,
         "mode": proposal_smoothing,
@@ -6525,6 +6675,8 @@ def evaluate_scene(
             component_min_size=component_min_size,
             component_rank_by=component_rank_by,
             silhouette_threshold=silhouette_threshold,
+            projection_mode=projection_mode,
+            alpha_binarization=alpha_binarization,
             mask_refinement=mask_refinement,
             mask_refinement_iters=mask_refinement_iters,
             mask_refinement_dilate=mask_refinement_dilate,
@@ -6578,6 +6730,7 @@ def evaluate_scene(
         "image_width": img_w,
         "official_frames_only": official_frames_only,
         "official_frames": OPEN_GAUSSIAN_LERF_FRAMES.get(scene, []),
+        "checkpoint_contract": getattr(config, "checkpoint_contract", {}),
         "results": scene_results,
         "best_by_miou": best_tag,
     }
@@ -6706,6 +6859,12 @@ def main() -> None:
     parser.add_argument("--config", required=True, help="Scene RADIO-GS config YAML")
     parser.add_argument("--checkpoint", required=True, help="Scene RADIO-GS checkpoint")
     parser.add_argument("--scene", required=True, choices=list(LERF_OVS_SCENES), help="LERF scene")
+    parser.add_argument(
+        "--protocol_preset",
+        choices=["none", "vala_paper_3d", "vala_repo_3d"],
+        default="none",
+        help="Frozen non-swept protocol preset matching VALA's released 3D readout",
+    )
     parser.add_argument("--label_dir", default=DEFAULT_LABEL_DIR, help="LERF-OVS label root")
     parser.add_argument("--output_dir", default="output/radio_gs/lerf_direct_3d_selection", help="Output root")
     parser.add_argument("--summary_head_weights", default="checkpoints/siglip2_summary_head.pth", help="SigLIP2 summary head weights")
@@ -6742,6 +6901,9 @@ def main() -> None:
     parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max", "voxel_max_dilate"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
+    parser.add_argument("--score_postprocess", choices=["none", "vala_knn_minmax"], default="none", help="Fixed primitive-score readout applied before selection")
+    parser.add_argument("--vala_knn_k", type=int, default=10, help="Neighbour count for vala_knn_minmax")
+    parser.add_argument("--vala_knn_chunk_size", type=int, default=65536, help="Score-gather chunk size for vala_knn_minmax")
     parser.add_argument("--proposal_smoothing", choices=["none", "voxel"], default="none", help="GT-free proposal-memory smoothing applied to primitive text scores before selection")
     parser.add_argument("--proposal_voxel_size", type=float, default=0.08, help="Scene-space voxel size for --proposal_smoothing voxel")
     parser.add_argument("--proposal_smoothing_alpha", type=float, default=0.0, help="Residual blend for proposal-memory score smoothing; 0 disables")
@@ -6816,6 +6978,18 @@ def main() -> None:
         ),
     )
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
+    parser.add_argument(
+        "--projection_mode",
+        choices=["feature_composite", "selected_only_alpha"],
+        default="feature_composite",
+        help="Projection mask source; selected_only_alpha physically removes unselected primitives",
+    )
+    parser.add_argument(
+        "--alpha_binarization",
+        choices=["float_threshold", "png_uint8_gt10"],
+        default="float_threshold",
+        help="How selected-only alpha becomes a binary mask",
+    )
     parser.add_argument(
         "--mask_refinement",
         choices=[
@@ -6911,6 +7085,52 @@ def main() -> None:
     )
     parser.add_argument("--gpu", type=int, default=0, help="GPU id")
     args = parser.parse_args()
+    if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}:
+        # Freeze the VALA paper-level 3D protocol after our primitive features
+        # are produced.  The repo diagnostic additionally enables its kNN,
+        # min-max, and 2x-1 score remapping. No value is selected from LERF GT.
+        args.selection_mode = "score_threshold"
+        args.score_threshold = 0.6
+        args.threshold_sweep = ""
+        args.ratio_sweep = ""
+        args.mean_std_sweep = ""
+        args.confidence_sweep = ""
+        args.selection_min_ratio = 0.0
+        args.selection_max_ratio = 0.0
+        args.score_source = "direct"
+        args.score_cache = ""
+        args.registered_feature_cache = ""
+        args.direct_readout_mode = "gaussian"
+        args.direct_readout_k = 8
+        args.direct_readout_candidate_k = 0
+        args.compact_feature_key = "features"
+        args.scoring = "relevancy"
+        args.softmax_temperature = 10.0
+        args.prompt_templates = "{query}"
+        args.score_aggregation = "none"
+        args.score_aggregation_blend = 0.0
+        args.score_postprocess = (
+            "vala_knn_minmax" if args.protocol_preset == "vala_repo_3d" else "none"
+        )
+        args.vala_knn_k = 10
+        args.proposal_smoothing = "none"
+        args.proposal_smoothing_alpha = 0.0
+        args.sam3_proposal_registration_dir = ""
+        args.sam3_proposal_registration_alpha = 0.0
+        args.selection_refinement = "none"
+        args.direct_primitive_confidence_mode = "none"
+        args.direct_primitive_confidence_blend = 0.0
+        args.use_point_summary_adapter = False
+        args.silhouette_threshold = 10.0 / 255.0
+        args.projection_mode = "selected_only_alpha"
+        args.alpha_binarization = "png_uint8_gt10"
+        args.mask_refinement = "none"
+        args.all_labeled_frames = False
+        args.min_select = 0
+        if not args.canonical_embedding_cache or args.canonical_embedding_cache == "checkpoints/siglip2_canonical_embeddings.pt":
+            args.canonical_embedding_cache = (
+                f"checkpoints/{args.text_encoder}_lerf_negative_embeddings.pt"
+            )
     if (
         args.sam3_prompt_mask_head_oracle_prompt != "none"
         and not args.allow_sam3_prompt_mask_head_oracle_diagnostic
@@ -6921,12 +7141,44 @@ def main() -> None:
         )
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-    if args.text_encoder == "openclip" and args.scoring == "relevancy":
-        parser.error("--text_encoder openclip currently supports --scoring cosine or softmax_scene")
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
     prompt_templates = parse_prompt_templates(args.prompt_templates)
     specs = build_selection_specs(args)
     device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
+    if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}:
+        if not args.text_embedding_cache or not args.canonical_embedding_cache:
+            parser.error(
+                f"{args.protocol_preset} requires explicit frozen query and negative caches"
+            )
+        if args.text_encoder == "siglip2" and not Path(args.summary_head_weights).exists():
+            parser.error(
+                f"{args.protocol_preset} requires the declared --summary_head_weights; "
+                "implicit fallback is disabled for frozen evaluation"
+            )
+        if Path(args.text_embedding_cache).resolve() == Path(args.canonical_embedding_cache).resolve():
+            parser.error("Query and canonical-negative caches must be separate files")
+        _, frozen_categories, _, _ = load_lerf_ovs_labels(args.label_dir, args.scene)
+        encoder_model = (
+            args.openclip_model if args.text_encoder == "openclip" else _SIGLIP2_MODEL_NAME
+        )
+        encoder_pretrained = args.openclip_pretrained if args.text_encoder == "openclip" else ""
+        validate_text_embedding_cache_contract(
+            args.text_embedding_cache,
+            required_queries=frozen_categories,
+            prompt_templates=prompt_templates,
+            text_encoder=args.text_encoder,
+            model_name=encoder_model,
+            pretrained=encoder_pretrained,
+        )
+        validate_text_embedding_cache_contract(
+            args.canonical_embedding_cache,
+            required_queries=list(NEGATIVE_PROMPTS),
+            prompt_templates=["{query}"],
+            text_encoder=args.text_encoder,
+            model_name=encoder_model,
+            pretrained=encoder_pretrained,
+            exact_queries=True,
+        )
 
     print("=" * 72)
     print("LERF-OVS Direct 3D Object Selection")
@@ -6937,6 +7189,7 @@ def main() -> None:
     print(f"Score src:  {args.score_source}")
     print(f"Scoring:    {args.scoring}")
     print(f"Text enc.:  {args.text_encoder}")
+    print(f"Projection: {args.projection_mode}")
     if args.score_source == "direct" and args.direct_primitive_confidence_mode != "none":
         print(
             "Direct conf: "
@@ -7006,6 +7259,9 @@ def main() -> None:
         score_aggregation=args.score_aggregation,
         score_aggregation_resolution=args.score_aggregation_resolution,
         score_aggregation_blend=args.score_aggregation_blend,
+        score_postprocess=args.score_postprocess,
+        vala_knn_k=args.vala_knn_k,
+        vala_knn_chunk_size=args.vala_knn_chunk_size,
         proposal_smoothing=args.proposal_smoothing,
         proposal_voxel_size=args.proposal_voxel_size,
         proposal_smoothing_alpha=args.proposal_smoothing_alpha,
@@ -7045,10 +7301,13 @@ def main() -> None:
         point_summary_adapter_blend_alpha=args.point_summary_adapter_blend_alpha,
         point_summary_adapter_valid_mask_mode=args.point_summary_adapter_valid_mask_mode,
         strict_direct_head_consistency=args.strict_direct_head_consistency,
+        strict_checkpoint_contract=args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"},
         direct_primitive_confidence_mode=args.direct_primitive_confidence_mode,
         direct_primitive_confidence_blend=args.direct_primitive_confidence_blend,
         direct_primitive_opacity_threshold=args.direct_primitive_opacity_threshold,
         silhouette_threshold=args.silhouette_threshold,
+        projection_mode=args.projection_mode,
+        alpha_binarization=args.alpha_binarization,
         mask_refinement=args.mask_refinement,
         mask_refinement_iters=args.mask_refinement_iters,
         mask_refinement_dilate=args.mask_refinement_dilate,
@@ -7112,7 +7371,19 @@ def main() -> None:
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "args": {key: str(value) for key, value in vars(args).items()},
         "protocol": {
-            "name": "OpenGaussian-style LERF-OVS direct 3D object selection",
+            "name": (
+                "VALA-compatible released-code post-score/projection protocol (single-level GaussFM)"
+                if args.protocol_preset == "vala_repo_3d"
+                else (
+                    "VALA-compatible paper-level LERF-OVS direct 3D protocol (single-level GaussFM)"
+                    if args.protocol_preset == "vala_paper_3d"
+                    else "OpenGaussian-style LERF-OVS direct 3D object selection"
+                )
+            ),
+            "protocol_preset": args.protocol_preset,
+            "feature_level_count": 1,
+            "level_selection": "not_applicable_single_level_representation",
+            "checkpoint_contract": scene_report.get("checkpoint_contract", {}),
             "query_location": "3D Gaussian primitives",
             "feature_source": (
                 (
@@ -7152,6 +7423,16 @@ def main() -> None:
             "score_aggregation": args.score_aggregation,
             "score_aggregation_resolution": args.score_aggregation_resolution,
             "score_aggregation_blend": args.score_aggregation_blend,
+            "score_postprocess": args.score_postprocess,
+            "vala_knn_k": args.vala_knn_k,
+            "vala_repo_score_remap": (
+                "clip(2 * per_query_minmax - 1, 0, 1)"
+                if args.score_postprocess == "vala_knn_minmax"
+                else ""
+            ),
+            "vala_repo_effective_pre_remap_threshold": (
+                0.8 if args.protocol_preset == "vala_repo_3d" else None
+            ),
             "proposal_smoothing": args.proposal_smoothing,
             "proposal_voxel_size": float(args.proposal_voxel_size),
             "proposal_smoothing_alpha": float(args.proposal_smoothing_alpha),
@@ -7196,9 +7477,16 @@ def main() -> None:
                 args.point_summary_adapter_valid_mask_mode if args.use_point_summary_adapter else ""
             ),
             "render_role": "render selected primitives only for mask evaluation",
+            "projection_mode": args.projection_mode,
+            "alpha_binarization": args.alpha_binarization,
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50", "boundary_f", "trimap_iou"],
             "geometry_alignment_maps": bool(args.save_geometry_maps),
             "silhouette_threshold": args.silhouette_threshold,
+            "silhouette_threshold_source": (
+                "VALA released compute_lerf_iou.py PNG threshold 10/255"
+                if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}
+                else "evaluator argument"
+            ),
             "mask_refinement": args.mask_refinement,
             "mask_refinement_iters": args.mask_refinement_iters,
             "mask_refinement_dilate": args.mask_refinement_dilate,
@@ -7268,6 +7556,11 @@ def main() -> None:
             "summary_head_weights_sha256": sha256_file_if_exists(args.summary_head_weights),
             "text_embedding_cache_sha256": sha256_file_if_exists(args.text_embedding_cache)
             if args.text_embedding_cache
+            else "",
+            "canonical_embedding_cache_sha256": sha256_file_if_exists(
+                args.canonical_embedding_cache
+            )
+            if args.canonical_embedding_cache
             else "",
             "repo_commit": subprocess.check_output(
                 ["git", "rev-parse", "HEAD"],

@@ -12,9 +12,20 @@ import yaml
 
 
 RADIO_HELPER_ZERO_KEYS = (
+    "adaptor_weight",
+    "boundary_aware_loss_weight",
+    "depth_guided_feature_weight",
+    "depth_loss_weight",
+    "geometric_edge_loss_weight",
+    "geom_depth_loss_weight",
+    "gradient_loss_weight",
+    "hybrid_semantic_adaptor_reg_weight",
+    "hybrid_semantic_aux_weight",
+    "seg_loss_weight",
     "siglip_alignment_weight",
     "siglip_summary_alignment_weight",
     "text_heatmap_distill_weight",
+    "tv_weight",
     "radio_adaptor_alignment_weight",
     "radio_adaptor_relation_weight",
     "radio_adaptor_local_affinity_weight",
@@ -66,6 +77,19 @@ RADIO_HELPER_EMPTY_NAME_KEYS = (
     "radio_adaptor_cross_view_mask_propagation_names",
 )
 
+RADIO_HELPER_FALSE_KEYS = (
+    "hybrid_semantic_adaptor",
+    "hybrid_semantic_adaptor_use_depth_guidance",
+    "hybrid_semantic_adaptor_use_geometry_guidance",
+    "refiner_alpha_guide",
+    "refiner_boundary_guide",
+    "refiner_depth_grad",
+    "refiner_depth_guide",
+    "refiner_rgb_guide",
+    "self_guided",
+    "use_refiner",
+)
+
 
 def _load_yaml(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as handle:
@@ -96,6 +120,12 @@ def generate_config(
     variant: str,
     repo_root: str | Path | None = None,
     epochs: int | None = None,
+    samclip_mask_loss_weight: float = 0.0,
+    samclip_contrastive_loss_weight: float = 0.0,
+    samclip_background_loss_weight: float = 0.0,
+    samclip_contrastive_temperature: float = 0.07,
+    samclip_mask_min_pixels: int = 16,
+    samclip_mask_max_regions: int = 64,
 ) -> Path:
     """Clone one RADIO-GS config into a SAM-CLIP ablation config."""
     template_path = Path(template_path)
@@ -120,10 +150,22 @@ def generate_config(
             "output_dir": str(repo_root / "output" / "radio_gs" / exp_name),
             "scene": scene,
             "radio_feature_dim": 512,
+            "codec_type": "identity",
+            "bottleneck_dim": 512,
+            "hybrid_output_dim": 512,
+            "latent_dim": 512,
+            "dual_stream": False,
+            "symmetric_decoder": False,
             "feature_dir": str(level_root),
             "val_feature_dir": str(level_root),
             "samclip_feature_level": level,
             "samclip_language_feature_dir": str(level_root),
+            "samclip_mask_loss_weight": float(samclip_mask_loss_weight),
+            "samclip_contrastive_loss_weight": float(samclip_contrastive_loss_weight),
+            "samclip_background_loss_weight": float(samclip_background_loss_weight),
+            "samclip_contrastive_temperature": float(samclip_contrastive_temperature),
+            "samclip_mask_min_pixels": int(samclip_mask_min_pixels),
+            "samclip_mask_max_regions": int(samclip_mask_max_regions),
             "samclip_source_config": str(template_path),
         }
     )
@@ -143,7 +185,11 @@ def generate_config(
         cfg[key] = ""
     for key in RADIO_HELPER_EMPTY_NAME_KEYS:
         cfg[key] = ""
+    for key in RADIO_HELPER_FALSE_KEYS:
+        cfg[key] = False
     cfg["grounding_use_adaptor"] = False
+    cfg["featsharp_mode"] = "none"
+    cfg["featsharp_strength"] = 0.0
 
     output_root.mkdir(parents=True, exist_ok=True)
     output_path = output_root / f"{exp_name}.yaml"
@@ -163,6 +209,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--variant", required=True)
     parser.add_argument("--repo-root", type=Path, default=Path.cwd().resolve())
     parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--samclip-mask-loss-weight", type=float, default=0.0)
+    parser.add_argument("--samclip-contrastive-loss-weight", type=float, default=0.0)
+    parser.add_argument("--samclip-background-loss-weight", type=float, default=0.0)
+    parser.add_argument("--samclip-contrastive-temperature", type=float, default=0.07)
+    parser.add_argument("--samclip-mask-min-pixels", type=int, default=16)
+    parser.add_argument("--samclip-mask-max-regions", type=int, default=64)
     return parser
 
 
@@ -179,6 +231,12 @@ def main(argv: Sequence[str] | None = None) -> int:
             variant=args.variant,
             repo_root=args.repo_root,
             epochs=args.epochs,
+            samclip_mask_loss_weight=args.samclip_mask_loss_weight,
+            samclip_contrastive_loss_weight=args.samclip_contrastive_loss_weight,
+            samclip_background_loss_weight=args.samclip_background_loss_weight,
+            samclip_contrastive_temperature=args.samclip_contrastive_temperature,
+            samclip_mask_min_pixels=args.samclip_mask_min_pixels,
+            samclip_mask_max_regions=args.samclip_mask_max_regions,
         )
         for template in args.templates
     ]

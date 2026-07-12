@@ -28,13 +28,13 @@ def _write_good_fixture(root: Path) -> None:
         encoding="utf-8",
     )
     (root / "paper/lerf_direct_3d_selection_table.tex").write_text(
-        "\\method{} & \\textbf{54.36} & \\textbf{80.84} \\\\\n",
+        "\\method{} & 50.14 & 70.44 \\\\\n",
         encoding="utf-8",
     )
     (root / "paper/scannet_published_context_table.tex").write_text(
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52 \\\\\n"
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\\\\n"
-        "\\method{} & \\textbf{36.55} & \\textbf{50.57} & \\textbf{42.78} & \\textbf{72.85} & \\textbf{57.85} & \\textbf{77.93} \\\\\n",
+        "\\method{} & 38.06 & 61.29 & 38.71 & 63.15 & 47.11 & 72.00 \\\\\n",
         encoding="utf-8",
     )
     (root / "paper/artifacts/final_rows.yaml").write_text(
@@ -141,7 +141,7 @@ def test_validate_claims_flags_cags_in_scannet_context_table(tmp_path):
         "CAGS & 35.00 & 50.00 & 37.00 & 55.00 & 47.00 & 66.00 \\\\\n"
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52 \\\\\n"
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\\\\n"
-        "\\method{} & \\textbf{36.55} & \\textbf{50.57} & \\textbf{42.78} & \\textbf{72.85} & \\textbf{57.85} & \\textbf{77.93} \\\\\n",
+        "\\method{} & 38.06 & 61.29 & 38.71 & 63.15 & 47.11 & 72.00 \\\\\n",
         encoding="utf-8",
     )
 

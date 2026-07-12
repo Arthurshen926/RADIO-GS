@@ -13,6 +13,9 @@ def _write_template(path: Path, scene: str, dataset_type: str) -> None:
         "dataset_type": dataset_type,
         "scene": scene,
         "radio_feature_dim": 1280,
+        "codec_type": "direct",
+        "bottleneck_dim": 192,
+        "hybrid_output_dim": 192,
         "feature_height": 30,
         "feature_width": 40,
         "feature_dir": "/tmp/radio_features",
@@ -30,6 +33,29 @@ def _write_template(path: Path, scene: str, dataset_type: str) -> None:
         "grounding_query_loss_weight": 0.1,
         "grounding_text_embeddings": "checkpoints/siglip2_text_embeddings_v2.pt",
         "grounding_use_adaptor": True,
+        "use_refiner": True,
+        "self_guided": True,
+        "refiner_rgb_guide": True,
+        "refiner_depth_guide": True,
+        "refiner_depth_grad": True,
+        "refiner_alpha_guide": True,
+        "refiner_boundary_guide": True,
+        "featsharp_mode": "analytical",
+        "featsharp_strength": 0.35,
+        "tv_weight": 0.03,
+        "gradient_loss_weight": 0.3,
+        "depth_guided_feature_weight": 0.2,
+        "geometric_edge_loss_weight": 0.15,
+        "boundary_aware_loss_weight": 0.4,
+        "hybrid_semantic_aux_weight": 0.2,
+        "hybrid_semantic_adaptor": True,
+        "hybrid_semantic_adaptor_reg_weight": 0.001,
+        "hybrid_semantic_adaptor_use_geometry_guidance": True,
+        "hybrid_semantic_adaptor_use_depth_guidance": True,
+        "adaptor_weight": 0.5,
+        "depth_loss_weight": 0.2,
+        "geom_depth_loss_weight": 0.1,
+        "seg_loss_weight": 0.3,
         "frozen_depth_head_weight": 0.1,
         "frozen_depth_head_path": "output/depth_head.pth",
         "frozen_seg_head_weight": 0.2,
@@ -73,6 +99,9 @@ def test_generate_lerf_samclip_config_disables_radio_helpers(tmp_path):
     assert payload["output_dir"] == str(tmp_path / "repo" / "output" / "radio_gs" / "lerf_figurines_samclip_l1_smoke_e1")
     assert payload["scene_root"] == str(tmp_path / "lerf_ovs" / "figurines")
     assert payload["radio_feature_dim"] == 512
+    assert payload["codec_type"] == "identity"
+    assert payload["bottleneck_dim"] == 512
+    assert payload["hybrid_output_dim"] == 512
     assert payload["feature_height"] == 90
     assert payload["feature_width"] == 123
     assert payload["feature_dir"] == str(samclip_root / "figurines" / "l1")
@@ -90,6 +119,29 @@ def test_generate_lerf_samclip_config_disables_radio_helpers(tmp_path):
     assert payload["grounding_query_loss_weight"] == 0.0
     assert payload["grounding_text_embeddings"] == ""
     assert payload["grounding_use_adaptor"] is False
+    assert payload["use_refiner"] is False
+    assert payload["self_guided"] is False
+    assert payload["refiner_rgb_guide"] is False
+    assert payload["refiner_depth_guide"] is False
+    assert payload["refiner_depth_grad"] is False
+    assert payload["refiner_alpha_guide"] is False
+    assert payload["refiner_boundary_guide"] is False
+    assert payload["featsharp_mode"] == "none"
+    assert payload["featsharp_strength"] == 0.0
+    assert payload["tv_weight"] == 0.0
+    assert payload["gradient_loss_weight"] == 0.0
+    assert payload["depth_guided_feature_weight"] == 0.0
+    assert payload["geometric_edge_loss_weight"] == 0.0
+    assert payload["boundary_aware_loss_weight"] == 0.0
+    assert payload["hybrid_semantic_aux_weight"] == 0.0
+    assert payload["hybrid_semantic_adaptor"] is False
+    assert payload["hybrid_semantic_adaptor_reg_weight"] == 0.0
+    assert payload["hybrid_semantic_adaptor_use_geometry_guidance"] is False
+    assert payload["hybrid_semantic_adaptor_use_depth_guidance"] is False
+    assert payload["adaptor_weight"] == 0.0
+    assert payload["depth_loss_weight"] == 0.0
+    assert payload["geom_depth_loss_weight"] == 0.0
+    assert payload["seg_loss_weight"] == 0.0
     assert payload["frozen_depth_head_weight"] == 0.0
     assert payload["frozen_depth_head_path"] == ""
     assert payload["frozen_seg_head_weight"] == 0.0
@@ -98,6 +150,9 @@ def test_generate_lerf_samclip_config_disables_radio_helpers(tmp_path):
     assert payload["resume_from"] == ""
     assert payload["samclip_feature_level"] == 1
     assert payload["samclip_language_feature_dir"] == str(samclip_root / "figurines" / "l1")
+    assert payload["samclip_mask_loss_weight"] == 0.0
+    assert payload["samclip_contrastive_loss_weight"] == 0.0
+    assert payload["samclip_background_loss_weight"] == 0.0
     assert payload["epochs"] == 1
 
 
@@ -126,3 +181,33 @@ def test_generate_scannet_samclip_config_uses_scene_filename(tmp_path):
     assert payload["val_feature_dir"] == str(samclip_root / scene / "l2")
     assert payload["feature_height"] == 60
     assert payload["feature_width"] == 80
+
+
+def test_generate_samclip_config_can_enable_mask_losses(tmp_path):
+    template = tmp_path / "lerf.yaml"
+    _write_template(template, scene="figurines", dataset_type="lerf")
+    samclip_root = tmp_path / "samclip_lerf"
+    _write_manifest(samclip_root, "figurines", 1, (90, 123))
+
+    output = generate_config(
+        template,
+        scene="figurines",
+        samclip_root=samclip_root,
+        level=1,
+        output_root=tmp_path / "configs",
+        variant="samclip_l1_maskproto_e1",
+        repo_root=tmp_path / "repo",
+        epochs=1,
+        samclip_mask_loss_weight=1.0,
+        samclip_contrastive_loss_weight=0.1,
+        samclip_background_loss_weight=0.2,
+        samclip_mask_min_pixels=8,
+        samclip_mask_max_regions=32,
+    )
+
+    payload = yaml.safe_load(output.read_text(encoding="utf-8"))
+    assert payload["samclip_mask_loss_weight"] == 1.0
+    assert payload["samclip_contrastive_loss_weight"] == 0.1
+    assert payload["samclip_background_loss_weight"] == 0.2
+    assert payload["samclip_mask_min_pixels"] == 8
+    assert payload["samclip_mask_max_regions"] == 32

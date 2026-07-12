@@ -229,6 +229,29 @@ def _parse_colmap_sparse(scene_root: Path) -> Dict:
         int(ref_camera["model_id"]),
         np.asarray(ref_camera["params"], dtype=np.float32),
     )
+    width = int(ref_camera["width"])
+    height = int(ref_camera["height"])
+    calibration_source = str(cameras_path)
+
+    # NeX's public undistorted LLFF release stores cropped undistorted images.
+    # Its COLMAP cameras.bin retains the pre-crop sensor size, while this
+    # explicit sidecar contains [H, W, fx, fy, cx, cy] for the released RGBs.
+    # NVOS annotations are aligned to those released undistorted images, so
+    # preferring the sidecar is required for an aligned held-out-view render.
+    nex_intrinsics_path = scene_root / "hwf_cxcy.npy"
+    if nex_intrinsics_path.is_file():
+        values = np.asarray(np.load(nex_intrinsics_path), dtype=np.float64).reshape(-1)
+        if values.size != 6 or not bool(np.isfinite(values).all()):
+            raise ValueError(
+                f"Expected finite [H,W,fx,fy,cx,cy] in {nex_intrinsics_path}, "
+                f"got shape {tuple(values.shape)}"
+            )
+        height_f, width_f, fx, fy, cx, cy = (float(value) for value in values)
+        width = int(round(width_f))
+        height = int(round(height_f))
+        if width <= 0 or height <= 0 or min(fx, fy) <= 0:
+            raise ValueError(f"Invalid NeX intrinsics in {nex_intrinsics_path}")
+        calibration_source = str(nex_intrinsics_path)
     return {
         "c2w_list": c2w_list,
         "file_paths": file_paths,
@@ -236,8 +259,9 @@ def _parse_colmap_sparse(scene_root: Path) -> Dict:
         "fl_y": fy,
         "cx": cx,
         "cy": cy,
-        "w": int(ref_camera["width"]),
-        "h": int(ref_camera["height"]),
+        "w": width,
+        "h": height,
+        "calibration_source": calibration_source,
     }
 
 
@@ -344,6 +368,8 @@ class LERFDataset(Dataset):
             If None, tries ``{scene_root}/annotations``.
         feature_height: Target spatial height for grounding masks.
         feature_width: Target spatial width for grounding masks.
+        allow_empty_features: Build a pose/annotation-only dataset when feature
+            tensors are unavailable. Intended for rendered-field evaluators.
     """
 
     def __init__(
@@ -353,6 +379,7 @@ class LERFDataset(Dataset):
         annotation_dir: Optional[str] = None,
         feature_height: int = 30,
         feature_width: int = 40,
+        allow_empty_features: bool = False,
     ) -> None:
         super().__init__()
         self.scene_root = Path(scene_root)
@@ -368,7 +395,7 @@ class LERFDataset(Dataset):
             backbone_dir.glob("rgb_*.pt"),
             key=lambda p: int(p.stem.split("_")[1]),
         )
-        if len(self.feature_paths) == 0:
+        if len(self.feature_paths) == 0 and not allow_empty_features:
             raise FileNotFoundError(
                 f"No rgb_*.pt features found in {backbone_dir}"
             )
@@ -428,7 +455,7 @@ class LERFDataset(Dataset):
                 self.annotation_format = "raw_polygons"
             self.text_queries = self.get_text_queries(str(self.annotation_dir))
             annotated_frame_ids = self.get_annotated_frame_ids(str(self.annotation_dir))
-            if annotated_frame_ids:
+            if annotated_frame_ids and self.feature_paths:
                 annotated_set = set(annotated_frame_ids)
                 filtered = [
                     (path, frame_idx)

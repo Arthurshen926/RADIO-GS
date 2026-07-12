@@ -1,7 +1,7 @@
 {
-  "label": "GaussFM VALA-aligned ScanNet-v2 reproduced benchmark row",
+  "label": "GaussFM ScanNet-v2 local direct point-query result",
   "artifact_type": "paper-facing summary",
-  "protocol": "VALA-aligned ScanNet-v2 direct point-query protocol",
+  "protocol": "Local ScanNet-v2 GT-point direct-query protocol on the VALA eight-scene subset",
   "scene_count": 8,
   "scenes": [
     "scene0000_00",
@@ -13,11 +13,9 @@
     "scene0400_00",
     "scene0590_00"
   ],
-  "source_timestamp": "2026-06-15",
+  "source_timestamp": "2026-05-24 22:12:47",
   "source_artifacts": [
-    "paper/artifacts/reproduced_benchmark_update_20260615.md",
-    "paper/scannet_published_context_table.tex",
-    "paper/artifacts/final_rows.yaml"
+    "paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json"
   ],
   "source_args": {
     "scene_list": "scene0000_00,scene0062_00,scene0070_00,scene0097_00,scene0140_00,scene0347_00,scene0400_00,scene0590_00",
@@ -38,18 +36,67 @@
   },
   "macro": {
     "19": {
-      "miou": 0.3655,
-      "macc": 0.5057
+      "miou": 0.3806,
+      "macc": 0.6129
     },
     "15": {
-      "miou": 0.4278,
-      "macc": 0.7285
+      "miou": 0.3871,
+      "macc": 0.6315
     },
     "10": {
-      "miou": 0.5785,
-      "macc": 0.7793
+      "miou": 0.4711,
+      "macc": 0.72
     }
   },
-  "rows": [],
-  "note": "This summary is the canonical paper-facing ScanNet row used by final_rows.yaml and the TPAMI ScanNet table. Per-scene contextual-kNN diagnostic JSON files are retained separately as support artifacts and are not the final table source."
+  "rows": [
+    {
+      "scene": "scene0000_00",
+      "19": {"miou": 0.31652084583856455, "macc": 0.5880579807402719},
+      "15": {"miou": 0.2965139026931167, "macc": 0.5784874809004342},
+      "10": {"miou": 0.35906381082843175, "macc": 0.6990383119801864}
+    },
+    {
+      "scene": "scene0062_00",
+      "19": {"miou": 0.40801993538460407, "macc": 0.7448339505057122},
+      "15": {"miou": 0.40801993538460407, "macc": 0.7448339505057122},
+      "10": {"miou": 0.5504028393232385, "macc": 0.8339491481269269}
+    },
+    {
+      "scene": "scene0070_00",
+      "19": {"miou": 0.2192039687344507, "macc": 0.3134258654183676},
+      "15": {"miou": 0.24003034366404846, "macc": 0.3459612779518209},
+      "10": {"miou": 0.3758396474749403, "macc": 0.5428374591272502}
+    },
+    {
+      "scene": "scene0097_00",
+      "19": {"miou": 0.46607147279195066, "macc": 0.7679617435408442},
+      "15": {"miou": 0.4421255537609934, "macc": 0.7543989653131206},
+      "10": {"miou": 0.4933006044327844, "macc": 0.7166561815129658}
+    },
+    {
+      "scene": "scene0140_00",
+      "19": {"miou": 0.3549693289759711, "macc": 0.5537094664904674},
+      "15": {"miou": 0.40763780244071146, "macc": 0.633296106286462},
+      "10": {"miou": 0.4369456924451413, "macc": 0.6996144642110034}
+    },
+    {
+      "scene": "scene0347_00",
+      "19": {"miou": 0.5938827385178032, "macc": 0.7521854945388556},
+      "15": {"miou": 0.5603198662530213, "macc": 0.7363287873665222},
+      "10": {"miou": 0.7097379237177041, "macc": 0.8015409691727561}
+    },
+    {
+      "scene": "scene0400_00",
+      "19": {"miou": 0.3987569307475899, "macc": 0.7252718252685497},
+      "15": {"miou": 0.3987569307475899, "macc": 0.7252718252685497},
+      "10": {"miou": 0.4325576434404516, "macc": 0.7886628667904456}
+    },
+    {
+      "scene": "scene0590_00",
+      "19": {"miou": 0.28749818997178167, "macc": 0.457700758447446},
+      "15": {"miou": 0.34324040259740674, "macc": 0.533640318410606},
+      "10": {"miou": 0.4106518865250636, "macc": 0.6773904325737748}
+    }
+  ],
+  "note": "This derivative summary copies the macro and all eight per-scene rows from the source artifact above. It is a local GT-point direct-query result, not a same-protocol reproduction of published Gaussian-domain ScanNet rows."
 }

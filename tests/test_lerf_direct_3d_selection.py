@@ -8,6 +8,7 @@ import torch
 
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     SelectionSpec,
+    GaussianSubsetAlphaProxy,
     Sam3AdaptorMaskRefiner,
     apply_direct_primitive_confidence,
     apply_sam3_prompt_heatmap_guard,
@@ -62,6 +63,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     summarize_initial_iou_buckets,
     _project_points_to_image,
     trimap_iou,
+    vala_knn_minmax_scores,
     mask_to_sam3_box_prompt,
 )
 
@@ -100,6 +102,59 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert "--score_component_guard_min_mass_fraction" in result.stdout
     assert "--text_encoder" in result.stdout
     assert "openclip" in result.stdout
+
+
+def test_gaussian_subset_alpha_proxy_physically_removes_unselected_primitives():
+    class _Model:
+        xyz = torch.arange(12, dtype=torch.float32).reshape(4, 3)
+        rotation = torch.arange(16, dtype=torch.float32).reshape(4, 4)
+        scaling = torch.arange(12, dtype=torch.float32).reshape(4, 3)
+        opacity = torch.tensor([[0.1], [0.2], [0.3], [0.4]])
+
+        def get_xyz(self):
+            return self.xyz
+
+        def get_rotation(self):
+            return self.rotation
+
+        def get_scaling(self):
+            return self.scaling
+
+        def get_opacity(self):
+            return self.opacity
+
+    proxy = GaussianSubsetAlphaProxy(_Model(), torch.tensor([False, True, False, True]))
+
+    assert proxy.get_xyz().shape == (2, 3)
+    assert torch.equal(proxy.get_xyz(), _Model.xyz[[1, 3]])
+    assert torch.equal(proxy.get_opacity(), _Model.opacity[[1, 3]])
+    assert torch.equal(proxy.get_features(), torch.ones(2, 1))
+
+
+def test_gaussian_subset_alpha_proxy_supports_empty_selection():
+    class _Model:
+        xyz = torch.zeros(2, 3)
+        rotation = torch.zeros(2, 4)
+        scaling = torch.ones(2, 3)
+        opacity = torch.ones(2, 1)
+
+        def get_xyz(self):
+            return self.xyz
+
+        def get_rotation(self):
+            return self.rotation
+
+        def get_scaling(self):
+            return self.scaling
+
+        def get_opacity(self):
+            return self.opacity
+
+    proxy = GaussianSubsetAlphaProxy(_Model(), torch.zeros(2, dtype=torch.bool))
+
+    assert proxy.get_xyz().shape == (0, 3)
+    assert proxy.get_opacity().shape == (0, 1)
+    assert proxy.get_features().shape == (0, 1)
 
 
 def test_openclip_text_projection_head_is_identity():
@@ -824,6 +879,19 @@ def test_score_text_aligned_embeddings_supports_canonical_relevancy():
     assert scores.shape == (2, 1)
     assert scores[0, 0] > 0.99
     assert scores[1, 0] < 0.01
+
+
+def test_vala_knn_minmax_scores_matches_released_readout_shape_and_scale():
+    scores = torch.tensor([[0.0], [0.5], [1.0]], dtype=torch.float32)
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [4.0, 0.0, 0.0]])
+
+    normalized = vala_knn_minmax_scores(scores, xyz, k=2, chunk_size=2)
+
+    assert normalized.shape == scores.shape
+    assert normalized[0, 0] == pytest.approx(0.0)
+    assert normalized[2, 0] == pytest.approx(1.0)
+    # The released evaluator remaps min-max scores as clip(2*x-1, 0, 1).
+    assert normalized[1, 0] == pytest.approx(0.0, abs=1e-6)
 
 
 def test_compute_selection_ranking_scores_supports_margin_and_entropy_confidence():

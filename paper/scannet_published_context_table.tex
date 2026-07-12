@@ -1,8 +1,10 @@
 \begin{table*}[t]
 \centering
 \caption{Quantitative evaluation of ScanNet-v2 open-vocabulary point querying
-under a VALA-aligned eight-scene protocol. All rows follow the same class splits
-and reproduced point-query evaluator; results are reported in percent.}
+on the VALA eight-scene subset. Baselines are published source-paper values,
+whereas \method{} is our locally auditable direct point-query result. The
+evaluation domains are not yet unified, so external rows are reported context
+rather than a strict same-protocol ranking; results are in percent.}
 \label{tab:scannet_published_context}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{lrrrrrr}
@@ -16,7 +18,7 @@ Dr. Splat & 29.31 & 47.68 & 33.25 & 54.33 & 44.19 & 65.19 \\
 OccamLGS & 31.93 & 48.93 & 34.25 & 53.71 & 45.16 & 64.39 \\
 VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61 \\
 \midrule
-\method{} & \textbf{36.55} & \textbf{50.57} & \textbf{42.78} & \textbf{72.85} & \textbf{57.85} & \textbf{77.93} \\
+\method{} & 38.06 & 61.29 & 38.71 & 63.15 & 47.11 & 72.00 \\
 \bottomrule
 \end{tabular}
 }

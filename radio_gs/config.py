@@ -73,7 +73,7 @@ class RadioGSConfig:
     grounding_text_embeddings: str = DEFAULT_SIGLIP2_TEXT_EMBEDDINGS
 
     # HCD Codec
-    codec_type: str = "hcd"  # "hcd" main method, "direct" for no-HCD ablation
+    codec_type: str = "hcd"  # "hcd", "direct", or "identity" for no-codec ablations
     bottleneck_dim: int = 64
     dual_stream: bool = True
     symmetric_decoder: bool = False
@@ -136,6 +136,15 @@ class RadioGSConfig:
     cosine_weight: float = 0.5
     consistency_weight: float = 0.1
     adaptor_weight: float = 0.1
+    samclip_mask_loss_weight: float = 0.0
+    samclip_contrastive_loss_weight: float = 0.0
+    samclip_background_loss_weight: float = 0.0
+    samclip_contrastive_temperature: float = 0.07
+    samclip_mask_min_pixels: int = 16
+    samclip_mask_max_regions: int = 64
+    samclip_mask_cache_size: int = 8
+    samclip_feature_level: int = 0
+    samclip_language_feature_dir: str = ""
     siglip_alignment_weight: float = 0.0
     siglip_summary_alignment_weight: float = 0.0
     siglip_summary_head_weights: str = "checkpoints/siglip2_summary_head.pth"

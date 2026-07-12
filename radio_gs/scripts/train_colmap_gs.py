@@ -11,10 +11,14 @@ Usage:
         --iters 30000 --device cuda
 """
 
+from __future__ import annotations
+
 import argparse
+import hashlib
+import json
 import math
-import os
 import random
+import struct
 import sys
 from pathlib import Path
 
@@ -34,25 +38,154 @@ from radio_gs.data.lerf_dataset import (
     _read_cameras_binary,
     _read_images_binary,
 )
+from radio_gs.data.view_split import (
+    load_excluded_image_stems,
+    select_image_indices,
+)
 
 # SH basis constant for degree-0
 C0 = 0.28209479177387814
+_CAMERA_MAP_SCHEMA_VERSION = 1
+_CAMERA_MAP_RULES = frozenset(
+    {
+        "exact_case_sensitive_basename_stem",
+        "strip_official_0_or_1_split_prefix_then_exact_stem",
+        "imageNNN_canonical_index_to_lexicographic_colmap_camera",
+    }
+)
+
+
+def _load_colmap_camera_rgb_map(
+    source: str | Path,
+    *,
+    scene_root: Path,
+) -> tuple[dict[str, dict], dict]:
+    """Load an explicit COLMAP-camera-to-RGB mapping, never infer one here."""
+
+    path = Path(source).expanduser().resolve()
+    if not path.is_file():
+        raise FileNotFoundError(f"Image-map JSON not found: {path}")
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Image-map JSON must contain an object")
+    if int(payload.get("schema_version", -1)) != _CAMERA_MAP_SCHEMA_VERSION:
+        raise ValueError("Unsupported or missing image-map schema_version")
+    declared_root = Path(str(payload.get("scene_root") or "")).expanduser().resolve()
+    if declared_root != scene_root.resolve():
+        raise ValueError(
+            f"Image-map scene_root differs from requested scene: "
+            f"{declared_root} != {scene_root.resolve()}"
+        )
+    raw_records = payload.get("records")
+    if not isinstance(raw_records, list) or not raw_records:
+        raise ValueError("Image-map JSON must contain a non-empty records list")
+
+    lookup: dict[str, dict] = {}
+    rgb_names: set[str] = set()
+    for index, raw in enumerate(raw_records):
+        if not isinstance(raw, dict):
+            raise ValueError(f"Image-map record {index} is not an object")
+        colmap_name = str(raw.get("colmap_camera_name") or "")
+        rgb_name = str(raw.get("rgb_camera_name") or "")
+        rgb_path = Path(str(raw.get("rgb_path") or "")).expanduser()
+        colmap_path = Path(str(raw.get("colmap_file_path") or ""))
+        rule = str(raw.get("match_rule") or "")
+        if not colmap_name or Path(colmap_name).name != colmap_name:
+            raise ValueError(f"Invalid COLMAP camera name in image-map record {index}")
+        if not rgb_name or Path(rgb_name).name != rgb_name:
+            raise ValueError(f"Invalid RGB camera name in image-map record {index}")
+        if colmap_path.stem != colmap_name:
+            raise ValueError(
+                f"Image-map COLMAP stem mismatch: {colmap_path.stem!r} != "
+                f"{colmap_name!r}"
+            )
+        if not rgb_path.is_absolute() or rgb_path.stem != rgb_name:
+            raise ValueError(
+                f"Image-map RGB path/name mismatch for {rgb_name!r}: {rgb_path}"
+            )
+        if not rgb_path.is_file():
+            raise FileNotFoundError(f"Mapped RGB image not found: {rgb_path}")
+        if rule not in _CAMERA_MAP_RULES:
+            raise ValueError(
+                f"Image-map record {rgb_name!r} has unsupported match_rule {rule!r}"
+            )
+        if colmap_name in lookup or rgb_name in rgb_names:
+            raise ValueError(
+                f"Image map is not one-to-one at RGB {rgb_name!r} / "
+                f"COLMAP {colmap_name!r}"
+            )
+        lookup[colmap_name] = dict(raw)
+        rgb_names.add(rgb_name)
+
+    declared_camera_to_rgb = payload.get("colmap_camera_to_rgb_path")
+    if declared_camera_to_rgb is not None:
+        if not isinstance(declared_camera_to_rgb, dict):
+            raise ValueError("colmap_camera_to_rgb_path must be a JSON object")
+        expected_camera_to_rgb = {
+            camera: str(record["rgb_path"]) for camera, record in lookup.items()
+        }
+        normalized_camera_to_rgb = {
+            str(camera): str(rgb_path)
+            for camera, rgb_path in declared_camera_to_rgb.items()
+        }
+        if normalized_camera_to_rgb != expected_camera_to_rgb:
+            raise ValueError(
+                "colmap_camera_to_rgb_path disagrees with image-map records"
+            )
+
+    return lookup, {
+        "path": str(path),
+        "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "record_count": len(lookup),
+        "nearest_or_fuzzy_matching": "forbidden",
+    }
 
 
 # ──────────────────────────────────────────────────────────────────
 # COLMAP points3D.ply loader
 # ──────────────────────────────────────────────────────────────────
 
-def load_colmap_points(scene_root: Path) -> tuple[np.ndarray, np.ndarray]:
+def load_colmap_points(
+    scene_root: Path,
+    *,
+    excluded_image_ids: frozenset[int] = frozenset(),
+    return_metadata: bool = False,
+):
     """Load COLMAP sparse points from points3D.ply.
 
     Returns:
         xyz: (N, 3) float32 positions
         rgb: (N, 3) float32 colours in [0, 1]
     """
-    ply_path = scene_root / "sparse" / "0" / "points3D.ply"
+    sparse_root = scene_root / "sparse" / "0"
+    ply_path = sparse_root / "points3D.ply"
+    binary_path = sparse_root / "points3D.bin"
+    # A PLY does not retain observation tracks.  When a benchmark view is
+    # held out, use points3D.bin and drop every point whose track contains the
+    # held-out image.  Otherwise target pixels could still enter through the
+    # sparse initialization even though their RGB frame is absent from the
+    # photometric loss.
+    if excluded_image_ids:
+        if not binary_path.exists():
+            raise FileNotFoundError(
+                "Track-safe sparse initialization requires points3D.bin when "
+                f"views are excluded; not found: {binary_path}"
+            )
+        return _load_colmap_points_binary(
+            binary_path,
+            excluded_image_ids=excluded_image_ids,
+            return_metadata=return_metadata,
+        )
+
     if not ply_path.exists():
-        raise FileNotFoundError(f"COLMAP points3D.ply not found: {ply_path}")
+        if binary_path.exists():
+            return _load_colmap_points_binary(
+                binary_path,
+                return_metadata=return_metadata,
+            )
+        raise FileNotFoundError(
+            f"COLMAP points not found: expected {ply_path} or {binary_path}"
+        )
 
     from plyfile import PlyData
 
@@ -70,14 +203,92 @@ def load_colmap_points(scene_root: Path) -> tuple[np.ndarray, np.ndarray]:
          np.asarray(vertex["blue"], dtype=np.float32)],
         axis=1,
     ) / 255.0
-    return xyz, rgb
+    if not return_metadata:
+        return xyz, rgb
+    return xyz, rgb, {
+        "source": str(ply_path.resolve()),
+        "source_point_count": int(xyz.shape[0]),
+        "retained_point_count": int(xyz.shape[0]),
+        "removed_point_count": 0,
+        "excluded_image_ids": [],
+        "track_filter": "none",
+    }
+
+
+def _read_exact(handle, size: int) -> bytes:
+    value = handle.read(size)
+    if len(value) != size:
+        raise EOFError("Unexpected end of COLMAP points3D.bin")
+    return value
+
+
+def _load_colmap_points_binary(
+    path: Path,
+    *,
+    excluded_image_ids: frozenset[int] = frozenset(),
+    return_metadata: bool = False,
+):
+    """Read XYZ/RGB and optionally remove points seen by excluded images."""
+
+    xyz_values: list[tuple[float, float, float]] = []
+    rgb_values: list[tuple[int, int, int]] = []
+    removed_points = 0
+    with path.open("rb") as handle:
+        (num_points,) = struct.unpack("<Q", _read_exact(handle, 8))
+        for _ in range(num_points):
+            _point_id, x, y, z = struct.unpack("<Qddd", _read_exact(handle, 32))
+            red, green, blue = struct.unpack("<BBB", _read_exact(handle, 3))
+            _error = struct.unpack("<d", _read_exact(handle, 8))[0]
+            (track_length,) = struct.unpack("<Q", _read_exact(handle, 8))
+            # Each track element is (image_id:uint32, point2D_idx:uint32).
+            track_bytes = _read_exact(handle, int(track_length) * 8)
+            track_image_ids = {
+                int(image_id)
+                for image_id, _point2d_idx in struct.iter_unpack("<II", track_bytes)
+            }
+            if excluded_image_ids.intersection(track_image_ids):
+                removed_points += 1
+                continue
+            xyz_values.append((x, y, z))
+            rgb_values.append((red, green, blue))
+        if handle.read(1):
+            raise ValueError(f"Trailing bytes after {num_points} points in {path}")
+    if not xyz_values:
+        raise ValueError(f"COLMAP point cloud is empty: {path}")
+    xyz = np.asarray(xyz_values, dtype=np.float32)
+    rgb = np.asarray(rgb_values, dtype=np.float32) / 255.0
+    if not return_metadata:
+        return xyz, rgb
+    return xyz, rgb, {
+        "source": str(path.resolve()),
+        "source_point_count": int(num_points),
+        "retained_point_count": int(xyz.shape[0]),
+        "removed_point_count": int(removed_points),
+        "excluded_image_ids": sorted(int(value) for value in excluded_image_ids),
+        "track_filter": (
+            "drop_any_point_observed_by_excluded_image"
+            if excluded_image_ids
+            else "none"
+        ),
+    }
 
 
 # ──────────────────────────────────────────────────────────────────
 # Scene data loading
 # ──────────────────────────────────────────────────────────────────
 
-def load_scene(scene_root: str, device: torch.device):
+def load_scene(
+    scene_root: str,
+    device: torch.device,
+    *,
+    excluded_image_stems: tuple[str, ...] = (),
+    image_dir: str | None = None,
+    image_map_json: str | None = None,
+    image_scale: float = 1.0,
+    image_width: int | None = None,
+    image_height: int | None = None,
+    return_view_metadata: bool = False,
+):
     """Load images, w2c matrices, and intrinsics from a COLMAP scene.
 
     Images are kept on CPU to save GPU memory; only the active frame is
@@ -91,37 +302,174 @@ def load_scene(scene_root: str, device: torch.device):
         camera_extent: float, NeRF++ style camera radius for LR scaling
     """
     scene_root = Path(scene_root)
+    if image_dir and image_map_json:
+        raise ValueError("Use either image_dir or image_map_json, not both")
     colmap = _parse_colmap_sparse(scene_root)
 
-    W, H = colmap["w"], colmap["h"]
-    fx, fy, cx, cy = colmap["fl_x"], colmap["fl_y"], colmap["cx"], colmap["cy"]
-    K = torch.tensor(
-        [[fx, 0.0, cx], [0.0, fy, cy], [0.0, 0.0, 1.0]],
-        dtype=torch.float32, device=device,
-    )
+    calibration_w, calibration_h = int(colmap["w"]), int(colmap["h"])
+    if not math.isfinite(float(image_scale)) or float(image_scale) <= 0:
+        raise ValueError("image_scale must be finite and positive")
+    if (image_width is None) != (image_height is None):
+        raise ValueError("image_width and image_height must be specified together")
+    if image_width is not None and (int(image_width) <= 0 or int(image_height) <= 0):
+        raise ValueError("image_width and image_height must be positive")
+    if image_width is not None and float(image_scale) != 1.0:
+        raise ValueError("Use either explicit image_width/image_height or image_scale")
 
-    # c2w → w2c
-    c2w_list = colmap["c2w_list"]
+    fx, fy, cx, cy = colmap["fl_x"], colmap["fl_y"], colmap["cx"], colmap["cy"]
+
+    all_file_paths = list(colmap["file_paths"])
+    colmap_index_by_stem: dict[str, int] = {}
+    for index, file_path in enumerate(all_file_paths):
+        stem = Path(str(file_path)).stem
+        if stem in colmap_index_by_stem:
+            raise ValueError(f"Duplicate COLMAP camera basename stem {stem!r}")
+        colmap_index_by_stem[stem] = index
+
+    image_map_lookup: dict[str, dict] | None = None
+    image_map_metadata: dict | None = None
+    if image_map_json:
+        image_map_lookup, image_map_metadata = _load_colmap_camera_rgb_map(
+            image_map_json,
+            scene_root=scene_root,
+        )
+        unknown_mapped_cameras = sorted(set(image_map_lookup) - set(colmap_index_by_stem))
+        if unknown_mapped_cameras:
+            raise ValueError(
+                f"Image map references cameras absent from COLMAP: "
+                f"{unknown_mapped_cameras}"
+            )
+        candidate_indices = [
+            index
+            for index, file_path in enumerate(all_file_paths)
+            if Path(str(file_path)).stem in image_map_lookup
+        ]
+    else:
+        candidate_indices = list(range(len(all_file_paths)))
+    candidate_paths = [all_file_paths[index] for index in candidate_indices]
+    retained_candidate_indices, excluded_names = select_image_indices(
+        candidate_paths,
+        excluded_image_stems,
+        min_remaining=2,
+    )
+    retained_indices = [candidate_indices[index] for index in retained_candidate_indices]
+
+    # c2w → w2c. Keep image paths and cameras under the same exact filter.
+    c2w_list = [colmap["c2w_list"][index] for index in retained_indices]
+    file_paths = [all_file_paths[index] for index in retained_indices]
     w2cs = []
     for c2w in c2w_list:
         w2c = np.linalg.inv(c2w).astype(np.float32)
         w2cs.append(torch.from_numpy(w2c).to(device))
 
-    # Load images (kept on CPU)
-    file_paths = colmap["file_paths"]
+    # Resolve an optional exact image-directory override. This supports
+    # downsampled/cropped benchmark RGB pyramids while retaining COLMAP poses.
+    override_lookup: dict[str, Path] | None = None
+    if image_dir:
+        override_root = Path(image_dir).expanduser().resolve()
+        if not override_root.is_dir():
+            raise FileNotFoundError(f"Image directory not found: {override_root}")
+        override_lookup = {}
+        for path in sorted(override_root.iterdir(), key=lambda value: value.name):
+            if not path.is_file() or path.suffix.lower() not in {".jpg", ".jpeg", ".png"}:
+                continue
+            if path.stem in override_lookup:
+                raise ValueError(
+                    f"Duplicate image stem {path.stem!r} in {override_root}"
+                )
+            override_lookup[path.stem] = path
+
+    # Load images (kept on CPU), then scale the calibration to their exact
+    # dimensions. All selected views must share one resolution.
     images = []
+    resolved_paths: list[Path] = []
+    output_size: tuple[int, int] | None = None
     for fp in file_paths:
         full = scene_root / fp
+        if image_map_lookup is not None:
+            stem = Path(fp).stem
+            full = Path(str(image_map_lookup[stem]["rgb_path"]))
+        elif override_lookup is not None:
+            stem = Path(fp).stem
+            if stem not in override_lookup:
+                raise FileNotFoundError(
+                    f"No exact image stem {stem!r} in override directory {image_dir}"
+                )
+            full = override_lookup[stem]
         if not full.exists():
             raise FileNotFoundError(f"Image not found: {full}")
-        img = np.array(Image.open(str(full)).convert("RGB"), dtype=np.float32) / 255.0
+        pil_image = Image.open(str(full)).convert("RGB")
+        if image_width is not None:
+            target_size = (int(image_width), int(image_height))
+        elif float(image_scale) != 1.0:
+            target_size = (
+                max(1, int(round(pil_image.width * float(image_scale)))),
+                max(1, int(round(pil_image.height * float(image_scale)))),
+            )
+        else:
+            target_size = pil_image.size
+        if output_size is None:
+            output_size = target_size
+        elif output_size != target_size:
+            raise ValueError(
+                f"Selected RGB views have inconsistent output sizes: "
+                f"{output_size} versus {target_size} for {full}"
+            )
+        if pil_image.size != target_size:
+            resampling = getattr(Image, "Resampling", Image).LANCZOS
+            pil_image = pil_image.resize(target_size, resample=resampling)
+        img = np.array(pil_image, dtype=np.float32) / 255.0
         images.append(torch.from_numpy(img))  # CPU
+        resolved_paths.append(full.resolve())
+
+    assert output_size is not None
+    W, H = output_size
+    scale_x = float(W) / float(calibration_w)
+    scale_y = float(H) / float(calibration_h)
+    fx, cx = float(fx) * scale_x, float(cx) * scale_x
+    fy, cy = float(fy) * scale_y, float(cy) * scale_y
+    K = torch.tensor(
+        [[fx, 0.0, cx], [0.0, fy, cy], [0.0, 0.0, 1.0]],
+        dtype=torch.float32, device=device,
+    )
 
     print(f"Loaded {len(images)} images at {W}×{H}, "
           f"fx={fx:.1f} fy={fy:.1f} cx={cx:.1f} cy={cy:.1f}")
-    camera_extent = compute_camera_extent(colmap["c2w_list"])
+    if excluded_names:
+        print(f"  Excluded RGB training views: {', '.join(excluded_names)}")
+    camera_extent = compute_camera_extent(c2w_list)
     print(f"  Camera extent (NeRF++ radius): {camera_extent:.2f}")
-    return images, w2cs, K, W, H, camera_extent
+    result = (images, w2cs, K, W, H, camera_extent)
+    if not return_view_metadata:
+        return result
+    metadata = {
+        "selection": (
+            "locked_explicit_colmap_camera_to_rgb_path_map"
+            if image_map_lookup is not None
+            else "exact_case_sensitive_basename_stem"
+        ),
+        "source_view_count": len(all_file_paths),
+        "mapped_view_count": (
+            len(image_map_lookup) if image_map_lookup is not None else len(all_file_paths)
+        ),
+        "training_view_count": len(file_paths),
+        "training_image_names": [Path(path).name for path in file_paths],
+        "training_image_paths": [str(path) for path in resolved_paths],
+        "excluded_image_stems": list(excluded_image_stems),
+        "excluded_image_names": excluded_names,
+        "calibration_source": colmap.get("calibration_source"),
+        "calibration_resolution": [calibration_w, calibration_h],
+        "training_resolution": [W, H],
+        "intrinsics_scale_xy": [scale_x, scale_y],
+        "image_map": image_map_metadata,
+    }
+    canonical = json.dumps(
+        metadata["training_image_names"], separators=(",", ":"), ensure_ascii=False
+    )
+    metadata["training_image_names_sha256"] = hashlib.sha256(
+        canonical.encode("utf-8")
+    ).hexdigest()
+    return (*result, metadata)
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -147,7 +495,41 @@ def compute_camera_extent(c2w_list: list) -> float:
     return float(np.max(dists) * 1.1)
 
 
-def init_gaussians(scene_root: str, device: torch.device):
+def _excluded_colmap_image_ids(
+    scene_root: Path,
+    excluded_image_stems: tuple[str, ...],
+) -> frozenset[int]:
+    """Resolve exact held-out stems to COLMAP image IDs for track filtering."""
+
+    if not excluded_image_stems:
+        return frozenset()
+    images_path = scene_root / "sparse" / "0" / "images.bin"
+    if not images_path.is_file():
+        raise FileNotFoundError(
+            f"Track-safe sparse initialization requires {images_path}"
+        )
+    by_stem: dict[str, int] = {}
+    for entry in _read_images_binary(images_path):
+        stem = Path(str(entry["name"])).stem
+        if stem in by_stem:
+            raise ValueError(
+                f"Duplicate COLMAP image basename stem {stem!r} in {images_path}"
+            )
+        by_stem[stem] = int(entry["image_id"])
+    unknown = sorted(set(excluded_image_stems) - set(by_stem))
+    if unknown:
+        raise ValueError(
+            f"Excluded image stems are absent from COLMAP images.bin: {unknown}"
+        )
+    return frozenset(by_stem[stem] for stem in excluded_image_stems)
+
+
+def init_gaussians(
+    scene_root: str,
+    device: torch.device,
+    *,
+    excluded_image_stems: tuple[str, ...] = (),
+):
     """Create initial Gaussian parameters from COLMAP points3D.ply.
 
     Returns:
@@ -155,7 +537,16 @@ def init_gaussians(scene_root: str, device: torch.device):
             means, scales, quats, opacities, sh0, shN
         scene_scale: float
     """
-    xyz, rgb = load_colmap_points(Path(scene_root))
+    source_root = Path(scene_root)
+    excluded_image_ids = _excluded_colmap_image_ids(
+        source_root,
+        excluded_image_stems,
+    )
+    xyz, rgb, sparse_metadata = load_colmap_points(
+        source_root,
+        excluded_image_ids=excluded_image_ids,
+        return_metadata=True,
+    )
     N = xyz.shape[0]
     scene_scale = compute_scene_scale(xyz)
     print(f"Initialising {N:,} Gaussians from COLMAP points "
@@ -187,7 +578,22 @@ def init_gaussians(scene_root: str, device: torch.device):
         "sh0": torch.nn.Parameter(sh0),
         "shN": torch.nn.Parameter(shN),
     }
-    return params, scene_scale
+    sparse_metadata.update(
+        {
+            "excluded_image_stems": list(excluded_image_stems),
+            "target_rgb_observation_policy": (
+                "points_with_any_excluded_view_track_removed"
+                if excluded_image_stems
+                else "no_views_excluded"
+            ),
+            # Camera poses/intrinsics are retained so the held-out view can be
+            # rendered.  They originate from the upstream reconstruction and
+            # may have been jointly estimated using all capture views.
+            "camera_calibration_prior": "upstream_shared_full_capture",
+            "camera_calibration_shared_exception": bool(excluded_image_stems),
+        }
+    )
+    return params, scene_scale, sparse_metadata
 
 
 def _estimate_initial_scales(means: Tensor, scene_scale: float) -> Tensor:
@@ -363,12 +769,31 @@ def train(args):
     np.random.seed(args.seed)
 
     # Load scene data
-    images, w2cs, K, W, H, camera_extent = load_scene(args.scene_root, device)
+    excluded_image_stems = load_excluded_image_stems(
+        args.exclude_image_stem,
+        args.exclude_image_stems_file,
+    )
+    images, w2cs, K, W, H, camera_extent, view_metadata = load_scene(
+        args.scene_root,
+        device,
+        excluded_image_stems=excluded_image_stems,
+        image_dir=args.image_dir or None,
+        image_map_json=args.image_map_json or None,
+        image_scale=args.image_scale,
+        image_width=args.image_width,
+        image_height=args.image_height,
+        return_view_metadata=True,
+    )
     n_frames = len(images)
 
     # Initialise Gaussians from COLMAP points
-    params, scene_scale = init_gaussians(args.scene_root, device)
+    params, scene_scale, sparse_metadata = init_gaussians(
+        args.scene_root,
+        device,
+        excluded_image_stems=excluded_image_stems,
+    )
     n_init = params["means"].shape[0]
+    view_metadata["sparse_initialization"] = sparse_metadata
 
     # Background colour
     if args.white_bg:
@@ -423,6 +848,10 @@ def train(args):
     # Output directory
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "training_views.json").write_text(
+        json.dumps(view_metadata, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     ply_dir = out_dir / "point_cloud" / f"iteration_{args.iters}"
     ply_dir.mkdir(parents=True, exist_ok=True)
 
@@ -542,6 +971,44 @@ def main():
                         help="Output directory for trained model")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument(
+        "--image-dir",
+        default="",
+        help=(
+            "Optional RGB directory override matched to COLMAP cameras by exact "
+            "basename stem"
+        ),
+    )
+    parser.add_argument(
+        "--image-map-json",
+        default="",
+        help=(
+            "Explicit queue-audited JSON mapping from COLMAP camera names to RGB "
+            "paths. This is mutually exclusive with --image-dir."
+        ),
+    )
+    parser.add_argument(
+        "--image-scale",
+        type=float,
+        default=1.0,
+        help="Resize RGB training views and intrinsics by this scale",
+    )
+    parser.add_argument("--image-width", type=int, default=None)
+    parser.add_argument("--image-height", type=int, default=None)
+    parser.add_argument(
+        "--exclude-image-stem",
+        action="append",
+        default=[],
+        help=(
+            "Exact case-sensitive image basename stem to exclude from RGB training; "
+            "repeat for multiple held-out views"
+        ),
+    )
+    parser.add_argument(
+        "--exclude-image-stems-file",
+        default="",
+        help="Optional JSON/text file of exact image stems to exclude",
+    )
 
     # Training
     parser.add_argument("--iters", type=int, default=30000)

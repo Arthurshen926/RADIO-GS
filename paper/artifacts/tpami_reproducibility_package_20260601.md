@@ -73,15 +73,15 @@ reproduced.
 
 | Track | Canonical row | Source artifact | Main metrics |
 | --- | --- | --- | --- |
-| T1 LERF rendered-view OVS | `ctfgs_rendered` | `paper/artifacts/final_rows.yaml`; `paper/lerf_ovs_main_table.tex` | 64.98 mIoU / 82.68 Acc |
-| T2 LERF direct 3D selection | `ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55` | `paper/artifacts/final_rows.yaml`; `paper/lerf_ovs_main_table.tex` | 54.36 mIoU / 80.84 Acc@0.25 |
-| T3 VALA-aligned ScanNet-8 point query | `radio_gs_dino_cv_contextual_knn_scene_mean_support` | `paper/artifacts/final_rows.yaml`; `paper/scannet_published_context_table.tex` | 36.55 / 42.78 / 57.85 mIoU on split 19/15/10 |
+| T1 LERF rendered-view OVS | `ctfgs_rendered` | `paper/artifacts/lerf_rendered_grounding_feature_sam3_boundary_20260525.json` | 58.89 mIoU / 85.98 Acc |
+| T2 LERF direct 3D selection | `ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55` | `paper/artifacts/lerf_direct3d_compact_readout_ablation_20260528.json` | 50.14 mIoU / 70.44 Acc@0.25 |
+| T3 ScanNet-8 local point query | `radio_gs_dino_cv_contextual_knn_scene_mean_support` | `paper/artifacts/scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.json` | 38.06 / 38.71 / 47.11 mIoU on split 19/15/10 |
 
 Important scope boundaries:
 
-- The main LERF and ScanNet tables use the reproduced protocols reported in the
-  manuscript. Historical compatibility/source-context notes remain in separate
-  audit files only for traceability.
+- External rows in the main LERF and ScanNet tables are published source-paper
+  context, not local reproductions. The GaussFM rows above are local outputs;
+  strict unified-protocol comparisons are pending.
 - The direct-3D compact row does not read a multiview-registration feature cache
   and does not call an official RGB SAM decoder at inference. It does use a
   GT-free RGB/color-edge score-component support calibration; the strict no-RGB

@@ -15,7 +15,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import Tensor
 
-from gsplat import rasterization, rasterization_2dgs
+from gsplat import rasterization
+
+try:
+    from gsplat import rasterization_2dgs
+except ImportError:
+    # gsplat 1.2 exposes the 3DGS rasterizer but not the optional 2DGS API.
+    # Keep the normal 3DGS path importable and fail only if 2DGS is requested.
+    rasterization_2dgs = None
 
 
 class FeatureFieldRenderer(nn.Module):
@@ -41,6 +48,12 @@ class FeatureFieldRenderer(nn.Module):
         far_plane: float = 100.0,
     ) -> None:
         super().__init__()
+        if use_2dgs and rasterization_2dgs is None:
+            raise ImportError(
+                "FeatureFieldRenderer(use_2dgs=True) requires a gsplat build "
+                "that exports rasterization_2dgs; the installed build supports "
+                "only the 3DGS rasterization path"
+            )
         self.image_height = image_height
         self.image_width = image_width
         self.max_channels_per_chunk = max_channels_per_chunk

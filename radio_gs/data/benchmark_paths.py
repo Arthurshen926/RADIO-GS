@@ -48,10 +48,28 @@ def list_feature_paths(feature_dir: str | Path, frame_ids: Optional[Sequence[int
         backbone_dir.glob("rgb_*.pt"),
         key=extract_feature_frame_index,
     )
+    by_index: dict[int, Path] = {}
+    for path in feature_paths:
+        frame_index = extract_feature_frame_index(path)
+        if frame_index in by_index:
+            raise ValueError(
+                f"Duplicate feature frame id {frame_index}: "
+                f"{by_index[frame_index]} and {path}"
+            )
+        by_index[frame_index] = path
     if frame_ids is None:
         return feature_paths
-    wanted = {int(fid) for fid in frame_ids}
-    return [p for p in feature_paths if extract_feature_frame_index(p) in wanted]
+    requested = [int(fid) for fid in frame_ids]
+    if len(requested) != len(set(requested)):
+        raise ValueError(f"Requested feature frame ids contain duplicates: {requested}")
+    missing = [frame_id for frame_id in requested if frame_id not in by_index]
+    if missing:
+        raise FileNotFoundError(
+            f"Missing requested feature frame ids in {backbone_dir}: {missing}"
+        )
+    # Preserve the frozen frame-list order rather than rediscovering an order
+    # from directory enumeration.
+    return [by_index[frame_id] for frame_id in requested]
 
 
 def load_frame_id_list(path: str | Path | None) -> Optional[list[int]]:

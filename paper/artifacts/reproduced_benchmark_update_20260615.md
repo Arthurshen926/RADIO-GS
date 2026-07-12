@@ -1,8 +1,10 @@
-# Reproduced Benchmark and Contribution Wording Update
+# Paper Result Provenance Correction and Contribution Wording Update
 
 Date: 2026-06-15
 
-This note records the paper-facing update requested after the reproduced benchmark tables were finalized.
+This note has been corrected to record the locally auditable GaussFM outputs.
+External rows in the associated tables are published source-paper context and
+must not be described as local same-protocol reproductions.
 
 ## Contribution wording
 
@@ -17,37 +19,38 @@ This wording is now reflected in:
 
 ## Paper-facing quantitative results
 
-The main LERF and ScanNet tables now use the reproduced-protocol comparison results, not source-context caveats.
+The main LERF and ScanNet tables use local GaussFM outputs alongside explicitly
+labelled published context. A strict unified rerun is pending.
 
 ### LERF-OVS 2D open-vocabulary query
 
-Ours: 64.98 mIoU / 82.68 Acc.
+Ours: 58.89 mIoU / 85.98 Acc.
 
 Per scene:
 
-- Figurines: 64.29 / 92.86
-- Teatime: 76.09 / 93.22
-- Ramen: 53.78 / 62.83
-- Waldo Kitchen: 65.76 / 81.82
+- Figurines: 52.43 / 82.14
+- Teatime: 65.15 / 89.83
+- Ramen: 63.25 / 90.14
+- Waldo Kitchen: 54.75 / 81.82
 
 ### LERF-OVS 3D direct open-vocabulary query
 
-Ours: 54.36 mIoU / 80.84 Acc.
+Ours: 50.14 mIoU / 70.44 Acc@0.25.
 
 Per scene:
 
-- Figurines: 59.36 / 92.86
-- Teatime: 71.04 / 89.83
-- Ramen: 38.43 / 63.38
-- Waldo Kitchen: 48.61 / 77.27
+- Figurines: 51.04 / 67.86
+- Teatime: 56.40 / 76.27
+- Ramen: 59.99 / 83.10
+- Waldo Kitchen: 33.12 / 54.55
 
 ### VALA-aligned ScanNet-v2 protocol
 
 Ours:
 
-- 19 classes: 36.55 mIoU / 50.57 mAcc
-- 15 classes: 42.78 mIoU / 72.85 mAcc
-- 10 classes: 57.85 mIoU / 77.93 mAcc
+- 19 classes: 38.06 mIoU / 61.29 mAcc
+- 15 classes: 38.71 mIoU / 63.15 mAcc
+- 10 classes: 47.11 mIoU / 72.00 mAcc
 
 ## Updated files
 

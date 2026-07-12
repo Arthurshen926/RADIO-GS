@@ -88,6 +88,11 @@ from radio_gs.losses.radio_adaptor_loss import (
 from radio_gs.losses.text_heatmap_distill_loss import (
     compute_text_heatmap_distill_loss,
 )
+from radio_gs.losses.samclip_mask_loss import (
+    SamClipMaskEntry,
+    compute_samclip_mask_losses,
+    load_samclip_mask_manifest,
+)
 from radio_gs.models.explicit_gaussian import ExplicitFeatureGaussian
 from radio_gs.models.featsharp_3d import FeatSharp3D
 from radio_gs.models.feature_quality import (
@@ -1542,6 +1547,63 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         # Feature norm regularization weight
         self.feat_norm_weight = getattr(config, "feat_norm_weight", 0.0)
 
+        # SAM-CLIP mask-level supervision for LangSplat cache ablations.
+        self.samclip_mask_loss_weight = float(
+            getattr(config, "samclip_mask_loss_weight", 0.0)
+        )
+        self.samclip_contrastive_loss_weight = float(
+            getattr(config, "samclip_contrastive_loss_weight", 0.0)
+        )
+        self.samclip_background_loss_weight = float(
+            getattr(config, "samclip_background_loss_weight", 0.0)
+        )
+        self.samclip_contrastive_temperature = max(
+            1e-6, float(getattr(config, "samclip_contrastive_temperature", 0.07))
+        )
+        self.samclip_mask_min_pixels = max(
+            1, int(getattr(config, "samclip_mask_min_pixels", 16))
+        )
+        self.samclip_mask_max_regions = max(
+            0, int(getattr(config, "samclip_mask_max_regions", 64))
+        )
+        self.samclip_mask_cache_size = max(
+            0, int(getattr(config, "samclip_mask_cache_size", 8))
+        )
+        self.samclip_mask_entries: Dict[int, SamClipMaskEntry] = {}
+        self.samclip_mask_cache: Dict[int, Tuple[torch.Tensor, torch.Tensor]] = {}
+        if self.samclip_mask_loss_weight < 0:
+            raise ValueError("samclip_mask_loss_weight must be non-negative")
+        if self.samclip_contrastive_loss_weight < 0:
+            raise ValueError("samclip_contrastive_loss_weight must be non-negative")
+        if self.samclip_background_loss_weight < 0:
+            raise ValueError("samclip_background_loss_weight must be non-negative")
+        if (
+            self.samclip_mask_loss_weight > 0
+            or self.samclip_contrastive_loss_weight > 0
+            or self.samclip_background_loss_weight > 0
+        ):
+            samclip_root = str(
+                getattr(config, "samclip_language_feature_dir", "")
+                or getattr(config, "feature_dir", "")
+                or ""
+            )
+            if not samclip_root:
+                raise ValueError(
+                    "samclip_language_feature_dir or feature_dir is required when "
+                    "SAM-CLIP mask losses are enabled"
+                )
+            self.samclip_mask_entries = load_samclip_mask_manifest(samclip_root)
+            self._log(
+                "SAM-CLIP mask supervision enabled: "
+                f"frames={len(self.samclip_mask_entries)} "
+                f"prototype_weight={self.samclip_mask_loss_weight:g} "
+                f"contrastive_weight={self.samclip_contrastive_loss_weight:g} "
+                f"background_weight={self.samclip_background_loss_weight:g} "
+                f"temperature={self.samclip_contrastive_temperature:g} "
+                f"min_pixels={self.samclip_mask_min_pixels} "
+                f"max_regions={self.samclip_mask_max_regions}"
+            )
+
         # Optimizer with separate LR groups
         self.optimizer = self._build_optimizer(config)
         self.scheduler = self._build_scheduler(config)
@@ -2396,6 +2458,11 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "radio_cross_view_propagation": 0.0,
             "radio_cross_view_mask_propagation": 0.0,
             "foundation_cache": 0.0,
+            "samclip_mask": 0.0,
+            "samclip_mask_proto": 0.0,
+            "samclip_mask_contrast": 0.0,
+            "samclip_mask_background": 0.0,
+            "samclip_mask_regions": 0.0,
             "ground_query": 0.0,
             "ground_query_acc": 0.0,
             "ground_query_valid": 0.0,
@@ -2648,6 +2715,11 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     decoded=decoded_for_depth if self.train_mode != "latent" else None,
                 )
                 l_foundation_cache = foundation_cache_stats["loss"]
+                samclip_mask_stats = self._compute_samclip_mask_loss(
+                    batch=batch,
+                    decoded=decoded_for_depth,
+                )
+                l_samclip_mask = samclip_mask_stats["loss"]
 
                 l_tv = self.tv_loss_fn(rendered_compact)
 
@@ -3039,6 +3111,7 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     + l_radio_cross_view_propagation
                     + l_radio_cross_view_mask_propagation
                     + l_foundation_cache
+                    + l_samclip_mask
                 )
 
             self.scaler.scale(loss).backward()
@@ -3198,6 +3271,11 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 l_radio_cross_view_mask_propagation.item()
             )
             loss_accum["foundation_cache"] += l_foundation_cache.item()
+            loss_accum["samclip_mask"] += l_samclip_mask.item()
+            loss_accum["samclip_mask_proto"] += samclip_mask_stats["prototype"].item()
+            loss_accum["samclip_mask_contrast"] += samclip_mask_stats["contrastive"].item()
+            loss_accum["samclip_mask_background"] += samclip_mask_stats["background"].item()
+            loss_accum["samclip_mask_regions"] += samclip_mask_stats["valid_regions"].item()
             loss_accum["ground_query"] += l_ground_query.item()
             loss_accum["ground_query_acc"] += ground_query_acc.item()
             loss_accum["ground_query_valid"] += ground_query_valid.item()
@@ -3307,6 +3385,29 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 self.writer.add_scalar(
                     "train/foundation_cache",
                     l_foundation_cache.item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/samclip_mask", l_samclip_mask.item(), self.global_step
+                )
+                self.writer.add_scalar(
+                    "train/samclip_mask_proto",
+                    samclip_mask_stats["prototype"].item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/samclip_mask_contrast",
+                    samclip_mask_stats["contrastive"].item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/samclip_mask_background",
+                    samclip_mask_stats["background"].item(),
+                    self.global_step,
+                )
+                self.writer.add_scalar(
+                    "train/samclip_mask_regions",
+                    samclip_mask_stats["valid_regions"].item(),
                     self.global_step,
                 )
                 self.writer.add_scalar(
@@ -3960,6 +4061,119 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         if isinstance(elem, (int, float)):
             return torch.tensor(batch)
         return batch
+
+    def _load_samclip_mask_frame(
+        self, frame_idx: int
+    ) -> Optional[Tuple[torch.Tensor, torch.Tensor]]:
+        """Load cached CLIP prototypes and the selected SAM segment level."""
+        frame_idx = int(frame_idx)
+        if frame_idx in self.samclip_mask_cache:
+            return self.samclip_mask_cache[frame_idx]
+        entry = self.samclip_mask_entries.get(frame_idx)
+        if entry is None:
+            return None
+
+        feature_np = np.asarray(np.load(entry.feature_path), dtype=np.float32)
+        segment_np = np.load(entry.segments_path, mmap_mode="r")
+        level = int(getattr(self.cfg, "samclip_feature_level", 0))
+        if segment_np.ndim == 3:
+            if level < 0 or level >= int(segment_np.shape[0]):
+                raise ValueError(
+                    f"SAM-CLIP level {level} is outside segment map levels "
+                    f"[0,{int(segment_np.shape[0])}) for frame {frame_idx}"
+                )
+            selected_segment_np = np.asarray(segment_np[level], dtype=np.int64)
+        elif segment_np.ndim == 2:
+            selected_segment_np = np.asarray(segment_np, dtype=np.int64)
+        else:
+            raise ValueError(
+                f"Expected SAM segment map [L,H,W] or [H,W], got "
+                f"{tuple(segment_np.shape)} for frame {frame_idx}"
+            )
+
+        loaded = (
+            torch.from_numpy(feature_np.copy()),
+            torch.from_numpy(selected_segment_np.copy()),
+        )
+        if self.samclip_mask_cache_size > 0:
+            if len(self.samclip_mask_cache) >= self.samclip_mask_cache_size:
+                oldest = next(iter(self.samclip_mask_cache))
+                self.samclip_mask_cache.pop(oldest, None)
+            self.samclip_mask_cache[frame_idx] = loaded
+        return loaded
+
+    def _compute_samclip_mask_loss(
+        self,
+        *,
+        batch: Dict[str, torch.Tensor],
+        decoded: Optional[torch.Tensor],
+    ) -> Dict[str, torch.Tensor]:
+        zero_ref = decoded if decoded is not None else torch.zeros((), device=self.device)
+        zero = zero_ref.sum() * 0.0
+        stats = {
+            "loss": zero,
+            "prototype": zero,
+            "contrastive": zero,
+            "background": zero,
+            "valid_regions": torch.zeros((), device=self.device),
+        }
+        if (
+            decoded is None
+            or (
+                self.samclip_mask_loss_weight <= 0
+                and self.samclip_contrastive_loss_weight <= 0
+                and self.samclip_background_loss_weight <= 0
+            )
+        ):
+            return stats
+
+        frame_indices = batch.get("frame_idx")
+        if frame_indices is None:
+            return stats
+        if frame_indices.dim() == 0:
+            frame_indices = frame_indices.view(1)
+
+        proto_terms: List[torch.Tensor] = []
+        contrast_terms: List[torch.Tensor] = []
+        background_terms: List[torch.Tensor] = []
+        region_terms: List[torch.Tensor] = []
+        for batch_idx, frame_idx_tensor in enumerate(frame_indices):
+            loaded = self._load_samclip_mask_frame(int(frame_idx_tensor.item()))
+            if loaded is None:
+                continue
+            prototypes_cpu, segments_cpu = loaded
+            losses = compute_samclip_mask_losses(
+                decoded[batch_idx],
+                prototypes_cpu.to(self.device, non_blocking=True),
+                segments_cpu.to(self.device, non_blocking=True),
+                min_pixels=self.samclip_mask_min_pixels,
+                max_regions=self.samclip_mask_max_regions,
+                contrastive_temperature=self.samclip_contrastive_temperature,
+            )
+            proto_terms.append(losses["prototype_loss"])
+            contrast_terms.append(losses["contrastive_loss"])
+            background_terms.append(losses["background_loss"])
+            region_terms.append(losses["valid_regions"])
+
+        if not proto_terms:
+            return stats
+
+        prototype = torch.stack(proto_terms).mean()
+        contrastive = torch.stack(contrast_terms).mean()
+        background = torch.stack(background_terms).mean()
+        valid_regions = torch.stack(region_terms).float().mean()
+        total = (
+            self.samclip_mask_loss_weight * prototype
+            + self.samclip_contrastive_loss_weight * contrastive
+            + self.samclip_background_loss_weight * background
+        )
+        return {
+            "loss": total,
+            "prototype": prototype,
+            "contrastive": contrastive,
+            "background": background,
+            "valid_regions": valid_regions,
+        }
 
     def _canonicalize_spatial_map(
         self,

@@ -137,7 +137,7 @@ def _check_vpr_protocol_card(text: str, issues: list[str]) -> None:
 def _check_selection_table(text: str, issues: list[str]) -> None:
     if MEAN_2P5_STD_RE.search(text):
         issues.append(f"{SELECTION_TABLE}: promoted selection table must not cite mean+2.5std")
-    required_snippet = r"\method{} & \textbf{54.36} & \textbf{80.84}"
+    required_snippet = r"\method{} & 50.14 & 70.44"
     if required_snippet not in text:
         issues.append(f"{SELECTION_TABLE}: missing current same-protocol GaussFM Direct3D row: {required_snippet}")
 
@@ -148,7 +148,7 @@ def _check_scannet_context_table(text: str, issues: list[str]) -> None:
     required_snippets = (
         "LangSplatV2 & 14.75 & 25.47 & 17.09 & 35.68 & 22.83 & 41.52",
         "VALA & 32.11 & 50.05 & 35.10 & 54.77 & 46.21 & 65.61",
-        "\\method{} & \\textbf{36.55} & \\textbf{50.57} & \\textbf{42.78} & \\textbf{72.85} & \\textbf{57.85} & \\textbf{77.93}",
+        "\\method{} & 38.06 & 61.29 & 38.71 & 63.15 & 47.11 & 72.00",
     )
     for snippet in required_snippets:
         if snippet not in text:

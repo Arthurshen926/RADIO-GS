@@ -38,13 +38,14 @@ direct primitive selection, and direct point querying without deploying a
 multiview feature cache.
 
 We evaluate \method{} under three protocols. On LERF-OVS rendered-view
-open-vocabulary query, \method{} reaches 64.98 mIoU and 82.68 Acc. Under the
-same LERF-OVS direct 3D query-select-render protocol, compact primitive scoring
-with support calibration reaches 54.36 mIoU and 80.84 Acc without
+open-vocabulary query, \method{} reaches 58.89 mIoU and 85.98 Acc. On our
+LERF-OVS direct 3D query-select-render implementation, compact primitive scoring
+with support calibration reaches 50.14 mIoU and 70.44 Acc without
 reading a multiview-registration cache or invoking an official RGB SAM decoder
-at inference. On the VALA-aligned ScanNet-8 direct point-query protocol, the
-compact field reaches 36.55, 42.78, and 57.85 mIoU on the 19-, 15-, and
-10-class splits. Same-evaluator frame-wise foundation-feature comparisons
+at inference. On our ScanNet direct point-query evaluation over the VALA
+eight-scene subset, the compact field reaches 38.06, 38.71, and 47.11 mIoU on
+the 19-, 15-, and 10-class splits. Same-evaluator frame-wise
+foundation-feature comparisons
 and component ablations show that multiview reconstruction, sparse primitive
 anchoring, and support-calibrated 3D selection drive the gains. Small
 fragmented objects remain the primary failure mode.
@@ -91,8 +92,9 @@ selection tests whether text queries can select Gaussian primitives before any
 rendered-mask evaluation; and VALA-aligned ScanNet-8 direct point querying
 tests whether the same compact representation remains usable outside the LERF
 object-query setting. Baseline comparisons in the main LERF and ScanNet tables
-follow the same reproduced protocols as \method{}, while historical provenance
-audits are kept in the appendix.
+are published source-paper values included as context. The local and published
+readout protocols are not yet fully unified, so we do not treat these rows as a
+strict same-protocol ranking.
 
 \paragraph{Contributions.}
 We make three contributions:
@@ -418,30 +420,31 @@ All \method{} numbers are tied to fixed evaluation outputs and a provenance
 manifest. The rendered-view and direct-3D LERF runs use the same four annotated
 LERF-OVS scenes; the ScanNet study uses the VALA-aligned eight-scene subset and
 the class splits described below. The main quantitative baseline rows are
-reported under the same reproduced evaluation protocols as \method{}; historical
-source/provenance notes are retained separately for auditability.
+published source-paper values shown as context, whereas the \method{} rows are
+linked to local source artifacts; source/provenance notes are retained for
+auditability.
 
 \subsection{LERF-OVS Main Result}
 
 \input{lerf_ovs_main_table}
 
-Table~\ref{tab:lerf_ovs_main} provides the same-protocol LERF-OVS 2D and 3D
-open-vocabulary query comparison. The 2D rows evaluate rendered-view query
+Table~\ref{tab:lerf_ovs_main} provides LERF-OVS 2D and 3D open-vocabulary
+query results. Published baseline rows are included as context pending a fully
+unified local rerun. The 2D rows evaluate rendered-view query
 masks, while the 3D rows query Gaussian primitives first and render selected
-support only for mask evaluation. The \method{} row gives the highest mean mIoU
-in 2D and the highest mean mIoU/Acc in direct 3D. For 2D query, the compact
+support only for mask evaluation. For 2D query, the compact
 RADIO feature field renders a dense RADIO-compatible feature map; the resulting
-query heatmap is converted to a mask by the fixed protocol used for the
-reproduced baseline comparison.
+query heatmap is converted to a mask by the local fixed readout recorded in the
+source artifact.
 
 Supplementary calibration isolates the rendered-mask boundary head from
 feature quality. Under a controlled PCC-only mask conversion, raising the
 label-free peak-relative threshold from 0.50 to 0.60 tightens masks and improves
 macro mIoU from 0.494 to 0.524, while peak-connected-component filtering lifts
 the same four-scene mask conversion to 0.5707. This controlled number is not the
-final 2D benchmark row. The final reproduced 2D OVS row in
+final 2D benchmark row. The final locally auditable 2D OVS row in
 Table~\ref{tab:lerf_ovs_main} further uses the feature-only SAM3-adaptor
-boundary head and reaches 64.98 mIoU.
+boundary head and reaches 58.89 mIoU.
 The feature-only SAM3-adaptor boundary head is therefore used only after the
 peak component has supplied a stable coarse support, turning it into a boundary
 refinement step rather than a new localization mechanism.
@@ -468,7 +471,7 @@ GT-free color-edge component support gives 0.500/0.705. The final row is the
 complete fixed-protocol compact-memory result from Table~\ref{tab:lerf_ovs_main}.
 It should not be read as the next single-module step in the controlled
 factorial; the controlled rows isolate partial mechanisms, while the last row
-records the deployed selector used for the benchmark ranking. In all cases the
+records the deployed selector used for the local paper result. In all cases the
 compact primitive query
 does not read a multiview-registration feature cache or use an official SAM3
 mask decoder.
@@ -676,18 +679,20 @@ Table~\ref{tab:scannet_published_context} evaluates cross-domain feature
 usability on the VALA-aligned ScanNet-8 scene subset:
 \texttt{scene0000\_00}, \texttt{scene0062\_00}, \texttt{scene0070\_00},
 \texttt{scene0097\_00}, \texttt{scene0140\_00}, \texttt{scene0347\_00},
-\texttt{scene0400\_00}, and \texttt{scene0590\_00}. This follows a
-public VALA-aligned direct point-query setting with every-20-frame ScanNet training
-splits and mIoU/mAcc evaluation on GT semantic point clouds. This is not
-presented as a full ScanNet semantic segmentation leaderboard result; it is a
-split-aligned direct probe of the learned feature field. The \method{} result uses
+\texttt{scene0400\_00}, and \texttt{scene0590\_00}. We reuse the VALA scene and
+class splits, but query at GT semantic point-cloud coordinates rather than
+evaluating labels on pseudo-GT Gaussian centers. This is not presented as a
+full ScanNet semantic segmentation leaderboard result or as a same-domain
+comparison with the published rows; it is a split-aligned direct probe of the
+learned feature field. The \method{} result uses
 the cross-view DINO-consistent compact field with a label-free contextual kNN
 point-query classifier ($k=16$, 80 candidate Gaussians), single-template text prompts, and
 scene-mean logit calibration at $\alpha=0.45$. A label-free spatial logit
 propagation step averages class logits over 12 nearest 3D neighbours before the
-final argmax. It reaches 36.55/50.57,
-42.78/72.85, and 57.85/77.93 mIoU/mAcc on the 19/15/10-class splits. The
-baseline rows follow the same reproduced VALA-aligned point-query protocol.
+final argmax. It reaches 38.06/61.29,
+38.71/63.15, and 47.11/72.00 mIoU/mAcc on the 19/15/10-class splits. The
+baseline rows are published Gaussian-domain results shown as context and are
+not claimed as local same-evaluator reproductions.
 A diagnostic proposal-memory variant improves some fine-grained
 19-class categories but lowers the final 15-/10-class balance, so it is kept as
 an auxiliary ScanNet control in the supplementary material.
@@ -844,10 +849,10 @@ fragmented scenes, so we distinguish primitive scoring quality from boundary and
 support calibration quality.
 
 \paragraph{Baseline scope.}
-The main LERF and ScanNet quantitative tables use the reproduced protocols
-reported in this paper. Historical cross-paper provenance tables are retained
-only as auxiliary audit material and are not the basis for the main ranking
-claims.
+The main LERF and ScanNet quantitative tables separate locally auditable
+\method{} rows from published source-paper context. Until all methods are rerun
+under a single frozen protocol, the mixed-source tables are not used for strict
+ranking claims.
 
 \paragraph{Why the compact field can outperform frame-wise RADIO.}
 \method{} is trained from frame-wise RADIO features, but its rendered query path is
@@ -865,9 +870,9 @@ to improve RGB reconstruction. Small objects remain challenging because RADIO
 feature resolution, Gaussian support density, and rendered feature alignment
 limit heatmap sharpness. The ScanNet protocol is a direct point-query feature
 probe, not a replacement for a full standardized semantic segmentation
-benchmark. The main LERF and ScanNet tables use the reproduced protocols
-reported in this paper; historical cross-paper provenance notes are kept only
-for auditability. The deployed compact direct-3D result uses GT-free color-edge
+benchmark. The main LERF and ScanNet tables separate local outputs from
+published context; historical cross-paper provenance notes are kept for
+auditability. The deployed compact direct-3D result uses GT-free color-edge
 and score-component support calibration. This does not invoke a learned RGB
 segmentation network or official RGB SAM decoder, but it should be understood as
 a lightweight support-calibration step rather than a completely image-free

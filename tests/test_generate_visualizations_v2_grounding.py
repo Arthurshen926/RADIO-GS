@@ -2,6 +2,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+import pytest
 import torch
 
 from radio_gs.scripts import generate_visualizations_v2 as viz
@@ -9,8 +10,10 @@ from radio_gs.scripts.eval_lerf_grounding import (
     build_sam3_prompt_initial_mask,
     compute_iou,
     compute_relevancy_heatmap,
+    heatmap_to_binary_mask,
     heatmap_peak_in_shape,
     keep_peak_connected_component,
+    localization_accuracy_bbox_smoothed,
     project_to_siglip2,
     refine_mask_with_rgb_edges,
     resolve_heatmap_threshold_ratio,
@@ -171,6 +174,37 @@ def test_project_to_siglip2_accepts_half_features_on_cpu():
     assert projected.device.type == "cpu"
     assert projected.dtype == torch.float32
     assert projected.shape == (1, 3, 1, 1)
+    assert torch.isfinite(projected).all()
+
+
+def test_half_zero_visual_features_have_finite_relevancy_heatmap():
+    visual = project_to_siglip2(
+        torch.zeros(1, 3, 2, 2, dtype=torch.float16),
+        torch.nn.Identity(),
+    )
+    heatmaps = compute_relevancy_heatmap(
+        visual,
+        torch.tensor([[1.0, 0.0, 0.0]], dtype=torch.float16),
+        canonical_emb=torch.tensor([[0.0, 1.0, 0.0]], dtype=torch.float16),
+        temperature=0.1,
+        scoring="relevancy",
+    )
+
+    assert heatmaps.dtype == torch.float32
+    assert torch.isfinite(heatmaps).all()
+    assert torch.allclose(heatmaps, torch.full_like(heatmaps, 0.5))
+
+
+def test_relevancy_heatmap_rejects_non_finite_inputs():
+    visual = torch.zeros(1, 3, 1, 1)
+    visual[0, 0, 0, 0] = float("nan")
+
+    with pytest.raises(FloatingPointError, match="Non-finite visual features"):
+        compute_relevancy_heatmap(
+            visual,
+            torch.tensor([[1.0, 0.0, 0.0]]),
+            scoring="cosine",
+        )
 
 
 def test_refine_mask_with_rgb_edges_snaps_grounding_mask_to_boundary():
@@ -292,6 +326,62 @@ def test_compute_iou_accepts_adaptive_threshold_mode():
     )
 
     assert adaptive_iou > 0.0
+
+
+def test_heatmap_to_binary_mask_supports_absolute_probability_threshold():
+    heatmap = torch.tensor([[0.49, 0.50], [0.51, 0.90]], dtype=torch.float32)
+
+    mask = heatmap_to_binary_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="absolute",
+    )
+
+    np.testing.assert_array_equal(mask, np.array([[0, 0], [1, 1]], dtype=np.uint8))
+
+
+def test_absolute_threshold_is_not_peak_relative():
+    heatmap = torch.tensor([[0.20, 0.30], [0.40, 0.49]], dtype=torch.float32)
+
+    absolute = heatmap_to_binary_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="absolute",
+    )
+    relative = heatmap_to_binary_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="fixed",
+    )
+
+    assert int(absolute.sum()) == 0
+    assert int(relative.sum()) == 3
+
+
+def test_bbox_smoothed_localization_accepts_any_tied_peak_in_any_instance_box():
+    heatmap = torch.zeros(8, 8)
+    heatmap[1, 1] = 1.0
+    heatmap[6, 6] = 1.0
+    bboxes = [np.array([5.5, 5.5, 7.0, 7.0], dtype=np.float32)]
+
+    assert localization_accuracy_bbox_smoothed(
+        heatmap,
+        bboxes,
+        image_shape=(8, 8),
+        kernel_size=1,
+    )
+
+
+def test_bbox_smoothed_localization_does_not_use_polygon_membership():
+    heatmap = torch.zeros(8, 8)
+    heatmap[3, 3] = 1.0
+
+    assert localization_accuracy_bbox_smoothed(
+        heatmap,
+        [np.array([2.0, 2.0, 4.0, 4.0], dtype=np.float32)],
+        image_shape=(8, 8),
+        kernel_size=1,
+    )
 
 
 def test_lerf_overlay_preserves_rgb_aspect_ratio(tmp_path):

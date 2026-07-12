@@ -143,15 +143,14 @@ sha256sum -c paper/artifacts/checksums.txt
 
 ## T3: ScanNet Point-Cloud Probe
 
-- `scannet_published_context_table.tex`: paper-facing ScanNet comparison
-  table under the VALA-aligned point-query protocol.
+- `scannet_published_context_table.tex`: paper-facing ScanNet table containing
+  published Gaussian-domain context and the local GT-point query result.
 - `scannet_pointcloud_radio_gs_vala8_reproduced_benchmark_20260615.json`:
-  canonical paper-facing GaussFM VALA-aligned ScanNet-8 reproduced benchmark
-  summary mirrored by `final_rows.yaml` and `paper/scannet_published_context_table.tex`.
+  derivative paper-facing summary that mirrors all eight rows from the raw
+  contextual-kNN source below; it is not an independent reproduction artifact.
 - `scannet_pointcloud_radio_gs_vala8_dino_cv_contextual_knn16_cand80_scene_mean_a045_spatial_smoothk12a1_results.{md,json}`:
-  supporting contextual-kNN diagnostic with scene-mean calibration and one-step
-  spatial logit propagation. It is retained for provenance, not as the final
-  paper table source.
+  canonical local contextual-kNN source with scene-mean calibration, one-step
+  spatial logit propagation, and all eight per-scene rows.
 - `scannet_pointcloud_radio_gs_vala8_dino_cv_proposal_memory_vxl005_a04_lm005_results.{md,json}`:
   proposal-memory readout ablation. It improves split19 detail metrics
   (0.3931/0.6255) but is not promoted because split15/split10 decrease.
@@ -193,6 +192,13 @@ sha256sum -c paper/artifacts/checksums.txt
 - `opengaussian_vs_radio_gs_report.md`: OpenGaussian/RADIO-GS comparison notes.
 
 ## Paper Tables And Guards
+
+- `protocol_alignment_audit_20260711.md`: consolidated T1/T2/T3 audit that
+  separates restored historical post-hoc numbers from the frozen VALA-aligned
+  reruns, records exact result hashes, explains the GrabCut readout, and audits
+  the LangSplat CLIP+SAM replacement path.
+- `protocol_alignment_scannet_20260711.md`: detailed ScanNet mesh-query versus
+  Gaussian-domain protocol and metric audit.
 
 - `paper_submission_main_table.md` and `paper_submission_result_audit.md`:
   paper-facing main table and source audit.

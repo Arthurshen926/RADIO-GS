@@ -389,6 +389,46 @@ class DirectProjectionCodec(nn.Module):
         return self.input_dim / self.bottleneck_dim
 
 
+class IdentityFeatureCodec(nn.Module):
+    """No-op codec for full-dimensional feature-field ablations.
+
+    This keeps the trainer/evaluator codec interface while removing both
+    compact projection and decoder normalization.  It is useful for CLIP-style
+    feature fields where small text-similarity margins can be damaged by an
+    unneeded reconstruction bottleneck.
+    """
+
+    def __init__(self, input_dim: int = 1280, bottleneck_dim: int = 1280) -> None:
+        super().__init__()
+        if int(bottleneck_dim) != int(input_dim):
+            raise ValueError(
+                "IdentityFeatureCodec requires bottleneck_dim == input_dim, "
+                f"got bottleneck_dim={bottleneck_dim}, input_dim={input_dim}"
+            )
+        self.input_dim = int(input_dim)
+        self.bottleneck_dim = int(bottleneck_dim)
+        self.encoder = nn.Identity()
+        self.decoder = nn.Identity()
+
+    def encode(self, x: torch.Tensor) -> torch.Tensor:
+        return x
+
+    def decode(self, z: torch.Tensor) -> torch.Tensor:
+        return z
+
+    def decode_points(self, z: torch.Tensor) -> torch.Tensor:
+        if z.ndim != 2:
+            raise ValueError(f"Expected [N, C] compact points, got shape {tuple(z.shape)}")
+        return z
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x
+
+    @property
+    def compression_ratio(self) -> float:
+        return 1.0
+
+
 def build_feature_codec(
     *,
     input_dim: int = 1280,
@@ -408,6 +448,11 @@ def build_feature_codec(
         )
     if normalized in {"direct", "linear", "projection"}:
         return DirectProjectionCodec(
+            input_dim=input_dim,
+            bottleneck_dim=bottleneck_dim,
+        )
+    if normalized in {"identity", "none", "raw"}:
+        return IdentityFeatureCodec(
             input_dim=input_dim,
             bottleneck_dim=bottleneck_dim,
         )

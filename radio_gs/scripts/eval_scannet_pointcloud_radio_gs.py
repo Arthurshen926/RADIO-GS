@@ -27,7 +27,7 @@ from radio_gs.artifact_paths import (
     resolve_siglip_projection_path,
 )
 from radio_gs.config import load_config
-from radio_gs.models.hcd_codec import HCDCodec
+from radio_gs.models.hcd_codec import build_feature_codec
 from radio_gs.models.hybrid_gaussian import HybridFeatureGaussian
 from radio_gs.models.point_summary_adapter import CompactToSummaryAdapter
 from radio_gs.models.proposal_memory import (
@@ -383,9 +383,10 @@ def _build_hybrid_model(config, checkpoint_path: str, device: torch.device):
     model.load_from_ply(ply_path)
     model = model.to(device).eval()
 
-    codec = HCDCodec(
+    codec = build_feature_codec(
         input_dim=getattr(config, "radio_feature_dim", 1280),
         bottleneck_dim=getattr(config, "bottleneck_dim", getattr(config, "hybrid_output_dim", 128)),
+        codec_type=getattr(config, "codec_type", "hcd"),
         dual_stream=getattr(config, "dual_stream", True),
         symmetric_decoder=getattr(config, "symmetric_decoder", False),
     ).to(device).eval()
@@ -432,7 +433,7 @@ def _load_state_or_raise(
 
 def _decode_points_1280(
     model: HybridFeatureGaussian,
-    codec: HCDCodec,
+    codec: torch.nn.Module,
     points_xyz: torch.Tensor,
     k: int,
     *,
@@ -473,7 +474,7 @@ def _decode_points_1280(
 
 def _decode_gaussian_indices_1280(
     model: HybridFeatureGaussian,
-    codec: HCDCodec,
+    codec: torch.nn.Module,
     gaussian_indices: torch.Tensor,
     *,
     points_xyz: Optional[torch.Tensor] = None,
@@ -566,7 +567,26 @@ def _project_points(
     return F.normalize(siglip.squeeze(0).float(), dim=-1)
 
 
-def _decode_compact_1280(codec: HCDCodec, compact: torch.Tensor) -> torch.Tensor:
+def _feature_projection_label(
+    config: object,
+    *,
+    text_encoder: str,
+    use_point_summary_adapter: bool,
+    point_summary_adapter_blend_alpha: float,
+) -> str:
+    if use_point_summary_adapter:
+        return (
+            "compact_to_summary_adapter"
+            if point_summary_adapter_blend_alpha >= 1.0
+            else "codec_summary_blend_compact_to_summary_adapter"
+        )
+    codec_type = str(getattr(config, "codec_type", "hcd") or "hcd").strip().lower()
+    if text_encoder == "openclip":
+        return f"{codec_type}_codec_plus_openclip_readout"
+    return f"{codec_type}_codec_plus_siglip_summary_head"
+
+
+def _decode_compact_1280(codec: torch.nn.Module, compact: torch.Tensor) -> torch.Tensor:
     if hasattr(codec, "decode_points"):
         return codec.decode_points(compact.float())
     compact_map = compact.T.reshape(1, compact.shape[1], compact.shape[0], 1)
@@ -1168,6 +1188,7 @@ def evaluate_scene(
     proposal_margin_threshold: float = 0.0,
     proposal_confidence_threshold: float = 0.0,
     proposal_consensus_threshold: float = 0.0,
+    text_encoder: str = "siglip2",
 ) -> dict:
     if query_mode not in QUERY_MODES:
         raise ValueError(f"query_mode must be one of: {', '.join(QUERY_MODES)}")
@@ -1650,14 +1671,11 @@ def evaluate_scene(
         "gaussian_index_position_mode": gaussian_index_position_mode,
         "candidate_k": int(candidate_k) if candidate_k is not None else None,
         "compact_feature_key": compact_feature_key,
-        "feature_projection": (
-            (
-                "compact_to_summary_adapter"
-                if point_summary_adapter_blend_alpha >= 1.0
-                else "hcd_decoder_summary_blend_compact_to_summary_adapter"
-            )
-            if use_point_summary_adapter
-            else "hcd_decoder_plus_siglip_summary_head"
+        "feature_projection": _feature_projection_label(
+            config,
+            text_encoder=text_encoder,
+            use_point_summary_adapter=use_point_summary_adapter,
+            point_summary_adapter_blend_alpha=point_summary_adapter_blend_alpha,
         ),
         "point_summary_adapter_blend_alpha": (
             float(point_summary_adapter_blend_alpha)
@@ -2073,9 +2091,9 @@ def main() -> None:
             )
             if args.use_point_summary_adapter
             else (
-                "HCD decoder + OpenCLIP identity readout"
+                "configured codec + OpenCLIP readout"
                 if args.text_encoder == "openclip"
-                else "HCD decoder + SigLIP summary head"
+                else "configured codec + SigLIP summary head"
             )
         )
     )
@@ -2128,6 +2146,7 @@ def main() -> None:
             proposal_margin_threshold=args.proposal_margin_threshold,
             proposal_confidence_threshold=args.proposal_confidence_threshold,
             proposal_consensus_threshold=args.proposal_consensus_threshold,
+            text_encoder=args.text_encoder,
         )
         all_results[scene] = result
         for split in split_names:

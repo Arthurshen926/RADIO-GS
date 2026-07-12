@@ -17,9 +17,9 @@
 
 当前结果显示，该方法在三个主要任务上形成闭环证据：
 
-- LERF-OVS rendered-view open-vocabulary query：GaussFM 达到 64.98 mIoU / 82.68 Acc，在同协议复现的开源方法对比中取得最优 mean mIoU。
-- LERF-OVS direct 3D open-vocabulary query：GaussFM 达到 54.36 mIoU / 80.84 Acc，显著超过同协议复现的 OpenGaussian、Dr. Splat、OccamLGS、LangSplatV2 等方法。
-- VALA-aligned ScanNet-v2 protocol：GaussFM 达到 19-class 36.55 mIoU / 50.57 mAcc，15-class 42.78 / 72.85，10-class 57.85 / 77.93，在所有评价指标上优于同协议复现的开源对比方法。
+- LERF-OVS rendered-view open-vocabulary query：GaussFM 本地可追溯结果为 58.89 mIoU / 85.98 Acc；外部方法行目前仅作为论文报告值背景。
+- LERF-OVS direct 3D open-vocabulary query：GaussFM 本地可追溯结果为 50.14 mIoU / 70.44 Acc@0.25；统一 readout 后再进行严格排名。
+- ScanNet-v2 八场景本地点查询：GaussFM 达到 19-class 38.06 mIoU / 61.29 mAcc，15-class 38.71 / 63.15，10-class 47.11 / 72.00；该 GT-point 查询域尚未与论文中 Gaussian-domain 外部结果统一。
 
 此外，在 feature usability 层面，重建出的三维场景特征在所选 frozen-head 2D 下游任务主指标上均超过 frame-wise RADIO，包括 SAM3 prompt/mask 相关任务、DINOv3 dense matching 和 DINOv3 mask propagation。存储方面，compact latent payload 相比直接存储 1280-D fp16 特征约 20 倍压缩；即使计入固定 decoder/refiner，feature-memory package 随场景规模增长时仍具有明显优势。
 
@@ -232,9 +232,9 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 | GOI | 42.00 | 59.20 | 23.90 / 44.60 | 55.80 / 67.80 | 33.70 / 56.30 | 54.50 / 68.20 |
 | GALA | 55.49 | 73.43 | 59.35 / 82.14 | 76.73 / 88.14 | 35.13 / 50.70 | 50.75 / 72.73 |
 | LangSplatV2 | 59.90 | 84.10 | 56.40 / 82.10 | 72.20 / 93.20 | 51.80 / 74.70 | 59.10 / 95.50 |
-| GaussFM | 64.98 | 82.68 | 64.29 / 92.86 | 76.09 / 93.22 | 53.78 / 62.83 | 65.76 / 81.82 |
+| GaussFM | 58.89 | 85.98 | 52.43 / 82.14 | 65.15 / 89.83 | 63.25 / 90.14 | 54.75 / 81.82 |
 
-结论：GaussFM 在同协议复现的 LERF-OVS 2D open-vocabulary query 中取得最高 mean mIoU，说明 compact RADIO feature field 渲染出的 dense feature map 具有强二维开放词汇定位能力。
+说明：GaussFM 行来自本地原始输出；外部行是 source-paper reported context。当前表支持 feature usability 讨论，但在 readout 完全统一前不作严格排名。
 
 ### 7.2 LERF 3D direct open-vocabulary query
 
@@ -248,9 +248,9 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 | Dr. Splat | 43.29 | 64.30 | 54.42 / 80.36 | 57.35 / 77.97 | 24.33 / 35.21 | 37.05 / 63.64 |
 | GALA | 36.71 | 59.71 | 45.25 / 69.64 | 53.27 / 84.75 | 17.08 / 25.35 | 31.22 / 59.09 |
 | LangSplatV2 | 35.87 | 55.80 | 45.15 / 67.86 | 49.30 / 79.66 | 19.01 / 21.13 | 30.00 / 54.55 |
-| GaussFM | 54.36 | 80.84 | 59.36 / 92.86 | 71.04 / 89.83 | 38.43 / 63.38 | 48.61 / 77.27 |
+| GaussFM | 50.14 | 70.44 | 51.04 / 67.86 | 56.40 / 76.27 | 59.99 / 83.10 | 33.12 / 54.55 |
 
-结论：GaussFM 在同协议复现的 LERF-OVS 3D open-vocabulary query 中取得最高 mean mIoU 和 mean Acc。该结果直接支撑“compact RADIO Gaussian feature field 可直接进行三维 primitive-level 查询”的核心 claim。
+说明：该本地结果支撑 compact RADIO Gaussian feature field 可进行 primitive-level 查询；外部行尚未在完全相同的 selector/readout 下重跑，因此不作严格排名。
 
 ### 7.3 VALA-aligned ScanNet-8 direct point query
 
@@ -264,9 +264,9 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 | Dr. Splat | 29.31 / 47.68 | 33.25 / 54.33 | 44.19 / 65.19 |
 | OccamLGS | 31.93 / 48.93 | 34.25 / 53.71 | 45.16 / 64.39 |
 | VALA | 32.11 / 50.05 | 35.10 / 54.77 | 46.21 / 65.61 |
-| GaussFM | 36.55 / 50.57 | 42.78 / 72.85 | 57.85 / 77.93 |
+| GaussFM | 38.06 / 61.29 | 38.71 / 63.15 | 47.11 / 72.00 |
 
-结论：GaussFM 在 VALA-aligned ScanNet-v2 open-vocabulary point query 中所有指标均为最优，说明 compact RADIO feature field 不只适用于 LERF 小场景二维/三维查询，也具备跨数据集的三维点级开放词汇理解能力。
+说明：结果表明 compact RADIO feature field 具备跨数据集的点级查询能力；由于本地 GT-point 域和外部 Gaussian-domain 协议不同，当前不据此宣称全面最优。
 
 ### 7.4 Reconstructed scene features vs frame-wise RADIO
 
@@ -274,7 +274,7 @@ Direct 3D object selection 中，primitive score 本身并不等于高质量 mas
 
 | Task | Primary metric | Frame-wise RADIO | GaussFM | Delta |
 |---|---:|---:|---:|---:|
-| LERF text grounding | mIoU | 0.4634 | 0.6498 | +0.1864 |
+| LERF text grounding | mIoU | 0.4673 | 0.5889 | +0.1217 |
 | SAM3 point prompt | mIoU | 0.3700 | 0.4173 | +0.0473 |
 | SAM3 box prompt | mIoU | 0.6560 | 0.6638 | +0.0079 |
 | SAM3 mask propagation | mIoU | 0.3583 | 0.3756 | +0.0173 |
@@ -378,7 +378,7 @@ Rendered boundary calibration 可以放 appendix 或作为次要消融；如果�
 2. **术语统一**：主文已统一为“compact foundation-feature scene memory / contextual Gaussian feature field / support calibration”等表达，`readout` 不再作为顶层方法叙事。
 3. **Direct3D 文字边界**：主结果明确为 no multiview-registration feature cache、no official RGB SAM decoder；RGB/GrabCut boundary snapping 被表述为 GT-free lightweight support calibration。
 4. **DINO/SAM/SigLIP 叙事**：主文已避免声称学习官方 DINO/SAM/SigLIP 原生特征，统一写作 RADIO-compatible scene feature 经过 frozen/adaptor heads 检验下游可用性。
-5. **论文压缩**：主文移除了历史 context/provenance 表，仅保留同协议主表、机制消融、feature usability、storage/efficiency 和核心定性图；详细审计放入补充材料或 artifacts。
+5. **论文压缩**：主文保留本地结果与 published-context 表、机制消融、feature usability、storage/efficiency 和核心定性图；详细审计放入补充材料或 artifacts。
 
 总体判断：
 
@@ -485,7 +485,7 @@ GaussFM 学习 compact foundation-feature Gaussian memory：在 Gaussian 上存�
 1. 保持 `final_rows.yaml`、主文表格和 reproducibility package 三者一致。
 2. 上传或归档 large-asset manifest 中列出的 checkpoint、mask/logit、qualitative source assets。
 3. 投稿前运行 LaTeX 编译、claim validator、final-row registry validator、checksum 和 `git diff --check`。
-4. 准备 cover letter，突出 compact reconstructive RADIO Gaussian feature memory、同协议三任务最优结果、storage/efficiency 和 feature usability 证据链。
+4. 准备 cover letter，突出 compact reconstructive RADIO Gaussian feature memory、可追溯的三任务本地结果、storage/efficiency 和 feature usability 证据链；统一协议完成前不写三任务最优。
 
 ### 12.3 写作计划
 

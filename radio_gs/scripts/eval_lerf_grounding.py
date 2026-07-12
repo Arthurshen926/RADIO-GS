@@ -34,6 +34,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import re
@@ -69,9 +70,21 @@ from radio_gs.models.prompt_conditioned_mask_refinement import (
     mask_overlap_stats,
     refine_mask_with_prompt_conditioned_sam3_head,
 )
+from radio_gs.evaluation.openclip_readout import (
+    NEGATIVE_PROMPTS,
+    load_or_generate_openclip_prompt_ensemble_embeddings,
+)
 from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
 
 logger = logging.getLogger(__name__)
+
+
+def file_sha256(path: str | Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -318,7 +331,10 @@ def load_or_generate_text_embeddings(
         data = torch.load(cache_path, map_location="cpu")
         bank = {q: e for q, e in zip(data["queries"], data["embeddings"])}
         missing = [q for q in queries if q not in bank]
-        if not missing:
+        cached_templates = [str(value) for value in data.get("prompt_templates", [])]
+        template_compatible = not cached_templates or cached_templates == ["{query}"]
+        encoder_compatible = str(data.get("text_encoder", "siglip2")) == "siglip2"
+        if not missing and template_compatible and encoder_compatible:
             emb = torch.stack([bank[q] for q in queries])
             return F.normalize(emb.float(), dim=-1).to(device)
 
@@ -327,7 +343,16 @@ def load_or_generate_text_embeddings(
         emb = encode_text_siglip2(queries, device)
         if cache_path:
             Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
-            torch.save({"queries": queries, "embeddings": emb.cpu()}, cache_path)
+            torch.save(
+                {
+                    "queries": queries,
+                    "prompt_templates": ["{query}"],
+                    "text_encoder": "siglip2",
+                    "model_name": _SIGLIP2_MODEL_NAME,
+                    "embeddings": emb.cpu(),
+                },
+                cache_path,
+            )
             logger.info("Cached text embeddings → %s", cache_path)
         return emb
     except Exception as exc:
@@ -338,11 +363,12 @@ def load_or_generate_text_embeddings(
         data = torch.load(cache_path, map_location="cpu")
         bank = {q: e for q, e in zip(data["queries"], data["embeddings"])}
         missing = [q for q in queries if q not in bank]
-        if missing:
+        cached_templates = [str(value) for value in data.get("prompt_templates", [])]
+        if missing or (cached_templates and cached_templates != ["{query}"]):
             raise RuntimeError(
-                f"Cached text-embedding bank at {cache_path} is missing "
-                f"queries: {missing}.  Please ensure the SigLIP2 model is "
-                f"downloadable or provide a complete cache."
+                f"Cached text-embedding bank at {cache_path} is incompatible "
+                f"with raw {{query}} evaluation (missing={missing}, "
+                f"prompt_templates={cached_templates or '<missing>'})."
             )
         emb = torch.stack([bank[q] for q in queries])
         return F.normalize(emb.float(), dim=-1).to(device)
@@ -457,6 +483,8 @@ def load_or_generate_prompt_ensemble_embeddings(
                 {
                     "queries": queries,
                     "prompt_templates": templates,
+                    "text_encoder": "siglip2",
+                    "model_name": _SIGLIP2_MODEL_NAME,
                     "embeddings": emb.cpu(),
                 },
                 cache_path,
@@ -470,6 +498,60 @@ def load_or_generate_prompt_ensemble_embeddings(
         "Cannot generate prompt-ensemble SigLIP2 text embeddings and no matching "
         "cache is available."
     )
+
+
+def validate_text_embedding_cache_contract(
+    cache_path: str | Path,
+    *,
+    required_queries: List[str],
+    prompt_templates: List[str],
+    text_encoder: str,
+    model_name: str,
+    pretrained: str = "",
+    exact_queries: bool = False,
+) -> None:
+    """Fail closed when a frozen-protocol text cache lacks provenance metadata."""
+    path = Path(cache_path)
+    if not path.exists():
+        raise FileNotFoundError(f"Frozen-protocol text cache not found: {path}")
+    payload = torch.load(path, map_location="cpu")
+    if not isinstance(payload, dict) or not isinstance(payload.get("embeddings"), torch.Tensor):
+        raise ValueError(f"Invalid text embedding cache payload: {path}")
+    cached_queries = [str(value) for value in payload.get("queries", [])]
+    required = [str(value) for value in required_queries]
+    if exact_queries:
+        if cached_queries != required:
+            raise ValueError(
+                f"Frozen cache query mismatch for {path}: expected exact {required}, "
+                f"got {cached_queries}"
+            )
+    else:
+        missing = [query for query in required if query not in cached_queries]
+        if missing:
+            raise ValueError(f"Frozen cache {path} is missing queries: {missing}")
+    cached_templates = [str(value) for value in payload.get("prompt_templates", [])]
+    if cached_templates != [str(value) for value in prompt_templates]:
+        raise ValueError(
+            f"Frozen cache prompt-template mismatch for {path}: "
+            f"expected {prompt_templates}, got {cached_templates or '<missing>'}"
+        )
+    if str(payload.get("text_encoder", "")) != str(text_encoder):
+        raise ValueError(
+            f"Frozen cache text_encoder mismatch for {path}: "
+            f"expected {text_encoder!r}, got {payload.get('text_encoder')!r}"
+        )
+    if str(payload.get("model_name", "")) != str(model_name):
+        raise ValueError(
+            f"Frozen cache model_name mismatch for {path}: "
+            f"expected {model_name!r}, got {payload.get('model_name')!r}"
+        )
+    if pretrained and str(payload.get("pretrained", "")) != str(pretrained):
+        raise ValueError(
+            f"Frozen cache pretrained mismatch for {path}: "
+            f"expected {pretrained!r}, got {payload.get('pretrained')!r}"
+        )
+    if int(payload["embeddings"].shape[0]) != len(cached_queries):
+        raise ValueError(f"Frozen cache row/query count mismatch: {path}")
 
 
 # ---------------------------------------------------------------------------
@@ -513,7 +595,14 @@ def load_lerf_ovs_labels(
                 continue
             polys = _coerce_polygons(obj.get("segmentation"))
             if polys:
-                objects.append({"category": cat, "polygons": polys})
+                bbox = np.asarray(obj.get("bbox", []), dtype=np.float32).reshape(-1)
+                objects.append(
+                    {
+                        "category": cat,
+                        "polygons": polys,
+                        "bbox": bbox[:4] if bbox.size >= 4 else None,
+                    }
+                )
                 all_categories.add(cat)
         frame_annotations[frame_id] = objects
 
@@ -564,7 +653,14 @@ def project_to_siglip2(
     features_1280: torch.Tensor,
     proj_model: nn.Module,
 ) -> torch.Tensor:
-    """Project ``[1, 1280, H, W]`` to L2-normalised ``[1, 1536, H, W]``."""
+    """Project ``[1, C, H, W]`` to finite FP32, L2-normalised features.
+
+    Projection modules may deliberately run in FP16, but normalization must
+    not: the default ``F.normalize`` epsilon underflows to zero in FP16, so an
+    all-zero background vector becomes ``0 / 0`` and contaminates an entire
+    relevance map with NaNs.  Keep the public readout contract in FP32 and use
+    an epsilon representable by both FP16 and FP32.
+    """
     B, C, H, W = features_1280.shape
     feat_flat = features_1280.reshape(B, C, H * W).permute(0, 2, 1)  # [B, HW, 1280]
     try:
@@ -575,7 +671,12 @@ def project_to_siglip2(
         feat_flat = feat_flat.to(dtype=first_param.dtype)
     with torch.no_grad():
         siglip = proj_model(feat_flat)  # [B, HW, 1536]
-    siglip = F.normalize(siglip, dim=-1)
+    siglip = siglip.float()
+    if not bool(torch.isfinite(siglip).all()):
+        raise FloatingPointError("Projection produced non-finite visual features")
+    siglip = F.normalize(siglip, dim=-1, eps=1e-8)
+    if not bool(torch.isfinite(siglip).all()):
+        raise FloatingPointError("Visual feature normalization produced non-finite values")
     return siglip.permute(0, 2, 1).reshape(B, -1, H, W)  # [B, 1536, H, W]
 
 
@@ -604,6 +705,25 @@ def compute_relevancy_heatmap(
     Returns:
         ``[N, H, W]`` similarity maps.
     """
+    # Relevance scoring is a probability readout, not part of mixed-precision
+    # rendering.  Do every normalization/matmul/softmax in FP32 and reject a
+    # corrupt tensor instead of silently reporting zero-valued metrics.
+    visual_feat = F.normalize(visual_feat.float(), dim=1, eps=1e-8)
+    text_emb = F.normalize(text_emb.float(), dim=-1, eps=1e-8)
+    if canonical_emb is not None:
+        canonical_emb = F.normalize(canonical_emb.float(), dim=-1, eps=1e-8)
+    if all_scene_emb is not None:
+        all_scene_emb = F.normalize(all_scene_emb.float(), dim=-1, eps=1e-8)
+    inputs = {
+        "visual features": visual_feat,
+        "text embeddings": text_emb,
+        "canonical embeddings": canonical_emb,
+        "all-scene embeddings": all_scene_emb,
+    }
+    for name, tensor in inputs.items():
+        if tensor is not None and not bool(torch.isfinite(tensor).all()):
+            raise FloatingPointError(f"Non-finite {name} in relevance scoring")
+
     _, D, H, W = visual_feat.shape
     vis_flat = visual_feat.squeeze(0).reshape(D, H * W)  # [D, HW]
 
@@ -611,7 +731,10 @@ def compute_relevancy_heatmap(
         # Softmax over all scene categories (matches LangSplat evaluation protocol)
         all_sim = all_scene_emb @ vis_flat  # [K, HW]
         all_prob = torch.softmax(all_sim * temperature, dim=0)  # [K, HW]
-        return all_prob[active_scene_indices].reshape(-1, H, W)
+        heatmaps = all_prob[active_scene_indices].reshape(-1, H, W)
+        if not bool(torch.isfinite(heatmaps).all()):
+            raise FloatingPointError("Non-finite softmax-scene heatmap")
+        return heatmaps
 
     sim = text_emb @ vis_flat  # [N, HW]
 
@@ -624,9 +747,15 @@ def compute_relevancy_heatmap(
         relevancy = torch.exp(sim_scaled - max_val) / (
             torch.exp(sim_scaled - max_val) + torch.exp(canon_scaled - max_val) + 1e-8
         )
-        return relevancy.reshape(-1, H, W)
+        heatmaps = relevancy.reshape(-1, H, W)
+        if not bool(torch.isfinite(heatmaps).all()):
+            raise FloatingPointError("Non-finite relevancy heatmap")
+        return heatmaps
 
-    return sim.reshape(-1, H, W)
+    heatmaps = sim.reshape(-1, H, W)
+    if not bool(torch.isfinite(heatmaps).all()):
+        raise FloatingPointError("Non-finite cosine heatmap")
+    return heatmaps
 
 
 def apply_readout_confidence_gate(
@@ -706,6 +835,40 @@ def localization_accuracy(
     return bool(gt_mask[py, px] > 0)
 
 
+def localization_accuracy_bbox_smoothed(
+    heatmap: torch.Tensor,
+    bboxes: List[np.ndarray],
+    *,
+    image_shape: Tuple[int, int],
+    kernel_size: int = 30,
+) -> bool:
+    """VALA/LangSplat localization: box-filtered peak inside any GT bbox."""
+    if not bboxes:
+        return False
+    heat = heatmap.detach().float().cpu().numpy()
+    size = max(1, int(kernel_size))
+    kernel = np.ones((size, size), dtype=np.float32) / float(size * size)
+    smoothed = cv2.filter2D(heat, -1, kernel)
+    peak_value = float(smoothed.max())
+    peak_yx = np.argwhere(smoothed == peak_value)
+    image_h, image_w = int(image_shape[0]), int(image_shape[1])
+    heat_h, heat_w = int(smoothed.shape[0]), int(smoothed.shape[1])
+    for py, px in peak_yx:
+        image_y = float(py) * image_h / max(heat_h, 1)
+        image_x = float(px) * image_w / max(heat_w, 1)
+        for raw_bbox in bboxes:
+            box = np.asarray(raw_bbox, dtype=np.float32).reshape(-1)
+            if box.size < 4:
+                continue
+            x1, y1, x2, y2 = [float(v) for v in box[:4]]
+            if (
+                min(x1, x2) <= image_x <= max(x1, x2)
+                and min(y1, y2) <= image_y <= max(y1, y2)
+            ):
+                return True
+    return False
+
+
 def heatmap_to_binary_mask(
     heatmap: torch.Tensor,
     *,
@@ -717,19 +880,25 @@ def heatmap_to_binary_mask(
     target_shape: Optional[Tuple[int, int]] = None,
 ) -> np.ndarray:
     """Binarize a heatmap and optionally resize it to a target H,W."""
-    hmax = heatmap.max().item()
-    if hmax <= 0:
-        source = np.zeros(tuple(heatmap.shape), dtype=np.uint8)
+    if threshold_mode == "absolute":
+        # LERF/LangSplat-style relevance maps are calibrated probabilities.
+        # Their published 0.5 rule is an absolute probability threshold, not
+        # 0.5 times the maximum response in each evaluated query heatmap.
+        source = (heatmap > float(threshold_ratio)).cpu().numpy().astype(np.uint8)
     else:
-        ratio = resolve_heatmap_threshold_ratio(
-            heatmap,
-            threshold_ratio,
-            mode=threshold_mode,
-            mean_std_k=threshold_mean_std_k,
-            min_ratio=threshold_min_ratio,
-            max_ratio=threshold_max_ratio,
-        )
-        source = (heatmap > ratio * hmax).cpu().numpy().astype(np.uint8)
+        hmax = heatmap.max().item()
+        if hmax <= 0:
+            source = np.zeros(tuple(heatmap.shape), dtype=np.uint8)
+        else:
+            ratio = resolve_heatmap_threshold_ratio(
+                heatmap,
+                threshold_ratio,
+                mode=threshold_mode,
+                mean_std_k=threshold_mean_std_k,
+                min_ratio=threshold_min_ratio,
+                max_ratio=threshold_max_ratio,
+            )
+            source = (heatmap > ratio * hmax).cpu().numpy().astype(np.uint8)
     if target_shape is not None and tuple(source.shape) != tuple(target_shape):
         source = cv2.resize(
             source,
@@ -750,7 +919,7 @@ def resolve_heatmap_threshold_ratio(
 ) -> float:
     """Return a GT-free peak-relative threshold ratio for one heatmap."""
     fixed = float(threshold_ratio)
-    if mode == "fixed":
+    if mode in {"fixed", "absolute"}:
         return fixed
     values = heatmap.detach().float()
     hmax = float(values.max().item()) if values.numel() else 0.0
@@ -1037,7 +1206,13 @@ def _import_render_pipeline():
     }
 
 
-def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.device):
+def load_render_pipeline(
+    config_path: str,
+    checkpoint_path: str,
+    device: torch.device,
+    *,
+    strict_checkpoint_contract: bool = False,
+):
     """Load the trained RADIO-GS model, codec, renderer, and refiner.
 
     Returns:
@@ -1132,12 +1307,44 @@ def load_render_pipeline(config_path: str, checkpoint_path: str, device: torch.d
         ).to(device).eval()
 
     ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
-    model.load_state_dict(ckpt["model_state_dict"], strict=False)
-    codec.load_state_dict(ckpt["codec_state_dict"], strict=False)
-    if "sharpener_state_dict" in ckpt:
-        sharpener.load_state_dict(ckpt["sharpener_state_dict"], strict=False)
-    if refiner is not None and "refiner_state_dict" in ckpt:
-        refiner.load_state_dict(ckpt["refiner_state_dict"], strict=False)
+    model_status = model.load_state_dict(ckpt["model_state_dict"], strict=False)
+    codec_status = codec.load_state_dict(ckpt["codec_state_dict"], strict=False)
+    contract = {
+        "model_missing_keys": list(model_status.missing_keys),
+        "model_unexpected_keys": list(model_status.unexpected_keys),
+        "codec_missing_keys": list(codec_status.missing_keys),
+        "codec_unexpected_keys": list(codec_status.unexpected_keys),
+    }
+    contract_errors = [
+        key for key, value in contract.items() if isinstance(value, list) and value
+    ]
+
+    def _load_optional_module(module: Optional[nn.Module], checkpoint_key: str, prefix: str) -> None:
+        if module is None or not module.state_dict():
+            contract[f"{prefix}_status"] = "not_applicable"
+            return
+        if checkpoint_key not in ckpt:
+            contract[f"{prefix}_status"] = "missing_state_dict"
+            contract_errors.append(f"{prefix}_missing_state_dict")
+            return
+        status = module.load_state_dict(ckpt[checkpoint_key], strict=False)
+        contract[f"{prefix}_status"] = "loaded"
+        contract[f"{prefix}_missing_keys"] = list(status.missing_keys)
+        contract[f"{prefix}_unexpected_keys"] = list(status.unexpected_keys)
+        if status.missing_keys:
+            contract_errors.append(f"{prefix}_missing_keys")
+        if status.unexpected_keys:
+            contract_errors.append(f"{prefix}_unexpected_keys")
+
+    _load_optional_module(sharpener, "sharpener_state_dict", "sharpener")
+    _load_optional_module(refiner, "refiner_state_dict", "refiner")
+    contract["errors"] = contract_errors
+    if strict_checkpoint_contract and contract_errors:
+        raise RuntimeError(
+            "Frozen evaluator checkpoint/config contract mismatch: "
+            + json.dumps(contract, sort_keys=True)
+        )
+    setattr(config, "checkpoint_contract", contract)
 
     return model, codec, renderer, sharpener, refiner, config, is_hybrid
 
@@ -1414,6 +1621,9 @@ def evaluate_scene(
     temperature: float = 50.0,
     scoring: str = "softmax_scene",
     heatmap_upsample: int = 1,
+    eval_at_image_resolution: bool = False,
+    localization_mode: str = "polygon_argmax",
+    localization_smoothing_kernel: int = 30,
     readout_confidence_gate: str = "none",
     readout_confidence_gamma: float = 1.0,
     save_overlay_vis: bool = False,
@@ -1471,6 +1681,15 @@ def evaluate_scene(
         if mode == "rendered":
             model, codec, renderer, sharpener, refiner, config, is_hybrid = render_pipeline
             scene_root_hint = getattr(config, "scene_root", "")
+            if lerf_dataset is None:
+                raise RuntimeError(f"Missing rendered pose dataset for scene={scene!r}")
+            missing_pose_frames = sorted(
+                set(frame_annotations) - set(lerf_dataset.pose_by_frame_idx)
+            )
+            if missing_pose_frames:
+                raise RuntimeError(
+                    f"Missing camera poses for labeled {scene} frames: {missing_pose_frames}"
+                )
         else:
             scene_root_hint = ""
         canonical_mode = canonical_lerf_mode(mode)
@@ -1535,8 +1754,9 @@ def evaluate_scene(
                         rgb_image=rgb_tensor,
                     )
 
-            # --- project to SigLIP2 ---
-            siglip_feat = project_to_siglip2(feat_1280.half(), proj)  # [1, 1536, H, W]
+            # Project into the selected text space.  ``proj`` is an identity
+            # module for native 512-D OpenCLIP/SAM-CLIP feature fields.
+            siglip_feat = project_to_siglip2(feat_1280.half(), proj)
 
             # Only evaluate categories present in this frame
             frame_cats = {obj["category"] for obj in frame_objects}
@@ -1550,6 +1770,13 @@ def evaluate_scene(
                 continue
 
             active_emb = text_embeddings[active_indices].to(device)  # [K, 1536]
+            if int(siglip_feat.shape[1]) != int(active_emb.shape[1]):
+                raise ValueError(
+                    "Visual/text feature dimension mismatch: "
+                    f"visual={int(siglip_feat.shape[1])}, text={int(active_emb.shape[1])}. "
+                    "Use --text_encoder openclip for a 512-D SAM-CLIP field or "
+                    "--text_encoder siglip2 for a RADIO/SigLIP2 field."
+                )
 
             # Build all-scene embeddings for softmax_scene scoring
             all_scene_emb = None
@@ -1576,8 +1803,17 @@ def evaluate_scene(
                     gamma=readout_confidence_gamma,
                 )
 
-            # Sub-pixel localization via heatmap upsampling
-            if heatmap_upsample > 1:
+            # Published LERF evaluators compare image-resolution masks.  Keep
+            # the legacy integer upsample path available for old artifacts,
+            # while the frozen protocol evaluates at the annotation size.
+            if eval_at_image_resolution and tuple(heatmaps.shape[-2:]) != (img_h, img_w):
+                heatmaps = F.interpolate(
+                    heatmaps.unsqueeze(0),
+                    size=(img_h, img_w),
+                    mode="bilinear",
+                    align_corners=False,
+                ).squeeze(0)
+            elif heatmap_upsample > 1:
                 K = heatmaps.shape[0]
                 heatmaps = F.interpolate(
                     heatmaps.unsqueeze(0),  # [1, K, fH, fW]
@@ -1618,7 +1854,22 @@ def evaluate_scene(
                     continue
 
                 # Localization: map feature-level argmax to image coordinates
-                is_correct = localization_accuracy(hm, gt_full)
+                if localization_mode == "bbox_smoothed_peak":
+                    cat_bboxes = [
+                        obj["bbox"]
+                        for obj in frame_objects
+                        if obj["category"] == cat and obj.get("bbox") is not None
+                    ]
+                    is_correct = localization_accuracy_bbox_smoothed(
+                        hm,
+                        cat_bboxes,
+                        image_shape=(img_h, img_w),
+                        kernel_size=localization_smoothing_kernel,
+                    )
+                elif localization_mode == "polygon_argmax":
+                    is_correct = localization_accuracy(hm, gt_full)
+                else:
+                    raise ValueError(f"Unsupported localization_mode: {localization_mode}")
                 loc_correct += int(is_correct)
                 loc_total += 1
                 per_cat_loc[cat].append(is_correct)
@@ -1754,8 +2005,14 @@ def evaluate_scene(
                     save_per_query=save_per_query_vis,
                 )
 
-        loc_acc = loc_correct / max(loc_total, 1)
-        miou = float(np.mean(ious)) if ious else 0.0
+        if loc_total == 0 or not ious:
+            raise RuntimeError(
+                f"Zero-sample LERF evaluation for scene={scene!r}, mode={canonical_mode!r}. "
+                "Check labeled frame IDs, camera poses, and requested feature source; "
+                "refusing to write a misleading all-zero result."
+            )
+        loc_acc = loc_correct / loc_total
+        miou = float(np.mean(ious))
 
         per_cat_summary = {}
         for cat in scene_categories:
@@ -1769,6 +2026,8 @@ def evaluate_scene(
 
         mode_metrics = {
             "loc_acc": loc_acc,
+            "localization_mode": localization_mode,
+            "localization_smoothing_kernel": int(localization_smoothing_kernel),
             "miou": miou,
             "loc_correct": loc_correct,
             "loc_total": loc_total,
@@ -1836,6 +2095,8 @@ def main() -> None:
                         help="Dir with teacher/oracle RADIO 1280-d .pt files (or parent with backbone/ subdir)")
     parser.add_argument("--gt_only", action="store_true",
                         help="Evaluate teacher/oracle RADIO features only (skip rendered mode)")
+    parser.add_argument("--rendered_only", action="store_true",
+                        help="Evaluate the rendered feature field only (skip teacher features)")
     # Scene selection
     parser.add_argument("--scene", default="all",
                         help="Scene name or 'all' (default: all)")
@@ -1854,14 +2115,23 @@ def main() -> None:
                         help="Use spatial feature projection instead of summary head")
     parser.add_argument("--text_embedding_cache", default=None,
                         help="Path to cache/load pre-computed text embeddings")
+    parser.add_argument("--canonical_embedding_cache", default=None,
+                        help="Optional cache for fixed generic negative/canonical text embeddings")
+    parser.add_argument("--text_encoder", choices=["siglip2", "openclip"], default="siglip2",
+                        help="Text/readout space. OpenCLIP expects a native 512-D SAM-CLIP field")
+    parser.add_argument("--openclip_model", default="ViT-B-16",
+                        help="OpenCLIP model used with --text_encoder openclip")
+    parser.add_argument("--openclip_pretrained", default="laion2b_s34b_b88k",
+                        help="OpenCLIP pretrained tag used with --text_encoder openclip")
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES,
                         help="Prompt templates separated by '|'. Use {query} as placeholder")
     # Evaluation
+    parser.add_argument("--protocol_preset", choices=["none", "vala_paper_2d"], default="none",
+                        help="Frozen paper-level preset: relevance>0.5, image-resolution evaluation, and no refinement")
     parser.add_argument("--iou_threshold", type=float, default=0.5,
-                        help="Threshold ratio (fraction of max) for mIoU binarisation")
-    parser.add_argument("--threshold_mode", choices=["fixed", "mean_std"], default="fixed",
-                        help="GT-free mask threshold rule. 'fixed' uses --iou_threshold; "
-                             "'mean_std' uses mean+k*std of the peak-normalized heatmap.")
+                        help="Mask threshold. Its units are selected by --threshold_mode")
+    parser.add_argument("--threshold_mode", choices=["fixed", "absolute", "mean_std"], default="fixed",
+                        help="Mask threshold rule: fixed/mean_std are peak-relative; absolute applies score > --iou_threshold")
     parser.add_argument("--threshold_mean_std_k", type=float, default=1.0,
                         help="k for --threshold_mode mean_std")
     parser.add_argument("--threshold_min_ratio", type=float, default=0.0,
@@ -1884,6 +2154,16 @@ def main() -> None:
                         help="Save per-query GT, initial, and final binary masks/overlays for qualitative figures")
     parser.add_argument("--heatmap_upsample", type=int, default=4,
                         help="Upsample heatmaps by this factor before localization (default 4)")
+    parser.add_argument("--eval_at_image_resolution", action="store_true",
+                        help="Bilinearly resize heatmaps to annotation resolution before mask evaluation")
+    parser.add_argument(
+        "--localization_mode",
+        choices=["polygon_argmax", "bbox_smoothed_peak"],
+        default="polygon_argmax",
+        help="Localization metric readout; bbox_smoothed_peak matches released VALA/LangSplat",
+    )
+    parser.add_argument("--localization_smoothing_kernel", type=int, default=30,
+                        help="Box-filter kernel for bbox_smoothed_peak localization")
     parser.add_argument(
         "--readout_confidence_gate",
         choices=["none", "quality", "visibility", "quality_visibility", "alpha"],
@@ -1975,6 +2255,32 @@ def main() -> None:
                         help="GPU device id")
 
     args = parser.parse_args()
+    if args.gt_only and args.rendered_only:
+        parser.error("--gt_only and --rendered_only are mutually exclusive")
+    if args.scene == "all" and not args.gt_only:
+        parser.error(
+            "Rendered --scene all is unsafe because one config/checkpoint cannot "
+            "represent four scene-specific fields; run one command per scene."
+        )
+    if args.protocol_preset == "vala_paper_2d":
+        # Freeze every paper-facing readout choice.  In particular, this does
+        # not inspect LERF annotations to choose a threshold, temperature,
+        # checkpoint, component rule, or boundary post-process.
+        args.scoring = "relevancy"
+        args.relevancy_temp = 0.1
+        args.threshold_mode = "absolute"
+        args.iou_threshold = 0.5
+        args.mask_refinement = "none"
+        args.readout_confidence_gate = "none"
+        args.prompt_templates = "{query}"
+        args.heatmap_upsample = 1
+        args.eval_at_image_resolution = True
+        args.localization_mode = "bbox_smoothed_peak"
+        args.localization_smoothing_kernel = 30
+        # RADIO/SigLIP fields use the declared frozen summary projection;
+        # native SAM-CLIP/OpenCLIP fields are already in their text space and
+        # therefore use the identity projection below.
+        args.use_summary_head = args.text_encoder == "siglip2"
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
     prompt_templates = parse_prompt_templates(args.prompt_templates)
 
@@ -1995,14 +2301,18 @@ def main() -> None:
     scenes = LERF_OVS_SCENES if args.scene == "all" else (args.scene,)
 
     print("=" * 70)
-    print("  LERF-OVS Text Grounding Evaluation (RADIO-GS → SigLIP2)")
+    print("  LERF-OVS Text Grounding Evaluation")
     print("=" * 70)
     print(f"  Scenes:     {', '.join(scenes)}")
     print(f"  Label dir:  {args.label_dir}")
-    print(f"  Mode:       {'Teacher only' if args.gt_only else 'Teacher + Rendered'}")
+    mode_label = "Teacher only" if args.gt_only else ("Rendered only" if args.rendered_only else "Teacher + Rendered")
+    print(f"  Mode:       {mode_label}")
+    print(f"  Protocol:   {args.protocol_preset}")
+    print(f"  Text enc.:  {args.text_encoder}")
     print(f"  IoU thresh: {args.iou_threshold}")
     print(f"  Thr mode:   {args.threshold_mode}")
     print(f"  Heatmap ↑:  {args.heatmap_upsample}×")
+    print(f"  Loc mode:   {args.localization_mode}")
     print(f"  Conf gate:  {args.readout_confidence_gate} (γ={args.readout_confidence_gamma})")
     print(f"  Mask ref.:  {args.mask_refinement}")
     print(f"  Prompts:    {len(prompt_templates)} template(s)")
@@ -2029,10 +2339,46 @@ def main() -> None:
         print(f"  [{i:2d}] {c}")
     print()
 
+    if args.protocol_preset == "vala_paper_2d":
+        if not args.text_embedding_cache or not args.canonical_embedding_cache:
+            parser.error(
+                "vala_paper_2d requires explicit --text_embedding_cache and "
+                "--canonical_embedding_cache with frozen provenance metadata"
+            )
+        if args.text_encoder == "siglip2" and not Path(args.summary_head_weights).exists():
+            parser.error(
+                "vala_paper_2d requires the declared --summary_head_weights file; "
+                "frozen evaluation forbids implicit checkpoint fallback"
+            )
+        encoder_model = (
+            args.openclip_model if args.text_encoder == "openclip" else _SIGLIP2_MODEL_NAME
+        )
+        encoder_pretrained = args.openclip_pretrained if args.text_encoder == "openclip" else ""
+        validate_text_embedding_cache_contract(
+            args.text_embedding_cache,
+            required_queries=categories,
+            prompt_templates=prompt_templates,
+            text_encoder=args.text_encoder,
+            model_name=encoder_model,
+            pretrained=encoder_pretrained,
+        )
+        validate_text_embedding_cache_contract(
+            args.canonical_embedding_cache,
+            required_queries=list(NEGATIVE_PROMPTS),
+            prompt_templates=["{query}"],
+            text_encoder=args.text_encoder,
+            model_name=encoder_model,
+            pretrained=encoder_pretrained,
+            exact_queries=True,
+        )
+
     # ------------------------------------------------------------------
-    # 2. Load SigLIP2 projection model
+    # 2. Load the visual-to-text projection model
     # ------------------------------------------------------------------
-    if args.use_summary_head:
+    if args.text_encoder == "openclip":
+        proj = nn.Identity()
+        print("Using identity projection for native OpenCLIP/SAM-CLIP features")
+    elif args.use_summary_head:
         head_path = Path(args.summary_head_weights)
         if head_path.exists():
             proj = SigLIP2SummaryHead.from_extracted_weights(str(head_path))
@@ -2057,14 +2403,24 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 3. Generate / load text embeddings
     # ------------------------------------------------------------------
-    print("Generating SigLIP2 text embeddings …")
+    print(f"Generating {args.text_encoder} text embeddings …")
     t0 = time.time()
-    text_embeddings = load_or_generate_prompt_ensemble_embeddings(
-        categories,
-        device,
-        cache_path=args.text_embedding_cache,
-        prompt_templates=prompt_templates,
-    )  # [N, 1536]
+    if args.text_encoder == "openclip":
+        text_embeddings = load_or_generate_openclip_prompt_ensemble_embeddings(
+            categories,
+            device,
+            cache_path=args.text_embedding_cache,
+            prompt_templates=prompt_templates,
+            model_name=args.openclip_model,
+            pretrained=args.openclip_pretrained,
+        )
+    else:
+        text_embeddings = load_or_generate_prompt_ensemble_embeddings(
+            categories,
+            device,
+            cache_path=args.text_embedding_cache,
+            prompt_templates=prompt_templates,
+        )
     text_embeddings = text_embeddings.half() if device.type == "cuda" else text_embeddings.float()
     print(f"  {text_embeddings.shape[0]} embeddings ({text_embeddings.shape[1]}-d), "
           f"{time.time() - t0:.1f}s")
@@ -2072,19 +2428,39 @@ def main() -> None:
     # Generate canonical phrase embeddings for relevancy scoring
     canonical_emb = None
     if args.scoring == "relevancy":
-        canon_cache = Path("checkpoints/siglip2_canonical_embeddings.pt")
-        if canon_cache.exists():
+        if args.protocol_preset == "vala_paper_2d" or args.text_encoder == "openclip":
+            default_name = f"{args.text_encoder}_lerf_negative_embeddings.pt"
+            canon_cache = Path(args.canonical_embedding_cache or f"checkpoints/{default_name}")
+            if args.text_encoder == "openclip":
+                canonical_emb = load_or_generate_openclip_prompt_ensemble_embeddings(
+                    list(NEGATIVE_PROMPTS),
+                    device,
+                    cache_path=canon_cache,
+                    prompt_templates=["{query}"],
+                    model_name=args.openclip_model,
+                    pretrained=args.openclip_pretrained,
+                )
+            else:
+                canonical_emb = load_or_generate_prompt_ensemble_embeddings(
+                    list(NEGATIVE_PROMPTS),
+                    device,
+                    cache_path=str(canon_cache),
+                    prompt_templates=["{query}"],
+                )
+            canonical_emb = F.normalize(canonical_emb.float(), dim=-1).to(device)
+            canonical_emb = canonical_emb.half() if device.type == "cuda" else canonical_emb.float()
+            print(f"  Fixed generic negatives {list(NEGATIVE_PROMPTS)}: {canonical_emb.shape}")
+        else:
+            canon_cache = Path(args.canonical_embedding_cache or "checkpoints/siglip2_canonical_embeddings.pt")
+            if not canon_cache.exists():
+                raise FileNotFoundError(
+                    f"Canonical embedding cache not found: {canon_cache}. "
+                    "Use --protocol_preset vala_paper_2d to generate fixed generic negatives."
+                )
             cdata = torch.load(canon_cache, map_location="cpu")
             canonical_emb = F.normalize(cdata["embeddings"].float(), dim=-1).to(device)
             canonical_emb = canonical_emb.half() if device.type == "cuda" else canonical_emb.float()
             print(f"  Loaded canonical embeddings from {canon_cache}: {canonical_emb.shape}")
-        else:
-            # Fallback: use mean of all category embeddings as canonical
-            canonical_emb = F.normalize(
-                text_embeddings.float().mean(dim=0, keepdim=True), dim=-1
-            ).to(device)
-            canonical_emb = canonical_emb.half() if device.type == "cuda" else canonical_emb.float()
-            print(f"  Using mean-category canonical embedding: {canonical_emb.shape}")
         print(f"  Scoring: LERF-style relevancy")
     elif args.scoring == "softmax_scene":
         print("  Scoring: scene-category softmax")
@@ -2098,7 +2474,12 @@ def main() -> None:
     lerf_datasets: Dict[str, LERFDataset] = {}
     if not args.gt_only:
         print("Loading rendering pipeline …")
-        render_pipeline = load_render_pipeline(args.config, args.checkpoint, device)
+        render_pipeline = load_render_pipeline(
+            args.config,
+            args.checkpoint,
+            device,
+            strict_checkpoint_contract=args.protocol_preset == "vala_paper_2d",
+        )
         config = render_pipeline[5]
         fH = getattr(config, "feature_height", 30)
         fW = getattr(config, "feature_width", 40)
@@ -2118,6 +2499,7 @@ def main() -> None:
                     annotation_dir=str(Path(args.label_dir) / scene),
                     feature_height=fH,
                     feature_width=fW,
+                    allow_empty_features=True,
                 )
                 lerf_datasets[scene] = ds
             except Exception as e:
@@ -2135,7 +2517,9 @@ def main() -> None:
         print(f"{'─' * 70}")
 
         gt_feat_dir = None
-        if args.gt_feature_dir:
+        if args.rendered_only:
+            gt_feat_dir = None
+        elif args.gt_feature_dir:
             candidate = Path(args.gt_feature_dir)
             if candidate.name == scene or (candidate / "backbone").exists():
                 gt_feat_dir = str(candidate)
@@ -2180,6 +2564,9 @@ def main() -> None:
             temperature=args.relevancy_temp,
             scoring=args.scoring,
             heatmap_upsample=args.heatmap_upsample,
+            eval_at_image_resolution=args.eval_at_image_resolution,
+            localization_mode=args.localization_mode,
+            localization_smoothing_kernel=args.localization_smoothing_kernel,
             readout_confidence_gate=args.readout_confidence_gate,
             readout_confidence_gamma=args.readout_confidence_gamma,
             save_overlay_vis=args.save_overlay_vis,
@@ -2271,9 +2658,32 @@ def main() -> None:
     # ------------------------------------------------------------------
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    provenance_paths = {
+        "evaluator_source": str(Path(__file__).resolve()),
+        "config": args.config,
+        "checkpoint": args.checkpoint,
+        "text_embedding_cache": args.text_embedding_cache,
+        "canonical_embedding_cache": args.canonical_embedding_cache,
+    }
+    if args.text_encoder == "siglip2" and args.use_summary_head:
+        provenance_paths["summary_head_weights"] = args.summary_head_weights
+
     report = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         "args": {k: str(v) for k, v in vars(args).items()},
+        "provenance": {
+            name: {
+                "path": str(path),
+                "sha256": file_sha256(path),
+            }
+            for name, path in provenance_paths.items()
+            if path and Path(path).exists()
+        },
+        "checkpoint_contract": (
+            getattr(render_pipeline[5], "checkpoint_contract", {})
+            if render_pipeline is not None
+            else {}
+        ),
         "prompt_templates": prompt_templates,
         "categories": categories,
         "scenes": {},
@@ -2298,6 +2708,8 @@ def main() -> None:
                 "loc_correct": m["loc_correct"],
                 "loc_total": m["loc_total"],
                 "n_iou_samples": m.get("n_iou_samples"),
+                "localization_mode": m.get("localization_mode"),
+                "localization_smoothing_kernel": m.get("localization_smoothing_kernel"),
                 "per_category": per_cat_json,
             }
             for key in (

@@ -13,6 +13,7 @@ import yaml
 from radio_gs.scripts.build_scannet_vala8_report import SCAN_SPLITS, VALA8_SCENES
 
 SCANNET_TABLE = Path("paper/scannet_published_context_table.tex")
+LERF_SCENES = ("figurines", "ramen", "teatime", "waldo_kitchen")
 
 PROMOTED_SCANNET_SOURCE_ARGS = {
     "scene_list": ",".join(VALA8_SCENES),
@@ -74,8 +75,13 @@ def _check_vala8_source_protocol(
         issues.append(f"{label} scene list drift: got {scenes!r}, expected {list(VALA8_SCENES)!r}")
 
     rows = source.get("rows", [])
+    if not isinstance(rows, list):
+        issues.append(f"{label} rows must be a list")
+        rows = []
+    if len(rows) != len(VALA8_SCENES):
+        issues.append(f"{label} must contain exactly {len(VALA8_SCENES)} per-scene rows, got {len(rows)}")
     row_scenes = [row.get("scene") for row in rows]
-    if row_scenes and row_scenes != list(VALA8_SCENES):
+    if row_scenes != list(VALA8_SCENES):
         issues.append(f"{label} per-scene row order drift: got {row_scenes!r}")
 
     if len(rows) == len(VALA8_SCENES):
@@ -101,6 +107,91 @@ def _check_vala8_source_protocol(
         actual = _as_str(source_args.get(key))
         if actual != expected:
             issues.append(f"{label} source_args.{key} mismatch: got {actual!r}, expected {expected!r}")
+
+
+def _check_promoted_lerf_rows(
+    payload: dict[str, Any],
+    root: Path,
+    issues: list[str],
+) -> None:
+    try:
+        t1 = payload["tracks"]["t1_lerf_rendered_view_ovs"]
+        t1_row = t1["rows"]["ctfgs_rendered"]
+        t1_source_path = _resolve(root, t1["source_json"])
+        t1_source = _read_json(t1_source_path)
+    except (KeyError, OSError, json.JSONDecodeError) as exc:
+        issues.append(f"cannot load promoted LERF 2D source: {exc}")
+    else:
+        if t1_row.get("promoted") is not True:
+            issues.append("LERF 2D ctfgs_rendered row must be promoted=true")
+        for registry_key, source_key in (("miou", "miou"), ("locacc", "loc_acc")):
+            try:
+                registry_value = _rounded4(t1_row[registry_key])
+                source_value = _rounded4(t1_source["macro"][source_key])
+            except (KeyError, TypeError, ValueError) as exc:
+                issues.append(f"cannot compare LERF 2D macro {registry_key}: {exc}")
+                continue
+            if registry_value != source_value:
+                issues.append(
+                    f"LERF 2D promoted {registry_key} drift: "
+                    f"registry={registry_value:.4f} source={source_value:.4f}"
+                )
+        registry_scenes = t1_row.get("per_scene", {})
+        if set(registry_scenes) != set(LERF_SCENES):
+            issues.append(f"LERF 2D registry per_scene must contain exactly {list(LERF_SCENES)!r}")
+        for scene in LERF_SCENES:
+            for registry_key, source_key in (("miou", "miou"), ("acc", "loc_acc")):
+                try:
+                    registry_value = _rounded4(registry_scenes[scene][registry_key])
+                    source_value = _rounded4(t1_source["scenes"][scene][source_key])
+                except (KeyError, TypeError, ValueError) as exc:
+                    issues.append(f"cannot compare LERF 2D {scene}.{registry_key}: {exc}")
+                    continue
+                if registry_value != source_value:
+                    issues.append(
+                        f"LERF 2D promoted {scene}.{registry_key} drift: "
+                        f"registry={registry_value:.4f} source={source_value:.4f}"
+                    )
+
+    try:
+        t2 = payload["tracks"]["t2_lerf_direct_3d_selection"]
+        t2_row = t2["rows"]["ctfgs_compact_prompt_ensemble_score_component_guard_thr0p55"]
+        t2_source_path = _resolve(root, t2["source_json"])
+        t2_source = _read_json(t2_source_path)
+        t2_source_row = t2_source["rows"][t2_row["source_row"]]
+    except (KeyError, OSError, json.JSONDecodeError) as exc:
+        issues.append(f"cannot load promoted LERF Direct3D source: {exc}")
+    else:
+        if t2_row.get("promoted") is not True:
+            issues.append("LERF Direct3D compact score-component row must be promoted=true")
+        for metric in ("miou", "acc025"):
+            try:
+                registry_value = _rounded4(t2_row[metric])
+                source_value = _rounded4(t2_source_row[metric])
+            except (KeyError, TypeError, ValueError) as exc:
+                issues.append(f"cannot compare LERF Direct3D macro {metric}: {exc}")
+                continue
+            if registry_value != source_value:
+                issues.append(
+                    f"LERF Direct3D promoted {metric} drift: "
+                    f"registry={registry_value:.4f} source={source_value:.4f}"
+                )
+        registry_scenes = t2_row.get("per_scene", {})
+        if set(registry_scenes) != set(LERF_SCENES):
+            issues.append(f"LERF Direct3D registry per_scene must contain exactly {list(LERF_SCENES)!r}")
+        for scene in LERF_SCENES:
+            for metric in ("miou", "acc025"):
+                try:
+                    registry_value = _rounded4(registry_scenes[scene][metric])
+                    source_value = _rounded4(t2_source_row["per_scene"][scene][metric])
+                except (KeyError, TypeError, ValueError) as exc:
+                    issues.append(f"cannot compare LERF Direct3D {scene}.{metric}: {exc}")
+                    continue
+                if registry_value != source_value:
+                    issues.append(
+                        f"LERF Direct3D promoted {scene}.{metric} drift: "
+                        f"registry={registry_value:.4f} source={source_value:.4f}"
+                    )
 
 
 def _check_promoted_scannet_row(
@@ -146,6 +237,77 @@ def _check_promoted_scannet_row(
                         f"registry={registry_value:.4f} source={source_value:.4f}"
                     )
 
+        registry_scenes = row.get("per_scene", {})
+        if set(registry_scenes) != set(VALA8_SCENES):
+            issues.append(
+                f"ScanNet promoted registry per_scene must contain exactly {list(VALA8_SCENES)!r}"
+            )
+        source_rows = {source_row.get("scene"): source_row for source_row in source.get("rows", [])}
+        for scene in VALA8_SCENES:
+            for split in ("19", "15", "10"):
+                row_key = f"split{split}"
+                for metric in ("miou", "macc"):
+                    try:
+                        registry_value = _rounded4(registry_scenes[scene][row_key][metric])
+                        source_value = _rounded4(source_rows[scene][split][metric])
+                    except (KeyError, TypeError, ValueError) as exc:
+                        issues.append(f"cannot compare ScanNet {scene}.{row_key}.{metric}: {exc}")
+                        continue
+                    if registry_value != source_value:
+                        issues.append(
+                            f"ScanNet promoted {scene}.{row_key}.{metric} drift: "
+                            f"registry={registry_value:.4f} source={source_value:.4f}"
+                        )
+
+        summary_json = track.get("paper_summary_json")
+        if summary_json:
+            summary_path = _resolve(root, summary_json)
+            try:
+                summary = _read_json(summary_path)
+            except (OSError, json.JSONDecodeError) as exc:
+                issues.append(f"cannot read ScanNet paper summary {summary_path}: {exc}")
+            else:
+                _check_vala8_source_protocol(
+                    summary,
+                    label="ScanNet paper summary",
+                    expected_args=PROMOTED_SCANNET_SOURCE_ARGS,
+                    issues=issues,
+                )
+                summary_rows = {item.get("scene"): item for item in summary.get("rows", [])}
+                for split in ("19", "15", "10"):
+                    for metric in ("miou", "macc"):
+                        try:
+                            summary_value = _rounded4(summary["macro"][split][metric])
+                            source_value = _rounded4(source["macro"][split][metric])
+                        except (KeyError, TypeError, ValueError) as exc:
+                            issues.append(f"cannot compare ScanNet paper summary split{split}.{metric}: {exc}")
+                            continue
+                        if summary_value != source_value:
+                            issues.append(
+                                f"ScanNet paper summary split{split}.{metric} drift: "
+                                f"summary={summary_value:.4f} source={source_value:.4f}"
+                            )
+                for scene in VALA8_SCENES:
+                    for split in ("19", "15", "10"):
+                        for metric in ("miou", "macc"):
+                            try:
+                                summary_value = _rounded4(summary_rows[scene][split][metric])
+                                source_value = _rounded4(source_rows[scene][split][metric])
+                            except (KeyError, TypeError, ValueError) as exc:
+                                issues.append(
+                                    f"cannot compare ScanNet paper summary {scene}.split{split}.{metric}: {exc}"
+                                )
+                                continue
+                            if summary_value != source_value:
+                                issues.append(
+                                    f"ScanNet paper summary {scene}.split{split}.{metric} drift: "
+                                    f"summary={summary_value:.4f} source={source_value:.4f}"
+                                )
+
+    for name, context_row in track.get("rows", {}).items():
+        if name.endswith("_published_context") and context_row.get("reproduced_local") is not False:
+            issues.append(f"ScanNet published context row {name} must have reproduced_local=false")
+
     table_path = root / SCANNET_TABLE
     try:
         table_text = table_path.read_text(encoding="utf-8")
@@ -158,7 +320,7 @@ def _check_promoted_scannet_row(
         row_key = f"split{split}"
         for metric in ("miou", "macc"):
             try:
-                expected_cells.append(f"\\textbf{{{_pct(row[row_key][metric])}}}")
+                expected_cells.append(_pct(row[row_key][metric]))
             except (KeyError, TypeError, ValueError) as exc:
                 issues.append(f"cannot format ScanNet promoted {row_key}.{metric}: {exc}")
                 return
@@ -310,6 +472,7 @@ def validate_registry(final_rows_path: str | Path, *, root: str | Path = ".") ->
     root_path = Path(root)
     payload = _read_yaml(Path(final_rows_path))
     issues: list[str] = []
+    _check_promoted_lerf_rows(payload, root_path, issues)
     _check_promoted_scannet_row(payload, root_path, issues)
     _check_completed_external_summaries(payload, root_path, issues)
     return issues

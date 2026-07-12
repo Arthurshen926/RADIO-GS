@@ -43,7 +43,7 @@ from radio_gs.models.depth_fusion import (
     sample_depth_fusion_training_pixels,
     train_depth_fusion_probe,
 )
-from radio_gs.models.hcd_codec import HCDCodec
+from radio_gs.models.hcd_codec import build_feature_codec
 from radio_gs.models.featsharp_3d import FeatSharp3D
 from radio_gs.models.screen_refiner import (
     ScreenSpaceRefiner,
@@ -104,6 +104,16 @@ def _train_probe(probe, train_X, train_Y, epochs=300, batch_size=16384,
     return probe
 
 
+def _build_codec_from_config(config):
+    return build_feature_codec(
+        input_dim=getattr(config, "radio_feature_dim", 1280),
+        bottleneck_dim=getattr(config, "bottleneck_dim", 64),
+        codec_type=getattr(config, "codec_type", "hcd"),
+        dual_stream=getattr(config, "dual_stream", True),
+        symmetric_decoder=getattr(config, "symmetric_decoder", False),
+    )
+
+
 def load_model_and_render(config_path, checkpoint_path):
     """Load trained model and render 1280d features for all frames."""
     config = load_config(config_path)
@@ -147,12 +157,7 @@ def load_model_and_render(config_path, checkpoint_path):
     model = model.to(device).eval()
     use_2dgs = resolve_use_2dgs(config, ply_path)
     
-    codec = HCDCodec(
-        input_dim=getattr(config, "radio_feature_dim", 1280),
-        bottleneck_dim=getattr(config, "bottleneck_dim", 64),
-        dual_stream=getattr(config, "dual_stream", True),
-        symmetric_decoder=getattr(config, "symmetric_decoder", False),
-    ).to(device).eval()
+    codec = _build_codec_from_config(config).to(device).eval()
     
     renderer = FeatureFieldRenderer(
         image_height=getattr(config, "feature_height", 30),

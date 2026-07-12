@@ -15,8 +15,17 @@ NEGATIVE_PROMPTS = ("object", "things", "stuff", "texture")
 def normalized_embeddings(x: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
     """L2-normalize rows while keeping all-zero rows zero."""
     values = x.float()
+    if not bool(torch.isfinite(values).all()):
+        raise FloatingPointError("Cannot normalize non-finite OpenCLIP embeddings")
     norms = values.norm(dim=-1, keepdim=True)
-    return torch.where(norms > eps, values / norms.clamp_min(eps), torch.zeros_like(values))
+    normalized = torch.where(
+        norms > eps,
+        values / norms.clamp_min(eps),
+        torch.zeros_like(values),
+    )
+    if not bool(torch.isfinite(normalized).all()):
+        raise FloatingPointError("OpenCLIP embedding normalization produced non-finite values")
+    return normalized
 
 
 def cosine_logits(features: torch.Tensor, text_embeddings: torch.Tensor) -> torch.Tensor:
@@ -54,14 +63,22 @@ def load_or_generate_openclip_prompt_ensemble_embeddings(
     cache = Path(cache_path) if cache_path else None
     if cache is not None and cache.exists():
         data = torch.load(cache, map_location="cpu")
-        if (
-            [str(q) for q in data.get("queries", [])] == query_list
-            and [str(t) for t in data.get("prompt_templates", ["{query}"])] == list(templates)
+        cached_queries = [str(q) for q in data.get("queries", [])]
+        cache_compatible = (
+            [str(t) for t in data.get("prompt_templates", ["{query}"])] == list(templates)
             and str(data.get("text_encoder", "openclip")) == "openclip"
-            and str(data.get("openclip_model", model_name)) == model_name
-            and str(data.get("openclip_pretrained", pretrained)) == pretrained
-        ):
-            return F.normalize(data["embeddings"].float(), dim=-1).to(device)
+            and str(data.get("openclip_model", data.get("model_name", model_name))) == model_name
+            and str(data.get("openclip_pretrained", data.get("pretrained", pretrained))) == pretrained
+        )
+        if cache_compatible:
+            bank = {query: embedding for query, embedding in zip(cached_queries, data["embeddings"])}
+            missing = [query for query in query_list if query not in bank]
+            if not missing:
+                # A frozen all-scene bank is intentionally a superset of any
+                # single scene.  Select rows without re-encoding or mutating
+                # the declared cache on disk.
+                selected = torch.stack([bank[query] for query in query_list])
+                return normalized_embeddings(selected).to(device)
 
     import open_clip
 
@@ -79,7 +96,7 @@ def load_or_generate_openclip_prompt_ensemble_embeddings(
         tokens = torch.cat([tokenizer(prompt) for prompt in flat_prompts]).to(device)
         flat_emb = normalized_embeddings(model.encode_text(tokens))
         emb = flat_emb.reshape(len(query_list), len(templates), -1).mean(dim=1)
-        emb = F.normalize(emb.float(), dim=-1)
+        emb = normalized_embeddings(emb)
     if cache is not None:
         cache.parent.mkdir(parents=True, exist_ok=True)
         torch.save(
@@ -89,6 +106,8 @@ def load_or_generate_openclip_prompt_ensemble_embeddings(
                 "text_encoder": "openclip",
                 "openclip_model": model_name,
                 "openclip_pretrained": pretrained,
+                "model_name": model_name,
+                "pretrained": pretrained,
                 "embeddings": emb.detach().cpu(),
             },
             cache,
