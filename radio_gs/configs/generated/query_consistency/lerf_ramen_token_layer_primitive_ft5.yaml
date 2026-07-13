@@ -1,0 +1,22 @@
+base_config: lerf_ramen_token_layer_core_ft20.yaml
+exp_name: lerf_ramen_token_layer_primitive_ft5
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_primitive_ft5
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_ft5/checkpoints/best.pth
+resume_from: ""
+
+# Controlled intervention: keep the canonical token-wise field from the
+# previous audit, but supervise decoded Gaussian primitives from the same
+# frozen RADIO maps used by the screen-space reconstruction loss.
+direct_point_loss_weight: 1.0
+direct_point_sample_count: 2048
+direct_point_sample_strategy: uniform
+direct_point_source: gaussian
+direct_point_query_mode: gaussian_index
+direct_point_gaussian_position_mode: gaussian_center
+direct_point_feature_key: features
+direct_point_render_consistency_weight: 0.0
+
+epochs: 5
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

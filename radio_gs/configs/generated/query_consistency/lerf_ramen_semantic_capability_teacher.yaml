@@ -1,0 +1,8 @@
+base_config: ../../lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml
+
+# Query-free capability maps produced by the global cross-scene region bridge
+# and the frozen official SigLIP2 summary head. Camera registration remains the
+# same as the raw RADIO extraction; no benchmark image, mask, or text is read.
+feature_dir: /root/RADIO-GS/output/semantic_bridge/ramen_train_dev_bridge_dense/ramen
+pose_dir: /root/RADIO-GS/output/radio_features_lerf/ramen/poses_w2c
+pose_file: ""

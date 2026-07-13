@@ -17,6 +17,7 @@ import numpy as np
 import torch
 import torch.nn.functional as torch_functional
 from scipy.spatial import cKDTree
+from scipy.sparse import csr_matrix
 
 
 class QueryKind(str, Enum):
@@ -238,6 +239,9 @@ class SupportPropagationConfig:
     iterations: int = 4
     residual: float = 0.35
     clamp_seeds: bool = True
+    graph_mode: str = "directed"
+    adaptive_spatial: bool = False
+    spatial_scale: float = 2.0
 
     def __post_init__(self) -> None:
         if self.neighbors <= 0 or self.iterations < 0:
@@ -246,6 +250,10 @@ class SupportPropagationConfig:
             raise ValueError("propagation scales must be positive")
         if not 0.0 <= self.residual <= 1.0:
             raise ValueError("residual must be in [0,1]")
+        if self.graph_mode not in {"directed", "symmetric_union"}:
+            raise ValueError("graph_mode must be directed or symmetric_union")
+        if self.spatial_scale <= 0:
+            raise ValueError("spatial_scale must be positive")
 
 
 @dataclass(frozen=True)
@@ -288,11 +296,37 @@ def build_support_graph(
     distances, indices = cKDTree(points).query(points, k=k)
     distances = np.asarray(distances, dtype=np.float32)[:, 1:]
     indices = np.asarray(indices, dtype=np.int64)[:, 1:]
+    if config.graph_mode == "symmetric_union":
+        rows = np.repeat(np.arange(count, dtype=np.int64), indices.shape[1])
+        adjacency = csr_matrix(
+            (np.ones(rows.shape[0], dtype=np.uint8), (rows, indices.reshape(-1))),
+            shape=(count, count),
+        )
+        symmetric = adjacency.maximum(adjacency.T).tocsr()
+        degrees = np.diff(symmetric.indptr)
+        width = int(degrees.max(initial=0))
+        symmetric_indices = np.repeat(
+            np.arange(count, dtype=np.int64)[:, None], width, axis=1
+        )
+        symmetric_distances = np.full((count, width), np.inf, dtype=np.float32)
+        for row in range(count):
+            neighbors = symmetric.indices[
+                symmetric.indptr[row] : symmetric.indptr[row + 1]
+            ]
+            degree = neighbors.size
+            symmetric_indices[row, :degree] = neighbors
+            symmetric_distances[row, :degree] = np.linalg.norm(
+                points[neighbors] - points[row], axis=1
+            )
+        indices = symmetric_indices
+        distances = symmetric_distances
     # Avoid materializing [N,K,D], which is several GB for ScanNet SAM3
     # features.  The graph remains exact; only the temporary working set is
     # bounded.
     feature_cosine = np.empty(indices.shape, dtype=np.float32)
-    affinity_chunk_size = 1024
+    # 4096 keeps the temporary below ~320 MiB for 1280-D, k=16 ScanNet
+    # features while avoiding hundreds of costly large allocations.
+    affinity_chunk_size = 4096
     for start in range(0, count, affinity_chunk_size):
         stop = min(start + affinity_chunk_size, count)
         feature_cosine[start:stop] = np.einsum(
@@ -301,10 +335,23 @@ def build_support_graph(
             normalized[indices[start:stop]],
             optimize=True,
         )
-    spatial_weight = np.exp(-0.5 * (distances / config.spatial_sigma) ** 2)
-    feature_weight = np.exp((feature_cosine - 1.0) / config.feature_temperature)
-    weights = spatial_weight * feature_weight
-    weights /= np.maximum(weights.sum(axis=1, keepdims=True), 1e-12)
+    valid = np.isfinite(distances)
+    if config.adaptive_spatial:
+        local = np.where(valid, distances, np.nan)
+        sigma = np.nanmedian(local, axis=1, keepdims=True) * config.spatial_scale
+        sigma = np.where(np.isfinite(sigma), sigma, config.spatial_sigma)
+        sigma = np.maximum(sigma, 1e-6)
+    else:
+        sigma = float(config.spatial_sigma)
+    log_weights = (
+        -0.5 * (distances / sigma) ** 2
+        + (feature_cosine - 1.0) / config.feature_temperature
+    )
+    log_weights = np.where(valid, log_weights, -np.inf)
+    row_max = np.max(log_weights, axis=1, keepdims=True)
+    stable = np.exp(log_weights - row_max)
+    stable = np.where(valid, stable, 0.0)
+    weights = stable / np.maximum(stable.sum(axis=1, keepdims=True), 1e-12)
     return SupportGraph(indices, distances, weights)
 
 
@@ -325,19 +372,26 @@ def propagate_support(
     """
 
     points = np.asarray(xyz, dtype=np.float32)
-    normalized = _normalized_features(features)
+    feature_values = np.asarray(features, dtype=np.float32)
     values = np.asarray(scores, dtype=np.float32).reshape(-1)
     if points.ndim != 2 or points.shape[1] != 3:
         raise ValueError(f"xyz must be [N,3], got {points.shape}")
-    if points.shape[0] != normalized.shape[0] or values.shape != (points.shape[0],):
+    if feature_values.ndim != 2 or feature_values.shape[0] != points.shape[0]:
+        raise ValueError("features must be [N,D] and align with xyz")
+    if values.shape != (points.shape[0],):
         raise ValueError("xyz, features, and scores must share their first dimension")
-    if not bool(np.isfinite(points).all()) or not bool(np.isfinite(values).all()):
-        raise ValueError("xyz/scores contain NaN or infinity")
+    if (
+        not bool(np.isfinite(points).all())
+        or not bool(np.isfinite(feature_values).all())
+        or not bool(np.isfinite(values).all())
+    ):
+        raise ValueError("xyz/features/scores contain NaN or infinity")
     count = points.shape[0]
     if count <= 1 or config.iterations == 0:
         return values.copy()
 
-    graph = build_support_graph(points, normalized, config) if graph is None else graph
+    if graph is None:
+        graph = build_support_graph(points, feature_values, config)
     if graph.indices.shape[0] != count:
         raise ValueError("Support graph does not align with query arrays")
     if graph.indices.shape[1] == 0:

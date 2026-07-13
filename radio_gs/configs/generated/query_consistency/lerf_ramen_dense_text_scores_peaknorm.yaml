@@ -1,0 +1,8 @@
+base_config: ../../lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml
+
+# Exact LERF peak-relative score maps compiled by the frozen text readout.
+# The per-view normalization is query-time, GT-free, and mirrors the 2D mask
+# rule before multi-view registration.
+feature_dir: /root/RADIO-GS/output/query_scores/ramen_teacher_centered_softmax_peaknorm/ramen
+pose_dir: /root/RADIO-GS/output/radio_features_lerf/ramen/poses_w2c
+pose_file: ""

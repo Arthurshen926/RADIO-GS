@@ -365,7 +365,9 @@ class FeatureSupervisionMixin:
         stats = {
             "loss": zero,
             "valid_ratio": zero,
+            "feature_distill": zero,
             "summary": zero,
+            "relation": zero,
             "summary_adapter": zero,
             "text": zero,
             "text_valid_ratio": zero,
@@ -772,6 +774,36 @@ class FeatureSupervisionMixin:
             target_summary_points = _target_summary_points()
             summary_per_point = 1.0 - (pred_summary_points * target_summary_points).sum(dim=1)
             summary_loss = _weighted_vector_mean(summary_per_point, sample_weights)
+        relation_loss = decoded_points.sum() * 0.0
+        if getattr(self, "direct_point_relation_weight", 0.0) > 0:
+            if pred_summary is None:
+                pred_summary = self._project_summary_head_features(decoded_points)
+            pred_relation = self._direct_point_map_to_rows(pred_summary)
+            target_relation = _target_summary_points()
+            max_relation_points = max(
+                2, int(getattr(self, "direct_point_relation_max_points", 256))
+            )
+            if pred_relation.shape[0] > max_relation_points:
+                keep = torch.randperm(
+                    pred_relation.shape[0], device=pred_relation.device
+                )[:max_relation_points]
+                pred_relation = pred_relation[keep]
+                target_relation = target_relation[keep]
+            if pred_relation.shape[0] >= 2:
+                pred_relation = F.normalize(pred_relation.float(), dim=-1)
+                target_relation = F.normalize(target_relation.float(), dim=-1)
+                pred_similarity = pred_relation @ pred_relation.T
+                with torch.no_grad():
+                    target_similarity = target_relation @ target_relation.T
+                off_diagonal = ~torch.eye(
+                    pred_similarity.shape[0],
+                    dtype=torch.bool,
+                    device=pred_similarity.device,
+                )
+                relation_loss = F.smooth_l1_loss(
+                    pred_similarity[off_diagonal],
+                    target_similarity[off_diagonal],
+                )
         adapter_loss = decoded_points.sum() * 0.0
         pred_summary_points = None
         if (
@@ -1201,7 +1233,9 @@ class FeatureSupervisionMixin:
                     proposal_contrast_num_proposals = proposal_contrast_stats[
                         "num_proposals"
                     ]
+        stats["feature_distill"] = distill["total"]
         stats["summary"] = summary_loss
+        stats["relation"] = relation_loss
         stats["summary_adapter"] = adapter_loss
         stats["text"] = text_loss
         stats["text_valid_ratio"] = text_valid_ratio
@@ -1248,6 +1282,7 @@ class FeatureSupervisionMixin:
         stats["loss"] = (
             distill["total"]
             + self.direct_point_summary_alignment_weight * summary_loss
+            + getattr(self, "direct_point_relation_weight", 0.0) * relation_loss
             + getattr(self, "direct_point_summary_adapter_weight", 0.0) * adapter_loss
             + getattr(self, "direct_point_text_loss_weight", 0.0) * text_loss
             + getattr(self, "direct_point_adapter_text_loss_weight", 0.0) * adapter_text_loss

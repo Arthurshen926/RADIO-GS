@@ -1,0 +1,16 @@
+base_config: lerf_ramen_token_layer_multiview_cache_ft5.yaml
+exp_name: lerf_ramen_token_layer_multiview_summary_ft5
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_multiview_summary_ft5
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_multiview_cache_ft5/checkpoints/best.pth
+resume_from: ""
+
+# Query-agnostic primitive supervision in the frozen SigLIP2 summary space.
+# Targets come only from the 131-view RADIO teacher cache; no LERF text,
+# annotations, masks, or evaluation thresholds are used for training.
+direct_point_summary_alignment_weight: 1.0
+direct_point_relation_weight: 0.0
+
+epochs: 5
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

@@ -557,8 +557,11 @@ def extract(args: argparse.Namespace) -> None:
             torch.save(sm, sm_path)
             total_bytes += sm.nelement() * sm.element_size()
 
-            # Accumulate for PCA (convert back to float32)
-            pca_accumulator.append(bb.float())
+            # Accumulate only when the optional PCA warm-start artifact is
+            # requested.  Large oracle/teacher extractions otherwise spend
+            # most of their runtime and RAM on an unused global SVD.
+            if not args.skip_pca_stats:
+                pca_accumulator.append(bb.float())
 
             # Adaptor features
             if adaptor_names and adaptor_2d:
@@ -572,10 +575,13 @@ def extract(args: argparse.Namespace) -> None:
                     total_bytes += ad_frame.nelement() * ad_frame.element_size()
 
     # PCA statistics
-    print("[RADIO] Computing PCA statistics …")
-    pca_stats = _compute_pca_stats(pca_accumulator, n_components=64)
     pca_path = os.path.join(args.output_dir, "pca_stats.pt")
-    torch.save(pca_stats, pca_path)
+    if args.skip_pca_stats:
+        pca_path = ""
+    else:
+        print("[RADIO] Computing PCA statistics …")
+        pca_stats = _compute_pca_stats(pca_accumulator, n_components=64)
+        torch.save(pca_stats, pca_path)
 
     manifest_path = Path(args.output_dir) / "frame_manifest.json"
     manifest_path.write_text(
@@ -642,7 +648,7 @@ def extract(args: argparse.Namespace) -> None:
     print(f"  Backbone dim: {D} × {patch_h}×{patch_w}")
     print(f"  Summary dim : {summary.shape[-1]}")
     print(f"  Disk usage  : {disk_mb:.1f} MB  (float16 spatial + float32 summary)")
-    print(f"  PCA saved   : {pca_path}")
+    print(f"  PCA saved   : {pca_path or 'skipped'}")
     print(f"  Manifest    : {manifest_path}")
     print(f"  Time        : {elapsed:.1f}s  ({elapsed / n:.2f}s/frame)")
     print("=" * 60)
@@ -758,6 +764,11 @@ def main() -> None:
         action="store_true",
         default=True,
         help="Use automatic mixed precision (default: True)",
+    )
+    parser.add_argument(
+        "--skip_pca_stats",
+        action="store_true",
+        help="Skip the optional global PCA warm-start artifact.",
     )
 
     args = parser.parse_args()

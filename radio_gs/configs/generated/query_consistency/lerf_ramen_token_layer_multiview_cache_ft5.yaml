@@ -1,0 +1,21 @@
+base_config: lerf_ramen_token_layer_primitive_ft5.yaml
+exp_name: lerf_ramen_token_layer_multiview_cache_ft5
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_multiview_cache_ft5
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_primitive_ft5/checkpoints/best.pth
+resume_from: ""
+
+# True training-only multiview primitive targets: all 131 posed RADIO maps,
+# filtered by rendered depth/alpha, then averaged per preserved Gaussian row.
+direct_point_teacher_cache: /root/RADIO-GS/output/query_consistency/teacher_cache/ramen_gaussian_radio_mv131_depth.pt
+direct_point_teacher_cache_feature_key: features
+direct_point_teacher_cache_feature_space: radio
+direct_point_teacher_cache_require_xyz_alignment: true
+direct_point_sample_count: 2048
+direct_point_view_count_weighting: log
+direct_point_summary_alignment_weight: 0.0
+direct_point_relation_weight: 0.0
+
+epochs: 5
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

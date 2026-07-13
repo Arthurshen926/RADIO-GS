@@ -74,6 +74,8 @@ def test_geometry_uses_locked_camera_rgb_map_and_scales_intrinsics(
     )
 
     assert len(images) == len(w2cs) == 2
+    assert all(image.dtype == torch.uint8 for image in images)
+    assert images[0][0, 0].tolist() == [10, 20, 30]
     assert (width, height) == (20, 10)
     assert torch.allclose(
         K,

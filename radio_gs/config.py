@@ -77,6 +77,8 @@ class RadioGSConfig:
     bottleneck_dim: int = 64
     dual_stream: bool = True
     symmetric_decoder: bool = False
+    codec_hidden_normalization: str = "legacy_group"
+    codec_final_normalization: str = "legacy_group"
     decoder_hidden_dim: int = 512
     decoder_num_layers: int = 3
 
@@ -258,6 +260,8 @@ class RadioGSConfig:
     direct_point_relative_depth_tolerance: float = 0.02
     direct_point_alpha_threshold: float = 0.02
     direct_point_summary_alignment_weight: float = 0.0
+    direct_point_relation_weight: float = 0.0
+    direct_point_relation_max_points: int = 256
     direct_point_summary_adapter_weight: float = 0.0
     direct_point_text_loss_weight: float = 0.0
     direct_point_adapter_text_loss_weight: float = 0.0

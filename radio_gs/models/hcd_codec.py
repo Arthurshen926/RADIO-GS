@@ -12,17 +12,99 @@ with 3D Gaussian splatting rasterization.
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Dict, Optional, Tuple
+from typing import Dict
 
 
-def _conv1x1_gnorm_gelu(in_ch: int, out_ch: int, num_groups: int = 32) -> nn.Sequential:
-    """1×1 Conv → GroupNorm → GELU block."""
-    groups = min(num_groups, out_ch)
-    while out_ch % groups != 0:
+NORMALIZATION_MODES = ("legacy_group", "token_layer", "token_rms", "none")
+
+
+class TokenLayerNorm2d(nn.Module):
+    """LayerNorm over channels independently for every spatial token.
+
+    Parameters live directly on this module so legacy GroupNorm checkpoint
+    keys (``*.weight``/``*.bias``) remain load-compatible.
+    """
+
+    def __init__(self, channels: int, eps: float = 1e-5) -> None:
+        super().__init__()
+        self.channels = int(channels)
+        self.eps = float(eps)
+        self.weight = nn.Parameter(torch.ones(self.channels))
+        self.bias = nn.Parameter(torch.zeros(self.channels))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.ndim != 4 or x.shape[1] != self.channels:
+            raise ValueError(f"Expected [B,{self.channels},H,W], got {tuple(x.shape)}")
+        tokens = x.permute(0, 2, 3, 1)
+        output = F.layer_norm(
+            tokens, (self.channels,), self.weight, self.bias, self.eps
+        )
+        return output.permute(0, 3, 1, 2).contiguous()
+
+
+class TokenRMSNorm2d(nn.Module):
+    """RMSNorm over channels independently for every spatial token."""
+
+    def __init__(self, channels: int, eps: float = 1e-6) -> None:
+        super().__init__()
+        self.channels = int(channels)
+        self.eps = float(eps)
+        self.weight = nn.Parameter(torch.ones(self.channels))
+        self.bias = nn.Parameter(torch.zeros(self.channels))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.ndim != 4 or x.shape[1] != self.channels:
+            raise ValueError(f"Expected [B,{self.channels},H,W], got {tuple(x.shape)}")
+        scale = torch.rsqrt(x.float().square().mean(dim=1, keepdim=True) + self.eps)
+        normalized = x.float() * scale
+        return (
+            normalized * self.weight[None, :, None, None]
+            + self.bias[None, :, None, None]
+        ).to(dtype=x.dtype)
+
+
+class AffineIdentityNorm2d(nn.Module):
+    """No-op normalization retaining affine keys for checkpoint compatibility."""
+
+    def __init__(self, channels: int) -> None:
+        super().__init__()
+        self.weight = nn.Parameter(torch.ones(int(channels)), requires_grad=False)
+        self.bias = nn.Parameter(torch.zeros(int(channels)), requires_grad=False)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return x
+
+
+def _normalization_2d(mode: str, channels: int, *, num_groups: int = 32) -> nn.Module:
+    normalized = str(mode).strip().lower()
+    if normalized not in NORMALIZATION_MODES:
+        raise ValueError(
+            f"normalization must be one of {NORMALIZATION_MODES}, got {mode!r}"
+        )
+    if normalized == "token_layer":
+        return TokenLayerNorm2d(channels)
+    if normalized == "token_rms":
+        return TokenRMSNorm2d(channels)
+    if normalized == "none":
+        return AffineIdentityNorm2d(channels)
+    groups = min(num_groups, channels)
+    while channels % groups != 0:
         groups -= 1
+    return nn.GroupNorm(groups, channels)
+
+
+def _conv1x1_norm_gelu(
+    in_ch: int,
+    out_ch: int,
+    *,
+    normalization: str = "legacy_group",
+    num_groups: int = 32,
+) -> nn.Sequential:
+    """1×1 Conv → configured normalization → GELU block."""
+
     return nn.Sequential(
         nn.Conv2d(in_ch, out_ch, kernel_size=1, bias=False),
-        nn.GroupNorm(groups, out_ch),
+        _normalization_2d(normalization, out_ch, num_groups=num_groups),
         nn.GELU(),
     )
 
@@ -46,11 +128,13 @@ class HCDEncoder(nn.Module):
         input_dim: int = 1280,
         bottleneck_dim: int = 64,
         dual_stream: bool = True,
+        hidden_normalization: str = "legacy_group",
     ) -> None:
         super().__init__()
         self.input_dim = input_dim
         self.bottleneck_dim = bottleneck_dim
         self.dual_stream = dual_stream
+        self.hidden_normalization = str(hidden_normalization)
 
         if dual_stream:
             if bottleneck_dim % 2 != 0:
@@ -59,19 +143,19 @@ class HCDEncoder(nn.Module):
                 )
             stream_dim = bottleneck_dim // 2
             self.geometric_stream = nn.Sequential(
-                _conv1x1_gnorm_gelu(input_dim, 512),
-                _conv1x1_gnorm_gelu(512, 256),
+                _conv1x1_norm_gelu(input_dim, 512, normalization=hidden_normalization),
+                _conv1x1_norm_gelu(512, 256, normalization=hidden_normalization),
                 nn.Conv2d(256, stream_dim, kernel_size=1),
             )
             self.semantic_stream = nn.Sequential(
-                _conv1x1_gnorm_gelu(input_dim, 512),
-                _conv1x1_gnorm_gelu(512, 256),
+                _conv1x1_norm_gelu(input_dim, 512, normalization=hidden_normalization),
+                _conv1x1_norm_gelu(512, 256, normalization=hidden_normalization),
                 nn.Conv2d(256, stream_dim, kernel_size=1),
             )
         else:
             self.stream = nn.Sequential(
-                _conv1x1_gnorm_gelu(input_dim, 512),
-                _conv1x1_gnorm_gelu(512, 256),
+                _conv1x1_norm_gelu(input_dim, 512, normalization=hidden_normalization),
+                _conv1x1_norm_gelu(512, 256, normalization=hidden_normalization),
                 nn.Conv2d(256, bottleneck_dim, kernel_size=1),
             )
 
@@ -120,26 +204,32 @@ class HCDDecoder(nn.Module):
         bottleneck_dim: int = 64,
         output_dim: int = 1280,
         symmetric: bool = False,
+        hidden_normalization: str = "legacy_group",
+        final_normalization: str = "legacy_group",
     ) -> None:
         super().__init__()
         self.bottleneck_dim = bottleneck_dim
         self.output_dim = output_dim
+        self.hidden_normalization = str(hidden_normalization)
+        self.final_normalization = str(final_normalization)
 
         if symmetric:
             self.mlp = nn.Sequential(
-                _conv1x1_gnorm_gelu(bottleneck_dim, 256),
-                _conv1x1_gnorm_gelu(256, 512),
-                _conv1x1_gnorm_gelu(512, 512),
+                _conv1x1_norm_gelu(bottleneck_dim, 256, normalization=hidden_normalization),
+                _conv1x1_norm_gelu(256, 512, normalization=hidden_normalization),
+                _conv1x1_norm_gelu(512, 512, normalization=hidden_normalization),
                 nn.Conv2d(512, output_dim, kernel_size=1),
             )
         else:
             self.mlp = nn.Sequential(
-                _conv1x1_gnorm_gelu(bottleneck_dim, 256),
-                _conv1x1_gnorm_gelu(256, 512),
+                _conv1x1_norm_gelu(bottleneck_dim, 256, normalization=hidden_normalization),
+                _conv1x1_norm_gelu(256, 512, normalization=hidden_normalization),
                 nn.Conv2d(512, output_dim, kernel_size=1),
             )
         self.residual = nn.Conv2d(bottleneck_dim, output_dim, kernel_size=1)
-        self.norm = nn.GroupNorm(1, output_dim)  # equivalent to LayerNorm over C
+        self.norm = _normalization_2d(
+            final_normalization, output_dim, num_groups=1
+        )
 
         n_params = sum(p.numel() for p in self.parameters())
         print(f"[HCDDecoder] {bottleneck_dim}d → {output_dim}d "
@@ -190,13 +280,28 @@ class HCDCodec(nn.Module):
         bottleneck_dim: int = 64,
         dual_stream: bool = True,
         symmetric_decoder: bool = False,
+        hidden_normalization: str = "legacy_group",
+        final_normalization: str = "legacy_group",
     ) -> None:
         super().__init__()
         self.input_dim = input_dim
         self.bottleneck_dim = bottleneck_dim
 
-        self.encoder = HCDEncoder(input_dim, bottleneck_dim, dual_stream)
-        self.decoder = HCDDecoder(bottleneck_dim, input_dim, symmetric=symmetric_decoder)
+        self.hidden_normalization = str(hidden_normalization)
+        self.final_normalization = str(final_normalization)
+        self.encoder = HCDEncoder(
+            input_dim,
+            bottleneck_dim,
+            dual_stream,
+            hidden_normalization=hidden_normalization,
+        )
+        self.decoder = HCDDecoder(
+            bottleneck_dim,
+            input_dim,
+            symmetric=symmetric_decoder,
+            hidden_normalization=hidden_normalization,
+            final_normalization=final_normalization,
+        )
 
         total = sum(p.numel() for p in self.parameters())
         print(f"[HCDCodec] total {total / 1e6:.2f}M params | "
@@ -340,12 +445,20 @@ class DirectProjectionEncoder(nn.Module):
 class DirectProjectionDecoder(nn.Module):
     """Single 1x1 projection decoder from compact codes to RADIO space."""
 
-    def __init__(self, bottleneck_dim: int = 64, output_dim: int = 1280) -> None:
+    def __init__(
+        self,
+        bottleneck_dim: int = 64,
+        output_dim: int = 1280,
+        final_normalization: str = "legacy_group",
+    ) -> None:
         super().__init__()
         self.bottleneck_dim = bottleneck_dim
         self.output_dim = output_dim
         self.proj = nn.Conv2d(bottleneck_dim, output_dim, kernel_size=1)
-        self.norm = nn.GroupNorm(1, output_dim)
+        self.final_normalization = str(final_normalization)
+        self.norm = _normalization_2d(
+            final_normalization, output_dim, num_groups=1
+        )
 
     def forward(self, z: torch.Tensor) -> torch.Tensor:
         return self.norm(self.proj(z.float()))
@@ -365,12 +478,19 @@ class DirectProjectionCodec(nn.Module):
     controlled HCD-vs-direct ablations.
     """
 
-    def __init__(self, input_dim: int = 1280, bottleneck_dim: int = 64) -> None:
+    def __init__(
+        self,
+        input_dim: int = 1280,
+        bottleneck_dim: int = 64,
+        final_normalization: str = "legacy_group",
+    ) -> None:
         super().__init__()
         self.input_dim = input_dim
         self.bottleneck_dim = bottleneck_dim
         self.encoder = DirectProjectionEncoder(input_dim, bottleneck_dim)
-        self.decoder = DirectProjectionDecoder(bottleneck_dim, input_dim)
+        self.decoder = DirectProjectionDecoder(
+            bottleneck_dim, input_dim, final_normalization=final_normalization
+        )
 
     def encode(self, x: torch.Tensor) -> torch.Tensor:
         return self.encoder(x)
@@ -436,6 +556,8 @@ def build_feature_codec(
     codec_type: str = "hcd",
     dual_stream: bool = True,
     symmetric_decoder: bool = False,
+    hidden_normalization: str = "legacy_group",
+    final_normalization: str = "legacy_group",
 ) -> nn.Module:
     """Build the configured compact-to-RADIO feature codec."""
     normalized = str(codec_type or "hcd").strip().lower()
@@ -445,11 +567,14 @@ def build_feature_codec(
             bottleneck_dim=bottleneck_dim,
             dual_stream=dual_stream,
             symmetric_decoder=symmetric_decoder,
+            hidden_normalization=hidden_normalization,
+            final_normalization=final_normalization,
         )
     if normalized in {"direct", "linear", "projection"}:
         return DirectProjectionCodec(
             input_dim=input_dim,
             bottleneck_dim=bottleneck_dim,
+            final_normalization=final_normalization,
         )
     if normalized in {"identity", "none", "raw"}:
         return IdentityFeatureCodec(

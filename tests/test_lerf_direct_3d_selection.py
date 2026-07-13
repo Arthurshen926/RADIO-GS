@@ -34,6 +34,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     load_text_projection_head,
     load_score_cache,
     merge_registered_scores,
+    average_registered_signal_sums,
     normalize_registered_feature_sums,
     accumulate_raster_contribution_features,
     keep_largest_mask_component,
@@ -64,6 +65,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     _project_points_to_image,
     trimap_iou,
     vala_knn_minmax_scores,
+    peak_normalize_query_scores,
     mask_to_sam3_box_prompt,
 )
 
@@ -856,6 +858,28 @@ def test_select_registration_frame_ids_supports_train_pose_subset():
     assert frames == [0, 5]
 
 
+def test_select_registration_frame_ids_excludes_annotated_target_cameras():
+    frames = select_registration_frame_ids(
+        available_pose_ids=[1, 2, 3, 4],
+        annotated_frame_ids=[2, 4],
+        official_frame_ids=[2],
+        train_frame_ids=[1, 2, 3],
+        mode="train_nonannotated",
+        max_frames=0,
+    )
+    assert frames == [1, 3]
+
+    fallback = select_registration_frame_ids(
+        available_pose_ids=[1, 2, 3, 4],
+        annotated_frame_ids=[2, 4],
+        official_frame_ids=[2],
+        train_frame_ids=None,
+        mode="train_nonannotated",
+        max_frames=0,
+    )
+    assert fallback == [1, 3]
+
+
 def test_choose_registration_refiner_can_disable_vfa_for_ablation():
     refiner = object()
 
@@ -892,6 +916,33 @@ def test_vala_knn_minmax_scores_matches_released_readout_shape_and_scale():
     assert normalized[2, 0] == pytest.approx(1.0)
     # The released evaluator remaps min-max scores as clip(2*x-1, 0, 1).
     assert normalized[1, 0] == pytest.approx(0.0, abs=1e-6)
+
+
+def test_vala_knn_minmax_ignores_external_cache_invalid_rows():
+    scores = torch.tensor([[0.0], [0.5], [1.0], [-1.0e4]], dtype=torch.float32)
+    xyz = torch.arange(4, dtype=torch.float32)[:, None].expand(-1, 3).contiguous()
+    valid = torch.tensor([True, True, True, False])
+
+    normalized = vala_knn_minmax_scores(
+        scores, xyz, k=1, chunk_size=2, valid_mask=valid
+    )
+
+    assert normalized[0, 0] == pytest.approx(0.0)
+    assert normalized[2, 0] == pytest.approx(1.0)
+    assert normalized[3, 0] == pytest.approx(0.0)
+
+
+def test_peak_normalize_query_scores_matches_lerf_peak_relative_rule():
+    scores = torch.tensor(
+        [[0.1, 0.5], [0.4, 0.25], [99.0, 99.0]], dtype=torch.float32
+    )
+    valid = torch.tensor([True, True, False])
+
+    normalized = peak_normalize_query_scores(scores, valid_mask=valid)
+
+    assert torch.allclose(normalized[0], torch.tensor([0.25, 1.0]))
+    assert torch.allclose(normalized[1], torch.tensor([1.0, 0.5]))
+    assert torch.equal(normalized[2], torch.zeros(2))
 
 
 def test_compute_selection_ranking_scores_supports_margin_and_entropy_confidence():
@@ -1360,6 +1411,17 @@ def test_accumulate_raster_contribution_features_normalizes_by_weight():
     assert torch.allclose(sums[1], expected1)
     assert torch.allclose(counts, torch.tensor([4.0, 2.0]))
 
+    stable_sums, stable_counts = accumulate_raster_contribution_features(
+        feature_map,
+        gaussian_ids,
+        pixel_ids,
+        weights,
+        n_gaussians=2,
+        deterministic_cpu=True,
+    )
+    torch.testing.assert_close(stable_sums, sums)
+    torch.testing.assert_close(stable_counts, counts)
+
 
 def test_normalize_registered_feature_sums_uses_subunit_weights():
     registered_sum = torch.tensor(
@@ -1375,6 +1437,22 @@ def test_normalize_registered_feature_sums_uses_subunit_weights():
 
     assert torch.allclose(normalized[0], torch.tensor([1.0, 0.0]))
     assert torch.allclose(normalized[1], torch.zeros(2))
+
+
+def test_average_registered_signal_sums_preserves_independent_query_magnitudes():
+    registered_sum = torch.tensor([[0.2, 0.8], [0.6, 0.2], [3.0, 4.0]])
+    registered_counts = torch.tensor([0.5, 1.0, 0.0])
+
+    averaged = average_registered_signal_sums(registered_sum, registered_counts)
+
+    assert torch.allclose(
+        averaged,
+        torch.tensor([[0.4, 1.6], [0.6, 0.2], [0.0, 0.0]]),
+    )
+    assert not torch.allclose(
+        torch.linalg.vector_norm(averaged[:2], dim=-1),
+        torch.ones(2),
+    )
 
 
 def test_select_dominant_raster_hits_keeps_strongest_hit_per_pixel():

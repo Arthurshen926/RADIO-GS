@@ -4,8 +4,22 @@ import struct
 from pathlib import Path
 
 import numpy as np
+import torch
 
-from radio_gs.scripts.train_colmap_gs import _load_colmap_points_binary
+from radio_gs.scripts.train_colmap_gs import (
+    _estimate_initial_scales,
+    _load_colmap_points_binary,
+)
+
+
+def test_initial_scale_uses_exact_nearest_neighbor_median() -> None:
+    means = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [1.0, 0.0, 0.0]],
+        dtype=torch.float32,
+    )
+    log_scales = _estimate_initial_scales(means, scene_scale=2.0)
+    expected = np.log(0.05)  # median nearest distance 0.1, then multiplied by 0.5
+    np.testing.assert_allclose(log_scales.numpy(), expected, atol=1e-6)
 
 
 def _write_points3d(path: Path) -> None:
@@ -53,4 +67,3 @@ def test_unfiltered_binary_loader_is_backward_compatible(tmp_path: Path) -> None
 
     assert xyz.shape == (3, 3)
     assert rgb.shape == (3, 3)
-

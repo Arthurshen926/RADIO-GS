@@ -1,0 +1,12 @@
+base_config: ../scannet_og/scannet_og_hybrid_v14_scene0000_00.yaml
+
+# Fresh official C-RADIOv4 extraction is 60x81 at its supported 960x1296 input.
+# Keep the MPR renderer on that native grid instead of upsampling teacher tokens.
+feature_dir: /root/RADIO-GS/output/radio_features_scannet_og/scene0000_00
+val_feature_dir: /root/RADIO-GS/output/radio_features_scannet_og/scene0000_00
+feature_height: 60
+feature_width: 81
+pose_file: /root/RADIO-GS/dataset/scannet_og/scene0000_00/traj_w_c.txt
+val_pose_file: /root/RADIO-GS/dataset/scannet_og/scene0000_00/traj_w_c.txt
+pose_dir: ""
+val_pose_dir: ""

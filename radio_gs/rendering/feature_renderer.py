@@ -66,6 +66,23 @@ class FeatureFieldRenderer(nn.Module):
         K = self._build_K_matrix(fx, fy, cx, cy)
         self.register_buffer("K", K)
 
+    def scaled_intrinsics(self, width: int, height: int) -> Tensor:
+        """Express the native camera intrinsics in a requested raster size.
+
+        gsplat does not rescale ``K`` when a low-resolution feature raster is
+        requested.  Keeping the full-image intrinsics at feature resolution
+        silently projects geometry into the wrong pixels.
+        """
+
+        width = int(width)
+        height = int(height)
+        if width <= 0 or height <= 0:
+            raise ValueError("raster width and height must be positive")
+        scaled = self.K.clone()
+        scaled[0, :] *= float(width) / float(self.image_width)
+        scaled[1, :] *= float(height) / float(self.image_height)
+        return scaled
+
     @staticmethod
     def _canonicalize_batch_map(x: Tensor) -> Tensor:
         """Convert common single-channel raster outputs to [B, H, W]."""
@@ -86,6 +103,75 @@ class FeatureFieldRenderer(nn.Module):
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+
+    def render_feature_rows(
+        self,
+        gaussian_model: nn.Module,
+        viewmat: Tensor,
+        features: Tensor,
+        *,
+        feature_height: int | None = None,
+        feature_width: int | None = None,
+        alpha_normalize: bool = False,
+        alpha_eps: float = 1e-6,
+        row_confidence: Tensor | None = None,
+    ) -> dict[str, Tensor]:
+        """Render caller-supplied per-Gaussian rows with the field geometry.
+
+        This is the primitive-first query path: ``features[i]`` and direct 3-D
+        query row ``i`` are exactly the same value.  When ``alpha_normalize``
+        is enabled, the composited feature is divided by accumulated alpha so
+        it represents a weighted feature average rather than premultiplied
+        color semantics.
+        """
+
+        fH = feature_height or self.image_height
+        fW = feature_width or self.image_width
+        means = gaussian_model.get_xyz()
+        if features.ndim != 2 or features.shape[0] != means.shape[0]:
+            raise ValueError(
+                "features must be [num_gaussians,D], got "
+                f"{tuple(features.shape)} for {means.shape[0]} Gaussians"
+            )
+        if means.shape[0] == 0:
+            return {
+                "feature_map": torch.zeros(features.shape[1], fH, fW, device=features.device),
+                "depth_map": torch.zeros(fH, fW, device=features.device),
+                "alpha_map": torch.zeros(fH, fW, device=features.device),
+            }
+        opacities = gaussian_model.get_opacity().squeeze(-1)
+        if row_confidence is not None:
+            confidence = torch.as_tensor(
+                row_confidence, device=opacities.device, dtype=opacities.dtype
+            ).reshape(-1)
+            if confidence.shape != opacities.shape or bool((confidence < 0).any()):
+                raise ValueError("row_confidence must be non-negative [num_gaussians]")
+            opacities = opacities * confidence.clamp(max=1.0)
+        rendered, depth, alpha = self._chunk_render(
+            means,
+            gaussian_model.get_rotation(),
+            gaussian_model.get_scaling(),
+            opacities,
+            features,
+            viewmat.unsqueeze(0),
+            self.scaled_intrinsics(fW, fH).unsqueeze(0),
+            fW,
+            fH,
+        )
+        feature_map = rendered[0].permute(2, 0, 1)
+        alpha_map = self._canonicalize_single_map(alpha)
+        if alpha_normalize:
+            visible = alpha_map > float(alpha_eps)
+            feature_map = torch.where(
+                visible.unsqueeze(0),
+                feature_map / alpha_map.clamp_min(float(alpha_eps)).unsqueeze(0),
+                torch.zeros_like(feature_map),
+            )
+        return {
+            "feature_map": feature_map,
+            "depth_map": self._canonicalize_single_map(depth),
+            "alpha_map": alpha_map,
+        }
 
     def render_features(
         self,
@@ -132,7 +218,7 @@ class FeatureFieldRenderer(nn.Module):
 
         # gsplat expects batched camera tensors: [C, 4, 4] and [C, 3, 3]
         viewmats = viewmat.unsqueeze(0)    # [1, 4, 4]
-        Ks = self.K.unsqueeze(0)           # [1, 3, 3]
+        Ks = self.scaled_intrinsics(fW, fH).unsqueeze(0)  # [1, 3, 3]
 
         feat_render, depth, alpha = self._chunk_render(
             means, quats, scales, opacities, features,
@@ -191,7 +277,7 @@ class FeatureFieldRenderer(nn.Module):
                 "alpha_map": torch.zeros(B, fH, fW, device=device),
             }
 
-        Ks = self.K.unsqueeze(0).expand(B, -1, -1)  # [B, 3, 3]
+        Ks = self.scaled_intrinsics(fW, fH).unsqueeze(0).expand(B, -1, -1)
 
         feat_render, depth, alpha = self._chunk_render(
             means, quats, scales, opacities, features,
@@ -259,7 +345,7 @@ class FeatureFieldRenderer(nn.Module):
             )
             scales = torch.cat([scales, pad], dim=-1)
 
-        Ks = self.K.unsqueeze(0).expand(B, -1, -1)
+        Ks = self.scaled_intrinsics(fW, fH).unsqueeze(0).expand(B, -1, -1)
         bg = torch.zeros(B, 3, device=means.device)
         bg_rgbed = torch.zeros(B, 4, device=means.device) if self.use_2dgs else None
 

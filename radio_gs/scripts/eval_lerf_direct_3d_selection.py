@@ -1654,6 +1654,9 @@ def select_registration_frame_ids(
         frames = sorted(available)
     elif mode == "train":
         frames = sorted(available & train)
+    elif mode == "train_nonannotated":
+        candidates = (available & train) if train else available
+        frames = sorted(candidates - annotated)
     elif mode == "val":
         frames = sorted(available & val)
     else:
@@ -2139,6 +2142,7 @@ def accumulate_raster_contribution_features(
     weights: torch.Tensor,
     *,
     n_gaussians: int,
+    deterministic_cpu: bool = False,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Scatter weighted rendered-view features from raster hits to Gaussians."""
     if feature_map.dim() == 4:
@@ -2175,6 +2179,32 @@ def accumulate_raster_contribution_features(
     pids = pids[valid]
     w = w[valid]
     flat = features.float().reshape(channels, height * width).t()
+    if deterministic_cpu:
+        # CUDA index_add uses atomic additions when several prompt pixels map
+        # to one primitive.  A low-channel registered prompt can use an
+        # audited CPU reduction without dropping any raster evidence.
+        gids_np = gids.detach().cpu().numpy()
+        pids_np = pids.detach().cpu().numpy()
+        weights_np = w.detach().cpu().numpy().astype(np.float64, copy=False)
+        flat_np = flat.detach().cpu().numpy().astype(np.float64, copy=False)
+        count_np = np.bincount(
+            gids_np, weights=weights_np, minlength=int(n_gaussians)
+        )
+        sum_np = np.stack(
+            [
+                np.bincount(
+                    gids_np,
+                    weights=weights_np * flat_np[pids_np, channel],
+                    minlength=int(n_gaussians),
+                )
+                for channel in range(channels)
+            ],
+            axis=1,
+        )
+        return (
+            torch.from_numpy(sum_np.astype(np.float32, copy=False)).to(device),
+            torch.from_numpy(count_np.astype(np.float32, copy=False)).to(device),
+        )
     sampled = flat[pids] * w.unsqueeze(1)
     sums.index_add_(0, gids, sampled)
     counts.index_add_(0, gids, w)
@@ -2198,6 +2228,28 @@ def normalize_registered_feature_sums(
         mean = sums[valid] / counts[valid].clamp_min(1e-8).unsqueeze(1)
         normalized[valid] = F.normalize(mean, dim=-1)
     return normalized
+
+
+def average_registered_signal_sums(
+    registered_sum: torch.Tensor,
+    registered_counts: torch.Tensor,
+) -> torch.Tensor:
+    """Return weighted primitive means without changing signal magnitudes.
+
+    Query-specific scalar scores must not be L2-normalized across queries:
+    that would couple independent queries and change primitive rankings.
+    """
+    sums = torch.as_tensor(registered_sum).float()
+    counts = torch.as_tensor(registered_counts).float().to(device=sums.device)
+    if sums.ndim != 2 or counts.ndim != 1 or int(sums.shape[0]) != int(counts.shape[0]):
+        raise ValueError(
+            "registered_sum must be [N,K] and registered_counts must be [N] with matching N"
+        )
+    averaged = torch.zeros_like(sums)
+    valid = counts > 0
+    if bool(valid.any()):
+        averaged[valid] = sums[valid] / counts[valid].clamp_min(1e-8).unsqueeze(1)
+    return averaged
 
 
 def select_dominant_raster_hits(
@@ -2279,6 +2331,7 @@ def rasterize_registered_view_features(
     registration_weight_mode: str,
     dominant_only: bool = False,
     gaussian_top1: bool = False,
+    deterministic_cpu_accumulation: bool = False,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Register a rendered feature map to primitives using rasterizer hits."""
     if getattr(renderer, "use_2dgs", False):
@@ -2312,7 +2365,9 @@ def rasterize_registered_view_features(
         opacities = opacities[:, 0]
     colors = torch.zeros(n_gaussians, 3, dtype=torch.float32, device=device)
     backgrounds = torch.zeros(1, 3, dtype=torch.float32, device=device)
-    Ks = renderer.K.to(device=device, dtype=torch.float32).unsqueeze(0)
+    Ks = renderer.scaled_intrinsics(width, height).to(
+        device=device, dtype=torch.float32
+    ).unsqueeze(0)
 
     _renders, _alphas, info = rasterization(
         means=means,
@@ -2392,6 +2447,7 @@ def rasterize_registered_view_features(
         pixel_ids[valid],
         weights[valid],
         n_gaussians=n_gaussians,
+        deterministic_cpu=deterministic_cpu_accumulation,
     )
     return sums, counts
 
@@ -2445,7 +2501,9 @@ def raster_adjoint_registered_view_features(
     opacities = model.get_opacity().detach().to(device=device, dtype=torch.float32)
     if opacities.dim() == 2 and int(opacities.shape[1]) == 1:
         opacities = opacities[:, 0]
-    Ks = renderer.K.detach().to(device=device, dtype=torch.float32).unsqueeze(0)
+    Ks = renderer.scaled_intrinsics(width, height).detach().to(
+        device=device, dtype=torch.float32
+    ).unsqueeze(0)
 
     pixel_weight = None
     if alpha_threshold > 0.0 and alpha_map is not None:
@@ -2635,6 +2693,7 @@ def vala_knn_minmax_scores(
     *,
     k: int = 10,
     chunk_size: int = 65536,
+    valid_mask: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
     """Apply the released VALA/LangSplat 3D relevance readout.
 
@@ -2655,6 +2714,13 @@ def vala_knn_minmax_scores(
     count = int(values.shape[0])
     if count == 0:
         return values
+    valid = (
+        torch.ones(count, dtype=torch.bool)
+        if valid_mask is None
+        else torch.as_tensor(valid_mask).bool().cpu().reshape(-1)
+    )
+    if valid.shape != (count,) or not bool(valid.any()):
+        raise ValueError("valid_mask must keep at least one primitive")
 
     from sklearn.neighbors import NearestNeighbors
 
@@ -2668,11 +2734,20 @@ def vala_knn_minmax_scores(
     for start in range(0, count, step):
         end = min(start + step, count)
         neighbor_idx = torch.from_numpy(indices[start:end]).long()
-        neighbor_mean = values[neighbor_idx].mean(dim=1)
+        neighbor_valid = valid[neighbor_idx]
+        neighbor_count = neighbor_valid.sum(dim=1, keepdim=True)
+        neighbor_mean = (
+            values[neighbor_idx] * neighbor_valid.unsqueeze(-1)
+        ).sum(dim=1) / neighbor_count.clamp_min(1)
+        neighbor_mean = torch.where(
+            neighbor_count > 0,
+            neighbor_mean,
+            values[start:end],
+        )
         smoothed[start:end] = 0.5 * (values[start:end] + neighbor_mean)
 
-    low = smoothed.amin(dim=0, keepdim=True)
-    high = smoothed.amax(dim=0, keepdim=True)
+    low = smoothed[valid].amin(dim=0, keepdim=True)
+    high = smoothed[valid].amax(dim=0, keepdim=True)
     span = high - low
     normalized = torch.where(
         span > 1e-9,
@@ -2683,7 +2758,38 @@ def vala_knn_minmax_scores(
     # before applying mask_thresh=0.6.  Consequently the effective threshold
     # on the pre-remap min-max score is 0.8; retain the literal transformation
     # here so result metadata remains faithful to the implementation.
-    return (2.0 * normalized - 1.0).clamp_(0.0, 1.0)
+    result = (2.0 * normalized - 1.0).clamp_(0.0, 1.0)
+    result[~valid] = 0.0
+    return result
+
+
+def peak_normalize_query_scores(
+    scores: torch.Tensor,
+    *,
+    valid_mask: Optional[torch.Tensor] = None,
+) -> torch.Tensor:
+    """Normalize each query by its GT-free scene peak.
+
+    LERF's 2D readout thresholds every heatmap relative to that heatmap's own
+    peak. Query-score caches have already passed through their semantic
+    scorer, so another softmax or min-max transform would change their
+    meaning. This is the primitive-space counterpart of the released 2D rule.
+    """
+    values = scores.detach().float().cpu()
+    if values.ndim != 2:
+        raise ValueError(f"Expected scores [N,Q], got {tuple(values.shape)}")
+    count = int(values.shape[0])
+    valid = (
+        torch.ones(count, dtype=torch.bool)
+        if valid_mask is None
+        else torch.as_tensor(valid_mask).bool().cpu().reshape(-1)
+    )
+    if valid.shape != (count,) or not bool(valid.any()):
+        raise ValueError("valid_mask must keep at least one primitive")
+    peaks = values[valid].amax(dim=0, keepdim=True).clamp_min(1.0e-12)
+    result = (values / peaks).clamp_(0.0, 1.0)
+    result[~valid] = 0.0
+    return result
 
 
 def load_summary_head(weights_path: str, device: torch.device) -> SigLIP2SummaryHead:
@@ -2888,7 +2994,15 @@ def _validate_teacher_cache_geometry(
         return
     fingerprint = payload.get("geometry_fingerprint")
     if not isinstance(fingerprint, dict):
-        raise ValueError(f"teacher cache missing geometry_fingerprint: {cache_path}")
+        cached_xyz = payload.get("xyz")
+        if not isinstance(cached_xyz, torch.Tensor) or cached_xyz.shape != expected_xyz.shape:
+            raise ValueError(f"teacher cache missing geometry identity: {cache_path}")
+        row_error = (cached_xyz.float() - expected_xyz.detach().cpu().float()).norm(dim=-1)
+        if row_error.numel() and float(row_error.max()) > 1e-6:
+            raise ValueError(
+                f"teacher cache xyz mismatch: {cache_path} max_l2={float(row_error.max()):.3e}"
+            )
+        return
     expected_fingerprint = xyz_geometry_fingerprint(expected_xyz)
     cached_hash = str(fingerprint.get("xyz_sha256", ""))
     expected_hash = str(expected_fingerprint.get("xyz_sha256", ""))
@@ -3232,6 +3346,7 @@ def compute_registered_view_text_scores(
     registration_weight_mode: str,
     registration_confidence_blend: float,
     registration_confidence_mode: str,
+    registration_query_order: str,
     fallback_scores: Optional[torch.Tensor],
     device: torch.device,
     registered_feature_cache_path: Optional[str] = None,
@@ -3245,6 +3360,12 @@ def compute_registered_view_text_scores(
     """
     if registration_assignment_mode not in {"center", "raster_contrib", "raster_dominant", "raster_gaussian_top1", "raster_adjoint"}:
         raise ValueError(f"Unsupported registration assignment mode: {registration_assignment_mode}")
+    if registration_query_order not in {"feature_then_score", "score_then_register"}:
+        raise ValueError(
+            "registration_query_order must be feature_then_score or score_then_register"
+        )
+    if registration_query_order == "score_then_register" and registered_feature_cache_path:
+        raise ValueError("score_then_register does not produce a reusable feature cache")
     frame_ids = select_registration_frame_ids(
         available_pose_ids=dataset.pose_by_frame_idx.keys(),
         annotated_frame_ids=frame_annotations.keys(),
@@ -3267,8 +3388,12 @@ def compute_registered_view_text_scores(
         if canonical_embeddings is not None
         else None
     )
-    embedding_dim = int(text.shape[1])
-    registered_sum = torch.zeros(n_gaussians, embedding_dim, dtype=torch.float32)
+    registered_dim = (
+        int(text.shape[0])
+        if registration_query_order == "score_then_register"
+        else int(text.shape[1])
+    )
+    registered_sum = torch.zeros(n_gaussians, registered_dim, dtype=torch.float32)
     registered_counts = torch.zeros(n_gaussians, dtype=torch.float32)
     chunk_size = max(int(registration_chunk_size), 1)
 
@@ -3298,6 +3423,22 @@ def compute_registered_view_text_scores(
             feat_1280 = feat_1280.to(dtype=head_param.dtype)
         siglip_feat = project_to_siglip2(feat_1280, summary_head).float()
         siglip_feat = F.normalize(siglip_feat, dim=1)
+        registered_signal = siglip_feat
+        if registration_query_order == "score_then_register":
+            _, _, signal_h, signal_w = siglip_feat.shape
+            pixel_embeddings = siglip_feat.permute(0, 2, 3, 1).reshape(
+                -1, siglip_feat.shape[1]
+            )
+            pixel_scores = score_text_aligned_embeddings(
+                pixel_embeddings,
+                text,
+                canonical_embeddings=canonical,
+                scoring=scoring,
+                softmax_temperature=softmax_temperature,
+            )
+            registered_signal = pixel_scores.reshape(
+                1, signal_h, signal_w, -1
+            ).permute(0, 3, 1, 2)
 
         aux = renderer.render_features(model, viewmat.squeeze(0))
         depth_map = aux["depth_map"].detach().float().unsqueeze(0)
@@ -3308,7 +3449,7 @@ def compute_registered_view_text_scores(
                 model=model,
                 renderer=renderer,
                 viewmat=viewmat,
-                siglip_feat=siglip_feat,
+                siglip_feat=registered_signal,
                 alpha_map=alpha_map,
                 alpha_threshold=registration_alpha_threshold,
             )
@@ -3322,7 +3463,7 @@ def compute_registered_view_text_scores(
                 model=model,
                 renderer=renderer,
                 viewmat=viewmat,
-                siglip_feat=siglip_feat,
+                siglip_feat=registered_signal,
                 depth_map=depth_map,
                 alpha_map=alpha_map,
                 registration_depth_tolerance=registration_depth_tolerance,
@@ -3343,7 +3484,7 @@ def compute_registered_view_text_scores(
                 points = xyz_cpu[start:end].to(device=device, dtype=torch.float32)
                 targets, valid, counts = sample_multiview_radio_targets(
                     points,
-                    siglip_feat,
+                    registered_signal,
                     viewmat,
                     renderer.K,
                     depth_map=depth_map,
@@ -3360,8 +3501,8 @@ def compute_registered_view_text_scores(
                         points,
                         viewmat,
                         renderer.K,
-                        image_height=int(siglip_feat.shape[-2]),
-                        image_width=int(siglip_feat.shape[-1]),
+                        image_height=int(registered_signal.shape[-2]),
+                        image_width=int(registered_signal.shape[-1]),
                         depth_map=depth_map,
                         alpha_map=alpha_map,
                         depth_tolerance=registration_depth_tolerance,
@@ -3379,7 +3520,7 @@ def compute_registered_view_text_scores(
                     )
                     registered_counts[start:end][valid_cpu] += counts_valid
 
-        del feat_1280, siglip_feat, aux, depth_map, alpha_map
+        del feat_1280, siglip_feat, registered_signal, aux, depth_map, alpha_map
         if device.type == "cuda":
             torch.cuda.empty_cache()
 
@@ -3404,22 +3545,34 @@ def compute_registered_view_text_scores(
     all_scores: List[torch.Tensor] = []
     for start in tqdm(range(0, n_gaussians, chunk_size), desc="  score registered", leave=False):
         end = min(start + chunk_size, n_gaussians)
-        registered = normalize_registered_feature_sums(
-            registered_sum[start:end],
-            registered_counts[start:end],
-        ).to(device)
-        fallback_chunk = None
-        if fallback_scores is not None:
-            fallback_chunk = fallback_scores[start:end]
-        scores = merge_registered_scores(
-            registered,
-            valid_all[start:end],
-            text,
-            fallback_scores=fallback_chunk,
-            canonical_embeddings=canonical,
-            scoring=scoring,
-            softmax_temperature=softmax_temperature,
-        )
+        if registration_query_order == "score_then_register":
+            scores = average_registered_signal_sums(
+                registered_sum[start:end],
+                registered_counts[start:end],
+            ).to(device)
+            invalid = ~valid_all[start:end].to(device)
+            if bool(invalid.any()):
+                if fallback_scores is not None:
+                    scores[invalid] = fallback_scores[start:end].to(device)[invalid]
+                else:
+                    scores[invalid] = -1.0e4
+        else:
+            registered = normalize_registered_feature_sums(
+                registered_sum[start:end],
+                registered_counts[start:end],
+            ).to(device)
+            fallback_chunk = None
+            if fallback_scores is not None:
+                fallback_chunk = fallback_scores[start:end]
+            scores = merge_registered_scores(
+                registered,
+                valid_all[start:end],
+                text,
+                fallback_scores=fallback_chunk,
+                canonical_embeddings=canonical,
+                scoring=scoring,
+                softmax_temperature=softmax_temperature,
+            )
         scores = apply_registration_confidence(
             scores,
             registered_counts[start:end],
@@ -3427,13 +3580,16 @@ def compute_registered_view_text_scores(
             mode=registration_confidence_mode,
         )
         all_scores.append(scores.detach().cpu())
-        del registered, scores
+        if registration_query_order != "score_then_register":
+            del registered
+        del scores
 
     valid_count = int(valid_all.sum().item())
     stats: Dict[str, object] = {
         "frame_mode": registration_frame_mode,
         "frame_ids": frame_ids,
         "num_frames": len(frame_ids),
+        "query_order": registration_query_order,
         "registered_gaussians": valid_count,
         "total_gaussians": n_gaussians,
         "registered_fraction": float(valid_count / max(n_gaussians, 1)),
@@ -5875,6 +6031,8 @@ def evaluate_scene(
     openclip_pretrained: str,
     score_cache_path: Optional[str],
     registered_feature_cache_path: Optional[str],
+    external_query_feature_cache_path: Optional[str],
+    external_query_score_cache_path: Optional[str],
     prompt_templates: List[str],
     selection_specs: List[SelectionSpec],
     score_source: str,
@@ -5924,6 +6082,7 @@ def evaluate_scene(
     registration_weight_mode: str,
     registration_confidence_blend: float,
     registration_confidence_mode: str,
+    registration_query_order: str,
     disable_registered_refiner: bool,
     use_point_summary_adapter: bool,
     point_summary_adapter_blend_alpha: float,
@@ -6015,6 +6174,7 @@ def evaluate_scene(
         checkpoint_path,
         device,
         strict_checkpoint_contract=strict_checkpoint_contract,
+        load_ply_rgb_features=False,
     )
     if not is_hybrid:
         logger.warning("Model architecture is explicit; direct readout will use per-Gaussian compact codes")
@@ -6354,6 +6514,7 @@ def evaluate_scene(
         "registration_weight_mode": registration_weight_mode,
         "registration_confidence_blend": float(registration_confidence_blend),
         "registration_confidence_mode": registration_confidence_mode,
+        "registration_query_order": registration_query_order,
         "disable_registered_refiner": bool(disable_registered_refiner),
         "direct_primitive_confidence_mode": direct_primitive_confidence_mode,
         "direct_primitive_confidence_blend": float(direct_primitive_confidence_blend),
@@ -6368,6 +6529,7 @@ def evaluate_scene(
             }
         )
     scores: Optional[torch.Tensor] = None
+    score_valid_mask: Optional[torch.Tensor] = None
     cache_path = Path(score_cache_path) if score_cache_path else None
     if cache_path is not None:
         score_cache_info["path"] = str(cache_path)
@@ -6421,6 +6583,94 @@ def evaluate_scene(
             )
 
     direct_scores: Optional[torch.Tensor] = None
+    if scores is None and external_query_score_cache_path:
+        external_path = Path(external_query_score_cache_path)
+        print(f"  loading external primitive query scores: {external_path}")
+        payload = torch.load(external_path, map_location="cpu")
+        external_scores = payload.get("query_scores", payload.get("features"))
+        external_valid = payload.get("valid")
+        external_xyz = payload.get("xyz")
+        query_names = [
+            str(value) for value in dict(payload.get("metadata", {})).get("query_names", [])
+        ]
+        if query_names != list(scene_categories):
+            raise ValueError(
+                f"External score query order mismatch: {query_names} vs {scene_categories}"
+            )
+        expected_shape = (int(model.get_xyz().shape[0]), len(scene_categories))
+        if not isinstance(external_scores, torch.Tensor) or tuple(external_scores.shape) != expected_shape:
+            raise ValueError(f"External query scores must be {expected_shape}")
+        if not isinstance(external_valid, torch.Tensor) or external_valid.shape != (expected_shape[0],):
+            raise ValueError("External query score cache requires row-aligned valid")
+        if not isinstance(external_xyz, torch.Tensor) or external_xyz.shape != model.get_xyz().shape:
+            raise ValueError("External query score cache requires row-aligned xyz")
+        xyz_error = (
+            external_xyz.float() - model.get_xyz().detach().cpu().float()
+        ).norm(dim=-1)
+        if float(xyz_error.max()) > 1e-6:
+            raise ValueError("External query score cache xyz mismatch")
+        scores = external_scores.float().cpu()
+        score_valid_mask = external_valid.bool().cpu()
+        scores[~score_valid_mask] = -1.0e4
+        registration_stats = {
+            "source": "external_query_score_cache",
+            "path": str(external_path),
+            "registered_gaussians": int(score_valid_mask.sum()),
+            "total_gaussians": int(score_valid_mask.numel()),
+            "registered_fraction": float(score_valid_mask.float().mean()),
+        }
+        score_cache_info["external_query_score_cache"] = str(external_path)
+    if scores is None and external_query_feature_cache_path:
+        if scene_text is None:
+            raise RuntimeError("Text embeddings are required for external query features")
+        external_path = Path(external_query_feature_cache_path)
+        print(f"  loading external primitive query features: {external_path}")
+        payload = torch.load(external_path, map_location="cpu")
+        external_features = payload.get("summary_features", payload.get("features"))
+        external_valid = payload.get("valid")
+        external_xyz = payload.get("xyz")
+        if not isinstance(external_features, torch.Tensor) or external_features.ndim != 2:
+            raise ValueError("External query cache must contain 2D 'features' or 'summary_features'")
+        if tuple(external_features.shape) != (int(model.get_xyz().shape[0]), int(scene_text.shape[1])):
+            raise ValueError(
+                f"External query feature shape mismatch: {tuple(external_features.shape)}"
+            )
+        if not isinstance(external_valid, torch.Tensor) or external_valid.shape != (external_features.shape[0],):
+            raise ValueError("External query cache must contain row-aligned boolean 'valid'")
+        if not isinstance(external_xyz, torch.Tensor) or external_xyz.shape != model.get_xyz().shape:
+            raise ValueError("External query cache must contain row-aligned 'xyz'")
+        xyz_error = (
+            external_xyz.float() - model.get_xyz().detach().cpu().float()
+        ).norm(dim=-1)
+        if float(xyz_error.max()) > 1e-6:
+            raise ValueError(
+                f"External query cache xyz mismatch: max_l2={float(xyz_error.max()):.3e}"
+            )
+        external_score_parts: List[torch.Tensor] = []
+        for start in range(0, external_features.shape[0], max(1, int(chunk_size))):
+            feature_chunk = external_features[
+                start : start + max(1, int(chunk_size))
+            ].to(device=device, dtype=torch.float32)
+            external_score_parts.append(
+                score_text_aligned_embeddings(
+                    feature_chunk,
+                    scene_text,
+                    canonical_embeddings=canonical_text,
+                    scoring=scoring,
+                    softmax_temperature=softmax_temperature,
+                ).cpu()
+            )
+        scores = torch.cat(external_score_parts, dim=0)
+        score_valid_mask = external_valid.bool().cpu()
+        scores[~external_valid.bool()] = -1.0e4
+        registration_stats = {
+            "source": "external_query_feature_cache",
+            "path": str(external_path),
+            "registered_gaussians": int(external_valid.bool().sum()),
+            "total_gaussians": int(external_valid.numel()),
+            "registered_fraction": float(external_valid.float().mean()),
+        }
+        score_cache_info["external_query_feature_cache"] = str(external_path)
     needs_direct_scores = score_source == "direct" or (
         score_source == "registered_view" and registered_view_fallback == "direct"
     )
@@ -6501,6 +6751,7 @@ def evaluate_scene(
             registration_weight_mode=registration_weight_mode,
             registration_confidence_blend=registration_confidence_blend,
             registration_confidence_mode=registration_confidence_mode,
+            registration_query_order=registration_query_order,
             fallback_scores=direct_scores if registered_view_fallback == "direct" else None,
             device=device,
             registered_feature_cache_path=registered_feature_cache_path,
@@ -6549,6 +6800,13 @@ def evaluate_scene(
             model.get_xyz().detach().cpu(),
             k=vala_knn_k,
             chunk_size=vala_knn_chunk_size,
+            valid_mask=score_valid_mask,
+        )
+    elif score_postprocess == "query_peak_normalize":
+        print("  applying GT-free per-query scene peak normalization")
+        scores = peak_normalize_query_scores(
+            scores,
+            valid_mask=score_valid_mask,
         )
     elif score_postprocess != "none":
         raise ValueError(f"Unsupported score_postprocess: {score_postprocess}")
@@ -6857,6 +7115,8 @@ def main() -> None:
     parser.add_argument("--openclip_pretrained", default="laion2b_s34b_b88k", help="OpenCLIP pretrained tag used when --text_encoder openclip")
     parser.add_argument("--score_cache", default="", help="Optional primitive text-score cache path; loaded if metadata matches, written when missing")
     parser.add_argument("--registered_feature_cache", default="", help="Optional VPR-registered primitive summary-feature cache path written when registered-view scores are computed")
+    parser.add_argument("--external_query_feature_cache", default="", help="Oracle/audit cache of row-aligned per-Gaussian text-space features")
+    parser.add_argument("--external_query_score_cache", default="", help="Query-time score-then-register cache with fixed query order")
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES, help="Prompt templates separated by '|'; use {query}")
     parser.add_argument(
         "--selection_mode",
@@ -6884,7 +7144,12 @@ def main() -> None:
     parser.add_argument("--score_aggregation", choices=["none", "voxel_mean", "voxel_max", "voxel_max_dilate"], default="none", help="GT-free spatial aggregation applied to Gaussian text scores")
     parser.add_argument("--score_aggregation_resolution", type=int, default=64, help="Voxel resolution per scene axis for score aggregation")
     parser.add_argument("--score_aggregation_blend", type=float, default=0.0, help="Blend weight for aggregated scores; 0 disables aggregation")
-    parser.add_argument("--score_postprocess", choices=["none", "vala_knn_minmax"], default="none", help="Fixed primitive-score readout applied before selection")
+    parser.add_argument(
+        "--score_postprocess",
+        choices=["none", "vala_knn_minmax", "query_peak_normalize"],
+        default="none",
+        help="Fixed primitive-score readout applied before selection",
+    )
     parser.add_argument("--vala_knn_k", type=int, default=10, help="Neighbour count for vala_knn_minmax")
     parser.add_argument("--vala_knn_chunk_size", type=int, default=65536, help="Score-gather chunk size for vala_knn_minmax")
     parser.add_argument("--proposal_smoothing", choices=["none", "voxel"], default="none", help="GT-free proposal-memory smoothing applied to primitive text scores before selection")
@@ -6925,7 +7190,7 @@ def main() -> None:
     parser.add_argument("--component_min_size", type=int, default=8, help="Minimum selected Gaussians per component before ranking")
     parser.add_argument("--component_rank_by", choices=["mean_score", "score_sum", "size"], default="score_sum", help="How top_score_components ranks connected components")
     parser.add_argument("--registered_view_fallback", choices=["direct", "low"], default="direct", help="Fallback score for Gaussians not visible in registration views")
-    parser.add_argument("--registration_frame_mode", choices=["official", "annotated", "all_poses", "train", "val"], default="official", help="Views used to register rendered features back to primitives")
+    parser.add_argument("--registration_frame_mode", choices=["official", "annotated", "all_poses", "train", "train_nonannotated", "val"], default="official", help="Views used to register rendered features back to primitives")
     parser.add_argument("--registration_max_frames", type=int, default=0, help="Evenly subsample registration views; 0 uses all selected views")
     parser.add_argument("--registration_chunk_size", type=int, default=32768, help="Gaussian chunk size for rendered-view registration sampling")
     parser.add_argument("--registration_depth_tolerance", type=float, default=0.08, help="Absolute depth tolerance for rendered-view primitive registration")
@@ -6935,6 +7200,7 @@ def main() -> None:
     parser.add_argument("--registration_weight_mode", choices=["uniform", "alpha", "alpha_depth"], default="uniform", help="Contribution-style weighting for VPR registered samples")
     parser.add_argument("--registration_confidence_blend", type=float, default=0.0, help="Blend weight for GT-free registration-count confidence calibration")
     parser.add_argument("--registration_confidence_mode", choices=["log", "linear"], default="log", help="How registration counts are mapped to confidence")
+    parser.add_argument("--registration_query_order", choices=["feature_then_score", "score_then_register"], default="feature_then_score", help="Whether registered-view fusion averages query-space features or query scores")
     parser.add_argument("--disable_registered_refiner", action="store_true", help="Disable VFA/screen refiner only for registered-view primitive scoring")
     parser.add_argument(
         "--direct_primitive_confidence_mode",
@@ -7230,6 +7496,8 @@ def main() -> None:
         openclip_pretrained=args.openclip_pretrained,
         score_cache_path=args.score_cache or None,
         registered_feature_cache_path=args.registered_feature_cache or None,
+        external_query_feature_cache_path=args.external_query_feature_cache or None,
+        external_query_score_cache_path=args.external_query_score_cache or None,
         prompt_templates=prompt_templates,
         selection_specs=specs,
         score_source=args.score_source,
@@ -7279,6 +7547,7 @@ def main() -> None:
         registration_weight_mode=args.registration_weight_mode,
         registration_confidence_blend=args.registration_confidence_blend,
         registration_confidence_mode=args.registration_confidence_mode,
+        registration_query_order=args.registration_query_order,
         disable_registered_refiner=args.disable_registered_refiner,
         use_point_summary_adapter=args.use_point_summary_adapter,
         point_summary_adapter_blend_alpha=args.point_summary_adapter_blend_alpha,
@@ -7449,6 +7718,7 @@ def main() -> None:
             "registration_weight_mode": args.registration_weight_mode,
             "registration_confidence_blend": args.registration_confidence_blend,
             "registration_confidence_mode": args.registration_confidence_mode,
+            "registration_query_order": args.registration_query_order,
             "disable_registered_refiner": bool(args.disable_registered_refiner),
             "direct_primitive_confidence_mode": args.direct_primitive_confidence_mode,
             "direct_primitive_confidence_blend": float(args.direct_primitive_confidence_blend),

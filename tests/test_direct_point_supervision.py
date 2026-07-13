@@ -263,6 +263,20 @@ def test_direct_point_loss_can_align_summary_space(monkeypatch):
     assert torch.allclose(stats["summary"], torch.tensor(0.5))
     assert torch.allclose(stats["loss"], torch.tensor(0.5))
 
+    trainer.direct_point_summary_alignment_weight = 0.0
+    trainer.direct_point_relation_weight = 1.0
+    trainer.direct_point_relation_max_points = 2
+    relation_stats = trainer._compute_direct_point_loss(
+        batch={"pose_w2c": torch.eye(4).unsqueeze(0)},
+        render_result={},
+        target_features=torch.zeros(1, 2, 2, 2),
+    )
+
+    # The student collapses both points to the same direction (similarity 1),
+    # while the teacher points are orthogonal (similarity 0).
+    assert torch.allclose(relation_stats["relation"], torch.tensor(0.5))
+    assert torch.allclose(relation_stats["loss"], torch.tensor(0.5))
+
 
 def test_direct_point_loss_can_use_cached_teacher_features_without_view_sampling(monkeypatch):
     trainer = object.__new__(RadioGSTrainer)

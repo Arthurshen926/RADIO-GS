@@ -389,6 +389,12 @@ def _build_hybrid_model(config, checkpoint_path: str, device: torch.device):
         codec_type=getattr(config, "codec_type", "hcd"),
         dual_stream=getattr(config, "dual_stream", True),
         symmetric_decoder=getattr(config, "symmetric_decoder", False),
+        hidden_normalization=getattr(
+            config, "codec_hidden_normalization", "legacy_group"
+        ),
+        final_normalization=getattr(
+            config, "codec_final_normalization", "legacy_group"
+        ),
     ).to(device).eval()
 
     ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)

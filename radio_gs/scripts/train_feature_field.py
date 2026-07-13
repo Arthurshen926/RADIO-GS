@@ -427,6 +427,12 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
         self.direct_point_summary_alignment_weight = float(
             getattr(config, "direct_point_summary_alignment_weight", 0.0)
         )
+        self.direct_point_relation_weight = float(
+            getattr(config, "direct_point_relation_weight", 0.0)
+        )
+        self.direct_point_relation_max_points = max(
+            2, int(getattr(config, "direct_point_relation_max_points", 256))
+        )
         self.direct_point_summary_adapter_weight = float(
             getattr(config, "direct_point_summary_adapter_weight", 0.0)
         )
@@ -1340,6 +1346,7 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             or self.text_heatmap_distill_weight > 0
             or self.grounding_query_loss_weight > 0
             or self.direct_point_summary_alignment_weight > 0
+            or self.direct_point_relation_weight > 0
             or self.direct_point_summary_adapter_weight > 0
             or self.direct_point_text_loss_weight > 0
             or self.direct_point_adapter_text_loss_weight > 0
@@ -1752,6 +1759,12 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             codec_type=getattr(config, "codec_type", "hcd"),
             dual_stream=getattr(config, "dual_stream", True),
             symmetric_decoder=getattr(config, "symmetric_decoder", False),
+            hidden_normalization=getattr(
+                config, "codec_hidden_normalization", "legacy_group"
+            ),
+            final_normalization=getattr(
+                config, "codec_final_normalization", "legacy_group"
+            ),
         )
 
     def _build_optimizer(self, config: RadioGSConfig) -> optim.Optimizer:
@@ -2405,6 +2418,9 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             "frozen_seg": 0.0,
             "direct_point": 0.0,
             "direct_point_valid": 0.0,
+            "direct_point_feature_distill": 0.0,
+            "direct_point_summary": 0.0,
+            "direct_point_relation": 0.0,
             "direct_point_text": 0.0,
             "direct_point_text_valid": 0.0,
             "direct_point_text_acc": 0.0,
@@ -2774,6 +2790,9 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                 l_visibility = torch.tensor(0.0, device=self.device)
                 l_direct_point = torch.tensor(0.0, device=self.device)
                 direct_point_valid = torch.tensor(0.0, device=self.device)
+                direct_point_feature_distill = torch.tensor(0.0, device=self.device)
+                direct_point_summary = torch.tensor(0.0, device=self.device)
+                direct_point_relation = torch.tensor(0.0, device=self.device)
                 direct_point_text = torch.tensor(0.0, device=self.device)
                 direct_point_text_valid = torch.tensor(0.0, device=self.device)
                 direct_point_text_acc = torch.tensor(0.0, device=self.device)
@@ -2913,6 +2932,15 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
                     )
                     l_direct_point = direct_point_stats["loss"]
                     direct_point_valid = direct_point_stats["valid_ratio"]
+                    direct_point_feature_distill = direct_point_stats.get(
+                        "feature_distill", direct_point_feature_distill
+                    )
+                    direct_point_summary = direct_point_stats.get(
+                        "summary", direct_point_summary
+                    )
+                    direct_point_relation = direct_point_stats.get(
+                        "relation", direct_point_relation
+                    )
                     direct_point_text = direct_point_stats.get("text", direct_point_text)
                     direct_point_text_valid = direct_point_stats.get(
                         "text_valid_ratio", direct_point_text_valid
@@ -3158,6 +3186,11 @@ class RadioGSTrainer(FeatureSupervisionMixin, TrainingArtifactMixin):
             loss_accum["frozen_seg"] += frozen_seg_losses["total"].item()
             loss_accum["direct_point"] += l_direct_point.item()
             loss_accum["direct_point_valid"] += direct_point_valid.item()
+            loss_accum["direct_point_feature_distill"] += (
+                direct_point_feature_distill.item()
+            )
+            loss_accum["direct_point_summary"] += direct_point_summary.item()
+            loss_accum["direct_point_relation"] += direct_point_relation.item()
             loss_accum["direct_point_text"] += direct_point_text.item()
             loss_accum["direct_point_text_valid"] += direct_point_text_valid.item()
             loss_accum["direct_point_text_acc"] += direct_point_text_acc.item()

@@ -26,6 +26,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from PIL import Image
+from scipy.spatial import cKDTree
 from torch import Tensor
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -295,7 +296,7 @@ def load_scene(
     moved to *device* during training.
 
     Returns:
-        images: list of [H, W, 3] float32 tensors on **CPU**
+        images: list of [H, W, 3] uint8 tensors on **CPU**
         w2cs:   list of [4, 4] float32 w2c tensors on *device*
         K:      [3, 3] intrinsics tensor on *device*
         W, H:   image width and height
@@ -418,7 +419,9 @@ def load_scene(
         if pil_image.size != target_size:
             resampling = getattr(Image, "Resampling", Image).LANCZOS
             pil_image = pil_image.resize(target_size, resample=resampling)
-        img = np.array(pil_image, dtype=np.float32) / 255.0
+        # Keep the resident training set compact.  Only one sampled frame is
+        # converted to float on the GPU per step below.
+        img = np.array(pil_image, dtype=np.uint8)
         images.append(torch.from_numpy(img))  # CPU
         resolved_paths.append(full.resolve())
 
@@ -607,20 +610,13 @@ def _estimate_initial_scales(means: Tensor, scene_scale: float) -> Tensor:
     idx = torch.randperm(N)[:max_sample]
     subset = cpu_means[idx]
 
-    # Pairwise distances on CPU (chunked to avoid GPU OOM during init)
-    chunk = 1024
-    nn_dists = []
-    for i in range(0, len(subset), chunk):
-        end = min(i + chunk, len(subset))
-        dists = torch.cdist(subset[i:end], subset)  # [chunk_sz, max_sample]
-        # Mask self-distances on the diagonal (local row j → global col i+j)
-        rows = torch.arange(end - i)
-        dists[rows, i + rows] = float("inf")
-        nn_dist, _ = dists.min(dim=1)
-        nn_dists.append(nn_dist)
-
-    nn_dists = torch.cat(nn_dists)
-    median_nn = nn_dists.median().item()
+    # An exact KD-tree computes the same nearest-neighbour statistic without
+    # materialising the former O(S^2) 50k-by-50k distance matrix.
+    # Use one worker deliberately: large shared hosts can expose hundreds of
+    # CPUs, where ``workers=-1`` spends far longer in thread scheduling than
+    # this small 3-D query needs.
+    distances, _ = cKDTree(subset.numpy()).query(subset.numpy(), k=2, workers=1)
+    median_nn = float(np.median(np.asarray(distances, dtype=np.float32)[:, 1]))
     init_scale = max(median_nn * 0.5, scene_scale * 1e-4)
     log_scale = math.log(init_scale)
     print(f"  Median NN distance: {median_nn:.4f}, "
@@ -869,7 +865,7 @@ def train(args):
 
         # Random training frame
         idx = random.randint(0, n_frames - 1)
-        gt_img = images[idx].to(device)  # [H, W, 3] — CPU → GPU
+        gt_img = images[idx].to(device=device, dtype=torch.float32).div_(255.0)
         viewmat = w2cs[idx]              # [4, 4]
 
         # Build SH colour tensor: [N, K_cur, 3]

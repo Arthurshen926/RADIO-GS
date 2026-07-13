@@ -724,7 +724,7 @@ class HybridFeatureGaussian(nn.Module):
 
     # -- PLY I/O ------------------------------------------------------------
 
-    def load_from_ply(self, ply_path: str) -> None:
+    def load_from_ply(self, ply_path: str, *, load_rgb_features: bool = True) -> None:
         """Load pre-trained 3DGS geometry from PLY and freeze it.
 
         Initialises per-Gaussian latent codes with small random values.
@@ -739,9 +739,10 @@ class HybridFeatureGaussian(nn.Module):
             axis=1,
         )
         opacity = np.asarray(vertex["opacity"])[..., np.newaxis]
-        features_dc = np.zeros((N, 1, 3))
-        for i in range(3):
-            features_dc[:, 0, i] = np.asarray(vertex[f"f_dc_{i}"])
+        features_dc = np.zeros((N, 1, 3), dtype=np.float32)
+        if load_rgb_features:
+            for i in range(3):
+                features_dc[:, 0, i] = np.asarray(vertex[f"f_dc_{i}"])
 
         scale_names = sorted(
             [p.name for p in vertex.properties if p.name.startswith("scale_")],
@@ -763,13 +764,13 @@ class HybridFeatureGaussian(nn.Module):
         self.register_buffer("_features_dc", torch.tensor(features_dc, dtype=torch.float32))
 
         # Load SH rest coefficients for RGB rendering
-        rest_names = sorted(
+        all_rest_names = sorted(
             [p.name for p in vertex.properties if p.name.startswith("f_rest_")],
             key=lambda x: int(x.split("_")[-1]),
         )
-        if rest_names:
+        if load_rgb_features and all_rest_names:
             features_rest = np.stack(
-                [np.asarray(vertex[n]) for n in rest_names], axis=1
+                [np.asarray(vertex[n]) for n in all_rest_names], axis=1
             )  # [N, K*3]
             num_sh_coeffs = features_rest.shape[1] // 3
             features_rest = features_rest.reshape(N, num_sh_coeffs, 3)
@@ -780,6 +781,16 @@ class HybridFeatureGaussian(nn.Module):
             import math
             total_coeffs = num_sh_coeffs + 1  # +1 for DC
             self._sh_degree = int(math.sqrt(total_coeffs)) - 1
+        elif all_rest_names:
+            # Feature-only renderers never read SH colors, but checkpoint loading
+            # still requires the registered buffer to have the saved shape.
+            num_sh_coeffs = len(all_rest_names) // 3
+            self.register_buffer(
+                "_features_rest",
+                torch.empty(N, num_sh_coeffs, 3, dtype=torch.float32),
+            )
+            import math
+            self._sh_degree = int(math.sqrt(num_sh_coeffs + 1)) - 1
         else:
             self.register_buffer("_features_rest", torch.empty(0))
             self._sh_degree = 0

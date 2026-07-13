@@ -37,6 +37,7 @@ import argparse
 import hashlib
 import json
 import logging
+import math
 import re
 import sys
 import time
@@ -204,20 +205,32 @@ def _load_siglip2_text_head_state(model_name: str) -> Optional[Dict[str, torch.T
     except Exception:
         return None
 
+    patterns = [
+        "model.safetensors",
+        "model-*.safetensors",
+        "model.safetensors.index.json",
+    ]
     try:
+        # Prefer the already verified local shards.  Requiring a Hub metadata
+        # request here made exact-query evaluation fail during transient TLS
+        # outages even though every necessary tensor was present on disk.
         snapshot = Path(
             snapshot_download(
                 model_name,
-                allow_patterns=[
-                    "model.safetensors",
-                    "model-*.safetensors",
-                    "model.safetensors.index.json",
-                ],
+                allow_patterns=patterns,
+                local_files_only=True,
             )
         )
-    except Exception as exc:
-        logger.warning("Could not locate SigLIP2 safetensors for text-head restore: %s", exc)
-        return None
+    except Exception:
+        try:
+            snapshot = Path(
+                snapshot_download(model_name, allow_patterns=patterns)
+            )
+        except Exception as exc:
+            logger.warning(
+                "Could not locate SigLIP2 safetensors for text-head restore: %s", exc
+            )
+            return None
 
     state: Dict[str, torch.Tensor] = {}
     for shard in sorted(snapshot.glob("*.safetensors")):
@@ -1211,6 +1224,7 @@ def load_render_pipeline(
     device: torch.device,
     *,
     strict_checkpoint_contract: bool = False,
+    load_ply_rgb_features: bool = True,
 ):
     """Load the trained RADIO-GS model, codec, renderer, and refiner.
 
@@ -1256,8 +1270,43 @@ def load_render_pipeline(
         model = R["ExplicitFeatureGaussian"](latent_dim=latent_dim)
 
     ply_path = getattr(config, "ply_path", "")
-    if ply_path:
-        model.load_from_ply(ply_path)
+    ckpt = None
+    if is_hybrid and not load_ply_rgb_features:
+        # Feature-only checkpoints already contain every geometry buffer.  Seed
+        # matching shapes directly from the trusted state dict so large remote
+        # PLY files are not parsed a second time merely to allocate tensors.
+        ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+        model_state = ckpt.get("model_state_dict", {})
+        buffer_names = (
+            "_xyz",
+            "_rotation",
+            "_scaling",
+            "_opacity",
+            "_features_dc",
+            "_features_rest",
+        )
+        missing_geometry = [name for name in (*buffer_names, "_latent") if name not in model_state]
+        if missing_geometry:
+            raise KeyError(
+                "Feature-only checkpoint lacks geometry state: "
+                + ", ".join(missing_geometry)
+            )
+        for name in buffer_names:
+            setattr(model, name, torch.empty_like(model_state[name], device="cpu"))
+        model._latent = nn.Parameter(
+            torch.empty_like(model_state["_latent"], device="cpu")
+        )
+        rest = model_state["_features_rest"]
+        model._sh_degree = int(math.sqrt(int(rest.shape[1]) + 1)) - 1 if rest.ndim == 3 else 0
+        print(
+            f"[HybridFeatureGaussian] Geometry shapes from checkpoint: "
+            f"{int(model_state['_xyz'].shape[0])} Gaussians"
+        )
+    elif ply_path:
+        if is_hybrid:
+            model.load_from_ply(ply_path, load_rgb_features=True)
+        else:
+            model.load_from_ply(ply_path)
     model = model.to(device).eval()
     use_2dgs = resolve_use_2dgs(config, ply_path)
 
@@ -1267,6 +1316,12 @@ def load_render_pipeline(
         codec_type=getattr(config, "codec_type", "hcd"),
         dual_stream=getattr(config, "dual_stream", True),
         symmetric_decoder=getattr(config, "symmetric_decoder", False),
+        hidden_normalization=getattr(
+            config, "codec_hidden_normalization", "legacy_group"
+        ),
+        final_normalization=getattr(
+            config, "codec_final_normalization", "legacy_group"
+        ),
     ).to(device).eval()
 
     fH = getattr(config, "feature_height", 30)
@@ -1305,7 +1360,8 @@ def load_render_pipeline(
             norm_type=getattr(config, "refiner_norm_type", "gn"),
         ).to(device).eval()
 
-    ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+    if ckpt is None:
+        ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
     model_status = model.load_state_dict(ckpt["model_state_dict"], strict=False)
     codec_status = codec.load_state_dict(ckpt["codec_state_dict"], strict=False)
     contract = {
@@ -1420,6 +1476,14 @@ def render_1280d(
 
         decoded = codec.decode(latent)  # [1, 1280, H, W]
         if return_aux:
+            depth_map = result.get("depth_map")
+            if depth_map is not None:
+                if depth_map.dim() == 2:
+                    aux["depth_map"] = depth_map.unsqueeze(0).unsqueeze(0).detach()
+                elif depth_map.dim() == 3:
+                    aux["depth_map"] = depth_map.unsqueeze(0).detach()
+                else:
+                    aux["depth_map"] = depth_map.detach()
             alpha_map = result.get("alpha_map")
             if alpha_map is not None:
                 if alpha_map.dim() == 2:
@@ -1431,6 +1495,47 @@ def render_1280d(
     if return_aux:
         return decoded, aux
     return decoded
+
+
+@torch.inference_mode()
+def decode_primitive_query_rows(
+    model: nn.Module,
+    codec: nn.Module,
+    projection: nn.Module,
+    *,
+    is_hybrid: bool,
+    device: torch.device,
+    chunk_size: int = 8192,
+    store_on_cpu: bool = False,
+) -> torch.Tensor:
+    """Decode every Gaussian into the frozen text-aligned query space.
+
+    These exact rows are shared by direct 3-D querying and primitive-first 2-D
+    rendering; no screen-space decoder or refiner is involved.
+    """
+    rows: List[torch.Tensor] = []
+    num_gaussians = int(model.get_xyz().shape[0])
+    try:
+        projection_dtype = next(projection.parameters()).dtype
+    except StopIteration:
+        projection_dtype = torch.float32
+    for start in tqdm(
+        range(0, num_gaussians, max(1, int(chunk_size))),
+        desc="  decode primitive query rows",
+        leave=False,
+    ):
+        stop = min(start + max(1, int(chunk_size)), num_gaussians)
+        indices = torch.arange(start, stop, device=device, dtype=torch.long)
+        if is_hybrid and hasattr(model, "query_gaussian_points"):
+            compact = model.query_gaussian_points(indices)
+        else:
+            compact = model.get_features()[indices]
+        decoded = codec.decode_points(compact.float())
+        projected = projection(decoded.unsqueeze(0).to(dtype=projection_dtype)).squeeze(0)
+        normalized = F.normalize(projected.float(), dim=-1, eps=1e-8)
+        rows.append(normalized.half().cpu() if store_on_cpu else normalized)
+        del compact, decoded, projected, normalized
+    return torch.cat(rows, dim=0)
 
 
 # ---------------------------------------------------------------------------
@@ -1647,6 +1752,9 @@ def evaluate_scene(
     sam3_prompt_mask_head_require_peak_in_refined: bool = False,
     sam3_prompt_mask_head_initial_refinement: str = "none",
     sam3_prompt_mask_head_apply_to: str = "rendered",
+    render_readout: str = "screen_decode",
+    primitive_chunk_size: int = 8192,
+    primitive_query_cache: str = "",
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -1689,8 +1797,47 @@ def evaluate_scene(
                 raise RuntimeError(
                     f"Missing camera poses for labeled {scene} frames: {missing_pose_frames}"
                 )
+            primitive_query_rows = None
+            primitive_query_valid = None
+            if render_readout in {"primitive_query", "primitive_score"}:
+                if primitive_query_cache:
+                    payload = torch.load(primitive_query_cache, map_location="cpu")
+                    primitive_query_rows = payload.get(
+                        "summary_features", payload.get("features")
+                    )
+                    primitive_query_valid = payload.get("valid")
+                    cached_xyz = payload.get("xyz")
+                    if not isinstance(primitive_query_rows, torch.Tensor):
+                        raise ValueError("Primitive query cache lacks feature rows")
+                    if primitive_query_rows.shape[0] != model.get_xyz().shape[0]:
+                        raise ValueError("Primitive query cache row-count mismatch")
+                    if not isinstance(cached_xyz, torch.Tensor) or cached_xyz.shape != model.get_xyz().shape:
+                        raise ValueError("Primitive query cache lacks row-aligned xyz")
+                    xyz_error = (
+                        cached_xyz.float() - model.get_xyz().detach().cpu().float()
+                    ).norm(dim=-1)
+                    if float(xyz_error.max()) > 1e-6:
+                        raise ValueError(
+                            f"Primitive query cache xyz mismatch: max_l2={float(xyz_error.max()):.3e}"
+                        )
+                    if render_readout == "primitive_query":
+                        primitive_query_rows = primitive_query_rows.to(
+                            device=device, dtype=torch.float32
+                        )
+                else:
+                    primitive_query_rows = decode_primitive_query_rows(
+                        model,
+                        codec,
+                        proj,
+                        is_hybrid=is_hybrid,
+                        device=device,
+                        chunk_size=primitive_chunk_size,
+                        store_on_cpu=render_readout == "primitive_score",
+                    )
         else:
             scene_root_hint = ""
+            primitive_query_rows = None
+            primitive_query_valid = None
         canonical_mode = canonical_lerf_mode(mode)
         mode_mask_refinement = mask_refinement
         if (
@@ -1726,6 +1873,28 @@ def evaluate_scene(
                     logger.warning("No pose for frame %d – skipping", frame_id)
                     continue
                 viewmat = torch.from_numpy(pose_w2c.copy()).float().to(device).unsqueeze(0)
+                render_aux = None
+                if render_readout == "primitive_query":
+                    assert primitive_query_rows is not None
+                    primitive_render = renderer.render_feature_rows(
+                        model,
+                        viewmat.squeeze(0),
+                        primitive_query_rows,
+                        alpha_normalize=True,
+                    )
+                    siglip_feat = F.normalize(
+                        primitive_render["feature_map"].unsqueeze(0).float(),
+                        dim=1,
+                        eps=1e-8,
+                    )
+                    render_aux = {
+                        "alpha_map": primitive_render["alpha_map"][None, None]
+                    }
+                    feat_1280 = None
+                elif render_readout == "primitive_score":
+                    assert primitive_query_rows is not None
+                    siglip_feat = None
+                    feat_1280 = None
                 # Load RGB image for refiner guide if needed
                 rgb_tensor = None
                 if getattr(config, "refiner_rgb_guide", False):
@@ -1738,8 +1907,9 @@ def evaluate_scene(
                         from PIL import Image
                         rgb_pil = Image.open(img_path).convert("RGB")
                         rgb_tensor = TF.to_tensor(rgb_pil).unsqueeze(0).to(device)
-                render_aux = None
-                if mode_confidence_gate != "none":
+                if render_readout in {"primitive_query", "primitive_score"}:
+                    pass
+                elif mode_confidence_gate != "none":
                     feat_1280, render_aux = render_1280d(
                         model, codec, renderer, sharpener, refiner, viewmat,
                         is_hybrid=is_hybrid, config=config, device=device,
@@ -1755,7 +1925,11 @@ def evaluate_scene(
 
             # Project into the selected text space.  ``proj`` is an identity
             # module for native 512-D OpenCLIP/SAM-CLIP feature fields.
-            siglip_feat = project_to_siglip2(feat_1280.half(), proj)
+            if not (
+                mode == "rendered"
+                and render_readout in {"primitive_query", "primitive_score"}
+            ):
+                siglip_feat = project_to_siglip2(feat_1280.half(), proj)
 
             # Only evaluate categories present in this frame
             frame_cats = {obj["category"] for obj in frame_objects}
@@ -1769,10 +1943,15 @@ def evaluate_scene(
                 continue
 
             active_emb = text_embeddings[active_indices].to(device)  # [K, 1536]
-            if int(siglip_feat.shape[1]) != int(active_emb.shape[1]):
+            visual_dim = (
+                int(primitive_query_rows.shape[1])
+                if mode == "rendered" and render_readout == "primitive_score"
+                else int(siglip_feat.shape[1])
+            )
+            if visual_dim != int(active_emb.shape[1]):
                 raise ValueError(
                     "Visual/text feature dimension mismatch: "
-                    f"visual={int(siglip_feat.shape[1])}, text={int(active_emb.shape[1])}. "
+                    f"visual={visual_dim}, text={int(active_emb.shape[1])}. "
                     "Use --text_encoder openclip for a 512-D SAM-CLIP field or "
                     "--text_encoder siglip2 for a RADIO/SigLIP2 field."
                 )
@@ -1786,14 +1965,45 @@ def evaluate_scene(
                 scene_cats_sorted = sorted(scene_cat_indices.keys())
                 active_scene_idx = [scene_cats_sorted.index(c) for c in active_cats]
 
-            heatmaps = compute_relevancy_heatmap(
-                siglip_feat, active_emb,
-                canonical_emb=canonical_emb,
-                temperature=temperature,
-                scoring=scoring,
-                all_scene_emb=all_scene_emb,
-                active_scene_indices=active_scene_idx,
-            )
+            if mode == "rendered" and render_readout == "primitive_score":
+                assert primitive_query_rows is not None
+                primitive_score_parts: List[torch.Tensor] = []
+                for start in range(0, primitive_query_rows.shape[0], primitive_chunk_size):
+                    query_chunk = primitive_query_rows[
+                        start : start + primitive_chunk_size
+                    ].to(device=device, dtype=torch.float32)
+                    chunk_heatmaps = compute_relevancy_heatmap(
+                        query_chunk.T[None, :, :, None],
+                        active_emb,
+                        canonical_emb=canonical_emb,
+                        temperature=temperature,
+                        scoring=scoring,
+                        all_scene_emb=all_scene_emb,
+                        active_scene_indices=active_scene_idx,
+                    )
+                    primitive_score_parts.append(chunk_heatmaps.squeeze(-1).T)
+                primitive_score_rows = torch.cat(primitive_score_parts, dim=0).contiguous()
+                if primitive_query_valid is not None:
+                    primitive_score_rows[
+                        ~primitive_query_valid.to(device=device, dtype=torch.bool)
+                    ] = -1.0e4
+                score_render = renderer.render_feature_rows(
+                    model,
+                    viewmat.squeeze(0),
+                    primitive_score_rows,
+                    alpha_normalize=True,
+                )
+                heatmaps = score_render["feature_map"].float()
+                render_aux = {"alpha_map": score_render["alpha_map"][None, None]}
+            else:
+                heatmaps = compute_relevancy_heatmap(
+                    siglip_feat, active_emb,
+                    canonical_emb=canonical_emb,
+                    temperature=temperature,
+                    scoring=scoring,
+                    all_scene_emb=all_scene_emb,
+                    active_scene_indices=active_scene_idx,
+                )
             if mode_confidence_gate != "none":
                 heatmaps = apply_readout_confidence_gate(
                     heatmaps,
@@ -2032,6 +2242,7 @@ def evaluate_scene(
             "loc_total": loc_total,
             "n_iou_samples": len(ious),
             "per_category": per_cat_summary,
+            "render_readout": render_readout if canonical_mode == "rendered" else "teacher",
         }
         if initial_ious:
             accepted = sum(1 for report in refinement_reports if bool(report.get("accepted", False)))
@@ -2096,6 +2307,14 @@ def main() -> None:
                         help="Evaluate teacher/oracle RADIO features only (skip rendered mode)")
     parser.add_argument("--rendered_only", action="store_true",
                         help="Evaluate the rendered feature field only (skip teacher features)")
+    parser.add_argument(
+        "--render_readout",
+        choices=["screen_decode", "primitive_query", "primitive_score"],
+        default="screen_decode",
+        help="Rendered path: decode-after-splat, splat query rows, or score primitives then splat scalar scores.",
+    )
+    parser.add_argument("--primitive_chunk_size", type=int, default=8192)
+    parser.add_argument("--primitive_query_cache", default="", help="Oracle/audit cache of row-aligned per-Gaussian query-space features")
     # Scene selection
     parser.add_argument("--scene", default="all",
                         help="Scene name or 'all' (default: all)")
@@ -2256,6 +2475,8 @@ def main() -> None:
     args = parser.parse_args()
     if args.gt_only and args.rendered_only:
         parser.error("--gt_only and --rendered_only are mutually exclusive")
+    if args.render_readout in {"primitive_query", "primitive_score"} and args.text_encoder != "siglip2":
+        parser.error("primitive-first render readouts currently require --text_encoder siglip2")
     if args.scene == "all" and not args.gt_only:
         parser.error(
             "Rendered --scene all is unsafe because one config/checkpoint cannot "
@@ -2306,6 +2527,7 @@ def main() -> None:
     print(f"  Label dir:  {args.label_dir}")
     mode_label = "Teacher only" if args.gt_only else ("Rendered only" if args.rendered_only else "Teacher + Rendered")
     print(f"  Mode:       {mode_label}")
+    print(f"  Readout:    {args.render_readout}")
     print(f"  Protocol:   {args.protocol_preset}")
     print(f"  Text enc.:  {args.text_encoder}")
     print(f"  IoU thresh: {args.iou_threshold}")
@@ -2478,6 +2700,9 @@ def main() -> None:
             args.checkpoint,
             device,
             strict_checkpoint_contract=args.protocol_preset == "vala_paper_2d",
+            # LERF feature evaluation never calls Gaussian RGB/SH rendering;
+            # optional RGB guides are loaded from the source image directly.
+            load_ply_rgb_features=False,
         )
         config = render_pipeline[5]
         fH = getattr(config, "feature_height", 30)
@@ -2590,6 +2815,9 @@ def main() -> None:
             sam3_prompt_mask_head_require_peak_in_refined=args.sam3_prompt_mask_head_require_peak_in_refined,
             sam3_prompt_mask_head_initial_refinement=args.sam3_prompt_mask_head_initial_refinement,
             sam3_prompt_mask_head_apply_to=args.sam3_prompt_mask_head_apply_to,
+            render_readout=args.render_readout,
+            primitive_chunk_size=args.primitive_chunk_size,
+            primitive_query_cache=args.primitive_query_cache,
         )
         all_results[scene] = scene_results
 

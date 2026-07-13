@@ -1,0 +1,16 @@
+base_config: lerf_ramen_token_layer_primitive_ft5.yaml
+exp_name: lerf_ramen_token_layer_relation_probe_e1
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_relation_probe_e1
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_primitive_ft5/checkpoints/best.pth
+resume_from: ""
+
+# Magnitude probe only: one warm-up epoch establishes the natural scale of
+# query-agnostic pairwise semantic-relation distillation before weighting it.
+direct_point_summary_alignment_weight: 0.0
+direct_point_relation_weight: 1.0
+direct_point_relation_max_points: 256
+
+epochs: 1
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

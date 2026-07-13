@@ -1,0 +1,14 @@
+base_config: lerf_ramen_token_layer_primitive_ft5.yaml
+exp_name: lerf_ramen_token_layer_primitive_summary_ft5
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_primitive_summary_ft5
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_primitive_ft5/checkpoints/best.pth
+resume_from: ""
+
+# Preserve the frozen teacher's text-aligned summary embedding at every
+# supervised visible primitive.  This uses no benchmark category strings.
+direct_point_summary_alignment_weight: 1.0
+
+epochs: 5
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

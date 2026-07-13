@@ -1,0 +1,17 @@
+base_config: lerf_ramen_token_layer_primitive_ft5.yaml
+exp_name: lerf_ramen_token_layer_relation_ft5
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_relation_ft5
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_primitive_ft5/checkpoints/best.pth
+resume_from: ""
+
+# The one-epoch training-only magnitude probe measured relation=0.0379 and
+# feature-distill=1.148.  Weight 5 makes relational structure a modest ~16%
+# auxiliary rather than allowing it to dominate reconstruction.
+direct_point_summary_alignment_weight: 0.0
+direct_point_relation_weight: 5.0
+direct_point_relation_max_points: 256
+
+epochs: 5
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

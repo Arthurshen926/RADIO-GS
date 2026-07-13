@@ -1,0 +1,57 @@
+base_config: ../../lerf_hybrid_v14_ramen_fdh_ws240_240ep.yaml
+exp_name: lerf_ramen_frozen_field_point_adapter_ft10
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_frozen_field_point_adapter_ft10
+warmstart_from: /root/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth
+resume_from: ""
+scene_root: /mnt/pool/sqy/3d_understanding/lerf_ovs/ramen
+feature_dir: /root/RADIO-GS/output/radio_features_lerf/ramen
+val_feature_dir: /root/RADIO-GS/output/radio_features_lerf/ramen
+pose_file: ""
+val_pose_file: ""
+pose_dir: /root/RADIO-GS/output/radio_features_lerf/ramen/poses_w2c
+val_pose_dir: /root/RADIO-GS/output/radio_features_lerf/ramen/poses_w2c
+
+# Train a small primitive semantic readout while preserving the established
+# screen-space field bit-for-bit.  Targets are query-agnostic and never use
+# LERF categories, masks, or evaluation thresholds.
+direct_point_loss_weight: 1.0
+direct_point_teacher_cache: /root/RADIO-GS/output/query_consistency/teacher_cache/ramen_gaussian_siglip_mv131_depth.pt
+direct_point_teacher_cache_feature_key: features
+direct_point_teacher_cache_feature_space: siglip_summary
+direct_point_teacher_cache_require_xyz_alignment: true
+direct_point_sample_count: 4096
+direct_point_view_count_weighting: log
+direct_point_summary_alignment_weight: 0.0
+direct_point_summary_adapter_weight: 1.0
+direct_point_relation_weight: 0.0
+
+point_summary_adapter_hidden_dim: 512
+point_summary_adapter_num_layers: 2
+point_summary_adapter_dropout: 0.0
+point_summary_adapter_context_features: opacity,scale_log_mean,scale_log_max,view_count
+lr_point_summary_adapter: 0.0005
+
+# Freeze every pre-existing method component; only the adapter optimizer group
+# has a non-zero learning rate.
+lr_features: 0.0
+lr_hash: 0.0
+lr_decoder: 0.0
+lr_refiner: 0.0
+lr_heads: 0.0
+
+depth_loss_weight: 0.0
+geom_depth_loss_weight: 0.0
+frozen_depth_head_weight: 0.0
+frozen_depth_gradient_weight: 0.0
+gradient_loss_weight: 0.0
+depth_guided_feature_weight: 0.0
+geometric_edge_loss_weight: 0.0
+hybrid_semantic_aux_weight: 0.0
+hybrid_semantic_adaptor_reg_weight: 0.0
+seg_loss_weight: 0.0
+grounding_query_loss_weight: 0.0
+
+epochs: 10
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

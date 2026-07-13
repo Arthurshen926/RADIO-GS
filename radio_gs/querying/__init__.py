@@ -17,6 +17,25 @@ from .unified_query import (
     score_feature_map,
     score_features,
 )
+from .query_engine import CanonicalQueryEngine, QueryResult
+from .query_compilers import compile_registered_primitive_seeds
+from .query_spec import (
+    PrototypeSet,
+    QueryIntent,
+    QueryModality,
+    QuerySpec as TypedQuerySpec,
+    RegistrationMode,
+    SelectionMode,
+    SoftSeedSet,
+)
+from .support_solver import (
+    PrimitiveSupportGraph,
+    SupportGraphConfig,
+    SupportSolverConfig,
+    build_primitive_support_graph,
+    select_support_components,
+    solve_primitive_support,
+)
 
 __all__ = [
     "QueryKind",
@@ -34,4 +53,20 @@ __all__ = [
     "seed_connected_component",
     "score_feature_map",
     "score_features",
+    "CanonicalQueryEngine",
+    "PrimitiveSupportGraph",
+    "PrototypeSet",
+    "QueryIntent",
+    "QueryModality",
+    "QueryResult",
+    "RegistrationMode",
+    "SelectionMode",
+    "SoftSeedSet",
+    "SupportGraphConfig",
+    "SupportSolverConfig",
+    "TypedQuerySpec",
+    "build_primitive_support_graph",
+    "compile_registered_primitive_seeds",
+    "select_support_components",
+    "solve_primitive_support",
 ]

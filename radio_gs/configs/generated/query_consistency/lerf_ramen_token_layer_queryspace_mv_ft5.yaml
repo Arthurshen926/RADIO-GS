@@ -1,0 +1,20 @@
+base_config: lerf_ramen_token_layer_multiview_cache_ft5.yaml
+exp_name: lerf_ramen_token_layer_queryspace_mv_ft5
+output_dir: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_queryspace_mv_ft5
+warmstart_from: /root/RADIO-GS/output/query_consistency/train/lerf_ramen_token_layer_multiview_cache_ft5/checkpoints/best.pth
+resume_from: ""
+
+# Each 2D teacher observation is projected through the frozen SigLIP2 summary
+# adaptor before multiview aggregation.  This avoids both projection/averaging
+# and decode/splat order mismatches without using category strings or masks.
+direct_point_teacher_cache: /root/RADIO-GS/output/query_consistency/teacher_cache/ramen_gaussian_siglip_mv131_depth.pt
+direct_point_teacher_cache_feature_key: features
+direct_point_teacher_cache_feature_space: siglip_summary
+direct_point_teacher_cache_require_xyz_alignment: true
+direct_point_summary_alignment_weight: 1.0
+direct_point_relation_weight: 0.0
+
+epochs: 5
+warmup_epochs: 1
+save_every: 1
+eval_every: 1

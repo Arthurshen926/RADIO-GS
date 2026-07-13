@@ -65,6 +65,29 @@ def test_support_propagation_is_label_free_and_clamps_declared_seeds() -> None:
     assert component[1]
 
 
+def test_symmetric_adaptive_support_graph_has_reciprocal_edges() -> None:
+    xyz = np.array(
+        [[0.0, 0.0, 0.0], [0.01, 0.0, 0.0], [0.03, 0.0, 0.0], [1.0, 0.0, 0.0]],
+        dtype=np.float32,
+    )
+    features = np.tile(np.array([[1.0, 0.0]], dtype=np.float32), (4, 1))
+    graph = build_support_graph(
+        xyz,
+        features,
+        SupportPropagationConfig(
+            neighbors=1,
+            graph_mode="symmetric_union",
+            adaptive_spatial=True,
+        ),
+    )
+    for row in range(xyz.shape[0]):
+        valid = np.isfinite(graph.distances[row])
+        for neighbor in graph.indices[row, valid]:
+            reverse_valid = np.isfinite(graph.distances[int(neighbor)])
+            assert row in graph.indices[int(neighbor), reverse_valid]
+    np.testing.assert_allclose(graph.weights.sum(axis=1), 1.0, atol=1e-6)
+
+
 def test_fail_closed_for_invalid_prototype_and_scores() -> None:
     with pytest.raises(ValueError, match="zero vector"):
         QuerySpec(QueryKind.TEXT, QuerySpace.SEMANTIC, np.zeros(3))

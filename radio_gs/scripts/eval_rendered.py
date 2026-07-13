@@ -111,6 +111,12 @@ def _build_codec_from_config(config):
         codec_type=getattr(config, "codec_type", "hcd"),
         dual_stream=getattr(config, "dual_stream", True),
         symmetric_decoder=getattr(config, "symmetric_decoder", False),
+        hidden_normalization=getattr(
+            config, "codec_hidden_normalization", "legacy_group"
+        ),
+        final_normalization=getattr(
+            config, "codec_final_normalization", "legacy_group"
+        ),
     )
 
 
