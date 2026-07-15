@@ -77,11 +77,29 @@ def evaluate_oracle(args: argparse.Namespace) -> dict:
         raise RuntimeError("no scene has both raw teacher features and LERF labels")
     ordered_categories = sorted(categories)
 
-    with torch.inference_mode():
-        # This is the same official SigLIP2-G text tower/tokenizer referenced
-        # by C-RADIO's siglip2-g adaptor.  The helper also restores the
-        # upstream 1536-D projection whose HF config is currently malformed.
-        text_embeddings = encode_text_siglip2(ordered_categories, device).cpu()
+    if str(args.text_embedding_cache).strip():
+        text_payload = torch.load(args.text_embedding_cache, map_location="cpu")
+        cached_queries = [str(value) for value in text_payload.get("queries", [])]
+        cached_embeddings = torch.as_tensor(text_payload.get("embeddings")).float()
+        if cached_embeddings.ndim != 2 or len(cached_queries) != cached_embeddings.shape[0]:
+            raise ValueError("text embedding cache has invalid query/embedding rows")
+        bank = dict(zip(cached_queries, cached_embeddings))
+        missing = [query for query in ordered_categories if query not in bank]
+        if missing:
+            raise ValueError(f"text embedding cache is missing exact queries: {missing}")
+        if str(text_payload.get("text_encoder", "siglip2")) != "siglip2":
+            raise ValueError("teacher oracle requires an official SigLIP2 text cache")
+        if [str(value) for value in text_payload.get("prompt_templates", ["{query}"])] != [
+            "{query}"
+        ]:
+            raise ValueError("teacher oracle requires the raw {query} prompt template")
+        text_embeddings = torch.stack([bank[query] for query in ordered_categories])
+    else:
+        with torch.inference_mode():
+            # This is the same official SigLIP2-G text tower/tokenizer referenced
+            # by C-RADIO's siglip2-g adaptor.  The helper also restores the
+            # upstream 1536-D projection whose HF config is currently malformed.
+            text_embeddings = encode_text_siglip2(ordered_categories, device).cpu()
     if device.type == "cuda":
         torch.cuda.empty_cache()
 
@@ -106,6 +124,7 @@ def evaluate_oracle(args: argparse.Namespace) -> dict:
     for parameter in projection.parameters():
         parameter.requires_grad_(False)
 
+    vala_temperature = 1.0 / float(args.vala_logit_scale)
     protocols = {
         "direct_cosine": {
             "scoring": "cosine",
@@ -119,7 +138,11 @@ def evaluate_oracle(args: argparse.Namespace) -> dict:
         },
         "vala_relevancy": {
             "scoring": "relevancy",
-            "temperature": float(args.vala_logit_scale),
+            # ``compute_relevancy_heatmap`` accepts a softmax temperature and
+            # internally converts it to a logit scale.  Keep the public CLI in
+            # the same logit-scale units used by VALA/LangSplat.
+            "temperature": vala_temperature,
+            "logit_scale": float(args.vala_logit_scale),
             "formula": "softmax([query_cosine, max_generic_negative_cosine])",
         },
     }
@@ -135,7 +158,7 @@ def evaluate_oracle(args: argparse.Namespace) -> dict:
         "text_prompt_templates": ["{query}"],
         "text_encoder": "official SigLIP2-G tokenizer/text tower used by C-RADIOv4 siglip2-g",
         "visual_encoder": visual_encoder,
-        "iou_threshold_mode": "fixed_peak_relative",
+        "iou_threshold_mode": str(args.threshold_mode),
         "iou_threshold": float(args.iou_threshold),
         "localization_mode": args.localization_mode,
         "localization_smoothing_kernel": int(args.localization_smoothing_kernel),
@@ -145,6 +168,11 @@ def evaluate_oracle(args: argparse.Namespace) -> dict:
         "benchmark_masks_used_for_model_or_threshold_selection": False,
         "radio_version": args.radio_version,
         "radio_checkpoint_sha256": sha256_file(args.radio_checkpoint),
+        "text_embedding_cache": (
+            str(Path(args.text_embedding_cache).resolve())
+            if str(args.text_embedding_cache).strip()
+            else "generated_by_official_encoder"
+        ),
     }
     readout_results: dict[str, dict] = {}
     for readout_name, readout in protocols.items():
@@ -164,7 +192,7 @@ def evaluate_oracle(args: argparse.Namespace) -> dict:
                 device=device,
                 gt_feature_dir=str(Path(args.feature_root) / scene),
                 iou_threshold=float(args.iou_threshold),
-                threshold_mode="fixed",
+                threshold_mode=str(args.threshold_mode),
                 temperature=float(readout["temperature"]),
                 scoring=str(readout["scoring"]),
                 canonical_emb=(
@@ -253,11 +281,25 @@ def main() -> None:
     parser.add_argument("--require-all-scenes", action="store_true")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--iou-threshold", type=float, default=0.60)
+    parser.add_argument(
+        "--threshold-mode",
+        choices=["fixed", "absolute", "mean_std"],
+        default="fixed",
+        help=(
+            "Mask threshold convention passed to the shared LERF evaluator. "
+            "Use absolute with threshold 0.5 for vala_paper_2d."
+        ),
+    )
     parser.add_argument("--temperature", type=float, default=50.0)
     parser.add_argument("--vala-logit-scale", type=float, default=10.0)
     parser.add_argument(
         "--canonical-embedding-cache",
         default="checkpoints/siglip2_lerf_generic_negatives_exact_official.pt",
+    )
+    parser.add_argument(
+        "--text-embedding-cache",
+        default="",
+        help="Optional exact raw-query official SigLIP2 cache; avoids loading the text tower.",
     )
     parser.add_argument(
         "--decision-readout",

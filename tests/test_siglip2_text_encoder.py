@@ -2,6 +2,7 @@ import torch
 from torch import nn
 
 from radio_gs.scripts.eval_lerf_grounding import (
+    _canonicalize_siglip2_text,
     _resolve_siglip2_text_max_length,
     _restore_siglip2_text_head_from_state,
 )
@@ -56,3 +57,8 @@ def test_resolve_siglip2_text_max_length_prefers_text_config() -> None:
         text_config = TextConfig()
 
     assert _resolve_siglip2_text_max_length(Config()) == 64
+
+
+def test_canonicalize_siglip2_text_matches_official_radio_adaptor() -> None:
+    assert _canonicalize_siglip2_text(" Stainless_steel pots! ") == "stainless steel pots"
+    assert _canonicalize_siglip2_text("pour-over   vessel") == "pourover vessel"

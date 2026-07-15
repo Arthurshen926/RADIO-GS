@@ -6,8 +6,10 @@ from scipy.spatial import cKDTree
 from radio_gs.querying.unified_query import SupportPropagationConfig
 from radio_gs.scripts.eval_scannet_3d_point_query import (
     _local_multiscale_positive_prototypes,
+    choose_official_sam3_point_mask,
     evaluate_point_queries,
     load_scannet_instances,
+    select_depth_visible_views,
 )
 
 
@@ -71,3 +73,36 @@ def test_point_query_separates_two_feature_coherent_instances() -> None:
     )
     assert result["num_queries"] == 2
     assert result["macro_connected_iou"] == 1.0
+
+
+def test_depth_visible_view_selection_rejects_occlusion_and_ranks_center() -> None:
+    poses = np.repeat(np.eye(4, dtype=np.float32)[None], 3, axis=0)
+    # Project the same z=2 point to the center in all views.  View 1 is
+    # occluded; view 2 has a small depth error and therefore follows view 0.
+    depth = np.full((3, 5, 5), 2.0, dtype=np.float32)
+    depth[1] = 1.0
+    depth[2] = 2.02
+    alpha = np.ones_like(depth)
+    selected = select_depth_visible_views(
+        np.array([0.0, 0.0, 2.0], dtype=np.float32),
+        poses,
+        np.array([[1.0, 0.0, 2.0], [0.0, 1.0, 2.0], [0.0, 0.0, 1.0]]),
+        depth,
+        alpha,
+        max_views=3,
+        depth_tolerance=0.05,
+        relative_depth_tolerance=0.0,
+        alpha_threshold=0.1,
+    )
+    assert [row["view_index"] for row in selected] == [0, 2]
+
+
+def test_official_sam3_point_mask_uses_predicted_quality() -> None:
+    masks = np.zeros((3, 4, 4), dtype=bool)
+    masks[1, 1:3, 1:3] = True
+    selected, index, score = choose_official_sam3_point_mask(
+        masks, np.array([0.1, 0.8, 0.2], dtype=np.float32)
+    )
+    assert index == 1
+    assert score == np.float32(0.8)
+    np.testing.assert_array_equal(selected, masks[1])

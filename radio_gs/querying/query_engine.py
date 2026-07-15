@@ -2,17 +2,26 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Mapping
 
 import torch
 
 from radio_gs.field.field_signature import FeatureSpaceSignature
-from .evidence_scorer import EvidenceScoringConfig, score_query_evidence
-from .query_spec import QuerySpec
+from .evidence_scorer import (
+    EvidenceScoringConfig,
+    score_query_evidence,
+    shrink_unary_by_reliability,
+)
+from .score_calibration import (
+    SceneSpaceCalibration,
+    fit_scene_space_calibration,
+)
+from .query_spec import QueryModality, QuerySpec
 from .support_solver import (
     PrimitiveSupportGraph,
     SupportSolverConfig,
+    graph_for_query_intent,
     select_support_components,
     solve_primitive_support,
 )
@@ -24,6 +33,8 @@ class QueryResult:
     evidence_components: Mapping[str, torch.Tensor]
     probabilities: torch.Tensor
     selected_support: torch.Tensor
+    score_calibration: str = "none"
+    reliability_applied: bool = False
 
     @property
     def selected_probabilities(self) -> torch.Tensor:
@@ -39,10 +50,51 @@ class CanonicalQueryEngine:
         *,
         scoring_config: EvidenceScoringConfig = EvidenceScoringConfig(),
         solver_config: SupportSolverConfig = SupportSolverConfig(),
+        graph_policy: str = "legacy",
+        component_graph_policy: str = "same",
+        graph_legacy_residual: float = 0.0,
+        node_reliability: torch.Tensor | None = None,
+        score_calibration_by_modality: Mapping[
+            QueryModality | str, str
+        ] | None = None,
     ) -> None:
         self.graph = graph
         self.scoring_config = scoring_config
         self.solver_config = solver_config
+        self.graph_policy = str(graph_policy)
+        self.component_graph_policy = str(component_graph_policy)
+        self.graph_legacy_residual = float(graph_legacy_residual)
+        if not 0.0 <= self.graph_legacy_residual <= 1.0:
+            raise ValueError("graph_legacy_residual must be in [0,1]")
+        self.node_reliability: torch.Tensor | None = None
+        if node_reliability is not None:
+            reliability = torch.as_tensor(node_reliability).detach().float().reshape(-1)
+            if reliability.shape != (self.graph.num_nodes,):
+                raise ValueError("node_reliability must align with graph primitive rows")
+            if not bool(torch.isfinite(reliability).all()):
+                raise ValueError("node_reliability contains NaN or infinity")
+            if bool((reliability < 0).any()) or bool((reliability > 1).any()):
+                raise ValueError("node_reliability must be in [0,1]")
+            self.node_reliability = reliability.to(self.graph.edge_index.device)
+        self.score_calibration_by_modality: dict[QueryModality, str] = {}
+        for modality, calibration in (score_calibration_by_modality or {}).items():
+            typed_modality = QueryModality(modality)
+            calibration = str(calibration)
+            # Reuse the scoring-config contract so an invalid modality override
+            # fails at construction rather than silently at query time.
+            replace(scoring_config, score_calibration=calibration)
+            self.score_calibration_by_modality[typed_modality] = calibration
+        self._calibrations: dict[str, SceneSpaceCalibration] = {}
+        self._calibration_bank_shapes: dict[str, tuple[int, int]] = {}
+        self._query_graphs: dict[tuple[str, str, float], PrimitiveSupportGraph] = {}
+
+    def scoring_config_for_query(self, query: QuerySpec) -> EvidenceScoringConfig:
+        """Resolve an explicit modality override without changing global defaults."""
+
+        calibration = self.score_calibration_by_modality.get(query.modality)
+        if calibration is None or calibration == self.scoring_config.score_calibration:
+            return self.scoring_config
+        return replace(self.scoring_config, score_calibration=calibration)
 
     def execute(
         self,
@@ -51,6 +103,7 @@ class CanonicalQueryEngine:
         *,
         feature_signatures: Mapping[str, FeatureSpaceSignature] | None = None,
     ) -> QueryResult:
+        scoring_config = self.scoring_config_for_query(query)
         counts = {name: values.shape[0] for name, values in feature_banks.items()}
         if counts and any(count != self.graph.num_nodes for count in counts.values()):
             raise ValueError("all feature banks must align with graph primitive rows")
@@ -70,23 +123,82 @@ class CanonicalQueryEngine:
             if name not in feature_signatures:
                 raise KeyError(f"missing signature for {name} feature bank")
             evidence.signature.assert_comparable(feature_signatures[name])
+        if (
+            scoring_config.feature_calibration != "none"
+            or scoring_config.background_centroids > 0
+        ):
+            for name in required:
+                matrix = feature_banks[name]
+                shape = tuple(map(int, matrix.shape))
+                if name in self._calibration_bank_shapes:
+                    if self._calibration_bank_shapes[name] != shape:
+                        raise ValueError("feature bank changed after scene calibration")
+                    continue
+                self._calibrations[name] = fit_scene_space_calibration(
+                    matrix,
+                    method=scoring_config.feature_calibration,
+                    sample_size=scoring_config.calibration_sample_size,
+                    background_centroids=scoring_config.background_centroids,
+                    centroid_iterations=scoring_config.centroid_iterations,
+                )
+                self._calibration_bank_shapes[name] = shape
         unary, components = score_query_evidence(
-            query, feature_banks, config=self.scoring_config
+            query,
+            feature_banks,
+            config=scoring_config,
+            calibrations=self._calibrations,
         )
+        reliability_applied = self.node_reliability is not None and bool(components)
+        if reliability_applied:
+            assert self.node_reliability is not None
+            unary = shrink_unary_by_reliability(unary, self.node_reliability)
+            components = {
+                name: shrink_unary_by_reliability(values, self.node_reliability)
+                for name, values in components.items()
+            }
         if unary.numel() != self.graph.num_nodes:
             if unary.numel() == 0 and self.graph.num_nodes > 0:
                 unary = torch.zeros(self.graph.num_nodes)
             else:
                 raise ValueError("query unary does not align with support graph")
+        graph_key = (
+            self.graph_policy,
+            str(query.intent.value),
+            self.graph_legacy_residual,
+        )
+        if graph_key not in self._query_graphs:
+            self._query_graphs[graph_key] = graph_for_query_intent(
+                self.graph,
+                query.intent,
+                policy=self.graph_policy,
+                legacy_residual=self.graph_legacy_residual,
+            )
+        query_graph = self._query_graphs[graph_key]
+        if self.component_graph_policy == "same":
+            component_graph = query_graph
+        else:
+            component_key = (
+                self.component_graph_policy,
+                str(query.intent.value),
+                self.graph_legacy_residual,
+            )
+            if component_key not in self._query_graphs:
+                self._query_graphs[component_key] = graph_for_query_intent(
+                    self.graph,
+                    query.intent,
+                    policy=self.component_graph_policy,
+                    legacy_residual=self.graph_legacy_residual,
+                )
+            component_graph = self._query_graphs[component_key]
         probabilities = solve_primitive_support(
-            self.graph,
+            query_graph,
             unary,
             positive_seeds=query.positive_seeds,
             negative_seeds=query.negative_seeds,
             config=self.solver_config,
         )
         selected = select_support_components(
-            self.graph,
+            component_graph,
             probabilities,
             query.selection_mode,
             positive_seeds=query.positive_seeds,
@@ -97,4 +209,6 @@ class CanonicalQueryEngine:
             evidence_components=components,
             probabilities=probabilities,
             selected_support=selected,
+            score_calibration=scoring_config.score_calibration,
+            reliability_applied=reliability_applied,
         )

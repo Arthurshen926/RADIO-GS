@@ -12,7 +12,13 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from radio_gs.field import CanonicalGaussianField, FeatureSpaceSignature, fit_affine_basis
+from radio_gs.field import (
+    CanonicalGaussianField,
+    FeatureSpaceSignature,
+    fit_affine_basis,
+    load_canonical_field_checkpoint,
+    validate_observation_contract_metadata,
+)
 from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews, sha256_file
 from radio_gs.training.canonical_field_losses import (
     CanonicalFieldLossConfig,
@@ -26,8 +32,14 @@ def _sha256_tensor_rows(values: torch.Tensor) -> str:
     return hashlib.sha256(array.tobytes()).hexdigest()
 
 
-def _consensus_from_cache(cache: dict) -> PrimitiveConsensus:
-    targets = torch.as_tensor(cache["features"]).float().cpu()
+def _consensus_from_cache(
+    cache: dict,
+    *,
+    preserve_target_dtype: bool = False,
+) -> PrimitiveConsensus:
+    targets = torch.as_tensor(cache["features"]).cpu()
+    if not preserve_target_dtype:
+        targets = targets.float()
     valid = torch.as_tensor(cache["valid"]).bool().cpu()
     counts = torch.as_tensor(cache["view_counts"]).long().cpu()
     reliability = cache.get("reliability")
@@ -45,6 +57,113 @@ def _consensus_from_cache(cache: dict) -> PrimitiveConsensus:
         reliability=reliability,
         per_view_agreement=torch.empty(0, targets.shape[0]),
     )
+
+
+def _load_capability_mpr_target(
+    path: str | Path,
+    *,
+    expected_space: str,
+    raw_cache: dict,
+    raw_metadata: dict,
+    radio_checkpoint_sha256: str,
+) -> tuple[PrimitiveConsensus, dict]:
+    """Load an official-adaptor-before-MPR target with strict provenance."""
+
+    cache_path = Path(path)
+    cache = torch.load(cache_path, map_location="cpu")
+    if not isinstance(cache, dict) or "features" not in cache:
+        raise ValueError(f"{expected_space} MPR cache must contain primitive features")
+    metadata = dict(cache.get("metadata", {}))
+    validate_observation_contract_metadata(
+        metadata,
+        require_declaration="observation_lifting_contract" in raw_metadata,
+    )
+    if str(metadata.get("feature_space", "")) != str(expected_space):
+        raise ValueError(f"expected a {expected_space} MPR cache")
+    safety = {
+        "benchmark_masks_opened": False,
+        "benchmark_images_opened": False,
+        "text_queries_opened": False,
+        "capability_projection_before_mpr": True,
+        "custom_adaptor_head": False,
+    }
+    for key, expected in safety.items():
+        if metadata.get(key) is not expected:
+            raise ValueError(f"{expected_space} MPR violates safety contract: {key}")
+    if str(metadata.get("official_adaptor_checkpoint_sha256", "")) != str(
+        radio_checkpoint_sha256
+    ):
+        raise ValueError(f"{expected_space} MPR uses another RADIO checkpoint")
+
+    raw_xyz = torch.as_tensor(raw_cache["xyz"]).float().cpu()
+    target_xyz = torch.as_tensor(cache.get("xyz")).float().cpu()
+    if target_xyz.shape != raw_xyz.shape or _sha256_tensor_rows(
+        target_xyz
+    ) != _sha256_tensor_rows(raw_xyz):
+        raise ValueError(f"{expected_space} MPR geometry does not align with raw MPR")
+    raw_valid = torch.as_tensor(raw_cache["valid"]).bool().cpu()
+    target_valid = torch.as_tensor(cache.get("valid")).bool().cpu()
+    raw_counts = torch.as_tensor(raw_cache["view_counts"]).long().cpu()
+    target_counts = torch.as_tensor(cache.get("view_counts")).long().cpu()
+    if not torch.equal(target_valid, raw_valid) or not torch.equal(
+        target_counts, raw_counts
+    ):
+        raise ValueError(
+            f"{expected_space} MPR must use the exact raw-MPR observation support"
+        )
+    responsibility_sha256 = str(
+        metadata.get("registration_responsibility_cache_sha256", "")
+    )
+    if str(raw_metadata.get("aggregation_mode", "")) == "raster_gaussian_top1":
+        raw_responsibility_sha256 = str(
+            raw_metadata.get("registration_responsibility_cache_sha256", "")
+        )
+        if (
+            not raw_responsibility_sha256
+            or not bool(raw_metadata.get("shared_registration_responsibility", False))
+            or not bool(metadata.get("shared_registration_responsibility", False))
+            or responsibility_sha256 != raw_responsibility_sha256
+        ):
+            raise ValueError(
+                f"{expected_space} MPR must reuse the exact raw-MPR "
+                "registration responsibility sidecar"
+            )
+    policy_keys = (
+        "config",
+        "checkpoint",
+        "selected_frame_indices",
+        "excluded_frame_ids",
+        "aggregation_mode",
+        "registration_weight_mode",
+        "raster_view_fusion",
+        "raster_topk",
+        "depth_tolerance",
+        "relative_depth_tolerance",
+        "alpha_threshold",
+        "normalize_each_view",
+    )
+    mismatched = [
+        key for key in policy_keys if metadata.get(key) != raw_metadata.get(key)
+    ]
+    if mismatched:
+        raise ValueError(
+            f"{expected_space} MPR policy differs from raw MPR: {mismatched}"
+        )
+    consensus = _consensus_from_cache(cache, preserve_target_dtype=True)
+    return consensus, {
+        "path": str(cache_path.resolve()),
+        "sha256": sha256_file(cache_path),
+        "feature_space": expected_space,
+        "feature_dim": int(consensus.targets.shape[1]),
+        "projection_order": "official_adaptor_then_geometry_matched_mpr",
+        "official_adaptor_name": metadata.get("official_adaptor_name"),
+        "official_adaptor_checkpoint_sha256": metadata.get(
+            "official_adaptor_checkpoint_sha256"
+        ),
+        "selected_frame_indices": metadata.get("selected_frame_indices", []),
+        "registration_responsibility_cache_sha256": responsibility_sha256,
+        "uses_query_or_benchmark_supervision": False,
+    }
 
 
 @torch.no_grad()
@@ -72,30 +191,109 @@ def _reconstruction_metrics(
     }
 
 
+@torch.no_grad()
+def _capability_reconstruction_metrics(
+    field: CanonicalGaussianField,
+    official_views: FrozenRadioViews,
+    targets: dict[str, PrimitiveConsensus],
+    rows: torch.Tensor,
+    batch_size: int,
+) -> dict[str, float]:
+    values: dict[str, list[torch.Tensor]] = {name: [] for name in targets}
+    device = field.local_codes.device
+    for start in range(0, rows.numel(), int(batch_size)):
+        batch = rows[start : start + int(batch_size)]
+        radio = field.radio_features(batch.to(device)).float()
+        for name, consensus in targets.items():
+            valid = consensus.valid[batch]
+            if not bool(valid.any()):
+                continue
+            projected = (
+                official_views.project_dino_primitives(radio)
+                if name == "dino_v3"
+                else official_views.project_sam3_primitives(radio)
+            )
+            target = consensus.targets[batch].to(device).float()
+            values[name].append(
+                F.cosine_similarity(
+                    projected[valid.to(device)],
+                    target[valid.to(device)],
+                    dim=-1,
+                    eps=1e-8,
+                ).cpu()
+            )
+    report: dict[str, float] = {}
+    for name, parts in values.items():
+        if not parts:
+            report[f"{name}_target_mean_cosine"] = 0.0
+            report[f"{name}_target_p05_cosine"] = 0.0
+            continue
+        cosine = torch.cat(parts)
+        report[f"{name}_target_mean_cosine"] = float(cosine.mean())
+        report[f"{name}_target_p05_cosine"] = float(torch.quantile(cosine, 0.05))
+    return report
+
+
+@torch.no_grad()
+def _cross_basis_projection(local_decoder, output_decoder) -> tuple[torch.Tensor, torch.Tensor]:
+    """Map local PCA coordinates into the higher-rank output PCA coordinates."""
+
+    scale_ratio = local_decoder.scale / output_decoder.scale
+    matrix = (
+        local_decoder.basis.transpose(0, 1) * scale_ratio[None]
+    ) @ output_decoder.basis
+    bias = (
+        (local_decoder.mean - output_decoder.mean) / output_decoder.scale
+    ) @ output_decoder.basis
+    return matrix.transpose(0, 1).contiguous(), bias.contiguous()
+
+
 def train(args: argparse.Namespace) -> dict:
+    torch.manual_seed(int(args.seed))
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(int(args.seed))
     device = torch.device(args.device)
     cache = torch.load(Path(args.mpr_cache), map_location="cpu")
     if not isinstance(cache, dict) or "features" not in cache:
         raise ValueError("MPR cache must contain primitive features")
     metadata = dict(cache.get("metadata", {}))
+    observation_contract_mode = str(
+        getattr(args, "observation_contract", "unchecked")
+    )
+    if observation_contract_mode != "unchecked":
+        validate_observation_contract_metadata(
+            metadata,
+            require_declaration=observation_contract_mode == "canonical-mpr-v1",
+        )
     if metadata.get("benchmark_masks_opened", False) or metadata.get("text_queries_opened", False):
         raise ValueError("MPR training cache is contaminated by benchmark queries or masks")
     if str(metadata.get("feature_space", "radio")) != "radio":
         raise ValueError("canonical main field must reconstruct raw RADIO, not a query head")
     consensus = _consensus_from_cache(cache)
-    valid_rows = torch.where(consensus.valid)[0]
-    if valid_rows.numel() < int(args.coefficient_dim):
-        raise ValueError("too few valid primitive targets for the requested basis")
-
-    decoder, fit_report = fit_affine_basis(
-        consensus.targets[valid_rows],
-        int(args.coefficient_dim),
-        standardize=not args.no_standardize,
-        max_samples=int(args.pca_samples),
-        seed=int(args.seed),
-        trainable_basis=not args.freeze_basis,
-    )
     radio_hash = sha256_file(args.radio_checkpoint)
+    capability_targets: dict[str, PrimitiveConsensus] = {}
+    capability_target_provenance: dict[str, dict] = {}
+    for name, path in (
+        ("dino_v3", args.dino_mpr_cache),
+        ("sam3", args.sam3_mpr_cache),
+    ):
+        if not str(path).strip():
+            continue
+        target, provenance = _load_capability_mpr_target(
+            path,
+            expected_space=name,
+            raw_cache=cache,
+            raw_metadata=metadata,
+            radio_checkpoint_sha256=radio_hash,
+        )
+        capability_targets[name] = target
+        capability_target_provenance[name] = provenance
+    if capability_targets and not args.official_capability_loss:
+        raise ValueError(
+            "auxiliary capability MPR targets require --official-capability-loss"
+        )
+    primitive_positions = torch.as_tensor(cache["xyz"]).float().cpu()
+    valid_rows = torch.where(consensus.valid)[0]
     signature = FeatureSpaceSignature(
         radio_version=args.radio_version,
         radio_checkpoint_sha256=radio_hash,
@@ -109,17 +307,120 @@ def train(args: argparse.Namespace) -> dict:
         # field checkpoint contract.
         semantic_alignment="none",
     )
-    field = CanonicalGaussianField(
-        num_gaussians=consensus.targets.shape[0],
-        decoder=decoder,
-        signature=signature,
-        reliability=consensus.reliability,
-        hidden_dim=int(args.hidden_dim),
-        use_fusion=bool(args.primitive_fusion),
-    ).to(device)
-    with torch.no_grad():
-        encoded = decoder.encode(consensus.targets.to(device))
-        field.local_codes.copy_(encoded)
+    initial_field_provenance: dict = {}
+    if str(args.initial_field_checkpoint).strip():
+        initial_path = Path(args.initial_field_checkpoint)
+        field, initial_payload = load_canonical_field_checkpoint(
+            initial_path, map_location="cpu"
+        )
+        if initial_payload.get("benchmark_masks_opened", False) or initial_payload.get(
+            "text_queries_opened", False
+        ):
+            raise ValueError("initial field used benchmark masks or text queries")
+        if field.num_gaussians != consensus.targets.shape[0]:
+            raise ValueError("initial field Gaussian count differs from the MPR cache")
+        if field.decoder.feature_dim != consensus.targets.shape[1]:
+            raise ValueError("initial field RADIO dimension differs from the MPR cache")
+        signature.assert_compatible(
+            field.signature, allow_field_checkpoint_difference=True
+        )
+        expected_geometry = str(
+            cache.get("geometry_fingerprint", {}).get("xyz_sha256", "")
+        )
+        actual_geometry = str(
+            initial_payload.get("geometry_fingerprint", {}).get("xyz_sha256", "")
+        )
+        if not expected_geometry or actual_geometry != expected_geometry:
+            raise ValueError("initial field geometry differs from the MPR cache")
+        if field.reliability.shape != consensus.reliability.shape:
+            raise ValueError("initial field reliability shape differs from the MPR cache")
+        # Registration support is part of the current raw target contract.
+        # Updating this fixed buffer affects control and treatment identically;
+        # no learned state or query signal is introduced.
+        with torch.no_grad():
+            field.reliability.copy_(consensus.reliability)
+        field = field.to(device)
+        basis_fit_report = dict(initial_payload.get("basis_fit_report", {}))
+        initial_field_provenance = {
+            "path": str(initial_path.resolve()),
+            "sha256": sha256_file(initial_path),
+            "source_final_metrics": initial_payload.get("final_metrics", {}),
+            "source_capability_target_mode": initial_payload.get(
+                "capability_target_mode", "legacy_or_unspecified"
+            ),
+            "source_training_epochs": len(initial_payload.get("history", [])),
+            "architecture_reused_exactly": True,
+            "learned_state_reinitialized": False,
+            "fixed_reliability_refreshed_from_current_raw_mpr": True,
+        }
+    else:
+        if valid_rows.numel() < int(args.coefficient_dim):
+            raise ValueError("too few valid primitive targets for the requested basis")
+        decoder, fit_report = fit_affine_basis(
+            consensus.targets[valid_rows],
+            int(args.coefficient_dim),
+            standardize=not args.no_standardize,
+            max_samples=int(args.pca_samples),
+            seed=int(args.seed),
+            trainable_basis=not args.freeze_basis,
+        )
+        basis_fit_report = asdict(fit_report)
+        local_dim = (
+            int(args.local_dim)
+            if int(args.local_dim) > 0
+            else int(args.coefficient_dim)
+        )
+        use_fusion = bool(args.primitive_fusion)
+        if (
+            local_dim != int(args.coefficient_dim)
+            or int(args.spatial_coarse_dim) > 0
+        ) and not use_fusion:
+            raise ValueError("compact local/spatial codes require --primitive-fusion")
+        spatial_hash = None
+        if int(args.spatial_coarse_dim) > 0:
+            spatial_hash = {
+                "output_dim": int(args.spatial_coarse_dim),
+                "num_levels": int(args.hash_levels),
+                "features_per_level": int(args.hash_features_per_level),
+                "log2_hashmap_size": int(args.hash_log2_size),
+                "base_resolution": int(args.hash_base_resolution),
+                "max_resolution": int(args.hash_max_resolution),
+                "hidden_dim": int(args.hash_hidden_dim),
+            }
+        field = CanonicalGaussianField(
+            num_gaussians=consensus.targets.shape[0],
+            decoder=decoder,
+            signature=signature,
+            local_dim=local_dim,
+            coarse_dim=int(args.spatial_coarse_dim),
+            primitive_positions=(
+                primitive_positions if spatial_hash is not None else None
+            ),
+            spatial_hash=spatial_hash,
+            reliability=consensus.reliability,
+            fusion_reliability=bool(args.fusion_reliability),
+            hidden_dim=int(args.hidden_dim),
+            use_fusion=use_fusion,
+        ).to(device)
+        with torch.no_grad():
+            if local_dim == int(args.coefficient_dim):
+                encoded = decoder.encode(consensus.targets.to(device))
+            else:
+                local_decoder, _local_fit_report = fit_affine_basis(
+                    consensus.targets[valid_rows],
+                    local_dim,
+                    standardize=not args.no_standardize,
+                    max_samples=int(args.pca_samples),
+                    seed=int(args.seed),
+                    trainable_basis=False,
+                )
+                encoded = local_decoder.encode(consensus.targets).to(device)
+                if field.fusion is None:
+                    raise RuntimeError("local compression requires primitive fusion")
+                weight, bias = _cross_basis_projection(local_decoder, decoder.cpu())
+                decoder.to(device)
+                field.fusion.initialize_base_projection(weight, bias)
+            field.local_codes.copy_(encoded)
 
     official_views = None
     if args.official_capability_loss:
@@ -159,6 +460,7 @@ def train(args: argparse.Namespace) -> dict:
                 consensus,
                 rows,
                 official_views=official_views,
+                capability_targets=capability_targets,
                 config=loss_config,
             )
             loss.backward()
@@ -168,6 +470,16 @@ def train(args: argparse.Namespace) -> dict:
         validation = _reconstruction_metrics(
             field, consensus, validation_rows, int(args.eval_batch_size)
         )
+        if official_views is not None and capability_targets:
+            validation.update(
+                _capability_reconstruction_metrics(
+                    field,
+                    official_views,
+                    capability_targets,
+                    validation_rows,
+                    int(args.eval_batch_size),
+                )
+            )
         record = {
             "epoch": epoch + 1,
             "loss": sum(totals) / max(1, len(totals)),
@@ -175,13 +487,28 @@ def train(args: argparse.Namespace) -> dict:
         }
         history.append(record)
         print(json.dumps(record), flush=True)
-        if validation["mean_cosine"] >= float(args.target_cosine):
+        if (
+            epoch + 1 >= int(args.min_epochs)
+            and validation["mean_cosine"] >= float(args.target_cosine)
+        ):
             break
 
-    field.eval().cpu()
+    field.eval()
     final_metrics = _reconstruction_metrics(
         field, consensus, valid_rows, int(args.eval_batch_size)
     )
+    final_capability_metrics = (
+        _capability_reconstruction_metrics(
+            field,
+            official_views,
+            capability_targets,
+            valid_rows,
+            int(args.eval_batch_size),
+        )
+        if official_views is not None and capability_targets
+        else {}
+    )
+    field.cpu()
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     architecture = {
@@ -190,24 +517,47 @@ def train(args: argparse.Namespace) -> dict:
         "coefficient_dim": field.decoder.coefficient_dim,
         "local_dim": field.local_codes.shape[1],
         "coarse_dim": field.coarse_dim,
-        "hidden_dim": int(args.hidden_dim),
-        "use_fusion": bool(args.primitive_fusion),
-        "trainable_basis": not args.freeze_basis,
-        "trainable_statistics": False,
+        "spatial_hash": (
+            field.spatial_encoder.architecture()
+            if field.spatial_encoder is not None
+            else None
+        ),
+        "position_storage": "normalized_fp16" if field.coarse_dim else "none",
+        "fusion_reliability": field.fusion_reliability,
+        "hidden_dim": (
+            int(field.fusion.network[0].out_features)
+            if field.fusion is not None
+            else int(args.hidden_dim)
+        ),
+        "use_fusion": field.fusion is not None,
+        "trainable_basis": bool(field.decoder.basis.requires_grad),
+        "trainable_statistics": bool(
+            field.decoder.mean.requires_grad or field.decoder.scale.requires_grad
+        ),
     }
     payload = {
         "schema_version": 1,
         "architecture": architecture,
-        "feature_signature": signature.to_dict(),
+        "feature_signature": field.signature.to_dict(),
         "state_dict": field.state_dict(),
         "reliability": consensus.reliability.half(),
         "geometry_fingerprint": cache.get("geometry_fingerprint", {}),
         "mpr_cache": str(Path(args.mpr_cache).resolve()),
         "mpr_cache_metadata": metadata,
-        "basis_fit_report": asdict(fit_report),
+        "basis_fit_report": basis_fit_report,
+        "initial_field_checkpoint": initial_field_provenance,
         "loss_config": asdict(loss_config),
+        "capability_target_mode": (
+            "official_adaptor_then_geometry_matched_mpr"
+            if capability_targets
+            else "adaptor_of_raw_mpr_target"
+            if official_views is not None
+            else "none"
+        ),
+        "capability_mpr_targets": capability_target_provenance,
         "history": history,
         "final_metrics": final_metrics,
+        "final_capability_metrics": final_capability_metrics,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
     }
@@ -217,9 +567,15 @@ def train(args: argparse.Namespace) -> dict:
         "num_gaussians": field.num_gaussians,
         "valid_gaussians": int(valid_rows.numel()),
         "coefficient_dim": field.decoder.coefficient_dim,
-        "basis_fit": asdict(fit_report),
+        "local_dim": field.local_codes.shape[1],
+        "coarse_dim": field.coarse_dim,
+        "basis_fit": basis_fit_report,
+        "initial_field_checkpoint": initial_field_provenance,
         "final_metrics": final_metrics,
-        "feature_signature": signature.to_dict(),
+        "final_capability_metrics": final_capability_metrics,
+        "capability_target_mode": payload["capability_target_mode"],
+        "capability_mpr_targets": capability_target_provenance,
+        "feature_signature": field.signature.to_dict(),
         "xyz_sha256": _sha256_tensor_rows(torch.as_tensor(cache["xyz"])),
     }
     output.with_suffix(output.suffix + ".json").write_text(
@@ -231,11 +587,45 @@ def train(args: argparse.Namespace) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mpr-cache", required=True)
+    parser.add_argument(
+        "--observation-contract",
+        choices=["canonical-mpr-v1", "compatible-legacy", "unchecked"],
+        default="canonical-mpr-v1",
+        help="Require the shared dataset-independent MPR contract for new fields.",
+    )
     parser.add_argument("--radio-checkpoint", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument(
+        "--initial-field-checkpoint",
+        default="",
+        help=(
+            "Continue from an exactly geometry/signature-compatible canonical "
+            "field. Its architecture and learned state are reused unchanged; "
+            "architecture initialization flags are ignored."
+        ),
+    )
     parser.add_argument("--radio-version", default="c-radio_v4-h")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--coefficient-dim", type=int, default=256)
+    parser.add_argument(
+        "--local-dim",
+        type=int,
+        default=0,
+        help="Per-Gaussian code dimension; 0 uses coefficient-dim.",
+    )
+    parser.add_argument("--spatial-coarse-dim", type=int, default=0)
+    parser.add_argument("--hash-levels", type=int, default=8)
+    parser.add_argument("--hash-features-per-level", type=int, default=2)
+    parser.add_argument("--hash-log2-size", type=int, default=15)
+    parser.add_argument("--hash-base-resolution", type=int, default=8)
+    parser.add_argument("--hash-max-resolution", type=int, default=512)
+    parser.add_argument("--hash-hidden-dim", type=int, default=64)
+    parser.add_argument(
+        "--fusion-reliability",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Expose fixed MPR observation reliability to primitive fusion.",
+    )
     parser.add_argument("--hidden-dim", type=int, default=192)
     parser.add_argument(
         "--primitive-fusion",
@@ -247,12 +637,34 @@ def main() -> None:
     parser.add_argument("--no-standardize", action="store_true")
     parser.add_argument("--freeze-basis", action="store_true")
     parser.add_argument("--official-capability-loss", action="store_true")
+    parser.add_argument(
+        "--dino-mpr-cache",
+        default="",
+        help=(
+            "Optional query-free target built by applying the official DINOv3 "
+            "spatial adaptor to each 2-D teacher view before matched MPR."
+        ),
+    )
+    parser.add_argument(
+        "--sam3-mpr-cache",
+        default="",
+        help=(
+            "Optional query-free target built by applying the official SAM3 "
+            "spatial adaptor to each 2-D teacher view before matched MPR."
+        ),
+    )
     parser.add_argument("--mpr-weight", type=float, default=1.0)
     parser.add_argument("--dino-weight", type=float, default=0.20)
     parser.add_argument("--sam3-weight", type=float, default=0.20)
     parser.add_argument("--coefficient-weight", type=float, default=1e-5)
     parser.add_argument("--basis-orthogonality-weight", type=float, default=1e-3)
     parser.add_argument("--epochs", type=int, default=20)
+    parser.add_argument(
+        "--min-epochs",
+        type=int,
+        default=1,
+        help="Minimum optimization epochs before the raw-MPR early-stop rule applies.",
+    )
     parser.add_argument("--batch-size", type=int, default=4096)
     parser.add_argument("--eval-batch-size", type=int, default=16384)
     parser.add_argument("--learning-rate", type=float, default=2e-3)
@@ -261,6 +673,8 @@ def main() -> None:
     parser.add_argument("--target-cosine", type=float, default=0.985)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
+    if args.min_epochs <= 0 or args.min_epochs > args.epochs:
+        parser.error("--min-epochs must lie in [1, --epochs]")
     print(json.dumps(train(args), indent=2))
 
 

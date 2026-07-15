@@ -1,21 +1,12 @@
-"""Evaluate text grounding on the LERF-OVS benchmark.
+"""Evaluate text grounding on LERF-OVS with an explicit protocol record.
 
-Pipeline
---------
-1. Load LERF-OVS polygon annotations for the requested scene(s).
-2. Generate SigLIP2 text embeddings for every object category on-the-fly
-   (falls back to a pre-computed bank if the ``transformers`` model is
-   unavailable).
-3. For each labeled frame:
-   a. **Teacher mode** – load pre-extracted RADIO 1280-d features from real RGB.
-   b. **Rendered mode** – render latent features from the trained 3DGS
-      feature field and decode to 1280-d.
-4. Project 1280-d features → SigLIP2 1536-d using a frozen projection head.
-5. Compute cosine-similarity heatmaps for every query.
-6. Evaluate:
-   - **Localization accuracy** – argmax pixel inside GT polygon?
-   - **mIoU** – binarised heatmap (0.5 × max) vs. GT polygon mask.
-7. Print per-scene / per-query tables and save a JSON report.
+The evaluator supports raw teacher maps, legacy rendered RADIO maps, and
+row-aligned primitive-query capability caches.  Query text, negative prompts,
+scoring, threshold convention, localization rule, and optional refinement are
+all serialized in the result.  ``vala_paper_2d`` fixes exact ``{query}`` text,
+four generic negatives, relevancy logit scale 10, absolute threshold 0.5,
+image-resolution masks, bbox-smoothed localization, and no refinement or
+test-set calibration.
 
 Usage
 -----
@@ -39,10 +30,11 @@ import json
 import logging
 import math
 import re
+import string
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 import cv2
 import numpy as np
@@ -149,10 +141,248 @@ def get_lerf_mode_metrics(scene_result: Dict, mode: str) -> Optional[Dict]:
     return None
 
 
+def aggregate_lerf_mode_metrics(metrics: List[Dict]) -> Dict:
+    """Keep benchmark sample, scene, and category averaging conventions explicit."""
+
+    if not metrics:
+        raise ValueError("cannot aggregate an empty LERF metric list")
+    sample_counts = [
+        int(value.get("n_iou_samples", value["loc_total"])) for value in metrics
+    ]
+    sample_count = sum(sample_counts)
+    loc_total = sum(int(value["loc_total"]) for value in metrics)
+    category_values = [
+        float(info["miou"])
+        for value in metrics
+        for info in value["per_category"].values()
+        if info["miou"] is not None
+    ]
+    return {
+        "localization_accuracy": sum(int(value["loc_correct"]) for value in metrics)
+        / max(1, loc_total),
+        "sample_micro_miou": sum(
+            float(value["miou"]) * count
+            for value, count in zip(metrics, sample_counts)
+        )
+        / max(1, sample_count),
+        "scene_macro_miou": float(np.mean([value["miou"] for value in metrics])),
+        "category_macro_miou": (
+            float(np.mean(category_values)) if category_values else None
+        ),
+        "sample_count": sample_count,
+        "scene_count": len(metrics),
+    }
+
+
+def neutralize_invalid_primitive_scores_for_render(
+    scores: torch.Tensor,
+    valid: Optional[torch.Tensor],
+) -> torch.Tensor:
+    """Use zero semantic support, not a selection sentinel, during rendering.
+
+    Direct 3-D selection can safely assign invalid primitives a very negative
+    logit. Alpha compositing cannot: that sentinel is mixed into visible
+    pixels and overwhelms every valid score. A zero row keeps the invalid
+    primitive as an opacity occluder while contributing no query support.
+    """
+
+    if valid is None:
+        return scores
+    mask = torch.as_tensor(valid, device=scores.device, dtype=torch.bool).reshape(-1)
+    if mask.shape != (scores.shape[0],):
+        raise ValueError("primitive validity mask does not align with score rows")
+    result = scores.clone()
+    result[~mask] = 0.0
+    return result
+
+
+def apply_primitive_semantic_confidence(
+    scores: torch.Tensor,
+    confidence: Optional[torch.Tensor],
+) -> torch.Tensor:
+    """Suppress uncertain primitive support before alpha compositing.
+
+    Confidence is a row-aligned, query-independent field property stored by
+    the semantic cache.  It is deliberately applied to scalar support after
+    text scoring; scaling a normalized descriptor itself would have no effect
+    on cosine similarity.
+    """
+    if confidence is None:
+        return scores
+    values = torch.as_tensor(
+        confidence, device=scores.device, dtype=scores.dtype
+    ).reshape(-1)
+    if values.shape != (scores.shape[0],):
+        raise ValueError("primitive semantic confidence does not align with scores")
+    if not bool(torch.isfinite(values).all()):
+        raise FloatingPointError("primitive semantic confidence is non-finite")
+    if bool(((values < 0.0) | (values > 1.0)).any()):
+        raise ValueError("primitive semantic confidence must lie in [0,1]")
+    return scores * values[:, None]
+
+
+def blend_primary_with_uncovered_fallback(
+    primary_heatmaps: torch.Tensor,
+    fallback_heatmaps: torch.Tensor,
+    primary_coverage: torch.Tensor,
+) -> torch.Tensor:
+    """Add fallback semantics only in image regions lacking primary support."""
+    if primary_heatmaps.shape != fallback_heatmaps.shape:
+        raise ValueError("primary and fallback heatmaps must have equal shape")
+    coverage = torch.as_tensor(
+        primary_coverage,
+        device=primary_heatmaps.device,
+        dtype=primary_heatmaps.dtype,
+    )
+    if coverage.ndim == 3 and coverage.shape[0] == 1:
+        coverage = coverage[0]
+    if coverage.shape != primary_heatmaps.shape[-2:]:
+        raise ValueError("primary coverage must align with heatmap pixels")
+    if not bool(torch.isfinite(coverage).all()):
+        raise FloatingPointError("primary coverage is non-finite")
+    return primary_heatmaps + fallback_heatmaps * (1.0 - coverage.clamp(0.0, 1.0))
+
+
+def blend_primary_with_dominant_fallback(
+    primary_heatmaps: torch.Tensor,
+    fallback_heatmaps: torch.Tensor,
+    primary_coverage: torch.Tensor,
+    fallback_coverage: torch.Tensor,
+) -> torch.Tensor:
+    """Route fallback support only to pixels where its geometry dominates."""
+    if primary_heatmaps.shape != fallback_heatmaps.shape:
+        raise ValueError("primary and fallback heatmaps must have equal shape")
+    coverages = []
+    for name, value in (
+        ("primary", primary_coverage),
+        ("fallback", fallback_coverage),
+    ):
+        coverage = torch.as_tensor(
+            value,
+            device=primary_heatmaps.device,
+            dtype=primary_heatmaps.dtype,
+        )
+        if coverage.ndim == 3 and coverage.shape[0] == 1:
+            coverage = coverage[0]
+        if coverage.shape != primary_heatmaps.shape[-2:]:
+            raise ValueError(f"{name} coverage must align with heatmap pixels")
+        if not bool(torch.isfinite(coverage).all()):
+            raise FloatingPointError(f"{name} coverage is non-finite")
+        coverages.append(coverage)
+    fallback_gate = (coverages[1] > coverages[0]).to(primary_heatmaps.dtype)
+    return primary_heatmaps + fallback_heatmaps * fallback_gate
+
+
+def blend_primary_first(
+    primary_heatmaps: torch.Tensor,
+    fallback_heatmaps: torch.Tensor,
+    *,
+    semantic_threshold: float,
+) -> torch.Tensor:
+    """Use completion only for queries with no positive primary support.
+
+    The fixed relevancy decision threshold is already part of the declared
+    evaluation/readout protocol.  Reusing it here adds no fitted parameter and
+    makes every supported query exactly follow the established primary path.
+    """
+    if primary_heatmaps.shape != fallback_heatmaps.shape:
+        raise ValueError("primary and fallback heatmaps must have equal shape")
+    if primary_heatmaps.ndim != 3:
+        raise ValueError("query heatmaps must be [Q,H,W]")
+    primary_supported = primary_heatmaps.amax(dim=(-2, -1)) >= float(
+        semantic_threshold
+    )
+    completed = primary_heatmaps + fallback_heatmaps
+    return torch.where(
+        primary_supported[:, None, None], primary_heatmaps, completed
+    )
+
+
+def blend_strongest_source(
+    primary_heatmaps: torch.Tensor,
+    fallback_heatmaps: torch.Tensor,
+) -> torch.Tensor:
+    """Complete a query only when fallback has stronger peak evidence."""
+    if primary_heatmaps.shape != fallback_heatmaps.shape:
+        raise ValueError("primary and fallback heatmaps must have equal shape")
+    if primary_heatmaps.ndim != 3:
+        raise ValueError("query heatmaps must be [Q,H,W]")
+    fallback_stronger = fallback_heatmaps.amax(dim=(-2, -1)) > primary_heatmaps.amax(
+        dim=(-2, -1)
+    )
+    completed = primary_heatmaps + fallback_heatmaps
+    return torch.where(
+        fallback_stronger[:, None, None], completed, primary_heatmaps
+    )
+
+
+def validate_primitive_support_cache(
+    payload: Mapping[str, Any],
+    model_xyz: torch.Tensor,
+    categories: List[str],
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Validate a solved, row-aligned primitive support cache.
+
+    The strict contract prevents an unary score cache, a cache with a different
+    query list, or a cache from different Gaussian geometry from silently
+    entering the paper-facing ``primitive_support`` readout.
+    """
+    scores = payload.get("query_scores", payload.get("features"))
+    valid = payload.get("valid")
+    cached_xyz = payload.get("xyz")
+    metadata = dict(payload.get("metadata", {}))
+    query_names = [str(value) for value in metadata.get("query_names", [])]
+    expected_shape = (int(model_xyz.shape[0]), len(categories))
+    if not isinstance(scores, torch.Tensor) or tuple(scores.shape) != expected_shape:
+        raise ValueError(f"Primitive support scores must be {expected_shape}")
+    if not isinstance(valid, torch.Tensor) or tuple(valid.shape) != (expected_shape[0],):
+        raise ValueError("Primitive support cache requires row-aligned valid")
+    if not isinstance(cached_xyz, torch.Tensor) or cached_xyz.shape != model_xyz.shape:
+        raise ValueError("Primitive support cache requires row-aligned xyz")
+    if query_names != list(categories):
+        raise ValueError(
+            f"Primitive support query order mismatch: {query_names} vs {categories}"
+        )
+    if metadata.get("construction") != "shared_3d_support_solver_probabilities":
+        raise ValueError(
+            "primitive_support requires shared_3d_support_solver_probabilities"
+        )
+    xyz_error = (cached_xyz.float() - model_xyz.detach().cpu().float()).norm(dim=-1)
+    if xyz_error.numel() and float(xyz_error.max()) > 1e-6:
+        raise ValueError(
+            f"Primitive support cache xyz mismatch: max_l2={float(xyz_error.max()):.3e}"
+        )
+    values = scores.float().cpu()
+    mask = valid.bool().cpu()
+    if bool(mask.any()):
+        supported = values[mask]
+        if not bool(torch.isfinite(supported).all()):
+            raise ValueError("Primitive support cache contains non-finite probabilities")
+        if float(supported.min()) < 0.0 or float(supported.max()) > 1.0:
+            raise ValueError("Primitive support probabilities must lie in [0,1]")
+    return values, mask
+
+
 # ---------------------------------------------------------------------------
 # Text-embedding generation (SigLIP2 via ``transformers``)
 # ---------------------------------------------------------------------------
 _SIGLIP2_MODEL_NAME = "google/siglip2-giant-opt-patch16-384"
+_SIGLIP2_TEXT_CANONICALIZATION = "official_c_radio_siglip2_g"
+
+
+def _canonicalize_siglip2_text(text: str) -> str:
+    """Match the official C-RADIO ``siglip2-g`` text pre-processing.
+
+    NVIDIA's released adaptor lower-cases text, removes ASCII punctuation,
+    replaces underscores with spaces, and collapses whitespace before the
+    official SigLIP2 tokenizer is called.  Keeping that operation here makes
+    the lightweight frozen-cache path equivalent to the adaptor's tokenizer
+    instead of relying on tokenizer-version-specific implicit behaviour.
+    """
+
+    value = str(text).replace("_", " ")
+    value = value.translate(str.maketrans("", "", string.punctuation)).lower()
+    return " ".join(value.split()).strip()
 
 
 def _restore_siglip2_text_head_from_state(
@@ -276,11 +506,18 @@ def _tokenize_siglip2_text(
     queries: List[str],
     model_name: str,
 ) -> Dict[str, torch.Tensor]:
+    canonical_queries = [_canonicalize_siglip2_text(query) for query in queries]
     try:
         from transformers import AutoProcessor
 
         processor = AutoProcessor.from_pretrained(model_name)
-        inputs = processor(text=queries, padding="max_length", return_tensors="pt")
+        inputs = processor(
+            text=canonical_queries,
+            padding="max_length",
+            truncation=True,
+            max_length=64,
+            return_tensors="pt",
+        )
     except Exception as exc:
         logger.warning("AutoProcessor text tokenization failed, falling back to AutoTokenizer: %s", exc)
         from transformers import AutoConfig, AutoTokenizer
@@ -288,7 +525,7 @@ def _tokenize_siglip2_text(
         config = AutoConfig.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         inputs = tokenizer(
-            queries,
+            canonical_queries,
             padding="max_length",
             truncation=True,
             max_length=_resolve_siglip2_text_max_length(config),
@@ -363,6 +600,7 @@ def load_or_generate_text_embeddings(
                     "prompt_templates": ["{query}"],
                     "text_encoder": "siglip2",
                     "model_name": _SIGLIP2_MODEL_NAME,
+                    "text_canonicalization": _SIGLIP2_TEXT_CANONICALIZATION,
                     "embeddings": emb.cpu(),
                 },
                 cache_path,
@@ -499,6 +737,7 @@ def load_or_generate_prompt_ensemble_embeddings(
                     "prompt_templates": templates,
                     "text_encoder": "siglip2",
                     "model_name": _SIGLIP2_MODEL_NAME,
+                    "text_canonicalization": _SIGLIP2_TEXT_CANONICALIZATION,
                     "embeddings": emb.cpu(),
                 },
                 cache_path,
@@ -1128,6 +1367,41 @@ def build_sam3_prompt_initial_mask(
             pred,
             heatmap_peak_in_shape(heatmap, tuple(pred.shape)),
         ).astype(bool)
+    if initial_refinement == "peak_component_or_seed":
+        peak = heatmap_peak_in_shape(heatmap, tuple(pred.shape))
+        if pred.any():
+            return keep_peak_connected_component(pred, peak).astype(bool)
+
+        # An absolute relevance threshold can legitimately produce no coarse
+        # mask even when the query heatmap has a localized maximum.  In that
+        # case use only the top ten percent of the heatmap's own dynamic range
+        # as a box seed for the official SAM3 decoder.  This is query-driven,
+        # fixed across scenes, and never reads an RGB frame or benchmark mask.
+        heat_np = (
+            heatmap.detach().float().cpu().numpy()
+            if isinstance(heatmap, torch.Tensor)
+            else np.asarray(heatmap)
+        )
+        if heat_np.ndim == 3:
+            heat_np = heat_np[0]
+        heat_np = heat_np.astype(np.float32)
+        if heat_np.shape != pred.shape:
+            heat_np = cv2.resize(
+                heat_np,
+                (pred.shape[1], pred.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            )
+        finite = np.isfinite(heat_np)
+        if not finite.any():
+            return pred
+        finite_values = heat_np[finite]
+        heat_min = float(finite_values.min())
+        heat_max = float(finite_values.max())
+        if heat_max - heat_min <= 1e-8:
+            return pred
+        seed_threshold = heat_min + 0.90 * (heat_max - heat_min)
+        seed = finite & (heat_np >= seed_threshold)
+        return keep_peak_connected_component(seed, peak).astype(bool)
     if initial_refinement == "adaptive_peak":
         peak = keep_peak_connected_component(
             pred,
@@ -1734,9 +2008,15 @@ def evaluate_scene(
     save_per_query_vis: bool = False,
     pred_mask_dir: Optional[Path] = None,
     mask_refinement: str = "none",
+    rgb_refinement_source: str = "dataset_frame",
     mask_refinement_iters: int = 1,
     mask_refinement_dilate: int = 5,
     mask_refinement_erode: int = 2,
+    sam3_box_refiner: Optional[Any] = None,
+    sam3_box_initial_refinement: str = "none",
+    sam3_box_min_heatmap_mean_ratio: float = 0.0,
+    sam3_box_min_heatmap_mass_ratio: float = 0.0,
+    sam3_box_require_peak_in_refined: bool = False,
     sam3_prompt_mask_head: Optional[PromptConditionedMaskHead] = None,
     sam3_prompt_mask_head_target_size: Tuple[int, int] = (240, 320),
     sam3_prompt_mask_head_logit_threshold: float = DEFAULT_SAM3_PROMPT_MASK_HEAD_LOGIT_THRESHOLD,
@@ -1755,6 +2035,10 @@ def evaluate_scene(
     render_readout: str = "screen_decode",
     primitive_chunk_size: int = 8192,
     primitive_query_cache: str = "",
+    primitive_score_cache: str = "",
+    primitive_confidence: str = "cache",
+    primitive_fallback_blend: str = "uncovered",
+    feature_contribution_gamma: float = 1.0,
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -1799,6 +2083,10 @@ def evaluate_scene(
                 )
             primitive_query_rows = None
             primitive_query_valid = None
+            primitive_query_confidence = None
+            primitive_query_primary = None
+            primitive_support_rows = None
+            primitive_support_valid = None
             if render_readout in {"primitive_query", "primitive_score"}:
                 if primitive_query_cache:
                     payload = torch.load(primitive_query_cache, map_location="cpu")
@@ -1806,6 +2094,34 @@ def evaluate_scene(
                         "summary_features", payload.get("features")
                     )
                     primitive_query_valid = payload.get("valid")
+                    primitive_query_primary = payload.get("primary_valid")
+                    if primitive_query_primary is not None:
+                        primitive_query_primary = torch.as_tensor(
+                            primitive_query_primary
+                        ).bool()
+                        if primitive_query_primary.shape != (
+                            model.get_xyz().shape[0],
+                        ):
+                            raise ValueError(
+                                "Primitive query primary mask row-count mismatch"
+                            )
+                        valid_mask = torch.as_tensor(primitive_query_valid).bool()
+                        if bool((primitive_query_primary & ~valid_mask).any()):
+                            raise ValueError(
+                                "Primitive query primary rows must be valid"
+                            )
+                    if primitive_confidence == "cache":
+                        primitive_query_confidence = payload.get(
+                            "semantic_confidence"
+                        )
+                        if primitive_query_confidence is not None:
+                            confidence_shape = tuple(
+                                torch.as_tensor(primitive_query_confidence).shape
+                            )
+                            if confidence_shape != (model.get_xyz().shape[0],):
+                                raise ValueError(
+                                    "Primitive query confidence row-count mismatch"
+                                )
                     cached_xyz = payload.get("xyz")
                     if not isinstance(primitive_query_rows, torch.Tensor):
                         raise ValueError("Primitive query cache lacks feature rows")
@@ -1834,10 +2150,27 @@ def evaluate_scene(
                         chunk_size=primitive_chunk_size,
                         store_on_cpu=render_readout == "primitive_score",
                     )
+            elif render_readout == "primitive_support":
+                if not primitive_score_cache:
+                    raise ValueError(
+                        "primitive_support requires --primitive_score_cache"
+                    )
+                support_payload = torch.load(primitive_score_cache, map_location="cpu")
+                primitive_support_rows, primitive_support_valid = (
+                    validate_primitive_support_cache(
+                        support_payload,
+                        model.get_xyz(),
+                        categories,
+                    )
+                )
         else:
             scene_root_hint = ""
             primitive_query_rows = None
             primitive_query_valid = None
+            primitive_query_confidence = None
+            primitive_query_primary = None
+            primitive_support_rows = None
+            primitive_support_valid = None
         canonical_mode = canonical_lerf_mode(mode)
         mode_mask_refinement = mask_refinement
         if (
@@ -1846,6 +2179,28 @@ def evaluate_scene(
             and canonical_mode != "rendered"
         ):
             mode_mask_refinement = "none"
+        if mask_refinement == "sam3_box" and canonical_mode != "rendered":
+            mode_mask_refinement = "none"
+        rgb_mask_renderer = None
+        render_rgb_refinement_frame_fn = None
+        if (
+            canonical_mode == "rendered"
+            and rgb_refinement_source == "rendered"
+            and mode_mask_refinement
+            in {"rgb_grabcut", "peak_component_rgb_grabcut", "sam3_box"}
+        ):
+            from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+                build_mask_renderer,
+                render_rgb_refinement_frame,
+            )
+
+            rgb_mask_renderer = build_mask_renderer(
+                config,
+                height=img_h,
+                width=img_w,
+                device=device,
+            )
+            render_rgb_refinement_frame_fn = render_rgb_refinement_frame
         mode_confidence_gate = readout_confidence_gate if canonical_mode == "rendered" else "none"
         for frame_id, frame_objects in tqdm(
             sorted(frame_annotations.items()),
@@ -1881,6 +2236,7 @@ def evaluate_scene(
                         viewmat.squeeze(0),
                         primitive_query_rows,
                         alpha_normalize=True,
+                        contribution_gamma=feature_contribution_gamma,
                     )
                     siglip_feat = F.normalize(
                         primitive_render["feature_map"].unsqueeze(0).float(),
@@ -1891,8 +2247,9 @@ def evaluate_scene(
                         "alpha_map": primitive_render["alpha_map"][None, None]
                     }
                     feat_1280 = None
-                elif render_readout == "primitive_score":
-                    assert primitive_query_rows is not None
+                elif render_readout in {"primitive_score", "primitive_support"}:
+                    if render_readout == "primitive_score":
+                        assert primitive_query_rows is not None
                     siglip_feat = None
                     feat_1280 = None
                 # Load RGB image for refiner guide if needed
@@ -1907,7 +2264,11 @@ def evaluate_scene(
                         from PIL import Image
                         rgb_pil = Image.open(img_path).convert("RGB")
                         rgb_tensor = TF.to_tensor(rgb_pil).unsqueeze(0).to(device)
-                if render_readout in {"primitive_query", "primitive_score"}:
+                if render_readout in {
+                    "primitive_query",
+                    "primitive_score",
+                    "primitive_support",
+                }:
                     pass
                 elif mode_confidence_gate != "none":
                     feat_1280, render_aux = render_1280d(
@@ -1927,7 +2288,8 @@ def evaluate_scene(
             # module for native 512-D OpenCLIP/SAM-CLIP feature fields.
             if not (
                 mode == "rendered"
-                and render_readout in {"primitive_query", "primitive_score"}
+                and render_readout
+                in {"primitive_query", "primitive_score", "primitive_support"}
             ):
                 siglip_feat = project_to_siglip2(feat_1280.half(), proj)
 
@@ -1943,18 +2305,19 @@ def evaluate_scene(
                 continue
 
             active_emb = text_embeddings[active_indices].to(device)  # [K, 1536]
-            visual_dim = (
-                int(primitive_query_rows.shape[1])
-                if mode == "rendered" and render_readout == "primitive_score"
-                else int(siglip_feat.shape[1])
-            )
-            if visual_dim != int(active_emb.shape[1]):
-                raise ValueError(
-                    "Visual/text feature dimension mismatch: "
-                    f"visual={visual_dim}, text={int(active_emb.shape[1])}. "
-                    "Use --text_encoder openclip for a 512-D SAM-CLIP field or "
-                    "--text_encoder siglip2 for a RADIO/SigLIP2 field."
+            if not (mode == "rendered" and render_readout == "primitive_support"):
+                visual_dim = (
+                    int(primitive_query_rows.shape[1])
+                    if mode == "rendered" and render_readout == "primitive_score"
+                    else int(siglip_feat.shape[1])
                 )
+                if visual_dim != int(active_emb.shape[1]):
+                    raise ValueError(
+                        "Visual/text feature dimension mismatch: "
+                        f"visual={visual_dim}, text={int(active_emb.shape[1])}. "
+                        "Use --text_encoder openclip for a 512-D SAM-CLIP field or "
+                        "--text_encoder siglip2 for a RADIO/SigLIP2 field."
+                    )
 
             # Build all-scene embeddings for softmax_scene scoring
             all_scene_emb = None
@@ -1983,18 +2346,113 @@ def evaluate_scene(
                     )
                     primitive_score_parts.append(chunk_heatmaps.squeeze(-1).T)
                 primitive_score_rows = torch.cat(primitive_score_parts, dim=0).contiguous()
-                if primitive_query_valid is not None:
-                    primitive_score_rows[
-                        ~primitive_query_valid.to(device=device, dtype=torch.bool)
-                    ] = -1.0e4
-                score_render = renderer.render_feature_rows(
+                primitive_score_rows = neutralize_invalid_primitive_scores_for_render(
+                    primitive_score_rows,
+                    primitive_query_valid,
+                )
+                primitive_score_rows = apply_primitive_semantic_confidence(
+                    primitive_score_rows,
+                    primitive_query_confidence,
+                )
+                if (
+                    primitive_fallback_blend
+                    in {"uncovered", "dominant", "primary_first", "strongest"}
+                    and primitive_query_primary is not None
+                ):
+                    primary_mask = primitive_query_primary.to(device=device)
+                    primary_rows = primitive_score_rows * primary_mask[:, None]
+                    fallback_rows = primitive_score_rows * (~primary_mask)[:, None]
+                    primary_render = renderer.render_feature_rows(
+                        model,
+                        viewmat.squeeze(0),
+                        primary_rows,
+                        alpha_normalize=True,
+                        contribution_gamma=feature_contribution_gamma,
+                    )
+                    fallback_render = renderer.render_feature_rows(
+                        model,
+                        viewmat.squeeze(0),
+                        fallback_rows,
+                        alpha_normalize=True,
+                        contribution_gamma=feature_contribution_gamma,
+                    )
+                    if primitive_fallback_blend == "primary_first":
+                        heatmaps = blend_primary_first(
+                            primary_render["feature_map"].float(),
+                            fallback_render["feature_map"].float(),
+                            semantic_threshold=float(iou_threshold),
+                        )
+                    elif primitive_fallback_blend == "strongest":
+                        heatmaps = blend_strongest_source(
+                            primary_render["feature_map"].float(),
+                            fallback_render["feature_map"].float(),
+                        )
+                    else:
+                        coverage_render = renderer.render_feature_rows(
+                            model,
+                            viewmat.squeeze(0),
+                            primary_mask.float()[:, None],
+                            alpha_normalize=True,
+                            contribution_gamma=feature_contribution_gamma,
+                        )
+                    if primitive_fallback_blend == "dominant":
+                        fallback_coverage_render = renderer.render_feature_rows(
+                            model,
+                            viewmat.squeeze(0),
+                            (~primary_mask).float()[:, None]
+                            * torch.as_tensor(
+                                primitive_query_valid,
+                                device=device,
+                                dtype=torch.float32,
+                            )[:, None],
+                            alpha_normalize=True,
+                            contribution_gamma=feature_contribution_gamma,
+                        )
+                        heatmaps = blend_primary_with_dominant_fallback(
+                            primary_render["feature_map"].float(),
+                            fallback_render["feature_map"].float(),
+                            coverage_render["feature_map"].float(),
+                            fallback_coverage_render["feature_map"].float(),
+                        )
+                    elif primitive_fallback_blend == "uncovered":
+                        heatmaps = blend_primary_with_uncovered_fallback(
+                            primary_render["feature_map"].float(),
+                            fallback_render["feature_map"].float(),
+                            coverage_render["feature_map"].float(),
+                        )
+                    render_aux = {
+                        "alpha_map": primary_render["alpha_map"][None, None]
+                    }
+                else:
+                    score_render = renderer.render_feature_rows(
+                        model,
+                        viewmat.squeeze(0),
+                        primitive_score_rows,
+                        alpha_normalize=True,
+                        contribution_gamma=feature_contribution_gamma,
+                    )
+                    heatmaps = score_render["feature_map"].float()
+                    render_aux = {
+                        "alpha_map": score_render["alpha_map"][None, None]
+                    }
+            elif mode == "rendered" and render_readout == "primitive_support":
+                assert primitive_support_rows is not None
+                support_rows = primitive_support_rows[:, active_indices]
+                support_rows = neutralize_invalid_primitive_scores_for_render(
+                    support_rows,
+                    primitive_support_valid,
+                ).to(device=device, dtype=torch.float32)
+                support_render = renderer.render_feature_rows(
                     model,
                     viewmat.squeeze(0),
-                    primitive_score_rows,
+                    support_rows,
                     alpha_normalize=True,
+                    contribution_gamma=feature_contribution_gamma,
                 )
-                heatmaps = score_render["feature_map"].float()
-                render_aux = {"alpha_map": score_render["alpha_map"][None, None]}
+                heatmaps = support_render["feature_map"].float()
+                render_aux = {
+                    "alpha_map": support_render["alpha_map"][None, None]
+                }
             else:
                 heatmaps = compute_relevancy_heatmap(
                     siglip_feat, active_emb,
@@ -2047,8 +2505,32 @@ def evaluate_scene(
             gt_masks_feat = build_gt_masks(frame_objects, active_cats, fH, fW,
                                            src_height=img_h, src_width=img_w)
             rgb_image_for_masks = None
+            sam3_box_state = None
             if mode_mask_refinement != "none" or save_overlay_vis:
-                rgb_image_for_masks = load_lerf_rgb_frame(scene, frame_id, scene_root_hint)
+                if (
+                    mode_mask_refinement != "none"
+                    and rgb_refinement_source == "rendered"
+                    and canonical_mode == "rendered"
+                    and rgb_mask_renderer is not None
+                    and render_rgb_refinement_frame_fn is not None
+                ):
+                    rgb_image_for_masks = render_rgb_refinement_frame_fn(
+                        model,
+                        rgb_mask_renderer,
+                        viewmat.squeeze(0),
+                    )
+                else:
+                    rgb_image_for_masks = load_lerf_rgb_frame(
+                        scene,
+                        frame_id,
+                        scene_root_hint,
+                    )
+                if (
+                    mode_mask_refinement == "sam3_box"
+                    and sam3_box_refiner is not None
+                    and rgb_image_for_masks is not None
+                ):
+                    sam3_box_state = sam3_box_refiner.set_image(rgb_image_for_masks)
 
             hm_vis: Dict[str, np.ndarray] = {}
             gt_vis: Dict[str, np.ndarray] = {}
@@ -2085,7 +2567,56 @@ def evaluate_scene(
 
                 # mIoU at feature resolution by default; optional RGB refinement
                 # evaluates the refined mask at image resolution without using GT.
-                if mode_mask_refinement == "sam3_prompt_mask_head" and prompt_mask_feature is not None:
+                if mode_mask_refinement == "sam3_box" and sam3_box_refiner is not None:
+                    initial_pred = build_sam3_prompt_initial_mask(
+                        hm,
+                        threshold_ratio=iou_threshold,
+                        threshold_mode=threshold_mode,
+                        threshold_mean_std_k=threshold_mean_std_k,
+                        threshold_min_ratio=threshold_min_ratio,
+                        threshold_max_ratio=threshold_max_ratio,
+                        target_shape=(img_h, img_w),
+                        initial_refinement=sam3_box_initial_refinement,
+                    )
+                    initial_pred_for_save = initial_pred
+                    initial_overlap = mask_overlap_stats(initial_pred, gt_full)
+                    if sam3_box_state is None:
+                        pred = initial_pred.copy()
+                        report = {
+                            "attempted": False,
+                            "accepted": False,
+                            "fallback_reason": "missing_sam3_state",
+                        }
+                    else:
+                        pred, report = sam3_box_refiner.refine_from_state_with_report(
+                            sam3_box_state,
+                            initial_pred,
+                        )
+                    if report.get("accepted", False) and (
+                        sam3_box_require_peak_in_refined
+                        or sam3_box_min_heatmap_mean_ratio > 0
+                        or sam3_box_min_heatmap_mass_ratio > 0
+                    ):
+                        pred, support_report = filter_refined_mask_by_heatmap_support(
+                            initial_pred,
+                            pred,
+                            hm,
+                            min_mean_ratio=sam3_box_min_heatmap_mean_ratio,
+                            min_mass_ratio=sam3_box_min_heatmap_mass_ratio,
+                            require_peak_in_refined=sam3_box_require_peak_in_refined,
+                        )
+                        report["heatmap_support"] = support_report
+                        if not support_report.get("accepted", False):
+                            report["accepted"] = False
+                            report["fallback_reason"] = support_report.get(
+                                "fallback_reason",
+                                "heatmap_support_rejected",
+                            )
+                    iou = float(mask_overlap_stats(pred, gt_full)["iou"])
+                    pred_for_save = pred
+                    initial_ious.append(float(initial_overlap["iou"]))
+                    refinement_reports.append(report)
+                elif mode_mask_refinement == "sam3_prompt_mask_head" and prompt_mask_feature is not None:
                     initial_pred = build_sam3_prompt_initial_mask(
                         hm,
                         threshold_ratio=iou_threshold,
@@ -2309,12 +2840,64 @@ def main() -> None:
                         help="Evaluate the rendered feature field only (skip teacher features)")
     parser.add_argument(
         "--render_readout",
-        choices=["screen_decode", "primitive_query", "primitive_score"],
+        choices=[
+            "screen_decode",
+            "primitive_query",
+            "primitive_score",
+            "primitive_support",
+        ],
         default="screen_decode",
-        help="Rendered path: decode-after-splat, splat query rows, or score primitives then splat scalar scores.",
+        help=(
+            "Rendered path: decode-after-splat, splat query rows, score "
+            "primitives then splat scalar unaries, or splat a shared-3D-solver "
+            "support cache."
+        ),
     )
     parser.add_argument("--primitive_chunk_size", type=int, default=8192)
     parser.add_argument("--primitive_query_cache", default="", help="Oracle/audit cache of row-aligned per-Gaussian query-space features")
+    parser.add_argument(
+        "--primitive_confidence",
+        choices=["cache", "none"],
+        default="cache",
+        help=(
+            "For primitive_score, apply an optional query-independent "
+            "semantic_confidence vector stored in the primitive cache."
+        ),
+    )
+    parser.add_argument(
+        "--primitive_fallback_blend",
+        choices=[
+            "primary_first",
+            "strongest",
+            "uncovered",
+            "dominant",
+            "direct",
+        ],
+        default="primary_first",
+        help=(
+            "For completion caches, preserve the primary score map whenever "
+            "it has positive support and use fallback only for unsupported "
+            "queries (default). Other choices are diagnostic ablations."
+        ),
+    )
+    parser.add_argument(
+        "--primitive_score_cache",
+        default="",
+        help=(
+            "Row-aligned shared-3D-solver probability cache required by "
+            "--render_readout primitive_support."
+        ),
+    )
+    parser.add_argument(
+        "--feature_contribution_gamma",
+        type=float,
+        default=1.0,
+        help=(
+            "Query-independent exponent for normalized front-to-back feature "
+            "mixture weights. 1 preserves ordinary alpha averaging; 2 is the "
+            "label-free frozen compositor candidate."
+        ),
+    )
     # Scene selection
     parser.add_argument("--scene", default="all",
                         help="Scene name or 'all' (default: all)")
@@ -2394,14 +2977,42 @@ def main() -> None:
         default=1.0,
         help="Exponent for --readout_confidence_gate; 0 disables gating.",
     )
-    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut", "peak_component", "peak_component_rgb_grabcut", "sam3_prompt_mask_head"], default="none",
+    parser.add_argument("--mask_refinement", choices=["none", "rgb_grabcut", "peak_component", "peak_component_rgb_grabcut", "sam3_box", "sam3_prompt_mask_head"], default="none",
                         help="Optional GT-free RGB boundary snapping after heatmap binarisation")
+    parser.add_argument(
+        "--rgb_refinement_source",
+        choices=["rendered", "dataset_frame"],
+        default="dataset_frame",
+        help=(
+            "RGB used by GrabCut/official SAM3 refinement. 'rendered' uses only "
+            "the Gaussian scene; 'dataset_frame' preserves historical behavior."
+        ),
+    )
     parser.add_argument("--mask_refinement_iters", type=int, default=1,
                         help="GrabCut iterations for rgb_grabcut mask refinement")
     parser.add_argument("--mask_refinement_dilate", type=int, default=5,
                         help="Pixel dilation radius defining rgb_grabcut support band")
     parser.add_argument("--mask_refinement_erode", type=int, default=2,
                         help="Pixel erosion radius defining sure foreground for rgb_grabcut")
+    parser.add_argument("--sam3_checkpoint_path", default="checkpoints/sam3_modelscope/sam3.pt")
+    parser.add_argument("--sam3_confidence_threshold", type=float, default=0.0)
+    parser.add_argument("--sam3_resolution", type=int, default=1008)
+    parser.add_argument("--sam3_amp_dtype", choices=["auto", "off", "bfloat16"], default="auto")
+    parser.add_argument("--sam3_box_padding", type=int, default=8)
+    parser.add_argument("--sam3_min_initial_iou", type=float, default=0.05)
+    parser.add_argument(
+        "--sam3_box_initial_refinement",
+        choices=["none", "peak_component", "peak_component_or_seed"],
+        default="none",
+        help=(
+            "GT-free coarse prompt cleanup. peak_component_or_seed falls back "
+            "to the peak-connected top 10%% heatmap band only when the fixed "
+            "threshold produces an empty mask."
+        ),
+    )
+    parser.add_argument("--sam3_box_min_heatmap_mean_ratio", type=float, default=0.0)
+    parser.add_argument("--sam3_box_min_heatmap_mass_ratio", type=float, default=0.0)
+    parser.add_argument("--sam3_box_require_peak_in_refined", action="store_true")
     parser.add_argument("--sam3_prompt_mask_head_checkpoint", default="",
                         help="Feature-only prompt-conditioned SAM mask head checkpoint. Supports {scene}.")
     parser.add_argument(
@@ -2473,10 +3084,25 @@ def main() -> None:
                         help="GPU device id")
 
     args = parser.parse_args()
+    if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
+        parser.error("--feature_contribution_gamma must be finite and positive")
     if args.gt_only and args.rendered_only:
         parser.error("--gt_only and --rendered_only are mutually exclusive")
-    if args.render_readout in {"primitive_query", "primitive_score"} and args.text_encoder != "siglip2":
+    if args.render_readout in {
+        "primitive_query",
+        "primitive_score",
+        "primitive_support",
+    } and args.text_encoder != "siglip2":
         parser.error("primitive-first render readouts currently require --text_encoder siglip2")
+    if args.render_readout == "primitive_support" and not args.primitive_score_cache:
+        parser.error("primitive_support requires --primitive_score_cache")
+    if (
+        args.feature_contribution_gamma != 1.0
+        and args.render_readout == "screen_decode"
+    ):
+        parser.error(
+            "contribution sharpening currently requires a primitive-first render readout"
+        )
     if args.scene == "all" and not args.gt_only:
         parser.error(
             "Rendered --scene all is unsafe because one config/checkpoint cannot "
@@ -2514,6 +3140,8 @@ def main() -> None:
         args.gt_only = True
     if args.mask_refinement == "sam3_prompt_mask_head" and not args.sam3_prompt_mask_head_checkpoint:
         parser.error("--mask_refinement sam3_prompt_mask_head requires --sam3_prompt_mask_head_checkpoint")
+    if args.mask_refinement == "sam3_box" and not args.sam3_checkpoint_path:
+        parser.error("--mask_refinement sam3_box requires --sam3_checkpoint_path")
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     device = torch.device(f"cuda:{args.gpu}" if torch.cuda.is_available() else "cpu")
@@ -2535,7 +3163,12 @@ def main() -> None:
     print(f"  Heatmap ↑:  {args.heatmap_upsample}×")
     print(f"  Loc mode:   {args.localization_mode}")
     print(f"  Conf gate:  {args.readout_confidence_gate} (γ={args.readout_confidence_gamma})")
+    if args.render_readout == "primitive_score":
+        print(f"  Prim. conf: {args.primitive_confidence}")
+        print(f"  Fallback:   {args.primitive_fallback_blend}")
     print(f"  Mask ref.:  {args.mask_refinement}")
+    if args.mask_refinement in {"rgb_grabcut", "peak_component_rgb_grabcut", "sam3_box"}:
+        print(f"  RGB source: {args.rgb_refinement_source}")
     print(f"  Prompts:    {len(prompt_templates)} template(s)")
     print()
 
@@ -2761,11 +3394,24 @@ def main() -> None:
 
         prompt_mask_head = None
         prompt_mask_target_size = (240, 320)
+        sam3_box_refiner = None
         if args.mask_refinement == "sam3_prompt_mask_head":
             prompt_head_path = args.sam3_prompt_mask_head_checkpoint.format(scene=scene)
             prompt_mask_head, prompt_mask_target_size = load_prompt_conditioned_mask_head(
                 prompt_head_path,
                 device,
+            )
+        elif args.mask_refinement == "sam3_box":
+            from radio_gs.scripts.eval_lerf_direct_3d_selection import Sam3BoxMaskRefiner
+
+            sam3_box_refiner = Sam3BoxMaskRefiner(
+                checkpoint_path=args.sam3_checkpoint_path,
+                device=str(device),
+                confidence_threshold=args.sam3_confidence_threshold,
+                resolution=args.sam3_resolution,
+                amp_dtype=args.sam3_amp_dtype,
+                box_padding_pixels=args.sam3_box_padding,
+                min_initial_iou=args.sam3_min_initial_iou,
             )
 
         scene_results = evaluate_scene(
@@ -2797,9 +3443,15 @@ def main() -> None:
             save_per_query_vis=args.save_per_query_vis or args.save_overlay_vis,
             pred_mask_dir=Path(args.output_dir) / "pred_masks" if args.save_pred_masks else None,
             mask_refinement=args.mask_refinement,
+            rgb_refinement_source=args.rgb_refinement_source,
             mask_refinement_iters=args.mask_refinement_iters,
             mask_refinement_dilate=args.mask_refinement_dilate,
             mask_refinement_erode=args.mask_refinement_erode,
+            sam3_box_refiner=sam3_box_refiner,
+            sam3_box_initial_refinement=args.sam3_box_initial_refinement,
+            sam3_box_min_heatmap_mean_ratio=args.sam3_box_min_heatmap_mean_ratio,
+            sam3_box_min_heatmap_mass_ratio=args.sam3_box_min_heatmap_mass_ratio,
+            sam3_box_require_peak_in_refined=args.sam3_box_require_peak_in_refined,
             sam3_prompt_mask_head=prompt_mask_head,
             sam3_prompt_mask_head_target_size=prompt_mask_target_size,
             sam3_prompt_mask_head_logit_threshold=args.sam3_prompt_mask_head_logit_threshold,
@@ -2818,6 +3470,10 @@ def main() -> None:
             render_readout=args.render_readout,
             primitive_chunk_size=args.primitive_chunk_size,
             primitive_query_cache=args.primitive_query_cache,
+            primitive_score_cache=args.primitive_score_cache,
+            primitive_confidence=args.primitive_confidence,
+            primitive_fallback_blend=args.primitive_fallback_blend,
+            feature_contribution_gamma=args.feature_contribution_gamma,
         )
         all_results[scene] = scene_results
 
@@ -2841,26 +3497,22 @@ def main() -> None:
         print(f"  {'Scene':<20} {'Loc Acc':>10} {'mIoU':>10} {'Samples':>10}")
         print(f"  {'─' * 50}")
 
-        agg_loc_correct = 0
-        agg_loc_total = 0
-        agg_ious: List[float] = []
-
         for scene_name, m in scene_metrics:
             print(f"  {scene_name:<20} {m['loc_acc']:>10.4f} {m['miou']:>10.4f} "
                   f"{m['loc_total']:>10d}")
-            agg_loc_correct += m["loc_correct"]
-            agg_loc_total += m["loc_total"]
-
-            # Accumulate per-category IoUs for overall mean
-            for cat_info in m["per_category"].values():
-                if cat_info["miou"] is not None:
-                    agg_ious.append(cat_info["miou"])
-
-        overall_loc = agg_loc_correct / max(agg_loc_total, 1)
-        overall_miou = float(np.mean(agg_ious)) if agg_ious else 0.0
+        aggregate = aggregate_lerf_mode_metrics([value for _, value in scene_metrics])
         print(f"  {'─' * 50}")
-        print(f"  {'OVERALL':<20} {overall_loc:>10.4f} {overall_miou:>10.4f} "
-              f"{agg_loc_total:>10d}")
+        print(
+            f"  {'OVERALL (samples)':<20} "
+            f"{aggregate['localization_accuracy']:>10.4f} "
+            f"{aggregate['sample_micro_miou']:>10.4f} "
+            f"{aggregate['sample_count']:>10d}"
+        )
+        if aggregate["category_macro_miou"] is not None:
+            print(
+                f"  {'CATEGORY MACRO':<20} {'':>10} "
+                f"{aggregate['category_macro_miou']:>10.4f} {'':>10}"
+            )
 
         # Per-category breakdown (across scenes)
         print(f"\n  Per-category breakdown ({canonical_lerf_mode(mode)}):")
@@ -2891,6 +3543,10 @@ def main() -> None:
         "checkpoint": args.checkpoint,
         "text_embedding_cache": args.text_embedding_cache,
         "canonical_embedding_cache": args.canonical_embedding_cache,
+        "primitive_query_cache": args.primitive_query_cache,
+        "primitive_score_cache": args.primitive_score_cache,
+        "primitive_confidence": args.primitive_confidence,
+        "primitive_fallback_blend": args.primitive_fallback_blend,
     }
     if args.text_encoder == "siglip2" and args.use_summary_head:
         provenance_paths["summary_head_weights"] = args.summary_head_weights
@@ -2912,7 +3568,18 @@ def main() -> None:
             else {}
         ),
         "prompt_templates": prompt_templates,
+        "feature_observation_operator": {
+            "type": (
+                "normalized_front_to_back_contribution_power"
+                if float(args.feature_contribution_gamma) != 1.0
+                else "alpha_normalized_mean"
+            ),
+            "gamma": float(args.feature_contribution_gamma),
+            "query_dependent": False,
+            "changes_geometry_or_alpha": False,
+        },
         "categories": categories,
+        "aggregates": {},
         "scenes": {},
     }
     for scene_name, scene_res in all_results.items():
@@ -2955,6 +3622,15 @@ def main() -> None:
             if mode == "teacher":
                 scene_report["gt"] = scene_report[mode]
         report["scenes"][scene_name] = scene_report
+
+    for mode in ("teacher", "rendered"):
+        metrics = [
+            get_lerf_mode_metrics(value, mode) for value in all_results.values()
+        ]
+        metrics = [value for value in metrics if value is not None]
+        if not metrics:
+            continue
+        report["aggregates"][mode] = aggregate_lerf_mode_metrics(metrics)
 
     report_path = out_dir / "lerf_ovs_results.json"
     with open(report_path, "w", encoding="utf-8") as f:

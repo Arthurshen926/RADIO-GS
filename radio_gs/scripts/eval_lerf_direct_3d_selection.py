@@ -2317,12 +2317,13 @@ def select_top_raster_hits_per_gaussian(
 
 
 @torch.no_grad()
-def rasterize_registered_view_features(
+def rasterize_registered_view_assignments(
     *,
     model: torch.nn.Module,
     renderer: FeatureFieldRenderer,
     viewmat: torch.Tensor,
-    siglip_feat: torch.Tensor,
+    image_height: int,
+    image_width: int,
     depth_map: torch.Tensor,
     alpha_map: torch.Tensor,
     registration_depth_tolerance: float,
@@ -2331,16 +2332,22 @@ def rasterize_registered_view_features(
     registration_weight_mode: str,
     dominant_only: bool = False,
     gaussian_top1: bool = False,
-    deterministic_cpu_accumulation: bool = False,
-) -> Tuple[torch.Tensor, torch.Tensor]:
-    """Register a rendered feature map to primitives using rasterizer hits."""
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Return a feature-independent pixel-to-Gaussian responsibility map.
+
+    Geometry registration is deliberately separated from feature sampling so
+    raw RADIO and every frozen official capability view can consume exactly
+    the same raster hits.  This also makes the registration contract reusable
+    and hashable instead of relying on repeated CUDA rasterization to reproduce
+    boundary intersections bit-for-bit.
+    """
     if getattr(renderer, "use_2dgs", False):
         raise RuntimeError("raster_contrib registration currently supports 3DGS rasterization only")
 
     from gsplat import rasterization
     from gsplat.cuda._wrapper import rasterize_to_indices_in_range
 
-    device = siglip_feat.device
+    device = model.get_xyz().device
     if viewmat.dim() == 2:
         viewmats = viewmat.to(device=device, dtype=torch.float32).unsqueeze(0)
     elif viewmat.dim() == 3 and viewmat.shape[0] == 1:
@@ -2351,12 +2358,15 @@ def rasterize_registered_view_features(
     n_gaussians = int(model.get_xyz().shape[0])
     if n_gaussians == 0:
         return (
-            torch.empty(0, int(siglip_feat.shape[1]), dtype=torch.float32, device=device),
+            torch.empty(0, dtype=torch.long, device=device),
+            torch.empty(0, dtype=torch.long, device=device),
             torch.empty(0, dtype=torch.float32, device=device),
         )
 
-    height = int(siglip_feat.shape[-2])
-    width = int(siglip_feat.shape[-1])
+    height = int(image_height)
+    width = int(image_width)
+    if height <= 0 or width <= 0:
+        raise ValueError("image dimensions must be positive")
     means = model.get_xyz().to(device=device, dtype=torch.float32)
     quats = model.get_rotation().to(device=device, dtype=torch.float32)
     scales = model.get_scaling().to(device=device, dtype=torch.float32)
@@ -2388,8 +2398,9 @@ def rasterize_registered_view_features(
     total_intersections = int(info.get("flatten_ids", torch.empty(0, device=device)).numel())
     if total_intersections <= 0:
         return (
-            torch.zeros(n_gaussians, int(siglip_feat.shape[1]), dtype=torch.float32, device=device),
-            torch.zeros(n_gaussians, dtype=torch.float32, device=device),
+            torch.empty(0, dtype=torch.long, device=device),
+            torch.empty(0, dtype=torch.long, device=device),
+            torch.empty(0, dtype=torch.float32, device=device),
         )
 
     transmittances = torch.ones(1, height, width, dtype=torch.float32, device=device)
@@ -2441,11 +2452,52 @@ def rasterize_registered_view_features(
             n_gaussians=n_gaussians,
         )
         valid = valid & top1
+    return gaussian_ids[valid], pixel_ids[valid], weights[valid]
+
+
+@torch.no_grad()
+def rasterize_registered_view_features(
+    *,
+    model: torch.nn.Module,
+    renderer: FeatureFieldRenderer,
+    viewmat: torch.Tensor,
+    siglip_feat: torch.Tensor,
+    depth_map: torch.Tensor,
+    alpha_map: torch.Tensor,
+    registration_depth_tolerance: float,
+    registration_relative_depth_tolerance: float,
+    registration_alpha_threshold: float,
+    registration_weight_mode: str,
+    dominant_only: bool = False,
+    gaussian_top1: bool = False,
+    deterministic_cpu_accumulation: bool = False,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Register a rendered feature map through a shared geometry assignment."""
+    if siglip_feat.dim() != 4 or int(siglip_feat.shape[0]) != 1:
+        raise ValueError(
+            f"Expected siglip_feat [1,C,H,W], got {tuple(siglip_feat.shape)}"
+        )
+    n_gaussians = int(model.get_xyz().shape[0])
+    gaussian_ids, pixel_ids, weights = rasterize_registered_view_assignments(
+        model=model,
+        renderer=renderer,
+        viewmat=viewmat,
+        image_height=int(siglip_feat.shape[-2]),
+        image_width=int(siglip_feat.shape[-1]),
+        depth_map=depth_map,
+        alpha_map=alpha_map,
+        registration_depth_tolerance=registration_depth_tolerance,
+        registration_relative_depth_tolerance=registration_relative_depth_tolerance,
+        registration_alpha_threshold=registration_alpha_threshold,
+        registration_weight_mode=registration_weight_mode,
+        dominant_only=dominant_only,
+        gaussian_top1=gaussian_top1,
+    )
     sums, counts = accumulate_raster_contribution_features(
         siglip_feat,
-        gaussian_ids[valid],
-        pixel_ids[valid],
-        weights[valid],
+        gaussian_ids,
+        pixel_ids,
+        weights,
         n_gaussians=n_gaussians,
         deterministic_cpu=deterministic_cpu_accumulation,
     )
@@ -3316,6 +3368,36 @@ def _load_lerf_rgb_tensor(
     image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
     tensor = torch.from_numpy(np.ascontiguousarray(image_rgb)).permute(2, 0, 1)
     return tensor.float().div(255.0).unsqueeze(0).to(device)
+
+
+def render_rgb_refinement_frame(
+    model: torch.nn.Module,
+    renderer: FeatureFieldRenderer,
+    viewmat: torch.Tensor,
+) -> np.ndarray:
+    """Render the scene's own RGB as an OpenCV-compatible BGR frame.
+
+    Unlike the historical LERF refinement path, this does not open the RGB
+    frame associated with the evaluated annotation.
+    """
+
+    with torch.no_grad():
+        rendered = renderer.render_rgb(model, viewmat)
+    rgb = rendered.get("rgb")
+    if not isinstance(rgb, torch.Tensor) or rgb.ndim != 3 or rgb.shape[0] != 3:
+        raise RuntimeError("RGB renderer must return an 'rgb' tensor with shape [3,H,W]")
+    rgb_u8 = (
+        rgb.detach()
+        .float()
+        .clamp(0.0, 1.0)
+        .permute(1, 2, 0)
+        .mul(255.0)
+        .round()
+        .to(torch.uint8)
+        .cpu()
+        .numpy()
+    )
+    return cv2.cvtColor(rgb_u8, cv2.COLOR_RGB2BGR)
 
 
 @torch.no_grad()
@@ -4790,6 +4872,7 @@ class Sam3BoxMaskRefiner:
         from radio_gs.scripts.build_sam3_foundation_cache import (
             _load_sam3_model,
             resolve_sam3_amp_dtype,
+            set_requested_cuda_device,
             validate_sam3_resolution,
         )
 
@@ -4797,6 +4880,10 @@ class Sam3BoxMaskRefiner:
             resolution,
             allow_unsafe=False,
         )
+        # Official SAM3 normalizes ``cuda:<index>`` to ``cuda`` internally.
+        # Select the requested process-local device first so model.cuda() does
+        # not silently place every parallel evaluator on GPU 0.
+        set_requested_cuda_device(device)
         self.processor = _load_sam3_model(
             checkpoint_path=checkpoint_path,
             device=device,
@@ -5324,6 +5411,7 @@ def evaluate_selection_spec(
     projection_mode: str,
     alpha_binarization: str,
     mask_refinement: str,
+    rgb_refinement_source: str,
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
     mask_refinement_erode: int,
@@ -5333,6 +5421,9 @@ def evaluate_selection_spec(
     score_component_guard_min_mean_fraction: float,
     score_component_guard_max_components: int,
     score_component_guard_min_recovery_pixels: int,
+    sam3_box_min_heatmap_mean_ratio: float,
+    sam3_box_min_heatmap_mass_ratio: float,
+    sam3_box_require_peak_in_refined: bool,
     sam3_refinement_geometry_gate: bool,
     sam3_refinement_gate_min_area_ratio: float,
     sam3_refinement_gate_max_area_ratio: float,
@@ -5399,13 +5490,24 @@ def evaluate_selection_spec(
         )
     selected = selected.to(device=device, dtype=torch.float32)
     proxy = GaussianSelectionProxy(model, selected)
-    needs_prompt_heatmap = mask_refinement == "rgb_grabcut_score_component_guard" or (
-        mask_refinement == "sam3_prompt_mask_head"
-        and (
-            sam3_prompt_mask_head_initial_refinement != "none"
-            or float(sam3_prompt_mask_head_min_heatmap_mean_ratio) > 0.0
-            or float(sam3_prompt_mask_head_min_heatmap_mass_ratio) > 0.0
-            or bool(sam3_prompt_mask_head_require_peak_in_refined)
+    needs_prompt_heatmap = (
+        mask_refinement == "rgb_grabcut_score_component_guard"
+        or (
+            mask_refinement == "sam3_box"
+            and (
+                float(sam3_box_min_heatmap_mean_ratio) > 0.0
+                or float(sam3_box_min_heatmap_mass_ratio) > 0.0
+                or bool(sam3_box_require_peak_in_refined)
+            )
+        )
+        or (
+            mask_refinement == "sam3_prompt_mask_head"
+            and (
+                sam3_prompt_mask_head_initial_refinement != "none"
+                or float(sam3_prompt_mask_head_min_heatmap_mean_ratio) > 0.0
+                or float(sam3_prompt_mask_head_min_heatmap_mass_ratio) > 0.0
+                or bool(sam3_prompt_mask_head_require_peak_in_refined)
+            )
         )
     )
     score_heatmap_proxy = (
@@ -5482,7 +5584,18 @@ def evaluate_selection_spec(
             "sam3_box",
         }
         if needs_rgb_refinement:
-            rgb_for_refinement = load_lerf_rgb_frame(scene, frame_id, getattr(dataset, "scene_root", ""))
+            if rgb_refinement_source == "rendered":
+                rgb_for_refinement = render_rgb_refinement_frame(model, renderer, viewmat)
+            elif rgb_refinement_source == "dataset_frame":
+                rgb_for_refinement = load_lerf_rgb_frame(
+                    scene,
+                    frame_id,
+                    getattr(dataset, "scene_root", ""),
+                )
+            else:
+                raise ValueError(
+                    f"Unsupported rgb_refinement_source: {rgb_refinement_source}"
+                )
             if mask_refinement == "sam3_box" and rgb_for_refinement is not None and sam3_box_refiner is not None:
                 sam3_state = sam3_box_refiner.set_image(rgb_for_refinement)
         if mask_refinement in {"sam3_adaptor_boundary", "sam3_adaptor_grabcut"} and sam3_adaptor_refiner is not None:
@@ -5577,7 +5690,45 @@ def evaluate_selection_spec(
                     min_recovery_pixels=score_component_guard_min_recovery_pixels,
                 )
             if mask_refinement == "sam3_box" and sam3_state is not None and sam3_box_refiner is not None:
-                pred, sam3_report = sam3_box_refiner.refine_from_state_with_report(sam3_state, pred)
+                candidate_pred, sam3_report = sam3_box_refiner.refine_from_state_with_report(
+                    sam3_state,
+                    pred,
+                )
+                if bool(sam3_report.get("accepted", False)) and (
+                    float(sam3_box_min_heatmap_mean_ratio) > 0.0
+                    or float(sam3_box_min_heatmap_mass_ratio) > 0.0
+                    or bool(sam3_box_require_peak_in_refined)
+                ):
+                    candidate_pred, heatmap_guard_report = apply_sam3_prompt_heatmap_guard(
+                        initial_pred,
+                        candidate_pred,
+                        prompt_heatmap,
+                        min_mean_ratio=sam3_box_min_heatmap_mean_ratio,
+                        min_mass_ratio=sam3_box_min_heatmap_mass_ratio,
+                        require_peak_in_refined=sam3_box_require_peak_in_refined,
+                    )
+                    sam3_report["heatmap_support"] = dict(heatmap_guard_report)
+                    if not bool(heatmap_guard_report.get("accepted", False)):
+                        sam3_report["accepted"] = False
+                        sam3_report["fallback_reason"] = str(
+                            heatmap_guard_report.get(
+                                "fallback_reason",
+                                "heatmap_support_rejected",
+                            )
+                        )
+                if sam3_refinement_geometry_gate:
+                    pred, sam3_report = apply_geometry_gate_to_sam3_report(
+                        initial_pred,
+                        candidate_pred,
+                        sam3_report,
+                        alpha_np,
+                        depth_np,
+                        min_area_ratio=sam3_refinement_gate_min_area_ratio,
+                        max_area_ratio=sam3_refinement_gate_max_area_ratio,
+                        min_boundary_gain=sam3_refinement_gate_min_boundary_gain,
+                    )
+                else:
+                    pred = candidate_pred
             elif mask_refinement == "sam3_box":
                 if rgb_for_refinement is None:
                     fallback_reason = "missing_rgb_frame"
@@ -5975,8 +6126,16 @@ def evaluate_selection_spec(
             "component_rank_by": component_rank_by,
             "silhouette_threshold": silhouette_threshold,
             "projection_mode": projection_mode,
+            "projection_semantics": (
+                "full-scene visibility-aware premultiplied selected-membership composite"
+                if projection_mode == "feature_composite"
+                else "physically subset selected primitives and render their alpha"
+            ),
             "alpha_binarization": alpha_binarization,
             "mask_refinement": mask_refinement,
+            "rgb_refinement_source": (
+                rgb_refinement_source if needs_rgb_refinement else ""
+            ),
             "mask_refinement_iters": mask_refinement_iters,
             "mask_refinement_dilate": mask_refinement_dilate,
             "mask_refinement_erode": mask_refinement_erode,
@@ -5989,6 +6148,15 @@ def evaluate_selection_spec(
             "score_component_guard_max_components": int(score_component_guard_max_components),
             "score_component_guard_min_recovery_pixels": int(
                 score_component_guard_min_recovery_pixels
+            ),
+            "sam3_box_min_heatmap_mean_ratio": float(
+                sam3_box_min_heatmap_mean_ratio
+            ),
+            "sam3_box_min_heatmap_mass_ratio": float(
+                sam3_box_min_heatmap_mass_ratio
+            ),
+            "sam3_box_require_peak_in_refined": bool(
+                sam3_box_require_peak_in_refined
             ),
             "sam3_refinement_count": int(len(sam3_reports)),
             "sam3_attempt_count": int(sam3_attempt_count),
@@ -6096,6 +6264,7 @@ def evaluate_scene(
     projection_mode: str,
     alpha_binarization: str,
     mask_refinement: str,
+    rgb_refinement_source: str,
     mask_refinement_iters: int,
     mask_refinement_dilate: int,
     mask_refinement_erode: int,
@@ -6105,6 +6274,9 @@ def evaluate_scene(
     score_component_guard_min_mean_fraction: float,
     score_component_guard_max_components: int,
     score_component_guard_min_recovery_pixels: int,
+    sam3_box_min_heatmap_mean_ratio: float,
+    sam3_box_min_heatmap_mass_ratio: float,
+    sam3_box_require_peak_in_refined: bool,
     sam3_refinement_geometry_gate: bool,
     sam3_refinement_gate_min_area_ratio: float,
     sam3_refinement_gate_max_area_ratio: float,
@@ -6340,7 +6512,7 @@ def evaluate_scene(
         )
         sam3_box_refiner = Sam3BoxMaskRefiner(
             checkpoint_path=sam3_checkpoint_path,
-            device="cuda" if device.type == "cuda" else "cpu",
+            device=str(device),
             confidence_threshold=sam3_confidence_threshold,
             resolution=sam3_resolution,
             amp_dtype=sam3_amp_dtype,
@@ -6919,6 +7091,7 @@ def evaluate_scene(
             projection_mode=projection_mode,
             alpha_binarization=alpha_binarization,
             mask_refinement=mask_refinement,
+            rgb_refinement_source=rgb_refinement_source,
             mask_refinement_iters=mask_refinement_iters,
             mask_refinement_dilate=mask_refinement_dilate,
             mask_refinement_erode=mask_refinement_erode,
@@ -6928,6 +7101,9 @@ def evaluate_scene(
             score_component_guard_min_mean_fraction=score_component_guard_min_mean_fraction,
             score_component_guard_max_components=score_component_guard_max_components,
             score_component_guard_min_recovery_pixels=score_component_guard_min_recovery_pixels,
+            sam3_box_min_heatmap_mean_ratio=sam3_box_min_heatmap_mean_ratio,
+            sam3_box_min_heatmap_mass_ratio=sam3_box_min_heatmap_mass_ratio,
+            sam3_box_require_peak_in_refined=sam3_box_require_peak_in_refined,
             sam3_refinement_geometry_gate=sam3_refinement_geometry_gate,
             sam3_refinement_gate_min_area_ratio=sam3_refinement_gate_min_area_ratio,
             sam3_refinement_gate_max_area_ratio=sam3_refinement_gate_max_area_ratio,
@@ -7231,7 +7407,11 @@ def main() -> None:
         "--projection_mode",
         choices=["feature_composite", "selected_only_alpha"],
         default="feature_composite",
-        help="Projection mask source; selected_only_alpha physically removes unselected primitives",
+        help=(
+            "Projection mask source. feature_composite keeps all scene opacity "
+            "so unselected primitives remain occluders while compositing binary "
+            "selected membership; selected_only_alpha physically removes them."
+        ),
     )
     parser.add_argument(
         "--alpha_binarization",
@@ -7258,6 +7438,15 @@ def main() -> None:
         default="none",
         help="Optional GT-free projection cleanup after rendering selected primitives",
     )
+    parser.add_argument(
+        "--rgb_refinement_source",
+        choices=["rendered", "dataset_frame"],
+        default="dataset_frame",
+        help=(
+            "RGB used by GrabCut/SAM3 box refinement. 'rendered' uses only the "
+            "Gaussian scene; 'dataset_frame' preserves the historical evaluator."
+        ),
+    )
     parser.add_argument("--mask_refinement_iters", type=int, default=1, help="GrabCut iterations for rgb_grabcut mask refinement")
     parser.add_argument("--mask_refinement_dilate", type=int, default=5, help="Pixel dilation radius defining the rgb_grabcut support band")
     parser.add_argument("--mask_refinement_erode", type=int, default=2, help="Pixel erosion radius defining sure foreground for rgb_grabcut")
@@ -7280,7 +7469,7 @@ def main() -> None:
             "from the rendered compact score heatmap before component ranking"
         ),
     )
-    parser.add_argument("--sam3_refinement_geometry_gate", action="store_true", help="Accept feature-only SAM3 refinement only when alpha/depth boundary alignment improves without GT")
+    parser.add_argument("--sam3_refinement_geometry_gate", action="store_true", help="Accept SAM3 refinement only when alpha/depth boundary alignment improves without GT")
     parser.add_argument("--sam3_refinement_gate_min_area_ratio", type=float, default=0.5, help="Minimum refined/coarse area ratio for geometry-gated SAM3 feature refinement")
     parser.add_argument("--sam3_refinement_gate_max_area_ratio", type=float, default=1.5, help="Maximum refined/coarse area ratio for geometry-gated SAM3 feature refinement")
     parser.add_argument("--sam3_refinement_gate_min_boundary_gain", type=float, default=0.0, help="Minimum alpha/depth boundary-score gain required by geometry-gated SAM3 feature refinement")
@@ -7290,6 +7479,23 @@ def main() -> None:
     parser.add_argument("--sam3_amp_dtype", choices=["auto", "off", "bfloat16"], default="auto", help="SAM3 CUDA autocast dtype")
     parser.add_argument("--sam3_box_padding", type=int, default=8, help="Pixel padding around rendered mask box before SAM3 prompt")
     parser.add_argument("--sam3_min_initial_iou", type=float, default=0.05, help="Minimum initial-mask overlap required to accept a SAM3 box-refined mask")
+    parser.add_argument(
+        "--sam3_box_min_heatmap_mean_ratio",
+        type=float,
+        default=0.0,
+        help="Reject official SAM3 box masks whose mean rendered query response falls below this fraction of the coarse mask",
+    )
+    parser.add_argument(
+        "--sam3_box_min_heatmap_mass_ratio",
+        type=float,
+        default=0.0,
+        help="Reject official SAM3 box masks that retain less than this fraction of coarse-mask query-response mass",
+    )
+    parser.add_argument(
+        "--sam3_box_require_peak_in_refined",
+        action="store_true",
+        help="Require the official SAM3 box mask to retain the rendered query-response peak",
+    )
     parser.add_argument("--sam3_adaptor_checkpoint", default=DEFAULT_RADIO_ADAPTOR_CHECKPOINT, help="RADIO checkpoint containing the frozen sam3 feature_projection adaptor")
     parser.add_argument("--sam3_adaptor_support_mode", choices=["mask_dilate", "box"], default="mask_dilate", help="Support region for feature-only SAM3-adaptor refinement")
     parser.add_argument("--sam3_adaptor_prototype_mode", choices=["mask_inner", "box"], default="mask_inner", help="Feature prototype source for feature-only SAM3-adaptor refinement")
@@ -7472,6 +7678,15 @@ def main() -> None:
     print(f"Silhouette: > {args.silhouette_threshold}")
     if args.mask_refinement != "none":
         print(f"Mask ref.:  {args.mask_refinement}")
+        if args.mask_refinement in {
+            "rgb_grabcut",
+            "largest_component_rgb_grabcut",
+            "rgb_grabcut_largest_component",
+            "rgb_grabcut_component_guard",
+            "rgb_grabcut_score_component_guard",
+            "sam3_box",
+        }:
+            print(f"RGB source: {args.rgb_refinement_source}")
     print()
 
     summary_head = load_text_projection_head(
@@ -7561,6 +7776,7 @@ def main() -> None:
         projection_mode=args.projection_mode,
         alpha_binarization=args.alpha_binarization,
         mask_refinement=args.mask_refinement,
+        rgb_refinement_source=args.rgb_refinement_source,
         mask_refinement_iters=args.mask_refinement_iters,
         mask_refinement_dilate=args.mask_refinement_dilate,
         mask_refinement_erode=args.mask_refinement_erode,
@@ -7570,6 +7786,9 @@ def main() -> None:
         score_component_guard_min_mean_fraction=args.score_component_guard_min_mean_fraction,
         score_component_guard_max_components=args.score_component_guard_max_components,
         score_component_guard_min_recovery_pixels=args.score_component_guard_min_recovery_pixels,
+        sam3_box_min_heatmap_mean_ratio=args.sam3_box_min_heatmap_mean_ratio,
+        sam3_box_min_heatmap_mass_ratio=args.sam3_box_min_heatmap_mass_ratio,
+        sam3_box_require_peak_in_refined=args.sam3_box_require_peak_in_refined,
         sam3_refinement_geometry_gate=args.sam3_refinement_geometry_gate,
         sam3_refinement_gate_min_area_ratio=args.sam3_refinement_gate_min_area_ratio,
         sam3_refinement_gate_max_area_ratio=args.sam3_refinement_gate_max_area_ratio,
@@ -7729,8 +7948,17 @@ def main() -> None:
             "point_summary_adapter_valid_mask": (
                 args.point_summary_adapter_valid_mask_mode if args.use_point_summary_adapter else ""
             ),
-            "render_role": "render selected primitives only for mask evaluation",
+            "render_role": (
+                "render binary selected membership with full-scene visibility and opacity"
+                if args.projection_mode == "feature_composite"
+                else "render physically selected primitives only for mask evaluation"
+            ),
             "projection_mode": args.projection_mode,
+            "projection_semantics": (
+                "full-scene visibility-aware premultiplied selected-membership composite"
+                if args.projection_mode == "feature_composite"
+                else "physically subset selected primitives and render their alpha"
+            ),
             "alpha_binarization": args.alpha_binarization,
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50", "boundary_f", "trimap_iou"],
             "geometry_alignment_maps": bool(args.save_geometry_maps),
@@ -7741,6 +7969,19 @@ def main() -> None:
                 else "evaluator argument"
             ),
             "mask_refinement": args.mask_refinement,
+            "rgb_refinement_source": (
+                args.rgb_refinement_source
+                if args.mask_refinement
+                in {
+                    "rgb_grabcut",
+                    "largest_component_rgb_grabcut",
+                    "rgb_grabcut_largest_component",
+                    "rgb_grabcut_component_guard",
+                    "rgb_grabcut_score_component_guard",
+                    "sam3_box",
+                }
+                else ""
+            ),
             "mask_refinement_iters": args.mask_refinement_iters,
             "mask_refinement_dilate": args.mask_refinement_dilate,
             "mask_refinement_erode": args.mask_refinement_erode,
@@ -7757,6 +7998,15 @@ def main() -> None:
             "score_component_guard_max_components": int(args.score_component_guard_max_components),
             "score_component_guard_min_recovery_pixels": int(
                 args.score_component_guard_min_recovery_pixels
+            ),
+            "sam3_box_min_heatmap_mean_ratio": float(
+                args.sam3_box_min_heatmap_mean_ratio
+            ),
+            "sam3_box_min_heatmap_mass_ratio": float(
+                args.sam3_box_min_heatmap_mass_ratio
+            ),
+            "sam3_box_require_peak_in_refined": bool(
+                args.sam3_box_require_peak_in_refined
             ),
             "sam3_refinement_geometry_gate": bool(args.sam3_refinement_geometry_gate),
             "sam3_refinement_gate_min_area_ratio": float(args.sam3_refinement_gate_min_area_ratio),

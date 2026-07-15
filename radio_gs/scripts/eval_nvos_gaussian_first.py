@@ -24,6 +24,7 @@ from radio_gs.evaluation.promptable_segmentation import (
 )
 from radio_gs.interfaces.capability_cache import (
     load_canonical_capability_bank,
+    load_canonical_primitive_reliability,
     load_canonical_support_graph,
 )
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
@@ -31,6 +32,7 @@ from radio_gs.querying.evidence_scorer import EvidenceScoringConfig
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
 from radio_gs.querying.query_engine import CanonicalQueryEngine
 from radio_gs.querying.support_solver import SupportSolverConfig
+from radio_gs.querying.support_solver import PrimitiveSupportGraph
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     rasterize_registered_view_features,
 )
@@ -293,6 +295,7 @@ def run(args: argparse.Namespace) -> dict:
     region_rows = None
     capability_bank = None
     support_graph = None
+    primitive_reliability = None
     if args.support_mode == "canonical_support":
         if not args.canonical_capability_cache or not args.canonical_support_graph:
             raise ValueError(
@@ -306,6 +309,40 @@ def run(args: argparse.Namespace) -> dict:
         support_graph = load_canonical_support_graph(
             args.canonical_support_graph, capability_bank
         )
+        if str(args.canonical_reliability_cache).strip():
+            primitive_reliability = load_canonical_primitive_reliability(
+                args.canonical_reliability_cache,
+                expected_xyz=capability_bank.xyz,
+                expected_valid=capability_bank.valid,
+                expected_field_checkpoint_sha256=str(
+                    capability_bank.metadata.get("field_checkpoint_sha256", "")
+                ),
+            )
+        if str(args.diagnostic_graph_affinity_override).strip():
+            override_path = Path(args.diagnostic_graph_affinity_override)
+            override = torch.load(override_path, map_location="cpu")
+            global_rows = torch.as_tensor(override.get("global_rows")).long().cpu()
+            if not torch.equal(global_rows, capability_bank.global_rows):
+                raise ValueError("diagnostic graph override nodes do not match capability rows")
+            if int(override.get("num_global_rows", -1)) != capability_bank.num_gaussians:
+                raise ValueError("diagnostic graph override global row count differs")
+            base_edges = support_graph.edge_index.cpu()
+            override_edges = torch.as_tensor(override.get("edge_index")).long().cpu()
+            if not torch.equal(base_edges, override_edges):
+                raise ValueError(
+                    "diagnostic graph override must preserve the exact geometry topology"
+                )
+            support_graph = PrimitiveSupportGraph(
+                edge_index=override_edges,
+                edge_weight=torch.as_tensor(override["edge_weight"]).float(),
+                raw_affinity=torch.as_tensor(override["raw_affinity"]).float(),
+                local_sigma=torch.as_tensor(override["local_sigma"]).float(),
+                num_nodes=int(global_rows.numel()),
+                edge_channels={
+                    str(name): torch.as_tensor(values).float()
+                    for name, values in dict(override.get("edge_channels", {})).items()
+                },
+            )
         geometry_xyz = model.get_xyz().detach().float().cpu()
         if geometry_xyz.shape != capability_bank.xyz.shape or not torch.allclose(
             geometry_xyz, capability_bank.xyz, atol=1e-6, rtol=0.0
@@ -339,6 +376,7 @@ def run(args: argparse.Namespace) -> dict:
     prompt_pose = torch.from_numpy(prompt_view["w2c"].copy()).float().to(device)
     support_view_count = 1
     prediction_threshold = 0.0
+    canonical_stage_gaussian_scores: dict[str, torch.Tensor] | None = None
     if args.support_mode in {"prompt_gaussian", "canonical_support"}:
         prompt_aux = renderer.render_features(model, prompt_pose)
         support_sum, support_count = rasterize_registered_view_features(
@@ -400,7 +438,11 @@ def run(args: argparse.Namespace) -> dict:
             negative_soft = torch.where(
                 negative_seed.cpu(), negative_weight.detach().float().cpu(), 0.0
             )[valid_rows]
-            feature_banks = capability_bank.valid_feature_banks()
+            feature_banks = {
+                name: values.to(device)
+                for name, values in capability_bank.valid_feature_banks().items()
+            }
+            support_graph = support_graph.to(device)
             query = compile_registered_primitive_seeds(
                 positive_soft,
                 negative_soft,
@@ -409,6 +451,7 @@ def run(args: argparse.Namespace) -> dict:
                 appearance_signature=capability_bank.signatures["appearance"],
                 boundary_signature=capability_bank.signatures["boundary"],
                 prototype_count=args.prototype_count,
+                prototype_strategy=args.prototype_strategy,
             )
             engine = CanonicalQueryEngine(
                 support_graph,
@@ -417,6 +460,13 @@ def run(args: argparse.Namespace) -> dict:
                     appearance_weight=args.appearance_weight,
                     boundary_weight=args.boundary_weight,
                     prototype_temperature=args.prototype_temperature,
+                    feature_calibration=args.feature_calibration,
+                    background_centroids=args.background_centroids,
+                    calibration_sample_size=args.calibration_sample_size,
+                    centroid_iterations=args.centroid_iterations,
+                    score_calibration=args.score_calibration,
+                    score_tanh_scale=args.score_tanh_scale,
+                    score_chunk_size=args.score_chunk_size,
                 ),
                 solver_config=SupportSolverConfig(
                     iterations=args.solver_iterations,
@@ -424,17 +474,36 @@ def run(args: argparse.Namespace) -> dict:
                     unary_temperature=args.solver_unary_temperature,
                     support_threshold=args.solver_support_threshold,
                 ),
+                graph_policy=args.graph_policy,
+                component_graph_policy=args.component_graph_policy,
+                graph_legacy_residual=args.graph_legacy_residual,
+                node_reliability=(
+                    primitive_reliability.valid_confidence().to(device)
+                    if primitive_reliability is not None
+                    else None
+                ),
             )
             result = engine.execute(
                 query,
                 feature_banks,
                 feature_signatures=capability_bank.signatures,
             )
-            gaussian_scores = torch.zeros(
-                capability_bank.num_gaussians, dtype=torch.float32
+            def expand_valid_rows(values: torch.Tensor) -> torch.Tensor:
+                expanded = torch.zeros(
+                    capability_bank.num_gaussians, dtype=torch.float32
+                )
+                expanded[valid_rows] = values.detach().float().cpu()
+                return expanded.to(device)
+
+            unary_prior = torch.sigmoid(
+                result.unary / float(args.solver_unary_temperature)
             )
-            gaussian_scores[valid_rows] = result.selected_probabilities.cpu()
-            gaussian_scores = gaussian_scores.to(device)
+            canonical_stage_gaussian_scores = {
+                "unary_prior": expand_valid_rows(unary_prior),
+                "propagated": expand_valid_rows(result.probabilities),
+                "connected": expand_valid_rows(result.selected_probabilities),
+            }
+            gaussian_scores = canonical_stage_gaussian_scores["connected"]
             prediction_threshold = float(args.solver_support_threshold)
         positive_seed_count = int(positive_seed.sum())
         negative_seed_count = int(negative_seed.sum())
@@ -505,20 +574,53 @@ def run(args: argparse.Namespace) -> dict:
     output_root = Path(args.output_dir).resolve()
     score_paths: dict[str, str] = {}
     predictions: dict[str, np.ndarray] = {}
+    stage_score_paths: dict[str, dict[str, str]] = {}
+    stage_predictions: dict[str, dict[str, np.ndarray]] = {}
     for frame_id in evaluation_frames:
         view = _view_by_frame(views, frame_id)
         pose = torch.from_numpy(view["w2c"].copy()).float().to(device)
         rendered = renderer.render_feature_rows(
-            model, pose, gaussian_scores[:, None], alpha_normalize=True
+            model,
+            pose,
+            gaussian_scores[:, None],
+            alpha_normalize=True,
+            contribution_gamma=args.feature_contribution_gamma,
         )["feature_map"][0].float().cpu().numpy()
         score_path = output_root / "scores" / args.scene_id / f"{frame_id}.npy"
         score_path.parent.mkdir(parents=True, exist_ok=True)
         np.save(score_path, rendered.astype(np.float32), allow_pickle=False)
         score_paths[frame_id] = str(score_path)
         predictions[frame_id] = rendered
+        if canonical_stage_gaussian_scores is not None:
+            for stage_name, stage_gaussian_scores in canonical_stage_gaussian_scores.items():
+                stage_rendered = (
+                    rendered
+                    if stage_name == "connected"
+                    else renderer.render_feature_rows(
+                        model,
+                        pose,
+                        stage_gaussian_scores[:, None],
+                        alpha_normalize=True,
+                        contribution_gamma=args.feature_contribution_gamma,
+                    )["feature_map"][0].float().cpu().numpy()
+                )
+                stage_path = (
+                    output_root
+                    / "stage_scores"
+                    / stage_name
+                    / args.scene_id
+                    / f"{frame_id}.npy"
+                )
+                stage_path.parent.mkdir(parents=True, exist_ok=True)
+                np.save(stage_path, stage_rendered.astype(np.float32), allow_pickle=False)
+                stage_score_paths.setdefault(stage_name, {})[frame_id] = str(stage_path)
+                stage_predictions.setdefault(stage_name, {})[frame_id] = stage_rendered
 
     # Evaluation begins only after every prediction has been persisted.
     frame_metrics: list[dict] = []
+    stage_frame_metrics: dict[str, list[dict]] = {
+        name: [] for name in stage_predictions
+    }
     for frame_id in evaluation_frames:
         frame = next(value for value in scene["frames"] if str(value["frame_id"]) == frame_id)
         gt = load_ground_truth_mask(frame["ground_truth"]).astype(bool)
@@ -533,6 +635,39 @@ def run(args: argparse.Namespace) -> dict:
         frame_metrics.append(
             {"frame_id": frame_id, "foreground_iou": iou, "pixel_accuracy": accuracy}
         )
+        for stage_name, per_frame in stage_predictions.items():
+            stage_score = cv2.resize(
+                per_frame[frame_id],
+                (gt.shape[1], gt.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            )
+            stage_pred = stage_score >= prediction_threshold
+            stage_intersection = np.logical_and(stage_pred, gt).sum()
+            stage_union = np.logical_or(stage_pred, gt).sum()
+            stage_iou = (
+                float(stage_intersection / stage_union) if stage_union else 1.0
+            )
+            stage_accuracy = float((stage_pred == gt).mean())
+            stage_frame_metrics[stage_name].append(
+                {
+                    "frame_id": frame_id,
+                    "foreground_iou": stage_iou,
+                    "pixel_accuracy": stage_accuracy,
+                }
+            )
+
+    stage_metrics = {
+        name: {
+            "foreground_iou": float(
+                np.mean([value["foreground_iou"] for value in values])
+            ),
+            "pixel_accuracy": float(
+                np.mean([value["pixel_accuracy"] for value in values])
+            ),
+            "frames": values,
+        }
+        for name, values in stage_frame_metrics.items()
+    }
 
     report = {
         "scene_id": args.scene_id,
@@ -550,6 +685,7 @@ def run(args: argparse.Namespace) -> dict:
         "support_view_count": support_view_count,
         "support_threshold": float(args.support_threshold),
         "prototype_count": int(args.prototype_count),
+        "prototype_strategy": str(args.prototype_strategy),
         "prompt_feature_source": (
             "raster_responsibility"
             if args.support_mode == "canonical_support"
@@ -561,6 +697,16 @@ def run(args: argparse.Namespace) -> dict:
             if args.support_mode == "canonical_support"
             else "raster_contribution"
         ),
+        "feature_observation_operator": {
+            "type": (
+                "normalized_front_to_back_contribution_power"
+                if float(args.feature_contribution_gamma) != 1.0
+                else "alpha_normalized_mean"
+            ),
+            "gamma": float(args.feature_contribution_gamma),
+            "query_dependent": False,
+            "changes_geometry_or_alpha": False,
+        },
         "score_threshold": prediction_threshold,
         "shared_solver": (
             {
@@ -571,6 +717,40 @@ def run(args: argparse.Namespace) -> dict:
                 "residual": float(args.solver_residual),
                 "unary_temperature": float(args.solver_unary_temperature),
                 "support_threshold": float(args.solver_support_threshold),
+                "graph_policy": args.graph_policy,
+                "component_graph_policy": args.component_graph_policy,
+                "graph_legacy_residual": float(args.graph_legacy_residual),
+                "feature_calibration": args.feature_calibration,
+                "background_centroids": int(args.background_centroids),
+                "calibration_sample_size": int(args.calibration_sample_size),
+                "centroid_iterations": int(args.centroid_iterations),
+                "score_calibration": args.score_calibration,
+                "score_tanh_scale": float(args.score_tanh_scale),
+                "calibration_uses_target_labels": False,
+                "calibration_uses_target_masks": False,
+                "calibration_uses_query_conditioned_scores": (
+                    args.score_calibration != "none"
+                ),
+                "calibration_uses_unlabeled_scene_statistics": (
+                    args.feature_calibration != "none"
+                    or int(args.background_centroids) > 0
+                    or args.score_calibration != "none"
+                ),
+                "primitive_reliability": (
+                    {
+                        "cache": str(
+                            Path(args.canonical_reliability_cache).resolve()
+                        ),
+                        "formula": primitive_reliability.metadata.get("formula"),
+                        "application": "centered_unary_shrink",
+                        "prototype_precision_weighting": False,
+                        "centered_unary_shrink": True,
+                        "seed_constraints_shrunk": False,
+                        "uses_query_or_target_labels": False,
+                    }
+                    if primitive_reliability is not None
+                    else None
+                ),
             }
             if args.support_mode == "canonical_support"
             else None
@@ -579,6 +759,8 @@ def run(args: argparse.Namespace) -> dict:
         "foreground_iou": float(np.mean([value["foreground_iou"] for value in frame_metrics])),
         "pixel_accuracy": float(np.mean([value["pixel_accuracy"] for value in frame_metrics])),
         "score_paths": score_paths,
+        "stage_metrics": stage_metrics,
+        "stage_score_paths": stage_score_paths,
         "safety": {
             "target_ground_truth_opened_before_prediction_write": False,
             "target_rgb_opened": False,
@@ -588,6 +770,10 @@ def run(args: argparse.Namespace) -> dict:
             ),
             "target_camera_used_as_support": False,
             "test_calibration": False,
+            "test_calibration_definition": (
+                "no target labels, target masks, or metric feedback are used; "
+                "unlabeled evaluation-scene statistics are disclosed separately"
+            ),
             "official_sam_decoder": False,
             "canonical_capability_cache": (
                 str(Path(args.canonical_capability_cache).resolve())
@@ -598,6 +784,19 @@ def run(args: argparse.Namespace) -> dict:
                 str(Path(args.canonical_support_graph).resolve())
                 if args.canonical_support_graph
                 else ""
+            ),
+            "canonical_reliability_cache": (
+                str(Path(args.canonical_reliability_cache).resolve())
+                if str(args.canonical_reliability_cache).strip()
+                else ""
+            ),
+            "diagnostic_graph_affinity_override": (
+                str(Path(args.diagnostic_graph_affinity_override).resolve())
+                if str(args.diagnostic_graph_affinity_override).strip()
+                else ""
+            ),
+            "main_result_eligible": not bool(
+                str(args.diagnostic_graph_affinity_override).strip()
             ),
             "target_camera_names_excluded_from_support": evaluation_camera_names,
         },
@@ -628,6 +827,11 @@ def main() -> None:
     parser.add_argument("--support-threshold", type=float, default=0.0)
     parser.add_argument("--prototype-count", type=int, default=1)
     parser.add_argument(
+        "--prototype-strategy",
+        choices=("weighted_fps", "spherical_mean_fps"),
+        default="spherical_mean_fps",
+    )
+    parser.add_argument(
         "--prompt-feature-source",
         choices=("observed", "rendered"),
         default="observed",
@@ -640,15 +844,79 @@ def main() -> None:
     )
     parser.add_argument("--canonical-capability-cache", default="")
     parser.add_argument("--canonical-support-graph", default="")
+    parser.add_argument("--canonical-reliability-cache", default="")
+    parser.add_argument(
+        "--feature-contribution-gamma",
+        type=float,
+        default=1.0,
+        help=(
+            "Query-independent exponent for normalized front-to-back feature "
+            "mixture weights; 1 is ordinary alpha averaging."
+        ),
+    )
+    parser.add_argument(
+        "--diagnostic-graph-affinity-override",
+        default="",
+        help=(
+            "Diagnostic only: replace edge affinities with an exact-topology graph "
+            "from another canonical field; reported results are not main-table eligible."
+        ),
+    )
+    parser.add_argument(
+        "--graph-policy",
+        choices=(
+            "legacy",
+            "typed",
+            "geometry",
+            "appearance",
+            "boundary",
+            "category_mix",
+            "instance_mix",
+        ),
+        default="legacy",
+    )
+    parser.add_argument(
+        "--component-graph-policy",
+        choices=(
+            "same",
+            "legacy",
+            "typed",
+            "geometry",
+            "appearance",
+            "boundary",
+            "category_mix",
+            "instance_mix",
+        ),
+        default="same",
+    )
+    parser.add_argument("--graph-legacy-residual", type=float, default=0.0)
     parser.add_argument("--canonical-field-sha256", default="")
     parser.add_argument("--appearance-weight", type=float, default=1.0)
     parser.add_argument("--boundary-weight", type=float, default=0.35)
     parser.add_argument("--prototype-temperature", type=float, default=0.07)
+    parser.add_argument(
+        "--feature-calibration",
+        choices=("none", "diagonal_robust"),
+        default="none",
+    )
+    parser.add_argument("--background-centroids", type=int, default=0)
+    parser.add_argument("--calibration-sample-size", type=int, default=8192)
+    parser.add_argument("--centroid-iterations", type=int, default=4)
+    parser.add_argument(
+        "--score-calibration",
+        choices=("none", "robust_tanh", "robust_tanh_centered", "robust_tanh_zero"),
+        default="none",
+    )
+    parser.add_argument("--score-tanh-scale", type=float, default=2.0)
+    parser.add_argument("--score-chunk-size", type=int, default=65536)
     parser.add_argument("--solver-iterations", type=int, default=12)
     parser.add_argument("--solver-residual", type=float, default=0.30)
     parser.add_argument("--solver-unary-temperature", type=float, default=0.10)
     parser.add_argument("--solver-support-threshold", type=float, default=0.50)
-    print(json.dumps(run(parser.parse_args()), indent=2))
+    args = parser.parse_args()
+    if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
+        parser.error("--feature-contribution-gamma must be finite and positive")
+    print(json.dumps(run(args), indent=2))
 
 
 if __name__ == "__main__":

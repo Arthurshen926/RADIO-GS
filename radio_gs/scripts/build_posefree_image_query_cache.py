@@ -18,6 +18,7 @@ from radio_gs.interfaces import (
     OfficialCropSummaryRuntime,
     OfficialRadioRuntime,
     load_canonical_capability_bank,
+    load_canonical_primitive_reliability,
     load_canonical_support_graph,
 )
 from radio_gs.querying.evidence_scorer import EvidenceScoringConfig
@@ -55,6 +56,21 @@ def run(args: argparse.Namespace) -> dict:
     ):
         raise ValueError("requested RADIO checkpoint differs from capability cache")
     graph = load_canonical_support_graph(args.support_graph, bank).to(device)
+    primitive_reliability = None
+    if str(args.reliability_cache).strip():
+        primitive_reliability = load_canonical_primitive_reliability(
+            args.reliability_cache,
+            expected_xyz=bank.xyz,
+            expected_valid=bank.valid,
+            expected_field_checkpoint_sha256=str(
+                bank.metadata.get("field_checkpoint_sha256", "")
+            ),
+        )
+    node_reliability = (
+        primitive_reliability.valid_confidence()
+        if primitive_reliability is not None
+        else None
+    )
     semantic = torch.load(args.semantic_cache, map_location="cpu")
     semantic_features = torch.as_tensor(semantic["features"])
     semantic_valid = torch.as_tensor(semantic["valid"]).bool()
@@ -195,6 +211,9 @@ def run(args: argparse.Namespace) -> dict:
             unary_temperature=args.unary_temperature,
             support_threshold=args.support_threshold,
         ),
+        node_reliability=(
+            node_reliability.to(device) if node_reliability is not None else None
+        ),
     )
     result = engine.execute(
         query,
@@ -225,6 +244,17 @@ def run(args: argparse.Namespace) -> dict:
             "appearance": appearance_field_signature.to_dict(),
         },
         "negative_baseline": "query_independent_canonical_scene_mean",
+        "primitive_reliability": (
+            {
+                "cache": str(Path(args.reliability_cache).resolve()),
+                "formula": primitive_reliability.metadata.get("formula"),
+                "scene_mean_precision_weighting": False,
+                "centered_unary_shrink": True,
+                "uses_query_or_target_labels": False,
+            }
+            if primitive_reliability is not None
+            else None
+        ),
         "target_masks_opened": False,
         "test_calibration": False,
         "capability_cache": str(Path(args.capability_cache).resolve()),
@@ -262,6 +292,7 @@ def main() -> None:
     parser.add_argument("--capability-cache", required=True)
     parser.add_argument("--semantic-cache", required=True)
     parser.add_argument("--support-graph", required=True)
+    parser.add_argument("--reliability-cache", default="")
     parser.add_argument("--field-checkpoint-sha256", default="")
     parser.add_argument("--output", required=True)
     parser.add_argument("--radio-repo", default="/root/RADIO")

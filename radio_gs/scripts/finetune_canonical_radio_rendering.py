@@ -18,6 +18,10 @@ from radio_gs.interfaces.semantic_alignment import (
     GlobalRegionSummaryBridge,
     project_dense_region_semantics,
 )
+from radio_gs.losses.radio_adaptor_loss import (
+    compute_radio_adaptor_masked_render_losses,
+)
+from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.rendering.coefficient_renderer import render_canonical_radio
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
@@ -395,6 +399,22 @@ def finetune(args: argparse.Namespace) -> dict:
         for frame in set(render_train_frames) | set(validation_frames):
             _semantic_teacher_path(semantic_teacher_root, semantic_scene, frame)
 
+    capability_weights = {
+        "dino_v3": float(args.dino_render_weight),
+        "sam3": float(args.sam3_render_weight),
+    }
+    capability_weights = {
+        name: weight for name, weight in capability_weights.items() if weight > 0
+    }
+    capability_adaptors: dict[str, torch.nn.Module] = {}
+    for name in capability_weights:
+        adaptor = load_radio_adaptor_from_checkpoint(
+            args.radio_checkpoint, name, kind="feature_projection"
+        ).to(device).eval()
+        for parameter in adaptor.parameters():
+            parameter.requires_grad_(False)
+        capability_adaptors[name] = adaptor
+
     optimizer = torch.optim.AdamW(
         _trainable_parameters(field, args),
         lr=float(args.learning_rate),
@@ -449,7 +469,7 @@ def finetune(args: argparse.Namespace) -> dict:
         best_semantic_validation = initial_semantic_validation
     best_step = 0
     best_state = copy.deepcopy(field.state_dict())
-    history: list[dict[str, float | int]] = []
+    history: list[dict] = []
     shuffled: list[int] = []
 
     for step in range(int(args.steps)):
@@ -489,6 +509,22 @@ def finetune(args: argparse.Namespace) -> dict:
         mpr_loss, _mpr_stats = primitive_reconstruction_loss(
             predicted_rows, consensus, row_indices=chosen
         )
+        capability_alignment_loss = render_loss.detach() * 0.0
+        capability_local_affinity_loss = render_loss.detach() * 0.0
+        capability_stats: dict[str, dict[str, torch.Tensor]] = {}
+        if capability_adaptors:
+            (
+                capability_alignment_loss,
+                capability_local_affinity_loss,
+                capability_stats,
+            ) = compute_radio_adaptor_masked_render_losses(
+                result["feature_map"][None],
+                teacher,
+                capability_adaptors,
+                result["alpha_map"][None] >= float(args.alpha_threshold),
+                adaptor_weights=capability_weights,
+                local_radius=int(args.capability_local_radius),
+            )
         semantic_absolute_loss = render_loss.detach() * 0.0
         semantic_centered_loss = render_loss.detach() * 0.0
         semantic_loss = render_loss.detach() * 0.0
@@ -517,16 +553,25 @@ def finetune(args: argparse.Namespace) -> dict:
                 semantic_absolute_loss
                 + float(args.semantic_centered_weight) * semantic_centered_loss
             )
+        capability_scale = sum(capability_weights.values())
         loss = (
             render_loss
             + float(args.mpr_weight) * mpr_loss
+            + capability_scale * capability_alignment_loss
+            + capability_scale
+            * float(args.capability_local_affinity_weight)
+            * capability_local_affinity_loss
             + float(args.semantic_weight) * semantic_loss
         )
         loss.backward()
         torch.nn.utils.clip_grad_norm_(field.parameters(), float(args.grad_clip))
         optimizer.step()
 
-        should_validate = (step + 1) % int(args.log_every) == 0 or step == 0
+        should_validate = (
+            (step + 1) % int(args.log_every) == 0
+            or step == 0
+            or step + 1 == int(args.steps)
+        )
         if should_validate:
             validation_cosine = _mean_view_cosine(
                 field,
@@ -568,7 +613,9 @@ def finetune(args: argparse.Namespace) -> dict:
                 semantic_validation = 0.5 * (
                     semantic_validation_absolute + semantic_validation_centered
                 )
-            if args.selection_policy == "validation":
+            if args.selection_policy == "final":
+                selected = True
+            elif args.selection_policy == "validation":
                 selected = validation_cosine > best_validation
             elif args.selection_policy == "raw_fidelity":
                 selected = (
@@ -604,6 +651,21 @@ def finetune(args: argparse.Namespace) -> dict:
                 "loss": float(loss.detach()),
                 "render_loss": float(render_loss.detach()),
                 "mpr_loss": float(mpr_loss.detach()),
+                "capability_alignment_loss": float(
+                    capability_alignment_loss.detach()
+                ),
+                "capability_local_affinity_loss": float(
+                    capability_local_affinity_loss.detach()
+                ),
+                "capability_adaptors": {
+                    name: {
+                        "alignment": float(values["alignment"].detach()),
+                        "local_affinity": float(
+                            values["local_affinity"].detach()
+                        ),
+                    }
+                    for name, values in capability_stats.items()
+                },
                 "semantic_loss": float(semantic_loss.detach()),
                 "semantic_absolute_loss": float(semantic_absolute_loss.detach()),
                 "semantic_centered_loss": float(semantic_centered_loss.detach()),
@@ -677,6 +739,25 @@ def finetune(args: argparse.Namespace) -> dict:
             "uses_benchmark_masks": False,
             "uses_text_queries": False,
         },
+        "official_render_capability": {
+            "enabled": bool(capability_adaptors),
+            "radio_checkpoint": (
+                str(Path(args.radio_checkpoint).resolve())
+                if capability_adaptors
+                else ""
+            ),
+            "adaptor_weights": capability_weights,
+            "dense_alignment": bool(capability_adaptors),
+            "local_affinity_weight": float(
+                args.capability_local_affinity_weight
+            ),
+            "local_radius": int(args.capability_local_radius),
+            "projection_order": "complete_rendered_2d_grid_then_official_adaptor",
+            "visibility_domain": f"rendered_alpha>={float(args.alpha_threshold)}",
+            "custom_adaptor_head": False,
+            "uses_benchmark_masks": False,
+            "uses_text_queries": False,
+        },
         "train_probe_frames": train_probe_frames,
         "train_probe_cosine": final_train_probe,
         "reliability_splat": reliability_splat,
@@ -730,6 +811,25 @@ def main() -> None:
     parser.add_argument("--mpr-batch-size", type=int, default=4096)
     parser.add_argument("--mpr-validation-rows", type=int, default=32768)
     parser.add_argument("--render-huber-weight", type=float, default=0.0)
+    parser.add_argument(
+        "--dino-render-weight",
+        type=float,
+        default=0.0,
+        help="Weight for query-free dense alignment through the official DINOv3 adaptor.",
+    )
+    parser.add_argument(
+        "--sam3-render-weight",
+        type=float,
+        default=0.0,
+        help="Weight for query-free dense alignment through the official SAM3 adaptor.",
+    )
+    parser.add_argument(
+        "--capability-local-affinity-weight",
+        type=float,
+        default=0.25,
+        help="Local-relation loss relative to each enabled capability alignment term.",
+    )
+    parser.add_argument("--capability-local-radius", type=int, default=1)
     parser.add_argument("--semantic-weight", type=float, default=0.0)
     parser.add_argument("--semantic-centered-weight", type=float, default=1.0)
     parser.add_argument("--semantic-teacher-root", default="")
@@ -759,6 +859,7 @@ def main() -> None:
     parser.add_argument(
         "--selection-policy",
         choices=[
+            "final",
             "validation",
             "raw_fidelity",
             "pareto_mpr",
@@ -769,6 +870,14 @@ def main() -> None:
     parser.add_argument("--max-validation-drop", type=float, default=0.0)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
+    if min(
+        args.dino_render_weight,
+        args.sam3_render_weight,
+        args.capability_local_affinity_weight,
+    ) < 0:
+        parser.error("capability render weights cannot be negative")
+    if args.capability_local_radius <= 0:
+        parser.error("--capability-local-radius must be positive")
     print(json.dumps(finetune(args), indent=2))
 
 

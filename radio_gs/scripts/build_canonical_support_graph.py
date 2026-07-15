@@ -56,7 +56,29 @@ def build(args: argparse.Namespace) -> dict:
     required = {"xyz", "valid", "appearance_dino_v3", "boundary_sam3", "metadata"}
     if not isinstance(capability, dict) or not required.issubset(capability):
         raise ValueError(f"capability cache must contain {sorted(required)}")
-    valid = torch.as_tensor(capability["valid"]).bool().cpu()
+    capability_valid = torch.as_tensor(capability["valid"]).bool().cpu()
+    valid = capability_valid
+    valid_mask_source = "capability.valid"
+    if args.valid_mask_cache:
+        mask_payload = torch.load(args.valid_mask_cache, map_location="cpu")
+        if args.valid_mask_key not in mask_payload:
+            raise ValueError(
+                f"valid-mask cache lacks key {args.valid_mask_key!r}"
+            )
+        valid = torch.as_tensor(mask_payload[args.valid_mask_key]).bool().cpu()
+        if valid.shape != capability_valid.shape:
+            raise ValueError("override valid mask does not align with capability rows")
+        if bool((valid & ~capability_valid).any()):
+            raise ValueError("override valid mask must be a capability-valid subset")
+        mask_xyz = mask_payload.get("xyz")
+        if mask_xyz is not None and not torch.equal(
+            torch.as_tensor(mask_xyz).float().cpu(),
+            torch.as_tensor(capability["xyz"]).float().cpu(),
+        ):
+            raise ValueError("override valid-mask geometry does not align")
+        valid_mask_source = (
+            f"{Path(args.valid_mask_cache).resolve()}:{args.valid_mask_key}"
+        )
     global_rows = torch.where(valid)[0]
     xyz = torch.as_tensor(capability["xyz"]).float().cpu()[global_rows]
     appearance = deterministic_feature_hash(
@@ -77,6 +99,7 @@ def build(args: argparse.Namespace) -> dict:
         normal_temperature=0.20,
         covisibility_weight=0.0,
         affinity_chunk_size=int(args.affinity_chunk_size),
+        topology_mode=str(args.topology_mode),
     )
     graph = build_primitive_support_graph(
         xyz,
@@ -86,15 +109,19 @@ def build(args: argparse.Namespace) -> dict:
     )
     metadata = {
         "schema_version": 1,
-        "source": "canonical_official_dino_sam3_shared_support_graph",
+        "source": "canonical_official_dino_sam3_multichannel_support_graph",
         "capability_cache": str(Path(args.capability_cache).resolve()),
         "capability_metadata": capability["metadata"],
+        "valid_mask_source": valid_mask_source,
         "feature_hash": {
             "algorithm": "signed_multiplicative_hash",
             "output_dim": int(args.affinity_dim),
             "query_independent": True,
         },
         "graph_config": asdict(config),
+        "edge_channels": sorted(graph.edge_channels),
+        "legacy_edge_weight": "product_of_all_available_channel_affinities",
+        "typed_edge_weight": "arithmetic_mixture_of_row_normalized_channels",
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
@@ -110,6 +137,9 @@ def build(args: argparse.Namespace) -> dict:
             "edge_index": graph.edge_index,
             "edge_weight": graph.edge_weight.half(),
             "raw_affinity": graph.raw_affinity.half(),
+            "edge_channels": {
+                name: values.half() for name, values in graph.edge_channels.items()
+            },
             "local_sigma": graph.local_sigma,
             "metadata": metadata,
         },
@@ -130,6 +160,16 @@ def build(args: argparse.Namespace) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capability-cache", required=True)
+    parser.add_argument(
+        "--valid-mask-cache",
+        default="",
+        help="Optional row-aligned cache supplying a capability-valid subset",
+    )
+    parser.add_argument(
+        "--valid-mask-key",
+        default="primary_valid",
+        help="Mask key read from --valid-mask-cache",
+    )
     parser.add_argument("--output", required=True)
     parser.add_argument("--neighbors", type=int, default=16)
     parser.add_argument("--spatial-scale", type=float, default=2.0)
@@ -138,6 +178,11 @@ def main() -> None:
     parser.add_argument("--affinity-dim", type=int, default=256)
     parser.add_argument("--hash-batch-size", type=int, default=8192)
     parser.add_argument("--affinity-chunk-size", type=int, default=65536)
+    parser.add_argument(
+        "--topology-mode",
+        choices=("symmetric_union", "mutual_knn"),
+        default="symmetric_union",
+    )
     args = parser.parse_args()
     print(json.dumps(build(args), indent=2))
 

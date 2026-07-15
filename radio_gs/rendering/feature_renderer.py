@@ -115,6 +115,8 @@ class FeatureFieldRenderer(nn.Module):
         alpha_normalize: bool = False,
         alpha_eps: float = 1e-6,
         row_confidence: Tensor | None = None,
+        contribution_gamma: float = 1.0,
+        contribution_cache: dict[str, Tensor] | None = None,
     ) -> dict[str, Tensor]:
         """Render caller-supplied per-Gaussian rows with the field geometry.
 
@@ -122,7 +124,10 @@ class FeatureFieldRenderer(nn.Module):
         query row ``i`` are exactly the same value.  When ``alpha_normalize``
         is enabled, the composited feature is divided by accumulated alpha so
         it represents a weighted feature average rather than premultiplied
-        color semantics.
+        color semantics.  ``contribution_gamma != 1`` selects the shared,
+        inference-only contribution-sharpened observation operator; it always
+        returns a normalized feature mixture and leaves geometric alpha/depth
+        unchanged.
         """
 
         fH = feature_height or self.image_height
@@ -139,6 +144,35 @@ class FeatureFieldRenderer(nn.Module):
                 "depth_map": torch.zeros(fH, fW, device=features.device),
                 "alpha_map": torch.zeros(fH, fW, device=features.device),
             }
+        gamma = float(contribution_gamma)
+        if not torch.isfinite(torch.tensor(gamma)) or gamma <= 0:
+            raise ValueError("contribution_gamma must be finite and positive")
+        if contribution_cache is not None and gamma == 1.0:
+            raise ValueError(
+                "contribution_cache is only valid for the explicit sharpened path"
+            )
+        if gamma != 1.0:
+            if not alpha_normalize:
+                raise ValueError(
+                    "contribution sharpening requires alpha_normalize=True"
+                )
+            from radio_gs.rendering.contribution_compositor import (
+                render_contribution_sharpened_features,
+            )
+
+            return render_contribution_sharpened_features(
+                gaussian_model,
+                self,
+                viewmat,
+                features,
+                height=fH,
+                width=fW,
+                gamma=gamma,
+                opacity_scale=row_confidence,
+                contributions=contribution_cache,
+                channel_chunk_size=self.max_channels_per_chunk,
+                eps=alpha_eps,
+            )
         opacities = gaussian_model.get_opacity().squeeze(-1)
         if row_confidence is not None:
             confidence = torch.as_tensor(

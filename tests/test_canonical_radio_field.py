@@ -48,6 +48,81 @@ def test_stage_one_field_reads_local_coefficients_without_fusion():
     torch.testing.assert_close(field.coefficients(rows), field.local_codes[rows])
 
 
+def test_compact_spatial_field_is_primitive_and_batch_invariant():
+    torch.manual_seed(11)
+    decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
+    positions = torch.rand(6, 3)
+    field = CanonicalGaussianField(
+        6,
+        decoder,
+        _signature(),
+        local_dim=2,
+        coarse_dim=2,
+        primitive_positions=positions,
+        spatial_hash={
+            "output_dim": 2,
+            "num_levels": 2,
+            "features_per_level": 2,
+            "log2_hashmap_size": 4,
+            "base_resolution": 2,
+            "max_resolution": 4,
+            "hidden_dim": 8,
+        },
+        reliability=torch.rand(6, 3),
+        hidden_dim=8,
+        use_fusion=True,
+    )
+    weight = torch.randn(4, 2)
+    bias = torch.randn(4)
+    field.fusion.initialize_base_projection(weight, bias)
+
+    one = field.radio_features(torch.tensor([3]))[0]
+    batch = field.radio_features(torch.tensor([1, 3, 5]))[1]
+
+    torch.testing.assert_close(one, batch, atol=1e-7, rtol=1e-6)
+    assert field.normalized_positions.dtype == torch.float16
+    assert field.spatial_encoder.architecture()["output_dim"] == 2
+
+
+def test_low_dimensional_fusion_starts_from_analytical_projection():
+    torch.manual_seed(13)
+    decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
+    field = CanonicalGaussianField(
+        5,
+        decoder,
+        _signature(),
+        local_dim=2,
+        reliability=torch.rand(5, 3),
+        hidden_dim=8,
+        use_fusion=True,
+    )
+    weight = torch.randn(4, 2)
+    bias = torch.randn(4)
+    field.fusion.initialize_base_projection(weight, bias)
+
+    expected = field.local_codes @ weight.transpose(0, 1) + bias
+
+    torch.testing.assert_close(field.coefficients(), expected)
+
+
+def test_reliability_can_be_stored_without_entering_fusion():
+    decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
+    field = CanonicalGaussianField(
+        5,
+        decoder,
+        _signature(),
+        local_dim=2,
+        reliability=torch.rand(5, 3),
+        fusion_reliability=False,
+        hidden_dim=8,
+        use_fusion=True,
+    )
+
+    assert field.reliability.shape == (5, 3)
+    assert field.fusion.reliability_dim == 0
+    assert field.coefficients().shape == (5, 4)
+
+
 def test_pca_initialization_reconstructs_low_rank_teacher():
     torch.manual_seed(4)
     latent = torch.randn(200, 3)

@@ -136,6 +136,132 @@ def compute_radio_adaptor_alignment_loss(
     return total, losses
 
 
+def _masked_local_affinity_values(
+    features: torch.Tensor,
+    valid_mask: torch.Tensor,
+    *,
+    radius: int,
+) -> torch.Tensor:
+    """Return local cosine affinities whose two endpoints are visible."""
+
+    if radius <= 0:
+        raise ValueError("radius must be positive")
+    if features.ndim != 4 or valid_mask.shape != (
+        features.shape[0],
+        features.shape[2],
+        features.shape[3],
+    ):
+        raise ValueError("features/valid_mask must align as [B,C,H,W]/[B,H,W]")
+    values = F.normalize(features.float(), dim=1, eps=1e-8)
+    _, _, height, width = values.shape
+    relations: list[torch.Tensor] = []
+    for dy in range(0, radius + 1):
+        for dx in range(-radius, radius + 1):
+            if dy == 0 and dx <= 0:
+                continue
+            if dy * dy + dx * dx > radius * radius:
+                continue
+            src_y0 = max(0, -dy)
+            src_y1 = min(height, height - dy)
+            dst_y0 = max(0, dy)
+            dst_y1 = min(height, height + dy)
+            src_x0 = max(0, -dx)
+            src_x1 = min(width, width - dx)
+            dst_x0 = max(0, dx)
+            dst_x1 = min(width, width + dx)
+            if src_y1 <= src_y0 or src_x1 <= src_x0:
+                continue
+            pair_valid = (
+                valid_mask[:, src_y0:src_y1, src_x0:src_x1]
+                & valid_mask[:, dst_y0:dst_y1, dst_x0:dst_x1]
+            )
+            relation = (
+                values[:, :, src_y0:src_y1, src_x0:src_x1]
+                * values[:, :, dst_y0:dst_y1, dst_x0:dst_x1]
+            ).sum(dim=1)
+            if bool(pair_valid.any()):
+                relations.append(relation[pair_valid])
+    if not relations:
+        return features.new_empty(0, dtype=torch.float32)
+    return torch.cat(relations)
+
+
+def compute_radio_adaptor_masked_render_losses(
+    decoded: torch.Tensor,
+    target: torch.Tensor,
+    adaptors: Mapping[str, nn.Module],
+    valid_mask: torch.Tensor,
+    *,
+    adaptor_weights: Mapping[str, float] | None = None,
+    local_radius: int = 1,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, dict[str, torch.Tensor]]]:
+    """Preserve official dense capability and local relations after rendering.
+
+    The loss is query-free and only supervises pixels supported by rendered
+    alpha.  Frozen official adaptor maps are evaluated on the complete 2-D
+    RADIO grid before visible pixels or local pairs are selected.
+    """
+
+    if decoded.shape != target.shape or decoded.ndim != 4:
+        raise ValueError("decoded/target must be matching [B,C,H,W]")
+    valid = torch.as_tensor(valid_mask, device=decoded.device).bool()
+    if valid.ndim == 4 and valid.shape[1] == 1:
+        valid = valid[:, 0]
+    if valid.shape != (decoded.shape[0], decoded.shape[2], decoded.shape[3]):
+        raise ValueError("valid_mask must align as [B,H,W] or [B,1,H,W]")
+    requested = {
+        str(name): float(weight)
+        for name, weight in dict(adaptor_weights or {}).items()
+        if float(weight) > 0
+    }
+    if not requested:
+        requested = {str(name): 1.0 for name in adaptors}
+    missing = sorted(set(requested) - set(adaptors))
+    if missing:
+        raise ValueError(f"missing requested official adaptors: {missing}")
+    if not requested or not bool(valid.any()):
+        zero = _zero_like_features(decoded)
+        return zero, zero, {}
+
+    total_weight = sum(requested.values())
+    alignment_total = _zero_like_features(decoded)
+    local_total = _zero_like_features(decoded)
+    details: dict[str, dict[str, torch.Tensor]] = {}
+    for name, weight in requested.items():
+        adaptor = adaptors[name]
+        predicted = project_feature_map_with_adaptor(decoded, adaptor)
+        with torch.no_grad():
+            teacher = project_feature_map_with_adaptor(target, adaptor)
+        cosine = (predicted.float() * teacher.float()).sum(dim=1)
+        alignment = 1.0 - cosine[valid].mean()
+        predicted_relation = _masked_local_affinity_values(
+            predicted, valid, radius=int(local_radius)
+        )
+        with torch.no_grad():
+            teacher_relation = _masked_local_affinity_values(
+                teacher, valid, radius=int(local_radius)
+            )
+        local = (
+            F.mse_loss(predicted_relation, teacher_relation)
+            if predicted_relation.numel()
+            else _zero_like_features(predicted)
+        )
+        normalized_weight = float(weight) / total_weight
+        alignment_total = alignment_total + normalized_weight * alignment
+        local_total = local_total + normalized_weight * local
+        details[name] = {
+            "alignment": alignment,
+            "local_affinity": local,
+            "visible_pixels": torch.as_tensor(
+                int(valid.sum()), device=decoded.device
+            ),
+            "visible_pairs": torch.as_tensor(
+                int(predicted_relation.numel()), device=decoded.device
+            ),
+        }
+    return alignment_total, local_total, details
+
+
 def compute_radio_adaptor_cross_view_propagation_loss(
     decoded: torch.Tensor,
     target: torch.Tensor,

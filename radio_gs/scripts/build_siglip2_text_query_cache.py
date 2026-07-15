@@ -12,6 +12,7 @@ import torch
 from radio_gs.evaluation.openclip_readout import NEGATIVE_PROMPTS
 from radio_gs.scripts.eval_lerf_grounding import (
     _SIGLIP2_MODEL_NAME,
+    _SIGLIP2_TEXT_CANONICALIZATION,
     encode_text_siglip2,
 )
 
@@ -19,7 +20,13 @@ from radio_gs.scripts.eval_lerf_grounding import (
 def _queries(raw: str) -> list[str]:
     value = str(raw).strip()
     path = Path(value)
-    if path.is_file():
+    try:
+        is_file = path.is_file()
+    except OSError:
+        # A comma-separated benchmark vocabulary can exceed the host's
+        # filename limit; it is query text, not a malformed cache path.
+        is_file = False
+    if is_file:
         value = path.read_text(encoding="utf-8")
     result = [item.strip() for item in value.replace("\n", ",").split(",") if item.strip()]
     if not result:
@@ -40,6 +47,7 @@ def build(args: argparse.Namespace) -> dict:
         "prompt_templates": ["{query}"],
         "text_encoder": "siglip2",
         "model_name": _SIGLIP2_MODEL_NAME,
+        "text_canonicalization": _SIGLIP2_TEXT_CANONICALIZATION,
     }
     torch.save(
         {**common, "queries": queries, "embeddings": embeddings[: len(queries)]},

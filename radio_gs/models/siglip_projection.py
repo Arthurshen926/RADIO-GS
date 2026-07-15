@@ -6,6 +6,8 @@ import torch
 import torch.nn as nn
 from timm.models.vision_transformer import Block
 
+from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+
 
 class SigLIP2FeatureProjection(nn.Module):
     """Project RADIO 1280d features into SigLIP2 visual embedding space.
@@ -39,14 +41,14 @@ class SigLIP2FeatureProjection(nn.Module):
     @classmethod
     def from_extracted_weights(cls, ckpt_path: str) -> "SigLIP2FeatureProjection":
         """Load from already-extracted projection state dict (e.g. siglip2_feat_projection.pth)."""
-        sd = torch.load(ckpt_path, map_location="cpu")
+        sd = load_trusted_checkpoint(ckpt_path, map_location="cpu")
         proj = cls()
         proj.load_state_dict(sd, strict=True)
         return proj
 
     @classmethod
     def from_radio_checkpoint(cls, ckpt_path: str) -> "SigLIP2FeatureProjection":
-        chk = torch.load(ckpt_path, map_location="cpu")
+        chk = load_trusted_checkpoint(ckpt_path, map_location="cpu")
         sd = chk["state_dict"]
         proj = cls()
         proj_sd = {}
@@ -96,7 +98,7 @@ class SigLIP2SummaryHead(nn.Module):
     @classmethod
     def from_extracted_weights(cls, ckpt_path: str) -> "SigLIP2SummaryHead":
         """Load from extracted state dict (e.g. siglip2_summary_head.pth)."""
-        sd = torch.load(ckpt_path, map_location="cpu")
+        sd = load_trusted_checkpoint(ckpt_path, map_location="cpu")
         head = cls()
         head.load_state_dict(sd, strict=True)
         return head
@@ -104,7 +106,7 @@ class SigLIP2SummaryHead(nn.Module):
     @classmethod
     def from_radio_checkpoint(cls, ckpt_path: str) -> "SigLIP2SummaryHead":
         """Extract ``_heads.siglip2-g`` from a full RADIO checkpoint."""
-        chk = torch.load(ckpt_path, map_location="cpu")
+        chk = load_trusted_checkpoint(ckpt_path, map_location="cpu")
         sd = chk["state_dict"]
         head = cls()
         head_sd = {}

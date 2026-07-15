@@ -37,7 +37,9 @@ def load_canonical_field_checkpoint(
         signature=signature,
         local_dim=int(architecture["local_dim"]),
         coarse_dim=int(architecture.get("coarse_dim", 0)),
+        spatial_hash=architecture.get("spatial_hash"),
         reliability=reliability,
+        fusion_reliability=bool(architecture.get("fusion_reliability", True)),
         hidden_dim=int(architecture["hidden_dim"]),
         use_fusion=bool(architecture.get("use_fusion", True)),
     )

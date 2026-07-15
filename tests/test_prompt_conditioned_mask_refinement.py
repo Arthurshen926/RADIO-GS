@@ -71,6 +71,43 @@ def test_sam3_prompt_initial_mask_can_keep_peak_component():
     assert not pred[3, 3]
 
 
+def test_sam3_prompt_initial_mask_can_seed_an_empty_absolute_mask_from_peak():
+    heatmap = torch.full((7, 7), 0.20)
+    heatmap[1:3, 1:3] = 0.44
+    heatmap[5, 5] = 0.42
+
+    pred = build_sam3_prompt_initial_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="absolute",
+        threshold_mean_std_k=1.0,
+        threshold_min_ratio=0.0,
+        threshold_max_ratio=1.0,
+        target_shape=(7, 7),
+        initial_refinement="peak_component_or_seed",
+    )
+
+    assert pred[1:3, 1:3].all()
+    assert not pred[5, 5]
+
+
+def test_sam3_prompt_initial_mask_does_not_seed_a_flat_heatmap():
+    heatmap = torch.full((7, 7), 0.20)
+
+    pred = build_sam3_prompt_initial_mask(
+        heatmap,
+        threshold_ratio=0.5,
+        threshold_mode="absolute",
+        threshold_mean_std_k=1.0,
+        threshold_min_ratio=0.0,
+        threshold_max_ratio=1.0,
+        target_shape=(7, 7),
+        initial_refinement="peak_component_or_seed",
+    )
+
+    assert not pred.any()
+
+
 def test_model_prompt_conditioned_sam3_head_resizes_coarse_prompt_to_feature_shape():
     seen: dict[str, torch.Tensor] = {}
 

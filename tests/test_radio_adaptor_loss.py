@@ -6,6 +6,7 @@ from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_cross_view_
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_cross_view_propagation_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_local_affinity_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_mask_logit_loss
+from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_masked_render_losses
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_peak_background_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_region_loss
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_relation_loss
@@ -44,6 +45,41 @@ def test_compute_radio_adaptor_alignment_loss_matches_identical_features():
 
     assert loss.item() < 1e-6
     assert "sam3" in stats
+
+
+def test_masked_render_losses_match_identical_visible_capability() -> None:
+    decoded = torch.randn(1, 4, 3, 3)
+    valid = torch.ones(1, 3, 3, dtype=torch.bool)
+
+    alignment, local, stats = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        decoded.clone(),
+        {"sam3": IdentityAdaptor()},
+        valid,
+    )
+
+    assert alignment.item() < 1e-6
+    assert local.item() < 1e-6
+    assert stats["sam3"]["visible_pixels"].item() == 9
+    assert stats["sam3"]["visible_pairs"].item() == 12
+
+
+def test_masked_render_losses_ignore_unsupported_pixels_and_pairs() -> None:
+    target = torch.randn(1, 4, 3, 3)
+    decoded = target.clone()
+    decoded[:, :, 1, 1] = -target[:, :, 1, 1]
+    valid = torch.ones(1, 3, 3, dtype=torch.bool)
+    valid[:, 1, 1] = False
+
+    alignment, local, _ = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        target,
+        {"sam3": IdentityAdaptor()},
+        valid,
+    )
+
+    assert alignment.item() < 1e-6
+    assert local.item() < 1e-6
 
 
 def test_compute_radio_adaptor_relation_loss_matches_identical_pairwise_structure():

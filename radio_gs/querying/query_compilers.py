@@ -23,34 +23,92 @@ def _deterministic_prototypes(
     features: torch.Tensor,
     weights: torch.Tensor,
     count: int,
+    *,
+    chunk_size: int = 8192,
+    strategy: str = "weighted_fps",
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    """Weighted farthest-point prototypes; no learned or benchmark state."""
+    """Deterministic weighted prototypes; no learned or benchmark state.
 
-    values = F.normalize(torch.as_tensor(features).float(), dim=-1, eps=1e-8)
-    masses = torch.as_tensor(weights).float().reshape(-1).to(values.device)
-    valid = masses > 0
-    values = values[valid]
-    masses = masses[valid]
-    if values.shape[0] == 0:
+    ``spherical_mean_fps`` anchors the set with the weighted spherical mean
+    before retaining diverse FPS representatives.  This makes the dominant
+    prototype an aggregate observation instead of a potentially noisy single
+    primitive while preserving multi-modal prompt support.
+    """
+
+    # Promote only one supported chunk at a time.  A full-reference negative
+    # prompt can cover most of a million-row scene, so even selecting all
+    # supported fp16 rows before conversion can require many GiB in fp32.
+    # This is the same weighted farthest-point algorithm as the dense form:
+    # only the normalized rows and assignments are evaluated in chunks.
+    raw_values = torch.as_tensor(features)
+    raw_masses = torch.as_tensor(weights).reshape(-1)
+    if raw_values.ndim != 2 or raw_masses.shape != (raw_values.shape[0],):
+        raise ValueError("prototype features and weights must align as [N,D] and [N]")
+    if int(chunk_size) <= 0:
+        raise ValueError("prototype chunk_size must be positive")
+    strategy = str(strategy)
+    if strategy not in {"weighted_fps", "spherical_mean_fps"}:
+        raise ValueError("prototype strategy must be weighted_fps or spherical_mean_fps")
+    valid = raw_masses > 0
+    if not bool(valid.any()):
         raise ValueError("cannot build prototypes from empty support")
-    count = min(max(1, int(count)), values.shape[0])
-    selected = [int(masses.argmax())]
-    nearest_distance = 1.0 - values @ values[selected[0]]
+    active_rows = torch.where(valid)[0]
+    device = raw_values.device
+    masses = raw_masses[valid].float().to(device)
+    count = min(max(1, int(count)), active_rows.numel())
+
+    def normalized_active_chunk(start: int, stop: int) -> torch.Tensor:
+        rows = active_rows[start:stop].to(device)
+        return F.normalize(
+            raw_values.index_select(0, rows).float(), dim=-1, eps=1e-8
+        )
+
+    def normalized_active_row(local_index: int) -> torch.Tensor:
+        global_index = active_rows[int(local_index)].reshape(1).to(device)
+        return F.normalize(
+            raw_values.index_select(0, global_index).float()[0], dim=0, eps=1e-8
+        )
+
+    if strategy == "spherical_mean_fps":
+        mean = torch.zeros(raw_values.shape[1], device=device, dtype=torch.float32)
+        for start in range(0, active_rows.numel(), int(chunk_size)):
+            stop = min(start + int(chunk_size), active_rows.numel())
+            mean.add_((normalized_active_chunk(start, stop) * masses[start:stop, None]).sum(dim=0))
+        if float(mean.norm()) <= 1e-8:
+            first = normalized_active_row(int(masses.argmax()))
+        else:
+            first = F.normalize(mean, dim=0, eps=1e-8)
+        selected: list[int] = []
+        prototypes = [first]
+    else:
+        selected = [int(masses.argmax())]
+        prototypes = [normalized_active_row(selected[0])]
+    nearest_distance = torch.empty(active_rows.numel(), device=device)
+    for start in range(0, active_rows.numel(), int(chunk_size)):
+        stop = min(start + int(chunk_size), active_rows.numel())
+        values = normalized_active_chunk(start, stop)
+        nearest_distance[start:stop] = 1.0 - values @ prototypes[0]
     for _ in range(1, count):
         score = nearest_distance * masses
         index = int(score.argmax())
         selected.append(index)
-        nearest_distance = torch.minimum(
-            nearest_distance, 1.0 - values @ values[index]
-        )
-    prototypes = values[selected]
-    similarities = values @ prototypes.T
-    assignment = similarities.argmax(dim=1)
-    prototype_masses = torch.stack(
-        [masses[assignment == index].sum() for index in range(count)]
-    )
+        prototype = normalized_active_row(index)
+        prototypes.append(prototype)
+        for start in range(0, active_rows.numel(), int(chunk_size)):
+            stop = min(start + int(chunk_size), active_rows.numel())
+            values = normalized_active_chunk(start, stop)
+            nearest_distance[start:stop] = torch.minimum(
+                nearest_distance[start:stop], 1.0 - values @ prototype
+            )
+    prototype_matrix = torch.stack(prototypes)
+    prototype_masses = torch.zeros(count, device=device)
+    for start in range(0, active_rows.numel(), int(chunk_size)):
+        stop = min(start + int(chunk_size), active_rows.numel())
+        values = normalized_active_chunk(start, stop)
+        assignment = (values @ prototype_matrix.T).argmax(dim=1)
+        prototype_masses.scatter_add_(0, assignment, masses[start:stop])
     prototype_masses /= prototype_masses.sum().clamp_min(1e-8)
-    return prototypes, prototype_masses
+    return prototype_matrix, prototype_masses
 
 
 def compile_text_query(
@@ -90,6 +148,7 @@ def compile_image_query(
     appearance_negatives: torch.Tensor | None = None,
     foreground_weights: torch.Tensor | None = None,
     prototype_count: int = 4,
+    prototype_strategy: str = "spherical_mean_fps",
 ) -> QuerySpec:
     tokens = torch.as_tensor(appearance_tokens).float()
     if tokens.ndim != 2:
@@ -99,7 +158,9 @@ def compile_image_query(
         if foreground_weights is None
         else torch.as_tensor(foreground_weights).float().to(tokens.device)
     )
-    prototypes, masses = _deterministic_prototypes(tokens, weights, prototype_count)
+    prototypes, masses = _deterministic_prototypes(
+        tokens, weights, prototype_count, strategy=prototype_strategy
+    )
     return QuerySpec(
         modality=QueryModality.IMAGE,
         intent=QueryIntent.INSTANCE,
@@ -130,6 +191,7 @@ def compile_registered_2d_query(
     appearance_signature: FeatureSpaceSignature,
     boundary_signature: FeatureSpaceSignature,
     prototype_count: int = 4,
+    prototype_strategy: str = "spherical_mean_fps",
 ) -> QuerySpec:
     """Lift arbitrary points/scribbles/box/mask through raster responsibilities."""
 
@@ -154,6 +216,7 @@ def compile_registered_2d_query(
         appearance_signature=appearance_signature,
         boundary_signature=boundary_signature,
         prototype_count=prototype_count,
+        prototype_strategy=prototype_strategy,
         seed_source="raster_responsibility",
     )
 
@@ -167,6 +230,7 @@ def compile_registered_primitive_seeds(
     appearance_signature: FeatureSpaceSignature,
     boundary_signature: FeatureSpaceSignature,
     prototype_count: int = 4,
+    prototype_strategy: str = "spherical_mean_fps",
     seed_source: str = "raster_responsibility",
 ) -> QuerySpec:
     """Compile sparse raster-registered primitive seeds into shared evidence."""
@@ -177,8 +241,10 @@ def compile_registered_primitive_seeds(
         if negative_seeds is None
         else torch.as_tensor(negative_seeds).float().reshape(-1)
     )
-    appearance = torch.as_tensor(appearance_features).float()
-    boundary = torch.as_tensor(boundary_features).float()
+    # Keep the full capability banks in their compact storage dtype.  The
+    # prototype builder promotes only non-zero seed rows after indexing.
+    appearance = torch.as_tensor(appearance_features)
+    boundary = torch.as_tensor(boundary_features)
     if appearance.ndim != 2 or boundary.ndim != 2:
         raise ValueError("appearance/boundary features must be matrices")
     if appearance.shape[0] != positive.numel() or boundary.shape[0] != positive.numel():
@@ -189,19 +255,19 @@ def compile_registered_primitive_seeds(
         raise ValueError("registered query has no positive primitive support")
 
     app_proto, app_mass = _deterministic_prototypes(
-        appearance, positive, prototype_count
+        appearance, positive, prototype_count, strategy=prototype_strategy
     )
     bnd_proto, bnd_mass = _deterministic_prototypes(
-        boundary, positive, prototype_count
+        boundary, positive, prototype_count, strategy=prototype_strategy
     )
     app_neg = None
     bnd_neg = None
     if negative is not None and bool((negative > 0).any()):
         app_neg, _ = _deterministic_prototypes(
-            appearance, negative, prototype_count
+            appearance, negative, prototype_count, strategy=prototype_strategy
         )
         bnd_neg, _ = _deterministic_prototypes(
-            boundary, negative, prototype_count
+            boundary, negative, prototype_count, strategy=prototype_strategy
         )
     return QuerySpec(
         modality=QueryModality.REGISTERED_2D,
@@ -221,6 +287,7 @@ def compile_registered_primitive_seeds(
         ),
         selection_mode=SelectionMode.SEEDED_COMPONENT,
         field_signature=appearance_signature,
+        metadata={"prototype_strategy": str(prototype_strategy)},
     )
 
 
@@ -228,6 +295,9 @@ def world_point_soft_seeds(
     gaussian_xyz: torch.Tensor,
     gaussian_covariance: torch.Tensor,
     points: torch.Tensor,
+    *,
+    gaussian_precision: torch.Tensor | None = None,
+    euclidean_candidate_k: int = 0,
 ) -> torch.Tensor:
     xyz = torch.as_tensor(gaussian_xyz).float()
     covariance = torch.as_tensor(gaussian_covariance).float()
@@ -238,11 +308,27 @@ def world_point_soft_seeds(
         raise ValueError("xyz/covariance must be [N,3] and [N,3,3]")
     if queries.ndim != 2 or queries.shape[1] != 3:
         raise ValueError("points must be [P,3]")
-    identity = torch.eye(3, device=covariance.device, dtype=covariance.dtype)
-    inverse = torch.linalg.pinv(covariance + 1e-6 * identity)
+    if gaussian_precision is None:
+        identity = torch.eye(3, device=covariance.device, dtype=covariance.dtype)
+        inverse = torch.linalg.pinv(covariance + 1e-6 * identity)
+    else:
+        inverse = torch.as_tensor(gaussian_precision).to(covariance)
+        if inverse.shape != covariance.shape:
+            raise ValueError("gaussian_precision must align with covariance [N,3,3]")
     delta = xyz[:, None, :] - queries[None, :, :]
     mahalanobis = torch.einsum("npi,nij,npj->np", delta, inverse, delta)
-    return torch.exp(-0.5 * mahalanobis).amax(dim=1)
+    weights = torch.exp(-0.5 * mahalanobis)
+    candidate_k = int(euclidean_candidate_k)
+    if candidate_k < 0:
+        raise ValueError("euclidean_candidate_k cannot be negative")
+    if 0 < candidate_k < xyz.shape[0]:
+        nearest = delta.square().sum(dim=-1).topk(
+            candidate_k, dim=0, largest=False
+        ).indices
+        candidate_mask = torch.zeros_like(weights, dtype=torch.bool)
+        candidate_mask.scatter_(0, nearest, True)
+        weights = weights.masked_fill(~candidate_mask, 0.0)
+    return weights.amax(dim=1)
 
 
 def compile_world_3d_query(
@@ -256,35 +342,79 @@ def compile_world_3d_query(
     boundary_signature: FeatureSpaceSignature,
     negative_points: torch.Tensor | None = None,
     prototype_count: int = 4,
+    prototype_strategy: str = "weighted_fps",
     scene_mean_negative: bool = True,
+    gaussian_precision: torch.Tensor | None = None,
+    euclidean_candidate_k: int = 64,
+    seed_topk: int = 0,
+    seed_temperature: float = 1.0,
 ) -> QuerySpec:
-    positive = world_point_soft_seeds(gaussian_xyz, gaussian_covariance, positive_points)
+    positive = world_point_soft_seeds(
+        gaussian_xyz,
+        gaussian_covariance,
+        positive_points,
+        gaussian_precision=gaussian_precision,
+        euclidean_candidate_k=euclidean_candidate_k,
+    )
     negative = (
-        world_point_soft_seeds(gaussian_xyz, gaussian_covariance, negative_points)
+        world_point_soft_seeds(
+            gaussian_xyz,
+            gaussian_covariance,
+            negative_points,
+            gaussian_precision=gaussian_precision,
+            euclidean_candidate_k=euclidean_candidate_k,
+        )
         if negative_points is not None
         else None
     )
+    seed_temperature = float(seed_temperature)
+    if seed_temperature <= 0:
+        raise ValueError("seed_temperature must be positive")
+
+    def calibrate_seed_weights(values: torch.Tensor) -> torch.Tensor:
+        relative = values / values.max().clamp_min(1e-30)
+        return relative.pow(1.0 / seed_temperature)
+
+    positive = calibrate_seed_weights(positive)
+    if negative is not None:
+        negative = calibrate_seed_weights(negative)
+    seed_topk = int(seed_topk)
+    if seed_topk < 0:
+        raise ValueError("seed_topk cannot be negative")
+    if 0 < seed_topk < positive.numel():
+        keep = positive.topk(seed_topk).indices
+        sparse_positive = torch.zeros_like(positive)
+        sparse_positive[keep] = positive[keep]
+        positive = sparse_positive
+    if negative is not None and 0 < seed_topk < negative.numel():
+        keep = negative.topk(seed_topk).indices
+        sparse_negative = torch.zeros_like(negative)
+        sparse_negative[keep] = negative[keep]
+        negative = sparse_negative
+
     app_proto, app_mass = _deterministic_prototypes(
-        appearance_features, positive, prototype_count
+        appearance_features, positive, prototype_count, strategy=prototype_strategy
     )
     bnd_proto, bnd_mass = _deterministic_prototypes(
-        boundary_features, positive, prototype_count
+        boundary_features, positive, prototype_count, strategy=prototype_strategy
     )
     app_neg = None
     bnd_neg = None
     if negative is not None:
-        app_neg, _ = _deterministic_prototypes(appearance_features, negative, prototype_count)
-        bnd_neg, _ = _deterministic_prototypes(boundary_features, negative, prototype_count)
+        app_neg, _ = _deterministic_prototypes(
+            appearance_features, negative, prototype_count, strategy=prototype_strategy
+        )
+        bnd_neg, _ = _deterministic_prototypes(
+            boundary_features, negative, prototype_count, strategy=prototype_strategy
+        )
     elif scene_mean_negative:
         # A one-click protocol supplies no explicit background click.  The
         # unlabeled scene mean is a fixed, query-independent negative and may
         # include the target itself; it therefore cannot leak instance GT.
-        app_neg = F.normalize(
-            torch.as_tensor(appearance_features).float().mean(dim=0), dim=0
-        )[None]
-        bnd_neg = F.normalize(
-            torch.as_tensor(boundary_features).float().mean(dim=0), dim=0
-        )[None]
+        app_mean = torch.as_tensor(appearance_features).float().mean(dim=0)
+        bnd_mean = torch.as_tensor(boundary_features).float().mean(dim=0)
+        app_neg = F.normalize(app_mean, dim=0)[None]
+        bnd_neg = F.normalize(bnd_mean, dim=0)[None]
     return QuerySpec(
         modality=QueryModality.WORLD_3D,
         intent=QueryIntent.INSTANCE,
@@ -300,6 +430,10 @@ def compile_world_3d_query(
         selection_mode=SelectionMode.SEEDED_COMPONENT,
         field_signature=appearance_signature,
         metadata={
+            "seed_topk": seed_topk,
+            "euclidean_candidate_k": int(euclidean_candidate_k),
+            "seed_temperature": seed_temperature,
+            "prototype_strategy": str(prototype_strategy),
             "negative_evidence": (
                 "explicit_world_points"
                 if negative is not None

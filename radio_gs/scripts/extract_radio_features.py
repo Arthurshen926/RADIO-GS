@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -39,6 +40,14 @@ from radio_gs.data.view_split import (
 
 IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 FRAME_ID_MODES = ("auto", "source_rank")
+
+
+def _sha256_file(path: str | Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 # ---- image loading helpers ------------------------------------------------
@@ -541,6 +550,7 @@ def extract(args: argparse.Namespace) -> None:
                     "source_rank": source_rank,
                     "frame_idx": frame_idx,
                     "source_file": source_path.name,
+                    "source_sha256": _sha256_file(source_path),
                     "saved_stem": stem,
                 }
             )
@@ -596,6 +606,11 @@ def extract(args: argparse.Namespace) -> None:
                 "image_dir": str(Path(args.image_dir).resolve()),
                 "image_sort_mode": image_sort_mode,
                 "frame_id_mode": frame_id_mode,
+                "batch_size": int(args.batch_size),
+                "amp": bool(args.amp),
+                "sliding_window": bool(args.sliding_window),
+                "tile_size": int(args.tile_size) if args.sliding_window else None,
+                "tile_overlap": int(args.tile_overlap) if args.sliding_window else None,
                 "resolution_scale": float(args.resolution_scale),
                 "radio_input_resolution_hw": [int(target_h), int(target_w)],
                 "source_image_count_before_exclusion": source_image_count,

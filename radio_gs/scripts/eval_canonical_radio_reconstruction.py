@@ -12,8 +12,14 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.config import load_config
-from radio_gs.field import load_canonical_field_checkpoint
-from radio_gs.rendering.coefficient_renderer import render_canonical_radio
+from radio_gs.field import (
+    load_canonical_field_checkpoint,
+    load_view_residual_checkpoint,
+)
+from radio_gs.rendering.coefficient_renderer import (
+    render_canonical_radio,
+    render_view_conditioned_radio,
+)
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.training.feature_training_utils import SimpleRadioDataset
 
@@ -21,6 +27,14 @@ from radio_gs.training.feature_training_utils import SimpleRadioDataset
 def _sha256_tensor_rows(values: torch.Tensor) -> str:
     array = values.detach().float().cpu().contiguous().numpy().astype("<f4", copy=False)
     return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _sha256_file(path: str | Path) -> str:
+    digest = hashlib.sha256()
+    with Path(path).open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8 * 1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _parse_frame_ids(raw: str) -> list[int]:
@@ -56,6 +70,32 @@ def evaluate(args: argparse.Namespace) -> dict:
     )
     if not expected_hash or xyz_hash != expected_hash:
         raise ValueError("canonical field/geometry row fingerprint mismatch")
+
+    view_residual = None
+    view_residual_payload = None
+    if str(args.view_residual_checkpoint).strip():
+        view_residual, view_residual_payload = load_view_residual_checkpoint(
+            args.view_residual_checkpoint, map_location="cpu"
+        )
+        residual_fingerprint = dict(
+            view_residual_payload.get("geometry_fingerprint", {})
+        )
+        if str(residual_fingerprint.get("xyz_sha256", "")) != xyz_hash:
+            raise ValueError("view residual/geometry row fingerprint mismatch")
+        if int(view_residual.num_gaussians) != int(model.get_xyz().shape[0]):
+            raise ValueError("view residual row count mismatch")
+        if int(view_residual.coefficient_dim) != int(field.decoder.coefficient_dim):
+            raise ValueError("view residual coefficient dimension mismatch")
+        expected_field_hash = str(view_residual_payload.get("base_field_sha256", ""))
+        if not expected_field_hash or expected_field_hash != _sha256_file(args.field_checkpoint):
+            raise ValueError("view residual was trained over a different canonical field")
+        if not bool(
+            view_residual_payload.get("invariants", {}).get(
+                "residual_used_only_for_view_rendering", False
+            )
+        ):
+            raise ValueError("view residual checkpoint lacks rendering-only invariant")
+        view_residual = view_residual.to(device).eval()
 
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
     raw_pose_file = str(getattr(config, "pose_file", "") or "").strip()
@@ -132,15 +172,30 @@ def evaluate(args: argparse.Namespace) -> dict:
     with torch.inference_mode():
         for index in candidates:
             sample = dataset[index]
-            rendered = render_canonical_radio(
-                renderer,
-                model,
-                field,
-                sample["pose_w2c"].to(device),
-                feature_height=feature_height,
-                feature_width=feature_width,
-                use_reliability=bool(args.reliability_splat),
-            )
+            if view_residual is None:
+                rendered = render_canonical_radio(
+                    renderer,
+                    model,
+                    field,
+                    sample["pose_w2c"].to(device),
+                    feature_height=feature_height,
+                    feature_width=feature_width,
+                    use_reliability=bool(args.reliability_splat),
+                )
+            else:
+                if bool(args.reliability_splat):
+                    raise ValueError(
+                        "reliability splatting is not part of the frozen view-residual path"
+                    )
+                rendered = render_view_conditioned_radio(
+                    renderer,
+                    model,
+                    field,
+                    view_residual,
+                    sample["pose_w2c"].to(device),
+                    feature_height=feature_height,
+                    feature_width=feature_width,
+                )
             predicted = rendered["feature_map"].permute(1, 2, 0).float()
             teacher = sample["radio_features"].to(device).permute(1, 2, 0).float()
             valid = rendered["alpha_map"] >= float(args.alpha_threshold)
@@ -160,6 +215,13 @@ def evaluate(args: argparse.Namespace) -> dict:
     report = {
         "schema_version": 1,
         "field_checkpoint": str(Path(args.field_checkpoint).resolve()),
+        "view_residual_checkpoint": (
+            str(Path(args.view_residual_checkpoint).resolve())
+            if view_residual is not None
+            else ""
+        ),
+        "view_conditioned_rendering": view_residual is not None,
+        "primitive_query_remains_canonical": view_residual is not None,
         "geometry_checkpoint": str(Path(args.geometry_checkpoint).resolve()),
         "held_out_from_mpr": True,
         "frame_policy": frame_policy,
@@ -194,6 +256,7 @@ def main() -> None:
     parser.add_argument("--config", required=True)
     parser.add_argument("--geometry-checkpoint", required=True)
     parser.add_argument("--field-checkpoint", required=True)
+    parser.add_argument("--view-residual-checkpoint", default="")
     parser.add_argument("--output", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--max-views", type=int, default=16)

@@ -5,7 +5,10 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.field import FeatureSpaceSignature
-from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
+from radio_gs.querying.query_compilers import (
+    _deterministic_prototypes,
+    compile_registered_primitive_seeds,
+)
 from radio_gs.scripts.eval_nvos_gaussian_first import (
     _load_training_poses,
     _resolve_observed_feature_path,
@@ -142,3 +145,48 @@ def test_sparse_registered_compiler_uses_continuous_primitive_seeds() -> None:
         query.positive_seeds.weights, torch.tensor([0.125, 1.0, 0.0])
     )
     assert query.negative_seeds is not None
+
+
+def test_sparse_prototypes_match_prefiltered_reference_for_half_bank() -> None:
+    features = F.normalize(
+        torch.tensor(
+            [
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 1.0],
+            ],
+            dtype=torch.float16,
+        ).float(),
+        dim=-1,
+    ).half()
+    weights = torch.tensor([0.0, 0.7, 0.0, 0.2, 0.0])
+
+    actual_features, actual_masses = _deterministic_prototypes(
+        features, weights, count=2, chunk_size=1
+    )
+    active = weights > 0
+    expected_features, expected_masses = _deterministic_prototypes(
+        features[active].float(), weights[active], count=2
+    )
+
+    torch.testing.assert_close(actual_features, expected_features)
+    torch.testing.assert_close(actual_masses, expected_masses)
+
+
+def test_spherical_mean_fps_anchors_with_weighted_mean() -> None:
+    features = torch.tensor([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0]])
+    weights = torch.tensor([0.5, 0.4, 0.1])
+    prototypes, masses = _deterministic_prototypes(
+        features,
+        weights,
+        count=2,
+        chunk_size=1,
+        strategy="spherical_mean_fps",
+    )
+    expected_mean = F.normalize(
+        (F.normalize(features, dim=-1) * weights[:, None]).sum(dim=0), dim=0
+    )
+    torch.testing.assert_close(prototypes[0], expected_mean)
+    torch.testing.assert_close(masses.sum(), torch.tensor(1.0))

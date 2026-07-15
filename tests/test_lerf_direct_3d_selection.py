@@ -41,6 +41,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     keep_largest_mask_component_if_dominant,
     keep_mask_components_by_heatmap_score,
     refine_mask_with_rgb_edges,
+    render_rgb_refinement_frame,
     refine_mask_with_sam3_feature_grabcut,
     sample_registration_view_weights,
     save_score_cache,
@@ -101,9 +102,33 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert "--proposal_consensus_threshold" in result.stdout
     assert "raster_adjoint" in result.stdout
     assert "rgb_grabcut_score_component_guard" in result.stdout
+    assert "--rgb_refinement_source" in result.stdout
     assert "--score_component_guard_min_mass_fraction" in result.stdout
     assert "--text_encoder" in result.stdout
     assert "openclip" in result.stdout
+
+
+def test_render_rgb_refinement_frame_converts_rgb_tensor_to_bgr_uint8():
+    class _Renderer:
+        @staticmethod
+        def render_rgb(_model, _viewmat):
+            return {
+                "rgb": torch.tensor(
+                    [
+                        [[1.0, 0.0]],
+                        [[0.5, 0.0]],
+                        [[0.0, 1.0]],
+                    ],
+                    dtype=torch.float32,
+                )
+            }
+
+    frame = render_rgb_refinement_frame(object(), _Renderer(), torch.eye(4))
+
+    assert frame.dtype == np.uint8
+    assert frame.shape == (1, 2, 3)
+    assert frame[0, 0].tolist() == [0, 128, 255]
+    assert frame[0, 1].tolist() == [255, 0, 0]
 
 
 def test_gaussian_subset_alpha_proxy_physically_removes_unselected_primitives():

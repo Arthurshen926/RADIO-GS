@@ -18,6 +18,13 @@ from .unified_query import (
     score_features,
 )
 from .query_engine import CanonicalQueryEngine, QueryResult
+from .score_calibration import (
+    SceneSpaceCalibration,
+    deterministic_sample_rows,
+    fit_scene_space_calibration,
+    robust_tanh_score_calibration,
+)
+from .evidence_scorer import shrink_unary_by_reliability
 from .query_compilers import compile_registered_primitive_seeds
 from .query_spec import (
     PrototypeSet,
@@ -33,6 +40,8 @@ from .support_solver import (
     SupportGraphConfig,
     SupportSolverConfig,
     build_primitive_support_graph,
+    graph_for_query_intent,
+    mix_support_graph_channels,
     select_support_components,
     solve_primitive_support,
 )
@@ -59,6 +68,10 @@ __all__ = [
     "QueryIntent",
     "QueryModality",
     "QueryResult",
+    "SceneSpaceCalibration",
+    "deterministic_sample_rows",
+    "fit_scene_space_calibration",
+    "robust_tanh_score_calibration",
     "RegistrationMode",
     "SelectionMode",
     "SoftSeedSet",
@@ -67,6 +80,9 @@ __all__ = [
     "TypedQuerySpec",
     "build_primitive_support_graph",
     "compile_registered_primitive_seeds",
+    "graph_for_query_intent",
+    "mix_support_graph_channels",
     "select_support_components",
     "solve_primitive_support",
+    "shrink_unary_by_reliability",
 ]

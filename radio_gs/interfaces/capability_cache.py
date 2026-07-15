@@ -39,6 +39,20 @@ class CanonicalCapabilityBank:
         }
 
 
+@dataclass(frozen=True)
+class CanonicalPrimitiveReliability:
+    """Row-aligned, query-independent precision of canonical descriptors."""
+
+    xyz: torch.Tensor
+    valid: torch.Tensor
+    confidence: torch.Tensor
+    components: Mapping[str, torch.Tensor]
+    metadata: Mapping[str, Any]
+
+    def valid_confidence(self) -> torch.Tensor:
+        return self.confidence[self.valid]
+
+
 def _load_payload(path: str | Path) -> Mapping[str, Any]:
     payload = torch.load(Path(path), map_location="cpu")
     if not isinstance(payload, Mapping) or int(payload.get("schema_version", -1)) != 1:
@@ -110,6 +124,92 @@ def load_canonical_capability_bank(
     )
 
 
+def load_canonical_primitive_reliability(
+    path: str | Path,
+    *,
+    expected_xyz: torch.Tensor | None = None,
+    expected_valid: torch.Tensor | None = None,
+    expected_field_checkpoint_sha256: str = "",
+) -> CanonicalPrimitiveReliability:
+    """Load a reliability sidecar and fail closed on provenance/alignment."""
+
+    payload = _load_payload(path)
+    required = {"xyz", "valid", "confidence", "components", "metadata"}
+    if not required.issubset(payload):
+        raise ValueError(f"reliability cache lacks keys: {sorted(required - set(payload))}")
+    metadata = payload["metadata"]
+    if not isinstance(metadata, Mapping):
+        raise ValueError("reliability metadata must be a mapping")
+    if metadata.get("source") != "canonical_primitive_reliability_v1":
+        raise ValueError("unsupported canonical primitive reliability source")
+    safety_requirements = {
+        "query_independent": True,
+        "uses_query": False,
+        "uses_text": False,
+        "uses_target_labels": False,
+        "uses_target_masks": False,
+        "uses_metric_feedback": False,
+        "benchmark_masks_opened": False,
+        "text_queries_opened": False,
+    }
+    for key, expected in safety_requirements.items():
+        if metadata.get(key) is not expected:
+            raise ValueError(f"reliability cache violates safety contract: {key}")
+    actual_field_hash = str(metadata.get("field_checkpoint_sha256", ""))
+    if expected_field_checkpoint_sha256 and actual_field_hash != str(
+        expected_field_checkpoint_sha256
+    ):
+        raise ValueError("reliability cache canonical-field hash mismatch")
+
+    xyz = torch.as_tensor(payload["xyz"]).float().cpu()
+    valid = torch.as_tensor(payload["valid"]).bool().cpu()
+    confidence = torch.as_tensor(payload["confidence"]).float().cpu()
+    count = int(xyz.shape[0]) if xyz.ndim == 2 else -1
+    if xyz.shape != (count, 3) or valid.shape != (count,) or confidence.shape != (count,):
+        raise ValueError("reliability geometry/confidence rows are malformed")
+    if not bool(torch.isfinite(xyz).all()) or not bool(torch.isfinite(confidence).all()):
+        raise ValueError("reliability cache contains NaN or infinity")
+    if bool((confidence < 0).any()) or bool((confidence > 1).any()):
+        raise ValueError("primitive reliability confidence must be in [0,1]")
+    if bool((confidence[~valid] != 0).any()):
+        raise ValueError("invalid primitive rows must have zero confidence")
+    raw_components = payload["components"]
+    if not isinstance(raw_components, Mapping):
+        raise ValueError("reliability components must be a mapping")
+    components: dict[str, torch.Tensor] = {}
+    for name in (
+        "observation_evidence",
+        "multiview_agreement",
+        "reconstruction_fidelity",
+    ):
+        if name not in raw_components:
+            raise ValueError(f"reliability cache lacks component: {name}")
+        values = torch.as_tensor(raw_components[name]).float().cpu()
+        if values.shape != (count,) or not bool(torch.isfinite(values).all()):
+            raise ValueError(f"reliability component {name!r} is malformed")
+        if bool((values < 0).any()) or bool((values > 1).any()):
+            raise ValueError(f"reliability component {name!r} must be in [0,1]")
+        components[name] = values
+
+    if expected_xyz is not None:
+        reference_xyz = torch.as_tensor(expected_xyz).float().cpu()
+        if reference_xyz.shape != xyz.shape or not torch.allclose(
+            reference_xyz, xyz, atol=1e-6, rtol=0.0
+        ):
+            raise ValueError("reliability cache geometry does not align")
+    if expected_valid is not None:
+        reference_valid = torch.as_tensor(expected_valid).bool().cpu()
+        if reference_valid.shape != valid.shape or not torch.equal(reference_valid, valid):
+            raise ValueError("reliability cache valid rows do not align")
+    return CanonicalPrimitiveReliability(
+        xyz=xyz,
+        valid=valid,
+        confidence=confidence,
+        components=components,
+        metadata=metadata,
+    )
+
+
 def load_canonical_support_graph(
     path: str | Path,
     bank: CanonicalCapabilityBank,
@@ -155,4 +255,8 @@ def load_canonical_support_graph(
         raw_affinity=torch.as_tensor(payload["raw_affinity"]).float(),
         local_sigma=payload["local_sigma"],
         num_nodes=int(global_rows.numel()),
+        edge_channels={
+            str(name): torch.as_tensor(values).float()
+            for name, values in dict(payload.get("edge_channels", {})).items()
+        },
     )

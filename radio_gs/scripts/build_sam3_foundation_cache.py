@@ -235,18 +235,48 @@ def _load_sam3_model(
     confidence_threshold: float,
     dtype: str,
     resolution: int,
+    point_only: bool = False,
 ):
     from sam3.model.sam3_image_processor import Sam3Processor
     from sam3.model_builder import build_sam3_image_model
 
     device = normalize_sam3_device(device)
+    target_dtype = resolve_sam3_dtype(device, dtype)
+    # The official builder moves the freshly constructed fp32 model to CUDA
+    # before callers get a chance to cast it.  The complete SAM3 image model
+    # (including its official interactive SAM decoder) briefly exceeds a
+    # 24-GB card in that order.  For explicitly requested reduced-precision
+    # inference, load the official checkpoint on CPU, cast there, and only
+    # then transfer the unchanged official model to CUDA.
+    build_device = (
+        "cpu"
+        if device == "cuda" and target_dtype != torch.float32
+        else device
+    )
     model = build_sam3_image_model(
         checkpoint_path=checkpoint_path or None,
         load_from_HF=not checkpoint_path,
-        device=device,
+        device=build_device,
         eval_mode=True,
+        enable_segmentation=not point_only,
+        enable_inst_interactivity=point_only,
     )
-    model = cast_sam3_model_for_inference(model, resolve_sam3_dtype(device, dtype))
+    if point_only:
+        if model.inst_interactive_predictor is None:
+            raise RuntimeError(
+                "Official SAM3 checkpoint has no interactive point decoder"
+            )
+        # ``predict_inst`` consumes only the official visual backbone and
+        # interactive SAM decoder.  Cast/move exactly those registered
+        # submodules; the unused text-grounding stack remains on CPU.  This is
+        # a deployment-only placement change, not a replacement of weights.
+        model.backbone.vision_backbone.to(dtype=target_dtype, device=device)
+        model.inst_interactive_predictor.to(dtype=target_dtype, device=device)
+        model._device = None
+    else:
+        model = cast_sam3_model_for_inference(model, target_dtype)
+        if build_device != device:
+            model = model.to(device=device)
     return make_sam3_processor(
         Sam3Processor,
         model,

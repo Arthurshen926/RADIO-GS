@@ -2,7 +2,9 @@
 
 from .capability_cache import (
     CanonicalCapabilityBank,
+    CanonicalPrimitiveReliability,
     load_canonical_capability_bank,
+    load_canonical_primitive_reliability,
     load_canonical_support_graph,
 )
 
@@ -23,6 +25,7 @@ from .semantic_alignment import (
 
 __all__ = [
     "CanonicalCapabilityBank",
+    "CanonicalPrimitiveReliability",
     "FrozenRadioViews",
     "GlobalSemanticBridgeManifest",
     "GlobalRegionSummaryBridge",
@@ -34,5 +37,6 @@ __all__ = [
     "SemanticAlignmentStage",
     "SemanticOracleResult",
     "load_canonical_capability_bank",
+    "load_canonical_primitive_reliability",
     "load_canonical_support_graph",
 ]
