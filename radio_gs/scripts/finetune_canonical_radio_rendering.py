@@ -21,7 +21,10 @@ from radio_gs.interfaces.semantic_alignment import (
 from radio_gs.losses.radio_adaptor_loss import (
     compute_radio_adaptor_masked_render_losses,
 )
-from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
+from radio_gs.models.radio_adaptors import (
+    load_radio_adaptor_from_checkpoint,
+    project_feature_map_with_adaptor,
+)
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.rendering.coefficient_renderer import render_canonical_radio
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
@@ -56,7 +59,9 @@ def _load_consensus(path: str) -> tuple[PrimitiveConsensus, dict]:
     )
 
 
-def _dataset(config, renderer) -> SimpleRadioDataset:
+def _dataset(
+    config, renderer, frame_ids: list[int] | None = None
+) -> SimpleRadioDataset:
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
     raw_pose_file = str(getattr(config, "pose_file", "") or "").strip()
     pose_file = raw_pose_file if raw_pose_file and Path(raw_pose_file).is_file() else None
@@ -77,6 +82,7 @@ def _dataset(config, renderer) -> SimpleRadioDataset:
         ),
         split="train",
         dataset_type=str(getattr(config, "dataset_type", "lerf")),
+        frame_ids=frame_ids,
     )
 
 
@@ -204,6 +210,42 @@ def _mean_view_cosine(
 
 
 @torch.no_grad()
+def _mean_multicapability_fidelity(
+    field, model, renderer, dataset, frame_to_index, frames, device, *,
+    adaptors: dict[str, torch.nn.Module], reliability_splat: bool,
+    alpha_threshold: float,
+) -> dict[str, float]:
+    totals = {"raw_radio": 0.0, **{name: 0.0 for name in adaptors}}
+    count = 0
+    field.eval()
+    for frame in frames:
+        sample = dataset[frame_to_index[frame]]
+        result = render_canonical_radio(
+            renderer, model, field, sample["pose_w2c"].to(device),
+            feature_height=sample["radio_features"].shape[1],
+            feature_width=sample["radio_features"].shape[2],
+            use_reliability=reliability_splat,
+        )
+        predicted = result["feature_map"][None].float()
+        target = sample["radio_features"].to(device)[None].float()
+        valid = result["alpha_map"] >= float(alpha_threshold)
+        pixels = int(valid.sum())
+        if not pixels:
+            continue
+        totals["raw_radio"] += float(
+            F.cosine_similarity(predicted, target, dim=1)[0][valid].mean()
+        ) * pixels
+        for name, adaptor in adaptors.items():
+            projected = project_feature_map_with_adaptor(predicted, adaptor)
+            teacher = project_feature_map_with_adaptor(target, adaptor)
+            totals[name] += float((projected * teacher).sum(dim=1)[0][valid].mean()) * pixels
+        count += pixels
+    if count <= 0:
+        raise RuntimeError("multicapability validation rendered no visible pixels")
+    return {name: value / count for name, value in totals.items()}
+
+
+@torch.no_grad()
 def _primitive_probe_cosine(
     field,
     consensus: PrimitiveConsensus,
@@ -321,7 +363,8 @@ def finetune(args: argparse.Namespace) -> dict:
         raise ValueError("MPR override reliability rows do not match canonical field")
     with torch.no_grad():
         field.reliability.copy_(consensus.reliability.to(device))
-    dataset = _dataset(config, renderer)
+    included_frames = sorted(_parse_frame_ids(args.include_frame_ids))
+    dataset = _dataset(config, renderer, included_frames or None)
     frame_to_index = {int(frame): index for index, frame in enumerate(dataset.frame_indices)}
     mpr_frames = [
         int(frame)
@@ -437,6 +480,12 @@ def finetune(args: argparse.Namespace) -> dict:
         reliability_splat=reliability_splat,
     )
     best_validation = initial_validation
+    initial_capability_validation = _mean_multicapability_fidelity(
+        field, model, renderer, dataset, frame_to_index, validation_frames, device,
+        adaptors=capability_adaptors, reliability_splat=reliability_splat,
+        alpha_threshold=float(args.alpha_threshold),
+    )
+    best_capability_validation = dict(initial_capability_validation)
     initial_mpr_probe = _primitive_probe_cosine(
         field, consensus, mpr_probe_rows, device
     )
@@ -524,6 +573,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 result["alpha_map"][None] >= float(args.alpha_threshold),
                 adaptor_weights=capability_weights,
                 local_radius=int(args.capability_local_radius),
+                local_balance_quantile=float(args.capability_local_balance_quantile),
             )
         semantic_absolute_loss = render_loss.detach() * 0.0
         semantic_centered_loss = render_loss.detach() * 0.0
@@ -586,6 +636,12 @@ def finetune(args: argparse.Namespace) -> dict:
             mpr_probe_cosine = _primitive_probe_cosine(
                 field, consensus, mpr_probe_rows, device
             )
+            capability_validation = _mean_multicapability_fidelity(
+                field, model, renderer, dataset, frame_to_index, validation_frames,
+                device, adaptors=capability_adaptors,
+                reliability_splat=reliability_splat,
+                alpha_threshold=float(args.alpha_threshold),
+            )
             semantic_validation = None
             semantic_validation_absolute = None
             semantic_validation_centered = None
@@ -629,6 +685,20 @@ def finetune(args: argparse.Namespace) -> dict:
                     >= initial_validation - float(args.max_validation_drop)
                     and mpr_probe_cosine > best_mpr_probe
                 )
+            elif args.selection_policy == "capability_pareto":
+                current_score = sum(capability_validation.values())
+                best_score = sum(best_capability_validation.values())
+                selected = (
+                    current_score > best_score
+                    and all(
+                        capability_validation[name]
+                        >= initial_capability_validation[name]
+                        - float(args.max_capability_drop)
+                        for name in initial_capability_validation
+                    )
+                    and mpr_probe_cosine
+                    >= initial_mpr_probe - float(args.max_mpr_drop)
+                )
             else:
                 selected = (
                     semantic_validation is not None
@@ -643,6 +713,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 best_mpr_probe = mpr_probe_cosine
                 if semantic_validation is not None:
                     best_semantic_validation = semantic_validation
+                best_capability_validation = dict(capability_validation)
                 best_step = step + 1
                 best_state = copy.deepcopy(field.state_dict())
             record = {
@@ -671,6 +742,8 @@ def finetune(args: argparse.Namespace) -> dict:
                 "semantic_centered_loss": float(semantic_centered_loss.detach()),
                 "validation_cosine": validation_cosine,
                 "mpr_probe_cosine": mpr_probe_cosine,
+                "capability_validation_cosine": capability_validation,
+                "best_capability_validation_cosine": best_capability_validation,
                 "semantic_validation_cosine": semantic_validation,
                 "semantic_validation_absolute_cosine": semantic_validation_absolute,
                 "semantic_validation_centered_cosine": semantic_validation_centered,
@@ -712,11 +785,13 @@ def finetune(args: argparse.Namespace) -> dict:
         "excluded_from_field_training": sorted(excluded_from_field_training),
         "initial_validation_cosine": initial_validation,
         "initial_mpr_probe_cosine": initial_mpr_probe,
+        "initial_capability_validation_cosine": initial_capability_validation,
         "initial_semantic_validation_cosine": initial_semantic_validation,
         "initial_semantic_absolute_cosine": initial_semantic_absolute,
         "initial_semantic_centered_cosine": initial_semantic_centered,
         "best_validation_cosine": best_validation,
         "best_mpr_probe_cosine": best_mpr_probe,
+        "best_capability_validation_cosine": best_capability_validation,
         "best_semantic_validation_cosine": best_semantic_validation,
         "best_step": best_step,
         "selection_policy": args.selection_policy,
@@ -765,7 +840,15 @@ def finetune(args: argparse.Namespace) -> dict:
         "train_fusion": bool(args.train_fusion),
         "history": history,
         "benchmark_masks_opened": False,
+        "benchmark_labels_opened": False,
         "text_queries_opened": False,
+        "canonical_contract": {
+            "name": "canonical-mpr-v2",
+            "definition": "canonical-mpr-v1 initialization + exact render replay + render-matched coefficient fitting + primitive MPR prior",
+            "exact_training_renderer_matches_inference": True,
+            "primitive_prior_weight": float(args.mpr_weight),
+            "selection_uses_nonbenchmark_validation_only": True,
+        },
     }
     torch.save(payload, output)
     report = {
@@ -773,11 +856,13 @@ def finetune(args: argparse.Namespace) -> dict:
         "steps": int(args.steps),
         "initial_validation_cosine": initial_validation,
         "initial_mpr_probe_cosine": initial_mpr_probe,
+        "initial_capability_validation_cosine": initial_capability_validation,
         "initial_semantic_validation_cosine": initial_semantic_validation,
         "initial_semantic_absolute_cosine": initial_semantic_absolute,
         "initial_semantic_centered_cosine": initial_semantic_centered,
         "best_validation_cosine": best_validation,
         "best_mpr_probe_cosine": best_mpr_probe,
+        "best_capability_validation_cosine": best_capability_validation,
         "best_semantic_validation_cosine": best_semantic_validation,
         "best_step": best_step,
         "train_probe_cosine": final_train_probe,
@@ -830,6 +915,15 @@ def main() -> None:
         help="Local-relation loss relative to each enabled capability alignment term.",
     )
     parser.add_argument("--capability-local-radius", type=int, default=1)
+    parser.add_argument(
+        "--capability-local-balance-quantile",
+        type=float,
+        default=0.0,
+        help=(
+            "Query-free teacher-affinity tail fraction. Values above zero "
+            "balance discontinuity and interior relation errors."
+        ),
+    )
     parser.add_argument("--semantic-weight", type=float, default=0.0)
     parser.add_argument("--semantic-centered-weight", type=float, default=1.0)
     parser.add_argument("--semantic-teacher-root", default="")
@@ -851,6 +945,11 @@ def main() -> None:
         help="Comma list or commented text file; every dev frame must already be excluded from MPR.",
     )
     parser.add_argument(
+        "--include-frame-ids",
+        default="",
+        help="Optional registered-frame allowlist applied before pose loading.",
+    )
+    parser.add_argument(
         "--render-view-policy", choices=["all_nonbenchmark", "mpr"], default="all_nonbenchmark"
     )
     parser.add_argument("--reliability-splat", action="store_true")
@@ -864,10 +963,12 @@ def main() -> None:
             "raw_fidelity",
             "pareto_mpr",
             "semantic_capability",
+            "capability_pareto",
         ],
         default="validation",
     )
     parser.add_argument("--max-validation-drop", type=float, default=0.0)
+    parser.add_argument("--max-capability-drop", type=float, default=0.002)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
     if min(

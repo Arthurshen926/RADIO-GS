@@ -1,0 +1,10 @@
+base_config: lerf_ramen_radio_verified_pose.yaml
+
+# Official SigLIP2-G visual summaries from multiscale real-image crops.  The
+# extraction manifest excludes every LERF-OVS evaluation frame before RGB is
+# opened; poses remain the verified RADIO/geometry poses.
+feature_dir: /root/RADIO-GS/output/optimization_20260716/semantic_teacher_train/ramen
+feature_height: 46
+feature_width: 62
+pose_file: ""
+pose_dir: /root/RADIO-GS/output/radio_features_lerf/ramen/poses_c2w_colmap_verified

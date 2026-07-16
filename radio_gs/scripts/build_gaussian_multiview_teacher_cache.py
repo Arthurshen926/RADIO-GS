@@ -284,10 +284,15 @@ def _load_responsibility_cache(
     if not isinstance(payload, dict) or int(payload.get("schema_version", -1)) != 1:
         raise ValueError("responsibility cache must use schema version 1")
     metadata = dict(payload.get("metadata", {}))
+    # ``config`` and dataset-local row indices are feature-source aliases, not
+    # registration identity.  A semantic directory may deliberately omit held
+    # out images, shifting local indices.  Frame IDs plus pose/intrinsics and
+    # complete Gaussian-state hashes are the fail-closed geometric identity.
+    alias_fields = {"config", "selected_dataset_indices"}
     mismatched = [
         key
         for key, expected in expected_contract.items()
-        if metadata.get(key) != expected
+        if key not in alias_fields and metadata.get(key) != expected
     ]
     if mismatched:
         raise ValueError(
@@ -368,6 +373,9 @@ def build_cache(args: argparse.Namespace) -> dict:
         if configured_pose_dir is not None and configured_pose_dir.is_dir()
         else str(fallback_pose_dir) if fallback_pose_dir.is_dir() else None
     )
+    included_frame_ids = _parse_frame_ids(
+        str(getattr(args, "include_frame_ids", "") or "")
+    )
     dataset = SimpleRadioDataset(
         feature_dir=str(feature_dir),
         pose_file=pose_file,
@@ -375,6 +383,7 @@ def build_cache(args: argparse.Namespace) -> dict:
         feature_size=(feature_height, feature_width),
         split="train",
         dataset_type=str(getattr(config, "dataset_type", "lerf")),
+        frame_ids=sorted(included_frame_ids) if included_frame_ids else None,
     )
     excluded_frame_ids = _parse_frame_ids(args.exclude_frame_ids)
     candidates = [
@@ -922,6 +931,14 @@ def main() -> None:
         "--exclude-frame-ids",
         default="",
         help="Comma list, text file, or LERF label directory of held-out frame IDs.",
+    )
+    parser.add_argument(
+        "--include-frame-ids",
+        default="",
+        help=(
+            "Optional comma list/file restricting observations before pose loading; "
+            "use for RGB frames without registered cameras."
+        ),
     )
     parser.add_argument("--render-batch-size", type=int, default=4)
     parser.add_argument("--view-chunk-size", type=int, default=8)

@@ -42,7 +42,13 @@ class FeatureSpaceSignature:
             raise ValueError("adaptor_output_dim cannot be negative")
         if self.token_type not in {"spatial", "summary", "region", "primitive"}:
             raise ValueError("unsupported token_type")
-        if self.normalization not in {"none", "l2", "whiten_l2"}:
+        if self.normalization not in {
+            "none",
+            "l2",
+            "whiten_l2",
+            "radio_raw_full",
+            "radio_direction_unit",
+        }:
             raise ValueError("unsupported normalization")
         if self.extraction_resolution is not None:
             resolution = tuple(int(v) for v in self.extraction_resolution)

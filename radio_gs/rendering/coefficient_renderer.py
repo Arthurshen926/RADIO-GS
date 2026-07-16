@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import torch
+import torch.nn.functional as F
 
 from radio_gs.field.canonical_gaussian_field import CanonicalGaussianField
 from radio_gs.field.view_residual import ZeroMeanViewResidual
+from radio_gs.field.boundary_screen_residual import BoundaryConditionedScreenResidual
 from radio_gs.rendering.feature_renderer import FeatureFieldRenderer
 
 
@@ -65,6 +67,46 @@ def render_scalar_support(
         alpha_normalize=True,
         contribution_gamma=contribution_gamma,
     )
+
+
+def render_boundary_conditioned_radio(
+    renderer: FeatureFieldRenderer,
+    gaussian_geometry,
+    field: CanonicalGaussianField,
+    residual: BoundaryConditionedScreenResidual,
+    viewmat: torch.Tensor,
+    *,
+    feature_height: int | None = None,
+    feature_width: int | None = None,
+) -> dict[str, torch.Tensor]:
+    """Apply a global discontinuity residual after canonical rendering only."""
+
+    rendered = render_canonical_radio(
+        renderer,
+        gaussian_geometry,
+        field,
+        viewmat,
+        feature_height=feature_height,
+        feature_width=feature_width,
+    )
+    rgb_render = renderer.render_rgb(gaussian_geometry, viewmat)
+    rgb = rgb_render["rgb"]
+    target_size = rendered["depth_map"].shape[-2:]
+    if rgb.shape[-2:] != target_size:
+        rgb = F.interpolate(
+            rgb[None], size=target_size, mode="bilinear", align_corners=False
+        )[0]
+    delta = residual(
+        rgb[None],
+        rendered["depth_map"][None],
+        rendered["alpha_map"][None],
+    )[0]
+    return {
+        **rendered,
+        "rgb": rgb,
+        "feature_map": rendered["feature_map"] + delta,
+        "screen_delta": delta,
+    }
 
 
 def render_view_conditioned_radio(

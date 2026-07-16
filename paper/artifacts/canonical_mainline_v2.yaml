@@ -1,0 +1,68 @@
+schema_version: 1
+name: canonical-mpr-v2
+status: promoted_mainline
+promoted_at: 2026-07-16
+
+lifting_contract:
+  name: canonical-mpr-v1
+  role: shared_dataset_independent_observation_lifting
+
+field_training_contract:
+  initialization: canonical-mpr-v1 field
+  exact_renderer_replay: true
+  raw_radio_render_fitting: true
+  frozen_official_adaptors: [dino_v3, sam3]
+  local_affinity_preservation: true
+  primitive_replay_prior: true
+  radio_normalization_semantics: radio_direction_unit
+
+selection:
+  policy: heldout_capability_pareto
+  benchmark_masks_opened: false
+  benchmark_labels_opened: false
+  text_queries_opened: false
+  test_set_calibration: false
+  validated_scenes:
+    - scannet_scene0062_00
+    - scannet_scene0140_00
+    - scannet_scene0200_00
+
+optional_2d_modules:
+  boundary_conditioned_residual:
+    status: promoted_optional
+    domain: screen_only
+    primitive_queries_unchanged: true
+    rank: 16
+    capacity_parameters: 20816
+    training_steps: 256
+
+semantic_alignment:
+  promoted_level: 2
+  teacher: official_c_radio_v4_siglip2_g_crop_visual_summary
+  custom_query_head: false
+  custom_text_projection: false
+  lifting: canonical_mpr_v1
+  benchmark_eval_frames_excluded: true
+  test_set_calibration: false
+  text_query_readout: primitive_score_then_render
+  feature_then_score_role: commutation_audit
+  development_evidence:
+    scene: lerf_ramen
+    sample_miou: 0.2079
+    category_macro_miou: 0.2002
+    localization_accuracy: 0.3803
+    samples: 71
+    protocol:
+      scoring: softmax_scene
+      logit_scale: 50
+      threshold_mode: fixed_peak_relative
+      threshold: 0.60
+      localization: polygon_argmax
+      mask_refinement: none
+      prompt_template: "{query}"
+
+not_mainline:
+  - scene_specific_query_head
+  - test_set_calibration
+  - semantic_labels_as_instance_ground_truth
+  - custom_sam3_adaptor

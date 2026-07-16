@@ -298,6 +298,7 @@ def world_point_soft_seeds(
     *,
     gaussian_precision: torch.Tensor | None = None,
     euclidean_candidate_k: int = 0,
+    candidate_mask: torch.Tensor | None = None,
 ) -> torch.Tensor:
     xyz = torch.as_tensor(gaussian_xyz).float()
     covariance = torch.as_tensor(gaussian_covariance).float()
@@ -325,9 +326,14 @@ def world_point_soft_seeds(
         nearest = delta.square().sum(dim=-1).topk(
             candidate_k, dim=0, largest=False
         ).indices
-        candidate_mask = torch.zeros_like(weights, dtype=torch.bool)
-        candidate_mask.scatter_(0, nearest, True)
-        weights = weights.masked_fill(~candidate_mask, 0.0)
+        euclidean_mask = torch.zeros_like(weights, dtype=torch.bool)
+        euclidean_mask.scatter_(0, nearest, True)
+        weights = weights.masked_fill(~euclidean_mask, 0.0)
+    if candidate_mask is not None:
+        allowed = torch.as_tensor(candidate_mask, device=weights.device).bool().reshape(-1)
+        if allowed.shape != (xyz.shape[0],) or not bool(allowed.any()):
+            raise ValueError("candidate_mask must be a non-empty [N] mask")
+        weights = weights.masked_fill(~allowed[:, None], 0.0)
     return weights.amax(dim=1)
 
 
@@ -348,6 +354,7 @@ def compile_world_3d_query(
     euclidean_candidate_k: int = 64,
     seed_topk: int = 0,
     seed_temperature: float = 1.0,
+    seed_candidate_mask: torch.Tensor | None = None,
 ) -> QuerySpec:
     positive = world_point_soft_seeds(
         gaussian_xyz,
@@ -355,6 +362,7 @@ def compile_world_3d_query(
         positive_points,
         gaussian_precision=gaussian_precision,
         euclidean_candidate_k=euclidean_candidate_k,
+        candidate_mask=seed_candidate_mask,
     )
     negative = (
         world_point_soft_seeds(
@@ -363,6 +371,7 @@ def compile_world_3d_query(
             negative_points,
             gaussian_precision=gaussian_precision,
             euclidean_candidate_k=euclidean_candidate_k,
+            candidate_mask=seed_candidate_mask,
         )
         if negative_points is not None
         else None
@@ -433,6 +442,11 @@ def compile_world_3d_query(
             "seed_topk": seed_topk,
             "euclidean_candidate_k": int(euclidean_candidate_k),
             "seed_temperature": seed_temperature,
+            "seed_candidate_mask_count": (
+                int(torch.as_tensor(seed_candidate_mask).bool().sum())
+                if seed_candidate_mask is not None
+                else 0
+            ),
             "prototype_strategy": str(prototype_strategy),
             "negative_evidence": (
                 "explicit_world_points"

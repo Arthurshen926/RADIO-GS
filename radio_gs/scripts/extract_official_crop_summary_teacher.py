@@ -145,9 +145,20 @@ def extract(args: argparse.Namespace) -> dict:
     dataset_root = Path(args.dataset_root)
     label_dir = Path(args.label_dir)
     output_root = Path(args.output_root)
+    excluded = {
+        int(value)
+        for value in str(args.exclude_frame_ids).replace(",", " ").split()
+        if value.strip()
+    }
     scene_reports = {}
     for scene in scenes:
-        frames = _resolve_frames(dataset_root, label_dir, scene, args.frames)
+        frames = [
+            path
+            for path in _resolve_frames(dataset_root, label_dir, scene, args.frames)
+            if int(path.stem.split("_")[-1]) not in excluded
+        ]
+        if not frames:
+            raise RuntimeError(f"all frames excluded for {scene}")
         scene_output = output_root / scene
         scene_output.mkdir(parents=True, exist_ok=True)
         frame_reports = []
@@ -177,6 +188,7 @@ def extract(args: argparse.Namespace) -> dict:
         "dataset_root": str(dataset_root.resolve()),
         "label_dir": str(label_dir.resolve()),
         "frame_selection": args.frames,
+        "excluded_frame_ids": sorted(excluded),
         "label_content_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
@@ -199,6 +211,11 @@ def main() -> None:
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--scenes", default="figurines,ramen,teatime,waldo_kitchen")
     parser.add_argument("--frames", choices=["all", "labeled"], default="all")
+    parser.add_argument(
+        "--exclude-frame-ids",
+        default="",
+        help="Comma list of benchmark/evaluation frame IDs never opened by extraction.",
+    )
     parser.add_argument("--scales", default="0.25,0.5,0.75,1.0")
     parser.add_argument("--stride-ratio", type=float, default=0.5)
     parser.add_argument("--output-size", default="46x62")

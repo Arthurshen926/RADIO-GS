@@ -80,6 +80,17 @@ def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(
     assert len(assignments) == 1
     assert assignments[0]["gaussian_ids"].tolist() == [0, 2]
     assert len(digest) == 64
+    alias_contract = {
+        **contract,
+        "config": "/different/feature/source.yaml",
+        "selected_dataset_indices": [0],
+    }
+    assignments, _ = _load_responsibility_cache(
+        path,
+        expected_contract=alias_contract,
+        num_gaussians=3,
+    )
+    assert len(assignments) == 1
     with pytest.raises(ValueError, match="contract differs"):
         _load_responsibility_cache(
             path,

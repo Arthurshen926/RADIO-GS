@@ -224,6 +224,19 @@ def test_world_point_euclidean_candidates_block_distant_large_gaussian() -> None
     assert local[1] == 0
 
 
+def test_world_point_candidate_mask_enforces_surface_support() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.01, 0.0, 0.0], [0.02, 0.0, 0.0]])
+    covariance = torch.eye(3).repeat(3, 1, 1)
+    weights = world_point_soft_seeds(
+        xyz,
+        covariance,
+        torch.zeros(3),
+        candidate_mask=torch.tensor([True, False, True]),
+    )
+    assert weights[0] > 0 and weights[2] > 0
+    assert weights[1] == 0
+
+
 def test_world_point_seed_temperature_sharpens_relative_responsibility():
     xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
     covariance = torch.eye(3)[None].repeat(2, 1, 1)

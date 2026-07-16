@@ -17,7 +17,22 @@ from radio_gs.querying.support_solver import (
     graph_for_query_intent,
     mix_support_graph_channels,
     select_support_components,
+    solve_primitive_support,
 )
+
+
+def test_confidence_aware_weight_uses_evidence_not_task_name():
+    from radio_gs.querying.support_solver import confidence_aware_laplacian_weight
+
+    positive = torch.tensor([1.0, 0.0, 0.0, 0.0])
+    negative = torch.tensor([0.0, 0.0, 0.0, 1.0])
+    confident = torch.tensor([0.99, 0.95, 0.05, 0.01])
+    uncertain = torch.tensor([0.55, 0.52, 0.48, 0.45])
+    assert confidence_aware_laplacian_weight(
+        uncertain, positive, negative, base_weight=1.0
+    ) > confidence_aware_laplacian_weight(
+        confident, positive, negative, base_weight=1.0
+    )
 
 
 def _two_clusters():
@@ -146,3 +161,37 @@ def test_seeded_bfs_fast_path_matches_full_component_labels():
         if bool((positive.weights[labels == component] >= config.seeded_component_min_weight).any()):
             expected |= labels == component
     torch.testing.assert_close(actual.cpu(), expected)
+
+
+def test_random_walker_enforces_positive_and_negative_seeds_exactly():
+    points = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0], [0.3, 0.0, 0.0]]
+    )
+    graph = build_primitive_support_graph(points, config=SupportGraphConfig(neighbors=2))
+    positive = SoftSeedSet(torch.tensor([1.0, 0.0, 0.0, 0.0]), "positive")
+    negative = SoftSeedSet(torch.tensor([0.0, 0.0, 0.0, 1.0]), "negative")
+    probability = solve_primitive_support(
+        graph,
+        torch.zeros(4),
+        positive_seeds=positive,
+        negative_seeds=negative,
+        config=SupportSolverConfig(
+            solver_type="random_walker", laplacian_weight=1.0, cg_iterations=128
+        ),
+    )
+    assert probability[0] == 1.0
+    assert probability[3] == 0.0
+    assert 0.0 < probability[2] < probability[1] < 1.0
+
+
+def test_random_walker_without_hard_seeds_preserves_constant_prior():
+    graph = build_primitive_support_graph(
+        torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]]),
+        config=SupportGraphConfig(neighbors=1),
+    )
+    probability = solve_primitive_support(
+        graph,
+        torch.zeros(2),
+        config=SupportSolverConfig(solver_type="random_walker"),
+    )
+    torch.testing.assert_close(probability, torch.full((2,), 0.5), atol=1e-5, rtol=0)

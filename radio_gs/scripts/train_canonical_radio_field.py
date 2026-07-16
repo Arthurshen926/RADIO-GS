@@ -300,9 +300,13 @@ def train(args: argparse.Namespace) -> dict:
         raw_feature_dim=consensus.targets.shape[1],
         adaptor_name="backbone",
         token_type="primitive",
-        normalization="none",
+        normalization=(
+            "radio_direction_unit"
+            if bool(metadata.get("normalize_each_view", False))
+            else "radio_raw_full"
+        ),
         crop_policy="training_views_depth_alpha_checked_mpr",
-        # The canonical field stores raw RADIO only.  Semantic alignment is a
+        # The field stores exactly the declared MPR RADIO semantics.  Semantic alignment is a
         # separately selected, frozen capability view and is never part of the
         # field checkpoint contract.
         semantic_alignment="none",

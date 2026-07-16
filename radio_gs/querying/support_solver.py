@@ -375,6 +375,11 @@ class SupportSolverConfig:
     component_edge_threshold: float = 1e-5
     seeded_component_min_weight: float = 0.20
     top_k_components: int = 3
+    solver_type: str = "diffusion"
+    laplacian_weight: float = 1.0
+    cg_iterations: int = 64
+    cg_tolerance: float = 1e-5
+    hard_seed_threshold: float = 0.20
 
     def __post_init__(self) -> None:
         if self.iterations < 0 or self.unary_temperature <= 0:
@@ -385,6 +390,16 @@ class SupportSolverConfig:
             raise ValueError("support_threshold must be in [0,1]")
         if self.component_edge_threshold < 0 or self.top_k_components <= 0:
             raise ValueError("component parameters are invalid")
+        if self.solver_type not in {
+            "diffusion", "random_walker", "confidence_random_walker"
+        }:
+            raise ValueError(
+                "solver_type must be diffusion, random_walker, or confidence_random_walker"
+            )
+        if self.laplacian_weight < 0 or self.cg_iterations <= 0:
+            raise ValueError("random-walker parameters are invalid")
+        if self.cg_tolerance <= 0 or not 0 <= self.hard_seed_threshold <= 1:
+            raise ValueError("CG tolerance/seed threshold are invalid")
 
 
 def _seed_values(seed: SoftSeedSet | None, count: int, device: torch.device) -> torch.Tensor:
@@ -414,6 +429,22 @@ def solve_primitive_support(
     positive = _seed_values(positive_seeds, graph.num_nodes, device)
     negative = _seed_values(negative_seeds, graph.num_nodes, device)
     prior = torch.sigmoid(values / config.unary_temperature)
+    if config.solver_type in {"random_walker", "confidence_random_walker"}:
+        automatic_weight = (
+            confidence_aware_laplacian_weight(
+                prior, positive, negative, base_weight=config.laplacian_weight
+            )
+            if config.solver_type == "confidence_random_walker"
+            else float(config.laplacian_weight)
+        )
+        return solve_seeded_random_walker(
+            working_graph,
+            prior,
+            positive,
+            negative,
+            config=config,
+            laplacian_weight=automatic_weight,
+        )
     probability = prior
 
     row, col = working_graph.edge_index
@@ -426,6 +457,111 @@ def solve_primitive_support(
         probability = config.residual * prior + (1.0 - config.residual) * propagated
         probability = probability * (1.0 - negative)
         probability = probability * (1.0 - positive) + positive
+    return probability.clamp(0.0, 1.0)
+
+
+def confidence_aware_laplacian_weight(
+    prior: torch.Tensor,
+    positive: torch.Tensor,
+    negative: torch.Tensor,
+    *,
+    base_weight: float,
+) -> float:
+    """Choose graph regularization from query evidence, never benchmark identity.
+
+    Uncertain unary evidence receives more graph regularization.  Reliable
+    positive/negative separation permits that regularization to increase, while
+    already confident unary evidence stays close to its direct prediction.
+    """
+
+    values = torch.as_tensor(prior).float().clamp(1e-6, 1.0 - 1e-6)
+    entropy = -(values * values.log() + (1.0 - values) * (1.0 - values).log())
+    uncertainty = float(entropy.mean() / torch.log(values.new_tensor(2.0)))
+
+    def weighted_mean(weights: torch.Tensor) -> torch.Tensor | None:
+        weights = torch.as_tensor(weights, device=values.device).float().clamp_min(0)
+        mass = weights.sum()
+        return (values * weights).sum() / mass if float(mass) > 0 else None
+
+    positive_mean = weighted_mean(positive)
+    negative_mean = weighted_mean(negative)
+    separation = (
+        float((positive_mean - negative_mean).abs().clamp(0.0, 1.0))
+        if positive_mean is not None and negative_mean is not None
+        else 0.0
+    )
+    multiplier = max(0.25, min(1.5, 0.25 + uncertainty * (0.5 + separation)))
+    return float(base_weight) * multiplier
+
+
+def solve_seeded_random_walker(
+    graph: PrimitiveSupportGraph,
+    prior: torch.Tensor,
+    positive: torch.Tensor,
+    negative: torch.Tensor,
+    *,
+    config: SupportSolverConfig,
+    laplacian_weight: float | None = None,
+) -> torch.Tensor:
+    """Solve a confidence-weighted normalized Laplacian with hard seeds.
+
+    Positive/negative seeds above the fixed solver threshold are eliminated
+    from the linear system and are therefore exactly 1/0, not soft penalties.
+    The remaining unary fidelity is its label-free Bernoulli confidence.
+    """
+
+    device = prior.device
+    row, col = graph.edge_index
+    affinity = graph.raw_affinity.to(device).float()
+    degree = torch.zeros(graph.num_nodes, device=device)
+    if row.numel():
+        degree.index_add_(0, row, affinity)
+    inverse_sqrt = degree.clamp_min(1e-12).rsqrt()
+    normalized_affinity = affinity * inverse_sqrt[row] * inverse_sqrt[col]
+    hard_positive = positive >= float(config.hard_seed_threshold)
+    hard_negative = negative >= float(config.hard_seed_threshold)
+    hard_negative &= ~hard_positive
+    fixed = hard_positive | hard_negative
+    free = ~fixed
+    fixed_values = hard_positive.to(prior.dtype)
+    if not bool(free.any()):
+        return fixed_values
+
+    confidence = (2.0 * prior - 1.0).abs().clamp_min(0.05)
+    lam = float(
+        config.laplacian_weight if laplacian_weight is None else laplacian_weight
+    )
+
+    def laplacian(vector: torch.Tensor) -> torch.Tensor:
+        message = torch.zeros_like(vector)
+        if row.numel():
+            message.index_add_(0, row, normalized_affinity * vector[col])
+        return vector - message
+
+    def operator(vector: torch.Tensor) -> torch.Tensor:
+        masked = vector * free
+        return (confidence * masked + lam * laplacian(masked)) * free
+
+    right = (confidence * prior - lam * laplacian(fixed_values)) * free
+    solution = prior * free
+    residual = right - operator(solution)
+    direction = residual.clone()
+    residual_norm = torch.dot(residual, residual)
+    initial_norm = residual_norm.sqrt().clamp_min(1e-12)
+    for _ in range(int(config.cg_iterations)):
+        product = operator(direction)
+        denominator = torch.dot(direction, product).clamp_min(1e-20)
+        step = residual_norm / denominator
+        solution = solution + step * direction
+        next_residual = residual - step * product
+        next_norm = torch.dot(next_residual, next_residual)
+        if float(next_norm.sqrt() / initial_norm) <= float(config.cg_tolerance):
+            residual = next_residual
+            break
+        direction = next_residual + (next_norm / residual_norm.clamp_min(1e-20)) * direction
+        residual = next_residual
+        residual_norm = next_norm
+    probability = solution * free + fixed_values
     return probability.clamp(0.0, 1.0)
 
 

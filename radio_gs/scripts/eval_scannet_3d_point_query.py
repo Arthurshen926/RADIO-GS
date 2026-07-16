@@ -915,6 +915,10 @@ def evaluate_canonical_point_queries(
             residual=args.residual,
             unary_temperature=args.canonical_unary_temperature,
             support_threshold=args.canonical_support_threshold,
+            solver_type=getattr(args, "canonical_solver_type", "diffusion"),
+            laplacian_weight=getattr(args, "canonical_laplacian_weight", 1.0),
+            cg_iterations=getattr(args, "canonical_cg_iterations", 64),
+            cg_tolerance=getattr(args, "canonical_cg_tolerance", 1e-5),
         ),
         graph_policy=args.canonical_graph_policy,
         component_graph_policy=args.canonical_component_graph_policy,
@@ -952,42 +956,157 @@ def evaluate_canonical_point_queries(
     # core rows drift even though their inputs were identical.  Apart from
     # fixing the audit contract, this also makes ``macro_core_iou`` an exact
     # ablation control for every post-processing variant.
+    scale_candidates = [
+        int(value)
+        for value in str(getattr(args, "canonical_point_candidate_ks", ""))
+        .replace(",", " ")
+        .split()
+    ]
+    if any(value <= 0 for value in scale_candidates):
+        raise ValueError("canonical point candidate ks must be positive")
+    if not scale_candidates:
+        scale_candidates = [int(args.canonical_point_euclidean_candidate_k)]
+    scale_candidates = sorted(set(scale_candidates))
+    graph_hops = [
+        int(value)
+        for value in str(getattr(args, "canonical_point_graph_hops", ""))
+        .replace(",", " ")
+        .split()
+    ]
+    if any(value <= 0 for value in graph_hops):
+        raise ValueError("canonical point graph hops must be positive")
+    graph_hops = sorted(set(graph_hops))
+
+    def graph_hop_mask(seed_nodes: torch.Tensor, hops: int) -> torch.Tensor:
+        active = torch.zeros(graph.num_nodes, dtype=torch.bool, device=device)
+        active[torch.as_tensor(seed_nodes, device=device).long().reshape(-1)] = True
+        row, col = graph.edge_index
+        for _ in range(int(hops)):
+            reached = torch.zeros_like(active)
+            reached[row[active[col]]] = True
+            active |= reached
+        return active
+
+    def grouping_quality(result, query) -> dict[str, float]:
+        selected = result.selected_probabilities >= float(
+            args.canonical_support_threshold
+        )
+        unary_probability = torch.sigmoid(
+            result.unary / float(args.canonical_unary_temperature)
+        )
+        coherence = (
+            float(unary_probability[selected].mean()) if bool(selected.any()) else 0.0
+        )
+        seed_weights = query.positive_seeds.weights.to(result.probabilities)
+        seed_containment = float(
+            (result.probabilities * seed_weights).sum()
+            / seed_weights.sum().clamp_min(1e-8)
+        )
+        row, col = graph.edge_index
+        affinity = graph.raw_affinity
+        crossing = selected[row] != selected[col]
+        incident = selected[row] | selected[col]
+        conductance = float(
+            affinity[crossing].sum() / affinity[incident].sum().clamp_min(1e-8)
+        )
+        # Equal-weight geometric aggregation: no benchmark-specific fitted
+        # coefficient and no preference for a particular physical scale.
+        quality = (
+            max(coherence, 1e-8)
+            * max(seed_containment, 1e-8)
+            * max(1.0 - conductance, 1e-8)
+        ) ** (1.0 / 3.0)
+        return {
+            "quality": quality,
+            "unary_coherence": coherence,
+            "seed_containment": seed_containment,
+            "conductance": conductance,
+        }
+
     prepared: list[dict[str, Any]] = []
     for instance_id in eligible:
         target = instance_ids == instance_id
         candidates = np.flatnonzero(target)
         rng = np.random.default_rng(int(args.random_seed) + 1_000_003 * instance_id)
-        seed_index = int(candidates[int(rng.integers(0, candidates.size))])
-        query_point = torch.from_numpy(mesh_xyz[seed_index]).to(device=device)
-        query = compile_world_3d_query(
-            gaussian_xyz,
-            covariance,
-            query_point,
-            appearance_features=feature_banks["appearance"],
-            boundary_features=feature_banks["boundary"],
-            appearance_signature=bank.signatures["appearance"],
-            boundary_signature=bank.signatures["boundary"],
-            prototype_count=args.canonical_prototype_count,
-            prototype_strategy=args.canonical_prototype_strategy,
-            scene_mean_negative=True,
-            gaussian_precision=precision,
-            euclidean_candidate_k=args.canonical_point_euclidean_candidate_k,
-            seed_topk=args.canonical_point_seed_topk,
-            seed_temperature=args.canonical_point_seed_temperature,
+        click_count = min(max(1, int(args.clicks)), int(candidates.size))
+        if click_count == 1:
+            selected = candidates[int(rng.integers(0, candidates.size)) :][:1]
+        else:
+            selected = rng.choice(candidates, size=click_count, replace=False)
+        seed_indices = tuple(int(value) for value in np.asarray(selected).reshape(-1))
+        seed_index = seed_indices[0]
+        query_points = torch.from_numpy(mesh_xyz[np.asarray(seed_indices)]).to(device=device)
+        query_point = query_points[0]
+        scale_results = []
+        candidate_specs = [
+            {
+                "scale_type": "euclidean_k",
+                "scale_value": candidate_k,
+                "candidate_k": candidate_k,
+                "candidate_mask": None,
+            }
+            for candidate_k in scale_candidates
+        ]
+        nearest_nodes = torch.cdist(query_points.float(), gaussian_xyz.float()).argmin(dim=1)
+        candidate_specs.extend(
+            {
+                "scale_type": "graph_hops",
+                "scale_value": hops,
+                "candidate_k": 0,
+                "candidate_mask": graph_hop_mask(nearest_nodes, hops),
+            }
+            for hops in graph_hops
         )
-        core_result = engine.execute(
-            query,
-            feature_banks,
-            feature_signatures=bank.signatures,
-        )
+        for candidate_spec in candidate_specs:
+            query = compile_world_3d_query(
+                gaussian_xyz,
+                covariance,
+                query_points,
+                appearance_features=feature_banks["appearance"],
+                boundary_features=feature_banks["boundary"],
+                appearance_signature=bank.signatures["appearance"],
+                boundary_signature=bank.signatures["boundary"],
+                prototype_count=args.canonical_prototype_count,
+                prototype_strategy=args.canonical_prototype_strategy,
+                scene_mean_negative=True,
+                gaussian_precision=precision,
+                euclidean_candidate_k=int(candidate_spec["candidate_k"]),
+                seed_candidate_mask=candidate_spec["candidate_mask"],
+                seed_topk=args.canonical_point_seed_topk,
+                seed_temperature=args.canonical_point_seed_temperature,
+            )
+            core_result = engine.execute(
+                query, feature_banks, feature_signatures=bank.signatures
+            )
+            scale_results.append(
+                {
+                    "candidate_k": int(candidate_spec["candidate_k"]),
+                    "scale_type": str(candidate_spec["scale_type"]),
+                    "scale_value": int(candidate_spec["scale_value"]),
+                    "candidate_count": (
+                        int(candidate_spec["candidate_mask"].sum())
+                        if candidate_spec["candidate_mask"] is not None
+                        else int(candidate_spec["candidate_k"])
+                    ),
+                    "query": query,
+                    "core_result": core_result,
+                    "selection": grouping_quality(core_result, query),
+                }
+            )
+        automatic = max(scale_results, key=lambda value: value["selection"]["quality"])
         prepared.append(
             {
                 "instance_id": instance_id,
                 "target": target,
                 "seed_index": seed_index,
+                "seed_indices": seed_indices,
                 "query_point": query_point,
-                "query": query,
-                "core_result": core_result,
+                "query": automatic["query"],
+                "core_result": automatic["core_result"],
+                "scale_results": scale_results,
+                "automatic_candidate_k": automatic["candidate_k"],
+                "automatic_scale_type": automatic["scale_type"],
+                "automatic_scale_value": automatic["scale_value"],
             }
         )
 
@@ -1011,6 +1130,24 @@ def evaluate_canonical_point_queries(
         query_point = item["query_point"]
         query = item["query"]
         core_result = item["core_result"]
+        scale_diagnostics = []
+        for scale_item in item["scale_results"]:
+            primitive_values = scale_item["core_result"].selected_probabilities
+            values = primitive_values.detach().float().cpu().numpy()
+            mesh_probability = (values[neighbor] * projection_weight).sum(axis=1)
+            scale_prediction = mesh_probability >= float(
+                args.canonical_support_threshold
+            )
+            scale_diagnostics.append(
+                {
+                    "candidate_k": int(scale_item["candidate_k"]),
+                    "scale_type": str(scale_item["scale_type"]),
+                    "scale_value": int(scale_item["scale_value"]),
+                    "candidate_count": int(scale_item["candidate_count"]),
+                    "iou": _intersection_over_union(scale_prediction, target),
+                    **scale_item["selection"],
+                }
+            )
         result = core_result
         rendered_prompt_report = None
         if rendered_prompt_context is not None:
@@ -1055,7 +1192,9 @@ def evaluate_canonical_point_queries(
                 "instance_id": instance_id,
                 "label": str(meta.get("label", "")),
                 "seed_index": seed_index,
+                "seed_indices": list(item["seed_indices"]),
                 "seed_xyz": mesh_xyz[seed_index].tolist(),
+                "seed_xyzs": mesh_xyz[np.asarray(item["seed_indices"])].tolist(),
                 "num_gt_points": int(target.sum()),
                 "core_iou": _intersection_over_union(predictions["core"], target),
                 "unary_iou": _intersection_over_union(predictions["unary"], target),
@@ -1064,6 +1203,11 @@ def evaluate_canonical_point_queries(
                 ),
                 "iou": _intersection_over_union(prediction, target),
                 "num_predicted_points": int(prediction.sum()),
+                "automatic_candidate_k": int(item["automatic_candidate_k"]),
+                "automatic_scale_type": str(item["automatic_scale_type"]),
+                "automatic_scale_value": int(item["automatic_scale_value"]),
+                "scale_candidates": scale_diagnostics,
+                "oracle_scale_iou": max(value["iou"] for value in scale_diagnostics),
                 "rendered_prompt": rendered_prompt_report,
             }
         )
@@ -1073,6 +1217,9 @@ def evaluate_canonical_point_queries(
     propagated_ious = np.asarray(
         [row["propagated_iou"] for row in rows], dtype=np.float64
     )
+    oracle_scale_ious = np.asarray(
+        [row["oracle_scale_iou"] for row in rows], dtype=np.float64
+    )
     return {
         "num_queries": len(rows),
         "macro_core_iou": float(core_ious.mean()) if core_ious.size else 0.0,
@@ -1081,12 +1228,16 @@ def evaluate_canonical_point_queries(
             float(propagated_ious.mean()) if propagated_ious.size else 0.0
         ),
         "macro_connected_iou": float(ious.mean()) if ious.size else 0.0,
+        "macro_oracle_scale_iou": (
+            float(oracle_scale_ious.mean()) if oracle_scale_ious.size else 0.0
+        ),
         "accuracy_at_025": float((ious >= 0.25).mean()) if ious.size else 0.0,
         "accuracy_at_050": float((ious >= 0.50).mean()) if ious.size else 0.0,
         "queries": rows,
         "protocol": {
-            "query": "one deterministic GT-sampled mesh point per instance",
-            "query_reveals": "only the sampled world coordinate",
+            "query": f"{int(args.clicks)} deterministic GT-sampled mesh point(s) per instance",
+            "query_reveals": "only the sampled world coordinates",
+            "clicks_per_query": int(args.clicks),
             "field_domain": "canonical Gaussian primitives",
             "output_domain": "official ScanNet mesh vertices",
             "mesh_projection": f"adaptive-sigma Gaussian kNN mean, k={projection_k}",
@@ -1101,6 +1252,13 @@ def evaluate_canonical_point_queries(
             "point_seed_euclidean_candidate_k": int(
                 args.canonical_point_euclidean_candidate_k
             ),
+            "point_seed_candidate_ks": scale_candidates,
+            "point_seed_graph_hops": graph_hops,
+            "automatic_scale_selection": (
+                "equal-weight geometric mean of unary coherence, seed containment, "
+                "and one-minus graph conductance"
+            ),
+            "oracle_scale_diagnostic_uses_gt_only_for_reporting": True,
             "unary": "official DINOv3 + official SAM3 prototypes minus unlabeled scene mean",
             "primitive_reliability": (
                 {
@@ -1173,6 +1331,12 @@ def evaluate_canonical_point_queries(
                 "residual": float(args.residual),
                 "unary_temperature": float(args.canonical_unary_temperature),
                 "support_threshold": float(args.canonical_support_threshold),
+                "solver_type": getattr(args, "canonical_solver_type", "diffusion"),
+                "laplacian_weight": float(
+                    getattr(args, "canonical_laplacian_weight", 1.0)
+                ),
+                "cg_iterations": int(getattr(args, "canonical_cg_iterations", 64)),
+                "hard_seed_threshold": 0.20,
             },
             "test_calibration": False,
             "test_calibration_definition": (
@@ -1292,6 +1456,23 @@ def main() -> None:
     parser.add_argument(
         "--canonical_point_euclidean_candidate_k", type=int, default=64
     )
+    parser.add_argument(
+        "--canonical_point_candidate_ks",
+        default="",
+        help=(
+            "Optional comma list of label-free local support sizes. The formal "
+            "prediction selects one by evidence coherence; GT is used only for "
+            "the separately reported oracle-scale diagnostic."
+        ),
+    )
+    parser.add_argument(
+        "--canonical_point_graph_hops",
+        default="",
+        help=(
+            "Optional comma list of query-independent support-graph hop radii; "
+            "adds surface-aware candidates to the same label-free scale selector."
+        ),
+    )
     parser.add_argument("--canonical_point_seed_temperature", type=float, default=1.0)
     parser.add_argument("--canonical_appearance_weight", type=float, default=1.0)
     parser.add_argument("--canonical_boundary_weight", type=float, default=0.35)
@@ -1312,6 +1493,14 @@ def main() -> None:
     parser.add_argument("--canonical_score_tanh_scale", type=float, default=2.0)
     parser.add_argument("--canonical_score_chunk_size", type=int, default=65536)
     parser.add_argument("--canonical_solver_iterations", type=int, default=12)
+    parser.add_argument(
+        "--canonical_solver_type",
+        choices=("diffusion", "random_walker", "confidence_random_walker"),
+        default="diffusion",
+    )
+    parser.add_argument("--canonical_laplacian_weight", type=float, default=1.0)
+    parser.add_argument("--canonical_cg_iterations", type=int, default=64)
+    parser.add_argument("--canonical_cg_tolerance", type=float, default=1e-5)
     parser.add_argument("--canonical_unary_temperature", type=float, default=0.10)
     parser.add_argument("--canonical_support_threshold", type=float, default=0.50)
     parser.add_argument("--mesh_projection_k", type=int, default=8)
@@ -1354,6 +1543,8 @@ def main() -> None:
     args = parser.parse_args()
     if not 0.0 <= float(args.canonical_sam3_min_predicted_quality) <= 1.0:
         raise ValueError("--canonical_sam3_min_predicted_quality must be in [0,1]")
+    if bool(args.canonical_sam3_multiview) and int(args.clicks) != 1:
+        raise ValueError("canonical rendered SAM3 currently requires --clicks 1")
 
     instance_ids, metadata = load_scannet_instances(args.aggregation, args.segmentation)
     mesh_xyz = None

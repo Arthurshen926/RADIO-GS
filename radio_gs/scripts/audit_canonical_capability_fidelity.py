@@ -18,6 +18,7 @@ from radio_gs.evaluation.capability_fidelity import (
     relation_fidelity_summary,
 )
 from radio_gs.field import (
+    load_boundary_screen_residual_checkpoint,
     load_canonical_field_checkpoint,
     load_view_residual_checkpoint,
 )
@@ -26,6 +27,7 @@ from radio_gs.models.radio_adaptors import (
     project_feature_map_with_adaptor,
 )
 from radio_gs.rendering.coefficient_renderer import (
+    render_boundary_conditioned_radio,
     render_canonical_radio,
     render_view_conditioned_radio,
 )
@@ -60,7 +62,7 @@ def _parse_frame_ids(raw: str) -> list[int]:
     return result
 
 
-def _dataset(config, renderer) -> SimpleRadioDataset:
+def _dataset(config, renderer, frame_ids: list[int] | None = None) -> SimpleRadioDataset:
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
     raw_pose_file = str(getattr(config, "pose_file", "") or "").strip()
     pose_file = raw_pose_file if raw_pose_file and Path(raw_pose_file).is_file() else None
@@ -81,6 +83,7 @@ def _dataset(config, renderer) -> SimpleRadioDataset:
         ),
         split="validation",
         dataset_type=str(getattr(config, "dataset_type", "lerf")),
+        frame_ids=frame_ids,
     )
 
 
@@ -103,6 +106,10 @@ def audit(args: argparse.Namespace) -> dict:
     field = field.to(device).eval()
     residual = None
     residual_payload = None
+    boundary_residual = None
+    boundary_payload = None
+    if str(args.view_residual_checkpoint).strip() and str(args.boundary_residual_checkpoint).strip():
+        raise ValueError("view and boundary residual checkpoints are mutually exclusive")
     if str(args.view_residual_checkpoint).strip():
         residual, residual_payload = load_view_residual_checkpoint(
             args.view_residual_checkpoint, map_location="cpu"
@@ -112,6 +119,11 @@ def audit(args: argparse.Namespace) -> dict:
         ):
             raise ValueError("view residual was trained over another field")
         residual = residual.to(device).eval()
+    if str(args.boundary_residual_checkpoint).strip():
+        boundary_residual, boundary_payload = load_boundary_screen_residual_checkpoint(
+            args.boundary_residual_checkpoint, map_location="cpu"
+        )
+        boundary_residual = boundary_residual.to(device).eval()
 
     frames = _parse_frame_ids(args.frame_ids)
     mpr_training = {
@@ -123,7 +135,8 @@ def audit(args: argparse.Namespace) -> dict:
     overlap = sorted(set(frames).intersection(mpr_training))
     if overlap:
         raise ValueError(f"capability audit frames overlap MPR training: {overlap}")
-    dataset = _dataset(config, renderer)
+    included_frames = _parse_frame_ids(args.include_frame_ids) if str(args.include_frame_ids).strip() else []
+    dataset = _dataset(config, renderer, included_frames or None)
     frame_to_index = {int(frame): index for index, frame in enumerate(dataset.frame_indices)}
     missing = sorted(set(frames) - set(frame_to_index))
     if missing:
@@ -149,7 +162,17 @@ def audit(args: argparse.Namespace) -> dict:
         for frame in frames:
             sample = dataset[frame_to_index[frame]]
             pose = sample["pose_w2c"].to(device)
-            if residual is None:
+            if boundary_residual is not None:
+                rendered = render_boundary_conditioned_radio(
+                    renderer,
+                    model,
+                    field,
+                    boundary_residual,
+                    pose,
+                    feature_height=sample["radio_features"].shape[1],
+                    feature_width=sample["radio_features"].shape[2],
+                )
+            elif residual is None:
                 rendered = render_canonical_radio(
                     renderer,
                     model,
@@ -219,6 +242,8 @@ def audit(args: argparse.Namespace) -> dict:
             "official_adaptors_frozen": True,
             "benchmark_masks_opened": False,
             "text_queries_opened": False,
+            "screen_residual_only": boundary_residual is not None,
+            "primitive_queries_unchanged": boundary_residual is not None,
             "boundary_definition": (
                 "lowest/highest teacher-adaptor local-affinity quantiles; no task labels"
             ),
@@ -227,6 +252,10 @@ def audit(args: argparse.Namespace) -> dict:
             "field_checkpoint": str(Path(args.field_checkpoint).resolve()),
             "view_residual_checkpoint": (
                 str(Path(args.view_residual_checkpoint).resolve()) if residual is not None else ""
+            ),
+            "boundary_residual_checkpoint": (
+                str(Path(args.boundary_residual_checkpoint).resolve())
+                if boundary_residual is not None else ""
             ),
             "radio_checkpoint": str(radio_checkpoint.resolve()),
             "radio_checkpoint_sha256": _sha256_file(radio_checkpoint),
@@ -247,8 +276,10 @@ def main() -> None:
     parser.add_argument("--geometry-checkpoint", required=True)
     parser.add_argument("--field-checkpoint", required=True)
     parser.add_argument("--view-residual-checkpoint", default="")
+    parser.add_argument("--boundary-residual-checkpoint", default="")
     parser.add_argument("--radio-checkpoint", required=True)
     parser.add_argument("--frame-ids", required=True)
+    parser.add_argument("--include-frame-ids", default="")
     parser.add_argument("--output", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--alpha-threshold", type=float, default=0.02)
@@ -260,4 +291,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

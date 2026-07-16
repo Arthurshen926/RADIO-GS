@@ -1,3 +1,4 @@
+import pytest
 import torch
 
 from radio_gs.losses.radio_adaptor_loss import compute_radio_adaptor_alignment_loss
@@ -80,6 +81,24 @@ def test_masked_render_losses_ignore_unsupported_pixels_and_pairs() -> None:
 
     assert alignment.item() < 1e-6
     assert local.item() < 1e-6
+
+
+def test_masked_render_losses_support_teacher_boundary_balancing() -> None:
+    torch.manual_seed(7)
+    target = torch.randn(1, 4, 4, 4)
+    decoded = target.clone()
+    decoded[:, :, :, 2:] = decoded[:, :, :, 2:].flip(-1)
+    valid = torch.ones(1, 4, 4, dtype=torch.bool)
+    _alignment, local, stats = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        target,
+        {"sam3": IdentityAdaptor()},
+        valid,
+        local_balance_quantile=0.2,
+    )
+    assert torch.isfinite(local)
+    assert local.item() > 0
+    assert stats["sam3"]["local_balance_quantile"].item() == pytest.approx(0.2)
 
 
 def test_compute_radio_adaptor_relation_loss_matches_identical_pairwise_structure():

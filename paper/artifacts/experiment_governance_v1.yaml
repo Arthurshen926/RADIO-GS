@@ -1,0 +1,69 @@
+schema_version: 1
+name: query_consistent_radio_field_governance_v1
+frozen_at: 2026-07-15
+
+roles:
+  development:
+    - lerf_ramen
+    - lerf_figurines
+    - nvos_fern
+    - spin_fern
+    - scannet_scene0000_00
+  validation:
+    - scannet_scene0062_00
+    - scannet_scene0140_00
+    - scannet_scene0200_00
+  sealed_test:
+    - remaining_lerf_scenes
+    - remaining_nvos_scenes
+    - remaining_spin_nerf_scenes
+    - remaining_scannet_scenes
+
+validation_policy:
+  query_free_field_build: true
+  benchmark_masks_opened_during_field_build: false
+  benchmark_labels_opened_during_field_build: false
+  text_queries_opened_during_field_build: false
+  per_scene_hyperparameter_selection: false
+  global_hyperparameters_source: development_only
+  fixed_render_validation_frames:
+    scannet_scene0062_00: [0, 240, 480, 720]
+    scannet_scene0140_00: [0, 1420, 2860, 4280]
+    scannet_scene0200_00: [0, 300, 600, 900]
+  registered_observation_frames:
+    scannet_scene0200_00: "0..900 step 20; RGB frames 920..1100 lack poses and are excluded fail-closed"
+
+promotion_gates:
+  render_matched_field:
+    minimum_scenes: 3
+    raw_dino_sam_mean_noninferior: true
+    raw_dino_sam_p05_noninferior: true
+    primitive_fidelity_max_drop: 0.005
+    task_metric_noninferior: true
+  boundary_residual:
+    minimum_scenes: 3
+    boundary_margin_must_improve: true
+    global_capability_noninferior: true
+    primitive_query_exactly_unchanged: true
+  seeded_solver:
+    benchmark_specific_parameters: false
+    must_pareto_dominate_diffusion_across_nvos_spin_scannet: true
+  compact_representation:
+    matched_bytes_and_shared_parameters: true
+    fusion_must_be_on_memory_accuracy_pareto_frontier: true
+
+required_provenance:
+  - method_commit
+  - field_checkpoint_sha256
+  - mpr_contract_sha256
+  - render_operator_sha256
+  - radio_normalization_semantics
+  - capability_adaptor_sha256
+  - query_compiler_sha256
+  - query_prototype_strategy
+  - world_point_scale_policy
+  - graph_topology_sha256
+  - solver_sha256
+  - view_residual_sha256
+  - boundary_residual_condition_variables
+  - external_sam_variant

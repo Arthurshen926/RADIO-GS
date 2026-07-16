@@ -2,6 +2,10 @@
 
 from .basis_decoder import AffineBasisDecoder, fit_affine_basis
 from .canonical_gaussian_field import CanonicalGaussianField
+from .boundary_screen_residual import (
+    BoundaryConditionedScreenResidual,
+    load_boundary_screen_residual_checkpoint,
+)
 from .checkpoint import load_canonical_field_checkpoint
 from .view_residual import ZeroMeanViewResidual, load_view_residual_checkpoint
 from .observation_lifting_contract import (
@@ -22,6 +26,7 @@ from .spatial_hash import PrimitiveSpatialHash
 __all__ = [
     "AffineBasisDecoder",
     "CanonicalGaussianField",
+    "BoundaryConditionedScreenResidual",
     "FeatureSpaceSignature",
     "PrimitiveFusion",
     "PrimitiveReliability",
@@ -29,6 +34,7 @@ __all__ = [
     "canonical_primitive_reliability",
     "fit_affine_basis",
     "load_canonical_field_checkpoint",
+    "load_boundary_screen_residual_checkpoint",
     "ZeroMeanViewResidual",
     "load_view_residual_checkpoint",
     "CANONICAL_OBSERVATION_CONTRACT_NAME",

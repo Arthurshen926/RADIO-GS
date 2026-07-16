@@ -194,6 +194,7 @@ def compute_radio_adaptor_masked_render_losses(
     *,
     adaptor_weights: Mapping[str, float] | None = None,
     local_radius: int = 1,
+    local_balance_quantile: float = 0.0,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, dict[str, torch.Tensor]]]:
     """Preserve official dense capability and local relations after rendering.
 
@@ -241,11 +242,28 @@ def compute_radio_adaptor_masked_render_losses(
             teacher_relation = _masked_local_affinity_values(
                 teacher, valid, radius=int(local_radius)
             )
-        local = (
-            F.mse_loss(predicted_relation, teacher_relation)
-            if predicted_relation.numel()
-            else _zero_like_features(predicted)
-        )
+        balance_quantile = float(local_balance_quantile)
+        if not 0.0 <= balance_quantile < 0.5:
+            raise ValueError("local_balance_quantile must be in [0, 0.5)")
+        if predicted_relation.numel() and balance_quantile > 0.0:
+            # Interior pairs vastly outnumber true discontinuities.  Balance
+            # the two teacher-defined tails so the loss cannot minimize its
+            # average by smoothing away SAM boundaries.  The selection is
+            # query/label-free and the teacher branch remains frozen.
+            lower = torch.quantile(teacher_relation, balance_quantile)
+            upper = torch.quantile(teacher_relation, 1.0 - balance_quantile)
+            boundary = teacher_relation <= lower
+            interior = teacher_relation >= upper
+            local = 0.5 * (
+                F.mse_loss(predicted_relation[boundary], teacher_relation[boundary])
+                + F.mse_loss(predicted_relation[interior], teacher_relation[interior])
+            )
+        else:
+            local = (
+                F.mse_loss(predicted_relation, teacher_relation)
+                if predicted_relation.numel()
+                else _zero_like_features(predicted)
+            )
         normalized_weight = float(weight) / total_weight
         alignment_total = alignment_total + normalized_weight * alignment
         local_total = local_total + normalized_weight * local
@@ -257,6 +275,9 @@ def compute_radio_adaptor_masked_render_losses(
             ),
             "visible_pairs": torch.as_tensor(
                 int(predicted_relation.numel()), device=decoded.device
+            ),
+            "local_balance_quantile": torch.as_tensor(
+                balance_quantile, device=decoded.device
             ),
         }
     return alignment_total, local_total, details

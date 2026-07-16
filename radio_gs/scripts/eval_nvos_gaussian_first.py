@@ -473,6 +473,10 @@ def run(args: argparse.Namespace) -> dict:
                     residual=args.solver_residual,
                     unary_temperature=args.solver_unary_temperature,
                     support_threshold=args.solver_support_threshold,
+                    solver_type=getattr(args, "solver_type", "diffusion"),
+                    laplacian_weight=getattr(args, "laplacian_weight", 1.0),
+                    cg_iterations=getattr(args, "cg_iterations", 64),
+                    cg_tolerance=getattr(args, "cg_tolerance", 1e-5),
                 ),
                 graph_policy=args.graph_policy,
                 component_graph_policy=args.component_graph_policy,
@@ -717,6 +721,10 @@ def run(args: argparse.Namespace) -> dict:
                 "residual": float(args.solver_residual),
                 "unary_temperature": float(args.solver_unary_temperature),
                 "support_threshold": float(args.solver_support_threshold),
+                "solver_type": getattr(args, "solver_type", "diffusion"),
+                "laplacian_weight": float(getattr(args, "laplacian_weight", 1.0)),
+                "cg_iterations": int(getattr(args, "cg_iterations", 64)),
+                "hard_seed_threshold": 0.20,
                 "graph_policy": args.graph_policy,
                 "component_graph_policy": args.component_graph_policy,
                 "graph_legacy_residual": float(args.graph_legacy_residual),
@@ -911,6 +919,12 @@ def main() -> None:
     parser.add_argument("--score-chunk-size", type=int, default=65536)
     parser.add_argument("--solver-iterations", type=int, default=12)
     parser.add_argument("--solver-residual", type=float, default=0.30)
+    parser.add_argument(
+        "--solver-type", choices=("diffusion", "random_walker", "confidence_random_walker"), default="diffusion"
+    )
+    parser.add_argument("--laplacian-weight", type=float, default=1.0)
+    parser.add_argument("--cg-iterations", type=int, default=64)
+    parser.add_argument("--cg-tolerance", type=float, default=1e-5)
     parser.add_argument("--solver-unary-temperature", type=float, default=0.10)
     parser.add_argument("--solver-support-threshold", type=float, default=0.50)
     args = parser.parse_args()

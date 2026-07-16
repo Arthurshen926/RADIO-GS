@@ -2,7 +2,10 @@
 
 RADIO-GS reconstructs one query-independent C-RADIOv4 feature field on 3D Gaussian primitives and exposes several frozen query interfaces over that same field.
 
-The current research mainline is the **query-consistent canonical field**. The older HCD, dual-stream screen decoder, and screen-space refiner remain available only as legacy baselines; they are not the default method described here.
+The current research mainline is the **query-consistent canonical field trained
+with `canonical-mpr-v2`**. The older HCD, dual-stream screen decoder, and
+screen-space refiner remain available only as legacy baselines; they are not
+the default method described here.
 
 ## Current method
 
@@ -37,6 +40,12 @@ compact canonical Gaussian field
 The canonical field reconstructs raw RADIO only. It never stores a text query, image query, prompt, benchmark mask, or task-specific score. Its affine decoder is point- and batch-invariant, so direct primitive reads and alpha-normalized rendered reads use the same decoded primitive truth.
 
 All new fields require the versioned `canonical-mpr-v1` observation contract.
+This is the lifting-layer contract.  The promoted field-training contract is
+`canonical-mpr-v2`: initialize from a compliant v1 MPR field, replay the exact
+renderer, jointly preserve raw RADIO and frozen official DINOv3/SAM3 outputs
+and local affinities, and constrain primitive replay.  Promotion is fail-closed
+through the held-out multi-capability Pareto gate; it does not use benchmark
+masks, labels, query text, or test-set calibration.
 The optional view residual is centered with exact replayed MPR weights and is
 never read by primitive-domain text, image, registered-prompt, or 3D-point
 queries. It only compensates view context when rendering a 2D feature map.
