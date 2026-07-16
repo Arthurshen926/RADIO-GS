@@ -1,0 +1,100 @@
+schema_version: 1
+name: canonical-mpr-v3-evaluation-freeze
+frozen_at: 2026-07-16
+base_git_commit: 2f0e778a4db5da033743118e41c291114a17d0bc
+policy:
+  method_and_hyperparameters_frozen: true
+  allowed_after_freeze:
+    - resume_failed_or_incomplete_jobs
+    - fix_crashes_without_changing_numerical_semantics
+    - aggregate_metrics_and_write_diagnostics
+  forbidden_after_freeze:
+    - scene_specific_tuning
+    - benchmark_label_or_mask_calibration
+    - query_set_calibration
+    - test_set_calibration
+  note: Exact file hashes below supersede the dirty-worktree base commit.
+
+method:
+  mainline_manifest: paper/artifacts/canonical_mainline_v3.yaml
+  mainline_manifest_sha256: 3d6d36ab91ef3b2c406a6fad02bc9bf085a680690f84e35896751d414d57dbae
+  official_c_radio_checkpoint: /root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar
+  official_c_radio_checkpoint_sha256: bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9
+  global_surface_region_readout: output/optimization_20260716/global_3d_readout/surface_region_readout_h128.pth
+  global_surface_region_readout_sha256: 06c1d9c3bfaf674de54fa1167aa2d156e183e0a751c87d0e7c09733928464b5b
+
+promptable_reconstruction:
+  runner: radio_gs/scripts/run_canonical_promptable_closeout.py
+  runner_sha256: 79f8b4c0dec1366d57770b550d7f173e5c1f7bba3fa4ee9a2a750bfa3de2f6cf
+  lifting_contract: canonical-mpr-v1
+  canonical_field:
+    coefficient_dim: 256
+    local_dim: 128
+    primitive_fusion: true
+    official_capability_loss: true
+    epochs: 20
+    min_epochs: 5
+    target_cosine: 0.985
+    seed: 0
+  support_graph:
+    neighbors: 16
+    topology_mode: symmetric_union
+  registered_prompt_solver:
+    type: confidence_random_walker
+    laplacian_weight: 1.0
+    hard_positive_negative_constraints: true
+    support_threshold: 0.50
+    feature_calibration: none
+    score_calibration: none
+  runtime_only:
+    cuda_allocator: "garbage_collection_threshold:0.6,max_split_size_mb:128"
+    changes_numerical_hyperparameters: false
+    reason: avoid_fragmentation_during_full_resolution_3dgs_densification
+  spin_nerf:
+    status: diagnostic_only
+    reason: full_reference_mask_is_not_the_official_sparse_point_protocol
+    available_scenes: 9
+    missing_scene: fork
+    protocol_hash: d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752
+    queue_plan: output/unified_query/spin9_gaussfm_queue_20260712/queue_plan.json
+    queue_plan_sha256: 8cfb744099b8aa1efe9e8f65e376b61c305320e200310de448d8ab85c44953f3
+    manifest: output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json
+    manifest_sha256: e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede
+  nvos:
+    scenes: 8
+    target_rgb_absent_from_geometry_and_feature_extraction: true
+    feature_manifests_checked: 8
+    nonnumeric_excluded_stems_forwarded_to_integer_mpr_filter: false
+
+text_query:
+  scoring: independent_normalized_cosine
+  test_set_calibration: false
+  query_set_invariant: true
+  lerf_compatibility: paper_protocol_with_explicit_query_cache
+  scannet: official_label_mapping_with_19_15_10_class_reports
+
+source_hashes:
+  canonical_field: 245d81ec308c80c37f00d7f5162817d5b34c9c1e32cf253df5be1fe27954aaf0
+  geometry_training: 0e2b845ae76c9d06197df5a5397e104f291d2eb61262a43c06e3cd23f6336fd6
+  radio_feature_extraction: 2c593071a2d373289fd6d755cba539475dc2ca1fdae352c38d4f3a6f0b6dcd07
+  legacy_teacher_field: 73098d7f6defed455c87a8b9dca9b3a9fc61886c5e8a99c52ae549fe0ba23a67
+  mpr_lifting: fa08b43e8be19c18801695c3bce1f94b7ffa3359cebb99d2609a18b4b1be0f90
+  canonical_training: f751469226382c44ec9d2a1d83e53318d279bb98755d0fecb36a53d78ed199f0
+  capability_views: 6e6c85c186e072c351892193b41f95f78109c4272f04e98777231f25e3208c6d
+  support_graph: a10d8689da031eb958c4e2bc35ba4612bf29b3fcfd9f8d2a3d4070214e270834
+  registered_prompt_evaluator: faa4d9a31597fa426fd4ccd90ec03c801c4774f34f88ff3f521dce967daf8176
+  seeded_solver: db26110437b87995dde7c0647bd06167c41430acb9fdaa6be280af0cb55a501a
+  surface_region_readout: 250680859e1697856150a9e374465a9f2e8b92dd25091dd066b0b97a07a9c2a4
+  surface_region_training: d2dba86d16d077953b3208e6e177c4ef116febf362418eb5782af4e2e95adfc8
+  primitive_text_scoring: 2621a3372dc98af14675ff3ec58373cfa1eb0dba09b8114f1281c954fd9fb914
+  scannet_text_evaluator: 09b7096ab69b3f42a9472d213438b677e8a812a7ade0167fca67ce9358b64482
+  lerf_evaluator: 44d239edf88d58f4dc2830ac3fdf66a291d789cbb914e00fb8a2c8fb0a348017
+  registered_prompt_aggregator: 63eb005ba05d7191bf301a321b0cc8f81243a26f0e3624116aecd377454020c4
+
+frozen_evidence:
+  region_text_summary: output/optimization_20260716/global_3d_readout/canonical_mpr_v3_text_summary.json
+  region_text_summary_sha256: c31ead2980c0421ece9501f00d253612c8a190f3a488e1948ec170ff2193441d
+  region_scale_audit: output/optimization_20260716/global_3d_readout/validation_by_physical_scale.json
+  region_scale_audit_sha256: 21a431a50dfb0a9e4cd62972cdec96c5940fdd9618b210cd2114d2590edb6eb6
+  nvos_eight_scene_summary: output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/summary.json
+  nvos_eight_scene_summary_sha256: 2c8846ca0aedd47f86e6479eae75345dc47d6b24eceba2c1d158e6354cda054b

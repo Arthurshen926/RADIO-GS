@@ -157,7 +157,7 @@ def graph_for_query_intent(
     graph: PrimitiveSupportGraph,
     intent: QueryIntent,
     *,
-    policy: str = "legacy",
+    policy: str = "typed_if_available",
     legacy_residual: float = 0.0,
 ) -> PrimitiveSupportGraph:
     """Resolve one frozen, modality-independent channel policy for a query intent."""
@@ -165,6 +165,15 @@ def graph_for_query_intent(
     policy = str(policy)
     if policy == "legacy":
         return graph
+    if policy == "typed_if_available":
+        required = (
+            {"geometry", "boundary"}
+            if QueryIntent(intent) is QueryIntent.CATEGORY
+            else {"geometry", "appearance", "boundary"}
+        )
+        if not required.issubset(graph.edge_channels):
+            return graph
+        policy = "typed"
     if policy == "typed":
         policy = (
             "category_mix"

@@ -35,6 +35,7 @@ class QueryResult:
     selected_support: torch.Tensor
     score_calibration: str = "none"
     reliability_applied: bool = False
+    graph_policy: str = "typed_if_available"
 
     @property
     def selected_probabilities(self) -> torch.Tensor:
@@ -50,7 +51,7 @@ class CanonicalQueryEngine:
         *,
         scoring_config: EvidenceScoringConfig = EvidenceScoringConfig(),
         solver_config: SupportSolverConfig = SupportSolverConfig(),
-        graph_policy: str = "legacy",
+        graph_policy: str = "typed_if_available",
         component_graph_policy: str = "same",
         graph_legacy_residual: float = 0.0,
         node_reliability: torch.Tensor | None = None,
@@ -211,4 +212,5 @@ class CanonicalQueryEngine:
             selected_support=selected,
             score_calibration=scoring_config.score_calibration,
             reliability_applied=reliability_applied,
+            graph_policy=self.graph_policy,
         )

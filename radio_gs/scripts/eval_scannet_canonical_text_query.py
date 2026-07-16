@@ -99,7 +99,7 @@ def load_primitive_semantic_cache(
     schema_version = payload.get("schema_version")
     if schema_version is None and isinstance(payload.get("metadata"), Mapping):
         schema_version = payload["metadata"].get("schema_version")
-    if int(schema_version or -1) != 1:
+    if int(schema_version or -1) not in {1, 3, 4}:
         raise ValueError(f"unsupported primitive semantic cache: {path}")
     required = {"xyz", "valid", "metadata"}
     if not required.issubset(payload):
@@ -116,7 +116,22 @@ def load_primitive_semantic_cache(
     count = int(xyz.shape[0]) if xyz.ndim == 2 else -1
     if xyz.ndim != 2 or xyz.shape[1] != 3 or valid.shape != (count,):
         raise ValueError("semantic cache xyz/valid rows are malformed")
-    if features.ndim != 2 or features.shape[0] != count:
+    if int(schema_version) == 4:
+        global_rows = torch.as_tensor(payload.get("global_rows")).long().cpu()
+        if global_rows.ndim != 1 or features.ndim != 2:
+            raise ValueError("sparse semantic cache rows are malformed")
+        if features.shape[0] != global_rows.numel():
+            raise ValueError("sparse semantic features do not align with global_rows")
+        if bool((global_rows < 0).any()) or bool((global_rows >= count).any()):
+            raise ValueError("sparse semantic global_rows are out of bounds")
+        if global_rows.numel() != torch.unique(global_rows).numel():
+            raise ValueError("sparse semantic global_rows contain duplicates")
+        if not torch.equal(torch.where(valid)[0], global_rows):
+            raise ValueError("sparse semantic global_rows do not match valid")
+        dense_features = torch.zeros(count, features.shape[1], dtype=features.dtype)
+        dense_features[global_rows] = features
+        features = dense_features
+    elif features.ndim != 2 or features.shape[0] != count:
         raise ValueError("semantic cache features do not align with geometry")
     if not bool(valid.any()):
         raise ValueError("semantic cache has no valid primitive rows")
@@ -127,6 +142,7 @@ def load_primitive_semantic_cache(
         "canonical_radio_primitive_neighborhood",
         "mpr_radio_primitive_neighborhood",
         "official_crop_summary_mpr",
+        "canonical_radio_surface_region_readout",
     }:
         raise ValueError(f"unsupported semantic cache source: {source}")
     if source.startswith("mpr_") and not allow_mpr_oracle:

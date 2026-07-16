@@ -22,6 +22,11 @@ from .semantic_alignment import (
     SemanticAlignmentStage,
     SemanticOracleResult,
 )
+from .surface_region_summary import (
+    SURFACE_GEOMETRY_DIM,
+    SurfaceRegionSummaryReadout,
+    surface_region_geometry,
+)
 
 __all__ = [
     "CanonicalCapabilityBank",
@@ -36,7 +41,10 @@ __all__ = [
     "SemanticAlignmentPolicy",
     "SemanticAlignmentStage",
     "SemanticOracleResult",
+    "SURFACE_GEOMETRY_DIM",
+    "SurfaceRegionSummaryReadout",
     "load_canonical_capability_bank",
     "load_canonical_primitive_reliability",
     "load_canonical_support_graph",
+    "surface_region_geometry",
 ]

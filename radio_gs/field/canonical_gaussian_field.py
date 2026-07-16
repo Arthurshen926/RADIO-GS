@@ -143,8 +143,16 @@ class CanonicalGaussianField(nn.Module):
         return self.coefficients()
 
     def primitive_confidence(self) -> torch.Tensor | None:
-        """Training-only observation reliability for confidence-aware splatting."""
+        """Training-only joint reliability for confidence-aware splatting.
+
+        Reliability channels are conjunctive evidence (coverage, agreement,
+        etc.), so a geometric mean is appropriate.  ``amax`` allowed one good
+        channel to hide a failed channel and systematically over-trusted
+        boundary/occlusion primitives.
+        """
 
         if self.reliability.shape[1] == 0:
             return None
-        return self.reliability.amax(dim=-1).clamp(0.0, 1.0)
+        values = self.reliability.clamp(0.0, 1.0)
+        confidence = values.clamp_min(1e-6).log().mean(dim=-1).exp()
+        return confidence.masked_fill((values <= 0).any(dim=-1), 0.0)

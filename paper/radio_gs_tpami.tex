@@ -348,69 +348,66 @@ feature-only field, then initialize the FGC model from that checkpoint and
 continue training with the frozen geometry-head loss active. This makes FGC a
 late geometry-aware refinement signal instead of an early competing objective.
 
-\subsection{Sparse Primitive Anchoring by Multiview Registration}
+\subsection{Canonical MPR and Global Surface-Region Readout}
 
-\emph{Multiview Primitive Registration} is a training and analysis bridge, not a
-deployed feature cache. It renders decoded RADIO-space features from posed
-views, applies view-conditioned calibration and the frozen SigLIP2 summary head,
-and registers the resulting text-aligned summaries back to visible Gaussian
-centers with depth/alpha checks. This produces sparse primitive-level semantic
-targets from multiview evidence while keeping the stored representation as a
-compact RADIO-reconstructive memory.
+\emph{Multiview Primitive Registration} (MPR) is query-free observation
+lifting: posed teacher observations are fused into one compact canonical RADIO
+field using visibility, coverage, and cross-view agreement.  It never consumes
+text, object masks, benchmark labels, or a scene-specific classifier.  A
+zero-mean low-capacity view residual may compensate only rendering context; all
+text, image, and prompt interfaces still query the same canonical primitive
+memory.
 
-To make the direct compact field itself more usable, we train a
-label-free multiview-registration-to-field consistency variant. Let
-$\bar{e}^{\mathrm{mpr}}_i$ be the registered normalized summary target for
-Gaussian $i$, and let $n_i$ be the number of posed views that registered valid
-evidence to Gaussian $i$. The transfer objective uses a label-free confidence
-weight
-$w_i=\log(1+n_i)/\mathrm{mean}_j\log(1+n_j)$ over valid registered primitives.
-We fine-tune the compact field and a lightweight summary adaptor with
+Dense SigLIP2 spatial tokens are not themselves reliable region summaries.
+We therefore train one global surface-region readout on label-free ScanNet train
+scenes and select it on disjoint official-validation scenes.  For primitive
+$i$, a fixed physical-radius neighborhood $\mathcal{N}_r(i)$ is gathered from a
+geometry/RGB-discontinuity surface graph.  The shared readout pools decoded
+canonical RADIO features, relative 3-D geometry, and query-independent MPR
+reliability,
 \[
-  \mathcal{L}_{v2f}
-  = 1 - \cos(A_{\mathrm{SigLIP2}}(D_{\theta}(c_i)),
-             \mathrm{sg}[\bar{e}^{\mathrm{mpr}}_i])
-  + \lambda\,\mathcal{L}_{text},
+  u_i^r = R_\phi\!\left(\{D_\theta(c_j),\,g_{ij},\,\rho_j\}_{j\in
+  \mathcal{N}_r(i)}\right), \qquad
+  e_i = \mathrm{norm}\!\left(\frac{1}{|\mathcal R|}
+  \sum_{r\in\mathcal R} A_{\mathrm{SigLIP2}}(u_i^r)\right).
 \]
-where $\mathcal{L}_{text}$ matches the registered multiview scene-query
-distribution and uses only the LERF text categories, not object masks; all loss
-terms are averaged with $w_i$. Importantly, the supervision path still decodes
-$c_i$ to RADIO space before the SigLIP2 summary head is applied. The compact
-latent is never directly stored or optimized as a standalone SigLIP embedding.
-At inference, the main compact memory does not read the registration targets.
-For the Dr.~Splat-inspired audit, we also implement rasterizer-level
-Gaussian--pixel hit registration variants: all footprint contributions,
-per-pixel dominant hits, and per-Gaussian top-contribution pixels. These variants
-capture real rasterization intersections instead of only projected centers, but
-they are treated as negative controls because they reduce the LERF direct-3D
-metrics under the fixed protocol.
+Here $A_{\mathrm{SigLIP2}}$ is the official frozen visual-summary head.  The
+readout is trained once, is scene independent, and is frozen for every
+benchmark.  Its targets are official C-RADIO crop summaries from generic
+training surfaces; no benchmark vocabulary or evaluation image is opened.
+Only the compact canonical RADIO field is persistent scene memory.  The
+1536-dimensional $e_i$ values are disposable, query-independent evaluation
+caches stored sparsely for observable surface primitives, rather than learned
+per-scene semantic parameters.
 
 \subsection{Query Modes and Support Calibration}
 
-At evaluation time, \method{} renders a feature map for each novel view. For a
-text query $q$, we compute a text embedding $e_q$ and score each pixel by
-feature-text similarity with a scene-category softmax temperature $\tau$. The
-predicted localization point is the heatmap maximum. LERF-OVS reports
-localization accuracy and mIoU over query heatmaps.
+At evaluation time, every query is first compiled into evidence on the same
+canonical primitives.  For a text query $q$, the default open-vocabulary score
+is the query-set-invariant normalized cosine
+\(s_i(q)=\cos(e_i,e_q)\).  Adding or removing an unrelated category therefore
+cannot change an existing heatmap.  A scene-category softmax is retained only
+as an explicitly named closed-taxonomy, paper-compatibility row.  Novel-view
+outputs render the scalar primitive scores (or selected membership) with the
+fixed geometry/visibility operator; they do not alpha-average a high-dimensional
+semantic feature and then rescore it.  LERF-OVS reports localization accuracy
+and mIoU over these rendered score maps.
 
 For direct 3D querying, the base Gaussian-center query decodes pre-refiner
 compact features at Gaussian centers:
 \[
   \hat{f}_i = D_{\theta}(c_i), \qquad
-  s_i(q) = \cos(A_{\mathrm{SigLIP2}}(\hat{f}_i), e_q),
+  s_i(q) = \cos(e_i, e_q),
 \]
-where $A_{\mathrm{SigLIP2}}$ is the frozen text-aligned summary head. This uses
-the same compact Gaussian memory as the ScanNet point-query experiments. For
-LERF primitive selection, we use a frozen SigLIP2 prompt ensemble and
-support-calibrated primitive selection: selected Gaussians are rendered to a
-coarse mask, label-free color-edge support calibration refines local boundaries, and a component
-guard keeps the largest component only when it dominates the refined support;
-otherwise it preserves multi-component support only above a fixed support-area
-floor. This is
-a label-free support rule. It uses the evaluation RGB image only through a
-classical color-edge support refinement, not through a learned feature extractor
-or official SAM decoder, and uses LERF masks only for the final
-query-select-render evaluation.
+where $e_i$ is produced query-free by the global surface-region readout and the
+frozen official SigLIP2 visual-summary head.  Registered 2-D and world-space
+3-D prompts instead create positive/negative primitive seeds in the official
+SAM3/DINOv3 capability spaces.  A fixed seeded random-walker may propagate
+instance support on the shared surface graph while enforcing both seed signs.
+Neither text scoring nor prompt propagation uses benchmark masks, labels,
+per-scene thresholds, or test-set calibration.  RGB/depth discontinuities may
+condition the query-independent observation topology, but do not change a
+primitive's canonical query score.
 
 \section{Experiments}
 

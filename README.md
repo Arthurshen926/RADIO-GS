@@ -2,8 +2,9 @@
 
 RADIO-GS reconstructs one query-independent C-RADIOv4 feature field on 3D Gaussian primitives and exposes several frozen query interfaces over that same field.
 
-The current research mainline is the **query-consistent canonical field trained
-with `canonical-mpr-v2`**. The older HCD, dual-stream screen decoder, and
+The current research mainline is the **one-field route trained with
+`canonical-mpr-v3`**: the `canonical-mpr-v2` compact core plus one global,
+scene-disjoint 3-D surface-region summary readout. The older HCD, dual-stream screen decoder, and
 screen-space refiner remain available only as legacy baselines; they are not
 the default method described here.
 
@@ -24,7 +25,7 @@ compact canonical Gaussian field
                  │
         ┌────────┼───────────────┐
         ▼        ▼               ▼
- official     official      global frozen region-to-summary bridge
+ official     official      global frozen 3D surface-region readout
  DINOv3      SAM3 adaptor       → official SigLIP2 summary head
  adaptor                          (text capability only)
         └────────┬───────────────┘
@@ -55,8 +56,9 @@ queries. It only compensates view context when rendering a 2D feature map.
 - `Canonical-D384` is a high-fidelity oracle, not the submitted compact design.
 - The current compact candidate uses a 128-D per-Gaussian local code, primitive-local fusion to a 256-D affine coefficient, and a shared 1280-D RADIO basis.
 - DINOv3 and SAM3 capability losses/readouts use the frozen adaptors shipped in the official C-RADIOv4 checkpoint.
-- The optional text bridge is custom, trained globally once on generic image crops without annotations or text, then frozen for every scene. It must not be described as an official SigLIP2 adaptor.
-- The current bridge candidate uses an image-disjoint 10,000-crop split. The older 1,000-crop bridge is retained only as a Ramen development baseline; bridges must never be selected per scene.
+- The text readout is custom and predicts a 1280-D RADIO backbone summary token from a physical-scale, surface-connected canonical primitive region. The predicted token is passed through the frozen official SigLIP2 summary head; the custom readout must not be described as an official adaptor.
+- It is trained once, without labels, masks, text, or scene IDs, on 24 ScanNet train scenes and selected on 8 disjoint official-val scenes. The older 2-D crop bridge and scene-specific crop-summary MPR caches are diagnostic/oracle baselines only.
+- A semantic descriptor cache is disposable: formal text descriptors are deterministic functions of the canonical core, global readout, and official head. Cold per-scene storage contains no semantic field.
 
 The latest controlled experiment record is `paper/artifacts/canonical_compact_capability_iteration_20260714.md`.
 
@@ -85,9 +87,9 @@ The same decoded RADIO primitive can be viewed through:
 Primary entry points:
 
 - `radio_gs/scripts/build_canonical_capability_views.py`
-- `radio_gs/scripts/build_generic_region_summary_cache.py`
-- `radio_gs/scripts/train_global_region_summary_bridge.py`
-- `radio_gs/scripts/build_canonical_primitive_semantic_cache.py`
+- `radio_gs/scripts/build_scannet_surface_region_cache.py`
+- `radio_gs/scripts/train_surface_region_summary_readout.py`
+- `radio_gs/scripts/build_surface_region_semantic_cache.py`
 
 ### 3. Query interfaces
 
@@ -100,7 +102,11 @@ Supported query types compile into primitive-domain evidence:
 
 The support solver is optional: category relevance can be read directly, while instance prompts normally use the shared topology for grouping.
 
-Score normalization is also typed and explicit. The default remains raw score calibration (`none`). The current development candidate keeps `none` for text, image, and registered 2D prompts, while a frozen zero-preserving robust scale may be enabled for world-space 3D points. Every `QueryResult` records the effective policy; no modality override may use target labels.
+Score normalization is also typed and explicit. Independent cosine/relevancy is
+the default text scorer, so adding an unrelated query cannot change an existing
+score. Scene-category softmax is retained only as a named closed-taxonomy or
+LERF paper-compatibility evaluation variant. Every `QueryResult` records the
+effective policy; no modality override may use target labels.
 
 Primary entry points:
 

@@ -1,0 +1,93 @@
+schema_version: 1
+name: canonical-mpr-v3
+status: promoted_mainline
+promoted_at: 2026-07-16
+
+scene_memory:
+  stored_per_scene: one_compact_canonical_c_radio_primitive_field
+  semantic_sidecar_stored: false
+  dino_sam_sidecars_stored: false
+  derived_caches: disposable_and_rebuildable
+
+canonical_core:
+  lifting_contract: canonical-mpr-v1
+  training_contract: canonical-mpr-v2
+  architecture:
+    feature_dim: 1280
+    coefficient_dim: 256
+    local_dim: 128
+    coarse_dim: 0
+    spatial_hash: null
+    fusion_reliability: true
+    reliability_reduction: geometric_mean
+    hidden_dim: 192
+    use_fusion: true
+    trainable_basis: true
+    trainable_statistics: false
+  structural_architecture_digest: e7fc8aa35d404a5d5d446ddc669e342ab15511358f8f80734bfe4db452cca78f
+  coarse_branch_claimed: false
+
+global_3d_summary_readout:
+  architecture: surface_region_summary_readout_v1
+  feature_dim: 1280
+  geometry_dim: 12
+  hidden_dim: 128
+  architecture_digest: 2ea0107b914ed2e4498893e75475f5597f55b6a1a2d6bdf7bcc5aefab2545a88
+  checkpoint_sha256: 06c1d9c3bfaf674de54fa1167aa2d156e183e0a751c87d0e7c09733928464b5b
+  output: radio_backbone_summary_token_1280d
+  final_projection: frozen_official_c_radio_v4_siglip2_g_summary_head
+  permutation_invariant: true
+  query_free: true
+  scene_id_input: false
+  raw_weighted_mean_residual: true
+  region_definition:
+    topology: dino_sam_geometry_surface_graph
+    inference_expansion: two_hop_then_physical_radius_clip
+    physical_radii_m: [0.20, 0.40, 0.70]
+  training:
+    dataset: ScanNet_frames_25k
+    train_scenes: 24
+    validation_scenes: 8
+    scene_overlap: []
+    annotations_opened: false
+    labels_opened: false
+    instances_opened: false
+    text_opened: false
+    forbidden_benchmark_scenes: [scene0062_00, scene0140_00, scene0200_00]
+    train_split_sha256: 96acca299b7855f02824c496b19077904d80996e7ced1bb9f0dac98f7dd4d0c8
+    validation_split_sha256: d75d4971c3fa7128c643695840e279042c212ef904fe933bd00cf9918c61b083
+
+text_scoring:
+  system_default: independent_normalized_cosine
+  query_set_invariant: true
+  generic_negative_relevancy_supported: true
+  scene_softmax_role: closed_taxonomy_or_paper_compatibility_only
+  test_set_calibration: false
+
+diagnostic_only:
+  - official_crop_summary_semantic_mpr_sidecar
+  - legacy_2d_crop_region_summary_bridge
+  - mpr_radio_source_for_semantic_readout
+  - full_mask_spin_nerf
+  - rgb_or_sam_mask_refinement
+
+evidence:
+  summary: output/optimization_20260716/global_3d_readout/canonical_mpr_v3_text_summary.json
+  validation_by_scale: output/optimization_20260716/global_3d_readout/validation_by_physical_scale.json
+  storage: output/optimization_20260716/global_3d_readout/storage_cold_warm_v3.json
+  scene_disjoint_descriptor_selection_score: 0.9264728150715859
+  scene_disjoint_all_view_descriptor_cosine: 0.9167616494770707
+  lerf_compatibility_scene_macro_miou: 0.34331799419365755
+  lerf_sidecar_oracle_scene_macro_miou: 0.24804814151249707
+  scannet_19_scene_macro_miou: 0.462859237348892
+  scannet_15_scene_macro_miou: 0.4752776208706924
+  scannet_10_scene_macro_miou: 0.5845051371600943
+
+pose_free_image_exemplar:
+  current_status: not_reported
+  reason: existing_scene_fields_did_not_exclude_query_frames_from_geometry_and_mpr
+  scannet_frames_25k_can_support_future_protocol: true
+  required_before_reporting:
+    - choose_heldout_query_frames_before_any_scene_training
+    - rebuild_geometry_mpr_render_fitting_without_query_frames
+    - obtain_official_3d_instance_aggregation_ground_truth

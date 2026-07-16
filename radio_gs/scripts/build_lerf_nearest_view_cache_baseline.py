@@ -220,7 +220,7 @@ def build_markdown(summary: dict[str, Any]) -> str:
     lines = [
         "# LERF Nearest-View Cache Baseline",
         "",
-        "Protocol: unwarped nearest-view cached RADIO reference features. For each annotated target frame, the baseline substitutes the closest cached RADIO frame by camera-center distance, excluding the target frame itself, then runs the same LERF text scoring and thresholded-mask evaluator.",
+        "Protocol: unwarped nearest-view cached teacher features. For each annotated target frame, the baseline substitutes the closest cached RADIO teacher frame by camera-center distance, excluding the target frame itself, then runs the same LERF text scoring and thresholded-mask evaluator.",
         "",
         "| Scene | LocAcc | mIoU | N | Mean nearest distance |",
         "|---|---:|---:|---:|---:|",

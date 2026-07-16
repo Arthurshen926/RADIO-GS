@@ -21,7 +21,7 @@ def compile_scores(
     temperature: float,
     chunk_size: int,
     peak_normalize: bool,
-    scoring: str = "softmax_scene",
+    scoring: str = "cosine",
     canonical: torch.Tensor | None = None,
     peak_mask: torch.Tensor | None = None,
 ) -> torch.Tensor:
@@ -155,6 +155,17 @@ def apply_completion_evidence(
 
 def build(args: argparse.Namespace) -> dict:
     feature_cache = torch.load(args.feature_cache, map_location="cpu")
+    feature_values = feature_cache["features"]
+    if "global_rows" in feature_cache:
+        global_rows = torch.as_tensor(feature_cache["global_rows"]).long().cpu()
+        valid = torch.as_tensor(feature_cache["valid"]).bool().cpu()
+        sparse = torch.as_tensor(feature_values).cpu()
+        if sparse.ndim != 2 or sparse.shape[0] != global_rows.numel():
+            raise ValueError("sparse feature cache does not align with global_rows")
+        if not torch.equal(torch.where(valid)[0], global_rows):
+            raise ValueError("sparse feature cache global_rows do not match valid")
+        feature_values = torch.zeros(valid.numel(), sparse.shape[1], dtype=sparse.dtype)
+        feature_values[global_rows] = sparse
     text_cache = torch.load(args.text_embedding_cache, map_location="cpu")
     canonical_cache = None
     if args.scoring == "relevancy":
@@ -171,7 +182,7 @@ def build(args: argparse.Namespace) -> dict:
         else None
     )
     scores = compile_scores(
-        feature_cache["features"],
+        feature_values,
         text_cache["embeddings"],
         feature_cache["valid"],
         temperature=float(args.temperature),
@@ -258,7 +269,7 @@ def main() -> None:
     parser.add_argument(
         "--scoring",
         choices=("softmax_scene", "cosine", "relevancy"),
-        default="softmax_scene",
+        default="cosine",
     )
     parser.add_argument("--canonical-embedding-cache", default="")
     parser.add_argument("--temperature", type=float, default=50.0)
