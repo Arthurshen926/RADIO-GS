@@ -150,12 +150,27 @@ def extract(args: argparse.Namespace) -> dict:
         for value in str(args.exclude_frame_ids).replace(",", " ").split()
         if value.strip()
     }
+    included = {
+        int(value)
+        for value in str(args.include_frame_ids).replace(",", " ").split()
+        if value.strip()
+    }
     scene_reports = {}
     for scene in scenes:
+        if args.image_dir:
+            if len(scenes) != 1:
+                raise ValueError("--image-dir requires exactly one --scenes entry")
+            image_dir = Path(args.image_dir)
+            frames = sorted(
+                (path for path in image_dir.iterdir() if path.suffix.lower() in {".jpg", ".jpeg", ".png"}),
+                key=lambda path: int(path.stem.split("_")[-1]),
+            )
+        else:
+            frames = _resolve_frames(dataset_root, label_dir, scene, args.frames)
         frames = [
-            path
-            for path in _resolve_frames(dataset_root, label_dir, scene, args.frames)
+            path for path in frames
             if int(path.stem.split("_")[-1]) not in excluded
+            and (not included or int(path.stem.split("_")[-1]) in included)
         ]
         if not frames:
             raise RuntimeError(f"all frames excluded for {scene}")
@@ -180,6 +195,29 @@ def extract(args: argparse.Namespace) -> dict:
             "num_frames": len(frame_reports),
             "frames": frame_reports,
         }
+        # Each scene owns an immutable provenance record.  This avoids
+        # concurrent single-scene extraction jobs racing on the aggregate
+        # root manifest while retaining the root report for serial runs.
+        scene_report = {
+            "schema_version": 1,
+            "teacher_space": "official_siglip2_crop_summary",
+            "radio_version": runtime.version,
+            "radio_checkpoint_sha256": runtime.radio_checkpoint_sha256,
+            "dataset_root": str(dataset_root.resolve()),
+            "label_dir": str(label_dir.resolve()),
+            "frame_selection": args.frames,
+            "excluded_frame_ids": sorted(excluded),
+            "label_content_opened": False,
+            "benchmark_masks_opened": False,
+            "text_queries_opened": False,
+            "scales": scales,
+            "stride_ratio": float(args.stride_ratio),
+            "output_size": list(output_size),
+            "scenes": {scene: scene_reports[scene]},
+        }
+        (scene_output / "manifest.json").write_text(
+            json.dumps(scene_report, indent=2), encoding="utf-8"
+        )
     report = {
         "schema_version": 1,
         "teacher_space": "official_siglip2_crop_summary",
@@ -208,6 +246,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset-root", required=True)
     parser.add_argument("--label-dir", required=True)
+    parser.add_argument(
+        "--image-dir",
+        default="",
+        help="Optional generic frame-id RGB directory for one declared scene.",
+    )
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--scenes", default="figurines,ramen,teatime,waldo_kitchen")
     parser.add_argument("--frames", choices=["all", "labeled"], default="all")
@@ -215,6 +258,11 @@ def main() -> None:
         "--exclude-frame-ids",
         default="",
         help="Comma list of benchmark/evaluation frame IDs never opened by extraction.",
+    )
+    parser.add_argument(
+        "--include-frame-ids",
+        default="",
+        help="Optional comma/space list restricting extraction to fixed frame IDs.",
     )
     parser.add_argument("--scales", default="0.25,0.5,0.75,1.0")
     parser.add_argument("--stride-ratio", type=float, default=0.5)

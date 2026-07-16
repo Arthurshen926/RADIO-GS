@@ -98,12 +98,19 @@ def _parse_frame_ids(raw: str) -> set[int]:
     if not value:
         return set()
     path = Path(value)
-    if path.is_dir():
+    try:
+        is_dir = path.is_dir()
+        is_file = path.is_file()
+    except OSError:
+        # Long comma-separated CLI lists are values, not filesystem paths.
+        is_dir = False
+        is_file = False
+    if is_dir:
         return {
             int(item.stem.split("_")[-1])
             for item in path.glob("frame_*.json")
         }
-    if path.is_file():
+    if is_file:
         value = path.read_text(encoding="utf-8")
     tokens: list[str] = []
     for line in value.splitlines():
@@ -864,6 +871,30 @@ def build_cache(args: argparse.Namespace) -> dict:
         "capability_projection_before_mpr": feature_space
         in {"dino_v3", "sam3"},
         "custom_adaptor_head": False,
+        "source": (
+            "official_crop_summary_mpr"
+            if feature_space == "semantic_descriptor"
+            and args.semantic_descriptor_source == "official_siglip2_crop_summary"
+            else ""
+        ),
+        "official_summary_head": (
+            True
+            if feature_space == "semantic_descriptor"
+            and args.semantic_descriptor_source == "official_siglip2_crop_summary"
+            else None
+        ),
+        "custom_text_projection": (
+            False
+            if feature_space == "semantic_descriptor"
+            and args.semantic_descriptor_source == "official_siglip2_crop_summary"
+            else None
+        ),
+        "semantic_alignment_level": (
+            2
+            if feature_space == "semantic_descriptor"
+            and args.semantic_descriptor_source == "official_siglip2_crop_summary"
+            else None
+        ),
         "query_names": [
             value.strip() for value in str(args.query_names).split(",") if value.strip()
         ],
@@ -969,6 +1000,12 @@ def main() -> None:
             "Aggregate raw RADIO, precomputed semantic descriptors, or first "
             "project every view through a frozen SigLIP2 pointwise head."
         ),
+    )
+    parser.add_argument(
+        "--semantic-descriptor-source",
+        choices=["unspecified", "official_siglip2_crop_summary"],
+        default="unspecified",
+        help="Auditable provenance for precomputed semantic_descriptor maps.",
     )
     parser.add_argument(
         "--summary-head-weights",

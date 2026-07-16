@@ -46,12 +46,18 @@ semantic_alignment:
   test_set_calibration: false
   text_query_readout: primitive_score_then_render
   feature_then_score_role: commutation_audit
-  development_evidence:
-    scene: lerf_ramen
-    sample_miou: 0.2079
-    category_macro_miou: 0.2002
-    localization_accuracy: 0.3803
-    samples: 71
+  four_scene_evidence:
+    scene_macro_miou: 0.248048
+    scene_macro_localization_accuracy: 0.431605
+    sample_micro_miou: 0.246087
+    sample_micro_localization_accuracy: 0.432692
+    samples: 208
+    scenes: 4
+    per_scene_miou:
+      figurines: 0.230223
+      ramen: 0.207899
+      teatime: 0.306575
+      waldo_kitchen: 0.247496
     protocol:
       scoring: softmax_scene
       logit_scale: 50
@@ -60,6 +66,32 @@ semantic_alignment:
       localization: polygon_argmax
       mask_refinement: none
       prompt_template: "{query}"
+
+scannet_text_evidence:
+  scenes: [scene0062_00, scene0140_00, scene0200_00]
+  official_label_mesh: true
+  calibration: none
+  spatial_postprocess: none
+  primitive_to_mesh: inverse_distance_knn_k8
+  split_19: {scene_macro_miou: 0.292998, scene_macro_macc: 0.565014}
+  split_15: {scene_macro_miou: 0.295680, scene_macro_macc: 0.547505}
+  split_10: {scene_macro_miou: 0.396866, scene_macro_macc: 0.645045}
+
+compactness_evidence:
+  scene: lerf_ramen
+  heldout_frames: [2, 45, 87, 130]
+  pca_curve:
+    d64:  {checkpoint_mib: 100.33, primitive_cosine: 0.944363, raw_render: 0.721350, dino_render: 0.823401, sam_render: 0.677604}
+    d128: {checkpoint_mib: 194.07, primitive_cosine: 0.973429, raw_render: 0.733168, dino_render: 0.827357, sam_render: 0.685854}
+    d192: {checkpoint_mib: 287.81, primitive_cosine: 0.983909, raw_render: 0.736923, dino_render: 0.828244, sam_render: 0.688143}
+    d256: {checkpoint_mib: 381.55, primitive_cosine: 0.988975, raw_render: 0.738682, dino_render: 0.828751, sam_render: 0.689031}
+    d384: {checkpoint_mib: 569.04, primitive_cosine: 0.994042, raw_render: 0.740227, dino_render: 0.829134, sam_render: 0.689751}
+  local128_fusion_d256:
+    checkpoint_mib: 195.9
+    raw_render: 0.742731
+    dino_render: 0.831868
+    sam_render: 0.691673
+    conclusion: dominates_direct_pca_at_matched_storage
 
 not_mainline:
   - scene_specific_query_head

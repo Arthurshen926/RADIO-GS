@@ -253,3 +253,12 @@ method-level and label-free; it is not a scene-specific head or a benchmark
 threshold choice.  The result is development evidence on one scene and must
 still be reproduced on the other LERF scenes before it becomes a final table
 row.
+
+The frozen run was subsequently completed on all four scenes using the same
+official summary extraction, canonical MPR contract, primitive-score readout,
+and protocol constants.  Figurines/Ramen/Teatime/Waldo obtain sample mIoU
+0.230223/0.207899/0.306575/0.247496 and localization accuracy
+0.428571/0.380282/0.508475/0.409091.  The four-scene macro is 0.248048 mIoU
+and 0.431605 localization; over all 208 samples, the micro result is 0.246087
+mIoU and 0.432692 localization.  No mask refinement, RGB boundary decoder,
+benchmark-text training, or test-set calibration is used.

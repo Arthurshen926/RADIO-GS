@@ -94,7 +94,12 @@ def load_primitive_semantic_cache(
     """Load a query-free, official-SigLIP2 primitive semantic cache."""
 
     payload = torch.load(Path(path), map_location="cpu", weights_only=False)
-    if not isinstance(payload, Mapping) or int(payload.get("schema_version", -1)) != 1:
+    if not isinstance(payload, Mapping):
+        raise ValueError(f"unsupported primitive semantic cache: {path}")
+    schema_version = payload.get("schema_version")
+    if schema_version is None and isinstance(payload.get("metadata"), Mapping):
+        schema_version = payload["metadata"].get("schema_version")
+    if int(schema_version or -1) != 1:
         raise ValueError(f"unsupported primitive semantic cache: {path}")
     required = {"xyz", "valid", "metadata"}
     if not required.issubset(payload):
@@ -121,6 +126,7 @@ def load_primitive_semantic_cache(
     if source not in {
         "canonical_radio_primitive_neighborhood",
         "mpr_radio_primitive_neighborhood",
+        "official_crop_summary_mpr",
     }:
         raise ValueError(f"unsupported semantic cache source: {source}")
     if source.startswith("mpr_") and not allow_mpr_oracle:
