@@ -363,6 +363,45 @@ def validate_primitive_support_cache(
     return values, mask
 
 
+def validate_primitive_unary_cache(
+    payload: Mapping[str, Any],
+    model_xyz: torch.Tensor,
+    categories: List[str],
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Validate frozen query-set-invariant primitive text unaries."""
+
+    scores = payload.get("query_scores", payload.get("features"))
+    valid = payload.get("valid")
+    cached_xyz = payload.get("xyz")
+    metadata = dict(payload.get("metadata", {}))
+    expected_shape = (int(model_xyz.shape[0]), len(categories))
+    if not isinstance(scores, torch.Tensor) or tuple(scores.shape) != expected_shape:
+        raise ValueError(f"Primitive unary scores must be {expected_shape}")
+    if not isinstance(valid, torch.Tensor) or tuple(valid.shape) != (expected_shape[0],):
+        raise ValueError("Primitive unary cache requires row-aligned valid")
+    if not isinstance(cached_xyz, torch.Tensor) or cached_xyz.shape != model_xyz.shape:
+        raise ValueError("Primitive unary cache requires row-aligned xyz")
+    if [str(value) for value in metadata.get("query_names", [])] != list(categories):
+        raise ValueError("Primitive unary query order mismatch")
+    if metadata.get("feature_space") != "primitive_text_query_scores":
+        raise ValueError("primitive_unary requires primitive_text_query_scores")
+    if metadata.get("scoring") != "cosine":
+        raise ValueError("paper-facing primitive_unary requires independent cosine")
+    xyz_error = (cached_xyz.float() - model_xyz.detach().cpu().float()).norm(dim=-1)
+    if xyz_error.numel() and float(xyz_error.max()) > 1e-6:
+        raise ValueError(
+            f"Primitive unary cache xyz mismatch: max_l2={float(xyz_error.max()):.3e}"
+        )
+    values = scores.float().cpu(); mask = valid.bool().cpu()
+    if bool(mask.any()):
+        selected = values[mask]
+        if not bool(torch.isfinite(selected).all()):
+            raise ValueError("Primitive unary cache contains non-finite scores")
+        if float(selected.min()) < -1.0001 or float(selected.max()) > 1.0001:
+            raise ValueError("Cosine primitive unaries must lie in [-1,1]")
+    return values, mask
+
+
 # ---------------------------------------------------------------------------
 # Text-embedding generation (SigLIP2 via ``transformers``)
 # ---------------------------------------------------------------------------
@@ -2150,18 +2189,16 @@ def evaluate_scene(
                         chunk_size=primitive_chunk_size,
                         store_on_cpu=render_readout == "primitive_score",
                     )
-            elif render_readout == "primitive_support":
+            elif render_readout in {"primitive_support", "primitive_unary"}:
                 if not primitive_score_cache:
                     raise ValueError(
-                        "primitive_support requires --primitive_score_cache"
+                        f"{render_readout} requires --primitive_score_cache"
                     )
                 support_payload = torch.load(primitive_score_cache, map_location="cpu")
                 primitive_support_rows, primitive_support_valid = (
-                    validate_primitive_support_cache(
-                        support_payload,
-                        model.get_xyz(),
-                        categories,
-                    )
+                    validate_primitive_support_cache(support_payload, model.get_xyz(), categories)
+                    if render_readout == "primitive_support"
+                    else validate_primitive_unary_cache(support_payload, model.get_xyz(), categories)
                 )
         else:
             scene_root_hint = ""
@@ -2247,7 +2284,7 @@ def evaluate_scene(
                         "alpha_map": primitive_render["alpha_map"][None, None]
                     }
                     feat_1280 = None
-                elif render_readout in {"primitive_score", "primitive_support"}:
+                elif render_readout in {"primitive_score", "primitive_support", "primitive_unary"}:
                     if render_readout == "primitive_score":
                         assert primitive_query_rows is not None
                     siglip_feat = None
@@ -2268,6 +2305,7 @@ def evaluate_scene(
                     "primitive_query",
                     "primitive_score",
                     "primitive_support",
+                    "primitive_unary",
                 }:
                     pass
                 elif mode_confidence_gate != "none":
@@ -2289,7 +2327,7 @@ def evaluate_scene(
             if not (
                 mode == "rendered"
                 and render_readout
-                in {"primitive_query", "primitive_score", "primitive_support"}
+                in {"primitive_query", "primitive_score", "primitive_support", "primitive_unary"}
             ):
                 siglip_feat = project_to_siglip2(feat_1280.half(), proj)
 
@@ -2305,7 +2343,7 @@ def evaluate_scene(
                 continue
 
             active_emb = text_embeddings[active_indices].to(device)  # [K, 1536]
-            if not (mode == "rendered" and render_readout == "primitive_support"):
+            if not (mode == "rendered" and render_readout in {"primitive_support", "primitive_unary"}):
                 visual_dim = (
                     int(primitive_query_rows.shape[1])
                     if mode == "rendered" and render_readout == "primitive_score"
@@ -2435,7 +2473,7 @@ def evaluate_scene(
                     render_aux = {
                         "alpha_map": score_render["alpha_map"][None, None]
                     }
-            elif mode == "rendered" and render_readout == "primitive_support":
+            elif mode == "rendered" and render_readout in {"primitive_support", "primitive_unary"}:
                 assert primitive_support_rows is not None
                 support_rows = primitive_support_rows[:, active_indices]
                 support_rows = neutralize_invalid_primitive_scores_for_render(
@@ -2845,6 +2883,7 @@ def main() -> None:
             "primitive_query",
             "primitive_score",
             "primitive_support",
+            "primitive_unary",
         ],
         default="screen_decode",
         help=(
@@ -3092,10 +3131,11 @@ def main() -> None:
         "primitive_query",
         "primitive_score",
         "primitive_support",
+        "primitive_unary",
     } and args.text_encoder != "siglip2":
         parser.error("primitive-first render readouts currently require --text_encoder siglip2")
-    if args.render_readout == "primitive_support" and not args.primitive_score_cache:
-        parser.error("primitive_support requires --primitive_score_cache")
+    if args.render_readout in {"primitive_support", "primitive_unary"} and not args.primitive_score_cache:
+        parser.error(f"{args.render_readout} requires --primitive_score_cache")
     if (
         args.feature_contribution_gamma != 1.0
         and args.render_readout == "screen_decode"

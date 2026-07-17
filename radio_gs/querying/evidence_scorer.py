@@ -141,6 +141,7 @@ def score_query_evidence(
     *,
     config: EvidenceScoringConfig = EvidenceScoringConfig(),
     calibrations: Mapping[str, SceneSpaceCalibration] | None = None,
+    num_nodes: int | None = None,
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
     components: dict[str, torch.Tensor] = {}
     weighted: list[torch.Tensor] = []
@@ -172,13 +173,14 @@ def score_query_evidence(
         components[name] = score
         weighted.append(score * float(weight))
     if not weighted:
-        count = (
-            query.positive_seeds.weights.numel()
-            if query.positive_seeds is not None
-            else 0
-        )
+        count = int(num_nodes) if num_nodes is not None else 0
+        if count <= 0 and query.positive_seeds is not None:
+            count = query.positive_seeds.weights.numel()
         if count == 0:
             raise ValueError("query has neither prototypes nor seeds")
+        for seeds in (query.positive_seeds, query.negative_seeds):
+            if seeds is not None and seeds.weights.numel() != count:
+                raise ValueError("query seeds do not align with num_nodes")
         # A seed-only query has no global foreground evidence.  Use the
         # minimum cosine prior instead of an ambiguous 0-logit (p=0.5), then
         # let the same graph diffuse the registered/world-space seeds.

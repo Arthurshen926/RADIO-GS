@@ -148,6 +148,7 @@ class CanonicalQueryEngine:
             feature_banks,
             config=scoring_config,
             calibrations=self._calibrations,
+            num_nodes=self.graph.num_nodes,
         )
         reliability_applied = self.node_reliability is not None and bool(components)
         if reliability_applied:

@@ -76,6 +76,67 @@ def compile_scores(
     return result.half()
 
 
+def compile_multiscale_scores(
+    features_by_scale: torch.Tensor,
+    text: torch.Tensor,
+    valid: torch.Tensor,
+    *,
+    temperature: float,
+    chunk_size: int,
+    peak_normalize: bool,
+    scoring: str = "cosine",
+    canonical: torch.Tensor | None = None,
+    peak_mask: torch.Tensor | None = None,
+    scale_aggregation: str = "max",
+    scale_lse_temperature: float = 10.0,
+) -> torch.Tensor:
+    """Compile per-scale descriptors before a fixed query/scale reduction.
+
+    A surface has no single privileged physical extent.  Scoring every frozen
+    descriptor independently and reducing only the resulting unary preserves
+    that ambiguity without learning a benchmark- or query-specific scale
+    selector.  Normalized log-mean-exp is provided as a smoother ablation;
+    ``max`` is the parameter-free default.
+    """
+
+    values = torch.as_tensor(features_by_scale)
+    if values.ndim != 3 or values.shape[1] < 1:
+        raise ValueError("features_by_scale must be [N,S,D] with at least one scale")
+    if scale_aggregation not in {"max", "logmeanexp"}:
+        raise ValueError(f"unsupported scale aggregation: {scale_aggregation}")
+    if scale_lse_temperature <= 0:
+        raise ValueError("scale_lse_temperature must be positive")
+    per_scale = torch.stack([
+        compile_scores(
+            values[:, index], text, valid,
+            temperature=temperature, chunk_size=chunk_size,
+            peak_normalize=False, scoring=scoring, canonical=canonical,
+        ).float()
+        for index in range(values.shape[1])
+    ], dim=1)
+    if scale_aggregation == "max":
+        result = per_scale.amax(dim=1)
+    else:
+        tau = float(scale_lse_temperature)
+        result = (
+            torch.logsumexp(per_scale * tau, dim=1)
+            - torch.log(torch.tensor(float(values.shape[1])))
+        ) / tau
+    mask = torch.as_tensor(valid).bool().cpu()
+    result[~mask] = 0.0
+    if peak_normalize:
+        peak_rows = mask
+        if peak_mask is not None:
+            peak_rows = torch.as_tensor(peak_mask).bool().cpu().reshape(-1)
+            if peak_rows.shape != mask.shape or bool((peak_rows & ~mask).any()):
+                raise ValueError("peak_mask must be a subset of valid rows")
+            if not bool(peak_rows.any()):
+                raise ValueError("peak_mask must keep at least one row")
+        peaks = result[peak_rows].amax(dim=0, keepdim=True).clamp_min(1e-12)
+        result[mask] = (result[mask] / peaks).clamp_(0.0, 1.0)
+    return result.half()
+
+
 def apply_completion_evidence(
     scores: torch.Tensor,
     valid: torch.Tensor,
@@ -156,6 +217,10 @@ def apply_completion_evidence(
 def build(args: argparse.Namespace) -> dict:
     feature_cache = torch.load(args.feature_cache, map_location="cpu")
     feature_values = feature_cache["features"]
+    scale_values = (
+        None if bool(args.ignore_multiscale)
+        else feature_cache.get("features_by_scale")
+    )
     if "global_rows" in feature_cache:
         global_rows = torch.as_tensor(feature_cache["global_rows"]).long().cpu()
         valid = torch.as_tensor(feature_cache["valid"]).bool().cpu()
@@ -166,7 +231,30 @@ def build(args: argparse.Namespace) -> dict:
             raise ValueError("sparse feature cache global_rows do not match valid")
         feature_values = torch.zeros(valid.numel(), sparse.shape[1], dtype=sparse.dtype)
         feature_values[global_rows] = sparse
+        if scale_values is not None:
+            sparse_scales = torch.as_tensor(scale_values).cpu()
+            if sparse_scales.ndim != 3 or sparse_scales.shape[0] != global_rows.numel():
+                raise ValueError("sparse multiscale cache does not align with global_rows")
+            scale_values = torch.zeros(
+                valid.numel(), sparse_scales.shape[1], sparse_scales.shape[2],
+                dtype=sparse_scales.dtype,
+            )
+            scale_values[global_rows] = sparse_scales
     text_cache = torch.load(args.text_embedding_cache, map_location="cpu")
+    text_queries = [str(value) for value in text_cache["queries"]]
+    text_embeddings = text_cache["embeddings"]
+    if str(args.queries).strip():
+        requested = [
+            value.strip() for value in str(args.queries).split(",") if value.strip()
+        ]
+        index = {name: offset for offset, name in enumerate(text_queries)}
+        missing = [name for name in requested if name not in index]
+        if missing:
+            raise ValueError(f"requested text queries are absent: {missing}")
+        text_embeddings = torch.as_tensor(text_embeddings)[
+            torch.tensor([index[name] for name in requested])
+        ]
+        text_queries = requested
     canonical_cache = None
     if args.scoring == "relevancy":
         if not args.canonical_embedding_cache:
@@ -181,19 +269,32 @@ def build(args: argparse.Namespace) -> dict:
         if args.peak_domain == "primary"
         else None
     )
-    scores = compile_scores(
-        feature_values,
-        text_cache["embeddings"],
-        feature_cache["valid"],
-        temperature=float(args.temperature),
-        chunk_size=int(args.chunk_size),
-        peak_normalize=bool(args.peak_normalize),
-        scoring=str(args.scoring),
-        canonical=(
+    compile_kwargs = {
+        "temperature": float(args.temperature),
+        "chunk_size": int(args.chunk_size),
+        "peak_normalize": bool(args.peak_normalize),
+        "scoring": str(args.scoring),
+        "canonical": (
             canonical_cache["embeddings"] if canonical_cache is not None else None
         ),
-        peak_mask=primary_peak_mask,
-    )
+        "peak_mask": primary_peak_mask,
+    }
+    if scale_values is None:
+        scores = compile_scores(
+            feature_values, text_embeddings, feature_cache["valid"],
+            **compile_kwargs,
+        )
+        scale_aggregation = "single_descriptor"
+        scale_count = 1
+    else:
+        scores = compile_multiscale_scores(
+            scale_values, text_embeddings, feature_cache["valid"],
+            scale_aggregation=str(args.scale_aggregation),
+            scale_lse_temperature=float(args.scale_lse_temperature),
+            **compile_kwargs,
+        )
+        scale_aggregation = str(args.scale_aggregation)
+        scale_count = int(torch.as_tensor(scale_values).shape[1])
     scores, completion = apply_completion_evidence(
         scores,
         feature_cache["valid"],
@@ -222,9 +323,13 @@ def build(args: argparse.Namespace) -> dict:
         ),
         "scoring": str(args.scoring),
         "temperature": float(args.temperature),
+        "score_chunk_size": int(args.chunk_size),
+        "scale_aggregation": scale_aggregation,
+        "scale_count": scale_count,
+        "scale_lse_temperature": float(args.scale_lse_temperature),
         "peak_domain": str(args.peak_domain),
         "completion": completion,
-        "query_names": [str(value) for value in text_cache["queries"]],
+        "query_names": text_queries,
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": True,
@@ -265,6 +370,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--feature-cache", required=True)
     parser.add_argument("--text-embedding-cache", required=True)
+    parser.add_argument(
+        "--queries", default="",
+        help="Optional comma-separated ordered subset of the frozen embedding cache",
+    )
     parser.add_argument("--output", required=True)
     parser.add_argument(
         "--scoring",
@@ -273,7 +382,19 @@ def main() -> None:
     )
     parser.add_argument("--canonical-embedding-cache", default="")
     parser.add_argument("--temperature", type=float, default=50.0)
-    parser.add_argument("--chunk-size", type=int, default=65536)
+    parser.add_argument(
+        "--scale-aggregation", choices=("max", "logmeanexp"), default="max",
+        help="Fixed query-time reduction over preserved physical region scales",
+    )
+    parser.add_argument("--scale-lse-temperature", type=float, default=10.0)
+    parser.add_argument(
+        "--ignore-multiscale", action="store_true",
+        help="Explicit legacy ablation using the cache's pre-averaged descriptor",
+    )
+    parser.add_argument(
+        "--chunk-size", type=int, default=1024,
+        help="Fixed cosine reduction chunk; 1024 matches cold streaming exactly.",
+    )
     parser.add_argument("--peak-normalize", action="store_true")
     parser.add_argument(
         "--peak-domain",

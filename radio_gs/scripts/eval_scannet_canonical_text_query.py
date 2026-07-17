@@ -99,7 +99,7 @@ def load_primitive_semantic_cache(
     schema_version = payload.get("schema_version")
     if schema_version is None and isinstance(payload.get("metadata"), Mapping):
         schema_version = payload["metadata"].get("schema_version")
-    if int(schema_version or -1) not in {1, 3, 4}:
+    if int(schema_version or -1) not in {1, 3, 4, 5}:
         raise ValueError(f"unsupported primitive semantic cache: {path}")
     required = {"xyz", "valid", "metadata"}
     if not required.issubset(payload):
@@ -116,7 +116,7 @@ def load_primitive_semantic_cache(
     count = int(xyz.shape[0]) if xyz.ndim == 2 else -1
     if xyz.ndim != 2 or xyz.shape[1] != 3 or valid.shape != (count,):
         raise ValueError("semantic cache xyz/valid rows are malformed")
-    if int(schema_version) == 4:
+    if int(schema_version) in {4, 5}:
         global_rows = torch.as_tensor(payload.get("global_rows")).long().cpu()
         if global_rows.ndim != 1 or features.ndim != 2:
             raise ValueError("sparse semantic cache rows are malformed")
@@ -155,6 +155,35 @@ def load_primitive_semantic_cache(
         if metadata.get(forbidden) is not False:
             raise ValueError(f"semantic cache must be query-free ({forbidden}=False)")
     return xyz, valid, features, metadata
+
+
+def load_primitive_multiscale_features(
+    path: str | Path,
+    *,
+    valid: torch.Tensor,
+) -> torch.Tensor | None:
+    """Load optional sparse scale descriptors and restore primitive row order."""
+
+    payload = torch.load(Path(path), map_location="cpu", weights_only=False)
+    value = payload.get("features_by_scale") if isinstance(payload, Mapping) else None
+    if value is None:
+        return None
+    scales = torch.as_tensor(value).cpu()
+    mask = torch.as_tensor(valid).bool().cpu()
+    if scales.ndim != 3 or scales.shape[2] != 1536:
+        raise ValueError("features_by_scale must be [N,S,1536]")
+    if "global_rows" in payload:
+        rows = torch.as_tensor(payload["global_rows"]).long().cpu()
+        if scales.shape[0] != rows.numel() or not torch.equal(torch.where(mask)[0], rows):
+            raise ValueError("sparse multiscale descriptors do not align with valid rows")
+        dense = torch.zeros(mask.numel(), scales.shape[1], scales.shape[2], dtype=scales.dtype)
+        dense[rows] = scales
+        scales = dense
+    elif scales.shape[0] != mask.numel():
+        raise ValueError("dense multiscale descriptors do not align with valid rows")
+    if not bool(torch.isfinite(scales).all()):
+        raise ValueError("multiscale semantic cache contains NaN or infinity")
+    return scales
 
 
 @torch.no_grad()
@@ -225,26 +254,41 @@ def evaluate(
             allow_mpr_oracle=allow_mpr_oracle,
         )
     )
-    mesh_xyz, gt_labels = _read_label_ply(label_ply)
-    mesh_features = project_primitive_semantics_to_points(
-        primitive_xyz,
-        primitive_valid,
-        primitive_features,
-        mesh_xyz,
-        k=projection_k,
-        distance_epsilon=distance_epsilon,
-        chunk_size=chunk_size,
-        device=device,
+    primitive_multiscale = load_primitive_multiscale_features(
+        semantic_cache,
+        valid=primitive_valid,
     )
+    mesh_xyz, gt_labels = _read_label_ply(label_ply)
+    primitive_scales = (
+        [primitive_features]
+        if primitive_multiscale is None
+        else [primitive_multiscale[:, index] for index in range(primitive_multiscale.shape[1])]
+    )
+    mesh_features_by_scale = [
+        project_primitive_semantics_to_points(
+            primitive_xyz,
+            primitive_valid,
+            scale_features,
+            mesh_xyz,
+            k=projection_k,
+            distance_epsilon=distance_epsilon,
+            chunk_size=chunk_size,
+            device=device,
+        )
+        for scale_features in primitive_scales
+    ]
     results: dict[str, dict[str, Any]] = {}
     for split in split_names:
         class_ids = OPENGAUSSIAN_NYU40_CLASS_SPLITS[split]
         text = F.normalize(split_text_embeddings[split].float().to(device), dim=-1)
         pred_parts: list[np.ndarray] = []
-        for start in range(0, mesh_features.shape[0], int(chunk_size)):
-            stop = min(mesh_features.shape[0], start + int(chunk_size))
-            visual = mesh_features[start:stop].float().to(device)
-            indices = (visual @ text.T).argmax(dim=-1).cpu().numpy()
+        for start in range(0, mesh_features_by_scale[0].shape[0], int(chunk_size)):
+            stop = min(mesh_features_by_scale[0].shape[0], start + int(chunk_size))
+            scale_logits = [
+                mesh_features[start:stop].float().to(device) @ text.T
+                for mesh_features in mesh_features_by_scale
+            ]
+            indices = torch.stack(scale_logits, dim=0).amax(dim=0).argmax(dim=-1).cpu().numpy()
             pred_parts.append(np.asarray(class_ids, dtype=np.int32)[indices])
         pred_labels = np.concatenate(pred_parts)
         results[split] = compute_split_metrics(pred_labels, gt_labels, class_ids)
@@ -264,6 +308,10 @@ def evaluate(
             "projection_k": int(projection_k),
             "distance_epsilon": float(distance_epsilon),
             "classification": "normalized_cosine_argmax",
+            "semantic_scale_aggregation": (
+                "single_descriptor" if primitive_multiscale is None else "max_after_cosine"
+            ),
+            "num_semantic_scales": int(len(primitive_scales)),
             "text_encoder": "official_siglip2_g",
             "logit_calibration": "none",
             "spatial_postprocess": "none",

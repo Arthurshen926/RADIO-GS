@@ -10,6 +10,7 @@ from radio_gs.scripts.eval_lerf_grounding import (
     blend_strongest_source,
     neutralize_invalid_primitive_scores_for_render,
     validate_primitive_support_cache,
+    validate_primitive_unary_cache,
 )
 
 
@@ -150,3 +151,19 @@ def test_primitive_support_cache_rejects_geometry_or_query_mismatch() -> None:
     shifted[0, 0] = 1.0
     with pytest.raises(ValueError, match="xyz mismatch"):
         validate_primitive_support_cache(payload, shifted, ["bowl"])
+
+
+def test_primitive_unary_cache_accepts_only_independent_cosine() -> None:
+    xyz = torch.zeros(2, 3)
+    payload = {
+        "xyz": xyz.clone(), "valid": torch.ones(2, dtype=torch.bool),
+        "features": torch.tensor([[0.8], [-0.2]]),
+        "metadata": {"query_names": ["bowl"],
+                     "feature_space": "primitive_text_query_scores",
+                     "scoring": "cosine"},
+    }
+    scores, valid = validate_primitive_unary_cache(payload, xyz, ["bowl"])
+    assert scores.shape == (2, 1) and bool(valid.all())
+    payload["metadata"]["scoring"] = "softmax_scene"
+    with pytest.raises(ValueError, match="independent cosine"):
+        validate_primitive_unary_cache(payload, xyz, ["bowl"])

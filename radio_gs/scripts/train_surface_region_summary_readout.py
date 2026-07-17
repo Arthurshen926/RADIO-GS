@@ -11,7 +11,8 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from radio_gs.interfaces.surface_region_summary import SurfaceRegionSummaryReadout
+from radio_gs.interfaces.surface_region_contract import SurfaceRegionContractV2
+from radio_gs.interfaces.surface_region_summary import SurfaceRegionSummaryReadoutV2
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 
 
@@ -29,13 +30,23 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
     keys = (
         "radio_features", "geometry", "token_mask", "reliability",
         "official_summary_tokens", "official_crop_summaries", "teacher_mask",
+        "anchor_index",
     )
-    parts = {key: [] for key in keys}; scenes = set(); hashes = []
+    parts = {key: [] for key in keys}; scenes = set(); hashes = []; contracts = []; contract_specs = []
     for path in paths:
         payload = torch.load(path, map_location="cpu")
         metadata = payload.get("metadata", {})
-        if metadata.get("schema_version") != 2 or metadata.get("split_role") != expected_role:
+        if metadata.get("schema_version") != 3 or metadata.get("split_role") != expected_role:
             raise ValueError(f"{path} has wrong 3-D cache schema/split")
+        contract = SurfaceRegionContractV2(
+            **{
+                **metadata["region_contract"],
+                "radii_m": tuple(metadata["region_contract"]["radii_m"]),
+            }
+        )
+        contract.assert_compatible(metadata)
+        contracts.append(contract.digest)
+        contract_specs.append(contract.to_dict())
         if any(metadata.get(key, True) for key in (
             "uses_benchmark_scenes", "uses_benchmark_test_vocabulary",
             "annotations_opened", "labels_opened", "instances_opened", "text_opened",
@@ -46,8 +57,15 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
         for key in keys:
             parts[key].append(torch.as_tensor(payload[key]))
     merged = {key: torch.cat(value, dim=0) for key, value in parts.items()}
-    return merged, {"scenes": sorted(scenes), "split_hashes": sorted(set(hashes)),
-                    "cache_paths": [str(path.resolve()) for path in paths]}
+    if len(set(contracts)) != 1:
+        raise ValueError("surface-region cache contracts differ")
+    if any(spec != contract_specs[0] for spec in contract_specs[1:]):
+        raise ValueError("surface-region cache contract specifications differ")
+    merged_meta = {"scenes": sorted(scenes), "split_hashes": sorted(set(hashes)),
+                   "cache_paths": [str(path.resolve()) for path in paths],
+                   "region_contract_sha256": contracts[0]}
+    merged_meta["region_contract"] = contract_specs[0]
+    return merged, merged_meta
 
 
 def _targets(data: dict, rows: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -69,6 +87,29 @@ def _targets(data: dict, rows: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor
     return target_token, target_descriptor, descriptors, mask
 
 
+def inject_tangent_direction_noise(
+    features: torch.Tensor,
+    token_mask: torch.Tensor,
+    *,
+    angle_degrees: float,
+) -> torch.Tensor:
+    """Apply isotropic canonical-reconstruction noise to unit RADIO directions."""
+
+    values = F.normalize(torch.as_tensor(features).float(), dim=-1, eps=1e-8)
+    mask = torch.as_tensor(token_mask, device=values.device).bool()
+    if angle_degrees <= 0:
+        return values * mask[..., None]
+    tangent = torch.randn_like(values)
+    tangent = tangent - (tangent * values).sum(-1, keepdim=True) * values
+    tangent = F.normalize(tangent, dim=-1, eps=1e-8)
+    # Half-normal angular noise matches a non-negative reconstruction error;
+    # clipping avoids rare, unphysical augmentation outliers.
+    angle = torch.randn(values.shape[:-1], device=values.device).abs().clamp_max(2.0)
+    angle = angle * (float(angle_degrees) * torch.pi / 180.0)
+    result = values * angle.cos()[..., None] + tangent * angle.sin()[..., None]
+    return F.normalize(result, dim=-1, eps=1e-8) * mask[..., None]
+
+
 @torch.no_grad()
 def _evaluate(model, head, data, device, batch_size: int) -> dict:
     token_cos, descriptor_cos, multiview_cos = [], [], []
@@ -77,6 +118,7 @@ def _evaluate(model, head, data, device, batch_size: int) -> dict:
         token, descriptor, all_descriptors, teacher_mask = _targets(data, rows)
         predicted = model(
             data["radio_features"][rows].to(device), data["geometry"][rows].to(device),
+            anchor_index=data["anchor_index"][rows].to(device),
             token_mask=data["token_mask"][rows].to(device),
             reliability=data["reliability"][rows].to(device),
         )
@@ -98,8 +140,10 @@ def train(args: argparse.Namespace) -> dict:
     overlap = set(train_meta["scenes"]) & set(val_meta["scenes"])
     if overlap:
         raise ValueError(f"train/validation scene leakage: {sorted(overlap)}")
+    if train_meta["region_contract_sha256"] != val_meta["region_contract_sha256"]:
+        raise ValueError("train/validation region contracts differ")
     device = torch.device(args.device)
-    model = SurfaceRegionSummaryReadout(hidden_dim=int(args.hidden_dim)).to(device)
+    model = SurfaceRegionSummaryReadoutV2(hidden_dim=int(args.hidden_dim)).to(device)
     head = SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint).to(device).eval()
     for parameter in head.parameters(): parameter.requires_grad_(False)
     model.eval()
@@ -119,10 +163,16 @@ def train(args: argparse.Namespace) -> dict:
         for start in range(0, len(order), int(args.batch_size)):
             rows = order[start:start + int(args.batch_size)]
             target_token, target_descriptor, all_descriptors, teacher_mask = _targets(train_data, rows)
+            token_mask = train_data["token_mask"][rows].to(device)
+            radio_features = inject_tangent_direction_noise(
+                train_data["radio_features"][rows].to(device), token_mask,
+                angle_degrees=float(args.canonical_noise_degrees),
+            )
             predicted = model(
-                train_data["radio_features"][rows].to(device),
+                radio_features,
                 train_data["geometry"][rows].to(device),
-                token_mask=train_data["token_mask"][rows].to(device),
+                anchor_index=train_data["anchor_index"][rows].to(device),
+                token_mask=token_mask,
                 reliability=train_data["reliability"][rows].to(device),
             )
             projected = F.normalize(head(predicted[:, None])[:, 0].float(), dim=-1)
@@ -152,15 +202,19 @@ def train(args: argparse.Namespace) -> dict:
         if int(args.patience) and stale >= int(args.patience): break
     assert best_state is not None
     model.load_state_dict(best_state)
-    architecture = model.architecture()
+    architecture = model.architecture(train_meta["region_contract_sha256"])
     provenance = {
-        "training_scope": "global_cross_scene_3d_surface", "frozen": True,
+        "training_scope": "global_cross_scene_3d_surface_v2", "frozen": True,
         "uses_benchmark_scenes": False, "uses_benchmark_test_vocabulary": False,
         "train": train_meta, "validation": val_meta,
         "scene_disjoint": True, "official_summary_head": "c-radio_v4 siglip2-g",
         "custom_text_projection": False,
+        "region_contract_sha256": train_meta["region_contract_sha256"],
+        "region_contract": train_meta["region_contract"],
+        "canonical_direction_noise_degrees": float(args.canonical_noise_degrees),
+        "canonical_noise_calibration": str(args.canonical_noise_calibration),
     }
-    payload = {"schema_version": 2, "architecture": architecture,
+    payload = {"schema_version": 3, "architecture": architecture,
                "state_dict": {k: v.cpu() for k, v in model.state_dict().items()},
                "provenance": provenance, "history": history, "best_epoch": best_epoch,
                "best_selection_score": best_score, "untrained_baseline": baseline,
@@ -193,6 +247,11 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--token-weight", type=float, default=0.25)
     parser.add_argument("--relation-weight", type=float, default=0.1)
+    parser.add_argument("--canonical-noise-degrees", type=float, default=0.0)
+    parser.add_argument(
+        "--canonical-noise-calibration", default="",
+        help="Frozen-field angular-residual audit used to set the augmentation",
+    )
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--radio-checkpoint", default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar")

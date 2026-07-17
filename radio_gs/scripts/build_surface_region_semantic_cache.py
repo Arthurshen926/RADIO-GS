@@ -12,10 +12,12 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.field import load_canonical_field_checkpoint
+from radio_gs.interfaces.surface_region_contract import SurfaceRegionContractV2
 from radio_gs.interfaces.surface_region_summary import (
-    SurfaceRegionSummaryReadout, surface_region_geometry,
+    SurfaceRegionSummaryReadoutV2, surface_region_geometry_v2,
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
+from radio_gs.querying.support_solver import PrimitiveSupportGraph
 
 
 def _sha256(path: Path) -> str:
@@ -65,7 +67,7 @@ def build(args: argparse.Namespace) -> dict:
     ))
     field, field_payload = load_canonical_field_checkpoint(field_path, map_location="cpu")
     graph = torch.load(graph_path, map_location="cpu")
-    readout, readout_payload = SurfaceRegionSummaryReadout.from_checkpoint(readout_path)
+    readout, readout_payload = SurfaceRegionSummaryReadoutV2.from_checkpoint(readout_path)
     if readout_payload["provenance"].get("uses_benchmark_scenes", True):
         raise ValueError("readout provenance is benchmark contaminated")
     mpr = torch.load(Path(field_payload["mpr_cache"]), map_location="cpu")
@@ -74,7 +76,27 @@ def build(args: argparse.Namespace) -> dict:
     xyz = torch.as_tensor(graph["xyz"]).float().cpu()
     if not torch.equal(xyz, xyz_global[global_rows]):
         raise ValueError("support graph and canonical field geometry differ")
-    adjacency = _adjacency(graph, int(args.graph_neighbors)).to(device)
+    provenance = readout_payload["provenance"]
+    contract = SurfaceRegionContractV2(**{
+        **provenance["region_contract"],
+        "radii_m": tuple(provenance["region_contract"]["radii_m"]),
+    })
+    if str(args.region_radii).strip():
+        requested = tuple(
+            float(value) for value in str(args.region_radii).replace(",", " ").split()
+        )
+        if requested != contract.radii_m:
+            raise ValueError("CLI radii differ from the frozen readout contract")
+    contract.assert_compatible({
+        "region_contract_version": contract.version,
+        "region_contract_sha256": provenance["region_contract_sha256"],
+    })
+    support = PrimitiveSupportGraph(
+        edge_index=graph["edge_index"], edge_weight=graph["edge_weight"],
+        raw_affinity=graph["raw_affinity"], local_sigma=graph["local_sigma"],
+        num_nodes=len(xyz), edge_channels=graph.get("edge_channels", {}),
+    )
+    prepared_graph = contract.prepare_graph(support, xyz)
     field, readout = field.to(device).eval(), readout.to(device).eval()
     head = SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint).to(device).eval()
     for module in (field, readout, head):
@@ -91,33 +113,99 @@ def build(args: argparse.Namespace) -> dict:
     reliability = reliability.to(device)
     local_scale = torch.as_tensor(graph["local_sigma"]).float().clamp_min(1e-4).to(device)
     xyz_device = xyz.to(device)
-    radii = tuple(float(value) for value in str(args.region_radii).replace(",", " ").split())
-    descriptors = torch.zeros(len(global_rows), 1536, dtype=torch.float16)
+    radii = contract.radii_m
+    stream_text = bool(str(args.stream_text_queries).strip())
+    text_queries: list[str] = []
+    text_embeddings = None
+    if stream_text:
+        if not args.text_embedding_cache:
+            raise ValueError("streaming text queries require --text-embedding-cache")
+        text_payload = torch.load(args.text_embedding_cache, map_location="cpu")
+        available = [str(value) for value in text_payload.get("queries", [])]
+        text_queries = [
+            value.strip() for value in str(args.stream_text_queries).split(",")
+            if value.strip()
+        ]
+        lookup = {name: index for index, name in enumerate(available)}
+        missing = [name for name in text_queries if name not in lookup]
+        if missing:
+            raise ValueError(f"streaming text queries are absent: {missing}")
+        text_embeddings = F.normalize(
+            torch.as_tensor(text_payload["embeddings"])[
+                torch.tensor([lookup[name] for name in text_queries])
+            ].float(), dim=-1, eps=1e-8,
+        )
+        streamed_scores = torch.zeros(
+            len(xyz_global), len(text_queries), dtype=torch.float16
+        )
+        descriptors_by_scale = None
+    else:
+        descriptors_by_scale = torch.zeros(
+            len(global_rows), len(radii), 1536, dtype=torch.float16
+        )
     for start in range(0, len(global_rows), int(args.semantic_batch_size)):
         stop = min(start + int(args.semantic_batch_size), len(global_rows))
-        centers = torch.arange(start, stop, device=device)
-        scale_outputs = []
-        for radius in radii:
-            rows, mask = two_hop_physical_regions(centers, adjacency, xyz_device, radius)
+        centers_cpu = torch.arange(start, stop)
+        batch_streamed_scores = None
+        for scale_index, radius in enumerate(radii):
+            regions = contract.expand_batch(
+                support, xyz, centers_cpu.tolist(), radius,
+                prepared_graph=prepared_graph,
+            )
+            batch = len(regions); width = contract.maximum_tokens
+            rows = torch.zeros(batch, width, dtype=torch.long)
+            mask = torch.zeros(batch, width, dtype=torch.bool)
+            core = torch.zeros(batch, width, dtype=torch.bool)
+            anchor_local = torch.zeros(batch, dtype=torch.long)
+            for offset, (region_rows, region_core, _distance) in enumerate(regions):
+                count = len(region_rows)
+                rows[offset, :count] = region_rows
+                mask[offset, :count] = True
+                core[offset, :count] = region_core
+                anchor_local[offset] = int(torch.where(region_rows == centers_cpu[offset])[0][0])
+            rows, mask, core, anchor_local = (
+                rows.to(device), mask.to(device), core.to(device), anchor_local.to(device)
+            )
             token_xyz = xyz_device[rows]
             token_scale = local_scale[rows, None].expand(-1, -1, 3)
             token_reliability = reliability[rows, None]
-            geometry = surface_region_geometry(
-                token_xyz, token_scale, torch.ones_like(token_reliability),
-                token_reliability, float(radius), token_mask=mask,
+            geometry = surface_region_geometry_v2(
+                token_xyz, token_scale, token_reliability, float(radius),
+                anchor_index=anchor_local, core_mask=core, token_mask=mask,
             )
             summary = readout(
                 radio[rows], geometry, token_mask=mask,
-                reliability=token_reliability,
+                reliability=token_reliability, anchor_index=anchor_local,
             )
-            scale_outputs.append(F.normalize(head(summary[:, None])[:, 0].float(), dim=-1))
-        descriptors[start:stop] = F.normalize(
-            torch.stack(scale_outputs, dim=1).mean(1), dim=-1
-        ).half().cpu()
+            descriptor = F.normalize(
+                head(summary[:, None])[:, 0].float(), dim=-1
+            ).half()
+            if stream_text:
+                # Match the warm-cache compiler exactly: descriptors are
+                # quantized to fp16 before normalized cosine and scores are
+                # finally stored as fp16 primitive unaries.
+                assert text_embeddings is not None
+                # Deliberately perform this tiny Q-way dot product on CPU.
+                # The warm-cache compiler also reloads fp16 descriptors on
+                # CPU, so this makes cold/warm unaries bitwise reproducible
+                # instead of merely close across CUDA/CPU reduction kernels.
+                scale_scores = F.normalize(
+                    descriptor.cpu().float(), dim=-1, eps=1e-8
+                ) @ text_embeddings.T
+                batch_streamed_scores = (
+                    scale_scores if batch_streamed_scores is None
+                    else torch.maximum(batch_streamed_scores, scale_scores)
+                )
+            else:
+                assert descriptors_by_scale is not None
+                descriptors_by_scale[start:stop, scale_index] = descriptor.cpu()
+        if stream_text:
+            assert batch_streamed_scores is not None
+            streamed_scores[global_rows[start:stop]] = batch_streamed_scores.half()
     output_valid = torch.zeros(len(xyz_global), dtype=torch.bool)
     output_valid[global_rows] = True
     metadata = {
-        "schema_version": 4, "feature_space": "official_siglip2_summary_descriptor",
+        "schema_version": 5, "feature_space": "official_siglip2_summary_descriptor_multiscale",
         "source": "canonical_radio_surface_region_readout",
         "construction": "canonical_radio_surface_region_readout_then_official_summary_head",
         "canonical_radio_source": "field_decode_only", "mpr_radio_features_opened": False,
@@ -128,20 +216,61 @@ def build(args: argparse.Namespace) -> dict:
         "support_graph": str(graph_path.resolve()),
         "support_graph_sha256": _sha256(graph_path),
         "official_radio_checkpoint_sha256": _sha256(Path(args.radio_checkpoint)),
-        "region_radii_m": list(radii), "region_topology": "two_hop_surface_graph_physical_clip",
+        "region_radii_m": list(radii), "region_topology": contract.expansion,
+        "readout_batch_size": int(args.semantic_batch_size),
+        "region_contract": contract.to_dict(),
+        "region_contract_version": contract.version,
+        "region_contract_sha256": contract.digest,
         "query_set_invariant": True, "benchmark_images_opened": False,
         "official_summary_head": True, "custom_text_projection": False,
         "benchmark_masks_opened": False, "text_queries_opened": False,
         "cache_role": "disposable_derivative_not_scene_memory",
         "row_storage": "sparse_valid_rows_with_global_row_index",
+        "scale_storage": "all_scales_preserved; mean_descriptor_legacy_only",
     }
     output = Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
+    if stream_text:
+        score_metadata = {
+            "schema_version": 2,
+            "feature_space": "primitive_text_query_scores",
+            "construction": "cold_streaming_surface_region_readout_then_cosine_max",
+            "scoring": "cosine",
+            "scale_aggregation": "max",
+            "scale_count": len(radii),
+            "score_chunk_size": int(args.semantic_batch_size),
+            "query_names": text_queries,
+            "text_embedding_cache": str(Path(args.text_embedding_cache).resolve()),
+            "semantic_cache_materialized": False,
+            "benchmark_images_opened": False,
+            "benchmark_masks_opened": False,
+            "text_queries_opened": True,
+            "semantic_provenance": metadata,
+        }
+        torch.save({
+            "xyz": xyz_global,
+            "features": streamed_scores,
+            "valid": output_valid,
+            "metadata": score_metadata,
+        }, output)
+        report = {
+            "output": str(output.resolve()),
+            "valid_primitives": int(output_valid.sum()),
+            "total_primitives": len(output_valid),
+            "num_queries": len(text_queries),
+            "semantic_cache_materialized": False,
+            "metadata": score_metadata,
+        }
+        output.with_suffix(output.suffix + ".json").write_text(json.dumps(report, indent=2))
+        return report
+    assert descriptors_by_scale is not None
+    descriptors = F.normalize(descriptors_by_scale.float().mean(1), dim=-1).half()
     # Semantic descriptors dominate cache size (1536 fp16 values per row).  Do
     # not materialize zero descriptors for invalid/background primitives.  The
     # global geometry and explicit row index retain an exact, lossless mapping;
     # consumers expand only when their downstream score representation needs it.
     torch.save({"xyz": xyz_global, "features": descriptors,
                 "summary_features": descriptors, "global_rows": global_rows,
+                "features_by_scale": descriptors_by_scale,
                 "valid": output_valid, "metadata": metadata}, output)
     report = {"output": str(output.resolve()), "valid_primitives": int(output_valid.sum()),
               "total_primitives": len(output_valid), "metadata": metadata}
@@ -158,11 +287,20 @@ def main() -> None:
     parser.add_argument("--support-graph", required=True)
     parser.add_argument("--readout-checkpoint", required=True)
     parser.add_argument("--output", required=True)
-    parser.add_argument("--region-radii", default="0.20,0.40,0.70")
+    parser.add_argument("--region-radii", default="")
     parser.add_argument("--graph-neighbors", type=int, default=16)
     parser.add_argument("--radio-batch-size", type=int, default=4096)
     parser.add_argument("--semantic-batch-size", type=int, default=256)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--text-embedding-cache", default="")
+    parser.add_argument(
+        "--stream-text-queries", default="",
+        help=(
+            "Optional ordered comma-separated queries. When set, execute the "
+            "readout and cosine scoring as a cold stream and save only scalar "
+            "primitive unaries, never a 1536D semantic cache."
+        ),
+    )
     parser.add_argument("--radio-checkpoint", default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar")
     args = parser.parse_args(); print(json.dumps(build(args), indent=2))
 

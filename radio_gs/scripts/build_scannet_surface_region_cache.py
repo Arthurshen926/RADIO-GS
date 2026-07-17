@@ -16,18 +16,21 @@ import random
 
 import numpy as np
 from PIL import Image
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import dijkstra
-from scipy.spatial import cKDTree
 import torch
 import torch.nn.functional as F
 from torchvision.transforms.functional import pil_to_tensor
 
 from radio_gs.interfaces.frozen_radio_views import OfficialCropSummaryRuntime
-from radio_gs.interfaces.surface_region_summary import surface_region_geometry
+from radio_gs.interfaces.surface_region_contract import SurfaceRegionContractV2
+from radio_gs.interfaces.surface_region_summary import surface_region_geometry_v2
+from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
+from radio_gs.scripts.build_canonical_support_graph import deterministic_feature_hash
 
 
-FORBIDDEN_EVAL_SCENES = {"scene0062_00", "scene0140_00", "scene0200_00"}
+FORBIDDEN_EVAL_SCENES = {
+    "scene0000_00", "scene0062_00", "scene0070_00", "scene0097_00",
+    "scene0140_00", "scene0200_00", "scene0347_00", "scene0400_00", "scene0590_00",
+}
 
 
 def _sha256(path: Path) -> str:
@@ -98,8 +101,11 @@ def _lift_observation(
     u = color_intrinsic[0, 0] * x / z.clamp_min(1e-6) + color_intrinsic[0, 2]
     v = color_intrinsic[1, 1] * y / z.clamp_min(1e-6) + color_intrinsic[1, 2]
     color_width, color_height = (float(value) for value in color_size)
+    # ``align_corners=False`` maps pixel centres, not pixel corners.  Omitting
+    # the half-pixel term creates a fixed lifting bias in both image axes.
     grid = torch.stack(
-        [2.0 * u / color_width - 1.0, 2.0 * v / color_height - 1.0], dim=-1
+        [2.0 * (u + 0.5) / color_width - 1.0,
+         2.0 * (v + 0.5) / color_height - 1.0], dim=-1
     )[valid]
     features = F.grid_sample(
         spatial[None].float(), grid[None, None], mode="bilinear",
@@ -123,35 +129,10 @@ def _voxel_fuse(
     return fused_xyz, fused_features, fused_footprint, count
 
 
-def _surface_radius_graph(xyz: torch.Tensor, voxel_size: float) -> csr_matrix:
-    points = xyz.numpy()
-    pairs = cKDTree(points).query_pairs(r=float(voxel_size) * 1.8, output_type="ndarray")
-    if pairs.size == 0:
-        raise RuntimeError("surface radius graph contains no edges")
-    distances = np.linalg.norm(points[pairs[:, 0]] - points[pairs[:, 1]], axis=1)
-    rows = np.concatenate([pairs[:, 0], pairs[:, 1]])
-    cols = np.concatenate([pairs[:, 1], pairs[:, 0]])
-    values = np.concatenate([distances, distances]).astype(np.float32)
-    return csr_matrix((values, (rows, cols)), shape=(len(points), len(points)))
-
-
-def _region_indices(
-    graph: csr_matrix, seed: int, radius: float, *, min_tokens: int, max_tokens: int,
-    rng: random.Random,
-) -> np.ndarray | None:
-    distance = dijkstra(graph, directed=False, indices=int(seed), limit=float(radius))
-    rows = np.flatnonzero(np.isfinite(distance))
-    if rows.size < int(min_tokens):
-        return None
-    if rows.size > int(max_tokens):
-        rows = np.asarray(rng.sample(rows.tolist(), int(max_tokens)), dtype=np.int64)
-    return rows
-
-
 def _project_region_box(
     xyz: torch.Tensor, depth: torch.Tensor, depth_intrinsic: torch.Tensor,
     color_intrinsic: torch.Tensor, camera_to_world: torch.Tensor,
-    color_size: tuple[int, int], *, min_visible: int,
+    color_size: tuple[int, int], *, min_visible: int, context_pad: float = 0.12,
 ) -> list[int] | None:
     world_to_camera = torch.linalg.inv(camera_to_world)
     camera = torch.cat([xyz, torch.ones(len(xyz), 1)], dim=1) @ world_to_camera.T
@@ -177,10 +158,22 @@ def _project_region_box(
     width, height = color_size
     x0, x1 = float(u.min()), float(u.max())
     y0, y1 = float(v.min()), float(v.max())
-    pad = 0.12 * max(x1 - x0, y1 - y0, 16.0)
+    pad = float(context_pad) * max(x1 - x0, y1 - y0, 16.0)
     left, right = max(0, int(math.floor(x0 - pad))), min(width, int(math.ceil(x1 + pad)))
     top, bottom = max(0, int(math.floor(y0 - pad))), min(height, int(math.ceil(y1 + pad)))
-    if right - left < 24 or bottom - top < 24:
+    # Isolated/small surface components are valid inference regions too.  Give
+    # their teacher observation a deterministic minimum pixel footprint rather
+    # than silently dropping them from the bridge's training support.
+    minimum_crop = 24
+    if right - left < minimum_crop:
+        centre = 0.5 * (left + right)
+        left = max(0, min(width - minimum_crop, int(round(centre - minimum_crop / 2))))
+        right = min(width, left + minimum_crop)
+    if bottom - top < minimum_crop:
+        centre = 0.5 * (top + bottom)
+        top = max(0, min(height - minimum_crop, int(round(centre - minimum_crop / 2))))
+        bottom = min(height, top + minimum_crop)
+    if right <= left or bottom <= top:
         return None
     return [top, left, bottom, right]
 
@@ -192,6 +185,25 @@ def _teacher_medoid(tokens: torch.Tensor, descriptors: torch.Tensor | None = Non
     return int((normalized @ normalized.T).sum(dim=1).argmax())
 
 
+def _voxel_reliability_v2(
+    xyz: torch.Tensor,
+    features: torch.Tensor,
+    voxel_size: float,
+    fused_features: torch.Tensor,
+) -> torch.Tensor:
+    """Coverage/agreement geometric mean matching canonical reliability semantics."""
+    keys = torch.floor(xyz / float(voxel_size)).to(torch.int64)
+    _unique, inverse = torch.unique(keys, dim=0, return_inverse=True)
+    count = torch.bincount(inverse, minlength=fused_features.shape[0]).float()
+    direction = F.normalize(features.float(), dim=-1, eps=1e-8)
+    centre = F.normalize(fused_features.float(), dim=-1, eps=1e-8)
+    cosine = (direction * centre[inverse]).sum(-1).clamp(-1, 1)
+    agreement = torch.zeros_like(count).index_add_(0, inverse, (cosine + 1.0) * 0.5)
+    agreement = agreement / count.clamp_min(1.0)
+    coverage = 1.0 - torch.exp(-count / 2.0)
+    return (coverage.clamp_min(1e-6) * agreement.clamp_min(1e-6)).sqrt()
+
+
 @torch.no_grad()
 def build(args: argparse.Namespace) -> dict:
     root, split_file = Path(args.dataset_root), Path(args.split_file)
@@ -199,7 +211,17 @@ def build(args: argparse.Namespace) -> dict:
     if split_role not in {"train", "validation"}:
         raise ValueError("split-role must be train or validation")
     scenes = _scene_names(split_file, root)
-    scenes = scenes[int(args.shard_index)::int(args.shard_count)][:int(args.max_scenes)]
+    if str(args.scene_names).strip():
+        requested = [
+            value for value in str(args.scene_names).replace(",", " ").split()
+            if value
+        ]
+        missing = sorted(set(requested) - set(scenes))
+        if missing:
+            raise ValueError(f"requested scenes are absent/forbidden: {missing}")
+        scenes = requested
+    else:
+        scenes = scenes[int(args.shard_index)::int(args.shard_count)][:int(args.max_scenes)]
     if not scenes:
         raise RuntimeError("no ScanNet scenes selected")
     if FORBIDDEN_EVAL_SCENES.intersection(scenes):
@@ -209,11 +231,28 @@ def build(args: argparse.Namespace) -> dict:
         version=args.radio_version, device=args.device,
     )
     device = torch.device(args.device)
+    contract = SurfaceRegionContractV2(
+        radii_m=tuple(float(v) for v in str(args.region_radii).replace(",", " ").split()),
+        context_ratio=float(args.context_ratio),
+        neighbors=int(args.graph_neighbors),
+        maximum_tokens=int(args.max_tokens),
+        minimum_tokens=int(args.min_tokens),
+    )
+    adaptors = {
+        "appearance": load_radio_adaptor_from_checkpoint(
+            args.radio_checkpoint, "dino_v3_7b", kind="feature_projection"
+        ).to(device).eval(),
+        "boundary": load_radio_adaptor_from_checkpoint(
+            args.radio_checkpoint, "sam3", kind="feature_projection"
+        ).to(device).eval(),
+    }
+    for adaptor in adaptors.values():
+        adaptor.requires_grad_(False)
     rng = random.Random(int(args.seed) + int(args.shard_index) * 100003)
     records, feature_rows, geometry_rows, masks, reliability_rows = [], [], [], [], []
     teacher_tokens, teacher_descriptors, teacher_masks = [], [], []
     failures = {}
-    radii = tuple(float(v) for v in str(args.region_radii).replace(",", " ").split())
+    radii = contract.radii_m
     for scene_name in scenes:
         scene_dir = root / scene_name
         try:
@@ -242,26 +281,75 @@ def build(args: argparse.Namespace) -> dict:
                 torch.cat(lifted_xyz), torch.cat(lifted_features),
                 torch.cat(lifted_footprint), float(args.voxel_size),
             )
-            graph = _surface_radius_graph(xyz, float(args.voxel_size))
+            reliability_all = _voxel_reliability_v2(
+                torch.cat(lifted_xyz), torch.cat(lifted_features),
+                float(args.voxel_size), features,
+            )
+            features = F.normalize(features.float(), dim=-1, eps=1e-8)
+            projected = {}
+            for name, adaptor in adaptors.items():
+                chunks = []
+                for start in range(0, len(features), int(args.adaptor_batch_size)):
+                    value = adaptor(features[start:start + int(args.adaptor_batch_size)].to(device))
+                    chunks.append(F.normalize(value.float(), dim=-1, eps=1e-8).cpu())
+                projected[name] = deterministic_feature_hash(
+                    torch.cat(chunks), int(args.affinity_dim)
+                )
+            graph = contract.build_graph(
+                xyz, appearance_features=projected["appearance"],
+                boundary_features=projected["boundary"],
+            )
+            if str(args.scene_graph_output_root).strip():
+                graph_root = Path(args.scene_graph_output_root)
+                graph_root.mkdir(parents=True, exist_ok=True)
+                graph_payload = {
+                    "schema_version": 1,
+                    "scene": scene_name,
+                    "xyz": xyz,
+                    "edge_index": graph.edge_index,
+                    "edge_weight": graph.edge_weight,
+                    "raw_affinity": graph.raw_affinity,
+                    "local_sigma": graph.local_sigma,
+                    "edge_channels": graph.edge_channels,
+                    "depth_intrinsic": kd,
+                    "color_intrinsic": kc,
+                    "frames": [
+                        {
+                            "color": str(color_path.resolve()),
+                            "depth": str(depth_path.resolve()),
+                            "pose": pose,
+                        }
+                        for (color_path, _color, _depth, pose),
+                            (_color_path, depth_path, _pose_path)
+                        in zip(frame_data, frames)
+                    ],
+                    "metadata": {
+                        "source": "ScanNet_frames_25k_query_free",
+                        "labels_opened": False, "instances_opened": False,
+                        "masks_opened": False, "text_opened": False,
+                        "region_contract": contract.to_dict(),
+                        "region_contract_sha256": contract.digest,
+                    },
+                }
+                torch.save(graph_payload, graph_root / f"{scene_name}.pt")
+            prepared_graph = contract.prepare_graph(graph, xyz)
             candidates = list(range(len(xyz))); rng.shuffle(candidates)
             scene_regions = 0
             for seed in candidates:
                 if scene_regions >= int(args.regions_per_scene):
                     break
                 radius = radii[scene_regions % len(radii)]
-                indices = _region_indices(
-                    graph, seed, radius, min_tokens=int(args.min_tokens),
-                    max_tokens=int(args.max_tokens), rng=rng,
+                rows, core, _geodesic = contract.expand(
+                    graph, xyz, seed, radius, prepared_graph=prepared_graph
                 )
-                if indices is None:
-                    continue
-                idx = torch.from_numpy(indices)
+                idx = rows
                 crops, views = [], []
                 for color_path, color, depth, pose in frame_data:
                     box = _project_region_box(
                         xyz[idx], depth, kd, kc, pose,
                         (int(color.shape[2]), int(color.shape[1])),
-                        min_visible=int(args.min_visible_tokens),
+                        min_visible=min(int(args.min_visible_tokens), len(idx)),
+                        context_pad=0.0,
                     )
                     if box is None:
                         continue
@@ -279,16 +367,16 @@ def build(args: argparse.Namespace) -> dict:
                 _, tokens, descriptors = runtime.encode_training_pair(torch.stack(crops).to(device))
                 view_count = len(crops)
                 padded_features = torch.zeros(int(args.max_tokens), 1280, dtype=torch.float16)
-                padded_geometry = torch.zeros(int(args.max_tokens), 12, dtype=torch.float16)
+                padded_geometry = torch.zeros(int(args.max_tokens), 14, dtype=torch.float16)
                 padded_mask = torch.zeros(int(args.max_tokens), dtype=torch.bool)
                 padded_reliability = torch.zeros(int(args.max_tokens), 1, dtype=torch.float16)
                 n = len(idx)
-                rel = (1.0 - torch.exp(-counts[idx, None] / 2.0)).clamp(0, 1)
-                scale = footprint[idx, None].expand(-1, 3).clamp(
-                    min=float(args.voxel_size) * 0.5, max=float(args.voxel_size) * 2.0
-                )
-                geom = surface_region_geometry(
-                    xyz[idx], scale, torch.ones(n, 1), rel, float(radius)
+                rel = reliability_all[idx, None]
+                scale = graph.local_sigma[idx, None].expand(-1, 3).clamp_min(1e-4)
+                anchor_local = int(torch.where(idx == int(seed))[0][0])
+                geom = surface_region_geometry_v2(
+                    xyz[idx], scale, rel, float(radius), anchor_index=anchor_local,
+                    core_mask=core,
                 )
                 padded_features[:n] = features[idx].half()
                 padded_geometry[:n] = geom.half()
@@ -308,6 +396,9 @@ def build(args: argparse.Namespace) -> dict:
                     "scene": scene_name, "seed": int(seed), "physical_radius_m": radius,
                     "tokens": n, "teacher_views": views,
                     "teacher_medoid": _teacher_medoid(tokens, descriptors),
+                    "anchor_local_index": anchor_local,
+                    "core_tokens": int(core.sum()),
+                    "below_nominal_minimum": bool(len(idx) < contract.minimum_tokens),
                 })
                 scene_regions += 1
             if scene_regions == 0:
@@ -317,15 +408,21 @@ def build(args: argparse.Namespace) -> dict:
     if not records:
         raise RuntimeError(f"all scenes failed: {failures}")
     metadata = {
-        "schema_version": 2, "training_scope": "global_cross_scene_3d_surface",
+        "schema_version": 3, "training_scope": "global_cross_scene_3d_surface_v2",
         "dataset_id": "ScanNet_frames_25k_query_free", "split_role": split_role,
         "split_file": str(split_file.resolve()), "split_file_sha256": _sha256(split_file),
         "uses_benchmark_test_vocabulary": False, "uses_benchmark_scenes": False,
         "annotations_opened": False, "labels_opened": False, "instances_opened": False,
-        "text_opened": False, "region_construction": "depth_pose_surface_radius_graph",
+        "text_opened": False, "region_construction": "shared_surface_region_contract_v2",
+        "region_contract": contract.to_dict(),
+        "region_contract_version": contract.version,
+        "region_contract_sha256": contract.digest,
         "radio_version": runtime.version,
         "radio_checkpoint_sha256": runtime.radio_checkpoint_sha256,
         "scene_names": sorted({record["scene"] for record in records}),
+        "regions_below_nominal_minimum": sum(
+            bool(record["below_nominal_minimum"]) for record in records
+        ),
         "region_records": records, "failed_scenes": failures,
         "forbidden_eval_scenes": sorted(FORBIDDEN_EVAL_SCENES),
     }
@@ -336,6 +433,9 @@ def build(args: argparse.Namespace) -> dict:
         "official_summary_tokens": torch.stack(teacher_tokens),
         "official_crop_summaries": torch.stack(teacher_descriptors),
         "teacher_mask": torch.stack(teacher_masks), "metadata": metadata,
+        "anchor_index": torch.tensor(
+            [record["anchor_local_index"] for record in records], dtype=torch.long
+        ),
     }
     output = Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
     torch.save(payload, output)
@@ -355,20 +455,29 @@ def main() -> None:
     parser.add_argument("--split-role", choices=("train", "validation"), required=True)
     parser.add_argument("--output", required=True)
     parser.add_argument("--max-scenes", type=int, default=16)
+    parser.add_argument("--scene-names", default="")
     parser.add_argument("--frames-per-scene", type=int, default=8)
     parser.add_argument("--regions-per-scene", type=int, default=12)
     parser.add_argument("--region-radii", default="0.25,0.45,0.70")
+    parser.add_argument("--context-ratio", type=float, default=1.20)
+    parser.add_argument("--graph-neighbors", type=int, default=16)
     parser.add_argument("--voxel-size", type=float, default=0.04)
     parser.add_argument("--depth-stride", type=int, default=8)
     parser.add_argument("--min-tokens", type=int, default=24)
     parser.add_argument("--max-tokens", type=int, default=256)
     parser.add_argument("--min-visible-tokens", type=int, default=12)
     parser.add_argument("--teacher-views", type=int, default=3)
+    parser.add_argument("--adaptor-batch-size", type=int, default=4096)
+    parser.add_argument("--affinity-dim", type=int, default=256)
     parser.add_argument("--radio-resolution", type=int, default=384)
     parser.add_argument("--shard-count", type=int, default=1)
     parser.add_argument("--shard-index", type=int, default=0)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--scene-graph-output-root", default="",
+        help="Optional query-free per-scene graph export for relation calibration",
+    )
     parser.add_argument("--radio-repo", default="/root/RADIO")
     parser.add_argument("--radio-version", default="c-radio_v4-h")
     parser.add_argument("--radio-checkpoint", default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar")

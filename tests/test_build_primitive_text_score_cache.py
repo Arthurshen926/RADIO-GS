@@ -5,6 +5,7 @@ from radio_gs.querying.unified_query import cosine_relevancy_torch
 from radio_gs.scripts.build_primitive_text_score_cache import (
     apply_completion_evidence,
     compile_scores,
+    compile_multiscale_scores,
 )
 
 
@@ -49,6 +50,31 @@ def test_compile_relevancy_requires_generic_negatives() -> None:
             peak_normalize=False,
             scoring="relevancy",
         )
+
+
+def test_multiscale_query_reduction_preserves_the_best_physical_extent() -> None:
+    # Query 0 matches the small scale, while query 1 matches the large scale.
+    features = torch.tensor([[[1.0, 0.0], [0.0, 1.0]]])
+    queries = torch.eye(2)
+    actual = compile_multiscale_scores(
+        features, queries, torch.tensor([True]), temperature=1.0,
+        chunk_size=4, peak_normalize=False, scoring="cosine",
+        scale_aggregation="max",
+    ).float()
+
+    torch.testing.assert_close(actual, torch.ones(1, 2))
+
+
+def test_multiscale_logmeanexp_is_bounded_by_mean_and_max() -> None:
+    features = torch.tensor([[[1.0, 0.0], [0.0, 1.0]]])
+    query = torch.tensor([[1.0, 0.0]])
+    actual = compile_multiscale_scores(
+        features, query, torch.tensor([True]), temperature=1.0,
+        chunk_size=4, peak_normalize=False, scoring="cosine",
+        scale_aggregation="logmeanexp", scale_lse_temperature=4.0,
+    ).float().item()
+
+    assert 0.5 < actual < 1.0
 
 
 def test_peak_normalization_can_preserve_primary_domain() -> None:
