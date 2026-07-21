@@ -1,8 +1,11 @@
 import torch
 
 from radio_gs.scripts.build_scannet_surface_region_cache import (
+    _excluded_spaces,
     _lift_observation,
+    _physical_space,
     _project_region_box,
+    _scene_names,
     _teacher_medoid,
     _voxel_fuse,
 )
@@ -47,3 +50,23 @@ def test_singleton_surface_region_gets_a_valid_teacher_crop() -> None:
     assert box is not None
     top, left, bottom, right = box
     assert bottom - top == 24 and right - left == 24
+
+
+def test_exclusion_is_applied_to_every_rescan_of_a_physical_space(tmp_path) -> None:
+    root = tmp_path / "frames"
+    for scene in ("scene0012_00", "scene0012_02", "scene0013_00"):
+        (root / scene).mkdir(parents=True)
+    split = tmp_path / "split.txt"
+    split.write_text("scene0012_00\nscene0012_02\nscene0013_00\n")
+    exclusion = tmp_path / "pfir_dev.txt"
+    exclusion.write_text("# comment\nscene0012_02\n")
+
+    spaces, records = _excluded_spaces(str(exclusion), "")
+    assert spaces == {"scene0012"}
+    assert records[0]["sha256"]
+    assert _physical_space("scene0012_02") == "scene0012"
+    assert _scene_names(
+        split,
+        root,
+        excluded_physical_spaces=spaces,
+    ) == ["scene0013_00"]

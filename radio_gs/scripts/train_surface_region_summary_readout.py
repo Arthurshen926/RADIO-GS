@@ -33,6 +33,8 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
         "anchor_index",
     )
     parts = {key: [] for key in keys}; scenes = set(); hashes = []; contracts = []; contract_specs = []
+    excluded_spaces: set[str] | None = None
+    exclusion_files: dict[str, str] = {}
     for path in paths:
         payload = torch.load(path, map_location="cpu")
         metadata = payload.get("metadata", {})
@@ -54,6 +56,21 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
             raise ValueError(f"{path} violates the query-free scene-disjoint contract")
         scenes.update(str(value) for value in metadata["scene_names"])
         hashes.append(str(metadata["split_file_sha256"]))
+        cache_exclusions = {
+            str(value) for value in metadata.get("excluded_physical_spaces", [])
+        }
+        if excluded_spaces is None:
+            excluded_spaces = cache_exclusions
+        elif cache_exclusions != excluded_spaces:
+            raise ValueError("surface-region cache exclusion contracts differ")
+        if not bool(metadata.get("physical_space_disjoint", True)):
+            raise ValueError(f"{path} does not certify physical-space disjointness")
+        for record in metadata.get("exclusion_files", []):
+            resolved = str(record["path"])
+            digest = str(record["sha256"])
+            previous = exclusion_files.setdefault(resolved, digest)
+            if previous != digest:
+                raise ValueError("surface-region exclusion file hashes differ")
         for key in keys:
             parts[key].append(torch.as_tensor(payload[key]))
     merged = {key: torch.cat(value, dim=0) for key, value in parts.items()}
@@ -65,6 +82,12 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
                    "cache_paths": [str(path.resolve()) for path in paths],
                    "region_contract_sha256": contracts[0]}
     merged_meta["region_contract"] = contract_specs[0]
+    merged_meta["excluded_physical_spaces"] = sorted(excluded_spaces or set())
+    merged_meta["exclusion_files"] = [
+        {"path": path, "sha256": digest}
+        for path, digest in sorted(exclusion_files.items())
+    ]
+    merged_meta["physical_space_disjoint"] = True
     return merged, merged_meta
 
 
@@ -142,6 +165,11 @@ def train(args: argparse.Namespace) -> dict:
         raise ValueError(f"train/validation scene leakage: {sorted(overlap)}")
     if train_meta["region_contract_sha256"] != val_meta["region_contract_sha256"]:
         raise ValueError("train/validation region contracts differ")
+    if (
+        train_meta["excluded_physical_spaces"]
+        != val_meta["excluded_physical_spaces"]
+    ):
+        raise ValueError("train/validation benchmark exclusion contracts differ")
     device = torch.device(args.device)
     model = SurfaceRegionSummaryReadoutV2(hidden_dim=int(args.hidden_dim)).to(device)
     head = SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint).to(device).eval()

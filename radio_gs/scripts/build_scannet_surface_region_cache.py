@@ -41,9 +41,56 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _scene_names(split_file: Path, root: Path) -> list[str]:
+def _physical_space(scene_name: str) -> str:
+    """Return ScanNet's physical-space identifier (``sceneXXXX``)."""
+
+    return str(scene_name).split("_", 1)[0]
+
+
+def _read_scene_file(path: Path) -> list[str]:
+    return [
+        line.strip()
+        for line in path.read_text().splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def _excluded_spaces(
+    scene_files: str,
+    scene_names: str,
+) -> tuple[set[str], list[dict[str, str]]]:
+    """Compile an auditable physical-space exclusion set.
+
+    Excluding the whole ``sceneXXXX`` space prevents a different rescan from
+    leaking the development/test environment into the global readout.
+    """
+
+    names = [
+        value
+        for value in str(scene_names).replace(",", " ").split()
+        if value
+    ]
+    records: list[dict[str, str]] = []
+    for value in str(scene_files).replace(",", " ").split():
+        path = Path(value)
+        if not path.is_file():
+            raise FileNotFoundError(f"exclude scene file is missing: {path}")
+        names.extend(_read_scene_file(path))
+        records.append({"path": str(path.resolve()), "sha256": _sha256(path)})
+    spaces = {_physical_space(name) for name in names}
+    return spaces, records
+
+
+def _scene_names(
+    split_file: Path,
+    root: Path,
+    *,
+    excluded_physical_spaces: set[str] | None = None,
+) -> list[str]:
     names = [line.strip() for line in split_file.read_text().splitlines() if line.strip()]
     names = [name for name in names if name not in FORBIDDEN_EVAL_SCENES]
+    excluded = excluded_physical_spaces or set()
+    names = [name for name in names if _physical_space(name) not in excluded]
     return [name for name in names if (root / name).is_dir()]
 
 
@@ -210,7 +257,15 @@ def build(args: argparse.Namespace) -> dict:
     split_role = str(args.split_role)
     if split_role not in {"train", "validation"}:
         raise ValueError("split-role must be train or validation")
-    scenes = _scene_names(split_file, root)
+    excluded_spaces, exclusion_files = _excluded_spaces(
+        args.exclude_scene_files,
+        args.exclude_scene_names,
+    )
+    scenes = _scene_names(
+        split_file,
+        root,
+        excluded_physical_spaces=excluded_spaces,
+    )
     if str(args.scene_names).strip():
         requested = [
             value for value in str(args.scene_names).replace(",", " ").split()
@@ -226,6 +281,12 @@ def build(args: argparse.Namespace) -> dict:
         raise RuntimeError("no ScanNet scenes selected")
     if FORBIDDEN_EVAL_SCENES.intersection(scenes):
         raise RuntimeError("paper evaluation scenes leaked into bridge data")
+    leaked_spaces = {_physical_space(name) for name in scenes} & excluded_spaces
+    if leaked_spaces:
+        raise RuntimeError(
+            f"excluded benchmark physical spaces leaked into bridge data: "
+            f"{sorted(leaked_spaces)}"
+        )
     runtime = OfficialCropSummaryRuntime.load(
         checkpoint_path=args.radio_checkpoint, radio_repo=args.radio_repo,
         version=args.radio_version, device=args.device,
@@ -237,6 +298,11 @@ def build(args: argparse.Namespace) -> dict:
         neighbors=int(args.graph_neighbors),
         maximum_tokens=int(args.max_tokens),
         minimum_tokens=int(args.min_tokens),
+        path_cost_mode=str(args.path_cost_mode),
+        path_affinity_floor=float(args.path_affinity_floor),
+        token_subsampling=str(args.token_subsampling),
+        token_candidate_limit=int(args.token_candidate_limit),
+        core_token_fraction=float(args.core_token_fraction),
     )
     adaptors = {
         "appearance": load_radio_adaptor_from_checkpoint(
@@ -425,6 +491,9 @@ def build(args: argparse.Namespace) -> dict:
         ),
         "region_records": records, "failed_scenes": failures,
         "forbidden_eval_scenes": sorted(FORBIDDEN_EVAL_SCENES),
+        "excluded_physical_spaces": sorted(excluded_spaces),
+        "exclusion_files": exclusion_files,
+        "physical_space_disjoint": True,
     }
     payload = {
         "radio_features": torch.stack(feature_rows),
@@ -456,6 +525,19 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--max-scenes", type=int, default=16)
     parser.add_argument("--scene-names", default="")
+    parser.add_argument(
+        "--exclude-scene-files",
+        default="",
+        help=(
+            "Comma/space-separated benchmark scene-list files. Every rescan "
+            "of each listed sceneXXXX physical space is excluded."
+        ),
+    )
+    parser.add_argument(
+        "--exclude-scene-names",
+        default="",
+        help="Additional comma/space-separated scenes or sceneXXXX spaces to exclude.",
+    )
     parser.add_argument("--frames-per-scene", type=int, default=8)
     parser.add_argument("--regions-per-scene", type=int, default=12)
     parser.add_argument("--region-radii", default="0.25,0.45,0.70")
@@ -465,6 +547,27 @@ def main() -> None:
     parser.add_argument("--depth-stride", type=int, default=8)
     parser.add_argument("--min-tokens", type=int, default=24)
     parser.add_argument("--max-tokens", type=int, default=256)
+    parser.add_argument(
+        "--token-subsampling",
+        choices=("nearest_geodesic_then_node_index", "core_context_radial_stratified_v1"),
+        default="nearest_geodesic_then_node_index",
+        help="Declared fixed-budget region-token selection policy.",
+    )
+    parser.add_argument(
+        "--token-candidate-limit", type=int, default=256,
+        help="Maximum settled Dijkstra candidates before deterministic token selection.",
+    )
+    parser.add_argument(
+        "--core-token-fraction", type=float, default=0.60,
+        help="Core quota for core/context stratified sampling.",
+    )
+    parser.add_argument(
+        "--path-cost-mode",
+        choices=("euclidean", "appearance_boundary_geometric"),
+        default="euclidean",
+        help="Query-free shortest-path cost; relation weighting is manifest-locked.",
+    )
+    parser.add_argument("--path-affinity-floor", type=float, default=1e-4)
     parser.add_argument("--min-visible-tokens", type=int, default=12)
     parser.add_argument("--teacher-views", type=int, default=3)
     parser.add_argument("--adaptor-batch-size", type=int, default=4096)

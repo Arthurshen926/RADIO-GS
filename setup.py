@@ -21,7 +21,12 @@ setup(
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["output", "dataset", "reference"]),
     include_package_data=True,
-    package_data={"radio_gs": ["configs/*.yaml"]},
+    package_data={
+        "radio_gs": [
+            "configs/*.yaml",
+            "benchmarks/scannet_pfir/split/*.txt",
+        ]
+    },
     python_requires=">=3.9",
     install_requires=requirements,
 )

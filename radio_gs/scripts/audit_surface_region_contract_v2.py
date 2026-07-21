@@ -22,7 +22,21 @@ def run(args: argparse.Namespace) -> dict:
         raw_affinity=payload["raw_affinity"], local_sigma=payload["local_sigma"],
         num_nodes=len(xyz), edge_channels=payload.get("edge_channels", {}),
     )
-    contract = SurfaceRegionContractV2()
+    contract = SurfaceRegionContractV2(
+        radii_m=tuple(
+            float(value)
+            for value in str(args.region_radii).replace(",", " ").split()
+        ),
+        context_ratio=float(args.context_ratio),
+        neighbors=int(args.graph_neighbors),
+        maximum_tokens=int(args.maximum_tokens),
+        minimum_tokens=int(args.minimum_tokens),
+        path_cost_mode=str(args.path_cost_mode),
+        path_affinity_floor=float(args.path_affinity_floor),
+        token_subsampling=str(args.token_subsampling),
+        token_candidate_limit=int(args.token_candidate_limit),
+        core_token_fraction=float(args.core_token_fraction),
+    )
     prepared = contract.prepare_graph(graph, xyz)
     rng = random.Random(int(args.seed))
     anchors = rng.sample(range(graph.num_nodes), min(int(args.anchors), graph.num_nodes))
@@ -76,6 +90,24 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     parser.add_argument("--anchors", type=int, default=1000)
     parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--region-radii", default="0.25,0.45,0.70")
+    parser.add_argument("--context-ratio", type=float, default=1.20)
+    parser.add_argument("--graph-neighbors", type=int, default=16)
+    parser.add_argument("--maximum-tokens", type=int, default=256)
+    parser.add_argument("--minimum-tokens", type=int, default=24)
+    parser.add_argument(
+        "--token-subsampling",
+        choices=("nearest_geodesic_then_node_index", "core_context_radial_stratified_v1"),
+        default="nearest_geodesic_then_node_index",
+    )
+    parser.add_argument("--token-candidate-limit", type=int, default=256)
+    parser.add_argument("--core-token-fraction", type=float, default=0.60)
+    parser.add_argument(
+        "--path-cost-mode",
+        choices=("euclidean", "appearance_boundary_geometric"),
+        default="euclidean",
+    )
+    parser.add_argument("--path-affinity-floor", type=float, default=1e-4)
     parser.add_argument("--seed", type=int, default=0)
     print(json.dumps(run(parser.parse_args()), indent=2))
 

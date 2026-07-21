@@ -427,6 +427,7 @@ def solve_primitive_support(
     positive_seeds: SoftSeedSet | None = None,
     negative_seeds: SoftSeedSet | None = None,
     config: SupportSolverConfig = SupportSolverConfig(),
+    normalized_affinity: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Diffuse unary evidence while softly clamping registered evidence."""
 
@@ -453,6 +454,7 @@ def solve_primitive_support(
             negative,
             config=config,
             laplacian_weight=automatic_weight,
+            normalized_affinity=normalized_affinity,
         )
     probability = prior
 
@@ -511,6 +513,7 @@ def solve_seeded_random_walker(
     *,
     config: SupportSolverConfig,
     laplacian_weight: float | None = None,
+    normalized_affinity: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Solve a confidence-weighted normalized Laplacian with hard seeds.
 
@@ -521,12 +524,18 @@ def solve_seeded_random_walker(
 
     device = prior.device
     row, col = graph.edge_index
-    affinity = graph.raw_affinity.to(device).float()
-    degree = torch.zeros(graph.num_nodes, device=device)
-    if row.numel():
-        degree.index_add_(0, row, affinity)
-    inverse_sqrt = degree.clamp_min(1e-12).rsqrt()
-    normalized_affinity = affinity * inverse_sqrt[row] * inverse_sqrt[col]
+    if normalized_affinity is None:
+        normalized_affinity = normalized_laplacian_affinity(graph)
+    else:
+        normalized_affinity = torch.as_tensor(
+            normalized_affinity, device=device
+        ).float().reshape(-1)
+        if normalized_affinity.shape != graph.raw_affinity.shape:
+            raise ValueError("normalized_affinity must align with graph edges")
+        if not bool(torch.isfinite(normalized_affinity).all()) or bool(
+            (normalized_affinity < 0).any()
+        ):
+            raise ValueError("normalized_affinity must be finite and non-negative")
     hard_positive = positive >= float(config.hard_seed_threshold)
     hard_negative = negative >= float(config.hard_seed_threshold)
     hard_negative &= ~hard_positive
@@ -572,6 +581,24 @@ def solve_seeded_random_walker(
         residual_norm = next_norm
     probability = solution * free + fixed_values
     return probability.clamp(0.0, 1.0)
+
+
+def normalized_laplacian_affinity(graph: PrimitiveSupportGraph) -> torch.Tensor:
+    """Return the symmetric normalized affinity used by the random walker.
+
+    It depends only on the frozen scene graph, so callers evaluating many
+    click sequences on one graph may cache it without changing the solver or
+    its query inputs.  The arithmetic intentionally matches the former
+    in-solver construction exactly.
+    """
+
+    row, col = graph.edge_index
+    affinity = graph.raw_affinity.float()
+    degree = torch.zeros(graph.num_nodes, device=affinity.device)
+    if row.numel():
+        degree.index_add_(0, row, affinity)
+    inverse_sqrt = degree.clamp_min(1e-12).rsqrt()
+    return affinity * inverse_sqrt[row] * inverse_sqrt[col]
 
 
 def _component_labels(

@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import torch
@@ -22,6 +23,26 @@ from radio_gs.querying.support_solver import PrimitiveSupportGraph
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _atomic_torch_save(payload: object, output: Path) -> None:
+    """Publish a cache only after its entire tensor payload is durable.
+
+    Full semantic caches are several GB, while the PFIR field workers and the
+    compact-query cache materializer may run concurrently.  ``torch.save``
+    creates its destination immediately, so file-existence checks alone do not
+    establish that a reader sees a complete archive.  A same-filesystem rename
+    does, and leaves a prior valid cache untouched on interruption.
+    """
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    temporary = output.with_name(f".{output.name}.{os.getpid()}.tmp")
+    try:
+        torch.save(payload, temporary)
+        os.replace(temporary, output)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
 
 
 def _adjacency(graph: dict, neighbors: int) -> torch.Tensor:
@@ -77,6 +98,14 @@ def build(args: argparse.Namespace) -> dict:
     if not torch.equal(xyz, xyz_global[global_rows]):
         raise ValueError("support graph and canonical field geometry differ")
     provenance = readout_payload["provenance"]
+    training_scope = str(provenance.get("training_scope", ""))
+    if (
+        not training_scope.startswith("global_cross_scene")
+        or provenance.get("uses_benchmark_scenes", True)
+        or provenance.get("uses_benchmark_test_vocabulary", True)
+        or provenance.get("scene_disjoint") is not True
+    ):
+        raise ValueError("readout provenance is not frozen global cross-scene training")
     contract = SurfaceRegionContractV2(**{
         **provenance["region_contract"],
         "radii_m": tuple(provenance["region_contract"]["radii_m"]),
@@ -204,18 +233,24 @@ def build(args: argparse.Namespace) -> dict:
             streamed_scores[global_rows[start:stop]] = batch_streamed_scores.half()
     output_valid = torch.zeros(len(xyz_global), dtype=torch.bool)
     output_valid[global_rows] = True
+    readout_sha256 = _sha256(readout_path)
+    radio_sha256 = _sha256(Path(args.radio_checkpoint))
     metadata = {
         "schema_version": 5, "feature_space": "official_siglip2_summary_descriptor_multiscale",
         "source": "canonical_radio_surface_region_readout",
         "construction": "canonical_radio_surface_region_readout_then_official_summary_head",
         "canonical_radio_source": "field_decode_only", "mpr_radio_features_opened": False,
         "readout_checkpoint": str(readout_path.resolve()),
-        "readout_checkpoint_sha256": _sha256(readout_path),
+        "readout_checkpoint_sha256": readout_sha256,
+        "bridge_checkpoint_sha256": readout_sha256,
+        "bridge_training_scope": "global_cross_scene",
+        "bridge_training_scope_detail": training_scope,
         "field_checkpoint": str(field_path.resolve()),
         "field_checkpoint_sha256": _sha256(field_path),
         "support_graph": str(graph_path.resolve()),
         "support_graph_sha256": _sha256(graph_path),
-        "official_radio_checkpoint_sha256": _sha256(Path(args.radio_checkpoint)),
+        "official_radio_checkpoint_sha256": radio_sha256,
+        "radio_checkpoint_sha256": radio_sha256,
         "region_radii_m": list(radii), "region_topology": contract.expansion,
         "readout_batch_size": int(args.semantic_batch_size),
         "region_contract": contract.to_dict(),
@@ -246,7 +281,7 @@ def build(args: argparse.Namespace) -> dict:
             "text_queries_opened": True,
             "semantic_provenance": metadata,
         }
-        torch.save({
+        _atomic_torch_save({
             "xyz": xyz_global,
             "features": streamed_scores,
             "valid": output_valid,
@@ -268,10 +303,39 @@ def build(args: argparse.Namespace) -> dict:
     # not materialize zero descriptors for invalid/background primitives.  The
     # global geometry and explicit row index retain an exact, lossless mapping;
     # consumers expand only when their downstream score representation needs it.
-    torch.save({"xyz": xyz_global, "features": descriptors,
-                "summary_features": descriptors, "global_rows": global_rows,
-                "features_by_scale": descriptors_by_scale,
-                "valid": output_valid, "metadata": metadata}, output)
+    _atomic_torch_save(
+        {
+            "xyz": xyz_global,
+            "features": descriptors,
+            "summary_features": descriptors,
+            "global_rows": global_rows,
+            "features_by_scale": descriptors_by_scale,
+            "valid": output_valid,
+            "metadata": metadata,
+        },
+        output,
+    )
+    # Pose-free image querying only consumes the already aggregated descriptor,
+    # never the retained per-scale tensor.  Save an exact, provenance-identical
+    # derivative alongside the full cache so each query does not repeatedly
+    # deserialize several otherwise unused gigabytes.  This is an execution
+    # representation change only: ``features`` is byte-for-byte the tensor
+    # stored in the full semantic cache.
+    query_output = (
+        Path(args.query_output)
+        if str(args.query_output).strip()
+        else output.with_name(f"{output.stem}_query{output.suffix}")
+    )
+    _atomic_torch_save(
+        {
+            "xyz": xyz_global,
+            "features": descriptors,
+            "global_rows": global_rows,
+            "valid": output_valid,
+            "metadata": metadata,
+        },
+        query_output,
+    )
     report = {"output": str(output.resolve()), "valid_primitives": int(output_valid.sum()),
               "total_primitives": len(output_valid), "metadata": metadata}
     output.with_suffix(output.suffix + ".json").write_text(json.dumps(report, indent=2))
@@ -287,6 +351,13 @@ def main() -> None:
     parser.add_argument("--support-graph", required=True)
     parser.add_argument("--readout-checkpoint", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument(
+        "--query-output", default="",
+        help=(
+            "Optional compact descriptor-only sidecar for pose-free querying; "
+            "defaults next to --output."
+        ),
+    )
     parser.add_argument("--region-radii", default="")
     parser.add_argument("--graph-neighbors", type=int, default=16)
     parser.add_argument("--radio-batch-size", type=int, default=4096)

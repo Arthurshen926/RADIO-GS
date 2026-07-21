@@ -28,7 +28,7 @@ def _bounded_dijkstra_batch(
     data: np.ndarray,
     anchors: np.ndarray,
     limit: float,
-    maximum_tokens: int,
+    maximum_candidates: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Sparse bounded Dijkstra without a ``batch x num_nodes`` allocation.
 
@@ -38,9 +38,9 @@ def _bounded_dijkstra_batch(
     """
 
     count_nodes = indptr.shape[0] - 1
-    rows = np.full((anchors.shape[0], maximum_tokens), -1, dtype=np.int64)
+    rows = np.full((anchors.shape[0], maximum_candidates), -1, dtype=np.int64)
     distances = np.full(
-        (anchors.shape[0], maximum_tokens), np.inf, dtype=np.float64
+        (anchors.shape[0], maximum_candidates), np.inf, dtype=np.float64
     )
     counts = np.zeros(anchors.shape[0], dtype=np.int64)
     best = np.empty(count_nodes, dtype=np.float64)
@@ -53,7 +53,7 @@ def _bounded_dijkstra_batch(
         stamp[anchor] = marker
         best[anchor] = 0.0
         output_count = 0
-        while queue and output_count < maximum_tokens:
+        while queue and output_count < maximum_candidates:
             distance, node = heapq.heappop(queue)
             if stamp[node] != marker or distance > best[node] or settled[node] == marker:
                 continue
@@ -103,6 +103,10 @@ class SurfaceRegionContractV2:
     opacity_semantics: str = "absent"
     expansion: str = "undirected_dijkstra_physical_edge_length"
     token_subsampling: str = "nearest_geodesic_then_node_index"
+    path_cost_mode: str = "euclidean"
+    path_affinity_floor: float = 1e-4
+    token_candidate_limit: int = 256
+    core_token_fraction: float = 0.60
 
     def __post_init__(self) -> None:
         if self.version != "surface-region-contract-v2":
@@ -117,6 +121,21 @@ class SurfaceRegionContractV2:
             raise ValueError("invalid token-count bounds")
         if min(self.minimum_appearance_affinity, self.minimum_boundary_affinity) < 0:
             raise ValueError("edge-channel thresholds cannot be negative")
+        if self.path_cost_mode not in {
+            "euclidean", "appearance_boundary_geometric",
+        }:
+            raise ValueError("unsupported surface-region path_cost_mode")
+        if not 0.0 < self.path_affinity_floor <= 1.0:
+            raise ValueError("path_affinity_floor must lie in (0,1]")
+        if self.token_subsampling not in {
+            "nearest_geodesic_then_node_index",
+            "core_context_radial_stratified_v1",
+        }:
+            raise ValueError("unsupported surface-region token_subsampling")
+        if self.token_candidate_limit < self.maximum_tokens:
+            raise ValueError("token_candidate_limit cannot be below maximum_tokens")
+        if not 0.0 < self.core_token_fraction <= 1.0:
+            raise ValueError("core_token_fraction must lie in (0,1]")
         # Reuse the graph config validator as the single graph-construction
         # authority rather than duplicating its numerical contract here.
         self.graph_config()
@@ -134,6 +153,27 @@ class SurfaceRegionContractV2:
     def to_dict(self) -> dict:
         payload = asdict(self)
         payload["radii_m"] = list(self.radii_m)
+        # Preserve the exact v2 digest for legacy/default contracts.  Extended
+        # path and sampling semantics become part of the manifest only when
+        # they are actually enabled, so an old frozen readout continues to
+        # fail closed on genuine changes without becoming unloadable merely
+        # because this implementation learned new optional modes.
+        if self.path_cost_mode == "euclidean":
+            payload.pop("path_cost_mode")
+            if self.path_affinity_floor == 1e-4:
+                payload.pop("path_affinity_floor")
+        else:
+            # ``expansion`` is retained for old manifests, but must describe
+            # the effective shortest-path metric once relation evidence is
+            # part of the edge cost.  This makes a frozen manifest readable
+            # without relying on an implementation-specific default.
+            payload["expansion"] = (
+                "undirected_dijkstra_relation_weighted_physical_edge_cost"
+            )
+        if self.token_candidate_limit == self.maximum_tokens:
+            payload.pop("token_candidate_limit")
+        if self.core_token_fraction == 0.60:
+            payload.pop("core_token_fraction")
         return payload
 
     @property
@@ -181,6 +221,23 @@ class SurfaceRegionContractV2:
         length = np.linalg.norm(points[edge[0]] - points[edge[1]], axis=1).astype(
             np.float32
         )
+        if self.path_cost_mode == "appearance_boundary_geometric":
+            if not {"appearance", "boundary"}.issubset(channels):
+                raise ValueError(
+                    "appearance_boundary_geometric path cost requires both "
+                    "appearance and boundary edge channels"
+                )
+            appearance = channels["appearance"].detach().cpu().numpy()[keep]
+            boundary = channels["boundary"].detach().cpu().numpy()[keep]
+            # The geometric mean is parameter-free, symmetric in the two
+            # official capability views, and preserves metre units.  Weak
+            # semantic/boundary transitions therefore consume more physical
+            # path budget instead of merely surviving a permissive hard gate.
+            relation = np.sqrt(
+                np.maximum(appearance, self.path_affinity_floor)
+                * np.maximum(boundary, self.path_affinity_floor)
+            )
+            length = length / relation.astype(np.float32)
         # Duplicate edges are harmless mathematically but canonicalizing them
         # here makes train/inference expansion byte-for-byte deterministic.
         return csr_matrix(
@@ -209,25 +266,16 @@ class SurfaceRegionContractV2:
         radius = float(radius_m)
         if anchor < 0 or anchor >= graph.num_nodes or radius <= 0:
             raise ValueError("anchor/radius is outside the region contract")
-        limit = radius * (self.context_ratio if include_context else 1.0)
-        distance = dijkstra(
-            self._csr(graph, xyz) if prepared_graph is None else prepared_graph,
-            directed=False, indices=anchor, limit=limit
+        matrix = (self._csr(graph, xyz) if prepared_graph is None else prepared_graph).tocsr()
+        rows, distances, counts = _bounded_dijkstra_batch(
+            matrix.indptr.astype(np.int64, copy=False),
+            matrix.indices.astype(np.int64, copy=False),
+            matrix.data.astype(np.float64, copy=False),
+            np.asarray([anchor], dtype=np.int64),
+            radius * (self.context_ratio if include_context else 1.0),
+            self.token_candidate_limit,
         )
-        rows = np.flatnonzero(np.isfinite(distance))
-        if anchor not in rows:
-            rows = np.concatenate([rows, np.asarray([anchor], dtype=np.int64)])
-            distance[anchor] = 0.0
-        # Stable lexicographic ordering is the declared truncation contract.
-        order = np.lexsort((rows, distance[rows]))
-        rows = rows[order][: self.maximum_tokens]
-        distances = distance[rows].astype(np.float32)
-        core = distances <= radius + 1e-7
-        return (
-            torch.from_numpy(rows.astype(np.int64)),
-            torch.from_numpy(core),
-            torch.from_numpy(distances),
-        )
+        return self._select_tokens(rows[0, :counts[0]], distances[0, :counts[0]], anchor, radius)
 
     def prepare_graph(self, graph: PrimitiveSupportGraph, xyz: torch.Tensor) -> csr_matrix:
         """Prepare the immutable shortest-path matrix once for many anchors."""
@@ -264,21 +312,102 @@ class SurfaceRegionContractV2:
             matrix.data.astype(np.float64, copy=False),
             anchor_array,
             radius * self.context_ratio,
-            self.maximum_tokens,
+            self.token_candidate_limit,
         )
         result = []
         for batch_index, anchor in enumerate(anchor_array):
             count = int(counts[batch_index])
             rows = rows_by_anchor[batch_index, :count]
-            selected_distance = distances_by_anchor[batch_index, :count].astype(np.float32)
+            distances = distances_by_anchor[batch_index, :count]
             if count == 0 or rows[0] != anchor:
                 raise RuntimeError("bounded Dijkstra lost its anchor")
-            result.append((
-                torch.from_numpy(rows.copy()),
-                torch.from_numpy(selected_distance <= radius + 1e-7),
-                torch.from_numpy(selected_distance),
-            ))
+            result.append(self._select_tokens(rows, distances, anchor, radius))
         return result
+
+    def _select_tokens(
+        self,
+        candidate_rows: np.ndarray,
+        candidate_distances: np.ndarray,
+        anchor: int,
+        radius: float,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Apply the declared deterministic token-selection contract.
+
+        Candidate rows already arrive ordered by (geodesic distance, node id)
+        from bounded Dijkstra.  The stratified variant deliberately allocates a
+        fixed core/context budget before filling residual slots, preventing a
+        dense anchor neighbourhood from silently erasing the context shell.
+        """
+
+        rows = np.asarray(candidate_rows, dtype=np.int64)
+        distances = np.asarray(candidate_distances, dtype=np.float64)
+        if rows.size == 0 or rows[0] != int(anchor):
+            raise RuntimeError("bounded Dijkstra candidate set lost its anchor")
+        if self.token_subsampling == "nearest_geodesic_then_node_index":
+            selected = np.arange(min(self.maximum_tokens, rows.size), dtype=np.int64)
+        else:
+            selected = self._stratified_indices(rows, distances, int(anchor), float(radius))
+        selected_rows = rows[selected]
+        selected_distances = distances[selected].astype(np.float32)
+        order = np.lexsort((selected_rows, selected_distances))
+        selected_rows = selected_rows[order]
+        selected_distances = selected_distances[order]
+        return (
+            torch.from_numpy(selected_rows.copy()),
+            torch.from_numpy(selected_distances <= float(radius) + 1e-7),
+            torch.from_numpy(selected_distances.copy()),
+        )
+
+    def _stratified_indices(
+        self,
+        rows: np.ndarray,
+        distances: np.ndarray,
+        anchor: int,
+        radius: float,
+    ) -> np.ndarray:
+        max_tokens = min(self.maximum_tokens, rows.size)
+        if rows.size <= self.maximum_tokens:
+            return np.arange(rows.size, dtype=np.int64)
+        core = distances <= radius + 1e-7
+        anchor_index = int(np.flatnonzero(rows == anchor)[0])
+        core_budget = max(1, min(max_tokens, int(round(max_tokens * self.core_token_fraction))))
+        context_budget = max_tokens - core_budget
+        chosen: set[int] = {anchor_index}
+
+        def pick(indices: np.ndarray, budget: int, *, start: float, stop: float) -> None:
+            if budget <= 0 or indices.size == 0:
+                return
+            indices = indices[~np.isin(indices, np.fromiter(chosen, dtype=np.int64))]
+            if indices.size == 0:
+                return
+            normalized = distances[indices] / max(radius, 1e-12)
+            # Four equal radial bands in the core and three in the context
+            # shell; empty bands donate their quota deterministically.
+            bins = 4 if start == 0.0 else 3
+            edges = np.linspace(start, stop, bins + 1)
+            assigned = 0
+            for bin_index in range(bins):
+                lower, upper = edges[bin_index], edges[bin_index + 1]
+                in_bin = indices[(normalized >= lower - 1e-7) & (
+                    normalized <= upper + 1e-7 if bin_index == bins - 1 else normalized < upper
+                )]
+                remaining_bins = bins - bin_index
+                quota = min(in_bin.size, max(0, (budget - assigned + remaining_bins - 1) // remaining_bins))
+                if quota:
+                    positions = np.linspace(0, in_bin.size - 1, quota).round().astype(np.int64)
+                    chosen.update(int(value) for value in in_bin[positions])
+                    assigned += quota
+            if assigned < budget:
+                remaining = indices[~np.isin(indices, np.fromiter(chosen, dtype=np.int64))]
+                chosen.update(int(value) for value in remaining[: budget - assigned])
+
+        pick(np.flatnonzero(core), core_budget - 1, start=0.0, stop=1.0)
+        pick(np.flatnonzero(~core), context_budget, start=1.0, stop=self.context_ratio)
+        if len(chosen) < max_tokens:
+            remaining = np.arange(rows.size, dtype=np.int64)
+            remaining = remaining[~np.isin(remaining, np.fromiter(chosen, dtype=np.int64))]
+            chosen.update(int(value) for value in remaining[: max_tokens - len(chosen)])
+        return np.asarray(sorted(chosen), dtype=np.int64)[:max_tokens]
 
 
 DEFAULT_SURFACE_REGION_CONTRACT_V2 = SurfaceRegionContractV2()

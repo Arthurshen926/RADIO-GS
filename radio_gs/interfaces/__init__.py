@@ -34,6 +34,12 @@ from .surface_region_contract import (
     DEFAULT_SURFACE_REGION_CONTRACT_V2,
     SurfaceRegionContractV2,
 )
+from .scale_ordered_relation import (
+    accumulate_scale_ordered_votes,
+    logarithmic_scale_bin_edges,
+    merge_scale_intervals,
+    robust_mask_physical_radius,
+)
 
 __all__ = [
     "CanonicalCapabilityBank",
@@ -59,4 +65,8 @@ __all__ = [
     "surface_region_geometry_v2",
     "SurfaceRegionContractV2",
     "DEFAULT_SURFACE_REGION_CONTRACT_V2",
+    "accumulate_scale_ordered_votes",
+    "logarithmic_scale_bin_edges",
+    "merge_scale_intervals",
+    "robust_mask_physical_radius",
 ]

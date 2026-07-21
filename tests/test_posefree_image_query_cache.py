@@ -2,11 +2,16 @@ import pytest
 import torch
 from torch import nn
 from types import SimpleNamespace
+import hashlib
 
 from radio_gs.field import FeatureSpaceSignature
 from radio_gs.interfaces import OfficialRadioRuntime
 from radio_gs.querying.query_compilers import compile_image_query
-from radio_gs.scripts.build_posefree_image_query_cache import parse_bbox
+from radio_gs.scripts.build_posefree_image_query_cache import (
+    parse_bbox,
+    semantic_feature_rows,
+)
+from radio_gs.scripts.materialize_surface_region_query_cache import run as materialize_query_sidecar
 
 
 def test_posefree_bbox_is_clipped_and_validated() -> None:
@@ -14,6 +19,83 @@ def test_posefree_bbox_is_clipped_and_validated() -> None:
     assert parse_bbox("", 10, 8) == (0, 0, 10, 8)
     with pytest.raises(ValueError, match="empty"):
         parse_bbox("4,4,3,5", 10, 8)
+
+
+def test_posefree_semantic_rows_accept_sparse_surface_cache() -> None:
+    xyz = torch.randn(5, 3)
+    rows = torch.tensor([1, 4])
+    valid = torch.zeros(5, dtype=torch.bool); valid[rows] = True
+    features = torch.randn(2, 7).half()
+    local, metadata = semantic_feature_rows(
+        {
+            "xyz": xyz,
+            "valid": valid,
+            "features": features,
+            "global_rows": rows,
+            "metadata": {"source": "test"},
+        },
+        bank_xyz=xyz,
+        bank_valid=valid,
+        bank_global_rows=rows,
+    )
+    assert torch.equal(local, features)
+    assert metadata["source"] == "test"
+
+
+def test_posefree_semantic_rows_reject_misaligned_sparse_cache() -> None:
+    xyz = torch.randn(5, 3)
+    rows = torch.tensor([1, 4])
+    valid = torch.zeros(5, dtype=torch.bool); valid[rows] = True
+    with pytest.raises(ValueError, match="global_rows"):
+        semantic_feature_rows(
+            {
+                "xyz": xyz,
+                "valid": valid,
+                "features": torch.randn(2, 7),
+                "global_rows": torch.tensor([1, 3]),
+                "metadata": {},
+            },
+            bank_xyz=xyz,
+            bank_valid=valid,
+            bank_global_rows=rows,
+        )
+
+
+def test_posefree_sidecar_normalizes_verified_legacy_bridge_provenance(tmp_path) -> None:
+    readout = tmp_path / "readout.pt"
+    torch.save({
+        "provenance": {
+            "training_scope": "global_cross_scene_3d_surface_v2",
+            "uses_benchmark_scenes": False,
+            "uses_benchmark_test_vocabulary": False,
+            "scene_disjoint": True,
+        }
+    }, readout)
+    sha = hashlib.sha256(readout.read_bytes()).hexdigest()
+    xyz = torch.randn(4, 3)
+    rows = torch.tensor([0, 3])
+    valid = torch.zeros(4, dtype=torch.bool); valid[rows] = True
+    source = tmp_path / "semantic.pt"
+    output = tmp_path / "semantic_query.pt"
+    features = torch.randn(2, 5).half()
+    torch.save({
+        "xyz": xyz,
+        "features": features,
+        "global_rows": rows,
+        "valid": valid,
+        "metadata": {
+            "official_radio_checkpoint_sha256": "radio",
+            "readout_checkpoint": str(readout),
+            "readout_checkpoint_sha256": sha,
+        },
+    }, source)
+    materialize_query_sidecar(SimpleNamespace(semantic_cache=str(source), output=str(output)))
+    sidecar = torch.load(output, map_location="cpu")
+    assert torch.equal(sidecar["features"], features)
+    assert torch.equal(sidecar["global_rows"], rows)
+    assert sidecar["metadata"]["radio_checkpoint_sha256"] == "radio"
+    assert sidecar["metadata"]["bridge_training_scope"] == "global_cross_scene"
+    assert sidecar["metadata"]["bridge_checkpoint_sha256"] == sha
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is unavailable")

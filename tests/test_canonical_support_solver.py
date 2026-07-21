@@ -16,6 +16,7 @@ from radio_gs.querying.support_solver import (
     build_primitive_support_graph,
     graph_for_query_intent,
     mix_support_graph_channels,
+    normalized_laplacian_affinity,
     select_support_components,
     solve_primitive_support,
 )
@@ -195,3 +196,27 @@ def test_random_walker_without_hard_seeds_preserves_constant_prior():
         config=SupportSolverConfig(solver_type="random_walker"),
     )
     torch.testing.assert_close(probability, torch.full((2,), 0.5), atol=1e-5, rtol=0)
+
+
+def test_cached_normalized_affinity_is_exactly_equivalent_to_in_solver_build():
+    graph = build_primitive_support_graph(
+        _two_clusters(), config=SupportGraphConfig(neighbors=2)
+    )
+    positive = SoftSeedSet(torch.tensor([1.0, 0.0, 0.0, 0.0, 0.0, 0.0]), "positive")
+    negative = SoftSeedSet(torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 1.0]), "negative")
+    config = SupportSolverConfig(
+        solver_type="confidence_random_walker", cg_iterations=64
+    )
+    kwargs = {
+        "positive_seeds": positive,
+        "negative_seeds": negative,
+        "config": config,
+    }
+    expected = solve_primitive_support(graph, torch.linspace(-0.2, 0.3, 6), **kwargs)
+    actual = solve_primitive_support(
+        graph,
+        torch.linspace(-0.2, 0.3, 6),
+        normalized_affinity=normalized_laplacian_affinity(graph),
+        **kwargs,
+    )
+    torch.testing.assert_close(actual, expected, atol=0, rtol=0)

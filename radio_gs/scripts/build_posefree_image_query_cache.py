@@ -42,6 +42,57 @@ def parse_bbox(raw: str, width: int, height: int) -> tuple[int, int, int, int]:
     return x0, y0, x1, y1
 
 
+def semantic_feature_rows(
+    payload: dict,
+    *,
+    bank_xyz: torch.Tensor,
+    bank_valid: torch.Tensor,
+    bank_global_rows: torch.Tensor,
+) -> tuple[torch.Tensor, dict]:
+    """Validate a dense or sparse semantic cache and return graph-local rows.
+
+    Surface-region caches intentionally store descriptors only for valid
+    canonical primitives.  The support graph is defined on that same compact
+    row set, so expanding to all Gaussian rows is both unnecessary and was an
+    incorrect index operation in the original pose-free path.
+    """
+
+    semantic_features = torch.as_tensor(payload["features"])
+    semantic_valid = torch.as_tensor(payload["valid"]).bool().cpu()
+    semantic_xyz = torch.as_tensor(payload["xyz"]).float().cpu()
+    metadata = payload.get("metadata", {})
+    if not isinstance(metadata, dict):
+        raise ValueError("semantic cache metadata must be a mapping")
+    bank_xyz = torch.as_tensor(bank_xyz).float().cpu()
+    bank_valid = torch.as_tensor(bank_valid).bool().cpu()
+    bank_global_rows = torch.as_tensor(bank_global_rows).long().cpu()
+    if (
+        semantic_features.ndim != 2
+        or semantic_valid.shape != bank_valid.shape
+        or not torch.equal(semantic_valid, bank_valid)
+        or semantic_xyz.shape != bank_xyz.shape
+        or not torch.allclose(semantic_xyz, bank_xyz, atol=1e-6, rtol=0.0)
+    ):
+        raise ValueError("semantic cache does not align with canonical capability rows")
+    sparse_rows = payload.get("global_rows")
+    if sparse_rows is None:
+        if semantic_features.shape[0] != bank_xyz.shape[0]:
+            raise ValueError("dense semantic cache does not align with canonical geometry")
+        local_features = semantic_features[bank_global_rows]
+    else:
+        sparse_rows = torch.as_tensor(sparse_rows).long().cpu()
+        if (
+            sparse_rows.ndim != 1
+            or semantic_features.shape[0] != sparse_rows.numel()
+            or not torch.equal(sparse_rows, bank_global_rows)
+        ):
+            raise ValueError("sparse semantic cache global_rows do not align with support graph")
+        local_features = semantic_features
+    if not bool(torch.isfinite(local_features).all()):
+        raise ValueError("semantic cache contains NaN or infinity")
+    return local_features, metadata
+
+
 def run(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
     bank = load_canonical_capability_bank(
@@ -72,19 +123,16 @@ def run(args: argparse.Namespace) -> dict:
         else None
     )
     semantic = torch.load(args.semantic_cache, map_location="cpu")
-    semantic_features = torch.as_tensor(semantic["features"])
-    semantic_valid = torch.as_tensor(semantic["valid"]).bool()
-    semantic_xyz = torch.as_tensor(semantic["xyz"]).float()
-    semantic_metadata = semantic.get("metadata", {})
+    semantic_features, semantic_metadata = semantic_feature_rows(
+        semantic,
+        bank_xyz=bank.xyz,
+        bank_valid=bank.valid,
+        bank_global_rows=bank.global_rows,
+    )
     if (
-        semantic_features.ndim != 2
-        or semantic_features.shape[0] != bank.num_gaussians
-        or not torch.equal(semantic_valid, bank.valid)
-        or not torch.allclose(semantic_xyz, bank.xyz, atol=1e-6, rtol=0.0)
-    ):
-        raise ValueError("semantic cache does not align with canonical capability rows")
-    if semantic_metadata.get("field_checkpoint_sha256") != bank.metadata.get(
-        "field_checkpoint_sha256"
+        semantic_metadata.get("field_checkpoint_sha256") != bank.metadata.get(
+            "field_checkpoint_sha256"
+        )
     ):
         raise ValueError("semantic/capability canonical-field hashes differ")
     if semantic_metadata.get("radio_checkpoint_sha256") != bank.metadata.get(
@@ -184,7 +232,7 @@ def run(args: argparse.Namespace) -> dict:
         semantic_signature=semantic_query_signature,
         appearance_signature=appearance_query_signature,
         semantic_negatives=F.normalize(
-            semantic_features[bank.global_rows].float().mean(dim=0, keepdim=True),
+            semantic_features.float().mean(dim=0, keepdim=True),
             dim=-1,
         ).to(device),
         appearance_negatives=F.normalize(
@@ -194,7 +242,7 @@ def run(args: argparse.Namespace) -> dict:
         prototype_count=args.prototype_count,
     )
     feature_banks = {
-        "semantic": semantic_features[bank.global_rows].to(device),
+        "semantic": semantic_features.to(device),
         "appearance": bank.appearance[bank.global_rows].to(device),
     }
     engine = CanonicalQueryEngine(
@@ -225,6 +273,10 @@ def run(args: argparse.Namespace) -> dict:
     )
     probabilities = torch.zeros(bank.num_gaussians, dtype=torch.float16)
     probabilities[bank.global_rows] = result.selected_probabilities.half().cpu()
+    unary = torch.full(
+        (bank.num_gaussians,), -float("inf"), dtype=torch.float16
+    )
+    unary[bank.global_rows] = result.unary.half().cpu()
     metadata = {
         "schema_version": 1,
         "source": "posefree_official_image_crop_to_canonical_3d_support",
@@ -269,6 +321,7 @@ def run(args: argparse.Namespace) -> dict:
             "xyz": bank.xyz,
             "valid": bank.valid,
             "features": probabilities[:, None],
+            "unary": unary[:, None],
             "metadata": metadata,
         },
         output_path,
@@ -278,6 +331,8 @@ def run(args: argparse.Namespace) -> dict:
         "output": str(output_path),
         "valid_gaussians": int(bank.valid.sum()),
         "selected_gaussians": int((probabilities >= args.support_threshold).sum()),
+        "track_a_score": "fused_primitive_unary_before_graph_or_threshold",
+        "track_b_score": "selected_support_probability_after_frozen_solver",
     }
     output_path.with_suffix(output_path.suffix + ".json").write_text(
         json.dumps(report, indent=2), encoding="utf-8"

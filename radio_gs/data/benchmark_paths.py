@@ -306,9 +306,16 @@ def load_w2c_from_pose_dir(pose_dir: str | Path, frame_indices: Sequence[int]) -
     pose_root = Path(pose_dir)
     poses = []
     for frame_idx in frame_indices:
-        pose_path = pose_root / f"{int(frame_idx)}.txt"
-        if not pose_path.exists():
-            raise FileNotFoundError(f"Missing pose file: {pose_path}")
+        candidates = (
+            pose_root / f"{int(frame_idx)}.txt",
+            pose_root / f"{int(frame_idx):06d}.txt",
+        )
+        pose_path = _first_existing(candidates)
+        if pose_path is None:
+            raise FileNotFoundError(
+                "Missing pose file; tried: "
+                + ", ".join(str(value) for value in candidates)
+            )
         pose = np.loadtxt(str(pose_path)).reshape(4, 4).astype(np.float32)
         if not np.isfinite(pose).all():
             raise ValueError(f"Invalid pose values in {pose_path}")

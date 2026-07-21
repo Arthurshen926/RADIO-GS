@@ -45,14 +45,42 @@ def list_scannet_frame_ids(scene_root: Path) -> list[int]:
     return sorted(set(frame_ids))
 
 
+def index_frame_files(directory: Path, suffixes: tuple[str, ...]) -> dict[int, Path]:
+    """Index numeric ScanNet files without discarding zero-padded filenames."""
+
+    indexed: dict[int, Path] = {}
+    allowed = {value.lower() for value in suffixes}
+    for path in directory.iterdir():
+        if not path.is_file() or path.suffix.lower() not in allowed:
+            continue
+        try:
+            frame_idx = extract_feature_frame_index(path)
+        except ValueError:
+            continue
+        previous = indexed.get(frame_idx)
+        if previous is not None and previous.resolve() != path.resolve():
+            raise ValueError(
+                f"Duplicate numeric frame id {frame_idx} in {directory}: "
+                f"{previous.name}, {path.name}"
+            )
+        indexed[frame_idx] = path
+    return indexed
+
+
 def load_scannet_data(scene_root: Path, frame_stride: int, max_frames: int | None):
     color_dir = scene_root / "color"
     depth_dir = scene_root / "depth"
     pose_dir = scene_root / "pose"
 
-    frame_ids_all = list_scannet_frame_ids(scene_root)
+    color_files = index_frame_files(color_dir, (".jpg", ".jpeg", ".png"))
+    depth_files = index_frame_files(depth_dir, (".png",))
+    pose_files = index_frame_files(pose_dir, (".txt",))
+    frame_ids_all = sorted(set(color_files) & set(depth_files) & set(pose_files))
     if not frame_ids_all:
-        raise RuntimeError(f"No ScanNet pose frames found under {pose_dir}")
+        raise RuntimeError(
+            "No common numeric ScanNet RGB-D-pose frames found under "
+            f"{scene_root}"
+        )
 
     selected = frame_ids_all[:: max(1, frame_stride)]
     if max_frames is not None:
@@ -64,13 +92,9 @@ def load_scannet_data(scene_root: Path, frame_stride: int, max_frames: int | Non
     kept_frame_ids = []
 
     for frame_idx in selected:
-        color_path = color_dir / f"{frame_idx}.jpg"
-        if not color_path.exists():
-            color_path = color_dir / f"{frame_idx}.png"
-        depth_path = depth_dir / f"{frame_idx}.png"
-        pose_path = pose_dir / f"{frame_idx}.txt"
-        if not color_path.exists() or not depth_path.exists() or not pose_path.exists():
-            continue
+        color_path = color_files[frame_idx]
+        depth_path = depth_files[frame_idx]
+        pose_path = pose_files[frame_idx]
 
         c2w = _load_scannet_pose(str(pose_path))
         if c2w is None:

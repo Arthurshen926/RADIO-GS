@@ -116,6 +116,11 @@ Primary entry points:
 - `radio_gs/scripts/eval_scannet_3d_point_query.py`
 - `radio_gs/scripts/build_posefree_image_query_cache.py`
 
+The reproducible pose-free ScanNet benchmark builder and its method-independent
+mesh-domain evaluators live in `radio_gs/benchmarks/scannet_pfir/`. See
+`docs/benchmarks/scannet_pfir_small_v1.md` for the held-out-frame, private-GT,
+ranking, and instance-selection contracts.
+
 ## Audit ladder
 
 Do not infer field quality from primitive-to-MPR cosine alone. The repository includes separate checks for lifting, coverage, compression, compositing, capability preservation, and query behavior:
