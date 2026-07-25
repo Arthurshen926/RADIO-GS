@@ -77,6 +77,67 @@ def test_multiscale_logmeanexp_is_bounded_by_mean_and_max() -> None:
     assert 0.5 < actual < 1.0
 
 
+def test_multiscale_specificity_prefers_first_near_best_physical_scale() -> None:
+    # Scales are ordered from local to contextual. The second scale is the
+    # numerical maximum, but the first remains within the frozen margin and
+    # must therefore keep the more specific score. The third scale is neither.
+    features = torch.tensor(
+        [[
+            [0.80, 0.60],
+            [0.81, 0.5864299],
+            [0.00, 1.00],
+        ]]
+    )
+    query = torch.tensor([[1.0, 0.0]])
+    actual = compile_multiscale_scores(
+        features,
+        query,
+        torch.tensor([True]),
+        temperature=1.0,
+        chunk_size=4,
+        peak_normalize=False,
+        scoring="cosine",
+        scale_aggregation="specificity",
+        scale_specificity_margin=0.02,
+    ).float().item()
+
+    assert actual == pytest.approx(0.8, abs=5e-4)
+
+
+def test_zero_specificity_margin_is_exactly_max_aggregation() -> None:
+    features = torch.tensor(
+        [
+            [[1.0, 0.0], [0.8, 0.6], [0.0, 1.0]],
+            [[0.6, 0.8], [0.0, 1.0], [1.0, 0.0]],
+        ]
+    )
+    queries = torch.eye(2)
+    valid = torch.tensor([True, True])
+    maximum = compile_multiscale_scores(
+        features,
+        queries,
+        valid,
+        temperature=1.0,
+        chunk_size=4,
+        peak_normalize=False,
+        scoring="cosine",
+        scale_aggregation="max",
+    )
+    specificity = compile_multiscale_scores(
+        features,
+        queries,
+        valid,
+        temperature=1.0,
+        chunk_size=4,
+        peak_normalize=False,
+        scoring="cosine",
+        scale_aggregation="specificity",
+        scale_specificity_margin=0.0,
+    )
+
+    torch.testing.assert_close(specificity, maximum, atol=0.0, rtol=0.0)
+
+
 def test_peak_normalization_can_preserve_primary_domain() -> None:
     features = torch.tensor([[1.0, 0.0], [0.8, 0.6]])
     queries = torch.tensor([[1.0, 0.0]])

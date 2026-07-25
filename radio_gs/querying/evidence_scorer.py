@@ -23,6 +23,7 @@ class EvidenceScoringConfig:
     prototype_temperature: float = 0.07
     feature_calibration: str = "none"
     background_centroids: int = 0
+    background_negative_policy: str = "pooled_mean"
     calibration_sample_size: int = 8192
     centroid_iterations: int = 4
     score_calibration: str = "none"
@@ -36,6 +37,13 @@ class EvidenceScoringConfig:
             raise ValueError("prototype_temperature must be positive")
         if self.feature_calibration not in {"none", "diagonal_robust"}:
             raise ValueError("feature_calibration must be none or diagonal_robust")
+        if self.background_negative_policy not in {
+            "pooled_mean",
+            "explicit_hard_max",
+        }:
+            raise ValueError(
+                "background_negative_policy must be pooled_mean or explicit_hard_max"
+            )
         if self.score_calibration not in {
             "none",
             "robust_tanh",
@@ -78,19 +86,24 @@ def _score_bank(
     *,
     temperature: float,
     calibration: SceneSpaceCalibration | None = None,
+    background_negative_policy: str = "pooled_mean",
     chunk_size: int = 65536,
 ) -> torch.Tensor:
     field = torch.as_tensor(field_features)
     if field.ndim != 2 or chunk_size <= 0:
         raise ValueError("field feature bank must be [N,D] and chunk_size positive")
+    if background_negative_policy not in {"pooled_mean", "explicit_hard_max"}:
+        raise ValueError(
+            "background_negative_policy must be pooled_mean or explicit_hard_max"
+        )
     if calibration is None:
         prototypes = evidence.features.to(field.device)
     else:
         prototypes = calibration.transform(evidence.features)
     weights = evidence.weights.to(field.device).clamp_min(1e-8)
-    negatives = None
+    explicit_negatives = None
     if evidence.negatives is not None:
-        negatives = (
+        explicit_negatives = (
             evidence.negatives.to(field.device)
             if calibration is None
             else calibration.transform(evidence.negatives)
@@ -101,7 +114,6 @@ def _score_bank(
     if has_background_bank:
         assert calibration is not None
         centroids = calibration.background_centroids
-        negatives = centroids if negatives is None else torch.cat([negatives, centroids])
     parts: list[torch.Tensor] = []
     for start in range(0, field.shape[0], int(chunk_size)):
         rows = field[start : start + int(chunk_size)].float()
@@ -114,22 +126,53 @@ def _score_bank(
         positive = temperature * torch.logsumexp(
             logits / temperature + weights.log()[None], dim=1
         )
-        if negatives is not None:
-            negative_logits = rows @ negatives.T
+        if explicit_negatives is not None or has_background_bank:
+            explicit_negative = (
+                (rows @ explicit_negatives.T).amax(dim=1)
+                if explicit_negatives is not None
+                else None
+            )
+            background_negative = None
             if has_background_bank:
+                assert calibration is not None and calibration.background_centroids is not None
+                background_logits = rows @ calibration.background_centroids.T
+                background_negative = temperature * (
+                    torch.logsumexp(background_logits / temperature, dim=1)
+                    - torch.log(
+                        torch.tensor(
+                            calibration.background_centroids.shape[0],
+                            device=rows.device,
+                            dtype=torch.float32,
+                        )
+                    )
+                )
+            if explicit_negative is None:
+                assert background_negative is not None
+                negative = background_negative
+            elif background_negative is None:
+                # Preserve the original explicit-negative readout exactly.
+                negative = explicit_negative
+            elif background_negative_policy == "pooled_mean":
+                # Historical behavior: pool user negatives and scene modes into
+                # one average background bank.
+                negative_logits = rows @ torch.cat(
+                    [explicit_negatives, calibration.background_centroids], dim=0
+                ).T
                 negative = temperature * (
                     torch.logsumexp(negative_logits / temperature, dim=1)
                     - torch.log(
                         torch.tensor(
-                            negatives.shape[0],
+                            negative_logits.shape[1],
                             device=rows.device,
                             dtype=torch.float32,
                         )
                     )
                 )
             else:
-                # Preserve the original explicit-negative readout exactly.
-                negative = negative_logits.amax(dim=1)
+                # Scene modes only provide a query-independent prior.  Once a
+                # user supplies a concrete negative click, it must remain hard
+                # contrastive evidence instead of being diluted by every mode.
+                negative = torch.maximum(explicit_negative, background_negative)
             positive = positive - negative
         parts.append(positive)
     return torch.cat(parts)
@@ -159,6 +202,7 @@ def score_query_evidence(
             evidence,
             temperature=config.prototype_temperature,
             calibration=(calibrations or {}).get(name),
+            background_negative_policy=config.background_negative_policy,
             chunk_size=config.score_chunk_size,
         )
         if config.score_calibration != "none":

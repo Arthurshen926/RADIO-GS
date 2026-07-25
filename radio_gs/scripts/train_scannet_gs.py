@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import random
@@ -65,6 +66,84 @@ def index_frame_files(directory: Path, suffixes: tuple[str, ...]) -> dict[int, P
             )
         indexed[frame_idx] = path
     return indexed
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def select_scannet_initialization_frame_positions(
+    frame_ids: list[int],
+    *,
+    init_frames: int,
+    selection_policy: str = "uniform",
+    field_source_contract: str | Path = "",
+) -> tuple[list[int], dict[str, object]]:
+    """Choose depth-bootstrap frames without accessing benchmark labels.
+
+    ``coverage_prefix`` consumes the rank emitted by the query-free full-.sens
+    materializer.  The RGB-D directory itself remains numeric-sorted for all
+    downstream consumers; this helper is the sole point at which the geometry
+    bootstrap restores that coverage order.
+    """
+
+    normalized = [int(value) for value in frame_ids]
+    if not normalized:
+        raise ValueError("cannot initialize a ScanNet field without RGB-D frames")
+    if len(set(normalized)) != len(normalized):
+        raise ValueError("ScanNet frame_ids must be unique")
+    init_frames = int(init_frames)
+    if init_frames <= 0:
+        raise ValueError("init_frames must be positive")
+    count = min(init_frames, len(normalized))
+    selection_policy = str(selection_policy)
+    report: dict[str, object] = {
+        "policy": selection_policy,
+        "source_manifest": "",
+        "source_manifest_sha256": "",
+        "source_manifest_uses_labels": False,
+    }
+    if selection_policy == "uniform":
+        positions = np.linspace(0, len(normalized) - 1, count, dtype=int).tolist()
+    elif selection_policy == "coverage_prefix":
+        contract_path = Path(field_source_contract)
+        if not contract_path.is_file():
+            raise FileNotFoundError(
+                "coverage_prefix initialization requires a field-source contract"
+            )
+        payload = json.loads(contract_path.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("field-source contract must be a JSON object")
+        if bool(payload.get("uses_instances_or_semantic_labels", False)):
+            raise ValueError("geometry bootstrap source contract must be label-free")
+        selected = [int(value) for value in payload.get("selected_frame_indices", [])]
+        ranked = [int(value) for value in payload.get("selection_order_frame_indices", [])]
+        if len(set(selected)) != len(selected) or len(set(ranked)) != len(ranked):
+            raise ValueError("field-source frame manifests must not contain duplicates")
+        if set(selected) != set(normalized):
+            raise ValueError(
+                "field-source selected frames do not exactly match the RGB-D scene root"
+            )
+        if set(ranked) != set(selected):
+            raise ValueError(
+                "coverage-prefix initialization requires a complete ranked frame order"
+            )
+        position_by_id = {frame_id: index for index, frame_id in enumerate(normalized)}
+        positions = [position_by_id[frame_id] for frame_id in ranked[:count]]
+        report.update(
+            {
+                "source_manifest": str(contract_path.resolve()),
+                "source_manifest_sha256": _sha256_file(contract_path),
+            }
+        )
+    else:
+        raise ValueError("selection_policy must be uniform or coverage_prefix")
+    report["selected_frame_ids"] = [normalized[index] for index in positions]
+    return positions, report
 
 
 def load_scannet_data(scene_root: Path, frame_stride: int, max_frames: int | None):
@@ -136,6 +215,12 @@ def train(args):
     K = torch.tensor([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], dtype=torch.float32, device=device)
     w2cs = [torch.inverse(c2w.to(device)) for c2w in c2ws]
 
+    init_positions, init_report = select_scannet_initialization_frame_positions(
+        frame_ids,
+        init_frames=args.init_frames,
+        selection_policy=args.init_selection_policy,
+        field_source_contract=args.field_source_contract,
+    )
     init_data = init_gaussians_from_depth(
         images,
         depths,
@@ -147,6 +232,7 @@ def train(args):
         n_init_frames=args.init_frames,
         stride=args.init_stride,
         max_points=args.max_points,
+        frame_indices=init_positions,
     )
     for key, value in init_data.items():
         init_data[key] = value.to(device)
@@ -179,6 +265,7 @@ def train(args):
         "cx": cx,
         "cy": cy,
         "iters": args.iters,
+        "initialization": init_report,
     }
     (out_dir / "train_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 
@@ -251,6 +338,17 @@ def main():
     parser.add_argument("--init_frames", type=int, default=50)
     parser.add_argument("--init_stride", type=int, default=8)
     parser.add_argument("--max_points", type=int, default=200000)
+    parser.add_argument(
+        "--init-selection-policy",
+        choices=("uniform", "coverage_prefix"),
+        default="uniform",
+        help="query-free depth-bootstrap frame ordering",
+    )
+    parser.add_argument(
+        "--field-source-contract",
+        default="",
+        help="label-free full-observation manifest required by coverage_prefix",
+    )
     parser.add_argument("--lr_means", type=float, default=1.6e-4)
     parser.add_argument("--lr_sh", type=float, default=2.5e-3)
     parser.add_argument("--lr_scale", type=float, default=5e-3)

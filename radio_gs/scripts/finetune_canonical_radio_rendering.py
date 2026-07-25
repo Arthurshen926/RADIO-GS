@@ -7,6 +7,7 @@ import argparse
 import copy
 import hashlib
 import json
+from collections.abc import Mapping
 from pathlib import Path
 
 import torch
@@ -28,6 +29,9 @@ from radio_gs.models.radio_adaptors import (
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.rendering.coefficient_renderer import render_canonical_radio
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
+from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
+    _resolve_extracted_capability_source,
+)
 from radio_gs.training.canonical_field_losses import normalized_render_reconstruction_loss
 from radio_gs.training.feature_training_utils import SimpleRadioDataset
 from radio_gs.training.primitive_consensus import (
@@ -60,7 +64,11 @@ def _load_consensus(path: str) -> tuple[PrimitiveConsensus, dict]:
 
 
 def _dataset(
-    config, renderer, frame_ids: list[int] | None = None
+    config,
+    renderer,
+    frame_ids: list[int] | None = None,
+    *,
+    feature_subdir: str = "backbone",
 ) -> SimpleRadioDataset:
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
     raw_pose_file = str(getattr(config, "pose_file", "") or "").strip()
@@ -80,10 +88,69 @@ def _dataset(
             int(getattr(config, "feature_height", renderer.image_height)),
             int(getattr(config, "feature_width", renderer.image_width)),
         ),
+        feature_subdir=feature_subdir,
         split="train",
         dataset_type=str(getattr(config, "dataset_type", "lerf")),
         frame_ids=frame_ids,
     )
+
+
+def _load_official_capability_teacher_datasets(
+    config,
+    renderer,
+    raw_dataset: SimpleRadioDataset,
+    capability_names: list[str],
+) -> tuple[
+    dict[str, SimpleRadioDataset],
+    dict[str, dict[int, int]],
+    dict[str, dict[str, object]],
+]:
+    """Load registered maps emitted by the official C-RADIO adaptor runtime.
+
+    The extractor stores adaptor maps on their native token grid.  The dataset
+    is intentionally responsible for the *only* subsequent interpolation to
+    the fixed Gaussian render grid.  This preserves the required ordering
+    ``resample(A_official(raw))`` and avoids applying a nonlinear adaptor to an
+    interpolated raw feature map.
+    """
+
+    feature_dir = Path(str(getattr(config, "feature_dir", "")))
+    frame_ids = [int(frame) for frame in raw_dataset.frame_indices]
+    datasets: dict[str, SimpleRadioDataset] = {}
+    frame_to_index: dict[str, dict[int, int]] = {}
+    provenance: dict[str, dict[str, object]] = {}
+    for name in capability_names:
+        source = _resolve_extracted_capability_source(feature_dir, name)
+        dataset = _dataset(
+            config,
+            renderer,
+            frame_ids,
+            feature_subdir=str(source["subdir"]),
+        )
+        capability_frames = [int(frame) for frame in dataset.frame_indices]
+        if capability_frames != frame_ids:
+            raise ValueError(
+                f"official {name} frame order differs from raw RADIO render targets"
+            )
+        datasets[name] = dataset
+        frame_to_index[name] = {
+            int(frame): index for index, frame in enumerate(capability_frames)
+        }
+        provenance[name] = dict(source)
+    return datasets, frame_to_index, provenance
+
+
+def _official_capability_teacher_map(
+    dataset: SimpleRadioDataset,
+    index: int,
+    device: torch.device,
+) -> torch.Tensor:
+    """Return one normalized official map after only registration resampling."""
+
+    values = dataset[index]["radio_features"].to(device=device, dtype=torch.float32)
+    if values.ndim != 3:
+        raise ValueError("official capability teacher must be [C,H,W]")
+    return F.normalize(values[None], dim=1, eps=1e-8)
 
 
 def _even_subset(values: list[int], count: int) -> list[int]:
@@ -214,7 +281,26 @@ def _mean_multicapability_fidelity(
     field, model, renderer, dataset, frame_to_index, frames, device, *,
     adaptors: dict[str, torch.nn.Module], reliability_splat: bool,
     alpha_threshold: float,
+    capability_teacher_datasets: Mapping[str, SimpleRadioDataset] | None = None,
+    capability_teacher_frame_to_index: Mapping[str, Mapping[int, int]] | None = None,
 ) -> dict[str, float]:
+    if (capability_teacher_datasets is None) != (
+        capability_teacher_frame_to_index is None
+    ):
+        raise ValueError(
+            "official capability datasets and frame indices must be supplied together"
+        )
+    if capability_teacher_datasets is not None:
+        missing = sorted(set(adaptors) - set(capability_teacher_datasets))
+        if missing:
+            raise ValueError(f"official capability datasets are missing: {missing}")
+        missing_indices = sorted(
+            set(adaptors) - set(capability_teacher_frame_to_index or {})
+        )
+        if missing_indices:
+            raise ValueError(
+                f"official capability frame indices are missing: {missing_indices}"
+            )
     totals = {"raw_radio": 0.0, **{name: 0.0 for name in adaptors}}
     count = 0
     field.eval()
@@ -237,7 +323,22 @@ def _mean_multicapability_fidelity(
         ) * pixels
         for name, adaptor in adaptors.items():
             projected = project_feature_map_with_adaptor(predicted, adaptor)
-            teacher = project_feature_map_with_adaptor(target, adaptor)
+            if capability_teacher_datasets is None:
+                teacher = project_feature_map_with_adaptor(target, adaptor)
+            else:
+                teacher_index = capability_teacher_frame_to_index[name].get(int(frame))
+                if teacher_index is None:
+                    raise ValueError(
+                        f"official {name} teacher does not contain frame {int(frame)}"
+                    )
+                teacher = _official_capability_teacher_map(
+                    capability_teacher_datasets[name], teacher_index, device
+                )
+                if teacher.shape != projected.shape:
+                    raise ValueError(
+                        f"official {name} teacher/render shape mismatch: "
+                        f"{tuple(teacher.shape)} vs {tuple(projected.shape)}"
+                    )
             totals[name] += float((projected * teacher).sum(dim=1)[0][valid].mean()) * pixels
         count += pixels
     if count <= 0:
@@ -457,6 +558,23 @@ def finetune(args: argparse.Namespace) -> dict:
         for parameter in adaptor.parameters():
             parameter.requires_grad_(False)
         capability_adaptors[name] = adaptor
+    capability_teacher_datasets: dict[str, SimpleRadioDataset] | None = None
+    capability_teacher_frame_to_index: dict[str, dict[int, int]] | None = None
+    capability_teacher_provenance: dict[str, dict[str, object]] = {}
+    if (
+        capability_adaptors
+        and args.capability_map_source == "official_extracted"
+    ):
+        (
+            capability_teacher_datasets,
+            capability_teacher_frame_to_index,
+            capability_teacher_provenance,
+        ) = _load_official_capability_teacher_datasets(
+            config,
+            renderer,
+            dataset,
+            list(capability_adaptors),
+        )
 
     optimizer = torch.optim.AdamW(
         _trainable_parameters(field, args),
@@ -484,6 +602,8 @@ def finetune(args: argparse.Namespace) -> dict:
         field, model, renderer, dataset, frame_to_index, validation_frames, device,
         adaptors=capability_adaptors, reliability_splat=reliability_splat,
         alpha_threshold=float(args.alpha_threshold),
+        capability_teacher_datasets=capability_teacher_datasets,
+        capability_teacher_frame_to_index=capability_teacher_frame_to_index,
     )
     best_capability_validation = dict(initial_capability_validation)
     initial_mpr_probe = _primitive_probe_cosine(
@@ -562,6 +682,18 @@ def finetune(args: argparse.Namespace) -> dict:
         capability_local_affinity_loss = render_loss.detach() * 0.0
         capability_stats: dict[str, dict[str, torch.Tensor]] = {}
         if capability_adaptors:
+            teacher_capability_maps = None
+            if capability_teacher_datasets is not None:
+                teacher_capability_maps = {}
+                for name, teacher_dataset in capability_teacher_datasets.items():
+                    teacher_index = capability_teacher_frame_to_index[name].get(int(frame))
+                    if teacher_index is None:
+                        raise ValueError(
+                            f"official {name} teacher does not contain frame {int(frame)}"
+                        )
+                    teacher_capability_maps[name] = _official_capability_teacher_map(
+                        teacher_dataset, teacher_index, device
+                    )
             (
                 capability_alignment_loss,
                 capability_local_affinity_loss,
@@ -574,6 +706,7 @@ def finetune(args: argparse.Namespace) -> dict:
                 adaptor_weights=capability_weights,
                 local_radius=int(args.capability_local_radius),
                 local_balance_quantile=float(args.capability_local_balance_quantile),
+                teacher_capability_maps=teacher_capability_maps,
             )
         semantic_absolute_loss = render_loss.detach() * 0.0
         semantic_centered_loss = render_loss.detach() * 0.0
@@ -641,6 +774,8 @@ def finetune(args: argparse.Namespace) -> dict:
                 device, adaptors=capability_adaptors,
                 reliability_splat=reliability_splat,
                 alpha_threshold=float(args.alpha_threshold),
+                capability_teacher_datasets=capability_teacher_datasets,
+                capability_teacher_frame_to_index=capability_teacher_frame_to_index,
             )
             semantic_validation = None
             semantic_validation_absolute = None
@@ -822,12 +957,21 @@ def finetune(args: argparse.Namespace) -> dict:
                 else ""
             ),
             "adaptor_weights": capability_weights,
+            "teacher_map_source": args.capability_map_source,
+            "teacher_map_provenance": capability_teacher_provenance,
             "dense_alignment": bool(capability_adaptors),
             "local_affinity_weight": float(
                 args.capability_local_affinity_weight
             ),
             "local_radius": int(args.capability_local_radius),
-            "projection_order": "complete_rendered_2d_grid_then_official_adaptor",
+            "local_balance_quantile": float(
+                args.capability_local_balance_quantile
+            ),
+            "projection_order": (
+                "complete_rendered_2d_grid_vs_resample(official_runtime_adaptor_output)"
+                if args.capability_map_source == "official_extracted"
+                else "complete_rendered_2d_grid_then_official_adaptor"
+            ),
             "visibility_domain": f"rendered_alpha>={float(args.alpha_threshold)}",
             "custom_adaptor_head": False,
             "uses_benchmark_masks": False,
@@ -934,6 +1078,16 @@ def main() -> None:
     parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    )
+    parser.add_argument(
+        "--capability-map-source",
+        choices=["project_raw", "official_extracted"],
+        default="project_raw",
+        help=(
+            "Teacher source for DINO/SAM render losses. 'official_extracted' "
+            "requires extractor-produced native official adaptor maps and "
+            "only resamples them to the render grid."
+        ),
     )
     parser.add_argument("--alpha-threshold", type=float, default=0.02)
     parser.add_argument("--grad-clip", type=float, default=5.0)

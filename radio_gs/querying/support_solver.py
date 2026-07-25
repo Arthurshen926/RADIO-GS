@@ -19,6 +19,8 @@ class SupportGraphConfig:
     appearance_temperature: float = 0.10
     boundary_temperature: float = 0.10
     normal_temperature: float = 0.20
+    surface_tangent_temperature: float = 0.20
+    surface_tangent_relation: bool = False
     covisibility_weight: float = 0.25
     minimum_sigma: float = 1e-4
     affinity_chunk_size: int = 8192
@@ -32,6 +34,7 @@ class SupportGraphConfig:
             self.appearance_temperature,
             self.boundary_temperature,
             self.normal_temperature,
+            self.surface_tangent_temperature,
             self.minimum_sigma,
         ) <= 0:
             raise ValueError("graph scales and temperatures must be positive")
@@ -175,9 +178,36 @@ def graph_for_query_intent(
             return graph
         policy = "typed"
     if policy == "typed":
+        has_normal_relation = "normal" in graph.edge_channels
+        has_tangent_relation = "surface_tangent" in graph.edge_channels
+        has_covisibility_relation = "covisibility" in graph.edge_channels
         policy = (
-            "category_mix"
+            "category_manifold_covisibility_mix"
             if QueryIntent(intent) is QueryIntent.CATEGORY
+            and has_tangent_relation
+            and has_covisibility_relation
+            else "category_manifold_mix"
+            if QueryIntent(intent) is QueryIntent.CATEGORY and has_tangent_relation
+            else "category_surface_covisibility_mix"
+            if QueryIntent(intent) is QueryIntent.CATEGORY
+            and has_normal_relation
+            and has_covisibility_relation
+            else "category_surface_mix"
+            if QueryIntent(intent) is QueryIntent.CATEGORY and has_normal_relation
+            else "category_covisibility_mix"
+            if QueryIntent(intent) is QueryIntent.CATEGORY and has_covisibility_relation
+            else "category_mix"
+            if QueryIntent(intent) is QueryIntent.CATEGORY
+            else "instance_manifold_covisibility_mix"
+            if has_tangent_relation and has_covisibility_relation
+            else "instance_manifold_mix"
+            if has_tangent_relation
+            else "instance_surface_covisibility_mix"
+            if has_normal_relation and has_covisibility_relation
+            else "instance_surface_mix"
+            if has_normal_relation
+            else "instance_covisibility_mix"
+            if has_covisibility_relation
             else "instance_mix"
         )
     policies = {
@@ -189,6 +219,79 @@ def graph_for_query_intent(
             "geometry": 0.2,
             "appearance": 0.4,
             "boundary": 0.4,
+        },
+        # A local-PCA normal is unoriented, so this relation is purely about
+        # whether two canonical primitives lie on the same surface, not about
+        # an arbitrary global normal sign.  It is available only to graphs
+        # that explicitly persisted the label-free relation channel.
+        "category_surface_mix": {
+            "geometry": 0.45,
+            "boundary": 0.45,
+            "normal": 0.10,
+        },
+        # ``surface_tangent`` supplements the sign-agnostic normal agreement
+        # with a point-to-local-plane relation.  It prevents a Euclidean kNN
+        # shortcut between two close, parallel surfaces while remaining
+        # neutral whenever local PCA is unreliable.  This is a field-side
+        # geometric relation shared by every prompt modality, not an
+        # evaluator- or object-dependent edge rule.
+        "category_manifold_mix": {
+            "geometry": 0.40,
+            "boundary": 0.40,
+            "normal": 0.10,
+            "surface_tangent": 0.10,
+        },
+        "category_covisibility_mix": {
+            "geometry": 0.45,
+            "boundary": 0.45,
+            "covisibility": 0.10,
+        },
+        "category_surface_covisibility_mix": {
+            "geometry": 0.40,
+            "boundary": 0.40,
+            "normal": 0.10,
+            "covisibility": 0.10,
+        },
+        "category_manifold_covisibility_mix": {
+            "geometry": 0.35,
+            "boundary": 0.35,
+            "normal": 0.10,
+            "surface_tangent": 0.10,
+            "covisibility": 0.10,
+        },
+        "instance_surface_mix": {
+            "geometry": 0.20,
+            "appearance": 0.35,
+            "boundary": 0.35,
+            "normal": 0.10,
+        },
+        "instance_manifold_mix": {
+            "geometry": 0.20,
+            "appearance": 0.30,
+            "boundary": 0.30,
+            "normal": 0.10,
+            "surface_tangent": 0.10,
+        },
+        "instance_covisibility_mix": {
+            "geometry": 0.20,
+            "appearance": 0.35,
+            "boundary": 0.35,
+            "covisibility": 0.10,
+        },
+        "instance_surface_covisibility_mix": {
+            "geometry": 0.18,
+            "appearance": 0.31,
+            "boundary": 0.31,
+            "normal": 0.10,
+            "covisibility": 0.10,
+        },
+        "instance_manifold_covisibility_mix": {
+            "geometry": 0.18,
+            "appearance": 0.27,
+            "boundary": 0.27,
+            "normal": 0.09,
+            "surface_tangent": 0.09,
+            "covisibility": 0.10,
         },
     }
     if policy not in policies:
@@ -203,10 +306,11 @@ def _feature_matrix(
     count: int,
     *,
     name: str,
+    device: torch.device | str = "cpu",
 ) -> torch.Tensor | None:
     if values is None:
         return None
-    matrix = torch.as_tensor(values).detach().float().cpu()
+    matrix = torch.as_tensor(values).detach().to(device=device, dtype=torch.float32)
     if matrix.ndim != 2 or matrix.shape[0] != count:
         raise ValueError(f"{name} must be [num_nodes,D]")
     if not bool(torch.isfinite(matrix).all()):
@@ -220,8 +324,10 @@ def build_primitive_support_graph(
     appearance_features: torch.Tensor | None = None,
     boundary_features: torch.Tensor | None = None,
     normals: torch.Tensor | None = None,
+    normal_reliability: torch.Tensor | None = None,
     view_observations: torch.Tensor | None = None,
     config: SupportGraphConfig = SupportGraphConfig(),
+    feature_affinity_device: torch.device | str = "cpu",
 ) -> PrimitiveSupportGraph:
     """Build a symmetric adaptive-surface graph without query or GT access.
 
@@ -238,6 +344,11 @@ def build_primitive_support_graph(
     count = points.shape[0]
     if count <= 0:
         raise ValueError("cannot construct an empty support graph")
+    if normal_reliability is not None and normals is None:
+        raise ValueError("normal_reliability requires normals")
+    affinity_device = torch.device(feature_affinity_device)
+    if affinity_device.type == "cuda" and not torch.cuda.is_available():
+        raise ValueError("feature_affinity_device requests CUDA but CUDA is unavailable")
     if count == 1:
         channel_names = ["geometry"]
         if appearance_features is not None:
@@ -246,6 +357,8 @@ def build_primitive_support_graph(
             channel_names.append("boundary")
         if normals is not None:
             channel_names.append("normal")
+            if config.surface_tangent_relation:
+                channel_names.append("surface_tangent")
         if view_observations is not None:
             channel_names.append("covisibility")
         return PrimitiveSupportGraph(
@@ -296,9 +409,37 @@ def build_primitive_support_graph(
         col = torch.from_numpy((mutual_codes % int(count)).copy()).long()
     edge_index = torch.stack([row, col])
 
-    appearance = _feature_matrix(appearance_features, count, name="appearance_features")
-    boundary = _feature_matrix(boundary_features, count, name="boundary_features")
-    normal = _feature_matrix(normals, count, name="normals")
+    # Geometry/PCA relations stay on CPU because cKDTree establishes the
+    # topology there.  DINO/SAM edge cosines may instead be evaluated on a
+    # caller-selected accelerator.  This makes it practical to build a
+    # graph from the exact official capability dimensions rather than a
+    # compressed proxy, while the returned graph remains a portable CPU
+    # artifact and uses no query/evaluator state.
+    appearance = _feature_matrix(
+        appearance_features,
+        count,
+        name="appearance_features",
+        device=affinity_device,
+    )
+    boundary = _feature_matrix(
+        boundary_features,
+        count,
+        name="boundary_features",
+        device=affinity_device,
+    )
+    normal = _feature_matrix(normals, count, name="normals", device=points.device)
+    normal_confidence = None
+    if normal_reliability is not None:
+        if normal is None:
+            raise ValueError("normal_reliability requires normals")
+        normal_confidence = torch.as_tensor(normal_reliability).detach().float().cpu()
+        if (
+            normal_confidence.shape != (count,)
+            or not bool(torch.isfinite(normal_confidence).all())
+            or bool((normal_confidence < 0).any())
+            or bool((normal_confidence > 1).any())
+        ):
+            raise ValueError("normal_reliability must be finite [N] values in [0,1]")
     visibility = None
     if view_observations is not None:
         visibility = torch.as_tensor(view_observations).detach().bool().cpu()
@@ -313,6 +454,8 @@ def build_primitive_support_graph(
         channel_parts["boundary"] = []
     if normal is not None:
         channel_parts["normal"] = []
+        if config.surface_tangent_relation:
+            channel_parts["surface_tangent"] = []
     if visibility is not None and visibility.shape[1] > 0:
         channel_parts["covisibility"] = []
     for start in range(0, row.numel(), config.affinity_chunk_size):
@@ -328,26 +471,73 @@ def build_primitive_support_graph(
             geometry_log.clamp(min=-60.0, max=0.0).exp()
         )
         if appearance is not None:
-            cosine = (appearance[src] * appearance[dst]).sum(dim=-1)
-            appearance_log = (cosine - 1.0) / config.appearance_temperature
+            source = src.to(appearance.device)
+            destination = dst.to(appearance.device)
+            cosine = (appearance[source] * appearance[destination]).sum(dim=-1)
+            appearance_log = (
+                (cosine - 1.0) / config.appearance_temperature
+            ).to(points.device)
             log_affinity.add_(appearance_log)
             channel_parts["appearance"].append(
                 appearance_log.clamp(min=-60.0, max=0.0).exp()
             )
         if boundary is not None:
-            cosine = (boundary[src] * boundary[dst]).sum(dim=-1)
-            boundary_log = (cosine - 1.0) / config.boundary_temperature
+            source = src.to(boundary.device)
+            destination = dst.to(boundary.device)
+            cosine = (boundary[source] * boundary[destination]).sum(dim=-1)
+            boundary_log = (
+                (cosine - 1.0) / config.boundary_temperature
+            ).to(points.device)
             log_affinity.add_(boundary_log)
             channel_parts["boundary"].append(
                 boundary_log.clamp(min=-60.0, max=0.0).exp()
             )
         if normal is not None:
-            cosine = (normal[src] * normal[dst]).sum(dim=-1).clamp(-1.0, 1.0)
+            # Local PCA normals have an arbitrary sign.  Treat n and -n as
+            # the same surface orientation, then blend uncertain estimates to
+            # the neutral affinity one instead of hallucinating a boundary.
+            cosine = (normal[src] * normal[dst]).sum(dim=-1).abs().clamp(0.0, 1.0)
             normal_log = (cosine - 1.0) / config.normal_temperature
-            log_affinity.add_(normal_log)
-            channel_parts["normal"].append(
-                normal_log.clamp(min=-60.0, max=0.0).exp()
-            )
+            normal_affinity = normal_log.clamp(min=-60.0, max=0.0).exp()
+            if normal_confidence is not None:
+                confidence = torch.minimum(
+                    normal_confidence[src], normal_confidence[dst]
+                )
+                normal_affinity = (
+                    confidence * normal_affinity + (1.0 - confidence)
+                )
+            log_affinity.add_(normal_affinity.clamp_min(1e-12).log())
+            channel_parts["normal"].append(normal_affinity)
+            if config.surface_tangent_relation:
+                # Normal agreement alone cannot tell whether two closely
+                # spaced, parallel surface sheets are actually connected:
+                # their unoriented normals agree perfectly.  Evaluate the
+                # displacement in each local tangent plane as well.  On one
+                # surface the normalized displacement is orthogonal to its
+                # normal; across a parallel layer it has a large normal
+                # component.  The same planarity confidence used above blends
+                # uncertain/corner-like estimates back to neutral affinity,
+                # so the relation never invents a boundary from a speculative
+                # normal.
+                distance = distance2.sqrt().clamp_min(config.minimum_sigma)
+                direction = (points[dst] - points[src]) / distance[:, None]
+                surface_offset = torch.maximum(
+                    (direction * normal[src]).sum(dim=-1).abs(),
+                    (direction * normal[dst]).sum(dim=-1).abs(),
+                ).clamp(0.0, 1.0)
+                tangent_log = -0.5 * (
+                    surface_offset / config.surface_tangent_temperature
+                ).square()
+                tangent_affinity = tangent_log.clamp(min=-60.0, max=0.0).exp()
+                if normal_confidence is not None:
+                    confidence = torch.minimum(
+                        normal_confidence[src], normal_confidence[dst]
+                    )
+                    tangent_affinity = (
+                        confidence * tangent_affinity + (1.0 - confidence)
+                    )
+                log_affinity.add_(tangent_affinity.clamp_min(1e-12).log())
+                channel_parts["surface_tangent"].append(tangent_affinity)
         if visibility is not None and visibility.shape[1] > 0:
             shared = (visibility[src] & visibility[dst]).sum(dim=-1).float()
             union = (visibility[src] | visibility[dst]).sum(dim=-1).float()
@@ -389,6 +579,9 @@ class SupportSolverConfig:
     cg_iterations: int = 64
     cg_tolerance: float = 1e-5
     hard_seed_threshold: float = 0.20
+    hard_seed_conflict_policy: str = "positive_priority"
+    hard_seed_conflict_margin: float = 0.0
+    unary_edge_contrast: float = 0.0
 
     def __post_init__(self) -> None:
         if self.iterations < 0 or self.unary_temperature <= 0:
@@ -407,8 +600,15 @@ class SupportSolverConfig:
             )
         if self.laplacian_weight < 0 or self.cg_iterations <= 0:
             raise ValueError("random-walker parameters are invalid")
-        if self.cg_tolerance <= 0 or not 0 <= self.hard_seed_threshold <= 1:
-            raise ValueError("CG tolerance/seed threshold are invalid")
+        if (
+            self.cg_tolerance <= 0
+            or not 0 <= self.hard_seed_threshold <= 1
+            or self.hard_seed_conflict_policy
+            not in {"positive_priority", "exclusive_relative"}
+            or self.hard_seed_conflict_margin < 0
+            or self.unary_edge_contrast < 0
+        ):
+            raise ValueError("CG tolerance/hard-seed parameters are invalid")
 
 
 def _seed_values(seed: SoftSeedSet | None, count: int, device: torch.device) -> torch.Tensor:
@@ -418,6 +618,55 @@ def _seed_values(seed: SoftSeedSet | None, count: int, device: torch.device) -> 
     if values.shape != (count,):
         raise ValueError("query seeds do not align with support graph")
     return values
+
+
+def _hard_seed_masks(
+    positive: torch.Tensor,
+    negative: torch.Tensor,
+    config: SupportSolverConfig,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Resolve hard constraints where broad Gaussian supports overlap.
+
+    A world-space click can legitimately touch several primitives.  When a
+    later opposite-sign click shares one of those broad primitives, forcing
+    that row to foreground solely because positives are evaluated first makes
+    the correction unavailable to the Laplacian.  ``exclusive_relative``
+    keeps only rows whose covariance responsibility is strictly larger for
+    one sign; ties remain soft evidence and the shared unary/graph inference
+    decides them.  This relies only on the method's accumulated clicks and
+    their Gaussian responsibilities, never evaluator targets or scene IDs.
+
+    ``positive_priority`` is the historical behavior and remains the default
+    so existing reproducible protocols stay bit-for-bit unchanged.
+    """
+
+    positive_values = torch.as_tensor(positive)
+    negative_values = torch.as_tensor(negative)
+    if positive_values.dtype == torch.bool or negative_values.dtype == torch.bool:
+        # The helper is intentionally internal, but fail clearly rather than
+        # treating a boolean tensor as an arbitrary confidence magnitude.
+        raise ValueError("positive/negative hard-seed weights must be numeric")
+    positive = positive_values.float()
+    negative = negative_values.float()
+    if positive.shape != negative.shape or positive.ndim != 1:
+        raise ValueError("positive/negative hard-seed weights must align as [N]")
+    if (
+        not bool(torch.isfinite(positive).all())
+        or not bool(torch.isfinite(negative).all())
+        or bool((positive < 0).any())
+        or bool((negative < 0).any())
+    ):
+        raise ValueError("positive/negative hard-seed weights must be finite and non-negative")
+    threshold = float(config.hard_seed_threshold)
+    hard_positive = positive >= threshold
+    hard_negative = negative >= threshold
+    if config.hard_seed_conflict_policy == "positive_priority":
+        return hard_positive, hard_negative & ~hard_positive
+    margin = float(config.hard_seed_conflict_margin)
+    return (
+        hard_positive & (positive > negative + margin),
+        hard_negative & (negative > positive + margin),
+    )
 
 
 def solve_primitive_support(
@@ -525,7 +774,15 @@ def solve_seeded_random_walker(
     device = prior.device
     row, col = graph.edge_index
     if normalized_affinity is None:
-        normalized_affinity = normalized_laplacian_affinity(graph)
+        normalized_affinity = (
+            query_conditioned_laplacian_affinity(
+                graph,
+                prior,
+                contrast=float(config.unary_edge_contrast),
+            )
+            if float(config.unary_edge_contrast) > 0
+            else normalized_laplacian_affinity(graph)
+        )
     else:
         normalized_affinity = torch.as_tensor(
             normalized_affinity, device=device
@@ -536,9 +793,9 @@ def solve_seeded_random_walker(
             (normalized_affinity < 0).any()
         ):
             raise ValueError("normalized_affinity must be finite and non-negative")
-    hard_positive = positive >= float(config.hard_seed_threshold)
-    hard_negative = negative >= float(config.hard_seed_threshold)
-    hard_negative &= ~hard_positive
+    hard_positive, hard_negative = _hard_seed_masks(
+        positive, negative, config
+    )
     fixed = hard_positive | hard_negative
     free = ~fixed
     fixed_values = hard_positive.to(prior.dtype)
@@ -599,6 +856,41 @@ def normalized_laplacian_affinity(graph: PrimitiveSupportGraph) -> torch.Tensor:
         degree.index_add_(0, row, affinity)
     inverse_sqrt = degree.clamp_min(1e-12).rsqrt()
     return affinity * inverse_sqrt[row] * inverse_sqrt[col]
+
+
+def query_conditioned_laplacian_affinity(
+    graph: PrimitiveSupportGraph,
+    prior: torch.Tensor,
+    *,
+    contrast: float,
+) -> torch.Tensor:
+    """Gate a frozen graph only where this query's unary sees a boundary.
+
+    This is not a task/scene-specific graph rebuild: it is a fixed monotone
+    transform of the shared graph and the current query's own probability
+    prior.  Equal-evidence neighbors retain their original edge; an edge
+    spanning an evidence discontinuity receives less random-walker flow.
+    Hard positive/negative constraints remain handled by the same seeded
+    Laplacian solver.
+    """
+
+    strength = float(contrast)
+    values = torch.as_tensor(prior, device=graph.edge_index.device).float().reshape(-1)
+    if values.shape != (graph.num_nodes,) or not bool(torch.isfinite(values).all()):
+        raise ValueError("query-conditioned affinity prior must be finite [num_nodes]")
+    if strength < 0:
+        raise ValueError("query-conditioned affinity contrast cannot be negative")
+    if strength == 0:
+        return normalized_laplacian_affinity(graph)
+    row, col = graph.edge_index
+    raw = graph.raw_affinity.float() * torch.exp(
+        -strength * (values[row] - values[col]).abs()
+    )
+    degree = torch.zeros(graph.num_nodes, device=raw.device)
+    if row.numel():
+        degree.index_add_(0, row, raw)
+    inverse_sqrt = degree.clamp_min(1e-12).rsqrt()
+    return raw * inverse_sqrt[row] * inverse_sqrt[col]
 
 
 def _component_labels(

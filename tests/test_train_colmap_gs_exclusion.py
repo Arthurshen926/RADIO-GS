@@ -8,6 +8,7 @@ import torch
 
 from radio_gs.scripts.train_colmap_gs import (
     _estimate_initial_scales,
+    _gaussian_budget_prune_mask,
     _load_colmap_points_binary,
 )
 
@@ -67,3 +68,17 @@ def test_unfiltered_binary_loader_is_backward_compatible(tmp_path: Path) -> None
 
     assert xyz.shape == (3, 3)
     assert rgb.shape == (3, 3)
+
+
+def test_gaussian_budget_prunes_lowest_opacity_with_stable_ties() -> None:
+    logits = torch.tensor([0.5, -2.0, -2.0, 1.0, 0.0])
+
+    mask = _gaussian_budget_prune_mask(logits, maximum_gaussians=3)
+
+    assert mask.tolist() == [False, True, True, False, False]
+
+
+def test_zero_gaussian_budget_preserves_historical_unlimited_path() -> None:
+    mask = _gaussian_budget_prune_mask(torch.tensor([1.0, -1.0]), 0)
+
+    assert not bool(mask.any())

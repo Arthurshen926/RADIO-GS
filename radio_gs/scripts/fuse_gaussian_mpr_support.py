@@ -54,6 +54,35 @@ def _assert_query_free(payload: dict[str, Any], label: str) -> None:
         raise ValueError(f"{label} MPR cache is benchmark-contaminated: {contaminated}")
 
 
+def _selected_source_frame_set(payload: dict[str, Any], label: str) -> frozenset[int]:
+    """Return the immutable observation set used by one MPR cache.
+
+    Support completion is an aggregation/registration control, not a way to
+    add observations.  The primary top-1 cache and its adjoint fallback must
+    therefore cover exactly the same source frames.  Order is deliberately
+    ignored: coverage-ranked primary lifting and an explicitly included
+    fallback set may enumerate the same frames differently, while their
+    observation domain remains identical.
+    """
+
+    metadata = dict(payload.get("metadata", {}))
+    raw_ids = metadata.get("selected_frame_indices")
+    if not isinstance(raw_ids, (list, tuple)) or not raw_ids:
+        raise ValueError(f"{label} MPR cache lacks selected source-frame IDs")
+    try:
+        frame_ids = [int(value) for value in raw_ids]
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{label} MPR cache has invalid selected source-frame IDs") from error
+    if len(frame_ids) != len(set(frame_ids)):
+        raise ValueError(f"{label} MPR cache repeats a selected source-frame ID")
+    declared = metadata.get("num_declared_views")
+    if declared is not None and int(declared) != len(frame_ids):
+        raise ValueError(
+            f"{label} MPR cache selected source-frame count differs from its declaration"
+        )
+    return frozenset(frame_ids)
+
+
 def fuse_primary_with_support(
     primary: dict[str, Any],
     support: dict[str, Any],
@@ -62,6 +91,20 @@ def fuse_primary_with_support(
 
     _assert_query_free(primary, "primary")
     _assert_query_free(support, "support")
+    primary_metadata = dict(primary.get("metadata", {}))
+    support_metadata = dict(support.get("metadata", {}))
+    primary_space = str(primary_metadata.get("feature_space", ""))
+    support_space = str(support_metadata.get("feature_space", ""))
+    if not primary_space or primary_space != support_space:
+        raise ValueError(
+            "primary and support MPR caches have different feature spaces"
+        )
+    primary_frames = _selected_source_frame_set(primary, "primary")
+    support_frames = _selected_source_frame_set(support, "support")
+    if primary_frames != support_frames:
+        raise ValueError(
+            "primary and support MPR caches use different selected source-frame sets"
+        )
     primary_xyz = _tensor(primary, "xyz").float().cpu()
     support_xyz = _tensor(support, "xyz").float().cpu()
     if primary_xyz.shape != support_xyz.shape or _xyz_digest(primary_xyz) != _xyz_digest(
@@ -140,6 +183,7 @@ def fuse_primary_with_support(
         "primary_rows_preserved": bool(
             torch.equal(fused_features[primary_valid], primary_features[primary_valid])
         ),
+        "shared_selected_source_frame_count": int(len(primary_frames)),
     }
     return fused, report
 

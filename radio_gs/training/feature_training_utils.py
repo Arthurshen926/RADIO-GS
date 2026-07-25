@@ -445,6 +445,7 @@ class SimpleRadioDataset(Dataset):
         semantics_dir: Optional[str] = None,
         rgb_dir: Optional[str] = None,
         feature_size: Optional[tuple] = None,
+        feature_subdir: str = "backbone",
         split: str = "train",
         dataset_type: str = "replica",
         frame_ids: Optional[List[int]] = None,
@@ -457,12 +458,23 @@ class SimpleRadioDataset(Dataset):
         self.semantics_dir = Path(semantics_dir) if semantics_dir else None
         self.rgb_dir = Path(rgb_dir) if rgb_dir else None
         self.feature_size = feature_size  # (H, W) for downsampling RGB
+        self.feature_subdir = str(feature_subdir).strip()
+        if (
+            not self.feature_subdir
+            or Path(self.feature_subdir).name != self.feature_subdir
+        ):
+            raise ValueError("feature_subdir must be a non-empty basename")
         self.split = split
         self.dataset_type = resolve_dataset_type(dataset_type)
         self.frame_filter = {int(fid) for fid in frame_ids} if frame_ids is not None else None
 
         # --- discover feature files (backbone/rgb_{idx}.pt) ---------------
-        self.feature_paths = list_feature_paths(self.feature_dir, frame_ids=frame_ids)
+        feature_root = (
+            self.feature_dir
+            if self.feature_subdir == "backbone"
+            else self.feature_dir / self.feature_subdir
+        )
+        self.feature_paths = list_feature_paths(feature_root, frame_ids=frame_ids)
         assert len(self.feature_paths) > 0, (
             f"No feature files found in {self.feature_dir}"
         )

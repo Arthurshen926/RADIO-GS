@@ -30,6 +30,13 @@ from .surface_region_summary import (
     surface_region_geometry,
     surface_region_geometry_v2,
 )
+from .crop_spatial_alignment import (
+    CropContextAlignmentManifest,
+    CropSpatialAlignmentManifest,
+    GlobalCropContextAdapter,
+    GlobalCropSpatialAdapter,
+    checkpoint_sha256 as crop_spatial_adapter_sha256,
+)
 from .surface_region_contract import (
     DEFAULT_SURFACE_REGION_CONTRACT_V2,
     SurfaceRegionContractV2,
@@ -44,7 +51,11 @@ from .scale_ordered_relation import (
 __all__ = [
     "CanonicalCapabilityBank",
     "CanonicalPrimitiveReliability",
+    "CropContextAlignmentManifest",
+    "CropSpatialAlignmentManifest",
     "FrozenRadioViews",
+    "GlobalCropSpatialAdapter",
+    "GlobalCropContextAdapter",
     "GlobalSemanticBridgeManifest",
     "GlobalRegionSummaryBridge",
     "OfficialCropSummaryRuntime",
@@ -61,6 +72,7 @@ __all__ = [
     "load_canonical_capability_bank",
     "load_canonical_primitive_reliability",
     "load_canonical_support_graph",
+    "crop_spatial_adapter_sha256",
     "surface_region_geometry",
     "surface_region_geometry_v2",
     "SurfaceRegionContractV2",

@@ -180,6 +180,7 @@ def test_capability_mpr_loader_requires_exact_observation_contract(
     assert provenance["projection_order"] == (
         "official_adaptor_then_geometry_matched_mpr"
     )
+    assert provenance["capability_map_source"] == "project_raw"
 
     contaminated = dict(target)
     contaminated["metadata"] = {
@@ -188,6 +189,71 @@ def test_capability_mpr_loader_requires_exact_observation_contract(
     }
     torch.save(contaminated, path)
     with pytest.raises(ValueError, match="safety contract"):
+        _load_capability_mpr_target(
+            path,
+            expected_space="sam3",
+            raw_cache=raw,
+            raw_metadata=raw["metadata"],
+            radio_checkpoint_sha256="radio",
+        )
+
+
+def test_direct_capability_mpr_requires_native_runtime_provenance(
+    tmp_path: Path,
+) -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0]])
+    valid = torch.tensor([True])
+    counts = torch.tensor([1])
+    raw = {
+        "xyz": xyz,
+        "features": torch.randn(1, 3),
+        "valid": valid,
+        "view_counts": counts,
+        "reliability": torch.ones(1, 3),
+        "metadata": _cache_metadata("radio"),
+    }
+    metadata = {
+        **_cache_metadata("sam3"),
+        "capability_map_source": "official_extracted",
+        "capability_native_map_manifest": "/tmp/frame_manifest.json",
+        "capability_native_map_manifest_sha256": "manifest",
+        "capability_adaptor_execution": "official_c_radio_runtime_adaptor_output",
+    }
+    path = tmp_path / "sam3_direct.pt"
+    torch.save(
+        {
+            "xyz": xyz,
+            "features": torch.randn(1, 4).half(),
+            "valid": valid,
+            "view_counts": counts,
+            "reliability": torch.ones(1, 3),
+            "metadata": metadata,
+        },
+        path,
+    )
+
+    _consensus_value, provenance = _load_capability_mpr_target(
+        path,
+        expected_space="sam3",
+        raw_cache=raw,
+        raw_metadata=raw["metadata"],
+        radio_checkpoint_sha256="radio",
+    )
+    assert provenance["capability_map_source"] == "official_extracted"
+
+    metadata.pop("capability_native_map_manifest_sha256")
+    torch.save(
+        {
+            "xyz": xyz,
+            "features": torch.randn(1, 4).half(),
+            "valid": valid,
+            "view_counts": counts,
+            "reliability": torch.ones(1, 3),
+            "metadata": metadata,
+        },
+        path,
+    )
+    with pytest.raises(ValueError, match="native-map provenance"):
         _load_capability_mpr_target(
             path,
             expected_space="sam3",

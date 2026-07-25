@@ -66,6 +66,48 @@ def build(args: argparse.Namespace) -> dict:
     radio_checkpoint_sha256 = _sha256_file(args.radio_checkpoint)
     field_checkpoint_sha256 = _sha256_file(args.field_checkpoint)
     base_signature = field.signature.to_dict()
+    raw_capability_targets = payload.get("capability_mpr_targets", {})
+    if not isinstance(raw_capability_targets, dict):
+        raise ValueError("canonical field capability MPR provenance must be a mapping")
+    capability_teacher_sources: dict[str, dict[str, object]] = {}
+    for target_name, output_name in (
+        ("dino_v3", "appearance"),
+        ("sam3", "boundary"),
+    ):
+        target = raw_capability_targets.get(target_name, {})
+        if not isinstance(target, dict):
+            raise ValueError(
+                f"canonical field {target_name} capability provenance must be a mapping"
+            )
+        native_grid = target.get("capability_native_map_grid", [])
+        if not isinstance(native_grid, (list, tuple)):
+            raise ValueError(
+                f"canonical field {target_name} native-map grid must be a sequence"
+            )
+        capability_teacher_sources[output_name] = {
+            "capability_map_source": str(
+                target.get("capability_map_source", "project_raw")
+            ),
+            "capability_native_map_manifest": str(
+                target.get("capability_native_map_manifest", "")
+            ),
+            "capability_native_map_manifest_sha256": str(
+                target.get("capability_native_map_manifest_sha256", "")
+            ),
+            "capability_native_map_grid": list(native_grid),
+            "capability_adaptor_execution": str(
+                target.get("capability_adaptor_execution", "")
+            ),
+        }
+    render_optimization = payload.get("render_optimization", {})
+    if not isinstance(render_optimization, dict):
+        raise ValueError("canonical field render optimization provenance must be a mapping")
+    render_capability = render_optimization.get("official_render_capability", {})
+    if not isinstance(render_capability, dict):
+        raise ValueError("canonical field render capability provenance must be a mapping")
+    render_teacher_provenance = render_capability.get("teacher_map_provenance", {})
+    if not isinstance(render_teacher_provenance, dict):
+        raise ValueError("canonical field render teacher provenance must be a mapping")
 
     def capability_signature(name: str, output_dim: int) -> dict:
         return FeatureSpaceSignature(
@@ -97,6 +139,11 @@ def build(args: argparse.Namespace) -> dict:
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
+        "capability_training_mpr_sources": capability_teacher_sources,
+        "render_capability_teacher_source": str(
+            render_capability.get("teacher_map_source", "project_raw")
+        ),
+        "render_capability_teacher_provenance": dict(render_teacher_provenance),
         "capability_signatures": {
             "appearance": capability_signature(
                 "dino_v3_7b", outputs["appearance_dino_v3"].shape[1]

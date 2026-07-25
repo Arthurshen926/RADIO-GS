@@ -18,6 +18,7 @@ def _cache(valid: list[bool], offset: float = 0.0) -> dict:
         "metadata": {
             "feature_space": "radio",
             "construction": f"cache_{offset}",
+            "selected_frame_indices": [11, 23, 37],
             "benchmark_images_opened": False,
             "benchmark_masks_opened": False,
             "text_queries_opened": False,
@@ -46,6 +47,24 @@ def test_fusion_rejects_geometry_mismatch() -> None:
     support["xyz"][1, 0] += 1.0
 
     with pytest.raises(ValueError, match="row-aligned geometry"):
+        fuse_primary_with_support(primary, support)
+
+
+def test_fusion_rejects_different_observation_frame_set() -> None:
+    primary = _cache([True, False])
+    support = _cache([False, True])
+    support["metadata"]["selected_frame_indices"] = [11, 23, 41]
+
+    with pytest.raises(ValueError, match="selected source-frame set"):
+        fuse_primary_with_support(primary, support)
+
+
+def test_fusion_rejects_different_feature_space() -> None:
+    primary = _cache([True, False])
+    support = _cache([False, True])
+    support["metadata"]["feature_space"] = "dino_v3"
+
+    with pytest.raises(ValueError, match="feature spaces"):
         fuse_primary_with_support(primary, support)
 
 

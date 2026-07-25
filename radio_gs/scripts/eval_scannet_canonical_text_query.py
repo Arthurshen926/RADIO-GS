@@ -27,6 +27,9 @@ from radio_gs.scannet_constants import (
     compute_split_metrics,
 )
 from radio_gs.scripts.eval_lerf_grounding import parse_prompt_templates
+from radio_gs.scripts.build_primitive_text_score_cache import (
+    reduce_multiscale_scores,
+)
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _default_label_ply,
     _parse_splits,
@@ -247,6 +250,8 @@ def evaluate(
     chunk_size: int,
     device: torch.device,
     allow_mpr_oracle: bool = False,
+    scale_aggregation: str = "max",
+    scale_specificity_margin: float = 0.0,
 ) -> dict[str, Any]:
     primitive_xyz, primitive_valid, primitive_features, metadata = (
         load_primitive_semantic_cache(
@@ -288,7 +293,12 @@ def evaluate(
                 mesh_features[start:stop].float().to(device) @ text.T
                 for mesh_features in mesh_features_by_scale
             ]
-            indices = torch.stack(scale_logits, dim=0).amax(dim=0).argmax(dim=-1).cpu().numpy()
+            reduced = reduce_multiscale_scores(
+                torch.stack(scale_logits, dim=1),
+                scale_aggregation=scale_aggregation,
+                scale_specificity_margin=scale_specificity_margin,
+            )
+            indices = reduced.argmax(dim=-1).cpu().numpy()
             pred_parts.append(np.asarray(class_ids, dtype=np.int32)[indices])
         pred_labels = np.concatenate(pred_parts)
         results[split] = compute_split_metrics(pred_labels, gt_labels, class_ids)
@@ -309,8 +319,11 @@ def evaluate(
             "distance_epsilon": float(distance_epsilon),
             "classification": "normalized_cosine_argmax",
             "semantic_scale_aggregation": (
-                "single_descriptor" if primitive_multiscale is None else "max_after_cosine"
+                "single_descriptor"
+                if primitive_multiscale is None
+                else f"{scale_aggregation}_after_cosine"
             ),
+            "scale_specificity_margin": float(scale_specificity_margin),
             "num_semantic_scales": int(len(primitive_scales)),
             "text_encoder": "official_siglip2_g",
             "logit_calibration": "none",
@@ -339,6 +352,12 @@ def main() -> None:
         help="Base path; _split{split} is inserted before the suffix.",
     )
     parser.add_argument("--allow-mpr-oracle", action="store_true")
+    parser.add_argument(
+        "--scale-aggregation",
+        choices=("max", "specificity"),
+        default="max",
+    )
+    parser.add_argument("--scale-specificity-margin", type=float, default=0.0)
     parser.add_argument("--device", default="cuda:0")
     args = parser.parse_args()
 
@@ -371,6 +390,8 @@ def main() -> None:
         chunk_size=args.chunk_size,
         device=device,
         allow_mpr_oracle=args.allow_mpr_oracle,
+        scale_aggregation=args.scale_aggregation,
+        scale_specificity_margin=args.scale_specificity_margin,
     )
     report["protocol"]["prompt_templates"] = templates
     report["protocol"]["class_aliases"] = "none"

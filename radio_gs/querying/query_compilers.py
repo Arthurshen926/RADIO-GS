@@ -291,7 +291,7 @@ def compile_registered_primitive_seeds(
     )
 
 
-def world_point_soft_seeds(
+def world_point_soft_seed_matrix(
     gaussian_xyz: torch.Tensor,
     gaussian_covariance: torch.Tensor,
     points: torch.Tensor,
@@ -300,6 +300,12 @@ def world_point_soft_seeds(
     euclidean_candidate_k: int = 0,
     candidate_mask: torch.Tensor | None = None,
 ) -> torch.Tensor:
+    """Return covariance-aware relative seeds separately for every world point.
+
+    Columns correspond to the supplied world points.  They are normalized in
+    log-kernel space for numerical stability, but candidate membership remains
+    exactly the query-independent Gaussian/candidate contract.
+    """
     xyz = torch.as_tensor(gaussian_xyz).float()
     covariance = torch.as_tensor(gaussian_covariance).float()
     queries = torch.as_tensor(points).float()
@@ -318,7 +324,6 @@ def world_point_soft_seeds(
             raise ValueError("gaussian_precision must align with covariance [N,3,3]")
     delta = xyz[:, None, :] - queries[None, :, :]
     mahalanobis = torch.einsum("npi,nij,npj->np", delta, inverse, delta)
-    weights = torch.exp(-0.5 * mahalanobis)
     candidate_k = int(euclidean_candidate_k)
     if candidate_k < 0:
         raise ValueError("euclidean_candidate_k cannot be negative")
@@ -326,15 +331,186 @@ def world_point_soft_seeds(
         nearest = delta.square().sum(dim=-1).topk(
             candidate_k, dim=0, largest=False
         ).indices
-        euclidean_mask = torch.zeros_like(weights, dtype=torch.bool)
+        euclidean_mask = torch.zeros_like(mahalanobis, dtype=torch.bool)
         euclidean_mask.scatter_(0, nearest, True)
-        weights = weights.masked_fill(~euclidean_mask, 0.0)
+        allowed_by_distance = euclidean_mask
+    else:
+        allowed_by_distance = torch.ones_like(mahalanobis, dtype=torch.bool)
     if candidate_mask is not None:
-        allowed = torch.as_tensor(candidate_mask, device=weights.device).bool().reshape(-1)
+        allowed = torch.as_tensor(
+            candidate_mask, device=mahalanobis.device
+        ).bool().reshape(-1)
         if allowed.shape != (xyz.shape[0],) or not bool(allowed.any()):
             raise ValueError("candidate_mask must be a non-empty [N] mask")
-        weights = weights.masked_fill(~allowed[:, None], 0.0)
-    return weights.amax(dim=1)
+        allowed_by_distance &= allowed[:, None]
+    # A click is a hard interaction constraint.  Only relative Gaussian
+    # responsibility is meaningful for its seed weights: the absolute 3-D
+    # kernel density is audited separately by continuous field support.
+    # Subtracting the best permitted log-density prevents tiny, valid
+    # covariances from underflowing to an all-zero seed at an official 5 cm
+    # point.  This is not a radius lift: candidate membership is still fixed
+    # by the covariance-aware standard compiler (and optional Euclidean top-K).
+    masked_mahalanobis = mahalanobis.masked_fill(~allowed_by_distance, float("inf"))
+    best = masked_mahalanobis.amin(dim=0, keepdim=True)
+    if not bool(torch.isfinite(best).all()):
+        raise ValueError("world point query has no permitted Gaussian candidate")
+    weights = torch.exp(-0.5 * (masked_mahalanobis - best))
+    weights = weights.masked_fill(~allowed_by_distance, 0.0)
+    return weights
+
+
+def world_point_soft_seeds(
+    gaussian_xyz: torch.Tensor,
+    gaussian_covariance: torch.Tensor,
+    points: torch.Tensor,
+    *,
+    gaussian_precision: torch.Tensor | None = None,
+    euclidean_candidate_k: int = 0,
+    candidate_mask: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Aggregate covariance-aware soft seeds over one or more world points."""
+
+    return world_point_soft_seed_matrix(
+        gaussian_xyz,
+        gaussian_covariance,
+        points,
+        gaussian_precision=gaussian_precision,
+        euclidean_candidate_k=euclidean_candidate_k,
+        candidate_mask=candidate_mask,
+    ).amax(dim=1)
+
+
+def _world_point_local_prototypes(
+    features: torch.Tensor,
+    seed_matrix: torch.Tensor,
+    *,
+    maximum_count: int = 0,
+    prototype_weighting: str = "support_mass",
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Pool one feature prototype per registered world point.
+
+    A point prompt is an interaction event, not a generic region.  Keeping a
+    local descriptor for each click retains different object facets and
+    accumulated corrective evidence without adding any scene-trained head.
+    """
+
+    bank = torch.as_tensor(features)
+    weights = torch.as_tensor(seed_matrix, device=bank.device).float()
+    if bank.ndim != 2 or weights.ndim != 2 or weights.shape[0] != bank.shape[0]:
+        raise ValueError("world-point local prototypes require [N,D] features and [N,P] seeds")
+    if not bool((weights > 0).any(dim=0).all()):
+        raise ValueError("every world point needs non-empty Gaussian support")
+    point_count = int(weights.shape[1])
+    maximum_count = int(maximum_count)
+    if maximum_count < 0:
+        raise ValueError("world_point_max_prototypes cannot be negative")
+    prototype_weighting = str(prototype_weighting)
+    if prototype_weighting not in {"support_mass", "equal_click"}:
+        raise ValueError(
+            "world-point prototype weighting must be support_mass or equal_click"
+        )
+    if 0 < maximum_count < point_count:
+        # Preserve the temporal order of a bounded interactive prompt rather
+        # than selecting by method output or benchmark identity.
+        keep = torch.linspace(
+            0, point_count - 1, maximum_count, device=weights.device
+        ).round().long().unique(sorted=True)
+    else:
+        keep = torch.arange(point_count, device=weights.device)
+    prototypes: list[torch.Tensor] = []
+    masses: list[torch.Tensor] = []
+    for column in keep.tolist():
+        local_weights = weights[:, column]
+        rows = torch.where(local_weights > 0)[0]
+        local_features = F.normalize(
+            bank.index_select(0, rows).float(), dim=-1, eps=1e-8
+        )
+        mass = local_weights.index_select(0, rows)
+        prototype = F.normalize(
+            (local_features * mass[:, None]).sum(dim=0), dim=0, eps=1e-8
+        )
+        prototypes.append(prototype)
+        # A registered world click is an interaction constraint, not a vote
+        # proportional to the size of the Gaussian kernel that happens to
+        # support it.  Equal click mass prevents a broad early Gaussian from
+        # silencing a later corrective click; support-mass remains available
+        # as the historical, reproducible ablation.
+        masses.append(
+            mass.sum()
+            if prototype_weighting == "support_mass"
+            else mass.new_tensor(1.0)
+        )
+    prototype_masses = torch.stack(masses).float()
+    prototype_masses /= prototype_masses.sum().clamp_min(1e-8)
+    return torch.stack(prototypes), prototype_masses
+
+
+def continuous_gaussian_readout(
+    gaussian_xyz: torch.Tensor,
+    gaussian_covariance: torch.Tensor,
+    primitive_values: torch.Tensor,
+    points: torch.Tensor,
+    *,
+    gaussian_precision: torch.Tensor | None = None,
+    opacity: torch.Tensor | None = None,
+    candidate_k: int = 64,
+    candidate_indices: torch.Tensor | None = None,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Read scalar primitive values at world points through fixed Gaussians.
+
+    The result is a normalized opacity-weighted Gaussian-kernel average and
+    its unnormalized support mass.  Callers may supply query-independent
+    nearest-candidate indices to avoid materializing an all-points by
+    all-primitives distance matrix for dense evaluation domains.
+    """
+
+    xyz = torch.as_tensor(gaussian_xyz).float()
+    covariance = torch.as_tensor(gaussian_covariance, device=xyz.device).float()
+    values = torch.as_tensor(primitive_values, device=xyz.device).float().reshape(-1)
+    queries = torch.as_tensor(points, device=xyz.device).float()
+    if queries.ndim == 1:
+        queries = queries[None]
+    if xyz.ndim != 2 or xyz.shape[1] != 3 or covariance.shape != (xyz.shape[0], 3, 3):
+        raise ValueError("xyz/covariance must be [N,3] and [N,3,3]")
+    if values.shape != (xyz.shape[0],):
+        raise ValueError("primitive_values must align with gaussian_xyz")
+    if queries.ndim != 2 or queries.shape[1] != 3:
+        raise ValueError("points must be [P,3]")
+    if gaussian_precision is None:
+        identity = torch.eye(3, device=xyz.device, dtype=covariance.dtype)
+        precision = torch.linalg.pinv(covariance + 1e-6 * identity)
+    else:
+        precision = torch.as_tensor(gaussian_precision, device=xyz.device).float()
+        if precision.shape != covariance.shape:
+            raise ValueError("gaussian_precision must align with covariance [N,3,3]")
+    if opacity is None:
+        density = torch.ones(xyz.shape[0], device=xyz.device, dtype=torch.float32)
+    else:
+        density = torch.as_tensor(opacity, device=xyz.device).float().reshape(-1)
+        if density.shape != values.shape or bool((density < 0).any()):
+            raise ValueError("opacity must be non-negative and align with primitive_values")
+
+    candidate_k = int(candidate_k)
+    if candidate_k <= 0:
+        raise ValueError("candidate_k must be positive")
+    if candidate_indices is None:
+        count = min(candidate_k, int(xyz.shape[0]))
+        indices = torch.cdist(queries, xyz).topk(count, dim=1, largest=False).indices
+    else:
+        indices = torch.as_tensor(candidate_indices, device=xyz.device).long()
+        if indices.ndim != 2 or indices.shape[0] != queries.shape[0] or indices.shape[1] == 0:
+            raise ValueError("candidate_indices must be a non-empty [P,K] matrix")
+        if bool((indices < 0).any()) or bool((indices >= xyz.shape[0]).any()):
+            raise IndexError("candidate_indices contains an invalid Gaussian row")
+
+    centers = xyz[indices]
+    selected_precision = precision[indices]
+    delta = centers - queries[:, None, :]
+    mahalanobis = torch.einsum("pki,pkij,pkj->pk", delta, selected_precision, delta)
+    weights = torch.exp(-0.5 * mahalanobis).clamp_min(0.0) * density[indices]
+    support = weights.sum(dim=1)
+    readout = (weights * values[indices]).sum(dim=1) / support.clamp_min(1e-12)
+    return readout, support
 
 
 def compile_world_3d_query(
@@ -355,8 +531,11 @@ def compile_world_3d_query(
     seed_topk: int = 0,
     seed_temperature: float = 1.0,
     seed_candidate_mask: torch.Tensor | None = None,
+    world_point_prototype_mode: str = "aggregate_fps",
+    world_point_max_prototypes: int = 0,
+    world_point_prototype_weighting: str = "support_mass",
 ) -> QuerySpec:
-    positive = world_point_soft_seeds(
+    positive_matrix = world_point_soft_seed_matrix(
         gaussian_xyz,
         gaussian_covariance,
         positive_points,
@@ -364,8 +543,8 @@ def compile_world_3d_query(
         euclidean_candidate_k=euclidean_candidate_k,
         candidate_mask=seed_candidate_mask,
     )
-    negative = (
-        world_point_soft_seeds(
+    negative_matrix = (
+        world_point_soft_seed_matrix(
             gaussian_xyz,
             gaussian_covariance,
             negative_points,
@@ -376,6 +555,8 @@ def compile_world_3d_query(
         if negative_points is not None
         else None
     )
+    positive = positive_matrix.amax(dim=1)
+    negative = negative_matrix.amax(dim=1) if negative_matrix is not None else None
     seed_temperature = float(seed_temperature)
     if seed_temperature <= 0:
         raise ValueError("seed_temperature must be positive")
@@ -401,21 +582,60 @@ def compile_world_3d_query(
         sparse_negative[keep] = negative[keep]
         negative = sparse_negative
 
-    app_proto, app_mass = _deterministic_prototypes(
-        appearance_features, positive, prototype_count, strategy=prototype_strategy
-    )
-    bnd_proto, bnd_mass = _deterministic_prototypes(
-        boundary_features, positive, prototype_count, strategy=prototype_strategy
-    )
+    world_point_prototype_mode = str(world_point_prototype_mode)
+    if world_point_prototype_mode not in {"aggregate_fps", "per_click_local"}:
+        raise ValueError(
+            "world_point_prototype_mode must be aggregate_fps or per_click_local"
+        )
+    world_point_prototype_weighting = str(world_point_prototype_weighting)
+    if world_point_prototype_weighting not in {"support_mass", "equal_click"}:
+        raise ValueError(
+            "world_point_prototype_weighting must be support_mass or equal_click"
+        )
+    if world_point_prototype_mode == "per_click_local":
+        app_proto, app_mass = _world_point_local_prototypes(
+            appearance_features,
+            positive_matrix,
+            maximum_count=int(world_point_max_prototypes),
+            prototype_weighting=world_point_prototype_weighting,
+        )
+        bnd_proto, bnd_mass = _world_point_local_prototypes(
+            boundary_features,
+            positive_matrix,
+            maximum_count=int(world_point_max_prototypes),
+            prototype_weighting=world_point_prototype_weighting,
+        )
+    else:
+        app_proto, app_mass = _deterministic_prototypes(
+            appearance_features, positive, prototype_count, strategy=prototype_strategy
+        )
+        bnd_proto, bnd_mass = _deterministic_prototypes(
+            boundary_features, positive, prototype_count, strategy=prototype_strategy
+        )
     app_neg = None
     bnd_neg = None
     if negative is not None:
-        app_neg, _ = _deterministic_prototypes(
-            appearance_features, negative, prototype_count, strategy=prototype_strategy
-        )
-        bnd_neg, _ = _deterministic_prototypes(
-            boundary_features, negative, prototype_count, strategy=prototype_strategy
-        )
+        if world_point_prototype_mode == "per_click_local":
+            assert negative_matrix is not None
+            app_neg, _ = _world_point_local_prototypes(
+                appearance_features,
+                negative_matrix,
+                maximum_count=int(world_point_max_prototypes),
+                prototype_weighting=world_point_prototype_weighting,
+            )
+            bnd_neg, _ = _world_point_local_prototypes(
+                boundary_features,
+                negative_matrix,
+                maximum_count=int(world_point_max_prototypes),
+                prototype_weighting=world_point_prototype_weighting,
+            )
+        else:
+            app_neg, _ = _deterministic_prototypes(
+                appearance_features, negative, prototype_count, strategy=prototype_strategy
+            )
+            bnd_neg, _ = _deterministic_prototypes(
+                boundary_features, negative, prototype_count, strategy=prototype_strategy
+            )
     elif scene_mean_negative:
         # A one-click protocol supplies no explicit background click.  The
         # unlabeled scene mean is a fixed, query-independent negative and may
@@ -448,6 +668,9 @@ def compile_world_3d_query(
                 else 0
             ),
             "prototype_strategy": str(prototype_strategy),
+            "world_point_prototype_mode": world_point_prototype_mode,
+            "world_point_max_prototypes": int(world_point_max_prototypes),
+            "world_point_prototype_weighting": world_point_prototype_weighting,
             "negative_evidence": (
                 "explicit_world_points"
                 if negative is not None

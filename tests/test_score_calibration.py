@@ -19,6 +19,7 @@ from radio_gs.querying.query_spec import (
     RegistrationMode,
 )
 from radio_gs.querying.score_calibration import (
+    SceneSpaceCalibration,
     deterministic_sample_rows,
     fit_scene_space_calibration,
     robust_tanh_score_calibration,
@@ -62,6 +63,19 @@ def test_robust_scene_calibration_is_deterministic_and_whitens_shape():
     torch.testing.assert_close(norms, torch.ones_like(norms))
 
 
+def test_scene_calibration_preserves_nonzero_direction_at_exact_robust_center():
+    features = F.normalize(
+        torch.tensor([[3.0, 1.0], [2.0, 2.0], [1.0, 3.0]]), dim=-1
+    )
+    calibration = fit_scene_space_calibration(
+        features, method="diagonal_robust", sample_size=3
+    )
+    transformed = calibration.transform(features)
+    torch.testing.assert_close(
+        transformed.norm(dim=-1), torch.ones(3), atol=1e-6, rtol=1e-6
+    )
+
+
 def test_robust_tanh_score_calibration_centers_scene_median():
     scores = torch.tensor([-10.0, -1.0, 0.0, 1.0, 50.0])
     calibrated = robust_tanh_score_calibration(scores)
@@ -88,6 +102,72 @@ def test_uncalibrated_score_bank_preserves_original_explicit_negative_rule():
     expected = field @ evidence.features.T
     expected = expected[:, 0] - (field @ evidence.negatives.T).amax(dim=1)
     torch.testing.assert_close(actual, expected)
+
+
+def test_background_prior_does_not_dilute_an_explicit_negative_click():
+    """Scene modes are a prior, while an interaction negative stays hard evidence."""
+
+    field = F.normalize(
+        torch.tensor([[1.0, 0.0], [0.0, 1.0], [-1.0, 0.0]]), dim=-1
+    )
+    evidence = PrototypeSet(
+        torch.tensor([[1.0, 0.0]]),
+        _signature(2),
+        negatives=torch.tensor([[0.0, 1.0]]),
+    )
+    calibration = SceneSpaceCalibration(
+        center=torch.zeros(2),
+        scale=torch.ones(2),
+        background_centroids=torch.tensor([[-1.0, 0.0]]),
+        method="none",
+        sample_count=3,
+    )
+    actual = _score_bank(
+        field,
+        evidence,
+        temperature=0.07,
+        calibration=calibration,
+        background_negative_policy="explicit_hard_max",
+    )
+    expected = (field @ evidence.features.T)[:, 0] - torch.maximum(
+        (field @ evidence.negatives.T).amax(dim=1),
+        (field @ calibration.background_centroids.T)[:, 0],
+    )
+    torch.testing.assert_close(actual, expected)
+
+
+def test_calibrated_background_scoring_is_chunk_size_invariant() -> None:
+    generator = torch.Generator().manual_seed(19)
+    field = F.normalize(torch.randn(23, 7, generator=generator), dim=-1)
+    evidence = PrototypeSet(
+        F.normalize(torch.randn(3, 7, generator=generator), dim=-1),
+        _signature(7),
+        negatives=F.normalize(torch.randn(2, 7, generator=generator), dim=-1),
+    )
+    calibration = fit_scene_space_calibration(
+        field,
+        method="diagonal_robust",
+        sample_size=17,
+        background_centroids=4,
+    )
+    reference = _score_bank(
+        field,
+        evidence,
+        temperature=0.07,
+        calibration=calibration,
+        background_negative_policy="pooled_mean",
+        chunk_size=23,
+    )
+    memory_bounded = _score_bank(
+        field,
+        evidence,
+        temperature=0.07,
+        calibration=calibration,
+        background_negative_policy="pooled_mean",
+        chunk_size=3,
+    )
+
+    torch.testing.assert_close(memory_bounded, reference, atol=1e-6, rtol=1e-6)
 
 
 def test_engine_fits_label_free_calibration_once_and_returns_finite_scores():
@@ -237,6 +317,22 @@ def test_world_point_candidate_mask_enforces_surface_support() -> None:
     assert weights[1] == 0
 
 
+def test_world_point_seeds_are_stable_when_gaussian_density_underflows() -> None:
+    """World clicks use relative kernel responsibility, not raw density scale."""
+
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.01, 0.0, 0.0]])
+    covariance = torch.eye(3)[None].repeat(2, 1, 1) * 1e-8
+    weights = world_point_soft_seeds(
+        xyz,
+        covariance,
+        torch.tensor([10.0, 0.0, 0.0]),
+        euclidean_candidate_k=2,
+    )
+    assert torch.isfinite(weights).all()
+    assert float(weights.max()) == 1.0
+    assert int((weights > 0).sum()) == 1
+
+
 def test_world_point_seed_temperature_sharpens_relative_responsibility():
     xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
     covariance = torch.eye(3)[None].repeat(2, 1, 1)
@@ -260,3 +356,65 @@ def test_world_point_seed_temperature_sharpens_relative_responsibility():
     assert base.positive_seeds is not None and sharp.positive_seeds is not None
     assert sharp.positive_seeds.weights[1] < base.positive_seeds.weights[1]
     assert sharp.metadata["seed_temperature"] == 0.5
+
+
+def test_world_point_per_click_prototypes_preserve_multiple_interaction_modes():
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    covariance = torch.eye(3)[None].repeat(2, 1, 1) * 0.001
+    features = F.normalize(torch.tensor([[1.0, 0.0], [0.0, 1.0]]), dim=-1)
+    query = compile_world_3d_query(
+        xyz,
+        covariance,
+        torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]),
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_signature(2),
+        boundary_signature=_signature(2),
+        world_point_prototype_mode="per_click_local",
+    )
+    assert query.appearance_evidence is not None
+    assert query.appearance_evidence.features.shape == (2, 2)
+    assert query.metadata["world_point_prototype_mode"] == "per_click_local"
+
+
+def test_world_point_equal_click_weighting_prevents_kernel_scale_dominance():
+    xyz = torch.tensor(
+        [[0.00, 0.0, 0.0], [0.05, 0.0, 0.0], [1.00, 0.0, 0.0], [1.05, 0.0, 0.0]]
+    )
+    covariance = torch.diag_embed(
+        torch.tensor(
+            [[1e-2, 1e-2, 1e-2], [1e-2, 1e-2, 1e-2], [1e-6, 1e-6, 1e-6], [1e-6, 1e-6, 1e-6]]
+        )
+    )
+    features = F.normalize(torch.eye(4), dim=-1)
+    kwargs = dict(
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_signature(4),
+        boundary_signature=_signature(4),
+        world_point_prototype_mode="per_click_local",
+    )
+    historical = compile_world_3d_query(
+        xyz,
+        covariance,
+        torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]),
+        world_point_prototype_weighting="support_mass",
+        **kwargs,
+    )
+    equal = compile_world_3d_query(
+        xyz,
+        covariance,
+        torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]]),
+        world_point_prototype_weighting="equal_click",
+        **kwargs,
+    )
+    assert historical.appearance_evidence is not None
+    assert equal.appearance_evidence is not None
+    assert not torch.allclose(
+        historical.appearance_evidence.weights,
+        torch.full((2,), 0.5),
+    )
+    torch.testing.assert_close(
+        equal.appearance_evidence.weights, torch.full((2,), 0.5)
+    )
+    assert equal.metadata["world_point_prototype_weighting"] == "equal_click"

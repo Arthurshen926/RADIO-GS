@@ -23,9 +23,13 @@ from tqdm import tqdm
 from radio_gs.config import load_config
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.field.observation_lifting_contract import (
+    CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
     CANONICAL_OBSERVATION_CONTRACT_NAME,
     apply_canonical_observation_contract,
     observation_contract_sha256,
+    select_full_observation_coverage_ranked_dataset_indices,
 )
 from radio_gs.models.radio_adaptors import (
     load_radio_adaptor_from_checkpoint,
@@ -50,6 +54,158 @@ def _sha256_file(path: str | Path) -> str:
         for block in iter(lambda: handle.read(8 * 1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+# These names and dimensions are those emitted by the official C-RADIOv4-H
+# runtime.  The direct path deliberately consumes the saved official adaptor
+# output, rather than applying an MLP to an already interpolated raw map.
+_EXTRACTED_CAPABILITY_SPECS: dict[str, dict[str, object]] = {
+    "dino_v3": {
+        "adaptor_name": "dino_v3_7b",
+        "subdir": "dino_v3_7b",
+        "output_dim": 4096,
+    },
+    "sam3": {
+        "adaptor_name": "sam3",
+        "subdir": "sam3",
+        "output_dim": 1024,
+    },
+}
+
+
+def _resolve_extracted_capability_source(
+    feature_dir: str | Path,
+    feature_space: str,
+) -> dict[str, object]:
+    """Verify an official C-RADIO adaptor map advertised by a frame manifest.
+
+    A capability MPR may only consume this route when the same feature
+    extraction run explicitly recorded the official adaptor output.  This is
+    intentionally stricter than accepting a directory with compatible tensors:
+    a forgotten ``--extract_adaptors`` flag must fail closed instead of
+    silently reintroducing the legacy project-after-interpolation route.
+    """
+
+    space = str(feature_space).lower()
+    if space not in _EXTRACTED_CAPABILITY_SPECS:
+        raise ValueError(f"no extracted official capability source for {feature_space!r}")
+    expected = dict(_EXTRACTED_CAPABILITY_SPECS[space])
+    root = Path(feature_dir)
+    manifest_path = root / "frame_manifest.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(
+            f"official extracted capability source needs {manifest_path}"
+        )
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"invalid feature frame manifest: {manifest_path}") from exc
+    if not isinstance(manifest, dict):
+        raise ValueError("feature frame manifest must contain an object")
+    features = manifest.get("features")
+    adapters = features.get("adaptors") if isinstance(features, dict) else None
+    if not isinstance(adapters, list):
+        raise ValueError(
+            f"feature manifest does not declare official adaptor maps for {space}"
+        )
+    matches = [
+        value
+        for value in adapters
+        if isinstance(value, dict)
+        and value.get("name") == expected["adaptor_name"]
+        and value.get("subdir") == expected["subdir"]
+    ]
+    if len(matches) != 1:
+        raise ValueError(
+            f"feature manifest does not declare the matching official {space} adaptor"
+        )
+    record = matches[0]
+    if int(record.get("dim", -1)) != int(expected["output_dim"]):
+        raise ValueError(
+            f"official {space} adaptor dimension differs from C-RADIO contract"
+        )
+    grid = record.get("grid")
+    if (
+        not isinstance(grid, list)
+        or len(grid) != 2
+        or any(int(value) <= 0 for value in grid)
+    ):
+        raise ValueError(f"official {space} adaptor manifest has an invalid spatial grid")
+    subdir = root / str(expected["subdir"])
+    if not subdir.is_dir():
+        raise FileNotFoundError(
+            f"feature manifest declares {space}, but its map directory is missing: {subdir}"
+        )
+    return {
+        **expected,
+        "native_grid": [int(grid[0]), int(grid[1])],
+        "frame_manifest": str(manifest_path.resolve()),
+        "frame_manifest_sha256": _sha256_file(manifest_path),
+        "radio_version": str(dict(manifest.get("radio", {})).get("version", "")),
+        "execution": "official_c_radio_runtime_adaptor_output",
+    }
+
+
+def _load_extracted_capability_maps(
+    *,
+    feature_dir: str | Path,
+    feature_space: str,
+    pose_file: str | None,
+    pose_dir: str | None,
+    feature_size: tuple[int, int],
+    dataset_type: str,
+    selected_frame_indices: list[int],
+) -> tuple[torch.Tensor, dict[str, object]]:
+    """Load selected native official-adaptor maps then resample for registration.
+
+    The frozen adaptor is evaluated by the official C-RADIO runtime at its
+    native token locations.  Interpolation is applied only afterwards to match
+    the fixed Gaussian raster grid, which preserves the intended ordering
+    ``MPR(resample(A_official(f_v)))``.
+    """
+
+    source = _resolve_extracted_capability_source(feature_dir, feature_space)
+    dataset = SimpleRadioDataset(
+        feature_dir=str(feature_dir),
+        pose_file=pose_file,
+        pose_dir=pose_dir,
+        feature_size=feature_size,
+        feature_subdir=str(source["subdir"]),
+        split="train",
+        dataset_type=dataset_type,
+        frame_ids=list(selected_frame_indices),
+    )
+    if [int(value) for value in dataset.frame_indices] != [
+        int(value) for value in selected_frame_indices
+    ]:
+        raise ValueError("official capability frame order differs from raw RADIO MPR")
+    maps = None
+    for index in range(len(dataset)):
+        item = dataset[index]["radio_features"].float().cpu()
+        if item.ndim != 3 or item.shape[0] != int(source["output_dim"]):
+            raise ValueError(
+                f"official {feature_space} map {index} has unexpected shape "
+                f"{tuple(item.shape)}"
+            )
+        if maps is None:
+            maps = torch.empty(
+                (len(dataset), *item.shape),
+                dtype=torch.float32,
+            )
+        elif item.shape != maps.shape[1:]:
+            raise ValueError(
+                f"official {feature_space} maps do not share one spatial shape"
+            )
+        maps[index].copy_(item)
+    if maps is None:
+        raise ValueError(f"official {feature_space} map selection is empty")
+    if maps.ndim != 4 or maps.shape[1] != int(source["output_dim"]):
+        raise ValueError(
+            f"official {feature_space} maps have unexpected shape {tuple(maps.shape)}"
+        )
+    norms = torch.linalg.vector_norm(maps, ord=2, dim=1, keepdim=True)
+    maps.div_(norms.clamp_min_(1e-8))
+    return maps, source
 
 
 @torch.no_grad()
@@ -123,6 +279,81 @@ def _select_candidate_indices(candidates: list[int], max_views: int) -> list[int
     return [candidates[index] for index in chosen]
 
 
+def _select_full_observation_coverage_views(
+    *,
+    scene_root: str | Path,
+    dataset_frame_ids: list[int],
+    candidates: list[int],
+    maximum_views: int,
+    minimum_source_views: int = 0,
+) -> tuple[list[int], dict[str, object]]:
+    """Restore a full-.sens field's label-free greedy coverage order.
+
+    A numeric-sorted RGB-D directory is deliberately convenient for normal
+    loaders, but it must not erase the coverage ranking that created it.  The
+    source manifest has no target/object/click information and is checked here
+    before it can influence MPR frame selection.
+    """
+
+    manifest_path = Path(scene_root) / "field_source_contract.json"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(
+            "canonical full-observation MPR requires "
+            f"{manifest_path}"
+        )
+    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("full-observation field-source contract must be an object")
+    allowed_versions = {
+        "scannet_full_observation_v1",
+        "scannet_full_observation_pfpr_queryheldout_v1",
+    }
+    if str(payload.get("field_contract_version", "")) not in allowed_versions:
+        raise ValueError(
+            "full-observation MPR source contract has an unsupported provenance version"
+        )
+    for key in (
+        "uses_private_anchor",
+        "uses_private_depth_pixel",
+        "uses_instances_or_semantic_labels",
+        "contains_instance_or_label_directories",
+    ):
+        if bool(payload.get(key, False)):
+            raise ValueError(
+                "full-observation MPR source contract is not query/label free: "
+                f"{key}"
+            )
+    selected_frame_ids = [int(value) for value in payload.get("selected_frame_indices", [])]
+    ranked_frame_ids = [int(value) for value in payload.get("selection_order_frame_indices", [])]
+    if len(set(selected_frame_ids)) != len(selected_frame_ids) or set(
+        selected_frame_ids
+    ) != set(ranked_frame_ids):
+        raise ValueError(
+            "full-observation source contract has an incomplete coverage ranking"
+        )
+    minimum_source_views = int(minimum_source_views)
+    if minimum_source_views > 0 and len(selected_frame_ids) < minimum_source_views:
+        raise ValueError(
+            "full-observation MPR contract requires an independently "
+            f"materialized {minimum_source_views}-view source prefix"
+        )
+    selected = select_full_observation_coverage_ranked_dataset_indices(
+        dataset_frame_ids=dataset_frame_ids,
+        candidate_dataset_indices=candidates,
+        ranked_frame_ids=ranked_frame_ids,
+        maximum_views=int(maximum_views),
+    )
+    return selected, {
+        "full_observation_source_contract": str(manifest_path.resolve()),
+        "full_observation_source_contract_sha256": _sha256_file(manifest_path),
+        "full_observation_source_contract_version": str(
+            payload["field_contract_version"]
+        ),
+        "full_observation_coverage_order_applied": True,
+        "full_observation_source_view_count": int(len(selected_frame_ids)),
+    }
+
+
 def merge_topk_view_observations(
     current_features: torch.Tensor,
     current_responsibility: torch.Tensor,
@@ -172,6 +403,8 @@ def accumulate_contribution_mean_channel_chunked(
     registered_counts: torch.Tensor,
     *,
     channel_chunk_size: int,
+    cpu_sum_staging: torch.Tensor | None = None,
+    cpu_count_staging: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Accumulate one view without materializing a dense ``N x C`` CUDA tensor.
 
@@ -189,6 +422,19 @@ def accumulate_contribution_mean_channel_chunked(
         raise ValueError("registered accumulation tensors do not align")
     if channel_chunk_size <= 0:
         raise ValueError("channel_chunk_size must be positive")
+    maximum_chunk = min(int(channel_chunk_size), int(channels))
+    if cpu_sum_staging is not None and (
+        cpu_sum_staging.device.type != "cpu"
+        or cpu_sum_staging.dtype != torch.float32
+        or cpu_sum_staging.shape != (num_rows, maximum_chunk)
+    ):
+        raise ValueError("cpu_sum_staging must be float32 [N,min(C,chunk)] on CPU")
+    if cpu_count_staging is not None and (
+        cpu_count_staging.device.type != "cpu"
+        or cpu_count_staging.dtype != torch.float32
+        or cpu_count_staging.shape != (num_rows,)
+    ):
+        raise ValueError("cpu_count_staging must be float32 [N] on CPU")
     device = features.device
     gids = torch.as_tensor(gaussian_ids, device=device).long()
     pids = torch.as_tensor(pixel_ids, device=device).long()
@@ -205,7 +451,11 @@ def accumulate_contribution_mean_channel_chunked(
     frame_counts = torch.zeros(num_rows, dtype=torch.float32, device=device)
     if gids.numel():
         frame_counts.index_add_(0, gids, weight)
-    counts_cpu = frame_counts.cpu()
+    if cpu_count_staging is None:
+        counts_cpu = frame_counts.cpu()
+    else:
+        cpu_count_staging.copy_(frame_counts)
+        counts_cpu = cpu_count_staging
     registered_counts.add_(counts_cpu)
     if not gids.numel():
         return counts_cpu
@@ -217,7 +467,12 @@ def accumulate_contribution_mean_channel_chunked(
             num_rows, stop - start, dtype=torch.float32, device=device
         )
         sums.index_add_(0, gids, sampled)
-        registered_sum[:, start:stop].add_(sums.cpu())
+        if cpu_sum_staging is None:
+            sums_cpu = sums.cpu()
+        else:
+            sums_cpu = cpu_sum_staging[:, : stop - start]
+            sums_cpu.copy_(sums)
+        registered_sum[:, start:stop].add_(sums_cpu)
         del flat, sampled, sums
     return counts_cpu
 
@@ -349,7 +604,12 @@ def _load_responsibility_cache(
 
 def build_cache(args: argparse.Namespace) -> dict:
     observation_contract = None
-    if str(getattr(args, "observation_contract", "legacy")) == CANONICAL_OBSERVATION_CONTRACT_NAME:
+    if str(getattr(args, "observation_contract", "legacy")) in {
+        CANONICAL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+    }:
         observation_contract = apply_canonical_observation_contract(args)
     device = torch.device(args.device)
     config = load_config(args.config)
@@ -400,18 +660,75 @@ def build_cache(args: argparse.Namespace) -> dict:
     ]
     if not candidates:
         raise RuntimeError("all available feature frames were excluded")
-    selected = _select_candidate_indices(candidates, int(args.max_views))
-    teacher_maps = torch.stack(
-        [dataset[index]["radio_features"].float().cpu() for index in selected], dim=0
-    )
+    full_observation_source_metadata: dict[str, object] = {}
+    if observation_contract is not None and bool(
+        observation_contract["requires_full_observation_source_contract"]
+    ):
+        selected, full_observation_source_metadata = (
+            _select_full_observation_coverage_views(
+                scene_root=str(getattr(config, "scene_root", "")),
+                dataset_frame_ids=[int(value) for value in dataset.frame_indices],
+                candidates=candidates,
+                maximum_views=int(args.max_views),
+                minimum_source_views=int(
+                    observation_contract.get("minimum_source_views", 0)
+                ),
+            )
+        )
+    else:
+        selected = _select_candidate_indices(candidates, int(args.max_views))
     poses = torch.stack(
         [dataset[index]["pose_w2c"].float().cpu() for index in selected], dim=0
     )
     feature_space = str(args.feature_space).lower()
+    capability_map_source = str(args.capability_map_source).lower()
+    if capability_map_source not in {"project_raw", "official_extracted"}:
+        raise ValueError(
+            "capability_map_source must be project_raw or official_extracted"
+        )
+    selected_frame_indices = [
+        int(dataset.frame_indices[index]) for index in selected
+    ]
     summary_head_path = ""
     adaptor_name = ""
     adaptor_checkpoint_path = ""
     adaptor_checkpoint_sha256 = ""
+    capability_source_metadata: dict[str, object] = {
+        "capability_map_source": "not_applicable",
+        "capability_native_map_manifest": "",
+        "capability_native_map_manifest_sha256": "",
+        "capability_native_map_grid": [],
+        "capability_adaptor_execution": "not_applicable",
+    }
+    if feature_space in {"dino_v3", "sam3"} and capability_map_source == "official_extracted":
+        teacher_maps, extracted_source = _load_extracted_capability_maps(
+            feature_dir=feature_dir,
+            feature_space=feature_space,
+            pose_file=pose_file,
+            pose_dir=pose_dir,
+            feature_size=(feature_height, feature_width),
+            dataset_type=str(getattr(config, "dataset_type", "lerf")),
+            selected_frame_indices=selected_frame_indices,
+        )
+        adaptor_name = str(extracted_source["adaptor_name"])
+        adaptor_checkpoint_path = str(Path(args.radio_checkpoint).expanduser().resolve())
+        adaptor_checkpoint_sha256 = _sha256_file(adaptor_checkpoint_path)
+        capability_source_metadata = {
+            "capability_map_source": "official_extracted",
+            "capability_native_map_manifest": str(
+                extracted_source["frame_manifest"]
+            ),
+            "capability_native_map_manifest_sha256": str(
+                extracted_source["frame_manifest_sha256"]
+            ),
+            "capability_native_map_grid": list(extracted_source["native_grid"]),
+            "capability_adaptor_execution": str(extracted_source["execution"]),
+        }
+    else:
+        teacher_maps = torch.stack(
+            [dataset[index]["radio_features"].float().cpu() for index in selected],
+            dim=0,
+        )
     if feature_space == "siglip_summary":
         summary_head_path = str(Path(args.summary_head_weights).expanduser().resolve())
         summary_head = SigLIP2SummaryHead.from_extracted_weights(summary_head_path).to(device)
@@ -438,7 +755,10 @@ def build_cache(args: argparse.Namespace) -> dict:
         del summary_head
         if device.type == "cuda":
             torch.cuda.empty_cache()
-    elif feature_space in {"dino_v3", "sam3"}:
+    elif (
+        feature_space in {"dino_v3", "sam3"}
+        and capability_map_source != "official_extracted"
+    ):
         adaptor_name = "dino_v3_7b" if feature_space == "dino_v3" else "sam3"
         adaptor_checkpoint_path = str(
             Path(args.radio_checkpoint).expanduser().resolve()
@@ -459,13 +779,17 @@ def build_cache(args: argparse.Namespace) -> dict:
         del adaptor
         if device.type == "cuda":
             torch.cuda.empty_cache()
-    elif feature_space not in {"radio", "semantic_descriptor"}:
+        capability_source_metadata = {
+            "capability_map_source": "project_raw",
+            "capability_native_map_manifest": "",
+            "capability_native_map_manifest_sha256": "",
+            "capability_native_map_grid": [],
+            "capability_adaptor_execution": "frozen_official_feature_projection_after_raw_resampling",
+        }
+    elif feature_space not in {"radio", "semantic_descriptor", "dino_v3", "sam3"}:
         raise ValueError(f"Unsupported feature space: {feature_space}")
 
     xyz_cpu = model.get_xyz().detach().float().cpu().contiguous()
-    selected_frame_indices = [
-        int(dataset.frame_indices[index]) for index in selected
-    ]
     responsibility_assignments: list[dict[str, torch.Tensor]] | None = None
     responsibility_cache_path = ""
     responsibility_cache_sha256 = ""
@@ -623,6 +947,20 @@ def build_cache(args: argparse.Namespace) -> dict:
             xyz_cpu.shape[0], teacher_maps.shape[1], dtype=torch.float32
         )
         registered_counts = torch.zeros(xyz_cpu.shape[0], dtype=torch.float32)
+        contribution_sum_staging = None
+        contribution_count_staging = None
+        if args.raster_view_fusion == "contribution_mean":
+            contribution_sum_staging = torch.empty(
+                xyz_cpu.shape[0],
+                min(
+                    int(args.raster_channel_chunk_size),
+                    int(teacher_maps.shape[1]),
+                ),
+                dtype=torch.float32,
+            )
+            contribution_count_staging = torch.empty(
+                xyz_cpu.shape[0], dtype=torch.float32
+            )
         observation_counts = torch.zeros(xyz_cpu.shape[0], dtype=torch.long)
         topk_observations = None
         topk_responsibility = None
@@ -725,6 +1063,8 @@ def build_cache(args: argparse.Namespace) -> dict:
                             registered_sum,
                             registered_counts,
                             channel_chunk_size=int(args.raster_channel_chunk_size),
+                            cpu_sum_staging=contribution_sum_staging,
+                            cpu_count_staging=contribution_count_staging,
                         )
                         frame_valid = counts_cpu > 0
                         observation_counts[frame_valid] += 1
@@ -843,6 +1183,7 @@ def build_cache(args: argparse.Namespace) -> dict:
         "selected_dataset_indices": selected,
         "selected_frame_indices": selected_frame_indices,
         "excluded_frame_ids": sorted(excluded_frame_ids),
+        **full_observation_source_metadata,
         "depth_tolerance": float(args.depth_tolerance),
         "relative_depth_tolerance": float(args.relative_depth_tolerance),
         "alpha_threshold": float(args.alpha_threshold),
@@ -862,6 +1203,7 @@ def build_cache(args: argparse.Namespace) -> dict:
         "official_adaptor_name": adaptor_name,
         "official_adaptor_checkpoint": adaptor_checkpoint_path,
         "official_adaptor_checkpoint_sha256": adaptor_checkpoint_sha256,
+        **capability_source_metadata,
         "registration_responsibility_cache": responsibility_cache_path,
         "registration_responsibility_cache_sha256": responsibility_cache_sha256,
         "shared_registration_responsibility": bool(
@@ -950,11 +1292,19 @@ def main() -> None:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument(
         "--observation-contract",
-        choices=["legacy", CANONICAL_OBSERVATION_CONTRACT_NAME],
+        choices=[
+            "legacy",
+            CANONICAL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+        ],
         default=CANONICAL_OBSERVATION_CONTRACT_NAME,
         help=(
-            "Versioned dataset-independent lifting policy. canonical-mpr-v1 "
-            "overrides all policy knobs while retaining dataset provenance."
+            "Versioned query-free lifting policy. canonical-full-observation "
+            "variants restore the field-source coverage ranking; v1 is the "
+            "frozen 240-view control; v2/v3 preserve independent 480/960-view "
+            "source prefixes."
         ),
     )
     parser.add_argument("--max-views", type=int, default=32)
@@ -1015,6 +1365,16 @@ def main() -> None:
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
         help="Official C-RADIO checkpoint used only for frozen capability projections.",
+    )
+    parser.add_argument(
+        "--capability-map-source",
+        choices=["project_raw", "official_extracted"],
+        default="project_raw",
+        help=(
+            "For DINO/SAM MPR, either apply the frozen feature projection to "
+            "the raw map (legacy) or consume the matching native official "
+            "C-RADIO adaptor maps emitted by extract_radio_features."
+        ),
     )
     parser.add_argument("--projection-batch-size", type=int, default=2)
     parser.add_argument(

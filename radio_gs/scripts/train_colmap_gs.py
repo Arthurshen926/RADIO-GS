@@ -32,6 +32,7 @@ from torch import Tensor
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from gsplat import DefaultStrategy, rasterization
+from gsplat.strategy.ops import remove as remove_gaussians
 from radio_gs.data.lerf_dataset import (
     _camera_params_to_intrinsics,
     _parse_colmap_sparse,
@@ -54,6 +55,24 @@ _CAMERA_MAP_RULES = frozenset(
         "imageNNN_canonical_index_to_lexicographic_colmap_camera",
     }
 )
+
+
+def _gaussian_budget_prune_mask(
+    opacity_logits: torch.Tensor,
+    maximum_gaussians: int,
+) -> torch.Tensor:
+    """Select the lowest-opacity rows needed to enforce a fixed scene budget."""
+
+    values = torch.as_tensor(opacity_logits).reshape(-1)
+    maximum = int(maximum_gaussians)
+    if maximum < 0:
+        raise ValueError("maximum_gaussians cannot be negative")
+    remove_count = max(0, int(values.numel()) - maximum) if maximum else 0
+    mask = torch.zeros(values.numel(), dtype=torch.bool, device=values.device)
+    if remove_count:
+        # Stable sorting makes equal-opacity ties resolve by primitive index.
+        mask[torch.argsort(values, stable=True)[:remove_count]] = True
+    return mask
 
 
 def _load_colmap_camera_rgb_map(
@@ -844,6 +863,16 @@ def train(args):
     # Output directory
     out_dir = Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
+    view_metadata["geometry_training_contract"] = {
+        "maximum_gaussians": int(args.max_gaussians),
+        "budget_enabled": bool(args.max_gaussians),
+        "budget_pruning": (
+            "stable_lowest_opacity_after_densification"
+            if args.max_gaussians
+            else "none"
+        ),
+        "uses_labels_masks_queries_or_metrics": False,
+    }
     (out_dir / "training_views.json").write_text(
         json.dumps(view_metadata, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -857,6 +886,10 @@ def train(args):
     print(f"Output: {out_dir}")
     print(f"Scene scale (pts bbox): {scene_scale:.2f}, Camera extent: {camera_extent:.2f}")
     print(f"Position LR: {args.lr_means} × {camera_extent:.2f} = {args.lr_means * camera_extent:.4e}")
+    print(
+        "Gaussian budget: "
+        + (f"{args.max_gaussians:,}" if args.max_gaussians else "unlimited")
+    )
     print(f"{'='*60}\n")
 
     for step in range(args.iters):
@@ -920,6 +953,21 @@ def train(args):
             params=params, optimizers=optimizers, state=state,
             step=step, info=info, packed=False,
         )
+        budget_prune = _gaussian_budget_prune_mask(
+            params["opacities"], args.max_gaussians
+        )
+        if bool(budget_prune.any()):
+            removed = int(budget_prune.sum())
+            remove_gaussians(
+                params=params,
+                optimizers=optimizers,
+                state=state,
+                mask=budget_prune,
+            )
+            print(
+                f"Step {step}: primitive budget pruned {removed:,} "
+                f"lowest-opacity Gaussians; retained {len(params['means']):,}."
+            )
 
         # Optimiser step
         for opt in optimizers.values():
@@ -948,6 +996,30 @@ def train(args):
 
     # Final save
     save_ply(str(ply_dir / "point_cloud.ply"), params, max_sh_degree)
+    (out_dir / "geometry_training_report.json").write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "initial_gaussians": int(n_init),
+                "final_gaussians": int(params["means"].shape[0]),
+                "maximum_gaussians": int(args.max_gaussians),
+                "budget_satisfied": (
+                    not args.max_gaussians
+                    or int(params["means"].shape[0]) <= int(args.max_gaussians)
+                ),
+                "budget_pruning": (
+                    "stable_lowest_opacity_after_densification"
+                    if args.max_gaussians
+                    else "none"
+                ),
+                "uses_labels_masks_queries_or_metrics": False,
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     print(f"\nTraining complete. Final #GS: {params['means'].shape[0]:,}")
     print(f"Output saved to {ply_dir / 'point_cloud.ply'}")
 
@@ -1028,6 +1100,16 @@ def main():
     parser.add_argument("--densify_every", type=int, default=100)
     parser.add_argument("--densify_grad_thresh", type=float, default=0.0008)
     parser.add_argument("--opacity_reset_every", type=int, default=3000)
+    parser.add_argument(
+        "--max-gaussians",
+        type=int,
+        default=0,
+        help=(
+            "Fixed query/label-independent primitive budget. After each "
+            "densification step, deterministically prune the lowest-opacity "
+            "rows to this count; 0 preserves the historical unlimited path."
+        ),
+    )
 
     # Logging / checkpoints
     parser.add_argument("--log_every", type=int, default=100)
@@ -1035,6 +1117,8 @@ def main():
                         help="Save intermediate checkpoint every N iters (0=off)")
 
     args = parser.parse_args()
+    if args.max_gaussians < 0:
+        parser.error("--max-gaussians cannot be negative")
     train(args)
 
 

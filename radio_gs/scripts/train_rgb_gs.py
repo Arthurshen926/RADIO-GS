@@ -117,11 +117,24 @@ def depth_to_points(depth: Tensor, c2w: Tensor, fx: float, fy: float,
 
 def init_gaussians_from_depth(images, depths, c2ws, fx, fy, cx, cy,
                               n_init_frames: int = 50, stride: int = 8,
-                              max_points: int = 200_000):
+                              max_points: int = 200_000,
+                              frame_indices=None):
     """Create initial Gaussian parameters from depth-unprojected points."""
-    # Sample frames uniformly
+    # Sample frames uniformly unless a caller supplies a deterministic,
+    # query-free initialization order (for example an RGB-D coverage order).
     n = len(images)
-    frame_ids = np.linspace(0, n - 1, min(n_init_frames, n), dtype=int)
+    if frame_indices is None:
+        frame_ids = np.linspace(0, n - 1, min(n_init_frames, n), dtype=int)
+    else:
+        frame_ids = np.asarray(frame_indices, dtype=int).reshape(-1)
+        if frame_ids.size == 0:
+            raise ValueError("frame_indices cannot be empty")
+        if frame_ids.size > int(n_init_frames):
+            raise ValueError("frame_indices cannot exceed n_init_frames")
+        if bool((frame_ids < 0).any()) or bool((frame_ids >= n).any()):
+            raise IndexError("frame_indices contains an out-of-range frame")
+        if len(np.unique(frame_ids)) != len(frame_ids):
+            raise ValueError("frame_indices must not contain duplicates")
 
     all_points = []
     all_colors = []

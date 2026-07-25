@@ -9,10 +9,16 @@ from .boundary_screen_residual import (
 from .checkpoint import load_canonical_field_checkpoint
 from .view_residual import ZeroMeanViewResidual, load_view_residual_checkpoint
 from .observation_lifting_contract import (
+    CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_CONTRACT_NAMES,
+    CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
     CANONICAL_OBSERVATION_CONTRACT_NAME,
     apply_canonical_observation_contract,
     canonical_observation_contract,
+    is_canonical_full_observation_contract,
     observation_contract_sha256,
+    select_full_observation_coverage_ranked_dataset_indices,
     validate_observation_contract_metadata,
 )
 from .field_signature import FeatureSpaceSignature
@@ -37,9 +43,15 @@ __all__ = [
     "load_boundary_screen_residual_checkpoint",
     "ZeroMeanViewResidual",
     "load_view_residual_checkpoint",
+    "CANONICAL_FULL_OBSERVATION_CONTRACT_NAME",
+    "CANONICAL_FULL_OBSERVATION_CONTRACT_NAMES",
+    "CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME",
+    "CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME",
     "CANONICAL_OBSERVATION_CONTRACT_NAME",
     "apply_canonical_observation_contract",
     "canonical_observation_contract",
+    "is_canonical_full_observation_contract",
     "observation_contract_sha256",
+    "select_full_observation_coverage_ranked_dataset_indices",
     "validate_observation_contract_metadata",
 ]

@@ -13,6 +13,10 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.field import (
+    CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+    CANONICAL_OBSERVATION_CONTRACT_NAME,
     CanonicalGaussianField,
     FeatureSpaceSignature,
     fit_affine_basis,
@@ -74,9 +78,16 @@ def _load_capability_mpr_target(
     if not isinstance(cache, dict) or "features" not in cache:
         raise ValueError(f"{expected_space} MPR cache must contain primitive features")
     metadata = dict(cache.get("metadata", {}))
+    raw_contract = raw_metadata.get("observation_lifting_contract", {})
+    raw_contract_name = (
+        str(raw_contract.get("name", CANONICAL_OBSERVATION_CONTRACT_NAME))
+        if isinstance(raw_contract, dict)
+        else CANONICAL_OBSERVATION_CONTRACT_NAME
+    )
     validate_observation_contract_metadata(
         metadata,
         require_declaration="observation_lifting_contract" in raw_metadata,
+        contract_name=raw_contract_name,
     )
     if str(metadata.get("feature_space", "")) != str(expected_space):
         raise ValueError(f"expected a {expected_space} MPR cache")
@@ -94,6 +105,36 @@ def _load_capability_mpr_target(
         radio_checkpoint_sha256
     ):
         raise ValueError(f"{expected_space} MPR uses another RADIO checkpoint")
+    capability_map_source = str(metadata.get("capability_map_source", "project_raw"))
+    if capability_map_source not in {"project_raw", "official_extracted"}:
+        raise ValueError(
+            f"{expected_space} MPR has an unsupported capability map source "
+            f"{capability_map_source!r}"
+        )
+    if capability_map_source == "official_extracted":
+        required_native_provenance = {
+            "capability_native_map_manifest",
+            "capability_native_map_manifest_sha256",
+            "capability_adaptor_execution",
+        }
+        missing_native_provenance = sorted(
+            key
+            for key in required_native_provenance
+            if not str(metadata.get(key, ""))
+        )
+        if missing_native_provenance:
+            raise ValueError(
+                f"{expected_space} direct official MPR lacks native-map provenance: "
+                f"{missing_native_provenance}"
+            )
+        if (
+            str(metadata.get("capability_adaptor_execution", ""))
+            != "official_c_radio_runtime_adaptor_output"
+        ):
+            raise ValueError(
+                f"{expected_space} direct official MPR did not use the official "
+                "C-RADIO runtime adaptor output"
+            )
 
     raw_xyz = torch.as_tensor(raw_cache["xyz"]).float().cpu()
     target_xyz = torch.as_tensor(cache.get("xyz")).float().cpu()
@@ -159,6 +200,19 @@ def _load_capability_mpr_target(
         "official_adaptor_name": metadata.get("official_adaptor_name"),
         "official_adaptor_checkpoint_sha256": metadata.get(
             "official_adaptor_checkpoint_sha256"
+        ),
+        "capability_map_source": capability_map_source,
+        "capability_native_map_manifest": metadata.get(
+            "capability_native_map_manifest", ""
+        ),
+        "capability_native_map_manifest_sha256": metadata.get(
+            "capability_native_map_manifest_sha256", ""
+        ),
+        "capability_native_map_grid": metadata.get(
+            "capability_native_map_grid", []
+        ),
+        "capability_adaptor_execution": metadata.get(
+            "capability_adaptor_execution", ""
         ),
         "selected_frame_indices": metadata.get("selected_frame_indices", []),
         "registration_responsibility_cache_sha256": responsibility_sha256,
@@ -261,9 +315,20 @@ def train(args: argparse.Namespace) -> dict:
         getattr(args, "observation_contract", "unchecked")
     )
     if observation_contract_mode != "unchecked":
+        strict_contract_modes = {
+            CANONICAL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+        }
         validate_observation_contract_metadata(
             metadata,
-            require_declaration=observation_contract_mode == "canonical-mpr-v1",
+            require_declaration=observation_contract_mode in strict_contract_modes,
+            contract_name=(
+                observation_contract_mode
+                if observation_contract_mode in strict_contract_modes
+                else None
+            ),
         )
     if metadata.get("benchmark_masks_opened", False) or metadata.get("text_queries_opened", False):
         raise ValueError("MPR training cache is contaminated by benchmark queries or masks")
@@ -593,8 +658,15 @@ def main() -> None:
     parser.add_argument("--mpr-cache", required=True)
     parser.add_argument(
         "--observation-contract",
-        choices=["canonical-mpr-v1", "compatible-legacy", "unchecked"],
-        default="canonical-mpr-v1",
+        choices=[
+            CANONICAL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+            CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+            "compatible-legacy",
+            "unchecked",
+        ],
+        default=CANONICAL_OBSERVATION_CONTRACT_NAME,
         help="Require the shared dataset-independent MPR contract for new fields.",
     )
     parser.add_argument("--radio-checkpoint", required=True)

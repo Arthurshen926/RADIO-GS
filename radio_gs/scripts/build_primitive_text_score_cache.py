@@ -76,6 +76,38 @@ def compile_scores(
     return result.half()
 
 
+def reduce_multiscale_scores(
+    per_scale: torch.Tensor,
+    *,
+    scale_aggregation: str,
+    scale_lse_temperature: float = 10.0,
+    scale_specificity_margin: float = 0.0,
+) -> torch.Tensor:
+    """Reduce ``[N,S,Q]`` scores under one query-set-invariant scale rule."""
+
+    values = torch.as_tensor(per_scale)
+    if values.ndim != 3 or values.shape[1] < 1:
+        raise ValueError("per_scale must be [N,S,Q] with at least one scale")
+    if scale_aggregation not in {"max", "logmeanexp", "specificity"}:
+        raise ValueError(f"unsupported scale aggregation: {scale_aggregation}")
+    if scale_lse_temperature <= 0:
+        raise ValueError("scale_lse_temperature must be positive")
+    if scale_specificity_margin < 0:
+        raise ValueError("scale_specificity_margin cannot be negative")
+    if scale_aggregation == "max":
+        return values.amax(dim=1)
+    if scale_aggregation == "logmeanexp":
+        tau = float(scale_lse_temperature)
+        return (
+            torch.logsumexp(values * tau, dim=1)
+            - torch.log(torch.tensor(float(values.shape[1])))
+        ) / tau
+    maximum = values.amax(dim=1, keepdim=True)
+    eligible = values >= maximum - float(scale_specificity_margin)
+    first = eligible.to(torch.int64).argmax(dim=1, keepdim=True)
+    return torch.gather(values, dim=1, index=first).squeeze(1)
+
+
 def compile_multiscale_scores(
     features_by_scale: torch.Tensor,
     text: torch.Tensor,
@@ -89,23 +121,22 @@ def compile_multiscale_scores(
     peak_mask: torch.Tensor | None = None,
     scale_aggregation: str = "max",
     scale_lse_temperature: float = 10.0,
+    scale_specificity_margin: float = 0.0,
 ) -> torch.Tensor:
     """Compile per-scale descriptors before a fixed query/scale reduction.
 
     A surface has no single privileged physical extent.  Scoring every frozen
     descriptor independently and reducing only the resulting unary preserves
     that ambiguity without learning a benchmark- or query-specific scale
-    selector.  Normalized log-mean-exp is provided as a smoother ablation;
-    ``max`` is the parameter-free default.
+    selector. Normalized log-mean-exp is provided as a smoother ablation.
+    ``specificity`` chooses the first (smallest physical) scale whose score is
+    within a fixed absolute margin of the numerical maximum. A zero margin is
+    exactly equivalent to ``max`` in value.
     """
 
     values = torch.as_tensor(features_by_scale)
     if values.ndim != 3 or values.shape[1] < 1:
         raise ValueError("features_by_scale must be [N,S,D] with at least one scale")
-    if scale_aggregation not in {"max", "logmeanexp"}:
-        raise ValueError(f"unsupported scale aggregation: {scale_aggregation}")
-    if scale_lse_temperature <= 0:
-        raise ValueError("scale_lse_temperature must be positive")
     per_scale = torch.stack([
         compile_scores(
             values[:, index], text, valid,
@@ -114,14 +145,12 @@ def compile_multiscale_scores(
         ).float()
         for index in range(values.shape[1])
     ], dim=1)
-    if scale_aggregation == "max":
-        result = per_scale.amax(dim=1)
-    else:
-        tau = float(scale_lse_temperature)
-        result = (
-            torch.logsumexp(per_scale * tau, dim=1)
-            - torch.log(torch.tensor(float(values.shape[1])))
-        ) / tau
+    result = reduce_multiscale_scores(
+        per_scale,
+        scale_aggregation=scale_aggregation,
+        scale_lse_temperature=scale_lse_temperature,
+        scale_specificity_margin=scale_specificity_margin,
+    )
     mask = torch.as_tensor(valid).bool().cpu()
     result[~mask] = 0.0
     if peak_normalize:
@@ -291,6 +320,7 @@ def build(args: argparse.Namespace) -> dict:
             scale_values, text_embeddings, feature_cache["valid"],
             scale_aggregation=str(args.scale_aggregation),
             scale_lse_temperature=float(args.scale_lse_temperature),
+            scale_specificity_margin=float(args.scale_specificity_margin),
             **compile_kwargs,
         )
         scale_aggregation = str(args.scale_aggregation)
@@ -327,6 +357,7 @@ def build(args: argparse.Namespace) -> dict:
         "scale_aggregation": scale_aggregation,
         "scale_count": scale_count,
         "scale_lse_temperature": float(args.scale_lse_temperature),
+        "scale_specificity_margin": float(args.scale_specificity_margin),
         "peak_domain": str(args.peak_domain),
         "completion": completion,
         "query_names": text_queries,
@@ -383,10 +414,21 @@ def main() -> None:
     parser.add_argument("--canonical-embedding-cache", default="")
     parser.add_argument("--temperature", type=float, default=50.0)
     parser.add_argument(
-        "--scale-aggregation", choices=("max", "logmeanexp"), default="max",
+        "--scale-aggregation",
+        choices=("max", "logmeanexp", "specificity"),
+        default="max",
         help="Fixed query-time reduction over preserved physical region scales",
     )
     parser.add_argument("--scale-lse-temperature", type=float, default=10.0)
+    parser.add_argument(
+        "--scale-specificity-margin",
+        type=float,
+        default=0.0,
+        help=(
+            "For specificity aggregation, choose the first/smallest physical "
+            "scale within this absolute cosine margin of the best scale"
+        ),
+    )
     parser.add_argument(
         "--ignore-multiscale", action="store_true",
         help="Explicit legacy ablation using the cache's pre-averaged descriptor",

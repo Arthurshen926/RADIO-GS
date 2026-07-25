@@ -25,7 +25,14 @@ class SceneSpaceCalibration:
         if matrix.shape[-1] != self.center.numel():
             raise ValueError("calibration feature dimension mismatch")
         transformed = (matrix - self.center) / self.scale
-        return F.normalize(transformed, dim=-1, eps=1e-8)
+        # A primitive exactly at the robust scene centre has a zero centred
+        # vector.  Turning that row into a zero feature would create an
+        # artificial non-comparable node.  Preserve its original normalized
+        # direction instead; this is deterministic and uses no query signal.
+        normalized = F.normalize(transformed, dim=-1, eps=1e-8)
+        fallback = F.normalize(matrix, dim=-1, eps=1e-8)
+        valid = transformed.norm(dim=-1, keepdim=True) > 1e-8
+        return torch.where(valid, normalized, fallback)
 
 
 def deterministic_sample_rows(values: torch.Tensor, count: int) -> torch.Tensor:

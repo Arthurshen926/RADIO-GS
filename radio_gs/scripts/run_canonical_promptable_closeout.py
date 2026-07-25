@@ -42,6 +42,22 @@ def _scene(queue: dict[str, Any], scene_id: str) -> dict[str, Any]:
     return rows[0]
 
 
+def _ply_vertex_count(path: Path) -> int:
+    """Read the declared vertex count without materializing a binary PLY."""
+
+    with path.open("rb") as handle:
+        for _ in range(256):
+            line = handle.readline()
+            if not line:
+                break
+            text = line.decode("ascii", errors="strict").strip()
+            if text.startswith("element vertex "):
+                return int(text.rsplit(" ", 1)[1])
+            if text == "end_header":
+                break
+    raise ValueError(f"PLY lacks an element vertex declaration: {path}")
+
+
 def _run_stage(
     *, name: str, command: list[str], terminal: Path, log_root: Path,
     records: list[dict[str, Any]],
@@ -86,9 +102,27 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "feature_extraction": scene_root / "radio_features" / "frame_manifest.json",
         "feature_field": legacy_field,
     }
+    if geometry_ply.is_file() and int(args.geometry_max_gaussians) > 0:
+        existing_count = _ply_vertex_count(geometry_ply)
+        if existing_count > int(args.geometry_max_gaussians):
+            raise ValueError(
+                f"existing geometry has {existing_count} Gaussians, exceeding "
+                f"the requested fixed budget {int(args.geometry_max_gaussians)}"
+            )
+    geometry_command = list(scene["commands"]["geometry"])
+    if int(args.geometry_max_gaussians) > 0:
+        geometry_command += [
+            "--max-gaussians",
+            str(int(args.geometry_max_gaussians)),
+        ]
+    legacy_commands = {
+        "geometry": geometry_command,
+        "feature_extraction": list(scene["commands"]["feature_extraction"]),
+        "feature_field": list(scene["commands"]["feature_field"]),
+    }
     for name in ("geometry", "feature_extraction", "feature_field"):
         try:
-            _run_stage(name=name, command=list(scene["commands"][name]),
+            _run_stage(name=name, command=legacy_commands[name],
                        terminal=terminals[name], log_root=logs, records=records)
         finally:
             _write_json(status_path, {"scene_id": args.scene_id, "records": records})
@@ -183,8 +217,19 @@ def main() -> None:
     parser.add_argument("--scene-id", required=True)
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--geometry-max-gaussians",
+        type=int,
+        default=0,
+        help=(
+            "Optional fixed, label-free geometry primitive budget forwarded "
+            "to train_colmap_gs; zero preserves the audited queue command."
+        ),
+    )
     parser.add_argument("--stop-after", choices=("legacy", "all"), default="all")
     args = parser.parse_args()
+    if args.geometry_max_gaussians < 0:
+        parser.error("--geometry-max-gaussians cannot be negative")
     print(json.dumps(run(args), indent=2))
 
 

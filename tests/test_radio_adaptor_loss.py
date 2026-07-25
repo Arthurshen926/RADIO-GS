@@ -65,6 +65,25 @@ def test_masked_render_losses_match_identical_visible_capability() -> None:
     assert stats["sam3"]["visible_pairs"].item() == 12
 
 
+def test_masked_render_losses_accept_exact_official_capability_maps() -> None:
+    """A native official map must not be projected a second time as raw RADIO."""
+
+    decoded = torch.randn(1, 4, 3, 3)
+    valid = torch.ones(1, 3, 3, dtype=torch.bool)
+    official_sam = torch.nn.functional.normalize(decoded, dim=1)
+
+    alignment, local, _stats = compute_radio_adaptor_masked_render_losses(
+        decoded,
+        decoded.clone(),
+        {"sam3": IdentityAdaptor()},
+        valid,
+        teacher_capability_maps={"sam3": official_sam},
+    )
+
+    assert alignment.item() < 1e-6
+    assert local.item() < 1e-6
+
+
 def test_masked_render_losses_ignore_unsupported_pixels_and_pairs() -> None:
     target = torch.randn(1, 4, 3, 3)
     decoded = target.clone()

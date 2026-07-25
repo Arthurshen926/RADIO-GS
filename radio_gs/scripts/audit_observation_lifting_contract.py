@@ -11,6 +11,10 @@ from pathlib import Path
 import torch
 
 from radio_gs.field.observation_lifting_contract import (
+    CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+    CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+    CANONICAL_OBSERVATION_CONTRACT_NAME,
     canonical_observation_contract,
     validate_observation_contract_metadata,
 )
@@ -24,13 +28,17 @@ def audit(paths: list[str]) -> dict:
         metadata = dict(payload.get("mpr_cache_metadata", {}))
         declared = "observation_lifting_contract" in metadata
         status = "compatible_legacy"
+        contract_name = ""
+        declared_payload = metadata.get("observation_lifting_contract")
+        if isinstance(declared_payload, dict):
+            contract_name = str(declared_payload.get("name", ""))
         error = ""
         try:
             validate_observation_contract_metadata(
                 metadata, require_declaration=declared
             )
             if declared:
-                status = "declared_canonical_v1"
+                status = "declared_canonical"
         except ValueError as exc:
             status = "incompatible"
             error = str(exc)
@@ -39,6 +47,7 @@ def audit(paths: list[str]) -> dict:
                 "field_checkpoint": str(path.resolve()),
                 "mpr_cache": str(payload.get("mpr_cache", "")),
                 "status": status,
+                "observation_contract": contract_name or None,
                 "error": error,
                 "observed_policy": {
                     key: metadata.get(key)
@@ -60,12 +69,25 @@ def audit(paths: list[str]) -> dict:
     return {
         "schema_version": 1,
         "audit": "canonical_observation_lifting_contract",
-        "expected_contract": canonical_observation_contract(),
+        "accepted_contracts": {
+            CANONICAL_OBSERVATION_CONTRACT_NAME: canonical_observation_contract(
+                CANONICAL_OBSERVATION_CONTRACT_NAME
+            ),
+            CANONICAL_FULL_OBSERVATION_CONTRACT_NAME: canonical_observation_contract(
+                CANONICAL_FULL_OBSERVATION_CONTRACT_NAME
+            ),
+            CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME: canonical_observation_contract(
+                CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME
+            ),
+            CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME: canonical_observation_contract(
+                CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME
+            ),
+        },
         "fields": rows,
         "summary": {
             "total": len(rows),
-            "declared_canonical_v1": sum(
-                row["status"] == "declared_canonical_v1" for row in rows
+            "declared_canonical": sum(
+                row["status"] == "declared_canonical" for row in rows
             ),
             "compatible_legacy": sum(
                 row["status"] == "compatible_legacy" for row in rows

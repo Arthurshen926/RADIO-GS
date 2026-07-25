@@ -195,12 +195,16 @@ def compute_radio_adaptor_masked_render_losses(
     adaptor_weights: Mapping[str, float] | None = None,
     local_radius: int = 1,
     local_balance_quantile: float = 0.0,
+    teacher_capability_maps: Mapping[str, torch.Tensor] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, dict[str, dict[str, torch.Tensor]]]:
     """Preserve official dense capability and local relations after rendering.
 
     The loss is query-free and only supervises pixels supported by rendered
-    alpha.  Frozen official adaptor maps are evaluated on the complete 2-D
-    RADIO grid before visible pixels or local pairs are selected.
+    alpha.  By default frozen official adaptor maps are evaluated on the
+    complete 2-D RADIO grid before visible pixels or local pairs are selected.
+    ``teacher_capability_maps`` optionally supplies those already-evaluated
+    native official maps, which avoids incorrectly applying an adaptor a
+    second time after raw-map interpolation.
     """
 
     if decoded.shape != target.shape or decoded.ndim != 4:
@@ -220,6 +224,12 @@ def compute_radio_adaptor_masked_render_losses(
     missing = sorted(set(requested) - set(adaptors))
     if missing:
         raise ValueError(f"missing requested official adaptors: {missing}")
+    if teacher_capability_maps is not None:
+        missing_teacher = sorted(set(requested) - set(teacher_capability_maps))
+        if missing_teacher:
+            raise ValueError(
+                f"missing requested precomputed official capability maps: {missing_teacher}"
+            )
     if not requested or not bool(valid.any()):
         zero = _zero_like_features(decoded)
         return zero, zero, {}
@@ -231,8 +241,22 @@ def compute_radio_adaptor_masked_render_losses(
     for name, weight in requested.items():
         adaptor = adaptors[name]
         predicted = project_feature_map_with_adaptor(decoded, adaptor)
-        with torch.no_grad():
-            teacher = project_feature_map_with_adaptor(target, adaptor)
+        if teacher_capability_maps is None:
+            with torch.no_grad():
+                teacher = project_feature_map_with_adaptor(target, adaptor)
+        else:
+            with torch.no_grad():
+                teacher = F.normalize(
+                    torch.as_tensor(teacher_capability_maps[name])
+                    .to(device=predicted.device, dtype=predicted.dtype),
+                    dim=1,
+                    eps=1e-8,
+                )
+            if teacher.shape != predicted.shape:
+                raise ValueError(
+                    f"precomputed {name} capability map does not match rendered map: "
+                    f"{tuple(teacher.shape)} vs {tuple(predicted.shape)}"
+                )
         cosine = (predicted.float() * teacher.float()).sum(dim=1)
         alignment = 1.0 - cosine[valid].mean()
         predicted_relation = _masked_local_affinity_values(
