@@ -467,6 +467,15 @@ def run(args: argparse.Namespace) -> dict:
                     score_calibration=args.score_calibration,
                     score_tanh_scale=args.score_tanh_scale,
                     score_chunk_size=args.score_chunk_size,
+                    negative_spatial_mode=str(
+                        getattr(args, "negative_spatial_mode", "none")
+                    ),
+                    negative_spatial_steps=int(
+                        getattr(args, "negative_spatial_steps", 4)
+                    ),
+                    negative_spatial_decay=float(
+                        getattr(args, "negative_spatial_decay", 0.8)
+                    ),
                 ),
                 solver_config=SupportSolverConfig(
                     iterations=args.solver_iterations,
@@ -481,6 +490,9 @@ def run(args: argparse.Namespace) -> dict:
                 graph_policy=args.graph_policy,
                 component_graph_policy=args.component_graph_policy,
                 graph_legacy_residual=args.graph_legacy_residual,
+                channel_confidence_mode=str(
+                    getattr(args, "channel_confidence_mode", "none")
+                ),
                 node_reliability=(
                     primitive_reliability.valid_confidence().to(device)
                     if primitive_reliability is not None
@@ -728,6 +740,20 @@ def run(args: argparse.Namespace) -> dict:
                 "graph_policy": args.graph_policy,
                 "component_graph_policy": args.component_graph_policy,
                 "graph_legacy_residual": float(args.graph_legacy_residual),
+                "channel_confidence_mode": str(
+                    getattr(args, "channel_confidence_mode", "none")
+                ),
+                "negative_spatial_mode": str(
+                    getattr(args, "negative_spatial_mode", "none")
+                ),
+                "negative_spatial_steps": int(
+                    getattr(args, "negative_spatial_steps", 4)
+                ),
+                "negative_spatial_decay": float(
+                    getattr(args, "negative_spatial_decay", 0.8)
+                ),
+                "spatial_log_weight": 0.25,
+                "spatial_floor": 0.01,
                 "feature_calibration": args.feature_calibration,
                 "background_centroids": int(args.background_centroids),
                 "calibration_sample_size": int(args.calibration_sample_size),
@@ -898,6 +924,22 @@ def main() -> None:
         default="same",
     )
     parser.add_argument("--graph-legacy-residual", type=float, default=0.0)
+    parser.add_argument(
+        "--channel-confidence-mode",
+        choices=("none", "affinity_mass", "max_affinity"),
+        default="none",
+        help=(
+            "optional label-free capability abstention; confidence modes keep "
+            "unary evidence through a self loop when all neighbour relations are weak"
+        ),
+    )
+    parser.add_argument(
+        "--negative-spatial-mode",
+        choices=("none", "truncated_graph_decay", "signed_geodesic"),
+        default="none",
+    )
+    parser.add_argument("--negative-spatial-steps", type=int, default=4)
+    parser.add_argument("--negative-spatial-decay", type=float, default=0.8)
     parser.add_argument("--canonical-field-sha256", default="")
     parser.add_argument("--appearance-weight", type=float, default=1.0)
     parser.add_argument("--boundary-weight", type=float, default=0.35)

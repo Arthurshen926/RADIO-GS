@@ -8,6 +8,7 @@ from radio_gs.querying.query_spec import (
     QuerySpec,
     RegistrationMode,
     SelectionMode,
+    SoftSeedGroups,
     SoftSeedSet,
 )
 from radio_gs.querying.support_solver import (
@@ -17,6 +18,7 @@ from radio_gs.querying.support_solver import (
     _hard_seed_masks,
     build_primitive_support_graph,
     graph_for_query_intent,
+    graph_local_seed_influence,
     mix_support_graph_channels,
     normalized_laplacian_affinity,
     query_conditioned_laplacian_affinity,
@@ -37,6 +39,47 @@ def test_confidence_aware_weight_uses_evidence_not_task_name():
     ) > confidence_aware_laplacian_weight(
         confident, positive, negative, base_weight=1.0
     )
+
+
+def test_confidence_aware_weight_decreases_with_seed_separation():
+    """Reliable signed query evidence should need less graph correction."""
+
+    from radio_gs.querying.support_solver import confidence_aware_laplacian_weight
+
+    prior = torch.tensor([0.80, 0.70, 0.55, 0.45, 0.30, 0.20])
+    positive = torch.tensor([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+    aligned_negative = torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
+    contradictory_negative = torch.tensor([0.0, 1.0, 0.0, 0.0, 0.0, 0.0])
+
+    aligned = confidence_aware_laplacian_weight(
+        prior, positive, aligned_negative, base_weight=1.0
+    )
+    contradictory = confidence_aware_laplacian_weight(
+        prior, positive, contradictory_negative, base_weight=1.0
+    )
+    assert aligned < contradictory
+
+
+def test_confidence_aware_weight_ignores_confident_background_majority():
+    """Adding easy background must not suppress support-boundary ambiguity."""
+
+    from radio_gs.querying.support_solver import confidence_aware_laplacian_weight
+
+    candidate = torch.tensor([0.55, 0.52, 0.48, 0.45])
+    background = torch.full((100,), 0.001)
+    no_seeds = torch.zeros(candidate.numel())
+    padded_seeds = torch.zeros(candidate.numel() + background.numel())
+
+    candidate_weight = confidence_aware_laplacian_weight(
+        candidate, no_seeds, no_seeds, base_weight=1.0
+    )
+    padded_weight = confidence_aware_laplacian_weight(
+        torch.cat([candidate, background]),
+        padded_seeds,
+        padded_seeds,
+        base_weight=1.0,
+    )
+    assert padded_weight > 0.5 * candidate_weight
 
 
 def _two_clusters():
@@ -95,6 +138,129 @@ def test_multichannel_mixture_is_normalized_and_typed():
         legacy_residual=1.0,
     )
     torch.testing.assert_close(legacy_endpoint.edge_weight, graph.edge_weight)
+
+
+def test_max_affinity_abstention_adds_self_loops_for_unreliable_channels():
+    """A uniformly implausible capability must not be normalized into a vote."""
+
+    graph = build_primitive_support_graph(
+        torch.tensor(
+            [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]
+        ),
+        config=SupportGraphConfig(neighbors=1),
+    )
+    # Preserve the query-independent topology but emulate a capability whose
+    # every relation is untrustworthy.  Historical row normalization would
+    # nevertheless give the least-bad neighbour all transition mass.
+    weak = torch.full_like(graph.edge_weight, 1e-6)
+    graph = type(graph)(
+        edge_index=graph.edge_index,
+        edge_weight=graph.edge_weight,
+        raw_affinity=graph.raw_affinity,
+        local_sigma=graph.local_sigma,
+        num_nodes=graph.num_nodes,
+        edge_channels={"weak": weak},
+    )
+
+    mixed = mix_support_graph_channels(
+        graph,
+        {"weak": 1.0},
+        channel_confidence_mode="max_affinity",
+    )
+    row, col = mixed.edge_index
+    self_loop = row == col
+    assert int(self_loop.sum()) == graph.num_nodes
+    self_probability = torch.zeros(graph.num_nodes)
+    self_probability.index_add_(
+        0, row[self_loop], mixed.edge_weight[self_loop]
+    )
+    assert bool((self_probability > 0.999).all())
+    row_sum = torch.zeros(graph.num_nodes)
+    row_sum.index_add_(0, row, mixed.edge_weight)
+    torch.testing.assert_close(row_sum, torch.ones_like(row_sum), atol=1e-6, rtol=0)
+
+
+def test_max_affinity_abstention_preserves_reliable_neighbour_flow():
+    graph = build_primitive_support_graph(
+        torch.tensor(
+            [[0.0, 0.0, 0.0], [0.01, 0.0, 0.0], [0.02, 0.0, 0.0]]
+        ),
+        config=SupportGraphConfig(neighbors=2),
+    )
+    reliable = torch.ones_like(graph.edge_weight)
+    graph = type(graph)(
+        edge_index=graph.edge_index,
+        edge_weight=graph.edge_weight,
+        raw_affinity=graph.raw_affinity,
+        local_sigma=graph.local_sigma,
+        num_nodes=graph.num_nodes,
+        edge_channels={"reliable": reliable},
+    )
+
+    mixed = mix_support_graph_channels(
+        graph,
+        {"reliable": 1.0},
+        channel_confidence_mode="max_affinity",
+    )
+    row, col = mixed.edge_index
+    self_loop = row == col
+    self_probability = torch.zeros(graph.num_nodes)
+    self_probability.index_add_(
+        0, row[self_loop], mixed.edge_weight[self_loop]
+    )
+    assert bool((self_probability < 1e-6).all())
+
+
+def test_graph_local_seed_influence_has_a_fixed_topological_horizon():
+    points = torch.tensor(
+        [[float(index), 0.0, 0.0] for index in range(6)]
+    )
+    graph = build_primitive_support_graph(
+        points,
+        config=SupportGraphConfig(
+            neighbors=1,
+            topology_mode="symmetric_union",
+        ),
+    )
+    seed = torch.zeros(6)
+    seed[0] = 1.0
+    influence = graph_local_seed_influence(
+        graph,
+        seed,
+        steps=2,
+        decay=0.8,
+    )
+    assert influence[0] == 1.0
+    assert influence[1] > 0
+    assert influence[2] > 0
+    assert torch.equal(influence[3:], torch.zeros(3))
+
+
+def test_graph_local_seed_influence_preserves_independent_click_columns():
+    points = torch.tensor(
+        [[float(index), 0.0, 0.0] for index in range(6)]
+    )
+    graph = build_primitive_support_graph(
+        points,
+        config=SupportGraphConfig(
+            neighbors=1,
+            topology_mode="symmetric_union",
+        ),
+    )
+    seeds = torch.zeros(6, 2)
+    seeds[0, 0] = 1.0
+    seeds[5, 1] = 1.0
+    influence = graph_local_seed_influence(
+        graph,
+        seeds,
+        steps=1,
+        decay=0.8,
+    )
+    assert influence.shape == (6, 2)
+    assert influence[0, 0] == 1.0 and influence[5, 1] == 1.0
+    assert influence[1, 0] > 0 and influence[4, 1] > 0
+    assert torch.equal(influence[:4, 1], torch.zeros(4))
+    assert torch.equal(influence[2:, 0], torch.zeros(4))
 
 
 def test_typed_instance_graph_uses_unoriented_surface_normals_when_available():
@@ -172,6 +338,29 @@ def test_surface_tangent_relation_rejects_parallel_layer_shortcuts():
     assert tangent[index[(0, 2)]] < 0.01
 
 
+def test_surface_topology_filter_removes_parallel_layer_shortcuts():
+    points = torch.tensor(
+        [
+            [0.00, 0.0, 0.00],
+            [0.04, 0.0, 0.00],
+            [0.00, 0.0, 0.04],
+        ]
+    )
+    graph = build_primitive_support_graph(
+        points,
+        normals=torch.tensor([[0.0, 0.0, 1.0]] * len(points)),
+        normal_reliability=torch.ones(len(points)),
+        config=SupportGraphConfig(
+            neighbors=2,
+            surface_tangent_relation=True,
+            surface_topology_min_affinity=0.5,
+        ),
+    )
+    edges = {tuple(edge) for edge in graph.edge_index.T.tolist()}
+    assert (0, 1) in edges and (1, 0) in edges
+    assert (0, 2) not in edges and (2, 0) not in edges
+
+
 def test_surface_tangent_becomes_neutral_when_local_normals_are_unreliable():
     points = torch.tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.04]])
     graph = build_primitive_support_graph(
@@ -219,6 +408,26 @@ def test_typed_instance_graph_uses_query_free_covisibility_when_available():
         },
     )
     torch.testing.assert_close(typed.edge_weight, expected.edge_weight)
+
+
+def test_covisibility_topology_filter_requires_a_shared_training_view():
+    points = torch.tensor(
+        [[0.00, 0.0, 0.0], [0.04, 0.0, 0.0], [0.08, 0.0, 0.0]]
+    )
+    visibility = torch.tensor(
+        [[1, 0], [1, 0], [0, 1]],
+        dtype=torch.bool,
+    )
+    graph = build_primitive_support_graph(
+        points,
+        view_observations=visibility,
+        config=SupportGraphConfig(
+            neighbors=2,
+            require_covisibility_topology=True,
+        ),
+    )
+    edges = {tuple(edge) for edge in graph.edge_index.T.tolist()}
+    assert edges == {(0, 1), (1, 0)}
 
 
 def test_mutual_knn_topology_is_a_symmetric_subset_of_union():
@@ -289,6 +498,59 @@ def test_seeded_bfs_fast_path_matches_full_component_labels():
         if bool((positive.weights[labels == component] >= config.seeded_component_min_weight).any()):
             expected |= labels == component
     torch.testing.assert_close(actual.cpu(), expected)
+
+
+def test_min_seed_cover_uses_fewest_clean_components_and_excludes_negative_seed():
+    graph = build_primitive_support_graph(
+        _two_clusters(), config=SupportGraphConfig(neighbors=2)
+    )
+    probabilities = torch.full((6,), 0.9)
+    positive_groups = SoftSeedGroups(
+        torch.tensor(
+            [
+                [1.0, 0.0],
+                [0.0, 1.0],
+                [0.0, 0.0],
+                [1.0, 0.0],
+                [0.0, 0.0],
+                [0.0, 0.0],
+            ]
+        ),
+        "two_clicks",
+    )
+    negative = SoftSeedSet(torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 1.0]), "negative")
+    selected = select_support_components(
+        graph,
+        probabilities,
+        SelectionMode.MIN_SEED_COVER,
+        positive_seed_groups=positive_groups,
+        negative_seeds=negative,
+        config=SupportSolverConfig(support_threshold=0.5),
+    )
+    # The first component alone covers both positive groups.  The second also
+    # touches group zero, but is rejected because it contains a negative seed.
+    torch.testing.assert_close(
+        selected.cpu(), torch.tensor([True, True, True, False, False, False])
+    )
+
+
+def test_min_seed_cover_abstains_when_a_positive_group_has_no_clean_active_component():
+    graph = build_primitive_support_graph(
+        _two_clusters(), config=SupportGraphConfig(neighbors=2)
+    )
+    groups = SoftSeedGroups(
+        torch.tensor([[1.0], [0.0], [0.0], [0.0], [0.0], [0.0]]), "click"
+    )
+    negative = SoftSeedSet(torch.tensor([0.0, 1.0, 0.0, 0.0, 0.0, 0.0]), "negative")
+    selected = select_support_components(
+        graph,
+        torch.full((6,), 0.9),
+        SelectionMode.MIN_SEED_COVER,
+        positive_seed_groups=groups,
+        negative_seeds=negative,
+        config=SupportSolverConfig(support_threshold=0.5),
+    )
+    assert not bool(selected.any())
 
 
 def test_random_walker_enforces_positive_and_negative_seeds_exactly():

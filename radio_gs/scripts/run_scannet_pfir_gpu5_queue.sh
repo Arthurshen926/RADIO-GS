@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$REPO_ROOT"
 
 GPU="${GPU:-5}"
-FIELD_ROOT="${FIELD_ROOT:-/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/field_only_test_v1}"
+FIELD_ROOT="${FIELD_ROOT:-/mnt/pool/sqy/3d_understanding/ScanNet-PFIR-Small/field_only_test_v1}"
 PFIR_MATERIALIZATION_REPORT="${PFIR_MATERIALIZATION_REPORT:-$FIELD_ROOT/materialization_report.json}"
 RUN_ROOT="${RUN_ROOT:-output/scannet_pfir_small_v1/test_v1_final/reconstruction_v1}"
 GEOMETRY_ROOT="${GEOMETRY_ROOT:-$RUN_ROOT/geometry}"
@@ -367,7 +367,37 @@ for scene in "${SCENES[@]}"; do
       --print-csv
   )"
 
-  if [[ ! -s "$config" || ! -s "$checkpoint" ]]; then
+  render_contract_current=0
+  if [[ -s "$config" && -s "$checkpoint" ]] && \
+    CONFIG="$config" SCENE_ROOT="$scene_root" FEATURE_DIR="$feature_dir" \
+      bash radio_gs/scripts/run_repo_python.sh - <<'PY'
+import os
+from pathlib import Path
+
+import yaml
+
+config = yaml.safe_load(Path(os.environ["CONFIG"]).read_text(encoding="utf-8"))
+scene_root = Path(os.environ["SCENE_ROOT"]).resolve()
+feature_dir = Path(os.environ["FEATURE_DIR"]).resolve()
+expected = {
+    "scene_root": scene_root,
+    "feature_dir": feature_dir,
+    "rgb_dir": scene_root / "color",
+    "depth_dir": scene_root / "depth",
+    "pose_dir": scene_root / "pose",
+    "val_rgb_dir": scene_root / "color",
+    "val_depth_dir": scene_root / "depth",
+    "val_pose_dir": scene_root / "pose",
+}
+for key, path in expected.items():
+    configured = str(config.get(key, "") or "").strip()
+    if not configured or Path(configured).resolve() != path or not path.exists():
+        raise SystemExit(f"stale render contract path {key}: {configured!r} != {path}")
+PY
+  then
+    render_contract_current=1
+  fi
+  if (( ! render_contract_current )); then
     bash radio_gs/scripts/run_repo_python.sh \
       radio_gs/scripts/build_geometry_render_contract.py \
       --ply-path "$ply" \

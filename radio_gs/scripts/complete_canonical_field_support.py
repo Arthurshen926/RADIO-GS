@@ -123,6 +123,62 @@ def initialize_completion_local_codes(
     return mode
 
 
+@torch.no_grad()
+def initialize_completion_from_primary_codes(
+    field,
+    *,
+    xyz: torch.Tensor,
+    target_features: torch.Tensor,
+    fallback_rows: torch.Tensor,
+    primary_rows: torch.Tensor,
+    spatial_neighbors: int = 16,
+) -> str:
+    """Put fallback rows on the frozen field's learned local-code manifold.
+
+    In a compact field with a nonlinear residual fusion module, inverting only
+    the affine base projection can produce extreme out-of-manifold codes.  For
+    every newly observed primitive, select the most target-compatible code
+    among its spatially nearest authoritative primitives.  Both geometry and
+    RADIO targets come from the query-free reconstruction contract.
+    """
+
+    from scipy.spatial import cKDTree
+
+    fallback = torch.as_tensor(fallback_rows).long().cpu()
+    primary = torch.as_tensor(primary_rows).long().cpu()
+    points = torch.as_tensor(xyz).float().cpu()
+    targets = torch.as_tensor(target_features).float().cpu()
+    if fallback.numel() == 0 or primary.numel() == 0:
+        raise ValueError("primary-code initialization requires both row sets")
+    if points.ndim != 2 or points.shape[1] != 3:
+        raise ValueError("completion xyz must be [N,3]")
+    if targets.ndim != 2 or targets.shape[0] != points.shape[0]:
+        raise ValueError("completion targets must align with xyz")
+
+    k = min(max(1, int(spatial_neighbors)), int(primary.numel()))
+    tree = cKDTree(points[primary].numpy())
+    _distance, neighbor_slots = tree.query(points[fallback].numpy(), k=k)
+    neighbor_slots = np.asarray(neighbor_slots)
+    if neighbor_slots.ndim == 1:
+        neighbor_slots = neighbor_slots[:, None]
+    candidate_rows = primary[torch.from_numpy(neighbor_slots).long()]
+    candidate_targets = targets[candidate_rows]
+    query_targets = targets[fallback, None, :]
+    affinity = torch.nn.functional.cosine_similarity(
+        candidate_targets, query_targets, dim=-1
+    )
+    selected_rows = candidate_rows[
+        torch.arange(fallback.numel()), affinity.argmax(dim=1)
+    ]
+    source_codes = field.local_codes.detach().cpu()[selected_rows]
+    field.local_codes.index_copy_(
+        0,
+        fallback.to(field.local_codes.device),
+        source_codes.to(field.local_codes),
+    )
+    return f"spatial_knn{k}_target_affinity_primary_code"
+
+
 def complete(args: argparse.Namespace) -> dict:
     torch.manual_seed(int(args.seed))
     if torch.cuda.is_available():
@@ -185,11 +241,21 @@ def complete(args: argparse.Namespace) -> dict:
         resumed_epochs = len(previous_history)
         initialization_mode = "resume_fallback_local_codes"
     else:
-        initialization_mode = initialize_completion_local_codes(
-            field,
-            consensus.targets[fallback_rows],
-            fallback_rows,
-        )
+        if field.fusion is None:
+            initialization_mode = initialize_completion_local_codes(
+                field,
+                consensus.targets[fallback_rows],
+                fallback_rows,
+            )
+        else:
+            initialization_mode = initialize_completion_from_primary_codes(
+                field,
+                xyz=xyz,
+                target_features=consensus.targets,
+                fallback_rows=fallback_rows,
+                primary_rows=primary_rows,
+                spatial_neighbors=int(args.initialization_spatial_neighbors),
+            )
 
     old_reliability = field.reliability.detach().float().cpu()
     new_reliability = consensus.reliability.float().cpu()
@@ -378,6 +444,7 @@ def main() -> None:
     parser.add_argument("--sam3-weight", type=float, default=0.20)
     parser.add_argument("--coefficient-weight", type=float, default=1e-5)
     parser.add_argument("--primary-audit-rows", type=int, default=4096)
+    parser.add_argument("--initialization-spatial-neighbors", type=int, default=16)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
     print(json.dumps(complete(args), indent=2))

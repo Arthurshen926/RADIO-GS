@@ -287,6 +287,8 @@ def run(args: argparse.Namespace) -> dict:
         "official_dino_v3_7b_spatial": True,
         "custom_image_head": False,
         "semantic_alignment_level": 3,
+        "query_intent": query.intent.value,
+        "selection_mode": query.selection_mode.value,
         "query_signatures": {
             "semantic": semantic_query_signature.to_dict(),
             "appearance": appearance_query_signature.to_dict(),

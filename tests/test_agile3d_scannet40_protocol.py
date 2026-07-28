@@ -11,6 +11,7 @@ from radio_gs.benchmarks.agile3d_scannet40.protocol import (
     Click,
     aggregate_official_metrics,
     evaluate_interactive_predictions,
+    interaction_health_metrics,
     quantize_scannet_points,
     select_next_click,
 )
@@ -21,6 +22,7 @@ from radio_gs.benchmarks.agile3d_scannet40.evaluate_feature_cache import (
 import radio_gs.benchmarks.agile3d_scannet40.evaluate_canonical_field as canonical_evaluator
 from radio_gs.benchmarks.agile3d_scannet40.evaluate_canonical_field import (
     CanonicalFieldPointPredictor,
+    constrain_released_click_scores,
     _gaussian_covariances,
     _read_official_geometry,
     evaluate,
@@ -41,6 +43,7 @@ from radio_gs.field.observation_lifting_contract import (
     canonical_observation_contract,
     observation_contract_sha256,
 )
+from radio_gs.querying.query_spec import SelectionMode
 from radio_gs.querying.support_solver import SupportGraphConfig, SupportSolverConfig
 from radio_gs.querying.support_solver import build_primitive_support_graph
 from radio_gs.scripts.export_canonical_field_to_agile3d_mesh import (
@@ -59,6 +62,32 @@ def _canonical_signature(name: str, dim: int) -> FeatureSpaceSignature:
         token_type="primitive",
         field_checkpoint_sha256="field-hash",
     )
+
+
+def test_released_click_score_constraint_is_opt_in_and_local() -> None:
+    scores = torch.tensor([0.2, 0.3, 0.8, 0.7])
+    unchanged = constrain_released_click_scores(
+        scores, positive_indices=[1], negative_indices=[2], mode="none"
+    )
+    constrained = constrain_released_click_scores(
+        scores,
+        positive_indices=[1],
+        negative_indices=[2],
+        mode="click_score_clamp",
+    )
+    assert torch.equal(unchanged, scores)
+    assert torch.equal(constrained, torch.tensor([0.2, 1.0, 0.0, 0.7]))
+    assert torch.equal(scores, torch.tensor([0.2, 0.3, 0.8, 0.7]))
+
+
+def test_released_click_score_constraint_rejects_conflicting_signs() -> None:
+    with pytest.raises(ValueError, match="conflicting"):
+        constrain_released_click_scores(
+            torch.zeros(3),
+            positive_indices=[1],
+            negative_indices=[1],
+            mode="click_score_clamp",
+        )
 
 
 def test_quantization_reconstructs_full_rows() -> None:
@@ -311,8 +340,93 @@ def test_interaction_forces_clicked_labels_and_aggregates_metrics() -> None:
         max_clicks=20,
     )
     assert result["trajectory"][1] > 0
+    assert set(result["seed_satisfaction"][1]) == {
+        "positive",
+        "negative",
+        "all",
+    }
+    # The inert predictor misses each newly placed click before the official
+    # evaluator overwrite, so this exposes method-side constraint failures
+    # without changing the benchmark trajectory.
+    assert result["seed_satisfaction"][1]["positive"] == 0.0
     metrics = aggregate_official_metrics([result["trajectory"]])
     assert set(("IoU@1", "IoU@15", "NoC@50", "NoC@90")) <= set(metrics)
+
+
+def test_interaction_records_label_free_stages_before_protocol_overwrite() -> None:
+    xyz = np.column_stack([np.arange(5), np.zeros((5, 2))]).astype(np.float32)
+    target = np.array([0, 1, 1, 1, 0], dtype=bool)
+
+    class DiagnosticPredictor:
+        last_seed_satisfaction_stages = {}
+
+        def __call__(self, _xyz, previous, clicks):
+            self.last_seed_satisfaction_stages = {
+                "primitive_solver": {
+                    "positive": 0.5,
+                    "negative": None,
+                    "all": 0.5,
+                },
+                "official_continuous_readout": {
+                    "positive": 0.0,
+                    "negative": None,
+                    "all": 0.0,
+                },
+                "post_selection_pre_overwrite": {
+                    "positive": 0.0,
+                    "negative": None,
+                    "all": 0.0,
+                },
+            }
+            return previous
+
+    result = evaluate_interactive_predictions(
+        xyz,
+        target,
+        target,
+        np.arange(5),
+        DiagnosticPredictor(),
+        max_clicks=1,
+    )
+    stages = result["seed_satisfaction_stages"][1]
+    assert stages["primitive_solver"]["positive"] == 0.5
+    assert stages["official_continuous_readout"]["positive"] == 0.0
+    assert stages["post_selection_pre_overwrite"]["positive"] == 0.0
+    assert stages["protocol_overwrite"]["positive"] == 1.0
+
+
+def test_interaction_health_reports_click_monotonicity_and_regression_size() -> None:
+    healthy = {step: 0.1 + 0.01 * step for step in range(1, 21)}
+    regressing = dict(healthy)
+    regressing[6] = regressing[5] - 0.20
+    report = interaction_health_metrics([healthy, regressing], max_clicks=20)
+    assert report["trajectory_count"] == 2
+    assert report["transition_count"] == 38
+    assert report["monotonic_trajectory_fraction"] == pytest.approx(0.5)
+    assert report["monotonic_transition_fraction"] == pytest.approx(37 / 38)
+    assert report["mean_regression_magnitude"] == pytest.approx(0.20)
+
+
+def test_interaction_health_aggregates_pre_overwrite_seed_satisfaction() -> None:
+    trajectory = {step: 0.1 + 0.01 * step for step in range(1, 21)}
+    satisfaction = {
+        step: {
+            "positive": 1.0,
+            "negative": None if step == 1 else 0.75,
+            "all": 1.0 if step == 1 else 0.875,
+        }
+        for step in range(1, 21)
+    }
+    report = interaction_health_metrics(
+        [trajectory],
+        seed_satisfaction=[satisfaction],
+        max_clicks=20,
+    )
+    assert report["positive_seed_satisfaction"] == 1.0
+    assert report["negative_seed_satisfaction"] == pytest.approx(0.75)
+    assert report["all_seed_satisfaction"] == pytest.approx(
+        (1.0 + 19 * 0.875) / 20
+    )
 
 
 def test_canonical_predictor_hard_clamps_positive_and_negative_clicks() -> None:
@@ -387,10 +501,69 @@ def test_canonical_field_predictor_uses_standard_world_query_without_observation
 
     assert prediction[0]
     assert not prediction[2]
+    assert set(predictor.last_seed_satisfaction_stages) == {
+        "primitive_solver",
+        "official_continuous_readout",
+        "post_selection_pre_overwrite",
+    }
+    for stage in predictor.last_seed_satisfaction_stages.values():
+        assert set(stage) == {"positive", "negative", "all"}
     report = predictor.protocol_report()
     assert report["observation_lift"] == "none"
     assert report["labels_opened"] is False
     assert report["primitive_reliability_applied"] is False
+
+
+def test_canonical_field_click_constraint_survives_readout_support_gate() -> None:
+    xyz = np.array(
+        [[0.00, 0.0, 0.0], [0.05, 0.0, 0.0], [0.10, 0.0, 0.0]],
+        dtype=np.float32,
+    )
+    features = torch.tensor([[1.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
+    graph = build_primitive_support_graph(
+        torch.from_numpy(xyz),
+        appearance_features=features,
+        boundary_features=features,
+        config=SupportGraphConfig(neighbors=2),
+    )
+    predictor = CanonicalFieldPointPredictor(
+        gaussian_xyz=torch.from_numpy(xyz),
+        gaussian_covariance=torch.eye(3).repeat(3, 1, 1) * 0.0001,
+        gaussian_precision=torch.eye(3).repeat(3, 1, 1) * 10000.0,
+        gaussian_opacity=torch.ones(3),
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_canonical_signature("dino", 2),
+        boundary_signature=_canonical_signature("sam3", 2),
+        graph=graph,
+        official_xyz=xyz,
+        device="cpu",
+        solver_config=SupportSolverConfig(
+            solver_type="random_walker", cg_iterations=16
+        ),
+        readout_candidate_k=3,
+        readout_support_threshold=1e9,
+        point_readout_constraint="click_score_clamp",
+    )
+    prediction = predictor(
+        xyz,
+        np.zeros(len(xyz), dtype=bool),
+        (Click(point_index=0, is_positive=True, order=0),),
+    )
+    assert prediction[0]
+    assert predictor.last_seed_satisfaction_stages[
+        "post_selection_pre_overwrite"
+    ]["all"] == 1.0
+    assert predictor.protocol_report()["point_readout_constraint"] == "click_score_clamp"
+    with pytest.raises(ValueError, match="conflicting"):
+        predictor(
+            xyz,
+            prediction,
+            (
+                Click(point_index=1, is_positive=True, order=0),
+                Click(point_index=1, is_positive=False, order=1),
+            ),
+        )
 
 
 def test_full_observation_contract_rejects_sparse_frames25k_source() -> None:
@@ -821,6 +994,34 @@ def test_canonical_reader_can_hard_anchor_only_the_best_gaussian() -> None:
     assert report["hard_seed_conflict_policy"] == "positive_priority"
     assert report["hard_seed_conflict_margin"] == 0.0
     assert report["world_point_prototype_mode"] == "per_click_local"
+
+
+def test_canonical_reader_reports_explicit_min_seed_cover_variant() -> None:
+    xyz = np.array([[0.0, 0.0, 0.0]], dtype=np.float32)
+    features = torch.tensor([[1.0, 0.0]])
+    graph = build_primitive_support_graph(
+        torch.from_numpy(xyz),
+        appearance_features=features,
+        boundary_features=features,
+        config=SupportGraphConfig(neighbors=1),
+    )
+    predictor = CanonicalFieldPointPredictor(
+        gaussian_xyz=torch.from_numpy(xyz),
+        gaussian_covariance=torch.eye(3)[None] * 0.001,
+        gaussian_precision=torch.eye(3)[None] * 1000.0,
+        gaussian_opacity=torch.ones(1),
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_canonical_signature("dino", 2),
+        boundary_signature=_canonical_signature("sam3", 2),
+        graph=graph,
+        official_xyz=xyz,
+        device="cpu",
+        solver_config=SupportSolverConfig(solver_type="random_walker", cg_iterations=8),
+        readout_candidate_k=1,
+        selection_mode=SelectionMode.MIN_SEED_COVER,
+    )
+    assert predictor.protocol_report()["selection_mode"] == "min_seed_cover"
 
 
 def test_observed_domain_is_exactly_legacy_when_every_row_is_observed() -> None:

@@ -386,7 +386,13 @@ def build(args: argparse.Namespace) -> dict:
         normal_temperature=float(args.normal_temperature),
         surface_tangent_temperature=float(args.surface_tangent_temperature),
         surface_tangent_relation=surface_relation == "local_pca_tangent_v1",
+        surface_topology_min_affinity=float(
+            args.surface_topology_min_affinity
+        ),
         covisibility_weight=float(args.covisibility_weight),
+        require_covisibility_topology=bool(
+            args.require_covisibility_topology
+        ),
         affinity_chunk_size=int(args.affinity_chunk_size),
         topology_mode=str(args.topology_mode),
     )
@@ -514,6 +520,15 @@ def main() -> None:
     parser.add_argument("--surface-normal-batch-size", type=int, default=8192)
     parser.add_argument("--surface-normal-min-planarity", type=float, default=0.0)
     parser.add_argument(
+        "--surface-topology-min-affinity",
+        type=float,
+        default=0.0,
+        help=(
+            "optional query-free hard topology filter on local tangent "
+            "continuity; zero preserves the historical relation-only graph"
+        ),
+    )
+    parser.add_argument(
         "--responsibility-cache",
         default="",
         help=(
@@ -526,6 +541,14 @@ def main() -> None:
         type=float,
         default=0.25,
         help="fixed Jaccard relation strength used only when --responsibility-cache is set",
+    )
+    parser.add_argument(
+        "--require-covisibility-topology",
+        action="store_true",
+        help=(
+            "retain an edge only when its primitives share at least one "
+            "registered source view"
+        ),
     )
     parser.add_argument("--affinity-dim", type=int, default=256)
     parser.add_argument("--hash-batch-size", type=int, default=8192)

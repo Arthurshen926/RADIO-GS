@@ -28,6 +28,8 @@ from radio_gs.benchmarks.scannet_pfpr.score_dino_center import (
     validate_pfpr_observation_contract,
 )
 from radio_gs.benchmarks.scannet_pfpr.score_dino_center import (
+    _fuse_query_prototype_scores,
+    _vector_candidate_similarity,
     sample_spatial_descriptor_at_pixels,
 )
 from radio_gs.benchmarks.scannet_pfpr.audit_geometry_support import (
@@ -232,6 +234,105 @@ def test_pfpr_center_token_uses_only_the_anchor_aligned_spatial_token() -> None:
     )
 
 
+def test_pfpr_fixed_late_fusion_keeps_a_strong_prototype_without_metric_selection() -> None:
+    scores = torch.tensor([[0.9, 0.1], [0.2, 0.8]])
+    fused = _fuse_query_prototype_scores(scores, temperature=0.1)
+    assert fused[0] > fused[1]
+    assert 0.8 < float(fused[0]) < 0.9
+
+
+def test_pfpr_vector_readout_normalizes_after_interpolation() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
+    covariance = torch.eye(3).repeat(2, 1, 1)
+    precision = covariance.clone()
+    field = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    query = torch.tensor([1.0, 0.0])
+    points = torch.tensor([[0.0, 0.0, 0.0]])
+    indices = torch.tensor([[0, 1]], dtype=torch.long)
+    score = _vector_candidate_similarity(
+        xyz,
+        covariance,
+        field,
+        query,
+        points,
+        precision=precision,
+        opacity=torch.ones(2),
+        candidate_indices=indices,
+        coherence_sqrt=False,
+    )
+    torch.testing.assert_close(
+        score, torch.tensor([1.0 / np.sqrt(2.0)], dtype=torch.float32)
+    )
+
+
+def test_pfpr_interleaved_coarse_to_fine_preserves_top1_and_refines_regions() -> None:
+    xyz = np.asarray(
+        [
+            [0.00, 0.0, 0.0],
+            [0.05, 0.0, 0.0],
+            [1.00, 0.0, 0.0],
+            [1.05, 0.0, 0.0],
+            [2.00, 0.0, 0.0],
+        ],
+        dtype=np.float32,
+    )
+    fine = np.asarray([0.95, 0.90, 0.20, 0.80, 0.10], dtype=np.float32)
+    coarse = np.asarray([0.40, 0.30, 0.99, 0.98, 0.10], dtype=np.float32)
+    ranked = score_dino_center._interleaved_coarse_to_fine_scores(
+        xyz,
+        fine,
+        coarse,
+        np.ones(len(xyz), dtype=np.bool_),
+        region_radius_m=0.1,
+        maximum_regions=4,
+    )
+    order = np.argsort(-ranked)
+    assert int(order[0]) == 0
+    assert int(order[1]) == 3
+    assert ranked[2] < ranked[3]
+
+
+def test_pfpr_interleave_can_anchor_rank_one_to_primary_evidence() -> None:
+    xyz = np.asarray(
+        [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [2.0, 0.0, 0.0]],
+        dtype=np.float32,
+    )
+    ranked = score_dino_center._interleaved_coarse_to_fine_scores(
+        xyz,
+        fine_scores=np.asarray([0.4, 0.99, 0.2], dtype=np.float32),
+        coarse_scores=np.asarray([0.3, 0.2, 0.9], dtype=np.float32),
+        valid=np.ones(3, dtype=np.bool_),
+        region_radius_m=0.1,
+        maximum_regions=3,
+        rank_one_scores=np.asarray([0.8, 0.1, 0.2], dtype=np.float32),
+        rank_one_valid=np.asarray([True, False, True]),
+    )
+
+    order = np.argsort(-ranked)
+    assert int(order[0]) == 0
+    assert int(order[1]) == 1
+
+
+def test_pfpr_primary_region_can_be_locally_refined_by_support() -> None:
+    xyz = np.asarray(
+        [[0.00, 0.0, 0.0], [0.05, 0.0, 0.0], [1.0, 0.0, 0.0]],
+        dtype=np.float32,
+    )
+    ranked = score_dino_center._interleaved_coarse_to_fine_scores(
+        xyz,
+        fine_scores=np.asarray([0.5, 0.9, 0.7], dtype=np.float32),
+        coarse_scores=np.asarray([0.4, 0.3, 0.8], dtype=np.float32),
+        valid=np.ones(3, dtype=np.bool_),
+        region_radius_m=0.1,
+        maximum_regions=3,
+        rank_one_scores=np.asarray([0.95, 0.2, 0.1], dtype=np.float32),
+        rank_one_valid=np.ones(3, dtype=np.bool_),
+        refine_rank_one_with_fine=True,
+    )
+
+    assert int(np.argmax(ranked)) == 1
+
+
 def test_pfpr_field_space_calibration_is_query_independent_and_normalized() -> None:
     field = torch.tensor([[3.0, 1.0], [2.0, 2.0], [1.0, 3.0]])
     query = torch.tensor([[2.0, 1.0], [1.0, 2.0]])
@@ -344,6 +445,94 @@ def test_pfpr_context_adapter_receives_only_crop_visible_center_and_context(
     np.testing.assert_allclose(adapter.center.numpy(), [[1.0, 0.0]], atol=1e-6)
     assert not torch.allclose(adapter.center, adapter.context)
     torch.testing.assert_close(adapter.context.norm(dim=-1), torch.ones(1), atol=1e-6, rtol=1e-6)
+    paired = score_dino_center._encode_scene_queries(
+        [{"crop_rgb_path": str(image_path)}],
+        device=torch.device("cpu"),
+        radio_repo="unused",
+        radio_version="unused",
+        batch_size=1,
+        crop_context_adapter=adapter,  # type: ignore[arg-type]
+        preserve_raw_context_pair=True,
+    )
+    assert paired.shape == (1, 2, 2)
+    np.testing.assert_allclose(paired[:, 0], adapter.center.numpy(), atol=1e-6)
+    np.testing.assert_allclose(paired[:, 1], adapter.center.numpy(), atol=1e-6)
+
+
+def test_pfpr_center_late_fusion_preserves_two_query_visible_prototypes(
+    tmp_path, monkeypatch
+) -> None:
+    image_path = tmp_path / "crop.png"
+    Image.fromarray(np.full((128, 128, 3), 127, dtype=np.uint8)).save(image_path)
+
+    class _Runtime:
+        def encode_adaptor_images(self, images, _name, *, feature_fmt):
+            spatial = torch.zeros((len(images), 2, 5, 5), device=images.device)
+            spatial[:, 0] = 1.0
+            spatial[:, 1, 2, 2] = 3.0
+            return None, spatial
+
+    monkeypatch.setattr(
+        score_dino_center.OfficialRadioRuntime,
+        "load",
+        staticmethod(lambda **_kwargs: _Runtime()),
+    )
+    descriptors = score_dino_center._encode_scene_queries(
+        [{"crop_rgb_path": str(image_path)}],
+        device=torch.device("cpu"),
+        radio_repo="unused",
+        radio_version="unused",
+        batch_size=1,
+        query_pooling="center_late_fusion",
+    )
+    assert descriptors.shape == (1, 2, 2)
+    assert not np.allclose(descriptors[:, 0], descriptors[:, 1])
+
+
+def test_pfpr_vector_readout_and_fixed_late_fusion_are_explicit() -> None:
+    xyz = torch.zeros((2, 3))
+    covariance = torch.eye(3).repeat(2, 1, 1)
+    field = torch.eye(2)
+    query = torch.tensor([1.0, 0.0])
+    points = torch.zeros((1, 3))
+    indices = torch.tensor([[0, 1]])
+    opacity = torch.ones(2)
+
+    normalized = score_dino_center._vector_candidate_similarity(
+        xyz,
+        covariance,
+        field,
+        query,
+        points,
+        precision=covariance,
+        opacity=opacity,
+        candidate_indices=indices,
+        coherence_sqrt=False,
+    )
+    coherence = score_dino_center._vector_candidate_similarity(
+        xyz,
+        covariance,
+        field,
+        query,
+        points,
+        precision=covariance,
+        opacity=opacity,
+        candidate_indices=indices,
+        coherence_sqrt=True,
+    )
+    torch.testing.assert_close(normalized, torch.tensor([2**-0.5]))
+    torch.testing.assert_close(
+        coherence, normalized * torch.tensor(2**-0.25)
+    )
+
+    scores = torch.tensor([[0.2, 0.5], [0.4, 0.1]])
+    fused = score_dino_center._fuse_query_prototype_scores(
+        scores, temperature=0.1
+    )
+    expected = 0.1 * (
+        torch.logsumexp(scores / 0.1, dim=0) - np.log(2.0)
+    )
+    torch.testing.assert_close(fused, expected)
 
 
 def test_global_crop_alignment_centers_are_deterministic_and_crop_safe() -> None:

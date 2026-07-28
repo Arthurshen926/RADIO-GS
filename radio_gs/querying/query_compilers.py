@@ -15,6 +15,7 @@ from .query_spec import (
     QuerySpec,
     RegistrationMode,
     SelectionMode,
+    SoftSeedGroups,
     SoftSeedSet,
 )
 
@@ -176,7 +177,12 @@ def compile_image_query(
             masses,
             appearance_negatives,
         ),
-        selection_mode=SelectionMode.TOP_K,
+        # A pose-free exemplar denotes one physical instance.  Retaining a
+        # fixed number of high-scoring components conflates instance recovery
+        # with multi-instance category retrieval and permits avoidable
+        # cross-instance leakage.  Ranking remains an unfiltered unary output;
+        # only the full-mask readout uses the strongest connected support.
+        selection_mode=SelectionMode.TOP_COMPONENT,
         field_signature=semantic_signature,
     )
 
@@ -285,6 +291,12 @@ def compile_registered_primitive_seeds(
             if negative is not None
             else None
         ),
+        positive_seed_groups=SoftSeedGroups(positive[:, None], seed_source),
+        negative_seed_groups=(
+            SoftSeedGroups(negative[:, None], seed_source)
+            if negative is not None and bool((negative > 0).any())
+            else None
+        ),
         selection_mode=SelectionMode.SEEDED_COMPONENT,
         field_signature=appearance_signature,
         metadata={"prototype_strategy": str(prototype_strategy)},
@@ -380,6 +392,23 @@ def world_point_soft_seeds(
     ).amax(dim=1)
 
 
+def _world_point_local_columns(
+    point_count: int,
+    maximum_count: int,
+    *,
+    device: torch.device,
+) -> torch.Tensor:
+    maximum_count = int(maximum_count)
+    if maximum_count < 0:
+        raise ValueError("world_point_max_prototypes cannot be negative")
+    if 0 < maximum_count < int(point_count):
+        # Preserve temporal coverage without using output or benchmark state.
+        return torch.linspace(
+            0, int(point_count) - 1, maximum_count, device=device
+        ).round().long().unique(sorted=True)
+    return torch.arange(int(point_count), device=device)
+
+
 def _world_point_local_prototypes(
     features: torch.Tensor,
     seed_matrix: torch.Tensor,
@@ -401,22 +430,16 @@ def _world_point_local_prototypes(
     if not bool((weights > 0).any(dim=0).all()):
         raise ValueError("every world point needs non-empty Gaussian support")
     point_count = int(weights.shape[1])
-    maximum_count = int(maximum_count)
-    if maximum_count < 0:
-        raise ValueError("world_point_max_prototypes cannot be negative")
     prototype_weighting = str(prototype_weighting)
     if prototype_weighting not in {"support_mass", "equal_click"}:
         raise ValueError(
             "world-point prototype weighting must be support_mass or equal_click"
         )
-    if 0 < maximum_count < point_count:
-        # Preserve the temporal order of a bounded interactive prompt rather
-        # than selecting by method output or benchmark identity.
-        keep = torch.linspace(
-            0, point_count - 1, maximum_count, device=weights.device
-        ).round().long().unique(sorted=True)
-    else:
-        keep = torch.arange(point_count, device=weights.device)
+    keep = _world_point_local_columns(
+        point_count,
+        maximum_count,
+        device=weights.device,
+    )
     prototypes: list[torch.Tensor] = []
     masses: list[torch.Tensor] = []
     for column in keep.tolist():
@@ -534,6 +557,7 @@ def compile_world_3d_query(
     world_point_prototype_mode: str = "aggregate_fps",
     world_point_max_prototypes: int = 0,
     world_point_prototype_weighting: str = "support_mass",
+    selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
 ) -> QuerySpec:
     positive_matrix = world_point_soft_seed_matrix(
         gaussian_xyz,
@@ -555,19 +579,22 @@ def compile_world_3d_query(
         if negative_points is not None
         else None
     )
-    positive = positive_matrix.amax(dim=1)
-    negative = negative_matrix.amax(dim=1) if negative_matrix is not None else None
     seed_temperature = float(seed_temperature)
     if seed_temperature <= 0:
         raise ValueError("seed_temperature must be positive")
 
-    def calibrate_seed_weights(values: torch.Tensor) -> torch.Tensor:
-        relative = values / values.max().clamp_min(1e-30)
+    def calibrate_seed_groups(values: torch.Tensor) -> torch.Tensor:
+        relative = values / values.amax(dim=0, keepdim=True).clamp_min(1e-30)
         return relative.pow(1.0 / seed_temperature)
 
-    positive = calibrate_seed_weights(positive)
-    if negative is not None:
-        negative = calibrate_seed_weights(negative)
+    positive_groups = calibrate_seed_groups(positive_matrix)
+    negative_groups = (
+        calibrate_seed_groups(negative_matrix)
+        if negative_matrix is not None
+        else None
+    )
+    positive = positive_groups.amax(dim=1)
+    negative = negative_groups.amax(dim=1) if negative_groups is not None else None
     seed_topk = int(seed_topk)
     if seed_topk < 0:
         raise ValueError("seed_topk cannot be negative")
@@ -593,6 +620,12 @@ def compile_world_3d_query(
             "world_point_prototype_weighting must be support_mass or equal_click"
         )
     if world_point_prototype_mode == "per_click_local":
+        positive_columns = _world_point_local_columns(
+            positive_groups.shape[1],
+            int(world_point_max_prototypes),
+            device=positive_groups.device,
+        )
+        positive_spatial_groups = positive_groups.index_select(1, positive_columns)
         app_proto, app_mass = _world_point_local_prototypes(
             appearance_features,
             positive_matrix,
@@ -606,6 +639,7 @@ def compile_world_3d_query(
             prototype_weighting=world_point_prototype_weighting,
         )
     else:
+        positive_spatial_groups = positive[:, None]
         app_proto, app_mass = _deterministic_prototypes(
             appearance_features, positive, prototype_count, strategy=prototype_strategy
         )
@@ -614,9 +648,19 @@ def compile_world_3d_query(
         )
     app_neg = None
     bnd_neg = None
+    negative_spatial_groups = None
     if negative is not None:
         if world_point_prototype_mode == "per_click_local":
             assert negative_matrix is not None
+            assert negative_groups is not None
+            negative_columns = _world_point_local_columns(
+                negative_groups.shape[1],
+                int(world_point_max_prototypes),
+                device=negative_groups.device,
+            )
+            negative_spatial_groups = negative_groups.index_select(
+                1, negative_columns
+            )
             app_neg, _ = _world_point_local_prototypes(
                 appearance_features,
                 negative_matrix,
@@ -630,6 +674,7 @@ def compile_world_3d_query(
                 prototype_weighting=world_point_prototype_weighting,
             )
         else:
+            negative_spatial_groups = negative[:, None]
             app_neg, _ = _deterministic_prototypes(
                 appearance_features, negative, prototype_count, strategy=prototype_strategy
             )
@@ -656,7 +701,19 @@ def compile_world_3d_query(
         ),
         positive_seeds=SoftSeedSet(positive, "gaussian_mahalanobis"),
         negative_seeds=(SoftSeedSet(negative, "gaussian_mahalanobis") if negative is not None else None),
-        selection_mode=SelectionMode.SEEDED_COMPONENT,
+        positive_seed_groups=SoftSeedGroups(
+            positive_spatial_groups,
+            "gaussian_mahalanobis_per_click",
+        ),
+        negative_seed_groups=(
+            SoftSeedGroups(
+                negative_spatial_groups,
+                "gaussian_mahalanobis_per_click",
+            )
+            if negative_spatial_groups is not None
+            else None
+        ),
+        selection_mode=SelectionMode(selection_mode),
         field_signature=appearance_signature,
         metadata={
             "seed_topk": seed_topk,

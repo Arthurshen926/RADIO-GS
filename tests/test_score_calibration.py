@@ -204,6 +204,71 @@ def test_engine_fits_label_free_calibration_once_and_returns_finite_scores():
     assert result.score_calibration == "robust_tanh"
 
 
+def test_explicit_negative_evidence_can_be_localized_without_moving_positive_evidence():
+    signature = _signature(2)
+    evidence = PrototypeSet(
+        torch.tensor([1.0, 0.0]),
+        signature,
+        negatives=torch.tensor([[0.0, 1.0]]),
+    )
+    field = torch.tensor([[0.0, 1.0], [0.0, 1.0]])
+    localized = _score_bank(
+        field,
+        evidence,
+        temperature=0.07,
+        explicit_negative_influence=torch.tensor([1.0, 0.0]),
+    )
+    assert localized[0] < -0.99
+    assert abs(float(localized[1])) < 1e-6
+
+
+def test_signed_spatial_evidence_keeps_each_negative_coupled_to_its_click():
+    signature = _signature(2)
+    evidence = PrototypeSet(
+        torch.tensor([1.0, 0.0]),
+        signature,
+        negatives=torch.tensor([[0.0, 1.0], [1.0, 0.0]]),
+    )
+    field = torch.tensor([[0.0, 1.0], [0.0, 1.0]])
+    # Both nodes match the first negative descriptor. Only node zero is
+    # geodesically close to the click that produced that descriptor.
+    localized = _score_bank(
+        field,
+        evidence,
+        temperature=0.07,
+        explicit_negative_spatial=torch.tensor(
+            [[1.0, 0.0], [0.0, 1.0]]
+        ),
+        spatial_log_weight=1.0,
+        spatial_floor=1e-6,
+    )
+    assert localized[0] < -0.99
+    assert abs(float(localized[1])) < 1e-4
+
+
+def test_signed_spatial_evidence_keeps_each_positive_coupled_to_its_click():
+    signature = _signature(2)
+    evidence = PrototypeSet(
+        torch.tensor([[1.0, 0.0], [0.0, 1.0]]),
+        signature,
+    )
+    field = torch.tensor([[1.0, 0.0], [1.0, 0.0]])
+    localized = _score_bank(
+        field,
+        evidence,
+        temperature=0.07,
+        positive_spatial_influence=torch.tensor(
+            [[1.0, 0.0], [0.0, 1.0]]
+        ),
+        spatial_log_weight=1.0,
+        spatial_floor=1e-6,
+    )
+    assert localized[0] > 0.95
+    # The only nearby descriptor is orthogonal. The small negative offset is
+    # the existing equal-prototype log weight, not leakage from the far click.
+    assert -0.06 < float(localized[1]) < -0.04
+
+
 def test_engine_applies_explicit_modality_score_policy_without_changing_default():
     xyz = torch.tensor(
         [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [1.0, 0.0, 0.0]]

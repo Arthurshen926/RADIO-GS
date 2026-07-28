@@ -22,7 +22,7 @@ SCENE_STOP_INDEX="${SCENE_STOP_INDEX:?set the one-scene source slice stop}"
 # fidelity and make the field schedule unnecessarily brittle.
 AFTER_RESULT="${AFTER_RESULT:-}"
 
-FIELD_ROOT="${FIELD_ROOT:-/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/field_only_full_sens_agile3_dev_v1}"
+FIELD_ROOT="${FIELD_ROOT:-/mnt/pool/sqy/3d_understanding/ScanNet-PFIR-Small/field_only_full_sens_agile3_dev_v1}"
 PFIR_MATERIALIZATION_REPORT="${PFIR_MATERIALIZATION_REPORT:-$FIELD_ROOT/materialization_report.json}"
 BASE_GEOMETRY_ROOT="${BASE_GEOMETRY_ROOT:-output/agile3d_scannet40/full_sens_dev_v2/reconstruction_v1/geometry}"
 RUN_ROOT="${RUN_ROOT:-output/agile3d_scannet40/full_sens_hires_official_v1/reconstruction_v1}"

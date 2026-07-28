@@ -41,6 +41,7 @@ from .protocol import (
     Click,
     aggregate_official_metrics,
     evaluate_interactive_predictions,
+    interaction_health_metrics,
     load_official_object_list,
     quantize_scannet_points,
 )
@@ -382,6 +383,49 @@ def _nearest_candidate_indices(
     return torch.from_numpy(np.ascontiguousarray(indices))
 
 
+def constrain_released_click_scores(
+    scores: torch.Tensor,
+    *,
+    positive_indices: Sequence[int],
+    negative_indices: Sequence[int],
+    mode: str = "none",
+) -> torch.Tensor:
+    """Apply an optional, label-free constraint at released click locations.
+
+    This is method-side readout, before the AGILE evaluator's mandatory
+    overwrite.  It consumes only the released interaction events and leaves
+    every non-clicked official point unchanged.  The continuous readout still
+    uses its frozen candidate indices, Gaussian responsibilities and opacity;
+    this final constraint preserves the defining semantics of an interactive
+    prompt at the exact sampled point.
+
+    ``none`` is the backwards-compatible default.  ``click_score_clamp`` is a
+    named method variant and must be reported explicitly.
+    """
+
+    value = torch.as_tensor(scores)
+    if value.ndim != 1:
+        raise ValueError("official point scores must be one-dimensional")
+    if mode not in {"none", "click_score_clamp"}:
+        raise ValueError("point readout constraint must be none or click_score_clamp")
+    if mode == "none":
+        return value
+    positive = torch.as_tensor(positive_indices, dtype=torch.long, device=value.device)
+    negative = torch.as_tensor(negative_indices, dtype=torch.long, device=value.device)
+    all_indices = torch.cat((positive, negative))
+    if all_indices.numel() and (
+        bool((all_indices < 0).any()) or bool((all_indices >= value.numel()).any())
+    ):
+        raise IndexError("released click index is outside the official point domain")
+    if positive.numel() and negative.numel():
+        if bool(torch.isin(positive, negative).any()):
+            raise ValueError("one released point cannot have conflicting click signs")
+    constrained = value.clone()
+    constrained[positive] = 1.0
+    constrained[negative] = 0.0
+    return constrained
+
+
 class CanonicalFieldPointPredictor:
     """AGILE callback backed by the shared world-query compiler and field graph."""
 
@@ -422,7 +466,13 @@ class CanonicalFieldPointPredictor:
         score_calibration: str = "none",
         score_chunk_size: int = 8192,
         graph_policy: str = "typed",
+        channel_confidence_mode: str = "none",
+        negative_spatial_mode: str = "none",
+        negative_spatial_steps: int = 4,
+        negative_spatial_decay: float = 0.8,
         node_reliability: torch.Tensor | None = None,
+        point_readout_constraint: str = "none",
+        selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
     ) -> None:
         self.device = torch.device(device)
         self.gaussian_xyz = torch.as_tensor(gaussian_xyz, device=self.device).float()
@@ -534,10 +584,14 @@ class CanonicalFieldPointPredictor:
                 centroid_iterations=int(centroid_iterations),
                 score_calibration=str(score_calibration),
                 score_chunk_size=int(score_chunk_size),
+                negative_spatial_mode=str(negative_spatial_mode),
+                negative_spatial_steps=int(negative_spatial_steps),
+                negative_spatial_decay=float(negative_spatial_decay),
             ),
             solver_config=solver_config,
             graph_policy=str(graph_policy),
             component_graph_policy="same",
+            channel_confidence_mode=str(channel_confidence_mode),
             node_reliability=node_reliability,
         )
         self.primitive_reliability_applied = node_reliability is not None
@@ -565,6 +619,31 @@ class CanonicalFieldPointPredictor:
         if self.readout_support_threshold < 0:
             raise ValueError("readout_support_threshold must be non-negative")
         self.readout_valid = support >= self.readout_support_threshold
+        self.point_readout_constraint = str(point_readout_constraint)
+        if self.point_readout_constraint not in {"none", "click_score_clamp"}:
+            raise ValueError(
+                "point_readout_constraint must be none or click_score_clamp"
+            )
+        self.selection_mode = SelectionMode(selection_mode)
+        # Populated after each callback for diagnostics only.  The evaluator
+        # never feeds these values back into click selection or prediction.
+        self.last_seed_satisfaction_stages: dict[
+            str, dict[str, float | None]
+        ] = {}
+
+    @staticmethod
+    def _summarize_click_matches(
+        positive_matches: Sequence[bool],
+        negative_matches: Sequence[bool],
+    ) -> dict[str, float | None]:
+        positive = [bool(value) for value in positive_matches]
+        negative = [bool(value) for value in negative_matches]
+        combined = positive + negative
+        return {
+            "positive": float(np.mean(positive)) if positive else None,
+            "negative": float(np.mean(negative)) if negative else None,
+            "all": float(np.mean(combined)) if combined else None,
+        }
 
     def protocol_report(self) -> dict[str, object]:
         support_quantiles = torch.quantile(
@@ -578,13 +657,26 @@ class CanonicalFieldPointPredictor:
             "world_query_compiler": "compile_world_3d_query",
             "point_seed_lifting": "gaussian_mahalanobis",
             "official_point_readout": "continuous_opacity_weighted_gaussian",
+            "point_readout_constraint": self.point_readout_constraint,
             "observation_lift": "none",
-            "selection_mode": SelectionMode.SEEDED_COMPONENT.value,
+            "selection_mode": self.selection_mode.value,
             "world_point_prototype_mode": self.world_point_prototype_mode,
             "world_point_max_prototypes": int(self.world_point_max_prototypes),
             "world_point_prototype_weighting": self.world_point_prototype_weighting,
             "support_graph_edge_channels": sorted(self.engine.graph.edge_channels),
             "support_graph_policy": self.engine.graph_policy,
+            "channel_confidence_mode": self.engine.channel_confidence_mode,
+            "negative_spatial_mode": self.engine.scoring_config.negative_spatial_mode,
+            "negative_spatial_steps": int(
+                self.engine.scoring_config.negative_spatial_steps
+            ),
+            "negative_spatial_decay": float(
+                self.engine.scoring_config.negative_spatial_decay
+            ),
+            "spatial_log_weight": float(
+                self.engine.scoring_config.spatial_log_weight
+            ),
+            "spatial_floor": float(self.engine.scoring_config.spatial_floor),
             "readout_candidate_count": int(self.readout_candidate_indices.shape[1]),
             "readout_support_threshold": float(self.readout_support_threshold),
             "continuous_support_quantiles": {
@@ -639,16 +731,22 @@ class CanonicalFieldPointPredictor:
             points, self.official_xyz, atol=1e-6, rtol=0.0
         ):
             raise ValueError("AGILE callback coordinates do not match its fixed official domain")
-        positive_indices = [item.point_index for item in clicks if item.is_positive]
-        negative_indices = [item.point_index for item in clicks if not item.is_positive]
+        positive_indices = [int(item.point_index) for item in clicks if item.is_positive]
+        negative_indices = [int(item.point_index) for item in clicks if not item.is_positive]
         if not positive_indices:
             return np.zeros(len(points), dtype=bool)
         if min(positive_indices + negative_indices) < 0 or max(positive_indices + negative_indices) >= len(points):
             raise IndexError("AGILE click is outside the official point domain")
+        positive_index_tensor = torch.as_tensor(
+            positive_indices, dtype=torch.long, device=self.device
+        )
+        negative_index_tensor = torch.as_tensor(
+            negative_indices, dtype=torch.long, device=self.device
+        )
         point_tensor = torch.as_tensor(points, device=self.device)
-        positive_points = point_tensor[torch.as_tensor(positive_indices, device=self.device)]
+        positive_points = point_tensor[positive_index_tensor]
         negative_points = (
-            point_tensor[torch.as_tensor(negative_indices, device=self.device)]
+            point_tensor[negative_index_tensor]
             if negative_indices
             else None
         )
@@ -671,6 +769,7 @@ class CanonicalFieldPointPredictor:
             euclidean_candidate_k=self.seed_candidate_k,
             seed_topk=self.seed_topk,
             seed_temperature=self.seed_temperature,
+            selection_mode=self.selection_mode,
         )
         result = self.engine.execute(
             query, self.feature_banks, feature_signatures=self.feature_signatures
@@ -695,11 +794,87 @@ class CanonicalFieldPointPredictor:
             candidate_k=int(self.readout_candidate_indices.shape[1]),
             candidate_indices=self.readout_candidate_indices,
         )
+        probability = constrain_released_click_scores(
+            probability,
+            positive_indices=positive_indices,
+            negative_indices=negative_indices,
+            mode=self.point_readout_constraint,
+        )
+        component = constrain_released_click_scores(
+            component,
+            positive_indices=positive_indices,
+            negative_indices=negative_indices,
+            mode=self.point_readout_constraint,
+        )
         prediction = (
             (probability >= float(self.solver_config.support_threshold))
             & (component >= float(self.solver_config.support_threshold))
             & self.readout_valid
         )
+        if self.point_readout_constraint == "click_score_clamp":
+            # A click is itself an observation in the fixed official domain;
+            # do not let a query-free support gate erase that exact evidence.
+            prediction[positive_index_tensor] = True
+            prediction[negative_index_tensor] = False
+        threshold = float(self.solver_config.support_threshold)
+
+        def primitive_group_matches(groups, *, positive: bool) -> list[bool]:
+            if groups is None:
+                return []
+            weights = groups.weights.to(
+                device=result.probabilities.device,
+                dtype=result.probabilities.dtype,
+            )
+            mass = weights.sum(dim=0).clamp_min(1e-12)
+            scores = (weights * result.probabilities[:, None]).sum(dim=0) / mass
+            labels = scores >= threshold
+            return (
+                labels.detach().cpu().tolist()
+                if positive
+                else (~labels).detach().cpu().tolist()
+            )
+
+        primitive_positive = primitive_group_matches(
+            query.positive_seed_groups, positive=True
+        )
+        primitive_negative = primitive_group_matches(
+            query.negative_seed_groups, positive=False
+        )
+        probability_labels = probability >= threshold
+        # This is the actual method output returned to the evaluator, including
+        # the named method-side click constraint when enabled.
+        selected_labels = prediction
+        official_positive = probability_labels[
+            positive_index_tensor
+        ].detach().cpu().tolist()
+        official_negative = (
+            (~probability_labels[
+                negative_index_tensor
+            ]).detach().cpu().tolist()
+            if negative_indices
+            else []
+        )
+        selected_positive = selected_labels[
+            positive_index_tensor
+        ].detach().cpu().tolist()
+        selected_negative = (
+            (~selected_labels[
+                negative_index_tensor
+            ]).detach().cpu().tolist()
+            if negative_indices
+            else []
+        )
+        self.last_seed_satisfaction_stages = {
+            "primitive_solver": self._summarize_click_matches(
+                primitive_positive, primitive_negative
+            ),
+            "official_continuous_readout": self._summarize_click_matches(
+                official_positive, official_negative
+            ),
+            "post_selection_pre_overwrite": self._summarize_click_matches(
+                selected_positive, selected_negative
+            ),
+        }
         return prediction.cpu().numpy()
 
 
@@ -1060,7 +1235,13 @@ def _load_scene_predictor(
     centroid_iterations: int,
     score_calibration: str,
     score_chunk_size: int,
+    channel_confidence_mode: str,
+    negative_spatial_mode: str,
+    negative_spatial_steps: int,
+    negative_spatial_decay: float,
     require_official_extracted_capability_teachers: bool,
+    point_readout_constraint: str = "none",
+    selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
     field_checkpoint_name: str = "canonical_mpr_v2.pt",
     capability_cache_name: str = "official_dino_sam3_views.pt",
     support_graph_name: str = "shared_support_graph_k16.pt",
@@ -1114,6 +1295,8 @@ def _load_scene_predictor(
         ),
     )
     graph = load_canonical_support_graph(graph_path, bank)
+    graph_payload = torch.load(graph_path, map_location="cpu")
+    graph_metadata = dict(graph_payload.get("metadata", {}))
     primitive_reliability = (
         load_canonical_primitive_reliability(
             reliability_path,
@@ -1163,6 +1346,12 @@ def _load_scene_predictor(
         centroid_iterations=int(centroid_iterations),
         score_calibration=str(score_calibration),
         score_chunk_size=int(score_chunk_size),
+        channel_confidence_mode=str(channel_confidence_mode),
+        negative_spatial_mode=str(negative_spatial_mode),
+        negative_spatial_steps=int(negative_spatial_steps),
+        negative_spatial_decay=float(negative_spatial_decay),
+        point_readout_constraint=str(point_readout_constraint),
+        selection_mode=selection_mode,
         node_reliability=(
             primitive_reliability.valid_confidence()
             if primitive_reliability is not None
@@ -1174,6 +1363,14 @@ def _load_scene_predictor(
         "field_checkpoint_sha256": field_hash,
         "capability_cache": str(capability_path.resolve()),
         "support_graph": str(graph_path.resolve()),
+        "support_graph_sha256": _sha256(graph_path),
+        "support_graph_config": dict(graph_metadata.get("graph_config", {})),
+        "support_graph_surface_relation": dict(
+            graph_metadata.get("surface_relation") or {}
+        ),
+        "support_graph_covisibility_relation": dict(
+            graph_metadata.get("covisibility_relation") or {}
+        ),
         "mpr_observation_contract": str(
             dict(mpr_metadata.get("observation_lifting_contract", {})).get("name", "")
         ),
@@ -1332,6 +1529,24 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             centroid_iterations=int(args.centroid_iterations),
             score_calibration=str(args.score_calibration),
             score_chunk_size=int(getattr(args, "score_chunk_size", 8192)),
+            channel_confidence_mode=str(
+                getattr(args, "channel_confidence_mode", "none")
+            ),
+            negative_spatial_mode=str(
+                getattr(args, "negative_spatial_mode", "none")
+            ),
+            negative_spatial_steps=int(
+                getattr(args, "negative_spatial_steps", 4)
+            ),
+            negative_spatial_decay=float(
+                getattr(args, "negative_spatial_decay", 0.8)
+            ),
+            point_readout_constraint=str(
+                getattr(args, "point_readout_constraint", "none")
+            ),
+            selection_mode=str(
+                getattr(args, "selection_mode", SelectionMode.SEEDED_COMPONENT.value)
+            ),
             require_official_extracted_capability_teachers=bool(
                 args.require_official_extracted_capability_teachers
             ),
@@ -1472,7 +1687,11 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             coordinates: np.ndarray, previous: np.ndarray, clicks: Sequence[Click]
         ) -> np.ndarray:
             world = np.asarray(coordinates, dtype=np.float32) + scene_origin
-            return predictor(world, previous, clicks)
+            prediction = predictor(world, previous, clicks)
+            callback.last_seed_satisfaction_stages = (  # type: ignore[attr-defined]
+                predictor.last_seed_satisfaction_stages
+            )
+            return prediction
 
         for item in by_scene[scene_id]:
             target_full = labels_full == int(item.object_id)
@@ -1564,6 +1783,9 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             "clicked_labels_forced": True,
             "test_set_calibration": False,
             "world_query": "compile_world_3d_query",
+            "selection_mode": str(
+                getattr(args, "selection_mode", SelectionMode.SEEDED_COMPONENT.value)
+            ),
             "official_coordinate_contract": (
                 "released_shifted_5cm_callback_plus_label_free_scene_origin_to_scannet_world"
             ),
@@ -1601,6 +1823,20 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             "centroid_iterations": int(args.centroid_iterations),
             "score_calibration": str(args.score_calibration),
             "score_chunk_size": int(getattr(args, "score_chunk_size", 8192)),
+            "channel_confidence_mode": str(
+                getattr(args, "channel_confidence_mode", "none")
+            ),
+            "negative_spatial_mode": str(
+                getattr(args, "negative_spatial_mode", "none")
+            ),
+            "negative_spatial_steps": int(
+                getattr(args, "negative_spatial_steps", 4)
+            ),
+            "negative_spatial_decay": float(
+                getattr(args, "negative_spatial_decay", 0.8)
+            ),
+            "spatial_log_weight": 0.25,
+            "spatial_floor": 0.01,
             "requires_official_extracted_capability_teachers": bool(
                 args.require_official_extracted_capability_teachers
             ),
@@ -1609,6 +1845,11 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
         "scene_support": scene_support,
         "metrics": aggregate_official_metrics(
             [row["trajectory"] for row in rows], max_clicks=int(args.max_clicks)
+        ),
+        "interaction_health": interaction_health_metrics(
+            [row["trajectory"] for row in rows],
+            seed_satisfaction=[row["seed_satisfaction"] for row in rows],
+            max_clicks=int(args.max_clicks),
         ),
         "rows": rows,
         "shard": {
@@ -1716,6 +1957,27 @@ def main() -> None:
     parser.add_argument("--minimum-support-fraction", type=float, default=0.95)
     parser.add_argument("--readout-candidate-k", type=int, default=64)
     parser.add_argument("--readout-support-threshold", type=float, default=1e-6)
+    parser.add_argument(
+        "--point-readout-constraint",
+        choices=("none", "click_score_clamp"),
+        default="none",
+        help=(
+            "optional label-free method-side constraint at exact released click "
+            "points; default none preserves all previous results"
+        ),
+    )
+    parser.add_argument(
+        "--selection-mode",
+        choices=(
+            SelectionMode.SEEDED_COMPONENT.value,
+            SelectionMode.MIN_SEED_COVER.value,
+        ),
+        default=SelectionMode.SEEDED_COMPONENT.value,
+        help=(
+            "component readout variant; seeded_component is the frozen protocol, "
+            "min_seed_cover is an explicit no-GT multi-positive ablation"
+        ),
+    )
     parser.add_argument("--seed-candidate-k", type=int, default=64)
     parser.add_argument(
         "--seed-topk",
@@ -1817,6 +2079,26 @@ def main() -> None:
         default=0.0,
         help="fixed query-unary boundary gating of the shared random-walker graph",
     )
+    parser.add_argument(
+        "--channel-confidence-mode",
+        choices=("none", "affinity_mass", "max_affinity"),
+        default="none",
+        help=(
+            "optional label-free capability abstention; confidence modes add "
+            "self-loop conductance when every neighbour relation is weak"
+        ),
+    )
+    parser.add_argument(
+        "--negative-spatial-mode",
+        choices=("none", "truncated_graph_decay", "signed_geodesic"),
+        default="none",
+        help=(
+            "couple click descriptors to their fixed-geometry neighborhoods; "
+            "scene-background evidence remains global"
+        ),
+    )
+    parser.add_argument("--negative-spatial-steps", type=int, default=4)
+    parser.add_argument("--negative-spatial-decay", type=float, default=0.8)
     args = parser.parse_args()
     print(json.dumps(evaluate(args), indent=2))
 

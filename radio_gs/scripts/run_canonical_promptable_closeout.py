@@ -58,6 +58,79 @@ def _ply_vertex_count(path: Path) -> int:
     raise ValueError(f"PLY lacks an element vertex declaration: {path}")
 
 
+def prompt_graph_contract(
+    name: str,
+    *,
+    responsibility: Path,
+    device: str,
+) -> dict[str, Any]:
+    """Resolve one frozen graph/readout contract without benchmark branching."""
+
+    name = str(name)
+    if name == "legacy_v1":
+        return {
+            "name": name,
+            "graph_name": "shared_support_graph_k16.pt",
+            "build_args": [
+                "--neighbors",
+                "16",
+                "--topology-mode",
+                "symmetric_union",
+            ],
+            "evaluation_args": [
+                "--graph-policy",
+                "legacy",
+                "--component-graph-policy",
+                "same",
+            ],
+            "evaluation_dir": "eval_full_mask_random_walker",
+        }
+    if name == "capability_signed_v1":
+        return {
+            "name": name,
+            "graph_name": (
+                "shared_support_graph_k16_mutual_surface_covis.pt"
+            ),
+            "build_args": [
+                "--responsibility-cache",
+                str(Path(responsibility)),
+                "--neighbors",
+                "16",
+                "--topology-mode",
+                "mutual_knn",
+                "--surface-relation",
+                "local_pca_tangent_v1",
+                "--surface-topology-min-affinity",
+                "0.5",
+                "--covisibility-weight",
+                "0.25",
+                "--require-covisibility-topology",
+                "--capability-affinity-mode",
+                "exact_official_capability",
+                "--affinity-device",
+                str(device),
+            ],
+            "evaluation_args": [
+                "--graph-policy",
+                "typed",
+                "--component-graph-policy",
+                "same",
+                "--channel-confidence-mode",
+                "max_affinity",
+                "--negative-spatial-mode",
+                "signed_geodesic",
+                "--negative-spatial-steps",
+                "12",
+                "--negative-spatial-decay",
+                "0.9",
+                "--background-centroids",
+                "4",
+            ],
+            "evaluation_dir": "eval_full_mask_capability_signed_v1",
+        }
+    raise ValueError(f"unsupported prompt graph contract: {name!r}")
+
+
 def _run_stage(
     *, name: str, command: list[str], terminal: Path, log_root: Path,
     records: list[dict[str, Any]],
@@ -115,6 +188,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "--max-gaussians",
             str(int(args.geometry_max_gaussians)),
         ]
+    if args.geometry_packed:
+        geometry_command.append("--packed")
     legacy_commands = {
         "geometry": geometry_command,
         "feature_extraction": list(scene["commands"]["feature_extraction"]),
@@ -182,13 +257,22 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "--radio-checkpoint", RADIO_CHECKPOINT, "--output", str(capability),
         "--batch-size", "2048", "--device", args.device,
     ], terminal=capability, log_root=logs, records=records)
-    graph = out / "shared_support_graph_k16.pt"
+    graph_contract = prompt_graph_contract(
+        args.graph_contract,
+        responsibility=responsibility,
+        device=args.device,
+    )
+    graph = out / str(graph_contract["graph_name"])
     _run_stage(name="support_graph", command=[
         PYTHON, str(project / "radio_gs/scripts/build_canonical_support_graph.py"),
         "--capability-cache", str(capability), "--output", str(graph),
-        "--neighbors", "16", "--topology-mode", "symmetric_union",
+        *graph_contract["build_args"],
     ], terminal=graph, log_root=logs, records=records)
-    evaluation = out / "eval_full_mask_random_walker" / f"{args.scene_id}_evaluation.json"
+    evaluation = (
+        out
+        / str(graph_contract["evaluation_dir"])
+        / f"{args.scene_id}_evaluation.json"
+    )
     _run_stage(name="registered_full_mask", command=[
         PYTHON, str(project / "radio_gs/scripts/eval_nvos_gaussian_first.py"),
         "--manifest", queue["manifest"], "--queue-root", str(Path(args.queue_plan).parent),
@@ -196,7 +280,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "--device", args.device, "--region-space", "sam3", "--support-mode", "canonical_support",
         "--prototype-count", "4", "--canonical-capability-cache", str(capability),
         "--canonical-support-graph", str(graph), "--canonical-field-sha256", _sha256(field),
-        "--graph-policy", "legacy", "--component-graph-policy", "same",
+        *graph_contract["evaluation_args"],
         "--feature-calibration", "none", "--score-calibration", "none",
         "--solver-type", "confidence_random_walker", "--laplacian-weight", "1.0",
         "--solver-iterations", "12", "--solver-residual", "0.30",
@@ -205,7 +289,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     result = {
         "scene_id": args.scene_id, "status": "complete", "protocol_hash": queue["protocol_hash"],
         "queue_plan_sha256": _sha256(queue_path), "field_sha256": _sha256(field),
-        "canonical_mainline": "canonical-mpr-v3", "records": records,
+        "canonical_mainline": "canonical-mpr-v3",
+        "graph_contract": graph_contract["name"],
+        "records": records,
     }
     _write_json(status_path, result)
     return result
@@ -218,6 +304,11 @@ def main() -> None:
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument(
+        "--graph-contract",
+        choices=("legacy_v1", "capability_signed_v1"),
+        default="legacy_v1",
+    )
+    parser.add_argument(
         "--geometry-max-gaussians",
         type=int,
         default=0,
@@ -225,6 +316,11 @@ def main() -> None:
             "Optional fixed, label-free geometry primitive budget forwarded "
             "to train_colmap_gs; zero preserves the audited queue command."
         ),
+    )
+    parser.add_argument(
+        "--geometry-packed",
+        action="store_true",
+        help="Use memory-bounded packed gsplat rasterization for geometry fitting.",
     )
     parser.add_argument("--stop-after", choices=("legacy", "all"), default="all")
     args = parser.parse_args()

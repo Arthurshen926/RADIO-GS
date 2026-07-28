@@ -207,6 +207,10 @@ def evaluate_interactive_predictions(
     prediction = np.zeros_like(target_quantized)
     clicks: list[Click] = []
     trajectory: dict[int, float] = {}
+    seed_satisfaction: dict[int, dict[str, float | None]] = {}
+    seed_satisfaction_stages: dict[
+        int, dict[str, dict[str, float | None]]
+    ] = {}
     for click_count in range(1, int(max_clicks) + 1):
         click = select_next_click(
             coordinates,
@@ -223,12 +227,55 @@ def evaluate_interactive_predictions(
         ).reshape(-1)
         if prediction.shape != target_quantized.shape:
             raise ValueError("predictor output does not align with quantized points")
+        positive_matches = [
+            bool(prediction[item.point_index])
+            for item in clicks
+            if item.is_positive
+        ]
+        negative_matches = [
+            not bool(prediction[item.point_index])
+            for item in clicks
+            if not item.is_positive
+        ]
+        all_matches = positive_matches + negative_matches
+        seed_satisfaction[click_count] = {
+            "positive": (
+                float(np.mean(positive_matches)) if positive_matches else None
+            ),
+            "negative": (
+                float(np.mean(negative_matches)) if negative_matches else None
+            ),
+            "all": float(np.mean(all_matches)) if all_matches else None,
+        }
+        stage_rows = getattr(predictor, "last_seed_satisfaction_stages", None)
+        if stage_rows is not None:
+            # Predictor-owned diagnostics are label-free: they are computed
+            # only from the released clicks and intermediate method outputs.
+            # Copy them before the evaluator applies its protocol overwrite.
+            seed_satisfaction_stages[click_count] = {
+                str(stage): {
+                    name: (
+                        None if values.get(name) is None
+                        else float(values[name])
+                    )
+                    for name in ("positive", "negative", "all")
+                }
+                for stage, values in stage_rows.items()
+            }
         # AGILE3D explicitly overwrites model errors at every clicked point.
         for item in clicks:
             prediction[item.point_index] = item.is_positive
+        if stage_rows is not None:
+            seed_satisfaction_stages[click_count]["protocol_overwrite"] = {
+                "positive": 1.0 if positive_matches else None,
+                "negative": 1.0 if negative_matches else None,
+                "all": 1.0 if all_matches else None,
+            }
         trajectory[click_count] = _iou(prediction[inverse_map], target_full)
     return {
         "trajectory": trajectory,
+        "seed_satisfaction": seed_satisfaction,
+        "seed_satisfaction_stages": seed_satisfaction_stages,
         "clicks": [
             {
                 "point_index": click.point_index,
@@ -263,3 +310,96 @@ def aggregate_official_metrics(
             values.append(reached)
         metrics[f"NoC@{int(round(threshold * 100))}"] = float(np.mean(values))
     return metrics
+
+
+def interaction_health_metrics(
+    trajectories: Iterable[Mapping[int, float]],
+    *,
+    seed_satisfaction: Iterable[
+        Mapping[int, Mapping[str, float | None]]
+    ] | None = None,
+    max_clicks: int = 20,
+    tolerance: float = 1e-12,
+) -> dict[str, float | int]:
+    """Report whether corrective clicks improve rather than erase support.
+
+    These diagnostics use only the already released interaction trajectories;
+    they do not alter click selection, predictions, or official AGILE metrics.
+    """
+
+    rows = [
+        {int(key): float(value) for key, value in row.items()}
+        for row in trajectories
+    ]
+    if not rows:
+        raise ValueError("no interactive trajectories to diagnose")
+    if int(max_clicks) < 2 or float(tolerance) < 0:
+        raise ValueError("health diagnostics require max_clicks >=2 and non-negative tolerance")
+    deltas: list[float] = []
+    monotonic_rows = 0
+    regressions: list[float] = []
+    for row in rows:
+        missing = [
+            step for step in range(1, int(max_clicks) + 1) if step not in row
+        ]
+        if missing:
+            raise ValueError(f"interactive trajectory misses click steps: {missing[:4]}")
+        current = [
+            row[step + 1] - row[step]
+            for step in range(1, int(max_clicks))
+        ]
+        deltas.extend(current)
+        is_monotonic = all(delta >= -float(tolerance) for delta in current)
+        monotonic_rows += int(is_monotonic)
+        regressions.extend(
+            -delta for delta in current if delta < -float(tolerance)
+        )
+    monotonic_transitions = sum(
+        delta >= -float(tolerance) for delta in deltas
+    )
+    report: dict[str, float | int] = {
+        "trajectory_count": len(rows),
+        "transition_count": len(deltas),
+        "monotonic_trajectory_fraction": float(monotonic_rows / len(rows)),
+        "monotonic_transition_fraction": float(
+            monotonic_transitions / max(1, len(deltas))
+        ),
+        "regression_transition_fraction": float(
+            len(regressions) / max(1, len(deltas))
+        ),
+        "mean_regression_magnitude": float(
+            np.mean(regressions) if regressions else 0.0
+        ),
+        "maximum_regression_magnitude": float(
+            max(regressions) if regressions else 0.0
+        ),
+        "mean_iou_delta_per_click": float(np.mean(deltas)),
+    }
+    if seed_satisfaction is not None:
+        satisfaction_rows = list(seed_satisfaction)
+        if len(satisfaction_rows) != len(rows):
+            raise ValueError("seed-satisfaction rows must align with trajectories")
+        values: dict[str, list[float]] = {
+            "positive": [],
+            "negative": [],
+            "all": [],
+        }
+        for row in satisfaction_rows:
+            for step in range(1, int(max_clicks) + 1):
+                if step not in row:
+                    raise ValueError(
+                        f"seed satisfaction misses click step {step}"
+                    )
+                for name in values:
+                    value = row[step].get(name)
+                    if value is not None:
+                        values[name].append(float(value))
+        report.update(
+            {
+                f"{name}_seed_satisfaction": float(
+                    np.mean(entries) if entries else 1.0
+                )
+                for name, entries in values.items()
+            }
+        )
+    return report

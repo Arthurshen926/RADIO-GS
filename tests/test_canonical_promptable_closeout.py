@@ -2,7 +2,10 @@ from pathlib import Path
 
 import pytest
 
-from radio_gs.scripts.run_canonical_promptable_closeout import _ply_vertex_count
+from radio_gs.scripts.run_canonical_promptable_closeout import (
+    _ply_vertex_count,
+    prompt_graph_contract,
+)
 
 
 def test_ply_vertex_count_reads_binary_header_without_payload(tmp_path: Path) -> None:
@@ -24,3 +27,27 @@ def test_ply_vertex_count_fails_closed_without_vertex_declaration(
 
     with pytest.raises(ValueError, match="lacks an element vertex"):
         _ply_vertex_count(path)
+
+
+def test_capability_signed_graph_contract_matches_agile_structural_candidate():
+    contract = prompt_graph_contract(
+        "capability_signed_v1",
+        responsibility=Path("/tmp/responsibility.pt"),
+        device="cuda:0",
+    )
+    assert contract["graph_name"] == (
+        "shared_support_graph_k16_mutual_surface_covis.pt"
+    )
+    assert {"--topology-mode", "mutual_knn"} <= set(
+        contract["build_args"]
+    )
+    assert "--require-covisibility-topology" in contract["build_args"]
+    assert {"--channel-confidence-mode", "max_affinity"} <= set(
+        contract["evaluation_args"]
+    )
+    assert {"--negative-spatial-mode", "signed_geodesic"} <= set(
+        contract["evaluation_args"]
+    )
+    assert contract["evaluation_dir"] == (
+        "eval_full_mask_capability_signed_v1"
+    )

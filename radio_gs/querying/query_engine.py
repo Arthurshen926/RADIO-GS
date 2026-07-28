@@ -21,6 +21,7 @@ from .query_spec import QueryModality, QuerySpec
 from .support_solver import (
     PrimitiveSupportGraph,
     SupportSolverConfig,
+    graph_local_seed_influence,
     graph_for_query_intent,
     select_support_components,
     solve_primitive_support,
@@ -36,6 +37,8 @@ class QueryResult:
     score_calibration: str = "none"
     reliability_applied: bool = False
     graph_policy: str = "typed_if_available"
+    channel_confidence_mode: str = "none"
+    negative_spatial_mode: str = "none"
 
     @property
     def selected_probabilities(self) -> torch.Tensor:
@@ -54,6 +57,7 @@ class CanonicalQueryEngine:
         graph_policy: str = "typed_if_available",
         component_graph_policy: str = "same",
         graph_legacy_residual: float = 0.0,
+        channel_confidence_mode: str = "none",
         node_reliability: torch.Tensor | None = None,
         score_calibration_by_modality: Mapping[
             QueryModality | str, str
@@ -67,6 +71,22 @@ class CanonicalQueryEngine:
         self.graph_legacy_residual = float(graph_legacy_residual)
         if not 0.0 <= self.graph_legacy_residual <= 1.0:
             raise ValueError("graph_legacy_residual must be in [0,1]")
+        self.channel_confidence_mode = str(channel_confidence_mode)
+        if self.channel_confidence_mode not in {
+            "none",
+            "affinity_mass",
+            "max_affinity",
+        }:
+            raise ValueError(
+                "channel_confidence_mode must be none, affinity_mass, or max_affinity"
+            )
+        if (
+            self.channel_confidence_mode != "none"
+            and self.graph_legacy_residual > 0
+        ):
+            raise ValueError(
+                "graph_legacy_residual is incompatible with confidence-gated self loops"
+            )
         self.node_reliability: torch.Tensor | None = None
         if node_reliability is not None:
             reliability = torch.as_tensor(node_reliability).detach().float().reshape(-1)
@@ -87,7 +107,9 @@ class CanonicalQueryEngine:
             self.score_calibration_by_modality[typed_modality] = calibration
         self._calibrations: dict[str, SceneSpaceCalibration] = {}
         self._calibration_bank_shapes: dict[str, tuple[int, int]] = {}
-        self._query_graphs: dict[tuple[str, str, float], PrimitiveSupportGraph] = {}
+        self._query_graphs: dict[
+            tuple[str, str, float, str], PrimitiveSupportGraph
+        ] = {}
 
     def scoring_config_for_query(self, query: QuerySpec) -> EvidenceScoringConfig:
         """Resolve an explicit modality override without changing global defaults."""
@@ -143,12 +165,72 @@ class CanonicalQueryEngine:
                     centroid_iterations=scoring_config.centroid_iterations,
                 )
                 self._calibration_bank_shapes[name] = shape
+        explicit_negative_influence = None
+        positive_spatial_influence = None
+        explicit_negative_spatial = None
+        if scoring_config.negative_spatial_mode in {
+            "truncated_graph_decay",
+            "signed_geodesic",
+        }:
+            local_graph_key = (
+                "geometry",
+                str(query.intent.value),
+                0.0,
+                "none",
+            )
+            if local_graph_key not in self._query_graphs:
+                self._query_graphs[local_graph_key] = graph_for_query_intent(
+                    self.graph,
+                    query.intent,
+                    policy="geometry",
+                    legacy_residual=0.0,
+                    channel_confidence_mode="none",
+                )
+            local_graph = self._query_graphs[local_graph_key]
+            if (
+                scoring_config.negative_spatial_mode
+                == "truncated_graph_decay"
+                and query.negative_seeds is not None
+            ):
+                explicit_negative_influence = graph_local_seed_influence(
+                    local_graph,
+                    query.negative_seeds.weights.to(
+                        self.graph.edge_index.device
+                    ),
+                    steps=scoring_config.negative_spatial_steps,
+                    decay=scoring_config.negative_spatial_decay,
+                )
+            elif scoring_config.negative_spatial_mode == "signed_geodesic":
+                if query.positive_seed_groups is None:
+                    raise ValueError(
+                        "signed_geodesic requires per-query positive seed groups"
+                    )
+                positive_spatial_influence = graph_local_seed_influence(
+                    local_graph,
+                    query.positive_seed_groups.weights.to(
+                        self.graph.edge_index.device
+                    ),
+                    steps=scoring_config.negative_spatial_steps,
+                    decay=scoring_config.negative_spatial_decay,
+                )
+                if query.negative_seed_groups is not None:
+                    explicit_negative_spatial = graph_local_seed_influence(
+                        local_graph,
+                        query.negative_seed_groups.weights.to(
+                            self.graph.edge_index.device
+                        ),
+                        steps=scoring_config.negative_spatial_steps,
+                        decay=scoring_config.negative_spatial_decay,
+                    )
         unary, components = score_query_evidence(
             query,
             feature_banks,
             config=scoring_config,
             calibrations=self._calibrations,
             num_nodes=self.graph.num_nodes,
+            explicit_negative_influence=explicit_negative_influence,
+            positive_spatial_influence=positive_spatial_influence,
+            explicit_negative_spatial=explicit_negative_spatial,
         )
         reliability_applied = self.node_reliability is not None and bool(components)
         if reliability_applied:
@@ -167,6 +249,7 @@ class CanonicalQueryEngine:
             self.graph_policy,
             str(query.intent.value),
             self.graph_legacy_residual,
+            self.channel_confidence_mode,
         )
         if graph_key not in self._query_graphs:
             self._query_graphs[graph_key] = graph_for_query_intent(
@@ -174,6 +257,7 @@ class CanonicalQueryEngine:
                 query.intent,
                 policy=self.graph_policy,
                 legacy_residual=self.graph_legacy_residual,
+                channel_confidence_mode=self.channel_confidence_mode,
             )
         query_graph = self._query_graphs[graph_key]
         if self.component_graph_policy == "same":
@@ -183,6 +267,7 @@ class CanonicalQueryEngine:
                 self.component_graph_policy,
                 str(query.intent.value),
                 self.graph_legacy_residual,
+                self.channel_confidence_mode,
             )
             if component_key not in self._query_graphs:
                 self._query_graphs[component_key] = graph_for_query_intent(
@@ -190,6 +275,7 @@ class CanonicalQueryEngine:
                     query.intent,
                     policy=self.component_graph_policy,
                     legacy_residual=self.graph_legacy_residual,
+                    channel_confidence_mode=self.channel_confidence_mode,
                 )
             component_graph = self._query_graphs[component_key]
         probabilities = solve_primitive_support(
@@ -204,6 +290,9 @@ class CanonicalQueryEngine:
             probabilities,
             query.selection_mode,
             positive_seeds=query.positive_seeds,
+            negative_seeds=query.negative_seeds,
+            positive_seed_groups=query.positive_seed_groups,
+            negative_seed_groups=query.negative_seed_groups,
             config=self.solver_config,
         )
         return QueryResult(
@@ -214,4 +303,6 @@ class CanonicalQueryEngine:
             score_calibration=scoring_config.score_calibration,
             reliability_applied=reliability_applied,
             graph_policy=self.graph_policy,
+            channel_confidence_mode=self.channel_confidence_mode,
+            negative_spatial_mode=scoring_config.negative_spatial_mode,
         )

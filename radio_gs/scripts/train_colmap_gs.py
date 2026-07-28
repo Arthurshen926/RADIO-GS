@@ -865,6 +865,7 @@ def train(args):
     out_dir.mkdir(parents=True, exist_ok=True)
     view_metadata["geometry_training_contract"] = {
         "maximum_gaussians": int(args.max_gaussians),
+        "packed_rasterization": bool(args.packed),
         "budget_enabled": bool(args.max_gaussians),
         "budget_pruning": (
             "stable_lowest_opacity_after_densification"
@@ -930,7 +931,7 @@ def train(args):
             far_plane=1000.0,
             backgrounds=bg.unsqueeze(0),
             sh_degree=cur_sh_degree,
-            packed=False,
+            packed=bool(args.packed),
             absgrad=True,
         )
         pred_rgb = renders[0].clamp(0.0, 1.0)  # [H, W, 3]
@@ -951,7 +952,7 @@ def train(args):
         # Densification: post-backward
         strategy.step_post_backward(
             params=params, optimizers=optimizers, state=state,
-            step=step, info=info, packed=False,
+            step=step, info=info, packed=bool(args.packed),
         )
         budget_prune = _gaussian_budget_prune_mask(
             params["opacities"], args.max_gaussians
@@ -1003,6 +1004,7 @@ def train(args):
                 "initial_gaussians": int(n_init),
                 "final_gaussians": int(params["means"].shape[0]),
                 "maximum_gaussians": int(args.max_gaussians),
+                "packed_rasterization": bool(args.packed),
                 "budget_satisfied": (
                     not args.max_gaussians
                     or int(params["means"].shape[0]) <= int(args.max_gaussians)
@@ -1100,6 +1102,15 @@ def main():
     parser.add_argument("--densify_every", type=int, default=100)
     parser.add_argument("--densify_grad_thresh", type=float, default=0.0008)
     parser.add_argument("--opacity_reset_every", type=int, default=3000)
+    parser.add_argument(
+        "--packed",
+        action="store_true",
+        help=(
+            "Use gsplat's sparse packed rasterization to bound transient tile "
+            "memory on high-resolution views. This changes storage only, not "
+            "the RGB supervision or scene/query protocol."
+        ),
+    )
     parser.add_argument(
         "--max-gaussians",
         type=int,

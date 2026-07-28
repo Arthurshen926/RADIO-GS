@@ -22,6 +22,33 @@ from radio_gs.models.featsharp_3d import FeatSharp3D
 from radio_gs.models.hcd_codec import build_feature_codec
 
 
+def registered_scannet_source_config(scene_root: str | Path) -> dict[str, str]:
+    """Return explicit registered RGB-D paths for a materialized ScanNet scene."""
+
+    root = Path(scene_root).resolve()
+    required = {
+        "rgb_dir": root / "color",
+        "depth_dir": root / "depth",
+        "pose_dir": root / "pose",
+    }
+    missing = [str(path) for path in required.values() if not path.is_dir()]
+    if missing:
+        raise ValueError(
+            "materialized ScanNet source lacks registered observation directories: "
+            + ", ".join(missing)
+        )
+    return {
+        "rgb_dir": str(required["rgb_dir"]),
+        "val_rgb_dir": str(required["rgb_dir"]),
+        "depth_dir": str(required["depth_dir"]),
+        "val_depth_dir": str(required["depth_dir"]),
+        "pose_file": "",
+        "val_pose_file": "",
+        "pose_dir": str(required["pose_dir"]),
+        "val_pose_dir": str(required["pose_dir"]),
+    }
+
+
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -213,6 +240,7 @@ def build_contract(
         },
         output_checkpoint,
     )
+    registered_source = registered_scannet_source_config(scene_root)
     config = {
         "architecture": "explicit",
         "latent_dim": int(latent_dim),
@@ -227,8 +255,7 @@ def build_contract(
         "scene_root": str(scene_root),
         "observation_contract": observation_contract,
         "feature_dir": str(feature_dir),
-        "pose_dir": str(scene_root / "pose"),
-        "pose_file": "",
+        **registered_source,
         "image_height": int(image_height),
         "image_width": int(image_width),
         "fx": float(intrinsic[0, 0]),

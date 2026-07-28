@@ -33,6 +33,7 @@ from .query_spec import (
     QuerySpec as TypedQuerySpec,
     RegistrationMode,
     SelectionMode,
+    SoftSeedGroups,
     SoftSeedSet,
 )
 from .support_solver import (
@@ -74,6 +75,7 @@ __all__ = [
     "robust_tanh_score_calibration",
     "RegistrationMode",
     "SelectionMode",
+    "SoftSeedGroups",
     "SoftSeedSet",
     "SupportGraphConfig",
     "SupportSolverConfig",

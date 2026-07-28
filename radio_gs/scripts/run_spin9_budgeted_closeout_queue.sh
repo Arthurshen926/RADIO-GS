@@ -14,6 +14,7 @@ SCENE_NAMES="${SCENE_NAMES:?set a disjoint list of SPIn scene IDs}"
 QUEUE_PLAN="${QUEUE_PLAN:-output/unified_query/spin9_gaussfm_queue_20260712/queue_plan.json}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-output/evaluation_closeout_20260716/canonical_mpr_v3_spin9}"
 GEOMETRY_MAX_GAUSSIANS="${GEOMETRY_MAX_GAUSSIANS:-1400000}"
+GEOMETRY_PACKED="${GEOMETRY_PACKED:-0}"
 AFTER_MARKERS="${AFTER_MARKERS:-}"
 
 wait_for_dependencies() {
@@ -52,6 +53,10 @@ for scene in $SCENE_NAMES; do
     continue
   fi
   wait_for_gpu
+  geometry_args=()
+  if [[ "$GEOMETRY_PACKED" == "1" ]]; then
+    geometry_args+=(--geometry-packed)
+  fi
   CUDA_VISIBLE_DEVICES="$GPU" bash radio_gs/scripts/run_repo_python.sh \
     radio_gs/scripts/run_canonical_promptable_closeout.py \
     --queue-plan "$QUEUE_PLAN" \
@@ -59,6 +64,6 @@ for scene in $SCENE_NAMES; do
     --output-root "$OUTPUT_ROOT" \
     --device cuda:0 \
     --geometry-max-gaussians "$GEOMETRY_MAX_GAUSSIANS" \
+    "${geometry_args[@]}" \
     >"$OUTPUT_ROOT/queue_logs/$scene.log" 2>&1
 done
-

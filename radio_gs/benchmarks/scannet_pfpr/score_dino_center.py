@@ -44,6 +44,7 @@ from radio_gs.querying.score_calibration import fit_scene_space_calibration
 from .protocol import (
     PFPR_V2_BENCHMARK_VERSION,
     SUPPORTED_BENCHMARK_VERSIONS,
+    fixed_radius_nms,
     protocol_config_from_record,
     validate_field_query_exclusion_commitment,
 )
@@ -191,14 +192,19 @@ def _encode_scene_queries(
     query_pooling: str = "center3x3",
     crop_spatial_adapter: GlobalCropSpatialAdapter | None = None,
     crop_context_adapter: GlobalCropContextAdapter | None = None,
+    preserve_raw_context_pair: bool = False,
 ) -> np.ndarray:
     query_pooling = str(query_pooling)
-    if query_pooling not in {"center3x3", "center"}:
-        raise ValueError("PFPR query pooling must be center3x3 or center")
+    if query_pooling not in {"center3x3", "center", "center_late_fusion"}:
+        raise ValueError(
+            "PFPR query pooling must be center3x3, center, or center_late_fusion"
+        )
     if crop_spatial_adapter is not None and crop_context_adapter is not None:
         raise ValueError("PFPR accepts at most one frozen crop query adapter")
     if crop_context_adapter is not None and query_pooling != "center3x3":
         raise ValueError("the crop-context adapter requires center3x3 query pooling")
+    if preserve_raw_context_pair and crop_context_adapter is None:
+        raise ValueError("raw/context pairing requires a frozen crop-context adapter")
     runtime = OfficialRadioRuntime.load(
         radio_repo=radio_repo,
         version=radio_version,
@@ -213,18 +219,23 @@ def _encode_scene_queries(
                 _summary, spatial = runtime.encode_adaptor_images(
                     batch, "dino_v3_7b", feature_fmt="NCHW"
                 )
-                descriptor = torch.from_numpy(
-                    center_spatial_descriptor(spatial)
-                    if query_pooling == "center3x3"
-                    else center_token_descriptor(spatial)
-                ).to(device)
+                center3x3 = torch.from_numpy(center_spatial_descriptor(spatial)).to(device)
+                center = torch.from_numpy(center_token_descriptor(spatial)).to(device)
+                descriptor = (
+                    torch.stack((center3x3, center), dim=1)
+                    if query_pooling == "center_late_fusion"
+                    else (center3x3 if query_pooling == "center3x3" else center)
+                )
                 if crop_context_adapter is not None:
+                    raw_descriptor = descriptor
                     context = F.normalize(
                         torch.as_tensor(spatial, device=device).float().mean(dim=(-2, -1)),
                         dim=-1,
                         eps=1e-8,
                     )
                     descriptor = crop_context_adapter(descriptor, context)
+                    if preserve_raw_context_pair:
+                        descriptor = torch.stack((raw_descriptor, descriptor), dim=1)
                 descriptors.append(descriptor.cpu().numpy().astype(np.float32))
     finally:
         del runtime
@@ -243,6 +254,182 @@ def _encode_scene_queries(
                 .astype(np.float32)
             )
     return result
+
+
+def _fuse_query_prototype_scores(
+    scores: torch.Tensor, *, temperature: float = 0.1
+) -> torch.Tensor:
+    """Fuse query-visible center prototypes without choosing one from metrics."""
+
+    values = torch.as_tensor(scores).float()
+    if values.ndim != 2 or values.shape[0] <= 0:
+        raise ValueError("prototype scores must be a non-empty [M,P] matrix")
+    if temperature <= 0:
+        raise ValueError("late-fusion temperature must be positive")
+    return float(temperature) * (
+        torch.logsumexp(values / float(temperature), dim=0)
+        - np.log(float(values.shape[0]))
+    )
+
+
+def _vector_candidate_similarity(
+    gaussian_xyz: torch.Tensor,
+    covariance: torch.Tensor,
+    field: torch.Tensor,
+    query: torch.Tensor,
+    points: torch.Tensor,
+    *,
+    precision: torch.Tensor,
+    opacity: torch.Tensor,
+    candidate_indices: torch.Tensor,
+    coherence_sqrt: bool,
+    chunk_size: int = 512,
+) -> torch.Tensor:
+    """Interpolate a feature vector, normalize it, then compare to query."""
+
+    output: list[torch.Tensor] = []
+    for start in range(0, len(points), int(chunk_size)):
+        stop = min(start + int(chunk_size), len(points))
+        indices = candidate_indices[start:stop]
+        delta = gaussian_xyz[indices] - points[start:stop, None]
+        mahalanobis = torch.einsum(
+            "pki,pkij,pkj->pk", delta, precision[indices], delta
+        )
+        weights = torch.exp(-0.5 * mahalanobis).clamp_min(0.0) * opacity[indices]
+        support = weights.sum(dim=1).clamp_min(1e-12)
+        vector = torch.einsum("pk,pkd->pd", weights, field[indices]) / support[:, None]
+        coherence = vector.norm(dim=-1).clamp(0.0, 1.0)
+        score = F.normalize(vector, dim=-1, eps=1e-8) @ query
+        if coherence_sqrt:
+            score = score * coherence.sqrt()
+        output.append(score)
+    return torch.cat(output)
+
+
+def _interleaved_coarse_to_fine_scores(
+    candidate_xyz: np.ndarray,
+    fine_scores: torch.Tensor | np.ndarray,
+    coarse_scores: torch.Tensor | np.ndarray,
+    valid: torch.Tensor | np.ndarray,
+    *,
+    region_radius_m: float,
+    maximum_regions: int,
+    rank_one_scores: torch.Tensor | np.ndarray | None = None,
+    rank_one_valid: torch.Tensor | np.ndarray | None = None,
+    refine_rank_one_with_fine: bool = False,
+) -> np.ndarray:
+    """Interleave precise global proposals with context-proposed regions."""
+
+    xyz = np.asarray(candidate_xyz, dtype=np.float32)
+    fine = np.asarray(torch.as_tensor(fine_scores).detach().cpu(), dtype=np.float32)
+    coarse = np.asarray(
+        torch.as_tensor(coarse_scores).detach().cpu(), dtype=np.float32
+    )
+    valid_array = np.asarray(
+        torch.as_tensor(valid).detach().cpu(), dtype=np.bool_
+    )
+    if xyz.ndim != 2 or xyz.shape[1] != 3:
+        raise ValueError("candidate xyz must be [N,3]")
+    if fine.shape != (len(xyz),) or coarse.shape != fine.shape:
+        raise ValueError("coarse/fine scores must align with candidate xyz")
+    if valid_array.shape != fine.shape:
+        raise ValueError("valid mask must align with candidate xyz")
+    if not np.isfinite(region_radius_m) or float(region_radius_m) <= 0.0:
+        raise ValueError("coarse-to-fine region radius must be positive")
+    if int(maximum_regions) <= 0:
+        raise ValueError("maximum coarse-to-fine regions must be positive")
+    rank_one = (
+        fine
+        if rank_one_scores is None
+        else np.asarray(
+            torch.as_tensor(rank_one_scores).detach().cpu(), dtype=np.float32
+        )
+    )
+    rank_one_valid_array = (
+        valid_array
+        if rank_one_valid is None
+        else np.asarray(
+            torch.as_tensor(rank_one_valid).detach().cpu(), dtype=np.bool_
+        )
+    )
+    if rank_one.shape != fine.shape or rank_one_valid_array.shape != fine.shape:
+        raise ValueError("rank-one scores and validity must align with candidates")
+
+    masked_fine = np.where(valid_array, fine, -1e30).astype(np.float32)
+    masked_coarse = np.where(valid_array, coarse, -1e30).astype(np.float32)
+    masked_rank_one = np.where(
+        rank_one_valid_array, rank_one, -1e30
+    ).astype(np.float32)
+    fine_centers = fixed_radius_nms(
+        xyz,
+        masked_fine,
+        radius_m=float(region_radius_m),
+        maximum=int(maximum_regions),
+    )
+    coarse_centers = fixed_radius_nms(
+        xyz,
+        masked_coarse,
+        radius_m=float(region_radius_m),
+        maximum=int(maximum_regions),
+    )
+    if not len(fine_centers):
+        raise ValueError("coarse-to-fine readout has no valid fine proposal")
+    rank_one_centers = fixed_radius_nms(
+        xyz,
+        masked_rank_one,
+        radius_m=float(region_radius_m),
+        maximum=1,
+    )
+    if not len(rank_one_centers):
+        raise ValueError("coarse-to-fine readout has no authoritative rank-one proposal")
+
+    tree = cKDTree(xyz)
+    rank_one_index = int(rank_one_centers[0])
+    if bool(refine_rank_one_with_fine):
+        local = np.asarray(
+            tree.query_ball_point(
+                xyz[rank_one_index], r=float(region_radius_m)
+            ),
+            dtype=np.int64,
+        )
+        local = local[valid_array[local]]
+        if len(local):
+            rank_one_index = int(local[np.argmax(masked_fine[local])])
+    refined_coarse: list[int] = []
+    for center in coarse_centers:
+        local = np.asarray(
+            tree.query_ball_point(xyz[int(center)], r=float(region_radius_m)),
+            dtype=np.int64,
+        )
+        if not len(local):
+            continue
+        local = local[valid_array[local]]
+        if len(local):
+            refined_coarse.append(int(local[np.argmax(masked_fine[local])]))
+
+    # The precise stream owns rank one. Remaining global and context-localized
+    # proposals are interleaved with no learned or benchmark-tuned score weight.
+    order: list[int] = [rank_one_index]
+    fine_offset = 1
+    if rank_one_scores is not None:
+        # A support-completed fine stream can disagree with the authoritative
+        # primary stream. Keep its strongest proposal instead of assuming it
+        # duplicates rank one.
+        order.append(int(fine_centers[0]))
+        fine_offset = 1
+    for rank in range(int(maximum_regions)):
+        if rank < len(refined_coarse):
+            order.append(int(refined_coarse[rank]))
+        if rank + fine_offset < len(fine_centers):
+            order.append(int(fine_centers[rank + fine_offset]))
+
+    ranked = np.full(len(xyz), -1e30, dtype=np.float32)
+    next_score = float(len(order) + 1)
+    for index in order:
+        if ranked[index] <= -1e20:
+            ranked[index] = next_score
+            next_score -= 1.0
+    return ranked
 
 
 def _candidate_indices(gaussian_xyz: torch.Tensor, candidate_xyz: np.ndarray, count: int) -> torch.Tensor:
@@ -367,6 +554,7 @@ def _score_scene(
     capability_cache_name: str,
     feature_calibration: str,
     calibration_sample_size: int,
+    candidate_readout: str = "scalar",
     require_official_extracted_capability_teachers: bool = False,
 ) -> dict[str, Any]:
     scene_dir = field_root / "canonical_fields" / scene_id
@@ -430,14 +618,31 @@ def _score_scene(
     )
     try:
         field = bank.appearance[bank.global_rows].to(device).float()
+        primary_local_mask = None
+        if candidate_readout == "context_coarse_fine_primary_anchor":
+            field_payload = torch.load(field_path, map_location="cpu")
+            completion = dict(field_payload.get("support_completion", {}))
+            base_mpr_path = str(completion.get("base_mpr_cache", ""))
+            if not base_mpr_path:
+                raise ValueError(
+                    "primary-anchor readout requires a support-completed field"
+                )
+            base_mpr = torch.load(base_mpr_path, map_location="cpu")
+            primary_valid = torch.as_tensor(base_mpr["valid"]).bool().cpu()
+            primary_local_mask = primary_valid[bank.global_rows].to(device)
         query = torch.from_numpy(np.asarray(descriptors, dtype=np.float32)).to(device)
+        query_shape = query.shape
+        if query.ndim == 3:
+            query = query.reshape(-1, query.shape[-1])
         field, query = calibrate_query_and_field(
             field,
             query,
             method=str(feature_calibration),
             sample_size=int(calibration_sample_size),
         )
-        if field.shape[1] != query.shape[1]:
+        if len(query_shape) == 3:
+            query = query.reshape(query_shape)
+        if field.shape[1] != query.shape[-1]:
             raise ValueError("official DINO patch descriptor does not match canonical DINO field")
         precision = _cell_convolved_precision(covariance, voxel_size_m)
         indices = _candidate_indices(gaussian_xyz, candidate_xyz, candidate_k).to(device)
@@ -462,21 +667,115 @@ def _score_scene(
             )
         output_dir.mkdir(parents=True, exist_ok=True)
         for local_index, record in enumerate(records):
-            primitive_scores = torch.empty(len(field), device=device)
-            for start in range(0, len(field), 65536):
-                stop = min(start + 65536, len(field))
-                primitive_scores[start:stop] = field[start:stop] @ query[local_index]
-            point_scores, _point_support = continuous_gaussian_readout(
-                gaussian_xyz,
-                covariance,
-                primitive_scores,
-                point_tensor,
-                gaussian_precision=precision,
-                opacity=opacity,
-                candidate_k=int(candidate_k),
-                candidate_indices=indices,
-            )
-            values = point_scores.masked_fill(~valid, -1e30).cpu().numpy().astype(np.float32)
+            prototypes = query[local_index]
+            if prototypes.ndim == 1:
+                prototypes = prototypes[None]
+            if candidate_readout in {
+                "context_coarse_fine_equal",
+                "context_coarse_fine_interleave",
+                "context_coarse_fine_primary_anchor",
+            }:
+                if len(prototypes) != 2:
+                    raise ValueError(
+                        "context coarse/fine readout requires [raw, adapted] prototypes"
+                    )
+                prototype_readouts = ("scalar", "vector_normalized")
+            else:
+                prototype_readouts = (candidate_readout,) * len(prototypes)
+            prototype_scores: list[torch.Tensor] = []
+            primary_anchor_scores = None
+            primary_anchor_valid = None
+            for prototype, prototype_readout in zip(
+                prototypes, prototype_readouts
+            ):
+                if prototype_readout == "scalar":
+                    primitive_scores = torch.empty(len(field), device=device)
+                    for start in range(0, len(field), 65536):
+                        stop = min(start + 65536, len(field))
+                        primitive_scores[start:stop] = field[start:stop] @ prototype
+                    point_scores, _point_support = continuous_gaussian_readout(
+                        gaussian_xyz,
+                        covariance,
+                        primitive_scores,
+                        point_tensor,
+                        gaussian_precision=precision,
+                        opacity=opacity,
+                        candidate_k=int(candidate_k),
+                        candidate_indices=indices,
+                    )
+                    if (
+                        candidate_readout
+                        == "context_coarse_fine_primary_anchor"
+                        and primary_anchor_scores is None
+                    ):
+                        assert primary_local_mask is not None
+                        primary_anchor_scores, primary_support = (
+                            continuous_gaussian_readout(
+                                gaussian_xyz,
+                                covariance,
+                                primitive_scores,
+                                point_tensor,
+                                gaussian_precision=precision,
+                                opacity=opacity * primary_local_mask.float(),
+                                candidate_k=int(candidate_k),
+                                candidate_indices=indices,
+                            )
+                        )
+                        primary_anchor_valid = (
+                            primary_support >= float(readout_support_threshold)
+                        )
+                else:
+                    point_scores = _vector_candidate_similarity(
+                        gaussian_xyz,
+                        covariance,
+                        field,
+                        prototype,
+                        point_tensor,
+                        precision=precision,
+                        opacity=opacity,
+                        candidate_indices=indices,
+                        coherence_sqrt=(
+                            prototype_readout
+                            == "vector_normalized_coherence_sqrt"
+                        ),
+                    )
+                prototype_scores.append(point_scores)
+            if candidate_readout in {
+                "context_coarse_fine_interleave",
+                "context_coarse_fine_primary_anchor",
+            }:
+                values = _interleaved_coarse_to_fine_scores(
+                    candidate_xyz,
+                    prototype_scores[0],
+                    prototype_scores[1],
+                    valid,
+                    region_radius_m=2.0 * float(voxel_size_m),
+                    maximum_regions=int(candidate_k),
+                    rank_one_scores=primary_anchor_scores,
+                    rank_one_valid=primary_anchor_valid,
+                    refine_rank_one_with_fine=(
+                        candidate_readout
+                        == "context_coarse_fine_primary_anchor"
+                    ),
+                )
+            else:
+                point_scores = (
+                    prototype_scores[0]
+                    if len(prototype_scores) == 1
+                    else (
+                        torch.stack(prototype_scores).mean(dim=0)
+                        if candidate_readout == "context_coarse_fine_equal"
+                        else _fuse_query_prototype_scores(
+                            torch.stack(prototype_scores)
+                        )
+                    )
+                )
+                values = (
+                    point_scores.masked_fill(~valid, -1e30)
+                    .cpu()
+                    .numpy()
+                    .astype(np.float32)
+                )
             np.save(output_dir / f"{record['query_id']}.npy", values)
         return {
             "scene_id": scene_id,
@@ -525,6 +824,7 @@ def _score_scene(
             },
             "feature_calibration": str(feature_calibration),
             "calibration_sample_size": int(calibration_sample_size),
+            "candidate_readout": str(candidate_readout),
             **teacher_fidelity,
         }
     finally:
@@ -547,6 +847,28 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     )
     if str(args.feature_calibration) not in {"none", "diagonal_robust"}:
         raise ValueError("PFPR feature calibration must be none or diagonal_robust")
+    if str(args.candidate_readout) not in {
+        "scalar",
+        "vector_normalized",
+        "vector_normalized_coherence_sqrt",
+        "context_coarse_fine_equal",
+        "context_coarse_fine_interleave",
+        "context_coarse_fine_primary_anchor",
+    }:
+        raise ValueError("unknown PFPR candidate readout")
+    if str(args.candidate_readout) in {
+        "context_coarse_fine_equal",
+        "context_coarse_fine_interleave",
+        "context_coarse_fine_primary_anchor",
+    }:
+        if not str(args.crop_context_adapter_checkpoint).strip():
+            raise ValueError(
+                "context coarse/fine readout requires a crop-context adapter"
+            )
+        if str(args.query_pooling) != "center3x3":
+            raise ValueError(
+                "context coarse/fine readout requires center3x3 query pooling"
+            )
     if int(args.calibration_sample_size) <= 0:
         raise ValueError("PFPR calibration sample size must be positive")
     (
@@ -607,6 +929,14 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             query_pooling=str(args.query_pooling),
             crop_spatial_adapter=crop_spatial_adapter,
             crop_context_adapter=crop_context_adapter,
+            preserve_raw_context_pair=(
+                str(args.candidate_readout)
+                in {
+                    "context_coarse_fine_equal",
+                    "context_coarse_fine_interleave",
+                    "context_coarse_fine_primary_anchor",
+                }
+            ),
         )
         reports.append(
             _score_scene(
@@ -630,6 +960,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 capability_cache_name=str(args.capability_cache_name),
                 feature_calibration=str(args.feature_calibration),
                 calibration_sample_size=int(args.calibration_sample_size),
+                candidate_readout=str(args.candidate_readout),
                 require_official_extracted_capability_teachers=bool(
                     args.require_official_extracted_capability_teachers
                 ),
@@ -651,6 +982,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         )
     if str(args.feature_calibration) != "none":
         method_name = f"{method_name}_with_{args.feature_calibration}_scene_calibration"
+    if str(args.candidate_readout) != "scalar":
+        method_name = f"{method_name}_with_{args.candidate_readout}_readout"
 
     report = {
         "benchmark": benchmark_version,
@@ -659,15 +992,28 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "method_manifest_only": True,
             "evaluator_anchor_opened": False,
             "query_descriptor": (
+                "official_dino_v3_7b_raw_center_3x3_and_frozen_context_adapted_center_3x3_pair"
+                if str(args.candidate_readout)
+                in {
+                    "context_coarse_fine_equal",
+                    "context_coarse_fine_interleave",
+                    "context_coarse_fine_primary_anchor",
+                }
+                else (
                 "official_dino_v3_7b_center_3x3_plus_spatial_global_mean_then_frozen_global_crop_context_adapter"
                 if crop_context_adapter is not None
                 else (
                 "official_dino_v3_7b_center_3x3_then_frozen_global_crop_spatial_adapter"
                 if crop_spatial_adapter is not None
                 else (
-                    "official_dino_v3_7b_center_3x3_l2_mean"
-                    if str(args.query_pooling) == "center3x3"
-                    else "official_dino_v3_7b_center_token_l2_normalized"
+                    "official_dino_v3_7b_center3x3_and_center_token_fixed_late_fusion"
+                    if str(args.query_pooling) == "center_late_fusion"
+                    else (
+                        "official_dino_v3_7b_center_3x3_l2_mean"
+                        if str(args.query_pooling) == "center3x3"
+                        else "official_dino_v3_7b_center_token_l2_normalized"
+                    )
+                )
                 )
                 )
             ),
@@ -703,7 +1049,40 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             ),
             "feature_calibration": str(args.feature_calibration),
             "calibration_sample_size": int(args.calibration_sample_size),
-            "candidate_readout": "continuous_opacity_weighted_gaussian_convolved_with_5cm_voxel_cell",
+            "candidate_readout": str(args.candidate_readout),
+            "candidate_readout_geometry": (
+                "continuous_opacity_weighted_gaussian_convolved_with_5cm_voxel_cell"
+            ),
+            "query_prototype_fusion": (
+                {
+                    "method": "equal_score_mean",
+                    "weights": [0.5, 0.5],
+                    "prototypes": ["raw_center3x3", "context_adapted_center3x3"],
+                    "readouts": ["scalar", "vector_normalized"],
+                }
+                if str(args.candidate_readout) == "context_coarse_fine_equal"
+                else (
+                    {
+                        "method": "fine_top1_then_interleaved_context_region_proposals",
+                        "region_radius": "2x_candidate_voxel_size",
+                        "prototypes": ["raw_center3x3", "context_adapted_center3x3"],
+                        "readouts": ["scalar", "vector_normalized"],
+                        "region_refinement": "raw_scalar_argmax",
+                        "uses_query_pose_depth_or_gt": False,
+                    }
+                    if str(args.candidate_readout)
+                    == "context_coarse_fine_interleave"
+                    else (
+                    {
+                        "method": "logmeanexp",
+                        "temperature": 0.1,
+                        "prototype_count": 2,
+                    }
+                    if str(args.query_pooling) == "center_late_fusion"
+                    else None
+                    )
+                )
+            ),
             "candidate_k": int(args.candidate_k),
             "candidate_voxel_size_m": float(args.candidate_voxel_size_m),
             "field_checkpoint_name": str(args.field_checkpoint_name),
@@ -746,9 +1125,25 @@ def main() -> None:
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument(
         "--query-pooling",
-        choices=("center3x3", "center"),
+        choices=("center3x3", "center", "center_late_fusion"),
         default="center3x3",
-        help="frozen PFPR patch-center descriptor; center is a named ablation",
+        help=(
+            "frozen PFPR patch-center descriptor; center and center_late_fusion "
+            "are explicit query-only ablations"
+        ),
+    )
+    parser.add_argument(
+        "--candidate-readout",
+        choices=(
+            "scalar",
+            "vector_normalized",
+            "vector_normalized_coherence_sqrt",
+            "context_coarse_fine_equal",
+            "context_coarse_fine_interleave",
+            "context_coarse_fine_primary_anchor",
+        ),
+        default="scalar",
+        help="explicit candidate feature-readout ablation; scalar is the frozen default",
     )
     parser.add_argument("--candidate-k", type=int, default=64)
     parser.add_argument("--candidate-voxel-size-m", type=float, default=0.05)

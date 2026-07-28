@@ -8,7 +8,7 @@ cd "$REPO_ROOT"
 GPU="${GPU:-5}"
 BENCHMARK_DIR="${BENCHMARK_DIR:-output/scannet_pfir_small_v1/test_v1_final}"
 RUN_ROOT="${RUN_ROOT:-$BENCHMARK_DIR/reconstruction_v1}"
-ANNOTATIONS_ROOT="${ANNOTATIONS_ROOT:-/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/annotations}"
+ANNOTATIONS_ROOT="${ANNOTATIONS_ROOT:-/mnt/pool/sqy/3d_understanding/ScanNet-PFIR-Small/annotations}"
 FIELD_TERMINAL="${FIELD_TERMINAL:-$RUN_ROOT/canonical_mpr_v3_fields.complete}"
 # The default waits for the all-scene field audit.  An explicitly selected
 # shard whose referenced scenes are already complete may set this to 0 to use

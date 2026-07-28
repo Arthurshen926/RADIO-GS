@@ -1106,7 +1106,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--pfir-annotations-root",
-        default="/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/annotations",
+        default="/mnt/pool/sqy/3d_understanding/ScanNet-PFIR-Small/annotations",
     )
     parser.add_argument(
         "--agile-results",

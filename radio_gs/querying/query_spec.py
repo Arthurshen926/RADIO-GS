@@ -36,6 +36,10 @@ class SelectionMode(str, Enum):
     ALL_COMPONENTS = "all_components"
     TOP_COMPONENT = "top_component"
     SEEDED_COMPONENT = "seeded_component"
+    # Optional interaction readout: choose the smallest set of clean active
+    # components that covers every positive interaction group.  It is never
+    # selected implicitly, so existing benchmark contracts are unchanged.
+    MIN_SEED_COVER = "min_seed_cover"
     TOP_K = "top_k"
 
 
@@ -93,6 +97,27 @@ class SoftSeedSet:
 
 
 @dataclass(frozen=True)
+class SoftSeedGroups:
+    """Keep one primitive-responsibility column for every interaction event."""
+
+    weights: torch.Tensor
+    source: str
+
+    def __post_init__(self) -> None:
+        values = torch.as_tensor(self.weights).float()
+        if (
+            values.ndim != 2
+            or min(values.shape) <= 0
+            or not bool(torch.isfinite(values).all())
+        ):
+            raise ValueError("seed groups must be a finite non-empty [N,K] matrix")
+        if bool((values < 0).any()) or not bool((values > 0).any(dim=0).all()):
+            raise ValueError("every seed group must have non-negative support")
+        values = values / values.amax(dim=0, keepdim=True).clamp_min(1e-30)
+        object.__setattr__(self, "weights", values)
+
+
+@dataclass(frozen=True)
 class QuerySpec:
     modality: QueryModality
     intent: QueryIntent
@@ -102,6 +127,8 @@ class QuerySpec:
     boundary_evidence: PrototypeSet | None = None
     positive_seeds: SoftSeedSet | None = None
     negative_seeds: SoftSeedSet | None = None
+    positive_seed_groups: SoftSeedGroups | None = None
+    negative_seed_groups: SoftSeedGroups | None = None
     granularity_m: tuple[float, ...] = ()
     selection_mode: SelectionMode = SelectionMode.ALL_COMPONENTS
     field_signature: FeatureSpaceSignature | None = None
@@ -132,6 +159,16 @@ class QuerySpec:
             raise ValueError("registered 2D queries require camera registration")
         if self.modality is QueryModality.WORLD_3D and self.registration is not RegistrationMode.WORLD:
             raise ValueError("world 3D queries require world registration")
+        for name, groups, aggregate in (
+            ("positive", self.positive_seed_groups, self.positive_seeds),
+            ("negative", self.negative_seed_groups, self.negative_seeds),
+        ):
+            if groups is None:
+                continue
+            if aggregate is None:
+                raise ValueError(f"{name} seed groups require aggregate seeds")
+            if groups.weights.shape[0] != aggregate.weights.numel():
+                raise ValueError(f"{name} seed groups and aggregate seeds must align")
 
     def assert_field_compatible(self, signature: FeatureSpaceSignature) -> None:
         if self.field_signature is not None:

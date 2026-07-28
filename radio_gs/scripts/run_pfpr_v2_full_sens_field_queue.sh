@@ -15,7 +15,7 @@ cd "$REPO_ROOT"
 GPU="${GPU:?set GPU to a physical GPU index}"
 SCENE_START_INDEX="${SCENE_START_INDEX:?set the inclusive source-report scene index}"
 SCENE_STOP_INDEX="${SCENE_STOP_INDEX:?set the exclusive source-report scene index}"
-SOURCE_ROOT="${SOURCE_ROOT:-/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/field_only_full_sens_pfpr_v2_queryheldout_v1}"
+SOURCE_ROOT="${SOURCE_ROOT:-/mnt/pool/sqy/3d_understanding/ScanNet-PFIR-Small/field_only_full_sens_pfpr_v2_queryheldout_v1}"
 BENCHMARK_DIR="${BENCHMARK_DIR:-output/scannet_pfpr_small_v2/test_v2_r1}"
 RUN_ROOT="${RUN_ROOT:-output/scannet_pfpr_small_v2/full_sens_official_v2_r1/reconstruction_v1}"
 # Optional artifact dependency for a real GPU work chain.  It is never a

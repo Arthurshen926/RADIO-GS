@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from .query_spec import QueryIntent, SelectionMode, SoftSeedSet
+from .query_spec import QueryIntent, SelectionMode, SoftSeedGroups, SoftSeedSet
 
 
 @dataclass(frozen=True)
@@ -21,7 +21,9 @@ class SupportGraphConfig:
     normal_temperature: float = 0.20
     surface_tangent_temperature: float = 0.20
     surface_tangent_relation: bool = False
+    surface_topology_min_affinity: float = 0.0
     covisibility_weight: float = 0.25
+    require_covisibility_topology: bool = False
     minimum_sigma: float = 1e-4
     affinity_chunk_size: int = 8192
     topology_mode: str = "symmetric_union"
@@ -40,6 +42,15 @@ class SupportGraphConfig:
             raise ValueError("graph scales and temperatures must be positive")
         if self.covisibility_weight < 0:
             raise ValueError("covisibility_weight cannot be negative")
+        if not 0 <= self.surface_topology_min_affinity <= 1:
+            raise ValueError("surface_topology_min_affinity must be in [0,1]")
+        if (
+            self.surface_topology_min_affinity > 0
+            and not self.surface_tangent_relation
+        ):
+            raise ValueError(
+                "surface topology filtering requires surface_tangent_relation"
+            )
         if self.topology_mode not in {"symmetric_union", "mutual_knn"}:
             raise ValueError("topology_mode must be symmetric_union or mutual_knn")
 
@@ -104,6 +115,7 @@ def mix_support_graph_channels(
     channel_weights: Mapping[str, float],
     *,
     legacy_residual: float = 0.0,
+    channel_confidence_mode: str = "none",
 ) -> PrimitiveSupportGraph:
     """Compose typed edge channels without letting one channel veto all edges.
 
@@ -116,6 +128,19 @@ def mix_support_graph_channels(
     legacy_residual = float(legacy_residual)
     if not 0.0 <= legacy_residual <= 1.0:
         raise ValueError("legacy_residual must be in [0,1]")
+    channel_confidence_mode = str(channel_confidence_mode)
+    if channel_confidence_mode not in {
+        "none",
+        "affinity_mass",
+        "max_affinity",
+    }:
+        raise ValueError(
+            "channel_confidence_mode must be none, affinity_mass, or max_affinity"
+        )
+    if channel_confidence_mode != "none" and legacy_residual > 0:
+        raise ValueError(
+            "legacy_residual is incompatible with confidence-gated self loops"
+        )
     requested = {
         str(name): float(weight)
         for name, weight in channel_weights.items()
@@ -129,6 +154,79 @@ def mix_support_graph_channels(
     total = sum(requested.values())
     normalized = {name: weight / total for name, weight in requested.items()}
     row = graph.edge_index[0]
+    col = graph.edge_index[1]
+    if channel_confidence_mode in {"affinity_mass", "max_affinity"}:
+        # Estimate whether each capability has at least one credible neighbour.
+        # ``max_affinity`` follows the strongest-relation test directly;
+        # ``affinity_mass`` is retained as an explicit diagnostic ablation.
+        # Cross-node conductances remain symmetric through the geometric mean
+        # of endpoint confidence, preserving the random-walker linear system.
+        cross_affinity = torch.zeros_like(graph.raw_affinity)
+        node_confidence = torch.zeros(
+            graph.num_nodes,
+            dtype=graph.raw_affinity.dtype,
+            device=graph.raw_affinity.device,
+        )
+        for name, weight in normalized.items():
+            raw = graph.edge_channels[name].to(graph.raw_affinity.device)
+            if channel_confidence_mode == "affinity_mass":
+                mass = torch.zeros_like(node_confidence)
+                mass.index_add_(0, row, raw)
+                confidence = -torch.expm1(-mass.clamp_min(0.0))
+            else:
+                confidence = torch.zeros_like(node_confidence)
+                confidence.scatter_reduce_(
+                    0, row, raw, reduce="amax", include_self=True
+                )
+            endpoint_confidence = (
+                confidence[row] * confidence[col]
+            ).clamp_min(0.0).sqrt()
+            cross_affinity.add_(weight * endpoint_confidence * raw)
+            node_confidence.add_(weight * confidence)
+
+        cross_row_sum = torch.zeros_like(node_confidence)
+        cross_row_sum.index_add_(0, row, cross_affinity)
+        confidence = node_confidence.clamp(0.0, 1.0)
+        self_affinity = torch.where(
+            cross_row_sum > 0,
+            cross_row_sum
+            * (1.0 - confidence)
+            / confidence.clamp_min(1e-12),
+            torch.ones_like(cross_row_sum),
+        )
+        nodes = torch.arange(
+            graph.num_nodes, dtype=torch.long, device=graph.edge_index.device
+        )
+        edge_index = torch.cat(
+            [graph.edge_index, torch.stack([nodes, nodes])], dim=1
+        )
+        raw_affinity = torch.cat([cross_affinity, self_affinity])
+        mixed_row = edge_index[0]
+        row_sum = torch.zeros_like(node_confidence)
+        row_sum.index_add_(0, mixed_row, raw_affinity)
+        transition = raw_affinity / row_sum[mixed_row].clamp_min(1e-12)
+        edge_channels = {
+            name: torch.cat(
+                [
+                    values.to(graph.raw_affinity.device),
+                    torch.ones(
+                        graph.num_nodes,
+                        dtype=values.dtype,
+                        device=graph.raw_affinity.device,
+                    ),
+                ]
+            )
+            for name, values in graph.edge_channels.items()
+        }
+        return PrimitiveSupportGraph(
+            edge_index=edge_index,
+            edge_weight=transition,
+            raw_affinity=raw_affinity,
+            local_sigma=graph.local_sigma,
+            num_nodes=graph.num_nodes,
+            edge_channels=edge_channels,
+        ).to(graph.edge_index.device)
+
     transition = torch.zeros_like(graph.edge_weight)
     log_affinity = torch.zeros_like(graph.raw_affinity)
     for name, weight in normalized.items():
@@ -162,6 +260,7 @@ def graph_for_query_intent(
     *,
     policy: str = "typed_if_available",
     legacy_residual: float = 0.0,
+    channel_confidence_mode: str = "none",
 ) -> PrimitiveSupportGraph:
     """Resolve one frozen, modality-independent channel policy for a query intent."""
 
@@ -297,7 +396,10 @@ def graph_for_query_intent(
     if policy not in policies:
         raise ValueError(f"unknown support graph channel policy: {policy!r}")
     return mix_support_graph_channels(
-        graph, policies[policy], legacy_residual=legacy_residual
+        graph,
+        policies[policy],
+        legacy_residual=legacy_residual,
+        channel_confidence_mode=channel_confidence_mode,
     )
 
 
@@ -346,6 +448,10 @@ def build_primitive_support_graph(
         raise ValueError("cannot construct an empty support graph")
     if normal_reliability is not None and normals is None:
         raise ValueError("normal_reliability requires normals")
+    if config.surface_topology_min_affinity > 0 and normals is None:
+        raise ValueError("surface topology filtering requires normals")
+    if config.require_covisibility_topology and view_observations is None:
+        raise ValueError("covisibility topology filtering requires view observations")
     affinity_device = torch.device(feature_affinity_device)
     if affinity_device.type == "cuda" and not torch.cuda.is_available():
         raise ValueError("feature_affinity_device requests CUDA but CUDA is unavailable")
@@ -445,8 +551,13 @@ def build_primitive_support_graph(
         visibility = torch.as_tensor(view_observations).detach().bool().cpu()
         if visibility.ndim != 2 or visibility.shape[0] != count:
             raise ValueError("view_observations must be [num_nodes,num_views]")
+        if config.require_covisibility_topology and visibility.shape[1] <= 0:
+            raise ValueError(
+                "covisibility topology filtering requires at least one view"
+            )
 
     raw_parts: list[torch.Tensor] = []
+    topology_keep_parts: list[torch.Tensor] = []
     channel_parts: dict[str, list[torch.Tensor]] = {"geometry": []}
     if appearance is not None:
         channel_parts["appearance"] = []
@@ -461,6 +572,7 @@ def build_primitive_support_graph(
     for start in range(0, row.numel(), config.affinity_chunk_size):
         stop = min(start + config.affinity_chunk_size, row.numel())
         src, dst = row[start:stop], col[start:stop]
+        topology_keep = torch.ones(stop - start, dtype=torch.bool)
         distance2 = (points[src] - points[dst]).square().sum(dim=-1)
         pair_sigma2 = (local_sigma[src] * local_sigma[dst]).clamp_min(
             config.minimum_sigma**2
@@ -538,6 +650,11 @@ def build_primitive_support_graph(
                     )
                 log_affinity.add_(tangent_affinity.clamp_min(1e-12).log())
                 channel_parts["surface_tangent"].append(tangent_affinity)
+                if config.surface_topology_min_affinity > 0:
+                    topology_keep &= (
+                        tangent_affinity
+                        >= float(config.surface_topology_min_affinity)
+                    )
         if visibility is not None and visibility.shape[1] > 0:
             shared = (visibility[src] & visibility[dst]).sum(dim=-1).float()
             union = (visibility[src] | visibility[dst]).sum(dim=-1).float()
@@ -547,11 +664,23 @@ def build_primitive_support_graph(
             channel_parts["covisibility"].append(
                 covisibility_log.clamp(min=-60.0, max=0.0).exp()
             )
+            if config.require_covisibility_topology:
+                topology_keep &= shared > 0
         raw_parts.append(log_affinity.clamp(min=-60.0, max=0.0).exp())
+        topology_keep_parts.append(topology_keep)
     raw_affinity = torch.cat(raw_parts)
     edge_channels = {
         name: torch.cat(parts) for name, parts in channel_parts.items()
     }
+    topology_keep = torch.cat(topology_keep_parts)
+    if not bool(topology_keep.all()):
+        edge_index = edge_index[:, topology_keep]
+        raw_affinity = raw_affinity[topology_keep]
+        edge_channels = {
+            name: values[topology_keep]
+            for name, values in edge_channels.items()
+        }
+        row = edge_index[0]
     row_sum = torch.zeros(count, dtype=torch.float32)
     row_sum.index_add_(0, row, raw_affinity)
     edge_weight = raw_affinity / row_sum[row].clamp_min(1e-12)
@@ -618,6 +747,53 @@ def _seed_values(seed: SoftSeedSet | None, count: int, device: torch.device) -> 
     if values.shape != (count,):
         raise ValueError("query seeds do not align with support graph")
     return values
+
+
+def graph_local_seed_influence(
+    graph: PrimitiveSupportGraph,
+    seeds: torch.Tensor,
+    *,
+    steps: int,
+    decay: float,
+) -> torch.Tensor:
+    """Approximate a local geodesic kernel by bounded graph propagation.
+
+    The fixed step horizon prevents an opposite-sign click on another,
+    appearance-similar instance from becoming global negative evidence.
+    This helper reads only the query-independent topology and supplied seeds.
+    """
+
+    values = torch.as_tensor(seeds).float()
+    squeeze = values.ndim == 1
+    if squeeze:
+        values = values[:, None]
+    if (
+        values.ndim != 2
+        or values.shape[0] != graph.num_nodes
+        or values.shape[1] <= 0
+        or not bool(torch.isfinite(values).all())
+    ):
+        raise ValueError("graph-local seeds must be finite [N] or [N,K]")
+    if bool((values < 0).any()):
+        raise ValueError("graph-local seed weights cannot be negative")
+    steps = int(steps)
+    decay = float(decay)
+    if steps < 0 or not 0.0 <= decay <= 1.0:
+        raise ValueError("graph-local steps/decay are invalid")
+    working = graph if graph.edge_index.device == values.device else graph.to(values.device)
+    row, col = working.edge_index
+    frontier = values.clamp(0.0, 1.0)
+    influence = frontier.clone()
+    for _ in range(steps):
+        propagated = torch.zeros_like(frontier)
+        if row.numel():
+            propagated.index_add_(
+                0, row, working.edge_weight[:, None] * frontier[col]
+            )
+        frontier = decay * propagated
+        influence = torch.maximum(influence, frontier)
+    influence = influence.clamp(0.0, 1.0)
+    return influence[:, 0] if squeeze else influence
 
 
 def _hard_seed_masks(
@@ -729,14 +905,26 @@ def confidence_aware_laplacian_weight(
 ) -> float:
     """Choose graph regularization from query evidence, never benchmark identity.
 
-    Uncertain unary evidence receives more graph regularization.  Reliable
-    positive/negative separation permits that regularization to increase, while
-    already confident unary evidence stays close to its direct prediction.
+    The most uncertain one percent of rows (at least four) is used instead of
+    the scene mean:
+    this keeps a large, confidently rejected background from hiding ambiguity
+    around the query support.  Clear positive/negative separation then reduces
+    graph strength because the query already supplies reliable discrimination.
+    The fixed transform is shared by every modality and uses neither labels nor
+    benchmark-specific constants.
     """
 
     values = torch.as_tensor(prior).float().clamp(1e-6, 1.0 - 1e-6)
     entropy = -(values * values.log() + (1.0 - values) * (1.0 - values).log())
-    uncertainty = float(entropy.mean() / torch.log(values.new_tensor(2.0)))
+    normalized_entropy = entropy / torch.log(values.new_tensor(2.0))
+    # A small fixed tail sees candidate/support ambiguity even when most scene
+    # primitives are confidently rejected.  Averaging (rather than taking the
+    # maximum) keeps one numerical outlier from dictating the whole query.
+    tail_count = min(
+        normalized_entropy.numel(),
+        max(4, int(np.ceil(0.01 * normalized_entropy.numel()))),
+    )
+    uncertainty = float(torch.topk(normalized_entropy, k=tail_count).values.mean())
 
     def weighted_mean(weights: torch.Tensor) -> torch.Tensor | None:
         weights = torch.as_tensor(weights, device=values.device).float().clamp_min(0)
@@ -750,7 +938,8 @@ def confidence_aware_laplacian_weight(
         if positive_mean is not None and negative_mean is not None
         else 0.0
     )
-    multiplier = max(0.25, min(1.5, 0.25 + uncertainty * (0.5 + separation)))
+    multiplier = 0.25 + 1.25 * uncertainty * (1.0 - 0.5 * separation)
+    multiplier = max(0.25, min(1.5, multiplier))
     return float(base_weight) * multiplier
 
 
@@ -997,6 +1186,9 @@ def select_support_components(
     selection_mode: SelectionMode,
     *,
     positive_seeds: SoftSeedSet | None = None,
+    negative_seeds: SoftSeedSet | None = None,
+    positive_seed_groups: SoftSeedGroups | None = None,
+    negative_seed_groups: SoftSeedGroups | None = None,
     config: SupportSolverConfig = SupportSolverConfig(),
 ) -> torch.Tensor:
     """Apply the query-declared, benchmark-independent component policy."""
@@ -1020,6 +1212,72 @@ def select_support_components(
             return selected.to(values.device)
     labels = _component_labels(graph, active, config.component_edge_threshold)
     component_ids = labels[labels >= 0].unique()
+    if mode is SelectionMode.MIN_SEED_COVER:
+        if positive_seed_groups is None:
+            raise ValueError("min-seed-cover selection requires positive seed groups")
+        positive = positive_seed_groups.weights.detach().float().cpu()
+        if positive.shape[0] != graph.num_nodes:
+            raise ValueError("positive seed groups do not align with support graph")
+        negative = (
+            negative_seed_groups.weights.detach().float().cpu().amax(dim=1)
+            if negative_seed_groups is not None
+            else (
+                negative_seeds.weights.detach().float().cpu()
+                if negative_seeds is not None
+                else torch.zeros(graph.num_nodes)
+            )
+        )
+        if negative.shape != (graph.num_nodes,):
+            raise ValueError("negative seeds do not align with support graph")
+
+        # Components containing an explicit negative seed are inadmissible.
+        clean_components = [
+            component
+            for component in component_ids
+            if not bool(
+                (negative[labels == component] >= config.seeded_component_min_weight).any()
+            )
+        ]
+        group_count = positive.shape[1]
+        candidates: list[tuple[torch.Tensor, int, float]] = []
+        for component in clean_components:
+            component_seeds = positive[labels == component]
+            peaks = component_seeds.amax(dim=0)
+            coverage = 0
+            for group in range(group_count):
+                if float(peaks[group]) >= config.seeded_component_min_weight:
+                    coverage |= 1 << group
+            if coverage:
+                candidates.append((component, coverage, float(peaks.sum())))
+
+        # Exact dynamic-programming set cover. Interactive protocols use few
+        # positive clicks (typically <=15), making the 2^K state space small.
+        # For equal cardinality, prefer greater declared seed mass; component
+        # order provides a final deterministic tie break.
+        states: dict[int, tuple[tuple[int, ...], float]] = {0: ((), 0.0)}
+        for candidate_index, (_component, coverage, mass) in enumerate(candidates):
+            updates = dict(states)
+            for covered, (indices, total_mass) in states.items():
+                merged = covered | coverage
+                proposal = (indices + (candidate_index,), total_mass + mass)
+                incumbent = updates.get(merged)
+                if incumbent is None or (len(proposal[0]), -proposal[1], proposal[0]) < (
+                    len(incumbent[0]),
+                    -incumbent[1],
+                    incumbent[0],
+                ):
+                    updates[merged] = proposal
+            states = updates
+        target = (1 << group_count) - 1
+        if target not in states:
+            # The active support cannot satisfy the declared constraints.
+            # Abstention is safer than silently adding a negative component.
+            return torch.zeros(graph.num_nodes, dtype=torch.bool, device=values.device)
+        chosen = [candidates[index][0] for index in states[target][0]]
+        selected = torch.zeros(graph.num_nodes, dtype=torch.bool)
+        for component in chosen:
+            selected |= labels == component
+        return selected.to(values.device)
     scores = torch.stack(
         [values.detach().cpu()[labels == component].sum() for component in component_ids]
     )

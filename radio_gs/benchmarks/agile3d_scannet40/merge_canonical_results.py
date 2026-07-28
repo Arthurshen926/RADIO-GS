@@ -14,7 +14,11 @@ from radio_gs.field.observation_lifting_contract import (
     CANONICAL_FULL_OBSERVATION_CONTRACT_NAMES,
 )
 
-from .protocol import aggregate_official_metrics, load_official_object_list
+from .protocol import (
+    aggregate_official_metrics,
+    interaction_health_metrics,
+    load_official_object_list,
+)
 
 
 _PROTOCOL_KEYS = (
@@ -66,6 +70,12 @@ _PROTOCOL_KEYS = (
     "calibration_sample_size",
     "centroid_iterations",
     "score_calibration",
+    "channel_confidence_mode",
+    "negative_spatial_mode",
+    "negative_spatial_steps",
+    "negative_spatial_decay",
+    "spatial_log_weight",
+    "spatial_floor",
 )
 
 # These two fields were introduced after the first direct-canonical pilot.  A
@@ -109,6 +119,12 @@ _HISTORICAL_PROTOCOL_DEFAULTS = {
     "calibration_sample_size": 8192,
     "centroid_iterations": 4,
     "score_calibration": "none",
+    "channel_confidence_mode": "none",
+    "negative_spatial_mode": "none",
+    "negative_spatial_steps": 4,
+    "negative_spatial_decay": 0.8,
+    "spatial_log_weight": 0.25,
+    "spatial_floor": 0.01,
 }
 
 
@@ -265,6 +281,15 @@ def merge(
         },
         "metrics": aggregate_official_metrics(
             [row["trajectory"] for row in ordered_rows],
+            max_clicks=int(common_protocol["max_clicks"]),
+        ),
+        "interaction_health": interaction_health_metrics(
+            [row["trajectory"] for row in ordered_rows],
+            seed_satisfaction=(
+                [row["seed_satisfaction"] for row in ordered_rows]
+                if all("seed_satisfaction" in row for row in ordered_rows)
+                else None
+            ),
             max_clicks=int(common_protocol["max_clicks"]),
         ),
         "rows": ordered_rows,

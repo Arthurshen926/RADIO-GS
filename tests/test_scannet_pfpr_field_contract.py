@@ -22,6 +22,7 @@ from radio_gs.benchmarks.scannet_pfpr.prepare_field_contract import (
 )
 from radio_gs.benchmarks.scannet_pfpr.protocol import query_frame_exclusion_digest
 from radio_gs.scripts.build_geometry_render_contract import (
+    registered_scannet_source_config,
     validate_field_source_contract,
 )
 
@@ -44,6 +45,34 @@ def _write_frame_scene(root: Path, scene: str) -> None:
         "extrinsics_depth.txt",
     ):
         (scene_root / name).write_text("1\n", encoding="utf-8")
+
+
+def test_registered_scannet_source_config_explicitly_binds_all_modalities(
+    tmp_path: Path,
+) -> None:
+    scene_root = tmp_path / "scene0001_00"
+    for name in ("color", "depth", "pose"):
+        (scene_root / name).mkdir(parents=True)
+
+    config = registered_scannet_source_config(scene_root)
+
+    assert config["rgb_dir"] == str((scene_root / "color").resolve())
+    assert config["val_rgb_dir"] == config["rgb_dir"]
+    assert config["depth_dir"] == str((scene_root / "depth").resolve())
+    assert config["val_depth_dir"] == config["depth_dir"]
+    assert config["pose_dir"] == str((scene_root / "pose").resolve())
+    assert config["val_pose_dir"] == config["pose_dir"]
+    assert config["pose_file"] == ""
+    assert config["val_pose_file"] == ""
+
+
+def test_registered_scannet_source_config_rejects_missing_pose(tmp_path: Path) -> None:
+    scene_root = tmp_path / "scene0001_00"
+    (scene_root / "color").mkdir(parents=True)
+    (scene_root / "depth").mkdir()
+
+    with pytest.raises(ValueError, match="registered observation directories"):
+        registered_scannet_source_config(scene_root)
 
 
 def test_pfpr_field_contract_excludes_only_exact_query_source_frames(tmp_path: Path) -> None:

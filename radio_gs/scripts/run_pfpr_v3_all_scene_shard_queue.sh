@@ -16,11 +16,12 @@ SHARD_COUNT="${SHARD_COUNT:?set positive shard count}"
 RUN_ROOT="${RUN_ROOT:-output/scannet_pfpr_small_v2/full_sens_official_v3_960_r1}"
 BENCHMARK_DIR="${BENCHMARK_DIR:-output/scannet_pfpr_small_v2/test_v2_r1}"
 AFTER_ARTIFACT="${AFTER_ARTIFACT:-}"
-REQUIRE_GEOMETRY_SUPPORT_GATE="${REQUIRE_GEOMETRY_SUPPORT_GATE:-0}"
+REQUIRE_GEOMETRY_SUPPORT_GATE="${REQUIRE_GEOMETRY_SUPPORT_GATE:-1}"
 
-DEV3_ROOT="/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/field_only_full_sens_pfpr_v2_queryheldout_coverage960_dev3_v3"
-SCENE0050_ROOT="/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/field_only_full_sens_pfpr_v2_queryheldout_coverage960_scene0050_v3"
-REMAINING16_ROOT="/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/ScanNet-PFIR-Small/field_only_full_sens_pfpr_v2_queryheldout_coverage960_remaining16_v3"
+DATA_ROOT="${DATA_ROOT:-/mnt/pool/sqy/3d_understanding/ScanNet-PFIR-Small}"
+DEV3_ROOT="${DATA_ROOT}/field_only_full_sens_pfpr_v2_queryheldout_coverage960_dev3_v3"
+SCENE0050_ROOT="${DATA_ROOT}/field_only_full_sens_pfpr_v2_queryheldout_coverage960_scene0050_v3"
+REMAINING16_ROOT="${DATA_ROOT}/field_only_full_sens_pfpr_v2_queryheldout_coverage960_remaining16_v3"
 
 if (( SHARD_COUNT <= 0 || SHARD_INDEX < 0 || SHARD_INDEX >= SHARD_COUNT )); then
   echo "invalid SHARD_INDEX/SHARD_COUNT" >&2
