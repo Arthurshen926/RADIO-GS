@@ -333,6 +333,28 @@ def test_pfpr_primary_region_can_be_locally_refined_by_support() -> None:
     assert int(np.argmax(ranked)) == 1
 
 
+def test_pfpr_primary_prefix_precedes_distant_support_regions() -> None:
+    xyz = np.asarray(
+        [[0.0, 0.0, 0.0], [0.04, 0.0, 0.0], [1.0, 0.0, 0.0],
+         [2.0, 0.0, 0.0], [3.0, 0.0, 0.0], [4.0, 0.0, 0.0]],
+        dtype=np.float32,
+    )
+    merged = score_dino_center._primary_prefix_then_support_scores(
+        xyz,
+        anchor_scores=np.asarray([0.1, 1.0, 0.0, 0.0, 0.0, 0.0]),
+        primary_scores=np.asarray([1.0, 0.9, 0.8, 0.7, 0.6, 0.1]),
+        support_scores=np.asarray([0.1, 0.2, 0.3, 0.4, 0.5, 1.0]),
+        primary_prefix=5,
+        region_radius_m=0.1,
+        maximum=6,
+    )
+    order = np.argsort(-merged)
+
+    assert int(order[0]) == 1
+    assert int(order[1]) == 2
+    assert int(order[4]) == 5
+
+
 def test_pfpr_field_space_calibration_is_query_independent_and_normalized() -> None:
     field = torch.tensor([[3.0, 1.0], [2.0, 2.0], [1.0, 3.0]])
     query = torch.tensor([[2.0, 1.0], [1.0, 2.0]])

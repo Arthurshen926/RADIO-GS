@@ -432,6 +432,59 @@ def _interleaved_coarse_to_fine_scores(
     return ranked
 
 
+def _primary_prefix_then_support_scores(
+    candidate_xyz: np.ndarray,
+    anchor_scores: torch.Tensor | np.ndarray,
+    primary_scores: torch.Tensor | np.ndarray,
+    support_scores: torch.Tensor | np.ndarray,
+    *,
+    primary_prefix: int,
+    region_radius_m: float,
+    maximum: int,
+) -> np.ndarray:
+    """Keep early authoritative regions, then append support-only proposals."""
+
+    xyz = np.asarray(candidate_xyz, dtype=np.float32)
+    streams = [
+        np.asarray(torch.as_tensor(values).detach().cpu(), dtype=np.float32)
+        for values in (anchor_scores, primary_scores, support_scores)
+    ]
+    if any(values.shape != (len(xyz),) for values in streams):
+        raise ValueError("ranked score streams must align with candidates")
+    if int(primary_prefix) <= 0:
+        raise ValueError("primary prefix must be positive")
+    if int(maximum) < int(primary_prefix):
+        raise ValueError("maximum merged regions cannot be smaller than prefix")
+    if not np.isfinite(region_radius_m) or float(region_radius_m) <= 0.0:
+        raise ValueError("merge region radius must be positive")
+
+    orders = [np.argsort(-values, kind="stable") for values in streams]
+    selected: list[int] = [int(orders[0][0])]
+
+    def append_if_new(index: int) -> bool:
+        if any(
+            np.linalg.norm(xyz[int(index)] - xyz[old]) < float(region_radius_m)
+            for old in selected
+        ):
+            return False
+        selected.append(int(index))
+        return True
+
+    for index in orders[1]:
+        append_if_new(int(index))
+        if len(selected) >= int(primary_prefix):
+            break
+    for index in orders[2]:
+        append_if_new(int(index))
+        if len(selected) >= int(maximum):
+            break
+
+    ranked = np.full(len(xyz), -1e30, dtype=np.float32)
+    for rank, index in enumerate(selected):
+        ranked[index] = float(len(selected) - rank)
+    return ranked
+
+
 def _candidate_indices(gaussian_xyz: torch.Tensor, candidate_xyz: np.ndarray, count: int) -> torch.Tensor:
     source = torch.as_tensor(gaussian_xyz).float().cpu().numpy()
     _distance, rows = cKDTree(source).query(candidate_xyz, k=min(int(count), len(source)))
@@ -683,6 +736,7 @@ def _score_scene(
             else:
                 prototype_readouts = (candidate_readout,) * len(prototypes)
             prototype_scores: list[torch.Tensor] = []
+            primary_prototype_scores: list[torch.Tensor] = []
             primary_anchor_scores = None
             primary_anchor_valid = None
             for prototype, prototype_readout in zip(
@@ -724,6 +778,7 @@ def _score_scene(
                         primary_anchor_valid = (
                             primary_support >= float(readout_support_threshold)
                         )
+                        primary_prototype_scores.append(primary_anchor_scores)
                 else:
                     point_scores = _vector_candidate_similarity(
                         gaussian_xyz,
@@ -739,12 +794,30 @@ def _score_scene(
                             == "vector_normalized_coherence_sqrt"
                         ),
                     )
+                    if candidate_readout == "context_coarse_fine_primary_anchor":
+                        assert primary_local_mask is not None
+                        primary_prototype_scores.append(
+                            _vector_candidate_similarity(
+                                gaussian_xyz,
+                                covariance,
+                                field,
+                                prototype,
+                                point_tensor,
+                                precision=precision,
+                                opacity=opacity * primary_local_mask.float(),
+                                candidate_indices=indices,
+                                coherence_sqrt=(
+                                    prototype_readout
+                                    == "vector_normalized_coherence_sqrt"
+                                ),
+                            )
+                        )
                 prototype_scores.append(point_scores)
             if candidate_readout in {
                 "context_coarse_fine_interleave",
                 "context_coarse_fine_primary_anchor",
             }:
-                values = _interleaved_coarse_to_fine_scores(
+                support_values = _interleaved_coarse_to_fine_scores(
                     candidate_xyz,
                     prototype_scores[0],
                     prototype_scores[1],
@@ -758,6 +831,33 @@ def _score_scene(
                         == "context_coarse_fine_primary_anchor"
                     ),
                 )
+                if candidate_readout == "context_coarse_fine_primary_anchor":
+                    if (
+                        len(primary_prototype_scores) != 2
+                        or primary_anchor_valid is None
+                    ):
+                        raise RuntimeError(
+                            "primary-anchor readout lacks primary score streams"
+                        )
+                    primary_values = _interleaved_coarse_to_fine_scores(
+                        candidate_xyz,
+                        primary_prototype_scores[0],
+                        primary_prototype_scores[1],
+                        primary_anchor_valid,
+                        region_radius_m=2.0 * float(voxel_size_m),
+                        maximum_regions=int(candidate_k),
+                    )
+                    values = _primary_prefix_then_support_scores(
+                        candidate_xyz,
+                        support_values,
+                        primary_values,
+                        support_values,
+                        primary_prefix=5,
+                        region_radius_m=2.0 * float(voxel_size_m),
+                        maximum=int(candidate_k),
+                    )
+                else:
+                    values = support_values
             else:
                 point_scores = (
                     prototype_scores[0]
@@ -1074,12 +1174,26 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                     == "context_coarse_fine_interleave"
                     else (
                     {
+                        "method": "primary_authoritative_prefix_then_support_completion",
+                        "primary_region_count": 5,
+                        "support_candidate_budget": int(args.candidate_k),
+                        "region_radius": "2x_candidate_voxel_size",
+                        "prototypes": ["raw_center3x3", "context_adapted_center3x3"],
+                        "primary_readouts": ["scalar", "vector_normalized"],
+                        "support_role": "missing_observation_candidate_completion_only",
+                        "uses_query_pose_depth_or_gt": False,
+                    }
+                    if str(args.candidate_readout)
+                    == "context_coarse_fine_primary_anchor"
+                    else (
+                    {
                         "method": "logmeanexp",
                         "temperature": 0.1,
                         "prototype_count": 2,
                     }
                     if str(args.query_pooling) == "center_late_fusion"
                     else None
+                    )
                     )
                 )
             ),
