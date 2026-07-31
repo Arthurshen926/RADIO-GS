@@ -206,6 +206,39 @@ def test_completion_primary_first_preserves_supported_queries() -> None:
     assert stats["fallback_valid_count"] == 1
 
 
+def test_relative_peak_completion_routing_matches_raw_cosine_domain() -> None:
+    scores = torch.tensor(
+        [
+            [0.10, 0.08],
+            [0.09, 0.14],
+            [0.11, 0.15],
+        ]
+    )
+    actual, stats = apply_completion_evidence(
+        scores,
+        torch.ones(3, dtype=torch.bool),
+        primary_valid=torch.tensor([True, False, False]),
+        routing="primary_first",
+        primary_support_mode="relative_peak",
+        primary_support_margin=0.02,
+    )
+
+    torch.testing.assert_close(
+        actual.float(),
+        torch.tensor(
+            [
+                [0.10, 0.08],
+                [0.00, 0.14],
+                [0.00, 0.15],
+            ]
+        ),
+        atol=1e-4,
+        rtol=0,
+    )
+    assert stats["primary_supported_queries"] == 1
+    assert stats["primary_support_mode"] == "relative_peak"
+
+
 def test_completion_rejects_primary_rows_outside_valid_support() -> None:
     with pytest.raises(ValueError, match="must also be valid"):
         apply_completion_evidence(

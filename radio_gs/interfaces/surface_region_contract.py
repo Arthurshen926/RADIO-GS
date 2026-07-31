@@ -132,6 +132,11 @@ class SurfaceRegionContractV2:
             "core_context_radial_stratified_v1",
         }:
             raise ValueError("unsupported surface-region token_subsampling")
+        if self.reliability_semantics not in {
+            "geometric_mean_observation_agreement",
+            "uniform_valid",
+        }:
+            raise ValueError("unsupported surface-region reliability semantics")
         if self.token_candidate_limit < self.maximum_tokens:
             raise ValueError("token_candidate_limit cannot be below maximum_tokens")
         if not 0.0 < self.core_token_fraction <= 1.0:

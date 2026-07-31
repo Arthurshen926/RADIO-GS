@@ -56,6 +56,44 @@ def _sha256_file(path: str | Path) -> str:
     return digest.hexdigest()
 
 
+def raster_fusion_reliability(
+    features: torch.Tensor,
+    valid: torch.Tensor,
+    view_counts: torch.Tensor,
+    *,
+    num_views: int,
+    mode: str,
+    normalized_observations: bool,
+) -> torch.Tensor:
+    """Build query-free reliability for a raster-fused primitive target.
+
+    For unit-normalized observations, the norm of their weighted mean is the
+    mean resultant length: one for perfect directional agreement and lower as
+    observations disagree. The legacy mode is retained for frozen contracts.
+    """
+
+    values = torch.as_tensor(features).float()
+    active = torch.as_tensor(valid).bool().reshape(-1)
+    counts = torch.as_tensor(view_counts).float().reshape(-1)
+    if values.ndim != 2 or active.shape[0] != values.shape[0]:
+        raise ValueError("raster features and validity must align by primitive")
+    if counts.shape != active.shape or num_views <= 0:
+        raise ValueError("raster view counts must align and num_views be positive")
+    if mode not in {"legacy_valid", "mean_resultant"}:
+        raise ValueError("unsupported raster reliability mode")
+    coverage = (counts / float(num_views)).clamp(0.0, 1.0)
+    if mode == "legacy_valid":
+        agreement = active.float()
+    else:
+        if not normalized_observations:
+            raise ValueError(
+                "mean-resultant reliability requires normalized observations"
+            )
+        agreement = values.norm(dim=-1).clamp(0.0, 1.0)
+        agreement = agreement.masked_fill(~active, 0.0)
+    return torch.stack([coverage, agreement, active.float()], dim=-1).half()
+
+
 # These names and dimensions are those emitted by the official C-RADIOv4-H
 # runtime.  The direct path deliberately consumes the saved official adaptor
 # output, rather than applying an MLP to an already interpolated raw map.
@@ -1148,14 +1186,14 @@ def build_cache(args: argparse.Namespace) -> dict:
                 / registered_counts[valid].clamp_min(1e-8).unsqueeze(1)
             ).half()
         view_counts = observation_counts
-        reliability = torch.stack(
-            [
-                view_counts.float() / max(1, len(selected)),
-                valid.float(),
-                valid.float(),
-            ],
-            dim=-1,
-        ).half()
+        reliability = raster_fusion_reliability(
+            features,
+            valid,
+            view_counts,
+            num_views=max(1, len(selected)),
+            mode=str(getattr(args, "raster_reliability_mode", "legacy_valid")),
+            normalized_observations=bool(args.normalize_each_view),
+        )
     metadata = {
         "schema_version": 1,
         "feature_space": feature_space,
@@ -1171,6 +1209,9 @@ def build_cache(args: argparse.Namespace) -> dict:
         "aggregation_mode": args.aggregation_mode,
         "registration_weight_mode": args.registration_weight_mode,
         "raster_view_fusion": args.raster_view_fusion,
+        "raster_reliability_mode": str(
+            getattr(args, "raster_reliability_mode", "legacy_valid")
+        ),
         "raster_topk": max(1, int(args.raster_topk)),
         "raster_topk_ranking": (
             "whole_view_compositing_responsibility"
@@ -1418,6 +1459,15 @@ def main() -> None:
         help="Across-view fusion after each raster registration observation.",
     )
     parser.add_argument(
+        "--raster-reliability-mode",
+        choices=["legacy_valid", "mean_resultant"],
+        default="legacy_valid",
+        help=(
+            "Keep frozen [coverage,valid,valid] reliability or record the "
+            "mean-resultant directional agreement of normalized observations."
+        ),
+    )
+    parser.add_argument(
         "--raster-topk",
         type=int,
         default=3,
@@ -1431,6 +1481,21 @@ def main() -> None:
         help="Mark diagnostic caches built from held-out benchmark RGB/features.",
     )
     args = parser.parse_args()
+    if (
+        args.raster_reliability_mode != "legacy_valid"
+        and args.aggregation_mode == "center"
+    ):
+        parser.error(
+            "--raster-reliability-mode applies only to raster aggregation"
+        )
+    if (
+        args.raster_reliability_mode == "mean_resultant"
+        and not args.normalize_each_view
+    ):
+        parser.error(
+            "--raster-reliability-mode mean_resultant requires "
+            "--normalize-each-view"
+        )
     print(json.dumps(build_cache(args), indent=2))
 
 

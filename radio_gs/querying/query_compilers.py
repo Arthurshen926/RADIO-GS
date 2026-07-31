@@ -8,7 +8,9 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.field.field_signature import FeatureSpaceSignature
+from .evidence_scorer import registered_seed_unary
 from .query_spec import (
+    PrimitiveUnaryEvidence,
     PrototypeSet,
     QueryIntent,
     QueryModality,
@@ -198,6 +200,7 @@ def compile_registered_2d_query(
     boundary_signature: FeatureSpaceSignature,
     prototype_count: int = 4,
     prototype_strategy: str = "spherical_mean_fps",
+    selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
 ) -> QuerySpec:
     """Lift arbitrary points/scribbles/box/mask through raster responsibilities."""
 
@@ -224,6 +227,7 @@ def compile_registered_2d_query(
         prototype_count=prototype_count,
         prototype_strategy=prototype_strategy,
         seed_source="raster_responsibility",
+        selection_mode=selection_mode,
     )
 
 
@@ -238,6 +242,9 @@ def compile_registered_primitive_seeds(
     prototype_count: int = 4,
     prototype_strategy: str = "spherical_mean_fps",
     seed_source: str = "raster_responsibility",
+    selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
+    positive_prompt_mass: torch.Tensor | None = None,
+    negative_prompt_mass: torch.Tensor | None = None,
 ) -> QuerySpec:
     """Compile sparse raster-registered primitive seeds into shared evidence."""
 
@@ -259,6 +266,19 @@ def compile_registered_primitive_seeds(
         raise ValueError("positive and negative primitive seeds must align")
     if not bool((positive > 0).any()):
         raise ValueError("registered query has no positive primitive support")
+    direct_positive = (
+        positive
+        if positive_prompt_mass is None
+        else torch.as_tensor(positive_prompt_mass).float().reshape(-1)
+    )
+    direct_negative = (
+        negative
+        if negative_prompt_mass is None
+        else torch.as_tensor(negative_prompt_mass).float().reshape(-1)
+    )
+    direct_unary = registered_seed_unary(direct_positive, direct_negative)
+    if direct_unary.shape != positive.shape:
+        raise ValueError("registered prompt masses and primitive seeds must align")
 
     app_proto, app_mass = _deterministic_prototypes(
         appearance, positive, prototype_count, strategy=prototype_strategy
@@ -297,9 +317,16 @@ def compile_registered_primitive_seeds(
             if negative is not None and bool((negative > 0).any())
             else None
         ),
-        selection_mode=SelectionMode.SEEDED_COMPONENT,
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            direct_unary,
+            f"{seed_source}_joint_mass",
+        ),
+        selection_mode=SelectionMode(selection_mode),
         field_signature=appearance_signature,
-        metadata={"prototype_strategy": str(prototype_strategy)},
+        metadata={
+            "prototype_strategy": str(prototype_strategy),
+            "registered_unary_normalization": "joint_prompt_mass",
+        },
     )
 
 

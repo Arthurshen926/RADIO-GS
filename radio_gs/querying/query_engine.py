@@ -240,6 +240,26 @@ class CanonicalQueryEngine:
                 name: shrink_unary_by_reliability(values, self.node_reliability)
                 for name, values in components.items()
             }
+        if (
+            query.modality is QueryModality.REGISTERED_2D
+            and query.primitive_unary_evidence is not None
+            and scoring_config.registered_seed_unary_weight > 0
+        ):
+            # A registered prompt is direct scene evidence.  Add it after
+            # query-independent field-reliability shrinkage so a low-confidence
+            # feature row cannot erase an observed scribble/full-mask unary.
+            prompt_unary = query.primitive_unary_evidence.values.to(
+                device=unary.device, dtype=unary.dtype
+            )
+            if prompt_unary.shape != unary.shape:
+                raise ValueError(
+                    "registered prompt unary does not align with support graph"
+                )
+            weighted_prompt_unary = (
+                prompt_unary * scoring_config.registered_seed_unary_weight
+            )
+            unary = unary + weighted_prompt_unary
+            components = {**components, "registered_seed": weighted_prompt_unary}
         if unary.numel() != self.graph.num_nodes:
             if unary.numel() == 0 and self.graph.num_nodes > 0:
                 unary = torch.zeros(self.graph.num_nodes)

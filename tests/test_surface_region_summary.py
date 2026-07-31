@@ -90,3 +90,37 @@ def test_v2_readout_is_anchor_conditioned_and_jointly_permutation_invariant() ->
         reliability=reliability,
     )
     assert not torch.allclose(other_anchor, expected)
+
+
+def test_v2_input_only_mode_does_not_double_apply_reliability_prior() -> None:
+    torch.manual_seed(23)
+    features = torch.randn(1, 4, 16)
+    geometry = torch.randn(1, 4, 14)
+    mask = torch.ones(1, 4, dtype=torch.bool)
+    anchor = torch.tensor([0])
+    low_high = torch.tensor([[[0.1], [1.0], [1.0], [1.0]]])
+    high_low = torch.tensor([[[1.0], [0.1], [1.0], [1.0]]])
+    input_only = SurfaceRegionSummaryReadoutV2(
+        feature_dim=16,
+        hidden_dim=8,
+        reliability_attention_mode="input_only",
+    ).eval()
+    first = input_only(
+        features,
+        geometry,
+        anchor_index=anchor,
+        token_mask=mask,
+        reliability=low_high,
+    )
+    second = input_only(
+        features,
+        geometry,
+        anchor_index=anchor,
+        token_mask=mask,
+        reliability=high_low,
+    )
+    torch.testing.assert_close(first, second)
+    assert (
+        input_only.architecture("contract")["reliability_attention_mode"]
+        == "input_only"
+    )

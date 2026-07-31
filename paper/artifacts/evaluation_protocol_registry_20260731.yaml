@@ -1,0 +1,348 @@
+schema_version: 1
+created: 2026-07-31
+purpose: >-
+  Cross-benchmark, fail-closed registry for the external-method evaluation
+  audit. A numerical paper delta is not a same-protocol claim unless every
+  protocol-match dimension is true and strict_table_eligible is true.
+
+reporting_policy:
+  oracle_metrics_are_diagnostic_only: true
+  incomplete_cohorts_are_strictly_comparable: false
+  preserve_historical_rows: true
+  historical_rows_policy: >-
+    Existing paper tables and final_rows.yaml are provenance records. This
+    registry governs whether a row may be described as a strict reproduction;
+    it does not silently overwrite historical post-hoc values.
+  aggregation_policy: >-
+    Store scene-equal macro and query-weighted micro separately. Use only the
+    aggregation that reproduces the published metric when computing a paper
+    delta, and disclose mixed aggregation across metrics.
+  target_visibility_policy: >-
+    Methods that consume target RGB at training or query time cannot be placed
+    in a strict-unseen reusable-field row.
+
+evaluations:
+  lerf2d_langsplatv2_exact_camera_20260731:
+    benchmark_family: concept_query
+    task: LERF-OVS rendered-view 2D open-vocabulary segmentation/localization
+    method: LangSplatV2
+    completion: complete
+    evidence_class: released_code_reproduction
+    cohort:
+      complete: true
+      scenes: [figurines, teatime, ramen, waldo_kitchen]
+      annotated_frames: 22
+      queries: 208
+      labelled_camera_roles: {train: 15, test: 7}
+    protocol:
+      query: official annotation strings
+      camera_mapping: exact annotation stem over train-camera plus test-camera union
+      mask_threshold: 0.4
+      semantic_levels: 3
+      metric_domain: labelled image pixels and localization bboxes
+      aggregation: >-
+        mIoU paper delta uses four-scene equal macro; LocAcc paper delta uses
+        208-query micro, matching the published mixed overall convention
+      calibration: released fixed threshold; no target-mask threshold selection
+      target_visibility: mixed labelled train/test roles from eval=True checkpoints
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - The released evaluator indexed the train-camera list by original frame index; the audit applies a minimal exact-name camera correction.
+        - Fifteen of 22 annotated views have train role, conflicting with held-out-test-view prose.
+        - The checkpoints are local compatibility checkpoints rather than a released paper checkpoint bundle.
+      protocol_match_to_paper:
+        cohort: true
+        prompt_or_query: true
+        target_visibility: false
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: false
+    reported_metrics:
+      - name: miou_scene_macro_percent
+        role: primary
+        local: 61.51
+        paper: 59.9
+        delta_points: 1.61
+      - name: localization_accuracy_query_micro_percent
+        role: primary
+        local: 79.8076923076923
+        paper: 84.1
+        delta_points: -4.2923076923077
+      - name: miou_query_micro_percent
+        role: secondary
+        value: 62.45120192307693
+      - name: localization_accuracy_scene_macro_percent
+        role: secondary
+        value: 79.84554088785409
+      - name: prior_buggy_miou_scene_macro_percent
+        role: diagnostic
+        value: 46.010000000000005
+      - name: prior_buggy_localization_scene_macro_percent
+        role: diagnostic
+        value: 61.76
+    artifacts:
+      cohort_summary: output/protocol_audit_20260731/langsplatv2_lerf2d_view_fix/cohort_summary.json
+      reproduction_package: reproductions/langsplatv2
+      minimal_patch_sha256: a0ba52f843fdc21a0135f71b2ebe2edb5112c4ef48235a080c3c8828a5b285f3
+
+  lerf2d_occamlgs_official_checkpoint_context_20260731:
+    benchmark_family: concept_query
+    task: LERF-OVS rendered-view 2D open-vocabulary segmentation/localization
+    method: OccamLGS
+    completion: blocked
+    evidence_class: published_context
+    cohort:
+      complete: false
+      scenes: [figurines, teatime, ramen, waldo_kitchen]
+      reason: no released paper checkpoint bundle and no self-contained released LERF evaluator
+    protocol:
+      query: official annotation strings
+      target_visibility: paper describes withheld test views
+      metric_domain: labelled image pixels and localization bboxes
+      aggregation: published four-scene overall
+      calibration: paper threshold 0.5; three language-feature levels
+    comparability:
+      paper_comparison: forbidden
+      strict_table_eligible: false
+      reasons:
+        - The official repository delegates LERF evaluation to LangSplat and still marks evaluation code for release.
+        - Available local Occam compatibility checkpoints have eval=False and therefore include labelled views during geometry training.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: false
+        metric_domain: false
+        aggregation: false
+        calibration: true
+        implementation: false
+    paper_context:
+      miou_percent: 61.3
+      localization_accuracy_percent: 82.5
+      source: https://bmvc2025.bmva.org/proceedings/694/
+    artifacts:
+      streaming_diagnostic_evaluator: radio_gs/scripts/eval_occamlgs_lerf_checkpoint.py
+
+  lerf3d_drsplat_compatibility_20260519:
+    benchmark_family: concept_query
+    task: LERF-OVS direct 3D open-vocabulary object selection
+    method: Dr. Splat
+    completion: complete
+    evidence_class: compatibility_reproduction
+    cohort:
+      complete: true
+      scenes: [figurines, teatime, ramen, waldo_kitchen]
+      queries: 208
+      missing_predictions: 0
+    protocol:
+      query: official annotation strings
+      target_visibility: not established by an official released evaluation package
+      metric_domain: locally exported nested 2D silhouette masks
+      aggregation: query-weighted mean over 208 objects
+      calibration: local compatibility mask threshold 0.4
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - Upstream official quantitative evaluation remains unavailable/TBA.
+        - The local nested-mask export is a compatibility adapter, not the paper's released direct-3D evaluator.
+        - Metric domain, threshold, and overall aggregation cannot be proven identical to the paper row.
+      protocol_match_to_paper:
+        cohort: true
+        prompt_or_query: true
+        target_visibility: false
+        metric_domain: false
+        aggregation: false
+        calibration: false
+        implementation: false
+    reported_metrics:
+      - name: miou_percent
+        role: primary
+        local: 17.617341010031962
+        paper: 43.29
+        delta_points: -25.67265898996804
+      - name: accuracy_at_iou_0p25_percent
+        role: primary
+        local: 25.61156616122002
+        paper: 64.3
+        delta_points: -38.68843383877998
+    artifacts:
+      result: paper/artifacts/drsplat_lerf_summary.json
+
+  lerf3d_occamlgs_opengaff_adaptation_context_20260731:
+    benchmark_family: concept_query
+    task: LERF-OVS direct 3D open-vocabulary object selection
+    method: OccamLGS adaptation reported by OpenGaFF
+    completion: not_attempted
+    evidence_class: published_context
+    cohort:
+      complete: false
+      scenes: [figurines, teatime, ramen, waldo_kitchen]
+      reason: adaptation code/checkpoints were not released
+    protocol:
+      query: LERF-OVS object strings
+      target_visibility: undocumented for the adaptation
+      metric_domain: OpenGaFF direct-3D adaptation table
+      aggregation: published overall
+      calibration: undocumented for the adaptation
+    comparability:
+      paper_comparison: forbidden
+      strict_table_eligible: false
+      reasons:
+        - OccamLGS's own paper and repository evaluate LERF 2D and 3D-OVS, not this LERF direct-3D row.
+        - The 47.22/74.84 row is an OpenGaFF adaptation without released reproduction code.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: false
+        target_visibility: false
+        metric_domain: false
+        aggregation: false
+        calibration: false
+        implementation: false
+    paper_context:
+      miou_percent: 47.22
+      accuracy_at_iou_0p25_percent: 74.84
+      source: https://arxiv.org/abs/2605.06088
+
+  scannet_ovs_vala_compatibility_20260611:
+    benchmark_family: concept_query
+    task: ScanNet-v2 open-vocabulary 3D semantic query on VALA8
+    method: VALA
+    completion: complete
+    evidence_class: compatibility_reproduction
+    cohort:
+      complete: true
+      scenes:
+        - scene0000_00
+        - scene0062_00
+        - scene0070_00
+        - scene0097_00
+        - scene0140_00
+        - scene0347_00
+        - scene0400_00
+        - scene0590_00
+    protocol:
+      query: ScanNet class-name prompts for 19/15/10 splits
+      target_visibility: all ScanNet training views are available
+      metric_domain: local resolution-2 point/PLY compatibility predictions
+      aggregation: unweighted macro over the same eight scenes
+      calibration: local compatibility pipeline; no claim of paper-identical checkpoint/readout
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - The run used local compatibility checkpoints and resolution-2 prediction assets.
+        - It is not the paper's released checkpoint/result bundle.
+        - The local point/PLY metric domain must not be mixed with the VALA Gaussian-volume domain used by the aligned GaussFM audit.
+      protocol_match_to_paper:
+        cohort: true
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: false
+        aggregation: true
+        calibration: false
+        implementation: false
+    reported_metrics:
+      - {name: split19_miou_percent, role: primary, local: 11.978540187041181, paper: 32.11, delta_points: -20.13145981295882}
+      - {name: split19_macc_percent, role: primary, local: 23.739873368090336, paper: 50.05, delta_points: -26.31012663190966}
+      - {name: split15_miou_percent, role: primary, local: 14.86999750417189, paper: 35.1, delta_points: -20.23000249582811}
+      - {name: split15_macc_percent, role: primary, local: 28.153840089204085, paper: 54.77, delta_points: -26.61615991079591}
+      - {name: split10_miou_percent, role: primary, local: 22.716264554959673, paper: 46.21, delta_points: -23.493735445040327}
+      - {name: split10_macc_percent, role: primary, local: 41.70291613483177, paper: 65.61, delta_points: -23.90708386516823}
+    artifacts:
+      result: paper/artifacts/vala_scannet_vala8_local_reproduction_20260611.json
+      metric_domain_audit: paper/artifacts/protocol_alignment_scannet_20260711.md
+      gaussfm_vala_domain_result: output/scannet_pointcloud_eval/vala_gaussian_protocol_20260711/scannet_vala_gaussian_protocol_results.json
+
+  spin_nerf_ludvig_9scene_missing_fork_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: blocked
+    evidence_class: diagnostic
+    cohort:
+      complete: false
+      available_scenes: [orchids, leaves, fern, room, horns, fortress, pinecone, truck, lego]
+      missing_scenes: [fork]
+      annotated_frames: 423
+      reason: >-
+        Fork data is absent. Exact fern checkpoint reuse is CPU-preflighted,
+        but the 30k checkpoint and all GPU evaluation are pending recovery
+        from GPU0 lost; the other eight available scenes have no compatible
+        local all-view 30k checkpoints.
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: foreground image IoU on non-reference annotated frames
+      aggregation: frame mean then equal-weight macro over scenes
+      calibration: per-scene SAM candidate and threshold selected on the reference GT mask
+    comparability:
+      paper_comparison: forbidden
+      strict_table_eligible: false
+      reasons:
+        - The local cohort is nine scenes rather than the paper's ten.
+        - No completed compatible all-view 30k checkpoint or local SPIn metric is available while GPU0 is lost.
+        - Only fern checkpoint reuse is preflighted; the other eight available scenes remain without compatible all-view geometry.
+        - The nine-scene paper context 94.5778 must not be substituted for the full-ten-scene 93.8 row.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: false
+        calibration: true
+        implementation: true
+    paper_context:
+      full_10scene_miou_percent: 93.8
+      same_available_9scene_macro_percent: 94.5777777778
+    artifacts:
+      manifest: output/protocol_audit_20260731/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json
+      fern_checkpoint_reuse_preflight: output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  pfpr_ludvig_style_partial6_20260731:
+    benchmark_family: correspondence_query
+    task: PFPR custom cross-view correspondence retrieval
+    method: LUDVIG-style DINO uplift sanity
+    completion: partial
+    evidence_class: diagnostic
+    cohort:
+      complete: false
+      available_scenes: 6
+      expected_scenes: 20
+      queries: 60
+      expected_queries: 200
+    protocol:
+      query: held-out RGB crop
+      target_visibility: method consumes scene id and query crop RGB
+      metric_domain: 3D retrieval distance and recall at 10 cm
+      aggregation: exact query micro and equal-scene macro replay
+      calibration: no support gate; custom corrected-v2 cache
+    comparability:
+      paper_comparison: forbidden
+      strict_table_eligible: false
+      reasons:
+        - PFPR is a custom benchmark with no published LUDVIG task or paper number.
+        - This is a DINOv3/MPR uplift sanity, not the official DINOv2 inverse-rendering and graph-diffusion implementation.
+        - Only six of 20 scenes are available in the corrected-v2 cache.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: false
+        target_visibility: false
+        metric_domain: false
+        aggregation: false
+        calibration: false
+        implementation: false
+    reported_metrics:
+      - {name: top1_mean_distance_m, role: primary, value: 1.2669}
+      - {name: top1_median_distance_m, role: primary, value: 0.6899}
+      - {name: recall_at_1_at_10cm_percent, role: primary, value: 16.67}
+      - {name: recall_at_5_at_10cm_percent, role: primary, value: 35.0}
+      - {name: recall_at_10_at_10cm_percent, role: primary, value: 41.67}
+      - {name: mean_reciprocal_rank, role: secondary, value: 0.2463}
+    artifacts:
+      audit: output/protocol_audit_20260731/pfpr_ludvig_style_v2_partial6/audit.json
+      evaluation: output/protocol_audit_20260731/pfpr_ludvig_style_v2_partial6/evaluation.json
+      protocol_card: paper/artifacts/pfpr_ludvig_style_protocol_card_20260731.md

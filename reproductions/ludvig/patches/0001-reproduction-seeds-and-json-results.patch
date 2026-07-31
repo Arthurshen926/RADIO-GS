@@ -1,0 +1,105 @@
+diff --git a/evaluation/spin_nvos/segmentation.py b/evaluation/spin_nvos/segmentation.py
+index 8677c85..6c69728 100644
+--- a/evaluation/spin_nvos/segmentation.py
++++ b/evaluation/spin_nvos/segmentation.py
+@@ -1,4 +1,5 @@
+ import os
++import json
+ import numpy as np
+ from .base import SegmentationBase
+ 
+@@ -29,6 +30,25 @@ class SegmentationNVOSSAM(SegmentationBase):
+         f_iou.write(
+             f"IoU for selected threshold ({round(k_best, 1)}): {round(_best_iou, 3)}\n"
+         )
++        json.dump(
++            {
++                "schema_version": 1,
++                "benchmark": "NVOS",
++                "scene": self.scene,
++                "reference_frame": self.scribble_camera.image_name,
++                "target_frame": os.path.basename(self.ev_name),
++                "metric": "foreground_iou",
++                "oracle_target_iou": float(_best_iou_th),
++                "oracle_target_threshold_parameter": float(k_best_th),
++                "selected_iou": float(_best_iou),
++                "selected_threshold_parameter": float(k_best),
++                "threshold_policy": "fixed_across_nvos_scenes",
++                "reference_scored": False,
++            },
++            open(os.path.join(self.logdir, "protocol_result.json"), "w"),
++            indent=2,
++        )
++        f_iou.close()
+ 
+ 
+ class SegmentationNVOSDINOv2(SegmentationBase):
+@@ -66,6 +86,7 @@ class SegmentationSPIn(SegmentationBase):
+         else:
+             sid_best_iou = 0
+         res = []
++        frame_results = []
+         for i, ev in enumerate(self.eval_paths):
+             _iou, *args = self.segment_and_evaluate(
+                 k_best=k_best,
+@@ -74,10 +95,35 @@ class SegmentationSPIn(SegmentationBase):
+                 sam_index=sam_index,
+                 normalize=True,
+             )
++            frame_results.append(
++                {
++                    "frame": os.path.basename(ev),
++                    "role": "reference" if i == 0 else "target",
++                    "foreground_iou": float(_iou),
++                }
++            )
+             if i > 0:
+                 res.append(_iou)
+-        print("Mean IoU:", round(sum(res) / len(res), 3))
+-        f_iou.write(f"Mean IoU: {round(sum(res)/len(res), 3)} \n")
++        mean_iou = float(sum(res) / len(res))
++        print("Mean IoU:", round(mean_iou, 3))
++        f_iou.write(f"Mean IoU: {round(mean_iou, 3)} \n")
++        json.dump(
++            {
++                "schema_version": 1,
++                "benchmark": "SPIn-NeRF",
++                "scene": self.scene,
++                "reference_frame": os.path.basename(self.eval_paths[0]),
++                "metric": "foreground_iou",
++                "selected_threshold_parameter": float(k_best),
++                "selected_sam_candidate": int(sid_best_iou),
++                "threshold_and_candidate_policy": "maximize_reference_mask_iou_per_scene",
++                "reference_scored": False,
++                "frame_results": frame_results,
++                "scene_mean_iou": mean_iou,
++            },
++            open(os.path.join(self.logdir, "protocol_result.json"), "w"),
++            indent=2,
++        )
+         f_iou.close()
+ 
+ 
+diff --git a/ludvig_uplift.py b/ludvig_uplift.py
+index 4a548c9..0dac29a 100644
+--- a/ludvig_uplift.py
++++ b/ludvig_uplift.py
+@@ -112,10 +112,17 @@ if __name__ == "__main__":
+     parser.add_argument("--height", type=int, default=1199)
+     parser.add_argument("--width", type=int, default=1600)
+     parser.add_argument("--tag", type=str)  #
++    parser.add_argument(
++        "--seed",
++        type=int,
++        default=0,
++        help="Random seed for an independent stochastic SAM/DINO reproduction run.",
++    )
+ 
+     args = parser.parse_args()
+-    reproducibility(0)
++    reproducibility(args.seed)
+     model = LUDVIGUplift(args)
++    model.config["reproduction_seed"] = args.seed
+     model.uplift()
+     model.save()
+     sys.exit()

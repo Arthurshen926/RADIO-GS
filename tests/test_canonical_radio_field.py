@@ -105,6 +105,34 @@ def test_low_dimensional_fusion_starts_from_analytical_projection():
     torch.testing.assert_close(field.coefficients(), expected)
 
 
+def test_deep_primitive_fusion_preserves_initial_projection_and_batch_invariance():
+    torch.manual_seed(17)
+    decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
+    field = CanonicalGaussianField(
+        5,
+        decoder,
+        _signature(),
+        local_dim=2,
+        reliability=torch.rand(5, 3),
+        hidden_dim=8,
+        fusion_residual_blocks=2,
+        use_fusion=True,
+    )
+    weight = torch.randn(4, 2)
+    bias = torch.randn(4)
+    field.fusion.initialize_base_projection(weight, bias)
+
+    expected = field.local_codes @ weight.transpose(0, 1) + bias
+    torch.testing.assert_close(field.coefficients(), expected)
+    torch.testing.assert_close(
+        field.radio_features(torch.tensor([3]))[0],
+        field.radio_features(torch.tensor([1, 3, 4]))[1],
+        atol=1e-7,
+        rtol=1e-6,
+    )
+    assert len(field.fusion.residual_blocks) == 2
+
+
 def test_reliability_can_be_stored_without_entering_fusion():
     decoder = AffineBasisDecoder(feature_dim=8, coefficient_dim=4)
     field = CanonicalGaussianField(

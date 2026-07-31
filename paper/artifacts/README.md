@@ -164,6 +164,19 @@ sha256sum -c paper/artifacts/checksums.txt
 
 ## Baseline Reproduction
 
+- `easy3d_agile3d_protocol_audit_20260731.md`: official-checkpoint Easy3D
+  protocol card covering the exact four-worker preprocessing cache, paired
+  AGILE3D/Easy3D interaction-contract pilot, selected primary contract, and
+  the explicitly non-formal 68-scene hardware-interrupted resume state.
+- `ludvig_nvos_spin_protocol_audit_20260731.md`: LUDVIG-SAM NVOS/SPIn-NeRF
+  protocol audit. It pins the reconstructed byte-identical official 3DGS
+  training source, the completed fern hybrid pilot, the validated all-view
+  CPU dry run and GPU-lost resume boundary, plus the SPIn fern checkpoint
+  reuse and reference-mask calibration preflight.
+- `pfpr_ludvig_style_protocol_card_20260731.md`: compact protocol/provenance
+  card for the six-scene PFPR LUDVIG-style DINO uplift sanity. It explicitly
+  records why the cache is not an official LUDVIG reproduction, its partial
+  no-support-gate status, immutable hashes, and exact evaluator replay.
 - `external_baseline_audit.{md,json}`: local clone/build/reproduction status for
   OpenGaussian, LangSplatV2, OccamLGS, GAGS, Dr. Splat, LangSplat,
   LEGaussians, CAGS, Semantic Gaussians, and LaGa.

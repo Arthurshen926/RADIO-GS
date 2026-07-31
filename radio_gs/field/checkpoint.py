@@ -41,6 +41,9 @@ def load_canonical_field_checkpoint(
         reliability=reliability,
         fusion_reliability=bool(architecture.get("fusion_reliability", True)),
         hidden_dim=int(architecture["hidden_dim"]),
+        fusion_residual_blocks=int(
+            architecture.get("fusion_residual_blocks", 0)
+        ),
         use_fusion=bool(architecture.get("use_fusion", True)),
     )
     field.load_state_dict(payload["state_dict"], strict=True)

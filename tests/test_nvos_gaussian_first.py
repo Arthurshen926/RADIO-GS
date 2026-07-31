@@ -12,6 +12,8 @@ from radio_gs.querying.query_compilers import (
 from radio_gs.scripts.eval_nvos_gaussian_first import (
     _load_training_poses,
     _resolve_observed_feature_path,
+    _scaled_raster_shape,
+    _valid_normalized_score_map,
     _weighted_spherical_prototypes,
 )
 
@@ -145,6 +147,38 @@ def test_sparse_registered_compiler_uses_continuous_primitive_seeds() -> None:
         query.positive_seeds.weights, torch.tensor([0.125, 1.0, 0.0])
     )
     assert query.negative_seeds is not None
+
+
+def test_native_prompt_raster_shape_is_not_tied_to_feature_resolution() -> None:
+    assert _scaled_raster_shape(756, 1008, 1.0) == (756, 1008)
+    assert _scaled_raster_shape(756, 1008, 0.5) == (378, 504)
+
+
+def test_valid_normalized_score_map_uses_only_supported_compositing_mass() -> None:
+    rendered = torch.tensor(
+        [
+            [[0.20, 0.00], [0.45, 0.10]],
+            [[0.25, 0.00], [0.50, 0.20]],
+        ]
+    )
+    actual = _valid_normalized_score_map(rendered)
+    torch.testing.assert_close(
+        actual,
+        torch.tensor([[0.8, 0.0], [0.9, 0.5]]),
+    )
+
+
+def test_valid_normalized_score_map_interpolates_to_total_alpha_score() -> None:
+    rendered = torch.tensor(
+        [
+            [[0.20, 0.45]],
+            [[0.25, 0.50]],
+        ]
+    )
+
+    total_alpha = _valid_normalized_score_map(rendered, coverage_power=1.0)
+
+    torch.testing.assert_close(total_alpha, rendered[0])
 
 
 def test_sparse_prototypes_match_prefiltered_reference_for_half_bank() -> None:

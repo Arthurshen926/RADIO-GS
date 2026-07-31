@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/graphdeco-inria/gaussian-splatting.git",
+  "commit": "f7a116fb1397d9842239127d39dc212f93171f70",
+  "commit_date": "2023-08-14T10:25:42+02:00",
+  "selection": {
+    "reason": "The LUDVIG checkout vendors gaussian-splatting as an ordinary tree, not a gitlink. This official revision has the exact LUDVIG train.py blob and the maximum audited identity across the common pre-release source files.",
+    "ludvig_gaussiansplatting_tree_mode": "040000",
+    "ludvig_gaussiansplatting_is_gitlink": false,
+    "common_tracked_files_compared": 30,
+    "byte_identical_files": 20,
+    "ludvig_modified_files": 10,
+    "identical_training_entrypoint": {
+      "path": "train.py",
+      "git_blob": "36faf0de5a5a8b76d6a2644a3ec27fad6764b45c",
+      "sha256": "c5a61947e2abcf56bf83451ae9633799d96894910ea2982a01f209c47cec462d"
+    },
+    "byte_identical_paths": [
+      ".gitignore",
+      ".gitmodules",
+      "LICENSE.md",
+      "README.md",
+      "assets/logo_mpi.svg",
+      "convert.py",
+      "full_eval.py",
+      "lpipsPyTorch/__init__.py",
+      "lpipsPyTorch/modules/lpips.py",
+      "lpipsPyTorch/modules/networks.py",
+      "lpipsPyTorch/modules/utils.py",
+      "metrics.py",
+      "render.py",
+      "scene/colmap_loader.py",
+      "train.py",
+      "utils/general_utils.py",
+      "utils/image_utils.py",
+      "utils/loss_utils.py",
+      "utils/sh_utils.py",
+      "utils/system_utils.py"
+    ],
+    "ludvig_modified_paths": [
+      "arguments/__init__.py",
+      "environment.yml",
+      "gaussian_renderer/__init__.py",
+      "gaussian_renderer/network_gui.py",
+      "scene/__init__.py",
+      "scene/cameras.py",
+      "scene/dataset_readers.py",
+      "scene/gaussian_model.py",
+      "utils/camera_utils.py",
+      "utils/graphics_utils.py"
+    ]
+  },
+  "submodules": {
+    "submodules/diff-gaussian-rasterization": {
+      "commit": "8064f52ca233942bdec2d1a1451c026deedd320b",
+      "third_party/glm": "5c46b9c07008ae65cb81ab79cd677ecc1934b903"
+    },
+    "submodules/simple-knn": {
+      "commit": "44f764299fa305faf6ec5ebd99939e0508331503"
+    }
+  },
+  "source_sha256": {
+    "train.py": "c5a61947e2abcf56bf83451ae9633799d96894910ea2982a01f209c47cec462d",
+    "arguments/__init__.py": "5448f65111453ab465e0667004a70c57a8bbd969e06396ae88298bf461291dcf",
+    "gaussian_renderer/__init__.py": "75fcc86a57d27d9ea55b2904a4faaf075e7f73dba8c54bcb6cbd4c02c4884084",
+    "scene/dataset_readers.py": "5f81e382f638ec351efab3583eec4a018eab8d7204d03384f3dc880f614cacf1",
+    "scene/gaussian_model.py": "fb31f5a087733194985a82192746c36dc627596fd084600b29cfefb5c92fdeb5",
+    "utils/camera_utils.py": "a450a6bcd3630a183f0a6be1b75a89e91444471b12f460613b8beb23a9c3bcef"
+  },
+  "training_defaults": {
+    "iterations": 30000,
+    "position_lr_init": 0.00016,
+    "position_lr_final": 0.0000016,
+    "position_lr_delay_mult": 0.01,
+    "position_lr_max_steps": 30000,
+    "feature_lr": 0.0025,
+    "opacity_lr": 0.05,
+    "scaling_lr": 0.005,
+    "rotation_lr": 0.001,
+    "percent_dense": 0.01,
+    "lambda_dssim": 0.2,
+    "densification_interval": 100,
+    "opacity_reset_interval": 3000,
+    "densify_from_iter": 500,
+    "densify_until_iter": 15000,
+    "densify_grad_threshold": 0.0002
+  },
+  "model_defaults": {
+    "sh_degree": 3,
+    "resolution": -1,
+    "white_background": false,
+    "data_device": "cuda",
+    "eval": false
+  }
+}

@@ -5,6 +5,7 @@ from radio_gs.field.field_signature import FeatureSpaceSignature
 from radio_gs.querying.evidence_scorer import (
     EvidenceScoringConfig,
     _score_bank,
+    registered_seed_unary,
 )
 from radio_gs.querying.query_engine import CanonicalQueryEngine
 from radio_gs.querying.query_compilers import (
@@ -12,11 +13,13 @@ from radio_gs.querying.query_compilers import (
     world_point_soft_seeds,
 )
 from radio_gs.querying.query_spec import (
+    PrimitiveUnaryEvidence,
     PrototypeSet,
     QueryIntent,
     QueryModality,
     QuerySpec,
     RegistrationMode,
+    SoftSeedSet,
 )
 from radio_gs.querying.score_calibration import (
     SceneSpaceCalibration,
@@ -89,6 +92,57 @@ def test_centered_score_calibration_is_explicit_optional_diagnostic():
     centered = robust_tanh_score_calibration(scores, preserve_zero=False)
     assert zero_preserving[2] > 0
     assert centered[2] == 0
+
+
+def test_registered_seed_unary_preserves_soft_signed_responsibility() -> None:
+    actual = registered_seed_unary(
+        torch.tensor([1.0, 0.5, 0.0]),
+        torch.tensor([0.0, 0.1, 0.5]),
+    )
+    torch.testing.assert_close(actual, torch.tensor([1.0, 0.4, -0.5]))
+
+
+def test_registered_seed_unary_is_not_erased_by_field_reliability() -> None:
+    xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]
+    )
+    features = F.normalize(
+        torch.tensor([[1.0, 0.0], [0.8, 0.2], [0.0, 1.0]]), dim=-1
+    )
+    signature = _signature(2)
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features[0], signature),
+        positive_seeds=SoftSeedSet(torch.tensor([1.0, 0.4, 0.0]), "unit"),
+        negative_seeds=SoftSeedSet(torch.tensor([0.0, 0.0, 1.0]), "unit"),
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            torch.tensor([1.0, 0.4, -1.0]),
+            "unit_joint_mass",
+        ),
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_seed_unary_weight=1.0
+        ),
+        node_reliability=torch.zeros(3),
+    )
+    result = engine.execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+
+    torch.testing.assert_close(result.unary, torch.tensor([1.0, 0.4, -1.0]))
+    torch.testing.assert_close(
+        result.evidence_components["appearance"], torch.zeros(3)
+    )
+    torch.testing.assert_close(
+        result.evidence_components["registered_seed"],
+        torch.tensor([1.0, 0.4, -1.0]),
+    )
 
 
 def test_uncalibrated_score_bank_preserves_original_explicit_negative_rule():

@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/naver/ludvig.git",
+  "commit": "4461fc515439bb498a75d71738a1e73cf7a452ed",
+  "paper": "https://openaccess.thecvf.com/content/ICCV2025/papers/Marrie_LUDVIG_Learning-Free_Uplifting_of_2D_Visual_Features_to_Gaussian_Splatting_ICCV_2025_paper.pdf",
+  "patch": "patches/0001-reproduction-seeds-and-json-results.patch",
+  "segment_anything": {
+    "repository": "https://github.com/facebookresearch/segment-anything.git",
+    "commit": "6fdee8f2727f4506cfbbe553e23b895e27956588"
+  },
+  "gaussian_splatting": {
+    "lock_file": "official_3dgs.lock.json",
+    "note": "LUDVIG vendors gaussian-splatting as a normal tree rather than a gitlink; the lock records the audited official revision with the byte-identical train.py entrypoint."
+  },
+  "paper_reported_runs": 3
+}

@@ -18,6 +18,7 @@ class PrimitiveFusion(nn.Module):
         *,
         hidden_dim: int = 192,
         residual_local: bool = True,
+        residual_blocks: int = 0,
     ) -> None:
         super().__init__()
         self.local_dim = int(local_dim)
@@ -25,6 +26,9 @@ class PrimitiveFusion(nn.Module):
         self.reliability_dim = int(reliability_dim)
         self.output_dim = int(output_dim)
         self.residual_local = bool(residual_local)
+        self.residual_blocks_count = int(residual_blocks)
+        if self.residual_blocks_count < 0:
+            raise ValueError("residual_blocks cannot be negative")
         input_dim = self.local_dim + self.coarse_dim + self.reliability_dim
         if input_dim <= 0 or self.output_dim <= 0:
             raise ValueError("fusion dimensions must be positive")
@@ -34,6 +38,17 @@ class PrimitiveFusion(nn.Module):
             nn.Linear(int(hidden_dim), self.output_dim),
         )
         self.gate = nn.Sequential(nn.Linear(input_dim, self.output_dim), nn.Sigmoid())
+        self.residual_blocks = nn.ModuleList(
+            [
+                nn.Sequential(
+                    nn.LayerNorm(self.output_dim),
+                    nn.Linear(self.output_dim, int(hidden_dim)),
+                    nn.GELU(),
+                    nn.Linear(int(hidden_dim), self.output_dim),
+                )
+                for _ in range(self.residual_blocks_count)
+            ]
+        )
         self.base_projection = (
             None
             if self.local_dim == self.output_dim
@@ -43,6 +58,9 @@ class PrimitiveFusion(nn.Module):
         # reconstruction.  Fusion starts as an exact residual-free baseline.
         nn.init.zeros_(self.network[-1].weight)
         nn.init.zeros_(self.network[-1].bias)
+        for block in self.residual_blocks:
+            nn.init.zeros_(block[-1].weight)
+            nn.init.zeros_(block[-1].bias)
 
     @torch.no_grad()
     def initialize_base_projection(
@@ -88,6 +106,9 @@ class PrimitiveFusion(nn.Module):
                 raise ValueError(f"{name} must be [N,{dim}]")
             parts.append(value)
         inputs = torch.cat(parts, dim=-1)
-        update = self.network(inputs) * self.gate(inputs)
+        update = self.network(inputs)
+        for block in self.residual_blocks:
+            update = update + block(update)
+        update = update * self.gate(inputs)
         base = local if self.base_projection is None else self.base_projection(local)
         return base + update if self.residual_local else update

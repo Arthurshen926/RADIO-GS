@@ -196,6 +196,38 @@ def neutralize_invalid_primitive_scores_for_render(
     return result
 
 
+def normalize_primitive_scores_by_valid_mass(
+    rendered_scores_and_validity: torch.Tensor,
+    *,
+    eps: float = 1e-6,
+    coverage_power: float = 0.0,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Separate semantic score from valid-capability coverage.
+
+    The last rendered channel is ``sum(w*v)/sum(w)`` and preceding channels
+    are ``sum(w*v*s_q)/sum(w)``.  Dividing them yields the intended
+    ``sum(w*v*s_q)/sum(w*v)`` without changing geometric transmittance.
+    """
+
+    rendered = torch.as_tensor(rendered_scores_and_validity)
+    if rendered.ndim != 3 or rendered.shape[0] < 2:
+        raise ValueError(
+            "valid-conditioned primitive render needs score channels plus validity"
+        )
+    if not np.isfinite(coverage_power) or coverage_power < 0:
+        raise ValueError("coverage_power must be finite and non-negative")
+    validity = rendered[-1]
+    supported = validity > float(eps)
+    scores = torch.where(
+        supported[None],
+        rendered[:-1] / validity.clamp_min(float(eps))[None],
+        torch.zeros_like(rendered[:-1]),
+    )
+    if coverage_power != 0:
+        scores = scores * validity.clamp(0.0, 1.0).pow(float(coverage_power))[None]
+    return scores, validity
+
+
 def apply_primitive_semantic_confidence(
     scores: torch.Tensor,
     confidence: Optional[torch.Tensor],
@@ -2078,6 +2110,8 @@ def evaluate_scene(
     primitive_confidence: str = "cache",
     primitive_fallback_blend: str = "uncovered",
     feature_contribution_gamma: float = 1.0,
+    primitive_valid_normalization: bool = False,
+    primitive_valid_coverage_power: float = 0.0,
 ) -> Dict:
     """Evaluate one LERF-OVS scene.
 
@@ -2397,6 +2431,11 @@ def evaluate_scene(
                     in {"uncovered", "dominant", "primary_first", "strongest"}
                     and primitive_query_primary is not None
                 ):
+                    if primitive_valid_normalization:
+                        raise ValueError(
+                            "valid normalization with split primary/fallback "
+                            "rendering requires --primitive_fallback_blend direct"
+                        )
                     primary_mask = primitive_query_primary.to(device=device)
                     primary_rows = primitive_score_rows * primary_mask[:, None]
                     fallback_rows = primitive_score_rows * (~primary_mask)[:, None]
@@ -2462,17 +2501,47 @@ def evaluate_scene(
                         "alpha_map": primary_render["alpha_map"][None, None]
                     }
                 else:
+                    render_rows = primitive_score_rows
+                    if primitive_valid_normalization:
+                        if primitive_query_valid is None:
+                            raise ValueError(
+                                "valid normalization requires primitive query validity"
+                            )
+                        render_rows = torch.cat(
+                            [
+                                primitive_score_rows,
+                                torch.as_tensor(
+                                    primitive_query_valid,
+                                    device=device,
+                                    dtype=primitive_score_rows.dtype,
+                                )[:, None],
+                            ],
+                            dim=1,
+                        )
                     score_render = renderer.render_feature_rows(
                         model,
                         viewmat.squeeze(0),
-                        primitive_score_rows,
+                        render_rows,
                         alpha_normalize=True,
                         contribution_gamma=feature_contribution_gamma,
                     )
-                    heatmaps = score_render["feature_map"].float()
+                    if primitive_valid_normalization:
+                        heatmaps, semantic_coverage = (
+                            normalize_primitive_scores_by_valid_mass(
+                                score_render["feature_map"].float(),
+                                coverage_power=primitive_valid_coverage_power,
+                            )
+                        )
+                    else:
+                        heatmaps = score_render["feature_map"].float()
+                        semantic_coverage = None
                     render_aux = {
                         "alpha_map": score_render["alpha_map"][None, None]
                     }
+                    if semantic_coverage is not None:
+                        render_aux["semantic_coverage"] = semantic_coverage[
+                            None, None
+                        ]
             elif mode == "rendered" and render_readout in {"primitive_support", "primitive_unary"}:
                 assert primitive_support_rows is not None
                 support_rows = primitive_support_rows[:, active_indices]
@@ -2480,17 +2549,47 @@ def evaluate_scene(
                     support_rows,
                     primitive_support_valid,
                 ).to(device=device, dtype=torch.float32)
+                render_rows = support_rows
+                if primitive_valid_normalization:
+                    if primitive_support_valid is None:
+                        raise ValueError(
+                            "valid normalization requires primitive support validity"
+                        )
+                    render_rows = torch.cat(
+                        [
+                            support_rows,
+                            torch.as_tensor(
+                                primitive_support_valid,
+                                device=device,
+                                dtype=support_rows.dtype,
+                            )[:, None],
+                        ],
+                        dim=1,
+                    )
                 support_render = renderer.render_feature_rows(
                     model,
                     viewmat.squeeze(0),
-                    support_rows,
+                    render_rows,
                     alpha_normalize=True,
                     contribution_gamma=feature_contribution_gamma,
                 )
-                heatmaps = support_render["feature_map"].float()
+                if primitive_valid_normalization:
+                    heatmaps, semantic_coverage = (
+                        normalize_primitive_scores_by_valid_mass(
+                            support_render["feature_map"].float(),
+                            coverage_power=primitive_valid_coverage_power,
+                        )
+                    )
+                else:
+                    heatmaps = support_render["feature_map"].float()
+                    semantic_coverage = None
                 render_aux = {
                     "alpha_map": support_render["alpha_map"][None, None]
                 }
+                if semantic_coverage is not None:
+                    render_aux["semantic_coverage"] = semantic_coverage[
+                        None, None
+                    ]
             else:
                 heatmaps = compute_relevancy_heatmap(
                     siglip_feat, active_emb,
@@ -2937,6 +3036,24 @@ def main() -> None:
             "label-free frozen compositor candidate."
         ),
     )
+    parser.add_argument(
+        "--primitive_valid_normalization",
+        action="store_true",
+        help=(
+            "Render scalar primitive scores as sum(w*v*s)/sum(w*v), keeping "
+            "semantic validity coverage separate from the score value."
+        ),
+    )
+    parser.add_argument(
+        "--primitive_valid_coverage_power",
+        type=float,
+        default=0.0,
+        help=(
+            "Query-independent coverage abstention after valid-mass "
+            "normalization. Zero is purely conditional; one recovers the "
+            "original total-alpha score."
+        ),
+    )
     # Scene selection
     parser.add_argument("--scene", default="all",
                         help="Scene name or 'all' (default: all)")
@@ -3125,6 +3242,21 @@ def main() -> None:
     args = parser.parse_args()
     if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
         parser.error("--feature_contribution_gamma must be finite and positive")
+    if (
+        not np.isfinite(args.primitive_valid_coverage_power)
+        or args.primitive_valid_coverage_power < 0
+    ):
+        parser.error(
+            "--primitive_valid_coverage_power must be finite and non-negative"
+        )
+    if (
+        args.primitive_valid_coverage_power != 0
+        and not args.primitive_valid_normalization
+    ):
+        parser.error(
+            "--primitive_valid_coverage_power requires "
+            "--primitive_valid_normalization"
+        )
     if args.gt_only and args.rendered_only:
         parser.error("--gt_only and --rendered_only are mutually exclusive")
     if args.render_readout in {
@@ -3136,6 +3268,19 @@ def main() -> None:
         parser.error("primitive-first render readouts currently require --text_encoder siglip2")
     if args.render_readout in {"primitive_support", "primitive_unary"} and not args.primitive_score_cache:
         parser.error(f"{args.render_readout} requires --primitive_score_cache")
+    if (
+        args.primitive_valid_normalization
+        and args.render_readout
+        not in {
+            "primitive_query",
+            "primitive_score",
+            "primitive_support",
+            "primitive_unary",
+        }
+    ):
+        parser.error(
+            "--primitive_valid_normalization requires a primitive-first render readout"
+        )
     if (
         args.feature_contribution_gamma != 1.0
         and args.render_readout == "screen_decode"
@@ -3514,6 +3659,8 @@ def main() -> None:
             primitive_confidence=args.primitive_confidence,
             primitive_fallback_blend=args.primitive_fallback_blend,
             feature_contribution_gamma=args.feature_contribution_gamma,
+            primitive_valid_normalization=args.primitive_valid_normalization,
+            primitive_valid_coverage_power=args.primitive_valid_coverage_power,
         )
         all_results[scene] = scene_results
 
@@ -3615,6 +3762,19 @@ def main() -> None:
                 else "alpha_normalized_mean"
             ),
             "gamma": float(args.feature_contribution_gamma),
+            "primitive_valid_normalization": bool(
+                args.primitive_valid_normalization
+            ),
+            "semantic_score_formula": (
+                "sum(w*v*s)/sum(w*v) * coverage**coverage_power"
+                if args.primitive_valid_normalization
+                else "sum(w*v*s)/sum(w)"
+            ),
+            "semantic_coverage_power": (
+                float(args.primitive_valid_coverage_power)
+                if args.primitive_valid_normalization
+                else None
+            ),
             "query_dependent": False,
             "changes_geometry_or_alpha": False,
         },

@@ -9,6 +9,7 @@ from radio_gs.scripts.eval_lerf_grounding import (
     blend_primary_first,
     blend_strongest_source,
     neutralize_invalid_primitive_scores_for_render,
+    normalize_primitive_scores_by_valid_mass,
     validate_primitive_support_cache,
     validate_primitive_unary_cache,
 )
@@ -52,6 +53,40 @@ def test_invalid_primitive_scores_are_neutral_during_alpha_compositing() -> None
     assert torch.equal(result[1], torch.zeros(2))
     assert torch.equal(result[2], scores[2])
     assert torch.equal(scores[1], torch.tensor([0.7, 0.3]))
+
+
+def test_valid_mass_normalization_separates_score_from_coverage() -> None:
+    rendered = torch.tensor(
+        [
+            [[0.20, 0.45]],
+            [[0.10, 0.05]],
+            [[0.25, 0.50]],
+        ]
+    )
+    scores, coverage = normalize_primitive_scores_by_valid_mass(rendered)
+
+    torch.testing.assert_close(
+        scores,
+        torch.tensor([[[0.8, 0.9]], [[0.4, 0.1]]]),
+    )
+    torch.testing.assert_close(coverage, torch.tensor([[0.25, 0.50]]))
+
+
+def test_valid_mass_coverage_power_one_recovers_total_alpha_scores() -> None:
+    rendered = torch.tensor(
+        [
+            [[0.20, 0.45]],
+            [[0.10, 0.05]],
+            [[0.25, 0.50]],
+        ]
+    )
+
+    scores, coverage = normalize_primitive_scores_by_valid_mass(
+        rendered, coverage_power=1.0
+    )
+
+    torch.testing.assert_close(scores, rendered[:-1])
+    torch.testing.assert_close(coverage, rendered[-1])
 
 
 def test_primitive_semantic_confidence_damps_query_support_rowwise() -> None:

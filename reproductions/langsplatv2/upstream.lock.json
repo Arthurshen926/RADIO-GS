@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/ZhaoYujie2002/LangSplatV2.git",
+  "commit": "1667303d5c111a5b62f69b9b8991d80045e92b5f",
+  "patch": "patches/0001-exact-label-camera-resolution.patch",
+  "patch_sha256": "a0ba52f843fdc21a0135f71b2ebe2edb5112c4ef48235a080c3c8828a5b285f3",
+  "patch_scope": [
+    "add _select_view_for_label_image",
+    "resolve label frames by exact image stem over train and test camera union",
+    "apply the same lookup in evaluate and evaluate_quick"
+  ],
+  "audit_run_checkout": {
+    "path": "/root/baselines/LangSplatV2",
+    "head": "1667303d5c111a5b62f69b9b8991d80045e92b5f",
+    "eval_lerf_diff_sha256": "c65abd0c79f06ecc56df6e4a8a5093c8203ba785ebd3ff898cb39246221b8994",
+    "full_tracked_diff_sha256": "31f14de37bb17650526b68f9dc6bd0a904c9322e7be1db2186557e217bbee608",
+    "note": "The audit checkout already contained optional visualization plumbing in eval_lerf.py and torch/runtime compatibility edits in utils/loss_utils.py and utils/vq_utils.py. Those edits are not part of the reusable patch. The packaged patch was generated and validated against a clean detached worktree at the pinned commit."
+  }
+}

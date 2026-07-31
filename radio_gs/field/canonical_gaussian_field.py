@@ -29,6 +29,7 @@ class CanonicalGaussianField(nn.Module):
         reliability: torch.Tensor | None = None,
         fusion_reliability: bool = True,
         hidden_dim: int = 192,
+        fusion_residual_blocks: int = 0,
         use_fusion: bool = True,
     ) -> None:
         super().__init__()
@@ -57,8 +58,13 @@ class CanonicalGaussianField(nn.Module):
                 raise ValueError("reliability must be [num_gaussians,R]")
             self.register_buffer("reliability", reliability)
         self.use_fusion = bool(use_fusion)
+        self.fusion_residual_blocks = int(fusion_residual_blocks)
+        if self.fusion_residual_blocks < 0:
+            raise ValueError("fusion_residual_blocks cannot be negative")
         if not self.use_fusion and self.coarse_dim:
             raise ValueError("coarse codes require primitive fusion")
+        if not self.use_fusion and self.fusion_residual_blocks:
+            raise ValueError("fusion residual blocks require primitive fusion")
         if self.coarse_dim:
             if spatial_hash is None:
                 raise ValueError("coarse codes require a checkpointed spatial hash")
@@ -93,6 +99,7 @@ class CanonicalGaussianField(nn.Module):
                 reliability_dim=reliability_dim,
                 output_dim=decoder.coefficient_dim,
                 hidden_dim=hidden_dim,
+                residual_blocks=self.fusion_residual_blocks,
             )
             if self.use_fusion
             else None

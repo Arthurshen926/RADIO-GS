@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -5,6 +6,7 @@ import torch
 
 from radio_gs.field import FeatureSpaceSignature
 from radio_gs.interfaces.capability_cache import (
+    _load_memory_mapped_capability_payload,
     load_canonical_capability_bank,
     load_canonical_support_graph,
 )
@@ -89,3 +91,42 @@ def test_capability_cache_rejects_missing_signatures(tmp_path: Path) -> None:
     torch.save(payload, path)
     with pytest.raises(ValueError, match="signatures"):
         load_canonical_capability_bank(path)
+
+
+def test_dense_capability_archive_can_be_read_without_eager_storage_load(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "dense.pt"
+    xyz = torch.arange(9, dtype=torch.float32).reshape(3, 3)
+    valid = torch.tensor([True, False, True])
+    appearance = torch.arange(15, dtype=torch.float16).reshape(3, 5)
+    boundary = torch.arange(6, dtype=torch.float16).reshape(3, 2)
+    torch.save(
+        {
+            "schema_version": 1,
+            "xyz": xyz,
+            "valid": valid,
+            "appearance_dino_v3": appearance,
+            "boundary_sam3": boundary,
+            "metadata": {},
+        },
+        path,
+    )
+    path.with_suffix(".pt.json").write_text(
+        json.dumps(
+            {
+                "num_gaussians": 3,
+                "appearance_dim": 5,
+                "boundary_dim": 2,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    payload = _load_memory_mapped_capability_payload(path)
+
+    torch.testing.assert_close(payload["xyz"], xyz)
+    torch.testing.assert_close(payload["valid"].bool(), valid)
+    torch.testing.assert_close(payload["appearance_dino_v3"], appearance)
+    torch.testing.assert_close(payload["boundary_sam3"], boundary)
+    assert payload["_memory_mapped"] is True

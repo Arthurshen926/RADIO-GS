@@ -1,0 +1,61 @@
+diff --git a/eval_lerf.py b/eval_lerf.py
+index 094a93a..96fb984 100644
+--- a/eval_lerf.py
++++ b/eval_lerf.py
+@@ -101,6 +101,21 @@ def eval_gt_lerfdata(json_folder: Union[str, Path] = None, ouput_path: Path = No
+ 
+     return gt_ann, (h, w), img_paths
+ 
++
++def _select_view_for_label_image(train_views, test_views, image_path: Union[str, Path]):
++    image_name = Path(image_path).stem
++    views_by_name = {
++        view.image_name: view
++        for view in list(train_views) + list(test_views)
++    }
++    try:
++        return views_by_name[image_name]
++    except KeyError as exc:
++        raise KeyError(
++            f"Label image {image_name!r} has no exact COLMAP camera match"
++        ) from exc
++
++
+ def smooth_cuda(mask_pred:torch.Tensor):
+     scale = 7
+     avg_pool = torch.nn.AvgPool2d(kernel_size=scale, stride=1, padding=3, count_include_pad=False).to(mask_pred.device)
+@@ -251,8 +266,11 @@ def evaluate(dataset:ModelParams, pipeline:PipelineParams, args):
+             dataset.model_path = args.ckpt_paths[level_idx]
+             gaussians = GaussianModel(dataset.sh_degree)
+             scene = Scene(dataset, gaussians, shuffle=False)
+-            views = scene.getTrainCameras()
+-            view = views[idx]
++            view = _select_view_for_label_image(
++                scene.getTrainCameras(),
++                scene.getTestCameras(),
++                image_paths[i],
++            )
+             bg_color = [1,1,1] if dataset.white_background else [0, 0, 0]
+             background = torch.tensor(bg_color, dtype=torch.float32, device="cuda")
+             checkpoint = os.path.join(args.ckpt_paths[level_idx], f'chkpnt{args.checkpoint}.pth')
+@@ -321,8 +339,11 @@ def evaluate_quick(dataset:ModelParams, pipeline:PipelineParams, args):
+         combined_gaussians = GaussianModel(dataset.sh_degree)
+         dataset.model_path = args.ckpt_paths[0]
+         scene = Scene(dataset, combined_gaussians, shuffle=False)
+-        views = scene.getTrainCameras()
+-        view = views[idx]
++        view = _select_view_for_label_image(
++            scene.getTrainCameras(),
++            scene.getTestCameras(),
++            image_paths[i],
++        )
+         checkpoint = os.path.join(args.ckpt_paths[0], f'chkpnt{args.checkpoint}.pth')
+         (model_params, first_iter) = torch.load(checkpoint)
+         combined_gaussians.restore(model_params, args, mode='test')
+@@ -425,4 +446,4 @@ if __name__ == "__main__":
+         if args.quick_render:
+             evaluate_quick(model.extract(args), pipeline.extract(args), args)
+         else:
+-            evaluate(model.extract(args), pipeline.extract(args), args)
+\ No newline at end of file
++            evaluate(model.extract(args), pipeline.extract(args), args)

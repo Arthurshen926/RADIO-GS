@@ -171,7 +171,12 @@ def train(args: argparse.Namespace) -> dict:
     ):
         raise ValueError("train/validation benchmark exclusion contracts differ")
     device = torch.device(args.device)
-    model = SurfaceRegionSummaryReadoutV2(hidden_dim=int(args.hidden_dim)).to(device)
+    model = SurfaceRegionSummaryReadoutV2(
+        hidden_dim=int(args.hidden_dim),
+        reliability_attention_mode=str(
+            getattr(args, "reliability_attention_mode", "log_prior")
+        ),
+    ).to(device)
     head = SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint).to(device).eval()
     for parameter in head.parameters(): parameter.requires_grad_(False)
     model.eval()
@@ -275,6 +280,15 @@ def main() -> None:
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--token-weight", type=float, default=0.25)
     parser.add_argument("--relation-weight", type=float, default=0.1)
+    parser.add_argument(
+        "--reliability-attention-mode",
+        choices=("log_prior", "input_only"),
+        default="log_prior",
+        help=(
+            "Keep the frozen multiplicative confidence prior or use reliability "
+            "only through the geometry input to avoid train/inference prior shift."
+        ),
+    )
     parser.add_argument("--canonical-noise-degrees", type=float, default=0.0)
     parser.add_argument(
         "--canonical-noise-calibration", default="",

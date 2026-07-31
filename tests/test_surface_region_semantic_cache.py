@@ -1,7 +1,10 @@
 import torch
 
 from radio_gs.scripts.build_surface_region_semantic_cache import (
-    _adjacency, two_hop_physical_regions,
+    _adjacency,
+    completion_primary_valid,
+    preserve_primary_region_tokens,
+    two_hop_physical_regions,
 )
 from radio_gs.scripts.eval_scannet_canonical_text_query import (
     load_primitive_multiscale_features,
@@ -19,6 +22,39 @@ def test_two_hop_regions_are_unique_and_physical_scale_clipped() -> None:
     kept = rows[0, mask[0]]
     assert set(kept.tolist()) == {0, 1, 2}
     assert len(kept) == len(torch.unique(kept))
+
+
+def test_completed_surface_regions_preserve_primary_context() -> None:
+    primary = torch.tensor([True, True, False, False])
+    rows = torch.tensor([[0, 1, 2, 3], [0, 1, 2, 3]])
+    mask = torch.ones_like(rows, dtype=torch.bool)
+
+    kept = preserve_primary_region_tokens(
+        rows,
+        mask,
+        centers=torch.tensor([0, 2]),
+        primary_valid=primary,
+    )
+
+    assert torch.equal(kept[0], torch.tensor([True, True, False, False]))
+    assert torch.equal(kept[1], torch.tensor([True, True, True, False]))
+
+
+def test_completed_mpr_primary_partition_is_fail_closed() -> None:
+    valid = torch.tensor([True, True, True, False])
+    mpr = {
+        "reliability": torch.tensor(
+            [[1.0, 1.0, 1.0], [1.0, 1.0, 0.0], [1.0, 1.0, 1.0], [0.0, 0.0, 0.0]]
+        ),
+        "metadata": {
+            "construction": "dominant_primary_with_query_free_support_completion",
+            "primary_valid_count": 2,
+        },
+    }
+
+    primary = completion_primary_valid(mpr, valid)
+
+    assert torch.equal(primary, torch.tensor([True, False, True, False]))
 
 
 def test_sparse_v4_cache_expands_losslessly(tmp_path) -> None:

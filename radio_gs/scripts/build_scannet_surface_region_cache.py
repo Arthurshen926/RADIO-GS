@@ -303,6 +303,13 @@ def build(args: argparse.Namespace) -> dict:
         token_subsampling=str(args.token_subsampling),
         token_candidate_limit=int(args.token_candidate_limit),
         core_token_fraction=float(args.core_token_fraction),
+        reliability_semantics=str(
+            getattr(
+                args,
+                "region_reliability_mode",
+                "geometric_mean_observation_agreement",
+            )
+        ),
     )
     adaptors = {
         "appearance": load_radio_adaptor_from_checkpoint(
@@ -347,10 +354,20 @@ def build(args: argparse.Namespace) -> dict:
                 torch.cat(lifted_xyz), torch.cat(lifted_features),
                 torch.cat(lifted_footprint), float(args.voxel_size),
             )
-            reliability_all = _voxel_reliability_v2(
-                torch.cat(lifted_xyz), torch.cat(lifted_features),
-                float(args.voxel_size), features,
-            )
+            if (
+                getattr(
+                    args,
+                    "region_reliability_mode",
+                    "geometric_mean_observation_agreement",
+                )
+                == "uniform_valid"
+            ):
+                reliability_all = torch.ones(len(features), dtype=torch.float32)
+            else:
+                reliability_all = _voxel_reliability_v2(
+                    torch.cat(lifted_xyz), torch.cat(lifted_features),
+                    float(args.voxel_size), features,
+                )
             features = F.normalize(features.float(), dim=-1, eps=1e-8)
             projected = {}
             for name, adaptor in adaptors.items():
@@ -550,16 +567,34 @@ def main() -> None:
     parser.add_argument(
         "--token-subsampling",
         choices=("nearest_geodesic_then_node_index", "core_context_radial_stratified_v1"),
-        default="nearest_geodesic_then_node_index",
-        help="Declared fixed-budget region-token selection policy.",
+        default="core_context_radial_stratified_v1",
+        help=(
+            "Declared fixed-budget region-token selection policy. New caches "
+            "preserve a core/context quota; frozen legacy contracts remain loadable."
+        ),
     )
     parser.add_argument(
-        "--token-candidate-limit", type=int, default=256,
-        help="Maximum settled Dijkstra candidates before deterministic token selection.",
+        "--token-candidate-limit", type=int, default=1024,
+        help=(
+            "Maximum settled Dijkstra candidates before deterministic token "
+            "selection; must exceed max-tokens to expose the context shell."
+        ),
     )
     parser.add_argument(
         "--core-token-fraction", type=float, default=0.60,
         help="Core quota for core/context stratified sampling.",
+    )
+    parser.add_argument(
+        "--region-reliability-mode",
+        choices=(
+            "geometric_mean_observation_agreement",
+            "uniform_valid",
+        ),
+        default="uniform_valid",
+        help=(
+            "New caches default to a matched train/inference abstention contract "
+            "until canonical MPR stores real multiview agreement."
+        ),
     )
     parser.add_argument(
         "--path-cost-mode",

@@ -31,14 +31,59 @@ from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.querying.evidence_scorer import EvidenceScoringConfig
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
 from radio_gs.querying.query_engine import CanonicalQueryEngine
+from radio_gs.querying.query_spec import SelectionMode
 from radio_gs.querying.support_solver import SupportSolverConfig
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+    raster_adjoint_registered_view_features,
     rasterize_registered_view_features,
 )
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.scripts.eval_lerf_grounding import render_1280d
 from radio_gs.scripts.render_promptable_nvs_features import resolve_protocol_views
+
+
+def _scaled_raster_shape(
+    height: int,
+    width: int,
+    scale: float,
+) -> tuple[int, int]:
+    if height <= 0 or width <= 0:
+        raise ValueError("raster dimensions must be positive")
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("raster scale must be finite and positive")
+    return max(1, int(round(height * scale))), max(1, int(round(width * scale)))
+
+
+def _valid_normalized_score_map(
+    rendered_channels: torch.Tensor,
+    *,
+    eps: float = 1e-6,
+    coverage_power: float = 0.0,
+) -> torch.Tensor:
+    """Return a valid-conditioned score with optional coverage abstention.
+
+    ``coverage_power=0`` is ``E[p | valid]`` while ``coverage_power=1``
+    exactly recovers the total-alpha score ``E[v*p]``. Intermediate values
+    keep the conditional score but lower confidence where few visible
+    contributions have a valid capability row.
+    """
+
+    channels = torch.as_tensor(rendered_channels)
+    if channels.ndim != 3 or channels.shape[0] != 2:
+        raise ValueError("valid-normalized render must contain [numerator,validity]")
+    if not np.isfinite(coverage_power) or coverage_power < 0:
+        raise ValueError("coverage_power must be finite and non-negative")
+    numerator, valid_mass = channels
+    supported = valid_mass > float(eps)
+    conditional = torch.where(
+        supported,
+        numerator / valid_mass.clamp_min(float(eps)),
+        torch.zeros_like(numerator),
+    )
+    if coverage_power == 0:
+        return conditional
+    return conditional * valid_mass.clamp(0.0, 1.0).pow(float(coverage_power))
 
 
 @torch.inference_mode()
@@ -353,23 +398,36 @@ def run(args: argparse.Namespace) -> dict:
             model, codec, adaptor, device=device, chunk_size=max(1, args.chunk_size)
         )
 
-    height, width = int(renderer.image_height), int(renderer.image_width)
     prompt = scene["prompt"]
     prompt_type = str(prompt.get("type", ""))
     if prompt_type == "positive_negative_scribbles":
-        positive = resize_mask_nearest(
-            load_ground_truth_mask(prompt["positive_path"]), (height, width)
-        ).astype(bool)
-        negative = resize_mask_nearest(
-            load_ground_truth_mask(prompt["negative_path"]), (height, width)
-        ).astype(bool)
+        positive_native = load_ground_truth_mask(prompt["positive_path"]).astype(bool)
+        negative_native = load_ground_truth_mask(prompt["negative_path"]).astype(bool)
+        if positive_native.shape != negative_native.shape:
+            raise ValueError("positive and negative prompt rasters must align")
     elif prompt_type == "reference_binary_mask":
-        positive = resize_mask_nearest(
-            load_ground_truth_mask(prompt["mask_path"]), (height, width)
-        ).astype(bool)
-        negative = np.logical_not(positive)
+        positive_native = load_ground_truth_mask(prompt["mask_path"]).astype(bool)
+        negative_native = np.logical_not(positive_native)
     else:
         raise ValueError(f"Unsupported registered prompt type: {prompt_type!r}")
+    native_height, native_width = map(int, positive_native.shape)
+    if (
+        getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
+        == "raster_adjoint"
+    ):
+        height, width = _scaled_raster_shape(
+            native_height,
+            native_width,
+            float(getattr(args, "prompt_registration_scale", 1.0)),
+        )
+    else:
+        height, width = int(renderer.image_height), int(renderer.image_width)
+    positive = resize_mask_nearest(
+        positive_native, (height, width)
+    ).astype(bool)
+    negative = resize_mask_nearest(
+        negative_native, (height, width)
+    ).astype(bool)
     prompt_maps = torch.from_numpy(
         np.stack([positive, negative], axis=0).astype(np.float32)
     )[None].to(device)
@@ -378,20 +436,49 @@ def run(args: argparse.Namespace) -> dict:
     prediction_threshold = 0.0
     canonical_stage_gaussian_scores: dict[str, torch.Tensor] | None = None
     if args.support_mode in {"prompt_gaussian", "canonical_support"}:
-        prompt_aux = renderer.render_features(model, prompt_pose)
-        support_sum, support_count = rasterize_registered_view_features(
-            model=model,
-            renderer=renderer,
-            viewmat=prompt_pose,
-            siglip_feat=prompt_maps,
-            depth_map=prompt_aux["depth_map"][None],
-            alpha_map=prompt_aux["alpha_map"][None],
-            registration_depth_tolerance=args.depth_tolerance,
-            registration_relative_depth_tolerance=args.relative_depth_tolerance,
-            registration_alpha_threshold=args.alpha_threshold,
-            registration_weight_mode="alpha_depth",
-            deterministic_cpu_accumulation=args.support_mode == "canonical_support",
-        )
+        if (
+            getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
+            == "raster_adjoint"
+        ):
+            prompt_alpha = None
+            if args.alpha_threshold > 0:
+                prompt_alpha = renderer.render_feature_rows(
+                    model,
+                    prompt_pose,
+                    torch.ones(
+                        model.get_xyz().shape[0],
+                        1,
+                        device=device,
+                        dtype=torch.float32,
+                    ),
+                    feature_height=height,
+                    feature_width=width,
+                )["alpha_map"]
+            support_sum, support_count = raster_adjoint_registered_view_features(
+                model=model,
+                renderer=renderer,
+                viewmat=prompt_pose,
+                siglip_feat=prompt_maps,
+                alpha_map=prompt_alpha,
+                alpha_threshold=args.alpha_threshold,
+            )
+        else:
+            prompt_aux = renderer.render_features(model, prompt_pose)
+            support_sum, support_count = rasterize_registered_view_features(
+                model=model,
+                renderer=renderer,
+                viewmat=prompt_pose,
+                siglip_feat=prompt_maps,
+                depth_map=prompt_aux["depth_map"][None],
+                alpha_map=prompt_aux["alpha_map"][None],
+                registration_depth_tolerance=args.depth_tolerance,
+                registration_relative_depth_tolerance=args.relative_depth_tolerance,
+                registration_alpha_threshold=args.alpha_threshold,
+                registration_weight_mode="alpha_depth",
+                deterministic_cpu_accumulation=(
+                    args.support_mode == "canonical_support"
+                ),
+            )
         support_fraction = support_sum / support_count.clamp_min(1e-8).unsqueeze(1)
         positive_weight = support_fraction[:, 0]
         negative_weight = support_fraction[:, 1]
@@ -452,6 +539,19 @@ def run(args: argparse.Namespace) -> dict:
                 boundary_signature=capability_bank.signatures["boundary"],
                 prototype_count=args.prototype_count,
                 prototype_strategy=args.prototype_strategy,
+                positive_prompt_mass=positive_weight.detach().float().cpu()[
+                    valid_rows
+                ],
+                negative_prompt_mass=negative_weight.detach().float().cpu()[
+                    valid_rows
+                ],
+                selection_mode=SelectionMode(
+                    getattr(
+                        args,
+                        "registered_selection_mode",
+                        SelectionMode.SEEDED_COMPONENT.value,
+                    )
+                ),
             )
             engine = CanonicalQueryEngine(
                 support_graph,
@@ -475,6 +575,9 @@ def run(args: argparse.Namespace) -> dict:
                     ),
                     negative_spatial_decay=float(
                         getattr(args, "negative_spatial_decay", 0.8)
+                    ),
+                    registered_seed_unary_weight=float(
+                        getattr(args, "registered_seed_unary_weight", 0.0)
                     ),
                 ),
                 solver_config=SupportSolverConfig(
@@ -519,7 +622,9 @@ def run(args: argparse.Namespace) -> dict:
                 "propagated": expand_valid_rows(result.probabilities),
                 "connected": expand_valid_rows(result.selected_probabilities),
             }
-            gaussian_scores = canonical_stage_gaussian_scores["connected"]
+            gaussian_scores = canonical_stage_gaussian_scores[
+                str(getattr(args, "registered_readout_stage", "connected"))
+            ]
             prediction_threshold = float(args.solver_support_threshold)
         positive_seed_count = int(positive_seed.sum())
         negative_seed_count = int(negative_seed.sum())
@@ -592,16 +697,60 @@ def run(args: argparse.Namespace) -> dict:
     predictions: dict[str, np.ndarray] = {}
     stage_score_paths: dict[str, dict[str, str]] = {}
     stage_predictions: dict[str, dict[str, np.ndarray]] = {}
+    score_height, score_width = _scaled_raster_shape(
+        int(renderer.image_height),
+        int(renderer.image_width),
+        float(getattr(args, "score_render_scale", 1.0)),
+    )
+    valid_support = (
+        capability_bank.valid.to(device=device, dtype=torch.float32)
+        if (
+            capability_bank is not None
+            and bool(getattr(args, "valid_support_normalization", False))
+        )
+        else None
+    )
+
+    def render_scalar_scores(
+        pose: torch.Tensor,
+        values: torch.Tensor,
+    ) -> np.ndarray:
+        with torch.no_grad():
+            if valid_support is None:
+                score_map = renderer.render_feature_rows(
+                    model,
+                    pose,
+                    values[:, None],
+                    feature_height=score_height,
+                    feature_width=score_width,
+                    alpha_normalize=True,
+                    contribution_gamma=args.feature_contribution_gamma,
+                )["feature_map"][0]
+            else:
+                channels = renderer.render_feature_rows(
+                    model,
+                    pose,
+                    torch.stack(
+                        [values * valid_support, valid_support],
+                        dim=1,
+                    ),
+                    feature_height=score_height,
+                    feature_width=score_width,
+                    alpha_normalize=True,
+                    contribution_gamma=args.feature_contribution_gamma,
+                )["feature_map"]
+                score_map = _valid_normalized_score_map(
+                    channels,
+                    coverage_power=float(
+                        getattr(args, "valid_support_coverage_power", 0.0)
+                    ),
+                )
+        return score_map.float().cpu().numpy()
+
     for frame_id in evaluation_frames:
         view = _view_by_frame(views, frame_id)
         pose = torch.from_numpy(view["w2c"].copy()).float().to(device)
-        rendered = renderer.render_feature_rows(
-            model,
-            pose,
-            gaussian_scores[:, None],
-            alpha_normalize=True,
-            contribution_gamma=args.feature_contribution_gamma,
-        )["feature_map"][0].float().cpu().numpy()
+        rendered = render_scalar_scores(pose, gaussian_scores)
         score_path = output_root / "scores" / args.scene_id / f"{frame_id}.npy"
         score_path.parent.mkdir(parents=True, exist_ok=True)
         np.save(score_path, rendered.astype(np.float32), allow_pickle=False)
@@ -612,13 +761,7 @@ def run(args: argparse.Namespace) -> dict:
                 stage_rendered = (
                     rendered
                     if stage_name == "connected"
-                    else renderer.render_feature_rows(
-                        model,
-                        pose,
-                        stage_gaussian_scores[:, None],
-                        alpha_normalize=True,
-                        contribution_gamma=args.feature_contribution_gamma,
-                    )["feature_map"][0].float().cpu().numpy()
+                    else render_scalar_scores(pose, stage_gaussian_scores)
                 )
                 stage_path = (
                     output_root
@@ -697,6 +840,10 @@ def run(args: argparse.Namespace) -> dict:
         "negative_gaussian_seeds": negative_seed_count,
         "positive_prompt_pixels": int(positive.sum()),
         "negative_prompt_pixels": int(negative.sum()),
+        "positive_prompt_pixels_native": int(positive_native.sum()),
+        "negative_prompt_pixels_native": int(negative_native.sum()),
+        "prompt_native_resolution": [native_height, native_width],
+        "prompt_registration_resolution": [height, width],
         "support_mode": args.support_mode,
         "support_view_count": support_view_count,
         "support_threshold": float(args.support_threshold),
@@ -709,9 +856,14 @@ def run(args: argparse.Namespace) -> dict:
         ),
         "prompt_type": prompt_type,
         "prompt_registration": (
-            "raster_responsibility_deterministic_cpu"
-            if args.support_mode == "canonical_support"
-            else "raster_contribution"
+            "exact_front_to_back_raster_adjoint"
+            if getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
+            == "raster_adjoint"
+            else (
+                "raster_responsibility_deterministic_cpu"
+                if args.support_mode == "canonical_support"
+                else "raster_contribution"
+            )
         ),
         "feature_observation_operator": {
             "type": (
@@ -720,6 +872,18 @@ def run(args: argparse.Namespace) -> dict:
                 else "alpha_normalized_mean"
             ),
             "gamma": float(args.feature_contribution_gamma),
+            "score_render_resolution": [score_height, score_width],
+            "valid_support_normalization": bool(valid_support is not None),
+            "valid_support_formula": (
+                "sum(w*v*p)/sum(w*v) * coverage**coverage_power"
+                if valid_support is not None
+                else None
+            ),
+            "valid_support_coverage_power": (
+                float(getattr(args, "valid_support_coverage_power", 0.0))
+                if valid_support is not None
+                else None
+            ),
             "query_dependent": False,
             "changes_geometry_or_alpha": False,
         },
@@ -737,6 +901,19 @@ def run(args: argparse.Namespace) -> dict:
                 "laplacian_weight": float(getattr(args, "laplacian_weight", 1.0)),
                 "cg_iterations": int(getattr(args, "cg_iterations", 64)),
                 "hard_seed_threshold": 0.20,
+                "registered_seed_unary_weight": float(
+                    getattr(args, "registered_seed_unary_weight", 0.0)
+                ),
+                "registered_selection_mode": str(
+                    getattr(
+                        args,
+                        "registered_selection_mode",
+                        SelectionMode.SEEDED_COMPONENT.value,
+                    )
+                ),
+                "registered_readout_stage": str(
+                    getattr(args, "registered_readout_stage", "connected")
+                ),
                 "graph_policy": args.graph_policy,
                 "component_graph_policy": args.component_graph_policy,
                 "graph_legacy_residual": float(args.graph_legacy_residual),
@@ -880,6 +1057,48 @@ def main() -> None:
     parser.add_argument("--canonical-support-graph", default="")
     parser.add_argument("--canonical-reliability-cache", default="")
     parser.add_argument(
+        "--prompt-registration-mode",
+        choices=("legacy_alpha_depth", "raster_adjoint"),
+        default="legacy_alpha_depth",
+        help=(
+            "Use the frozen footprint/depth proxy or the exact front-to-back "
+            "compositing adjoint for registered prompt lifting."
+        ),
+    )
+    parser.add_argument(
+        "--prompt-registration-scale",
+        type=float,
+        default=1.0,
+        help=(
+            "Raster scale relative to the native prompt; used only by "
+            "--prompt-registration-mode raster_adjoint."
+        ),
+    )
+    parser.add_argument(
+        "--score-render-scale",
+        type=float,
+        default=1.0,
+        help="Scalar score raster scale relative to the frozen feature raster.",
+    )
+    parser.add_argument(
+        "--valid-support-normalization",
+        action="store_true",
+        help=(
+            "For canonical support, render sum(w*v*p)/sum(w*v) so invalid "
+            "capability rows abstain instead of diluting scalar scores."
+        ),
+    )
+    parser.add_argument(
+        "--valid-support-coverage-power",
+        type=float,
+        default=0.0,
+        help=(
+            "Query-independent abstention after valid normalization. Zero is "
+            "pure conditional scoring and one exactly recovers total-alpha "
+            "dilution; intermediate values trade score purity for coverage."
+        ),
+    )
+    parser.add_argument(
         "--feature-contribution-gamma",
         type=float,
         default=1.0,
@@ -941,6 +1160,36 @@ def main() -> None:
     parser.add_argument("--negative-spatial-steps", type=int, default=4)
     parser.add_argument("--negative-spatial-decay", type=float, default=0.8)
     parser.add_argument("--canonical-field-sha256", default="")
+    parser.add_argument(
+        "--registered-seed-unary-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Direct signed unary weight for raster-registered positive/negative "
+            "primitive responsibilities; zero preserves the frozen protocol."
+        ),
+    )
+    parser.add_argument(
+        "--registered-selection-mode",
+        choices=(
+            SelectionMode.SEEDED_COMPONENT.value,
+            SelectionMode.ALL_COMPONENTS.value,
+        ),
+        default=SelectionMode.SEEDED_COMPONENT.value,
+        help=(
+            "Read out only seed-connected active support (frozen behavior) or "
+            "retain every active component for full-region prompts."
+        ),
+    )
+    parser.add_argument(
+        "--registered-readout-stage",
+        choices=("unary_prior", "propagated", "connected"),
+        default="connected",
+        help=(
+            "Choose the continuous unary/graph field or the component-masked "
+            "support as the final scalar render; all stages remain reported."
+        ),
+    )
     parser.add_argument("--appearance-weight", type=float, default=1.0)
     parser.add_argument("--boundary-weight", type=float, default=0.35)
     parser.add_argument("--prototype-temperature", type=float, default=0.07)
@@ -972,6 +1221,43 @@ def main() -> None:
     args = parser.parse_args()
     if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
         parser.error("--feature-contribution-gamma must be finite and positive")
+    if (
+        not np.isfinite(args.prompt_registration_scale)
+        or args.prompt_registration_scale <= 0
+    ):
+        parser.error("--prompt-registration-scale must be finite and positive")
+    if not np.isfinite(args.score_render_scale) or args.score_render_scale <= 0:
+        parser.error("--score-render-scale must be finite and positive")
+    if (
+        args.prompt_registration_mode == "legacy_alpha_depth"
+        and args.prompt_registration_scale != 1.0
+    ):
+        parser.error(
+            "--prompt-registration-scale applies only to raster_adjoint mode"
+        )
+    if args.valid_support_normalization and args.support_mode != "canonical_support":
+        parser.error(
+            "--valid-support-normalization requires --support-mode canonical_support"
+        )
+    if (
+        not np.isfinite(args.valid_support_coverage_power)
+        or args.valid_support_coverage_power < 0
+    ):
+        parser.error(
+            "--valid-support-coverage-power must be finite and non-negative"
+        )
+    if (
+        args.valid_support_coverage_power != 0
+        and not args.valid_support_normalization
+    ):
+        parser.error(
+            "--valid-support-coverage-power requires --valid-support-normalization"
+        )
+    if (
+        not np.isfinite(args.registered_seed_unary_weight)
+        or args.registered_seed_unary_weight < 0
+    ):
+        parser.error("--registered-seed-unary-weight must be finite and non-negative")
     print(json.dumps(run(args), indent=2))
 
 

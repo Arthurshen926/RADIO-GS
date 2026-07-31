@@ -9,6 +9,7 @@ from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _resolve_extracted_capability_source,
     accumulate_contribution_mean_channel_chunked,
     merge_topk_view_observations,
+    raster_fusion_reliability,
 )
 
 
@@ -45,6 +46,47 @@ def test_topk_view_fusion_keeps_channels_from_same_ranked_view() -> None:
 
     torch.testing.assert_close(features[..., 0], observation)
     torch.testing.assert_close(scores[:, 0], torch.tensor([0.5, 0.8]))
+
+
+def test_mean_resultant_reliability_measures_directional_agreement() -> None:
+    features = torch.tensor(
+        [
+            [1.0, 0.0],
+            [0.5, 0.0],
+            [0.0, 0.0],
+        ]
+    )
+    reliability = raster_fusion_reliability(
+        features,
+        torch.tensor([True, True, False]),
+        torch.tensor([4, 2, 0]),
+        num_views=4,
+        mode="mean_resultant",
+        normalized_observations=True,
+    ).float()
+
+    torch.testing.assert_close(
+        reliability,
+        torch.tensor(
+            [
+                [1.0, 1.0, 1.0],
+                [0.5, 0.5, 1.0],
+                [0.0, 0.0, 0.0],
+            ]
+        ),
+    )
+
+
+def test_mean_resultant_reliability_rejects_unnormalized_observations() -> None:
+    with pytest.raises(ValueError, match="normalized observations"):
+        raster_fusion_reliability(
+            torch.ones(1, 2),
+            torch.ones(1, dtype=torch.bool),
+            torch.ones(1),
+            num_views=1,
+            mode="mean_resultant",
+            normalized_observations=False,
+        )
 
 
 def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(

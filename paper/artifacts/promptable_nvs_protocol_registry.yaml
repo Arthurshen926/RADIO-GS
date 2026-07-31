@@ -90,6 +90,258 @@ protocols:
     target_masks: scoring_only_except_reference_mask_used_to_generate_prompts
     eligible_published_rows_without_reproduction: false
 
+  ludvig_official_online_multiview_v1:
+    dataset: [NVOS, SPIn-NeRF multiview segmentation]
+    method_scope: [LUDVIG-SAM, LUDVIG-SAM2, LUDVIG-DINOv2]
+    capability_track: online_multiview_propagation
+    upstream:
+      repository: https://github.com/naver/ludvig
+      audited_commit: 4461fc515439bb498a75d71738a1e73cf7a452ed
+    common:
+      gaussian_splatting:
+        implementation: original_3dgs
+        iterations: 30000
+        training_views: all_registered_scene_views
+        source_provenance:
+          ludvig_vendored_as_gitlink: false
+          reconstruction_lock: reproductions/ludvig/official_3dgs.lock.json
+          official_commit: f7a116fb1397d9842239127d39dc212f93171f70
+          byte_identical_train_entrypoint: true
+          train_entrypoint_sha256: c5a61947e2abcf56bf83451ae9633799d96894910ea2982a01f209c47cec462d
+          algorithm_source_patch: null
+      target_rgb_visible_during_gaussian_splatting_training: true
+      target_rgb_visible_during_uplifting: true
+      target_mask_use: scoring_only
+      target_view_2d_foundation_model_calls: true
+      prediction_resize_before_threshold: bilinear
+      metric: foreground_iou
+      paper_run_aggregation: mean_over_3_independent_runs
+      released_entrypoint_seed: 0
+      released_entrypoint_supports_multiple_seeds: false
+    nvos:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      prompt:
+        type: official_positive_scribble
+        official_negative_scribble_used_by_released_code: false
+        points_per_sam_call: 3
+        sam_calls_per_view: 10
+      source_mask_calibration:
+        sam: false
+        sam2: false
+        dinov2_graph_diffusion: sam_mask_predicted_on_reference_rgb
+      evaluation:
+        frames_per_task: 1
+        reference_scored: false
+        aggregation: equal_weight_macro_over_8_tasks
+        sam_threshold_after_per_frame_minmax: {comparison: greater_than, value: 0.25}
+        sam2_threshold: li_iterative_minimum_cross_entropy_per_frame
+    spin_nerf:
+      scenes: [orchids, leaves, fern, room, horns, fortress, fork, pinecone, truck, lego]
+      prompt:
+        frame_role: first_official_annotated_frame_after_released_code_mapping
+        type: complete_binary_mask
+        points_per_sam_call: 3
+        sam_calls_per_view: 10
+      source_mask_calibration:
+        reference_ground_truth_mask_used: true
+        per_scene_threshold_selected_by_reference_iou: true
+        per_scene_sam_candidate_selected_by_reference_iou: true
+        non_reference_target_masks_used: false
+      evaluation:
+        reference_scored: false
+        aggregation: frame_mean_then_equal_weight_macro_over_10_scenes
+    exact_match:
+      nvos_strict_unseen_v1: false
+      spin_nerf_full_reference_mask_10scene_v1: false
+      reasons:
+        - LUDVIG sees target RGB during both 3DGS training and query-specific uplifting.
+        - LUDVIG calls a 2D foundation model on target views.
+        - SPIn-NeRF LUDVIG selects a threshold and SAM candidate separately for each scene from the reference ground-truth mask.
+
+  ludvig_spin_nerf_9scene_without_fork_diagnostic_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: diagnostic_incomplete_cohort
+    scenes: [orchids, leaves, fern, room, horns, fortress, pinecone, truck, lego]
+    missing_scenes: [fork]
+    evaluation:
+      reference_scored: false
+      aggregation: frame_mean_then_equal_weight_macro_over_9_available_scenes
+    paper_reported_same_scene_macro:
+      ludvig_dinov2: 94.8111111111
+      ludvig_sam: 94.5777777778
+      ludvig_sam2: 94.5555555556
+    eligible_for_spin_nerf_10scene_table: false
+    eligible_for_strict_unseen_claim: false
+
+  ludvig_nvos_fern_released_all_view_exact_preflight_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: blocked_hardware_after_validated_cpu_dry_run
+    scene: fern
+    geometry_protocol: released_all_view
+    source:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      rasterizer_commit: 8064f52ca233942bdec2d1a1451c026deedd320b
+      simple_knn_commit: 44f764299fa305faf6ec5ebd99939e0508331503
+      glm_commit: 5c46b9c07008ae65cb81ab79cd677ecc1934b903
+      ludvig_train_entrypoint_byte_identical: true
+      common_tracked_paths_compared: 30
+      byte_identical_paths: 20
+      ludvig_modified_paths: 10
+      checkout_tracked_and_untracked_clean: true
+      algorithm_source_patch: null
+    training:
+      registered_views: 20
+      held_out_views: 0
+      iterations: 30000
+      rng_seed: 0
+      resolution_argument: -1
+      effective_resolution: [1600, 1199]
+      defaults:
+        position_lr_init: 0.00016
+        position_lr_final: 0.0000016
+        position_lr_delay_mult: 0.01
+        position_lr_max_steps: 30000
+        feature_lr: 0.0025
+        opacity_lr: 0.05
+        scaling_lr: 0.005
+        rotation_lr: 0.001
+        percent_dense: 0.01
+        lambda_dssim: 0.2
+        densification_interval: 100
+        opacity_reset_interval: 3000
+        densify_from_iter: 500
+        densify_until_iter: 15000
+        densify_grad_threshold: 0.0002
+    camera_staging:
+      model: PINHOLE
+      registered_images: 20
+      rgb_dimensions: [3985, 2988]
+      max_qvec_delta_vs_raw_sparse: 1.1102230246251565e-16
+      max_tvec_delta_vs_raw_sparse: 0.0
+      raw_dataset_modified: false
+    artifacts:
+      source_lock: reproductions/ludvig/official_3dgs.lock.json
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      dry_run_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_dryrun_v2/training_manifest.json
+      dry_run_manifest_sha256: c81670c3310147a7ce204d7ea424a2fe8e855f994b14b0a73b16d30e6a3f6ef2
+    blocker:
+      type: gpu_hardware_lost
+      last_good_at: "2026-07-31 12:49:00.349"
+      first_gpu_lost_at: "2026-07-31 12:49:00.600"
+      gpu_process_queued: false
+      blocked_flock_process_present: false
+    resume_boundary:
+      - explicit_hardware_recovery_confirmation
+      - train_one_all_view_30k_checkpoint
+      - validate_and_hash_iteration_30000_ply
+      - evaluate_same_checkpoint_with_seeds_0_1_2
+      - aggregate_selected_iou_only_and_compare_paper_fern_85p5
+    eligibility:
+      exact_paper_protocol_comparison: false
+      reason: no completed checkpoint or three-seed result while GPU is unavailable
+      strict_unseen_exact_match: false
+
+  ludvig_spin_fern_checkpoint_reuse_preflight_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: ready_pending_exact_nvos_fern_checkpoint_and_gpu_recovery
+    scene: fern
+    checkpoint_reuse:
+      can_reuse_exact_nvos_fern_all_view_30k: true
+      additional_training_required: false
+      released_seg_script_uses_same_llff_data_fern_checkpoint: true
+    source_equivalence:
+      raw_sparse_byte_identical: true
+      raw_rgb_byte_identical: true
+      raw_rgb_images: 20
+      cameras_bin_sha256: ca0f39ee49fd61d9c66bd56c39f4ec89bf57b251e286f28cb43620c84f1355bc
+      images_bin_sha256: 55440bb428f6be4f57200bd46677648989914d7e2315fe5d30454d0aa9fb86b6
+      points3d_bin_sha256: e27cbffde2922f437243bb25bb2fd4c9de8067c0805c1888540f3b0c37baad19
+    mapping:
+      policy: sorted_unique_mask_names_zip_sorted_colmap_camera_names
+      frames: 20
+      first: {mask: image000.png, camera: IMG_4026, role: reference}
+      last: {mask: image019.png, camera: IMG_4045, role: target}
+      reference_scored: false
+      scored_target_frames: 19
+      mask_dimensions: [1008, 756]
+      mask_values: [0, 1]
+    calibration:
+      per_scene_reference_mask_iou: true
+      sam_candidates: 3
+      threshold_and_candidate_selected_on_reference: true
+      target_masks_used_for_selection: false
+    planned_evaluation:
+      seeds: [0, 1, 2]
+      paper_fern_iou_percent: 97.0
+      estimated_total_runtime_minutes: [6, 15]
+      second_3dgs_training_run: false
+    artifacts:
+      preflight: output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json
+      preflight_sha256: ecf1df13466f32f4b16babbcb33b5206fcb613cea0579e5a94abe9f1e77db9dd
+      preflight_script: reproductions/ludvig/preflight_spin_fern.py
+    eligibility:
+      single_scene_diagnostic: false
+      local_9scene_macro: false
+      paper_10scene_row: false
+      reason: checkpoint and three-seed fern results are pending; Fork and eight other local scene results are not part of this preflight
+
+  ludvig_nvos_fern_strict_geometry_hybrid_diagnostic_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_single_scene_single_seed_diagnostic
+    scene: fern
+    seed: 0
+    geometry_protocol: strict_geometry_hybrid_diagnostic
+    visibility:
+      target_rgb_visible_during_gaussian_splatting_training: false
+      target_rgb_visible_during_uplifting: true
+      target_view_2d_foundation_model_calls: true
+      target_masks_scoring_only: true
+    camera_staging:
+      raw_sparse_model: SIMPLE_RADIAL
+      raw_sparse_dimensions: [4032, 3024]
+      staged_model: PINHOLE
+      staged_rgb_dimensions: [3985, 2988]
+      source: dense/sparse
+      raw_dataset_modified: false
+      max_qvec_delta_vs_raw_sparse: 1.1102230246251565e-16
+      max_tvec_delta_vs_raw_sparse: 0.0
+      effective_target_intrinsics:
+        dimensions: [1600, 1199]
+        fx: 1309.11973214779
+        fy: 1309.1197321477898
+        cx: 800.0
+        cy: 599.5
+    result:
+      selected_foreground_iou_percent: 84.01535329822478
+      selected_threshold_parameter: 75
+      paper_fern_iou_percent: 85.5
+      delta_local_minus_paper_points: -1.484646701775219
+      oracle_target_iou_percent_diagnostic_only: 85.97932926631772
+      oracle_threshold_parameter_diagnostic_only: 54
+    runtime:
+      gpu_wall_time_seconds: 94.28004455566406
+      queue_wait_seconds: 974.8389151096344
+      launcher_wall_time_seconds: 1069.1191339630168
+      observed_gpu_memory_mib: 8076
+    artifacts:
+      manifest: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/attempts/pinhole_stage_retry_1/run_manifest.json
+      manifest_sha256: 14c40f0720f9ad5b5ce16a7aa8a22cf4c0e284339957b87e9c769cdfe2f62255
+      result: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/attempts/pinhole_stage_retry_1/fern/sam/protocol_result.json
+      result_sha256: 59250d146ef88bc1a8981b16bb89c21d9bff430c65512735e4b3a0357fccfc09
+      summary: output/protocol_audit_20260731/ludvig/nvos/fern_seed0_hybrid_pilot_summary.json
+      failed_camera_model_attempt: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/run_manifest.json
+      validated_staging_dry_run: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/attempts/pinhole_stage_dryrun/run_manifest.json
+    eligibility:
+      exact_paper_protocol_comparison: false
+      strict_unseen_exact_match: false
+      full_nvos_cohort_report: false
+      three_run_paper_mean: false
+    interpretation: >-
+      The released evaluator, frame mapping, fixed threshold, and local data
+      produce an expected-range fern score. The one-seed hybrid result cannot
+      isolate an evaluator delta from the all-view-versus-strict geometry
+      difference and must not replace the paper's three-run all-view row.
+
 tracks:
   reusable_feature_field:
     definition: >-
@@ -158,13 +410,36 @@ reported_context:
   - method: LUDVIG-SAM
     method_id: marrie_et_al_iccv_2025_ludvig_sam
     track: online_multiview_propagation
+    protocol_id: ludvig_official_online_multiview_v1
     source: https://www.openaccess.thecvf.com/content/ICCV2025/papers/Marrie_LUDVIG_Learning-Free_Uplifting_of_2D_Visual_Features_to_Gaussian_Splatting_ICCV_2025_paper.pdf
     values:
       nvos: {miou: 91.3, macc: null}
       spin_nerf: {miou: 93.8, macc: null}
+    published_per_scene_iou:
+      nvos:
+        fern: 85.5
+        flower: 97.6
+        fortress: 98.1
+        horns_center: 97.9
+        horns_left: 94.1
+        leaves: 96.4
+        orchids: 73.1
+        trex: 88.0
+      spin_nerf:
+        orchids: 92.2
+        leaves: 96.3
+        fern: 97.0
+        room: 96.5
+        horns: 94.5
+        fortress: 98.3
+        fork: 86.8
+        pinecone: 88.8
+        truck: 94.9
+        lego: 92.7
     final_published_version: true
     local_reproduction: false
     exact_local_evaluator: false
+    strict_unseen_exact_match: false
     cautions:
       - NVOS uplifting traverses all COLMAP cameras and therefore sees target RGB.
       - Uses per-view SAM image prediction and is not a reusable SAM feature field.
@@ -173,6 +448,7 @@ reported_context:
   - method: LUDVIG-SAM2
     method_id: marrie_et_al_iccv_2025_ludvig_sam2
     track: online_multiview_propagation
+    protocol_id: ludvig_official_online_multiview_v1
     source: https://www.openaccess.thecvf.com/content/ICCV2025/papers/Marrie_LUDVIG_Learning-Free_Uplifting_of_2D_Visual_Features_to_Gaussian_Splatting_ICCV_2025_paper.pdf
     values:
       nvos: {miou: 91.3, macc: null}
@@ -180,6 +456,7 @@ reported_context:
     final_published_version: true
     local_reproduction: false
     exact_local_evaluator: false
+    strict_unseen_exact_match: false
     cautions:
       - SAM2 image predictor, not SAM2-Video.
       - NVOS uplifting traverses all COLMAP cameras and therefore sees target RGB.

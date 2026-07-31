@@ -272,11 +272,21 @@ class SurfaceRegionSummaryReadout(nn.Module):
 class SurfaceRegionSummaryReadoutV2(nn.Module):
     """Anchor/core-context conditioned low-capacity region readout."""
 
-    def __init__(self, feature_dim: int = 1280, hidden_dim: int = 128) -> None:
+    def __init__(
+        self,
+        feature_dim: int = 1280,
+        hidden_dim: int = 128,
+        reliability_attention_mode: str = "log_prior",
+    ) -> None:
         super().__init__()
         self.feature_dim = int(feature_dim)
         self.geometry_dim = SURFACE_GEOMETRY_V2_DIM
         self.hidden_dim = int(hidden_dim)
+        self.reliability_attention_mode = str(reliability_attention_mode)
+        if self.reliability_attention_mode not in {"log_prior", "input_only"}:
+            raise ValueError(
+                "reliability_attention_mode must be log_prior or input_only"
+            )
         self.feature_encoder = nn.Sequential(
             nn.LayerNorm(self.feature_dim), nn.Linear(self.feature_dim, self.hidden_dim)
         )
@@ -336,7 +346,10 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
             torch.cat([values[batch, anchor], geom[batch, anchor]], dim=-1)
         )
         logits = torch.einsum("bh,bth->bt", query, self.key(hidden)) / self.hidden_dim**0.5
-        if reliability is not None:
+        if (
+            reliability is not None
+            and self.reliability_attention_mode == "log_prior"
+        ):
             confidence = torch.as_tensor(reliability, device=values.device).float()
             if confidence.ndim == 3 and confidence.shape[-1] == 1:
                 confidence = confidence[..., 0]
@@ -362,6 +375,10 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
             "core_context_conditioned": "true",
             "contract_sha256": str(contract_sha256),
         }
+        if self.reliability_attention_mode != "log_prior":
+            payload["reliability_attention_mode"] = (
+                self.reliability_attention_mode
+            )
         payload["digest"] = hashlib.sha256(
             json.dumps(payload, sort_keys=True).encode("utf-8")
         ).hexdigest()
@@ -379,6 +396,9 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
         model = cls(
             feature_dim=int(architecture["feature_dim"]),
             hidden_dim=int(architecture["hidden_dim"]),
+            reliability_attention_mode=str(
+                architecture.get("reliability_attention_mode", "log_prior")
+            ),
         )
         if model.architecture(str(architecture["contract_sha256"]))["digest"] != expected:
             raise ValueError("v2 surface-region architecture digest mismatch")

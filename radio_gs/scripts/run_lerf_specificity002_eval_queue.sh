@@ -13,6 +13,28 @@ GPU="${GPU:?set GPU to a physical GPU index}"
 SOURCE_ROOT="${SOURCE_ROOT:-output/optimization_20260724/text_specificity_margin002}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-output/optimization_20260724/text_specificity_margin002}"
 AFTER_MARKER="${AFTER_MARKER:-}"
+PRIMITIVE_VALID_NORMALIZATION="${PRIMITIVE_VALID_NORMALIZATION:-0}"
+PRIMITIVE_VALID_COVERAGE_POWER="${PRIMITIVE_VALID_COVERAGE_POWER:-0}"
+
+case "$PRIMITIVE_VALID_NORMALIZATION" in
+  0)
+    if [[ ! "$PRIMITIVE_VALID_COVERAGE_POWER" =~ ^0([.]0+)?$ ]]; then
+      echo "nonzero PRIMITIVE_VALID_COVERAGE_POWER requires PRIMITIVE_VALID_NORMALIZATION=1" >&2
+      exit 2
+    fi
+    VALID_NORMALIZATION_ARGS=()
+    ;;
+  1)
+    VALID_NORMALIZATION_ARGS=(
+      --primitive_valid_normalization
+      --primitive_valid_coverage_power "$PRIMITIVE_VALID_COVERAGE_POWER"
+    )
+    ;;
+  *)
+    echo "PRIMITIVE_VALID_NORMALIZATION must be 0 or 1" >&2
+    exit 2
+    ;;
+esac
 
 wait_for_gpu() {
   local available=0
@@ -68,6 +90,7 @@ for scene in figurines ramen teatime waldo_kitchen; do
     --rendered_only \
     --render_readout primitive_unary \
     --primitive_score_cache "$unary" \
+    "${VALID_NORMALIZATION_ARGS[@]}" \
     --scene "$scene" \
     --label_dir /mnt/pool/sqy/3d_understanding/lerf_ovs/label \
     --output_dir "$OUTPUT_ROOT/${scene}_eval_specificity002" \

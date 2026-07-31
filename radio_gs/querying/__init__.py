@@ -24,9 +24,10 @@ from .score_calibration import (
     fit_scene_space_calibration,
     robust_tanh_score_calibration,
 )
-from .evidence_scorer import shrink_unary_by_reliability
+from .evidence_scorer import registered_seed_unary, shrink_unary_by_reliability
 from .query_compilers import compile_registered_primitive_seeds
 from .query_spec import (
+    PrimitiveUnaryEvidence,
     PrototypeSet,
     QueryIntent,
     QueryModality,
@@ -65,6 +66,7 @@ __all__ = [
     "score_features",
     "CanonicalQueryEngine",
     "PrimitiveSupportGraph",
+    "PrimitiveUnaryEvidence",
     "PrototypeSet",
     "QueryIntent",
     "QueryModality",
@@ -84,6 +86,7 @@ __all__ = [
     "compile_registered_primitive_seeds",
     "graph_for_query_intent",
     "mix_support_graph_channels",
+    "registered_seed_unary",
     "select_support_components",
     "solve_primitive_support",
     "shrink_unary_by_reliability",

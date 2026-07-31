@@ -19,6 +19,12 @@ from radio_gs.interfaces.surface_region_summary import (
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
+from radio_gs.scripts.build_canonical_primitive_semantic_cache import (
+    canonical_reconstruction_confidence,
+)
+from radio_gs.scripts.build_primitive_text_score_cache import (
+    apply_completion_evidence,
+)
 
 
 def _sha256(path: Path) -> str:
@@ -80,6 +86,58 @@ def two_hop_physical_regions(
     return rows, mask
 
 
+def completion_primary_valid(
+    mpr: dict,
+    output_valid: torch.Tensor,
+) -> torch.Tensor | None:
+    """Recover the explicit primary/fallback partition from a fused MPR."""
+
+    metadata = dict(mpr.get("metadata", {}))
+    if (
+        metadata.get("construction")
+        != "dominant_primary_with_query_free_support_completion"
+    ):
+        return None
+    observed = torch.as_tensor(output_valid).bool().reshape(-1)
+    reliability = torch.as_tensor(mpr.get("reliability")).float()
+    if reliability.ndim != 2 or reliability.shape[0] != observed.numel():
+        raise ValueError("completed MPR reliability does not align with rows")
+    if reliability.shape[1] < 3:
+        raise ValueError("completed MPR lacks its primary indicator channel")
+    primary = observed & (reliability[:, 2] > 0.5)
+    expected = metadata.get("primary_valid_count")
+    if expected is None or int(primary.sum()) != int(expected):
+        raise ValueError("completed MPR primary partition count mismatch")
+    if not bool(primary.any()) or torch.equal(primary, observed):
+        raise ValueError("completed MPR does not contain a distinct fallback partition")
+    return primary
+
+
+def preserve_primary_region_tokens(
+    rows: torch.Tensor,
+    mask: torch.Tensor,
+    centers: torch.Tensor,
+    primary_valid: torch.Tensor | None,
+) -> torch.Tensor:
+    """Prevent fallback rows from changing an existing primary descriptor."""
+
+    active = torch.as_tensor(mask).bool()
+    if primary_valid is None:
+        return active
+    neighbors = torch.as_tensor(rows).long()
+    center_rows = torch.as_tensor(centers).long().reshape(-1)
+    primary = torch.as_tensor(primary_valid).bool()
+    if neighbors.shape != active.shape or center_rows.shape != (
+        neighbors.shape[0],
+    ):
+        raise ValueError("surface region rows, mask, and centers must align")
+    if neighbors.numel() and int(neighbors.max()) >= primary.numel():
+        raise ValueError("surface region rows exceed the primary partition")
+    return active & (
+        primary[neighbors] | (neighbors == center_rows[:, None])
+    )
+
+
 @torch.no_grad()
 def build(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
@@ -97,6 +155,12 @@ def build(args: argparse.Namespace) -> dict:
     xyz = torch.as_tensor(graph["xyz"]).float().cpu()
     if not torch.equal(xyz, xyz_global[global_rows]):
         raise ValueError("support graph and canonical field geometry differ")
+    output_valid = torch.zeros(len(xyz_global), dtype=torch.bool)
+    output_valid[global_rows] = True
+    primary_valid = completion_primary_valid(mpr, output_valid)
+    primary_local = (
+        primary_valid[global_rows] if primary_valid is not None else None
+    )
     provenance = readout_payload["provenance"]
     training_scope = str(provenance.get("training_scope", ""))
     if (
@@ -134,11 +198,42 @@ def build(args: argparse.Namespace) -> dict:
     for start in range(0, len(global_rows), int(args.radio_batch_size)):
         stop = min(start + int(args.radio_batch_size), len(global_rows))
         radio[start:stop] = field.radio_features(global_rows[start:stop].to(device)).half()
-    reliability_source = torch.as_tensor(mpr.get("reliability")).float()[global_rows]
-    if reliability_source.ndim != 2 or reliability_source.shape[1] < 2:
-        raise ValueError("canonical MPR reliability needs coverage/agreement channels")
-    reliability = reliability_source[:, :2].clamp_min(1e-6).log().mean(-1).exp()
-    reliability[(reliability_source[:, :2] <= 0).any(-1)] = 0.0
+    semantic_confidence = None
+    if primary_valid is not None:
+        teacher_radio = torch.as_tensor(mpr["features"])[global_rows]
+        observation_counts = torch.as_tensor(mpr["view_counts"])[global_rows]
+        local_confidence = torch.zeros(
+            len(global_rows), dtype=torch.float16
+        )
+        for start in range(0, len(global_rows), int(args.radio_batch_size)):
+            stop = min(start + int(args.radio_batch_size), len(global_rows))
+            local_confidence[start:stop] = canonical_reconstruction_confidence(
+                radio[start:stop].float(),
+                teacher_radio[start:stop].to(
+                    device=device, dtype=torch.float32
+                ),
+                torch.ones(stop - start, dtype=torch.bool, device=device),
+                primary_local[start:stop].to(device),
+                observation_counts[start:stop].to(device),
+            ).half().cpu()
+        semantic_confidence = torch.zeros(
+            len(xyz_global), dtype=torch.float16
+        )
+        semantic_confidence[global_rows] = local_confidence
+    if contract.reliability_semantics == "uniform_valid":
+        reliability = torch.ones(len(global_rows), dtype=torch.float32)
+    else:
+        reliability_source = torch.as_tensor(mpr.get("reliability")).float()[
+            global_rows
+        ]
+        if reliability_source.ndim != 2 or reliability_source.shape[1] < 2:
+            raise ValueError(
+                "canonical MPR reliability needs coverage/agreement channels"
+            )
+        reliability = (
+            reliability_source[:, :2].clamp_min(1e-6).log().mean(-1).exp()
+        )
+        reliability[(reliability_source[:, :2] <= 0).any(-1)] = 0.0
     reliability = reliability.to(device)
     local_scale = torch.as_tensor(graph["local_sigma"]).float().clamp_min(1e-4).to(device)
     xyz_device = xyz.to(device)
@@ -192,6 +287,13 @@ def build(args: argparse.Namespace) -> dict:
                 mask[offset, :count] = True
                 core[offset, :count] = region_core
                 anchor_local[offset] = int(torch.where(region_rows == centers_cpu[offset])[0][0])
+            mask = preserve_primary_region_tokens(
+                rows,
+                mask,
+                centers_cpu,
+                primary_local,
+            )
+            core &= mask
             rows, mask, core, anchor_local = (
                 rows.to(device), mask.to(device), core.to(device), anchor_local.to(device)
             )
@@ -231,8 +333,6 @@ def build(args: argparse.Namespace) -> dict:
         if stream_text:
             assert batch_streamed_scores is not None
             streamed_scores[global_rows[start:stop]] = batch_streamed_scores.half()
-    output_valid = torch.zeros(len(xyz_global), dtype=torch.bool)
-    output_valid[global_rows] = True
     readout_sha256 = _sha256(readout_path)
     radio_sha256 = _sha256(Path(args.radio_checkpoint))
     metadata = {
@@ -262,9 +362,46 @@ def build(args: argparse.Namespace) -> dict:
         "cache_role": "disposable_derivative_not_scene_memory",
         "row_storage": "sparse_valid_rows_with_global_row_index",
         "scale_storage": "all_scales_preserved; mean_descriptor_legacy_only",
+        "completion_context_policy": (
+            "primary_plus_center"
+            if primary_valid is not None
+            else "all_valid"
+        ),
+        "primary_valid_count": (
+            int(primary_valid.sum()) if primary_valid is not None else None
+        ),
+        "semantic_confidence": (
+            {
+                "source": "canonical_radio_reconstruction_fidelity",
+                "nonzero_count": int((semantic_confidence > 0).sum()),
+                "mean_valid": float(
+                    semantic_confidence[output_valid].float().mean()
+                ),
+            }
+            if semantic_confidence is not None
+            else None
+        ),
     }
     output = Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
     if stream_text:
+        streamed_scores, completion = apply_completion_evidence(
+            streamed_scores,
+            output_valid,
+            semantic_confidence=semantic_confidence,
+            primary_valid=primary_valid,
+            routing=str(
+                getattr(args, "completion_routing", "primary_first")
+            ),
+            primary_support_threshold=float(
+                getattr(args, "primary_support_threshold", 0.5)
+            ),
+            primary_support_mode=str(
+                getattr(args, "primary_support_mode", "relative_peak")
+            ),
+            primary_support_margin=float(
+                getattr(args, "primary_support_margin", 0.02)
+            ),
+        )
         score_metadata = {
             "schema_version": 2,
             "feature_space": "primitive_text_query_scores",
@@ -276,17 +413,23 @@ def build(args: argparse.Namespace) -> dict:
             "query_names": text_queries,
             "text_embedding_cache": str(Path(args.text_embedding_cache).resolve()),
             "semantic_cache_materialized": False,
+            "completion": completion,
             "benchmark_images_opened": False,
             "benchmark_masks_opened": False,
             "text_queries_opened": True,
             "semantic_provenance": metadata,
         }
-        _atomic_torch_save({
+        score_payload = {
             "xyz": xyz_global,
             "features": streamed_scores,
             "valid": output_valid,
             "metadata": score_metadata,
-        }, output)
+        }
+        if primary_valid is not None:
+            score_payload["primary_valid"] = primary_valid
+        if semantic_confidence is not None:
+            score_payload["semantic_confidence"] = semantic_confidence
+        _atomic_torch_save(score_payload, output)
         report = {
             "output": str(output.resolve()),
             "valid_primitives": int(output_valid.sum()),
@@ -303,18 +446,20 @@ def build(args: argparse.Namespace) -> dict:
     # not materialize zero descriptors for invalid/background primitives.  The
     # global geometry and explicit row index retain an exact, lossless mapping;
     # consumers expand only when their downstream score representation needs it.
-    _atomic_torch_save(
-        {
-            "xyz": xyz_global,
-            "features": descriptors,
-            "summary_features": descriptors,
-            "global_rows": global_rows,
-            "features_by_scale": descriptors_by_scale,
-            "valid": output_valid,
-            "metadata": metadata,
-        },
-        output,
-    )
+    semantic_payload = {
+        "xyz": xyz_global,
+        "features": descriptors,
+        "summary_features": descriptors,
+        "global_rows": global_rows,
+        "features_by_scale": descriptors_by_scale,
+        "valid": output_valid,
+        "metadata": metadata,
+    }
+    if primary_valid is not None:
+        semantic_payload["primary_valid"] = primary_valid
+    if semantic_confidence is not None:
+        semantic_payload["semantic_confidence"] = semantic_confidence
+    _atomic_torch_save(semantic_payload, output)
     # Pose-free image querying only consumes the already aggregated descriptor,
     # never the retained per-scale tensor.  Save an exact, provenance-identical
     # derivative alongside the full cache so each query does not repeatedly
@@ -326,16 +471,18 @@ def build(args: argparse.Namespace) -> dict:
         if str(args.query_output).strip()
         else output.with_name(f"{output.stem}_query{output.suffix}")
     )
-    _atomic_torch_save(
-        {
-            "xyz": xyz_global,
-            "features": descriptors,
-            "global_rows": global_rows,
-            "valid": output_valid,
-            "metadata": metadata,
-        },
-        query_output,
-    )
+    query_payload = {
+        "xyz": xyz_global,
+        "features": descriptors,
+        "global_rows": global_rows,
+        "valid": output_valid,
+        "metadata": metadata,
+    }
+    if primary_valid is not None:
+        query_payload["primary_valid"] = primary_valid
+    if semantic_confidence is not None:
+        query_payload["semantic_confidence"] = semantic_confidence
+    _atomic_torch_save(query_payload, query_output)
     report = {"output": str(output.resolve()), "valid_primitives": int(output_valid.sum()),
               "total_primitives": len(output_valid), "metadata": metadata}
     output.with_suffix(output.suffix + ".json").write_text(json.dumps(report, indent=2))
@@ -364,6 +511,18 @@ def main() -> None:
     parser.add_argument("--semantic-batch-size", type=int, default=256)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--text-embedding-cache", default="")
+    parser.add_argument(
+        "--completion-routing",
+        choices=("primary_first", "direct", "primary_only"),
+        default="primary_first",
+    )
+    parser.add_argument(
+        "--primary-support-mode",
+        choices=("absolute", "relative_peak"),
+        default="relative_peak",
+    )
+    parser.add_argument("--primary-support-threshold", type=float, default=0.5)
+    parser.add_argument("--primary-support-margin", type=float, default=0.02)
     parser.add_argument(
         "--stream-text-queries", default="",
         help=(

@@ -118,6 +118,22 @@ class SoftSeedGroups:
 
 
 @dataclass(frozen=True)
+class PrimitiveUnaryEvidence:
+    """Bounded signed evidence already registered to primitive rows."""
+
+    values: torch.Tensor
+    source: str
+
+    def __post_init__(self) -> None:
+        values = torch.as_tensor(self.values).float().reshape(-1)
+        if values.numel() == 0 or not bool(torch.isfinite(values).all()):
+            raise ValueError("primitive unary evidence must be a finite vector")
+        if bool((values < -1).any()) or bool((values > 1).any()):
+            raise ValueError("primitive unary evidence must be in [-1,1]")
+        object.__setattr__(self, "values", values)
+
+
+@dataclass(frozen=True)
 class QuerySpec:
     modality: QueryModality
     intent: QueryIntent
@@ -129,6 +145,7 @@ class QuerySpec:
     negative_seeds: SoftSeedSet | None = None
     positive_seed_groups: SoftSeedGroups | None = None
     negative_seed_groups: SoftSeedGroups | None = None
+    primitive_unary_evidence: PrimitiveUnaryEvidence | None = None
     granularity_m: tuple[float, ...] = ()
     selection_mode: SelectionMode = SelectionMode.ALL_COMPONENTS
     field_signature: FeatureSpaceSignature | None = None
@@ -150,6 +167,7 @@ class QuerySpec:
                 self.appearance_evidence,
                 self.boundary_evidence,
                 self.positive_seeds,
+                self.primitive_unary_evidence,
             )
         ):
             raise ValueError("query contains no evidence")
@@ -157,8 +175,24 @@ class QuerySpec:
             raise ValueError("text queries are unregistered")
         if self.modality is QueryModality.REGISTERED_2D and self.registration is not RegistrationMode.CAMERA:
             raise ValueError("registered 2D queries require camera registration")
+        if (
+            self.primitive_unary_evidence is not None
+            and self.modality is not QueryModality.REGISTERED_2D
+        ):
+            raise ValueError(
+                "primitive unary evidence is currently restricted to registered 2D queries"
+            )
         if self.modality is QueryModality.WORLD_3D and self.registration is not RegistrationMode.WORLD:
             raise ValueError("world 3D queries require world registration")
+        if (
+            self.primitive_unary_evidence is not None
+            and self.positive_seeds is not None
+            and self.primitive_unary_evidence.values.shape
+            != self.positive_seeds.weights.shape
+        ):
+            raise ValueError(
+                "primitive unary evidence and registered seeds must align"
+            )
         for name, groups, aggregate in (
             ("positive", self.positive_seed_groups, self.positive_seeds),
             ("negative", self.negative_seed_groups, self.negative_seeds),

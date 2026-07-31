@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from typing import Mapping
 
 import torch
@@ -34,12 +35,23 @@ class EvidenceScoringConfig:
     negative_spatial_decay: float = 0.8
     spatial_log_weight: float = 0.25
     spatial_floor: float = 0.01
+    # Registered masks/scribbles are observations, not merely a way to build
+    # appearance prototypes.  Keep their direct signed-unary contribution
+    # opt-in so frozen benchmark contracts remain bit-for-bit compatible.
+    registered_seed_unary_weight: float = 0.0
 
     def __post_init__(self) -> None:
         if min(self.semantic_weight, self.appearance_weight, self.boundary_weight) < 0:
             raise ValueError("evidence weights must be non-negative")
         if self.prototype_temperature <= 0:
             raise ValueError("prototype_temperature must be positive")
+        if (
+            not math.isfinite(self.registered_seed_unary_weight)
+            or self.registered_seed_unary_weight < 0
+        ):
+            raise ValueError(
+                "registered_seed_unary_weight must be finite and non-negative"
+            )
         if self.feature_calibration not in {"none", "diagonal_robust"}:
             raise ValueError("feature_calibration must be none or diagonal_robust")
         if self.background_negative_policy not in {
@@ -96,6 +108,40 @@ def shrink_unary_by_reliability(
     if bool((confidence < 0).any()) or bool((confidence > 1).any()):
         raise ValueError("primitive reliability must be in [0,1]")
     return values * confidence
+
+
+def registered_seed_unary(
+    positive: torch.Tensor,
+    negative: torch.Tensor | None,
+) -> torch.Tensor:
+    """Convert raw registered masses into confidence-weighted signed purity.
+
+    Algebraically this is ``purity * confidence`` where purity is
+    ``(m+ - m-) / (m+ + m-)`` and confidence is joint prompt mass normalized
+    by the largest observed joint mass.  The factors cancel to a stable,
+    bounded ``(m+ - m-) / max_i(m+ + m-)``.  Unlike independently normalized
+    solver seeds, a weak tail cannot become unit-strength direct evidence.
+    """
+
+    foreground = torch.as_tensor(positive).float().reshape(-1)
+    if foreground.numel() == 0 or not bool(torch.isfinite(foreground).all()):
+        raise ValueError("positive registered seeds must be a finite vector")
+    if bool((foreground < 0).any()):
+        raise ValueError("positive registered seeds must be non-negative")
+    if negative is None:
+        background = torch.zeros_like(foreground)
+    else:
+        background = torch.as_tensor(negative).float().reshape(-1)
+        if background.shape != foreground.shape:
+            raise ValueError("positive and negative registered seeds must align")
+        if not bool(torch.isfinite(background).all()) or bool((background < 0).any()):
+            raise ValueError(
+                "negative registered seeds must be finite and non-negative"
+            )
+    joint_scale = (foreground + background).amax()
+    if joint_scale <= 0:
+        return torch.zeros_like(foreground)
+    return ((foreground - background) / joint_scale).clamp(-1.0, 1.0)
 
 
 def _score_bank(

@@ -469,6 +469,9 @@ def train(args: argparse.Namespace) -> dict:
             reliability=consensus.reliability,
             fusion_reliability=bool(args.fusion_reliability),
             hidden_dim=int(args.hidden_dim),
+            fusion_residual_blocks=int(
+                getattr(args, "fusion_residual_blocks", 0)
+            ),
             use_fusion=use_fusion,
         ).to(device)
         with torch.no_grad():
@@ -598,6 +601,7 @@ def train(args: argparse.Namespace) -> dict:
             if field.fusion is not None
             else int(args.hidden_dim)
         ),
+        "fusion_residual_blocks": int(field.fusion_residual_blocks),
         "use_fusion": field.fusion is not None,
         "trainable_basis": bool(field.decoder.basis.requires_grad),
         "trainable_statistics": bool(
@@ -704,6 +708,15 @@ def main() -> None:
     )
     parser.add_argument("--hidden-dim", type=int, default=192)
     parser.add_argument(
+        "--fusion-residual-blocks",
+        type=int,
+        default=0,
+        help=(
+            "Optional token-wise coefficient residual depth after primitive "
+            "local/coarse/reliability fusion; zero preserves schema-v1 behavior."
+        ),
+    )
+    parser.add_argument(
         "--primitive-fusion",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -749,6 +762,10 @@ def main() -> None:
     parser.add_argument("--target-cosine", type=float, default=0.985)
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
+    if args.fusion_residual_blocks < 0:
+        parser.error("--fusion-residual-blocks cannot be negative")
+    if args.fusion_residual_blocks and not args.primitive_fusion:
+        parser.error("--fusion-residual-blocks requires --primitive-fusion")
     if args.min_epochs <= 0 or args.min_epochs > args.epochs:
         parser.error("--min-epochs must lie in [1, --epochs]")
     print(json.dumps(train(args), indent=2))

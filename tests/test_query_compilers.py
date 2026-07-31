@@ -4,6 +4,7 @@ import torch
 from radio_gs.field import FeatureSpaceSignature
 from radio_gs.querying.query_compilers import (
     compile_image_query,
+    compile_registered_primitive_seeds,
     compile_world_3d_query,
     continuous_gaussian_readout,
 )
@@ -49,6 +50,42 @@ def test_posefree_image_query_selects_one_instance_component() -> None:
 
     assert query.intent is QueryIntent.INSTANCE
     assert query.selection_mode is SelectionMode.TOP_COMPONENT
+
+
+def test_registered_query_allows_explicit_full_region_selection() -> None:
+    features = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    common = dict(
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_signature("dino", 2),
+        boundary_signature=_signature("sam3", 2),
+        prototype_count=1,
+    )
+    frozen = compile_registered_primitive_seeds(
+        torch.tensor([1.0, 0.0]),
+        torch.tensor([0.0, 1.0]),
+        **common,
+    )
+    full_region = compile_registered_primitive_seeds(
+        torch.tensor([1.0, 0.0]),
+        torch.tensor([0.0, 1.0]),
+        positive_prompt_mass=torch.tensor([1.0, 0.0]),
+        negative_prompt_mass=torch.tensor([0.0, 0.1]),
+        selection_mode=SelectionMode.ALL_COMPONENTS,
+        **common,
+    )
+
+    assert frozen.selection_mode is SelectionMode.SEEDED_COMPONENT
+    assert full_region.selection_mode is SelectionMode.ALL_COMPONENTS
+    assert full_region.negative_seeds is not None
+    torch.testing.assert_close(
+        full_region.negative_seeds.weights, torch.tensor([0.0, 1.0])
+    )
+    assert full_region.primitive_unary_evidence is not None
+    torch.testing.assert_close(
+        full_region.primitive_unary_evidence.values,
+        torch.tensor([1.0, -0.1]),
+    )
 
 
 def test_world_point_hard_seed_topk_keeps_continuous_descriptor_support() -> None:

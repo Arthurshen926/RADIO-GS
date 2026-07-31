@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 
 import torch
@@ -174,6 +175,8 @@ def apply_completion_evidence(
     primary_valid: torch.Tensor | None = None,
     routing: str = "primary_first",
     primary_support_threshold: float = 0.5,
+    primary_support_mode: str = "absolute",
+    primary_support_margin: float = 0.02,
 ) -> tuple[torch.Tensor, dict]:
     """Apply query-independent completion confidence and optional routing.
 
@@ -192,6 +195,10 @@ def apply_completion_evidence(
         raise ValueError("scores and valid must be row-aligned [N,Q]/[N]")
     if routing not in {"direct", "primary_first", "primary_only"}:
         raise ValueError(f"unsupported completion routing: {routing}")
+    if primary_support_mode not in {"absolute", "relative_peak"}:
+        raise ValueError("primary_support_mode must be absolute or relative_peak")
+    if not math.isfinite(primary_support_margin) or primary_support_margin < 0:
+        raise ValueError("primary_support_margin must be finite and non-negative")
     if not bool(torch.isfinite(values).all()):
         raise FloatingPointError("primitive query scores are non-finite")
     values[~mask] = 0.0
@@ -221,9 +228,17 @@ def apply_completion_evidence(
         fallback = mask & ~primary
         fallback_count = int(fallback.sum())
         if bool(primary.any()):
-            primary_supported = values[primary].amax(dim=0) >= float(
-                primary_support_threshold
-            )
+            primary_peak = values[primary].amax(dim=0)
+            if primary_support_mode == "absolute":
+                primary_supported = primary_peak >= float(
+                    primary_support_threshold
+                )
+            else:
+                valid_peak = values[mask].amax(dim=0)
+                primary_supported = (
+                    primary_peak
+                    >= valid_peak - float(primary_support_margin)
+                )
         if routing == "primary_first" and bool(fallback.any()):
             values[fallback] *= (~primary_supported).to(values.dtype)[None, :]
         elif routing == "primary_only":
@@ -237,6 +252,8 @@ def apply_completion_evidence(
         "primary_valid_count": int(primary_count),
         "fallback_valid_count": int(fallback_count),
         "primary_support_threshold": float(primary_support_threshold),
+        "primary_support_mode": str(primary_support_mode),
+        "primary_support_margin": float(primary_support_margin),
         "primary_supported_queries": int(primary_supported.sum()),
         "total_queries": int(values.shape[1]),
     }
@@ -332,6 +349,8 @@ def build(args: argparse.Namespace) -> dict:
         primary_valid=feature_cache.get("primary_valid"),
         routing=str(args.completion_routing),
         primary_support_threshold=float(args.primary_support_threshold),
+        primary_support_mode=str(args.primary_support_mode),
+        primary_support_margin=float(args.primary_support_margin),
     )
     construction = {
         "softmax_scene": "scene_softmax",
@@ -463,6 +482,22 @@ def main() -> None:
         type=float,
         default=0.5,
         help="Fixed query-score boundary used by primary_first routing",
+    )
+    parser.add_argument(
+        "--primary-support-mode",
+        choices=("absolute", "relative_peak"),
+        default="relative_peak",
+        help=(
+            "Preserve primary support when its peak is within a fixed raw-"
+            "cosine margin of the valid peak; absolute retains the legacy "
+            "fixed-boundary ablation."
+        ),
+    )
+    parser.add_argument(
+        "--primary-support-margin",
+        type=float,
+        default=0.02,
+        help="Absolute score margin used by relative_peak primary routing.",
     )
     args = parser.parse_args()
     print(json.dumps(build(args), indent=2))
