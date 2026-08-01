@@ -1,5 +1,11 @@
 # AGILE3D / Easy3D ScanNet40 3-D Point Prompt
 
+> **Scope note.** This document also covers the project's broader interactive
+> prompt protocol. The frozen Easy3D external-baseline reproduction is capped
+> at 10 clicks and is defined by
+> `paper/artifacts/evaluation_protocol_freeze_20260801.yaml`; generic 20-click,
+> IoU@15, or NoC settings here must not be applied to that baseline row.
+
 This evaluation is the released AGILE3D single-object protocol, not the older
 RADIO-GS one-random-positive-point diagnostic.
 

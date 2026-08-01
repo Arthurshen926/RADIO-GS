@@ -19,6 +19,8 @@ from torch import nn
 
 SURFACE_GEOMETRY_DIM = 12
 SURFACE_GEOMETRY_V2_DIM = 14
+JOINT_CONTEXT_POOLING = "joint_attention_v1"
+SEPARATE_CONTEXT_POOLING = "core_context_separate_attention_v1"
 
 
 def surface_region_geometry(
@@ -277,15 +279,25 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
         feature_dim: int = 1280,
         hidden_dim: int = 128,
         reliability_attention_mode: str = "log_prior",
+        context_pooling_mode: str = JOINT_CONTEXT_POOLING,
     ) -> None:
         super().__init__()
         self.feature_dim = int(feature_dim)
         self.geometry_dim = SURFACE_GEOMETRY_V2_DIM
         self.hidden_dim = int(hidden_dim)
         self.reliability_attention_mode = str(reliability_attention_mode)
+        self.context_pooling_mode = str(context_pooling_mode)
         if self.reliability_attention_mode not in {"log_prior", "input_only"}:
             raise ValueError(
                 "reliability_attention_mode must be log_prior or input_only"
+            )
+        if self.context_pooling_mode not in {
+            JOINT_CONTEXT_POOLING,
+            SEPARATE_CONTEXT_POOLING,
+        }:
+            raise ValueError(
+                "context_pooling_mode must be joint_attention_v1 or "
+                "core_context_separate_attention_v1"
             )
         self.feature_encoder = nn.Sequential(
             nn.LayerNorm(self.feature_dim), nn.Linear(self.feature_dim, self.hidden_dim)
@@ -356,14 +368,55 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
             if confidence.shape != mask.shape:
                 raise ValueError("reliability must align with region tokens")
             logits = logits + confidence.clamp_min(1e-4).log()
-        logits = logits.masked_fill(~mask, torch.finfo(logits.dtype).min)
-        weights = torch.softmax(logits, dim=1)
-        raw_mean = torch.einsum("bt,btc->bc", weights, values)
         anchor_feature = values[batch, anchor]
-        base = raw_mean + 0.25 * (anchor_feature - raw_mean)
-        pooled = torch.einsum("bt,bth->bh", weights, hidden)
-        output = base + self.residual(pooled + query)
+        if self.context_pooling_mode == JOINT_CONTEXT_POOLING:
+            weights = self._masked_attention(logits, mask)
+            raw_mean = torch.einsum("bt,btc->bc", weights, values)
+            base = raw_mean + 0.25 * (anchor_feature - raw_mean)
+            pooled = torch.einsum("bt,bth->bh", weights, hidden) + query
+        else:
+            # Geometry-v2 channels 8/9 are the mutually exclusive core and
+            # context flags.  Normalizing their attention streams separately
+            # prevents a larger candidate pool from changing the core base
+            # merely by adding context tokens.  Context remains an O(1)
+            # conditioning stream through the learned residual.
+            core = mask & (geom[..., 8] > 0.5)
+            context = mask & (geom[..., 9] > 0.5)
+            if (
+                not bool(core.any(dim=1).all())
+                or bool((core & context).any())
+                or not torch.equal(core | context, mask)
+                or not bool(core[batch, anchor].all())
+            ):
+                raise ValueError(
+                    "separate context pooling requires valid core/context flags "
+                    "and a core anchor"
+                )
+            core_weights = self._masked_attention(logits, core)
+            context_weights = self._masked_attention(logits, context)
+            core_mean = torch.einsum("bt,btc->bc", core_weights, values)
+            base = core_mean + 0.25 * (anchor_feature - core_mean)
+            core_hidden = torch.einsum("bt,bth->bh", core_weights, hidden)
+            context_hidden = torch.einsum(
+                "bt,bth->bh", context_weights, hidden
+            )
+            pooled = core_hidden + context_hidden + query
+        output = base + self.residual(pooled)
         return output[0] if squeeze else output
+
+    @staticmethod
+    def _masked_attention(
+        logits: torch.Tensor,
+        selection: torch.Tensor,
+    ) -> torch.Tensor:
+        """Return row-normalized weights, or an exact zero row if empty."""
+
+        active = selection.any(dim=1, keepdim=True)
+        masked = logits.masked_fill(
+            ~selection,
+            torch.finfo(logits.dtype).min,
+        )
+        return torch.softmax(masked, dim=1) * active.to(logits.dtype)
 
     def architecture(self, contract_sha256: str) -> dict[str, int | str]:
         payload: dict[str, int | str] = {
@@ -379,6 +432,8 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
             payload["reliability_attention_mode"] = (
                 self.reliability_attention_mode
             )
+        if self.context_pooling_mode != JOINT_CONTEXT_POOLING:
+            payload["context_pooling_mode"] = self.context_pooling_mode
         payload["digest"] = hashlib.sha256(
             json.dumps(payload, sort_keys=True).encode("utf-8")
         ).hexdigest()
@@ -398,6 +453,12 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
             hidden_dim=int(architecture["hidden_dim"]),
             reliability_attention_mode=str(
                 architecture.get("reliability_attention_mode", "log_prior")
+            ),
+            context_pooling_mode=str(
+                architecture.get(
+                    "context_pooling_mode",
+                    JOINT_CONTEXT_POOLING,
+                )
             ),
         )
         if model.architecture(str(architecture["contract_sha256"]))["digest"] != expected:

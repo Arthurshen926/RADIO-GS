@@ -4,12 +4,14 @@ import json
 from argparse import Namespace
 from pathlib import Path
 
+import pytest
 import torch
 
 from radio_gs.scripts.extract_radio_features import (
     _adaptor_output_subdir,
     _compute_scaled_radio_resolution,
     _parse_adaptor_names,
+    _radio_model_source,
     _stitch_sliding_window_features,
     _unpack_radio_output,
 )
@@ -21,6 +23,20 @@ from radio_gs.scripts.sweep_lerf_grounding import (
     read_metrics,
     sort_results,
 )
+
+
+def test_explicit_radio_checkpoint_is_content_addressed(tmp_path: Path) -> None:
+    checkpoint = tmp_path / "radio.pth"
+    checkpoint.write_bytes(b"frozen-radio")
+
+    source = _radio_model_source("c-radio_v4-h", str(checkpoint))
+
+    assert source["load_source"] == str(checkpoint.resolve())
+    assert source["checkpoint"] == str(checkpoint.resolve())
+    assert len(source["checkpoint_sha256"]) == 64
+    assert source["checkpoint_provenance"] == "explicit_file_sha256"
+    with pytest.raises(FileNotFoundError):
+        _radio_model_source("c-radio_v4-h", str(tmp_path / "missing.pth"))
 
 
 def test_sweep_cases_cover_cartesian_product() -> None:

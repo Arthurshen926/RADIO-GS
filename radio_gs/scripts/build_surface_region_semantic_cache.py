@@ -4,19 +4,18 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
-import os
+import math
 from pathlib import Path
+import time
+from typing import Any, Mapping
 
 import torch
 import torch.nn.functional as F
 
 from radio_gs.field import load_canonical_field_checkpoint
 from radio_gs.interfaces.surface_region_contract import SurfaceRegionContractV2
-from radio_gs.interfaces.surface_region_summary import (
-    SurfaceRegionSummaryReadoutV2, surface_region_geometry_v2,
-)
+from radio_gs.interfaces.surface_region_summary import surface_region_geometry_v2
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
 from radio_gs.scripts.build_canonical_primitive_semantic_cache import (
@@ -25,30 +24,214 @@ from radio_gs.scripts.build_canonical_primitive_semantic_cache import (
 from radio_gs.scripts.build_primitive_text_score_cache import (
     apply_completion_evidence,
 )
+from radio_gs.utils.immutable_artifacts import (
+    canonical_json_sha256,
+    file_record,
+    load_json_object,
+    load_surface_region_summary_readout_v2,
+    load_torch_mapping,
+    load_torch_payload,
+    sha256_file,
+    validate_file_record,
+    write_frozen_json,
+    write_torch_noclobber,
+)
 
 
 def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return sha256_file(path)
 
 
 def _atomic_torch_save(payload: object, output: Path) -> None:
-    """Publish a cache only after its entire tensor payload is durable.
+    """Durably publish a first-writer-wins cache without replacement."""
 
-    Full semantic caches are several GB, while the PFIR field workers and the
-    compact-query cache materializer may run concurrently.  ``torch.save``
-    creates its destination immediately, so file-existence checks alone do not
-    establish that a reader sees a complete archive.  A same-filesystem rename
-    does, and leaves a prior valid cache untouched on interruption.
-    """
+    write_torch_noclobber(output, payload)
 
-    output.parent.mkdir(parents=True, exist_ok=True)
-    temporary = output.with_name(f".{output.name}.{os.getpid()}.tmp")
+
+class _ResumeStateError(ValueError):
+    pass
+
+
+def _resume_failure(resume_dir: Path, reason: str) -> _ResumeStateError:
+    quarantine = resume_dir.with_name(f"{resume_dir.name}.quarantine-required")
+    return _ResumeStateError(
+        f"stale/corrupt semantic resume state: {reason}; "
+        f"quarantine path: {quarantine} (not deleted automatically)"
+    )
+
+
+def _load_or_create_resume_contract(
+    resume_dir: Path,
+    payload: Mapping[str, Any],
+) -> str:
+    resume_dir.mkdir(parents=True, exist_ok=True)
+    contract_path = resume_dir / "contract.json"
+    expected = dict(payload)
+    expected_digest = canonical_json_sha256(expected)
+    if contract_path.exists() or contract_path.is_symlink():
+        try:
+            observed, _, _ = load_json_object(
+                contract_path,
+                label="semantic resume contract",
+            )
+        except Exception as exc:
+            raise _resume_failure(resume_dir, "contract cannot be reopened") from exc
+        if observed != expected:
+            raise _resume_failure(resume_dir, "contract differs from this stage")
+    else:
+        write_frozen_json(contract_path, expected)
+    return expected_digest
+
+
+def _resume_paths(
+    resume_dir: Path,
+    *,
+    phase: str,
+    start: int,
+    stop: int,
+) -> tuple[Path, Path]:
+    stem = f"{phase}_{int(start):09d}_{int(stop):09d}"
+    return resume_dir / f"{stem}.pt", resume_dir / f"{stem}.complete.json"
+
+
+def _load_resume_tensor(
+    resume_dir: Path,
+    *,
+    phase: str,
+    start: int,
+    stop: int,
+    contract_sha256: str,
+    expected_shape: tuple[int, ...],
+    expected_dtype: torch.dtype,
+) -> torch.Tensor | None:
+    shard, terminal = _resume_paths(
+        resume_dir,
+        phase=phase,
+        start=start,
+        stop=stop,
+    )
+    shard_present = shard.exists() or shard.is_symlink()
+    terminal_present = terminal.exists() or terminal.is_symlink()
+    if not shard_present and not terminal_present:
+        return None
+    if shard_present != terminal_present:
+        raise _resume_failure(resume_dir, f"partial {phase} batch {start}:{stop}")
     try:
-        torch.save(payload, temporary)
-        os.replace(temporary, output)
-    finally:
-        if temporary.exists():
-            temporary.unlink()
+        marker, _, _ = load_json_object(terminal, label=f"{phase} resume terminal")
+        if (
+            set(marker)
+            != {
+                "schema_version",
+                "artifact_type",
+                "phase",
+                "start",
+                "stop",
+                "contract_sha256",
+                "tensor",
+                "shape",
+                "dtype",
+            }
+            or marker.get("schema_version") != 1
+            or marker.get("artifact_type") != "surface_semantic_resume_batch"
+            or marker.get("phase") != phase
+            or marker.get("start") != start
+            or marker.get("stop") != stop
+            or marker.get("contract_sha256") != contract_sha256
+            or marker.get("shape") != list(expected_shape)
+            or marker.get("dtype") != str(expected_dtype)
+        ):
+            raise _resume_failure(resume_dir, f"{phase} batch marker differs")
+        tensor_path = validate_file_record(
+            marker["tensor"],
+            label=f"{phase} resume tensor",
+        )
+        if tensor_path != shard.resolve():
+            raise _resume_failure(resume_dir, f"{phase} batch path differs")
+        value, _, _ = load_torch_payload(
+            shard,
+            expected_sha256=marker["tensor"]["sha256"],
+            map_location="cpu",
+            label=f"{phase} resume tensor",
+        )
+    except _ResumeStateError:
+        raise
+    except Exception as exc:
+        raise _resume_failure(resume_dir, f"{phase} batch cannot be reopened") from exc
+    if (
+        not torch.is_tensor(value)
+        or tuple(value.shape) != expected_shape
+        or value.dtype != expected_dtype
+        or not bool(torch.isfinite(value).all())
+    ):
+        raise _resume_failure(resume_dir, f"{phase} batch tensor differs")
+    return value
+
+
+def _commit_resume_tensor(
+    resume_dir: Path,
+    *,
+    phase: str,
+    start: int,
+    stop: int,
+    contract_sha256: str,
+    value: torch.Tensor,
+) -> None:
+    shard, terminal = _resume_paths(
+        resume_dir,
+        phase=phase,
+        start=start,
+        stop=stop,
+    )
+    tensor = value.detach().cpu().contiguous()
+    write_torch_noclobber(shard, tensor)
+    marker = {
+        "schema_version": 1,
+        "artifact_type": "surface_semantic_resume_batch",
+        "phase": phase,
+        "start": int(start),
+        "stop": int(stop),
+        "contract_sha256": contract_sha256,
+        "tensor": file_record(shard),
+        "shape": list(tensor.shape),
+        "dtype": str(tensor.dtype),
+    }
+    write_frozen_json(terminal, marker)
+
+
+def _pace_after_commit(device: torch.device, seconds: float) -> None:
+    if device.type == "cuda":
+        torch.cuda.synchronize(device)
+    time.sleep(float(seconds))
+
+
+def _validate_resume_inventory(
+    resume_dir: Path,
+    *,
+    row_count: int,
+    radio_batch_size: int,
+    semantic_batch_size: int,
+    semantic_phase: str,
+) -> None:
+    allowed = {"contract.json"}
+    for phase, batch_size in (
+        ("radio", int(radio_batch_size)),
+        (str(semantic_phase), int(semantic_batch_size)),
+    ):
+        for start in range(0, int(row_count), batch_size):
+            stop = min(int(row_count), start + batch_size)
+            shard, terminal = _resume_paths(
+                resume_dir,
+                phase=phase,
+                start=start,
+                stop=stop,
+            )
+            allowed.update((shard.name, terminal.name))
+    unexpected = sorted(path.name for path in resume_dir.iterdir() if path.name not in allowed)
+    if unexpected:
+        raise _resume_failure(
+            resume_dir,
+            f"unexpected files {unexpected[:5]}",
+        )
 
 
 def _adjacency(graph: dict, neighbors: int) -> torch.Tensor:
@@ -144,12 +327,64 @@ def build(args: argparse.Namespace) -> dict:
     field_path, graph_path, readout_path = map(Path, (
         args.field_checkpoint, args.support_graph, args.readout_checkpoint,
     ))
-    field, field_payload = load_canonical_field_checkpoint(field_path, map_location="cpu")
-    graph = torch.load(graph_path, map_location="cpu")
-    readout, readout_payload = SurfaceRegionSummaryReadoutV2.from_checkpoint(readout_path)
+    output = Path(args.output).resolve()
+    if output.exists() or output.is_symlink():
+        raise FileExistsError(f"semantic output already exists: {output}")
+    radio_batch_size = int(args.radio_batch_size)
+    semantic_batch_size = int(args.semantic_batch_size)
+    pacing_seconds = float(args.thermal_pacing_seconds_per_batch)
+    if (
+        radio_batch_size <= 0
+        or semantic_batch_size <= 0
+        or not math.isfinite(pacing_seconds)
+        or pacing_seconds <= 0.0
+    ):
+        raise ValueError("batch sizes and thermal pacing must be positive")
+
+    field_expected = str(getattr(args, "field_checkpoint_sha256", "")).strip() or None
+    graph_expected = str(getattr(args, "support_graph_sha256", "")).strip() or None
+    readout_expected = str(getattr(args, "readout_checkpoint_sha256", "")).strip() or None
+    mpr_expected = str(getattr(args, "mpr_cache_sha256", "")).strip() or None
+    radio_expected = str(getattr(args, "radio_checkpoint_sha256", "")).strip() or None
+    field, field_payload = load_canonical_field_checkpoint(
+        field_path,
+        map_location="cpu",
+        expected_sha256=field_expected,
+    )
+    graph, _, _ = load_torch_mapping(
+        graph_path,
+        expected_sha256=graph_expected,
+        map_location="cpu",
+        label="surface support graph",
+    )
+    readout, readout_payload, _, _ = load_surface_region_summary_readout_v2(
+        readout_path,
+        expected_sha256=readout_expected,
+        map_location="cpu",
+    )
     if readout_payload["provenance"].get("uses_benchmark_scenes", True):
         raise ValueError("readout provenance is benchmark contaminated")
-    mpr = torch.load(Path(field_payload["mpr_cache"]), map_location="cpu")
+    mpr_path = Path(field_payload["mpr_cache"]).resolve()
+    mpr, _, _ = load_torch_mapping(
+        mpr_path,
+        expected_sha256=mpr_expected,
+        map_location="cpu",
+        label="canonical field MPR cache",
+    )
+    field_record = file_record(field_path)
+    graph_record = file_record(graph_path)
+    readout_record = file_record(readout_path)
+    mpr_record = file_record(mpr_path)
+    radio_record = file_record(args.radio_checkpoint)
+    for expected, record, label in (
+        (field_expected, field_record, "field"),
+        (graph_expected, graph_record, "support graph"),
+        (readout_expected, readout_record, "readout"),
+        (mpr_expected, mpr_record, "MPR"),
+        (radio_expected, radio_record, "RADIO"),
+    ):
+        if expected is not None and record["sha256"] != expected:
+            raise ValueError(f"{label} checkpoint SHA-256 differs")
     xyz_global = torch.as_tensor(mpr["xyz"]).float().cpu()
     global_rows = torch.as_tensor(graph["global_rows"]).long().cpu()
     xyz = torch.as_tensor(graph["xyz"]).float().cpu()
@@ -184,6 +419,42 @@ def build(args: argparse.Namespace) -> dict:
         "region_contract_version": contract.version,
         "region_contract_sha256": provenance["region_contract_sha256"],
     })
+    stream_text = bool(str(args.stream_text_queries).strip())
+    resume_dir = (
+        Path(args.resume_dir).resolve()
+        if str(args.resume_dir).strip()
+        else output.with_name(f"{output.name}.resume")
+    )
+    text_record = (
+        file_record(args.text_embedding_cache)
+        if stream_text and str(args.text_embedding_cache).strip()
+        else None
+    )
+    resume_contract = {
+        "schema_version": 1,
+        "artifact_type": "surface_semantic_resume_contract",
+        "output": str(output),
+        "inputs": {
+            "field": field_record,
+            "mpr": mpr_record,
+            "support_graph": graph_record,
+            "readout": readout_record,
+            "radio": radio_record,
+            "text": text_record,
+        },
+        "region_contract": contract.to_dict(),
+        "region_contract_sha256": contract.digest,
+        "radio_batch_size": radio_batch_size,
+        "semantic_batch_size": semantic_batch_size,
+        "stream_text_queries": str(args.stream_text_queries),
+        "device_type": device.type,
+        "thermal_pacing_seconds_per_batch": pacing_seconds,
+        "implementation": file_record(Path(__file__).resolve()),
+    }
+    resume_contract_sha256 = _load_or_create_resume_contract(
+        resume_dir,
+        resume_contract,
+    )
     support = PrimitiveSupportGraph(
         edge_index=graph["edge_index"], edge_weight=graph["edge_weight"],
         raw_affinity=graph["raw_affinity"], local_sigma=graph["local_sigma"],
@@ -191,13 +462,46 @@ def build(args: argparse.Namespace) -> dict:
     )
     prepared_graph = contract.prepare_graph(support, xyz)
     field, readout = field.to(device).eval(), readout.to(device).eval()
-    head = SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint).to(device).eval()
+    head = SigLIP2SummaryHead.from_radio_checkpoint(
+        args.radio_checkpoint,
+        **({"expected_sha256": radio_expected} if radio_expected else {}),
+    ).to(device).eval()
     for module in (field, readout, head):
         for parameter in module.parameters(): parameter.requires_grad_(False)
+    semantic_phase = "text_scores" if stream_text else "semantic"
+    _validate_resume_inventory(
+        resume_dir,
+        row_count=len(global_rows),
+        radio_batch_size=radio_batch_size,
+        semantic_batch_size=semantic_batch_size,
+        semantic_phase=semantic_phase,
+    )
     radio = torch.empty(len(global_rows), 1280, dtype=torch.float16, device=device)
-    for start in range(0, len(global_rows), int(args.radio_batch_size)):
-        stop = min(start + int(args.radio_batch_size), len(global_rows))
-        radio[start:stop] = field.radio_features(global_rows[start:stop].to(device)).half()
+    for start in range(0, len(global_rows), radio_batch_size):
+        stop = min(start + radio_batch_size, len(global_rows))
+        cached = _load_resume_tensor(
+            resume_dir,
+            phase="radio",
+            start=start,
+            stop=stop,
+            contract_sha256=resume_contract_sha256,
+            expected_shape=(stop - start, 1280),
+            expected_dtype=torch.float16,
+        )
+        if cached is not None:
+            radio[start:stop] = cached.to(device)
+            continue
+        computed = field.radio_features(global_rows[start:stop].to(device)).half()
+        radio[start:stop] = computed
+        _commit_resume_tensor(
+            resume_dir,
+            phase="radio",
+            start=start,
+            stop=stop,
+            contract_sha256=resume_contract_sha256,
+            value=computed,
+        )
+        _pace_after_commit(device, pacing_seconds)
     semantic_confidence = None
     if primary_valid is not None:
         teacher_radio = torch.as_tensor(mpr["features"])[global_rows]
@@ -205,8 +509,8 @@ def build(args: argparse.Namespace) -> dict:
         local_confidence = torch.zeros(
             len(global_rows), dtype=torch.float16
         )
-        for start in range(0, len(global_rows), int(args.radio_batch_size)):
-            stop = min(start + int(args.radio_batch_size), len(global_rows))
+        for start in range(0, len(global_rows), radio_batch_size):
+            stop = min(start + radio_batch_size, len(global_rows))
             local_confidence[start:stop] = canonical_reconstruction_confidence(
                 radio[start:stop].float(),
                 teacher_radio[start:stop].to(
@@ -238,13 +542,17 @@ def build(args: argparse.Namespace) -> dict:
     local_scale = torch.as_tensor(graph["local_sigma"]).float().clamp_min(1e-4).to(device)
     xyz_device = xyz.to(device)
     radii = contract.radii_m
-    stream_text = bool(str(args.stream_text_queries).strip())
     text_queries: list[str] = []
     text_embeddings = None
     if stream_text:
         if not args.text_embedding_cache:
             raise ValueError("streaming text queries require --text-embedding-cache")
-        text_payload = torch.load(args.text_embedding_cache, map_location="cpu")
+        text_payload, _, _ = load_torch_mapping(
+            args.text_embedding_cache,
+            expected_sha256=(text_record or {}).get("sha256"),
+            map_location="cpu",
+            label="streamed text embedding cache",
+        )
         available = [str(value) for value in text_payload.get("queries", [])]
         text_queries = [
             value.strip() for value in str(args.stream_text_queries).split(",")
@@ -267,8 +575,29 @@ def build(args: argparse.Namespace) -> dict:
         descriptors_by_scale = torch.zeros(
             len(global_rows), len(radii), 1536, dtype=torch.float16
         )
-    for start in range(0, len(global_rows), int(args.semantic_batch_size)):
-        stop = min(start + int(args.semantic_batch_size), len(global_rows))
+    for start in range(0, len(global_rows), semantic_batch_size):
+        stop = min(start + semantic_batch_size, len(global_rows))
+        cached_shape = (
+            (stop - start, len(text_queries))
+            if stream_text
+            else (stop - start, len(radii), 1536)
+        )
+        cached = _load_resume_tensor(
+            resume_dir,
+            phase=semantic_phase,
+            start=start,
+            stop=stop,
+            contract_sha256=resume_contract_sha256,
+            expected_shape=cached_shape,
+            expected_dtype=torch.float16,
+        )
+        if cached is not None:
+            if stream_text:
+                streamed_scores[global_rows[start:stop]] = cached
+            else:
+                assert descriptors_by_scale is not None
+                descriptors_by_scale[start:stop] = cached
+            continue
         centers_cpu = torch.arange(start, stop)
         batch_streamed_scores = None
         for scale_index, radius in enumerate(radii):
@@ -332,9 +661,22 @@ def build(args: argparse.Namespace) -> dict:
                 descriptors_by_scale[start:stop, scale_index] = descriptor.cpu()
         if stream_text:
             assert batch_streamed_scores is not None
-            streamed_scores[global_rows[start:stop]] = batch_streamed_scores.half()
-    readout_sha256 = _sha256(readout_path)
-    radio_sha256 = _sha256(Path(args.radio_checkpoint))
+            committed = batch_streamed_scores.half()
+            streamed_scores[global_rows[start:stop]] = committed
+        else:
+            assert descriptors_by_scale is not None
+            committed = descriptors_by_scale[start:stop].clone()
+        _commit_resume_tensor(
+            resume_dir,
+            phase=semantic_phase,
+            start=start,
+            stop=stop,
+            contract_sha256=resume_contract_sha256,
+            value=committed,
+        )
+        _pace_after_commit(device, pacing_seconds)
+    readout_sha256 = readout_record["sha256"]
+    radio_sha256 = radio_record["sha256"]
     metadata = {
         "schema_version": 5, "feature_space": "official_siglip2_summary_descriptor_multiscale",
         "source": "canonical_radio_surface_region_readout",
@@ -345,10 +687,15 @@ def build(args: argparse.Namespace) -> dict:
         "bridge_checkpoint_sha256": readout_sha256,
         "bridge_training_scope": "global_cross_scene",
         "bridge_training_scope_detail": training_scope,
-        "field_checkpoint": str(field_path.resolve()),
-        "field_checkpoint_sha256": _sha256(field_path),
+        "field_checkpoint": field_record["path"],
+        "field_checkpoint_sha256": field_record["sha256"],
+        "mpr_cache": mpr_record["path"],
+        "mpr_cache_sha256": mpr_record["sha256"],
+        "field_geometry_xyz_sha256": field_payload.get(
+            "geometry_fingerprint", {}
+        ).get("xyz_sha256"),
         "support_graph": str(graph_path.resolve()),
-        "support_graph_sha256": _sha256(graph_path),
+        "support_graph_sha256": graph_record["sha256"],
         "official_radio_checkpoint_sha256": radio_sha256,
         "radio_checkpoint_sha256": radio_sha256,
         "region_radii_m": list(radii), "region_topology": contract.expansion,
@@ -362,6 +709,8 @@ def build(args: argparse.Namespace) -> dict:
         "cache_role": "disposable_derivative_not_scene_memory",
         "row_storage": "sparse_valid_rows_with_global_row_index",
         "scale_storage": "all_scales_preserved; mean_descriptor_legacy_only",
+        "resume_contract_sha256": resume_contract_sha256,
+        "thermal_pacing_seconds_per_batch": pacing_seconds,
         "completion_context_policy": (
             "primary_plus_center"
             if primary_valid is not None
@@ -382,7 +731,7 @@ def build(args: argparse.Namespace) -> dict:
             else None
         ),
     }
-    output = Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
+    output.parent.mkdir(parents=True, exist_ok=True)
     if stream_text:
         streamed_scores, completion = apply_completion_evidence(
             streamed_scores,
@@ -438,7 +787,7 @@ def build(args: argparse.Namespace) -> dict:
             "semantic_cache_materialized": False,
             "metadata": score_metadata,
         }
-        output.with_suffix(output.suffix + ".json").write_text(json.dumps(report, indent=2))
+        write_frozen_json(output.with_suffix(output.suffix + ".json"), report)
         return report
     assert descriptors_by_scale is not None
     descriptors = F.normalize(descriptors_by_scale.float().mean(1), dim=-1).half()
@@ -485,9 +834,10 @@ def build(args: argparse.Namespace) -> dict:
     _atomic_torch_save(query_payload, query_output)
     report = {"output": str(output.resolve()), "valid_primitives": int(output_valid.sum()),
               "total_primitives": len(output_valid), "metadata": metadata}
-    output.with_suffix(output.suffix + ".json").write_text(json.dumps(report, indent=2))
-    output.with_suffix(output.suffix + ".provenance.json").write_text(
-        json.dumps({"cache": str(output.resolve()), "inputs": metadata}, indent=2)
+    write_frozen_json(output.with_suffix(output.suffix + ".json"), report)
+    write_frozen_json(
+        output.with_suffix(output.suffix + ".provenance.json"),
+        {"cache": str(output.resolve()), "inputs": metadata},
     )
     return report
 
@@ -495,8 +845,12 @@ def build(args: argparse.Namespace) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--field-checkpoint", required=True)
+    parser.add_argument("--field-checkpoint-sha256", default="")
     parser.add_argument("--support-graph", required=True)
+    parser.add_argument("--support-graph-sha256", default="")
     parser.add_argument("--readout-checkpoint", required=True)
+    parser.add_argument("--readout-checkpoint-sha256", default="")
+    parser.add_argument("--mpr-cache-sha256", default="")
     parser.add_argument("--output", required=True)
     parser.add_argument(
         "--query-output", default="",
@@ -509,6 +863,12 @@ def main() -> None:
     parser.add_argument("--graph-neighbors", type=int, default=16)
     parser.add_argument("--radio-batch-size", type=int, default=4096)
     parser.add_argument("--semantic-batch-size", type=int, default=256)
+    parser.add_argument("--resume-dir", default="")
+    parser.add_argument(
+        "--thermal-pacing-seconds-per-batch",
+        type=float,
+        default=1.0,
+    )
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--text-embedding-cache", default="")
     parser.add_argument(
@@ -532,6 +892,7 @@ def main() -> None:
         ),
     )
     parser.add_argument("--radio-checkpoint", default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar")
+    parser.add_argument("--radio-checkpoint-sha256", default="")
     args = parser.parse_args(); print(json.dumps(build(args), indent=2))
 
 

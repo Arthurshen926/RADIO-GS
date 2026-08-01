@@ -1570,6 +1570,7 @@ def load_render_pipeline(
     *,
     strict_checkpoint_contract: bool = False,
     load_ply_rgb_features: bool = True,
+    expected_checkpoint_sha256: str | None = None,
 ):
     """Load the trained RADIO-GS model, codec, renderer, and refiner.
 
@@ -1620,7 +1621,11 @@ def load_render_pipeline(
         # Feature-only checkpoints already contain every geometry buffer.  Seed
         # matching shapes directly from the trusted state dict so large remote
         # PLY files are not parsed a second time merely to allocate tensors.
-        ckpt = load_trusted_checkpoint(checkpoint_path, map_location="cpu")
+        ckpt = load_trusted_checkpoint(
+            checkpoint_path,
+            map_location="cpu",
+            expected_sha256=expected_checkpoint_sha256,
+        )
         model_state = ckpt.get("model_state_dict", {})
         buffer_names = (
             "_xyz",
@@ -1706,7 +1711,11 @@ def load_render_pipeline(
         ).to(device).eval()
 
     if ckpt is None:
-        ckpt = load_trusted_checkpoint(checkpoint_path, map_location=device)
+        ckpt = load_trusted_checkpoint(
+            checkpoint_path,
+            map_location=device,
+            expected_sha256=expected_checkpoint_sha256,
+        )
     model_status = model.load_state_dict(ckpt["model_state_dict"], strict=False)
     codec_status = codec.load_state_dict(ckpt["codec_state_dict"], strict=False)
     contract = {

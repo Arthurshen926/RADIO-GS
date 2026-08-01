@@ -40,11 +40,16 @@ the official checkpoint, batch size 4, BF16, and 10 clicks:
 | `agile3d_release` | 0.6800 | 0.7368 | 0.7657 | 0.7889 | 0.8102 | 0.650 pp |
 | `easy3d_released_code` | 0.6799 | 0.7338 | 0.7600 | 0.7800 | 0.7970 | 1.266 pp |
 
-All 226 contract/object trajectories completed without failure.
-`agile3d_release` is selected as the sole formal contract because its mean
-absolute gap over all five paper IoUs is smaller. The frozen decision source
-is
-`output/protocol_audit_20260731/easy3d_agile3d_pilot3_protocol_decision.json`.
+All 226 contract/object trajectories completed without failure. The pilot is
+not used to choose whichever protocol is numerically closest to the paper.
+The source-grounded primary is `agile3d_release`, because the paper says it
+uses the AGILE3D benchmark; `easy3d_released_code` is a full-cohort
+sensitivity row following the released Easy3D forward path. The historical
+pilot decision artifact is retained but its paper-gap selection field is
+superseded by
+`output/protocol_audit_20260731/easy3d_agile3d_pilot3_source_grounded_policy_v2.json`
+(SHA256
+`1f065485514b82af0c8afe64b4941b07cc2135f8a3094b92a9ee4f19f954bbcc`).
 
 ## Formal status
 
@@ -58,12 +63,41 @@ prefix diagnostic is explicitly non-comparable:
 | legacy-key intersection | 2,608 | 0.70159 | 0.75901 | 0.78336 | 0.80644 | 0.82686 |
 
 These rows are a lexicographic hardware-interrupted prefix, not a
-representative pilot and not a paper reproduction number. Attempt 002 is
-prepared to resume only exact-provenance complete scene shards after GPU0
-recovers.
+representative pilot and not a paper reproduction number. Attempt 002 resumed
+only exact-provenance complete scene shards and completed the full cohort.
 
 Failure and resume provenance:
 `output/protocol_audit_20260731/easy3d_agile3d_formal_agile3d_release_v1/formal_attempt_001_failure.json`.
 
 Partial diagnostic:
 `output/protocol_audit_20260731/easy3d_agile3d_formal_agile3d_release_v1/partial68_hardware_interrupted_diagnostic.json`.
+
+Both 312-scene / 10,357-object runs completed with zero failures:
+
+| Contract | IoU@1 | IoU@2 | IoU@3 | IoU@5 | IoU@10 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| paper | 0.682000 | 0.746000 | 0.773000 | 0.796000 | 0.817000 |
+| `agile3d_release` primary | 0.697137 | 0.760135 | 0.785942 | 0.809951 | 0.830384 |
+| `easy3d_released_code` sensitivity | 0.697138 | 0.759464 | 0.783255 | 0.803703 | 0.821321 |
+
+The primary paper gaps are
+`+1.514 / +1.414 / +1.294 / +1.395 / +1.338` percentage points. The
+released-code gaps are
+`+1.514 / +1.346 / +1.026 / +0.770 / +0.432` points. The primary-minus-
+sensitivity protocol effect grows from approximately zero at click 1 to
+`+0.906` points at click 10.
+
+Provenance:
+
+- primary result SHA256:
+  `c771f29400e912565ee2ea5a754d0fd80a7fafc1eb91e38b6db1953cdcbbc09d`;
+- primary 312-shard-set SHA256:
+  `6fc27936ebf1b1e5a14df6c87e81b7699e6a72c8c661550efbdb3fc9ea467f44`;
+- sensitivity result SHA256:
+  `c8c0c6820cf88166e77002a20ddf68af44c7be2e58a2e36cd26b147bdbd2f5a1`;
+- sensitivity 312-shard-set SHA256:
+  `1915fef1216b822abe373b58b7962a4ecac2ddd8452258296cf2cb6f89a55189`.
+
+These remain diagnostic-only released-checkpoint rows. The preprocessing
+prose/code mismatch, AGILE3D/Easy3D interaction ambiguity, 10,357/10,016
+cohort mismatch, and local quantitative adapter prevent a strict-table claim.

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import hashlib
 from pathlib import Path
 from typing import Iterable, Mapping
 
@@ -16,14 +15,7 @@ from radio_gs.models.siglip_projection import (
     SigLIP2FeatureProjection,
     SigLIP2SummaryHead,
 )
-
-
-def sha256_file(path: str | Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+from radio_gs.utils.immutable_artifacts import sha256_file
 
 
 def _freeze(module: nn.Module) -> nn.Module:
@@ -60,14 +52,34 @@ class FrozenRadioViews(nn.Module):
         self.radio_checkpoint_sha256 = str(radio_checkpoint_sha256)
 
     @classmethod
-    def from_radio_checkpoint(cls, checkpoint_path: str | Path) -> "FrozenRadioViews":
+    def from_radio_checkpoint(
+        cls,
+        checkpoint_path: str | Path,
+        *,
+        expected_sha256: str | None = None,
+    ) -> "FrozenRadioViews":
         path = Path(checkpoint_path)
+        checkpoint_sha256 = str(expected_sha256 or sha256_file(path))
         return cls(
-            siglip_spatial=SigLIP2FeatureProjection.from_radio_checkpoint(str(path)),
-            siglip_summary=SigLIP2SummaryHead.from_radio_checkpoint(str(path)),
-            dino=load_radio_adaptor_from_checkpoint(path, "dino_v3", kind="feature_projection"),
-            sam3=load_radio_adaptor_from_checkpoint(path, "sam3", kind="feature_projection"),
-            radio_checkpoint_sha256=sha256_file(path),
+            siglip_spatial=SigLIP2FeatureProjection.from_radio_checkpoint(
+                str(path), expected_sha256=checkpoint_sha256
+            ),
+            siglip_summary=SigLIP2SummaryHead.from_radio_checkpoint(
+                str(path), expected_sha256=checkpoint_sha256
+            ),
+            dino=load_radio_adaptor_from_checkpoint(
+                path,
+                "dino_v3",
+                kind="feature_projection",
+                expected_sha256=checkpoint_sha256,
+            ),
+            sam3=load_radio_adaptor_from_checkpoint(
+                path,
+                "sam3",
+                kind="feature_projection",
+                expected_sha256=checkpoint_sha256,
+            ),
+            radio_checkpoint_sha256=checkpoint_sha256,
         )
 
     def project_siglip_spatial_tokens(

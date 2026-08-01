@@ -6,7 +6,38 @@ import torch
 import torch.nn as nn
 from timm.models.vision_transformer import Block
 
-from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.utils.immutable_artifacts import (
+    load_fixed_radio_checkpoint_payload,
+    load_torch_payload,
+)
+
+
+OFFICIAL_C_RADIO_V4_H_HALF_SHA256 = (
+    "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+)
+
+
+def _load_weights_only(path: str) -> object:
+    payload, _, _ = load_torch_payload(
+        path,
+        map_location="cpu",
+        label="SigLIP2 projection checkpoint",
+    )
+    return payload
+
+
+def _load_fixed_radio_checkpoint(
+    path: str,
+    *,
+    expected_sha256: str,
+) -> object:
+    payload, _, _ = load_fixed_radio_checkpoint_payload(
+        path,
+        expected_sha256=expected_sha256,
+        map_location="cpu",
+        label="official C-RADIOv4-H checkpoint",
+    )
+    return payload
 
 
 class SigLIP2FeatureProjection(nn.Module):
@@ -41,14 +72,22 @@ class SigLIP2FeatureProjection(nn.Module):
     @classmethod
     def from_extracted_weights(cls, ckpt_path: str) -> "SigLIP2FeatureProjection":
         """Load from already-extracted projection state dict (e.g. siglip2_feat_projection.pth)."""
-        sd = load_trusted_checkpoint(ckpt_path, map_location="cpu")
+        sd = _load_weights_only(ckpt_path)
         proj = cls()
         proj.load_state_dict(sd, strict=True)
         return proj
 
     @classmethod
-    def from_radio_checkpoint(cls, ckpt_path: str) -> "SigLIP2FeatureProjection":
-        chk = load_trusted_checkpoint(ckpt_path, map_location="cpu")
+    def from_radio_checkpoint(
+        cls,
+        ckpt_path: str,
+        *,
+        expected_sha256: str = OFFICIAL_C_RADIO_V4_H_HALF_SHA256,
+    ) -> "SigLIP2FeatureProjection":
+        chk = _load_fixed_radio_checkpoint(
+            ckpt_path,
+            expected_sha256=expected_sha256,
+        )
         sd = chk["state_dict"]
         proj = cls()
         proj_sd = {}
@@ -98,15 +137,23 @@ class SigLIP2SummaryHead(nn.Module):
     @classmethod
     def from_extracted_weights(cls, ckpt_path: str) -> "SigLIP2SummaryHead":
         """Load from extracted state dict (e.g. siglip2_summary_head.pth)."""
-        sd = load_trusted_checkpoint(ckpt_path, map_location="cpu")
+        sd = _load_weights_only(ckpt_path)
         head = cls()
         head.load_state_dict(sd, strict=True)
         return head
 
     @classmethod
-    def from_radio_checkpoint(cls, ckpt_path: str) -> "SigLIP2SummaryHead":
+    def from_radio_checkpoint(
+        cls,
+        ckpt_path: str,
+        *,
+        expected_sha256: str = OFFICIAL_C_RADIO_V4_H_HALF_SHA256,
+    ) -> "SigLIP2SummaryHead":
         """Extract ``_heads.siglip2-g`` from a full RADIO checkpoint."""
-        chk = load_trusted_checkpoint(ckpt_path, map_location="cpu")
+        chk = _load_fixed_radio_checkpoint(
+            ckpt_path,
+            expected_sha256=expected_sha256,
+        )
         sd = chk["state_dict"]
         head = cls()
         head_sd = {}

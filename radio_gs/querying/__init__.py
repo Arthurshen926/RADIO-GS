@@ -24,7 +24,14 @@ from .score_calibration import (
     fit_scene_space_calibration,
     robust_tanh_score_calibration,
 )
-from .evidence_scorer import registered_seed_unary, shrink_unary_by_reliability
+from .evidence_scorer import (
+    fuse_registered_observation_unary,
+    registered_observation_anchor_mask,
+    registered_observation_effective_confidence,
+    registered_seed_observation,
+    registered_seed_unary,
+    shrink_unary_by_reliability,
+)
 from .query_compilers import compile_registered_primitive_seeds
 from .query_spec import (
     PrimitiveUnaryEvidence,
@@ -87,6 +94,10 @@ __all__ = [
     "graph_for_query_intent",
     "mix_support_graph_channels",
     "registered_seed_unary",
+    "registered_seed_observation",
+    "registered_observation_anchor_mask",
+    "registered_observation_effective_confidence",
+    "fuse_registered_observation_unary",
     "select_support_components",
     "solve_primitive_support",
     "shrink_unary_by_reliability",

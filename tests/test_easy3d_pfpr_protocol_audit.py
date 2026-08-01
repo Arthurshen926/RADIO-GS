@@ -169,7 +169,7 @@ def test_existing_easy3d_shard_resumes_only_exact_provenance(
         raise AssertionError("--no-resume silently authorized shard overwrite")
 
 
-def test_easy3d_pilot_summary_selects_closer_paired_contract(
+def test_easy3d_pilot_summary_freezes_source_grounded_contract_before_gaps(
     tmp_path: Path,
 ) -> None:
     common = {
@@ -197,8 +197,8 @@ def test_easy3d_pilot_summary_selects_closer_paired_contract(
     reports = {}
     paths = {}
     for contract, offset in (
-        ("agile3d_release", -0.001),
-        ("easy3d_released_code", -0.020),
+        ("agile3d_release", -0.020),
+        ("easy3d_released_code", -0.001),
     ):
         path = tmp_path / f"{contract}.json"
         path.write_text(contract, encoding="utf-8")
@@ -237,10 +237,12 @@ def test_easy3d_pilot_summary_selects_closer_paired_contract(
     )
 
     assert summary["primary_contract"] == "agile3d_release"
+    assert summary["paper_gap_used_for_contract_selection"] is False
+    assert "source-grounded" in summary["primary_contract_basis"]
     assert summary["pilot_object_count"] == 1
     assert (
         summary["agile3d_release_advantage_percentage_points"]["IoU@10"]
-        > 1.8
+        < -1.8
     )
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate paired Easy3D pilot reports and freeze the protocol decision."""
+"""Validate paired Easy3D reports and freeze a source-grounded protocol policy."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from typing import Any, Mapping
 from .evaluate_easy3d import PAPER_IOU
 
 
-SUMMARY_SCHEMA = "easy3d-agile3d-dual-contract-pilot-summary-v1"
+SUMMARY_SCHEMA = "easy3d-agile3d-dual-contract-pilot-summary-v2"
 CONTRACTS = ("agile3d_release", "easy3d_released_code")
 COMMON_PROVENANCE_KEYS = (
     "easy3d_commit",
@@ -120,15 +120,12 @@ def summarize_reports(
         )
         for contract in CONTRACTS
     }
-    primary = min(
-        CONTRACTS,
-        key=lambda contract: (
-            summaries[contract][
-                "mean_absolute_paper_gap_percentage_points"
-            ],
-            contract,
-        ),
-    )
+    # The paper explicitly says it follows the AGILE3D benchmark.  Freeze that
+    # source-grounded contract before inspecting any pilot-to-paper gap; using
+    # a published test row as a protocol selector would be post-hoc
+    # calibration.  The released Easy3D forward remains a coextensive
+    # sensitivity contract.
+    primary = "agile3d_release"
     metric_advantage = {
         key: float(
             100.0
@@ -144,7 +141,7 @@ def summarize_reports(
     provenance = first["provenance"]
     return {
         "summary_schema": SUMMARY_SCHEMA,
-        "status": "complete_protocol_decision",
+        "status": "complete_protocol_sensitivity_audit",
         "pilot_scene_count": int(provenance["scene_count"]),
         "pilot_object_count": int(provenance["object_count"]),
         "pilot_scene_ids": sorted(
@@ -157,13 +154,15 @@ def summarize_reports(
         "contracts": summaries,
         "agile3d_release_advantage_percentage_points": metric_advantage,
         "primary_contract": primary,
-        "selection_criterion": (
-            "minimum mean absolute gap to the five reported Easy3D "
-            "IoU@1/2/3/5/10 values on the exact paired pilot objects"
+        "paper_gap_used_for_contract_selection": False,
+        "primary_contract_basis": (
+            "source-grounded: the Easy3D paper states that quantitative "
+            "evaluation follows the AGILE3D benchmark"
         ),
         "formal_run_policy": (
-            "run only the selected primary contract on all 312 scenes and "
-            "10,357 released objects"
+            "run agile3d_release as the paper-facing primary and "
+            "easy3d_released_code as a full-cohort implementation "
+            "sensitivity on the same 312 scenes and 10,357 objects"
         ),
     }
 

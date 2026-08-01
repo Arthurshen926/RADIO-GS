@@ -1,6 +1,8 @@
 from pathlib import Path
 import argparse
+import hashlib
 
+import pytest
 import torch
 
 from radio_gs.models.radio_adaptors import (
@@ -53,6 +55,42 @@ def test_load_radio_adaptor_from_checkpoint_supports_trusted_metadata(tmp_path: 
 
     assert isinstance(adaptor, RadioMLPAdaptor)
     assert adaptor.input_dim == 4
+
+
+def test_load_radio_adaptor_rejects_wrong_external_checkpoint_digest(
+    tmp_path: Path,
+):
+    path = tmp_path / "radio.pth"
+    torch.save(
+        {"state_dict": _state("_feature_projections.sam3")},
+        path,
+    )
+
+    with pytest.raises(ValueError, match="SHA-256 differs"):
+        load_radio_adaptor_from_checkpoint(
+            path,
+            "sam3",
+            expected_sha256="0" * 64,
+        )
+
+
+def test_load_radio_adaptor_accepts_matching_external_checkpoint_digest(
+    tmp_path: Path,
+):
+    path = tmp_path / "radio.pth"
+    torch.save(
+        {"state_dict": _state("_feature_projections.sam3")},
+        path,
+    )
+    expected = hashlib.sha256(path.read_bytes()).hexdigest()
+
+    adaptor = load_radio_adaptor_from_checkpoint(
+        path,
+        "sam3",
+        expected_sha256=expected,
+    )
+
+    assert adaptor.output_dim == 3
 
 
 def test_project_feature_map_with_adaptor_preserves_spatial_shape():

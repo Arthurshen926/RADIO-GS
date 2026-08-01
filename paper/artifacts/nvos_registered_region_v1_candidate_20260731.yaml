@@ -1,0 +1,105 @@
+schema_version: 2
+candidate_id: registered-region-v1
+date: 2026-07-31
+status: diagnostic_rejected_after_three_scene_screen
+promoted: false
+
+base_field:
+  id: canonical-mpr-v3
+  retrained: false
+  geometry_changed: false
+  capability_cache_changed: false
+
+registered_observation:
+  registration: exact_front_to_back_raster_adjoint
+  registration_resolution: native_prompt
+  seed_construction: joint_signed
+  seed_normalization: none
+  seed_scale_semantics: shared_poisson_observation_scale
+  mass_source: raw_raster_adjoint_prompt_mass
+  confidence_model: poisson_effective_observation
+  mass_scale_alpha_weighted_pixels: 1.0
+  constructed_before_capability_valid_filter: true
+  formulas:
+    joint_mass: m_pos + m_neg
+    confidence: 1 - exp(-joint_mass)
+    foreground_probability: m_pos / (m_pos + m_neg)
+    signed_observation: confidence * (2 * foreground_probability - 1)
+    positive_seed_mass: relu(signed_observation)
+    negative_seed_mass: relu(-signed_observation)
+    field_probability: sigmoid(field_unary / unary_temperature)
+    fused_probability: (1 - confidence) * field_probability + confidence * foreground_probability
+  tie_policy: neutral
+  feature_reliability_can_shrink_registered_observation: false
+  capability_invalid_prompt_extension: false
+
+support_inference:
+  solver: confidence_random_walker
+  graph_policy: legacy
+  laplacian_weight: 1.0
+  unary_temperature: 0.10
+  primitive_support_threshold: 0.50
+  hard_seed_threshold: 0.20
+  hard_seed_conflict_policy: exclusive_relative
+  final_readout: propagated_continuous
+  diagnostic_selection_mode: seeded_component
+  selection_applied_to_main_output: false
+  connected_component_prior_in_main_output: false
+
+scalar_observation:
+  resolution: native_prompt
+  valid_support_normalization: true
+  valid_support_coverage_power: 1.0
+  interpretation: exact_total_alpha_control
+  pixel_threshold: 0.50
+
+protocol:
+  target_rgb_used: false
+  target_camera_used_as_support: false
+  target_mask_used_before_prediction_write: false
+  target_metric_calibration: false
+  per_scene_stage_switching: false
+  method_digest_required_for_aggregation: true
+  dataset_protocol_digest_required: true
+  evaluation_protocol_digest_required: true
+  contract_digests_recomputed_by_aggregator: true
+  candidate_method_contract_bound_to_run_manifest: true
+  promotion_eligibility_bound_to_run_manifest: true
+  frozen_diagnostic_eligible: true
+  main_result_eligible: false
+  prompt_assets_verified_before_prediction: true
+  target_assets_verified_after_prediction_write: true
+  source_artifact_sha256_required: true
+  score_artifact_sha256_required: true
+  final_propagated_score_identity_required: true
+  per_frame_final_propagated_metric_identity_required: true
+  runner: radio_gs/scripts/run_nvos_registered_region_v1_queue.sh
+
+evidence_status:
+  historical_frozen_macro:
+    unary_iou: 0.74013042992377
+    propagated_iou: 0.749029011383134
+    connected_iou: 0.7264043978580944
+  known_connected_failure:
+    scene: orchids
+    propagated_iou: 0.7000911446547765
+    connected_iou: 0.48204155805314414
+  current_gpu_result:
+    scenes: [fern, flower, fortress]
+    unary_macro_iou: 0.6036565923880356
+    propagated_macro_iou: 0.5910049314421238
+    connected_macro_iou: 0.5634213722436048
+    historical_propagated_macro_iou_same_scenes: 0.8478
+    decision: reject_without_full_eight_expansion
+  gpu_blocker: null
+  note: >-
+    The corrected evaluator produced three independent stages on the first
+    three frozen scenes. V1 underperformed the historical propagated macro by
+    about 0.257 and was stopped before the remaining five scenes.
+
+promotion_gate:
+  passed: false
+  reason: >-
+    The frozen three-scene diagnostic failed decisively. NVOS target masks
+    must not be used to tune fusion, stage, threshold, coverage power, or
+    renderer; any replacement requires an independent development gate.

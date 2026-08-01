@@ -268,7 +268,7 @@ def run(args: argparse.Namespace) -> Path:
                         "same llff_data/fern 30k checkpoint for both tasks."
                     ),
                     "checkpoint_status": (
-                        "pending; GPU work prohibited while GPU0 is lost"
+                        "pending; this CPU preflight performs no GPU work"
                     ),
                 },
                 "planned_evaluation": {

@@ -87,7 +87,7 @@ second row is consequently an explicit interaction/metric adapter, not a
 claim that the checkpoint was fed through MinkowskiEngine's different
 first-row quantization.
 
-### Paired protocol pilot and decision
+### Paired protocol pilot
 
 The paired scenes were:
 
@@ -107,20 +107,33 @@ failures:
 | `agile3d_release` | 0.6800 | 0.7368 | 0.7657 | 0.7889 | 0.8102 | 0.650 pp |
 | `easy3d_released_code` | 0.6799 | 0.7338 | 0.7600 | 0.7800 | 0.7970 | 1.266 pp |
 
-The `agile3d_release` paper gaps are
+The `agile3d_release` pilot gaps are
 `-0.20 / -0.92 / -0.73 / -0.71 / -0.68` percentage points. The released-code
 contract falls increasingly behind after the first click, reaching -2.00
-points at click 10. The frozen decision criterion is the smaller mean absolute
-gap across the five paper IoUs, so `agile3d_release` is the sole primary
-contract for the formal run. Scene-evaluation time summed to 23.03 seconds for
-that contract and 21.11 seconds for the released-code diagnostic.
+points at click 10. This pilot is a sensitivity check, not a protocol selector:
+choosing the contract whose pilot happens to be closest to the paper would
+calibrate on the published test row.
+
+The primary contract is instead frozen from source semantics:
+`agile3d_release` is the paper-facing row because the Easy3D paper says it
+follows the AGILE3D benchmark. `easy3d_released_code` is a coextensive
+full-cohort code-sensitivity row because it follows Easy3D's released forward
+logic. Both were run on all 312 scenes, so the conclusion does not depend on
+the three pilot scenes. Scene-evaluation time in the pilot summed to 23.03
+seconds for the AGILE3D adapter and 21.11 seconds for the released-code path.
 
 The machine-wide GPU trace from the subsequent formal attempt observed a
 maximum total GPU0 memory usage of 4,756 MiB at batch size 4. This is a total
 device reading, not PyTorch allocated memory.
 
-Decision artifact:
+Historical pilot artifact:
 `output/protocol_audit_20260731/easy3d_agile3d_pilot3_protocol_decision.json`.
+Its paper-gap selection field is superseded by the source-grounded
+primary/sensitivity policy above. The canonical replacement is
+`output/protocol_audit_20260731/easy3d_agile3d_pilot3_source_grounded_policy_v2.json`
+(SHA256
+`1f065485514b82af0c8afe64b4941b07cc2135f8a3094b92a9ee4f19f954bbcc`);
+it explicitly records that paper gaps were not used to select the contract.
 
 The paper compares at most 10 clicks, so the formal Easy3D comparison uses
 IoU@1/2/3/5/10. NoC@50/65/80/85/90 is additionally emitted as a diagnostic
@@ -182,7 +195,7 @@ The worker cache is constructed and audited on CPU before inference:
   --output output/protocol_audit_20260731/easy3d_agile3d_scannet40/official_worker_cache_audit.json
 ```
 
-Formal command (GPU 0 is additionally serialized by the project lock). The
+Primary formal command (GPU 0 is additionally serialized by the project lock). The
 `LD_PRELOAD` is a machine-specific repair for this host's incorrect
 `libcuda.so.1` symlink from version 580 to a version-535 kernel driver; it is
 not part of the benchmark protocol:
@@ -204,6 +217,12 @@ flock /tmp/radio-gs-gpu0.lock -c '
 ```
 
 Scene JSON shards are provenance-checked and resumed rather than overwritten.
+The released-code sensitivity run uses the identical command except:
+
+```text
+--interaction-contract easy3d_released_code
+--output-dir /root/RADIO-GS/output/protocol_audit_20260731/easy3d_agile3d_formal_easy3d_released_code_v1
+```
 
 ### Formal run state
 
@@ -223,18 +242,58 @@ For debugging only, the unchanged query-micro aggregator was applied to the
 | legacy-key intersection | 2,608 | 0.70159 | 0.75901 | 0.78336 | 0.80644 | 0.82686 |
 
 This is a lexicographic scene prefix covering 21.8% of scenes and 25.8% of
-objects, not a representative sample. Its positive paper gaps must not be
-reported as reproduction accuracy or used to replace the pending 312-scene
-aggregate. The diagnostic is explicitly marked `not_formal_result: true` and
-`paper_metric_comparable: false` in
+objects, not a representative sample. Its positive paper gaps are not used as
+reproduction accuracy. The diagnostic is explicitly marked
+`not_formal_result: true` and `paper_metric_comparable: false` in
 `output/protocol_audit_20260731/easy3d_agile3d_formal_agile3d_release_v1/partial68_hardware_interrupted_diagnostic.json`.
 
-The evaluator, monitor, and lock shell were terminated by exact PID, the lock
-was verified released, and the 68 complete shards were preserved. Attempt 002
-is prepared with a new immutable trace name and the identical evaluator
-arguments, but must not start until GPU0 recovers. Exact failure provenance,
-the completed-shard set hash, and the resume argv are in
+The 68 complete shards were preserved. Attempt 002 accepted only shards with
+the exact checkpoint, evaluator, preprocessing, object-list, and contract
+provenance, then completed the remaining 244 scenes. Exact attempt-001 failure
+provenance, the completed-shard set hash, and the resume argv are in
 `output/protocol_audit_20260731/easy3d_agile3d_formal_agile3d_release_v1/formal_attempt_001_failure.json`.
+
+Both full-cohort runs completed 312/312 scenes and 10,357/10,357 objects with
+zero failures:
+
+| Full 312-scene contract | IoU@1 | IoU@2 | IoU@3 | IoU@5 | IoU@10 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| paper | 0.682000 | 0.746000 | 0.773000 | 0.796000 | 0.817000 |
+| `agile3d_release` primary | 0.697137 | 0.760135 | 0.785942 | 0.809951 | 0.830384 |
+| `easy3d_released_code` sensitivity | 0.697138 | 0.759464 | 0.783255 | 0.803703 | 0.821321 |
+
+The primary local-minus-paper gaps are
+`+1.514 / +1.414 / +1.294 / +1.395 / +1.338` percentage points. The
+released-code gaps are
+`+1.514 / +1.346 / +1.026 / +0.770 / +0.432` points. Thus neither local
+contract is below the paper row. The AGILE3D interaction adapter minus the
+Easy3D released-code path is
+`-0.000 / +0.067 / +0.269 / +0.625 / +0.906` points: the protocol effect is
+negligible at the first click and grows with corrective interactions.
+
+The 10,016-key legacy intersection differs only slightly from the complete
+10,357-object cohort:
+
+| Full contract, legacy keys only | IoU@1 | IoU@2 | IoU@3 | IoU@5 | IoU@10 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| `agile3d_release` | 0.697465 | 0.760246 | 0.786216 | 0.810182 | 0.830566 |
+| `easy3d_released_code` | 0.697467 | 0.759577 | 0.783498 | 0.804010 | 0.821680 |
+
+Formal result provenance:
+
+- AGILE3D primary `results.json` SHA256:
+  `c771f29400e912565ee2ea5a754d0fd80a7fafc1eb91e38b6db1953cdcbbc09d`;
+- AGILE3D primary 312-shard-set SHA256:
+  `6fc27936ebf1b1e5a14df6c87e81b7699e6a72c8c661550efbdb3fc9ea467f44`;
+- Easy3D released-code `results.json` SHA256:
+  `c8c0c6820cf88166e77002a20ddf68af44c7be2e58a2e36cd26b147bdbd2f5a1`;
+- Easy3D released-code 312-shard-set SHA256:
+  `1915fef1216b822abe373b58b7962a4ecac2ddd8452258296cf2cb6f89a55189`.
+
+These are released-checkpoint protocol diagnostics, not strict-table rows.
+The paper prose/released preprocessing mismatch, the Easy3D/AGILE3D
+interaction ambiguity, the 10,357/10,016 cohort mismatch, and the local
+quantitative adapter all remain disclosed even though the numbers are close.
 
 ## PFPR: LUDVIG-style DINO uplift sanity
 
@@ -242,9 +301,12 @@ This result is deliberately **not** named “LUDVIG reproduction.”
 
 Official LUDVIG commit
 `4461fc515439bb498a75d71738a1e73cf7a452ed` supports segmentation, not PFPR
-patch-to-3D point retrieval. Its reference path uses DINOv2 ViT-g with
-registers, multi-view inverse-rendering uplift into Gaussians, and, for NVOS,
-a 200-neighbor / 100-iteration graph diffusion driven by scribbles.
+patch-to-3D point retrieval. Its released checkpoint contains four register
+tokens, but the vendored ViT-g architecture has no register-token support and
+its `strict=False` load silently discards that sole tensor. The primary exact
+reproduction records this incompatibility explicitly, then uses multi-view
+inverse-rendering uplift into Gaussians. For NVOS, LUDVIG additionally uses a
+200-neighbor / 100-iteration graph diffusion driven by scribbles.
 
 The audited historical PFPR cache instead uses:
 
@@ -298,13 +360,58 @@ python -m radio_gs.benchmarks.scannet_pfpr.audit_ludvig_style_uplift \
   --repository-root /root/RADIO-GS
 ```
 
+### Exact-LUDVIG one-scene adapter
+
+A separate fail-closed Phase A-E run now uses the released LUDVIG DINO/PCA
+and inverse-render path rather than the historical C-RADIO field:
+
+1. Stage 120 query-held-out `scene0050_02` views and bind the 300k shared
+   Gaussian PLY.
+2. Extract all 277,440 scene tokens with the vendored ViT-g/14, explicitly
+   permitting only the checkpoint's otherwise silently ignored
+   `register_tokens` key; fit and freeze the released PCA40 transform.
+3. Reconstruct official sliding-window feature maps and call released
+   `GaussianModel.apply_weights` for 3-D uplifting.
+4. Encode ten method-visible 128x128 RGB crops, pool the center 3x3 of their
+   9x9 token grids, and use learning-free primitive cosine plus continuous
+   opacity-weighted Gaussian/5 cm cell readout over all 31,143 public points.
+5. Freeze and hash all scores before the evaluator-only process opens private
+   anchors.
+
+All 31,143 candidates have strictly positive kernel support. No support
+threshold, private metric, or target annotation selects the adapter. The
+result is deliberately benchmark-local because LUDVIG publishes no PFPR head:
+
+| Metric | Exact-LUDVIG custom adapter, `scene0050_02` |
+| --- | ---: |
+| top-1 mean / median error | 1.9873 m / 1.9546 m |
+| R@1 / R@5 / R@10 at 10 cm | 0.000 / 0.000 / 0.000 |
+| R@1 / R@5 / R@10 at 20 cm | 0.000 / 0.100 / 0.100 |
+| MRR at 10 / 20 cm | 0.000 / 0.020 |
+
+The historical C-RADIO/DINOv3 diagnostic on this same scene is much stronger
+(0.2664/0.2206 m Top-1 mean/median and 0.20/0.60/0.70 recall at 10 cm), but it
+uses a different feature field. The contrast is an interpretable negative
+sanity: direct scene-PCA DINO crop cosine is not a substitute for a learned
+crop-to-3D correspondence head.
+
+Immutable Phase A/B/C/D/E manifest SHA256 values are respectively
+`de3f0281ae863d9f640eaabce5c805f35a9fca03221ceee0a67756fc9023e22a`,
+`1d546a335e2f3ec807c69b23f06a7876d1a325d53e16a94b0d64f8b7556d147b`,
+`dcf8d864da50aa455f805d94bce707daf4cfc4ac1f602ea03141b38a57eb13fb`,
+`e7f615ed0013cc32b858c92df364c36585dcfa1a10758202bcb361035c42b6ee`,
+and `d85c59aebb21cb6c6b6c1251c737f82c88c36eea58e4c8175167a71797c32901`.
+Phase B/C/D GPU0 thermal peaks were 58/52/49 C with zero pauses.
+
 ## Verification
 
 The dedicated CPU tests cover Easy3D's sorted/last-write equivalence,
-fail-closed shard resume, paired-pilot protocol selection, KD-tree error-center
+fail-closed shard resume, paired-pilot protocol sensitivity with a
+source-grounded primary, KD-tree error-center
 equivalence, FP/FN tie behavior, explicit NoC cap, AGILE3D key-intersection
 reporting, PFPR cache identity, and rejection of private-anchor leakage:
 
 ```text
 tests/test_easy3d_pfpr_protocol_audit.py: 9 passed
+tests/test_ludvig_pfpr_phase_{a,b,c,d,e}.py: 39 passed
 ```

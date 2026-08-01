@@ -1,0 +1,133 @@
+schema_version: 1
+candidate_id: registered-region-v3
+date: 2026-07-31
+status: theory_frozen_awaiting_one_shot_diagnostic
+promoted: false
+
+parent_candidate: registered-region-v2
+base_field: canonical-mpr-v3
+
+registered_observation:
+  registration: exact_front_to_back_raster_adjoint
+  registration_resolution: native_prompt
+  seed_construction: joint_signed
+  seed_normalization: none
+  fusion: hard_seed_anchored_probability
+  mass_source: raw_raster_adjoint_prompt_mass
+  visibility_source: raw_raster_adjoint_all_pixel_mass
+  formulas:
+    joint_mass: m_pos + m_neg
+    poisson_confidence: 1 - exp(-joint_mass / mass_scale)
+    labeled_fraction: joint_mass / visible_raster_mass
+    confidence: poisson_confidence * labeled_fraction
+    purity: (m_pos - m_neg) / joint_mass
+    signed_observation: confidence * purity
+    positive_seed_mass: relu(signed_observation)
+    negative_seed_mass: relu(-signed_observation)
+    anchor: 1[confidence > 0 and abs(signed_observation) >= hard_seed_threshold]
+    effective_confidence: anchor + (1 - anchor) * confidence
+    field_probability: sigmoid(field_unary / unary_temperature)
+    observation_probability: 0.5 * (1 + purity)
+    fused_probability: >-
+      (1 - effective_confidence) * field_probability
+      + effective_confidence * observation_probability
+  strong_unary_semantics: >-
+    The exact rows already accepted as signed hard seeds by the shared solver
+    become unit-confidence unary observations. Sub-threshold raster tails keep
+    the v2 Poisson-and-coverage mixture; unlabeled pixels are not converted to
+    negative labels.
+  tie_policy: neutral
+  feature_reliability_can_shrink_registered_observation: false
+  capability_invalid_prompt_extension: false
+
+constant_provenance:
+  mass_scale: 1.0
+  mass_scale_basis: one_native_alpha_weighted_pixel_is_one_poisson_observation_unit
+  coverage_power: 1.0
+  coverage_power_basis: exact_labeled_fraction_without_shape_distortion
+  hard_seed_threshold: 0.20
+  hard_seed_threshold_basis: inherited_shared_solver_hard_evidence_contract
+  hard_seed_threshold_new_for_v3: false
+  unary_temperature: 0.10
+  unary_temperature_basis: inherited_registered_region_solver_contract
+  pixel_threshold: 0.50
+  pixel_threshold_basis: fixed_bernoulli_decision_boundary
+  target_metric_or_mask_calibration: false
+
+theoretical_reductions:
+  unobserved_row: exact_field_probability
+  subthreshold_row: exact_registered_region_v2_probability_mixture
+  accepted_pure_positive_seed: foreground_probability_one
+  accepted_pure_negative_seed: foreground_probability_zero
+  accepted_conflicting_seed: observed_foreground_fraction
+  full_mask: poisson_mass_with_unit_labeled_coverage
+  sign_symmetry: true
+  native_observability_only: true
+
+diagnostic_screen:
+  scenes: [fern, flower, fortress]
+  parent_v2_propagated_iou:
+    fern: 0.44801025143203155
+    flower: 0.7886652885090718
+    fortress: 0.6967529158458324
+    macro: 0.6444761519289787
+  historical_same_scene_macro: 0.8478
+  continuation_rule: >-
+    Continue from the three frozen scenes to the remaining five only if the
+    v3 propagated macro is strictly greater than v2, at least two of three
+    scenes strictly improve, and no scene is below its v2 value. Otherwise
+    stop without a full-eight expansion. No magnitude threshold is fitted.
+  gpu_result_status: not_run
+
+support_inference:
+  solver: confidence_random_walker
+  graph_policy: legacy
+  laplacian_weight: 1.0
+  unary_temperature: 0.10
+  primitive_support_threshold: 0.50
+  hard_seed_threshold: 0.20
+  hard_seed_conflict_policy: exclusive_relative
+  hard_seed_conflict_margin: 0.0
+  final_readout: propagated_continuous
+  diagnostic_selection_mode: seeded_component
+  selection_applied_to_main_output: false
+
+scalar_observation:
+  resolution: native_prompt
+  valid_support_normalization: true
+  valid_support_coverage_power: 1.0
+  feature_contribution_gamma: 1.0
+  pixel_threshold: 0.50
+
+implementation:
+  scorer: radio_gs/querying/evidence_scorer.py
+  engine: radio_gs/querying/query_engine.py
+  evaluator: radio_gs/scripts/eval_nvos_gaussian_first.py
+  runner: radio_gs/scripts/run_nvos_registered_region_v3_queue.sh
+  gpu_execution_started: false
+  cpu_tests_only: true
+
+thermal_plan:
+  physical_gpu: 1
+  maximum_temperature_c: 78
+  maximum_start_temperature_c: 65
+  soft_pause_temperature_c: 75
+  soft_resume_temperature_c: 70
+  peer_gpu: null
+  peer_pause_temperature_c: 0
+  peer_resume_temperature_c: 0
+  peer_quiet_seconds_before_launch: 0
+  peer_maximum_power_w: 0.0
+  peer_maximum_memory_mib: 0
+  peer_maximum_utilization_percent: 100
+  poll_seconds: 3
+  maximum_power_limit_w: 300.5
+
+eligibility:
+  frozen_diagnostic_eligible: true
+  main_result_eligible: false
+  reason: >-
+    The complete formula and all constants are frozen before a one-shot NVOS
+    diagnostic. NVOS target masks may measure this candidate but may not tune
+    the anchor, confidence, graph, stage, compositor, or threshold. Promotion
+    requires a disjoint registered-prompt development gate.

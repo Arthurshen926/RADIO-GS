@@ -1,6 +1,8 @@
 import torch
 
 from radio_gs.interfaces.surface_region_summary import (
+    JOINT_CONTEXT_POOLING,
+    SEPARATE_CONTEXT_POOLING,
     SurfaceRegionSummaryReadout,
     SurfaceRegionSummaryReadoutV2,
     surface_region_geometry,
@@ -124,3 +126,115 @@ def test_v2_input_only_mode_does_not_double_apply_reliability_prior() -> None:
         input_only.architecture("contract")["reliability_attention_mode"]
         == "input_only"
     )
+
+
+def _core_context_inputs(context_rows: int) -> tuple[torch.Tensor, ...]:
+    features = torch.zeros(1, 2 + context_rows, 16)
+    features[:, 0, 0] = 1.0
+    features[:, 1, 1] = 1.0
+    features[:, 2:, 2] = 8.0
+    geometry = torch.zeros(1, 2 + context_rows, 14)
+    geometry[:, :2, 8] = 1.0
+    geometry[:, 2:, 9] = 1.0
+    mask = torch.ones(1, 2 + context_rows, dtype=torch.bool)
+    reliability = torch.ones(1, 2 + context_rows, 1)
+    anchor = torch.tensor([0])
+    return features, geometry, mask, reliability, anchor
+
+
+def test_v2_separate_context_pooling_protects_the_zero_residual_core_base() -> None:
+    torch.manual_seed(29)
+    one_context = _core_context_inputs(1)
+    repeated_context = _core_context_inputs(5)
+    separate = SurfaceRegionSummaryReadoutV2(
+        feature_dim=16,
+        hidden_dim=8,
+        context_pooling_mode=SEPARATE_CONTEXT_POOLING,
+    ).eval()
+    joint = SurfaceRegionSummaryReadoutV2(
+        feature_dim=16,
+        hidden_dim=8,
+        context_pooling_mode=JOINT_CONTEXT_POOLING,
+    ).eval()
+    joint.load_state_dict(separate.state_dict())
+
+    def run(model: SurfaceRegionSummaryReadoutV2, values: tuple[torch.Tensor, ...]):
+        features, geometry, mask, reliability, anchor = values
+        return model(
+            features,
+            geometry,
+            anchor_index=anchor,
+            token_mask=mask,
+            reliability=reliability,
+        )
+
+    torch.testing.assert_close(
+        run(separate, one_context),
+        run(separate, repeated_context),
+    )
+    assert not torch.allclose(
+        run(joint, one_context),
+        run(joint, repeated_context),
+    )
+
+
+def test_v2_separate_context_pooling_is_manifest_bound_and_context_trainable() -> None:
+    torch.manual_seed(31)
+    values = _core_context_inputs(2)
+    model = SurfaceRegionSummaryReadoutV2(
+        feature_dim=16,
+        hidden_dim=8,
+        context_pooling_mode=SEPARATE_CONTEXT_POOLING,
+    ).eval()
+    architecture = model.architecture("contract")
+    assert architecture["context_pooling_mode"] == SEPARATE_CONTEXT_POOLING
+    assert (
+        "context_pooling_mode"
+        not in SurfaceRegionSummaryReadoutV2(
+            feature_dim=16,
+            hidden_dim=8,
+        ).architecture("contract")
+    )
+
+    features, geometry, mask, reliability, anchor = values
+    with torch.no_grad():
+        model.residual[-1].weight.normal_()
+        before = model(
+            features,
+            geometry,
+            anchor_index=anchor,
+            token_mask=mask,
+            reliability=reliability,
+        )
+        changed = features.clone()
+        changed[:, 2:, 2] = -8.0
+        after = model(
+            changed,
+            geometry,
+            anchor_index=anchor,
+            token_mask=mask,
+            reliability=reliability,
+        )
+    assert not torch.allclose(before, after)
+
+
+def test_v2_separate_context_pooling_rejects_missing_partition_flags() -> None:
+    features, geometry, mask, reliability, anchor = _core_context_inputs(1)
+    geometry[:, -1, 9] = 0.0
+    model = SurfaceRegionSummaryReadoutV2(
+        feature_dim=16,
+        hidden_dim=8,
+        context_pooling_mode=SEPARATE_CONTEXT_POOLING,
+    )
+    try:
+        model(
+            features,
+            geometry,
+            anchor_index=anchor,
+            token_mask=mask,
+            reliability=reliability,
+        )
+    except ValueError as exc:
+        assert "core/context flags" in str(exc)
+    else:
+        raise AssertionError("expected an incomplete core/context partition to fail")

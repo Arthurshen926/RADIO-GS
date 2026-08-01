@@ -1,5 +1,7 @@
 from pathlib import Path
+import hashlib
 
+import pytest
 import torch
 
 
@@ -43,3 +45,37 @@ def test_load_trusted_checkpoint_supports_older_torch_without_weights_only(
         {"map_location": "cpu", "weights_only": False},
         {"map_location": "cpu"},
     ]
+
+
+def test_load_trusted_checkpoint_uses_restricted_sha_bound_path(tmp_path):
+    from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+
+    path = tmp_path / "formal.pth"
+    torch.save(
+        {"state_dict": {"weight": torch.ones(2)}, "output": Path("run")},
+        path,
+    )
+    expected = hashlib.sha256(path.read_bytes()).hexdigest()
+
+    payload = load_trusted_checkpoint(
+        path,
+        expected_sha256=expected,
+        map_location="cpu",
+    )
+
+    assert payload["output"] == Path("run")
+    assert torch.equal(payload["state_dict"]["weight"], torch.ones(2))
+
+
+def test_load_trusted_checkpoint_rejects_wrong_formal_digest(tmp_path):
+    from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+
+    path = tmp_path / "formal.pth"
+    torch.save({"state_dict": {}}, path)
+
+    with pytest.raises(ValueError, match="SHA-256 differs"):
+        load_trusted_checkpoint(
+            path,
+            expected_sha256="0" * 64,
+            map_location="cpu",
+        )

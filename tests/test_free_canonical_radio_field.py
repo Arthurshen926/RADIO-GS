@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import copy
+
+import pytest
 import torch
 
 from radio_gs.field import load_canonical_field_checkpoint
@@ -54,3 +57,42 @@ def test_free_field_rejects_query_contaminated_mpr() -> None:
         assert "text-query" in str(error)
     else:
         raise AssertionError("query-contaminated MPR must be rejected")
+
+
+@pytest.mark.parametrize(
+    "mutation,match",
+    [
+        ("oversized_architecture", "num_gaussians is out of bounds"),
+        ("non_boolean_architecture", "use_fusion must be boolean"),
+        ("state_shape", "state tensor local_codes differs"),
+        ("state_nonfinite", "state tensor decoder.mean is non-finite"),
+        ("reliability_copy", "reliability copies differ"),
+        ("signature_dimension", "signature feature dimension differs"),
+    ],
+)
+def test_field_loader_rejects_malformed_payload_before_model_use(
+    tmp_path,
+    mutation: str,
+    match: str,
+) -> None:
+    payload = copy.deepcopy(
+        build_free_field_payload(
+            _mpr_payload(), source_path="mpr.pt", feature_signature=_SIGNATURE
+        )
+    )
+    if mutation == "oversized_architecture":
+        payload["architecture"]["num_gaussians"] = 10_000_001
+    elif mutation == "non_boolean_architecture":
+        payload["architecture"]["use_fusion"] = "false"
+    elif mutation == "state_shape":
+        payload["state_dict"]["local_codes"] = torch.zeros(3, 3)
+    elif mutation == "state_nonfinite":
+        payload["state_dict"]["decoder.mean"][0] = float("nan")
+    elif mutation == "reliability_copy":
+        payload["reliability"][0, 0] = 0.5
+    else:
+        payload["feature_signature"]["raw_feature_dim"] = 4
+    checkpoint = tmp_path / f"{mutation}.pth"
+    torch.save(payload, checkpoint)
+    with pytest.raises(ValueError, match=match):
+        load_canonical_field_checkpoint(checkpoint)

@@ -16,7 +16,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from radio_gs.utils.checkpoint_io import load_trusted_checkpoint
+from radio_gs.utils.immutable_artifacts import (
+    load_fixed_radio_checkpoint_payload,
+    sha256_file,
+)
 
 
 RADIO_ADAPTOR_ALIASES: dict[str, tuple[str, ...]] = {
@@ -124,9 +127,27 @@ def load_radio_adaptor_from_checkpoint(
     name: str,
     *,
     kind: str = "feature_projection",
+    expected_sha256: str | None = None,
 ) -> RadioMLPAdaptor:
-    """Load a frozen RADIO MLP adaptor from a full RADIO checkpoint."""
-    checkpoint = load_trusted_checkpoint(Path(checkpoint_path), map_location="cpu")
+    """Load a frozen RADIO MLP adaptor through the restricted RADIO loader.
+
+    Formal callers provide an externally trusted digest.  Legacy callers are
+    still protected by the purpose-specific pickle allowlist and stable-file
+    checks, but their digest is self-observed and therefore is not an external
+    authority statement.
+    """
+    path = Path(checkpoint_path)
+    trusted_sha256 = str(expected_sha256 or sha256_file(path))
+    checkpoint, _observed_sha256, _source = (
+        load_fixed_radio_checkpoint_payload(
+            path,
+            expected_sha256=trusted_sha256,
+            map_location="cpu",
+            label="frozen RADIO adaptor checkpoint",
+        )
+    )
+    if not isinstance(checkpoint, Mapping):
+        raise TypeError("RADIO checkpoint must contain a mapping")
     adaptor_state = _extract_prefixed_state(_checkpoint_state_dict(checkpoint), name, kind)
     input_dim, hidden_dim, output_dim, num_blocks = _infer_mlp_shape(adaptor_state)
     adaptor = RadioMLPAdaptor(

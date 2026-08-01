@@ -1,5 +1,9 @@
 # Dr. Splat LERF Mask Summary
 
+> **SUPERSEDED / DIAGNOSTIC ONLY.** This fixed-L1 compatibility result is not
+> the canonical LERF direct-3D protocol. Use
+> `evaluation_protocol_freeze_20260801.yaml` and the VALA protocol row.
+
 Protocol: Dr. Splat/VALA LERF nested mask IoU
 
 | Split | mIoU | Acc@0.25 | Acc@0.5 | Objects | Missing |

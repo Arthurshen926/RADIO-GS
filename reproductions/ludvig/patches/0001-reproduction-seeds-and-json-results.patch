@@ -1,3 +1,32 @@
+diff --git a/evaluation/spin_nvos/base.py b/evaluation/spin_nvos/base.py
+index 662c84a..e2b93b4 100644
+--- a/evaluation/spin_nvos/base.py
++++ b/evaluation/spin_nvos/base.py
+@@ -223,7 +223,14 @@ class SegmentationBase(EvaluationBase):
+             mask_best,
+         )
+ 
+-        mask_arr = (anchor.squeeze() > 1 - k_best / 100).cpu().numpy()
++        visualization_mask = (anchor > 1 - k_best / 100).type_as(rgb_img)
++        if visualization_mask.shape[-2:] != rgb_img.shape[-2:]:
++            visualization_mask = F.interpolate(
++                visualization_mask[None],
++                size=rgb_img.shape[-2:],
++                mode="nearest",
++            ).squeeze(0)
++        mask_arr = visualization_mask.squeeze().cpu().numpy()
+         mask_arr = mask_arr // mask_arr.max()
+         mask_diff = mask_superposition(mask_arr, gt_img_arr)
+         save_img(
+@@ -232,7 +239,7 @@ class SegmentationBase(EvaluationBase):
+             mask_diff,
+         )
+ 
+-        rgb_mask = rgb_img * (anchor > 1 - k_best / 100)
++        rgb_mask = rgb_img * visualization_mask
+         save_img(
+             os.path.join(self.logdir, "masks", "rgb", f"{img_name}_iou{rbest_iou}.jpg"),
+             rgb_mask,
 diff --git a/evaluation/spin_nvos/segmentation.py b/evaluation/spin_nvos/segmentation.py
 index 8677c85..6c69728 100644
 --- a/evaluation/spin_nvos/segmentation.py
@@ -103,3 +132,130 @@ index 4a548c9..0dac29a 100644
      model.uplift()
      model.save()
      sys.exit()
+diff --git a/predictors/sam.py b/predictors/sam.py
+index 3ffe4b0..6a81411 100644
+--- a/predictors/sam.py
++++ b/predictors/sam.py
+@@ -10,6 +10,23 @@ from utils.scribble import load_scribbles, scribble_inverse_rendering
+ from utils.sam import load_sam
+ from .base import BaseDataset
+ 
++
++def _require_sam_resolution_match(
++    *, prompt_shape, image_shape, camera_shape, mask_shape=None
++):
++    if prompt_shape != image_shape or image_shape != camera_shape:
++        raise RuntimeError(
++            "SAM uplift resolution mismatch before prompt sampling: "
++            f"prompt={prompt_shape}, image={image_shape}, "
++            f"camera={camera_shape}"
++        )
++    if mask_shape is not None and mask_shape != camera_shape:
++        raise RuntimeError(
++            "SAM uplift resolution mismatch after prediction: "
++            f"mask={mask_shape}, camera={camera_shape}"
++        )
++
++
+ class SAMDataset(BaseDataset):
+ 
+     def __init__(
+@@ -40,11 +57,19 @@ class SAMDataset(BaseDataset):
+     def __getitem__(self, idx):
+         camera = self.cameras[idx]
+         img = image_from_path(self.directory, camera.image_name)
++        _, height, width = img.shape
++        camera_shape = (camera.image_height, camera.image_width)
++        image_shape = (height, width)
++        pt2d = self.render_fn(self.scribbles_3d, camera)[0]
++        prompt_shape = tuple(pt2d.shape)
++        _require_sam_resolution_match(
++            prompt_shape=prompt_shape,
++            image_shape=image_shape,
++            camera_shape=camera_shape,
++        )
+         self.model.set_image(
+             np.asarray(to_pil_image(img.cpu())).copy(),
+         )
+-        _, height, width = img.shape
+-        pt2d = self.render_fn(self.scribbles_3d, camera)[0]
+         npos = 3
+         n_pred = 10
+         sample_from = int(pt2d.sum() * self.thres)
+@@ -71,5 +96,12 @@ class SAMDataset(BaseDataset):
+             for _ppt in ppt
+         ]
+         mask = sum(mask) / len(mask)
++        mask_shape = tuple(mask.shape[-2:])
++        _require_sam_resolution_match(
++            prompt_shape=prompt_shape,
++            image_shape=image_shape,
++            camera_shape=camera_shape,
++            mask_shape=mask_shape,
++        )
+         mask /= mask.max()
+         return torch.from_numpy(mask).to(torch.float32).cuda(), camera
+diff --git a/utils/image.py b/utils/image.py
+index f2c5892..70709eb 100644
+--- a/utils/image.py
++++ b/utils/image.py
+@@ -10,17 +10,24 @@ MEAN = [0.485, 0.456, 0.406]
+ STD = [0.229, 0.224, 0.225]
+ 
+ 
++def _max_dimension_downsample_resolution(orig_w, orig_h, resize_down):
++    orig = max(orig_w, orig_h)
++    if resize_down and orig > resize_down:
++        global_down = orig / resize_down
++        if orig_w >= orig_h:
++            return resize_down, int(orig_h / global_down)
++        return int(orig_w / global_down), resize_down
++    return orig_w, orig_h
++
++
+ def image_from_path(image_folder, cam_name, resize_down=1600, normalize=False):
+     ext = os.path.splitext(os.listdir(image_folder)[0])[1]
+     image_path = os.path.join(image_folder, cam_name + ext)
+     image = Image.open(image_path)
+     orig_w, orig_h = image.size
+-    orig = max(orig_w, orig_h)
+-    if resize_down and orig > resize_down:
+-        global_down = orig / resize_down
+-    else:
+-        global_down = 1
+-    resolution = (int(orig_w / global_down), int(orig_h / global_down))
++    resolution = _max_dimension_downsample_resolution(
++        orig_w, orig_h, resize_down
++    )
+     image = PILtoTorch(image, resolution)
+     if normalize:
+         image = Normalize(MEAN, STD)(image)
+diff --git a/utils/solver.py b/utils/solver.py
+index da22884..827391a 100644
+--- a/utils/solver.py
++++ b/utils/solver.py
+@@ -4,6 +4,14 @@ from tqdm import tqdm
+ from .image import resize
+ 
+ 
++def _require_feature_camera_resolution(feature_shape, camera_shape):
++    if feature_shape != camera_shape:
++        raise RuntimeError(
++            "Feature/camera resolution mismatch before apply_weights: "
++            f"feature={feature_shape}, camera={camera_shape}"
++        )
++
++
+ @torch.no_grad()
+ def uplifting(
+     loader, gaussian, resolution=None, prune_gaussians=None, min_gaussians=400000
+@@ -52,6 +60,9 @@ def uplifting(
+             )
+         if resolution and feat.shape[-1] != resolution[-1]:
+             feat = resize(feat, resolution)
++        feature_shape = tuple(feat.shape[-2:])
++        camera_shape = (cam.image_height, cam.image_width)
++        _require_feature_camera_resolution(feature_shape, camera_shape)
+         gaussian.apply_weights(cam, features_3d, weights, feat.cuda())
+     features_3d /= weights + 1e-8
+     keep = None

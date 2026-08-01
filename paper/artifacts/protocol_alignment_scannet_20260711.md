@@ -46,6 +46,23 @@ about 93.4% of rows on average, so the remaining clean-row/VALA gap is expected.
 The historical T3 gap is much larger because it additionally changes the query
 domain and applies test-scene calibration and spatial propagation.
 
+## 2026-08-01 compatibility-domain isolation addendum
+
+A separate CPU-only P0 replay holds local checkpoint/features/text cache fixed
+on `scene0000_00` and `scene0400_00` and compares cached VALA-pruned Gaussian
+centers against the archived mesh-kNN4 readout. On split 10, Gaussian-domain
+pseudo-GT plus volume weighting reaches 16.3307/34.3724 mIoU/mAcc, versus
+14.4578/33.5118 for mesh kNN4: only +1.8729/+0.8606 points.
+
+This two-scene sensitivity is not the eight-scene result above and is not
+paper-comparable. It narrows the compatibility diagnosis: final evaluation
+domain is a secondary contributor, while checkpoint/2D-feature provenance and
+the proxy render-significance aggregation used upstream of gating and pruning
+remain the main unresolved differences. The result is
+`output/protocol_audit_20260801/vala/scannet_cached_vala_gaussian_domain_p0/scannet_cached_vala_gaussian_domain_p0.json`
+(SHA-256
+`3ea3e2a554e1fe639e04c45f7aafd505ea86dfe95b526a63c487192733ea7c04`).
+
 ## No semantic-GT label loss in the evaluated checkpoints
 
 The training configuration does load `direct_point_pool_labels` from the label

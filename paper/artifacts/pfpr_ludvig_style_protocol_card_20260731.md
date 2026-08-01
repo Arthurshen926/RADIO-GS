@@ -1,9 +1,41 @@
-# PFPR LUDVIG-style DINO uplift sanity
+# PFPR LUDVIG protocol audit
 
-Status: diagnostic only; not an official LUDVIG reproduction and not a
-paper-metric comparison.
+Status: exact released LUDVIG DINO/PCA/uplift plus a custom one-scene PFPR
+adapter is complete; the older six-scene C-RADIO/DINOv3 sanity is retained.
+Neither is a LUDVIG paper-metric comparison because LUDVIG has no PFPR task.
 
-## Scope and result
+## Exact-LUDVIG adapter closeout
+
+- scene/query coverage: `scene0050_02`, 10 public crops;
+- field coverage: 120 query-held-out views, 300,000 shared Gaussians;
+- public domain: 31,143 candidates, all with strictly positive readout support;
+- exact component: released vendored ViT-g/14 behavior, scene PCA40, sliding
+  reconstruction, and `GaussianModel.apply_weights` inverse-render uplift;
+- custom component: center-3x3 query pooling, primitive cosine, and continuous
+  opacity-weighted Gaussian/5 cm cell readout;
+- Top-1 mean/median: 1.9873/1.9546 m;
+- R@1/R@5/R@10 at 10 cm: 0/0/0;
+- R@1/R@5/R@10 at 20 cm: 0/10/10%;
+- interpretation: normal negative sanity for an untuned learning-free adapter,
+  not evidence of an evaluation-protocol mismatch.
+
+The official reg4 checkpoint has SHA256
+`746ecb8c6301c645c5c855be91687d274587d6e48fdaec4a729753160b34a283`,
+but the released LUDVIG vendored model has no register-token support. The
+primary exact run explicitly permits and discards only `register_tokens`,
+matching the released `strict=False` behavior without hiding other mismatches.
+Phase A/B/C/D/E manifest SHA256 values are
+`de3f0281ae863d9f640eaabce5c805f35a9fca03221ceee0a67756fc9023e22a`,
+`1d546a335e2f3ec807c69b23f06a7876d1a325d53e16a94b0d64f8b7556d147b`,
+`dcf8d864da50aa455f805d94bce707daf4cfc4ac1f602ea03141b38a57eb13fb`,
+`e7f615ed0013cc32b858c92df364c36585dcfa1a10758202bcb361035c42b6ee`,
+and `d85c59aebb21cb6c6b6c1251c737f82c88c36eea58e4c8175167a71797c32901`.
+
+Only Phase E opens evaluator-private anchors. Phase B/C/D reached 58/52/49 C
+on physical GPU0 with zero pause events, so the executed 78/81/70 C thermal
+policy with one stable cool sample did not limit this reproduction.
+
+## Historical C-RADIO/DINOv3 scope and result
 
 - benchmark: corrected `scannet-pfpr-small-v2`
 - coverage: 6/20 scenes, 60/200 queries

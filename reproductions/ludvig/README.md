@@ -35,6 +35,15 @@ requires the patched rasterizer on `PYTHONPATH` and locks GPU 0 itself. On this
 machine it also prepends `/root/baselines/LUDVIG/.driver535` so PyTorch loads
 the `libcuda.so.1` matching the 535 kernel driver; the resolved library and
 SHA-256 are recorded in every non-dry-run manifest.
+LUDVIG-SAM requires the audited ViT-H SAM checkpoint SHA-256
+`a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e`;
+an arbitrary file passed through `--sam-checkpoint` is rejected before GPU
+work.
+The only permitted tracked checkout diff is the two-file reproduction patch
+with SHA-256
+`7c86d5883058fb9e529608ba6cf856c04e66d37d338a69a8ca6863725292e9ac`;
+the launcher also verifies both patched file hashes and rejects staged or
+additional tracked changes.
 
 ## Exact original-3DGS geometry source
 
@@ -70,12 +79,13 @@ resolution, and original 30k hyperparameters. The manifest is
 `output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_dryrun_v2/training_manifest.json`
 (SHA-256 `c81670c3310147a7ce204d7ea424a2fe8e855f994b14b0a73b16d30e6a3f6ef2`).
 
-The hardware record was last good at 2026-07-31 12:49:00.349 and first
-reported `[GPU is lost]` at 12:49:00.600. No training or evaluation launcher
-is queued, so nothing can auto-start when a stale lock is released. Resume
-only after an explicit hardware-recovery confirmation:
-train one all-view fern checkpoint, validate the 30k PLY, then run LUDVIG-SAM
-seeds 0/1/2 on that same checkpoint.
+The 2026-07-31 driver/UVM interruption is retained only as historical failure
+evidence. After the host recovered, all released all-view NVOS checkpoints and
+the exact seeds `[0,1,2]` completed on physical GPU0. The immutable aggregate is
+`output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json`
+(SHA-256 `65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546`).
+Its eight-scene macro is 91.257685 IoU versus the paper's same-scene recompute
+of 91.3375, a -0.079815 point difference.
 
 ## Fail-closed dry run
 
@@ -112,6 +122,7 @@ For an official all-view run, pass a 30k all-view `point_cloud.ply`:
   --attempt-id all_view_seed0 \
   --stage-nvos-pinhole \
   --gs-source /path/to/all_view/point_cloud/iteration_30000/point_cloud.ply \
+  --gs-training-manifest /path/to/all_view/training_manifest.json \
   --upstream /root/baselines/LUDVIG \
   --python /root/miniconda3/envs/cybersim_agent/bin/python \
   --pythonpath /path/to/isolated/ludvig/dependencies
@@ -133,11 +144,14 @@ Repeat seeds 0, 1, and 2, then aggregate:
 ```
 
 Geometry protocols must be aggregated from separate roots. The aggregator
-rejects mixed geometry, mismatched target-training visibility, duplicate
-scene/seed pairs, or seeds of one scene that reference different checkpoint
-hashes. A released all-view fern result with exact seeds `[0,1,2]` is eligible
-for a per-scene paper-protocol check against 85.5, but remains ineligible for
-the full eight-task paper row.
+rejects mixed geometry, an unpinned LUDVIG commit or SAM checkpoint,
+mismatched target-view visibility/calibration/aggregation, invalid IoUs,
+duplicate scene/seed pairs, or seeds of one scene that reference different
+checkpoint hashes. It binds NVOS results to the fixed threshold parameter 75
+and recomputes SPIn scene IoU from target-only frame rows. A released all-view
+fern result with exact seeds `[0,1,2]`, embedded patch provenance, and one
+shared checkpoint is eligible for a per-scene paper-protocol check against
+85.5, but remains ineligible for the full eight-task paper row.
 
 ## Audited 8-scene x 3-seed hybrid cohort
 
@@ -151,9 +165,10 @@ an immutable 24-task plan:
   reproductions/ludvig/run_nvos_hybrid_cohort.py
 ```
 
-The 2026-07-31 plan reuses the completed fern seed 0 pilot and leaves 23
-pending runs. Once GPU 0 is explicitly available, execute the same plan
-serially:
+The original plan reused the completed fern seed 0 pilot and scheduled the
+remaining 23 runs. The complete exact 24-run cohort is now recorded by the
+aggregate above; the command remains useful only for immutable discovery and
+verification:
 
 ```bash
 /root/miniconda3/envs/cybersim_agent/bin/python \
@@ -192,7 +207,37 @@ and excludes that reference from the scene mean.
 The CPU-only preflight manifest is
 `output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json`
 (SHA-256 `ecf1df13466f32f4b16babbcb33b5206fcb613cea0579e5a94abe9f1e77db9dd`).
-It is ready but does not queue evaluation while GPU0 is unavailable. After
-the exact checkpoint exists, seeds 0/1/2 are estimated at roughly 6-15
-minutes total. This remains a single-scene diagnostic, not a local 9-scene or
-paper 10-scene row.
+That preflight was followed by the exact three-seed evaluation. The same
+contract was then completed for all locally available SPIn-NeRF scenes.
+
+## Completed SPIn-NeRF nine-scene cohort
+
+The local source lacks `fork`, so the strict local endpoint is the nine-scene
+cohort `fern`, `fortress`, `horns`, `leaves`, `lego`, `orchids`, `pinecone`,
+`room`, and `truck`, each with exact seeds `[0,1,2]`. The immutable aggregate
+is
+`output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json`
+(SHA-256 `ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17`).
+It reports 93.720045 IoU versus 94.577778 for the paper's matching nine scenes,
+a -0.857733 point difference. The paper's 93.8 ten-scene row is context only
+and is not a strict comparison because it includes `fork`.
+
+Pinecone required an explicit official-COLMAP undistortion and a fresh exact
+original-3DGS 30k all-view model. The staging and training entry points are:
+
+```bash
+/root/miniconda3/envs/cybersim_agent/bin/python \
+  reproductions/ludvig/stage_spin_pinecone_official_undistortion.py \
+  --attempt-id official_colmap_3p6_v2
+
+/root/miniconda3/envs/cybersim_agent/bin/python \
+  reproductions/ludvig/train_spin_pinecone_all_view_3dgs.py \
+  --attempt-id exact_f7a_allview_30k_v1
+```
+
+The official COLMAP 3.6 output is PINHOLE 4015x3011 for all 99 views; original
+3DGS trains at effective 1600x1199. The resulting 2,598,612-Gaussian PLY has
+SHA-256 `27d5670cd642542cdba671a7a5718ae463b1097c437d2f4e232999090aef451e`.
+The three Pinecone IoUs are 81.401456, 86.281102, and 86.136876 percent, for
+84.606478 versus the paper's 88.8. The reference frame is excluded and all 98
+targets are scored in every seed.

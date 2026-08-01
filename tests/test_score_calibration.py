@@ -1,3 +1,4 @@
+import pytest
 import torch
 import torch.nn.functional as F
 
@@ -5,6 +6,10 @@ from radio_gs.field.field_signature import FeatureSpaceSignature
 from radio_gs.querying.evidence_scorer import (
     EvidenceScoringConfig,
     _score_bank,
+    fuse_registered_observation_unary,
+    registered_observation_anchor_mask,
+    registered_observation_effective_confidence,
+    registered_seed_observation,
     registered_seed_unary,
 )
 from radio_gs.querying.query_engine import CanonicalQueryEngine
@@ -102,6 +107,353 @@ def test_registered_seed_unary_preserves_soft_signed_responsibility() -> None:
     torch.testing.assert_close(actual, torch.tensor([1.0, 0.4, -0.5]))
 
 
+def test_registered_probability_mixture_is_exact_at_observation_extremes() -> None:
+    evidence = PrimitiveUnaryEvidence(
+        torch.tensor([0.0, 1.0, -1.0, 0.2]),
+        "joint_mass",
+        confidence=torch.tensor([0.0, 1.0, 1.0, 0.4]),
+    )
+    field = torch.tensor([-0.7, -2.0, 2.0, -0.3])
+
+    fused = fuse_registered_observation_unary(
+        field, evidence, unary_temperature=0.1
+    )
+    probability = torch.sigmoid(fused / 0.1)
+
+    assert fused[0] == field[0]
+    assert probability[1] > 0.999
+    assert probability[2] < 0.001
+    expected_last = 0.6 * torch.sigmoid(field[3] / 0.1) + 0.4 * 0.75
+    torch.testing.assert_close(probability[3], expected_last)
+
+
+def test_registered_probability_mixture_rejects_invalid_confidence() -> None:
+    with pytest.raises(ValueError, match="confidence"):
+        PrimitiveUnaryEvidence(
+            torch.tensor([0.8]),
+            "bad",
+            confidence=torch.tensor([0.4]),
+        )
+    with pytest.raises(ValueError, match="registered_observation_fusion"):
+        EvidenceScoringConfig(registered_observation_fusion="target_tuned")
+    with pytest.raises(ValueError, match="requires registered_seed_unary_weight=0"):
+        EvidenceScoringConfig(
+            registered_observation_fusion="probability_mixture",
+            registered_seed_unary_weight=1.0,
+        )
+    with pytest.raises(ValueError, match="explicit observation confidence"):
+        fuse_registered_observation_unary(
+            torch.tensor([0.0]),
+            PrimitiveUnaryEvidence(torch.tensor([0.1]), "ambiguous"),
+            unary_temperature=0.1,
+        )
+
+
+def test_poisson_registered_confidence_discounts_tiny_raster_tail() -> None:
+    signed, confidence = registered_seed_observation(
+        torch.tensor([100.0, 1e-3]),
+        torch.zeros(2),
+        confidence_mode="poisson_mass",
+    )
+
+    assert confidence[0] > 0.999
+    assert 0 < confidence[1] < 0.002
+    torch.testing.assert_close(signed, confidence)
+
+
+def test_poisson_coverage_requires_both_mass_and_labeled_footprint() -> None:
+    signed, confidence = registered_seed_observation(
+        torch.tensor([1.0, 1.0]),
+        torch.zeros(2),
+        confidence_mode="poisson_mass_coverage",
+        visible_mass=torch.tensor([1.0, 100.0]),
+    )
+
+    expected_poisson = 1.0 - torch.exp(torch.tensor(-1.0))
+    torch.testing.assert_close(confidence[0], expected_poisson)
+    torch.testing.assert_close(confidence[1], expected_poisson / 100.0)
+    torch.testing.assert_close(signed, confidence)
+
+
+def test_poisson_coverage_reduces_to_poisson_for_full_mask() -> None:
+    positive = torch.tensor([2.0, 0.0])
+    negative = torch.tensor([0.0, 0.25])
+    signed, confidence = registered_seed_observation(
+        positive,
+        negative,
+        confidence_mode="poisson_mass_coverage",
+        visible_mass=positive + negative,
+    )
+    reference_signed, reference_confidence = registered_seed_observation(
+        positive,
+        negative,
+        confidence_mode="poisson_mass",
+    )
+
+    torch.testing.assert_close(signed, reference_signed)
+    torch.testing.assert_close(confidence, reference_confidence)
+
+
+def test_poisson_coverage_fails_closed_on_invalid_visible_mass() -> None:
+    with pytest.raises(ValueError, match="requires visible"):
+        registered_seed_observation(
+            torch.ones(1),
+            torch.zeros(1),
+            confidence_mode="poisson_mass_coverage",
+        )
+    with pytest.raises(ValueError, match="cannot exceed"):
+        registered_seed_observation(
+            torch.ones(1),
+            torch.zeros(1),
+            confidence_mode="poisson_mass_coverage",
+            visible_mass=torch.tensor([0.5]),
+        )
+
+
+def test_zero_poisson_coverage_still_validates_coverage_contract() -> None:
+    zero = torch.zeros(1)
+    with pytest.raises(ValueError, match="requires visible"):
+        registered_seed_observation(
+            zero,
+            zero,
+            confidence_mode="poisson_mass_coverage",
+        )
+    with pytest.raises(ValueError, match="finite non-negative"):
+        registered_seed_observation(
+            zero,
+            zero,
+            confidence_mode="poisson_mass_coverage",
+            visible_mass=torch.tensor([float("nan")]),
+        )
+    with pytest.raises(ValueError, match="coverage_power"):
+        registered_seed_observation(
+            zero,
+            zero,
+            confidence_mode="poisson_mass_coverage",
+            visible_mass=zero,
+            coverage_power=0.0,
+        )
+
+
+def test_registered_probability_mixture_keeps_float64_tail_precision() -> None:
+    field = torch.tensor([2.0, -2.0])
+    evidence = PrimitiveUnaryEvidence(
+        torch.tensor([1e-8, -1e-8]),
+        "tiny_tail",
+        confidence=torch.full((2,), 1e-8),
+    )
+
+    fused = fuse_registered_observation_unary(
+        field,
+        evidence,
+        unary_temperature=0.1,
+    )
+
+    torch.testing.assert_close(fused, field, atol=1e-6, rtol=1e-6)
+
+
+def test_registered_probability_mixture_retains_tiny_signed_direction() -> None:
+    fused = fuse_registered_observation_unary(
+        torch.zeros(2),
+        PrimitiveUnaryEvidence(
+            torch.tensor([1e-8, -1e-8]),
+            "tiny_signed_tail",
+            confidence=torch.full((2,), 1e-8),
+        ),
+        unary_temperature=0.1,
+    )
+
+    assert fused[0] > 0
+    assert fused[1] < 0
+
+
+def test_registered_probability_mixture_maps_full_conflict_to_neutral() -> None:
+    fused = fuse_registered_observation_unary(
+        torch.tensor([1.0]),
+        PrimitiveUnaryEvidence(
+            torch.tensor([0.0]),
+            "full_conflict",
+            confidence=torch.tensor([1.0]),
+        ),
+        unary_temperature=0.1,
+    )
+
+    torch.testing.assert_close(fused, torch.zeros_like(fused), atol=1e-12, rtol=0)
+
+
+def test_hard_seed_anchored_probability_makes_shared_seeds_strong_unary() -> None:
+    field = torch.tensor([-2.0, 2.0, -2.0, 2.0, 0.7])
+    observation = PrimitiveUnaryEvidence(
+        torch.tensor([0.20, -0.20, 0.19, -0.19, 0.0]),
+        "poisson_coverage_native_adjoint",
+        confidence=torch.tensor([0.20, 0.20, 0.19, 0.19, 0.0]),
+    )
+
+    fused = fuse_registered_observation_unary(
+        field,
+        observation,
+        unary_temperature=0.1,
+        anchor_threshold=0.20,
+    )
+    probability = torch.sigmoid(fused / 0.1)
+
+    assert probability[0] > 0.999
+    assert probability[1] < 0.001
+    assert probability[2] < 0.20
+    assert probability[3] > 0.80
+    assert fused[4] == field[4]
+    torch.testing.assert_close(
+        registered_observation_anchor_mask(
+            observation,
+            anchor_threshold=0.20,
+        ),
+        torch.tensor([True, True, False, False, False]),
+    )
+    torch.testing.assert_close(
+        registered_observation_effective_confidence(
+            observation,
+            anchor_threshold=0.20,
+        ),
+        torch.tensor([1.0, 1.0, 0.19, 0.19, 0.0]),
+    )
+
+
+def test_hard_seed_anchored_probability_is_sign_symmetric() -> None:
+    positive = fuse_registered_observation_unary(
+        torch.tensor([0.3]),
+        PrimitiveUnaryEvidence(
+            torch.tensor([0.4]),
+            "positive",
+            confidence=torch.tensor([0.5]),
+        ),
+        unary_temperature=0.1,
+        anchor_threshold=0.2,
+    )
+    negative = fuse_registered_observation_unary(
+        torch.tensor([-0.3]),
+        PrimitiveUnaryEvidence(
+            torch.tensor([-0.4]),
+            "negative",
+            confidence=torch.tensor([0.5]),
+        ),
+        unary_temperature=0.1,
+        anchor_threshold=0.2,
+    )
+
+    torch.testing.assert_close(positive, -negative)
+
+
+def test_hard_seed_anchor_keeps_broad_scribble_tail_weak() -> None:
+    signed, confidence = registered_seed_observation(
+        torch.tensor([0.25, 0.25]),
+        torch.zeros(2),
+        confidence_mode="poisson_mass_coverage",
+        visible_mass=torch.tensor([0.25, 25.0]),
+    )
+    observation = PrimitiveUnaryEvidence(
+        signed,
+        "native_adjoint_concentrated_and_broad",
+        confidence=confidence,
+    )
+
+    anchors = registered_observation_anchor_mask(
+        observation,
+        anchor_threshold=0.20,
+    )
+    fused = fuse_registered_observation_unary(
+        torch.full((2,), -2.0),
+        observation,
+        unary_temperature=0.1,
+        anchor_threshold=0.20,
+    )
+    probability = torch.sigmoid(fused / 0.1)
+
+    torch.testing.assert_close(anchors, torch.tensor([True, False]))
+    assert probability[0] > 0.999
+    assert 0 < probability[1] < 0.01
+
+
+def test_hard_seed_anchor_fails_closed_without_confidence_or_valid_threshold() -> None:
+    evidence = PrimitiveUnaryEvidence(torch.tensor([0.4]), "legacy")
+    with pytest.raises(ValueError, match="explicit observation confidence"):
+        registered_observation_anchor_mask(evidence, anchor_threshold=0.2)
+    observed = PrimitiveUnaryEvidence(
+        torch.tensor([0.4]),
+        "observed",
+        confidence=torch.tensor([0.4]),
+    )
+    with pytest.raises(ValueError, match="anchor_threshold"):
+        registered_observation_effective_confidence(
+            observed,
+            anchor_threshold=float("nan"),
+        )
+
+
+def test_hard_seed_anchored_engine_requires_exact_joint_signed_seeds() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    features = F.normalize(torch.tensor([[1.0, 0.0], [-1.0, 0.0]]), dim=-1)
+    signature = _signature(2)
+    observation = PrimitiveUnaryEvidence(
+        torch.tensor([0.4, -0.4]),
+        "joint_signed",
+        confidence=torch.tensor([0.4, 0.4]),
+    )
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features[1], signature),
+        positive_seeds=SoftSeedSet(
+            torch.tensor([0.4, 0.0]),
+            "joint_signed",
+            normalization="none",
+        ),
+        negative_seeds=SoftSeedSet(
+            torch.tensor([0.0, 0.4]),
+            "joint_signed",
+            normalization="none",
+        ),
+        primitive_unary_evidence=observation,
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="hard_seed_anchored_probability"
+        ),
+    )
+
+    result = engine.execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+    probability = torch.sigmoid(
+        result.unary / engine.solver_config.unary_temperature
+    )
+    assert probability[0] > 0.999
+    assert probability[1] < 0.001
+
+    mismatched_query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features[1], signature),
+        positive_seeds=query.positive_seeds,
+        negative_seeds=SoftSeedSet(
+            torch.tensor([0.0, 0.3]),
+            "joint_signed",
+            normalization="none",
+        ),
+        primitive_unary_evidence=observation,
+    )
+    with pytest.raises(ValueError, match="positive-minus-negative"):
+        engine.execute(
+            mismatched_query,
+            {"appearance": features},
+            feature_signatures={"appearance": signature},
+        )
+
+
 def test_registered_seed_unary_is_not_erased_by_field_reliability() -> None:
     xyz = torch.tensor(
         [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]
@@ -143,6 +495,40 @@ def test_registered_seed_unary_is_not_erased_by_field_reliability() -> None:
         result.evidence_components["registered_seed"],
         torch.tensor([1.0, 0.4, -1.0]),
     )
+
+
+def test_registered_probability_mixture_overrides_zero_reliability_field() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    features = F.normalize(torch.tensor([[1.0, 0.0], [-1.0, 0.0]]), dim=-1)
+    signature = _signature(2)
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features[1], signature),
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            torch.tensor([1.0, -1.0]),
+            "joint_mass",
+            confidence=torch.ones(2),
+        ),
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="probability_mixture"
+        ),
+        node_reliability=torch.zeros(2),
+    )
+
+    result = engine.execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+    probability = torch.sigmoid(result.unary / engine.solver_config.unary_temperature)
+
+    assert probability[0] > 0.999
+    assert probability[1] < 0.001
 
 
 def test_uncalibrated_score_bank_preserves_original_explicit_negative_rule():

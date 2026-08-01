@@ -83,6 +83,7 @@ class PrototypeSet:
 class SoftSeedSet:
     weights: torch.Tensor
     source: str
+    normalization: str = "independent_max"
 
     def __post_init__(self) -> None:
         values = torch.as_tensor(self.weights).float().reshape(-1)
@@ -90,10 +91,19 @@ class SoftSeedSet:
             raise ValueError("seed weights must be a finite non-empty vector")
         if bool((values < 0).any()):
             raise ValueError("seed weights cannot be negative")
-        maximum = values.max()
-        if maximum > 0:
-            values = values / maximum
+        normalization = str(self.normalization)
+        if normalization not in {"independent_max", "none"}:
+            raise ValueError(
+                "seed normalization must be independent_max or none"
+            )
+        if normalization == "independent_max":
+            maximum = values.max()
+            if maximum > 0:
+                values = values / maximum
+        elif bool((values > 1).any()):
+            raise ValueError("unnormalized seed weights must be in [0,1]")
         object.__setattr__(self, "weights", values)
+        object.__setattr__(self, "normalization", normalization)
 
 
 @dataclass(frozen=True)
@@ -102,6 +112,7 @@ class SoftSeedGroups:
 
     weights: torch.Tensor
     source: str
+    normalization: str = "independent_max"
 
     def __post_init__(self) -> None:
         values = torch.as_tensor(self.weights).float()
@@ -113,16 +124,34 @@ class SoftSeedGroups:
             raise ValueError("seed groups must be a finite non-empty [N,K] matrix")
         if bool((values < 0).any()) or not bool((values > 0).any(dim=0).all()):
             raise ValueError("every seed group must have non-negative support")
-        values = values / values.amax(dim=0, keepdim=True).clamp_min(1e-30)
+        normalization = str(self.normalization)
+        if normalization not in {"independent_max", "none"}:
+            raise ValueError(
+                "seed-group normalization must be independent_max or none"
+            )
+        if normalization == "independent_max":
+            values = values / values.amax(dim=0, keepdim=True).clamp_min(1e-30)
+        elif bool((values > 1).any()):
+            raise ValueError("unnormalized seed-group weights must be in [0,1]")
         object.__setattr__(self, "weights", values)
+        object.__setattr__(self, "normalization", normalization)
 
 
 @dataclass(frozen=True)
 class PrimitiveUnaryEvidence:
-    """Bounded signed evidence already registered to primitive rows."""
+    """Bounded signed evidence already registered to primitive rows.
+
+    ``values`` stores signed purity multiplied by observation confidence.
+    ``confidence`` keeps that joint observation mass explicit so registered
+    evidence can be fused in probability space without treating an
+    unobserved row (zero) as an ambiguous 50/50 observation.  It may be
+    omitted only for legacy additive use; probability fusion fails closed
+    without it.
+    """
 
     values: torch.Tensor
     source: str
+    confidence: torch.Tensor | None = None
 
     def __post_init__(self) -> None:
         values = torch.as_tensor(self.values).float().reshape(-1)
@@ -131,6 +160,23 @@ class PrimitiveUnaryEvidence:
         if bool((values < -1).any()) or bool((values > 1).any()):
             raise ValueError("primitive unary evidence must be in [-1,1]")
         object.__setattr__(self, "values", values)
+        if self.confidence is None:
+            return
+        confidence = torch.as_tensor(self.confidence).float().reshape(-1)
+        if (
+            confidence.shape != values.shape
+            or not bool(torch.isfinite(confidence).all())
+            or bool((confidence < 0).any())
+            or bool((confidence > 1).any())
+        ):
+            raise ValueError(
+                "primitive unary confidence must align with values in [0,1]"
+            )
+        if bool((values.abs() > confidence + 1e-6).any()):
+            raise ValueError(
+                "signed primitive unary magnitude cannot exceed its confidence"
+            )
+        object.__setattr__(self, "confidence", confidence)
 
 
 @dataclass(frozen=True)

@@ -13,7 +13,10 @@ import argparse
 import contextlib
 import hashlib
 import json
+import os
 from pathlib import Path
+import re
+import tempfile
 
 import numpy as np
 import torch
@@ -41,6 +44,16 @@ from radio_gs.training.feature_training_utils import (
     sample_multiview_radio_targets,
 )
 from radio_gs.training.primitive_consensus import robust_multiview_consensus
+from radio_gs.training.tensor_cache_io import validate_mpr_cache_payload
+from radio_gs.utils.immutable_artifacts import (
+    load_json_object,
+    load_torch_mapping,
+    load_torch_payload,
+    sha256_file,
+)
+from radio_gs.scripts.extract_radio_features import (
+    _validate_final_output_bundle,
+)
 
 
 def _sha256_tensor_rows(values: torch.Tensor) -> str:
@@ -49,11 +62,7 @@ def _sha256_tensor_rows(values: torch.Tensor) -> str:
 
 
 def _sha256_file(path: str | Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as handle:
-        for block in iter(lambda: handle.read(8 * 1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+    return sha256_file(path)
 
 
 def raster_fusion_reliability(
@@ -111,9 +120,157 @@ _EXTRACTED_CAPABILITY_SPECS: dict[str, dict[str, object]] = {
 }
 
 
+def _validated_feature_bundle(
+    feature_dir: str | Path,
+    *,
+    expected_output_bundle_sha256: str = "",
+) -> tuple[dict[str, object], dict[str, object], dict[str, dict[str, object]]]:
+    """Reopen a complete feature bundle and index every declared tensor."""
+
+    root = Path(feature_dir).expanduser().resolve()
+    manifest, manifest_sha256, _source = load_json_object(
+        root / "frame_manifest.json",
+        label="RADIO feature frame manifest",
+    )
+    validation = _validate_final_output_bundle(
+        root,
+        manifest,
+        expected_output_bundle_sha256=(
+            str(expected_output_bundle_sha256) or None
+        ),
+        expected_manifest_sha256=manifest_sha256,
+    )
+    bundle = manifest.get("output_bundle")
+    if not isinstance(bundle, dict) or not isinstance(bundle.get("frames"), list):
+        raise ValueError("RADIO feature output bundle has no frame records")
+    records: dict[str, dict[str, object]] = {}
+    for frame in bundle["frames"]:
+        if not isinstance(frame, dict) or not isinstance(frame.get("tensors"), list):
+            raise ValueError("RADIO feature output bundle frame is malformed")
+        for record in frame["tensors"]:
+            if not isinstance(record, dict):
+                raise ValueError("RADIO feature tensor record is malformed")
+            relative_path = str(record.get("relative_path", ""))
+            if (
+                not relative_path
+                or Path(relative_path).is_absolute()
+                or ".." in Path(relative_path).parts
+                or relative_path in records
+            ):
+                raise ValueError("RADIO feature tensor path is unsafe or repeated")
+            records[relative_path] = record
+    return manifest, {**validation, "manifest_sha256": manifest_sha256}, records
+
+
+def _load_bundle_feature_maps(
+    *,
+    feature_dir: str | Path,
+    selected_frame_indices: list[int],
+    subdir: str,
+    expected_dim: int,
+    feature_size: tuple[int, int],
+    tensor_records: dict[str, dict[str, object]],
+    normalize: bool,
+    output_dtype: torch.dtype,
+) -> torch.Tensor:
+    """Consume selected feature maps through their bundle-bound descriptors."""
+
+    root = Path(feature_dir).expanduser().resolve()
+    maps: torch.Tensor | None = None
+    for output_index, frame_index in enumerate(selected_frame_indices):
+        relative_path = f"{subdir}/rgb_{int(frame_index)}.pt"
+        record = tensor_records.get(relative_path)
+        if record is None:
+            raise ValueError(f"feature output bundle lacks {relative_path}")
+        value, _digest, _source = load_torch_payload(
+            root / relative_path,
+            expected_sha256=str(record.get("sha256", "")),
+            map_location="cpu",
+            label=f"RADIO feature tensor {relative_path}",
+        )
+        if not torch.is_tensor(value):
+            raise ValueError(f"{relative_path} is not a tensor")
+        item = value.detach().cpu()
+        if item.ndim == 4 and item.shape[0] == 1:
+            item = item[0]
+        if item.ndim != 3 or int(item.shape[0]) != int(expected_dim):
+            raise ValueError(
+                f"{relative_path} has unexpected shape {tuple(item.shape)}"
+            )
+        if item.dtype not in {torch.float16, torch.float32}:
+            raise ValueError(f"{relative_path} has unsupported dtype {item.dtype}")
+        if not bool(torch.isfinite(item).all()):
+            raise ValueError(f"{relative_path} contains non-finite values")
+        target_height, target_width = (int(value) for value in feature_size)
+        if target_height > item.shape[1] or target_width > item.shape[2]:
+            item = F.interpolate(
+                item.float().unsqueeze(0),
+                size=(target_height, target_width),
+                mode="bilinear",
+                align_corners=False,
+            )[0]
+        if normalize:
+            item = F.normalize(item.float(), dim=0, eps=1e-8)
+        item = item.to(dtype=output_dtype)
+        if maps is None:
+            maps = torch.empty(
+                (len(selected_frame_indices), *item.shape),
+                dtype=output_dtype,
+            )
+        elif item.shape != maps.shape[1:]:
+            raise ValueError(
+                "selected feature maps do not share one spatial shape"
+            )
+        maps[output_index].copy_(item)
+    if maps is None:
+        raise ValueError("feature map selection is empty")
+    return maps
+
+
+def validate_raster_reliability_policy(args: argparse.Namespace) -> None:
+    """Resolve the observation contract before checking reliability options."""
+
+    memory_fraction = float(
+        getattr(args, "max_estimated_cpu_memory_fraction", 0.85)
+    )
+    if not 0.0 < memory_fraction <= 1.0:
+        raise ValueError(
+            "--max-estimated-cpu-memory-fraction must lie in (0,1]"
+        )
+    if str(getattr(args, "observation_contract", "legacy")) in {
+        CANONICAL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+    }:
+        apply_canonical_observation_contract(args)
+    if (
+        args.raster_reliability_mode != "legacy_valid"
+        and args.aggregation_mode == "center"
+    ):
+        raise ValueError(
+            "--raster-reliability-mode applies only to raster aggregation"
+        )
+    if (
+        args.raster_reliability_mode == "mean_resultant"
+        and not args.normalize_each_view
+    ):
+        raise ValueError(
+            "--raster-reliability-mode mean_resultant requires "
+            "--normalize-each-view"
+        )
+
+
 def _resolve_extracted_capability_source(
     feature_dir: str | Path,
     feature_space: str,
+    *,
+    expected_radio_checkpoint_sha256: str = "",
+    expected_scene: str = "",
+    expected_image_dir: str | Path = "",
+    expected_frame_indices: list[int] | None = None,
+    expected_output_bundle_sha256: str = "",
+    include_tensor_records: bool = False,
 ) -> dict[str, object]:
     """Verify an official C-RADIO adaptor map advertised by a frame manifest.
 
@@ -130,16 +287,69 @@ def _resolve_extracted_capability_source(
     expected = dict(_EXTRACTED_CAPABILITY_SPECS[space])
     root = Path(feature_dir)
     manifest_path = root / "frame_manifest.json"
-    if not manifest_path.is_file():
-        raise FileNotFoundError(
-            f"official extracted capability source needs {manifest_path}"
+    manifest, bundle_validation, tensor_records = _validated_feature_bundle(
+        root,
+        expected_output_bundle_sha256=expected_output_bundle_sha256,
+    )
+    scene = str(manifest.get("scene", ""))
+    image_dir = str(manifest.get("image_dir", ""))
+    if str(expected_scene) and scene != str(expected_scene):
+        raise ValueError(
+            "official capability manifest belongs to a different scene"
         )
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"invalid feature frame manifest: {manifest_path}") from exc
-    if not isinstance(manifest, dict):
-        raise ValueError("feature frame manifest must contain an object")
+    if str(expected_image_dir):
+        if not image_dir or Path(image_dir).resolve() != Path(
+            expected_image_dir
+        ).resolve():
+            raise ValueError(
+                "official capability manifest belongs to a different image "
+                "directory"
+            )
+    frame_records = manifest.get("frames")
+    if not isinstance(frame_records, list) or not frame_records:
+        raise ValueError("feature manifest does not declare extracted frames")
+    frame_indices: list[int] = []
+    saved_stems: list[str] = []
+    for frame in frame_records:
+        if not isinstance(frame, dict):
+            raise ValueError("feature manifest contains an invalid frame record")
+        frame_index = int(frame.get("frame_idx", -1))
+        saved_stem = str(frame.get("saved_stem", ""))
+        if frame_index < 0 or saved_stem != f"rgb_{frame_index}":
+            raise ValueError("feature manifest frame identity is invalid")
+        frame_indices.append(frame_index)
+        saved_stems.append(saved_stem)
+    if (
+        len(set(frame_indices)) != len(frame_indices)
+        or len(set(saved_stems)) != len(saved_stems)
+    ):
+        raise ValueError("feature manifest contains duplicate frames")
+    expected_frames = {
+        int(value) for value in (expected_frame_indices or [])
+    }
+    if expected_frames and not expected_frames.issubset(frame_indices):
+        raise ValueError(
+            "official capability manifest lacks selected raw RADIO frames"
+        )
+    radio = manifest.get("radio")
+    if not isinstance(radio, dict):
+        raise ValueError("feature manifest does not declare its RADIO runtime")
+    checkpoint_sha256 = str(radio.get("checkpoint_sha256", ""))
+    checkpoint_provenance = str(radio.get("checkpoint_provenance", ""))
+    checkpoint_load_contract = str(
+        radio.get("checkpoint_load_contract", "")
+    )
+    expected_checkpoint = str(expected_radio_checkpoint_sha256 or "")
+    if expected_checkpoint and (
+        checkpoint_provenance != "explicit_file_sha256"
+        or checkpoint_sha256 != expected_checkpoint
+        or checkpoint_load_contract
+        != "external_sha256_same_fd_restricted_pickle_hub_injection_v1"
+    ):
+        raise ValueError(
+            f"official {space} maps are not bound to the requested RADIO "
+            "checkpoint SHA256"
+        )
     features = manifest.get("features")
     adapters = features.get("adaptors") if isinstance(features, dict) else None
     if not isinstance(adapters, list):
@@ -174,14 +384,47 @@ def _resolve_extracted_capability_source(
         raise FileNotFoundError(
             f"feature manifest declares {space}, but its map directory is missing: {subdir}"
         )
-    return {
+    expected_files = {
+        f"{stem}.pt"
+        for stem in saved_stems
+    }
+    actual_files = {
+        path.name
+        for path in subdir.iterdir()
+        if path.is_file() and path.suffix == ".pt"
+    }
+    if actual_files != expected_files:
+        raise ValueError(
+            f"official {space} map files differ from the frame manifest"
+        )
+    frame_indices_sha256 = hashlib.sha256(
+        json.dumps(
+            frame_indices,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
+    result: dict[str, object] = {
         **expected,
         "native_grid": [int(grid[0]), int(grid[1])],
         "frame_manifest": str(manifest_path.resolve()),
-        "frame_manifest_sha256": _sha256_file(manifest_path),
-        "radio_version": str(dict(manifest.get("radio", {})).get("version", "")),
+        "frame_manifest_sha256": str(bundle_validation["manifest_sha256"]),
+        "output_bundle_sha256": str(
+            bundle_validation["output_bundle_sha256"]
+        ),
+        "radio_version": str(radio.get("version", "")),
+        "radio_checkpoint": str(radio.get("checkpoint", "")),
+        "radio_checkpoint_sha256": checkpoint_sha256,
+        "radio_checkpoint_provenance": checkpoint_provenance,
+        "radio_checkpoint_load_contract": checkpoint_load_contract,
+        "scene": scene,
+        "image_dir": str(Path(image_dir).resolve()) if image_dir else "",
+        "frame_indices": frame_indices,
+        "frame_indices_sha256": frame_indices_sha256,
         "execution": "official_c_radio_runtime_adaptor_output",
     }
+    if include_tensor_records:
+        result["tensor_records"] = tensor_records
+    return result
 
 
 def _load_extracted_capability_maps(
@@ -193,6 +436,10 @@ def _load_extracted_capability_maps(
     feature_size: tuple[int, int],
     dataset_type: str,
     selected_frame_indices: list[int],
+    expected_radio_checkpoint_sha256: str = "",
+    expected_scene: str = "",
+    expected_image_dir: str | Path = "",
+    expected_output_bundle_sha256: str = "",
 ) -> tuple[torch.Tensor, dict[str, object]]:
     """Load selected native official-adaptor maps then resample for registration.
 
@@ -202,47 +449,33 @@ def _load_extracted_capability_maps(
     ``MPR(resample(A_official(f_v)))``.
     """
 
-    source = _resolve_extracted_capability_source(feature_dir, feature_space)
-    dataset = SimpleRadioDataset(
-        feature_dir=str(feature_dir),
-        pose_file=pose_file,
-        pose_dir=pose_dir,
-        feature_size=feature_size,
-        feature_subdir=str(source["subdir"]),
-        split="train",
-        dataset_type=dataset_type,
-        frame_ids=list(selected_frame_indices),
+    source = _resolve_extracted_capability_source(
+        feature_dir,
+        feature_space,
+        expected_radio_checkpoint_sha256=expected_radio_checkpoint_sha256,
+        expected_scene=expected_scene,
+        expected_image_dir=expected_image_dir,
+        expected_frame_indices=selected_frame_indices,
+        expected_output_bundle_sha256=expected_output_bundle_sha256,
+        include_tensor_records=True,
     )
-    if [int(value) for value in dataset.frame_indices] != [
-        int(value) for value in selected_frame_indices
-    ]:
-        raise ValueError("official capability frame order differs from raw RADIO MPR")
-    maps = None
-    for index in range(len(dataset)):
-        item = dataset[index]["radio_features"].float().cpu()
-        if item.ndim != 3 or item.shape[0] != int(source["output_dim"]):
-            raise ValueError(
-                f"official {feature_space} map {index} has unexpected shape "
-                f"{tuple(item.shape)}"
-            )
-        if maps is None:
-            maps = torch.empty(
-                (len(dataset), *item.shape),
-                dtype=torch.float32,
-            )
-        elif item.shape != maps.shape[1:]:
-            raise ValueError(
-                f"official {feature_space} maps do not share one spatial shape"
-            )
-        maps[index].copy_(item)
-    if maps is None:
-        raise ValueError(f"official {feature_space} map selection is empty")
+    maps = _load_bundle_feature_maps(
+        feature_dir=feature_dir,
+        selected_frame_indices=selected_frame_indices,
+        subdir=str(source["subdir"]),
+        expected_dim=int(source["output_dim"]),
+        feature_size=feature_size,
+        tensor_records=dict(source["tensor_records"]),
+        normalize=True,
+        output_dtype=torch.float16,
+    )
     if maps.ndim != 4 or maps.shape[1] != int(source["output_dim"]):
         raise ValueError(
             f"official {feature_space} maps have unexpected shape {tuple(maps.shape)}"
         )
-    norms = torch.linalg.vector_norm(maps, ord=2, dim=1, keepdim=True)
-    maps.div_(norms.clamp_min_(1e-8))
+    source["in_memory_dtype"] = "float16"
+    source["normalization"] = "per_pixel_float32_then_float16_storage"
+    source.pop("tensor_records", None)
     return maps, source
 
 
@@ -515,6 +748,102 @@ def accumulate_contribution_mean_channel_chunked(
     return counts_cpu
 
 
+def finalize_registered_mean_chunked(
+    registered_sum: torch.Tensor,
+    registered_counts: torch.Tensor,
+    *,
+    row_chunk_size: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Normalize a large CPU MPR without full-size advanced-index temporaries."""
+
+    sums = torch.as_tensor(registered_sum)
+    counts = torch.as_tensor(registered_counts)
+    if (
+        sums.device.type != "cpu"
+        or sums.dtype != torch.float32
+        or sums.ndim != 2
+        or counts.device.type != "cpu"
+        or counts.dtype != torch.float32
+        or counts.shape != (sums.shape[0],)
+    ):
+        raise ValueError(
+            "registered sums/counts must be aligned float32 CPU tensors"
+        )
+    if int(row_chunk_size) <= 0:
+        raise ValueError("row_chunk_size must be positive")
+    valid = counts > 0
+    features = torch.zeros_like(sums, dtype=torch.float16)
+    for start in range(0, sums.shape[0], int(row_chunk_size)):
+        stop = min(start + int(row_chunk_size), sums.shape[0])
+        chunk_valid = valid[start:stop]
+        normalized = sums[start:stop] / counts[
+            start:stop, None
+        ].clamp_min(1e-8)
+        normalized[~chunk_valid] = 0.0
+        features[start:stop].copy_(normalized.half())
+        del normalized
+    return features, valid
+
+
+def estimate_capability_mpr_cpu_bytes(
+    *,
+    num_views: int,
+    channels: int,
+    height: int,
+    width: int,
+    num_gaussians: int,
+    aggregation_mode: str,
+    raster_view_fusion: str,
+    raster_topk: int,
+    raster_channel_chunk_size: int,
+    responsibility_cache_bytes: int = 0,
+) -> dict[str, int]:
+    """Conservative overlapping CPU allocation estimate for a capability MPR."""
+
+    values = (num_views, channels, height, width, num_gaussians)
+    if any(int(value) <= 0 for value in values):
+        raise ValueError("MPR memory dimensions must be positive")
+    teacher_maps = (
+        int(num_views)
+        * int(channels)
+        * int(height)
+        * int(width)
+        * 2
+    )
+    components = {
+        "teacher_maps_float16": teacher_maps,
+        "responsibility_cache_file_allowance": max(
+            0, int(responsibility_cache_bytes)
+        ),
+    }
+    if str(aggregation_mode) != "center":
+        rows, dims = int(num_gaussians), int(channels)
+        components["registered_sum_float32"] = rows * dims * 4
+        components["final_features_float16"] = rows * dims * 2
+        if str(raster_view_fusion) == "contribution_mean":
+            components["channel_staging_float32"] = (
+                rows
+                * min(dims, int(raster_channel_chunk_size))
+                * 4
+            )
+        elif str(raster_view_fusion) == "topk_mean":
+            components["topk_features_float32"] = (
+                rows * dims * max(1, int(raster_topk)) * 4
+            )
+    components["estimated_peak_bytes"] = sum(components.values())
+    return components
+
+
+def _available_cpu_memory_bytes() -> int:
+    try:
+        for line in Path("/proc/meminfo").read_text().splitlines():
+            if line.startswith("MemAvailable:"):
+                return int(line.split()[1]) * 1024
+    except (OSError, IndexError, ValueError):
+        pass
+    return 0
+
+
 def _gaussian_state_sha256(model: torch.nn.Module) -> str:
     """Hash every primitive attribute that affects raster responsibility."""
 
@@ -576,11 +905,16 @@ def _load_responsibility_cache(
     *,
     expected_contract: dict,
     num_gaussians: int,
+    expected_sha256: str = "",
 ) -> tuple[list[dict[str, torch.Tensor]], str]:
     """Load a shared registration sidecar and fail closed on any mismatch."""
 
-    cache_path = Path(path)
-    payload = torch.load(cache_path, map_location="cpu")
+    payload, observed_sha256, cache_path = load_torch_mapping(
+        path,
+        expected_sha256=str(expected_sha256) or None,
+        map_location="cpu",
+        label="registration responsibility cache",
+    )
     if not isinstance(payload, dict) or int(payload.get("schema_version", -1)) != 1:
         raise ValueError("responsibility cache must use schema version 1")
     metadata = dict(payload.get("metadata", {}))
@@ -607,9 +941,25 @@ def _load_responsibility_cache(
     for view_index, item in enumerate(assignments):
         if not isinstance(item, dict):
             raise ValueError(f"responsibility view {view_index} is malformed")
-        gaussian_ids = torch.as_tensor(item.get("gaussian_ids")).long().cpu()
-        pixel_ids = torch.as_tensor(item.get("pixel_ids")).long().cpu()
-        weights = torch.as_tensor(item.get("weights")).float().cpu()
+        raw_gaussian_ids = item.get("gaussian_ids")
+        raw_pixel_ids = item.get("pixel_ids")
+        raw_weights = item.get("weights")
+        if (
+            not torch.is_tensor(raw_gaussian_ids)
+            or raw_gaussian_ids.dtype
+            not in {torch.int8, torch.int16, torch.int32, torch.int64, torch.uint8}
+            or not torch.is_tensor(raw_pixel_ids)
+            or raw_pixel_ids.dtype
+            not in {torch.int8, torch.int16, torch.int32, torch.int64, torch.uint8}
+            or not torch.is_tensor(raw_weights)
+            or raw_weights.dtype not in {torch.float16, torch.float32, torch.float64}
+        ):
+            raise ValueError(
+                f"responsibility view {view_index} has invalid tensor dtypes"
+            )
+        gaussian_ids = raw_gaussian_ids.long().cpu()
+        pixel_ids = raw_pixel_ids.long().cpu()
+        weights = raw_weights.float().cpu()
         if (
             gaussian_ids.ndim != 1
             or pixel_ids.shape != gaussian_ids.shape
@@ -628,7 +978,15 @@ def _load_responsibility_cache(
             int(pixel_ids.min()) < 0 or int(pixel_ids.max()) >= num_pixels
         ):
             raise ValueError(f"responsibility view {view_index} has invalid pixel IDs")
-        if not bool(torch.isfinite(weights).all()) or bool((weights <= 0).any()):
+        if pixel_ids.numel() > num_pixels or pixel_ids.unique().numel() != pixel_ids.numel():
+            raise ValueError(
+                f"responsibility view {view_index} repeats top-1 pixel IDs"
+            )
+        if (
+            not bool(torch.isfinite(weights).all())
+            or bool((weights <= 0).any())
+            or bool((weights > 1.001).any())
+        ):
             raise ValueError(f"responsibility view {view_index} has invalid weights")
         checked.append(
             {
@@ -637,7 +995,7 @@ def _load_responsibility_cache(
                 "weights": weights,
             }
         )
-    return checked, _sha256_file(cache_path)
+    return checked, observed_sha256
 
 
 def build_cache(args: argparse.Namespace) -> dict:
@@ -649,6 +1007,42 @@ def build_cache(args: argparse.Namespace) -> dict:
         CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
     }:
         observation_contract = apply_canonical_observation_contract(args)
+    expected_feature_bundle_sha256 = str(
+        getattr(args, "expected_feature_output_bundle_sha256", "")
+    )
+    expected_geometry_sha256 = str(
+        getattr(args, "expected_geometry_checkpoint_sha256", "")
+    )
+    if (
+        observation_contract is not None
+        and re.fullmatch(r"[0-9a-f]{64}", expected_feature_bundle_sha256)
+        is None
+    ):
+        raise ValueError(
+            "formal MPR requires --expected-feature-output-bundle-sha256"
+        )
+    if observation_contract is not None and re.fullmatch(
+        r"[0-9a-f]{64}", expected_geometry_sha256
+    ) is None:
+        raise ValueError(
+            "formal MPR requires --expected-geometry-checkpoint-sha256"
+        )
+    if expected_geometry_sha256 and (
+        _sha256_file(args.checkpoint) != expected_geometry_sha256
+    ):
+        raise ValueError("geometry checkpoint differs from caller authority")
+    if (
+        observation_contract is not None
+        and str(getattr(args, "responsibility_cache", "")).strip()
+        and re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(getattr(args, "expected_responsibility_cache_sha256", "")),
+        )
+        is None
+    ):
+        raise ValueError(
+            "formal MPR responsibility reuse requires its expected SHA-256"
+        )
     device = torch.device(args.device)
     config = load_config(args.config)
     model, _codec, renderer, _sharpener, _refiner, _cfg, _is_hybrid = (
@@ -658,11 +1052,24 @@ def build_cache(args: argparse.Namespace) -> dict:
             device,
             strict_checkpoint_contract=True,
             load_ply_rgb_features=False,
+            expected_checkpoint_sha256=(
+                expected_geometry_sha256 or None
+            ),
         )
     )
     feature_height = int(getattr(config, "feature_height", renderer.image_height))
     feature_width = int(getattr(config, "feature_width", renderer.image_width))
     feature_dir = Path(str(getattr(config, "feature_dir", "")))
+    (
+        _feature_manifest,
+        feature_bundle_validation,
+        feature_tensor_records,
+    ) = _validated_feature_bundle(
+        feature_dir,
+        expected_output_bundle_sha256=str(
+            expected_feature_bundle_sha256
+        ),
+    )
     raw_pose_file = str(getattr(config, "pose_file", "") or "").strip()
     configured_pose_file = Path(raw_pose_file) if raw_pose_file else None
     pose_file = (
@@ -716,7 +1123,11 @@ def build_cache(args: argparse.Namespace) -> dict:
     else:
         selected = _select_candidate_indices(candidates, int(args.max_views))
     poses = torch.stack(
-        [dataset[index]["pose_w2c"].float().cpu() for index in selected], dim=0
+        [
+            torch.from_numpy(dataset.poses_w2c[index]).float().cpu()
+            for index in selected
+        ],
+        dim=0,
     )
     feature_space = str(args.feature_space).lower()
     capability_map_source = str(args.capability_map_source).lower()
@@ -731,14 +1142,96 @@ def build_cache(args: argparse.Namespace) -> dict:
     adaptor_name = ""
     adaptor_checkpoint_path = ""
     adaptor_checkpoint_sha256 = ""
+    adaptor_checkpoint_provenance = ""
     capability_source_metadata: dict[str, object] = {
         "capability_map_source": "not_applicable",
         "capability_native_map_manifest": "",
         "capability_native_map_manifest_sha256": "",
         "capability_native_map_grid": [],
+        "capability_native_map_scene": "",
+        "capability_native_map_image_dir": "",
+        "capability_native_map_frame_indices_sha256": "",
+        "capability_native_map_output_bundle_sha256": "",
+        "capability_native_map_radio_checkpoint_load_contract": "",
         "capability_adaptor_execution": "not_applicable",
     }
+    capability_cpu_memory_preflight: dict[str, int | float] = {}
     if feature_space in {"dino_v3", "sam3"} and capability_map_source == "official_extracted":
+        expected_radio_checkpoint_sha256 = _sha256_file(
+            args.radio_checkpoint
+        )
+        responsibility_cache_bytes = 0
+        if str(args.responsibility_cache).strip():
+            responsibility_path = Path(
+                args.responsibility_cache
+            ).expanduser()
+            if responsibility_path.is_file():
+                responsibility_cache_bytes = (
+                    2 * responsibility_path.stat().st_size
+                )
+        capability_cpu_memory_preflight = (
+            estimate_capability_mpr_cpu_bytes(
+                num_views=len(selected),
+                channels=int(
+                    _EXTRACTED_CAPABILITY_SPECS[feature_space][
+                        "output_dim"
+                    ]
+                ),
+                height=feature_height,
+                width=feature_width,
+                num_gaussians=int(model.get_xyz().shape[0]),
+                aggregation_mode=str(args.aggregation_mode),
+                raster_view_fusion=str(args.raster_view_fusion),
+                raster_topk=int(args.raster_topk),
+                raster_channel_chunk_size=int(
+                    args.raster_channel_chunk_size
+                ),
+                responsibility_cache_bytes=(
+                    responsibility_cache_bytes
+                ),
+            )
+        )
+        available_memory = _available_cpu_memory_bytes()
+        capability_cpu_memory_preflight.update(
+            {
+                "available_memory_bytes": available_memory,
+                "maximum_fraction": float(
+                    getattr(
+                        args,
+                        "max_estimated_cpu_memory_fraction",
+                        0.85,
+                    )
+                ),
+            }
+        )
+        print(
+            json.dumps(
+                {
+                    "capability_cpu_memory_preflight": (
+                        capability_cpu_memory_preflight
+                    )
+                }
+            ),
+            flush=True,
+        )
+        if (
+            available_memory > 0
+            and capability_cpu_memory_preflight[
+                "estimated_peak_bytes"
+            ]
+            > available_memory
+            * float(
+                getattr(
+                    args,
+                    "max_estimated_cpu_memory_fraction",
+                    0.85,
+                )
+            )
+        ):
+            raise MemoryError(
+                "estimated official capability MPR CPU peak exceeds "
+                "the configured fraction of available memory"
+            )
         teacher_maps, extracted_source = _load_extracted_capability_maps(
             feature_dir=feature_dir,
             feature_space=feature_space,
@@ -747,10 +1240,27 @@ def build_cache(args: argparse.Namespace) -> dict:
             feature_size=(feature_height, feature_width),
             dataset_type=str(getattr(config, "dataset_type", "lerf")),
             selected_frame_indices=selected_frame_indices,
+            expected_radio_checkpoint_sha256=(
+                expected_radio_checkpoint_sha256
+            ),
+            expected_scene=str(
+                getattr(args, "expected_feature_scene", "")
+            ),
+            expected_image_dir=str(
+                getattr(args, "expected_feature_image_dir", "")
+            ),
+            expected_output_bundle_sha256=str(
+                feature_bundle_validation["output_bundle_sha256"]
+            ),
         )
         adaptor_name = str(extracted_source["adaptor_name"])
-        adaptor_checkpoint_path = str(Path(args.radio_checkpoint).expanduser().resolve())
-        adaptor_checkpoint_sha256 = _sha256_file(adaptor_checkpoint_path)
+        adaptor_checkpoint_path = str(extracted_source["radio_checkpoint"])
+        adaptor_checkpoint_sha256 = str(
+            extracted_source["radio_checkpoint_sha256"]
+        )
+        adaptor_checkpoint_provenance = str(
+            extracted_source["radio_checkpoint_provenance"]
+        )
         capability_source_metadata = {
             "capability_map_source": "official_extracted",
             "capability_native_map_manifest": str(
@@ -760,12 +1270,33 @@ def build_cache(args: argparse.Namespace) -> dict:
                 extracted_source["frame_manifest_sha256"]
             ),
             "capability_native_map_grid": list(extracted_source["native_grid"]),
+            "capability_native_map_scene": str(
+                extracted_source["scene"]
+            ),
+            "capability_native_map_image_dir": str(
+                extracted_source["image_dir"]
+            ),
+            "capability_native_map_frame_indices_sha256": str(
+                extracted_source["frame_indices_sha256"]
+            ),
+            "capability_native_map_output_bundle_sha256": str(
+                extracted_source["output_bundle_sha256"]
+            ),
+            "capability_native_map_radio_checkpoint_load_contract": str(
+                extracted_source["radio_checkpoint_load_contract"]
+            ),
             "capability_adaptor_execution": str(extracted_source["execution"]),
         }
     else:
-        teacher_maps = torch.stack(
-            [dataset[index]["radio_features"].float().cpu() for index in selected],
-            dim=0,
+        teacher_maps = _load_bundle_feature_maps(
+            feature_dir=feature_dir,
+            selected_frame_indices=selected_frame_indices,
+            subdir="backbone",
+            expected_dim=1280,
+            feature_size=(feature_height, feature_width),
+            tensor_records=feature_tensor_records,
+            normalize=False,
+            output_dtype=torch.float32,
         )
     if feature_space == "siglip_summary":
         summary_head_path = str(Path(args.summary_head_weights).expanduser().resolve())
@@ -802,10 +1333,12 @@ def build_cache(args: argparse.Namespace) -> dict:
             Path(args.radio_checkpoint).expanduser().resolve()
         )
         adaptor_checkpoint_sha256 = _sha256_file(adaptor_checkpoint_path)
+        adaptor_checkpoint_provenance = "runtime_cli_checkpoint_sha256"
         adaptor = load_radio_adaptor_from_checkpoint(
             adaptor_checkpoint_path,
             adaptor_name,
             kind="feature_projection",
+            expected_sha256=adaptor_checkpoint_sha256,
         ).to(device).eval()
         adaptor.requires_grad_(False)
         teacher_maps = project_official_capability_maps(
@@ -822,6 +1355,11 @@ def build_cache(args: argparse.Namespace) -> dict:
             "capability_native_map_manifest": "",
             "capability_native_map_manifest_sha256": "",
             "capability_native_map_grid": [],
+            "capability_native_map_scene": "",
+            "capability_native_map_image_dir": "",
+            "capability_native_map_frame_indices_sha256": "",
+            "capability_native_map_output_bundle_sha256": "",
+            "capability_native_map_radio_checkpoint_load_contract": "",
             "capability_adaptor_execution": "frozen_official_feature_projection_after_raw_resampling",
         }
     elif feature_space not in {"radio", "semantic_descriptor", "dino_v3", "sam3"}:
@@ -860,6 +1398,13 @@ def build_cache(args: argparse.Namespace) -> dict:
                     responsibility_cache_path,
                     expected_contract=responsibility_contract,
                     num_gaussians=int(xyz_cpu.shape[0]),
+                    expected_sha256=str(
+                        getattr(
+                            args,
+                            "expected_responsibility_cache_sha256",
+                            "",
+                        )
+                    ),
                 )
             )
 
@@ -970,6 +1515,7 @@ def build_cache(args: argparse.Namespace) -> dict:
                 valid_parts.append(valid.cpu())
                 count_parts.append(view_counts.cpu())
                 reliability_parts.append(reliability.half().cpu())
+        del teacher_maps
         features = torch.cat(feature_parts, dim=0)
         valid = torch.cat(valid_parts, dim=0)
         view_counts = torch.cat(count_parts, dim=0)
@@ -1150,6 +1696,7 @@ def build_cache(args: argparse.Namespace) -> dict:
                 del frame_sum, frame_counts
                 if device.type == "cuda":
                     torch.cuda.empty_cache()
+        del teacher_maps
         if args.save_responsibility_cache:
             if len(captured_assignments) != len(selected):
                 raise RuntimeError("failed to capture every registration view")
@@ -1179,12 +1726,13 @@ def build_cache(args: argparse.Namespace) -> dict:
             features[~valid] = 0.0
             del topk_observations, topk_responsibility, finite
         else:
-            valid = registered_counts > 0
-            features = torch.zeros_like(registered_sum, dtype=torch.float16)
-            features[valid] = (
-                registered_sum[valid]
-                / registered_counts[valid].clamp_min(1e-8).unsqueeze(1)
-            ).half()
+            features, valid = finalize_registered_mean_chunked(
+                registered_sum,
+                registered_counts,
+                row_chunk_size=int(args.point_chunk_size),
+            )
+        del registered_sum, registered_counts
+        del contribution_sum_staging, contribution_count_staging
         view_counts = observation_counts
         reliability = raster_fusion_reliability(
             features,
@@ -1229,6 +1777,15 @@ def build_cache(args: argparse.Namespace) -> dict:
         "relative_depth_tolerance": float(args.relative_depth_tolerance),
         "alpha_threshold": float(args.alpha_threshold),
         "normalize_each_view": bool(args.normalize_each_view),
+        "feature_frame_manifest": str(
+            (feature_dir / "frame_manifest.json").resolve()
+        ),
+        "feature_frame_manifest_sha256": str(
+            feature_bundle_validation["manifest_sha256"]
+        ),
+        "feature_output_bundle_sha256": str(
+            feature_bundle_validation["output_bundle_sha256"]
+        ),
         "per_view_normalization_applied": bool(args.normalize_each_view),
         "per_view_normalization_stage": (
             "pixel_feature_before_raster_lifting"
@@ -1244,6 +1801,9 @@ def build_cache(args: argparse.Namespace) -> dict:
         "official_adaptor_name": adaptor_name,
         "official_adaptor_checkpoint": adaptor_checkpoint_path,
         "official_adaptor_checkpoint_sha256": adaptor_checkpoint_sha256,
+        "official_adaptor_checkpoint_provenance": (
+            adaptor_checkpoint_provenance
+        ),
         **capability_source_metadata,
         "registration_responsibility_cache": responsibility_cache_path,
         "registration_responsibility_cache_sha256": responsibility_cache_sha256,
@@ -1253,6 +1813,9 @@ def build_cache(args: argparse.Namespace) -> dict:
         "registration_responsibility_contract": responsibility_contract,
         "capability_projection_before_mpr": feature_space
         in {"dino_v3", "sam3"},
+        "capability_cpu_memory_preflight": (
+            capability_cpu_memory_preflight
+        ),
         "custom_adaptor_head": False,
         "source": (
             "official_crop_summary_mpr"
@@ -1293,21 +1856,36 @@ def build_cache(args: argparse.Namespace) -> dict:
         )
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(
-        {
-            "xyz": xyz_cpu,
-            "geometry_fingerprint": {
-                "num_gaussians": int(xyz_cpu.shape[0]),
-                "xyz_sha256": _sha256_tensor_rows(xyz_cpu),
-            },
-            "features": features,
-            "valid": valid,
-            "view_counts": view_counts,
-            "reliability": reliability,
-            "metadata": metadata,
+    output_payload = {
+        "xyz": xyz_cpu,
+        "geometry_fingerprint": {
+            "num_gaussians": int(xyz_cpu.shape[0]),
+            "xyz_sha256": _sha256_tensor_rows(xyz_cpu),
         },
-        output,
+        "features": features,
+        "valid": valid,
+        "view_counts": view_counts,
+        "reliability": reliability,
+        "metadata": metadata,
+    }
+    validate_mpr_cache_payload(
+        output_payload,
+        expected_feature_space=feature_space,
+        require_reliability=True,
+        require_formal_safety=observation_contract is not None,
     )
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{output.name}.",
+        suffix=".tmp",
+        dir=output.parent,
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        torch.save(output_payload, temporary)
+        os.replace(temporary, output)
+    finally:
+        temporary.unlink(missing_ok=True)
     positive = view_counts[valid]
     report = {
         "output": str(output),
@@ -1321,7 +1899,14 @@ def build_cache(args: argparse.Namespace) -> dict:
         "metadata": metadata,
     }
     report_path = output.with_suffix(output.suffix + ".json")
-    report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    temporary_report = report_path.with_suffix(
+        report_path.suffix + ".tmp"
+    )
+    temporary_report.write_text(
+        json.dumps(report, indent=2),
+        encoding="utf-8",
+    )
+    temporary_report.replace(report_path)
     return report
 
 
@@ -1365,6 +1950,16 @@ def main() -> None:
     parser.add_argument("--render-batch-size", type=int, default=4)
     parser.add_argument("--view-chunk-size", type=int, default=8)
     parser.add_argument("--point-chunk-size", type=int, default=4096)
+    parser.add_argument(
+        "--max-estimated-cpu-memory-fraction",
+        type=float,
+        default=0.85,
+        help=(
+            "Fail before loading official capability maps when the known "
+            "overlapping CPU allocations exceed this fraction of currently "
+            "available memory."
+        ),
+    )
     parser.add_argument("--depth-tolerance", type=float, default=0.08)
     parser.add_argument("--relative-depth-tolerance", type=float, default=0.02)
     parser.add_argument("--alpha-threshold", type=float, default=0.02)
@@ -1417,6 +2012,35 @@ def main() -> None:
             "C-RADIO adaptor maps emitted by extract_radio_features."
         ),
     )
+    parser.add_argument(
+        "--expected-feature-scene",
+        default="",
+        help="Fail if an official extracted manifest names another scene.",
+    )
+    parser.add_argument(
+        "--expected-feature-image-dir",
+        default="",
+        help=(
+            "Fail if an official extracted manifest was built from another "
+            "resolved image directory."
+        ),
+    )
+    parser.add_argument(
+        "--expected-geometry-checkpoint-sha256",
+        default="",
+        help=(
+            "Externally trusted geometry checkpoint digest required by "
+            "formal MPR contracts."
+        ),
+    )
+    parser.add_argument(
+        "--expected-feature-output-bundle-sha256",
+        default="",
+        help=(
+            "Caller-trusted SHA-256 of the complete extracted feature output "
+            "bundle. Formal runs must provide this value."
+        ),
+    )
     parser.add_argument("--projection-batch-size", type=int, default=2)
     parser.add_argument(
         "--responsibility-cache",
@@ -1426,6 +2050,11 @@ def main() -> None:
             "Using the same sidecar makes raw and capability MPR observation "
             "support exactly identical."
         ),
+    )
+    parser.add_argument(
+        "--expected-responsibility-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for a loaded responsibility sidecar.",
     )
     parser.add_argument(
         "--save-responsibility-cache",
@@ -1481,21 +2110,10 @@ def main() -> None:
         help="Mark diagnostic caches built from held-out benchmark RGB/features.",
     )
     args = parser.parse_args()
-    if (
-        args.raster_reliability_mode != "legacy_valid"
-        and args.aggregation_mode == "center"
-    ):
-        parser.error(
-            "--raster-reliability-mode applies only to raster aggregation"
-        )
-    if (
-        args.raster_reliability_mode == "mean_resultant"
-        and not args.normalize_each_view
-    ):
-        parser.error(
-            "--raster-reliability-mode mean_resultant requires "
-            "--normalize-each-view"
-        )
+    try:
+        validate_raster_reliability_policy(args)
+    except ValueError as error:
+        parser.error(str(error))
     print(json.dumps(build_cache(args), indent=2))
 
 

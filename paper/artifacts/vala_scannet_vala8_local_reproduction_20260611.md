@@ -1,5 +1,9 @@
 # VALA ScanNet VALA8 Local Reproduction
 
+> **SUPERSEDED / DIAGNOSTIC ONLY.** This is the old mesh/proxy readout. The
+> paper-facing baseline is the exact Gaussian-domain `paper8` row selected by
+> `evaluation_protocol_freeze_20260801.yaml`.
+
 Protocol: VALA-aligned ScanNet-8 scenes, point-level open-vocabulary querying.
 
 | Split | mIoU | mAcc | Overall Acc |

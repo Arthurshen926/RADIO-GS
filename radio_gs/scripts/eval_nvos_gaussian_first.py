@@ -9,8 +9,10 @@ so it cannot affect prototypes, thresholds, or the 3-D support.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
+from typing import Callable, Mapping
 
 import cv2
 import numpy as np
@@ -28,10 +30,15 @@ from radio_gs.interfaces.capability_cache import (
     load_canonical_support_graph,
 )
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
-from radio_gs.querying.evidence_scorer import EvidenceScoringConfig
+from radio_gs.querying.evidence_scorer import (
+    EvidenceScoringConfig,
+    registered_observation_anchor_mask,
+    registered_observation_effective_confidence,
+    registered_seed_observation,
+)
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
 from radio_gs.querying.query_engine import CanonicalQueryEngine
-from radio_gs.querying.query_spec import SelectionMode
+from radio_gs.querying.query_spec import PrimitiveUnaryEvidence, SelectionMode
 from radio_gs.querying.support_solver import SupportSolverConfig
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
@@ -41,6 +48,9 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.scripts.eval_lerf_grounding import render_1280d
 from radio_gs.scripts.render_promptable_nvs_features import resolve_protocol_views
+from radio_gs.scripts.nvos_registered_region_v3_authority import (
+    write_cuda_child_attestation,
+)
 
 
 def _scaled_raster_shape(
@@ -84,6 +94,558 @@ def _valid_normalized_score_map(
     if coverage_power == 0:
         return conditional
     return conditional * valid_mass.clamp(0.0, 1.0).pow(float(coverage_power))
+
+
+def _registered_solver_masses(
+    positive: torch.Tensor,
+    negative: torch.Tensor,
+    *,
+    support_threshold: float,
+    construction: str,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Derive continuous solver/prototype masses from one joint observation.
+
+    ``winner_take_all`` is the historical behavior.  ``joint_signed`` keeps
+    the positive/negative competition in one scale: equal evidence becomes
+    neutral, while raster tails are discounted by both purity and prompt
+    coverage instead of being independently promoted to a hard seed.
+    """
+
+    foreground = torch.as_tensor(positive).float().reshape(-1)
+    background = torch.as_tensor(negative).float().reshape(-1)
+    if (
+        foreground.shape != background.shape
+        or foreground.numel() == 0
+        or not bool(torch.isfinite(foreground).all())
+        or not bool(torch.isfinite(background).all())
+        or bool((foreground < 0).any())
+        or bool((background < 0).any())
+    ):
+        raise ValueError("registered positive/negative masses must be finite and aligned")
+    threshold = float(support_threshold)
+    if not np.isfinite(threshold) or threshold < 0:
+        raise ValueError("support_threshold must be finite and non-negative")
+    mode = str(construction)
+    if mode == "winner_take_all":
+        positive_support = (foreground > threshold) & (
+            foreground >= background
+        )
+        negative_support = (background > threshold) & (
+            background > foreground
+        )
+        return (
+            torch.where(positive_support, foreground, 0.0),
+            torch.where(negative_support, background, 0.0),
+        )
+    if mode != "joint_signed":
+        raise ValueError(
+            "registered seed construction must be winner_take_all or joint_signed"
+        )
+    observed = foreground + background > threshold
+    signed = foreground - background
+    return (
+        torch.where(observed, signed.clamp_min(0.0), 0.0),
+        torch.where(observed, (-signed).clamp_min(0.0), 0.0),
+    )
+
+
+def _joint_signed_observation_seeds(
+    signed_observation: torch.Tensor,
+    confidence: torch.Tensor,
+    *,
+    support_threshold: float,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Split one bounded signed observation without per-sign renormalization."""
+
+    signed = torch.as_tensor(signed_observation).float().reshape(-1)
+    mass = torch.as_tensor(confidence).float().reshape(-1)
+    threshold = float(support_threshold)
+    if (
+        signed.numel() == 0
+        or signed.shape != mass.shape
+        or not bool(torch.isfinite(signed).all())
+        or not bool(torch.isfinite(mass).all())
+        or bool((mass < 0).any())
+        or bool((mass > 1).any())
+        or bool((signed.abs() > mass + 1e-6).any())
+        or not np.isfinite(threshold)
+        or threshold < 0
+    ):
+        raise ValueError("joint signed observation/threshold is invalid")
+    observed = mass > threshold
+    return (
+        torch.where(observed, signed.clamp_min(0.0), 0.0),
+        torch.where(observed, (-signed).clamp_min(0.0), 0.0),
+    )
+
+
+def _require_bipolar_solver_support(
+    positive: torch.Tensor,
+    negative: torch.Tensor,
+    *,
+    label: str,
+) -> tuple[int, int]:
+    positive_count = int((torch.as_tensor(positive) > 0).sum())
+    negative_count = int((torch.as_tensor(negative) > 0).sum())
+    if positive_count == 0 or negative_count == 0:
+        raise RuntimeError(
+            f"{label} registered prompt support is empty: "
+            f"pos={positive_count}, neg={negative_count}"
+        )
+    return positive_count, negative_count
+
+
+def _render_registered_stage_maps(
+    stage_values: Mapping[str, torch.Tensor],
+    *,
+    final_stage: str,
+    final_rendered: np.ndarray,
+    render: Callable[[torch.Tensor], np.ndarray],
+) -> dict[str, np.ndarray]:
+    """Render every diagnostic from its own primitive tensor.
+
+    Reusing the already rendered final tensor is an optimization only for the
+    stage that actually produced it.  This prevents a propagated final output
+    from being mislabeled as the connected diagnostic.
+    """
+
+    resolved = str(final_stage)
+    if resolved not in stage_values:
+        raise ValueError(f"final registered readout stage {resolved!r} is unavailable")
+    return {
+        name: final_rendered if name == resolved else render(values)
+        for name, values in stage_values.items()
+    }
+
+
+def _json_sha256(payload: object) -> str:
+    encoded = json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _dataset_protocol_contract(
+    manifest: Mapping[str, object],
+    *,
+    benchmark_manifest_sha256: str = "",
+) -> dict[str, object]:
+    """Extract dataset/prompt roles without inheriting a method's score rules."""
+
+    protocol = dict(manifest.get("protocol", {}))
+    scenes = list(manifest.get("scenes", []))
+    scene_ids = [str(scene["scene_id"]) for scene in scenes]
+    cohort = [str(value) for value in protocol.get("cohort", scene_ids)]
+    if cohort != scene_ids:
+        raise ValueError("manifest scene order differs from its declared cohort")
+    prompt_hashes = dict(protocol.get("prompt_asset_sha256", {}))
+    scene_contracts: list[dict[str, object]] = []
+    for scene in scenes:
+        scene_id = str(scene["scene_id"])
+        prompt = dict(scene.get("prompt", {}))
+        frame_records = {
+            str(frame["frame_id"]): frame
+            for frame in scene.get("frames", [])
+        }
+        evaluation_targets = []
+        for frame_id in scene.get("evaluation_frame_ids", []):
+            frame = frame_records.get(str(frame_id))
+            if frame is None:
+                raise ValueError(
+                    f"{scene_id}: evaluation frame {frame_id!r} is undeclared"
+                )
+            digest = str(frame.get("ground_truth_sha256", "")).strip()
+            if not digest:
+                raise ValueError(
+                    f"{scene_id}: evaluation frame {frame_id!r} lacks target SHA"
+                )
+            evaluation_targets.append(
+                {
+                    "frame_id": str(frame_id),
+                    "ground_truth_sha256": digest,
+                }
+            )
+        declared_prompt_hashes = dict(prompt_hashes.get(scene_id, {}))
+        if not declared_prompt_hashes:
+            raise ValueError(f"{scene_id}: prompt asset hashes are undeclared")
+        scene_contracts.append(
+            {
+                "scene_id": scene_id,
+                "base_scene_id": str(scene.get("base_scene_id") or scene_id),
+                "prompt": {
+                    "type": str(prompt.get("type", "")),
+                    "frame_id": str(prompt.get("frame_id", "")),
+                    "asset_sha256": declared_prompt_hashes,
+                },
+                "prompt_frame_ids": [
+                    str(value) for value in scene.get("prompt_frame_ids", [])
+                ],
+                "calibration_frame_ids": [
+                    str(value) for value in scene.get(
+                        "calibration_frame_ids", []
+                    )
+                ],
+                "evaluation_frame_ids": [
+                    str(value) for value in scene.get(
+                        "evaluation_frame_ids", []
+                    )
+                ],
+                "excluded_training_frame_ids": [
+                    str(value) for value in scene.get(
+                        "excluded_training_frame_ids", []
+                    )
+                ],
+                "training_frame_ids": [
+                    str(value["frame_id"])
+                    for value in scene.get("training_frames", [])
+                ],
+                "target_rgb_policy": str(
+                    scene.get("target_rgb_policy", "")
+                ),
+                "evaluation_targets": evaluation_targets,
+            }
+        )
+    return {
+        "schema_version": 1,
+        "benchmark": str(manifest.get("benchmark", "")),
+        "legacy_protocol_hash": str(manifest.get("protocol_hash", "")),
+        "benchmark_manifest_sha256": str(benchmark_manifest_sha256),
+        "dataset_version": str(protocol.get("dataset_version", "")),
+        "task": str(protocol.get("task", "")),
+        "cohort": cohort,
+        "prompt_type": str(protocol.get("prompt_type", "")),
+        "prompt_support": str(protocol.get("prompt_support", "")),
+        "target_mask_use": str(protocol.get("target_mask_use", "")),
+        "target_rgb_at_query": str(protocol.get("target_rgb_at_query", "")),
+        "target_rgb_during_field_training": str(
+            protocol.get("target_rgb_during_field_training", "")
+        ),
+        "allow_reference_scoring": bool(
+            protocol.get("allow_reference_scoring", False)
+        ),
+        "scenes": scene_contracts,
+    }
+
+
+def _verify_declared_sha256(
+    path: Path,
+    expected: object,
+    *,
+    label: str,
+) -> str:
+    declared = str(expected or "").strip()
+    if len(declared) != 64:
+        raise ValueError(f"{label} lacks a valid declared SHA256")
+    actual = _file_sha256(path)
+    if actual != declared:
+        raise ValueError(f"{label} SHA256 mismatch")
+    return actual
+
+
+def _candidate_method_manifest_contract(
+    args: argparse.Namespace,
+) -> dict[str, object]:
+    """Return the runner-facing method subset checked before any model load."""
+
+    observation_mode = str(
+        getattr(
+            args,
+            "registered_observation_confidence",
+            "relative_joint_max",
+        )
+    )
+    observation_fusion = str(
+        getattr(args, "registered_observation_fusion", "additive")
+    )
+    seed_construction = str(
+        getattr(args, "registered_seed_construction", "winner_take_all")
+    )
+    final_readout = str(
+        getattr(args, "registered_readout_stage", "connected")
+    )
+    return {
+        "support_mode": str(args.support_mode),
+        "region_space": str(args.region_space),
+        "prompt_registration": {
+            "mode": str(
+                getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
+            ),
+            "scale": float(
+                getattr(args, "prompt_registration_scale", 1.0)
+            ),
+            "alpha_threshold": float(args.alpha_threshold),
+            "depth_tolerance": float(args.depth_tolerance),
+            "relative_depth_tolerance": float(
+                args.relative_depth_tolerance
+            ),
+        },
+        "seed_construction": seed_construction,
+        "seed_normalization": (
+            "none"
+            if seed_construction == "joint_signed"
+            else "independent_max"
+        ),
+        "observation_fusion": observation_fusion,
+        "registered_seed_unary_weight": float(
+            getattr(args, "registered_seed_unary_weight", 0.0)
+        ),
+        **(
+            {
+                "strong_unary": {
+                    "policy": "unit_confidence_on_shared_hard_seed_rows",
+                    "anchor_threshold_source": "solver.hard_seed_threshold",
+                    "anchor_threshold": float(
+                        getattr(args, "hard_seed_threshold", 0.20)
+                    ),
+                    "formula": (
+                        "a=1[c>0 and abs(s)>=tau]; c_eff=a+(1-a)c; "
+                        "p=(1-c_eff)p_field+c_eff*q"
+                    ),
+                    "new_numeric_constant": False,
+                }
+            }
+            if observation_fusion == "hard_seed_anchored_probability"
+            else {}
+        ),
+        "observation_mass_source": (
+            "raw_raster_adjoint_prompt_mass_times_labeled_footprint_coverage"
+            if observation_mode == "poisson_mass_coverage"
+            else (
+                "raw_raster_adjoint_prompt_mass"
+                if observation_mode == "poisson_mass"
+                else "conditional_labeled_footprint_fraction"
+            )
+        ),
+        "observation_confidence": observation_mode,
+        "observation_mass_scale": float(
+            getattr(args, "registered_observation_mass_scale", 1.0)
+        ),
+        **(
+            {
+                "observation_coverage_power": float(
+                    getattr(
+                        args,
+                        "registered_observation_coverage_power",
+                        1.0,
+                    )
+                )
+            }
+            if observation_mode == "poisson_mass_coverage"
+            else {}
+        ),
+        "observation_constructed_before_capability_filter": (
+            str(args.support_mode)
+            in {"prompt_gaussian", "canonical_support"}
+        ),
+        "prompt_support_threshold": float(args.support_threshold),
+        "prototype_count": int(args.prototype_count),
+        "prototype_strategy": str(args.prototype_strategy),
+        "appearance_weight": float(args.appearance_weight),
+        "boundary_weight": float(args.boundary_weight),
+        "prototype_temperature": float(args.prototype_temperature),
+        "feature_calibration": str(args.feature_calibration),
+        "background_centroids": int(args.background_centroids),
+        "score_calibration": str(args.score_calibration),
+        "negative_spatial_mode": str(
+            getattr(args, "negative_spatial_mode", "none")
+        ),
+        "diagnostic_selection_mode": str(
+            getattr(
+                args,
+                "registered_selection_mode",
+                SelectionMode.SEEDED_COMPONENT.value,
+            )
+        ),
+        "selection_applied_to_main_output": final_readout == "connected",
+        "final_readout": final_readout,
+        "graph": {
+            "policy": str(args.graph_policy),
+            "component_policy": str(args.component_graph_policy),
+            "legacy_residual": float(args.graph_legacy_residual),
+            "channel_confidence_mode": str(
+                getattr(args, "channel_confidence_mode", "none")
+            ),
+        },
+        "score_render": {
+            "resolution": str(
+                getattr(args, "score_render_resolution", "scaled_renderer")
+            ),
+            "scale": float(getattr(args, "score_render_scale", 1.0)),
+            "valid_support_normalization": bool(
+                getattr(args, "valid_support_normalization", False)
+            ),
+            "valid_support_coverage_power": float(
+                getattr(args, "valid_support_coverage_power", 0.0)
+            ),
+            "feature_contribution_gamma": float(
+                args.feature_contribution_gamma
+            ),
+            "score_chunk_size": int(args.score_chunk_size),
+            "pixel_threshold": float(args.solver_support_threshold),
+            "threshold_comparison": "greater_or_equal",
+            "resize_to_ground_truth": "cv2.INTER_LINEAR",
+        },
+        "solver": {
+            "type": str(getattr(args, "solver_type", "diffusion")),
+            "iterations": int(args.solver_iterations),
+            "residual": float(args.solver_residual),
+            "unary_temperature": float(args.solver_unary_temperature),
+            "support_threshold": float(args.solver_support_threshold),
+            "laplacian_weight": float(
+                getattr(args, "laplacian_weight", 1.0)
+            ),
+            "cg_iterations": int(getattr(args, "cg_iterations", 64)),
+            "cg_tolerance": float(getattr(args, "cg_tolerance", 1e-5)),
+            "hard_seed_threshold": float(
+                getattr(args, "hard_seed_threshold", 0.20)
+            ),
+            "hard_seed_conflict_policy": str(
+                getattr(
+                    args,
+                    "hard_seed_conflict_policy",
+                    "positive_priority",
+                )
+            ),
+            "hard_seed_conflict_margin": float(
+                getattr(args, "hard_seed_conflict_margin", 0.0)
+            ),
+            "component_edge_threshold": float(
+                getattr(args, "component_edge_threshold", 1e-5)
+            ),
+            "seeded_component_min_weight": float(
+                getattr(args, "seeded_component_min_weight", 0.20)
+            ),
+        },
+        "canonical_reliability_cache": str(
+            getattr(args, "canonical_reliability_cache", "")
+        ).strip(),
+        "diagnostic_graph_affinity_override": str(
+            getattr(args, "diagnostic_graph_affinity_override", "")
+        ).strip(),
+        "asset_hash_verification_required": bool(
+            getattr(args, "require_asset_hashes", False)
+        ),
+        "uses_target_calibration": False,
+    }
+
+
+def _validate_candidate_run_manifest(
+    args: argparse.Namespace,
+    *,
+    scene_id: str,
+    benchmark_manifest_path: Path,
+) -> tuple[dict[str, object] | None, str]:
+    """Fail closed on a candidate manifest before loading any scene model."""
+
+    raw_path = str(getattr(args, "run_manifest", "")).strip()
+    if not raw_path:
+        return None, ""
+    path = Path(raw_path).expanduser().resolve()
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    manifest_sha256 = _file_sha256(path)
+    expected_candidate = str(
+        getattr(args, "candidate_id", "registered-region-v1")
+    )
+    if (
+        payload.get("candidate") != expected_candidate
+        or scene_id not in payload.get("scenes", [])
+        or Path(str(payload.get("benchmark_manifest", ""))).resolve()
+        != benchmark_manifest_path
+        or payload.get("benchmark_manifest_sha256")
+        != _file_sha256(benchmark_manifest_path)
+        or Path(str(payload.get("radio_checkpoint", ""))).resolve()
+        != Path(args.radio_checkpoint).expanduser().resolve()
+        or payload.get("radio_checkpoint_sha256")
+        != _file_sha256(Path(args.radio_checkpoint).expanduser().resolve())
+    ):
+        raise ValueError("candidate run manifest benchmark/RADIO contract mismatch")
+    queue_plan = Path(str(payload.get("queue_plan", ""))).resolve()
+    if (
+        not queue_plan.is_file()
+        or payload.get("queue_plan_sha256") != _file_sha256(queue_plan)
+    ):
+        raise ValueError("candidate run manifest queue-plan mismatch")
+    if payload.get("method_contract") != _candidate_method_manifest_contract(args):
+        raise ValueError("candidate run manifest method contract mismatch")
+
+    implementation_root = Path(__file__).resolve().parents[2]
+    implementation = payload.get("implementation_sources")
+    if not isinstance(implementation, dict) or not implementation:
+        raise ValueError("candidate run manifest lacks implementation sources")
+    for relative, expected in implementation.items():
+        source = implementation_root / str(relative)
+        if not source.is_file() or _file_sha256(source) != str(expected):
+            raise ValueError(
+                f"candidate implementation source mismatch: {relative}"
+            )
+    runner = Path(str(payload.get("runner", ""))).resolve()
+    if (
+        not runner.is_file()
+        or payload.get("runner_sha256") != _file_sha256(runner)
+    ):
+        raise ValueError("candidate runner source mismatch")
+
+    source_records = payload.get("source_artifacts", {}).get(scene_id)
+    if not isinstance(source_records, dict):
+        raise ValueError(f"{scene_id}: candidate source artifacts are absent")
+    expected_paths = {
+        "canonical_d256_l128_capability_first.pth": None,
+        "official_dino_sam3_views.pt": str(
+            Path(args.canonical_capability_cache).resolve()
+        ),
+        "shared_support_graph_k16.pt": str(
+            Path(args.canonical_support_graph).resolve()
+        ),
+    }
+    for name, expected_path in expected_paths.items():
+        record = source_records.get(name)
+        if not isinstance(record, dict):
+            raise ValueError(f"{scene_id}: missing candidate source {name}")
+        artifact = Path(str(record.get("path", ""))).resolve()
+        if expected_path is not None and str(artifact) != expected_path:
+            raise ValueError(f"{scene_id}: candidate source path mismatch for {name}")
+        if (
+            not artifact.is_file()
+            or int(record.get("bytes", -1)) != artifact.stat().st_size
+            or record.get("sha256") != _file_sha256(artifact)
+        ):
+            raise ValueError(f"{scene_id}: candidate source SHA mismatch for {name}")
+        metadata = Path(str(record.get("metadata_path", ""))).resolve()
+        if (
+            not metadata.is_file()
+            or record.get("metadata_sha256") != _file_sha256(metadata)
+        ):
+            raise ValueError(
+                f"{scene_id}: candidate source metadata mismatch for {name}"
+            )
+        if (
+            name == "canonical_d256_l128_capability_first.pth"
+            and str(args.canonical_field_sha256).strip()
+            != str(record.get("sha256"))
+        ):
+            raise ValueError(f"{scene_id}: canonical field digest mismatch")
+
+    queue_inputs = payload.get("queue_scene_inputs", {}).get(scene_id)
+    if not isinstance(queue_inputs, dict) or not queue_inputs:
+        raise ValueError(f"{scene_id}: candidate renderer/view inputs are absent")
+    for raw_input, record in queue_inputs.items():
+        asset = Path(str(raw_input)).resolve()
+        if (
+            not isinstance(record, dict)
+            or not asset.is_file()
+            or int(record.get("bytes", -1)) != asset.stat().st_size
+            or record.get("sha256") != _file_sha256(asset)
+        ):
+            raise ValueError(f"{scene_id}: renderer/view input mismatch: {asset}")
+    return payload, manifest_sha256
 
 
 @torch.inference_mode()
@@ -290,6 +852,23 @@ def run(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
     manifest_path = Path(args.manifest).resolve()
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    candidate_run_manifest, candidate_run_manifest_sha256 = (
+        _validate_candidate_run_manifest(
+            args,
+            scene_id=str(args.scene_id),
+            benchmark_manifest_path=manifest_path,
+        )
+    )
+    candidate_eligibility = (
+        str(candidate_run_manifest.get("eligibility", "")).strip()
+        if candidate_run_manifest is not None
+        else "unregistered"
+    )
+    candidate_method_contract_sha256 = (
+        _json_sha256(candidate_run_manifest["method_contract"])
+        if candidate_run_manifest is not None
+        else ""
+    )
     scene = _scene_record(manifest, args.scene_id)
     base_scene_id = str(scene.get("base_scene_id") or args.scene_id)
     scene_root = Path(args.queue_root).resolve() / "scenes"
@@ -400,12 +979,36 @@ def run(args: argparse.Namespace) -> dict:
 
     prompt = scene["prompt"]
     prompt_type = str(prompt.get("type", ""))
+    declared_prompt_hashes = dict(
+        manifest.get("protocol", {})
+        .get("prompt_asset_sha256", {})
+        .get(args.scene_id, {})
+    )
     if prompt_type == "positive_negative_scribbles":
+        if bool(getattr(args, "require_asset_hashes", False)):
+            _verify_declared_sha256(
+                Path(prompt["positive_path"]),
+                declared_prompt_hashes.get("positive"),
+                label=f"{args.scene_id} positive prompt",
+            )
+            _verify_declared_sha256(
+                Path(prompt["negative_path"]),
+                declared_prompt_hashes.get("negative"),
+                label=f"{args.scene_id} negative prompt",
+            )
         positive_native = load_ground_truth_mask(prompt["positive_path"]).astype(bool)
         negative_native = load_ground_truth_mask(prompt["negative_path"]).astype(bool)
         if positive_native.shape != negative_native.shape:
             raise ValueError("positive and negative prompt rasters must align")
     elif prompt_type == "reference_binary_mask":
+        if bool(getattr(args, "require_asset_hashes", False)):
+            _verify_declared_sha256(
+                Path(prompt["mask_path"]),
+                declared_prompt_hashes.get(
+                    "mask", declared_prompt_hashes.get("positive")
+                ),
+                label=f"{args.scene_id} reference mask",
+            )
         positive_native = load_ground_truth_mask(prompt["mask_path"]).astype(bool)
         negative_native = np.logical_not(positive_native)
     else:
@@ -435,6 +1038,7 @@ def run(args: argparse.Namespace) -> dict:
     support_view_count = 1
     prediction_threshold = 0.0
     canonical_stage_gaussian_scores: dict[str, torch.Tensor] | None = None
+    registered_prompt_evidence: dict[str, object] | None = None
     if args.support_mode in {"prompt_gaussian", "canonical_support"}:
         if (
             getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
@@ -482,30 +1086,198 @@ def run(args: argparse.Namespace) -> dict:
         support_fraction = support_sum / support_count.clamp_min(1e-8).unsqueeze(1)
         positive_weight = support_fraction[:, 0]
         negative_weight = support_fraction[:, 1]
-        positive_seed = (positive_weight > args.support_threshold) & (
-            positive_weight >= negative_weight
+        raw_positive_mass = support_sum[:, 0].detach().float().clamp_min(0.0)
+        raw_negative_mass = support_sum[:, 1].detach().float().clamp_min(0.0)
+        raw_joint_mass = raw_positive_mass + raw_negative_mass
+        visibility_tolerance = 1e-4 * max(
+            1.0,
+            float(support_count.detach().float().amax()),
         )
-        negative_seed = (negative_weight > args.support_threshold) & (
-            negative_weight > positive_weight
-        )
-        if not bool(positive_seed.any()) or not bool(negative_seed.any()):
-            raise RuntimeError(
-                f"Empty Gaussian prompt support: pos={int(positive_seed.sum())}, "
-                f"neg={int(negative_seed.sum())}"
+        if bool((raw_joint_mass > support_count + visibility_tolerance).any()):
+            raise ValueError(
+                "registered positive/negative prompt mass exceeds visible "
+                "raster-adjoint mass"
             )
+        observation_confidence_mode = str(
+            getattr(
+                args,
+                "registered_observation_confidence",
+                "relative_joint_max",
+            )
+        )
+        observation_mass_scale = float(
+            getattr(args, "registered_observation_mass_scale", 1.0)
+        )
+        observation_coverage_power = float(
+            getattr(args, "registered_observation_coverage_power", 1.0)
+        )
+        if observation_confidence_mode in {
+            "poisson_mass",
+            "poisson_mass_coverage",
+        }:
+            direct_signed, direct_confidence = registered_seed_observation(
+                raw_positive_mass,
+                raw_negative_mass,
+                confidence_mode=observation_confidence_mode,
+                mass_scale=observation_mass_scale,
+                visible_mass=(
+                    support_count.detach().float().clamp_min(0.0)
+                    if observation_confidence_mode
+                    == "poisson_mass_coverage"
+                    else None
+                ),
+                coverage_power=observation_coverage_power,
+            )
+            direct_mass_source = (
+                "raw_raster_adjoint_prompt_mass_times_"
+                "labeled_footprint_coverage"
+                if observation_confidence_mode
+                == "poisson_mass_coverage"
+                else "raw_raster_adjoint_prompt_mass"
+            )
+        else:
+            direct_signed, direct_confidence = registered_seed_observation(
+                positive_weight,
+                negative_weight,
+                confidence_mode=observation_confidence_mode,
+                mass_scale=observation_mass_scale,
+            )
+            direct_mass_source = "conditional_labeled_footprint_fraction"
+        direct_observation = PrimitiveUnaryEvidence(
+            direct_signed,
+            f"raster_adjoint_{observation_confidence_mode}",
+            direct_confidence,
+        )
+        observation_fusion = str(
+            getattr(args, "registered_observation_fusion", "additive")
+        )
+        strong_unary_anchor_threshold = (
+            float(getattr(args, "hard_seed_threshold", 0.20))
+            if observation_fusion == "hard_seed_anchored_probability"
+            else None
+        )
+        strong_unary_anchor_mask = (
+            registered_observation_anchor_mask(
+                direct_observation,
+                anchor_threshold=strong_unary_anchor_threshold,
+            )
+            if strong_unary_anchor_threshold is not None
+            else torch.zeros_like(direct_confidence, dtype=torch.bool)
+        )
+        strong_unary_effective_confidence = (
+            registered_observation_effective_confidence(
+                direct_observation,
+                anchor_threshold=strong_unary_anchor_threshold,
+            )
+            if strong_unary_anchor_threshold is not None
+            else direct_confidence
+        )
+        seed_construction = str(
+            getattr(args, "registered_seed_construction", "winner_take_all")
+        )
+        if seed_construction == "joint_signed":
+            positive_solver_mass, negative_solver_mass = (
+                _joint_signed_observation_seeds(
+                    direct_signed,
+                    direct_confidence,
+                    support_threshold=float(args.support_threshold),
+                )
+            )
+            seed_normalization = "none"
+        else:
+            positive_solver_mass, negative_solver_mass = _registered_solver_masses(
+                positive_weight,
+                negative_weight,
+                support_threshold=float(args.support_threshold),
+                construction=seed_construction,
+            )
+            seed_normalization = "independent_max"
+        positive_support = positive_solver_mass > 0
+        negative_support = negative_solver_mass > 0
+        _require_bipolar_solver_support(
+            positive_solver_mass,
+            negative_solver_mass,
+            label="Global",
+        )
+        registered_prompt_evidence = {
+            "seed_construction": seed_construction,
+            "seed_normalization": seed_normalization,
+            "observation_mass_source": direct_mass_source,
+            "observation_confidence_mode": observation_confidence_mode,
+            "observation_mass_scale": observation_mass_scale,
+            "observation_coverage_power": (
+                observation_coverage_power
+                if observation_confidence_mode
+                == "poisson_mass_coverage"
+                else None
+            ),
+            "observation_confidence_formula": (
+                "(1-exp(-raw_joint_prompt_mass/mass_scale))*"
+                "(raw_joint_prompt_mass/raw_visible_mass)^coverage_power"
+                if observation_confidence_mode
+                == "poisson_mass_coverage"
+                else (
+                    "1-exp(-raw_joint_prompt_mass/mass_scale)"
+                    if observation_confidence_mode == "poisson_mass"
+                    else "joint_prompt_fraction/max_joint_prompt_fraction"
+                )
+            ),
+            "observation_constructed_before_capability_filter": True,
+            "all_gaussians": int(support_count.numel()),
+            "observed_gaussians": int((support_count > 0).sum()),
+            "positive_prompt_mass_sum": float(positive_weight.sum()),
+            "negative_prompt_mass_sum": float(negative_weight.sum()),
+            "raw_positive_prompt_mass_sum": float(raw_positive_mass.sum()),
+            "raw_negative_prompt_mass_sum": float(raw_negative_mass.sum()),
+            "raw_visible_mass_sum": float(support_count.sum()),
+            "observation_confidence_sum": float(direct_confidence.sum()),
+            "strong_unary_policy": (
+                "unit_confidence_on_shared_hard_seed_rows"
+                if strong_unary_anchor_threshold is not None
+                else "none"
+            ),
+            "strong_unary_anchor_threshold": strong_unary_anchor_threshold,
+            "strong_unary_anchor_rows": int(strong_unary_anchor_mask.sum()),
+            "strong_unary_effective_confidence_sum": float(
+                strong_unary_effective_confidence.sum()
+            ),
+            "strong_unary_formula": (
+                "a=1[c>0 and abs(signed_observation)>=hard_seed_threshold]; "
+                "effective_confidence=a+(1-a)*c; "
+                "p=(1-effective_confidence)*p_field+"
+                "effective_confidence*foreground_probability"
+                if strong_unary_anchor_threshold is not None
+                else None
+            ),
+            "positive_solver_mass_sum": float(positive_solver_mass.sum()),
+            "negative_solver_mass_sum": float(negative_solver_mass.sum()),
+            "positive_solver_rows": int(positive_support.sum()),
+            "negative_solver_rows": int(negative_support.sum()),
+            "neutral_observed_rows": int(
+                (
+                    (support_count > 0)
+                    & ~positive_support
+                    & ~negative_support
+                ).sum()
+            ),
+        }
         if args.support_mode == "prompt_gaussian":
             assert region_rows is not None
-            positive_rows = region_rows[positive_seed.cpu()].to(
+            positive_rows = region_rows[positive_support.cpu()].to(
                 device=device, dtype=torch.float32
             )
-            negative_rows = region_rows[negative_seed.cpu()].to(
+            negative_rows = region_rows[negative_support.cpu()].to(
                 device=device, dtype=torch.float32
             )
             positive_prototypes = _weighted_spherical_prototypes(
-                positive_rows, positive_weight[positive_seed], args.prototype_count
+                positive_rows,
+                positive_solver_mass[positive_support],
+                args.prototype_count,
             )
             negative_prototypes = _weighted_spherical_prototypes(
-                negative_rows, negative_weight[negative_seed], args.prototype_count
+                negative_rows,
+                negative_solver_mass[negative_support],
+                args.prototype_count,
             )
             score_parts: list[torch.Tensor] = []
             for start in range(0, region_rows.shape[0], max(1, args.chunk_size)):
@@ -519,12 +1291,65 @@ def run(args: argparse.Namespace) -> dict:
         else:
             assert capability_bank is not None and support_graph is not None
             valid_rows = capability_bank.global_rows
-            positive_soft = torch.where(
-                positive_seed.cpu(), positive_weight.detach().float().cpu(), 0.0
-            )[valid_rows]
-            negative_soft = torch.where(
-                negative_seed.cpu(), negative_weight.detach().float().cpu(), 0.0
-            )[valid_rows]
+            valid_rows_device = valid_rows.to(positive_solver_mass.device)
+            positive_soft = (
+                positive_solver_mass[valid_rows_device].detach().float().cpu()
+            )
+            negative_soft = (
+                negative_solver_mass[valid_rows_device].detach().float().cpu()
+            )
+            _require_bipolar_solver_support(
+                positive_soft,
+                negative_soft,
+                label="Capability-valid",
+            )
+            valid_observation = PrimitiveUnaryEvidence(
+                direct_observation.values[valid_rows_device].detach().float().cpu(),
+                direct_observation.source,
+                (
+                    direct_observation.confidence[valid_rows_device]
+                    .detach()
+                    .float()
+                    .cpu()
+                    if direct_observation.confidence is not None
+                    else None
+                ),
+            )
+            assert registered_prompt_evidence is not None
+            registered_prompt_evidence.update(
+                {
+                    "capability_valid_gaussians": int(valid_rows.numel()),
+                    "valid_positive_prompt_mass_sum": float(
+                        positive_weight[valid_rows_device].sum()
+                    ),
+                    "valid_negative_prompt_mass_sum": float(
+                        negative_weight[valid_rows_device].sum()
+                    ),
+                    "valid_raw_positive_prompt_mass_sum": float(
+                        raw_positive_mass[valid_rows_device].sum()
+                    ),
+                    "valid_raw_negative_prompt_mass_sum": float(
+                        raw_negative_mass[valid_rows_device].sum()
+                    ),
+                    "valid_observation_confidence_sum": float(
+                        valid_observation.confidence.sum()
+                        if valid_observation.confidence is not None
+                        else 0.0
+                    ),
+                    "valid_strong_unary_anchor_rows": int(
+                        strong_unary_anchor_mask[valid_rows_device].sum()
+                    ),
+                    "valid_strong_unary_effective_confidence_sum": float(
+                        strong_unary_effective_confidence[
+                            valid_rows_device
+                        ].sum()
+                    ),
+                    "valid_positive_solver_mass_sum": float(positive_soft.sum()),
+                    "valid_negative_solver_mass_sum": float(negative_soft.sum()),
+                    "valid_positive_solver_rows": int((positive_soft > 0).sum()),
+                    "valid_negative_solver_rows": int((negative_soft > 0).sum()),
+                }
+            )
             feature_banks = {
                 name: values.to(device)
                 for name, values in capability_bank.valid_feature_banks().items()
@@ -539,12 +1364,8 @@ def run(args: argparse.Namespace) -> dict:
                 boundary_signature=capability_bank.signatures["boundary"],
                 prototype_count=args.prototype_count,
                 prototype_strategy=args.prototype_strategy,
-                positive_prompt_mass=positive_weight.detach().float().cpu()[
-                    valid_rows
-                ],
-                negative_prompt_mass=negative_weight.detach().float().cpu()[
-                    valid_rows
-                ],
+                primitive_unary_evidence=valid_observation,
+                seed_normalization=seed_normalization,
                 selection_mode=SelectionMode(
                     getattr(
                         args,
@@ -552,6 +1373,50 @@ def run(args: argparse.Namespace) -> dict:
                         SelectionMode.SEEDED_COMPONENT.value,
                     )
                 ),
+            )
+            normalized_positive = query.positive_seeds
+            normalized_negative = query.negative_seeds
+            assert normalized_positive is not None
+            hard_seed_threshold = float(
+                getattr(args, "hard_seed_threshold", 0.20)
+            )
+            hard_positive = normalized_positive.weights >= hard_seed_threshold
+            hard_negative = (
+                normalized_negative.weights >= hard_seed_threshold
+                if normalized_negative is not None
+                else torch.zeros_like(hard_positive)
+            )
+            hard_seed_conflict_policy = str(
+                getattr(args, "hard_seed_conflict_policy", "positive_priority")
+            )
+            hard_seed_conflict_margin = float(
+                getattr(args, "hard_seed_conflict_margin", 0.0)
+            )
+            if hard_seed_conflict_policy == "positive_priority":
+                hard_negative &= ~hard_positive
+            else:
+                positive_values = normalized_positive.weights
+                negative_values = (
+                    normalized_negative.weights
+                    if normalized_negative is not None
+                    else torch.zeros_like(positive_values)
+                )
+                hard_positive &= (
+                    positive_values
+                    > negative_values + hard_seed_conflict_margin
+                )
+                hard_negative &= (
+                    negative_values
+                    > positive_values + hard_seed_conflict_margin
+                )
+            registered_prompt_evidence.update(
+                {
+                    "hard_positive_valid_rows": int(hard_positive.sum()),
+                    "hard_negative_valid_rows": int(hard_negative.sum()),
+                    "hard_seed_conflict_policy": hard_seed_conflict_policy,
+                    "hard_seed_conflict_margin": hard_seed_conflict_margin,
+                    "hard_seed_threshold": hard_seed_threshold,
+                }
             )
             engine = CanonicalQueryEngine(
                 support_graph,
@@ -579,6 +1444,13 @@ def run(args: argparse.Namespace) -> dict:
                     registered_seed_unary_weight=float(
                         getattr(args, "registered_seed_unary_weight", 0.0)
                     ),
+                    registered_observation_fusion=str(
+                        getattr(
+                            args,
+                            "registered_observation_fusion",
+                            "additive",
+                        )
+                    ),
                 ),
                 solver_config=SupportSolverConfig(
                     iterations=args.solver_iterations,
@@ -589,6 +1461,15 @@ def run(args: argparse.Namespace) -> dict:
                     laplacian_weight=getattr(args, "laplacian_weight", 1.0),
                     cg_iterations=getattr(args, "cg_iterations", 64),
                     cg_tolerance=getattr(args, "cg_tolerance", 1e-5),
+                    hard_seed_threshold=hard_seed_threshold,
+                    hard_seed_conflict_policy=hard_seed_conflict_policy,
+                    hard_seed_conflict_margin=hard_seed_conflict_margin,
+                    component_edge_threshold=float(
+                        getattr(args, "component_edge_threshold", 1e-5)
+                    ),
+                    seeded_component_min_weight=float(
+                        getattr(args, "seeded_component_min_weight", 0.20)
+                    ),
                 ),
                 graph_policy=args.graph_policy,
                 component_graph_policy=args.component_graph_policy,
@@ -626,8 +1507,11 @@ def run(args: argparse.Namespace) -> dict:
                 str(getattr(args, "registered_readout_stage", "connected"))
             ]
             prediction_threshold = float(args.solver_support_threshold)
-        positive_seed_count = int(positive_seed.sum())
-        negative_seed_count = int(negative_seed.sum())
+            positive_seed_count = int((positive_soft > 0).sum())
+            negative_seed_count = int((negative_soft > 0).sum())
+        if args.support_mode != "canonical_support":
+            positive_seed_count = int(positive_support.sum())
+            negative_seed_count = int(negative_support.sum())
     else:
         if args.prompt_feature_source == "observed":
             prompt_region = _observed_region_map(
@@ -694,14 +1578,26 @@ def run(args: argparse.Namespace) -> dict:
 
     output_root = Path(args.output_dir).resolve()
     score_paths: dict[str, str] = {}
+    score_sha256: dict[str, str] = {}
     predictions: dict[str, np.ndarray] = {}
     stage_score_paths: dict[str, dict[str, str]] = {}
+    stage_score_sha256: dict[str, dict[str, str]] = {}
     stage_predictions: dict[str, dict[str, np.ndarray]] = {}
-    score_height, score_width = _scaled_raster_shape(
-        int(renderer.image_height),
-        int(renderer.image_width),
-        float(getattr(args, "score_render_scale", 1.0)),
+    score_resolution_mode = str(
+        getattr(args, "score_render_resolution", "scaled_renderer")
     )
+    if score_resolution_mode == "prompt_native":
+        score_height, score_width = native_height, native_width
+    elif score_resolution_mode == "scaled_renderer":
+        score_height, score_width = _scaled_raster_shape(
+            int(renderer.image_height),
+            int(renderer.image_width),
+            float(getattr(args, "score_render_scale", 1.0)),
+        )
+    else:
+        raise ValueError(
+            "score_render_resolution must be scaled_renderer or prompt_native"
+        )
     valid_support = (
         capability_bank.valid.to(device=device, dtype=torch.float32)
         if (
@@ -755,14 +1651,18 @@ def run(args: argparse.Namespace) -> dict:
         score_path.parent.mkdir(parents=True, exist_ok=True)
         np.save(score_path, rendered.astype(np.float32), allow_pickle=False)
         score_paths[frame_id] = str(score_path)
+        score_sha256[frame_id] = _file_sha256(score_path)
         predictions[frame_id] = rendered
         if canonical_stage_gaussian_scores is not None:
-            for stage_name, stage_gaussian_scores in canonical_stage_gaussian_scores.items():
-                stage_rendered = (
-                    rendered
-                    if stage_name == "connected"
-                    else render_scalar_scores(pose, stage_gaussian_scores)
-                )
+            rendered_stages = _render_registered_stage_maps(
+                canonical_stage_gaussian_scores,
+                final_stage=str(
+                    getattr(args, "registered_readout_stage", "connected")
+                ),
+                final_rendered=rendered,
+                render=lambda values: render_scalar_scores(pose, values),
+            )
+            for stage_name, stage_rendered in rendered_stages.items():
                 stage_path = (
                     output_root
                     / "stage_scores"
@@ -773,6 +1673,9 @@ def run(args: argparse.Namespace) -> dict:
                 stage_path.parent.mkdir(parents=True, exist_ok=True)
                 np.save(stage_path, stage_rendered.astype(np.float32), allow_pickle=False)
                 stage_score_paths.setdefault(stage_name, {})[frame_id] = str(stage_path)
+                stage_score_sha256.setdefault(stage_name, {})[
+                    frame_id
+                ] = _file_sha256(stage_path)
                 stage_predictions.setdefault(stage_name, {})[frame_id] = stage_rendered
 
     # Evaluation begins only after every prediction has been persisted.
@@ -782,6 +1685,12 @@ def run(args: argparse.Namespace) -> dict:
     }
     for frame_id in evaluation_frames:
         frame = next(value for value in scene["frames"] if str(value["frame_id"]) == frame_id)
+        if bool(getattr(args, "require_asset_hashes", False)):
+            _verify_declared_sha256(
+                Path(frame["ground_truth"]),
+                frame.get("ground_truth_sha256"),
+                label=f"{args.scene_id} target {frame_id}",
+            )
         gt = load_ground_truth_mask(frame["ground_truth"]).astype(bool)
         score = cv2.resize(
             predictions[frame_id], (gt.shape[1], gt.shape[0]), interpolation=cv2.INTER_LINEAR
@@ -844,6 +1753,7 @@ def run(args: argparse.Namespace) -> dict:
         "negative_prompt_pixels_native": int(negative_native.sum()),
         "prompt_native_resolution": [native_height, native_width],
         "prompt_registration_resolution": [height, width],
+        "registered_prompt_evidence": registered_prompt_evidence,
         "support_mode": args.support_mode,
         "support_view_count": support_view_count,
         "support_threshold": float(args.support_threshold),
@@ -873,6 +1783,7 @@ def run(args: argparse.Namespace) -> dict:
             ),
             "gamma": float(args.feature_contribution_gamma),
             "score_render_resolution": [score_height, score_width],
+            "score_render_resolution_mode": score_resolution_mode,
             "valid_support_normalization": bool(valid_support is not None),
             "valid_support_formula": (
                 "sum(w*v*p)/sum(w*v) * coverage**coverage_power"
@@ -900,9 +1811,86 @@ def run(args: argparse.Namespace) -> dict:
                 "solver_type": getattr(args, "solver_type", "diffusion"),
                 "laplacian_weight": float(getattr(args, "laplacian_weight", 1.0)),
                 "cg_iterations": int(getattr(args, "cg_iterations", 64)),
-                "hard_seed_threshold": 0.20,
+                "cg_tolerance": float(getattr(args, "cg_tolerance", 1e-5)),
+                "hard_seed_threshold": float(
+                    getattr(args, "hard_seed_threshold", 0.20)
+                ),
+                "hard_seed_conflict_policy": str(
+                    getattr(
+                        args,
+                        "hard_seed_conflict_policy",
+                        "positive_priority",
+                    )
+                ),
+                "hard_seed_conflict_margin": float(
+                    getattr(args, "hard_seed_conflict_margin", 0.0)
+                ),
+                "component_edge_threshold": float(
+                    getattr(args, "component_edge_threshold", 1e-5)
+                ),
+                "seeded_component_min_weight": float(
+                    getattr(args, "seeded_component_min_weight", 0.20)
+                ),
+                "score_chunk_size": int(args.score_chunk_size),
                 "registered_seed_unary_weight": float(
                     getattr(args, "registered_seed_unary_weight", 0.0)
+                ),
+                "registered_observation_fusion": str(
+                    getattr(args, "registered_observation_fusion", "additive")
+                ),
+                **(
+                    {
+                        "registered_strong_unary": {
+                            "policy": (
+                                "unit_confidence_on_shared_hard_seed_rows"
+                            ),
+                            "anchor_threshold_source": (
+                                "hard_seed_threshold"
+                            ),
+                            "anchor_threshold": float(
+                                getattr(args, "hard_seed_threshold", 0.20)
+                            ),
+                            "new_numeric_constant": False,
+                        }
+                    }
+                    if str(
+                        getattr(
+                            args,
+                            "registered_observation_fusion",
+                            "additive",
+                        )
+                    )
+                    == "hard_seed_anchored_probability"
+                    else {}
+                ),
+                "registered_seed_construction": str(
+                    getattr(
+                        args,
+                        "registered_seed_construction",
+                        "winner_take_all",
+                    )
+                ),
+                "registered_seed_normalization": (
+                    str(seed_normalization)
+                    if registered_prompt_evidence is not None
+                    else None
+                ),
+                "registered_observation_confidence": str(
+                    getattr(
+                        args,
+                        "registered_observation_confidence",
+                        "relative_joint_max",
+                    )
+                ),
+                "registered_observation_mass_scale": float(
+                    getattr(args, "registered_observation_mass_scale", 1.0)
+                ),
+                "registered_observation_coverage_power": float(
+                    getattr(
+                        args,
+                        "registered_observation_coverage_power",
+                        1.0,
+                    )
                 ),
                 "registered_selection_mode": str(
                     getattr(
@@ -970,8 +1958,10 @@ def run(args: argparse.Namespace) -> dict:
         "foreground_iou": float(np.mean([value["foreground_iou"] for value in frame_metrics])),
         "pixel_accuracy": float(np.mean([value["pixel_accuracy"] for value in frame_metrics])),
         "score_paths": score_paths,
+        "score_sha256": score_sha256,
         "stage_metrics": stage_metrics,
         "stage_score_paths": stage_score_paths,
+        "stage_score_sha256": stage_score_sha256,
         "safety": {
             "target_ground_truth_opened_before_prediction_write": False,
             "target_rgb_opened": False,
@@ -1006,16 +1996,230 @@ def run(args: argparse.Namespace) -> dict:
                 if str(args.diagnostic_graph_affinity_override).strip()
                 else ""
             ),
-            "main_result_eligible": not bool(
+            "candidate_eligibility": candidate_eligibility,
+            "frozen_diagnostic_eligible": not bool(
                 str(args.diagnostic_graph_affinity_override).strip()
+            ),
+            "main_result_eligible": (
+                (
+                    candidate_run_manifest is None
+                    or candidate_eligibility == "main_result_eligible"
+                )
+                and not bool(
+                    str(args.diagnostic_graph_affinity_override).strip()
+                )
             ),
             "target_camera_names_excluded_from_support": evaluation_camera_names,
         },
     }
+    solver_contract = json.loads(json.dumps(report["shared_solver"]))
+    if (
+        isinstance(solver_contract, dict)
+        and isinstance(solver_contract.get("primitive_reliability"), dict)
+    ):
+        solver_contract["primitive_reliability"].pop("cache", None)
+    signature_checkpoint_hashes = (
+        {
+            str(signature.radio_checkpoint_sha256)
+            for signature in capability_bank.signatures.values()
+            if str(signature.radio_checkpoint_sha256).strip()
+        }
+        if capability_bank is not None
+        else set()
+    )
+    if len(signature_checkpoint_hashes) > 1:
+        raise ValueError("canonical capability signatures disagree on RADIO checkpoint")
+    radio_checkpoint_sha256 = (
+        next(iter(signature_checkpoint_hashes))
+        if signature_checkpoint_hashes
+        else _file_sha256(Path(args.radio_checkpoint).expanduser().resolve())
+    )
+    implementation_root = Path(__file__).resolve().parents[2]
+    method_contract = {
+        "schema_version": 2,
+        "candidate_id": str(
+            getattr(args, "candidate_id", "registered-region-v1")
+        ),
+        "evaluator": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+        "evaluator_sha256": _file_sha256(Path(__file__).resolve()),
+        "implementation_sha256": {
+            relative: _file_sha256(implementation_root / relative)
+            for relative in (
+                "radio_gs/evaluation/promptable_segmentation.py",
+                "radio_gs/interfaces/capability_cache.py",
+                "radio_gs/config.py",
+                "radio_gs/data/lerf_dataset.py",
+                "radio_gs/models/explicit_gaussian.py",
+                "radio_gs/models/featsharp_3d.py",
+                "radio_gs/models/hcd_codec.py",
+                "radio_gs/models/hybrid_gaussian.py",
+                "radio_gs/models/screen_refiner.py",
+                "radio_gs/querying/query_spec.py",
+                "radio_gs/querying/query_compilers.py",
+                "radio_gs/querying/evidence_scorer.py",
+                "radio_gs/querying/query_engine.py",
+                "radio_gs/querying/score_calibration.py",
+                "radio_gs/querying/support_solver.py",
+                "radio_gs/rendering/feature_renderer.py",
+                "radio_gs/rendering/contribution_compositor.py",
+                "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+                "radio_gs/scripts/eval_lerf_grounding.py",
+                "radio_gs/scripts/render_promptable_nvs_features.py",
+                "radio_gs/utils/checkpoint_io.py",
+            )
+        },
+        "radio_checkpoint_sha256": radio_checkpoint_sha256,
+        "candidate_run_manifest_sha256": candidate_run_manifest_sha256,
+        "candidate_method_contract_sha256": (
+            candidate_method_contract_sha256
+        ),
+        "candidate_eligibility": candidate_eligibility,
+        "asset_hash_verification_required": bool(
+            getattr(args, "require_asset_hashes", False)
+        ),
+        "prompt_type": prompt_type,
+        "support_mode": str(args.support_mode),
+        "region_space": str(args.region_space),
+        "prompt_feature_source": str(report["prompt_feature_source"]),
+        "prompt_registration": {
+            "mode": str(
+                getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
+            ),
+            "scale": float(getattr(args, "prompt_registration_scale", 1.0)),
+            "alpha_threshold": float(args.alpha_threshold),
+            "depth_tolerance": float(args.depth_tolerance),
+            "relative_depth_tolerance": float(args.relative_depth_tolerance),
+            "observation_mass_source": (
+                registered_prompt_evidence.get("observation_mass_source")
+                if registered_prompt_evidence is not None
+                else None
+            ),
+            "observation_confidence_mode": str(
+                getattr(
+                    args,
+                    "registered_observation_confidence",
+                    "relative_joint_max",
+                )
+            ),
+            "observation_mass_scale": float(
+                getattr(args, "registered_observation_mass_scale", 1.0)
+            ),
+            **(
+                {
+                    "observation_coverage_power": float(
+                        getattr(
+                            args,
+                            "registered_observation_coverage_power",
+                            1.0,
+                        )
+                    )
+                }
+                if str(
+                    getattr(
+                        args,
+                        "registered_observation_confidence",
+                        "relative_joint_max",
+                    )
+                )
+                == "poisson_mass_coverage"
+                else {}
+            ),
+            "observation_constructed_before_capability_filter": (
+                bool(
+                    registered_prompt_evidence.get(
+                        "observation_constructed_before_capability_filter",
+                        False,
+                    )
+                )
+                if registered_prompt_evidence is not None
+                else False
+            ),
+        },
+        "prototype_count": int(args.prototype_count),
+        "prototype_strategy": str(args.prototype_strategy),
+        "prompt_support_threshold": float(args.support_threshold),
+        "score_render": {
+            "resolution_mode": score_resolution_mode,
+            "scale": float(getattr(args, "score_render_scale", 1.0)),
+            "valid_support_normalization": bool(valid_support is not None),
+            "valid_support_coverage_power": float(
+                getattr(args, "valid_support_coverage_power", 0.0)
+            ),
+            "feature_contribution_gamma": float(args.feature_contribution_gamma),
+            "pixel_threshold": float(prediction_threshold),
+            "threshold_comparison": "greater_or_equal",
+            "resize_to_ground_truth": "cv2.INTER_LINEAR",
+        },
+        "shared_solver": solver_contract,
+    }
+    report["method_contract"] = method_contract
+    report["method_config_sha256"] = _json_sha256(method_contract)
+    report["run_manifest_sha256"] = candidate_run_manifest_sha256 or None
+    dataset_protocol_contract = _dataset_protocol_contract(
+        manifest,
+        benchmark_manifest_sha256=_file_sha256(manifest_path),
+    )
+    dataset_protocol_sha256 = _json_sha256(dataset_protocol_contract)
+    benchmark_protocol = dict(manifest.get("protocol", {}))
+    evaluation_protocol_contract = {
+        "schema_version": 1,
+        "dataset_protocol_sha256": dataset_protocol_sha256,
+        "method_config_sha256": report["method_config_sha256"],
+        "prediction_representation": (
+            "coverage_weighted_foreground_posterior"
+            if bool(valid_support is not None)
+            else "alpha_normalized_foreground_posterior"
+        ),
+        "score_domain": [0.0, 1.0],
+        "final_readout": str(
+            getattr(args, "registered_readout_stage", "connected")
+        ),
+        "scalar_compositor": {
+            "alpha_normalized": True,
+            "valid_support_normalization": bool(valid_support is not None),
+            "valid_support_coverage_power": float(
+                getattr(args, "valid_support_coverage_power", 0.0)
+            ),
+            "feature_contribution_gamma": float(
+                args.feature_contribution_gamma
+            ),
+        },
+        "resize_to_ground_truth": "cv2.INTER_LINEAR",
+        "pixel_threshold": {
+            "value": float(prediction_threshold),
+            "comparison": "greater_or_equal",
+        },
+        "metrics": list(
+            benchmark_protocol.get(
+                "metrics", ["foreground_iou", "pixel_accuracy"]
+            )
+        ),
+        "within_scene_aggregation": str(
+            benchmark_protocol.get(
+                "within_scene_aggregation", "frame_macro"
+            )
+        ),
+        "dataset_aggregation": str(
+            benchmark_protocol.get("aggregation", "scene_macro")
+        ),
+        "empty_union_value": float(
+            benchmark_protocol.get("empty_union_value", 1.0)
+        ),
+    }
+    report["legacy_protocol_hash"] = manifest["protocol_hash"]
+    report["dataset_protocol_contract"] = dataset_protocol_contract
+    report["dataset_protocol_sha256"] = dataset_protocol_sha256
+    report["evaluation_protocol_contract"] = evaluation_protocol_contract
+    report["evaluation_protocol_sha256"] = _json_sha256(
+        evaluation_protocol_contract
+    )
     output_root.mkdir(parents=True, exist_ok=True)
-    (output_root / f"{args.scene_id}_evaluation.json").write_text(
+    report_path = output_root / f"{args.scene_id}_evaluation.json"
+    temporary_report = report_path.with_suffix(".json.tmp")
+    temporary_report.write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
+    temporary_report.replace(report_path)
     return report
 
 
@@ -1026,10 +2230,23 @@ def main() -> None:
     parser.add_argument("--scene-id", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument(
+        "--run-manifest",
+        default="",
+        help="Optional immutable candidate run manifest bound into the report.",
+    )
+    parser.add_argument(
+        "--candidate-id",
+        default="registered-region-v1",
+        help="Candidate identifier required to match the immutable run manifest.",
+    )
+    parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
     )
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument("--gpu-attestation-output", default="")
+    parser.add_argument("--expected-gpu-uuid", default="")
+    parser.add_argument("--expected-gpu-bus-id", default="")
     parser.add_argument("--region-space", choices=["radio", "sam3"], default="sam3")
     parser.add_argument("--chunk-size", type=int, default=8192)
     parser.add_argument("--depth-tolerance", type=float, default=0.08)
@@ -1079,6 +2296,15 @@ def main() -> None:
         type=float,
         default=1.0,
         help="Scalar score raster scale relative to the frozen feature raster.",
+    )
+    parser.add_argument(
+        "--score-render-resolution",
+        choices=("scaled_renderer", "prompt_native"),
+        default="scaled_renderer",
+        help=(
+            "Render at a scaled frozen-renderer resolution or at the observable "
+            "native prompt resolution (without opening target RGB or masks)."
+        ),
     )
     parser.add_argument(
         "--valid-support-normalization",
@@ -1170,6 +2396,62 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--registered-observation-fusion",
+        choices=(
+            "additive",
+            "probability_mixture",
+            "hard_seed_anchored_probability",
+        ),
+        default="additive",
+        help=(
+            "Fuse registered mass by the historical additive unary or as the "
+            "label-free probability mixture (1-c)*p_field+c*q, or make "
+            "the same direct rows accepted as solver hard seeds unit-confidence "
+            "unary anchors."
+        ),
+    )
+    parser.add_argument(
+        "--registered-observation-confidence",
+        choices=(
+            "relative_joint_max",
+            "poisson_mass",
+            "poisson_mass_coverage",
+        ),
+        default="relative_joint_max",
+        help=(
+            "Normalize generic prompt mass by its joint maximum or interpret "
+            "raw raster-adjoint mass as Poisson observation confidence; the "
+            "coverage variant additionally requires labeled footprint support."
+        ),
+    )
+    parser.add_argument(
+        "--registered-observation-mass-scale",
+        type=float,
+        default=1.0,
+        help=(
+            "Effective alpha-weighted pixel mass for Poisson observation "
+            "confidence; one is the fixed native-raster unit."
+        ),
+    )
+    parser.add_argument(
+        "--registered-observation-coverage-power",
+        type=float,
+        default=1.0,
+        help=(
+            "Power applied to labeled/visible footprint coverage for "
+            "poisson_mass_coverage confidence."
+        ),
+    )
+    parser.add_argument(
+        "--registered-seed-construction",
+        choices=("winner_take_all", "joint_signed"),
+        default="winner_take_all",
+        help=(
+            "Historical per-sign winner-take-all seeds or joint signed masses "
+            "relu(m_pos-m_neg)/relu(m_neg-m_pos), which leave ties neutral."
+        ),
+    )
+    parser.add_argument(
         "--registered-selection-mode",
         choices=(
             SelectionMode.SEEDED_COMPONENT.value,
@@ -1216,8 +2498,27 @@ def main() -> None:
     parser.add_argument("--laplacian-weight", type=float, default=1.0)
     parser.add_argument("--cg-iterations", type=int, default=64)
     parser.add_argument("--cg-tolerance", type=float, default=1e-5)
+    parser.add_argument("--hard-seed-threshold", type=float, default=0.20)
+    parser.add_argument(
+        "--hard-seed-conflict-policy",
+        choices=("positive_priority", "exclusive_relative"),
+        default="positive_priority",
+    )
+    parser.add_argument("--hard-seed-conflict-margin", type=float, default=0.0)
+    parser.add_argument("--component-edge-threshold", type=float, default=1e-5)
+    parser.add_argument(
+        "--seeded-component-min-weight", type=float, default=0.20
+    )
     parser.add_argument("--solver-unary-temperature", type=float, default=0.10)
     parser.add_argument("--solver-support-threshold", type=float, default=0.50)
+    parser.add_argument(
+        "--require-asset-hashes",
+        action="store_true",
+        help=(
+            "Verify prompt assets before prediction and target masks only "
+            "after every prediction has been persisted."
+        ),
+    )
     args = parser.parse_args()
     if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
         parser.error("--feature-contribution-gamma must be finite and positive")
@@ -1258,6 +2559,78 @@ def main() -> None:
         or args.registered_seed_unary_weight < 0
     ):
         parser.error("--registered-seed-unary-weight must be finite and non-negative")
+    if (
+        args.registered_observation_fusion
+        in {"probability_mixture", "hard_seed_anchored_probability"}
+        and args.registered_seed_unary_weight != 0
+    ):
+        parser.error(
+            "probability registered-observation fusion requires "
+            "--registered-seed-unary-weight 0"
+        )
+    if args.registered_observation_fusion == "hard_seed_anchored_probability":
+        if args.registered_seed_construction != "joint_signed":
+            parser.error(
+                "hard_seed_anchored_probability requires "
+                "--registered-seed-construction joint_signed"
+            )
+        if args.hard_seed_threshold <= 0 or args.hard_seed_conflict_margin != 0:
+            parser.error(
+                "hard_seed_anchored_probability requires a positive "
+                "--hard-seed-threshold and --hard-seed-conflict-margin 0"
+            )
+    if (
+        not np.isfinite(args.registered_observation_mass_scale)
+        or args.registered_observation_mass_scale <= 0
+    ):
+        parser.error(
+            "--registered-observation-mass-scale must be finite and positive"
+        )
+    if (
+        not np.isfinite(args.registered_observation_coverage_power)
+        or args.registered_observation_coverage_power <= 0
+    ):
+        parser.error(
+            "--registered-observation-coverage-power must be finite and positive"
+        )
+    if (
+        args.registered_observation_confidence
+        in {"poisson_mass", "poisson_mass_coverage"}
+        and args.prompt_registration_mode != "raster_adjoint"
+    ):
+        parser.error(
+            "Poisson registered observation confidence requires "
+            "--prompt-registration-mode raster_adjoint"
+        )
+    if not 0 <= args.hard_seed_threshold <= 1:
+        parser.error("--hard-seed-threshold must be in [0,1]")
+    if (
+        not np.isfinite(args.hard_seed_conflict_margin)
+        or args.hard_seed_conflict_margin < 0
+        or not np.isfinite(args.component_edge_threshold)
+        or args.component_edge_threshold < 0
+        or not 0 <= args.seeded_component_min_weight <= 1
+    ):
+        parser.error("registered hard-seed/component parameters are invalid")
+    attestation_values = (
+        args.gpu_attestation_output,
+        args.expected_gpu_uuid,
+        args.expected_gpu_bus_id,
+    )
+    if any(attestation_values) and not all(attestation_values):
+        parser.error(
+            "GPU attestation output, expected UUID, and expected PCI bus must "
+            "be provided together"
+        )
+    if all(attestation_values):
+        if args.device != "cuda:0":
+            parser.error("GPU-attested NVOS evaluation requires --device cuda:0")
+        write_cuda_child_attestation(
+            output=args.gpu_attestation_output,
+            scene=args.scene_id,
+            expected_uuid=args.expected_gpu_uuid,
+            expected_bus_id=args.expected_gpu_bus_id,
+        )
     print(json.dumps(run(args), indent=2))
 
 

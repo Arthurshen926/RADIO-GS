@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""Run a VALA ScanNet baseline on the fixed VALA-aligned ScanNet-8 split.
+"""Run VALA feature lifting for the ScanNet paper/code cohorts.
 
 The public VALA ScanNet shell script is not directly usable with the prepared
 RADIO-GS ScanNet assets: it expects ``transforms_train.json`` and a GraphDECO
 checkpoint, while our RGB Gaussian assets are stored as trained PLYs plus
 gsplat-style state dicts.  This wrapper keeps the VALA core aggregation code
 unchanged, builds a lightweight staging tree with the metadata VALA expects,
-loads Gaussians from the trained PLY, aggregates VALA language features, and
-exports point-query predictions in the same PLY layout as the existing
-OpenGaussian qualitative baseline.
+loads Gaussians from the trained PLY and aggregates VALA language features.
+The historical mesh-kNN evaluator remains available only as a compatibility
+diagnostic.  Paper-facing evaluation must use
+``eval_vala_scannet_checkpoint_gaussian_protocol`` instead.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -31,8 +33,8 @@ from scipy.spatial import cKDTree
 from tqdm import tqdm
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-VALA_ROOT = Path("/root/baselines/VALA")
-VALA8_SCENES = (
+VALA_ROOT = Path("/root/baselines/VALA-upstream-48902a5")
+VALA_PAPER8_SCENES = (
     "scene0000_00",
     "scene0062_00",
     "scene0070_00",
@@ -42,6 +44,9 @@ VALA8_SCENES = (
     "scene0400_00",
     "scene0590_00",
 )
+VALA_CURRENT9_SCENES = VALA_PAPER8_SCENES + ("scene0645_00",)
+# Backward-compatible import used by older report builders.
+VALA8_SCENES = VALA_PAPER8_SCENES
 
 SPLIT_IDS = {
     "19": (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 24, 28, 33, 34, 36),
@@ -82,9 +87,9 @@ class ScenePaths:
     label_ply: Path
 
 
-def _ensure_vala_imports() -> None:
-    sys.path.insert(0, str(VALA_ROOT))
-    os.chdir(str(VALA_ROOT))
+def _ensure_vala_imports(vala_root: Path) -> None:
+    sys.path.insert(0, str(vala_root))
+    os.chdir(str(vala_root))
 
 
 def _symlink_or_replace(src: Path, dst: Path) -> None:
@@ -106,12 +111,55 @@ def _camera_angle_x(meta: dict) -> float:
     return float(2.0 * math.atan(width / (2.0 * fl_x)))
 
 
-def _stage_scene(scene: str, *, data_root: Path, model_root: Path, staging_root: Path) -> ScenePaths:
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _enrich_vala_transforms(source_path: Path) -> tuple[dict, list[str]]:
+    """Add fields required by VALA without changing the source frame cohort."""
+    with source_path.open("r", encoding="utf-8") as stream:
+        raw = json.load(stream)
+    frames = []
+    frame_ids = []
+    for frame in raw["frames"]:
+        stem = Path(str(frame["file_path"])).stem
+        frame_ids.append(stem)
+        frames.append(
+            {
+                "file_path": f"color/{stem}.jpg",
+                "transform_matrix": frame["transform_matrix"],
+                "language_features_path": f"langsplat/language_features/{stem}",
+                "instance_masks_path": "",
+                "correlation_path": "",
+            }
+        )
+    return {"camera_angle_x": _camera_angle_x(raw), "frames": frames}, frame_ids
+
+
+def _stage_scene(
+    scene: str,
+    *,
+    data_root: Path,
+    model_root: Path,
+    staging_root: Path,
+    test_loader_limit: int = 0,
+) -> ScenePaths:
     source = data_root / scene
     model = model_root / scene / "og_rgb_3dgs"
     label_ply = source / f"{scene}_vh_clean_2.labels.ply"
     point_ply = model / "point_cloud" / "iteration_30000" / "point_cloud.ply"
-    for required in (source / "transforms.json", source / "color", source / "language_features", label_ply, point_ply):
+    fallback_transforms = source / "transforms.json"
+    train_transforms = source / "transforms_train.json"
+    test_transforms = source / "transforms_test.json"
+    if not train_transforms.is_file():
+        train_transforms = fallback_transforms
+    if not test_transforms.is_file():
+        test_transforms = fallback_transforms
+    for required in (train_transforms, test_transforms, source / "color", source / "language_features", label_ply, point_ply):
         if not required.exists():
             raise FileNotFoundError(required)
 
@@ -122,26 +170,33 @@ def _stage_scene(scene: str, *, data_root: Path, model_root: Path, staging_root:
     _symlink_or_replace(source / "language_features", staged / "langsplat" / "language_features")
     _symlink_or_replace(point_ply, staged / "points3d.ply")
 
-    with (source / "transforms.json").open("r", encoding="utf-8") as f:
-        raw = json.load(f)
-    frames = []
-    for frame in raw["frames"]:
-        stem = Path(str(frame["file_path"])).name
-        frames.append(
-            {
-                "file_path": f"color/{stem}.jpg",
-                "transform_matrix": frame["transform_matrix"],
-                "language_features_path": f"langsplat/language_features/{stem}",
-                "instance_masks_path": "",
-                "correlation_path": "",
-            }
-        )
-    staged_meta = {
-        "camera_angle_x": _camera_angle_x(raw),
-        "frames": frames,
-    }
-    for name in ("transforms_train.json", "transforms_test.json"):
-        (staged / name).write_text(json.dumps(staged_meta, indent=2) + "\n", encoding="utf-8")
+    staged_splits = {}
+    for split, source_meta in (("train", train_transforms), ("test", test_transforms)):
+        staged_meta, frame_ids = _enrich_vala_transforms(source_meta)
+        source_frame_ids = list(frame_ids)
+        if split == "test" and test_loader_limit > 0:
+            staged_meta["frames"] = staged_meta["frames"][: int(test_loader_limit)]
+            frame_ids = frame_ids[: int(test_loader_limit)]
+        staged_path = staged / f"transforms_{split}.json"
+        staged_path.write_text(json.dumps(staged_meta, indent=2) + "\n", encoding="utf-8")
+        staged_splits[split] = {
+            "source": str(source_meta.resolve()),
+            "source_sha256": _sha256(source_meta),
+            "source_num_frames": len(source_frame_ids),
+            "source_frame_ids": source_frame_ids,
+            "staged_num_frames": len(frame_ids),
+            "staged_frame_ids": frame_ids,
+            "staging_change": "reader-required paths only; frame IDs and poses preserved",
+        }
+        if split == "test" and test_loader_limit > 0:
+            staged_splits[split]["staging_change"] = (
+                "reader-required paths plus loader-only test-camera truncation; "
+                "feature extraction consumes train cameras exclusively"
+            )
+    (staged / "staging_manifest.json").write_text(
+        json.dumps({"scene": scene, "splits": staged_splits}, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
     return ScenePaths(scene=scene, source=source, staged=staged, model=model, label_ply=label_ply)
 
@@ -195,19 +250,21 @@ def _make_vala_params(paths: ScenePaths, *, resolution: int) -> tuple[SimpleName
 def _extract_vala_features(
     paths: ScenePaths,
     *,
+    vala_root: Path,
+    checkpoint: Path,
     resolution: int,
     feature_level: int,
     batch_size: int,
     weight_threshold: float,
     max_views: int,
     force: bool,
+    allow_proxy_significance: bool,
 ) -> Path:
-    _ensure_vala_imports()
+    _ensure_vala_imports(vala_root)
     from scene import Scene
     from gaussian_renderer import GaussianModel
     from gaussian_renderer import render
 
-    checkpoint = paths.model / "none" / f"chkpnt30000_langfeat_{feature_level}_stochastic_gate.pth"
     if checkpoint.exists() and not force:
         return checkpoint
 
@@ -238,28 +295,36 @@ def _extract_vala_features(
                 feature_level=int(feature_level),
             )
             info = render_pkg["info"]
-            radii = info["radii"][0]
             means2d_all = info["means2d"][0]
-            height, width = int(gt_language_feature.shape[1]), int(gt_language_feature.shape[2])
-            in_frame = (
-                (means2d_all[:, 0] >= 0)
-                & (means2d_all[:, 0] < width)
-                & (means2d_all[:, 1] >= 0)
-                & (means2d_all[:, 1] < height)
-            )
-            mask = (radii > 0) & in_frame
+            activated = info.get("activated")
+            exact_significance = info.get("significance")
+            if activated is not None and exact_significance is not None:
+                mask = activated[0] > 0
+                significance = exact_significance[0, mask].float()
+            elif allow_proxy_significance:
+                radii = info["radii"][0]
+                height, width = int(gt_language_feature.shape[1]), int(gt_language_feature.shape[2])
+                in_frame = (
+                    (means2d_all[:, 0] >= 0)
+                    & (means2d_all[:, 0] < width)
+                    & (means2d_all[:, 1] >= 0)
+                    & (means2d_all[:, 1] < height)
+                )
+                mask = (radii > 0) & in_frame
+                opacity = info.get("opacities")
+                if opacity is None:
+                    significance = torch.ones_like(radii[mask], dtype=torch.float32)
+                else:
+                    significance = opacity[0].float()[mask] * torch.sqrt(
+                        radii[mask].float().clamp_min(1.0)
+                    )
+            else:
+                raise RuntimeError(
+                    "Pinned VALA gsplat did not return info['activated'] and "
+                    "info['significance']; refusing to substitute a visibility proxy"
+                )
             if not bool(mask.any()):
                 continue
-            opacity = info.get("opacities")
-            if opacity is None:
-                significance = torch.ones_like(radii[mask], dtype=torch.float32)
-            else:
-                opacity_view = opacity[0].float()
-                # gsplat does not expose the old LangSplat per-Gaussian
-                # contribution tensor.  This GT-free proxy preserves VALA's
-                # visibility-aware weighting: visible, opaque, larger-screen
-                # primitives contribute more strongly to the robust aggregate.
-                significance = opacity_view[mask] * torch.sqrt(radii[mask].float().clamp_min(1.0))
             gaussians.accumulate_gaussian_feature_per_view_robust(
                 gt_language_feature.permute(1, 2, 0),
                 gt_mask.squeeze(0),
@@ -486,59 +551,150 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, default=REPO_ROOT / "dataset/scannet_og")
     parser.add_argument("--model-root", type=Path, default=REPO_ROOT / "output/3dgs_models/scannet_og")
-    parser.add_argument("--output-root", type=Path, default=REPO_ROOT / "output/baselines/vala/scannet_vala8_compat_20260611")
-    parser.add_argument("--text-features", type=Path, default=VALA_ROOT / "autolabel/text_features.json")
-    parser.add_argument("--scenes", nargs="*", default=list(VALA8_SCENES))
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        default=None,
+        help=(
+            "Output root. paper8 defaults to the frozen exact-protocol root; "
+            "code9 and custom scene lists require an explicit root."
+        ),
+    )
+    parser.add_argument("--vala-root", type=Path, default=VALA_ROOT)
+    parser.add_argument("--text-features", type=Path, default=None)
+    parser.add_argument("--cohort", choices=("paper8", "code9"), default="paper8")
+    parser.add_argument("--scenes", nargs="*", default=None)
     parser.add_argument("--feature-level", type=int, default=0)
-    parser.add_argument("--resolution", type=int, default=1)
+    parser.add_argument("--resolution", type=int, default=-1)
     parser.add_argument("--batch-size", type=int, default=50000)
     parser.add_argument("--weight-threshold", type=float, default=1e-5)
     parser.add_argument("--max-views", type=int, default=0, help="Debug only; 0 uses all views.")
+    parser.add_argument(
+        "--test-loader-limit",
+        type=int,
+        default=0,
+        help=(
+            "Limit eagerly loaded test cameras to reduce memory. Safe for extract-only "
+            "runs because VALA aggregates scene.getTrainCameras() exclusively; 0 keeps all."
+        ),
+    )
     parser.add_argument("--knn", type=int, default=4)
     parser.add_argument("--point-chunk", type=int, default=8192)
     parser.add_argument("--force-extract", action="store_true")
     parser.add_argument("--skip-extract", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument(
+        "--extract-only",
+        dest="extract_only",
+        action="store_true",
+        default=True,
+        help="Canonical default: stop after VALA semantic extraction.",
+    )
+    mode.add_argument(
+        "--legacy-mesh-eval",
+        dest="extract_only",
+        action="store_false",
+        help="Diagnostic only: run the superseded mesh-kNN compatibility readout.",
+    )
+    parser.add_argument(
+        "--allow-proxy-significance",
+        action="store_true",
+        help="Legacy diagnostic only; strict runs fail if official significance is unavailable.",
+    )
     args = parser.parse_args()
+    if args.test_loader_limit < 0:
+        parser.error("--test-loader-limit must be non-negative")
 
-    output_root = args.output_root.resolve()
+    vala_root = args.vala_root.resolve()
+    scenes = args.scenes
+    if scenes is None:
+        scenes = list(VALA_PAPER8_SCENES if args.cohort == "paper8" else VALA_CURRENT9_SCENES)
+    else:
+        canonical_scenes = list(
+            VALA_PAPER8_SCENES if args.cohort == "paper8" else VALA_CURRENT9_SCENES
+        )
+        if list(scenes) != canonical_scenes:
+            parser.error(
+                f"--cohort {args.cohort} rejects a mismatched --scenes list; "
+                "use the Gaussian evaluator's --cohort custom for subset diagnostics"
+            )
+    if args.output_root is None:
+        if args.cohort != "paper8":
+            parser.error("--output-root is required for the code9 sensitivity")
+        output_root = (
+            REPO_ROOT
+            / "output/protocol_audit_20260801/vala/"
+            "scannet_official_significance_paper8_v2"
+        ).resolve()
+    else:
+        output_root = args.output_root.resolve()
+    text_feature_path = (
+        args.text_features.resolve()
+        if args.text_features is not None
+        else vala_root / "autolabel" / "text_features.json"
+    )
     staging_root = output_root / "staged"
     results = []
-    for scene in args.scenes:
-        paths = _stage_scene(scene, data_root=args.data_root.resolve(), model_root=args.model_root.resolve(), staging_root=staging_root)
-        checkpoint = paths.model / "none" / f"chkpnt30000_langfeat_{args.feature_level}_stochastic_gate.pth"
+    extracted = []
+    for scene in scenes:
+        paths = _stage_scene(
+            scene,
+            data_root=args.data_root.resolve(),
+            model_root=args.model_root.resolve(),
+            staging_root=staging_root,
+            test_loader_limit=args.test_loader_limit,
+        )
+        checkpoint = output_root / "checkpoints" / scene / f"chkpnt30000_langfeat_{args.feature_level}_stochastic_gate.pth"
         if not args.skip_extract:
             checkpoint = _extract_vala_features(
                 paths,
+                vala_root=vala_root,
+                checkpoint=checkpoint,
                 resolution=args.resolution,
                 feature_level=args.feature_level,
                 batch_size=args.batch_size,
                 weight_threshold=args.weight_threshold,
                 max_views=args.max_views,
                 force=args.force_extract,
+                allow_proxy_significance=args.allow_proxy_significance,
             )
         if not checkpoint.exists():
             raise FileNotFoundError(f"VALA feature checkpoint missing for {scene}: {checkpoint}")
+        extracted.append({"scene": scene, "checkpoint": str(checkpoint)})
+        if args.extract_only:
+            continue
         results.append(
             _evaluate_scene(
                 paths,
                 checkpoint,
                 output_root=output_root,
-                text_feature_path=args.text_features.resolve(),
+                text_feature_path=text_feature_path,
                 knn=args.knn,
                 point_chunk=args.point_chunk,
             )
         )
     payload = {
-        "method": "VALA local compatibility reproduction",
+        "method": (
+            "VALA official-significance feature extraction"
+            if args.extract_only
+            else "VALA legacy mesh-kNN compatibility reproduction"
+        ),
+        "cohort": args.cohort,
+        "cohort_scenes": scenes,
+        "vala_root": str(vala_root),
+        "extracted": extracted,
         "scenes": results,
-        "macro": _macro(results),
+        "macro": _macro(results) if results else {},
         "settings": {
             "feature_level": args.feature_level,
             "resolution": args.resolution,
             "batch_size": args.batch_size,
             "weight_threshold": args.weight_threshold,
             "max_views": args.max_views,
+            "test_loader_limit": args.test_loader_limit,
             "knn": args.knn,
+            "allow_proxy_significance": args.allow_proxy_significance,
+            "paper_facing_evaluator": "radio_gs.scripts.eval_vala_scannet_checkpoint_gaussian_protocol",
         },
     }
     _write_reports(output_root, payload)

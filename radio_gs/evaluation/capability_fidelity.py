@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import torch
 import torch.nn.functional as F
 
@@ -116,7 +118,10 @@ def select_query_free_compositor(
         value = report[space].get(key)
         if value is None:
             raise ValueError(f"undefined {space}/{key} in compositor report")
-        return float(value)
+        result = float(value)
+        if not math.isfinite(result):
+            raise ValueError(f"non-finite {space}/{key} in compositor report")
+        return result
 
     def relation_score(report: dict) -> float:
         values: list[float] = []
@@ -126,7 +131,12 @@ def select_query_free_compositor(
                 value = relation.get(key)
                 if value is None:
                     raise ValueError(f"undefined {space}/{key} in compositor report")
-                values.append(float(value))
+                result = float(value)
+                if not math.isfinite(result):
+                    raise ValueError(
+                        f"non-finite {space}/{key} in compositor report"
+                    )
+                values.append(result)
         return sum(values) / len(values)
 
     reference = variants[baseline]
@@ -144,16 +154,26 @@ def select_query_free_compositor(
             for space in spaces
         }
         score = relation_score(report)
-        unsupported_fraction = 1.0 - float(
-            report.get("support_fraction_on_visible", 1.0)
+        if "support_fraction_on_visible" not in report:
+            raise ValueError(
+                f"{name}: capability report does not declare visible support"
+            )
+        support_fraction = float(report["support_fraction_on_visible"])
+        if not math.isfinite(support_fraction) or not 0.0 <= support_fraction <= 1.0:
+            raise ValueError(f"{name}: visible support fraction is invalid")
+        unsupported_fraction = 1.0 - support_fraction
+        dense_guard_passed = (
+            max(mean_drops.values()) <= float(max_mean_dense_drop)
+            and max(p05_drops.values()) <= float(max_p05_dense_drop)
         )
-        eligible = max(mean_drops.values()) <= float(max_mean_dense_drop) and max(
-            p05_drops.values()
-        ) <= float(max_p05_dense_drop) and unsupported_fraction <= float(
-            max_unsupported_fraction
+        support_guard_passed = (
+            unsupported_fraction <= float(max_unsupported_fraction)
         )
+        eligible = dense_guard_passed and support_guard_passed
         candidates[name] = {
             "eligible": bool(eligible),
+            "dense_guard_passed": bool(dense_guard_passed),
+            "support_guard_passed": bool(support_guard_passed),
             "unsupported_fraction": unsupported_fraction,
             "mean_dense_drop": mean_drops,
             "p05_dense_drop": p05_drops,
@@ -161,19 +181,47 @@ def select_query_free_compositor(
             "relation_gain_over_alpha_mean": score - baseline_score,
         }
     eligible_names = [name for name, values in candidates.items() if values["eligible"]]
-    best = max(
-        eligible_names,
-        key=lambda name: (
-            candidates[name]["official_relation_score"],
-            -sum(candidates[name]["mean_dense_drop"].values()),
-            name == baseline,
-        ),
-    )
-    if candidates[best]["relation_gain_over_alpha_mean"] < float(min_relation_gain):
-        best = baseline
+    selection_status = "candidate_selected"
+    best: str | None = None
+    if not eligible_names:
+        selection_status = (
+            "support_gate_failed_no_promotion"
+            if all(
+                not values["support_guard_passed"]
+                for values in candidates.values()
+            )
+            else "no_eligible_candidate_no_promotion"
+        )
+    else:
+        best = max(
+            eligible_names,
+            key=lambda name: (
+                candidates[name]["official_relation_score"],
+                -sum(candidates[name]["mean_dense_drop"].values()),
+                name == baseline,
+            ),
+        )
+        if (
+            candidates[best]["relation_gain_over_alpha_mean"]
+            < float(min_relation_gain)
+        ):
+            if candidates[baseline]["eligible"]:
+                best = baseline
+                selection_status = (
+                    "baseline_retained_relation_gain_below_threshold"
+                )
+            else:
+                best = None
+                selection_status = (
+                    "relation_gain_gate_failed_no_promotion"
+                )
     return {
         "selected_variant": best,
         "baseline_variant": baseline,
+        "selection_status": selection_status,
+        "promotion_allowed": bool(
+            best is not None and best != baseline
+        ),
         "selection_uses_task_labels": False,
         "rule": (
             "mean dense drop <= max_mean_dense_drop and p05 dense drop <= "

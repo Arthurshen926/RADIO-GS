@@ -1,0 +1,135 @@
+{
+  "camera_contract": {
+    "camera_axes": "opencv_x_right_y_down_z_forward",
+    "image_dimensions": [
+      640,
+      480
+    ],
+    "intrinsics_bindings": {
+      "color": {
+        "bytes": 186,
+        "relative_path": "intrinsics_color.txt",
+        "sha256": "27ac50ff96747e4b4a3b99b815cde2f13b6b36584c05d0e0885e3067baa7a5c1"
+      },
+      "depth": {
+        "bytes": 184,
+        "relative_path": "intrinsics_depth.txt",
+        "sha256": "724bf7f283fac2e67601d047b76433fd6c964e1fd6846d1ddb76b876dec505a6"
+      }
+    },
+    "intrinsics_model": "PINHOLE",
+    "pose_convention": "camera_to_world",
+    "pose_fixtures": [
+      {
+        "camera_center_world": [
+          4.83481693,
+          0.6515162,
+          1.57706583
+        ],
+        "camera_xyz": [
+          0.125,
+          -0.075,
+          2.0
+        ],
+        "frame_id": 1647,
+        "pixel_uv": [
+          355.616912841875,
+          217.829852294875
+        ],
+        "world_xyz": [
+          5.334103144748023,
+          2.567314932591945,
+          1.2581951791685306
+        ]
+      },
+      {
+        "camera_center_world": [
+          5.67725372,
+          2.83986354,
+          1.52302599
+        ],
+        "camera_xyz": [
+          0.125,
+          -0.075,
+          2.0
+        ],
+        "frame_id": 3509,
+        "pixel_uv": [
+          355.616912841875,
+          217.829852294875
+        ],
+        "world_xyz": [
+          5.314573731659357,
+          1.042304664788669,
+          0.711548746815569
+        ]
+      },
+      {
+        "camera_center_world": [
+          5.0736618,
+          3.07682991,
+          1.63891995
+        ],
+        "camera_xyz": [
+          0.125,
+          -0.075,
+          2.0
+        ],
+        "frame_id": 3106,
+        "pixel_uv": [
+          355.616912841875,
+          217.829852294875
+        ],
+        "world_xyz": [
+          3.0785031225652606,
+          2.881262343067889,
+          1.6873469943152613
+        ]
+      }
+    ]
+  },
+  "coverage_prefix": {
+    "count": 120,
+    "ordered_frame_ids_sha256": "d36b4289e6df0b672fd7e935ed8f4d81574a882aa5a317766451b45291f8d07a"
+  },
+  "provenance": {
+    "audit_date_utc": "2026-08-01",
+    "audit_scope": "independent_cpu_source_adapter_tofu",
+    "evaluator_private_manifest_opened": false,
+    "field_contract_sha256": "ea1703be96daed5674f06ce7bc29db4d24186b9128a06aebe52a58f272cb3d70",
+    "materialization_mode": "decoded_sens",
+    "query_private_anchor_pose_depth_used": false,
+    "source_sens_sha256": "3a439012733c742f602ce45bbdbec2f6f54bebe8a157dc2bea058f0010f03f9b",
+    "statement": "hashes_frozen_after_manual_protocol_audit_without_evaluator_private_inputs"
+  },
+  "scene_id": "scene0050_02",
+  "schema_version": "ludvig_pfpr_source_adapter_ledger_v1",
+  "selected_source_inventory": {
+    "canonical_records_sha256": "3a7fbacd7d94d58f29c899231201a5e1a383e6c1129c3f8688e87392a7c60fa3",
+    "canonicalization": "sha256_of_RFC8259_canonical_JSON_ordered_records_sort_keys_compact_utf8",
+    "modality_records_sha256": {
+      "color": "d390b6eecc7548467f3887724343fe6f7c9476788e248696d245ac189eea15cd",
+      "depth": "fb65a0d843992dd40f3026d930aa9df06d37cec89fc0d1d61f14bd33a324164c",
+      "pose": "2dc8c487e6c1d29e98f808943c861476f49f5746f9431e0d2de2f0098b7898b7"
+    },
+    "record_count": 120,
+    "record_schema": {
+      "modalities": [
+        "color",
+        "depth",
+        "pose"
+      ],
+      "modality_binding_fields": [
+        "relative_path",
+        "bytes",
+        "sha256"
+      ],
+      "ordering": "coverage_prefix_order",
+      "record_fields": [
+        "frame_id",
+        "modalities"
+      ]
+    }
+  },
+  "trust_model": "trust_on_first_audit"
+}

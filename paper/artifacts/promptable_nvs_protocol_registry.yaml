@@ -1,5 +1,6 @@
 schema_version: 1
 created: 2026-07-12
+updated: 2026-08-01
 purpose: >-
   Fail-closed registry for NVOS and SPIn-NeRF promptable novel-view
   segmentation. Published values are context only until a row has the same
@@ -97,7 +98,44 @@ protocols:
     upstream:
       repository: https://github.com/naver/ludvig
       audited_commit: 4461fc515439bb498a75d71738a1e73cf7a452ed
+    local_reproduction:
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 1f1bc95d70f22fcfb1cfe2df1bc3f2416ebb667c2faeddb7dc24bcd9bceed68f
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 20fdda242368540aba731afe4d477635030a25e90d0718e6b41231d64f812842
+      reproduction_patch: reproductions/ludvig/patches/0001-reproduction-seeds-and-json-results.patch
+      reproduction_patch_sha256: 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      accepted_historical_patch_sha256:
+        - 7c86d5883058fb9e529608ba6cf856c04e66d37d338a69a8ca6863725292e9ac
+        - 20061d98ec591d833ef5080bf7c454bc298135b2bb04acbd9e516b6d8d30e587
+        - 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      reproduction_patch_base_sha256: 7ecd469119b4ee87e3cc9cf5764426ec6c8a1d9118db072beab4d8335ea0d353
+      patched_segmentation_sha256: ecc9d7b1a29faa7d1091e14e9c5a50036180c5ba8671ba396d0292075a559b0e
+      patched_entrypoint_sha256: ae2eb5af2050e619a8d3a6f5bb04d228b4c090425cfcaf30f25aa9a859cddd3e
+      patched_sam_predictor_sha256: 3cbf8bda6f7334086c3ba7c117a1b604ed12757c351fff96054a6a2f484684b9
+      patched_image_utils_sha256: 6047b23c26fcece6bc451961a532b302e6aeb0dcdce0c5c89a7e46f71eed87c1
+      patched_solver_sha256: 6b71c91c5e4dbe50b2995f6b9428c9cd9bd6940ab58b1f16fe788dfc50b1c70c
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 7f1d73e2f0bf38c8e09466f78b7954a36c1c97e1a72569828d8226953fe9a632
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+      spin_truck_trainer: reproductions/ludvig/train_spin_truck_all_view_3dgs.py
+      spin_truck_trainer_sha256: 83f0ab28c169a4ac7aa39ca3c33b889c5b2d91ca632172b717c0ca93725c5e78
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 4daa492d2026d58f5d83184dc12dbf4f87747bf1d8630c0e70bf563c5acfed79
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+      thermal_guard_default_policy:
+        poll_seconds: 3.0
+        query_timeout_seconds: 2.0
+        warning_temperature_c: 78.0
+        pause_temperature_c: 81.0
+        resume_temperature_c: 70.0
+        resume_stable_samples: 2
     common:
+      foundation_model:
+        variant: SAM_ViT-H
+        checkpoint_sha256: a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e
+        arbitrary_checkpoint_allowed: false
       gaussian_splatting:
         implementation: original_3dgs
         iterations: 30000
@@ -160,9 +198,16 @@ protocols:
 
   ludvig_spin_nerf_9scene_without_fork_diagnostic_v1:
     parent_protocol: ludvig_official_online_multiview_v1
-    status: diagnostic_incomplete_cohort
+    status: all_nine_locally_available_scenes_exact_complete_and_fork_missing
     scenes: [orchids, leaves, fern, room, horns, fortress, pinecone, truck, lego]
     missing_scenes: [fork]
+    exact_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+    exact_pending_available_scenes: []
+    historical_preflights:
+      truck:
+        status: superseded_by_completed_30k_checkpoint_and_three_seed_result
+        dry_run_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_truck_cpu_dryrun_v1/training_manifest.json
+        dry_run_manifest_sha256: e8cff51860a8f82e1b8bcebcdc6710d579ba1468d638c3fd2d088db1f0fffef0
     evaluation:
       reference_scored: false
       aggregation: frame_mean_then_equal_weight_macro_over_9_available_scenes
@@ -170,12 +215,251 @@ protocols:
       ludvig_dinov2: 94.8111111111
       ludvig_sam: 94.5777777778
       ludvig_sam2: 94.5555555556
+    completed_nine_scene_diagnostic:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      seeds_per_scene: [0, 1, 2]
+      local_scene_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      released_all_view_geometry: true
+      released_all_view_training_provenance_verified: true
+      all_runs_have_verified_upstream_patch: true
+      eligible_for_matching_released_online_multiview_diagnostic: true
+      eligible_for_9scene_macro: true
+      pinecone:
+        run_values_iou_percent: [81.40145559710756, 86.28110177736835, 86.13687631589627]
+        local_mean_iou_percent: 84.60647789679072
+        paper_iou_percent: 88.8
+        delta_local_minus_paper_points: -4.1935221032092755
     eligible_for_spin_nerf_10scene_table: false
     eligible_for_strict_unseen_claim: false
+    artifacts:
+      exact_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      exact_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest_sha256_by_scene:
+        fern: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+        fortress: e01d76a52f0e0df0176e48301f9753ec610b475114f0449ab4cb634c6938aab3
+        horns: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+        leaves: 2a610c0c356ae05f9a7d712c4352e032b137fa0794df3d701ec550759b67ba69
+        lego: 145f2e8e3b10c36f085ffb6c389ec6e91f744310f88345e7da5add058593b5a4
+        orchids: 8fc085e1c6ad817772898fd5e24f120b72ec78d3c0efa793a7ccbd761935d3d7
+        pinecone: 2d1b5d8b14765f03dd0b84a3ed64f41d7dffcf2d776835a2d6270cf328eb816b
+        room: 275c72ced3689cbca6b51cca8cc7830130fa6a1ac2d4eed3d471a346a7345dd4
+        truck: 858ac2c6b6438ef609ac7bc82c701067a0117dc470159179326ed26929de2cd6
+      point_cloud_sha256_by_scene:
+        fern: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+        fortress: 723bfaa66c2e2da9c5e76662dc317d86fafe0dfed5c109b5e9fd6c11e8626c45
+        horns: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+        leaves: da74e7c81debf212d0b3c6f7278a62259dfcc045f97401cb9370b1e62d340378
+        lego: 544437bb194995502d3a8cfe8a74935944adb6b90b22de2a3d243656d9cc2183
+        orchids: e04a38f5aa22aaa716ec1c741222e1d1c94fb3cf0305aa4cc06a50a823ae5ef5
+        pinecone: 27d5670cd642542cdba671a7a5718ae463b1097c437d2f4e232999090aef451e
+        room: c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd
+        truck: aa5b6d166277cde9d49632c9ffa427c392a4e52b7c68719c3d6ca312bedc3492
+      pinecone_run_manifest_sha256_by_seed: [c6d17f651758e81804bed570cedf1eaa76f3e787c83cc2c136d24e8f9333c24c, 573029cfa39c63ac65b5c615f8d89a17e36fc68eccc7d86d4c6fecc0e38a2573, de0d7bb7ce100e7d21b6554c0ae96c7dcc76c32c78cc279a82a8e8dd60130761]
+      pinecone_protocol_result_sha256_by_seed: [f51efdd892bfd936edeb36a1ffe0b4e6f718ff45d4121feb80482717c71cdee0, 0e432ceec545a61d6cb12d88b80d47127fd9f1ed64a182b38e973ff4c500978a, 88757c60385af7d2c5881b9ce72f92accc55db3cb9b8e153d5b7912f60d21c8e]
+
+  ludvig_spin_room_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: room
+    geometry_scene: room
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [97.12692191657342, 97.09182876192173, 97.34374774015015]
+      local_mean_iou_percent: 97.18749947288177
+      paper_room_iou_percent: 96.5
+      delta_local_minus_paper_points: 0.6874994728817683
+      metric_source: scene_mean_iou_after_reference_calibration
+      selected_threshold_parameter_per_seed: [73, 74, 72]
+      selected_sam_candidate_per_seed: [0, 0, 0]
+      reference_frames: 1
+      scored_target_frames: 40
+      oracle_values_aggregated: false
+    current_nine_scene_diagnostic:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      local_scene_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      eligible_for_matching_released_online_multiview_diagnostic: true
+      eligible_for_9scene_macro: true
+    resolution_safe_staging:
+      strategy: fractional_center_crop_bicubic_preserve_jpeg_tables_v1
+      source_rgb_dimensions: [4005, 3003]
+      center_crop_dimensions: [4004.0, 3003.0]
+      center_crop_box: [0.5, 0.0, 4004.5, 3003.0]
+      target_rgb_dimensions: [1600, 1200]
+      resize_resampling: BICUBIC
+      pillow_version: 11.3.0
+      libjpeg_version: 6.2
+      jpeg_tables_and_sampling_preserved: true
+      source_dataset_modified: false
+      protocol_effect: shape-consistency repair only; prompt, calibration, metric, and aggregation unchanged
+    failure_diagnosis:
+      excluded_attempt: exact_f7a_allview_room_seed0_v1
+      excluded_from_all_metrics: true
+      returncode: 1
+      error: >-
+        SAM uplift resolution mismatch before prompt sampling:
+        prompt=(1200, 1600), image=(1199, 1600), camera=(1200, 1600)
+      accepted_attempts: exact_f7a_allview_room_seed0_v2_resolution_safe, exact_f7a_allview_room_seed1_v2_resolution_safe, exact_f7a_allview_room_seed2_v2_resolution_safe
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 41
+      held_out_training_views: 0
+      source_raw_rgb_images: 41
+      source_raw_cameras_bin_sha256: 24d758b2eb1b03a3c3b3413383f22af156e45d728dc4674a045e003f1218d547
+      source_raw_images_bin_sha256: 70081f9c77d4e77cd883515fed8cddeff4564b844886d469eb36ef40332a3ef0
+      source_raw_points3d_bin_sha256: 6f1c189edd3776decefebb3750b490843c7427d01bea40b286616afe9776643e
+      pinhole_cameras_bin_sha256: f5fffc812396ecda167042c4d2b7ecd5eaaad4e30814b62ee7594cf1cfed0d55
+      pinhole_images_bin_sha256: 29d22d20e8deeefa91c3960af1b6b0f522e451b5fbed95704b32b7bc32c0ab85
+      pinhole_points3d_bin_sha256: 790569a1db2aea200565448ca65bbb22d2040c597d423bf373b04bb55ec4b913
+      training_manifest_sha256: 275c72ced3689cbca6b51cca8cc7830130fa6a1ac2d4eed3d471a346a7345dd4
+      point_cloud_sha256: c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd
+      point_cloud_bytes: 72323043
+      point_cloud_vertices: 291619
+      run_manifest_sha256_by_seed: [95fe50d036a218e3d4e0e5b28eccacfe9ebb38ef5d4dfe1d1ce47b469b117557, 903afb587c034d65284ff0488821370db09523a73a7d41091ab2a93b106590a2, 77b2f522c1a382fa66f3f6f61aadc875d6008e10843fe98b2633e8fb800105f5]
+      protocol_result_sha256_by_seed: [f45b07652c3e94237a7c9320c708ae5c9442effad83bcb77c2d3685e182d7468, e581799298942eb662e88914d819e67b8e6c269d72862cf182c884eaaff9956e, 4a0db78b1fa86af4855f81a52a09010e63b70c6f84aa91f6dba050fdc7b665af]
+      all_runs_have_verified_upstream_patch: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/room/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/spin/released_all_view/room/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      failed_v1_run_excluded_from_metrics: output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v1/run_manifest.json
+      failed_v1_run_manifest_sha256: be2a512557684c94814551ca12f1589c2767d271e8205f8c24923c7165b04512
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: b2135e390b17574af774b6956e56d9d8460222948496f74e95b367e62f4bffb0
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 20fdda242368540aba731afe4d477635030a25e90d0718e6b41231d64f812842
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
+
+  ludvig_spin_truck_released_all_view_cpu_dryrun_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: superseded_cpu_staging_preflight
+    superseded_by: ludvig_spin_truck_released_all_view_exact_3seed_v1
+    dataset: SPIn-NeRF multiview segmentation
+    scene: truck
+    geometry_scene: truck
+    geometry_protocol: released_all_view
+    source_asset_contract: native_spin_graphdeco_truck_half_resolution_pinhole
+    training:
+      registered_views: 251
+      held_out_views: 0
+      iterations: 30000
+      eval_split_enabled: false
+      resolution_argument: -1
+      source_rgb_dimensions: [979, 546]
+      source_camera_metadata_dimensions: [1957, 1091]
+      evaluation_render_resolution: [979, 546]
+      cpu_dry_run_only: true
+      gpu_training_complete: false
+    artifacts:
+      general_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      general_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      truck_trainer: reproductions/ludvig/train_spin_truck_all_view_3dgs.py
+      truck_trainer_sha256: 83f0ab28c169a4ac7aa39ca3c33b889c5b2d91ca632172b717c0ca93725c5e78
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      dry_run_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_truck_cpu_dryrun_v1/training_manifest.json
+      dry_run_manifest_sha256: e8cff51860a8f82e1b8bcebcdc6710d579ba1468d638c3fd2d088db1f0fffef0
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: false
+      local_9scene_macro: false
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: >-
+        The CPU dry run validates source staging and the frozen training
+        contract only. It remains ineligible on its own even though a separate,
+        completed checkpoint and three-seed result now exist.
+
+  ludvig_spin_truck_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: truck
+    geometry_scene: truck
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [96.7499675983893, 96.57112436400695, 96.81178718348382]
+      local_mean_iou_percent: 96.71095971529336
+      paper_truck_iou_percent: 94.9
+      delta_local_minus_paper_points: 1.8109597152933503
+      metric_source: scene_mean_iou_after_reference_calibration
+      selected_threshold_parameter_per_seed: [87, 87, 87]
+      selected_sam_candidate_per_seed: [2, 2, 2]
+      reference_frames: 1
+      scored_target_frames: 64
+      oracle_values_aggregated: false
+    current_nine_scene_diagnostic:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      local_scene_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      eligible_for_matching_released_online_multiview_diagnostic: true
+      eligible_for_9scene_macro: true
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 251
+      held_out_training_views: 0
+      source_asset_contract: native_spin_graphdeco_truck_half_resolution_pinhole
+      source_rgb_dimensions: [979, 546]
+      source_camera_metadata_dimensions: [1957, 1091]
+      effective_training_dimensions: [979, 546]
+      evaluation_render_resolution: [979, 546]
+      training_gpu_wall_seconds: 1396.461709022522
+      training_manifest_sha256: 858ac2c6b6438ef609ac7bc82c701067a0117dc470159179326ed26929de2cd6
+      point_cloud_sha256: aa5b6d166277cde9d49632c9ffa427c392a4e52b7c68719c3d6ca312bedc3492
+      point_cloud_bytes: 640766572
+      point_cloud_vertices: 2583730
+      run_manifest_sha256_by_seed: [abb735687067fb32ed139fda366150a4bd106c20e9c1374ee44a598ab9ef4eaa, 665b0d63255ed445ba26723995344e610ae7ca7ecf0dac49bf904d63e74bc267, b84c52fa446b8ab55625949d79851d27c594455a0123a70199e623dad66ef096]
+      protocol_result_sha256_by_seed: [5c26a177d2a9929d10b5a8281afc9ab0636de61f8158566b031e2ce74f7d40ce, 5874c069c9f68f2c58f73cac7805bc59d3b85ed3a1ea5a474a9a8751c98eeb48, e7806edc5bfca76ff31b5f6f319206e7023bec852f3fee4e1875e0d5bde2fa24]
+      all_runs_have_verified_upstream_patch: true
+      postflight_recovery:
+        reason: legacy wrapper compared Graphdeco camera metadata dimensions with released half-resolution RGB dimensions
+        gpu_work_performed: false
+        model_files_modified: false
+        recovery_tool_sha256: 1af23fe2c89279c1c819d99aa481315b9318146735d6fa6cb1a7c4f4c7c8eb7a
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 1caf00531ed357d7fd8590e897584ccc0d744a05fb16deffe6f498a668aa8457
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 20fdda242368540aba731afe4d477635030a25e90d0718e6b41231d64f812842
+      truck_trainer: reproductions/ludvig/train_spin_truck_all_view_3dgs.py
+      truck_trainer_sha256: 83f0ab28c169a4ac7aa39ca3c33b889c5b2d91ca632172b717c0ca93725c5e78
+      postflight_recovery_tool: reproductions/ludvig/recover_spin_truck_training_postflight.py
+      postflight_recovery_tool_sha256: 1af23fe2c89279c1c819d99aa481315b9318146735d6fa6cb1a7c4f4c7c8eb7a
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
 
   ludvig_nvos_fern_released_all_view_exact_preflight_v1:
     parent_protocol: ludvig_official_online_multiview_v1
-    status: blocked_hardware_after_validated_cpu_dry_run
+    status: completed_checkpoint_and_exact_fern_three_seed_evaluation
     scene: fern
     geometry_protocol: released_all_view
     source:
@@ -222,28 +506,35 @@ protocols:
     artifacts:
       source_lock: reproductions/ludvig/official_3dgs.lock.json
       trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
       dry_run_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_dryrun_v2/training_manifest.json
       dry_run_manifest_sha256: c81670c3310147a7ce204d7ea424a2fe8e855f994b14b0a73b16d30e6a3f6ef2
-    blocker:
-      type: gpu_hardware_lost
-      last_good_at: "2026-07-31 12:49:00.349"
-      first_gpu_lost_at: "2026-07-31 12:49:00.600"
-      gpu_process_queued: false
-      blocked_flock_process_present: false
-    resume_boundary:
-      - explicit_hardware_recovery_confirmation
-      - train_one_all_view_30k_checkpoint
-      - validate_and_hash_iteration_30000_ply
-      - evaluate_same_checkpoint_with_seeds_0_1_2
-      - aggregate_selected_iou_only_and_compare_paper_fern_85p5
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+      exact_fern_summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_3seed_summary.json
+      exact_fern_summary_sha256: f6a40968f18e32cd0cf0065d44b2f42620d86d5bcef35adee80e66b48064ec5b
+    completed_evaluation:
+      seeds: [0, 1, 2]
+      run_values_iou_percent: [84.47952301482711, 84.55520707736805, 84.48712054128204]
+      local_mean_iou_percent: 84.5072835444924
+      paper_fern_iou_percent: 85.5
+      delta_local_minus_paper_points: -0.9927164555076047
+      all_runs_have_verified_upstream_patch: true
     eligibility:
       exact_paper_protocol_comparison: false
-      reason: no completed checkpoint or three-seed result while GPU is unavailable
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      reason: >-
+        fern is exact and complete for seeds 0/1/2; the separate exact
+        full-eight-task protocol row is also complete, but this preflight row
+        remains fern-only
       strict_unseen_exact_match: false
 
   ludvig_spin_fern_checkpoint_reuse_preflight_v1:
     parent_protocol: ludvig_official_online_multiview_v1
-    status: ready_pending_exact_nvos_fern_checkpoint_and_gpu_recovery
+    status: completed_reuse_and_exact_fern_three_seed_evaluation
     scene: fern
     checkpoint_reuse:
       can_reuse_exact_nvos_fern_all_view_30k: true
@@ -270,20 +561,875 @@ protocols:
       sam_candidates: 3
       threshold_and_candidate_selected_on_reference: true
       target_masks_used_for_selection: false
-    planned_evaluation:
+    completed_evaluation:
       seeds: [0, 1, 2]
+      run_values_iou_percent: [97.03640290264825, 97.04568881614468, 97.05169990481623]
+      local_mean_iou_percent: 97.04459720786971
       paper_fern_iou_percent: 97.0
-      estimated_total_runtime_minutes: [6, 15]
+      delta_local_minus_paper_points: 0.044597207869713884
+      all_runs_have_verified_upstream_patch: true
       second_3dgs_training_run: false
     artifacts:
       preflight: output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json
       preflight_sha256: ecf1df13466f32f4b16babbcb33b5206fcb613cea0579e5a94abe9f1e77db9dd
       preflight_script: reproductions/ludvig/preflight_spin_fern.py
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+      point_cloud_sha256: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+      exact_fern_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_3seed_summary.json
+      exact_fern_summary_sha256: fd11b9aaa873a3a8b4ddebcdde84470c4016e541a9b6acd19a4659d7803ed917
     eligibility:
-      single_scene_diagnostic: false
+      single_scene_diagnostic: true
+      exact_per_scene_three_seed_paper_protocol_check: true
       local_9scene_macro: false
       paper_10scene_row: false
-      reason: checkpoint and three-seed fern results are pending; Fork and eight other local scene results are not part of this preflight
+      reason: fern is exact and complete, but Fork and three other locally available scene results remain absent from the current exact cohort
+
+  ludvig_nvos_fern_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    preflight_protocol: ludvig_nvos_fern_released_all_view_exact_preflight_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: fern
+    geometry_scene: fern
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [84.47952301482711, 84.55520707736805, 84.48712054128204]
+      local_mean_iou_percent: 84.5072835444924
+      paper_fern_iou_percent: 85.5
+      delta_local_minus_paper_points: -0.9927164555076047
+      metric_source: selected_iou_fixed_threshold
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 20
+      held_out_training_views: 0
+      training_manifest_sha256: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+      point_cloud_sha256: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_3seed_summary.json
+      summary_sha256: f6a40968f18e32cd0cf0065d44b2f42620d86d5bcef35adee80e66b48064ec5b
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact fern check remains per-task
+
+  ludvig_nvos_flower_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: flower
+    geometry_scene: flower
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [97.54894488560335, 97.58082742618251, 97.59102125967293]
+      local_mean_iou_percent: 97.57359785715292
+      paper_flower_iou_percent: 97.6
+      delta_local_minus_paper_points: -0.02640214284707465
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      scored_target_frames_per_seed: 1
+      oracle_values_aggregated: false
+    completed_full_eight_task_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_task_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      eligible_for_full_nvos_row: true
+      separately_reported: true
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: flower
+      training_manifest_geometry_scene: flower
+      legacy_dataset_fallback_used: false
+      registered_training_views: 34
+      held_out_training_views: 0
+      source_rgb_dimensions: [3982, 2986]
+      effective_training_dimensions: [1600, 1199]
+      pinhole_cameras_bin_sha256: 2a0a32a5ec3c3874e31ecdebc62f09837660be4de4ae1933cfe503c4646834e9
+      pinhole_images_bin_sha256: 658f1676ce5e44140e011f4410f041db726b1011b0b91a471390578e17e44490
+      pinhole_points3d_bin_sha256: c3d167c4e63d2cb8dc1e83cad43608aa13e3dd5200a8ac66ed5df55b96756e3f
+      training_manifest_sha256: 945e3fe89dbf451a74dfea4d8edfb406fef4fc1045c9719b73debce0f456b4e6
+      point_cloud_sha256: eb9658266c5dc10d639fbe9371858edcb537f0ad2e4a8f0d8e817b55e2c567ec
+      point_cloud_bytes: 160421075
+      point_cloud_vertices: 646853
+      training_gpu_wall_seconds: 1586.195262670517
+      run_manifest_sha256_by_seed: [0f2c27b81ad440a55ac55f83a56b78b85e954d944dc967f175d94eb7e6fa8d6f, 385fe47a490e8989ca5b486484c106df484755e1c5a0531cd61d5592c7b11c2a, e48a5d4154522c7ea7dafeae5981454043907ecbaff70118e0cdf60cbdb48fed]
+      protocol_result_sha256_by_seed: [695dee642358406a82a26fbc63a38fe6bcc9b0ae33303f269e85af808a1fa987, f0f7be30fcb520b747eae535307558b43a8559b7bf634d7cba7ede34a351fe7a, 53b88ec1e7d769b36978faf72fc8c5e30fad20e148c96a1b2c2bec7082d0434a]
+      all_runs_have_verified_upstream_patch: true
+    runtime_safety:
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/flower_exact_f7a_allview_v1
+      training_max_temperature_c: 82.0
+      training_pause_events: 43
+      training_resume_events: 43
+      evaluation_max_temperature_c_by_seed: [69.0, 70.0, 69.0]
+      evaluation_pause_events: 0
+      telemetry_query_failures: 0
+      all_job_returncodes_zero: true
+      scope: execution_infrastructure_only_not_evaluation_protocol
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_flower_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: 53ba2ae876702046b1f9a816218b23eadcb5d41546bd31e4c26617f2974a7479
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact flower check remains per-task
+
+  ludvig_spin_fern_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    preflight_protocol: ludvig_spin_fern_checkpoint_reuse_preflight_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: fern
+    geometry_scene: fern
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [97.03640290264825, 97.04568881614468, 97.05169990481623]
+      local_mean_iou_percent: 97.04459720786971
+      paper_fern_iou_percent: 97.0
+      delta_local_minus_paper_points: 0.044597207869713884
+      metric_source: scene_mean_iou_after_reference_calibration
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 20
+      held_out_training_views: 0
+      source_raw_sparse_and_rgb_byte_identical_to_nvos_conversion_source: true
+      training_manifest_sha256: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+      point_cloud_sha256: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_3seed_summary.json
+      summary_sha256: fd11b9aaa873a3a8b4ddebcdde84470c4016e541a9b6acd19a4659d7803ed917
+      source_equivalence_preflight: output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
+
+  ludvig_nvos_fortress_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: fortress
+    geometry_scene: fortress
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [98.48415828422033, 98.48672030713139, 98.48736695498349]
+      local_mean_iou_percent: 98.4860818487784
+      paper_fortress_iou_percent: 98.1
+      delta_local_minus_paper_points: 0.386081848778403
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: fortress
+      training_manifest_geometry_scene: fortress
+      legacy_dataset_fallback_used: false
+      registered_training_views: 42
+      held_out_training_views: 0
+      source_rgb_dimensions: [4014, 3010]
+      effective_training_dimensions: [1600, 1199]
+      pinhole_cameras_bin_sha256: 4847921a99a466df0270816a6d551778165fefab25737047c138e5f13b8e3c90
+      pinhole_images_bin_sha256: 59713dc966e2aed6b46e1b716eb460fb1b5de72e7b4b7fb2fc63e17f1cf22952
+      pinhole_points3d_bin_sha256: 135ad6782ad07abffa49f2995f01ffd6a01efb7c484635cb11f6b24334c89acf
+      training_manifest_sha256: e01d76a52f0e0df0176e48301f9753ec610b475114f0449ab4cb634c6938aab3
+      point_cloud_sha256: 723bfaa66c2e2da9c5e76662dc317d86fafe0dfed5c109b5e9fd6c11e8626c45
+      point_cloud_bytes: 224237179
+      point_cloud_vertices: 904176
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_leaves_orchids_fortress_3seed_summary.json
+      summary_sha256: a79c289d37e31a3772caf747019205971600ef24106f585dd2315c9a0d331cd6
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact fortress check remains per-task
+
+  ludvig_spin_fortress_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: fortress
+    geometry_scene: fortress
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [98.35799208126069, 98.35685776001813, 98.35342535780724]
+      local_mean_iou_percent: 98.35609173302869
+      paper_fortress_iou_percent: 98.3
+      delta_local_minus_paper_points: 0.05609173302869408
+      metric_source: scene_mean_iou_after_reference_calibration
+      selected_threshold_parameter_per_seed: [69, 69, 69]
+      selected_sam_candidate_per_seed: [2, 2, 2]
+      reference_frames: 1
+      scored_target_frames: 41
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 42
+      held_out_training_views: 0
+      source_raw_sparse_and_rgb_byte_identical_to_nvos_conversion_source: true
+      source_raw_rgb_images: 42
+      source_raw_cameras_bin_sha256: 0780ba1b521452b2be37719d8aefd148723625300c8ec5d99fb300eff65a8f26
+      source_raw_images_bin_sha256: aed84eea58ac55bae70c191fe71bd7f98adb425ea1c8fe227260bad088da83f0
+      source_raw_points3d_bin_sha256: 70bb9247cc05f882ff22153fea2712ed9bcf77fb384cb7fa80c681d6e4cbd60f
+      pinhole_cameras_bin_sha256: 4847921a99a466df0270816a6d551778165fefab25737047c138e5f13b8e3c90
+      pinhole_images_bin_sha256: 59713dc966e2aed6b46e1b716eb460fb1b5de72e7b4b7fb2fc63e17f1cf22952
+      pinhole_points3d_bin_sha256: 135ad6782ad07abffa49f2995f01ffd6a01efb7c484635cb11f6b24334c89acf
+      training_manifest_sha256: e01d76a52f0e0df0176e48301f9753ec610b475114f0449ab4cb634c6938aab3
+      point_cloud_sha256: 723bfaa66c2e2da9c5e76662dc317d86fafe0dfed5c109b5e9fd6c11e8626c45
+      point_cloud_bytes: 224237179
+      point_cloud_vertices: 904176
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_3seed_summary.json
+      summary_sha256: 80cae986379795545835efb900b173ae3da11b41c501396827f1878eab9bed82
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
+
+  ludvig_nvos_horns_center_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: horns_center
+    geometry_scene: horns
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [97.96949305054981, 97.96561238666135, 97.97277646827688]
+      local_mean_iou_percent: 97.96929396849602
+      paper_horns_center_iou_percent: 97.9
+      delta_local_minus_paper_points: 0.06929396849601233
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      scored_target_frames_per_seed: 1
+      oracle_values_aggregated: false
+    completed_full_eight_task_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_task_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      eligible_for_full_nvos_row: true
+      separately_reported: true
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: horns
+      training_manifest_geometry_scene: horns
+      registered_training_views: 62
+      held_out_training_views: 0
+      source_rgb_dimensions: [4003, 3002]
+      effective_training_dimensions: [1600, 1199]
+      pinhole_cameras_bin_sha256: f328efa43a68cd47a75e6c9bdb81debc5438d75735493f6ead7ecef03523c868
+      pinhole_images_bin_sha256: 1f6f3188e4e61f34ac5543d9a2fdb7547f0096f400c04a0f0ff8e7954d9dcda3
+      pinhole_points3d_bin_sha256: d5446e4b62a5f8ab349c7e4b46c093704ba21ef003bd2e724c46f5352d94f245
+      training_manifest_sha256: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+      point_cloud_sha256: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+      point_cloud_bytes: 238598611
+      point_cloud_vertices: 962085
+      run_manifest_sha256_by_seed: [68e492732677706192054fac04b64fcb8e77c7ff4d281318f0c62fe275caa7a7, 5219c68925d79855df6c960ebb1aec8fc42b445cc82089a63f337a7ffeee4171, cdf8491ac7c1b278d812308588e5feace741de78d50bd9c08faecdac1ebc2ffa]
+      protocol_result_sha256_by_seed: [feeed39903bcf28d07dc6148901f64c09af725165a3b37b75b893bde86274e8d, 4556b17ce62c62ce6ff62f3ab92bcba5406c6f9e7c23809f935069156ae0ea6b, 3a7f2fefaa7f67980f6178fbeee411d4d6359156fe313de41e21830d0fd1c811]
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    runtime_safety:
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/horns_exact_f7a_allview_v1
+      max_temperature_c_by_seed: [65.0, 67.0, 67.0]
+      pause_events: 0
+      query_failures: 0
+      scope: execution_infrastructure_only_not_evaluation_protocol
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_flower_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: 53ba2ae876702046b1f9a816218b23eadcb5d41546bd31e4c26617f2974a7479
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact horns_center check remains per-task
+
+  ludvig_nvos_horns_left_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: horns_left
+    geometry_scene: horns
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [92.64614421701877, 92.65208078577824, 92.65070964129706]
+      local_mean_iou_percent: 92.6496448813647
+      paper_horns_left_iou_percent: 94.1
+      delta_local_minus_paper_points: -1.4503551186353008
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      scored_target_frames_per_seed: 1
+      oracle_values_aggregated: false
+      oracle_diagnostic:
+        diagnostic_only: true
+        used_for_reported_metric: false
+        used_for_model_or_threshold_selection: false
+        target_iou_percent_by_seed: [94.56588492687982, 94.58314365789316, 94.58721999256832]
+        threshold_parameter_by_seed: [42, 42, 42]
+    completed_full_eight_task_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_task_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      eligible_for_full_nvos_row: true
+      separately_reported: true
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: horns
+      training_manifest_geometry_scene: horns
+      registered_training_views: 62
+      held_out_training_views: 0
+      source_rgb_dimensions: [4003, 3002]
+      effective_training_dimensions: [1600, 1199]
+      pinhole_cameras_bin_sha256: f328efa43a68cd47a75e6c9bdb81debc5438d75735493f6ead7ecef03523c868
+      pinhole_images_bin_sha256: 1f6f3188e4e61f34ac5543d9a2fdb7547f0096f400c04a0f0ff8e7954d9dcda3
+      pinhole_points3d_bin_sha256: d5446e4b62a5f8ab349c7e4b46c093704ba21ef003bd2e724c46f5352d94f245
+      training_manifest_sha256: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+      point_cloud_sha256: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+      point_cloud_bytes: 238598611
+      point_cloud_vertices: 962085
+      run_manifest_sha256_by_seed: [644a66c81c86c10e20d6470d2a729542f23f7fe03328dbdc33707461ae24bcd2, c33b3caabac9c9592d45cad00a3d0e1e91f72e22dfeba9308d1c2bf16b60b066, 3577f6175766b72bf2a3dc71849f49c55326a2aff2a76a44a2ce6f2bf59d07b2]
+      protocol_result_sha256_by_seed: [a39f21d13f36082cd33114983e8fd71c343024f8e9b68b535e524c060172eebd, f70e0c9f5c2b1f19f6f6e2ecba1c82c813a92e08f1d101857d425a901573e582, a11a14c17b96ebfd821864d53cac0f374c2c7441d7bdef3e4b4da66f8518c12a]
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    runtime_safety:
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/horns_exact_f7a_allview_v1
+      max_temperature_c_by_seed: [67.0, 68.0, 67.0]
+      pause_events: 0
+      query_failures: 0
+      scope: execution_infrastructure_only_not_evaluation_protocol
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_flower_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: 53ba2ae876702046b1f9a816218b23eadcb5d41546bd31e4c26617f2974a7479
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact horns_left check remains per-task
+
+  ludvig_spin_horns_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: horns
+    geometry_scene: horns
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [90.00783561472001, 89.9954048932602, 89.97314407556229]
+      local_mean_iou_percent: 89.99212819451417
+      paper_horns_iou_percent: 94.5
+      delta_local_minus_paper_points: -4.507871805485834
+      metric_source: scene_mean_iou_after_reference_calibration
+      selected_threshold_parameter_per_seed: [71, 70, 69]
+      selected_sam_candidate_per_seed: [2, 2, 2]
+      reference_frames: 1
+      scored_target_frames: 61
+      oracle_values_aggregated: false
+    current_nine_scene_diagnostic:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      local_scene_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      eligible_for_matching_released_online_multiview_diagnostic: true
+      eligible_for_9scene_macro: true
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 62
+      held_out_training_views: 0
+      source_raw_sparse_and_rgb_byte_identical_to_nvos_conversion_source: true
+      source_raw_rgb_images: 62
+      source_raw_cameras_bin_sha256: 178c5ec2b39b04072ed7ed2fa9b9358e2e79a1943b5e9aac12ec8456243455a2
+      source_raw_images_bin_sha256: 4137f33bd74c590b13488ab5cfd4cd1ac2b9bd24be0f43e4787a1a60bc28dcad
+      source_raw_points3d_bin_sha256: a00d19015e645df54f903efc30278cd265ab531c3e055b09545b6a52826b6908
+      pinhole_cameras_bin_sha256: f328efa43a68cd47a75e6c9bdb81debc5438d75735493f6ead7ecef03523c868
+      pinhole_images_bin_sha256: 1f6f3188e4e61f34ac5543d9a2fdb7547f0096f400c04a0f0ff8e7954d9dcda3
+      pinhole_points3d_bin_sha256: d5446e4b62a5f8ab349c7e4b46c093704ba21ef003bd2e724c46f5352d94f245
+      training_manifest_sha256: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+      point_cloud_sha256: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+      point_cloud_bytes: 238598611
+      point_cloud_vertices: 962085
+      run_manifest_sha256_by_seed: [bd65c6c8f83d73b7579fe1d9fe65bb7af525a5866a276fab6ac76e7c0a2391a0, 8bf8f1c47a7c0894890bd5b30c0bd9151c80b3554b4b3ee72243974d498ab6c9, 9749cd7c2dd90f28fab8c89f0724830be88a0b9b582b387f100f0dadc4885a01]
+      protocol_result_sha256_by_seed: [7ee9124f1c3e53fb0e1c90961ed06a225c1564c41cad52e8df596cb87a6ae44c, fc9b074188b40e1e39c743a1f6b737a88b07b2a83ce567e239c46c75353ea257, 60cfe62c1ab5da0930d20353f3be625e2ff62cf0e23d180a6d2717e03a9e14e1]
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    runtime_safety:
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/horns_exact_f7a_allview_v1
+      max_temperature_c_by_seed: [67.0, 68.0, 68.0]
+      pause_events: 0
+      query_failures: 0
+      scope: execution_infrastructure_only_not_evaluation_protocol
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: ac01b58889aaecce2ab8795f43633f8d89c57a78ea18ea6523edab1a1d0e99ea
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
+
+  ludvig_nvos_leaves_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: leaves
+    geometry_scene: leaves
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [96.65015933402205, 96.64442461502301, 96.65347552076786]
+      local_mean_iou_percent: 96.6493531566043
+      paper_leaves_iou_percent: 96.4
+      delta_local_minus_paper_points: 0.24935315660430035
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: leaves
+      training_manifest_geometry_scene: leaves
+      legacy_dataset_fallback_used: false
+      registered_training_views: 26
+      held_out_training_views: 0
+      source_rgb_dimensions: [3954, 2965]
+      effective_training_dimensions: [1600, 1199]
+      training_manifest_sha256: 2a610c0c356ae05f9a7d712c4352e032b137fa0794df3d701ec550759b67ba69
+      point_cloud_sha256: da74e7c81debf212d0b3c6f7278a62259dfcc045f97401cb9370b1e62d340378
+      point_cloud_bytes: 421018980
+      point_cloud_vertices: 1697651
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_leaves_3seed_summary.json
+      summary_sha256: dd7c85dcf0921306246aa04fd25cd390289ff92c30860ad9d36aa89cf2bf6e4a
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact leaves check remains per-task
+
+  ludvig_spin_leaves_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: leaves
+    geometry_scene: leaves
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [96.37101740363673, 96.36833763128026, 96.36638559959174]
+      local_mean_iou_percent: 96.3685802115029
+      paper_leaves_iou_percent: 96.3
+      delta_local_minus_paper_points: 0.06858021150290483
+      metric_source: scene_mean_iou_after_reference_calibration
+      selected_threshold_parameter_per_seed: [75, 75, 75]
+      selected_sam_candidate_per_seed: [1, 1, 1]
+      reference_frames: 1
+      scored_target_frames: 25
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 26
+      held_out_training_views: 0
+      source_raw_sparse_and_rgb_byte_identical_to_nvos_conversion_source: true
+      source_raw_rgb_images: 26
+      source_raw_cameras_bin_sha256: 73bcea72824cf4cb48a1f58e9d03efd9e4728bb198e4f11e4aba004a454d52cb
+      source_raw_images_bin_sha256: f4bd3b275b1bce1be544dbe79459a1136c2376c8b8c192857799a143f7724bc8
+      source_raw_points3d_bin_sha256: e47ad2e4be1aae5d19495f5aecca8a625ce1e0d9b24f4645c64cd05361385cc1
+      pinhole_cameras_bin_sha256: 65bdfbe795a018ce461e5a3c5e152011737da89c60c47c678d15ede87fddc2c9
+      pinhole_images_bin_sha256: 4b66d5e00ceae0a4c989204f69c0ed7bc2e6133507e483e5b57d5e635c6b42c4
+      pinhole_points3d_bin_sha256: ccbbe5889371b47f487e3c5ee3b689d9ff80baef467261678046feb58a56668b
+      training_manifest_sha256: 2a610c0c356ae05f9a7d712c4352e032b137fa0794df3d701ec550759b67ba69
+      point_cloud_sha256: da74e7c81debf212d0b3c6f7278a62259dfcc045f97401cb9370b1e62d340378
+      point_cloud_bytes: 421018980
+      point_cloud_vertices: 1697651
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_3seed_summary.json
+      summary_sha256: 92d13e4daf2b542b1a3d4ac5a208809ca609de0078b2ff5c4f616fb56961f7b3
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
+
+  ludvig_nvos_orchids_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: orchids
+    geometry_scene: orchids
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [74.5600598535339, 74.57440748800788, 74.55468270132222]
+      local_mean_iou_percent: 74.563050014288
+      paper_orchids_iou_percent: 73.1
+      delta_local_minus_paper_points: 1.463050014288001
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: orchids
+      training_manifest_geometry_scene: orchids
+      legacy_dataset_fallback_used: false
+      registered_training_views: 25
+      held_out_training_views: 0
+      source_rgb_dimensions: [3949, 2961]
+      effective_training_dimensions: [1600, 1199]
+      pinhole_cameras_bin_sha256: 73d98571b2ffc0ad60877dc0b898c91d2c5a2a6c5d7a47a6b4516dcefe9b1546
+      pinhole_images_bin_sha256: 1d6abf177761c1e57ae3579e48bff6cdaa8a794c127b8c20c1a47df412c4bfc9
+      pinhole_points3d_bin_sha256: b058c96d68ccda1318efd5422e7842a428d5f94ee60156a37230521adebf950f
+      training_manifest_sha256: 8fc085e1c6ad817772898fd5e24f120b72ec78d3c0efa793a7ccbd761935d3d7
+      point_cloud_sha256: e04a38f5aa22aaa716ec1c741222e1d1c94fb3cf0305aa4cc06a50a823ae5ef5
+      point_cloud_bytes: 374352324
+      point_cloud_vertices: 1509479
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_leaves_orchids_3seed_summary.json
+      summary_sha256: d0d665727c6d2f0352adf39c32544bc28011830fe3588dc7050ac9634002752d
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact orchids check remains per-task
+
+  ludvig_spin_orchids_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: SPIn-NeRF multiview segmentation
+    scene: orchids
+    geometry_scene: orchids
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [90.04484915366488, 90.21745545450443, 89.93389795424861]
+      local_mean_iou_percent: 90.06540085413931
+      paper_orchids_iou_percent: 92.2
+      delta_local_minus_paper_points: -2.1345991458606903
+      metric_source: scene_mean_iou_after_reference_calibration
+      selected_threshold_parameter_per_seed: [89, 92, 93]
+      selected_sam_candidate_per_seed: [0, 0, 0]
+      reference_frames: 1
+      scored_target_frames: 23
+      upstream_omitted_frame: image014.png
+      oracle_values_aggregated: false
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      registered_training_views: 25
+      held_out_training_views: 0
+      source_raw_sparse_and_rgb_byte_identical_to_nvos_conversion_source: true
+      source_raw_rgb_images: 25
+      source_raw_cameras_bin_sha256: 5797e621b8bf269aeccf8127b5f438199e574a92ef0af8761c776da962b5f102
+      source_raw_images_bin_sha256: bb07036e7932adeb602d16a7d9a6b82426b07992d9efd9865c4b3bc03da34cc9
+      source_raw_points3d_bin_sha256: 953b37835a1f23ab02d5d54e6f572657ed953c4ab1121e9c92efd3325da53a60
+      pinhole_cameras_bin_sha256: 73d98571b2ffc0ad60877dc0b898c91d2c5a2a6c5d7a47a6b4516dcefe9b1546
+      pinhole_images_bin_sha256: 1d6abf177761c1e57ae3579e48bff6cdaa8a794c127b8c20c1a47df412c4bfc9
+      pinhole_points3d_bin_sha256: b058c96d68ccda1318efd5422e7842a428d5f94ee60156a37230521adebf950f
+      training_manifest_sha256: 8fc085e1c6ad817772898fd5e24f120b72ec78d3c0efa793a7ccbd761935d3d7
+      point_cloud_sha256: e04a38f5aa22aaa716ec1c741222e1d1c94fb3cf0305aa4cc06a50a823ae5ef5
+      point_cloud_bytes: 374352324
+      point_cloud_vertices: 1509479
+      all_runs_have_verified_upstream_patch: true
+      cross_benchmark_same_training_manifest_and_ply: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_3seed_summary.json
+      summary_sha256: 5c93439163278ce2cb4d69cea89b98de09d2039bd9721f9d004f60f2371dc879
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      released_online_multiview_protocol_match: true
+      matching_nine_scene_available_cohort: true
+      local_9scene_macro: true
+      paper_10scene_row: false
+      strict_unseen_exact_match: false
+      reason: all nine locally available scenes are complete; Fork is absent, so this exact nine-scene snapshot is not a ten-scene macro
+
+  ludvig_nvos_trex_released_all_view_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_per_scene_three_seed_check
+    dataset: NVOS
+    scene: trex
+    geometry_scene: trex
+    geometry_protocol: released_all_view
+    seeds: [0, 1, 2]
+    result:
+      run_values_iou_percent: [87.52962314809301, 87.67112176569724, 87.78877993071195]
+      local_mean_iou_percent: 87.6631749481674
+      paper_trex_iou_percent: 88.0
+      delta_local_minus_paper_points: -0.336825051832605
+      metric_source: selected_iou_fixed_threshold
+      fixed_threshold_parameter: 75
+      scored_target_frames_per_seed: 1
+      oracle_values_aggregated: false
+      oracle_diagnostic:
+        diagnostic_only: true
+        used_for_reported_metric: false
+        used_for_model_or_threshold_selection: false
+        target_iou_percent_by_seed: [87.85932183882778, 87.77851969664819, 88.26558886047232]
+        threshold_parameter_by_seed: [73, 73, 70]
+    completed_full_eight_task_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_task_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      eligible_for_full_nvos_row: true
+      separately_reported: true
+    provenance:
+      official_3dgs_commit: f7a116fb1397d9842239127d39dc212f93171f70
+      training_manifest_benchmark: NVOS
+      training_manifest_scene: trex
+      training_manifest_geometry_scene: trex
+      source_asset_contract: native_nvos_llff_pinhole_undistortion
+      legacy_dataset_fallback_used: false
+      raw_dataset_modified: false
+      registered_training_views: 55
+      held_out_training_views: 0
+      source_rgb_dimensions: [4002, 3001]
+      effective_training_dimensions: [1599, 1199]
+      evaluation_render_dimensions: [1600, 1199]
+      pinhole_cameras_bin_sha256: 1b711b32b1ca110eaa979f5f5b9ff02f248ccc066c7f9bf89c34f17493c425fe
+      pinhole_images_bin_sha256: e83956f2665b6041bb295f637802630aea9f0cd8d08a3b4f390e7a8f54af9075
+      pinhole_points3d_bin_sha256: dcbae55ccf2a7e1eb4ac02673fc090c1aa8d4a241ed6194eb1401e63ddd9c32a
+      max_qvec_delta_vs_original_sparse: 1.1102230246251565e-16
+      max_tvec_delta_vs_original_sparse: 0.0
+      training_manifest_sha256: e8341f2ed5f77a48189790b3d61bdab0f1bea7efb45e41134403996bd4e10035
+      point_cloud_sha256: 444c364891ff637a6f82b85fc1236f04a89f3ce7bd8b18bcf4806f88b5e0a7b0
+      point_cloud_bytes: 174396867
+      point_cloud_vertices: 703207
+      run_manifest_sha256_by_seed: [aed278d2b4a165d6e31a04796daa11370dd92c6700eae3521c02ccb17e7f6906, 2d6b7600ab227da1415d0fdfedc3bcfd06afd81aef8dc27fd10b64953841dbfe, 3c41b55df401b9a9358778a835460748558a11d2960ed7b321cbf68fdf0549bd]
+      protocol_result_sha256_by_seed: [0147fd6f5edb09c4b73d6a45607451ad28d8de20ea7679562c279fdcd2c769c2, 5261866da6e36b344796a49a95947e2005ce8c3fd0705a1df588c80d4f0b12c2, 4baff8cb9c1c50b205a6e39ef617ca791af1f7cace4e4ffd3538ae8dbf2a68a7]
+      reproduction_patch_sha256: 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      reproduction_patch_base_sha256: 7ecd469119b4ee87e3cc9cf5764426ec6c8a1d9118db072beab4d8335ea0d353
+      patched_segmentation_sha256: ecc9d7b1a29faa7d1091e14e9c5a50036180c5ba8671ba396d0292075a559b0e
+      patched_entrypoint_sha256: ae2eb5af2050e619a8d3a6f5bb04d228b4c090425cfcaf30f25aa9a859cddd3e
+      patched_sam_predictor_sha256: 3cbf8bda6f7334086c3ba7c117a1b604ed12757c351fff96054a6a2f484684b9
+      patched_image_utils_sha256: 6047b23c26fcece6bc451961a532b302e6aeb0dcdce0c5c89a7e46f71eed87c1
+      patched_solver_sha256: 6b71c91c5e4dbe50b2995f6b9428c9cd9bd6940ab58b1f16fe788dfc50b1c70c
+      all_runs_have_verified_upstream_patch: true
+    failure_diagnosis:
+      excluded_attempt: exact_f7a_allview_trex_seed0_v1
+      excluded_from_all_metrics: true
+      cause: >-
+        floating-point floor produced a 1599-wide prompt image while the
+        camera, render, and SAM mask were 1600-wide, corrupting prompt
+        coordinates and downstream weight indexing
+      v3_fix_scope: >-
+        exact long-edge resize plus fail-closed image/camera/mask/feature
+        shape checks; metric, fixed threshold, negative-scribble behavior,
+        and uplifting aggregation are unchanged
+    runtime_safety:
+      thermal_guard_sha256: 4daa492d2026d58f5d83184dc12dbf4f87747bf1d8630c0e70bf563c5acfed79
+      training_log_sha256: b7be623b0e0e6bd7b155c0aac44a7af3c0fe1902fbbad580febbb406067a3c1b
+      evaluation_log_sha256_by_seed: [73e72dc78568fe780178890c9be39ec987d6885f7b5913789a5782e691f7a79f, 79ac51b06a2afb85595f1d60e52bbde6a30687fa5bbe5dca8771e3aab0bd939c, 57fb3ef7c0fdf84402756e800b9dead346e54dd5dca0a1da2debb18d0cdf48e9]
+      training_max_temperature_c: 82.0
+      training_pause_events: 37
+      training_resume_events: 37
+      evaluation_max_temperature_c_by_seed: [72.0, 68.0, 69.0]
+      evaluation_pause_events: 0
+      query_failures: 0
+      all_job_returncodes_zero: true
+      scope: execution_infrastructure_only_not_evaluation_protocol
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      failed_v1_run: output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v1/run_manifest.json
+    eligibility:
+      exact_per_scene_three_seed_paper_protocol_check: true
+      full_nvos_8task_row: false
+      strict_unseen_exact_match: false
+      reason: the full eight-task result is reported separately; this exact trex check remains per-task
+
+  ludvig_nvos_released_all_view_full8_exact_3seed_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: completed_exact_full_eight_task_three_seed_paper_protocol
+    dataset: NVOS
+    geometry_protocol: released_all_view
+    tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+    seeds: [0, 1, 2]
+    expected_runs: 24
+    complete_runs: 24
+    missing_tasks: []
+    unique_geometry_checkpoints: 7
+    result:
+      local_task_macro_iou_percent: 91.25768502741802
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      aggregation: seed_mean_per_task_then_equal_weight_eight_task_macro
+      metric_source: selected_iou_fixed_threshold
+      oracle_values_aggregated: false
+    protocol_match_to_paper:
+      cohort: true
+      prompt_or_query: true
+      target_visibility: true
+      metric_domain: true
+      aggregation: true
+      calibration: true
+      implementation: true
+    provenance:
+      released_all_view_training_provenance_verified: true
+      all_runs_have_verified_upstream_patch: true
+      approved_reproduction_patch_sha256: [7c86d5883058fb9e529608ba6cf856c04e66d37d338a69a8ca6863725292e9ac, 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602]
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+    eligibility:
+      exact_paper_protocol_comparison: true
+      full_nvos_8task_row: true
+      strict_paper_protocol_table: true
+      strict_unseen_exact_match: false
+      reason: >-
+        complete and exact for the paper's released online multiview protocol;
+        target RGB visibility during all-view training and uplifting still
+        forbids a strict-unseen claim
 
   ludvig_nvos_fern_strict_geometry_hybrid_diagnostic_v1:
     parent_protocol: ludvig_official_online_multiview_v1
@@ -329,8 +1475,19 @@ protocols:
       result: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/attempts/pinhole_stage_retry_1/fern/sam/protocol_result.json
       result_sha256: 59250d146ef88bc1a8981b16bb89c21d9bff430c65512735e4b3a0357fccfc09
       summary: output/protocol_audit_20260731/ludvig/nvos/fern_seed0_hybrid_pilot_summary.json
+      summary_sha256: 8ee7b032f03e7f2f48e6c3e9ac4a20d362a8194648fd96174c9d47943810b83e
       failed_camera_model_attempt: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/run_manifest.json
       validated_staging_dry_run: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic/fern/seed_0/attempts/pinhole_stage_dryrun/run_manifest.json
+    posthoc_source_audit:
+      embedded_in_historical_run_manifest: false
+      patch_sha256: 7c86d5883058fb9e529608ba6cf856c04e66d37d338a69a8ca6863725292e9ac
+      tracked_diff_sha256: 7c86d5883058fb9e529608ba6cf856c04e66d37d338a69a8ca6863725292e9ac
+      patched_segmentation_sha256: ecc9d7b1a29faa7d1091e14e9c5a50036180c5ba8671ba396d0292075a559b0e
+      patched_entrypoint_sha256: ae2eb5af2050e619a8d3a6f5bb04d228b4c090425cfcaf30f25aa9a859cddd3e
+      consequence: >-
+        the result remains a valid diagnostic replay, but its historical
+        manifest cannot satisfy the new embedded-patch-provenance eligibility
+        gate
     eligibility:
       exact_paper_protocol_comparison: false
       strict_unseen_exact_match: false
@@ -341,6 +1498,42 @@ protocols:
       produce an expected-range fern score. The one-seed hybrid result cannot
       isolate an evaluator delta from the all-view-versus-strict geometry
       difference and must not replace the paper's three-run all-view row.
+
+  ludvig_nvos_hybrid_8scene_3seed_cohort_v1:
+    parent_protocol: ludvig_official_online_multiview_v1
+    status: partially_complete_optional_nonpaper_diagnostic
+    geometry_protocol: strict_geometry_hybrid_diagnostic
+    scenes: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+    seeds: [0, 1, 2]
+    expected_runs: 24
+    complete_runs: 1
+    pending_runs: 23
+    completed_scene_seeds:
+      - {scene: fern, seed: 0, attempt: pinhole_stage_retry_1}
+    execution:
+      serial: true
+      gpu: 0
+      lock: /tmp/radio-gs-gpu0.lock
+      immutable_attempts: true
+    visibility:
+      target_rgb_visible_during_gaussian_splatting_training: false
+      target_rgb_visible_during_uplifting: true
+      target_view_2d_foundation_model_calls: true
+      target_masks_scoring_only: true
+    aggregation_after_completion: >-
+      mean over exact seeds 0/1/2 within each task, then equal-weight macro
+      over all eight tasks using selected_iou only
+    artifacts:
+      plan: output/protocol_audit_20260731/ludvig/nvos/nvos_hybrid_8scene_3seed_v1_plan.json
+      plan_snapshot_sha256: 90ee1f6352e770bf18f57ea026f36883524f34ba3b9cf4c4191d114b36f1f288
+      completed_pilot_summary: output/protocol_audit_20260731/ludvig/nvos/fern_seed0_hybrid_pilot_summary.json
+      completed_pilot_summary_sha256: 8ee7b032f03e7f2f48e6c3e9ac4a20d362a8194648fd96174c9d47943810b83e
+    eligibility:
+      exact_paper_protocol_comparison: false
+      strict_unseen_exact_match: false
+      reason: >-
+        even after 24/24 completion, the geometry omits target RGB during 3DGS
+        training and therefore differs from LUDVIG's released all-view geometry
 
 tracks:
   reusable_feature_field:

@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from radio_gs.scripts import audit_langsplatv2_lerf2d_final_gap as gap_audit
 from radio_gs.scripts import summarize_langsplatv2_lerf_audit as summarize
 from reproductions.langsplatv2 import run_lerf2d_exact_camera as launcher
 
@@ -73,7 +74,7 @@ def test_launcher_reads_namespace_cfg_without_executing_it(tmp_path):
         launcher._read_cfg_args(cfg)
 
 
-def test_published_langsplatv2_overall_uses_mixed_aggregation():
+def test_published_langsplatv2_row_numerically_matches_mixed_aggregation():
     scene_miou = np.mean(
         [summarize.PAPER_ROWS[scene]["miou"] for scene in summarize.SCENE_ORDER]
     )
@@ -96,3 +97,47 @@ def test_published_langsplatv2_overall_uses_mixed_aggregation():
     assert scene_loc == pytest.approx(0.86375)
     assert micro_loc == pytest.approx(0.8413990385)
     assert round(micro_loc, 3) == summarize.PAPER_OVERALL["loc_acc"]
+
+
+def test_langsplatv2_mixed_aggregation_is_row_specific_not_benchmark_wide():
+    rows = gap_audit._parse_paper_rows(ROOT / "paper" / "lerf_ovs_main_table.tex")
+    langsplatv2 = rows["LangSplatV2"]["numerical_match_at_printed_precision"]
+
+    assert langsplatv2 == {
+        "miou_scene_macro": True,
+        "miou_query_weighted": False,
+        "loc_acc_scene_macro": False,
+        "loc_acc_query_weighted": True,
+    }
+    assert all(
+        row["numerical_match_at_printed_precision"]["loc_acc_scene_macro"]
+        for method, row in rows.items()
+        if method != "LangSplatV2"
+    )
+
+
+def test_paper_locacc_nearest_integer_hit_reconstruction():
+    paper_rows = {
+        "figurines": 0.821,
+        "teatime": 0.932,
+        "ramen": 0.747,
+        "waldo_kitchen": 0.955,
+    }
+    expected_nearest = {
+        "figurines": 46,
+        "teatime": 55,
+        "ramen": 53,
+        "waldo_kitchen": 21,
+    }
+    audits = {
+        scene: gap_audit._integer_hit_audit(
+            gap_audit.SCENE_QUERY_COUNTS[scene], paper_rows[scene]
+        )
+        for scene in gap_audit.SCENE_ORDER
+    }
+
+    assert {
+        scene: audit["nearest_integer_hits"] for scene, audit in audits.items()
+    } == expected_nearest
+    assert audits["ramen"]["integer_hits_consistent_with_printed_precision"] == []
+    assert sum(expected_nearest.values()) == 175

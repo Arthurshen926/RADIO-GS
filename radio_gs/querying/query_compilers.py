@@ -8,7 +8,7 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.field.field_signature import FeatureSpaceSignature
-from .evidence_scorer import registered_seed_unary
+from .evidence_scorer import registered_seed_observation
 from .query_spec import (
     PrimitiveUnaryEvidence,
     PrototypeSet,
@@ -245,6 +245,8 @@ def compile_registered_primitive_seeds(
     selection_mode: SelectionMode | str = SelectionMode.SEEDED_COMPONENT,
     positive_prompt_mass: torch.Tensor | None = None,
     negative_prompt_mass: torch.Tensor | None = None,
+    primitive_unary_evidence: PrimitiveUnaryEvidence | None = None,
+    seed_normalization: str = "independent_max",
 ) -> QuerySpec:
     """Compile sparse raster-registered primitive seeds into shared evidence."""
 
@@ -266,19 +268,35 @@ def compile_registered_primitive_seeds(
         raise ValueError("positive and negative primitive seeds must align")
     if not bool((positive > 0).any()):
         raise ValueError("registered query has no positive primitive support")
-    direct_positive = (
-        positive
-        if positive_prompt_mass is None
-        else torch.as_tensor(positive_prompt_mass).float().reshape(-1)
-    )
-    direct_negative = (
-        negative
-        if negative_prompt_mass is None
-        else torch.as_tensor(negative_prompt_mass).float().reshape(-1)
-    )
-    direct_unary = registered_seed_unary(direct_positive, direct_negative)
-    if direct_unary.shape != positive.shape:
-        raise ValueError("registered prompt masses and primitive seeds must align")
+    if primitive_unary_evidence is not None and (
+        positive_prompt_mass is not None or negative_prompt_mass is not None
+    ):
+        raise ValueError(
+            "explicit primitive unary evidence cannot be combined with prompt masses"
+        )
+    if primitive_unary_evidence is None:
+        direct_positive = (
+            positive
+            if positive_prompt_mass is None
+            else torch.as_tensor(positive_prompt_mass).float().reshape(-1)
+        )
+        direct_negative = (
+            negative
+            if negative_prompt_mass is None
+            else torch.as_tensor(negative_prompt_mass).float().reshape(-1)
+        )
+        direct_unary, direct_confidence = registered_seed_observation(
+            direct_positive, direct_negative
+        )
+        observation = PrimitiveUnaryEvidence(
+            direct_unary,
+            f"{seed_source}_joint_mass",
+            direct_confidence,
+        )
+    else:
+        observation = primitive_unary_evidence
+    if observation.values.shape != positive.shape:
+        raise ValueError("registered prompt evidence and primitive seeds must align")
 
     app_proto, app_mass = _deterministic_prototypes(
         appearance, positive, prototype_count, strategy=prototype_strategy
@@ -305,27 +323,41 @@ def compile_registered_primitive_seeds(
         boundary_evidence=PrototypeSet(
             bnd_proto, boundary_signature, bnd_mass, bnd_neg
         ),
-        positive_seeds=SoftSeedSet(positive, seed_source),
+        positive_seeds=SoftSeedSet(
+            positive,
+            seed_source,
+            normalization=seed_normalization,
+        ),
         negative_seeds=(
-            SoftSeedSet(negative, seed_source)
+            SoftSeedSet(
+                negative,
+                seed_source,
+                normalization=seed_normalization,
+            )
             if negative is not None
             else None
         ),
-        positive_seed_groups=SoftSeedGroups(positive[:, None], seed_source),
+        positive_seed_groups=SoftSeedGroups(
+            positive[:, None],
+            seed_source,
+            normalization=seed_normalization,
+        ),
         negative_seed_groups=(
-            SoftSeedGroups(negative[:, None], seed_source)
+            SoftSeedGroups(
+                negative[:, None],
+                seed_source,
+                normalization=seed_normalization,
+            )
             if negative is not None and bool((negative > 0).any())
             else None
         ),
-        primitive_unary_evidence=PrimitiveUnaryEvidence(
-            direct_unary,
-            f"{seed_source}_joint_mass",
-        ),
+        primitive_unary_evidence=observation,
         selection_mode=SelectionMode(selection_mode),
         field_signature=appearance_signature,
         metadata={
             "prototype_strategy": str(prototype_strategy),
             "registered_unary_normalization": "joint_prompt_mass",
+            "registered_seed_normalization": str(seed_normalization),
         },
     )
 

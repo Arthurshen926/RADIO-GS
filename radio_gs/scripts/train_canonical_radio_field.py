@@ -7,7 +7,9 @@ import argparse
 from dataclasses import asdict
 import hashlib
 import json
+import os
 from pathlib import Path
+import tempfile
 
 import torch
 import torch.nn.functional as F
@@ -23,12 +25,14 @@ from radio_gs.field import (
     load_canonical_field_checkpoint,
     validate_observation_contract_metadata,
 )
-from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews, sha256_file
+from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews
 from radio_gs.training.canonical_field_losses import (
     CanonicalFieldLossConfig,
     canonical_primitive_loss,
 )
 from radio_gs.training.primitive_consensus import PrimitiveConsensus
+from radio_gs.training.tensor_cache_io import load_mpr_cache
+from radio_gs.utils.immutable_artifacts import sha256_file
 
 
 def _sha256_tensor_rows(values: torch.Tensor) -> str:
@@ -70,13 +74,18 @@ def _load_capability_mpr_target(
     raw_cache: dict,
     raw_metadata: dict,
     radio_checkpoint_sha256: str,
+    expected_cache_sha256: str = "",
+    expected_feature_output_bundle_sha256: str = "",
 ) -> tuple[PrimitiveConsensus, dict]:
     """Load an official-adaptor-before-MPR target with strict provenance."""
 
-    cache_path = Path(path)
-    cache = torch.load(cache_path, map_location="cpu")
-    if not isinstance(cache, dict) or "features" not in cache:
-        raise ValueError(f"{expected_space} MPR cache must contain primitive features")
+    cache, cache_sha256, cache_path = load_mpr_cache(
+        path,
+        expected_sha256=str(expected_cache_sha256) or None,
+        expected_feature_space=expected_space,
+        require_reliability=True,
+        require_formal_safety=True,
+    )
     metadata = dict(cache.get("metadata", {}))
     raw_contract = raw_metadata.get("observation_lifting_contract", {})
     raw_contract_name = (
@@ -112,9 +121,23 @@ def _load_capability_mpr_target(
             f"{capability_map_source!r}"
         )
     if capability_map_source == "official_extracted":
+        if (
+            str(
+                metadata.get(
+                    "official_adaptor_checkpoint_provenance",
+                    "",
+                )
+            )
+            != "explicit_file_sha256"
+        ):
+            raise ValueError(
+                f"{expected_space} direct official MPR is not bound to the "
+                "extraction checkpoint SHA256"
+            )
         required_native_provenance = {
             "capability_native_map_manifest",
             "capability_native_map_manifest_sha256",
+            "capability_native_map_radio_checkpoint_load_contract",
             "capability_adaptor_execution",
         }
         missing_native_provenance = sorted(
@@ -134,6 +157,26 @@ def _load_capability_mpr_target(
             raise ValueError(
                 f"{expected_space} direct official MPR did not use the official "
                 "C-RADIO runtime adaptor output"
+            )
+        if (
+            metadata.get(
+                "capability_native_map_radio_checkpoint_load_contract"
+            )
+            != "external_sha256_same_fd_restricted_pickle_hub_injection_v1"
+        ):
+            raise ValueError(
+                f"{expected_space} direct official MPR used an unrestricted "
+                "RADIO checkpoint loader"
+            )
+        expected_bundle = str(expected_feature_output_bundle_sha256 or "")
+        if (
+            not expected_bundle
+            or metadata.get("feature_output_bundle_sha256") != expected_bundle
+            or metadata.get("capability_native_map_output_bundle_sha256")
+            != expected_bundle
+        ):
+            raise ValueError(
+                f"{expected_space} MPR belongs to another feature output bundle"
             )
 
     raw_xyz = torch.as_tensor(raw_cache["xyz"]).float().cpu()
@@ -193,7 +236,7 @@ def _load_capability_mpr_target(
     consensus = _consensus_from_cache(cache, preserve_target_dtype=True)
     return consensus, {
         "path": str(cache_path.resolve()),
-        "sha256": sha256_file(cache_path),
+        "sha256": cache_sha256,
         "feature_space": expected_space,
         "feature_dim": int(consensus.targets.shape[1]),
         "projection_order": "official_adaptor_then_geometry_matched_mpr",
@@ -201,12 +244,24 @@ def _load_capability_mpr_target(
         "official_adaptor_checkpoint_sha256": metadata.get(
             "official_adaptor_checkpoint_sha256"
         ),
+        "official_adaptor_checkpoint_provenance": metadata.get(
+            "official_adaptor_checkpoint_provenance", ""
+        ),
         "capability_map_source": capability_map_source,
         "capability_native_map_manifest": metadata.get(
             "capability_native_map_manifest", ""
         ),
         "capability_native_map_manifest_sha256": metadata.get(
             "capability_native_map_manifest_sha256", ""
+        ),
+        "feature_output_bundle_sha256": metadata.get(
+            "feature_output_bundle_sha256", ""
+        ),
+        "capability_native_map_output_bundle_sha256": metadata.get(
+            "capability_native_map_output_bundle_sha256", ""
+        ),
+        "capability_native_map_radio_checkpoint_load_contract": metadata.get(
+            "capability_native_map_radio_checkpoint_load_contract", ""
         ),
         "capability_native_map_grid": metadata.get(
             "capability_native_map_grid", []
@@ -307,20 +362,26 @@ def train(args: argparse.Namespace) -> dict:
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(int(args.seed))
     device = torch.device(args.device)
-    cache = torch.load(Path(args.mpr_cache), map_location="cpu")
-    if not isinstance(cache, dict) or "features" not in cache:
-        raise ValueError("MPR cache must contain primitive features")
-    metadata = dict(cache.get("metadata", {}))
     observation_contract_mode = str(
         getattr(args, "observation_contract", "unchecked")
     )
+    strict_contract_modes = {
+        CANONICAL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+    }
+    cache, mpr_cache_sha256, mpr_cache_path = load_mpr_cache(
+        args.mpr_cache,
+        expected_sha256=(
+            str(getattr(args, "expected_mpr_cache_sha256", "")) or None
+        ),
+        expected_feature_space="radio",
+        require_reliability=True,
+        require_formal_safety=observation_contract_mode in strict_contract_modes,
+    )
+    metadata = dict(cache.get("metadata", {}))
     if observation_contract_mode != "unchecked":
-        strict_contract_modes = {
-            CANONICAL_OBSERVATION_CONTRACT_NAME,
-            CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
-            CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
-            CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
-        }
         validate_observation_contract_metadata(
             metadata,
             require_declaration=observation_contract_mode in strict_contract_modes,
@@ -336,6 +397,20 @@ def train(args: argparse.Namespace) -> dict:
         raise ValueError("canonical main field must reconstruct raw RADIO, not a query head")
     consensus = _consensus_from_cache(cache)
     radio_hash = sha256_file(args.radio_checkpoint)
+    expected_radio_hash = str(
+        getattr(args, "expected_radio_checkpoint_sha256", "")
+    )
+    if expected_radio_hash and radio_hash != expected_radio_hash:
+        raise ValueError("RADIO checkpoint differs from caller authority")
+    expected_feature_bundle_sha256 = str(
+        getattr(args, "expected_feature_output_bundle_sha256", "")
+    )
+    if observation_contract_mode in strict_contract_modes and (
+        not expected_feature_bundle_sha256
+        or metadata.get("feature_output_bundle_sha256")
+        != expected_feature_bundle_sha256
+    ):
+        raise ValueError("raw MPR belongs to another feature output bundle")
     capability_targets: dict[str, PrimitiveConsensus] = {}
     capability_target_provenance: dict[str, dict] = {}
     for name, path in (
@@ -350,6 +425,12 @@ def train(args: argparse.Namespace) -> dict:
             raw_cache=cache,
             raw_metadata=metadata,
             radio_checkpoint_sha256=radio_hash,
+            expected_cache_sha256=str(
+                getattr(args, f"expected_{name}_mpr_cache_sha256", "")
+            ),
+            expected_feature_output_bundle_sha256=(
+                expected_feature_bundle_sha256
+            ),
         )
         capability_targets[name] = target
         capability_target_provenance[name] = provenance
@@ -380,7 +461,18 @@ def train(args: argparse.Namespace) -> dict:
     if str(args.initial_field_checkpoint).strip():
         initial_path = Path(args.initial_field_checkpoint)
         field, initial_payload = load_canonical_field_checkpoint(
-            initial_path, map_location="cpu"
+            initial_path,
+            map_location="cpu",
+            expected_sha256=(
+                str(
+                    getattr(
+                        args,
+                        "expected_initial_field_checkpoint_sha256",
+                        "",
+                    )
+                )
+                or None
+            ),
         )
         if initial_payload.get("benchmark_masks_opened", False) or initial_payload.get(
             "text_queries_opened", False
@@ -496,7 +588,10 @@ def train(args: argparse.Namespace) -> dict:
 
     official_views = None
     if args.official_capability_loss:
-        official_views = FrozenRadioViews.from_radio_checkpoint(args.radio_checkpoint).to(device)
+        official_views = FrozenRadioViews.from_radio_checkpoint(
+            args.radio_checkpoint,
+            expected_sha256=radio_hash,
+        ).to(device)
     loss_config = CanonicalFieldLossConfig(
         mpr_weight=float(args.mpr_weight),
         dino_weight=float(args.dino_weight if official_views is not None else 0.0),
@@ -608,6 +703,17 @@ def train(args: argparse.Namespace) -> dict:
             field.decoder.mean.requires_grad or field.decoder.scale.requires_grad
         ),
     }
+    training_config = {
+        key: value
+        for key, value in vars(args).items()
+    }
+    training_config_sha256 = hashlib.sha256(
+        json.dumps(
+            training_config,
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("utf-8")
+    ).hexdigest()
     payload = {
         "schema_version": 1,
         "architecture": architecture,
@@ -615,8 +721,10 @@ def train(args: argparse.Namespace) -> dict:
         "state_dict": field.state_dict(),
         "reliability": consensus.reliability.half(),
         "geometry_fingerprint": cache.get("geometry_fingerprint", {}),
-        "mpr_cache": str(Path(args.mpr_cache).resolve()),
+        "mpr_cache": str(mpr_cache_path),
+        "mpr_cache_sha256": mpr_cache_sha256,
         "mpr_cache_metadata": metadata,
+        "feature_output_bundle_sha256": expected_feature_bundle_sha256,
         "basis_fit_report": basis_fit_report,
         "initial_field_checkpoint": initial_field_provenance,
         "loss_config": asdict(loss_config),
@@ -628,13 +736,26 @@ def train(args: argparse.Namespace) -> dict:
             else "none"
         ),
         "capability_mpr_targets": capability_target_provenance,
+        "training_config": training_config,
+        "training_config_sha256": training_config_sha256,
         "history": history,
         "final_metrics": final_metrics,
         "final_capability_metrics": final_capability_metrics,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
     }
-    torch.save(payload, output)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{output.name}.",
+        suffix=".tmp",
+        dir=output.parent,
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    try:
+        torch.save(payload, temporary)
+        os.replace(temporary, output)
+    finally:
+        temporary.unlink(missing_ok=True)
     report = {
         "output": str(output),
         "num_gaussians": field.num_gaussians,
@@ -648,18 +769,32 @@ def train(args: argparse.Namespace) -> dict:
         "final_capability_metrics": final_capability_metrics,
         "capability_target_mode": payload["capability_target_mode"],
         "capability_mpr_targets": capability_target_provenance,
+        "mpr_cache_sha256": mpr_cache_sha256,
+        "feature_output_bundle_sha256": expected_feature_bundle_sha256,
+        "training_config_sha256": training_config_sha256,
         "feature_signature": field.signature.to_dict(),
         "xyz_sha256": _sha256_tensor_rows(torch.as_tensor(cache["xyz"])),
     }
-    output.with_suffix(output.suffix + ".json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
+    report_path = output.with_suffix(output.suffix + ".json")
+    temporary_report = report_path.with_suffix(
+        report_path.suffix + ".tmp"
     )
+    temporary_report.write_text(
+        json.dumps(report, indent=2),
+        encoding="utf-8",
+    )
+    temporary_report.replace(report_path)
     return report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mpr-cache", required=True)
+    parser.add_argument(
+        "--expected-mpr-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the raw RADIO MPR cache.",
+    )
     parser.add_argument(
         "--observation-contract",
         choices=[
@@ -674,6 +809,16 @@ def main() -> None:
         help="Require the shared dataset-independent MPR contract for new fields.",
     )
     parser.add_argument("--radio-checkpoint", required=True)
+    parser.add_argument(
+        "--expected-radio-checkpoint-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the official RADIO checkpoint.",
+    )
+    parser.add_argument(
+        "--expected-feature-output-bundle-sha256",
+        default="",
+        help="Caller-trusted SHA-256 of the extracted feature output bundle.",
+    )
     parser.add_argument("--output", required=True)
     parser.add_argument(
         "--initial-field-checkpoint",
@@ -683,6 +828,11 @@ def main() -> None:
             "field. Its architecture and learned state are reused unchanged; "
             "architecture initialization flags are ignored."
         ),
+    )
+    parser.add_argument(
+        "--expected-initial-field-checkpoint-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for --initial-field-checkpoint.",
     )
     parser.add_argument("--radio-version", default="c-radio_v4-h")
     parser.add_argument("--device", default="cuda:0")
@@ -735,12 +885,22 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--expected-dino-v3-mpr-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for --dino-mpr-cache.",
+    )
+    parser.add_argument(
         "--sam3-mpr-cache",
         default="",
         help=(
             "Optional query-free target built by applying the official SAM3 "
             "spatial adaptor to each 2-D teacher view before matched MPR."
         ),
+    )
+    parser.add_argument(
+        "--expected-sam3-mpr-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for --sam3-mpr-cache.",
     )
     parser.add_argument("--mpr-weight", type=float, default=1.0)
     parser.add_argument("--dino-weight", type=float, default=0.20)

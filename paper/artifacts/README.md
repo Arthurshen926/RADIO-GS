@@ -164,29 +164,83 @@ sha256sum -c paper/artifacts/checksums.txt
 
 ## Baseline Reproduction
 
+- `evaluation_protocol_freeze_20260801.yaml`: single canonical selector for
+  the seven external-method benchmark routes. It pins cohorts, parameters,
+  aggregation, entrypoints, result hashes, provenance boundaries, and
+  superseded diagnostics. Validate it with
+  `bash radio_gs/scripts/run_repo_python.sh -m radio_gs.scripts.validate_evaluation_protocol_freeze`.
+- `evaluation_protocol_cleanup_decisions_20260801.md` and
+  `evaluation_protocol_cleanup_inventory_20260801.yaml`: decision-ready human
+  and machine inventories for historical code, documents, checkpoints,
+  caches, and outputs. They authorize no deletion; every cleanup wave requires
+  explicit user approval.
+- `evaluation_protocol_audit_summary_20260731.md`: consolidated, fail-closed
+  status across LERF-2D/direct-3D, ScanNet OVS, Easy3D/AGILE3D, NVOS,
+  SPIn-NeRF, and PFPR. NVOS now has a complete exact 8-task x 3-seed
+  released-online-protocol row; SPIn-NeRF now has exact three-seed checks for
+  all nine locally available scenes, with Fork absent and therefore no strict
+  full-ten-scene claim. PFPR now has a complete one-scene Phase A-E chain using
+  exact released LUDVIG DINO/PCA/uplift plus an explicitly custom crop-retrieval
+  adapter.
 - `easy3d_agile3d_protocol_audit_20260731.md`: official-checkpoint Easy3D
   protocol card covering the exact four-worker preprocessing cache, paired
-  AGILE3D/Easy3D interaction-contract pilot, selected primary contract, and
-  the explicitly non-formal 68-scene hardware-interrupted resume state.
+  AGILE3D/Easy3D interaction-contract sensitivity audit, source-grounded
+  primary contract, two complete 312-scene results, and the preserved
+  non-formal 68-scene hardware-interrupted prefix.
 - `ludvig_nvos_spin_protocol_audit_20260731.md`: LUDVIG-SAM NVOS/SPIn-NeRF
   protocol audit. It pins the reconstructed byte-identical official 3DGS
-  training source, the completed fern hybrid pilot, the validated all-view
-  CPU dry run and GPU-lost resume boundary, plus the SPIn fern checkpoint
-  reuse and reference-mask calibration preflight.
+  training source, the completed exact NVOS 8-task x 3-seed result, the
+  resolution-safe Trex and Room diagnoses, thermal receipts, and the completed
+  local nine-scene SPIn-NeRF checkpoint/reference-calibration boundary.
+- `concept_query_protocol_audit_20260731.md`: authoritative concept-query
+  protocol audit. It now closes OccamLGS LERF-2D at `63.62/82.85`, validates
+  VALA's direct-3D semantic/evaluator protocol at `54.12/79.35` on compatible
+  Occam RGB geometry, and closes VALA ScanNet `paper8` at
+  `34.53/51.59`, `37.96/56.77`, and `47.36/67.47`. Historical LangSplatV2,
+  Dr. Splat, and two-scene ScanNet diagnostics remain for provenance but are
+  explicitly superseded for protocol conclusions.
+- `occamlgs_lerf2d_strict_reproduction_20260801.md`: four-scene streamed
+  OccamLGS reproduction, per-scene paper deltas, camera-loading optimization,
+  and GPU0 safety receipt.
+- `vala_lerf3d_protocol_reproduction_20260801.md`: exact VALA three-level
+  semantic lifting/direct-3D evaluator result, extensionless `test.txt`
+  contract, per-scene metrics, and compatible-RGB-geometry scope boundary.
+- `vala_scannet_exact_protocol_reproduction_20260801.md`: VALA ScanNet
+  `paper8`/`code9` cohort definitions, exact Gaussian pseudo-GT/significance
+  protocol, results, and old-feature ablation.
+- `langsplatv2_lerf2d_final_gap_audit_20260801.md`: CPU-only final LERF-2D
+  gap closure over 208 query units. It validates the released localization
+  contract, reconstructs an approximate nine-hit paper gap, documents why no
+  existing render cache supports further offline counterfactuals, and links
+  the machine receipt SHA-256
+  `0bda52d7f8598c731817d2a2e69e62a043e5ab2f16de91840ccecbd11c4543d2`.
 - `pfpr_ludvig_style_protocol_card_20260731.md`: compact protocol/provenance
-  card for the six-scene PFPR LUDVIG-style DINO uplift sanity. It explicitly
-  records why the cache is not an official LUDVIG reproduction, its partial
-  no-support-gate status, immutable hashes, and exact evaluator replay.
+  card for both the exact-LUDVIG one-scene Phase A-E PFPR adapter and the older
+  six-scene C-RADIO/DINOv3 sanity. It records the released register-token load
+  incompatibility, method/evaluator privacy boundary, immutable hashes, weak
+  but interpretable custom-adapter result, and GPU0 thermal receipts.
 - `external_baseline_audit.{md,json}`: local clone/build/reproduction status for
   OpenGaussian, LangSplatV2, OccamLGS, GAGS, Dr. Splat, LangSplat,
   LEGaussians, CAGS, Semantic Gaussians, and LaGa.
 - `baseline_source_verification.md`: earlier paper baseline source
   verification snapshot.
 - `langsplatv2_lerf_summary.{md,json}`: current LangSplatV2 compatibility
-  summary. As of this snapshot, all four LERF scenes are complete.
+  summary. All four LERF scenes are complete, but this historical summary is
+  not strict-table-eligible; use
+  `langsplatv2_lerf2d_final_gap_audit_20260801.md` for the final protocol and
+  provenance interpretation.
 - `langsplat_classic_lerf_summary.{md,json}`: current classic LangSplat
   compatibility summary. All four scenes are evaluated after the split-aware
   train/test feature path fix.
+- `drsplat_lerf_summary.{md,json}`: historical four-scene Dr. Splat L1
+  compatibility result retained as the paired scale baseline. The final
+  machine receipt is
+  `output/baselines/dr_splat/lerf_protocol_audit_20260801/remaining_l3_paired_20260801_a1/drsplat_l3_scale_paired_four_scene_summary.json`
+  (SHA-256
+  `39c849e45ee4fcca53fd5977ddfc37d15917ef954e47fe654d012c349cc39aca`).
+  It fixes `feature_level=3` across all four scenes, reports paper deltas only
+  with the equal-scene macro, and records
+  `strict_checkpoint_reproduction=false` / `paper_comparison=diagnostic_only`.
 - `legaussians_lerf_readiness_audit.{md,json}`: LEGaussians LERF readiness
   check. The repo/native extensions are ready, but all four LERF scenes still
   lack the official quantized feature files required before training.
@@ -203,6 +257,23 @@ sha256sum -c paper/artifacts/checksums.txt
   All four scenes are evaluated, with missing rendered masks counted in the
   source JSONs; this is a diagnostic reproduction row rather than a SOTA claim.
 - `opengaussian_vs_radio_gs_report.md`: OpenGaussian/RADIO-GS comparison notes.
+
+## 2026-07-31 Feature-Recovery Continuation
+
+- `feature_recovery_continuation_20260731.md`: live evidence ledger for the
+  query-free SurfaceRegion recovery, text-response fidelity path, NVOS unary
+  correction, canonical R/W/S/D capacity screen, and thermal-safe GPU1 queue.
+- `target_blind_imagenet1k_primary_text_bank_v1.{json,manifest.json}`: frozen
+  997-query ImageNet-1K primary-name bank with target-blind fit/dev/audit
+  splits; benchmark vocabulary is never read during construction.
+- `text_response_fidelity_gate_contract_20260731.md`: independent-cosine
+  response-error and region-ranking promotion contract on held-out generic
+  queries and held-out ScanNet scenes.
+- `nvos_registered_region_v{1,2,3}_candidate_20260731.yaml`: predeclared
+  registered-prompt unary diagnostics.  V1/V2 are rejected by the frozen
+  three-scene stop rule; V3 is theory-frozen and awaits its one-shot run.
+- `canonical_v5_scene{0011_01,0046_00}_overlay_20260731.yaml`: query-free,
+  two-scene overlays for the reliability/width/spatial/depth capacity ladder.
 
 ## Paper Tables And Guards
 

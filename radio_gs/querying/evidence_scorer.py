@@ -9,7 +9,7 @@ from typing import Mapping
 import torch
 import torch.nn.functional as F
 
-from .query_spec import PrototypeSet, QuerySpec
+from .query_spec import PrimitiveUnaryEvidence, PrototypeSet, QuerySpec
 from .score_calibration import (
     SceneSpaceCalibration,
     robust_tanh_score_calibration,
@@ -39,6 +39,11 @@ class EvidenceScoringConfig:
     # appearance prototypes.  Keep their direct signed-unary contribution
     # opt-in so frozen benchmark contracts remain bit-for-bit compatible.
     registered_seed_unary_weight: float = 0.0
+    # ``additive`` preserves the historical opt-in heuristic.  The
+    # probability mixture instead treats prompt mass as an observation:
+    # p=(1-c)*p_field+c*q, with no task-label calibration or scale-mismatched
+    # addition to cosine margins.
+    registered_observation_fusion: str = "additive"
 
     def __post_init__(self) -> None:
         if min(self.semantic_weight, self.appearance_weight, self.boundary_weight) < 0:
@@ -51,6 +56,23 @@ class EvidenceScoringConfig:
         ):
             raise ValueError(
                 "registered_seed_unary_weight must be finite and non-negative"
+            )
+        if self.registered_observation_fusion not in {
+            "additive",
+            "probability_mixture",
+            "hard_seed_anchored_probability",
+        }:
+            raise ValueError(
+                "registered_observation_fusion must be additive, "
+                "probability_mixture, or hard_seed_anchored_probability"
+            )
+        if (
+            self.registered_observation_fusion
+            in {"probability_mixture", "hard_seed_anchored_probability"}
+            and self.registered_seed_unary_weight != 0
+        ):
+            raise ValueError(
+                "probability fusion requires registered_seed_unary_weight=0"
             )
         if self.feature_calibration not in {"none", "diagonal_robust"}:
             raise ValueError("feature_calibration must be none or diagonal_robust")
@@ -110,17 +132,30 @@ def shrink_unary_by_reliability(
     return values * confidence
 
 
-def registered_seed_unary(
+def registered_seed_observation(
     positive: torch.Tensor,
     negative: torch.Tensor | None,
-) -> torch.Tensor:
-    """Convert raw registered masses into confidence-weighted signed purity.
+    *,
+    confidence_mode: str = "relative_joint_max",
+    mass_scale: float = 1.0,
+    visible_mass: torch.Tensor | None = None,
+    coverage_power: float = 1.0,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Return confidence-weighted signed purity and joint confidence.
 
-    Algebraically this is ``purity * confidence`` where purity is
-    ``(m+ - m-) / (m+ + m-)`` and confidence is joint prompt mass normalized
-    by the largest observed joint mass.  The factors cancel to a stable,
-    bounded ``(m+ - m-) / max_i(m+ + m-)``.  Unlike independently normalized
-    solver seeds, a weak tail cannot become unit-strength direct evidence.
+    ``relative_joint_max`` preserves the original query-compiler arithmetic.
+    ``poisson_mass`` is intended for raw raster-adjoint contribution sums:
+    ``c = 1-exp(-(m+ + m-)/mass_scale)`` is the probability of at least one
+    effective observation under a Poisson model, while
+    ``s = c*(m+ - m-)/(m+ + m-)`` retains foreground/background purity.  It
+    gives tiny raster tails tiny confidence without scene-wise calibration.
+
+    ``poisson_mass_coverage`` additionally multiplies ``c`` by the labeled
+    fraction of the primitive's visible raster footprint.  This distinction
+    is important for sparse scribbles: a Gaussian that accumulates substantial
+    mass from a few labeled pixels is not a strong unary when most of its
+    visible footprint is unlabeled.  A full reference mask has coverage one,
+    while Poisson mass still suppresses tiny raster tails.
     """
 
     foreground = torch.as_tensor(positive).float().reshape(-1)
@@ -138,10 +173,217 @@ def registered_seed_unary(
             raise ValueError(
                 "negative registered seeds must be finite and non-negative"
             )
-    joint_scale = (foreground + background).amax()
+    joint = foreground + background
+    if not math.isfinite(float(mass_scale)) or float(mass_scale) <= 0:
+        raise ValueError("registered observation mass_scale must be positive")
+    mode = str(confidence_mode)
+    if mode not in {
+        "relative_joint_max",
+        "poisson_mass",
+        "poisson_mass_coverage",
+    }:
+        raise ValueError(
+            "registered observation confidence_mode must be "
+            "relative_joint_max, poisson_mass, or poisson_mass_coverage"
+        )
+    visible: torch.Tensor | None = None
+    power = float(coverage_power)
+    if mode == "poisson_mass_coverage":
+        if visible_mass is None:
+            raise ValueError(
+                "poisson_mass_coverage requires visible raster mass"
+            )
+        visible = torch.as_tensor(visible_mass).float().reshape(-1)
+        if (
+            visible.shape != joint.shape
+            or not bool(torch.isfinite(visible).all())
+            or bool((visible < 0).any())
+        ):
+            raise ValueError(
+                "visible raster mass must be a finite non-negative aligned vector"
+            )
+        if not math.isfinite(power) or power <= 0:
+            raise ValueError("registered observation coverage_power must be positive")
+        tolerance = 1e-5 * torch.maximum(
+            torch.ones_like(visible),
+            visible,
+        )
+        if bool((joint > visible + tolerance).any()):
+            raise ValueError(
+                "registered prompt mass cannot exceed visible raster mass"
+            )
+    joint_scale = joint.amax()
     if joint_scale <= 0:
-        return torch.zeros_like(foreground)
-    return ((foreground - background) / joint_scale).clamp(-1.0, 1.0)
+        zeros = torch.zeros_like(foreground)
+        return zeros, zeros
+    if mode == "relative_joint_max":
+        confidence = (joint / joint_scale).clamp(0.0, 1.0)
+        signed = ((foreground - background) / joint_scale).clamp(-1.0, 1.0)
+        return signed, confidence
+    confidence = -torch.expm1(-joint / float(mass_scale))
+    if mode == "poisson_mass_coverage":
+        assert visible is not None
+        labeled_fraction = torch.where(
+            visible > 0,
+            joint / visible.clamp_min(1e-30),
+            torch.zeros_like(joint),
+        ).clamp(0.0, 1.0)
+        confidence = confidence * labeled_fraction.pow(power)
+    purity = torch.where(
+        joint > 0,
+        (foreground - background) / joint.clamp_min(1e-30),
+        torch.zeros_like(joint),
+    ).clamp(-1.0, 1.0)
+    signed = confidence * purity
+    return signed, confidence
+
+
+def registered_seed_unary(
+    positive: torch.Tensor,
+    negative: torch.Tensor | None,
+) -> torch.Tensor:
+    """Backward-compatible signed registered unary."""
+
+    return registered_seed_observation(positive, negative)[0]
+
+
+def registered_observation_anchor_mask(
+    observation: PrimitiveUnaryEvidence,
+    *,
+    anchor_threshold: float,
+) -> torch.Tensor:
+    """Return rows whose direct signed observation is also a hard seed.
+
+    The threshold is intentionally shared with ``SupportSolverConfig`` rather
+    than introducing another strength parameter.  Confidence must be positive
+    so a zero-confidence row remains unobserved even when the shared threshold
+    is zero.
+    """
+
+    threshold = float(anchor_threshold)
+    if not math.isfinite(threshold) or not 0.0 <= threshold <= 1.0:
+        raise ValueError("registered observation anchor_threshold must be in [0,1]")
+    if observation.confidence is None:
+        raise ValueError(
+            "hard-seed anchored probability requires explicit observation confidence"
+        )
+    magnitude = observation.values.abs()
+    return (observation.confidence > 0) & (magnitude > 0) & (
+        magnitude >= threshold
+    )
+
+
+def registered_observation_effective_confidence(
+    observation: PrimitiveUnaryEvidence,
+    *,
+    anchor_threshold: float,
+) -> torch.Tensor:
+    """Promote direct hard-seed rows to unit fusion confidence."""
+
+    anchors = registered_observation_anchor_mask(
+        observation,
+        anchor_threshold=anchor_threshold,
+    )
+    assert observation.confidence is not None
+    return torch.where(
+        anchors,
+        torch.ones_like(observation.confidence),
+        observation.confidence,
+    )
+
+
+def fuse_registered_observation_unary(
+    field_unary: torch.Tensor,
+    observation: PrimitiveUnaryEvidence,
+    *,
+    unary_temperature: float,
+    chunk_size: int = 262144,
+    anchor_threshold: float | None = None,
+) -> torch.Tensor:
+    """Fuse registered evidence with field evidence in Bernoulli space.
+
+    Let ``c`` be normalized joint prompt mass and ``q`` the foreground purity
+    of that observation.  The fused probability is
+    ``(1-c)*sigmoid(u/T) + c*q``.  Thus unobserved rows preserve the field
+    exactly, a pure fully observed row overrides it, and conflicting
+    foreground/background mass tends continuously toward an uninformative
+    observation instead of winning an arbitrary tie.
+
+    When ``anchor_threshold`` is supplied, rows that meet the solver's same
+    direct signed hard-seed threshold use effective confidence one:
+    ``a=1[c>0 and |s|>=tau]``, ``c_eff=a+(1-a)c``, and
+    ``p=(1-c_eff)*p_field+c_eff*q``.  This makes an accepted native-raster adjoint
+    seed explicit strong unary evidence while leaving weak footprint tails on
+    the coverage-conditioned mixture.  No new task-tuned constant is added.
+    """
+
+    values = torch.as_tensor(field_unary)
+    if values.ndim != 1 or not bool(torch.isfinite(values).all()):
+        raise ValueError("field unary must be a finite vector")
+    temperature = float(unary_temperature)
+    if not math.isfinite(temperature) or temperature <= 0:
+        raise ValueError("unary_temperature must be finite and positive")
+    signed = observation.values.to(device=values.device, dtype=values.dtype)
+    confidence = observation.confidence
+    if confidence is None:
+        raise ValueError(
+            "probability mixture requires explicit observation confidence"
+        )
+    confidence = confidence.to(device=values.device, dtype=values.dtype)
+    if signed.shape != values.shape or confidence.shape != values.shape:
+        raise ValueError("registered observation does not align with field unary")
+    if int(chunk_size) <= 0:
+        raise ValueError("registered observation fusion chunk_size must be positive")
+    effective_confidence: torch.Tensor | None = None
+    if anchor_threshold is not None:
+        effective_confidence = registered_observation_effective_confidence(
+            observation,
+            anchor_threshold=float(anchor_threshold),
+        ).to(device=values.device, dtype=values.dtype)
+    output = torch.empty_like(values)
+    eps = float(torch.finfo(torch.float64).eps)
+    for start in range(0, values.numel(), int(chunk_size)):
+        stop = min(start + int(chunk_size), values.numel())
+        field_chunk = values[start:stop].double()
+        signed_chunk = signed[start:stop].double()
+        confidence_chunk = confidence[start:stop].double()
+        field_probability = torch.sigmoid(field_chunk / temperature)
+        if effective_confidence is None:
+            # Since signed=c*(2q-1), c*q=(c+signed)/2.  This closed form avoids
+            # dividing tiny confidence values and keeps the v1/v2 calculation
+            # bit-compatible in float64 before returning to field-unary dtype.
+            fused_probability = (
+                (1.0 - confidence_chunk) * field_probability
+                + 0.5 * (confidence_chunk + signed_chunk)
+            )
+            effective_chunk = confidence_chunk
+        else:
+            effective_chunk = effective_confidence[start:stop].double()
+            observation_probability = torch.where(
+                confidence_chunk > 0,
+                0.5
+                * (
+                    1.0
+                    + signed_chunk / confidence_chunk.clamp_min(1e-300)
+                ),
+                torch.full_like(confidence_chunk, 0.5),
+            ).clamp(0.0, 1.0)
+            fused_probability = (
+                (1.0 - effective_chunk) * field_probability
+                + effective_chunk * observation_probability
+            )
+        fused_chunk = temperature * torch.logit(
+            fused_probability.clamp(eps, 1.0 - eps)
+        )
+        unchanged = (effective_chunk == 0) | (
+            fused_probability == field_probability
+        )
+        output[start:stop] = torch.where(
+            unchanged,
+            field_chunk,
+            fused_chunk,
+        ).to(dtype=values.dtype)
+    return output
 
 
 def _score_bank(

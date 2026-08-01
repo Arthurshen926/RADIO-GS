@@ -10,6 +10,7 @@ import torch
 from radio_gs.field.field_signature import FeatureSpaceSignature
 from .evidence_scorer import (
     EvidenceScoringConfig,
+    fuse_registered_observation_unary,
     score_query_evidence,
     shrink_unary_by_reliability,
 )
@@ -66,6 +67,18 @@ class CanonicalQueryEngine:
         self.graph = graph
         self.scoring_config = scoring_config
         self.solver_config = solver_config
+        if (
+            scoring_config.registered_observation_fusion
+            == "hard_seed_anchored_probability"
+            and (
+                solver_config.hard_seed_threshold <= 0
+                or solver_config.hard_seed_conflict_margin != 0
+            )
+        ):
+            raise ValueError(
+                "hard_seed_anchored_probability requires a positive "
+                "hard_seed_threshold and zero hard_seed_conflict_margin"
+            )
         self.graph_policy = str(graph_policy)
         self.component_graph_policy = str(component_graph_policy)
         self.graph_legacy_residual = float(graph_legacy_residual)
@@ -243,7 +256,6 @@ class CanonicalQueryEngine:
         if (
             query.modality is QueryModality.REGISTERED_2D
             and query.primitive_unary_evidence is not None
-            and scoring_config.registered_seed_unary_weight > 0
         ):
             # A registered prompt is direct scene evidence.  Add it after
             # query-independent field-reliability shrinkage so a low-confidence
@@ -255,11 +267,64 @@ class CanonicalQueryEngine:
                 raise ValueError(
                     "registered prompt unary does not align with support graph"
                 )
-            weighted_prompt_unary = (
-                prompt_unary * scoring_config.registered_seed_unary_weight
-            )
-            unary = unary + weighted_prompt_unary
-            components = {**components, "registered_seed": weighted_prompt_unary}
+            if scoring_config.registered_observation_fusion in {
+                "probability_mixture",
+                "hard_seed_anchored_probability",
+            }:
+                if (
+                    scoring_config.registered_observation_fusion
+                    == "hard_seed_anchored_probability"
+                ):
+                    if (
+                        query.positive_seeds is None
+                        or query.negative_seeds is None
+                        or query.positive_seeds.normalization != "none"
+                        or query.negative_seeds.normalization != "none"
+                    ):
+                        raise ValueError(
+                            "hard-seed anchored probability requires aligned "
+                            "joint-signed, non-normalized positive/negative seeds"
+                        )
+                    seed_signed = (
+                        query.positive_seeds.weights
+                        - query.negative_seeds.weights
+                    ).to(device=prompt_unary.device, dtype=prompt_unary.dtype)
+                    if not torch.allclose(
+                        prompt_unary,
+                        seed_signed,
+                        atol=1e-6,
+                        rtol=0.0,
+                    ):
+                        raise ValueError(
+                            "hard-seed anchored probability requires direct "
+                            "observation values equal positive-minus-negative seeds"
+                        )
+                fused_unary = fuse_registered_observation_unary(
+                    unary,
+                    query.primitive_unary_evidence,
+                    unary_temperature=self.solver_config.unary_temperature,
+                    chunk_size=scoring_config.score_chunk_size,
+                    anchor_threshold=(
+                        self.solver_config.hard_seed_threshold
+                        if scoring_config.registered_observation_fusion
+                        == "hard_seed_anchored_probability"
+                        else None
+                    ),
+                )
+                components = {
+                    **components,
+                    "registered_seed": fused_unary - unary,
+                }
+                unary = fused_unary
+            elif scoring_config.registered_seed_unary_weight > 0:
+                weighted_prompt_unary = (
+                    prompt_unary * scoring_config.registered_seed_unary_weight
+                )
+                unary = unary + weighted_prompt_unary
+                components = {
+                    **components,
+                    "registered_seed": weighted_prompt_unary,
+                }
         if unary.numel() != self.graph.num_nodes:
             if unary.numel() == 0 and self.graph.num_nodes > 0:
                 unary = torch.zeros(self.graph.num_nodes)

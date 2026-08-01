@@ -1,5 +1,6 @@
 schema_version: 1
 created: 2026-07-31
+updated: 2026-08-01
 purpose: >-
   Cross-benchmark, fail-closed registry for the external-method evaluation
   audit. A numerical paper delta is not a same-protocol claim unless every
@@ -15,8 +16,10 @@ reporting_policy:
     it does not silently overwrite historical post-hoc values.
   aggregation_policy: >-
     Store scene-equal macro and query-weighted micro separately. Use only the
-    aggregation that reproduces the published metric when computing a paper
-    delta, and disclose mixed aggregation across metrics.
+    row-specific aggregation that numerically reproduces a published metric
+    when computing a paper delta. Disclose mixed aggregation and source-table
+    heterogeneity; a numerical row match never establishes a benchmark-wide
+    formal aggregation rule.
   target_visibility_policy: >-
     Methods that consume target RGB at training or query time cannot be placed
     in a strict-unseen reusable-field row.
@@ -27,13 +30,16 @@ evaluations:
     task: LERF-OVS rendered-view 2D open-vocabulary segmentation/localization
     method: LangSplatV2
     completion: complete
-    evidence_class: released_code_reproduction
+    evidence_class: compatibility_reproduction
     cohort:
       complete: true
       scenes: [figurines, teatime, ramen, waldo_kitchen]
       annotated_frames: 22
       queries: 208
       labelled_camera_roles: {train: 15, test: 7}
+      labelled_query_roles: {train: 134, test: 74}
+      local_checkpoint_levels: 12
+      local_checkpoint_eval_true: 12
     protocol:
       query: official annotation strings
       camera_mapping: exact annotation stem over train-camera plus test-camera union
@@ -41,23 +47,36 @@ evaluations:
       semantic_levels: 3
       metric_domain: labelled image pixels and localization bboxes
       aggregation: >-
-        mIoU paper delta uses four-scene equal macro; LocAcc paper delta uses
-        208-query micro, matching the published mixed overall convention
-      calibration: released fixed threshold; no target-mask threshold selection
-      target_visibility: mixed labelled train/test roles from eval=True checkpoints
+        LangSplatV2-row-specific numerical match only: mIoU paper delta uses
+        four-scene equal macro and LocAcc uses 208-query micro. The surrounding
+        source-context table is aggregation-heterogeneous, so this is not a
+        benchmark-wide formal mixed-aggregation rule.
+      calibration: >-
+        released fixed segmentation threshold 0.4 with no target-mask
+        selection; localization is independent of the mask threshold
+      target_visibility: >-
+        local eval=True checkpoints create mixed labelled train/test roles,
+        whereas released LangSplatV2 train.sh omits --eval and defaults to
+        all-view eval=False training
+      effective_quick_render_topk: 4
+      localization_level_selection: argmax over each level's 29x29-average-pooled peak
+      localization_bbox_rule: any tied maximum inside any merged bbox, inclusive boundary
     comparability:
       paper_comparison: diagnostic_only
       strict_table_eligible: false
       reasons:
         - The released evaluator indexed the train-camera list by original frame index; the audit applies a minimal exact-name camera correction.
-        - Fifteen of 22 annotated views have train role, conflicting with held-out-test-view prose.
-        - The checkpoints are local compatibility checkpoints rather than a released paper checkpoint bundle.
+        - Released LangSplatV2 train.sh defaults to eval=False/all-view training, while all twelve local level checkpoints record eval=True and withhold every eighth camera from language-field training.
+        - Seventy-four of 208 evaluated query units lie on labelled views withheld by the local eval=True split, while 134 lie on local train-role views.
+        - The checkpoints use local Occam-compatible RGB starts and compatibility language features rather than an identity-verified official LangSplatV2 checkpoint bundle.
+        - The audit checkout contains training-side loss/VQ compatibility edits, so clean paper-training implementation identity is not established.
+        - Mixed aggregation is only a numerical match for the LangSplatV2 printed row; every other listed 2D baseline Acc mean matches scene macro, making the source-context table aggregation-heterogeneous.
       protocol_match_to_paper:
-        cohort: true
+        cohort: false
         prompt_or_query: true
         target_visibility: false
         metric_domain: true
-        aggregation: true
+        aggregation: false
         calibration: true
         implementation: false
     reported_metrics:
@@ -83,47 +102,89 @@ evaluations:
       - name: prior_buggy_localization_scene_macro_percent
         role: diagnostic
         value: 61.76
+      - name: localization_hits
+        role: diagnostic
+        value: 166
+      - name: nearest_paper_scene_row_integer_hit_reconstruction
+        role: diagnostic
+        value: 175
+      - name: nearest_paper_hit_deficit
+        role: diagnostic
+        value: 9
+      - name: labelled_queries_locally_withheld_by_eval_true
+        role: diagnostic
+        value: 74
+    diagnosis:
+      known_remaining_evaluator_protocol_error_explains_locacc_gap: false
+      dominant_remaining_gap_class: checkpoint_training_and_feature_provenance
+      locacc_gap_receipt: >-
+        local 166/208; nearest reconstruction from printed scene rows 175/208,
+        approximately nine hits. Ramen 74.7 percent is not exactly realizable
+        by an integer numerator over 71 at its printed precision.
+      cpu_counterfactual_boundary: >-
+        exact-camera outputs contain no rendered feature/relevance cache,
+        localization levels, peak coordinates, or per-query hit bits; top-k,
+        level, tie, bbox, and camera-role counterfactuals require a new render
+      reporting_label: >-
+        LangSplatV2 released-code-intent / local-checkpoint exact-camera diagnostic
     artifacts:
       cohort_summary: output/protocol_audit_20260731/langsplatv2_lerf2d_view_fix/cohort_summary.json
+      cohort_summary_sha256: c8ca2f79e1c39b027d4ab7a114a10bcccf4f07b08517e33251cb072d8ba73da4
       reproduction_package: reproductions/langsplatv2
       minimal_patch_sha256: a0ba52f843fdc21a0135f71b2ebe2edb5112c4ef48235a080c3c8828a5b285f3
+      final_gap_audit: paper/artifacts/langsplatv2_lerf2d_final_gap_audit_20260801.md
+      final_gap_receipt: output/protocol_audit_20260801/langsplatv2_lerf2d_final_gap_audit.json
+      final_gap_receipt_sha256: 0bda52d7f8598c731817d2a2e69e62a043e5ab2f16de91840ccecbd11c4543d2
+      final_gap_audit_script: radio_gs/scripts/audit_langsplatv2_lerf2d_final_gap.py
 
   lerf2d_occamlgs_official_checkpoint_context_20260731:
     benchmark_family: concept_query
     task: LERF-OVS rendered-view 2D open-vocabulary segmentation/localization
     method: OccamLGS
-    completion: blocked
-    evidence_class: published_context
+    completion: complete
+    evidence_class: compatibility_reproduction
     cohort:
-      complete: false
+      complete: true
       scenes: [figurines, teatime, ramen, waldo_kitchen]
-      reason: no released paper checkpoint bundle and no self-contained released LERF evaluator
+      labelled_frames: 22
+      queries: 208
     protocol:
       query: official annotation strings
-      target_visibility: paper describes withheld test views
+      target_visibility: >-
+        RGB geometry follows the released all-view LERF intent; semantic
+        feature lifting excludes sparse/0/test.txt cameras
       metric_domain: labelled image pixels and localization bboxes
-      aggregation: published four-scene overall
-      calibration: paper threshold 0.5; three language-feature levels
+      aggregation: unweighted equal macro over four scenes
+      calibration: >-
+        raw OpenCLIP relevance, raw-peak selection over three levels, threshold
+        0.5, 30x30 OpenCV filter2D activation, and legacy 7x7 smoothing
     comparability:
-      paper_comparison: forbidden
+      paper_comparison: diagnostic_only
       strict_table_eligible: false
       reasons:
-        - The official repository delegates LERF evaluation to LangSplat and still marks evaluation code for release.
-        - Available local Occam compatibility checkpoints have eval=False and therefore include labelled views during geometry training.
+        - The local checkpoints and input language-feature bundle are not an upstream-signed official pretrained asset release.
+        - RGB geometry sees all registered RGB views by released intent; only semantic lifting is test-frame held out.
       protocol_match_to_paper:
-        cohort: false
+        cohort: true
         prompt_or_query: true
-        target_visibility: false
-        metric_domain: false
-        aggregation: false
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
         calibration: true
-        implementation: false
+        implementation: true
+    reported_metrics:
+      - {name: miou_percent, role: primary, local: 63.62004352868187, paper: 61.3, delta_points: 2.320043528681872}
+      - {name: localization_accuracy_percent, role: primary, local: 82.84871013445853, paper: 82.5, delta_points: 0.34871013445852794}
+      - {name: query_micro_miou_percent, role: secondary, value: 63.91871838394974}
+      - {name: query_micro_localization_accuracy_percent, role: secondary, value: 81.73076923076923}
     paper_context:
       miou_percent: 61.3
       localization_accuracy_percent: 82.5
       source: https://bmvc2025.bmva.org/proceedings/694/
     artifacts:
       streaming_diagnostic_evaluator: radio_gs/scripts/eval_occamlgs_lerf_checkpoint.py
+      result_root: output/protocol_audit_20260801/occamlgs_lerf2d_corrected_compat_v1
+      report: paper/artifacts/occamlgs_lerf2d_strict_reproduction_20260801.md
 
   lerf3d_drsplat_compatibility_20260519:
     benchmark_family: concept_query
@@ -131,6 +192,7 @@ evaluations:
     method: Dr. Splat
     completion: complete
     evidence_class: compatibility_reproduction
+    strict_checkpoint_reproduction: false
     cohort:
       complete: true
       scenes: [figurines, teatime, ramen, waldo_kitchen]
@@ -140,15 +202,23 @@ evaluations:
       query: official annotation strings
       target_visibility: not established by an official released evaluation package
       metric_domain: locally exported nested 2D silhouette masks
-      aggregation: query-weighted mean over 208 objects
-      calibration: local compatibility mask threshold 0.4
+      aggregation: >-
+        paper deltas use an unweighted equal macro over four scenes; 208-query
+        micro is stored separately as a secondary diagnostic
+      calibration: >-
+        fixed feature_level=3, topk=45, PQ enabled, local mask threshold 0.4,
+        PNG binary threshold 10, and strict IoU > 0.25 / > 0.5 accuracy tests
+      feature_scale_pairing: >-
+        the historical feature_level=1 compatibility cohort and final
+        feature_level=3 cohort use the same four scenes and 208 queries
     comparability:
       paper_comparison: diagnostic_only
       strict_table_eligible: false
       reasons:
         - Upstream official quantitative evaluation remains unavailable/TBA.
-        - The local nested-mask export is a compatibility adapter, not the paper's released direct-3D evaluator.
-        - Metric domain, threshold, and overall aggregation cannot be proven identical to the paper row.
+        - Geometry starts are local OccamLGS-compatible RGB checkpoints rather than released Dr. Splat pretrained checkpoints.
+        - The nested-mask export uses a local VALA single-checkpoint adapter and threshold 0.4, not an official released Dr. Splat evaluator.
+        - Fixing all scenes to feature_level=3 materially reduces the gap but does not close it, and the paper values remain OpenGaFF-reported context.
       protocol_match_to_paper:
         cohort: true
         prompt_or_query: true
@@ -157,19 +227,128 @@ evaluations:
         aggregation: false
         calibration: false
         implementation: false
+    diagnosis:
+      dominant_corrected_protocol_factor: feature_level_scale
+      scale_is_material: true
+      scale_is_sufficient_to_reproduce_paper: false
+      superseded_for_protocol_conclusion: true
+      superseding_vala_protocol_reproduction:
+        semantic_pipeline: released VALA three-level robust lifting and direct-3D evaluator
+        rgb_geometry: compatible OccamLGS iteration-30000 geometry
+        extensionless_test_split_validated: true
+        scene_macro_miou_percent: 54.12488773209907
+        scene_macro_accuracy_at_iou_0p25_percent: 79.35264708435513
+        paper_miou_percent: 43.29
+        paper_accuracy_at_iou_0p25_percent: 64.3
+        decision: old fixed-L3 threshold-0.4 result is a protocol/adapter limitation, not the VALA method ceiling
+      l1_to_l3_scene_macro_delta_points:
+        miou: 14.914352933478498
+        accuracy_at_iou_0p25: 24.82038804475543
+      scene_delta_points_miou_accuracy_at_iou_0p25:
+        figurines: [23.7510031651306, 33.92857142857143]
+        teatime: [26.480341730352364, 45.76271186440678]
+        ramen: [0.35767141728785006, 1.4084507042253502]
+        waldo_kitchen: [9.068395421143164, 18.181818181818183]
+      scene_delta_points_accuracy_at_iou_0p5:
+        figurines: 35.714285714285715
+        teatime: 37.28813559322034
+        ramen: -4.225352112676058
+        waldo_kitchen: 9.090909090909092
     reported_metrics:
       - name: miou_percent
         role: primary
-        local: 17.617341010031962
+        local: 32.53169394351046
         paper: 43.29
-        delta_points: -25.67265898996804
+        delta_points: -10.758306056489538
       - name: accuracy_at_iou_0p25_percent
         role: primary
-        local: 25.61156616122002
+        local: 50.43195420597545
         paper: 64.3
-        delta_points: -38.68843383877998
+        delta_points: -13.868045794024546
+      - name: l1_miou_scene_macro_percent
+        role: secondary
+        value: 17.617341010031962
+      - name: l1_accuracy_at_iou_0p25_scene_macro_percent
+        role: secondary
+        value: 25.61156616122002
+      - name: l1_to_l3_miou_scene_macro_delta_points
+        role: secondary
+        value: 14.914352933478498
+      - name: l1_to_l3_accuracy_at_iou_0p25_scene_macro_delta_points
+        role: secondary
+        value: 24.82038804475543
+      - name: accuracy_at_iou_0p5_scene_macro_percent
+        role: secondary
+        value: 30.833983097351442
+      - name: miou_query_micro_percent
+        role: secondary
+        value: 32.50508397390278
+      - name: accuracy_at_iou_0p25_query_micro_percent
+        role: secondary
+        value: 51.442307692307686
+      - name: accuracy_at_iou_0p5_query_micro_percent
+        role: secondary
+        value: 29.326923076923077
     artifacts:
-      result: paper/artifacts/drsplat_lerf_summary.json
+      legacy_l1_result: paper/artifacts/drsplat_lerf_summary.json
+      legacy_l1_result_sha256: 9196611f5cdf24edfbd803e74f7a6164338eb4825e849b93ca77ffd15385c8cd
+      result: output/baselines/dr_splat/lerf_protocol_audit_20260801/remaining_l3_paired_20260801_a1/drsplat_l3_scale_paired_four_scene_summary.json
+      result_sha256: 39c849e45ee4fcca53fd5977ddfc37d15917ef954e47fe654d012c349cc39aca
+      aggregator: radio_gs/scripts/aggregate_drsplat_lerf_scale_audit.py
+      superseding_vala_report: paper/artifacts/vala_lerf3d_protocol_reproduction_20260801.md
+      superseding_vala_result: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/evaluation/all_metrics_30000_0.6.json
+      superseding_vala_result_sha256: 1a4a4ce2856b2af7e83d0c157aebf3498d1740ecc5deaefc39403c0daa01fcae
+      vala_split_auditor: radio_gs/scripts/audit_vala_lerf3d_split.py
+
+  lerf3d_vala_occam_geometry_exact_protocol_20260801:
+    benchmark_family: concept_query
+    task: LERF-OVS direct 3D open-vocabulary object selection
+    method: VALA semantic pipeline on compatible OccamLGS RGB geometry
+    completion: complete
+    evidence_class: compatibility_reproduction
+    cohort:
+      complete: true
+      scenes: [figurines, ramen, teatime, waldo_kitchen]
+      queries: 208
+      train_views_by_scene: {figurines: 295, ramen: 124, teatime: 171, waldo_kitchen: 182}
+      test_views_by_scene: {figurines: 4, ramen: 7, teatime: 6, waldo_kitchen: 5}
+    protocol:
+      query: official LERF-OVS annotation strings
+      target_visibility: >-
+        VALA semantic lifting excludes the extensionless stems in test.txt;
+        the compatible OccamLGS RGB geometry follows its released all-view intent
+      metric_domain: selected Gaussian silhouettes rendered into the official nested 2D masks
+      aggregation: per-object metrics followed by an unweighted equal macro over four scenes
+      calibration: >-
+        three released VALA feature levels with official gsplat marginal
+        significance and robust stochastic lifting (tau_mass=0.75,
+        tau_abs=0.13); highest raw-relevance peak selects the level; KNN=10;
+        min/max mapping and clipping; fixed threshold 0.6; selected-only alpha render
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - The semantic lifting and evaluator are protocol-exact, but the RGB Gaussian geometry is compatible OccamLGS geometry rather than a fresh paper-identical VALA training receipt.
+        - The result closes the evaluator/protocol gap and is not evidence that a VALA checkpoint trained from the paper's exact RGB initialization would have identical per-scene values.
+      protocol_match_to_paper:
+        cohort: true
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: false
+    reported_metrics:
+      - {name: miou_percent, role: primary, local: 54.12488773209907, paper: 43.29, delta_points: 10.83488773209907}
+      - {name: accuracy_at_iou_0p25_percent, role: primary, local: 79.35264708435513, paper: 64.3, delta_points: 15.052647084355126}
+      - {name: accuracy_at_iou_0p5_percent, role: secondary, value: 56.61140378480436}
+    artifacts:
+      result: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/evaluation/all_metrics_30000_0.6.json
+      result_sha256: 1a4a4ce2856b2af7e83d0c157aebf3498d1740ecc5deaefc39403c0daa01fcae
+      split_audit: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/split_audit.json
+      split_audit_sha256: 120651911b2a2f034b5ffe6a59d7e7a50986f0ee921b0537ba5d7800e2b8bf25
+      split_auditor: radio_gs/scripts/audit_vala_lerf3d_split.py
+      report: paper/artifacts/vala_lerf3d_protocol_reproduction_20260801.md
 
   lerf3d_occamlgs_opengaff_adaptation_context_20260731:
     benchmark_family: concept_query
@@ -226,52 +405,1554 @@ evaluations:
     protocol:
       query: ScanNet class-name prompts for 19/15/10 splits
       target_visibility: all ScanNet training views are available
-      metric_domain: local resolution-2 point/PLY compatibility predictions
+      metric_domain: >-
+        optimized/pruned Gaussian centers with anisotropic Gaussian pseudo-GT
+        and sigmoid(opacity)*scale-volume metric weights
       aggregation: unweighted macro over the same eight scenes
-      calibration: local compatibility pipeline; no claim of paper-identical checkpoint/readout
+      calibration: >-
+        full-resolution official gsplat alpha*transmittance significance,
+        stochastic robust aggregation/gating, released CLIP text cache,
+        present-GT classes, and scene-equal aggregation
     comparability:
       paper_comparison: diagnostic_only
       strict_table_eligible: false
       reasons:
-        - The run used local compatibility checkpoints and resolution-2 prediction assets.
-        - It is not the paper's released checkpoint/result bundle.
-        - The local point/PLY metric domain must not be mixed with the VALA Gaussian-volume domain used by the aligned GaussFM audit.
+        - The semantic lifting/evaluator protocol is exact and reproduces the paper, but RGB Gaussian geometry is the available local asset rather than a fresh paper-identical VALA training receipt.
+        - The paper states eight scenes; the current repository's later ninth scene is kept as separate code9 sensitivity.
       protocol_match_to_paper:
         cohort: true
         prompt_or_query: true
         target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - {name: split19_miou_percent, role: primary, local: 34.526858420379014, paper: 32.11, delta_points: 2.4168584203790133}
+      - {name: split19_macc_percent, role: primary, local: 51.5906462858573, paper: 50.05, delta_points: 1.5406462858572998}
+      - {name: split15_miou_percent, role: primary, local: 37.96059846359539, paper: 35.1, delta_points: 2.860598463595389}
+      - {name: split15_macc_percent, role: primary, local: 56.76961825724202, paper: 54.77, delta_points: 1.9996182572420211}
+      - {name: split10_miou_percent, role: primary, local: 47.36416326341668, paper: 46.21, delta_points: 1.1541632634166783}
+      - {name: split10_macc_percent, role: primary, local: 67.4650012001333, paper: 65.61, delta_points: 1.8550012001333067}
+      - {name: code9_split19_miou_percent, role: secondary, value: 34.040696446739204}
+      - {name: code9_split15_miou_percent, role: secondary, value: 37.66294494056916}
+      - {name: code9_split10_miou_percent, role: secondary, value: 46.21814039654717}
+    artifacts:
+      result: output/protocol_audit_20260801/vala/scannet_official_significance_paper8_v2/gaussian_eval/vala_scannet_gaussian_protocol_results.json
+      result_sha256: 81e6584a29eab59ffacba91b21d079c88213643a1b9a234356240d70b7d13740
+      report: paper/artifacts/vala_scannet_exact_protocol_reproduction_20260801.md
+      evaluator: radio_gs/scripts/eval_vala_scannet_checkpoint_gaussian_protocol.py
+      lifting_runner: radio_gs/scripts/run_vala_scannet_baseline.py
+      code9_scene0645_result: output/protocol_audit_20260801/vala/scannet_official_significance_code9_scene0645_v1/gaussian_eval/vala_scannet_gaussian_protocol_results.json
+
+  scannet_ovs_vala_gaussian_vs_mesh_p0_2scene_20260801:
+    benchmark_family: concept_query
+    task: ScanNet-v2 VALA-domain isolation on a prespecified two-scene P0 subset
+    method: VALA compatibility assets
+    completion: complete
+    evidence_class: compatibility_reproduction
+    cohort:
+      complete: true
+      scope: two_scene_cpu_only_metric_domain_sensitivity
+      scenes: [scene0000_00, scene0400_00]
+      benchmark_scenes: 8
+      full_vala8_complete: false
+      splits: [19, 15, 10]
+    protocol:
+      query: exact upstream ScanNet class-name text cache for the 19/15/10 splits
+      target_visibility: all ScanNet training views are available
+      metric_domain: >-
+        paired local readouts on cached VALA-pruned Gaussian centers: direct
+        normalized 512-D cosine predictions with anisotropic pseudo-GT and
+        volume weighting, versus the archived inverse-distance mesh-kNN4
+        unweighted result
+      aggregation: unweighted macro over the same two prespecified scenes
+      calibration: no target-scene threshold or prompt selection in this CPU-only replay
+    comparability:
+      paper_comparison: forbidden
+      strict_table_eligible: false
+      reasons:
+        - This is a two-scene P0 sensitivity experiment, not the complete eight-scene VALA benchmark.
+        - Both branches reuse local compatibility checkpoints and cached 2D/Gaussian features rather than an official paper checkpoint bundle.
+        - The Gaussian branch approximates the evaluation domain, but it cannot recover the paper's render-significance aggregation, gating, pruning, or checkpoint provenance.
+        - The paired domain delta is diagnostic only and must not be presented as a VALA paper reproduction or paper gap.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
         metric_domain: false
+        aggregation: false
+        calibration: false
+        implementation: false
+    reported_metrics:
+      - {name: split10_gaussian_domain_two_scene_miou_percent, role: primary, value: 16.3306876202596}
+      - {name: split10_gaussian_domain_two_scene_macc_percent, role: primary, value: 34.37237688286379}
+      - {name: split10_mesh_domain_two_scene_miou_percent, role: secondary, value: 14.457832793231376}
+      - {name: split10_mesh_domain_two_scene_macc_percent, role: secondary, value: 33.511822230446175}
+      - {name: split10_gaussian_minus_mesh_miou_points, role: diagnostic, value: 1.8728548270282225}
+      - {name: split10_gaussian_minus_mesh_macc_points, role: diagnostic, value: 0.8605546524176111}
+    diagnosis:
+      metric_domain_contribution: small_on_this_two_scene_p0
+      primary_remaining_gap: >-
+        local checkpoint and 2D-feature provenance, followed by proxy
+        significance aggregation and its downstream gating/pruning effects
+    artifacts:
+      result: output/protocol_audit_20260801/vala/scannet_cached_vala_gaussian_domain_p0/scannet_cached_vala_gaussian_domain_p0.json
+      result_sha256: 3ea3e2a554e1fe639e04c45f7aafd505ea86dfe95b526a63c487192733ea7c04
+      report: output/protocol_audit_20260801/vala/scannet_cached_vala_gaussian_domain_p0/scannet_cached_vala_gaussian_domain_p0.md
+      runner: output/protocol_audit_20260801/vala/scannet_cached_vala_gaussian_domain_p0/run_cpu_audit.py
+      runner_sha256: 3bbcd5de168bb3735b3aa8759c2c69b632899304ea791d66d3430c2edbea699e
+      archived_mesh_result: paper/artifacts/vala_scannet_vala8_local_reproduction_20260611.json
+      archived_mesh_result_sha256: e838635dabf050b528a57c1cc455aa0922041a8e0bc338aad6a9ad42419335b9
+      device: cpu
+      gpu_queries_or_initialization: none
+
+  agile3d_easy3d_agile_release_full312_20260731:
+    benchmark_family: spatial_prompt
+    task: AGILE3D ScanNet40 single-object interactive 3D segmentation
+    method: Easy3D official pretrained checkpoint
+    completion: complete
+    evidence_class: released_code_reproduction
+    cohort:
+      complete: true
+      scenes: 312
+      release_objects: 10357
+      evaluated_objects: 10357
+      failed_objects: 0
+      legacy_reference_key_intersection: 10016
+    protocol:
+      prompt: >-
+        First click at the largest false-negative error-region center, then
+        largest false-positive/false-negative error region with clicked-voxel
+        ground-truth overwrite
+      target_visibility: >-
+        ground truth is used by the benchmark harness to synthesize
+        corrective clicks, not as a model input
+      metric_domain: point-level object IoU after each of 1/2/3/5/10 clicks
+      aggregation: query-micro mean over all 10,357 released object instances
+      calibration: >-
+        official fixed checkpoint and fixed 0.5 sigmoid threshold; the
+        three-scene pilot was not used to select the paper-facing contract
+      preprocessing: released Easy3D worker last-write voxel quantization
+      interaction_contract: agile3d_release
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - The paper says voxel RGB features are averaged, while the released Easy3D worker uses stable last-write quantization.
+        - The local evaluator applies the released AGILE3D click semantics to Easy3D integer-voxel preprocessing rather than executing the original MinkowskiEngine benchmark stack.
+        - The released object list contains 10,357 objects, whereas AGILE3D's bundled result keys silently intersect only 10,016 of them.
+        - Easy3D's released forward interaction differs from the AGILE3D evaluator after corrective clicks, so both contracts are disclosed instead of selecting by paper proximity.
+        - The paper table does not fully specify the released checkpoint/evaluator threshold calibration.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
         aggregation: true
         calibration: false
         implementation: false
     reported_metrics:
-      - {name: split19_miou_percent, role: primary, local: 11.978540187041181, paper: 32.11, delta_points: -20.13145981295882}
-      - {name: split19_macc_percent, role: primary, local: 23.739873368090336, paper: 50.05, delta_points: -26.31012663190966}
-      - {name: split15_miou_percent, role: primary, local: 14.86999750417189, paper: 35.1, delta_points: -20.23000249582811}
-      - {name: split15_macc_percent, role: primary, local: 28.153840089204085, paper: 54.77, delta_points: -26.61615991079591}
-      - {name: split10_miou_percent, role: primary, local: 22.716264554959673, paper: 46.21, delta_points: -23.493735445040327}
-      - {name: split10_macc_percent, role: primary, local: 41.70291613483177, paper: 65.61, delta_points: -23.90708386516823}
+      - {name: iou_at_1_query_micro_percent, role: primary, local: 69.7136671023463, paper: 68.2, delta_points: 1.5136671023463}
+      - {name: iou_at_2_query_micro_percent, role: primary, local: 76.01352226829643, paper: 74.6, delta_points: 1.41352226829643}
+      - {name: iou_at_3_query_micro_percent, role: primary, local: 78.59416889098002, paper: 77.3, delta_points: 1.29416889098002}
+      - {name: iou_at_5_query_micro_percent, role: primary, local: 80.99510345918428, paper: 79.6, delta_points: 1.39510345918428}
+      - {name: iou_at_10_query_micro_percent, role: primary, local: 83.03839027824663, paper: 81.7, delta_points: 1.33839027824663}
+      - {name: iou_at_1_scene_macro_percent, role: secondary, value: 71.62818440310778}
+      - {name: iou_at_2_scene_macro_percent, role: secondary, value: 77.62296284614972}
+      - {name: iou_at_3_scene_macro_percent, role: secondary, value: 80.1171082004008}
+      - {name: iou_at_5_scene_macro_percent, role: secondary, value: 82.36231787624282}
+      - {name: iou_at_10_scene_macro_percent, role: secondary, value: 84.25299036969074}
+      - {name: legacy_intersection_iou_at_1_query_micro_percent, role: secondary, value: 69.74648683269763}
+      - {name: legacy_intersection_iou_at_2_query_micro_percent, role: secondary, value: 76.02463931140364}
+      - {name: legacy_intersection_iou_at_3_query_micro_percent, role: secondary, value: 78.62155139835285}
+      - {name: legacy_intersection_iou_at_5_query_micro_percent, role: secondary, value: 81.01820241144151}
+      - {name: legacy_intersection_iou_at_10_query_micro_percent, role: secondary, value: 83.05661639101268}
     artifacts:
-      result: paper/artifacts/vala_scannet_vala8_local_reproduction_20260611.json
-      metric_domain_audit: paper/artifacts/protocol_alignment_scannet_20260711.md
-      gaussfm_vala_domain_result: output/scannet_pointcloud_eval/vala_gaussian_protocol_20260711/scannet_vala_gaussian_protocol_results.json
+      result: output/protocol_audit_20260731/easy3d_agile3d_formal_agile3d_release_v1/results.json
+      result_sha256: c771f29400e912565ee2ea5a754d0fd80a7fafc1eb91e38b6db1953cdcbbc09d
+      scene_shard_set_sha256: 6fc27936ebf1b1e5a14df6c87e81b7699e6a72c8c661550efbdb3fc9ea467f44
+      evaluator: radio_gs/benchmarks/agile3d_scannet40/evaluate_easy3d.py
+      evaluator_sha256: a2af43c40df442a4e739ce925a9a1d7de831c6b102173f22e1e09460edc6ae6e
+      easy3d_commit: b3f5bd70defaa9a601edb0975802775b056c784a
+      agile3d_commit: b73638da41edbabe52a1b578d52ddeb8fa552173
+      checkpoint_sha256: 4a13d16ba2f2470031287812dbbdf1ec6aa14097cb3738e0fe596bb708dc475f
+      object_ids_sha256: d734230755fdde72ee04f8ca199b15c19f330233588eba1e24021fe36459a037
+      object_classes_sha256: f2bf7241e0cbad22056c9fe9b029818ac3b7d1d9846a96399eee68bac2fef537
+      preprocessing_manifest: output/protocol_audit_20260731/easy3d_official_worker_preprocessing/manifest.json
+      preprocessing_manifest_sha256: 39035ec87a3ff73bd9cfd6eec9a93182b7ebd7d9b2e84515b1c0e51cad453d23
+      agile3d_reference_csv_sha256: 1a9f1c219d8af701b2d7cfc186418a73e19dff4920395c0daad17e6c5f7de120
+      source_grounded_pilot_policy: output/protocol_audit_20260731/easy3d_agile3d_pilot3_source_grounded_policy_v2.json
+      source_grounded_pilot_policy_sha256: 1f065485514b82af0c8afe64b4941b07cc2135f8a3094b92a9ee4f19f954bbcc
+      pilot_summarizer_sha256: 8f93f310556b843309fc221e2fef7cc25de49029684bc080c4cbeb7dd028a1a9
+      audit: paper/artifacts/easy3d_agile3d_protocol_audit_20260731.md
+
+  agile3d_easy3d_released_code_full312_sensitivity_20260731:
+    benchmark_family: spatial_prompt
+    task: AGILE3D ScanNet40 single-object interactive 3D segmentation
+    method: Easy3D official pretrained checkpoint, released-forward sensitivity
+    completion: complete
+    evidence_class: diagnostic
+    cohort:
+      complete: true
+      scenes: 312
+      release_objects: 10357
+      evaluated_objects: 10357
+      failed_objects: 0
+      legacy_reference_key_intersection: 10016
+    protocol:
+      prompt: >-
+        Released Easy3D forward click path: false positives are selected only
+        among valid voxels, clicked voxels are not overwritten with ground
+        truth, and invalid-token handling follows the released implementation
+      target_visibility: >-
+        ground truth is used by the benchmark harness to synthesize
+        corrective clicks, not as a model input
+      metric_domain: point-level object IoU after each of 1/2/3/5/10 clicks
+      aggregation: query-micro mean over all 10,357 released object instances
+      calibration: >-
+        official fixed checkpoint and fixed 0.5 sigmoid threshold; retained
+        only as a full-cohort code-sensitivity row
+      preprocessing: released Easy3D worker last-write voxel quantization
+      interaction_contract: easy3d_released_code
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - The paper-facing protocol is AGILE3D, while this row deliberately follows Easy3D's differing released forward interaction.
+        - The paper preprocessing prose and released worker quantization disagree.
+        - The released object list and AGILE3D bundled result-key intersection contain 10,357 and 10,016 objects respectively.
+        - This row is a prespecified implementation-sensitivity comparison and cannot replace the source-grounded AGILE3D-contract primary row.
+        - The paper table does not fully specify the released checkpoint/evaluator threshold calibration.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: false
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: false
+        implementation: false
+    reported_metrics:
+      - {name: iou_at_1_query_micro_percent, role: primary, local: 69.71381263973948, paper: 68.2, delta_points: 1.51381263973948}
+      - {name: iou_at_2_query_micro_percent, role: primary, local: 75.94643430014172, paper: 74.6, delta_points: 1.34643430014172}
+      - {name: iou_at_3_query_micro_percent, role: primary, local: 78.3255055214862, paper: 77.3, delta_points: 1.0255055214862}
+      - {name: iou_at_5_query_micro_percent, role: primary, local: 80.37027913805113, paper: 79.6, delta_points: 0.77027913805113}
+      - {name: iou_at_10_query_micro_percent, role: primary, local: 82.13209216046787, paper: 81.7, delta_points: 0.43209216046787}
+      - {name: iou_at_1_scene_macro_percent, role: secondary, value: 71.62789699859518}
+      - {name: iou_at_2_scene_macro_percent, role: secondary, value: 77.60071606011297}
+      - {name: iou_at_3_scene_macro_percent, role: secondary, value: 79.85126972220196}
+      - {name: iou_at_5_scene_macro_percent, role: secondary, value: 81.72938069879371}
+      - {name: iou_at_10_scene_macro_percent, role: secondary, value: 83.3729932712734}
+      - {name: primary_minus_sensitivity_iou_at_1_points, role: secondary, value: -0.0001455373934757791}
+      - {name: primary_minus_sensitivity_iou_at_2_points, role: secondary, value: 0.0670879681547149}
+      - {name: primary_minus_sensitivity_iou_at_3_points, role: secondary, value: 0.268663369493821}
+      - {name: primary_minus_sensitivity_iou_at_5_points, role: secondary, value: 0.62482432113315}
+      - {name: primary_minus_sensitivity_iou_at_10_points, role: secondary, value: 0.90629811777876}
+    artifacts:
+      result: output/protocol_audit_20260731/easy3d_agile3d_formal_easy3d_released_code_v1/results.json
+      result_sha256: c8c0c6820cf88166e77002a20ddf68af44c7be2e58a2e36cd26b147bdbd2f5a1
+      scene_shard_set_sha256: 1915fef1216b822abe373b58b7962a4ecac2ddd8452258296cf2cb6f89a55189
+      evaluator: radio_gs/benchmarks/agile3d_scannet40/evaluate_easy3d.py
+      evaluator_sha256: a2af43c40df442a4e739ce925a9a1d7de831c6b102173f22e1e09460edc6ae6e
+      easy3d_commit: b3f5bd70defaa9a601edb0975802775b056c784a
+      agile3d_commit: b73638da41edbabe52a1b578d52ddeb8fa552173
+      checkpoint_sha256: 4a13d16ba2f2470031287812dbbdf1ec6aa14097cb3738e0fe596bb708dc475f
+      object_ids_sha256: d734230755fdde72ee04f8ca199b15c19f330233588eba1e24021fe36459a037
+      object_classes_sha256: f2bf7241e0cbad22056c9fe9b029818ac3b7d1d9846a96399eee68bac2fef537
+      preprocessing_manifest: output/protocol_audit_20260731/easy3d_official_worker_preprocessing/manifest.json
+      preprocessing_manifest_sha256: 39035ec87a3ff73bd9cfd6eec9a93182b7ebd7d9b2e84515b1c0e51cad453d23
+      agile3d_reference_csv_sha256: 1a9f1c219d8af701b2d7cfc186418a73e19dff4920395c0daad17e6c5f7de120
+      source_grounded_pilot_policy: output/protocol_audit_20260731/easy3d_agile3d_pilot3_source_grounded_policy_v2.json
+      source_grounded_pilot_policy_sha256: 1f065485514b82af0c8afe64b4941b07cc2135f8a3094b92a9ee4f19f954bbcc
+      pilot_summarizer_sha256: 8f93f310556b843309fc221e2fef7cc25de49029684bc080c4cbeb7dd028a1a9
+      audit: paper/artifacts/easy3d_agile3d_protocol_audit_20260731.md
+
+  nvos_ludvig_fern_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS fern foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: fern_per_scene_three_seed_check
+      tasks: [fern]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS fern target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for fern only
+      calibration: released fixed threshold parameter 75; oracle threshold excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact fern per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 84.5073 fern mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: fern_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 84.5072835444924
+        paper: 85.5
+        delta_points: -0.9927164555076047
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 84.47952301482711
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 84.55520707736805
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 84.48712054128204
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_3seed_summary.json
+      summary_sha256: f6a40968f18e32cd0cf0065d44b2f42620d86d5bcef35adee80e66b48064ec5b
+      full_benchmark_summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      full_benchmark_summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_fortress_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS fortress foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: fortress_per_scene_three_seed_check
+      tasks: [fortress]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS fortress target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for fortress only
+      calibration: released fixed threshold parameter 75; oracle threshold excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact fortress per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 98.4861 fortress mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: fortress_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 98.4860818487784
+        paper: 98.1
+        delta_points: 0.386081848778403
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 98.48415828422033
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 98.48672030713139
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 98.48736695498349
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_leaves_orchids_fortress_3seed_summary.json
+      summary_sha256: a79c289d37e31a3772caf747019205971600ef24106f585dd2315c9a0d331cd6
+      full_benchmark_summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      full_benchmark_summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: e01d76a52f0e0df0176e48301f9753ec610b475114f0449ab4cb634c6938aab3
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 723bfaa66c2e2da9c5e76662dc317d86fafe0dfed5c109b5e9fd6c11e8626c45
+      point_cloud_bytes: 224237179
+      point_cloud_vertices: 904176
+      registered_training_views: 42
+      held_out_training_views: 0
+      source_rgb_dimensions: [4014, 3010]
+      effective_training_dimensions: [1600, 1199]
+      legacy_geometry_scene_fallback: false
+      pinhole_cameras_bin_sha256: 4847921a99a466df0270816a6d551778165fefab25737047c138e5f13b8e3c90
+      pinhole_images_bin_sha256: 59713dc966e2aed6b46e1b716eb460fb1b5de72e7b4b7fb2fc63e17f1cf22952
+      pinhole_points3d_bin_sha256: 135ad6782ad07abffa49f2995f01ffd6a01efb7c484635cb11f6b24334c89acf
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_leaves_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS leaves foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: leaves_per_scene_three_seed_check
+      tasks: [leaves]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS leaves target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for leaves only
+      calibration: released fixed threshold parameter 75; oracle threshold excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact leaves per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 96.6494 leaves mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: leaves_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 96.6493531566043
+        paper: 96.4
+        delta_points: 0.24935315660430035
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 96.65015933402205
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 96.64442461502301
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 96.65347552076786
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_leaves_3seed_summary.json
+      summary_sha256: dd7c85dcf0921306246aa04fd25cd390289ff92c30860ad9d36aa89cf2bf6e4a
+      full_benchmark_summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      full_benchmark_summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 2a610c0c356ae05f9a7d712c4352e032b137fa0794df3d701ec550759b67ba69
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: da74e7c81debf212d0b3c6f7278a62259dfcc045f97401cb9370b1e62d340378
+      point_cloud_bytes: 421018980
+      point_cloud_vertices: 1697651
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_orchids_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS orchids foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: orchids_per_scene_three_seed_check
+      tasks: [orchids]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS orchids target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for orchids only
+      calibration: released fixed threshold parameter 75; oracle threshold excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact orchids per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 74.5631 orchids mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: orchids_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 74.563050014288
+        paper: 73.1
+        delta_points: 1.463050014288001
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 74.5600598535339
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 74.57440748800788
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 74.55468270132222
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_leaves_orchids_3seed_summary.json
+      summary_sha256: d0d665727c6d2f0352adf39c32544bc28011830fe3588dc7050ac9634002752d
+      full_benchmark_summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      full_benchmark_summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 8fc085e1c6ad817772898fd5e24f120b72ec78d3c0efa793a7ccbd761935d3d7
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: e04a38f5aa22aaa716ec1c741222e1d1c94fb3cf0305aa4cc06a50a823ae5ef5
+      point_cloud_bytes: 374352324
+      point_cloud_vertices: 1509479
+      registered_training_views: 25
+      held_out_training_views: 0
+      source_rgb_dimensions: [3949, 2961]
+      effective_training_dimensions: [1600, 1199]
+      legacy_geometry_scene_fallback: false
+      pinhole_cameras_bin_sha256: 73d98571b2ffc0ad60877dc0b898c91d2c5a2a6c5d7a47a6b4516dcefe9b1546
+      pinhole_images_bin_sha256: 1d6abf177761c1e57ae3579e48bff6cdaa8a794c127b8c20c1a47df412c4bfc9
+      pinhole_points3d_bin_sha256: b058c96d68ccda1318efd5422e7842a428d5f94ee60156a37230521adebf950f
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_flower_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS flower foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: flower_per_scene_three_seed_check
+      tasks: [flower]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS flower target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for flower only
+      calibration: released fixed threshold parameter 75; oracle threshold excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact flower per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 97.5736 flower mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - {name: flower_foreground_iou_3seed_mean_percent, role: primary, local: 97.57359785715292, paper: 97.6, delta_points: -0.02640214284707465}
+      - {name: seed_0_foreground_iou_percent, role: secondary, value: 97.54894488560335}
+      - {name: seed_1_foreground_iou_percent, role: secondary, value: 97.58082742618251}
+      - {name: seed_2_foreground_iou_percent, role: secondary, value: 97.59102125967293}
+    full_benchmark_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      full_benchmark_complete: true
+      separately_reported_as_strict_paper_protocol_row: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_flower_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: 53ba2ae876702046b1f9a816218b23eadcb5d41546bd31e4c26617f2974a7479
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 945e3fe89dbf451a74dfea4d8edfb406fef4fc1045c9719b73debce0f456b4e6
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: eb9658266c5dc10d639fbe9371858edcb537f0ad2e4a8f0d8e817b55e2c567ec
+      point_cloud_bytes: 160421075
+      point_cloud_vertices: 646853
+      registered_training_views: 34
+      held_out_training_views: 0
+      source_rgb_dimensions: [3982, 2986]
+      effective_training_dimensions: [1600, 1199]
+      scored_target_frames_per_seed: 1
+      legacy_geometry_scene_fallback: false
+      pinhole_cameras_bin_sha256: 2a0a32a5ec3c3874e31ecdebc62f09837660be4de4ae1933cfe503c4646834e9
+      pinhole_images_bin_sha256: 658f1676ce5e44140e011f4410f041db726b1011b0b91a471390578e17e44490
+      pinhole_points3d_bin_sha256: c3d167c4e63d2cb8dc1e83cad43608aa13e3dd5200a8ac66ed5df55b96756e3f
+      training_gpu_wall_seconds: 1586.195262670517
+      run_manifest_sha256_by_seed: [0f2c27b81ad440a55ac55f83a56b78b85e954d944dc967f175d94eb7e6fa8d6f, 385fe47a490e8989ca5b486484c106df484755e1c5a0531cd61d5592c7b11c2a, e48a5d4154522c7ea7dafeae5981454043907ecbaff70118e0cdf60cbdb48fed]
+      protocol_result_sha256_by_seed: [695dee642358406a82a26fbc63a38fe6bcc9b0ae33303f269e85af808a1fa987, f0f7be30fcb520b747eae535307558b43a8559b7bf634d7cba7ede34a351fe7a, 53b88ec1e7d769b36978faf72fc8c5e30fad20e148c96a1b2c2bec7082d0434a]
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_guard_default_policy:
+        poll_seconds: 3.0
+        query_timeout_seconds: 2.0
+        warning_temperature_c: 78.0
+        pause_temperature_c: 81.0
+        resume_temperature_c: 68.0
+        resume_stable_samples: 3
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/flower_exact_f7a_allview_v1
+      thermal_training_max_temperature_c: 82.0
+      thermal_training_pause_events: 43
+      thermal_training_resume_events: 43
+      thermal_evaluation_max_temperature_c_by_seed: [69.0, 70.0, 69.0]
+      thermal_evaluation_pause_events: 0
+      thermal_query_failures: 0
+      thermal_all_job_returncodes_zero: true
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_trex_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS trex foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: trex_per_scene_three_seed_check
+      tasks: [trex]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS trex target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for trex only
+      calibration: released fixed threshold parameter 75; oracle thresholds excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact trex per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 87.6632 trex mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: trex_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 87.6631749481674
+        paper: 88.0
+        delta_points: -0.336825051832605
+      - {name: seed_0_foreground_iou_percent, role: secondary, value: 87.52962314809301}
+      - {name: seed_1_foreground_iou_percent, role: secondary, value: 87.67112176569724}
+      - {name: seed_2_foreground_iou_percent, role: secondary, value: 87.78877993071195}
+    oracle_diagnostics:
+      diagnostic_only: true
+      used_for_reported_metric: false
+      used_for_model_or_threshold_selection: false
+      target_iou_percent_by_seed: [87.85932183882778, 87.77851969664819, 88.26558886047232]
+      threshold_parameter_by_seed: [73, 73, 70]
+    full_benchmark_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      full_benchmark_complete: true
+      separately_reported_as_strict_paper_protocol_row: true
+    artifacts:
+      full_benchmark_summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      full_benchmark_summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: e8341f2ed5f77a48189790b3d61bdab0f1bea7efb45e41134403996bd4e10035
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 444c364891ff637a6f82b85fc1236f04a89f3ce7bd8b18bcf4806f88b5e0a7b0
+      point_cloud_bytes: 174396867
+      point_cloud_vertices: 703207
+      registered_training_views: 55
+      held_out_training_views: 0
+      source_rgb_dimensions: [4002, 3001]
+      effective_training_dimensions: [1599, 1199]
+      evaluation_render_dimensions: [1600, 1199]
+      source_asset_contract: native_nvos_llff_pinhole_undistortion
+      raw_dataset_modified: false
+      pinhole_cameras_bin_sha256: 1b711b32b1ca110eaa979f5f5b9ff02f248ccc066c7f9bf89c34f17493c425fe
+      pinhole_images_bin_sha256: e83956f2665b6041bb295f637802630aea9f0cd8d08a3b4f390e7a8f54af9075
+      pinhole_points3d_bin_sha256: dcbae55ccf2a7e1eb4ac02673fc090c1aa8d4a241ed6194eb1401e63ddd9c32a
+      max_qvec_delta_vs_original_sparse: 1.1102230246251565e-16
+      max_tvec_delta_vs_original_sparse: 0.0
+      training_gpu_wall_seconds: 2351.850069999695
+      run_manifest_sha256_by_seed: [aed278d2b4a165d6e31a04796daa11370dd92c6700eae3521c02ccb17e7f6906, 2d6b7600ab227da1415d0fdfedc3bcfd06afd81aef8dc27fd10b64953841dbfe, 3c41b55df401b9a9358778a835460748558a11d2960ed7b321cbf68fdf0549bd]
+      protocol_result_sha256_by_seed: [0147fd6f5edb09c4b73d6a45607451ad28d8de20ea7679562c279fdcd2c769c2, 5261866da6e36b344796a49a95947e2005ce8c3fd0705a1df588c80d4f0b12c2, 4baff8cb9c1c50b205a6e39ef617ca791af1f7cace4e4ffd3538ae8dbf2a68a7]
+      reproduction_patch_sha256: 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      reproduction_patch_base_sha256: 7ecd469119b4ee87e3cc9cf5764426ec6c8a1d9118db072beab4d8335ea0d353
+      patched_segmentation_sha256: ecc9d7b1a29faa7d1091e14e9c5a50036180c5ba8671ba396d0292075a559b0e
+      patched_entrypoint_sha256: ae2eb5af2050e619a8d3a6f5bb04d228b4c090425cfcaf30f25aa9a859cddd3e
+      patched_sam_predictor_sha256: 3cbf8bda6f7334086c3ba7c117a1b604ed12757c351fff96054a6a2f484684b9
+      patched_image_utils_sha256: 6047b23c26fcece6bc451961a532b302e6aeb0dcdce0c5c89a7e46f71eed87c1
+      patched_solver_sha256: 6b71c91c5e4dbe50b2995f6b9428c9cd9bd6940ab58b1f16fe788dfc50b1c70c
+      all_runs_have_verified_upstream_patch: true
+      failed_v1_run_excluded_from_metrics: output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v1/run_manifest.json
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+    runtime_safety:
+      thermal_guard_sha256: 4daa492d2026d58f5d83184dc12dbf4f87747bf1d8630c0e70bf563c5acfed79
+      training_log: output/protocol_audit_20260731/ludvig/thermal_logs/trex_exact_f7a_allview_v1/training.jsonl
+      training_log_sha256: b7be623b0e0e6bd7b155c0aac44a7af3c0fe1902fbbad580febbb406067a3c1b
+      evaluation_log_sha256_by_seed: [73e72dc78568fe780178890c9be39ec987d6885f7b5913789a5782e691f7a79f, 79ac51b06a2afb85595f1d60e52bbde6a30687fa5bbe5dca8771e3aab0bd939c, 57fb3ef7c0fdf84402756e800b9dead346e54dd5dca0a1da2debb18d0cdf48e9]
+      training_max_temperature_c: 82.0
+      training_pause_events: 37
+      training_resume_events: 37
+      evaluation_max_temperature_c_by_seed: [72.0, 68.0, 69.0]
+      evaluation_pause_events: 0
+      query_failures: 0
+      all_job_returncodes_zero: true
+      scope: execution_infrastructure_only_not_evaluation_protocol
+
+  nvos_ludvig_released_all_view_full8_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS full eight-task foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      full_benchmark_complete: true
+      scope: full_eight_task_three_seed_paper_protocol
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      seeds: [0, 1, 2]
+      expected_runs: 24
+      completed_runs: 24
+      unique_geometry_checkpoints: 7
+      missing_tasks: []
+      extra_tasks: []
+    protocol:
+      prompt: official positive scribbles; released code ignores official negative scribbles
+      target_visibility: all-view 3DGS training and released uplifting both see every target RGB
+      metric_domain: foreground image IoU on one official target frame per NVOS task
+      aggregation: mean over seeds 0, 1, and 2 within task, then equal-weight macro over all eight tasks
+      calibration: released fixed threshold parameter 75 for every task; target-oracle thresholds excluded
+      strict_unseen_exact_match: false
+    comparability:
+      paper_comparison: strict
+      strict_table_eligible: true
+      reasons: []
+      protocol_match_to_paper:
+        cohort: true
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: full_eight_task_macro_iou_percent_vs_paper_headline
+        role: primary
+        local: 91.25768502741802
+        paper: 91.3
+        delta_points: -0.04231497258197692
+      - name: full_eight_task_macro_iou_percent_vs_recomputed_paper_scene_macro
+        role: secondary
+        local: 91.25768502741802
+        paper: 91.3375
+        delta_points: -0.07981497258198544
+      - {name: exact_evaluation_runs, role: secondary, value: 24}
+      - {name: unique_geometry_checkpoints, role: secondary, value: 7}
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json
+      summary_sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546
+      all_runs_have_verified_upstream_patch: true
+      released_all_view_training_provenance_verified: true
+      approved_reproduction_patch_sha256: [7c86d5883058fb9e529608ba6cf856c04e66d37d338a69a8ca6863725292e9ac, 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602]
+      oracle_values_aggregated: false
+      eligible_for_strict_unseen_claim: false
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spin_nerf_ludvig_fern_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF fern multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: fern_per_scene_three_seed_check
+      scenes: [fern]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: false
+      full_benchmark_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_available_scenes: []
+      unavailable_scenes: [fork]
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: foreground image IoU on 19 non-reference annotated fern frames
+      aggregation: frame mean within fern then mean over exact seeds 0, 1, and 2
+      calibration: per-seed SAM candidate and threshold selected on the fern reference GT mask
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact fern per-scene three-seed check, not a nine- or ten-scene SPIn-NeRF macro.
+        - All nine locally available scenes are exact-complete; Fork is absent.
+        - The 97.0446 fern mean cannot be relabelled as the paper's 93.8 full ten-scene macro.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: fern_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 97.04459720786971
+        paper: 97.0
+        delta_points: 0.044597207869713884
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 97.03640290264825
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 97.04568881614468
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 97.05169990481623
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_3seed_summary.json
+      summary_sha256: fd11b9aaa873a3a8b4ddebcdde84470c4016e541a9b6acd19a4659d7803ed917
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 8b7ebe7ff6d946c4ae03b1943835a4d73ee94b0e53d663a5933de03ea947909e
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 4eaac89e70e00e4776e1bd9505b7560c483edd5df8ee1958c84b91091e49134b
+      source_equivalence_preflight: output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json
+      source_equivalence_preflight_sha256: ecf1df13466f32f4b16babbcb33b5206fcb613cea0579e5a94abe9f1e77db9dd
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spin_nerf_ludvig_fortress_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF fortress multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: fortress_per_scene_three_seed_check
+      scenes: [fortress]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: false
+      full_benchmark_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_available_scenes: []
+      unavailable_scenes: [fork]
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: foreground image IoU on 41 non-reference annotated fortress frames
+      aggregation: frame mean within fortress then mean over exact seeds 0, 1, and 2
+      calibration: >-
+        per-seed SAM candidate and threshold selected on the fortress reference
+        GT mask; threshold 69 and candidate 2 for all three seeds
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact fortress per-scene three-seed check, not a nine- or ten-scene SPIn-NeRF macro.
+        - All nine locally available scenes are exact-complete; Fork is absent.
+        - The 98.3561 fortress mean cannot be relabelled as the paper's 93.8 full ten-scene macro.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: fortress_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 98.35609173302869
+        paper: 98.3
+        delta_points: 0.05609173302869408
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 98.35799208126069
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 98.35685776001813
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 98.35342535780724
+    artifacts:
+      historical_four_scene_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_3seed_summary.json
+      historical_four_scene_summary_sha256: 80cae986379795545835efb900b173ae3da11b41c501396827f1878eab9bed82
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: e01d76a52f0e0df0176e48301f9753ec610b475114f0449ab4cb634c6938aab3
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 723bfaa66c2e2da9c5e76662dc317d86fafe0dfed5c109b5e9fd6c11e8626c45
+      point_cloud_bytes: 224237179
+      point_cloud_vertices: 904176
+      registered_training_views: 42
+      held_out_training_views: 0
+      released_evaluator_frames: 42
+      scored_target_frames_per_seed: 41
+      excluded_reference_frame: image000.png
+      source_raw_cameras_bin_sha256: 0780ba1b521452b2be37719d8aefd148723625300c8ec5d99fb300eff65a8f26
+      source_raw_images_bin_sha256: aed84eea58ac55bae70c191fe71bd7f98adb425ea1c8fe227260bad088da83f0
+      source_raw_points3d_bin_sha256: 70bb9247cc05f882ff22153fea2712ed9bcf77fb384cb7fa80c681d6e4cbd60f
+      source_raw_rgb_images: 42
+      source_raw_rgb_byte_identical_to_nvos_conversion_source: true
+      pinhole_cameras_bin_sha256: 4847921a99a466df0270816a6d551778165fefab25737047c138e5f13b8e3c90
+      pinhole_images_bin_sha256: 59713dc966e2aed6b46e1b716eb460fb1b5de72e7b4b7fb2fc63e17f1cf22952
+      pinhole_points3d_bin_sha256: 135ad6782ad07abffa49f2995f01ffd6a01efb7c484635cb11f6b24334c89acf
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spin_nerf_ludvig_leaves_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF leaves multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: leaves_per_scene_three_seed_check
+      scenes: [leaves]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: false
+      full_benchmark_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_available_scenes: []
+      unavailable_scenes: [fork]
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: foreground image IoU on 25 non-reference annotated leaves frames
+      aggregation: frame mean within leaves then mean over exact seeds 0, 1, and 2
+      calibration: per-seed SAM candidate and threshold selected on the leaves reference GT mask
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact leaves per-scene three-seed check, not a nine- or ten-scene SPIn-NeRF macro.
+        - All nine locally available scenes are exact-complete; Fork is absent.
+        - The 96.3686 leaves mean cannot be relabelled as the paper's 93.8 full ten-scene macro.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: leaves_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 96.3685802115029
+        paper: 96.3
+        delta_points: 0.06858021150290483
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 96.37101740363673
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 96.36833763128026
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 96.36638559959174
+    artifacts:
+      historical_two_scene_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_3seed_summary.json
+      historical_two_scene_summary_sha256: 92d13e4daf2b542b1a3d4ac5a208809ca609de0078b2ff5c4f616fb56961f7b3
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 2a610c0c356ae05f9a7d712c4352e032b137fa0794df3d701ec550759b67ba69
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: da74e7c81debf212d0b3c6f7278a62259dfcc045f97401cb9370b1e62d340378
+      point_cloud_bytes: 421018980
+      point_cloud_vertices: 1697651
+      source_raw_cameras_bin_sha256: 73bcea72824cf4cb48a1f58e9d03efd9e4728bb198e4f11e4aba004a454d52cb
+      source_raw_images_bin_sha256: f4bd3b275b1bce1be544dbe79459a1136c2376c8b8c192857799a143f7724bc8
+      source_raw_points3d_bin_sha256: e47ad2e4be1aae5d19495f5aecca8a625ce1e0d9b24f4645c64cd05361385cc1
+      source_raw_rgb_images: 26
+      source_raw_rgb_byte_identical_to_nvos_conversion_source: true
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spin_nerf_ludvig_orchids_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF orchids multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: orchids_per_scene_three_seed_check
+      scenes: [orchids]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: false
+      full_benchmark_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_available_scenes: []
+      unavailable_scenes: [fork]
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: >-
+        foreground image IoU on 23 non-reference orchids frames; the released
+        upstream frame list omits image014
+      aggregation: frame mean within orchids then mean over exact seeds 0, 1, and 2
+      calibration: >-
+        per-seed SAM candidate and threshold selected on the orchids reference
+        GT mask; thresholds 89/92/93 and candidate 0 for seeds 0/1/2
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact orchids per-scene three-seed check, not a nine- or ten-scene SPIn-NeRF macro.
+        - All nine locally available scenes are exact-complete; Fork is absent.
+        - The 90.0654 orchids mean cannot be relabelled as the paper's 93.8 full ten-scene macro.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - name: orchids_foreground_iou_3seed_mean_percent
+        role: primary
+        local: 90.06540085413931
+        paper: 92.2
+        delta_points: -2.1345991458606903
+      - name: seed_0_foreground_iou_percent
+        role: secondary
+        value: 90.04484915366488
+      - name: seed_1_foreground_iou_percent
+        role: secondary
+        value: 90.21745545450443
+      - name: seed_2_foreground_iou_percent
+        role: secondary
+        value: 89.93389795424861
+    artifacts:
+      historical_three_scene_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_3seed_summary.json
+      historical_three_scene_summary_sha256: 5c93439163278ce2cb4d69cea89b98de09d2039bd9721f9d004f60f2371dc879
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 8fc085e1c6ad817772898fd5e24f120b72ec78d3c0efa793a7ccbd761935d3d7
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: e04a38f5aa22aaa716ec1c741222e1d1c94fb3cf0305aa4cc06a50a823ae5ef5
+      point_cloud_bytes: 374352324
+      point_cloud_vertices: 1509479
+      registered_training_views: 25
+      held_out_training_views: 0
+      released_evaluator_frames: 24
+      scored_target_frames_per_seed: 23
+      excluded_reference_frame: image000.png
+      upstream_omitted_frame: image014.png
+      source_raw_cameras_bin_sha256: 5797e621b8bf269aeccf8127b5f438199e574a92ef0af8761c776da962b5f102
+      source_raw_images_bin_sha256: bb07036e7932adeb602d16a7d9a6b82426b07992d9efd9865c4b3bc03da34cc9
+      source_raw_points3d_bin_sha256: 953b37835a1f23ab02d5d54e6f572657ed953c4ab1121e9c92efd3325da53a60
+      source_raw_rgb_images: 25
+      source_raw_rgb_byte_identical_to_nvos_conversion_source: true
+      pinhole_cameras_bin_sha256: 73d98571b2ffc0ad60877dc0b898c91d2c5a2a6c5d7a47a6b4516dcefe9b1546
+      pinhole_images_bin_sha256: 1d6abf177761c1e57ae3579e48bff6cdaa8a794c127b8c20c1a47df412c4bfc9
+      pinhole_points3d_bin_sha256: b058c96d68ccda1318efd5422e7842a428d5f94ee60156a37230521adebf950f
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_horns_center_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS horns_center foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: horns_center_per_scene_three_seed_check
+      tasks: [horns_center]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS horns_center target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for horns_center only
+      calibration: released fixed threshold parameter 75; oracle threshold excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact horns_center per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 97.9693 horns_center mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - {name: horns_center_foreground_iou_3seed_mean_percent, role: primary, local: 97.96929396849602, paper: 97.9, delta_points: 0.06929396849601233}
+      - {name: seed_0_foreground_iou_percent, role: secondary, value: 97.96949305054981}
+      - {name: seed_1_foreground_iou_percent, role: secondary, value: 97.96561238666135}
+      - {name: seed_2_foreground_iou_percent, role: secondary, value: 97.97277646827688}
+    full_benchmark_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      full_benchmark_complete: true
+      separately_reported_as_strict_paper_protocol_row: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_flower_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: 53ba2ae876702046b1f9a816218b23eadcb5d41546bd31e4c26617f2974a7479
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+      point_cloud_bytes: 238598611
+      point_cloud_vertices: 962085
+      registered_training_views: 62
+      held_out_training_views: 0
+      source_rgb_dimensions: [4003, 3002]
+      effective_training_dimensions: [1600, 1199]
+      scored_target_frames_per_seed: 1
+      pinhole_cameras_bin_sha256: f328efa43a68cd47a75e6c9bdb81debc5438d75735493f6ead7ecef03523c868
+      pinhole_images_bin_sha256: 1f6f3188e4e61f34ac5543d9a2fdb7547f0096f400c04a0f0ff8e7954d9dcda3
+      pinhole_points3d_bin_sha256: d5446e4b62a5f8ab349c7e4b46c093704ba21ef003bd2e724c46f5352d94f245
+      run_manifest_sha256_by_seed: [68e492732677706192054fac04b64fcb8e77c7ff4d281318f0c62fe275caa7a7, 5219c68925d79855df6c960ebb1aec8fc42b445cc82089a63f337a7ffeee4171, cdf8491ac7c1b278d812308588e5feace741de78d50bd9c08faecdac1ebc2ffa]
+      protocol_result_sha256_by_seed: [feeed39903bcf28d07dc6148901f64c09af725165a3b37b75b893bde86274e8d, 4556b17ce62c62ce6ff62f3ab92bcba5406c6f9e7c23809f935069156ae0ea6b, 3a7f2fefaa7f67980f6178fbeee411d4d6359156fe313de41e21830d0fd1c811]
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/horns_exact_f7a_allview_v1
+      thermal_max_temperature_c_by_seed: [65.0, 67.0, 67.0]
+      thermal_pause_events: 0
+      thermal_query_failures: 0
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  nvos_ludvig_horns_left_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: NVOS horns_left foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: horns_left_per_scene_three_seed_check
+      tasks: [horns_left]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: true
+      full_benchmark_completed_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      missing_tasks: []
+    protocol:
+      prompt: official positive scribble; released code ignores the negative scribble
+      target_visibility: all-view 3DGS training and released uplifting both see target RGB
+      metric_domain: foreground image IoU on the single NVOS horns_left target frame
+      aggregation: mean over exact seeds 0, 1, and 2 for horns_left only
+      calibration: released fixed threshold parameter 75; target-oracle threshold 42 excluded
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact horns_left per-scene three-seed check, not the complete eight-task NVOS row.
+        - A separate exact full eight-task row is complete; this 92.6496 horns_left mean remains a per-task diagnostic and cannot replace its 91.2577 macro.
+        - Released LUDVIG is an online multiview protocol, not a strict-unseen reusable-field protocol.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - {name: horns_left_foreground_iou_3seed_mean_percent, role: primary, local: 92.6496448813647, paper: 94.1, delta_points: -1.4503551186353008}
+      - {name: seed_0_foreground_iou_percent, role: secondary, value: 92.64614421701877}
+      - {name: seed_1_foreground_iou_percent, role: secondary, value: 92.65208078577824}
+      - {name: seed_2_foreground_iou_percent, role: secondary, value: 92.65070964129706}
+    oracle_diagnostics:
+      diagnostic_only: true
+      used_for_reported_metric: false
+      used_for_model_or_threshold_selection: false
+      target_iou_percent_by_seed: [94.56588492687982, 94.58314365789316, 94.58721999256832]
+      threshold_parameter_by_seed: [42, 42, 42]
+    full_benchmark_context:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      local_macro_iou_percent: 91.25768502741802
+      paper_same_task_macro_iou_percent: 91.3375
+      delta_local_minus_paper_same_task_points: -0.07981497258198544
+      paper_headline_iou_percent: 91.3
+      delta_local_minus_paper_headline_points: -0.04231497258197692
+      full_benchmark_complete: true
+      separately_reported_as_strict_paper_protocol_row: true
+    artifacts:
+      summary: output/protocol_audit_20260731/ludvig/nvos/released_all_view_fern_flower_leaves_orchids_fortress_horns_3seed_summary.json
+      summary_sha256: 53ba2ae876702046b1f9a816218b23eadcb5d41546bd31e4c26617f2974a7479
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+      point_cloud_bytes: 238598611
+      point_cloud_vertices: 962085
+      registered_training_views: 62
+      held_out_training_views: 0
+      source_rgb_dimensions: [4003, 3002]
+      effective_training_dimensions: [1600, 1199]
+      scored_target_frames_per_seed: 1
+      pinhole_cameras_bin_sha256: f328efa43a68cd47a75e6c9bdb81debc5438d75735493f6ead7ecef03523c868
+      pinhole_images_bin_sha256: 1f6f3188e4e61f34ac5543d9a2fdb7547f0096f400c04a0f0ff8e7954d9dcda3
+      pinhole_points3d_bin_sha256: d5446e4b62a5f8ab349c7e4b46c093704ba21ef003bd2e724c46f5352d94f245
+      run_manifest_sha256_by_seed: [644a66c81c86c10e20d6470d2a729542f23f7fe03328dbdc33707461ae24bcd2, c33b3caabac9c9592d45cad00a3d0e1e91f72e22dfeba9308d1c2bf16b60b066, 3577f6175766b72bf2a3dc71849f49c55326a2aff2a76a44a2ce6f2bf59d07b2]
+      protocol_result_sha256_by_seed: [a39f21d13f36082cd33114983e8fd71c343024f8e9b68b535e524c060172eebd, f70e0c9f5c2b1f19f6f6e2ecba1c82c813a92e08f1d101857d425a901573e582, a11a14c17b96ebfd821864d53cac0f374c2c7441d7bdef3e4b4da66f8518c12a]
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/horns_exact_f7a_allview_v1
+      thermal_max_temperature_c_by_seed: [67.0, 68.0, 67.0]
+      thermal_pause_events: 0
+      thermal_query_failures: 0
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spin_nerf_ludvig_horns_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF horns multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: horns_per_scene_three_seed_check
+      scenes: [horns]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: false
+      full_benchmark_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_available_scenes: []
+      unavailable_scenes: [fork]
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: foreground image IoU on 61 non-reference annotated horns frames
+      aggregation: frame mean within horns then mean over exact seeds 0, 1, and 2
+      calibration: per-seed SAM candidate and threshold selected on the horns reference GT mask; thresholds 71/70/69 and candidate 2
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact horns per-scene three-seed check, not a nine- or ten-scene SPIn-NeRF macro.
+        - All nine locally available scenes are exact-complete; Fork is absent.
+        - The 89.9921 horns mean cannot be relabelled as the paper's 93.8 full ten-scene macro.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - {name: horns_foreground_iou_3seed_mean_percent, role: primary, local: 89.99212819451417, paper: 94.5, delta_points: -4.507871805485834}
+      - {name: seed_0_foreground_iou_percent, role: secondary, value: 90.00783561472001}
+      - {name: seed_1_foreground_iou_percent, role: secondary, value: 89.9954048932602}
+      - {name: seed_2_foreground_iou_percent, role: secondary, value: 89.97314407556229}
+    current_available_cohort_context:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      local_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      local_9scene_complete: true
+      full_10scene_complete: false
+    artifacts:
+      historical_five_scene_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_3seed_summary.json
+      historical_five_scene_summary_sha256: ac01b58889aaecce2ab8795f43633f8d89c57a78ea18ea6523edab1a1d0e99ea
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 77154d2f5e761ba34a605677be8143214246ff8fbbf310b3400b55e4332488bc
+      point_cloud: output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: 1f3084daba5e9a70263152f73f704815f452a2f37e81f56cf3a3eb96c3e49803
+      point_cloud_bytes: 238598611
+      point_cloud_vertices: 962085
+      registered_training_views: 62
+      held_out_training_views: 0
+      released_evaluator_frames: 62
+      scored_target_frames_per_seed: 61
+      source_raw_cameras_bin_sha256: 178c5ec2b39b04072ed7ed2fa9b9358e2e79a1943b5e9aac12ec8456243455a2
+      source_raw_images_bin_sha256: 4137f33bd74c590b13488ab5cfd4cd1ac2b9bd24be0f43e4787a1a60bc28dcad
+      source_raw_points3d_bin_sha256: a00d19015e645df54f903efc30278cd265ab531c3e055b09545b6a52826b6908
+      source_raw_rgb_images: 62
+      source_raw_rgb_byte_identical_to_nvos_conversion_source: true
+      pinhole_cameras_bin_sha256: f328efa43a68cd47a75e6c9bdb81debc5438d75735493f6ead7ecef03523c868
+      pinhole_images_bin_sha256: 1f6f3188e4e61f34ac5543d9a2fdb7547f0096f400c04a0f0ff8e7954d9dcda3
+      pinhole_points3d_bin_sha256: d5446e4b62a5f8ab349c7e4b46c093704ba21ef003bd2e724c46f5352d94f245
+      run_manifest_sha256_by_seed: [bd65c6c8f83d73b7579fe1d9fe65bb7af525a5866a276fab6ac76e7c0a2391a0, 8bf8f1c47a7c0894890bd5b30c0bd9151c80b3554b4b3ee72243974d498ab6c9, 9749cd7c2dd90f28fab8c89f0724830be88a0b9b582b387f100f0dadc4885a01]
+      protocol_result_sha256_by_seed: [7ee9124f1c3e53fb0e1c90961ed06a225c1564c41cad52e8df596cb87a6ae44c, fc9b074188b40e1e39c743a1f6b737a88b07b2a83ce567e239c46c75353ea257, 60cfe62c1ab5da0930d20353f3be625e2ff62cf0e23d180a6d2717e03a9e14e1]
+      all_runs_have_verified_upstream_patch: true
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 0120a174e715ddb67c932bf6b25ddfe6c8072bea11df4d762ac9f9b6f234252b
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 3a0a36ef27621fc17de5b382994d6577256c683fe97dd6d29e58fd37f4834976
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 5264caed89c2f071e6be08f3ad64abe2a247e17410b439c8dadec9e6996e232b
+      thermal_log_root: output/protocol_audit_20260731/ludvig/thermal_logs/horns_exact_f7a_allview_v1
+      thermal_max_temperature_c_by_seed: [67.0, 68.0, 68.0]
+      thermal_pause_events: 0
+      thermal_query_failures: 0
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+      cross_benchmark_same_training_manifest_and_ply: true
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spin_nerf_ludvig_room_released_all_view_3seed_exact_20260731:
+    benchmark_family: spatial_prompt
+    task: SPIn-NeRF room multiview foreground segmentation
+    method: LUDVIG-SAM
+    completion: complete
+    evidence_class: exact_reproduction
+    cohort:
+      complete: true
+      scope: room_per_scene_three_seed_check
+      scenes: [room]
+      seeds: [0, 1, 2]
+      full_benchmark_complete: false
+      full_benchmark_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_available_scenes: []
+      unavailable_scenes: [fork]
+    protocol:
+      prompt: complete first-frame reference mask
+      target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
+      metric_domain: foreground image IoU on 40 non-reference annotated room frames
+      aggregation: frame mean within room then mean over exact seeds 0, 1, and 2
+      calibration: >-
+        per-seed SAM candidate and threshold selected on the room reference GT
+        mask; thresholds 73/74/72 and candidate 0 for seeds 0/1/2
+      resolution_repair: >-
+        evaluation-only fractional-center-crop staging maps 4005x3003 source
+        JPEGs through crop [0.5, 0, 4004.5, 3003] to exact 1600x1200
+        BICUBIC images while preserving JPEG tables/sampling and leaving the
+        source dataset unchanged
+    comparability:
+      paper_comparison: diagnostic_only
+      strict_table_eligible: false
+      reasons:
+        - This is an exact room per-scene three-seed check, not a nine- or ten-scene SPIn-NeRF macro.
+        - All nine locally available scenes are exact-complete; Fork is absent.
+        - The 97.1875 room mean cannot be relabelled as the paper's 93.8 full ten-scene macro.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: true
+        target_visibility: true
+        metric_domain: true
+        aggregation: true
+        calibration: true
+        implementation: true
+    reported_metrics:
+      - {name: room_foreground_iou_3seed_mean_percent, role: primary, local: 97.18749947288177, paper: 96.5, delta_points: 0.6874994728817683}
+      - {name: seed_0_foreground_iou_percent, role: secondary, value: 97.12692191657342}
+      - {name: seed_1_foreground_iou_percent, role: secondary, value: 97.09182876192173}
+      - {name: seed_2_foreground_iou_percent, role: secondary, value: 97.34374774015015}
+    current_available_cohort_context:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      local_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      local_9scene_complete: true
+      full_10scene_complete: false
+    failure_diagnosis:
+      excluded_attempt: exact_f7a_allview_room_seed0_v1
+      excluded_from_all_metrics: true
+      returncode: 1
+      error: >-
+        SAM uplift resolution mismatch before prompt sampling:
+        prompt=(1200, 1600), image=(1199, 1600), camera=(1200, 1600)
+      repair_scope: resolution-safe RGB staging only; prompt, calibration, metric, and aggregation are unchanged
+    artifacts:
+      historical_six_scene_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_3seed_summary.json
+      historical_six_scene_summary_sha256: 392074e2c0261f08b31558cec90d99709b92b326ab8c3cec7ad5578f930d441d
+      latest_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      latest_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      training_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/room/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      training_manifest_sha256: 275c72ced3689cbca6b51cca8cc7830130fa6a1ac2d4eed3d471a346a7345dd4
+      point_cloud: output/protocol_audit_20260731/ludvig/spin/released_all_view/room/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      point_cloud_sha256: c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd
+      point_cloud_bytes: 72323043
+      point_cloud_vertices: 291619
+      registered_training_views: 41
+      held_out_training_views: 0
+      released_evaluator_frames: 41
+      scored_target_frames_per_seed: 40
+      source_raw_cameras_bin_sha256: 24d758b2eb1b03a3c3b3413383f22af156e45d728dc4674a045e003f1218d547
+      source_raw_images_bin_sha256: 70081f9c77d4e77cd883515fed8cddeff4564b844886d469eb36ef40332a3ef0
+      source_raw_points3d_bin_sha256: 6f1c189edd3776decefebb3750b490843c7427d01bea40b286616afe9776643e
+      source_raw_rgb_images: 41
+      source_rgb_dimensions: [4005, 3003]
+      staged_rgb_dimensions: [1600, 1200]
+      fractional_center_crop_dimensions: [4004.0, 3003.0]
+      fractional_center_crop_box: [0.5, 0.0, 4004.5, 3003.0]
+      resize_resampling: BICUBIC
+      jpeg_tables_and_sampling_preserved: true
+      source_dataset_modified: false
+      pinhole_cameras_bin_sha256: f5fffc812396ecda167042c4d2b7ecd5eaaad4e30814b62ee7594cf1cfed0d55
+      pinhole_images_bin_sha256: 29d22d20e8deeefa91c3960af1b6b0f522e451b5fbed95704b32b7bc32c0ab85
+      pinhole_points3d_bin_sha256: 790569a1db2aea200565448ca65bbb22d2040c597d423bf373b04bb55ec4b913
+      run_manifest_sha256_by_seed: [95fe50d036a218e3d4e0e5b28eccacfe9ebb38ef5d4dfe1d1ce47b469b117557, 903afb587c034d65284ff0488821370db09523a73a7d41091ab2a93b106590a2, 77b2f522c1a382fa66f3f6f61aadc875d6008e10843fe98b2633e8fb800105f5]
+      protocol_result_sha256_by_seed: [f45b07652c3e94237a7c9320c708ae5c9442effad83bcb77c2d3685e182d7468, e581799298942eb662e88914d819e67b8e6c269d72862cf182c884eaaff9956e, 4a0db78b1fa86af4855f81a52a09010e63b70c6f84aa91f6dba050fdc7b665af]
+      failed_v1_run_excluded_from_metrics: output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v1/run_manifest.json
+      failed_v1_run_manifest_sha256: be2a512557684c94814551ca12f1589c2767d271e8205f8c24923c7165b04512
+      all_runs_have_verified_upstream_patch: true
+      approved_reproduction_patch_sha256: 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: 1caf00531ed357d7fd8590e897584ccc0d744a05fb16deffe6f498a668aa8457
+      aggregator: reproductions/ludvig/aggregate_results.py
+      aggregator_sha256: 20fdda242368540aba731afe4d477635030a25e90d0718e6b41231d64f812842
+      spin_llff_room_trainer: reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      spin_llff_room_trainer_sha256: 561980d9bea84e171a86a978c83529dea99a294adddb93aa4194108d16ebc0e6
+      audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
 
   spin_nerf_ludvig_9scene_missing_fork_20260731:
     benchmark_family: spatial_prompt
     task: SPIn-NeRF multiview foreground segmentation
     method: LUDVIG-SAM
-    completion: blocked
+    completion: partial
     evidence_class: diagnostic
     cohort:
       complete: false
+      locally_available_cohort_complete: true
+      full_10scene_benchmark_complete: false
       available_scenes: [orchids, leaves, fern, room, horns, fortress, pinecone, truck, lego]
       missing_scenes: [fork]
+      exact_completed_scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      exact_pending_available_scenes: []
       annotated_frames: 423
       reason: >-
-        Fork data is absent. Exact fern checkpoint reuse is CPU-preflighted,
-        but the 30k checkpoint and all GPU evaluation are pending recovery
-        from GPU0 lost; the other eight available scenes have no compatible
-        local all-view 30k checkpoints.
+        Fork data is absent. All nine locally available scenes have completed
+        exact all-view 30k checkpoints and three-seed results, so the local
+        nine-scene cohort is complete while the paper's ten-scene cohort is not.
     protocol:
       prompt: complete first-frame reference mask
       target_visibility: released LUDVIG sees all RGBs and calls SAM on target views
@@ -279,13 +1960,12 @@ evaluations:
       aggregation: frame mean then equal-weight macro over scenes
       calibration: per-scene SAM candidate and threshold selected on the reference GT mask
     comparability:
-      paper_comparison: forbidden
+      paper_comparison: diagnostic_only
       strict_table_eligible: false
       reasons:
         - The local cohort is nine scenes rather than the paper's ten.
-        - No completed compatible all-view 30k checkpoint or local SPIn metric is available while GPU0 is lost.
-        - Only fern checkpoint reuse is preflighted; the other eight available scenes remain without compatible all-view geometry.
-        - The nine-scene paper context 94.5778 must not be substituted for the full-ten-scene 93.8 row.
+        - All nine locally available scenes have completed registered exact checkpoints and three-seed metrics; only absent Fork prevents a full-ten-scene result.
+        - The matching nine-scene 94.5778 comparison is diagnostic and must not be substituted for the full-ten-scene 93.8 row.
       protocol_match_to_paper:
         cohort: false
         prompt_or_query: true
@@ -297,9 +1977,63 @@ evaluations:
     paper_context:
       full_10scene_miou_percent: 93.8
       same_available_9scene_macro_percent: 94.5777777778
+    reported_metrics:
+      - name: available_9scene_macro_iou_percent
+        role: primary
+        local: 93.7200449592385
+        paper: 94.57777777777778
+        delta_points: -0.8577328185392759
+    completed_nine_scene_diagnostic:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      seeds_per_scene: [0, 1, 2]
+      local_scene_macro_iou_percent: 93.7200449592385
+      paper_same_scene_macro_iou_percent: 94.57777777777778
+      delta_local_minus_paper_points: -0.8577328185392759
+      eligible_for_matching_9scene_diagnostic: true
+      eligible_for_full_10scene_table: false
+      pinecone:
+        run_values_iou_percent: [81.40145559710756, 86.28110177736835, 86.13687631589627]
+        local_mean_iou_percent: 84.60647789679072
+        paper_iou_percent: 88.8
+        delta_local_minus_paper_points: -4.1935221032092755
     artifacts:
       manifest: output/protocol_audit_20260731/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json
       fern_checkpoint_reuse_preflight: output/protocol_audit_20260731/ludvig/spin/preflight/fern_checkpoint_reuse_v1/preflight_manifest.json
+      exact_available_cohort_summary: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json
+      exact_available_cohort_summary_sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17
+      truck_cpu_dry_run_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_truck_cpu_dryrun_v1/training_manifest.json
+      truck_cpu_dry_run_manifest_sha256: e8cff51860a8f82e1b8bcebcdc6710d579ba1468d638c3fd2d088db1f0fffef0
+      launcher: reproductions/ludvig/run_ludvig_sam.py
+      launcher_sha256: b2135e390b17574af774b6956e56d9d8460222948496f74e95b367e62f4bffb0
+      all_view_trainer: reproductions/ludvig/train_nvos_all_view_3dgs.py
+      all_view_trainer_sha256: 63e36c2514c110d24e7e54ff967d8cac853bfd5691863b7982e06617e48cd1b5
+      truck_trainer: reproductions/ludvig/train_spin_truck_all_view_3dgs.py
+      truck_trainer_sha256: 83f0ab28c169a4ac7aa39ca3c33b889c5b2d91ca632172b717c0ca93725c5e78
+      lego_training_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/lego/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      lego_training_manifest_sha256: 145f2e8e3b10c36f085ffb6c389ec6e91f744310f88345e7da5add058593b5a4
+      lego_point_cloud: output/protocol_audit_20260731/ludvig/spin/released_all_view/lego/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      lego_point_cloud_sha256: 544437bb194995502d3a8cfe8a74935944adb6b90b22de2a3d243656d9cc2183
+      lego_trainer: reproductions/ludvig/train_spin_lego_all_view_3dgs.py
+      lego_trainer_sha256: 930a0bfa46e611b7f32a74a329e9abe3d902109a20679fde008163f46d19277f
+      pinecone_training_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/pinecone/training/attempts/exact_f7a_allview_30k_v1/training_manifest.json
+      pinecone_training_manifest_sha256: 2d1b5d8b14765f03dd0b84a3ed64f41d7dffcf2d776835a2d6270cf328eb816b
+      pinecone_point_cloud: output/protocol_audit_20260731/ludvig/spin/released_all_view/pinecone/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply
+      pinecone_point_cloud_sha256: 27d5670cd642542cdba671a7a5718ae463b1097c437d2f4e232999090aef451e
+      pinecone_run_manifest_sha256_by_seed: [c6d17f651758e81804bed570cedf1eaa76f3e787c83cc2c136d24e8f9333c24c, 573029cfa39c63ac65b5c615f8d89a17e36fc68eccc7d86d4c6fecc0e38a2573, de0d7bb7ce100e7d21b6554c0ae96c7dcc76c32c78cc279a82a8e8dd60130761]
+      pinecone_protocol_result_sha256_by_seed: [f51efdd892bfd936edeb36a1ffe0b4e6f718ff45d4121feb80482717c71cdee0, 0e432ceec545a61d6cb12d88b80d47127fd9f1ed64a182b38e973ff4c500978a, 88757c60385af7d2c5881b9ce72f92accc55db3cb9b8e153d5b7912f60d21c8e]
+      pinecone_failed_seed0_v1_manifest: output/protocol_audit_20260731/ludvig/spin/released_all_view/pinecone/seed_0/attempts/exact_f7a_allview_pinecone_seed0_v1/run_manifest.json
+      pinecone_failed_seed0_v1_manifest_sha256: 55903ae10bdf37c61a514979facf9a517d1a15088bdea340251251989ce0c678
+      pinecone_failed_seed0_v1_excluded_from_metrics: true
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      thermal_guard_sha256: 4daa492d2026d58f5d83184dc12dbf4f87747bf1d8630c0e70bf563c5acfed79
+      thermal_guard_scope: execution_infrastructure_only_not_evaluation_protocol
+      thermal_guard_default_policy:
+        poll_seconds: 3.0
+        query_timeout_seconds: 2.0
+        warning_temperature_c: 78.0
+        pause_temperature_c: 81.0
+        resume_temperature_c: 70.0
+        resume_stable_samples: 2
       audit: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
 
   pfpr_ludvig_style_partial6_20260731:
@@ -346,3 +2080,75 @@ evaluations:
       audit: output/protocol_audit_20260731/pfpr_ludvig_style_v2_partial6/audit.json
       evaluation: output/protocol_audit_20260731/pfpr_ludvig_style_v2_partial6/evaluation.json
       protocol_card: paper/artifacts/pfpr_ludvig_style_protocol_card_20260731.md
+
+  pfpr_exact_ludvig_custom_adapter_scene0050_02_20260801:
+    benchmark_family: correspondence_query
+    task: PFPR custom cross-view correspondence retrieval
+    method: exact released LUDVIG DINO/PCA/uplift plus frozen learning-free PFPR adapter
+    completion: complete
+    evidence_class: diagnostic
+    cohort:
+      complete: true
+      scenes: [scene0050_02]
+      source_views: 120
+      gaussians: 300000
+      queries: 10
+      public_candidates: 31143
+      full_benchmark_scenes: 20
+      full_benchmark_queries: 200
+    protocol:
+      query: method-visible depth-aligned 128x128 RGB crop only
+      target_visibility: >-
+        source field uses 120 frozen query-held-out ScanNet views; scoring sees
+        only scene_id and crop_rgb; private anchors open only in Phase E
+      scene_feature_extractor: >-
+        released LUDVIG vendored ViT-g/14, last of four intermediate layers,
+        explicit code-exact discard of the checkpoint register_tokens tensor
+      scene_transform: frozen PCA40 over all 277440 scene tokens with released singular-value weighting
+      uplift: released LUDVIG sliding-window reconstruction and GaussianModel.apply_weights
+      query_adapter: frozen scene transform, center 3x3 mean of one 9x9 grid, L2 normalization
+      primitive_score: cosine
+      candidate_readout: continuous opacity-weighted Gaussian convolved with 5cm voxel cell, k64
+      metric_domain: public quantized 5cm candidate points with evaluator-only 3D anchor distance and fixed 10cm NMS
+      support_rule: strictly positive with no tuned threshold; 31143/31143 valid
+      aggregation: one-scene query micro; equal to scene macro
+      calibration: none
+    comparability:
+      paper_comparison: forbidden
+      strict_table_eligible: false
+      reasons:
+        - PFPR is a custom benchmark with no published LUDVIG task, head, or paper number.
+        - The DINO/PCA/uplift component is exact, but crop pooling and candidate readout are an explicit custom adapter.
+        - This is one scene rather than the full 20-scene PFPR benchmark.
+      protocol_match_to_paper:
+        cohort: false
+        prompt_or_query: false
+        target_visibility: false
+        metric_domain: false
+        aggregation: false
+        calibration: false
+        implementation: false
+    reported_metrics:
+      - {name: top1_mean_distance_m, role: primary, value: 1.9873129278421402}
+      - {name: top1_median_distance_m, role: primary, value: 1.9546312093734741}
+      - {name: recall_at_1_at_10cm, role: primary, value: 0.0}
+      - {name: recall_at_5_at_10cm, role: primary, value: 0.0}
+      - {name: recall_at_10_at_10cm, role: primary, value: 0.0}
+      - {name: recall_at_10_at_20cm, role: secondary, value: 0.1}
+      - {name: mean_reciprocal_rank_at_20cm, role: secondary, value: 0.02}
+    artifacts:
+      phase_a_manifest: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_vendored_coverage120_phase_a_v2/run_manifest.json
+      phase_a_manifest_sha256: de3f0281ae863d9f640eaabce5c805f35a9fca03221ceee0a67756fc9023e22a
+      phase_b_manifest: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_vendored_dino_pca_full120_v2_driver535/run_manifest.json
+      phase_b_manifest_sha256: 1d546a335e2f3ec807c69b23f06a7876d1a325d53e16a94b0d64f8b7556d147b
+      phase_c_manifest: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_phase_c_full120_v1_driver535/run_manifest.json
+      phase_c_manifest_sha256: dcf8d864da50aa455f805d94bce707daf4cfc4ac1f602ea03141b38a57eb13fb
+      phase_d_manifest: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_phase_d_public10_v1_driver535/run_manifest.json
+      phase_d_manifest_sha256: e7f615ed0013cc32b858c92df364c36585dcfa1a10758202bcb361035c42b6ee
+      phase_e_manifest: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_phase_e_eval10_v1/run_manifest.json
+      phase_e_manifest_sha256: d85c59aebb21cb6c6b6c1251c737f82c88c36eea58e4c8175167a71797c32901
+      protocol_card: paper/artifacts/pfpr_ludvig_style_protocol_card_20260731.md
+      thermal_guard: reproductions/ludvig/run_gpu0_thermal_guard.py
+      executed_thermal_policy: {physical_gpu: 0, warning_c: 78, pause_c: 81, resume_c: 70, stable_samples: 1}
+      phase_b_c_d_peak_temperature_c: [58, 52, 49]
+      phase_b_c_d_pause_events: [0, 0, 0]

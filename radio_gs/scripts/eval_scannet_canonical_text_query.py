@@ -11,7 +11,7 @@ implementation used by the legacy RADIO-GS ScanNet evaluator.
 from __future__ import annotations
 
 import argparse
-import hashlib
+import io
 import json
 from pathlib import Path
 from typing import Any, Mapping
@@ -19,6 +19,7 @@ from typing import Any, Mapping
 import numpy as np
 import torch
 import torch.nn.functional as F
+from plyfile import PlyData
 from scipy.spatial import cKDTree
 
 from radio_gs.scannet_constants import (
@@ -33,7 +34,11 @@ from radio_gs.scripts.build_primitive_text_score_cache import (
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import (
     _default_label_ply,
     _parse_splits,
-    _read_label_ply,
+)
+from radio_gs.utils.immutable_artifacts import (
+    load_torch_mapping,
+    stable_descriptor_load,
+    write_frozen_json,
 )
 
 
@@ -43,12 +48,37 @@ DEFAULT_PROMPTS = (
 )
 
 
-def _sha256_file(path: str | Path) -> str:
-    digest = hashlib.sha256()
-    with Path(path).open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+def read_label_ply_secure(
+    path: str | Path,
+) -> tuple[np.ndarray, np.ndarray, str]:
+    """Read one immutable label PLY through the already hashed descriptor."""
+
+    def load(handle):
+        # plyfile wraps ASCII streams in TextIOWrapper; the wrapper can close
+        # its underlying object when it is released.  Parse an in-memory copy
+        # so stable_descriptor_load retains ownership of the descriptor for
+        # its post-deserialization fstat/hash verification.
+        ply = PlyData.read(io.BytesIO(handle.read()), mmap=False)
+        vertex = ply["vertex"]
+        if "label" not in vertex.data.dtype.names:
+            raise ValueError(f"Label PLY has no 'label' property: {path}")
+        xyz = np.stack(
+            [
+                np.asarray(vertex["x"], dtype=np.float32),
+                np.asarray(vertex["y"], dtype=np.float32),
+                np.asarray(vertex["z"], dtype=np.float32),
+            ],
+            axis=1,
+        )
+        labels = np.asarray(vertex["label"], dtype=np.int32)
+        return xyz, labels
+
+    value, digest, _ = stable_descriptor_load(
+        path,
+        load,
+        label="ScanNet label PLY",
+    )
+    return value[0], value[1], digest
 
 
 def load_frozen_text_cache(
@@ -61,11 +91,11 @@ def load_frozen_text_cache(
     """Load an exact frozen cache without silently encoding or overwriting it."""
 
     cache_path = Path(path)
-    if not cache_path.exists():
-        raise FileNotFoundError(f"frozen text cache not found: {cache_path}")
-    payload = torch.load(cache_path, map_location="cpu", weights_only=False)
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"invalid text cache payload: {cache_path}")
+    payload, _, _ = load_torch_mapping(
+        cache_path,
+        map_location="cpu",
+        label="frozen SigLIP2 text cache",
+    )
     queries = [str(value) for value in payload.get("queries", [])]
     templates = [str(value) for value in payload.get("prompt_templates", [])]
     if queries != list(class_names):
@@ -93,12 +123,16 @@ def load_primitive_semantic_cache(
     path: str | Path,
     *,
     allow_mpr_oracle: bool = False,
+    payload: Mapping[str, Any] | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, Mapping[str, Any]]:
     """Load a query-free, official-SigLIP2 primitive semantic cache."""
 
-    payload = torch.load(Path(path), map_location="cpu", weights_only=False)
-    if not isinstance(payload, Mapping):
-        raise ValueError(f"unsupported primitive semantic cache: {path}")
+    if payload is None:
+        payload, _, _ = load_torch_mapping(
+            path,
+            map_location="cpu",
+            label="primitive semantic cache",
+        )
     schema_version = payload.get("schema_version")
     if schema_version is None and isinstance(payload.get("metadata"), Mapping):
         schema_version = payload["metadata"].get("schema_version")
@@ -164,11 +198,17 @@ def load_primitive_multiscale_features(
     path: str | Path,
     *,
     valid: torch.Tensor,
+    payload: Mapping[str, Any] | None = None,
 ) -> torch.Tensor | None:
     """Load optional sparse scale descriptors and restore primitive row order."""
 
-    payload = torch.load(Path(path), map_location="cpu", weights_only=False)
-    value = payload.get("features_by_scale") if isinstance(payload, Mapping) else None
+    if payload is None:
+        payload, _, _ = load_torch_mapping(
+            path,
+            map_location="cpu",
+            label="primitive multiscale semantic cache",
+        )
+    value = payload.get("features_by_scale")
     if value is None:
         return None
     scales = torch.as_tensor(value).cpu()
@@ -200,11 +240,14 @@ def project_primitive_semantics_to_points(
     distance_epsilon: float = 1e-4,
     chunk_size: int = 2048,
     device: torch.device | str = "cpu",
+    tree_workers: int = 1,
 ) -> torch.Tensor:
     """Lift normalized primitive descriptors to arbitrary 3-D query points."""
 
-    if k <= 0 or distance_epsilon <= 0 or chunk_size <= 0:
-        raise ValueError("k, distance_epsilon, and chunk_size must be positive")
+    if k <= 0 or distance_epsilon <= 0 or chunk_size <= 0 or tree_workers <= 0:
+        raise ValueError(
+            "k, distance_epsilon, chunk_size, and tree_workers must be positive"
+        )
     xyz = torch.as_tensor(primitive_xyz).float().cpu()
     valid = torch.as_tensor(primitive_valid).bool().cpu()
     features = torch.as_tensor(primitive_features).cpu()
@@ -216,7 +259,11 @@ def project_primitive_semantics_to_points(
     global_rows = torch.where(valid)[0]
     active_k = min(int(k), int(global_rows.numel()))
     tree = cKDTree(xyz[global_rows].numpy())
-    distances, local_indices = tree.query(points, k=active_k, workers=-1)
+    distances, local_indices = tree.query(
+        points,
+        k=active_k,
+        workers=int(tree_workers),
+    )
     distances = np.asarray(distances, dtype=np.float32)
     local_indices = np.asarray(local_indices, dtype=np.int64)
     if active_k == 1:
@@ -252,18 +299,30 @@ def evaluate(
     allow_mpr_oracle: bool = False,
     scale_aggregation: str = "max",
     scale_specificity_margin: float = 0.0,
+    tree_workers: int = 1,
+    torch_threads: int = 1,
 ) -> dict[str, Any]:
+    if int(torch_threads) <= 0:
+        raise ValueError("torch_threads must be positive")
+    torch.set_num_threads(int(torch_threads))
+    semantic_payload, semantic_digest, _ = load_torch_mapping(
+        semantic_cache,
+        map_location="cpu",
+        label="primitive semantic cache",
+    )
     primitive_xyz, primitive_valid, primitive_features, metadata = (
         load_primitive_semantic_cache(
             semantic_cache,
             allow_mpr_oracle=allow_mpr_oracle,
+            payload=semantic_payload,
         )
     )
     primitive_multiscale = load_primitive_multiscale_features(
         semantic_cache,
         valid=primitive_valid,
+        payload=semantic_payload,
     )
-    mesh_xyz, gt_labels = _read_label_ply(label_ply)
+    mesh_xyz, gt_labels, label_digest = read_label_ply_secure(label_ply)
     primitive_scales = (
         [primitive_features]
         if primitive_multiscale is None
@@ -279,6 +338,7 @@ def evaluate(
             distance_epsilon=distance_epsilon,
             chunk_size=chunk_size,
             device=device,
+            tree_workers=tree_workers,
         )
         for scale_features in primitive_scales
     ]
@@ -303,11 +363,12 @@ def evaluate(
         pred_labels = np.concatenate(pred_parts)
         results[split] = compute_split_metrics(pred_labels, gt_labels, class_ids)
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "scene": scene,
         "label_ply": str(label_ply),
+        "label_ply_sha256": label_digest,
         "semantic_cache": str(semantic_cache),
-        "semantic_cache_sha256": _sha256_file(semantic_cache),
+        "semantic_cache_sha256": semantic_digest,
         "semantic_source": str(metadata.get("source", "")),
         "num_mesh_vertices": int(mesh_xyz.shape[0]),
         "num_primitives": int(primitive_xyz.shape[0]),
@@ -317,6 +378,8 @@ def evaluate(
             "primitive_to_mesh": "inverse_distance_knn",
             "projection_k": int(projection_k),
             "distance_epsilon": float(distance_epsilon),
+            "evaluation_chunk_size": int(chunk_size),
+            "evaluation_device": str(torch.device(device)),
             "classification": "normalized_cosine_argmax",
             "semantic_scale_aggregation": (
                 "single_descriptor"
@@ -329,6 +392,8 @@ def evaluate(
             "logit_calibration": "none",
             "spatial_postprocess": "none",
             "ground_truth_usage": "metrics_only",
+            "knn_workers": int(tree_workers),
+            "torch_num_threads": int(torch_threads),
         },
         "splits": results,
     }
@@ -345,6 +410,8 @@ def main() -> None:
     parser.add_argument("--projection-k", type=int, default=8)
     parser.add_argument("--distance-epsilon", type=float, default=1e-4)
     parser.add_argument("--chunk-size", type=int, default=2048)
+    parser.add_argument("--knn-workers", type=int, default=1)
+    parser.add_argument("--torch-threads", type=int, default=1)
     parser.add_argument("--prompt-templates", default=DEFAULT_PROMPTS)
     parser.add_argument(
         "--text-embedding-cache",
@@ -392,13 +459,14 @@ def main() -> None:
         allow_mpr_oracle=args.allow_mpr_oracle,
         scale_aggregation=args.scale_aggregation,
         scale_specificity_margin=args.scale_specificity_margin,
+        tree_workers=args.knn_workers,
+        torch_threads=args.torch_threads,
     )
     report["protocol"]["prompt_templates"] = templates
     report["protocol"]["class_aliases"] = "none"
     report["protocol"]["text_embedding_cache_base"] = str(args.text_embedding_cache)
     output = Path(args.output)
-    output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(report, indent=2), encoding="utf-8")
+    write_frozen_json(output, report)
     print(json.dumps(report, indent=2))
 
 

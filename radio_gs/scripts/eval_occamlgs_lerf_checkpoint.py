@@ -78,16 +78,23 @@ def validate_label_camera_roles(
     return manifest
 
 
-def _load_occam_modules(occam_root: Path) -> tuple[Any, Any, Any, Any]:
+def _load_occam_modules(occam_root: Path) -> tuple[Any, Any, Any, Any, Any]:
     root = str(occam_root.resolve())
     if root not in sys.path:
         sys.path.insert(0, root)
     from arguments import OptimizationParams
     from gaussian_renderer import render
-    from scene import Scene
+    from scene.dataset_readers import sceneLoadTypeCallbacks
     from scene.gaussian_model import GaussianModel
+    from utils.camera_utils import cameraList_from_camInfos
 
-    return OptimizationParams, render, Scene, GaussianModel
+    return (
+        OptimizationParams,
+        render,
+        GaussianModel,
+        sceneLoadTypeCallbacks,
+        cameraList_from_camInfos,
+    )
 
 
 def _optimization_defaults(optimization_params: Any) -> Any:
@@ -148,8 +155,9 @@ def evaluate_scene(args: argparse.Namespace) -> dict[str, object]:
     if checkpoint_eval is not True and not args.allow_training_visible_checkpoint:
         raise ProtocolError(
             f"{checkpoint_config_path}: checkpoint cfg has eval={checkpoint_eval!r}; "
-            "the geometry is not a held-out-view reproduction. Pass "
-            "--allow-training-visible-checkpoint only for an explicitly labeled diagnostic."
+            "the RGB geometry uses all registered views, as in OccamLGS's released "
+            "LERF script. Pass --allow-training-visible-checkpoint only for an "
+            "explicitly labeled released-code-intent compatibility run."
         )
     frames = SCENE_GT_FRAMES[args.scene]
     objects_by_frame = load_lerf_objects(args.label_root, frames=frames)
@@ -157,31 +165,63 @@ def evaluate_scene(args: argparse.Namespace) -> dict[str, object]:
         missing = sorted(set(frames) - set(objects_by_frame))
         raise FileNotFoundError(f"missing annotation frames: {missing}")
 
-    optimization_params, render, scene_type, gaussian_model = _load_occam_modules(args.occam_root)
+    (
+        optimization_params,
+        render,
+        gaussian_model,
+        scene_loaders,
+        camera_list_from_infos,
+    ) = _load_occam_modules(args.occam_root)
     optimization = _optimization_defaults(optimization_params)
     dataset = _dataset_args(args.source, args.model, feature_level=1)
-    bootstrap_gaussians = gaussian_model(3)
-    scene = scene_type(
-        dataset,
-        bootstrap_gaussians,
-        load_iteration=args.iteration,
-        shuffle=False,
-        include_feature=True,
+    # OccamLGS's Scene eagerly materializes every RGB image, per-pixel alpha
+    # mask, camera ray grid, and transform on CUDA.  LERF-2D evaluates only the
+    # released annotation/test frames, so loading all 100--300 registered views
+    # is both unnecessary and can exceed a 24 GB GPU or a 32 GB host.  Read the
+    # identical COLMAP camera metadata first, validate the official split, and
+    # materialize only the exact annotated cameras.  This changes memory
+    # residency, not poses, intrinsics, resolution, rendering, or evaluation.
+    scene_info = scene_loaders["Colmap"](
+        dataset.source_path,
+        dataset.images,
+        dataset.depths,
+        dataset.eval,
+        dataset.train_test_exp,
+        llffhold=None,
     )
-    train_views = list(scene.getTrainCameras())
-    test_views = list(scene.getTestCameras())
+    train_infos = list(scene_info.train_cameras)
+    test_infos = list(scene_info.test_cameras)
     camera_manifest = validate_label_camera_roles(
         frames,
-        [view.image_name for view in train_views],
-        [view.image_name for view in test_views],
+        [info.image_name for info in train_infos],
+        [info.image_name for info in test_infos],
         require_test_only=args.require_test_only,
+    )
+    frame_set = set(frames)
+    selected_train_infos = [
+        info for info in train_infos if Path(info.image_name).stem in frame_set
+    ]
+    selected_test_infos = [
+        info for info in test_infos if Path(info.image_name).stem in frame_set
+    ]
+    train_views = camera_list_from_infos(
+        selected_train_infos,
+        1.0,
+        dataset,
+        scene_info.is_nerf_synthetic,
+        False,
+    )
+    test_views = camera_list_from_infos(
+        selected_test_infos,
+        1.0,
+        dataset,
+        scene_info.is_nerf_synthetic,
+        True,
     )
     views_by_stem = {
         Path(view.image_name).stem: view
         for view in [*train_views, *test_views]
     }
-    scene.gaussians = None
-    del bootstrap_gaussians
     torch.cuda.empty_cache()
 
     scorer = OpenCLIPTextScorer(
@@ -264,6 +304,10 @@ def evaluate_scene(args: argparse.Namespace) -> dict[str, object]:
                 for level in (1, 2, 3)
             ],
             "raw_feature_cache": "none; frame-local GPU streaming",
+            "camera_loading": (
+                "exact annotated cameras only; COLMAP metadata and released "
+                "test.txt split are read before filtering"
+            ),
             "checkpoint_config": {
                 "path": str(checkpoint_config_path),
                 "source_path": checkpoint_config.get("source_path"),
@@ -273,11 +317,15 @@ def evaluate_scene(args: argparse.Namespace) -> dict[str, object]:
                     if checkpoint_eval is True
                     else "all_registered_views_training_visible"
                 ),
+                "semantic_feature_visibility": (
+                    "source test cameras excluded by the released extractor intent; "
+                    "checkpoint provenance is locally reconstructed, not upstream-signed"
+                ),
             },
             "comparison_status": (
                 "strict_checkpoint_visibility"
                 if checkpoint_eval is True
-                else "diagnostic_only_training_visible_checkpoint"
+                else "released_code_intent_compatibility_rgb_all_views"
             ),
         }
     )
@@ -302,8 +350,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "--allow-training-visible-checkpoint",
         action="store_true",
         help=(
-            "Explicitly permit a checkpoint whose cfg_args has eval!=True; the result "
-            "is labeled diagnostic-only and cannot be called held-out."
+            "Permit cfg_args eval!=True for OccamLGS's released LERF intent: RGB "
+            "geometry sees all registered views while semantic lifting excludes the "
+            "test split. The receipt remains compatibility-level unless feature "
+            "checkpoint provenance is independently verified."
         ),
     )
     parser.add_argument("--openclip-model", default="ViT-B-16")

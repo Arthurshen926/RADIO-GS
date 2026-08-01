@@ -1,6 +1,7 @@
 import json
 
 import numpy as np
+import pytest
 import torch
 import torch.nn.functional as F
 
@@ -10,7 +11,12 @@ from radio_gs.querying.query_compilers import (
     compile_registered_primitive_seeds,
 )
 from radio_gs.scripts.eval_nvos_gaussian_first import (
+    _dataset_protocol_contract,
+    _joint_signed_observation_seeds,
     _load_training_poses,
+    _registered_solver_masses,
+    _require_bipolar_solver_support,
+    _render_registered_stage_maps,
     _resolve_observed_feature_path,
     _scaled_raster_shape,
     _valid_normalized_score_map,
@@ -152,6 +158,105 @@ def test_sparse_registered_compiler_uses_continuous_primitive_seeds() -> None:
 def test_native_prompt_raster_shape_is_not_tied_to_feature_resolution() -> None:
     assert _scaled_raster_shape(756, 1008, 1.0) == (756, 1008)
     assert _scaled_raster_shape(756, 1008, 0.5) == (378, 504)
+
+
+def test_joint_signed_registered_seeds_leave_conflicting_mass_neutral() -> None:
+    positive, negative = _joint_signed_observation_seeds(
+        torch.tensor([0.7, 0.0, -0.5, 0.0]),
+        torch.tensor([0.9, 0.8, 0.7, 0.0]),
+        support_threshold=0.0,
+    )
+
+    torch.testing.assert_close(positive, torch.tensor([0.7, 0.0, 0.0, 0.0]))
+    torch.testing.assert_close(negative, torch.tensor([0.0, 0.0, 0.5, 0.0]))
+
+
+def test_historical_registered_seed_construction_preserves_positive_tie() -> None:
+    positive, negative = _registered_solver_masses(
+        torch.tensor([0.4]),
+        torch.tensor([0.4]),
+        support_threshold=0.0,
+        construction="winner_take_all",
+    )
+
+    torch.testing.assert_close(positive, torch.tensor([0.4]))
+    torch.testing.assert_close(negative, torch.tensor([0.0]))
+
+
+def test_capability_filter_must_preserve_both_prompt_signs() -> None:
+    with pytest.raises(RuntimeError, match="Capability-valid.*neg=0"):
+        _require_bipolar_solver_support(
+            torch.tensor([0.5, 0.0]),
+            torch.zeros(2),
+            label="Capability-valid",
+        )
+
+
+def test_registered_stage_renderer_reuses_only_the_actual_final_stage() -> None:
+    values = {
+        "unary_prior": torch.tensor([1.0]),
+        "propagated": torch.tensor([2.0]),
+        "connected": torch.tensor([3.0]),
+    }
+    rendered = _render_registered_stage_maps(
+        values,
+        final_stage="propagated",
+        final_rendered=np.array([20.0], dtype=np.float32),
+        render=lambda tensor: np.array([float(tensor.item() * 10.0)]),
+    )
+
+    np.testing.assert_array_equal(rendered["unary_prior"], np.array([10.0]))
+    np.testing.assert_array_equal(rendered["propagated"], np.array([20.0]))
+    np.testing.assert_array_equal(rendered["connected"], np.array([30.0]))
+
+
+def test_dataset_protocol_contract_excludes_method_score_semantics() -> None:
+    manifest = {
+        "benchmark": "nvos",
+        "protocol": {
+            "cohort": ["scene"],
+            "dataset_version": "v1",
+            "task": "segmentation",
+            "prompt_type": "fixed_scribble",
+            "prompt_support": "complete",
+            "prompt_asset_sha256": {
+                "scene": {"positive": "p", "negative": "n"}
+            },
+            "prediction_representation": "continuous_margin",
+            "score_semantics": "cosine_margin",
+            "threshold": {"value": 0.0},
+        },
+        "scenes": [
+            {
+                "scene_id": "scene",
+                "prompt": {
+                    "type": "positive_negative_scribbles",
+                    "frame_id": "prompt",
+                },
+                "prompt_frame_ids": ["prompt"],
+                "calibration_frame_ids": [],
+                "evaluation_frame_ids": ["target"],
+                "excluded_training_frame_ids": ["target"],
+                "training_frames": [{"frame_id": "prompt"}],
+                "target_rgb_policy": "forbidden",
+                "frames": [
+                    {
+                        "frame_id": "target",
+                        "ground_truth_sha256": "ground-truth",
+                    }
+                ],
+            }
+        ],
+    }
+
+    original = _dataset_protocol_contract(manifest)
+    manifest["protocol"]["prediction_representation"] = "posterior"
+    manifest["protocol"]["score_semantics"] = "foreground_probability"
+    manifest["protocol"]["threshold"] = {"value": 0.5}
+
+    assert _dataset_protocol_contract(manifest) == original
+    manifest["protocol"]["prompt_asset_sha256"]["scene"]["positive"] = "changed"
+    assert _dataset_protocol_contract(manifest) != original
 
 
 def test_valid_normalized_score_map_uses_only_supported_compositing_mass() -> None:

@@ -1,5 +1,9 @@
 # LangSplatV2 LERF Compatibility Summary
 
+> **SUPERSEDED / DIAGNOSTIC ONLY.** This pre-correction summary contains the
+> old camera-mapping result and is not a canonical LERF-2D baseline. Use
+> `evaluation_protocol_freeze_20260801.yaml` and the OccamLGS row instead.
+
 - root: `output/baselines/langsplatv2/lerf_compat_20260518`
 - completed scene/index rows: 4
 - scene mean: LocAcc 0.6176, mIoU 0.46010000000000006

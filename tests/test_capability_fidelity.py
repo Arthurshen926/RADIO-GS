@@ -35,7 +35,7 @@ def test_local_affinity_respects_valid_edges():
 
 
 def _compositor_report(mean=0.8, p05=0.6, pearson=0.2, retention=0.3):
-    return {
+    report = {
         space: {
             "mean_cosine": mean,
             "p05_cosine": p05,
@@ -46,6 +46,8 @@ def _compositor_report(mean=0.8, p05=0.6, pearson=0.2, retention=0.3):
         }
         for space in ("raw_radio", "official_dino_v3", "official_sam3")
     }
+    report["support_fraction_on_visible"] = 1.0
+    return report
 
 
 def test_compositor_selection_accepts_relation_gain_with_dense_guard():
@@ -61,3 +63,54 @@ def test_compositor_selection_accepts_relation_gain_with_dense_guard():
     decision = select_query_free_compositor(reports)
     assert decision["selected_variant"] == "gamma_1.5"
     assert not decision["candidates"]["top1"]["eligible"]
+
+
+def test_compositor_selection_requires_explicit_visible_support() -> None:
+    report = _compositor_report()
+    report.pop("support_fraction_on_visible")
+
+    with pytest.raises(ValueError, match="visible support"):
+        select_query_free_compositor(
+            {
+                "alpha_mean": _compositor_report(),
+                "missing": report,
+            }
+        )
+
+
+def test_compositor_selection_fails_closed_when_all_support_is_too_low() -> None:
+    reports = {
+        "alpha_mean": _compositor_report(),
+        "candidate": _compositor_report(
+            pearson=0.4,
+            retention=0.5,
+        ),
+    }
+    for report in reports.values():
+        report["support_fraction_on_visible"] = 0.90
+
+    decision = select_query_free_compositor(reports)
+
+    assert decision["selected_variant"] is None
+    assert not decision["promotion_allowed"]
+    assert (
+        decision["selection_status"]
+        == "support_gate_failed_no_promotion"
+    )
+    assert all(
+        not candidate["support_guard_passed"]
+        for candidate in decision["candidates"].values()
+    )
+
+
+def test_compositor_selection_rejects_nonfinite_metrics() -> None:
+    report = _compositor_report()
+    report["official_dino_v3"]["mean_cosine"] = float("nan")
+
+    with pytest.raises(ValueError, match="non-finite"):
+        select_query_free_compositor(
+            {
+                "alpha_mean": _compositor_report(),
+                "invalid": report,
+            }
+        )

@@ -8,7 +8,11 @@ from radio_gs.querying.query_compilers import (
     compile_world_3d_query,
     continuous_gaussian_readout,
 )
-from radio_gs.querying.query_spec import QueryIntent, SelectionMode
+from radio_gs.querying.query_spec import (
+    PrimitiveUnaryEvidence,
+    QueryIntent,
+    SelectionMode,
+)
 
 
 def test_continuous_gaussian_readout_normalizes_local_support() -> None:
@@ -85,6 +89,39 @@ def test_registered_query_allows_explicit_full_region_selection() -> None:
     torch.testing.assert_close(
         full_region.primitive_unary_evidence.values,
         torch.tensor([1.0, -0.1]),
+    )
+    torch.testing.assert_close(
+        full_region.primitive_unary_evidence.confidence,
+        torch.tensor([1.0, 0.1]),
+    )
+
+
+def test_registered_query_can_preserve_one_shared_observation_scale() -> None:
+    features = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    evidence = PrimitiveUnaryEvidence(
+        torch.tensor([0.8, -0.001]),
+        "poisson_adjoint",
+        confidence=torch.tensor([0.8, 0.001]),
+    )
+
+    query = compile_registered_primitive_seeds(
+        torch.tensor([0.8, 0.0]),
+        torch.tensor([0.0, 0.001]),
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=_signature("dino", 2),
+        boundary_signature=_signature("sam3", 2),
+        primitive_unary_evidence=evidence,
+        seed_normalization="none",
+    )
+
+    assert query.positive_seeds is not None
+    assert query.negative_seeds is not None
+    torch.testing.assert_close(
+        query.positive_seeds.weights, torch.tensor([0.8, 0.0])
+    )
+    torch.testing.assert_close(
+        query.negative_seeds.weights, torch.tensor([0.0, 0.001])
     )
 
 

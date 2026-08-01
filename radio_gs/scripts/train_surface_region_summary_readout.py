@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import glob
 import hashlib
 import json
 from pathlib import Path
@@ -12,18 +13,52 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.interfaces.surface_region_contract import SurfaceRegionContractV2
-from radio_gs.interfaces.surface_region_summary import SurfaceRegionSummaryReadoutV2
+from radio_gs.interfaces.surface_region_summary import (
+    JOINT_CONTEXT_POOLING,
+    SEPARATE_CONTEXT_POOLING,
+    SurfaceRegionSummaryReadoutV2,
+)
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
+from radio_gs.utils.immutable_artifacts import (
+    load_torch_mapping,
+    sha256_file,
+    write_frozen_json,
+    write_torch_noclobber,
+)
 
 
 def _paths(raw: str) -> list[Path]:
     result = []
     for value in str(raw).replace(",", " ").split():
-        matches = sorted(Path().glob(value)) if any(c in value for c in "*?[") else [Path(value)]
+        matches = (
+            [Path(path) for path in sorted(glob.glob(value))]
+            if any(c in value for c in "*?[")
+            else [Path(value)]
+        )
         result.extend(matches)
     if not result or any(not path.is_file() for path in result):
         raise FileNotFoundError("surface-region cache list is empty or missing")
     return result
+
+
+def _sha256_file(path: Path) -> str:
+    return sha256_file(path)
+
+
+def _seed_training(
+    seed: int,
+    *,
+    device: torch.device | str = "cpu",
+) -> torch.Generator:
+    """Seed model initialization, augmentation, and data order coherently."""
+
+    value = int(seed)
+    if value < 0:
+        raise ValueError("training seed must be non-negative")
+    torch.manual_seed(value)
+    if torch.device(device).type == "cuda":
+        torch.cuda.manual_seed_all(value)
+    return torch.Generator().manual_seed(value)
 
 
 def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
@@ -33,10 +68,19 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
         "anchor_index",
     )
     parts = {key: [] for key in keys}; scenes = set(); hashes = []; contracts = []; contract_specs = []
+    teacher_region_specs = []
+    radio_checkpoint_hashes = []
+    region_ids: set[str] = set()
+    row_scenes: list[str] = []
+    row_scenes_complete = True
     excluded_spaces: set[str] | None = None
     exclusion_files: dict[str, str] = {}
     for path in paths:
-        payload = torch.load(path, map_location="cpu")
+        payload, _, _ = load_torch_mapping(
+            path,
+            map_location="cpu",
+            label="SurfaceRegion training cache",
+        )
         metadata = payload.get("metadata", {})
         if metadata.get("schema_version") != 3 or metadata.get("split_role") != expected_role:
             raise ValueError(f"{path} has wrong 3-D cache schema/split")
@@ -49,6 +93,93 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
         contract.assert_compatible(metadata)
         contracts.append(contract.digest)
         contract_specs.append(contract.to_dict())
+        teacher_semantics = metadata.get(
+            "teacher_region_semantics",
+            "selected_core_and_context_extent_legacy",
+        )
+        if teacher_semantics == (
+            "fixed_core_geodesic_support_without_input_context_v1"
+        ):
+            target_protocol = metadata.get(
+                "teacher_target_protocol",
+                {},
+            )
+            protocol_digest = hashlib.sha256(
+                json.dumps(
+                    target_protocol,
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ).encode("utf-8")
+            ).hexdigest()
+            if (
+                metadata.get("teacher_target_source")
+                not in {"fresh_official_runtime", "exact_cache_replay"}
+                or metadata.get("teacher_regions_saturated") != 0
+                or metadata.get("complete_scene_regions") is not True
+                or metadata.get("teacher_target_schema_version") != 1
+                or metadata.get("teacher_crop_protocol")
+                != (
+                    "core_support_defined_unmasked_bbox_min24_"
+                    "context_pad0_v1"
+                )
+                or metadata.get("teacher_target_protocol_sha256")
+                != protocol_digest
+            ):
+                raise ValueError(
+                    f"{path} has an incomplete fixed-core teacher protocol"
+                )
+            cache_records = metadata.get("region_records", [])
+            if len(cache_records) != len(payload["radio_features"]):
+                raise ValueError(
+                    f"{path} has misaligned fixed-core region records"
+                )
+            for record in cache_records:
+                region_id = str(record.get("region_id", ""))
+                scene_id = str(record.get("scene", ""))
+                if (
+                    not region_id
+                    or region_id in region_ids
+                    or not scene_id
+                    or scene_id not in metadata.get("scene_names", [])
+                ):
+                    raise ValueError(
+                        "surface-region caches contain duplicate/invalid "
+                        "region IDs or scene bindings"
+                    )
+                region_ids.add(region_id)
+                row_scenes.append(scene_id)
+        else:
+            cache_scenes = [str(value) for value in metadata.get("scene_names", [])]
+            if len(cache_scenes) == 1:
+                row_scenes.extend(
+                    [cache_scenes[0]] * len(payload["radio_features"])
+                )
+            else:
+                row_scenes_complete = False
+        teacher_region_specs.append(
+            {
+                "semantics": teacher_semantics,
+                "contract": metadata.get("teacher_region_contract"),
+                "contract_sha256": metadata.get(
+                    "teacher_region_contract_sha256",
+                    "",
+                ),
+                "target_source": metadata.get(
+                    "teacher_target_source",
+                    "legacy_in_cache",
+                ),
+                "target_protocol_sha256": metadata.get(
+                    "teacher_target_protocol_sha256",
+                    "",
+                ),
+            }
+        )
+        radio_checkpoint_sha256 = str(
+            metadata.get("radio_checkpoint_sha256", "")
+        )
+        if not radio_checkpoint_sha256:
+            raise ValueError(f"{path} lacks RADIO checkpoint provenance")
+        radio_checkpoint_hashes.append(radio_checkpoint_sha256)
         if any(metadata.get(key, True) for key in (
             "uses_benchmark_scenes", "uses_benchmark_test_vocabulary",
             "annotations_opened", "labels_opened", "instances_opened", "text_opened",
@@ -74,14 +205,29 @@ def _load(paths: list[Path], expected_role: str) -> tuple[dict, dict]:
         for key in keys:
             parts[key].append(torch.as_tensor(payload[key]))
     merged = {key: torch.cat(value, dim=0) for key, value in parts.items()}
+    if row_scenes_complete:
+        if len(row_scenes) != len(merged["radio_features"]):
+            raise ValueError("surface-region row/scene bindings are misaligned")
+        merged["scene_ids"] = row_scenes
     if len(set(contracts)) != 1:
         raise ValueError("surface-region cache contracts differ")
     if any(spec != contract_specs[0] for spec in contract_specs[1:]):
         raise ValueError("surface-region cache contract specifications differ")
+    if any(
+        spec != teacher_region_specs[0]
+        for spec in teacher_region_specs[1:]
+    ):
+        raise ValueError("surface-region teacher contracts differ")
+    if len(set(radio_checkpoint_hashes)) != 1:
+        raise ValueError("surface-region RADIO checkpoints differ")
     merged_meta = {"scenes": sorted(scenes), "split_hashes": sorted(set(hashes)),
                    "cache_paths": [str(path.resolve()) for path in paths],
                    "region_contract_sha256": contracts[0]}
     merged_meta["region_contract"] = contract_specs[0]
+    merged_meta["teacher_region"] = teacher_region_specs[0]
+    merged_meta["radio_checkpoint_sha256"] = (
+        radio_checkpoint_hashes[0]
+    )
     merged_meta["excluded_physical_spaces"] = sorted(excluded_spaces or set())
     merged_meta["exclusion_files"] = [
         {"path": path, "sha256": digest}
@@ -170,11 +316,29 @@ def train(args: argparse.Namespace) -> dict:
         != val_meta["excluded_physical_spaces"]
     ):
         raise ValueError("train/validation benchmark exclusion contracts differ")
+    if train_meta["teacher_region"] != val_meta["teacher_region"]:
+        raise ValueError("train/validation teacher protocols differ")
+    if (
+        train_meta["radio_checkpoint_sha256"]
+        != val_meta["radio_checkpoint_sha256"]
+    ):
+        raise ValueError("train/validation RADIO checkpoints differ")
+    if (
+        _sha256_file(Path(args.radio_checkpoint))
+        != train_meta["radio_checkpoint_sha256"]
+    ):
+        raise ValueError(
+            "training RADIO checkpoint differs from cache provenance"
+    )
     device = torch.device(args.device)
+    generator = _seed_training(int(args.seed), device=device)
     model = SurfaceRegionSummaryReadoutV2(
         hidden_dim=int(args.hidden_dim),
         reliability_attention_mode=str(
             getattr(args, "reliability_attention_mode", "log_prior")
+        ),
+        context_pooling_mode=str(
+            getattr(args, "context_pooling_mode", JOINT_CONTEXT_POOLING)
         ),
     ).to(device)
     head = SigLIP2SummaryHead.from_radio_checkpoint(args.radio_checkpoint).to(device).eval()
@@ -187,7 +351,6 @@ def train(args: argparse.Namespace) -> dict:
     print(json.dumps({"untrained_baseline": baseline, "selection_score": baseline_score}), flush=True)
     optimizer = torch.optim.AdamW(model.parameters(), lr=float(args.learning_rate),
                                   weight_decay=float(args.weight_decay))
-    generator = torch.Generator().manual_seed(int(args.seed))
     best_score, best_epoch, best_state, history, stale = -1.0, 0, None, [], 0
     for epoch in range(int(args.epochs)):
         order = torch.randperm(len(train_data["radio_features"]), generator=generator)
@@ -246,6 +409,12 @@ def train(args: argparse.Namespace) -> dict:
         "region_contract": train_meta["region_contract"],
         "canonical_direction_noise_degrees": float(args.canonical_noise_degrees),
         "canonical_noise_calibration": str(args.canonical_noise_calibration),
+        "random_seed_contract": {
+            "seed": int(args.seed),
+            "model_initialization": True,
+            "data_order": True,
+            "canonical_noise": True,
+        },
     }
     payload = {"schema_version": 3, "architecture": architecture,
                "state_dict": {k: v.cpu() for k, v in model.state_dict().items()},
@@ -253,7 +422,7 @@ def train(args: argparse.Namespace) -> dict:
                "best_selection_score": best_score, "untrained_baseline": baseline,
                "untrained_baseline_score": baseline_score, "training_config": vars(args)}
     output = Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(payload, output)
+    write_torch_noclobber(output, payload)
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
     report = {"output": str(output.resolve()), "checkpoint_sha256": digest,
               "architecture": architecture, "best_epoch": best_epoch,
@@ -263,7 +432,8 @@ def train(args: argparse.Namespace) -> dict:
               "validation": _evaluate(model.to(device), head, val_data, device, int(args.batch_size)),
               "train_scenes": len(train_meta["scenes"]),
               "validation_scenes": len(val_meta["scenes"]), "scene_overlap": []}
-    output.with_suffix(output.suffix + ".json").write_text(json.dumps(report, indent=2))
+    report_path = output.with_suffix(output.suffix + ".json")
+    write_frozen_json(report_path, report)
     return report
 
 
@@ -287,6 +457,15 @@ def main() -> None:
         help=(
             "Keep the frozen multiplicative confidence prior or use reliability "
             "only through the geometry input to avoid train/inference prior shift."
+        ),
+    )
+    parser.add_argument(
+        "--context-pooling-mode",
+        choices=(JOINT_CONTEXT_POOLING, SEPARATE_CONTEXT_POOLING),
+        default=JOINT_CONTEXT_POOLING,
+        help=(
+            "Keep legacy joint attention or preserve the core base while "
+            "pooling context as a separately normalized conditioning stream."
         ),
     )
     parser.add_argument("--canonical-noise-degrees", type=float, default=0.0)

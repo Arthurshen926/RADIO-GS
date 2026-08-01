@@ -1,0 +1,54 @@
+schema_version: 1
+candidate_id: registered-region-v2
+date: 2026-07-31
+status: diagnostic_rejected_after_three_scene_screen
+promoted: false
+
+parent_candidate: registered-region-v1
+base_field: canonical-mpr-v3
+
+registered_observation:
+  registration: exact_front_to_back_raster_adjoint
+  seed_construction: joint_signed
+  fusion: probability_mixture
+  mass_scale_alpha_weighted_pixels: 1.0
+  coverage_power: 1.0
+  formulas:
+    joint_mass: m_pos + m_neg
+    labeled_fraction: joint_mass / visible_raster_mass
+    confidence: (1 - exp(-joint_mass)) * labeled_fraction
+    purity: (m_pos - m_neg) / joint_mass
+    signed_observation: confidence * purity
+  full_mask_reduction: exact_poisson_mass_v1
+  target_calibration: false
+
+screen:
+  scenes: [fern, flower, fortress]
+  stop_after_consecutive_failures: 3
+  propagated_iou:
+    fern: 0.44801025143203155
+    flower: 0.7886652885090718
+    fortress: 0.6967529158458324
+    macro: 0.6444761519289787
+  parent_v1_macro: 0.5910049314421238
+  historical_same_scene_macro: 0.8478
+  delta_from_parent_v1: 0.0534712204868549
+  delta_from_historical: -0.2033238480710213
+  decision: reject_without_full_eight_expansion
+
+thermal_run:
+  physical_gpu: 1
+  maximum_temperature_c: 75
+  observed_peak_temperature_c: 58
+  observed_peak_power_w: 182.4
+  telemetry: output/optimization_20260731/nvos_registered_region_v2/gpu1_telemetry.csv
+  run_manifest_sha256: 5dcfd7242db0990f1741364f9af01a956141cdbcb9dc0268a2a0b43a47324be0
+
+eligibility:
+  frozen_diagnostic_eligible: true
+  main_result_eligible: false
+  reason: >-
+    Coverage conditioning is theoretically valid and improves two scenes, but
+    does not consistently recover the historical unary capability. Further
+    NVOS-target tuning is forbidden; the route returns to query-free feature
+    capacity recovery and independent registered-prompt development.

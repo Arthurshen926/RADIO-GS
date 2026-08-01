@@ -1,16 +1,110 @@
 import json
+from argparse import Namespace
+from pathlib import Path
 
 import pytest
 import torch
+from PIL import Image
 
+from radio_gs.scripts import extract_radio_features as extraction
 from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     _load_extracted_capability_maps,
     _load_responsibility_cache,
     _resolve_extracted_capability_source,
     accumulate_contribution_mean_channel_chunked,
+    estimate_capability_mpr_cpu_bytes,
+    finalize_registered_mean_chunked,
     merge_topk_view_observations,
     raster_fusion_reliability,
+    validate_raster_reliability_policy,
 )
+
+
+def _strict_feature_bundle(
+    tmp_path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    frame_id: int,
+) -> tuple[Path, Path, str]:
+    """Create one real, strictly resumable extractor bundle without a GPU."""
+
+    image_dir = tmp_path / "images"
+    image_dir.mkdir(parents=True, exist_ok=True)
+    Image.new("RGB", (16, 16), color=(1, 2, 3)).save(
+        image_dir / f"rgb_{frame_id}.png"
+    )
+    radio_repo = tmp_path / "RADIO"
+    radio_repo.mkdir(parents=True, exist_ok=True)
+    (radio_repo / "hubconf.py").write_text("# test runtime\n")
+    checkpoint = tmp_path / "radio.pth"
+    checkpoint.write_bytes(b"test-radio-checkpoint")
+    output = tmp_path / "features"
+
+    monkeypatch.setattr(torch.cuda, "is_available", lambda: False)
+    monkeypatch.setattr(
+        extraction,
+        "_load_radio_model",
+        lambda *_args, **_kwargs: (object(), object()),
+    )
+
+    def fake_preprocess(paths, _height, _width, _device):
+        ids = [int(path.stem.rsplit("_", 1)[-1]) for path in paths]
+        return torch.tensor(ids, dtype=torch.float32).reshape(-1, 1, 1, 1)
+
+    def fake_forward(
+        _model,
+        _conditioner,
+        images,
+        _amp,
+        _patch_h,
+        _patch_w,
+        adaptor_names=None,
+    ):
+        batch = int(images.shape[0])
+        assert list(adaptor_names or []) == ["dino_v3_7b", "sam3"]
+        return (
+            torch.ones(batch, 2),
+            torch.ones(batch, 8, 1, 1),
+            {
+                "dino_v3_7b": torch.ones(batch, 4096, 1, 1),
+                "sam3": torch.arange(1024, dtype=torch.float32)
+                .reshape(1, 1024, 1, 1)
+                .repeat(batch, 1, 1, 1),
+            },
+        )
+
+    monkeypatch.setattr(extraction, "_load_and_preprocess", fake_preprocess)
+    monkeypatch.setattr(extraction, "_run_radio_batch", fake_forward)
+    monkeypatch.setattr(extraction, "_thermal_pause", lambda *_args: None)
+    extraction.extract(
+        Namespace(
+            scene="scene0001_00",
+            image_dir=str(image_dir),
+            output_dir=str(output),
+            radio_repo=str(radio_repo),
+            radio_version="c-radio_v4-h",
+            radio_checkpoint=str(checkpoint),
+            batch_size=1,
+            frame_stride=1,
+            max_frames=None,
+            frame_id_mode="auto",
+            exclude_image_stem=[],
+            exclude_image_stems_file="",
+            extract_adaptors=True,
+            adaptor_names="dino_v3_7b,sam3",
+            resolution_scale=1.0,
+            sliding_window=False,
+            tile_size=1024,
+            tile_overlap=128,
+            device="cpu",
+            amp=False,
+            skip_pca_stats=True,
+            resume_partial=True,
+            radio_thermal_pacing_seconds_per_image=0.0,
+        )
+    )
+    manifest = json.loads((output / "frame_manifest.json").read_text())
+    return output, image_dir, str(manifest["output_bundle_sha256"])
 
 
 def test_topk_view_fusion_preserves_whole_observation_vectors() -> None:
@@ -87,6 +181,39 @@ def test_mean_resultant_reliability_rejects_unnormalized_observations() -> None:
             mode="mean_resultant",
             normalized_observations=False,
         )
+
+
+def test_canonical_contract_resolves_before_mean_resultant_validation() -> None:
+    args = Namespace(
+        observation_contract="canonical-mpr-v1",
+        aggregation_mode="center",
+        raster_reliability_mode="mean_resultant",
+        normalize_each_view=False,
+        max_views=1,
+        registration_weight_mode="uniform",
+        raster_view_fusion="view_mean",
+        depth_tolerance=1.0,
+        relative_depth_tolerance=1.0,
+        alpha_threshold=1.0,
+        robust_mpr=True,
+    )
+
+    validate_raster_reliability_policy(args)
+
+    assert args.aggregation_mode == "raster_gaussian_top1"
+    assert args.normalize_each_view is True
+
+
+def test_legacy_mean_resultant_still_requires_normalized_raster_inputs() -> None:
+    args = Namespace(
+        observation_contract="legacy",
+        aggregation_mode="raster_gaussian_top1",
+        raster_reliability_mode="mean_resultant",
+        normalize_each_view=False,
+    )
+
+    with pytest.raises(ValueError, match="requires --normalize-each-view"):
+        validate_raster_reliability_policy(args)
 
 
 def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(
@@ -208,6 +335,7 @@ def test_chunked_contribution_mean_reuses_cpu_transfer_staging() -> None:
 
 def test_official_extracted_capability_source_requires_the_matching_manifest(
     tmp_path,
+    monkeypatch,
 ) -> None:
     """A direct SAM/DINO MPR must come from the official extractor output.
 
@@ -216,72 +344,69 @@ def test_official_extracted_capability_source_requires_the_matching_manifest(
     dimensionality.
     """
 
-    manifest = {
-        "radio": {"version": "c-radio_v4-h"},
-        "features": {
-            "adaptors": [
-                {
-                    "name": "dino_v3_7b",
-                    "subdir": "dino_v3_7b",
-                    "dim": 4096,
-                    "grid": [30, 40],
-                    "dtype": "float16",
-                },
-                {
-                    "name": "sam3",
-                    "subdir": "sam3",
-                    "dim": 1024,
-                    "grid": [30, 40],
-                    "dtype": "float16",
-                },
-            ]
-        },
-    }
-    (tmp_path / "frame_manifest.json").write_text(json.dumps(manifest))
-    (tmp_path / "sam3").mkdir()
+    feature_root, image_dir, bundle_sha256 = _strict_feature_bundle(
+        tmp_path,
+        monkeypatch,
+        frame_id=0,
+    )
+    manifest_path = feature_root / "frame_manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    checkpoint_sha256 = str(manifest["radio"]["checkpoint_sha256"])
 
-    source = _resolve_extracted_capability_source(tmp_path, "sam3")
+    source = _resolve_extracted_capability_source(
+        feature_root,
+        "sam3",
+        expected_scene="scene0001_00",
+        expected_image_dir=image_dir,
+        expected_frame_indices=[0],
+        expected_output_bundle_sha256=bundle_sha256,
+    )
 
     assert source["subdir"] == "sam3"
     assert source["adaptor_name"] == "sam3"
     assert source["output_dim"] == 1024
-    assert source["native_grid"] == [30, 40]
+    assert source["native_grid"] == [1, 1]
+    assert source["radio_checkpoint_sha256"] == checkpoint_sha256
+    assert source["scene"] == "scene0001_00"
+
+    with pytest.raises(ValueError, match="not bound"):
+        _resolve_extracted_capability_source(
+            feature_root,
+            "sam3",
+            expected_radio_checkpoint_sha256="another",
+            expected_output_bundle_sha256=bundle_sha256,
+        )
+    with pytest.raises(ValueError, match="different scene"):
+        _resolve_extracted_capability_source(
+            feature_root,
+            "sam3",
+            expected_scene="scene0002_00",
+            expected_output_bundle_sha256=bundle_sha256,
+        )
 
     manifest["features"]["adaptors"] = manifest["features"]["adaptors"][:1]
-    (tmp_path / "frame_manifest.json").write_text(json.dumps(manifest))
-    with pytest.raises(ValueError, match="does not declare"):
-        _resolve_extracted_capability_source(tmp_path, "sam3")
+    manifest_path.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="manifest|signature"):
+        _resolve_extracted_capability_source(
+            feature_root,
+            "sam3",
+            expected_output_bundle_sha256=bundle_sha256,
+        )
 
 
 def test_extracted_capability_maps_are_selected_by_raw_frame_id_and_then_resampled(
     tmp_path,
     monkeypatch,
 ) -> None:
-    feature_root = tmp_path / "features"
-    (feature_root / "sam3").mkdir(parents=True)
+    feature_root, _image_dir, bundle_sha256 = _strict_feature_bundle(
+        tmp_path,
+        monkeypatch,
+        frame_id=7,
+    )
     pose_dir = tmp_path / "pose"
     pose_dir.mkdir()
-    torch.save(torch.arange(1024, dtype=torch.float16).reshape(1024, 1, 1), feature_root / "sam3" / "rgb_7.pt")
     (pose_dir / "7.txt").write_text(
         "1 0 0 0\n0 1 0 0\n0 0 1 0\n0 0 0 1\n"
-    )
-    (feature_root / "frame_manifest.json").write_text(
-        json.dumps(
-            {
-                "radio": {"version": "c-radio_v4-h"},
-                "features": {
-                    "adaptors": [
-                        {
-                            "name": "sam3",
-                            "subdir": "sam3",
-                            "dim": 1024,
-                            "grid": [1, 1],
-                            "dtype": "float16",
-                        }
-                    ]
-                },
-            }
-        )
     )
 
     def reject_full_selection_stack(*args, **kwargs):
@@ -296,11 +421,68 @@ def test_extracted_capability_maps_are_selected_by_raw_frame_id_and_then_resampl
         feature_size=(2, 3),
         dataset_type="scannet",
         selected_frame_indices=[7],
+        expected_output_bundle_sha256=bundle_sha256,
     )
 
     assert maps.shape == (1, 1024, 2, 3)
+    assert maps.dtype == torch.float16
     torch.testing.assert_close(
-        maps[0].norm(dim=0), torch.ones(2, 3), atol=1e-5, rtol=1e-5
+        maps[0].float().norm(dim=0),
+        torch.ones(2, 3),
+        atol=5e-4,
+        rtol=5e-4,
     )
-    torch.testing.assert_close(maps[0, 1, 0, 0] / maps[0, 2, 0, 0], torch.tensor(0.5))
+    torch.testing.assert_close(
+        (
+            maps[0, 1, 0, 0].float()
+            / maps[0, 2, 0, 0].float()
+        ),
+        torch.tensor(0.5),
+        atol=5e-4,
+        rtol=5e-4,
+    )
     assert source["subdir"] == "sam3"
+
+
+def test_registered_mean_finalization_is_row_chunked_and_exact() -> None:
+    sums = torch.tensor(
+        [[2.0, 4.0], [0.0, 0.0], [9.0, 3.0]],
+        dtype=torch.float32,
+    )
+    counts = torch.tensor([2.0, 0.0, 3.0], dtype=torch.float32)
+
+    features, valid = finalize_registered_mean_chunked(
+        sums,
+        counts,
+        row_chunk_size=1,
+    )
+
+    assert features.dtype == torch.float16
+    assert torch.equal(valid, torch.tensor([True, False, True]))
+    torch.testing.assert_close(
+        features.float(),
+        torch.tensor([[1.0, 2.0], [0.0, 0.0], [3.0, 1.0]]),
+    )
+
+
+def test_capability_mpr_memory_estimate_accounts_for_half_maps_and_output() -> None:
+    estimate = estimate_capability_mpr_cpu_bytes(
+        num_views=120,
+        channels=4096,
+        height=60,
+        width=80,
+        num_gaussians=300_000,
+        aggregation_mode="raster_gaussian_top1",
+        raster_view_fusion="contribution_mean",
+        raster_topk=3,
+        raster_channel_chunk_size=256,
+    )
+
+    assert estimate["teacher_maps_float16"] == 120 * 4096 * 60 * 80 * 2
+    assert estimate["registered_sum_float32"] == 300_000 * 4096 * 4
+    assert estimate["final_features_float16"] == 300_000 * 4096 * 2
+    assert estimate["estimated_peak_bytes"] == sum(
+        value
+        for key, value in estimate.items()
+        if key != "estimated_peak_bytes"
+    )

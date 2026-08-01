@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 
 import pytest
 import torch
@@ -115,12 +116,24 @@ def test_official_capability_projection_happens_on_complete_2d_maps() -> None:
     torch.testing.assert_close(projected[0, 1, 0, 1].float(), torch.tensor(1.0))
 
 
-def _cache_metadata(space: str) -> dict:
+_FEATURE_BUNDLE_SHA256 = "b" * 64
+_RESPONSIBILITY_SHA256 = "c" * 64
+
+
+def _xyz_sha256(xyz: torch.Tensor) -> str:
+    array = xyz.float().contiguous().numpy().astype("<f4", copy=False)
+    return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _cache_metadata(space: str, xyz: torch.Tensor) -> dict:
     return {
+        "schema_version": 1,
         "feature_space": space,
         "config": "scene.yaml",
         "checkpoint": "geometry.pth",
         "selected_frame_indices": [1, 2],
+        "num_declared_views": 2,
+        "xyz_sha256": _xyz_sha256(xyz),
         "excluded_frame_ids": [3],
         "aggregation_mode": "raster_gaussian_top1",
         "registration_weight_mode": "alpha_depth",
@@ -132,8 +145,10 @@ def _cache_metadata(space: str) -> dict:
         "normalize_each_view": True,
         "per_view_normalization_applied": True,
         "per_view_normalization_stage": "pixel_feature_before_raster_lifting",
+        "raster_reliability_mode": "legacy_valid",
         "shared_registration_responsibility": True,
-        "registration_responsibility_cache_sha256": "responsibility",
+        "registration_responsibility_cache_sha256": _RESPONSIBILITY_SHA256,
+        "feature_output_bundle_sha256": _FEATURE_BUNDLE_SHA256,
         "benchmark_masks_opened": False,
         "benchmark_images_opened": False,
         "text_queries_opened": False,
@@ -144,28 +159,39 @@ def _cache_metadata(space: str) -> dict:
     }
 
 
+def _mpr_payload(
+    space: str,
+    xyz: torch.Tensor,
+    features: torch.Tensor,
+    counts: torch.Tensor,
+    **metadata_updates,
+) -> dict:
+    valid = counts > 0
+    metadata = {**_cache_metadata(space, xyz), **metadata_updates}
+    reliability = torch.stack(
+        [counts.float() / 2.0, valid.float(), valid.float()], dim=-1
+    )
+    return {
+        "xyz": xyz.float(),
+        "features": features,
+        "valid": valid,
+        "view_counts": counts,
+        "reliability": reliability,
+        "geometry_fingerprint": {
+            "num_gaussians": int(xyz.shape[0]),
+            "xyz_sha256": _xyz_sha256(xyz),
+        },
+        "metadata": metadata,
+    }
+
+
 def test_capability_mpr_loader_requires_exact_observation_contract(
     tmp_path: Path,
 ) -> None:
     xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
-    valid = torch.tensor([True, True])
     counts = torch.tensor([2, 1])
-    raw = {
-        "xyz": xyz,
-        "features": torch.randn(2, 3),
-        "valid": valid,
-        "view_counts": counts,
-        "reliability": torch.ones(2, 3),
-        "metadata": _cache_metadata("radio"),
-    }
-    target = {
-        "xyz": xyz,
-        "features": torch.randn(2, 4).half(),
-        "valid": valid,
-        "view_counts": counts,
-        "reliability": torch.ones(2, 3),
-        "metadata": _cache_metadata("sam3"),
-    }
+    raw = _mpr_payload("radio", xyz, torch.randn(2, 3), counts)
+    target = _mpr_payload("sam3", xyz, torch.randn(2, 4).half(), counts)
     path = tmp_path / "sam3.pt"
     torch.save(target, path)
 
@@ -175,6 +201,7 @@ def test_capability_mpr_loader_requires_exact_observation_contract(
         raw_cache=raw,
         raw_metadata=raw["metadata"],
         radio_checkpoint_sha256="radio",
+        expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
     )
     assert consensus.targets.dtype == torch.float16
     assert provenance["projection_order"] == (
@@ -188,13 +215,16 @@ def test_capability_mpr_loader_requires_exact_observation_contract(
         "benchmark_images_opened": True,
     }
     torch.save(contaminated, path)
-    with pytest.raises(ValueError, match="safety contract"):
+    with pytest.raises(
+        ValueError, match="contaminated|safety contract|safety declaration"
+    ):
         _load_capability_mpr_target(
             path,
             expected_space="sam3",
             raw_cache=raw,
             raw_metadata=raw["metadata"],
             radio_checkpoint_sha256="radio",
+            expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
         )
 
 
@@ -202,33 +232,29 @@ def test_direct_capability_mpr_requires_native_runtime_provenance(
     tmp_path: Path,
 ) -> None:
     xyz = torch.tensor([[0.0, 0.0, 0.0]])
-    valid = torch.tensor([True])
     counts = torch.tensor([1])
-    raw = {
-        "xyz": xyz,
-        "features": torch.randn(1, 3),
-        "valid": valid,
-        "view_counts": counts,
-        "reliability": torch.ones(1, 3),
-        "metadata": _cache_metadata("radio"),
-    }
+    raw = _mpr_payload("radio", xyz, torch.randn(1, 3), counts)
     metadata = {
-        **_cache_metadata("sam3"),
+        **_cache_metadata("sam3", xyz),
         "capability_map_source": "official_extracted",
+        "official_adaptor_checkpoint_provenance": "explicit_file_sha256",
         "capability_native_map_manifest": "/tmp/frame_manifest.json",
         "capability_native_map_manifest_sha256": "manifest",
+        "capability_native_map_output_bundle_sha256": _FEATURE_BUNDLE_SHA256,
+        "capability_native_map_radio_checkpoint_load_contract": (
+            "external_sha256_same_fd_restricted_pickle_hub_injection_v1"
+        ),
         "capability_adaptor_execution": "official_c_radio_runtime_adaptor_output",
     }
     path = tmp_path / "sam3_direct.pt"
     torch.save(
-        {
-            "xyz": xyz,
-            "features": torch.randn(1, 4).half(),
-            "valid": valid,
-            "view_counts": counts,
-            "reliability": torch.ones(1, 3),
-            "metadata": metadata,
-        },
+        _mpr_payload(
+            "sam3",
+            xyz,
+            torch.randn(1, 4).half(),
+            counts,
+            **metadata,
+        ),
         path,
     )
 
@@ -238,19 +264,41 @@ def test_direct_capability_mpr_requires_native_runtime_provenance(
         raw_cache=raw,
         raw_metadata=raw["metadata"],
         radio_checkpoint_sha256="radio",
+        expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
     )
     assert provenance["capability_map_source"] == "official_extracted"
 
+    unbound_metadata = dict(metadata)
+    unbound_metadata.pop("official_adaptor_checkpoint_provenance")
+    torch.save(
+        _mpr_payload(
+            "sam3",
+            xyz,
+            torch.randn(1, 4).half(),
+            counts,
+            **unbound_metadata,
+        ),
+        path,
+    )
+    with pytest.raises(ValueError, match="extraction checkpoint SHA256"):
+        _load_capability_mpr_target(
+            path,
+            expected_space="sam3",
+            raw_cache=raw,
+            raw_metadata=raw["metadata"],
+            radio_checkpoint_sha256="radio",
+            expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
+        )
+
     metadata.pop("capability_native_map_manifest_sha256")
     torch.save(
-        {
-            "xyz": xyz,
-            "features": torch.randn(1, 4).half(),
-            "valid": valid,
-            "view_counts": counts,
-            "reliability": torch.ones(1, 3),
-            "metadata": metadata,
-        },
+        _mpr_payload(
+            "sam3",
+            xyz,
+            torch.randn(1, 4).half(),
+            counts,
+            **metadata,
+        ),
         path,
     )
     with pytest.raises(ValueError, match="native-map provenance"):
@@ -260,4 +308,5 @@ def test_direct_capability_mpr_requires_native_runtime_provenance(
             raw_cache=raw,
             raw_metadata=raw["metadata"],
             radio_checkpoint_sha256="radio",
+            expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
         )

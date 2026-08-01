@@ -1,0 +1,192 @@
+schema_version: 1
+created: 2026-08-01
+purpose: decision inventory only; this file authorizes no deletion or move
+policy:
+  deletion_performed: false
+  user_approval_required_for_every_cleanup_wave: true
+  must_keep_source: paper/artifacts/evaluation_protocol_freeze_20260801.yaml
+  archive_requires_checksum_manifest: true
+  preserve_unrelated_worktree_changes: true
+  other_method_session_assets_are_out_of_scope: true
+
+categories:
+  must_keep:
+    meaning: canonical code, reports, manifests, checkpoints, and hashed results
+  deprecated_keep:
+    meaning: small provenance or sensitivity evidence; label as superseded and retain
+  archive_then_remove:
+    meaning: preserve compact receipts and checksums in cold storage before removing working payload
+  safe_remove:
+    meaning: invalid, failed, duplicated, or reproducible cache with no canonical dependency
+
+protected_groups:
+  canonical_freeze_artifacts:
+    category: must_keep
+    target: all authoritative_artifacts and entrypoints in evaluation_protocol_freeze_20260801.yaml
+  concept_assets:
+    category: must_keep
+    target: Occam 12 language checkpoints and 30k PLYs; VALA LERF-3D 12 valid semantic checkpoints/masks; VALA ScanNet paper8 checkpoints/predictions/pseudo-GT/source RGB PLYs
+  easy3d_assets:
+    category: must_keep
+    target: both formal 312-scene results, source-grounded policy, and official-worker preprocessing cache
+  ludvig_assets:
+    category: must_keep
+    target: 11 accepted 30k PLYs, accepted training/run manifests, protocol results, SAM checkpoint, launchers, patches, trainers, and stagers
+  pfpr_assets:
+    category: must_keep
+    target: test_v2_r1 release, PFPR core protocol code/tests, exact LUDVIG Phase A-E final chain, and the historical partial6 audit plus its referenced score vectors
+
+candidates:
+  concept_occam_iteration7000:
+    category: safe_remove
+    target: output/baselines/occamlgs/lerf_compat_20260518/*/point_cloud/iteration_7000
+    estimated_size: 903 MB
+    reason: unused intermediate geometry; canonical evaluation uses iteration 30000
+  concept_vala_invalid_suffix_leak:
+    category: safe_remove
+    target: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/models/ramen/invalid_test_suffix_leak
+    estimated_size: 302 MB
+    reason: invalid checkpoint produced after a zero-match suffixed test split leaked test views
+  concept_vala_lerf3d_pilot:
+    category: safe_remove
+    target: output/protocol_audit_20260801/vala/lerf3d_pilot
+    estimated_size: 25 MB
+    reason: redundant pilot superseded by lerf3d_occam_geometry_v1
+  concept_vala_paper8_failed_v1:
+    category: safe_remove
+    target: output/protocol_audit_20260801/vala/scannet_official_significance_paper8_v1
+    estimated_size: 0.86 MB
+    reason: failed parallel shards; paper8_v2 is canonical
+  concept_vala_scannet_smokes:
+    category: safe_remove
+    target: output/protocol_audit_20260801/vala/scannet_official_significance_smoke_scene0062_v1 and output/baselines/vala/scannet_vala8_smoke_20260611
+    estimated_size: 15 MB
+    reason: one-view/early smoke outputs with no canonical metric
+  spatial_pinecone_undistortion_v1:
+    category: safe_remove
+    target: SPIn-NeRF pinecone undistortion/attempts/official_colmap_3p6_v1
+    estimated_size: 0.772 GiB
+    reason: duplicate without authoritative manifest; v2 is the bound source
+  spatial_interim_summaries:
+    category: safe_remove
+    target: four unreferenced fern/room/truck/lego interim summary JSON files listed in the cleanup report
+    estimated_size: less than 0.1 MB
+    reason: superseded by full NVOS and SPIn-NeRF summaries
+  pfpr_gpu5_concurrent_smoke:
+    category: safe_remove
+    target: output/scannet_pfpr_small_v2/gpu5_concurrent_scene0050
+    estimated_size: 17 MB
+    reason: unreferenced concurrent temporary run
+  repository_runtime_caches:
+    category: safe_remove
+    target: repository __pycache__, .pytest_cache, generated test logs, and zero-byte superseded stdout files
+    estimated_size: about 28 MB
+    reason: reproducible runtime cache only; resolve exact paths before deletion
+
+  concept_langsplatv2_assets:
+    category: archive_then_remove
+    target: output/baselines/langsplatv2/lerf_compat_20260518
+    estimated_size: 19.89 GB
+    reason: superseded by canonical OccamLGS LERF-2D
+    retain_before_action: summary, camera manifest, exact-camera receipt, hashes
+  concept_drsplat_assets:
+    category: archive_then_remove
+    target: output/baselines/dr_splat/lerf_compat_20260519 and output/baselines/dr_splat/lerf_protocol_audit_20260801
+    estimated_size: 6.91 GB
+    reason: superseded by canonical VALA direct-3D protocol reproduction
+    retain_before_action: L1/L3 summaries, per-scene metrics, configs, hashes
+  concept_occam_resume_checkpoints:
+    category: archive_then_remove
+    target: four OccamLGS chkpnt30000.pth RGB resume checkpoints
+    estimated_size: 3.69 GB
+    reason: canonical evaluation reads 30k PLYs, but checkpoints retain training-resume value
+    retain_before_action: cold archive and checkpoint hashes
+  concept_vala_old_res2:
+    category: archive_then_remove
+    target: output/baselines/vala/scannet_vala8_compat_20260611_res2
+    estimated_size: 162 MB
+    reason: old resolution-2 proxy/mesh assets
+    blocker: regenerate or relabel any qualitative panels still pointing here
+  concept_vala_local_site:
+    category: archive_then_remove
+    target: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/local_site
+    estimated_size: 79 MB
+    reason: reproducible environment overlay
+    blocker: first record environment lock and install procedure
+  spatial_ludvig_regenerable_payload:
+    category: archive_then_remove
+    target: accepted LUDVIG run gaussians.ply, features.npy, sam/removal, and sam/masks only
+    estimated_size: 9.125 GiB
+    reason: aggregator does not read these regenerated payloads
+    retain_before_action: every JSON/config/log plus training PLYs and manifests
+  spatial_strict_geometry_hybrid:
+    category: archive_then_remove
+    target: output/protocol_audit_20260731/ludvig/nvos/strict_geometry_hybrid_diagnostic
+    estimated_size: 0.095 GiB
+    reason: non-paper hybrid diagnostic superseded by exact all-view NVOS
+    retain_before_action: summary, run manifests, protocol result, and hashes
+  pfpr_v1_tree:
+    category: archive_then_remove
+    target: output/scannet_pfpr_small_v1
+    estimated_size: 20 GB
+    reason: native-color-raster v1 is superseded by depth-aligned v2
+    retain_before_action: release manifests, hashes, protocol-change note, result JSONs
+  pfpr_v2_superseded_release_and_field:
+    category: archive_then_remove
+    target: output/scannet_pfpr_small_v2/test_v2 and output/scannet_pfpr_small_v2/full_sens_official_v2_r1
+    estimated_size: 8.42 GB
+    reason: superseded release and earlier MPR-v1 field
+    retain_before_action: contracts, hashes, summary metrics
+  pfpr_geometry_ablation_600k:
+    category: archive_then_remove
+    target: output/scannet_pfpr_small_v2/geometry_ablation_scene0249_init{480,720,960}_p600k
+    estimated_size: 48 GB
+    reason: unreferenced 600k geometry ablation payloads
+    retain_before_action: geometry-support reports and configs
+  pfpr_duplicate_diagnostics:
+    category: archive_then_remove
+    target: unreferenced eval_fast_no_support_gate and eval_support_refined2 branches, excluding the bound partial6 source
+    estimated_size: 1.2 to 1.5 GB
+    reason: same-day duplicate diagnostic branches
+    retain_before_action: manifests, JSON summaries, table rows
+  pfpr_ludvig_failed_smokes:
+    category: archive_then_remove
+    target: rejected official-register Phase A v1 and DINO/PCA smoke1/v1 attempts under /root/ludvig_pfpr_runs
+    estimated_size: about 2 MB
+    reason: final exact-vendored full120 chain supersedes them
+    retain_before_action: one failure receipt per cause
+  conversation_and_tmp_history:
+    category: archive_then_remove
+    target: root ChatGPT-*.md, session-ses_2730.md, review1.md, relation_with_loc.md, and tmp/
+    estimated_size: about 2.6 MB
+    reason: design/session history rather than executable protocol
+    retain_before_action: move to a checksummed docs/archive area
+
+  concept_small_historical_rows:
+    category: deprecated_keep
+    target: LangSplatV2 exact-camera/final-gap; Dr. Splat L1/L3; old VALA mesh/P0/proxy; ScanNet code9 summaries and associated small code/tests
+    estimated_size: less than 100 MB excluding checkpoints
+    reason: compact provenance and sensitivity evidence; now carries superseded labels where most ambiguous
+  spatial_small_historical_rows:
+    category: deprecated_keep
+    target: Easy3D pilots/interrupted prefix, LUDVIG intermediate summaries, strict-geometry tools, dry-runs, and recovery receipts
+    estimated_size: about 5 MB plus small receipts
+    reason: explains protocol selection and past recovery without meaningful space savings
+  pfpr_small_historical_rows:
+    category: deprecated_keep
+    target: PFPR v1 protocol doc, oracle/context audit code, no-gate and mpr480 launchers, historical C-RADIO partial6 report
+    estimated_size: less than 1 MB excluding bound score vectors
+    reason: compact protocol history; must remain explicitly diagnostic/oracle-only
+
+  project_agile3d_historical_tree:
+    category: archive_then_remove
+    target: output/agile3d_scannet40
+    estimated_size: about 553 GiB
+    reason: project-method experiments, not Easy3D external baseline assets
+    blocker: out of scope; another method-improvement task may still depend on configs, paper assets, or queues
+  pfpr_current_materialized_field:
+    category: archive_then_remove
+    target: output/scannet_pfpr_small_v2/full_sens_official_v3_960_r1/reconstruction_v1
+    estimated_size: at least 410 GB
+    reason: high-cost current materialized field with no formal PFPR result yet
+    blocker: user decision; retain if formal PFPR work will resume soon, otherwise preserve final checkpoints/contracts/manifests and archive regenerable per-frame radio_features first

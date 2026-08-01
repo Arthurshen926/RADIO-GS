@@ -1,5 +1,11 @@
 # NVOS / SPIn-NeRF promptable segmentation protocol freeze
 
+> **Scope note.** This note primarily defines the project's strict-unseen
+> reusable-field protocol. The LUDVIG external baseline is a distinct released
+> online-multiview protocol that sees target RGB; its canonical NVOS and
+> SPIn-NeRF-9 routes are selected in
+> `evaluation_protocol_freeze_20260801.yaml`.
+
 This note freezes the evaluation contract before producing any GaussFM number.
 It prevents paper-reported baselines, query-time SAM systems, and reusable
 feature fields from being silently treated as the same capability.

@@ -1,0 +1,316 @@
+schema_version: 1
+freeze_id: evaluation_protocols_20260801_v1
+created: 2026-08-01
+purpose: >-
+  Single canonical selector for external-method evaluation protocols. Detailed
+  provenance remains in the two registries and benchmark reports; this file
+  prevents a historical diagnostic from silently replacing a frozen row.
+
+governance:
+  primary_registry: paper/artifacts/evaluation_protocol_registry_20260731.yaml
+  promptable_registry: paper/artifacts/promptable_nvs_protocol_registry.yaml
+  consolidated_report: paper/artifacts/evaluation_protocol_audit_summary_20260731.md
+  protocol_change_requires:
+    - a new protocol id rather than mutating the meaning of a frozen id
+    - a written reason and before/after sensitivity result
+    - a complete cohort or an explicit incomplete-cohort label
+    - immutable result hashes and passing freeze validation
+  historical_results_may_replace_canonical_rows: false
+  oracle_may_select_reported_configuration_or_metric: false
+  cleanup_requires_user_approval: true
+  cleanup_may_remove_must_keep_artifacts: false
+  execution_safety_is_evaluation_semantics: false
+  gpu0_execution_safety:
+    power_limit_w: 300
+    warning_temperature_c: 78
+    pause_temperature_c: 81
+    resume_temperature_c: 70
+    hard_stop_temperature_c: 84
+    note: execution-only; must not alter cohorts, prompts, calibration, metrics, or aggregation
+
+canonical_tasks:
+  concept_lerf2d_occamlgs:
+    family: concept_query
+    benchmark: LERF-2D
+    method: OccamLGS
+    status: canonical_protocol_reproduction
+    registry_row: lerf2d_occamlgs_official_checkpoint_context_20260731
+    cohort:
+      scenes: [figurines, ramen, teatime, waldo_kitchen]
+      labelled_frames: 22
+      queries: 208
+    frozen_protocol:
+      source_commit: eb98bcbedfdeb8770aae51d62c0263bddbc54329
+      openclip: ViT-B-16 / laion2b_s34b_b88k
+      rgb_geometry: all registered RGB views, following released OccamLGS intent
+      semantic_lifting: exclude released test.txt cameras
+      camera_lookup: exact annotation name over all registered cameras
+      level_selection: highest raw OpenCLIP relevance peak over three levels
+      segmentation_threshold: 0.5
+      activation_filter: 30x30 OpenCV filter2D
+      smoothing: legacy 7x7
+      metrics: [mIoU, localization_accuracy]
+      aggregation: unweighted equal macro over four scenes
+    headline:
+      local_percent: {mIoU: 63.62004352868187, localization_accuracy: 82.84871013445853}
+      paper_percent: {mIoU: 61.3, localization_accuracy: 82.5}
+    entrypoints:
+      - radio_gs/scripts/eval_occamlgs_lerf_checkpoint.py
+      - radio_gs/scripts/eval_prerendered_lerf_features.py
+    authoritative_artifacts:
+      - {path: output/protocol_audit_20260801/occamlgs_lerf2d_corrected_compat_v1/figurines.json, sha256: eb56f50ac2fec82c84ba2380a5616cd0b9df3b55054bc2447a281e8a33b48e4b, retention: must_keep}
+      - {path: output/protocol_audit_20260801/occamlgs_lerf2d_corrected_compat_v1/ramen.json, sha256: 19d7eefdff1c7e4e4abdb684a1bb9951e863c6bab18d7767511b8801b5b8f22e, retention: must_keep}
+      - {path: output/protocol_audit_20260801/occamlgs_lerf2d_corrected_compat_v1/teatime.json, sha256: 4af8dfab2c6c9213a5cc3a4c82f021bb4c305b1078bab120f551a6828897567b, retention: must_keep}
+      - {path: output/protocol_audit_20260801/occamlgs_lerf2d_corrected_compat_v1/waldo_kitchen.json, sha256: e2f126f2225195a3a4388cb66cb0a5bf1663100944757a432c45214847a7cbdc, retention: must_keep}
+    report: paper/artifacts/occamlgs_lerf2d_strict_reproduction_20260801.md
+    supersedes_for_protocol_conclusions: [lerf2d_langsplatv2_exact_camera_20260731]
+
+  concept_lerf3d_vala:
+    family: concept_query
+    benchmark: LERF direct 3D
+    method: VALA
+    status: canonical_protocol_reproduction_with_compatible_rgb_geometry
+    registry_row: lerf3d_vala_occam_geometry_exact_protocol_20260801
+    cohort:
+      scenes: [figurines, ramen, teatime, waldo_kitchen]
+      queries: 208
+      extensionless_test_stems_required: true
+    frozen_protocol:
+      source_commit: 48902a541333d65aeb0aebf64ad664777a27c3fc
+      semantic_levels: 3
+      significance: official gsplat marginal alpha-times-transmittance
+      robust_lift: {tau_mass: 0.75, tau_abs: 0.13}
+      significance_weight_threshold: 0.00001
+      aggregation_batch_size: 50000
+      level_selection: highest raw relevance peak per query
+      knn: 10
+      relevance_mapping: min-max map then clip
+      mask_threshold: 0.6
+      render: selected-only alpha
+      metrics: [mIoU, accuracy_at_iou_0p25, accuracy_at_iou_0p5]
+      aggregation: per-object metrics then unweighted equal macro over four scenes
+    provenance_boundary: exact VALA semantic/evaluator path on compatible OccamLGS RGB geometry
+    headline:
+      local_percent: {mIoU: 54.12488773209907, accuracy_at_iou_0p25: 79.35264708435513, accuracy_at_iou_0p5: 56.61140378480436}
+      paper_percent: {mIoU: 43.29, accuracy_at_iou_0p25: 64.30}
+    entrypoints:
+      - radio_gs/scripts/audit_vala_lerf3d_split.py
+    authoritative_artifacts:
+      - {path: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/evaluation/all_metrics_30000_0.6.json, sha256: 1a4a4ce2856b2af7e83d0c157aebf3498d1740ecc5deaefc39403c0daa01fcae, retention: must_keep}
+      - {path: output/protocol_audit_20260801/vala/lerf3d_occam_geometry_v1/split_audit.json, sha256: 120651911b2a2f034b5ffe6a59d7e7a50986f0ee921b0537ba5d7800e2b8bf25, retention: must_keep}
+    report: paper/artifacts/vala_lerf3d_protocol_reproduction_20260801.md
+    supersedes_for_protocol_conclusions: [lerf3d_drsplat_compatibility_20260519]
+
+  concept_scannet_ovs_vala_paper8:
+    family: concept_query
+    benchmark: ScanNet OVS
+    method: VALA
+    status: canonical_protocol_reproduction
+    registry_row: scannet_ovs_vala_compatibility_20260611
+    cohort:
+      scenes: [scene0000_00, scene0062_00, scene0070_00, scene0097_00, scene0140_00, scene0347_00, scene0400_00, scene0590_00]
+      splits: [19, 15, 10]
+      scene0645_00_role: post-paper code9 sensitivity only
+    frozen_protocol:
+      query: fixed-vocabulary CLIP text class queries for 19/15/10 splits
+      resolution: full
+      feature_level: 0
+      significance: official gsplat alpha-times-transmittance
+      lifting: released robust stochastic aggregation and gating
+      robust_lift: {tau_mass: 0.9, tau_abs: 0.01}
+      significance_weight_threshold: 0.00001
+      pseudo_ground_truth: anisotropic Mahalanobis Gaussian assignment
+      pseudo_ground_truth_radius: five times maximum Gaussian scale
+      pseudo_ground_truth_topk: 1000
+      pseudo_ground_truth_vote: class-balanced
+      metric_weight: sigmoid(opacity) times scale_x times scale_y times scale_z
+      classes: present ground-truth classes only
+      aggregation: unweighted equal macro over paper8 scenes
+    headline:
+      local_percent:
+        split19: {mIoU: 34.526858420379014, mAcc: 51.5906462858573}
+        split15: {mIoU: 37.96059846359539, mAcc: 56.76961825724202}
+        split10: {mIoU: 47.36416326341668, mAcc: 67.4650012001333}
+      paper_percent:
+        split19: {mIoU: 32.11, mAcc: 50.05}
+        split15: {mIoU: 35.10, mAcc: 54.77}
+        split10: {mIoU: 46.21, mAcc: 65.61}
+    entrypoints:
+      - radio_gs/scripts/run_vala_scannet_baseline.py
+      - radio_gs/scripts/eval_vala_scannet_checkpoint_gaussian_protocol.py
+      - radio_gs/scripts/eval_scannet_vala_gaussian_protocol.py
+    authoritative_artifacts:
+      - {path: output/protocol_audit_20260801/vala/scannet_official_significance_paper8_v2/gaussian_eval/vala_scannet_gaussian_protocol_results.json, sha256: 81e6584a29eab59ffacba91b21d079c88213643a1b9a234356240d70b7d13740, retention: must_keep}
+    report: paper/artifacts/vala_scannet_exact_protocol_reproduction_20260801.md
+    supersedes_for_protocol_conclusions: [scannet_ovs_vala_gaussian_vs_mesh_p0_2scene_20260801]
+
+  spatial_agile3d_easy3d:
+    family: spatial_prompt
+    benchmark: AGILE3D ScanNet40
+    method: Easy3D official pretrained checkpoint
+    status: canonical_released_checkpoint_reproduction
+    registry_row: agile3d_easy3d_agile_release_full312_20260731
+    cohort: {scenes: 312, objects: 10357, failures: 0}
+    frozen_protocol:
+      interaction_contract: agile3d_release
+      preprocessing: released Easy3D stable last-write voxel quantization
+      coordinates: Easy3D integer-voxel coordinates
+      sigmoid_threshold: 0.5
+      first_click: largest false-negative error-region center
+      corrective_click: largest false-positive or false-negative error-region center; exact radius ties choose false positive
+      clicked_voxel_update: overwrite with ground truth
+      metric_domain: point-level object IoU
+      click_counts: [1, 2, 3, 5, 10]
+      max_clicks: 10
+      numerical_mode: BF16
+      object_batch_size: 4
+      random_seed: not applicable; fixed preprocessing cache and deterministic click trajectory
+      aggregation: query-micro over all released objects
+    headline:
+      local_iou_percent: {1: 69.7136671023463, 2: 76.01352226829643, 3: 78.59416889098002, 5: 80.99510345918428, 10: 83.03839027824663}
+    entrypoints:
+      - radio_gs/benchmarks/agile3d_scannet40/cache_easy3d_preprocessing.py
+      - radio_gs/benchmarks/agile3d_scannet40/audit_easy3d_preprocessing_cache.py
+      - radio_gs/benchmarks/agile3d_scannet40/evaluate_easy3d.py
+    authoritative_artifacts:
+      - {path: output/protocol_audit_20260731/easy3d_agile3d_formal_agile3d_release_v1/results.json, sha256: c771f29400e912565ee2ea5a754d0fd80a7fafc1eb91e38b6db1953cdcbbc09d, retention: must_keep}
+      - {path: output/protocol_audit_20260731/easy3d_agile3d_formal_easy3d_released_code_v1/results.json, sha256: c8c0c6820cf88166e77002a20ddf68af44c7be2e58a2e36cd26b147bdbd2f5a1, retention: must_keep}
+      - {path: output/protocol_audit_20260731/easy3d_official_worker_preprocessing/manifest.json, sha256: 39035ec87a3ff73bd9cfd6eec9a93182b7ebd7d9b2e84515b1c0e51cad453d23, retention: must_keep}
+      - {path: output/protocol_audit_20260731/easy3d_agile3d_pilot3_source_grounded_policy_v2.json, sha256: 1f065485514b82af0c8afe64b4941b07cc2135f8a3094b92a9ee4f19f954bbcc, retention: must_keep}
+    sensitivity_registry_rows: [agile3d_easy3d_released_code_full312_sensitivity_20260731]
+    report: paper/artifacts/easy3d_agile3d_protocol_audit_20260731.md
+
+  spatial_nvos_ludvig:
+    family: spatial_prompt
+    benchmark: NVOS
+    method: LUDVIG-SAM
+    status: canonical_exact_paper_protocol_reproduction
+    registry_row: nvos_ludvig_released_all_view_full8_3seed_exact_20260731
+    promptable_registry_row: ludvig_nvos_released_all_view_full8_exact_3seed_v1
+    cohort:
+      tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+      seeds: [0, 1, 2]
+      completed_runs: 24
+    frozen_protocol:
+      source_commits: {LUDVIG: 4461fc, gaussian_splatting: f7a116}
+      sam_vit_h_checkpoint_sha256: a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e
+      approved_resolution_patch_sha256: 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      geometry: released all-view 3DGS, 30000 iterations, eval=false, resolution=-1
+      prompt: official positive scribbles; released code ignores negative scribbles
+      target_rgb_visibility: visible during both 3DGS training and LUDVIG uplifting
+      prompt_sampling: 3 positive points per SAM call and 10 calls per view
+      relevance_calibration: per-frame min-max normalization then greater than 0.25
+      wrapper_threshold_parameter: 75
+      aggregation: seed mean per task then equal-weight eight-task macro
+      oracle_values_aggregated: false
+      strict_unseen_claim: false
+    headline: {local_macro_iou_percent: 91.25768502741802, paper_percent: 91.3}
+    entrypoints:
+      - reproductions/ludvig/train_nvos_all_view_3dgs.py
+      - reproductions/ludvig/run_ludvig_sam.py
+      - reproductions/ludvig/aggregate_results.py
+    authoritative_artifacts:
+      - {path: output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json, sha256: 65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546, retention: must_keep}
+    report: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  spatial_spin9_ludvig:
+    family: spatial_prompt
+    benchmark: SPIn-NeRF
+    method: LUDVIG-SAM
+    status: canonical_local_9scene_diagnostic
+    registry_row: spin_nerf_ludvig_9scene_missing_fork_20260731
+    promptable_registry_row: ludvig_spin_nerf_9scene_without_fork_diagnostic_v1
+    cohort:
+      scenes: [fern, fortress, horns, leaves, lego, orchids, pinecone, room, truck]
+      missing_scenes: [fork]
+      seeds: [0, 1, 2]
+      full_10scene_table_eligible: false
+    frozen_protocol:
+      source_commits: {LUDVIG: 4461fc, gaussian_splatting: f7a116}
+      sam_vit_h_checkpoint_sha256: a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e
+      approved_resolution_patch_sha256: 2c21257316c6f65d25eea2bbd98481bd3e42f0d84df23a13c1bd1cb645e7d602
+      geometry: released all-view 3DGS, 30000 iterations
+      prompt: complete first-frame reference mask
+      reference_scored: false
+      target_rgb_visibility: visible during both 3DGS training and LUDVIG uplifting
+      calibration: per scene and per seed, select SAM candidate and threshold on reference ground truth only
+      aggregation: target-frame mean per seed, then scene seed mean, then equal-weight macro over nine available scenes
+    headline: {local_9scene_macro_iou_percent: 93.7200449592385, paper_matching_9scene_percent: 94.57777777777778}
+    entrypoints:
+      - reproductions/ludvig/train_nvos_all_view_3dgs.py
+      - reproductions/ludvig/train_spin_llff_room_all_view_3dgs.py
+      - reproductions/ludvig/train_spin_truck_all_view_3dgs.py
+      - reproductions/ludvig/train_spin_lego_all_view_3dgs.py
+      - reproductions/ludvig/stage_spin_lego_official_undistortion.py
+      - reproductions/ludvig/stage_spin_pinecone_official_undistortion.py
+      - reproductions/ludvig/train_spin_pinecone_all_view_3dgs.py
+      - reproductions/ludvig/run_ludvig_sam.py
+      - reproductions/ludvig/aggregate_results.py
+    authoritative_artifacts:
+      - {path: output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json, sha256: ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17, retention: must_keep}
+    report: paper/artifacts/ludvig_nvos_spin_protocol_audit_20260731.md
+
+  correspondence_pfpr_ludvig_adapter:
+    family: correspondence_query
+    benchmark: PFPR
+    method: exact LUDVIG DINO/PCA/uplift plus frozen custom retrieval adapter
+    status: canonical_preliminary_diagnostic
+    registry_row: pfpr_exact_ludvig_custom_adapter_scene0050_02_20260801
+    cohort:
+      benchmark_release: ScanNet-PFPR-Small v2 / test_v2_r1
+      full_benchmark_scenes: 20
+      full_benchmark_queries: 200
+      diagnostic_scenes: [scene0050_02]
+      diagnostic_queries: 10
+      public_candidates: 31143
+      full_benchmark_complete: false
+    frozen_protocol:
+      method_visible_query: scene id and public depth-aligned 128x128 RGB crop only
+      private_method_inputs_forbidden: [pose, depth, source_frame_id, 3D_anchor, mask, instance, class]
+      public_candidate_domain: 5 cm annotation-mesh points
+      ranking_postprocess: fixed 10 cm Euclidean NMS
+      benchmark_metrics:
+        - recall_at_1_5_10_at_10cm
+        - recall_at_1_at_5_10_20cm
+        - top1_mean_and_median_distance
+        - first_correct_mrr_at_5_10_20cm
+      benchmark_aggregation: report query-micro and equal-scene macro separately
+      field_privacy: query source frames excluded by one-way hash commitment
+      formal_geometry_admission: public-geometry-only coverage at least 0.95
+      formal_scoring_admission: continuous support at least 0.01
+      source_views: 120 query-held-out views
+      geometry: shared 300000 Gaussians
+      feature_path: released vendored DINOv2 ViT-g/14, PCA40, and LUDVIG uplift
+      query_pooling: center 3x3 mean from one 9x9 token grid then L2 normalize
+      score: cosine
+      candidate_readout: opacity-weighted Gaussian convolution, 5cm voxel, k64
+      private_anchors_visible_only_in_phase_e: true
+      paper_comparison: forbidden
+      oracle_completion_deferred: true
+      formal_full_benchmark_deferred: true
+    headline: {top1_mean_m: 1.9873129278421402, top1_median_m: 1.9546312093734741, recall_at_10_at_20cm: 0.1}
+    entrypoints:
+      - docs/benchmarks/scannet_pfpr_small_v2.md
+      - radio_gs/benchmarks/scannet_pfpr/protocol.py
+      - radio_gs/benchmarks/scannet_pfpr/build_benchmark.py
+      - radio_gs/benchmarks/scannet_pfpr/evaluate_predictions.py
+      - radio_gs/benchmarks/scannet_pfpr/prepare_field_contract.py
+      - radio_gs/benchmarks/scannet_pfpr/score_dino_center.py
+      - radio_gs/benchmarks/scannet_pfpr/audit_geometry_support.py
+      - radio_gs/benchmarks/scannet_pfpr/ludvig_phase_a.py
+      - radio_gs/benchmarks/scannet_pfpr/ludvig_phase_b.py
+      - radio_gs/benchmarks/scannet_pfpr/ludvig_phase_c.py
+      - radio_gs/benchmarks/scannet_pfpr/ludvig_phase_d.py
+      - radio_gs/benchmarks/scannet_pfpr/ludvig_phase_e.py
+      - reproductions/ludvig/run_pfpr_dinov2.py
+      - reproductions/ludvig/run_pfpr_uplift.py
+      - reproductions/ludvig/run_pfpr_score.py
+      - reproductions/ludvig/run_pfpr_evaluate.py
+    authoritative_artifacts:
+      - {path: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_vendored_coverage120_phase_a_v2/run_manifest.json, sha256: de3f0281ae863d9f640eaabce5c805f35a9fca03221ceee0a67756fc9023e22a, retention: must_keep}
+      - {path: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_vendored_dino_pca_full120_v2_driver535/run_manifest.json, sha256: 1d546a335e2f3ec807c69b23f06a7876d1a325d53e16a94b0d64f8b7556d147b, retention: must_keep}
+      - {path: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_phase_c_full120_v1_driver535/run_manifest.json, sha256: dcf8d864da50aa455f805d94bce707daf4cfc4ac1f602ea03141b38a57eb13fb, retention: must_keep}
+      - {path: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_phase_d_public10_v1_driver535/run_manifest.json, sha256: e7f615ed0013cc32b858c92df364c36585dcfa1a10758202bcb361035c42b6ee, retention: must_keep}
+      - {path: /root/ludvig_pfpr_runs/pfpr_scene0050_02_exact_ludvig_phase_e_eval10_v1/run_manifest.json, sha256: d85c59aebb21cb6c6b6c1251c737f82c88c36eea58e4c8175167a71797c32901, retention: must_keep}
+    report: paper/artifacts/pfpr_ludvig_style_protocol_card_20260731.md
+    supersedes_for_protocol_conclusions: [pfpr_ludvig_style_partial6_20260731]
