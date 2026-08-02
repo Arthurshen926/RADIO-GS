@@ -217,6 +217,98 @@ def _unit_gate_kwargs(scenes):
     }
 
 
+def test_selection_contract_family_mapping_is_exact_and_fail_closed():
+    legacy_family = fidelity_module.IMAGENET1K_PRIMARY_BANK_FAMILY
+    holdout_family = fidelity_module.IMAGENET12K_HOLDOUT_BANK_FAMILY
+
+    legacy = fidelity_module.selection_contract_for_bank_family(legacy_family)
+    holdout = fidelity_module.selection_contract_for_bank_family(holdout_family)
+    assert legacy == {
+        "benchmark_vocabulary_opened": False,
+        "uses_benchmark_vocabulary_for_construction": False,
+        "queries": "target_blind_imagenet1k_primary_text_bank_v1",
+        "query_axis": "heldout_generic_only",
+        "device": "cpu",
+    }
+    assert holdout == {
+        "benchmark_vocabulary_opened": False,
+        "uses_benchmark_vocabulary_for_construction": False,
+        "queries": "target_blind_imagenet12k_minus_imagenet1k_holdout_v1",
+        "query_axis": "heldout_generic_only",
+        "device": "cpu",
+    }
+
+    # Callers receive a copy and cannot mutate the frozen module authority.
+    holdout["device"] = "cuda"
+    assert fidelity_module.selection_contract_for_bank_family(holdout_family)[
+        "device"
+    ] == "cpu"
+    with pytest.raises(ValueError, match="unknown text query-bank family"):
+        fidelity_module.selection_contract_for_bank_family("unregistered_family")
+
+
+def test_formal_text_bank_pair_classification_is_exact(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    artifact = tmp_path / "dev.pt"
+    manifest = tmp_path / "dev.manifest.json"
+    artifact.write_bytes(b"registered-dev-artifact")
+    manifest.write_bytes(b"registered-dev-sidecar")
+    registered = dict(fidelity_gate_module.FORMAL_HISTORICAL_TEXT_BANKS)
+    registered["dev"] = {
+        "artifact_path": str(artifact.resolve()),
+        "artifact_sha256": hashlib.sha256(artifact.read_bytes()).hexdigest(),
+        "manifest_path": str(manifest.resolve()),
+        "manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+    }
+    monkeypatch.setattr(
+        fidelity_gate_module, "FORMAL_HISTORICAL_TEXT_BANKS", registered
+    )
+
+    assert fidelity_gate_module.classify_formal_text_bank_pair(
+        artifact, manifest, "dev"
+    ) == fidelity_module.IMAGENET1K_PRIMARY_BANK_FAMILY
+
+    artifact.write_bytes(b"changed")
+    with pytest.raises(ValueError, match="unregistered or changed"):
+        fidelity_gate_module.classify_formal_text_bank_pair(
+            artifact, manifest, "dev"
+        )
+
+
+def test_report_validation_accepts_only_exact_registered_family_contracts():
+    teacher, text, scenes, regions, queries = _descriptors()
+    report = _report(
+        "candidate",
+        0,
+        teacher,
+        teacher,
+        text,
+        scenes,
+        regions,
+        queries,
+    )
+    holdout_family = fidelity_module.IMAGENET12K_HOLDOUT_BANK_FAMILY
+    report["selection_contract"] = (
+        fidelity_module.selection_contract_for_bank_family(holdout_family)
+    )
+    fidelity_module._validate_report(report)
+
+    drifted = deepcopy(report)
+    drifted["selection_contract"]["unregistered_field"] = True
+    with pytest.raises(ValueError, match="selection_contract differs"):
+        fidelity_module._validate_report(drifted)
+
+    hybrid = deepcopy(report)
+    hybrid["selection_contract"]["queries"] = (
+        "target_blind_imagenet1k_primary_text_bank_v1"
+    )
+    hybrid["selection_contract"]["query_axis"] = "changed_axis"
+    with pytest.raises(ValueError, match="selection_contract differs"):
+        fidelity_module._validate_report(hybrid)
+
+
 def test_paired_multi_seed_scene_bootstrap_promotes_consistent_improvement():
     teacher, text, scenes, regions, queries = _descriptors()
     degraded = teacher.clone()
@@ -751,6 +843,7 @@ def test_historical_builder_compatibility_is_exactly_bound_to_formal_dev_bank():
         manifest_path=Path(formal["manifest_path"]),
         manifest_sha256=formal["manifest_sha256"],
         query_split="dev",
+        algorithm_version=fidelity_gate_module.TEXT_BANK_ALGORITHM_VERSION,
         hash_cache={},
     )
 
@@ -778,6 +871,7 @@ def test_historical_builder_compatibility_rejects_formal_bank_drift(
             manifest_path=Path(formal["manifest_path"]),
             manifest_sha256=formal["manifest_sha256"],
             query_split="dev",
+            algorithm_version=fidelity_gate_module.TEXT_BANK_ALGORITHM_VERSION,
             hash_cache={},
         )
 

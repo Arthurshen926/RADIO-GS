@@ -3,10 +3,14 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.losses.direct_point_query_logit_distill_loss import (
+    compute_multiview_teacher_response_uncertainty,
     compute_direct_point_query_logit_distill_loss,
     compute_direct_point_query_support_distill_loss,
     compute_independent_normalized_cosine_response_smooth_l1_loss,
+    compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss,
     compute_scene_wise_text_response_profile_ranking_loss,
+    compute_scene_wise_uncertainty_weighted_text_response_pairwise_gap_smooth_l1_loss,
+    fractional_upper_cvar,
 )
 
 
@@ -285,6 +289,208 @@ def test_scene_wise_profile_ranking_loss_rejects_invalid_grouping_or_parameters(
             scene_ids=scene_ids,
             **kwargs,
         )
+
+
+def test_pairwise_gap_loss_is_zero_for_matching_descriptors_and_freezes_targets():
+    teacher = F.normalize(torch.randn(6, 5), dim=-1).requires_grad_(True)
+    student = teacher.detach().clone().requires_grad_(True)
+    text = F.normalize(torch.randn(4, 5), dim=-1).requires_grad_(True)
+
+    loss, stats = compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+        student,
+        teacher,
+        text,
+        scene_ids=["a", "a", "a", "b", "b", "b"],
+    )
+
+    assert loss.item() == 0.0
+    assert stats["valid_scene_count"].item() == 2
+    assert stats["valid_pair_query_count"].item() > 0
+    loss.backward()
+    assert torch.equal(student.grad, torch.zeros_like(student))
+    assert teacher.grad is None
+    assert text.grad is None
+
+
+def test_pairwise_gap_loss_penalizes_lower_rank_swap_even_when_top1_is_preserved():
+    teacher_response = torch.tensor([0.9, 0.3, -0.3])
+    student_response = torch.tensor([0.9, -0.3, 0.3])
+    teacher = torch.stack(
+        (teacher_response, (1.0 - teacher_response.square()).sqrt()), dim=-1
+    )
+    student = torch.stack(
+        (student_response, (1.0 - student_response.square()).sqrt()), dim=-1
+    ).requires_grad_(True)
+
+    loss, stats = compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+        student,
+        teacher,
+        torch.tensor([[1.0, 0.0]]),
+        scene_ids=["scene"] * 3,
+    )
+
+    assert teacher_response.argmax() == student_response.argmax()
+    assert loss.item() > 0.0
+    assert stats["valid_pair_query_count"].item() == 3
+    loss.backward()
+    assert torch.isfinite(student.grad).all()
+
+
+def test_pairwise_gap_loss_skips_ties_and_singletons():
+    student = torch.eye(3, requires_grad=True)
+    teacher = torch.eye(3)
+    loss, stats = compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+        student,
+        teacher,
+        torch.tensor([[0.0, 0.0, 1.0]]),
+        scene_ids=["tie", "tie", "singleton"],
+    )
+
+    assert loss.item() == 0.0
+    assert stats["valid_scene_count"].item() == 0
+    assert stats["valid_pair_query_count"].item() == 0
+    loss.backward()
+    assert torch.equal(student.grad, torch.zeros_like(student))
+
+
+@pytest.mark.parametrize("tie_tolerance,eps", [(-1.0, 1e-6), (1e-6, 0.0)])
+def test_pairwise_gap_loss_rejects_invalid_parameters(tie_tolerance, eps):
+    with pytest.raises(ValueError):
+        compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+            torch.eye(2),
+            torch.eye(2),
+            torch.eye(2),
+            scene_ids=["a", "a"],
+            tie_tolerance=tie_tolerance,
+            eps=eps,
+        )
+
+
+def test_multiview_response_uncertainty_matches_unbiased_sample_formula_and_detaches():
+    teacher_views = torch.tensor(
+        [
+            [[1.0, 0.0], [0.8, 0.6], [0.0, 0.0]],
+            [[0.0, 1.0], [0.6, 0.8], [0.0, 0.0]],
+        ],
+        requires_grad=True,
+    )
+    teacher_mask = torch.tensor(
+        [[True, True, False], [True, True, False]]
+    )
+    text = torch.eye(2, requires_grad=True)
+
+    uncertainty = compute_multiview_teacher_response_uncertainty(
+        teacher_views,
+        teacher_mask,
+        text,
+    )
+
+    torch.testing.assert_close(
+        uncertainty["response_mean"],
+        torch.tensor([[0.9, 0.3], [0.3, 0.9]]),
+    )
+    torch.testing.assert_close(
+        uncertainty["response_variance"],
+        torch.tensor([[0.02, 0.18], [0.18, 0.02]]),
+    )
+    torch.testing.assert_close(
+        uncertainty["response_standard_error"],
+        torch.tensor([[0.1, 0.3], [0.3, 0.1]]),
+    )
+    assert uncertainty["view_counts"].tolist() == [2, 2]
+    assert all(not value.requires_grad for value in uncertainty.values())
+    assert teacher_views.grad is None
+    assert text.grad is None
+
+
+def test_multiview_response_uncertainty_requires_two_valid_views():
+    with pytest.raises(ValueError, match="at least two"):
+        compute_multiview_teacher_response_uncertainty(
+            torch.tensor([[[1.0, 0.0], [0.0, 0.0]]]),
+            torch.tensor([[True, False]]),
+            torch.tensor([[1.0, 0.0]]),
+        )
+
+
+def test_uncertainty_weighted_pairwise_gap_matches_confidence_formula_and_freezes_targets():
+    root_three_quarters = 0.75**0.5
+    root_twenty_four_twenty_fifths = 0.96**0.5
+    teacher = torch.tensor(
+        [[1.0, 0.0], [0.5, root_three_quarters], [0.0, 1.0]],
+        requires_grad=True,
+    )
+    teacher_views = torch.tensor(
+        [
+            [[1.0, 0.0], [1.0, 0.0]],
+            [[0.8, 0.6], [0.2, root_twenty_four_twenty_fifths]],
+            [[0.0, 1.0], [0.0, -1.0]],
+        ],
+        requires_grad=True,
+    )
+    teacher_mask = torch.ones(3, 2, dtype=torch.bool)
+    student = torch.tensor(
+        [[1.0, 0.0], [0.0, 1.0], [0.0, -1.0]],
+        requires_grad=True,
+    )
+    text = torch.tensor([[1.0, 0.0]], requires_grad=True)
+
+    loss, stats = (
+        compute_scene_wise_uncertainty_weighted_text_response_pairwise_gap_smooth_l1_loss(
+            student,
+            teacher,
+            teacher_views,
+            teacher_mask,
+            text,
+            scene_ids=["scene"] * 3,
+        )
+    )
+
+    noisy_weight = 0.5 / (0.5 + 2.0 * 0.3 + 1e-6)
+    stable_weight = 1.0 / (1.0 + 1e-6)
+    expected = (0.125 * noisy_weight * 2.0) / (
+        2.0 * noisy_weight + stable_weight
+    )
+    assert loss.item() == pytest.approx(expected, rel=1e-5, abs=1e-7)
+    assert stats["scene_query_loss"].shape == (1, 1)
+    assert stats["scene_query_valid"].tolist() == [[True]]
+    assert stats["valid_pair_query_count"].item() == 3
+    assert stats["uncertainty_weight_mean"].item() == pytest.approx(
+        (2.0 * noisy_weight + stable_weight) / 3.0,
+        rel=1e-5,
+    )
+    loss.backward()
+    assert student.grad is not None
+    assert torch.isfinite(student.grad).all()
+    assert teacher.grad is None
+    assert teacher_views.grad is None
+    assert text.grad is None
+
+
+def test_fractional_upper_cvar_uses_exact_fractional_tail_mass_and_gradients():
+    values = torch.tensor([4.0, 3.0, 2.0, 1.0], requires_grad=True)
+
+    result = fractional_upper_cvar(values, 0.375)
+
+    assert result.item() == pytest.approx((4.0 + 0.5 * 3.0) / 1.5)
+    result.backward()
+    torch.testing.assert_close(
+        values.grad,
+        torch.tensor([2.0 / 3.0, 1.0 / 3.0, 0.0, 0.0]),
+    )
+    assert fractional_upper_cvar(values.detach(), 0.01).item() == 4.0
+    assert fractional_upper_cvar(values.detach(), 1.0).item() == 2.5
+
+
+def test_fractional_upper_cvar_reduces_declared_dimension():
+    values = torch.tensor([[4.0, 1.0, 3.0, 2.0], [0.0, 8.0, 2.0, 6.0]])
+    result = fractional_upper_cvar(values, 0.5, dim=1)
+    torch.testing.assert_close(result, torch.tensor([3.5, 7.0]))
+
+
+@pytest.mark.parametrize("tail_fraction", [0.0, -0.1, 1.1, float("nan")])
+def test_fractional_upper_cvar_rejects_invalid_tail_fraction(tail_fraction):
+    with pytest.raises(ValueError):
+        fractional_upper_cvar(torch.tensor([1.0]), tail_fraction)
 
 
 def test_query_logit_distill_is_zero_for_matching_student_teacher():

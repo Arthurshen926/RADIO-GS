@@ -9,6 +9,7 @@ from plyfile import PlyData, PlyElement
 
 from radio_gs.benchmarks.agile3d_scannet40.protocol import (
     Click,
+    aggregate_frozen_full312_metrics,
     aggregate_official_metrics,
     evaluate_interactive_predictions,
     interaction_health_metrics,
@@ -351,6 +352,17 @@ def test_interaction_forces_clicked_labels_and_aggregates_metrics() -> None:
     assert result["seed_satisfaction"][1]["positive"] == 0.0
     metrics = aggregate_official_metrics([result["trajectory"]])
     assert set(("IoU@1", "IoU@15", "NoC@50", "NoC@90")) <= set(metrics)
+
+    trajectory10 = {step: result["trajectory"][step] for step in range(1, 11)}
+    legacy_compatible = aggregate_official_metrics(
+        [trajectory10], max_clicks=10
+    )
+    assert "IoU@10" in legacy_compatible
+    assert "IoU@15" not in legacy_compatible
+    frozen = aggregate_frozen_full312_metrics([trajectory10])
+    assert set(frozen) == {"IoU@1", "IoU@2", "IoU@3", "IoU@5", "IoU@10"}
+    with pytest.raises(ValueError, match="exactly clicks 1..10"):
+        aggregate_frozen_full312_metrics([{**trajectory10, 11: 1.0}])
 
 
 def test_interaction_records_label_free_stages_before_protocol_overwrite() -> None:

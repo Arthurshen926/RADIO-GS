@@ -252,6 +252,435 @@ def compute_scene_wise_text_response_profile_ranking_loss(
     }
 
 
+def compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+    student_descriptors: torch.Tensor,
+    teacher_descriptors: torch.Tensor,
+    frozen_text_bank: torch.Tensor,
+    scene_ids: Sequence[Hashable] | torch.Tensor,
+    *,
+    tie_tolerance: float = 1e-6,
+    eps: float = 1e-6,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Distill the complete within-scene region order for every text query.
+
+    For every unordered region pair ``(i,j)`` and query, this loss regresses
+    ``response_i-response_j`` after normalizing by the teacher response span
+    for that scene/query.  The objective is shift invariant, weights the full
+    ordering axis instead of only softmax peaks, and excludes teacher near-ties
+    whose order is not identifiable.  Teacher descriptors and text embeddings
+    are detached; gradients flow only through the student descriptors.
+    """
+
+    _validate_cosine_response_inputs(
+        student_descriptors,
+        teacher_descriptors,
+        frozen_text_bank,
+    )
+    for name, value in {"tie_tolerance": tie_tolerance, "eps": eps}.items():
+        if not math.isfinite(float(value)):
+            raise ValueError(f"{name} must be finite")
+    if tie_tolerance < 0:
+        raise ValueError("tie_tolerance must be non-negative")
+    if eps <= 0:
+        raise ValueError("eps must be positive")
+
+    student = F.normalize(student_descriptors.float(), dim=-1)
+    with torch.no_grad():
+        teacher = F.normalize(
+            teacher_descriptors.detach().to(
+                device=student.device, dtype=torch.float32
+            ),
+            dim=-1,
+        )
+        text = F.normalize(
+            frozen_text_bank.detach().to(
+                device=student.device, dtype=torch.float32
+            ),
+            dim=-1,
+        )
+        teacher_responses = teacher @ text.T
+    student_responses = student @ text.T
+    groups = _scene_group_indices(
+        scene_ids,
+        batch_size=student_descriptors.shape[0],
+        device=student.device,
+    )
+
+    zero = student_descriptors.sum() * 0.0
+    losses: list[torch.Tensor] = []
+    valid_scene_count = 0
+    valid_query_count = 0
+    valid_pair_query_count = 0
+    for indices in groups:
+        region_count = int(indices.numel())
+        if region_count < 2:
+            continue
+        student_scene = student_responses.index_select(0, indices)
+        teacher_scene = teacher_responses.index_select(0, indices)
+        pairs = torch.triu_indices(
+            region_count,
+            region_count,
+            offset=1,
+            device=student.device,
+        )
+        student_gaps = student_scene[pairs[0]] - student_scene[pairs[1]]
+        with torch.no_grad():
+            teacher_gaps = teacher_scene[pairs[0]] - teacher_scene[pairs[1]]
+            teacher_span = teacher_scene.amax(dim=0) - teacher_scene.amin(dim=0)
+            valid_queries = teacher_span > float(tie_tolerance)
+            valid = (
+                teacher_gaps.abs() > float(tie_tolerance)
+            ) & valid_queries.unsqueeze(0)
+            scale = teacher_span.clamp_min(float(eps)).unsqueeze(0)
+        if not bool(valid.any()):
+            continue
+        valid_scene_count += 1
+        valid_query_count += int(valid_queries.sum().item())
+        valid_pair_query_count += int(valid.sum().item())
+        normalized_student = student_gaps / scale
+        normalized_teacher = teacher_gaps / scale
+        losses.append(
+            F.smooth_l1_loss(
+                normalized_student[valid],
+                normalized_teacher[valid],
+                reduction="none",
+            )
+        )
+
+    loss = torch.cat(losses).mean() if losses else zero
+    return loss, {
+        "valid_scene_count": zero.new_tensor(valid_scene_count).detach(),
+        "valid_query_count": zero.new_tensor(valid_query_count).detach(),
+        "valid_pair_query_count": zero.new_tensor(
+            valid_pair_query_count
+        ).detach(),
+    }
+
+
+def compute_multiview_teacher_response_uncertainty(
+    teacher_view_descriptors: torch.Tensor,
+    teacher_mask: torch.Tensor,
+    frozen_text_bank: torch.Tensor,
+    *,
+    eps: float = 1e-6,
+) -> dict[str, torch.Tensor]:
+    """Return detached per-region text-response disagreement statistics.
+
+    ``teacher_view_descriptors`` contains the independently re-encoded teacher
+    crops for every region.  Their response variance is an unbiased sample
+    variance across valid views; it is a deterministic disagreement proxy, not
+    a claim that the selected views are IID samples.  At least two valid views
+    are required so that a finite variance is identifiable.
+
+    All returned tensors are detached even when a caller accidentally supplies
+    differentiable teacher descriptors or text embeddings.
+    """
+
+    if not isinstance(teacher_view_descriptors, torch.Tensor):
+        raise TypeError("teacher_view_descriptors must be a torch.Tensor")
+    if not isinstance(teacher_mask, torch.Tensor):
+        raise TypeError("teacher_mask must be a torch.Tensor")
+    if not isinstance(frozen_text_bank, torch.Tensor):
+        raise TypeError("frozen_text_bank must be a torch.Tensor")
+    if teacher_view_descriptors.ndim != 3:
+        raise ValueError(
+            "teacher_view_descriptors must have shape [B,V,D], got "
+            f"{tuple(teacher_view_descriptors.shape)}"
+        )
+    if not teacher_view_descriptors.is_floating_point():
+        raise ValueError("teacher_view_descriptors must have a floating-point dtype")
+    if teacher_mask.dtype != torch.bool:
+        raise ValueError("teacher_mask must have dtype bool")
+    if teacher_mask.shape != teacher_view_descriptors.shape[:2]:
+        raise ValueError("teacher_mask must align with the [B,V] teacher views")
+    if frozen_text_bank.ndim != 2 or not frozen_text_bank.is_floating_point():
+        raise ValueError("frozen_text_bank must be floating point [Q,D]")
+    if (
+        teacher_view_descriptors.shape[0] == 0
+        or teacher_view_descriptors.shape[1] == 0
+        or teacher_view_descriptors.shape[2] == 0
+        or frozen_text_bank.shape[0] == 0
+        or frozen_text_bank.shape[1] != teacher_view_descriptors.shape[2]
+    ):
+        raise ValueError("teacher views and text bank have empty or mismatched shapes")
+    if not bool(torch.isfinite(teacher_view_descriptors).all().item()) or not bool(
+        torch.isfinite(frozen_text_bank).all().item()
+    ):
+        raise ValueError("teacher views and text bank must contain only finite values")
+    if not math.isfinite(float(eps)) or float(eps) <= 0.0:
+        raise ValueError("eps must be finite and positive")
+
+    with torch.no_grad():
+        views = F.normalize(
+            teacher_view_descriptors.detach().to(dtype=torch.float32),
+            dim=-1,
+            eps=float(eps),
+        )
+        text = F.normalize(
+            frozen_text_bank.detach().to(
+                device=views.device,
+                dtype=torch.float32,
+            ),
+            dim=-1,
+            eps=float(eps),
+        )
+        mask = teacher_mask.detach().to(device=views.device)
+        view_counts = mask.sum(dim=1)
+        if not bool((view_counts >= 2).all().item()):
+            raise ValueError(
+                "multiview response uncertainty requires at least two valid "
+                "teacher views per region"
+            )
+        responses = torch.einsum("bvd,qd->bvq", views, text)
+        active = mask[..., None].to(dtype=responses.dtype)
+        counts = view_counts.to(dtype=responses.dtype)[..., None]
+        response_mean = (responses * active).sum(dim=1) / counts
+        centered = responses - response_mean[:, None, :]
+        response_variance = (
+            centered.square() * active
+        ).sum(dim=1) / (counts - 1.0)
+        response_standard_error = torch.sqrt(
+            response_variance.clamp_min(0.0) / counts
+        )
+
+    return {
+        "response_mean": response_mean.detach(),
+        "response_variance": response_variance.detach(),
+        "response_standard_error": response_standard_error.detach(),
+        "view_counts": view_counts.detach(),
+    }
+
+
+def compute_scene_wise_uncertainty_weighted_text_response_pairwise_gap_smooth_l1_loss(
+    student_descriptors: torch.Tensor,
+    teacher_descriptors: torch.Tensor,
+    teacher_view_descriptors: torch.Tensor,
+    teacher_mask: torch.Tensor,
+    frozen_text_bank: torch.Tensor,
+    scene_ids: Sequence[Hashable] | torch.Tensor,
+    *,
+    standard_error_multiplier: float = 2.0,
+    tie_tolerance: float = 1e-6,
+    eps: float = 1e-6,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """Regress scene-wise response gaps with multiview confidence weights.
+
+    For a region pair and text query, the detached confidence is
+
+    ``abs(gap) / (abs(gap) + multiplier * pair_standard_error + eps)``.
+
+    Each scene/query is first reduced over all valid region pairs, then the
+    scalar loss averages valid scene/query units.  This prevents a scene with
+    more region pairs from silently dominating the objective.  Teacher
+    descriptors, per-view variance, confidence weights, and the text bank are
+    all excluded from autograd; only ``student_descriptors`` receives gradient.
+    """
+
+    _validate_cosine_response_inputs(
+        student_descriptors,
+        teacher_descriptors,
+        frozen_text_bank,
+    )
+    if (
+        not math.isfinite(float(standard_error_multiplier))
+        or float(standard_error_multiplier) < 0.0
+    ):
+        raise ValueError("standard_error_multiplier must be finite and non-negative")
+    if not math.isfinite(float(tie_tolerance)) or float(tie_tolerance) < 0.0:
+        raise ValueError("tie_tolerance must be finite and non-negative")
+    if not math.isfinite(float(eps)) or float(eps) <= 0.0:
+        raise ValueError("eps must be finite and positive")
+    if (
+        teacher_view_descriptors.ndim != 3
+        or teacher_view_descriptors.shape[0] != student_descriptors.shape[0]
+        or teacher_view_descriptors.shape[2] != student_descriptors.shape[1]
+        or teacher_mask.shape != teacher_view_descriptors.shape[:2]
+    ):
+        raise ValueError("teacher view descriptors/mask must align with [B,V,D]")
+
+    student = F.normalize(student_descriptors.float(), dim=-1, eps=float(eps))
+    uncertainty = compute_multiview_teacher_response_uncertainty(
+        teacher_view_descriptors.detach().to(device=student.device),
+        teacher_mask.detach().to(device=student.device),
+        frozen_text_bank.detach().to(device=student.device),
+        eps=float(eps),
+    )
+    with torch.no_grad():
+        teacher = F.normalize(
+            teacher_descriptors.detach().to(
+                device=student.device,
+                dtype=torch.float32,
+            ),
+            dim=-1,
+            eps=float(eps),
+        )
+        text = F.normalize(
+            frozen_text_bank.detach().to(
+                device=student.device,
+                dtype=torch.float32,
+            ),
+            dim=-1,
+            eps=float(eps),
+        )
+        teacher_responses = teacher @ text.T
+        response_standard_error = uncertainty["response_standard_error"]
+    student_responses = student @ text.T
+    groups = _scene_group_indices(
+        scene_ids,
+        batch_size=student_descriptors.shape[0],
+        device=student.device,
+    )
+
+    zero = student_descriptors.sum() * 0.0
+    scene_query_losses: list[torch.Tensor] = []
+    scene_query_validity: list[torch.Tensor] = []
+    scene_query_weight_sums: list[torch.Tensor] = []
+    valid_weights: list[torch.Tensor] = []
+    valid_scene_count = 0
+    valid_pair_query_count = 0
+    for indices in groups:
+        region_count = int(indices.numel())
+        if region_count < 2:
+            continue
+        student_scene = student_responses.index_select(0, indices)
+        teacher_scene = teacher_responses.index_select(0, indices)
+        standard_error_scene = response_standard_error.index_select(0, indices)
+        pairs = torch.triu_indices(
+            region_count,
+            region_count,
+            offset=1,
+            device=student.device,
+        )
+        student_gaps = student_scene[pairs[0]] - student_scene[pairs[1]]
+        with torch.no_grad():
+            teacher_gaps = teacher_scene[pairs[0]] - teacher_scene[pairs[1]]
+            teacher_span = teacher_scene.amax(dim=0) - teacher_scene.amin(dim=0)
+            pair_standard_error = torch.sqrt(
+                standard_error_scene[pairs[0]].square()
+                + standard_error_scene[pairs[1]].square()
+            )
+            confidence = teacher_gaps.abs() / (
+                teacher_gaps.abs()
+                + float(standard_error_multiplier) * pair_standard_error
+                + float(eps)
+            )
+            valid_queries = teacher_span > float(tie_tolerance)
+            valid = (
+                teacher_gaps.abs() > float(tie_tolerance)
+            ) & valid_queries.unsqueeze(0)
+            weights = confidence * valid.to(dtype=confidence.dtype)
+            weight_sum = weights.sum(dim=0)
+            unit_valid = weight_sum > float(eps)
+            scale = teacher_span.clamp_min(float(eps)).unsqueeze(0)
+        normalized_student = student_gaps / scale
+        normalized_teacher = teacher_gaps / scale
+        pair_losses = F.smooth_l1_loss(
+            normalized_student,
+            normalized_teacher,
+            reduction="none",
+        )
+        unit_losses = (pair_losses * weights).sum(dim=0) / weight_sum.clamp_min(
+            float(eps)
+        )
+        unit_losses = unit_losses.masked_fill(~unit_valid, 0.0)
+        scene_query_losses.append(unit_losses)
+        scene_query_validity.append(unit_valid)
+        scene_query_weight_sums.append(weight_sum)
+        if bool(valid.any().item()):
+            valid_scene_count += 1
+            valid_pair_query_count += int(valid.sum().item())
+            valid_weights.append(confidence[valid])
+
+    if scene_query_losses:
+        unit_loss_tensor = torch.stack(scene_query_losses)
+        unit_valid_tensor = torch.stack(scene_query_validity)
+        unit_weight_tensor = torch.stack(scene_query_weight_sums)
+        loss = (
+            unit_loss_tensor[unit_valid_tensor].mean()
+            if bool(unit_valid_tensor.any().item())
+            else zero
+        )
+    else:
+        query_count = int(frozen_text_bank.shape[0])
+        unit_loss_tensor = zero.new_zeros((0, query_count))
+        unit_valid_tensor = torch.zeros(
+            (0, query_count),
+            dtype=torch.bool,
+            device=zero.device,
+        )
+        unit_weight_tensor = zero.new_zeros((0, query_count))
+        loss = zero
+    weight_mean = (
+        torch.cat(valid_weights).mean()
+        if valid_weights
+        else zero.detach()
+    )
+    return loss, {
+        "valid_scene_count": zero.new_tensor(valid_scene_count).detach(),
+        "valid_query_count": unit_valid_tensor.sum().detach(),
+        "valid_pair_query_count": zero.new_tensor(
+            valid_pair_query_count
+        ).detach(),
+        "uncertainty_weight_mean": weight_mean.detach(),
+        "scene_query_loss": unit_loss_tensor.detach(),
+        "scene_query_valid": unit_valid_tensor.detach(),
+        "scene_query_weight_sum": unit_weight_tensor.detach(),
+        "teacher_response_variance_mean": uncertainty[
+            "response_variance"
+        ].mean().detach(),
+    }
+
+
+def fractional_upper_cvar(
+    values: torch.Tensor,
+    tail_fraction: float = 0.1,
+    *,
+    dim: int | None = None,
+) -> torch.Tensor:
+    """Return a fractional empirical upper-tail conditional value at risk.
+
+    The final order statistic receives a fractional coefficient when
+    ``tail_fraction * N`` is non-integral.  Unlike rounding the tail to an
+    integer top-k, this preserves the requested empirical tail mass.  The
+    operation remains differentiable with respect to the selected values.
+    """
+
+    if not isinstance(values, torch.Tensor):
+        raise TypeError("values must be a torch.Tensor")
+    if not values.is_floating_point() or values.numel() == 0:
+        raise ValueError("values must be a non-empty floating-point tensor")
+    if not bool(torch.isfinite(values).all().item()):
+        raise ValueError("values must contain only finite values")
+    if (
+        not math.isfinite(float(tail_fraction))
+        or not 0.0 < float(tail_fraction) <= 1.0
+    ):
+        raise ValueError("tail_fraction must lie in (0,1]")
+    if dim is None:
+        ordered = torch.sort(values.reshape(-1), descending=True).values
+        axis = 0
+    else:
+        axis = int(dim)
+        if axis < -values.ndim or axis >= values.ndim:
+            raise ValueError("dim is outside the input rank")
+        axis %= values.ndim
+        ordered = torch.sort(values, dim=axis, descending=True).values
+
+    count = int(ordered.shape[axis])
+    tail_mass = float(tail_fraction) * count
+    full_count = min(count, int(math.floor(tail_mass + 1e-12)))
+    remainder = tail_mass - full_count
+    if remainder < 1e-12:
+        remainder = 0.0
+    if full_count:
+        full = ordered.narrow(axis, 0, full_count).sum(dim=axis)
+    else:
+        full = ordered.select(axis, 0) * 0.0
+    if remainder > 0.0 and full_count < count:
+        full = full + remainder * ordered.select(axis, full_count)
+    return full / tail_mass
+
+
 def _weighted_mean(values: torch.Tensor, weights: Optional[torch.Tensor]) -> torch.Tensor:
     if weights is None:
         return values.mean()

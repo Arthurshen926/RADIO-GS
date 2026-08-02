@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Callable, Mapping
 
@@ -32,6 +33,9 @@ from radio_gs.interfaces.capability_cache import (
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.querying.evidence_scorer import (
     EvidenceScoringConfig,
+    RegisteredForwardBetaDiagnostics,
+    registered_forward_beta_balanced_residual_observation,
+    registered_forward_beta_observation,
     registered_observation_anchor_mask,
     registered_observation_effective_confidence,
     registered_seed_observation,
@@ -41,6 +45,9 @@ from radio_gs.querying.query_engine import CanonicalQueryEngine
 from radio_gs.querying.query_spec import PrimitiveUnaryEvidence, SelectionMode
 from radio_gs.querying.support_solver import SupportSolverConfig
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
+from radio_gs.rendering.contribution_compositor import (
+    rasterize_single_view_contributions,
+)
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     raster_adjoint_registered_view_features,
     rasterize_registered_view_features,
@@ -233,6 +240,659 @@ def _file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _registered_forward_unary_contract(
+    args: argparse.Namespace,
+) -> dict[str, object] | None:
+    """Return the new-method contract without perturbing the legacy default."""
+
+    mode = str(getattr(args, "registered_forward_unary", "none"))
+    if mode == "none":
+        return None
+    if mode not in {"beta_coverage_v1", "beta_balanced_residual_v2"}:
+        raise ValueError(f"unknown registered forward unary mode {mode!r}")
+    if mode == "beta_balanced_residual_v2":
+        return {
+            "mode": mode,
+            "status": "protocol_authority_bound_non_exact_diagnostic",
+            "strict_unseen_eligible": False,
+            "strict_unseen_scoring_binding": (
+                "nvos_strict_unseen_v1_non_exact_beta_centered_posterior"
+            ),
+            "field_prior_stage": "post_reliability_pre_registered_fusion",
+            "field_prior_formula": (
+                "sigmoid(field_unary/solver_unary_temperature)"
+            ),
+            "field_prior_precision_source": (
+                "canonical_query_independent_reliability_v1"
+            ),
+            "field_prior_concentration_formula": (
+                "kappa_i=1+reliability_i*observation_coverage_i"
+            ),
+            "field_prior_concentration_bounds": {
+                "minimum": 1.0,
+                "maximum": 2.0,
+            },
+            "class_balance": {
+                "scope": "global_expected_counts",
+                "formula": (
+                    "B=(sum(n_pos_raw)+sum(n_neg_raw))/2; "
+                    "n_pos=B*n_pos_raw/sum(n_pos_raw); "
+                    "n_neg=B*n_neg_raw/sum(n_neg_raw)"
+                ),
+                "class_prior_from_scribble_area": False,
+                "one_sided_observable_policy": "fail_closed",
+                "zero_observable_policy": "exact_field_fallback",
+            },
+            "residual_evidence_concentration_formula": "m_i/(1+m_i)",
+            "residual_evidence_concentration_bounds": {
+                "minimum": 0.0,
+                "maximum_exclusive": 1.0,
+            },
+            "semantic_precision_is_primary_for_nonanchors": True,
+            "anchor": {
+                "strength_formula": (
+                    "abs(n_pos_raw-n_neg_raw)/(1+n_pos_raw+n_neg_raw)"
+                ),
+                "threshold_source": "solver.hard_seed_threshold",
+                "positive": "strength>=threshold and n_pos_raw>n_neg_raw",
+                "negative": "strength>=threshold and n_neg_raw>n_pos_raw",
+                "probability_override": "positive=1;negative=0",
+                "solver_constraint": "promote_matching_seed_weight_to_one",
+                "conflict_policy": "strict_count_dominance_ties_unanchored",
+            },
+            "registered_observation_confidence_role": "seed_construction_only",
+            "compositor": "exact_front_to_back_sparse_triplets",
+            "prompt_registration_mode": "raster_adjoint",
+            "prompt_registration_scale": 1.0,
+            "compositor_resolution": "native_prompt_registration_raster",
+            "compositor_alpha_threshold": 0.0,
+            "score_feature_contribution_gamma": 1.0,
+            "score_gamma_role": "target_score_render_only_not_forward_e_step",
+            "capability_invalid_policy": "exclude_before_forward_and_e_step",
+            "labeled_policy": "positive_or_negative_only",
+            "unlabeled_scribble_policy": "unobserved_not_negative",
+            "all_pixel_policy": "all_prompt_registration_raster_pixels",
+            "e_steps": 1,
+            "posterior_formula": (
+                "(kappa_i*p_field_i+n_res_i*mu_i)/(kappa_i+n_res_i)"
+            ),
+            "accumulation_dtype": "float64_cpu",
+            "evidence_dtype": "float32",
+            "nll_eps": 1e-12,
+            "saturated_likelihood_policy": (
+                "sign_symmetric_common_perturbation_limit"
+            ),
+            "nll_used_for_selection_or_calibration": False,
+            "selection_applied_to_main_output": False,
+            "required_final_readout": "propagated",
+            "uses_target_calibration": False,
+            "uses_scene_id_branching": False,
+            "scoring_adapter": _registered_forward_scoring_contract(args),
+        }
+    return {
+        "mode": mode,
+        "status": "protocol_authority_bound_non_exact_diagnostic",
+        "strict_unseen_eligible": False,
+        "strict_unseen_scoring_binding": (
+            "nvos_strict_unseen_v1_non_exact_beta_centered_posterior"
+        ),
+        "field_prior_stage": "post_reliability_pre_registered_fusion",
+        "field_prior_formula": (
+            "sigmoid(field_unary/solver_unary_temperature)"
+        ),
+        "registered_observation_confidence_role": "seed_construction_only",
+        "compositor": "exact_front_to_back_sparse_triplets",
+        "prompt_registration_mode": "raster_adjoint",
+        "prompt_registration_scale": 1.0,
+        "compositor_resolution": "native_prompt_registration_raster",
+        "compositor_alpha_threshold": 0.0,
+        "score_feature_contribution_gamma": 1.0,
+        "score_gamma_role": "target_score_render_only_not_forward_e_step",
+        "capability_invalid_policy": "exclude_before_forward_and_e_step",
+        "labeled_policy": "positive_or_negative_only",
+        "unlabeled_scribble_policy": "unobserved_not_negative",
+        "all_pixel_policy": "all_prompt_registration_raster_pixels",
+        "e_steps": 1,
+        "prior_pseudocount": 1.0,
+        "confidence_formula": "1-(1-rho)/(1+n)",
+        "fusion_formula": "(1-c)*p_field+c*mu",
+        "accumulation_dtype": "float64_cpu",
+        "evidence_dtype": "float32",
+        "nll_eps": 1e-12,
+        "saturated_likelihood_policy": (
+            "sign_symmetric_common_perturbation_limit"
+        ),
+        "nll_used_for_selection_or_calibration": False,
+        "selection_applied_to_main_output": False,
+        "required_final_readout": "propagated",
+        "scoring_adapter": _registered_forward_scoring_contract(args),
+    }
+
+
+def _registered_forward_scoring_contract(
+    args: argparse.Namespace,
+) -> dict[str, object] | None:
+    """Return the non-exact strict-row scoring adapter selected by the method."""
+
+    mode = str(getattr(args, "registered_forward_unary", "none"))
+    if mode == "none":
+        return None
+    if mode not in {"beta_coverage_v1", "beta_balanced_residual_v2"}:
+        raise ValueError(f"unknown registered forward unary mode {mode!r}")
+    return {
+        "score_semantics": "beta_centered_posterior",
+        "prediction_representation": "continuous_beta_centered_posterior",
+        "threshold": {"comparison": "greater_or_equal", "value": 0.0},
+        "resize": "nearest",
+    }
+
+
+def _center_registered_forward_score_map(
+    posterior: np.ndarray,
+) -> np.ndarray:
+    """Map a rendered foreground posterior to a zero-centered score."""
+
+    values = np.asarray(posterior)
+    if values.ndim != 2 or not np.issubdtype(values.dtype, np.floating):
+        raise ValueError("rendered beta posterior must be a floating 2-D array")
+    if not bool(np.isfinite(values).all()):
+        raise ValueError("rendered beta posterior contains NaN or infinity")
+    tolerance = 1e-6
+    if bool((values < -tolerance).any()) or bool((values > 1.0 + tolerance).any()):
+        raise ValueError("rendered beta posterior must lie in [0,1]")
+    clipped = np.clip(values.astype(np.float32, copy=False), 0.0, 1.0)
+    return clipped * np.float32(2.0) - np.float32(1.0)
+
+
+def _resize_nvos_score_for_evaluation(
+    score: np.ndarray,
+    target_shape: tuple[int, int],
+    *,
+    registered_forward_unary: str,
+) -> np.ndarray:
+    """Apply the selected method's explicit score-resize adapter."""
+
+    height, width = map(int, target_shape)
+    if height <= 0 or width <= 0:
+        raise ValueError("target score shape must be positive")
+    mode = str(registered_forward_unary)
+    if mode == "none":
+        interpolation = cv2.INTER_LINEAR
+    elif mode in {"beta_coverage_v1", "beta_balanced_residual_v2"}:
+        interpolation = cv2.INTER_NEAREST
+    else:
+        raise ValueError(f"unknown registered forward unary mode {mode!r}")
+    return cv2.resize(
+        np.asarray(score),
+        (width, height),
+        interpolation=interpolation,
+    )
+
+
+def _load_registered_forward_protocol_authority(
+    args: argparse.Namespace,
+    candidate_run_manifest: Mapping[str, object] | None,
+    candidate_method_contract_sha256: str,
+) -> dict[str, object] | None:
+    """Validate the hash-bound inline receipt without opening authority sources."""
+
+    scoring = _registered_forward_scoring_contract(args)
+    if scoring is None:
+        return None
+    method_sha = str(candidate_method_contract_sha256)
+    if len(method_sha) != 64 or any(
+        character not in "0123456789abcdef" for character in method_sha
+    ):
+        raise ValueError(
+            "registered forward Beta requires a validated candidate method contract SHA256"
+        )
+    if not isinstance(candidate_run_manifest, Mapping):
+        raise ValueError(
+            "registered forward Beta requires an authority-bound candidate run manifest"
+        )
+    raw_authority = candidate_run_manifest.get(
+        "registered_forward_protocol_authority"
+    )
+    declared_sha256 = candidate_run_manifest.get(
+        "registered_forward_protocol_authority_sha256"
+    )
+    if not isinstance(raw_authority, Mapping):
+        raise ValueError(
+            "beta candidate run manifest lacks inline protocol authority"
+        )
+    authority = json.loads(json.dumps(raw_authority))
+    if (
+        not isinstance(declared_sha256, str)
+        or len(declared_sha256) != 64
+        or any(
+            character not in "0123456789abcdef"
+            for character in declared_sha256
+        )
+        or _json_sha256(authority) != declared_sha256
+    ):
+        raise ValueError("inline protocol authority canonical SHA256 differs")
+
+    # Lazy import keeps the historical path independent of the new authority
+    # implementation. Validation is pure: the checked-in authority builder is
+    # used by the manifest producer, while snapshot runtime opens no paper/
+    # source authority file and accepts no caller authority path or exact flag.
+    from radio_gs.scripts.bind_nvos_forward_beta_protocol_authority import (
+        validate_authority_payload,
+    )
+
+    validate_authority_payload(authority)
+    expected_top_level = {
+        "schema_version",
+        "artifact_type",
+        "status",
+        "candidate",
+        "scoring_contract",
+        "strict_unseen_protocol_exact_match",
+        "strict_unseen_exact_match_blockers",
+        "protocol_provenance",
+        "protocol_provenance_sha256",
+        "external_comparator_provenance",
+    }
+    if set(authority) != expected_top_level:
+        raise ValueError("inline protocol authority fields differ")
+    candidate = authority.get("candidate")
+    if not isinstance(candidate, Mapping) or set(candidate) != {
+        "method_family",
+        "method_contract_sha256",
+        "parent_method_exact_match",
+    }:
+        raise ValueError("inline protocol authority candidate fields differ")
+    if authority.get("scoring_contract") != scoring:
+        raise ValueError("inline protocol authority scoring contract differs")
+    if authority.get("strict_unseen_protocol_exact_match") is not False:
+        raise ValueError(
+            "registered forward Beta protocol authority must remain strict-unseen non-exact"
+        )
+    if authority.get("strict_unseen_exact_match_blockers") != [
+        "score_semantics_differs",
+        "prediction_representation_differs",
+    ]:
+        raise ValueError("inline protocol authority exactness blockers differ")
+    if (
+        candidate.get("method_contract_sha256")
+        != method_sha
+    ):
+        raise ValueError("protocol authority candidate method SHA256 differs")
+    return authority
+
+
+def _validate_registered_forward_unary_args(args: argparse.Namespace) -> None:
+    """Fail closed before model loading when the diagnostic is misconfigured."""
+
+    contract = _registered_forward_unary_contract(args)
+    if contract is None:
+        return
+    requirements = {
+        "--support-mode canonical_support": (
+            str(args.support_mode) == "canonical_support"
+        ),
+        "--registered-observation-fusion probability_mixture": (
+            str(args.registered_observation_fusion) == "probability_mixture"
+        ),
+        "--registered-seed-unary-weight 0": (
+            float(args.registered_seed_unary_weight) == 0.0
+        ),
+        "--registered-readout-stage propagated": (
+            str(args.registered_readout_stage) == "propagated"
+        ),
+        "--prompt-registration-mode raster_adjoint": (
+            str(args.prompt_registration_mode) == "raster_adjoint"
+        ),
+        "--prompt-registration-scale 1": (
+            float(args.prompt_registration_scale) == 1.0
+        ),
+        "--alpha-threshold 0": float(args.alpha_threshold) == 0.0,
+        "--feature-contribution-gamma 1": (
+            float(args.feature_contribution_gamma) == 1.0
+        ),
+    }
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    mode = str(getattr(args, "registered_forward_unary", "none"))
+    if mode == "beta_balanced_residual_v2" and not str(
+        getattr(args, "canonical_reliability_cache", "")
+    ).strip():
+        failed.append("--canonical-reliability-cache <query-independent-v1>")
+    if mode == "beta_balanced_residual_v2" and str(
+        getattr(args, "registered_seed_construction", "winner_take_all")
+    ) != "joint_signed":
+        failed.append("--registered-seed-construction joint_signed")
+    if mode == "beta_balanced_residual_v2" and not (
+        0.0 < float(getattr(args, "hard_seed_threshold", 0.0)) <= 1.0
+    ):
+        failed.append("--hard-seed-threshold in (0,1]")
+    if failed:
+        raise ValueError(
+            f"{mode} requires " + ", ".join(failed)
+        )
+
+
+def _compact_registered_forward_beta_diagnostics(
+    diagnostics: RegisteredForwardBetaDiagnostics,
+    capability_valid: torch.Tensor,
+) -> dict[str, object]:
+    """Summarize the CPU vectors without persisting primitive/pixel arrays."""
+
+    valid = torch.as_tensor(capability_valid).detach().bool().cpu().reshape(-1)
+    primitive_vectors = {
+        "positive_expected_count": diagnostics.positive_expected_count,
+        "negative_expected_count": diagnostics.negative_expected_count,
+        "labeled_expected_count": diagnostics.labeled_expected_count,
+        "visible_contribution_mass": diagnostics.visible_contribution_mass,
+        "labeled_contribution_mass": diagnostics.labeled_contribution_mass,
+        "labeled_coverage": diagnostics.labeled_coverage,
+        "beta_confidence": diagnostics.beta_confidence,
+        "effective_confidence": diagnostics.effective_confidence,
+    }
+    vectors = {
+        name: torch.as_tensor(values).detach().double().cpu().reshape(-1)
+        for name, values in primitive_vectors.items()
+    }
+    if any(values.shape != valid.shape for values in vectors.values()):
+        raise ValueError("registered forward diagnostics do not align with capability rows")
+    if any(not bool(torch.isfinite(values).all()) for values in vectors.values()):
+        raise ValueError("registered forward diagnostics contain NaN or infinity")
+
+    observed = valid & (vectors["labeled_expected_count"] > 0)
+    visible = valid & (vectors["visible_contribution_mass"] > 0)
+
+    def distribution(values: torch.Tensor, mask: torch.Tensor) -> dict[str, object]:
+        selected = values[mask]
+        if selected.numel() == 0:
+            return {"count": 0, "min": None, "q50": None, "q90": None, "max": None}
+        quantiles = torch.quantile(
+            selected,
+            torch.tensor([0.5, 0.9], dtype=torch.float64),
+        )
+        return {
+            "count": int(selected.numel()),
+            "min": float(selected.min()),
+            "q50": float(quantiles[0]),
+            "q90": float(quantiles[1]),
+            "max": float(selected.max()),
+        }
+
+    compact = {
+        "protocol_status": str(diagnostics.protocol_status),
+        "nll": {
+            "before": float(diagnostics.nll_before),
+            "after": float(diagnostics.nll_after),
+            "delta": float(diagnostics.nll_after - diagnostics.nll_before),
+            "used_for_selection_or_calibration": False,
+        },
+        "observable_labeled_alpha_mass": float(
+            diagnostics.observable_labeled_alpha_mass
+        ),
+        "observable_labeled_pixel_count": int(
+            diagnostics.observable_labeled_pixel_count
+        ),
+        "unobservable_labeled_pixel_count": int(
+            diagnostics.unobservable_labeled_pixel_count
+        ),
+        "valid_hit_count": int(diagnostics.valid_hit_count),
+        "row_counts": {
+            "all": int(valid.numel()),
+            "capability_valid": int(valid.sum()),
+            "visible_valid": int(visible.sum()),
+            "observed_valid": int(observed.sum()),
+        },
+        "sums": {
+            name: float(values[valid].sum())
+            for name, values in vectors.items()
+        },
+        "distributions": {
+            "labeled_expected_count_observed": distribution(
+                vectors["labeled_expected_count"], observed
+            ),
+            "labeled_coverage_visible": distribution(
+                vectors["labeled_coverage"], visible
+            ),
+            "beta_confidence_observed": distribution(
+                vectors["beta_confidence"], observed
+            ),
+            "effective_confidence_observed": distribution(
+                vectors["effective_confidence"], observed
+            ),
+        },
+        "vectors_persisted": False,
+    }
+    optional_vectors = {
+        "raw_positive_expected_count": diagnostics.raw_positive_expected_count,
+        "raw_negative_expected_count": diagnostics.raw_negative_expected_count,
+        "field_prior_reliability": diagnostics.field_prior_reliability,
+        "field_prior_coverage": diagnostics.field_prior_coverage,
+        "field_prior_concentration": diagnostics.field_prior_concentration,
+        "residual_evidence_concentration": (
+            diagnostics.residual_evidence_concentration
+        ),
+    }
+    if any(value is not None for value in optional_vectors.values()):
+        if any(value is None for value in optional_vectors.values()):
+            raise ValueError("registered forward v2 diagnostics are incomplete")
+        v2_vectors = {
+            name: torch.as_tensor(value).detach().double().cpu().reshape(-1)
+            for name, value in optional_vectors.items()
+        }
+        if any(values.shape != valid.shape for values in v2_vectors.values()):
+            raise ValueError("registered forward v2 diagnostics do not align")
+        if any(
+            not bool(torch.isfinite(values).all())
+            for values in v2_vectors.values()
+        ):
+            raise ValueError("registered forward v2 diagnostics are non-finite")
+        if (
+            diagnostics.positive_anchor_mask is None
+            or diagnostics.negative_anchor_mask is None
+            or diagnostics.positive_class_balance_scale is None
+            or diagnostics.negative_class_balance_scale is None
+        ):
+            raise ValueError("registered forward v2 anchor diagnostics are absent")
+        positive_anchor = torch.as_tensor(
+            diagnostics.positive_anchor_mask
+        ).detach().bool().cpu().reshape(-1)
+        negative_anchor = torch.as_tensor(
+            diagnostics.negative_anchor_mask
+        ).detach().bool().cpu().reshape(-1)
+        if (
+            positive_anchor.shape != valid.shape
+            or negative_anchor.shape != valid.shape
+            or bool((positive_anchor & negative_anchor).any())
+        ):
+            raise ValueError("registered forward v2 anchor diagnostics are invalid")
+        compact["v2"] = {
+            "class_balance": {
+                "positive_scale": float(
+                    diagnostics.positive_class_balance_scale
+                ),
+                "negative_scale": float(
+                    diagnostics.negative_class_balance_scale
+                ),
+                "raw_positive_sum": float(
+                    v2_vectors["raw_positive_expected_count"][valid].sum()
+                ),
+                "raw_negative_sum": float(
+                    v2_vectors["raw_negative_expected_count"][valid].sum()
+                ),
+                "balanced_positive_sum": float(
+                    vectors["positive_expected_count"][valid].sum()
+                ),
+                "balanced_negative_sum": float(
+                    vectors["negative_expected_count"][valid].sum()
+                ),
+            },
+            "anchors": {
+                "positive": int((positive_anchor & valid).sum()),
+                "negative": int((negative_anchor & valid).sum()),
+                "conflicting": 0,
+            },
+            "distributions": {
+                "field_prior_reliability_valid": distribution(
+                    v2_vectors["field_prior_reliability"], valid
+                ),
+                "field_prior_coverage_valid": distribution(
+                    v2_vectors["field_prior_coverage"], valid
+                ),
+                "field_prior_concentration_valid": distribution(
+                    v2_vectors["field_prior_concentration"], valid
+                ),
+                "residual_evidence_concentration_observed": distribution(
+                    v2_vectors["residual_evidence_concentration"], observed
+                ),
+            },
+            "vectors_persisted": False,
+        }
+    return compact
+
+
+def _execute_registered_forward_beta(
+    engine: CanonicalQueryEngine,
+    query,
+    feature_banks: Mapping[str, torch.Tensor],
+    feature_signatures,
+    *,
+    gaussian_ids: torch.Tensor,
+    pixel_ids: torch.Tensor,
+    contribution_weights: torch.Tensor,
+    capability_valid: torch.Tensor,
+    valid_rows: torch.Tensor,
+    positive_pixels: torch.Tensor,
+    negative_pixels: torch.Tensor,
+    unary_temperature: float,
+    mode: str = "beta_coverage_v1",
+    primitive_reliability: torch.Tensor | None = None,
+    primitive_coverage: torch.Tensor | None = None,
+    anchor_threshold: float | None = None,
+):
+    """Execute the field pass and beta-fused pass around one CPU primitive."""
+
+    valid = torch.as_tensor(capability_valid).detach().bool().cpu().reshape(-1)
+    rows = torch.as_tensor(valid_rows).detach().long().cpu().reshape(-1)
+    if not torch.equal(rows, torch.where(valid)[0]):
+        raise ValueError("valid_rows must exactly enumerate capability_valid")
+    temperature = float(unary_temperature)
+    if not np.isfinite(temperature) or temperature <= 0:
+        raise ValueError("unary_temperature must be finite and positive")
+
+    field_query = replace(query, primitive_unary_evidence=None)
+    field_result = engine.execute(
+        field_query,
+        feature_banks,
+        feature_signatures=feature_signatures,
+    )
+    valid_field_prior = torch.sigmoid(
+        field_result.unary / temperature
+    ).detach().float().cpu()
+    if valid_field_prior.shape != rows.shape:
+        raise ValueError("field unary does not align with capability-valid rows")
+    field_prior = torch.full((valid.numel(),), 0.5, dtype=torch.float32)
+    field_prior[rows] = valid_field_prior
+
+    positive = torch.as_tensor(positive_pixels).detach().bool().cpu().reshape(-1)
+    negative = torch.as_tensor(negative_pixels).detach().bool().cpu().reshape(-1)
+    labeled = positive | negative
+    all_pixels = torch.ones_like(labeled)
+    resolved_mode = str(mode)
+    common_arguments = (
+        torch.as_tensor(gaussian_ids).detach().cpu(),
+        torch.as_tensor(pixel_ids).detach().cpu(),
+        torch.as_tensor(contribution_weights).detach().cpu(),
+        valid,
+        field_prior,
+    )
+    if resolved_mode == "beta_coverage_v1":
+        if primitive_reliability is not None or primitive_coverage is not None:
+            raise ValueError("beta_coverage_v1 does not consume v2 prior precision")
+        forward_observation, diagnostics = registered_forward_beta_observation(
+            *common_arguments,
+            positive,
+            negative,
+            labeled,
+            all_pixels,
+        )
+    elif resolved_mode == "beta_balanced_residual_v2":
+        if primitive_reliability is None or primitive_coverage is None:
+            raise ValueError(
+                "beta_balanced_residual_v2 requires reliability and coverage"
+            )
+        if anchor_threshold is None:
+            raise ValueError(
+                "beta_balanced_residual_v2 requires an anchor threshold"
+            )
+        forward_observation, diagnostics = (
+            registered_forward_beta_balanced_residual_observation(
+                *common_arguments,
+                torch.as_tensor(primitive_reliability).detach().cpu(),
+                torch.as_tensor(primitive_coverage).detach().cpu(),
+                positive,
+                negative,
+                labeled,
+                all_pixels,
+                anchor_threshold=float(anchor_threshold),
+            )
+        )
+    else:
+        raise ValueError(f"unknown registered forward unary mode {resolved_mode!r}")
+    forward_valid_observation = PrimitiveUnaryEvidence(
+        forward_observation.values[rows],
+        forward_observation.source,
+        (
+            forward_observation.confidence[rows]
+            if forward_observation.confidence is not None
+            else None
+        ),
+    )
+    final_query = replace(field_query, primitive_unary_evidence=forward_valid_observation)
+    if resolved_mode == "beta_balanced_residual_v2":
+        if (
+            diagnostics.positive_anchor_mask is None
+            or diagnostics.negative_anchor_mask is None
+            or field_query.positive_seeds is None
+            or field_query.negative_seeds is None
+        ):
+            raise ValueError("beta_balanced_residual_v2 anchor contract is incomplete")
+        positive_anchor = diagnostics.positive_anchor_mask[rows]
+        negative_anchor = diagnostics.negative_anchor_mask[rows]
+        positive_seed = field_query.positive_seeds
+        negative_seed = field_query.negative_seeds
+        positive_weights = torch.maximum(
+            positive_seed.weights,
+            positive_anchor.to(
+                device=positive_seed.weights.device,
+                dtype=positive_seed.weights.dtype,
+            ),
+        )
+        negative_weights = torch.maximum(
+            negative_seed.weights,
+            negative_anchor.to(
+                device=negative_seed.weights.device,
+                dtype=negative_seed.weights.dtype,
+            ),
+        )
+        final_query = replace(
+            final_query,
+            positive_seeds=replace(
+                positive_seed,
+                weights=positive_weights,
+                source=positive_seed.source + "+forward_beta_v2_anchor",
+            ),
+            negative_seeds=replace(
+                negative_seed,
+                weights=negative_weights,
+                source=negative_seed.source + "+forward_beta_v2_anchor",
+            ),
+        )
+    result = engine.execute(
+        final_query,
+        feature_banks,
+        feature_signatures=feature_signatures,
+    )
+    return result, field_result, forward_observation, diagnostics
+
+
 def _dataset_protocol_contract(
     manifest: Mapping[str, object],
     *,
@@ -371,6 +1031,8 @@ def _candidate_method_manifest_contract(
     final_readout = str(
         getattr(args, "registered_readout_stage", "connected")
     )
+    forward_unary = _registered_forward_unary_contract(args)
+    forward_scoring = _registered_forward_scoring_contract(args)
     return {
         "support_mode": str(args.support_mode),
         "region_space": str(args.region_space),
@@ -466,6 +1128,11 @@ def _candidate_method_manifest_contract(
         ),
         "selection_applied_to_main_output": final_readout == "connected",
         "final_readout": final_readout,
+        **(
+            {"registered_forward_unary": forward_unary}
+            if forward_unary is not None
+            else {}
+        ),
         "graph": {
             "policy": str(args.graph_policy),
             "component_policy": str(args.component_graph_policy),
@@ -489,9 +1156,17 @@ def _candidate_method_manifest_contract(
                 args.feature_contribution_gamma
             ),
             "score_chunk_size": int(args.score_chunk_size),
-            "pixel_threshold": float(args.solver_support_threshold),
+            "pixel_threshold": (
+                float(forward_scoring["threshold"]["value"])
+                if forward_scoring is not None
+                else float(args.solver_support_threshold)
+            ),
             "threshold_comparison": "greater_or_equal",
-            "resize_to_ground_truth": "cv2.INTER_LINEAR",
+            "resize_to_ground_truth": (
+                "cv2.INTER_NEAREST"
+                if forward_scoring is not None
+                else "cv2.INTER_LINEAR"
+            ),
         },
         "solver": {
             "type": str(getattr(args, "solver_type", "diffusion")),
@@ -524,9 +1199,14 @@ def _candidate_method_manifest_contract(
                 getattr(args, "seeded_component_min_weight", 0.20)
             ),
         },
-        "canonical_reliability_cache": str(
-            getattr(args, "canonical_reliability_cache", "")
-        ).strip(),
+        "canonical_reliability_cache": (
+            "per_scene_source_artifact:canonical_primitive_reliability_v1.pt"
+            if (
+                str(getattr(args, "registered_forward_unary", "none"))
+                == "beta_balanced_residual_v2"
+            )
+            else str(getattr(args, "canonical_reliability_cache", "")).strip()
+        ),
         "diagnostic_graph_affinity_override": str(
             getattr(args, "diagnostic_graph_affinity_override", "")
         ).strip(),
@@ -586,6 +1266,33 @@ def _validate_candidate_run_manifest(
             raise ValueError(
                 f"candidate implementation source mismatch: {relative}"
             )
+    if _registered_forward_scoring_contract(args) is not None:
+        required_beta_sources = [
+            "radio_gs/scripts/eval_nvos_gaussian_first.py",
+            "radio_gs/querying/evidence_scorer.py",
+            "radio_gs/rendering/contribution_compositor.py",
+            "radio_gs/scripts/bind_nvos_forward_beta_protocol_authority.py",
+            "radio_gs/scripts/bind_evaluation_protocol_freeze.py",
+            "radio_gs/scripts/validate_evaluation_protocol_freeze.py",
+        ]
+        if (
+            str(getattr(args, "registered_forward_unary", "none"))
+            == "beta_balanced_residual_v2"
+        ):
+            required_beta_sources.extend(
+                [
+                    "radio_gs/interfaces/capability_cache.py",
+                    "radio_gs/field/primitive_reliability.py",
+                    "radio_gs/scripts/build_canonical_reliability_cache.py",
+                ]
+            )
+        for relative in required_beta_sources:
+            source = implementation_root / relative
+            if implementation.get(relative) != _file_sha256(source):
+                raise ValueError(
+                    "beta candidate manifest lacks current implementation "
+                    f"authority: {relative}"
+                )
     runner = Path(str(payload.get("runner", ""))).resolve()
     if (
         not runner.is_file()
@@ -605,6 +1312,13 @@ def _validate_candidate_run_manifest(
             Path(args.canonical_support_graph).resolve()
         ),
     }
+    if (
+        str(getattr(args, "registered_forward_unary", "none"))
+        == "beta_balanced_residual_v2"
+    ):
+        expected_paths["canonical_primitive_reliability_v1.pt"] = str(
+            Path(args.canonical_reliability_cache).resolve()
+        )
     for name, expected_path in expected_paths.items():
         record = source_records.get(name)
         if not isinstance(record, dict):
@@ -849,6 +1563,8 @@ def _screen_region_map(
 
 
 def run(args: argparse.Namespace) -> dict:
+    _validate_registered_forward_unary_args(args)
+    registered_forward_contract = _registered_forward_unary_contract(args)
     device = torch.device(args.device)
     manifest_path = Path(args.manifest).resolve()
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -867,6 +1583,18 @@ def run(args: argparse.Namespace) -> dict:
     candidate_method_contract_sha256 = (
         _json_sha256(candidate_run_manifest["method_contract"])
         if candidate_run_manifest is not None
+        else ""
+    )
+    registered_forward_protocol_authority = (
+        _load_registered_forward_protocol_authority(
+            args,
+            candidate_run_manifest,
+            candidate_method_contract_sha256,
+        )
+    )
+    registered_forward_protocol_authority_sha256 = (
+        _json_sha256(registered_forward_protocol_authority)
+        if registered_forward_protocol_authority is not None
         else ""
     )
     scene = _scene_record(manifest, args.scene_id)
@@ -1483,11 +2211,78 @@ def run(args: argparse.Namespace) -> dict:
                     else None
                 ),
             )
-            result = engine.execute(
-                query,
-                feature_banks,
-                feature_signatures=capability_bank.signatures,
-            )
+            forward_unary_contract = _registered_forward_unary_contract(args)
+            if forward_unary_contract is None:
+                result = engine.execute(
+                    query,
+                    feature_banks,
+                    feature_signatures=capability_bank.signatures,
+                )
+            else:
+                exact_hits = rasterize_single_view_contributions(
+                    model,
+                    renderer,
+                    prompt_pose,
+                    height=height,
+                    width=width,
+                )
+                positive_pixels = torch.from_numpy(
+                    np.ascontiguousarray(positive.reshape(-1))
+                ).bool()
+                negative_pixels = torch.from_numpy(
+                    np.ascontiguousarray(negative.reshape(-1))
+                ).bool()
+                (
+                    result,
+                    _field_result,
+                    _forward_observation,
+                    forward_diagnostics,
+                ) = _execute_registered_forward_beta(
+                    engine,
+                    query,
+                    feature_banks,
+                    capability_bank.signatures,
+                    gaussian_ids=exact_hits["gaussian_ids"],
+                    pixel_ids=exact_hits["pixel_ids"],
+                    contribution_weights=exact_hits["weights"],
+                    capability_valid=capability_bank.valid,
+                    valid_rows=valid_rows,
+                    positive_pixels=positive_pixels,
+                    negative_pixels=negative_pixels,
+                    unary_temperature=float(args.solver_unary_temperature),
+                    mode=str(args.registered_forward_unary),
+                    primitive_reliability=(
+                        primitive_reliability.confidence
+                        if (
+                            str(args.registered_forward_unary)
+                            == "beta_balanced_residual_v2"
+                            and primitive_reliability is not None
+                        )
+                        else None
+                    ),
+                    primitive_coverage=(
+                        primitive_reliability.components["observation_evidence"]
+                        if (
+                            str(args.registered_forward_unary)
+                            == "beta_balanced_residual_v2"
+                            and primitive_reliability is not None
+                        )
+                        else None
+                    ),
+                    anchor_threshold=(
+                        float(args.hard_seed_threshold)
+                        if str(args.registered_forward_unary)
+                        == "beta_balanced_residual_v2"
+                        else None
+                    ),
+                )
+                registered_prompt_evidence["registered_forward_unary"] = {
+                    "contract": forward_unary_contract,
+                    "diagnostics": _compact_registered_forward_beta_diagnostics(
+                        forward_diagnostics,
+                        capability_bank.valid,
+                    ),
+                }
             def expand_valid_rows(values: torch.Tensor) -> torch.Tensor:
                 expanded = torch.zeros(
                     capability_bank.num_gaussians, dtype=torch.float32
@@ -1576,6 +2371,9 @@ def run(args: argparse.Namespace) -> dict:
         positive_seed_count = None
         negative_seed_count = None
 
+    if registered_forward_protocol_authority is not None:
+        prediction_threshold = 0.0
+
     output_root = Path(args.output_dir).resolve()
     score_paths: dict[str, str] = {}
     score_sha256: dict[str, str] = {}
@@ -1641,7 +2439,10 @@ def run(args: argparse.Namespace) -> dict:
                         getattr(args, "valid_support_coverage_power", 0.0)
                     ),
                 )
-        return score_map.float().cpu().numpy()
+        rendered_score = score_map.float().cpu().numpy()
+        if registered_forward_protocol_authority is not None:
+            return _center_registered_forward_score_map(rendered_score)
+        return rendered_score
 
     for frame_id in evaluation_frames:
         view = _view_by_frame(views, frame_id)
@@ -1692,9 +2493,18 @@ def run(args: argparse.Namespace) -> dict:
                 label=f"{args.scene_id} target {frame_id}",
             )
         gt = load_ground_truth_mask(frame["ground_truth"]).astype(bool)
-        score = cv2.resize(
-            predictions[frame_id], (gt.shape[1], gt.shape[0]), interpolation=cv2.INTER_LINEAR
-        )
+        if registered_forward_protocol_authority is not None:
+            score = _resize_nvos_score_for_evaluation(
+                predictions[frame_id],
+                gt.shape,
+                registered_forward_unary=str(args.registered_forward_unary),
+            )
+        else:
+            score = cv2.resize(
+                predictions[frame_id],
+                (gt.shape[1], gt.shape[0]),
+                interpolation=cv2.INTER_LINEAR,
+            )
         pred = score >= prediction_threshold
         intersection = np.logical_and(pred, gt).sum()
         union = np.logical_or(pred, gt).sum()
@@ -1704,11 +2514,18 @@ def run(args: argparse.Namespace) -> dict:
             {"frame_id": frame_id, "foreground_iou": iou, "pixel_accuracy": accuracy}
         )
         for stage_name, per_frame in stage_predictions.items():
-            stage_score = cv2.resize(
-                per_frame[frame_id],
-                (gt.shape[1], gt.shape[0]),
-                interpolation=cv2.INTER_LINEAR,
-            )
+            if registered_forward_protocol_authority is not None:
+                stage_score = _resize_nvos_score_for_evaluation(
+                    per_frame[frame_id],
+                    gt.shape,
+                    registered_forward_unary=str(args.registered_forward_unary),
+                )
+            else:
+                stage_score = cv2.resize(
+                    per_frame[frame_id],
+                    (gt.shape[1], gt.shape[0]),
+                    interpolation=cv2.INTER_LINEAR,
+                )
             stage_pred = stage_score >= prediction_threshold
             stage_intersection = np.logical_and(stage_pred, gt).sum()
             stage_union = np.logical_or(stage_pred, gt).sum()
@@ -1741,7 +2558,8 @@ def run(args: argparse.Namespace) -> dict:
         "scene_id": args.scene_id,
         "protocol_hash": manifest["protocol_hash"],
         "method": (
-            f"gaussian_first_{args.support_mode}_{args.region_space}_cosine_margin_"
+            f"gaussian_first_{args.support_mode}_{args.region_space}_"
+            f"{'beta_centered_posterior' if registered_forward_protocol_authority is not None else 'cosine_margin'}_"
             f"{args.prototype_count}proto_"
             f"{'raster_responsibility' if args.support_mode == 'canonical_support' else args.prompt_feature_source}_prompt"
         ),
@@ -1754,6 +2572,22 @@ def run(args: argparse.Namespace) -> dict:
         "prompt_native_resolution": [native_height, native_width],
         "prompt_registration_resolution": [height, width],
         "registered_prompt_evidence": registered_prompt_evidence,
+        **(
+            {
+                "registered_forward_protocol_authority": (
+                    registered_forward_protocol_authority
+                ),
+                "registered_forward_protocol_authority_sha256": (
+                    registered_forward_protocol_authority_sha256
+                ),
+                "registered_forward_protocol_authority_builder": (
+                    "radio_gs/scripts/"
+                    "bind_nvos_forward_beta_protocol_authority.py"
+                ),
+            }
+            if registered_forward_protocol_authority is not None
+            else {}
+        ),
         "support_mode": args.support_mode,
         "support_view_count": support_view_count,
         "support_threshold": float(args.support_threshold),
@@ -1797,6 +2631,15 @@ def run(args: argparse.Namespace) -> dict:
             ),
             "query_dependent": False,
             "changes_geometry_or_alpha": False,
+            **(
+                {
+                    "post_compositor_scoring_adapter": (
+                        _registered_forward_scoring_contract(args)
+                    )
+                }
+                if registered_forward_protocol_authority is not None
+                else {}
+            ),
         },
         "score_threshold": prediction_threshold,
         "shared_solver": (
@@ -1902,6 +2745,11 @@ def run(args: argparse.Namespace) -> dict:
                 "registered_readout_stage": str(
                     getattr(args, "registered_readout_stage", "connected")
                 ),
+                **(
+                    {"registered_forward_unary": registered_forward_contract}
+                    if registered_forward_contract is not None
+                    else {}
+                ),
                 "graph_policy": args.graph_policy,
                 "component_graph_policy": args.component_graph_policy,
                 "graph_legacy_residual": float(args.graph_legacy_residual),
@@ -1997,10 +2845,15 @@ def run(args: argparse.Namespace) -> dict:
                 else ""
             ),
             "candidate_eligibility": candidate_eligibility,
-            "frozen_diagnostic_eligible": not bool(
-                str(args.diagnostic_graph_affinity_override).strip()
+            "frozen_diagnostic_eligible": (
+                registered_forward_contract is None
+                and not bool(
+                    str(args.diagnostic_graph_affinity_override).strip()
+                )
             ),
             "main_result_eligible": (
+                registered_forward_contract is None
+                and
                 (
                     candidate_run_manifest is None
                     or candidate_eligibility == "main_result_eligible"
@@ -2008,6 +2861,26 @@ def run(args: argparse.Namespace) -> dict:
                 and not bool(
                     str(args.diagnostic_graph_affinity_override).strip()
                 )
+            ),
+            **(
+                {
+                    "strict_unseen_eligible": False,
+                    "strict_unseen_protocol_exact_match": (
+                        registered_forward_protocol_authority[
+                            "strict_unseen_protocol_exact_match"
+                        ]
+                    ),
+                    "strict_unseen_scoring_binding": (
+                        registered_forward_contract[
+                            "strict_unseen_scoring_binding"
+                        ]
+                    ),
+                    "registered_forward_protocol_authority_sha256": (
+                        registered_forward_protocol_authority_sha256
+                    ),
+                }
+                if registered_forward_contract is not None
+                else {}
             ),
             "target_camera_names_excluded_from_support": evaluation_camera_names,
         },
@@ -2035,6 +2908,35 @@ def run(args: argparse.Namespace) -> dict:
         else _file_sha256(Path(args.radio_checkpoint).expanduser().resolve())
     )
     implementation_root = Path(__file__).resolve().parents[2]
+    implementation_relatives = (
+        "radio_gs/evaluation/promptable_segmentation.py",
+        "radio_gs/interfaces/capability_cache.py",
+        "radio_gs/config.py",
+        "radio_gs/data/lerf_dataset.py",
+        "radio_gs/models/explicit_gaussian.py",
+        "radio_gs/models/featsharp_3d.py",
+        "radio_gs/models/hcd_codec.py",
+        "radio_gs/models/hybrid_gaussian.py",
+        "radio_gs/models/screen_refiner.py",
+        "radio_gs/querying/query_spec.py",
+        "radio_gs/querying/query_compilers.py",
+        "radio_gs/querying/evidence_scorer.py",
+        "radio_gs/querying/query_engine.py",
+        "radio_gs/querying/score_calibration.py",
+        "radio_gs/querying/support_solver.py",
+        "radio_gs/rendering/feature_renderer.py",
+        "radio_gs/rendering/contribution_compositor.py",
+        "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+        "radio_gs/scripts/eval_lerf_grounding.py",
+        "radio_gs/scripts/render_promptable_nvs_features.py",
+        "radio_gs/utils/checkpoint_io.py",
+    )
+    if registered_forward_protocol_authority is not None:
+        implementation_relatives += (
+            "radio_gs/scripts/bind_nvos_forward_beta_protocol_authority.py",
+            "radio_gs/scripts/bind_evaluation_protocol_freeze.py",
+            "radio_gs/scripts/validate_evaluation_protocol_freeze.py",
+        )
     method_contract = {
         "schema_version": 2,
         "candidate_id": str(
@@ -2044,29 +2946,7 @@ def run(args: argparse.Namespace) -> dict:
         "evaluator_sha256": _file_sha256(Path(__file__).resolve()),
         "implementation_sha256": {
             relative: _file_sha256(implementation_root / relative)
-            for relative in (
-                "radio_gs/evaluation/promptable_segmentation.py",
-                "radio_gs/interfaces/capability_cache.py",
-                "radio_gs/config.py",
-                "radio_gs/data/lerf_dataset.py",
-                "radio_gs/models/explicit_gaussian.py",
-                "radio_gs/models/featsharp_3d.py",
-                "radio_gs/models/hcd_codec.py",
-                "radio_gs/models/hybrid_gaussian.py",
-                "radio_gs/models/screen_refiner.py",
-                "radio_gs/querying/query_spec.py",
-                "radio_gs/querying/query_compilers.py",
-                "radio_gs/querying/evidence_scorer.py",
-                "radio_gs/querying/query_engine.py",
-                "radio_gs/querying/score_calibration.py",
-                "radio_gs/querying/support_solver.py",
-                "radio_gs/rendering/feature_renderer.py",
-                "radio_gs/rendering/contribution_compositor.py",
-                "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
-                "radio_gs/scripts/eval_lerf_grounding.py",
-                "radio_gs/scripts/render_promptable_nvs_features.py",
-                "radio_gs/utils/checkpoint_io.py",
-            )
+            for relative in implementation_relatives
         },
         "radio_checkpoint_sha256": radio_checkpoint_sha256,
         "candidate_run_manifest_sha256": candidate_run_manifest_sha256,
@@ -2074,6 +2954,18 @@ def run(args: argparse.Namespace) -> dict:
             candidate_method_contract_sha256
         ),
         "candidate_eligibility": candidate_eligibility,
+        **(
+            {
+                "registered_forward_protocol_authority": (
+                    registered_forward_protocol_authority
+                ),
+                "registered_forward_protocol_authority_sha256": (
+                    registered_forward_protocol_authority_sha256
+                ),
+            }
+            if registered_forward_protocol_authority is not None
+            else {}
+        ),
         "asset_hash_verification_required": bool(
             getattr(args, "require_asset_hashes", False)
         ),
@@ -2148,7 +3040,20 @@ def run(args: argparse.Namespace) -> dict:
             "feature_contribution_gamma": float(args.feature_contribution_gamma),
             "pixel_threshold": float(prediction_threshold),
             "threshold_comparison": "greater_or_equal",
-            "resize_to_ground_truth": "cv2.INTER_LINEAR",
+            "resize_to_ground_truth": (
+                "cv2.INTER_NEAREST"
+                if registered_forward_protocol_authority is not None
+                else "cv2.INTER_LINEAR"
+            ),
+            **(
+                {
+                    "scoring_adapter": _registered_forward_scoring_contract(
+                        args
+                    )
+                }
+                if registered_forward_protocol_authority is not None
+                else {}
+            ),
         },
         "shared_solver": solver_contract,
     }
@@ -2166,11 +3071,21 @@ def run(args: argparse.Namespace) -> dict:
         "dataset_protocol_sha256": dataset_protocol_sha256,
         "method_config_sha256": report["method_config_sha256"],
         "prediction_representation": (
-            "coverage_weighted_foreground_posterior"
-            if bool(valid_support is not None)
-            else "alpha_normalized_foreground_posterior"
+            _registered_forward_scoring_contract(args)[
+                "prediction_representation"
+            ]
+            if registered_forward_protocol_authority is not None
+            else (
+                "coverage_weighted_foreground_posterior"
+                if bool(valid_support is not None)
+                else "alpha_normalized_foreground_posterior"
+            )
         ),
-        "score_domain": [0.0, 1.0],
+        "score_domain": (
+            [-1.0, 1.0]
+            if registered_forward_protocol_authority is not None
+            else [0.0, 1.0]
+        ),
         "final_readout": str(
             getattr(args, "registered_readout_stage", "connected")
         ),
@@ -2184,7 +3099,11 @@ def run(args: argparse.Namespace) -> dict:
                 args.feature_contribution_gamma
             ),
         },
-        "resize_to_ground_truth": "cv2.INTER_LINEAR",
+        "resize_to_ground_truth": (
+            "cv2.INTER_NEAREST"
+            if registered_forward_protocol_authority is not None
+            else "cv2.INTER_LINEAR"
+        ),
         "pixel_threshold": {
             "value": float(prediction_threshold),
             "comparison": "greater_or_equal",
@@ -2204,6 +3123,23 @@ def run(args: argparse.Namespace) -> dict:
         ),
         "empty_union_value": float(
             benchmark_protocol.get("empty_union_value", 1.0)
+        ),
+        **(
+            {
+                "score_semantics": _registered_forward_scoring_contract(args)[
+                    "score_semantics"
+                ],
+                "registered_forward_protocol_authority_sha256": (
+                    registered_forward_protocol_authority_sha256
+                ),
+                "strict_unseen_protocol_exact_match": (
+                    registered_forward_protocol_authority[
+                        "strict_unseen_protocol_exact_match"
+                    ]
+                ),
+            }
+            if registered_forward_protocol_authority is not None
+            else {}
         ),
     }
     report["legacy_protocol_hash"] = manifest["protocol_hash"]
@@ -2245,6 +3181,16 @@ def main() -> None:
     )
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--gpu-attestation-output", default="")
+    parser.add_argument(
+        "--expected-gpu-physical-index",
+        type=int,
+        choices=(0, 1),
+        default=None,
+        help=(
+            "Physical GPU0/GPU1 selected by UUID visibility; required only "
+            "for registered forward-Beta attestation."
+        ),
+    )
     parser.add_argument("--expected-gpu-uuid", default="")
     parser.add_argument("--expected-gpu-bus-id", default="")
     parser.add_argument("--region-space", choices=["radio", "sam3"], default="sam3")
@@ -2421,7 +3367,18 @@ def main() -> None:
         help=(
             "Normalize generic prompt mass by its joint maximum or interpret "
             "raw raster-adjoint mass as Poisson observation confidence; the "
-            "coverage variant additionally requires labeled footprint support."
+            "coverage variant additionally requires labeled footprint support. "
+            "With a forward-Beta mode this controls seed construction only."
+        ),
+    )
+    parser.add_argument(
+        "--registered-forward-unary",
+        choices=("none", "beta_coverage_v1", "beta_balanced_residual_v2"),
+        default="none",
+        help=(
+            "Diagnostic new-method unary from an exact registered-view forward "
+            "likelihood E-step. It is authority-bound but non-exact for frozen "
+            "strict-unseen scoring; none preserves the historical evaluator path."
         ),
     )
     parser.add_argument(
@@ -2520,6 +3477,10 @@ def main() -> None:
         ),
     )
     args = parser.parse_args()
+    try:
+        _validate_registered_forward_unary_args(args)
+    except ValueError as error:
+        parser.error(str(error))
     if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
         parser.error("--feature-contribution-gamma must be finite and positive")
     if (
@@ -2617,20 +3578,48 @@ def main() -> None:
         args.expected_gpu_uuid,
         args.expected_gpu_bus_id,
     )
-    if any(attestation_values) and not all(attestation_values):
-        parser.error(
-            "GPU attestation output, expected UUID, and expected PCI bus must "
-            "be provided together"
-        )
-    if all(attestation_values):
+    beta_forward = args.registered_forward_unary in {
+        "beta_coverage_v1",
+        "beta_balanced_residual_v2",
+    }
+    if beta_forward:
+        if not all(attestation_values) or args.expected_gpu_physical_index is None:
+            parser.error(
+                "registered forward Beta requires GPU attestation output, physical "
+                "index, expected UUID, and expected PCI bus"
+            )
         if args.device != "cuda:0":
             parser.error("GPU-attested NVOS evaluation requires --device cuda:0")
-        write_cuda_child_attestation(
+        from radio_gs.scripts.nvos_forward_beta_scene_authority import (
+            write_forward_beta_cuda_child_attestation,
+        )
+
+        write_forward_beta_cuda_child_attestation(
             output=args.gpu_attestation_output,
             scene=args.scene_id,
+            physical_index=args.expected_gpu_physical_index,
             expected_uuid=args.expected_gpu_uuid,
             expected_bus_id=args.expected_gpu_bus_id,
         )
+    else:
+        if args.expected_gpu_physical_index is not None:
+            parser.error(
+                "--expected-gpu-physical-index applies only to registered forward Beta"
+            )
+        if any(attestation_values) and not all(attestation_values):
+            parser.error(
+                "GPU attestation output, expected UUID, and expected PCI bus must "
+                "be provided together"
+            )
+        if all(attestation_values):
+            if args.device != "cuda:0":
+                parser.error("GPU-attested NVOS evaluation requires --device cuda:0")
+            write_cuda_child_attestation(
+                output=args.gpu_attestation_output,
+                scene=args.scene_id,
+                expected_uuid=args.expected_gpu_uuid,
+                expected_bus_id=args.expected_gpu_bus_id,
+            )
     print(json.dumps(run(args), indent=2))
 
 

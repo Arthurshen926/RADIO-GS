@@ -113,6 +113,56 @@ class EvidenceScoringConfig:
             raise ValueError("invalid evidence calibration parameters")
 
 
+@dataclass(frozen=True)
+class RegisteredForwardBetaDiagnostics:
+    """Auditable terms produced by one registered-prompt mixture E-step.
+
+    All tensor-valued diagnostics are CPU float64 vectors.  ``nll_*`` is the
+    valid-alpha-weighted mean Bernoulli negative log likelihood over labeled
+    pixels that have at least one capability-valid contribution.  When that
+    mass is zero, both NLL values are zero and
+    ``observable_labeled_alpha_mass`` records that the value is vacuous.
+
+    This diagnostic belongs to a method primitive and makes no independent
+    protocol claim.  The caller is responsible for binding it to an evaluation
+    authority; the current forward-Beta candidate remains non-exact and is not
+    promoted to a strict-unseen result row.
+    """
+
+    positive_expected_count: torch.Tensor
+    negative_expected_count: torch.Tensor
+    labeled_expected_count: torch.Tensor
+    visible_contribution_mass: torch.Tensor
+    labeled_contribution_mass: torch.Tensor
+    labeled_coverage: torch.Tensor
+    beta_confidence: torch.Tensor
+    effective_confidence: torch.Tensor
+    observation_probability: torch.Tensor
+    fused_probability: torch.Tensor
+    forward_probability_before: torch.Tensor
+    forward_probability_after: torch.Tensor
+    nll_before: float
+    nll_after: float
+    observable_labeled_alpha_mass: float
+    observable_labeled_pixel_count: int
+    unobservable_labeled_pixel_count: int
+    valid_hit_count: int
+    protocol_status: str = "method_primitive_no_independent_protocol_claim"
+    # v2-only audit terms.  Keeping these optional preserves the v1 constructor
+    # and serialized compact diagnostics exactly unless the independent v2
+    # primitive is selected.
+    raw_positive_expected_count: torch.Tensor | None = None
+    raw_negative_expected_count: torch.Tensor | None = None
+    field_prior_reliability: torch.Tensor | None = None
+    field_prior_coverage: torch.Tensor | None = None
+    field_prior_concentration: torch.Tensor | None = None
+    residual_evidence_concentration: torch.Tensor | None = None
+    positive_anchor_mask: torch.Tensor | None = None
+    negative_anchor_mask: torch.Tensor | None = None
+    positive_class_balance_scale: float | None = None
+    negative_class_balance_scale: float | None = None
+
+
 def shrink_unary_by_reliability(
     unary: torch.Tensor,
     reliability: torch.Tensor,
@@ -245,6 +295,634 @@ def registered_seed_unary(
     """Backward-compatible signed registered unary."""
 
     return registered_seed_observation(positive, negative)[0]
+
+
+@torch.no_grad()
+def registered_forward_beta_observation(
+    gaussian_ids: torch.Tensor,
+    pixel_ids: torch.Tensor,
+    contribution_weights: torch.Tensor,
+    capability_valid: torch.Tensor,
+    field_prior: torch.Tensor,
+    positive_pixel_mask: torch.Tensor,
+    negative_pixel_mask: torch.Tensor,
+    labeled_pixel_mask: torch.Tensor,
+    all_pixel_mask: torch.Tensor,
+    *,
+    eps: float = 1e-12,
+) -> tuple[PrimitiveUnaryEvidence, RegisteredForwardBetaDiagnostics]:
+    """Construct a strong registered unary from one forward-likelihood E-step.
+
+    ``contribution_weights`` are exact front-to-back compositor weights for the
+    sparse ``(pixel_ids, gaussian_ids)`` hits.  Only capability-valid rows enter
+    the forward mixture.  If ``q_i`` is the supplied field probability and
+    ``r_p`` its valid-contribution-normalized forward render, the expected
+    alpha-weighted positive and negative counts are
+
+    ``n+_i = q_i * sum_{p positive} A_pi / r_p`` and
+    ``n-_i = (1-q_i) * sum_{p negative} A_pi / (1-r_p)``.
+
+    Let ``mu=n+/(n++n-)`` and let ``rho`` be the labeled fraction of a row's
+    visible contribution mass.  The returned observation uses
+
+    ``c_beta=n/(1+n)``, ``c=1-(1-rho)/(1+n)``, and
+    ``signed=c*(2*mu-1)``.
+
+    Coverage therefore only strengthens the unit-pseudocount Beta update; it
+    never multiplies away a sparse scribble.  Unobserved rows have exactly
+    zero confidence and leave the field prior unchanged.  A full mask gives
+    unit confidence to every visible capability-valid row.  Saturated zero- or
+    one-probability priors use the sign-symmetric limiting responsibility
+    ``A_pi`` when the corresponding labeled likelihood is zero.
+
+    This is a CPU-only pure method primitive.  The NVOS evaluator invokes it
+    only behind the explicit forward-Beta candidate switch and a validated
+    protocol-authority receipt.  That candidate is deliberately non-exact and
+    is not a promoted strict-unseen result row.
+    """
+
+    tensors = {
+        "gaussian_ids": torch.as_tensor(gaussian_ids),
+        "pixel_ids": torch.as_tensor(pixel_ids),
+        "contribution_weights": torch.as_tensor(contribution_weights),
+        "capability_valid": torch.as_tensor(capability_valid),
+        "field_prior": torch.as_tensor(field_prior),
+        "positive_pixel_mask": torch.as_tensor(positive_pixel_mask),
+        "negative_pixel_mask": torch.as_tensor(negative_pixel_mask),
+        "labeled_pixel_mask": torch.as_tensor(labeled_pixel_mask),
+        "all_pixel_mask": torch.as_tensor(all_pixel_mask),
+    }
+    non_cpu = sorted(
+        name for name, value in tensors.items() if value.device.type != "cpu"
+    )
+    if non_cpu:
+        raise ValueError(
+            "registered forward Beta observation is CPU-only; non-CPU inputs: "
+            + ", ".join(non_cpu)
+        )
+
+    gids = tensors["gaussian_ids"]
+    pids = tensors["pixel_ids"]
+    weights = tensors["contribution_weights"]
+    valid = tensors["capability_valid"]
+    prior = tensors["field_prior"]
+    positive = tensors["positive_pixel_mask"]
+    negative = tensors["negative_pixel_mask"]
+    labeled = tensors["labeled_pixel_mask"]
+    all_pixels = tensors["all_pixel_mask"]
+
+    integer_dtypes = {
+        torch.int8,
+        torch.int16,
+        torch.int32,
+        torch.int64,
+        torch.uint8,
+    }
+    if gids.ndim != 1 or pids.ndim != 1 or weights.ndim != 1:
+        raise ValueError("sparse contribution triplets must be one-dimensional")
+    if gids.dtype not in integer_dtypes or pids.dtype not in integer_dtypes:
+        raise ValueError("gaussian_ids and pixel_ids must have integer dtype")
+    if gids.shape != pids.shape or gids.shape != weights.shape:
+        raise ValueError("sparse contribution triplets must have matching shapes")
+    if valid.ndim != 1 or prior.ndim != 1 or valid.shape != prior.shape:
+        raise ValueError("capability_valid and field_prior must align as [N]")
+    if valid.numel() == 0:
+        raise ValueError("field_prior must contain at least one primitive")
+    if valid.dtype != torch.bool:
+        raise ValueError("capability_valid must have boolean dtype")
+    pixel_masks = {
+        "positive_pixel_mask": positive,
+        "negative_pixel_mask": negative,
+        "labeled_pixel_mask": labeled,
+        "all_pixel_mask": all_pixels,
+    }
+    if any(mask.ndim != 1 for mask in pixel_masks.values()):
+        raise ValueError("registered pixel masks must be one-dimensional")
+    if any(mask.dtype != torch.bool for mask in pixel_masks.values()):
+        raise ValueError("registered pixel masks must have boolean dtype")
+    pixel_count = int(all_pixels.numel())
+    if pixel_count == 0 or any(
+        mask.shape != all_pixels.shape for mask in pixel_masks.values()
+    ):
+        raise ValueError("registered pixel masks must align as non-empty [P]")
+    if bool((positive & negative).any()):
+        raise ValueError("positive and negative pixel masks must be disjoint")
+    if not torch.equal(labeled, positive | negative):
+        raise ValueError(
+            "labeled_pixel_mask must equal positive_pixel_mask OR negative_pixel_mask"
+        )
+    if bool((labeled & ~all_pixels).any()):
+        raise ValueError("labeled pixels must be a subset of all_pixel_mask")
+
+    if not prior.dtype.is_floating_point:
+        raise ValueError("field_prior must have floating-point dtype")
+    if not bool(torch.isfinite(prior).all()) or bool((prior < 0).any()) or bool(
+        (prior > 1).any()
+    ):
+        raise ValueError("field_prior must contain finite probabilities in [0,1]")
+    if not weights.dtype.is_floating_point:
+        raise ValueError("contribution_weights must have floating-point dtype")
+    if not bool(torch.isfinite(weights).all()) or bool((weights < 0).any()) or bool(
+        (weights > 1).any()
+    ):
+        raise ValueError("contribution_weights must be finite values in [0,1]")
+    epsilon = float(eps)
+    if not math.isfinite(epsilon) or not 0.0 < epsilon < 0.5:
+        raise ValueError("eps must be finite and in (0,0.5)")
+
+    primitive_count = int(prior.numel())
+    if gids.numel():
+        gids_long = gids.long()
+        pids_long = pids.long()
+        if int(gids_long.min()) < 0 or int(gids_long.max()) >= primitive_count:
+            raise ValueError("gaussian id outside field_prior")
+        if int(pids_long.min()) < 0 or int(pids_long.max()) >= pixel_count:
+            raise ValueError("pixel id outside registered pixel masks")
+    else:
+        gids_long = gids.long()
+        pids_long = pids.long()
+
+    weights64 = weights.double()
+    raw_pixel_mass = torch.zeros(pixel_count, dtype=torch.float64)
+    if pids_long.numel():
+        raw_pixel_mass.index_add_(0, pids_long, weights64)
+    alpha_tolerance = 1e-5 * torch.maximum(
+        torch.ones_like(raw_pixel_mass), raw_pixel_mass
+    )
+    if bool((raw_pixel_mass > 1.0 + alpha_tolerance).any()):
+        raise ValueError(
+            "front-to-back contribution mass must not exceed one per pixel"
+        )
+
+    valid_hit = (
+        valid[gids_long]
+        & all_pixels[pids_long]
+        & (weights64 > 0)
+    )
+    valid_gids = gids_long[valid_hit]
+    valid_pids = pids_long[valid_hit]
+    valid_weights = weights64[valid_hit]
+    prior64 = prior.double()
+
+    pixel_visible_mass = torch.zeros(pixel_count, dtype=torch.float64)
+    pixel_foreground_mass = torch.zeros(pixel_count, dtype=torch.float64)
+    if valid_gids.numel():
+        pixel_visible_mass.index_add_(0, valid_pids, valid_weights)
+        pixel_foreground_mass.index_add_(
+            0,
+            valid_pids,
+            valid_weights * prior64[valid_gids],
+        )
+    supported_pixel = pixel_visible_mass > 0
+    forward_before = torch.zeros(pixel_count, dtype=torch.float64)
+    forward_before[supported_pixel] = (
+        pixel_foreground_mass[supported_pixel]
+        / pixel_visible_mass[supported_pixel]
+    ).clamp(0.0, 1.0)
+
+    positive_count = torch.zeros(primitive_count, dtype=torch.float64)
+    negative_count = torch.zeros(primitive_count, dtype=torch.float64)
+    visible_mass = torch.zeros(primitive_count, dtype=torch.float64)
+    labeled_mass = torch.zeros(primitive_count, dtype=torch.float64)
+    if valid_gids.numel():
+        visible_mass.index_add_(0, valid_gids, valid_weights)
+        hit_labeled = labeled[valid_pids]
+        if bool(hit_labeled.any()):
+            labeled_mass.index_add_(
+                0,
+                valid_gids[hit_labeled],
+                valid_weights[hit_labeled],
+            )
+
+        hit_positive = positive[valid_pids]
+        if bool(hit_positive.any()):
+            pos_gids = valid_gids[hit_positive]
+            pos_pids = valid_pids[hit_positive]
+            pos_weights = valid_weights[hit_positive]
+            pos_prior = prior64[pos_gids]
+            pos_forward = forward_before[pos_pids]
+            # If r=0, all contributing priors are zero.  The q/r limit under a
+            # common positive perturbation is one, so responsibility is A_pi.
+            safe_pos_forward = torch.where(
+                pos_forward > 0,
+                pos_forward,
+                torch.ones_like(pos_forward),
+            )
+            pos_factor = torch.where(
+                pos_forward > 0,
+                pos_prior / safe_pos_forward,
+                torch.ones_like(pos_forward),
+            )
+            positive_count.index_add_(0, pos_gids, pos_weights * pos_factor)
+
+        hit_negative = negative[valid_pids]
+        if bool(hit_negative.any()):
+            neg_gids = valid_gids[hit_negative]
+            neg_pids = valid_pids[hit_negative]
+            neg_weights = valid_weights[hit_negative]
+            neg_prior = prior64[neg_gids]
+            neg_background = 1.0 - forward_before[neg_pids]
+            # Symmetric limiting responsibility for an all-foreground prior.
+            safe_neg_background = torch.where(
+                neg_background > 0,
+                neg_background,
+                torch.ones_like(neg_background),
+            )
+            neg_factor = torch.where(
+                neg_background > 0,
+                (1.0 - neg_prior) / safe_neg_background,
+                torch.ones_like(neg_background),
+            )
+            negative_count.index_add_(0, neg_gids, neg_weights * neg_factor)
+
+    expected_count = positive_count + negative_count
+    safe_visible_mass = torch.where(
+        visible_mass > 0,
+        visible_mass,
+        torch.ones_like(visible_mass),
+    )
+    coverage = torch.where(
+        visible_mass > 0,
+        labeled_mass / safe_visible_mass,
+        torch.zeros_like(visible_mass),
+    ).clamp(0.0, 1.0)
+    safe_expected_count = torch.where(
+        expected_count > 0,
+        expected_count,
+        torch.ones_like(expected_count),
+    )
+    observation_probability = torch.where(
+        expected_count > 0,
+        positive_count / safe_expected_count,
+        torch.full_like(expected_count, 0.5),
+    ).clamp(0.0, 1.0)
+    beta_confidence = expected_count / (1.0 + expected_count)
+    effective_confidence = (
+        1.0 - (1.0 - coverage) / (1.0 + expected_count)
+    ).clamp(0.0, 1.0)
+    # Invalid rows are method-ineligible even if malformed triplets tried to
+    # attach prompt observations to them.
+    effective_confidence = torch.where(
+        valid,
+        effective_confidence,
+        torch.zeros_like(effective_confidence),
+    )
+    signed = (
+        effective_confidence * (2.0 * observation_probability - 1.0)
+    ).clamp(-1.0, 1.0)
+    fused_probability = torch.where(
+        valid,
+        (1.0 - effective_confidence) * prior64
+        + effective_confidence * observation_probability,
+        prior64,
+    ).clamp(0.0, 1.0)
+
+    pixel_foreground_after = torch.zeros(pixel_count, dtype=torch.float64)
+    if valid_gids.numel():
+        pixel_foreground_after.index_add_(
+            0,
+            valid_pids,
+            valid_weights * fused_probability[valid_gids],
+        )
+    forward_after = torch.zeros(pixel_count, dtype=torch.float64)
+    forward_after[supported_pixel] = (
+        pixel_foreground_after[supported_pixel]
+        / pixel_visible_mass[supported_pixel]
+    ).clamp(0.0, 1.0)
+
+    observable_labeled = labeled & supported_pixel
+    observable_mass = pixel_visible_mass[observable_labeled].sum()
+
+    def weighted_nll(probability: torch.Tensor) -> float:
+        if float(observable_mass) == 0.0:
+            return 0.0
+        observed_probability = probability[observable_labeled].clamp(
+            epsilon, 1.0 - epsilon
+        )
+        observed_positive = positive[observable_labeled]
+        loss = torch.where(
+            observed_positive,
+            -torch.log(observed_probability),
+            -torch.log1p(-observed_probability),
+        )
+        return float(
+            (
+                loss * pixel_visible_mass[observable_labeled]
+            ).sum()
+            / observable_mass
+        )
+
+    evidence = PrimitiveUnaryEvidence(
+        signed.float(),
+        "forward_likelihood_beta_coverage_v1",
+        confidence=effective_confidence.float(),
+    )
+    diagnostics = RegisteredForwardBetaDiagnostics(
+        positive_expected_count=positive_count,
+        negative_expected_count=negative_count,
+        labeled_expected_count=expected_count,
+        visible_contribution_mass=visible_mass,
+        labeled_contribution_mass=labeled_mass,
+        labeled_coverage=coverage,
+        beta_confidence=beta_confidence,
+        effective_confidence=effective_confidence,
+        observation_probability=observation_probability,
+        fused_probability=fused_probability,
+        forward_probability_before=forward_before,
+        forward_probability_after=forward_after,
+        nll_before=weighted_nll(forward_before),
+        nll_after=weighted_nll(forward_after),
+        observable_labeled_alpha_mass=float(observable_mass),
+        observable_labeled_pixel_count=int(observable_labeled.sum()),
+        unobservable_labeled_pixel_count=int((labeled & ~supported_pixel).sum()),
+        valid_hit_count=int(valid_hit.sum()),
+    )
+    return evidence, diagnostics
+
+
+@torch.no_grad()
+def registered_forward_beta_balanced_residual_observation(
+    gaussian_ids: torch.Tensor,
+    pixel_ids: torch.Tensor,
+    contribution_weights: torch.Tensor,
+    capability_valid: torch.Tensor,
+    field_prior: torch.Tensor,
+    primitive_reliability: torch.Tensor,
+    primitive_coverage: torch.Tensor,
+    positive_pixel_mask: torch.Tensor,
+    negative_pixel_mask: torch.Tensor,
+    labeled_pixel_mask: torch.Tensor,
+    all_pixel_mask: torch.Tensor,
+    *,
+    anchor_threshold: float,
+    eps: float = 1e-12,
+) -> tuple[PrimitiveUnaryEvidence, RegisteredForwardBetaDiagnostics]:
+    """Target-blind class-balanced forward-Beta residual with explicit anchors.
+
+    The v1 E-step supplies exact compositor responsibilities, but v2 removes
+    prompt area as a foreground/background prior by rescaling the two observed
+    classes to the same global expected-count total.  Per-row evidence mass is
+    then tempered as ``m/(1+m)``.  A query-independent canonical reliability
+    ``r`` and observation-coverage component ``v`` define the bounded semantic
+    prior concentration ``kappa=1+r*v``.  Thus ``kappa`` is in ``[1,2]`` and
+    the non-anchor Beta residual has concentration below one: the existing
+    semantic unary always retains at least half of the posterior precision.
+
+    Rows with sufficiently strong sign-pure direct evidence reuse the solver's
+    hard-seed threshold and become explicit probability/seed anchors.  This is
+    not a learned or scene-specific threshold.  If neither sign has observable
+    compositor mass, the method exactly restores the field prior.  If only one
+    requested sign is observable, class balancing is undefined and fails
+    closed rather than inventing a class prior.
+    """
+
+    reliability = torch.as_tensor(primitive_reliability)
+    coverage_proxy = torch.as_tensor(primitive_coverage)
+    prior = torch.as_tensor(field_prior)
+    valid = torch.as_tensor(capability_valid)
+    auxiliary = {
+        "primitive_reliability": reliability,
+        "primitive_coverage": coverage_proxy,
+    }
+    non_cpu = sorted(
+        name for name, value in auxiliary.items() if value.device.type != "cpu"
+    )
+    if non_cpu:
+        raise ValueError(
+            "registered forward Beta v2 is CPU-only; non-CPU inputs: "
+            + ", ".join(non_cpu)
+        )
+    if (
+        reliability.ndim != 1
+        or coverage_proxy.ndim != 1
+        or reliability.shape != prior.shape
+        or coverage_proxy.shape != prior.shape
+    ):
+        raise ValueError(
+            "primitive reliability/coverage must align with field_prior as [N]"
+        )
+    for name, values in auxiliary.items():
+        if not values.dtype.is_floating_point:
+            raise ValueError(f"{name} must have floating-point dtype")
+        if (
+            not bool(torch.isfinite(values).all())
+            or bool((values < 0).any())
+            or bool((values > 1).any())
+        ):
+            raise ValueError(f"{name} must contain finite values in [0,1]")
+    if valid.dtype != torch.bool or valid.shape != prior.shape:
+        raise ValueError("capability_valid must align with field_prior as bool [N]")
+    if bool((reliability[~valid] != 0).any()) or bool(
+        (coverage_proxy[~valid] != 0).any()
+    ):
+        raise ValueError(
+            "invalid primitive rows must have zero reliability and coverage"
+        )
+    threshold = float(anchor_threshold)
+    if not math.isfinite(threshold) or not 0.0 < threshold <= 1.0:
+        raise ValueError("forward Beta v2 anchor_threshold must be in (0,1]")
+
+    # Reuse the frozen v1 validation and exact responsibility implementation.
+    # Its fused posterior is deliberately ignored; only target-blind E-step
+    # sufficient statistics and compositor audits are consumed below.
+    _, base = registered_forward_beta_observation(
+        gaussian_ids,
+        pixel_ids,
+        contribution_weights,
+        capability_valid,
+        field_prior,
+        positive_pixel_mask,
+        negative_pixel_mask,
+        labeled_pixel_mask,
+        all_pixel_mask,
+        eps=eps,
+    )
+    raw_positive = base.positive_expected_count.double()
+    raw_negative = base.negative_expected_count.double()
+    valid_cpu = valid.detach().cpu()
+    positive_total = raw_positive[valid_cpu].sum()
+    negative_total = raw_negative[valid_cpu].sum()
+    has_positive = float(positive_total) > 0.0
+    has_negative = float(negative_total) > 0.0
+    if has_positive != has_negative:
+        raise ValueError(
+            "forward Beta v2 class balancing requires observable positive and "
+            "negative evidence"
+        )
+
+    if has_positive:
+        # Preserve the total amount of labeled evidence while giving each sign
+        # exactly half of it.  Scribble area can change evidence precision, but
+        # cannot act as a foreground/background class prior.
+        common_total = 0.5 * (positive_total + negative_total)
+        positive_scale = float(common_total / positive_total)
+        negative_scale = float(common_total / negative_total)
+        positive_count = raw_positive * positive_scale
+        negative_count = raw_negative * negative_scale
+    else:
+        positive_scale = 0.0
+        negative_scale = 0.0
+        positive_count = torch.zeros_like(raw_positive)
+        negative_count = torch.zeros_like(raw_negative)
+
+    balanced_count = positive_count + negative_count
+    safe_balanced_count = torch.where(
+        balanced_count > 0,
+        balanced_count,
+        torch.ones_like(balanced_count),
+    )
+    observation_probability = torch.where(
+        balanced_count > 0,
+        positive_count / safe_balanced_count,
+        torch.full_like(balanced_count, 0.5),
+    ).clamp(0.0, 1.0)
+    residual_concentration = balanced_count / (1.0 + balanced_count)
+
+    reliability64 = reliability.detach().double().cpu()
+    coverage64 = coverage_proxy.detach().double().cpu()
+    prior64 = prior.detach().double().cpu()
+    prior_concentration = 1.0 + reliability64 * coverage64
+    posterior_confidence = residual_concentration / (
+        prior_concentration + residual_concentration
+    )
+    fused_probability = (
+        prior_concentration * prior64
+        + residual_concentration * observation_probability
+    ) / (prior_concentration + residual_concentration)
+
+    # Anchors are decided from unscaled direct evidence.  Global class
+    # balancing must neither manufacture a hard seed from a tiny minority
+    # raster tail nor erase a strong majority-class full-mask observation.
+    raw_count = raw_positive + raw_negative
+    direct_signed_strength = torch.where(
+        raw_count > 0,
+        (raw_positive - raw_negative).abs() / (1.0 + raw_count),
+        torch.zeros_like(raw_count),
+    )
+    positive_anchor = (
+        valid_cpu
+        & (raw_positive > raw_negative)
+        & (direct_signed_strength >= threshold)
+    )
+    negative_anchor = (
+        valid_cpu
+        & (raw_negative > raw_positive)
+        & (direct_signed_strength >= threshold)
+    )
+    anchor = positive_anchor | negative_anchor
+    effective_confidence = torch.where(
+        anchor,
+        torch.ones_like(posterior_confidence),
+        posterior_confidence,
+    )
+    fused_probability = torch.where(
+        positive_anchor,
+        torch.ones_like(fused_probability),
+        torch.where(negative_anchor, torch.zeros_like(fused_probability), fused_probability),
+    ).clamp(0.0, 1.0)
+    signed = torch.where(
+        positive_anchor,
+        torch.ones_like(effective_confidence),
+        torch.where(
+            negative_anchor,
+            -torch.ones_like(effective_confidence),
+            posterior_confidence * (2.0 * observation_probability - 1.0),
+        ),
+    ).clamp(-1.0, 1.0)
+    # Capability-invalid rows are method-ineligible and exactly retain field.
+    effective_confidence = torch.where(
+        valid_cpu, effective_confidence, torch.zeros_like(effective_confidence)
+    )
+    signed = torch.where(valid_cpu, signed, torch.zeros_like(signed))
+    fused_probability = torch.where(valid_cpu, fused_probability, prior64)
+
+    pixel_count = int(base.forward_probability_before.numel())
+    gids = torch.as_tensor(gaussian_ids).detach().long().cpu().reshape(-1)
+    pids = torch.as_tensor(pixel_ids).detach().long().cpu().reshape(-1)
+    weights = torch.as_tensor(contribution_weights).detach().double().cpu().reshape(-1)
+    all_pixels = torch.as_tensor(all_pixel_mask).detach().bool().cpu().reshape(-1)
+    valid_hit = valid_cpu[gids] & all_pixels[pids] & (weights > 0)
+    valid_gids = gids[valid_hit]
+    valid_pids = pids[valid_hit]
+    valid_weights = weights[valid_hit]
+    pixel_visible_mass = torch.zeros(pixel_count, dtype=torch.float64)
+    pixel_foreground_after = torch.zeros(pixel_count, dtype=torch.float64)
+    if valid_gids.numel():
+        pixel_visible_mass.index_add_(0, valid_pids, valid_weights)
+        pixel_foreground_after.index_add_(
+            0, valid_pids, valid_weights * fused_probability[valid_gids]
+        )
+    supported_pixel = pixel_visible_mass > 0
+    forward_after = torch.zeros(pixel_count, dtype=torch.float64)
+    forward_after[supported_pixel] = (
+        pixel_foreground_after[supported_pixel]
+        / pixel_visible_mass[supported_pixel]
+    ).clamp(0.0, 1.0)
+
+    positive_pixels = torch.as_tensor(positive_pixel_mask).detach().bool().cpu()
+    negative_pixels = torch.as_tensor(negative_pixel_mask).detach().bool().cpu()
+    labeled_pixels = torch.as_tensor(labeled_pixel_mask).detach().bool().cpu()
+    observable_labeled = labeled_pixels & supported_pixel
+    observable_mass = pixel_visible_mass[observable_labeled].sum()
+    epsilon = float(eps)
+
+    def weighted_nll(probability: torch.Tensor) -> float:
+        if float(observable_mass) == 0.0:
+            return 0.0
+        selected = probability[observable_labeled].clamp(
+            epsilon, 1.0 - epsilon
+        )
+        loss = torch.where(
+            positive_pixels[observable_labeled],
+            -torch.log(selected),
+            -torch.log1p(-selected),
+        )
+        return float(
+            (loss * pixel_visible_mass[observable_labeled]).sum()
+            / observable_mass
+        )
+
+    evidence = PrimitiveUnaryEvidence(
+        signed.float(),
+        "forward_likelihood_beta_balanced_residual_v2",
+        confidence=effective_confidence.float(),
+    )
+    diagnostics = RegisteredForwardBetaDiagnostics(
+        positive_expected_count=positive_count,
+        negative_expected_count=negative_count,
+        labeled_expected_count=balanced_count,
+        visible_contribution_mass=base.visible_contribution_mass,
+        labeled_contribution_mass=base.labeled_contribution_mass,
+        labeled_coverage=base.labeled_coverage,
+        beta_confidence=posterior_confidence,
+        effective_confidence=effective_confidence,
+        observation_probability=observation_probability,
+        fused_probability=fused_probability,
+        forward_probability_before=base.forward_probability_before,
+        forward_probability_after=forward_after,
+        nll_before=weighted_nll(base.forward_probability_before),
+        nll_after=weighted_nll(forward_after),
+        observable_labeled_alpha_mass=float(observable_mass),
+        observable_labeled_pixel_count=int(observable_labeled.sum()),
+        unobservable_labeled_pixel_count=int(
+            (labeled_pixels & ~supported_pixel).sum()
+        ),
+        valid_hit_count=int(valid_hit.sum()),
+        protocol_status=(
+            "target_blind_method_primitive_v2_no_independent_protocol_claim"
+        ),
+        raw_positive_expected_count=raw_positive,
+        raw_negative_expected_count=raw_negative,
+        field_prior_reliability=reliability64,
+        field_prior_coverage=coverage64,
+        field_prior_concentration=prior_concentration,
+        residual_evidence_concentration=residual_concentration,
+        positive_anchor_mask=positive_anchor,
+        negative_anchor_mask=negative_anchor,
+        positive_class_balance_scale=positive_scale,
+        negative_class_balance_scale=negative_scale,
+    )
+    return evidence, diagnostics
 
 
 def registered_observation_anchor_mask(

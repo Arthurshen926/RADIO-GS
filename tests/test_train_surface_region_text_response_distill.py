@@ -15,6 +15,7 @@ import torch.nn.functional as F
 from radio_gs.interfaces.surface_region_summary import SurfaceRegionSummaryReadoutV2
 from radio_gs.losses.direct_point_query_logit_distill_loss import (
     compute_independent_normalized_cosine_response_smooth_l1_loss,
+    compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss,
     compute_scene_wise_text_response_profile_ranking_loss,
 )
 from radio_gs.scripts.build_target_blind_siglip2_embedding_artifact import (
@@ -30,6 +31,11 @@ import radio_gs.scripts.train_surface_region_text_response_distill as trainer_mo
 from radio_gs.scripts.train_surface_region_text_response_distill import (
     MAX_COMPLETE_SCENE_BATCH_ROWS,
     RESPONSE_BRANCH_GRADIENT_RATIO,
+    SCENE_PAIRWISE_GAP_LOSS,
+    SCENE_PAIRWISE_GAP_WEIGHT,
+    SCENE_PROFILE_LOSS,
+    SCENE_PROFILE_WEIGHT,
+    SCENE_RESPONSE_LOSS,
     SHARED_TRAINING_SEEDS,
     SURFACE_CONTROL_METRICS,
     SURFACE_CONTROL_NONINFERIORITY_TOLERANCE,
@@ -37,6 +43,8 @@ from radio_gs.scripts.train_surface_region_text_response_distill import (
     _cache_bound_metadata,
     _fit_bank_binding,
     _implementation_binding,
+    _load_gradient_design_diagnostic,
+    _scene_response_objective_contract,
     _training_config,
     _training_provenance,
     audit_training_artifacts,
@@ -59,6 +67,111 @@ _TEST_SOURCE_SHA256 = {"mock_imagenet_source.txt": "a" * 64}
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _write_balanced_design_diagnostic(tmp_path: Path) -> tuple[Path, dict]:
+    train = tmp_path / "train.pt"
+    radio = tmp_path / "radio.pt"
+    fit = tmp_path / "fit.pt"
+    fit_manifest = tmp_path / "fit.json"
+    surface = tmp_path / "surface.pt"
+    for path, content in (
+        (train, b"train"),
+        (radio, b"radio"),
+        (fit, b"fit"),
+        (fit_manifest, b"fit-manifest"),
+        (surface, b"surface"),
+    ):
+        path.write_bytes(content)
+    diagnostic_source = (
+        REPO_ROOT / "radio_gs/scripts/diagnose_warmstart_response_gradients.py"
+    )
+    training_source = Path(trainer_module.__file__).resolve()
+    loss_source = Path(
+        compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss.__code__.co_filename
+    ).resolve()
+    payload = {
+        "schema_version": 2,
+        "artifact_type": "warmstart_surface_text_response_gradient_diagnostic",
+        "device": "cuda:0",
+        "rows": 2,
+        "scenes": ["scene-a"],
+        "scene_response_objective": _scene_response_objective_contract(),
+        "losses": {
+            "surface": 0.1,
+            "token": 0.1,
+            "descriptor": 0.1,
+            "relation": 0.1,
+            "independent_response": 0.01,
+            "scene_response": 0.04,
+            "scene_profile": 0.1,
+            "scene_ranking": 0.02,
+        },
+        "gradient_l2": {
+            "surface": 0.1,
+            "independent_response": 0.01,
+            "scene_response": 0.4,
+            "scene_profile": 1.0,
+            "scene_ranking": 0.2,
+        },
+        "equal_surface_gradient_lambdas": {
+            "independent_response": 10.0,
+            "scene_response": 0.25,
+            "scene_profile": 0.1,
+            "scene_ranking": 0.5,
+        },
+        "weighted_component_gradient_l2_upper_bounds": {
+            "scene_profile": 0.2,
+            "scene_ranking": 0.2,
+            "triangle_sum": 0.4,
+        },
+        "component_balance": {
+            "raw_equalizing_profile_weight": 0.2,
+            "frozen_profile_weight": 0.2,
+            "weighted_profile_to_ranking_gradient_ratio": 1.0,
+            "derivation": (
+                "fit_only_seed0_fixed_calibration_batch_rounded_near_unit_"
+                "weighted_component_gradient_ratio"
+            ),
+        },
+        "bindings": {
+            "surface_control": {"path": str(surface), "sha256": _sha256(surface)},
+            "radio_checkpoint": {"path": str(radio), "sha256": _sha256(radio)},
+            "train_caches": [{"path": str(train), "sha256": _sha256(train)}],
+            "fit_text_bank": {"path": str(fit), "sha256": _sha256(fit)},
+            "fit_text_bank_manifest": {
+                "path": str(fit_manifest),
+                "sha256": _sha256(fit_manifest),
+            },
+            "implementation": {
+                "path": str(diagnostic_source),
+                "sha256": _sha256(diagnostic_source),
+            },
+            "training_implementation": {
+                "path": str(training_source),
+                "sha256": _sha256(training_source),
+            },
+            "loss_implementation": {
+                "path": str(loss_source),
+                "sha256": _sha256(loss_source),
+            },
+        },
+    }
+    path = tmp_path / "diagnostic.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    inputs = {
+        "train_paths": [train],
+        "radio_path": radio,
+        "fit_bank": {
+            "path": fit,
+            "file_sha256": _sha256(fit),
+            "manifest_path": fit_manifest,
+            "manifest_sha256": _sha256(fit_manifest),
+        },
+        "scenes": ["scene-a"],
+        "row_count": 2,
+    }
+    return path, inputs
 
 
 def _split_sha(records: list[dict[str, str]], split: str) -> str:
@@ -389,7 +502,7 @@ def test_dual_gradient_budget_limits_each_branch_to_quarter_surface() -> None:
     assert second == first
 
 
-def test_training_objective_adds_both_calibrated_response_branches() -> None:
+def test_training_objective_uses_weighted_profile_and_pairwise_scene_branch() -> None:
     parameter, target, all_descriptors, mask, text_bank = _tiny_response_inputs()
     projected = F.normalize(parameter, dim=-1)
     predicted_token = F.normalize(torch.randn(4, 7), dim=-1).requires_grad_()
@@ -411,11 +524,25 @@ def test_training_objective_adds_both_calibrated_response_branches() -> None:
         independent_response_lambda=independent_lambda,
         scene_response_lambda=scene_lambda,
     )
-    expected_scene, _ = compute_scene_wise_text_response_profile_ranking_loss(
+    expected_profile, _ = compute_scene_wise_text_response_profile_ranking_loss(
         projected,
         target,
         text_bank,
         scene_ids,
+        profile_weight=1.0,
+        ranking_weight=0.0,
+    )
+    expected_pairwise, _ = (
+        compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+            projected,
+            target,
+            text_bank,
+            scene_ids,
+        )
+    )
+    expected_scene = (
+        SCENE_PROFILE_WEIGHT * expected_profile
+        + SCENE_PAIRWISE_GAP_WEIGHT * expected_pairwise
     )
     expected_response = (
         compute_independent_normalized_cosine_response_smooth_l1_loss(
@@ -434,10 +561,174 @@ def test_training_objective_adds_both_calibrated_response_branches() -> None:
 
     torch.testing.assert_close(losses["independent_response"], expected_response)
     torch.testing.assert_close(losses["scene_response"], expected_scene)
+    torch.testing.assert_close(losses["scene_profile"], expected_profile)
+    torch.testing.assert_close(losses["scene_ranking"], expected_pairwise)
     torch.testing.assert_close(losses["total"], expected_total)
     losses["total"].backward()
     assert parameter.grad is not None
     assert predicted_token.grad is not None
+
+
+def test_pairwise_scene_objective_contract_is_frozen_and_self_describing() -> None:
+    assert SCENE_PROFILE_WEIGHT == 0.2
+    assert SCENE_PAIRWISE_GAP_WEIGHT == 1.0
+    expected = {
+        "name": SCENE_RESPONSE_LOSS,
+        "profile_loss": SCENE_PROFILE_LOSS,
+        "profile_weight": 0.2,
+        "ranking_loss": SCENE_PAIRWISE_GAP_LOSS,
+        "ranking_weight": 1.0,
+        "tie_tolerance": 1e-6,
+        "pairwise_gap_normalization": "per_scene_query_teacher_response_span",
+    }
+    assert trainer_module._scene_response_objective_contract() == expected
+    calibration = trainer_module._calibration_objective_contract(
+        token_weight=0.25,
+        relation_weight=0.1,
+    )
+    assert calibration["scene_response_loss"] == SCENE_RESPONSE_LOSS
+    assert calibration["scene_response_objective"] == expected
+    training = trainer_module._training_contract(
+        argparse.Namespace(
+            hidden_dim=256,
+            epochs=60,
+            patience=10,
+            batch_size=16,
+            learning_rate=2e-4,
+            weight_decay=1e-4,
+            token_weight=0.25,
+            relation_weight=0.1,
+            reliability_attention_mode="log_prior",
+            context_pooling_mode="joint_attention_v1",
+            canonical_noise_degrees=0.0,
+            canonical_noise_calibration="",
+        )
+    )
+    assert training["response_losses"] == [
+        "independent_normalized_cosine_response_smooth_l1",
+        SCENE_RESPONSE_LOSS,
+    ]
+    assert training["scene_response_objective"] == expected
+    assert "scene_ranking_temperature" not in training
+
+
+def test_v4_proposal_contract_interpolation_hash_and_training_config() -> None:
+    contract = trainer_module._proposal_state_machine_contract()
+    assert trainer_module.LEGACY_RESPONSE_EPOCH_SELECTION == (
+        "surface_control_0p002_fit_scene_robust_0p005_then_response_error_v3"
+    )
+    assert trainer_module.RESPONSE_EPOCH_SELECTION == (
+        "surface_control_0p002_fit_scene_robust_0p005_accepted_anchor_"
+        "fixed_1over2048_then_response_error_v4"
+    )
+    assert contract["alpha_numerator"] == 1
+    assert contract["alpha_denominator"] == 2048
+    assert contract["validation_evaluations_per_proposal"] == 1
+    assert contract["optimizer_moments"] == "reset_before_every_proposal"
+    assert contract["proposal_loss_accounting"] == {
+        "measurement_state": "raw_proposal_before_micro_projection",
+        "fields": [
+            "total",
+            "token",
+            "descriptor",
+            "relation",
+            "independent_response",
+            "scene_response",
+            "scene_profile",
+            "scene_ranking",
+        ],
+        "legacy_flat_mirror": {
+            "total": "loss",
+            "token": "token_loss",
+            "descriptor": "descriptor_loss",
+            "relation": "relation_loss",
+            "independent_response": "independent_response_loss",
+            "scene_response": "scene_response_loss",
+            "scene_profile": "scene_profile_loss",
+            "scene_ranking": "scene_ranking_loss",
+        },
+    }
+
+    anchor = {
+        "counter": torch.tensor(3, dtype=torch.int64),
+        "weight": torch.tensor([0.0, 2.0], dtype=torch.float32),
+    }
+    raw = {
+        "counter": torch.tensor(3, dtype=torch.int64),
+        "weight": torch.tensor([2.0, -2.0], dtype=torch.float32),
+    }
+    trial = trainer_module.interpolate_anchor_raw_state(anchor, raw)
+    torch.testing.assert_close(
+        trial["weight"],
+        anchor["weight"] + (raw["weight"] - anchor["weight"]) / 2048.0,
+    )
+    assert trial["counter"].item() == 3
+    assert trainer_module.state_dict_sha256(anchor) == trainer_module.state_dict_sha256(
+        {key: value.clone() for key, value in anchor.items()}
+    )
+    assert trainer_module.state_dict_sha256(anchor) != trainer_module.state_dict_sha256(
+        trial
+    )
+    with pytest.raises(ValueError, match="non-floating state tensor changed"):
+        trainer_module.interpolate_anchor_raw_state(
+            anchor,
+            {**raw, "counter": torch.tensor(4, dtype=torch.int64)},
+        )
+
+    config_args = argparse.Namespace(
+        train_caches="train",
+        validation_caches="validation",
+        fit_text_bank="fit.pt",
+        fit_text_bank_manifest="fit.json",
+        calibration_manifest="calibration.json",
+        run_manifest="run.json",
+        surface_control_checkpoint="control.pt",
+        surface_control_checkpoint_sha256="a" * 64,
+        output="output.pt",
+        hidden_dim=256,
+        epochs=60,
+        patience=10,
+        batch_size=16,
+        learning_rate=2e-4,
+        weight_decay=1e-4,
+        token_weight=0.25,
+        relation_weight=0.1,
+        reliability_attention_mode="log_prior",
+        context_pooling_mode="joint_attention_v1",
+        canonical_noise_degrees=0.0,
+        canonical_noise_calibration="",
+        seed=0,
+        device="cuda:1",
+        radio_checkpoint="radio.pt",
+    )
+    assert _training_config(config_args)["proposal_state_machine"] == contract
+
+
+def test_balanced_design_diagnostic_is_exactly_validated(tmp_path: Path) -> None:
+    path, inputs = _write_balanced_design_diagnostic(tmp_path)
+
+    record = _load_gradient_design_diagnostic(
+        path,
+        expected_sha256=_sha256(path),
+        **inputs,
+    )
+
+    assert record["measured_seed"] == 0
+    assert record["calibration_reuses_measured_values"] is False
+
+
+def test_balanced_design_diagnostic_rejects_component_drift(tmp_path: Path) -> None:
+    path, inputs = _write_balanced_design_diagnostic(tmp_path)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["component_balance"]["weighted_profile_to_ranking_gradient_ratio"] = 2.0
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="component balance differs"):
+        _load_gradient_design_diagnostic(
+            path,
+            expected_sha256=_sha256(path),
+            **inputs,
+        )
 
 
 def test_complete_scene_batches_never_split_or_drop_rows() -> None:
@@ -509,6 +800,11 @@ def test_response_primary_selection_rejects_high_cosine_support_flip() -> None:
     )
     assert flipped["text_support_top1_agreement"] == 0.0
     assert preserved["text_support_top1_agreement"] == 1.0
+    for metrics in (flipped, preserved):
+        assert set(metrics["text_response_scene_metrics"]) == {"scene-a"}
+        assert -1.0 <= metrics["text_response_ranking_spearman_p05"] <= 1.0
+        assert 0.0 <= metrics["text_response_top_decile_overlap_mean"] <= 1.0
+        assert metrics["text_response_scene_worst_smooth_l1"] >= 0.0
 
     history, best_epoch, best_score = finalize_response_primary_epoch_selection(
         [
@@ -518,7 +814,7 @@ def test_response_primary_selection_rejects_high_cosine_support_flip() -> None:
                 "summary_token_cosine": 0.94,
                 "mean_descriptor_cosine": 0.94,
                 "all_view_descriptor_cosine": 0.94,
-                **flipped,
+                **preserved,
             },
             {
                 "epoch": 1,
@@ -551,8 +847,27 @@ def _selection_row(
     support: float,
     response_error: float,
     relation_error: float,
+    response_mae: float | None = None,
+    quality: float = 0.90,
+    ranking: float | None = None,
+    scene_metrics: dict[str, dict[str, float]] | None = None,
 ) -> dict[str, object]:
     summary, mean_descriptor, all_view = surface
+    mae = response_error if response_mae is None else response_mae
+    rank_quality = quality if ranking is None else ranking
+    if scene_metrics is None:
+        scene_metrics = {
+            "scene-a": {
+                "smooth_l1": response_error,
+                "mae": mae,
+                "profile_cosine_mean": quality,
+                "profile_cosine_p05": quality,
+                "ranking_spearman_mean": rank_quality,
+                "ranking_spearman_p05": rank_quality,
+                "top_decile_overlap_mean": quality,
+                "top_decile_overlap_p05": quality,
+            }
+        }
     return {
         "epoch": epoch,
         "surface_selection_score": 0.5 * (mean_descriptor + all_view),
@@ -561,8 +876,132 @@ def _selection_row(
         "all_view_descriptor_cosine": all_view,
         "text_support_top1_agreement": support,
         "text_response_smooth_l1": response_error,
+        "text_response_mae": mae,
+        "text_response_profile_cosine_mean": quality,
+        "text_response_profile_cosine_p05": quality,
+        "text_response_ranking_spearman_mean": rank_quality,
+        "text_response_ranking_spearman_p05": rank_quality,
+        "text_response_top_decile_overlap_mean": quality,
+        "text_response_top_decile_overlap_p05": quality,
+        "text_response_scene_metrics": scene_metrics,
         "descriptor_relation_smooth_l1": relation_error,
     }
+
+
+def _fit_scene_row(
+    *,
+    quality: float,
+    ranking: float,
+    smooth_l1: float,
+    mae: float,
+) -> dict[str, float]:
+    return {
+        "smooth_l1": smooth_l1,
+        "mae": mae,
+        "profile_cosine_mean": quality,
+        "profile_cosine_p05": quality,
+        "ranking_spearman_mean": ranking,
+        "ranking_spearman_p05": ranking,
+        "top_decile_overlap_mean": quality,
+        "top_decile_overlap_p05": quality,
+    }
+
+
+def test_fit_robust_selection_rejects_top1_gain_with_global_or_scene_rank_loss() -> None:
+    control_scenes = {
+        "scene-a": _fit_scene_row(
+            quality=0.90,
+            ranking=0.80,
+            smooth_l1=0.08,
+            mae=0.10,
+        ),
+        "scene-b": _fit_scene_row(
+            quality=0.92,
+            ranking=0.82,
+            smooth_l1=0.07,
+            mae=0.09,
+        ),
+    }
+    global_rank_failure = {
+        scene: dict(metrics) for scene, metrics in control_scenes.items()
+    }
+    scene_rank_failure = {
+        scene: dict(metrics) for scene, metrics in control_scenes.items()
+    }
+    scene_rank_failure["scene-b"]["ranking_spearman_mean"] = 0.70
+    robust_scenes = {
+        "scene-a": _fit_scene_row(
+            quality=0.901,
+            ranking=0.801,
+            smooth_l1=0.06,
+            mae=0.08,
+        ),
+        "scene-b": _fit_scene_row(
+            quality=0.921,
+            ranking=0.821,
+            smooth_l1=0.05,
+            mae=0.07,
+        ),
+    }
+    rows, best_epoch, _ = finalize_response_primary_epoch_selection(
+        [
+            _selection_row(
+                0,
+                surface=(0.90, 0.91, 0.92),
+                support=0.20,
+                response_error=0.08,
+                response_mae=0.10,
+                relation_error=0.04,
+                quality=0.90,
+                ranking=0.80,
+                scene_metrics=control_scenes,
+            ),
+            # Better top-1 and response error cannot compensate for a full
+            # fit-distribution ranking regression.
+            _selection_row(
+                1,
+                surface=(0.91, 0.92, 0.93),
+                support=0.99,
+                response_error=0.01,
+                response_mae=0.02,
+                relation_error=0.01,
+                quality=0.91,
+                ranking=0.70,
+                scene_metrics=global_rank_failure,
+            ),
+            # Aggregate quality is non-inferior, but one fit scene regresses.
+            _selection_row(
+                2,
+                surface=(0.91, 0.92, 0.93),
+                support=0.98,
+                response_error=0.02,
+                response_mae=0.03,
+                relation_error=0.01,
+                quality=0.91,
+                ranking=0.81,
+                scene_metrics=scene_rank_failure,
+            ),
+            _selection_row(
+                3,
+                surface=(0.901, 0.911, 0.921),
+                support=0.80,
+                response_error=0.06,
+                response_mae=0.08,
+                relation_error=0.03,
+                quality=0.901,
+                ranking=0.801,
+                scene_metrics=robust_scenes,
+            ),
+        ]
+    )
+    assert rows[0]["response_selection_feasible"] is True
+    assert rows[1]["fit_response_aggregate_control_feasible"] is False
+    assert rows[1]["selection_score"] == -1.0
+    assert rows[2]["fit_response_aggregate_control_feasible"] is True
+    assert rows[2]["fit_response_per_scene_control_feasible"] is False
+    assert rows[2]["selection_score"] == -1.0
+    assert rows[3]["fit_response_control_feasible"] is True
+    assert best_epoch == 3
 
 
 def test_surface_control_feasible_set_precedes_fit_text_selection() -> None:
@@ -622,6 +1061,170 @@ def test_surface_control_epoch_zero_is_selected_when_training_is_infeasible() ->
     assert best_score == pytest.approx(0.915)
     assert rows[0]["selection_score"] == pytest.approx(0.915)
     assert rows[1]["selection_score"] == -1.0
+
+
+def _proposal_loss_history_fields(value: float) -> dict[str, object]:
+    losses = {
+        field: value + index * 0.001
+        for index, field in enumerate(trainer_module.PROPOSAL_LOSS_FIELDS)
+    }
+    return {
+        "loss_measurement_state": (
+            trainer_module.PROPOSAL_LOSS_MEASUREMENT_STATE
+        ),
+        "proposal_losses": losses,
+        **{
+            legacy: losses[field]
+            for field, legacy in (
+                trainer_module.LEGACY_FLAT_PROPOSAL_LOSS_FIELDS.items()
+            )
+        },
+    }
+
+
+def _valid_proposal_state_machine_history() -> list[dict[str, object]]:
+    rows, best_epoch, _ = finalize_response_primary_epoch_selection(
+        [
+            _selection_row(
+                0,
+                surface=(0.90, 0.91, 0.92),
+                support=0.20,
+                response_error=0.080,
+                relation_error=0.040,
+            ),
+            # Robust-feasible but globally worse: it must still advance anchor.
+            _selection_row(
+                1,
+                surface=(0.901, 0.911, 0.921),
+                support=0.21,
+                response_error=0.081,
+                relation_error=0.041,
+            ),
+            # Better response error cannot rescue a Surface-infeasible trial.
+            _selection_row(
+                2,
+                surface=(0.890, 0.930, 0.940),
+                support=0.99,
+                response_error=0.010,
+                relation_error=0.010,
+            ),
+        ]
+    )
+    assert best_epoch == 0
+    rows[0].update(
+        {
+            "state_machine_role": "frozen_control_initial_anchor",
+            "accepted": True,
+            "rejected": False,
+            "anchor_epoch_after_proposal": 0,
+            "anchor_state_dict_sha256_after_proposal": "a" * 64,
+            "best_updated": True,
+            "best_epoch_after_proposal": 0,
+            "best_state_dict_sha256_after_proposal": "a" * 64,
+            "patience_stale_after_proposal": 0,
+            "patience_stop_after_proposal": False,
+        }
+    )
+    rows[1].update(
+        {
+            "state_machine_role": "fixed_micro_ray_trial",
+            "proposal": {
+                "index": 1,
+                "source_anchor_epoch": 0,
+                "anchor_state_dict_sha256": "a" * 64,
+                "raw_state_dict_sha256": "b" * 64,
+                "trial_state_dict_sha256": "c" * 64,
+                "alpha_numerator": 1,
+                "alpha_denominator": 2048,
+                "optimizer_state_reset": True,
+                "validation_evaluations": 1,
+                "backtracking": "none_fixed_alpha_single_trial",
+                "persistent_generator": "advanced_never_rolled_back",
+            },
+            **_proposal_loss_history_fields(0.10),
+            "accepted": True,
+            "rejected": False,
+            "anchor_epoch_after_proposal": 1,
+            "anchor_state_dict_sha256_after_proposal": "c" * 64,
+            "best_updated": False,
+            "best_epoch_after_proposal": 0,
+            "best_state_dict_sha256_after_proposal": "a" * 64,
+            "patience_stale_after_proposal": 1,
+            "patience_stop_after_proposal": False,
+        }
+    )
+    rows[2].update(
+        {
+            "state_machine_role": "fixed_micro_ray_trial",
+            "proposal": {
+                "index": 2,
+                "source_anchor_epoch": 1,
+                "anchor_state_dict_sha256": "c" * 64,
+                "raw_state_dict_sha256": "d" * 64,
+                "trial_state_dict_sha256": "e" * 64,
+                "alpha_numerator": 1,
+                "alpha_denominator": 2048,
+                "optimizer_state_reset": True,
+                "validation_evaluations": 1,
+                "backtracking": "none_fixed_alpha_single_trial",
+                "persistent_generator": "advanced_never_rolled_back",
+            },
+            **_proposal_loss_history_fields(0.20),
+            "accepted": False,
+            "rejected": True,
+            "anchor_epoch_after_proposal": 1,
+            "anchor_state_dict_sha256_after_proposal": "c" * 64,
+            "best_updated": False,
+            "best_epoch_after_proposal": 0,
+            "best_state_dict_sha256_after_proposal": "a" * 64,
+            "patience_stale_after_proposal": 2,
+            "patience_stop_after_proposal": True,
+        }
+    )
+    previous = None
+    for index, row in enumerate(rows):
+        rows[index] = trainer_module.attach_history_hash_chain(row, previous)
+        previous = rows[index]["history_hash_chain"]["sha256"]
+    return rows
+
+
+def test_proposal_state_machine_replays_feasible_nonbest_and_rejection() -> None:
+    history = _valid_proposal_state_machine_history()
+    replay = trainer_module.validate_proposal_state_machine_history(
+        history,
+        patience=2,
+    )
+    assert replay == {
+        "accepted_anchor": {
+            "epoch": 1,
+            "state_dict_sha256": "c" * 64,
+            "accepted_proposal_count": 1,
+            "rejected_proposal_count": 1,
+        },
+        "best_epoch": 0,
+        "best_state_dict_sha256": "a" * 64,
+        "history_hash_chain_sha256": history[-1]["history_hash_chain"]["sha256"],
+    }
+
+
+@pytest.mark.parametrize(
+    "tamper",
+    ("feasible_nonbest_rejected", "infeasible_accepted", "hash_chain"),
+)
+def test_proposal_state_machine_rejects_transition_and_chain_tampering(
+    tamper: str,
+) -> None:
+    history = json.loads(json.dumps(_valid_proposal_state_machine_history()))
+    if tamper == "feasible_nonbest_rejected":
+        history[1]["accepted"] = False
+        history[1]["rejected"] = True
+    elif tamper == "infeasible_accepted":
+        history[2]["accepted"] = True
+        history[2]["rejected"] = False
+    else:
+        history[2]["history_hash_chain"]["sha256"] = "f" * 64
+    with pytest.raises(ValueError):
+        trainer_module.validate_proposal_state_machine_history(history, patience=2)
 
 
 def _dummy_fit_bank(root: Path) -> dict[str, object]:
@@ -1023,11 +1626,11 @@ def test_companion_runner_is_gpu1_thermal_guarded_and_query_blind() -> None:
     assert 'if [[ "$GPU" != "1" ]]' in source
     assert 'for seed in 0 1 2' in source
     assert "run_with_gpu_thermal_guard.sh" in source
-    assert 'GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-78}"' in source
-    assert 'GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-65}"' in source
-    assert 'GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-3}"' in source
-    assert 'GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-75}"' in source
-    assert 'GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-70}"' in source
+    assert 'GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-80}"' in source
+    assert 'GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-70}"' in source
+    assert 'GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-5}"' in source
+    assert 'GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-76}"' in source
+    assert 'GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-72}"' in source
     assert 'GPU_PEER_INDEX=""' in source
     assert "GPU_PEER_PAUSE_TEMP_C=0" in source
     assert "GPU_PEER_RESUME_TEMP_C=0" in source

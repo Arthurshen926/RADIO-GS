@@ -108,6 +108,15 @@ from radio_gs.training.feature_training_utils import FoundationMaskLogitProjecto
 logger = logging.getLogger(__name__)
 SCORE_CACHE_VERSION = 1
 REGISTERED_FEATURE_CACHE_VERSION = 1
+OURS_MULTISCALE_QUERY_SCORE_CACHE_VERSION = 2
+OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT = (
+    "radio_gs.ours_lerf_direct3d_multiscale_query_scores.v2"
+)
+OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT = (
+    "radio_gs.lerf_multiscale_query_score_authority.v2"
+)
+OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT = 3
+OURS_VALA_MASK_THRESHOLD = 0.6
 DEFAULT_RADIO_ADAPTOR_CHECKPOINT = "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
 
 
@@ -209,6 +218,30 @@ class SelectionSpec:
         if self.mode == "entropy_score":
             return f"entropy{self.value:g}".replace(".", "p")
         return f"{self.mode}_{self.value:g}".replace(".", "p")
+
+
+@dataclass(frozen=True)
+class OursMultiscaleQueryScoreCache:
+    """Strict, row-aligned input for the frozen three-level Ours/VALA readout."""
+
+    query_scores: torch.Tensor
+    valid: torch.Tensor
+    query_ids: Tuple[str, ...]
+    scale_ids: Tuple[str, ...]
+    scale_radii_m: Tuple[float, ...]
+    xyz_sha256: str
+    field_checkpoint_sha256: str
+    readout_checkpoint_sha256: str
+    renderer_geometry_checkpoint_sha256: str
+
+
+@dataclass(frozen=True)
+class ValaMultiscaleQueryReadout:
+    """Selected per-query scores and auditable three-level peak decisions."""
+
+    scores: torch.Tensor
+    selected_scale_indices: torch.Tensor
+    raw_smoothed_peaks: torch.Tensor
 
 
 class GaussianSelectionProxy:
@@ -382,7 +415,10 @@ def load_score_cache(
     """Load cached primitive text scores after exact protocol matching."""
     cache_path = Path(path)
     payload = torch.load(cache_path, map_location="cpu")
-    version = int(payload.get("version", -1))
+    try:
+        version = int(payload.get("version", -1))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Ours multiscale query-score cache version must be an integer") from exc
     if version != SCORE_CACHE_VERSION:
         raise ValueError(
             f"unsupported score cache version {version}; expected {SCORE_CACHE_VERSION}"
@@ -436,6 +472,303 @@ def load_score_cache(
     if not isinstance(registration_stats, dict):
         raise ValueError("score cache payload registration_stats must be a dict")
     return scores.float().cpu(), registration_stats
+
+
+def _require_sha256(value: object, *, field: str) -> str:
+    digest = str(value)
+    if re.fullmatch(r"[0-9a-f]{64}", digest) is None:
+        raise ValueError(f"{field} must be a lowercase 64-character SHA256 digest")
+    return digest
+
+
+def _ours_native_scale_id(radius: float) -> str:
+    return str(float(radius))
+
+
+def _validate_ours_multiscale_authority(
+    payload: Mapping[str, Any],
+    *,
+    query_ids: Tuple[str, ...],
+    scale_ids: Tuple[str, ...],
+    scale_radii_m: Tuple[float, ...],
+    xyz_sha256: str,
+    count: int,
+    field_checkpoint_sha256: str,
+    readout_checkpoint_sha256: str,
+    renderer_geometry_checkpoint_sha256: str,
+) -> None:
+    authority = payload.get("authority")
+    if not isinstance(authority, Mapping):
+        raise ValueError("Ours multiscale cache requires shared authority")
+    if authority.get("contract") != OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT:
+        raise ValueError("Ours multiscale cache shared authority contract mismatch")
+    raw_axis = authority.get("scale_axis")
+    expected_axis = [
+        {"id": scale_id, "value": radius, "unit": "meter"}
+        for scale_id, radius in zip(scale_ids, scale_radii_m)
+    ]
+    if raw_axis != expected_axis:
+        raise ValueError("Ours multiscale cache authority scale axis differs")
+    query_axis = authority.get("query_axis")
+    if not isinstance(query_axis, Mapping) or query_axis.get("ids") != list(query_ids):
+        raise ValueError("Ours multiscale cache authority query axis differs")
+    geometry_axis = authority.get("geometry_axis")
+    if not isinstance(geometry_axis, Mapping):
+        raise ValueError("Ours multiscale cache authority geometry axis is missing")
+    expected_geometry = {
+        "num_gaussians": int(count),
+        "xyz_sha256": xyz_sha256,
+        "renderer_xyz_sha256": xyz_sha256,
+        "field_checkpoint_sha256": field_checkpoint_sha256,
+        "readout_checkpoint_sha256": readout_checkpoint_sha256,
+        "renderer_geometry_checkpoint_sha256": (
+            renderer_geometry_checkpoint_sha256
+        ),
+    }
+    for field, expected in expected_geometry.items():
+        if geometry_axis.get(field) != expected:
+            raise ValueError(
+                f"Ours multiscale cache authority geometry axis {field} differs"
+            )
+    sources = authority.get("source_artifacts")
+    if not isinstance(sources, Mapping):
+        raise ValueError("Ours multiscale cache authority source artifacts are missing")
+    expected_sources = {
+        "field_checkpoint": field_checkpoint_sha256,
+        "readout_checkpoint": readout_checkpoint_sha256,
+        "renderer_geometry_checkpoint": renderer_geometry_checkpoint_sha256,
+    }
+    for role, expected_sha in expected_sources.items():
+        record = sources.get(role)
+        if (
+            not isinstance(record, Mapping)
+            or not isinstance(record.get("path"), str)
+            or not record.get("path")
+            or record.get("sha256") != expected_sha
+        ):
+            raise ValueError(
+                f"Ours multiscale cache authority source artifact {role} differs"
+            )
+
+
+def validate_ours_multiscale_query_score_cache(
+    payload: Mapping[str, Any],
+    *,
+    expected_xyz: torch.Tensor,
+    expected_query_ids: Sequence[str],
+    expected_renderer_geometry_checkpoint_sha256: str,
+) -> OursMultiscaleQueryScoreCache:
+    """Validate the independent Ours three-scale cache contract fail-closed.
+
+    Required payload fields are ``query_scores [N,3,Q]``, row-aligned ``xyz``
+    and boolean ``valid``, exact ``query_ids``, three descriptor-native scales,
+    an xyz fingerprint, and separate field/readout/renderer checkpoint SHAs.
+    The renderer SHA remains mandatory even when two checkpoints happen to
+    share Gaussian centers, preventing seed/config drift from being hidden.
+    """
+    if not isinstance(payload, Mapping):
+        raise ValueError("Ours multiscale query-score cache must be a mapping")
+    version = int(payload.get("version", -1))
+    if version != OURS_MULTISCALE_QUERY_SCORE_CACHE_VERSION:
+        raise ValueError(
+            "unsupported Ours multiscale query-score cache version "
+            f"{version}; expected {OURS_MULTISCALE_QUERY_SCORE_CACHE_VERSION}"
+        )
+    contract = str(payload.get("contract", ""))
+    if contract != OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT:
+        raise ValueError(
+            "Ours multiscale query-score cache contract mismatch: "
+            f"{contract!r} vs {OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT!r}"
+        )
+
+    expected_queries = tuple(str(value) for value in expected_query_ids)
+    if not expected_queries or len(set(expected_queries)) != len(expected_queries):
+        raise ValueError("Expected Ours multiscale query_ids must be non-empty and unique")
+    raw_query_ids = payload.get("query_ids")
+    if not isinstance(raw_query_ids, (list, tuple)) or not all(
+        isinstance(value, str) for value in raw_query_ids
+    ):
+        raise ValueError("Ours multiscale cache query_ids must be a string list")
+    query_ids = tuple(raw_query_ids)
+    if len(set(query_ids)) != len(query_ids):
+        raise ValueError("Ours multiscale cache query_ids must be unique")
+    if query_ids != expected_queries:
+        raise ValueError(
+            f"Ours multiscale cache query order mismatch: {query_ids} vs {expected_queries}"
+        )
+
+    raw_scale_ids = payload.get("scale_ids")
+    if not isinstance(raw_scale_ids, (list, tuple)) or not all(
+        isinstance(value, str) for value in raw_scale_ids
+    ):
+        raise ValueError("Ours multiscale cache scale_ids must be a string list")
+    scale_ids = tuple(raw_scale_ids)
+    if (
+        len(scale_ids) != OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT
+        or len(set(scale_ids)) != OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT
+        or any(not value for value in scale_ids)
+    ):
+        raise ValueError("Ours multiscale cache must bind exactly three unique scale_ids")
+    raw_scale_radii = payload.get("scale_radii_m")
+    if (
+        not isinstance(raw_scale_radii, (list, tuple))
+        or len(raw_scale_radii) != OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT
+    ):
+        raise ValueError("Ours multiscale cache must bind exactly three scale_radii_m")
+    try:
+        scale_radii_m = tuple(float(value) for value in raw_scale_radii)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Ours multiscale cache scale_radii_m are malformed") from exc
+    if any(not math.isfinite(value) or value <= 0.0 for value in scale_radii_m):
+        raise ValueError("Ours multiscale cache scale_radii_m must be finite and positive")
+    if len(set(scale_radii_m)) != OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT or any(
+        left >= right for left, right in zip(scale_radii_m, scale_radii_m[1:])
+    ):
+        raise ValueError(
+            "Ours multiscale cache native scale order must be unique and strictly increasing"
+        )
+    expected_scale_ids = tuple(
+        _ours_native_scale_id(radius) for radius in scale_radii_m
+    )
+    if scale_ids != expected_scale_ids:
+        raise ValueError(
+            f"Ours multiscale cache scale order mismatch: {scale_ids} vs "
+            f"{expected_scale_ids}"
+        )
+
+    expected_xyz_cpu = expected_xyz.detach().cpu().float()
+    if expected_xyz_cpu.ndim != 2 or expected_xyz_cpu.shape[1] != 3:
+        raise ValueError(f"Expected model xyz [N,3], got {tuple(expected_xyz_cpu.shape)}")
+    cached_xyz = payload.get("xyz")
+    if not isinstance(cached_xyz, torch.Tensor) or cached_xyz.shape != expected_xyz_cpu.shape:
+        raise ValueError(
+            "Ours multiscale cache requires row-aligned xyz with shape "
+            f"{tuple(expected_xyz_cpu.shape)}"
+        )
+    cached_xyz_cpu = cached_xyz.detach().cpu().float()
+    if not bool(torch.isfinite(cached_xyz_cpu).all()):
+        raise ValueError("Ours multiscale cache xyz contains non-finite values")
+
+    fingerprint = payload.get("geometry_fingerprint")
+    if not isinstance(fingerprint, Mapping):
+        raise ValueError("Ours multiscale cache requires geometry_fingerprint")
+    cached_xyz_sha256 = _require_sha256(
+        fingerprint.get("xyz_sha256"), field="geometry_fingerprint.xyz_sha256"
+    )
+    cached_count = int(fingerprint.get("num_gaussians", -1))
+    payload_xyz_sha256 = tensor_sha256_float32(cached_xyz_cpu)
+    expected_fingerprint = xyz_geometry_fingerprint(expected_xyz_cpu)
+    expected_xyz_sha256 = str(expected_fingerprint["xyz_sha256"])
+    if cached_count != int(expected_xyz_cpu.shape[0]):
+        raise ValueError(
+            "Ours multiscale cache Gaussian count mismatch: "
+            f"{cached_count} vs {int(expected_xyz_cpu.shape[0])}"
+        )
+    if cached_xyz_sha256 != payload_xyz_sha256:
+        raise ValueError(
+            "Ours multiscale cache xyz fingerprint does not match its xyz tensor: "
+            f"{cached_xyz_sha256} vs {payload_xyz_sha256}"
+        )
+    if cached_xyz_sha256 != expected_xyz_sha256:
+        raise ValueError(
+            "Ours multiscale cache xyz/row-order mismatch: "
+            f"cached_xyz_sha256={cached_xyz_sha256} "
+            f"expected_xyz_sha256={expected_xyz_sha256}"
+        )
+
+    field_checkpoint_sha256 = _require_sha256(
+        payload.get("field_checkpoint_sha256"),
+        field="field_checkpoint_sha256",
+    )
+    readout_checkpoint_sha256 = _require_sha256(
+        payload.get("readout_checkpoint_sha256"),
+        field="readout_checkpoint_sha256",
+    )
+    renderer_geometry_checkpoint_sha256 = _require_sha256(
+        payload.get("renderer_geometry_checkpoint_sha256"),
+        field="renderer_geometry_checkpoint_sha256",
+    )
+    expected_checkpoint_sha256 = _require_sha256(
+        expected_renderer_geometry_checkpoint_sha256,
+        field="expected_renderer_geometry_checkpoint_sha256",
+    )
+    if renderer_geometry_checkpoint_sha256 != expected_checkpoint_sha256:
+        raise ValueError(
+            "Ours multiscale cache renderer geometry checkpoint mismatch: "
+            f"cached={renderer_geometry_checkpoint_sha256} "
+            f"expected={expected_checkpoint_sha256}"
+        )
+
+    query_scores = payload.get("query_scores")
+    expected_shape = (
+        int(expected_xyz_cpu.shape[0]),
+        OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT,
+        len(expected_queries),
+    )
+    if not isinstance(query_scores, torch.Tensor) or tuple(query_scores.shape) != expected_shape:
+        raise ValueError(
+            f"Ours multiscale cache query_scores must be [N,3,Q] {expected_shape}"
+        )
+    query_scores_cpu = query_scores.detach().cpu().float()
+    if not bool(torch.isfinite(query_scores_cpu).all()):
+        raise ValueError("Ours multiscale cache query_scores contains non-finite values")
+
+    valid = payload.get("valid")
+    if (
+        not isinstance(valid, torch.Tensor)
+        or valid.dtype != torch.bool
+        or tuple(valid.shape) != (expected_shape[0],)
+    ):
+        raise ValueError(
+            f"Ours multiscale cache valid must be row-aligned bool [{expected_shape[0]}]"
+        )
+    valid_cpu = valid.detach().cpu()
+    if not bool(valid_cpu.any()):
+        raise ValueError("Ours multiscale cache valid must keep at least one primitive")
+
+    _validate_ours_multiscale_authority(
+        payload,
+        query_ids=query_ids,
+        scale_ids=scale_ids,
+        scale_radii_m=scale_radii_m,
+        xyz_sha256=cached_xyz_sha256,
+        count=int(expected_xyz_cpu.shape[0]),
+        field_checkpoint_sha256=field_checkpoint_sha256,
+        readout_checkpoint_sha256=readout_checkpoint_sha256,
+        renderer_geometry_checkpoint_sha256=renderer_geometry_checkpoint_sha256,
+    )
+
+    return OursMultiscaleQueryScoreCache(
+        query_scores=query_scores_cpu,
+        valid=valid_cpu,
+        query_ids=query_ids,
+        scale_ids=scale_ids,
+        scale_radii_m=scale_radii_m,
+        xyz_sha256=cached_xyz_sha256,
+        field_checkpoint_sha256=field_checkpoint_sha256,
+        readout_checkpoint_sha256=readout_checkpoint_sha256,
+        renderer_geometry_checkpoint_sha256=(
+            renderer_geometry_checkpoint_sha256
+        ),
+    )
+
+
+def load_ours_multiscale_query_score_cache(
+    path: str | Path,
+    *,
+    expected_xyz: torch.Tensor,
+    expected_query_ids: Sequence[str],
+    expected_renderer_geometry_checkpoint_sha256: str,
+) -> OursMultiscaleQueryScoreCache:
+    payload = torch.load(Path(path), map_location="cpu")
+    return validate_ours_multiscale_query_score_cache(
+        payload,
+        expected_xyz=expected_xyz,
+        expected_query_ids=expected_query_ids,
+        expected_renderer_geometry_checkpoint_sha256=(
+            expected_renderer_geometry_checkpoint_sha256
+        ),
+    )
 
 
 def parse_float_list(raw: str | None) -> List[float]:
@@ -2739,7 +3072,7 @@ def aggregate_scores_by_voxel(
     return scores_f * (1.0 - blend) + voxel_scores[inverse] * blend
 
 
-def vala_knn_minmax_scores(
+def vala_knn_smoothed_scores(
     scores: torch.Tensor,
     xyz: torch.Tensor,
     *,
@@ -2747,14 +3080,7 @@ def vala_knn_minmax_scores(
     chunk_size: int = 65536,
     valid_mask: Optional[torch.Tensor] = None,
 ) -> torch.Tensor:
-    """Apply the released VALA/LangSplat 3D relevance readout.
-
-    For every primitive and query, VALA averages the raw response with the
-    mean response of its k nearest Gaussian centers, then independently
-    min-max normalizes each query over the full scene.  This function is
-    deliberately GT-free; the subsequent fixed 0.6 threshold is applied by
-    ``SelectionSpec('score_threshold', 0.6)``.
-    """
+    """Return VALA's raw kNN-smoothed response before per-query remapping."""
     values = scores.detach().float().cpu()
     points = xyz.detach().float().cpu()
     if values.ndim != 2:
@@ -2797,6 +3123,28 @@ def vala_knn_minmax_scores(
             values[start:end],
         )
         smoothed[start:end] = 0.5 * (values[start:end] + neighbor_mean)
+    return smoothed
+
+
+def vala_minmax_remap_scores(
+    smoothed_scores: torch.Tensor,
+    *,
+    valid_mask: Optional[torch.Tensor] = None,
+) -> torch.Tensor:
+    """Apply VALA's per-query min-max then ``clip(2*x-1, 0, 1)`` map."""
+    smoothed = smoothed_scores.detach().float().cpu()
+    if smoothed.ndim != 2:
+        raise ValueError(f"Expected smoothed scores [N,Q], got {tuple(smoothed.shape)}")
+    count = int(smoothed.shape[0])
+    if count == 0:
+        return smoothed
+    valid = (
+        torch.ones(count, dtype=torch.bool)
+        if valid_mask is None
+        else torch.as_tensor(valid_mask).bool().cpu().reshape(-1)
+    )
+    if valid.shape != (count,) or not bool(valid.any()):
+        raise ValueError("valid_mask must keep at least one primitive")
 
     low = smoothed[valid].amin(dim=0, keepdim=True)
     high = smoothed[valid].amax(dim=0, keepdim=True)
@@ -2813,6 +3161,87 @@ def vala_knn_minmax_scores(
     result = (2.0 * normalized - 1.0).clamp_(0.0, 1.0)
     result[~valid] = 0.0
     return result
+
+
+def vala_knn_minmax_scores(
+    scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    k: int = 10,
+    chunk_size: int = 65536,
+    valid_mask: Optional[torch.Tensor] = None,
+) -> torch.Tensor:
+    """Apply the released VALA/LangSplat single-level 3D relevance readout.
+
+    For every primitive and query, VALA averages the raw response with the
+    mean response of its k nearest Gaussian centers, then independently
+    min-max normalizes each query over the full scene.  This function is
+    deliberately GT-free; the subsequent fixed 0.6 threshold is applied by
+    ``SelectionSpec('score_threshold', 0.6)``.
+    """
+    smoothed = vala_knn_smoothed_scores(
+        scores,
+        xyz,
+        k=k,
+        chunk_size=chunk_size,
+        valid_mask=valid_mask,
+    )
+    return vala_minmax_remap_scores(
+        smoothed,
+        valid_mask=valid_mask,
+    )
+
+
+def vala_multiscale_knn_peak_select_scores(
+    query_scores: torch.Tensor,
+    xyz: torch.Tensor,
+    *,
+    k: int = 10,
+    chunk_size: int = 65536,
+    valid_mask: Optional[torch.Tensor] = None,
+) -> ValaMultiscaleQueryReadout:
+    """Apply frozen VALA three-level selection to Ours primitive scores.
+
+    Each of the three scales is kNN-smoothed independently.  For every query,
+    the scale with the highest peak in that raw smoothed response is selected;
+    only then is that scale's independently min-max/remapped score returned.
+    """
+    values = query_scores.detach().float().cpu()
+    if values.ndim != 3 or values.shape[1] != 3:
+        raise ValueError(f"Expected multiscale query scores [N,3,Q], got {tuple(values.shape)}")
+    count, levels, queries = (int(value) for value in values.shape)
+    if queries == 0:
+        raise ValueError("Multiscale query scores must contain at least one query")
+    valid = (
+        torch.ones(count, dtype=torch.bool)
+        if valid_mask is None
+        else torch.as_tensor(valid_mask).bool().cpu().reshape(-1)
+    )
+    if valid.shape != (count,) or not bool(valid.any()):
+        raise ValueError("valid_mask must keep at least one primitive")
+
+    flattened = values.reshape(count, levels * queries)
+    smoothed = vala_knn_smoothed_scores(
+        flattened,
+        xyz,
+        k=k,
+        chunk_size=chunk_size,
+        valid_mask=valid,
+    ).reshape(count, levels, queries)
+    raw_smoothed_peaks = smoothed[valid].amax(dim=0)
+    selected_scale_indices = raw_smoothed_peaks.argmax(dim=0)
+
+    remapped = vala_minmax_remap_scores(
+        smoothed.reshape(count, levels * queries),
+        valid_mask=valid,
+    ).reshape(count, levels, queries)
+    gather_index = selected_scale_indices.view(1, 1, queries).expand(count, 1, queries)
+    selected_scores = remapped.gather(dim=1, index=gather_index).squeeze(1)
+    return ValaMultiscaleQueryReadout(
+        scores=selected_scores,
+        selected_scale_indices=selected_scale_indices,
+        raw_smoothed_peaks=raw_smoothed_peaks,
+    )
 
 
 def peak_normalize_query_scores(
@@ -6201,6 +6630,7 @@ def evaluate_scene(
     registered_feature_cache_path: Optional[str],
     external_query_feature_cache_path: Optional[str],
     external_query_score_cache_path: Optional[str],
+    ours_multiscale_query_score_cache_path: Optional[str],
     prompt_templates: List[str],
     selection_specs: List[SelectionSpec],
     score_source: str,
@@ -6647,7 +7077,9 @@ def evaluate_scene(
     canonical_text: Optional[torch.Tensor] = None
 
     registration_stats: Dict[str, object] = {}
-    score_cache_info: Dict[str, object] = {"enabled": bool(score_cache_path)}
+    score_cache_info: Dict[str, object] = {
+        "enabled": bool(score_cache_path or ours_multiscale_query_score_cache_path)
+    }
     score_cache_metadata: Dict[str, object] = {
         "scene": scene,
         "config": str(config_path),
@@ -6702,6 +7134,47 @@ def evaluate_scene(
         )
     scores: Optional[torch.Tensor] = None
     score_valid_mask: Optional[torch.Tensor] = None
+    ours_multiscale_vala_applied = False
+    if ours_multiscale_query_score_cache_path:
+        conflicting_caches = {
+            "score_cache": score_cache_path,
+            "registered_feature_cache": registered_feature_cache_path,
+            "external_query_feature_cache": external_query_feature_cache_path,
+            "external_query_score_cache": external_query_score_cache_path,
+        }
+        enabled_conflicts = [
+            name for name, value in conflicting_caches.items() if value
+        ]
+        if enabled_conflicts:
+            raise ValueError(
+                "--ours_multiscale_query_score_cache is an independent input and "
+                "cannot be combined with: " + ", ".join(enabled_conflicts)
+            )
+        expected_selection = [
+            SelectionSpec("score_threshold", OURS_VALA_MASK_THRESHOLD)
+        ]
+        if list(selection_specs) != expected_selection:
+            raise ValueError(
+                "Ours multiscale VALA input requires the single frozen "
+                f"score threshold {OURS_VALA_MASK_THRESHOLD}"
+            )
+        if score_source != "direct" or scoring != "relevancy":
+            raise ValueError(
+                "Ours multiscale VALA input requires score_source='direct' "
+                "and scoring='relevancy'"
+            )
+        if score_postprocess != "vala_knn_minmax" or int(vala_knn_k) != 10:
+            raise ValueError(
+                "Ours multiscale VALA input requires frozen kNN10/min-max score postprocess"
+            )
+        if score_aggregation != "none" or float(score_aggregation_blend) != 0.0:
+            raise ValueError(
+                "Ours multiscale VALA input forbids additional score aggregation"
+            )
+        if proposal_smoothing != "none" or float(proposal_smoothing_alpha) != 0.0:
+            raise ValueError(
+                "Ours multiscale VALA input forbids proposal score smoothing"
+            )
     cache_path = Path(score_cache_path) if score_cache_path else None
     if cache_path is not None:
         score_cache_info["path"] = str(cache_path)
@@ -6755,6 +7228,54 @@ def evaluate_scene(
             )
 
     direct_scores: Optional[torch.Tensor] = None
+    if scores is None and ours_multiscale_query_score_cache_path:
+        external_path = Path(ours_multiscale_query_score_cache_path)
+        print(f"  loading Ours multiscale primitive query scores: {external_path}")
+        cache = load_ours_multiscale_query_score_cache(
+            external_path,
+            expected_xyz=model.get_xyz().detach().cpu(),
+            expected_query_ids=scene_categories,
+            expected_renderer_geometry_checkpoint_sha256=sha256_file(
+                checkpoint_path
+            ),
+        )
+        readout = vala_multiscale_knn_peak_select_scores(
+            cache.query_scores,
+            model.get_xyz().detach().cpu(),
+            k=vala_knn_k,
+            chunk_size=vala_knn_chunk_size,
+            valid_mask=cache.valid,
+        )
+        scores = readout.scores
+        score_valid_mask = cache.valid
+        ours_multiscale_vala_applied = True
+        selected_scale_indices = [
+            int(value) for value in readout.selected_scale_indices.tolist()
+        ]
+        selected_scale_ids = [
+            cache.scale_ids[index] for index in selected_scale_indices
+        ]
+        registration_stats = {
+            "source": "ours_multiscale_query_score_cache",
+            "path": str(external_path),
+            "registered_gaussians": int(cache.valid.sum()),
+            "total_gaussians": int(cache.valid.numel()),
+            "registered_fraction": float(cache.valid.float().mean()),
+            "feature_level_count": 3,
+            "scale_ids": list(cache.scale_ids),
+            "scale_radii_m": list(cache.scale_radii_m),
+            "level_selection": "highest_raw_knn_smoothed_peak_per_query",
+            "selected_scale_indices": selected_scale_indices,
+            "selected_scale_ids": selected_scale_ids,
+            "raw_smoothed_peaks": readout.raw_smoothed_peaks.tolist(),
+            "xyz_sha256": cache.xyz_sha256,
+            "field_checkpoint_sha256": cache.field_checkpoint_sha256,
+            "readout_checkpoint_sha256": cache.readout_checkpoint_sha256,
+            "renderer_geometry_checkpoint_sha256": (
+                cache.renderer_geometry_checkpoint_sha256
+            ),
+        }
+        score_cache_info["ours_multiscale_query_score_cache"] = str(external_path)
     if scores is None and external_query_score_cache_path:
         external_path = Path(external_query_score_cache_path)
         print(f"  loading external primitive query scores: {external_path}")
@@ -6963,17 +7484,23 @@ def evaluate_scene(
             blend=score_aggregation_blend,
         )
     if score_postprocess == "vala_knn_minmax":
-        print(
-            "  applying released VALA 3D score readout "
-            f"(kNN={vala_knn_k}, blend=0.5, per-query scene min-max, 2x-1 clip)"
-        )
-        scores = vala_knn_minmax_scores(
-            scores,
-            model.get_xyz().detach().cpu(),
-            k=vala_knn_k,
-            chunk_size=vala_knn_chunk_size,
-            valid_mask=score_valid_mask,
-        )
+        if ours_multiscale_vala_applied:
+            print(
+                "  Ours three-level VALA readout already applied "
+                "(kNN=10, raw-smoothed-peak level selection, per-level min-max, 2x-1 clip)"
+            )
+        else:
+            print(
+                "  applying released VALA 3D score readout "
+                f"(kNN={vala_knn_k}, blend=0.5, per-query scene min-max, 2x-1 clip)"
+            )
+            scores = vala_knn_minmax_scores(
+                scores,
+                model.get_xyz().detach().cpu(),
+                k=vala_knn_k,
+                chunk_size=vala_knn_chunk_size,
+                valid_mask=score_valid_mask,
+            )
     elif score_postprocess == "query_peak_normalize":
         print("  applying GT-free per-query scene peak normalization")
         scores = peak_normalize_query_scores(
@@ -7293,6 +7820,14 @@ def main() -> None:
     parser.add_argument("--registered_feature_cache", default="", help="Optional VPR-registered primitive summary-feature cache path written when registered-view scores are computed")
     parser.add_argument("--external_query_feature_cache", default="", help="Oracle/audit cache of row-aligned per-Gaussian text-space features")
     parser.add_argument("--external_query_score_cache", default="", help="Query-time score-then-register cache with fixed query order")
+    parser.add_argument(
+        "--ours_multiscale_query_score_cache",
+        default="",
+        help=(
+            "Independent frozen Ours/VALA cache: query_scores [N,3,Q], exact "
+            "query_ids/scale_ids, row-aligned xyz fingerprint, and geometry checkpoint SHA"
+        ),
+    )
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES, help="Prompt templates separated by '|'; use {query}")
     parser.add_argument(
         "--selection_mode",
@@ -7545,7 +8080,7 @@ def main() -> None:
         # are produced.  The repo diagnostic additionally enables its kNN,
         # min-max, and 2x-1 score remapping. No value is selected from LERF GT.
         args.selection_mode = "score_threshold"
-        args.score_threshold = 0.6
+        args.score_threshold = OURS_VALA_MASK_THRESHOLD
         args.threshold_sweep = ""
         args.ratio_sweep = ""
         args.mean_std_sweep = ""
@@ -7594,6 +8129,25 @@ def main() -> None:
             "--sam3_prompt_mask_head_oracle_prompt is diagnostic-only; pass "
             "--allow_sam3_prompt_mask_head_oracle_diagnostic to run a GT oracle prompt ceiling check"
         )
+    if args.ours_multiscale_query_score_cache:
+        if args.protocol_preset != "vala_repo_3d":
+            parser.error(
+                "--ours_multiscale_query_score_cache requires --protocol_preset vala_repo_3d"
+            )
+        conflicting = [
+            name
+            for name, value in (
+                ("--external_query_feature_cache", args.external_query_feature_cache),
+                ("--external_query_score_cache", args.external_query_score_cache),
+                ("--registered_feature_cache", args.registered_feature_cache),
+            )
+            if value
+        ]
+        if conflicting:
+            parser.error(
+                "--ours_multiscale_query_score_cache cannot be combined with "
+                + ", ".join(conflicting)
+            )
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
@@ -7713,6 +8267,9 @@ def main() -> None:
         registered_feature_cache_path=args.registered_feature_cache or None,
         external_query_feature_cache_path=args.external_query_feature_cache or None,
         external_query_score_cache_path=args.external_query_score_cache or None,
+        ours_multiscale_query_score_cache_path=(
+            args.ours_multiscale_query_score_cache or None
+        ),
         prompt_templates=prompt_templates,
         selection_specs=specs,
         score_source=args.score_source,
@@ -7843,21 +8400,45 @@ def main() -> None:
         "args": {key: str(value) for key, value in vars(args).items()},
         "protocol": {
             "name": (
-                "VALA-compatible released-code post-score/projection protocol (single-level GaussFM)"
-                if args.protocol_preset == "vala_repo_3d"
+                "Frozen Ours three-level primitive scores with VALA direct-3D readout"
+                if args.ours_multiscale_query_score_cache
                 else (
-                    "VALA-compatible paper-level LERF-OVS direct 3D protocol (single-level GaussFM)"
-                    if args.protocol_preset == "vala_paper_3d"
-                    else "OpenGaussian-style LERF-OVS direct 3D object selection"
+                    "VALA-compatible released-code post-score/projection protocol (single-level GaussFM)"
+                    if args.protocol_preset == "vala_repo_3d"
+                    else (
+                        "VALA-compatible paper-level LERF-OVS direct 3D protocol (single-level GaussFM)"
+                        if args.protocol_preset == "vala_paper_3d"
+                        else "OpenGaussian-style LERF-OVS direct 3D object selection"
+                    )
                 )
             ),
             "protocol_preset": args.protocol_preset,
-            "feature_level_count": 1,
-            "level_selection": "not_applicable_single_level_representation",
+            "feature_level_count": 3 if args.ours_multiscale_query_score_cache else 1,
+            "level_selection": (
+                "highest_raw_knn_smoothed_peak_per_query"
+                if args.ours_multiscale_query_score_cache
+                else "not_applicable_single_level_representation"
+            ),
+            "scale_ids": (
+                list(scene_report.get("registration", {}).get("scale_ids", []))
+                if args.ours_multiscale_query_score_cache
+                else []
+            ),
+            "scale_radii_m": (
+                list(
+                    scene_report.get("registration", {}).get(
+                        "scale_radii_m", []
+                    )
+                )
+                if args.ours_multiscale_query_score_cache
+                else []
+            ),
             "checkpoint_contract": scene_report.get("checkpoint_contract", {}),
             "query_location": "3D Gaussian primitives",
             "feature_source": (
-                (
+                "frozen Ours row-aligned three-scale primitive query-score cache"
+                if args.ours_multiscale_query_score_cache
+                else (
                     "pre-refiner rendered SigLIP2 features registered back to Gaussian primitives"
                     if args.disable_registered_refiner
                     else "post-refiner rendered SigLIP2 features registered back to Gaussian primitives"
@@ -7876,6 +8457,7 @@ def main() -> None:
             "score_source": args.score_source,
             "score_cache": args.score_cache,
             "registered_feature_cache": args.registered_feature_cache,
+            "ours_multiscale_query_score_cache": args.ours_multiscale_query_score_cache,
             "compact_feature_key": args.compact_feature_key,
             "direct_readout_mode": args.direct_readout_mode,
             "direct_readout_k": args.direct_readout_k,
@@ -8054,8 +8636,21 @@ def main() -> None:
                 and args.allow_sam3_prompt_mask_head_oracle_diagnostic
             ),
             "config_sha256": sha256_file_if_exists(args.config),
-            "checkpoint_sha256": sha256_file_if_exists(args.checkpoint),
+            "checkpoint_sha256": (
+                str(
+                    scene_report.get("registration", {}).get(
+                        "renderer_geometry_checkpoint_sha256", ""
+                    )
+                )
+                if args.ours_multiscale_query_score_cache
+                else sha256_file_if_exists(args.checkpoint)
+            ),
             "score_cache_sha256": sha256_file_if_exists(args.score_cache) if args.score_cache else "",
+            "ours_multiscale_query_score_cache_sha256": (
+                sha256_file_if_exists(args.ours_multiscale_query_score_cache)
+                if args.ours_multiscale_query_score_cache
+                else ""
+            ),
             "summary_head_weights_sha256": sha256_file_if_exists(args.summary_head_weights),
             "text_embedding_cache_sha256": sha256_file_if_exists(args.text_embedding_cache)
             if args.text_embedding_cache

@@ -14,16 +14,25 @@ from typing import Mapping
 import torch
 
 from radio_gs.evaluation.text_response_fidelity import (
+    IMAGENET12K_HOLDOUT_BANK_FAMILY,
+    IMAGENET1K_PRIMARY_BANK_FAMILY,
     REPORT_ARTIFACT_TYPE,
     REPORT_SCHEMA_VERSION,
     aggregate_paired_seed_gate,
     canonical_json_sha256,
     evaluate_response_fidelity,
     row_identity_sha256,
+    selection_contract_for_bank_family,
     tensor_sha256,
 )
 from radio_gs.scripts import (
     build_target_blind_siglip2_embedding_artifact as frozen_text_builder,
+)
+from radio_gs.scripts import (
+    build_target_blind_imagenet12k_holdout_embedding as holdout_text_builder,
+)
+from radio_gs.scripts import (
+    build_target_blind_imagenet12k_holdout_bank as holdout_vocabulary_builder,
 )
 from radio_gs.utils.immutable_artifacts import (
     load_json_object,
@@ -38,6 +47,7 @@ TEXT_BANK_SCHEMA_VERSION = 1
 TEXT_BANK_ARTIFACT_TYPE = "target_blind_text_embedding_cache"
 TEXT_BANK_MANIFEST_ARTIFACT_TYPE = "target_blind_text_embedding_cache_manifest"
 TEXT_BANK_ALGORITHM_VERSION = "siglip2-target-blind-split-v1"
+HOLDOUT_TEXT_BANK_ALGORITHM_VERSION = holdout_text_builder.ALGORITHM_VERSION
 TEXT_BANK_CANONICALIZATION = "official_c_radio_siglip2_g"
 TEXT_BANK_MODEL_ID = "google/siglip2-giant-opt-patch16-384"
 TEXT_BANK_MODEL_REVISION = "a713301b217d38485fb2204c808367d10bc3cc40"
@@ -53,6 +63,9 @@ TEXT_BANK_TOKENIZER_FILES = frozenset(
 ALLOWED_HELDOUT_SPLITS = frozenset({"dev", "audit"})
 FROZEN_VOCABULARY_CONTRACT = frozen_text_builder.FROZEN_VOCABULARY_CONTRACT
 FROZEN_SNAPSHOT_FILES_SHA256 = frozen_text_builder.FROZEN_SNAPSHOT_FILES_SHA256
+FROZEN_HOLDOUT_VOCABULARY_CONTRACT = (
+    holdout_text_builder.FROZEN_HOLDOUT_CONTRACT
+)
 
 # The formal held-out banks predate the builder's fail-closed HuggingFace blob
 # resolver.  They remain admissible only as this exact immutable pair; this is
@@ -75,6 +88,57 @@ FORMAL_HISTORICAL_BUILDER = {
     "path": "/root/RADIO-GS/radio_gs/scripts/build_target_blind_siglip2_embedding_artifact.py",
     "sha256": "e8e815b5f15796c21205788769a48d1bef95e21b9eac4c2777cf6754b424d136",
 }
+FORMAL_IMAGENET12K_HOLDOUT_TEXT_BANKS = {
+    "dev": {
+        "artifact_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/target_blind_imagenet12k_minus1k_siglip2_holdout_dev_v2/target_blind_siglip2_dev_embeddings.pt",
+        "artifact_sha256": "4496ac3cbdb95472c69a3cf315f202b35d274964d59be8e1f89419afad252481",
+        "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/target_blind_imagenet12k_minus1k_siglip2_holdout_dev_v2/target_blind_siglip2_dev_embeddings.manifest.json",
+        "manifest_sha256": "e7afd43c6700b4893196ef2ed6811db2a50368a5d7b225fb813f3a6eec50587d",
+    },
+    "audit": {
+        "artifact_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/target_blind_imagenet12k_minus1k_siglip2_holdout_audit_v1/target_blind_siglip2_audit_embeddings.pt",
+        "artifact_sha256": "b681d20e4d5096a11ea9971d9049195bcb4ffd43a78d6138e350f3e0727baf74",
+        "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/target_blind_imagenet12k_minus1k_siglip2_holdout_audit_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+        "manifest_sha256": "090683cc42e087f91b993aa83ed06d50194436428401b67c18d3e15c833a99d6",
+    },
+}
+FORMAL_IMAGENET12K_HOLDOUT_BUILDER = {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_target_blind_imagenet12k_holdout_embedding.py",
+    "sha256": "bedc7e1ed736c61a205890b44403f6dc60fcf2322930e194481b927309a37ffb",
+}
+
+
+def classify_formal_text_bank_pair(
+    artifact_path: Path,
+    manifest_path: Path,
+    query_split: str,
+    *,
+    _hash_cache: dict[Path, str] | None = None,
+) -> str:
+    """Classify only an exact registered formal artifact/sidecar pair."""
+
+    if query_split not in ALLOWED_HELDOUT_SPLITS:
+        raise ValueError("formal text-bank split must be dev or audit")
+    artifact_path = Path(artifact_path).resolve()
+    manifest_path = Path(manifest_path).resolve()
+    registries = (
+        (IMAGENET1K_PRIMARY_BANK_FAMILY, FORMAL_HISTORICAL_TEXT_BANKS),
+        (IMAGENET12K_HOLDOUT_BANK_FAMILY, FORMAL_IMAGENET12K_HOLDOUT_TEXT_BANKS),
+    )
+    for family, registry in registries:
+        expected = registry[query_split]
+        if (
+            artifact_path == Path(expected["artifact_path"]).resolve()
+            and manifest_path == Path(expected["manifest_path"]).resolve()
+            and _sha256_file_cached(artifact_path, _hash_cache)
+            == expected["artifact_sha256"]
+            and _sha256_file_cached(manifest_path, _hash_cache)
+            == expected["manifest_sha256"]
+        ):
+            return family
+    raise ValueError(
+        f"unregistered or changed formal {query_split} text-bank pair"
+    )
 
 _DESCRIPTOR_PAYLOAD_KEYS = {
     "schema_version",
@@ -725,7 +789,9 @@ def _validate_embedding_builder_provenance(
     manifest_path: Path,
     manifest_sha256: str,
     query_split: str,
+    algorithm_version: str,
     hash_cache: dict[Path, str] | None,
+    test_contract_injected: bool = False,
 ) -> None:
     current_builder = Path(__file__).resolve().with_name(
         "build_target_blind_siglip2_embedding_artifact.py"
@@ -736,7 +802,6 @@ def _validate_embedding_builder_provenance(
         and declared_sha == _sha256_file_cached(current_builder, hash_cache)
     ):
         return
-
     historical = FORMAL_HISTORICAL_TEXT_BANKS.get(query_split)
     if (
         isinstance(historical, Mapping)
@@ -746,6 +811,29 @@ def _validate_embedding_builder_provenance(
         and artifact_sha256 == historical.get("artifact_sha256")
         and str(manifest_path) == historical.get("manifest_path")
         and manifest_sha256 == historical.get("manifest_sha256")
+    ):
+        return
+    formal_holdout = FORMAL_IMAGENET12K_HOLDOUT_TEXT_BANKS.get(query_split)
+    if (
+        algorithm_version == HOLDOUT_TEXT_BANK_ALGORITHM_VERSION
+        and isinstance(formal_holdout, Mapping)
+        and str(builder_path) == FORMAL_IMAGENET12K_HOLDOUT_BUILDER["path"]
+        and declared_sha == FORMAL_IMAGENET12K_HOLDOUT_BUILDER["sha256"]
+        and str(artifact_path) == formal_holdout.get("artifact_path")
+        and artifact_sha256 == formal_holdout.get("artifact_sha256")
+        and str(manifest_path) == formal_holdout.get("manifest_path")
+        and manifest_sha256 == formal_holdout.get("manifest_sha256")
+    ):
+        return
+    current_holdout_builder = Path(__file__).resolve().with_name(
+        "build_target_blind_imagenet12k_holdout_embedding.py"
+    )
+    if (
+        test_contract_injected
+        and algorithm_version == HOLDOUT_TEXT_BANK_ALGORITHM_VERSION
+        and builder_path == current_holdout_builder
+        and declared_sha
+        == _sha256_file_cached(current_holdout_builder, hash_cache)
     ):
         return
     raise ValueError("embedding sidecar names an unexpected or changed builder")
@@ -813,17 +901,22 @@ def load_text_embedding_bank(
         "artifact",
         "builder",
     }
+    algorithm_version = payload.get("algorithm_version")
+    is_imagenet12k_holdout = (
+        algorithm_version == HOLDOUT_TEXT_BANK_ALGORITHM_VERSION
+    )
     if (
         set(payload) != expected_payload_keys
         or payload.get("schema_version") != TEXT_BANK_SCHEMA_VERSION
         or payload.get("artifact_type") != TEXT_BANK_ARTIFACT_TYPE
-        or payload.get("algorithm_version") != TEXT_BANK_ALGORITHM_VERSION
+        or algorithm_version
+        not in {TEXT_BANK_ALGORITHM_VERSION, HOLDOUT_TEXT_BANK_ALGORITHM_VERSION}
         or set(sidecar) != expected_sidecar_keys
         or sidecar.get("schema_version") != TEXT_BANK_SCHEMA_VERSION
         or sidecar.get("artifact_type") != TEXT_BANK_MANIFEST_ARTIFACT_TYPE
-        or sidecar.get("algorithm_version") != TEXT_BANK_ALGORITHM_VERSION
+        or sidecar.get("algorithm_version") != algorithm_version
     ):
-        raise ValueError("invalid target-blind split-v1 text embedding cache schema")
+        raise ValueError("invalid target-blind text embedding cache schema")
     if (
         payload.get("benchmark_vocabulary_opened") is not False
         or sidecar.get("benchmark_vocabulary_opened") is not False
@@ -871,90 +964,201 @@ def load_text_embedding_bank(
     )
     vocabulary = _read_json(vocabulary_path)
     vocabulary_manifest = _read_json(vocabulary_manifest_path)
-    if (
-        vocabulary.get("schema_version") != 1
-        or vocabulary.get("artifact_type") != "target_blind_imagenet1k_primary_text_bank"
-        or vocabulary.get("algorithm_version") != "imagenet1k-primary-v1"
-        or vocabulary.get("benchmark_vocabulary_opened") is not False
-        or vocabulary.get("prompt_templates") != ["{query}"]
-    ):
-        raise ValueError("bound vocabulary is not the target-blind primary bank v1")
-    if (
-        vocabulary_manifest.get("schema_version") != 1
-        or vocabulary_manifest.get("artifact_type")
-        != "target_blind_imagenet1k_primary_text_bank_manifest"
-        or vocabulary_manifest.get("algorithm_version") != "imagenet1k-primary-v1"
-        or vocabulary_manifest.get("benchmark_vocabulary_opened") is not False
-        or vocabulary_manifest.get("canonical_json", {}).get("sha256")
-        != vocabulary_sha
-    ):
-        raise ValueError("bound vocabulary manifest does not certify the canonical bank")
-    canonical_records = _canonical_vocabulary_records(vocabulary.get("records"))
     frozen_vocabulary = (
-        FROZEN_VOCABULARY_CONTRACT
+        (
+            FROZEN_HOLDOUT_VOCABULARY_CONTRACT
+            if is_imagenet12k_holdout
+            else FROZEN_VOCABULARY_CONTRACT
+        )
         if _test_vocabulary_contract is None
         else _test_vocabulary_contract
     )
-    if vocabulary_sha != frozen_vocabulary.get("canonical_vocabulary_sha256"):
-        raise ValueError(
-            "bound vocabulary is self-consistent but not the frozen target-blind bank"
+    if is_imagenet12k_holdout:
+        if (
+            vocabulary.get("schema_version") != 1
+            or vocabulary.get("artifact_type")
+            != holdout_vocabulary_builder.ARTIFACT_TYPE
+            or vocabulary.get("algorithm_version")
+            != holdout_vocabulary_builder.ALGORITHM_VERSION
+            or vocabulary.get("split") != query_split
+            or vocabulary.get("benchmark_vocabulary_opened") is not False
+            or vocabulary.get("uses_benchmark_vocabulary_for_construction")
+            is not False
+            or vocabulary.get("prompt_templates") != ["{query}"]
+        ):
+            raise ValueError("bound vocabulary is not the frozen ImageNet12K holdout")
+        if (
+            vocabulary_manifest.get("schema_version") != 1
+            or vocabulary_manifest.get("artifact_type")
+            != holdout_vocabulary_builder.MANIFEST_ARTIFACT_TYPE
+            or vocabulary_manifest.get("algorithm_version")
+            != holdout_vocabulary_builder.ALGORITHM_VERSION
+            or vocabulary_manifest.get("benchmark_vocabulary_opened") is not False
+            or vocabulary_manifest.get(
+                "uses_benchmark_vocabulary_for_construction"
+            )
+            is not False
+        ):
+            raise ValueError("bound ImageNet12K holdout manifest schema differs")
+        split_contract = frozen_vocabulary.get("splits", {}).get(query_split)
+        if not isinstance(split_contract, Mapping):
+            raise ValueError("frozen ImageNet12K holdout lacks the requested split")
+        _verify_hash(
+            vocabulary_manifest_sha,
+            frozen_vocabulary.get("manifest_sha256"),
+            "ImageNet12K holdout manifest",
         )
-    selected_records = [
-        record for record in canonical_records if record["split"] == query_split
-    ]
-    if not selected_records:
-        raise ValueError(f"target-blind vocabulary split {query_split} is empty")
-    records_sha = _records_sha256(selected_records)
-    _verify_hash(records_sha, payload.get("ordered_records_sha256"), "ordered records")
-    declared_split_hashes = vocabulary_manifest.get(
-        "split_synset_tab_query_lf_sha256", {}
-    )
-    if not isinstance(declared_split_hashes, Mapping) or set(
-        declared_split_hashes
-    ) != {"fit", "dev", "audit"}:
-        raise ValueError("vocabulary manifest has an incomplete split hash index")
-    computed_split_hashes = {
-        split: _split_sha256(canonical_records, split)
-        for split in ("fit", "dev", "audit")
-    }
-    for split, digest in computed_split_hashes.items():
-        _verify_hash(digest, declared_split_hashes.get(split), f"{split} vocabulary split")
-    expected_split_hashes = frozen_vocabulary.get("split_sha256")
-    if not isinstance(expected_split_hashes, Mapping) or computed_split_hashes != dict(
-        expected_split_hashes
-    ):
-        raise ValueError("bound vocabulary split hashes differ from the frozen contract")
-    split_counts = {
-        split: sum(record["split"] == split for record in canonical_records)
-        for split in ("fit", "dev", "audit")
-    }
-    expected_counts = frozen_vocabulary.get("counts")
-    if (
-        not isinstance(expected_counts, Mapping)
-        or vocabulary_manifest.get("counts") != expected_counts
-        or len(canonical_records)
-        != int(expected_counts.get("deduplicated_queries", -1))
-        or split_counts
-        != {
-            split: int(expected_counts.get(split, -1))
+        _verify_hash(
+            vocabulary_sha,
+            split_contract.get("vocabulary_sha256"),
+            "ImageNet12K holdout vocabulary",
+        )
+        manifest_artifact = vocabulary_manifest.get("artifacts", {}).get(query_split)
+        if (
+            not isinstance(manifest_artifact, Mapping)
+            or manifest_artifact.get("sha256") != vocabulary_sha
+        ):
+            raise ValueError("ImageNet12K holdout manifest binds another vocabulary")
+        canonical_records = _canonical_vocabulary_records(vocabulary.get("records"))
+        selected_records = canonical_records
+        if (
+            len(selected_records) != int(split_contract.get("records", -1))
+            or any(record["split"] != query_split for record in selected_records)
+        ):
+            raise ValueError("ImageNet12K holdout split record count differs")
+        split_sha = _split_sha256(selected_records, query_split)
+        _verify_hash(
+            split_sha,
+            split_contract.get("record_sha256"),
+            "ImageNet12K holdout split",
+        )
+        _verify_hash(
+            split_sha,
+            vocabulary_manifest.get("synset_tab_query_lf_sha256", {}).get(
+                query_split
+            ),
+            "ImageNet12K holdout manifest split",
+        )
+        if _test_vocabulary_contract is None:
+            if (
+                vocabulary_manifest.get("counts")
+                != dict(holdout_vocabulary_builder.EXPECTED_COUNTS)
+                or vocabulary_manifest.get("synset_tab_query_lf_sha256")
+                != dict(holdout_vocabulary_builder.EXPECTED_RECORD_SHA256)
+            ):
+                raise ValueError("production ImageNet12K holdout contract differs")
+            sources = vocabulary_manifest.get("sources")
+            if not isinstance(sources, Mapping) or set(sources) != set(
+                holdout_vocabulary_builder.EXPECTED_SOURCE_SHA256
+            ):
+                raise ValueError("ImageNet12K holdout source index differs")
+            for name, expected_sha in (
+                holdout_vocabulary_builder.EXPECTED_SOURCE_SHA256.items()
+            ):
+                record = sources[name]
+                if not isinstance(record, Mapping):
+                    raise ValueError("ImageNet12K holdout source record differs")
+                source_path = _resolve_bound_path(
+                    record.get("path"),
+                    relative_to=vocabulary_manifest_path.parent,
+                    name=f"ImageNet12K source {name}",
+                )
+                _verify_hash(
+                    _sha256_file_cached(source_path, _hash_cache),
+                    expected_sha,
+                    f"ImageNet12K source {name}",
+                )
+    else:
+        if (
+            vocabulary.get("schema_version") != 1
+            or vocabulary.get("artifact_type")
+            != "target_blind_imagenet1k_primary_text_bank"
+            or vocabulary.get("algorithm_version") != "imagenet1k-primary-v1"
+            or vocabulary.get("benchmark_vocabulary_opened") is not False
+            or vocabulary.get("prompt_templates") != ["{query}"]
+        ):
+            raise ValueError("bound vocabulary is not the target-blind primary bank v1")
+        if (
+            vocabulary_manifest.get("schema_version") != 1
+            or vocabulary_manifest.get("artifact_type")
+            != "target_blind_imagenet1k_primary_text_bank_manifest"
+            or vocabulary_manifest.get("algorithm_version") != "imagenet1k-primary-v1"
+            or vocabulary_manifest.get("benchmark_vocabulary_opened") is not False
+            or vocabulary_manifest.get("canonical_json", {}).get("sha256")
+            != vocabulary_sha
+        ):
+            raise ValueError(
+                "bound vocabulary manifest does not certify the canonical bank"
+            )
+        canonical_records = _canonical_vocabulary_records(vocabulary.get("records"))
+        if vocabulary_sha != frozen_vocabulary.get("canonical_vocabulary_sha256"):
+            raise ValueError(
+                "bound vocabulary is self-consistent but not the frozen target-blind bank"
+            )
+        selected_records = [
+            record for record in canonical_records if record["split"] == query_split
+        ]
+        if not selected_records:
+            raise ValueError(f"target-blind vocabulary split {query_split} is empty")
+        declared_split_hashes = vocabulary_manifest.get(
+            "split_synset_tab_query_lf_sha256", {}
+        )
+        if not isinstance(declared_split_hashes, Mapping) or set(
+            declared_split_hashes
+        ) != {"fit", "dev", "audit"}:
+            raise ValueError("vocabulary manifest has an incomplete split hash index")
+        computed_split_hashes = {
+            split: _split_sha256(canonical_records, split)
             for split in ("fit", "dev", "audit")
         }
-    ):
-        raise ValueError("bound vocabulary counts differ from the frozen contract")
-    declared_sources = vocabulary_manifest.get("sources")
-    expected_sources = frozen_vocabulary.get("source_sha256")
-    if not isinstance(declared_sources, Mapping) or not isinstance(
-        expected_sources, Mapping
-    ):
-        raise ValueError("bound vocabulary lacks frozen source provenance")
-    source_hashes = {
-        str(name): str(record.get("sha256", ""))
-        for name, record in declared_sources.items()
-        if isinstance(record, Mapping)
-    }
-    if source_hashes != dict(expected_sources):
-        raise ValueError("bound vocabulary source hashes differ from the frozen contract")
-    split_sha = computed_split_hashes[query_split]
+        for split, digest in computed_split_hashes.items():
+            _verify_hash(
+                digest,
+                declared_split_hashes.get(split),
+                f"{split} vocabulary split",
+            )
+        expected_split_hashes = frozen_vocabulary.get("split_sha256")
+        if not isinstance(expected_split_hashes, Mapping) or computed_split_hashes != dict(
+            expected_split_hashes
+        ):
+            raise ValueError(
+                "bound vocabulary split hashes differ from the frozen contract"
+            )
+        split_counts = {
+            split: sum(record["split"] == split for record in canonical_records)
+            for split in ("fit", "dev", "audit")
+        }
+        expected_counts = frozen_vocabulary.get("counts")
+        if (
+            not isinstance(expected_counts, Mapping)
+            or vocabulary_manifest.get("counts") != expected_counts
+            or len(canonical_records)
+            != int(expected_counts.get("deduplicated_queries", -1))
+            or split_counts
+            != {
+                split: int(expected_counts.get(split, -1))
+                for split in ("fit", "dev", "audit")
+            }
+        ):
+            raise ValueError("bound vocabulary counts differ from the frozen contract")
+        declared_sources = vocabulary_manifest.get("sources")
+        expected_sources = frozen_vocabulary.get("source_sha256")
+        if not isinstance(declared_sources, Mapping) or not isinstance(
+            expected_sources, Mapping
+        ):
+            raise ValueError("bound vocabulary lacks frozen source provenance")
+        source_hashes = {
+            str(name): str(record.get("sha256", ""))
+            for name, record in declared_sources.items()
+            if isinstance(record, Mapping)
+        }
+        if source_hashes != dict(expected_sources):
+            raise ValueError(
+                "bound vocabulary source hashes differ from the frozen contract"
+            )
+        split_sha = computed_split_hashes[query_split]
+    records_sha = _records_sha256(selected_records)
+    _verify_hash(records_sha, payload.get("ordered_records_sha256"), "ordered records")
     _verify_hash(
         split_sha,
         payload.get("split_synset_tab_query_lf_sha256"),
@@ -1071,7 +1275,9 @@ def load_text_embedding_bank(
         manifest_path=sidecar_path,
         manifest_sha256=_sha256_file_cached(sidecar_path, _hash_cache),
         query_split=query_split,
+        algorithm_version=str(algorithm_version),
         hash_cache=_hash_cache,
+        test_contract_injected=_test_vocabulary_contract is not None,
     )
 
     return {
@@ -1086,6 +1292,12 @@ def load_text_embedding_bank(
         "selected_records_sha256": split_sha,
         "ordered_records_sha256": records_sha,
         "query_split": query_split,
+        "algorithm_version": str(algorithm_version),
+        "bank_family": (
+            "imagenet12k_minus_imagenet1k_holdout_v1"
+            if is_imagenet12k_holdout
+            else "imagenet1k_primary_v1"
+        ),
         "vocabulary_sha256": vocabulary_sha,
         "embedding_tensor_sha256": tensor_sha256(embeddings),
         "embedding_semantic_sha256": semantic_sha,
@@ -1155,13 +1367,9 @@ def evaluate_artifacts(
         "seed": descriptor["seed"],
         "split_role": "query_free_validation",
         "query_split": query_split,
-        "selection_contract": {
-            "benchmark_vocabulary_opened": False,
-            "uses_benchmark_vocabulary_for_construction": False,
-            "queries": "target_blind_imagenet1k_primary_text_bank_v1",
-            "query_axis": "heldout_generic_only",
-            "device": "cpu",
-        },
+        "selection_contract": selection_contract_for_bank_family(
+            bank["bank_family"]
+        ),
         "descriptor_artifact": {
             "path": str(descriptor["path"]),
             "sha256": descriptor["file_sha256"],

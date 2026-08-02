@@ -3,8 +3,9 @@
 
 The inference architecture and checkpoint schema are identical to
 ``train_surface_region_summary_readout.py``.  Training adds an independent
-SmoothL1 loss and a scene-wise profile/ranking loss over responses to the
-frozen *fit* vocabulary.  Their coefficients are not command-line
+SmoothL1 loss and a scene-wise composite of a small centered-profile term plus
+full-order pairwise-gap SmoothL1 over responses to the frozen *fit* vocabulary.
+Their coefficients are not command-line
 hyperparameters: each seed receives one immutable CPU calibration measured at
 that seed's exact frozen Surface attention checkpoint.  Each response branch
 is budgeted to 0.25 of the complete Surface-objective gradient norm; by the
@@ -12,9 +13,11 @@ triangle inequality their combined gradient is bounded by 0.5 of Surface.
 Epoch
 selection is target-blind and constrained: summary-token, mean-descriptor, and
 all-view descriptor validation cosine must each remain within 0.002 of that
-seed's Surface control before fit-query response metrics may select an epoch.
-The frozen control is epoch 0, so selection cannot silently trade away the
-recovered Surface feature field.
+seed's Surface control, while aggregate and per-scene fit-query profile,
+ranking, overlap, and response errors must remain within 0.005 of epoch 0.
+Only then may fit-query SmoothL1 and MAE select an epoch.  The frozen control
+is epoch 0, so selection cannot silently trade away the recovered Surface
+feature field or one difficult scene.
 """
 
 from __future__ import annotations
@@ -33,6 +36,7 @@ from radio_gs.evaluation.text_response_fidelity import tensor_sha256
 from radio_gs.interfaces.surface_region_summary import SurfaceRegionSummaryReadoutV2
 from radio_gs.losses.direct_point_query_logit_distill_loss import (
     compute_independent_normalized_cosine_response_smooth_l1_loss,
+    compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss,
     compute_scene_wise_text_response_profile_ranking_loss,
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
@@ -58,7 +62,7 @@ from radio_gs.utils.immutable_artifacts import (
 CALIBRATION_SCHEMA_VERSION = 2
 CALIBRATION_ARTIFACT_TYPE = "surface_text_response_gradient_calibration"
 CALIBRATION_ALGORITHM_VERSION = (
-    "per-seed-surface-warmstart-dual-response-gradient-budget-v2"
+    "per-seed-surface-warmstart-dual-response-pairwise-gradient-budget-v3"
 )
 CALIBRATION_SCENE_COUNT = 4
 CALIBRATION_SCENE_SELECTION = "lexicographically_first_complete_train_scenes_v1"
@@ -66,23 +70,368 @@ SHARED_TRAINING_SEEDS = (0, 1, 2)
 GRADIENT_NORM_EPSILON = 1e-12
 RESPONSE_BRANCH_GRADIENT_RATIO = 0.25
 TOTAL_RESPONSE_GRADIENT_RATIO_UPPER_BOUND = 0.5
-SCENE_PROFILE_WEIGHT = 1.0
-SCENE_RANKING_WEIGHT = 1.0
-SCENE_RANKING_TEMPERATURE = 0.1
+SCENE_RESPONSE_LOSS = (
+    "scene_wise_text_response_weighted_profile_pairwise_gap_smooth_l1"
+)
+SCENE_PROFILE_LOSS = "scene_wise_centered_text_response_profile_cosine_distance"
+SCENE_PAIRWISE_GAP_LOSS = "scene_wise_text_response_pairwise_gap_smooth_l1"
+SCENE_PROFILE_WEIGHT = 0.2
+SCENE_PAIRWISE_GAP_WEIGHT = 1.0
 SCENE_TIE_TOLERANCE = 1e-6
 MAX_COMPLETE_SCENE_BATCH_ROWS = 64
 FIT_SPLIT = "fit"
 DISTILL_RUN_MANIFEST_SCHEMA_VERSION = 3
 DISTILL_RUN_MANIFEST_ARTIFACT_TYPE = "surface_region_text_response_distill_run"
-RESPONSE_EPOCH_SELECTION = (
-    "surface_control_feasible_0p002_then_fit_support_response_relation_surface_v2"
+LEGACY_RESPONSE_EPOCH_SELECTION = (
+    "surface_control_0p002_fit_scene_robust_0p005_then_response_error_v3"
 )
+RESPONSE_EPOCH_SELECTION = (
+    "surface_control_0p002_fit_scene_robust_0p005_accepted_anchor_"
+    "fixed_1over2048_then_response_error_v4"
+)
+PROPOSAL_ALPHA_NUMERATOR = 1
+PROPOSAL_ALPHA_DENOMINATOR = 2048
+PROPOSAL_ALPHA = PROPOSAL_ALPHA_NUMERATOR / PROPOSAL_ALPHA_DENOMINATOR
+HISTORY_HASH_CHAIN_ALGORITHM = (
+    "sha256_canonical_json_previous_plus_record_without_selection_score_v1"
+)
+PROPOSAL_LOSS_MEASUREMENT_STATE = "raw_proposal_before_micro_projection"
+PROPOSAL_LOSS_FIELDS = (
+    "total",
+    "token",
+    "descriptor",
+    "relation",
+    "independent_response",
+    "scene_response",
+    "scene_profile",
+    "scene_ranking",
+)
+LEGACY_FLAT_PROPOSAL_LOSS_FIELDS = {
+    "total": "loss",
+    "token": "token_loss",
+    "descriptor": "descriptor_loss",
+    "relation": "relation_loss",
+    "independent_response": "independent_response_loss",
+    "scene_response": "scene_response_loss",
+    "scene_profile": "scene_profile_loss",
+    "scene_ranking": "scene_ranking_loss",
+}
 SURFACE_CONTROL_NONINFERIORITY_TOLERANCE = 0.002
+FIT_RESPONSE_NONINFERIORITY_TOLERANCE = 0.005
 SURFACE_CONTROL_METRICS = (
     "summary_token_cosine",
     "mean_descriptor_cosine",
     "all_view_descriptor_cosine",
 )
+FIT_RESPONSE_QUALITY_METRICS = (
+    "text_response_profile_cosine_mean",
+    "text_response_profile_cosine_p05",
+    "text_response_ranking_spearman_mean",
+    "text_response_ranking_spearman_p05",
+    "text_response_top_decile_overlap_mean",
+    "text_response_top_decile_overlap_p05",
+)
+FIT_RESPONSE_SCENE_QUALITY_METRICS = (
+    "profile_cosine_mean",
+    "profile_cosine_p05",
+    "ranking_spearman_mean",
+    "ranking_spearman_p05",
+    "top_decile_overlap_mean",
+    "top_decile_overlap_p05",
+)
+FIT_RESPONSE_SCENE_ERROR_METRICS = (
+    "smooth_l1",
+    "mae",
+)
+
+
+def _scene_response_objective_contract() -> dict[str, Any]:
+    """Describe the immutable two-component scene-response objective."""
+
+    return {
+        "name": SCENE_RESPONSE_LOSS,
+        "profile_loss": SCENE_PROFILE_LOSS,
+        "profile_weight": SCENE_PROFILE_WEIGHT,
+        "ranking_loss": SCENE_PAIRWISE_GAP_LOSS,
+        "ranking_weight": SCENE_PAIRWISE_GAP_WEIGHT,
+        "tie_tolerance": SCENE_TIE_TOLERANCE,
+        "pairwise_gap_normalization": "per_scene_query_teacher_response_span",
+    }
+
+
+def _proposal_state_machine_contract() -> dict[str, Any]:
+    return {
+        "name": "accepted_anchor_fixed_micro_ray_fresh_adamw_v1",
+        "proposal_source": "current_accepted_anchor",
+        "proposal_optimizer": "fresh_adamw_complete_epoch",
+        "alpha_numerator": PROPOSAL_ALPHA_NUMERATOR,
+        "alpha_denominator": PROPOSAL_ALPHA_DENOMINATOR,
+        "trial_interpolation": "anchor+alpha*(raw-anchor)",
+        "validation_evaluations_per_proposal": 1,
+        "acceptance": "response_selection_feasible_is_exactly_true",
+        "feasible_nonbest_action": "accept_as_next_anchor",
+        "infeasible_action": "restore_exact_preproposal_anchor",
+        "optimizer_moments": "reset_before_every_proposal",
+        "best_selection": "existing_v3_robust_lexicographic_rank_control_and_trials",
+        "patience": "consecutive_proposals_without_global_best_update",
+        "persistent_generator": "advanced_across_proposals_never_rolled_back",
+        "backtracking": "none_fixed_alpha_single_trial",
+        "proposal_loss_accounting": {
+            "measurement_state": PROPOSAL_LOSS_MEASUREMENT_STATE,
+            "fields": list(PROPOSAL_LOSS_FIELDS),
+            "legacy_flat_mirror": dict(LEGACY_FLAT_PROPOSAL_LOSS_FIELDS),
+        },
+    }
+
+
+def _canonical_json_sha256(value: object) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _clone_cpu_state(model: torch.nn.Module) -> dict[str, torch.Tensor]:
+    return {
+        name: value.detach().cpu().clone()
+        for name, value in model.state_dict().items()
+    }
+
+
+def state_dict_sha256(state: Mapping[str, torch.Tensor]) -> str:
+    if not isinstance(state, Mapping) or not state:
+        raise ValueError("state_dict hash requires a non-empty mapping")
+    records = []
+    for name in sorted(state):
+        value = state[name]
+        if not isinstance(name, str) or not name or not torch.is_tensor(value):
+            raise ValueError("state_dict hash fields differ")
+        tensor = value.detach().cpu().contiguous()
+        if (tensor.is_floating_point() or tensor.is_complex()) and not bool(
+            torch.isfinite(tensor).all()
+        ):
+            raise ValueError(f"state_dict hash tensor is non-finite: {name}")
+        records.append(
+            {
+                "name": name,
+                "shape": list(tensor.shape),
+                "dtype": str(tensor.dtype),
+                "tensor_sha256": tensor_sha256(tensor),
+            }
+        )
+    return _canonical_json_sha256(records)
+
+
+def interpolate_anchor_raw_state(
+    anchor: Mapping[str, torch.Tensor],
+    raw: Mapping[str, torch.Tensor],
+) -> dict[str, torch.Tensor]:
+    if not isinstance(anchor, Mapping) or set(anchor) != set(raw) or not anchor:
+        raise ValueError("anchor/raw state_dict fields differ")
+    trial: dict[str, torch.Tensor] = {}
+    for name in sorted(anchor):
+        left = anchor[name].detach().cpu().contiguous()
+        right = raw[name].detach().cpu().contiguous()
+        if left.shape != right.shape or left.dtype != right.dtype:
+            raise ValueError(f"anchor/raw state tensor differs: {name}")
+        if left.is_floating_point():
+            if not bool(torch.isfinite(left).all()) or not bool(
+                torch.isfinite(right).all()
+            ):
+                raise ValueError(f"anchor/raw state tensor is non-finite: {name}")
+            trial[name] = torch.lerp(left, right, PROPOSAL_ALPHA)
+        else:
+            if not torch.equal(left, right):
+                raise ValueError(
+                    f"anchor/raw non-floating state tensor changed: {name}"
+                )
+            trial[name] = left.clone()
+    return trial
+
+
+def _history_hash_payload(record: Mapping[str, Any]) -> dict[str, Any]:
+    value = dict(record)
+    value.pop("history_hash_chain", None)
+    value.pop("selection_score", None)
+    return value
+
+
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def attach_history_hash_chain(
+    record: Mapping[str, Any], previous_sha256: str | None
+) -> dict[str, Any]:
+    if previous_sha256 is not None and not _is_sha256(previous_sha256):
+        raise ValueError("history hash-chain predecessor is invalid")
+    value = dict(record)
+    digest = _canonical_json_sha256(
+        {
+            "previous_sha256": previous_sha256,
+            "record": _history_hash_payload(value),
+        }
+    )
+    value["history_hash_chain"] = {
+        "algorithm": HISTORY_HASH_CHAIN_ALGORITHM,
+        "previous_sha256": previous_sha256,
+        "sha256": digest,
+    }
+    return value
+
+
+def validate_history_hash_chain(history: Sequence[Mapping[str, Any]]) -> str:
+    if not history:
+        raise ValueError("history hash chain is empty")
+    previous: str | None = None
+    for index, record in enumerate(history):
+        if not isinstance(record, Mapping):
+            raise ValueError("history hash-chain row differs")
+        observed = record.get("history_hash_chain")
+        expected = attach_history_hash_chain(record, previous)["history_hash_chain"]
+        if observed != expected:
+            raise ValueError(f"history hash chain differs at row {index}")
+        previous = str(expected["sha256"])
+    assert previous is not None
+    return previous
+
+
+def validate_proposal_state_machine_history(
+    history: Sequence[Mapping[str, Any]], *, patience: int
+) -> dict[str, Any]:
+    """Independently replay accepted-anchor, best, and patience transitions."""
+
+    if not history or any(not isinstance(row, Mapping) for row in history):
+        raise ValueError("proposal state-machine history is empty or malformed")
+    if int(patience) < 0:
+        raise ValueError("proposal state-machine patience is invalid")
+    control = history[0]
+    control_hash = control.get("anchor_state_dict_sha256_after_proposal")
+    if (
+        control.get("epoch") != 0
+        or control.get("state_machine_role") != "frozen_control_initial_anchor"
+        or control.get("accepted") is not True
+        or control.get("rejected") is not False
+        or control.get("anchor_epoch_after_proposal") != 0
+        or not _is_sha256(control_hash)
+        or control.get("best_updated") is not True
+        or control.get("best_epoch_after_proposal") != 0
+        or control.get("best_state_dict_sha256_after_proposal") != control_hash
+        or control.get("patience_stale_after_proposal") != 0
+        or control.get("patience_stop_after_proposal") is not False
+        or "proposal" in control
+    ):
+        raise ValueError("proposal state-machine control row differs")
+    anchor_epoch = 0
+    anchor_hash = str(control_hash)
+    best_epoch = 0
+    best_hash = str(control_hash)
+    stale = 0
+    accepted_count = 0
+    rejected_count = 0
+    for index, row in enumerate(history[1:], start=1):
+        proposal = row.get("proposal")
+        if (
+            row.get("epoch") != index
+            or row.get("state_machine_role") != "fixed_micro_ray_trial"
+            or not isinstance(proposal, Mapping)
+            or set(proposal)
+            != {
+                "index",
+                "source_anchor_epoch",
+                "anchor_state_dict_sha256",
+                "raw_state_dict_sha256",
+                "trial_state_dict_sha256",
+                "alpha_numerator",
+                "alpha_denominator",
+                "optimizer_state_reset",
+                "validation_evaluations",
+                "backtracking",
+                "persistent_generator",
+            }
+            or proposal.get("index") != index
+            or proposal.get("source_anchor_epoch") != anchor_epoch
+            or proposal.get("anchor_state_dict_sha256") != anchor_hash
+            or not _is_sha256(proposal.get("raw_state_dict_sha256"))
+            or not _is_sha256(proposal.get("trial_state_dict_sha256"))
+            or proposal.get("alpha_numerator") != PROPOSAL_ALPHA_NUMERATOR
+            or proposal.get("alpha_denominator") != PROPOSAL_ALPHA_DENOMINATOR
+            or proposal.get("optimizer_state_reset") is not True
+            or proposal.get("validation_evaluations") != 1
+            or proposal.get("backtracking") != "none_fixed_alpha_single_trial"
+            or proposal.get("persistent_generator")
+            != "advanced_never_rolled_back"
+        ):
+            raise ValueError(f"proposal state-machine row {index} differs")
+        proposal_losses = row.get("proposal_losses")
+        if (
+            row.get("loss_measurement_state") != PROPOSAL_LOSS_MEASUREMENT_STATE
+            or not isinstance(proposal_losses, Mapping)
+            or tuple(proposal_losses) != PROPOSAL_LOSS_FIELDS
+        ):
+            raise ValueError(f"proposal loss-accounting row {index} differs")
+        for field, legacy_field in LEGACY_FLAT_PROPOSAL_LOSS_FIELDS.items():
+            value = proposal_losses.get(field)
+            if (
+                not isinstance(value, (int, float))
+                or isinstance(value, bool)
+                or not math.isfinite(float(value))
+                or float(value) < 0.0
+                or row.get(legacy_field) != value
+            ):
+                raise ValueError(f"proposal loss {field} differs at row {index}")
+        accepted = row.get("response_selection_feasible") is True
+        if row.get("accepted") is not accepted or row.get("rejected") is accepted:
+            raise ValueError(f"proposal acceptance differs at row {index}")
+        if accepted:
+            anchor_epoch = index
+            anchor_hash = str(proposal["trial_state_dict_sha256"])
+            accepted_count += 1
+        else:
+            rejected_count += 1
+        _, prefix_best_epoch, _ = finalize_response_primary_epoch_selection(
+            history[: index + 1]
+        )
+        best_updated = prefix_best_epoch == index
+        if best_updated:
+            best_epoch = index
+            best_hash = str(proposal["trial_state_dict_sha256"])
+            stale = 0
+        else:
+            stale += 1
+        patience_stop = bool(int(patience) and stale >= int(patience))
+        if (
+            row.get("anchor_epoch_after_proposal") != anchor_epoch
+            or row.get("anchor_state_dict_sha256_after_proposal") != anchor_hash
+            or row.get("best_updated") is not best_updated
+            or row.get("best_epoch_after_proposal") != best_epoch
+            or row.get("best_state_dict_sha256_after_proposal") != best_hash
+            or row.get("patience_stale_after_proposal") != stale
+            or row.get("patience_stop_after_proposal") is not patience_stop
+            or (patience_stop and index != len(history) - 1)
+        ):
+            raise ValueError(f"proposal transition differs at row {index}")
+    return {
+        "accepted_anchor": {
+            "epoch": anchor_epoch,
+            "state_dict_sha256": anchor_hash,
+            "accepted_proposal_count": accepted_count,
+            "rejected_proposal_count": rejected_count,
+        },
+        "best_epoch": best_epoch,
+        "best_state_dict_sha256": best_hash,
+        "history_hash_chain_sha256": validate_history_hash_chain(history),
+    }
+
+
 FROZEN_FORMAL_FIT_BANK_BUILDER = {
     "path": "/root/RADIO-GS/radio_gs/scripts/build_target_blind_siglip2_embedding_artifact.py",
     "sha256": "e8e815b5f15796c21205788769a48d1bef95e21b9eac4c2777cf6754b424d136",
@@ -384,13 +733,95 @@ def _descriptor_loss(
     return (1.0 - cosine)[mask].mean()
 
 
+def _average_tie_ranks(values: torch.Tensor) -> torch.Tensor:
+    """Return zero-based average ranks for one finite one-dimensional tensor."""
+
+    if values.ndim != 1 or values.numel() < 2:
+        raise ValueError("average ranks require at least two scalar values")
+    ordered, permutation = torch.sort(values)
+    _, counts = torch.unique_consecutive(ordered, return_counts=True)
+    starts = torch.cumsum(counts, dim=0) - counts
+    tied_ranks = starts.to(values.dtype) + 0.5 * (counts.to(values.dtype) - 1.0)
+    sorted_ranks = torch.repeat_interleave(tied_ranks, counts)
+    ranks = torch.empty_like(sorted_ranks)
+    ranks[permutation] = sorted_ranks
+    return ranks
+
+
+def _scene_query_ranking_metrics(
+    student_response: torch.Tensor,
+    teacher_response: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Return per-query Spearman and top-decile overlap for one scene."""
+
+    if (
+        student_response.ndim != 2
+        or teacher_response.shape != student_response.shape
+        or student_response.shape[0] < 2
+    ):
+        raise ValueError("scene ranking responses must be aligned [R,Q]")
+    region_count, query_count = student_response.shape
+    top_count = max(1, math.ceil(0.1 * int(region_count)))
+    spearman: list[torch.Tensor] = []
+    overlap: list[torch.Tensor] = []
+    for query_index in range(int(query_count)):
+        local_teacher = teacher_response[:, query_index]
+        if float((local_teacher.max() - local_teacher.min()).abs().detach().cpu()) <= 1e-8:
+            continue
+        local_student = student_response[:, query_index]
+        teacher_ranks = _average_tie_ranks(local_teacher)
+        student_ranks = _average_tie_ranks(local_student)
+        centered_teacher = teacher_ranks - teacher_ranks.mean()
+        centered_student = student_ranks - student_ranks.mean()
+        denominator = centered_teacher.norm() * centered_student.norm()
+        if float(denominator.detach().cpu()) <= 1e-12:
+            # A constant student response must not evade robust selection by
+            # becoming an undefined rank unit.
+            spearman.append(student_response.new_tensor(-1.0))
+        else:
+            spearman.append(
+                (
+                    (centered_teacher * centered_student).sum() / denominator
+                ).clamp(-1.0, 1.0)
+            )
+        teacher_top = set(
+            local_teacher.topk(top_count, largest=True, sorted=False)
+            .indices.detach()
+            .cpu()
+            .tolist()
+        )
+        student_top = set(
+            local_student.topk(top_count, largest=True, sorted=False)
+            .indices.detach()
+            .cpu()
+            .tolist()
+        )
+        overlap.append(
+            student_response.new_tensor(
+                len(teacher_top.intersection(student_top)) / float(top_count)
+            )
+        )
+    if not spearman or not overlap:
+        raise ValueError("scene ranking requires a non-constant teacher query")
+    return torch.stack(spearman), torch.stack(overlap)
+
+
+def _mean_and_p05(values: torch.Tensor) -> tuple[float, float]:
+    if values.ndim != 1 or values.numel() == 0 or not bool(torch.isfinite(values).all()):
+        raise ValueError("quality summaries require finite scalar values")
+    return (
+        float(values.mean().detach().cpu()),
+        float(torch.quantile(values, 0.05).detach().cpu()),
+    )
+
+
 def compute_query_free_response_selection_metrics(
     student_descriptors: torch.Tensor,
     teacher_descriptors: torch.Tensor,
     text_bank: torch.Tensor,
     *,
     scene_ids: Sequence[str],
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Measure text unary preservation along the within-scene support axis.
 
     Descriptor cosine is a row-local metric.  A text unary instead ranks
@@ -427,9 +858,18 @@ def compute_query_free_response_selection_metrics(
 
     student_response = student @ text.T
     teacher_response = teacher @ text.T
+    response_profiles = F.cosine_similarity(
+        student_response,
+        teacher_response,
+        dim=1,
+        eps=1e-8,
+    )
     support_agreements: list[torch.Tensor] = []
     valid_ratios: list[torch.Tensor] = []
     relation_errors: list[torch.Tensor] = []
+    ranking_units: list[torch.Tensor] = []
+    top_decile_units: list[torch.Tensor] = []
+    per_scene: dict[str, dict[str, float]] = {}
     for scene in sorted(set(normalized_scenes)):
         rows = torch.tensor(
             [index for index, value in enumerate(normalized_scenes) if value == scene],
@@ -440,6 +880,7 @@ def compute_query_free_response_selection_metrics(
             continue
         local_student_response = student_response[rows]
         local_teacher_response = teacher_response[rows]
+        local_profiles = response_profiles[rows]
         top_two = local_teacher_response.topk(2, dim=0).values
         valid = (top_two[0] - top_two[1]).abs() > 1e-8
         valid_ratios.append(valid.float().mean())
@@ -458,11 +899,49 @@ def compute_query_free_response_selection_metrics(
                 local_teacher @ local_teacher.T,
             )
         )
+        local_spearman, local_top_decile = _scene_query_ranking_metrics(
+            local_student_response,
+            local_teacher_response,
+        )
+        ranking_units.append(local_spearman)
+        top_decile_units.append(local_top_decile)
+        profile_mean, profile_p05 = _mean_and_p05(local_profiles)
+        ranking_mean, ranking_p05 = _mean_and_p05(local_spearman)
+        top_decile_mean, top_decile_p05 = _mean_and_p05(local_top_decile)
+        per_scene[scene] = {
+            "smooth_l1": float(
+                F.smooth_l1_loss(
+                    local_student_response,
+                    local_teacher_response,
+                ).detach().cpu()
+            ),
+            "mae": float(
+                (local_student_response - local_teacher_response)
+                .abs().mean().detach().cpu()
+            ),
+            "profile_cosine_mean": profile_mean,
+            "profile_cosine_p05": profile_p05,
+            "ranking_spearman_mean": ranking_mean,
+            "ranking_spearman_p05": ranking_p05,
+            "top_decile_overlap_mean": top_decile_mean,
+            "top_decile_overlap_p05": top_decile_p05,
+        }
     if not support_agreements or not relation_errors:
         raise ValueError(
             "query-free response selection needs a multi-region scene with "
             "non-tied teacher support"
         )
+    ranking = torch.cat(ranking_units)
+    top_decile = torch.cat(top_decile_units)
+    profile_mean, profile_p05 = _mean_and_p05(response_profiles)
+    ranking_mean, ranking_p05 = _mean_and_p05(ranking)
+    top_decile_mean, top_decile_p05 = _mean_and_p05(top_decile)
+    scene_worst: dict[str, float] = {
+        "smooth_l1": max(row["smooth_l1"] for row in per_scene.values()),
+        "mae": max(row["mae"] for row in per_scene.values()),
+    }
+    for field in FIT_RESPONSE_SCENE_QUALITY_METRICS:
+        scene_worst[field] = min(row[field] for row in per_scene.values())
     return {
         "text_support_top1_agreement": float(
             torch.stack(support_agreements).mean().detach().cpu()
@@ -473,6 +952,36 @@ def compute_query_free_response_selection_metrics(
         "text_response_smooth_l1": float(
             F.smooth_l1_loss(student_response, teacher_response).detach().cpu()
         ),
+        "text_response_mae": float(
+            (student_response - teacher_response).abs().mean().detach().cpu()
+        ),
+        "text_response_profile_cosine_mean": profile_mean,
+        "text_response_profile_cosine_p05": profile_p05,
+        "text_response_ranking_spearman_mean": ranking_mean,
+        "text_response_ranking_spearman_p05": ranking_p05,
+        "text_response_top_decile_overlap_mean": top_decile_mean,
+        "text_response_top_decile_overlap_p05": top_decile_p05,
+        "text_response_scene_worst_smooth_l1": scene_worst["smooth_l1"],
+        "text_response_scene_worst_mae": scene_worst["mae"],
+        "text_response_scene_worst_profile_cosine_mean": scene_worst[
+            "profile_cosine_mean"
+        ],
+        "text_response_scene_worst_profile_cosine_p05": scene_worst[
+            "profile_cosine_p05"
+        ],
+        "text_response_scene_worst_ranking_spearman_mean": scene_worst[
+            "ranking_spearman_mean"
+        ],
+        "text_response_scene_worst_ranking_spearman_p05": scene_worst[
+            "ranking_spearman_p05"
+        ],
+        "text_response_scene_worst_top_decile_overlap_mean": scene_worst[
+            "top_decile_overlap_mean"
+        ],
+        "text_response_scene_worst_top_decile_overlap_p05": scene_worst[
+            "top_decile_overlap_p05"
+        ],
+        "text_response_scene_metrics": per_scene,
         "descriptor_relation_smooth_l1": float(
             torch.stack(relation_errors).mean().detach().cpu()
         ),
@@ -482,15 +991,17 @@ def compute_query_free_response_selection_metrics(
 def finalize_response_primary_epoch_selection(
     history: Sequence[Mapping[str, Any]],
 ) -> tuple[list[dict[str, Any]], int, float]:
-    """Select fit-text response quality inside the Surface-control feasible set.
+    """Select response-error improvement inside two target-blind constraints.
 
     The first row is the frozen control at epoch 0.  A later epoch is feasible
     only when *each* Surface validation component is at least control minus
-    :data:`SURFACE_CONTROL_NONINFERIORITY_TOLERANCE`.  Within that feasible set
-    the deterministic order is: support top-1 (higher), fit-response SmoothL1
-    (lower), descriptor-relation SmoothL1 (lower), and legacy Surface score
-    (higher).  The returned scalar remains the selected Surface score for
-    compatibility with descriptor-fidelity reports.
+    :data:`SURFACE_CONTROL_NONINFERIORITY_TOLERANCE`, all aggregate fit quality
+    metrics remain within :data:`FIT_RESPONSE_NONINFERIORITY_TOLERANCE`, and
+    every fit scene independently preserves profile, ranking, top-decile, and
+    response-error quality within that fit tolerance.  Feasible epochs are
+    ordered by response SmoothL1 then MAE, both lower-is-better.  Epoch 0
+    compares with itself and is therefore always feasible.  The returned
+    scalar remains the selected Surface score for checkpoint compatibility.
     """
 
     if not history:
@@ -501,44 +1012,85 @@ def finalize_response_primary_epoch_selection(
         raise ValueError(
             "response-aware history must start at control epoch 0 and be contiguous"
         )
-    control = rows[0]
-    control_surface: dict[str, float] = {}
-    for field in SURFACE_CONTROL_METRICS:
-        value = control.get(field)
+    def finite_value(record: Mapping[str, Any], field: str, *, label: str) -> float:
+        value = record.get(field)
         if (
             not isinstance(value, (int, float))
             or isinstance(value, bool)
             or not math.isfinite(float(value))
         ):
-            raise ValueError(f"Surface control {field} must be finite")
-        control_surface[field] = float(value)
+            raise ValueError(f"{label} {field} must be finite")
+        return float(value)
 
-    ranks: list[tuple[float, float, float, float] | None] = []
+    def scene_metrics(
+        record: Mapping[str, Any],
+        *,
+        expected_scenes: set[str] | None,
+        label: str,
+    ) -> dict[str, dict[str, float]]:
+        raw = record.get("text_response_scene_metrics")
+        if not isinstance(raw, Mapping) or not raw:
+            raise ValueError(f"{label} text_response_scene_metrics must be non-empty")
+        normalized: dict[str, dict[str, float]] = {}
+        for raw_scene, raw_metrics in raw.items():
+            scene = str(raw_scene)
+            if not scene or scene in normalized or not isinstance(raw_metrics, Mapping):
+                raise ValueError(f"{label} fit scene metrics are malformed")
+            normalized[scene] = {
+                field: finite_value(raw_metrics, field, label=f"{label} scene {scene}")
+                for field in (
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                )
+            }
+        if expected_scenes is not None and set(normalized) != expected_scenes:
+            raise ValueError(f"{label} fit scene IDs drifted from epoch 0")
+        return normalized
+
+    control = rows[0]
+    control_surface = {
+        field: finite_value(control, field, label="Surface control")
+        for field in SURFACE_CONTROL_METRICS
+    }
+    control_fit_quality = {
+        field: finite_value(control, field, label="fit-response control")
+        for field in FIT_RESPONSE_QUALITY_METRICS
+    }
+    control_scenes = scene_metrics(
+        control,
+        expected_scenes=None,
+        label="fit-response control",
+    )
+
+    ranks: list[tuple[float, ...] | None] = []
     for record in rows:
         finite_fields = (
             "surface_selection_score",
             "text_support_top1_agreement",
             "text_response_smooth_l1",
+            "text_response_mae",
             "descriptor_relation_smooth_l1",
+            *FIT_RESPONSE_QUALITY_METRICS,
             *SURFACE_CONTROL_METRICS,
         )
-        values: dict[str, float] = {}
-        for field in finite_fields:
-            raw = record.get(field)
-            if (
-                not isinstance(raw, (int, float))
-                or isinstance(raw, bool)
-                or not math.isfinite(float(raw))
-            ):
-                raise ValueError(
-                    f"response-aware epoch selection {field} must be finite"
-                )
-            values[field] = float(raw)
-        deltas = {
+        values = {
+            field: finite_value(
+                record,
+                field,
+                label="response-aware epoch selection",
+            )
+            for field in finite_fields
+        }
+        current_scenes = scene_metrics(
+            record,
+            expected_scenes=set(control_scenes),
+            label="response-aware epoch selection",
+        )
+        surface_deltas = {
             field: values[field] - control_surface[field]
             for field in SURFACE_CONTROL_METRICS
         }
-        feasible = all(
+        surface_feasible = all(
             delta >= -SURFACE_CONTROL_NONINFERIORITY_TOLERANCE
             or math.isclose(
                 delta,
@@ -546,17 +1098,104 @@ def finalize_response_primary_epoch_selection(
                 rel_tol=0.0,
                 abs_tol=1e-12,
             )
-            for delta in deltas.values()
+            for delta in surface_deltas.values()
         )
-        record["surface_control_deltas"] = deltas
-        record["surface_control_feasible"] = feasible
+        aggregate_quality_deltas = {
+            field: values[field] - control_fit_quality[field]
+            for field in FIT_RESPONSE_QUALITY_METRICS
+        }
+        aggregate_fit_feasible = all(
+            delta >= -FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+            or math.isclose(
+                delta,
+                -FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+            for delta in aggregate_quality_deltas.values()
+        )
+        scene_deltas: dict[str, dict[str, float]] = {}
+        per_scene_fit_feasible = True
+        for scene in sorted(control_scenes):
+            scene_deltas[scene] = {
+                field: current_scenes[scene][field] - control_scenes[scene][field]
+                for field in (
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                )
+            }
+            quality_feasible = all(
+                scene_deltas[scene][field]
+                >= -FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+                or math.isclose(
+                    scene_deltas[scene][field],
+                    -FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for field in FIT_RESPONSE_SCENE_QUALITY_METRICS
+            )
+            error_feasible = all(
+                scene_deltas[scene][field]
+                <= FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+                or math.isclose(
+                    scene_deltas[scene][field],
+                    FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for field in FIT_RESPONSE_SCENE_ERROR_METRICS
+            )
+            per_scene_fit_feasible = (
+                per_scene_fit_feasible and quality_feasible and error_feasible
+            )
+        fit_feasible = aggregate_fit_feasible and per_scene_fit_feasible
+        feasible = surface_feasible and fit_feasible
+        record["surface_control_deltas"] = surface_deltas
+        record["surface_control_feasible"] = surface_feasible
         record["surface_control_tolerance"] = (
             SURFACE_CONTROL_NONINFERIORITY_TOLERANCE
         )
+        record["fit_response_control_deltas"] = {
+            "aggregate_quality": aggregate_quality_deltas,
+            "per_scene": scene_deltas,
+        }
+        record["fit_response_aggregate_control_feasible"] = (
+            aggregate_fit_feasible
+        )
+        record["fit_response_per_scene_control_feasible"] = (
+            per_scene_fit_feasible
+        )
+        record["fit_response_control_feasible"] = fit_feasible
+        record["fit_response_control_tolerance"] = (
+            FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+        )
+        record["response_selection_feasible"] = feasible
+        record["fit_response_error_improvement_control_minus_candidate"] = {
+            "smooth_l1": finite_value(
+                control,
+                "text_response_smooth_l1",
+                label="fit-response control",
+            )
+            - values["text_response_smooth_l1"],
+            "mae": finite_value(
+                control,
+                "text_response_mae",
+                label="fit-response control",
+            )
+            - values["text_response_mae"],
+        }
         ranks.append(
             (
-                values["text_support_top1_agreement"],
                 -values["text_response_smooth_l1"],
+                -values["text_response_mae"],
+                values["text_response_ranking_spearman_p05"],
+                values["text_response_ranking_spearman_mean"],
+                values["text_response_profile_cosine_p05"],
+                values["text_response_profile_cosine_mean"],
+                values["text_response_top_decile_overlap_p05"],
+                values["text_response_top_decile_overlap_mean"],
+                values["text_support_top1_agreement"],
                 -values["descriptor_relation_smooth_l1"],
                 values["surface_selection_score"],
             )
@@ -657,9 +1296,6 @@ def compute_training_losses(
     relation_weight: float,
     independent_response_lambda: float,
     scene_response_lambda: float,
-    scene_profile_weight: float = SCENE_PROFILE_WEIGHT,
-    scene_ranking_weight: float = SCENE_RANKING_WEIGHT,
-    scene_ranking_temperature: float = SCENE_RANKING_TEMPERATURE,
 ) -> dict[str, torch.Tensor]:
     """Compute Surface plus independently budgeted response branches."""
 
@@ -683,16 +1319,12 @@ def compute_training_losses(
             fit_text_bank,
         )
     )
-    scene_response_loss, scene_stats = (
-        compute_scene_wise_text_response_profile_ranking_loss(
+    scene_response_loss, scene_profile_loss, scene_pairwise_gap_loss = (
+        _scene_profile_pairwise_gap_composite_loss(
             projected,
             target_descriptor,
             fit_text_bank,
             scene_ids,
-            profile_weight=float(scene_profile_weight),
-            ranking_weight=float(scene_ranking_weight),
-            ranking_temperature=float(scene_ranking_temperature),
-            tie_tolerance=SCENE_TIE_TOLERANCE,
         )
     )
     total = (
@@ -709,8 +1341,10 @@ def compute_training_losses(
         "relation": relation_loss,
         "independent_response": independent_response_loss,
         "scene_response": scene_response_loss,
-        "scene_profile": scene_stats["profile_loss"],
-        "scene_ranking": scene_stats["ranking_loss"],
+        "scene_profile": scene_profile_loss.detach(),
+        # This stable role key now contains the pairwise-gap ranking loss bound
+        # by _scene_response_objective_contract().
+        "scene_ranking": scene_pairwise_gap_loss.detach(),
     }
 
 
@@ -779,6 +1413,39 @@ def complete_scene_batches(
     return batches
 
 
+def _scene_profile_pairwise_gap_composite_loss(
+    student_descriptors: torch.Tensor,
+    teacher_descriptors: torch.Tensor,
+    fit_text_bank: torch.Tensor,
+    scene_ids: Sequence[str],
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Return the weighted scene composite and its two raw components."""
+
+    profile_loss, _ = compute_scene_wise_text_response_profile_ranking_loss(
+        student_descriptors,
+        teacher_descriptors,
+        fit_text_bank,
+        scene_ids,
+        profile_weight=1.0,
+        ranking_weight=0.0,
+        tie_tolerance=SCENE_TIE_TOLERANCE,
+    )
+    pairwise_gap_loss, _ = (
+        compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss(
+            student_descriptors,
+            teacher_descriptors,
+            fit_text_bank,
+            scene_ids,
+            tie_tolerance=SCENE_TIE_TOLERANCE,
+        )
+    )
+    composite = (
+        SCENE_PROFILE_WEIGHT * profile_loss
+        + SCENE_PAIRWISE_GAP_WEIGHT * pairwise_gap_loss
+    )
+    return composite, profile_loss, pairwise_gap_loss
+
+
 def _surface_and_response_losses(
     predicted_token: torch.Tensor,
     projected: torch.Tensor,
@@ -791,9 +1458,6 @@ def _surface_and_response_losses(
     *,
     token_weight: float,
     relation_weight: float,
-    scene_profile_weight: float,
-    scene_ranking_weight: float,
-    scene_ranking_temperature: float,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict[str, torch.Tensor]]:
     token_loss = (
         1.0 - F.cosine_similarity(predicted_token, target_token, dim=-1)
@@ -813,15 +1477,13 @@ def _surface_and_response_losses(
         target_descriptor,
         fit_text_bank,
     )
-    scene_loss, scene_stats = compute_scene_wise_text_response_profile_ranking_loss(
-        projected,
-        target_descriptor,
-        fit_text_bank,
-        scene_ids,
-        profile_weight=float(scene_profile_weight),
-        ranking_weight=float(scene_ranking_weight),
-        ranking_temperature=float(scene_ranking_temperature),
-        tie_tolerance=SCENE_TIE_TOLERANCE,
+    scene_loss, scene_profile_loss, scene_pairwise_gap_loss = (
+        _scene_profile_pairwise_gap_composite_loss(
+            projected,
+            target_descriptor,
+            fit_text_bank,
+            scene_ids,
+        )
     )
     return surface_loss, independent_loss, scene_loss, {
         "surface": surface_loss,
@@ -830,8 +1492,8 @@ def _surface_and_response_losses(
         "relation": relation_loss,
         "independent_response": independent_loss,
         "scene_response": scene_loss,
-        "scene_profile": scene_stats["profile_loss"],
-        "scene_ranking": scene_stats["ranking_loss"],
+        "scene_profile": scene_profile_loss,
+        "scene_ranking": scene_pairwise_gap_loss,
     }
 
 
@@ -896,9 +1558,6 @@ def calibrate_gradient_budgets(
     *,
     token_weight: float,
     relation_weight: float,
-    scene_profile_weight: float = SCENE_PROFILE_WEIGHT,
-    scene_ranking_weight: float = SCENE_RANKING_WEIGHT,
-    scene_ranking_temperature: float = SCENE_RANKING_TEMPERATURE,
 ) -> dict[str, Any]:
     """Budget both response gradients at a per-seed Surface warm start."""
 
@@ -914,9 +1573,6 @@ def calibrate_gradient_budgets(
         scene_ids,
         token_weight=float(token_weight),
         relation_weight=float(relation_weight),
-        scene_profile_weight=float(scene_profile_weight),
-        scene_ranking_weight=float(scene_ranking_weight),
-        scene_ranking_temperature=float(scene_ranking_temperature),
     )
     surface_norm = _gradient_l2_norm(
         surface_loss,
@@ -1346,16 +2002,15 @@ def _training_contract(args: argparse.Namespace) -> dict[str, Any]:
         ),
         "response_losses": [
             "independent_normalized_cosine_response_smooth_l1",
-            "scene_wise_text_response_profile_ranking",
+            SCENE_RESPONSE_LOSS,
         ],
-        "scene_profile_weight": SCENE_PROFILE_WEIGHT,
-        "scene_ranking_weight": SCENE_RANKING_WEIGHT,
-        "scene_ranking_temperature": SCENE_RANKING_TEMPERATURE,
+        "scene_response_objective": _scene_response_objective_contract(),
         "scene_tie_tolerance": SCENE_TIE_TOLERANCE,
         "training_batching": (
             "shuffle_complete_scene_groups_no_partial_scenes_v1"
         ),
         "max_complete_scene_batch_rows": MAX_COMPLETE_SCENE_BATCH_ROWS,
+        "proposal_state_machine": _proposal_state_machine_contract(),
         "epoch_selection": RESPONSE_EPOCH_SELECTION,
         "surface_control_initialization": "exact_seed_checkpoint_state_dict",
         "surface_control_noninferiority_tolerance": (
@@ -1391,7 +2046,7 @@ def _training_config(args: argparse.Namespace) -> dict[str, Any]:
         "device",
         "radio_checkpoint",
     )
-    return {
+    config = {
         key: (
             getattr(args, key, "joint_attention_v1")
             if key == "context_pooling_mode"
@@ -1399,6 +2054,8 @@ def _training_config(args: argparse.Namespace) -> dict[str, Any]:
         )
         for key in keys
     }
+    config["proposal_state_machine"] = _proposal_state_machine_contract()
+    return config
 
 
 def _training_provenance(
@@ -1447,6 +2104,7 @@ def _training_provenance(
             ),
             "selection_policy": RESPONSE_EPOCH_SELECTION,
         },
+        "proposal_state_machine": _proposal_state_machine_contract(),
         "text_response_distillation": {
             "fit_split_only": True,
             "benchmark_vocabulary_opened": False,
@@ -1463,8 +2121,9 @@ def _training_provenance(
             ),
             "losses": [
                 "independent_normalized_cosine_response_smooth_l1",
-                "scene_wise_text_response_profile_ranking",
+                SCENE_RESPONSE_LOSS,
             ],
+            "scene_response_objective": _scene_response_objective_contract(),
             "complete_scene_batching": True,
             "design_diagnostic": dict(calibration["design_diagnostic"]),
         },
@@ -1501,10 +2160,8 @@ def _calibration_objective_contract(
         "independent_response_loss": (
             "independent_normalized_cosine_response_smooth_l1"
         ),
-        "scene_response_loss": "scene_wise_text_response_profile_ranking",
-        "scene_profile_weight": SCENE_PROFILE_WEIGHT,
-        "scene_ranking_weight": SCENE_RANKING_WEIGHT,
-        "scene_ranking_temperature": SCENE_RANKING_TEMPERATURE,
+        "scene_response_loss": SCENE_RESPONSE_LOSS,
+        "scene_response_objective": _scene_response_objective_contract(),
         "scene_tie_tolerance": SCENE_TIE_TOLERANCE,
         "branch_gradient_target_ratio": RESPONSE_BRANCH_GRADIENT_RATIO,
         "combined_response_gradient_ratio_upper_bound": (
@@ -1543,18 +2200,21 @@ def _load_gradient_design_diagnostic(
             "device",
             "rows",
             "scenes",
-            "ranking_temperature",
+            "scene_response_objective",
             "losses",
             "gradient_l2",
             "equal_surface_gradient_lambdas",
+            "weighted_component_gradient_l2_upper_bounds",
+            "component_balance",
             "bindings",
         }
-        or payload.get("schema_version") != 1
+        or payload.get("schema_version") != 2
         or payload.get("artifact_type")
         != "warmstart_surface_text_response_gradient_diagnostic"
         or payload.get("scenes") != scenes
         or payload.get("rows") != int(row_count)
-        or payload.get("ranking_temperature") != SCENE_RANKING_TEMPERATURE
+        or payload.get("scene_response_objective")
+        != _scene_response_objective_contract()
     ):
         raise ValueError("gradient design diagnostic contract differs")
     bindings = payload.get("bindings")
@@ -1584,9 +2244,16 @@ def _load_gradient_design_diagnostic(
         "fit_text_bank",
         "fit_text_bank_manifest",
         "implementation",
+        "training_implementation",
+        "loss_implementation",
     }:
         raise ValueError("gradient design diagnostic binding fields differ")
-    for key in ("surface_control", "implementation"):
+    for key in (
+        "surface_control",
+        "implementation",
+        "training_implementation",
+        "loss_implementation",
+    ):
         record = bindings.get(key)
         if (
             not isinstance(record, Mapping)
@@ -1595,27 +2262,59 @@ def _load_gradient_design_diagnostic(
             != record.get("sha256")
         ):
             raise ValueError(f"gradient design diagnostic {key} binding differs")
+    loss_source = Path(
+        compute_scene_wise_text_response_pairwise_gap_smooth_l1_loss.__code__.co_filename
+    ).resolve()
+    if (
+        bindings["training_implementation"]["sha256"]
+        != _sha256_file(Path(__file__).resolve())
+        or bindings["loss_implementation"]["sha256"] != _sha256_file(loss_source)
+    ):
+        raise ValueError("gradient design diagnostic runtime implementation differs")
+    losses = payload.get("losses")
     norms = payload.get("gradient_l2")
     equal = payload.get("equal_surface_gradient_lambdas")
-    if not isinstance(norms, Mapping) or set(norms) != {
-        "surface",
-        "independent_response",
-        "scene_response",
-    } or not isinstance(equal, Mapping) or set(equal) != {
-        "independent_response",
-        "scene_response",
-    }:
+    weighted = payload.get("weighted_component_gradient_l2_upper_bounds")
+    balance = payload.get("component_balance")
+    loss_fields = {
+        "surface", "token", "descriptor", "relation", "independent_response",
+        "scene_response", "scene_profile", "scene_ranking",
+    }
+    response_fields = {
+        "independent_response", "scene_response", "scene_profile", "scene_ranking"
+    }
+    if (
+        not isinstance(losses, Mapping)
+        or set(losses) != loss_fields
+        or not isinstance(norms, Mapping)
+        or set(norms) != {"surface", *response_fields}
+        or not isinstance(equal, Mapping)
+        or set(equal) != response_fields
+        or not isinstance(weighted, Mapping)
+        or set(weighted) != {"scene_profile", "scene_ranking", "triangle_sum"}
+        or not isinstance(balance, Mapping)
+        or set(balance)
+        != {
+            "raw_equalizing_profile_weight",
+            "frozen_profile_weight",
+            "weighted_profile_to_ranking_gradient_ratio",
+            "derivation",
+        }
+    ):
         raise ValueError("gradient design diagnostic measurements differ")
-    numeric = [*norms.values(), *equal.values()]
+    numeric = [*losses.values(), *norms.values(), *equal.values(), *weighted.values()]
     if any(
         not isinstance(value, (int, float))
         or isinstance(value, bool)
         or not math.isfinite(float(value))
-        or float(value) <= GRADIENT_NORM_EPSILON
+        or float(value) < 0.0
         for value in numeric
+    ) or any(
+        float(value) <= GRADIENT_NORM_EPSILON
+        for value in [*norms.values(), *equal.values(), *weighted.values()]
     ):
         raise ValueError("gradient design diagnostic measurements are invalid")
-    for branch in ("independent_response", "scene_response"):
+    for branch in response_fields:
         if not math.isclose(
             float(equal[branch]),
             float(norms["surface"]) / float(norms[branch]),
@@ -1623,6 +2322,46 @@ def _load_gradient_design_diagnostic(
             abs_tol=1e-12,
         ):
             raise ValueError("gradient design diagnostic ratio is inconsistent")
+    weighted_profile = SCENE_PROFILE_WEIGHT * float(norms["scene_profile"])
+    weighted_ranking = SCENE_PAIRWISE_GAP_WEIGHT * float(norms["scene_ranking"])
+    if (
+        not math.isclose(
+            float(losses["scene_response"]),
+            SCENE_PROFILE_WEIGHT * float(losses["scene_profile"])
+            + SCENE_PAIRWISE_GAP_WEIGHT * float(losses["scene_ranking"]),
+            rel_tol=1e-7,
+            abs_tol=1e-10,
+        )
+        or not math.isclose(
+            float(weighted["scene_profile"]), weighted_profile,
+            rel_tol=1e-9, abs_tol=1e-12,
+        )
+        or not math.isclose(
+            float(weighted["scene_ranking"]), weighted_ranking,
+            rel_tol=1e-9, abs_tol=1e-12,
+        )
+        or not math.isclose(
+            float(weighted["triangle_sum"]), weighted_profile + weighted_ranking,
+            rel_tol=1e-9, abs_tol=1e-12,
+        )
+        or balance.get("frozen_profile_weight") != SCENE_PROFILE_WEIGHT
+        or balance.get("derivation")
+        != (
+            "fit_only_seed0_fixed_calibration_batch_rounded_near_unit_"
+            "weighted_component_gradient_ratio"
+        )
+        or not math.isclose(
+            float(balance.get("raw_equalizing_profile_weight")),
+            float(norms["scene_ranking"]) / float(norms["scene_profile"]),
+            rel_tol=1e-9, abs_tol=1e-12,
+        )
+        or not math.isclose(
+            float(balance.get("weighted_profile_to_ranking_gradient_ratio")),
+            weighted_profile / weighted_ranking,
+            rel_tol=1e-9, abs_tol=1e-12,
+        )
+    ):
+        raise ValueError("gradient design diagnostic component balance differs")
     return {
         "path": str(source),
         "sha256": str(expected_sha256),
@@ -2088,22 +2827,20 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         ),
         flush=True,
     )
-    optimizer = torch.optim.AdamW(
-        model.parameters(),
-        lr=float(args.learning_rate),
-        weight_decay=float(args.weight_decay),
-    )
     best_score = control_score
     best_epoch = 0
-    best_state = {
-        key: value.detach().cpu().clone()
-        for key, value in model.state_dict().items()
-    }
+    anchor_epoch = 0
+    anchor_state = _clone_cpu_state(model)
+    anchor_state_sha256 = state_dict_sha256(anchor_state)
+    best_state = {key: value.clone() for key, value in anchor_state.items()}
+    best_state_sha256 = anchor_state_sha256
     history: list[dict[str, Any]] = [
         {
             "epoch": 0,
             "initialization": "frozen_surface_control_checkpoint",
+            "state_machine_role": "frozen_control_initial_anchor",
             "response_lambdas": response_lambdas,
+            "scene_response_objective": _scene_response_objective_contract(),
             "surface_selection_score": control_score,
             "selection_score": control_score,
             **control_validation,
@@ -2111,10 +2848,36 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         }
     ]
     history, _, _ = finalize_response_primary_epoch_selection(history)
+    history[0].update(
+        {
+            "accepted": True,
+            "rejected": False,
+            "anchor_epoch_after_proposal": 0,
+            "anchor_state_dict_sha256_after_proposal": anchor_state_sha256,
+            "best_updated": True,
+            "best_epoch_after_proposal": 0,
+            "best_state_dict_sha256_after_proposal": best_state_sha256,
+            "patience_stale_after_proposal": 0,
+            "patience_stop_after_proposal": False,
+        }
+    )
+    history[0] = attach_history_hash_chain(history[0], None)
+    history_chain_sha256 = history[0]["history_hash_chain"]["sha256"]
     stale = 0
+    accepted_proposal_count = 0
+    rejected_proposal_count = 0
     observed_peak_batch_rows = 0
     observed_batch_count = 0
     for epoch in range(int(args.epochs)):
+        proposal_index = epoch + 1
+        model.load_state_dict(anchor_state, strict=True)
+        proposal_anchor_epoch = anchor_epoch
+        proposal_anchor_sha256 = anchor_state_sha256
+        optimizer = torch.optim.AdamW(
+            model.parameters(),
+            lr=float(args.learning_rate),
+            weight_decay=float(args.weight_decay),
+        )
         batches = complete_scene_batches(
             train_data.get("scene_ids"),
             row_count=len(train_data["radio_features"]),
@@ -2180,6 +2943,11 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             for name, value in terms.items():
                 epoch_terms[name].append(float(value.detach().cpu()))
 
+        raw_state = _clone_cpu_state(model)
+        raw_state_sha256 = state_dict_sha256(raw_state)
+        trial_state = interpolate_anchor_raw_state(anchor_state, raw_state)
+        trial_state_sha256 = state_dict_sha256(trial_state)
+        model.load_state_dict(trial_state, strict=True)
         model.eval()
         metrics, response_metrics = _evaluate_response_aware(
             model,
@@ -2192,23 +2960,34 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         score = 0.5 * (
             metrics["mean_descriptor_cosine"] + metrics["all_view_descriptor_cosine"]
         )
+        proposal_losses = {
+            name: sum(epoch_terms[name]) / len(epoch_terms[name])
+            for name in PROPOSAL_LOSS_FIELDS
+        }
         record = {
-            "epoch": epoch + 1,
-            "loss": sum(epoch_terms["total"]) / len(epoch_terms["total"]),
-            "token_loss": sum(epoch_terms["token"]) / len(epoch_terms["token"]),
-            "descriptor_loss": sum(epoch_terms["descriptor"])
-            / len(epoch_terms["descriptor"]),
-            "relation_loss": sum(epoch_terms["relation"])
-            / len(epoch_terms["relation"]),
-            "independent_response_loss": sum(epoch_terms["independent_response"])
-            / len(epoch_terms["independent_response"]),
-            "scene_response_loss": sum(epoch_terms["scene_response"])
-            / len(epoch_terms["scene_response"]),
-            "scene_profile_loss": sum(epoch_terms["scene_profile"])
-            / len(epoch_terms["scene_profile"]),
-            "scene_ranking_loss": sum(epoch_terms["scene_ranking"])
-            / len(epoch_terms["scene_ranking"]),
+            "epoch": proposal_index,
+            "state_machine_role": "fixed_micro_ray_trial",
+            "proposal": {
+                "index": proposal_index,
+                "source_anchor_epoch": proposal_anchor_epoch,
+                "anchor_state_dict_sha256": proposal_anchor_sha256,
+                "raw_state_dict_sha256": raw_state_sha256,
+                "trial_state_dict_sha256": trial_state_sha256,
+                "alpha_numerator": PROPOSAL_ALPHA_NUMERATOR,
+                "alpha_denominator": PROPOSAL_ALPHA_DENOMINATOR,
+                "optimizer_state_reset": True,
+                "validation_evaluations": 1,
+                "backtracking": "none_fixed_alpha_single_trial",
+                "persistent_generator": "advanced_never_rolled_back",
+            },
+            "loss_measurement_state": PROPOSAL_LOSS_MEASUREMENT_STATE,
+            "proposal_losses": proposal_losses,
+            **{
+                legacy_field: proposal_losses[field]
+                for field, legacy_field in LEGACY_FLAT_PROPOSAL_LOSS_FIELDS.items()
+            },
             "response_lambdas": response_lambdas,
+            "scene_response_objective": _scene_response_objective_contract(),
             "complete_scene_batch_count": len(batches),
             "max_complete_scene_batch_rows": epoch_peak_batch_rows,
             "surface_selection_score": score,
@@ -2217,21 +2996,51 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
             **response_metrics,
         }
         history.append(record)
-        print(json.dumps(record), flush=True)
         history, selected_epoch, selected_score = (
             finalize_response_primary_epoch_selection(history)
         )
-        if selected_epoch == epoch + 1:
+        accepted = history[-1].get("response_selection_feasible") is True
+        if accepted:
+            anchor_state = {key: value.clone() for key, value in trial_state.items()}
+            anchor_epoch = proposal_index
+            anchor_state_sha256 = trial_state_sha256
+            accepted_proposal_count += 1
+        else:
+            model.load_state_dict(anchor_state, strict=True)
+            rejected_proposal_count += 1
+        best_updated = selected_epoch == proposal_index
+        if best_updated:
             best_score = selected_score
             best_epoch = selected_epoch
+            best_state = {key: value.clone() for key, value in trial_state.items()}
+            best_state_sha256 = trial_state_sha256
             stale = 0
-            best_state = {
-                key: value.detach().cpu().clone()
-                for key, value in model.state_dict().items()
-            }
         else:
+            if selected_epoch != best_epoch or not math.isclose(
+                selected_score, best_score, rel_tol=0.0, abs_tol=0.0
+            ):
+                raise RuntimeError("proposal changed the previously frozen best state")
             stale += 1
-        if int(args.patience) and stale >= int(args.patience):
+        patience_stop = bool(int(args.patience) and stale >= int(args.patience))
+        history[-1].update(
+            {
+                "accepted": accepted,
+                "rejected": not accepted,
+                "anchor_epoch_after_proposal": anchor_epoch,
+                "anchor_state_dict_sha256_after_proposal": anchor_state_sha256,
+                "best_updated": best_updated,
+                "best_epoch_after_proposal": best_epoch,
+                "best_state_dict_sha256_after_proposal": best_state_sha256,
+                "patience_stale_after_proposal": stale,
+                "patience_stop_after_proposal": patience_stop,
+            }
+        )
+        history[-1] = attach_history_hash_chain(
+            history[-1], history_chain_sha256
+        )
+        history_chain_sha256 = history[-1]["history_hash_chain"]["sha256"]
+        print(json.dumps(history[-1]), flush=True)
+        if patience_stop:
             break
 
     history, selected_epoch, selected_score = (
@@ -2244,6 +3053,27 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         abs_tol=0.0,
     ):
         raise RuntimeError("online and finalized response-aware selection differ")
+    state_machine = validate_proposal_state_machine_history(
+        history,
+        patience=int(args.patience),
+    )
+    expected_accepted_anchor = {
+        "epoch": anchor_epoch,
+        "state_dict_sha256": anchor_state_sha256,
+        "accepted_proposal_count": accepted_proposal_count,
+        "rejected_proposal_count": rejected_proposal_count,
+    }
+    if (
+        state_machine["accepted_anchor"] != expected_accepted_anchor
+        or state_machine["best_epoch"] != best_epoch
+        or state_machine["best_state_dict_sha256"] != best_state_sha256
+        or state_machine["history_hash_chain_sha256"] != history_chain_sha256
+    ):
+        raise RuntimeError("online and replayed proposal state machines differ")
+    if state_dict_sha256(best_state) != best_state_sha256:
+        raise RuntimeError("best-state hash differs before checkpoint write")
+    if state_dict_sha256(anchor_state) != anchor_state_sha256:
+        raise RuntimeError("accepted-anchor hash differs before checkpoint write")
     model.load_state_dict(best_state)
     architecture = model.architecture(train_meta["region_contract_sha256"])
     training_config = _training_config(args)
@@ -2267,6 +3097,10 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "history": history,
         "best_epoch": best_epoch,
         "best_selection_score": best_score,
+        "best_state_dict_sha256": best_state_sha256,
+        "proposal_state_machine": _proposal_state_machine_contract(),
+        "accepted_anchor": expected_accepted_anchor,
+        "history_hash_chain_sha256": history_chain_sha256,
         "surface_control_checkpoint": surface_control,
         "surface_control_validation": control_validation,
         "surface_control_score": control_score,
@@ -2295,6 +3129,10 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         "architecture": architecture,
         "best_epoch": best_epoch,
         "best_selection_score": best_score,
+        "best_state_dict_sha256": best_state_sha256,
+        "proposal_state_machine": payload["proposal_state_machine"],
+        "accepted_anchor": payload["accepted_anchor"],
+        "history_hash_chain_sha256": history_chain_sha256,
         "surface_control_checkpoint": surface_control,
         "surface_control_validation": control_validation,
         "surface_control_score": control_score,
@@ -2497,6 +3335,8 @@ def audit_training_artifacts(args: argparse.Namespace) -> dict[str, Any]:
     for index, row in enumerate(history):
         if row.get("response_lambdas") != calibration["response_lambdas"]:
             raise ValueError("checkpoint history response lambdas drifted")
+        if row.get("scene_response_objective") != _scene_response_objective_contract():
+            raise ValueError("checkpoint history scene-response objective drifted")
         if index == 0:
             continue
         for field in (
@@ -2522,6 +3362,10 @@ def audit_training_artifacts(args: argparse.Namespace) -> dict[str, Any]:
     )
     if finalized_history != history:
         raise ValueError("checkpoint history response-aware selection drifted")
+    state_machine = validate_proposal_state_machine_history(
+        history,
+        patience=int(args.patience),
+    )
     if (
         checkpoint.get("best_epoch") != best_epoch
         or not math.isclose(
@@ -2535,6 +3379,19 @@ def audit_training_artifacts(args: argparse.Namespace) -> dict[str, Any]:
         )
     ):
         raise ValueError("checkpoint best selection metadata is inconsistent")
+    if (
+        checkpoint.get("proposal_state_machine")
+        != _proposal_state_machine_contract()
+        or checkpoint.get("accepted_anchor") != state_machine["accepted_anchor"]
+        or checkpoint.get("best_epoch") != state_machine["best_epoch"]
+        or checkpoint.get("best_state_dict_sha256")
+        != state_machine["best_state_dict_sha256"]
+        or checkpoint.get("history_hash_chain_sha256")
+        != state_machine["history_hash_chain_sha256"]
+        or state_dict_sha256(checkpoint.get("state_dict", {}))
+        != state_machine["best_state_dict_sha256"]
+    ):
+        raise ValueError("checkpoint proposal state-machine metadata differs")
     if checkpoint.get("surface_control_checkpoint") != surface_control:
         raise ValueError("checkpoint Surface control binding differs")
     control_validation = checkpoint.get("surface_control_validation")
@@ -2569,6 +3426,10 @@ def audit_training_artifacts(args: argparse.Namespace) -> dict[str, Any]:
         "architecture",
         "best_epoch",
         "best_selection_score",
+        "best_state_dict_sha256",
+        "proposal_state_machine",
+        "accepted_anchor",
+        "history_hash_chain_sha256",
         "surface_control_checkpoint",
         "surface_control_validation",
         "surface_control_score",
@@ -2595,6 +3456,12 @@ def audit_training_artifacts(args: argparse.Namespace) -> dict[str, Any]:
         "architecture": checkpoint["architecture"],
         "best_epoch": best_epoch,
         "best_selection_score": best_score,
+        "best_state_dict_sha256": state_machine["best_state_dict_sha256"],
+        "proposal_state_machine": _proposal_state_machine_contract(),
+        "accepted_anchor": state_machine["accepted_anchor"],
+        "history_hash_chain_sha256": state_machine[
+            "history_hash_chain_sha256"
+        ],
         "surface_control_checkpoint": surface_control,
         "surface_control_validation": control_validation,
         "surface_control_score": control_score,

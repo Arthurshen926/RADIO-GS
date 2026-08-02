@@ -7,6 +7,9 @@ import numpy as np
 import torch
 
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+    OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT,
+    OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT,
+    OURS_VALA_MASK_THRESHOLD,
     SelectionSpec,
     GaussianSubsetAlphaProxy,
     Sam3AdaptorMaskRefiner,
@@ -33,6 +36,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     geometry_discontinuity_maps,
     load_text_projection_head,
     load_score_cache,
+    load_ours_multiscale_query_score_cache,
     merge_registered_scores,
     average_registered_signal_sums,
     normalize_registered_feature_sums,
@@ -66,6 +70,9 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     _project_points_to_image,
     trimap_iou,
     vala_knn_minmax_scores,
+    vala_multiscale_knn_peak_select_scores,
+    validate_ours_multiscale_query_score_cache,
+    xyz_geometry_fingerprint,
     peak_normalize_query_scores,
     mask_to_sam3_box_prompt,
 )
@@ -106,6 +113,34 @@ def test_direct_3d_cli_help_builds_without_duplicate_options():
     assert "--score_component_guard_min_mass_fraction" in result.stdout
     assert "--text_encoder" in result.stdout
     assert "openclip" in result.stdout
+    assert "--ours_multiscale_query_score_cache" in result.stdout
+
+
+def test_ours_multiscale_cli_is_explicitly_opt_in_to_frozen_vala_repo_protocol():
+    repo_root = Path(__file__).resolve().parents[1]
+    result = subprocess.run(
+        [
+            sys.executable,
+            "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+            "--config",
+            "missing.yaml",
+            "--checkpoint",
+            "missing.pth",
+            "--scene",
+            "teatime",
+            "--ours_multiscale_query_score_cache",
+            "synthetic.pt",
+        ],
+        cwd=repo_root,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        timeout=30,
+        check=False,
+    )
+
+    assert result.returncode == 2
+    assert "requires --protocol_preset vala_repo_3d" in result.stderr
 
 
 def test_render_rgb_refinement_frame_converts_rgb_tensor_to_bgr_uint8():
@@ -955,6 +990,178 @@ def test_vala_knn_minmax_ignores_external_cache_invalid_rows():
     assert normalized[0, 0] == pytest.approx(0.0)
     assert normalized[2, 0] == pytest.approx(1.0)
     assert normalized[3, 0] == pytest.approx(0.0)
+
+
+def _ours_multiscale_cache_payload(
+    xyz: torch.Tensor,
+    *,
+    query_ids: tuple[str, ...] = ("red cup", "tea pot"),
+    scale_ids: tuple[str, ...] = ("0.25", "0.45", "0.7"),
+    scale_radii_m: tuple[float, ...] = (0.25, 0.45, 0.7),
+    field_checkpoint_sha256: str = "b" * 64,
+    readout_checkpoint_sha256: str = "c" * 64,
+    renderer_geometry_checkpoint_sha256: str = "a" * 64,
+) -> dict[str, object]:
+    scores = torch.zeros(len(xyz), 3, len(query_ids), dtype=torch.float32)
+    xyz_sha256 = xyz_geometry_fingerprint(xyz)["xyz_sha256"]
+    return {
+        "version": 2,
+        "contract": OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT,
+        "query_scores": scores,
+        "query_ids": list(query_ids),
+        "scale_ids": list(scale_ids),
+        "scale_radii_m": list(scale_radii_m),
+        "xyz": xyz.clone(),
+        "valid": torch.ones(len(xyz), dtype=torch.bool),
+        "geometry_fingerprint": xyz_geometry_fingerprint(xyz),
+        "field_checkpoint_sha256": field_checkpoint_sha256,
+        "readout_checkpoint_sha256": readout_checkpoint_sha256,
+        "renderer_geometry_checkpoint_sha256": (
+            renderer_geometry_checkpoint_sha256
+        ),
+        "authority": {
+            "contract": OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT,
+            "scale_axis": [
+                {"id": scale_id, "value": radius, "unit": "meter"}
+                for scale_id, radius in zip(scale_ids, scale_radii_m)
+            ],
+            "query_axis": {"ids": list(query_ids)},
+            "geometry_axis": {
+                "num_gaussians": len(xyz),
+                "xyz_sha256": xyz_sha256,
+                "renderer_xyz_sha256": xyz_sha256,
+                "field_checkpoint_sha256": field_checkpoint_sha256,
+                "readout_checkpoint_sha256": readout_checkpoint_sha256,
+                "renderer_geometry_checkpoint_sha256": (
+                    renderer_geometry_checkpoint_sha256
+                ),
+            },
+            "source_artifacts": {
+                "field_checkpoint": {
+                    "path": "/frozen/field.pt",
+                    "sha256": field_checkpoint_sha256,
+                },
+                "readout_checkpoint": {
+                    "path": "/frozen/readout.pt",
+                    "sha256": readout_checkpoint_sha256,
+                },
+                "renderer_geometry_checkpoint": {
+                    "path": "/frozen/renderer.pt",
+                    "sha256": renderer_geometry_checkpoint_sha256,
+                },
+            },
+        },
+    }
+
+
+def test_ours_multiscale_vala_selects_raw_smoothed_peak_per_query_then_thresholds():
+    xyz = torch.arange(4, dtype=torch.float32)[:, None].expand(-1, 3).contiguous()
+    scores = torch.zeros(4, 3, 2, dtype=torch.float32)
+    scores[1, 0, 0] = 1.0
+    scores[1, 1, 0] = 2.0
+    scores[1, 2, 0] = 0.5
+    scores[3, 0, 1] = 1.0
+    scores[3, 1, 1] = 0.2
+    scores[3, 2, 1] = 3.0
+
+    readout = vala_multiscale_knn_peak_select_scores(scores, xyz, k=1)
+
+    assert torch.equal(readout.selected_scale_indices, torch.tensor([1, 2]))
+    assert torch.allclose(
+        readout.raw_smoothed_peaks,
+        torch.tensor([[1.0, 1.0], [2.0, 0.2], [0.5, 3.0]]),
+    )
+    selected = select_gaussians_from_scores(
+        readout.scores,
+        SelectionSpec("score_threshold", OURS_VALA_MASK_THRESHOLD),
+        min_select=0,
+    )
+    assert torch.equal(selected[:, 0].bool(), torch.tensor([False, True, False, False]))
+    assert torch.equal(selected[:, 1].bool(), torch.tensor([False, False, False, True]))
+
+
+def test_ours_multiscale_cache_loads_strict_n3q_contract(tmp_path):
+    xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+        dtype=torch.float32,
+    )
+    payload = _ours_multiscale_cache_payload(xyz)
+    path = tmp_path / "ours_multiscale.pt"
+    torch.save(payload, path)
+
+    cache = load_ours_multiscale_query_score_cache(
+        path,
+        expected_xyz=xyz,
+        expected_query_ids=("red cup", "tea pot"),
+        expected_renderer_geometry_checkpoint_sha256="a" * 64,
+    )
+
+    assert cache.query_scores.shape == (3, 3, 2)
+    assert cache.query_ids == ("red cup", "tea pot")
+    assert cache.scale_ids == ("0.25", "0.45", "0.7")
+    assert cache.scale_radii_m == (0.25, 0.45, 0.7)
+    assert cache.xyz_sha256 == xyz_geometry_fingerprint(xyz)["xyz_sha256"]
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement", "message"),
+    [
+        ("query_ids", ["tea pot", "red cup"], "query order mismatch"),
+        ("scale_ids", ["0.4", "0.2", "0.7"], "scale order mismatch"),
+        ("valid", torch.ones(3, dtype=torch.float32), "valid must be row-aligned bool"),
+        ("query_scores", torch.zeros(3, 2, 2), r"query_scores must be \[N,3,Q\]"),
+    ],
+)
+def test_ours_multiscale_cache_rejects_query_scale_and_shape_drift(
+    field: str,
+    replacement: object,
+    message: str,
+):
+    xyz = torch.arange(3, dtype=torch.float32)[:, None].expand(-1, 3).contiguous()
+    payload = _ours_multiscale_cache_payload(xyz)
+    payload[field] = replacement
+
+    with pytest.raises(ValueError, match=message):
+        validate_ours_multiscale_query_score_cache(
+            payload,
+            expected_xyz=xyz,
+            expected_query_ids=("red cup", "tea pot"),
+            expected_renderer_geometry_checkpoint_sha256="a" * 64,
+        )
+
+
+def test_ours_multiscale_cache_rejects_row_order_even_with_self_consistent_fingerprint():
+    expected_xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [1.0, 2.0, 3.0], [4.0, 5.0, 6.0]],
+        dtype=torch.float32,
+    )
+    reordered_xyz = expected_xyz[[1, 0, 2]]
+    payload = _ours_multiscale_cache_payload(reordered_xyz)
+
+    with pytest.raises(ValueError, match="xyz/row-order mismatch"):
+        validate_ours_multiscale_query_score_cache(
+            payload,
+            expected_xyz=expected_xyz,
+            expected_query_ids=("red cup", "tea pot"),
+            expected_renderer_geometry_checkpoint_sha256="a" * 64,
+        )
+
+
+def test_ours_multiscale_cache_rejects_teatime_geometry_checkpoint_drift_even_when_xyz_matches():
+    xyz = torch.arange(3, dtype=torch.float32)[:, None].expand(-1, 3).contiguous()
+    payload = _ours_multiscale_cache_payload(
+        xyz,
+        renderer_geometry_checkpoint_sha256="a" * 64,
+    )
+
+    with pytest.raises(ValueError, match="geometry checkpoint mismatch"):
+        validate_ours_multiscale_query_score_cache(
+            payload,
+            expected_xyz=xyz,
+            expected_query_ids=("red cup", "tea pot"),
+            # Synthetic stand-ins for teatime seed7 vs non-seed7 checkpoint SHAs.
+            expected_renderer_geometry_checkpoint_sha256="b" * 64,
+        )
 
 
 def test_peak_normalize_query_scores_matches_lerf_peak_relative_rule():

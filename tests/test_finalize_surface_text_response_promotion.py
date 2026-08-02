@@ -17,10 +17,53 @@ from radio_gs.evaluation.text_response_fidelity import (
 from radio_gs.scripts import finalize_surface_region_query_free_promotion as surface_finalizer
 from radio_gs.scripts import finalize_surface_text_response_promotion as promotion
 from radio_gs.scripts import surface_text_response_distill_authority as distill_authority
+from radio_gs.scripts import train_surface_region_text_response_distill as trainer
 from radio_gs.scripts.eval_text_response_fidelity_gate import load_descriptor_pair
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_sha256_cache_reuses_only_an_unchanged_file_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "large-checkpoint.bin"
+    source.write_bytes(b"first")
+    promotion._SHA256_CACHE.clear()
+    original = promotion.sha256_file
+    calls: list[Path] = []
+
+    def counted(path: Path) -> str:
+        calls.append(Path(path))
+        return original(path)
+
+    monkeypatch.setattr(promotion, "sha256_file", counted)
+    first = promotion._sha256(source)
+
+    assert promotion._sha256(source) == first
+    assert len(calls) == 1
+    source.write_bytes(b"second-content")
+    second = promotion._sha256(source)
+    assert second != first
+    assert len(calls) == 2
+
+
+def test_sha256_cache_rejects_identity_change_during_initial_hash(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "changing-checkpoint.bin"
+    source.write_bytes(b"before")
+    promotion._SHA256_CACHE.clear()
+    original = promotion.sha256_file
+
+    def mutate_after_hash(path: Path) -> str:
+        digest = original(path)
+        source.write_bytes(b"after-and-different")
+        return digest
+
+    monkeypatch.setattr(promotion, "sha256_file", mutate_after_hash)
+    with pytest.raises(ValueError, match="changed while being read"):
+        promotion._sha256(source)
 
 
 def _load_surface_fixture_module() -> ModuleType:
@@ -42,6 +85,401 @@ def _sha256(path: Path) -> str:
 def _write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+
+def _pairwise_objective_contract(
+    *, token_weight: float = 0.25, relation_weight: float = 0.1
+) -> dict:
+    return {
+        "surface_objective": (
+            "token_weight*(1-cosine_summary_token)"
+            "+masked_mean_one_minus_all_view_cosine"
+            "+relation_weight*smooth_l1_descriptor_relation"
+        ),
+        "token_weight": token_weight,
+        "relation_weight": relation_weight,
+        "independent_response_loss": (
+            "independent_normalized_cosine_response_smooth_l1"
+        ),
+        "scene_response_loss": (
+            "scene_wise_text_response_weighted_profile_pairwise_gap_smooth_l1"
+        ),
+        "scene_response_objective": {
+            "name": (
+                "scene_wise_text_response_weighted_profile_"
+                "pairwise_gap_smooth_l1"
+            ),
+            "profile_loss": (
+                "scene_wise_centered_text_response_profile_cosine_distance"
+            ),
+            "profile_weight": 0.2,
+            "ranking_loss": "scene_wise_text_response_pairwise_gap_smooth_l1",
+            "ranking_weight": 1.0,
+            "tie_tolerance": 1e-6,
+            "pairwise_gap_normalization": (
+                "per_scene_query_teacher_response_span"
+            ),
+        },
+        "scene_tie_tolerance": 1e-6,
+        "branch_gradient_target_ratio": 0.25,
+        "combined_response_gradient_ratio_upper_bound": 0.5,
+        "upper_bound_derivation": (
+            "triangle_inequality_sum_of_two_branch_l2_budgets"
+        ),
+        "gradient_bound_scope": (
+            "local_at_unaugmented_exact_warmstart_not_a_global_training_bound"
+        ),
+        "training_batching": "shuffle_complete_scene_groups_no_partial_scenes_v1",
+        "max_complete_scene_batch_rows": 64,
+    }
+
+
+def _pairwise_selection_history() -> list[dict]:
+    scene_control = {
+        "scene-a": {
+            "profile_cosine_mean": 0.80,
+            "profile_cosine_p05": 0.70,
+            "ranking_spearman_mean": 0.60,
+            "ranking_spearman_p05": 0.50,
+            "top_decile_overlap_mean": 0.70,
+            "top_decile_overlap_p05": 0.60,
+            "smooth_l1": 0.030,
+            "mae": 0.040,
+        },
+        "scene-b": {
+            "profile_cosine_mean": 0.82,
+            "profile_cosine_p05": 0.72,
+            "ranking_spearman_mean": 0.62,
+            "ranking_spearman_p05": 0.52,
+            "top_decile_overlap_mean": 0.72,
+            "top_decile_overlap_p05": 0.62,
+            "smooth_l1": 0.032,
+            "mae": 0.042,
+        },
+    }
+    scene_candidate = {
+        scene: {
+            field: (
+                value - 0.002
+                if field in {"smooth_l1", "mae"}
+                else value + 0.001
+            )
+            for field, value in metrics.items()
+        }
+        for scene, metrics in scene_control.items()
+    }
+
+    def row(
+        epoch: int,
+        scenes: dict[str, dict[str, float]],
+        *,
+        surface_score: float,
+        smooth_l1: float,
+        mae: float,
+        quality_delta: float,
+    ) -> dict:
+        result = {
+            "epoch": epoch,
+            "initialization": "frozen_surface_control_checkpoint",
+            "response_lambdas": {
+                "independent_response": 2.0,
+                "scene_response": 0.5,
+            },
+            "scene_response_objective": _pairwise_objective_contract()[
+                "scene_response_objective"
+            ],
+            "surface_selection_score": surface_score,
+            "selection_score": surface_score,
+            "summary_token_cosine": 0.90,
+            "mean_descriptor_cosine": surface_score,
+            "all_view_descriptor_cosine": surface_score,
+            "text_support_top1_agreement": 0.75 + quality_delta,
+            "text_response_smooth_l1": smooth_l1,
+            "text_response_mae": mae,
+            "descriptor_relation_smooth_l1": 0.02,
+            "text_response_profile_cosine_mean": 0.81 + quality_delta,
+            "text_response_profile_cosine_p05": 0.71 + quality_delta,
+            "text_response_ranking_spearman_mean": 0.61 + quality_delta,
+            "text_response_ranking_spearman_p05": 0.51 + quality_delta,
+            "text_response_top_decile_overlap_mean": 0.71 + quality_delta,
+            "text_response_top_decile_overlap_p05": 0.61 + quality_delta,
+            "text_response_scene_metrics": scenes,
+        }
+        for field in promotion.FIT_RESPONSE_SCENE_ERROR_METRICS:
+            result[f"text_response_scene_worst_{field}"] = max(
+                metrics[field] for metrics in scenes.values()
+            )
+        for field in promotion.FIT_RESPONSE_SCENE_QUALITY_METRICS:
+            result[f"text_response_scene_worst_{field}"] = min(
+                metrics[field] for metrics in scenes.values()
+            )
+        if epoch > 0:
+            result.update(
+                {
+                    "loss": 0.5,
+                    "token_loss": 0.1,
+                    "descriptor_loss": 0.1,
+                    "relation_loss": 0.1,
+                    "independent_response_loss": 0.1,
+                    "scene_profile_loss": 0.4,
+                    "scene_ranking_loss": 0.1,
+                    "scene_response_loss": 0.18,
+                    "complete_scene_batch_count": 2,
+                    "max_complete_scene_batch_rows": 8,
+                }
+            )
+        return result
+
+    history, best_epoch, _ = trainer.finalize_response_primary_epoch_selection(
+        [
+            row(
+                0,
+                scene_control,
+                surface_score=0.800,
+                smooth_l1=0.031,
+                mae=0.041,
+                quality_delta=0.0,
+            ),
+            row(
+                1,
+                scene_candidate,
+                surface_score=0.801,
+                smooth_l1=0.029,
+                mae=0.039,
+                quality_delta=0.001,
+            ),
+        ]
+    )
+    assert best_epoch == 1
+    return history
+
+
+def test_pairwise_selector_recomputes_best_epoch_and_rejects_score_tamper() -> None:
+    history = _pairwise_selection_history()
+    assert promotion._recompute_response_primary_selection(history) == (1, 0.801)
+
+    forged = json.loads(json.dumps(history))
+    forged[1]["selection_score"] = 0.800
+    with pytest.raises(ValueError, match="selection score differs"):
+        promotion._recompute_response_primary_selection(forged)
+
+
+def test_pairwise_selector_rejects_scene_delta_tamper() -> None:
+    history = _pairwise_selection_history()
+    forged = json.loads(json.dumps(history))
+    forged[1]["text_response_scene_metrics"]["scene-b"]["smooth_l1"] -= 0.001
+    forged[1]["text_response_scene_worst_smooth_l1"] -= 0.001
+    with pytest.raises(ValueError, match="robust selection fields differ"):
+        promotion._recompute_response_primary_selection(forged)
+
+
+def test_pairwise_selector_rejects_nested_objective_tamper() -> None:
+    history = _pairwise_selection_history()
+    forged = json.loads(json.dumps(history))
+    forged[1]["scene_response_objective"]["profile_weight"] = 0.001
+    with pytest.raises(ValueError, match="scene-response objective differs"):
+        promotion._recompute_response_primary_selection(forged)
+
+
+def _accepted_anchor_checkpoint_fixture() -> tuple[dict, dict, dict]:
+    history = _pairwise_selection_history()
+    third = json.loads(json.dumps(history[1]))
+    third.update(
+        {
+            "epoch": 2,
+            "text_response_smooth_l1": 0.030,
+            "text_response_mae": 0.040,
+        }
+    )
+    history, best_epoch, _ = trainer.finalize_response_primary_epoch_selection(
+        [history[0], history[1], third]
+    )
+    assert best_epoch == 1
+    for row in history[1:]:
+        row.pop("initialization", None)
+
+    control_state = {"weight": torch.tensor([0.0, 1.0])}
+    best_state = {"weight": torch.tensor([0.1, 1.1])}
+    last_anchor_state = {"weight": torch.tensor([0.2, 1.2])}
+    control_sha = promotion._state_dict_sha256(control_state, label="control")
+    best_sha = promotion._state_dict_sha256(best_state, label="best")
+    last_anchor_sha = promotion._state_dict_sha256(
+        last_anchor_state, label="last anchor"
+    )
+    trial_hashes = {1: best_sha, 2: last_anchor_sha}
+    anchor_hashes = {1: control_sha, 2: best_sha}
+    for index, row in enumerate(history):
+        row["state_machine_role"] = (
+            "frozen_control_initial_anchor"
+            if index == 0
+            else "fixed_micro_ray_trial"
+        )
+        if index == 0:
+            row.update(
+                {
+                    "accepted": True,
+                    "rejected": False,
+                    "anchor_epoch_after_proposal": 0,
+                    "anchor_state_dict_sha256_after_proposal": control_sha,
+                    "best_updated": True,
+                    "best_epoch_after_proposal": 0,
+                    "best_state_dict_sha256_after_proposal": control_sha,
+                    "patience_stale_after_proposal": 0,
+                    "patience_stop_after_proposal": False,
+                }
+            )
+            continue
+        losses = {
+            field: 0.1 + offset * 0.01
+            for offset, field in enumerate(promotion.PROPOSAL_LOSS_FIELDS)
+        }
+        row.update(
+            {
+                "proposal": {
+                    "index": index,
+                    "source_anchor_epoch": index - 1,
+                    "anchor_state_dict_sha256": anchor_hashes[index],
+                    "raw_state_dict_sha256": format(index, "x") * 64,
+                    "trial_state_dict_sha256": trial_hashes[index],
+                    "alpha_numerator": 1,
+                    "alpha_denominator": 2048,
+                    "optimizer_state_reset": True,
+                    "validation_evaluations": 1,
+                    "backtracking": "none_fixed_alpha_single_trial",
+                    "persistent_generator": "advanced_never_rolled_back",
+                },
+                "loss_measurement_state": "raw_proposal_before_micro_projection",
+                "proposal_losses": losses,
+                **{
+                    promotion.PROPOSAL_LOSS_FLAT_MIRROR[field]: value
+                    for field, value in losses.items()
+                },
+                "accepted": True,
+                "rejected": False,
+                "anchor_epoch_after_proposal": index,
+                "anchor_state_dict_sha256_after_proposal": trial_hashes[index],
+                "best_updated": index == 1,
+                "best_epoch_after_proposal": 1,
+                "best_state_dict_sha256_after_proposal": best_sha,
+                "patience_stale_after_proposal": 0 if index == 1 else 1,
+                "patience_stop_after_proposal": False,
+            }
+        )
+    previous = None
+    for row in history:
+        digest = promotion._history_chain_digest(row, previous)
+        row["history_hash_chain"] = {
+            "algorithm": promotion.HISTORY_HASH_CHAIN_ALGORITHM,
+            "previous_sha256": previous,
+            "sha256": digest,
+        }
+        previous = digest
+    checkpoint = {
+        "state_dict": best_state,
+        "history": history,
+        "best_epoch": 1,
+        "best_selection_score": 0.801,
+        "best_state_dict_sha256": best_sha,
+        "proposal_state_machine": dict(promotion.PROPOSAL_STATE_MACHINE),
+        "accepted_anchor": {
+            "epoch": 2,
+            "state_dict_sha256": last_anchor_sha,
+            "accepted_proposal_count": 2,
+            "rejected_proposal_count": 0,
+        },
+        "history_hash_chain_sha256": previous,
+        "provenance": {
+            "proposal_state_machine": dict(promotion.PROPOSAL_STATE_MACHINE)
+        },
+        "training_config": {
+            "patience": 4,
+            "proposal_state_machine": dict(promotion.PROPOSAL_STATE_MACHINE),
+        },
+    }
+    return checkpoint, {"state_dict": control_state}, last_anchor_state
+
+
+def test_v4_state_machine_publishes_best_not_newer_accepted_anchor() -> None:
+    checkpoint, control, _last_anchor = _accepted_anchor_checkpoint_fixture()
+
+    result = promotion._validate_accepted_anchor_checkpoint_state(
+        checkpoint, control_payload=control, patience=4
+    )
+
+    assert result["best_state_dict_sha256"] == checkpoint[
+        "best_state_dict_sha256"
+    ]
+    assert result["accepted_anchor"]["epoch"] == 2
+    assert checkpoint["best_epoch"] == 1
+    assert (
+        result["accepted_anchor"]["state_dict_sha256"]
+        != result["best_state_dict_sha256"]
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation,match",
+    [
+        ("publish_last_anchor", "does not publish the best state"),
+        ("raw_loss_source", "raw-proposal loss accounting differs"),
+        ("fixed_alpha", "proposal row 2 differs"),
+        ("hash_chain", "history hash chain differs"),
+    ],
+)
+def test_v4_state_machine_rejects_raw_last_anchor_and_provenance_tamper(
+    mutation: str, match: str
+) -> None:
+    checkpoint, control, last_anchor = _accepted_anchor_checkpoint_fixture()
+    if mutation == "publish_last_anchor":
+        checkpoint["state_dict"] = last_anchor
+    elif mutation == "raw_loss_source":
+        checkpoint["history"][2]["loss_measurement_state"] = "trial_state"
+        previous = checkpoint["history"][1]["history_hash_chain"]["sha256"]
+        digest = promotion._history_chain_digest(checkpoint["history"][2], previous)
+        checkpoint["history"][2]["history_hash_chain"]["sha256"] = digest
+        checkpoint["history_hash_chain_sha256"] = digest
+    elif mutation == "fixed_alpha":
+        checkpoint["history"][2]["proposal"]["alpha_denominator"] = 1024
+        previous = checkpoint["history"][1]["history_hash_chain"]["sha256"]
+        digest = promotion._history_chain_digest(checkpoint["history"][2], previous)
+        checkpoint["history"][2]["history_hash_chain"]["sha256"] = digest
+        checkpoint["history_hash_chain_sha256"] = digest
+    else:
+        checkpoint["history"][2]["history_hash_chain"]["sha256"] = "f" * 64
+        checkpoint["history_hash_chain_sha256"] = "f" * 64
+
+    with pytest.raises(ValueError, match=match):
+        promotion._validate_accepted_anchor_checkpoint_state(
+            checkpoint, control_payload=control, patience=4
+        )
+
+
+def test_unregistered_legacy_brier_selection_v2_is_rejected(
+    tmp_path: Path,
+) -> None:
+    registered_sha = (
+        "497cc23d08db7500d78c5741de48c132c78e493a6fd205e34489668725f16615"
+    )
+    assert set(promotion.FORMAL_RECORDED_SOURCE_CLOSURE_AUTHORITIES) == {
+        registered_sha
+    }
+    assert promotion.FORMAL_RECORDED_SOURCE_CLOSURE_AUTHORITIES[registered_sha][
+        "response_protocol"
+    ] == "legacy_brier_selection_v2"
+    manifest_path = tmp_path / "unregistered-old-run.json"
+    manifest = {
+        "schema_version": 3,
+        "training_contract": {
+            "epoch_selection": promotion.LEGACY_DISTILL_EPOCH_SELECTION
+        },
+    }
+    _write_json(manifest_path, manifest)
+    with pytest.raises(ValueError, match="unregistered legacy Brier"):
+        promotion._response_protocol_for_manifest(
+            manifest_path.resolve(),
+            _sha256(manifest_path),
+            manifest,
+        )
 
 
 @pytest.mark.parametrize(
@@ -164,8 +602,13 @@ def test_authority_thermal_contract_requires_exact_owner_pid_namespace_mode(
             promotion._validate_distill_thermal_contract(forged, schema=2)
 
 
+@pytest.mark.parametrize(
+    "response_protocol",
+    ["pairwise_selection_v3", "accepted_anchor_selection_v4"],
+)
 def test_schema3_per_seed_calibration_rejects_surface_control_swap(
     tmp_path: Path,
+    response_protocol: str,
 ) -> None:
     fit_artifact = tmp_path / "fit.pt"
     fit_manifest = tmp_path / "fit.json"
@@ -220,21 +663,17 @@ def test_schema3_per_seed_calibration_rejects_surface_control_swap(
     payload = {
         "schema_version": 2,
         "artifact_type": "surface_text_response_gradient_calibration",
+        "algorithm_version": (
+            "per-seed-surface-warmstart-dual-response-"
+            "pairwise-gradient-budget-v3"
+        ),
         "benchmark_vocabulary_opened": False,
         "uses_benchmark_scenes": False,
         "uses_benchmark_test_vocabulary": False,
         "seed": 1,
         "surface_control": control,
         "design_diagnostic": design_diagnostic,
-        "objective_contract": {
-            "gradient_bound_scope": (
-                "local_at_unaugmented_exact_warmstart_not_a_global_training_bound"
-            ),
-            "training_batching": (
-                "shuffle_complete_scene_groups_no_partial_scenes_v1"
-            ),
-            "max_complete_scene_batch_rows": 64,
-        },
+        "objective_contract": _pairwise_objective_contract(),
         "gradient_contract": {
             "measurement_point": "exact_seed_frozen_surface_control_state_dict",
             "branch_target_ratio": 0.25,
@@ -261,6 +700,9 @@ def test_schema3_per_seed_calibration_rejects_surface_control_swap(
         surface_control=control,
         design_diagnostic=design_diagnostic,
         fit_text_bank=fit_bank,
+        response_protocol=response_protocol,
+        token_weight=0.25,
+        relation_weight=0.1,
         label="seed1",
     )
     swapped = {**control, "seed": 2, "path": str(tmp_path / "surface-seed2.pt")}
@@ -272,14 +714,47 @@ def test_schema3_per_seed_calibration_rejects_surface_control_swap(
             surface_control=swapped,
             design_diagnostic=design_diagnostic,
             fit_text_bank=fit_bank,
+            response_protocol=response_protocol,
+            token_weight=0.25,
+            relation_weight=0.1,
+            label="seed1",
+        )
+    payload["objective_contract"]["scene_response_objective"][
+        "profile_weight"
+    ] = 0.001
+    _write_json(calibration, payload)
+    with pytest.raises(ValueError, match="calibration objective contract differs"):
+        promotion._validate_calibration_manifest(
+            calibration,
+            seed=1,
+            response_lambdas=lambdas,
+            surface_control=control,
+            design_diagnostic=design_diagnostic,
+            fit_text_bank=fit_bank,
+            response_protocol=response_protocol,
+            token_weight=0.25,
+            relation_weight=0.1,
             label="seed1",
         )
 
 
+@pytest.mark.parametrize(
+    "response_protocol,epoch_selection",
+    [
+        ("pairwise_selection_v3", promotion.DISTILL_EPOCH_SELECTION),
+        (
+            "accepted_anchor_selection_v4",
+            promotion.ACCEPTED_ANCHOR_DISTILL_EPOCH_SELECTION,
+        ),
+    ],
+)
 def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    response_protocol: str,
+    epoch_selection: str,
 ) -> None:
+    accepted_anchor_v4 = response_protocol == "accepted_anchor_selection_v4"
     def touch(name: str, payload: bytes = b"x") -> Path:
         path = tmp_path / name
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -404,6 +879,12 @@ def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
             "response_lambdas": lambdas,
             "design_diagnostic": design,
             "distill_schema_version": 3,
+            "response_protocol": response_protocol,
+            "proposal_state_machine": (
+                dict(promotion.PROPOSAL_STATE_MACHINE)
+                if accepted_anchor_v4
+                else None
+            ),
             "payload": {
                 "training_config": {
                     **{
@@ -420,6 +901,15 @@ def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
                         }.items()
                     },
                     "seed": seed,
+                    **(
+                        {
+                            "proposal_state_machine": dict(
+                                promotion.PROPOSAL_STATE_MACHINE
+                            )
+                        }
+                        if accepted_anchor_v4
+                        else {}
+                    ),
                 },
                 "best_epoch": 1,
                 "best_selection_score": 0.8,
@@ -440,15 +930,20 @@ def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
         ),
         "response_losses": [
             "independent_normalized_cosine_response_smooth_l1",
-            "scene_wise_text_response_profile_ranking",
+            "scene_wise_text_response_weighted_profile_pairwise_gap_smooth_l1",
         ],
-        "scene_profile_weight": 1.0,
-        "scene_ranking_weight": 1.0,
-        "scene_ranking_temperature": 0.1,
+        "scene_response_objective": _pairwise_objective_contract()[
+            "scene_response_objective"
+        ],
         "scene_tie_tolerance": 1e-6,
         "training_batching": "shuffle_complete_scene_groups_no_partial_scenes_v1",
         "max_complete_scene_batch_rows": 64,
-        "epoch_selection": promotion.DISTILL_EPOCH_SELECTION,
+        **(
+            {"proposal_state_machine": dict(promotion.PROPOSAL_STATE_MACHINE)}
+            if accepted_anchor_v4
+            else {}
+        ),
+        "epoch_selection": epoch_selection,
         "surface_control_initialization": "exact_seed_checkpoint_state_dict",
         "surface_control_noninferiority_tolerance": 0.002,
     }
@@ -536,7 +1031,7 @@ def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
                 "candidate": "context_c1024_geometric",
                 "runtime_closure_digest": "e" * 64,
                 "evidence": {
-                    "selection_contract": promotion.DISTILL_EPOCH_SELECTION,
+                    "selection_contract": epoch_selection,
                     "checkpoint": completion_seeds[-1]["checkpoint"],
                     "report": completion_seeds[-1]["report"],
                     "guard_receipt": guard_receipt,
@@ -559,7 +1054,7 @@ def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
         "calibrations": calibrations,
         "gradient_design_diagnostic": promotion._file_record(diagnostic),
         "runtime_closure_digest": "e" * 64,
-        "selection_contract": promotion.DISTILL_EPOCH_SELECTION,
+        "selection_contract": epoch_selection,
         "seeds": completion_seeds,
     }
     _write_json(tmp_path / "text_response_distill.complete", completion)
@@ -604,7 +1099,19 @@ def test_schema3_shared_run_accepts_per_seed_calibrations_and_rejects_swap(
         surface=surface, responses=responses, radio_path=radio
     )
     assert result["authority_schema_version"] == 3
+    assert result["response_protocol"] == response_protocol
     assert [row["seed"] for row in result["calibrations"]] == [0, 1, 2]
+
+    responses[2]["response_protocol"] = (
+        "pairwise_selection_v3"
+        if accepted_anchor_v4
+        else "accepted_anchor_selection_v4"
+    )
+    with pytest.raises(ValueError, match="disagree on the distill authority schema"):
+        promotion._validate_shared_distill_run(
+            surface=surface, responses=responses, radio_path=radio
+        )
+    responses[2]["response_protocol"] = response_protocol
 
     manifest["calibrations"][1]["manifest"], manifest["calibrations"][2]["manifest"] = (
         manifest["calibrations"][2]["manifest"],
@@ -1009,7 +1516,14 @@ def _write_descriptor(
     torch.save(payload, path)
 
 
-def _bank(root: Path, split: str, embeddings: torch.Tensor) -> dict:
+def _bank(
+    root: Path,
+    split: str,
+    embeddings: torch.Tensor,
+    *,
+    bank_family: str = "imagenet1k_primary_v1",
+    algorithm_version: str = "siglip2-target-blind-split-v1",
+) -> dict:
     artifact = root / f"{split}_bank.pt"
     manifest = root / f"{split}_bank.manifest.json"
     artifact.write_bytes(f"{split}-bank".encode("utf-8"))
@@ -1032,6 +1546,8 @@ def _bank(root: Path, split: str, embeddings: torch.Tensor) -> dict:
         "selected_records_sha256": ("1" if split == "dev" else "2") * 64,
         "ordered_records_sha256": ("3" if split == "dev" else "4") * 64,
         "query_split": split,
+        "bank_family": bank_family,
+        "algorithm_version": algorithm_version,
         "vocabulary_sha256": "5" * 64,
         "embedding_tensor_sha256": ("6" if split == "dev" else "7") * 64,
         "embedding_semantic_sha256": ("8" if split == "dev" else "9") * 64,
@@ -1089,6 +1605,10 @@ def _fixture(
     monkeypatch: pytest.MonkeyPatch,
     *,
     metric_delta: float = 0.001,
+    dev_bank_family: str = "imagenet1k_primary_v1",
+    dev_algorithm_version: str = "siglip2-target-blind-split-v1",
+    audit_bank_family: str = "imagenet1k_primary_v1",
+    audit_algorithm_version: str = "siglip2-target-blind-split-v1",
 ) -> dict:
     SURFACE_FIXTURE.install_surface_finalizer_test_doubles(monkeypatch)
     surface_root = SURFACE_FIXTURE._fixture(tmp_path / "surface")
@@ -1185,8 +1705,20 @@ def _fixture(
         control_descriptors.append(control_path)
         candidate_descriptors.append(candidate_path)
 
-    dev_bank = _bank(tmp_path, "dev", torch.randn(4, 4))
-    audit_bank = _bank(tmp_path, "audit", torch.randn(4, 4))
+    dev_bank = _bank(
+        tmp_path,
+        "dev",
+        torch.randn(4, 4),
+        bank_family=dev_bank_family,
+        algorithm_version=dev_algorithm_version,
+    )
+    audit_bank = _bank(
+        tmp_path,
+        "audit",
+        torch.randn(4, 4),
+        bank_family=audit_bank_family,
+        algorithm_version=audit_algorithm_version,
+    )
     banks = {"dev": dev_bank, "audit": audit_bank}
     monkeypatch.setattr(
         promotion,
@@ -1287,6 +1819,77 @@ def test_dev_then_audit_cpu_mock_end_to_end(
     assert json.loads(audit_completion.read_text(encoding="utf-8"))[
         "stage_manifest_sha256"
     ] == _sha256(audit_output)
+
+
+def test_cross_family_audit_is_rejected_before_audit_reports_are_read(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = _fixture(
+        tmp_path,
+        monkeypatch,
+        dev_bank_family="imagenet12k_minus_imagenet1k_holdout_v1",
+        dev_algorithm_version=(
+            "siglip2-target-blind-imagenet12k-minus1k-holdout-v1"
+        ),
+        audit_bank_family="imagenet1k_primary_v1",
+        audit_algorithm_version="siglip2-target-blind-split-v1",
+    )
+    dev = _finalize_dev(tmp_path, fixture)
+
+    original_validate_reports = promotion._validate_reports
+    audit_report_reads = 0
+
+    def track_report_reads(*args: object, **kwargs: object) -> dict:
+        nonlocal audit_report_reads
+        if kwargs.get("query_split") == "audit":
+            audit_report_reads += 1
+            raise AssertionError("cross-family audit reports must stay closed")
+        return original_validate_reports(*args, **kwargs)
+
+    monkeypatch.setattr(promotion, "_validate_reports", track_report_reads)
+    audit_output = tmp_path / "cross-family-audit.json"
+    with pytest.raises(ValueError, match="family/algorithm differs"):
+        promotion.finalize_stage(
+            stage="audit",
+            plan_path=fixture["plan"],
+            control_descriptors=fixture["control_descriptors"],
+            candidate_descriptors=fixture["candidate_descriptors"],
+            control_reports=fixture["audit_control_reports"],
+            candidate_reports=fixture["audit_candidate_reports"],
+            gate_path=fixture["audit_gate"],
+            text_bank_path=fixture["audit_bank"]["path"],
+            text_bank_manifest_path=fixture["audit_bank"]["manifest_path"],
+            output=audit_output,
+            completion=tmp_path / "cross-family-audit.complete.json",
+            dev_manifest=dev["output"],
+            dev_completion=dev["completion"],
+        )
+
+    assert audit_report_reads == 0
+    assert not audit_output.exists()
+
+
+def test_text_bank_family_identity_is_fail_closed_and_algorithm_exact() -> None:
+    dev_identity = {
+        "bank_family": "imagenet12k_minus_imagenet1k_holdout_v1",
+        "algorithm_version": (
+            "siglip2-target-blind-imagenet12k-minus1k-holdout-v1"
+        ),
+    }
+    with pytest.raises(ValueError, match="family identity"):
+        promotion._validated_text_bank_identity(
+            {"bank_family": dev_identity["bank_family"]},
+            "audit",
+        )
+    with pytest.raises(ValueError, match="family/algorithm differs"):
+        promotion._require_matching_text_bank_family(
+            dev_identity,
+            {
+                "bank_family": dev_identity["bank_family"],
+                "algorithm_version": "imagenet12k-holdout-siglip2-v2",
+            },
+        )
 
 
 def test_surface_drop_rejects_dev_and_blocks_audit_before_bank_read(
@@ -1482,4 +2085,9 @@ def test_runner_is_cpu_only_and_dev_precedes_audit() -> None:
     assert "AUDIT_EVALUATE_ARGS" in source
     assert '--readout-binding-manifest "$PROMOTION_MANIFEST"' in source
     assert source.count("--readout-binding-manifest") == 1
-    assert "benchmark" not in source.lower()
+    assert "--scope external_benchmarks_unopened" in source
+    assert "--canonical-task-id" not in source
+    assert "--registry-row" not in source
+    assert source.index("verify_or_publish_freeze_binding") < source.index(
+        "classify_formal_text_bank_pair"
+    )

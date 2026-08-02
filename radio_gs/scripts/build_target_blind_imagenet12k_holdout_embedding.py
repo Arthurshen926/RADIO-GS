@@ -254,6 +254,7 @@ def build_embedding(
             "ordered_records_sha256",
         )
     }
+    sidecar["artifact_type"] = MANIFEST_ARTIFACT_TYPE
     sidecar.update(
         {
             "vocabulary": {

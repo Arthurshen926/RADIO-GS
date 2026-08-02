@@ -329,6 +329,31 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
         token_mask: torch.Tensor | None = None,
         reliability: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        output, _ = self.forward_with_context(
+            radio_features,
+            geometry,
+            anchor_index=anchor_index,
+            token_mask=token_mask,
+            reliability=reliability,
+        )
+        return output
+
+    def forward_with_context(
+        self,
+        radio_features: torch.Tensor,
+        geometry: torch.Tensor,
+        *,
+        anchor_index: torch.Tensor | int,
+        token_mask: torch.Tensor | None = None,
+        reliability: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return the official summary token and its pooled context.
+
+        The first element is bitwise identical to :meth:`forward`.  Exposing
+        the existing pooled hidden state lets optional downstream heads add a
+        descriptor-space residual without changing the summary-token path or
+        adding parameters to this checkpoint-compatible module.
+        """
         values = torch.as_tensor(radio_features).float()
         geom = torch.as_tensor(geometry, device=values.device).float()
         squeeze = values.ndim == 2
@@ -402,7 +427,9 @@ class SurfaceRegionSummaryReadoutV2(nn.Module):
             )
             pooled = core_hidden + context_hidden + query
         output = base + self.residual(pooled)
-        return output[0] if squeeze else output
+        if squeeze:
+            return output[0], pooled[0]
+        return output, pooled
 
     @staticmethod
     def _masked_attention(

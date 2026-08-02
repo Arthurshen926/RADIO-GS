@@ -1,7 +1,14 @@
+from pathlib import Path
+
 import pytest
 import torch
 
 import radio_gs.scripts.finetune_canonical_radio_rendering as finetune
+
+
+def test_checkpoint_persists_capability_pareto_drop_authority() -> None:
+    source = Path(finetune.__file__).read_text(encoding="utf-8")
+    assert '"max_capability_drop": float(args.max_capability_drop)' in source
 
 
 class _IdentityAdaptor(torch.nn.Module):

@@ -1,0 +1,99 @@
+schema_version: 1
+candidate_id: nvos-forward-beta-balanced-residual-v2
+status: protocol_authority_bound_non_exact_diagnostic
+promoted: false
+parent_candidate: nvos-forward-beta-coverage-v1
+v1_result_or_receipt_reuse_permitted: false
+eligibility:
+  protocol_authority_bound_non_exact_diagnostic: true
+  strict_unseen_eligible: false
+  strict_unseen_protocol_exact_match: false
+  frozen_diagnostic_eligible: false
+  main_result_eligible: false
+  target_metric_may_select_method_stage_or_continuation: false
+cohort:
+  benchmark: NVOS
+  ordered_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+  execution: fixed_full_eight_without_metric_continuation
+  aggregation: equal_weight_macro_over_8_tasks
+protocol_reuse:
+  dataset_exact: true
+  cohort_exact: true
+  prompt_exact: true
+  visibility_exact: true
+  calibration_policy_exact: true
+  aggregation_exact: true
+  resize_exact: true
+  threshold_exact: true
+  score_semantics_exact: false
+  prediction_representation_exact: false
+  overall_protocol_exact: false
+  target_metric_controls_continuation: false
+  target_mask_use: scoring_only
+method_namespace:
+  support_mode: canonical_support
+  region_space: sam3
+  prompt_registration_mode: raster_adjoint
+  prompt_registration_scale: 1.0
+  alpha_threshold: 0.0
+  depth_tolerance: 0.08
+  relative_depth_tolerance: 0.02
+  registered_seed_construction: joint_signed
+  registered_observation_fusion: probability_mixture
+  registered_seed_unary_weight: 0.0
+  registered_observation_confidence: poisson_mass_coverage
+  registered_observation_mass_scale: 1.0
+  registered_observation_coverage_power: 1.0
+  support_threshold: 0.0
+  prototype_count: 4
+  prototype_strategy: spherical_mean_fps
+  appearance_weight: 1.0
+  boundary_weight: 0.35
+  prototype_temperature: 0.07
+  feature_calibration: none
+  background_centroids: 0
+  score_calibration: none
+  negative_spatial_mode: none
+  registered_selection_mode: seeded_component
+  registered_readout_stage: propagated
+  registered_forward_unary: beta_balanced_residual_v2
+  graph_policy: legacy
+  component_graph_policy: same
+  graph_legacy_residual: 0.0
+  channel_confidence_mode: none
+  score_render_resolution: prompt_native
+  score_render_scale: 1.0
+  valid_support_normalization: true
+  valid_support_coverage_power: 1.0
+  feature_contribution_gamma: 1.0
+  score_chunk_size: 8192
+  solver_type: confidence_random_walker
+  solver_iterations: 12
+  solver_residual: 0.30
+  solver_unary_temperature: 0.10
+  solver_support_threshold: 0.50
+  laplacian_weight: 1.0
+  cg_iterations: 64
+  cg_tolerance: 1.0e-5
+  hard_seed_threshold: 0.20
+  hard_seed_conflict_policy: exclusive_relative
+  hard_seed_conflict_margin: 0.0
+  component_edge_threshold: 1.0e-5
+  seeded_component_min_weight: 0.20
+  canonical_reliability_cache: per_scene_source_artifact:canonical_primitive_reliability_v1.pt
+  diagnostic_graph_affinity_override: ''
+  require_asset_hashes: true
+reliability_authority:
+  manifest_artifact_type: nvos-beta-v2-query-independent-reliability-manifest-v1
+  manifest_required: true
+  run_manifest_binding: path_bytes_sha256
+  scene_source_logical_key: canonical_primitive_reliability_v1.pt
+  evaluator_argument: --canonical-reliability-cache
+  target_or_query_data_used: false
+execution_contract:
+  output_namespace: nvos_forward_beta_balanced_residual_v2_full8
+  prediction_generation_precedes_target_mask_open: true
+  metric_or_mask_feedback_changes_execution: false
+  scene_failure_policy: fail_closed
+  missing_scene_policy: no_aggregate
+  v1_result_or_receipt_reuse_permitted: false

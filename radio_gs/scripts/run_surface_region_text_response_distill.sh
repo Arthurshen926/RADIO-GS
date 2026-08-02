@@ -26,8 +26,8 @@ OUTPUT_ROOT="${OUTPUT_ROOT:?set OUTPUT_ROOT to a new lexical child of /root/RADI
 TRAIN_CACHES="${TRAIN_CACHES:?set TRAIN_CACHES to the frozen four-shard training cache glob}"
 VALIDATION_CACHES="${VALIDATION_CACHES:?set VALIDATION_CACHES to the frozen two-shard validation cache glob}"
 CALIBRATION_ROOT="${CALIBRATION_ROOT:-$OUTPUT_ROOT/calibrations}"
-GRADIENT_DIAGNOSTIC="${GRADIENT_DIAGNOSTIC:-/root/RADIO-GS/output/optimization_20260801/warmstart_gradient_diagnostic_gpu1_seed0_v3/result.json}"
-GRADIENT_DIAGNOSTIC_SHA256="${GRADIENT_DIAGNOSTIC_SHA256:-bff5f97c949559a0c0a7d60b7509be2caf3c65bf27e61a129cb867bd5d1cc4cd}"
+GRADIENT_DIAGNOSTIC="${GRADIENT_DIAGNOSTIC:-/root/RADIO-GS/output/optimization_20260801/warmstart_gradient_pairwise_balanced_bound_gpu1_seed0_v6/result.json}"
+GRADIENT_DIAGNOSTIC_SHA256="${GRADIENT_DIAGNOSTIC_SHA256:-5e5b149f154324001283058e9105198072c4b089f10cfdbade217903a4ea6c35}"
 RUN_MANIFEST="$OUTPUT_ROOT/run_manifest.json"
 COMPLETION="$OUTPUT_ROOT/text_response_distill.complete"
 INITIAL_GPU_PREFLIGHT="$OUTPUT_ROOT/receipts/gpu1.initial.json"
@@ -37,12 +37,12 @@ RECEIPT_FINALIZER="$REPO_ROOT/radio_gs/scripts/finalize_gpu_guard_receipt.py"
 
 # GPU1-only policy validated by the Surface p4 canary and post-cache readouts.
 # No peer board is queried or used as a launch/runtime condition.
-GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-78}"
-GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-65}"
+GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-80}"
+GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-70}"
 GPU_MAX_POWER_LIMIT_W="${GPU_MAX_POWER_LIMIT_W:-300.5}"
-GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-3}"
-GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-75}"
-GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-70}"
+GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-5}"
+GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-76}"
+GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-72}"
 GPU_PEER_INDEX=""
 GPU_PEER_PAUSE_TEMP_C=0
 GPU_PEER_RESUME_TEMP_C=0

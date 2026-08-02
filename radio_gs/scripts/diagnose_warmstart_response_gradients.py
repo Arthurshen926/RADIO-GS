@@ -11,14 +11,19 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
+from radio_gs.losses import direct_point_query_logit_distill_loss as loss_module
 from radio_gs.losses.direct_point_query_logit_distill_loss import (
     compute_independent_normalized_cosine_response_smooth_l1_loss,
-    compute_scene_wise_text_response_profile_ranking_loss,
 )
 from radio_gs.models.siglip_projection import SigLIP2SummaryHead
+from radio_gs.scripts import train_surface_region_text_response_distill as trainer_module
 from radio_gs.scripts.train_surface_region_text_response_distill import (
+    SCENE_PAIRWISE_GAP_WEIGHT,
+    SCENE_PROFILE_WEIGHT,
     _descriptor_loss,
     _load,
+    _scene_profile_pairwise_gap_composite_loss,
+    _scene_response_objective_contract,
     _targets,
     load_fit_text_embedding_bank,
 )
@@ -112,26 +117,29 @@ def diagnose(args: argparse.Namespace) -> dict:
             projected, target_descriptor, text
         )
     )
-    scene_loss, scene_stats = compute_scene_wise_text_response_profile_ranking_loss(
+    scene_loss, profile_loss, ranking_loss = (
+        _scene_profile_pairwise_gap_composite_loss(
         projected,
         target_descriptor,
         text,
         selected_ids,
-        ranking_temperature=float(args.ranking_temperature),
+        )
     )
     parameters = tuple(model.parameters())
     surface_norm = _gradient_norm(surface_loss, parameters, retain_graph=True)
     independent_norm = _gradient_norm(
         independent_loss, parameters, retain_graph=True
     )
-    scene_norm = _gradient_norm(scene_loss, parameters, retain_graph=False)
+    scene_norm = _gradient_norm(scene_loss, parameters, retain_graph=True)
+    profile_norm = _gradient_norm(profile_loss, parameters, retain_graph=True)
+    ranking_norm = _gradient_norm(ranking_loss, parameters, retain_graph=False)
     result = {
-        "schema_version": 1,
+        "schema_version": 2,
         "artifact_type": "warmstart_surface_text_response_gradient_diagnostic",
         "device": str(device),
         "rows": int(len(rows)),
         "scenes": selected_scenes,
-        "ranking_temperature": float(args.ranking_temperature),
+        "scene_response_objective": _scene_response_objective_contract(),
         "losses": {
             "surface": float(surface_loss.detach().cpu()),
             "token": float(token_loss.detach().cpu()),
@@ -139,17 +147,41 @@ def diagnose(args: argparse.Namespace) -> dict:
             "relation": float(relation_loss.detach().cpu()),
             "independent_response": float(independent_loss.detach().cpu()),
             "scene_response": float(scene_loss.detach().cpu()),
-            "scene_profile": float(scene_stats["profile_loss"].cpu()),
-            "scene_ranking": float(scene_stats["ranking_loss"].cpu()),
+            "scene_profile": float(profile_loss.detach().cpu()),
+            "scene_ranking": float(ranking_loss.detach().cpu()),
         },
         "gradient_l2": {
             "surface": surface_norm,
             "independent_response": independent_norm,
             "scene_response": scene_norm,
+            "scene_profile": profile_norm,
+            "scene_ranking": ranking_norm,
         },
         "equal_surface_gradient_lambdas": {
             "independent_response": surface_norm / independent_norm,
             "scene_response": surface_norm / scene_norm,
+            "scene_profile": surface_norm / profile_norm,
+            "scene_ranking": surface_norm / ranking_norm,
+        },
+        "weighted_component_gradient_l2_upper_bounds": {
+            "scene_profile": SCENE_PROFILE_WEIGHT * profile_norm,
+            "scene_ranking": SCENE_PAIRWISE_GAP_WEIGHT * ranking_norm,
+            "triangle_sum": (
+                SCENE_PROFILE_WEIGHT * profile_norm
+                + SCENE_PAIRWISE_GAP_WEIGHT * ranking_norm
+            ),
+        },
+        "component_balance": {
+            "raw_equalizing_profile_weight": ranking_norm / profile_norm,
+            "frozen_profile_weight": SCENE_PROFILE_WEIGHT,
+            "weighted_profile_to_ranking_gradient_ratio": (
+                SCENE_PROFILE_WEIGHT * profile_norm
+                / (SCENE_PAIRWISE_GAP_WEIGHT * ranking_norm)
+            ),
+            "derivation": (
+                "fit_only_seed0_fixed_calibration_batch_rounded_near_unit_"
+                "weighted_component_gradient_ratio"
+            ),
         },
         "bindings": {
             "surface_control": file_record(checkpoint),
@@ -158,6 +190,10 @@ def diagnose(args: argparse.Namespace) -> dict:
             "fit_text_bank": file_record(Path(args.fit_text_bank)),
             "fit_text_bank_manifest": file_record(Path(args.fit_text_bank_manifest)),
             "implementation": file_record(Path(__file__).resolve()),
+            "training_implementation": file_record(
+                Path(trainer_module.__file__).resolve()
+            ),
+            "loss_implementation": file_record(Path(loss_module.__file__).resolve()),
         },
     }
     write_frozen_json(Path(args.output), result)
@@ -173,7 +209,6 @@ def main() -> None:
     parser.add_argument("--fit-text-bank", required=True)
     parser.add_argument("--fit-text-bank-manifest", required=True)
     parser.add_argument("--scenes", type=int, default=4)
-    parser.add_argument("--ranking-temperature", type=float, default=0.1)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--output", required=True)
     result = diagnose(parser.parse_args())

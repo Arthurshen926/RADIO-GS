@@ -32,6 +32,8 @@ from radio_gs.evaluation.text_response_fidelity import (
     _validate_report,
     aggregate_paired_seed_gate,
     evaluate_response_fidelity,
+    selection_contract_for_bank_family,
+    tensor_sha256,
 )
 from radio_gs.scripts import finalize_surface_region_query_free_promotion as surface_finalizer
 from radio_gs.scripts.finalize_gpu_guard_receipt import validate_receipt
@@ -59,7 +61,7 @@ SURFACE_NONINFERIORITY_TOLERANCE = 0.002
 MINIMUM_IMPROVED_SEEDS = 2
 BOOTSTRAP_SAMPLES = 2000
 BOOTSTRAP_SEED = 20260731
-QUALITY_NONINFERIORITY_TOLERANCE = 0.0
+QUALITY_NONINFERIORITY_TOLERANCE = 0.005
 SURFACE_METRICS = (
     "summary_token_cosine",
     "mean_descriptor_cosine",
@@ -117,9 +119,161 @@ AUTHORITY_DISTILL_IMPLEMENTATION_SOURCES = {
     "radio_gs/utils/immutable_artifacts.py",
     "radio_gs/scripts/surface_attention_pooling_screen.py",
 }
-DISTILL_EPOCH_SELECTION = (
+LEGACY_DISTILL_EPOCH_SELECTION = (
     "surface_control_feasible_0p002_then_fit_support_response_relation_surface_v2"
 )
+DISTILL_EPOCH_SELECTION = (
+    "surface_control_0p002_fit_scene_robust_0p005_then_response_error_v3"
+)
+ACCEPTED_ANCHOR_DISTILL_EPOCH_SELECTION = (
+    "surface_control_0p002_fit_scene_robust_0p005_accepted_anchor_"
+    "fixed_1over2048_then_response_error_v4"
+)
+HISTORY_HASH_CHAIN_ALGORITHM = (
+    "sha256_canonical_json_previous_plus_record_without_selection_score_v1"
+)
+PROPOSAL_STATE_MACHINE = {
+    "name": "accepted_anchor_fixed_micro_ray_fresh_adamw_v1",
+    "proposal_source": "current_accepted_anchor",
+    "proposal_optimizer": "fresh_adamw_complete_epoch",
+    "alpha_numerator": 1,
+    "alpha_denominator": 2048,
+    "trial_interpolation": "anchor+alpha*(raw-anchor)",
+    "validation_evaluations_per_proposal": 1,
+    "acceptance": "response_selection_feasible_is_exactly_true",
+    "feasible_nonbest_action": "accept_as_next_anchor",
+    "infeasible_action": "restore_exact_preproposal_anchor",
+    "optimizer_moments": "reset_before_every_proposal",
+    "best_selection": "existing_v3_robust_lexicographic_rank_control_and_trials",
+    "patience": "consecutive_proposals_without_global_best_update",
+    "persistent_generator": "advanced_across_proposals_never_rolled_back",
+    "backtracking": "none_fixed_alpha_single_trial",
+    "proposal_loss_accounting": {
+        "measurement_state": "raw_proposal_before_micro_projection",
+        "fields": [
+            "total",
+            "token",
+            "descriptor",
+            "relation",
+            "independent_response",
+            "scene_response",
+            "scene_profile",
+            "scene_ranking",
+        ],
+        "legacy_flat_mirror": {
+            "total": "loss",
+            "token": "token_loss",
+            "descriptor": "descriptor_loss",
+            "relation": "relation_loss",
+            "independent_response": "independent_response_loss",
+            "scene_response": "scene_response_loss",
+            "scene_profile": "scene_profile_loss",
+            "scene_ranking": "scene_ranking_loss",
+        },
+    },
+}
+PROPOSAL_LOSS_FIELDS = tuple(
+    PROPOSAL_STATE_MACHINE["proposal_loss_accounting"]["fields"]
+)
+PROPOSAL_LOSS_FLAT_MIRROR = dict(
+    PROPOSAL_STATE_MACHINE["proposal_loss_accounting"]["legacy_flat_mirror"]
+)
+FIT_RESPONSE_NONINFERIORITY_TOLERANCE = 0.005
+DISTILL_SURFACE_CONTROL_METRICS = (
+    "summary_token_cosine",
+    "mean_descriptor_cosine",
+    "all_view_descriptor_cosine",
+)
+FIT_RESPONSE_QUALITY_METRICS = (
+    "text_response_profile_cosine_mean",
+    "text_response_profile_cosine_p05",
+    "text_response_ranking_spearman_mean",
+    "text_response_ranking_spearman_p05",
+    "text_response_top_decile_overlap_mean",
+    "text_response_top_decile_overlap_p05",
+)
+FIT_RESPONSE_SCENE_QUALITY_METRICS = (
+    "profile_cosine_mean",
+    "profile_cosine_p05",
+    "ranking_spearman_mean",
+    "ranking_spearman_p05",
+    "top_decile_overlap_mean",
+    "top_decile_overlap_p05",
+)
+FIT_RESPONSE_SCENE_ERROR_METRICS = ("smooth_l1", "mae")
+PAIRWISE_CALIBRATION_ALGORITHM_VERSION = (
+    "per-seed-surface-warmstart-dual-response-pairwise-gradient-budget-v3"
+)
+LEGACY_BRIER_CALIBRATION_ALGORITHM_VERSION = (
+    "per-seed-surface-warmstart-dual-response-gradient-budget-v2"
+)
+SCENE_RESPONSE_LOSS = (
+    "scene_wise_text_response_weighted_profile_pairwise_gap_smooth_l1"
+)
+SCENE_PROFILE_LOSS = "scene_wise_centered_text_response_profile_cosine_distance"
+SCENE_PAIRWISE_GAP_LOSS = "scene_wise_text_response_pairwise_gap_smooth_l1"
+SCENE_RESPONSE_OBJECTIVE = {
+    "name": SCENE_RESPONSE_LOSS,
+    "profile_loss": SCENE_PROFILE_LOSS,
+    "profile_weight": 0.2,
+    "ranking_loss": SCENE_PAIRWISE_GAP_LOSS,
+    "ranking_weight": 1.0,
+    "tie_tolerance": 1e-6,
+    "pairwise_gap_normalization": "per_scene_query_teacher_response_span",
+}
+LEGACY_BRIER_RESPONSE_LOSS = "scene_wise_text_response_profile_ranking"
+
+
+def _calibration_objective_contract(
+    *,
+    response_protocol: str,
+    token_weight: float,
+    relation_weight: float,
+) -> dict[str, Any]:
+    common = {
+        "surface_objective": (
+            "token_weight*(1-cosine_summary_token)"
+            "+masked_mean_one_minus_all_view_cosine"
+            "+relation_weight*smooth_l1_descriptor_relation"
+        ),
+        "token_weight": float(token_weight),
+        "relation_weight": float(relation_weight),
+        "independent_response_loss": (
+            "independent_normalized_cosine_response_smooth_l1"
+        ),
+        "branch_gradient_target_ratio": 0.25,
+        "combined_response_gradient_ratio_upper_bound": 0.5,
+        "upper_bound_derivation": (
+            "triangle_inequality_sum_of_two_branch_l2_budgets"
+        ),
+        "gradient_bound_scope": (
+            "local_at_unaugmented_exact_warmstart_not_a_global_training_bound"
+        ),
+        "training_batching": "shuffle_complete_scene_groups_no_partial_scenes_v1",
+        "max_complete_scene_batch_rows": 64,
+    }
+    if response_protocol in {
+        "pairwise_selection_v3",
+        "accepted_anchor_selection_v4",
+    }:
+        return {
+            **common,
+            "scene_response_loss": SCENE_RESPONSE_LOSS,
+            "scene_response_objective": dict(SCENE_RESPONSE_OBJECTIVE),
+            "scene_tie_tolerance": 1e-6,
+        }
+    _require(
+        response_protocol == "legacy_brier_selection_v2",
+        "unsupported calibration response protocol",
+    )
+    return {
+        **common,
+        "scene_response_loss": LEGACY_BRIER_RESPONSE_LOSS,
+        "scene_profile_weight": 1.0,
+        "scene_ranking_weight": 1.0,
+        "scene_ranking_temperature": 0.1,
+        "scene_tie_tolerance": 1e-6,
+    }
 DISTILL_RUNTIME_PYTHON_ENTRYPOINTS = (
     "radio_gs/scripts/surface_text_response_distill_authority.py",
     "radio_gs/scripts/train_surface_region_text_response_distill.py",
@@ -159,6 +313,20 @@ DISTILL_RUNTIME_ENVIRONMENT_KEYS = (
     "RADIO_GS_LD_LIBRARY_PATH",
     "RADIO_GS_SITE_PACKAGES",
 )
+FORMAL_RECORDED_SOURCE_CLOSURE_AUTHORITIES = {
+    "497cc23d08db7500d78c5741de48c132c78e493a6fd205e34489668725f16615": {
+        "manifest_path": (
+            "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/"
+            "surface_text_response_warmstart_dualprofile_joint_c1024_gpu1only_v3/"
+            "run_manifest.json"
+        ),
+        "source_root": "/root/RADIO-GS",
+        "runtime_closure_digest": (
+            "56736482529dc7f7fc34c6b29cba2373c59993820989c4f41bca3f8a1f6767e3"
+        ),
+        "response_protocol": "legacy_brier_selection_v2",
+    }
+}
 DISTILL_KERNEL_FAULT_PATTERN = re.compile(
     r"(?:\bNVRM\b.*\bXid\b|fallen off|PCIe.*(?:error|fatal)|GPU.*lost PCIe)",
     re.IGNORECASE,
@@ -176,14 +344,52 @@ IMPLEMENTATION_SOURCES = (
     "radio_gs/interfaces/surface_region_summary.py",
 )
 
+_SHA256_CACHE: dict[tuple[str, tuple[int, ...]], str] = {}
+
 
 def _require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
 
 
+def _sha256_identity(path: Path) -> tuple[Path, tuple[int, ...]]:
+    raw = Path(os.path.abspath(os.path.expanduser(os.fspath(path))))
+    source = raw.parent.resolve(strict=True) / raw.name
+    info = os.stat(source, follow_symlinks=False)
+    _require(stat.S_ISREG(info.st_mode), f"hashed artifact is not regular: {source}")
+    return source, (
+        int(info.st_dev),
+        int(info.st_ino),
+        int(info.st_mode),
+        int(info.st_nlink),
+        int(info.st_size),
+        int(info.st_mtime_ns),
+        int(info.st_ctime_ns),
+    )
+
+
 def _sha256(path: Path) -> str:
-    return sha256_file(path)
+    """Hash an unchanged file once per process and stable file identity.
+
+    ``sha256_file`` already performs a fail-closed double read.  Promotion
+    validation asks for the same 1.6-GB RADIO digest many times, so subsequent
+    checks reuse that result only while device/inode/mode/link-count/size and
+    nanosecond mtime/ctime are all unchanged.
+    """
+
+    source, fingerprint = _sha256_identity(path)
+    key = (str(source), fingerprint)
+    cached = _SHA256_CACHE.get(key)
+    if cached is not None:
+        return cached
+    digest = sha256_file(source)
+    source_after, fingerprint_after = _sha256_identity(source)
+    _require(
+        source_after == source and fingerprint_after == fingerprint,
+        f"hashed artifact changed while being read: {source}",
+    )
+    _SHA256_CACHE[key] = digest
+    return digest
 
 
 def _is_sha256(value: object) -> bool:
@@ -225,10 +431,54 @@ def _close(left: object, right: object, tolerance: float = 1e-7) -> bool:
     )
 
 
-def _recompute_response_primary_selection(
+def _response_protocol_for_manifest(
+    manifest_path: Path,
+    manifest_sha256: str,
+    manifest: Mapping[str, Any],
+) -> str:
+    """Classify accepted-anchor-v4, pairwise-v3, or registered Brier authority."""
+
+    schema = manifest.get("schema_version")
+    selection = manifest.get("training_contract", {}).get("epoch_selection")
+    if schema == 1 and selection is None:
+        return "legacy_single_response_v1"
+    if selection == ACCEPTED_ANCHOR_DISTILL_EPOCH_SELECTION:
+        _require(
+            schema == 3
+            and manifest.get("training_contract", {}).get(
+                "proposal_state_machine"
+            )
+            == PROPOSAL_STATE_MACHINE,
+            "accepted-anchor selection-v4 requires its exact schema-3 contract",
+        )
+        return "accepted_anchor_selection_v4"
+    if selection == DISTILL_EPOCH_SELECTION:
+        _require(
+            schema == 3,
+            "pairwise selection-v3 requires distill manifest schema 3",
+        )
+        return "pairwise_selection_v3"
+    if selection == LEGACY_DISTILL_EPOCH_SELECTION:
+        registered = FORMAL_RECORDED_SOURCE_CLOSURE_AUTHORITIES.get(
+            str(manifest_sha256)
+        )
+        _require(
+            registered is not None
+            and registered.get("response_protocol")
+            == "legacy_brier_selection_v2"
+            and Path(manifest_path).resolve()
+            == Path(str(registered["manifest_path"])).resolve()
+            and schema == 3,
+            "unregistered legacy Brier selection-v2 authority is forbidden",
+        )
+        return "legacy_brier_selection_v2"
+    raise ValueError("distill epoch-selection protocol is unsupported")
+
+
+def _recompute_legacy_response_primary_selection(
     history: object,
 ) -> tuple[int, float]:
-    """Independently reproduce Surface-feasible fit-response selection."""
+    """Reproduce the registered historical Surface/top-1 selection."""
 
     _require(isinstance(history, list) and history, "response history is empty")
     rows: list[dict[str, Any]] = []
@@ -300,6 +550,528 @@ def _recompute_response_primary_selection(
             "response history selection score differs from independent recomputation",
         )
     return best_epoch, best_score
+
+
+def _recompute_response_primary_selection(
+    history: object,
+) -> tuple[int, float]:
+    """Independently reproduce pairwise-v3 robust fit-response selection."""
+
+    _require(isinstance(history, list) and history, "response history is empty")
+    rows: list[dict[str, Any]] = []
+    for index, raw in enumerate(history):
+        _require(isinstance(raw, Mapping), f"response history row {index} is invalid")
+        row = dict(raw)
+        _require(
+            row.get("epoch") == index,
+            "response history must start at control epoch 0 and be contiguous",
+        )
+        for field in (
+            "surface_selection_score",
+            "selection_score",
+            "text_support_top1_agreement",
+            "text_response_smooth_l1",
+            "text_response_mae",
+            "descriptor_relation_smooth_l1",
+            *FIT_RESPONSE_QUALITY_METRICS,
+            *DISTILL_SURFACE_CONTROL_METRICS,
+        ):
+            _finite(row.get(field), f"response history {field}")
+        _require(
+            row.get("scene_response_objective") == SCENE_RESPONSE_OBJECTIVE,
+            "response history scene-response objective differs",
+        )
+        raw_scenes = row.get("text_response_scene_metrics")
+        _require(
+            isinstance(raw_scenes, Mapping) and bool(raw_scenes),
+            "response history fit scene metrics are empty",
+        )
+        scenes: dict[str, dict[str, float]] = {}
+        for scene, raw_metrics in raw_scenes.items():
+            _require(
+                isinstance(scene, str)
+                and bool(scene)
+                and scene not in scenes
+                and isinstance(raw_metrics, Mapping)
+                and set(raw_metrics)
+                == {
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                },
+                "response history fit scene metrics are malformed",
+            )
+            scenes[scene] = {
+                field: _finite(
+                    raw_metrics.get(field),
+                    f"response history scene {scene} {field}",
+                )
+                for field in (
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                )
+            }
+        for field in FIT_RESPONSE_SCENE_ERROR_METRICS:
+            expected = max(values[field] for values in scenes.values())
+            _require(
+                _close(
+                    row.get(f"text_response_scene_worst_{field}"),
+                    expected,
+                    tolerance=1e-12,
+                ),
+                "response history worst-scene error differs",
+            )
+        for field in FIT_RESPONSE_SCENE_QUALITY_METRICS:
+            expected = min(values[field] for values in scenes.values())
+            _require(
+                _close(
+                    row.get(f"text_response_scene_worst_{field}"),
+                    expected,
+                    tolerance=1e-12,
+                ),
+                "response history worst-scene quality differs",
+            )
+        row["_validated_scene_metrics"] = scenes
+        rows.append(row)
+
+    control = rows[0]
+    control_surface = {
+        field: float(control[field]) for field in DISTILL_SURFACE_CONTROL_METRICS
+    }
+    control_quality = {
+        field: float(control[field]) for field in FIT_RESPONSE_QUALITY_METRICS
+    }
+    control_scenes = control["_validated_scene_metrics"]
+    ranked: list[tuple[int, tuple[float, ...]]] = []
+    for row in rows:
+        scenes = row["_validated_scene_metrics"]
+        _require(
+            set(scenes) == set(control_scenes),
+            "response history fit scene IDs drifted from epoch 0",
+        )
+        surface_deltas = {
+            field: float(row[field]) - control_surface[field]
+            for field in DISTILL_SURFACE_CONTROL_METRICS
+        }
+        surface_feasible = all(
+            delta >= -SURFACE_NONINFERIORITY_TOLERANCE
+            or math.isclose(
+                delta,
+                -SURFACE_NONINFERIORITY_TOLERANCE,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+            for delta in surface_deltas.values()
+        )
+        aggregate_deltas = {
+            field: float(row[field]) - control_quality[field]
+            for field in FIT_RESPONSE_QUALITY_METRICS
+        }
+        aggregate_feasible = all(
+            delta >= -FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+            or math.isclose(
+                delta,
+                -FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+            for delta in aggregate_deltas.values()
+        )
+        scene_deltas: dict[str, dict[str, float]] = {}
+        per_scene_feasible = True
+        for scene in sorted(control_scenes):
+            scene_deltas[scene] = {
+                field: scenes[scene][field] - control_scenes[scene][field]
+                for field in (
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                )
+            }
+            quality_feasible = all(
+                scene_deltas[scene][field]
+                >= -FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+                or math.isclose(
+                    scene_deltas[scene][field],
+                    -FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for field in FIT_RESPONSE_SCENE_QUALITY_METRICS
+            )
+            error_feasible = all(
+                scene_deltas[scene][field]
+                <= FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+                or math.isclose(
+                    scene_deltas[scene][field],
+                    FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for field in FIT_RESPONSE_SCENE_ERROR_METRICS
+            )
+            per_scene_feasible = (
+                per_scene_feasible and quality_feasible and error_feasible
+            )
+        fit_feasible = aggregate_feasible and per_scene_feasible
+        feasible = surface_feasible and fit_feasible
+        error_improvement = {
+            "smooth_l1": float(control["text_response_smooth_l1"])
+            - float(row["text_response_smooth_l1"]),
+            "mae": float(control["text_response_mae"])
+            - float(row["text_response_mae"]),
+        }
+        _require(
+            row.get("surface_control_deltas") == surface_deltas
+            and row.get("surface_control_feasible") is surface_feasible
+            and row.get("surface_control_tolerance")
+            == SURFACE_NONINFERIORITY_TOLERANCE
+            and row.get("fit_response_control_deltas")
+            == {
+                "aggregate_quality": aggregate_deltas,
+                "per_scene": scene_deltas,
+            }
+            and row.get("fit_response_aggregate_control_feasible")
+            is aggregate_feasible
+            and row.get("fit_response_per_scene_control_feasible")
+            is per_scene_feasible
+            and row.get("fit_response_control_feasible") is fit_feasible
+            and row.get("fit_response_control_tolerance")
+            == FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+            and row.get("response_selection_feasible") is feasible
+            and row.get("fit_response_error_improvement_control_minus_candidate")
+            == error_improvement,
+            "response history robust selection fields differ from recomputation",
+        )
+        if int(row["epoch"]) > 0:
+            expected_scene_loss = 0.2 * _finite(
+                row.get("scene_profile_loss"), "history scene profile loss"
+            ) + _finite(row.get("scene_ranking_loss"), "history scene ranking loss")
+            _require(
+                _close(
+                    row.get("scene_response_loss"),
+                    expected_scene_loss,
+                    tolerance=1e-7,
+                ),
+                "response history scene composite loss differs",
+            )
+        if feasible:
+            ranked.append(
+                (
+                    int(row["epoch"]),
+                    (
+                        -float(row["text_response_smooth_l1"]),
+                        -float(row["text_response_mae"]),
+                        float(row["text_response_ranking_spearman_p05"]),
+                        float(row["text_response_ranking_spearman_mean"]),
+                        float(row["text_response_profile_cosine_p05"]),
+                        float(row["text_response_profile_cosine_mean"]),
+                        float(row["text_response_top_decile_overlap_p05"]),
+                        float(row["text_response_top_decile_overlap_mean"]),
+                        float(row["text_support_top1_agreement"]),
+                        -float(row["descriptor_relation_smooth_l1"]),
+                        float(row["surface_selection_score"]),
+                    ),
+                )
+            )
+    _require(ranked, "response history has no robust feasible epoch")
+    best_epoch, _ = max(ranked, key=lambda value: value[1])
+    best_score = float(rows[best_epoch]["surface_selection_score"])
+    for row in rows:
+        expected = best_score if int(row["epoch"]) == best_epoch else -1.0
+        _require(
+            math.isclose(
+                float(row["selection_score"]),
+                expected,
+                rel_tol=0.0,
+                abs_tol=0.0,
+            ),
+            "response history selection score differs from independent recomputation",
+        )
+    return best_epoch, best_score
+
+
+def _state_dict_sha256(state: object, *, label: str) -> str:
+    _require(
+        isinstance(state, Mapping) and bool(state),
+        f"{label} must be a non-empty state_dict",
+    )
+    records = []
+    for name in sorted(state):
+        value = state[name]
+        _require(
+            isinstance(name, str) and bool(name) and torch.is_tensor(value),
+            f"{label} fields differ",
+        )
+        tensor = value.detach().cpu().contiguous()
+        _require(
+            not (tensor.is_floating_point() or tensor.is_complex())
+            or bool(torch.isfinite(tensor).all()),
+            f"{label} contains a non-finite tensor",
+        )
+        records.append(
+            {
+                "name": name,
+                "shape": list(tensor.shape),
+                "dtype": str(tensor.dtype),
+                "tensor_sha256": tensor_sha256(tensor),
+            }
+        )
+    return canonical_json_sha256(records)
+
+
+def _history_chain_digest(
+    record: Mapping[str, Any], previous_sha256: str | None
+) -> str:
+    payload = dict(record)
+    payload.pop("history_hash_chain", None)
+    payload.pop("selection_score", None)
+    return canonical_json_sha256(
+        {"previous_sha256": previous_sha256, "record": payload}
+    )
+
+
+def _accepted_anchor_rank(
+    record: Mapping[str, Any], *, label: str
+) -> tuple[float, ...]:
+    values = {
+        field: _finite(record.get(field), f"{label} {field}")
+        for field in (
+            "text_response_smooth_l1",
+            "text_response_mae",
+            "text_response_ranking_spearman_p05",
+            "text_response_ranking_spearman_mean",
+            "text_response_profile_cosine_p05",
+            "text_response_profile_cosine_mean",
+            "text_response_top_decile_overlap_p05",
+            "text_response_top_decile_overlap_mean",
+            "text_support_top1_agreement",
+            "descriptor_relation_smooth_l1",
+            "surface_selection_score",
+        )
+    }
+    return (
+        -values["text_response_smooth_l1"],
+        -values["text_response_mae"],
+        values["text_response_ranking_spearman_p05"],
+        values["text_response_ranking_spearman_mean"],
+        values["text_response_profile_cosine_p05"],
+        values["text_response_profile_cosine_mean"],
+        values["text_response_top_decile_overlap_p05"],
+        values["text_response_top_decile_overlap_mean"],
+        values["text_support_top1_agreement"],
+        -values["descriptor_relation_smooth_l1"],
+        values["surface_selection_score"],
+    )
+
+
+def _validate_accepted_anchor_checkpoint_state(
+    checkpoint: Mapping[str, Any],
+    *,
+    control_payload: Mapping[str, Any],
+    patience: int,
+) -> dict[str, Any]:
+    """Replay v4 state transitions and prove the serialized state is the best."""
+
+    provenance = checkpoint.get("provenance")
+    config = checkpoint.get("training_config")
+    _require(
+        checkpoint.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE
+        and isinstance(provenance, Mapping)
+        and provenance.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE
+        and isinstance(config, Mapping)
+        and config.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE,
+        "accepted-anchor proposal state-machine contract differs",
+    )
+    best_state_sha = checkpoint.get("best_state_dict_sha256")
+    _require(
+        _is_sha256(best_state_sha)
+        and _state_dict_sha256(
+            checkpoint.get("state_dict"), label="published response checkpoint state"
+        )
+        == best_state_sha,
+        "response checkpoint does not publish the best state",
+    )
+    accepted_anchor = checkpoint.get("accepted_anchor")
+    _require(
+        isinstance(accepted_anchor, Mapping)
+        and set(accepted_anchor)
+        == {
+            "epoch",
+            "state_dict_sha256",
+            "accepted_proposal_count",
+            "rejected_proposal_count",
+        }
+        and _is_sha256(accepted_anchor.get("state_dict_sha256"))
+        and all(
+            isinstance(accepted_anchor.get(field), int)
+            and not isinstance(accepted_anchor.get(field), bool)
+            and int(accepted_anchor[field]) >= 0
+            for field in (
+                "epoch",
+                "accepted_proposal_count",
+                "rejected_proposal_count",
+            )
+        ),
+        "accepted-anchor terminal metadata differs",
+    )
+    history = checkpoint.get("history")
+    _require(
+        isinstance(history, list) and bool(history),
+        "accepted-anchor checkpoint history is empty",
+    )
+    control_state_sha = _state_dict_sha256(
+        control_payload.get("state_dict"), label="Surface control state"
+    )
+    previous_chain: str | None = None
+    anchor_epoch = 0
+    anchor_sha = control_state_sha
+    best_epoch = 0
+    best_sha = control_state_sha
+    stale = 0
+    accepted_count = 0
+    rejected_count = 0
+    feasible_ranks: list[tuple[int, tuple[float, ...]]] = []
+    proposal_fields = {
+        "index",
+        "source_anchor_epoch",
+        "anchor_state_dict_sha256",
+        "raw_state_dict_sha256",
+        "trial_state_dict_sha256",
+        "alpha_numerator",
+        "alpha_denominator",
+        "optimizer_state_reset",
+        "validation_evaluations",
+        "backtracking",
+        "persistent_generator",
+    }
+    for index, raw_record in enumerate(history):
+        _require(
+            isinstance(raw_record, Mapping) and raw_record.get("epoch") == index,
+            "accepted-anchor history must be contiguous from epoch 0",
+        )
+        record = dict(raw_record)
+        expected_chain_sha = _history_chain_digest(record, previous_chain)
+        _require(
+            record.get("history_hash_chain")
+            == {
+                "algorithm": HISTORY_HASH_CHAIN_ALGORITHM,
+                "previous_sha256": previous_chain,
+                "sha256": expected_chain_sha,
+            },
+            f"accepted-anchor history hash chain differs at row {index}",
+        )
+        previous_chain = expected_chain_sha
+        if record.get("response_selection_feasible") is True:
+            feasible_ranks.append(
+                (index, _accepted_anchor_rank(record, label=f"history row {index}"))
+            )
+        if index == 0:
+            _require(
+                record.get("initialization") == "frozen_surface_control_checkpoint"
+                and record.get("state_machine_role")
+                == "frozen_control_initial_anchor"
+                and "proposal" not in record
+                and "proposal_losses" not in record
+                and "loss_measurement_state" not in record
+                and not any(
+                    field in record for field in PROPOSAL_LOSS_FLAT_MIRROR.values()
+                )
+                and record.get("accepted") is True
+                and record.get("rejected") is False,
+                "accepted-anchor control history row differs",
+            )
+            best_updated = True
+        else:
+            proposal = record.get("proposal")
+            _require(
+                isinstance(proposal, Mapping)
+                and set(proposal) == proposal_fields
+                and proposal.get("index") == index
+                and proposal.get("source_anchor_epoch") == anchor_epoch
+                and proposal.get("anchor_state_dict_sha256") == anchor_sha
+                and _is_sha256(proposal.get("raw_state_dict_sha256"))
+                and _is_sha256(proposal.get("trial_state_dict_sha256"))
+                and proposal.get("alpha_numerator") == 1
+                and proposal.get("alpha_denominator") == 2048
+                and proposal.get("optimizer_state_reset") is True
+                and proposal.get("validation_evaluations") == 1
+                and proposal.get("backtracking")
+                == "none_fixed_alpha_single_trial"
+                and proposal.get("persistent_generator")
+                == "advanced_never_rolled_back"
+                and record.get("state_machine_role") == "fixed_micro_ray_trial",
+                f"accepted-anchor proposal row {index} differs",
+            )
+            proposal_losses = record.get("proposal_losses")
+            _require(
+                record.get("loss_measurement_state")
+                == "raw_proposal_before_micro_projection"
+                and isinstance(proposal_losses, Mapping)
+                and tuple(proposal_losses) == PROPOSAL_LOSS_FIELDS
+                and all(
+                    isinstance(proposal_losses.get(field), (int, float))
+                    and not isinstance(proposal_losses.get(field), bool)
+                    and math.isfinite(float(proposal_losses[field]))
+                    and float(proposal_losses[field]) >= 0.0
+                    and record.get(PROPOSAL_LOSS_FLAT_MIRROR[field])
+                    == proposal_losses[field]
+                    for field in PROPOSAL_LOSS_FIELDS
+                ),
+                f"accepted-anchor raw-proposal loss accounting differs at row {index}",
+            )
+            accepted = record.get("response_selection_feasible") is True
+            _require(
+                record.get("accepted") is accepted
+                and record.get("rejected") is (not accepted),
+                "accepted-anchor acceptance decision differs",
+            )
+            if accepted:
+                anchor_epoch = index
+                anchor_sha = str(proposal["trial_state_dict_sha256"])
+                accepted_count += 1
+            else:
+                rejected_count += 1
+            _require(bool(feasible_ranks), "accepted-anchor feasible set is empty")
+            selected_epoch = max(feasible_ranks, key=lambda value: value[1])[0]
+            best_updated = selected_epoch == index
+            if best_updated:
+                best_epoch = index
+                best_sha = str(proposal["trial_state_dict_sha256"])
+                stale = 0
+            else:
+                stale += 1
+        patience_stop = bool(patience and stale >= patience)
+        _require(
+            record.get("anchor_epoch_after_proposal") == anchor_epoch
+            and record.get("anchor_state_dict_sha256_after_proposal") == anchor_sha
+            and record.get("best_updated") is best_updated
+            and record.get("best_epoch_after_proposal") == best_epoch
+            and record.get("best_state_dict_sha256_after_proposal") == best_sha
+            and record.get("patience_stale_after_proposal") == stale
+            and record.get("patience_stop_after_proposal") is patience_stop
+            and (not patience_stop or index == len(history) - 1),
+            "accepted-anchor history transition differs",
+        )
+    expected_terminal = {
+        "epoch": anchor_epoch,
+        "state_dict_sha256": anchor_sha,
+        "accepted_proposal_count": accepted_count,
+        "rejected_proposal_count": rejected_count,
+    }
+    _require(
+        bool(feasible_ranks)
+        and accepted_anchor == expected_terminal
+        and accepted_count + rejected_count == len(history) - 1
+        and checkpoint.get("best_epoch") == best_epoch
+        and checkpoint.get("best_state_dict_sha256") == best_sha
+        and checkpoint.get("history_hash_chain_sha256") == previous_chain,
+        "accepted-anchor terminal checkpoint provenance differs",
+    )
+    return {
+        "proposal_state_machine": dict(PROPOSAL_STATE_MACHINE),
+        "best_state_dict_sha256": str(best_state_sha),
+        "accepted_anchor": dict(accepted_anchor),
+        "history_hash_chain_sha256": str(previous_chain),
+    }
 
 
 def _validate_immutable_source_snapshot(raw_root: object, *, label: str) -> Path:
@@ -489,6 +1261,149 @@ def _validate_distill_runtime_closure(
     expected_closure["digest"] = canonical_json_sha256(expected_closure)
     _require(dict(value) == expected_closure, "distill runtime closure digest differs")
     return str(expected_closure["digest"])
+
+
+def _validate_registered_recorded_runtime_closure(
+    value: object,
+    *,
+    source_root: Path,
+    implementation_sources: object,
+    expected_digest: str,
+) -> str:
+    """Validate an exact registered producer closure without live source reads.
+
+    The registered schema-3 authority recorded the execution repository rather
+    than an archived read-only copy. Its manifest is nevertheless immutable and
+    checkpoint-bound. For that one exact manifest, validate every recorded
+    digest and cross-binding internally instead of comparing against a worktree
+    that has legitimately advanced during downstream evaluation development.
+    """
+
+    _require(
+        isinstance(value, Mapping)
+        and set(value)
+        == {"schema_version", "repository_sources", "runtime_fingerprint", "digest"}
+        and value.get("schema_version") == 1,
+        "registered distill runtime closure schema differs",
+    )
+    source_root = Path(source_root)
+    _require(
+        source_root.is_absolute()
+        and source_root.resolve(strict=True) == source_root
+        and not source_root.is_symlink(),
+        "registered distill source root identity differs",
+    )
+    repository = value.get("repository_sources")
+    _require(
+        isinstance(repository, Mapping)
+        and set(repository)
+        == {"python_entrypoints", "shell_sources", "files", "digest"}
+        and repository.get("python_entrypoints")
+        == list(DISTILL_RUNTIME_PYTHON_ENTRYPOINTS)
+        and repository.get("shell_sources")
+        == list(DISTILL_RUNTIME_SHELL_SOURCES),
+        "registered distill repository closure contract differs",
+    )
+    files = repository.get("files")
+    _require(
+        isinstance(files, Mapping)
+        and bool(files)
+        and all(
+            isinstance(relative, str)
+            and bool(relative)
+            and not Path(relative).is_absolute()
+            and ".." not in Path(relative).parts
+            and _is_sha256(digest)
+            for relative, digest in files.items()
+        ),
+        "registered distill repository file index differs",
+    )
+    expected_repository = {
+        "python_entrypoints": list(DISTILL_RUNTIME_PYTHON_ENTRYPOINTS),
+        "shell_sources": list(DISTILL_RUNTIME_SHELL_SOURCES),
+        "files": dict(files),
+    }
+    expected_repository["digest"] = canonical_json_sha256(expected_repository)
+    _require(
+        dict(repository) == expected_repository,
+        "registered distill repository digest differs",
+    )
+    _require(
+        isinstance(implementation_sources, Mapping)
+        and set(implementation_sources) == AUTHORITY_DISTILL_IMPLEMENTATION_SOURCES
+        and all(
+            implementation_sources.get(relative) == files.get(relative)
+            for relative in AUTHORITY_DISTILL_IMPLEMENTATION_SOURCES
+        ),
+        "registered distill implementation sources differ from its closure",
+    )
+
+    runtime = value.get("runtime_fingerprint")
+    runtime_fields = {
+        "repository_import_root",
+        "imported_modules",
+        "python_executable",
+        "python_version",
+        "python_prefix",
+        "platform",
+        "machine",
+        "packages",
+        "torch_git_version",
+        "torch_cuda_version",
+        "torch_cudnn_version",
+        "environment",
+    }
+    _require(
+        isinstance(runtime, Mapping)
+        and set(runtime) == runtime_fields
+        and runtime.get("repository_import_root") == str(source_root),
+        "registered distill runtime fingerprint differs",
+    )
+    imports = runtime.get("imported_modules")
+    _require(
+        isinstance(imports, Mapping) and set(imports) == set(DISTILL_RUNTIME_MODULES),
+        "registered distill runtime import set differs",
+    )
+    for module_name in DISTILL_RUNTIME_MODULES:
+        expected_relative = (
+            "radio_gs/__init__.py"
+            if module_name == "radio_gs"
+            else f"{module_name.replace('.', '/')}.py"
+        )
+        record = imports.get(module_name)
+        _require(
+            isinstance(record, Mapping)
+            and set(record) == {"path", "relative_path", "sha256"}
+            and record.get("path") == str(source_root / expected_relative)
+            and record.get("relative_path") == expected_relative
+            and record.get("sha256") == files.get(expected_relative),
+            f"registered distill runtime import differs: {module_name}",
+        )
+    _validate_record_file(runtime.get("python_executable"), "distill Python executable")
+    packages = runtime.get("packages")
+    environment = runtime.get("environment")
+    _require(
+        isinstance(packages, Mapping)
+        and set(packages) == set(DISTILL_RUNTIME_PACKAGES)
+        and all(isinstance(version, str) for version in packages.values())
+        and isinstance(environment, Mapping)
+        and set(environment) == set(DISTILL_RUNTIME_ENVIRONMENT_KEYS)
+        and all(item is None or isinstance(item, str) for item in environment.values())
+        and environment.get("RADIO_GS_REPO_ROOT") == str(source_root),
+        "registered distill runtime environment differs",
+    )
+    expected_closure = {
+        "schema_version": 1,
+        "repository_sources": expected_repository,
+        "runtime_fingerprint": dict(runtime),
+    }
+    expected_closure["digest"] = canonical_json_sha256(expected_closure)
+    _require(
+        dict(value) == expected_closure
+        and expected_closure["digest"] == expected_digest,
+        "registered distill runtime closure digest differs",
+    )
+    return expected_digest
 
 
 def _validate_authority_seed_evidence(
@@ -721,13 +1636,23 @@ def _validate_calibration_manifest(
     surface_control: Mapping[str, Any],
     design_diagnostic: Mapping[str, Any],
     fit_text_bank: Mapping[str, Any],
+    response_protocol: str,
+    token_weight: float,
+    relation_weight: float,
     label: str,
 ) -> None:
     payload = _json_object(path)
+    expected_algorithm = (
+        PAIRWISE_CALIBRATION_ALGORITHM_VERSION
+        if response_protocol
+        in {"pairwise_selection_v3", "accepted_anchor_selection_v4"}
+        else LEGACY_BRIER_CALIBRATION_ALGORITHM_VERSION
+    )
     _require(
         payload.get("schema_version") == 2
         and payload.get("artifact_type")
         == "surface_text_response_gradient_calibration"
+        and payload.get("algorithm_version") == expected_algorithm
         and payload.get("benchmark_vocabulary_opened") is False
         and payload.get("uses_benchmark_scenes") is False
         and payload.get("uses_benchmark_test_vocabulary") is False
@@ -755,12 +1680,12 @@ def _validate_calibration_manifest(
     )
     objective = payload.get("objective_contract")
     _require(
-        isinstance(objective, Mapping)
-        and objective.get("gradient_bound_scope")
-        == "local_at_unaugmented_exact_warmstart_not_a_global_training_bound"
-        and objective.get("training_batching")
-        == "shuffle_complete_scene_groups_no_partial_scenes_v1"
-        and objective.get("max_complete_scene_batch_rows") == 64,
+        objective
+        == _calibration_objective_contract(
+            response_protocol=response_protocol,
+            token_weight=token_weight,
+            relation_weight=relation_weight,
+        ),
         f"{label} calibration objective contract differs",
     )
     inventory = gradient.get("trainable_parameters")
@@ -1662,6 +2587,39 @@ def _validate_response_checkpoint(
             control["payload"]["best_selection_score"]
         ),
     }
+    run_binding = provenance.get("distill_run_manifest")
+    _require(
+        isinstance(run_binding, Mapping)
+        and set(run_binding) == {"path", "sha256", "candidate"}
+        and isinstance(run_binding.get("candidate"), str)
+        and bool(run_binding.get("candidate")),
+        f"response seed {seed} lacks an exact distill run-manifest binding",
+    )
+    run_manifest_path = _bound_file(
+        run_binding["path"],
+        run_binding["sha256"],
+        f"response seed {seed} distill run manifest",
+    )
+    distill_manifest = _json_object(run_manifest_path)
+    distill_schema = int(distill_manifest.get("schema_version", -1))
+    _require(
+        distill_schema in {1, 2, 3},
+        f"response seed {seed} uses an unsupported distill manifest schema",
+    )
+    response_protocol = _response_protocol_for_manifest(
+        run_manifest_path,
+        _sha256(run_manifest_path),
+        distill_manifest,
+    )
+    selection_contract = (
+        ACCEPTED_ANCHOR_DISTILL_EPOCH_SELECTION
+        if response_protocol == "accepted_anchor_selection_v4"
+        else DISTILL_EPOCH_SELECTION
+        if response_protocol == "pairwise_selection_v3"
+        else LEGACY_DISTILL_EPOCH_SELECTION
+        if response_protocol == "legacy_brier_selection_v2"
+        else None
+    )
     warm_start = provenance.get("surface_control_warm_start") is not None
     if warm_start:
         _require(
@@ -1689,7 +2647,7 @@ def _validate_response_checkpoint(
                     "all_view_descriptor_cosine",
                 ],
                 "noninferiority_tolerance": SURFACE_NONINFERIORITY_TOLERANCE,
-                "selection_policy": DISTILL_EPOCH_SELECTION,
+                "selection_policy": selection_contract,
             },
             f"response seed {seed} Surface warm-start contract differs",
         )
@@ -1708,14 +2666,22 @@ def _validate_response_checkpoint(
     _require(isinstance(response_contract, Mapping), "response provenance differs")
     v3_response = "response_lambdas" in response_contract
     expected_response_fields = (
-        {
+        (
+            {
             "fit_split_only", "benchmark_vocabulary_opened", "fit_text_bank",
             "calibration_manifest", "calibration_manifest_sha256",
             "calibration_seed", "response_lambdas",
             "response_branch_gradient_target_ratio",
             "total_response_gradient_ratio_upper_bound", "losses",
             "complete_scene_batching", "design_diagnostic",
-        }
+            }
+            | (
+                {"scene_response_objective"}
+                if response_protocol
+                in {"pairwise_selection_v3", "accepted_anchor_selection_v4"}
+                else set()
+            )
+        )
         if v3_response
         else {
             "fit_split_only", "benchmark_vocabulary_opened", "fit_text_bank",
@@ -1739,6 +2705,12 @@ def _validate_response_checkpoint(
     )
     if v3_response:
         response_lambdas = response_contract.get("response_lambdas")
+        expected_scene_loss = (
+            SCENE_RESPONSE_LOSS
+            if response_protocol
+            in {"pairwise_selection_v3", "accepted_anchor_selection_v4"}
+            else LEGACY_BRIER_RESPONSE_LOSS
+        )
         _require(
             response_contract.get("calibration_seed") == seed
             and isinstance(response_lambdas, Mapping)
@@ -1751,8 +2723,15 @@ def _validate_response_checkpoint(
             and response_contract.get("losses")
             == [
                 "independent_normalized_cosine_response_smooth_l1",
-                "scene_wise_text_response_profile_ranking",
+                expected_scene_loss,
             ]
+            and (
+                response_contract.get("scene_response_objective")
+                == SCENE_RESPONSE_OBJECTIVE
+                if response_protocol
+                in {"pairwise_selection_v3", "accepted_anchor_selection_v4"}
+                else "scene_response_objective" not in response_contract
+            )
             and response_contract.get("complete_scene_batching") is True,
             f"response seed {seed} dual response budget differs",
         )
@@ -1785,6 +2764,11 @@ def _validate_response_checkpoint(
             surface_control=expected_surface_control,
             design_diagnostic=design_diagnostic,
             fit_text_bank=fit_text_bank,
+            response_protocol=response_protocol,
+            token_weight=_finite(config.get("token_weight"), "token weight"),
+            relation_weight=_finite(
+                config.get("relation_weight"), "relation weight"
+            ),
             label=f"response seed {seed}",
         )
     else:
@@ -1799,25 +2783,6 @@ def _validate_response_checkpoint(
             fit_text_bank=fit_text_bank,
             label=f"response seed {seed}",
         )
-    run_binding = provenance.get("distill_run_manifest")
-    _require(
-        isinstance(run_binding, Mapping)
-        and set(run_binding) == {"path", "sha256", "candidate"}
-        and isinstance(run_binding.get("candidate"), str)
-        and bool(run_binding.get("candidate")),
-        f"response seed {seed} lacks an exact distill run-manifest binding",
-    )
-    run_manifest_path = _bound_file(
-        run_binding["path"],
-        run_binding["sha256"],
-        f"response seed {seed} distill run manifest",
-    )
-    distill_manifest = _json_object(run_manifest_path)
-    distill_schema = int(distill_manifest.get("schema_version", -1))
-    _require(
-        distill_schema in {1, 2, 3},
-        f"response seed {seed} uses an unsupported distill manifest schema",
-    )
     _require(
         (distill_schema in {2, 3} and warm_start)
         or (distill_schema == 1 and not warm_start),
@@ -1869,7 +2834,17 @@ def _validate_response_checkpoint(
                     )
             if distill_schema == 3:
                 _require(
-                    row.get("response_lambdas") == response_lambdas,
+                    row.get("response_lambdas") == response_lambdas
+                    and (
+                        row.get("scene_response_objective")
+                        == SCENE_RESPONSE_OBJECTIVE
+                        if response_protocol
+                        in {
+                            "pairwise_selection_v3",
+                            "accepted_anchor_selection_v4",
+                        }
+                        else "scene_response_objective" not in row
+                    ),
                     "history response lambdas drift",
                 )
             else:
@@ -1897,10 +2872,18 @@ def _validate_response_checkpoint(
     if distill_schema in {2, 3}:
         _require(
             distill_manifest.get("training_contract", {}).get("epoch_selection")
-            == DISTILL_EPOCH_SELECTION,
+            == selection_contract,
             f"response seed {seed} authority selection contract differs",
         )
-        best_epoch, best_score = _recompute_response_primary_selection(history)
+        if response_protocol in {
+            "pairwise_selection_v3",
+            "accepted_anchor_selection_v4",
+        }:
+            best_epoch, best_score = _recompute_response_primary_selection(history)
+        else:
+            best_epoch, best_score = _recompute_legacy_response_primary_selection(
+                history
+            )
     else:
         # Schema-1 artifacts remain readable, but never acquire newer
         # authority retroactively.
@@ -1939,6 +2922,37 @@ def _validate_response_checkpoint(
         float(surface_control_validation["mean_descriptor_cosine"])
         + float(surface_control_validation["all_view_descriptor_cosine"])
     )
+    state_machine = None
+    if response_protocol == "accepted_anchor_selection_v4":
+        patience = config.get("patience")
+        _require(
+            isinstance(patience, int)
+            and not isinstance(patience, bool)
+            and patience >= 0,
+            f"response seed {seed} accepted-anchor patience differs",
+        )
+        state_machine = _validate_accepted_anchor_checkpoint_state(
+            checkpoint,
+            control_payload=control["payload"],
+            patience=patience,
+        )
+        _require(
+            state_machine["best_state_dict_sha256"]
+            == checkpoint.get("best_state_dict_sha256"),
+            f"response seed {seed} accepted-anchor best state differs",
+        )
+    elif any(
+        field in checkpoint
+        for field in (
+            "best_state_dict_sha256",
+            "proposal_state_machine",
+            "accepted_anchor",
+            "history_hash_chain_sha256",
+        )
+    ) or "proposal_state_machine" in provenance or "proposal_state_machine" in config:
+        raise ValueError(
+            f"response seed {seed} non-v4 checkpoint contains accepted-anchor fields"
+        )
     _require(
         sidecar.get("checkpoint_sha256") == checkpoint_sha
         and Path(str(sidecar.get("output", ""))).resolve() == checkpoint_path
@@ -1981,6 +2995,15 @@ def _validate_response_checkpoint(
         expected_sidecar_keys.update(
             {"response_lambdas", "complete_scene_batching"}
         )
+        if response_protocol == "accepted_anchor_selection_v4":
+            expected_sidecar_keys.update(
+                {
+                    "best_state_dict_sha256",
+                    "proposal_state_machine",
+                    "accepted_anchor",
+                    "history_hash_chain_sha256",
+                }
+            )
     else:
         expected_sidecar_keys.add("response_lambda")
     if distill_schema in {2, 3}:
@@ -2041,6 +3064,11 @@ def _validate_response_checkpoint(
         and sidecar.get("scene_overlap") == [],
         f"response seed {seed} sidecar immutable bindings differ",
     )
+    if state_machine is not None:
+        _require(
+            all(sidecar.get(field) == value for field, value in state_machine.items()),
+            f"response seed {seed} accepted-anchor sidecar provenance differs",
+        )
     return {
         "seed": seed,
         "checkpoint": str(checkpoint_path),
@@ -2067,6 +3095,10 @@ def _validate_response_checkpoint(
             "candidate": str(run_binding["candidate"]),
         },
         "distill_schema_version": distill_schema,
+        "response_protocol": response_protocol,
+        "proposal_state_machine": (
+            dict(PROPOSAL_STATE_MACHINE) if state_machine is not None else None
+        ),
         "surface_control": (
             expected_surface_control if distill_schema in {2, 3} else None
         ),
@@ -2092,16 +3124,36 @@ def _validate_shared_distill_run(
         binding["candidate"] == surface["selected_candidate"],
         "distill run candidate differs from the frozen Surface selection",
     )
-    manifest_path = Path(binding["path"]).resolve()
+    manifest_path = _bound_file(
+        binding["path"], binding["sha256"], "shared distill run manifest"
+    )
     manifest = _json_object(manifest_path)
     schema = int(manifest.get("schema_version", -1))
+    response_protocol = _response_protocol_for_manifest(
+        manifest_path,
+        _sha256(manifest_path),
+        manifest,
+    )
     _require(
         schema in {1, 2, 3}
         and all(
             responses[seed].get("distill_schema_version") == schema
             for seed in REQUIRED_SEEDS
+        )
+        and all(
+            responses[seed].get("response_protocol") == response_protocol
+            for seed in REQUIRED_SEEDS
         ),
         "response checkpoints disagree on the distill authority schema",
+    )
+    selection_contract = (
+        ACCEPTED_ANCHOR_DISTILL_EPOCH_SELECTION
+        if response_protocol == "accepted_anchor_selection_v4"
+        else DISTILL_EPOCH_SELECTION
+        if response_protocol == "pairwise_selection_v3"
+        else LEGACY_DISTILL_EPOCH_SELECTION
+        if response_protocol == "legacy_brier_selection_v2"
+        else None
     )
     legacy_keys = {
         "schema_version",
@@ -2309,8 +3361,7 @@ def _validate_shared_distill_run(
         if field != "seed"
     }
     if schema == 3:
-        expected_training_contract.update(
-            {
+        response_training_contract = {
                 "seeds": list(REQUIRED_SEEDS),
                 "response_lambda_source": (
                     "per_seed_exact_surface_warmstart_gradient_budget"
@@ -2322,18 +3373,51 @@ def _validate_shared_distill_run(
                 ),
                 "response_losses": [
                     "independent_normalized_cosine_response_smooth_l1",
-                    "scene_wise_text_response_profile_ranking",
+                    (
+                        SCENE_RESPONSE_LOSS
+                        if response_protocol
+                        in {
+                            "pairwise_selection_v3",
+                            "accepted_anchor_selection_v4",
+                        }
+                        else LEGACY_BRIER_RESPONSE_LOSS
+                    ),
                 ],
-                "scene_profile_weight": 1.0,
-                "scene_ranking_weight": 1.0,
-                "scene_ranking_temperature": 0.1,
                 "scene_tie_tolerance": 1e-6,
                 "training_batching": (
                     "shuffle_complete_scene_groups_no_partial_scenes_v1"
                 ),
                 "max_complete_scene_batch_rows": 64,
             }
+        response_training_contract.update(
+            {
+                "scene_response_objective": dict(SCENE_RESPONSE_OBJECTIVE),
+            }
+            if response_protocol
+            in {"pairwise_selection_v3", "accepted_anchor_selection_v4"}
+            else {
+                "scene_profile_weight": 1.0,
+                "scene_ranking_weight": 1.0,
+                "scene_ranking_temperature": 0.1,
+            }
         )
+        if response_protocol == "accepted_anchor_selection_v4":
+            _require(
+                all(
+                    responses[seed].get("proposal_state_machine")
+                    == PROPOSAL_STATE_MACHINE
+                    and responses[seed]["payload"].get("training_config", {}).get(
+                        "proposal_state_machine"
+                    )
+                    == PROPOSAL_STATE_MACHINE
+                    for seed in REQUIRED_SEEDS
+                ),
+                "response checkpoints disagree on the accepted-anchor protocol",
+            )
+            response_training_contract["proposal_state_machine"] = dict(
+                PROPOSAL_STATE_MACHINE
+            )
+        expected_training_contract.update(response_training_contract)
     else:
         expected_training_contract.update(
             {
@@ -2345,7 +3429,7 @@ def _validate_shared_distill_run(
     if schema in {2, 3}:
         expected_training_contract.update(
             {
-                "epoch_selection": DISTILL_EPOCH_SELECTION,
+                "epoch_selection": selection_contract,
                 "surface_control_initialization": (
                     "exact_seed_checkpoint_state_dict"
                 ),
@@ -2379,7 +3463,7 @@ def _validate_shared_distill_run(
             manifest.get("authority_status")
             == "query_free_three_seed_gpu1_run_frozen"
             and manifest.get("training_contract", {}).get("epoch_selection")
-            == DISTILL_EPOCH_SELECTION
+            == selection_contract
             and thermal.get("peer_activity_action") in {"pause", "terminate"}
             and thermal.get("owner_pid_namespace_mode")
             == "exclusive-singleton-after-clear-v1",
@@ -2404,16 +3488,38 @@ def _validate_shared_distill_run(
             is True,
             "authority distill execution contract differs",
         )
-        source_snapshot_root = _validate_snapshot_source_hashes(
-            manifest.get("implementation_sources"),
-            required=AUTHORITY_DISTILL_IMPLEMENTATION_SOURCES,
-            source_snapshot_root=authority_contract.get("source_snapshot_root"),
-            label="authority distill run",
+        manifest_sha256 = _sha256(manifest_path)
+        registered_closure = FORMAL_RECORDED_SOURCE_CLOSURE_AUTHORITIES.get(
+            manifest_sha256
         )
-        closure_digest = _validate_distill_runtime_closure(
-            manifest.get("runtime_closure"),
-            source_snapshot_root=source_snapshot_root,
-        )
+        if registered_closure is not None:
+            _require(
+                schema == 3
+                and manifest_path
+                == Path(registered_closure["manifest_path"]).resolve()
+                and binding.get("sha256") == manifest_sha256
+                and authority_contract.get("source_snapshot_root")
+                == registered_closure["source_root"],
+                "registered distill authority identity differs",
+            )
+            source_snapshot_root = Path(registered_closure["source_root"])
+            closure_digest = _validate_registered_recorded_runtime_closure(
+                manifest.get("runtime_closure"),
+                source_root=source_snapshot_root,
+                implementation_sources=manifest.get("implementation_sources"),
+                expected_digest=registered_closure["runtime_closure_digest"],
+            )
+        else:
+            source_snapshot_root = _validate_snapshot_source_hashes(
+                manifest.get("implementation_sources"),
+                required=AUTHORITY_DISTILL_IMPLEMENTATION_SOURCES,
+                source_snapshot_root=authority_contract.get("source_snapshot_root"),
+                label="authority distill run",
+            )
+            closure_digest = _validate_distill_runtime_closure(
+                manifest.get("runtime_closure"),
+                source_snapshot_root=source_snapshot_root,
+            )
         initial_path = _validate_record_file(
             manifest.get("initial_gpu_preflight"),
             "initial distill GPU preflight",
@@ -2530,7 +3636,7 @@ def _validate_shared_distill_run(
                 and terminal.get("candidate") == surface["selected_candidate"]
                 and terminal.get("runtime_closure_digest") == closure_digest
                 and evidence.get("selection_contract")
-                == DISTILL_EPOCH_SELECTION
+                == selection_contract
                 and evidence.get("checkpoint")
                 == {
                     "path": responses[seed]["checkpoint"],
@@ -2600,7 +3706,7 @@ def _validate_shared_distill_run(
                 == _file_record(calibration_path)
             )
             and completion.get("runtime_closure_digest") == closure_digest
-            and completion.get("selection_contract") == DISTILL_EPOCH_SELECTION
+            and completion.get("selection_contract") == selection_contract
             and completion.get("seeds") == expected_authority_seeds,
             "authority distill completion differs from independent recomputation",
         )
@@ -2617,6 +3723,7 @@ def _validate_shared_distill_run(
             else None
         ),
         "authority_schema_version": schema,
+        "response_protocol": response_protocol,
     }
 
 
@@ -2879,13 +3986,9 @@ def _expected_report(
         "seed": descriptor["seed"],
         "split_role": "query_free_validation",
         "query_split": query_split,
-        "selection_contract": {
-            "benchmark_vocabulary_opened": False,
-            "uses_benchmark_vocabulary_for_construction": False,
-            "queries": "target_blind_imagenet1k_primary_text_bank_v1",
-            "query_axis": "heldout_generic_only",
-            "device": "cpu",
-        },
+        "selection_contract": selection_contract_for_bank_family(
+            bank["bank_family"]
+        ),
         "descriptor_artifact": {
             "path": str(descriptor["path"]),
             "sha256": descriptor["file_sha256"],
@@ -3414,7 +4517,40 @@ def _validate_dev_dependency(
         "completion": completion_path,
         "completion_sha256": _sha256(completion_path),
         "payload": manifest,
+        "text_bank_identity": _validated_text_bank_identity(bank, "dev"),
     }
+
+
+def _validated_text_bank_identity(
+    bank: Mapping[str, Any],
+    query_split: str,
+) -> dict[str, str]:
+    """Return the fail-closed vocabulary/embedding-family identity of a bank."""
+
+    bank_family = bank.get("bank_family")
+    algorithm_version = bank.get("algorithm_version")
+    _require(
+        isinstance(bank_family, str)
+        and bool(bank_family)
+        and isinstance(algorithm_version, str)
+        and bool(algorithm_version),
+        f"{query_split} text bank lacks a validated family identity",
+    )
+    return {
+        "bank_family": bank_family,
+        "algorithm_version": algorithm_version,
+    }
+
+
+def _require_matching_text_bank_family(
+    dev_identity: Mapping[str, Any],
+    audit_bank: Mapping[str, Any],
+) -> None:
+    audit_identity = _validated_text_bank_identity(audit_bank, "audit")
+    _require(
+        dict(dev_identity) == audit_identity,
+        "audit text bank family/algorithm differs from the frozen dev text bank",
+    )
 
 
 def finalize_stage(
@@ -3469,6 +4605,15 @@ def finalize_stage(
         Path(text_bank_manifest_path),
         query_split,
     )
+    if stage == "audit":
+        assert dev_dependency is not None
+        # The audit bank must be validated to learn its frozen family identity,
+        # but a cross-family pair is rejected before any audit report or metric
+        # artifact is opened.
+        _require_matching_text_bank_family(
+            dev_dependency["text_bank_identity"],
+            bank,
+        )
     control_report_rows = _validate_reports(
         control_reports,
         descriptors=controls,

@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_canonical_mpr_v3_gaussian_semantic_totality_freeze",
+  "contract": "radio_gs.canonical_mpr_v3_gaussian_semantic_totality.v1",
+  "status": "frozen_before_formal_evaluation",
+  "frozen_at": "2026-08-02",
+  "purpose": "Freeze the canonical-mpr-v3 total Gaussian-row text scoring adapter before the ScanNet OVS paper8 result is materialized.",
+  "benchmark_binding": {
+    "family": "concept_query",
+    "benchmark": "ScanNet OVS",
+    "canonical_task_id": "concept_scannet_ovs_vala_paper8",
+    "registry_row": "scannet_ovs_vala_compatibility_20260611",
+    "external_protocol_freeze_id": "evaluation_protocols_20260801_v1",
+    "cohort": {
+      "scenes": [
+        "scene0000_00",
+        "scene0062_00",
+        "scene0070_00",
+        "scene0097_00",
+        "scene0140_00",
+        "scene0347_00",
+        "scene0400_00",
+        "scene0590_00"
+      ],
+      "splits": [19, 15, 10]
+    }
+  },
+  "method_binding": {
+    "method_family": "canonical_mpr_v3",
+    "mainline_name": "canonical-mpr-v3",
+    "method_freeze_name": "canonical-mpr-v3-evaluation-freeze",
+    "materializer_contract": "radio_gs.ours_scannet_ovs_canonical_mpr_v3_score_materializer.v2",
+    "semantic_score_cache_contract": "radio_gs.ours_scannet_ovs_gaussian_scores.v1",
+    "prediction_domain": "optimized_gaussian_checkpoint_rows",
+    "row_order": "zero_based_geometry_checkpoint_row_order",
+    "semantic_readout": "direct_per_gaussian_class_argmax"
+  },
+  "semantic_totality": {
+    "valid_domain": "all_optimized_gaussian_checkpoint_rows",
+    "valid_is_total": true,
+    "graph_observed": {
+      "row_predicate": "canonical_mpr_valid_and_support_graph_global_rows",
+      "descriptor": "frozen_surface_region_summary_readout_h128_then_frozen_official_c_radio_v4_siglip2_g_summary_head",
+      "physical_radii_m": [0.2, 0.4, 0.7],
+      "per_scale_score": "independent_l2_normalized_cosine_to_exact_split19_query",
+      "scale_aggregation": "per_class_max_over_three_independent_cosines"
+    },
+    "no_graph_evidence": {
+      "row_predicate": "not_canonical_mpr_valid",
+      "descriptor": "same_row_canonical_field_primitive_radio_then_frozen_official_c_radio_v4_siglip2_g_summary_head",
+      "score": "independent_l2_normalized_cosine_to_exact_split19_query",
+      "spatial_fill": false,
+      "neighbor_transfer": false
+    },
+    "query_bank": {
+      "model": "google/siglip2-giant-opt-patch16-384",
+      "queries": "exact_scannet_nyu40_split19_in_frozen_class_order",
+      "shape": [19, 1536],
+      "unit_normalized": true,
+      "prompt_ensemble": false
+    },
+    "query_set_invariant": true,
+    "query_set_calibration": false,
+    "logit_calibration": "none",
+    "logit_smoothing": "none",
+    "spatial_transfer": "none",
+    "mesh_vertices_used": false,
+    "knn_used": false
+  },
+  "safety_and_eligibility": {
+    "benchmark_images_opened_by_materializer": false,
+    "benchmark_masks_opened_by_materializer": false,
+    "benchmark_labels_opened_by_materializer": false,
+    "benchmark_metrics_opened_by_materializer": false,
+    "legacy_hybrid_v67_is_diagnostic_only": true,
+    "legacy_mesh_knn8_forbidden": true,
+    "scene_specific_tuning_forbidden": true,
+    "query_or_test_set_calibration_forbidden": true,
+    "partial_row_score_cache_eligible": false
+  },
+  "immutable_sources": {
+    "external_protocol_freeze": {
+      "path": "/root/RADIO-GS/paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+      "bytes": 18601,
+      "sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916"
+    },
+    "canonical_method_freeze": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_mpr_v3_evaluation_freeze_20260716.yaml",
+      "bytes": 5134,
+      "sha256": "9ea6fc8d79ee11ae2ccb3b6ef738580983cae406f586db61833182780587c009"
+    },
+    "canonical_mainline": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_mainline_v3.yaml",
+      "bytes": 3504,
+      "sha256": "3d6d36ab91ef3b2c406a6fad02bc9bf085a680690f84e35896751d414d57dbae"
+    },
+    "surface_region_readout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/global_3d_readout/surface_region_readout_h128.pth",
+      "bytes": 1479073,
+      "sha256": "06c1d9c3bfaf674de54fa1167aa2d156e183e0a751c87d0e7c09733928464b5b"
+    },
+    "official_c_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "bytes": 1681320675,
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "exact_split19_query_bank": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_scannet_og_text_embeddings_exact_split19.pt",
+      "bytes": 118118,
+      "sha256": "d40b0781001e236ab77d8a5fc8d1fee2e30cefe614c0b6e9884ffae70c737b9f"
+    },
+    "producer_source": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_ours_scannet_gaussian_semantic_score_cache.py",
+      "bytes": 35669,
+      "sha256": "235490f9369e0d35a675ae3d091807f025bcfb53dcfbaa56f27b085a7193e0da"
+    },
+    "evaluator_source": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_ours_scannet_vala_gaussian_protocol.py",
+      "bytes": 30005,
+      "sha256": "721a55b2022a122f4b0cee35453326ff0d0c28a8a86263cb0b1c6adce4a2e3d6"
+    }
+  },
+  "per_scene_result_binding": {
+    "required": [
+      "config_source",
+      "geometry_checkpoint",
+      "canonical_field_source",
+      "mpr_source",
+      "support_graph_source",
+      "semantic_score_cache",
+      "semantic_score_cache_receipt"
+    ],
+    "row_identity": "xyz_scale_quaternion_opacity_valid_and_semantic_score_tensor_sha256",
+    "region_partition": "region_observed_bool_tensor_sha256_and_observed_fallback_counts",
+    "formal_result_requires_complete_paper8": true
+  }
+}

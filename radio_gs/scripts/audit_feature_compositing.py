@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from typing import Any
 
 import torch
 import torch.nn.functional as F
@@ -42,8 +43,18 @@ from radio_gs.rendering.contribution_compositor import (
     composite_feature_variants,
     rasterize_single_view_contributions,
 )
+from radio_gs.scripts.build_frozen_scalar_compositor_replay import (
+    _load_primitive_ids as _load_dual_primitive_ids,
+    exact_contribution_cache_payload,
+)
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.training.feature_training_utils import SimpleRadioDataset
+from radio_gs.evaluation.text_response_fidelity import tensor_sha256
+from radio_gs.utils.immutable_artifacts import (
+    file_record,
+    write_frozen_json,
+    write_torch_noclobber,
+)
 
 
 def _sha256_file(path: str | Path) -> str:
@@ -126,6 +137,37 @@ def audit(args: argparse.Namespace) -> dict:
         strict_checkpoint_contract=True,
         load_ply_rgb_features=False,
     )
+    replay_input_raw = str(
+        getattr(args, "scalar_replay_primitive_input_cache", "")
+    ).strip()
+    replay_output_raw = str(
+        getattr(args, "scalar_replay_contribution_output", "")
+    ).strip()
+    replay_camera_raw = str(
+        getattr(args, "scalar_replay_camera_manifest_output", "")
+    ).strip()
+    replay_requested = any((replay_input_raw, replay_output_raw, replay_camera_raw))
+    if replay_requested and not all(
+        (replay_input_raw, replay_output_raw, replay_camera_raw)
+    ):
+        raise ValueError("all scalar replay export paths must be provided together")
+    replay_primitive_ids: list[str] = []
+    replay_input_record: dict[str, str] | None = None
+    replay_row_authority: dict[str, Any] | None = None
+    if replay_requested:
+        if args.frame_role != "development":
+            raise ValueError("scalar replay contributions require development frames")
+        (
+            replay_primitive_ids,
+            replay_input_record,
+            replay_row_authority,
+        ) = _load_dual_primitive_ids(Path(replay_input_raw))
+        if (
+            len(replay_primitive_ids) != int(model.get_xyz().shape[0])
+            or replay_row_authority["geometry_checkpoint"]
+            != file_record(args.geometry_checkpoint)
+        ):
+            raise ValueError("scalar replay primitive rows differ from loaded geometry")
     geometry_hash = _sha256_tensor_rows(model.get_xyz())
     field, field_payload = load_canonical_field_checkpoint(
         args.field_checkpoint, map_location="cpu"
@@ -206,6 +248,8 @@ def audit(args: argparse.Namespace) -> dict:
     mixture_uncertainty_values: list[torch.Tensor] = []
     baseline_error_values: list[torch.Tensor] = []
     variant_names: tuple[str, ...] | None = None
+    replay_view_hits: list[tuple[str, dict[str, torch.Tensor]]] = []
+    replay_camera_rows: list[dict[str, Any]] = []
 
     with torch.inference_mode():
         base_coefficients = field.coefficients().detach()
@@ -238,6 +282,29 @@ def audit(args: argparse.Namespace) -> dict:
             hits = rasterize_single_view_contributions(
                 model, renderer, pose, height=height, width=width
             )
+            if replay_requested and hits["pixel_ids"].numel():
+                unique_pixels = torch.unique_consecutive(hits["pixel_ids"])
+                retained = unique_pixels[:256]
+                keep = hits["pixel_ids"] <= retained[-1]
+                replay_view_hits.append(
+                    (
+                        f"frame-{int(frame)}",
+                        {
+                            "gaussian_ids": hits["gaussian_ids"][keep].cpu(),
+                            "pixel_ids": hits["pixel_ids"][keep].cpu(),
+                            "weights": hits["weights"][keep].cpu(),
+                        },
+                    )
+                )
+                replay_camera_rows.append(
+                    {
+                        "frame_id": int(frame),
+                        "height": int(height),
+                        "width": int(width),
+                        "pose_w2c_sha256": tensor_sha256(pose.float().cpu()),
+                        "retained_nonempty_pixels": int(retained.numel()),
+                    }
+                )
             alpha_error = (
                 hits["accumulated_alpha"] - baseline["alpha_map"].float()
             ).abs()
@@ -494,6 +561,64 @@ def audit(args: argparse.Namespace) -> dict:
         "decision": decision,
         "per_frame": per_frame,
     }
+    if replay_requested:
+        if not replay_view_hits or replay_input_record is None or replay_row_authority is None:
+            raise RuntimeError("scalar replay export has no exact production hits")
+        camera_manifest_path = Path(replay_camera_raw)
+        contribution_output_path = Path(replay_output_raw)
+        camera_manifest = {
+            "schema_version": 1,
+            "artifact_type": "query_free_scalar_compositor_camera_manifest",
+            "frame_role": "development",
+            "frames": replay_camera_rows,
+            "primitive_input_cache": replay_input_record,
+            "geometry_checkpoint": file_record(args.geometry_checkpoint),
+            "geometry_xyz_sha256": replay_row_authority["geometry_xyz_sha256"],
+            "uses_benchmark_scenes": False,
+            "uses_benchmark_test_vocabulary": False,
+            "benchmark_targets_opened": False,
+            "annotations_opened": False,
+            "labels_opened": False,
+            "instances_opened": False,
+            "masks_opened": False,
+            "text_opened": False,
+            "producer_runner_implementation": file_record(Path(__file__).resolve()),
+        }
+        write_frozen_json(camera_manifest_path, camera_manifest)
+        contribution = exact_contribution_cache_payload(
+            primitive_input_cache=Path(replay_input_raw),
+            view_hits=replay_view_hits,
+            geometry_checkpoint=Path(args.geometry_checkpoint),
+            camera_manifest=camera_manifest_path,
+            target_blind_provenance={
+                "uses_benchmark_scenes": False,
+                "uses_benchmark_test_vocabulary": False,
+                "benchmark_targets_opened": False,
+                "annotations_opened": False,
+                "labels_opened": False,
+                "instances_opened": False,
+                "masks_opened": False,
+                "text_opened": False,
+                "target_blind": True,
+                "benchmark_targets_or_metrics_used": False,
+                "production_capture_runner": (
+                    "query_free_feature_compositing_exact_hit_export_v1"
+                ),
+                "production_capture_runner_implementation": file_record(
+                    Path(__file__).resolve()
+                ),
+            },
+        )
+        write_torch_noclobber(contribution_output_path, contribution)
+        report["scalar_replay_export"] = {
+            "primitive_input_cache": replay_input_record,
+            "camera_manifest": file_record(camera_manifest_path),
+            "contribution_cache": file_record(contribution_output_path),
+            "captured_frames": len(replay_view_hits),
+            "production_capture_runner": (
+                "query_free_feature_compositing_exact_hit_export_v1"
+            ),
+        }
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2), encoding="utf-8")
@@ -518,6 +643,9 @@ def main() -> None:
     parser.add_argument("--radio-checkpoint", required=True)
     parser.add_argument("--frame-ids", required=True)
     parser.add_argument("--output", required=True)
+    parser.add_argument("--scalar-replay-primitive-input-cache", default="")
+    parser.add_argument("--scalar-replay-contribution-output", default="")
+    parser.add_argument("--scalar-replay-camera-manifest-output", default="")
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--frame-role", choices=["development", "benchmark"], default="development")
     parser.add_argument("--frozen-selected-variant", default="")

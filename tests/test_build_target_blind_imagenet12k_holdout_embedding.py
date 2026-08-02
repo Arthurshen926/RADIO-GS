@@ -136,6 +136,7 @@ def test_build_dev_embedding_from_bound_holdout(tmp_path: Path) -> None:
     assert payload["algorithm_version"] == ALGORITHM_VERSION
     assert payload["split"] == "dev"
     assert payload["embeddings"].shape == (2, encoder_v1.OUTPUT_DIMENSION)
+    assert result["artifact_type"] == "target_blind_text_embedding_cache_manifest"
     assert json.loads(sidecar.read_text()) == result
     with pytest.raises(FileExistsError, match="already exists"):
         build_embedding(

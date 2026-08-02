@@ -24,6 +24,7 @@ GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-78}"
 GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-70}"
 GPU_MAX_POWER_LIMIT_W="${GPU_MAX_POWER_LIMIT_W:-300.5}"
 GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-10}"
+GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES="${GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES:-1}"
 GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-0}"
 GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-0}"
 GPU_PEER_INDEX="${GPU_PEER_INDEX:-}"
@@ -38,6 +39,7 @@ GPU_PEER_INTERRUPT_EXIT_CODE=87
 
 for integer_value in "$GPU" "$GPU_MAX_TEMP_C" \
   "$GPU_START_MAX_TEMP_C" "$GPU_POLL_SECONDS" \
+  "$GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES" \
   "$GPU_SOFT_PAUSE_TEMP_C" "$GPU_SOFT_RESUME_TEMP_C" \
   "$GPU_PEER_PAUSE_TEMP_C" "$GPU_PEER_RESUME_TEMP_C" \
   "$GPU_PEER_QUIET_SECONDS" "$GPU_PEER_MAX_MEMORY_MIB" \
@@ -53,6 +55,10 @@ if (( GPU_START_MAX_TEMP_C >= GPU_MAX_TEMP_C )); then
 fi
 if (( GPU_POLL_SECONDS < 1 )); then
   echo "GPU_POLL_SECONDS must be at least 1 second" >&2
+  exit 2
+fi
+if (( GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES < 1 )); then
+  echo "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES must be at least 1" >&2
   exit 2
 fi
 if (( GPU_SOFT_PAUSE_TEMP_C > 0 )); then
@@ -483,6 +489,7 @@ verify_target_gpu_released() {
 
 trap 'terminate_child_group || true; exit 130' INT TERM
 
+consecutive_telemetry_failures=0
 while process_group_has_live_members; do
   if ! check_pcie; then
     printf '%s,%s,%s,,,,,,,pcie_unresponsive\n' \
@@ -493,21 +500,44 @@ while process_group_has_live_members; do
     terminate_child_group || true
     break
   fi
+  current_sample=""
+  telemetry_failure_reason=""
   if ! current_sample="$(sample_gpu)"; then
-    printf '%s,%s,%s,,,,,,,telemetry_failed\n' \
+    telemetry_failure_reason="query_failed"
+  elif ! parse_sample "$current_sample"; then
+    telemetry_failure_reason="invalid_sample"
+  fi
+  if [[ -n "$telemetry_failure_reason" ]]; then
+    consecutive_telemetry_failures=$((consecutive_telemetry_failures + 1))
+    if ! check_pcie; then
+      printf '%s,%s,%s,,,,,,,pcie_unresponsive_after_telemetry_failure\n' \
+        "$(date --iso-8601=seconds)" "$GPU" "$gpu_bus_id" \
+        >>"$GPU_TELEMETRY_LOG"
+      echo "GPU$GPU lost PCIe response after telemetry failure; terminating guarded command" >&2
+      thermal_abort=1
+      terminate_child_group || true
+      break
+    fi
+    if (( consecutive_telemetry_failures \
+          < GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES )); then
+      printf '%s,%s,%s,,,,,,,telemetry_retry_%s_of_%s\n' \
+        "$(date --iso-8601=seconds)" "$GPU" "$gpu_bus_id" \
+        "$consecutive_telemetry_failures" \
+        "$GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES" >>"$GPU_TELEMETRY_LOG"
+      echo "GPU$GPU telemetry failure ${consecutive_telemetry_failures}/${GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES} (${telemetry_failure_reason}); PCIe still responds, retrying" >&2
+      sleep "$GPU_POLL_SECONDS"
+      continue
+    fi
+    printf '%s,%s,%s,,,,,,,telemetry_failed_%s_of_%s\n' \
       "$(date --iso-8601=seconds)" "$GPU" "$gpu_bus_id" \
-      >>"$GPU_TELEMETRY_LOG"
-    echo "GPU$GPU telemetry failed; terminating guarded command" >&2
+      "$consecutive_telemetry_failures" \
+      "$GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES" >>"$GPU_TELEMETRY_LOG"
+    echo "GPU$GPU telemetry failed ${consecutive_telemetry_failures} consecutive time(s) (${telemetry_failure_reason}); terminating guarded command" >&2
     thermal_abort=1
     terminate_child_group || true
     break
   fi
-  if ! parse_sample "$current_sample"; then
-    echo "GPU$GPU returned invalid runtime telemetry" >&2
-    thermal_abort=1
-    terminate_child_group || true
-    break
-  fi
+  consecutive_telemetry_failures=0
   if ! audit_target_compute_owners; then
     printf '%s,%s,%s,,,,,,,owner_audit_failed\n' \
       "$(date --iso-8601=seconds)" "$GPU" "$gpu_bus_id" \

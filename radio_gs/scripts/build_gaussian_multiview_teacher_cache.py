@@ -978,10 +978,55 @@ def _load_responsibility_cache(
             int(pixel_ids.min()) < 0 or int(pixel_ids.max()) >= num_pixels
         ):
             raise ValueError(f"responsibility view {view_index} has invalid pixel IDs")
-        if pixel_ids.numel() > num_pixels or pixel_ids.unique().numel() != pixel_ids.numel():
+        # ``raster_gaussian_top1`` is primitive-top-1, not pixel-top-1: every
+        # Gaussian retains its strongest raster hit, so several Gaussians may
+        # legitimately sample the same feature pixel.  The rasterizer emits
+        # hits in non-decreasing pixel order and never emits the same
+        # Gaussian/pixel pair twice; keep those producer invariants fail-closed
+        # instead of incorrectly requiring pixel IDs to be unique.
+        if pixel_ids.numel() > 1 and bool((pixel_ids[1:] < pixel_ids[:-1]).any()):
             raise ValueError(
-                f"responsibility view {view_index} repeats top-1 pixel IDs"
+                f"responsibility view {view_index} has non-canonical pixel ordering"
             )
+        if gaussian_ids.numel():
+            gaussian_pixel_pairs = torch.stack(
+                [gaussian_ids, pixel_ids], dim=1
+            )
+            if (
+                torch.unique(gaussian_pixel_pairs, dim=0).shape[0]
+                != gaussian_pixel_pairs.shape[0]
+            ):
+                raise ValueError(
+                    f"responsibility view {view_index} repeats Gaussian/pixel pairs"
+                )
+
+            # The producer uses ``weight >= max_weight - 1e-8``.  Consequently
+            # an exact or float32-near tie can retain more than one pixel for a
+            # Gaussian.  Re-evaluate that same predicate here: arbitrary
+            # duplicate Gaussian rows remain invalid, while existing sidecars
+            # preserve byte-identical lifting across RADIO/DINO/SAM.
+            maximum_weights = torch.full(
+                (int(num_gaussians),),
+                -float("inf"),
+                dtype=torch.float32,
+            )
+            maximum_weights.scatter_reduce_(
+                0,
+                gaussian_ids,
+                weights,
+                reduce="amax",
+                include_self=True,
+            )
+            if bool(
+                (
+                    weights
+                    < maximum_weights[gaussian_ids] - 1e-8
+                ).any()
+            ):
+                raise ValueError(
+                    f"responsibility view {view_index} repeats Gaussian IDs "
+                    "outside the top-1 tie tolerance"
+                )
         if (
             not bool(torch.isfinite(weights).all())
             or bool((weights <= 0).any())

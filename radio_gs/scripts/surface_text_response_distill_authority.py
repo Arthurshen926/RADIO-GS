@@ -67,15 +67,135 @@ ALLOWED_CANDIDATES = {
     "context_c1024_uniform",
     "core_c1024_geometric",
 }
-EPOCH_SELECTION = (
-    "surface_control_feasible_0p002_then_fit_support_response_relation_surface_v2"
+LEGACY_EPOCH_SELECTION = (
+    "surface_control_0p002_fit_scene_robust_0p005_then_response_error_v3"
 )
+EPOCH_SELECTION = (
+    "surface_control_0p002_fit_scene_robust_0p005_accepted_anchor_"
+    "fixed_1over2048_then_response_error_v4"
+)
+PROPOSAL_ALPHA_NUMERATOR = 1
+PROPOSAL_ALPHA_DENOMINATOR = 2048
+HISTORY_HASH_CHAIN_ALGORITHM = (
+    "sha256_canonical_json_previous_plus_record_without_selection_score_v1"
+)
+PROPOSAL_LOSS_MEASUREMENT_STATE = "raw_proposal_before_micro_projection"
+PROPOSAL_LOSS_FIELDS = (
+    "total",
+    "token",
+    "descriptor",
+    "relation",
+    "independent_response",
+    "scene_response",
+    "scene_profile",
+    "scene_ranking",
+)
+LEGACY_FLAT_PROPOSAL_LOSS_FIELDS = {
+    "total": "loss",
+    "token": "token_loss",
+    "descriptor": "descriptor_loss",
+    "relation": "relation_loss",
+    "independent_response": "independent_response_loss",
+    "scene_response": "scene_response_loss",
+    "scene_profile": "scene_profile_loss",
+    "scene_ranking": "scene_ranking_loss",
+}
+PROPOSAL_STATE_MACHINE = {
+    "name": "accepted_anchor_fixed_micro_ray_fresh_adamw_v1",
+    "proposal_source": "current_accepted_anchor",
+    "proposal_optimizer": "fresh_adamw_complete_epoch",
+    "alpha_numerator": PROPOSAL_ALPHA_NUMERATOR,
+    "alpha_denominator": PROPOSAL_ALPHA_DENOMINATOR,
+    "trial_interpolation": "anchor+alpha*(raw-anchor)",
+    "validation_evaluations_per_proposal": 1,
+    "acceptance": "response_selection_feasible_is_exactly_true",
+    "feasible_nonbest_action": "accept_as_next_anchor",
+    "infeasible_action": "restore_exact_preproposal_anchor",
+    "optimizer_moments": "reset_before_every_proposal",
+    "best_selection": "existing_v3_robust_lexicographic_rank_control_and_trials",
+    "patience": "consecutive_proposals_without_global_best_update",
+    "persistent_generator": "advanced_across_proposals_never_rolled_back",
+    "backtracking": "none_fixed_alpha_single_trial",
+    "proposal_loss_accounting": {
+        "measurement_state": PROPOSAL_LOSS_MEASUREMENT_STATE,
+        "fields": list(PROPOSAL_LOSS_FIELDS),
+        "legacy_flat_mirror": dict(LEGACY_FLAT_PROPOSAL_LOSS_FIELDS),
+    },
+}
 SURFACE_CONTROL_NONINFERIORITY_TOLERANCE = 0.002
+FIT_RESPONSE_NONINFERIORITY_TOLERANCE = 0.005
 SURFACE_CONTROL_METRICS = (
     "summary_token_cosine",
     "mean_descriptor_cosine",
     "all_view_descriptor_cosine",
 )
+FIT_RESPONSE_QUALITY_METRICS = (
+    "text_response_profile_cosine_mean",
+    "text_response_profile_cosine_p05",
+    "text_response_ranking_spearman_mean",
+    "text_response_ranking_spearman_p05",
+    "text_response_top_decile_overlap_mean",
+    "text_response_top_decile_overlap_p05",
+)
+FIT_RESPONSE_SCENE_QUALITY_METRICS = (
+    "profile_cosine_mean",
+    "profile_cosine_p05",
+    "ranking_spearman_mean",
+    "ranking_spearman_p05",
+    "top_decile_overlap_mean",
+    "top_decile_overlap_p05",
+)
+FIT_RESPONSE_SCENE_ERROR_METRICS = ("smooth_l1", "mae")
+CALIBRATION_ALGORITHM_VERSION = (
+    "per-seed-surface-warmstart-dual-response-pairwise-gradient-budget-v3"
+)
+INDEPENDENT_RESPONSE_LOSS = "independent_normalized_cosine_response_smooth_l1"
+SCENE_RESPONSE_LOSS = (
+    "scene_wise_text_response_weighted_profile_pairwise_gap_smooth_l1"
+)
+SCENE_PROFILE_LOSS = "scene_wise_centered_text_response_profile_cosine_distance"
+SCENE_PAIRWISE_GAP_LOSS = "scene_wise_text_response_pairwise_gap_smooth_l1"
+SCENE_RESPONSE_OBJECTIVE = {
+    "name": SCENE_RESPONSE_LOSS,
+    "profile_loss": SCENE_PROFILE_LOSS,
+    "profile_weight": 0.2,
+    "ranking_loss": SCENE_PAIRWISE_GAP_LOSS,
+    "ranking_weight": 1.0,
+    "tie_tolerance": 1e-6,
+    "pairwise_gap_normalization": "per_scene_query_teacher_response_span",
+}
+RESPONSE_BRANCH_GRADIENT_RATIO = 0.25
+TOTAL_RESPONSE_GRADIENT_RATIO_UPPER_BOUND = 0.5
+FROZEN_GRADIENT_DESIGN_DIAGNOSTIC_LEXICAL_PATH = (
+    "/root/RADIO-GS/output/optimization_20260801/"
+    "warmstart_gradient_pairwise_balanced_bound_gpu1_seed0_v6/result.json"
+)
+FROZEN_GRADIENT_DESIGN_DIAGNOSTIC = {
+    "path": (
+        "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/"
+        "warmstart_gradient_pairwise_balanced_bound_gpu1_seed0_v6/result.json"
+    ),
+    "sha256": "5e5b149f154324001283058e9105198072c4b089f10cfdbade217903a4ea6c35",
+}
+GRADIENT_DIAGNOSTIC_SCENES = (
+    "scene0024_00",
+    "scene0038_01",
+    "scene0049_00",
+    "scene0054_00",
+)
+GRADIENT_DIAGNOSTIC_ROWS = 48
+GRADIENT_DIAGNOSTIC_IMPLEMENTATION = {
+    "path": "/root/RADIO-GS/radio_gs/scripts/diagnose_warmstart_response_gradients.py",
+    "sha256": "c541299a1c12889177600295e45818d5f44450fd7a03da0de0de917895e44bac",
+}
+GRADIENT_DIAGNOSTIC_TRAINING_IMPLEMENTATION = {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_surface_region_text_response_distill.py",
+    "sha256": "13c958e1ef0f38154a7e76707b499a6c55e3b32271f95e4a030ea8e9678848f8",
+}
+GRADIENT_DIAGNOSTIC_LOSS_IMPLEMENTATION = {
+    "path": "/root/RADIO-GS/radio_gs/losses/direct_point_query_logit_distill_loss.py",
+    "sha256": "870a00530ee1dc2e671734413d393956a56ae8b11de3bb38ecf3a7bb1fde8977",
+}
 CONTEXT_POOLING_MODE = "joint_attention_v1"
 ATTENTION_BINDING_MODE = "attention_postcache_joint_v1"
 TRAINING_CONTRACT = {
@@ -93,26 +213,43 @@ TRAINING_CONTRACT = {
     "canonical_noise_calibration": "",
     "seeds": list(REQUIRED_SEEDS),
     "response_lambda_source": "per_seed_exact_surface_warmstart_gradient_budget",
-    "response_branch_gradient_target_ratio": 0.25,
-    "total_response_gradient_ratio_upper_bound": 0.5,
+    "response_branch_gradient_target_ratio": RESPONSE_BRANCH_GRADIENT_RATIO,
+    "total_response_gradient_ratio_upper_bound": (
+        TOTAL_RESPONSE_GRADIENT_RATIO_UPPER_BOUND
+    ),
     "response_gradient_bound_scope": (
         "local_at_unaugmented_exact_warmstart_not_a_global_training_bound"
     ),
     "response_losses": [
-        "independent_normalized_cosine_response_smooth_l1",
-        "scene_wise_text_response_profile_ranking",
+        INDEPENDENT_RESPONSE_LOSS,
+        SCENE_RESPONSE_LOSS,
     ],
-    "scene_profile_weight": 1.0,
-    "scene_ranking_weight": 1.0,
-    "scene_ranking_temperature": 0.1,
+    "scene_response_objective": dict(SCENE_RESPONSE_OBJECTIVE),
     "scene_tie_tolerance": 1e-6,
     "training_batching": "shuffle_complete_scene_groups_no_partial_scenes_v1",
     "max_complete_scene_batch_rows": 64,
+    "proposal_state_machine": dict(PROPOSAL_STATE_MACHINE),
     "epoch_selection": EPOCH_SELECTION,
     "surface_control_initialization": "exact_seed_checkpoint_state_dict",
     "surface_control_noninferiority_tolerance": (
         SURFACE_CONTROL_NONINFERIORITY_TOLERANCE
     ),
+}
+LEGACY_TRAINING_CONTRACT = {
+    key: value
+    for key, value in {
+        **TRAINING_CONTRACT,
+        "epoch_selection": LEGACY_EPOCH_SELECTION,
+    }.items()
+    if key != "proposal_state_machine"
+}
+REGISTERED_LEGACY_MANIFEST = {
+    "path": (
+        "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/"
+        "surface_text_response_pairwise_balanced_robust_c1024_gpu1only_v1/"
+        "run_manifest.json"
+    ),
+    "sha256": "ccdb44d233850a72c590cc8c5ca5dfffe134666dad22897a9b0bb90c90658c80",
 }
 PYTHON_ENTRYPOINTS = (
     "radio_gs/scripts/surface_text_response_distill_authority.py",
@@ -583,15 +720,59 @@ def _acquire_nofollow_lock(path: Path) -> int:
     return descriptor
 
 
+def verify_readonly_source_snapshot(repo_root: Path) -> Path:
+    """Reject mutable or aliased producer sources before acquiring GPU1."""
+
+    lexical_root = Path(os.path.abspath(os.fspath(repo_root)))
+    try:
+        root = lexical_root.resolve(strict=True)
+    except (FileNotFoundError, RuntimeError) as exc:
+        raise ValueError("source snapshot root is missing") from exc
+    _require(
+        lexical_root == root,
+        "source snapshot root must not traverse a symlink",
+    )
+
+    def validate_node(path: Path, *, expect_directory: bool = False) -> None:
+        try:
+            info = os.lstat(path)
+        except OSError as exc:
+            raise ValueError(f"source snapshot entry is unavailable: {path}") from exc
+        _require(
+            not stat.S_ISLNK(info.st_mode),
+            f"source snapshot contains a symlink: {path}",
+        )
+        if expect_directory:
+            _require(
+                stat.S_ISDIR(info.st_mode),
+                "source snapshot root is not a real directory",
+            )
+        else:
+            _require(
+                stat.S_ISDIR(info.st_mode) or stat.S_ISREG(info.st_mode),
+                f"source snapshot contains a non-file entry: {path}",
+            )
+            if stat.S_ISREG(info.st_mode):
+                _require(
+                    info.st_nlink == 1,
+                    f"source snapshot contains a multiply linked file: {path}",
+                )
+        _require(
+            stat.S_IMODE(info.st_mode) & 0o222 == 0,
+            f"source snapshot contains a writable entry: {path}",
+        )
+
+    validate_node(root, expect_directory=True)
+    for current, directory_names, file_names in os.walk(root, followlinks=False):
+        for name in sorted([*directory_names, *file_names]):
+            validate_node(Path(current) / name)
+    return root
+
+
 def run_locked(
     *, repo_root: Path, lock_root: Path, output_root: Path, command: Sequence[str]
 ) -> int:
-    root = Path(os.path.abspath(os.fspath(repo_root)))
-    root_info = os.stat(root, follow_symlinks=False)
-    _require(
-        stat.S_ISDIR(root_info.st_mode),
-        f"source snapshot root is not a real directory: {root}",
-    )
+    root = verify_readonly_source_snapshot(repo_root)
     canonical_lock_root = Path(os.path.abspath(os.fspath(lock_root)))
     _require(
         canonical_lock_root == CANONICAL_LOCK_ROOT,
@@ -1682,6 +1863,257 @@ def validate_authority_path_contract(manifest: Mapping[str, Any]) -> dict[str, A
     }
 
 
+def validate_gradient_design_diagnostic(
+    value: object,
+    *,
+    surface_control: Mapping[str, Any],
+    train_caches: Sequence[Mapping[str, Any]],
+    radio_checkpoint: Mapping[str, Any],
+    fit_text_bank: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Independently reproduce the frozen schema-2 gradient derivations."""
+
+    _require(isinstance(value, Mapping), "gradient diagnostic is not an object")
+    payload = dict(value)
+    _require(
+        set(payload)
+        == {
+            "schema_version",
+            "artifact_type",
+            "device",
+            "rows",
+            "scenes",
+            "scene_response_objective",
+            "losses",
+            "gradient_l2",
+            "equal_surface_gradient_lambdas",
+            "weighted_component_gradient_l2_upper_bounds",
+            "component_balance",
+            "bindings",
+        }
+        and payload.get("schema_version") == 2
+        and payload.get("artifact_type")
+        == "warmstart_surface_text_response_gradient_diagnostic"
+        and payload.get("device") == "cuda:0"
+        and payload.get("rows") == GRADIENT_DIAGNOSTIC_ROWS
+        and payload.get("scenes") == list(GRADIENT_DIAGNOSTIC_SCENES)
+        and payload.get("scene_response_objective")
+        == SCENE_RESPONSE_OBJECTIVE,
+        "gradient diagnostic schema-2 contract differs",
+    )
+    bindings = payload.get("bindings")
+    _require(
+        isinstance(bindings, Mapping)
+        and set(bindings)
+        == {
+            "surface_control",
+            "radio_checkpoint",
+            "train_caches",
+            "fit_text_bank",
+            "fit_text_bank_manifest",
+            "implementation",
+            "training_implementation",
+            "loss_implementation",
+        }
+        and bindings.get("surface_control") == dict(surface_control)
+        and bindings.get("radio_checkpoint") == dict(radio_checkpoint)
+        and bindings.get("train_caches")
+        == [dict(record) for record in train_caches]
+        and bindings.get("fit_text_bank") == fit_text_bank.get("artifact")
+        and bindings.get("fit_text_bank_manifest")
+        == fit_text_bank.get("manifest")
+        and bindings.get("implementation")
+        == GRADIENT_DIAGNOSTIC_IMPLEMENTATION
+        and bindings.get("training_implementation")
+        == GRADIENT_DIAGNOSTIC_TRAINING_IMPLEMENTATION
+        and bindings.get("loss_implementation")
+        == GRADIENT_DIAGNOSTIC_LOSS_IMPLEMENTATION,
+        "gradient diagnostic immutable bindings differ",
+    )
+    for implementation, label in (
+        (GRADIENT_DIAGNOSTIC_IMPLEMENTATION, "diagnostic"),
+        (GRADIENT_DIAGNOSTIC_TRAINING_IMPLEMENTATION, "training"),
+        (GRADIENT_DIAGNOSTIC_LOSS_IMPLEMENTATION, "loss"),
+    ):
+        _require(
+            file_record(implementation["path"]) == implementation,
+            f"gradient diagnostic {label} implementation SHA-256 differs",
+        )
+
+    losses = payload.get("losses")
+    gradients = payload.get("gradient_l2")
+    equal_lambdas = payload.get("equal_surface_gradient_lambdas")
+    bounds = payload.get("weighted_component_gradient_l2_upper_bounds")
+    balance = payload.get("component_balance")
+    _require(
+        isinstance(losses, Mapping)
+        and set(losses)
+        == {
+            "surface",
+            "token",
+            "descriptor",
+            "relation",
+            "independent_response",
+            "scene_response",
+            "scene_profile",
+            "scene_ranking",
+        }
+        and isinstance(gradients, Mapping)
+        and set(gradients)
+        == {
+            "surface",
+            "independent_response",
+            "scene_response",
+            "scene_profile",
+            "scene_ranking",
+        }
+        and isinstance(equal_lambdas, Mapping)
+        and set(equal_lambdas)
+        == {
+            "independent_response",
+            "scene_response",
+            "scene_profile",
+            "scene_ranking",
+        }
+        and isinstance(bounds, Mapping)
+        and set(bounds) == {"scene_profile", "scene_ranking", "triangle_sum"}
+        and isinstance(balance, Mapping)
+        and set(balance)
+        == {
+            "raw_equalizing_profile_weight",
+            "frozen_profile_weight",
+            "weighted_profile_to_ranking_gradient_ratio",
+            "derivation",
+        },
+        "gradient diagnostic numeric field topology differs",
+    )
+    loss_values = {
+        field: _finite(losses.get(field), label=f"diagnostic loss {field}")
+        for field in losses
+    }
+    gradient_values = {
+        field: _finite(
+            gradients.get(field), label=f"diagnostic gradient norm {field}"
+        )
+        for field in gradients
+    }
+    lambda_values = {
+        field: _finite(
+            equal_lambdas.get(field), label=f"diagnostic equal lambda {field}"
+        )
+        for field in equal_lambdas
+    }
+    bound_values = {
+        field: _finite(bounds.get(field), label=f"diagnostic bound {field}")
+        for field in bounds
+    }
+    _require(
+        all(value >= 0.0 for value in loss_values.values())
+        and all(value > 0.0 for value in gradient_values.values())
+        and all(value > 0.0 for value in lambda_values.values())
+        and all(value > 0.0 for value in bound_values.values()),
+        "gradient diagnostic numeric values are invalid",
+    )
+
+    profile_weight = float(SCENE_RESPONSE_OBJECTIVE["profile_weight"])
+    ranking_weight = float(SCENE_RESPONSE_OBJECTIVE["ranking_weight"])
+    expected_scene_loss = (
+        profile_weight * loss_values["scene_profile"]
+        + ranking_weight * loss_values["scene_ranking"]
+    )
+    _require(
+        math.isclose(
+            loss_values["scene_response"],
+            expected_scene_loss,
+            rel_tol=5e-8,
+            abs_tol=1e-9,
+        ),
+        "gradient diagnostic composite scene loss was not reproduced",
+    )
+    surface_gradient = gradient_values["surface"]
+    _require(
+        all(
+            math.isclose(
+                lambda_values[field],
+                surface_gradient / gradient_values[field],
+                rel_tol=1e-12,
+                abs_tol=1e-15,
+            )
+            for field in (
+                "independent_response",
+                "scene_response",
+                "scene_profile",
+                "scene_ranking",
+            )
+        ),
+        "gradient diagnostic equal-surface lambdas were not reproduced",
+    )
+    expected_profile_bound = profile_weight * gradient_values["scene_profile"]
+    expected_ranking_bound = ranking_weight * gradient_values["scene_ranking"]
+    expected_triangle_bound = expected_profile_bound + expected_ranking_bound
+    _require(
+        math.isclose(
+            bound_values["scene_profile"],
+            expected_profile_bound,
+            rel_tol=1e-12,
+            abs_tol=1e-15,
+        )
+        and math.isclose(
+            bound_values["scene_ranking"],
+            expected_ranking_bound,
+            rel_tol=1e-12,
+            abs_tol=1e-15,
+        )
+        and math.isclose(
+            bound_values["triangle_sum"],
+            expected_triangle_bound,
+            rel_tol=1e-12,
+            abs_tol=1e-15,
+        )
+        and gradient_values["scene_response"]
+        <= expected_triangle_bound + 1e-12,
+        "gradient diagnostic weighted component bounds were not reproduced",
+    )
+    raw_equalizing_weight = (
+        ranking_weight
+        * gradient_values["scene_ranking"]
+        / gradient_values["scene_profile"]
+    )
+    weighted_ratio = expected_profile_bound / expected_ranking_bound
+    _require(
+        math.isclose(
+            _finite(
+                balance.get("raw_equalizing_profile_weight"),
+                label="diagnostic raw equalizing profile weight",
+            ),
+            raw_equalizing_weight,
+            rel_tol=1e-12,
+            abs_tol=1e-15,
+        )
+        and _finite(
+            balance.get("frozen_profile_weight"),
+            label="diagnostic frozen profile weight",
+        )
+        == profile_weight
+        and math.isclose(
+            _finite(
+                balance.get("weighted_profile_to_ranking_gradient_ratio"),
+                label="diagnostic weighted component ratio",
+            ),
+            weighted_ratio,
+            rel_tol=1e-12,
+            abs_tol=1e-15,
+        )
+        and balance.get("derivation")
+        == (
+            "fit_only_seed0_fixed_calibration_batch_rounded_near_unit_"
+            "weighted_component_gradient_ratio"
+        ),
+        "gradient diagnostic component balance was not reproduced",
+    )
+    return payload
+
+
 def _calibration_bindings(
     args: argparse.Namespace,
     *,
@@ -1695,22 +2127,54 @@ def _calibration_bindings(
     audits = _seed_path_map(args.calibration_audit, label="calibration audit")
     diagnostic_record = file_record(args.gradient_diagnostic)
     _require(
-        diagnostic_record["sha256"] == str(args.gradient_diagnostic_sha256),
-        "formal gradient design diagnostic SHA-256 differs",
+        os.path.abspath(os.fspath(args.gradient_diagnostic))
+        == FROZEN_GRADIENT_DESIGN_DIAGNOSTIC_LEXICAL_PATH
+        and diagnostic_record == FROZEN_GRADIENT_DESIGN_DIAGNOSTIC
+        and diagnostic_record["sha256"] == str(args.gradient_diagnostic_sha256),
+        "formal schema-2 gradient design diagnostic binding differs",
     )
     diagnostic, _, _ = load_json_object(
         args.gradient_diagnostic, label="formal gradient design diagnostic"
     )
     controls = _surface_controls_by_seed(surface_promotion)
-    _require(
-        diagnostic.get("schema_version") == 1
-        and diagnostic.get("artifact_type")
-        == "warmstart_surface_text_response_gradient_diagnostic"
-        and diagnostic.get("bindings", {}).get("surface_control")
-        == controls[0]["checkpoint"],
-        "formal gradient diagnostic does not bind the selected seed-0 Surface control",
+    validate_gradient_design_diagnostic(
+        diagnostic,
+        surface_control=controls[0]["checkpoint"],
+        train_caches=train,
+        radio_checkpoint=file_record(args.radio_checkpoint),
+        fit_text_bank={
+            "artifact": file_record(args.fit_text_bank),
+            "manifest": file_record(args.fit_text_bank_manifest),
+        },
     )
     rows: list[dict[str, Any]] = []
+    expected_objective = {
+        "surface_objective": (
+            "token_weight*(1-cosine_summary_token)"
+            "+masked_mean_one_minus_all_view_cosine"
+            "+relation_weight*smooth_l1_descriptor_relation"
+        ),
+        "token_weight": TRAINING_CONTRACT["token_weight"],
+        "relation_weight": TRAINING_CONTRACT["relation_weight"],
+        "independent_response_loss": INDEPENDENT_RESPONSE_LOSS,
+        "scene_response_loss": SCENE_RESPONSE_LOSS,
+        "scene_response_objective": dict(SCENE_RESPONSE_OBJECTIVE),
+        "scene_tie_tolerance": SCENE_RESPONSE_OBJECTIVE["tie_tolerance"],
+        "branch_gradient_target_ratio": RESPONSE_BRANCH_GRADIENT_RATIO,
+        "combined_response_gradient_ratio_upper_bound": (
+            TOTAL_RESPONSE_GRADIENT_RATIO_UPPER_BOUND
+        ),
+        "upper_bound_derivation": (
+            "triangle_inequality_sum_of_two_branch_l2_budgets"
+        ),
+        "gradient_bound_scope": (
+            "local_at_unaugmented_exact_warmstart_not_a_global_training_bound"
+        ),
+        "training_batching": "shuffle_complete_scene_groups_no_partial_scenes_v1",
+        "max_complete_scene_batch_rows": TRAINING_CONTRACT[
+            "max_complete_scene_batch_rows"
+        ],
+    }
     for seed in REQUIRED_SEEDS:
         payload, payload_sha, payload_path = load_json_object(
             manifests[seed], label=f"seed-{seed} calibration manifest"
@@ -1720,6 +2184,9 @@ def _calibration_bindings(
             payload.get("schema_version") == 2
             and payload.get("artifact_type")
             == "surface_text_response_gradient_calibration"
+            and payload.get("algorithm_version")
+            == CALIBRATION_ALGORITHM_VERSION
+            and payload.get("objective_contract") == expected_objective
             and payload.get("seed") == seed
             and isinstance(control, Mapping)
             and control.get("seed") == seed
@@ -1864,24 +2331,53 @@ def build_manifest(args: argparse.Namespace) -> dict[str, Any]:
 
 
 def create_or_verify_manifest(args: argparse.Namespace) -> dict[str, Any]:
-    expected = build_manifest(args)
     path = Path(args.run_manifest).resolve()
     if path.exists() or path.is_symlink():
         observed, digest, source = load_json_object(path, label="distill run manifest")
+        selection_contract = _manifest_selection_contract(
+            observed, digest=digest, source=source
+        )
+        if selection_contract == LEGACY_EPOCH_SELECTION:
+            _manifest(path)
+            return {
+                "status": "verified",
+                "manifest": {"path": str(source), "sha256": digest},
+            }
+        expected = build_manifest(args)
         _require(observed == expected, "distill run manifest/runtime closure changed")
         return {"status": "verified", "manifest": {"path": str(source), "sha256": digest}}
+    expected = build_manifest(args)
     write_frozen_json(path, expected)
     return {"status": "created", "manifest": file_record(path)}
+
+
+def _manifest_selection_contract(
+    value: Mapping[str, Any], *, digest: str, source: Path
+) -> str:
+    training_contract = value.get("training_contract")
+    if training_contract == TRAINING_CONTRACT:
+        return EPOCH_SELECTION
+    registered_legacy = (
+        training_contract == LEGACY_TRAINING_CONTRACT
+        and str(source.resolve()) == REGISTERED_LEGACY_MANIFEST["path"]
+        and digest == REGISTERED_LEGACY_MANIFEST["sha256"]
+    )
+    _require(
+        registered_legacy,
+        "distill run manifest method contract is neither current nor the exact "
+        "registered formal legacy manifest",
+    )
+    return LEGACY_EPOCH_SELECTION
 
 
 def _manifest(path: Path) -> tuple[dict[str, Any], str, Path]:
     value, digest, source = load_json_object(path, label="distill run manifest")
     _require(
         value.get("schema_version") == SCHEMA_VERSION
-        and value.get("artifact_type") == ARTIFACT_TYPE
-        and value.get("training_contract") == TRAINING_CONTRACT,
-        "distill run manifest schema/method contract differs",
+        and value.get("artifact_type") == ARTIFACT_TYPE,
+        "distill run manifest schema/artifact contract differs",
     )
+    _manifest_selection_contract(value, digest=digest, source=source)
     validate_authority_path_contract(value)
     validate_training_command_contract(value, manifest_path=source)
     return value, digest, source
@@ -1961,34 +2457,136 @@ def _finite(value: object, *, label: str) -> float:
     return float(value)
 
 
-def recompute_response_epoch_selection(history: object) -> tuple[int, float]:
+def _recompute_v3_response_epoch_selection(history: object) -> tuple[int, float]:
     _require(isinstance(history, list) and bool(history), "response history is empty")
     rows: list[dict[str, Any]] = []
     for index, raw in enumerate(history):
         _require(isinstance(raw, Mapping), f"response history row {index} is invalid")
         row = dict(raw)
-        for field in (
-            "surface_selection_score",
-            "selection_score",
-            "text_support_top1_agreement",
-            "text_response_smooth_l1",
-            "descriptor_relation_smooth_l1",
-            *SURFACE_CONTROL_METRICS,
-        ):
-            _finite(row.get(field), label=f"history {field}")
         _require(
             row.get("epoch") == index,
             "response history must start at control epoch 0 and be contiguous",
         )
+        _require(
+            row.get("scene_response_objective") == SCENE_RESPONSE_OBJECTIVE,
+            "response history scene-response objective differs",
+        )
+        if index:
+            for field in (
+                "independent_response_loss",
+                "scene_response_loss",
+                "scene_profile_loss",
+                "scene_ranking_loss",
+            ):
+                _require(
+                    _finite(row.get(field), label=f"history {field}") >= 0.0,
+                    f"history {field} must be non-negative",
+                )
         rows.append(row)
-    control = {field: float(rows[0][field]) for field in SURFACE_CONTROL_METRICS}
-    ranked: list[tuple[int, tuple[float, float, float, float]]] = []
+
+    def scene_metrics(
+        row: Mapping[str, Any],
+        *,
+        expected_scenes: set[str] | None,
+        label: str,
+    ) -> dict[str, dict[str, float]]:
+        raw_scenes = row.get("text_response_scene_metrics")
+        _require(
+            isinstance(raw_scenes, Mapping) and bool(raw_scenes),
+            f"{label} text_response_scene_metrics must be non-empty",
+        )
+        normalized: dict[str, dict[str, float]] = {}
+        expected_fields = {
+            *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+            *FIT_RESPONSE_SCENE_ERROR_METRICS,
+        }
+        for scene, raw_metrics in raw_scenes.items():
+            _require(
+                isinstance(scene, str)
+                and bool(scene)
+                and scene not in normalized
+                and isinstance(raw_metrics, Mapping)
+                and set(raw_metrics) == expected_fields,
+                f"{label} fit scene metrics are malformed",
+            )
+            normalized[scene] = {
+                field: _finite(
+                    raw_metrics.get(field),
+                    label=f"{label} scene {scene} {field}",
+                )
+                for field in (
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                )
+            }
+        _require(
+            expected_scenes is None or set(normalized) == expected_scenes,
+            f"{label} fit scene IDs drifted from epoch 0",
+        )
+        expected_worst = {
+            "text_response_scene_worst_smooth_l1": max(
+                metrics["smooth_l1"] for metrics in normalized.values()
+            ),
+            "text_response_scene_worst_mae": max(
+                metrics["mae"] for metrics in normalized.values()
+            ),
+            **{
+                f"text_response_scene_worst_{field}": min(
+                    metrics[field] for metrics in normalized.values()
+                )
+                for field in FIT_RESPONSE_SCENE_QUALITY_METRICS
+            },
+        }
+        _require(
+            all(
+                math.isclose(
+                    _finite(row.get(field), label=f"{label} {field}"),
+                    value,
+                    rel_tol=0.0,
+                    abs_tol=0.0,
+                )
+                for field, value in expected_worst.items()
+            ),
+            f"{label} fit scene worst-case summaries differ",
+        )
+        return normalized
+
+    control_surface = {
+        field: _finite(rows[0].get(field), label=f"history control {field}")
+        for field in SURFACE_CONTROL_METRICS
+    }
+    control_fit_quality = {
+        field: _finite(rows[0].get(field), label=f"history control {field}")
+        for field in FIT_RESPONSE_QUALITY_METRICS
+    }
+    control_scenes = scene_metrics(
+        rows[0], expected_scenes=None, label="history fit-response control"
+    )
+    ranked: list[tuple[int, tuple[float, ...]]] = []
     for row in rows:
-        deltas = {
-            field: float(row[field]) - control[field]
+        fields = (
+            "surface_selection_score",
+            "text_support_top1_agreement",
+            "text_response_smooth_l1",
+            "text_response_mae",
+            "descriptor_relation_smooth_l1",
+            *FIT_RESPONSE_QUALITY_METRICS,
+            *SURFACE_CONTROL_METRICS,
+        )
+        values = {
+            field: _finite(row.get(field), label=f"history {field}")
+            for field in fields
+        }
+        current_scenes = scene_metrics(
+            row,
+            expected_scenes=set(control_scenes),
+            label=f"history epoch {row['epoch']}",
+        )
+        surface_deltas = {
+            field: values[field] - control_surface[field]
             for field in SURFACE_CONTROL_METRICS
         }
-        feasible = all(
+        surface_feasible = all(
             delta >= -SURFACE_CONTROL_NONINFERIORITY_TOLERANCE
             or math.isclose(
                 delta,
@@ -1996,35 +2594,128 @@ def recompute_response_epoch_selection(history: object) -> tuple[int, float]:
                 rel_tol=0.0,
                 abs_tol=1e-12,
             )
-            for delta in deltas.values()
+            for delta in surface_deltas.values()
         )
+        aggregate_quality_deltas = {
+            field: values[field] - control_fit_quality[field]
+            for field in FIT_RESPONSE_QUALITY_METRICS
+        }
+        aggregate_fit_feasible = all(
+            delta >= -FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+            or math.isclose(
+                delta,
+                -FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                rel_tol=0.0,
+                abs_tol=1e-12,
+            )
+            for delta in aggregate_quality_deltas.values()
+        )
+        scene_deltas: dict[str, dict[str, float]] = {}
+        per_scene_fit_feasible = True
+        for scene in sorted(control_scenes):
+            scene_deltas[scene] = {
+                field: current_scenes[scene][field] - control_scenes[scene][field]
+                for field in (
+                    *FIT_RESPONSE_SCENE_QUALITY_METRICS,
+                    *FIT_RESPONSE_SCENE_ERROR_METRICS,
+                )
+            }
+            quality_feasible = all(
+                scene_deltas[scene][field]
+                >= -FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+                or math.isclose(
+                    scene_deltas[scene][field],
+                    -FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for field in FIT_RESPONSE_SCENE_QUALITY_METRICS
+            )
+            error_feasible = all(
+                scene_deltas[scene][field]
+                <= FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+                or math.isclose(
+                    scene_deltas[scene][field],
+                    FIT_RESPONSE_NONINFERIORITY_TOLERANCE,
+                    rel_tol=0.0,
+                    abs_tol=1e-12,
+                )
+                for field in FIT_RESPONSE_SCENE_ERROR_METRICS
+            )
+            per_scene_fit_feasible = (
+                per_scene_fit_feasible and quality_feasible and error_feasible
+            )
+        fit_feasible = aggregate_fit_feasible and per_scene_fit_feasible
+        feasible = surface_feasible and fit_feasible
+        expected_fit_deltas = {
+            "aggregate_quality": aggregate_quality_deltas,
+            "per_scene": scene_deltas,
+        }
+        expected_improvement = {
+            "smooth_l1": _finite(
+                rows[0].get("text_response_smooth_l1"),
+                label="history control text_response_smooth_l1",
+            )
+            - values["text_response_smooth_l1"],
+            "mae": _finite(
+                rows[0].get("text_response_mae"),
+                label="history control text_response_mae",
+            )
+            - values["text_response_mae"],
+        }
         _require(
-            row.get("surface_control_deltas") == deltas
-            and row.get("surface_control_feasible") is feasible
+            row.get("surface_control_deltas") == surface_deltas
+            and row.get("surface_control_feasible") is surface_feasible
             and row.get("surface_control_tolerance")
             == SURFACE_CONTROL_NONINFERIORITY_TOLERANCE,
             "response history Surface-control feasibility was not reproduced",
+        )
+        _require(
+            row.get("fit_response_control_deltas") == expected_fit_deltas
+            and row.get("fit_response_aggregate_control_feasible")
+            is aggregate_fit_feasible
+            and row.get("fit_response_per_scene_control_feasible")
+            is per_scene_fit_feasible
+            and row.get("fit_response_control_feasible") is fit_feasible
+            and row.get("fit_response_control_tolerance")
+            == FIT_RESPONSE_NONINFERIORITY_TOLERANCE
+            and row.get("response_selection_feasible") is feasible
+            and row.get(
+                "fit_response_error_improvement_control_minus_candidate"
+            )
+            == expected_improvement,
+            "response history fit-scene feasibility was not reproduced",
         )
         if feasible:
             ranked.append(
                 (
                     int(row["epoch"]),
                     (
-                        float(row["text_support_top1_agreement"]),
-                        -float(row["text_response_smooth_l1"]),
-                        -float(row["descriptor_relation_smooth_l1"]),
-                        float(row["surface_selection_score"]),
+                        -values["text_response_smooth_l1"],
+                        -values["text_response_mae"],
+                        values["text_response_ranking_spearman_p05"],
+                        values["text_response_ranking_spearman_mean"],
+                        values["text_response_profile_cosine_p05"],
+                        values["text_response_profile_cosine_mean"],
+                        values["text_response_top_decile_overlap_p05"],
+                        values["text_response_top_decile_overlap_mean"],
+                        values["text_support_top1_agreement"],
+                        -values["descriptor_relation_smooth_l1"],
+                        values["surface_selection_score"],
                     ),
                 )
             )
-    _require(bool(ranked), "response history has no Surface-feasible epoch")
+    _require(bool(ranked), "response history has no robust-feasible epoch")
     best_epoch, _ = max(ranked, key=lambda value: value[1])
     best_score = float(rows[best_epoch]["surface_selection_score"])
     for row in rows:
         expected = best_score if int(row["epoch"]) == best_epoch else -1.0
         _require(
             math.isclose(
-                float(row["selection_score"]),
+                _finite(
+                    row.get("selection_score"),
+                    label="history selection_score",
+                ),
                 expected,
                 rel_tol=0.0,
                 abs_tol=0.0,
@@ -2032,6 +2723,356 @@ def recompute_response_epoch_selection(history: object) -> tuple[int, float]:
             "response history selection_score was not independently reproduced",
         )
     return best_epoch, best_score
+
+
+def _response_epoch_rank(row: Mapping[str, Any]) -> tuple[float, ...]:
+    return (
+        -_finite(row.get("text_response_smooth_l1"), label="history rank smooth_l1"),
+        -_finite(row.get("text_response_mae"), label="history rank mae"),
+        _finite(
+            row.get("text_response_ranking_spearman_p05"),
+            label="history rank ranking_spearman_p05",
+        ),
+        _finite(
+            row.get("text_response_ranking_spearman_mean"),
+            label="history rank ranking_spearman_mean",
+        ),
+        _finite(
+            row.get("text_response_profile_cosine_p05"),
+            label="history rank profile_cosine_p05",
+        ),
+        _finite(
+            row.get("text_response_profile_cosine_mean"),
+            label="history rank profile_cosine_mean",
+        ),
+        _finite(
+            row.get("text_response_top_decile_overlap_p05"),
+            label="history rank top_decile_overlap_p05",
+        ),
+        _finite(
+            row.get("text_response_top_decile_overlap_mean"),
+            label="history rank top_decile_overlap_mean",
+        ),
+        _finite(
+            row.get("text_support_top1_agreement"),
+            label="history rank text_support_top1_agreement",
+        ),
+        -_finite(
+            row.get("descriptor_relation_smooth_l1"),
+            label="history rank descriptor_relation_smooth_l1",
+        ),
+        _finite(
+            row.get("surface_selection_score"),
+            label="history rank surface_selection_score",
+        ),
+    )
+
+
+def _recompute_history_hash_chain(history: Sequence[Mapping[str, Any]]) -> str:
+    _require(bool(history), "response history hash chain is empty")
+    previous_sha256: str | None = None
+    for index, row in enumerate(history):
+        _require(isinstance(row, Mapping), f"history hash-chain row {index} is invalid")
+        payload = dict(row)
+        payload.pop("history_hash_chain", None)
+        payload.pop("selection_score", None)
+        digest = canonical_json_sha256(
+            {"previous_sha256": previous_sha256, "record": payload}
+        )
+        expected = {
+            "algorithm": HISTORY_HASH_CHAIN_ALGORITHM,
+            "previous_sha256": previous_sha256,
+            "sha256": digest,
+        }
+        _require(
+            row.get("history_hash_chain") == expected,
+            f"response history hash chain differs at row {index}",
+        )
+        previous_sha256 = digest
+    assert previous_sha256 is not None
+    return previous_sha256
+
+
+def _replay_v4_proposal_state_machine(
+    history: Sequence[Mapping[str, Any]],
+    *,
+    epochs: int,
+    patience: int,
+) -> dict[str, Any]:
+    _require(
+        isinstance(epochs, int)
+        and not isinstance(epochs, bool)
+        and epochs > 0
+        and isinstance(patience, int)
+        and not isinstance(patience, bool)
+        and patience > 0,
+        "proposal state-machine epochs/patience contract differs",
+    )
+    _require(
+        bool(history) and len(history) <= epochs + 1,
+        "proposal state-machine history length differs",
+    )
+    control = history[0]
+    _require(isinstance(control, Mapping), "proposal state-machine control row is invalid")
+    control_hash = control.get("anchor_state_dict_sha256_after_proposal")
+    _require(
+        control.get("epoch") == 0
+        and control.get("initialization") == "frozen_surface_control_checkpoint"
+        and control.get("state_machine_role") == "frozen_control_initial_anchor"
+        and control.get("accepted") is True
+        and control.get("rejected") is False
+        and control.get("anchor_epoch_after_proposal") == 0
+        and SHA256_PATTERN.fullmatch(str(control_hash)) is not None
+        and control.get("best_updated") is True
+        and control.get("best_epoch_after_proposal") == 0
+        and control.get("best_state_dict_sha256_after_proposal") == control_hash
+        and control.get("patience_stale_after_proposal") == 0
+        and control.get("patience_stop_after_proposal") is False
+        and "proposal" not in control
+        and "proposal_losses" not in control
+        and "loss_measurement_state" not in control,
+        "proposal state-machine control row differs",
+    )
+    anchor_epoch = 0
+    anchor_hash = str(control_hash)
+    best_epoch = 0
+    best_hash = str(control_hash)
+    best_rank = _response_epoch_rank(control)
+    stale = 0
+    accepted_count = 0
+    rejected_count = 0
+    proposal_fields = {
+        "index",
+        "source_anchor_epoch",
+        "anchor_state_dict_sha256",
+        "raw_state_dict_sha256",
+        "trial_state_dict_sha256",
+        "alpha_numerator",
+        "alpha_denominator",
+        "optimizer_state_reset",
+        "validation_evaluations",
+        "backtracking",
+        "persistent_generator",
+    }
+    for index, row in enumerate(history[1:], start=1):
+        _require(isinstance(row, Mapping), f"proposal state-machine row {index} is invalid")
+        proposal = row.get("proposal")
+        _require(
+            row.get("epoch") == index
+            and row.get("state_machine_role") == "fixed_micro_ray_trial"
+            and isinstance(proposal, Mapping)
+            and set(proposal) == proposal_fields
+            and proposal.get("index") == index
+            and proposal.get("source_anchor_epoch") == anchor_epoch
+            and proposal.get("anchor_state_dict_sha256") == anchor_hash
+            and SHA256_PATTERN.fullmatch(
+                str(proposal.get("raw_state_dict_sha256", ""))
+            )
+            is not None
+            and SHA256_PATTERN.fullmatch(
+                str(proposal.get("trial_state_dict_sha256", ""))
+            )
+            is not None
+            and proposal.get("alpha_numerator") == PROPOSAL_ALPHA_NUMERATOR
+            and proposal.get("alpha_denominator") == PROPOSAL_ALPHA_DENOMINATOR
+            and proposal.get("optimizer_state_reset") is True
+            and proposal.get("validation_evaluations") == 1
+            and proposal.get("backtracking") == "none_fixed_alpha_single_trial"
+            and proposal.get("persistent_generator")
+            == "advanced_never_rolled_back",
+            f"proposal state-machine row {index} differs",
+        )
+        proposal_losses = row.get("proposal_losses")
+        _require(
+            row.get("loss_measurement_state")
+            == PROPOSAL_LOSS_MEASUREMENT_STATE
+            and isinstance(proposal_losses, Mapping)
+            and tuple(proposal_losses) == PROPOSAL_LOSS_FIELDS,
+            f"proposal loss-accounting row {index} differs",
+        )
+        for field, flat_field in LEGACY_FLAT_PROPOSAL_LOSS_FIELDS.items():
+            value = _finite(
+                proposal_losses.get(field),
+                label=f"proposal loss {field} at row {index}",
+            )
+            _require(
+                value >= 0.0 and row.get(flat_field) == proposal_losses.get(field),
+                f"proposal loss {field} differs at row {index}",
+            )
+
+        accepted = row.get("response_selection_feasible") is True
+        _require(
+            row.get("accepted") is accepted
+            and row.get("rejected") is (not accepted),
+            f"proposal acceptance differs at row {index}",
+        )
+        if accepted:
+            anchor_epoch = index
+            anchor_hash = str(proposal["trial_state_dict_sha256"])
+            accepted_count += 1
+        else:
+            rejected_count += 1
+
+        candidate_rank = _response_epoch_rank(row)
+        best_updated = accepted and candidate_rank > best_rank
+        if best_updated:
+            best_epoch = index
+            best_hash = str(proposal["trial_state_dict_sha256"])
+            best_rank = candidate_rank
+            stale = 0
+        else:
+            stale += 1
+        patience_stop = stale >= patience
+        _require(
+            row.get("anchor_epoch_after_proposal") == anchor_epoch
+            and row.get("anchor_state_dict_sha256_after_proposal") == anchor_hash
+            and row.get("best_updated") is best_updated
+            and row.get("best_epoch_after_proposal") == best_epoch
+            and row.get("best_state_dict_sha256_after_proposal") == best_hash
+            and row.get("patience_stale_after_proposal") == stale
+            and row.get("patience_stop_after_proposal") is patience_stop
+            and (not patience_stop or index == len(history) - 1),
+            f"proposal transition differs at row {index}",
+        )
+    _require(
+        len(history) == epochs + 1
+        or history[-1].get("patience_stop_after_proposal") is True,
+        "proposal history ended before the frozen epoch/patience stop condition",
+    )
+    return {
+        "accepted_anchor": {
+            "epoch": anchor_epoch,
+            "state_dict_sha256": anchor_hash,
+            "accepted_proposal_count": accepted_count,
+            "rejected_proposal_count": rejected_count,
+        },
+        "best_epoch": best_epoch,
+        "best_state_dict_sha256": best_hash,
+        "history_hash_chain_sha256": _recompute_history_hash_chain(history),
+    }
+
+
+def recompute_response_epoch_selection(
+    history: object, *, selection_contract: str = EPOCH_SELECTION
+) -> tuple[int, float]:
+    _require(
+        selection_contract in {EPOCH_SELECTION, LEGACY_EPOCH_SELECTION},
+        "response epoch-selection contract is not registered",
+    )
+    selected = _recompute_v3_response_epoch_selection(history)
+    if selection_contract == EPOCH_SELECTION:
+        assert isinstance(history, list)
+        replay = _replay_v4_proposal_state_machine(
+            history,
+            epochs=int(TRAINING_CONTRACT["epochs"]),
+            patience=int(TRAINING_CONTRACT["patience"]),
+        )
+        _require(
+            replay["best_epoch"] == selected[0],
+            "proposal replay and robust global-best selection differ",
+        )
+    return selected
+
+
+def _tensor_sha256(value: torch.Tensor) -> str:
+    tensor = torch.as_tensor(value).detach().cpu().contiguous()
+    if tensor.is_floating_point():
+        array = tensor.to(torch.float32).numpy().astype("<f4", copy=False)
+        dtype = "float32-le"
+    elif tensor.dtype == torch.bool:
+        array = tensor.to(torch.uint8).numpy()
+        dtype = "bool-u8"
+    elif tensor.dtype in (torch.int8, torch.int16, torch.int32, torch.int64):
+        array = tensor.to(torch.int64).numpy().astype("<i8", copy=False)
+        dtype = "int64-le"
+    else:
+        raise ValueError(f"unsupported checkpoint tensor dtype: {tensor.dtype}")
+    header = json.dumps(
+        {"dtype": dtype, "shape": list(tensor.shape)},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("ascii")
+    digest = hashlib.sha256()
+    digest.update(header)
+    digest.update(b"\0")
+    digest.update(array.tobytes(order="C"))
+    return digest.hexdigest()
+
+
+def _state_dict_sha256(state: object) -> str:
+    _require(isinstance(state, Mapping) and bool(state), "checkpoint state_dict is invalid")
+    records = []
+    for name in sorted(state):
+        tensor = state[name]
+        _require(
+            isinstance(name, str) and bool(name) and torch.is_tensor(tensor),
+            "checkpoint state_dict fields differ",
+        )
+        contiguous = tensor.detach().cpu().contiguous()
+        _require(
+            not (contiguous.is_floating_point() or contiguous.is_complex())
+            or bool(torch.isfinite(contiguous).all()),
+            f"checkpoint state_dict tensor is non-finite: {name}",
+        )
+        records.append(
+            {
+                "name": name,
+                "shape": list(contiguous.shape),
+                "dtype": str(contiguous.dtype),
+                "tensor_sha256": _tensor_sha256(contiguous),
+            }
+        )
+    return canonical_json_sha256(records)
+
+
+def validate_v4_proposal_checkpoint(
+    checkpoint: Mapping[str, Any], *, report: Mapping[str, Any] | None = None
+) -> tuple[int, float]:
+    _require(isinstance(checkpoint, Mapping), "response checkpoint is invalid")
+    history = checkpoint.get("history")
+    _require(isinstance(history, list), "response checkpoint history is invalid")
+    selected = recompute_response_epoch_selection(
+        history, selection_contract=EPOCH_SELECTION
+    )
+    training_config = checkpoint.get("training_config")
+    provenance = checkpoint.get("provenance")
+    _require(
+        checkpoint.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE
+        and isinstance(training_config, Mapping)
+        and training_config.get("epochs") == TRAINING_CONTRACT["epochs"]
+        and training_config.get("patience") == TRAINING_CONTRACT["patience"]
+        and training_config.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE
+        and isinstance(provenance, Mapping)
+        and provenance.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE,
+        "response checkpoint proposal contract differs",
+    )
+    replay = _replay_v4_proposal_state_machine(
+        history,
+        epochs=int(training_config["epochs"]),
+        patience=int(training_config["patience"]),
+    )
+    best_state_hash = _state_dict_sha256(checkpoint.get("state_dict"))
+    _require(
+        checkpoint.get("accepted_anchor") == replay["accepted_anchor"]
+        and checkpoint.get("best_epoch") == replay["best_epoch"] == selected[0]
+        and checkpoint.get("best_state_dict_sha256")
+        == replay["best_state_dict_sha256"]
+        == best_state_hash
+        and checkpoint.get("history_hash_chain_sha256")
+        == replay["history_hash_chain_sha256"],
+        "response checkpoint accepted-anchor/best/hash-chain fields differ",
+    )
+    if report is not None:
+        _require(
+            report.get("proposal_state_machine") == PROPOSAL_STATE_MACHINE
+            and report.get("accepted_anchor") == replay["accepted_anchor"]
+            and report.get("best_epoch") == replay["best_epoch"]
+            and report.get("best_state_dict_sha256") == best_state_hash
+            and report.get("history_hash_chain_sha256")
+            == replay["history_hash_chain_sha256"],
+            "trainer report proposal/anchor/best/hash-chain fields differ",
+        )
+    return selected
 
 
 def _expected_surface_control_binding(
@@ -2263,6 +3304,119 @@ def validate_seed_execution_timeline(
     }
 
 
+def validate_response_distillation_provenance(
+    value: object,
+    *,
+    manifest: Mapping[str, Any],
+    calibration: Mapping[str, Any],
+    seed: int,
+) -> dict[str, Any]:
+    """Fail closed on the fixed and run-bound response-loss provenance."""
+
+    response_contract_keys = {
+        "fit_split_only",
+        "benchmark_vocabulary_opened",
+        "fit_text_bank",
+        "calibration_manifest",
+        "calibration_manifest_sha256",
+        "calibration_seed",
+        "response_lambdas",
+        "response_branch_gradient_target_ratio",
+        "total_response_gradient_ratio_upper_bound",
+        "losses",
+        "scene_response_objective",
+        "complete_scene_batching",
+        "design_diagnostic",
+    }
+    fit_binding_keys = {
+        "artifact_path",
+        "artifact_sha256",
+        "manifest_path",
+        "manifest_sha256",
+        "split",
+        "query_count",
+        "split_synset_tab_query_lf_sha256",
+        "ordered_records_sha256",
+        "vocabulary_sha256",
+        "vocabulary_manifest_sha256",
+        "embedding_semantic_sha256",
+        "embedding_tensor_sha256",
+        "text_encoder_snapshot_files_sha256",
+    }
+    response_contract = dict(value) if isinstance(value, Mapping) else {}
+    fit_binding = response_contract.get("fit_text_bank")
+    expected_fit_files = manifest.get("fit_text_bank")
+    diagnostic_record = manifest.get("gradient_design_diagnostic")
+    _require(
+        isinstance(expected_fit_files, Mapping)
+        and isinstance(diagnostic_record, Mapping),
+        "distill manifest lacks response provenance inputs",
+    )
+    expected_design_diagnostic = {
+        **dict(diagnostic_record),
+        "role": "seed0_design_prior_only_per_seed_values_remeasured",
+        "measured_seed": 0,
+        "calibration_reuses_measured_values": False,
+        "diagnostic_surface_control": _surface_controls_by_seed(
+            manifest.get("surface_promotion", {})
+        )[0]["checkpoint"],
+    }
+    _require(
+        isinstance(value, Mapping)
+        and set(response_contract) == response_contract_keys
+        and response_contract.get("fit_split_only") is True
+        and response_contract.get("benchmark_vocabulary_opened") is False
+        and isinstance(fit_binding, Mapping)
+        and set(fit_binding) == fit_binding_keys
+        and fit_binding.get("artifact_path")
+        == expected_fit_files.get("artifact", {}).get("path")
+        and fit_binding.get("artifact_sha256")
+        == expected_fit_files.get("artifact", {}).get("sha256")
+        and fit_binding.get("manifest_path")
+        == expected_fit_files.get("manifest", {}).get("path")
+        and fit_binding.get("manifest_sha256")
+        == expected_fit_files.get("manifest", {}).get("sha256")
+        and fit_binding.get("split") == "fit"
+        and isinstance(fit_binding.get("query_count"), int)
+        and not isinstance(fit_binding.get("query_count"), bool)
+        and fit_binding.get("query_count") > 0
+        and all(
+            SHA256_PATTERN.fullmatch(str(fit_binding.get(field, "")))
+            is not None
+            for field in (
+                "split_synset_tab_query_lf_sha256",
+                "ordered_records_sha256",
+                "vocabulary_sha256",
+                "vocabulary_manifest_sha256",
+                "embedding_semantic_sha256",
+                "embedding_tensor_sha256",
+                "text_encoder_snapshot_files_sha256",
+            )
+        )
+        and response_contract.get("calibration_seed") == seed
+        and {
+            "path": response_contract.get("calibration_manifest"),
+            "sha256": response_contract.get("calibration_manifest_sha256"),
+        }
+        == calibration.get("manifest")
+        and response_contract.get("response_lambdas")
+        == calibration.get("response_lambdas")
+        and response_contract.get("response_branch_gradient_target_ratio")
+        == RESPONSE_BRANCH_GRADIENT_RATIO
+        and response_contract.get("total_response_gradient_ratio_upper_bound")
+        == TOTAL_RESPONSE_GRADIENT_RATIO_UPPER_BOUND
+        and response_contract.get("losses")
+        == [INDEPENDENT_RESPONSE_LOSS, SCENE_RESPONSE_LOSS]
+        and response_contract.get("scene_response_objective")
+        == SCENE_RESPONSE_OBJECTIVE
+        and response_contract.get("complete_scene_batching") is True
+        and response_contract.get("design_diagnostic")
+        == expected_design_diagnostic,
+        f"seed-{seed} checkpoint response-loss provenance differs",
+    )
+    return response_contract
+
+
 def _seed_evidence(
     manifest_path: Path,
     seed: int,
@@ -2281,24 +3435,28 @@ def _seed_evidence(
         map_location="cpu",
         label=f"seed-{seed} response checkpoint",
     )
-    best_epoch, best_score = recompute_response_epoch_selection(checkpoint.get("history"))
+    selection_contract = _manifest_selection_contract(
+        manifest, digest=manifest_sha, source=manifest_source
+    )
+    if selection_contract == EPOCH_SELECTION:
+        best_epoch, best_score = validate_v4_proposal_checkpoint(
+            checkpoint, report=report
+        )
+    else:
+        best_epoch, best_score = recompute_response_epoch_selection(
+            checkpoint.get("history"), selection_contract=selection_contract
+        )
     calibration = _calibration_row(manifest, seed)
     validate_file_record(calibration["manifest"], label=f"seed-{seed} calibration")
     validate_file_record(calibration["audit"], label=f"seed-{seed} calibration audit")
-    response_contract = checkpoint.get("provenance", {}).get(
-        "text_response_distillation"
+    validate_response_distillation_provenance(
+        checkpoint.get("provenance", {}).get("text_response_distillation"),
+        manifest=manifest,
+        calibration=calibration,
+        seed=seed,
     )
     _require(
-        isinstance(response_contract, Mapping)
-        and response_contract.get("calibration_seed") == seed
-        and {
-            "path": response_contract.get("calibration_manifest"),
-            "sha256": response_contract.get("calibration_manifest_sha256"),
-        }
-        == calibration["manifest"]
-        and response_contract.get("response_lambdas")
-        == calibration["response_lambdas"]
-        and report.get("calibration_manifest") == calibration["manifest"]["path"]
+        report.get("calibration_manifest") == calibration["manifest"]["path"]
         and report.get("calibration_manifest_sha256")
         == calibration["manifest"]["sha256"]
         and report.get("response_lambdas") == calibration["response_lambdas"],
@@ -2457,7 +3615,7 @@ def _seed_evidence(
         "execution_timeline": execution_timeline,
         "best_epoch": best_epoch,
         "best_selection_score": best_score,
-        "selection_contract": EPOCH_SELECTION,
+        "selection_contract": selection_contract,
         "surface_control": expected_control,
         "calibration": calibration,
     }
@@ -2555,6 +3713,9 @@ def validate_cross_seed_replay(evidence_rows: Sequence[Mapping[str, Any]]) -> No
 
 def finalize_run(manifest_path: Path, output: Path) -> dict[str, Any]:
     manifest, manifest_sha, manifest_source = _manifest(manifest_path)
+    selection_contract = _manifest_selection_contract(
+        manifest, digest=manifest_sha, source=manifest_source
+    )
     seeds = []
     seed_evidence: list[Mapping[str, Any]] = []
     for seed in REQUIRED_SEEDS:
@@ -2591,7 +3752,7 @@ def finalize_run(manifest_path: Path, output: Path) -> dict[str, Any]:
             manifest["gradient_design_diagnostic"]
         ),
         "runtime_closure_digest": manifest["runtime_closure"]["digest"],
-        "selection_contract": EPOCH_SELECTION,
+        "selection_contract": selection_contract,
         "seeds": seeds,
     }
     write_frozen_json(output, payload)

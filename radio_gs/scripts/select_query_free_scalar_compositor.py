@@ -18,10 +18,10 @@ import argparse
 import hashlib
 import json
 import math
-import os
 from pathlib import Path
-import tempfile
 from typing import Any
+
+from radio_gs.utils.immutable_artifacts import write_frozen_json
 
 
 SCREEN_NAME = "query-free-scalar-compositor-v1"
@@ -438,17 +438,10 @@ def _parse_paths(raw: str) -> list[Path]:
 
 
 def _write_atomic(path: Path, payload: dict) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    descriptor, temporary_name = tempfile.mkstemp(
-        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
-    )
-    os.close(descriptor)
-    temporary = Path(temporary_name)
-    try:
-        temporary.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-        os.replace(temporary, path)
-    finally:
-        temporary.unlink(missing_ok=True)
+    # A compositor decision is a frozen authority, not a mutable convenience
+    # report.  Identical recomputation is allowed; replacement with a different
+    # decision is rejected and the first writer always wins.
+    write_frozen_json(path, payload)
 
 
 def main() -> None:

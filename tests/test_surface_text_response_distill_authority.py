@@ -8,6 +8,7 @@ from pathlib import Path
 import sys
 
 import pytest
+import torch
 
 from radio_gs.scripts import finalize_surface_text_response_promotion as promotion
 from radio_gs.scripts import surface_gpu1_lock_supervisor as gpu1_lock
@@ -19,40 +20,236 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 RUNNER = REPO_ROOT / "radio_gs/scripts/run_surface_region_text_response_distill.sh"
 
 
-def _history() -> list[dict[str, float | int]]:
+def _history() -> list[dict[str, object]]:
+    def row(
+        epoch: int,
+        *,
+        surface: float,
+        fit_quality: float,
+        response_smooth_l1: float,
+        response_mae: float,
+    ) -> dict[str, object]:
+        scene_metrics = {
+            scene: {
+                **{
+                    field: fit_quality
+                    for field in authority.FIT_RESPONSE_SCENE_QUALITY_METRICS
+                },
+                "smooth_l1": response_smooth_l1 + offset,
+                "mae": response_mae + offset,
+            }
+            for scene, offset in (("scene-a", 0.0), ("scene-b", 0.001))
+        }
+        result: dict[str, object] = {
+            "epoch": epoch,
+            "surface_selection_score": surface,
+            "summary_token_cosine": surface,
+            "mean_descriptor_cosine": surface,
+            "all_view_descriptor_cosine": surface,
+            "text_support_top1_agreement": 0.5 + 0.1 * epoch,
+            "text_response_smooth_l1": response_smooth_l1,
+            "text_response_mae": response_mae,
+            "descriptor_relation_smooth_l1": 0.001 + 0.001 * epoch,
+            "scene_response_objective": dict(
+                authority.SCENE_RESPONSE_OBJECTIVE
+            ),
+            "text_response_scene_metrics": scene_metrics,
+            "text_response_scene_worst_smooth_l1": max(
+                metrics["smooth_l1"] for metrics in scene_metrics.values()
+            ),
+            "text_response_scene_worst_mae": max(
+                metrics["mae"] for metrics in scene_metrics.values()
+            ),
+            **{
+                field: fit_quality
+                for field in authority.FIT_RESPONSE_QUALITY_METRICS
+            },
+            **{
+                f"text_response_scene_worst_{field}": fit_quality
+                for field in authority.FIT_RESPONSE_SCENE_QUALITY_METRICS
+            },
+        }
+        if epoch:
+            result.update(
+                {
+                    "independent_response_loss": 0.03,
+                    "scene_response_loss": 0.02,
+                    "scene_profile_loss": 0.01,
+                    "scene_ranking_loss": 0.018,
+                }
+            )
+        return result
+
     rows = [
-        {
-            "epoch": 0,
-            "surface_selection_score": 0.96,
-            "summary_token_cosine": 0.96,
-            "mean_descriptor_cosine": 0.96,
-            "all_view_descriptor_cosine": 0.96,
-            "text_support_top1_agreement": 0.5,
-            "text_response_smooth_l1": 0.02,
-            "descriptor_relation_smooth_l1": 0.001,
-        },
-        {
-            "epoch": 1,
-            "surface_selection_score": 0.95,
-            "summary_token_cosine": 0.959,
-            "mean_descriptor_cosine": 0.959,
-            "all_view_descriptor_cosine": 0.959,
-            "text_support_top1_agreement": 1.0,
-            "text_response_smooth_l1": 0.01,
-            "descriptor_relation_smooth_l1": 0.003,
-        },
-        {
-            "epoch": 2,
-            "surface_selection_score": 0.97,
-            "summary_token_cosine": 0.97,
-            "mean_descriptor_cosine": 0.97,
-            "all_view_descriptor_cosine": 0.97,
-            "text_support_top1_agreement": 1.0,
-            "text_response_smooth_l1": 0.02,
-            "descriptor_relation_smooth_l1": 0.004,
-        },
+        row(
+            0,
+            surface=0.96,
+            fit_quality=0.90,
+            response_smooth_l1=0.02,
+            response_mae=0.04,
+        ),
+        row(
+            1,
+            surface=0.959,
+            fit_quality=0.899,
+            response_smooth_l1=0.01,
+            response_mae=0.02,
+        ),
+        row(
+            2,
+            surface=0.97,
+            fit_quality=0.91,
+            response_smooth_l1=0.02,
+            response_mae=0.03,
+        ),
     ]
     return trainer.finalize_response_primary_epoch_selection(rows)[0]
+
+
+def _v4_checkpoint() -> tuple[dict[str, object], dict[str, object]]:
+    rows = json.loads(json.dumps(_history()))[:2]
+    rows[0].update(
+        {
+            "initialization": "frozen_surface_control_checkpoint",
+            "state_machine_role": "frozen_control_initial_anchor",
+        }
+    )
+    rows[1]["state_machine_role"] = "fixed_micro_ray_trial"
+    template = json.loads(json.dumps(_history()[2]))
+    for epoch in range(2, 12):
+        row = json.loads(json.dumps(template))
+        row["epoch"] = epoch
+        row["state_machine_role"] = "fixed_micro_ray_trial"
+        if epoch % 2 == 0:
+            row.update(
+                {
+                    "surface_selection_score": 0.95,
+                    "summary_token_cosine": 0.95,
+                    "mean_descriptor_cosine": 0.95,
+                    "all_view_descriptor_cosine": 0.95,
+                }
+            )
+        rows.append(row)
+    history, best_epoch, best_score = trainer.finalize_response_primary_epoch_selection(
+        rows
+    )
+    assert (best_epoch, best_score) == (1, 0.959)
+
+    state_dict = {"weight": torch.tensor([1.0], dtype=torch.float32)}
+    best_hash = authority._state_dict_sha256(state_dict)
+    anchor_epoch = 0
+    anchor_hash = "0" * 64
+    accepted_count = 0
+    rejected_count = 0
+    previous_hash: str | None = None
+    stale = 0
+    for index, row in enumerate(history):
+        if index == 0:
+            row.update(
+                {
+                    "accepted": True,
+                    "rejected": False,
+                    "anchor_epoch_after_proposal": 0,
+                    "anchor_state_dict_sha256_after_proposal": anchor_hash,
+                    "best_updated": True,
+                    "best_epoch_after_proposal": 0,
+                    "best_state_dict_sha256_after_proposal": anchor_hash,
+                    "patience_stale_after_proposal": 0,
+                    "patience_stop_after_proposal": False,
+                }
+            )
+        else:
+            trial_hash = best_hash if index == 1 else f"{1000 + index:064x}"
+            proposal_losses = {
+                field: 0.01 + offset * 0.001
+                for offset, field in enumerate(authority.PROPOSAL_LOSS_FIELDS)
+            }
+            row.update(
+                {
+                    "proposal": {
+                        "index": index,
+                        "source_anchor_epoch": anchor_epoch,
+                        "anchor_state_dict_sha256": anchor_hash,
+                        "raw_state_dict_sha256": f"{2000 + index:064x}",
+                        "trial_state_dict_sha256": trial_hash,
+                        "alpha_numerator": 1,
+                        "alpha_denominator": 2048,
+                        "optimizer_state_reset": True,
+                        "validation_evaluations": 1,
+                        "backtracking": "none_fixed_alpha_single_trial",
+                        "persistent_generator": "advanced_never_rolled_back",
+                    },
+                    "loss_measurement_state": (
+                        authority.PROPOSAL_LOSS_MEASUREMENT_STATE
+                    ),
+                    "proposal_losses": proposal_losses,
+                    **{
+                        flat_field: proposal_losses[field]
+                        for field, flat_field in (
+                            authority.LEGACY_FLAT_PROPOSAL_LOSS_FIELDS.items()
+                        )
+                    },
+                }
+            )
+            accepted = row["response_selection_feasible"] is True
+            if accepted:
+                anchor_epoch = index
+                anchor_hash = trial_hash
+                accepted_count += 1
+            else:
+                rejected_count += 1
+            best_updated = index == 1
+            stale = 0 if best_updated else stale + 1
+            row.update(
+                {
+                    "accepted": accepted,
+                    "rejected": not accepted,
+                    "anchor_epoch_after_proposal": anchor_epoch,
+                    "anchor_state_dict_sha256_after_proposal": anchor_hash,
+                    "best_updated": best_updated,
+                    "best_epoch_after_proposal": 1,
+                    "best_state_dict_sha256_after_proposal": best_hash,
+                    "patience_stale_after_proposal": stale,
+                    "patience_stop_after_proposal": stale >= 10,
+                }
+            )
+        history[index] = trainer.attach_history_hash_chain(row, previous_hash)
+        previous_hash = history[index]["history_hash_chain"]["sha256"]
+
+    checkpoint: dict[str, object] = {
+        "state_dict": state_dict,
+        "history": history,
+        "best_epoch": 1,
+        "best_selection_score": best_score,
+        "best_state_dict_sha256": best_hash,
+        "proposal_state_machine": trainer._proposal_state_machine_contract(),
+        "accepted_anchor": {
+            "epoch": anchor_epoch,
+            "state_dict_sha256": anchor_hash,
+            "accepted_proposal_count": accepted_count,
+            "rejected_proposal_count": rejected_count,
+        },
+        "history_hash_chain_sha256": previous_hash,
+        "training_config": {
+            "epochs": 60,
+            "patience": 10,
+            "proposal_state_machine": trainer._proposal_state_machine_contract(),
+        },
+        "provenance": {
+            "proposal_state_machine": trainer._proposal_state_machine_contract()
+        },
+    }
+    report = {
+        field: checkpoint[field]
+        for field in (
+            "best_epoch",
+            "best_state_dict_sha256",
+            "proposal_state_machine",
+            "accepted_anchor",
+            "history_hash_chain_sha256",
+        )
+    }
+    return checkpoint, report
 
 
 def test_runner_freezes_gpu1_authority_defaults_and_per_seed_receipts() -> None:
@@ -72,11 +269,11 @@ def test_runner_freezes_gpu1_authority_defaults_and_per_seed_receipts() -> None:
     assert "--singleton-fd" in source
     assert "verify-lock-fds" in source
     assert "git -C" not in source
-    assert 'GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-78}"' in source
-    assert 'GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-65}"' in source
-    assert 'GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-3}"' in source
-    assert 'GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-75}"' in source
-    assert 'GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-70}"' in source
+    assert 'GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-80}"' in source
+    assert 'GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-70}"' in source
+    assert 'GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-5}"' in source
+    assert 'GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-76}"' in source
+    assert 'GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-72}"' in source
     assert 'GPU_PEER_INDEX=""' in source
     assert "GPU_PEER_PAUSE_TEMP_C=0" in source
     assert "GPU_PEER_RESUME_TEMP_C=0" in source
@@ -105,9 +302,24 @@ def test_runner_freezes_gpu1_authority_defaults_and_per_seed_receipts() -> None:
     assert "journalctl -k" in source
     assert 'authority verify-manifest "${MANIFEST_ARGUMENTS[@]}"' in source
     assert "finalize-seed" in source and "verify-seed" in source
-    assert authority.EPOCH_SELECTION in (
+    assert "accepted_anchor_" in (
         REPO_ROOT / "radio_gs/scripts/train_surface_region_text_response_distill.py"
     ).read_text(encoding="utf-8")
+    assert authority.EPOCH_SELECTION == trainer.RESPONSE_EPOCH_SELECTION
+    assert authority.TRAINING_CONTRACT["response_losses"] == [
+        authority.INDEPENDENT_RESPONSE_LOSS,
+        trainer.SCENE_RESPONSE_LOSS,
+    ]
+    assert authority.TRAINING_CONTRACT["scene_response_objective"] == (
+        trainer._scene_response_objective_contract()
+    )
+    assert authority.PROPOSAL_STATE_MACHINE == trainer._proposal_state_machine_contract()
+    assert authority.TRAINING_CONTRACT["proposal_state_machine"] == (
+        trainer._proposal_state_machine_contract()
+    )
+    assert "scene_profile_weight" not in authority.TRAINING_CONTRACT
+    assert "scene_ranking_weight" not in authority.TRAINING_CONTRACT
+    assert "scene_ranking_temperature" not in authority.TRAINING_CONTRACT
 
 
 def _manifest_cli_arguments(
@@ -161,17 +373,17 @@ def _manifest_cli_arguments(
         "--run-manifest",
         str(tmp_path / "run_manifest.json"),
         "--gpu-max-temp-c",
-        "78",
+        "80",
         "--gpu-start-max-temp-c",
-        "65",
+        "70",
         "--gpu-max-power-limit-w",
         "300.5",
         "--gpu-poll-seconds",
-        "3",
+        "5",
         "--gpu-soft-pause-temp-c",
-        "75",
+        "76",
         "--gpu-soft-resume-temp-c",
-        "70",
+        "72",
         "--gpu-peer-pause-temp-c",
         "0",
         "--gpu-peer-resume-temp-c",
@@ -434,6 +646,139 @@ def test_receipt_command_requires_current_manifest_scene_seed_and_complete_argv(
         )
 
 
+def test_checkpoint_response_provenance_is_exact_and_pairwise_weight_bound(
+    tmp_path: Path,
+) -> None:
+    manifest, _ = _minimal_training_manifest(tmp_path)
+    diagnostic = {"path": str(tmp_path / "diagnostic.json"), "sha256": "a" * 64}
+    manifest["gradient_design_diagnostic"] = diagnostic
+    calibration = dict(manifest["calibrations"][1])
+    calibration["response_lambdas"] = {
+        "independent_response": 0.25,
+        "scene_response": 0.5,
+    }
+    fit_files = manifest["fit_text_bank"]
+    fit_binding = {
+        "artifact_path": fit_files["artifact"]["path"],
+        "artifact_sha256": fit_files["artifact"]["sha256"],
+        "manifest_path": fit_files["manifest"]["path"],
+        "manifest_sha256": fit_files["manifest"]["sha256"],
+        "split": "fit",
+        "query_count": 9808,
+        "split_synset_tab_query_lf_sha256": "b" * 64,
+        "ordered_records_sha256": "c" * 64,
+        "vocabulary_sha256": "d" * 64,
+        "vocabulary_manifest_sha256": "e" * 64,
+        "embedding_semantic_sha256": "f" * 64,
+        "embedding_tensor_sha256": "1" * 64,
+        "text_encoder_snapshot_files_sha256": "2" * 64,
+    }
+    response_contract = {
+        "fit_split_only": True,
+        "benchmark_vocabulary_opened": False,
+        "fit_text_bank": fit_binding,
+        "calibration_manifest": calibration["manifest"]["path"],
+        "calibration_manifest_sha256": calibration["manifest"]["sha256"],
+        "calibration_seed": 1,
+        "response_lambdas": calibration["response_lambdas"],
+        "response_branch_gradient_target_ratio": 0.25,
+        "total_response_gradient_ratio_upper_bound": 0.5,
+        "losses": [
+            authority.INDEPENDENT_RESPONSE_LOSS,
+            authority.SCENE_RESPONSE_LOSS,
+        ],
+        "scene_response_objective": dict(authority.SCENE_RESPONSE_OBJECTIVE),
+        "complete_scene_batching": True,
+        "design_diagnostic": {
+            **diagnostic,
+            "role": "seed0_design_prior_only_per_seed_values_remeasured",
+            "measured_seed": 0,
+            "calibration_reuses_measured_values": False,
+            "diagnostic_surface_control": manifest["surface_promotion"][
+                "selected_readouts"
+            ][0]["checkpoint"],
+        },
+    }
+    assert authority.validate_response_distillation_provenance(
+        response_contract,
+        manifest=manifest,
+        calibration=calibration,
+        seed=1,
+    ) == response_contract
+
+    stale_weight = json.loads(json.dumps(response_contract))
+    stale_weight["scene_response_objective"]["profile_weight"] = 0.001
+    with pytest.raises(ValueError, match="response-loss provenance"):
+        authority.validate_response_distillation_provenance(
+            stale_weight,
+            manifest=manifest,
+            calibration=calibration,
+            seed=1,
+        )
+
+    extra_field = {**response_contract, "legacy_compatibility": True}
+    with pytest.raises(ValueError, match="response-loss provenance"):
+        authority.validate_response_distillation_provenance(
+            extra_field,
+            manifest=manifest,
+            calibration=calibration,
+            seed=1,
+        )
+
+
+def test_schema2_gradient_diagnostic_recomputes_all_pairwise_balance_bounds() -> None:
+    record = authority.FROZEN_GRADIENT_DESIGN_DIAGNOSTIC
+    source = Path(authority.FROZEN_GRADIENT_DESIGN_DIAGNOSTIC_LEXICAL_PATH)
+    assert authority.file_record(source) == record
+    payload = json.loads(source.read_text(encoding="utf-8"))
+    bindings = payload["bindings"]
+    arguments = {
+        "surface_control": bindings["surface_control"],
+        "train_caches": bindings["train_caches"],
+        "radio_checkpoint": bindings["radio_checkpoint"],
+        "fit_text_bank": {
+            "artifact": bindings["fit_text_bank"],
+            "manifest": bindings["fit_text_bank_manifest"],
+        },
+    }
+    assert authority.validate_gradient_design_diagnostic(
+        payload, **arguments
+    ) == payload
+    assert payload["component_balance"][
+        "weighted_profile_to_ranking_gradient_ratio"
+    ] == pytest.approx(1.0449448819955465, rel=0.0, abs=0.0)
+
+    attacks = []
+    stale_schema = json.loads(json.dumps(payload))
+    stale_schema["schema_version"] = 1
+    attacks.append(stale_schema)
+    stale_composite = json.loads(json.dumps(payload))
+    stale_composite["losses"]["scene_response"] += 1e-4
+    attacks.append(stale_composite)
+    stale_lambda = json.loads(json.dumps(payload))
+    stale_lambda["equal_surface_gradient_lambdas"]["scene_profile"] += 1e-4
+    attacks.append(stale_lambda)
+    stale_bound = json.loads(json.dumps(payload))
+    stale_bound["weighted_component_gradient_l2_upper_bounds"][
+        "triangle_sum"
+    ] += 1e-4
+    attacks.append(stale_bound)
+    stale_balance = json.loads(json.dumps(payload))
+    stale_balance["component_balance"][
+        "weighted_profile_to_ranking_gradient_ratio"
+    ] = 1.0
+    attacks.append(stale_balance)
+    stale_training = json.loads(json.dumps(payload))
+    stale_training["bindings"]["training_implementation"]["sha256"] = "0" * 64
+    attacks.append(stale_training)
+    stale_loss = json.loads(json.dumps(payload))
+    stale_loss["bindings"]["loss_implementation"]["sha256"] = "0" * 64
+    attacks.append(stale_loss)
+    for attack in attacks:
+        with pytest.raises(ValueError):
+            authority.validate_gradient_design_diagnostic(attack, **arguments)
+
+
 def test_journal_and_telemetry_intervals_reject_cross_seed_replay(tmp_path: Path) -> None:
     start = 1_754_000_000
     end = start + 10
@@ -530,6 +875,7 @@ def test_nofollow_nonblocking_lock_rejects_symlink_and_contention(
 ) -> None:
     repo = tmp_path / "frozen-source-without-git"
     repo.mkdir()
+    repo.chmod(0o555)
     lock_parent = tmp_path / "main"
     lock_parent.mkdir()
     lock_root = lock_parent / "output"
@@ -665,6 +1011,9 @@ def test_text_and_surface_singleton_blocks_unlink_recreate_cross_runner(
     address = f"\0radio-gs-cross-runner-{os.getpid()}".encode("ascii")
     monkeypatch.setattr(authority, "CANONICAL_LOCK_ROOT", lock_root)
     monkeypatch.setattr(authority, "GPU1_SINGLETON_ADDRESS", address)
+    snapshot = tmp_path / "snapshot"
+    snapshot.mkdir()
+    snapshot.chmod(0o555)
 
     surface_file_lock = gpu1_lock._open_canonical_lock(lock_path)
     surface_singleton = gpu1_lock._open_kernel_singleton(address)
@@ -672,7 +1021,7 @@ def test_text_and_surface_singleton_blocks_unlink_recreate_cross_runner(
         lock_path.unlink()
         with pytest.raises(OSError) as caught:
             authority.run_locked(
-                repo_root=tmp_path,
+                repo_root=snapshot,
                 lock_root=lock_root,
                 output_root=output,
                 command=[sys.executable, "-c", "raise SystemExit(0)"],
@@ -687,6 +1036,7 @@ def test_text_and_surface_singleton_blocks_unlink_recreate_cross_runner(
 def test_run_locked_rejects_any_noncanonical_lock_root(tmp_path: Path) -> None:
     source = tmp_path / "snapshot"
     source.mkdir()
+    source.chmod(0o555)
     fake = tmp_path / "other/output"
     fake.mkdir(parents=True)
     with pytest.raises(ValueError, match="/root/RADIO-GS/output"):
@@ -807,10 +1157,13 @@ def test_controlled_root_still_rejects_every_child_symlink(
         "GPU1_SINGLETON_ADDRESS",
         f"\0radio-gs-text-child-symlink-{os.getpid()}".encode("ascii"),
     )
+    snapshot = tmp_path / "snapshot"
+    snapshot.mkdir()
+    snapshot.chmod(0o555)
 
     with pytest.raises(ValueError, match="symlink/non-directory output component"):
         authority.run_locked(
-            repo_root=tmp_path,
+            repo_root=snapshot,
             lock_root=lexical_root,
             output_root=lexical_root / "optimization/run",
             command=[sys.executable, "-c", "raise SystemExit(0)"],
@@ -875,16 +1228,150 @@ def test_real_deployment_lock_root_preflight_is_read_only() -> None:
     assert (before.st_dev, before.st_ino) == (after.st_dev, after.st_ino)
 
 
-def test_authority_and_promotion_independently_recompute_response_selection() -> None:
+def test_authority_independently_recomputes_v3_robust_response_selection() -> None:
     history = _history()
-    assert authority.recompute_response_epoch_selection(history) == (1, 0.95)
-    assert promotion._recompute_response_primary_selection(history) == (1, 0.95)
+    def recompute(value: object) -> tuple[int, float]:
+        return authority.recompute_response_epoch_selection(
+            value, selection_contract=authority.LEGACY_EPOCH_SELECTION
+        )
+
+    assert recompute(history) == (1, 0.959)
     tampered = [dict(row) for row in history]
     tampered[0]["selection_score"] = 0.99
     with pytest.raises(ValueError, match="independently reproduced"):
-        authority.recompute_response_epoch_selection(tampered)
-    with pytest.raises(ValueError, match="independent recomputation"):
-        promotion._recompute_response_primary_selection(tampered)
+        recompute(tampered)
+
+    stale_fit_feasibility = json.loads(json.dumps(history))
+    stale_fit_feasibility[1]["fit_response_per_scene_control_feasible"] = False
+    with pytest.raises(ValueError, match="fit-scene feasibility"):
+        recompute(stale_fit_feasibility)
+
+    missing_scene_metrics = json.loads(json.dumps(history))
+    del missing_scene_metrics[1]["text_response_scene_metrics"]
+    with pytest.raises(ValueError, match="scene_metrics must be non-empty"):
+        recompute(missing_scene_metrics)
+
+    stale_objective = json.loads(json.dumps(history))
+    stale_objective[2]["scene_response_objective"]["profile_weight"] = 0.001
+    with pytest.raises(ValueError, match="scene-response objective"):
+        recompute(stale_objective)
+
+
+def test_manifest_accepts_only_the_exact_registered_legacy_contract() -> None:
+    legacy = {"training_contract": authority.LEGACY_TRAINING_CONTRACT}
+    registered_path = Path(authority.REGISTERED_LEGACY_MANIFEST["path"])
+    registered_sha = authority.REGISTERED_LEGACY_MANIFEST["sha256"]
+    assert authority._manifest_selection_contract(
+        legacy,
+        digest=registered_sha,
+        source=registered_path,
+    ) == authority.LEGACY_EPOCH_SELECTION
+
+    with pytest.raises(ValueError, match="exact registered formal legacy"):
+        authority._manifest_selection_contract(
+            legacy,
+            digest="0" * 64,
+            source=registered_path,
+        )
+    with pytest.raises(ValueError, match="exact registered formal legacy"):
+        authority._manifest_selection_contract(
+            legacy,
+            digest=registered_sha,
+            source=registered_path.with_name("copied_manifest.json"),
+        )
+
+    current = {"training_contract": authority.TRAINING_CONTRACT}
+    assert authority._manifest_selection_contract(
+        current,
+        digest="0" * 64,
+        source=Path("/unregistered/current/run_manifest.json"),
+    ) == authority.EPOCH_SELECTION
+
+
+def test_authority_replays_v4_accepted_anchor_hash_chain_best_and_patience() -> None:
+    checkpoint, report = _v4_checkpoint()
+    assert authority.validate_v4_proposal_checkpoint(
+        checkpoint, report=report
+    ) == (1, 0.959)
+    accepted_anchor = checkpoint["accepted_anchor"]
+    assert accepted_anchor["accepted_proposal_count"] == 6
+    assert accepted_anchor["rejected_proposal_count"] == 5
+    assert checkpoint["history"][-1]["patience_stale_after_proposal"] == 10
+    assert checkpoint["history"][-1]["patience_stop_after_proposal"] is True
+
+
+def test_authority_v4_proposal_contract_is_fail_closed_under_tampering() -> None:
+    def alpha(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["proposal"]["alpha_numerator"] = 2
+
+    def reset(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["proposal"]["optimizer_state_reset"] = False
+
+    def validation_count(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["proposal"]["validation_evaluations"] = 2
+
+    def backtracking(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["proposal"]["backtracking"] = "halve_until_fit"
+
+    def anchor_chain(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][2]["proposal"]["source_anchor_epoch"] = 0
+
+    def acceptance(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][2]["accepted"] = True
+
+    def robust_feasibility(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][2]["response_selection_feasible"] = True
+
+    def best_fields(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["best_updated"] = False
+
+    def patience(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][3]["patience_stale_after_proposal"] = 99
+
+    def loss_state(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["loss_measurement_state"] = "trial_state"
+
+    def loss_mirror(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][1]["loss"] += 1.0
+
+    def history_hash(checkpoint: dict[str, object]) -> None:
+        checkpoint["history"][4]["history_hash_chain"]["sha256"] = "f" * 64
+
+    for mutate in (
+        alpha,
+        reset,
+        validation_count,
+        backtracking,
+        anchor_chain,
+        acceptance,
+        robust_feasibility,
+        best_fields,
+        patience,
+        loss_state,
+        loss_mirror,
+        history_hash,
+    ):
+        checkpoint, report = _v4_checkpoint()
+        mutate(checkpoint)
+        with pytest.raises(ValueError):
+            authority.validate_v4_proposal_checkpoint(checkpoint, report=report)
+
+
+def test_authority_v4_binds_checkpoint_and_report_terminal_fields() -> None:
+    checkpoint, report = _v4_checkpoint()
+    checkpoint["accepted_anchor"]["accepted_proposal_count"] += 1
+    with pytest.raises(ValueError, match="accepted-anchor/best/hash-chain"):
+        authority.validate_v4_proposal_checkpoint(checkpoint, report=report)
+
+    checkpoint, report = _v4_checkpoint()
+    checkpoint["training_config"]["proposal_state_machine"] = {}
+    with pytest.raises(ValueError, match="proposal contract"):
+        authority.validate_v4_proposal_checkpoint(checkpoint, report=report)
+
+    checkpoint, report = _v4_checkpoint()
+    report["best_state_dict_sha256"] = "f" * 64
+    with pytest.raises(ValueError, match="trainer report proposal"):
+        authority.validate_v4_proposal_checkpoint(checkpoint, report=report)
 
 
 def test_runtime_closure_covers_authority_transitive_sources(
@@ -933,6 +1420,38 @@ def test_runtime_closure_covers_authority_transitive_sources(
             tampered,
             source_snapshot_root=REPO_ROOT,
         )
+
+
+def test_readonly_source_snapshot_rejects_mutability_and_aliases(
+    tmp_path: Path,
+) -> None:
+    snapshot = tmp_path / "snapshot"
+    package = snapshot / "radio_gs"
+    package.mkdir(parents=True)
+    source = package / "__init__.py"
+    source.write_text("VALUE = 1\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="writable entry"):
+        authority.verify_readonly_source_snapshot(snapshot)
+
+    source.chmod(0o444)
+    package.chmod(0o555)
+    snapshot.chmod(0o555)
+    assert authority.verify_readonly_source_snapshot(snapshot) == snapshot.resolve()
+
+    alias = tmp_path / "snapshot-link"
+    alias.symlink_to(snapshot, target_is_directory=True)
+    with pytest.raises(ValueError, match="must not traverse a symlink"):
+        authority.verify_readonly_source_snapshot(alias)
+
+    snapshot.chmod(0o755)
+    package.chmod(0o755)
+    hardlink = package / "hardlink.py"
+    os.link(source, hardlink)
+    package.chmod(0o555)
+    snapshot.chmod(0o555)
+    with pytest.raises(ValueError, match="multiply linked file"):
+        authority.verify_readonly_source_snapshot(snapshot)
 
 
 def test_training_inputs_do_not_use_generic_torch_load_fallback() -> None:

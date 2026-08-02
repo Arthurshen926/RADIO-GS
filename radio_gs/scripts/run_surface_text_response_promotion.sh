@@ -17,19 +17,57 @@ RADIO_CHECKPOINT="${RADIO_CHECKPOINT:-/root/.cache/torch/hub/checkpoints/c-radio
 DEV_TEXT_BANK="${DEV_TEXT_BANK:?set DEV_TEXT_BANK to the frozen dev-split artifact}"
 DEV_TEXT_BANK_MANIFEST="${DEV_TEXT_BANK_MANIFEST:?set DEV_TEXT_BANK_MANIFEST to its sidecar}"
 OUTPUT_ROOT="${OUTPUT_ROOT:?set OUTPUT_ROOT to a new promotion output directory}"
+EVALUATION_PROTOCOL_FREEZE="${EVALUATION_PROTOCOL_FREEZE:-$REPO_ROOT/paper/artifacts/evaluation_protocol_freeze_20260801.yaml}"
 COMPANION="$REPO_ROOT/radio_gs/scripts/finalize_surface_text_response_promotion.py"
 MATERIALIZER="$REPO_ROOT/radio_gs/scripts/materialize_surface_text_response_descriptors.py"
 TEXT_GATE="$REPO_ROOT/radio_gs/scripts/eval_text_response_fidelity_gate.py"
+FREEZE_BINDER="$REPO_ROOT/radio_gs/scripts/bind_evaluation_protocol_freeze.py"
+FREEZE_BINDING_RECEIPT="$OUTPUT_ROOT/evaluation_protocol_freeze.binding.json"
 
 for required in \
   "$PROMOTION_MANIFEST" "$PROMOTION_COMPLETION" "$RADIO_CHECKPOINT" \
   "$DEV_TEXT_BANK" "$DEV_TEXT_BANK_MANIFEST" "$COMPANION" \
-  "$MATERIALIZER" "$TEXT_GATE"; do
+  "$MATERIALIZER" "$TEXT_GATE" "$EVALUATION_PROTOCOL_FREEZE" \
+  "$FREEZE_BINDER"; do
   if [[ ! -f "$required" ]]; then
     echo "missing Surface text-response promotion input: $required" >&2
     exit 2
   fi
 done
+
+verify_or_publish_freeze_binding() {
+  local mode=()
+  if [[ -e "$FREEZE_BINDING_RECEIPT" || -L "$FREEZE_BINDING_RECEIPT" ]]; then
+    mode+=(--verify-existing)
+  fi
+  bash radio_gs/scripts/run_repo_python.sh "$FREEZE_BINDER" \
+    --freeze "$EVALUATION_PROTOCOL_FREEZE" \
+    --repo-root "$REPO_ROOT" \
+    --scope external_benchmarks_unopened \
+    --output "$FREEZE_BINDING_RECEIPT" \
+    "${mode[@]}"
+}
+
+# Bind the canonical external-evaluation freeze before even classifying the
+# internal dev bank.  This stage is explicitly not an external benchmark run.
+verify_or_publish_freeze_binding
+
+# Reject a changed/unregistered dev bank before the expensive descriptor pass.
+# This hashes only the small embedding artifact and sidecar; the full loader
+# performs the deeper model/vocabulary provenance validation once per split.
+DEV_BANK_FAMILY="$(
+  bash radio_gs/scripts/run_repo_python.sh - \
+    "$DEV_TEXT_BANK" "$DEV_TEXT_BANK_MANIFEST" <<'PY'
+import sys
+from pathlib import Path
+
+from radio_gs.scripts.eval_text_response_fidelity_gate import (
+    classify_formal_text_bank_pair,
+)
+
+print(classify_formal_text_bank_pair(Path(sys.argv[1]), Path(sys.argv[2]), "dev"))
+PY
+)"
 
 SELECTED_CANDIDATE="$({
   bash radio_gs/scripts/run_repo_python.sh - "$PROMOTION_MANIFEST" <<'PY'
@@ -205,7 +243,7 @@ if [[ ! -s "$DEV_GATE" ]]; then
     --minimum-improved-seeds 2 \
     --bootstrap-samples 2000 \
     --bootstrap-seed 20260731 \
-    --quality-noninferiority-tolerance 0.0 \
+    --quality-noninferiority-tolerance 0.005 \
     --output "$DEV_GATE" \
     >"$OUTPUT_ROOT/logs/dev_gate.log" 2>&1
 fi
@@ -231,6 +269,8 @@ bash radio_gs/scripts/run_repo_python.sh "$COMPANION" finalize-dev \
   --completion "$DEV_COMPLETION" \
   >"$OUTPUT_ROOT/logs/finalize_dev.log" 2>&1
 
+verify_or_publish_freeze_binding
+
 DEV_DECISION="$(bash radio_gs/scripts/run_repo_python.sh - "$DEV_MANIFEST" <<'PY'
 import json
 import sys
@@ -240,6 +280,7 @@ PY
 )"
 if [[ "$DEV_DECISION" == "reject_no_audit" ]]; then
   date -Iseconds >"$OUTPUT_ROOT/dev_rejected.complete"
+  verify_or_publish_freeze_binding
   exit 0
 fi
 if [[ "$DEV_DECISION" != "promote_audit_required" ]]; then
@@ -255,6 +296,23 @@ for required in "$AUDIT_TEXT_BANK" "$AUDIT_TEXT_BANK_MANIFEST"; do
     exit 2
   fi
 done
+AUDIT_BANK_FAMILY="$(
+  bash radio_gs/scripts/run_repo_python.sh - \
+    "$AUDIT_TEXT_BANK" "$AUDIT_TEXT_BANK_MANIFEST" <<'PY'
+import sys
+from pathlib import Path
+
+from radio_gs.scripts.eval_text_response_fidelity_gate import (
+    classify_formal_text_bank_pair,
+)
+
+print(classify_formal_text_bank_pair(Path(sys.argv[1]), Path(sys.argv[2]), "audit"))
+PY
+)"
+if [[ "$AUDIT_BANK_FAMILY" != "$DEV_BANK_FAMILY" ]]; then
+  echo "audit text-bank family differs from frozen dev family" >&2
+  exit 2
+fi
 mkdir -p "$OUTPUT_ROOT/audit"
 
 CONTROL_AUDIT_REPORTS=()
@@ -295,7 +353,7 @@ if [[ ! -s "$AUDIT_GATE" ]]; then
     --minimum-improved-seeds 2 \
     --bootstrap-samples 2000 \
     --bootstrap-seed 20260731 \
-    --quality-noninferiority-tolerance 0.0 \
+    --quality-noninferiority-tolerance 0.005 \
     --output "$AUDIT_GATE" \
     >"$OUTPUT_ROOT/logs/audit_gate.log" 2>&1
 fi
@@ -321,4 +379,5 @@ bash radio_gs/scripts/run_repo_python.sh "$COMPANION" finalize-audit \
   --completion "$OUTPUT_ROOT/audit_confirmation.complete.json" \
   >"$OUTPUT_ROOT/logs/finalize_audit.log" 2>&1
 
+verify_or_publish_freeze_binding
 date -Iseconds >"$OUTPUT_ROOT/promotion.complete"

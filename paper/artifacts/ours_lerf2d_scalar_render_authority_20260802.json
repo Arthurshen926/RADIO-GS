@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf2d_scalar_map_render_authority",
+  "method": "RADIO-GS canonical SurfaceRegionV2 native multiscale",
+  "canonical_task_id": "concept_lerf2d_occamlgs",
+  "registry_row": "lerf2d_occamlgs_official_checkpoint_context_20260731",
+  "protocol_freeze": {
+    "freeze_id": "evaluation_protocols_20260801_v1",
+    "sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916"
+  },
+  "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+  "scenes": {
+    "figurines": {
+      "scene_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines",
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_figurines_radio_verified_pose.yaml",
+        "sha256": "e3e213f6551aaa339683b8de18459ba87427f8146d2709ff6173cd58b46be8bd"
+      },
+      "geometry_checkpoint": {
+        "path": "/root/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+      },
+      "geometry_ply": {
+        "path": "/root/RADIO-GS/output/3dgs_models/figurines/point_cloud/iteration_30000/point_cloud.ply",
+        "sha256": "e9dfe3d86c5cf9e90e647c4c5aafd6deb0f8e87e37ec80731140ddb82f4485cc"
+      },
+      "query_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/figurines.pt",
+        "sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac"
+      },
+      "camera_sources": {
+        "colmap_cameras_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/cameras.bin",
+          "sha256": "f15177de04831c7052822d0694ede2de78151052de5199df9afaacf141ae7154"
+        },
+        "colmap_images_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/figurines/sparse/0/images.bin",
+          "sha256": "ecbf431d68982126fcae865cf2d951f4cdf14c70348f760939543b5cb8c7ee9e"
+        }
+      }
+    },
+    "ramen": {
+      "scene_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen",
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+        "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+      },
+      "geometry_checkpoint": {
+        "path": "/root/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+      },
+      "geometry_ply": {
+        "path": "/root/RADIO-GS/output/3dgs_models/ramen/point_cloud/iteration_30000/point_cloud.ply",
+        "sha256": "52ba52b880b1ba69b9010f25f13022a4a6ec8d81c9aab86713c6b866e9d6bc4c"
+      },
+      "query_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/ramen.pt",
+        "sha256": "62a6e7381f08c6a288e04a03cc35b6469c9911e9885c62b1691d7de4d751e5ee"
+      },
+      "camera_sources": {
+        "colmap_cameras_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/cameras.bin",
+          "sha256": "72b479230bcca2ca5952de882ef09f84f048d23e4297ab4585e24c3427c3347c"
+        },
+        "colmap_images_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/sparse/0/images.bin",
+          "sha256": "a2710cb4285f7930ee382a6f739fc352b9a579c98f1dd912c05c42ac2a6d21af"
+        }
+      }
+    },
+    "teatime": {
+      "scene_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/teatime",
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+        "sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775"
+      },
+      "geometry_checkpoint": {
+        "path": "/root/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep_seed7/checkpoints/best.pth",
+        "sha256": "f5be0dea030dba6b69906e8b49da740d2722ebb589fe1f9d6bce4731de877f53"
+      },
+      "geometry_ply": {
+        "path": "/root/RADIO-GS/output/3dgs_models/teatime/point_cloud/iteration_30000/point_cloud.ply",
+        "sha256": "4d7fc58999654bf450e7bab61c17d1c66f52244bb9df8d63908cf79223e139b2"
+      },
+      "query_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/teatime.pt",
+        "sha256": "42d4501662a9ce03b78e7247ddb174ad2a7d71905c0ee883aaab4d9c06ce13b5"
+      },
+      "camera_sources": {
+        "colmap_cameras_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/teatime/sparse/0/cameras.bin",
+          "sha256": "4cc6cf691103e8cd52d50d4f252ec830168e0a5f951563a6f528c915150b671f"
+        },
+        "colmap_images_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/teatime/sparse/0/images.bin",
+          "sha256": "001969ee5028b53f97bd95a4cd519bfb9326f99cbfa1d94b127d10112833e70c"
+        }
+      }
+    },
+    "waldo_kitchen": {
+      "scene_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/waldo_kitchen",
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+        "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+      },
+      "geometry_checkpoint": {
+        "path": "/root/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+      },
+      "geometry_ply": {
+        "path": "/root/RADIO-GS/output/3dgs_models/waldo_kitchen/point_cloud/iteration_30000/point_cloud.ply",
+        "sha256": "88d121a95bec8141593c05a80941d211853ce78714a561104f6295fd2f0cdc69"
+      },
+      "query_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/waldo_kitchen.pt",
+        "sha256": "4df19f049f9c2c2803467b8e090df9e8343ef5846393e0f25327e952104d9af5"
+      },
+      "camera_sources": {
+        "colmap_cameras_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/waldo_kitchen/sparse/0/cameras.bin",
+          "sha256": "19696bf503152fe5f7d9778577a81414024c1659e05a5aad55bd4999ae167e11"
+        },
+        "colmap_images_bin": {
+          "path": "/mnt/pool/sqy/3d_understanding/lerf_ovs/waldo_kitchen/sparse/0/images.bin",
+          "sha256": "568a1e5aed5a3c2c950da9791a2147c544a76cf391df499f05dff6cd55134f46"
+        }
+      }
+    }
+  }
+}

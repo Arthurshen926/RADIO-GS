@@ -18,6 +18,8 @@ from scipy.spatial import cKDTree
 
 
 IOU_CLICK_COUNTS = (1, 2, 3, 5, 10, 15)
+FROZEN_FULL312_IOU_CLICK_COUNTS = (1, 2, 3, 5, 10)
+FROZEN_FULL312_MAX_CLICKS = 10
 NOC_THRESHOLDS = (0.50, 0.65, 0.80, 0.85, 0.90)
 
 
@@ -295,9 +297,25 @@ def aggregate_official_metrics(
     rows = [{int(key): float(value) for key, value in row.items()} for row in trajectories]
     if not rows:
         raise ValueError("no interactive trajectories to aggregate")
+    max_clicks = int(max_clicks)
+    if max_clicks <= 0:
+        raise ValueError("max_clicks must be positive")
+    required_steps = set(range(1, max_clicks + 1))
+    for index, row in enumerate(rows):
+        missing = sorted(required_steps - set(row))
+        if missing:
+            raise ValueError(
+                "interactive trajectory misses click steps for aggregation: "
+                f"row={index}, missing={missing[:4]}"
+            )
+    # The historical evaluator reports IoU@15 when it runs 20 clicks.  A
+    # frozen 10-click run must not index a nonexistent click 15.
+    iou_click_counts = tuple(
+        count for count in IOU_CLICK_COUNTS if count <= max_clicks
+    )
     metrics = {
         f"IoU@{count}": float(np.mean([row[count] for row in rows]))
-        for count in IOU_CLICK_COUNTS
+        for count in iou_click_counts
     }
     for threshold in NOC_THRESHOLDS:
         values = []
@@ -310,6 +328,48 @@ def aggregate_official_metrics(
             values.append(reached)
         metrics[f"NoC@{int(round(threshold * 100))}"] = float(np.mean(values))
     return metrics
+
+
+def aggregate_frozen_full312_metrics(
+    trajectories: Iterable[Mapping[int, float]],
+) -> dict[str, float]:
+    """Aggregate the frozen full312 headline and nothing else.
+
+    The paper-facing ScanNet40 contract ends after click 10 and reports
+    query-micro IoU at exactly 1/2/3/5/10 clicks.  Rejecting extra as well as
+    missing steps prevents a legacy 15/20-click artifact from being silently
+    relabelled as a frozen result.
+    """
+
+    rows = [
+        {int(key): float(value) for key, value in row.items()}
+        for row in trajectories
+    ]
+    if not rows:
+        raise ValueError("no frozen full312 trajectories to aggregate")
+    required_steps = set(range(1, FROZEN_FULL312_MAX_CLICKS + 1))
+    for index, row in enumerate(rows):
+        if set(row) != required_steps:
+            missing = sorted(required_steps - set(row))
+            extra = sorted(set(row) - required_steps)
+            raise ValueError(
+                "frozen full312 trajectory must contain exactly clicks 1..10: "
+                f"row={index}, missing={missing[:4]}, extra={extra[:4]}"
+            )
+        invalid = [
+            (step, value)
+            for step, value in row.items()
+            if not np.isfinite(value) or value < 0.0 or value > 1.0
+        ]
+        if invalid:
+            raise ValueError(
+                "frozen full312 trajectory contains invalid IoU values: "
+                f"row={index}, values={invalid[:4]}"
+            )
+    return {
+        f"IoU@{count}": float(np.mean([row[count] for row in rows]))
+        for count in FROZEN_FULL312_IOU_CLICK_COUNTS
+    }
 
 
 def interaction_health_metrics(

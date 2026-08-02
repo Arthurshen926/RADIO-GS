@@ -932,6 +932,7 @@ def finetune(args: argparse.Namespace) -> dict:
         "selection_policy": args.selection_policy,
         "max_validation_drop": float(args.max_validation_drop),
         "max_mpr_drop": float(args.max_mpr_drop),
+        "max_capability_drop": float(args.max_capability_drop),
         "semantic_capability": {
             "enabled": semantic_enabled,
             "teacher_root": str(semantic_teacher_root.resolve()) if semantic_enabled else "",

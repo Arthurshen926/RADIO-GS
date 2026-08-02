@@ -18,6 +18,9 @@ from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     raster_fusion_reliability,
     validate_raster_reliability_policy,
 )
+from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+    select_top_raster_hits_per_gaussian,
+)
 
 
 def _strict_feature_bundle(
@@ -228,6 +231,14 @@ def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
     }
+    candidate_gaussian_ids = torch.tensor([0, 2, 0], dtype=torch.int32)
+    candidate_pixel_ids = torch.tensor([1, 1, 5], dtype=torch.int32)
+    candidate_weights = torch.tensor([0.25, 0.75, 0.1])
+    producer_keep = select_top_raster_hits_per_gaussian(
+        candidate_gaussian_ids,
+        candidate_weights,
+        n_gaussians=3,
+    )
     path = tmp_path / "responsibility.pt"
     torch.save(
         {
@@ -235,9 +246,11 @@ def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(
             "metadata": contract,
             "assignments": [
                 {
-                    "gaussian_ids": torch.tensor([0, 2], dtype=torch.int32),
-                    "pixel_ids": torch.tensor([1, 5], dtype=torch.int32),
-                    "weights": torch.tensor([0.25, 0.75]),
+                    # Gaussian-top-1 lifting permits distinct Gaussians to
+                    # share a feature pixel.
+                    "gaussian_ids": candidate_gaussian_ids[producer_keep],
+                    "pixel_ids": candidate_pixel_ids[producer_keep],
+                    "weights": candidate_weights[producer_keep],
                 }
             ],
         },
@@ -269,6 +282,108 @@ def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(
             path,
             expected_contract={**contract, "gaussian_state_sha256": "other"},
             num_gaussians=3,
+        )
+
+
+def test_shared_responsibility_cache_accepts_producer_top1_float_ties(
+    tmp_path,
+) -> None:
+    contract = {
+        "selected_frame_indices": [3],
+        "feature_height": 2,
+        "feature_width": 3,
+    }
+    path = tmp_path / "responsibility.pt"
+    torch.save(
+        {
+            "schema_version": 1,
+            "metadata": contract,
+            "assignments": [
+                {
+                    # This is the rare boundary case emitted by the producer's
+                    # ``weight >= max_weight - 1e-8`` predicate.
+                    "gaussian_ids": torch.tensor([0, 0, 1], dtype=torch.int32),
+                    "pixel_ids": torch.tensor([1, 2, 2], dtype=torch.int32),
+                    "weights": torch.tensor(
+                        [0.25, 0.25 - 8e-9, 0.5], dtype=torch.float32
+                    ),
+                }
+            ],
+        },
+        path,
+    )
+
+    assignments, _ = _load_responsibility_cache(
+        path,
+        expected_contract=contract,
+        num_gaussians=2,
+    )
+
+    assert assignments[0]["gaussian_ids"].tolist() == [0, 0, 1]
+    assert assignments[0]["pixel_ids"].tolist() == [1, 2, 2]
+
+
+def test_shared_responsibility_cache_rejects_non_top1_duplicate_gaussian(
+    tmp_path,
+) -> None:
+    contract = {
+        "selected_frame_indices": [3],
+        "feature_height": 2,
+        "feature_width": 3,
+    }
+    path = tmp_path / "responsibility.pt"
+    torch.save(
+        {
+            "schema_version": 1,
+            "metadata": contract,
+            "assignments": [
+                {
+                    "gaussian_ids": torch.tensor([0, 0], dtype=torch.int32),
+                    "pixel_ids": torch.tensor([1, 2], dtype=torch.int32),
+                    "weights": torch.tensor([0.25, 0.5], dtype=torch.float32),
+                }
+            ],
+        },
+        path,
+    )
+
+    with pytest.raises(ValueError, match="outside the top-1 tie tolerance"):
+        _load_responsibility_cache(
+            path,
+            expected_contract=contract,
+            num_gaussians=1,
+        )
+
+
+def test_shared_responsibility_cache_rejects_duplicate_gaussian_pixel_pair(
+    tmp_path,
+) -> None:
+    contract = {
+        "selected_frame_indices": [3],
+        "feature_height": 2,
+        "feature_width": 3,
+    }
+    path = tmp_path / "responsibility.pt"
+    torch.save(
+        {
+            "schema_version": 1,
+            "metadata": contract,
+            "assignments": [
+                {
+                    "gaussian_ids": torch.tensor([0, 0], dtype=torch.int32),
+                    "pixel_ids": torch.tensor([1, 1], dtype=torch.int32),
+                    "weights": torch.tensor([0.5, 0.5], dtype=torch.float32),
+                }
+            ],
+        },
+        path,
+    )
+
+    with pytest.raises(ValueError, match="repeats Gaussian/pixel pairs"):
+        _load_responsibility_cache(
+            path,
+            expected_contract=contract,
+            num_gaussians=1,
         )
 
 

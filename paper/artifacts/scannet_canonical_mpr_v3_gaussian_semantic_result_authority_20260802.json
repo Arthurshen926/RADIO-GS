@@ -1,0 +1,284 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_scannet_canonical_mpr_v3_gaussian_semantic_result_authority",
+  "contract": "radio_gs.scannet_canonical_mpr_v3_gaussian_semantic_result_authority.v1",
+  "status": "formal_result_frozen_exact",
+  "frozen_at": "2026-08-02",
+  "benchmark_binding": {
+    "benchmark": "ScanNet OVS",
+    "canonical_task_id": "concept_scannet_ovs_vala_paper8",
+    "registry_row": "scannet_ovs_vala_compatibility_20260611",
+    "external_protocol_freeze_id": "evaluation_protocols_20260801_v1",
+    "cohort": "paper8",
+    "scenes": [
+      "scene0000_00",
+      "scene0062_00",
+      "scene0070_00",
+      "scene0097_00",
+      "scene0140_00",
+      "scene0347_00",
+      "scene0400_00",
+      "scene0590_00"
+    ],
+    "splits": ["19", "15", "10"]
+  },
+  "method_binding": {
+    "method_family": "canonical_mpr_v3",
+    "mainline_name": "canonical-mpr-v3",
+    "method_freeze_name": "canonical-mpr-v3-evaluation-freeze",
+    "totality_contract": "radio_gs.canonical_mpr_v3_gaussian_semantic_totality.v1",
+    "materializer_contract": "radio_gs.ours_scannet_ovs_canonical_mpr_v3_score_materializer.v2",
+    "semantic_score_cache_contract": "radio_gs.ours_scannet_ovs_gaussian_scores.v1",
+    "prediction_domain": "optimized_gaussian_checkpoint_rows",
+    "semantic_readout": "direct_per_gaussian_class_argmax",
+    "spatial_transfer": "none"
+  },
+  "derivation_binding": {
+    "pseudo_gt": "VALA anisotropic Mahalanobis-density vote",
+    "metric_weights": "activated_opacity * activated_scale.prod()",
+    "class_aggregation": "present classes within each scene",
+    "scene_aggregation": "unweighted scene macro",
+    "prediction_rule": "restrict_the_single_exact_split19_score_bank_to_each_frozen_split_then_per_row_argmax",
+    "required_scene_evidence": [
+      "semantic_score_cache",
+      "semantic_score_cache_receipt",
+      "pseudo_gt",
+      "prediction"
+    ],
+    "receipt_transitive_sources": [
+      "config_source",
+      "geometry_checkpoint",
+      "canonical_field_source",
+      "mpr_source",
+      "support_graph_source"
+    ],
+    "exact_array_replay_required": true,
+    "exact_metric_replay_required": true
+  },
+  "totality_freeze": {
+    "path": "/root/RADIO-GS/paper/artifacts/scannet_canonical_mpr_v3_gaussian_semantic_totality_freeze_20260802_v2.json",
+    "bytes": 6976,
+    "sha256": "9a11b6d6db11ed338c76450d239adcc8d41ed25aca484b6b9ab5f3fd8674f7b6"
+  },
+  "evaluator_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/ours_scannet_gaussian_protocol_results.json",
+    "bytes": 63564,
+    "sha256": "2eac056c0179bb4e65c17b017a0253a1e3eddd0482674fe1d970cfd8af160007"
+  },
+  "metrics": {
+    "19": {
+      "miou": 0.3786329623189025,
+      "macc": 0.5521891702607359
+    },
+    "15": {
+      "miou": 0.41979414941029086,
+      "macc": 0.6044140413721429
+    },
+    "10": {
+      "miou": 0.5234081172660365,
+      "macc": 0.6860258736952943
+    }
+  },
+  "scenes": {
+    "scene0000_00": {
+      "num_gaussians": 81369,
+      "region_observed_count": 63730,
+      "no_evidence_fallback_count": 17639,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0000_00.pt",
+        "bytes": 9935635,
+        "sha256": "3e99771de237b0f88d999fde3fcf5714bd6f54e090f6d053610645f92790b4d5"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0000_00.pt.receipt.json",
+        "bytes": 4114,
+        "sha256": "e8230687d70341cf062ded5073fcde8958ee37361e523973c1e56fa31552a5ff"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0000_00.npz",
+        "bytes": 21602,
+        "sha256": "bc021f71a7095a6b895c8f336e623bceac6618d5ea075bf535b586cf169253a4"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0000_00.npz",
+        "bytes": 1241416,
+        "sha256": "3efc0ad6903f0965de9c0d706babb405e4c614ae0be9a3e3dbd705af0633f51f"
+      }
+    },
+    "scene0062_00": {
+      "num_gaussians": 51610,
+      "region_observed_count": 47272,
+      "no_evidence_fallback_count": 4338,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0062_00.pt",
+        "bytes": 6304851,
+        "sha256": "cbbfd9abfc05059617211bbf50b3056cf43274d34aa28a5f90c11807a34901c3"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0062_00.pt.receipt.json",
+        "bytes": 4001,
+        "sha256": "ba9ec12bcebf33312a62bfde4a10f13ceb37466f1aafa52dc8fca354955146b4"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0062_00.npz",
+        "bytes": 13849,
+        "sha256": "6a15d42114562c8ae6c417c76a093499b8a3cfb6c7427f7ef40f95d4946e8b63"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0062_00.npz",
+        "bytes": 790992,
+        "sha256": "ad6f2dd15634ee21b2f1707487e52cc79d9f286b73a38609e448eaa65bce4acc"
+      }
+    },
+    "scene0070_00": {
+      "num_gaussians": 109380,
+      "region_observed_count": 90856,
+      "no_evidence_fallback_count": 18524,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0070_00.pt",
+        "bytes": 13352979,
+        "sha256": "2bf576f2b078316271be3fbb87d30b0168cd05fcf2d2e19cf99e36c642edcac2"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0070_00.pt.receipt.json",
+        "bytes": 4118,
+        "sha256": "384cae8dd9a0eea2343d3f4b03ebef6beb4f72ee0f0cb8a6559cbe8041022100"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0070_00.npz",
+        "bytes": 27929,
+        "sha256": "8fc500fd35e8fa802097a44356900f3f8a74060785fcd3ae1b74b444a8fbe23f"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0070_00.npz",
+        "bytes": 1667200,
+        "sha256": "59125c615cbce906532425333dc1b62943f2a5c85ded461c012f4051207eec04"
+      }
+    },
+    "scene0097_00": {
+      "num_gaussians": 72007,
+      "region_observed_count": 65537,
+      "no_evidence_fallback_count": 6470,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0097_00.pt",
+        "bytes": 8793555,
+        "sha256": "aa69de405686b43157d21a85578bc1dc8831260fdf9eaf19a64a697575d2dc97"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0097_00.pt.receipt.json",
+        "bytes": 4114,
+        "sha256": "e5b11066e0e17961e422f94830981059dbfaf7bcaab4617b0b9f73b5c72d70b3"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0097_00.npz",
+        "bytes": 17073,
+        "sha256": "6bfb6696cb8670b72cfd3cd2ab353883267c34b5d83cbafa7f1ce4527ef20c1c"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0097_00.npz",
+        "bytes": 1096065,
+        "sha256": "36b1306985f75b68bc6dd19d0e5c1230b03b9e26b47a828e52c3b124839fc911"
+      }
+    },
+    "scene0140_00": {
+      "num_gaussians": 372941,
+      "region_observed_count": 272063,
+      "no_evidence_fallback_count": 100878,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0140_00.pt",
+        "bytes": 45507347,
+        "sha256": "afe3342782830fbbe18157da8fc35c2c06f26dbd208bbd8022e7614be8eb37ef"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0140_00.pt.receipt.json",
+        "bytes": 4002,
+        "sha256": "33f26265cd48b27c616bb26871c58b6d68d60d4d68f53f8f50d28b2b31530b53"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0140_00.npz",
+        "bytes": 74088,
+        "sha256": "4c09a2ce1cf84088e4aeee0b37868e6d75f4a78b5fb33c58901325360b762ab9"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0140_00.npz",
+        "bytes": 5606212,
+        "sha256": "31a75865bbd4f792185351578081ce9f5530abc8e101fe5edb8f728c75731ee4"
+      }
+    },
+    "scene0347_00": {
+      "num_gaussians": 67984,
+      "region_observed_count": 60539,
+      "no_evidence_fallback_count": 7445,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0347_00.pt",
+        "bytes": 8302547,
+        "sha256": "badffafad0c546eb8b56d045373355ccdf2d762137de42887941ea12afa13338"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0347_00.pt.receipt.json",
+        "bytes": 4114,
+        "sha256": "597671d74850b2858cdded368e3fed3f4db7e464de2111c4f0e6e00ea1c950e2"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0347_00.npz",
+        "bytes": 17875,
+        "sha256": "3d618bb06f0da4c8c74b5da4aeb4769ecb8ffcde61eb1c29dca9e197a4c11934"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0347_00.npz",
+        "bytes": 1038783,
+        "sha256": "c3dc651175cfb21ff54403ae355a9f6fc47a00af42d054fcf5fc9bb0a391a798"
+      }
+    },
+    "scene0400_00": {
+      "num_gaussians": 155959,
+      "region_observed_count": 123538,
+      "no_evidence_fallback_count": 32421,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0400_00.pt",
+        "bytes": 19035603,
+        "sha256": "9e849f551a1c74cfb0b8cc90d484622fb24ab95e1a982433dfb0df351b237725"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0400_00.pt.receipt.json",
+        "bytes": 4141,
+        "sha256": "34cdedba643cd96dbe7822de6a9216ca50f11cb9e4a42c1b71d169cc6dc27173"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0400_00.npz",
+        "bytes": 31991,
+        "sha256": "2c01f8a85b6c4230b5455f396c9d033acf1d7b5c0db6c76a1c040f96746a2bb4"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0400_00.npz",
+        "bytes": 2347872,
+        "sha256": "9e6c25e8f3d25a0b47ce20b30b620e0dc140bf24a200cbfbbf128e7b8ec8f74f"
+      }
+    },
+    "scene0590_00": {
+      "num_gaussians": 222957,
+      "region_observed_count": 192836,
+      "no_evidence_fallback_count": 30121,
+      "semantic_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0590_00.pt",
+        "bytes": 27209363,
+        "sha256": "281f7a8516f0d25a8c0b5426b307439eba3c1b8b11c5d6b3716cf922974c0974"
+      },
+      "semantic_score_cache_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/score_caches/scene0590_00.pt.receipt.json",
+        "bytes": 4115,
+        "sha256": "4b88864a1110e3ea740d986817267c8567c09cd625fb62548af666853aed438f"
+      },
+      "pseudo_gt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/pseudo_gt/scene0590_00.npz",
+        "bytes": 53892,
+        "sha256": "fa0f56782c664e4d6360f49958811cfb0f85228bcef269427083c03222ca0112"
+      },
+      "prediction": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/scannet_canonical_mpr_v3_paper8/evaluation_frozen_exact_v2/predictions/scene0590_00.npz",
+        "bytes": 3353214,
+        "sha256": "fa00767464a6abc7e5dc53b581b16e4632eb676d49ae9c7add3cbe83e984e9df"
+      }
+    }
+  }
+}

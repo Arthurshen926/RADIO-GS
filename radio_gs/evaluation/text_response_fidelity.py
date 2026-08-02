@@ -75,6 +75,30 @@ _SELECTION_CONTRACT = {
     "query_axis": "heldout_generic_only",
     "device": "cpu",
 }
+_HOLDOUT_SELECTION_CONTRACT = {
+    "benchmark_vocabulary_opened": False,
+    "uses_benchmark_vocabulary_for_construction": False,
+    "queries": "target_blind_imagenet12k_minus_imagenet1k_holdout_v1",
+    "query_axis": "heldout_generic_only",
+    "device": "cpu",
+}
+IMAGENET1K_PRIMARY_BANK_FAMILY = "imagenet1k_primary_v1"
+IMAGENET12K_HOLDOUT_BANK_FAMILY = "imagenet12k_minus_imagenet1k_holdout_v1"
+_SELECTION_CONTRACTS_BY_BANK_FAMILY = {
+    IMAGENET1K_PRIMARY_BANK_FAMILY: _SELECTION_CONTRACT,
+    IMAGENET12K_HOLDOUT_BANK_FAMILY: _HOLDOUT_SELECTION_CONTRACT,
+}
+
+
+def selection_contract_for_bank_family(bank_family: str) -> dict:
+    """Return the exact frozen report contract for a known query-bank family."""
+
+    if not isinstance(bank_family, str):
+        raise ValueError(f"unknown text query-bank family: {bank_family!r}")
+    contract = _SELECTION_CONTRACTS_BY_BANK_FAMILY.get(bank_family)
+    if contract is None:
+        raise ValueError(f"unknown text query-bank family: {bank_family!r}")
+    return dict(contract)
 
 
 def canonical_json_sha256(value: object) -> str:
@@ -405,7 +429,10 @@ def _validate_report(report: Mapping) -> None:
         raise ValueError("report split_role must be query_free_validation")
     if report.get("query_split") not in ("dev", "audit"):
         raise ValueError("report query_split must be held-out dev or audit")
-    if report.get("selection_contract") != _SELECTION_CONTRACT:
+    if report.get("selection_contract") not in (
+        _SELECTION_CONTRACT,
+        _HOLDOUT_SELECTION_CONTRACT,
+    ):
         raise ValueError("report selection_contract differs from the frozen policy")
     descriptor_artifact = report.get("descriptor_artifact")
     if (

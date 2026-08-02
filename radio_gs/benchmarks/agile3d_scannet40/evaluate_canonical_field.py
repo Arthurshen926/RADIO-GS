@@ -37,6 +37,10 @@ from radio_gs.querying.query_spec import SelectionMode
 from radio_gs.querying.support_solver import PrimitiveSupportGraph, SupportSolverConfig
 from radio_gs.scripts.eval_scannet_pointcloud_radio_gs import _build_hybrid_model
 
+from .frozen_full312_contract import (
+    bind_frozen_method_contract,
+    source_contract_bindings_sha256,
+)
 from .protocol import (
     Click,
     aggregate_official_metrics,
@@ -1837,6 +1841,7 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             ),
             "spatial_log_weight": 0.25,
             "spatial_floor": 0.01,
+            "point_readout_constraint": str(args.point_readout_constraint),
             "requires_official_extracted_capability_teachers": bool(
                 args.require_official_extracted_capability_teachers
             ),
@@ -1861,6 +1866,24 @@ def evaluate(args: argparse.Namespace) -> dict[str, object]:
             "metrics_are_partial": object_shard_count > 1,
         },
     }
+    if (
+        source_contract == "scannet_full_observation_v1"
+        and int(args.max_clicks) == 10
+        and not diagnostic_no_support_gate
+    ):
+        # Bind future paper-facing shards before they leave the evaluator.
+        # Per-scene 240/480/960 source identities are committed separately so
+        # the label-free source ladder does not alter the method contract.
+        method_contract, method_contract_sha256 = bind_frozen_method_contract(
+            report["protocol"]  # type: ignore[arg-type]
+        )
+        source_bindings, source_bindings_sha256 = (
+            source_contract_bindings_sha256(scene_support)
+        )
+        report["method_contract"] = method_contract
+        report["method_contract_sha256"] = method_contract_sha256
+        report["source_contract_bindings"] = source_bindings
+        report["source_contract_bindings_sha256"] = source_bindings_sha256
     output.write_text(json.dumps(report, indent=2), encoding="utf-8")
     return report
 

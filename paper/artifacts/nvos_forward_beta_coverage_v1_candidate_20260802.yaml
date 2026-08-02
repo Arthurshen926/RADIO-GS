@@ -1,0 +1,161 @@
+schema_version: 1
+candidate_id: nvos-forward-beta-coverage-v1
+date: 2026-08-02
+status: protocol_authority_bound_non_exact_diagnostic
+promoted: false
+
+parent_asset_candidate: registered-region-v2
+method_comparator: registered-region-v3
+base_field: canonical-mpr-v3
+
+eligibility:
+  protocol_authority_bound_non_exact_diagnostic: true
+  strict_unseen_eligible: false
+  strict_unseen_protocol_exact_match: false
+  frozen_diagnostic_eligible: false
+  main_result_eligible: false
+  target_metric_may_select_method_stage_or_continuation: false
+
+cohort:
+  benchmark: NVOS
+  ordered_tasks: [fern, flower, fortress, horns_center, horns_left, leaves, orchids, trex]
+  execution: fixed_full_eight_without_metric_continuation
+  aggregation: equal_weight_macro_over_8_tasks
+
+protocol_reuse:
+  protocol_id: nvos_strict_unseen_v1
+  dataset_exact: true
+  cohort_exact: true
+  prompt_exact: true
+  visibility_exact: true
+  calibration_policy_exact: true
+  aggregation_exact: true
+  resize_exact: true
+  threshold_exact: true
+  score_semantics_exact: false
+  prediction_representation_exact: false
+  overall_protocol_exact: false
+  target_rgb_during_field_training: forbidden
+  target_rgb_at_query: forbidden
+  target_mask_use: scoring_only
+  target_metric_controls_continuation: false
+
+authority_contract:
+  builder: radio_gs/scripts/bind_nvos_forward_beta_protocol_authority.py
+  receipt_generation_root: complete_main_repository_before_snapshot_staging
+  receipt_embedded_in_snapshot: true
+  candidate_method_sha_source: canonical_json_of_evaluator_derived_method_contract
+  parent_method_exact_match: false
+  strict_unseen_protocol_exact_match: false
+  strict_unseen_exact_match_blockers:
+    - score_semantics_differs
+    - prediction_representation_differs
+  external_ludvig_candidate_binding: null
+
+method_contract:
+  support_mode: canonical_support
+  region_space: sam3
+  prompt_registration:
+    mode: raster_adjoint
+    scale: 1.0
+    alpha_threshold: 0.0
+    depth_tolerance: 0.08
+    relative_depth_tolerance: 0.02
+  seed_construction: joint_signed
+  seed_normalization: none
+  observation_fusion: probability_mixture
+  registered_seed_unary_weight: 0.0
+  observation_mass_source: raw_raster_adjoint_prompt_mass_times_labeled_footprint_coverage
+  observation_confidence: poisson_mass_coverage
+  observation_mass_scale: 1.0
+  observation_coverage_power: 1.0
+  observation_constructed_before_capability_filter: true
+  prompt_support_threshold: 0.0
+  prototype_count: 4
+  prototype_strategy: spherical_mean_fps
+  appearance_weight: 1.0
+  boundary_weight: 0.35
+  prototype_temperature: 0.07
+  feature_calibration: none
+  background_centroids: 0
+  score_calibration: none
+  negative_spatial_mode: none
+  diagnostic_selection_mode: seeded_component
+  selection_applied_to_main_output: false
+  final_readout: propagated
+  registered_forward_unary:
+    mode: beta_coverage_v1
+    status: protocol_authority_bound_non_exact_diagnostic
+    strict_unseen_eligible: false
+    strict_unseen_scoring_binding: nvos_strict_unseen_v1_non_exact_beta_centered_posterior
+    field_prior_stage: post_reliability_pre_registered_fusion
+    field_prior_formula: sigmoid(field_unary/solver_unary_temperature)
+    registered_observation_confidence_role: seed_construction_only
+    compositor: exact_front_to_back_sparse_triplets
+    prompt_registration_mode: raster_adjoint
+    prompt_registration_scale: 1.0
+    compositor_resolution: native_prompt_registration_raster
+    compositor_alpha_threshold: 0.0
+    score_feature_contribution_gamma: 1.0
+    score_gamma_role: target_score_render_only_not_forward_e_step
+    capability_invalid_policy: exclude_before_forward_and_e_step
+    labeled_policy: positive_or_negative_only
+    unlabeled_scribble_policy: unobserved_not_negative
+    all_pixel_policy: all_prompt_registration_raster_pixels
+    e_steps: 1
+    prior_pseudocount: 1.0
+    confidence_formula: 1-(1-rho)/(1+n)
+    fusion_formula: (1-c)*p_field+c*mu
+    accumulation_dtype: float64_cpu
+    evidence_dtype: float32
+    nll_eps: 1.0e-12
+    saturated_likelihood_policy: sign_symmetric_common_perturbation_limit
+    nll_used_for_selection_or_calibration: false
+    selection_applied_to_main_output: false
+    required_final_readout: propagated
+    scoring_adapter:
+      score_semantics: beta_centered_posterior
+      prediction_representation: continuous_beta_centered_posterior
+      threshold: {comparison: greater_or_equal, value: 0.0}
+      resize: nearest
+  graph:
+    policy: legacy
+    component_policy: same
+    legacy_residual: 0.0
+    channel_confidence_mode: none
+  score_render:
+    resolution: prompt_native
+    scale: 1.0
+    valid_support_normalization: true
+    valid_support_coverage_power: 1.0
+    feature_contribution_gamma: 1.0
+    score_chunk_size: 8192
+    pixel_threshold: 0.0
+    threshold_comparison: greater_or_equal
+    resize_to_ground_truth: cv2.INTER_NEAREST
+  solver:
+    type: confidence_random_walker
+    iterations: 12
+    residual: 0.30
+    unary_temperature: 0.10
+    support_threshold: 0.50
+    laplacian_weight: 1.0
+    cg_iterations: 64
+    cg_tolerance: 1.0e-5
+    hard_seed_threshold: 0.20
+    hard_seed_conflict_policy: exclusive_relative
+    hard_seed_conflict_margin: 0.0
+    component_edge_threshold: 1.0e-5
+    seeded_component_min_weight: 0.20
+  canonical_reliability_cache: ''
+  diagnostic_graph_affinity_override: ''
+  asset_hash_verification_required: true
+  uses_target_calibration: false
+
+execution_contract:
+  prediction_generation_precedes_target_mask_open: true
+  metric_or_mask_feedback_changes_execution: false
+  scene_failure_policy: fail_closed
+  missing_scene_policy: no_aggregate
+  source_snapshot_required: readonly_non_live_source_snapshot
+  source_hashes: runtime_recomputed_never_handwritten
