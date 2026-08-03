@@ -61,18 +61,33 @@ class EvidenceScoringConfig:
             "additive",
             "probability_mixture",
             "hard_seed_anchored_probability",
+            "hard_seed_anchor_only_probability",
+            "direct_raster_adjoint",
+            "raster_adjoint_bernoulli_poe",
+            "dual_registration_bernoulli_poe",
         }:
             raise ValueError(
                 "registered_observation_fusion must be additive, "
-                "probability_mixture, or hard_seed_anchored_probability"
+                "probability_mixture, hard_seed_anchored_probability, "
+                "hard_seed_anchor_only_probability, direct_raster_adjoint, "
+                "raster_adjoint_bernoulli_poe, or "
+                "dual_registration_bernoulli_poe"
             )
         if (
             self.registered_observation_fusion
-            in {"probability_mixture", "hard_seed_anchored_probability"}
+            in {
+                "probability_mixture",
+                "hard_seed_anchored_probability",
+                "hard_seed_anchor_only_probability",
+                "direct_raster_adjoint",
+                "raster_adjoint_bernoulli_poe",
+                "dual_registration_bernoulli_poe",
+            }
             and self.registered_seed_unary_weight != 0
         ):
             raise ValueError(
-                "probability fusion requires registered_seed_unary_weight=0"
+                "non-additive registered observation fusion requires "
+                "registered_seed_unary_weight=0"
             )
         if self.feature_calibration not in {"none", "diagonal_robust"}:
             raise ValueError("feature_calibration must be none or diagonal_robust")
@@ -295,6 +310,74 @@ def registered_seed_unary(
     """Backward-compatible signed registered unary."""
 
     return registered_seed_observation(positive, negative)[0]
+
+
+def registered_raster_adjoint_observation(
+    foreground_mass: torch.Tensor,
+    background_mass: torch.Tensor,
+    visible_mass: torch.Tensor,
+) -> PrimitiveUnaryEvidence:
+    """Return the exact continuous foreground/background raster adjoint.
+
+    Inputs are sufficient statistics accumulated with the *same* compositor
+    responsibility matrix ``W``:
+
+    ``m_fg=W.T@y_fg``, ``m_bg=W.T@y_bg``, and ``m_vis=W.T@1``.
+
+    The returned evidence is ``u=(m_fg-m_bg)/m_vis`` with labeled-footprint
+    confidence ``c=(m_fg+m_bg)/m_vis``.  Consequently ``u=c*(2q-1)`` for
+    foreground purity ``q=m_fg/(m_fg+m_bg)``.  A full foreground/background
+    mask has ``c=1`` on every visible primitive and therefore yields the exact
+    signed primitive foreground probability ``2*m_fg/m_vis-1``.  Unlabeled or
+    invisible rows remain exactly neutral with zero confidence.
+
+    This function deliberately accepts already accumulated masses so callers
+    can reuse an authority-bound responsibility cache without materializing a
+    dense pixel-by-primitive matrix.  It fails closed when the sufficient
+    statistics violate the necessary mass constraint; the caller must also
+    validate foreground/background disjointness before accumulation.
+    """
+
+    foreground = torch.as_tensor(foreground_mass).float().reshape(-1)
+    background = torch.as_tensor(background_mass).float().reshape(-1)
+    visible = torch.as_tensor(visible_mass).float().reshape(-1)
+    if foreground.numel() == 0:
+        raise ValueError("raster-adjoint masses must be non-empty vectors")
+    if foreground.shape != background.shape or foreground.shape != visible.shape:
+        raise ValueError("raster-adjoint foreground/background/visible masses must align")
+    for name, values in (
+        ("foreground", foreground),
+        ("background", background),
+        ("visible", visible),
+    ):
+        if not bool(torch.isfinite(values).all()) or bool((values < 0).any()):
+            raise ValueError(
+                f"raster-adjoint {name} mass must be finite and non-negative"
+            )
+    labeled = foreground + background
+    tolerance = 1e-5 * torch.maximum(torch.ones_like(visible), visible)
+    if bool((labeled > visible + tolerance).any()):
+        raise ValueError(
+            "raster-adjoint labeled mass cannot exceed visible mass; foreground "
+            "and background must be disjoint and share one responsibility cache"
+        )
+    safe_visible = visible.clamp_min(1e-30)
+    observed = visible > 0
+    confidence = torch.where(
+        observed,
+        labeled / safe_visible,
+        torch.zeros_like(visible),
+    ).clamp(0.0, 1.0)
+    signed = torch.where(
+        observed,
+        (foreground - background) / safe_visible,
+        torch.zeros_like(visible),
+    ).clamp(-1.0, 1.0)
+    return PrimitiveUnaryEvidence(
+        signed,
+        "raster_adjoint_foreground_background_continuous",
+        confidence,
+    )
 
 
 @torch.no_grad()
@@ -970,6 +1053,21 @@ def registered_observation_effective_confidence(
     )
 
 
+def registered_observation_anchor_only_confidence(
+    observation: PrimitiveUnaryEvidence,
+    *,
+    anchor_threshold: float,
+) -> torch.Tensor:
+    """Return unit confidence on accepted anchors and exact zero elsewhere."""
+
+    anchors = registered_observation_anchor_mask(
+        observation,
+        anchor_threshold=anchor_threshold,
+    )
+    assert observation.confidence is not None
+    return anchors.to(dtype=observation.confidence.dtype)
+
+
 def fuse_registered_observation_unary(
     field_unary: torch.Tensor,
     observation: PrimitiveUnaryEvidence,
@@ -977,6 +1075,7 @@ def fuse_registered_observation_unary(
     unary_temperature: float,
     chunk_size: int = 262144,
     anchor_threshold: float | None = None,
+    anchor_only: bool = False,
 ) -> torch.Tensor:
     """Fuse registered evidence with field evidence in Bernoulli space.
 
@@ -993,6 +1092,12 @@ def fuse_registered_observation_unary(
     ``p=(1-c_eff)*p_field+c_eff*q``.  This makes an accepted native-raster adjoint
     seed explicit strong unary evidence while leaving weak footprint tails on
     the coverage-conditioned mixture.  No new task-tuned constant is added.
+
+    ``anchor_only=True`` changes only the effective-confidence rule to
+    ``c_eff=a``.  Non-anchor rows therefore return the original field unary
+    bit-for-bit, even when they carry non-zero weak raster evidence.  This flag
+    requires ``anchor_threshold`` and is opt-in so every existing fusion mode
+    remains unchanged.
     """
 
     values = torch.as_tensor(field_unary)
@@ -1012,12 +1117,20 @@ def fuse_registered_observation_unary(
         raise ValueError("registered observation does not align with field unary")
     if int(chunk_size) <= 0:
         raise ValueError("registered observation fusion chunk_size must be positive")
+    if anchor_only and anchor_threshold is None:
+        raise ValueError("anchor_only fusion requires anchor_threshold")
     effective_confidence: torch.Tensor | None = None
     if anchor_threshold is not None:
-        effective_confidence = registered_observation_effective_confidence(
-            observation,
-            anchor_threshold=float(anchor_threshold),
-        ).to(device=values.device, dtype=values.dtype)
+        if anchor_only:
+            effective_confidence = registered_observation_anchor_only_confidence(
+                observation,
+                anchor_threshold=float(anchor_threshold),
+            ).to(device=values.device, dtype=values.dtype)
+        else:
+            effective_confidence = registered_observation_effective_confidence(
+                observation,
+                anchor_threshold=float(anchor_threshold),
+            ).to(device=values.device, dtype=values.dtype)
     output = torch.empty_like(values)
     eps = float(torch.finfo(torch.float64).eps)
     for start in range(0, values.numel(), int(chunk_size)):

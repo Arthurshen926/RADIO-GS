@@ -1,0 +1,53 @@
+schema_version: 1
+benchmark: SPIn-NeRF
+cohort_role: local9_full_reference_mask_diagnostic
+official_10scene_eligible: false
+missing_official_scene: fork
+protocol_manifest: output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json
+protocol_manifest_sha256: e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede
+scenes:
+  orchids:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/orchids/rgb_to_colmap_camera_mapping.json
+    config: output/unified_query/spin9_gaussfm_queue_20260712/scenes/orchids/gaussfm_main_track.yaml
+    geometry_checkpoint: output/unified_query/spin9_gaussfm_queue_20260712/scenes/orchids/feature_field/checkpoints/best.pth
+    canonical_field: output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/orchids/canonical_d256_l128_capability_first.pth
+  leaves:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/rgb_to_colmap_camera_mapping.json
+    config: output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/gaussfm_main_track.yaml
+    geometry_checkpoint: output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/feature_field/checkpoints/best.pth
+    canonical_field: output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/leaves/canonical_d256_l128_capability_first.pth
+  fern:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/fern/rgb_to_colmap_camera_mapping.json
+    config: output/unified_query/spin9_gaussfm_queue_20260712/scenes/fern/gaussfm_main_track.yaml
+    geometry_checkpoint: output/unified_query/spin9_gaussfm_queue_20260712/scenes/fern/feature_field/checkpoints/best.pth
+    canonical_field: output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/fern/canonical_d256_l128_capability_first.pth
+  room:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/room/rgb_to_colmap_camera_mapping.json
+    config: output/optimization_20260802/spin9_exact_local9/carriers/room/config.yaml
+    geometry_checkpoint: output/optimization_20260802/spin9_exact_local9/carriers/room/geometry_carrier.pth
+    canonical_field: output/optimization_20260802/spin9_exact_local9/fields/room/canonical_d256_l128_capability_first.pth
+  horns:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/horns/rgb_to_colmap_camera_mapping.json
+    config: output/optimization_20260802/spin9_exact_local9/carriers/horns/config.yaml
+    geometry_checkpoint: output/optimization_20260802/spin9_exact_local9/carriers/horns/geometry_carrier.pth
+    canonical_field: output/optimization_20260802/spin9_exact_local9/fields/horns/canonical_d256_l128_capability_first.pth
+  fortress:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/fortress/rgb_to_colmap_camera_mapping.json
+    config: output/unified_query/spin9_gaussfm_queue_20260712/scenes/fortress/gaussfm_main_track.yaml
+    geometry_checkpoint: output/unified_query/spin9_gaussfm_queue_20260712/scenes/fortress/feature_field/checkpoints/best.pth
+    canonical_field: output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/fortress/canonical_d256_l128_capability_first.pth
+  pinecone:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/rgb_to_colmap_camera_mapping.json
+    config: output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/gaussfm_main_track.yaml
+    geometry_checkpoint: output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/feature_field/checkpoints/best.pth
+    canonical_field: output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/pinecone/canonical_d256_l128_capability_first.pth
+  truck:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/truck/rgb_to_colmap_camera_mapping.json
+    config: output/optimization_20260802/spin9_exact_local9/carriers/truck/config.yaml
+    geometry_checkpoint: output/optimization_20260802/spin9_exact_local9/carriers/truck/geometry_carrier.pth
+    canonical_field: output/optimization_20260802/spin9_exact_local9/fields/truck/canonical_d256_l128_capability_first.pth
+  lego:
+    camera_map: output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/rgb_to_colmap_camera_mapping.json
+    config: output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/gaussfm_main_track.yaml
+    geometry_checkpoint: output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/feature_field/checkpoints/best.pth
+    canonical_field: output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/canonical_d256_l128_capability_first.pth

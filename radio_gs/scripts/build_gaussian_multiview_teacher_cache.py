@@ -44,7 +44,7 @@ from radio_gs.training.feature_training_utils import (
     sample_multiview_radio_targets,
 )
 from radio_gs.training.primitive_consensus import robust_multiview_consensus
-from radio_gs.training.tensor_cache_io import validate_mpr_cache_payload
+from radio_gs.training.tensor_cache_io import load_mpr_cache, validate_mpr_cache_payload
 from radio_gs.utils.immutable_artifacts import (
     load_json_object,
     load_torch_mapping,
@@ -237,6 +237,8 @@ def validate_raster_reliability_policy(args: argparse.Namespace) -> None:
         raise ValueError(
             "--max-estimated-cpu-memory-fraction must lie in (0,1]"
         )
+    if int(getattr(args, "capability_shard_channels", 256)) <= 0:
+        raise ValueError("--capability-shard-channels must be positive")
     if str(getattr(args, "observation_contract", "legacy")) in {
         CANONICAL_OBSERVATION_CONTRACT_NAME,
         CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
@@ -785,6 +787,308 @@ def finalize_registered_mean_chunked(
     return features, valid
 
 
+def _atomic_json(path: Path, value: dict[str, object]) -> None:
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(
+        json.dumps(value, indent=2, sort_keys=True), encoding="utf-8"
+    )
+    os.replace(temporary, path)
+
+
+def _stream_channel_sharded_contribution_mean(
+    *,
+    output: Path,
+    feature_space: str,
+    feature_dir: Path,
+    feature_tensor_records: dict[str, dict[str, object]],
+    selected_frame_indices: list[int],
+    feature_size: tuple[int, int],
+    responsibility_assignments: list[dict[str, torch.Tensor]],
+    num_gaussians: int,
+    output_dim: int,
+    shard_channels: int,
+    inner_channel_chunk_size: int,
+    point_chunk_size: int,
+    num_views: int,
+    normalize_each_view: bool,
+    reliability_mode: str,
+    adaptor: torch.nn.Module | None,
+    device: torch.device,
+    resume_contract: dict[str, object],
+) -> tuple[list[dict[str, object]], torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Build exact contribution-mean feature channels without dense N x D state."""
+
+    if feature_space not in {"radio", "dino_v3", "sam3"}:
+        raise ValueError("channel-sharded MPR supports raw RADIO/DINO/SAM only")
+    if feature_space == "radio" and adaptor is not None:
+        raise ValueError("raw RADIO sharding must not receive an adaptor")
+    if feature_space != "radio" and adaptor is None:
+        raise ValueError("capability sharding requires a frozen official adaptor")
+    if (
+        len(responsibility_assignments) != len(selected_frame_indices)
+        or num_views != len(selected_frame_indices)
+        or num_gaussians <= 0
+        or output_dim <= 0
+        or shard_channels <= 0
+    ):
+        raise ValueError("channel-sharded MPR dimensions do not align")
+
+    output.parent.mkdir(parents=True, exist_ok=True)
+    progress_path = output.with_suffix(output.suffix + ".partial.json")
+    contract_sha256 = hashlib.sha256(
+        json.dumps(
+            resume_contract, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+    ).hexdigest()
+    completed: dict[tuple[int, int], dict[str, object]] = {}
+    expected_shard_keys = {
+        (start, min(start + int(shard_channels), output_dim))
+        for start in range(0, output_dim, int(shard_channels))
+    }
+    if progress_path.exists():
+        progress, _progress_sha256, _progress_source = load_json_object(
+            progress_path, label="channel-sharded MPR progress"
+        )
+        if (
+            not isinstance(progress, dict)
+            or progress.get("schema")
+            != "radio_gs.channel_sharded_mpr_progress.v1"
+            or progress.get("resume_contract_sha256") != contract_sha256
+            or progress.get("resume_contract") != resume_contract
+            or not isinstance(progress.get("shards"), list)
+        ):
+            raise ValueError("channel-sharded MPR resume contract differs")
+        for record in progress["shards"]:
+            if not isinstance(record, dict):
+                raise ValueError("channel-sharded MPR progress record is invalid")
+            key = (
+                int(record.get("channel_start", -1)),
+                int(record.get("channel_stop", -1)),
+            )
+            if key not in expected_shard_keys or key in completed:
+                raise ValueError(
+                    "channel-sharded MPR progress has repeated or unknown channels"
+                )
+            completed[key] = dict(record)
+    else:
+        _atomic_json(
+            progress_path,
+            {
+                "schema": "radio_gs.channel_sharded_mpr_progress.v1",
+                "resume_contract_sha256": contract_sha256,
+                "resume_contract": resume_contract,
+                "shards": [],
+            },
+        )
+
+    registered_counts = torch.zeros(num_gaussians, dtype=torch.float32)
+    observation_counts = torch.zeros(num_gaussians, dtype=torch.long)
+    for assignment in responsibility_assignments:
+        gids = assignment["gaussian_ids"].to(device).long()
+        weights = assignment["weights"].to(device).float()
+        frame_counts = torch.zeros(
+            num_gaussians, dtype=torch.float32, device=device
+        )
+        if gids.numel():
+            frame_counts.index_add_(0, gids, weights)
+        counts_cpu = frame_counts.cpu()
+        registered_counts.add_(counts_cpu)
+        observation_counts[counts_cpu > 0] += 1
+        del gids, weights, frame_counts, counts_cpu
+    valid = registered_counts > 0
+    if not torch.equal(valid, observation_counts > 0):
+        raise RuntimeError("sharded contribution support/counts disagree")
+
+    shard_records: list[dict[str, object]] = []
+    squared_norm = torch.zeros(num_gaussians, dtype=torch.float32)
+    for channel_start in range(0, output_dim, int(shard_channels)):
+        channel_stop = min(channel_start + int(shard_channels), output_dim)
+        width = channel_stop - channel_start
+        shard_name = (
+            f"{output.name}.channels_{channel_start:05d}_{channel_stop:05d}.f16"
+        )
+        shard_path = output.parent / shard_name
+        key = (channel_start, channel_stop)
+        record = completed.get(key)
+        expected_bytes = num_gaussians * width * 2
+        reuse = False
+        if record is not None:
+            if (
+                record.get("relative_path") != shard_name
+                or record.get("dtype") != "float16"
+                or record.get("shape") != [num_gaussians, width]
+                or not shard_path.is_file()
+                or shard_path.is_symlink()
+                or shard_path.stat().st_size != expected_bytes
+                or _sha256_file(shard_path) != record.get("sha256")
+            ):
+                raise ValueError("completed channel shard failed resume validation")
+            reuse = True
+        elif shard_path.exists():
+            raise ValueError("unbound channel shard exists without resume provenance")
+
+        if not reuse:
+            registered_sum = torch.zeros(
+                num_gaussians, width, dtype=torch.float32
+            )
+            sum_staging = torch.empty(
+                num_gaussians,
+                min(width, int(inner_channel_chunk_size)),
+                dtype=torch.float32,
+            )
+            count_staging = torch.empty(num_gaussians, dtype=torch.float32)
+            ignored_counts = torch.zeros(num_gaussians, dtype=torch.float32)
+            for view_index, frame_index in enumerate(selected_frame_indices):
+                raw_map = _load_bundle_feature_maps(
+                    feature_dir=feature_dir,
+                    selected_frame_indices=[int(frame_index)],
+                    subdir="backbone",
+                    expected_dim=1280,
+                    feature_size=feature_size,
+                    tensor_records=feature_tensor_records,
+                    normalize=False,
+                    output_dtype=torch.float32,
+                )
+                if adaptor is None:
+                    projected = raw_map
+                else:
+                    with torch.inference_mode():
+                        projected = (
+                            project_feature_map_with_adaptor(
+                                raw_map.to(device), adaptor, normalize=True
+                            )
+                            .half()
+                            .cpu()
+                        )
+                    del raw_map
+                full_view_features = projected.to(
+                    device=device, dtype=torch.float32
+                )
+                if normalize_each_view:
+                    full_view_features = F.normalize(
+                        full_view_features, dim=1, eps=1e-8
+                    )
+                view_features = full_view_features[
+                    :, channel_start:channel_stop
+                ]
+                assignment = responsibility_assignments[view_index]
+                accumulate_contribution_mean_channel_chunked(
+                    view_features,
+                    assignment["gaussian_ids"].to(device),
+                    assignment["pixel_ids"].to(device),
+                    assignment["weights"].to(device),
+                    registered_sum,
+                    ignored_counts,
+                    channel_chunk_size=int(inner_channel_chunk_size),
+                    cpu_sum_staging=sum_staging,
+                    cpu_count_staging=count_staging,
+                )
+                del projected, full_view_features, view_features
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+
+            if not torch.equal(ignored_counts, registered_counts):
+                raise RuntimeError(
+                    "channel-sharded accumulation support weights changed "
+                    "between the frozen count pass and feature pass"
+                )
+
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=f".{shard_name}.", suffix=".tmp", dir=output.parent
+            )
+            os.close(descriptor)
+            temporary = Path(temporary_name)
+            try:
+                mapped = np.memmap(
+                    temporary,
+                    mode="w+",
+                    dtype="<f2",
+                    shape=(num_gaussians, width),
+                    order="C",
+                )
+                for row_start in range(0, num_gaussians, int(point_chunk_size)):
+                    row_stop = min(
+                        row_start + int(point_chunk_size), num_gaussians
+                    )
+                    values = registered_sum[row_start:row_stop] / registered_counts[
+                        row_start:row_stop, None
+                    ].clamp_min(1e-8)
+                    values[~valid[row_start:row_stop]] = 0.0
+                    half = values.half()
+                    mapped[row_start:row_stop] = half.numpy()
+                    if reliability_mode == "mean_resultant":
+                        squared_norm[row_start:row_stop].add_(
+                            half.float().square().sum(dim=-1)
+                        )
+                    del values, half
+                mapped.flush()
+                del mapped
+                os.replace(temporary, shard_path)
+            finally:
+                temporary.unlink(missing_ok=True)
+            del registered_sum, sum_staging, count_staging, ignored_counts
+            record = {
+                "relative_path": shard_name,
+                "sha256": _sha256_file(shard_path),
+                "channel_start": channel_start,
+                "channel_stop": channel_stop,
+                "dtype": "float16",
+                "shape": [num_gaussians, width],
+            }
+            completed[key] = record
+            _atomic_json(
+                progress_path,
+                {
+                    "schema": "radio_gs.channel_sharded_mpr_progress.v1",
+                    "resume_contract_sha256": contract_sha256,
+                    "resume_contract": resume_contract,
+                    "shards": [
+                        completed[item]
+                        for item in sorted(completed)
+                    ],
+                },
+            )
+        else:
+            assert record is not None
+            if reliability_mode == "mean_resultant":
+                mapped = np.memmap(
+                    shard_path,
+                    mode="r",
+                    dtype="<f2",
+                    shape=(num_gaussians, width),
+                    order="C",
+                )
+                for row_start in range(0, num_gaussians, int(point_chunk_size)):
+                    row_stop = min(
+                        row_start + int(point_chunk_size), num_gaussians
+                    )
+                    values = torch.from_numpy(
+                        np.asarray(mapped[row_start:row_stop]).copy()
+                    ).float()
+                    squared_norm[row_start:row_stop].add_(
+                        values.square().sum(dim=-1)
+                    )
+                del mapped
+        shard_records.append(dict(record))
+
+    if reliability_mode == "legacy_valid":
+        agreement = valid.float()
+    elif reliability_mode == "mean_resultant":
+        agreement = squared_norm.sqrt().clamp(0.0, 1.0)
+        agreement[~valid] = 0.0
+    else:
+        raise ValueError("unsupported channel-sharded reliability mode")
+    reliability = torch.stack(
+        [
+            observation_counts.float() / float(max(1, num_views)),
+            agreement,
+            valid.float(),
+        ],
+        dim=-1,
+    ).half()
+    return shard_records, valid, observation_counts, reliability
+
+
 def estimate_capability_mpr_cpu_bytes(
     *,
     num_views: int,
@@ -1043,6 +1347,73 @@ def _load_responsibility_cache(
     return checked, observed_sha256
 
 
+def _load_saved_responsibility_for_sharded_resume(
+    *,
+    output: str | Path,
+    save_path: str | Path,
+    expected_contract: dict,
+    num_gaussians: int,
+) -> tuple[list[dict[str, torch.Tensor]], str, Path] | None:
+    """Reuse a save-mode sidecar only when a partial manifest binds its SHA.
+
+    ``torch.save`` archives are not byte-deterministic across temporary file
+    names, so serializing identical assignments again can change the sidecar
+    digest.  A resumed raw build must reopen the exact inode content already
+    frozen by its progress contract; it must never overwrite it first.
+    """
+
+    responsibility = Path(save_path).expanduser()
+    progress_path = Path(output).expanduser().with_suffix(
+        Path(output).suffix + ".partial.json"
+    )
+    if not responsibility.exists():
+        if progress_path.exists():
+            raise ValueError(
+                "sharded MPR progress exists but its saved responsibility "
+                "cache is missing"
+            )
+        return None
+    if responsibility.is_symlink() or not responsibility.is_file():
+        raise ValueError("saved responsibility cache must be a regular file")
+    if not progress_path.exists():
+        raise ValueError(
+            "saved responsibility cache already exists without a sharded "
+            "progress binding; use --responsibility-cache with an expected "
+            "SHA-256 instead of overwriting it"
+        )
+    progress, _progress_sha256, _progress_source = load_json_object(
+        progress_path, label="channel-sharded MPR progress"
+    )
+    resume_contract = progress.get("resume_contract")
+    if (
+        progress.get("schema") != "radio_gs.channel_sharded_mpr_progress.v1"
+        or not isinstance(resume_contract, dict)
+        or not isinstance(progress.get("shards"), list)
+    ):
+        raise ValueError("channel-sharded MPR progress is malformed")
+    encoded_contract = json.dumps(
+        resume_contract, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    if progress.get("resume_contract_sha256") != hashlib.sha256(
+        encoded_contract
+    ).hexdigest():
+        raise ValueError("channel-sharded MPR progress contract hash differs")
+    bound_sha256 = str(
+        resume_contract.get("registration_responsibility_cache_sha256", "")
+    )
+    if re.fullmatch(r"[0-9a-f]{64}", bound_sha256) is None:
+        raise ValueError(
+            "channel-sharded MPR progress lacks a responsibility SHA-256"
+        )
+    assignments, observed_sha256 = _load_responsibility_cache(
+        responsibility,
+        expected_contract=expected_contract,
+        num_gaussians=int(num_gaussians),
+        expected_sha256=bound_sha256,
+    )
+    return assignments, observed_sha256, responsibility.resolve()
+
+
 def build_cache(args: argparse.Namespace) -> dict:
     observation_contract = None
     if str(getattr(args, "observation_contract", "legacy")) in {
@@ -1176,9 +1547,32 @@ def build_cache(args: argparse.Namespace) -> dict:
     )
     feature_space = str(args.feature_space).lower()
     capability_map_source = str(args.capability_map_source).lower()
+    capability_storage = str(
+        getattr(args, "capability_storage", "dense")
+    ).lower()
     if capability_map_source not in {"project_raw", "official_extracted"}:
         raise ValueError(
             "capability_map_source must be project_raw or official_extracted"
+        )
+    if capability_storage not in {"dense", "channel_sharded"}:
+        raise ValueError("capability_storage must be dense or channel_sharded")
+    if capability_storage == "channel_sharded" and (
+        feature_space not in {"radio", "dino_v3", "sam3"}
+        or capability_map_source != "project_raw"
+        or args.aggregation_mode != "raster_gaussian_top1"
+        or args.raster_view_fusion != "contribution_mean"
+        or (
+            not str(args.responsibility_cache).strip()
+            and not (
+                feature_space == "radio"
+                and str(args.save_responsibility_cache).strip()
+            )
+        )
+    ):
+        raise ValueError(
+            "channel_sharded storage requires raw/DINO/SAM project_raw, "
+            "raster_gaussian_top1 contribution_mean, and an existing "
+            "responsibility cache (raw RADIO may create it in the same run)"
         )
     selected_frame_indices = [
         int(dataset.frame_indices[index]) for index in selected
@@ -1201,6 +1595,7 @@ def build_cache(args: argparse.Namespace) -> dict:
         "capability_adaptor_execution": "not_applicable",
     }
     capability_cpu_memory_preflight: dict[str, int | float] = {}
+    sharded_adaptor: torch.nn.Module | None = None
     if feature_space in {"dino_v3", "sam3"} and capability_map_source == "official_extracted":
         expected_radio_checkpoint_sha256 = _sha256_file(
             args.radio_checkpoint
@@ -1332,7 +1727,7 @@ def build_cache(args: argparse.Namespace) -> dict:
             ),
             "capability_adaptor_execution": str(extracted_source["execution"]),
         }
-    else:
+    elif capability_storage != "channel_sharded":
         teacher_maps = _load_bundle_feature_maps(
             feature_dir=feature_dir,
             selected_frame_indices=selected_frame_indices,
@@ -1343,6 +1738,8 @@ def build_cache(args: argparse.Namespace) -> dict:
             normalize=False,
             output_dtype=torch.float32,
         )
+    else:
+        teacher_maps = None
     if feature_space == "siglip_summary":
         summary_head_path = str(Path(args.summary_head_weights).expanduser().resolve())
         summary_head = SigLIP2SummaryHead.from_extracted_weights(summary_head_path).to(device)
@@ -1386,15 +1783,19 @@ def build_cache(args: argparse.Namespace) -> dict:
             expected_sha256=adaptor_checkpoint_sha256,
         ).to(device).eval()
         adaptor.requires_grad_(False)
-        teacher_maps = project_official_capability_maps(
-            teacher_maps,
-            adaptor,
-            device=device,
-            batch_size=int(args.projection_batch_size),
-        )
-        del adaptor
-        if device.type == "cuda":
-            torch.cuda.empty_cache()
+        if capability_storage == "channel_sharded":
+            sharded_adaptor = adaptor
+        else:
+            assert teacher_maps is not None
+            teacher_maps = project_official_capability_maps(
+                teacher_maps,
+                adaptor,
+                device=device,
+                batch_size=int(args.projection_batch_size),
+            )
+            del adaptor
+            if device.type == "cuda":
+                torch.cuda.empty_cache()
         capability_source_metadata = {
             "capability_map_source": "project_raw",
             "capability_native_map_manifest": "",
@@ -1415,6 +1816,8 @@ def build_cache(args: argparse.Namespace) -> dict:
     responsibility_cache_path = ""
     responsibility_cache_sha256 = ""
     responsibility_contract: dict = {}
+    depth_maps = None
+    alpha_maps = None
     if args.responsibility_cache or args.save_responsibility_cache:
         if args.aggregation_mode != "raster_gaussian_top1":
             raise ValueError(
@@ -1453,12 +1856,182 @@ def build_cache(args: argparse.Namespace) -> dict:
                 )
             )
 
+    if (
+        capability_storage == "channel_sharded"
+        and responsibility_assignments is None
+        and str(args.save_responsibility_cache).strip()
+    ):
+        resumed_responsibility = _load_saved_responsibility_for_sharded_resume(
+            output=args.output,
+            save_path=args.save_responsibility_cache,
+            expected_contract=responsibility_contract,
+            num_gaussians=int(xyz_cpu.shape[0]),
+        )
+        if resumed_responsibility is not None:
+            (
+                responsibility_assignments,
+                responsibility_cache_sha256,
+                resumed_responsibility_path,
+            ) = resumed_responsibility
+            responsibility_cache_path = str(resumed_responsibility_path)
+
+    if (
+        capability_storage == "channel_sharded"
+        and responsibility_assignments is None
+        and str(args.save_responsibility_cache).strip()
+    ):
+        from radio_gs.scripts.eval_lerf_direct_3d_selection import (
+            rasterize_registered_view_assignments,
+        )
+
+        depth_parts: list[torch.Tensor] = []
+        alpha_parts: list[torch.Tensor] = []
+        with torch.inference_mode():
+            for start in tqdm(
+                range(0, len(selected), int(args.render_batch_size)),
+                desc="render sharded responsibility visibility",
+            ):
+                stop = min(start + int(args.render_batch_size), len(selected))
+                result = renderer.render_features_batch(
+                    model,
+                    poses[start:stop].to(device),
+                    feature_height=feature_height,
+                    feature_width=feature_width,
+                )
+                depth_parts.append(result["depth_map"].float().cpu())
+                alpha_parts.append(result["alpha_map"].float().cpu())
+        depth_maps = torch.cat(depth_parts, dim=0)
+        alpha_maps = torch.cat(alpha_parts, dim=0)
+        captured_assignments: list[dict[str, torch.Tensor]] = []
+        with torch.inference_mode():
+            for view_index in tqdm(
+                range(len(selected)), desc="freeze sharded responsibility"
+            ):
+                gaussian_ids, pixel_ids, weights = (
+                    rasterize_registered_view_assignments(
+                        model=model,
+                        renderer=renderer,
+                        viewmat=poses[view_index].to(device),
+                        image_height=feature_height,
+                        image_width=feature_width,
+                        depth_map=depth_maps[view_index : view_index + 1].to(
+                            device
+                        ),
+                        alpha_map=alpha_maps[view_index : view_index + 1].to(
+                            device
+                        ),
+                        registration_depth_tolerance=float(args.depth_tolerance),
+                        registration_relative_depth_tolerance=float(
+                            args.relative_depth_tolerance
+                        ),
+                        registration_alpha_threshold=float(args.alpha_threshold),
+                        registration_weight_mode=args.registration_weight_mode,
+                        gaussian_top1=True,
+                    )
+                )
+                captured_assignments.append(
+                    {
+                        "gaussian_ids": gaussian_ids.int().cpu(),
+                        "pixel_ids": pixel_ids.int().cpu(),
+                        "weights": weights.float().cpu(),
+                    }
+                )
+        responsibility_output = Path(
+            args.save_responsibility_cache
+        ).expanduser()
+        responsibility_output.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=f".{responsibility_output.name}.",
+            suffix=".tmp",
+            dir=responsibility_output.parent,
+        )
+        os.close(descriptor)
+        temporary = Path(temporary_name)
+        try:
+            torch.save(
+                {
+                    "schema_version": 1,
+                    "metadata": responsibility_contract,
+                    "assignments": captured_assignments,
+                },
+                temporary,
+            )
+            os.replace(temporary, responsibility_output)
+        finally:
+            temporary.unlink(missing_ok=True)
+        responsibility_cache_path = str(responsibility_output.resolve())
+        responsibility_cache_sha256 = _sha256_file(responsibility_output)
+        responsibility_assignments = captured_assignments
+        depth_maps = None
+        alpha_maps = None
+
+    sharded_records: list[dict[str, object]] | None = None
+    if capability_storage == "channel_sharded":
+        if responsibility_assignments is None or not responsibility_cache_sha256:
+            raise ValueError(
+                "channel-sharded MPR requires a validated responsibility cache"
+            )
+        sharded_output_dim = (
+            1280
+            if feature_space == "radio"
+            else int(_EXTRACTED_CAPABILITY_SPECS[feature_space]["output_dim"])
+        )
+        sharded_resume_contract: dict[str, object] = {
+            "schema": "radio_gs.channel_sharded_mpr_resume.v1",
+            "feature_space": feature_space,
+            "feature_dim": sharded_output_dim,
+            "num_gaussians": int(xyz_cpu.shape[0]),
+            "xyz_sha256": _sha256_tensor_rows(xyz_cpu),
+            "selected_frame_indices": selected_frame_indices,
+            "feature_output_bundle_sha256": str(
+                feature_bundle_validation["output_bundle_sha256"]
+            ),
+            "geometry_checkpoint_sha256": str(
+                expected_geometry_sha256 or _sha256_file(args.checkpoint)
+            ),
+            "registration_responsibility_cache_sha256": (
+                responsibility_cache_sha256
+            ),
+            "official_adaptor_checkpoint_sha256": adaptor_checkpoint_sha256,
+            "aggregation_mode": str(args.aggregation_mode),
+            "registration_weight_mode": str(args.registration_weight_mode),
+            "raster_view_fusion": str(args.raster_view_fusion),
+            "normalize_each_view": bool(args.normalize_each_view),
+            "raster_reliability_mode": str(args.raster_reliability_mode),
+            "shard_channels": int(args.capability_shard_channels),
+            "inner_channel_chunk_size": int(args.raster_channel_chunk_size),
+        }
+        sharded_records, valid, view_counts, reliability = (
+            _stream_channel_sharded_contribution_mean(
+                output=Path(args.output).expanduser(),
+                feature_space=feature_space,
+                feature_dir=feature_dir,
+                feature_tensor_records=feature_tensor_records,
+                selected_frame_indices=selected_frame_indices,
+                feature_size=(feature_height, feature_width),
+                responsibility_assignments=responsibility_assignments,
+                num_gaussians=int(xyz_cpu.shape[0]),
+                output_dim=sharded_output_dim,
+                shard_channels=int(args.capability_shard_channels),
+                inner_channel_chunk_size=int(args.raster_channel_chunk_size),
+                point_chunk_size=int(args.point_chunk_size),
+                num_views=len(selected),
+                normalize_each_view=bool(args.normalize_each_view),
+                reliability_mode=str(args.raster_reliability_mode),
+                adaptor=sharded_adaptor,
+                device=device,
+                resume_contract=sharded_resume_contract,
+            )
+        )
+        if sharded_adaptor is not None:
+            del sharded_adaptor
+        if device.type == "cuda":
+            torch.cuda.empty_cache()
+
     # Visibility is already encoded in a loaded sidecar.  Otherwise render it
     # once, and optionally freeze the resulting registration assignments for
     # all feature spaces.
-    depth_maps = None
-    alpha_maps = None
-    if responsibility_assignments is None:
+    if capability_storage != "channel_sharded" and responsibility_assignments is None:
         depth_parts: list[torch.Tensor] = []
         alpha_parts: list[torch.Tensor] = []
         with torch.inference_mode():
@@ -1484,7 +2057,9 @@ def build_cache(args: argparse.Namespace) -> dict:
     reliability_parts: list[torch.Tensor] = []
     view_chunk = max(1, int(args.view_chunk_size))
     point_chunk = max(1, int(args.point_chunk_size))
-    if args.aggregation_mode == "center":
+    if capability_storage == "channel_sharded":
+        features = None
+    elif args.aggregation_mode == "center":
         if depth_maps is None or alpha_maps is None:
             raise RuntimeError("center aggregation requires rendered visibility maps")
         with torch.inference_mode():
@@ -1899,38 +2474,95 @@ def build_cache(args: argparse.Namespace) -> dict:
         metadata["observation_lifting_contract_sha256"] = observation_contract_sha256(
             observation_contract
         )
+    if capability_storage == "channel_sharded":
+        metadata["feature_storage"] = "channel_sharded_fp16_row_major"
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output_payload = {
-        "xyz": xyz_cpu,
-        "geometry_fingerprint": {
-            "num_gaussians": int(xyz_cpu.shape[0]),
-            "xyz_sha256": _sha256_tensor_rows(xyz_cpu),
-        },
-        "features": features,
-        "valid": valid,
-        "view_counts": view_counts,
-        "reliability": reliability,
-        "metadata": metadata,
+    geometry_fingerprint = {
+        "num_gaussians": int(xyz_cpu.shape[0]),
+        "xyz_sha256": _sha256_tensor_rows(xyz_cpu),
     }
-    validate_mpr_cache_payload(
-        output_payload,
-        expected_feature_space=feature_space,
-        require_reliability=True,
-        require_formal_safety=observation_contract is not None,
-    )
-    descriptor, temporary_name = tempfile.mkstemp(
-        prefix=f".{output.name}.",
-        suffix=".tmp",
-        dir=output.parent,
-    )
-    os.close(descriptor)
-    temporary = Path(temporary_name)
-    try:
-        torch.save(output_payload, temporary)
-        os.replace(temporary, output)
-    finally:
-        temporary.unlink(missing_ok=True)
+    if capability_storage == "channel_sharded":
+        assert sharded_records is not None
+        support_path = output.parent / f"{output.name}.support.pt"
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=f".{support_path.name}.", suffix=".tmp", dir=output.parent
+        )
+        os.close(descriptor)
+        temporary = Path(temporary_name)
+        try:
+            torch.save(
+                {
+                    "xyz": xyz_cpu,
+                    "valid": valid,
+                    "view_counts": view_counts,
+                    "reliability": reliability,
+                },
+                temporary,
+            )
+            os.replace(temporary, support_path)
+        finally:
+            temporary.unlink(missing_ok=True)
+        manifest: dict[str, object] = {
+            "schema": "radio_gs.channel_sharded_mpr.v1",
+            "schema_version": 1,
+            "layout": "row_major_channel_shards",
+            "feature_dtype": "float16",
+            "feature_shape": [
+                int(xyz_cpu.shape[0]),
+                (
+                    1280
+                    if feature_space == "radio"
+                    else int(
+                        _EXTRACTED_CAPABILITY_SPECS[feature_space]["output_dim"]
+                    )
+                ),
+            ],
+            "support": {
+                "relative_path": support_path.name,
+                "sha256": _sha256_file(support_path),
+            },
+            "shards": sharded_records,
+            "geometry_fingerprint": geometry_fingerprint,
+            "metadata": metadata,
+        }
+        _atomic_json(output, manifest)
+        manifest_sha256 = _sha256_file(output)
+        load_mpr_cache(
+            output,
+            expected_sha256=manifest_sha256,
+            expected_feature_space=feature_space,
+            require_reliability=True,
+            require_formal_safety=observation_contract is not None,
+        )
+    else:
+        output_payload = {
+            "xyz": xyz_cpu,
+            "geometry_fingerprint": geometry_fingerprint,
+            "features": features,
+            "valid": valid,
+            "view_counts": view_counts,
+            "reliability": reliability,
+            "metadata": metadata,
+        }
+        validate_mpr_cache_payload(
+            output_payload,
+            expected_feature_space=feature_space,
+            require_reliability=True,
+            require_formal_safety=observation_contract is not None,
+        )
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=f".{output.name}.",
+            suffix=".tmp",
+            dir=output.parent,
+        )
+        os.close(descriptor)
+        temporary = Path(temporary_name)
+        try:
+            torch.save(output_payload, temporary)
+            os.replace(temporary, output)
+        finally:
+            temporary.unlink(missing_ok=True)
     positive = view_counts[valid]
     report = {
         "output": str(output),
@@ -1943,6 +2575,9 @@ def build_cache(args: argparse.Namespace) -> dict:
         "max_views": int(positive.max()) if positive.numel() else 0,
         "metadata": metadata,
     }
+    if capability_storage == "channel_sharded":
+        report["feature_storage"] = metadata["feature_storage"]
+        report["channel_shards"] = len(sharded_records or [])
     report_path = output.with_suffix(output.suffix + ".json")
     temporary_report = report_path.with_suffix(
         report_path.suffix + ".tmp"
@@ -2056,6 +2691,23 @@ def main() -> None:
             "the raw map (legacy) or consume the matching native official "
             "C-RADIO adaptor maps emitted by extract_radio_features."
         ),
+    )
+    parser.add_argument(
+        "--capability-storage",
+        choices=["dense", "channel_sharded"],
+        default="dense",
+        help=(
+            "Keep the historical dense .pt default, or write a fail-closed "
+            "JSON manifest plus row-major fp16 channel shards. The sharded "
+            "mode is also valid for raw RADIO and requires a frozen "
+            "responsibility sidecar."
+        ),
+    )
+    parser.add_argument(
+        "--capability-shard-channels",
+        type=int,
+        default=256,
+        help="Outer feature-channel width for disk-backed MPR shards.",
     )
     parser.add_argument(
         "--expected-feature-scene",

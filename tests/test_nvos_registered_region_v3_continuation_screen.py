@@ -330,14 +330,14 @@ def test_runner_calls_screen_after_fortress_and_keeps_thermal_contract() -> None
     source = RUNNER.read_text(encoding="utf-8")
 
     assert 'GPU_MAX_TEMP_C="${GPU_MAX_TEMP_C:-78}"' in source
-    assert 'GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-60}"' in source
+    assert 'GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-65}"' in source
     assert 'GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-3}"' in source
-    assert 'GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-74}"' in source
-    assert 'GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-68}"' in source
-    assert 'GPU_PEER_PAUSE_TEMP_C="${GPU_PEER_PAUSE_TEMP_C:-77}"' in source
-    assert 'GPU_PEER_RESUME_TEMP_C="${GPU_PEER_RESUME_TEMP_C:-75}"' in source
+    assert 'GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-75}"' in source
+    assert 'GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-70}"' in source
+    assert 'GPU_PEER_PAUSE_TEMP_C="${GPU_PEER_PAUSE_TEMP_C:-0}"' in source
+    assert 'GPU_PEER_RESUME_TEMP_C="${GPU_PEER_RESUME_TEMP_C:-0}"' in source
     assert 'GPU_PEER_QUIET_SECONDS="${GPU_PEER_QUIET_SECONDS:-0}"' in source
-    assert 'GPU_PEER_MAX_POWER_W="${GPU_PEER_MAX_POWER_W:-300.5}"' in source
+    assert 'GPU_PEER_MAX_POWER_W="${GPU_PEER_MAX_POWER_W:-0}"' in source
     assert 'GPU_PEER_MAX_MEMORY_MIB="${GPU_PEER_MAX_MEMORY_MIB:-0}"' in source
     assert 'GPU_PEER_MAX_UTIL_PCT="${GPU_PEER_MAX_UTIL_PCT:-100}"' in source
     assert "physical GPU1 already has compute owner(s)" in source

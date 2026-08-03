@@ -13,6 +13,7 @@ import torch.nn.functional as F
 
 from radio_gs.field import FeatureSpaceSignature, load_canonical_field_checkpoint
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
+from radio_gs.training.tensor_cache_io import load_mpr_cache
 
 
 def _sha256_file(path: str | Path) -> str:
@@ -30,7 +31,13 @@ def build(args: argparse.Namespace) -> dict:
         args.field_checkpoint, map_location="cpu"
     )
     mpr_path = Path(args.mpr_cache or payload["mpr_cache"])
-    mpr = torch.load(mpr_path, map_location="cpu")
+    mpr, _mpr_sha256, mpr_path = load_mpr_cache(
+        mpr_path,
+        expected_sha256=str(payload.get("mpr_cache_sha256", "")) or None,
+        expected_feature_space="radio",
+        require_reliability=True,
+        require_formal_safety=True,
+    )
     xyz = torch.as_tensor(mpr["xyz"]).float().cpu()
     valid = torch.as_tensor(mpr["valid"]).bool().cpu()
     if field.num_gaussians != xyz.shape[0] or valid.shape != (xyz.shape[0],):
@@ -49,9 +56,15 @@ def build(args: argparse.Namespace) -> dict:
         module.requires_grad_(False)
 
     rows = torch.where(valid)[0]
+    # Capability consumers operate only on ``valid`` primitive rows.  The
+    # historical dense layout allocated N x (4096 + 1024) fp16 values and
+    # filled invalid rows with zero.  That is needlessly close to host OOM for
+    # multi-million-Gaussian scenes (for example SPIn-NeRF truck).  Store rows
+    # in the deterministic ``torch.where(valid)`` order instead; the aligned
+    # xyz/valid tensors retain the global primitive domain.
     outputs = {
-        name: torch.zeros(
-            xyz.shape[0], adaptor.output_dim, dtype=torch.float16
+        name: torch.empty(
+            rows.numel(), adaptor.output_dim, dtype=torch.float16
         )
         for name, adaptor in adaptors.items()
     }
@@ -61,7 +74,9 @@ def build(args: argparse.Namespace) -> dict:
         radio = field.radio_features(selected).float()
         for name, adaptor in adaptors.items():
             projected = F.normalize(adaptor(radio).float(), dim=-1, eps=1e-8)
-            outputs[name][selected_cpu] = projected.half().cpu()
+            outputs[name][start : start + selected_cpu.numel()] = (
+                projected.half().cpu()
+            )
 
     radio_checkpoint_sha256 = _sha256_file(args.radio_checkpoint)
     field_checkpoint_sha256 = _sha256_file(args.field_checkpoint)
@@ -136,6 +151,9 @@ def build(args: argparse.Namespace) -> dict:
         "boundary_view": "official C-RADIOv4 sam3 feature_projection",
         "custom_adaptor_head": False,
         "query_independent": True,
+        "feature_storage": "valid_rows_compact_v1",
+        "feature_row_order": "torch_where_valid_ascending",
+        "feature_row_count": int(rows.numel()),
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,

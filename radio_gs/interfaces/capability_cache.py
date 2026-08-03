@@ -234,9 +234,18 @@ def load_canonical_capability_bank(
     require_signatures: bool = True,
 ) -> CanonicalCapabilityBank:
     cache_path = Path(path)
+    sidecar_path = cache_path.with_suffix(cache_path.suffix + ".json")
+    sidecar: Mapping[str, Any] = {}
+    if sidecar_path.is_file():
+        raw_sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        if not isinstance(raw_sidecar, Mapping):
+            raise ValueError("capability cache sidecar must be an object")
+        sidecar = raw_sidecar
+    compact_sidecar = sidecar.get("feature_storage") == "valid_rows_compact_v1"
     if (
         cache_path.stat().st_size >= 2 * 1024**3
-        and cache_path.with_suffix(cache_path.suffix + ".json").is_file()
+        and sidecar_path.is_file()
+        and not compact_sidecar
     ):
         payload = _load_memory_mapped_capability_payload(cache_path)
     else:
@@ -258,6 +267,11 @@ def load_canonical_capability_bank(
         raise ValueError("capability cache canonical-field hash mismatch")
 
     memory_mapped = bool(payload.get("_memory_mapped", False))
+    compact = metadata.get("feature_storage") == "valid_rows_compact_v1"
+    if compact != compact_sidecar and sidecar_path.is_file():
+        raise ValueError(
+            "capability cache compact-storage declaration differs from sidecar"
+        )
     xyz = torch.as_tensor(payload["xyz"]).float().cpu()
     valid = torch.as_tensor(payload["valid"]).bool().cpu()
     appearance = torch.as_tensor(payload["appearance_dino_v3"]).cpu()
@@ -267,8 +281,17 @@ def load_canonical_capability_bank(
         raise ValueError("capability xyz/valid rows are malformed")
     if appearance.ndim != 2 or boundary.ndim != 2:
         raise ValueError("capability features must be matrices")
-    if appearance.shape[0] != count or boundary.shape[0] != count:
+    expected_feature_rows = int(valid.sum()) if compact else count
+    if (
+        appearance.shape[0] != expected_feature_rows
+        or boundary.shape[0] != expected_feature_rows
+    ):
         raise ValueError("capability feature rows do not align with geometry")
+    if compact:
+        if metadata.get("feature_row_order") != "torch_where_valid_ascending":
+            raise ValueError("compact capability row order is unsupported")
+        if int(metadata.get("feature_row_count", -1)) != expected_feature_rows:
+            raise ValueError("compact capability row count declaration differs")
     if not bool(torch.isfinite(xyz).all()):
         raise ValueError("capability geometry contains NaN or infinity")
     if memory_mapped:
@@ -310,7 +333,7 @@ def load_canonical_capability_bank(
         boundary=boundary,
         signatures=signatures,
         metadata=metadata,
-        features_are_compact=memory_mapped,
+        features_are_compact=memory_mapped or compact,
     )
 
 

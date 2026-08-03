@@ -93,6 +93,100 @@ def test_capability_cache_rejects_missing_signatures(tmp_path: Path) -> None:
         load_canonical_capability_bank(path)
 
 
+def test_compact_valid_row_capability_cache_preserves_global_alignment(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "compact.pt"
+    valid = torch.tensor([True, False, True])
+    appearance = torch.arange(8, dtype=torch.float16).reshape(2, 4)
+    boundary = torch.arange(4, dtype=torch.float16).reshape(2, 2)
+    metadata = {
+        "source": "canonical_radio_field_official_frozen_capability_views",
+        "field_checkpoint_sha256": "field-hash",
+        "radio_checkpoint_sha256": "radio-hash",
+        "custom_adaptor_head": False,
+        "query_independent": True,
+        "feature_storage": "valid_rows_compact_v1",
+        "feature_row_order": "torch_where_valid_ascending",
+        "feature_row_count": 2,
+        "capability_signatures": {
+            "appearance": _signature("dino", 4),
+            "boundary": _signature("sam3", 2),
+        },
+    }
+    torch.save(
+        {
+            "schema_version": 1,
+            "xyz": torch.arange(9, dtype=torch.float32).reshape(3, 3),
+            "valid": valid,
+            "appearance_dino_v3": appearance,
+            "boundary_sam3": boundary,
+            "metadata": metadata,
+        },
+        path,
+    )
+    path.with_suffix(".pt.json").write_text(
+        json.dumps({**metadata, "num_gaussians": 3}), encoding="utf-8"
+    )
+
+    bank = load_canonical_capability_bank(
+        path, expected_field_checkpoint_sha256="field-hash"
+    )
+
+    assert bank.features_are_compact is True
+    assert bank.global_rows.tolist() == [0, 2]
+    torch.testing.assert_close(bank.valid_feature_banks()["appearance"], appearance)
+    torch.testing.assert_close(bank.valid_feature_banks()["boundary"], boundary)
+
+
+@pytest.mark.parametrize("mutation", ["payload_only", "sidecar_only", "row_count"])
+def test_compact_capability_cache_fails_closed_on_storage_mismatch(
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    path = tmp_path / "compact.pt"
+    metadata = {
+        "source": "canonical_radio_field_official_frozen_capability_views",
+        "field_checkpoint_sha256": "field-hash",
+        "radio_checkpoint_sha256": "radio-hash",
+        "custom_adaptor_head": False,
+        "query_independent": True,
+        "feature_storage": "valid_rows_compact_v1",
+        "feature_row_order": "torch_where_valid_ascending",
+        "feature_row_count": 2,
+        "capability_signatures": {
+            "appearance": _signature("dino", 4),
+            "boundary": _signature("sam3", 2),
+        },
+    }
+    payload_metadata = dict(metadata)
+    sidecar_metadata = dict(metadata)
+    if mutation == "payload_only":
+        sidecar_metadata.pop("feature_storage")
+    elif mutation == "sidecar_only":
+        payload_metadata.pop("feature_storage")
+    else:
+        payload_metadata["feature_row_count"] = 1
+        sidecar_metadata["feature_row_count"] = 1
+    torch.save(
+        {
+            "schema_version": 1,
+            "xyz": torch.zeros(3, 3),
+            "valid": torch.tensor([True, False, True]),
+            "appearance_dino_v3": torch.zeros(2, 4),
+            "boundary_sam3": torch.zeros(2, 2),
+            "metadata": payload_metadata,
+        },
+        path,
+    )
+    path.with_suffix(".pt.json").write_text(
+        json.dumps(sidecar_metadata), encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="compact|row count|align"):
+        load_canonical_capability_bank(path)
+
+
 def test_dense_capability_archive_can_be_read_without_eager_storage_load(
     tmp_path: Path,
 ) -> None:

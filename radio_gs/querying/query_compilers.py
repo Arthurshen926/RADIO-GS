@@ -247,6 +247,10 @@ def compile_registered_primitive_seeds(
     negative_prompt_mass: torch.Tensor | None = None,
     primitive_unary_evidence: PrimitiveUnaryEvidence | None = None,
     seed_normalization: str = "independent_max",
+    prototype_positive_seeds: torch.Tensor | None = None,
+    prototype_negative_seeds: torch.Tensor | None = None,
+    prototype_seed_provenance: str | None = None,
+    solver_seed_provenance: str | None = None,
 ) -> QuerySpec:
     """Compile sparse raster-registered primitive seeds into shared evidence."""
 
@@ -268,6 +272,63 @@ def compile_registered_primitive_seeds(
         raise ValueError("positive and negative primitive seeds must align")
     if not bool((positive > 0).any()):
         raise ValueError("registered query has no positive primitive support")
+    prototype_positive = (
+        positive
+        if prototype_positive_seeds is None
+        else torch.as_tensor(prototype_positive_seeds).float().reshape(-1)
+    )
+    prototype_negative = (
+        negative
+        if prototype_negative_seeds is None
+        else torch.as_tensor(prototype_negative_seeds).float().reshape(-1)
+    )
+    prototype_decoupled = (
+        prototype_positive_seeds is not None
+        or prototype_negative_seeds is not None
+    )
+    if (
+        prototype_positive.shape != positive.shape
+        or not bool(torch.isfinite(prototype_positive).all())
+        or bool((prototype_positive < 0).any())
+        or not bool((prototype_positive > 0).any())
+    ):
+        raise ValueError(
+            "prototype positive seeds must be finite, non-negative, aligned, "
+            "and non-empty"
+        )
+    if prototype_negative is not None and (
+        prototype_negative.shape != positive.shape
+        or not bool(torch.isfinite(prototype_negative).all())
+        or bool((prototype_negative < 0).any())
+        or (
+            prototype_negative_seeds is not None
+            and not bool((prototype_negative > 0).any())
+        )
+    ):
+        raise ValueError(
+            "prototype negative seeds must be finite, non-negative, aligned, "
+            "and explicit overrides must be non-empty"
+        )
+    if not prototype_decoupled and (
+        prototype_seed_provenance is not None
+        or solver_seed_provenance is not None
+    ):
+        raise ValueError(
+            "prototype/solver seed provenance requires decoupled prototype seeds"
+        )
+    if prototype_decoupled and (
+        not str(prototype_seed_provenance or "").strip()
+        or not str(solver_seed_provenance or "").strip()
+    ):
+        # Generic callers remain supported, but their provenance is explicit
+        # and cannot accidentally satisfy the stricter dual-registration
+        # engine contract.
+        prototype_seed_provenance = (
+            str(prototype_seed_provenance or "explicit_override_unspecified")
+        )
+        solver_seed_provenance = str(
+            solver_seed_provenance or "registered_solver_seed_unspecified"
+        )
     if primitive_unary_evidence is not None and (
         positive_prompt_mass is not None or negative_prompt_mass is not None
     ):
@@ -299,19 +360,31 @@ def compile_registered_primitive_seeds(
         raise ValueError("registered prompt evidence and primitive seeds must align")
 
     app_proto, app_mass = _deterministic_prototypes(
-        appearance, positive, prototype_count, strategy=prototype_strategy
+        appearance,
+        prototype_positive,
+        prototype_count,
+        strategy=prototype_strategy,
     )
     bnd_proto, bnd_mass = _deterministic_prototypes(
-        boundary, positive, prototype_count, strategy=prototype_strategy
+        boundary,
+        prototype_positive,
+        prototype_count,
+        strategy=prototype_strategy,
     )
     app_neg = None
     bnd_neg = None
-    if negative is not None and bool((negative > 0).any()):
+    if prototype_negative is not None and bool((prototype_negative > 0).any()):
         app_neg, _ = _deterministic_prototypes(
-            appearance, negative, prototype_count, strategy=prototype_strategy
+            appearance,
+            prototype_negative,
+            prototype_count,
+            strategy=prototype_strategy,
         )
         bnd_neg, _ = _deterministic_prototypes(
-            boundary, negative, prototype_count, strategy=prototype_strategy
+            boundary,
+            prototype_negative,
+            prototype_count,
+            strategy=prototype_strategy,
         )
     return QuerySpec(
         modality=QueryModality.REGISTERED_2D,
@@ -358,6 +431,19 @@ def compile_registered_primitive_seeds(
             "prototype_strategy": str(prototype_strategy),
             "registered_unary_normalization": "joint_prompt_mass",
             "registered_seed_normalization": str(seed_normalization),
+            **(
+                {
+                    "prototype_seed_decoupled": True,
+                    "prototype_seed_role": "prototype_construction_only",
+                    "solver_seed_role": "soft_seed_and_registered_unary",
+                    "prototype_seed_provenance": str(
+                        prototype_seed_provenance
+                    ),
+                    "solver_seed_provenance": str(solver_seed_provenance),
+                }
+                if prototype_decoupled
+                else {}
+            ),
         },
     )
 

@@ -13,6 +13,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from radio_gs.interfaces.capability_cache import load_canonical_capability_bank
 from radio_gs.querying.support_solver import (
     SupportGraphConfig,
     build_primitive_support_graph,
@@ -318,11 +319,15 @@ def estimate_unoriented_local_surface_normals(
 
 
 def build(args: argparse.Namespace) -> dict:
-    capability = torch.load(args.capability_cache, map_location="cpu")
-    required = {"xyz", "valid", "appearance_dino_v3", "boundary_sam3", "metadata"}
-    if not isinstance(capability, dict) or not required.issubset(capability):
-        raise ValueError(f"capability cache must contain {sorted(required)}")
-    capability_valid = torch.as_tensor(capability["valid"]).bool().cpu()
+    bank = load_canonical_capability_bank(args.capability_cache)
+    capability = {
+        "xyz": bank.xyz,
+        "valid": bank.valid,
+        "appearance_dino_v3": bank.appearance,
+        "boundary_sam3": bank.boundary,
+        "metadata": bank.metadata,
+    }
+    capability_valid = bank.valid
     valid = capability_valid
     valid_mask_source = "capability.valid"
     if args.valid_mask_cache:
@@ -346,10 +351,23 @@ def build(args: argparse.Namespace) -> dict:
             f"{Path(args.valid_mask_cache).resolve()}:{args.valid_mask_key}"
         )
     global_rows = torch.where(valid)[0]
-    xyz = torch.as_tensor(capability["xyz"]).float().cpu()[global_rows]
+    xyz = bank.xyz[global_rows]
+    if bank.features_are_compact:
+        capability_rows = torch.where(capability_valid)[0]
+        global_to_capability = torch.full(
+            (capability_valid.numel(),), -1, dtype=torch.long
+        )
+        global_to_capability[capability_rows] = torch.arange(
+            capability_rows.numel(), dtype=torch.long
+        )
+        feature_rows = global_to_capability[global_rows]
+        if bool((feature_rows < 0).any()):
+            raise ValueError("graph valid rows are absent from compact capability bank")
+    else:
+        feature_rows = global_rows
     appearance, boundary, affinity_audit = capability_affinity_features(
         capability,
-        global_rows,
+        feature_rows,
         mode=str(args.capability_affinity_mode),
         affinity_dim=int(args.affinity_dim),
         hash_batch_size=int(args.hash_batch_size),

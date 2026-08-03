@@ -61,10 +61,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = build_arg_parser().parse_args(argv)
     manifest_path = args.manifest.expanduser().resolve()
     raw_manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    # The low-level readout also supports synthetic unit manifests.  The
-    # benchmark CLI is stricter: it binds the complete official cohort and
-    # re-hashes prompt/GT assets before opening any prompt feature.
-    validate_dataset_manifest(raw_manifest, check_files=True)
+    # The low-level readout also supports synthetic unit manifests.  Keep the
+    # benchmark CLI strict about the complete cohort and prompt/target roles,
+    # but do not open or hash evaluation ground truth during prediction.  The
+    # producer opens the declared prompt assets below when it constructs the
+    # prototypes; frozen manifest/file hashes are bound by the separate result
+    # authority, and target masks belong exclusively to the evaluator stage.
+    validate_dataset_manifest(raw_manifest, check_files=False)
     result = generate_feature_readout_predictions(
         manifest_path,
         args.output_dir,

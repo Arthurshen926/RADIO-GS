@@ -1,0 +1,445 @@
+{
+  "artifact_type": "nvos-current-field-strict-unseen-exact-authority-v1",
+  "benchmark": "NVOS",
+  "comparability": {
+    "note": "This is the strict-unseen RADIO-GS track; LUDVIG's frozen baseline is all-view.",
+    "same_training_visibility_as_frozen_LUDVIG_baseline": false,
+    "strict_unseen_target_rgb_and_mask": true
+  },
+  "evaluation_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/evaluation.json",
+    "sha256": "fd591beefbb37ace11e6951cfc03dc4c0f0e5e55ff9e734c9b6bfff97e14279b"
+  },
+  "method": "RADIO-GS canonical-mpr-v3 strict-unseen feature field",
+  "metrics": {
+    "foreground_iou": 0.611953540881344,
+    "num_frames": 8,
+    "num_scenes": 8,
+    "pixel_accuracy": 0.9153146888100718
+  },
+  "prediction_manifest": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/prediction_manifest.json",
+    "sha256": "4eebeaa7bdeeb497649b34d4bf5889dc25770446939c26ede0adca719f9f5df8"
+  },
+  "protocol": {
+    "aggregation": "one target per task, equal macro over full8",
+    "dataset_manifest": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+      "sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea"
+    },
+    "evaluation_protocol_freeze": {
+      "path": "/root/RADIO-GS/paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+      "sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916"
+    },
+    "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "resize": "nearest",
+    "score": "float32 cosine(foreground)-cosine(background)",
+    "threshold": "score >= 0"
+  },
+  "safety": {
+    "prediction_opens_target_ground_truth": false,
+    "render_opens_masks": false,
+    "render_opens_rgb": false,
+    "target_mask_scoring_only": true,
+    "target_rgb_excluded_at_query": true,
+    "target_rgb_excluded_from_field_training": true
+  },
+  "scenes": [
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fern/rgb_to_colmap_camera_mapping.json",
+        "sha256": "cbc970ce58549e171f8ecdc8414d35ef9df23d5f32df9e4889fcb5848549f3a3"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fern/canonical_d256_l128_capability_first.pth",
+        "sha256": "f19dfdcc09e7b5b0033c7c24abbc192e021921703e7b88d050145b4de0c6ca3e"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fern/gaussfm_main_track.yaml",
+        "sha256": "c8958c55f48ce119f4685fde96ce245c75019e8640953192bb02b4a277dd18ce"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fern/feature_field/checkpoints/best.pth",
+        "sha256": "1fe3354ba506d9fa48db30008fa8b47873e53888384ca604a20a61d1b819e5fc"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/fern/IMG_4038.pt",
+        "sha256": "4e0a6c2bee204965405d7cae9c1c7d7de97f803e5cccf250b78c0a0233fe6f44"
+      },
+      "prompt_frame_id": "IMG_4038",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/fern/render_manifest.json",
+        "sha256": "f0a40a352b3d1dad6d1197d38d9332836ffe03eefbaf8880adb06f4fb8b05ff0"
+      },
+      "scene_id": "fern",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.3691537380218506,
+        "minimum": -0.44993162155151367,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/fern/IMG_4027.npy",
+        "sha256": "aae6a1c278938f1ad1c15ffccaf919092ef0ef8b0d0edcd22164015f594053c6",
+        "shape": [
+          47,
+          62
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/fern/IMG_4027.pt",
+        "sha256": "9d6667af69aa37d87ac16e97d376771e7542192f37c67fd24d8129f162a219f4"
+      },
+      "target_frame_id": "IMG_4027"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/flower/rgb_to_colmap_camera_mapping.json",
+        "sha256": "0e52e63eff67a8a73fe8cb466d22ea734bd16d7a4e58cef8d4e838c0eaa3cc46"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/flower/canonical_d256_l128_capability_first.pth",
+        "sha256": "de7c89ec123946d3782e9c4b3b07abe29b02a8d31d930a5d4f7f5440ed152b36"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/flower/gaussfm_main_track.yaml",
+        "sha256": "453b6ae17c50169b3c0eccc023ef450e34073650f270127a43198f5d5e2ccfbb"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/flower/feature_field/checkpoints/best.pth",
+        "sha256": "eba68d94f176837cbda3c483adc0ddf473ba5cc636dd02593c271906c3b950d0"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/flower/IMG_2983.pt",
+        "sha256": "c2cd8164d028f1f3603280c22f06eb0a576dff7a500ebe2fb21b15b4d2997bd6"
+      },
+      "prompt_frame_id": "IMG_2983",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/flower/render_manifest.json",
+        "sha256": "cc08253ff210fc839c2d43e506602f04b56feb77fe5bd98dc451f872f01bbe5b"
+      },
+      "scene_id": "flower",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.38203778862953186,
+        "minimum": -0.4123592972755432,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/flower/IMG_2962.npy",
+        "sha256": "466249cc041b2085898dd41baaafe71d58365355d6d143f73f0ef3654fad05e1",
+        "shape": [
+          47,
+          62
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/flower/IMG_2962.pt",
+        "sha256": "04a4408de733995ab4ba43456fe35fd07af6c35ed6dfca015d33aa1c528c522d"
+      },
+      "target_frame_id": "IMG_2962"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fortress/rgb_to_colmap_camera_mapping.json",
+        "sha256": "b0a07d0d39e14c00b4a90a945946537952713dcac5ff93c04827164230250b57"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fortress/canonical_d256_l128_capability_first.pth",
+        "sha256": "e9b1f4e573ba237c278b2616acad16a62dd1357b75923644c067ae4fb57eadb2"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fortress/gaussfm_main_track.yaml",
+        "sha256": "9e5ae3242e58cd2ae0e030c7f208a1918b9f70dcf1aea233c46fb5a4c8049978"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fortress/feature_field/checkpoints/best.pth",
+        "sha256": "756f47f29be425f61c14c2400c830b5e115631ee74cbdd190dca066a330b6692"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/fortress/IMG_1821.pt",
+        "sha256": "09f907fde3c4abdaf34c78745e0ffd613459f38c045f995ee6ee36ab004abfc3"
+      },
+      "prompt_frame_id": "IMG_1821",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/fortress/render_manifest.json",
+        "sha256": "e499d1a13c1b5b9515136a3ed105d1aef1ef303e105bd3377d6ed6c1b5e32a13"
+      },
+      "scene_id": "fortress",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.5730775594711304,
+        "minimum": -0.5494531989097595,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/fortress/IMG_1800.npy",
+        "sha256": "d8e17ffe372ff26e44a540642a019cc814d9c17699cfbd24a7e960bf6daa6c16",
+        "shape": [
+          47,
+          63
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/fortress/IMG_1800.pt",
+        "sha256": "b55ccb55bc53b9356d1e552f1dfceb9c679ca22964594ee94e7d43d28ef44779"
+      },
+      "target_frame_id": "IMG_1800"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_center/rgb_to_colmap_camera_mapping.json",
+        "sha256": "a9435e3602e25346316f7e6c1da321b980997ec73f7df093413efc76800ae7d4"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_center/canonical_d256_l128_capability_first.pth",
+        "sha256": "7addbbbf48fd3b7c28f540d07fa15b0f7fe2410b2fb168da5e1a74c666d3171b"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_center/gaussfm_main_track.yaml",
+        "sha256": "5f36db73b3fc639015b0e3723b3a1986fdf0217036ea9e0bacae3dd2b7c3cc6f"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_center/feature_field/checkpoints/best.pth",
+        "sha256": "43cf012be92cd280606c9e2c692fe4ad664bfd175ac1658a3cfcaaa75386f048"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/horns_center/DJI_20200223_163055_437.pt",
+        "sha256": "8983d1d38dc974511542aafc51b600fd5de4e6c23fe87d6b483e4ba6bb89cb57"
+      },
+      "prompt_frame_id": "DJI_20200223_163055_437",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/horns_center/render_manifest.json",
+        "sha256": "09ca78c2997637a0f70543757840b32ca9bd6c3d63a7106f5d515a4a3de94cc0"
+      },
+      "scene_id": "horns_center",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.3296871781349182,
+        "minimum": -0.3526226282119751,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/horns_center/DJI_20200223_163024_597.npy",
+        "sha256": "82c7cad1a394cd2212817fd31e20364f6490faf3e7df9b3bd37765fcb74b8b01",
+        "shape": [
+          47,
+          63
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/horns_center/DJI_20200223_163024_597.pt",
+        "sha256": "f23699ee0e0ec7bb9898cebecaba1dd76e71c15553d01e417360126c4f541768"
+      },
+      "target_frame_id": "DJI_20200223_163024_597"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_left/rgb_to_colmap_camera_mapping.json",
+        "sha256": "c0620bbd893d2bdafb9b917e4583187d002032a3b5fca6829eab675459aec9dc"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_left/canonical_d256_l128_capability_first.pth",
+        "sha256": "40d173564f7cfb767da3bd33b28533e2bcd70e73173182163d697b3e2d4b999b"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_left/gaussfm_main_track.yaml",
+        "sha256": "cf55a2e3ba8a3805e3981934f6aea53514fc718250d7279a05fb7e2e22918847"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/horns_left/feature_field/checkpoints/best.pth",
+        "sha256": "ba629ed840c8dd20c466ffc8e4bc8ab14278024869d8f121427976eef428311e"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/horns_left/DJI_20200223_163055_437.pt",
+        "sha256": "25c12ff3210408cc4c29951f5b1c9611f5af3f50aff0732cf5163bdfe34b7050"
+      },
+      "prompt_frame_id": "DJI_20200223_163055_437",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/horns_left/render_manifest.json",
+        "sha256": "85dfe1afc9d5263f99b23ce8b59e45959deeb3b085501d32314d4ebfedb5f12a"
+      },
+      "scene_id": "horns_left",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.2904568314552307,
+        "minimum": -0.4052076041698456,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/horns_left/DJI_20200223_163024_597.npy",
+        "sha256": "1e0326493b89b62dd81e982b7a8107496703b3500a94a3564e348fc6bf3b17b8",
+        "shape": [
+          47,
+          63
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/horns_left/DJI_20200223_163024_597.pt",
+        "sha256": "9b7163e35296c9fbd8e08bf2033cab17b2ef6c0ed63db4bbd6175b5aaa8d995c"
+      },
+      "target_frame_id": "DJI_20200223_163024_597"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/leaves/rgb_to_colmap_camera_mapping.json",
+        "sha256": "4e145f7f1e86e7fdb8bc8bc9f5701dcd33159f0e51d9712ab55f31cae92249fc"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/leaves/canonical_d256_l128_capability_first.pth",
+        "sha256": "edd2c7bfc7b1e6fd09d10b7daed9b74afddcf3df0578353748a7ca2e948033db"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/leaves/gaussfm_main_track.yaml",
+        "sha256": "7ddb00fb43c90694ec00a5ca9adc3d0a8570678498d07772a183fb38d9fa8c0d"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/leaves/feature_field/checkpoints/best.pth",
+        "sha256": "1d6f3e2a66ecedfa641efd4a3101f4f1597c75d703b00b64ebd04c735d816489"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/leaves/IMG_3011.pt",
+        "sha256": "1fafb7b25b80a6ae9501232a46a3930c2bc5ef63b9d00541f2cd5f6277d82bc9"
+      },
+      "prompt_frame_id": "IMG_3011",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/leaves/render_manifest.json",
+        "sha256": "1fedb0881018822881471e7fa10863bfe36d0d8b07d5a486990236bf794a0dee"
+      },
+      "scene_id": "leaves",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.4127349853515625,
+        "minimum": -0.4467008709907532,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/leaves/IMG_2997.npy",
+        "sha256": "3fd8392c12ccdb86de1420c2c7cfb26cc8ec678f08e904da8ffa1bab3e9c4066",
+        "shape": [
+          46,
+          62
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/leaves/IMG_2997.pt",
+        "sha256": "d7b560b6fdcd18a8206f81201745c48b381c614bb029c4b624dfa85a44122a3e"
+      },
+      "target_frame_id": "IMG_2997"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/orchids/rgb_to_colmap_camera_mapping.json",
+        "sha256": "d298cce9b9a660c32221cf1e4ac89804592491d710c091a4de08d2585c0dd3b4"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/orchids/canonical_d256_l128_capability_first.pth",
+        "sha256": "6c71bc70233312584b68c30312c40d1ce112c187c9deda0fad49f28350b8f9a4"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/orchids/gaussfm_main_track.yaml",
+        "sha256": "be44d643382de20d275060d372509a5f6c6c1f7fbcc49accb497e4ae339d725e"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/orchids/feature_field/checkpoints/best.pth",
+        "sha256": "26c3f15be666b139cead50bfb46a12109491adf8c4f2f9078de92ae40cb695fe"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/orchids/IMG_4479.pt",
+        "sha256": "fdba23c33fc3002baeb19b2f8414b6250321e44f793b7946930a7faabeaec79e"
+      },
+      "prompt_frame_id": "IMG_4479",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/orchids/render_manifest.json",
+        "sha256": "a573119d8d406a1c002c2bd18c8e5e00131fc801b1fb970b2f49d7d574fe67a0"
+      },
+      "scene_id": "orchids",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.4576152563095093,
+        "minimum": -0.5382295846939087,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/orchids/IMG_4480.npy",
+        "sha256": "b60ecb1b782f94278a5257bad6e5bbe8d533f76f8c2c2cf0b542717c44935278",
+        "shape": [
+          46,
+          62
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/orchids/IMG_4480.pt",
+        "sha256": "803e38fcd4a2a20982e0ae5ea1ae51bbd4a5b624bb1645453cf305f25395fc16"
+      },
+      "target_frame_id": "IMG_4480"
+    },
+    {
+      "camera_map": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/trex/rgb_to_colmap_camera_mapping.json",
+        "sha256": "30452d7ad0400c71a153090262e414ac2c4b5d74d7930357fa79067db9a48f04"
+      },
+      "canonical_field_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/trex/canonical_d256_l128_capability_first.pth",
+        "sha256": "408d3bb5d2ce08f943586417fe4b2245888c75f72b5bfc789efb970f4d55d8f7"
+      },
+      "config": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/trex/gaussfm_main_track.yaml",
+        "sha256": "bd86687b945194b6b04b9a01e46afa20ebece1beb5fdfc79b42ba46f8054ff6c"
+      },
+      "geometry_carrier_checkpoint": {
+        "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/trex/feature_field/checkpoints/best.pth",
+        "sha256": "67c89ae47c857ea182f8ac8e14eb9bfcbe3f72f4a792a756e481c03b8c0f8b0a"
+      },
+      "prompt_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/trex/DJI_20200223_163607_906.pt",
+        "sha256": "fbf6a524155f71da73e77ceeb1f1ccca644cf1dab13f8910cfa732616739b0f8"
+      },
+      "prompt_frame_id": "DJI_20200223_163607_906",
+      "render_manifest": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/trex/render_manifest.json",
+        "sha256": "b0ec19796be45010f9d1593c037862e36c1a2cae1f90615c460bfcb051cf1916"
+      },
+      "scene_id": "trex",
+      "score": {
+        "dtype": "float32",
+        "maximum": 0.35115212202072144,
+        "minimum": -0.3805895149707794,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/predictions/scores/trex/DJI_20200223_163619_411.npy",
+        "sha256": "9e9d210cb7264de2b5245cd5a738ca05803d9ebcd75af0679894f0ac6c9773f0",
+        "shape": [
+          47,
+          63
+        ]
+      },
+      "target_absent_from_training": true,
+      "target_feature": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/nvos_canonical_mpr_v3_exact_full8/rendered_features/trex/DJI_20200223_163619_411.pt",
+        "sha256": "22a0af5fd2f34e59d9b29622407911428ab470a1c2201e250bbc06bb3d46e435"
+      },
+      "target_frame_id": "DJI_20200223_163619_411"
+    }
+  ],
+  "schema_version": 1,
+  "source_artifacts": [
+    {
+      "path": "/root/RADIO-GS/radio_gs/data/promptable_nvs_manifest.py",
+      "sha256": "c5d9d936f0a26ebbdbaf6902e21f645797f128d8934323164ee497313ff91b5a"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/evaluation/promptable_feature_readout.py",
+      "sha256": "a4b7d57f676fa474111ee2dc059505ec6fb7bb8130d4091aaf0a1a907a7a6cf7"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/evaluation/promptable_segmentation.py",
+      "sha256": "e7cca6be3f92ebd07d4349bbb1378c2438ddbcc66b266a16cc99fb2617696da8"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/field/checkpoint.py",
+      "sha256": "7a747fb5d7f24835eee14ac98abeb10261783db1d4ed4b20a5f47946a4f3fb32"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/rendering/coefficient_renderer.py",
+      "sha256": "b080d53df763db7ad5835f17f581ab05dd7ce3f9564e8602772b102f9d5034f9"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/scripts/render_promptable_nvs_features.py",
+      "sha256": "1f20b1dccb379e165548355cff9b6b3314c74ab79780126b399d95bc508f81ea"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/scripts/predict_promptable_nvs_feature_readout.py",
+      "sha256": "65da33ef9f345a5e76b5532d8e95c125d08df7ed99d17bf73bece8fe262e3860"
+    },
+    {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_promptable_nvs_segmentation.py",
+      "sha256": "703d3f8176121859fb2a7e4f5f46d9ee7cbd43a6df32a2224e20e0c1d834c603"
+    }
+  ],
+  "status": "complete_exact_full8_canonical_mpr_v3_screen"
+}

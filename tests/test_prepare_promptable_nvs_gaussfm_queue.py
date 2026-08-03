@@ -137,6 +137,24 @@ def _patch_protocol_and_colmap(monkeypatch, manifest: dict, scene_root: Path) ->
     monkeypatch.setattr(queue, "_parse_colmap_sparse", lambda root: parsed)
 
 
+def test_canonical_render_feature_source_is_mask_free_and_row_aligned() -> None:
+    payload = {
+        "schema_version": 1,
+        "architecture": {"num_gaussians": 3, "feature_dim": 1280},
+        "geometry_fingerprint": {"xyz_sha256": "abc"},
+        "benchmark_masks_opened": False,
+        "text_queries_opened": False,
+    }
+    render.validate_canonical_feature_source(
+        payload, num_gaussians=3, geometry_xyz_sha256="abc"
+    )
+    payload["benchmark_masks_opened"] = True
+    with pytest.raises(render.PromptableRenderError, match="benchmark-mask"):
+        render.validate_canonical_feature_source(
+            payload, num_gaussians=3, geometry_xyz_sha256="abc"
+        )
+
+
 def test_nvos_queue_excludes_target_everywhere_and_does_not_run_gpu(
     tmp_path: Path, monkeypatch
 ) -> None:

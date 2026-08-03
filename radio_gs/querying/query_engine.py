@@ -18,6 +18,11 @@ from .score_calibration import (
     SceneSpaceCalibration,
     fit_scene_space_calibration,
 )
+from .reliability_fusion import (
+    DUAL_PROTOTYPE_SEED_PROVENANCE,
+    DUAL_SOLVER_SEED_PROVENANCE,
+    geometric_consensus_unary,
+)
 from .query_spec import QueryModality, QuerySpec
 from .support_solver import (
     PrimitiveSupportGraph,
@@ -35,6 +40,7 @@ class QueryResult:
     evidence_components: Mapping[str, torch.Tensor]
     probabilities: torch.Tensor
     selected_support: torch.Tensor
+    field_unary: torch.Tensor
     score_calibration: str = "none"
     reliability_applied: bool = False
     graph_policy: str = "typed_if_available"
@@ -69,14 +75,17 @@ class CanonicalQueryEngine:
         self.solver_config = solver_config
         if (
             scoring_config.registered_observation_fusion
-            == "hard_seed_anchored_probability"
+            in {
+                "hard_seed_anchored_probability",
+                "hard_seed_anchor_only_probability",
+            }
             and (
                 solver_config.hard_seed_threshold <= 0
                 or solver_config.hard_seed_conflict_margin != 0
             )
         ):
             raise ValueError(
-                "hard_seed_anchored_probability requires a positive "
+                "hard-seed probability fusion requires a positive "
                 "hard_seed_threshold and zero hard_seed_conflict_margin"
             )
         self.graph_policy = str(graph_policy)
@@ -253,6 +262,10 @@ class CanonicalQueryEngine:
                 name: shrink_unary_by_reliability(values, self.node_reliability)
                 for name, values in components.items()
             }
+        # Preserve the capability-field expert before any registered prompt
+        # observation is fused.  This explicit interface lets protocol audits
+        # verify the field expert independently from the query observation.
+        field_unary = unary
         if (
             query.modality is QueryModality.REGISTERED_2D
             and query.primitive_unary_evidence is not None
@@ -267,13 +280,106 @@ class CanonicalQueryEngine:
                 raise ValueError(
                     "registered prompt unary does not align with support graph"
                 )
-            if scoring_config.registered_observation_fusion in {
+            if (
+                scoring_config.registered_observation_fusion
+                == "direct_raster_adjoint"
+            ):
+                if (
+                    query.primitive_unary_evidence.source
+                    != "raster_adjoint_foreground_background_continuous"
+                    or query.primitive_unary_evidence.confidence is None
+                ):
+                    raise ValueError(
+                        "direct_raster_adjoint requires exact foreground/background "
+                        "evidence from one raster responsibility cache"
+                    )
+                # The registered observation is the complete unary in this
+                # diagnostic path.  Prototype-cosine components are intentionally
+                # bypassed rather than added on a different score scale.
+                unary = prompt_unary
+                components = {"registered_seed": prompt_unary}
+            elif (
+                scoring_config.registered_observation_fusion
+                == "raster_adjoint_bernoulli_poe"
+            ):
+                if (
+                    query.primitive_unary_evidence.source
+                    != "raster_adjoint_foreground_background_continuous"
+                    or query.primitive_unary_evidence.confidence is None
+                ):
+                    raise ValueError(
+                        "Bernoulli-PoE registered fusion requires exact "
+                        "foreground/background "
+                        "evidence from one raster responsibility cache"
+                    )
+                field_unary = unary
+                unary = geometric_consensus_unary(
+                    field_unary,
+                    prompt_unary,
+                    unary_temperature=self.solver_config.unary_temperature,
+                    chunk_size=scoring_config.score_chunk_size,
+                )
+                components = {
+                    **components,
+                    "registered_seed": unary - field_unary,
+                }
+            elif (
+                scoring_config.registered_observation_fusion
+                == "dual_registration_bernoulli_poe"
+            ):
+                if (
+                    query.primitive_unary_evidence.source
+                    != "raster_adjoint_foreground_background_continuous"
+                    or query.primitive_unary_evidence.confidence is None
+                ):
+                    raise ValueError(
+                        "dual-registration Bernoulli-PoE requires exact "
+                        "foreground/background evidence from one native "
+                        "raster responsibility cache"
+                    )
+                metadata = dict(query.metadata)
+                required_provenance = {
+                    "prototype_seed_decoupled": True,
+                    "prototype_seed_role": "prototype_construction_only",
+                    "solver_seed_role": "soft_seed_and_registered_unary",
+                    "prototype_seed_provenance": (
+                        DUAL_PROTOTYPE_SEED_PROVENANCE
+                    ),
+                    "solver_seed_provenance": DUAL_SOLVER_SEED_PROVENANCE,
+                }
+                mismatched = [
+                    key
+                    for key, expected in required_provenance.items()
+                    if metadata.get(key) != expected
+                ]
+                if mismatched:
+                    raise ValueError(
+                        "dual-registration Bernoulli-PoE requires decoupled "
+                        "legacy/native seed provenance; invalid metadata: "
+                        + ", ".join(mismatched)
+                    )
+                field_unary = unary
+                unary = geometric_consensus_unary(
+                    field_unary,
+                    prompt_unary,
+                    unary_temperature=self.solver_config.unary_temperature,
+                    chunk_size=scoring_config.score_chunk_size,
+                )
+                components = {
+                    **components,
+                    "registered_seed": unary - field_unary,
+                }
+            elif scoring_config.registered_observation_fusion in {
                 "probability_mixture",
                 "hard_seed_anchored_probability",
+                "hard_seed_anchor_only_probability",
             }:
                 if (
                     scoring_config.registered_observation_fusion
-                    == "hard_seed_anchored_probability"
+                    in {
+                        "hard_seed_anchored_probability",
+                        "hard_seed_anchor_only_probability",
+                    }
                 ):
                     if (
                         query.positive_seeds is None
@@ -282,7 +388,7 @@ class CanonicalQueryEngine:
                         or query.negative_seeds.normalization != "none"
                     ):
                         raise ValueError(
-                            "hard-seed anchored probability requires aligned "
+                            "hard-seed probability fusion requires aligned "
                             "joint-signed, non-normalized positive/negative seeds"
                         )
                     seed_signed = (
@@ -296,7 +402,7 @@ class CanonicalQueryEngine:
                         rtol=0.0,
                     ):
                         raise ValueError(
-                            "hard-seed anchored probability requires direct "
+                            "hard-seed probability fusion requires direct "
                             "observation values equal positive-minus-negative seeds"
                         )
                 fused_unary = fuse_registered_observation_unary(
@@ -307,8 +413,15 @@ class CanonicalQueryEngine:
                     anchor_threshold=(
                         self.solver_config.hard_seed_threshold
                         if scoring_config.registered_observation_fusion
-                        == "hard_seed_anchored_probability"
+                        in {
+                            "hard_seed_anchored_probability",
+                            "hard_seed_anchor_only_probability",
+                        }
                         else None
+                    ),
+                    anchor_only=(
+                        scoring_config.registered_observation_fusion
+                        == "hard_seed_anchor_only_probability"
                     ),
                 )
                 components = {
@@ -385,6 +498,7 @@ class CanonicalQueryEngine:
             evidence_components=components,
             probabilities=probabilities,
             selected_support=selected,
+            field_unary=field_unary,
             score_calibration=scoring_config.score_calibration,
             reliability_applied=reliability_applied,
             graph_policy=self.graph_policy,

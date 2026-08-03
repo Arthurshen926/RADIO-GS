@@ -46,6 +46,47 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _sha256_float32_rows(values: torch.Tensor) -> str:
+    array = (
+        values.detach()
+        .float()
+        .cpu()
+        .contiguous()
+        .numpy()
+        .astype("<f4", copy=False)
+    )
+    return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def validate_canonical_feature_source(
+    payload: Mapping[str, Any],
+    *,
+    num_gaussians: int,
+    geometry_xyz_sha256: str,
+) -> None:
+    """Reject a canonical field that is supervised or belongs to other rows."""
+
+    if int(payload.get("schema_version", -1)) != 1:
+        raise PromptableRenderError("Canonical feature source is not schema-v1")
+    architecture = payload.get("architecture")
+    if not isinstance(architecture, Mapping):
+        raise PromptableRenderError("Canonical feature source lacks architecture")
+    if int(architecture.get("num_gaussians", -1)) != int(num_gaussians):
+        raise PromptableRenderError("Canonical field and geometry row counts differ")
+    if int(architecture.get("feature_dim", -1)) != 1280:
+        raise PromptableRenderError("Canonical NVOS field must decode 1280d RADIO")
+    fingerprint = payload.get("geometry_fingerprint")
+    if (
+        not isinstance(fingerprint, Mapping)
+        or str(fingerprint.get("xyz_sha256") or "") != geometry_xyz_sha256
+    ):
+        raise PromptableRenderError("Canonical field and geometry xyz rows differ")
+    if payload.get("benchmark_masks_opened") is not False:
+        raise PromptableRenderError("Canonical field lacks benchmark-mask exclusion authority")
+    if payload.get("text_queries_opened") is not False:
+        raise PromptableRenderError("Canonical field lacks text-query exclusion authority")
+
+
 def _safe_component(value: str, *, role: str) -> str:
     if not value or value in {".", ".."} or Path(value).name != value or "\\" in value:
         raise PromptableRenderError(f"Unsafe {role}: {value!r}")
@@ -404,6 +445,7 @@ def render_protocol_scene(
     camera_map_path: str | Path,
     config_path: str | Path,
     checkpoint_path: str | Path,
+    canonical_field_checkpoint_path: str | Path | None = None,
     output_dir: str | Path,
     device: str = "cuda",
     overwrite: bool = False,
@@ -414,6 +456,11 @@ def render_protocol_scene(
     camera_map_source = Path(camera_map_path).expanduser().resolve()
     config_source = Path(config_path).expanduser().resolve()
     checkpoint_source = Path(checkpoint_path).expanduser().resolve()
+    canonical_field_source = (
+        Path(canonical_field_checkpoint_path).expanduser().resolve()
+        if canonical_field_checkpoint_path is not None
+        else None
+    )
     for path, label in (
         (manifest_source, "manifest"),
         (camera_map_source, "camera map"),
@@ -422,6 +469,10 @@ def render_protocol_scene(
     ):
         if not path.is_file():
             raise FileNotFoundError(f"{label} not found: {path}")
+    if canonical_field_source is not None and not canonical_field_source.is_file():
+        raise FileNotFoundError(
+            f"canonical field checkpoint not found: {canonical_field_source}"
+        )
     manifest = json.loads(manifest_source.read_text(encoding="utf-8"))
     camera_mapping = json.loads(camera_map_source.read_text(encoding="utf-8"))
     normalized = validate_dataset_manifest(manifest, check_files=False)
@@ -447,29 +498,77 @@ def render_protocol_scene(
     if torch_device.type == "cuda" and not torch.cuda.is_available():
         raise PromptableRenderError(f"CUDA device requested but unavailable: {device}")
 
-    # eval_rendered historically keeps its device as a module global.  Set it
-    # before loading so every model/checkpoint tensor lands on the requested
-    # device without adding an RGB-dependent evaluation path.
-    from radio_gs.scripts import eval_rendered
+    canonical_field = None
+    canonical_payload: Mapping[str, Any] | None = None
+    if canonical_field_source is None:
+        # eval_rendered historically keeps its device as a module global.  Set it
+        # before loading so every model/checkpoint tensor lands on the requested
+        # device without adding an RGB-dependent evaluation path.
+        from radio_gs.scripts import eval_rendered
 
-    eval_rendered.device = torch_device
-    model, codec, renderer, sharpener, refiner, _, is_hybrid = (
-        eval_rendered.load_model_and_render(str(config_source), str(checkpoint_source))
-    )
-    if refiner is not None:
-        raise PromptableRenderError("Feature-only protocol unexpectedly constructed a refiner")
+        eval_rendered.device = torch_device
+        model, codec, renderer, sharpener, refiner, _, is_hybrid = (
+            eval_rendered.load_model_and_render(
+                str(config_source), str(checkpoint_source)
+            )
+        )
+        if refiner is not None:
+            raise PromptableRenderError(
+                "Feature-only protocol unexpectedly constructed a refiner"
+            )
+    else:
+        from radio_gs.field import load_canonical_field_checkpoint
+        from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
+
+        model, _codec, renderer, _sharpener, refiner, _, _is_hybrid = (
+            load_render_pipeline(
+                str(config_source),
+                str(checkpoint_source),
+                torch_device,
+                strict_checkpoint_contract=True,
+                load_ply_rgb_features=False,
+            )
+        )
+        if refiner is not None:
+            raise PromptableRenderError(
+                "Canonical protocol unexpectedly constructed a screen refiner"
+            )
+        canonical_field, canonical_payload = load_canonical_field_checkpoint(
+            canonical_field_source, map_location="cpu"
+        )
+        geometry_xyz_sha256 = _sha256_float32_rows(model.get_xyz())
+        validate_canonical_feature_source(
+            canonical_payload,
+            num_gaussians=int(model.get_xyz().shape[0]),
+            geometry_xyz_sha256=geometry_xyz_sha256,
+        )
+        canonical_field = canonical_field.to(torch_device).eval()
 
     output_root = Path(output_dir).expanduser().resolve()
     outputs: list[dict[str, Any]] = []
     for view in views:
         pose = torch.from_numpy(view["w2c"][None]).to(torch_device)
-        result = renderer.render_features_batch(model, pose)
-        rendered = sharpener(result["feature_map"])
-        if is_hybrid:
-            rendered = eval_rendered._hybrid_decode(
-                model, rendered, result, pose, renderer.K
+        if canonical_field is None:
+            result = renderer.render_features_batch(model, pose)
+            rendered = sharpener(result["feature_map"])
+            if is_hybrid:
+                rendered = eval_rendered._hybrid_decode(
+                    model, rendered, result, pose, renderer.K
+                )
+            decoded = codec.decoder(rendered).squeeze(0).float().cpu()
+        else:
+            from radio_gs.rendering.coefficient_renderer import render_canonical_radio
+
+            result = render_canonical_radio(
+                renderer,
+                model,
+                canonical_field,
+                pose.squeeze(0),
+                feature_height=int(getattr(config, "feature_height")),
+                feature_width=int(getattr(config, "feature_width")),
+                use_reliability=False,
             )
-        decoded = codec.decoder(rendered).squeeze(0).float().cpu()
+            decoded = result["feature_map"].float().cpu()
         destination = output_root / scene_id / f"{view['camera_name']}.pt"
         _atomic_torch_save(destination, decoded, overwrite=overwrite)
         outputs.append(
@@ -498,6 +597,34 @@ def render_protocol_scene(
         "config_sha256": _sha256(config_source),
         "checkpoint": str(checkpoint_source),
         "checkpoint_sha256": _sha256(checkpoint_source),
+        "render_mode": (
+            "canonical_mpr_v3_affine_normalized_splat"
+            if canonical_field_source is not None
+            else "legacy_reusable_hcd_screen_field"
+        ),
+        "canonical_field_checkpoint": (
+            str(canonical_field_source) if canonical_field_source is not None else None
+        ),
+        "canonical_field_checkpoint_sha256": (
+            _sha256(canonical_field_source)
+            if canonical_field_source is not None
+            else None
+        ),
+        "canonical_field_geometry_fingerprint": (
+            dict(canonical_payload.get("geometry_fingerprint", {}))
+            if canonical_payload is not None
+            else None
+        ),
+        "canonical_render_contract": (
+            {
+                "normalized_splat": True,
+                "affine_decode_after_splat": True,
+                "reliability_splat": False,
+                "screen_refiner": False,
+            }
+            if canonical_field_source is not None
+            else None
+        ),
         "feature_layout": "chw",
         "outputs": outputs,
         "safety": {
@@ -523,6 +650,15 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--camera-map", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument(
+        "--canonical-field-checkpoint",
+        type=Path,
+        default=None,
+        help=(
+            "Use a canonical-mpr-v3 field as the sole feature source; --checkpoint "
+            "then supplies only its row-aligned frozen geometry carrier."
+        ),
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--overwrite", action="store_true")
@@ -537,6 +673,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         camera_map_path=args.camera_map,
         config_path=args.config,
         checkpoint_path=args.checkpoint,
+        canonical_field_checkpoint_path=args.canonical_field_checkpoint,
         output_dir=args.output_dir,
         device=args.device,
         overwrite=args.overwrite,

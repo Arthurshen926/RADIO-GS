@@ -7,13 +7,16 @@ from radio_gs.querying.evidence_scorer import (
     EvidenceScoringConfig,
     _score_bank,
     fuse_registered_observation_unary,
+    registered_observation_anchor_only_confidence,
     registered_observation_anchor_mask,
     registered_observation_effective_confidence,
+    registered_raster_adjoint_observation,
     registered_seed_observation,
     registered_seed_unary,
 )
 from radio_gs.querying.query_engine import CanonicalQueryEngine
 from radio_gs.querying.query_compilers import (
+    compile_registered_primitive_seeds,
     compile_world_3d_query,
     world_point_soft_seeds,
 )
@@ -31,6 +34,10 @@ from radio_gs.querying.score_calibration import (
     deterministic_sample_rows,
     fit_scene_space_calibration,
     robust_tanh_score_calibration,
+)
+from radio_gs.querying.reliability_fusion import (
+    DUAL_PROTOTYPE_SEED_PROVENANCE,
+    DUAL_SOLVER_SEED_PROVENANCE,
 )
 from radio_gs.querying.support_solver import build_primitive_support_graph
 
@@ -105,6 +112,43 @@ def test_registered_seed_unary_preserves_soft_signed_responsibility() -> None:
         torch.tensor([0.0, 0.1, 0.5]),
     )
     torch.testing.assert_close(actual, torch.tensor([1.0, 0.4, -0.5]))
+
+
+def test_exact_raster_adjoint_observation_preserves_continuous_mass() -> None:
+    # These are W.T@y_fg, W.T@y_bg, and W.T@1 for one shared compositor W.
+    evidence = registered_raster_adjoint_observation(
+        torch.tensor([0.8, 0.2, 0.0]),
+        torch.tensor([0.2, 0.8, 0.0]),
+        torch.tensor([1.0, 1.0, 0.5]),
+    )
+
+    torch.testing.assert_close(evidence.values, torch.tensor([0.6, -0.6, 0.0]))
+    assert evidence.confidence is not None
+    torch.testing.assert_close(
+        evidence.confidence, torch.tensor([1.0, 1.0, 0.0])
+    )
+    assert evidence.source == "raster_adjoint_foreground_background_continuous"
+
+
+def test_exact_raster_adjoint_observation_keeps_unlabeled_coverage_explicit() -> None:
+    evidence = registered_raster_adjoint_observation(
+        torch.tensor([0.6]),
+        torch.tensor([0.2]),
+        torch.tensor([2.0]),
+    )
+
+    torch.testing.assert_close(evidence.values, torch.tensor([0.2]))
+    assert evidence.confidence is not None
+    torch.testing.assert_close(evidence.confidence, torch.tensor([0.4]))
+
+
+def test_exact_raster_adjoint_rejects_mixed_responsibility_statistics() -> None:
+    with pytest.raises(ValueError, match="cannot exceed visible mass"):
+        registered_raster_adjoint_observation(
+            torch.tensor([0.8]),
+            torch.tensor([0.5]),
+            torch.tensor([1.0]),
+        )
 
 
 def test_registered_probability_mixture_is_exact_at_observation_extremes() -> None:
@@ -343,6 +387,90 @@ def test_hard_seed_anchored_probability_is_sign_symmetric() -> None:
     torch.testing.assert_close(positive, -negative)
 
 
+def test_anchor_only_probability_preserves_every_weak_row_bitwise() -> None:
+    field = torch.tensor([0.7, -0.8, 0.9, -1.0, 0.3, -0.4])
+    observation = PrimitiveUnaryEvidence(
+        torch.tensor([0.199, 0.20, -0.20, 0.0, 1e-6, -0.199]),
+        "poisson_mass_coverage",
+        confidence=torch.tensor([0.4, 0.4, 0.4, 0.9, 1e-6, 0.4]),
+    )
+
+    fused = fuse_registered_observation_unary(
+        field,
+        observation,
+        unary_temperature=0.1,
+        anchor_threshold=0.20,
+        anchor_only=True,
+    )
+    anchors = torch.tensor([False, True, True, False, False, False])
+
+    # The equality threshold is closed, while weak/conflicting/tiny-tail rows
+    # are copied through the float64 fusion loop without numerical round trips.
+    torch.testing.assert_close(
+        registered_observation_anchor_mask(
+            observation,
+            anchor_threshold=0.20,
+        ),
+        anchors,
+    )
+    torch.testing.assert_close(
+        registered_observation_anchor_only_confidence(
+            observation,
+            anchor_threshold=0.20,
+        ),
+        anchors.float(),
+    )
+    assert torch.equal(fused[~anchors], field[~anchors])
+    assert torch.equal(fused != field, anchors)
+    torch.testing.assert_close(
+        torch.sigmoid(fused[anchors] / 0.1),
+        torch.tensor([0.75, 0.25]),
+    )
+
+
+def test_anchor_only_probability_is_sign_symmetric_and_finite_at_bounds() -> None:
+    positive = fuse_registered_observation_unary(
+        torch.tensor([0.3, -1e6]),
+        PrimitiveUnaryEvidence(
+            torch.tensor([0.4, 1.0]),
+            "positive",
+            confidence=torch.tensor([0.5, 1.0]),
+        ),
+        unary_temperature=0.1,
+        anchor_threshold=0.2,
+        anchor_only=True,
+    )
+    negative = fuse_registered_observation_unary(
+        torch.tensor([-0.3, 1e6]),
+        PrimitiveUnaryEvidence(
+            torch.tensor([-0.4, -1.0]),
+            "negative",
+            confidence=torch.tensor([0.5, 1.0]),
+        ),
+        unary_temperature=0.1,
+        anchor_threshold=0.2,
+        anchor_only=True,
+    )
+
+    torch.testing.assert_close(positive, -negative)
+    assert bool(torch.isfinite(positive).all())
+    assert bool(torch.isfinite(negative).all())
+
+
+def test_anchor_only_probability_requires_an_explicit_shared_threshold() -> None:
+    with pytest.raises(ValueError, match="anchor_only.*anchor_threshold"):
+        fuse_registered_observation_unary(
+            torch.zeros(1),
+            PrimitiveUnaryEvidence(
+                torch.zeros(1),
+                "unobserved",
+                confidence=torch.zeros(1),
+            ),
+            unary_temperature=0.1,
+            anchor_only=True,
+        )
+
+
 def test_hard_seed_anchor_keeps_broad_scribble_tail_weak() -> None:
     signed, confidence = registered_seed_observation(
         torch.tensor([0.25, 0.25]),
@@ -454,6 +582,61 @@ def test_hard_seed_anchored_engine_requires_exact_joint_signed_seeds() -> None:
         )
 
 
+def test_anchor_only_engine_residual_is_supported_only_on_anchor_rows() -> None:
+    xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0], [0.3, 0.0, 0.0]]
+    )
+    features = F.normalize(
+        torch.tensor([[1.0, 0.0], [0.8, 0.2], [0.0, 1.0], [-1.0, 0.0]]),
+        dim=-1,
+    )
+    signature = _signature(2)
+    observation = PrimitiveUnaryEvidence(
+        torch.tensor([0.30, 0.19, -0.30, -0.19]),
+        "joint_signed_poisson_mass_coverage",
+        confidence=torch.full((4,), 0.40),
+    )
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features[3], signature),
+        positive_seeds=SoftSeedSet(
+            torch.tensor([0.30, 0.19, 0.0, 0.0]),
+            "joint_signed",
+            normalization="none",
+        ),
+        negative_seeds=SoftSeedSet(
+            torch.tensor([0.0, 0.0, 0.30, 0.19]),
+            "joint_signed",
+            normalization="none",
+        ),
+        primitive_unary_evidence=observation,
+    )
+    graph = build_primitive_support_graph(xyz)
+    baseline = CanonicalQueryEngine(graph).execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+    candidate = CanonicalQueryEngine(
+        graph,
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="hard_seed_anchor_only_probability"
+        ),
+    ).execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+    anchors = torch.tensor([True, False, True, False])
+    residual = candidate.evidence_components["registered_seed"]
+
+    assert torch.equal(candidate.unary[~anchors], baseline.unary[~anchors])
+    assert torch.equal(residual[~anchors], torch.zeros_like(residual[~anchors]))
+    assert bool((residual[anchors] != 0).all())
+
+
 def test_registered_seed_unary_is_not_erased_by_field_reliability() -> None:
     xyz = torch.tensor(
         [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]
@@ -495,6 +678,251 @@ def test_registered_seed_unary_is_not_erased_by_field_reliability() -> None:
         result.evidence_components["registered_seed"],
         torch.tensor([1.0, 0.4, -1.0]),
     )
+
+
+def test_direct_raster_adjoint_bypasses_conflicting_prototype_cosine() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    features = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    signature = _signature(2)
+    observation = registered_raster_adjoint_observation(
+        torch.tensor([0.8, 0.2]),
+        torch.tensor([0.2, 0.8]),
+        torch.ones(2),
+    )
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        # Deliberately prefer the wrong primitive in feature space.  The exact
+        # registered mode must not average this cosine margin into the unary.
+        appearance_evidence=PrototypeSet(features[1], signature),
+        positive_seeds=SoftSeedSet(
+            torch.tensor([0.6, 0.0]), "joint_signed", normalization="none"
+        ),
+        negative_seeds=SoftSeedSet(
+            torch.tensor([0.0, 0.6]), "joint_signed", normalization="none"
+        ),
+        primitive_unary_evidence=observation,
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="direct_raster_adjoint"
+        ),
+    )
+
+    result = engine.execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+
+    torch.testing.assert_close(result.unary, torch.tensor([0.6, -0.6]))
+    assert set(result.evidence_components) == {"registered_seed"}
+
+
+def test_direct_raster_adjoint_fails_closed_on_generic_observation() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0]])
+    features = torch.tensor([[1.0, 0.0]])
+    signature = _signature(2)
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features, signature),
+        positive_seeds=SoftSeedSet(torch.ones(1), "generic"),
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            torch.ones(1), "generic", confidence=torch.ones(1)
+        ),
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="direct_raster_adjoint"
+        ),
+    )
+
+    with pytest.raises(ValueError, match="one raster responsibility cache"):
+        engine.execute(
+            query,
+            {"appearance": features},
+            feature_signatures={"appearance": signature},
+        )
+
+
+def test_raster_adjoint_bernoulli_poe_pools_in_primitive_domain() -> None:
+    xyz = torch.tensor(
+        [[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]
+    )
+    features = F.normalize(
+        torch.tensor([[1.0, 0.0], [0.7, 0.3], [0.0, 1.0]]),
+        dim=-1,
+    )
+    signature = _signature(2)
+    observation = registered_raster_adjoint_observation(
+        torch.tensor([0.8, 0.5, 0.1]),
+        torch.tensor([0.2, 0.5, 0.9]),
+        torch.ones(3),
+    )
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features[0], signature),
+        positive_seeds=SoftSeedSet(
+            torch.tensor([0.6, 0.0, 0.0]),
+            "joint_signed",
+            normalization="none",
+        ),
+        negative_seeds=SoftSeedSet(
+            torch.tensor([0.0, 0.0, 0.8]),
+            "joint_signed",
+            normalization="none",
+        ),
+        primitive_unary_evidence=observation,
+    )
+    graph = build_primitive_support_graph(xyz)
+    baseline = CanonicalQueryEngine(graph).execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+    candidate = CanonicalQueryEngine(
+        graph,
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="raster_adjoint_bernoulli_poe"
+        ),
+    ).execute(
+        query,
+        {"appearance": features},
+        feature_signatures={"appearance": signature},
+    )
+
+    torch.testing.assert_close(
+        candidate.unary,
+        baseline.unary + observation.values,
+        atol=1e-6,
+        rtol=0.0,
+    )
+    assert torch.equal(candidate.unary[1], baseline.unary[1])
+    assert "appearance" in candidate.evidence_components
+    torch.testing.assert_close(
+        candidate.evidence_components["registered_seed"],
+        candidate.unary - baseline.unary,
+    )
+
+
+def test_raster_adjoint_bernoulli_poe_fails_closed_on_generic_observation() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0]])
+    features = torch.tensor([[1.0, 0.0]])
+    signature = _signature(2)
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        appearance_evidence=PrototypeSet(features, signature),
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            torch.zeros(1), "generic", confidence=torch.ones(1)
+        ),
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="raster_adjoint_bernoulli_poe"
+        ),
+    )
+
+    with pytest.raises(ValueError, match="one raster responsibility cache"):
+        engine.execute(
+            query,
+            {"appearance": features},
+            feature_signatures={"appearance": signature},
+        )
+
+
+def test_dual_registration_poe_rejects_unspecified_decoupled_provenance() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    features = torch.eye(2)
+    signature = _signature(2)
+    observation = registered_raster_adjoint_observation(
+        torch.tensor([0.8, 0.1]),
+        torch.tensor([0.2, 0.9]),
+        torch.ones(2),
+    )
+    query = compile_registered_primitive_seeds(
+        torch.tensor([0.6, 0.0]),
+        torch.tensor([0.0, 0.8]),
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=signature,
+        boundary_signature=signature,
+        prototype_count=1,
+        prototype_positive_seeds=torch.tensor([1.0, 0.0]),
+        prototype_negative_seeds=torch.tensor([0.0, 1.0]),
+        primitive_unary_evidence=observation,
+        seed_normalization="none",
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="dual_registration_bernoulli_poe"
+        ),
+    )
+
+    with pytest.raises(ValueError, match="decoupled legacy/native seed provenance"):
+        engine.execute(
+            query,
+            {"appearance": features, "boundary": features},
+            feature_signatures={
+                "appearance": signature,
+                "boundary": signature,
+            },
+        )
+
+
+def test_dual_registration_poe_accepts_frozen_compiler_provenance() -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+    features = torch.eye(2)
+    signature = _signature(2)
+    observation = registered_raster_adjoint_observation(
+        torch.tensor([0.8, 0.1]),
+        torch.tensor([0.2, 0.9]),
+        torch.ones(2),
+    )
+    query = compile_registered_primitive_seeds(
+        torch.tensor([0.6, 0.0]),
+        torch.tensor([0.0, 0.8]),
+        appearance_features=features,
+        boundary_features=features,
+        appearance_signature=signature,
+        boundary_signature=signature,
+        prototype_count=1,
+        prototype_positive_seeds=torch.tensor([1.0, 0.0]),
+        prototype_negative_seeds=torch.tensor([0.0, 1.0]),
+        prototype_seed_provenance=DUAL_PROTOTYPE_SEED_PROVENANCE,
+        solver_seed_provenance=DUAL_SOLVER_SEED_PROVENANCE,
+        primitive_unary_evidence=observation,
+        seed_normalization="none",
+    )
+    engine = CanonicalQueryEngine(
+        build_primitive_support_graph(xyz),
+        scoring_config=EvidenceScoringConfig(
+            registered_observation_fusion="dual_registration_bernoulli_poe"
+        ),
+    )
+
+    assert query.metadata["prototype_seed_provenance"] == (
+        DUAL_PROTOTYPE_SEED_PROVENANCE
+    )
+    assert query.metadata["solver_seed_provenance"] == (
+        DUAL_SOLVER_SEED_PROVENANCE
+    )
+    result = engine.execute(
+        query,
+        {"appearance": features, "boundary": features},
+        feature_signatures={"appearance": signature, "boundary": signature},
+    )
+    assert torch.isfinite(result.unary).all()
 
 
 def test_registered_probability_mixture_overrides_zero_reliability_field() -> None:

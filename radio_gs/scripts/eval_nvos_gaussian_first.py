@@ -36,13 +36,22 @@ from radio_gs.querying.evidence_scorer import (
     RegisteredForwardBetaDiagnostics,
     registered_forward_beta_balanced_residual_observation,
     registered_forward_beta_observation,
+    registered_observation_anchor_only_confidence,
     registered_observation_anchor_mask,
     registered_observation_effective_confidence,
+    registered_raster_adjoint_observation,
     registered_seed_observation,
 )
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
 from radio_gs.querying.query_engine import CanonicalQueryEngine
-from radio_gs.querying.query_spec import PrimitiveUnaryEvidence, SelectionMode
+from radio_gs.querying.reliability_fusion import (
+    DUAL_PROTOTYPE_SEED_PROVENANCE,
+    DUAL_SOLVER_SEED_PROVENANCE,
+)
+from radio_gs.querying.query_spec import (
+    PrimitiveUnaryEvidence,
+    SelectionMode,
+)
 from radio_gs.querying.support_solver import SupportSolverConfig
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
 from radio_gs.rendering.contribution_compositor import (
@@ -58,6 +67,62 @@ from radio_gs.scripts.render_promptable_nvs_features import resolve_protocol_vie
 from radio_gs.scripts.nvos_registered_region_v3_authority import (
     write_cuda_child_attestation,
 )
+
+
+_EXACT_RASTER_OBSERVATION_FUSIONS = frozenset(
+    {
+        "direct_raster_adjoint",
+        "raster_adjoint_bernoulli_poe",
+        "dual_registration_bernoulli_poe",
+    }
+)
+_BERNOULLI_POE_FUSIONS = frozenset(
+    {"raster_adjoint_bernoulli_poe", "dual_registration_bernoulli_poe"}
+)
+_FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD = 0.02
+
+
+def _requires_legacy_prototype_observation(observation_fusion: str) -> bool:
+    """Return whether a second, frozen legacy observation must be rendered."""
+
+    return str(observation_fusion) == "dual_registration_bernoulli_poe"
+
+
+def _rasterize_frozen_legacy_prototype_support(
+    *,
+    model: object,
+    renderer: object,
+    viewmat: torch.Tensor,
+    prompt_maps: torch.Tensor,
+    depth_tolerance: float,
+    relative_depth_tolerance: float,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Run the exact historical canonical-support prompt operator.
+
+    The native exact-adjoint path requires alpha threshold zero, but the
+    historical K4 prototype expert used the ordinary evaluator default 0.02.
+    Keeping this helper independent prevents the exact contract from silently
+    changing the legacy expert again.
+    """
+
+    prompt_aux = renderer.render_features(model, viewmat)
+    return rasterize_registered_view_features(
+        model=model,
+        renderer=renderer,
+        viewmat=viewmat,
+        siglip_feat=prompt_maps,
+        depth_map=prompt_aux["depth_map"][None],
+        alpha_map=prompt_aux["alpha_map"][None],
+        registration_depth_tolerance=float(depth_tolerance),
+        registration_relative_depth_tolerance=float(
+            relative_depth_tolerance
+        ),
+        registration_alpha_threshold=(
+            _FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD
+        ),
+        registration_weight_mode="alpha_depth",
+        deterministic_cpu_accumulation=True,
+    )
 
 
 def _scaled_raster_shape(
@@ -222,6 +287,129 @@ def _render_registered_stage_maps(
     return {
         name: final_rendered if name == resolved else render(values)
         for name, values in stage_values.items()
+    }
+
+
+def _prompt_cycle_reconstruction_metrics(
+    score: np.ndarray,
+    prompt_mask: np.ndarray,
+    visibility: np.ndarray,
+) -> dict[str, float]:
+    """Measure reference-view reconstruction without any target-frame state."""
+
+    probability = np.asarray(score, dtype=np.float64)
+    mask = np.asarray(prompt_mask, dtype=bool)
+    visible = np.asarray(visibility, dtype=np.float64)
+    if probability.shape != mask.shape or visible.shape != mask.shape:
+        raise ValueError("prompt-cycle score, mask, and visibility must align")
+    if (
+        probability.size == 0
+        or not np.isfinite(probability).all()
+        or not np.isfinite(visible).all()
+        or np.any(probability < 0.0)
+        or np.any(probability > 1.0)
+        or np.any(visible < 0.0)
+        or np.any(visible > 1.0)
+        or not mask.any()
+        or mask.all()
+    ):
+        raise ValueError("prompt-cycle inputs must be finite, bounded, and bipolar")
+    lower = np.nextafter(np.float64(0.0), np.float64(1.0))
+    upper = np.nextafter(np.float64(1.0), np.float64(0.0))
+    clipped = np.clip(probability, lower, upper)
+    per_pixel_bce = -(
+        mask.astype(np.float64) * np.log(clipped)
+        + (~mask).astype(np.float64) * np.log1p(-clipped)
+    )
+    foreground_bce = float(per_pixel_bce[mask].mean())
+    background_bce = float(per_pixel_bce[~mask].mean())
+    intersection = float(probability[mask].sum())
+    union = float(
+        (probability + mask.astype(np.float64) - probability * mask).sum()
+    )
+    visible_mass = float(visible.sum())
+    visible_intersection = float((visible * probability * mask).sum())
+    visible_union = float(
+        (
+            visible
+            * (
+                probability
+                + mask.astype(np.float64)
+                - probability * mask
+            )
+        ).sum()
+    )
+    prompt_foreground_mass = float(mask.sum())
+    return {
+        "bce": float(per_pixel_bce.mean()),
+        "balanced_bce": 0.5 * (foreground_bce + background_bce),
+        "foreground_bce": foreground_bce,
+        "background_bce": background_bce,
+        "soft_iou": intersection / union if union > 0.0 else 1.0,
+        "visibility_weighted_bce": (
+            float((visible * per_pixel_bce).sum()) / visible_mass
+            if visible_mass > 0.0
+            else float("inf")
+        ),
+        "visibility_weighted_soft_iou": (
+            visible_intersection / visible_union
+            if visible_union > 0.0
+            else 1.0
+        ),
+        "foreground_soft_recall": float(probability[mask].mean()),
+        "background_soft_specificity": float((1.0 - probability[~mask]).mean()),
+        "predicted_to_prompt_foreground_mass_ratio": (
+            float(probability.sum()) / prompt_foreground_mass
+        ),
+        "mean_visibility": float(visible.mean()),
+        "foreground_mean_visibility": float(visible[mask].mean()),
+        "background_mean_visibility": float(visible[~mask].mean()),
+        "visible_pixel_fraction": float((visible > 0.0).mean()),
+    }
+
+
+def _prompt_cycle_fixed_ranking(
+    expert_metrics: Mapping[str, Mapping[str, float]],
+) -> dict[str, object]:
+    """Apply predeclared parameter-free rankings in prompt space only."""
+
+    if set(expert_metrics) != {"prototype_expert", "exact_expert"}:
+        raise ValueError("prompt-cycle ranking requires exactly two named experts")
+    soft_choice = max(
+        expert_metrics,
+        key=lambda name: float(expert_metrics[name]["soft_iou"]),
+    )
+    bce_choice = min(
+        expert_metrics,
+        key=lambda name: float(expert_metrics[name]["balanced_bce"]),
+    )
+    soft_values = {
+        name: float(metrics["soft_iou"])
+        for name, metrics in expert_metrics.items()
+    }
+    soft_sum = sum(soft_values.values())
+    soft_weights = (
+        {name: value / soft_sum for name, value in soft_values.items()}
+        if soft_sum > 0.0
+        else {name: 0.5 for name in expert_metrics}
+    )
+    likelihoods = {
+        name: float(np.exp(-float(metrics["balanced_bce"])))
+        for name, metrics in expert_metrics.items()
+    }
+    likelihood_sum = sum(likelihoods.values())
+    likelihood_weights = {
+        name: value / likelihood_sum for name, value in likelihoods.items()
+    }
+    return {
+        "soft_iou_choice": soft_choice,
+        "balanced_bce_choice": bce_choice,
+        "consensus_choice": soft_choice if soft_choice == bce_choice else None,
+        "abstains_on_metric_disagreement": True,
+        "soft_iou_normalized_weights": soft_weights,
+        "mean_bernoulli_likelihood_weights": likelihood_weights,
+        "uses_target_rgb_or_mask": False,
+        "learned_or_scene_tuned_constants": False,
     }
 
 
@@ -568,6 +756,127 @@ def _validate_registered_forward_unary_args(args: argparse.Namespace) -> None:
     if failed:
         raise ValueError(
             f"{mode} requires " + ", ".join(failed)
+        )
+
+
+def _validate_direct_raster_adjoint_args(args: argparse.Namespace) -> None:
+    """Validate the exact direct-observation contract before model loading."""
+
+    observation_fusion = str(args.registered_observation_fusion)
+    if observation_fusion not in _EXACT_RASTER_OBSERVATION_FUSIONS:
+        return
+    requirements = {
+        "--support-mode canonical_support": (
+            str(args.support_mode) == "canonical_support"
+        ),
+        "--prompt-registration-mode raster_adjoint": (
+            str(args.prompt_registration_mode) == "raster_adjoint"
+        ),
+        "--prompt-registration-scale 1": (
+            float(args.prompt_registration_scale) == 1.0
+        ),
+        "--alpha-threshold 0": float(args.alpha_threshold) == 0.0,
+        "--registered-seed-unary-weight 0": (
+            float(args.registered_seed_unary_weight) == 0.0
+        ),
+        "--registered-seed-construction joint_signed": (
+            str(args.registered_seed_construction) == "joint_signed"
+        ),
+        "--registered-forward-unary none": (
+            str(args.registered_forward_unary) == "none"
+        ),
+    }
+    if observation_fusion == "dual_registration_bernoulli_poe":
+        requirements.update(
+            {
+                "--depth-tolerance 0.08": (
+                    float(args.depth_tolerance) == 0.08
+                ),
+                "--relative-depth-tolerance 0.02": (
+                    float(args.relative_depth_tolerance) == 0.02
+                ),
+                "--support-threshold 0": (
+                    float(args.support_threshold) == 0.0
+                ),
+                "--prototype-count 4": int(args.prototype_count) == 4,
+                "--prototype-strategy spherical_mean_fps": (
+                    str(args.prototype_strategy) == "spherical_mean_fps"
+                ),
+                "--appearance-weight 1": (
+                    float(args.appearance_weight) == 1.0
+                ),
+                "--boundary-weight 0.35": (
+                    float(args.boundary_weight) == 0.35
+                ),
+                "--prototype-temperature 0.07": (
+                    float(args.prototype_temperature) == 0.07
+                ),
+                "--feature-calibration none": (
+                    str(args.feature_calibration) == "none"
+                ),
+                "--score-calibration none": (
+                    str(args.score_calibration) == "none"
+                ),
+            }
+        )
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(observation_fusion + " requires " + ", ".join(failed))
+
+
+def _validate_hard_seed_anchor_only_probability_args(
+    args: argparse.Namespace,
+) -> None:
+    """Fail closed on any change to the fixed target-blind anchor-only path."""
+
+    if str(args.registered_observation_fusion) != (
+        "hard_seed_anchor_only_probability"
+    ):
+        return
+    requirements = {
+        "--support-mode canonical_support": (
+            str(args.support_mode) == "canonical_support"
+        ),
+        "--prompt-registration-mode raster_adjoint": (
+            str(args.prompt_registration_mode) == "raster_adjoint"
+        ),
+        "--prompt-registration-scale 1": (
+            float(args.prompt_registration_scale) == 1.0
+        ),
+        "--alpha-threshold 0": float(args.alpha_threshold) == 0.0,
+        "--registered-seed-unary-weight 0": (
+            float(args.registered_seed_unary_weight) == 0.0
+        ),
+        "--registered-seed-construction joint_signed": (
+            str(args.registered_seed_construction) == "joint_signed"
+        ),
+        "--registered-observation-confidence poisson_mass_coverage": (
+            str(args.registered_observation_confidence)
+            == "poisson_mass_coverage"
+        ),
+        "--registered-observation-mass-scale 1": (
+            float(args.registered_observation_mass_scale) == 1.0
+        ),
+        "--registered-observation-coverage-power 1": (
+            float(args.registered_observation_coverage_power) == 1.0
+        ),
+        "--hard-seed-threshold 0.2": (
+            float(args.hard_seed_threshold) == 0.20
+        ),
+        "--hard-seed-conflict-policy exclusive_relative": (
+            str(args.hard_seed_conflict_policy) == "exclusive_relative"
+        ),
+        "--hard-seed-conflict-margin 0": (
+            float(args.hard_seed_conflict_margin) == 0.0
+        ),
+        "--registered-forward-unary none": (
+            str(args.registered_forward_unary) == "none"
+        ),
+    }
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(
+            "hard_seed_anchor_only_probability requires " + ", ".join(failed)
         )
 
 
@@ -935,7 +1244,44 @@ def _dataset_protocol_contract(
             )
         declared_prompt_hashes = dict(prompt_hashes.get(scene_id, {}))
         if not declared_prompt_hashes:
-            raise ValueError(f"{scene_id}: prompt asset hashes are undeclared")
+            # Legacy frozen full-reference-mask manifests already bind the
+            # prompt image as a frame-level ground-truth asset.  Requiring the
+            # same digest to be duplicated under a newer protocol field would
+            # change the computed protocol hash despite changing no frames,
+            # paths, or scoring semantics.  Reuse that declaration only when
+            # the prompt and frame paths are exactly the same asset; every
+            # other prompt type still fails closed.
+            prompt_frame_id = str(prompt.get("frame_id", ""))
+            prompt_frame = frame_records.get(prompt_frame_id)
+            prompt_path = Path(str(prompt.get("mask_path", ""))).resolve()
+            frame_path = (
+                Path(
+                    str(
+                        prompt_frame.get(
+                            "ground_truth",
+                            prompt_frame.get("gt_mask_path", ""),
+                        )
+                    )
+                ).resolve()
+                if isinstance(prompt_frame, Mapping)
+                else None
+            )
+            frame_digest = (
+                str(prompt_frame.get("ground_truth_sha256", "")).strip()
+                if isinstance(prompt_frame, Mapping)
+                else ""
+            )
+            if (
+                str(prompt.get("type", "")) != "reference_binary_mask"
+                or frame_path is None
+                or prompt_path != frame_path
+                or len(frame_digest) != 64
+                or any(character not in "0123456789abcdef" for character in frame_digest)
+            ):
+                raise ValueError(f"{scene_id}: prompt asset hashes are undeclared")
+            declared_prompt_hashes = {
+                "reference_binary_mask": frame_digest,
+            }
         scene_contracts.append(
             {
                 "scene_id": scene_id,
@@ -1010,6 +1356,88 @@ def _verify_declared_sha256(
     return actual
 
 
+def _registered_strong_unary_method_contract(
+    observation_fusion: str,
+    *,
+    anchor_threshold: float,
+) -> dict[str, object] | None:
+    """Describe the registered strong-unary rule without task-specific state."""
+
+    if observation_fusion == "hard_seed_anchored_probability":
+        return {
+            "policy": "unit_confidence_on_shared_hard_seed_rows",
+            "anchor_threshold_source": "solver.hard_seed_threshold",
+            "anchor_threshold": float(anchor_threshold),
+            "formula": (
+                "a=1[c>0 and abs(s)>=tau]; c_eff=a+(1-a)c; "
+                "p=(1-c_eff)p_field+c_eff*q"
+            ),
+            "new_numeric_constant": False,
+        }
+    if observation_fusion == "hard_seed_anchor_only_probability":
+        return {
+            "policy": "anchor_only_on_shared_hard_seed_rows",
+            "anchor_threshold_source": "solver.hard_seed_threshold",
+            "anchor_threshold": float(anchor_threshold),
+            "formula": (
+                "a=1[c>0 and abs(s)>=tau]; c_eff=a; "
+                "p=(1-a)p_field+a*q"
+            ),
+            "non_anchor_policy": "bitwise_field_unary_preservation",
+            "new_numeric_constant": False,
+        }
+    return None
+
+
+def _registered_posterior_consensus_method_contract(
+    observation_fusion: str,
+) -> dict[str, object] | None:
+    """Describe the target-blind two-expert posterior consensus, if selected."""
+
+    if observation_fusion not in _BERNOULLI_POE_FUSIONS:
+        return None
+    return {
+        "policy": "symmetric_normalized_bernoulli_product_of_experts",
+        "domain": "same_canonical_primitive_rows",
+        "experts": ["prototype_field", "exact_raster_adjoint"],
+        "formula": (
+            "p=(p_field*p_exact)/(p_field*p_exact+"
+            "(1-p_field)*(1-p_exact))"
+        ),
+        "posterior_temperature_source": "solver.unary_temperature",
+        "neutral_expert_probability": 0.5,
+        "neutral_policy": "exact_field_unary_preservation",
+        "certain_conflict_policy": "neutral_probability_0.5",
+        "new_numeric_constant": False,
+        "uses_target_rgb_or_mask": False,
+        "uses_scene_specific_constants": False,
+        "observation_operator_coupling": (
+            "independent_legacy_prototype_and_native_exact_adjoint"
+            if observation_fusion == "dual_registration_bernoulli_poe"
+            else "shared_native_exact_adjoint_negative_ablation"
+        ),
+        **(
+            {
+                "prototype_operator_contract": {
+                    "mode": "legacy_alpha_depth",
+                    "alpha_threshold": (
+                        _FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD
+                    ),
+                    "deterministic_cpu_accumulation": True,
+                    "seed_provenance": DUAL_PROTOTYPE_SEED_PROVENANCE,
+                },
+                "exact_operator_contract": {
+                    "mode": "native_front_to_back_raster_adjoint",
+                    "alpha_threshold": 0.0,
+                    "seed_provenance": DUAL_SOLVER_SEED_PROVENANCE,
+                },
+            }
+            if observation_fusion == "dual_registration_bernoulli_poe"
+            else {}
+        ),
+    }
+
+
 def _candidate_method_manifest_contract(
     args: argparse.Namespace,
 ) -> dict[str, object]:
@@ -1033,6 +1461,13 @@ def _candidate_method_manifest_contract(
     )
     forward_unary = _registered_forward_unary_contract(args)
     forward_scoring = _registered_forward_scoring_contract(args)
+    strong_unary = _registered_strong_unary_method_contract(
+        observation_fusion,
+        anchor_threshold=float(getattr(args, "hard_seed_threshold", 0.20)),
+    )
+    posterior_consensus = _registered_posterior_consensus_method_contract(
+        observation_fusion
+    )
     return {
         "support_mode": str(args.support_mode),
         "region_space": str(args.region_space),
@@ -1059,34 +1494,30 @@ def _candidate_method_manifest_contract(
         "registered_seed_unary_weight": float(
             getattr(args, "registered_seed_unary_weight", 0.0)
         ),
+        **({"strong_unary": strong_unary} if strong_unary is not None else {}),
         **(
-            {
-                "strong_unary": {
-                    "policy": "unit_confidence_on_shared_hard_seed_rows",
-                    "anchor_threshold_source": "solver.hard_seed_threshold",
-                    "anchor_threshold": float(
-                        getattr(args, "hard_seed_threshold", 0.20)
-                    ),
-                    "formula": (
-                        "a=1[c>0 and abs(s)>=tau]; c_eff=a+(1-a)c; "
-                        "p=(1-c_eff)p_field+c_eff*q"
-                    ),
-                    "new_numeric_constant": False,
-                }
-            }
-            if observation_fusion == "hard_seed_anchored_probability"
+            {"posterior_consensus": posterior_consensus}
+            if posterior_consensus is not None
             else {}
         ),
         "observation_mass_source": (
-            "raw_raster_adjoint_prompt_mass_times_labeled_footprint_coverage"
-            if observation_mode == "poisson_mass_coverage"
+            "exact_shared_raster_responsibility_foreground_background_over_visible_mass"
+            if observation_fusion in _EXACT_RASTER_OBSERVATION_FUSIONS
             else (
-                "raw_raster_adjoint_prompt_mass"
-                if observation_mode == "poisson_mass"
-                else "conditional_labeled_footprint_fraction"
+                "raw_raster_adjoint_prompt_mass_times_labeled_footprint_coverage"
+                if observation_mode == "poisson_mass_coverage"
+                else (
+                    "raw_raster_adjoint_prompt_mass"
+                    if observation_mode == "poisson_mass"
+                    else "conditional_labeled_footprint_fraction"
+                )
             )
         ),
-        "observation_confidence": observation_mode,
+        "observation_confidence": (
+            "exact_labeled_visible_fraction"
+            if observation_fusion in _EXACT_RASTER_OBSERVATION_FUSIONS
+            else observation_mode
+        ),
         "observation_mass_scale": float(
             getattr(args, "registered_observation_mass_scale", 1.0)
         ),
@@ -1637,8 +2068,16 @@ def run(args: argparse.Namespace) -> dict:
         strict_checkpoint_contract=True,
         load_ply_rgb_features=False,
     )
-    if not is_hybrid:
-        raise ValueError("Gaussian-first NVOS currently requires a hybrid field")
+    # ``canonical_support`` gets every query feature from the independently
+    # bound capability bank.  Its renderer checkpoint is only a geometry and
+    # raster-responsibility carrier, so requiring an HCD/hybrid codec here
+    # would incorrectly exclude frozen RGB 3DGS geometries.  The other support
+    # modes still decode field features and therefore retain the fail-closed
+    # hybrid-field requirement.
+    if not is_hybrid and args.support_mode != "canonical_support":
+        raise ValueError(
+            "non-canonical Gaussian-first NVOS requires a hybrid field"
+        )
     adaptor = None
     if args.region_space == "sam3" and args.support_mode != "canonical_support":
         adaptor = load_radio_adaptor_from_checkpoint(
@@ -1741,6 +2180,23 @@ def run(args: argparse.Namespace) -> dict:
         negative_native = np.logical_not(positive_native)
     else:
         raise ValueError(f"Unsupported registered prompt type: {prompt_type!r}")
+    if bool(
+        getattr(args, "export_registered_prompt_cycle_diagnostic", False)
+    ) and prompt_type != "reference_binary_mask":
+        raise ValueError(
+            "registered prompt-cycle diagnostic currently requires a full "
+            "reference binary mask"
+        )
+    if (
+        str(getattr(args, "registered_observation_fusion", "additive"))
+        in _EXACT_RASTER_OBSERVATION_FUSIONS
+        and bool(np.logical_and(positive_native, negative_native).any())
+    ):
+        raise ValueError(
+            "exact raster observation fusion requires disjoint "
+            "foreground/background "
+            "prompt rasters"
+        )
     native_height, native_width = map(int, positive_native.shape)
     if (
         getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
@@ -1766,8 +2222,13 @@ def run(args: argparse.Namespace) -> dict:
     support_view_count = 1
     prediction_threshold = 0.0
     canonical_stage_gaussian_scores: dict[str, torch.Tensor] | None = None
+    registered_prompt_cycle_gaussian_scores: dict[str, torch.Tensor] | None = None
     registered_prompt_evidence: dict[str, object] | None = None
     if args.support_mode in {"prompt_gaussian", "canonical_support"}:
+        observation_fusion = str(
+            getattr(args, "registered_observation_fusion", "additive")
+        )
+        legacy_prototype_support: tuple[torch.Tensor, torch.Tensor] | None = None
         if (
             getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
             == "raster_adjoint"
@@ -1794,6 +2255,35 @@ def run(args: argparse.Namespace) -> dict:
                 alpha_map=prompt_alpha,
                 alpha_threshold=args.alpha_threshold,
             )
+            if _requires_legacy_prototype_observation(observation_fusion):
+                # The two experts deliberately use independent observation
+                # operators.  Reconstruct the frozen historical prototype
+                # support at the renderer grid with alpha/depth registration;
+                # native exact-adjoint masses above are reserved for the
+                # registered Bernoulli expert and solver seeds.
+                legacy_height = int(renderer.image_height)
+                legacy_width = int(renderer.image_width)
+                legacy_positive = resize_mask_nearest(
+                    positive_native,
+                    (legacy_height, legacy_width),
+                ).astype(bool)
+                legacy_negative = resize_mask_nearest(
+                    negative_native,
+                    (legacy_height, legacy_width),
+                ).astype(bool)
+                legacy_prompt_maps = torch.from_numpy(
+                    np.stack(
+                        [legacy_positive, legacy_negative], axis=0
+                    ).astype(np.float32)
+                )[None].to(device)
+                legacy_prototype_support = _rasterize_frozen_legacy_prototype_support(
+                    model=model,
+                    renderer=renderer,
+                    viewmat=prompt_pose,
+                    prompt_maps=legacy_prompt_maps,
+                    depth_tolerance=args.depth_tolerance,
+                    relative_depth_tolerance=args.relative_depth_tolerance,
+                )
         else:
             prompt_aux = renderer.render_features(model, prompt_pose)
             support_sum, support_count = rasterize_registered_view_features(
@@ -1839,7 +2329,21 @@ def run(args: argparse.Namespace) -> dict:
         observation_coverage_power = float(
             getattr(args, "registered_observation_coverage_power", 1.0)
         )
-        if observation_confidence_mode in {
+        if observation_fusion in _EXACT_RASTER_OBSERVATION_FUSIONS:
+            direct_observation = registered_raster_adjoint_observation(
+                raw_positive_mass,
+                raw_negative_mass,
+                support_count.detach().float().clamp_min(0.0),
+            )
+            direct_signed = direct_observation.values
+            assert direct_observation.confidence is not None
+            direct_confidence = direct_observation.confidence
+            direct_mass_source = (
+                "exact_shared_raster_responsibility_foreground_background_"
+                "over_visible_mass"
+            )
+            observation_confidence_mode = "exact_labeled_visible_fraction"
+        elif observation_confidence_mode in {
             "poisson_mass",
             "poisson_mass_coverage",
         }:
@@ -1871,17 +2375,19 @@ def run(args: argparse.Namespace) -> dict:
                 mass_scale=observation_mass_scale,
             )
             direct_mass_source = "conditional_labeled_footprint_fraction"
-        direct_observation = PrimitiveUnaryEvidence(
-            direct_signed,
-            f"raster_adjoint_{observation_confidence_mode}",
-            direct_confidence,
-        )
-        observation_fusion = str(
-            getattr(args, "registered_observation_fusion", "additive")
-        )
+        if observation_fusion not in _EXACT_RASTER_OBSERVATION_FUSIONS:
+            direct_observation = PrimitiveUnaryEvidence(
+                direct_signed,
+                f"raster_adjoint_{observation_confidence_mode}",
+                direct_confidence,
+            )
         strong_unary_anchor_threshold = (
             float(getattr(args, "hard_seed_threshold", 0.20))
-            if observation_fusion == "hard_seed_anchored_probability"
+            if observation_fusion
+            in {
+                "hard_seed_anchored_probability",
+                "hard_seed_anchor_only_probability",
+            }
             else None
         )
         strong_unary_anchor_mask = (
@@ -1893,9 +2399,17 @@ def run(args: argparse.Namespace) -> dict:
             else torch.zeros_like(direct_confidence, dtype=torch.bool)
         )
         strong_unary_effective_confidence = (
-            registered_observation_effective_confidence(
-                direct_observation,
-                anchor_threshold=strong_unary_anchor_threshold,
+            (
+                registered_observation_anchor_only_confidence(
+                    direct_observation,
+                    anchor_threshold=strong_unary_anchor_threshold,
+                )
+                if observation_fusion
+                == "hard_seed_anchor_only_probability"
+                else registered_observation_effective_confidence(
+                    direct_observation,
+                    anchor_threshold=strong_unary_anchor_threshold,
+                )
             )
             if strong_unary_anchor_threshold is not None
             else direct_confidence
@@ -1920,6 +2434,31 @@ def run(args: argparse.Namespace) -> dict:
                 construction=seed_construction,
             )
             seed_normalization = "independent_max"
+        prototype_positive_solver_mass = positive_solver_mass
+        prototype_negative_solver_mass = negative_solver_mass
+        if _requires_legacy_prototype_observation(observation_fusion):
+            if legacy_prototype_support is None:
+                raise RuntimeError(
+                    "dual_registration_bernoulli_poe lacks its independent "
+                    "legacy prototype observation"
+                )
+            legacy_support_sum, legacy_support_count = legacy_prototype_support
+            legacy_fraction = legacy_support_sum / legacy_support_count.clamp_min(
+                1e-8
+            ).unsqueeze(1)
+            prototype_positive_solver_mass, prototype_negative_solver_mass = (
+                _registered_solver_masses(
+                    legacy_fraction[:, 0],
+                    legacy_fraction[:, 1],
+                    support_threshold=float(args.support_threshold),
+                    construction="winner_take_all",
+                )
+            )
+            _require_bipolar_solver_support(
+                prototype_positive_solver_mass,
+                prototype_negative_solver_mass,
+                label="Legacy prototype",
+            )
         positive_support = positive_solver_mass > 0
         negative_support = negative_solver_mass > 0
         _require_bipolar_solver_support(
@@ -1940,7 +2479,11 @@ def run(args: argparse.Namespace) -> dict:
                 else None
             ),
             "observation_confidence_formula": (
-                "(1-exp(-raw_joint_prompt_mass/mass_scale))*"
+                "raw_joint_prompt_mass/raw_visible_mass; "
+                "signed=(raw_foreground_mass-raw_background_mass)/"
+                "raw_visible_mass"
+                if observation_fusion in _EXACT_RASTER_OBSERVATION_FUSIONS
+                else "(1-exp(-raw_joint_prompt_mass/mass_scale))*"
                 "(raw_joint_prompt_mass/raw_visible_mass)^coverage_power"
                 if observation_confidence_mode
                 == "poisson_mass_coverage"
@@ -1960,22 +2503,93 @@ def run(args: argparse.Namespace) -> dict:
             "raw_visible_mass_sum": float(support_count.sum()),
             "observation_confidence_sum": float(direct_confidence.sum()),
             "strong_unary_policy": (
-                "unit_confidence_on_shared_hard_seed_rows"
+                "anchor_only_on_shared_hard_seed_rows"
+                if observation_fusion
+                == "hard_seed_anchor_only_probability"
+                else "unit_confidence_on_shared_hard_seed_rows"
+                if strong_unary_anchor_threshold is not None
+                else "none"
+            ),
+            "strong_unary_fusion_scope": (
+                "anchor_rows_only_with_bitwise_non_anchor_preservation"
+                if observation_fusion
+                == "hard_seed_anchor_only_probability"
+                else "anchors_plus_weak_probability_mixture"
                 if strong_unary_anchor_threshold is not None
                 else "none"
             ),
             "strong_unary_anchor_threshold": strong_unary_anchor_threshold,
             "strong_unary_anchor_rows": int(strong_unary_anchor_mask.sum()),
+            "strong_unary_fusion_rows": (
+                int(strong_unary_anchor_mask.sum())
+                if observation_fusion
+                == "hard_seed_anchor_only_probability"
+                else None
+            ),
             "strong_unary_effective_confidence_sum": float(
                 strong_unary_effective_confidence.sum()
             ),
             "strong_unary_formula": (
-                "a=1[c>0 and abs(signed_observation)>=hard_seed_threshold]; "
-                "effective_confidence=a+(1-a)*c; "
-                "p=(1-effective_confidence)*p_field+"
-                "effective_confidence*foreground_probability"
+                (
+                    "a=1[c>0 and abs(signed_observation)>=hard_seed_threshold]; "
+                    "effective_confidence=a; "
+                    "p=(1-a)*p_field+a*foreground_probability"
+                    if observation_fusion
+                    == "hard_seed_anchor_only_probability"
+                    else "a=1[c>0 and "
+                    "abs(signed_observation)>=hard_seed_threshold]; "
+                    "effective_confidence=a+(1-a)*c; "
+                    "p=(1-effective_confidence)*p_field+"
+                    "effective_confidence*foreground_probability"
+                )
                 if strong_unary_anchor_threshold is not None
                 else None
+            ),
+            **(
+                {
+                    "posterior_consensus": (
+                        _registered_posterior_consensus_method_contract(
+                            observation_fusion
+                        )
+                    )
+                }
+                if observation_fusion in _BERNOULLI_POE_FUSIONS
+                else {}
+            ),
+            **(
+                {
+                    "prototype_observation_operator": {
+                        "mode": "legacy_alpha_depth",
+                        "registration_resolution": [
+                            int(renderer.image_height),
+                            int(renderer.image_width),
+                        ],
+                        "seed_construction": "winner_take_all",
+                        "seed_normalization": "independent_max",
+                        "depth_tolerance": float(args.depth_tolerance),
+                        "relative_depth_tolerance": float(
+                            args.relative_depth_tolerance
+                        ),
+                        "alpha_threshold": (
+                            _FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD
+                        ),
+                        "deterministic_cpu_accumulation": True,
+                        "seed_provenance": (
+                            DUAL_PROTOTYPE_SEED_PROVENANCE
+                        ),
+                        "shares_support_sum_with_exact_adjoint": False,
+                    },
+                    "exact_observation_operator": {
+                        "mode": "native_front_to_back_raster_adjoint",
+                        "registration_resolution": [height, width],
+                        "alpha_threshold": float(args.alpha_threshold),
+                        "seed_provenance": DUAL_SOLVER_SEED_PROVENANCE,
+                        "seed_construction": seed_construction,
+                        "seed_normalization": seed_normalization,
+                    },
+                }
+                if _requires_legacy_prototype_observation(observation_fusion)
+                else {}
             ),
             "positive_solver_mass_sum": float(positive_solver_mass.sum()),
             "negative_solver_mass_sum": float(negative_solver_mass.sum()),
@@ -2026,10 +2640,27 @@ def run(args: argparse.Namespace) -> dict:
             negative_soft = (
                 negative_solver_mass[valid_rows_device].detach().float().cpu()
             )
+            prototype_positive_soft = (
+                prototype_positive_solver_mass[valid_rows_device]
+                .detach()
+                .float()
+                .cpu()
+            )
+            prototype_negative_soft = (
+                prototype_negative_solver_mass[valid_rows_device]
+                .detach()
+                .float()
+                .cpu()
+            )
             _require_bipolar_solver_support(
                 positive_soft,
                 negative_soft,
                 label="Capability-valid",
+            )
+            _require_bipolar_solver_support(
+                prototype_positive_soft,
+                prototype_negative_soft,
+                label="Capability-valid prototype",
             )
             valid_observation = PrimitiveUnaryEvidence(
                 direct_observation.values[valid_rows_device].detach().float().cpu(),
@@ -2067,6 +2698,12 @@ def run(args: argparse.Namespace) -> dict:
                     "valid_strong_unary_anchor_rows": int(
                         strong_unary_anchor_mask[valid_rows_device].sum()
                     ),
+                    "valid_strong_unary_fusion_rows": (
+                        int(strong_unary_anchor_mask[valid_rows_device].sum())
+                        if observation_fusion
+                        == "hard_seed_anchor_only_probability"
+                        else None
+                    ),
                     "valid_strong_unary_effective_confidence_sum": float(
                         strong_unary_effective_confidence[
                             valid_rows_device
@@ -2076,6 +2713,26 @@ def run(args: argparse.Namespace) -> dict:
                     "valid_negative_solver_mass_sum": float(negative_soft.sum()),
                     "valid_positive_solver_rows": int((positive_soft > 0).sum()),
                     "valid_negative_solver_rows": int((negative_soft > 0).sum()),
+                    **(
+                        {
+                            "valid_prototype_positive_solver_mass_sum": float(
+                                prototype_positive_soft.sum()
+                            ),
+                            "valid_prototype_negative_solver_mass_sum": float(
+                                prototype_negative_soft.sum()
+                            ),
+                            "valid_prototype_positive_solver_rows": int(
+                                (prototype_positive_soft > 0).sum()
+                            ),
+                            "valid_prototype_negative_solver_rows": int(
+                                (prototype_negative_soft > 0).sum()
+                            ),
+                        }
+                        if _requires_legacy_prototype_observation(
+                            observation_fusion
+                        )
+                        else {}
+                    ),
                 }
             )
             feature_banks = {
@@ -2094,6 +2751,34 @@ def run(args: argparse.Namespace) -> dict:
                 prototype_strategy=args.prototype_strategy,
                 primitive_unary_evidence=valid_observation,
                 seed_normalization=seed_normalization,
+                prototype_positive_seeds=(
+                    prototype_positive_soft
+                    if _requires_legacy_prototype_observation(
+                        observation_fusion
+                    )
+                    else None
+                ),
+                prototype_negative_seeds=(
+                    prototype_negative_soft
+                    if _requires_legacy_prototype_observation(
+                        observation_fusion
+                    )
+                    else None
+                ),
+                prototype_seed_provenance=(
+                    DUAL_PROTOTYPE_SEED_PROVENANCE
+                    if _requires_legacy_prototype_observation(
+                        observation_fusion
+                    )
+                    else None
+                ),
+                solver_seed_provenance=(
+                    DUAL_SOLVER_SEED_PROVENANCE
+                    if _requires_legacy_prototype_observation(
+                        observation_fusion
+                    )
+                    else None
+                ),
                 selection_mode=SelectionMode(
                     getattr(
                         args,
@@ -2298,6 +2983,34 @@ def run(args: argparse.Namespace) -> dict:
                 "propagated": expand_valid_rows(result.probabilities),
                 "connected": expand_valid_rows(result.selected_probabilities),
             }
+            if _requires_legacy_prototype_observation(observation_fusion):
+                # Audit the historical canonical-field expert independently
+                # from the native raster-adjoint expert and their PoE.  This
+                # stage must reproduce the frozen legacy unary before the
+                # dual-registration method can be considered valid.
+                prototype_expert_unary = torch.sigmoid(
+                    result.field_unary / float(args.solver_unary_temperature)
+                )
+                canonical_stage_gaussian_scores[
+                    "prototype_expert_unary"
+                ] = expand_valid_rows(prototype_expert_unary)
+                if bool(
+                    getattr(
+                        args,
+                        "export_registered_prompt_cycle_diagnostic",
+                        False,
+                    )
+                ):
+                    exact_expert_unary = torch.sigmoid(
+                        valid_observation.values
+                        / float(args.solver_unary_temperature)
+                    )
+                    registered_prompt_cycle_gaussian_scores = {
+                        "prototype_expert": expand_valid_rows(
+                            prototype_expert_unary
+                        ),
+                        "exact_expert": expand_valid_rows(exact_expert_unary),
+                    }
             gaussian_scores = canonical_stage_gaussian_scores[
                 str(getattr(args, "registered_readout_stage", "connected"))
             ]
@@ -2444,6 +3157,152 @@ def run(args: argparse.Namespace) -> dict:
             return _center_registered_forward_score_map(rendered_score)
         return rendered_score
 
+    registered_prompt_cycle_report: dict[str, object] | None = None
+    if registered_prompt_cycle_gaussian_scores is not None:
+        if registered_prompt_evidence is None:
+            raise RuntimeError("prompt-cycle diagnostic lacks registered evidence")
+        ordered_experts = ("prototype_expert", "exact_expert")
+        with torch.no_grad():
+            prompt_cycle_render = renderer.render_feature_rows(
+                model,
+                prompt_pose,
+                torch.stack(
+                    [
+                        registered_prompt_cycle_gaussian_scores[name]
+                        for name in ordered_experts
+                    ],
+                    dim=1,
+                ),
+                feature_height=native_height,
+                feature_width=native_width,
+                alpha_normalize=True,
+                contribution_gamma=args.feature_contribution_gamma,
+            )
+        prompt_cycle_maps = (
+            prompt_cycle_render["feature_map"].detach().float().cpu().numpy()
+        )
+        prompt_cycle_visibility = (
+            prompt_cycle_render["alpha_map"]
+            .detach()
+            .float()
+            .cpu()
+            .numpy()
+            .reshape(native_height, native_width)
+        )
+        if prompt_cycle_maps.shape != (2, native_height, native_width):
+            raise RuntimeError("prompt-cycle renderer returned an invalid shape")
+        cycle_root = output_root / "prompt_cycle" / args.scene_id
+        cycle_root.mkdir(parents=True, exist_ok=True)
+        cycle_score_paths: dict[str, str] = {}
+        cycle_score_sha256: dict[str, str] = {}
+        cycle_metrics: dict[str, dict[str, float]] = {}
+        for index, expert_name in enumerate(ordered_experts):
+            cycle_score = np.clip(prompt_cycle_maps[index], 0.0, 1.0)
+            cycle_path = cycle_root / f"{expert_name}_{prompt_frame}.npy"
+            np.save(
+                cycle_path,
+                cycle_score.astype(np.float32),
+                allow_pickle=False,
+            )
+            cycle_score_paths[expert_name] = str(cycle_path)
+            cycle_score_sha256[expert_name] = _file_sha256(cycle_path)
+            cycle_metrics[expert_name] = _prompt_cycle_reconstruction_metrics(
+                cycle_score,
+                positive_native,
+                prompt_cycle_visibility,
+            )
+        exact_positive_rows = int(
+            registered_prompt_evidence["valid_positive_solver_rows"]
+        )
+        exact_negative_rows = int(
+            registered_prompt_evidence["valid_negative_solver_rows"]
+        )
+        prototype_positive_rows = int(
+            registered_prompt_evidence[
+                "valid_prototype_positive_solver_rows"
+            ]
+        )
+        prototype_negative_rows = int(
+            registered_prompt_evidence[
+                "valid_prototype_negative_solver_rows"
+            ]
+        )
+        registered_prompt_cycle_report = {
+            "schema": "registered_prompt_cycle_reliability_diagnostic_v1",
+            "status": "target_blind_diagnostic_only",
+            "scene_id": str(args.scene_id),
+            "protocol_hash": str(manifest["protocol_hash"]),
+            "prompt_frame_id": prompt_frame,
+            "prompt_mask_path": str(prompt["mask_path"]),
+            "prompt_mask_sha256": _file_sha256(Path(prompt["mask_path"])),
+            "prompt_resolution": [native_height, native_width],
+            "prompt_foreground_pixels": int(positive_native.sum()),
+            "computed_before_any_target_mask_open": True,
+            "allowed_inputs": [
+                "reference_prompt_mask",
+                "legacy_alpha_depth_observation",
+                "native_exact_raster_adjoint_observation",
+                "renderer_responsibility_and_visibility",
+                "canonical_primitive_scores",
+            ],
+            "forbidden_inputs": [
+                "target_rgb",
+                "target_mask",
+                "target_metric",
+                "scene_specific_constants",
+            ],
+            "prototype_operator": registered_prompt_evidence[
+                "prototype_observation_operator"
+            ],
+            "exact_operator": registered_prompt_evidence[
+                "exact_observation_operator"
+            ],
+            "expert_metrics": cycle_metrics,
+            "fixed_ranking": _prompt_cycle_fixed_ranking(cycle_metrics),
+            "condition_indicators": {
+                "exact_positive_rows": exact_positive_rows,
+                "prototype_positive_rows": prototype_positive_rows,
+                "exact_to_prototype_positive_row_ratio": (
+                    exact_positive_rows / prototype_positive_rows
+                ),
+                "exact_negative_rows": exact_negative_rows,
+                "prototype_negative_rows": prototype_negative_rows,
+                "exact_to_prototype_negative_row_ratio": (
+                    exact_negative_rows / prototype_negative_rows
+                ),
+                "exact_observation_confidence_sum": float(
+                    registered_prompt_evidence[
+                        "valid_observation_confidence_sum"
+                    ]
+                ),
+                "mean_renderer_visibility": float(
+                    prompt_cycle_visibility.mean()
+                ),
+                "visible_pixel_fraction": float(
+                    (prompt_cycle_visibility > 0.0).mean()
+                ),
+            },
+            "score_paths": cycle_score_paths,
+            "score_sha256": cycle_score_sha256,
+            "uses_target_rgb_or_mask": False,
+            "learned_or_scene_tuned_constants": False,
+        }
+        cycle_report_path = cycle_root / "prompt_cycle_diagnostic.json"
+        cycle_report_path.write_text(
+            json.dumps(
+                registered_prompt_cycle_report,
+                indent=2,
+                allow_nan=False,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        registered_prompt_cycle_report = {
+            **registered_prompt_cycle_report,
+            "report_path": str(cycle_report_path),
+            "report_sha256": _file_sha256(cycle_report_path),
+        }
+
     for frame_id in evaluation_frames:
         view = _view_by_frame(views, frame_id)
         pose = torch.from_numpy(view["w2c"].copy()).float().to(device)
@@ -2572,6 +3431,11 @@ def run(args: argparse.Namespace) -> dict:
         "prompt_native_resolution": [native_height, native_width],
         "prompt_registration_resolution": [height, width],
         "registered_prompt_evidence": registered_prompt_evidence,
+        **(
+            {"registered_prompt_cycle": registered_prompt_cycle_report}
+            if registered_prompt_cycle_report is not None
+            else {}
+        ),
         **(
             {
                 "registered_forward_protocol_authority": (
@@ -2706,6 +3570,58 @@ def run(args: argparse.Namespace) -> dict:
                     == "hard_seed_anchored_probability"
                     else {}
                 ),
+                **(
+                    {
+                        "registered_posterior_consensus": (
+                            _registered_posterior_consensus_method_contract(
+                                str(
+                                    getattr(
+                                        args,
+                                        "registered_observation_fusion",
+                                        "additive",
+                                    )
+                                )
+                            )
+                        )
+                    }
+                    if str(
+                        getattr(
+                            args,
+                            "registered_observation_fusion",
+                            "additive",
+                        )
+                    )
+                    in _BERNOULLI_POE_FUSIONS
+                    else {}
+                ),
+                **(
+                    {
+                        "registered_strong_unary": {
+                            "policy": "anchor_only_on_shared_hard_seed_rows",
+                            "anchor_threshold_source": "hard_seed_threshold",
+                            "anchor_threshold": float(
+                                getattr(args, "hard_seed_threshold", 0.20)
+                            ),
+                            "formula": (
+                                "a=1[c>0 and abs(s)>=tau]; c_eff=a; "
+                                "p=(1-a)p_field+a*q"
+                            ),
+                            "non_anchor_policy": (
+                                "bitwise_field_unary_preservation"
+                            ),
+                            "new_numeric_constant": False,
+                        }
+                    }
+                    if str(
+                        getattr(
+                            args,
+                            "registered_observation_fusion",
+                            "additive",
+                        )
+                    )
+                    == "hard_seed_anchor_only_probability"
+                    else {}
+                ),
                 "registered_seed_construction": str(
                     getattr(
                         args,
@@ -2719,7 +3635,16 @@ def run(args: argparse.Namespace) -> dict:
                     else None
                 ),
                 "registered_observation_confidence": str(
-                    getattr(
+                    "exact_labeled_visible_fraction"
+                    if str(
+                        getattr(
+                            args,
+                            "registered_observation_fusion",
+                            "additive",
+                        )
+                    )
+                    in _EXACT_RASTER_OBSERVATION_FUSIONS
+                    else getattr(
                         args,
                         "registered_observation_confidence",
                         "relative_joint_max",
@@ -2987,7 +3912,16 @@ def run(args: argparse.Namespace) -> dict:
                 else None
             ),
             "observation_confidence_mode": str(
-                getattr(
+                "exact_labeled_visible_fraction"
+                if str(
+                    getattr(
+                        args,
+                        "registered_observation_fusion",
+                        "additive",
+                    )
+                )
+                in _EXACT_RASTER_OBSERVATION_FUSIONS
+                else getattr(
                     args,
                     "registered_observation_confidence",
                     "relative_joint_max",
@@ -3347,13 +4281,26 @@ def main() -> None:
             "additive",
             "probability_mixture",
             "hard_seed_anchored_probability",
+            "hard_seed_anchor_only_probability",
+            "direct_raster_adjoint",
+            "raster_adjoint_bernoulli_poe",
+            "dual_registration_bernoulli_poe",
         ),
         default="additive",
         help=(
             "Fuse registered mass by the historical additive unary or as the "
             "label-free probability mixture (1-c)*p_field+c*q, or make "
             "the same direct rows accepted as solver hard seeds unit-confidence "
-            "unary anchors."
+            "unary anchors, or apply those anchors only while preserving every "
+            "non-anchor field unary bit-for-bit. direct_raster_adjoint instead "
+            "bypasses prototype "
+            "cosine and uses the exact shared-responsibility foreground/background "
+            "continuous primitive unary. raster_adjoint_bernoulli_poe keeps the "
+            "prototype unary and pools its Bernoulli posterior with that same "
+            "exact-adjoint posterior by a symmetric normalized product. "
+            "dual_registration_bernoulli_poe instead reconstructs the prototype "
+            "expert with the frozen legacy alpha/depth operator and keeps native "
+            "exact adjoint as an independent expert."
         ),
     )
     parser.add_argument(
@@ -3427,6 +4374,15 @@ def main() -> None:
         help=(
             "Choose the continuous unary/graph field or the component-masked "
             "support as the final scalar render; all stages remain reported."
+        ),
+    )
+    parser.add_argument(
+        "--export-registered-prompt-cycle-diagnostic",
+        action="store_true",
+        help=(
+            "Before any target mask is opened, reproject the independently "
+            "registered prototype and exact experts into the reference prompt "
+            "view and persist fixed BCE/soft-IoU reliability diagnostics."
         ),
     )
     parser.add_argument("--appearance-weight", type=float, default=1.0)
@@ -3522,22 +4478,49 @@ def main() -> None:
         parser.error("--registered-seed-unary-weight must be finite and non-negative")
     if (
         args.registered_observation_fusion
-        in {"probability_mixture", "hard_seed_anchored_probability"}
+        in {
+            "probability_mixture",
+            "hard_seed_anchored_probability",
+            "hard_seed_anchor_only_probability",
+            "direct_raster_adjoint",
+            "raster_adjoint_bernoulli_poe",
+            "dual_registration_bernoulli_poe",
+        }
         and args.registered_seed_unary_weight != 0
     ):
         parser.error(
-            "probability registered-observation fusion requires "
+            "non-additive registered-observation fusion requires "
             "--registered-seed-unary-weight 0"
         )
-    if args.registered_observation_fusion == "hard_seed_anchored_probability":
+    try:
+        _validate_direct_raster_adjoint_args(args)
+    except ValueError as error:
+        parser.error(str(error))
+    if (
+        args.export_registered_prompt_cycle_diagnostic
+        and args.registered_observation_fusion
+        != "dual_registration_bernoulli_poe"
+    ):
+        parser.error(
+            "--export-registered-prompt-cycle-diagnostic requires "
+            "--registered-observation-fusion dual_registration_bernoulli_poe"
+        )
+    try:
+        _validate_hard_seed_anchor_only_probability_args(args)
+    except ValueError as error:
+        parser.error(str(error))
+    if args.registered_observation_fusion in {
+        "hard_seed_anchored_probability",
+        "hard_seed_anchor_only_probability",
+    }:
         if args.registered_seed_construction != "joint_signed":
             parser.error(
-                "hard_seed_anchored_probability requires "
+                "hard-seed probability fusion requires "
                 "--registered-seed-construction joint_signed"
             )
         if args.hard_seed_threshold <= 0 or args.hard_seed_conflict_margin != 0:
             parser.error(
-                "hard_seed_anchored_probability requires a positive "
+                "hard-seed probability fusion requires a positive "
                 "--hard-seed-threshold and --hard-seed-conflict-margin 0"
             )
     if (

@@ -260,3 +260,85 @@ def test_benchmark_clis_reject_truncated_cohort_before_prediction_or_scoring(
                 str(tmp_path / "report.json"),
             ]
         )
+
+
+def test_prediction_cli_never_requires_target_gt_but_still_requires_prompt_mask(
+    tmp_path: Path,
+) -> None:
+    annotations, rgb_map = _make_spin(tmp_path)
+    mixed_prompt = np.array(
+        [[255, 255, 0, 0], [255, 255, 0, 0], [255, 255, 0, 0]],
+        dtype=np.uint8,
+    )
+    for scene_id, folder in SPIN_SCENE_FOLDERS:
+        annotation_ids, _camera_ids = _spin_frame_ids(scene_id)
+        Image.fromarray(mixed_prompt).save(
+            annotations / folder / f"{annotation_ids[0]}.png"
+        )
+    manifest = build_spin_manifest(
+        annotations,
+        rgb_map,
+        enforce_official_counts=False,
+    )
+    feature_root = tmp_path / "features"
+    feature = np.array(
+        [
+            [[1.0, 0.0], [1.0, 0.0]],
+            [[0.0, 1.0], [0.0, 1.0]],
+            [[0.0, 0.0], [0.0, 0.0]],
+        ],
+        dtype=np.float32,
+    )
+    for scene in manifest["scenes"]:
+        scene_root = feature_root / scene["scene_id"]
+        scene_root.mkdir(parents=True, exist_ok=True)
+        for frame in scene["frames"]:
+            np.save(scene_root / f"{frame['camera_name']}.npy", feature)
+
+    first_scene = manifest["scenes"][0]
+    frames = {frame["frame_id"]: frame for frame in first_scene["frames"]}
+    target_id = first_scene["evaluation_frame_ids"][0]
+    Path(frames[target_id]["ground_truth"]).unlink()
+    source = tmp_path / "spin.json"
+    source.write_text(json.dumps(manifest), encoding="utf-8")
+
+    output = tmp_path / "predictions"
+    assert (
+        predict_cli.main(
+            [
+                "--manifest",
+                str(source),
+                "--feature-root",
+                str(feature_root),
+                "--feature-pattern",
+                "{scene_id}/{camera_name}.npy",
+                "--feature-layout",
+                "chw",
+                "--output-dir",
+                str(output),
+            ]
+        )
+        == 0
+    )
+    prediction = json.loads(
+        (output / "prediction_manifest.json").read_text(encoding="utf-8")
+    )
+    assert prediction["safety"]["evaluation_ground_truth_opened"] is False
+
+    prompt_mask = Path(first_scene["prompt"]["mask_path"])
+    prompt_mask.unlink()
+    with pytest.raises(FileNotFoundError):
+        predict_cli.main(
+            [
+                "--manifest",
+                str(source),
+                "--feature-root",
+                str(feature_root),
+                "--feature-pattern",
+                "{scene_id}/{camera_name}.npy",
+                "--feature-layout",
+                "chw",
+                "--output-dir",
+                str(tmp_path / "missing-prompt-predictions"),
+            ]
+        )

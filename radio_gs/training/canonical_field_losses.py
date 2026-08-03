@@ -3,14 +3,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
+from typing import Any, Mapping
 
 import torch
 import torch.nn.functional as F
 
 from radio_gs.field.canonical_gaussian_field import CanonicalGaussianField
 from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews
-from .primitive_consensus import PrimitiveConsensus, primitive_reconstruction_loss
+from .primitive_consensus import (
+    PrimitiveConsensus,
+    consensus_target_rows,
+    primitive_reconstruction_loss,
+)
 
 
 @dataclass(frozen=True)
@@ -57,12 +61,12 @@ def _relation_loss(
 
 def _capability_consensus_loss(
     projected: torch.Tensor,
-    consensus: PrimitiveConsensus,
+    consensus: PrimitiveConsensus | Any,
     rows_cpu: torch.Tensor,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Match an official view to features fused *after* per-view projection."""
 
-    target = consensus.targets[rows_cpu].to(projected.device).float()
+    target = consensus_target_rows(consensus, rows_cpu).to(projected.device).float()
     valid = consensus.valid[rows_cpu].to(projected.device)
     if projected.ndim != 2 or target.shape != projected.shape:
         raise ValueError(
@@ -88,7 +92,7 @@ def canonical_primitive_loss(
     row_indices: torch.Tensor,
     *,
     official_views: FrozenRadioViews | None = None,
-    capability_targets: Mapping[str, PrimitiveConsensus] | None = None,
+    capability_targets: Mapping[str, PrimitiveConsensus | Any] | None = None,
     pair_index: torch.Tensor | None = None,
     config: CanonicalFieldLossConfig = CanonicalFieldLossConfig(),
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
@@ -99,7 +103,9 @@ def canonical_primitive_loss(
     mpr, stats = primitive_reconstruction_loss(
         predicted_radio, consensus, row_indices=rows.detach().cpu()
     )
-    target_radio = consensus.targets[rows.detach().cpu()].to(predicted_radio.device).float()
+    target_radio = consensus_target_rows(
+        consensus, rows.detach().cpu()
+    ).to(predicted_radio.device).float()
     valid = consensus.valid[rows.detach().cpu()].to(predicted_radio.device)
     zero = predicted_radio.sum() * 0.0
     dino = zero

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import torch
 import torch.nn.functional as F
@@ -15,6 +16,19 @@ class PrimitiveConsensus:
     observation_count: torch.Tensor
     reliability: torch.Tensor
     per_view_agreement: torch.Tensor
+
+
+def consensus_target_rows(
+    consensus: PrimitiveConsensus | Any,
+    rows: torch.Tensor,
+) -> torch.Tensor:
+    """Read target rows from either a dense consensus or a disk-backed MPR."""
+
+    indices = torch.as_tensor(rows).detach().long().cpu()
+    fetch = getattr(consensus, "fetch_rows", None)
+    if callable(fetch):
+        return torch.as_tensor(fetch(indices))
+    return torch.as_tensor(consensus.targets)[indices]
 
 
 def robust_multiview_consensus(
@@ -110,12 +124,14 @@ def primitive_reconstruction_loss(
     """MPR loss used as a training bridge, never as a query-time cache."""
 
     if row_indices is None:
+        if callable(getattr(consensus, "fetch_rows", None)):
+            raise ValueError("disk-backed consensus requires explicit row_indices")
         target = consensus.targets.to(predicted.device)
         valid = consensus.valid.to(predicted.device)
         reliability = consensus.reliability[:, :2].mean(dim=-1).to(predicted.device)
     else:
         rows = torch.as_tensor(row_indices).long().cpu()
-        target = consensus.targets[rows].to(predicted.device)
+        target = consensus_target_rows(consensus, rows).to(predicted.device)
         valid = consensus.valid[rows].to(predicted.device)
         reliability = consensus.reliability[rows, :2].mean(dim=-1).to(predicted.device)
     if predicted.shape != target.shape:

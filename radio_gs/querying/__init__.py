@@ -26,13 +26,19 @@ from .score_calibration import (
 )
 from .evidence_scorer import (
     fuse_registered_observation_unary,
+    registered_observation_anchor_only_confidence,
     registered_observation_anchor_mask,
     registered_observation_effective_confidence,
     registered_seed_observation,
     registered_seed_unary,
+    registered_raster_adjoint_observation,
     shrink_unary_by_reliability,
 )
 from .query_compilers import compile_registered_primitive_seeds
+from .reliability_fusion import (
+    geometric_consensus_unary,
+    symmetric_bernoulli_product_of_experts,
+)
 from .query_spec import (
     PrimitiveUnaryEvidence,
     PrototypeSet,
@@ -94,11 +100,15 @@ __all__ = [
     "graph_for_query_intent",
     "mix_support_graph_channels",
     "registered_seed_unary",
+    "registered_raster_adjoint_observation",
     "registered_seed_observation",
     "registered_observation_anchor_mask",
+    "registered_observation_anchor_only_confidence",
     "registered_observation_effective_confidence",
     "fuse_registered_observation_unary",
+    "geometric_consensus_unary",
     "select_support_components",
+    "symmetric_bernoulli_product_of_experts",
     "solve_primitive_support",
     "shrink_unary_by_reliability",
 ]
