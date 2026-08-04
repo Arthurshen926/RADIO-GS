@@ -12,6 +12,7 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.field import FeatureSpaceSignature, load_canonical_field_checkpoint
+from radio_gs.interfaces.primitive_row_authority import PrimitiveRowAuthority
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.training.tensor_cache_io import load_mpr_cache
 
@@ -195,6 +196,9 @@ def build(args: argparse.Namespace) -> dict:
         "feature_storage": "valid_rows_compact_v1",
         "feature_row_order": "torch_where_valid_ascending",
         "feature_row_count": int(rows.numel()),
+        "primitive_row_authority": PrimitiveRowAuthority.from_tensors(
+            xyz, valid
+        ).to_dict(),
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,

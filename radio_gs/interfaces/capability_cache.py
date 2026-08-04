@@ -13,6 +13,7 @@ import numpy as np
 import torch
 
 from radio_gs.field.field_signature import FeatureSpaceSignature
+from radio_gs.interfaces.primitive_row_authority import PrimitiveRowAuthority
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
 
 
@@ -232,6 +233,7 @@ def load_canonical_capability_bank(
     *,
     expected_field_checkpoint_sha256: str = "",
     require_signatures: bool = True,
+    require_row_authority: bool = False,
 ) -> CanonicalCapabilityBank:
     cache_path = Path(path)
     sidecar_path = cache_path.with_suffix(cache_path.suffix + ".json")
@@ -294,6 +296,11 @@ def load_canonical_capability_bank(
             raise ValueError("compact capability row count declaration differs")
     if not bool(torch.isfinite(xyz).all()):
         raise ValueError("capability geometry contains NaN or infinity")
+    raw_row_authority = metadata.get("primitive_row_authority")
+    if require_row_authority and raw_row_authority is None:
+        raise ValueError("capability cache lacks primitive row authority")
+    if raw_row_authority is not None:
+        PrimitiveRowAuthority.from_mapping(raw_row_authority).validate(xyz, valid)
     if memory_mapped:
         # Copy and validate only rows exposed by the capability contract.  The
         # dense memory maps are released on return, and downstream consumers
@@ -426,6 +433,8 @@ def load_canonical_primitive_reliability(
 def load_canonical_support_graph(
     path: str | Path,
     bank: CanonicalCapabilityBank,
+    *,
+    require_row_authority: bool = False,
 ) -> PrimitiveSupportGraph:
     payload = _load_payload(path)
     required = {
@@ -445,6 +454,24 @@ def load_canonical_support_graph(
     if not torch.equal(global_rows, bank.global_rows):
         raise ValueError("support graph nodes do not match valid capability rows")
     metadata = payload["metadata"]
+    if not isinstance(metadata, Mapping):
+        raise ValueError("support graph metadata must be a mapping")
+    graph_valid = torch.zeros(bank.num_gaussians, dtype=torch.bool)
+    graph_valid[global_rows] = True
+    raw_row_authority = metadata.get("primitive_row_authority")
+    if require_row_authority and raw_row_authority is None:
+        raise ValueError("support graph lacks primitive row authority")
+    if raw_row_authority is not None:
+        PrimitiveRowAuthority.from_mapping(raw_row_authority).validate(
+            bank.xyz, graph_valid
+        )
+    if "xyz" in payload:
+        graph_xyz = torch.as_tensor(payload["xyz"]).float().cpu()
+        expected_xyz = bank.xyz[global_rows]
+        if graph_xyz.shape != expected_xyz.shape or not torch.equal(
+            graph_xyz, expected_xyz
+        ):
+            raise ValueError("support graph xyz rows do not match capability rows")
     capability_metadata = metadata.get("capability_metadata", {})
     if capability_metadata.get("field_checkpoint_sha256") != bank.metadata.get(
         "field_checkpoint_sha256"
@@ -454,6 +481,17 @@ def load_canonical_support_graph(
         "radio_checkpoint_sha256"
     ):
         raise ValueError("support graph and capability bank RADIO hashes differ")
+    graph_capability_authority = capability_metadata.get("primitive_row_authority")
+    bank_capability_authority = bank.metadata.get("primitive_row_authority")
+    if require_row_authority and (
+        graph_capability_authority is None or bank_capability_authority is None
+    ):
+        raise ValueError("support graph lacks source capability row authority")
+    if (
+        graph_capability_authority is not None
+        or bank_capability_authority is not None
+    ) and graph_capability_authority != bank_capability_authority:
+        raise ValueError("support graph and capability bank row authorities differ")
     graph_signatures = capability_metadata.get("capability_signatures")
     if not isinstance(graph_signatures, Mapping):
         raise ValueError("support graph lacks source capability signatures")

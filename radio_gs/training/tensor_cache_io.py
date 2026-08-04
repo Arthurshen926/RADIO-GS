@@ -14,6 +14,10 @@ from typing import Any
 import numpy as np
 import torch
 
+from radio_gs.rendering.contribution_compositor import (
+    EXACT_CENTER_UNCERTAINTY_CONTRACT,
+    MARGINAL_RESPONSIBILITY_CONTRACT,
+)
 from radio_gs.utils.immutable_artifacts import (
     load_json_object,
     load_torch_payload,
@@ -475,6 +479,50 @@ def validate_mpr_cache_payload(
                     )
         elif reliability_mode != "legacy_valid":
             raise ValueError("MPR reliability mode is unsupported")
+
+    aggregation_mode = metadata.get("aggregation_mode")
+    marginal_lifting = aggregation_mode in {
+        "raster_marginal_responsibility",
+        "raster_exact_center_uncertainty",
+    }
+    visibility_purity_value = payload.get("visibility_purity")
+    if marginal_lifting:
+        expected_contract = (
+            MARGINAL_RESPONSIBILITY_CONTRACT
+            if aggregation_mode == "raster_marginal_responsibility"
+            else EXACT_CENTER_UNCERTAINTY_CONTRACT
+        )
+        expected_weight_mode = (
+            "exact_front_to_back_marginal_responsibility"
+            if aggregation_mode == "raster_marginal_responsibility"
+            else "exact_front_to_back_adjoint_center"
+        )
+        if (
+            metadata.get("marginal_responsibility_contract")
+            != expected_contract
+            or metadata.get("registration_weight_mode")
+            != expected_weight_mode
+            or float(metadata.get("alpha_threshold", -1.0)) != 0.0
+            or metadata.get("visibility_uncertainty_semantics")
+            != "per_primitive_sum_weight_times_responsibility_over_sum_weight"
+        ):
+            raise ValueError("marginal-responsibility MPR contract differs")
+        if not torch.is_tensor(visibility_purity_value):
+            raise ValueError("marginal-responsibility MPR lacks visibility purity")
+        visibility_purity = visibility_purity_value.detach().float().cpu()
+        if (
+            visibility_purity_value.dtype not in {torch.float16, torch.float32}
+            or visibility_purity.shape != (num_rows,)
+            or not _all_finite(visibility_purity)
+            or bool((visibility_purity < 0).any())
+            or bool((visibility_purity > 1.001).any())
+            or not _all_zero_on_mask(visibility_purity, ~valid_cpu)
+        ):
+            raise ValueError("marginal visibility purity is invalid")
+    elif visibility_purity_value is not None:
+        raise ValueError(
+            "visibility purity requires marginal-responsibility aggregation"
+        )
 
     for key in (
         "benchmark_masks_opened",

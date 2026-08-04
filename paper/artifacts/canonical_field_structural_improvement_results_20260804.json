@@ -1,0 +1,158 @@
+{
+  "schema_version": "canonical_field_structural_improvement_results_v1",
+  "date": "2026-08-04",
+  "frozen_protocol": {
+    "scene": "LERF figurines sentinel",
+    "graph_sha256": "abcdd466fbbd726f277b59b137a59ac93b0a2c270a7557fc9916a478a66a1451",
+    "readout_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "renderer_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "text_query_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+    "fixed_threshold": 0.6,
+    "adaptive": "recursive_upper_otsu3"
+  },
+  "reference_metrics": {
+    "initial_same_readout": {
+      "average_precision": 0.80529689,
+      "oracle_threshold_iou": 0.70455528,
+      "positive_negative_score_margin": 0.57133461,
+      "fixed_miou": 0.40744666,
+      "otsu3_miou": 0.4696219,
+      "fixed_selected_purity": 0.43672092,
+      "otsu3_selected_purity": 0.60012458
+    },
+    "field_c": {
+      "average_precision": 0.80009474,
+      "oracle_threshold_iou": 0.72921943,
+      "positive_negative_score_margin": 0.58351375,
+      "fixed_miou": 0.36995542,
+      "otsu3_miou": 0.38791443,
+      "fixed_selected_purity": 0.39455087,
+      "otsu3_selected_purity": 0.4886338,
+      "decision": "rejected_for_full_expansion"
+    }
+  },
+  "confirmed_implementation_defects": [
+    {
+      "defect": "AffineBasisDecoder.encode used basis transpose as an inverse after training made the basis non-orthogonal.",
+      "fix": "least-squares inverse using the basis Gram matrix with Cholesky and pseudoinverse fallback; cross-basis projection uses the same inverse",
+      "impact": "old compact directional reconstruction mean cosine changed from -0.300842 to 0.520331, revealing both the implementation bug and the remaining subspace limitation"
+    },
+    {
+      "defect": "raster_adjoint metadata claimed per-view normalization while the actual per-pixel features were not normalized",
+      "fix": "apply and validate per-view feature normalization before exact contribution aggregation"
+    },
+    {
+      "defect": "cosine-only field and compression gates left feature amplitude unidentified even though the frozen nonlinear readout is scale-sensitive",
+      "fix": "all new gauge experiments gate cosine and absolute log norm error; future training must bind the gauge before readout training"
+    },
+    {
+      "defect": "formal capability caches and support graphs could be combined without a full global row authority",
+      "fix": "bind full xyz, valid/global rows, and their SHA-256; reject partial/nearest/zero-filled formal combinations"
+    },
+    {
+      "defect": "continuous diffusion could silently inherit release-compatible edge binarization",
+      "fix": "continuous formal kernels fail closed when a binarization threshold is present; release reproduction remains isolated"
+    }
+  ],
+  "field_d_label_free_capacity": {
+    "supported_rows": 62307,
+    "single_center": {
+      "mean_cosine": 0.700495,
+      "p05_cosine": 0.447094
+    },
+    "two_prototype": {
+      "mean_cosine": 0.806592,
+      "p05_cosine": 0.576313
+    },
+    "improvement": {
+      "mean_cosine": 0.106097,
+      "p05_cosine": 0.129218
+    },
+    "interpretation": "multi-view directions contain real information that no single center can retain"
+  },
+  "field_d_frozen_lerf": {
+    "native_unit_gauge_whole_neighborhood": {
+      "mode0_fixed_miou": 0.020181098952889442,
+      "mode1_fixed_miou": 0.016672469675540924,
+      "cause": "directional unit vectors replaced base-field features with L2 norm about 1 while the frozen readout was trained around a much larger field gauge"
+    },
+    "gauge_preserving_whole_neighborhood": {
+      "label_free_center_mean_p05_cosine": [0.9973406791687012, 0.9946951866149902],
+      "label_free_prototype_mean_p05_cosine": [0.9813796281814575, 0.9593802690505981],
+      "mode0": {
+        "average_precision": 0.7602215496923771,
+        "oracle_threshold_iou": 0.6708653268662356,
+        "positive_negative_score_margin": 0.5344581280176508,
+        "fixed_miou": 0.3036090964236043,
+        "otsu3_miou": 0.3550758830728465
+      },
+      "mode1": {
+        "average_precision": 0.5609926229453366,
+        "oracle_threshold_iou": 0.4583734835165692,
+        "positive_negative_score_margin": 0.35508705530157564,
+        "fixed_miou": 0.201152308112659,
+        "otsu3_miou": 0.22547973633618662
+      },
+      "decision": "rejected"
+    },
+    "gauge_preserving_anchor_only_with_canonical_context": {
+      "mode0": {
+        "average_precision": 0.7947504159589531,
+        "oracle_threshold_iou": 0.71859291481924,
+        "positive_negative_score_margin": 0.5804194281170022,
+        "fixed_miou": 0.31947817560836367,
+        "fixed_selected_purity": 0.34120405759081773,
+        "otsu3_miou": 0.3835818538130948,
+        "otsu3_selected_purity": 0.4806158327129103
+      },
+      "mode1": {
+        "average_precision": 0.7770990230015686,
+        "oracle_threshold_iou": 0.7014285027952833,
+        "positive_negative_score_margin": 0.5520423238265626,
+        "fixed_miou": 0.3005762177209029,
+        "fixed_selected_purity": 0.3213373438223785,
+        "otsu3_miou": 0.37749351566477013,
+        "otsu3_selected_purity": 0.4440359277095034
+      },
+      "decision": "rejected_because_both_modes_are_dominated_by_field_c"
+    },
+    "naive_mode_max": {
+      "fixed_miou": 0.0178,
+      "decision": "rejected_and_not_admitted_by_the_frozen_adaptive_score_semantics",
+      "cause": "existential max systematically raises background responses and destroys unary calibration"
+    }
+  },
+  "field_e_gauge_projection": {
+    "output_sha256": "ec4f9bf6c1178879aa4c19f3bce4f0cf799935fe1cea937292b53da218602b54",
+    "label_free": {
+      "target_mean_cosine": 0.9934621453285217,
+      "target_p05_cosine": 0.9875026345252991,
+      "mean_absolute_log_norm_error": 0.0246565118432045,
+      "p95_absolute_log_norm_error": 0.046176403760910034,
+      "preprojection_amplitude_ratio_p05_p95": [0.5961847901344299, 1.4145987033843994]
+    },
+    "frozen_lerf": {
+      "fixed_miou": 0.3327038884162903,
+      "otsu3_miou": 0.3790738582611084
+    },
+    "decision": "rejected_by_preregistered_stop_rule"
+  },
+  "first_principles_conclusion": {
+    "representation": "a task-sufficient primitive field must separate semantic direction, amplitude/reliability gauge, multi-view dispersion, and boundary relation evidence",
+    "readout": "a distribution cannot be converted to a calibrated unary by an unconditional max or a globally aligned prototype index",
+    "training": "feature gauge must be fixed during field and globally clean readout training; post-hoc rescaling around an already-trained nonlinear readout is insufficient",
+    "next_mainline": [
+      "train a globally clean SurfaceRegion readout on explicitly L2-normalized semantic directions with reliability/amplitude supplied as separate channels",
+      "add label-free view-dispersion and boundary-balanced hard-negative ranking without a second full feature field",
+      "for SPIn/NVOS, keep strict one-field and target-RGB-compatible tracks separate; use target-view conditioning only when the protocol grants that observation"
+    ]
+  },
+  "validation": {
+    "relevant_tests_passed": 99,
+    "gpu_observed_max_temperature_c": 58,
+    "gpu_observed_power_w_approximately": 139,
+    "thermal_pauses": 0,
+    "thermal_aborts": 0,
+    "driver_failures": 0
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": "canonical_field_e_gauge_projection_registration_v1",
+  "registered_at": "2026-08-04",
+  "hypothesis": "Field-C improved semantic directions but its unconstrained per-primitive feature norms moved the frozen nonlinear readout away from its calibrated input gauge.",
+  "fixed_method": {
+    "semantic_direction": "L2-normalized Field-C decoded feature per primitive",
+    "amplitude": "L2 norm of the same primitive in the immutable initial canonical field",
+    "projection": "least-squares encoding through the fixed Field-C affine decoder",
+    "learned_parameters": 0,
+    "scene_or_query_parameters": 0
+  },
+  "inputs": {
+    "learned_field_c_sha256": "7b8c1f3feddeb6f18af756fa5cf00816af3042e574355d610264245a6cdd52c6",
+    "initial_gauge_reference_sha256": "328ba9f9f19f69f02a118462cbb427fac7670cbc83e4d4eade7e66902943aa66"
+  },
+  "implementation_sha256": "0915e8959c14dc782d7ac40f5ffd0f1311b210ab32efe6b5db106c9debd07378",
+  "legacy_safety_compatibility": "The gauge reference predates the top-level benchmark_images_opened flag; compatibility requires its bound mpr_cache_metadata.benchmark_images_opened to be explicitly false. All other missing safety fields fail closed.",
+  "fixed_label_free_gate": {
+    "minimum_mean_cosine": 0.95,
+    "minimum_p05_cosine": 0.9,
+    "maximum_mean_absolute_log_norm_error": 0.05,
+    "maximum_p95_absolute_log_norm_error": 0.15
+  },
+  "sentinel": {
+    "scene": "LERF figurines",
+    "protocol": "identical frozen Field-C graph/readout/text/renderer/fixed/Otsu3/quality evaluation",
+    "continue_rule": "Expand only if AP is non-decreasing within 0.002 absolute and at least two of fixed mIoU, Otsu mIoU, fixed purity, or Otsu purity improve over Field-C.",
+    "stop_rule": "Reject gauge projection if AP decreases by more than 0.002 or both fixed and Otsu mIoU decrease."
+  },
+  "benchmark_images_opened_during_method_construction": false,
+  "benchmark_masks_opened_during_method_construction": false,
+  "text_queries_opened_during_method_construction": false
+}

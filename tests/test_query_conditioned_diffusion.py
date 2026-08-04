@@ -326,6 +326,7 @@ def test_continuous_convex_solver_locks_reliable_reference_and_fills_unknown():
         compatibility,
         config=QueryConditionedDiffusionConfig(
             kernel="continuous_convex_v2",
+            edge_binarize_threshold=None,
             cg_iterations=128,
             cg_tolerance=1e-7,
             solver_row_chunk_size=2,
@@ -343,6 +344,7 @@ def test_continuous_query_gate_changes_only_pairwise_completion_not_hard_unary()
     confidence = torch.tensor([1.0, 0.0, 1.0])
     config = QueryConditionedDiffusionConfig(
         kernel="continuous_convex_v2",
+        edge_binarize_threshold=None,
         cg_iterations=128,
         cg_tolerance=1e-7,
         solver_row_chunk_size=2,
@@ -378,6 +380,7 @@ def test_continuous_convex_solver_preserves_soft_unary_amplitude():
         torch.tensor([0.9, 0.5, 0.1]),
         config=QueryConditionedDiffusionConfig(
             kernel="continuous_convex_v2",
+            edge_binarize_threshold=None,
             cg_iterations=16,
         ),
     )
@@ -399,6 +402,7 @@ def test_continuous_implicit_pcg_matches_dense_hard_eliminated_energy():
     confidence = torch.tensor([1.0, 0.4, 0.0, 1.0])
     config = QueryConditionedDiffusionConfig(
         kernel="continuous_convex_v2",
+        edge_binarize_threshold=None,
         laplacian_weight=0.7,
         cg_iterations=256,
         cg_tolerance=1e-8,

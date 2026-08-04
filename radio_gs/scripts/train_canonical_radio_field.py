@@ -27,6 +27,10 @@ from radio_gs.field import (
     validate_observation_contract_metadata,
 )
 from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews
+from radio_gs.rendering.contribution_compositor import (
+    EXACT_CENTER_UNCERTAINTY_CONTRACT,
+    MARGINAL_RESPONSIBILITY_CONTRACT,
+)
 from radio_gs.training.canonical_field_losses import (
     CanonicalFieldLossConfig,
     canonical_primitive_loss,
@@ -46,6 +50,7 @@ from radio_gs.utils.immutable_artifacts import (
 
 CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1 = "matched_top1"
 CAPABILITY_TARGET_CONTRACT_FIELD_A = "field_a_exact_adjoint"
+CAPABILITY_TARGET_CONTRACT_FIELD_C = "field_c_exact_center_uncertainty"
 RELATION_OBJECTIVE_DISABLED = "disabled"
 RELATION_OBJECTIVE_FIELD_B = "field_b_boundary_ranking_v1"
 FIELD_B_RELATION_WEIGHT = CanonicalFieldLossConfig().relation_weight
@@ -303,6 +308,27 @@ def _consensus_from_cache(
         )
     else:
         reliability = torch.as_tensor(reliability).float().cpu()
+    metadata = dict(cache.get("metadata", {}))
+    if metadata.get("aggregation_mode") in {
+        "raster_marginal_responsibility",
+        "raster_exact_center_uncertainty",
+    }:
+        expected_contract = (
+            MARGINAL_RESPONSIBILITY_CONTRACT
+            if metadata.get("aggregation_mode")
+            == "raster_marginal_responsibility"
+            else EXACT_CENTER_UNCERTAINTY_CONTRACT
+        )
+        if (
+            metadata.get("marginal_responsibility_contract")
+            != expected_contract
+        ):
+            raise ValueError("marginal MPR responsibility contract differs")
+        purity = torch.as_tensor(cache.get("visibility_purity")).float().cpu()
+        if purity.shape != valid.shape:
+            raise ValueError("marginal MPR visibility purity does not align")
+        reliability = reliability.clone()
+        reliability[:, 2] = purity
     return PrimitiveConsensus(
         targets=targets,
         valid=valid,
@@ -370,6 +396,40 @@ def _load_capability_mpr_target(
             raise ValueError(
                 "Field-A capability observation reference must use raster_adjoint"
             )
+    elif target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C:
+        exact_policy = {
+            "aggregation_mode": "raster_exact_center_uncertainty",
+            "registration_weight_mode": (
+                "exact_front_to_back_adjoint_center"
+            ),
+            "raster_view_fusion": "contribution_mean",
+            "raster_reliability_mode": "mean_resultant",
+            "normalize_each_view": True,
+            "per_view_normalization_applied": True,
+            "per_view_normalization_stage": (
+                "pixel_feature_before_raster_lifting"
+            ),
+            "marginal_responsibility_contract": (
+                EXACT_CENTER_UNCERTAINTY_CONTRACT
+            ),
+            "visibility_uncertainty_semantics": (
+                "per_primitive_sum_weight_times_responsibility_over_sum_weight"
+            ),
+            "alpha_threshold": 0.0,
+        }
+        mismatched_exact = [
+            key for key, expected in exact_policy.items()
+            if metadata.get(key) != expected
+        ]
+        if mismatched_exact:
+            raise ValueError(
+                f"{expected_space} Field-C marginal capability policy differs: "
+                f"{sorted(mismatched_exact)}"
+            )
+        if raw_metadata.get("aggregation_mode") != "raster_exact_center_uncertainty":
+            raise ValueError(
+                "Field-C raw observation target must use marginal responsibility"
+            )
     else:
         raise ValueError(f"unsupported capability target contract: {target_contract}")
     if str(metadata.get("feature_space", "")) != str(expected_space):
@@ -394,20 +454,23 @@ def _load_capability_mpr_target(
             f"{expected_space} MPR has an unsupported capability map source "
             f"{capability_map_source!r}"
         )
-    if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A:
+    if target_contract in {
+        CAPABILITY_TARGET_CONTRACT_FIELD_A,
+        CAPABILITY_TARGET_CONTRACT_FIELD_C,
+    }:
         expected_bundle = str(expected_feature_output_bundle_sha256 or "")
         if re.fullmatch(r"[0-9a-f]{64}", expected_bundle) is None:
             raise ValueError(
-                "Field-A requires a trusted feature output bundle SHA-256"
+                f"{target_contract} requires a trusted feature output bundle SHA-256"
             )
         if metadata.get("feature_output_bundle_sha256") != expected_bundle:
             raise ValueError(
-                f"{expected_space} Field-A target belongs to another feature "
+                f"{expected_space} {target_contract} target belongs to another feature "
                 "output bundle"
             )
         if capability_map_source != "project_raw":
             raise ValueError(
-                f"{expected_space} Field-A preregistration requires project_raw"
+                f"{expected_space} {target_contract} preregistration requires project_raw"
             )
     if capability_map_source == "official_extracted":
         if (
@@ -541,6 +604,8 @@ def _load_capability_mpr_target(
         "projection_order": (
             "official_adaptor_then_exact_raster_adjoint_contribution_mpr"
             if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
+            else "official_adaptor_then_exact_center_plus_uncertainty_mpr"
+            if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
             else "official_adaptor_then_geometry_matched_mpr"
         ),
         "official_adaptor_name": metadata.get("official_adaptor_name"),
@@ -745,12 +810,13 @@ def _cross_basis_projection(local_decoder, output_decoder) -> tuple[torch.Tensor
     """Map local PCA coordinates into the higher-rank output PCA coordinates."""
 
     scale_ratio = local_decoder.scale / output_decoder.scale
+    output_inverse = output_decoder.encoding_projection()
     matrix = (
         local_decoder.basis.transpose(0, 1) * scale_ratio[None]
-    ) @ output_decoder.basis
+    ) @ output_inverse
     bias = (
         (local_decoder.mean - output_decoder.mean) / output_decoder.scale
-    ) @ output_decoder.basis
+    ) @ output_inverse
     return matrix.transpose(0, 1).contiguous(), bias.contiguous()
 
 
@@ -762,6 +828,13 @@ def train(args: argparse.Namespace) -> dict:
     observation_contract_mode = str(
         getattr(args, "observation_contract", "unchecked")
     )
+    capability_target_contract = str(
+        getattr(
+            args,
+            "capability_target_contract",
+            CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+        )
+    )
     cache, mpr_cache_sha256, mpr_cache_path = load_mpr_cache(
         args.mpr_cache,
         expected_sha256=(
@@ -771,6 +844,8 @@ def train(args: argparse.Namespace) -> dict:
         require_reliability=True,
         require_formal_safety=(
             observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES
+            or capability_target_contract
+            == CAPABILITY_TARGET_CONTRACT_FIELD_C
         ),
     )
     metadata = dict(cache.get("metadata", {}))
@@ -803,13 +878,6 @@ def train(args: argparse.Namespace) -> dict:
         != expected_feature_bundle_sha256
     ):
         raise ValueError("raw MPR belongs to another feature output bundle")
-    capability_target_contract = str(
-        getattr(
-            args,
-            "capability_target_contract",
-            CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
-        )
-    )
     capability_observation_cache = cache
     capability_observation_metadata = metadata
     capability_observation_provenance: dict = {}
@@ -837,6 +905,26 @@ def train(args: argparse.Namespace) -> dict:
                 )
             ),
         )
+    elif capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C:
+        if not bool(args.official_capability_loss):
+            raise ValueError("Field-C requires --official-capability-loss")
+        if metadata.get("aggregation_mode") != "raster_exact_center_uncertainty":
+            raise ValueError("Field-C requires an exact-center uncertainty raw MPR")
+        if not str(args.dino_mpr_cache).strip() or not str(
+            args.sam3_mpr_cache
+        ).strip():
+            raise ValueError("Field-C requires both DINO and SAM3 MPR targets")
+        for name in ("dino_v3", "sam3"):
+            if not str(getattr(args, f"expected_{name}_mpr_cache_sha256", "")):
+                raise ValueError(
+                    f"Field-C requires a trusted SHA-256 for the {name} MPR target"
+                )
+        if (
+            not expected_feature_bundle_sha256
+            or metadata.get("feature_output_bundle_sha256")
+            != expected_feature_bundle_sha256
+        ):
+            raise ValueError("Field-C raw MPR belongs to another feature bundle")
     elif capability_target_contract != CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1:
         raise ValueError(
             f"unsupported capability target contract: {capability_target_contract}"
@@ -1211,6 +1299,8 @@ def train(args: argparse.Namespace) -> dict:
     capability_reliability_policy = (
         "field_a_boundary_safe"
         if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
+        else "field_c_visibility_safe"
+        if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
         else "legacy_mean"
     )
     generator = torch.Generator(device="cpu").manual_seed(int(args.seed))
@@ -1398,6 +1488,8 @@ def train(args: argparse.Namespace) -> dict:
         "capability_target_mode": (
             "official_adaptor_then_exact_raster_adjoint_contribution_mpr"
             if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
+            else "official_adaptor_then_exact_center_plus_uncertainty_mpr"
+            if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
             else "official_adaptor_then_geometry_matched_mpr"
             if capability_targets
             else "adaptor_of_raw_mpr_target"
@@ -1564,12 +1656,13 @@ def main() -> None:
         choices=[
             CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
             CAPABILITY_TARGET_CONTRACT_FIELD_A,
+            CAPABILITY_TARGET_CONTRACT_FIELD_C,
         ],
         default=CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
         help=(
             "Keep the historical geometry-matched capability target, or opt "
-            "into Field-A exact raster-adjoint DINO/SAM targets with fixed "
-            "boundary-safe reliability weighting."
+            "into Field-A exact raster-adjoint targets or Field-C exact "
+            "marginal-responsibility targets with visibility uncertainty."
         ),
     )
     parser.add_argument(
@@ -1677,14 +1770,14 @@ def main() -> None:
         parser.error("--min-epochs must lie in [1, --epochs]")
     if (
         args.capability_target_contract
-        == CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1
+        != CAPABILITY_TARGET_CONTRACT_FIELD_A
         and (
             args.capability_observation_reference_mpr_cache
             or args.expected_capability_observation_reference_mpr_cache_sha256
         )
     ):
         parser.error(
-            "Field-A observation-reference arguments require "
+            "Observation-reference arguments require "
             "--capability-target-contract field_a_exact_adjoint"
         )
     print(json.dumps(train(args), indent=2))

@@ -14,6 +14,9 @@ from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
 )
 from radio_gs.scripts.train_canonical_radio_field import (
     CAPABILITY_TARGET_CONTRACT_FIELD_A,
+    CAPABILITY_TARGET_CONTRACT_FIELD_C,
+    _consensus_from_cache,
+    _cross_basis_projection,
     _load_field_a_observation_reference,
     _load_capability_mpr_target,
     _assert_initial_field_signature_compatible,
@@ -68,6 +71,30 @@ def _identity_field(rows: torch.Tensor) -> CanonicalGaussianField:
     with torch.no_grad():
         field.local_codes.copy_(rows)
     return field
+
+
+def test_cross_basis_projection_uses_trained_output_basis_inverse() -> None:
+    local = AffineBasisDecoder(
+        feature_dim=3,
+        coefficient_dim=2,
+        mean=torch.tensor([0.2, -0.1, 0.4]),
+        scale=torch.tensor([1.0, 0.5, 2.0]),
+        basis=torch.tensor([[1.0, 0.2], [0.1, 0.7], [0.4, -0.3]]),
+    )
+    output = AffineBasisDecoder(
+        feature_dim=3,
+        coefficient_dim=2,
+        mean=torch.tensor([-0.1, 0.3, 0.2]),
+        scale=torch.tensor([0.8, 1.5, 0.7]),
+        basis=torch.tensor([[2.0, 0.3], [0.0, 0.5], [1.0, -0.2]]),
+    )
+    weight, bias = _cross_basis_projection(local, output)
+    local_codes = torch.tensor([[0.5, -0.7], [-0.2, 1.1]])
+
+    projected = torch.nn.functional.linear(local_codes, weight, bias)
+    expected = output.encode(local(local_codes))
+
+    torch.testing.assert_close(projected, expected, atol=3e-6, rtol=3e-6)
 
 
 def test_auxiliary_capability_target_is_not_adaptor_of_raw_mpr() -> None:
@@ -181,6 +208,33 @@ def test_field_a_reliability_does_not_erase_low_agreement_boundary_rows() -> Non
 
     assert float(legacy) < 1e-3
     torch.testing.assert_close(field_a, torch.tensor(2.0 / 3.0))
+
+
+def test_field_c_visibility_purity_modulates_but_keeps_ambiguous_rows() -> None:
+    raw = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    target = _consensus(torch.tensor([[-1.0, 0.0], [0.0, 1.0]]))
+    target.reliability[0] = torch.tensor([1.0, 1.0, 0.0])
+    field = _identity_field(raw)
+    config = CanonicalFieldLossConfig(
+        mpr_weight=0.0,
+        dino_weight=1.0,
+        sam3_weight=0.0,
+        relation_weight=0.0,
+        coefficient_weight=0.0,
+        basis_orthogonality_weight=0.0,
+    )
+
+    field_c, _ = canonical_primitive_loss(
+        field,
+        _consensus(raw),
+        torch.arange(2),
+        official_views=_IdentityOfficialViews(),
+        capability_targets={"dino_v3": target},
+        capability_reliability_policy="field_c_visibility_safe",
+        config=config,
+    )
+
+    torch.testing.assert_close(field_c, torch.tensor(2.0 / 3.0))
 
 
 def test_official_capability_projection_happens_on_complete_2d_maps() -> None:
@@ -391,6 +445,111 @@ def test_field_a_loader_accepts_only_exact_adjoint_mean_resultant_targets(
             target_contract=CAPABILITY_TARGET_CONTRACT_FIELD_A,
         )
 
+
+def test_field_c_loader_binds_marginal_target_and_visibility_purity(
+    tmp_path: Path,
+) -> None:
+    xyz = torch.tensor([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    counts = torch.tensor([2, 1])
+    policy = {
+        "aggregation_mode": "raster_exact_center_uncertainty",
+        "registration_weight_mode": (
+            "exact_front_to_back_adjoint_center"
+        ),
+        "raster_view_fusion": "contribution_mean",
+        "raster_reliability_mode": "mean_resultant",
+        "normalize_each_view": True,
+        "per_view_normalization_applied": True,
+        "per_view_normalization_stage": "pixel_feature_before_raster_lifting",
+        "marginal_responsibility_contract": (
+            "exact_front_to_back_adjoint_center_plus_marginal_visibility_purity_v1"
+        ),
+        "visibility_uncertainty_semantics": (
+            "per_primitive_sum_weight_times_responsibility_over_sum_weight"
+        ),
+        "alpha_threshold": 0.0,
+        "shared_registration_responsibility": False,
+        "registration_responsibility_cache_sha256": "",
+    }
+    raw = _mpr_payload(
+        "radio", xyz, torch.randn(2, 3), counts, **policy
+    )
+    raw["visibility_purity"] = torch.tensor([0.8, 0.4], dtype=torch.float16)
+    target_features = torch.nn.functional.normalize(
+        torch.randn(2, 4), dim=-1
+    ).half()
+    target = _mpr_payload(
+        "sam3", xyz, target_features, counts, **policy
+    )
+    target["reliability"][:, 1] = (
+        target_features.float().norm(dim=-1).clamp(0.0, 1.0)
+    )
+    target["visibility_purity"] = torch.tensor(
+        [0.8, 0.4], dtype=torch.float16
+    )
+    path = tmp_path / "sam3_field_c.pt"
+    torch.save(target, path)
+
+    consensus, provenance = _load_capability_mpr_target(
+        path,
+        expected_space="sam3",
+        raw_cache=raw,
+        raw_metadata=raw["metadata"],
+        radio_checkpoint_sha256="radio",
+        expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
+        target_contract=CAPABILITY_TARGET_CONTRACT_FIELD_C,
+    )
+
+    torch.testing.assert_close(
+        consensus.reliability[:, 2], torch.tensor([0.8, 0.4]),
+        atol=3e-4,
+        rtol=0,
+    )
+    assert provenance["projection_order"] == (
+        "official_adaptor_then_exact_center_plus_uncertainty_mpr"
+    )
+
+    malformed = dict(target)
+    malformed["visibility_purity"] = torch.tensor([0.8, 0.0])
+    malformed["metadata"] = {
+        **target["metadata"],
+        "marginal_responsibility_contract": "wrong",
+    }
+    torch.save(malformed, path)
+    with pytest.raises(ValueError, match="marginal-responsibility MPR contract"):
+        _load_capability_mpr_target(
+            path,
+            expected_space="sam3",
+            raw_cache=raw,
+            raw_metadata=raw["metadata"],
+            radio_checkpoint_sha256="radio",
+            expected_feature_output_bundle_sha256=_FEATURE_BUNDLE_SHA256,
+            target_contract=CAPABILITY_TARGET_CONTRACT_FIELD_C,
+        )
+
+
+def test_field_c_consensus_exposes_visibility_purity_to_fusion() -> None:
+    cache = {
+        "features": torch.ones(2, 3),
+        "valid": torch.tensor([True, False]),
+        "view_counts": torch.tensor([1, 0]),
+        "reliability": torch.tensor(
+            [[1.0, 0.9, 1.0], [0.0, 0.0, 0.0]]
+        ),
+        "visibility_purity": torch.tensor([0.35, 0.0]),
+        "metadata": {
+            "aggregation_mode": "raster_exact_center_uncertainty",
+            "marginal_responsibility_contract": (
+                "exact_front_to_back_adjoint_center_plus_marginal_visibility_purity_v1"
+            ),
+        },
+    }
+
+    consensus = _consensus_from_cache(cache)
+
+    torch.testing.assert_close(
+        consensus.reliability[:, 2], torch.tensor([0.35, 0.0])
+    )
 
 def test_field_a_observation_reference_is_hash_geometry_and_policy_bound(
     tmp_path: Path,

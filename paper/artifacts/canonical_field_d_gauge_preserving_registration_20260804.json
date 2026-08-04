@@ -1,0 +1,46 @@
+{
+  "schema_version": "canonical_field_d_gauge_preserving_registration_v1",
+  "registered_at": "2026-08-04",
+  "hypothesis": "Directional semantic modes must retain the label-free base canonical field L2 amplitude because the frozen nonlinear SurfaceRegion readout is not invariant to feature scale.",
+  "method": {
+    "direction": "unit-normalized exact training-view RADIO prototypes",
+    "amplitude": "per-primitive L2 norm decoded by the frozen Field-C base field",
+    "carrier": "one shared 256-dimensional affine basis fitted to base-field centers and amplitude-restored prototypes",
+    "query_pooling": "no pooling is permitted before both standard-mode frozen sentinels are measured"
+  },
+  "inputs": {
+    "base_field_sha256": "7b8c1f3feddeb6f18af756fa5cf00816af3042e574355d610264245a6cdd52c6",
+    "raw_exact_center_mpr_sha256": "83c7d7db89fdea3f864200c145693c5e401d7d2506d28f70e1db44dff6e7bf28",
+    "directional_prototype_cache_sha256": "488041b0fda91060e9582d4dce02927534f3e06d767242f4fd6721bde6a70c1b"
+  },
+  "implementation": {
+    "basis_builder_sha256": "5c475218dfd7522ee7d3199aa67283ebc6305909500c2fc6119f273ef2eb1b19",
+    "compact_builder_sha256": "16ec85c9fb647401f8ff79b8d572668ceeb9fff62ea71e737385d944ccb7367f",
+    "standard_mode_materializer_sha256": "0a27cd1dc11fdf2f792263129cdb6eae7c63f54bfe103745542599b90b9b89c0"
+  },
+  "fixed_capacity_gate": {
+    "minimum_center_mean_cosine": 0.95,
+    "minimum_center_p05_cosine": 0.9,
+    "minimum_prototype_mean_cosine": 0.95,
+    "minimum_prototype_p05_cosine": 0.9,
+    "maximum_center_mean_absolute_log_norm_error": 0.05,
+    "maximum_center_p95_absolute_log_norm_error": 0.15,
+    "maximum_prototype_mean_absolute_log_norm_error": 0.05,
+    "maximum_prototype_p95_absolute_log_norm_error": 0.15
+  },
+  "fit": {
+    "coefficient_dim": 256,
+    "maximum_fit_samples": 200000,
+    "seed": 0
+  },
+  "sentinel": {
+    "scene": "LERF figurines",
+    "downstream_protocol": "frozen Field-C sentinel graph/readout/text/renderer/evaluators",
+    "first_measurement": "each mode separately; no label-selected mixing",
+    "stop_rule": "Do not expand if gauge-preserving modes fail the label-free capacity gate or both frozen single-mode sentinels remain materially below Field-C."
+  },
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "text_queries_opened": false,
+  "benchmark_metrics_opened": false
+}

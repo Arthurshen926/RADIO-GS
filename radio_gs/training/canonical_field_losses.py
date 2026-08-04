@@ -143,10 +143,24 @@ def _capability_consensus_loss(
         # This fixed mixture has no benchmark- or query-selected parameter.
         reliable = (coverage * agreement).clamp_min(0.0).sqrt()
         weights_all = 0.5 * (torch.ones_like(reliable) + reliable)
+    elif reliability_policy == "field_c_visibility_safe":
+        if reliability.shape[1] < 3:
+            raise ValueError("Field-C reliability requires visibility purity")
+        purity = reliability[:, 2]
+        if not bool(torch.isfinite(purity).all()) or bool(
+            ((purity < 0) | (purity > 1)).any()
+        ):
+            raise ValueError("Field-C visibility purity must be finite in [0,1]")
+        # The geometric mean treats coverage, directional agreement, and
+        # compositor purity as independent precision evidence.  The fixed
+        # uniform half keeps real boundary rows trainable instead of erasing
+        # them simply because their observation distribution is ambiguous.
+        reliable = (coverage * agreement * purity).clamp_min(0.0).pow(1.0 / 3.0)
+        weights_all = 0.5 * (torch.ones_like(reliable) + reliable)
     else:
         raise ValueError(
             "capability reliability policy must be legacy_mean or "
-            "field_a_boundary_safe"
+            "field_a_boundary_safe or field_c_visibility_safe"
         )
     weights = weights_all[valid].clamp_min(1e-4)
     errors = 1.0 - F.cosine_similarity(

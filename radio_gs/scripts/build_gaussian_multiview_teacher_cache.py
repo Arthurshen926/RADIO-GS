@@ -38,6 +38,12 @@ from radio_gs.models.radio_adaptors import (
     load_radio_adaptor_from_checkpoint,
     project_feature_map_with_adaptor,
 )
+from radio_gs.rendering.contribution_compositor import (
+    EXACT_CENTER_UNCERTAINTY_CONTRACT,
+    MARGINAL_RESPONSIBILITY_CONTRACT,
+    marginal_responsibility_statistics,
+    rasterize_single_view_contributions,
+)
 from radio_gs.scripts.eval_lerf_grounding import load_render_pipeline
 from radio_gs.training.feature_training_utils import (
     SimpleRadioDataset,
@@ -101,6 +107,28 @@ def raster_fusion_reliability(
         agreement = values.norm(dim=-1).clamp(0.0, 1.0)
         agreement = agreement.masked_fill(~active, 0.0)
     return torch.stack([coverage, agreement, active.float()], dim=-1).half()
+
+
+def prepare_raster_view_features(
+    feature_map: torch.Tensor, *, normalize_each_view: bool
+) -> torch.Tensor:
+    """Apply the declared pixel-feature normalization before every lift.
+
+    Keeping this outside individual raster operators prevents adjoint and
+    explicit-hit paths from claiming the same metadata while consuming
+    different teacher-map semantics.
+    """
+
+    values = torch.as_tensor(feature_map).float()
+    if values.ndim != 4 or values.shape[0] != 1:
+        raise ValueError("one raster view feature map must be [1,C,H,W]")
+    if not bool(torch.isfinite(values).all()):
+        raise ValueError("raster view feature map contains NaN or infinity")
+    return (
+        F.normalize(values, dim=1, eps=1e-8)
+        if bool(normalize_each_view)
+        else values
+    )
 
 
 # These names and dimensions are those emitted by the official C-RADIOv4-H
@@ -260,6 +288,29 @@ def validate_raster_reliability_policy(args: argparse.Namespace) -> None:
         raise ValueError(
             "--raster-reliability-mode mean_resultant requires "
             "--normalize-each-view"
+        )
+    if args.aggregation_mode in {
+        "raster_marginal_responsibility",
+        "raster_exact_center_uncertainty",
+    }:
+        if args.raster_view_fusion != "contribution_mean":
+            raise ValueError(
+                "raster marginal responsibility requires contribution_mean fusion"
+            )
+        if float(args.alpha_threshold) != 0.0:
+            raise ValueError(
+                "raster marginal responsibility forbids post-compositor alpha filtering"
+            )
+        if str(getattr(args, "responsibility_cache", "")).strip() or str(
+            getattr(args, "save_responsibility_cache", "")
+        ).strip():
+            raise ValueError(
+                "marginal responsibility currently requires exact live compositor hits"
+            )
+        args.registration_weight_mode = (
+            "exact_front_to_back_marginal_responsibility"
+            if args.aggregation_mode == "raster_marginal_responsibility"
+            else "exact_front_to_back_adjoint_center"
         )
 
 
@@ -2031,7 +2082,15 @@ def build_cache(args: argparse.Namespace) -> dict:
     # Visibility is already encoded in a loaded sidecar.  Otherwise render it
     # once, and optionally freeze the resulting registration assignments for
     # all feature spaces.
-    if capability_storage != "channel_sharded" and responsibility_assignments is None:
+    if (
+        capability_storage != "channel_sharded"
+        and responsibility_assignments is None
+        and args.aggregation_mode
+        not in {
+            "raster_marginal_responsibility",
+            "raster_exact_center_uncertainty",
+        }
+    ):
         depth_parts: list[torch.Tensor] = []
         alpha_parts: list[torch.Tensor] = []
         with torch.inference_mode():
@@ -2151,6 +2210,20 @@ def build_cache(args: argparse.Namespace) -> dict:
             xyz_cpu.shape[0], teacher_maps.shape[1], dtype=torch.float32
         )
         registered_counts = torch.zeros(xyz_cpu.shape[0], dtype=torch.float32)
+        marginal_visible_mass = (
+            torch.zeros(xyz_cpu.shape[0], dtype=torch.float32)
+            if args.aggregation_mode
+            in {
+                "raster_marginal_responsibility",
+                "raster_exact_center_uncertainty",
+            }
+            else None
+        )
+        marginal_pure_mass = (
+            torch.zeros(xyz_cpu.shape[0], dtype=torch.float32)
+            if marginal_visible_mass is not None
+            else None
+        )
         contribution_sum_staging = None
         contribution_count_staging = None
         if args.raster_view_fusion == "contribution_mean":
@@ -2197,19 +2270,71 @@ def build_cache(args: argparse.Namespace) -> dict:
                         raise RuntimeError(
                             "raster adjoint aggregation requires rendered alpha maps"
                         )
+                    view_features = prepare_raster_view_features(
+                        teacher_maps[view_index : view_index + 1].to(
+                            device=device, dtype=torch.float32
+                        ),
+                        normalize_each_view=bool(args.normalize_each_view),
+                    )
                     frame_sum, frame_counts = raster_adjoint_registered_view_features(
                         model=model,
                         renderer=renderer,
                         viewmat=poses[view_index].to(device),
-                        siglip_feat=teacher_maps[view_index : view_index + 1].to(
-                            device=device, dtype=torch.float32
-                        ),
+                        siglip_feat=view_features,
                         alpha_map=alpha_maps[view_index : view_index + 1].to(device),
                         alpha_threshold=float(args.alpha_threshold),
                         channel_chunk_size=int(args.adjoint_channel_chunk_size),
                     )
                 else:
-                    if responsibility_assignments is not None:
+                    if args.aggregation_mode in {
+                        "raster_marginal_responsibility",
+                        "raster_exact_center_uncertainty",
+                    }:
+                        hits = rasterize_single_view_contributions(
+                            model,
+                            renderer,
+                            poses[view_index].to(device),
+                            height=feature_height,
+                            width=feature_width,
+                        )
+                        gaussian_ids = hits["gaussian_ids"]
+                        pixel_ids = hits["pixel_ids"]
+                        raw_weights = hits["weights"]
+                        marginal = marginal_responsibility_statistics(
+                            pixel_ids,
+                            raw_weights,
+                            num_pixels=feature_height * feature_width,
+                        )
+                        target_weights = marginal.target_weight
+                        weights = (
+                            target_weights
+                            if args.aggregation_mode
+                            == "raster_marginal_responsibility"
+                            else raw_weights
+                        )
+                        raw_frame_mass = torch.zeros(
+                            xyz_cpu.shape[0], dtype=torch.float32, device=device
+                        )
+                        pure_frame_mass = torch.zeros_like(raw_frame_mass)
+                        raw_frame_mass.index_add_(
+                            0, gaussian_ids.long(), raw_weights.float()
+                        )
+                        pure_frame_mass.index_add_(
+                            0, gaussian_ids.long(), target_weights.float()
+                        )
+                        assert marginal_visible_mass is not None
+                        assert marginal_pure_mass is not None
+                        marginal_visible_mass.add_(raw_frame_mass.cpu())
+                        marginal_pure_mass.add_(pure_frame_mass.cpu())
+                        del (
+                            hits,
+                            marginal,
+                            raw_frame_mass,
+                            pure_frame_mass,
+                            raw_weights,
+                            target_weights,
+                        )
+                    elif responsibility_assignments is not None:
                         assignment = responsibility_assignments[view_index]
                         gaussian_ids = assignment["gaussian_ids"].to(device)
                         pixel_ids = assignment["pixel_ids"].to(device)
@@ -2253,11 +2378,12 @@ def build_cache(args: argparse.Namespace) -> dict:
                                     "weights": weights.float().cpu(),
                                 }
                             )
-                    view_features = teacher_maps[
-                        view_index : view_index + 1
-                    ].to(device=device, dtype=torch.float32)
-                    if bool(args.normalize_each_view):
-                        view_features = F.normalize(view_features, dim=1, eps=1e-8)
+                    view_features = prepare_raster_view_features(
+                        teacher_maps[view_index : view_index + 1].to(
+                            device=device, dtype=torch.float32
+                        ),
+                        normalize_each_view=bool(args.normalize_each_view),
+                    )
                     if args.raster_view_fusion == "contribution_mean":
                         counts_cpu = accumulate_contribution_mean_channel_chunked(
                             view_features,
@@ -2351,7 +2477,18 @@ def build_cache(args: argparse.Namespace) -> dict:
                 registered_counts,
                 row_chunk_size=int(args.point_chunk_size),
             )
+        visibility_purity = None
+        if marginal_visible_mass is not None:
+            assert marginal_pure_mass is not None
+            visibility_purity = torch.where(
+                marginal_visible_mass > 0,
+                marginal_pure_mass
+                / marginal_visible_mass.clamp_min(1e-12),
+                torch.zeros_like(marginal_visible_mass),
+            ).clamp(0.0, 1.0)
+            visibility_purity[~valid] = 0.0
         del registered_sum, registered_counts
+        del marginal_visible_mass, marginal_pure_mass
         del contribution_sum_staging, contribution_count_staging
         view_counts = observation_counts
         reliability = raster_fusion_reliability(
@@ -2379,6 +2516,22 @@ def build_cache(args: argparse.Namespace) -> dict:
         "raster_view_fusion": args.raster_view_fusion,
         "raster_reliability_mode": str(
             getattr(args, "raster_reliability_mode", "legacy_valid")
+        ),
+        "marginal_responsibility_contract": (
+            MARGINAL_RESPONSIBILITY_CONTRACT
+            if args.aggregation_mode == "raster_marginal_responsibility"
+            else EXACT_CENTER_UNCERTAINTY_CONTRACT
+            if args.aggregation_mode == "raster_exact_center_uncertainty"
+            else "not_applicable"
+        ),
+        "visibility_uncertainty_semantics": (
+            "per_primitive_sum_weight_times_responsibility_over_sum_weight"
+            if args.aggregation_mode
+            in {
+                "raster_marginal_responsibility",
+                "raster_exact_center_uncertainty",
+            }
+            else "not_available"
         ),
         "raster_topk": max(1, int(args.raster_topk)),
         "raster_topk_ranking": (
@@ -2545,6 +2698,13 @@ def build_cache(args: argparse.Namespace) -> dict:
             "reliability": reliability,
             "metadata": metadata,
         }
+        if args.aggregation_mode in {
+            "raster_marginal_responsibility",
+            "raster_exact_center_uncertainty",
+        }:
+            if visibility_purity is None:
+                raise RuntimeError("marginal visibility purity was not constructed")
+            output_payload["visibility_purity"] = visibility_purity.half()
         validate_mpr_cache_payload(
             output_payload,
             expected_feature_space=feature_space,
@@ -2575,6 +2735,19 @@ def build_cache(args: argparse.Namespace) -> dict:
         "max_views": int(positive.max()) if positive.numel() else 0,
         "metadata": metadata,
     }
+    if args.aggregation_mode in {
+        "raster_marginal_responsibility",
+        "raster_exact_center_uncertainty",
+    }:
+        active_purity = visibility_purity[valid].float()
+        report["visibility_purity"] = {
+            "mean": float(active_purity.mean()) if active_purity.numel() else 0.0,
+            "median": (
+                float(active_purity.median()) if active_purity.numel() else 0.0
+            ),
+            "minimum": float(active_purity.min()) if active_purity.numel() else 0.0,
+            "maximum": float(active_purity.max()) if active_purity.numel() else 0.0,
+        }
     if capability_storage == "channel_sharded":
         report["feature_storage"] = metadata["feature_storage"]
         report["channel_shards"] = len(sharded_records or [])
@@ -2763,7 +2936,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--aggregation-mode",
-        choices=["center", "raster_gaussian_top1", "raster_adjoint"],
+        choices=[
+            "center",
+            "raster_gaussian_top1",
+            "raster_adjoint",
+            "raster_marginal_responsibility",
+            "raster_exact_center_uncertainty",
+        ],
         default="center",
     )
     parser.add_argument(

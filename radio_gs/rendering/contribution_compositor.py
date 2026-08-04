@@ -2,9 +2,124 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Mapping
 
 import torch
+
+
+MARGINAL_RESPONSIBILITY_CONTRACT = (
+    "exact_front_to_back_weight_times_normalized_pixel_marginal_v1"
+)
+EXACT_CENTER_UNCERTAINTY_CONTRACT = (
+    "exact_front_to_back_adjoint_center_plus_marginal_visibility_purity_v1"
+)
+
+
+@dataclass(frozen=True)
+class MarginalResponsibilityStatistics:
+    """Query-free uncertainty induced by the exact 3DGS compositor.
+
+    ``responsibility`` is the normalized marginal contribution of one hit to
+    its pixel. ``target_weight`` is the exact contribution multiplied by that
+    responsibility, so a teacher observation is assigned strongly only when
+    the primitive both contributes and explains a large fraction of the
+    pixel. ``pixel_collision_purity`` is the collision probability
+    :math:`sum_i r_i^2`; it is one for an unambiguous pixel and decreases as
+    contribution mass is split across primitives.
+    """
+
+    responsibility: torch.Tensor
+    target_weight: torch.Tensor
+    pixel_mass: torch.Tensor
+    pixel_collision_purity: torch.Tensor
+
+
+def marginal_responsibility_statistics(
+    pixel_ids: torch.Tensor,
+    base_weights: torch.Tensor,
+    *,
+    num_pixels: int,
+    eps: float = 1e-12,
+) -> MarginalResponsibilityStatistics:
+    """Convert exact front-to-back contributions into target responsibilities.
+
+    This transformation has no scene-specific threshold or learned parameter.
+    It preserves continuous visibility while reducing the influence of pixels
+    whose feature observation is inherently shared by multiple primitives.
+    """
+
+    pids = torch.as_tensor(pixel_ids).long().reshape(-1)
+    weights = torch.as_tensor(base_weights).float().reshape(-1)
+    if pids.shape != weights.shape:
+        raise ValueError("pixel_ids and base_weights must have matching shapes")
+    if int(num_pixels) <= 0:
+        raise ValueError("num_pixels must be positive")
+    if pids.numel() and (
+        int(pids.min()) < 0 or int(pids.max()) >= int(num_pixels)
+    ):
+        raise ValueError("pixel id outside declared image")
+    if not bool(torch.isfinite(weights).all()) or bool((weights < 0).any()):
+        raise ValueError("base_weights must be finite and non-negative")
+    if float(eps) <= 0:
+        raise ValueError("eps must be positive")
+
+    pixel_mass = torch.zeros(
+        int(num_pixels), dtype=torch.float32, device=weights.device
+    )
+    pixel_mass.index_add_(0, pids, weights)
+    responsibility = weights / pixel_mass[pids].clamp_min(float(eps))
+    target_weight = weights * responsibility
+    pixel_collision_purity = torch.zeros_like(pixel_mass)
+    pixel_collision_purity.index_add_(0, pids, responsibility.square())
+    return MarginalResponsibilityStatistics(
+        responsibility=responsibility,
+        target_weight=target_weight,
+        pixel_mass=pixel_mass,
+        pixel_collision_purity=pixel_collision_purity,
+    )
+
+
+def primitive_visibility_purity(
+    gaussian_ids: torch.Tensor,
+    base_weights: torch.Tensor,
+    target_weights: torch.Tensor,
+    *,
+    num_gaussians: int,
+    eps: float = 1e-12,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    """Aggregate responsibility-weighted visibility and purity per primitive."""
+
+    gids = torch.as_tensor(gaussian_ids).long().reshape(-1)
+    visible = torch.as_tensor(base_weights).float().reshape(-1)
+    pure = torch.as_tensor(target_weights).float().reshape(-1)
+    if gids.shape != visible.shape or gids.shape != pure.shape:
+        raise ValueError("gaussian ids and visibility weights must align")
+    if int(num_gaussians) <= 0 or (
+        gids.numel()
+        and (int(gids.min()) < 0 or int(gids.max()) >= int(num_gaussians))
+    ):
+        raise ValueError("gaussian id outside declared primitive domain")
+    if (
+        not bool(torch.isfinite(visible).all())
+        or not bool(torch.isfinite(pure).all())
+        or bool((visible < 0).any())
+        or bool((pure < 0).any())
+        or bool((pure > visible + float(eps)).any())
+    ):
+        raise ValueError("primitive visibility weights are invalid")
+    visible_mass = torch.zeros(
+        int(num_gaussians), dtype=torch.float32, device=visible.device
+    )
+    pure_mass = torch.zeros_like(visible_mass)
+    visible_mass.index_add_(0, gids, visible)
+    pure_mass.index_add_(0, gids, pure)
+    purity = torch.where(
+        visible_mass > 0,
+        pure_mass / visible_mass.clamp_min(float(eps)),
+        torch.zeros_like(visible_mass),
+    ).clamp(0.0, 1.0)
+    return visible_mass, pure_mass, purity
 
 
 def front_to_back_weights(

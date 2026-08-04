@@ -1,0 +1,134 @@
+{
+  "schema_version": "canonical_field_c_d_result_summary_v1",
+  "date": "2026-08-04",
+  "field_c": {
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_compact_d256_l128_field_c_exact_center_uncertainty_seed0.pth",
+      "sha256": "7b8c1f3feddeb6f18af756fa5cf00816af3042e574355d610264245a6cdd52c6"
+    },
+    "label_free_gate": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_field_c_training_label_free_gate.json",
+      "sha256": "40764e79781e4384d50bec0966b9dd269dea9c164d13be731ab84ad844ef571d",
+      "passed": true,
+      "delta": {
+        "raw_mean_cosine": 0.13993942737579346,
+        "raw_p05_cosine": 0.3744107782840729,
+        "dino_v3_mean_cosine": 0.09464329481124878,
+        "sam3_mean_cosine": 0.1108430027961731
+      }
+    },
+    "frozen_lerf_figurines_sentinel": {
+      "fixed_result_sha256": "4acdd38b4ee1c34f9000f1cd71e38fb3ea5b58acbbdcce806ed513044c3c73b4",
+      "otsu3_result_sha256": "444aa3f81da206213434a4d50815c0c3b18913f37256b77a87e4c287866b54c7",
+      "score_quality_result_sha256": "ab14d99dd5ae8dc890a7d0671237c254e984b4305465cc434e4055876a4f4be0",
+      "same_frozen_surface_readout_as_initial_and_field_a": true,
+      "metrics": {
+        "initial_field": {
+          "average_precision": 0.8052968900431766,
+          "oracle_threshold_iou": 0.7045552849960747,
+          "positive_negative_score_margin": 0.5713346051377718,
+          "frozen_formal_miou": 0.4074466624002112,
+          "target_blind_otsu3_miou": 0.46962189985220376,
+          "frozen_formal_selected_purity": 0.43672092087491016,
+          "target_blind_otsu3_selected_purity": 0.6001245849918241
+        },
+        "field_c": {
+          "average_precision": 0.8000947411979721,
+          "oracle_threshold_iou": 0.7292194286515777,
+          "positive_negative_score_margin": 0.5835137472511943,
+          "frozen_formal_miou": 0.36995542210555665,
+          "target_blind_otsu3_miou": 0.3879144341977859,
+          "frozen_formal_selected_purity": 0.39455086808117124,
+          "target_blind_otsu3_selected_purity": 0.488633802402215
+        },
+        "field_c_minus_initial": {
+          "average_precision": -0.0052021488452045,
+          "oracle_threshold_iou": 0.024664143655503,
+          "positive_negative_score_margin": 0.0121791421134225,
+          "frozen_formal_miou": -0.0374912402946546,
+          "target_blind_otsu3_miou": -0.0817074656544179,
+          "frozen_formal_selected_purity": -0.0421700527937389,
+          "target_blind_otsu3_selected_purity": -0.1114907825896091
+        }
+      },
+      "decision": "stop_field_c_before_full_benchmark_expansion",
+      "reason": "Oracle separability and score margin improved, but AP did not improve and both fixed and target-blind adaptive mIoU/purity regressed. This satisfies the registered stop condition for a center-only visibility branch."
+    }
+  },
+  "must_fix_implementation_findings": {
+    "raster_pixel_normalization": "Fixed: raster-adjoint metadata declared normalized per-view pixels while raw RADIO features bypassed the normalization operation.",
+    "decoder_inverse": {
+      "fixed": true,
+      "finding": "AffineBasisDecoder.encode used basis multiplication, which is an inverse only for orthonormal columns. Learned bases reached condition numbers 13 (initial), 912 (Field-A), and 9159 (Field-C).",
+      "change": "Use a least-squares encoding projection with Cholesky solve and pseudoinverse fallback; apply the same inverse in cross-basis projection.",
+      "field_c_prototype_encode_decode_before_fix_mean_cosine": -0.30084213614463806,
+      "field_c_prototype_encode_decode_after_fix_mean_cosine": 0.5203310251235962
+    },
+    "primitive_row_authority": "Added full geometry/valid/global-row SHA-256 authority and graph xyz alignment validation.",
+    "diffusion_threshold_default": "Non-release continuous kernels now fail closed if a release-only edge binarization threshold is present."
+  },
+  "field_d": {
+    "contract": "weighted_spherical_two_prototype_v1",
+    "full_query_free_capacity": {
+      "receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_directional_capacity_full.json",
+        "sha256": "426e91de923e82d9e9c5b2316085d5a490cc870f67243050fc43c9f1409f5c7c"
+      },
+      "valid_rows_examined": 82088,
+      "rows_with_at_least_two_exact_visible_views": 62307,
+      "single_center": {
+        "mean_cosine": 0.7004950642585754,
+        "p05_cosine": 0.44709426164627075
+      },
+      "two_prototypes": {
+        "mean_cosine": 0.8065918684005737,
+        "p05_cosine": 0.5763126611709595
+      },
+      "prototype_minus_center": {
+        "mean_cosine": 0.10609680414199829,
+        "p05_cosine": 0.12921839952468872
+      },
+      "prototype_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_directional_prototypes_full.pt",
+        "sha256": "488041b0fda91060e9582d4dce02927534f3e06d767242f4fd6721bde6a70c1b"
+      },
+      "passed": true
+    },
+    "joint_compact_basis": {
+      "receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_joint_center_directional_basis_d256.pt.json",
+        "sha256": "9a5383c7d9d7c39694f2da9d4797e5ab5ca7bba939ae6aae5f6ef81baef2e2cd"
+      },
+      "coefficient_dim": 256,
+      "center_mean_cosine": 0.9826182126998901,
+      "center_p05_cosine": 0.9634593725204468,
+      "prototype_mean_cosine": 0.9817116856575012,
+      "prototype_p05_cosine": 0.9592713713645935,
+      "passed": true
+    },
+    "compact_prototype_carrier": {
+      "receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_compact_directional_prototypes_joint_d256.pt.json",
+        "sha256": "e59f3a6a11b08d21fade7b4661485f7afc775279aae63ad34ed42f158b972d85"
+      },
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_compact_directional_prototypes_joint_d256.pt",
+        "sha256": "747cfa5517619a596b8b2227dea797d64a23da37468847b399a844e403ec02f7"
+      },
+      "mean_cosine": 0.9817116856575012,
+      "p05_cosine": 0.9592713713645935,
+      "passed": true
+    },
+    "downstream_status": "not_opened_after_compact_carrier_creation",
+    "next_gate": "Integrate the two-mode carrier into capability and surface-region readout with fixed max-over-mode semantics, validate target-blind text-response/DINO/SAM fidelity, then run the frozen LERF/SPIn/NVOS sentinels."
+  },
+  "gpu_runtime": {
+    "physical_gpu_used_for_lerf_and_field_d": 1,
+    "maximum_observed_temperature_c": 54,
+    "maximum_observed_power_w": 125.45,
+    "thermal_pause_events": 0,
+    "thermal_abort_events": 0,
+    "guard_policy": "120-second polling, no soft pause, start <=83C, abort only after two consecutive >=87C samples, 300.5W cap"
+  },
+  "overall_conclusion": "The shared bottleneck is not another graph/threshold setting. Exact center lifting improves latent separability but cannot preserve minority view directions or selected purity. A query-free two-mode primitive distribution recovers about 10.6 mean-cosine points and 12.9 p05 points, and a jointly fitted 256-D basis retains both centers and modes above 0.98 mean cosine."
+}

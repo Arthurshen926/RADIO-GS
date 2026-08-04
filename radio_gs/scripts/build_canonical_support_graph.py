@@ -14,6 +14,7 @@ import torch
 import torch.nn.functional as F
 
 from radio_gs.interfaces.capability_cache import load_canonical_capability_bank
+from radio_gs.interfaces.primitive_row_authority import PrimitiveRowAuthority
 from radio_gs.querying.support_solver import (
     SupportGraphConfig,
     build_primitive_support_graph,
@@ -319,7 +320,9 @@ def estimate_unoriented_local_surface_normals(
 
 
 def build(args: argparse.Namespace) -> dict:
-    bank = load_canonical_capability_bank(args.capability_cache)
+    bank = load_canonical_capability_bank(
+        args.capability_cache, require_row_authority=True
+    )
     capability = {
         "xyz": bank.xyz,
         "valid": bank.valid,
@@ -429,6 +432,9 @@ def build(args: argparse.Namespace) -> dict:
         "source": "canonical_official_dino_sam3_multichannel_support_graph",
         "capability_cache": str(Path(args.capability_cache).resolve()),
         "capability_metadata": capability["metadata"],
+        "primitive_row_authority": PrimitiveRowAuthority.from_tensors(
+            bank.xyz, valid
+        ).to_dict(),
         "valid_mask_source": valid_mask_source,
         # Retain the historic key for readers that audit old graph files, but
         # make a high-fidelity exact route explicit rather than allowing a

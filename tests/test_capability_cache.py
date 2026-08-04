@@ -10,6 +10,7 @@ from radio_gs.interfaces.capability_cache import (
     load_canonical_capability_bank,
     load_canonical_support_graph,
 )
+from radio_gs.interfaces.primitive_row_authority import PrimitiveRowAuthority
 
 
 def _signature(name: str, dim: int) -> dict:
@@ -91,6 +92,82 @@ def test_capability_cache_rejects_missing_signatures(tmp_path: Path) -> None:
     torch.save(payload, path)
     with pytest.raises(ValueError, match="signatures"):
         load_canonical_capability_bank(path)
+
+
+def test_capability_cache_row_authority_rejects_geometry_or_mask_drift(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "authority-bank.pt"
+    _write_bank(path)
+    payload = torch.load(path)
+    payload["metadata"]["primitive_row_authority"] = (
+        PrimitiveRowAuthority.from_tensors(
+            payload["xyz"], payload["valid"]
+        ).to_dict()
+    )
+    torch.save(payload, path)
+
+    load_canonical_capability_bank(path, require_row_authority=True)
+    tampered = torch.load(path)
+    tampered["xyz"] = tampered["xyz"].clone()
+    tampered["xyz"][0, 0] = 1.0
+    torch.save(tampered, path)
+    with pytest.raises(ValueError, match="row authority"):
+        load_canonical_capability_bank(path, require_row_authority=True)
+
+    tampered = dict(payload)
+    tampered["valid"] = payload["valid"].clone()
+    tampered["valid"][1] = True
+    torch.save(tampered, path)
+    with pytest.raises(ValueError, match="row authority"):
+        load_canonical_capability_bank(path, require_row_authority=True)
+
+
+def test_support_graph_row_authority_rejects_compact_xyz_drift(
+    tmp_path: Path,
+) -> None:
+    bank_path = tmp_path / "authority-bank.pt"
+    _write_bank(bank_path)
+    bank_payload = torch.load(bank_path)
+    bank_payload["metadata"]["primitive_row_authority"] = (
+        PrimitiveRowAuthority.from_tensors(
+            bank_payload["xyz"], bank_payload["valid"]
+        ).to_dict()
+    )
+    torch.save(bank_payload, bank_path)
+    bank = load_canonical_capability_bank(
+        bank_path, require_row_authority=True
+    )
+    graph_path = tmp_path / "authority-graph.pt"
+    graph_metadata = {
+        "capability_metadata": bank.metadata,
+        "primitive_row_authority": PrimitiveRowAuthority.from_tensors(
+            bank.xyz, bank.valid
+        ).to_dict(),
+    }
+    graph_payload = {
+        "schema_version": 1,
+        "global_rows": bank.global_rows,
+        "num_global_rows": bank.num_gaussians,
+        "xyz": bank.xyz[bank.global_rows].clone(),
+        "edge_index": torch.tensor([[0, 1], [1, 0]]),
+        "edge_weight": torch.ones(2),
+        "raw_affinity": torch.ones(2),
+        "local_sigma": torch.ones(2),
+        "metadata": graph_metadata,
+    }
+    torch.save(graph_payload, graph_path)
+    load_canonical_support_graph(
+        graph_path, bank, require_row_authority=True
+    )
+
+    graph_payload["xyz"] = graph_payload["xyz"].clone()
+    graph_payload["xyz"][0, 1] = 2.0
+    torch.save(graph_payload, graph_path)
+    with pytest.raises(ValueError, match="xyz rows"):
+        load_canonical_support_graph(
+            graph_path, bank, require_row_authority=True
+        )
 
 
 def test_compact_valid_row_capability_cache_preserves_global_alignment(

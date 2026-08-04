@@ -106,7 +106,24 @@ class AffineBasisDecoder(nn.Module):
         if features.shape[-1] != self.feature_dim:
             raise ValueError(f"expected feature dim {self.feature_dim}")
         whitened = (features - self.mean) / self.scale
-        return torch.matmul(whitened, self.basis)
+        return torch.matmul(whitened, self.encoding_projection())
+
+    def encoding_projection(self) -> torch.Tensor:
+        """Return the least-squares inverse of the current decoder basis.
+
+        PCA initializes orthonormal columns, but the basis can subsequently be
+        trained.  Multiplication by ``basis`` is then no longer the inverse of
+        ``coefficients @ basis.T``.  Solve the normal equations once per call;
+        fall back to a Moore-Penrose inverse only for a rank-deficient basis.
+        """
+
+        gram = self.basis.transpose(0, 1) @ self.basis
+        cholesky, info = torch.linalg.cholesky_ex(gram)
+        if bool((info == 0).all()):
+            return torch.cholesky_solve(
+                self.basis.transpose(0, 1), cholesky
+            ).transpose(0, 1)
+        return torch.linalg.pinv(self.basis).transpose(0, 1)
 
     def orthogonality_loss(self) -> torch.Tensor:
         gram = self.basis.transpose(0, 1) @ self.basis

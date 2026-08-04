@@ -48,6 +48,35 @@ def _atomic_torch_save(payload: object, output: Path) -> None:
     write_torch_noclobber(output, payload)
 
 
+def directional_anchor_tokens(
+    context_tokens: torch.Tensor,
+    anchor_values: torch.Tensor,
+    anchor_index: torch.Tensor,
+) -> torch.Tensor:
+    """Replace only the anchor feature in each canonical context region."""
+
+    tokens = torch.as_tensor(context_tokens)
+    values = torch.as_tensor(
+        anchor_values, device=tokens.device, dtype=tokens.dtype
+    )
+    anchors = torch.as_tensor(
+        anchor_index, device=tokens.device, dtype=torch.long
+    )
+    if tokens.ndim != 3:
+        raise ValueError("directional context tokens must be [batch,width,channels]")
+    if values.shape != (tokens.shape[0], tokens.shape[2]):
+        raise ValueError("directional anchor values must be [batch,channels]")
+    if anchors.shape != (tokens.shape[0],):
+        raise ValueError("directional anchor indices must be [batch]")
+    if anchors.numel() and (
+        int(anchors.min()) < 0 or int(anchors.max()) >= tokens.shape[1]
+    ):
+        raise IndexError("directional anchor index is outside its region")
+    result = tokens.clone()
+    result[torch.arange(tokens.shape[0], device=tokens.device), anchors] = values
+    return result
+
+
 class _ResumeStateError(ValueError):
     pass
 
@@ -360,6 +389,51 @@ def build(args: argparse.Namespace) -> dict:
         map_location="cpu",
         expected_sha256=field_expected,
     )
+    context_field_arg = str(
+        getattr(args, "directional_context_field_checkpoint", "")
+    ).strip()
+    context_field_expected = str(
+        getattr(args, "directional_context_field_checkpoint_sha256", "")
+    ).strip() or None
+    context_field = None
+    context_field_payload = None
+    context_field_record = None
+    if context_field_arg:
+        if canonical_radio_source != "field_decode":
+            raise ValueError(
+                "directional anchor context requires canonical field decoding"
+            )
+        if context_field_expected is None:
+            raise ValueError(
+                "directional anchor context requires its trusted SHA-256"
+            )
+        context_field, context_field_payload = load_canonical_field_checkpoint(
+            context_field_arg,
+            map_location="cpu",
+            expected_sha256=context_field_expected,
+        )
+        context_field_record = file_record(context_field_arg)
+        if context_field_payload.get("geometry_fingerprint") != field_payload.get(
+            "geometry_fingerprint"
+        ):
+            raise ValueError("directional anchor/context field geometry differs")
+        if context_field_payload.get("feature_signature") != field_payload.get(
+            "feature_signature"
+        ):
+            raise ValueError("directional anchor/context feature signatures differ")
+        for payload, label in (
+            (field_payload, "directional anchor field"),
+            (context_field_payload, "directional context field"),
+        ):
+            if any(
+                payload.get(key) is not False
+                for key in (
+                    "benchmark_images_opened",
+                    "benchmark_masks_opened",
+                    "text_queries_opened",
+                )
+            ):
+                raise ValueError(f"{label} is task contaminated")
     graph, _, _ = load_torch_mapping(
         graph_path,
         expected_sha256=graph_expected,
@@ -452,6 +526,11 @@ def build(args: argparse.Namespace) -> dict:
         "output": str(output),
         "inputs": {
             "field": field_record,
+            **(
+                {"directional_context_field": context_field_record}
+                if context_field_record is not None
+                else {}
+            ),
             "mpr": mpr_record,
             "support_graph": graph_record,
             "readout": readout_record,
@@ -493,11 +572,15 @@ def build(args: argparse.Namespace) -> dict:
     )
     prepared_graph = contract.prepare_graph(support, xyz)
     field, readout = field.to(device).eval(), readout.to(device).eval()
+    if context_field is not None:
+        context_field = context_field.to(device).eval()
     head = SigLIP2SummaryHead.from_radio_checkpoint(
         args.radio_checkpoint,
         **({"expected_sha256": radio_expected} if radio_expected else {}),
     ).to(device).eval()
-    for module in (field, readout, head):
+    for module in (field, readout, head, context_field):
+        if module is None:
+            continue
         for parameter in module.parameters(): parameter.requires_grad_(False)
     semantic_phase = (
         "text_scores_multiscale"
@@ -512,8 +595,14 @@ def build(args: argparse.Namespace) -> dict:
         semantic_phase=semantic_phase,
     )
     radio = torch.empty(len(global_rows), 1280, dtype=torch.float16, device=device)
+    anchor_radio = (
+        torch.empty_like(radio) if context_field is not None else None
+    )
     for start in range(0, len(global_rows), radio_batch_size):
         stop = min(start + radio_batch_size, len(global_rows))
+        selected_rows = global_rows[start:stop].to(device)
+        if anchor_radio is not None:
+            anchor_radio[start:stop] = field.radio_features(selected_rows).half()
         cached = _load_resume_tensor(
             resume_dir,
             phase="radio",
@@ -527,7 +616,8 @@ def build(args: argparse.Namespace) -> dict:
             radio[start:stop] = cached.to(device)
             continue
         if canonical_radio_source == "field_decode":
-            computed = field.radio_features(global_rows[start:stop].to(device)).half()
+            source_field = context_field if context_field is not None else field
+            computed = source_field.radio_features(selected_rows).half()
         else:
             computed = torch.as_tensor(mpr["features"])[
                 global_rows[start:stop]
@@ -686,8 +776,13 @@ def build(args: argparse.Namespace) -> dict:
                 token_xyz, token_scale, token_reliability, float(radius),
                 anchor_index=anchor_local, core_mask=core, token_mask=mask,
             )
+            radio_tokens = radio[rows]
+            if anchor_radio is not None:
+                radio_tokens = directional_anchor_tokens(
+                    radio_tokens, anchor_radio[start:stop], anchor_local
+                )
             summary = readout(
-                radio[rows], geometry, token_mask=mask,
+                radio_tokens, geometry, token_mask=mask,
                 reliability=token_reliability, anchor_index=anchor_local,
             )
             descriptor = F.normalize(
@@ -766,6 +861,21 @@ def build(args: argparse.Namespace) -> dict:
         "bridge_training_scope_detail": training_scope,
         "field_checkpoint": field_record["path"],
         "field_checkpoint_sha256": field_record["sha256"],
+        **(
+            {
+                "directional_context_field_checkpoint": context_field_record[
+                    "path"
+                ],
+                "directional_context_field_checkpoint_sha256": (
+                    context_field_record["sha256"]
+                ),
+                "directional_readout_policy": (
+                    "anchor_mode_with_frozen_canonical_neighborhood_context"
+                ),
+            }
+            if context_field_record is not None
+            else {}
+        ),
         "mpr_cache": mpr_record["path"],
         "mpr_cache_sha256": mpr_record["sha256"],
         "field_geometry_xyz_sha256": field_payload.get(
@@ -984,6 +1094,18 @@ def main() -> None:
         ),
     )
     parser.add_argument("--field-checkpoint-sha256", default="")
+    parser.add_argument(
+        "--directional-context-field-checkpoint",
+        default="",
+        help=(
+            "Optional frozen canonical context field. When set, the primary "
+            "field supplies only each region anchor while neighboring tokens "
+            "come from this context field."
+        ),
+    )
+    parser.add_argument(
+        "--directional-context-field-checkpoint-sha256", default=""
+    )
     parser.add_argument("--support-graph", required=True)
     parser.add_argument("--support-graph-sha256", default="")
     parser.add_argument("--readout-checkpoint", required=True)

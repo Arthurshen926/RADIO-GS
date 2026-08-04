@@ -1,0 +1,60 @@
+{
+  "schema_version": "canonical_field_d_directional_prototype_registration_v1",
+  "registered_at": "2026-08-04",
+  "development_scene": "figurines",
+  "pilot_capacity_gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_directional_capacity.json",
+    "sha256": "555547dfc67462909c45470e9fba9d0cd58d6df46aa088200ead964b8bc80a88",
+    "sampled_valid_rows": 2048,
+    "supported_rows": 1541,
+    "prototype_minus_center_mean_cosine": 0.10421216487884521,
+    "prototype_minus_center_p05_cosine": 0.13164836168289185
+  },
+  "immutable_inputs": {
+    "field_c_raw_exact_center_mpr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_exact_center_uncertainty_train16.pt",
+      "sha256": "83c7d7db89fdea3f864200c145693c5e401d7d2506d28f70e1db44dff6e7bf28"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "feature_output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3"
+  },
+  "implementation_sha256": {
+    "audit_field_d_directional_capacity.py": "afc070343055c7e01abbf48e2d2ae822223c9cb0cc010a80a37fb83e667f1523",
+    "directional_distribution.py": "29d56dd7b49e0166b04945b272024a9b57d69bf6d24576948f0956322e7eb9b7"
+  },
+  "prototype_contract": {
+    "name": "weighted_spherical_two_prototype_v1",
+    "prototype_count": 2,
+    "view_mass": "equal_over_exactly_visible_training_views",
+    "initialization": "weighted_center_medoid_plus_supported_angular_novelty",
+    "iterations": 4,
+    "minimum_views": 2,
+    "sample_rows": 0,
+    "sample_rows_semantics": "all_valid_rows",
+    "prototype_row_chunk_size": 512,
+    "seed": 0,
+    "scene_specific_parameters": false,
+    "query_specific_parameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_directional_prototypes_full.pt",
+  "full_capacity_receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_d/figurines_directional_capacity_full.json",
+  "label_free_gate": {
+    "prototype_minus_center_mean_cosine_minimum": 0.0,
+    "prototype_minus_center_p05_cosine_minimum": 0.0,
+    "all_conditions_required": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "benchmark_metrics_used_to_select_field_d_parameters": false
+  },
+  "decision_rule": "Materialize all rows and verify non-regression without labels. Do not evaluate Field-D downstream until a compact two-mode carrier/readout passes a separate label-free compression gate."
+}

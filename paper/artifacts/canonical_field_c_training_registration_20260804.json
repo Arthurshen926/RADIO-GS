@@ -1,0 +1,72 @@
+{
+  "schema_version": "canonical_field_c_training_registration_v1",
+  "registered_at": "2026-08-04",
+  "development_scene": "figurines",
+  "promotion_gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_exact_center_label_free_gate.json",
+    "required_passed": true
+  },
+  "immutable_inputs": {
+    "initial_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/figurines_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth",
+      "sha256": "328ba9f9f19f69f02a118462cbb427fac7670cbc83e4d4eade7e66902943aa66"
+    },
+    "raw_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_exact_center_uncertainty_train16.pt",
+      "sha256": "83c7d7db89fdea3f864200c145693c5e401d7d2506d28f70e1db44dff6e7bf28"
+    },
+    "dino_v3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_dino_v3_exact_center_uncertainty_train16.pt",
+      "sha256": "8b4ca6922289b3fb4bfe9eb82830f9f40c3ea4fc204ed35b9c5ced87b5cfdad1"
+    },
+    "sam3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_sam3_exact_center_uncertainty_train16.pt",
+      "sha256": "cbb451dd717a2bfee4d84e59e7db5546d1a770f48be4cb1b64594f7d210d45a5"
+    },
+    "official_c_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "feature_output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3"
+  },
+  "implementation_sha256": {
+    "train_canonical_radio_field.py": "24fc1ac81ab2c39e1249f64fc50e32800272104061339212193a01bab51deb38",
+    "canonical_field_losses.py": "c9f9464a30052a4985ba55f53e29b032a8bc158432ba9d9b0f59ab0a2acd7775"
+  },
+  "training_contract": {
+    "capability_target_contract": "field_c_exact_center_uncertainty",
+    "capability_reliability_policy": "field_c_visibility_safe",
+    "epochs": 20,
+    "min_epochs": 20,
+    "batch_size": 4096,
+    "eval_batch_size": 16384,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "loss_weights": {
+      "raw_radio": 1.0,
+      "dino_v3": 0.2,
+      "sam3": 0.2,
+      "relation": 0.0,
+      "coefficient": 0.00001,
+      "basis_orthogonality": 0.001
+    }
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_compact_d256_l128_field_c_exact_center_uncertainty_seed0.pth",
+  "label_free_gate": {
+    "raw_mean_cosine_delta_minimum": -0.005,
+    "raw_p05_cosine_delta_minimum": -0.01,
+    "dino_v3_mean_cosine_delta_minimum": 0.0,
+    "sam3_mean_cosine_delta_minimum": 0.0,
+    "all_conditions_required": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_opened": false,
+    "scene_specific_parameter_search_allowed": false
+  },
+  "decision_rule": "Run one fixed seed. Open frozen benchmark metrics only after the label-free reconstruction gate passes."
+}

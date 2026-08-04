@@ -6,6 +6,8 @@ from radio_gs.rendering.contribution_compositor import (
     contribution_rank,
     front_to_back_weights,
     gaussian_footprint_alphas,
+    marginal_responsibility_statistics,
+    primitive_visibility_purity,
 )
 
 
@@ -30,6 +32,41 @@ def test_contribution_rank_is_descending_within_each_pixel():
     rank = contribution_rank(pixels, weights)
 
     torch.testing.assert_close(rank, torch.tensor([2, 0, 0, 1, 1]))
+
+
+def test_marginal_responsibility_is_continuous_and_parameter_free():
+    pixels = torch.tensor([0, 0, 1])
+    weights = torch.tensor([0.8, 0.2, 0.6])
+
+    statistics = marginal_responsibility_statistics(
+        pixels, weights, num_pixels=2
+    )
+
+    torch.testing.assert_close(
+        statistics.responsibility, torch.tensor([0.8, 0.2, 1.0])
+    )
+    torch.testing.assert_close(
+        statistics.target_weight, torch.tensor([0.64, 0.04, 0.6])
+    )
+    torch.testing.assert_close(statistics.pixel_mass, torch.tensor([1.0, 0.6]))
+    torch.testing.assert_close(
+        statistics.pixel_collision_purity, torch.tensor([0.68, 1.0])
+    )
+
+
+def test_primitive_visibility_purity_preserves_mass_and_marks_ambiguity():
+    visible, pure, purity = primitive_visibility_purity(
+        torch.tensor([0, 1, 0]),
+        torch.tensor([0.8, 0.2, 0.6]),
+        torch.tensor([0.64, 0.04, 0.6]),
+        num_gaussians=3,
+    )
+
+    torch.testing.assert_close(visible, torch.tensor([1.4, 0.2, 0.0]))
+    torch.testing.assert_close(pure, torch.tensor([1.24, 0.04, 0.0]))
+    torch.testing.assert_close(
+        purity, torch.tensor([1.24 / 1.4, 0.2, 0.0])
+    )
 
 
 def test_top1_and_mean_composite_expected_row_features():

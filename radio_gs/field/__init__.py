@@ -2,6 +2,19 @@
 
 from .basis_decoder import AffineBasisDecoder, fit_affine_basis
 from .canonical_gaussian_field import CanonicalGaussianField
+from .directional_canonical_field import (
+    DirectionalCanonicalField,
+    load_directional_canonical_field,
+)
+from .directional_distribution import (
+    DIRECTIONAL_PROTOTYPE_CONTRACT,
+    DirectionalPrototypeSet,
+    directional_prototype_observation_cosines,
+    directional_prototype_coverage,
+    directional_set_ranking_loss,
+    directional_set_rms_loss,
+    fit_two_direction_prototypes,
+)
 from .boundary_screen_residual import (
     BoundaryConditionedScreenResidual,
     load_boundary_screen_residual_checkpoint,
@@ -32,6 +45,15 @@ from .spatial_hash import PrimitiveSpatialHash
 __all__ = [
     "AffineBasisDecoder",
     "CanonicalGaussianField",
+    "DirectionalCanonicalField",
+    "DIRECTIONAL_PROTOTYPE_CONTRACT",
+    "DirectionalPrototypeSet",
+    "directional_prototype_observation_cosines",
+    "directional_prototype_coverage",
+    "directional_set_ranking_loss",
+    "directional_set_rms_loss",
+    "fit_two_direction_prototypes",
+    "load_directional_canonical_field",
     "BoundaryConditionedScreenResidual",
     "FeatureSpaceSignature",
     "PrimitiveFusion",

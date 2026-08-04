@@ -87,6 +87,14 @@ class QueryConditionedDiffusionConfig:
             and float(self.edge_binarize_threshold) < 0
         ):
             raise ValueError("edge_binarize_threshold cannot be negative")
+        if (
+            self.kernel != "ludvig_release_compat"
+            and self.edge_binarize_threshold is not None
+        ):
+            raise ValueError(
+                "RADIO-GS clean diffusion kernels require continuous affinities; "
+                "set edge_binarize_threshold=None explicitly"
+            )
 
 
 def normalize_node_features(features: torch.Tensor, *, eps: float = 1e-8) -> torch.Tensor:

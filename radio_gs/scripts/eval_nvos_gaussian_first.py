@@ -3305,8 +3305,11 @@ def run(args: argparse.Namespace) -> dict:
                             logistic_c=float(args.query_diffusion_logistic_c),
                             logistic_fit_population="all_nodes_positive_only",
                             iterations=int(args.query_diffusion_iterations),
-                            edge_binarize_threshold=float(
-                                args.query_diffusion_edge_binarize_threshold
+                            edge_binarize_threshold=(
+                                float(args.query_diffusion_edge_binarize_threshold)
+                                if query_diffusion_kernel
+                                == "ludvig_release_compat"
+                                else None
                             ),
                             distance_chunk_size=int(
                                 args.query_diffusion_distance_chunk_size

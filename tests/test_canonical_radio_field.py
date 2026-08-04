@@ -162,6 +162,30 @@ def test_pca_initialization_reconstructs_low_rank_teacher():
     assert report.explained_variance_ratio > 0.999
 
 
+def test_encode_is_least_squares_inverse_after_basis_loses_orthogonality():
+    basis = torch.tensor(
+        [
+            [2.0, 0.3],
+            [0.0, 0.5],
+            [1.0, -0.2],
+        ]
+    )
+    decoder = AffineBasisDecoder(
+        feature_dim=3,
+        coefficient_dim=2,
+        mean=torch.tensor([0.2, -0.1, 0.5]),
+        scale=torch.tensor([1.0, 2.0, 0.5]),
+        basis=basis,
+    )
+    coefficients = torch.tensor([[0.7, -1.2], [-0.4, 0.9]])
+    features = decoder(coefficients)
+
+    restored = decoder.encode(features)
+
+    torch.testing.assert_close(restored, coefficients, atol=2e-6, rtol=2e-6)
+    torch.testing.assert_close(decoder(restored), features, atol=2e-6, rtol=2e-6)
+
+
 def test_signature_comparison_preserves_but_allows_token_provenance() -> None:
     primitive = _signature(
         adaptor_name="dino_v3_7b.feature_projection",

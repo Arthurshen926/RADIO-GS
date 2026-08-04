@@ -1,0 +1,62 @@
+{
+  "schema_version": "canonical_field_c_marginal_gate_registration_v2",
+  "registered_at": "2026-08-04",
+  "development_scene": "figurines",
+  "branch": "field_c_exact_center_plus_uncertainty_v1",
+  "control": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_adjoint_train16_normalized_control.pt",
+    "sha256": "d229ac51d6a6f79b1ee62f4878835e781179d82ede25b5ca7d3fe71a82482d3a",
+    "aggregation_mode": "raster_adjoint",
+    "alpha_threshold": 0.0,
+    "raster_view_fusion": "contribution_mean",
+    "raster_reliability_mode": "mean_resultant",
+    "normalize_each_view": true,
+    "selected_frame_indices": [1, 21, 40, 61, 80, 100, 121, 140, 161, 180, 201, 221, 240, 260, 279, 301]
+  },
+  "candidate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_exact_center_uncertainty_train16.pt",
+    "sha256_supplied_after_build_by_trusted_cli": true,
+    "aggregation_mode": "raster_exact_center_uncertainty",
+    "marginal_responsibility_contract": "exact_front_to_back_adjoint_center_plus_marginal_visibility_purity_v1",
+    "registration_weight_mode": "exact_front_to_back_adjoint_center",
+    "alpha_threshold": 0.0,
+    "raster_view_fusion": "contribution_mean",
+    "raster_reliability_mode": "mean_resultant",
+    "normalize_each_view": true
+  },
+  "authorities": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "feature_manifest": {
+      "path": "/root/RADIO-GS/output/canonical_teacher_features/figurines/frame_manifest.json",
+      "sha256": "3db488c92f81289fb66c4d27a312d37dd0fb0fca5c271f8744721528f50eaaf9",
+      "output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3"
+    },
+    "implementation_sha256": {
+      "build_gaussian_multiview_teacher_cache.py": "c4708cc7b68ceedfd255179262492d1fa00f408d5661a4963f9f4b9399a23a5c",
+      "contribution_compositor.py": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0",
+      "tensor_cache_io.py": "bf700037317778ff6fc0efccf444f50a17a36fad75cf96e9470db096635f79ad"
+    }
+  },
+  "gate": {
+    "common_valid_mean_resultant_delta_minimum": -0.002,
+    "candidate_control_target_cosine_mean_minimum": 0.999,
+    "candidate_valid_count_over_control_minimum": 0.999,
+    "candidate_visibility_purity_p10_maximum": 0.95,
+    "all_conditions_required": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_opened": false,
+    "scene_specific_parameter_search_allowed": false
+  },
+  "decision_rule": "Promote only if the exact center is numerically preserved while the independent uncertainty channel is non-degenerate."
+}

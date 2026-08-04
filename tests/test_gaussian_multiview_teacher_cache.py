@@ -15,6 +15,7 @@ from radio_gs.scripts.build_gaussian_multiview_teacher_cache import (
     estimate_capability_mpr_cpu_bytes,
     finalize_registered_mean_chunked,
     merge_topk_view_observations,
+    prepare_raster_view_features,
     raster_fusion_reliability,
     validate_raster_reliability_policy,
 )
@@ -174,6 +175,22 @@ def test_mean_resultant_reliability_measures_directional_agreement() -> None:
     )
 
 
+def test_every_raster_lift_uses_the_declared_pixel_normalization() -> None:
+    feature_map = torch.tensor([[[[3.0]], [[4.0]]]])
+
+    normalized = prepare_raster_view_features(
+        feature_map, normalize_each_view=True
+    )
+    unchanged = prepare_raster_view_features(
+        feature_map, normalize_each_view=False
+    )
+
+    torch.testing.assert_close(
+        normalized[:, :, 0, 0], torch.tensor([[0.6, 0.8]])
+    )
+    torch.testing.assert_close(unchanged, feature_map)
+
+
 def test_mean_resultant_reliability_rejects_unnormalized_observations() -> None:
     with pytest.raises(ValueError, match="normalized observations"):
         raster_fusion_reliability(
@@ -217,6 +234,61 @@ def test_legacy_mean_resultant_still_requires_normalized_raster_inputs() -> None
 
     with pytest.raises(ValueError, match="requires --normalize-each-view"):
         validate_raster_reliability_policy(args)
+
+
+def test_marginal_responsibility_policy_is_exact_and_threshold_free() -> None:
+    args = Namespace(
+        observation_contract="legacy",
+        aggregation_mode="raster_marginal_responsibility",
+        raster_reliability_mode="mean_resultant",
+        normalize_each_view=True,
+        raster_view_fusion="contribution_mean",
+        registration_weight_mode="alpha_depth",
+        alpha_threshold=0.0,
+        responsibility_cache="",
+        save_responsibility_cache="",
+    )
+
+    validate_raster_reliability_policy(args)
+
+    assert args.registration_weight_mode == (
+        "exact_front_to_back_marginal_responsibility"
+    )
+
+
+def test_marginal_responsibility_policy_rejects_post_alpha_threshold() -> None:
+    args = Namespace(
+        observation_contract="legacy",
+        aggregation_mode="raster_marginal_responsibility",
+        raster_reliability_mode="legacy_valid",
+        normalize_each_view=True,
+        raster_view_fusion="contribution_mean",
+        registration_weight_mode="alpha_depth",
+        alpha_threshold=0.02,
+        responsibility_cache="",
+        save_responsibility_cache="",
+    )
+
+    with pytest.raises(ValueError, match="forbids post-compositor"):
+        validate_raster_reliability_policy(args)
+
+
+def test_exact_center_uncertainty_preserves_adjoint_target_policy() -> None:
+    args = Namespace(
+        observation_contract="legacy",
+        aggregation_mode="raster_exact_center_uncertainty",
+        raster_reliability_mode="mean_resultant",
+        normalize_each_view=True,
+        raster_view_fusion="contribution_mean",
+        registration_weight_mode="alpha_depth",
+        alpha_threshold=0.0,
+        responsibility_cache="",
+        save_responsibility_cache="",
+    )
+
+    validate_raster_reliability_policy(args)
+
+    assert args.registration_weight_mode == "exact_front_to_back_adjoint_center"
 
 
 def test_shared_responsibility_cache_is_feature_independent_and_fail_closed(

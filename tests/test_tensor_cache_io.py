@@ -112,6 +112,42 @@ def test_mpr_validator_accepts_dominant_primary_support_completion() -> None:
         validate_mpr_cache_payload(corrupted, require_formal_safety=True)
 
 
+def test_mpr_validator_binds_marginal_visibility_purity() -> None:
+    payload = _mpr_payload()
+    payload["metadata"].update(
+        {
+            "aggregation_mode": "raster_marginal_responsibility",
+            "registration_weight_mode": (
+                "exact_front_to_back_marginal_responsibility"
+            ),
+            "alpha_threshold": 0.0,
+            "marginal_responsibility_contract": (
+                "exact_front_to_back_weight_times_normalized_pixel_marginal_v1"
+            ),
+            "visibility_uncertainty_semantics": (
+                "per_primitive_sum_weight_times_responsibility_over_sum_weight"
+            ),
+            "shared_registration_responsibility": False,
+            "registration_responsibility_cache_sha256": "",
+        }
+    )
+    payload["visibility_purity"] = torch.tensor(
+        [0.8, 0.4, 0.0], dtype=torch.float16
+    )
+
+    observed = validate_mpr_cache_payload(payload, require_formal_safety=True)
+    torch.testing.assert_close(
+        observed["visibility_purity"].float(), torch.tensor([0.8, 0.4, 0.0]),
+        atol=3e-4,
+        rtol=0,
+    )
+
+    corrupted = copy.deepcopy(payload)
+    corrupted["visibility_purity"][2] = 0.5
+    with pytest.raises(ValueError, match="visibility purity"):
+        validate_mpr_cache_payload(corrupted, require_formal_safety=True)
+
+
 @pytest.mark.parametrize(
     ("mutate", "message"),
     [
