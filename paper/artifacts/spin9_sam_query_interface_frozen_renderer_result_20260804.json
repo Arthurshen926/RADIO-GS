@@ -1,0 +1,70 @@
+{
+  "schema_version": "spin9_sam_query_interface_frozen_renderer_result_v1",
+  "registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin9_sam_query_interface_frozen_renderer_registration_20260804.json",
+    "sha256": "6f3dd0eab0ff7e9b512202d97ca394aecae1501f4f86e586a19efa8baa409c85"
+  },
+  "claim_scope": "posthoc_component_attribution_only",
+  "formal_local9_replacement": false,
+  "results": {
+    "room_full_row_zero_fill": {
+      "mapped_fraction_of_carrier": 1.0,
+      "selected_candidate": 0,
+      "selected_threshold": 0.24999999999999933,
+      "reference_iou": 0.9491578290704928,
+      "target_foreground_iou": 0.9612164706099579,
+      "release_compatible_baseline": 0.8884382999,
+      "delta": 0.07277817070995788,
+      "report": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/room/room_evaluation.json",
+      "report_sha256": "333ee2280f0bd2cfc6a98d300aa1a228327ed0568c827db5681a9cef3c55c864",
+      "reference_receipt": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/room/reference_receipt.json",
+      "reference_receipt_sha256": "a4d9a9a7cd604a8d53d2ef4a268af843febe00b28bf39a67c797132fb6bd2c3a"
+    },
+    "truck_exact_subset_zero_fill": {
+      "mapped_fraction_of_carrier": 0.5,
+      "mapped_fraction_of_current_capability_valid_rows": 0.8960526274234859,
+      "selected_candidate": 2,
+      "selected_threshold": 0.6199999999999997,
+      "reference_iou": 0.814989747856221,
+      "target_foreground_iou": 0.8376585100010082,
+      "release_compatible_baseline": 0.7899438648,
+      "delta": 0.04771464520100821,
+      "report": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/truck_zero_fill/truck_evaluation.json",
+      "report_sha256": "b2272c66650101c435417e635407f54393fc5097ab210ea915bbfcaab1b41517",
+      "reference_receipt": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/truck_zero_fill/reference_receipt.json",
+      "reference_receipt_sha256": "7e6f9343a4147376614f458daa7480403ddcb1dc5d823759d5d30d96500a0056"
+    },
+    "truck_exact_subset_valid_normalized": {
+      "mapped_fraction_of_carrier": 0.5,
+      "mapped_fraction_of_current_capability_valid_rows": 0.8960526274234859,
+      "selected_candidate": 2,
+      "selected_threshold": 0.6199999999999997,
+      "reference_iou": 0.8146298683874683,
+      "target_foreground_iou": 0.8376792780564066,
+      "release_compatible_baseline": 0.7899438648,
+      "delta": 0.04773541325640662,
+      "report": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/truck_valid_normalized/truck_evaluation.json",
+      "report_sha256": "5f1955152b0b173a80206edc506bb52a7c0dc638e099197c4c52dc79f4bbaf3b",
+      "reference_receipt": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/truck_valid_normalized/reference_receipt.json",
+      "reference_receipt_sha256": "70d19e0695a881dbdb297b7ac2a5cc258fc5ed9810322f8572f717916c87252e"
+    }
+  },
+  "interpretation": {
+    "room_gate_passed": true,
+    "room_gate_required_delta": 0.03,
+    "primary_conclusion": "On an exactly identical carrier and the frozen RADIO-GS renderer, replacing only the primitive query field with the persisted SAM hypotheses recovers 7.28 IoU points. The SPIn shortfall is therefore primarily a query-interface/cross-view completion bottleneck, not merely compact relation capacity.",
+    "truck_conclusion": "The exact subset still adds about 4.77 points, but loses about 13 points relative to the native LUDVIG-SAM result because half the carrier rows have no persisted SAM hypothesis and the original LUDVIG render pruned those rows entirely. Valid-mass normalization changes less than 0.003 point and does not repair missing primitive support or changed transmittance.",
+    "lego_conclusion": "No persisted SAM row exactly matches the current carrier, so a defensible component test requires re-running the same target-RGB SAM interface and uplifting onto the current carrier. Nearest-neighbor transplantation is not accepted as a formal replacement."
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "telemetry": "/root/RADIO-GS/output/optimization_20260804/spin9_sam_query_interface_component/logs/gpu1_telemetry.csv",
+    "poll_seconds": 180,
+    "soft_pause_enabled": false,
+    "hard_limit_c": 87,
+    "hard_limit_consecutive_polls": 2,
+    "maximum_observed_temperature_c": 55,
+    "maximum_observed_power_w": 125.54,
+    "thermal_warning_or_abort": false
+  }
+}

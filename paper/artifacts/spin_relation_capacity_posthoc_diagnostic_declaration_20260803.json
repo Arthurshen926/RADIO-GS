@@ -1,0 +1,52 @@
+{
+  "schema_version": "spin_relation_capacity_posthoc_diagnostic_v1",
+  "status": "post_hoc_causal_diagnostic",
+  "formal_preregistered_result": false,
+  "declared_after_full9_results_were_available": true,
+  "purpose": "Test whether the signed-hash256 relation bottleneck explains the remaining SPIn gap by replacing only that relation representation with the uncompressed official C-RADIO DINOv3 4096-D primitive rows.",
+  "interpretation_limit": "The selected scenes and resulting scores are diagnostic evidence only and cannot be used as a preregistered formal promotion result.",
+  "scenes": [
+    {
+      "scene_id": "lego",
+      "role": "weak_scene"
+    },
+    {
+      "scene_id": "orchids",
+      "role": "control_scene"
+    }
+  ],
+  "scene_selection_after_full9": true,
+  "relation": {
+    "source": "official C-RADIOv4 dino_v3_7b feature_projection primitive rows",
+    "input_dimension": 4096,
+    "output_dimension": 4096,
+    "projection": "none_uncompressed",
+    "storage": "source fp16, runtime fp32 L2",
+    "query_independent": true,
+    "row_geometry_field_hash_bound": true,
+    "labels_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "frozen_method": {
+    "base_experiment_registration_sha256": "7c539fb523c7152446bdc5f28325986a9162baa6c85a5608a66552023aa869c4",
+    "evaluation_protocol_sha256": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+    "kernel": "ludvig_release_compat",
+    "official_num_neighbors_parameter": 200,
+    "effective_knn_columns": 201,
+    "logistic_c": 0.01,
+    "iterations": 100,
+    "edge_binarize_threshold": 1e-05,
+    "max_positive_fraction": 0.1,
+    "feature_bandwidth_grid": [0.5, 1.0, 2.0, 4.0, 8.0],
+    "regularizer_bandwidth_grid": [0.125, 0.25, 0.5, 1.0],
+    "rendered_threshold_grid": {
+      "start": 0.99,
+      "stop_inclusive": 0.03,
+      "step": -0.01
+    },
+    "selection": "strict first maximum on reference full-mask IoU",
+    "target_opening": "only after feature bandwidth, regularizer bandwidth, and rendered threshold are frozen from the reference view",
+    "target_conditioned_solver_tuning": false
+  }
+}

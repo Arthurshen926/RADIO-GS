@@ -59,10 +59,59 @@ def _relation_loss(
     return F.smooth_l1_loss(pred_relation, target_relation)
 
 
+def hard_boundary_relation_ranking_loss(
+    predicted_dino: torch.Tensor,
+    predicted_sam3: torch.Tensor,
+    pair_index: torch.Tensor,
+    teacher_margin: torch.Tensor,
+) -> torch.Tensor:
+    """Preserve exact-teacher positive/negative relation ordering.
+
+    ``pair_index`` is ``[2,2T]``: the first T columns are anchor-positive
+    pairs and the second T columns are the aligned anchor-negative pairs. The
+    margin is the detached, dimensionless exact-teacher relation gap stored in
+    the query-independent Field-B cache; there is no tuned scalar margin.
+    """
+
+    pairs = torch.as_tensor(pair_index, device=predicted_dino.device).long()
+    margin = torch.as_tensor(
+        teacher_margin, device=predicted_dino.device
+    ).float().reshape(-1)
+    if pairs.ndim != 2 or pairs.shape[0] != 2 or pairs.shape[1] != 2 * margin.numel():
+        raise ValueError("Field-B pair_index must be [2,2T] aligned with T margins")
+    if margin.numel() == 0:
+        return predicted_dino.sum() * 0.0
+    if predicted_dino.ndim != 2 or predicted_sam3.ndim != 2 or (
+        predicted_dino.shape[0] != predicted_sam3.shape[0]
+    ):
+        raise ValueError("Field-B predicted DINO/SAM rows must align")
+    if bool((pairs < 0).any()) or int(pairs.max()) >= predicted_dino.shape[0]:
+        raise ValueError("Field-B pair_index is outside predicted rows")
+    if not bool(torch.isfinite(margin).all()) or bool(
+        ((margin < 0) | (margin > 1)).any()
+    ):
+        raise ValueError("Field-B teacher margins must be finite in [0,1]")
+
+    def relation(values: torch.Tensor) -> torch.Tensor:
+        normalized = F.normalize(values.float(), dim=-1, eps=1e-8)
+        cosine = (normalized[pairs[0]] * normalized[pairs[1]]).sum(dim=-1)
+        return (0.5 * (1.0 + cosine)).clamp(0.0, 1.0)
+
+    dino_relation = relation(predicted_dino)
+    sam_relation = relation(predicted_sam3)
+    combined = torch.sqrt((dino_relation * sam_relation).clamp_min(1e-12))
+    count = margin.numel()
+    positive = combined[:count]
+    negative = combined[count:]
+    return F.relu(margin + negative - positive).mean()
+
+
 def _capability_consensus_loss(
     projected: torch.Tensor,
     consensus: PrimitiveConsensus | Any,
     rows_cpu: torch.Tensor,
+    *,
+    reliability_policy: str = "legacy_mean",
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     """Match an official view to features fused *after* per-view projection."""
 
@@ -75,10 +124,31 @@ def _capability_consensus_loss(
     if not bool(valid.any()):
         zero = projected.sum() * 0.0
         return zero, target, valid
-    reliability = consensus.reliability[rows_cpu, :2].mean(dim=-1).to(
-        projected.device
-    )
-    weights = reliability[valid].clamp_min(1e-4)
+    reliability = consensus.reliability[rows_cpu].to(projected.device).float()
+    if reliability.ndim != 2 or reliability.shape[1] < 2:
+        raise ValueError("capability reliability must provide coverage and agreement")
+    if not bool(torch.isfinite(reliability).all()) or bool(
+        ((reliability[:, :2] < 0) | (reliability[:, :2] > 1)).any()
+    ):
+        raise ValueError("capability coverage/agreement must be finite in [0,1]")
+    coverage = reliability[:, 0]
+    agreement = reliability[:, 1]
+    if reliability_policy == "legacy_mean":
+        weights_all = 0.5 * (coverage + agreement)
+    elif reliability_policy == "field_a_boundary_safe":
+        # A low mean-resultant agreement can identify a real occlusion or
+        # object boundary, not merely a noisy observation.  Keep an equal
+        # uniform-valid component so such rows retain at least half weight;
+        # the other half rewards jointly well-covered, view-consistent rows.
+        # This fixed mixture has no benchmark- or query-selected parameter.
+        reliable = (coverage * agreement).clamp_min(0.0).sqrt()
+        weights_all = 0.5 * (torch.ones_like(reliable) + reliable)
+    else:
+        raise ValueError(
+            "capability reliability policy must be legacy_mean or "
+            "field_a_boundary_safe"
+        )
+    weights = weights_all[valid].clamp_min(1e-4)
     errors = 1.0 - F.cosine_similarity(
         projected[valid].float(), target[valid], dim=-1, eps=1e-8
     )
@@ -94,6 +164,7 @@ def canonical_primitive_loss(
     official_views: FrozenRadioViews | None = None,
     capability_targets: Mapping[str, PrimitiveConsensus | Any] | None = None,
     pair_index: torch.Tensor | None = None,
+    capability_reliability_policy: str = "legacy_mean",
     config: CanonicalFieldLossConfig = CanonicalFieldLossConfig(),
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
     """Reconstruct RADIO first; preserve official DINO/SAM capability second."""
@@ -123,7 +194,10 @@ def canonical_primitive_loss(
         projected_sam3 = official_views.project_sam3_primitives(predicted_radio)
         if "dino_v3" in targets:
             dino, target_dino_all, dino_valid = _capability_consensus_loss(
-                projected_dino, targets["dino_v3"], rows_cpu
+                projected_dino,
+                targets["dino_v3"],
+                rows_cpu,
+                reliability_policy=capability_reliability_policy,
             )
         else:
             dino_valid = valid
@@ -134,7 +208,10 @@ def canonical_primitive_loss(
             )
         if "sam3" in targets:
             sam3, target_sam3_all, sam3_valid = _capability_consensus_loss(
-                projected_sam3, targets["sam3"], rows_cpu
+                projected_sam3,
+                targets["sam3"],
+                rows_cpu,
+                reliability_policy=capability_reliability_policy,
             )
         else:
             sam3_valid = valid

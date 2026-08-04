@@ -1,0 +1,83 @@
+{
+  "schema_version": "evidence_to_support_v2_master_registration_v1",
+  "registered_at": "2026-08-04T00:00:00+08:00",
+  "purpose": "Freeze the common mathematical contract, benchmark separation, expansion rules, and thermal policy before opening any Evidence-to-Support v2 predictions.",
+  "supersedes_method_selection_rules_in": {
+    "path": "paper/artifacts/evidence_to_support_v1_experiment_registration_20260803.json",
+    "sha256": "7c539fb523c7152446bdc5f28325986a9162baa6c85a5608a66552023aa869c4"
+  },
+  "inherits_frozen_protocols": [
+    {
+      "path": "paper/artifacts/evaluation_protocol_freeze_20260801.yaml",
+      "sha256": "af91f0861d3a15354063579e78f64898801c41f2543d1cf9b352a0a123820916"
+    },
+    {
+      "path": "paper/artifacts/evaluation_protocol_registry_20260731.yaml",
+      "sha256": "ed394c6a5dfd03143805de512169aa01bd684b9546561f321c53211a135da2c6"
+    },
+    {
+      "path": "paper/artifacts/evidence_to_support_v1_result_summary_20260803.json",
+      "sha256": "aaf569f67736aa53c1fbea797714ebcaa655413c4ba219082a03d347faade2ef"
+    }
+  ],
+  "frozen_evaluators_may_be_modified": false,
+  "target_use": {
+    "query_construction": false,
+    "hyperparameter_fitting": false,
+    "per_scene_branching": false,
+    "final_scoring_after_prediction_receipt_is_sealed": true,
+    "disclosure": "Earlier variants have already exposed benchmark scores. V2 is therefore a theory-registered posthoc method iteration, not a never-seen-target validation claim."
+  },
+  "common_energy": {
+    "objective": "sum_i c_i*(p_i-y_i)^2 + lambda*sum_ij w_ij*sqrt(g_i*g_j)*(p_i-p_j)^2",
+    "domain": "continuous primitive support p_i in [0,1]",
+    "unary": "y_i is the continuous query evidence and c_i is its separately represented reliability; neither may be replaced by binary reachability",
+    "pairwise": "w_ij is a symmetric query-independent scene relation; g_i is a query-positive relevance gate applied only to pairwise conductance",
+    "normalization": "symmetric degree normalization is recomputed after applying the query gate",
+    "constraints": "registered high-confidence positive and negative observations are eliminated from the linear system as exact 1/0 constraints",
+    "selection": "continuous probability is rendered directly; connected-component selection is disabled by default",
+    "compatibility": "all pre-v2 solver defaults and frozen evaluator behavior remain bit-for-bit unchanged"
+  },
+  "benchmark_isolation": {
+    "spin9": {
+      "diagnosis": "cross-view completion after locking reliable full-mask reference observations",
+      "development_scenes": ["lego", "truck", "room"],
+      "primary_gate": "development macro IoU >= 0.90 and no scene regresses by more than 0.01 from v1 query-conditioned diffusion",
+      "expansion": "run the other six scenes only if the primary gate passes",
+      "forbidden": ["target-derived seeds", "scene-specific thresholds", "default connected selection"]
+    },
+    "nvos": {
+      "diagnosis": "sparse signed unary construction and hard-seeded continuous propagation",
+      "tracks": ["strict_source_only", "published_compatible_all_view"],
+      "sentinels": ["fern", "horns_left"],
+      "strict_gate": "sentinel macro must exceed the v1 strict raw sentinel macro 0.61389329, at least one sentinel improves, and neither regresses by more than 0.03",
+      "expansion": "run strict full8 only after the strict gate; report compatible full8 separately and never label it strict unseen-view",
+      "forbidden": ["target-view RGB in strict unary", "target-derived calibration", "binary reachability as probability"]
+    },
+    "lerf3d": {
+      "diagnosis": "semantic target/readout mismatch, not graph connectivity",
+      "development_scenes": ["figurines", "waldo_kitchen"],
+      "allowed_changes": ["marginal-contribution visibility gating", "weighted cosine geometric-median aggregation", "core-versus-context query-agnostic anchor purity"],
+      "required_diagnostics": ["average_precision", "oracle_threshold_iou", "frozen_formal_iou"],
+      "primary_gate": "both development scenes improve average precision and oracle IoU over the compact-field v1 input before any full4 expansion",
+      "forbidden": ["query-specific field retraining", "GT-derived thresholds", "another benchmark-specific feature field"]
+    }
+  },
+  "component_attribution": {
+    "one_factor_at_a_time": true,
+    "component_replacement_is_diagnostic": true,
+    "no_failed_component_may_be_silently_combined_into_the_reported_method": true
+  },
+  "thermal_policy": {
+    "assigned_gpus": [0, 1],
+    "physical_power_limit_w": 300,
+    "poll_interval_seconds": 180,
+    "launch_inhibit_temperature_c": 83,
+    "warning_temperature_c": 84,
+    "hard_abort_temperature_c": 87,
+    "hard_abort_requires_consecutive_polls": 2,
+    "resume_temperature_c": 81,
+    "peer_gpu_activity_never_pauses_an_independently_assigned_job": true,
+    "rationale": "Prefer uninterrupted jobs and sparse health checks; intervene only on sustained high temperature rather than single readings."
+  }
+}

@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_cosine_geomedian_dev_gate_result",
+  "status": "primary_gate_failed_no_full4_expansion",
+  "method": "single_global_surface_region_readout_v2_with_released_vala_streaming_cosine_tangent_target",
+  "experiment_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_cosine_geomedian_readout_registration_20260804.json",
+    "sha256": "c2d65f4585644e4ee5a9afbbbffab7f4dcf2463a8872f4c4c8718c3b3bf0c724"
+  },
+  "readout_checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/readout_seed0.pt",
+    "sha256": "26493b5262f801b306c65f7e3564fa28652064c0089b07ebeb65212321da4d1b",
+    "best_epoch": 16,
+    "scene_disjoint_validation": {
+      "robust_target_descriptor_cosine": 0.9431843795,
+      "arithmetic_mean_descriptor_cosine": 0.9434936152,
+      "robust_minus_arithmetic": -0.0003092357,
+      "all_view_descriptor_cosine": 0.9130878001,
+      "summary_token_cosine": 0.8303571635
+    }
+  },
+  "frozen_protocol": {
+    "dev_scenes": [
+      "figurines",
+      "waldo_kitchen"
+    ],
+    "native_scales_m": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "query_score_semantics": "raw_independent_normalized_cosine_fp16_N3Q",
+    "scale_reduction_before_evaluator": false,
+    "completion_before_evaluator": false,
+    "frozen_readout": "VALA_kNN10_raw_smoothed_peak_scale_then_minmax_2x_minus_1_clip",
+    "fixed_threshold": 0.6,
+    "target_blind_diagnostic": "recursive_upper_otsu3",
+    "labels_opened_only_after_both_scene_scores_sealed": true,
+    "sealed_scores_receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/dev_gate/sealed_scores_before_labels.sha256"
+  },
+  "score_caches": {
+    "figurines": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/dev_gate/query_scores/figurines.pt",
+      "sha256": "91d3945fd312d37eced718f5a136d75e5e0377a636bcab2de46a15e3769fbd6c",
+      "shape": [
+        168791,
+        3,
+        21
+      ]
+    },
+    "waldo_kitchen": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/dev_gate/query_scores/waldo_kitchen.pt",
+      "sha256": "c3f07bd0ebc59b04b360346510cb2b0ce19aae75b3dd6a084b5cf2ee649928df",
+      "shape": [
+        691728,
+        3,
+        18
+      ]
+    }
+  },
+  "primary_gate": {
+    "criterion": "average_precision_and_oracle_threshold_iou_must_both_improve_on_each_dev_scene",
+    "passed": false,
+    "failed_conditions": [
+      "figurines.average_precision",
+      "figurines.oracle_threshold_iou",
+      "waldo_kitchen.average_precision"
+    ],
+    "full4_expansion_allowed": false
+  },
+  "scene_results": {
+    "figurines": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/dev_gate/score_quality/figurines/figurines/lerf_direct_3d_selection_results.json",
+        "sha256": "f9caee0f5f1368b3989340a1ebdef6c7640a59db28bac9646473e38b2940dc42"
+      },
+      "metrics": {
+        "average_precision": {
+          "baseline": 0.8052968900431766,
+          "candidate": 0.7923633369334698,
+          "delta": -0.012933553109706786
+        },
+        "oracle_threshold_iou": {
+          "baseline": 0.7045552849960747,
+          "candidate": 0.6926912223157263,
+          "delta": -0.011864062680348342
+        },
+        "positive_negative_score_margin": {
+          "baseline": 0.5713346051377718,
+          "candidate": 0.551399311937207,
+          "delta": -0.019935293200564752
+        },
+        "frozen_formal_miou": {
+          "baseline": 0.4074466624002112,
+          "candidate": 0.47135619384889615,
+          "delta": 0.06390953144868494
+        },
+        "target_blind_otsu3_miou": {
+          "baseline": 0.46962189985220376,
+          "candidate": 0.4818586909159264,
+          "delta": 0.012236791063722663
+        },
+        "frozen_formal_selected_purity": {
+          "baseline": 0.43672092087491016,
+          "candidate": 0.5130584090751291,
+          "delta": 0.07633748820021896
+        }
+      }
+    },
+    "waldo_kitchen": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/dev_gate/score_quality/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "bb0dae245051069f0db5cfeacd9038401e448993cd3075e8ec9d2c618f61ed01"
+      },
+      "metrics": {
+        "average_precision": {
+          "baseline": 0.5828987952776992,
+          "candidate": 0.5797005060575532,
+          "delta": -0.003198289220145978
+        },
+        "oracle_threshold_iou": {
+          "baseline": 0.46099329156888336,
+          "candidate": 0.4653347636834905,
+          "delta": 0.00434147211460717
+        },
+        "positive_negative_score_margin": {
+          "baseline": 0.33385668122863543,
+          "candidate": 0.3297854592014234,
+          "delta": -0.004071222027212051
+        },
+        "frozen_formal_miou": {
+          "baseline": 0.24083913341270383,
+          "candidate": 0.283778147764215,
+          "delta": 0.04293901435151118
+        },
+        "target_blind_otsu3_miou": {
+          "baseline": 0.26388404637663715,
+          "candidate": 0.3080082125479872,
+          "delta": 0.044124166171350065
+        },
+        "frozen_formal_selected_purity": {
+          "baseline": 0.2728399607445437,
+          "candidate": 0.30086085512464594,
+          "delta": 0.028020894380102246
+        }
+      }
+    }
+  },
+  "scene_equal_dev_macro": {
+    "aggregate": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf3d_cosine_geomedian_v1/dev_gate/score_quality/aggregate.json",
+      "sha256": "2bd4fe5b4052c7addb77c3981af83ef06276c79023a5fd80a9bbc20351c56b2c"
+    },
+    "average_precision": {
+      "baseline": 0.6940978426604379,
+      "candidate": 0.6860319214955115,
+      "delta": -0.008065921164926436
+    },
+    "oracle_threshold_iou": {
+      "baseline": 0.582774288282479,
+      "candidate": 0.5790129929996084,
+      "delta": -0.0037612952828706145
+    },
+    "frozen_formal_miou": {
+      "baseline": 0.3241428979064575,
+      "candidate": 0.37756717080655555,
+      "delta": 0.053424272900098046
+    },
+    "target_blind_otsu3_miou": {
+      "baseline": 0.36675297311442045,
+      "candidate": 0.3949334517319568,
+      "delta": 0.028180478617536364
+    }
+  },
+  "mechanism_conclusion": {
+    "supported": "The robust central target improves calibration at the frozen 0.6 operating point and raises selected purity, but does not improve ranking separability.",
+    "evidence": [
+      "positive_negative_score_margin decreases on both dev scenes",
+      "figurines AP and oracle both decrease while fixed and Otsu3 mIoU increase",
+      "waldo AP decreases despite oracle, fixed, and Otsu3 improvements",
+      "fine-grained sibling instances move in opposite directions: rubber duck with buoy loses AP while rubber duck with hat gains AP",
+      "semantically related kitchen objects show the same instability: pour-over vessel and pot lose AP while Stainless steel pots gains AP"
+    ],
+    "interpretation": "The cosine geometric-median target favors the dominant common semantic direction and suppresses view-specific minority evidence. This shifts score calibration and reduces false-positive mass at a fixed threshold, but can collapse distinctions among related instances and therefore harms global pixel ranking.",
+    "next_method_constraint": "Retain the calibration benefit only if a future preregistered objective also preserves per-view or hard-negative directional separation; do not promote this readout as the canonical field replacement."
+  },
+  "execution": {
+    "gpu": 0,
+    "power_limit_w": 300.0,
+    "thermal_policy": {
+      "poll_seconds": 180,
+      "launch_inhibit_c": 83,
+      "hard_abort_c": 87,
+      "hard_abort_consecutive_polls": 2,
+      "soft_pause": false,
+      "peer_pause": false
+    },
+    "maximum_sampled_temperature_c": 56,
+    "maximum_sampled_power_w": 132.6,
+    "thermal_pause_or_abort_events": 0,
+    "waldo_semantic_batch_size": 2048
+  },
+  "implementation": {
+    "streaming_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_surface_region_semantic_cache.py",
+      "sha256": "bd0716aed8bc0e11af39ea87be604a6899a7a1538fb86f75a40cde827a501a8d"
+    },
+    "streamed_authority_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_streamed_multiscale_query_score_cache.py",
+      "sha256": "42fc1e0a36ac70d7f50dabeabbf7c3075c403841886cbaff34a21a62ebb16843"
+    },
+    "frozen_evaluator_modified": false
+  },
+  "verification": {
+    "pytest_command": "PYTHONNOUSERSITE=1 /root/miniconda3/envs/cybersim_agent/bin/python -m pytest tests/test_materialize_lerf_multiscale_query_score_cache.py tests/test_surface_region_cosine_geomedian_readout.py tests/test_train_surface_region_summary.py -q",
+    "pytest_result": "18 passed",
+    "python_compile": "passed",
+    "runner_bash_syntax": "passed"
+  }
+}

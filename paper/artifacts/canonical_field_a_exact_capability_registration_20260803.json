@@ -1,0 +1,121 @@
+{
+  "schema_version": "canonical_field_a_exact_capability_registration_v1",
+  "registered_at": "2026-08-03T00:00:00+08:00",
+  "status": "frozen_before_capability_target_construction_or_field_training",
+  "purpose": "Test whether exact per-view official DINOv3 and SAM3 auxiliary teachers restore capability in the compact canonical field without changing the raw RADIO objective, architecture, query interface, or benchmark protocol.",
+  "scope": {
+    "development_scene": "figurines",
+    "representation_training_is_query_independent": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "benchmark_results_may_select_loss_hyperparameters": false,
+    "lerf_target_results_may_select_loss_hyperparameters": false,
+    "spin9_target_results_may_select_loss_hyperparameters": false,
+    "nvos_target_results_may_select_loss_hyperparameters": false,
+    "benchmark_evaluation_role": "post-freeze reporting only"
+  },
+  "hypothesis": {
+    "field_a": "The existing compact field is optimized against raw RADIO MPR and adaptor-of-fused targets; using official adaptors on each complete 2-D teacher map before exact raster-adjoint MPR should preserve DINO/SAM capability that cannot be reconstructed by adapting an already fused raw target.",
+    "boundary_safety": "Low mean-resultant agreement can denote a real occlusion or instance boundary. It must reduce confidence without removing the row from the auxiliary objective.",
+    "excluded_claim": "Field-A does not claim to solve instance relation propagation; a boundary-aware pairwise relation objective is reserved for a separately registered Field-B experiment."
+  },
+  "immutable_development_inputs": {
+    "initial_field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/figurines_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth",
+      "sha256": "328ba9f9f19f69f02a118462cbb427fac7670cbc83e4d4eade7e66902943aa66"
+    },
+    "primary_raw_mpr_objective": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_mpr/figurines_raw_radio_top1_120_plus_adjoint16_support_verified_pose.pt",
+      "sha256": "df01507d65b6a6e6ad75e001fd926b30e18482dd64cb065f3c58710c17969f81",
+      "valid_gaussians": 82603,
+      "must_remain_the_raw_loss_target": true
+    },
+    "exact_observation_reference": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_mpr/figurines_raw_radio_adjoint_train16_verified_pose.pt",
+      "sha256": "9d9c06223e638b978434fd6fe8057dc0c5fc00e989e3892ff2cfff262795119f",
+      "num_views": 16,
+      "valid_gaussians": 82088,
+      "selected_frame_indices": [1, 21, 40, 61, 80, 100, 121, 140, 161, 180, 201, 221, 240, 260, 279, 301],
+      "role": "Bind only the view, geometry, visibility, and observation-count support shared by the DINOv3 and SAM3 auxiliary targets."
+    },
+    "official_c_radio_checkpoint": {
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "geometry_xyz_sha256": "68a76a62a85ade9ab33a0e8a3ef247fd934b95300980586d4ad24413a70a4af8"
+  },
+  "capability_target_contract": {
+    "name": "field_a_exact_adjoint",
+    "builder": "radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+    "source_order": "complete raw 2-D RADIO map -> frozen official adaptor -> per-pixel L2 normalization -> exact raster adjoint -> contribution-weighted multiview mean",
+    "capability_map_source": "project_raw",
+    "aggregation_mode": "raster_adjoint",
+    "registration_weight_mode": "alpha_depth",
+    "raster_view_fusion": "contribution_mean",
+    "raster_reliability_mode": "mean_resultant",
+    "normalize_each_view": true,
+    "per_view_normalization_stage": "pixel_feature_before_raster_lifting",
+    "alpha_threshold": 0.02,
+    "depth_tolerance": 0.08,
+    "relative_depth_tolerance": 0.02,
+    "custom_adaptor_head": false,
+    "targets": {
+      "dino_v3": {
+        "official_adaptor_name": "dino_v3_7b",
+        "feature_dim": 4096,
+        "planned_output": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_mpr/figurines_dino_v3_adjoint_train16_mean_resultant_field_a.pt"
+      },
+      "sam3": {
+        "official_adaptor_name": "sam3",
+        "feature_dim": 1024,
+        "planned_output": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_mpr/figurines_sam3_adjoint_train16_mean_resultant_field_a.pt"
+      }
+    },
+    "precondition": "Before target construction, refresh or formally seal the existing label-free raw RADIO feature bundle so every source tensor and the output-bundle digest are immutable. The current legacy manifest does not contain the required output_bundle records.",
+    "future_target_hashes": "The generated DINOv3 and SAM3 cache SHA-256 values must be recorded in their build receipts and supplied to training. They intentionally do not exist at registration time."
+  },
+  "loss_contract": {
+    "raw_mpr_weight": 1.0,
+    "dino_v3_weight": 0.2,
+    "sam3_weight": 0.2,
+    "relation_weight": 0.0,
+    "coefficient_weight": 0.00001,
+    "basis_orthogonality_weight": 0.001,
+    "capability_reliability_policy": "field_a_boundary_safe",
+    "capability_row_weight_formula": "valid_i * 0.5 * (1 + sqrt(coverage_i * agreement_i))",
+    "minimum_valid_capability_row_weight": 0.5,
+    "hyperparameter_source": "pre-existing canonical-field defaults plus a fixed equal mixture of uniform-valid and geometric-mean reliability; no benchmark label or query result was used"
+  },
+  "training_contract": {
+    "initialization": "continue the immutable compact field checkpoint without architectural changes",
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "spatial_coarse_dim": 0,
+    "primitive_fusion": true,
+    "fusion_reliability": true,
+    "hidden_dim": 192,
+    "epochs": 20,
+    "min_epochs": 20,
+    "batch_size": 4096,
+    "eval_batch_size": 16384,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0,
+    "planned_output": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/figurines_compact_d256_l128_field_a_exact_capability_seed0.pth",
+    "sweeps_allowed": false
+  },
+  "label_free_gate_before_benchmark_evaluation": {
+    "raw_radio": "Final mean cosine may not regress by more than 0.005 and p05 cosine may not regress by more than 0.010 relative to the same initial checkpoint evaluated on the unchanged primary raw MPR objective.",
+    "capabilities": "Both exact-target DINOv3 and SAM3 mean cosine must improve relative to the same initial checkpoint; neither target may be replaced after this comparison.",
+    "failure_action": "Report Field-A as rejected. Do not tune its loss weights from LERF, SPIn9, or NVOS target labels. Any Field-B proposal requires a new registration."
+  },
+  "evaluation_after_gate": {
+    "protocol": "Use only the separately frozen, restored benchmark evaluators and report LERF3D, SPIn9, and NVOS without evaluator modification.",
+    "selection_rule": "The first frozen Field-A run is the registered result. Benchmark outcomes are evidence for the next registered method change, not hyperparameters for this run."
+  }
+}

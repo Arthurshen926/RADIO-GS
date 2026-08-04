@@ -1,0 +1,54 @@
+{
+  "schema_version": "spin9_v2_transferable_threshold_posthoc_registration_v1",
+  "registered_at": "2026-08-04T02:42:00+08:00",
+  "purpose": "Isolate the SPIn v2 threshold-domain failure without changing its sealed continuous Gaussian scores: calibrate the scalar threshold on the reference rendering of the transferable query-compatibility P, then apply that threshold to the already persisted continuous propagated target score maps.",
+  "status": "posthoc_difficult_scene_component_fix_only",
+  "not_formal_preregistered_result": true,
+  "master_registration": {
+    "path": "paper/artifacts/evidence_to_support_v2_master_registration_20260804.json",
+    "sha256": "064ee5a816fe5108035829860d8d48e583bbb2a7c3a12e0a90c7efb528dd0bef"
+  },
+  "parent_registration": {
+    "path": "paper/artifacts/evidence_to_support_v2_spin_component_registration_20260804.json",
+    "sha256": "30cd48eb7abe1ba3f003e9a8aa5425ebc1fbde873c4374bebd5b706df40775a0"
+  },
+  "sealed_parent_reports": {
+    "lego": {
+      "path": "output/optimization_20260804/spin9_continuous_convex_v2/reference_calibrated/lego/lego_evaluation.json",
+      "sha256": "871945301973a00a4ce7480eef3496c145631f83c8f8c9f8b4d17170b08fd9cf"
+    },
+    "truck": {
+      "path": "output/optimization_20260804/spin9_continuous_convex_v2/reference_calibrated/truck/truck_evaluation.json",
+      "sha256": "7d1cfe927c39ea754404eee506121ef399653844b3f4601967e2303f4d2ee308"
+    },
+    "room": {
+      "path": "output/optimization_20260804/spin9_continuous_convex_v2/reference_calibrated/room/room_evaluation.json",
+      "sha256": "d38d7ed81b30db309391c5868414c57b797f8aefc910eb1272e6f1954b9c638b"
+    }
+  },
+  "single_followup": {
+    "field": "unchanged parent compact canonical field",
+    "query_classifier": "unchanged parent balanced signed-reference logistic model",
+    "graph": "unchanged parent query-gated continuous K201 graph",
+    "solver": "unchanged parent continuous convex v2 probabilities",
+    "target_score_maps": "reuse byte-for-byte parent propagated score_paths; do not rerender or rewrite",
+    "calibration_score": "render the parent query_compatibility P on the declared reference camera using the same alpha-normalized scalar compositor",
+    "calibration_mask": "declared reference full binary mask only",
+    "threshold_grid": "0.99 down to 0.03 inclusive in steps of 0.01",
+    "tie_break": "descending thresholds and strict IoU improvement, retaining the first maximizer",
+    "target_readout": "threshold the sealed propagated target score maps with that query-compatibility-derived scalar",
+    "connected_component_selection": false
+  },
+  "forbidden": [
+    "target masks during threshold selection",
+    "target metrics during threshold selection",
+    "per-target-frame thresholds",
+    "solver or field recomputation",
+    "selection among multiple followup rules after target scoring"
+  ],
+  "reporting": {
+    "keep_parent_formal_v2_numbers_unchanged": true,
+    "report_followup_as_posthoc_only": true,
+    "compare_against_parent_formal_v2_and_release_v1": true
+  }
+}

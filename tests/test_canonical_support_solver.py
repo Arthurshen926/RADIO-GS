@@ -19,6 +19,7 @@ from radio_gs.querying.support_solver import (
     build_primitive_support_graph,
     graph_for_query_intent,
     graph_local_seed_influence,
+    gate_support_graph_by_query_compatibility,
     mix_support_graph_channels,
     normalized_laplacian_affinity,
     query_conditioned_laplacian_affinity,
@@ -138,6 +139,51 @@ def test_multichannel_mixture_is_normalized_and_typed():
         legacy_residual=1.0,
     )
     torch.testing.assert_close(legacy_endpoint.edge_weight, graph.edge_weight)
+
+
+def test_query_compatibility_gate_matches_sqrt_endpoint_rule_and_normalizes_rows():
+    graph = build_primitive_support_graph(
+        _two_clusters(), config=SupportGraphConfig(neighbors=2)
+    )
+    compatibility = torch.tensor([1.0, 0.25, 0.0, 0.8, 0.6, 0.4])
+    gated = gate_support_graph_by_query_compatibility(graph, compatibility)
+    row, col = graph.edge_index
+    expected_raw = graph.raw_affinity * torch.sqrt(
+        compatibility[row] * compatibility[col]
+    )
+    torch.testing.assert_close(gated.raw_affinity, expected_raw)
+    expected_transition = graph.edge_weight * torch.sqrt(
+        compatibility[row] * compatibility[col]
+    )
+    expected_transition_sum = torch.zeros(graph.num_nodes)
+    expected_transition_sum.index_add_(0, row, expected_transition)
+    expected_transition = expected_transition / expected_transition_sum[
+        row
+    ].clamp_min(1e-12)
+    torch.testing.assert_close(gated.edge_weight, expected_transition)
+    row_sum = torch.zeros(graph.num_nodes)
+    row_sum.index_add_(0, gated.edge_index[0], gated.edge_weight)
+    expected_sum = torch.zeros(graph.num_nodes)
+    expected_sum.index_add_(0, row, expected_raw)
+    torch.testing.assert_close(
+        row_sum,
+        (expected_sum > 0).float(),
+        atol=1e-6,
+        rtol=0,
+    )
+    torch.testing.assert_close(graph.raw_affinity, graph.edge_channels["geometry"])
+
+
+@pytest.mark.parametrize(
+    "compatibility",
+    [torch.tensor([0.5]), torch.tensor([0.2, float("nan"), 0.5, 0.5, 0.5, 0.5]), torch.tensor([0.2, -0.1, 0.5, 0.5, 0.5, 0.5])],
+)
+def test_query_compatibility_gate_rejects_malformed_probabilities(compatibility):
+    graph = build_primitive_support_graph(
+        _two_clusters(), config=SupportGraphConfig(neighbors=2)
+    )
+    with pytest.raises(ValueError, match="query compatibility"):
+        gate_support_graph_by_query_compatibility(graph, compatibility)
 
 
 def test_max_affinity_abstention_adds_self_loops_for_unreliable_channels():
@@ -648,6 +694,106 @@ def test_cached_normalized_affinity_is_exactly_equivalent_to_in_solver_build():
         **kwargs,
     )
     torch.testing.assert_close(actual, expected, atol=0, rtol=0)
+
+
+def test_explicit_unary_confidence_changes_v2_energy_without_changing_constraints():
+    graph = build_primitive_support_graph(
+        torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]),
+        config=SupportGraphConfig(neighbors=1),
+    )
+    positive = SoftSeedSet(torch.tensor([1.0, 0.0, 0.0]), "positive")
+    negative = SoftSeedSet(torch.tensor([0.0, 0.0, 1.0]), "negative")
+    config = SupportSolverConfig(
+        solver_type="random_walker", laplacian_weight=0.25, cg_iterations=128
+    )
+    unary = torch.tensor([8.0, 2.0, -8.0])
+    weak_middle = solve_primitive_support(
+        graph,
+        unary,
+        positive_seeds=positive,
+        negative_seeds=negative,
+        config=config,
+        unary_confidence=torch.tensor([1.0, 0.01, 1.0]),
+    )
+    strong_middle = solve_primitive_support(
+        graph,
+        unary,
+        positive_seeds=positive,
+        negative_seeds=negative,
+        config=config,
+        unary_confidence=torch.tensor([1.0, 1.0, 1.0]),
+    )
+    assert weak_middle[0] == strong_middle[0] == 1.0
+    assert weak_middle[2] == strong_middle[2] == 0.0
+    assert strong_middle[1] > weak_middle[1]
+
+
+def test_query_gate_recomputes_symmetric_degree_normalization():
+    graph = build_primitive_support_graph(
+        torch.tensor([[0.0, 0.0, 0.0], [0.1, 0.0, 0.0], [0.2, 0.0, 0.0]]),
+        config=SupportGraphConfig(neighbors=1),
+    )
+    gate = torch.tensor([1.0, 0.25, 0.04])
+    actual = normalized_laplacian_affinity(graph, query_gate=gate)
+    row, col = graph.edge_index
+    raw = graph.raw_affinity * torch.sqrt(gate[row] * gate[col])
+    degree = torch.zeros(graph.num_nodes)
+    degree.index_add_(0, row, raw)
+    expected = raw * degree.clamp_min(1e-12).rsqrt()[row] * degree.clamp_min(
+        1e-12
+    ).rsqrt()[col]
+    torch.testing.assert_close(actual, expected)
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        solve_primitive_support(
+            graph,
+            torch.zeros(3),
+            config=SupportSolverConfig(solver_type="random_walker"),
+            normalized_affinity=normalized_laplacian_affinity(graph),
+            query_gate=gate,
+        )
+
+
+def test_v2_random_walker_matches_dense_constrained_quadratic_energy():
+    graph = build_primitive_support_graph(
+        torch.tensor(
+            [[0.0, 0.0, 0.0], [0.08, 0.0, 0.0], [0.16, 0.0, 0.0], [0.24, 0.0, 0.0]]
+        ),
+        config=SupportGraphConfig(neighbors=2),
+    )
+    prior = torch.tensor([0.9, 0.7, 0.3, 0.1])
+    confidence = torch.tensor([1.0, 0.8, 0.2, 1.0])
+    gate = torch.tensor([0.9, 0.8, 0.4, 0.1])
+    positive = SoftSeedSet(torch.tensor([1.0, 0.0, 0.0, 0.0]), "positive")
+    negative = SoftSeedSet(torch.tensor([0.0, 0.0, 0.0, 1.0]), "negative")
+    lam = 0.25
+    actual = solve_primitive_support(
+        graph,
+        torch.logit(prior),
+        positive_seeds=positive,
+        negative_seeds=negative,
+        config=SupportSolverConfig(
+            solver_type="random_walker",
+            unary_temperature=1.0,
+            laplacian_weight=lam,
+            cg_iterations=256,
+            cg_tolerance=1e-8,
+        ),
+        unary_confidence=confidence,
+        query_gate=gate,
+    )
+
+    normalized = normalized_laplacian_affinity(graph, query_gate=gate)
+    row, col = graph.edge_index
+    transition = torch.zeros((4, 4))
+    transition.index_put_((row, col), normalized, accumulate=True)
+    operator = torch.diag(confidence) + lam * (torch.eye(4) - transition)
+    fixed = torch.tensor([True, False, False, True])
+    free = ~fixed
+    fixed_values = torch.tensor([1.0, 0.0, 0.0, 0.0])
+    right = confidence * prior - operator @ fixed_values
+    expected = fixed_values.clone()
+    expected[free] = torch.linalg.solve(operator[free][:, free], right[free])
+    torch.testing.assert_close(actual, expected, atol=2e-5, rtol=2e-5)
 
 
 def test_query_conditioned_affinity_preserves_smooth_edges_and_gates_unary_boundary():

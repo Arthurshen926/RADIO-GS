@@ -1,0 +1,107 @@
+{
+  "schema_version": "nvos_strict_cradio_dino_pca40_registration_v1",
+  "registered_at": "2026-08-03T19:44:27+08:00",
+  "parent_registration": {
+    "path": "paper/artifacts/evidence_to_support_v1_experiment_registration_20260803.json",
+    "sha256": "7c539fb523c7152446bdc5f28325986a9162baa6c85a5608a66552023aa869c4"
+  },
+  "relation_cache_registration": {
+    "path": "paper/artifacts/cradio_dino_pca40_relation_cache_registration_20260803.json",
+    "sha256": "4728cfc6cfc5028bcb4a8d966afb7914ca2a24e2a753b5494407c8a346c2bc4c"
+  },
+  "purpose": "Freeze the second strict NVOS relation-feature candidate after the query-independent hash diagnostic failed its two-sentinel non-regression gate, before any PCA40 selector is rendered or scored on a target view.",
+  "frozen_evaluator_may_be_modified": false,
+  "target_masks": {
+    "allowed_only_after_selector_and_score_freeze_reload": true,
+    "allowed_for_relation_fit": false,
+    "allowed_for_query_construction": false,
+    "allowed_for_hyperparameter_or_threshold_selection": false
+  },
+  "candidate": {
+    "name": "strict raw-scribble C-RADIO DINOv3 primitive PCA40 relation diagnostic",
+    "track": "raw signed scribbles -> exact adjoint -> balanced weighted logistic unary -> query-conditioned diffusion",
+    "relation_source": "official frozen C-RADIOv4 dino_v3_7b feature_projection rows from the canonical field",
+    "relation_source_signature": {
+      "adaptor_name": "dino_v3_7b.feature_projection",
+      "dimension": 4096,
+      "token_type": "primitive",
+      "normalization": "l2",
+      "query_independent": true,
+      "custom_adaptor_head": false
+    },
+    "pca40_transform": {
+      "fit_population": "all and only canonical capability-valid primitive rows in ascending global-row order",
+      "input_dtype": "stored float16 converted to float32 before statistics",
+      "standardization": "per-dimension scene mean and sample standard deviation with correction=1, matching torch.std default in the release",
+      "zero_or_nonfinite_standard_deviation": "fail_closed",
+      "components": 40,
+      "implementation": "sklearn.decomposition.PCA with release-default svd_solver=auto and global NumPy seed 0",
+      "pca_subsample": 500000,
+      "subsample_rule": "if valid rows exceed 500000, np.random.choice without replacement after np.random.seed(0); otherwise all valid rows",
+      "projection": "center standardized rows by fitted PCA mean and right-multiply by PCA components transpose",
+      "eigenvalue_weighting": "multiply each projected component by the fitted PCA singular value, matching dif_NVOS eigval_weighting=True",
+      "graph_input_normalization": "per-primitive L2 normalization with eps=1e-8 before relation distances",
+      "query_independent": true
+    },
+    "diffusion": {
+      "official_num_neighbors_parameter": 200,
+      "effective_knn_columns": 201,
+      "include_self": true,
+      "feature_bandwidth": 2.0,
+      "regularizer_bandwidth": 4.0,
+      "iterations": 100,
+      "edge_binarization_threshold": 1e-5,
+      "kernel": "released N-by-K positional normalization, symmetrization, and per-iteration feature-column normalization",
+      "threshold": 0.5,
+      "connected_selection": "none"
+    },
+    "immutable_hyperparameter_rule": "Do not tune f, g, K, logistic C, diffusion iterations, or threshold using fern or horns_left target labels."
+  },
+  "compatibility_boundary": {
+    "native_ludvig_dinov2_pca40_exact": false,
+    "reason": "LUDVIG fits PCA40 on standardized 1536-D native DINOv2 ViT-g image patch tokens before inverse-render uplift. This candidate instead fits standardized PCA40 on already-uplifted 4096-D official C-RADIO DINOv3 primitive rows, which are stored L2-normalized and float16-quantized.",
+    "allowed_claim": "query-independent C-RADIO DINOv3 primitive PCA40 relation diagnostic with LUDVIG-inspired transform semantics",
+    "forbidden_claims": [
+      "native LUDVIG DINOv2 PCA40",
+      "exact LUDVIG feature match",
+      "published LUDVIG-compatible feature field"
+    ]
+  },
+  "ludvig_native_audit": {
+    "source_commit": "4461fc515439bb498a75d71738a1e73cf7a452ed",
+    "source_hashes": {
+      "predictors/dino.py": "e537ad5dcb4241d1c90f05587fc19df74b9f5d854ccad0169de3c7af02e0222a",
+      "dinov2/model.py": "c6dd5addaf936f82dbd6114fe64009e6ca9a960e024aac1a47119887cd9b29f1",
+      "ludvig_uplift.py": "15279e8bda93799387b9194e9e5a963797de48c7a514a80b1904b807727e48ce",
+      "diffusion/base.py": "022d7362bcf115afee4e8de71f0c6a7aefd10f831b5d37f22e3d5b6d34318872",
+      "diffusion/segmentation.py": "c6de9567ce129653f467629bc60d22746ff6f88b4766fa765ae42b940d7a4e4e",
+      "evaluation/spin_nvos/diffusion.py": "f4814fecb8e98431c338c6af1d5db104075b009daef8a2a5cd54ff0e7ee94158",
+      "configs/dif_NVOS.yaml": "bfd9cde03403891f0a7702070756e506f2400d7b19cb98b2273929f2657f86af",
+      "ludvig_base.py": "5a7c7638dded5d6c20499bd1a1fcf35409c6d7bb81a9f91b0b0eba0e5226286f"
+    },
+    "native_semantics": [
+      "The last of four requested DINOv2 intermediate layers supplies 1536-D patch tokens.",
+      "All scene-view patch tokens are accumulated before PCA; each channel is centered and divided by torch's sample standard deviation.",
+      "At most 500000 standardized tokens are sampled without replacement for PCA fitting; NumPy is seeded by the run seed.",
+      "sklearn PCA40 centers again by its fitted mean and projects with components transpose.",
+      "dif_NVOS multiplies PCA components by PCA singular values before bilinear image upsampling and inverse-render uplift.",
+      "dif_NVOS does not enable the optional post-uplift L2 normalization, but GraphDiffusion L2-normalizes each primitive immediately before logistic fitting and graph distances."
+    ]
+  },
+  "sentinel_plan": {
+    "ordered_scenes": ["horns_left", "fern"],
+    "gate": "strict macro improves by at least 0.03 over frozen compact unary, at least one sentinel improves, and neither regresses by more than 0.03",
+    "full8_requires_gate": true,
+    "do_not_expand_automatically": true
+  },
+  "source_sidecars": {
+    "fern": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fern/official_dino_sam3_views.pt.json",
+      "sha256": "fbb576ae4a634724eae178a590d2675b657a4aaba67e7b4f8b252c1c7dfb3fb1"
+    },
+    "horns_left": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_left/official_dino_sam3_views.pt.json",
+      "sha256": "c621fb004dfde125b4375e2f610abb727a89ee33e40afb38c7138f2d447dabee"
+    }
+  }
+}

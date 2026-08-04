@@ -1,0 +1,56 @@
+{
+  "schema_version": "cradio_dino_pca40_relation_cache_registration_v1",
+  "registered_at": "2026-08-03T19:44:27+08:00",
+  "purpose": "Freeze a modality-agnostic and query-independent PCA40 relation transform for canonical official C-RADIO DINOv3 primitive rows before any downstream query-conditioned selector consumes it.",
+  "scope": "Any benchmark scene with a canonical capability cache satisfying the exact source signature; the transform opens no query, annotation, target RGB, target mask, or metric.",
+  "source_acceptance": {
+    "source": "canonical_radio_field_official_frozen_capability_views",
+    "custom_adaptor_head": false,
+    "query_independent": true,
+    "adaptor_name": "dino_v3_7b.feature_projection",
+    "adaptor_output_dimension": 4096,
+    "token_type": "primitive",
+    "normalization": "l2",
+    "storage_dtype": "float16 converted to float32 before statistics",
+    "row_population": "all and only capability-valid primitive rows in ascending global-row order"
+  },
+  "transform": {
+    "standardization": "per-dimension torch float32 mean and sample standard deviation with correction=1",
+    "zero_or_nonfinite_standard_deviation": "fail_closed",
+    "components": 40,
+    "implementation": "sklearn.decomposition.PCA with svd_solver=auto, random_state=None, and NumPy global seed 0",
+    "pca_subsample": 500000,
+    "subsample_rule": "if rows exceed 500000, np.random.choice without replacement after np.random.seed(0); otherwise fit all rows",
+    "projection": "subtract fitted PCA mean and right-multiply by fitted components transpose",
+    "eigenvalue_weighting": "multiply projected coordinates by fitted PCA singular values",
+    "downstream_graph_normalization": "per-row L2 with eps=1e-8",
+    "copy_false_note": "The memory-bounded builder may use PCA(copy=False); this changes allocation only and preserves the registered numerical transform."
+  },
+  "safety": {
+    "query_independent": true,
+    "labels_opened": false,
+    "target_rgb_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "compatibility_boundary": {
+    "native_ludvig_dinov2_pca40_exact": false,
+    "reason": "LUDVIG fits standardized PCA40 on native 1536-D DINOv2 ViT-g image patch tokens before inverse-render uplift. This transform fits already-uplifted, L2-normalized, float16 4096-D official C-RADIO DINOv3 primitive rows.",
+    "allowed_claim": "query-independent C-RADIO DINOv3 primitive PCA40 relation diagnostic with LUDVIG-inspired transform semantics",
+    "forbidden_claims": [
+      "native LUDVIG DINOv2 PCA40",
+      "exact LUDVIG feature match",
+      "published LUDVIG-compatible feature field"
+    ]
+  },
+  "ludvig_source_audit": {
+    "source_commit": "4461fc515439bb498a75d71738a1e73cf7a452ed",
+    "source_hashes": {
+      "predictors/dino.py": "e537ad5dcb4241d1c90f05587fc19df74b9f5d854ccad0169de3c7af02e0222a",
+      "dinov2/model.py": "c6dd5addaf936f82dbd6114fe64009e6ca9a960e024aac1a47119887cd9b29f1",
+      "ludvig_uplift.py": "15279e8bda93799387b9194e9e5a963797de48c7a514a80b1904b807727e48ce",
+      "diffusion/base.py": "022d7362bcf115afee4e8de71f0c6a7aefd10f831b5d37f22e3d5b6d34318872",
+      "configs/dif_NVOS.yaml": "bfd9cde03403891f0a7702070756e506f2400d7b19cb98b2273929f2657f86af"
+    }
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "schema_version": "evidence_to_support_v2_spin_component_registration_v1",
+  "registered_at": "2026-08-04T00:00:00+08:00",
+  "purpose": "Freeze a single target-blind SPIn component replacement: keep the accepted exact-adjoint observation, C-RADIO relation cache, Euclidean K201 topology, and frozen evaluator, while replacing release reachability with a continuous convex Evidence-to-Support solver that locks reliable reference observations.",
+  "claim_scope": "posthoc_difficult_scene_component_attribution_only",
+  "claim_scope_reason": "lego, truck, and room were selected after the complete SPIn9 result was opened; they cannot serve as independent confirmation scenes.",
+  "frozen_evaluators_may_be_modified": false,
+  "target_masks": {
+    "allowed_for_query_construction": false,
+    "allowed_for_reference_calibration": false,
+    "allowed_for_method_or_hyperparameter_selection": false,
+    "opened_only_after_prediction_receipt_is_sealed": true
+  },
+  "immutable_protocol_authority": {
+    "path": "paper/artifacts/spin9_canonical_mpr_v3_exact_local9_authority_20260803.json",
+    "sha256": "9eea89217b85b75319a87b90e3da4a27c8b62ed0c920f8b8da0a14a091899340"
+  },
+  "master_registration": {
+    "path": "paper/artifacts/evidence_to_support_v2_master_registration_20260804.json",
+    "sha256": "064ee5a816fe5108035829860d8d48e583bbb2a7c3a12e0a90c7efb528dd0bef"
+  },
+  "development_scenes": [
+    "lego",
+    "truck",
+    "room"
+  ],
+  "already_opened_release_baseline": {
+    "lego": 0.618145918359312,
+    "truck": 0.789943864811103,
+    "room": 0.888438299884812,
+    "macro": 0.765509361018409
+  },
+  "single_registered_configuration": {
+    "reference_observation": "native exact front-to-back raster adjoint of the declared full binary reference mask",
+    "observation_probability": "y_obs=m_fg/(m_fg+m_bg) for observed rows; unobserved rows use query compatibility P",
+    "observation_confidence": "c_obs=(m_fg+m_bg)/m_vis; because SPIn supplies a full binary mask this is one for every visible row and zero for invisible rows",
+    "unobserved_compatibility_fidelity": 0.01,
+    "query_compatibility": {
+      "model": "balanced logistic regression on every nonzero signed reference observation",
+      "relation": "existing deterministic signed-hash256 projection of canonical C-RADIO to DINO capability",
+      "logistic_C": 0.01,
+      "regularizer_bandwidth": 1.0
+    },
+    "graph": {
+      "topology": "existing exact Euclidean K200 plus self cache",
+      "base_affinity": "continuous DINO RBF with reference-positive median scale",
+      "feature_bandwidth": 1.0,
+      "query_gate": "sqrt(P_i*P_j) applied only to pairwise conductance",
+      "edge_binarization": false,
+      "normalization": "symmetric endpoint-degree normalization after query gating",
+      "connected_component_selection": false
+    },
+    "energy": "sum_i c_i*(p_i-y_i)^2 + lambda*sum_(i,j) w_ij*sqrt(P_i*P_j)*(p_i-p_j)^2",
+    "laplacian_weight": 1.0,
+    "hard_reference_lock": {
+      "minimum_observation_confidence": 0.99,
+      "positive_probability_threshold": 0.9,
+      "negative_probability_threshold": 0.1,
+      "conflict_policy": "no row can satisfy both inequalities"
+    },
+    "linear_solver": {
+      "algorithm": "Jacobi-preconditioned conjugate gradient on free rows",
+      "maximum_iterations": 64,
+      "relative_tolerance": 1e-05,
+      "probability_clip_after_solve": [
+        0.0,
+        1.0
+      ]
+    },
+    "rendered_threshold": "select one threshold from 0.99 down to 0.03 in steps of 0.01 using only the declared reference mask, then seal it before target scoring",
+    "readout": "continuous propagated probability",
+    "selection_mode": "all_components"
+  },
+  "ablation_order": [
+    "release_reachability_existing_result",
+    "continuous_convex_v2_with_reference_lock"
+  ],
+  "advancement_gate": {
+    "macro_gain_over_release_at_least": 0.02,
+    "maximum_allowed_per_scene_regression": 0.02,
+    "full9_expansion_requires_gate": true,
+    "no_failed_variant_may_be_retuned_from_target_masks": true
+  },
+  "thermal_policy": {
+    "physical_gpu": 0,
+    "power_limit_w": 300,
+    "do_not_launch_at_or_above_temperature_c": 83,
+    "hard_abort_temperature_c": 87,
+    "hard_abort_consecutive_samples": 2,
+    "poll_seconds": 180,
+    "polling_policy": "low-frequency thermal guard only; no frequent external polling"
+  }
+}

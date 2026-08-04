@@ -1,0 +1,1351 @@
+{
+  "capability_type": {
+    "DINO_or_PCA_named_assets_below_reproduced_all_view_root": [],
+    "DINOv2_PCA40_present": false,
+    "persisted_features": "one float32 SAM-derived scalar per native LUDVIG Gaussian per seed",
+    "selector": "the scalar primitive uplift rendered to the target and thresholded with the frozen NVOS parameter 75"
+  },
+  "code_authority": {
+    "sam_dataset": {
+      "bytes": 3726,
+      "path": "/root/baselines/LUDVIG/predictors/sam.py",
+      "sha256": "3cbf8bda6f7334086c3ba7c117a1b604ed12757c351fff96054a6a2f484684b9"
+    },
+    "segmentation": {
+      "bytes": 6348,
+      "path": "/root/baselines/LUDVIG/evaluation/spin_nvos/segmentation.py",
+      "sha256": "ecc9d7b1a29faa7d1091e14e9c5a50036180c5ba8671ba396d0292075a559b0e"
+    },
+    "uplift": {
+      "bytes": 4994,
+      "path": "/root/baselines/LUDVIG/ludvig_uplift.py",
+      "sha256": "ae2eb5af2050e619a8d3a6f5bb04d228b4c090425cfcaf30f25aa9a859cddd3e"
+    }
+  },
+  "frozen_evaluator_modified": false,
+  "information_boundary": {
+    "eligible_for_strict_source_only": false,
+    "method": "online_target_RGB_SAM_query_interface_then_scalar_uplift",
+    "per_camera_operation": "read that registered camera RGB, render inverse-scribble 3D support into the camera as positive point prompts, run SAM on that RGB, then uplift the returned scalar mask",
+    "query_free_all_view_field": false,
+    "target_rgb_visible_during_3dgs_training": true,
+    "target_rgb_visible_during_uplift": true,
+    "target_view_SAM_calls": true
+  },
+  "mapping_conclusion": {
+    "claim_boundary": "the transferred value remains a query-specific, target-RGB-informed compatible sidecar and cannot become a strict or query-free canonical capability",
+    "direct_row_mapping": false,
+    "minimum_faithful_reuse": "retain each cached native LUDVIG Gaussian geometry and its scalar features; render those scalar fields through registered cameras and apply an exact image-space adjoint onto canonical primitives",
+    "minimum_reuse_cost": "eight scene bridges per seed, consisting only of scalar rendering plus canonical adjoint; no repeated SAM call is needed when cached scalar features are accepted",
+    "nearest_xyz_copy_is_valid": false,
+    "query_free_DINO_relation_reconstruction": "requires a new DINOv2/PCA40 all-view extraction and uplift because no such asset exists in this reproduced SAM run",
+    "reason": "all eight native all-view Gaussian row counts differ from the strict canonical geometry; nearest-neighbor transfer is strongly many-to-one and usually many canonical spacings away"
+  },
+  "reproduced_summary": {
+    "bytes": 6923,
+    "macro_iou": 0.9125768502741802,
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json",
+    "protocol_id": "ludvig_official_online_multiview_v1",
+    "sha256": "65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546",
+    "strict_unseen_exact_match": false
+  },
+  "scenes": {
+    "fern": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fern/official_dino_sam3_views.pt",
+        "rows": 760715,
+        "sidecar_sha256": "fbb576ae4a634724eae178a590d2675b657a4aaba67e7b4f8b252c1c7dfb3fb1"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 405,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/protocol_result.json",
+            "sha256": "a3a2792beeb5c756cd78202c4eef82ef6257d6ebf23f2b8a5919f1552686b4a4"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 139039259,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/gaussians.ply",
+            "rows": 560636,
+            "sha256": "50b13419f71cab460359508fd828bc7150f0c1f8d245a1ef488091365e712cc4"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 2242672,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/features.npy",
+            "sha256": "0acf54769c1163bd46078200ee201b873290d438d969b406596658bd63932c29",
+            "shape": [
+              560636,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 61251,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/masks/binary/IMG_4027_iou84.png",
+            "sha256": "b3bc389c1d288011a7efc59af9bbd78c06f9b8f348a3b18eb5a32634edfddd87"
+          },
+          "rendered_float_selector": {
+            "bytes": 532103,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/masks/float/IMG_4027.png",
+            "sha256": "f97dfd0bb0cee683459478b7a3d0dc39d02e79582e6767d69abed0491c7e58a3"
+          },
+          "resolved_sam_config": {
+            "bytes": 754,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/fern/sam/config.yaml",
+            "sha256": "2bff31ec8b92bcbe41daac5f2074f77270f8ece57153d7a8f950d90c84d15f77"
+          },
+          "run_manifest": {
+            "bytes": 6532,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_0/attempts/exact_f7a_allview_fern_seed0_v1/run_manifest.json",
+            "sha256": "c59a7affdbb93bcbda1333f2c430a0ab08cf8f0ea422f21fbd16efe3b36e9c86"
+          },
+          "selected_iou": 0.8447952301482711
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 405,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/fern/sam/protocol_result.json",
+            "sha256": "eaeec947b85b8a776b29ab855bfae8a5c90c0f3ae93dcd9d8f12de1ab19530c2"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 139039259,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/fern/sam/gaussians.ply",
+            "rows": 560636,
+            "sha256": "50b13419f71cab460359508fd828bc7150f0c1f8d245a1ef488091365e712cc4"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 2242672,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/fern/sam/features.npy",
+            "sha256": "7c1c0a85c4c58f07119a9b85b4c9a1a8031aaba5cc9471bad1727f3782190bf5",
+            "shape": [
+              560636,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 61265,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/fern/sam/masks/binary/IMG_4027_iou85.png",
+            "sha256": "7da01912f620e41f54b8d8c287707898f221d5638eb2718794bbefa4594d87c9"
+          },
+          "rendered_float_selector": {
+            "bytes": 533850,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/fern/sam/masks/float/IMG_4027.png",
+            "sha256": "f045f2d532ce3f3e0cd39f5f8bd8a9665eed7435fbcc6da565726fb1d929013c"
+          },
+          "resolved_sam_config": {
+            "bytes": 754,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/fern/sam/config.yaml",
+            "sha256": "185daa65c1196a12bcbe2c6ffd7171408eace3c045fcc5df4b8d274370dd8cc2"
+          },
+          "run_manifest": {
+            "bytes": 6574,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_1/attempts/exact_f7a_allview_fern_seed1_v1/run_manifest.json",
+            "sha256": "dc7588b5c4630c06a1be331ed19606bda567b53536239d7b4c145c100f62c9e3"
+          },
+          "selected_iou": 0.8455520707736806
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 404,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/fern/sam/protocol_result.json",
+            "sha256": "491cf8104817540af7a5179734dbba986bc6e80b7634e304dc1d138d4230bc34"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 139039259,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/fern/sam/gaussians.ply",
+            "rows": 560636,
+            "sha256": "50b13419f71cab460359508fd828bc7150f0c1f8d245a1ef488091365e712cc4"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 2242672,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/fern/sam/features.npy",
+            "sha256": "f9f26b63035529ae82a78e4bc6e8101416c49d1883e50868d914b22e13a321cd",
+            "shape": [
+              560636,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 61284,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/fern/sam/masks/binary/IMG_4027_iou84.png",
+            "sha256": "a26b5b721e87c02a52d974557a7b978080eed65eb05b6a06536f8035232a6083"
+          },
+          "rendered_float_selector": {
+            "bytes": 533058,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/fern/sam/masks/float/IMG_4027.png",
+            "sha256": "0bd7bf01f4d2130a3f30175e271f0ebb097f11f517170b452390a6a75b873bf1"
+          },
+          "resolved_sam_config": {
+            "bytes": 754,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/fern/sam/config.yaml",
+            "sha256": "b1692375902fe84a53de653025fe47e4164bb94251afede91095448d2b1388fc"
+          },
+          "run_manifest": {
+            "bytes": 6574,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fern/seed_2/attempts/exact_f7a_allview_fern_seed2_v1/run_manifest.json",
+            "sha256": "50b32681d05141d10e7a5c50a12a44c22e8f53d1881df8e018382c4955e60661"
+          },
+          "selected_iou": 0.8448712054128203
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.01217741925880084,
+        "canonical_rows": 760715,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 560636,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.0003220822343505152,
+          0.11176924307853656,
+          0.41504889968792436,
+          1.7182781928464361,
+          65.829724785297
+        ],
+        "median_distance_over_canonical_spacing": 9.178401490755844,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.2735000963191804,
+        "within_half_spacing_fraction": 0.003974058034089855,
+        "within_one_spacing_fraction": 0.021095684187244487,
+        "within_two_spacing_fraction": 0.08433992822437375
+      }
+    },
+    "flower": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/flower/official_dino_sam3_views.pt",
+        "rows": 447935,
+        "sidecar_sha256": "7e28bd1aba345bfffc8b2ae4ee06fd9a779d276e967b24beb048257ebe8f07f1"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 407,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/flower/sam/protocol_result.json",
+            "sha256": "695dee642358406a82a26fbc63a38fe6bcc9b0ae33303f269e85af808a1fa987"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 80211179,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/flower/sam/gaussians.ply",
+            "rows": 323426,
+            "sha256": "87246babb88ab9da9ceb99114173c12a52b670a28cbea4194db4bfde1d51ef40"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1293832,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/flower/sam/features.npy",
+            "sha256": "daa5984bb4b3ea68227b9fa798dbd8c54c32a04dc651a80153f6b22b34fab2e2",
+            "shape": [
+              323426,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 32886,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/flower/sam/masks/binary/IMG_2962_iou98.png",
+            "sha256": "e8295d0bca55b4d364544c323926cd301cbae7e736ddabe64dbe26b173bea5bd"
+          },
+          "rendered_float_selector": {
+            "bytes": 179002,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/flower/sam/masks/float/IMG_2962.png",
+            "sha256": "5c90443dd7c7a0e39174f50c3d9e6c7eb29c6ed3e736b328096cbc5527d2dec5"
+          },
+          "resolved_sam_config": {
+            "bytes": 758,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/flower/sam/config.yaml",
+            "sha256": "26db99bc199f368fc31edeea0102df503e27c15865ebb3d0db2b336f3c0bbe33"
+          },
+          "run_manifest": {
+            "bytes": 6613,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_0/attempts/exact_f7a_allview_flower_seed0_v1/run_manifest.json",
+            "sha256": "0f2c27b81ad440a55ac55f83a56b78b85e954d944dc967f175d94eb7e6fa8d6f"
+          },
+          "selected_iou": 0.9754894488560335
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 406,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/flower/sam/protocol_result.json",
+            "sha256": "f0f7be30fcb520b747eae535307558b43a8559b7bf634d7cba7ede34a351fe7a"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 80211179,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/flower/sam/gaussians.ply",
+            "rows": 323426,
+            "sha256": "87246babb88ab9da9ceb99114173c12a52b670a28cbea4194db4bfde1d51ef40"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1293832,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/flower/sam/features.npy",
+            "sha256": "4d8da9a200e2eaaf706584e6824f15a00755d2b82387d1a124f269bd1e550ba4",
+            "shape": [
+              323426,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 33057,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/flower/sam/masks/binary/IMG_2962_iou98.png",
+            "sha256": "400bb28e0beff239214c06cdf5ce1fe8f26f7308be5a8d3a07891a8db4ca96f0"
+          },
+          "rendered_float_selector": {
+            "bytes": 171883,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/flower/sam/masks/float/IMG_2962.png",
+            "sha256": "ad9fccc1eb88376b08e2f36abd30e229acfbcf45a6c58b0c269055b55ef20107"
+          },
+          "resolved_sam_config": {
+            "bytes": 758,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/flower/sam/config.yaml",
+            "sha256": "df337ae77c17bf1a01db8c6e5b9855145543b24f914fd3bd52cd9fa2a80ff61f"
+          },
+          "run_manifest": {
+            "bytes": 6612,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_1/attempts/exact_f7a_allview_flower_seed1_v1/run_manifest.json",
+            "sha256": "385fe47a490e8989ca5b486484c106df484755e1c5a0531cd61d5592c7b11c2a"
+          },
+          "selected_iou": 0.9758082742618251
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 407,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/flower/sam/protocol_result.json",
+            "sha256": "53b88ec1e7d769b36978faf72fc8c5e30fad20e148c96a1b2c2bec7082d0434a"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 80211179,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/flower/sam/gaussians.ply",
+            "rows": 323426,
+            "sha256": "87246babb88ab9da9ceb99114173c12a52b670a28cbea4194db4bfde1d51ef40"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1293832,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/flower/sam/features.npy",
+            "sha256": "a05af10c087442925509656036ff03fbcaa51a37b8ead1176e439b5e79572b9a",
+            "shape": [
+              323426,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 32885,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/flower/sam/masks/binary/IMG_2962_iou98.png",
+            "sha256": "bdaebaf321d6c39a1c9cf8a13971ef04099784fa1c715230ff963c515a545262"
+          },
+          "rendered_float_selector": {
+            "bytes": 173300,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/flower/sam/masks/float/IMG_2962.png",
+            "sha256": "7c25c2456db898cb62346d690096cb592c1e7c4a4255de62db897539c3044074"
+          },
+          "resolved_sam_config": {
+            "bytes": 758,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/flower/sam/config.yaml",
+            "sha256": "0f09e187351733c2f1e45a2b71fc7f86da1837b3edc27922bca0f75622b4a51c"
+          },
+          "run_manifest": {
+            "bytes": 6612,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/flower/seed_2/attempts/exact_f7a_allview_flower_seed2_v1/run_manifest.json",
+            "sha256": "e48a5d4154522c7ea7dafeae5981454043907ecbaff70118e0cdf60cbdb48fed"
+          },
+          "selected_iou": 0.9759102125967293
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.020546257165840593,
+        "canonical_rows": 447935,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 323426,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.0009751758239145643,
+          0.419426167309171,
+          1.9235041484328315,
+          5.733849332940523,
+          29.579663223451114
+        ],
+        "median_distance_over_canonical_spacing": 20.41375049108665,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.24168125011594616,
+        "within_half_spacing_fraction": 0.002553907230711198,
+        "within_one_spacing_fraction": 0.013019979840829123,
+        "within_two_spacing_fraction": 0.051313128814628385
+      }
+    },
+    "fortress": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fortress/official_dino_sam3_views.pt",
+        "rows": 653541,
+        "sidecar_sha256": "1957d48806c3ba8f996f3116dea3981be0e2ea636b081b2b1839e1921028b0ce"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 409,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/fortress/sam/protocol_result.json",
+            "sha256": "909a377a4cc15d19a467cbb57270d85df9959fb2b4c61e3801c9fa1b377f2f8b"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 112119355,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/fortress/sam/gaussians.ply",
+            "rows": 452088,
+            "sha256": "f0dbc802dc7981709d65a91724ad420a3a458bef00250edbd8218aad961e7694"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1808480,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/fortress/sam/features.npy",
+            "sha256": "59cef9d2c484385ff4bfd7acce3a8f965f04009550d0d1406f483cff18ca3ed3",
+            "shape": [
+              452088,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 22865,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/fortress/sam/masks/binary/IMG_1800_iou98.png",
+            "sha256": "affb60f704008c7b01c7ad692393b18b5bf027e0e1016d1bdfd0d0352d6fda64"
+          },
+          "rendered_float_selector": {
+            "bytes": 166599,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/fortress/sam/masks/float/IMG_1800.png",
+            "sha256": "34222d14c06efc70874b223decd8fc6f8c03a345cfd8cf4b9da888db6721ded8"
+          },
+          "resolved_sam_config": {
+            "bytes": 762,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/fortress/sam/config.yaml",
+            "sha256": "8e65dc099d0c381c95920319d57cf6db8ffaa84cf4468857806ee5fff62b21f8"
+          },
+          "run_manifest": {
+            "bytes": 6654,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_0/attempts/exact_f7a_allview_fortress_seed0_v1/run_manifest.json",
+            "sha256": "e612efdc517d820af4d9be36202abae027e146a29c807adc38d564318f72f0a1"
+          },
+          "selected_iou": 0.9848415828422032
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 409,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/fortress/sam/protocol_result.json",
+            "sha256": "fa7c3bef92fffcd0f70c1604e4cfea56bb6c003ae908ad7895034c7c9aa09c47"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 112119355,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/fortress/sam/gaussians.ply",
+            "rows": 452088,
+            "sha256": "f0dbc802dc7981709d65a91724ad420a3a458bef00250edbd8218aad961e7694"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1808480,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/fortress/sam/features.npy",
+            "sha256": "f1d10eab148c6fc837419f4609c8dceae9490da55e1e583eead74d315f63970e",
+            "shape": [
+              452088,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 22855,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/fortress/sam/masks/binary/IMG_1800_iou98.png",
+            "sha256": "41bd96a26c57998d608984ddc8f90e5a7f837bba13a76d4eac78d8e68e6186ab"
+          },
+          "rendered_float_selector": {
+            "bytes": 167900,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/fortress/sam/masks/float/IMG_1800.png",
+            "sha256": "ffa59c3206586b46651cd93077864c043d2f343d0dda2295fe0a0cc2d884d795"
+          },
+          "resolved_sam_config": {
+            "bytes": 762,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/fortress/sam/config.yaml",
+            "sha256": "d437753fbc69ef8b9e1fed82e8bee41d24343ceae8483b7ad51f8c19e9df5a46"
+          },
+          "run_manifest": {
+            "bytes": 6654,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_1/attempts/exact_f7a_allview_fortress_seed1_v1/run_manifest.json",
+            "sha256": "0b83b88c43fdfdbf592f7d7e1fd65e00ff05406fedf590f35b5504508a1e9352"
+          },
+          "selected_iou": 0.9848672030713139
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 409,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/fortress/sam/protocol_result.json",
+            "sha256": "83fc844f0ab8e65d044e0d82a42f599de910dd7ab731c317d6582e98fd87c7b7"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 112119355,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/fortress/sam/gaussians.ply",
+            "rows": 452088,
+            "sha256": "f0dbc802dc7981709d65a91724ad420a3a458bef00250edbd8218aad961e7694"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1808480,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/fortress/sam/features.npy",
+            "sha256": "cd8d294ec20a3c655d42d28c83db7d3c2d43f0a92fac7c2ed0cb7cbfbc38fe1d",
+            "shape": [
+              452088,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 22857,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/fortress/sam/masks/binary/IMG_1800_iou98.png",
+            "sha256": "b83f74d62ace2103fe1c448b41b090e2f5fbdd114fcdb75bc34067ab3288bf44"
+          },
+          "rendered_float_selector": {
+            "bytes": 171442,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/fortress/sam/masks/float/IMG_1800.png",
+            "sha256": "db0943fd9b29161b3ea7a9312389c611e3cd10855e440b0a1a37a716ca2e1991"
+          },
+          "resolved_sam_config": {
+            "bytes": 762,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/fortress/sam/config.yaml",
+            "sha256": "28c0092987dee8a9f1a1da9b96ea8dbd9cb22cde8c2896daeb3bed4cc559b042"
+          },
+          "run_manifest": {
+            "bytes": 6654,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/fortress/seed_2/attempts/exact_f7a_allview_fortress_seed2_v1/run_manifest.json",
+            "sha256": "1205e5200a558348b70d486badb70e4aba250afb4d519c91b96358dc163cd6c4"
+          },
+          "selected_iou": 0.9848736695498349
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.015337662712116718,
+        "canonical_rows": 653541,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 452088,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.0004183968644615668,
+          0.0480941812491745,
+          0.22137901562035092,
+          2.903097630737662,
+          17.344060020937512
+        ],
+        "median_distance_over_canonical_spacing": 3.1356916729678903,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.4278481180655094,
+        "within_half_spacing_fraction": 0.016122967209923733,
+        "within_one_spacing_fraction": 0.08692776627559236,
+        "within_two_spacing_fraction": 0.30329935764718374
+      }
+    },
+    "horns_center": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_center/official_dino_sam3_views.pt",
+        "rows": 544871,
+        "sidecar_sha256": "186807c94df42c7f6b83c09d5f10cfecfd99ef89df97eeb7ebf89ce8a396955f"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 443,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/horns_center/sam/protocol_result.json",
+            "sha256": "feeed39903bcf28d07dc6148901f64c09af725165a3b37b75b893bde86274e8d"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 119299947,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/horns_center/sam/gaussians.ply",
+            "rows": 481042,
+            "sha256": "a01212fe494d7acf36e64aaf35cee7bf4371a43dfd8d41ca6fbf528931b8dad9"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1924296,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/horns_center/sam/features.npy",
+            "sha256": "37112c3ad5150583ce17c9df0c1954ae2ce3fd408331489a9f1f648187c55bcb",
+            "shape": [
+              481042,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 28366,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/horns_center/sam/masks/binary/DJI_20200223_163024_597_iou98.png",
+            "sha256": "f08b064fc707877badcd59ea6e39f381b4fc965397fedeadc2188db50a7e958e"
+          },
+          "rendered_float_selector": {
+            "bytes": 153626,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/horns_center/sam/masks/float/DJI_20200223_163024_597.png",
+            "sha256": "134d656deb6ca2eee1749bd05058d3e5f29fa319bab0c5365844078566cc5a50"
+          },
+          "resolved_sam_config": {
+            "bytes": 770,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/horns_center/sam/config.yaml",
+            "sha256": "486b5a3222506bed88701ce6159b16d1c24ebaa2bad02107d2e9398a113beaa0"
+          },
+          "run_manifest": {
+            "bytes": 6671,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_0/attempts/exact_f7a_allview_horns_center_seed0_v1/run_manifest.json",
+            "sha256": "68e492732677706192054fac04b64fcb8e77c7ff4d281318f0c62fe275caa7a7"
+          },
+          "selected_iou": 0.9796949305054982
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 443,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/horns_center/sam/protocol_result.json",
+            "sha256": "4556b17ce62c62ce6ff62f3ab92bcba5406c6f9e7c23809f935069156ae0ea6b"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 119299947,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/horns_center/sam/gaussians.ply",
+            "rows": 481042,
+            "sha256": "a01212fe494d7acf36e64aaf35cee7bf4371a43dfd8d41ca6fbf528931b8dad9"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1924296,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/horns_center/sam/features.npy",
+            "sha256": "8ca0ab824e15aedee5a36de75d6ab6bc8a6ea868d3130467510c9fad7d076e93",
+            "shape": [
+              481042,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 28343,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/horns_center/sam/masks/binary/DJI_20200223_163024_597_iou98.png",
+            "sha256": "07304d52708dd72da730ef53bef77b8586b499523c69c82bd07c11b6c0a54c44"
+          },
+          "rendered_float_selector": {
+            "bytes": 153198,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/horns_center/sam/masks/float/DJI_20200223_163024_597.png",
+            "sha256": "4a99d758a18ed6902dfebf47bf9a9d456ebbd823efe451a7f599d4e1c733d9b9"
+          },
+          "resolved_sam_config": {
+            "bytes": 770,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/horns_center/sam/config.yaml",
+            "sha256": "75d1f7f5ccba7f861e4705b3b1a48337943904cd95662488c0fa15c36422ba17"
+          },
+          "run_manifest": {
+            "bytes": 6672,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_1/attempts/exact_f7a_allview_horns_center_seed1_v1/run_manifest.json",
+            "sha256": "5219c68925d79855df6c960ebb1aec8fc42b445cc82089a63f337a7ffeee4171"
+          },
+          "selected_iou": 0.9796561238666135
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 443,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/horns_center/sam/protocol_result.json",
+            "sha256": "3a7f2fefaa7f67980f6178fbeee411d4d6359156fe313de41e21830d0fd1c811"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 119299947,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/horns_center/sam/gaussians.ply",
+            "rows": 481042,
+            "sha256": "a01212fe494d7acf36e64aaf35cee7bf4371a43dfd8d41ca6fbf528931b8dad9"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1924296,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/horns_center/sam/features.npy",
+            "sha256": "4fd269e6a1ccf7e6a537e77bf2d951f1c81beea9917caff4112a7820e1c64501",
+            "shape": [
+              481042,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 28459,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/horns_center/sam/masks/binary/DJI_20200223_163024_597_iou98.png",
+            "sha256": "e021b50140c0a1cdfcaacfed7d6d817d58c2411ac56c174de0d0a83403fcfd85"
+          },
+          "rendered_float_selector": {
+            "bytes": 153787,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/horns_center/sam/masks/float/DJI_20200223_163024_597.png",
+            "sha256": "069536327410effbcb477fcf1daa3ea472935bfdfdbafa916f88b7d0488d5bf0"
+          },
+          "resolved_sam_config": {
+            "bytes": 770,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/horns_center/sam/config.yaml",
+            "sha256": "fd1e4cb14b12a502eab9024c359f35701275577ec27e6d34b8204e3a47c639ad"
+          },
+          "run_manifest": {
+            "bytes": 6672,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_center/seed_2/attempts/exact_f7a_allview_horns_center_seed2_v1/run_manifest.json",
+            "sha256": "cdf8491ac7c1b278d812308588e5feace741de78d50bd9c08faecdac1ebc2ffa"
+          },
+          "selected_iou": 0.9797277646827688
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.01539417100013614,
+        "canonical_rows": 544871,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 481042,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.0006309692741845171,
+          0.1504265175706463,
+          1.4902606020342801,
+          4.321917504156492,
+          11.485739823064218
+        ],
+        "median_distance_over_canonical_spacing": 9.771654320931994,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.2365656221286291,
+        "within_half_spacing_fraction": 0.01296560383500817,
+        "within_one_spacing_fraction": 0.05768103408849955,
+        "within_two_spacing_fraction": 0.17449827665775547
+      }
+    },
+    "horns_left": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_left/official_dino_sam3_views.pt",
+        "rows": 552339,
+        "sidecar_sha256": "c621fb004dfde125b4375e2f610abb727a89ee33e40afb38c7138f2d447dabee"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 441,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/horns_left/sam/protocol_result.json",
+            "sha256": "a39f21d13f36082cd33114983e8fd71c343024f8e9b68b535e524c060172eebd"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 119299947,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/horns_left/sam/gaussians.ply",
+            "rows": 481042,
+            "sha256": "a01212fe494d7acf36e64aaf35cee7bf4371a43dfd8d41ca6fbf528931b8dad9"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1924296,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/horns_left/sam/features.npy",
+            "sha256": "2890eb76b9f94a4b3584b3fba0624932b6e5cb5cf0dee7e1a388fc5c892da8fc",
+            "shape": [
+              481042,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 20164,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/horns_left/sam/masks/binary/DJI_20200223_163024_597_iou93.png",
+            "sha256": "83472e7616e978bca50252c44c702dfae5ff41ccd6d6ae47b978e4745fc6f35a"
+          },
+          "rendered_float_selector": {
+            "bytes": 75860,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/horns_left/sam/masks/float/DJI_20200223_163024_597.png",
+            "sha256": "1cf39aa3236464c98cc209874f7618a7a04e07e678defc78fa3b14179e75f7ad"
+          },
+          "resolved_sam_config": {
+            "bytes": 766,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/horns_left/sam/config.yaml",
+            "sha256": "1cda47889a1ba51b00eb1a04a46f0387a0f9dc9b112ae84ef811fde011568d6d"
+          },
+          "run_manifest": {
+            "bytes": 6649,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_0/attempts/exact_f7a_allview_horns_left_seed0_v1/run_manifest.json",
+            "sha256": "644a66c81c86c10e20d6470d2a729542f23f7fe03328dbdc33707461ae24bcd2"
+          },
+          "selected_iou": 0.9264614421701877
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 441,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/horns_left/sam/protocol_result.json",
+            "sha256": "f70e0c9f5c2b1f19f6f6e2ecba1c82c813a92e08f1d101857d425a901573e582"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 119299947,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/horns_left/sam/gaussians.ply",
+            "rows": 481042,
+            "sha256": "a01212fe494d7acf36e64aaf35cee7bf4371a43dfd8d41ca6fbf528931b8dad9"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1924296,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/horns_left/sam/features.npy",
+            "sha256": "3456c8b1ba49ad8b610f1329ec6941e6ab9b7f6b43fc77ca01371a61a4944ba3",
+            "shape": [
+              481042,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 20152,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/horns_left/sam/masks/binary/DJI_20200223_163024_597_iou93.png",
+            "sha256": "382853e67da194b34cab57666a952e7d14f369d9f6acede3b3101db9f16d4018"
+          },
+          "rendered_float_selector": {
+            "bytes": 76459,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/horns_left/sam/masks/float/DJI_20200223_163024_597.png",
+            "sha256": "feec383df876decbaaeac46a601b24f1c848954c52e2e782928981d3d9417603"
+          },
+          "resolved_sam_config": {
+            "bytes": 766,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/horns_left/sam/config.yaml",
+            "sha256": "d587ad77ad2d62f2dd9fef2bcc75a33ed4002efe6afd5d2b31298489d48c4af1"
+          },
+          "run_manifest": {
+            "bytes": 6649,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_1/attempts/exact_f7a_allview_horns_left_seed1_v1/run_manifest.json",
+            "sha256": "c33b3caabac9c9592d45cad00a3d0e1e91f72e22dfeba9308d1c2bf16b60b066"
+          },
+          "selected_iou": 0.9265208078577823
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 441,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/horns_left/sam/protocol_result.json",
+            "sha256": "a11a14c17b96ebfd821864d53cac0f374c2c7441d7bdef3e4b4da66f8518c12a"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 119299947,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/horns_left/sam/gaussians.ply",
+            "rows": 481042,
+            "sha256": "a01212fe494d7acf36e64aaf35cee7bf4371a43dfd8d41ca6fbf528931b8dad9"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1924296,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/horns_left/sam/features.npy",
+            "sha256": "9b59ad9937411c96699e30f03d35c9b3f6ff2a31bcb3f822bb33acb640f69331",
+            "shape": [
+              481042,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 20150,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/horns_left/sam/masks/binary/DJI_20200223_163024_597_iou93.png",
+            "sha256": "ceb98066294468dfc836f1d6edbe9c5ec7d10506349f44bdbddccde1019ffb4c"
+          },
+          "rendered_float_selector": {
+            "bytes": 76342,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/horns_left/sam/masks/float/DJI_20200223_163024_597.png",
+            "sha256": "b3616935971ebd6940564ff108de94f0700911b4fe08b4d0eb8306c128b4c52d"
+          },
+          "resolved_sam_config": {
+            "bytes": 766,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/horns_left/sam/config.yaml",
+            "sha256": "6782c3ec55fde7712e3bca38fe4e4c62f628f7ccd4ce5dcec716b5e7c0ab8239"
+          },
+          "run_manifest": {
+            "bytes": 6651,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns_left/seed_2/attempts/exact_f7a_allview_horns_left_seed2_v1/run_manifest.json",
+            "sha256": "3577f6175766b72bf2a3dc71849f49c55326a2aff2a76a44a2ce6f2bf59d07b2"
+          },
+          "selected_iou": 0.9265070964129706
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.013742137017863174,
+        "canonical_rows": 552339,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 481042,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          5.350837471461864e-05,
+          0.14795657656894287,
+          1.5599611397226212,
+          4.438460258455546,
+          11.557980972523183
+        ],
+        "median_distance_over_canonical_spacing": 10.766635231231984,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.2373119187098008,
+        "within_half_spacing_fraction": 0.010171669001875097,
+        "within_one_spacing_fraction": 0.0465967628606234,
+        "within_two_spacing_fraction": 0.15051076621168213
+      }
+    },
+    "leaves": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/leaves/official_dino_sam3_views.pt",
+        "rows": 1394440,
+        "sidecar_sha256": "6f56ccb6286ad2921f206384d2916905201eef95d47201f82d6b9512870ecd50"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 407,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/leaves/sam/protocol_result.json",
+            "sha256": "5a95f3016446e2085f2a01764ad428e32fdb21ab7e05415184bedc6dec7c0f8e"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 210510131,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/leaves/sam/gaussians.ply",
+            "rows": 848825,
+            "sha256": "f43255cf0ab4bde93f73083ad8f9b6bfbce1a016ad41dd896ed8916dd910e981"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 3395428,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/leaves/sam/features.npy",
+            "sha256": "a81fb01b8b84ee6114ad89bb6a4f5e3fa58a8341c0ceb9b3935218af07684cdb",
+            "shape": [
+              848825,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 18624,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/leaves/sam/masks/binary/IMG_2997_iou97.png",
+            "sha256": "a4164fe95607cdf336ecffee51b32408e56419b5bfe3152356edf5ccb8734019"
+          },
+          "rendered_float_selector": {
+            "bytes": 49895,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/leaves/sam/masks/float/IMG_2997.png",
+            "sha256": "2bf9753ea11b742a8736c1810b948faf9a809b960508371163114553e0d41f38"
+          },
+          "resolved_sam_config": {
+            "bytes": 758,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/leaves/sam/config.yaml",
+            "sha256": "e217fa88ee9dadf74eb6dd807f50ad97aef5c1357b8d4cb358cf8768a34f20ab"
+          },
+          "run_manifest": {
+            "bytes": 6614,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_0/attempts/exact_f7a_allview_leaves_seed0_v1/run_manifest.json",
+            "sha256": "02f5288881161c2637156b6b7bbf68d2cd43d92b2b6f256aa4490425fa41c835"
+          },
+          "selected_iou": 0.9665015933402205
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 406,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/leaves/sam/protocol_result.json",
+            "sha256": "b13bd6cb185dd19dd8eba2a0aeec8a6702d9c64ad105f91e4d60de9f6f789334"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 210510131,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/leaves/sam/gaussians.ply",
+            "rows": 848825,
+            "sha256": "f43255cf0ab4bde93f73083ad8f9b6bfbce1a016ad41dd896ed8916dd910e981"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 3395428,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/leaves/sam/features.npy",
+            "sha256": "50a2c7303eff8f9c8dcb587332bacb053f242e1d44fa674c9534ec26840b564a",
+            "shape": [
+              848825,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 18645,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/leaves/sam/masks/binary/IMG_2997_iou97.png",
+            "sha256": "f21bc9ee17525d580dec3e0bab10c85331ce8fad9b23dcf48be0d9d52c466e14"
+          },
+          "rendered_float_selector": {
+            "bytes": 49864,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/leaves/sam/masks/float/IMG_2997.png",
+            "sha256": "d45bebecb82a56cbbc8057f9021e73374427c973e25e75c8bfd7f9956602fd58"
+          },
+          "resolved_sam_config": {
+            "bytes": 758,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/leaves/sam/config.yaml",
+            "sha256": "99aa32ef4eac0d9b327f28c192bdcd8f1583161b8797d173b3be15be31168ba4"
+          },
+          "run_manifest": {
+            "bytes": 6613,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_1/attempts/exact_f7a_allview_leaves_seed1_v1/run_manifest.json",
+            "sha256": "d699c04bde43fc6858df2671121e19ca52c5656fbbc0de190e71285b08b7ae2b"
+          },
+          "selected_iou": 0.9664442461502302
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 407,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/leaves/sam/protocol_result.json",
+            "sha256": "550f99296cb853539b0196978ecabf21a0636fc237319fa3e94da527547186a6"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 210510131,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/leaves/sam/gaussians.ply",
+            "rows": 848825,
+            "sha256": "f43255cf0ab4bde93f73083ad8f9b6bfbce1a016ad41dd896ed8916dd910e981"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 3395428,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/leaves/sam/features.npy",
+            "sha256": "51d74e9e245eed2b134ea6c2571745bfa72f4bc8658bcc482fead674de53c719",
+            "shape": [
+              848825,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 18642,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/leaves/sam/masks/binary/IMG_2997_iou97.png",
+            "sha256": "33258794d55a80dd4343218f3330ef1502502443f195af7c870b2f72015e9337"
+          },
+          "rendered_float_selector": {
+            "bytes": 49862,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/leaves/sam/masks/float/IMG_2997.png",
+            "sha256": "3a8f381f97c9a0a5954d9a7ed558dcd48ec2056f9394f649fba5eb117a4f8e26"
+          },
+          "resolved_sam_config": {
+            "bytes": 758,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/leaves/sam/config.yaml",
+            "sha256": "d6e3b5dede6791ae1fc6556a81d2d4d4f09117452ccfdcbd843da5955383b54b"
+          },
+          "run_manifest": {
+            "bytes": 6615,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/leaves/seed_2/attempts/exact_f7a_allview_leaves_seed2_v1/run_manifest.json",
+            "sha256": "97decae840e223f63b77a1e06bad9c70d5e71596aa2f9e8ffaf00f51a8194625"
+          },
+          "selected_iou": 0.9665347552076785
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.012721264712969813,
+        "canonical_rows": 1394440,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 848825,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.001930981377476862,
+          2.6107993102369527,
+          12.974355027549253,
+          52.46399149403328,
+          218.3922062523089
+        ],
+        "median_distance_over_canonical_spacing": 205.23111256187786,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.07065178334756869,
+        "within_half_spacing_fraction": 2.1205784466762878e-05,
+        "within_one_spacing_fraction": 0.00012487850852649251,
+        "within_two_spacing_fraction": 0.0006090772538509115
+      }
+    },
+    "orchids": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/orchids/official_dino_sam3_views.pt",
+        "rows": 999833,
+        "sidecar_sha256": "3c741eee6245d5083c31f5e629850b13fc0c158290c72d50d1da708791ddc709"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 407,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/orchids/sam/protocol_result.json",
+            "sha256": "f2b4a76c8885c1740a78ae5f99c9acbc0f784f224f18f373c3d753ca9b5128ee"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 187176803,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/orchids/sam/gaussians.ply",
+            "rows": 754739,
+            "sha256": "1bbab6d976430a0c52feaa1dbce65fa75b8f8a308545cd2b7e8fbcd21e0ce391"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 3019084,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/orchids/sam/features.npy",
+            "sha256": "050b9b0a6dc54e62c643e154113083da21709e7c5ff85170219116fbd7300a45",
+            "shape": [
+              754739,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 28418,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/orchids/sam/masks/binary/IMG_4480_iou75.png",
+            "sha256": "7880b22071a59c8c0e8c3c4b219b1c02c110c15086a526ad76a29589d2090460"
+          },
+          "rendered_float_selector": {
+            "bytes": 169309,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/orchids/sam/masks/float/IMG_4480.png",
+            "sha256": "1d8bd5b6d479242ab00b8fd8f89b3d60c1ce569cc80977400922e4d6c8b86391"
+          },
+          "resolved_sam_config": {
+            "bytes": 760,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/orchids/sam/config.yaml",
+            "sha256": "30514cf8b17c058f4b3fb8ff5c9d597fc9e7eb4541fdc1f0926181164bcec344"
+          },
+          "run_manifest": {
+            "bytes": 6632,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_0/attempts/exact_f7a_allview_orchids_seed0_v1/run_manifest.json",
+            "sha256": "32687d7054b3b9f03f5443f2cc872e8fcb358cdec0d0b05681021ad012503175"
+          },
+          "selected_iou": 0.745600598535339
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 407,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/orchids/sam/protocol_result.json",
+            "sha256": "35dac8e196732890515b03e3f5df96f0e47ae552327cd268e5f13c0edac50d75"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 187176803,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/orchids/sam/gaussians.ply",
+            "rows": 754739,
+            "sha256": "1bbab6d976430a0c52feaa1dbce65fa75b8f8a308545cd2b7e8fbcd21e0ce391"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 3019084,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/orchids/sam/features.npy",
+            "sha256": "2e2b321767e5b97bd642eb80035670a82408be8eeda15024d898725372d6a2e0",
+            "shape": [
+              754739,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 28378,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/orchids/sam/masks/binary/IMG_4480_iou75.png",
+            "sha256": "b350db8aa5d0d885c8618dd46666bc830830c28349f20718fcfd8deeac4fda6b"
+          },
+          "rendered_float_selector": {
+            "bytes": 155719,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/orchids/sam/masks/float/IMG_4480.png",
+            "sha256": "fdc51c38296cd32e9c08b1cc1c23da20f704043bfee1e832260320b9424b2693"
+          },
+          "resolved_sam_config": {
+            "bytes": 760,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/orchids/sam/config.yaml",
+            "sha256": "7fb630151e559f5293ece923719b84ad851bf96efda81f2a3ef100cfb94a3410"
+          },
+          "run_manifest": {
+            "bytes": 6632,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_1/attempts/exact_f7a_allview_orchids_seed1_v1/run_manifest.json",
+            "sha256": "620988ce7cb1c61f7ad2e600cc286573de0050d8fec2d2fae8c95fdca8e2d85d"
+          },
+          "selected_iou": 0.7457440748800788
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 408,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/orchids/sam/protocol_result.json",
+            "sha256": "6cb412a05f39624c58bdeac63201f8815cbd4cc885534c1af32aacb6c9605441"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 187176803,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/orchids/sam/gaussians.ply",
+            "rows": 754739,
+            "sha256": "1bbab6d976430a0c52feaa1dbce65fa75b8f8a308545cd2b7e8fbcd21e0ce391"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 3019084,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/orchids/sam/features.npy",
+            "sha256": "f318887ba7363b1c781769c6f6478be67063442c0e6afafdb699f6dfacbc71d2",
+            "shape": [
+              754739,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 28484,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/orchids/sam/masks/binary/IMG_4480_iou75.png",
+            "sha256": "f115f7ec9e223e3acb7516d8d32c59e8430ef35a30720aad2c217d0c9aabf25e"
+          },
+          "rendered_float_selector": {
+            "bytes": 184888,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/orchids/sam/masks/float/IMG_4480.png",
+            "sha256": "cfc659470b29f4502b7beb8ef878b04ada27dbf4ad34ab37d5a2daef83f09d8f"
+          },
+          "resolved_sam_config": {
+            "bytes": 760,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/orchids/sam/config.yaml",
+            "sha256": "269980cf36d98202cffea18aa0af3410d8d39ca12999cc18e42401ddb25f3109"
+          },
+          "run_manifest": {
+            "bytes": 6632,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/orchids/seed_2/attempts/exact_f7a_allview_orchids_seed2_v1/run_manifest.json",
+            "sha256": "389f6770927318abbc5f3b9a75cc34be7451146da4da2429f7077e403ad8be2d"
+          },
+          "selected_iou": 0.7455468270132222
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.012969462041658587,
+        "canonical_rows": 999833,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 754739,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.000394052180477396,
+          0.2631880526307188,
+          1.0954695136815058,
+          3.744624728082566,
+          23.387464023348734
+        ],
+        "median_distance_over_canonical_spacing": 20.292904346020297,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.1986859033387701,
+        "within_half_spacing_fraction": 0.004455845000722104,
+        "within_one_spacing_fraction": 0.021999658159973182,
+        "within_two_spacing_fraction": 0.07512530821913271
+      }
+    },
+    "trex": {
+      "all_three_scalar_uplifts_differ": true,
+      "canonical_capability_xyz": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/trex/official_dino_sam3_views.pt",
+        "rows": 457571,
+        "sidecar_sha256": "4a977750ec48a07b882ea466217bc9b8ad950371f886ca7dd9f19ce307219398"
+      },
+      "geometry_identical_across_three_seeds": true,
+      "runs": {
+        "0": {
+          "fixed_threshold_result": {
+            "bytes": 433,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/trex/sam/protocol_result.json",
+            "sha256": "0147fd6f5edb09c4b73d6a45607451ad28d8de20ea7679562c279fdcd2c769c2"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 87199075,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/trex/sam/gaussians.ply",
+            "rows": 351603,
+            "sha256": "5b1705849494cb89d9dee24a387b03beec3f9f6565b8c7e5072844244e552181"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1406540,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/trex/sam/features.npy",
+            "sha256": "47c41c5fbd7465610931eb625f93b2e1189951d14619f9b5b0ad37aba97d5c1b",
+            "shape": [
+              351603,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 43929,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/trex/sam/masks/binary/DJI_20200223_163619_411_iou88.png",
+            "sha256": "5b26fa6c87d151da12f2e00a5d719f04b0aec494485e1aa911c803bd7115cfcb"
+          },
+          "rendered_float_selector": {
+            "bytes": 248544,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/trex/sam/masks/float/DJI_20200223_163619_411.png",
+            "sha256": "24a23286cba0c4059631d96f991f6d473764ff087f2dfdc7833ca4da29dfb1d6"
+          },
+          "resolved_sam_config": {
+            "bytes": 770,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/trex/sam/config.yaml",
+            "sha256": "8696e3378341cc930bf745610dc45b47cf1566b89f969373403f44ebb40721bc"
+          },
+          "run_manifest": {
+            "bytes": 7212,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_0/attempts/exact_f7a_allview_trex_seed0_v3_resolution_safe/run_manifest.json",
+            "sha256": "aed278d2b4a165d6e31a04796daa11370dd92c6700eae3521c02ccb17e7f6906"
+          },
+          "selected_iou": 0.87529623148093
+        },
+        "1": {
+          "fixed_threshold_result": {
+            "bytes": 435,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/trex/sam/protocol_result.json",
+            "sha256": "5261866da6e36b344796a49a95947e2005ce8c3fd0705a1df588c80d4f0b12c2"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 87199075,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/trex/sam/gaussians.ply",
+            "rows": 351603,
+            "sha256": "5b1705849494cb89d9dee24a387b03beec3f9f6565b8c7e5072844244e552181"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1406540,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/trex/sam/features.npy",
+            "sha256": "09c851e1c470c9a06ffe83a0f5943acb7f53c2b98a69bdc34d9d4be1f0a67b93",
+            "shape": [
+              351603,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 43303,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/trex/sam/masks/binary/DJI_20200223_163619_411_iou88.png",
+            "sha256": "ef4eb293851649958f02d84d266a8c9800e6c490b54221f4ec29ffc29f4b6579"
+          },
+          "rendered_float_selector": {
+            "bytes": 243425,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/trex/sam/masks/float/DJI_20200223_163619_411.png",
+            "sha256": "5fa43a280bb48481a10b771b02698573c07b6903dd327ab5a2ff057f3f94f360"
+          },
+          "resolved_sam_config": {
+            "bytes": 770,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/trex/sam/config.yaml",
+            "sha256": "664e2ceee6f4813376d42a347016da39ef5e6680564656d5f4245137569fb97c"
+          },
+          "run_manifest": {
+            "bytes": 7041,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_1/attempts/exact_f7a_allview_trex_seed1_v3_resolution_safe/run_manifest.json",
+            "sha256": "2d6b7600ab227da1415d0fdfedc3bcfd06afd81aef8dc27fd10b64953841dbfe"
+          },
+          "selected_iou": 0.8767112176569724
+        },
+        "2": {
+          "fixed_threshold_result": {
+            "bytes": 435,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/trex/sam/protocol_result.json",
+            "sha256": "4baff8cb9c1c50b205a6e39ef617ca791af1f7cace4e4ffd3538ae8dbf2a68a7"
+          },
+          "native_gaussian_geometry": {
+            "bytes": 87199075,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/trex/sam/gaussians.ply",
+            "rows": 351603,
+            "sha256": "5b1705849494cb89d9dee24a387b03beec3f9f6565b8c7e5072844244e552181"
+          },
+          "primitive_scalar_uplift": {
+            "bytes": 1406540,
+            "dtype": "float32",
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/trex/sam/features.npy",
+            "sha256": "726c85fa87bd25b0b8e47baa483ee7c253019502e8ccfb4ab2fcbb2cfff33606",
+            "shape": [
+              351603,
+              1
+            ]
+          },
+          "rendered_binary_selector": {
+            "bytes": 43982,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/trex/sam/masks/binary/DJI_20200223_163619_411_iou88.png",
+            "sha256": "e34d9a145b3d400eb034ae3421d2b7ffa9678caed41870271184afd277f0b34c"
+          },
+          "rendered_float_selector": {
+            "bytes": 253133,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/trex/sam/masks/float/DJI_20200223_163619_411.png",
+            "sha256": "b3789ce486b6c40e1cfe8c786ef63314a99f6b1bd83777b920acc40f9b806ef3"
+          },
+          "resolved_sam_config": {
+            "bytes": 770,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/trex/sam/config.yaml",
+            "sha256": "61b852706b8c1dfd32d5f484696245502cb18ccc9c2ca5e207c218bcc5811e06"
+          },
+          "run_manifest": {
+            "bytes": 7041,
+            "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/trex/seed_2/attempts/exact_f7a_allview_trex_seed2_v3_resolution_safe/run_manifest.json",
+            "sha256": "3c41b55df401b9a9358778a835460748558a11d2960ed7b321cbf68fdf0549bd"
+          },
+          "selected_iou": 0.8778877993071196
+        }
+      },
+      "spatial_alignment": {
+        "canonical_median_nearest_neighbor_spacing_50k_sample": 0.009235612911959255,
+        "canonical_rows": 457571,
+        "direct_row_or_index_mapping": false,
+        "ludvig_rows": 351603,
+        "ludvig_to_canonical_nearest_distance_quantiles_0_50_90_99_100": [
+          0.00046763213703613726,
+          0.3209595820167165,
+          1.5489329715362146,
+          4.493615807867391,
+          8.423975598314325
+        ],
+        "median_distance_over_canonical_spacing": 34.75238569181519,
+        "row_count_equal": false,
+        "unique_canonical_nearest_fraction": 0.1936786659954551,
+        "within_half_spacing_fraction": 0.0005659792436355776,
+        "within_one_spacing_fraction": 0.003708728310054237,
+        "within_two_spacing_fraction": 0.019445226576565045
+      }
+    }
+  },
+  "schema_version": "nvos_ludvig_published_compatible_asset_audit_v1"
+}

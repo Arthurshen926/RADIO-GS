@@ -1,0 +1,70 @@
+{
+  "schema_version": "nvos_strict_compatible_asset_audit_v1",
+  "experiment_registration": {
+    "path": "paper/artifacts/evidence_to_support_v1_experiment_registration_20260803.json",
+    "sha256": "7c539fb523c7152446bdc5f28325986a9162baa6c85a5608a66552023aa869c4"
+  },
+  "frozen_evaluator_modified": false,
+  "strict_track": {
+    "query": "official raw positive/negative scribbles only",
+    "prompt_inverse": "native-resolution exact front-to-back W transpose divided by W transpose one",
+    "sentinels": [
+      "fern",
+      "horns_left"
+    ],
+    "exact_prompt_responsibility_available": {
+      "fern": {
+        "num_gaussians": 760715,
+        "triplet_count": 69256531,
+        "visible_gaussians": 616723,
+        "cache_bytes": 1391220123,
+        "file_sha256": "cc2dbc08ef06ae5a8573413145d72675fe7181ccf7fb3cbae6cb4d5a14ca3db1"
+      },
+      "horns_left": {
+        "num_gaussians": 552339,
+        "triplet_count": 61564103,
+        "visible_gaussians": 357391,
+        "cache_bytes": 1235704767,
+        "file_sha256": "c56fc72d858c23f11c6237cf5e330d949bc1d8be709e3932cb4ccd287e0ebfe0"
+      }
+    },
+    "held_out_exact_prompt_responsibility_available": false,
+    "full8_expansion_status": "blocked_by_preregistered_sentinel_gate_not_by_missing_field_assets"
+  },
+  "canonical_field_assets": {
+    "feature_family": "official C-RADIOv4 dino_v3_7b and SAM3 projections reconstructed from the compact canonical field",
+    "all_eight_scenes_have_capability_and_k16_graph": true,
+    "scenes": {
+      "fern": {"num_gaussians": 760715, "valid_gaussians": 297200, "capability_bytes": 7799614329},
+      "flower": {"num_gaussians": 447935, "valid_gaussians": 197201, "capability_bytes": 4592680985},
+      "fortress": {"num_gaussians": 653541, "valid_gaussians": 205097, "capability_bytes": 6700759353},
+      "horns_center": {"num_gaussians": 544871, "valid_gaussians": 150900, "capability_bytes": 5586565817},
+      "horns_left": {"num_gaussians": 552339, "valid_gaussians": 157883, "capability_bytes": 5663135161},
+      "leaves": {"num_gaussians": 1394440, "valid_gaussians": 89207, "capability_bytes": 14297196729},
+      "orchids": {"num_gaussians": 999833, "valid_gaussians": 294336, "capability_bytes": 10251291129},
+      "trex": {"num_gaussians": 457571, "valid_gaussians": 154586, "capability_bytes": 4691478809}
+    },
+    "matched_k200_graph_cache_status": "not_yet_materialized",
+    "warning": "The existing k16 shared graph is not an exact substitute for the released LUDVIG 200-neighbor query-conditioned graph."
+  },
+  "published_compatible_reference": {
+    "summary": "output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json",
+    "summary_sha256": "65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546",
+    "macro_foreground_iou": 0.9125768502741802,
+    "strict_unseen_exact_match": false,
+    "eligible_for_strict_unseen_claim": false,
+    "released_system_uses": {
+      "target_rgb_visible_during_gaussian_splatting_training": true,
+      "target_rgb_visible_during_uplifting": true,
+      "target_view_2d_foundation_model_calls": true
+    },
+    "comparison_boundary": "This is an external published-system reference, not a source-only SAM-completion result under the current strict field protocol.",
+    "source_only_sam_completion_asset_status": "must_be_generated_from_the_frozen_reference_RGB_and_official_scribbles; released all-view features cannot be relabeled as source-only"
+  },
+  "safety": {
+    "target_rgb_opened_for_strict_query": false,
+    "target_mask_opened_for_query_or_selection": false,
+    "target_metrics_used_to_choose_operator": false,
+    "full8_large_cache_launch_before_sentinel_gate": false
+  }
+}

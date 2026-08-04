@@ -1,0 +1,73 @@
+{
+  "schema_version": "nvos_v1_unary_v2_continuous_solver_followup_registration_v1",
+  "registered_at": "2026-08-04T02:40:00+08:00",
+  "master_registration": {
+    "path": "paper/artifacts/evidence_to_support_v2_master_registration_20260804.json",
+    "sha256": "064ee5a816fe5108035829860d8d48e583bbb2a7c3a12e0a90c7efb528dd0bef"
+  },
+  "parent_failed_candidate": {
+    "registration": "paper/artifacts/nvos_evidence_to_support_v2_registration_20260804.json",
+    "registration_sha256": "3d4085c634f89f527e7cacf8ea5a073f20de73ea7e3c14a77d7c0e77095ef8f9",
+    "sentinel_iou": {
+      "horns_left": 0.30846665506312204,
+      "fern": 0.46595268236956594,
+      "macro": 0.387209668716344
+    },
+    "label_free_failure_diagnostic": "4096D unscaled diagonal LDA logits span hundreds and mean unary confidence exceeds 0.99, so the nominal continuous energy degenerates toward an overfit hard classification"
+  },
+  "purpose": "A one-factor attribution follow-up: restore the previously sealed v1 target-blind hashed query compatibility as both continuous unary y and query gate g, while retaining only the v2 explicit-confidence hard-seeded continuous solver change.",
+  "fixed_inputs": {
+    "horns_left": {
+      "selector_path": "output/optimization_20260803/nvos_strict_hashed_query_conditioned_sentinels_v1/selectors/horns_left.pt",
+      "selector_sha256": "f90d723fa03abb916312f2510430661e47feee0b13df1eb2251a276b55e6a469",
+      "selector_method_contract_sha256": "ae11dc2abafed6111541ce5ec1652ede783b2593f77897611b7cbdb3360c8dbf",
+      "query_compatibility_sha256": "577055394928b07737c05eda716ae63ffb133999d1cd352376c3c04f155b269b",
+      "signed_reference_evidence_sha256": "b4628ed951f0336138c6c7985f0e0172c8799f18baaafc8585826fb7dc2139ac",
+      "support_graph_sha256": "cb8c0384d0951e9a4347935402e762a4c0c25fa4dcf9e493de8465054d47b7ba"
+    },
+    "fern": {
+      "selector_path": "output/optimization_20260803/nvos_strict_hashed_query_conditioned_sentinels_v1/selectors/fern.pt",
+      "selector_sha256": "ad04b55f17aefefba9b144ce13000fb885100b9aa3cb1d41fa38f8825d99f610",
+      "selector_method_contract_sha256": "ae11dc2abafed6111541ce5ec1652ede783b2593f77897611b7cbdb3360c8dbf",
+      "query_compatibility_sha256": "bca7d2cdc1d4624dda1d0d95067ee3d8ade9001d398fc56be8ef14eb94d33761",
+      "signed_reference_evidence_sha256": "012a7cf991506080f09cbe4f2c100592dc60ee5120d83ec785652e48c275e017",
+      "support_graph_sha256": "2d570d098e36dabb7fc82b06944f75def6ebc13598e97afce232f008cea34eeb"
+    }
+  },
+  "method": {
+    "track": "strict_source_only",
+    "unary_y": "sealed v1 query_compatibility without thresholding or recalibration",
+    "unary_confidence_c": "abs(2*y-1) clamped below at 0.05",
+    "query_gate_g": "the same sealed v1 query_compatibility",
+    "graph": "the exact frozen canonical shared k16 symmetric raw affinity already bound by the v1 selector",
+    "query_edge": "w_ij*sqrt(g_i*g_j), then recompute symmetric degree normalization",
+    "hard_seed_weights": "positive=relu(signed_reference_evidence), negative=relu(-signed_reference_evidence), each divided by its sign maximum",
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "exclusive_relative",
+    "laplacian_weight": 0.25,
+    "cg_iterations": 128,
+    "cg_tolerance": 1e-06,
+    "connected_selection": "none",
+    "readout": "continuous probability with frozen target renderer and threshold 0.5"
+  },
+  "one_factor_rule": "classifier, hashed feature relation, prompt inverse, and target readout are frozen; no LDA logit calibration or classifier refit is permitted in this follow-up",
+  "sentinel": {
+    "ordered_scenes": ["horns_left", "fern"],
+    "v1_comparator": {
+      "horns_left": 0.6969455416488206,
+      "fern": 0.53084104,
+      "macro": 0.61389329
+    },
+    "gate": "macro greater than 0.61389329, at least one scene improves, and neither scene regresses by more than 0.03",
+    "strict_full8_requires_gate": true
+  },
+  "target_and_thermal_rules": {
+    "target_mask_before_both_selector_receipts": false,
+    "frozen_evaluator_may_be_modified": false,
+    "gpu": 1,
+    "poll_interval_seconds": 180,
+    "launch_inhibit_temperature_c": 83,
+    "hard_abort_temperature_c": 87,
+    "hard_abort_requires_consecutive_polls": 2
+  }
+}

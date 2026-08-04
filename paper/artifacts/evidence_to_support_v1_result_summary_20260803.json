@@ -1,0 +1,99 @@
+{
+  "schema_version": "evidence_to_support_v1_result_summary",
+  "date": "2026-08-03",
+  "frozen_protocols_modified": false,
+  "headline": {
+    "spin9": {
+      "status": "full9_preregistered_gates_passed",
+      "method": "exact reference adjoint plus release-compatible query-conditioned diffusion",
+      "scene_macro_iou": 0.877162,
+      "exact_unary": 0.760165,
+      "fixed_graph": 0.764200,
+      "connected": 0.771640,
+      "reproduced_ludvig": 0.937200,
+      "delta_vs_exact_unary": 0.116997,
+      "delta_vs_reproduced_ludvig": -0.060039,
+      "evidence": {
+        "path": "output/optimization_20260803/spin9_query_conditioned_diffusion_v1/full9_audit.json",
+        "sha256": "6a73b77d8d2d15f6f589b06a42aecf218ee1780159adefa12bb184a22d16e05a"
+      }
+    },
+    "lerf3d": {
+      "status": "full4_target_blind_candidate_scored_but_not_robustly_promoted",
+      "fixed_formal_scene_macro_iou": 0.32726162,
+      "recursive_upper_otsu3_scene_macro_iou": 0.37605102,
+      "query_conditioned_support_scene_macro_iou": 0.37764610,
+      "reproduced_vala_scene_macro_iou": 0.54124888,
+      "delta_support_vs_otsu3": 0.00159508,
+      "delta_support_vs_reproduced_vala": -0.16360277,
+      "promotion_note": "The candidate improves three of four scenes but regresses ramen; retain Otsu3 as the robust baseline and report support as a theory-aligned ablation.",
+      "evidence": {
+        "path": "output/optimization_20260803/lerf_text_audit/query_conditioned_support_v1/aggregate.json",
+        "sha256": "a9cef48a5180258fd5c5a484a87368a15f85a99ec6901896b4f15ca2ae57532e"
+      }
+    },
+    "nvos": {
+      "status": "frozen_full8_unchanged_all_new_sentinel_gates_failed",
+      "frozen_strict_full8_scene_macro_iou": 0.61195354,
+      "best_new_strict_sentinel_method": "raw signed scribble plus hash256 K201 query-conditioned diffusion",
+      "best_new_strict_sentinel_macro_iou": 0.61389329,
+      "best_new_strict_sentinel_horns_left_iou": 0.69694554,
+      "best_new_strict_sentinel_fern_iou": 0.53084104,
+      "sentinel_promotion": false,
+      "reproduced_ludvig_all_view_published_compatible": 0.91257685,
+      "protocol_warning": "The reproduced LUDVIG value sees all registered-view RGB during uplift and is not a strict unseen/source-only result."
+    }
+  },
+  "field_diagnostics": {
+    "full_teacher_capacity": {
+      "conclusion": "Full-1280 teacher descriptors barely change AP/oracle relative to compact descriptors; compact capacity is not the primary LERF bottleneck."
+    },
+    "field_a": {
+      "checkpoint_sha256": "9753eeb9bba7062b26f2443ee61be8bf2be4b4eedb3516a21984f62188a27067",
+      "label_free_gate": "pass",
+      "raw_mean_cosine_delta": 0.060659,
+      "dino_mean_cosine_delta": 0.068597,
+      "sam_mean_cosine_delta": 0.105937,
+      "figurines_otsu3_iou": 0.46835507,
+      "figurines_query_support_iou": 0.47462234,
+      "gate_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/field_a/figurines_label_free_gate_checkpoint_receipt.json",
+        "sha256": "0ad679ed857ef68359aa5e3e3829955322091c8382dade95884f9cccd609c14f"
+      }
+    },
+    "field_b": {
+      "checkpoint_sha256": "f9b2d926c7a455acd6fcb2b87e3be9e385cd5cf2357204d0867546da93d9b710",
+      "label_free_gate": "pass",
+      "relation_hinge_before": 0.026330,
+      "relation_hinge_after": 0.015702,
+      "relation_order_accuracy_before": 0.8861,
+      "relation_order_accuracy_after": 0.9275,
+      "figurines_otsu3_iou": 0.46629117,
+      "figurines_query_support_iou": 0.47521114,
+      "conclusion": "Query-independent relation fidelity improves, but the frozen readout/support interface converts it into only 0.000589 IoU over Field-A support and remains below the old-field support result.",
+      "gate_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/field_b/figurines_field_b_label_free_gate_receipt.json",
+        "sha256": "0313702dbf7547485d9f8325003ad206e64db57301bd4c9fc46fc162ef4efcf5"
+      },
+      "downstream_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/lerf_field_b_query_conditioned_support_v1/field_b_figurines_post_gate_comparison_receipt.json",
+        "sha256": "a96f50e175c04e7a1ea0f39527ffe6b1c76771a31c768a587014ddb0ce4cde4a"
+      }
+    }
+  },
+  "nvos_rejected_followups": {
+    "published_compatible_hard_li_macro": 0.55310834,
+    "soft_entropy_reliability_macro": 0.6019765,
+    "raw_semantic_gated_macro": 0.416658,
+    "mechanism": "Released nonnegative diffusion reduces soft evidence to boolean reachability, so dense completed masks lose their calibrated magnitude and over-propagate."
+  },
+  "verification": {
+    "focused_tests_passed": 262,
+    "focused_tests_failed": 0,
+    "python_compile": "pass",
+    "shell_syntax": "pass",
+    "final_gpu_state": "both GPUs idle with 1 MiB reported memory",
+    "thermal_pauses_observed": 0,
+    "thermal_hard_aborts_observed": 0
+  }
+}

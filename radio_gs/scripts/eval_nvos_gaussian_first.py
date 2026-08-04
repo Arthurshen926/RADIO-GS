@@ -26,9 +26,14 @@ from radio_gs.evaluation.promptable_segmentation import (
     resize_mask_nearest,
 )
 from radio_gs.interfaces.capability_cache import (
+    CanonicalCapabilityBank,
     load_canonical_capability_bank,
     load_canonical_primitive_reliability,
     load_canonical_support_graph,
+)
+from radio_gs.interfaces.query_diffusion_cache import (
+    load_query_diffusion_knn_cache,
+    load_query_diffusion_relation_cache,
 )
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.querying.evidence_scorer import (
@@ -44,6 +49,17 @@ from radio_gs.querying.evidence_scorer import (
 )
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
 from radio_gs.querying.query_engine import CanonicalQueryEngine
+from radio_gs.querying.query_conditioned_diffusion import (
+    QueryConditionedDiffusionConfig,
+    cap_positive_reference_evidence,
+    compute_query_conditioned_support,
+    knn_feature_distances,
+    normalize_node_features,
+    rbf_similarity_from_distances,
+    run_query_conditioned_diffusion,
+    solve_continuous_query_support,
+    weighted_logistic_query_compatibility,
+)
 from radio_gs.querying.reliability_fusion import (
     DUAL_PROTOTYPE_SEED_PROVENANCE,
     DUAL_SOLVER_SEED_PROVENANCE,
@@ -2983,6 +2999,496 @@ def run(args: argparse.Namespace) -> dict:
                 "propagated": expand_valid_rows(result.probabilities),
                 "connected": expand_valid_rows(result.selected_probabilities),
             }
+            query_diffusion_kernel = str(
+                getattr(args, "query_conditioned_diffusion_kernel", "none")
+            )
+            if query_diffusion_kernel != "none":
+                # The compatibility path has already persisted the legacy
+                # stage scores above.  Release its 4096-D/1024-D GPU banks and
+                # k16 solver before constructing a K201 graph; otherwise large
+                # scenes needlessly keep both complete methods resident.
+                del engine, query, feature_banks, support_graph, result
+                if device.type == "cuda":
+                    torch.cuda.empty_cache()
+                relation_path = Path(args.query_diffusion_feature_cache).resolve()
+                support_graph_sha256 = _file_sha256(
+                    Path(args.canonical_support_graph)
+                )
+                expected_field_hash = str(
+                    capability_bank.metadata.get("field_checkpoint_sha256", "")
+                )
+                relation_cache = load_query_diffusion_relation_cache(
+                    relation_path,
+                    expected_global_rows=valid_rows,
+                    expected_xyz=capability_bank.xyz[valid_rows],
+                    expected_source_graph_sha256=support_graph_sha256,
+                    expected_field_checkpoint_sha256=expected_field_hash,
+                    expected_source_capability_cache=(
+                        args.canonical_capability_cache
+                    ),
+                )
+                relation_metadata = relation_cache.metadata
+                relation_features = relation_cache.features
+                relation_feature_dimension = relation_cache.feature_dimension
+                del relation_cache
+                knn_cache = load_query_diffusion_knn_cache(
+                    args.query_diffusion_knn_cache,
+                    expected_global_rows=valid_rows,
+                    expected_xyz=capability_bank.xyz[valid_rows],
+                    expected_source_graph_sha256=support_graph_sha256,
+                    expected_num_neighbors=200,
+                )
+                # Retain only the row/provenance contract after the relation
+                # cache has been verified.  The dense official capability
+                # tensors are no longer inputs to this query-time operator.
+                capability_bank = CanonicalCapabilityBank(
+                    xyz=capability_bank.xyz,
+                    valid=capability_bank.valid,
+                    appearance=torch.empty((valid_rows.numel(), 0)),
+                    boundary=torch.empty((valid_rows.numel(), 0)),
+                    signatures=capability_bank.signatures,
+                    metadata=capability_bank.metadata,
+                    features_are_compact=True,
+                )
+                continuous_convex_v2 = (
+                    query_diffusion_kernel == "continuous_convex_v2"
+                )
+                # Release compatibility uses the positive side alone.  V2
+                # instead retains the complete foreground/background adjoint:
+                # its full reference mask gives a calibrated Bernoulli unary
+                # and confidence for every visible primitive.
+                positive_initial = (
+                    positive_weight[valid_rows_device].detach().float().cpu()
+                )
+                negative_initial = (
+                    negative_weight[valid_rows_device].detach().float().cpu()
+                )
+                reference_weight = (
+                    support_count[valid_rows_device].detach().float().cpu()
+                )
+                positive_rows_before_cap = int((positive_initial > 0).sum())
+                if continuous_convex_v2:
+                    observation_confidence = (
+                        positive_initial + negative_initial
+                    ).clamp(0.0, 1.0)
+                    observation_probability = torch.where(
+                        observation_confidence > 0,
+                        positive_initial
+                        / observation_confidence.clamp_min(1e-8),
+                        torch.full_like(observation_confidence, 0.5),
+                    ).clamp(0.0, 1.0)
+                    classifier_evidence = positive_initial - negative_initial
+                    logistic_fit_population = "signed_nonzero"
+                else:
+                    positive_initial = cap_positive_reference_evidence(
+                        positive_initial,
+                        max_positive_fraction=float(
+                            args.query_diffusion_max_positive_fraction
+                        ),
+                    )
+                    observation_confidence = None
+                    observation_probability = None
+                    classifier_evidence = positive_initial
+                    logistic_fit_population = "all_nodes_positive_only"
+                neighbors_device = knn_cache.neighbor_indices.to(device)
+                calibration_records: list[dict[str, object]] = []
+                if bool(args.query_diffusion_reference_calibration):
+                    # Normalize once on CPU, where the relation cache already
+                    # resides, then transfer only the fp32 normalized bank.
+                    # This prevents simultaneous fp16+fp32 4096-D GPU banks in
+                    # the matched-capacity diagnostic.
+                    normalized_relation_cpu = normalize_node_features(
+                        relation_features
+                    )
+                    del relation_features
+                    base_compatibility = weighted_logistic_query_compatibility(
+                        normalized_relation_cpu,
+                        classifier_evidence,
+                        reference_weight,
+                        logistic_c=float(args.query_diffusion_logistic_c),
+                        regularizer_bandwidth=1.0,
+                        fit_population=logistic_fit_population,
+                    ).to(device)
+                    normalized_relation = normalized_relation_cpu.to(device)
+                    del normalized_relation_cpu
+                    feature_bandwidths = (
+                        [1.0]
+                        if continuous_convex_v2
+                        else [2.0**value for value in (-1, 0, 1, 2, 3)]
+                    )
+                    regularizer_bandwidths = (
+                        [1.0]
+                        if continuous_convex_v2
+                        else [2.0**value for value in (-3, -2, -1, 0)]
+                    )
+                    thresholds = np.arange(0.99, 0.02, -0.01, dtype=np.float64)
+                    best_reference_iou = -1.0
+                    best_support = None
+                    best_compatibility = None
+                    best_feature_bandwidth = None
+                    best_regularizer_bandwidth = None
+                    best_threshold = None
+
+                    def reference_score_map(values: torch.Tensor) -> np.ndarray:
+                        expanded = expand_valid_rows(values)
+                        with torch.no_grad():
+                            rendered = renderer.render_feature_rows(
+                                model,
+                                prompt_pose,
+                                expanded[:, None],
+                                feature_height=int(renderer.image_height),
+                                feature_width=int(renderer.image_width),
+                                alpha_normalize=True,
+                                contribution_gamma=args.feature_contribution_gamma,
+                            )["feature_map"][0]
+                        score = rendered.detach().float().cpu().numpy()
+                        return cv2.resize(
+                            score,
+                            (native_width, native_height),
+                            interpolation=cv2.INTER_LINEAR,
+                        )
+
+                    # Feature distances do not depend on either registered
+                    # bandwidth.  Reusing this N-by-K bank is exactly
+                    # equivalent to recomputation and is decisive for 4096-D
+                    # diagnostic rows.
+                    positive_reference_mask_device = (
+                        classifier_evidence.to(device) > 0
+                    )
+                    threshold_source = str(
+                        args.query_diffusion_reference_threshold_source
+                    )
+                    calibration_only = bool(
+                        args.query_diffusion_reference_calibration_only
+                    )
+                    relation_distance_bank = (
+                        None
+                        if calibration_only
+                        and threshold_source == "query_compatibility"
+                        else knn_feature_distances(
+                            normalized_relation,
+                            neighbors_device,
+                            distance_chunk_size=int(
+                                args.query_diffusion_distance_chunk_size
+                            ),
+                        )
+                    )
+                    for feature_bandwidth in feature_bandwidths:
+                        similarities = (
+                            None
+                            if relation_distance_bank is None
+                            else rbf_similarity_from_distances(
+                                relation_distance_bank,
+                                feature_bandwidth=float(feature_bandwidth),
+                                positive_reference_mask=(
+                                    positive_reference_mask_device
+                                ),
+                            )
+                        )
+                        for regularizer_bandwidth in regularizer_bandwidths:
+                            candidate_compatibility = base_compatibility.pow(
+                                1.0 / float(regularizer_bandwidth)
+                            )
+                            candidate_config = QueryConditionedDiffusionConfig(
+                                kernel=query_diffusion_kernel,
+                                feature_bandwidth=float(feature_bandwidth),
+                                regularizer_bandwidth=float(
+                                    regularizer_bandwidth
+                                ),
+                                logistic_c=float(args.query_diffusion_logistic_c),
+                                logistic_fit_population=logistic_fit_population,
+                                iterations=int(args.query_diffusion_iterations),
+                                edge_binarize_threshold=(
+                                    None
+                                    if continuous_convex_v2
+                                    else float(
+                                        args.query_diffusion_edge_binarize_threshold
+                                    )
+                                ),
+                                distance_chunk_size=int(
+                                    args.query_diffusion_distance_chunk_size
+                                ),
+                            )
+                            if calibration_only and threshold_source == (
+                                "query_compatibility"
+                            ):
+                                candidate_support = candidate_compatibility
+                            elif continuous_convex_v2:
+                                assert observation_probability is not None
+                                assert observation_confidence is not None
+                                assert similarities is not None
+                                candidate_support = solve_continuous_query_support(
+                                    observation_probability.to(device),
+                                    observation_confidence.to(device),
+                                    neighbors_device,
+                                    similarities,
+                                    candidate_compatibility,
+                                    config=candidate_config,
+                                )
+                            else:
+                                assert similarities is not None
+                                candidate_support = run_query_conditioned_diffusion(
+                                    positive_initial.to(device),
+                                    neighbors_device,
+                                    similarities,
+                                    candidate_compatibility,
+                                    config=candidate_config,
+                                ).squeeze(1)
+                            rendered_reference = reference_score_map(
+                                candidate_compatibility
+                                if threshold_source == "query_compatibility"
+                                else candidate_support
+                            )
+                            candidate_best_iou = -1.0
+                            candidate_threshold = None
+                            for threshold in thresholds:
+                                selected = rendered_reference >= float(threshold)
+                                intersection = int(
+                                    np.logical_and(selected, positive_native).sum()
+                                )
+                                union = int(
+                                    np.logical_or(selected, positive_native).sum()
+                                )
+                                reference_iou = (
+                                    float(intersection / union) if union else 1.0
+                                )
+                                # Descending thresholds and strict improvement
+                                # reproduce the release's deterministic first tie.
+                                if reference_iou > candidate_best_iou:
+                                    candidate_best_iou = reference_iou
+                                    candidate_threshold = float(threshold)
+                            calibration_records.append(
+                                {
+                                    "feature_bandwidth": float(feature_bandwidth),
+                                    "regularizer_bandwidth": float(
+                                        regularizer_bandwidth
+                                    ),
+                                    "reference_iou": float(candidate_best_iou),
+                                    "rendered_threshold": candidate_threshold,
+                                    "threshold_source": threshold_source,
+                                }
+                            )
+                            if candidate_best_iou > best_reference_iou:
+                                best_reference_iou = float(candidate_best_iou)
+                                best_support = candidate_support.detach().clone()
+                                best_compatibility = (
+                                    candidate_compatibility.detach().clone()
+                                )
+                                best_feature_bandwidth = float(feature_bandwidth)
+                                best_regularizer_bandwidth = float(
+                                    regularizer_bandwidth
+                                )
+                                best_threshold = float(candidate_threshold)
+                    if best_support is None or best_compatibility is None:
+                        raise RuntimeError("reference-only diffusion calibration failed")
+                    support = best_support
+                    query_compatibility = best_compatibility
+                    selected_query_diffusion_threshold = best_threshold
+                    selected_feature_bandwidth = best_feature_bandwidth
+                    selected_regularizer_bandwidth = best_regularizer_bandwidth
+                    selected_reference_iou = best_reference_iou
+                else:
+                    relation_features_device = relation_features.to(device)
+                    support, query_compatibility = compute_query_conditioned_support(
+                        relation_features_device,
+                        neighbors_device,
+                        positive_initial.to(device),
+                        reference_weight,
+                        config=QueryConditionedDiffusionConfig(
+                            kernel=query_diffusion_kernel,
+                            feature_bandwidth=float(
+                                args.query_diffusion_feature_bandwidth
+                            ),
+                            regularizer_bandwidth=float(
+                                args.query_diffusion_regularizer_bandwidth
+                            ),
+                            logistic_c=float(args.query_diffusion_logistic_c),
+                            logistic_fit_population="all_nodes_positive_only",
+                            iterations=int(args.query_diffusion_iterations),
+                            edge_binarize_threshold=float(
+                                args.query_diffusion_edge_binarize_threshold
+                            ),
+                            distance_chunk_size=int(
+                                args.query_diffusion_distance_chunk_size
+                            ),
+                        ),
+                    )
+                    selected_query_diffusion_threshold = float(
+                        args.solver_support_threshold
+                    )
+                    selected_feature_bandwidth = float(
+                        args.query_diffusion_feature_bandwidth
+                    )
+                    selected_regularizer_bandwidth = float(
+                        args.query_diffusion_regularizer_bandwidth
+                    )
+                    selected_reference_iou = None
+                canonical_stage_gaussian_scores.update(
+                    {
+                        "query_compatibility": expand_valid_rows(
+                            query_compatibility
+                        ),
+                        "propagated": expand_valid_rows(support),
+                        "connected": expand_valid_rows(support),
+                    }
+                )
+                assert registered_prompt_evidence is not None
+                registered_prompt_evidence["query_conditioned_diffusion"] = {
+                    "kernel": query_diffusion_kernel,
+                    "execution_optimization": (
+                        "implicit_symmetrized_boolean_reachability_nonnegative_v1"
+                        if query_diffusion_kernel == "ludvig_release_compat"
+                        else (
+                            "implicit_knn_symmetric_energy_jacobi_pcg_v1"
+                            if continuous_convex_v2
+                            else "explicit_symmetrized_sparse_numeric_v1"
+                        )
+                    ),
+                    "execution_optimization_changes_method_semantics": False,
+                    "relation_cache": str(relation_path),
+                    "relation_cache_sha256": _file_sha256(relation_path),
+                    "relation_feature_semantics": relation_metadata.get(
+                        "kernel_compatibility_scope"
+                    ),
+                    "relation_projection": relation_metadata.get("projection"),
+                    "relation_feature_dimension": relation_feature_dimension,
+                    "relation_storage_dtype": relation_metadata.get(
+                        "storage_dtype"
+                    ),
+                    "lossy_relation_compression": relation_metadata.get(
+                        "lossy_relation_compression"
+                    ),
+                    "relation_distance_bank_reused_across_feature_bandwidths": bool(
+                        args.query_diffusion_reference_calibration
+                    ),
+                    "relation_normalization_execution": (
+                        "cpu_fp32_l2_then_single_gpu_transfer_v1"
+                        if bool(args.query_diffusion_reference_calibration)
+                        else "end_to_end_default_v1"
+                    ),
+                    "native_ludvig_dinov2_pca40_exact": False,
+                    "diagnostic_status": relation_metadata.get(
+                        "diagnostic_status"
+                    ),
+                    "formal_preregistered_result": relation_metadata.get(
+                        "formal_preregistered_result"
+                    ),
+                    "scene_selection_after_full9": relation_metadata.get(
+                        "scene_selection_after_full9"
+                    ),
+                    "diagnostic_declaration": relation_metadata.get(
+                        "diagnostic_declaration"
+                    ),
+                    "diagnostic_declaration_sha256": relation_metadata.get(
+                        "diagnostic_declaration_sha256"
+                    ),
+                    "knn_cache": str(
+                        Path(args.query_diffusion_knn_cache).resolve()
+                    ),
+                    "official_num_neighbors_parameter": 200,
+                    "effective_knn_columns": int(knn_cache.effective_k),
+                    "knn_includes_self": True,
+                    "feature_bandwidth": selected_feature_bandwidth,
+                    "regularizer_bandwidth": selected_regularizer_bandwidth,
+                    "logistic_c": float(args.query_diffusion_logistic_c),
+                    "logistic_fit_population": logistic_fit_population,
+                    "max_positive_fraction": (
+                        None
+                        if continuous_convex_v2
+                        else float(args.query_diffusion_max_positive_fraction)
+                    ),
+                    "positive_cap_rule": (
+                        "none_preserve_complete_reference_observation"
+                        if continuous_convex_v2
+                        else "released_argsort_keep_largest_int_fraction"
+                    ),
+                    "positive_rows_before_cap": positive_rows_before_cap,
+                    "positive_rows_after_cap": int((positive_initial > 0).sum()),
+                    "iterations": (
+                        None
+                        if continuous_convex_v2
+                        else int(args.query_diffusion_iterations)
+                    ),
+                    "edge_binarize_threshold": (
+                        None
+                        if continuous_convex_v2
+                        else float(args.query_diffusion_edge_binarize_threshold)
+                    ),
+                    "continuous_convex_v2": (
+                        {
+                            "energy": "confidence_unary_plus_query_gated_symmetric_normalized_pairwise",
+                            "laplacian_weight": 1.0,
+                            "unobserved_fidelity": 0.01,
+                            "hard_observation_confidence": 0.99,
+                            "hard_positive_probability": 0.9,
+                            "hard_negative_probability": 0.1,
+                            "cg_iterations": 64,
+                            "cg_tolerance": 1e-5,
+                            "readout": "continuous_probability_all_components",
+                            "hard_positive_rows": int(
+                                (
+                                    (observation_confidence >= 0.99)
+                                    & (observation_probability >= 0.9)
+                                ).sum()
+                            ),
+                            "hard_negative_rows": int(
+                                (
+                                    (observation_confidence >= 0.99)
+                                    & (observation_probability <= 0.1)
+                                ).sum()
+                            ),
+                        }
+                        if continuous_convex_v2
+                        else None
+                    ),
+                    "reference_calibration": bool(
+                        args.query_diffusion_reference_calibration
+                    ),
+                    "reference_threshold_source": str(
+                        args.query_diffusion_reference_threshold_source
+                    ),
+                    "reference_calibration_candidates": calibration_records,
+                    "selected_reference_iou": selected_reference_iou,
+                    "selected_rendered_threshold": (
+                        selected_query_diffusion_threshold
+                    ),
+                    "reference_only": True,
+                    "target_masks_opened": False,
+                    "target_metrics_opened": False,
+                }
+                if bool(args.query_diffusion_reference_calibration_only):
+                    threshold_receipt = {
+                        "schema_version": (
+                            "query_diffusion_reference_threshold_receipt_v1"
+                        ),
+                        "scene_id": str(args.scene_id),
+                        "kernel": query_diffusion_kernel,
+                        "threshold_source": str(
+                            args.query_diffusion_reference_threshold_source
+                        ),
+                        "selected_rendered_threshold": float(
+                            selected_query_diffusion_threshold
+                        ),
+                        "selected_reference_iou": float(
+                            selected_reference_iou
+                        ),
+                        "reference_calibration_candidates": calibration_records,
+                        "query_conditioned_diffusion": registered_prompt_evidence[
+                            "query_conditioned_diffusion"
+                        ],
+                        "target_score_rendering_performed": False,
+                        "target_masks_opened": False,
+                        "target_metrics_opened": False,
+                    }
+                    threshold_receipt_path = (
+                        output_root / "query_compatibility_reference_threshold.json"
+                    )
+                    threshold_receipt_path.write_text(
+                        json.dumps(threshold_receipt, indent=2, allow_nan=False)
+                        + "\n",
+                        encoding="utf-8",
+                    )
+                    return threshold_receipt
             if _requires_legacy_prototype_observation(observation_fusion):
                 # Audit the historical canonical-field expert independently
                 # from the native raster-adjoint expert and their PoE.  This
@@ -3014,7 +3520,11 @@ def run(args: argparse.Namespace) -> dict:
             gaussian_scores = canonical_stage_gaussian_scores[
                 str(getattr(args, "registered_readout_stage", "connected"))
             ]
-            prediction_threshold = float(args.solver_support_threshold)
+            prediction_threshold = (
+                float(selected_query_diffusion_threshold)
+                if query_diffusion_kernel != "none"
+                else float(args.solver_support_threshold)
+            )
             positive_seed_count = int((positive_soft > 0).sum())
             negative_seed_count = int((negative_soft > 0).sum())
         if args.support_mode != "canonical_support":
@@ -3678,6 +4188,23 @@ def run(args: argparse.Namespace) -> dict:
                 "graph_policy": args.graph_policy,
                 "component_graph_policy": args.component_graph_policy,
                 "graph_legacy_residual": float(args.graph_legacy_residual),
+                "query_conditioned_diffusion": (
+                    registered_prompt_evidence.get(
+                        "query_conditioned_diffusion"
+                    )
+                    if (
+                        registered_prompt_evidence is not None
+                        and str(
+                            getattr(
+                                args,
+                                "query_conditioned_diffusion_kernel",
+                                "none",
+                            )
+                        )
+                        != "none"
+                    )
+                    else None
+                ),
                 "channel_confidence_mode": str(
                     getattr(args, "channel_confidence_mode", "none")
                 ),
@@ -3744,6 +4271,10 @@ def run(args: argparse.Namespace) -> dict:
             ),
             "target_camera_used_as_support": False,
             "test_calibration": False,
+            "reference_query_calibration": bool(
+                getattr(args, "query_diffusion_reference_calibration", False)
+            ),
+            "reference_query_calibration_uses_target_masks_or_metrics": False,
             "test_calibration_definition": (
                 "no target labels, target masks, or metric feedback are used; "
                 "unlabeled evaluation-scene statistics are disclosed separately"
@@ -3836,6 +4367,7 @@ def run(args: argparse.Namespace) -> dict:
     implementation_relatives = (
         "radio_gs/evaluation/promptable_segmentation.py",
         "radio_gs/interfaces/capability_cache.py",
+        "radio_gs/interfaces/query_diffusion_cache.py",
         "radio_gs/config.py",
         "radio_gs/data/lerf_dataset.py",
         "radio_gs/models/explicit_gaussian.py",
@@ -3847,6 +4379,7 @@ def run(args: argparse.Namespace) -> dict:
         "radio_gs/querying/query_compilers.py",
         "radio_gs/querying/evidence_scorer.py",
         "radio_gs/querying/query_engine.py",
+        "radio_gs/querying/query_conditioned_diffusion.py",
         "radio_gs/querying/score_calibration.py",
         "radio_gs/querying/support_solver.py",
         "radio_gs/rendering/feature_renderer.py",
@@ -4154,6 +4687,60 @@ def main() -> None:
     parser.add_argument("--canonical-support-graph", default="")
     parser.add_argument("--canonical-reliability-cache", default="")
     parser.add_argument(
+        "--query-conditioned-diffusion-kernel",
+        choices=(
+            "none",
+            "ludvig_release_compat",
+            "symmetric_normalized",
+            "continuous_convex_v2",
+        ),
+        default="none",
+        help=(
+            "Optional reference-only Evidence-to-Support readout. The release "
+            "compatibility kernel preserves LUDVIG's actual slotwise normalization."
+        ),
+    )
+    parser.add_argument("--query-diffusion-knn-cache", default="")
+    parser.add_argument("--query-diffusion-feature-cache", default="")
+    parser.add_argument(
+        "--query-diffusion-reference-calibration",
+        action="store_true",
+        help=(
+            "Select the preregistered SPIn feature/regularizer bandwidth grid "
+            "and final rendered threshold using only the declared reference mask."
+        ),
+    )
+    parser.add_argument(
+        "--query-diffusion-reference-threshold-source",
+        choices=("propagated", "query_compatibility"),
+        default="propagated",
+        help=(
+            "Reference-only score domain used to select the rendered scalar "
+            "threshold; propagated preserves existing runs."
+        ),
+    )
+    parser.add_argument(
+        "--query-diffusion-reference-calibration-only",
+        action="store_true",
+        help=(
+            "Persist a reference-only threshold receipt and exit before any "
+            "target score rendering or target-mask access."
+        ),
+    )
+    parser.add_argument("--query-diffusion-feature-bandwidth", type=float, default=1.0)
+    parser.add_argument(
+        "--query-diffusion-regularizer-bandwidth", type=float, default=1.0
+    )
+    parser.add_argument("--query-diffusion-logistic-c", type=float, default=0.01)
+    parser.add_argument("--query-diffusion-iterations", type=int, default=100)
+    parser.add_argument(
+        "--query-diffusion-edge-binarize-threshold", type=float, default=1e-5
+    )
+    parser.add_argument(
+        "--query-diffusion-max-positive-fraction", type=float, default=0.1
+    )
+    parser.add_argument("--query-diffusion-distance-chunk-size", type=int, default=32)
+    parser.add_argument(
         "--prompt-registration-mode",
         choices=("legacy_alpha_depth", "raster_adjoint"),
         default="legacy_alpha_depth",
@@ -4457,6 +5044,56 @@ def main() -> None:
         parser.error(
             "--valid-support-normalization requires --support-mode canonical_support"
         )
+    query_diffusion_enabled = args.query_conditioned_diffusion_kernel != "none"
+    if query_diffusion_enabled:
+        if args.support_mode != "canonical_support":
+            parser.error("query-conditioned diffusion requires canonical_support")
+        if args.prompt_registration_mode != "raster_adjoint":
+            parser.error("query-conditioned diffusion requires exact raster_adjoint")
+        if args.registered_observation_fusion != "direct_raster_adjoint":
+            parser.error(
+                "query-conditioned diffusion requires direct_raster_adjoint observation"
+            )
+        if not args.query_diffusion_knn_cache or not args.query_diffusion_feature_cache:
+            parser.error("query-conditioned diffusion requires kNN and feature caches")
+        if args.registered_readout_stage not in {"propagated", "connected"}:
+            parser.error("query-conditioned diffusion requires propagated/connected readout")
+        if args.query_conditioned_diffusion_kernel == "continuous_convex_v2":
+            if not args.query_diffusion_reference_calibration:
+                parser.error(
+                    "continuous_convex_v2 requires reference-only threshold calibration"
+                )
+            if args.registered_readout_stage != "propagated":
+                parser.error(
+                    "continuous_convex_v2 requires propagated all-component readout"
+                )
+            if float(args.query_diffusion_logistic_c) != 0.01:
+                parser.error("continuous_convex_v2 freezes query logistic C at 0.01")
+        if args.query_diffusion_reference_calibration_only:
+            if args.query_conditioned_diffusion_kernel != "continuous_convex_v2":
+                parser.error(
+                    "reference-calibration-only is registered only for continuous_convex_v2"
+                )
+            if args.query_diffusion_reference_threshold_source != (
+                "query_compatibility"
+            ):
+                parser.error(
+                    "reference-calibration-only requires query_compatibility threshold source"
+                )
+        if any(
+            not np.isfinite(value) or value <= 0
+            for value in (
+                args.query_diffusion_feature_bandwidth,
+                args.query_diffusion_regularizer_bandwidth,
+                args.query_diffusion_logistic_c,
+                args.query_diffusion_edge_binarize_threshold,
+            )
+        ):
+            parser.error("query-conditioned diffusion scales must be finite and positive")
+        if args.query_diffusion_iterations <= 0 or args.query_diffusion_distance_chunk_size <= 0:
+            parser.error("query-conditioned diffusion iterations/chunk must be positive")
+        if not 0 < args.query_diffusion_max_positive_fraction <= 1:
+            parser.error("query-diffusion max-positive-fraction must be in (0,1]")
     if (
         not np.isfinite(args.valid_support_coverage_power)
         or args.valid_support_coverage_power < 0

@@ -1,0 +1,109 @@
+{
+  "schema_version": "spin9_ludvig_sam_query_interface_audit_v1",
+  "created_at": "2026-08-04T00:00:00+08:00",
+  "status": "completed_read_only_audit",
+  "upstream": {
+    "checkout": "/root/baselines/LUDVIG",
+    "commit": "4461fc515439bb498a75d71738a1e73cf7a452ed",
+    "note": "The reproduction checkout has protocol logging, seed control, and fail-closed resolution checks as local modifications; exact executed source hashes are authoritative below.",
+    "sam_checkpoint": {
+      "path": "/root/baselines/VALA/ckpts/sam_vit_h_4b8939.pth",
+      "sha256": "a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e",
+      "model": "SAM ViT-H"
+    },
+    "executed_source_sha256": {
+      "predictors/sam.py": "3cbf8bda6f7334086c3ba7c117a1b604ed12757c351fff96054a6a2f484684b9",
+      "utils/sam.py": "27194ffa71bbf320cb98314fc138669650ad04a79721830767adce369e39c27e",
+      "utils/solver.py": "6b71c91c5e4dbe50b2995f6b9428c9cd9bd6940ab58b1f16fe788dfc50b1c70c",
+      "evaluation/spin_nvos/segmentation.py": "ecc9d7b1a29faa7d1091e14e9c5a50036180c5ba8671ba396d0292075a559b0e",
+      "evaluation/spin_nvos/base.py": "7ecd469119b4ee87e3cc9cf5764426ec6c8a1d9118db072beab4d8335ea0d353",
+      "ludvig_uplift.py": "ae2eb5af2050e619a8d3a6f5bb04d228b4c090425cfcaf30f25aa9a859cddd3e"
+    }
+  },
+  "reference_condition": {
+    "source": "the first SPIn-NeRF binary ground-truth reference mask for each scene",
+    "is_sparse_scribble": false,
+    "is_full_reference_mask": true,
+    "negative_prompt_used": false,
+    "query_scope": "one scene-specific object query per run",
+    "operation": "inverse-render the full reference mask to Gaussian rows and render that soft support into every registered camera"
+  },
+  "sam_candidate_generation": {
+    "rgb_access": "Every registered RGB image is opened, including evaluation/target RGB images and unlabelled views.",
+    "target_mask_access_during_generation": false,
+    "sampling_region": "largest values of the rendered reference support; sample population size is int(0.4 * sum(rendered_support))",
+    "positive_points_per_prediction": 3,
+    "negative_points_per_prediction": 0,
+    "stochastic_predictions_per_view": 10,
+    "multimask_output": true,
+    "candidate_count": 3,
+    "aggregation": "elementwise mean of each SAM candidate over ten positive-point samples, followed by shared maximum normalization",
+    "seeds": [0, 1, 2]
+  },
+  "candidate_to_gaussian_mapping": {
+    "operation": "alpha/raster-weighted all-view uplifting of the three per-view masks to an N x 3 primitive field",
+    "meaning": "three query-specific mask-probability hypotheses, not three semantic embedding dimensions",
+    "pruning": "If the carrier has more than 400000 rows, retain rows above the configured visibility-weight quantile 0.5; room is not pruned.",
+    "query_independent_canonical_field": false,
+    "target_view_independent": false
+  },
+  "selection_and_scoring": {
+    "candidate_policy": "Choose one of the three candidates by maximum IoU on the full reference mask.",
+    "threshold_policy": "Choose k in 1..97 on the reference mask, equivalent to a rendered score threshold from 0.99 down to 0.03 after per-view min-max normalization.",
+    "transfer": "Freeze candidate id and threshold for all target frames in the scene.",
+    "target_mask_access": "Target masks are opened only during evaluation after the query field has been generated.",
+    "connected_component_selection": false,
+    "graph_diffusion": false
+  },
+  "difficult3_seed0_assets": {
+    "lego": {
+      "registered_rgb_views": 102,
+      "sam_feature_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/lego/seed_0/attempts/exact_f7a_allview_lego_seed0_v2_absolute_ply/lego/sam/features.npy",
+      "sam_feature_sha256": "af9f45ea33f8a1ae2e1f49784967a0ca21d1eda100100a0421c72f9ae38619d6",
+      "sam_feature_shape": [578260, 3],
+      "sam_ply_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/lego/seed_0/attempts/exact_f7a_allview_lego_seed0_v2_absolute_ply/lego/sam/gaussians.ply",
+      "sam_ply_sha256": "e36479e5536176da17a0873c5d1e3d047945804ae34f46fea6b7127634faaf8e",
+      "current_carrier_rows": 636148,
+      "current_capability_valid_rows": 128780,
+      "exact_xyz_overlap_rows": 0,
+      "reuse_class": "not_row_reusable_reuplift_required"
+    },
+    "truck": {
+      "registered_rgb_views": 251,
+      "sam_feature_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/seed_0/attempts/exact_f7a_allview_truck_seed0_v1/truck/sam/features.npy",
+      "sam_feature_sha256": "539fc621ed188bc36ffe458a4349e03af757758499be83e45d959b8a08ec9919",
+      "sam_feature_shape": [1291865, 3],
+      "sam_ply_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/seed_0/attempts/exact_f7a_allview_truck_seed0_v1/truck/sam/gaussians.ply",
+      "sam_ply_sha256": "5119c64078967b0694e8d92b8d986e4f970fdad20ba4df28c2ab6133454cff0d",
+      "current_carrier_rows": 2583730,
+      "current_capability_valid_rows": 633282,
+      "sam_rows_exactly_mapped_to_current_carrier": 1291865,
+      "current_valid_rows_with_sam_candidate": 567454,
+      "current_valid_coverage": 0.8960526274234859,
+      "reuse_class": "exact_subset_row_reusable_with_missing_row_ablation"
+    },
+    "room": {
+      "registered_rgb_views": 41,
+      "sam_feature_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v2_resolution_safe/room/sam/features.npy",
+      "sam_feature_sha256": "431da36d8cb45f317247d2754b39021abf2de518c5ace36bd1dd324e86e88f96",
+      "sam_feature_shape": [291619, 3],
+      "sam_ply_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v2_resolution_safe/room/sam/gaussians.ply",
+      "sam_ply_sha256": "c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd",
+      "current_carrier_ply_sha256": "c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd",
+      "current_carrier_rows": 291619,
+      "current_capability_valid_rows": 214612,
+      "exact_row_alignment": true,
+      "reuse_class": "clean_full_row_reuse"
+    }
+  },
+  "difficult3_seed0_ludvig_renderer_results": {
+    "lego": 0.932961399100886,
+    "truck": 0.9674996759838931,
+    "room": 0.9712692191657342
+  },
+  "conclusion": {
+    "primary_gap_hypothesis": "The large reproduced LUDVIG-SAM advantage is primarily a strong, query-specific, target-RGB-aware SAM interface and not evidence that a persisted DINOv2/PCA40 compact relation field is stronger.",
+    "strict_comparability": "These scores are not directly equivalent to strict unseen or target-view-independent query protocols because target RGB is processed by SAM at query time. There is no target-label leakage during candidate generation.",
+    "next_clean_attribution": "Render the persisted room N x 3 candidates with the frozen RADIO-GS geometry renderer, select candidate and threshold on the reference mask only, and score targets only after predictions are persisted."
+  }
+}

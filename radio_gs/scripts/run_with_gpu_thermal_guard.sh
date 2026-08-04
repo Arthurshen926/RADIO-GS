@@ -25,6 +25,7 @@ GPU_START_MAX_TEMP_C="${GPU_START_MAX_TEMP_C:-70}"
 GPU_MAX_POWER_LIMIT_W="${GPU_MAX_POWER_LIMIT_W:-300.5}"
 GPU_POLL_SECONDS="${GPU_POLL_SECONDS:-10}"
 GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES="${GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES:-1}"
+GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS="${GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS:-1}"
 GPU_SOFT_PAUSE_TEMP_C="${GPU_SOFT_PAUSE_TEMP_C:-0}"
 GPU_SOFT_RESUME_TEMP_C="${GPU_SOFT_RESUME_TEMP_C:-0}"
 GPU_PEER_INDEX="${GPU_PEER_INDEX:-}"
@@ -40,6 +41,7 @@ GPU_PEER_INTERRUPT_EXIT_CODE=87
 for integer_value in "$GPU" "$GPU_MAX_TEMP_C" \
   "$GPU_START_MAX_TEMP_C" "$GPU_POLL_SECONDS" \
   "$GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES" \
+  "$GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS" \
   "$GPU_SOFT_PAUSE_TEMP_C" "$GPU_SOFT_RESUME_TEMP_C" \
   "$GPU_PEER_PAUSE_TEMP_C" "$GPU_PEER_RESUME_TEMP_C" \
   "$GPU_PEER_QUIET_SECONDS" "$GPU_PEER_MAX_MEMORY_MIB" \
@@ -59,6 +61,10 @@ if (( GPU_POLL_SECONDS < 1 )); then
 fi
 if (( GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES < 1 )); then
   echo "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES must be at least 1" >&2
+  exit 2
+fi
+if (( GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS < 1 )); then
+  echo "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS must be at least 1" >&2
   exit 2
 fi
 if (( GPU_SOFT_PAUSE_TEMP_C > 0 )); then
@@ -411,6 +417,18 @@ process_group_has_live_members() {
   '
 }
 
+wait_until_next_poll_or_child_exit() {
+  local _
+  # A sparse GPU telemetry interval must not impose the same delay between
+  # short jobs.  Poll only the local process table once per second and return
+  # immediately when the guarded process group exits; nvidia-smi is still
+  # queried no more often than GPU_POLL_SECONDS.
+  for ((_=0; _<GPU_POLL_SECONDS; _++)); do
+    process_group_has_live_members || return 0
+    sleep 1
+  done
+}
+
 pause_child_group() {
   if (( ! child_paused )) && process_group_has_live_members; then
     kill -STOP -- "-$child_pid" 2>/dev/null || return 1
@@ -490,6 +508,7 @@ verify_target_gpu_released() {
 trap 'terminate_child_group || true; exit 130' INT TERM
 
 consecutive_telemetry_failures=0
+consecutive_overheat_polls=0
 while process_group_has_live_members; do
   if ! check_pcie; then
     printf '%s,%s,%s,,,,,,,pcie_unresponsive\n' \
@@ -568,8 +587,15 @@ while process_group_has_live_members; do
   fi
   event="sample"
   if (( SAMPLE_TEMP >= GPU_MAX_TEMP_C )); then
-    event="thermal_abort"
-    thermal_abort=1
+    consecutive_overheat_polls=$((consecutive_overheat_polls + 1))
+    if (( consecutive_overheat_polls >= GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS )); then
+      event="thermal_abort_${consecutive_overheat_polls}_of_${GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS}"
+      thermal_abort=1
+    else
+      event="thermal_warning_${consecutive_overheat_polls}_of_${GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS}"
+    fi
+  else
+    consecutive_overheat_polls=0
   fi
   pause_reason=""
   if (( GPU_SOFT_PAUSE_TEMP_C > 0 \
@@ -631,7 +657,7 @@ while process_group_has_live_members; do
     fi
     break
   fi
-  sleep "$GPU_POLL_SECONDS"
+  wait_until_next_poll_or_child_exit
 done
 
 command_status=0

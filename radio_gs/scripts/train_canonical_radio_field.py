@@ -9,6 +9,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import tempfile
 
 import torch
@@ -29,13 +30,206 @@ from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews
 from radio_gs.training.canonical_field_losses import (
     CanonicalFieldLossConfig,
     canonical_primitive_loss,
+    hard_boundary_relation_ranking_loss,
 )
 from radio_gs.training.primitive_consensus import (
     PrimitiveConsensus,
     consensus_target_rows,
 )
 from radio_gs.training.tensor_cache_io import ShardedMPRCache, load_mpr_cache
-from radio_gs.utils.immutable_artifacts import sha256_file
+from radio_gs.utils.immutable_artifacts import (
+    load_json_object,
+    load_torch_mapping,
+    sha256_file,
+)
+
+
+CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1 = "matched_top1"
+CAPABILITY_TARGET_CONTRACT_FIELD_A = "field_a_exact_adjoint"
+RELATION_OBJECTIVE_DISABLED = "disabled"
+RELATION_OBJECTIVE_FIELD_B = "field_b_boundary_ranking_v1"
+FIELD_B_RELATION_WEIGHT = CanonicalFieldLossConfig().relation_weight
+STRICT_OBSERVATION_CONTRACT_MODES = frozenset(
+    {
+        CANONICAL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
+        CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
+    }
+)
+
+
+def _validate_training_observation_contract_metadata(
+    metadata: dict,
+    mode: str,
+) -> None:
+    """Apply a canonical contract only when the caller requested one.
+
+    ``compatible-legacy`` still receives the deep tensor, hash, geometry, and
+    contamination checks in ``load_mpr_cache``.  It must not silently be
+    interpreted as the default canonical lifting contract.
+    """
+
+    requested = str(mode)
+    if requested in STRICT_OBSERVATION_CONTRACT_MODES:
+        validate_observation_contract_metadata(
+            metadata,
+            require_declaration=True,
+            contract_name=requested,
+        )
+    elif requested not in {"compatible-legacy", "unchecked"}:
+        raise ValueError(f"unsupported training observation contract: {requested}")
+
+
+def _assert_initial_field_signature_compatible(
+    expected: FeatureSpaceSignature,
+    actual: FeatureSpaceSignature,
+    *,
+    allow_legacy_normalization: bool,
+) -> dict:
+    expected_values = expected.to_dict()
+    actual_values = actual.to_dict()
+    expected_values.pop("field_checkpoint_sha256", None)
+    actual_values.pop("field_checkpoint_sha256", None)
+    mismatches = {
+        key: [expected_values.get(key), actual_values.get(key)]
+        for key in sorted(set(expected_values) | set(actual_values))
+        if expected_values.get(key) != actual_values.get(key)
+    }
+    if not mismatches:
+        return {"legacy_normalization_mismatch_accepted": False}
+    if (
+        allow_legacy_normalization
+        and set(mismatches) == {"normalization"}
+        and mismatches["normalization"]
+        == ["radio_direction_unit", "none"]
+    ):
+        return {
+            "legacy_normalization_mismatch_accepted": True,
+            "mpr_declared_normalization": "radio_direction_unit",
+            "initial_checkpoint_recorded_normalization": "none",
+            "checkpoint_signature_preserved": True,
+            "feature_values_modified": False,
+        }
+    expected.assert_compatible(
+        actual,
+        allow_field_checkpoint_difference=True,
+    )
+    raise AssertionError("unreachable signature compatibility path")
+
+
+def _load_field_b_relation_triplets(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    num_rows: int,
+    capability_valid: torch.Tensor,
+    geometry_fingerprint: dict,
+    expected_dino_sha256: str,
+    expected_sam3_sha256: str,
+) -> tuple[dict[str, torch.Tensor], dict]:
+    if not expected_sha256:
+        raise ValueError("Field-B relation cache requires a trusted SHA-256")
+    payload, digest, source = load_torch_mapping(
+        path,
+        expected_sha256=expected_sha256,
+        map_location="cpu",
+        label="Field-B relation triplet cache",
+    )
+    if int(payload.get("schema_version", -1)) != 1:
+        raise ValueError("Field-B relation cache schema differs")
+    pairs = torch.as_tensor(payload.get("pair_index")).long().cpu()
+    margin = torch.as_tensor(payload.get("teacher_margin")).float().cpu().reshape(-1)
+    channel = (
+        torch.as_tensor(payload.get("boundary_channel"))
+        .to(torch.uint8)
+        .cpu()
+        .reshape(-1)
+    )
+    if (
+        pairs.ndim != 2
+        or pairs.shape != (2, 2 * margin.numel())
+        or channel.shape != margin.shape
+    ):
+        raise ValueError("Field-B pair/margin/channel tensors do not align")
+    if margin.numel() == 0 or not bool(torch.isfinite(margin).all()) or bool(
+        ((margin <= 0) | (margin > 1)).any()
+    ):
+        raise ValueError("Field-B teacher margins must be non-empty in (0,1]")
+    if bool((pairs < 0).any()) or int(pairs.max()) >= int(num_rows):
+        raise ValueError("Field-B pair rows are outside the canonical field")
+    count = margin.numel()
+    positive = pairs[:, :count]
+    negative = pairs[:, count:]
+    if (
+        not torch.equal(positive[0], negative[0])
+        or bool((positive[0] == positive[1]).any())
+        or bool((negative[0] == negative[1]).any())
+        or bool((positive[1] == negative[1]).any())
+    ):
+        raise ValueError("Field-B triplet topology is malformed")
+    valid = torch.as_tensor(capability_valid).bool().cpu().reshape(-1)
+    if valid.shape != (int(num_rows),) or not bool(valid[pairs].all()):
+        raise ValueError("Field-B triplets leave exact capability-valid rows")
+    metadata = dict(payload.get("metadata", {}))
+    expected_policy = {
+        "schema_version": "canonical_field_b_boundary_relation_triplets_v1",
+        "construction": "exact_capability_local_hard_boundary_ranking_v1",
+        "neighbors": 16,
+        "query_independent": True,
+        "benchmark_images_opened": False,
+        "benchmark_masks_opened": False,
+        "text_queries_opened": False,
+        "fixed_scalar_margin": None,
+    }
+    mismatched = [
+        key for key, value in expected_policy.items() if metadata.get(key) != value
+    ]
+    if mismatched:
+        raise ValueError(f"Field-B relation policy differs: {mismatched}")
+    if metadata.get("geometry_fingerprint") != geometry_fingerprint:
+        raise ValueError("Field-B relation geometry differs")
+    if dict(metadata.get("dino_mpr", {})).get("sha256") != expected_dino_sha256 or dict(
+        metadata.get("sam3_mpr", {})
+    ).get("sha256") != expected_sam3_sha256:
+        raise ValueError("Field-B relation exact capability targets differ")
+    return {
+        "pair_index": pairs,
+        "teacher_margin": margin,
+        "boundary_channel": channel,
+    }, {
+        "path": str(source),
+        "sha256": digest,
+        "triplets": int(count),
+        "metadata": metadata,
+    }
+
+
+def _field_b_relation_batch_loss(
+    field: CanonicalGaussianField,
+    official_views: FrozenRadioViews,
+    relation_cache: dict[str, torch.Tensor],
+    triplet_indices: torch.Tensor,
+) -> torch.Tensor:
+    triplets = int(relation_cache["teacher_margin"].numel())
+    selected = torch.as_tensor(triplet_indices).long().cpu()
+    if selected.numel() == 0:
+        return field.local_codes.sum() * 0.0
+    columns = torch.cat([selected, selected + triplets])
+    global_pairs = relation_cache["pair_index"][:, columns]
+    unique_rows, inverse = torch.unique(
+        global_pairs.reshape(-1), sorted=True, return_inverse=True
+    )
+    local_pairs = inverse.reshape_as(global_pairs).to(field.local_codes.device)
+    predicted_radio = field.radio_features(unique_rows.to(field.local_codes.device))
+    predicted_dino = official_views.project_dino_primitives(predicted_radio)
+    predicted_sam3 = official_views.project_sam3_primitives(predicted_radio)
+    return hard_boundary_relation_ranking_loss(
+        predicted_dino,
+        predicted_sam3,
+        local_pairs,
+        relation_cache["teacher_margin"][selected],
+    )
 
 
 def _sha256_tensor_rows(values: torch.Tensor) -> str:
@@ -127,6 +321,7 @@ def _load_capability_mpr_target(
     radio_checkpoint_sha256: str,
     expected_cache_sha256: str = "",
     expected_feature_output_bundle_sha256: str = "",
+    target_contract: str = CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
 ) -> tuple[PrimitiveConsensus, dict]:
     """Load an official-adaptor-before-MPR target with strict provenance."""
 
@@ -138,17 +333,45 @@ def _load_capability_mpr_target(
         require_formal_safety=True,
     )
     metadata = dict(cache.get("metadata", {}))
-    raw_contract = raw_metadata.get("observation_lifting_contract", {})
-    raw_contract_name = (
-        str(raw_contract.get("name", CANONICAL_OBSERVATION_CONTRACT_NAME))
-        if isinstance(raw_contract, dict)
-        else CANONICAL_OBSERVATION_CONTRACT_NAME
-    )
-    validate_observation_contract_metadata(
-        metadata,
-        require_declaration="observation_lifting_contract" in raw_metadata,
-        contract_name=raw_contract_name,
-    )
+    target_contract = str(target_contract)
+    if target_contract == CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1:
+        raw_contract = raw_metadata.get("observation_lifting_contract", {})
+        raw_contract_name = (
+            str(raw_contract.get("name", CANONICAL_OBSERVATION_CONTRACT_NAME))
+            if isinstance(raw_contract, dict)
+            else CANONICAL_OBSERVATION_CONTRACT_NAME
+        )
+        validate_observation_contract_metadata(
+            metadata,
+            require_declaration="observation_lifting_contract" in raw_metadata,
+            contract_name=raw_contract_name,
+        )
+    elif target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A:
+        exact_policy = {
+            "aggregation_mode": "raster_adjoint",
+            "raster_view_fusion": "contribution_mean",
+            "raster_reliability_mode": "mean_resultant",
+            "normalize_each_view": True,
+            "per_view_normalization_applied": True,
+            "per_view_normalization_stage": (
+                "pixel_feature_before_raster_lifting"
+            ),
+        }
+        mismatched_exact = [
+            key for key, expected in exact_policy.items()
+            if metadata.get(key) != expected
+        ]
+        if mismatched_exact:
+            raise ValueError(
+                f"{expected_space} Field-A exact capability policy differs: "
+                f"{sorted(mismatched_exact)}"
+            )
+        if raw_metadata.get("aggregation_mode") != "raster_adjoint":
+            raise ValueError(
+                "Field-A capability observation reference must use raster_adjoint"
+            )
+    else:
+        raise ValueError(f"unsupported capability target contract: {target_contract}")
     if str(metadata.get("feature_space", "")) != str(expected_space):
         raise ValueError(f"expected a {expected_space} MPR cache")
     safety = {
@@ -171,6 +394,21 @@ def _load_capability_mpr_target(
             f"{expected_space} MPR has an unsupported capability map source "
             f"{capability_map_source!r}"
         )
+    if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A:
+        expected_bundle = str(expected_feature_output_bundle_sha256 or "")
+        if re.fullmatch(r"[0-9a-f]{64}", expected_bundle) is None:
+            raise ValueError(
+                "Field-A requires a trusted feature output bundle SHA-256"
+            )
+        if metadata.get("feature_output_bundle_sha256") != expected_bundle:
+            raise ValueError(
+                f"{expected_space} Field-A target belongs to another feature "
+                "output bundle"
+            )
+        if capability_map_source != "project_raw":
+            raise ValueError(
+                f"{expected_space} Field-A preregistration requires project_raw"
+            )
     if capability_map_source == "official_extracted":
         if (
             str(
@@ -249,7 +487,11 @@ def _load_capability_mpr_target(
     responsibility_sha256 = str(
         metadata.get("registration_responsibility_cache_sha256", "")
     )
-    if str(raw_metadata.get("aggregation_mode", "")) == "raster_gaussian_top1":
+    if (
+        target_contract == CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1
+        and str(raw_metadata.get("aggregation_mode", ""))
+        == "raster_gaussian_top1"
+    ):
         raw_responsibility_sha256 = str(
             raw_metadata.get("registration_responsibility_cache_sha256", "")
         )
@@ -295,7 +537,12 @@ def _load_capability_mpr_target(
         "sha256": cache_sha256,
         "feature_space": expected_space,
         "feature_dim": int(feature_dim),
-        "projection_order": "official_adaptor_then_geometry_matched_mpr",
+        "target_contract": target_contract,
+        "projection_order": (
+            "official_adaptor_then_exact_raster_adjoint_contribution_mpr"
+            if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
+            else "official_adaptor_then_geometry_matched_mpr"
+        ),
         "official_adaptor_name": metadata.get("official_adaptor_name"),
         "official_adaptor_checkpoint_sha256": metadata.get(
             "official_adaptor_checkpoint_sha256"
@@ -326,11 +573,100 @@ def _load_capability_mpr_target(
             "capability_adaptor_execution", ""
         ),
         "selected_frame_indices": metadata.get("selected_frame_indices", []),
+        "aggregation_mode": metadata.get("aggregation_mode", ""),
+        "raster_view_fusion": metadata.get("raster_view_fusion", ""),
+        "raster_reliability_mode": metadata.get(
+            "raster_reliability_mode", "legacy_valid"
+        ),
         "registration_responsibility_cache_sha256": responsibility_sha256,
         "uses_query_or_benchmark_supervision": False,
         **(
             consensus.provenance()
             if isinstance(consensus, ShardedMPRCache)
+            else {"storage": "dense_torch_tensor"}
+        ),
+    }
+
+
+def _load_field_a_observation_reference(
+    path: str | Path,
+    *,
+    primary_raw_cache: dict | ShardedMPRCache,
+    primary_raw_metadata: dict,
+    expected_cache_sha256: str,
+) -> tuple[dict | ShardedMPRCache, dict, dict]:
+    """Load the raw-RADIO adjoint cache defining Field-A observations.
+
+    Field-A keeps the current canonical raw MPR objective unchanged.  This
+    second raw cache binds only the view/geometry/operator support on which
+    the exact DINO and SAM auxiliary teachers must have been constructed.
+    """
+
+    expected = str(expected_cache_sha256)
+    if not expected:
+        raise ValueError("Field-A observation reference requires a trusted SHA-256")
+    cache, digest, source = load_mpr_cache(
+        path,
+        expected_sha256=expected,
+        expected_feature_space="radio",
+        require_reliability=True,
+        # The frozen exact-adjoint support reference predates feature-bundle
+        # receipts.  Field-A never consumes its feature values: only its
+        # hash-bound geometry, validity, observation counts, views, and
+        # operator policy define the support shared by the newly formal DINO
+        # and SAM targets.  Do not invent provenance by rewriting this cache;
+        # validate its legacy payload deeply and enforce contamination/policy
+        # declarations explicitly below instead.
+        require_formal_safety=False,
+    )
+    metadata = dict(cache.get("metadata", {}))
+    contaminated = [
+        key
+        for key in (
+            "benchmark_images_opened",
+            "benchmark_masks_opened",
+            "text_queries_opened",
+        )
+        if metadata.get(key) is not False
+    ]
+    if contaminated:
+        raise ValueError(
+            f"Field-A observation reference is not query-independent: {contaminated}"
+        )
+    expected_policy = {
+        "aggregation_mode": "raster_adjoint",
+        "raster_view_fusion": "contribution_mean",
+        "normalize_each_view": True,
+    }
+    mismatched = [
+        key for key, value in expected_policy.items()
+        if metadata.get(key) != value
+    ]
+    if mismatched:
+        raise ValueError(
+            f"Field-A observation reference policy differs: {sorted(mismatched)}"
+        )
+    for key in ("config", "checkpoint", "excluded_frame_ids", "alpha_threshold"):
+        if metadata.get(key) != primary_raw_metadata.get(key):
+            raise ValueError(
+                f"Field-A observation reference differs from primary raw MPR: {key}"
+            )
+    primary_xyz = torch.as_tensor(primary_raw_cache["xyz"]).float().cpu()
+    reference_xyz = torch.as_tensor(cache["xyz"]).float().cpu()
+    if reference_xyz.shape != primary_xyz.shape or _sha256_tensor_rows(
+        reference_xyz
+    ) != _sha256_tensor_rows(primary_xyz):
+        raise ValueError("Field-A observation reference geometry differs")
+    return cache, metadata, {
+        "path": str(source.resolve()),
+        "sha256": digest,
+        "aggregation_mode": metadata["aggregation_mode"],
+        "raster_view_fusion": metadata["raster_view_fusion"],
+        "selected_frame_indices": list(metadata.get("selected_frame_indices", [])),
+        "uses_query_or_benchmark_supervision": False,
+        **(
+            cache.provenance()
+            if isinstance(cache, ShardedMPRCache)
             else {"storage": "dense_torch_tensor"}
         ),
     }
@@ -426,12 +762,6 @@ def train(args: argparse.Namespace) -> dict:
     observation_contract_mode = str(
         getattr(args, "observation_contract", "unchecked")
     )
-    strict_contract_modes = {
-        CANONICAL_OBSERVATION_CONTRACT_NAME,
-        CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
-        CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
-        CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
-    }
     cache, mpr_cache_sha256, mpr_cache_path = load_mpr_cache(
         args.mpr_cache,
         expected_sha256=(
@@ -439,19 +769,15 @@ def train(args: argparse.Namespace) -> dict:
         ),
         expected_feature_space="radio",
         require_reliability=True,
-        require_formal_safety=observation_contract_mode in strict_contract_modes,
+        require_formal_safety=(
+            observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES
+        ),
     )
     metadata = dict(cache.get("metadata", {}))
-    if observation_contract_mode != "unchecked":
-        validate_observation_contract_metadata(
-            metadata,
-            require_declaration=observation_contract_mode in strict_contract_modes,
-            contract_name=(
-                observation_contract_mode
-                if observation_contract_mode in strict_contract_modes
-                else None
-            ),
-        )
+    _validate_training_observation_contract_metadata(
+        metadata,
+        observation_contract_mode,
+    )
     if metadata.get("benchmark_masks_opened", False) or metadata.get("text_queries_opened", False):
         raise ValueError("MPR training cache is contaminated by benchmark queries or masks")
     if str(metadata.get("feature_space", "radio")) != "radio":
@@ -471,12 +797,50 @@ def train(args: argparse.Namespace) -> dict:
     expected_feature_bundle_sha256 = str(
         getattr(args, "expected_feature_output_bundle_sha256", "")
     )
-    if observation_contract_mode in strict_contract_modes and (
+    if observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES and (
         not expected_feature_bundle_sha256
         or metadata.get("feature_output_bundle_sha256")
         != expected_feature_bundle_sha256
     ):
         raise ValueError("raw MPR belongs to another feature output bundle")
+    capability_target_contract = str(
+        getattr(
+            args,
+            "capability_target_contract",
+            CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+        )
+    )
+    capability_observation_cache = cache
+    capability_observation_metadata = metadata
+    capability_observation_provenance: dict = {}
+    if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A:
+        if not bool(args.official_capability_loss):
+            raise ValueError("Field-A requires --official-capability-loss")
+        if not str(args.dino_mpr_cache).strip() or not str(args.sam3_mpr_cache).strip():
+            raise ValueError("Field-A requires both exact DINO and SAM3 MPR targets")
+        for name in ("dino_v3", "sam3"):
+            if not str(getattr(args, f"expected_{name}_mpr_cache_sha256", "")):
+                raise ValueError(
+                    f"Field-A requires a trusted SHA-256 for the {name} MPR target"
+                )
+        capability_observation_cache, capability_observation_metadata, (
+            capability_observation_provenance
+        ) = _load_field_a_observation_reference(
+            getattr(args, "capability_observation_reference_mpr_cache", ""),
+            primary_raw_cache=cache,
+            primary_raw_metadata=metadata,
+            expected_cache_sha256=str(
+                getattr(
+                    args,
+                    "expected_capability_observation_reference_mpr_cache_sha256",
+                    "",
+                )
+            ),
+        )
+    elif capability_target_contract != CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1:
+        raise ValueError(
+            f"unsupported capability target contract: {capability_target_contract}"
+        )
     capability_targets: dict[
         str, PrimitiveConsensus | ShardedMPRCache
     ] = {}
@@ -490,8 +854,8 @@ def train(args: argparse.Namespace) -> dict:
         target, provenance = _load_capability_mpr_target(
             path,
             expected_space=name,
-            raw_cache=cache,
-            raw_metadata=metadata,
+            raw_cache=capability_observation_cache,
+            raw_metadata=capability_observation_metadata,
             radio_checkpoint_sha256=radio_hash,
             expected_cache_sha256=str(
                 getattr(args, f"expected_{name}_mpr_cache_sha256", "")
@@ -499,6 +863,7 @@ def train(args: argparse.Namespace) -> dict:
             expected_feature_output_bundle_sha256=(
                 expected_feature_bundle_sha256
             ),
+            target_contract=capability_target_contract,
         )
         capability_targets[name] = target
         capability_target_provenance[name] = provenance
@@ -506,6 +871,142 @@ def train(args: argparse.Namespace) -> dict:
         raise ValueError(
             "auxiliary capability MPR targets require --official-capability-loss"
         )
+    relation_objective = str(
+        getattr(args, "relation_objective", RELATION_OBJECTIVE_DISABLED)
+    )
+    relation_weight = float(getattr(args, "relation_weight", 0.0))
+    relation_cache: dict[str, torch.Tensor] | None = None
+    relation_provenance: dict = {}
+    field_b_registration_provenance: dict = {}
+    relation_path = str(getattr(args, "relation_triplet_cache", "")).strip()
+    relation_expected_sha = str(
+        getattr(args, "expected_relation_triplet_cache_sha256", "")
+    )
+    if relation_objective == RELATION_OBJECTIVE_DISABLED:
+        if (
+            relation_weight != 0.0
+            or relation_path
+            or relation_expected_sha
+            or str(getattr(args, "field_b_experiment_registration", "")).strip()
+            or str(
+                getattr(
+                    args,
+                    "expected_field_b_experiment_registration_sha256",
+                    "",
+                )
+            ).strip()
+        ):
+            raise ValueError(
+                "disabled relation objective requires zero weight, no cache, and no Field-B registration"
+            )
+    elif relation_objective == RELATION_OBJECTIVE_FIELD_B:
+        if capability_target_contract != CAPABILITY_TARGET_CONTRACT_FIELD_A or set(
+            capability_targets
+        ) != {"dino_v3", "sam3"}:
+            raise ValueError("Field-B requires both Field-A exact capability targets")
+        if not bool(args.official_capability_loss):
+            raise ValueError("Field-B requires frozen official capability views")
+        if relation_weight != FIELD_B_RELATION_WEIGHT:
+            raise ValueError(
+                f"Field-B v1 freezes the pre-existing relation weight at "
+                f"{FIELD_B_RELATION_WEIGHT}"
+            )
+        registration, registration_sha, registration_path = load_json_object(
+            args.field_b_experiment_registration,
+            expected_sha256=(
+                args.expected_field_b_experiment_registration_sha256
+            ),
+            label="Field-B experiment registration",
+        )
+        if registration.get("schema_version") != (
+            "canonical_field_b_boundary_relation_registration_v1"
+        ):
+            raise ValueError("Field-B experiment registration schema differs")
+        source_hashes = dict(registration.get("source_hashes", {}))
+        current_source_hashes = {
+            "trainer": sha256_file(Path(__file__).resolve()),
+            "losses": sha256_file(
+                Path(__file__).parents[1]
+                / "training"
+                / "canonical_field_losses.py"
+            ),
+        }
+        if any(
+            source_hashes.get(key) != value
+            for key, value in current_source_hashes.items()
+        ):
+            raise ValueError("Field-B registered training source SHA-256 differs")
+        immutable_inputs = dict(registration.get("immutable_inputs", {}))
+        expected_registered_inputs = {
+            "field_a_checkpoint": str(
+                args.expected_initial_field_checkpoint_sha256
+            ),
+            "primary_raw_mpr": str(mpr_cache_sha256),
+            "exact_observation_reference": str(
+                args.expected_capability_observation_reference_mpr_cache_sha256
+            ),
+            "exact_dino_v3": str(args.expected_dino_v3_mpr_cache_sha256),
+            "exact_sam3": str(args.expected_sam3_mpr_cache_sha256),
+            "official_c_radio_checkpoint": str(radio_hash),
+        }
+        mismatched_inputs = {
+            key: [dict(immutable_inputs.get(key, {})).get("sha256"), value]
+            for key, value in expected_registered_inputs.items()
+            if dict(immutable_inputs.get(key, {})).get("sha256") != value
+        }
+        if mismatched_inputs:
+            raise ValueError(
+                f"Field-B registered immutable inputs differ: {mismatched_inputs}"
+            )
+        registered_loss = dict(registration.get("loss_contract", {}))
+        actual_loss = {
+            "raw_mpr_weight": float(args.mpr_weight),
+            "dino_v3_weight": float(args.dino_weight),
+            "sam3_weight": float(args.sam3_weight),
+            "relation_weight": relation_weight,
+            "coefficient_weight": float(args.coefficient_weight),
+            "basis_orthogonality_weight": float(
+                args.basis_orthogonality_weight
+            ),
+        }
+        if any(registered_loss.get(key) != value for key, value in actual_loss.items()):
+            raise ValueError("Field-B registered loss contract differs")
+        registered_training = dict(registration.get("training_contract", {}))
+        actual_training = {
+            "epochs": int(args.epochs),
+            "min_epochs": int(args.min_epochs),
+            "batch_size": int(args.batch_size),
+            "eval_batch_size": int(args.eval_batch_size),
+            "learning_rate": float(args.learning_rate),
+            "weight_decay": float(args.weight_decay),
+            "validation_fraction": float(args.validation_fraction),
+            "seed": int(args.seed),
+        }
+        if any(
+            registered_training.get(key) != value
+            for key, value in actual_training.items()
+        ):
+            raise ValueError("Field-B registered training contract differs")
+        field_b_registration_provenance = {
+            "path": str(registration_path),
+            "sha256": registration_sha,
+            "source_hashes": current_source_hashes,
+        }
+        dino_valid = torch.as_tensor(capability_targets["dino_v3"].valid).bool()
+        sam_valid = torch.as_tensor(capability_targets["sam3"].valid).bool()
+        if not torch.equal(dino_valid, sam_valid):
+            raise ValueError("Field-B exact DINO/SAM valid rows differ")
+        relation_cache, relation_provenance = _load_field_b_relation_triplets(
+            relation_path,
+            expected_sha256=relation_expected_sha,
+            num_rows=_target_shape(consensus)[0],
+            capability_valid=dino_valid,
+            geometry_fingerprint=dict(cache.get("geometry_fingerprint", {})),
+            expected_dino_sha256=str(args.expected_dino_v3_mpr_cache_sha256),
+            expected_sam3_sha256=str(args.expected_sam3_mpr_cache_sha256),
+        )
+    else:
+        raise ValueError(f"unsupported relation objective: {relation_objective}")
     primitive_positions = torch.as_tensor(cache["xyz"]).float().cpu()
     valid_rows = torch.where(consensus.valid)[0]
     consensus_num_rows, consensus_feature_dim = _target_shape(consensus)
@@ -551,8 +1052,12 @@ def train(args: argparse.Namespace) -> dict:
             raise ValueError("initial field Gaussian count differs from the MPR cache")
         if field.decoder.feature_dim != consensus_feature_dim:
             raise ValueError("initial field RADIO dimension differs from the MPR cache")
-        signature.assert_compatible(
-            field.signature, allow_field_checkpoint_difference=True
+        signature_compatibility = _assert_initial_field_signature_compatible(
+            signature,
+            field.signature,
+            allow_legacy_normalization=(
+                observation_contract_mode == "compatible-legacy"
+            ),
         )
         expected_geometry = str(
             cache.get("geometry_fingerprint", {}).get("xyz_sha256", "")
@@ -582,6 +1087,7 @@ def train(args: argparse.Namespace) -> dict:
             "architecture_reused_exactly": True,
             "learned_state_reinitialized": False,
             "fixed_reliability_refreshed_from_current_raw_mpr": True,
+            "signature_compatibility": signature_compatibility,
         }
     else:
         if valid_rows.numel() < int(args.coefficient_dim):
@@ -698,9 +1204,14 @@ def train(args: argparse.Namespace) -> dict:
         mpr_weight=float(args.mpr_weight),
         dino_weight=float(args.dino_weight if official_views is not None else 0.0),
         sam3_weight=float(args.sam3_weight if official_views is not None else 0.0),
-        relation_weight=0.0,
+        relation_weight=relation_weight,
         coefficient_weight=float(args.coefficient_weight),
         basis_orthogonality_weight=float(args.basis_orthogonality_weight),
+    )
+    capability_reliability_policy = (
+        "field_a_boundary_safe"
+        if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
+        else "legacy_mean"
     )
     generator = torch.Generator(device="cpu").manual_seed(int(args.seed))
     order = valid_rows[torch.randperm(valid_rows.numel(), generator=generator)]
@@ -709,6 +1220,24 @@ def train(args: argparse.Namespace) -> dict:
     training_rows = order[validation_count:]
     if training_rows.numel() == 0:
         training_rows = validation_rows
+    if relation_cache is not None:
+        triplets = int(relation_cache["teacher_margin"].numel())
+        training_mask = torch.zeros(consensus_num_rows, dtype=torch.bool)
+        training_mask[training_rows] = True
+        positive = relation_cache["pair_index"][:, :triplets]
+        negative = relation_cache["pair_index"][:, triplets:]
+        keep = training_mask[positive].all(dim=0) & training_mask[negative].all(dim=0)
+        if not bool(keep.any()):
+            raise ValueError("Field-B has no triplets wholly inside training rows")
+        relation_cache = {
+            "pair_index": torch.cat([positive[:, keep], negative[:, keep]], dim=1),
+            "teacher_margin": relation_cache["teacher_margin"][keep],
+            "boundary_channel": relation_cache["boundary_channel"][keep],
+        }
+        relation_provenance["training_triplets_after_validation_exclusion"] = int(
+            keep.sum()
+        )
+        relation_provenance["validation_rows_used_by_relation"] = False
     optimizer = torch.optim.AdamW(
         [parameter for parameter in field.parameters() if parameter.requires_grad],
         lr=float(args.learning_rate),
@@ -720,8 +1249,23 @@ def train(args: argparse.Namespace) -> dict:
             torch.randperm(training_rows.numel(), generator=generator)
         ]
         totals: list[float] = []
+        relation_totals: list[float] = []
+        relation_order = (
+            torch.randperm(
+                relation_cache["teacher_margin"].numel(), generator=generator
+            )
+            if relation_cache is not None
+            else torch.empty(0, dtype=torch.long)
+        )
+        epoch_batches = max(
+            1,
+            (epoch_order.numel() + int(args.batch_size) - 1)
+            // int(args.batch_size),
+        )
         field.train()
-        for start in range(0, epoch_order.numel(), int(args.batch_size)):
+        for batch_index, start in enumerate(
+            range(0, epoch_order.numel(), int(args.batch_size))
+        ):
             rows = epoch_order[start : start + int(args.batch_size)].to(device)
             optimizer.zero_grad(set_to_none=True)
             loss, _stats = canonical_primitive_loss(
@@ -730,8 +1274,23 @@ def train(args: argparse.Namespace) -> dict:
                 rows,
                 official_views=official_views,
                 capability_targets=capability_targets,
+                capability_reliability_policy=capability_reliability_policy,
                 config=loss_config,
             )
+            if relation_cache is not None:
+                relation_start = batch_index * relation_order.numel() // epoch_batches
+                relation_stop = (
+                    (batch_index + 1) * relation_order.numel() // epoch_batches
+                )
+                selected_triplets = relation_order[relation_start:relation_stop]
+                relation_loss = _field_b_relation_batch_loss(
+                    field,
+                    official_views,
+                    relation_cache,
+                    selected_triplets,
+                )
+                loss = loss + loss_config.relation_weight * relation_loss
+                relation_totals.append(float(relation_loss.detach()))
             loss.backward()
             optimizer.step()
             totals.append(float(loss.detach()))
@@ -752,6 +1311,11 @@ def train(args: argparse.Namespace) -> dict:
         record = {
             "epoch": epoch + 1,
             "loss": sum(totals) / max(1, len(totals)),
+            "relation_ranking_loss": (
+                sum(relation_totals) / len(relation_totals)
+                if relation_totals
+                else 0.0
+            ),
             **validation,
         }
         history.append(record)
@@ -832,18 +1396,27 @@ def train(args: argparse.Namespace) -> dict:
         "initial_field_checkpoint": initial_field_provenance,
         "loss_config": asdict(loss_config),
         "capability_target_mode": (
-            "official_adaptor_then_geometry_matched_mpr"
+            "official_adaptor_then_exact_raster_adjoint_contribution_mpr"
+            if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
+            else "official_adaptor_then_geometry_matched_mpr"
             if capability_targets
             else "adaptor_of_raw_mpr_target"
             if official_views is not None
             else "none"
         ),
+        "capability_target_contract": capability_target_contract,
+        "capability_reliability_policy": capability_reliability_policy,
+        "capability_observation_reference": capability_observation_provenance,
         "capability_mpr_targets": capability_target_provenance,
+        "relation_objective": relation_objective,
+        "relation_triplet_cache": relation_provenance,
+        "field_b_experiment_registration": field_b_registration_provenance,
         "training_config": training_config,
         "training_config_sha256": training_config_sha256,
         "history": history,
         "final_metrics": final_metrics,
         "final_capability_metrics": final_capability_metrics,
+        "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
     }
@@ -871,7 +1444,13 @@ def train(args: argparse.Namespace) -> dict:
         "final_metrics": final_metrics,
         "final_capability_metrics": final_capability_metrics,
         "capability_target_mode": payload["capability_target_mode"],
+        "capability_target_contract": capability_target_contract,
+        "capability_reliability_policy": capability_reliability_policy,
+        "capability_observation_reference": capability_observation_provenance,
         "capability_mpr_targets": capability_target_provenance,
+        "relation_objective": relation_objective,
+        "relation_triplet_cache": relation_provenance,
+        "field_b_experiment_registration": field_b_registration_provenance,
         "mpr_cache_sha256": mpr_cache_sha256,
         "mpr_cache_storage": raw_mpr_storage_provenance,
         "feature_output_bundle_sha256": expected_feature_bundle_sha256,
@@ -981,6 +1560,32 @@ def main() -> None:
     parser.add_argument("--freeze-basis", action="store_true")
     parser.add_argument("--official-capability-loss", action="store_true")
     parser.add_argument(
+        "--capability-target-contract",
+        choices=[
+            CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+            CAPABILITY_TARGET_CONTRACT_FIELD_A,
+        ],
+        default=CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+        help=(
+            "Keep the historical geometry-matched capability target, or opt "
+            "into Field-A exact raster-adjoint DINO/SAM targets with fixed "
+            "boundary-safe reliability weighting."
+        ),
+    )
+    parser.add_argument(
+        "--capability-observation-reference-mpr-cache",
+        default="",
+        help=(
+            "For Field-A only, raw-RADIO raster-adjoint cache that freezes the "
+            "exact view/geometry/operator support shared by DINO and SAM."
+        ),
+    )
+    parser.add_argument(
+        "--expected-capability-observation-reference-mpr-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the Field-A observation reference.",
+    )
+    parser.add_argument(
         "--dino-mpr-cache",
         default="",
         help=(
@@ -1009,6 +1614,44 @@ def main() -> None:
     parser.add_argument("--mpr-weight", type=float, default=1.0)
     parser.add_argument("--dino-weight", type=float, default=0.20)
     parser.add_argument("--sam3-weight", type=float, default=0.20)
+    parser.add_argument(
+        "--relation-objective",
+        choices=(RELATION_OBJECTIVE_DISABLED, RELATION_OBJECTIVE_FIELD_B),
+        default=RELATION_OBJECTIVE_DISABLED,
+        help=(
+            "Default-off relation supervision. Field-B v1 consumes a "
+            "query-independent exact-capability boundary-triplet cache."
+        ),
+    )
+    parser.add_argument(
+        "--field-b-experiment-registration",
+        default="",
+        help="Independent preregistration required by Field-B v1.",
+    )
+    parser.add_argument(
+        "--expected-field-b-experiment-registration-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the Field-B preregistration.",
+    )
+    parser.add_argument(
+        "--relation-triplet-cache",
+        default="",
+        help="Field-B query-independent pair_index/teacher-margin cache.",
+    )
+    parser.add_argument(
+        "--expected-relation-triplet-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the Field-B triplet cache.",
+    )
+    parser.add_argument(
+        "--relation-weight",
+        type=float,
+        default=0.0,
+        help=(
+            "Default zero. Field-B v1 accepts only the pre-existing global "
+            "CanonicalFieldLossConfig default of 0.05."
+        ),
+    )
     parser.add_argument("--coefficient-weight", type=float, default=1e-5)
     parser.add_argument("--basis-orthogonality-weight", type=float, default=1e-3)
     parser.add_argument("--epochs", type=int, default=20)
@@ -1032,6 +1675,18 @@ def main() -> None:
         parser.error("--fusion-residual-blocks requires --primitive-fusion")
     if args.min_epochs <= 0 or args.min_epochs > args.epochs:
         parser.error("--min-epochs must lie in [1, --epochs]")
+    if (
+        args.capability_target_contract
+        == CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1
+        and (
+            args.capability_observation_reference_mpr_cache
+            or args.expected_capability_observation_reference_mpr_cache_sha256
+        )
+    ):
+        parser.error(
+            "Field-A observation-reference arguments require "
+            "--capability-target-contract field_a_exact_adjoint"
+        )
     print(json.dumps(train(args), indent=2))
 
 

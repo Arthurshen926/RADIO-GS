@@ -24,20 +24,60 @@ def _sha256_file(path: str | Path) -> str:
     return digest.hexdigest()
 
 
+def _validate_compatible_legacy_observation(metadata: dict) -> None:
+    """Accept only the audited query-free completed-MPR legacy contract."""
+    if metadata.get("construction") != (
+        "dominant_primary_with_query_free_support_completion"
+    ):
+        raise ValueError("compatible-legacy capability MPR construction differs")
+    contaminated = [
+        key
+        for key in (
+            "benchmark_images_opened",
+            "benchmark_masks_opened",
+            "text_queries_opened",
+        )
+        if metadata.get(key) is not False
+    ]
+    if contaminated:
+        raise ValueError(
+            f"compatible-legacy capability MPR is not query-independent: {contaminated}"
+        )
+
+
 @torch.no_grad()
 def build(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
+    field_checkpoint_sha256 = _sha256_file(args.field_checkpoint)
+    expected_field_sha256 = str(
+        getattr(args, "expected_field_checkpoint_sha256", "")
+    )
+    if expected_field_sha256 and field_checkpoint_sha256 != expected_field_sha256:
+        raise ValueError("canonical field checkpoint SHA-256 differs")
     field, payload = load_canonical_field_checkpoint(
         args.field_checkpoint, map_location="cpu"
     )
     mpr_path = Path(args.mpr_cache or payload["mpr_cache"])
+    expected_mpr_sha256 = str(
+        getattr(args, "expected_mpr_cache_sha256", "")
+    ) or str(payload.get("mpr_cache_sha256", ""))
+    payload_mpr_sha256 = str(payload.get("mpr_cache_sha256", ""))
+    if not expected_mpr_sha256 or (
+        payload_mpr_sha256 and expected_mpr_sha256 != payload_mpr_sha256
+    ):
+        raise ValueError("capability MPR SHA-256 is absent or differs from field")
+    observation_contract = str(
+        getattr(args, "observation_contract", "canonical")
+    )
     mpr, _mpr_sha256, mpr_path = load_mpr_cache(
         mpr_path,
-        expected_sha256=str(payload.get("mpr_cache_sha256", "")) or None,
+        expected_sha256=expected_mpr_sha256,
         expected_feature_space="radio",
         require_reliability=True,
-        require_formal_safety=True,
+        require_formal_safety=observation_contract == "canonical",
     )
+    if observation_contract == "compatible-legacy":
+        _validate_compatible_legacy_observation(dict(mpr.get("metadata", {})))
     xyz = torch.as_tensor(mpr["xyz"]).float().cpu()
     valid = torch.as_tensor(mpr["valid"]).bool().cpu()
     if field.num_gaussians != xyz.shape[0] or valid.shape != (xyz.shape[0],):
@@ -79,7 +119,6 @@ def build(args: argparse.Namespace) -> dict:
             )
 
     radio_checkpoint_sha256 = _sha256_file(args.radio_checkpoint)
-    field_checkpoint_sha256 = _sha256_file(args.field_checkpoint)
     base_signature = field.signature.to_dict()
     raw_capability_targets = payload.get("capability_mpr_targets", {})
     if not isinstance(raw_capability_targets, dict):
@@ -145,6 +184,8 @@ def build(args: argparse.Namespace) -> dict:
         "field_checkpoint": str(Path(args.field_checkpoint).resolve()),
         "field_checkpoint_sha256": field_checkpoint_sha256,
         "mpr_cache": str(mpr_path.resolve()),
+        "mpr_cache_sha256": _mpr_sha256,
+        "observation_contract": observation_contract,
         "radio_checkpoint": str(Path(args.radio_checkpoint).resolve()),
         "radio_checkpoint_sha256": radio_checkpoint_sha256,
         "appearance_view": "official C-RADIOv4 dino_v3_7b feature_projection",
@@ -200,8 +241,15 @@ def build(args: argparse.Namespace) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--field-checkpoint", required=True)
+    parser.add_argument("--expected-field-checkpoint-sha256", default="")
     parser.add_argument("--output", required=True)
     parser.add_argument("--mpr-cache", default="")
+    parser.add_argument("--expected-mpr-cache-sha256", default="")
+    parser.add_argument(
+        "--observation-contract",
+        choices=("canonical", "compatible-legacy"),
+        default="canonical",
+    )
     parser.add_argument(
         "--radio-checkpoint",
         default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",

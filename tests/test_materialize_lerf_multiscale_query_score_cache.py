@@ -7,6 +7,7 @@ import pytest
 import torch
 
 from radio_gs.evaluation.openclip_readout import cosine_logits
+from radio_gs.scripts import build_surface_region_semantic_cache as surface_builder
 from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     validate_ours_multiscale_query_score_cache,
 )
@@ -19,6 +20,13 @@ from radio_gs.scripts.materialize_lerf_multiscale_query_score_cache import (
     SIGLIP2_TEXT_CANONICALIZATION,
     _direct_xyz_sha256,
     materialize,
+)
+from radio_gs.scripts.materialize_lerf_streamed_multiscale_query_score_cache import (
+    STREAMED_COMPLETION_REASON,
+    STREAMED_CONSTRUCTION,
+    STREAMED_FEATURE_SPACE,
+    STREAMED_SCALE_AGGREGATION,
+    materialize_streamed,
 )
 from radio_gs.utils.immutable_artifacts import load_torch_mapping, sha256_file
 
@@ -143,6 +151,97 @@ def _run(inputs: dict[str, object], output: Path) -> dict[str, object]:
     )
 
 
+def _write_streamed_scores(
+    inputs: dict[str, object], path: Path
+) -> tuple[Path, str, torch.Tensor]:
+    xyz = inputs["xyz"]
+    valid = inputs["valid"]
+    rows = inputs["global_rows"]
+    descriptors = inputs["descriptors"]
+    text_embeddings = inputs["text_embeddings"]
+    assert isinstance(xyz, torch.Tensor)
+    assert isinstance(valid, torch.Tensor)
+    assert isinstance(rows, torch.Tensor)
+    assert isinstance(descriptors, torch.Tensor)
+    assert isinstance(text_embeddings, torch.Tensor)
+    scores = torch.zeros(
+        len(xyz), 3, int(text_embeddings.shape[0]), dtype=torch.float16
+    )
+    for scale in range(3):
+        scores[rows, scale] = cosine_logits(
+            descriptors[:, scale], text_embeddings
+        ).half()
+    builder_path = Path(surface_builder.__file__).resolve()
+    field = Path(inputs["field"]).resolve()
+    readout = Path(inputs["readout"]).resolve()
+    text = Path(inputs["text"]).resolve()
+    payload = {
+        "xyz": xyz,
+        "valid": valid,
+        "features": scores,
+        "metadata": {
+            "schema_version": 3,
+            "feature_space": STREAMED_FEATURE_SPACE,
+            "construction": STREAMED_CONSTRUCTION,
+            "scoring": "raw_independent_normalized_cosine",
+            "scale_aggregation": STREAMED_SCALE_AGGREGATION,
+            "scale_count": 3,
+            "scale_radii_m": list(inputs["native_radii"]),
+            "query_names": list(inputs["text_payload"]["queries"]),
+            "text_embedding_cache": str(text),
+            "text_embedding_cache_sha256": inputs["text_sha"],
+            "streaming_implementation": {
+                "path": str(builder_path),
+                "sha256": _sha(builder_path),
+            },
+            "semantic_cache_materialized": False,
+            "completion": {
+                "applied": False,
+                "reason": STREAMED_COMPLETION_REASON,
+            },
+            "benchmark_images_opened": False,
+            "benchmark_masks_opened": False,
+            "text_queries_opened": True,
+            "semantic_provenance": {
+                "source": "canonical_radio_surface_region_readout",
+                "query_set_invariant": True,
+                "official_summary_head": True,
+                "custom_text_projection": False,
+                "benchmark_images_opened": False,
+                "benchmark_masks_opened": False,
+                "text_queries_opened": False,
+                "region_radii_m": list(inputs["native_radii"]),
+                "field_checkpoint": str(field),
+                "field_checkpoint_sha256": inputs["field_sha"],
+                "field_geometry_xyz_sha256": _direct_xyz_sha256(xyz),
+                "readout_checkpoint": str(readout),
+                "readout_checkpoint_sha256": inputs["readout_sha"],
+                "official_radio_checkpoint_sha256": "b" * 64,
+            },
+        },
+    }
+    torch.save(payload, path)
+    return path, _sha(path), scores
+
+
+def _run_streamed(
+    inputs: dict[str, object], streamed: Path, streamed_sha: str, output: Path
+) -> dict[str, object]:
+    return materialize_streamed(
+        streamed_score_cache=streamed,
+        streamed_score_cache_sha256=streamed_sha,
+        text_query_cache=inputs["text"],
+        text_query_cache_sha256=inputs["text_sha"],
+        field_checkpoint=inputs["field"],
+        field_checkpoint_sha256=inputs["field_sha"],
+        readout_checkpoint=inputs["readout"],
+        readout_checkpoint_sha256=inputs["readout_sha"],
+        renderer_geometry_checkpoint=inputs["renderer"],
+        renderer_geometry_checkpoint_sha256=inputs["renderer_sha"],
+        output=output,
+    )
+
+
 def test_materializes_exact_n3q_direct3d_contract_and_shared_authority(
     tmp_path: Path,
 ) -> None:
@@ -208,6 +307,43 @@ def test_materializes_exact_n3q_direct3d_contract_and_shared_authority(
     assert set(constraints.values()) == {False}
     assert report["shared_renderer_authority"] == authority
     assert output.with_suffix(".pt.json").is_file()
+
+
+def test_streamed_path_is_bitwise_equivalent_and_frozen_validator_compatible(
+    tmp_path: Path,
+) -> None:
+    inputs = _write_inputs(tmp_path)
+    streamed, streamed_sha, expected_scores = _write_streamed_scores(
+        inputs, tmp_path / "streamed_scores.pt"
+    )
+    output = tmp_path / "streamed_authority.pt"
+    report = _run_streamed(inputs, streamed, streamed_sha, output)
+    payload, _, _ = load_torch_mapping(
+        output, expected_sha256=report["query_score_cache"]["sha256"]
+    )
+
+    assert torch.equal(payload["query_scores"], expected_scores)
+    assert payload["authority"]["descriptor_axis"] == {
+        "dimension": DESCRIPTOR_DIMENSION,
+        "materialized": False,
+        "execution_representation": "streamed_scalar_scores_only",
+        "valid_rows": int(inputs["valid"].sum()),
+        "streamed_query_score_cache_sha256": streamed_sha,
+        "readout_checkpoint_sha256": inputs["readout_sha"],
+        "official_radio_checkpoint_sha256": "b" * 64,
+    }
+    direct = validate_ours_multiscale_query_score_cache(
+        payload,
+        expected_xyz=inputs["xyz"],
+        expected_query_ids=("red cup", "tea pot"),
+        expected_renderer_geometry_checkpoint_sha256=inputs["renderer_sha"],
+    )
+    assert torch.equal(direct.query_scores.half(), expected_scores)
+
+    standard = tmp_path / "standard_authority.pt"
+    _run(inputs, standard)
+    standard_payload, _, _ = load_torch_mapping(standard)
+    assert torch.equal(standard_payload["query_scores"], payload["query_scores"])
 
 
 def test_no_clobber_rejects_existing_cache_or_receipt(tmp_path: Path) -> None:

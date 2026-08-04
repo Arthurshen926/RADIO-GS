@@ -1,0 +1,143 @@
+{
+  "schema_version": "nvos_official_sam3_reference_completion_registration_v1",
+  "registered_at": "2026-08-03T21:12:27+08:00",
+  "status": "registered_not_launched_runtime_preflight_blocked",
+  "audit": {
+    "path": "paper/artifacts/nvos_published_compatible_reference_completion_audit_20260803.json",
+    "sha256": "148892c23ad1b44fff415dce3d012df11bcc1b3141362437d0cf684b1ea86486"
+  },
+  "parent_registration": {
+    "path": "paper/artifacts/evidence_to_support_v1_experiment_registration_20260803.json",
+    "sha256": "7c539fb523c7152446bdc5f28325986a9162baa6c85a5608a66552023aa869c4"
+  },
+  "purpose": "Test whether a frozen source/reference SAM completion converts the official scribble into a substantially stronger unary before exact primitive adjoint and the current fixed support operator.",
+  "claim_name": "LUDVIG-role-compatible source-reference completion with official SAM3",
+  "claim_exclusions": [
+    "not a LUDVIG model-exact reproduction",
+    "not the LUDVIG released all-view protocol",
+    "not eligible to relabel the reproduced LUDVIG 0.9125768502741802 result as strict unseen",
+    "not an intrinsic compact-field-only result because an external 2D decoder completes the source mask"
+  ],
+  "allowed_inputs": {
+    "source_reference_rgb": true,
+    "raw_official_positive_scribble": true,
+    "raw_official_negative_scribble": true,
+    "frozen_source_camera_and_geometry": true,
+    "frozen_exact_source_prompt_responsibility": true,
+    "query_independent_canonical_capability_and_graph": true,
+    "target_rgb": false,
+    "target_mask_before_method_artifact_freeze_and_reload": false,
+    "target_metric_for_any_method_choice": false,
+    "previous_target_outcome_for_any_scene_specific_choice": false
+  },
+  "official_sam3": {
+    "source_commit": "46957e47805eaa273f4aa7bbbd25a88bca9108ce",
+    "checkpoint_path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+    "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "python_path": "/root/miniconda3/envs/sam3/bin/python",
+    "loader": "/root/RADIO-GS/radio_gs/scripts/build_sam3_foundation_cache.py::_load_sam3_model",
+    "point_only": true,
+    "dtype": "bfloat16",
+    "device_at_future_launch": "cuda:0",
+    "multimask_output": false,
+    "no_replacement_or_custom_decoder": true
+  },
+  "reference_preprocessing": {
+    "decode": "PIL Image.open followed by convert RGB",
+    "output_size": [1008, 756],
+    "resize": "PIL LANCZOS directly from the frozen source RGB to width 1008 and height 756",
+    "reason": "The exact responsibility and official scribble authority are both native 1008x756.",
+    "receipt_requirements": [
+      "bind source RGB path, bytes, and sha256",
+      "bind positive and negative scribble paths, nonzero pixel counts, and sha256",
+      "bind resized RGB tensor sha256",
+      "bind official SAM3 source commit, checkpoint sha256, config sha256, torch version, dtype, and device"
+    ]
+  },
+  "positive_prompt_sampling": {
+    "relationship_to_ludvig": "Mirror LUDVIG sam_predict multiplicities: thirty positive pixels are sampled once and reshaped into ten triplets; no negative points are sent to SAM.",
+    "population": "all nonzero pixels of the official positive scribble in row-major pixel-id order",
+    "required_population": 30,
+    "predictions": 10,
+    "positive_points_per_prediction": 3,
+    "negative_points_per_prediction": 0,
+    "coordinate_format": "float32 (x,y) pixel-index coordinates, matching the official predict_inst point interface and LUDVIG's integer pixel-coordinate convention",
+    "deterministic_rank": "rank the population by SplitMix64(pixel_id XOR 0x243F6A8885A308D3), with pixel_id ascending as an exact tie break; take the first 30 and reshape contiguously to [10,3,2]",
+    "splitmix64": "z=(x+0x9E3779B97F4A7C15) mod 2^64; z=(z xor (z>>30))*0xBF58476D1CE4E5B9 mod 2^64; z=(z xor (z>>27))*0x94D049BB133111EB mod 2^64; return z xor (z>>31)",
+    "seed": 0,
+    "insufficient_population": "fail closed before model inference"
+  },
+  "reference_mask_completion": {
+    "per_triplet_call": "processor.model.predict_inst(state, point_coords=triplet, point_labels=[1,1,1], multimask_output=false)",
+    "per_call_validation": "require exactly one HxW mask and one finite quality value; reject malformed or nonfinite output",
+    "aggregation": "arithmetic mean of ten binary official SAM3 masks",
+    "threshold": "skimage.filters.threshold_li on the 1008x756 aggregate; completed positive is aggregate greater than or equal to the returned threshold",
+    "scribble_authority": "overwrite raw positive pixels true, then overwrite raw negative pixels false",
+    "negative_observation": "retain the raw negative scribble as the explicit negative channel; do not treat every pixel outside the completed positive mask as negative",
+    "frozen_artifacts": [
+      "completed positive mask PNG",
+      "ten-mask aggregate float tensor",
+      "positive and negative observation tensor bundle",
+      "JSON receipt containing all input, output, implementation, and environment hashes"
+    ]
+  },
+  "exact_adjoint": {
+    "cache_class": "/root/RADIO-GS/radio_gs/interfaces/prompt_responsibility_cache.py::PromptResponsibilityCache",
+    "operator": "exact sparse front-to-back W transpose divided by W transpose one at 1008x756",
+    "positive_observation": "the frozen completed positive mask",
+    "negative_observation": "the frozen raw negative scribble mask",
+    "positive_mass": "W transpose completed_positive",
+    "negative_mass": "W transpose raw_negative",
+    "visible_mass": "W transpose one",
+    "signed_evidence": "(positive_mass - negative_mass) divided by visible_mass where visible_mass is positive",
+    "evidence_weight": "positive_mass + negative_mass",
+    "overlap_policy": "raw negative overwrite in the reference mask makes the two pixel observations exclusive before adjoint",
+    "target_data": "forbidden"
+  },
+  "current_fixed_support": {
+    "relation": "query-independent official C-RADIO DINOv3 primitive signed multiplicative hash256 diagnostic reconstructed from the compact canonical field",
+    "classifier": "sklearn balanced LogisticRegression C=0.01 on nonzero signed evidence, sample weighted by evidence_weight",
+    "regularizer_bandwidth": 4.0,
+    "feature_bandwidth": 2.0,
+    "official_num_neighbors_parameter": 200,
+    "effective_knn_columns": 201,
+    "include_self": true,
+    "iterations": 100,
+    "edge_binarization_threshold": 0.00001,
+    "final_threshold": 0.5,
+    "positive_raw_scribble_exclusive_primitive_anchor": 1.0,
+    "negative_raw_scribble_exclusive_primitive_anchor": 0.0,
+    "connected_selection": "none",
+    "scene_specific_tuning": false,
+    "target_metric_selection": false
+  },
+  "two_phase_freeze_and_score": {
+    "phase_1": "Generate and hash both source completions in order horns_left then fern without opening either target RGB, target mask, or target metric.",
+    "phase_2": "Generate and hash both exact-adjoint/current-support primitive artifacts without opening either target RGB, target mask, or target metric.",
+    "phase_3": "Only after both phase-2 receipts exist, reload frozen primitive artifacts and call the frozen target scorer in order horns_left then fern.",
+    "method_mutation_after_first_target_score": false
+  },
+  "sentinel_plan": {
+    "ordered_scenes": [
+      "horns_left",
+      "fern"
+    ],
+    "device": "GPU0 only after explicit scheduler notification; GPU1 remains reserved for Field-A",
+    "launch_status": "blocked until the official SAM3 CUDA preflight succeeds",
+    "estimated_serial_wall_clock": "7-13 minutes for both sentinels after the runtime is compatible",
+    "full8": "not authorized by this registration; requires a separate result gate and registration"
+  },
+  "comparison_boundary": {
+    "ludvig_reproduced_macro_foreground_iou": 0.9125768502741802,
+    "ludvig_protocol": "released all-view, original 3DGS geometry, SAM v1 ViT-H, every registered view RGB visible during uplift, three seeds",
+    "this_protocol": "single source/reference RGB only, official SAM3, exact source adjoint, current compact capability/support, deterministic one-run sentinel",
+    "interpretation": "The sentinel isolates whether stronger source unary completion repairs the query-interface bottleneck; it does not close the field/protocol gap to LUDVIG by construction."
+  },
+  "safety": {
+    "target_rgb_opened_before_method_freeze": false,
+    "target_mask_opened_before_method_freeze": false,
+    "gpu_job_started_at_registration": false,
+    "current_runtime_preflight": "blocked_by_cuda_error_804",
+    "thermal_policy_when_later_authorized": "single GPU0 job, ordinary telemetry only, no frequent stop-trigger loop"
+  }
+}

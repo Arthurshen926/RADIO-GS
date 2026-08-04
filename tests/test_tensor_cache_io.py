@@ -89,6 +89,29 @@ def test_mpr_validator_accepts_one_fully_bound_cache(tmp_path: Path) -> None:
     assert source == path.resolve()
 
 
+def test_mpr_validator_accepts_dominant_primary_support_completion() -> None:
+    payload = _mpr_payload()
+    payload["reliability"][1, 2] = 0.0
+    payload["metadata"].update(
+        {
+            "construction": "dominant_primary_with_query_free_support_completion",
+            "aggregation_mode": "primary_then_support_completion",
+            "primary_valid_count": 1,
+            "fallback_valid_count": 1,
+            "primary_cache_sha256": "d" * 64,
+            "support_cache_sha256": "e" * 64,
+        }
+    )
+
+    observed = validate_mpr_cache_payload(payload, require_formal_safety=True)
+    assert observed["reliability"][1, 2] == 0
+
+    corrupted = copy.deepcopy(payload)
+    corrupted["reliability"][1, 2] = 0.5
+    with pytest.raises(ValueError, match="dominant reliability"):
+        validate_mpr_cache_payload(corrupted, require_formal_safety=True)
+
+
 @pytest.mark.parametrize(
     ("mutate", "message"),
     [

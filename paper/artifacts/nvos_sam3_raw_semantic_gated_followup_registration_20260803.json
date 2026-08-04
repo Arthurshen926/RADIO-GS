@@ -1,0 +1,111 @@
+{
+  "schema_version": "nvos_sam3_raw_semantic_gated_followup_registration_v1",
+  "registered_at": "2026-08-03T22:10:53+08:00",
+  "status": "posthoc_registered_before_followup_implementation_and_selector_construction",
+  "parent_registration": {
+    "path": "paper/artifacts/nvos_sam3_soft_reliability_followup_registration_20260803.json",
+    "sha256": "fcff94822697af71a8ac85ece28935f34b181c626070414ca25566b5614dc97f"
+  },
+  "motivating_result": {
+    "path": "paper/artifacts/nvos_sam3_soft_reliability_followup_sentinel_result_20260803.json",
+    "sha256": "fe63af6eb60461a204ba122567b1030bdab4bec8a765fb56825b0cef0d99a14b",
+    "posthoc_status": "Both horns_left and fern target results have already been inspected repeatedly. This is a final registered posthoc mechanism diagnostic, not independent target-blind validation."
+  },
+  "purpose": "Test whether a semantic compatibility fitted only from raw signed scribbles can suppress confident but irrelevant SAM completion while retaining the parameter-free soft completion recall benefit.",
+  "fixed_phase1_inputs": {
+    "phase1_summary_path": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/phase1_summary.json",
+    "phase1_summary_sha256": "76975bc2fe28f32375d0be5a839c577c1ddc0d1119d17310dbd7e040614a138a",
+    "horns_left": {
+      "completion_path": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/horns_left.pt",
+      "completion_sha256": "08a0f366702b79eee7d59f25a85a2480543b0298ef1abd8c30f0ff9edc027155",
+      "receipt_sha256": "cd6e04e7ed4126b24e07bd09e11cdc7fbd20066c2ff88b6a28326cc4637d9dfd"
+    },
+    "fern": {
+      "completion_path": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/fern.pt",
+      "completion_sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+      "receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a"
+    },
+    "allowed_phase1_tensor": "aggregate_probability q equal to the arithmetic mean of the same ten frozen official SAM3 binary masks",
+    "new_sam3_call_allowed": false,
+    "Li_threshold_used": false
+  },
+  "raw_semantic_compatibility": {
+    "raw_positive_mass": "W transpose raw_positive",
+    "raw_negative_mass": "W transpose raw_negative",
+    "visible_mass": "W transpose one",
+    "raw_signed_evidence": "(raw_positive_mass-raw_negative_mass)/visible_mass on visible primitives",
+    "raw_reference_weight": "raw_positive_mass+raw_negative_mass",
+    "relation": "the same query-independent C-RADIO DINO signed multiplicative hash256",
+    "classifier": "balanced LogisticRegression C=0.01 on raw signed-nonzero capability rows, sample weighted only by raw_reference_weight",
+    "compatibility": "P_raw=predict_proba(raw scribble positive)^(1/4), the existing regularizer_bandwidth=4 rule",
+    "completed_mask_or_target_used_to_fit_compatibility": false,
+    "compatibility_refit_allowed": false
+  },
+  "soft_completion": {
+    "binary_entropy_nats": "H2(q)=-q ln(q)-(1-q) ln(1-q), with 0 ln(0)=0",
+    "reliability": "c(q)=1-H2(q)/ln(2), with c(0)=c(1)=1 and c(0.5)=0",
+    "soft_positive_observation": "s(q)=q*c(q), computed float64 then frozen float32",
+    "scribble_pixel_order": [
+      "compute s(q)",
+      "overwrite raw positive pixels to exactly 1",
+      "overwrite raw negative pixels to exactly 0"
+    ],
+    "completed_positive_mass": "W transpose s(q)",
+    "completed_positive_probability": "completed_positive_mass/visible_mass on visible primitives",
+    "semantic_completed_initial_unary": "completed_positive_probability*P_raw on capability-valid primitives",
+    "parameters_added": 0
+  },
+  "fixed_support": {
+    "initial_anchor_order": "set raw-positive-exclusive primitive rows to 1 and raw-negative-exclusive rows to 0 after forming semantic_completed_initial_unary",
+    "feature_similarity": "same normalized hash256 RBF with feature_bandwidth=2 and positive reference mask semantic_completed_initial_unary>0",
+    "query_edge_gate": "sqrt(P_raw_i*P_raw_j), with the same frozen P_raw and no completed-evidence refit",
+    "kernel": "ludvig_release_compat",
+    "regularizer_bandwidth": 4.0,
+    "official_num_neighbors_parameter": 200,
+    "effective_knn_columns": 201,
+    "iterations": 100,
+    "edge_binarization_threshold": 0.00001,
+    "final_anchor_order": "after diffusion set raw-positive-exclusive primitive rows to 1 and raw-negative-exclusive rows to 0 again",
+    "threshold": 0.5,
+    "connected_selection": "none"
+  },
+  "forbidden_choices": {
+    "new_scalar": true,
+    "scene_specific_threshold_or_rule": true,
+    "target_metric_model_selection": true,
+    "per_scene_raw_vs_completed_selection": true,
+    "completed_mask_compatibility_refit": true,
+    "target_tuned_consensus_threshold": true,
+    "new_decoder_prompt_policy": true,
+    "connected_selection": true
+  },
+  "authority_boundary": {
+    "source_reference_rgb": "already consumed only by the frozen phase1 artifact",
+    "raw_positive_and_negative_scribbles": true,
+    "target_rgb": false,
+    "target_mask_before_both_selector_receipts_freeze": false,
+    "target_metrics_before_both_selector_receipts_freeze": false,
+    "previous_target_results_used_as_numeric_parameters": false
+  },
+  "execution_order": {
+    "phase_prelabel": "Implement and test the fixed operator, then freeze and reload horns_left and fern selectors. Neither target scorer may start until both selector receipts exist and pass hash validation.",
+    "phase_score": "After the cross-scene hard boundary, score horns_left then fern with the unchanged exact target readout.",
+    "method_mutation_after_first_followup_score": false
+  },
+  "gate": {
+    "comparator": "strict raw hash256 support",
+    "comparator_horns_left": 0.6969455416488206,
+    "comparator_fern": 0.5308410361456904,
+    "comparator_two_scene_macro": 0.6138932888972555,
+    "pass": "follow-up macro improves by at least 0.03, at least one sentinel improves, and neither sentinel regresses by more than 0.03",
+    "full8_requires_pass": true,
+    "stop_after_gate": true
+  },
+  "runtime": {
+    "physical_gpu": 0,
+    "python": "/root/miniconda3/envs/cybersim_agent/bin/python",
+    "process_local_libcuda": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "global_environment_or_driver_mutation": false,
+    "thermal_policy": "300W physical limit, launch 79C, soft pause 82C, resume 78C, hard abort 85C, no peer-GPU coupling"
+  }
+}

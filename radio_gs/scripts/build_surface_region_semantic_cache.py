@@ -324,6 +324,15 @@ def preserve_primary_region_tokens(
 @torch.no_grad()
 def build(args: argparse.Namespace) -> dict:
     device = torch.device(args.device)
+    canonical_radio_source = str(
+        getattr(args, "canonical_radio_source", "field_decode")
+    )
+    if canonical_radio_source not in {"field_decode", "mpr_teacher"}:
+        raise ValueError("unsupported canonical RADIO source")
+    registration_arg = str(getattr(args, "experiment_registration", "")).strip()
+    registration_record = file_record(registration_arg) if registration_arg else None
+    if canonical_radio_source == "mpr_teacher" and registration_record is None:
+        raise ValueError("mpr_teacher capacity diagnostics require preregistration")
     field_path, graph_path, readout_path = map(Path, (
         args.field_checkpoint, args.support_graph, args.readout_checkpoint,
     ))
@@ -420,6 +429,13 @@ def build(args: argparse.Namespace) -> dict:
         "region_contract_sha256": provenance["region_contract_sha256"],
     })
     stream_text = bool(str(args.stream_text_queries).strip())
+    preserve_streamed_text_scales = bool(
+        getattr(args, "preserve_streamed_text_scales", False)
+    )
+    if preserve_streamed_text_scales and not stream_text:
+        raise ValueError(
+            "--preserve-streamed-text-scales requires --stream-text-queries"
+        )
     resume_dir = (
         Path(args.resume_dir).resolve()
         if str(args.resume_dir).strip()
@@ -441,12 +457,27 @@ def build(args: argparse.Namespace) -> dict:
             "readout": readout_record,
             "radio": radio_record,
             "text": text_record,
+            **(
+                {"experiment_registration": registration_record}
+                if canonical_radio_source == "mpr_teacher"
+                else {}
+            ),
         },
         "region_contract": contract.to_dict(),
         "region_contract_sha256": contract.digest,
         "radio_batch_size": radio_batch_size,
         "semantic_batch_size": semantic_batch_size,
         "stream_text_queries": str(args.stream_text_queries),
+        **(
+            {"preserve_streamed_text_scales": True}
+            if preserve_streamed_text_scales
+            else {}
+        ),
+        **(
+            {"canonical_radio_source": canonical_radio_source}
+            if canonical_radio_source == "mpr_teacher"
+            else {}
+        ),
         "device_type": device.type,
         "thermal_pacing_seconds_per_batch": pacing_seconds,
         "implementation": file_record(Path(__file__).resolve()),
@@ -468,7 +499,11 @@ def build(args: argparse.Namespace) -> dict:
     ).to(device).eval()
     for module in (field, readout, head):
         for parameter in module.parameters(): parameter.requires_grad_(False)
-    semantic_phase = "text_scores" if stream_text else "semantic"
+    semantic_phase = (
+        "text_scores_multiscale"
+        if preserve_streamed_text_scales
+        else ("text_scores" if stream_text else "semantic")
+    )
     _validate_resume_inventory(
         resume_dir,
         row_count=len(global_rows),
@@ -491,7 +526,12 @@ def build(args: argparse.Namespace) -> dict:
         if cached is not None:
             radio[start:stop] = cached.to(device)
             continue
-        computed = field.radio_features(global_rows[start:stop].to(device)).half()
+        if canonical_radio_source == "field_decode":
+            computed = field.radio_features(global_rows[start:stop].to(device)).half()
+        else:
+            computed = torch.as_tensor(mpr["features"])[
+                global_rows[start:stop]
+            ].to(device=device, dtype=torch.float16)
         radio[start:stop] = computed
         _commit_resume_tensor(
             resume_dir,
@@ -558,6 +598,10 @@ def build(args: argparse.Namespace) -> dict:
             value.strip() for value in str(args.stream_text_queries).split(",")
             if value.strip()
         ]
+        if preserve_streamed_text_scales and len(set(text_queries)) != len(
+            text_queries
+        ):
+            raise ValueError("multiscale streamed text query IDs must be unique")
         lookup = {name: index for index, name in enumerate(available)}
         missing = [name for name in text_queries if name not in lookup]
         if missing:
@@ -568,7 +612,12 @@ def build(args: argparse.Namespace) -> dict:
             ].float(), dim=-1, eps=1e-8,
         )
         streamed_scores = torch.zeros(
-            len(xyz_global), len(text_queries), dtype=torch.float16
+            (
+                (len(xyz_global), len(radii), len(text_queries))
+                if preserve_streamed_text_scales
+                else (len(xyz_global), len(text_queries))
+            ),
+            dtype=torch.float16,
         )
         descriptors_by_scale = None
     else:
@@ -578,7 +627,11 @@ def build(args: argparse.Namespace) -> dict:
     for start in range(0, len(global_rows), semantic_batch_size):
         stop = min(start + semantic_batch_size, len(global_rows))
         cached_shape = (
-            (stop - start, len(text_queries))
+            (
+                (stop - start, len(radii), len(text_queries))
+                if preserve_streamed_text_scales
+                else (stop - start, len(text_queries))
+            )
             if stream_text
             else (stop - start, len(radii), 1536)
         )
@@ -652,10 +705,21 @@ def build(args: argparse.Namespace) -> dict:
                 scale_scores = F.normalize(
                     descriptor.cpu().float(), dim=-1, eps=1e-8
                 ) @ text_embeddings.T
-                batch_streamed_scores = (
-                    scale_scores if batch_streamed_scores is None
-                    else torch.maximum(batch_streamed_scores, scale_scores)
-                )
+                if preserve_streamed_text_scales:
+                    if batch_streamed_scores is None:
+                        batch_streamed_scores = torch.empty(
+                            batch,
+                            len(radii),
+                            len(text_queries),
+                            dtype=torch.float32,
+                        )
+                    batch_streamed_scores[:, scale_index] = scale_scores
+                else:
+                    batch_streamed_scores = (
+                        scale_scores
+                        if batch_streamed_scores is None
+                        else torch.maximum(batch_streamed_scores, scale_scores)
+                    )
             else:
                 assert descriptors_by_scale is not None
                 descriptors_by_scale[start:stop, scale_index] = descriptor.cpu()
@@ -681,7 +745,20 @@ def build(args: argparse.Namespace) -> dict:
         "schema_version": 5, "feature_space": "official_siglip2_summary_descriptor_multiscale",
         "source": "canonical_radio_surface_region_readout",
         "construction": "canonical_radio_surface_region_readout_then_official_summary_head",
-        "canonical_radio_source": "field_decode_only", "mpr_radio_features_opened": False,
+        "canonical_radio_source": (
+            "field_decode_only"
+            if canonical_radio_source == "field_decode"
+            else "frozen_mpr_full_1280_teacher"
+        ),
+        "mpr_radio_features_opened": canonical_radio_source == "mpr_teacher",
+        **(
+            {
+                "capacity_diagnostic_only": True,
+                "experiment_registration": registration_record,
+            }
+            if canonical_radio_source == "mpr_teacher"
+            else {}
+        ),
         "readout_checkpoint": str(readout_path.resolve()),
         "readout_checkpoint_sha256": readout_sha256,
         "bridge_checkpoint_sha256": readout_sha256,
@@ -733,34 +810,77 @@ def build(args: argparse.Namespace) -> dict:
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     if stream_text:
-        streamed_scores, completion = apply_completion_evidence(
-            streamed_scores,
-            output_valid,
-            semantic_confidence=semantic_confidence,
-            primary_valid=primary_valid,
-            routing=str(
-                getattr(args, "completion_routing", "primary_first")
-            ),
-            primary_support_threshold=float(
-                getattr(args, "primary_support_threshold", 0.5)
-            ),
-            primary_support_mode=str(
-                getattr(args, "primary_support_mode", "relative_peak")
-            ),
-            primary_support_margin=float(
-                getattr(args, "primary_support_margin", 0.02)
-            ),
-        )
+        if preserve_streamed_text_scales:
+            # The frozen LERF Direct3D protocol consumes all three raw scales
+            # and performs its own fixed KNN10/peak-scale readout.  Completion
+            # or scale reduction here would change that protocol.
+            streamed_scores[~output_valid] = 0
+            completion = {
+                "applied": False,
+                "reason": "frozen_direct3d_requires_raw_unreduced_scale_scores",
+            }
+        else:
+            streamed_scores, completion = apply_completion_evidence(
+                streamed_scores,
+                output_valid,
+                semantic_confidence=semantic_confidence,
+                primary_valid=primary_valid,
+                routing=str(
+                    getattr(args, "completion_routing", "primary_first")
+                ),
+                primary_support_threshold=float(
+                    getattr(args, "primary_support_threshold", 0.5)
+                ),
+                primary_support_mode=str(
+                    getattr(args, "primary_support_mode", "relative_peak")
+                ),
+                primary_support_margin=float(
+                    getattr(args, "primary_support_margin", 0.02)
+                ),
+            )
         score_metadata = {
-            "schema_version": 2,
-            "feature_space": "primitive_text_query_scores",
-            "construction": "cold_streaming_surface_region_readout_then_cosine_max",
-            "scoring": "cosine",
-            "scale_aggregation": "max",
+            "schema_version": 3 if preserve_streamed_text_scales else 2,
+            "feature_space": (
+                "primitive_text_query_scores_multiscale_unreduced"
+                if preserve_streamed_text_scales
+                else "primitive_text_query_scores"
+            ),
+            "construction": (
+                "cold_streaming_surface_region_readout_then_independent_cosine"
+                if preserve_streamed_text_scales
+                else "cold_streaming_surface_region_readout_then_cosine_max"
+            ),
+            "scoring": (
+                "raw_independent_normalized_cosine"
+                if preserve_streamed_text_scales
+                else "cosine"
+            ),
+            "scale_aggregation": (
+                "none_frozen_downstream_only"
+                if preserve_streamed_text_scales
+                else "max"
+            ),
             "scale_count": len(radii),
+            **(
+                {"scale_radii_m": list(radii)}
+                if preserve_streamed_text_scales
+                else {}
+            ),
             "score_chunk_size": int(args.semantic_batch_size),
             "query_names": text_queries,
             "text_embedding_cache": str(Path(args.text_embedding_cache).resolve()),
+            **(
+                {
+                    "text_embedding_cache_sha256": (text_record or {}).get(
+                        "sha256"
+                    ),
+                    "streaming_implementation": file_record(
+                        Path(__file__).resolve()
+                    ),
+                }
+                if preserve_streamed_text_scales
+                else {}
+            ),
             "semantic_cache_materialized": False,
             "completion": completion,
             "benchmark_images_opened": False,
@@ -845,6 +965,24 @@ def build(args: argparse.Namespace) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--field-checkpoint", required=True)
+    parser.add_argument(
+        "--canonical-radio-source",
+        choices=("field_decode", "mpr_teacher"),
+        default="field_decode",
+        help=(
+            "Diagnostic source for the 1280-D RADIO rows. The default preserves "
+            "the compact canonical-field path; mpr_teacher is a full-capacity "
+            "label-free teacher upper-bound and must not be reported as the field."
+        ),
+    )
+    parser.add_argument(
+        "--experiment-registration",
+        default="",
+        help=(
+            "Immutable preregistration receipt. Required for the label-free "
+            "mpr_teacher full-capacity diagnostic."
+        ),
+    )
     parser.add_argument("--field-checkpoint-sha256", default="")
     parser.add_argument("--support-graph", required=True)
     parser.add_argument("--support-graph-sha256", default="")
@@ -889,6 +1027,15 @@ def main() -> None:
             "Optional ordered comma-separated queries. When set, execute the "
             "readout and cosine scoring as a cold stream and save only scalar "
             "primitive unaries, never a 1536D semantic cache."
+        ),
+    )
+    parser.add_argument(
+        "--preserve-streamed-text-scales",
+        action="store_true",
+        help=(
+            "Keep raw [primitive,3,query] cosine scores for the frozen LERF "
+            "Direct3D protocol. This disables both scale reduction and "
+            "completion in the streamed derivative."
         ),
     )
     parser.add_argument("--radio-checkpoint", default="/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar")

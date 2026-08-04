@@ -1,0 +1,145 @@
+{
+  "schema_version": "nvos_sam3_raw_semantic_gated_followup_sentinel_result_v1",
+  "date": "2026-08-03",
+  "claim_boundary": "posthoc_registered_followup_not_independent_validation",
+  "status": "sentinel_gate_failed_stop_no_full8",
+  "registration": {
+    "path": "paper/artifacts/nvos_sam3_raw_semantic_gated_followup_registration_20260803.json",
+    "sha256": "c0942e8cb3b04754e3fd5c0b9f6c490d32c0174a9b2dfcfeff12e3a26b4f000a"
+  },
+  "method": {
+    "raw_compatibility": "balanced LogisticRegression C=0.01 on exact raw signed scribble adjoint over the same hash256; P_raw=predict_proba^(1/4)",
+    "soft_completion": "s=q*(1-H2(q)/ln2), exact adjoint completed_positive_probability",
+    "initial_unary": "completed_positive_probability*P_raw with raw positive/negative hard anchors",
+    "graph_gate": "sqrt(P_raw_i*P_raw_j), without compatibility refit",
+    "solver": "same K201 ludvig_release_compat, f2, edge threshold 1e-5, 100 iterations",
+    "new_scalar": false,
+    "scene_specific_rule": false,
+    "target_dependent_tuning": false
+  },
+  "protocol": {
+    "manifest_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "both_selectors_frozen_before_any_followup_target_score": true,
+    "target_rgb_opened": false,
+    "target_masks_opened_for_scoring_only": true,
+    "score_frozen_and_reloaded_before_target_mask": true
+  },
+  "selectors": {
+    "horns_left": {
+      "selector_sha256": "15e7fa6cf5ac3353b216ab165b0973e4c59876c6723bb1c43382d9e006a001b0",
+      "selector_receipt_sha256": "df2e24e4a6222a676412978c9e4d8914b8fc62073e3219a1b44d2419c695eb99",
+      "primitive_probability_sha256": "2b9a5b7632914bbef0dfc2c8de6f6baf78110344e3bcf942c2261dcc7dbf9653",
+      "raw_query_compatibility_sha256": "680d29789ec1baa2561207ed66d883e355fe76b0da5981bd71c9276423487b3f",
+      "nonzero_semantic_initial_fraction_valid": 0.16051126467067386,
+      "support_fraction_at_0_5": 0.192084933347093,
+      "target_mask_opened_before_freeze": false,
+      "target_metric_computed_before_freeze": false
+    },
+    "fern": {
+      "selector_sha256": "8d58cf7448e540d4265a1185e61292bb07491c2f7d5bc136631c3e37574b8f2f",
+      "selector_receipt_sha256": "9f775431851d9c7800e6d1a7ddbe69f0e97d5745a2d63c6594ccb45d1b5afa98",
+      "primitive_probability_sha256": "be7f7954468882e832cee8c4c76e1fceee3d1d8072e66b7c080e913ee02a9b7a",
+      "raw_query_compatibility_sha256": "fd8b2e4437ba37aca3300b25ab5f636729e92f00acd666c39c1248a08db3590c",
+      "nonzero_semantic_initial_fraction_valid": 0.634421265141319,
+      "support_fraction_at_0_5": 0.3436175177300303,
+      "target_mask_opened_before_freeze": false,
+      "target_metric_computed_before_freeze": false
+    }
+  },
+  "results": {
+    "horns_left": {
+      "foreground_iou": 0.29740930372088165,
+      "pixel_accuracy": 0.8612349864849863,
+      "precision": 0.2994477908452147,
+      "recall": 0.9776229064322545,
+      "prediction_fraction": 0.19616025822072486,
+      "ground_truth_fraction": 0.06008426724593464,
+      "confusion": {
+        "true_positive": 705876,
+        "false_positive": 1651383,
+        "false_negative": 16157,
+        "true_negative": 9643590
+      },
+      "score_sha256": "edb3f6bfd4f751a597eff72ab30369fc0aca153a0f0942d47acdd24fca89799b",
+      "report_sha256": "0b39752a815be36b9f1834a9a444b6b4b52e780c1a07ad7a40bf76654fcdc7c9"
+    },
+    "fern": {
+      "foreground_iou": 0.5359070177409306,
+      "pixel_accuracy": 0.823389585107473,
+      "precision": 0.6889405111912997,
+      "recall": 0.7069679844954696,
+      "prediction_fraction": 0.29601862069776386,
+      "ground_truth_fraction": 0.28847023392608495,
+      "confusion": {
+        "true_positive": 2428341,
+        "false_positive": 1096406,
+        "false_negative": 1006526,
+        "true_negative": 7375907
+      },
+      "score_sha256": "f57d49ac5de8054a9ecf52c1b51d3df245ac3c2e4138e3fc1dcee1bce0d8b216",
+      "report_sha256": "6e12b4d25e2e05a87a0302d8b05bed807908648c3e8dac0a26b23af556062570"
+    },
+    "macro_foreground_iou": 0.4166581607309061
+  },
+  "comparators": {
+    "strict_raw_hash256": {
+      "horns_left": 0.6969455416488206,
+      "fern": 0.5308410361456904,
+      "macro": 0.6138932888972555,
+      "delta_horns_left": -0.39953623792793896,
+      "delta_fern": 0.005065981595240188,
+      "delta_macro": -0.19723512816634942
+    },
+    "soft_reliability_without_raw_semantic_decoupling": {
+      "horns_left": 0.6251452369814852,
+      "fern": 0.5788083502218739,
+      "macro": 0.6019767936016795,
+      "delta_horns_left": -0.3277359332606035,
+      "delta_fern": -0.0429013324809433,
+      "delta_macro": -0.18531863287077344
+    }
+  },
+  "registered_gate": {
+    "criteria": "macro improves at least 0.03 over strict raw, at least one scene improves, and no scene regresses more than 0.03",
+    "macro_delta_over_strict_raw": -0.19723512816634942,
+    "at_least_one_scene_improves": true,
+    "worst_scene_regression": 0.39953623792793896,
+    "pass": false,
+    "action": "stop_after_two_sentinels_do_not_expand_full8"
+  },
+  "mechanism_diagnosis": {
+    "finding": "The released non-negative LUDVIG execution path converts the initial unary to a positivity/reachability mask. It therefore discards the magnitude of completed_positive_probability*P_raw before propagation.",
+    "evidence": "The nonzero semantic seed already covers 16.05% of valid horns_left primitives and 63.44% of valid fern primitives. After 100 reachability iterations the target horns prediction expands to 19.62% versus 6.01% ground truth, retaining 97.76% recall but collapsing precision to 29.94%.",
+    "conclusion": "P_raw is not an effective semantic rejection mechanism in this solver because finite logistic probabilities remain positive and the edge threshold operates after graph normalization. Soft completion and boolean reachability are structurally mismatched.",
+    "recommendation": "Do not promote or tune this path. Any future completion fusion must preserve unary magnitude in a signed or probability-valued solver, or use a stronger native semantic compatibility before graph propagation; adding scene thresholds would only hide the mismatch."
+  },
+  "verification": {
+    "focused_tests": "38 passed",
+    "python_compile": "passed",
+    "gpu": 0,
+    "power_limit_w": 300.0,
+    "start_soft_resume_hard_temperature_c": [79, 82, 78, 85],
+    "poll_seconds": 30,
+    "peak_observed_temperature_c": 43,
+    "peak_observed_power_w": 114.63,
+    "peak_observed_memory_mib": 2964,
+    "thermal_pause_events": 0,
+    "thermal_abort_events": 0,
+    "foreign_gpu_owner_events": 0
+  },
+  "implementation": {
+    "builder": {
+      "path": "radio_gs/scripts/build_nvos_sam3_raw_semantic_gated_support.py",
+      "sha256": "b3c1e42877f25617b2140d999708f4db150c3963725937bc1a56ed57e0c3edd6"
+    },
+    "evaluator": {
+      "path": "radio_gs/scripts/eval_nvos_sam3_raw_semantic_gated_support.py",
+      "sha256": "9728155aa31b6a4b395e335f45031cb2ee787b1c8177d6afd80e2dc0a3791fc2"
+    },
+    "tests": {
+      "path": "tests/test_nvos_sam3_raw_semantic_gated_support.py",
+      "sha256": "06b15acd3b773ab6b12cd327ae3c78f77ebba231b784b80390b0ae5cc913238d"
+    }
+  }
+}

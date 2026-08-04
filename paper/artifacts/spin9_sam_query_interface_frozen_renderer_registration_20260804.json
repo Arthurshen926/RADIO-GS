@@ -1,0 +1,61 @@
+{
+  "schema_version": "spin9_sam_query_interface_frozen_renderer_registration_v1",
+  "registered_at": "2026-08-04T00:00:00+08:00",
+  "status": "preregistered_before_target_scoring",
+  "claim_scope": "posthoc_component_attribution_only",
+  "benchmark_manifest": {
+    "path": "/root/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+  },
+  "primary_scene": "room",
+  "primary_input": {
+    "features": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v2_resolution_safe/room/sam/features.npy",
+    "features_sha256": "431da36d8cb45f317247d2754b39021abf2de518c5ace36bd1dd324e86e88f96",
+    "sam_ply": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v2_resolution_safe/room/sam/gaussians.ply",
+    "sam_ply_sha256": "c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd",
+    "carrier_config": "/root/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/config.yaml",
+    "carrier_checkpoint": "/root/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/geometry_carrier.pth",
+    "carrier_checkpoint_sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0",
+    "alignment": "full row-for-row; SAM PLY and carrier PLY have identical SHA256"
+  },
+  "frozen_method": {
+    "only_replaced_component": "primitive scalar query field",
+    "candidate_count": 3,
+    "renderer": "RADIO-GS FeatureFieldRenderer on the frozen room carrier",
+    "score_resolution": "frozen renderer feature_height x feature_width, bilinear resize to protocol mask resolution",
+    "per_view_score_normalization": "independent min-max normalization per candidate",
+    "reference_candidate_policy": "maximize reference-mask foreground IoU; deterministic lowest candidate index on ties",
+    "reference_threshold_grid": "0.99, 0.98, ..., 0.03 descending; deterministic first threshold on strict improvement",
+    "target_policy": "the selected candidate and threshold are fixed before any target mask is opened",
+    "graph": "none",
+    "solver": "none",
+    "connected_selection": "none",
+    "target_rgb_access_provenance": "The persisted SAM field was generated transductively from all registered RGBs; this is disclosed and is the component under attribution."
+  },
+  "execution_order": [
+    "validate hashes and exact primitive row alignment",
+    "render and persist all three reference score maps",
+    "select candidate and threshold from the reference mask only and persist a receipt",
+    "render and persist every target score map",
+    "only then open target masks and compute foreground IoU"
+  ],
+  "baseline": {
+    "scene": "room",
+    "method": "current release-compatible SPIn readout",
+    "foreground_iou": 0.8884382999
+  },
+  "interpretation_gate": {
+    "support_query_interface_bottleneck_if_delta_at_least": 0.03,
+    "expansion": "If the room delta is at least 0.03, run truck as an explicitly incomplete-row diagnostic with both zero-fill and valid-mass-normalized rendering. Lego remains blocked on re-uplifting onto the current carrier.",
+    "formal_benchmark_eligibility": false
+  },
+  "gpu_policy": {
+    "physical_gpu": 1,
+    "poll_seconds": 180,
+    "launch_inhibit_at_c": 83,
+    "hard_stop_at_c": 87,
+    "hard_stop_consecutive_polls": 2,
+    "resume_at_c": 81,
+    "power_limit_w": 300
+  }
+}

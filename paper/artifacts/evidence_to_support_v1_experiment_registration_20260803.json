@@ -1,0 +1,137 @@
+{
+  "schema_version": "evidence_to_support_experiment_registration_v1",
+  "registered_at": "2026-08-03T00:00:00+08:00",
+  "purpose": "Freeze target-blind development and expansion rules before evaluating the new query-conditioned Evidence-to-Support readout.",
+  "frozen_evaluators_may_be_modified": false,
+  "target_masks": {
+    "allowed_for_final_scoring": true,
+    "allowed_for_query_construction": false,
+    "allowed_for_reference_calibration": false,
+    "allowed_for_method_or_hyperparameter_selection": false
+  },
+  "reference_annotations": {
+    "spin_full_reference_mask": "allowed as the declared query and for reference-view-only calibration",
+    "nvos_raw_positive_negative_scribbles": "allowed as the strict-track query",
+    "nvos_frozen_sam_reference_completion": "allowed only in the separately named published-compatible track",
+    "lerf_text_query": "allowed; no reference mask is available"
+  },
+  "immutable_inputs": [
+    {
+      "path": "paper/artifacts/spin9_canonical_mpr_v3_exact_local9_authority_20260803.json",
+      "sha256": "9eea89217b85b75319a87b90e3da4a27c8b62ed0c920f8b8da0a14a091899340"
+    },
+    {
+      "path": "paper/artifacts/nvos_canonical_mpr_v3_strict_unseen_exact_authority_20260802.json",
+      "sha256": "8dddeb5d68bcc8e7dd2bce57b159bd625a6c8dfe05b4b37244a7615eb627ed5f"
+    },
+    {
+      "path": "output/protocol_audit_20260731/ludvig/spin/released_all_view_fern_leaves_orchids_fortress_horns_room_pinecone_truck_lego_3seed_summary.json",
+      "sha256": "ee300d2eb805600374461f953eb7a89ad1c890c2f02bbb347957e2f164e75e17"
+    },
+    {
+      "path": "output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json",
+      "sha256": "65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546"
+    }
+  ],
+  "ludvig_release_semantics": {
+    "source_commit": "4461fc515439bb498a75d71738a1e73cf7a452ed",
+    "source_hashes": {
+      "diffusion/base.py": "022d7362bcf115afee4e8de71f0c6a7aefd10f831b5d37f22e3d5b6d34318872",
+      "diffusion/segmentation.py": "c6de9567ce129653f467629bc60d22746ff6f88b4766fa765ae42b940d7a4e4e",
+      "evaluation/spin_nvos/diffusion.py": "f4814fecb8e98431c338c6af1d5db104075b009daef8a2a5cd54ff0e7ee94158",
+      "configs/dif_SPIn.yaml": "6df506dcdfcf0b13b50fc9d4754fcdb04ab7fa87083e17ec24928ada9486c7b1",
+      "configs/dif_NVOS.yaml": "bfd9cde03403891f0a7702070756e506f2400d7b19cb98b2273929f2657f86af"
+    },
+    "exact_compatibility_mode": {
+      "neighbors": 200,
+      "effective_knn_columns": 201,
+      "knn_includes_self": true,
+      "iterations": 100,
+      "max_positive_fraction": 0.1,
+      "spin_logistic_C": 0.01,
+      "spin_positive_only_fit_population": "all nodes, labels are initial evidence > 0, weighted by inverse-rendering Z",
+      "signed_fit_population": "only nonzero signed-evidence nodes",
+      "query_edge_gate": "sqrt(P_i*P_j)",
+      "pre_symmetrization_normalization": "N_by_K_slotwise_Dleft_Dright_as_released",
+      "edge_binarization_threshold": 1e-5,
+      "per_iteration_feature_column_normalization": true,
+      "warning": "This reproduces released code semantics and is not a standard symmetric normalized Laplacian."
+    },
+    "clean_mode": {
+      "role": "theory-facing ablation only until independently validated",
+      "normalization": "symmetric_node_degree",
+      "continuous_edge_weights": true,
+      "must_not_be_reported_as_exact_ludvig_compatible": true
+    }
+  },
+  "spin9": {
+    "development_scenes": [
+      "leaves",
+      "lego",
+      "orchids"
+    ],
+    "independent_confirmation_scenes": [
+      "pinecone",
+      "fern"
+    ],
+    "remaining_expansion_scenes": [
+      "fortress",
+      "horns",
+      "room",
+      "truck"
+    ],
+    "reference_only_bandwidth_grid": {
+      "feature_exponents_base2": [-1, 0, 1, 2, 3],
+      "regularizer_exponents_base2": [-3, -2, -1, 0]
+    },
+    "development_gate": "mean target IoU improves by at least 0.03 over exact-adjoint unary and at least two of three scenes improve, with no scene regression greater than 0.01",
+    "confirmation_gate": "mean target IoU improves by at least 0.02 over exact-adjoint unary and neither confirmation scene regresses by more than 0.02",
+    "full9_expansion_requires_both_gates": true
+  },
+  "nvos": {
+    "strict_track": "raw signed scribbles -> exact adjoint -> all-scribble classifier -> query-conditioned support",
+    "published_compatible_track": "frozen official reference-view SAM completion -> exact adjoint -> query-conditioned support",
+    "sentinel_scenes": [
+      "fern",
+      "horns_left"
+    ],
+    "held_out_expansion_scenes": [
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "sentinel_gate": "strict macro improves by at least 0.03 over the frozen compact unary, at least one sentinel improves, and neither regresses by more than 0.03",
+    "full8_expansion_requires_sentinel_gate": true,
+    "published_compatible_result_must_never_be_called_strict_unseen": true
+  },
+  "lerf3d": {
+    "diagnostic_development_scene": "figurines",
+    "independent_confirmation_scene": "waldo_kitchen",
+    "remaining_expansion_scenes": [
+      "ramen",
+      "teatime"
+    ],
+    "score_quality_metrics": [
+      "average_precision",
+      "area_under_precision_recall_curve",
+      "oracle_threshold_iou",
+      "selected_positive_coverage",
+      "selected_purity"
+    ],
+    "oracle_metrics_are_diagnostic_only": true,
+    "method_scores_and_receipts_must_be_frozen_before_labels_are_opened": true,
+    "target_blind_method_gate": "figurines and waldo_kitchen both improve over recursive-upper-Otsu3 before expanding to ramen and teatime"
+  },
+  "thermal_policy": {
+    "physical_gpu_power_limit_w": 300,
+    "launch_max_temperature_c": 78,
+    "soft_pause_temperature_c": 81,
+    "soft_resume_temperature_c": 76,
+    "hard_abort_temperature_c": 84,
+    "internal_poll_seconds": 20,
+    "peer_gpu_activity_does_not_pause_an_independently_assigned_job": true
+  }
+}

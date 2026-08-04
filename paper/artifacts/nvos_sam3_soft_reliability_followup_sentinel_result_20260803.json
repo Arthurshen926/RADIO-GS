@@ -1,0 +1,154 @@
+{
+  "schema_version": "nvos_sam3_soft_reliability_followup_sentinel_result_v1",
+  "date": "2026-08-03",
+  "claim_boundary": "posthoc_registered_followup_not_independent_validation",
+  "status": "sentinel_gate_failed_stop_no_full8",
+  "registration": {
+    "path": "paper/artifacts/nvos_sam3_soft_reliability_followup_registration_20260803.json",
+    "sha256": "fcff94822697af71a8ac85ece28935f34b181c626070414ca25566b5614dc97f"
+  },
+  "method": {
+    "phase1": "reuse_frozen_ten_official_SAM3_binary_masks_and_take_mean_q_without_Li",
+    "binary_entropy_nats": "H2(q)=-q*ln(q)-(1-q)*ln(1-q), with 0*ln(0)=0",
+    "reliability": "c(q)=1-H2(q)/ln(2), parameter_free, c(0)=c(1)=1, c(0.5)=0",
+    "positive_observation": "q*c(q), then raw_positive=1 and raw_negative=0",
+    "negative_observation": "raw_official_negative_scribble_as_a_separate_exact_channel",
+    "adjoint": "exact_front_to_back_W_transpose_soft_positive_minus_raw_negative_over_visible_mass",
+    "selector": "same_fixed_signed_multiplicative_hash256_f2_g4_K201_C0.01_diffusion100_threshold0.5_no_connected_selection",
+    "target_dependent_tuning": false
+  },
+  "protocol": {
+    "manifest_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "both_selectors_frozen_before_any_followup_target_score": true,
+    "selector_receipts_before_scoring": {
+      "horns_left": {
+        "target_mask_opened": false,
+        "target_metric_computed": false,
+        "selector_path": "output/optimization_20260803/nvos_sam3_soft_reliability_followup_v1/selectors/horns_left.pt",
+        "selector_sha256": "8d799ea029408d7932dda8da2f26293aa37d5ce7a0e5e64d59fa05d7d8d48ede",
+        "selector_receipt_sha256": "1ccf1767ae0437c9dfe38418fd36f8342d500de93f1967be0254f31ec0c38903",
+        "primitive_probability_sha256": "ca12aadcc4d850d53ef4c04526fd468a6a47cf26b973d2ff68dc4928aa57e618",
+        "support_fraction_at_0_5": 0.04928676048586104
+      },
+      "fern": {
+        "target_mask_opened": false,
+        "target_metric_computed": false,
+        "selector_path": "output/optimization_20260803/nvos_sam3_soft_reliability_followup_v1/selectors/fern.pt",
+        "selector_sha256": "9d62bf40a3eb83801565ea449bf5fa5cfd39adbb7a8495a5d480ae2305e0ea33",
+        "selector_receipt_sha256": "7270abf8808afaa21110b6ade29d7f984996f60dc1249ea8c47ab3efca2c6b72",
+        "primitive_probability_sha256": "00a0c6a08550860681bf2e8f7586313648ce9238c36d94ce039963e8b48e9f3c",
+        "support_fraction_at_0_5": 0.3264481441801463
+      }
+    },
+    "target_rgb_opened": false,
+    "target_masks_opened_for_scoring_only": true,
+    "score_frozen_and_reloaded_before_target_mask": true
+  },
+  "results": {
+    "horns_left": {
+      "foreground_iou": 0.6251452369814852,
+      "pixel_accuracy": 0.9648569701970691,
+      "precision": 0.6351465053969502,
+      "recall": 0.9754304858642195,
+      "prediction_fraction": 0.09227481454199157,
+      "ground_truth_fraction": 0.06008426724593464,
+      "confusion": {
+        "true_positive": 704293,
+        "false_positive": 404574,
+        "false_negative": 17740,
+        "true_negative": 10890399
+      },
+      "score_sha256": "a5802a43f03dea335bd1ea46dfb479247d6b80602821557edc28fa1a91ba464e",
+      "report_sha256": "d093941443a68ce7e2fdf110ebefb632a94af41db68d3aa93d630f89f32b76aa"
+    },
+    "fern": {
+      "foreground_iou": 0.5788083502218739,
+      "pixel_accuracy": 0.8497551057429215,
+      "precision": 0.751581754126807,
+      "recall": 0.7157374652351896,
+      "prediction_fraction": 0.27471256838311003,
+      "ground_truth_fraction": 0.28847023392608495,
+      "confusion": {
+        "true_positive": 2458463,
+        "false_positive": 812589,
+        "false_negative": 976404,
+        "true_negative": 7659724
+      },
+      "score_sha256": "6c939634c70b5bd4476279106e46b7e23a8bef90461d330bf2a1c99fc4b9e28d",
+      "report_sha256": "865ea6b1a8aa03bbf38ed31fe5a110a21063826111540bf8d8ca2fb3261e643e"
+    },
+    "macro_foreground_iou": 0.6019767936016795
+  },
+  "comparators": {
+    "strict_raw_hash256": {
+      "horns_left": 0.6969455416488206,
+      "fern": 0.5308410361456904,
+      "macro": 0.6138932888972555,
+      "delta_horns_left": -0.07180030466733545,
+      "delta_fern": 0.04796731407618349,
+      "delta_macro": -0.01191649529557598
+    },
+    "sam3_Li_union_followup": {
+      "horns_left": 0.5333466432533074,
+      "fern": 0.5728700392802852,
+      "macro": 0.5531083412667963,
+      "delta_horns_left": 0.09179859372817778,
+      "delta_fern": 0.005938310941588698,
+      "delta_macro": 0.04886845233488324
+    }
+  },
+  "registered_gate": {
+    "criteria": {
+      "macro_delta_over_strict_raw_at_least": 0.03,
+      "at_least_one_scene_improves_over_strict_raw": true,
+      "maximum_allowed_scene_regression": 0.03
+    },
+    "observed": {
+      "macro_delta_over_strict_raw": -0.01191649529557598,
+      "at_least_one_scene_improves_over_strict_raw": true,
+      "worst_scene_regression": 0.07180030466733545
+    },
+    "pass": false,
+    "action": "stop_after_two_sentinels_do_not_expand_full8"
+  },
+  "diagnosis": {
+    "horns_left": "Entropy reliability removes much of the Li-union false-positive spill while preserving recall, but precision remains only 0.6351 versus approximately 0.7104 for strict raw; the source SAM3 completion still injects too much positive mass.",
+    "fern": "The soft observation keeps part of the SAM3 recall gain while recovering precision: precision=0.7516 and recall=0.7157, between strict raw and Li-union behavior.",
+    "cross_scene": "The parameter-free entropy shrinkage interpolates between raw and Li-union but cannot satisfy both scenes. The remaining limitation is not connected selection; it is the semantics and calibration of the source unary before projection, plus the diagnostic hashed relation feature's limited ability to reject confident wrong SAM3 regions.",
+    "method_conclusion": "Do not promote this soft reliability rule as the main NVOS method. Preserve it as evidence that reliability weighting is directionally useful, then replace the hash relation/readout with a stronger learned or native semantic compatibility that is calibrated without target labels."
+  },
+  "verification": {
+    "focused_tests": "37 passed",
+    "python_compile": "passed",
+    "gpu": 0,
+    "power_limit_w": 300.0,
+    "start_soft_resume_hard_temperature_c": [79, 82, 78, 85],
+    "poll_seconds": 30,
+    "peak_observed_temperature_c": 51,
+    "peak_observed_power_w": 288.15,
+    "peak_observed_memory_mib": 11400,
+    "thermal_pause_events": 0,
+    "thermal_abort_events": 0,
+    "foreign_gpu_owner_events": 0,
+    "note": "One pre-compute launch used the shorthand scene id horns and failed on a missing frozen input before CUDA ownership or selector construction; it produced no score and did not affect the registered run."
+  },
+  "implementation": {
+    "helper": {
+      "path": "radio_gs/querying/sam3_reference_completion.py",
+      "sha256": "d69d3c10b72101139d30c73250cf927b6bfb08ffadf692d6c9a25143ebfed571"
+    },
+    "builder": {
+      "path": "radio_gs/scripts/build_nvos_sam3_soft_reliability_support.py",
+      "sha256": "ac26c5a47fcc0b953f0f685e3b7d0df83b92485683eeec2745c7b98ee6154943"
+    },
+    "evaluator": {
+      "path": "radio_gs/scripts/eval_nvos_sam3_soft_reliability_support.py",
+      "sha256": "2dce78bb7e0c3a618114fd1cbd44ed9a8adf8e8ad63184d4a6e095ba0cc934fe"
+    },
+    "receipt_tests": {
+      "path": "tests/test_nvos_sam3_soft_reliability_support.py",
+      "sha256": "2ca3c5887d828237944ec8e9395ef25e2f245445e6bb67391ebd7962fcf3528d"
+    }
+  }
+}

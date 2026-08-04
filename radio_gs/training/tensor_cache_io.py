@@ -374,15 +374,75 @@ def validate_mpr_cache_payload(
         ):
             raise ValueError("MPR reliability must lie in [0,1]")
         tolerance = 2e-3 if reliability.dtype == torch.float16 else 1e-6
-        if not torch.allclose(
-            reliability_cpu[:, 2], valid_cpu.float(), atol=tolerance, rtol=0
-        ):
-            raise ValueError("MPR reliability support channel differs from valid")
-        expected_coverage = counts.float() / float(num_views)
-        if not torch.allclose(
-            reliability_cpu[:, 0], expected_coverage, atol=tolerance, rtol=0
-        ):
-            raise ValueError("MPR reliability coverage differs from view_counts")
+        support_completion = (
+            metadata.get("construction")
+            == "dominant_primary_with_query_free_support_completion"
+            and metadata.get("aggregation_mode")
+            == "primary_then_support_completion"
+        )
+        if support_completion:
+            # Historical completed fields intentionally use channel 2 as a
+            # dominant-registration indicator: fallback adjoint rows are
+            # valid supervision but retain zero here so the fusion network can
+            # distinguish them.  This is not the ordinary validity channel.
+            dominant_values = reliability_cpu[:, 2]
+            dominant = dominant_values > 0.5
+            if (
+                not torch.allclose(
+                    dominant_values,
+                    dominant.float(),
+                    atol=tolerance,
+                    rtol=0,
+                )
+                or bool((dominant & ~valid_cpu).any())
+            ):
+                raise ValueError(
+                    "completed MPR dominant reliability channel is invalid"
+                )
+            fallback = valid_cpu & ~dominant
+            if (
+                int(metadata.get("primary_valid_count", -1))
+                != int(dominant.sum())
+                or int(metadata.get("fallback_valid_count", -1))
+                != int(fallback.sum())
+            ):
+                raise ValueError("completed MPR primary/fallback counts differ")
+            for key in ("primary_cache_sha256", "support_cache_sha256"):
+                if _SHA256.fullmatch(str(metadata.get(key, ""))) is None:
+                    raise ValueError(
+                        "completed MPR source-cache provenance differs"
+                    )
+            primary_coverage = counts[dominant].float() / float(num_views)
+            if not torch.allclose(
+                reliability_cpu[dominant, 0],
+                primary_coverage,
+                atol=tolerance,
+                rtol=0,
+            ):
+                raise ValueError("completed MPR primary coverage differs")
+            if bool(fallback.any()):
+                fallback_coverage = reliability_cpu[fallback, 0]
+                if bool((fallback_coverage <= 0).any()):
+                    raise ValueError("completed MPR fallback coverage is invalid")
+                denominators = counts[fallback].float() / fallback_coverage
+                support_views = int(round(float(torch.median(denominators))))
+                if support_views <= 0 or support_views > num_views or not torch.allclose(
+                    fallback_coverage,
+                    counts[fallback].float() / float(support_views),
+                    atol=tolerance,
+                    rtol=0,
+                ):
+                    raise ValueError("completed MPR fallback coverage differs")
+        else:
+            if not torch.allclose(
+                reliability_cpu[:, 2], valid_cpu.float(), atol=tolerance, rtol=0
+            ):
+                raise ValueError("MPR reliability support channel differs from valid")
+            expected_coverage = counts.float() / float(num_views)
+            if not torch.allclose(
+                reliability_cpu[:, 0], expected_coverage, atol=tolerance, rtol=0
+            ):
+                raise ValueError("MPR reliability coverage differs from view_counts")
         if not _all_zero_on_mask(reliability_cpu, ~valid_cpu):
             raise ValueError("MPR unsupported reliability rows must be zero")
         reliability_mode = str(

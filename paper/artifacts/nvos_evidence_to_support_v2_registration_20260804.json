@@ -1,0 +1,87 @@
+{
+  "schema_version": "nvos_evidence_to_support_v2_registration_v1",
+  "registered_at": "2026-08-04T00:00:00+08:00",
+  "master_registration": {
+    "path": "paper/artifacts/evidence_to_support_v2_master_registration_20260804.json",
+    "sha256": "064ee5a816fe5108035829860d8d48e583bbb2a7c3a12e0a90c7efb528dd0bef"
+  },
+  "status": "theory_registered_posthoc_iteration_after_prior_horns_left_and_fern_scores_were_observed",
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_renderer_resize_threshold_metric": "unchanged_eval_frozen_nvos_primitive_unary",
+    "frozen_evaluator_may_be_modified": false,
+    "selector_and_score_are_frozen_and_reloaded_before_target_mask": true
+  },
+  "tracks": {
+    "strict_source_only": {
+      "field_information": "target RGB excluded from reconstruction, feature field training, query construction, and selection",
+      "prompt": "official raw positive and negative scribbles only",
+      "reference_inverse": "native-resolution exact front-to-back W transpose",
+      "classifier": {
+        "type": "closed_form_class_balanced_diagonal_shrinkage_linear_discriminant",
+        "feature": "L2-normalized exact official C-RADIO-derived DINOv3 capability rows; no hash or prototype compression",
+        "population": "every capability-valid row with nonzero exact signed scribble evidence",
+        "sample_weight": "absolute signed evidence times W-transpose-one, normalized independently within each sign",
+        "positive_and_negative_means": "weighted means",
+        "covariance": "class-balanced pooled weighted diagonal within-class covariance",
+        "ridge": "one divided by feature dimension",
+        "logit": "w dot z minus one-half w dot (mu_positive plus mu_negative)",
+        "probability": "sigmoid of the unscaled discriminant logit",
+        "insufficient_population": "fail closed unless both signs have at least 32 valid rows and positive weight"
+      },
+      "continuous_energy": {
+        "unary_y": "linear discriminant probability without binarization",
+        "unary_confidence_c": "absolute two-y-minus-one clamped below at 0.05",
+        "graph": "frozen canonical shared k16 symmetric geometry-times-DINO-times-SAM raw affinity",
+        "query_gate_g": "linear discriminant probability",
+        "query_edge": "raw affinity times sqrt(g_i*g_j), followed by recomputed symmetric degree normalization",
+        "laplacian_weight": 0.25,
+        "cg_iterations": 128,
+        "cg_tolerance": 1e-06,
+        "hard_seed_normalization": "positive and negative exact adjoint masses independently divided by their sign maximum",
+        "hard_seed_threshold": 0.2,
+        "hard_seed_conflict_policy": "exclusive_relative",
+        "hard_seed_conflict_margin": 0.0,
+        "connected_selection": "none",
+        "output": "continuous probability clipped only for floating point roundoff"
+      },
+      "invalid_capability_rows": "zero except exact normalized hard-positive anchors; hard-negative anchors remain zero"
+    },
+    "published_compatible_all_view": {
+      "required_information": "all registered RGB views may contribute to query-free reconstruction and feature uplift, matching the reproduced LUDVIG information condition",
+      "reference": "output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json",
+      "reference_macro_iou": 0.9125768502741802,
+      "separation_rule": "a source-only canonical field or source-only SAM completion may not be relabeled as this track",
+      "current_action": "report separately; do not synthesize an all-view field from strict assets"
+    }
+  },
+  "sentinel": {
+    "ordered_scenes": ["horns_left", "fern"],
+    "v1_comparator": {
+      "horns_left": 0.6969455416488206,
+      "fern": 0.53084104,
+      "macro": 0.61389329
+    },
+    "gate": "macro greater than 0.61389329, at least one scene improves, and neither scene regresses by more than 0.03",
+    "full8_requires_gate": true,
+    "no_per_scene_expert_selection": true
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "poll_interval_seconds": 180,
+    "launch_inhibit_temperature_c": 83,
+    "warning_temperature_c": 84,
+    "hard_abort_temperature_c": 87,
+    "hard_abort_requires_consecutive_polls": 2,
+    "resume_temperature_c": 81
+  },
+  "forbidden": [
+    "target RGB in strict selector",
+    "target mask or IoU before selector and score freeze",
+    "scene-name branching",
+    "per-scene reliability gates",
+    "binary reachability presented as probability",
+    "connected-component default",
+    "modification of frozen evaluator"
+  ]
+}

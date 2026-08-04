@@ -1,0 +1,77 @@
+{
+  "schema_version": "lerf3d_cosine_geomedian_readout_registration_v1",
+  "registered_at": "2026-08-04T00:00:00+08:00",
+  "parent_registration": {
+    "path": "paper/artifacts/evidence_to_support_v2_master_registration_20260804.json",
+    "sha256": "064ee5a816fe5108035829860d8d48e583bbb2a7c3a12e0a90c7efb528dd0bef"
+  },
+  "purpose": "Isolate whether a robust multi-view semantic target improves the single global SurfaceRegion readout before changing the compact canonical field or support solver.",
+  "status": "posthoc_theory_registered_before_candidate_training_and_scoring",
+  "method_scope": {
+    "scene_memory": "one compact canonical C-RADIO field; no persistent language sidecar",
+    "trainable_component": "one global query-agnostic SurfaceRegionSummaryReadoutV2",
+    "frozen_components": [
+      "compact canonical field",
+      "MPR and query-independent surface graph",
+      "official C-RADIO SigLIP2 summary head",
+      "text embedding caches and scorer",
+      "renderer geometry",
+      "frozen LERF3D evaluator"
+    ],
+    "explicit_non_claim": "This treatment tests robust semantic-target aggregation only. It does not claim to implement VALA per-ray marginal-contribution lifting on the canonical geometry."
+  },
+  "training_data": {
+    "benchmark_scenes_used": false,
+    "benchmark_queries_or_masks_opened": false,
+    "train_scenes": 32,
+    "validation_scenes": 8,
+    "physical_spaces_scene_disjoint_from_benchmarks": true,
+    "teacher_semantics": "fixed_core_geodesic_support_without_input_context_v1",
+    "input_context": "context shell may condition the student but cannot expand the core-only teacher crop",
+    "train_shards": [
+      {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/context_c1024_geometric/train_shard0.pt", "sha256": "0e94c25ab1a3e0351bdd068517de9b3b61bf97b55f49f9410bdfad2ad07b1415"},
+      {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/context_c1024_geometric/train_shard1.pt", "sha256": "9b085d0ea07777d48a356447b4f18ae885e9a836475089c9d6dcb74e4ee229d9"},
+      {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/context_c1024_geometric/train_shard2.pt", "sha256": "ac590c9031ad1de929bf06bf8102d66408c7c1a485a63a8f073aac1926446321"},
+      {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/context_c1024_geometric/train_shard3.pt", "sha256": "7cabecee49cd09f8c1254c1f6b0dafbc34339eb1cb0bb4c6a30fd4ba212b2aab"}
+    ],
+    "validation_shards": [
+      {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/context_c1024_geometric/validation_shard0.pt", "sha256": "c97867a10f199deffbc401348de5ba1aee1e0bf6ef71e0ac9a54ae2305270025"},
+      {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/context_c1024_geometric/validation_shard1.pt", "sha256": "2b2a81a3bf2070c43939c9aa07773d7aee3efd02fb92a20aca24007804e84a1f"}
+    ]
+  },
+  "candidate": {
+    "architecture": "SurfaceRegionSummaryReadoutV2 hidden256 joint_attention_v1 log_prior",
+    "semantic_target": "official per-view SigLIP2 crop descriptors aggregated by the released VALA streaming cosine-tangent update in their frozen cache order",
+    "summary_token_target": "the observed official summary token whose descriptor is nearest in cosine distance to the robust aggregate",
+    "loss": {
+      "robust_target_descriptor_weight": 1.0,
+      "all_visible_view_descriptor_weight": 0.25,
+      "summary_token_weight": 0.25,
+      "relation_weight": 0.0
+    },
+    "optimization": {
+      "seed": 0,
+      "epochs": 60,
+      "patience": 10,
+      "batch_size": 16,
+      "learning_rate": 0.0002,
+      "weight_decay": 0.0001,
+      "canonical_noise_degrees": 0.0
+    }
+  },
+  "development": {
+    "scenes": ["figurines", "waldo_kitchen"],
+    "baseline": "compact-field v1 query scores with the frozen clean h256 SurfaceRegion readout",
+    "required_metrics": ["average_precision", "oracle_threshold_iou", "frozen_formal_iou"],
+    "primary_gate": "average precision and oracle-threshold IoU must each improve on both development scenes",
+    "secondary_witness": "report frozen threshold-0.6 and target-blind Otsu3 IoU without using either to tune the candidate",
+    "full4_expansion": "forbidden unless the primary gate passes"
+  },
+  "target_use": {
+    "candidate_training": false,
+    "candidate_selection": false,
+    "hyperparameter_fitting": false,
+    "per_scene_branching": false,
+    "labels_opened_only_after_candidate checkpoint and query-score receipts are sealed": true
+  }
+}

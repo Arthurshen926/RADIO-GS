@@ -1,0 +1,116 @@
+{
+  "schema_version": "nvos_signed_scribble_cv_feasibility_v1",
+  "computed_at": "2026-08-03T20:15:00+08:00",
+  "purpose": "Audit whether a deterministic three-fold reference-only propagation selection has enough positive and negative primitive anchors before registering or executing a new target readout.",
+  "population": "capability-valid primitive rows with nonzero exact signed W-transpose scribble evidence",
+  "weight": "exact reference-view primitive responsibility W-transpose-one",
+  "fold_assignment": {
+    "key": "global primitive row id",
+    "algorithm": "SplitMix64",
+    "folds": 3,
+    "minimum_positive_rows_per_training_or_heldout_population": 32,
+    "minimum_negative_rows_per_training_or_heldout_population": 32
+  },
+  "computation_boundary": {
+    "target_rgb_is_an_input": false,
+    "target_mask_is_an_input": false,
+    "target_metric_is_an_input": false,
+    "previous_target_outcomes_are_inputs": false,
+    "reference_signed_scribbles_are_inputs": true
+  },
+  "source_artifacts": {
+    "horns_left": {
+      "selector": "output/optimization_20260803/nvos_strict_hashed_query_conditioned_sentinels_v1/selectors/horns_left.pt",
+      "selector_sha256": "f90d723fa03abb916312f2510430661e47feee0b13df1eb2251a276b55e6a469",
+      "selector_sidecar_sha256": "2d665f4d2364fa167c83671eecf150d0a0144a5ae601a537184558dbbe6fffdf",
+      "responsibility_report_sha256": "8aab469b9f585b42a55aed8234d87a9b1b41f2103b306ebea6982bb012594420",
+      "selector_target_rgb_opened": false,
+      "selector_target_mask_opened": false,
+      "selector_target_metric_computed": false
+    },
+    "fern": {
+      "selector": "output/optimization_20260803/nvos_strict_hashed_query_conditioned_sentinels_v1/selectors/fern.pt",
+      "selector_sha256": "ad04b55f17aefefba9b144ce13000fb885100b9aa3cb1d41fa38f8825d99f610",
+      "selector_sidecar_sha256": "77a7decaa3e2f3f6b7e858d37d802d6d18bf304e28a7be4e5b5fe27ec8f7f5f5",
+      "responsibility_report_sha256": "6e5af7ac8f0794a4794fa5bd0ceb675c85b96b9f0c2698e12e21bc67b1c60aff",
+      "selector_target_rgb_opened": false,
+      "selector_target_mask_opened": false,
+      "selector_target_metric_computed": false
+    }
+  },
+  "scenes": {
+    "horns_left": {
+      "observed_rows": 32834,
+      "positive_rows": 9157,
+      "negative_rows": 23677,
+      "responsibility_weight_sum": 233931.73308171425,
+      "folds": [
+        {
+          "fold": 0,
+          "heldout_positive_rows": 3073,
+          "heldout_negative_rows": 7951,
+          "heldout_positive_weight": 8594.481221168797,
+          "heldout_negative_weight": 71771.83039141286,
+          "training_positive_rows": 6084,
+          "training_negative_rows": 15726
+        },
+        {
+          "fold": 1,
+          "heldout_positive_rows": 3031,
+          "heldout_negative_rows": 7856,
+          "heldout_positive_weight": 9106.841494252658,
+          "heldout_negative_weight": 68197.04238861839,
+          "training_positive_rows": 6126,
+          "training_negative_rows": 15821
+        },
+        {
+          "fold": 2,
+          "heldout_positive_rows": 3053,
+          "heldout_negative_rows": 7870,
+          "heldout_positive_weight": 9656.222311715886,
+          "heldout_negative_weight": 66605.31527454563,
+          "training_positive_rows": 6104,
+          "training_negative_rows": 15807
+        }
+      ],
+      "feasible": true
+    },
+    "fern": {
+      "observed_rows": 51317,
+      "positive_rows": 36095,
+      "negative_rows": 15222,
+      "responsibility_weight_sum": 161346.61901915944,
+      "folds": [
+        {
+          "fold": 0,
+          "heldout_positive_rows": 12056,
+          "heldout_negative_rows": 5124,
+          "heldout_positive_weight": 11931.516413373827,
+          "heldout_negative_weight": 46618.819916687105,
+          "training_positive_rows": 24039,
+          "training_negative_rows": 10098
+        },
+        {
+          "fold": 1,
+          "heldout_positive_rows": 11916,
+          "heldout_negative_rows": 5080,
+          "heldout_positive_weight": 11413.953618768097,
+          "heldout_negative_weight": 38709.36011479156,
+          "training_positive_rows": 24179,
+          "training_negative_rows": 10142
+        },
+        {
+          "fold": 2,
+          "heldout_positive_rows": 12123,
+          "heldout_negative_rows": 5018,
+          "heldout_positive_weight": 13201.850041990288,
+          "heldout_negative_weight": 39471.118913548526,
+          "training_positive_rows": 23972,
+          "training_negative_rows": 10204
+        }
+      ],
+      "feasible": true
+    }
+  },
+  "conclusion": "Both sentinels exceed the fail-closed minimum by two orders of magnitude in every held-out and training class population; reference-only three-fold selection is feasible."
+}

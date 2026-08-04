@@ -1,0 +1,152 @@
+{
+  "schema_version": "nvos_official_sam3_reference_completion_sentinel_result_v1",
+  "completed_at": "2026-08-03T21:46:47+08:00",
+  "registration": {
+    "path": "paper/artifacts/nvos_official_sam3_reference_completion_registration_20260803.json",
+    "sha256": "a30db1d31a6ffc2d651af37c50675cd12a9fb38b448bd3d96c5eb54740428eca"
+  },
+  "execution_boundary": {
+    "phase1_both_reference_masks_frozen_before_any_selector": true,
+    "phase2_both_selectors_frozen_before_any_target_score": true,
+    "target_rgb_opened": false,
+    "target_mask_opened_only_after_each_score_freeze_reload": true,
+    "target_metric_used_to_change_method": false,
+    "connected_selection": false,
+    "full8_started": false
+  },
+  "runtime_recovery": {
+    "cybersim_agent_status": "incompatible_with_official_SAM3_import_because_torch_2.0.1_lacks_torch.nn.attention",
+    "selected_base": "/root/miniconda3/envs/easy3d with torch 2.5.1+cu118",
+    "task_overlay": "/root/RADIO-GS/output/runtime_overlays/nvos_sam3_easy3d_py311",
+    "original_environments_modified": false,
+    "root_cause": "The host libcuda.so.1 symlink resolved to userspace 580.105.08 while the loaded kernel driver was 535.288.01, causing CUDA Error 804.",
+    "process_local_fix": "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "global_driver_symlink_modified": false,
+    "cpu_checkpoint_audit": {
+      "status": "passed",
+      "parameter_count": 857756343,
+      "interactive_parameter_count": 11743362,
+      "seconds": 17.361,
+      "peak_rss_kib": 7541024
+    },
+    "gpu0_smoke": {
+      "status": "passed",
+      "report": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/smoke/horns_point_smoke.json",
+      "report_sha256": "40e6ad77224b6dd8e6af16ab3aed47097125565e5ef2a53525e34ae3204e0ae4",
+      "mask_shape": [1, 756, 1008],
+      "quality": 0.80859375,
+      "peak_cuda_memory_bytes": 1709438976
+    }
+  },
+  "phase1_reference_completion": {
+    "summary": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/phase1_summary.json",
+    "summary_sha256": "76975bc2fe28f32375d0be5a839c577c1ddc0d1119d17310dbd7e040614a138a",
+    "horns_left": {
+      "artifact_sha256": "08a0f366702b79eee7d59f25a85a2480543b0298ef1abd8c30f0ff9edc027155",
+      "receipt_sha256": "cd6e04e7ed4126b24e07bd09e11cdc7fbd20066c2ff88b6a28326cc4637d9dfd",
+      "completed_positive_fraction": 0.07120548836818678,
+      "li_threshold": 0.05644815042614937,
+      "effective_discrete_consensus": "at least one of ten masks because trial mean is quantized in steps of 0.1",
+      "sam_before_overwrite_positive_coverage": 1.0,
+      "sam_before_overwrite_negative_overlap": 0.016314481044126788
+    },
+    "fern": {
+      "artifact_sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+      "receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a",
+      "completed_positive_fraction": 0.28128805534559503,
+      "li_threshold": 0.13311848044395447,
+      "effective_discrete_consensus": "at least two of ten masks because trial mean is quantized in steps of 0.1",
+      "sam_before_overwrite_positive_coverage": 0.9700664700444601,
+      "sam_before_overwrite_negative_overlap": 0.0011669561441597916
+    }
+  },
+  "phase2_support": {
+    "horns_left": {
+      "selector_sha256": "08c5e6fb3f039aeabd37b16ad6237af3f2dd0141689b45255a42a4b72c0fbbf2",
+      "primitive_probability_sha256": "51209b92e13a0f133689f77748b4cb6ebdcd10a37da54608b4b15147f073e85a",
+      "signed_observed_valid_rows": 48999,
+      "support_fraction_at_0_5": 0.06887798978525869
+    },
+    "fern": {
+      "selector_sha256": "3fac8e17010696f51427d034475650fd2edf6c46bc9da77ba7f45efb65389f38",
+      "primitive_probability_sha256": "702309fea43e6880e14ebbe2c8fabbe26d4d92f8157bafd555b018a262e57e45",
+      "signed_observed_valid_rows": 195867,
+      "support_fraction_at_0_5": 0.349703896991646
+    }
+  },
+  "sentinel_result": {
+    "horns_left": {
+      "foreground_iou": 0.5333466432533074,
+      "pixel_accuracy": 0.9486506039857182,
+      "foreground_fraction_at_0_5": 0.10864145361997822,
+      "report_sha256": "749dba2bdd27f0ae35a971facb9cffc40a1600b6f7a9cd519e7c4d9fb6045151",
+      "posthoc_derived_precision": 0.5402004526845113,
+      "posthoc_derived_recall": 0.9767642199179252
+    },
+    "fern": {
+      "foreground_iou": 0.5728700392802852,
+      "pixel_accuracy": 0.8388984629442068,
+      "foreground_fraction_at_0_5": 0.3047725825930237,
+      "report_sha256": "28c0f05c8dda3240eedc6476eb66fbedc679bc3bb9c2cd3a4bdf6d44fdd10968",
+      "posthoc_derived_precision": 0.708956947154877,
+      "posthoc_derived_recall": 0.7490223056671481
+    },
+    "two_scene_macro_foreground_iou": 0.5531083412667963
+  },
+  "comparators": {
+    "strict_raw_hash256_support": {
+      "horns_left": 0.6969455416488206,
+      "fern": 0.5308410361456904,
+      "two_scene_macro": 0.6138932888972555,
+      "candidate_minus_comparator": {
+        "horns_left": -0.16359889839551323,
+        "fern": 0.04202900313459479,
+        "two_scene_macro": -0.06078494763045916
+      }
+    },
+    "authority_hardened_compact_fixed_graph": {
+      "two_scene_macro": 0.5497157864427485,
+      "candidate_minus_comparator": 0.0033925548240477665
+    },
+    "ludvig_released_all_view_three_seed": {
+      "full8_macro": 0.9125768502741802,
+      "candidate_two_scene_macro_minus_reference_full8_macro": -0.3594685090073839,
+      "directly_protocol_comparable": false,
+      "reason": "LUDVIG uses SAM v1 and reads all registered RGB views including the eventual target during uplifting; this candidate uses one source RGB and official SAM3."
+    }
+  },
+  "gate": {
+    "status": "fail",
+    "reason": "The two-scene macro regresses 0.06078 versus the strongest registered raw hash support and horns_left regresses 0.16360, far beyond the allowed 0.03 sentinel regression.",
+    "expand_full8": false
+  },
+  "posthoc_diagnosis": {
+    "target_metrics_were_opened_only_after_method_freeze": true,
+    "horns_left": "The completed method preserves nearly all target recall (0.9768 versus 0.9736 for raw hash) but precision falls from 0.7104 to 0.5402. The very low Li threshold turns ten stochastic-shape hypotheses into an almost-union mask, and the current classifier treats those completed pixels as fully reliable positive observations.",
+    "fern": "The completion raises recall from 0.6295 to 0.7490 while precision falls from 0.7720 to 0.7090, producing a net +0.0420 IoU gain. This scene benefits from filling the raw method's missing foreground, but still over-expands.",
+    "method_level": "A binary Li-completed mask is not a uniformly strong unary. Trial consensus and decoder quality are discarded, then exact adjoint plus query-conditioned diffusion amplifies low-consensus positive regions. This is a query-interface reliability problem in addition to any canonical-field limitation."
+  },
+  "next_registered_direction": {
+    "name": "reliability_conditioned_soft_source_completion",
+    "proposal": "Preserve the ten-mask mean as soft q, estimate source-only reliability from trial consensus, entropy, decoder quality, and held-out raw scribble consistency, and fuse it with the raw exact-adjoint field unary instead of replacing it with a Li-binarized positive mask.",
+    "required_authority": "Any consensus calibration or fusion coefficient must be frozen using source/reference evidence only before target scores, with both sentinel receipts frozen before scoring.",
+    "signed_sam3_variant": "Passing official negative points into SAM3 is a separate symmetric prompt-interface experiment and must not be relabeled as LUDVIG-role-compatible.",
+    "do_not_do": [
+      "do not tune a consensus threshold from these target IoUs",
+      "do not select raw versus completed support per scene from target performance",
+      "do not use connected selection to mask the unary failure",
+      "do not expand this failed binary-completion candidate to full8"
+    ]
+  },
+  "verification": {
+    "focused_tests_passed": 47,
+    "focused_tests_failed": 0,
+    "gpu0_peak_temperature_c": 46,
+    "gpu0_peak_power_w": 175.21,
+    "gpu0_peak_memory_mib": 11352,
+    "thermal_pause_triggered": false,
+    "hard_abort_triggered": false,
+    "foreign_owner_detected": false,
+    "gpu0_owner_clear_after_final_score": true
+  }
+}

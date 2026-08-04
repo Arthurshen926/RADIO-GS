@@ -403,6 +403,62 @@ def graph_for_query_intent(
     )
 
 
+def gate_support_graph_by_query_compatibility(
+    graph: PrimitiveSupportGraph,
+    compatibility: torch.Tensor,
+    *,
+    eps: float = 1e-12,
+) -> PrimitiveSupportGraph:
+    """Apply the query gate ``sqrt(P_i P_j)`` to a frozen support graph.
+
+    The topology and its DINO/SAM/geometry channels remain query independent.
+    Only the transition conductance is conditioned on the current query, then
+    row-normalized for the existing personalized diffusion solver.  This is
+    the graph-form equivalent of the gate used by LUDVIG and avoids rebuilding
+    or permanently storing an object-specific field.
+    """
+
+    probability = torch.as_tensor(
+        compatibility, device=graph.edge_index.device
+    ).float().reshape(-1)
+    if probability.shape != (graph.num_nodes,):
+        raise ValueError("query compatibility must align with graph nodes")
+    if not bool(torch.isfinite(probability).all()) or bool(
+        ((probability < 0) | (probability > 1)).any()
+    ):
+        raise ValueError("query compatibility must be finite and in [0,1]")
+    if float(eps) <= 0:
+        raise ValueError("eps must be positive")
+
+    row, col = graph.edge_index
+    endpoint_gate = torch.sqrt(probability[row] * probability[col])
+    raw = graph.raw_affinity.float() * endpoint_gate
+    # ``edge_weight`` may already be the registered arithmetic mixture of
+    # independently normalized DINO/SAM/geometry channels.  Gate that actual
+    # transition, rather than silently reverting to the geometric diagnostic
+    # ``raw_affinity``, and normalize again after applying the query.
+    gated_transition = graph.edge_weight.float() * endpoint_gate
+    row_sum = torch.zeros(
+        graph.num_nodes,
+        dtype=gated_transition.dtype,
+        device=gated_transition.device,
+    )
+    if row.numel():
+        row_sum.index_add_(0, row, gated_transition)
+    transition = gated_transition / row_sum[row].clamp_min(float(eps))
+    # ``PrimitiveSupportGraph`` validates new persisted graphs on CPU.  This
+    # transform starts from an already validated graph and is called once per
+    # query, so preserve its current device without a GPU->CPU->GPU roundtrip.
+    result = object.__new__(PrimitiveSupportGraph)
+    object.__setattr__(result, "edge_index", graph.edge_index)
+    object.__setattr__(result, "edge_weight", transition)
+    object.__setattr__(result, "raw_affinity", raw)
+    object.__setattr__(result, "local_sigma", graph.local_sigma)
+    object.__setattr__(result, "num_nodes", graph.num_nodes)
+    object.__setattr__(result, "edge_channels", graph.edge_channels)
+    return result
+
+
 def _feature_matrix(
     values: torch.Tensor | None,
     count: int,
@@ -853,6 +909,8 @@ def solve_primitive_support(
     negative_seeds: SoftSeedSet | None = None,
     config: SupportSolverConfig = SupportSolverConfig(),
     normalized_affinity: torch.Tensor | None = None,
+    unary_confidence: torch.Tensor | None = None,
+    query_gate: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Diffuse unary evidence while softly clamping registered evidence."""
 
@@ -880,6 +938,12 @@ def solve_primitive_support(
             config=config,
             laplacian_weight=automatic_weight,
             normalized_affinity=normalized_affinity,
+            unary_confidence=unary_confidence,
+            query_gate=query_gate,
+        )
+    if unary_confidence is not None or query_gate is not None:
+        raise ValueError(
+            "unary_confidence/query_gate require a random-walker solver"
         )
     probability = prior
 
@@ -952,6 +1016,8 @@ def solve_seeded_random_walker(
     config: SupportSolverConfig,
     laplacian_weight: float | None = None,
     normalized_affinity: torch.Tensor | None = None,
+    unary_confidence: torch.Tensor | None = None,
+    query_gate: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Solve a confidence-weighted normalized Laplacian with hard seeds.
 
@@ -962,15 +1028,20 @@ def solve_seeded_random_walker(
 
     device = prior.device
     row, col = graph.edge_index
+    if normalized_affinity is not None and query_gate is not None:
+        raise ValueError(
+            "normalized_affinity and query_gate are mutually exclusive"
+        )
     if normalized_affinity is None:
         normalized_affinity = (
             query_conditioned_laplacian_affinity(
                 graph,
                 prior,
                 contrast=float(config.unary_edge_contrast),
+                query_gate=query_gate,
             )
             if float(config.unary_edge_contrast) > 0
-            else normalized_laplacian_affinity(graph)
+            else normalized_laplacian_affinity(graph, query_gate=query_gate)
         )
     else:
         normalized_affinity = torch.as_tensor(
@@ -991,7 +1062,22 @@ def solve_seeded_random_walker(
     if not bool(free.any()):
         return fixed_values
 
-    confidence = (2.0 * prior - 1.0).abs().clamp_min(0.05)
+    if unary_confidence is None:
+        # Preserve the historical implicit confidence exactly when callers do
+        # not opt into Evidence-to-Support v2's explicit ``c_i`` term.
+        confidence = (2.0 * prior - 1.0).abs().clamp_min(0.05)
+    else:
+        confidence = torch.as_tensor(
+            unary_confidence, device=device
+        ).float().reshape(-1)
+        if (
+            confidence.shape != prior.shape
+            or not bool(torch.isfinite(confidence).all())
+            or bool((confidence < 0).any())
+        ):
+            raise ValueError(
+                "unary_confidence must be finite non-negative [num_nodes]"
+            )
     lam = float(
         config.laplacian_weight if laplacian_weight is None else laplacian_weight
     )
@@ -1029,7 +1115,11 @@ def solve_seeded_random_walker(
     return probability.clamp(0.0, 1.0)
 
 
-def normalized_laplacian_affinity(graph: PrimitiveSupportGraph) -> torch.Tensor:
+def normalized_laplacian_affinity(
+    graph: PrimitiveSupportGraph,
+    *,
+    query_gate: torch.Tensor | None = None,
+) -> torch.Tensor:
     """Return the symmetric normalized affinity used by the random walker.
 
     It depends only on the frozen scene graph, so callers evaluating many
@@ -1040,6 +1130,17 @@ def normalized_laplacian_affinity(graph: PrimitiveSupportGraph) -> torch.Tensor:
 
     row, col = graph.edge_index
     affinity = graph.raw_affinity.float()
+    if query_gate is not None:
+        gate = torch.as_tensor(
+            query_gate, device=affinity.device
+        ).float().reshape(-1)
+        if (
+            gate.shape != (graph.num_nodes,)
+            or not bool(torch.isfinite(gate).all())
+            or bool(((gate < 0) | (gate > 1)).any())
+        ):
+            raise ValueError("query_gate must be finite [num_nodes] values in [0,1]")
+        affinity = affinity * torch.sqrt(gate[row] * gate[col])
     degree = torch.zeros(graph.num_nodes, device=affinity.device)
     if row.numel():
         degree.index_add_(0, row, affinity)
@@ -1052,6 +1153,7 @@ def query_conditioned_laplacian_affinity(
     prior: torch.Tensor,
     *,
     contrast: float,
+    query_gate: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Gate a frozen graph only where this query's unary sees a boundary.
 
@@ -1070,11 +1172,22 @@ def query_conditioned_laplacian_affinity(
     if strength < 0:
         raise ValueError("query-conditioned affinity contrast cannot be negative")
     if strength == 0:
-        return normalized_laplacian_affinity(graph)
+        return normalized_laplacian_affinity(graph, query_gate=query_gate)
     row, col = graph.edge_index
     raw = graph.raw_affinity.float() * torch.exp(
         -strength * (values[row] - values[col]).abs()
     )
+    if query_gate is not None:
+        gate = torch.as_tensor(
+            query_gate, device=raw.device
+        ).float().reshape(-1)
+        if (
+            gate.shape != (graph.num_nodes,)
+            or not bool(torch.isfinite(gate).all())
+            or bool(((gate < 0) | (gate > 1)).any())
+        ):
+            raise ValueError("query_gate must be finite [num_nodes] values in [0,1]")
+        raw = raw * torch.sqrt(gate[row] * gate[col])
     degree = torch.zeros(graph.num_nodes, device=raw.device)
     if row.numel():
         degree.index_add_(0, row, raw)

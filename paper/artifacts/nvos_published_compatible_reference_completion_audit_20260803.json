@@ -1,0 +1,145 @@
+{
+  "schema_version": "nvos_published_compatible_reference_completion_audit_v1",
+  "audited_at": "2026-08-03T21:12:27+08:00",
+  "scope": "Read-only audit for a source/reference-only SAM completion experiment before any GPU launch or target readout.",
+  "launch_performed": false,
+  "gpu_compute_used": false,
+  "result": "assets_and_official_interfaces_complete_but_current_sam3_cuda_runtime_preflight_blocked",
+  "frozen_authority": {
+    "manifest_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "target_rgb_at_query": "forbidden",
+    "target_mask_use": "scoring_only",
+    "frozen_evaluator_modified": false
+  },
+  "published_reference": {
+    "method": "LUDVIG-SAM",
+    "repository_path": "/root/baselines/LUDVIG",
+    "repository_commit": "4461fc515439bb498a75d71738a1e73cf7a452ed",
+    "segment_anything_commit": "6fdee8f2727f4506cfbbe553e23b895e27956588",
+    "sam_family": "SAM v1 ViT-H, not SAM3",
+    "sam_checkpoint_path": "/root/baselines/VALA/ckpts/sam_vit_h_4b8939.pth",
+    "sam_checkpoint_bytes": 2564550879,
+    "sam_checkpoint_sha256": "a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e",
+    "source_completion_interface": "/root/baselines/LUDVIG/utils/sam.py::sam_predict",
+    "all_view_uplift_interface": "/root/baselines/LUDVIG/predictors/sam.py::SAMDataset.__getitem__",
+    "prompt_policy": {
+      "positive_points_per_prediction": 3,
+      "predictions": 10,
+      "negative_points_sent_to_sam": false,
+      "nvos_multimask_output": false,
+      "source_completion_threshold": "Li followed by greater-than-zero binarization",
+      "negative_supervision": "the raw negative scribble is retained separately when the SAM positive completion trains the relation classifier"
+    },
+    "reproduced_full8_summary_path": "/root/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view_full8_3seed_summary.json",
+    "reproduced_full8_summary_sha256": "65e1f8e5c1f17083f66e5b7d4f6f03687f6806394c78a5cfce25546ca42e3546",
+    "reproduced_macro_foreground_iou": 0.9125768502741802,
+    "important_protocol_boundary": "The reproduced 0.9125768502741802 result is the released all-view, three-seed LUDVIG protocol. Its SAM uplifting calls read every registered view RGB, including the eventual target RGB, and therefore it is not a strict unseen source-only result."
+  },
+  "official_sam3": {
+    "repository_path": "/root/external/sam3",
+    "repository_commit": "46957e47805eaa273f4aa7bbbd25a88bca9108ce",
+    "repository_status": "clean_at_audit",
+    "python_path": "/root/miniconda3/envs/sam3/bin/python",
+    "checkpoint_path": "/root/RADIO-GS/checkpoints/sam3_modelscope/sam3.pt",
+    "checkpoint_bytes": 3450062241,
+    "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "config_path": "/root/RADIO-GS/checkpoints/sam3_modelscope/config.json",
+    "config_bytes": 25843,
+    "config_sha256": "4616385e4b21f2e5e22c875b65679185cbccfa95de42542b9166f7dc3d57160f",
+    "reusable_loader": "/root/RADIO-GS/radio_gs/scripts/build_sam3_foundation_cache.py::_load_sam3_model",
+    "loader_contract": "build_sam3_image_model with enable_segmentation=false and enable_inst_interactivity=true; in reduced precision only the official visual backbone and official interactive decoder are cast and moved to CUDA",
+    "official_point_interface": {
+      "set_image": "Sam3Processor.set_image(PIL.Image)",
+      "predict": "processor.model.predict_inst(state, point_coords=float32_xy_pixels, point_labels=int32, multimask_output=bool)",
+      "returns": "masks, quality, low_resolution_logits",
+      "source_locations": [
+        "/root/external/sam3/sam3/model/sam3_image.py::predict_inst",
+        "/root/external/sam3/sam3/model/sam1_task_predictor.py::predict",
+        "/root/external/sam3/sam3/model/sam3_image_processor.py::Sam3Processor"
+      ],
+      "known_working_call_sites": [
+        "/root/RADIO-GS/radio_gs/scripts/build_sam3_automatic_mask_cache.py::automatic_masks",
+        "/root/RADIO-GS/radio_gs/scripts/build_sam3_mpr_confirmed_mask_cache.py::_predict_target_masks"
+      ],
+      "box_prompt_warning": "Sam3Processor.add_geometric_prompt is the normalized cxcywh box interface and is not the direct point-prompt API required here."
+    },
+    "existing_cache_audit": {
+      "lerf_text_query_caches_present": true,
+      "nvos_scribble_conditioned_reference_masks_present": false,
+      "automatic_grid_prompt_caches_reusable_for_this_query": false,
+      "conclusion": "No existing cache can be relabeled as the fern or horns_left signed-scribble source completion; two new source masks must be produced and frozen."
+    }
+  },
+  "sentinel_source_bindings": {
+    "horns_left": {
+      "frame_id": "DJI_20200223_163055_437",
+      "source_rgb_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/horns_undistort/images/DJI_20200223_163055_437.jpg",
+      "annotation_reference_rgb_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/reference_image/horns_left/DJI_20200223_163055_437.jpg",
+      "source_and_annotation_rgb_byte_identical": true,
+      "source_rgb_sha256": "02b6b890199937014896f812abe4994af64898e02b4a025ff20ca3e37a62464a",
+      "source_rgb_size": [4003, 3002],
+      "positive_scribble_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/horns_left/pos_0_horns.png",
+      "positive_scribble_sha256": "1b4ef9a1b28322bb8c28c2293f767603c08644fd2d784e5e9ccf97503730ef51",
+      "positive_pixels": 7505,
+      "negative_scribble_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/horns_left/neg_0_horns.png",
+      "negative_scribble_sha256": "03fa4a98a919aa4daaf248628a38d84c778dc33f7cd1e8fb0a892bc4710f16cc",
+      "negative_pixels": 57924,
+      "scribble_size": [1008, 756],
+      "exact_responsibility_path": "/root/RADIO-GS/output/optimization_20260803/nvos_exact_prompt_responsibility_dino_completion_v1/cache/horns_left.pt",
+      "exact_responsibility_sha256": "c56fc72d858c23f11c6237cf5e330d949bc1d8be709e3932cb4ccd287e0ebfe0",
+      "exact_responsibility_triplets": 61564103,
+      "num_gaussians": 552339
+    },
+    "fern": {
+      "frame_id": "IMG_4038",
+      "source_rgb_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/fern_undistort/images/IMG_4038.JPG",
+      "annotation_reference_rgb_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/reference_image/fern/IMG_4038.JPG",
+      "source_and_annotation_rgb_byte_identical": true,
+      "source_rgb_sha256": "4f3c82baa3747652418655cfdb99fcaa7a5c3d9c44d72994366c1330fade5df7",
+      "source_rgb_size": [3985, 2988],
+      "positive_scribble_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/fern/pos_0_fern.png",
+      "positive_scribble_sha256": "cd0090254cf4cc986ec45c78615e3fbb0d3eeb433f4f6cb04b7695d1d9859118",
+      "positive_pixels": 22717,
+      "negative_scribble_path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/official_annotations/llff/scribbles/fern/neg_0_fern.png",
+      "negative_scribble_sha256": "c7c1af3d082a7a8caadaac3f822691b33325e4a71432869e1e65d524e7f2a535",
+      "negative_pixels": 36848,
+      "scribble_size": [1008, 756],
+      "exact_responsibility_path": "/root/RADIO-GS/output/optimization_20260803/nvos_exact_prompt_responsibility_dino_completion_v1/cache/fern.pt",
+      "exact_responsibility_sha256": "cc2dbc08ef06ae5a8573413145d72675fe7181ccf7fb3cbae6cb4d5a14ca3db1",
+      "exact_responsibility_triplets": 69256531,
+      "num_gaussians": 760715
+    }
+  },
+  "source_binding_conclusion": "Both sentinels can be bound without ambiguity: reference RGB and annotation reference RGB are byte-identical; official positive and negative scribbles already match the frozen manifest hashes; the exact W caches bind the same prompt frame, prompt hashes, camera, geometry, intrinsics, and pose at 1008x756.",
+  "runtime_preflight": {
+    "checked_without_model_load_or_gpu_kernel_launch": true,
+    "driver_version": "535.288.01",
+    "sam3_torch_version": "2.10.0+cu128",
+    "sam3_cuda_runtime": "12.8",
+    "torch_cuda_is_available": false,
+    "torch_cuda_device_count_reported": 2,
+    "error": "CUDA Error 804: forward compatibility was attempted on non supported HW",
+    "status": "blocked",
+    "required_before_launch": "Use a host driver/runtime combination accepted by this official SAM3 environment, or validate a separate environment that supports the official SAM3 source and checkpoint. Re-run the CUDA availability and one-image point-decoder smoke test before scheduling sentinels.",
+    "safety_note": "This audit does not diagnose by launching CUDA and does not reserve GPU0 or GPU1."
+  },
+  "estimated_two_sentinel_cost_after_runtime_fix": {
+    "assumptions": "Reuse the already-frozen exact responsibility and canonical field assets; run one official point-only SAM3 source completion per scene; no field training and no responsibility re-export.",
+    "sam3_source_completion": "approximately 1-3 minutes total including cold model load, conservative estimate",
+    "exact_adjoint_and_current_support": "approximately 5-9 minutes total for both scenes, based on prior exact-cache/support jobs",
+    "target_scoring": "approximately 1 minute total after both method receipts are frozen",
+    "total_serial_wall_clock": "approximately 7-13 minutes",
+    "gpu_memory": "point-only BF16 is intended to fit a 24-GB RTX 3090; exact peak has not been measured in the current host state",
+    "estimate_status": "planning_estimate_not_a_measurement"
+  },
+  "comparison_to_ludvig_0_91258": {
+    "model": "official SAM3 interactive decoder versus LUDVIG's SAM v1 ViT-H",
+    "rgb_visibility": "one frozen source/reference RGB only versus every registered RGB including target during LUDVIG uplifting",
+    "field": "current compact canonical capability field plus exact source adjoint/support versus LUDVIG's original all-view 3DGS uplifting",
+    "randomness": "one deterministically registered source completion versus LUDVIG's three seeded full-system runs with random point sampling",
+    "negative_scribble": "raw negative scribble remains explicit negative unary supervision in both the proposed role-compatible source completion and LUDVIG's DINO relation path",
+    "claim_boundary": "The proposed experiment is LUDVIG-role-compatible but neither model-exact nor protocol-exact. Its sentinel score must not be presented as a direct reproduction of 0.9125768502741802."
+  }
+}

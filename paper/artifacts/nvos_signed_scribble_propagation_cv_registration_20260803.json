@@ -1,0 +1,87 @@
+{
+  "schema_version": "nvos_signed_scribble_propagation_cv_registration_v1",
+  "registered_at": "2026-08-03T20:26:14+08:00",
+  "parent_registration": {
+    "path": "paper/artifacts/evidence_to_support_v1_experiment_registration_20260803.json",
+    "sha256": "7c539fb523c7152446bdc5f28325986a9162baa6c85a5608a66552023aa869c4"
+  },
+  "feasibility_audit": {
+    "path": "paper/artifacts/nvos_signed_scribble_cv_feasibility_audit_20260803.json",
+    "sha256": "bfcf65c1cb5a6113f30649371a4b74f9a4d86baf654e26e112590fe854149ba5",
+    "result": "both sentinels feasible"
+  },
+  "purpose": "Select whether a signed-scribble strong unary should be spatially propagated using only deterministic out-of-fold reference evidence, before freezing any new target-view score.",
+  "candidate_actions": [
+    {
+      "name": "strong_unary",
+      "definition": "balanced logistic probability on normalized hash256 relation rows, transformed by the fixed regularizer exponent P^(1/4), without graph reachability masking"
+    },
+    {
+      "name": "hash256_fixed_f2_g4_k201_diffusion",
+      "definition": "the same strong unary followed by the frozen release-compatible f=2, g=4, K201, 100-iteration query-conditioned graph reachability mask"
+    }
+  ],
+  "common_method": {
+    "track": "strict raw positive and negative scribbles",
+    "reference_evidence": "signed exact W-transpose scribble divided by W-transpose-one",
+    "reference_weight": "exact W-transpose-one primitive responsibility",
+    "relation": "query-independent official C-RADIO DINOv3 primitive signed multiplicative hash256 diagnostic",
+    "relation_role": "not native DINOv2 and not an exact LUDVIG feature match",
+    "classifier": "sklearn balanced LogisticRegression C=0.01 fit only on nonzero training-fold signed evidence and weighted by primitive responsibility",
+    "regularizer_bandwidth": 4.0,
+    "feature_bandwidth": 2.0,
+    "official_num_neighbors_parameter": 200,
+    "effective_knn_columns": 201,
+    "include_self": true,
+    "iterations": 100,
+    "edge_binarization_threshold": 1e-5,
+    "diffusion_kernel": "released N-by-K positional normalization, symmetrization, and per-iteration feature-column normalization",
+    "final_threshold": 0.5,
+    "connected_selection": "none"
+  },
+  "cross_validation": {
+    "folds": 3,
+    "population": "all capability-valid primitive rows with nonzero signed reference evidence",
+    "fold_key": "global primitive row id",
+    "fold_hash": "SplitMix64 with constants 0x9E3779B97F4A7C15, 0xBF58476D1CE4E5B9, and 0x94D049BB133111EB, modulo 3",
+    "minimum_positive_rows_per_training_fold": 32,
+    "minimum_negative_rows_per_training_fold": 32,
+    "minimum_positive_rows_per_heldout_fold": 32,
+    "minimum_negative_rows_per_heldout_fold": 32,
+    "insufficient_population": "fail_closed_without_target_readout",
+    "leakage_rule": "set every held-out row's signed evidence to exact zero before logistic fitting, positive-reference bandwidth statistics, query gating, and diffusion",
+    "heldout_prediction_rule": "score each held-out nonzero anchor before any direct hard-anchor overwrite",
+    "aggregation": "one strict out-of-fold prediction per observed primitive, pooled across all three folds"
+  },
+  "selection": {
+    "primary_metric": "responsibility-weighted balanced binary log-loss with positive and negative responsibility mass normalized to one half each",
+    "probability_clamp_for_log_loss": 1e-7,
+    "secondary_metric": "responsibility-weighted ROC AUC",
+    "metric_round_decimals": 12,
+    "decision": "lexicographically minimize rounded balanced log-loss, then maximize rounded weighted AUC, then prefer strong_unary on an exact tie",
+    "uniformity": "the identical rule is executed independently for every query; scene identity and previous target behavior are not inputs"
+  },
+  "final_refit": {
+    "rule": "after selection, refit the same classifier on all nonzero signed reference rows",
+    "strong_unary_output": "full-refit P^(1/4)",
+    "diffusion_output": "full-refit fixed f2/g4/K201 support",
+    "positive_exclusive_anchor": 1.0,
+    "negative_exclusive_anchor": 0.0,
+    "invalid_capability_rows": "zero except exact direct exclusive anchors"
+  },
+  "authority_boundary": {
+    "target_rgb_allowed": false,
+    "target_mask_allowed_before_selector_and_score_freeze_reload": false,
+    "target_metrics_allowed_for_selection": false,
+    "previous_fern_or_horns_target_outcomes_allowed_for_selection": false,
+    "scene_specific_rules": false,
+    "f_g_k_threshold_tuning": false,
+    "frozen_evaluator_may_be_modified": false
+  },
+  "sentinel_plan": {
+    "ordered_scenes": ["horns_left", "fern"],
+    "gate": "strict macro improves by at least 0.03 over frozen compact unary, at least one sentinel improves, and neither regresses by more than 0.03",
+    "full8_requires_gate": true,
+    "do_not_expand_automatically": true
+  }
+}

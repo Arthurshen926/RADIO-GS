@@ -1,0 +1,40 @@
+{
+  "schema_version": "lerf_text_evidence_to_support_v1_registration",
+  "registered_at": "2026-08-03T19:45:00+08:00",
+  "purpose": "Freeze the first target-blind text Evidence-to-Support candidate before opening its LERF3D target metrics.",
+  "frozen_evaluator_may_be_modified": false,
+  "development_scene": "figurines",
+  "independent_confirmation_scene": "waldo_kitchen",
+  "remaining_expansion_scenes": [
+    "ramen",
+    "teatime"
+  ],
+  "method": {
+    "initial_evidence": "frozen VALA three-scale peak-selected kNN10-smoothed per-query minmax remapped primitive text probability",
+    "surface_graph": "frozen canonical support_graph_v3 topology and official C-RADIO capability-derived channels",
+    "surface_channel_mixture": {
+      "geometry": 0.2,
+      "appearance": 0.4,
+      "boundary": 0.4
+    },
+    "channel_mixture_rule": "arithmetic mixture of independently row-normalized channels",
+    "query_compatibility": "P_i equals the initial text evidence clamped to [1e-6,1-1e-6]",
+    "query_edge_gate": "sqrt(P_i*P_j)",
+    "query_gated_transition": "row normalization after compatibility gating",
+    "solver": "personalized diffusion",
+    "solver_iterations": 12,
+    "solver_residual": 0.3,
+    "solver_prior": "P_i exactly, represented as logit(P_i) with unary_temperature=1",
+    "selection": "recursive upper Otsu with exactly 3 stages on propagated probability",
+    "connected_component_postprocessing": false
+  },
+  "hyperparameter_search": "none",
+  "target_blind_gate": "figurines and waldo_kitchen must both improve over their frozen recursive-upper-Otsu3 baselines before expansion to ramen and teatime",
+  "target_data_policy": {
+    "target_rgb_allowed_for_method_construction": false,
+    "target_mask_allowed_for_method_construction": false,
+    "target_metric_allowed_for_method_or_hyperparameter_selection": false,
+    "target_mask_allowed_after_method_receipt_freeze_for_final_scoring": true
+  },
+  "interpretation": "This candidate validates the clean theory-facing personalized solver. It must not be described as exact released-LUDVIG execution semantics."
+}

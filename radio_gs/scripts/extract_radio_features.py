@@ -57,6 +57,8 @@ FRAME_COMMIT_DIRNAME = ".extract_frame_commits"
 RESUME_CONTRACT_SCHEMA_VERSION = 2
 FRAME_COMMIT_SCHEMA_VERSION = 1
 OUTPUT_BUNDLE_SCHEMA_VERSION = 1
+LEGACY_RESEAL_CONTRACT = "radio-feature-legacy-tensor-reseal-v1"
+LEGACY_SOURCE_MANIFEST_FILENAME = "frame_manifest.legacy.json"
 
 
 def _sha256_file(path: str | Path) -> str:
@@ -1169,6 +1171,204 @@ def _build_output_bundle(
     return bundle, signature, total_bytes
 
 
+def _validate_resealed_legacy_output_bundle(
+    root: Path,
+    manifest: dict[str, object],
+    manifest_sha256: str,
+    *,
+    verify_source_images: bool,
+    expected_output_bundle_sha256: str | None,
+) -> dict[str, object]:
+    """Validate a content-addressed wrapper around immutable legacy tensors.
+
+    This contract does not invent missing extraction-runtime provenance.  It
+    proves only that the pre-existing manifest, source-image identities, and
+    every declared tensor are exactly the files sealed into ``output_bundle``.
+    """
+
+    execution = manifest.get("execution")
+    if not isinstance(execution, dict) or execution.get(
+        "formalization_contract"
+    ) != LEGACY_RESEAL_CONTRACT:
+        raise ValueError("legacy feature reseal execution contract differs")
+    legacy_name = str(execution.get("legacy_source_manifest", ""))
+    if legacy_name != LEGACY_SOURCE_MANIFEST_FILENAME:
+        raise ValueError("legacy feature reseal source path differs")
+    legacy_path = root / legacy_name
+    try:
+        legacy, legacy_sha256, _source = load_json_object(
+            legacy_path,
+            expected_sha256=str(
+                execution.get("legacy_source_manifest_sha256", "")
+            ),
+            label="legacy RADIO feature manifest",
+        )
+    except (OSError, ValueError) as exc:
+        raise ValueError("legacy RADIO source manifest is unreadable") from exc
+    if any(
+        key in legacy
+        for key in ("execution", "output_bundle", "output_bundle_sha256")
+    ):
+        raise ValueError("legacy RADIO source manifest is not an unsealed source")
+    frame_records = legacy.get("frames")
+    radio = legacy.get("radio")
+    if not isinstance(frame_records, list) or not frame_records:
+        raise ValueError("legacy RADIO source manifest has no frames")
+    if not isinstance(radio, dict):
+        raise ValueError("legacy RADIO source manifest has no RADIO declaration")
+    if int(legacy.get("num_frames", -1)) != len(frame_records):
+        raise ValueError("legacy RADIO source manifest frame count differs")
+    adaptor_names_value = radio.get("requested_adaptors", [])
+    if not isinstance(adaptor_names_value, list) or any(
+        not isinstance(value, str) for value in adaptor_names_value
+    ):
+        raise ValueError("legacy RADIO adaptor declaration is invalid")
+    adaptor_names = [str(value) for value in adaptor_names_value]
+
+    bundle = manifest.get("output_bundle")
+    if not isinstance(bundle, dict):
+        raise ValueError("resealed legacy manifest has no output bundle")
+    if (
+        bundle.get("schema_version") != OUTPUT_BUNDLE_SCHEMA_VERSION
+        or bundle.get("contract") != "radio-feature-output-bundle-v1"
+        or bundle.get("source_contract") != LEGACY_RESEAL_CONTRACT
+        or bundle.get("legacy_source_manifest_sha256") != legacy_sha256
+    ):
+        raise ValueError("resealed legacy output bundle contract differs")
+    observed_bundle_sha256 = str(manifest.get("output_bundle_sha256", ""))
+    if observed_bundle_sha256 != _canonical_json_sha256(bundle):
+        raise ValueError("resealed legacy output bundle SHA256 differs")
+    if (
+        expected_output_bundle_sha256 is not None
+        and observed_bundle_sha256 != expected_output_bundle_sha256
+    ):
+        raise ValueError("final feature output bundle differs from caller authority")
+    records = bundle.get("frames")
+    if not isinstance(records, list) or len(records) != len(frame_records):
+        raise ValueError("resealed legacy output bundle frame count differs")
+
+    expected_manifest = {
+        **legacy,
+        "execution": execution,
+        "output_bundle": bundle,
+        "output_bundle_sha256": observed_bundle_sha256,
+    }
+    if manifest != expected_manifest:
+        raise ValueError(
+            "resealed manifest changes fields outside the formal wrapper"
+        )
+
+    signature: dict[str, object] | None = None
+    total_bytes = 0
+    all_expected_paths: set[str] = set()
+    for frame_record, snapshot in zip(frame_records, records):
+        if not isinstance(frame_record, dict) or not isinstance(snapshot, dict):
+            raise ValueError("resealed legacy frame record is invalid")
+        if set(snapshot) != {"frame", "feature_signature", "tensors"}:
+            raise ValueError("resealed legacy frame snapshot has unknown fields")
+        if snapshot.get("frame") != frame_record:
+            raise ValueError("resealed legacy output frame order differs")
+        stem = str(frame_record.get("saved_stem", ""))
+        expected_paths = _expected_tensor_relative_paths(stem, adaptor_names)
+        tensor_records = snapshot.get("tensors")
+        if not isinstance(tensor_records, list):
+            raise ValueError("resealed legacy tensor set is invalid")
+        actual_paths = [
+            str(record.get("relative_path", ""))
+            for record in tensor_records
+            if isinstance(record, dict)
+        ]
+        if len(actual_paths) != len(tensor_records) or actual_paths != expected_paths:
+            raise ValueError("resealed legacy tensor path set differs")
+        if any(path in all_expected_paths for path in actual_paths):
+            raise ValueError("resealed legacy tensor path is repeated")
+        all_expected_paths.update(actual_paths)
+        values: dict[str, torch.Tensor] = {}
+        for record in tensor_records:
+            if set(record) != {
+                "relative_path",
+                "sha256",
+                "dtype",
+                "shape",
+                "num_bytes",
+            }:
+                raise ValueError("resealed legacy tensor record has unknown fields")
+            relative_path = str(record["relative_path"])
+            relative = Path(relative_path)
+            if relative.is_absolute() or ".." in relative.parts:
+                raise ValueError("resealed legacy tensor path is unsafe")
+            values[relative_path] = _load_validated_tensor(
+                root / relative,
+                record,
+            )
+            total_bytes += int(record["num_bytes"])
+        frame_signature = _signature_from_committed_tensors(
+            values,
+            stem,
+            adaptor_names,
+        )
+        if snapshot.get("feature_signature") != frame_signature:
+            raise ValueError("resealed legacy frame feature signature differs")
+        signature = _merge_feature_signature(signature, frame_signature)
+
+    features = legacy.get("features")
+    if signature != features:
+        raise ValueError("resealed legacy feature signature differs from source")
+    feature_subdirs = {
+        str(record.get("subdir", ""))
+        for record in (
+            [features.get("backbone", {}), features.get("summary", {})]
+            + list(features.get("adaptors", []))
+            if isinstance(features, dict)
+            else []
+        )
+        if isinstance(record, dict) and str(record.get("subdir", ""))
+    }
+    observed_paths: set[str] = set()
+    for subdir in feature_subdirs:
+        directory = root / subdir
+        if not directory.is_dir():
+            raise ValueError(f"resealed legacy feature directory is missing: {directory}")
+        observed_paths.update(
+            path.relative_to(root).as_posix()
+            for path in directory.iterdir()
+            if path.is_file() and path.suffix == ".pt"
+        )
+    if observed_paths != all_expected_paths:
+        raise ValueError("resealed legacy disk tensor set differs from its bundle")
+
+    if verify_source_images:
+        declared_image_dir = Path(
+            str(legacy.get("image_dir", ""))
+        ).expanduser().resolve()
+        image_dir = Path(
+            str(execution.get("resolved_source_image_dir", ""))
+        ).expanduser().resolve()
+        resolution_contract = str(
+            execution.get("source_image_dir_resolution", "")
+        )
+        if image_dir == declared_image_dir:
+            if resolution_contract != "declared_path":
+                raise ValueError("legacy source-image resolution contract differs")
+        elif resolution_contract != "explicit_override_all_frame_sha256_v1":
+            raise ValueError("legacy source-image override is not content-bound")
+        for frame_record in frame_records:
+            source = image_dir / str(frame_record.get("source_file", ""))
+            if not source.is_file():
+                raise ValueError(f"legacy feature source image is missing: {source}")
+            if _sha256_file(source) != str(frame_record.get("source_sha256", "")):
+                raise ValueError(f"legacy feature source image SHA256 differs: {source}")
+    return {
+        "manifest_sha256": manifest_sha256,
+        "output_bundle_sha256": observed_bundle_sha256,
+        "legacy_source_manifest_sha256": legacy_sha256,
+        "formalization_contract": LEGACY_RESEAL_CONTRACT,
+        "num_frames": len(frame_records),
+        "logical_tensor_bytes": total_bytes,
+        "feature_signature": signature,
+    }
+
+
 def _validate_final_output_bundle(
     output_root: str | Path,
     manifest: dict[str, object] | None = None,
@@ -1208,6 +1408,14 @@ def _validate_final_output_bundle(
     frame_records = manifest.get("frames")
     if not isinstance(execution, dict) or not isinstance(radio, dict):
         raise ValueError("final feature manifest provenance is incomplete")
+    if execution.get("formalization_contract") == LEGACY_RESEAL_CONTRACT:
+        return _validate_resealed_legacy_output_bundle(
+            root,
+            manifest,
+            manifest_sha256,
+            verify_source_images=verify_source_images,
+            expected_output_bundle_sha256=expected_output_bundle_sha256,
+        )
     if not isinstance(frame_records, list) or not frame_records:
         raise ValueError("final feature manifest has no frames")
     if int(manifest.get("num_frames", -1)) != len(frame_records):

@@ -1,0 +1,98 @@
+{
+  "schema_version": "nvos_evidence_to_support_v2_result_summary_v1",
+  "created_at": "2026-08-04T03:00:00+08:00",
+  "protocol": {
+    "frozen_evaluator_modified": false,
+    "strict_source_only_and_published_compatible_reported_separately": true,
+    "strict_headline_retained": 0.61195354,
+    "published_compatible_reproduced_LUDVIG_macro": 0.9125768502741802,
+    "published_compatible_is_strict_unseen": false
+  },
+  "strict_sentinel_comparator": {
+    "method": "v1 hashed query-conditioned release-compatible support",
+    "horns_left": 0.6969455416488206,
+    "fern": 0.53084104,
+    "macro": 0.61389329
+  },
+  "experiments": {
+    "exact_4096D_LDA_plus_continuous_solver": {
+      "registration": {
+        "path": "paper/artifacts/nvos_evidence_to_support_v2_registration_20260804.json",
+        "sha256": "3d4085c634f89f527e7cacf8ea5a073f20de73ea7e3c14a77d7c0e77095ef8f9"
+      },
+      "scores": {
+        "horns_left": {
+          "iou": 0.30846665506312204,
+          "report": "output/optimization_20260804/nvos_evidence_to_support_v2_sentinels/reports/horns_left.json",
+          "report_sha256": "c9abb68738c836cb286835de0acb113c1a5779988e6fa39621a58c7a8e1ba83e"
+        },
+        "fern": {
+          "iou": 0.46595268236956594,
+          "report": "output/optimization_20260804/nvos_evidence_to_support_v2_sentinels/reports/fern.json",
+          "report_sha256": "d42860a30c9a2434551bd7aabbfb677dde1c1305f221841c2d4caf5a11fac39f"
+        },
+        "macro": 0.387209668716344
+      },
+      "gate_passed": false,
+      "full8_expanded": false,
+      "failure": "unscaled exact-4096D diagonal LDA logits span roughly minus 675 to plus 780 and mean confidence is above 0.99, degenerating the continuous method into an overfit hard classifier"
+    },
+    "sealed_v1_unary_plus_continuous_solver_one_factor": {
+      "registration": {
+        "path": "paper/artifacts/nvos_v1_unary_v2_continuous_solver_followup_registration_20260804.json",
+        "sha256": "4c51f0f0bf660f9fdda6fbcc6171baf28e603be3a5843f349a4b1ac3b21b8414"
+      },
+      "scores": {
+        "horns_left": {
+          "iou": 0.348116120874799,
+          "report": "output/optimization_20260804/nvos_v1_unary_v2_solver_sentinels/reports/horns_left.json",
+          "report_sha256": "bfaa39596a97b7817390051438379c58084eb92a669fb67685440e938593a6f7"
+        },
+        "fern": {
+          "iou": 0.45646082392738896,
+          "report": "output/optimization_20260804/nvos_v1_unary_v2_solver_sentinels/reports/fern.json",
+          "report_sha256": "5ec15ecfd7040bcc0b2db460562e04ca0350368c1d6bb7516fa5f6b0ae4d8e91"
+        },
+        "macro": 0.402288472401094
+      },
+      "gate_passed": false,
+      "full8_expanded": false,
+      "failure": "with the classifier fixed, k16 continuous Laplacian smoothing expands weak near-boundary support and causes large target over-selection; the continuous solver is not a drop-in improvement over the released K201 operator"
+    }
+  },
+  "decision": {
+    "continuous_solver_branch": "stopped",
+    "lambda_or_confidence_tuning_after_failure": false,
+    "strict_full8_followup": "not_run_by_preregistered_gate",
+    "strict_headline": "retain frozen 0.61195354",
+    "canonical_field_retraining": "not_justified_by_these_results"
+  },
+  "published_compatible_asset_audit": {
+    "path": "paper/artifacts/nvos_ludvig_published_compatible_asset_audit_20260804.json",
+    "sha256": "93af6ff74879f306f1f1dfeb6d65e9efe6cf5d208a68f99f7006df7d554a5582",
+    "finding": "the reproduced 0.91257685 system is online target-RGB SAM followed by a one-dimensional scalar uplift, not a query-free DINOv2/PCA40 field",
+    "DINOv2_PCA40_assets_present": false,
+    "direct_mapping_to_strict_canonical_rows": false,
+    "minimum_faithful_bridge": "render each cached native scalar LUDVIG field into registered views and apply an exact image-space adjoint to canonical primitives; the result remains target-RGB-informed and published-compatible only"
+  },
+  "implementation": {
+    "shared_solver": "radio_gs/querying/support_solver.py",
+    "shared_solver_sha256": "0c764bf127b8ba3f30b82fbcb1a34a682ba559e2287ed6daa80b9970ebb29fd3",
+    "thermal_guard": "radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+    "thermal_guard_sha256": "bba05a680758849677bf77fdf2d395e97a265a965d0b26b88dc8c82894680c22",
+    "legacy_solver_defaults_unchanged": true,
+    "new_solver_inputs": ["explicit unary confidence c_i", "query gate g_i with symmetric degree renormalization"],
+    "thermal_poll_seconds": 180,
+    "thermal_hard_abort_consecutive_polls": 2,
+    "maximum_observed_GPU1_temperature_c": 45
+  },
+  "verification": {
+    "pytest": "35 passed",
+    "dense_quadratic_energy_reference_test": true,
+    "legacy_cached_affinity_exact_parity_test": true,
+    "thermal_guard_CPU_integration_test": "passed",
+    "py_compile": "passed",
+    "bash_syntax": "passed",
+    "git_diff_check": "passed"
+  }
+}

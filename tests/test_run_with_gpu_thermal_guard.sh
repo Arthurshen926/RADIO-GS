@@ -38,7 +38,14 @@ elif [[ "$arguments" == *"--query-gpu=temperature.gpu,power.draw,power.limit"* ]
       exit 1
       ;;
   esac
-  printf '40, 50.0, 300.0, 10, 100, P2\n'
+  case "$MOCK_TELEMETRY_PLAN:$count" in
+    overheat:2|overheat:3)
+      printf '87, 250.0, 300.0, 99, 1000, P2\n'
+      ;;
+    *)
+      printf '40, 50.0, 300.0, 10, 100, P2\n'
+      ;;
+  esac
 else
   echo "unexpected fake nvidia-smi arguments: $arguments" >&2
   exit 97
@@ -72,6 +79,7 @@ run_guard() {
   local maximum_failures="$3"
   local pcie_fail_at="$4"
   local child_seconds="$5"
+  local maximum_overheat_polls="${6:-1}"
   local case_root="$TEST_ROOT/$case_name"
   mkdir -p "$case_root/state"
   PATH="$FAKE_BIN:$PATH" \
@@ -84,6 +92,7 @@ run_guard() {
     GPU_START_MAX_TEMP_C=80 \
     GPU_POLL_SECONDS=1 \
     GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES="$maximum_failures" \
+    GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS="$maximum_overheat_polls" \
     bash "$GUARD" -- bash -c "sleep $child_seconds" \
     >"$case_root/stdout.log" 2>"$case_root/stderr.log"
 }
@@ -114,5 +123,13 @@ if grep -q 'telemetry_retry_' "$TEST_ROOT/pcie/telemetry.csv"; then
   echo "PCIe failure must not be retried as a transient telemetry failure" >&2
   exit 1
 fi
+
+set +e
+run_guard overheat overheat 3 0 20 2
+overheat_status=$?
+set -e
+[[ "$overheat_status" -eq 86 ]]
+grep -q ',thermal_warning_1_of_2$' "$TEST_ROOT/overheat/telemetry.csv"
+grep -q ',thermal_abort_2_of_2$' "$TEST_ROOT/overheat/telemetry.csv"
 
 printf 'thermal guard telemetry retry tests passed\n'

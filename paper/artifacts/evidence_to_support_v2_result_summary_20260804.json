@@ -1,0 +1,177 @@
+{
+  "schema_version": "evidence_to_support_v2_result_summary_v1",
+  "date": "2026-08-04",
+  "status": "all_preregistered_development_gates_closed",
+  "protocol": {
+    "master_registration": {
+      "path": "paper/artifacts/evidence_to_support_v2_master_registration_20260804.json",
+      "sha256": "064ee5a816fe5108035829860d8d48e583bbb2a7c3a12e0a90c7efb528dd0bef"
+    },
+    "frozen_evaluators_modified": false,
+    "target_metrics_used_for_training_or_query_construction": false,
+    "disclosure": "This is a theory-registered posthoc iteration after earlier benchmark scores had already been opened. Formal retained results, preregistered development failures, and component diagnostics are reported separately."
+  },
+  "retained_headlines": {
+    "spin9_local9": {
+      "method": "exact reference adjoint plus release-compatible query-conditioned diffusion v1",
+      "scene_macro_iou": 0.877162,
+      "reproduced_reference": {
+        "method": "LUDVIG-SAM official online multiview protocol",
+        "scene_macro_iou": 0.9372,
+        "information_condition": "full reference mask plus online SAM processing of every registered RGB, including target RGB; target masks are not used during generation"
+      },
+      "gap": -0.060038
+    },
+    "lerf3d_full4": {
+      "fixed_formal_scene_macro_iou": 0.32726162,
+      "target_blind_otsu3_scene_macro_iou": 0.37605102,
+      "query_conditioned_support_scene_macro_iou": 0.3776461,
+      "reproduced_VALA_scene_macro_iou": 0.54124888,
+      "robust_target_candidate_promoted": false
+    },
+    "nvos_strict_source_only_full8": {
+      "scene_macro_iou": 0.61195354,
+      "published_compatible_reproduced_LUDVIG_macro_iou": 0.9125768502741802,
+      "compatible_is_strict_unseen": false,
+      "information_condition_warning": "The compatible result performs online target-view RGB SAM calls and uplifts one query-specific scalar mask field."
+    }
+  },
+  "shared_evidence_to_support_v2": {
+    "energy": "sum_i c_i*(p_i-y_i)^2 + lambda*sum_ij w_ij*sqrt(g_i*g_j)*(p_i-p_j)^2",
+    "implemented_contract": [
+      "explicit continuous unary y_i and confidence c_i",
+      "query gate g_i applied to pairwise conductance",
+      "symmetric degree normalization recomputed after gating",
+      "exact positive and negative hard constraints",
+      "continuous all-component readout by default",
+      "legacy solver defaults and cached affinity behavior preserved"
+    ],
+    "implementation": {
+      "shared_solver": {
+        "path": "radio_gs/querying/support_solver.py",
+        "sha256": "0c764bf127b8ba3f30b82fbcb1a34a682ba559e2287ed6daa80b9970ebb29fd3"
+      },
+      "spin_solver": {
+        "path": "radio_gs/querying/query_conditioned_diffusion.py",
+        "sha256": "311584423e2ac3d233e188551ee60be17c28c457bf3b4dbb16b245674454cafc"
+      }
+    }
+  },
+  "spin9": {
+    "continuous_convex_v2": {
+      "scope": "posthoc difficult3 component replacement",
+      "registration": {
+        "path": "paper/artifacts/evidence_to_support_v2_spin_component_registration_20260804.json",
+        "sha256": "30cd48eb7abe1ba3f003e9a8aa5425ebc1fbde873c4374bebd5b706df40775a0"
+      },
+      "release_difficult3_macro_iou": 0.765509361018409,
+      "candidate": {
+        "lego": 0.45724026706837134,
+        "truck": 0.6370733112073477,
+        "room": 0.7868247662467155,
+        "macro": 0.6270461148408115
+      },
+      "gate_passed": false,
+      "full9_expanded": false,
+      "mechanism": "Hard reference locks improve the reference view but create a shifted high-score domain and do not supply the missing target-view object evidence; reference gain and target delta are strongly anticorrelated."
+    },
+    "sam_query_interface_component": {
+      "scope": "posthoc attribution only, not a formal local9 replacement",
+      "result": {
+        "path": "paper/artifacts/spin9_sam_query_interface_frozen_renderer_result_20260804.json",
+        "sha256": "f2f7ae28685a4efdca0c7271baffe541d2364b1b65ac1d76de949d8e13fde3db"
+      },
+      "room_clean_full_row": {
+        "release_iou": 0.8884382999,
+        "sam_field_iou": 0.9612164706099579,
+        "delta": 0.07277817070995788
+      },
+      "truck_exact_subset_zero_fill": {
+        "release_iou": 0.7899438648,
+        "sam_field_iou": 0.8376585100010082,
+        "delta": 0.04771464520100821,
+        "carrier_row_coverage": 0.5,
+        "current_valid_row_coverage": 0.8960526274234859
+      },
+      "truck_valid_mass_normalized_iou": 0.8376792780564066,
+      "lego": "no exact persisted SAM rows align to the current carrier; faithful testing requires rerunning SAM and uplifting onto that carrier",
+      "conclusion": "The remaining SPIn gap is primarily a strong transductive target-RGB SAM query-interface and cross-view completion gap, not evidence that another graph or a higher-dimensional relation field alone will close it."
+    }
+  },
+  "nvos": {
+    "result_summary": {
+      "path": "paper/artifacts/nvos_evidence_to_support_v2_result_summary_20260804.json",
+      "sha256": "67bf41119d70f1c74a5573990b6dcba543058b0c9733a4a770a7684d99fc6a6c"
+    },
+    "strict_sentinel_comparator_macro": 0.61389329,
+    "exact_4096D_LDA_plus_continuous_solver_macro": 0.387209668716344,
+    "sealed_v1_unary_plus_continuous_solver_macro": 0.402288472401094,
+    "both_gates_passed": false,
+    "strict_full8_expanded": false,
+    "mechanism": [
+      "The exact 4096D diagonal LDA unary saturates at confidence above 0.99 and overfits the sparse scribbles.",
+      "With the unary fixed, k16 continuous smoothing over-selects weak near-boundary support and is not a drop-in replacement for the released K201 operator."
+    ],
+    "published_compatible_asset_audit": {
+      "path": "paper/artifacts/nvos_ludvig_published_compatible_asset_audit_20260804.json",
+      "sha256": "93af6ff74879f306f1f1dfeb6d65e9efe6cf5d208a68f99f7006df7d554a5582",
+      "finding": "The reproduced 0.91257685 path is an online target-RGB SAM query interface followed by a one-dimensional scalar uplift, not a query-free DINOv2 or PCA40 field."
+    }
+  },
+  "lerf3d": {
+    "result": {
+      "path": "paper/artifacts/lerf3d_cosine_geomedian_dev_gate_20260804.json",
+      "sha256": "95de57e441fb38dbd98e4f9f1b29200757e83b2338a1355b2cce4a84ee241630"
+    },
+    "candidate": "one global scene-disjoint SurfaceRegion readout trained on the released VALA streaming cosine-tangent semantic target",
+    "dev_scene_macro": {
+      "average_precision": {
+        "baseline": 0.6940978426604379,
+        "candidate": 0.6860319214955115,
+        "delta": -0.008065921164926436
+      },
+      "oracle_threshold_iou": {
+        "baseline": 0.582774288282479,
+        "candidate": 0.5790129929996084,
+        "delta": -0.0037612952828706145
+      },
+      "fixed_formal_miou": {
+        "baseline": 0.3241428979064575,
+        "candidate": 0.37756717080655555,
+        "delta": 0.053424272900098046
+      },
+      "target_blind_otsu3_miou": {
+        "baseline": 0.36675297311442045,
+        "candidate": 0.3949334517319568,
+        "delta": 0.028180478617536364
+      }
+    },
+    "gate_passed": false,
+    "full4_expanded": false,
+    "mechanism": "The robust central direction improves fixed-threshold calibration and selected purity, but suppresses minority view directions and makes related-instance pixel ranking less separable. Robust aggregation alone does not implement VALA marginal-contribution visibility lifting."
+  },
+  "decision": {
+    "promoted_new_benchmark_method": false,
+    "canonical_field_retraining_justified_by_v2": false,
+    "continuous_solver_tuning_stopped": true,
+    "next_priority": [
+      "Implement and label a published-compatible target-RGB SAM query interface for SPIn and NVOS; never report it as strict unseen.",
+      "For strict NVOS, improve signed source-only unary construction or source-to-target correspondence before changing the graph solver.",
+      "For LERF3D, add exact marginal-contribution visibility lifting and an objective that preserves per-view/hard-negative directional separation; robust aggregation alone is insufficient."
+    ]
+  },
+  "thermal": {
+    "policy": "180-second telemetry, 83C launch inhibit, no soft pause, 87C hard abort only after two consecutive polls",
+    "maximum_observed_temperature_c": 56,
+    "maximum_observed_power_w": 132.6,
+    "thermal_warning_pause_or_abort_events": 0,
+    "final_gpu_state": "both GPUs idle"
+  },
+  "verification": {
+    "unified_focused_pytest": "107 passed",
+    "thermal_guard_integration": "passed",
+    "python_compile": "passed",
+    "bash_syntax": "passed",
+    "git_diff_check": "passed"
+  }
+}

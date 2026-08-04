@@ -184,6 +184,8 @@ def _load_cache_inputs(path: str | Path) -> dict:
         "renderer_geometry_checkpoint_sha256": (
             renderer_geometry_checkpoint_sha256
         ),
+        "field_checkpoint_sha256": str(payload.get("field_checkpoint_sha256", "")),
+        "readout_checkpoint_sha256": str(payload.get("readout_checkpoint_sha256", "")),
     }
 
 

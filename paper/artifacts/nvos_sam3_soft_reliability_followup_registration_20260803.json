@@ -1,0 +1,112 @@
+{
+  "schema_version": "nvos_sam3_soft_reliability_followup_registration_v1",
+  "registered_at": "2026-08-03T21:50:29+08:00",
+  "status": "posthoc_registered_before_followup_selector_construction",
+  "parent_registration": {
+    "path": "paper/artifacts/nvos_official_sam3_reference_completion_registration_20260803.json",
+    "sha256": "a30db1d31a6ffc2d651af37c50675cd12a9fb38b448bd3d96c5eb54740428eca"
+  },
+  "motivating_result": {
+    "path": "paper/artifacts/nvos_official_sam3_reference_completion_sentinel_result_20260803.json",
+    "sha256": "13526af40ea4b3f93fa7a8187eb02011682c8659ac966dda63689db7dcba3ae6",
+    "posthoc_status": "The same horns_left and fern target scores have already been inspected. This follow-up is therefore a registered posthoc diagnostic and not an independent target-blind validation."
+  },
+  "purpose": "Test whether preserving official SAM3 trial consensus as a parameter-free reliability-conditioned soft source observation avoids the union-like failure of Li binarization.",
+  "fixed_phase1_inputs": {
+    "phase1_summary_path": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/phase1_summary.json",
+    "phase1_summary_sha256": "76975bc2fe28f32375d0be5a839c577c1ddc0d1119d17310dbd7e040614a138a",
+    "horns_left": {
+      "completion_path": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/horns_left.pt",
+      "completion_sha256": "08a0f366702b79eee7d59f25a85a2480543b0298ef1abd8c30f0ff9edc027155",
+      "receipt_sha256": "cd6e04e7ed4126b24e07bd09e11cdc7fbd20066c2ff88b6a28326cc4637d9dfd"
+    },
+    "fern": {
+      "completion_path": "output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/fern.pt",
+      "completion_sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+      "receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a"
+    },
+    "allowed_phase1_tensor": "aggregate_probability equal to the arithmetic mean q of the ten frozen official SAM3 binary masks",
+    "li_completed_positive_used": false,
+    "new_sam3_call_allowed": false
+  },
+  "mathematical_operator": {
+    "domain": "q is finite and lies in [0,1] at every native 1008x756 source pixel",
+    "binary_entropy_nats": "H2(q) = -q ln(q) - (1-q) ln(1-q), with 0 ln(0) defined as 0",
+    "reliability": "c(q) = 1 - H2(q) / ln(2)",
+    "reliability_boundary": {
+      "c(0)": 1.0,
+      "c(0.5)": 0.0,
+      "c(1)": 1.0,
+      "range": "[0,1]",
+      "symmetry": "c(q)=c(1-q)",
+      "parameters": 0
+    },
+    "soft_positive_observation": "s(q) = q * c(q)",
+    "scribble_authority_order": [
+      "compute s(q) from the frozen aggregate q",
+      "overwrite every raw official positive scribble pixel to exactly 1",
+      "overwrite every raw official negative scribble pixel to exactly 0"
+    ],
+    "negative_observation": "the raw official negative scribble remains a separate exact negative channel",
+    "numeric_rule": "compute entropy and reliability in float64, clamp only roundoff to [0,1], then freeze q, c(q), and s(q) as contiguous float32 tensors"
+  },
+  "exact_adjoint": {
+    "positive_mass": "W transpose s(q)",
+    "negative_mass": "W transpose raw_negative",
+    "visible_mass": "W transpose one",
+    "signed_evidence": "(positive_mass-negative_mass)/visible_mass on visible primitives",
+    "reference_weight": "positive_mass+negative_mass",
+    "hard_positive_anchor": "raw positive exclusive primitive rows only",
+    "hard_negative_anchor": "raw negative exclusive primitive rows only"
+  },
+  "fixed_support": {
+    "relation": "the same query-independent C-RADIO DINO signed multiplicative hash256",
+    "classifier": "balanced LogisticRegression C=0.01, signed_nonzero rows, sample weighted by reference_weight",
+    "feature_bandwidth": 2.0,
+    "regularizer_bandwidth": 4.0,
+    "official_num_neighbors_parameter": 200,
+    "effective_knn_columns": 201,
+    "iterations": 100,
+    "edge_binarization_threshold": 0.00001,
+    "threshold": 0.5,
+    "connected_selection": "none"
+  },
+  "forbidden_choices": {
+    "target_tuned_consensus_threshold": true,
+    "scene_specific_rule": true,
+    "per_scene_raw_vs_soft_selection": true,
+    "target_metric_model_selection": true,
+    "Li_threshold": true,
+    "new_decoder_prompt_policy": true,
+    "connected_selection": true
+  },
+  "authority_boundary": {
+    "source_reference_rgb": "already consumed only by the frozen phase1 artifact",
+    "raw_positive_and_negative_scribbles": true,
+    "target_rgb": false,
+    "target_mask_before_both_selector_receipts_freeze": false,
+    "target_metrics_before_both_selector_receipts_freeze": false,
+    "previous_target_results_used_as_numeric_parameters": false
+  },
+  "execution_order": {
+    "phase_prelabel": "Freeze and reload both selectors in order horns_left then fern; neither target scorer may start until both selector receipts exist and pass hash validation.",
+    "phase_score": "After the cross-scene hard boundary, score horns_left then fern with the unchanged frozen exact target readout.",
+    "method_mutation_after_first_followup_score": false
+  },
+  "gate": {
+    "comparator": "strict raw hash256 support",
+    "comparator_horns_left": 0.6969455416488206,
+    "comparator_fern": 0.5308410361456904,
+    "comparator_two_scene_macro": 0.6138932888972555,
+    "pass": "follow-up macro improves by at least 0.03, at least one sentinel improves, and neither sentinel regresses by more than 0.03",
+    "full8_requires_pass": true,
+    "stop_after_gate": true
+  },
+  "runtime": {
+    "physical_gpu": 0,
+    "python": "/root/miniconda3/envs/cybersim_agent/bin/python",
+    "process_local_libcuda": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "global_environment_or_driver_mutation": false,
+    "thermal_policy": "300W physical limit, launch 79C, soft pause 82C, resume 78C, hard abort 85C, no peer-GPU coupling"
+  }
+}
