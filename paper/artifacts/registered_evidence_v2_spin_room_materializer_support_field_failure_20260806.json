@@ -1,0 +1,66 @@
+{
+  "schema": "radio_gs.registered_evidence_external_materializer_failure.v1",
+  "schema_version": 1,
+  "status": "failed_before_pre_metric_receipt_and_before_any_scoring",
+  "scene_id": "room",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_execution_authority_20260806.json",
+    "sha256": "bbbe30c14ec76da20885ca7fd86ce4b30a1d271bcc6a93321c74d1e07b16cf1c"
+  },
+  "execution_binding_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_execution_binding_addendum_20260806.json",
+    "sha256": "f5b08b106ed63c3463bb7cdad22a0b650500b57f990db08bc85b5b6e4b44ea33"
+  },
+  "implementation": {
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256_at_failed_execution": "4c2692079104275d9243e342f1927fb44747cc323d5e976e4d091f432b1bd744"
+    },
+    "failure": "AttributeError: SupportedCalibration object has no attribute support",
+    "root_cause": "the writer referenced calibrated.support although the frozen adapter dataclass field is named calibrated.supported",
+    "scientific_method_or_parameter_changed": false
+  },
+  "partial_output": {
+    "archived_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/failed_before_receipt_support_field_v1",
+    "pre_metric_receipt_written": false,
+    "primitive_unary": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/failed_before_receipt_support_field_v1/primitive_unary.pt",
+      "sha256": "6a2ff04e78cc4bb18e1071593781141098b7fb41df4d4fd9a062e47f58f43c94"
+    },
+    "single_incomplete_frame_raw_v1": {
+      "frame_id": "DJI_20200226_143851_396",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/failed_before_receipt_support_field_v1/scores/DJI_20200226_143851_396/raw_v1_probability.npy",
+      "sha256": "c4dadb8ad33f70fc1fdf961edc2095143a31cc8f363528be9c28ae303b9089fe"
+    },
+    "supported_map_written": false,
+    "calibrated_v2_map_written": false,
+    "eligible_for_scoring": false,
+    "eligible_for_reuse": false
+  },
+  "logs": {
+    "stdout_stderr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/logs/materialize.log",
+      "sha256": "c387814d83f99f91b599428b6a41433c9b9e70cbb7eed9316fc79691754b22bb"
+    },
+    "gpu0_telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/logs/materialize.gpu0.telemetry.csv",
+      "sha256": "ed56f3b40cf435f4bb841ef15e4da262a6cc1121544b57d3c1a8377bdcbe75e0",
+      "maximum_temperature_c": 44,
+      "maximum_power_w": 114.66,
+      "thermal_stop_triggered": false
+    },
+    "gpu0_owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/logs/materialize.gpu0.owner.csv",
+      "sha256": "455763e41133e09eda70a17b9a05eb090fdd54539db93b77b32d9a6333f4fb20"
+    }
+  },
+  "source_access": {
+    "source_mask_pixels_opened": true,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "per_scene_parameter_fit": false
+  },
+  "restart_policy": "fresh no-clobber output root only after a hash-bound engineering fix, focused regression tests, and a pre-restart addendum"
+}

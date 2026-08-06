@@ -1,0 +1,66 @@
+{
+  "schema": "radio_gs.registered_evidence_source_evidence_preservation_diagnostic.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "status": "post_result_source_only_diagnostic_not_authorized_for_room_method_selection_or_rescoring",
+  "scene_id": "room",
+  "question": "Did the learned V1 residual preserve primitives whose source evidence was already completely specified by the full reference mask?",
+  "inputs": {
+    "primitive_unary": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/pre_metric_numeric_policy_v1/primitive_unary.pt",
+      "sha256": "6a2ff04e78cc4bb18e1071593781141098b7fb41df4d4fd9a062e47f58f43c94"
+    },
+    "source_exact_w": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/reference_exact_w.pt",
+      "sha256": "c550e1c8a0a31936eecbaf42beb63f1b4246ab88cb95c7e3d7530dc505e5bb20"
+    }
+  },
+  "strata": {
+    "fully_observed": {
+      "definition": "labeled_coverage >= 1 - 1e-5",
+      "rows": 207285,
+      "mean_coverage": 1.0,
+      "mean_absolute_V1_minus_analytic_probability": 0.008854540064930916,
+      "threshold_flips": 2047,
+      "analytic_positive_to_V1_negative": 0,
+      "analytic_negative_to_V1_positive": 2047
+    },
+    "partially_observed": {
+      "rows": 0,
+      "threshold_flips": 0
+    },
+    "unobserved": {
+      "definition": "labeled_coverage <= 1e-5",
+      "rows": 84334,
+      "mean_coverage": 0.0,
+      "mean_absolute_V1_minus_analytic_probability": 0.037088386714458466,
+      "threshold_flips": 2808,
+      "analytic_positive_to_V1_negative": 2808,
+      "analytic_negative_to_V1_positive": 0
+    },
+    "all": {
+      "rows": 291619,
+      "mean_coverage": 0.7108076214790344,
+      "mean_absolute_V1_minus_analytic_probability": 0.01701955311000347,
+      "threshold_flips": 4855
+    }
+  },
+  "interpretation": {
+    "confirmed_invariant_violation": "RegisteredEvidenceToUnaryV1 does not preserve fully observed source evidence. It changes 207285 fully observed primitives and flips 2047 analytic background primitives to foreground at the fixed 0.5 threshold.",
+    "additional_failure_mode": "On the 84334 source-unobserved primitives, V1 flips 2808 analytic foreground primitives to background, so the learned residual can simultaneously corrupt exact evidence and suppress semantic completion.",
+    "not_proven": "This source-only diagnostic does not allocate the target IoU regression to individual primitive strata and is not a post-hoc alternative Room candidate score."
+  },
+  "next_general_method": {
+    "name": "observation_clamped_registered_residual_v2",
+    "required_invariant": "For labeled_coverage equal to one, output probability must equal the exact registered analytic unary. Residual capacity is reserved for source-unobserved or genuinely partial rows, with a globally fixed coverage-dependent gate.",
+    "validation": "Train and validate on nonbenchmark multi-scene source-to-held-out-target pairs for both full-mask and signed-scribble prompts before any new benchmark sentinel.",
+    "room_rescore_authorized": false
+  },
+  "source_access": {
+    "new_target_ground_truth_opened": false,
+    "new_target_metric_computed": false,
+    "target_rgb_opened": false,
+    "threshold_scan": false,
+    "parameter_fit": false
+  }
+}

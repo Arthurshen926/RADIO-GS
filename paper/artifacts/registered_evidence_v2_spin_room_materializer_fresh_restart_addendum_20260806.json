@@ -1,0 +1,47 @@
+{
+  "schema": "radio_gs.registered_evidence_external_materializer_fresh_restart_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_after_runtime_fix_tests_and_before_fresh_room_restart",
+  "scene_id": "room",
+  "failed_attempt": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_materializer_support_field_failure_20260806.json",
+    "sha256": "4d3e7e148335e27820ec58023f2db855c0fa4d8423868ed13571753db0bf3cc6",
+    "partial_output_reuse": false
+  },
+  "runtime_fix": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_external_materializer_supported_field_fix_20260806.json",
+    "sha256": "ba1ac358114f194aa90382b95dd51457f5185d6bfc3e1db6e58c5618106f3401"
+  },
+  "fixed_materializer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+    "sha256": "e9596fb1f6ebfa47a6231a6b125498ed16ffd78c9221b2140173ddd7f2588d6a"
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_execution_authority_20260806.json",
+    "sha256": "bbbe30c14ec76da20885ca7fd86ce4b30a1d271bcc6a93321c74d1e07b16cf1c"
+  },
+  "verification": {
+    "focused_tests_passed": 14,
+    "test_files": [
+      "tests/test_registered_evidence_external_adapter.py",
+      "tests/test_score_registered_evidence_external_prediction.py"
+    ],
+    "support_field_writer_roundtrip_tested": true,
+    "scientific_method_or_parameter_changed": false
+  },
+  "fresh_output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/pre_metric_runtime_fix1",
+  "fixed_method": {
+    "threshold": 0.5,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_fit": false,
+    "threshold_scan": false
+  },
+  "source_access": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "per_scene_parameter_fit": false
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "schema": "radio_gs.registered_evidence_to_unary.clean_scannet_pilot_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_before_opening_clean_scannet_instance_label_payloads",
+  "scientific_question": "Can one global graph-off prompt-conditioned unary head, trained directly from a source prompt view to independent held-out target-view instance membership, improve over its frozen analytic unary without target RGB at inference?",
+  "method": {
+    "name": "RegisteredEvidenceToUnaryV1",
+    "shared_across_prompts_and_instances": true,
+    "per_scene_or_per_instance_parameters": false,
+    "input_scope": [
+      "exact source-view foreground/background raster-adjoint masses",
+      "source visible mass and labeled coverage",
+      "factorized DINO-v3 positive-minus-negative prototype margin",
+      "factorized SAM3 positive-minus-negative prototype margin",
+      "directional dispersion, amplitude uncertainty, observation evidence, and visibility purity"
+    ],
+    "output": "continuous primitive foreground probability plus confidence and abstention",
+    "graph": "off",
+    "connected_selection": "off",
+    "inference_forbidden_inputs": [
+      "target RGB",
+      "target instance mask",
+      "target semantic label",
+      "benchmark query, mask, label, score, or metric"
+    ],
+    "zero_initialization": "the learned residual is initially exactly the frozen analytic unary",
+    "bounded_update": "logit residual is max_delta_logit=4.0 times tanh(network output)",
+    "capacity": "two-layer MLP, hidden width 32, shared globally"
+  },
+  "data_authority": {
+    "dataset": "ScanNet v2 official projected 2-D instance IDs",
+    "scene_id": "scene0001_00",
+    "scene_role": "nonbenchmark clean development pilot only",
+    "cohort_authority": {
+      "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+      "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+    },
+    "benchmark_exclusion_manifest": {
+      "path": "paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+      "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+    },
+    "clean_inventory": {
+      "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+      "sha256": "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539"
+    },
+    "archive": {
+      "path": "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+      "size_bytes": 161061273600,
+      "instance_member": "scans/scene0001_00/scene0001_00_2d-instance-filt.zip",
+      "instance_member_size_bytes": 10025617
+    },
+    "instance_payload_opened_before_seal": false,
+    "permitted_label_use": "loss and metrics for this nonbenchmark prompt-unary pilot only; labels may not enter the canonical field, factorized state, capability bank, typed context, or benchmark evaluation"
+  },
+  "frozen_input_authority": {
+    "clean_pilot_receipt_sha256": "171239d11fe57aaac971018d01eb46d4ce25f6113d2233b6aef637775c39d705",
+    "exact_responsibility_manifest_sha256": "2a8c061061aa4e7d9481878232c7ba63323da0d039585ec7d82978e32a3d2e7e",
+    "capability_bank_sha256": "bdd816914433381b6c38b11e26edf43ccaf3fba43563724938836f722c96c735",
+    "factorized_primitive_state_sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9"
+  },
+  "frozen_example_construction": {
+    "eligible_instance": "official instance ID > 0, present with at least 32 pixels after nearest-neighbor resize to the exact 60x80 responsibility grid in at least four authority views",
+    "instance_split": "validation iff uint64(first_16_hex(SHA256('registered_evidence_to_unary_v1|scene0001_00|<instance_id>'))) mod 5 equals 0; all other eligible instances are training",
+    "source_view": "eligible view minimizing SHA256('source|scene0001_00|<instance_id>|<frame_id>') lexicographically",
+    "target_views": "all other eligible authority views; source and target are always distinct",
+    "full_mask_prompt": "source positive is the official instance mask and source negative is its complement on exact-raster supported pixels",
+    "scribble_prompt": "deterministic 16 positive and 32 negative source pixels selected by SHA256 order from the full-mask positive and a 5-pixel exterior ring respectively",
+    "prototype_rule": "L2-normalized exact-source-mass weighted positive and negative capability means; margin is positive cosine minus negative cosine",
+    "training_targets": "only held-out target-view instance masks",
+    "validation": "instance-disjoint and target-view-held-out",
+    "seed": 260806
+  },
+  "optimization": {
+    "loss": "target supported-pixel class-balanced binary cross entropy plus 0.05 primitive residual L2 and 0.02 confidence calibration",
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "maximum_epochs": 80,
+    "checkpoint_selection": "maximum validation instance-macro pixel AP; ties use lower validation BCE then earlier epoch",
+    "no_target_threshold_selection": true
+  },
+  "metrics": {
+    "primary": "held-out validation instance-macro supported-pixel average precision",
+    "secondary": [
+      "IoU at fixed probability 0.5",
+      "oracle-threshold IoU for diagnosis only",
+      "precision and recall at 0.5",
+      "predicted-to-target area ratio",
+      "target pixel BCE"
+    ],
+    "comparators": [
+      "frozen analytic graph-off unary",
+      "direct registered observation with unobserved rows supplied by the same frozen analytic unary"
+    ]
+  },
+  "promotion_rule": "Promote only if validation instance-macro AP and fixed-0.5 IoU both improve, precision does not regress by more than 0.01, area ratio stays in [0.8,1.25], and no validation instance loses more than 0.05 AP. This one-scene pilot cannot establish cross-scene generalization.",
+  "stop_rules": [
+    "If fewer than three eligible validation instances remain after the frozen split, report an underpowered pilot and do not change the split.",
+    "If source-to-held-out-target metrics do not improve, stop this V1 feature/head rather than testing graph completion.",
+    "Do not open NVOS, SPIn9, or LERF benchmark target metrics for this pilot."
+  ],
+  "source_access": {
+    "clean_source_training_instance_labels_opened_at_seal": false,
+    "clean_source_training_instance_labels_planned_after_seal": true,
+    "clean_heldout_target_view_instance_labels_used_only_for_loss_and_metrics": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "benchmark_target_labels_opened": false,
+    "clean_target_view_rgb_opened_for_prompt_head": false,
+    "clean_target_view_labels_enter_model_inputs": false,
+    "target_rgb_used_at_inference": false,
+    "per_scene_tuning": false
+  }
+}

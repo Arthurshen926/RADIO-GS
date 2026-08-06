@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_posthoc_source_only_required_angle_stratification",
+  "scene": "figurines",
+  "status": "posthoc_label_free_development_diagnostic",
+  "scope": {
+    "source_only": true,
+    "query_free": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_frames_opened": false,
+    "gpu_used": false,
+    "rows_with_at_least_one_retained_teacher_view": 82400
+  },
+  "source_authorities": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt",
+      "sha256": "49528e9901a5cef53410e5651740ad96b677b5c492d51c713b4a28a2efabcceb"
+    },
+    "teacher_view_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/source_only/figurines_teacher_top4_siglip.pt",
+      "file_sha256": "0369a01256937d28dc3e31d2e3fe8a793a87da35293922924b896f385b637d86",
+      "content_authority_sha256": "dea108c4c4cc525d512e57df770abd8d8d9836ed51ffd6671f7d96f89779b5bf"
+    },
+    "oracle_matrix_query_free_diagnostic": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/matrix/figurines_query_free_diagnostics.json",
+      "sha256": "1e5fa6b6e89a7c44a85aa00dc0b9e571fabad648eda0e637ce334fe337147855"
+    },
+    "oracle_matrix_result_receipt": {
+      "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_results_20260806.json",
+      "sha256": "99020d7b29f8dbf8c304ee82df6662ca9cd24744dc8cbf5f9ba60ab88e5f64b8"
+    }
+  },
+  "definitions": {
+    "required_angle": "For each accepted row, take the geodesic angle from each of the three normalized base-scale descriptors to the normalized mean retained teacher descriptor, then average the three angles.",
+    "base_reliability": "semantic_confidence stored in the frozen base descriptor, indexed by its immutable global_rows.",
+    "teacher_view_context_resultant": "Norm of the arithmetic mean of normalized retained teacher-view descriptors. This is an explicitly posthoc source-only exploratory statistic, not a preregistered O0-O4 metric.",
+    "reliability_strata": "The 20% and 40% empirical quantiles are retained; duplicate upper quantiles caused by the mass at semantic_confidence=1 are collapsed, with the exact maximum reported separately.",
+    "context_strata": "Five empirical quantile intervals, left-open except for the first interval."
+  },
+  "base_reliability": {
+    "pearson_r": -0.5819862150761471,
+    "spearman_rho": -0.5929802049755275,
+    "per_scale_spearman_rho": [
+      -0.5831228748751451,
+      -0.5878651543466062,
+      -0.5911286393930094
+    ],
+    "tie_aware_collapsed_strata": [
+      {
+        "interval": "[0.336425781,0.438476562]",
+        "n": 16524,
+        "required_angle_mean_radians": 0.626184344291687,
+        "required_angle_median_radians": 0.6141917705535889,
+        "fraction_required_angle_gt_0_15": 1.0
+      },
+      {
+        "interval": "(0.438476562,0.63671875]",
+        "n": 16486,
+        "required_angle_mean_radians": 0.600562334060669,
+        "required_angle_median_radians": 0.5961560010910034,
+        "fraction_required_angle_gt_0_15": 1.0
+      },
+      {
+        "interval": "(0.63671875,1)",
+        "n": 14721,
+        "required_angle_mean_radians": 0.5624485015869141,
+        "required_angle_median_radians": 0.5604668259620667,
+        "fraction_required_angle_gt_0_15": 1.0
+      },
+      {
+        "interval": "=1",
+        "n": 34669,
+        "required_angle_mean_radians": 0.4677729308605194,
+        "required_angle_median_radians": 0.4638207256793976,
+        "fraction_required_angle_gt_0_15": 1.0
+      }
+    ],
+    "monotonicity_judgment": "strong inverse association: all four tie-aware strata decrease monotonically, and all three scale-wise Spearman coefficients are below -0.58"
+  },
+  "teacher_view_context_resultant": {
+    "pearson_r": -0.02414234645627864,
+    "spearman_rho": -0.055455213953137,
+    "per_scale_spearman_rho": [
+      -0.08154035528419605,
+      -0.045085027812957146,
+      -0.037443641140864674
+    ],
+    "quintile_strata": [
+      {
+        "interval": "[0.793602467,0.903107381]",
+        "n": 16481,
+        "required_angle_mean_radians": 0.5607610940933228,
+        "required_angle_median_radians": 0.5588297843933105
+      },
+      {
+        "interval": "(0.903107381,0.926317441]",
+        "n": 16479,
+        "required_angle_mean_radians": 0.54574054479599,
+        "required_angle_median_radians": 0.5519904494285583
+      },
+      {
+        "interval": "(0.926317441,0.943121719]",
+        "n": 16480,
+        "required_angle_mean_radians": 0.5431852340698242,
+        "required_angle_median_radians": 0.5552182197570801
+      },
+      {
+        "interval": "(0.943121719,0.959683537]",
+        "n": 16480,
+        "required_angle_mean_radians": 0.5264485478401184,
+        "required_angle_median_radians": 0.5429317951202393
+      },
+      {
+        "interval": "(0.959683537,1.00000024]",
+        "n": 16480,
+        "required_angle_mean_radians": 0.5389708280563354,
+        "required_angle_median_radians": 0.537677526473999
+      }
+    ],
+    "monotonicity_judgment": "no useful monotonic support: the global association is near zero and the highest quintile reverses the preceding mean-angle trend"
+  },
+  "o0_o4_gain_attribution": {
+    "o1_fraction_of_o4_minus_o0_fixed_miou_gain": 0.9227216721265968,
+    "o1_fraction_of_o4_minus_o0_average_precision_gain": 0.4624227175856674,
+    "o1_fraction_of_o4_minus_o0_oracle_iou_gain": 0.5953344931539236,
+    "interpretation": "O1 already captures about 92.27% of the full O4 fixed-mIoU gain, so the fixed 0.15-radian cap is not the first-order bottleneck for fixed mIoU. The cap remains relevant to ranking/calibration because O1 captures only about 46.24% of the O4 AP gain."
+  },
+  "method_decision": {
+    "supported": "Use the frozen base semantic_confidence, not teacher-view context resultant, as a source-only conditioning signal for angular capacity when targeting AP/ranking and calibration.",
+    "not_supported": "Do not use teacher-view context resultant as the controller, and do not claim that simply enlarging the 0.15-radian cap is the primary route to higher fixed-mIoU.",
+    "priority": "The next implementation should couple reliability-conditioned residual capacity with query-response/listwise sibling-negative calibration; a larger angle budget alone is insufficient."
+  }
+}

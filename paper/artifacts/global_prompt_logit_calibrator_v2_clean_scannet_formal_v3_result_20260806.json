@@ -1,0 +1,101 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.clean_scannet_result_receipt.v2",
+  "schema_version": 2,
+  "status": "formal_v3_clean_gate_passed",
+  "scene_id": "scene0001_00",
+  "method": {
+    "name": "GlobalPromptLogitCalibratorV2",
+    "trainable_parameter_count": 2,
+    "temperature": 0.9141638921209708,
+    "bias": -1.677629649339709,
+    "fixed_interiorization_epsilon": 1e-6,
+    "graph": "off",
+    "connected_selection": "off"
+  },
+  "fit": {
+    "train_pixel_count": 6566400,
+    "initial_bce": 0.2983896181574104,
+    "final_bce": 0.19158873600453447,
+    "stable_argsort_equal": true,
+    "tie_partition_equal": true
+  },
+  "validation_controls": {
+    "pixel_count": 921600,
+    "stable_argsort_equal": true,
+    "tie_partition_equal": true,
+    "v1_reproduction_absolute_tolerance": 1e-6,
+    "v1_reproduction_max_absolute_error": 1.187012749204186e-7,
+    "calibrated_vs_v1_ranking_absolute_tolerance": 1e-10,
+    "average_precision_max_absolute_error": 0.0,
+    "auroc_max_absolute_error": 0.0,
+    "oracle_iou_max_absolute_error": 0.0
+  },
+  "metrics": {
+    "all": {
+      "average_precision": 0.5913184150054258,
+      "auroc": 0.9287367507326172,
+      "oracle_iou": 0.47414669242416635,
+      "iou_at_0_5": 0.3789313502076004,
+      "precision_at_0_5": 0.7068003460437821,
+      "recall_at_0_5": 0.5061584552936462,
+      "area_ratio": 0.8349229699907705,
+      "bce": 0.1116145164705813
+    },
+    "full_mask": {
+      "average_precision": 0.6309797416437624,
+      "auroc": 0.931998355695891,
+      "oracle_iou": 0.5424660874266438,
+      "iou_at_0_5": 0.4813483452164449,
+      "precision_at_0_5": 0.6241430679489312,
+      "recall_at_0_5": 0.6223802332294659,
+      "area_ratio": 1.020629868222227,
+      "bce": 0.08431793842464685
+    },
+    "scribble": {
+      "average_precision": 0.5516570883670889,
+      "auroc": 0.9254751457693433,
+      "oracle_iou": 0.40582729742168877,
+      "iou_at_0_5": 0.2765143551987558,
+      "precision_at_0_5": 0.7894576241386331,
+      "recall_at_0_5": 0.38993667735782656,
+      "area_ratio": 0.6492160717593142,
+      "bce": 0.13891109451651573
+    }
+  },
+  "promotion_gate": {
+    "passed": true,
+    "decision": "eligible_for_cross_scene_confirmation",
+    "macro_area_ratio_in_0_8_to_1_25": true,
+    "macro_iou_at_0_5_not_below_analytic": true,
+    "macro_precision_at_0_5_not_below_analytic": true,
+    "worst_prompt_average_precision_delta_vs_analytic": 0.006227095179183961
+  },
+  "conclusion": "A strictly monotone global two-parameter calibration repairs the V1 macro probability scale and fixed-threshold precision/IoU without changing ranking. Its remaining weakness is prompt-wise calibration heterogeneity: scribble macro recall falls to 0.3899 and individual small/weak scribble prompts can remain severely under-selected. Cross-scene clean confirmation is required before benchmark evaluation.",
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v3/result.json",
+      "sha256": "cca4067acc4d7bf5c2a266bb5992f8ad04a41b0f8bdf02ea9affaf5f7e95f8e7"
+    },
+    "calibrator_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v3/calibrator.pt",
+      "sha256": "73ca03dfb567d180bb072267fd24ca8537d7bca60bf7e9b8947f3bf965e3f9a3"
+    },
+    "fit_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v3/fit_receipt.json",
+      "sha256": "08cfe145bf123e4b8cc7738996a76961e6a8f7891d94e0d6667b2d656a95f98d"
+    },
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_clean_scannet_execution_authority_v4_20260806.json",
+      "sha256": "5e23b8dae646ba6593cd391b82355eb79f35085942ee7a58e70806d2000b9d31"
+    },
+    "implementation_sha256": "9776597dc0c1cffe47b3741d4fe071803f002863f04059d19bd37051ee883426",
+    "calibrator_module_sha256": "9c400b1107a0a87e649eaf3103e6603c315f5f4b68514d0f0f3e34a3bff74067"
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false
+  }
+}

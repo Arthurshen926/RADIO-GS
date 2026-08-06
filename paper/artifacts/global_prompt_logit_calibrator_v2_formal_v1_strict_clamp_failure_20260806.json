@@ -1,0 +1,41 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.formal_failure.v2",
+  "schema_version": 2,
+  "status": "failed_closed_before_optimizer_and_before_any_result_or_checkpoint_output",
+  "scene_id": "scene0001_00",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_clean_scannet_execution_authority_v2_20260806.json",
+    "sha256": "dfbc16d6bd04285b2c123b9d19451c9d43ca7b1b65efdec6abdaeeb590339f88"
+  },
+  "failure": {
+    "stage": "train V1 probability strict-domain audit before calibrator optimizer construction",
+    "supported_train_pixel_count": 6566400,
+    "at_or_below_1e_minus_6": 633028,
+    "at_or_above_1_minus_1e_minus_6": 23723,
+    "exception": "supported V1 probabilities leave the strict monotone clamp domain",
+    "scientific_reason": "Hard clamping would merge distinct frozen V1 scores and invalidate the claimed strict ranking invariant."
+  },
+  "outputs": {
+    "calibrator_checkpoint_created": false,
+    "fit_receipt_created": false,
+    "result_created": false,
+    "eligible_for_selection": false
+  },
+  "logs": {
+    "stdout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v1/logs/stdout.log",
+      "sha256": "d9836a23bc77c48a781a6e0835d5559335854d72926280220771f5c562a222a4"
+    },
+    "gpu_telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v1/logs/gpu0.telemetry.csv",
+      "sha256": "d93c3b098be8d3c696d73691516954a47f414abba3067a4296dc47362deb17f4",
+      "peak_temperature_c": 40,
+      "peak_power_w": 22.60
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v1/logs/gpu0.owner_audit.csv",
+      "sha256": "cd8e324931f6baa08e226dd4c6efd0fa85996cb7c58ab15dcedb47599d08e57c"
+    }
+  },
+  "next_action": "Seal a pre-fit formula correction replacing non-strict hard clamp with a fixed strictly increasing affine interiorization; retain exactly two trainable global parameters and all original performance gates."
+}

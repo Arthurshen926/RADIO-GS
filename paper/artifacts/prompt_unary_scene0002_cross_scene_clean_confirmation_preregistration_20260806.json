@@ -1,0 +1,158 @@
+{
+  "schema": "radio_gs.prompt_unary.cross_scene_clean_confirmation_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_before_reading_or_extracting_scene0002_instance_labels",
+  "scientific_question": "Do the frozen scene0001 prompt-unary ranking and calibration candidates transfer without refitting to the lexicographically next fully materialized clean source scene?",
+  "scene_selection": {
+    "scene_id": "scene0002_00",
+    "role": "nonbenchmark_source_train_cross_scene_confirmation",
+    "rule": "lexicographically next complete source-only scene after the development scene scene0001_00",
+    "scene0001_reuse_for_tuning": false,
+    "cohort_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+      "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+    },
+    "clean_inventory": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+      "sha256": "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539"
+    },
+    "benchmark_exclusion_manifest": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+      "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+    }
+  },
+  "label_member_authority": {
+    "multipart_tar_part": "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "multipart_tar_part_size_bytes": 161061273600,
+    "member": "scans/scene0002_00/scene0002_00_2d-instance-filt.zip",
+    "offset_data_bytes": 17421558784,
+    "size_bytes": 69792829,
+    "member_bytes_or_payload_opened_at_seal": false,
+    "extraction_contract": "copy exactly size_bytes beginning at offset_data_bytes; bind the extracted zip by SHA-256 before any zip member is opened"
+  },
+  "frozen_scene_inputs": {
+    "responsibility_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/exact_marginal_responsibility_authority.json",
+      "sha256": "6765db28f57fc32f0cb301b49fcf0699b8e13f2db1558bf18bf7d64189a08927"
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/factorized_primitive_state_v2.pt",
+      "sha256": "7036ae2e0ab581c684f9c43c76923836659b666d30bdddcc7790f139d77fdfbe"
+    },
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "3f33cad54edd3ffc4ed4cb66cbdf3f2d5e42f5f823f417bcf1d21fa9c4d69cde"
+    },
+    "factorized_raw_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/factorized_raw_radio.pt",
+      "sha256": "880113d03832096817a7bcb3a8d42b21e8fd418e3e0cca902b10d6ad5d8a56bf"
+    },
+    "matched_raw_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/raw_radio_matched_exact_marginal.pt",
+      "sha256": "1c97767025c35cf1af1dcdd1bebc30acc7a521d484c5daf77eb9786963d7b01a"
+    },
+    "matched_dino_v3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/dino_v3_matched_exact_marginal.pt",
+      "sha256": "af0583fa83aa11f2db9518676dcc391b284a3abde85791ded489a422fa2d0014"
+    },
+    "matched_sam3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/sam3_matched_exact_marginal.pt",
+      "sha256": "2079278ef8cb9377841761e5676a2fc1377c616e48a92a53bb8e8e4f2c4097d9"
+    },
+    "capability_cohort": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/factorized_capability_cohort.json",
+      "sha256": "42bb057a1e96a1e0a01be9daa92a257a09d9cd06c0aa470075d4ed10e636771d"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "capability_materialization": {
+    "existing_bank_found": false,
+    "builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_capability_views.py",
+      "sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34"
+    },
+    "configuration": {
+      "field_checkpoint_schema": "factorized-v2",
+      "mpr_cache": "factorized_raw_radio.pt",
+      "batch_size": 4096,
+      "official_adaptors": ["dino_v3_7b", "sam3"],
+      "device": "physical GPU1"
+    },
+    "new_training_or_fitting": false,
+    "benchmark_or_query_access": false,
+    "planned_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_unary_scene0002_clean_confirmation_v1/source_only/canonical_capability_bank.pt"
+  },
+  "frozen_candidates": {
+    "analytic": "unchanged graph-off analytic unary from RegisteredEvidenceFeatures",
+    "V1": {
+      "name": "RegisteredEvidenceToUnaryV1",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.pth",
+      "sha256": "30f749485f0232568f66cc00694cbaf5a6fed922ecb105a1f1d60936a548e149"
+    },
+    "V2": {
+      "name": "GlobalPromptLogitCalibratorV2",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v3/calibrator.pt",
+      "sha256": "73ca03dfb567d180bb072267fd24ca8537d7bca60bf7e9b8947f3bf965e3f9a3",
+      "source_known_condition": "global"
+    },
+    "V3": {
+      "name": "PromptModeLogitCalibratorV3",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_mode_logit_calibrator_v3_scene0001_pilot/formal_v1/calibrator.pt",
+      "sha256": "d621758426d95c6d7cf68ebdf3594aaa6c78c60d8a8c492cbe0590cd301f1bee",
+      "source_known_condition": "full_mask or scribble",
+      "original_whole_gate_passed": false,
+      "benchmark_eligibility_regardless_of_confirmation": false
+    },
+    "V4": {
+      "name": "ObservationConditionedPromptCalibratorV4",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/observation_conditioned_prompt_calibrator_v4_scene0001_pilot/formal_v1/calibrator.pt",
+      "sha256": "9736a94df398ea433bb20beac3beb1bf3a7e77ccab23b17e5deabb318a4758f0",
+      "source_known_condition": "full_mask or scribble",
+      "original_whole_gate_passed": false,
+      "benchmark_eligibility_regardless_of_confirmation": false
+    }
+  },
+  "frozen_example_and_evaluation_contract": {
+    "eligible_instance": "official instance ID > 0 with at least 32 pixels after nearest-neighbor resize to the exact responsibility 60x80 grid in at least four authority views",
+    "evaluation_instances": "all eligible scene0002_00 instances; no scene0002 labels enter fit, selection, early stopping, threshold choice, or candidate choice",
+    "source_view": "eligible view minimizing SHA256('source|scene0002_00|<instance_id>|<frame_id>') lexicographically",
+    "target_views": "all other eligible authority views; source and target are distinct",
+    "prompt_modes": ["full_mask", "scribble"],
+    "prompt_construction": "identical to frozen V1 except the sealed scene namespace is scene0002_00",
+    "threshold": 0.5,
+    "threshold_sweep": false,
+    "refit": false,
+    "reported_partitions": ["all", "full_mask", "scribble"],
+    "reported_metrics": ["average_precision", "AUROC", "oracle_IoU", "IoU_at_0.5", "precision_at_0.5", "recall_at_0.5", "predicted_to_target_area_ratio", "BCE"],
+    "ranking_control": "V2/V3/V4 must preserve V1 stable ordering and tie partitions within each applicable source-known mode; AP, AUROC, and oracle IoU are diagnostic invariants"
+  },
+  "candidate_qualification": {
+    "V1": "ranking transfer is confirmed only if macro AP and oracle IoU both exceed analytic and worst prompt AP delta versus analytic is at least -0.05; V1 remains unqualified for benchmark if macro area is outside [0.8,1.25] or fixed IoU is below analytic",
+    "V2": "only candidate with an already passed whole-scene development gate; cross-scene confirmation additionally requires V1 ranking invariants, macro area in [0.8,1.25], fixed IoU and precision not below analytic, and worst prompt AP delta versus analytic at least -0.05",
+    "V3_and_V4": "diagnostic only because their formal whole-scene gates already failed; no scene0002 result can restore benchmark eligibility",
+    "no_candidate_selection_or_parameter_choice_from_scene0002": true
+  },
+  "thermal_contract_if_capability_build_is_required": {
+    "physical_gpu": 1,
+    "poll_interval_seconds": 30,
+    "maximum_temperature_c": 88,
+    "consecutive_over_temperature_polls_before_stop": 6,
+    "guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    }
+  },
+  "source_access_at_seal": {
+    "scene0002_instance_member_bytes_opened": false,
+    "scene0002_instance_zip_opened": false,
+    "scene0002_instance_labels_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false
+  }
+}

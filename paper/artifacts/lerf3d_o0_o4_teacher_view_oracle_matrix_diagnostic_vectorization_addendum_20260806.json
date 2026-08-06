@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_o0_o4_teacher_view_oracle_matrix_diagnostic_vectorization_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_after_interrupted_o0_diagnostic_and_before_any_o1_o4_target_metric",
+  "parent_metric_gate_receipt": {
+    "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_metric_gate_receipt_20260806.json",
+    "sha256": "4e744409d3aa73d541cf60cb8ddbfcc76cae2446216680f155de117d2658d51b"
+  },
+  "interrupted_attempt": {
+    "scope": "O0 baseline diagnostic only",
+    "candidate_oracle": false,
+    "result_file_created": false,
+    "o1_o4_metric_opened": false,
+    "reason": "scalar Python iteration over unique pixel ranks was computationally inefficient"
+  },
+  "implementation_correction": {
+    "change": "replace scalar equal-score midrank traversal by an exactly equivalent vectorized NumPy starts/stops/repeat construction",
+    "metric_definition_changed": false,
+    "scores_changed": false,
+    "frozen_evaluator_changed": false,
+    "threshold_or_oracle_changed": false,
+    "implementation": {
+      "path": "radio_gs/scripts/eval_lerf_teacher_view_oracle_diagnostic.py",
+      "sha256": "0db1eba59576311516b2f6e4731ffba8b767f295e1797be9d99ef251cf6cc166"
+    },
+    "tests": {
+      "path": "tests/test_eval_lerf_teacher_view_oracle_diagnostic.py",
+      "sha256": "2a205ba865bbe0b1ece69c4e93f9e8c299742d191bad60d091d11902bc2f47be",
+      "result": "3 passed"
+    }
+  }
+}

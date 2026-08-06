@@ -1,0 +1,108 @@
+{
+  "artifact": "clean_scene_source_query_response_hard_negative_preregistration",
+  "registered_at": "2026-08-06T13:26:49+08:00",
+  "schema_version": 1,
+  "status": "registered_before_implementation_and_execution",
+  "purpose": "Measure the frozen AcceptedV2 descriptor's source-only generic-query response/ranking gap and seal reusable scene-global spatially-distinct semantic confusers without opening any benchmark data.",
+  "scene_policy": {
+    "required": [
+      "scene0001_00"
+    ],
+    "optional_only_if_preexisting_teacher_is_complete": [
+      "scene0002_00"
+    ],
+    "scene0002_preflight_at_registration": "accepted_and_official_teacher_absent; do not build them for this experiment",
+    "cross_scene_similarity_matrix": false
+  },
+  "immutable_scene0001_inputs": {
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+      "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8"
+    },
+    "official_multiview_siglip2_teacher": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+      "sha256": "ce2edd5034c6769a14a1afa0efe567cb648fc68e9cd72ca6f94c13db13d5e92f"
+    }
+  },
+  "target_blind_text_authorities": {
+    "canonical_vocabulary": {
+      "path": "paper/artifacts/target_blind_imagenet1k_primary_text_bank_v1.json",
+      "sha256": "2644c8454c12b0d6ca16fc453ee63e5289112172b82b61136e003ddf65a090ab",
+      "manifest_path": "paper/artifacts/target_blind_imagenet1k_primary_text_bank_v1.manifest.json",
+      "manifest_sha256": "54af55648393b03327851d802c5180411d970ceea4e9592c48844433f1f54d7a"
+    },
+    "mining_fit_embeddings": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+      "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+      "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.manifest.json",
+      "manifest_sha256": "5d6c7fa167b63a4052f9be57389a2f5f0e469c75391916ef0b7fe562cce7e3f0",
+      "queries": 806
+    },
+    "diagnostic_dev_embeddings": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+      "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+      "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.manifest.json",
+      "manifest_sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3",
+      "queries": 101
+    },
+    "fit_dev_disjoint": true,
+    "benchmark_vocabulary_opened": false,
+    "uses_benchmark_vocabulary_for_construction": false
+  },
+  "teacher_response_contract": {
+    "per_view_descriptor": "official finite unit SigLIP2 descriptor",
+    "region_consensus_descriptor": "l2_normalize(arithmetic_mean(per_view_descriptors))",
+    "query_response": "temperature * (logsumexp(per_view_cosine / temperature) - log(view_count))",
+    "temperature": 0.05,
+    "single_view_fallback": "the sole official teacher descriptor",
+    "query_coupling": "independent_no_softmax"
+  },
+  "diagnostic_contract": {
+    "student": "immutable AcceptedV2 e0",
+    "queries": "held-out target-blind ImageNet1K-primary dev split",
+    "row_metrics": [
+      "response_profile_cosine",
+      "centered_response_profile_cosine",
+      "response_mae",
+      "response_smooth_l1"
+    ],
+    "query_rank_metrics": [
+      "spearman_over_all_scene_regions",
+      "top1_agreement",
+      "top5_overlap",
+      "top10_overlap",
+      "top_decile_overlap",
+      "teacher_top1_student_reciprocal_rank"
+    ],
+    "tie_break": "ascending canonical region row"
+  },
+  "hard_negative_contract": {
+    "queries": "target-blind ImageNet1K-primary fit split",
+    "scope": "one scene at a time",
+    "maximum_rows_per_matrix_block": 128,
+    "spatially_distinct": "zero shared active primitive tokens and distinct region row",
+    "teacher_similarity_source": {
+      "minimum_cosine_inclusive": 0.8,
+      "maximum_cosine_inclusive": 0.98,
+      "top_per_anchor": 4
+    },
+    "response_nearest_source": {
+      "profile": "centered l2-normalized multiview teacher fit-query response",
+      "top_per_anchor": 4
+    },
+    "union": "deduplicate directed anchor-negative pairs and retain a two-bit source code",
+    "expected_maximum_negatives_per_anchor": 8,
+    "dense_cross_scene_matrix": false,
+    "scene_specific_parameter_tuning": false
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "text_queries_opened": false
+  },
+  "stopping_rule": "Produce one descriptive diagnostic and one reusable negative-index authority; do not train a model or open a benchmark in this experiment."
+}

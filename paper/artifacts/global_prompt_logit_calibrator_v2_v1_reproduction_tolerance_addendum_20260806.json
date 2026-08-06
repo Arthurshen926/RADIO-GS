@@ -1,0 +1,38 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.v1_reproduction_tolerance_addendum.v2",
+  "schema_version": 2,
+  "status": "sealed_after_formal_v2_control_failure_and_before_formal_v3_run",
+  "scene_id": "scene0001_00",
+  "triggering_failure": {
+    "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_formal_v2_reproduction_tolerance_failure_20260806.json",
+    "sha256": "076ffb10c2a4b7bc5eb7ed672ec18da9c057b288841945e1e64564949e6795ac",
+    "eligible_for_selection": false
+  },
+  "corrected_control": {
+    "scope": "fresh-run reproduction of frozen V1 candidate metrics from the unchanged V1 checkpoint",
+    "metrics": [
+      "average_precision",
+      "auroc",
+      "iou_at_0_5",
+      "oracle_iou",
+      "precision_at_0_5",
+      "recall_at_0_5",
+      "area_ratio",
+      "bce"
+    ],
+    "absolute_tolerance": 1e-6,
+    "must_pass_every_validation_prompt": true
+  },
+  "general_numeric_basis": "The frozen V1 head and exact sparse renderer execute float32 GEMMs and reductions. IEEE-754 float32 unit roundoff is approximately 1.19e-7; independent invocations can legitimately differ by several ulps because kernel reduction order and batch execution are not bitwise contractual. An absolute 1e-6 control is a conventional small multiple of float32 roundoff and is registered independently of any downstream candidate metric.",
+  "explicit_separation": {
+    "calibrated_vs_v1_average_precision_absolute_tolerance": 1e-10,
+    "calibrated_vs_v1_auroc_absolute_tolerance": 1e-10,
+    "calibrated_vs_v1_oracle_iou_absolute_tolerance": 1e-10,
+    "fit_loss_changed": false,
+    "fit_instances_changed": false,
+    "optimizer_changed": false,
+    "calibrator_parameterization_changed": false,
+    "promotion_gate_changed": false,
+    "benchmark_targets_opened": false
+  }
+}

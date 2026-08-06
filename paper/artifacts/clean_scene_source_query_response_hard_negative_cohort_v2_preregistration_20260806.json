@@ -1,0 +1,109 @@
+{
+  "artifact": "clean_scene_source_query_response_hard_negative_cohort_v2_preregistration",
+  "registered_at": "2026-08-06T15:01:38+08:00",
+  "schema_version": 2,
+  "status": "sealed_before_cohort_v2_miner_implementation_or_execution",
+  "purpose": "Generalize the frozen source-only response diagnostic and hard-negative mining algorithm to every declared scene in the immutable clean 24-train/8-validation cohort without changing the V1 scene0001 authority, opening benchmark data, or constructing a cross-scene similarity matrix.",
+  "immutable_cohort": {
+    "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "authority_sha256": "397a436ecaef1fc270aa9c38a0f0e029f92c91841e43c26efdc257353bc6ab2e",
+    "schema": "radio_gs.surface_region_full_scalar_residual_clean_cohort_authority.v2",
+    "schema_version": 2,
+    "source_train_scenes": 24,
+    "source_validation_scenes": 8,
+    "scene_and_physical_space_disjoint": true
+  },
+  "immutable_v1_baseline": {
+    "preregistration": {
+      "path": "paper/artifacts/clean_scene_source_query_response_hard_negative_preregistration_20260806.json",
+      "sha256": "f1292006b1b402c74abaf1cc5bb091a8e23b9f7120c6971b6b4bc73809a96deb"
+    },
+    "miner": {
+      "path": "radio_gs/scripts/mine_source_query_response_hard_negatives.py",
+      "sha256": "06ba0089063a02eba29b5dc25fa930df686debc6aa0555427e725245c758840b",
+      "must_remain_byte_identical": true
+    },
+    "scene0001_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/scene0001_00/hard_negative_index_authority_bound_v1.pt",
+      "sha256": "243df78a8aaa103d61fd8ed1361af4031e90484cf028ce4da0ac0d612cdec36d",
+      "content_authority_sha256": "12b9e5e0f2663f3db1d162971f007fba6fd88f1f9d6db03b5c818d301991572e",
+      "must_remain_byte_identical": true
+    }
+  },
+  "frozen_algorithm": {
+    "path": "radio_gs/evaluation/source_query_response_hard_negatives.py",
+    "sha256": "45fc9adae25dc90decf8c211de2cc6bac933f8a1576d6b8c84eee6c31515c184",
+    "authority_schema": "radio_gs.source_query_response_hard_negative_authority.v1",
+    "teacher_response_temperature": 0.05,
+    "teacher_cosine_minimum_inclusive": 0.8,
+    "teacher_cosine_maximum_inclusive": 0.98,
+    "per_source_k": 4,
+    "matrix_block_rows": 128,
+    "spatially_distinct": "zero_shared_active_primitive_tokens_and_distinct_region_row",
+    "cross_scene_similarity_matrix": false,
+    "per_scene_hyperparameters": false
+  },
+  "target_blind_text_authorities": {
+    "canonical_vocabulary": {
+      "path": "paper/artifacts/target_blind_imagenet1k_primary_text_bank_v1.json",
+      "sha256": "2644c8454c12b0d6ca16fc453ee63e5289112172b82b61136e003ddf65a090ab",
+      "manifest_path": "paper/artifacts/target_blind_imagenet1k_primary_text_bank_v1.manifest.json",
+      "manifest_sha256": "54af55648393b03327851d802c5180411d970ceea4e9592c48844433f1f54d7a"
+    },
+    "mining_fit_embeddings": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+      "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+      "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.manifest.json",
+      "manifest_sha256": "5d6c7fa167b63a4052f9be57389a2f5f0e469c75391916ef0b7fe562cce7e3f0",
+      "queries": 806
+    },
+    "diagnostic_dev_embeddings": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+      "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+      "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.manifest.json",
+      "manifest_sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3",
+      "queries": 101
+    },
+    "fit_dev_disjoint": true,
+    "benchmark_vocabulary_opened": false,
+    "uses_benchmark_vocabulary_for_construction": false
+  },
+  "per_scene_execution_contract": {
+    "membership": "scene_id must occur exactly once in the immutable cohort source_train or source_validation list",
+    "split": "derived from the immutable cohort; never caller-selected",
+    "accepted_v2": "strict validated source-only AcceptedV2 authority whose scene_id equals the declared scene",
+    "official_teacher": "strict validated source-only official multiview SigLIP2 authority caller-bound to the exact AcceptedV2 file and aligned canonical rows",
+    "mining_scope": "one declared scene at a time",
+    "output": "one distinct no-clobber authority and report per scene",
+    "report_must_include": [
+      "scene_id",
+      "cohort_split",
+      "cohort_authority",
+      "exact input authorities",
+      "generic text-bank audit",
+      "source-only access audit"
+    ],
+    "hardcoded_scene_status_fields": false,
+    "missing_or_cohort_external_scene": "reject before loading AcceptedV2, teacher, or text embeddings"
+  },
+  "authorization": {
+    "cohort_scene_source_only_mining_authorized": true,
+    "accepted_v2_teacher_or_other_prerequisite_asset_production_authorized": false,
+    "model_training_authorized": false,
+    "benchmark_execution_authorized": false,
+    "target_label_or_mask_access_authorized": false,
+    "gpu_execution_authorized": false
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "text_queries_opened": false
+  },
+  "stopping_rule": "Implement and test the V2 entrypoint only; do not materialize a scene authority, train a model, open a benchmark, or use a GPU in this task."
+}

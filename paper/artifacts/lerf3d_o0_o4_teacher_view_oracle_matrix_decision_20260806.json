@@ -1,0 +1,92 @@
+{
+  "artifact": "lerf3d_o0_o4_teacher_view_oracle_matrix_decision",
+  "schema_version": 1,
+  "registered_at": "2026-08-06T14:34:27+08:00",
+  "status": "oracle_matrix_decided_before_response_listwise_v2_implementation",
+  "parent_authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_preregistration_20260806.json",
+      "sha256": "8e55c232282c533ba9a0b6179394cdd5b93a0e0832ebcc46e17f1c1c527063d9"
+    },
+    "execution_addendum": {
+      "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_execution_addendum_20260806.json",
+      "sha256": "4e76450e3e6b359685f0ba755a2c20dc4a6e01ea8035d223a60346713a746171"
+    },
+    "metric_gate_receipt": {
+      "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_metric_gate_receipt_20260806.json",
+      "sha256": "4e744409d3aa73d541cf60cb8ddbfcc76cae2446216680f155de117d2658d51b"
+    }
+  },
+  "sealed_diagnostic_results": {
+    "O0": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o0_diagnostic_retry1/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677",
+      "fixed_miou": 0.4753887355327606,
+      "average_precision": 0.7424453958489884,
+      "oracle_threshold_iou": 0.6481929084043052
+    },
+    "O1": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o1_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "8372e7aa5567d5ec72a1cb40cf5079876d0773d24db0096b5a83ce371cd33bd2",
+      "fixed_miou": 0.5215655565261841,
+      "average_precision": 0.7690397744816834,
+      "oracle_threshold_iou": 0.6639607112682723
+    },
+    "O2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o2_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "68ad643be68d738b0e1a4d266c36cf6b3b755245e7cd68274d129939871c223b",
+      "fixed_miou": 0.5220417976379395,
+      "average_precision": 0.7953353311048817,
+      "oracle_threshold_iou": 0.6723518043447729
+    },
+    "O3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o3_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "37270de1c5246d99fa3ab09dd4cf8043859c8498215e80ded3ba3f8689acfa29",
+      "fixed_miou": 0.5238398909568787,
+      "average_precision": 0.7985457651974278,
+      "oracle_threshold_iou": 0.6741689275499504
+    },
+    "O4": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o4_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "b06d6cd6a3b88df0c2cd6f92caf9b68c277f81942625735ccdf38898fda6cc9f",
+      "fixed_miou": 0.5254328846931458,
+      "average_precision": 0.7999563649716682,
+      "oracle_threshold_iou": 0.6746785279094568
+    }
+  },
+  "causal_readout": {
+    "O1_minus_O0": {
+      "fixed_miou": 0.0461768209934235,
+      "average_precision": 0.026594378632695,
+      "oracle_threshold_iou": 0.0157678028639671,
+      "interpretation": "the frozen 0.15-radian single-center hypothesis has material LERF query-level headroom"
+    },
+    "O3_minus_O2": {
+      "fixed_miou": 0.0017980933189392,
+      "average_precision": 0.0032104340925461,
+      "oracle_threshold_iou": 0.0018171232051775,
+      "per_query_ap_regressions": 18,
+      "per_query_oracle_iou_regressions": 20,
+      "query_count": 56,
+      "worst_ap_delta": -0.018770089742537133,
+      "worst_oracle_iou_delta": -0.030612244897959218,
+      "interpretation": "K=2 adds only a marginal macro gain and introduces material query-level fallback risk"
+    }
+  },
+  "decision": {
+    "retain_model_family": "SurfaceRegionAcceptedV2TypedContextResidualV1",
+    "retain_max_angle_radians": 0.15,
+    "retain_zero_initialized_bounded_single_center_output": true,
+    "build_k2_distributional_head": false,
+    "next_intervention": "source-only scene-global generic-query response/listwise V2 objective",
+    "reason": "available capacity is sufficient, while the current query-free row-local proxy does not consistently train the available query-ranking headroom"
+  },
+  "source_access": {
+    "oracle_metrics_already_authorized_and_opened": true,
+    "new_benchmark_images_opened_for_this_decision": false,
+    "new_benchmark_labels_opened_for_this_decision": false,
+    "new_benchmark_queries_opened_for_this_decision": false,
+    "threshold_or_parameter_sweep_run": false,
+    "second_scene_opened": false
+  }
+}

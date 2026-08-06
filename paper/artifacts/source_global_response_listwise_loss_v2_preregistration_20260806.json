@@ -1,0 +1,80 @@
+{
+  "artifact": "source_global_response_listwise_loss_v2_preregistration",
+  "registered_at": "2026-08-06T13:44:07+08:00",
+  "schema_version": 1,
+  "status": "registered_before_loss_implementation_or_training_integration",
+  "hypothesis": "The minimal generic repair is to supervise the scene-global generic-query response field produced by the bounded AcceptedV2 typed-context residual; neither AcceptedV2 materialization nor the canonical capability carrier should be changed.",
+  "audited_integration_point": {
+    "file": "radio_gs/scripts/train_surface_region_typed_context_residual.py",
+    "sha256": "02e9ba0124134b8d4bfe0ee6d76ae73fdde32fc8e7a54dc9efc8db5b0845f680",
+    "functions": [
+      "train_one_epoch",
+      "typed_context_objective"
+    ],
+    "placement": "after a complete scene's bounded typed-context semantic descriptors and official teacher observations are available, before the existing objective is backpropagated",
+    "required_future_batch_change": "evaluate one complete sealed scene in canonical region-row order; chunk only query and negative-pair axes",
+    "not_integration_points": [
+      "materialize_accepted_v2_canonical_region_authority.py",
+      "build_canonical_capability_views.py",
+      "any frozen evaluator or renderer"
+    ]
+  },
+  "immutable_authorities": {
+    "hard_negative_index": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/scene0001_00/hard_negative_index_authority_bound_v1.pt",
+      "sha256": "243df78a8aaa103d61fd8ed1361af4031e90484cf028ce4da0ac0d612cdec36d",
+      "content_authority_sha256": "12b9e5e0f2663f3db1d162971f007fba6fd88f1f9d6db03b5c818d301991572e"
+    },
+    "accepted_v2": {
+      "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8"
+    },
+    "official_multiview_siglip2_teacher": {
+      "sha256": "ce2edd5034c6769a14a1afa0efe567cb648fc68e9cd72ca6f94c13db13d5e92f"
+    },
+    "generic_fit_text_bank": {
+      "split": "fit",
+      "queries": 806,
+      "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+      "benchmark_vocabulary_opened": false,
+      "uses_benchmark_vocabulary_for_construction": false
+    }
+  },
+  "loss_contract": {
+    "scope": "one complete scene in canonical region-row order",
+    "teacher_response": "temperature-0.05 log-mean-exp of official per-view descriptor cosine responses",
+    "components": {
+      "centered_response_profile": "mean over nonconstant generic queries of one minus cosine between student and teacher scene-response vectors after centering over regions",
+      "pairwise_ordering": "SmoothL1 of student and teacher normalized response gaps on sealed hard-negative pairs; query units with absolute teacher gap below 0.05 of that query's scene span are excluded",
+      "hard_negative_triplet": "descriptor triplet against official teacher consensus descriptors with margin min(0.1, 0.5*(1-teacher_pair_cosine))"
+    },
+    "component_combination": "unweighted arithmetic mean of the three finite component means",
+    "only_recommended_v2_auxiliary_weight": 0.25,
+    "zero_weight_contract": "return the caller's existing base loss object directly without evaluating or adding an auxiliary zero",
+    "zero_init_contract": "retain the existing zero-final-projection typed-context residual so epoch-zero predictions remain bitwise immutable AcceptedV2 e0",
+    "pair_chunk_rows": 4096,
+    "query_chunk_rows": 128,
+    "new_learnable_parameters": false,
+    "per_scene_hyperparameters": false
+  },
+  "fail_closed": {
+    "hard_negative_file_sha256_required": true,
+    "hard_negative_content_authority_sha256_required": true,
+    "scene_id_and_complete_canonical_row_identity_required": true,
+    "accepted_v2_teacher_and_fit_text_bank_sha256_bindings_required": true,
+    "generic_target_blind_text_bank_opened_must_be_true": true,
+    "benchmark_text_queries_opened_must_be_false": true,
+    "partial_scene_or_batch_local_use": "reject"
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_text_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "text_queries_opened": false,
+    "text_queries_opened_field_semantics": "legacy field meaning benchmark text queries only"
+  },
+  "stopping_rule": "Implement and unit-test only. Do not modify the frozen trainer, launch training, or open a benchmark in this task."
+}

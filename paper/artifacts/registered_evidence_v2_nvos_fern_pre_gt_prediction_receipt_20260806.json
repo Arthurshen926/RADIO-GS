@@ -1,0 +1,75 @@
+{
+  "schema": "radio_gs.registered_evidence_external_pre_gt_execution_receipt.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "experiment": "registered-evidence-v2-nvos-fern-signed-scribble-sentinel",
+  "status": "complete_prediction_barrier_passed_waiting_for_one_shot_score_authorization",
+  "fresh_run_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_materializer_fresh_run_addendum_20260806.json",
+    "sha256": "2dad6994df0ec395887975807775ed4ed879bd6b018cae447ebe656245b3db38"
+  },
+  "prediction_receipt": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/pre_gt_prediction/pre_metric_prediction_receipt.json",
+    "sha256": "ba3a20c0cbf0daa904b3fac33a43a84873423f42c8ae379a8ed74f943f70bb2f",
+    "content_sha256": "8bb1f6d2ab5bc1d4100cf6cf305eac1a9977786bf3b5ab717504236d59c1e827"
+  },
+  "prediction_barrier": {
+    "implementation": "radio_gs.scripts.score_registered_evidence_external_prediction.verify_prediction_barrier",
+    "passed": true,
+    "benchmark": "NVOS",
+    "scene_id": "fern",
+    "source_frame_id": "IMG_4038",
+    "target_frame_ids": [
+      "IMG_4027"
+    ],
+    "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "ground_truth_file_opened": false,
+    "metric_computed": false
+  },
+  "sealed_predictions": {
+    "primitive_unary": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/pre_gt_prediction/primitive_unary.pt",
+      "sha256": "d032d75a866d3126a80aa395e3bf0a4c2f4217e6531b677b434cc019c878e81b"
+    },
+    "IMG_4027": {
+      "shape": [
+        47,
+        62
+      ],
+      "supported_pixels": 2914,
+      "raw_v1_probability_sha256": "5392eda65a33f264187ddb56ab826391d68a957f1e84283333bde7b102e006cf",
+      "supported_sha256": "9e657d0df6b7140b98f65b38e88d494ba74fe62f76695a2adb7cdda5aec8a57e",
+      "calibrated_v2_probability_sha256": "03515336ea4e7ef1c83e9de7582e91b9e4cd0436d082bc6540824b76ffc5cb00"
+    }
+  },
+  "method_contract": {
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_parameters": false,
+    "threshold_scan": false,
+    "fixed_threshold": 0.5,
+    "unsupported_policy": "exact_zero"
+  },
+  "gpu_guard": {
+    "physical_gpu": 1,
+    "maximum_temperature_c": 42,
+    "maximum_power_w": 120.71,
+    "thermal_stop_triggered": false,
+    "cuda_release_verified": true,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/logs/materialize_v2.gpu1.telemetry.csv",
+      "sha256": "3131821d5a7616a065589edc46d744ca05228f37978671190b767859c940ec78"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/logs/materialize_v2.gpu1.owner.csv",
+      "sha256": "e95018d2ec3f4455c969b4a0203d3082ab35f1d110da23242b6b6c30f33448f2"
+    }
+  },
+  "source_access": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "per_scene_parameter_fit": false
+  }
+}

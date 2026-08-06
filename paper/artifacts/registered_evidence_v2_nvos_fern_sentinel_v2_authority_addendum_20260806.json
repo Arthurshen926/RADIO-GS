@@ -1,0 +1,68 @@
+{
+  "schema": "radio_gs.registered_evidence_external_benchmark_preregistration_addendum.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "experiment": "registered-evidence-v2-nvos-fern-signed-scribble-sentinel",
+  "status": "sealed_after_cross_scene_authority_schema_fix_and_before_external_execution_authority_or_target_prediction",
+  "predecessor_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_sentinel_preregistration_20260806.json",
+    "sha256": "093672d01418e3420ed77b2c4f34b90c257ca25b1c562b12901914659f2d2593"
+  },
+  "reason": "The initial preregistration preceded a fail-closed schema correction that makes independent scene0002 promotion documents mandatory and semantically validated instead of trusting self-declared authorization booleans.",
+  "schema_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_external_execution_authority_v2_cross_scene_binding_addendum_20260806.json",
+    "sha256": "b64fe04cf5d7cd4a20d6cd4514beadd57bd0715741f67f66eb3fc65e7ca8501c",
+    "execution_authority_schema": "radio_gs.registered_evidence_external_execution_authority.v2",
+    "mandatory_promotion_records": [
+      "v1_result",
+      "v2_result",
+      "cross_scene_confirmation_receipt",
+      "cross_scene_confirmation_result"
+    ],
+    "mandatory_promotion_gates": [
+      "v2_clean_gate_passed",
+      "v2_cross_scene_gate_passed",
+      "benchmark_execution_authorized"
+    ]
+  },
+  "source_only_state_built_after_initial_preregistration": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/source_only/factorized_primitive_state_v2.pt",
+    "sha256": "62854fb93a5ef96e96ea63598fecdba43b927c79d1f5cf33817d1e41597f8875",
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/source_only/factorized_primitive_state_v2.pt.json",
+      "sha256": "b2d479cce35b7745ee1fd271e20aee8e83e12431639db9da889f2294a2b8183e"
+    },
+    "num_gaussians": 760715,
+    "valid_gaussians": 297200,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "final_implementation": {
+    "adapter": {
+      "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_external_adapter.py",
+      "sha256": "5e881742e3ccb7d7a14c5675c8b362edf9a05e0666865d7125284b75e46b95f0"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256": "4c2692079104275d9243e342f1927fb44747cc323d5e976e4d091f432b1bd744"
+    },
+    "score_only": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "sha256": "ea2341378fb17b04de402a42704ed1fc46a0cf5bd6d5b567f6e4a2e0a658a35b"
+    }
+  },
+  "unchanged_method_and_barrier": {
+    "scene_id": "fern",
+    "prompt_mode": "signed_scribble",
+    "threshold": 0.5,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_fit": false,
+    "threshold_scan": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "prediction_receipt_required_before_any_target_ground_truth_open": true
+  }
+}

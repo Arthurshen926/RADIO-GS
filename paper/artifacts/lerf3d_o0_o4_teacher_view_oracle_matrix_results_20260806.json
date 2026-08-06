@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf3d_teacher_view_oracle_matrix_results",
+  "scene": "figurines",
+  "development_only": true,
+  "second_scene_opened": false,
+  "o0_gate": {
+    "expected_miou": 0.4753371775,
+    "observed_miou": 0.4753887355327606,
+    "absolute_error": 0.00005155803276063464,
+    "maximum_absolute_error": 0.0001,
+    "passed": true
+  },
+  "metrics": {
+    "O0": {
+      "fixed_miou": 0.4753887355327606,
+      "average_precision": 0.7424453958489884,
+      "oracle_threshold_iou": 0.6481929084043052,
+      "selected_purity": 0.5475837231449316,
+      "positive_coverage": 0.7883230203634548,
+      "positive_negative_margin": 0.4545972230490443,
+      "within_scene_top1": 0.7764769115145264,
+      "rank_correlation": 0.2019500665691807
+    },
+    "O1": {
+      "fixed_miou": 0.5215655565261841,
+      "average_precision": 0.7690397744816834,
+      "oracle_threshold_iou": 0.6639607112682723,
+      "selected_purity": 0.6139820824424242,
+      "positive_coverage": 0.7815591978115434,
+      "positive_negative_margin": 0.44436358344850024,
+      "within_scene_top1": 0.7455216201544043,
+      "rank_correlation": 0.30149113505944924
+    },
+    "O2": {
+      "fixed_miou": 0.5220417976379395,
+      "average_precision": 0.7953353311048817,
+      "oracle_threshold_iou": 0.6723518043447729,
+      "selected_purity": 0.679264222876056,
+      "positive_coverage": 0.7523925384202202,
+      "positive_negative_margin": 0.408749706967539,
+      "within_scene_top1": 0.7400629681095919,
+      "rank_correlation": 0.4018137296211191
+    },
+    "O3": {
+      "fixed_miou": 0.5238398909568787,
+      "average_precision": 0.7985457651974278,
+      "oracle_threshold_iou": 0.6741689275499504,
+      "selected_purity": 0.6792380535563094,
+      "positive_coverage": 0.7544847799484001,
+      "positive_negative_margin": 0.4115865423512569,
+      "within_scene_top1": 0.7449379594117941,
+      "rank_correlation": 0.3993944225245665
+    },
+    "O4": {
+      "fixed_miou": 0.5254328846931458,
+      "average_precision": 0.7999563649716682,
+      "oracle_threshold_iou": 0.6746785279094568,
+      "selected_purity": 0.6799445895294417,
+      "positive_coverage": 0.7559807767803013,
+      "positive_negative_margin": 0.4111319609482568,
+      "within_scene_top1": 0.7458865649965573,
+      "rank_correlation": 0.39543284665161765
+    }
+  },
+  "delta_vs_o0": {
+    "O1": {
+      "fixed_miou": 0.04617682099342346,
+      "average_precision": 0.026594378632695,
+      "oracle_threshold_iou": 0.0157678028639671,
+      "selected_purity": 0.0663983592974926
+    },
+    "O2": {
+      "fixed_miou": 0.0466530621051788,
+      "average_precision": 0.0528899352558933,
+      "oracle_threshold_iou": 0.0241588959404677,
+      "selected_purity": 0.1316804997311244
+    },
+    "O3": {
+      "fixed_miou": 0.0484511554241181,
+      "average_precision": 0.0561003693484394,
+      "oracle_threshold_iou": 0.0259760191456452,
+      "selected_purity": 0.1316543304113778
+    },
+    "O4": {
+      "fixed_miou": 0.0500441491603852,
+      "average_precision": 0.0575109691226798,
+      "oracle_threshold_iou": 0.0264856195051516,
+      "selected_purity": 0.1323608663845101
+    }
+  },
+  "query_free": {
+    "mean_all_view_cosine": {
+      "O0": 0.7929420471191406,
+      "O1": 0.8551025390625,
+      "O2": 0.9307979345321655,
+      "O3_nearest_mode": 0.9695337414741516,
+      "O4": null
+    },
+    "p05_all_view_cosine": {
+      "O0": 0.6743108630180359,
+      "O1": 0.7528332471847534,
+      "O2": 0.8449621796607971,
+      "O3_nearest_mode": 0.91827392578125,
+      "O4": null
+    },
+    "required_rotation_median_radians": {
+      "0.25": 0.5569985508918762,
+      "0.45": 0.5480855703353882,
+      "0.7": 0.5484939813613892
+    },
+    "required_rotation_p95_radians": {
+      "0.25": 0.73919677734375,
+      "0.45": 0.7347296476364136,
+      "0.7": 0.7341309189796448
+    },
+    "o4_unavailable_reason": "O4 has no single query-free descriptor; no metric was imputed"
+  },
+  "stop_rules": {
+    "o1_improves_ap_and_oracle_iou": true,
+    "bounded_single_center_line_may_continue": true,
+    "o3_minus_o2": {
+      "average_precision": 0.0032104340925461,
+      "oracle_threshold_iou": 0.0018171232051775,
+      "fixed_miou": 0.0017980933189392
+    },
+    "distributional_gate_passed": true,
+    "distributional_increment_is_secondary": true,
+    "proxy_mismatch_stop_triggered": false
+  },
+  "bottleneck_judgment": {
+    "single_primary_bottleneck": "the compact single-center field is systematically under-aligned to source teacher semantics, and the fixed 0.15-radian residual budget is much smaller than the approximately 0.55-radian median correction required",
+    "remaining_bottleneck_after_o2": "query-response calibration and sibling-query discrimination, not missing additional view modes",
+    "evidence": [
+      "O1 alone recovers 0.04618 of the total O4 fixed-mIoU gain 0.05004",
+      "O2 doubles the AP gain versus O1 but adds only 0.00048 fixed mIoU while purity rises and positive coverage falls",
+      "O3/O4 add only 0.00339 fixed mIoU and 0.00462 AP over O2",
+      "O4 still has a 0.14925 oracle-IoU minus fixed-mIoU gap",
+      "within-scene top1 falls about 0.031 versus O0 even while one-vs-rest AP rises about 0.058"
+    ],
+    "next_general_method": "learn a source-only reliability-conditioned geodesic angular budget plus a query-response/listwise sibling-negative unary; retain K=2 only as a small optional distributional residual"
+  },
+  "notable_query_effects_o4_minus_o0": {
+    "largest_ap_gains": {
+      "tesla door handle": 0.7245278784226733,
+      "pikachu": 0.3938986952151835,
+      "miffy": 0.26026655826535583,
+      "jake": 0.14669952637142214
+    },
+    "largest_ap_regression": {
+      "green toy chair": -0.12549268392773005
+    }
+  },
+  "artifacts": {
+    "matrix_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/matrix/figurines_oracle_matrix_manifest.json",
+      "matrix_contract_sha256": "fd53828443cc70758c08c7dd2b523a4f823f62ed83462ac1847e5d572df23699"
+    },
+    "diagnostic_result_sha256": {
+      "O0": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677",
+      "O1": "8372e7aa5567d5ec72a1cb40cf5079876d0773d24db0096b5a83ce371cd33bd2",
+      "O2": "68ad643be68d738b0e1a4d266c36cf6b3b755245e7cd68274d129939871c223b",
+      "O3": "37270de1c5246d99fa3ab09dd4cf8043859c8498215e80ded3ba3f8689acfa29",
+      "O4": "b06d6cd6a3b88df0c2cd6f92caf9b68c277f81942625735ccdf38898fda6cc9f"
+    },
+    "pure_frozen_fixed_result_sha256": {
+      "O0": "2e4bf6b14cc522363e50cf4ee894693e28b250e93087b95fcd2143c01b6ba016",
+      "O1": "4978f59330157085eb0a7ffaccf57cd06abffab428dda110de4a2d9debe737ad",
+      "O2": "fcf41022f9e25aa5d888067353568d540ee9124407960ea930a10b526c7262d9",
+      "O3": "49e44f36e098703760675e12e7ce85386678382689bc7005a183c9a0de8238ea",
+      "O4": "607584c11fa31401bdea57bca521598a93b5ddf091d07fd1b1fe20f72a71aa24"
+    }
+  },
+  "independent_diagnostic_and_pure_fixed_miou_bitwise_equal_for_all_o0_o4": true,
+  "thermal_summary": {
+    "physical_gpu": 1,
+    "power_limit_w": 300,
+    "poll_seconds": 30,
+    "maximum_observed_temperature_c": 52,
+    "maximum_observed_power_w": 126.53,
+    "thermal_stop_triggered": false
+  }
+}

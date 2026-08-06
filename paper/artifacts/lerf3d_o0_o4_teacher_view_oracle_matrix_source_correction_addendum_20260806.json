@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_o0_o4_teacher_view_oracle_matrix_figurines_dev1_source_correction_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_before_corrected_source_teacher_materialization_and_before_any_candidate_scoring",
+  "parent_preregistration": {
+    "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_preregistration_20260806.json",
+    "sha256": "8e55c232282c533ba9a0b6179394cdd5b93a0e0832ebcc46e17f1c1c527063d9"
+  },
+  "correction_reason": {
+    "invalid_parent_declaration": "The parent preregistration incorrectly described the train16 MPR as sealing 120 source views.",
+    "invalid_source": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_exact_center_uncertainty_train16.pt",
+      "sha256": "83c7d7db89fdea3f864200c145693c5e401d7d2506d28f70e1db44dff6e7bf28",
+      "num_declared_views": 16,
+      "selected_frame_indices": [1, 21, 40, 61, 80, 100, 121, 140, 161, 180, 201, 221, 240, 260, 279, 301]
+    },
+    "discovery_timing": {
+      "candidate_output_created": false,
+      "candidate_scores_opened": false,
+      "source_feature_frame_opened_by_corrected_producer": false,
+      "renderer_opened_by_corrected_producer": false,
+      "benchmark_target_frame_opened": false
+    },
+    "policy": "The immutable parent file is retained unchanged; this addendum replaces only its source_view_mpr declaration and the dependent source-view wording. O0-O4 definitions, metrics, gates, and stopping rules remain unchanged."
+  },
+  "replacement_source_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v2/exact_marginal_responsibility_authority.json",
+    "sha256": "97ad42c2d62021af5168e5646c7f3c0ea5c620361700cfe7ce2713ad693dac27",
+    "schema": "radio_gs.sparse_exact_marginal_responsibility_authority.v1",
+    "source_view_count": 120,
+    "source_frame_ids_contract": "exactly the ordered frame_indices array in this SHA-bound authority",
+    "per_view_sidecar_contract": "exactly every ordered views record and its relative_path/sha256 in this SHA-bound authority",
+    "excluded_target_frame_ids": [41, 105, 152, 195],
+    "assignment_mode": "exact_front_to_back_sparse_marginal",
+    "registration_weight_mode": "exact_front_to_back_marginal_responsibility",
+    "target_weight": "base_weight_squared_divided_by_exact_pixel_mass",
+    "query_independent": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "replacement_teacher_view_definition": {
+    "feature_frame_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/figurines/frame_manifest.json",
+      "sha256": "3db488c92f81289fb66c4d27a312d37dd0fb0fca5c271f8744721528f50eaaf9",
+      "output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3"
+    },
+    "per_view_descriptor": "For each authority source view, aggregate raw spatial RADIO pixels to each AcceptedV2 primitive using the exact target marginal weights, apply the singleton official SigLIP2-G summary head, then FP32 L2-normalize.",
+    "retention": "retain at most four views by descending positive exact marginal mass, with ascending immutable frame id as the tie break",
+    "oracle_view_weights": "equal among retained visible views",
+    "target_frames_opened": false
+  },
+  "immutable_implementation": {
+    "producer": {
+      "path": "radio_gs/scripts/materialize_lerf_teacher_view_siglip_authority.py",
+      "sha256": "117d2268dc92dea41e299f4e82104ff7a831a0b61175bf17d15f29fd0379c8be"
+    },
+    "unit_tests": {
+      "path": "tests/test_materialize_lerf_teacher_view_siglip_authority.py",
+      "sha256": "757b60571d1ae0a6141511266baab620f1b0614fd936515dd9d9c2b24185f7e0",
+      "result": "5 passed"
+    },
+    "scene_config_sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11",
+    "geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "unchanged_parent_contracts": [
+    "Figurines development sentinel only",
+    "O0 through O4 oracle definitions",
+    "frozen evaluator and FP32 scoring path",
+    "O0 reproduction tolerance 0.0001",
+    "query-free and query-level metrics",
+    "all stop rules and no-sweep prohibition",
+    "GPU1 thermal policy"
+  ],
+  "candidate_target_metrics_opened_before_registration": false
+}

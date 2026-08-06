@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "artifact_type": "full_scalar_typed_context_multimodality_diagnostic_v1",
+  "status": "complete_label_free_diagnostic",
+  "scene_id": "scene0001_00",
+  "input": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/typed_context_stage_b_adaptive_v2.pt",
+    "sha256": "2b27eda34e292096b4f9222a545209230ee2017a980786ee433ea1f293232dda",
+    "rows": 4096,
+    "typed_context_valid_rows": 4096
+  },
+  "context_weighted_directional_resultant_length": {
+    "all_rows": {
+      "minimum": 0.5632545948028564,
+      "p05": 0.7065386772155762,
+      "p25": 0.7797488570213318,
+      "median": 0.8380768895149231,
+      "p75": 0.8968391418457031,
+      "p95": 0.946611225605011,
+      "maximum": 0.9813503623008728
+    },
+    "by_scale_index": {
+      "0": {"rows": 1366, "p25": 0.8580266833305359, "median": 0.8942641615867615},
+      "1": {"rows": 1365, "p25": 0.7925236225128174, "median": 0.8352851271629333},
+      "2": {"rows": 1365, "p25": 0.7269793152809143, "median": 0.771781861782074}
+    }
+  },
+  "context_to_anchor_radio_cosine_mean": {
+    "all_rows": {
+      "minimum": 0.1829921454191208,
+      "p05": 0.44267523288726807,
+      "p25": 0.5949627757072449,
+      "median": 0.7005841732025146,
+      "p75": 0.81327223777771,
+      "p95": 0.9045544862747192,
+      "maximum": 0.9669944047927856
+    },
+    "by_scale_index": {
+      "0": {"rows": 1366, "p25": 0.7554232478141785, "median": 0.8217834234237671},
+      "1": {"rows": 1365, "p25": 0.6270602941513062, "median": 0.6975383758544922},
+      "2": {"rows": 1365, "p25": 0.501792311668396, "median": 0.5790221691131592}
+    }
+  },
+  "interpretation": {
+    "selection_completeness": "already solved; every row has a complete 64-token context shell",
+    "observed_structure": "context becomes systematically less unimodal and less anchor-aligned as physical scale increases",
+    "method_implication": "a single spherical mean is least credible at the object/context scale; test K=2 context and teacher-mode oracles before training the single-center residual",
+    "not_claimed": "this label-free statistic alone does not establish a benchmark gain"
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false,
+    "per_scene_hyperparameters": false
+  }
+}

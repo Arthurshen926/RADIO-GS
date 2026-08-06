@@ -1,0 +1,109 @@
+{
+  "schema": "radio_gs.observation_conditioned_prompt_calibrator.clean_scannet_result_receipt.v4",
+  "schema_version": 4,
+  "status": "formal_v1_clean_gate_failed_calibration_branch_closed",
+  "scene_id": "scene0001_00",
+  "fit_by_mode": {
+    "full_mask": {
+      "temperature": 1.150254815080892,
+      "bias": -1.4554112293150077,
+      "loss_contract": "ordinary_pixel_micro_bce",
+      "initial_registered_loss": 0.21962447686752423,
+      "final_registered_loss": 0.16160839891667667
+    },
+    "scribble": {
+      "temperature": 0.7140887160960715,
+      "bias": 0.21335486006751384,
+      "loss_contract": "equal_class_within_prompt_then_equal_prompt_case_control_logistic",
+      "initial_registered_loss": 0.3842725677822013,
+      "final_registered_loss": 0.3701250403223037,
+      "final_pixel_micro_bce_for_reporting_only": 0.3866046826833635
+    }
+  },
+  "controls": {
+    "v1_reproduction_tolerance": 1e-6,
+    "v1_reproduction_max_absolute_error": 2.0037698233998924e-7,
+    "ranking_preservation_tolerance": 1e-10,
+    "full_mask_ranking_max_absolute_error": 0.0,
+    "scribble_ranking_max_absolute_error": 0.0,
+    "train_and_validation_stable_argsort_and_tie_partitions_preserved": true
+  },
+  "metrics": {
+    "all": {
+      "average_precision": 0.5913183633969042,
+      "auroc": 0.9287367484031404,
+      "oracle_iou": 0.47414669242416635,
+      "iou_at_0_5": 0.38414395851893635,
+      "precision_at_0_5": 0.5177787459734059,
+      "recall_at_0_5": 0.6389256894458402,
+      "area_ratio": 1.466201349670852,
+      "bce": 0.20379533525556326
+    },
+    "full_mask": {
+      "average_precision": 0.6309797059073046,
+      "auroc": 0.9319983545159279,
+      "oracle_iou": 0.5424660874266438,
+      "iou_at_0_5": 0.48918017761460864,
+      "precision_at_0_5": 0.6449046873328009,
+      "recall_at_0_5": 0.60711322418859,
+      "area_ratio": 0.9355443279074582,
+      "bce": 0.08618796430528164
+    },
+    "scribble": {
+      "average_precision": 0.5516570208865036,
+      "auroc": 0.9254751422903528,
+      "oracle_iou": 0.40582729742168877,
+      "iou_at_0_5": 0.2791077394232641,
+      "precision_at_0_5": 0.3906528046140107,
+      "recall_at_0_5": 0.6707381547030901,
+      "area_ratio": 1.9968583714342456,
+      "bce": 0.3214027062058449
+    }
+  },
+  "promotion_gate": {
+    "passed": false,
+    "decision": "stop_before_benchmarks_and_close_calibration_branch",
+    "full_mask": {
+      "ranking_preserved": true,
+      "iou_at_0_5_not_below_v1": true,
+      "area_ratio_in_0_8_to_1_25": true,
+      "precision_at_0_5_not_below_analytic": true
+    },
+    "scribble": {
+      "ranking_preserved": true,
+      "iou_at_0_5_not_below_v1": true,
+      "area_ratio_in_0_8_to_1_25": false,
+      "precision_at_0_5_not_below_analytic": true
+    },
+    "worst_prompt_average_precision_delta_vs_analytic": 0.006227095179183961,
+    "fifth_calibration_variant_allowed": false
+  },
+  "scientific_conclusion": "The observation-model diagnosis is correct but a class-symmetric case-control likelihood does not identify the deployment prevalence. V3 ordinary BCE under-selected scribbles (area 0.7724), whereas V4 symmetric risk over-selects them (area 1.9969) while restoring IoU above V1. Interpolating these biases or tuning a threshold on the seen validation set would be invalid. Future work must estimate censoring or sampling propensity from source-observable coverage, or change the unary model itself; the scalar calibration branch is closed.",
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/observation_conditioned_prompt_calibrator_v4_scene0001_pilot/formal_v1/result.json",
+      "sha256": "9e201319cdc3c3f92662805e94677d42428cda8203072eed82d0371524132387"
+    },
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/observation_conditioned_prompt_calibrator_v4_scene0001_pilot/formal_v1/calibrator.pt",
+      "sha256": "9736a94df398ea433bb20beac3beb1bf3a7e77ccab23b17e5deabb318a4758f0"
+    },
+    "fit_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/observation_conditioned_prompt_calibrator_v4_scene0001_pilot/formal_v1/fit_receipt.json",
+      "sha256": "6ccc3100f513242f170692dc77701da516438a2d77f82148021bf56408403098"
+    },
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/observation_conditioned_prompt_calibrator_v4_clean_scannet_execution_authority_20260806.json",
+      "sha256": "836fe86f75ba1f4d55beab91fea7a2117e1e77006e72abd1a72235be464e9958"
+    },
+    "implementation_sha256": "e7410a1c46ac4b17e12adae5df854df533a27e907c0177e657dc742a8f6cf192",
+    "calibrator_module_sha256": "ff96eb5d8c323b5ec2c947b2b23367af537e185d285ad082b2c2a33f153913cb"
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false
+  }
+}

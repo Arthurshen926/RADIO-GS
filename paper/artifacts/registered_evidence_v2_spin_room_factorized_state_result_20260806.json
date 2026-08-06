@@ -1,0 +1,63 @@
+{
+  "schema": "radio_gs.registered_evidence_external_source_state_result.v1",
+  "schema_version": 1,
+  "status": "source_only_factorized_state_complete_and_geometry_preflight_passed",
+  "scene_id": "room",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_sentinel_preregistration_20260806.json",
+    "sha256": "6e17d9f1494dd9ecd743a3dbca62252e23bfed5ef38693ee6254f079c59f2863"
+  },
+  "inputs": {
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_field_d256_l128.pth",
+      "sha256": "343b833b415d467f8993b6ce19057ea838fa12ae19395041347beaf273eef5f7"
+    },
+    "factorized_raw_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_raw_radio.pt",
+      "sha256": "0ae585ec98cccd9fb3d5d401c79b11def346d3598ec1600ebb72ef6b8d6ca76c"
+    },
+    "canonical_capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/official_dino_sam3_views.pt",
+      "sha256": "7e2c1ea44cb11317e9e8b9e41eb2f356cb431dba777c9ef62495a3bc6d4374a0"
+    }
+  },
+  "output": {
+    "state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_primitive_state_v2.pt",
+      "sha256": "2ded9ba63a699368d55bc0d3e13c0f2bfb5bae8f121c01fcc410c58728ad8387",
+      "size_bytes": 559428935
+    },
+    "build_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_primitive_state_v2.pt.json",
+      "sha256": "d82f5b3cd58a18c917866111ab34b0aca388aa25c6f7dc9e90c74ac8ae32fbcf",
+      "size_bytes": 1062
+    },
+    "contract_sha256": "292ca8c209a8c89e4cd3a5f29e44ab51a83323289f8aeb3506da9133d664a428",
+    "num_gaussians": 291619,
+    "valid_gaussians": 214612,
+    "visibility_purity_known_count": 0,
+    "visibility_purity_unknown_count": 214612
+  },
+  "strict_preflight": {
+    "capability_and_state_loaded_together": true,
+    "num_gaussians_equal": true,
+    "valid_mask_equal": true,
+    "global_rows_exact_equal": true,
+    "geometry_fingerprint": {
+      "num_gaussians": 291619,
+      "xyz_sha256": "0f520313afe582b3225890f8c023a760e60a097f9125a95cc2dab92071a7b12c"
+    },
+    "factorized_field_sha_replayed": true,
+    "factorized_raw_cache_sha_replayed": true,
+    "state_sha_replayed": true
+  },
+  "source_access": {
+    "query_independent": true,
+    "source_mask_pixels_opened_for_state_build": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "text_queries_opened": false,
+    "per_scene_parameter_fit": false
+  }
+}

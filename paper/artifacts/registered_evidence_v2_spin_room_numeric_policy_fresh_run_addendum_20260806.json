@@ -1,0 +1,66 @@
+{
+  "schema": "radio_gs.registered_evidence_external_numeric_policy_fresh_run_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_after_numeric_policy_verification_and_before_final_fresh_room_materialization",
+  "scene_id": "room",
+  "numeric_policy_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_raw_domain_roundoff_addendum_20260806.json",
+    "sha256": "9da3e9b70fe2c0feb425a3de5f9467fbe85c3b4d303f735afa2326867e159895"
+  },
+  "implementation": {
+    "adapter": {
+      "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_external_adapter.py",
+      "sha256": "0004e79c2d18e640a8c302a87d973cb47cdc2f8621bbc787544704867b8298a6"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256": "e9596fb1f6ebfa47a6231a6b125498ed16ffd78c9221b2140173ddd7f2588d6a"
+    },
+    "focused_tests": {
+      "path": "/root/RADIO-GS/tests/test_registered_evidence_external_adapter.py",
+      "sha256": "c18cde678b809d4b43550f8fac3de81c8b734cdaf0947456b6e5d1d443b13411"
+    }
+  },
+  "verification": {
+    "focused_tests_passed": 20,
+    "py_compile_passed": true,
+    "black_check_passed": true,
+    "git_diff_check_passed": true,
+    "small_finite_roundoff_accepted_and_clamped": true,
+    "large_roundoff_rejected": true,
+    "nan_and_infinity_rejected": true,
+    "unsupported_exact_zero_preserved": true
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_execution_authority_20260806.json",
+    "sha256": "bbbe30c14ec76da20885ca7fd86ce4b30a1d271bcc6a93321c74d1e07b16cf1c"
+  },
+  "superseded_partial_outputs": [
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/failed_before_receipt_support_field_v1",
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/failed_before_receipt_render_domain_v1"
+  ],
+  "partial_reuse": false,
+  "fresh_output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/pre_metric_numeric_policy_v1",
+  "method_contract": {
+    "threshold": 0.5,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_fit": false,
+    "threshold_scan": false,
+    "target_ground_truth_opening": "forbidden until pre-metric receipt and every array SHA are replayed and a separate scoring authorization is received"
+  },
+  "gpu_policy": {
+    "physical_gpu": 0,
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "consecutive_overheat_polls_before_stop": 6,
+    "maximum_power_limit_w": 300.5
+  },
+  "source_access": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "per_scene_parameter_fit": false
+  }
+}

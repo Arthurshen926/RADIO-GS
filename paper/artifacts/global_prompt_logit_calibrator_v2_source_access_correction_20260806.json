@@ -1,0 +1,28 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.source_access_correction.v2",
+  "schema_version": 2,
+  "status": "sealed_before_first_formal_calibrator_fit",
+  "scene_id": "scene0001_00",
+  "corrects": {
+    "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_clean_scannet_preregistration_20260806.json",
+    "sha256": "cb05ffdfc9a047fd983890da4a0f8b336b9ea060ea0e77fd39274d1b48121952",
+    "overstrong_statement": "clean_validation_instance_labels_opened_only_after_calibrator_parameters_are_frozen"
+  },
+  "reason": "The independent V2 producer reuses the frozen V1 loader. That loader deserializes complete official per-view instance-ID images and constructs all frozen prompt examples before fitting, so the original statement cannot truthfully be interpreted as physical label-payload access time.",
+  "corrected_contract": {
+    "validation_label_payload_may_be_deserialized_by_shared_v1_loader_before_fit": true,
+    "validation_prompt_feature_tensors_may_be_constructed_before_fit": true,
+    "validation_derived_tensor_prediction_or_metric_enters_optimizer": false,
+    "validation_labels_used_for_fit": false,
+    "validation_labels_used_for_early_stop": false,
+    "validation_labels_used_for_hyperparameter_selection": false,
+    "fit_receipt_frozen_before_validation_prediction_or_metric_evaluation": true,
+    "target_rgb_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false
+  },
+  "scientific_effect": "No validation target signal participates in either calibrator parameter. The correction narrows an inaccurate access-timing claim and does not change the method, optimizer, fit instances, evaluation split, or promotion gate."
+}

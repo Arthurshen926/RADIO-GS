@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_o0_o4_teacher_view_oracle_matrix_figurines_dev1_empty_view_implementation_correction_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_after_fail_closed_validation_and_before_any_source_feature_frame_or_candidate_score_was_opened",
+  "parent_source_correction": {
+    "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_source_correction_addendum_20260806.json",
+    "sha256": "38545bd67f3482120ab8a897203f4cfaf45d8d21583a0e57ddf57608c6172c68"
+  },
+  "failure": {
+    "cause": "The immutable 120-view responsibility authority validly contains one declared source view with zero raster hits; producer v1 incorrectly required every per-view hit count to be strictly positive.",
+    "failed_before_source_feature_frame_open": true,
+    "failed_before_official_summary_head_load": true,
+    "candidate_output_created": false,
+    "candidate_score_or_metric_opened": false
+  },
+  "correction": {
+    "scope": "accept a nonnegative declared hit count while retaining exact total-hit, ordered-view, per-sidecar SHA, policy, exclusion, geometry, and 120-view checks",
+    "oracle_definition_changed": false,
+    "source_view_set_changed": false,
+    "retention_or_weight_changed": false,
+    "stopping_rule_changed": false
+  },
+  "immutable_implementation": {
+    "producer": {
+      "path": "radio_gs/scripts/materialize_lerf_teacher_view_siglip_authority.py",
+      "sha256": "60de453ad3e47ae08e7fdb5ea940cbbc81e45fbc71150a023dd2a51e75fdff18"
+    },
+    "unit_tests": {
+      "path": "tests/test_materialize_lerf_teacher_view_siglip_authority.py",
+      "sha256": "1a806cb23c941164d09e606390a6ccfd4e5d165eb76a27443332f54a56d5acc2",
+      "result": "6 passed",
+      "new_regression": "a synthetic exact 120-view authority with one declared empty view is accepted"
+    }
+  },
+  "candidate_target_metrics_opened_before_registration": false
+}

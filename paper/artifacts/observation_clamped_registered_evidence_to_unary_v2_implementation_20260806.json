@@ -1,0 +1,44 @@
+{
+  "schema": "radio_gs.observation_clamped_registered_evidence_to_unary_v2_implementation.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "status": "implemented_and_unit_tested_not_trained_not_benchmark_eligible",
+  "method": "RegisteredEvidenceToUnaryV2",
+  "causal_trigger": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_source_evidence_preservation_diagnostic_20260806.json",
+    "sha256": "40244c4817501f9bd9a6034392253dad4fe02c649c5899b25ff66cad009899bf"
+  },
+  "invariants": {
+    "fully_observed_definition": "labeled_coverage >= 1 - 1e-5",
+    "fully_observed_residual": "exact zero",
+    "fully_observed_output": "bitwise analytic probability",
+    "partial_residual_budget": "(1 - labeled_coverage) times the global bounded residual",
+    "unobserved_residual_budget": "full global bounded residual",
+    "graph": false,
+    "connected_selection": false,
+    "scene_specific_parameter": false
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_to_unary.py",
+    "sha256": "1ee68bb8245c5601bd99bf2ac0196c1c58dc99c6495bf657a3f6e6d73f1e37cd"
+  },
+  "tests": {
+    "path": "/root/RADIO-GS/tests/test_registered_evidence_to_unary.py",
+    "sha256": "661eae8c2bc794651f8b173dfa7ee14363fd99041cc97995f553d7a40698aac1",
+    "focused_suite_passed": 22,
+    "coverage": [
+      "nonzero learned head preserves complete positive and background evidence",
+      "half-observed rows receive exactly half the constant residual budget",
+      "unobserved rows retain learnable residual capacity",
+      "zero initialization remains the exact graph-free analytic unary",
+      "existing V1, external adapter, and frozen score-interposer tests remain passing"
+    ]
+  },
+  "eligibility": {
+    "trained_checkpoint_exists": false,
+    "clean_multiscene_gate_passed": false,
+    "benchmark_execution_authorized": false,
+    "room_rescore_authorized": false
+  },
+  "next_gate": "Train on nonbenchmark multi-scene source-to-held-out-target full-mask and signed-scribble pairs, then require both prompt modes to improve under a frozen global threshold before any new external sentinel."
+}

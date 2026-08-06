@@ -1,0 +1,105 @@
+{
+  "schema": "radio_gs.prompt_mode_logit_calibrator.clean_scannet_result_receipt.v3",
+  "schema_version": 3,
+  "status": "formal_v1_clean_gate_failed_stop_before_benchmarks",
+  "scene_id": "scene0001_00",
+  "fit_by_mode": {
+    "full_mask": {
+      "temperature": 1.1502553039413541,
+      "bias": -1.4554111854437821,
+      "initial_train_bce": 0.21962452790694512,
+      "final_train_bce": 0.1616084432146683
+    },
+    "scribble": {
+      "temperature": 0.7364741064085724,
+      "bias": -1.8087139957705631,
+      "initial_train_bce": 0.37715480219063247,
+      "final_train_bce": 0.21474225746959583
+    }
+  },
+  "controls": {
+    "v1_reproduction_tolerance": 1e-6,
+    "v1_reproduction_max_absolute_error": 2.0837847569676882e-7,
+    "ranking_preservation_tolerance": 1e-10,
+    "full_mask_ranking_max_absolute_error": 0.0,
+    "scribble_ranking_max_absolute_error": 0.0,
+    "train_and_validation_stable_argsort_and_tie_partitions_preserved": true
+  },
+  "metrics": {
+    "all": {
+      "average_precision": 0.5913183726964403,
+      "auroc": 0.9287367502994579,
+      "oracle_iou": 0.47414669242416635,
+      "iou_at_0_5": 0.38072445091510915,
+      "precision_at_0_5": 0.6718295301915922,
+      "recall_at_0_5": 0.514789715495852,
+      "area_ratio": 0.8539543048802154,
+      "bce": 0.10865059588104486
+    },
+    "full_mask": {
+      "average_precision": 0.6309797297142572,
+      "auroc": 0.9319983549125459,
+      "oracle_iou": 0.5424660874266438,
+      "iou_at_0_5": 0.48918017761460864,
+      "precision_at_0_5": 0.6449046873328009,
+      "recall_at_0_5": 0.60711322418859,
+      "area_ratio": 0.9355443279074582,
+      "bce": 0.08618796989321709
+    },
+    "scribble": {
+      "average_precision": 0.5516570156786231,
+      "auroc": 0.9254751456863699,
+      "oracle_iou": 0.40582729742168877,
+      "iou_at_0_5": 0.27226872421560977,
+      "precision_at_0_5": 0.6987543730503832,
+      "recall_at_0_5": 0.4224662068031138,
+      "area_ratio": 0.7723642818529726,
+      "bce": 0.13111322186887264
+    }
+  },
+  "promotion_gate": {
+    "passed": false,
+    "decision": "stop_before_benchmarks",
+    "full_mask": {
+      "ranking_preserved": true,
+      "iou_at_0_5_not_below_v1": true,
+      "area_ratio_in_0_8_to_1_25": true,
+      "precision_at_0_5_not_below_analytic": true
+    },
+    "scribble": {
+      "ranking_preserved": true,
+      "iou_at_0_5_not_below_v1": false,
+      "area_ratio_in_0_8_to_1_25": false,
+      "precision_at_0_5_not_below_analytic": true
+    },
+    "worst_prompt_average_precision_delta_vs_analytic": 0.006227095179183961
+  },
+  "scientific_conclusion": "Conditioning calibration on the known prompt interface is useful but insufficient. It improves full-mask fixed-threshold IoU from V1 0.4425 to 0.4892 and moves scribble area ratio from V2 0.6492 to 0.7724, but separately optimized proper BCE still under-selects censored scribble observations and misses both frozen scribble gates. A subsequent method must model scribble censoring or coverage, rather than tune a validation threshold or add scene parameters.",
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_mode_logit_calibrator_v3_scene0001_pilot/formal_v1/result.json",
+      "sha256": "6f23193bb8cd1d6d83c95197e34816066a7bd345dafacec22955a12a74219e8f"
+    },
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_mode_logit_calibrator_v3_scene0001_pilot/formal_v1/calibrator.pt",
+      "sha256": "d621758426d95c6d7cf68ebdf3594aaa6c78c60d8a8c492cbe0590cd301f1bee"
+    },
+    "fit_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_mode_logit_calibrator_v3_scene0001_pilot/formal_v1/fit_receipt.json",
+      "sha256": "8a51b804116bc8490498b267b134ab295e6ab1853d2ee37efa96f4f53f5c2e39"
+    },
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/prompt_mode_logit_calibrator_v3_clean_scannet_execution_authority_20260806.json",
+      "sha256": "74c5374a74c838ecff7b53133d1c482535ecfdb4b50e81bf504291a10ab1afc0"
+    },
+    "implementation_sha256": "a78f1fdc45999c6df318806f30e74e5384415bde510ea3f0b3258e19c404e7dd",
+    "calibrator_module_sha256": "f9b86a789f2f50d2bcc8ad7dac5aaa99d130869a1aa4034ff44298f8f6e9033f"
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schema": "radio_gs.registered_evidence_external_render_numeric_policy_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_after_target_blind_raw_domain_diagnostic_and_before_numeric_policy_implementation",
+  "scene_id": "room",
+  "parent_restart_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_materializer_fresh_restart_addendum_20260806.json",
+    "sha256": "ed095b84707201d04e0681f712bc626203762189d75b40ae1932880a8e256098"
+  },
+  "failed_attempt": {
+    "status": "failed_before_pre_metric_receipt_and_before_scoring",
+    "archived_partial_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/failed_before_receipt_render_domain_v1",
+    "complete_frame_count": 11,
+    "first_failed_frame": "DJI_20200226_143906_682",
+    "pre_metric_receipt_written": false,
+    "target_ground_truth_opened": false,
+    "target_metric_computed": false
+  },
+  "target_blind_diagnostic": {
+    "log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/logs/render_domain_diagnostic_v2.log",
+      "sha256": "867345c3721a04d058872ae0540d289883b10273206b3d78b308375702374c7b"
+    },
+    "gpu0_telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/logs/render_domain_diagnostic_v2.gpu0.telemetry.csv",
+      "sha256": "a40f52488218a6b40f5c1e343412f8b2225cf127ac09f43d5939863543f90c09",
+      "maximum_temperature_c": 44,
+      "maximum_power_w": 116.06,
+      "thermal_stop_triggered": false
+    },
+    "raw_probability": {
+      "finite_count": 47628,
+      "total_count": 47628,
+      "nonfinite_count": 0,
+      "minimum": 7.544115874225099e-7,
+      "maximum": 1.0000001192092896,
+      "below_zero_count": 0,
+      "above_one_count": 1,
+      "maximum_above_one_excess": 1.1920928955078125e-7,
+      "unsupported_nonzero_count": 0
+    },
+    "support_channel": {
+      "finite_count": 47628,
+      "total_count": 47628,
+      "nonfinite_count": 0,
+      "minimum": 0.9999991655349731,
+      "maximum": 1.0000008344650269,
+      "positive_count": 47628,
+      "maximum_positive_unit_error": 8.344650268554688e-7
+    }
+  },
+  "registered_uniform_numeric_policy": {
+    "scope": "every external benchmark and every rendered frame before GlobalPromptLogitCalibratorV2",
+    "roundoff_tolerance": 0.00001,
+    "audit_before_transform": true,
+    "reject_nan_or_infinity": true,
+    "reject_minimum_below_negative_tolerance": true,
+    "reject_maximum_above_one_plus_tolerance": true,
+    "reject_nonzero_unsupported_probability": true,
+    "accepted_transform": "clamp finite raw rendered probability to closed [0,1] after all fail-closed checks",
+    "unsupported_policy": "unsupported pixels remain exact zero before and after clamp and calibration",
+    "threshold": 0.5,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_parameter_fit": false,
+    "scene_specific_tolerance": false
+  },
+  "implementation_before_change": {
+    "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_external_adapter.py",
+    "sha256": "5e881742e3ccb7d7a14c5675c8b362edf9a05e0666865d7125284b75e46b95f0"
+  },
+  "source_access": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "per_scene_parameter_fit": false
+  }
+}

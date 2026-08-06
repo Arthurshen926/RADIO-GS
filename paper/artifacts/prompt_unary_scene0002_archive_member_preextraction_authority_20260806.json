@@ -1,0 +1,50 @@
+{
+  "schema": "radio_gs.prompt_unary.scene0002_archive_member_preextraction_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_before_first_read_of_archive_member_payload",
+  "scene_id": "scene0002_00",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/prompt_unary_scene0002_cross_scene_clean_confirmation_preregistration_20260806.json",
+    "sha256": "bfd34877c133b727685b36a78f05514e5a7c0950d05fbd710a75831deedf473c"
+  },
+  "archive_member": {
+    "archive_part": "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "archive_part_size_bytes": 161061273600,
+    "member_name": "scans/scene0002_00/scene0002_00_2d-instance-filt.zip",
+    "offset_data_bytes": 17421558784,
+    "size_bytes": 69792829,
+    "planned_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_unary_scene0002_clean_confirmation_v1/labels/scans/scene0002_00/scene0002_00_2d-instance-filt.zip",
+    "copy_contract": "byte-exact range copy [offset_data_bytes, offset_data_bytes + size_bytes) using skip_bytes and count_bytes",
+    "post_copy_contract": "require exact output size, compute and freeze SHA-256, verify ZIP integrity, then seal the execution authority before opening any PNG member"
+  },
+  "bound_source_inputs": {
+    "responsibility_manifest_sha256": "6765db28f57fc32f0cb301b49fcf0699b8e13f2db1558bf18bf7d64189a08927",
+    "factorized_state_sha256": "7036ae2e0ab581c684f9c43c76923836659b666d30bdddcc7790f139d77fdfbe",
+    "factorized_field_sha256": "3f33cad54edd3ffc4ed4cb66cbdf3f2d5e42f5f823f417bcf1d21fa9c4d69cde",
+    "factorized_raw_radio_sha256": "880113d03832096817a7bcb3a8d42b21e8fd418e3e0cca902b10d6ad5d8a56bf",
+    "matched_raw_radio_sha256": "1c97767025c35cf1af1dcdd1bebc30acc7a521d484c5daf77eb9786963d7b01a",
+    "matched_dino_v3_sha256": "af0583fa83aa11f2db9518676dcc391b284a3abde85791ded489a422fa2d0014",
+    "matched_sam3_sha256": "2079278ef8cb9377841761e5676a2fc1377c616e48a92a53bb8e8e4f2c4097d9",
+    "capability_cohort_sha256": "42bb057a1e96a1e0a01be9daa92a257a09d9cd06c0aa470075d4ed10e636771d"
+  },
+  "frozen_model_inputs": {
+    "V1_checkpoint_sha256": "30f749485f0232568f66cc00694cbaf5a6fed922ecb105a1f1d60936a548e149",
+    "V2_checkpoint_sha256": "73ca03dfb567d180bb072267fd24ca8537d7bca60bf7e9b8947f3bf965e3f9a3",
+    "V3_checkpoint_sha256": "d621758426d95c6d7cf68ebdf3594aaa6c78c60d8a8c492cbe0590cd301f1bee",
+    "V4_checkpoint_sha256": "9736a94df398ea433bb20beac3beb1bf3a7e77ccab23b17e5deabb318a4758f0"
+  },
+  "forbidden_actions": [
+    "fit or update any V1, V2, V3, or V4 parameter",
+    "choose a threshold or candidate using scene0002 labels",
+    "reuse scene0001 for further tuning",
+    "open any benchmark image, query, mask, label, score, or metric",
+    "claim V3 or V4 benchmark eligibility despite their failed formal whole-scene gates"
+  ],
+  "access_at_seal": {
+    "archive_member_payload_read": false,
+    "extracted_zip_exists": false,
+    "zip_central_directory_opened": false,
+    "instance_png_opened": false,
+    "benchmark_opened": false
+  }
+}

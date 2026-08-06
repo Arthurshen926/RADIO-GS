@@ -1,0 +1,121 @@
+{
+  "schema": "radio_gs.focused_method_attack_round_result.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "status": "focused_round_complete_with_one_promoted_scene_result_and_one_rejected_transfer",
+  "retained_frozen_benchmark_state": {
+    "lerf3d_query_conditioned_support_scene_macro_iou": 0.3776461,
+    "spin9_strict_scene_macro_iou": 0.877162,
+    "nvos_graph_off_hierarchical_v2_scene_macro_iou": 0.7477712404198159,
+    "note": "Single-scene sentinels do not replace a full benchmark macro until their complete frozen cohort is evaluated."
+  },
+  "lerf3d": {
+    "status": "mechanism_decided_but_no_promoted_benchmark_candidate",
+    "development_scene": "figurines",
+    "oracle_matrix": {
+      "O0_fixed_miou": 0.4753887355327606,
+      "O1_bounded_single_center_fixed_miou": 0.5215655565261841,
+      "O2_unbounded_single_center_fixed_miou": 0.5220417976379395,
+      "O3_k2_fixed_miou": 0.5238398909568787,
+      "O4_per_view_response_fixed_miou": 0.5254328846931458,
+      "O1_minus_O0": 0.04617682099342346,
+      "O3_minus_O2": 0.0017980933189392
+    },
+    "decision": "Do not build a K=2 field or distributional head. The primary available gain is single-center alignment and query ranking; use the source-global generic-query response/listwise V2 objective.",
+    "implementation_status": "V2 objective, scene-global hard-negative miner, trainer, tests, and one-scene dry loss are complete; full 24+8 training is not authorized because 31 of 32 SHA-bound scene authorities are absent.",
+    "reference": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_results_20260806.json",
+      "sha256": "99020d7b29f8dbf8c304ee82df6662ca9cd24744dc8cbf5f9ba60ab88e5f64b8"
+    },
+    "asset_inventory": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_global_response_hard_negative_32scene_inventory_20260806.json",
+      "sha256": "18e8ea551651a6784a7a0ff58ce47406a3fa54e5354761dee140cb79eab059a4"
+    }
+  },
+  "prompt_conditioned_unary": {
+    "clean_cross_scene_confirmation": {
+      "scene_id": "scene0002_00",
+      "prompt_count": 20,
+      "analytic_average_precision": 0.5434019922210149,
+      "V1_average_precision": 0.6146715310640606,
+      "analytic_fixed_iou": 0.3076943900943646,
+      "V1_fixed_iou": 0.3760915983780671,
+      "V2_fixed_iou": 0.42592837807748046,
+      "V2_precision": 0.677973796133568,
+      "V2_area_ratio": 0.9069421400947737,
+      "reference": {
+        "path": "/root/RADIO-GS/paper/artifacts/prompt_unary_scene0002_cross_scene_clean_confirmation_result_20260806.json",
+        "sha256": "1f534cc116528f7c1912d06118a77483b3f83374497b6b847024b75884d0bfc1"
+      }
+    },
+    "nvos_fern_signed_scribble": {
+      "status": "promoted_as_new_scene_candidate_without_repeated_tuning",
+      "foreground_iou": 0.7621003198747434,
+      "retained_graph_off_baseline_iou": 0.7350345861696804,
+      "gain_vs_retained_baseline": 0.027065733705063,
+      "canonical_compact_control_iou": 0.7553155907838534,
+      "gain_vs_canonical_compact_control": 0.00678472909089,
+      "reference": {
+        "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_sentinel_result_20260806.json",
+        "sha256": "726f2f613019a88854a1327fc99bb4b17400e730db313289acd129f6da11233d"
+      }
+    },
+    "spin9_room_full_mask": {
+      "status": "rejected_after_exactly_one_frozen_score",
+      "foreground_iou": 0.7334476434347499,
+      "exact_adjoint_baseline_iou": 0.7910375263981893,
+      "delta": -0.057589882963439365,
+      "reference": {
+        "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_score_once_result_20260806.json",
+        "sha256": "0d91009507bc3618b676a959b8b42c35fb72e871e0e1ac1869b11017014bbfad"
+      }
+    },
+    "nvos_horns_left": {
+      "status": "not_run_fail_closed_before_prediction",
+      "reason": "The strict factorized-v2 field/raw-state pair is absent. Honest production requires a fresh 61-view source extraction and factorized field training; legacy normalized raw_radio lacks the required amplitude, dispersion, and evidence scalars.",
+      "target_ground_truth_or_metric_opened": false
+    }
+  },
+  "mechanistic_conclusion": {
+    "confirmed": [
+      "A globally trained registered-evidence head can convert sparse signed scribble evidence into a stronger graph-free NVOS unary.",
+      "The gain on fern exceeds both the retained hierarchical graph-off baseline and stronger canonical compact/factorized controls.",
+      "The same V1-to-V2 readout is not a universal full-mask cross-view completion head: it regresses the strong exact-adjoint Room comparator.",
+      "A shared canonical field remains reasonable, but the final query head must preserve strong registered analytic unaries: the current V1 flips 2047 fully observed Room primitives from analytic background to foreground and 2808 unobserved primitives in the opposite direction."
+    ],
+    "rejected": [
+      "Unconditional graph completion and connected selection.",
+      "A K=2 LERF field as the next primary intervention.",
+      "Unconditional reuse of the sparse-prompt V1-to-V2 head for SPIn full-mask queries.",
+      "Post-hoc Room rescoring, threshold changes, per-scene fitting, or fallback selection after observing its metric."
+    ]
+  },
+  "implementation_corrections": {
+    "execution_authority": "Schema v2 now semantically binds both the clean source gate and independent cross-scene confirmation instead of trusting self-reported booleans.",
+    "materializer": "The SupportedCalibration field mismatch was fixed and directly tested.",
+    "numeric_contract": "Rendered probabilities must be finite, preserve unsupported exact zero, and remain within 1e-5 of [0,1] before a uniform clamp; larger violations fail closed.",
+    "room_numeric_observation": "Across 40 frames only two values were clamped, with maximum correction 2.384185791015625e-7, so numeric sanitation cannot explain the 0.05759 IoU regression.",
+    "observation_clamped_v2": {
+      "status": "implemented_and_unit_tested_not_trained_not_benchmark_eligible",
+      "path": "/root/RADIO-GS/paper/artifacts/observation_clamped_registered_evidence_to_unary_v2_implementation_20260806.json",
+      "sha256": "e4ea7aaf28a330edd671b189725d16c1a116d222a54c61d54854c4ae8281feea"
+    }
+  },
+  "next_method_gate": {
+    "lerf3d": "Do not score another LERF benchmark candidate until the missing source-only response/listwise authorities exist and a multi-scene validation checkpoint passes query-ranking gates.",
+    "nvos": "Retain fern V2; do not claim a new NVOS macro until the remaining strict cohort has factorized-v2 assets and is evaluated once.",
+    "spin9": "Replace unconditional V1 updates with a globally coverage-gated observation-clamped residual: fully observed rows must remain the exact registered analytic unary and residual capacity is reserved for unobserved/partial rows. Train and validate this invariant on nonbenchmark held-out source-to-target scenes for both full-mask and scribble prompts, then use a different untouched SPIn scene for a one-shot sentinel.",
+    "source_preservation_diagnostic": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_source_evidence_preservation_diagnostic_20260806.json",
+      "sha256": "40244c4817501f9bd9a6034392253dad4fe02c649c5899b25ff66cad009899bf"
+    }
+  },
+  "baseline_reference": {
+    "path": "/root/RADIO-GS/paper/artifacts/evidence_to_support_v2_result_summary_20260804.json",
+    "sha256": "1bdee582cfe38f15fc586e48f106dedb06134294b6e3482142efa43f5dca5934"
+  },
+  "nvos_baseline_reference": {
+    "path": "/root/RADIO-GS/paper/artifacts/nvos_observation_clamped_graph_completion_stop_results_20260806.json",
+    "sha256": "bbec9d652a6c740cae2914a4de480e789c97bccba17f71305b95f34526d263e4"
+  }
+}

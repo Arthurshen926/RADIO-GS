@@ -1,0 +1,50 @@
+{
+  "schema": "radio_gs.registered_evidence_external_benchmark_execution_binding_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_after_cross_scene_authority_hardening_and_before_room_source_mask_decode_or_prediction",
+  "scene_id": "room",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_strict_sentinel_preregistration_20260806.json",
+    "sha256": "6e17d9f1494dd9ecd743a3dbca62252e23bfed5ef38693ee6254f079c59f2863"
+  },
+  "source_state_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_spin_room_factorized_state_result_20260806.json",
+    "sha256": "2437376b69ad7d785bc7c3b32941476ad4760f02e3f7cb57d10f3784451b7767"
+  },
+  "cross_scene_authority_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_external_execution_authority_v2_cross_scene_binding_addendum_20260806.json",
+    "sha256": "b64fe04cf5d7cd4a20d6cd4514beadd57bd0715741f67f66eb3fc65e7ca8501c"
+  },
+  "final_implementation": {
+    "adapter": {
+      "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_external_adapter.py",
+      "sha256": "5e881742e3ccb7d7a14c5675c8b362edf9a05e0666865d7125284b75e46b95f0"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256": "4c2692079104275d9243e342f1927fb44747cc323d5e976e4d091f432b1bd744"
+    },
+    "score_only_interposer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "sha256": "ea2341378fb17b04de402a42704ed1fc46a0cf5bd6d5b567f6e4a2e0a658a35b"
+    }
+  },
+  "required_promotion_binding": {
+    "schema": "radio_gs.registered_evidence_external_execution_authority.v2",
+    "v1_result": true,
+    "v2_result": true,
+    "cross_scene_confirmation_receipt": true,
+    "cross_scene_confirmation_result": true,
+    "v2_clean_gate_passed": true,
+    "v2_cross_scene_gate_passed": true,
+    "benchmark_execution_authorized": true,
+    "semantic_document_validation_before_source_mask_load": true
+  },
+  "source_access": {
+    "source_mask_pixels_opened_for_candidate": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "per_scene_parameter_fit": false
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schema": "radio_gs.registered_evidence.external_execution_authority_cross_scene_binding_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_after_source_only_state_builds_and_before_any_room_or_fern_candidate_prediction_or_metric",
+  "date": "2026-08-06",
+  "failure_found": {
+    "severity": "benchmark_authorization_fail_open",
+    "description": "The v1 external execution authority required self-declared clean-gate booleans but did not require or semantically validate the independent scene0002 cross-scene promotion documents.",
+    "target_prediction_materialized_before_fix": false,
+    "target_metric_opened_before_fix": false,
+    "room_or_fern_execution_authority_used_before_fix": false
+  },
+  "frozen_promotion_evidence": {
+    "scene0002_confirmation_receipt": {
+      "path": "paper/artifacts/prompt_unary_scene0002_cross_scene_clean_confirmation_result_20260806.json",
+      "sha256": "1f534cc116528f7c1912d06118a77483b3f83374497b6b847024b75884d0bfc1"
+    },
+    "scene0002_confirmation_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_unary_scene0002_clean_confirmation_v1/confirmation/result.json",
+      "sha256": "a3d8551e044fff6394f5ae0f72c02548388319c152461fe2587306360f40db29"
+    }
+  },
+  "replacement_contract": {
+    "schema": "radio_gs.registered_evidence_external_execution_authority.v2",
+    "required_promotion_records": [
+      "v1_result",
+      "v2_result",
+      "cross_scene_confirmation_receipt",
+      "cross_scene_confirmation_result"
+    ],
+    "required_gate_flags": [
+      "v2_clean_gate_passed",
+      "v2_cross_scene_gate_passed",
+      "benchmark_execution_authorized"
+    ],
+    "semantic_validation": [
+      "scene0001 V2 source result passed its frozen whole-scene gate",
+      "scene0002 receipt binds the exact raw cross-scene result SHA",
+      "scene0002 raw result names V2 eligible and V3/V4 ineligible",
+      "scene0002 performed no fit, target-RGB access, benchmark access, or per-scene tuning"
+    ],
+    "validation_timing": "materializer validates before source-mask decode or target rendering; score-only interposer validates before prediction arrays and before first ground-truth open"
+  },
+  "implementation": {
+    "adapter": {
+      "path": "radio_gs/querying/registered_evidence_external_adapter.py",
+      "sha256": "5e881742e3ccb7d7a14c5675c8b362edf9a05e0666865d7125284b75e46b95f0"
+    },
+    "materializer": {
+      "path": "radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256": "4c2692079104275d9243e342f1927fb44747cc323d5e976e4d091f432b1bd744"
+    },
+    "score_only_interposer": {
+      "path": "radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "sha256": "ea2341378fb17b04de402a42704ed1fc46a0cf5bd6d5b567f6e4a2e0a658a35b"
+    },
+    "tests": {
+      "adapter": {
+        "path": "tests/test_registered_evidence_external_adapter.py",
+        "sha256": "7add12096c6e2207e56ecccccc9ecd3412abf3ac6b80fe166de9360fb8768914"
+      },
+      "score_only": {
+        "path": "tests/test_score_registered_evidence_external_prediction.py",
+        "sha256": "aebd062dccc2853cc75ff3ac41f655cff3d28f9a977274f21b30e3f75129b253"
+      }
+    }
+  },
+  "verification": {
+    "focused_tests": "15 passed",
+    "py_compile": "passed",
+    "format": "black",
+    "frozen_frame_scorer_still_directly_reused": true
+  },
+  "authorization": {
+    "room_and_fern_v2_execution_authority_may_now_be_sealed": true,
+    "old_v1_execution_authority_may_be_used": false,
+    "threshold": 0.5,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_fit": false
+  }
+}

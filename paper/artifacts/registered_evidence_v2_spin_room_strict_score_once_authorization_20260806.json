@@ -1,0 +1,61 @@
+{
+  "schema": "radio_gs.registered_evidence_external_strict_score_once_authorization.v1",
+  "schema_version": 1,
+  "status": "sealed_after_complete_prediction_barrier_replay_and_before_first_ground_truth_open",
+  "benchmark": "SPIn-NeRF",
+  "scene_id": "room",
+  "prediction_receipt": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/pre_metric_numeric_policy_v1/pre_metric_prediction_receipt.json",
+    "sha256": "0f9e22c3d4a062f6d1c9db86de6e45bce1588008bc176c845ae475970303a152",
+    "content_sha256": "a6e31ad03f8d748ae0a8bef21507b71dfd493a2906fa51a9957ce321e6dc6c74"
+  },
+  "prediction_barrier": {
+    "frame_count": 40,
+    "array_count": 120,
+    "all_individual_array_sha256_replayed": true,
+    "raw_array_record_bundle_sha256": "12afeca182cbab4dc1ae3e508f113a0ba76369c2fa9e795c91f613788b200241",
+    "support_array_record_bundle_sha256": "511a7938409351389562b9b49676cbc815af41ea71e6b298c8fafb4059285df0",
+    "calibrated_array_record_bundle_sha256": "43f156b6640c9ea9147d55b29369e40a6ff1efea00bfd4a9f6c73d658259fdc9",
+    "all_array_record_bundle_sha256": "6ca5b936660cbc19a2208ff609a88261933f65ab67cb256ce3c696daa04b94da",
+    "declared_arrays_equal_filesystem_arrays": true,
+    "all_probabilities_finite_in_closed_unit_interval": true,
+    "unsupported_raw_and_calibrated_exact_zero": true,
+    "score_receipt_absent": true
+  },
+  "protocol": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+    "input": "calibrated_v2_probability",
+    "threshold": 0.5,
+    "score_resize": "cv2.INTER_LINEAR",
+    "aggregation": "per_frame_then_scene_macro",
+    "graph": false,
+    "connected_selection": false,
+    "prediction_or_parameter_change": false
+  },
+  "implementation": {
+    "score_interposer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "sha256": "ea2341378fb17b04de402a42704ed1fc46a0cf5bd6d5b567f6e4a2e0a658a35b"
+    },
+    "frozen_frame_scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/score_nvos_sealed_prediction_batch.py",
+      "sha256": "743e28ea286f7e6b6fb02b2810438c0925ce84a022bea4ee93b5a2d98e408eac"
+    }
+  },
+  "execution": {
+    "maximum_invocations": 1,
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_benchmark_sentinels/spin_room_strict_full_mask_v1/strict_score_once/result.json",
+    "output_absent_at_registration": true,
+    "baseline_room_exact_adjoint_foreground_iou": 0.7910375263981893,
+    "baseline_used_for_posthoc_reporting_only": true
+  },
+  "source_access_at_registration": {
+    "target_ground_truth_opened": false,
+    "target_metric_computed": false,
+    "target_metrics_used_for_method_selection": false
+  }
+}

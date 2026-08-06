@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "artifact_type": "registered_evidence_external_prediction_scorer_engineering_receipt",
+  "date": "2026-08-06",
+  "status": "implementation_and_synthetic_controls_complete",
+  "scope": {
+    "benchmark_execution": false,
+    "benchmark_results_claimed": false,
+    "supported_manifest_benchmarks": [
+      "NVOS",
+      "SPIn-NeRF"
+    ],
+    "prediction_input": "hash-bound registered_evidence_v2_pre_metric_prediction_receipt only"
+  },
+  "implementation": {
+    "scorer": {
+      "path": "radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "sha256": "181ec53b4883b9d83221b364fd681dde3046f3c80548b2c2b429349ea12e6547"
+    },
+    "synthetic_tests": {
+      "path": "tests/test_score_registered_evidence_external_prediction.py",
+      "sha256": "e745909ede21d9724f4d4b5979306fd50436ad9c5528f311fcb42ad55b999552"
+    },
+    "frozen_frame_scorer_control": {
+      "path": "radio_gs/scripts/score_nvos_sealed_prediction_batch.py",
+      "sha256": "743e28ea286f7e6b6fb02b2810438c0925ce84a022bea4ee93b5a2d98e408eac"
+    }
+  },
+  "barrier": {
+    "prediction_receipt_and_content_digest_verified": true,
+    "execution_authority_and_manifest_hashes_verified": true,
+    "protocol_scene_and_target_frame_set_verified": true,
+    "all_target_raw_probability_calibrated_probability_and_support_files_hash_loaded": true,
+    "all_target_arrays_type_shape_range_support_and_unsupported_zero_invariants_verified": true,
+    "ground_truth_first_opened_only_after_complete_prediction_barrier": true,
+    "ground_truth_hash_verified_through_stable_descriptor": true,
+    "output_no_clobber_checked_before_ground_truth_open": true
+  },
+  "frozen_metric_semantics": {
+    "input": "calibrated_v2_probability",
+    "resize": "cv2.INTER_LINEAR",
+    "threshold": 0.5,
+    "comparison": "greater_or_equal",
+    "empty_union_value": 1.0,
+    "metrics": [
+      "foreground_iou",
+      "pixel_accuracy"
+    ],
+    "aggregation": "per_frame_then_scene_macro"
+  },
+  "verification": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_score_registered_evidence_external_prediction.py tests/test_score_nvos_sealed_prediction_batch.py",
+    "result": "7 passed",
+    "controls": [
+      "synthetic NVOS hash-bound receipt scores",
+      "synthetic SPIn-NeRF hash-bound receipt scores",
+      "tampered prediction evidence fails before deliberately missing ground truth is opened",
+      "receipt-manifest target-frame mismatch fails closed",
+      "new frame scorer is numerically identical to frozen _score_frame on nontrivial resize",
+      "legacy frozen scorer regression tests remain green"
+    ],
+    "py_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "repository_mutation_boundary": {
+    "new_files_only": [
+      "radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "tests/test_score_registered_evidence_external_prediction.py",
+      "paper/artifacts/score_registered_evidence_external_prediction_engineering_receipt_20260806.json"
+    ],
+    "existing_evaluator_metric_renderer_modified": false,
+    "scene0002_or_v2_trainer_files_modified": false
+  },
+  "open_items": [
+    "No real adapter receipt was scored in this engineering closeout by design.",
+    "Dataset-level aggregation remains outside this single-receipt scene scorer."
+  ]
+}

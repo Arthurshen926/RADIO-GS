@@ -1,0 +1,50 @@
+{
+  "schema": "radio_gs.registered_evidence_to_unary.protocol_aborted_diagnostic.v1",
+  "schema_version": 1,
+  "status": "protocol_aborted_no_formal_result",
+  "scene_id": "scene0001_00",
+  "reason": "The first launch did not validate every immutable input against an execution authority before deserializing labels and tensors. It was terminated when this fail-closed omission was identified.",
+  "termination": {
+    "last_complete_epoch_in_stdout": 12,
+    "formal_result_exists": false,
+    "formal_checkpoint_exists": false,
+    "eligible_for_method_or_hyperparameter_selection": false,
+    "eligible_for_performance_claim": false,
+    "settings_changed_after_diagnostic": false,
+    "formal_restart_required_from_epoch": 0
+  },
+  "noncounted_early_trace": {
+    "epoch_1_validation_average_precision": 0.5247418360162814,
+    "epoch_12_validation_average_precision": 0.5549039804647202,
+    "interpretation": "mechanism-only noncounted trace; it did not select or change architecture, split, loss, optimizer, learning rate, epoch count, threshold, or promotion rule"
+  },
+  "files": {
+    "stdout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/stdout.log",
+      "sha256": "0844094277afa473cb2e9ee1946ba558da5e30dbd727fd835857ee5f4c909184"
+    },
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/gpu0_telemetry.csv",
+      "sha256": "725c4f82f7d5c1c1889499ef7b482a8e19816881b8abb712f493573202985ca6"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/gpu0_owner_audit.csv",
+      "sha256": "247083fc5c61ec7c5fa00ef9b8189598c62929f8d04b3008cac32d5d9466bc4d"
+    }
+  },
+  "thermal": {
+    "maximum_sampled_temperature_c": 47,
+    "maximum_sampled_power_w": 127.53,
+    "maximum_sampled_memory_mib": 7938,
+    "thermal_or_driver_abort": false
+  },
+  "source_access": {
+    "clean_source_training_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_rgb_used_at_inference": false
+  }
+}

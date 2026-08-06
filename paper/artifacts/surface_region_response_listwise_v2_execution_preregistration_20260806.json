@@ -1,0 +1,114 @@
+{
+  "artifact": "surface_region_response_listwise_v2_execution_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-06T14:34:27+08:00",
+  "status": "sealed_before_v2_trainer_implementation_or_training",
+  "oracle_decision": {
+    "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_decision_20260806.json",
+    "sha256": "b66be29404eeae834d8a33bc105277c6af3698f93415e69bc4ae0974e84409c8",
+    "decision": "retain_bounded_single_center_and_replace_the_training_proxy;do_not_build_k2"
+  },
+  "frozen_v1": {
+    "trainer": {
+      "path": "radio_gs/scripts/train_surface_region_typed_context_residual.py",
+      "sha256": "02e9ba0124134b8d4bfe0ee6d76ae73fdde32fc8e7a54dc9efc8db5b0845f680"
+    },
+    "model": {
+      "path": "radio_gs/models/surface_region_typed_context_residual.py",
+      "sha256": "06287aa06223da788a2f1b95fc6906cb8496e36d722eff594d1d397c243ae36f"
+    },
+    "base_objective": "typed_context_objective with all-view cosine weight 1.0, relation weight 0.1, and boundary-balanced hard-negative weight 0.25",
+    "max_angle_radians": 0.15,
+    "max_alpha": 0.25,
+    "zero_final_projection": true,
+    "inactive_invalid_or_ood_fallback": "bitwise AcceptedV2 e0"
+  },
+  "frozen_auxiliary_loss": {
+    "path": "radio_gs/losses/source_global_response_listwise_loss.py",
+    "sha256": "552e7bf0e4d83e9346af731e6ce9eaf891968b14f32b49f728b5188c5e012ae7",
+    "config": {
+      "auxiliary_weight": 0.25,
+      "response_temperature": 0.05,
+      "normalized_pair_gap_floor": 0.05,
+      "triplet_margin_ceiling": 0.1,
+      "triplet_margin_scale": 0.5,
+      "query_chunk_rows": 128,
+      "pair_chunk_rows": 4096
+    },
+    "new_learnable_parameters": false
+  },
+  "generic_fit_text_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+    "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+    "split": "fit",
+    "queries": 806,
+    "benchmark_vocabulary_opened": false,
+    "uses_benchmark_vocabulary_for_construction": false
+  },
+  "cohort": {
+    "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "source_train_scenes": 24,
+    "source_validation_scenes": 8,
+    "scene_and_physical_space_disjoint": true
+  },
+  "training_contract": {
+    "scene_forward_unit": "one complete scene in frozen canonical_region_indices order",
+    "partial_scene_or_batch_local_listwise_loss": "reject",
+    "scene_loading": "one scene at a time; release before the next scene",
+    "base_objective": "the frozen V1 typed_context_objective evaluated over every active row in the complete scene",
+    "combined_objective": "source_global_response_listwise_loss(base_objective, complete_scene_student, complete_teacher_pairs, generic_fit_bank, hard_negative_authority)",
+    "equal_scene_gradient_accumulation": true,
+    "per_scene_loss_weights": false,
+    "per_scene_hyperparameters": false,
+    "optimizer_and_schedule": "identical to frozen V1",
+    "source_validation_selection": "minimize scene-macro frozen auxiliary response loss among checkpoints that pass every frozen V1 non-regression and bitwise-fallback gate",
+    "epoch_zero_identity_candidate": true,
+    "automatic_nonimprovement_fallback": "epoch_zero"
+  },
+  "hard_negative_contract": {
+    "one_distinct_authority_per_scene": true,
+    "required_scene_count": 32,
+    "authority_file_sha256_required": true,
+    "content_authority_sha256_required": true,
+    "accepted_v2_file_sha256_required": true,
+    "official_teacher_file_and_pair_descriptor_channel_sha256_required": true,
+    "fit_text_bank_file_and_embedding_tensor_sha256_required": true,
+    "canonical_region_indices_exact_identity_required": true,
+    "missing_or_duplicate_scene": "reject_before_model_construction"
+  },
+  "permitted_preflight": {
+    "scene0001_source_only_dry_loss": {
+      "accepted_v2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+        "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8"
+      },
+      "official_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+        "sha256": "ce2edd5034c6769a14a1afa0efe567cb648fc68e9cd72ca6f94c13db13d5e92f"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/scene0001_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "243df78a8aaa103d61fd8ed1361af4031e90484cf028ce4da0ac0d612cdec36d",
+        "content_authority_sha256": "12b9e5e0f2663f3db1d162971f007fba6fd88f1f9d6db03b5c818d301991572e"
+      },
+      "operation": "evaluate the frozen auxiliary loss at AcceptedV2 e0 with a finite scalar base loss; no optimizer and no parameter update"
+    }
+  },
+  "execution_gate": {
+    "one_scene_source_only_dry_loss_authorized": true,
+    "full_24train_8validation_training_authorized": false,
+    "condition_to_authorize_full_training": "all 32 hard-negative authorities and all frozen V1 shard/context assets pass exact SHA and cross-asset preflight, then a separate immutable execution authority binds the implemented V2 trainer",
+    "benchmark_execution_authorized": false,
+    "24_plus_8_training_may_start_from_this_preregistration_alone": false
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_text_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  }
+}

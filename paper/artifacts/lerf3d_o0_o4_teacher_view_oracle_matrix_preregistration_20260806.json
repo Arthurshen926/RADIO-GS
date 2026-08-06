@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_o0_o4_teacher_view_oracle_matrix_figurines_dev1_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_before_new_teacher_view_materialization_and_before_any_new_candidate_scoring",
+  "causal_question": "On the already-consumed Figurines development sentinel, is the remaining LERF3D gap caused by the 0.15-radian bound, by the single-center output, or by a mismatch between teacher fidelity and text-query ranking?",
+  "scope": {
+    "scene": "figurines",
+    "development_only": true,
+    "second_scene": false,
+    "training": false,
+    "per_scene_or_per_query_tuning": false,
+    "full_lerf4_opened": false
+  },
+  "immutable_inputs": {
+    "accepted_v2_multiscale_descriptors": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt",
+      "sha256": "49528e9901a5cef53410e5651740ad96b677b5c492d51c713b4a28a2efabcceb",
+      "rows": 82603,
+      "scales": 3,
+      "descriptor_dim": 1536
+    },
+    "source_view_mpr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/field_c/figurines_raw_radio_exact_center_uncertainty_train16.pt",
+      "sha256": "83c7d7db89fdea3f864200c145693c5e401d7d2506d28f70e1db44dff6e7bf28",
+      "required_policy": {
+        "aggregation_mode": "raster_exact_center_uncertainty",
+        "registration_weight_mode": "exact_front_to_back_adjoint_center",
+        "normalize_each_view": true,
+        "benchmark_images_opened": false,
+        "benchmark_masks_opened": false,
+        "text_queries_opened": false
+      }
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "positive_text_cache_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+    "canonical_negative_text_cache_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "frozen_evaluator": {
+      "path": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "fp32_score_materializer_sha256": "3ab6fcc5dbebf27a37de0f3d694626dd4d92ac71b748677d7a4ecd7dbbf1b4fd"
+  },
+  "teacher_view_authority": {
+    "source_views": "the exact 120 selected_frame_indices sealed by source_view_mpr metadata",
+    "target_exclusion": "the four official Figurines evaluation frames 41,105,152,195 remain excluded",
+    "per_view_descriptor": "exact raster-contribution weighted source RADIO observation for one primitive, followed by the singleton official C-RADIOv4 SigLIP2-G summary head and FP32 L2 normalization",
+    "retention": "for every AcceptedV2 row retain at most four visible source views by descending exact contribution mass; ties use ascending immutable frame id",
+    "view_weights": "equal mass after visibility-based retention, matching the existing multiview teacher objective",
+    "storage_ceiling_bytes": 1200000000,
+    "query_independent": true,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "oracle_definitions": {
+    "O0": "immutable AcceptedV2 e0 at each of the three frozen radii",
+    "O1": "closed-form geodesic projection of O0 toward the normalized equal-view teacher mean, capped at 0.15 radians",
+    "O2": "normalized equal-view teacher mean without an angular cap",
+    "O3": {
+      "representation": "K=2 spherical teacher-view modes",
+      "fit": "deterministic permutation-invariant spherical k-means; farthest-pair initialization; fixed four iterations; empty modes retain their deterministic seed; modes canonically ordered by descending membership then descriptor SHA-256",
+      "query_aggregation": "beta^-1 log(sum_k pi_k exp(beta*cos(u_k,q))) with beta=10 and empirical mode frequencies pi",
+      "unconditional_max_forbidden": true
+    },
+    "O4": "the same beta=10 normalized log-sum-exp over every retained per-view teacher response with equal view weights",
+    "canonical_negative_probability": "sigmoid(10*(aggregated_positive_cosine-max_over_four_canonical_negatives_of_the_same_aggregation))",
+    "fallback": "rows with no retained teacher view remain bitwise O0; one-view rows use that one teacher descriptor for O1-O4"
+  },
+  "metrics": {
+    "query_free": [
+      "mean_all_view_cosine",
+      "p05_all_view_cosine",
+      "relation_fidelity",
+      "required_rotation_angle_quantiles",
+      "per_scale_all_view_cosine"
+    ],
+    "query_level": [
+      "frozen_fixed_threshold_mIoU",
+      "average_precision",
+      "oracle_threshold_IoU",
+      "selected_purity",
+      "positive_negative_margin",
+      "within_scene_top1",
+      "rank_correlation"
+    ],
+    "unavailable_is_reported_not_imputed": true
+  },
+  "control_and_stop_rules": {
+    "O0_expected_miou": 0.4753371775,
+    "O0_maximum_absolute_reproduction_error": 0.0001,
+    "fail_closed_on_control_mismatch": true,
+    "bounded_single_center_stop": "If O1 does not improve both AP and oracle IoU over O0, stop the current bounded V1 residual line.",
+    "distributional_stop": "If O3 does not improve over O2 on AP and oracle IoU without a fixed-mIoU regression above 0.01, do not build a distributional region head.",
+    "proxy_mismatch": "If query-free teacher fidelity improves but AP/oracle IoU do not, prioritize query-response/listwise training rather than more capacity.",
+    "no_threshold_graph_scale_prompt_or_scene_sweep": true
+  },
+  "execution": {
+    "preferred_physical_gpu": 1,
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 30,
+    "hard_temperature_c": 88,
+    "consecutive_hot_polls_before_stop": 6,
+    "frozen_evaluator_may_not_be_edited": true
+  },
+  "candidate_target_metrics_opened_before_registration": false
+}

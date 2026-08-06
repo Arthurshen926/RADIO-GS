@@ -1,0 +1,104 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.clean_scannet_preregistration.v2",
+  "schema_version": 2,
+  "status": "sealed_after_v1_clean_validation_and_before_v2_calibrator_fit",
+  "scientific_diagnosis": {
+    "v1_ranking_conclusion": "RegisteredEvidenceToUnaryV1 improved every held-out validation prompt AP and improved macro AP, AUROC, oracle IoU, fixed-threshold IoU, precision, recall, and BCE.",
+    "v1_only_macro_promotion_failure": "candidate predicted-to-target area ratio was 1.8404688245563001, outside the frozen [0.8,1.25] interval, although it improved from the analytic 2.104796498945095",
+    "mechanism_hypothesis": "class-balanced BCE learned useful ordering but imposed an artificial equal-class decision prior; a proper-BCE two-parameter global monotone calibration can repair probability scale without changing ranking"
+  },
+  "method": {
+    "name": "GlobalPromptLogitCalibratorV2",
+    "scope": "post-render supported-pixel scalar calibration after the frozen graph-off V1 primitive unary and exact scalar renderer",
+    "formula": "p_calibrated = sigmoid(logit(clamp(p_v1,1e-6,1-1e-6))/temperature + bias)",
+    "parameters": ["one positive global temperature", "one global bias"],
+    "positive_temperature_parameterization": "softplus(raw_temperature)+1e-4",
+    "parameter_count": 2,
+    "ranking_invariant": "strictly increasing scalar transform for every finite input because temperature is positive; AP, AUROC, and oracle IoU must be preserved up to numeric tolerance",
+    "v1_head_changed": false,
+    "v1_checkpoint_changed": false,
+    "primitive_unary_changed": false,
+    "graph": "off",
+    "connected_selection": "off",
+    "per_scene_parameters": false
+  },
+  "fit": {
+    "instances": "the 17 frozen V1 train instance IDs only",
+    "prompts": ["full_mask", "scribble"],
+    "views": "all frozen source-distinct held-out target views of train instances",
+    "inputs": "frozen V1 rendered supported-pixel probabilities",
+    "labels": "binary official instance membership for the corresponding train instance and target view",
+    "loss": "ordinary unweighted pixel-micro binary cross entropy (proper BCE)",
+    "optimizer": "deterministic full-batch LBFGS with strong-Wolfe line search",
+    "maximum_iterations": 100,
+    "history_size": 20,
+    "tolerance_grad": 1e-12,
+    "tolerance_change": 1e-12,
+    "initial_temperature": 1.0,
+    "initial_bias": 0.0,
+    "regularization": "none",
+    "validation_labels_used_for_fit": false,
+    "validation_labels_used_for_early_stop": false,
+    "validation_labels_used_for_hyperparameter_selection": false
+  },
+  "evaluation": {
+    "instances": "the same four frozen V1 validation instance IDs [1,12,20,21]",
+    "instance_disjoint_from_fit": true,
+    "target_views": "the same source-distinct held-out target views as V1",
+    "modes_reported": ["all", "full_mask", "scribble"],
+    "metrics": [
+      "average precision",
+      "AUROC",
+      "IoU at fixed 0.5",
+      "oracle IoU",
+      "precision at fixed 0.5",
+      "recall at fixed 0.5",
+      "predicted-to-target area ratio",
+      "BCE"
+    ]
+  },
+  "promotion_gate": {
+    "v1_average_precision_preserved_absolute_tolerance": 1e-10,
+    "v1_auroc_preserved_absolute_tolerance": 1e-10,
+    "v1_oracle_iou_preserved_absolute_tolerance": 1e-10,
+    "candidate_area_ratio_interval": [0.8, 1.25],
+    "candidate_iou_at_0_5_not_below_analytic": true,
+    "candidate_precision_at_0_5_not_below_analytic": true,
+    "worst_prompt_average_precision_delta_vs_analytic_minimum": -0.05,
+    "failure_action": "stop before every benchmark target metric"
+  },
+  "frozen_v1_authority": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.json",
+      "sha256": "3ad03ad67638879d16698e1efdf1a64367ba5e23bcb24542dcbef6edfcd7813f"
+    },
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.pth",
+      "sha256": "30f749485f0232568f66cc00694cbaf5a6fed922ecb105a1f1d60936a548e149"
+    },
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_execution_authority_v2_20260806.json",
+      "sha256": "de7cb637b8980d9cd0fef46b7a6453840318add276a7b7dbe6b3d507462d36ab"
+    },
+    "producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_registered_evidence_to_unary_clean_pilot.py",
+      "sha256": "d2dba997ad3efbc5607844506c3717b97f7cb50b80fe7abda5d5cb3139911c7d"
+    },
+    "unary_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_to_unary.py",
+      "sha256": "7965b1ab5079815c4629e11abbd577d10c71241cf20b408f337877a767f0e8cd"
+    }
+  },
+  "source_access": {
+    "clean_source_training_instance_labels_opened": true,
+    "clean_validation_instance_labels_opened_only_after_calibrator_parameters_are_frozen": true,
+    "clean_validation_labels_enter_fit": false,
+    "clean_target_view_rgb_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

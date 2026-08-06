@@ -1,0 +1,80 @@
+{
+  "schema": "radio_gs.registered_evidence_external_benchmark_result.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "experiment": "registered-evidence-v2-nvos-fern-signed-scribble-sentinel",
+  "status": "complete_one_shot_frozen_protocol_result",
+  "decision": "retain_registered_evidence_v2_as_the_new_nvos_fern_graph_free_unary_candidate",
+  "result": {
+    "scene_id": "fern",
+    "frame_count": 1,
+    "foreground_iou": 0.7621003198747434,
+    "pixel_accuracy": 0.9204753770414154,
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/score/result.json",
+    "sha256": "a51f0587e92ba8c43886b7399062c0dbc10c2d5eed86ac686c4e36fcbcfea89f"
+  },
+  "comparisons": {
+    "retained_graph_off_hierarchical_trust_v2": {
+      "foreground_iou": 0.7350345861696804,
+      "absolute_iou_gain": 0.027065733705063,
+      "reference": {
+        "path": "/root/RADIO-GS/paper/artifacts/nvos_observation_clamped_graph_completion_stop_results_20260806.json",
+        "sha256": "bbec9d652a6c740cae2914a4de480e789c97bccba17f71305b95f34526d263e4"
+      }
+    },
+    "canonical_compact_graph_free_unary": {
+      "foreground_iou": 0.7553155907838534,
+      "absolute_iou_gain": 0.00678472909089,
+      "reference": {
+        "path": "/root/RADIO-GS/paper/artifacts/nvos_exact_mpr_compact_same_compiler_ladder_results_20260805.json",
+        "sha256": "853180ffac2c308f64eea1c70b20f72bf35b0133200cb11dd5e3ebbdb62446"
+      }
+    },
+    "canonical_factorized_radio_v1": {
+      "foreground_iou": 0.7551381656227402,
+      "absolute_iou_gain": 0.0069621542520032,
+      "reference": {
+        "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_fern_frozen_unary_sentinel_results_20260805.json",
+        "sha256": "ba4fc8293571be6c4455f3a380e55bfd13915484f30b4a664ca2c125cb9ba00d"
+      }
+    }
+  },
+  "execution_evidence": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_external_execution_authority_20260806.json",
+      "sha256": "493f65138b91588a9a98acaf970dd789b2fb3d732d18c58467bdaf08720e3a4e"
+    },
+    "fresh_run_addendum": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_materializer_fresh_run_addendum_20260806.json",
+      "sha256": "2dad6994df0ec395887975807775ed4ed879bd6b018cae447ebe656245b3db38"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/source_only/factorized_primitive_state_v2.pt",
+      "sha256": "62854fb93a5ef96e96ea63598fecdba43b927c79d1f5cf33817d1e41597f8875"
+    },
+    "pre_metric_prediction_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/pre_gt_prediction/pre_metric_prediction_receipt.json",
+      "sha256": "ba3a20c0cbf0daa904b3fac33a43a84873423f42c8ae379a8ed74f943f70bb2f"
+    },
+    "paper_pre_metric_receipt": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_pre_gt_prediction_receipt_20260806.json",
+      "sha256": "9ffb3c2e52a891ba870130d587902306ed1da4a41dd053aa0e0cb47fc7e45a76"
+    }
+  },
+  "method_controls": {
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_fit": false,
+    "threshold_scan": false,
+    "threshold": 0.5,
+    "target_metrics_used_for_selection": false,
+    "score_only_invocation_count": 1
+  },
+  "conclusion": "The cross-scene-promoted registered-evidence readout plus global V2 post-render calibration gives a real frozen-protocol improvement on NVOS fern. The gain survives both the retained graph-off baseline and the stronger canonical compact/factorized controls without graph completion, connected selection, scene-specific fitting, or threshold search. No further fern tuning or rerun is authorized.",
+  "gpu_telemetry": {
+    "physical_gpu": 1,
+    "max_temperature_c": 42,
+    "max_power_watts": 120.71,
+    "thermal_stop_triggered": false
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "schema": "radio_gs.registered_evidence_to_unary.implementation_failure.v1",
+  "schema_version": 1,
+  "status": "completed_training_but_no_formal_result_or_checkpoint",
+  "scene_id": "scene0001_00",
+  "failure": "Python NameError while assembling source_access after epoch 80 because JSON-style lowercase booleans were used in Python result construction",
+  "scope": "serialization-only implementation defect after training and metric computation",
+  "formal_result_exists": false,
+  "formal_checkpoint_exists": false,
+  "eligible_for_performance_claim": false,
+  "eligible_for_method_or_hyperparameter_selection": false,
+  "method_configuration_changed": false,
+  "required_action": "bind corrected implementation and restart from epoch 0",
+  "failed_implementation_sha256": "f5c6c169c1bd751e3c07bdf4b43f34e35f5f4d87d5c24236f8a3ff0a120ee041",
+  "corrected_implementation_sha256": "d2dba997ad3efbc5607844506c3717b97f7cb50b80fe7abda5d5cb3139911c7d",
+  "files": {
+    "stdout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v1/stdout.log",
+      "sha256": "c45cfb1617e56172c8d672e10b6ad150a984c26388d26bfd36e4313648465670"
+    },
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v1/gpu0_telemetry.csv",
+      "sha256": "e0aee916460ba965f8e18fbf385e4bd2c26e706522461cecac4b04a3ee6f71e4"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v1/gpu0_owner_audit.csv",
+      "sha256": "247d40ebc3934822aea29299c7f32d409a3e0f6e702a0ea72c7ec5afb7b3e412"
+    }
+  },
+  "thermal": {
+    "maximum_sampled_temperature_c": 54,
+    "maximum_sampled_power_w": 164.5,
+    "maximum_sampled_memory_mib": 7938,
+    "thermal_or_driver_failure": false
+  },
+  "source_access": {
+    "clean_source_training_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_rgb_used_at_inference": false
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "radio_gs.prompt_unary.cross_scene_clean_confirmation_result_receipt.v1",
+  "schema_version": 1,
+  "status": "scene0002_independent_confirmation_complete",
+  "scene_id": "scene0002_00",
+  "cohort": {
+    "eligible_instances": 50,
+    "validation_instances_evaluated": 10,
+    "prompt_count": 20,
+    "scene0002_fit_or_selection": false,
+    "fixed_threshold": 0.5
+  },
+  "macro_all": {
+    "analytic": {
+      "average_precision": 0.5434019922210149,
+      "oracle_iou": 0.44120720128170204,
+      "iou_at_0_5": 0.3076943900943646,
+      "precision_at_0_5": 0.34630266443204244,
+      "area_ratio": 3.2804220722829927
+    },
+    "V1": {
+      "average_precision": 0.6146715310640606,
+      "oracle_iou": 0.4871153286957588,
+      "iou_at_0_5": 0.3760915983780671,
+      "precision_at_0_5": 0.4368590611964326,
+      "area_ratio": 2.392869098186309
+    },
+    "V2": {
+      "average_precision": 0.6146715310640606,
+      "oracle_iou": 0.4871153286957588,
+      "iou_at_0_5": 0.42592837807748046,
+      "precision_at_0_5": 0.677973796133568,
+      "area_ratio": 0.9069421400947737
+    },
+    "V3_diagnostic_only": {
+      "iou_at_0_5": 0.4309563275424685,
+      "area_ratio": 0.9313688748707769
+    },
+    "V4_diagnostic_only": {
+      "iou_at_0_5": 0.37737266672023556,
+      "area_ratio": 2.2555483335840556
+    }
+  },
+  "mode_area_and_fixed_iou": {
+    "V2_full_mask": {
+      "iou_at_0_5": 0.4816314169386612,
+      "area_ratio": 1.0997020784836795
+    },
+    "V2_scribble": {
+      "iou_at_0_5": 0.37022533921629985,
+      "area_ratio": 0.7141822017058682
+    },
+    "V3_scribble_diagnostic_only": {
+      "iou_at_0_5": 0.37913445457944894,
+      "area_ratio": 0.8220997227107354
+    },
+    "V4_scribble_diagnostic_only": {
+      "iou_at_0_5": 0.2719671329349832,
+      "area_ratio": 3.4704586401372928
+    }
+  },
+  "ranking": {
+    "V1_average_precision_delta_vs_analytic": 0.0712695388430457,
+    "V1_oracle_iou_delta_vs_analytic": 0.045908127414056756,
+    "worst_prompt_average_precision_delta_vs_analytic": -0.003927454402000707,
+    "V2_V3_V4_stable_order_and_tie_partitions_equal_to_V1": true,
+    "maximum_AP_AUROC_oracle_iou_error_vs_V1": 0.0
+  },
+  "decision": {
+    "V1": "ranking transfer confirmed, but not eligible because its original whole gate failed and its scene0002 macro area remains 2.3929",
+    "V2": "only existing candidate eligible to continue: original whole gate and independent scene0002 macro cross-scene gate both pass",
+    "V2_caveat": "scribble remains under-selected with area ratio 0.7142 despite the frozen macro gate passing",
+    "V3": "diagnostic only; its prior formal whole gate failure cannot be reversed by this scene",
+    "V4": "diagnostic only; scene0002 confirms severe scribble over-selection"
+  },
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_unary_scene0002_clean_confirmation_v1/confirmation/result.json",
+      "sha256": "a3d8551e044fff6394f5ae0f72c02548388319c152461fe2587306360f40db29"
+    },
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/prompt_unary_scene0002_cross_scene_execution_authority_v2_20260806.json",
+      "sha256": "4f0683002d8832533447001862dd066581e1e0cd58a15a6996a26a50bcc24eeb"
+    },
+    "capability_bank_sha256": "c5c1e46369d87fd1f0a817aa6d7399c0dba61293aa5912f3705db519ffce588c",
+    "label_zip_sha256": "9dc8915a293074d3526d09c4afa5d207232f9e23c4230aa6b5381c3d1a3e6160"
+  },
+  "verification": {
+    "focused_module_tests_passed": 14,
+    "evaluator_device": "CPU",
+    "capability_build_physical_gpu": 1,
+    "capability_build_max_temperature_c": 44,
+    "capability_build_max_power_w": 119.63,
+    "thermal_stop_triggered": false
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

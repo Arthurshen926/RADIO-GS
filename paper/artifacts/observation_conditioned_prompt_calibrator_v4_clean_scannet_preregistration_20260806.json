@@ -1,0 +1,94 @@
+{
+  "schema": "radio_gs.observation_conditioned_prompt_calibrator.clean_scannet_preregistration.v4",
+  "schema_version": 4,
+  "status": "sealed_after_v3_clean_failure_and_before_v4_fit",
+  "scene_id": "scene0001_00",
+  "scientific_diagnosis": {
+    "v3_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_mode_logit_calibrator_v3_scene0001_pilot/formal_v1/result.json",
+      "sha256": "6f23193bb8cd1d6d83c95197e34816066a7bd345dafacec22955a12a74219e8f"
+    },
+    "full_mask_observation_model": "A full object mask approximately supplies complete pixel membership, so ordinary pixel-frequency proper BCE is an appropriate posterior calibration objective.",
+    "scribble_observation_model": "Positive and negative scribbles are case-control/censored observations. Their sampled pixel frequency is an annotation-design quantity rather than the natural deployment foreground prior, so ordinary pixel-micro BCE incorrectly calibrates it as a posterior and systematically under-selects foreground.",
+    "registered_fix": "Fit scribble calibration with equal positive and negative logistic risk inside each train prompt, then average the 17 prompt risks equally. The resulting scalar is a class-symmetric foreground likelihood unary whose fixed 0.5 decision is not set by observed scribble class frequency."
+  },
+  "method": {
+    "name": "ObservationConditionedPromptCalibratorV4",
+    "architecture": "one positive temperature and one bias for each source-known mode [full_mask, scribble]",
+    "parameter_count": 4,
+    "formula_per_mode": "p_interior=1e-6+(1-2e-6)*p_v1; calibrated_logit=logit(p_interior)/positive_temperature[mode]+bias[mode]",
+    "fixed_interiorization_epsilon": 1e-6,
+    "fixed_interiorization_is_trainable": false,
+    "temperature_parameterization": "softplus(raw_temperature)+1e-4",
+    "formal_dtype": "float64",
+    "scene_id_is_model_input": false,
+    "target_view_is_model_input": false,
+    "target_image_is_model_input": false,
+    "target_label_is_model_input": false,
+    "per_scene_parameters": false,
+    "v1_head_changed": false,
+    "v1_checkpoint_changed": false,
+    "graph": "off",
+    "connected_selection": "off"
+  },
+  "fit": {
+    "instances": "the same 17 frozen V1 train instance IDs only",
+    "full_mask_loss": "ordinary unweighted pixel-micro BCEWithLogits over all full-mask train prompts and held-out target views",
+    "scribble_loss": "mean over 17 train prompts of [0.5*mean_positive softplus(-logit) + 0.5*mean_negative softplus(logit)]",
+    "scribble_prompt_weighting": "each train prompt has weight 1/17 independent of pixels, foreground area, or target-view count",
+    "scribble_class_weighting_within_prompt": "positive class 0.5 and negative class 0.5",
+    "loss_weights_are_tuned": false,
+    "threshold_is_tuned": false,
+    "optimizer_per_mode": "deterministic full-batch LBFGS with strong-Wolfe line search",
+    "maximum_iterations": 100,
+    "history_size": 20,
+    "tolerance_grad": 1e-12,
+    "tolerance_change": 1e-12,
+    "initial_temperature": 1.0,
+    "initial_bias": 0.0,
+    "regularization": "none",
+    "validation_labels_used_for_fit": false,
+    "validation_labels_used_for_early_stop": false,
+    "validation_labels_used_for_hyperparameter_selection": false
+  },
+  "evaluation": {
+    "instances": "the same four frozen V1 validation instance IDs [1,12,20,21]",
+    "instance_disjoint_from_fit": true,
+    "fixed_probability_threshold": 0.5,
+    "threshold_sweep": false,
+    "modes_reported": ["all", "full_mask", "scribble"],
+    "v1_reproduction_absolute_tolerance": 1e-6,
+    "per_mode_stable_argsort_and_tie_partition_must_match": true,
+    "calibrated_vs_v1_average_precision_absolute_tolerance": 1e-10,
+    "calibrated_vs_v1_auroc_absolute_tolerance": 1e-10,
+    "calibrated_vs_v1_oracle_iou_absolute_tolerance": 1e-10
+  },
+  "promotion_gate": {
+    "full_mask_iou_at_0_5_not_below_v1": true,
+    "scribble_iou_at_0_5_not_below_v1": true,
+    "full_mask_area_ratio_interval": [0.8, 1.25],
+    "scribble_area_ratio_interval": [0.8, 1.25],
+    "full_mask_precision_at_0_5_not_below_analytic": true,
+    "scribble_precision_at_0_5_not_below_analytic": true,
+    "worst_prompt_average_precision_delta_vs_analytic_minimum": -0.05,
+    "failure_action": "stop this calibration branch before every benchmark target metric; do not try a fifth calibration variant"
+  },
+  "iteration_status": {
+    "same_scene_validation_was_seen_for_v2_and_v3_method_diagnosis": true,
+    "v4_same_scene_gate_is_development_evidence_not_independent_confirmation": true,
+    "required_next_step_if_passed": "cross-scene clean confirmation before any benchmark"
+  },
+  "source_access": {
+    "validation_label_payload_may_be_deserialized_by_shared_v1_loader_before_fit": true,
+    "validation_prompt_feature_tensors_may_be_constructed_before_fit": true,
+    "validation_derived_tensor_prediction_or_metric_enters_optimizer": false,
+    "fit_receipt_frozen_before_validation_prediction_or_metric_evaluation": true,
+    "target_rgb_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

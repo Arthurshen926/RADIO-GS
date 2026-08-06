@@ -1,0 +1,16 @@
+{
+  "schema": "radio_gs.prompt_unary.cross_scene_evaluator_implementation_failure.v1",
+  "schema_version": 1,
+  "status": "failed_closed_before_zip_or_png_open_and_before_any_scene0002_metric",
+  "scene_id": "scene0002_00",
+  "failed_implementation_sha256": "759cb4710b74807bc86ddc99f67d98226b5f8ebe923f0d3b3e5f358046bb8f54",
+  "execution_authority_sha256": "8769dd8aaeaa8812808a9ecf639c1a8ed81f909050968e650f0582e659333b52",
+  "failure": "The evaluator expected paper-receipt status strings while the correctly bound raw source result JSONs encode promotion_gate_passed and decision.",
+  "outputs_written": false,
+  "scene0002_label_zip_file_bytes_hash_verified_and_loaded": true,
+  "scene0002_zip_opened": false,
+  "scene0002_instance_png_opened": false,
+  "scene0002_metric_computed": false,
+  "method_split_threshold_or_checkpoint_changed": false,
+  "registered_fix": "Validate the already frozen raw-result promotion_gate_passed and decision fields; change no model, split, score, threshold, or gate."
+}

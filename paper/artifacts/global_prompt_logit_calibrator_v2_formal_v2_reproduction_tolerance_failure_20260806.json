@@ -1,0 +1,46 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.formal_failure.v2",
+  "schema_version": 2,
+  "status": "failed_closed_after_train_only_fit_receipt_and_before_result_emission",
+  "scene_id": "scene0001_00",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_clean_scannet_execution_authority_v3_20260806.json",
+    "sha256": "586472f0723fd1e86cbd937da23c4821fc49d82263dde911845586df60c54651"
+  },
+  "fit": {
+    "temperature": 0.9141633664944948,
+    "bias": -1.6776297522306172,
+    "initial_train_bce": 0.2983896181574104,
+    "final_train_bce": 0.19158873600453447,
+    "stable_argsort_equal": true,
+    "tie_partition_equal": true,
+    "calibrator_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v2/calibrator.pt",
+      "sha256": "a4e90226c2e918e39ba26bc53e9044df28fd2c642eb4f19517826ca52960e225"
+    },
+    "fit_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v2/fit_receipt.json",
+      "sha256": "abfe65f53a74f2833b36c169eb6ee8b304ed284672f8da53f88e06136165c0ef"
+    }
+  },
+  "failure": {
+    "stage": "validation frozen-V1 reproduction control before result emission",
+    "instance_id": 1,
+    "prompt_mode": "scribble",
+    "maximum_metric_absolute_error": 1.2972491292284616e-7,
+    "registered_absolute_tolerance": 1e-10,
+    "exception": "frozen V1 prompt metric reproduction exceeds tolerance",
+    "diagnosis": "The control reused the V1 sparse-view path, but approximately 1e-7 floating-point recomputation drift is expected across fresh GEMM invocations. This tolerance is distinct from the calibrated ranking-preservation gate."
+  },
+  "outputs": {
+    "train_only_fit_artifacts_created": true,
+    "result_created": false,
+    "eligible_for_selection": false
+  },
+  "logs": {
+    "stdout_sha256": "311ef51e35298de4c69694c60f492ee56fb1f2d589826c2a0889b8fe181faa0e",
+    "gpu_telemetry_sha256": "9e470ea0e8b400737bc23b530bc7e164d6af6dcb28b26ea371504690cb2c82ab",
+    "owner_audit_sha256": "5412771b2fec58062ff51e96e2f45dd5e95fc607d6e99541b0f4d7a9d952ce6d"
+  },
+  "next_action": "Use the independently advised 1e-6 tolerance only for frozen-V1 recomputation control; retain 1e-10 for calibrated-versus-V1 AP, AUROC, and oracle-IoU preservation."
+}

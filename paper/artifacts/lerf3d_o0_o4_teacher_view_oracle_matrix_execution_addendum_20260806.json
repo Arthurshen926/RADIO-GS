@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_o0_o4_teacher_view_oracle_matrix_figurines_dev1_execution_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_after_source_only_teacher_authority_and_before_oracle_representation_scoring_or_target_metric_open",
+  "parent_implementation_addendum": {
+    "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_empty_view_implementation_addendum_20260806.json",
+    "sha256": "b445d6b7dbe4baad80dde9bb39c46fc4dd3e61e3b9c2db609f478b6b93fa9378"
+  },
+  "teacher_view_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/source_only/figurines_teacher_top4_siglip.pt",
+    "sha256": "0369a01256937d28dc3e31d2e3fe8a793a87da35293922924b896f385b637d86",
+    "content_authority_sha256": "dea108c4c4cc525d512e57df770abd8d8d9836ed51ffd6671f7d96f89779b5bf",
+    "accepted_rows": 82603,
+    "rows_with_teacher": 82400,
+    "rows_with_four_views": 79537,
+    "source_views": 120,
+    "target_frames_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "immutable_inputs": {
+    "accepted_v2_descriptor_sha256": "49528e9901a5cef53410e5651740ad96b677b5c492d51c713b4a28a2efabcceb",
+    "positive_text_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_figurines_officialcanonical_prompt5.pt",
+      "sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b"
+    },
+    "canonical_negative_text_cache": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+      "sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0"
+    },
+    "o0_positive_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_positive.pt",
+      "sha256": "7e7611ac7c886917d0b415c613e16c740d6248cb46c0bde536df6d353d9f739c"
+    },
+    "o0_negative_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_negative.pt",
+      "sha256": "a887eb9da5631ed8a1966e3ad844bb0797d94626a6025e1293b5712e11b9b19f"
+    },
+    "frozen_evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+  },
+  "oracle_execution": {
+    "O1": "FP32 closed-form 0.15-radian geodesic projection at each frozen scale; raw positive and canonical-negative cosine caches",
+    "O2": "FP32 normalized equal-view teacher mean repeated over the three evaluator scale slots; raw positive and canonical-negative cosine caches",
+    "O3": "K=2 modes canonically ordered by membership descending then float32 descriptor SHA-256 ascending; beta=10 frequency-weighted normalized LSE; final canonical-negative Bernoulli probability",
+    "O4": "beta=10 equal-view normalized LSE over retained teacher responses; final canonical-negative Bernoulli probability",
+    "fallback": "203 no-teacher rows use the exact O0 per-scale responses",
+    "probability_cache_compatibility_envelope": "O3/O4 use the frozen evaluator v3 exact_frozen_v2_slot0_control envelope because a nonlinear response distribution has no honest single-descriptor raw-cosine cache; the stored score formula records the exact O3/O4 aggregation.",
+    "O4_query_free_descriptor_metrics": "explicitly unavailable and null because O4 has no single query-free descriptor",
+    "unconditional_max_forbidden": true,
+    "batch_size_changes_method": false
+  },
+  "immutable_implementation": {
+    "producer": {
+      "path": "radio_gs/scripts/materialize_lerf_teacher_view_oracle_matrix.py",
+      "sha256": "f05fa8be771afe155a8cec09cf3361f254a7dc4c70de08d2d6665f909507cde6"
+    },
+    "unit_tests": {
+      "path": "tests/test_materialize_lerf_teacher_view_oracle_matrix.py",
+      "sha256": "58a3b5014dfdbabb5e2bc2d31de55bbc0d5b6a83f78d155b507051d3265dc810",
+      "result": "3 passed",
+      "permutation_checks": 24
+    }
+  },
+  "metric_open_gate": {
+    "first_action_after_materialization": "run O0 through the unchanged frozen evaluator",
+    "expected_o0_miou": 0.4753371775,
+    "maximum_absolute_error": 0.0001,
+    "o1_o4_metrics_forbidden_until_gate_passes": true,
+    "second_scene_forbidden": true
+  },
+  "candidate_target_metrics_opened_before_registration": false
+}

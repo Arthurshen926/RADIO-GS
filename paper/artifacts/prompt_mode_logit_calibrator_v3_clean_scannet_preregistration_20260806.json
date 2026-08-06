@@ -1,0 +1,101 @@
+{
+  "schema": "radio_gs.prompt_mode_logit_calibrator.clean_scannet_preregistration.v3",
+  "schema_version": 3,
+  "status": "sealed_after_v2_clean_validation_and_before_v3_fit",
+  "scene_id": "scene0001_00",
+  "scientific_diagnosis": {
+    "v2_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/global_prompt_logit_calibrator_v2_scene0001_pilot/formal_v3/result.json",
+      "sha256": "cca4067acc4d7bf5c2a266bb5992f8ad04a41b0f8bdf02ea9affaf5f7e95f8e7"
+    },
+    "observation": "One global V2 scale repaired overall area ratio to 0.8349 and overall precision/IoU, but full-mask area ratio was 1.0206 while scribble area ratio was 0.6492 and scribble recall was 0.3899.",
+    "hypothesis": "Full masks and scribbles are distinct known source-observation mechanisms with different censoring and class priors. Conditioning only the global probability calibration on this known interface can repair their different scales without weakening the shared feature field or introducing scene-specific parameters."
+  },
+  "method": {
+    "name": "PromptModeLogitCalibratorV3",
+    "input_score": "frozen RegisteredEvidenceToUnaryV1 exact-rendered supported-pixel probability",
+    "input_condition": "source-known prompt mode in the fixed set [full_mask, scribble]",
+    "formula_per_mode": "p_interior = 1e-6 + (1-2e-6)*p_v1; logit_calibrated = logit(p_interior)/positive_temperature[mode] + bias[mode]",
+    "trainable_parameters": [
+      "full_mask positive temperature",
+      "full_mask bias",
+      "scribble positive temperature",
+      "scribble bias"
+    ],
+    "parameter_count": 4,
+    "fixed_interiorization_epsilon": 1e-6,
+    "fixed_interiorization_is_trainable": false,
+    "temperature_parameterization": "softplus(raw_temperature)+1e-4",
+    "formal_dtype": "float64",
+    "scene_id_is_model_input": false,
+    "target_view_is_model_input": false,
+    "target_image_is_model_input": false,
+    "target_label_is_model_input": false,
+    "v1_head_changed": false,
+    "v1_checkpoint_changed": false,
+    "graph": "off",
+    "connected_selection": "off"
+  },
+  "fit": {
+    "instances": "the same 17 frozen V1 train instance IDs only",
+    "modes_fit_independently": ["full_mask", "scribble"],
+    "views": "all frozen source-distinct held-out target views for the corresponding train prompt mode",
+    "loss_per_mode": "ordinary unweighted pixel-micro BCEWithLogits",
+    "optimizer_per_mode": "deterministic full-batch LBFGS with strong-Wolfe line search",
+    "maximum_iterations": 100,
+    "history_size": 20,
+    "tolerance_grad": 1e-12,
+    "tolerance_change": 1e-12,
+    "initial_temperature": 1.0,
+    "initial_bias": 0.0,
+    "regularization": "none",
+    "validation_labels_used_for_fit": false,
+    "validation_labels_used_for_early_stop": false,
+    "validation_labels_used_for_hyperparameter_selection": false
+  },
+  "evaluation": {
+    "instances": "the same four frozen V1 validation instance IDs [1,12,20,21]",
+    "instance_disjoint_from_fit": true,
+    "modes_reported": ["all", "full_mask", "scribble"],
+    "v1_reproduction_absolute_tolerance": 1e-6,
+    "per_mode_stable_argsort_and_tie_partition_must_match": true,
+    "calibrated_vs_v1_average_precision_absolute_tolerance": 1e-10,
+    "calibrated_vs_v1_auroc_absolute_tolerance": 1e-10,
+    "calibrated_vs_v1_oracle_iou_absolute_tolerance": 1e-10
+  },
+  "promotion_gate": {
+    "full_mask_iou_at_0_5_not_below_v1": true,
+    "scribble_iou_at_0_5_not_below_v1": true,
+    "full_mask_area_ratio_interval": [0.8, 1.25],
+    "scribble_area_ratio_interval": [0.8, 1.25],
+    "full_mask_precision_at_0_5_not_below_analytic": true,
+    "scribble_precision_at_0_5_not_below_analytic": true,
+    "worst_prompt_average_precision_delta_vs_analytic_minimum": -0.05,
+    "failure_action": "stop before every benchmark target metric"
+  },
+  "iteration_status": {
+    "same_scene_validation_was_seen_for_v2_method_diagnosis": true,
+    "v3_same_scene_gate_is_development_evidence_not_independent_confirmation": true,
+    "required_next_step_if_passed": "cross-scene clean confirmation before any benchmark"
+  },
+  "frozen_v1_authority": {
+    "result_sha256": "3ad03ad67638879d16698e1efdf1a64367ba5e23bcb24542dcbef6edfcd7813f",
+    "checkpoint_sha256": "30f749485f0232568f66cc00694cbaf5a6fed922ecb105a1f1d60936a548e149",
+    "execution_authority_sha256": "de7cb637b8980d9cd0fef46b7a6453840318add276a7b7dbe6b3d507462d36ab",
+    "producer_sha256": "d2dba997ad3efbc5607844506c3717b97f7cb50b80fe7abda5d5cb3139911c7d",
+    "unary_module_sha256": "7965b1ab5079815c4629e11abbd577d10c71241cf20b408f337877a767f0e8cd"
+  },
+  "source_access": {
+    "validation_label_payload_may_be_deserialized_by_shared_v1_loader_before_fit": true,
+    "validation_prompt_feature_tensors_may_be_constructed_before_fit": true,
+    "validation_derived_tensor_prediction_or_metric_enters_optimizer": false,
+    "fit_receipt_frozen_before_validation_prediction_or_metric_evaluation": true,
+    "target_rgb_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

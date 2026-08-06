@@ -1,0 +1,41 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.strict_interiorization_addendum.v2",
+  "schema_version": 2,
+  "status": "sealed_after_formal_v1_failure_and_before_formal_v2_fit",
+  "scene_id": "scene0001_00",
+  "triggering_failure": {
+    "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_formal_v1_strict_clamp_failure_20260806.json",
+    "sha256": "5b95cba53c487252ff6e1e508884bac5614f7506833c8fe1b38be32311cb2554"
+  },
+  "corrected_formula": {
+    "fixed_interiorization": "p_interior = 1e-6 + (1 - 2e-6) * p_v1",
+    "calibrated_logit": "logit(p_interior) / positive_temperature + bias",
+    "calibrated_probability": "sigmoid(calibrated_logit)",
+    "trainable_parameters": [
+      "one positive global temperature",
+      "one global bias"
+    ],
+    "parameter_count": 2,
+    "formal_numeric_dtype": "float64"
+  },
+  "proof_obligations": {
+    "finite_domain": "For every p_v1 in [0,1], p_interior is in [1e-6,1-1e-6], so logit is finite.",
+    "strict_monotonicity": "The fixed affine slope is 1-2e-6 > 0, logit is strictly increasing on (0,1), division by positive temperature preserves order, and addition of bias preserves order.",
+    "ranking_gate": "Per-prompt AP, AUROC, and oracle IoU must still equal frozen V1 within absolute tolerance 1e-10.",
+    "v1_reproduction_control": "Before result emission, all frozen V1 prompt metrics must reproduce within absolute tolerance 1e-10."
+  },
+  "unchanged_contract": {
+    "fit_instances": "the same 17 frozen V1 train instance IDs only",
+    "loss": "ordinary unweighted pixel-micro BCE",
+    "optimizer": "deterministic full-batch LBFGS with strong-Wolfe line search",
+    "validation_labels_used_for_fit": false,
+    "validation_labels_used_for_early_stop": false,
+    "validation_labels_used_for_hyperparameter_selection": false,
+    "v1_head_changed": false,
+    "v1_checkpoint_changed": false,
+    "graph": "off",
+    "connected_selection": "off",
+    "promotion_gate_changed": false,
+    "benchmark_targets_opened": false
+  }
+}

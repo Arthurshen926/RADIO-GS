@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_o0_o4_teacher_view_oracle_matrix_figurines_dev1_metric_gate_receipt_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "o0_gate_passed_and_sealed_before_o1_o4_target_metrics",
+  "parent_execution_addendum": {
+    "path": "paper/artifacts/lerf3d_o0_o4_teacher_view_oracle_matrix_execution_addendum_20260806.json",
+    "sha256": "4e76450e3e6b359685f0ba755a2c20dc4a6e01ea8035d223a60346713a746171"
+  },
+  "o0_frozen_control": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o0_control/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "2e4bf6b14cc522363e50cf4ee894693e28b250e93087b95fcd2143c01b6ba016"
+    },
+    "frozen_evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "expected_miou": 0.4753371775,
+    "observed_miou": 0.4753887355327606,
+    "absolute_error": 0.00005155803276063464,
+    "maximum_absolute_error": 0.0001,
+    "passed": true,
+    "queries_evaluated": 56
+  },
+  "metric_diagnostic": {
+    "implementation": {
+      "path": "radio_gs/scripts/eval_lerf_teacher_view_oracle_diagnostic.py",
+      "sha256": "267ec98df2fcc17636d0f549c6b2bdc270bd14758742d12f7afe7ccf3ab0478b"
+    },
+    "tests": {
+      "path": "tests/test_eval_lerf_teacher_view_oracle_diagnostic.py",
+      "sha256": "2a205ba865bbe0b1ece69c4e93f9e8c299742d191bad60d091d11902bc2f47be",
+      "result": "3 passed"
+    },
+    "method_score_freeze": "complete post-kNN10 peak-scale VALA score tensor and SHA are frozen before benchmark labels enter the diagnostic hook",
+    "metrics": [
+      "frozen_fixed_threshold_mIoU",
+      "average_precision",
+      "oracle_threshold_IoU",
+      "selected_purity",
+      "positive_negative_margin",
+      "within_scene_top1",
+      "rank_correlation"
+    ]
+  },
+  "authorization_after_gate": {
+    "figurines_o0_o4_development_metrics_may_open": true,
+    "second_scene_may_open": false,
+    "threshold_or_parameter_sweep_may_run": false
+  },
+  "o1_o4_target_metrics_opened_before_this_receipt": false
+}

@@ -1,0 +1,65 @@
+{
+  "schema": "radio_gs.registered_evidence.external_materializer_supported_field_fix.v1",
+  "schema_version": 1,
+  "status": "sealed_after_fail_closed_runtime_and_before_fresh_room_or_fern_materialization",
+  "date": "2026-08-06",
+  "failure": {
+    "cause": "The materializer referenced SupportedCalibration.support, but the frozen dataclass field is SupportedCalibration.supported.",
+    "room": {
+      "outcome": "failed while writing first-frame support after primitive unary and first-frame raw probability",
+      "pre_metric_receipt_written": false,
+      "target_ground_truth_opened": false,
+      "target_metric_computed": false,
+      "partial_output_reusable": false,
+      "failure_receipt": {
+        "path": "paper/artifacts/registered_evidence_v2_spin_room_materializer_support_field_failure_20260806.json",
+        "sha256": "4d3e7e148335e27820ec58023f2db855c0fa4d8423868ed13571753db0bf3cc6"
+      }
+    },
+    "fern": {
+      "outcome": "stopped during input deserialization before output-root creation",
+      "pre_metric_receipt_written": false,
+      "target_ground_truth_opened": false,
+      "target_metric_computed": false,
+      "partial_output_created": false
+    }
+  },
+  "fix": {
+    "field": "SupportedCalibration.supported",
+    "refactor": "one helper atomically writes raw, supported, and calibrated arrays and returns their immutable frame record",
+    "fresh_output_root_required": true,
+    "old_room_partial_root_must_not_be_reused": true
+  },
+  "implementation": {
+    "adapter": {
+      "path": "radio_gs/querying/registered_evidence_external_adapter.py",
+      "sha256": "5e881742e3ccb7d7a14c5675c8b362edf9a05e0666865d7125284b75e46b95f0"
+    },
+    "materializer": {
+      "path": "radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256": "e9596fb1f6ebfa47a6231a6b125498ed16ffd78c9221b2140173ddd7f2588d6a"
+    },
+    "score_only_interposer": {
+      "path": "radio_gs/scripts/score_registered_evidence_external_prediction.py",
+      "sha256": "ea2341378fb17b04de402a42704ed1fc46a0cf5bd6d5b567f6e4a2e0a658a35b"
+    },
+    "focused_tests": {
+      "path": "tests/test_registered_evidence_external_adapter.py",
+      "sha256": "c6c197ad5c9a78b99836aca7dd7b96ee57134444458b0edac5c8733a7ae3a644"
+    }
+  },
+  "verification": {
+    "tests": "16 passed including direct three-array frame write/read control and frozen scorer regressions",
+    "py_compile": "passed",
+    "format": "black"
+  },
+  "authorization": {
+    "fresh_room_materialization": true,
+    "fresh_fern_materialization": true,
+    "metric_opening_before_new_receipt": false,
+    "threshold": 0.5,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_fit": false
+  }
+}

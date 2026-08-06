@@ -1,0 +1,84 @@
+{
+  "artifact": "source_global_response_hard_negative_32scene_inventory",
+  "schema_version": 1,
+  "audited_at": "2026-08-06T14:46:20+08:00",
+  "status": "incomplete_blocks_full_response_listwise_v2_training",
+  "cohort_authority": {
+    "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+  },
+  "audit_method": "exact lstat/stat and SHA-256 of the 32 cohort-derived expected paths; no recursive directory scan",
+  "expected_path_template": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/<scene_id>/hard_negative_index_authority_bound_v1.pt",
+  "summary": {
+    "required": 32,
+    "present": 1,
+    "missing": 31,
+    "source_train_required": 24,
+    "source_train_present": 1,
+    "source_train_missing": 23,
+    "source_validation_required": 8,
+    "source_validation_present": 0,
+    "source_validation_missing": 8,
+    "full_training_authorized": false
+  },
+  "present": [
+    {
+      "scene_id": "scene0001_00",
+      "split": "source_train",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/scene0001_00/hard_negative_index_authority_bound_v1.pt",
+      "size_bytes": 2425983,
+      "sha256": "243df78a8aaa103d61fd8ed1361af4031e90484cf028ce4da0ac0d612cdec36d",
+      "content_authority_sha256": "12b9e5e0f2663f3db1d162971f007fba6fd88f1f9d6db03b5c818d301991572e"
+    }
+  ],
+  "missing": [
+    {"scene_id": "scene0002_00", "split": "source_train"},
+    {"scene_id": "scene0003_00", "split": "source_train"},
+    {"scene_id": "scene0005_00", "split": "source_train"},
+    {"scene_id": "scene0006_00", "split": "source_train"},
+    {"scene_id": "scene0007_00", "split": "source_train"},
+    {"scene_id": "scene0009_00", "split": "source_train"},
+    {"scene_id": "scene0010_00", "split": "source_train"},
+    {"scene_id": "scene0012_00", "split": "source_train"},
+    {"scene_id": "scene0014_00", "split": "source_train"},
+    {"scene_id": "scene0016_00", "split": "source_train"},
+    {"scene_id": "scene0017_00", "split": "source_train"},
+    {"scene_id": "scene0020_00", "split": "source_train"},
+    {"scene_id": "scene0021_00", "split": "source_train"},
+    {"scene_id": "scene0022_00", "split": "source_train"},
+    {"scene_id": "scene0024_00", "split": "source_train"},
+    {"scene_id": "scene0026_00", "split": "source_train"},
+    {"scene_id": "scene0027_00", "split": "source_train"},
+    {"scene_id": "scene0029_00", "split": "source_train"},
+    {"scene_id": "scene0031_00", "split": "source_train"},
+    {"scene_id": "scene0032_00", "split": "source_train"},
+    {"scene_id": "scene0034_00", "split": "source_train"},
+    {"scene_id": "scene0035_00", "split": "source_train"},
+    {"scene_id": "scene0036_00", "split": "source_train"},
+    {"scene_id": "scene0004_00", "split": "source_validation"},
+    {"scene_id": "scene0008_00", "split": "source_validation"},
+    {"scene_id": "scene0013_00", "split": "source_validation"},
+    {"scene_id": "scene0018_00", "split": "source_validation"},
+    {"scene_id": "scene0023_00", "split": "source_validation"},
+    {"scene_id": "scene0028_00", "split": "source_validation"},
+    {"scene_id": "scene0033_00", "split": "source_validation"},
+    {"scene_id": "scene0037_00", "split": "source_validation"}
+  ],
+  "generic_fit_text_bank": {
+    "status": "present_and_dry_loss_validated",
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+    "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+    "queries": 806
+  },
+  "scene0001_dry_loss": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_global_response_listwise_v2_scene0001_dry_loss_v2.json",
+    "sha256": "71de3c1c4999336d2c6fccb5ea0aed8299780b485b81c304c2702daff2677aa6",
+    "complete_canonical_rows": 4096,
+    "valid_profile_queries": 806,
+    "hard_negative_pairs": 31971,
+    "auxiliary_loss": 0.24860501289367676,
+    "optimizer_constructed": false,
+    "parameter_update_performed": false
+  },
+  "next_gate": "materialize and SHA-bind the missing 23 source-train and 8 source-validation hard-negative authorities plus their prerequisite V1 shard/context assets; then seal a separate execution authority before any 24+8 training"
+}

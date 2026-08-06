@@ -1,0 +1,82 @@
+{
+  "schema": "radio_gs.global_prompt_logit_calibrator.execution_authority.v2",
+  "schema_version": 2,
+  "status": "sealed_after_implementation_tests_and_before_first_formal_fit",
+  "scene_id": "scene0001_00",
+  "inputs": {
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/global_prompt_logit_calibrator_v2_clean_scannet_preregistration_20260806.json",
+      "sha256": "cb05ffdfc9a047fd983890da4a0f8b336b9ea060ea0e77fd39274d1b48121952"
+    },
+    "v1_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.json",
+      "sha256": "3ad03ad67638879d16698e1efdf1a64367ba5e23bcb24542dcbef6edfcd7813f"
+    },
+    "v1_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.pth",
+      "sha256": "30f749485f0232568f66cc00694cbaf5a6fed922ecb105a1f1d60936a548e149"
+    },
+    "v1_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_execution_authority_v2_20260806.json",
+      "sha256": "de7cb637b8980d9cd0fef46b7a6453840318add276a7b7dbe6b3d507462d36ab"
+    },
+    "v1_producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_registered_evidence_to_unary_clean_pilot.py",
+      "sha256": "d2dba997ad3efbc5607844506c3717b97f7cb50b80fe7abda5d5cb3139911c7d"
+    },
+    "v1_unary_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_to_unary.py",
+      "sha256": "7965b1ab5079815c4629e11abbd577d10c71241cf20b408f337877a767f0e8cd"
+    },
+    "calibrator_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/global_prompt_logit_calibrator.py",
+      "sha256": "dc43d23f2f79e0096e300afbb498fe400b7492ca94449093c5a6f4cacf473842"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/fit_global_prompt_logit_calibrator_clean_pilot.py",
+      "sha256": "a41bf4feae138a1c3468310653c56d8faa3595c2ecc42d194a2cce24ee5c6ec5"
+    }
+  },
+  "original_v1_inputs": {
+    "v1_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_pilot_preregistration_20260806.json",
+      "sha256": "e870f7582b551dbd86fb100244921397fcfbb11273baf08b621b5d8f70c960d3"
+    },
+    "responsibility_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/exact_marginal_responsibility_authority.json",
+      "sha256": "2a8c061061aa4e7d9481878232c7ba63323da0d039585ec7d82978e32a3d2e7e"
+    },
+    "label_zip": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/labels/scans/scene0001_00/scene0001_00_2d-instance-filt.zip",
+      "sha256": "9f7660a48028e4a404b09edfa7f7d6e3a7684769d1ca76372dd0d4b5aacafa6b"
+    },
+    "capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_capability_bank.pt",
+      "sha256": "bdd816914433381b6c38b11e26edf43ccaf3fba43563724938836f722c96c735"
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/factorized_primitive_state_v2.pt",
+      "sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9"
+    }
+  },
+  "frozen_configuration": {
+    "parameter_count": 2,
+    "temperature_parameterization": "softplus(raw_temperature)+1e-4",
+    "loss": "ordinary unweighted pixel-micro BCEWithLogits",
+    "optimizer": "full-batch LBFGS with strong-Wolfe line search",
+    "maximum_iterations": 100,
+    "history_size": 20,
+    "graph": "off",
+    "connected_selection": "off"
+  },
+  "source_access": {
+    "validation_labels_enter_fit": false,
+    "target_rgb_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "radio_gs.registered_evidence_external_materializer_abort.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "experiment": "registered-evidence-v2-nvos-fern-signed-scribble-sentinel",
+  "status": "operator_terminated_before_prediction_root_creation_after_shared_runtime_bug_discovery",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_external_execution_authority_20260806.json",
+    "sha256": "493f65138b91588a9a98acaf970dd789b2fb3d732d18c58467bdaf08720e3a4e"
+  },
+  "implementation": {
+    "materializer_sha256": "4c2692079104275d9243e342f1927fb44747cc323d5e976e4d091f432b1bd744",
+    "bug": "SupportedCalibration exposes `supported`; the target-frame writer referenced nonexistent `support`",
+    "bug_observed_in_this_fern_process": false,
+    "reason_for_early_stop": "the shared bug was independently observed before fern completed input loading, so fern was stopped to avoid knowingly executing invalid code"
+  },
+  "partial_output": {
+    "declared_prediction_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/pre_gt_prediction",
+    "prediction_root_created": false,
+    "prediction_files_written": 0,
+    "target_scores_written": 0,
+    "pre_metric_receipt_written": false
+  },
+  "guard": {
+    "physical_gpu": 1,
+    "poll_seconds": 30,
+    "thermal_limit_c": 88,
+    "thermal_consecutive_polls": 6,
+    "observed_temperature_range_c": [
+      33,
+      34
+    ],
+    "observed_power_w_maximum": 31.16,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/logs/materialize.gpu1.telemetry.csv",
+      "sha256": "47dff0b4c6c1409de84fb83624dd02b98e2af298f0584edd15350224282790e5"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/logs/materialize.gpu1.owner.csv",
+      "sha256": "6c79655a9cdc28393c38004f08e07a3ac03de15402838a595a79319316b5d05c"
+    }
+  },
+  "logs": {
+    "stdout": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/logs/materialize.stdout.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "stderr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/logs/materialize.stderr.log",
+      "sha256": "5112e75d5ead8907661280959a139895460ade5f281b9ee2e1a1fb19ef5c0613"
+    }
+  },
+  "source_access": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "per_scene_parameter_fit": false
+  },
+  "eligible_for_scoring": false
+}

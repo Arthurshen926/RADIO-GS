@@ -1,0 +1,48 @@
+{
+  "schema": "radio_gs.registered_evidence_external_materializer_fresh_run_addendum.v1",
+  "schema_version": 1,
+  "date": "2026-08-06",
+  "experiment": "registered-evidence-v2-nvos-fern-signed-scribble-sentinel",
+  "status": "sealed_after_runtime_fix_and_before_fresh_target_prediction",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_external_execution_authority_20260806.json",
+    "sha256": "493f65138b91588a9a98acaf970dd789b2fb3d732d18c58467bdaf08720e3a4e"
+  },
+  "predecessor_abort": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_v2_nvos_fern_materializer_preoutput_abort_20260806.json",
+    "sha256": "1aaeee4a83f1b10b274ce5ac2ef7e42f1435bcb4f5f664b6e448ec57d0d16420",
+    "prediction_root_created": false,
+    "eligible_for_scoring": false
+  },
+  "runtime_fix": {
+    "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_external_materializer_supported_field_fix_20260806.json",
+    "sha256": "ba1ac358114f194aa90382b95dd51457f5185d6bfc3e1db6e58c5618106f3401",
+    "fixed_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_registered_evidence_external_prediction.py",
+      "sha256": "e9596fb1f6ebfa47a6231a6b125498ed16ffd78c9221b2140173ddd7f2588d6a"
+    },
+    "adapter_sha256": "5e881742e3ccb7d7a14c5675c8b362edf9a05e0666865d7125284b75e46b95f0",
+    "score_only_sha256": "ea2341378fb17b04de402a42704ed1fc46a0cf5bd6d5b567f6e4a2e0a658a35b",
+    "method_semantics_changed": false,
+    "field_name_correction_only": true
+  },
+  "fresh_output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_v2_nvos_fern_sentinel/pre_gt_prediction",
+    "absent_at_seal": true,
+    "no_prior_predictions_to_reuse": true
+  },
+  "unchanged_controls": {
+    "physical_gpu": 1,
+    "poll_seconds": 30,
+    "thermal_limit_c": 88,
+    "thermal_consecutive_polls": 6,
+    "graph": false,
+    "connected_selection": false,
+    "threshold": 0.5,
+    "per_scene_fit": false,
+    "threshold_scan": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

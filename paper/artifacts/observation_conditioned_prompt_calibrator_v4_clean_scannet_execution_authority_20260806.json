@@ -1,0 +1,112 @@
+{
+  "schema": "radio_gs.observation_conditioned_prompt_calibrator.execution_authority.v4",
+  "schema_version": 4,
+  "status": "sealed_after_implementation_tests_and_before_only_formal_fit",
+  "scene_id": "scene0001_00",
+  "inputs": {
+    "preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/observation_conditioned_prompt_calibrator_v4_clean_scannet_preregistration_20260806.json",
+      "sha256": "bfd18f566da83bb6afa8f91f5d53cbdef3380ed2dfd277235627a102c95be0f8"
+    },
+    "v3_diagnostic_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/prompt_mode_logit_calibrator_v3_scene0001_pilot/formal_v1/result.json",
+      "sha256": "6f23193bb8cd1d6d83c95197e34816066a7bd345dafacec22955a12a74219e8f"
+    },
+    "v1_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.json",
+      "sha256": "3ad03ad67638879d16698e1efdf1a64367ba5e23bcb24542dcbef6edfcd7813f"
+    },
+    "v1_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/formal_v2/result.pth",
+      "sha256": "30f749485f0232568f66cc00694cbaf5a6fed922ecb105a1f1d60936a548e149"
+    },
+    "v1_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_execution_authority_v2_20260806.json",
+      "sha256": "de7cb637b8980d9cd0fef46b7a6453840318add276a7b7dbe6b3d507462d36ab"
+    },
+    "v1_producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_registered_evidence_to_unary_clean_pilot.py",
+      "sha256": "d2dba997ad3efbc5607844506c3717b97f7cb50b80fe7abda5d5cb3139911c7d"
+    },
+    "v1_unary_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/registered_evidence_to_unary.py",
+      "sha256": "7965b1ab5079815c4629e11abbd577d10c71241cf20b408f337877a767f0e8cd"
+    },
+    "v2_numeric_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/global_prompt_logit_calibrator.py",
+      "sha256": "9c400b1107a0a87e649eaf3103e6603c315f5f4b68514d0f0f3e34a3bff74067"
+    },
+    "v2_helper_producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/fit_global_prompt_logit_calibrator_clean_pilot.py",
+      "sha256": "9776597dc0c1cffe47b3741d4fe071803f002863f04059d19bd37051ee883426"
+    },
+    "v3_architecture_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/prompt_mode_logit_calibrator.py",
+      "sha256": "f9b86a789f2f50d2bcc8ad7dac5aaa99d130869a1aa4034ff44298f8f6e9033f"
+    },
+    "v4_calibrator_module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/observation_conditioned_prompt_calibrator.py",
+      "sha256": "ff96eb5d8c323b5ec2c947b2b23367af537e185d285ad082b2c2a33f153913cb"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/fit_observation_conditioned_prompt_calibrator_clean_pilot.py",
+      "sha256": "e7410a1c46ac4b17e12adae5df854df533a27e907c0177e657dc742a8f6cf192"
+    }
+  },
+  "original_v1_inputs": {
+    "v1_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_pilot_preregistration_20260806.json",
+      "sha256": "e870f7582b551dbd86fb100244921397fcfbb11273baf08b621b5d8f70c960d3"
+    },
+    "responsibility_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/exact_marginal_responsibility_authority.json",
+      "sha256": "2a8c061061aa4e7d9481878232c7ba63323da0d039585ec7d82978e32a3d2e7e"
+    },
+    "label_zip": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/registered_evidence_to_unary_v1_scene0001_pilot/labels/scans/scene0001_00/scene0001_00_2d-instance-filt.zip",
+      "sha256": "9f7660a48028e4a404b09edfa7f7d6e3a7684769d1ca76372dd0d4b5aacafa6b"
+    },
+    "capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_capability_bank.pt",
+      "sha256": "bdd816914433381b6c38b11e26edf43ccaf3fba43563724938836f722c96c735"
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/factorized_primitive_state_v2.pt",
+      "sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9"
+    }
+  },
+  "frozen_configuration": {
+    "prompt_modes": ["full_mask", "scribble"],
+    "parameter_count": 4,
+    "parameters_keyed_only_by_prompt_mode": true,
+    "full_mask_loss": "ordinary unweighted pixel-micro BCEWithLogits",
+    "scribble_loss": "equal positive/negative logistic risk within each prompt then equal mean over 17 train prompts",
+    "scribble_positive_class_weight_within_prompt": 0.5,
+    "scribble_negative_class_weight_within_prompt": 0.5,
+    "prompt_weights": "1/17 each",
+    "fixed_probability_threshold": 0.5,
+    "threshold_tuned": false,
+    "loss_weights_tuned": false,
+    "fixed_interiorization_epsilon": 1e-6,
+    "formal_dtype": "float64",
+    "optimizer_per_mode": "full-batch LBFGS with strong-Wolfe line search",
+    "maximum_iterations": 100,
+    "history_size": 20,
+    "v1_reproduction_absolute_tolerance": 1e-6,
+    "ranking_preservation_absolute_tolerance": 1e-10,
+    "graph": "off",
+    "connected_selection": "off"
+  },
+  "source_access": {
+    "validation_label_payload_may_be_deserialized_before_fit": true,
+    "validation_derived_tensor_prediction_or_metric_enters_optimizer": false,
+    "fit_receipt_frozen_before_validation_prediction_or_metric_evaluation": true,
+    "target_rgb_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}
