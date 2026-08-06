@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "registration": "source_conditioned_hierarchy_completion_v1_implementation_closure",
+  "status": "sealed_after_preregistration_and_before_benchmark_evaluator_integration_or_target_prediction",
+  "preregistration": {
+    "path": "paper/artifacts/source_conditioned_hierarchy_completion_v1_preregistration_20260805.json",
+    "sha256": "6d28e1250b4c3ae92e46a63f138517e56caa577963920046d9ce71837c495fe0"
+  },
+  "implementation": {
+    "path": "radio_gs/querying/source_conditioned_hierarchy_completion.py",
+    "sha256": "50e7b224b0b9cc761fffabf5c82b938016d855cfbf464e2f9d7260b1018ee4e9",
+    "runtime": "CPU only",
+    "benchmark_evaluator_dependency": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "hierarchy": {
+    "algorithm": "Kruskal maximum-spanning forest over the frozen undirected non-negative surface affinity",
+    "edge_order": "descending affinity, then ascending canonical primitive-row endpoint pair",
+    "reciprocal_rule": "single-sided or reciprocal undirected storage is accepted, but repeated endpoint pairs must have exactly equal affinity",
+    "merge_rule": "every successful union creates one binary parent; disconnected components remain separate roots",
+    "determinism": "input edge position is never a tie-break",
+    "scalability_implementation": "directed endpoint pairs are encoded into vectorized int64 canonical keys; NumPy sorting, adjacent exact-affinity validation, and boolean unique compaction replace per-edge Python tuples/dictionaries; DSU state and hierarchy arrays are contiguous NumPy arrays",
+    "connected_fast_exit": "Kruskal stops after N-1 successful unions because no later dense edge can alter a connected hierarchy"
+  },
+  "sealed_hierarchy_probability": {
+    "positive_seed_leaf": "an observed leaf with m_positive greater than m_negative",
+    "candidate_nodes": "the deduplicated union of every positive seed leaf and every ancestor on its fixed hierarchy chain",
+    "node_probability": "r_A=sum_{i in A}(m_positive_i)/sum_{i in A}(m_positive_i+m_negative_i)",
+    "leaf_proposal_probability": "h_i=max over candidate ancestors A containing i of r_A; the maximum over an empty set is zero",
+    "field_floor": "p_H_i=max(p_field_i,h_i)",
+    "multi_branch_operator": "maximum; it is bounded, idempotent, and cannot inflate probability merely because duplicate branches name the same ancestor",
+    "unobserved_rule": "zero source mass contributes neither positive nor negative responsibility",
+    "no_postprocessing": [
+      "no graph diffusion",
+      "no connected selection",
+      "no edge threshold",
+      "no scene-specific numeric parameter"
+    ]
+  },
+  "source_fusion": {
+    "q_obs": "m_positive/(m_positive+m_negative) on observed rows and canonical neutral 0.5 otherwise",
+    "confidence": "finite c_obs in [0,1], exactly zero on unobserved rows",
+    "final_probability": "p_final=(1-c_obs)*p_H+c_obs*q_obs"
+  },
+  "source_only_selection": {
+    "folds": 3,
+    "fold_unit": "caller-sealed source-raster footprint block or complete hierarchy-subtree group",
+    "group_assignment": "SplitMix64(group_id) modulo 3; a group is never split",
+    "heldout_clear": "positive and negative prompt responsibility are exact zero on the complete heldout group before the field callback and hierarchy construction",
+    "rank": [
+      "rounded responsibility-balanced Bernoulli log-loss ascending",
+      "rounded responsibility-weighted ROC AUC descending",
+      "total proposal support ascending",
+      "field base on exact tie"
+    ],
+    "audits": [
+      "responsibility-weighted Brier score",
+      "fixed ten-bin responsibility-weighted expected calibration error",
+      "positive and negative train/heldout population",
+      "proposal support size",
+      "positive branch component count"
+    ],
+    "base_fail_safe": "the hierarchy arm is selected only when its complete lexicographic rank strictly beats the field base"
+  },
+  "fail_closed": [
+    "all tensors must be CPU resident and shape aligned",
+    "all masses must be finite and non-negative",
+    "all probabilities must be finite and in [0,1]",
+    "q_obs must replay the exact responsibility fraction within fixed floating-point tolerance",
+    "source content, hierarchy content, graph authority, source authority, and fold-unit authority are checked",
+    "OOF decisions cannot be applied to different hierarchy or source content"
+  ],
+  "tests": {
+    "path": "tests/test_source_conditioned_hierarchy_completion.py",
+    "sha256": "41bee41d9abcb62a211987bb55fa15e7a3b6d9ec85c91f2979a9889864dba628",
+    "focused": "8 passed",
+    "compatibility": "23 passed across hierarchy completion, query-specific propagation CV, and source-observation evidence gate",
+    "covered_gates": [
+      "edge-permutation determinism",
+      "reciprocal affinity and graph authority rejection",
+      "bounded multi-branch probability",
+      "unobserved responsibility neutrality",
+      "probability and source content rejection",
+      "group-preserving folds and exact heldout clearing",
+      "hierarchy-arm selection when source OOF improves",
+      "base exact-tie behavior",
+      "final source fusion and OOF provenance rejection",
+      "50,000-leaf, 800,000-directed-edge CPU scalability regression"
+    ],
+    "one_off_real_scale_cpu_synthetic": {
+      "leaves": 297000,
+      "directed_edges": 2970000,
+      "tree_nodes": 593999,
+      "roots": 1,
+      "hierarchy_build_and_validation_seconds": 7.945488440047484,
+      "target_data_opened": false,
+      "gpu_used": false
+    }
+  },
+  "integration_decision": "core implementation is ready for a separate frozen evaluator adapter; this closure itself performs no benchmark prediction or target access"
+}

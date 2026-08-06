@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_leaves_surface_safe_graph",
+  "registered_at": "2026-08-05T23:14:07+08:00",
+  "status": "registered_after_source_only_capability_gate_and_before_graph_build",
+  "purpose": "Build the uniformly frozen query-independent surface-safe K16 Leaves topology on the promoted factorized capability bank, with exact capability, cohort, geometry, and responsibility lineage.",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_source_chain_preregistration_20260805.json",
+    "sha256": "c2a28b2451bd4aa31a8db5a31204fc6852a3756caa1749a407101759dc6f4dd8"
+  },
+  "inputs": {
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/official_dino_sam3_views.pt",
+      "sha256": "921e500666561b259a14a29046c89105e22003163ffee14be9832bea087d6223",
+      "field_checkpoint_sha256": "e8d0eb10a4e24cb9c22869336b0c159e6b8fe3ec84161f20669c897bd158b807",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373",
+      "feature_output_bundle_sha256": "466248d6546d9fff98289b0c95f435ac18516eeab51f85d4da421111b90e677e",
+      "capability_cohort_authority_sha256": "7493d52dd7081a3bd3b6ac8f880f26dacb8c1d996813eae8d822a3e33fb59d15"
+    },
+    "capability_source_only_gate": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_capability_materialization_results_20260805.json",
+      "sha256": "2de35969b2d0dbe6955bdf85d1aeb9eb90d31de88982f2ff4da42250eeb0d8ad",
+      "passed": true
+    },
+    "registration_responsibility_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/leaves/responsibility.pt",
+      "sha256": "6a205bdb6a53f8755006eae583b800cf0fc7d1f234f59bfa1bf76bfca6d86551"
+    },
+    "geometry_xyz_sha256": "c6cd5b5bd6bde8da68dc60c5639199b5f3cab65cc71f7caaceed253005efb781",
+    "primitive_global_rows_sha256": "c7cf40126bbcf982165f1cbdce60140bc9d705ab492a2d9cec17a0191715ca05",
+    "primitive_valid_sha256": "adef829068229c6ccc8954a70f91ed5dad377bbfa1416bf10476fe8fd0f1fe3f"
+  },
+  "fixed_graph": {
+    "neighbors": 16,
+    "topology_mode": "mutual_knn",
+    "capability_affinity_mode": "exact_official_capability",
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "surface_relation": "local_pca_tangent_v1",
+    "surface_normal_neighbors": 24,
+    "surface_normal_min_planarity": 0.0,
+    "surface_topology_min_affinity": 0.0,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "covisibility_weight": 0.25,
+    "require_covisibility_topology": false,
+    "affinity_chunk_size": 65536,
+    "scene_specific_tuning": false,
+    "labels_or_queries_used": false
+  },
+  "lineage_gate": {
+    "caller_trusted_capability_file_sha256_required": true,
+    "embedded_responsibility_sha256_required": true,
+    "mpr_sidecar_responsibility_sha256_cross_check": true,
+    "embedded_factorized_geometry_required": true,
+    "payload_sidecar_capability_lineage_exact": true,
+    "graph_metadata_records_capability_file_sha256": true,
+    "formal_feature_bundle_cohort_preserved": true,
+    "target_access": false
+  },
+  "implementation": {
+    "support_graph_builder_sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "parent_registered_support_graph_builder_sha256": "b57ab599d03190d03e42f3e3d5bec89594979bcb4fe9c21efde9c4740bea329e",
+    "capability_cache_loader_sha256": "af6315eb956c998a3145f0b0fe4c5f9a7eae6a9ea25fe73bd4e351ba0960c35a",
+    "stage_local_execution_authority": true,
+    "method_or_graph_hyperparameter_changed_since_parent_registration": false
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "affinity_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary and approximately 180-second checks for stages longer than six minutes; stop after two consecutive temperatures at or above 88 C or a driver/Xid error",
+    "repository_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/shared_support_graph_surface_safe_k16.pt",
+    "output_was_absent_at_registration": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "registration": "pinecone_query_independent_camera_plane_clearance_diagnostic_v1",
+  "status": "registered_before_mask-oracle rerun",
+  "motivation": {
+    "observed_failure": "IMG_7280 and IMG_7281 are dominated by 131 and 21 near-camera Gaussian rows respectively, with all contribution mass at center depth below 0.1",
+    "causal_scope": "base geometry visibility; upstream of feature, prompt, query, unary, graph, and component selection",
+    "not_a_query_rule": true
+  },
+  "intervention": {
+    "contract": "gaussian_two_sigma_support_strictly_in_front_of_camera_near_plane_v1",
+    "support_sigma": 2.0,
+    "selection_reason": "fixed physical two-standard-deviation support bound; not selected by a segmentation metric sweep",
+    "confidence": "one iff center_depth - 2 * axial_standard_deviation > renderer.near_plane",
+    "uses_rgb": false,
+    "uses_prompt": false,
+    "uses_text_query": false,
+    "uses_segmentation_mask": false,
+    "per_scene_parameter": false
+  },
+  "evaluation": {
+    "scene": "pinecone",
+    "protocol": "same frozen SPIn-NeRF diagnostic manifest, cameras, geometry, masks, and metric as the unguarded carrier audit",
+    "primary_comparison": "shared scalar Gaussian carrier best feasible lower bound with versus without camera-plane clearance",
+    "optimizer_steps": 0,
+    "optimizer_reason": "the exact adjoint-ratio construction is already a feasible shared scalar membership; disabling the optional optimizer avoids its known 99-view memory cost and does not weaken the lower-bound interpretation",
+    "failure_frame_check": [
+      "IMG_7280",
+      "IMG_7281"
+    ],
+    "interpretation": "diagnostic-only because evaluation masks are opened by the carrier audit; it establishes whether the visibility correction repairs carrier support, not a valid benchmark score"
+  },
+  "locked_inputs": {
+    "unguarded_report": {
+      "path": "output/optimization_20260804/carrier_ceiling/spin_pinecone_formal_v1.json",
+      "sha256": "d54d3db5e146af8ba0a1d1e9ad9846141fce8013f3952317bd2a3c41048c7c54"
+    },
+    "clearance_implementation": {
+      "path": "radio_gs/rendering/camera_clearance.py",
+      "sha256": "ed4e7c77351a487447e22a1f9a0bcf42535834cc238b2e75de34a2d7ec4fb667"
+    },
+    "audit_script": {
+      "path": "radio_gs/scripts/audit_promptable_gaussian_carrier_ceiling.py",
+      "sha256": "3ea65cf59e7acd4f1e82253155446f2c48c07d6d9c5ed660d7774f942bf334b8"
+    },
+    "base_preregistration": {
+      "path": "paper/artifacts/promptable_gaussian_carrier_ceiling_preregistration_20260804.json",
+      "sha256": "f3e6b8dbedd33e9422f799c1298ceb7e172ec9169e8d89f990f15c3a64a29a41"
+    }
+  },
+  "output": "output/optimization_20260804/carrier_ceiling/spin_pinecone_clearance2_v1.json"
+}

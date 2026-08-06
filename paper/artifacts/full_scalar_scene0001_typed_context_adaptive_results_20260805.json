@@ -1,0 +1,120 @@
+{
+  "schema": "radio_gs.full_scalar_scene0001_typed_context_adaptive_results.v1",
+  "date": "2026-08-05",
+  "status": "stage_b_adaptive_authority_materialized_all_rows_valid",
+  "scene_id": "scene0001_00",
+  "problem_statement": "The frozen V4 1024-candidate limit confounds absence of context with an incomplete dense-core search. Stage A fails closed on cap-hit rows; Stage B proves only the weaker and sufficient condition that the final 192-core/64-context bounded selection cannot change.",
+  "immutable_base": {
+    "accepted_v2_e0_copied": false,
+    "accepted_v2_authority_sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8",
+    "factorized_field_checkpoint_sha256": "c273e6ac149d983e69de7005d54e53f55130e04703b555ff8fa8a3f71599ce77",
+    "factorized_primitive_state_sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9",
+    "factorized_radio_cache_sha256": "7d9ed70b5baddbd0ccecdced962874f130a6045e9ccd0e541729df2d12446067",
+    "support_graph_sha256": "040691ac254610b67a6e7269031dcaf7eb356e6a5bd6120b35f98493446b576c"
+  },
+  "implementations": {
+    "stage_a_interface": {
+      "path": "radio_gs/interfaces/surface_region_typed_context.py",
+      "sha256": "a6729cbdbaa4cca68e4b35a283de2ee10c63172048347a38d0a39a3f0fcc3710"
+    },
+    "stage_a_materializer": {
+      "path": "radio_gs/scripts/materialize_accepted_v2_typed_context_authority.py",
+      "sha256": "1517b91aa5f60b265d4df0cb5f0e23104a676f8246de58407969dcda0e817e9b"
+    },
+    "bounded_residual_model": {
+      "path": "radio_gs/models/surface_region_typed_context_residual.py",
+      "sha256": "06287aa06223da788a2f1b95fc6906cb8496e36d722eff594d1d397c243ae36f"
+    },
+    "stage_b_adaptive_interface": {
+      "path": "radio_gs/interfaces/surface_region_typed_context_adaptive.py",
+      "sha256": "de93ee9e549c766e7e5f4aedb8249b91f4315691f782ebc54f7f71988286dbc8"
+    },
+    "stage_b_adaptive_materializer": {
+      "path": "radio_gs/scripts/materialize_accepted_v2_typed_context_adaptive_authority.py",
+      "sha256": "c345a4e5f72acf09b084387c406f659c25ed6f26deed5d6a992550afcabc4841"
+    }
+  },
+  "stage_a": {
+    "output": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/typed_context_stage_a_v1.pt",
+      "sha256": "c8c3024625a47c7b0abb0278aa393e166fa65bd77da62dacef5b750b0d9f2b39",
+      "size_bytes": 13985915
+    },
+    "regions": 4096,
+    "context_present": 1751,
+    "selection_complete": 1283,
+    "typed_context_valid": 1283,
+    "candidate_cap_reached": 2813,
+    "valid_rate": 0.313232421875,
+    "per_scale_valid": {
+      "0.25": 1016,
+      "0.45": 237,
+      "0.70": 30
+    },
+    "invalid_carrier_exact_zero": true,
+    "invalid_statistics_exact_zero": true
+  },
+  "stage_b": {
+    "output": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/typed_context_stage_b_adaptive_v2.pt",
+      "sha256": "2b27eda34e292096b4f9222a545209230ee2017a980786ee433ea1f293232dda",
+      "size_bytes": 15668469
+    },
+    "isolated_v4_budget": {
+      "core_tokens": 192,
+      "context_tokens": 64,
+      "maximum_tokens": 256,
+      "selection_contract_sha256": "ec4d7545a2b79f17b491142400b256b8966f0505724fa423a9de725fc2035e84",
+      "overlay_contract_sha256": "368888b292a9ef852e4e8c1815d357df923fe850c50fbcb5dfcead4f406c6a33"
+    },
+    "regions": 4096,
+    "context_present": 4096,
+    "selection_complete": 4096,
+    "typed_context_valid": 4096,
+    "valid_rate": 1.0,
+    "per_scale_valid": {
+      "0.25": 1366,
+      "0.45": 1365,
+      "0.70": 1365
+    },
+    "termination_counts": {
+      "natural_exhaustion": 3352,
+      "typed_budget_satisfied": 744
+    },
+    "maximum_adaptive_rounds": 3,
+    "maximum_probe_width": 16400,
+    "maximum_settled_candidates": 16400,
+    "context_tokens_audited": 261709,
+    "memory": {
+      "ceiling_bytes": 536870912,
+      "maximum_estimated_working_bytes": 122722176,
+      "requested_batch_size": 8
+    }
+  },
+  "residual_safety": {
+    "base": "external immutable AcceptedV2 unit descriptor",
+    "zero_initialized": true,
+    "inactive_or_ood_fallback": "bitwise AcceptedV2 e0",
+    "update_space": "AcceptedV2 e0 tangent plane",
+    "maximum_angle_radians": 0.15,
+    "maximum_alpha": 0.25,
+    "trainable_parameter_count": 302592
+  },
+  "validation": {
+    "agent_joint_tests_passed": 37,
+    "independent_focused_tests_passed": 21,
+    "py_compile_passed": true,
+    "cli_help_passed": true,
+    "diff_check_passed": true
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "source_rgb_used": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false
+  },
+  "conclusion": "The Stage-A coverage loss was a search-completeness false negative caused by the fixed 1024 candidate cap. Typed-budget-complete adaptive search restores a valid query-independent context carrier for every AcceptedV2 row without weakening the fail-closed contract or changing the frozen base descriptor."
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "registration": "spin_lego_native_exact_w_source_export_v1",
+  "registered_at": "2026-08-05T13:49:42+08:00",
+  "status": "registered_before_real_export_or_gpu_execution",
+  "purpose": "Export the native-resolution, query-free exact compositor matrix W for the SPIn-NeRF Lego reference view so source-footprint folds can be assigned without decoding prompt labels.",
+  "scope": {
+    "scene_id": "lego",
+    "reference_frame_id": "0_00001",
+    "native_width": 1015,
+    "native_height": 764,
+    "prompt_type": "reference_binary_mask",
+    "reference_binary_mask_sha256": "09c1ff833ec86dce91ca382d0bd424e26dee7da7ddde75c6ef329024b379c53d"
+  },
+  "inputs": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "queue_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712",
+    "gaussfm_config_sha256": "4a1fdbc3b5461a195cee03a14782bfecfac8ef95ab285225500aedf10bb12dd8",
+    "camera_mapping_sha256": "9014d545d17582f4fb6cde323a9778b5e4b33a9c7751160482b23da8cee86baa",
+    "geometry_checkpoint_sha256": "b0f054692c678836cbcdc6badfb2abadae4b2ad6b6b430b6a8b33199485aff18"
+  },
+  "implementation": {
+    "header_authority_closure_sha256": "7d95e29467a3f64b47de4bc4a7c981950c8dd78e01dc8f124b40a1a20dcd9d89",
+    "exporter_sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "exact_compositor_sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary checks; continue below 88 C; stop only after two consecutive observations at or above 88 C",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/reference_exact_w.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/reference_exact_w_report.json"
+  },
+  "forbidden_access": {
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "evaluation_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "post_export_checks": [
+    "reload the cache through the strict PromptResponsibilityAuthority parser",
+    "verify the complete file SHA and all tensor bundle SHA values",
+    "verify native H/W, frame, geometry, camera, compositor, exporter, and source-file bindings",
+    "record triplet count, visible primitive count, peak RSS, and stage-end GPU temperature",
+    "do not decode or apply the reference mask"
+  ]
+}

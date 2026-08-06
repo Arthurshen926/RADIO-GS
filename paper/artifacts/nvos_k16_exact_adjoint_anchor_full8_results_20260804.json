@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_k16_exact_adjoint_anchor_full8_v1",
+  "status": "complete; anchor effect passes, combined candidate rejected against the earlier K16 winner-take-all unary",
+  "scene_iou": {
+    "fern": {"joint_signed_control": 0.7549143051, "exact_anchor": 0.7540757435},
+    "flower": {"joint_signed_control": 0.8537892407, "exact_anchor": 0.8536430069},
+    "fortress": {"joint_signed_control": 0.7606830634, "exact_anchor": 0.7685856997},
+    "horns_center": {"joint_signed_control": 0.6015479611, "exact_anchor": 0.6157231294},
+    "horns_left": {"joint_signed_control": 0.7086130221, "exact_anchor": 0.7266920843},
+    "leaves": {"joint_signed_control": 0.6556223223, "exact_anchor": 0.6653833372},
+    "orchids": {"joint_signed_control": 0.6864707031, "exact_anchor": 0.6865276222},
+    "trex": {"joint_signed_control": 0.6322813136, "exact_anchor": 0.6167406896}
+  },
+  "aggregate": {
+    "joint_signed_control_full8_macro_iou": 0.7067402414,
+    "exact_anchor_full8_macro_iou": 0.7109214141,
+    "anchor_effect_full8": 0.0041811727,
+    "joint_signed_control_heldout6_macro_iou": 0.6983991007,
+    "exact_anchor_heldout6_macro_iou": 0.7011005808,
+    "anchor_effect_heldout6": 0.0027014801,
+    "earlier_winner_take_all_k16_full8_macro_iou": 0.7249680053
+  },
+  "stage_macro_iou": {
+    "joint_signed_control": {
+      "unary_prior": 0.7067402414,
+      "propagated": 0.7093402930,
+      "connected": 0.6473767575
+    },
+    "exact_anchor": {
+      "unary_prior": 0.7109214141,
+      "propagated": 0.7093344385,
+      "connected": 0.6529157695
+    }
+  },
+  "gate": {
+    "full8_anchor_exceeds_joint_signed_control": true,
+    "heldout6_anchor_regression_within_0_005": true,
+    "combined_candidate_exceeds_earlier_k16": false
+  },
+  "diagnosis": "The exact signed anchors are beneficial, but the implementation couples solver/anchor seed construction to prototype-bank construction. Joint-signed masses are appropriate for conflict-free constraints but reduce broad positive/negative prototype coverage on heldout scenes. The two roles must be decoupled.",
+  "decision": "Do not replace the K16 winner-take-all headline with this coupled candidate. Implement a dual-path observation interface: winner-take-all masses for multimodal prototypes and joint-signed exact evidence for anchors/solver constraints."
+}

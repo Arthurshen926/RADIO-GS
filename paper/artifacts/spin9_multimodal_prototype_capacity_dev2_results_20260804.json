@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "experiment": "spin9_multimodal_prototype_capacity_dev2_v1",
+  "status": "fixed-threshold K16 gate failed; do not expand",
+  "k4_iou": {
+    "lego": 0.2568389634,
+    "truck": 0.7144464061,
+    "macro": 0.4856426847
+  },
+  "k16_iou": {
+    "lego": 0.3352141807,
+    "truck": 0.6183474066,
+    "macro": 0.4767807937
+  },
+  "k16_minus_k4": {
+    "lego": 0.0783752174,
+    "truck": -0.0960989994,
+    "macro": -0.0088618910
+  },
+  "gate": {
+    "macro_improvement": false,
+    "no_scene_regression_over_0_02": false,
+    "decision": "reject fixed-threshold K16 and do not expand full9"
+  },
+  "interpretation": "Prototype capacity improves Lego ranking but changes score calibration enough to hurt Truck at a fixed 0.5 probability threshold. Because K changes weighted log-sum-exp evidence amplitude, a fair SPIn comparison requires the same reference-only threshold calibration already granted by the full-mask protocol.",
+  "report_sha256": {
+    "k4_lego": "3e2bd65bf2dae9377839b9e8200754b0e16469284cbfc53bb76e5371605e77dd",
+    "k4_truck": "8187e8fc8f82f6d1570d736e98cc66d2d52257d7c4fe2d21e136151d3f9c5323",
+    "k16_lego": "6350fdc9e009197c537b239938a4585d908d8700ca6bb1c54bc7674dd8837319",
+    "k16_truck": "80b2616801765171cec6aa956e15399b53dfcba3c2a9e961489bd345ee7a89a2"
+  }
+}

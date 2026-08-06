@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "artifact_type": "accepted_v2_canonical_region_authority_real_input_preflight",
+  "observed_at": "2026-08-05T21:21:07+08:00",
+  "scene_id": "scene0001_00",
+  "physical_space_id": "scene0001",
+  "status": "fail_closed_missing_clean_field_state_and_support_graph",
+  "producer": {
+    "path": "radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+    "sha256": "9d31a6cad0c486256b94a85fc9da1a374d6c2ca392d14f91a198e269fcf18384",
+    "cpu_only": true,
+    "semantic_cache_final_payload_used": false,
+    "no_clobber": true
+  },
+  "available_authorities": {
+    "clean_cohort": {
+      "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+      "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+    },
+    "benchmark_exclusion": {
+      "path": "paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+      "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+    },
+    "clean_inventory": {
+      "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+      "sha256": "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539"
+    },
+    "accepted_v2_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "completed_clean_pilot_receipts": [
+      "00_sens_extraction.json",
+      "01_query_free_materialization.json",
+      "02_geometry.json",
+      "03_radio_features_formal_reseal.json",
+      "04_render_contract.json",
+      "05_factorized_radio.json",
+      "06_exact_raw_reference.json",
+      "07_exact_dino_v3.json",
+      "08_exact_sam3.json",
+      "09_capability_cohort.json"
+    ]
+  },
+  "observed_in_progress": {
+    "stage": "factorized_field",
+    "temporary_output_present": false,
+    "sealed_stage_receipt_present": false,
+    "adoption_policy": "do_not_read_or_adopt_unsealed_temporary_output"
+  },
+  "missing_required_inputs": [
+    "schema-v2 factorized field checkpoint",
+    "schema-v2 factorized primitive state",
+    "caller-SHA-bound canonical capability bank materialized from the clean field",
+    "caller-SHA-bound query-free canonical support graph over exactly the factorized-state valid rows"
+  ],
+  "required_producer_chain": [
+    "train and seal the schema-v2 factorized field",
+    "build and seal the schema-v2 factorized primitive state",
+    "materialize the official DINO/SAM canonical capability bank with field/cache/primitive-row authority",
+    "build the clean canonical support graph and bind its exact file SHA-256 and primitive-row authority",
+    "run the AcceptedV2 canonical region/e0 producer with caller-provided SHA-256 for every input"
+  ],
+  "fail_closed_reason": "The AcceptedV2 checkpoint, official head, and clean raw/DINO/SAM capability cohort are available, but no sealed clean factorized field/state or support graph exists yet. A semantic-cache descriptor tensor is not an admissible substitute for canonical region selection/readout authority.",
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false
+  }
+}

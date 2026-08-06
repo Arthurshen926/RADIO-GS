@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_field_b_canonical_negative_figurines_dev1_v1",
+  "status": "registered before candidate target-label evaluation",
+  "question": "Does the query-independent, boundary-balanced relation improvement of Field-B accumulate with the independently repaired canonical-negative text-query interface?",
+  "candidate": {
+    "field": "frozen Field-B boundary-balanced relation checkpoint",
+    "field_checkpoint_sha256": "f9b2d926c7a455acd6fcb2b87e3be9e385cd5cf2357204d0867546da93d9b710",
+    "positive_query_score_cache_sha256": "02f9f41357811b576f16b15126dd786852b2563208b84f90ddd86ba4a81b4a13",
+    "canonical_negative_prompts": [
+      "object",
+      "things",
+      "stuff",
+      "texture"
+    ],
+    "canonical_negative_text_cache_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "relevance_formula": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "downstream_readout": "unchanged frozen VALA kNN10, raw-peak scale selection, per-query min-max/2x-1 remap, fixed 0.6 threshold, selected-only-alpha projection",
+    "trainable_parameters_after_registration": 0,
+    "scene_specific_parameters": false,
+    "benchmark_mask_access": false,
+    "evaluation_protocol_changed": false
+  },
+  "development_scene": "figurines",
+  "controls": {
+    "current_field_with_canonical_negative_miou": 0.4753371775,
+    "field_b_positive_only_miou": 0.4178879210,
+    "current_field_positive_only_miou": 0.4074466527
+  },
+  "gate": {
+    "primary": "Field-B plus canonical negatives must exceed the current-field canonical-negative result by at least 0.005 absolute mIoU on Figurines",
+    "threshold_miou": 0.4803371775,
+    "on_success": "run the frozen score-quality ladder and treat boundary-balanced relation learning as an additive Field-F component; expansion requires training query-free checkpoints on other scenes",
+    "on_failure": "reject the combination as non-additive under the existing readout and move the intervention upstream into capability/readout training; do not tune thresholds or scene parameters"
+  },
+  "claim_boundary": "Only Figurines is tested because it is the only scene with a pre-existing frozen Field-B checkpoint. The candidate is not a cross-scene or benchmark-level claim."
+}

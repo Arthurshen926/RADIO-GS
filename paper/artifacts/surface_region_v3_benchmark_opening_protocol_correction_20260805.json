@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_benchmark_opening_protocol_correction_v1",
+  "status": "registered_before_any_v3_candidate_benchmark_evaluation",
+  "correction": {
+    "invalid_cross_protocol_gate": "The original 0.948742/0.939455 floor used an older validation scene set and cache/teacher generation and is retained only as historical evidence.",
+    "matched_authority": "The pre-existing V2 context-c1024 control and the current V3 full-support validation rows use the same 8 scenes and bitwise-identical official_summary_tokens, official_crop_summaries, and teacher_mask tensors.",
+    "audit": "paper/artifacts/surface_region_v3_matched_teacher_protocol_audit_20260805.json"
+  },
+  "selected_candidate": {
+    "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/readout_v3_connected_completion_h256_seed0_nosparse_diagnostic.pt",
+    "sha256": "0d706fe564c1fd9f6a8be510ae33043bca292c727396601bdb0a5d80c312ac22",
+    "schema_version": 7,
+    "selection_basis": "highest full-support query-free generic selection among preregistered schema-7 training-distribution controls",
+    "mean_descriptor_cosine": 0.9425745929280916,
+    "matched_v2_mean_descriptor_cosine": 0.9429590106010437,
+    "delta": -0.00038441767295205254,
+    "noninferiority_margin": -0.002,
+    "matched_generic_gate_passed": true,
+    "completion_nonregression_passed": true
+  },
+  "opening_rule": {
+    "first_and_only_sentinel": "LERF3D Figurines frozen vala_repo_3d canonical-negative protocol",
+    "control_miou": 0.4753371775,
+    "promotion_threshold_miou": 0.4803371775,
+    "on_success": "expand unchanged candidate to all four LERF scenes, then frozen SPIn9 and NVOS",
+    "on_failure": "do not tune thresholds, graph, scales, prompts, or scene parameters; diagnose the representation-to-unary response against the carrier ceiling"
+  },
+  "forbidden": [
+    "per-scene or per-query tuning",
+    "threshold, graph, scale, prompt, or checkpoint sweeps",
+    "using benchmark labels for model selection"
+  ],
+  "benchmark_state_at_registration": {
+    "v3_candidate_benchmarks_opened": false
+  }
+}

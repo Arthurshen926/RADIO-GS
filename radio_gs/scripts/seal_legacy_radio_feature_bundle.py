@@ -19,6 +19,7 @@ import tempfile
 import torch
 
 from radio_gs.scripts.extract_radio_features import (
+    INCOMPLETE_RUNTIME_RESEAL_CONTRACT,
     LEGACY_RESEAL_CONTRACT,
     LEGACY_SOURCE_MANIFEST_FILENAME,
     OUTPUT_BUNDLE_SCHEMA_VERSION,
@@ -131,27 +132,69 @@ def seal_legacy_bundle(
     current = json.loads(manifest_path.read_text(encoding="utf-8"))
     if isinstance(current, dict) and isinstance(current.get("execution"), dict):
         execution = current["execution"]
-        if (
-            execution.get("formalization_contract") == LEGACY_RESEAL_CONTRACT
-            and execution.get("legacy_source_manifest_sha256") == expected
-        ):
+        formalization_contract = execution.get("formalization_contract")
+        expected_source_sha = (
+            execution.get("legacy_source_manifest_sha256")
+            if formalization_contract == LEGACY_RESEAL_CONTRACT
+            else execution.get("incomplete_runtime_source_manifest_sha256")
+        )
+        if formalization_contract in {
+            LEGACY_RESEAL_CONTRACT,
+            INCOMPLETE_RUNTIME_RESEAL_CONTRACT,
+        } and expected_source_sha == expected:
             validation = _validate_final_output_bundle(root, current)
             return {
                 **validation,
                 "feature_dir": str(root),
                 "idempotent_existing_seal": True,
             }
-        raise ValueError("feature manifest is already formalized under another contract")
+        is_incomplete_runtime = (
+            not str(execution.get("resume_contract", ""))
+            and not str(execution.get("resume_contract_sha256", ""))
+            and not str(execution.get("resume_contract_file_sha256", ""))
+            and current.get("output_bundle") is None
+            and not str(current.get("output_bundle_sha256", ""))
+        )
+        if not is_incomplete_runtime:
+            raise ValueError(
+                "feature manifest is already formalized under another contract"
+            )
+    else:
+        is_incomplete_runtime = False
 
     legacy, legacy_bytes, legacy_sha256 = _load_source_manifest_bytes(
         manifest_path,
         expected_sha256=expected,
     )
-    if any(
-        key in legacy
-        for key in ("execution", "output_bundle", "output_bundle_sha256")
-    ):
-        raise ValueError("input manifest is not an unsealed legacy manifest")
+    if is_incomplete_runtime:
+        source_execution = legacy.get("execution")
+        if not isinstance(source_execution, dict):
+            raise ValueError("incomplete-runtime execution provenance is missing")
+        if (
+            str(source_execution.get("resume_contract", ""))
+            or str(source_execution.get("resume_contract_sha256", ""))
+            or str(source_execution.get("resume_contract_file_sha256", ""))
+            or legacy.get("output_bundle") is not None
+            or str(legacy.get("output_bundle_sha256", ""))
+        ):
+            raise ValueError(
+                "input is not an unbundled completed runtime extraction"
+            )
+        formalization_contract = INCOMPLETE_RUNTIME_RESEAL_CONTRACT
+        source_manifest_name = f"frame_manifest.original.{legacy_sha256}.json"
+        source_manifest_sha_key = "incomplete_runtime_source_manifest_sha256"
+        source_manifest_name_key = "incomplete_runtime_source_manifest"
+    else:
+        if any(
+            key in legacy
+            for key in ("execution", "output_bundle", "output_bundle_sha256")
+        ):
+            raise ValueError("input manifest is not an unsealed legacy manifest")
+        source_execution = None
+        formalization_contract = LEGACY_RESEAL_CONTRACT
+        source_manifest_name = LEGACY_SOURCE_MANIFEST_FILENAME
+        source_manifest_sha_key = "legacy_source_manifest_sha256"
+        source_manifest_name_key = "legacy_source_manifest"
     frames = legacy.get("frames")
     radio = legacy.get("radio")
     features = legacy.get("features")
@@ -253,17 +296,19 @@ def seal_legacy_bundle(
             f"legacy tensor disk set differs: missing={missing[:3]} extra={extra[:3]}"
         )
 
-    source_copy = root / LEGACY_SOURCE_MANIFEST_FILENAME
+    source_copy = root / source_manifest_name
     if source_copy.exists():
         if _sha256_file(source_copy) != legacy_sha256:
             raise ValueError("existing legacy source-manifest copy differs")
     else:
         _atomic_bytes(source_copy, legacy_bytes)
+    if is_incomplete_runtime:
+        source_copy.chmod(source_copy.stat().st_mode & ~0o222)
     sealer_sha256 = _sha256_file(Path(__file__).resolve())
     execution: dict[str, object] = {
-        "formalization_contract": LEGACY_RESEAL_CONTRACT,
-        "legacy_source_manifest": LEGACY_SOURCE_MANIFEST_FILENAME,
-        "legacy_source_manifest_sha256": legacy_sha256,
+        "formalization_contract": formalization_contract,
+        source_manifest_name_key: source_manifest_name,
+        source_manifest_sha_key: legacy_sha256,
         "sealer": str(Path(__file__).resolve()),
         "sealer_sha256": sealer_sha256,
         "tensor_load_contract": "same_fd_sha256_weights_only_dtype_shape_finite_v1",
@@ -274,13 +319,19 @@ def seal_legacy_bundle(
         "reseal_inputs": "legacy_manifest_declared_source_images_and_feature_tensors_only",
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
-        "original_extraction_runtime_provenance": "legacy_unavailable_not_invented",
+        "original_extraction_runtime_provenance": (
+            "preserved_verbatim_from_incomplete_runtime_manifest"
+            if is_incomplete_runtime
+            else "legacy_unavailable_not_invented"
+        ),
     }
+    if source_execution is not None:
+        execution["original_extraction_execution"] = source_execution
     bundle: dict[str, object] = {
         "schema_version": OUTPUT_BUNDLE_SCHEMA_VERSION,
         "contract": "radio-feature-output-bundle-v1",
-        "source_contract": LEGACY_RESEAL_CONTRACT,
-        "legacy_source_manifest_sha256": legacy_sha256,
+        "source_contract": formalization_contract,
+        source_manifest_sha_key: legacy_sha256,
         "frames": snapshots,
     }
     bundle_sha256 = _canonical_json_sha256(bundle)
@@ -296,7 +347,11 @@ def seal_legacy_bundle(
         expected_output_bundle_sha256=bundle_sha256,
     )
     receipt: dict[str, object] = {
-        "schema_version": "radio_feature_legacy_reseal_receipt_v1",
+        "schema_version": (
+            "radio_feature_incomplete_runtime_reseal_receipt_v1"
+            if is_incomplete_runtime
+            else "radio_feature_legacy_reseal_receipt_v1"
+        ),
         "feature_dir": str(root),
         "legacy_source_manifest": str(source_copy),
         "legacy_source_manifest_sha256": legacy_sha256,
@@ -314,7 +369,12 @@ def seal_legacy_bundle(
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
         "tensor_values_modified": False,
-        "original_extraction_runtime_provenance": "legacy_unavailable_not_invented",
+        "formalization_contract": formalization_contract,
+        "original_extraction_runtime_provenance": (
+            "preserved_verbatim_from_incomplete_runtime_manifest"
+            if is_incomplete_runtime
+            else "legacy_unavailable_not_invented"
+        ),
     }
     destination = (
         Path(receipt_path).expanduser().resolve()

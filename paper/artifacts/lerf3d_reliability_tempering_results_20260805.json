@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_reliability_tempering_dev2_v1",
+  "status": "rejected_by_preregistered_development_gate_with_positive_signal",
+  "results": {
+    "figurines": {
+      "control_miou": 0.4753371775,
+      "candidate_miou": 0.4734956920,
+      "delta": -0.0018414855,
+      "report_sha256": "911f8a8154363c5e7534777f93f1d71e367d22ba06e93bb7eb7826db53e78e42"
+    },
+    "ramen": {
+      "control_miou": 0.2979446054,
+      "candidate_miou": 0.3182113171,
+      "delta": 0.0202667117,
+      "report_sha256": "169191ee474a5ff6eb7c3489d3b1f694de1179cb6ee978c0e4bf9001ddfc1068"
+    }
+  },
+  "aggregate": {
+    "control_macro_miou": 0.3866408915,
+    "candidate_macro_miou": 0.3958535045,
+    "delta": 0.0092126131
+  },
+  "gate_decision": {
+    "required": "macro gain at least 0.01 and no scene regression larger than 0.01",
+    "macro_gain_pass": false,
+    "per_scene_safety_pass": true,
+    "shortfall_to_macro_gate": 0.0007873869,
+    "decision": "do not expand and do not tune a reliability exponent or threshold"
+  },
+  "implementation_finding": {
+    "ramen_field_reliable_rows": 282143,
+    "ramen_text_descriptor_valid_rows": 221608,
+    "descriptor_valid_is_strict_subset": true,
+    "fix": "added a fail-closed query-free validity alignment utility; retained reliability values are byte-preserved and excluded rows are zeroed"
+  },
+  "interpretation": "Separating semantic probability from query-independent primitive precision materially repairs Ramen, so reliability is a real missing state rather than another graph parameter. Linear probability interpolation is slightly non-inferior on Figurines but narrowly misses the frozen macro gate; a probability-theoretic logit power posterior is the only registered follow-up."
+}

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "experiment": "target_blind_source_observation_evidence_gate_v1_authority_corrected_development",
+  "status": "complete; authority correction passed; development selection gate failed; heldout stopped",
+  "preregistration": {
+    "path": "paper/artifacts/source_observation_evidence_gate_preregistration_20260805.json",
+    "sha256": "d0e7f927423f1a8ea8d855aeeac13519dd16df565ac6aa4ab3ee5225699647c7"
+  },
+  "numeric_correction": {
+    "path": "paper/artifacts/source_observation_evidence_authority_correction_addendum_20260805.json",
+    "sha256": "b04c7ba51161bb0fa87555e8adf1da7bead5167c5106ec001e3c9e97afd84cfd"
+  },
+  "implementation": {
+    "eval_nvos_gaussian_first_sha256": "c0f3d53bdd714929f76811aaf12bc4d5b83ea3f0b601d73d89b38383d8f2e90b",
+    "query_specific_propagation_cv_sha256": "8ac8f6e4cfd0dfc7f45a91ff38e1ef913cd2c216f6d5684d2cc682d29e32b17d",
+    "source_observation_authority_sha256": "0d110f9c78661b896c5fcb99266fd4ea2c7a37110a49f8847b2933e176398fa6",
+    "focused_tests": 72,
+    "py_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "execution_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/source_observation_evidence_authority_codec0f3_v3",
+  "authority_audit": {
+    "fold_zero_sealed_before_clear": true,
+    "later_folds_loaded_same_authority": true,
+    "exact_zero_support_reproduced": true,
+    "gate_cross_fold_invariants_bitwise_equal": true,
+    "fixed_replay_rtol": 0.0001,
+    "fixed_replay_atol": 0.0,
+    "maximum_observed_relative_error": {
+      "spin9_lego": 0.000001612288997421274,
+      "nvos_fern": 0.000000802998329163529
+    },
+    "all_replays_passed": true
+  },
+  "development_results": {
+    "spin9_lego": {
+      "expected_action": "surface_safe_propagated",
+      "selected_action": "surface_safe_propagated",
+      "selection_match": true,
+      "observed_rows": 88360,
+      "unary": {
+        "responsibility_balanced_log_loss": 0.6931471805599454,
+        "responsibility_weighted_auc": 0.5
+      },
+      "surface_safe_propagated": {
+        "responsibility_balanced_log_loss": 0.11110530275598098,
+        "responsibility_weighted_auc": 0.9908409000462185
+      },
+      "source_evidence_authority_sha256": "01d1f5462e80c0929309ce0214c1a22824a50eff1eba6e489eb7d235a3043676",
+      "gate_receipt_sha256": "5641d6d849a49141b1ec3e748ac54e374ff5e42bf5d9abecfa49d8e2da6395ee"
+    },
+    "nvos_fern": {
+      "expected_action": "unary",
+      "selected_action": "surface_safe_propagated",
+      "selection_match": false,
+      "observed_rows": 51317,
+      "unary": {
+        "responsibility_balanced_log_loss": 0.0651405170925677,
+        "responsibility_weighted_auc": 0.9999910595375343
+      },
+      "surface_safe_propagated": {
+        "responsibility_balanced_log_loss": 0.05500493718936752,
+        "responsibility_weighted_auc": 0.9999969642080005
+      },
+      "source_evidence_authority_sha256": "6023f338ebf3d46daf5ecea51dff50e5079d2a4510f98baca64bca2799fc29e9",
+      "gate_receipt_sha256": "a9adebfec7007ca0146146a54c2e22e9efa50c2a8f16fef9b580e02a33790d55"
+    }
+  },
+  "development_gate": {
+    "both_expected_selections_match": false,
+    "decision": "reject current random-primitive source OOF action gate and stop before heldout scenes",
+    "heldout_spin9_room_executed": false,
+    "heldout_nvos_horns_center_executed": false,
+    "heldout_nvos_horns_left_executed": false,
+    "rule_or_constants_changed_after_result": false
+  },
+  "diagnosis": {
+    "numeric_authority_bug_resolved": true,
+    "remaining_failure": "Random primitive-row folds measure reconstruction of spatially correlated source-visible evidence. Surface propagation can therefore win this OOF task even when the full-fit target-safe action is the strong unary.",
+    "implication": "Source-visible primitive OOF is not a reliable proxy for target-hidden object completion or target-view false-positive risk.",
+    "next_step": "Use source-raster footprint blocks or complete hierarchy subtrees as heldout units, retain the immutable common authority, and add an explicit base-abstain arm. Do not tune the graph or change the expected action by scene."
+  },
+  "target_score_rendering_performed": false,
+  "target_rgb_opened": false,
+  "target_mask_opened": false,
+  "target_metric_computed": false,
+  "thermal": {
+    "overheat_abort": false,
+    "observed_temperatures_safe": true
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_multimodal_prototype_capacity_dev2_v1",
+  "status": "registered before opening candidate outcomes",
+  "hypothesis": "A full reference mask is appearance-multimodal. The same under-capacity prototype bottleneck found on NVOS may suppress SPIn cross-view unary quality before query-conditioned diffusion.",
+  "development_scenes": ["lego", "truck"],
+  "arms": [
+    {
+      "name": "k4_unary_control",
+      "prototype_count": 4
+    },
+    {
+      "name": "k16_unary_candidate",
+      "prototype_count": 16
+    }
+  ],
+  "shared": {
+    "prototype_strategy": "spherical_mean_fps",
+    "prototype_temperature": 0.07,
+    "registered_seed_construction": "winner_take_all",
+    "registered_observation_fusion": "additive",
+    "prompt_registration": "native exact front-to-back raster adjoint",
+    "final_readout": "unary_prior",
+    "score_threshold": 0.5,
+    "query_conditioned_diffusion": false,
+    "target_rgb": false,
+    "reference_threshold_tuning": false,
+    "scene_specific_parameters": false
+  },
+  "comparators": {
+    "release_compatible_query_diffusion": {
+      "lego": 0.6181460737,
+      "truck": 0.7899440557
+    },
+    "note": "The main K4-vs-K16 causal comparison uses the same fixed probability threshold. Release-compatible scores are reported separately because they use a reference-selected threshold and a different propagated operator."
+  },
+  "gate": {
+    "primary": "K16 fixed-threshold dev2 macro exceeds K4",
+    "safety": "neither scene regresses by more than 0.02",
+    "next": "If passed, test K16 plus the already validated decoupled exact-anchor interface before any full9 expansion"
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "target_evaluator_modified": false
+  }
+}

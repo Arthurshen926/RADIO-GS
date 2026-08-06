@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_lego_native_exact_w_source_export_v1",
+  "completed_at": "2026-08-05T14:02:59+08:00",
+  "status": "pass",
+  "preregistration": {
+    "path": "paper/artifacts/spin_lego_native_exact_w_source_export_preregistration_20260805.json",
+    "sha256": "c3634eec23a4a3272314d56be4337dc7aa2e3b53fc0454c3eade28bd2d819a71"
+  },
+  "artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/reference_exact_w.pt",
+    "sha256": "f572dede45dca479f7430b7735a0e63805ea598e1b61d6a1d6336b00efbdd1aa",
+    "authority_sha256": "fed59f104a3930157c09acd2f4470cb294cb9d52b939dd1fe75da366e05ab170",
+    "tensor_bundle_sha256": "204758fdc53f124183d10e8a9634266b2fb80abecea63d886e8a99d21417a948",
+    "report_sha256": "a8f5566b609eb94c3676103323f4b4eadd091d0b6b6242c3e5427d093e8f27be",
+    "execution_log_sha256": "1bb01947de80420d8d8f40bbffb05ffd3f38ff9bbd2333da2d9dc5ba10205b85"
+  },
+  "authority": {
+    "scene_id": "lego",
+    "frame_id": "0_00001",
+    "native_height": 764,
+    "native_width": 1015,
+    "num_gaussians": 636148,
+    "geometry_xyz_sha256": "74d9d97dbfbc31445b8ffcdc4bebb2ebc7f3dfd20490318b3712ff189611e337",
+    "pose_sha256": "76efbc40cfe2a369f1d6553b8c09419fbc5f209900ca9748e0caad9a8816de09",
+    "intrinsics_sha256": "83e812d667d5087b676e62ce71968c73092c391f119947b95d973f0b89cf480f",
+    "reference_binary_mask_sha256": "09c1ff833ec86dce91ca382d0bd424e26dee7da7ddde75c6ef329024b379c53d"
+  },
+  "statistics": {
+    "triplet_count": 71039533,
+    "visible_gaussians": 141427,
+    "visible_mass_sum": 755221.9979039059,
+    "zero_weight_hits_dropped": 0,
+    "process_peak_rss_kib": 2983756
+  },
+  "verification": {
+    "strict_prompt_responsibility_reload": true,
+    "complete_file_sha_replayed": true,
+    "authority_replayed": true,
+    "tensor_digests_replayed": true,
+    "tensor_bundle_replayed": true,
+    "front_to_back_pixel_mass_checked": true,
+    "visible_mass_recomputed_exactly": true
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "power_limit_w": 300,
+    "stage_end_temperature_c": 39,
+    "thermal_stop_triggered": false,
+    "telemetry_policy": "stage-boundary observation; no frequent thermal polling"
+  },
+  "safety": {
+    "historical_top1_responsibility_opened": false,
+    "source_mask_pixels_decoded": false,
+    "source_mask_pixels_interpreted": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "decision": "eligible_for_query_free_source_footprint_authority_construction"
+}

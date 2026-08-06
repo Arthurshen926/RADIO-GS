@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_contract_v4_current_fresh_paired_teacher_replay_addendum_v1",
+  "status": "registered_after_historical_replay_identity_failure_and_before_successful_v4_cache_build",
+  "parent": "paper/artifacts/surface_region_contract_v4_candidate_complete_preregistration_20260805.json",
+  "failed_historical_replay": {
+    "cache_sha256": "460cafa7a3f3726ceeb96bac879e35cfa8cf5d3b248a89e1e17e4792e704f036",
+    "scene": "scene0593_00",
+    "seed": 9437,
+    "radius_m": 0.7,
+    "reason": "The legacy identity hashes incidental Dijkstra order. Two rows exchange order although the 1428-node support set, voxel xyz, crop boxes, and teacher target are identical.",
+    "decision": "Do not weaken the identity check and do not use the historical cache."
+  },
+  "replacement_authority": {
+    "cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/caches/validation_shard0.pt",
+    "sha256": "7a6c99dc2107d14fe7b0dbed9711a58bc1b3842d7745476ce9bbadd887b83913",
+    "teacher_target_source": "fresh_official_runtime",
+    "teacher_protocol": "unchanged_schema1_fixed_core",
+    "paired_cache_policy": "consume only full_support rows; require every completion row to share exact teacher tensors and teacher identity with its paired full row",
+    "candidate_inputs_reused": false,
+    "benchmark_opened": false
+  },
+  "implementation": {
+    "build_scannet_surface_region_cache.py": "2ccedc2ec9a126ea7c614c9e253ed524c98cf2548c168185095cfe5be23803c4",
+    "create_surface_region_teacher_replay_authority.py": "8852ecad9bff07166a5148593187f3623f961e3749d0c12584ee60d88ff9d7ce",
+    "tests": "schema4 full-row extraction, exact pair tensor identity, pair tamper rejection, and strict authority creation",
+    "tests_passed": 32
+  },
+  "unchanged_v4_gates": true
+}

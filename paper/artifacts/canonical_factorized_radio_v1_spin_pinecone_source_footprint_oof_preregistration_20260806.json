@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_pinecone_source_footprint_oof_v1",
+  "registered_at": "2026-08-06T05:36:00+08:00",
+  "status": "registered_after_query_free_footprint_authority_and_before_source_mask_pixel_access",
+  "question": "Under complete query-free source-raster footprint holdout, should the frozen Pinecone compiler retain its unary or use the fixed surface-safe propagation before the K201 matched interface?",
+  "parent_source_chain": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_pinecone_source_chain_preregistration_20260806.json",
+    "sha256": "8010015f8ceaa83f5434e428b313c46622a69a9db14e5888415857bfe312253d"
+  },
+  "inputs": {
+    "benchmark_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "scene_id": "pinecone",
+    "source_mask_hash_only": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/SPIn-NeRF/multiview_annotations/pinecone (nerf_real_360)/IMG_7238.png",
+      "sha256": "990c441ec9067104647de1046917fb918957b93fe40cf39d2faf1715c96f38ae",
+      "pixels_opened_at_registration": false
+    },
+    "carrier": {
+      "config_sha256": "84fc359e406ae86c6f7eaa64d95def26ea055a3647fd77473ed16efd22fe1613",
+      "checkpoint_sha256": "e2e66dd2c03e52ed2307679e26fb1cc55d6734dadfc9f201b39fabe484c891d3",
+      "camera_map_sha256": "f12e617f141710cc4712f827f524fa30a1fe245af50d749723f02beb54a1208d",
+      "all_three_caller_hash_verified_before_each_fold": true
+    },
+    "factorized_field_sha256": "746f7b0e9a274742733b067aafbaf791843735c989e532a9f9da0e5c155f5671",
+    "capability_cache_sha256": "ae762afce2bccef73ecdc94e5b3bd9ec4b4f1a9ad3707b37da6152193a4a7aeb",
+    "support_graph_sha256": "f2b751659903b4d0740568f81d20b79dfbeae1ad3d33a86dcbc2346d94982594",
+    "source_footprint_fold_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/pinecone/source_footprint_fold_authority.pt",
+      "file_sha256": "09c8bfcd094afec01083fc7cc1ff5ac0faf9b4eb37bfd7e4b8a36bbe8abd0254",
+      "authority_sha256": "21a7d24b567791511ce58362f0cf355280e930575fb76a7a113bddc1bbd64f63",
+      "tensor_bundle_sha256": "2d28c9c643d084b84d24b2730cc34c20b9da8cdef8e09071efaccf31535a3d01"
+    }
+  },
+  "fold_contract": {
+    "mode": "source_footprint_v1",
+    "assignment": "splitmix64_source_footprint_group_v1",
+    "folds": 3,
+    "authority_loaded_before_source_prompt_labels": true,
+    "heldout_clear_tensors": ["positive_weight", "negative_weight", "raw_positive_mass", "raw_negative_mass"],
+    "candidate_actions_when_non_degenerate": ["unary", "surface_safe_propagated"],
+    "primary_metric": "responsibility_balanced_log_loss",
+    "secondary_metric": "responsibility_weighted_auc",
+    "complexity_tiebreak": "unary",
+    "target_feedback": false
+  },
+  "fixed_compiler": {
+    "region_space": "sam3",
+    "prototype_count": 4,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_registration_mode": "raster_adjoint",
+    "prompt_registration_scale": 1.0,
+    "alpha_threshold": 0.0,
+    "support_threshold": 0.0,
+    "registered_observation_fusion": "direct_raster_adjoint",
+    "registered_observation_confidence": "relative_joint_max",
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "shared",
+    "registered_selection_mode": "all_components",
+    "registered_readout_stage": "propagated",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "graph_policy": "typed",
+    "component_graph_policy": "same",
+    "channel_confidence_mode": "none",
+    "solver_type": "confidence_random_walker",
+    "solver_iterations": 12,
+    "solver_residual": 0.3,
+    "solver_unary_temperature": 0.1,
+    "solver_support_threshold": 0.5,
+    "laplacian_weight": 1.0,
+    "cg_iterations": 64,
+    "cg_tolerance": 0.00001,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "positive_priority",
+    "hard_seed_conflict_margin": 0.0,
+    "component_edge_threshold": 0.00001,
+    "seeded_component_min_weight": 0.2,
+    "connected_selection": false,
+    "query_conditioned_diffusion": "none",
+    "scene_specific_tuning": false
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "30-second polls; stop only after six consecutive observations at or above 88 C",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/source_footprint_oof_v1"
+  },
+  "opening_rule": "Run and seal folds 0, 1, and 2; load the immutable gate receipt; then build the matched K201 source-only full fit. No target score, RGB, mask, or metric may be opened in these invocations.",
+  "safety": {
+    "source_prompt_opened_at_registration": false,
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

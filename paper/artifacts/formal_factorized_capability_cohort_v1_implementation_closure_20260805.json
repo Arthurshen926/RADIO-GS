@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "artifact_type": "implementation_closure",
+  "result": "formal_factorized_capability_cohort_v1",
+  "date": "2026-08-05",
+  "problem": "The factorized trainer previously required every new scene to masquerade as the frozen July/Lego legacy capability-receipt exception.",
+  "implementation": {
+    "trainer": {
+      "path": "radio_gs/scripts/train_canonical_radio_field.py",
+      "sha256": "3cb2d5199934a4af755a3f3402c79f2965dff3e83d0c042f9e4ce1562af1ad28"
+    },
+    "test": {
+      "path": "tests/test_factorized_radio_training_integration.py",
+      "sha256": "940cdf7f4e227fe498f625f3297582a652d4a730cee2b7ad819a9a80117eaf76"
+    }
+  },
+  "contract": {
+    "new_experiment": "canonical-factorized-radio-v1-formal-capability-cohort",
+    "artifact_type": "factorized_capability_cohort_authority",
+    "schema_version": 1,
+    "required_authorities": [
+      "radio",
+      "dino_v3",
+      "sam3"
+    ],
+    "required_shared_lineage": [
+      "feature_output_bundle_sha256",
+      "geometry_fingerprint",
+      "registration_responsibility_cache_sha256",
+      "selected views and lifting policy",
+      "validity and view-count support",
+      "official RADIO checkpoint SHA-256"
+    ],
+    "formal_cache_loading": true,
+    "target_access_must_be_false": true,
+    "legacy_lego_receipt_compatible": true,
+    "preferred_cli": "--factorized-capability-cohort-authority plus caller-trusted SHA-256",
+    "formal_and_legacy_cli_mutually_exclusive": true
+  },
+  "tests": {
+    "targeted_factorized_training": "6 passed",
+    "broader_factorized_and_canonical_regression": "43 passed",
+    "formal_acceptance_covered": true,
+    "formal_bundle_mismatch_rejected": true,
+    "legacy_compatibility_covered": true,
+    "diff_check_passed": true
+  },
+  "scientific_effect": "Fresh Figurines/Fern capability cohorts now enter training through positive formal provenance rather than a historical compatibility exemption. No loss weight, scene hyperparameter, target, or benchmark metric changed.",
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_design": false
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "experiment": "canonical_factorized_radio_v1_spin_lego_matched_interface_v1",
+  "completed_at": "2026-08-05T15:11:36+08:00",
+  "status": "near_parity_with_previous_compact_full_interface",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_matched_interface_preregistration_20260805.json",
+    "sha256": "460dedab40465793f2f7c7955c951e12f5f83f9dd3bb4dbefc5f772c0ae124e9"
+  },
+  "query_independent_assets": {
+    "knn": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_euclidean_k200_self.pt",
+      "sha256": "26e6757bcfbda88c4ec177a1af28ce8bec79d9a4358a6c17ac855a6fc65261e0",
+      "sidecar_sha256": "1135b0869029d1d7621dd837bbf31d4388d945f8e4b261356c9b2e0c752d4c8a",
+      "bit_exact_to_previous_knn": true,
+      "effective_k": 201
+    },
+    "relation": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_dino_signed_hash256.pt",
+      "sha256": "4138760ba4c82b14d86d07ce9b61f4d443415787987f42405b7c4626a354c891",
+      "sidecar_sha256": "068255e329d00b73cb1bdf1cfffdcdd853e03e8cea01b4f9583b168eb7055a43",
+      "cosine_to_previous_relation_mean": 0.9889826774597168,
+      "cosine_to_previous_relation_p05": 0.9788082242012024,
+      "cosine_to_previous_relation_min": 0.9326077699661255
+    }
+  },
+  "sealed_evaluation": {
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/evaluation/lego_evaluation.json",
+      "sha256": "b18fad2b9cedcf6ec4dd712ac05c64a01b3980dee5d8fef0f35202d5cf72ec95"
+    },
+    "pre_metric_prediction_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/pre_metric_prediction_receipt.json",
+      "sha256": "d23378e3f819f46319fa1eec3b75ddbc06c314c91c43f38adc75bde50e32f076",
+      "sealed_before_target_ground_truth_open": true
+    },
+    "log_sha256": "f41daac0a3ff29650aaeb7a4946d31eabeb22ce6aa7bad67ff4fcf8ad57d6276"
+  },
+  "source_only_selection": {
+    "selected_feature_bandwidth": 0.5,
+    "selected_regularizer_bandwidth": 1.0,
+    "selected_reference_iou": 0.7369439820370872,
+    "selected_rendered_threshold": 0.7099999999999997,
+    "target_masks_opened_for_selection": false
+  },
+  "target_metrics": {
+    "frames": 43,
+    "foreground_iou": 0.6296096108315573,
+    "pixel_accuracy": 0.9873292311420259,
+    "stage_foreground_iou_at_selected_threshold": {
+      "unary_prior": 0.5034177231130249,
+      "k16_propagated_before_query_diffusion": 0.6296096108315573,
+      "connected_diagnostic": 0.6296096108315573,
+      "query_compatibility": 0.6310343996292368
+    }
+  },
+  "matched_comparison": {
+    "previous_compact_full_interface_iou": 0.6331459007792092,
+    "factorized_full_interface_iou": 0.6296096108315573,
+    "absolute_delta": -0.0035362899476519,
+    "previous_source_reference_iou": 0.7353558481205876,
+    "factorized_source_reference_iou": 0.7369439820370872,
+    "source_reference_delta": 0.0015881339164996,
+    "interpretation": "The factorized representation preserves the full SPIn interface to within 0.36 IoU points while slightly improving source-reference calibration. The remaining target delta is smaller than the previously observed release-compatible run-to-run threshold sensitivity and is not evidence of a material feature-field regression."
+  },
+  "conclusions": {
+    "representation": "canonical-factorized-radio-v1 restores the nonlinear official capability scale and retains the old SPIn relation geometry.",
+    "interface": "K16 graph plus fixed threshold is not the SPIn method; K201 query-conditioned support and source-only reference calibration account for most of the recovered score.",
+    "oof": "source-footprint OOF is a useful completion diagnostic but cannot alone choose the final novel-view interface.",
+    "next": "Expand the same factorized contract to LERF Figurines and NVOS Fern sentinels before full benchmark promotion."
+  },
+  "safety": {
+    "scene_specific_tuning": false,
+    "new_hyperparameters_selected_from_target": false,
+    "target_rgb_opened": false,
+    "maximum_stage_boundary_gpu1_temperature_c": 42
+  }
+}

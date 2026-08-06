@@ -11,7 +11,9 @@ from radio_gs.scripts.surface_region_scene_resume import (
     RESUME_CONTRACT_ARTIFACT_TYPE,
     RESUME_SCHEMA_VERSION,
     SCENE_PARTIAL_SUFFIX,
+    SCENE_ROW_SCHEMA_V3,
     SCENE_TENSOR_KEYS,
+    SCENE_TENSOR_KEYS_V3,
     SceneResumeStateError,
     append_scene_rows,
     commit_scene_partial,
@@ -23,6 +25,9 @@ from radio_gs.scripts.surface_region_scene_resume import (
     validate_resume_inventory,
 )
 from radio_gs.utils.immutable_artifacts import file_record, write_frozen_json
+from radio_gs.training.surface_region_eligibility_completion import (
+    STRUCTURED_ELIGIBILITY_POLICY,
+)
 
 
 SCENES = ["scene0001_00", "scene0002_00", "scene0003_00"]
@@ -120,8 +125,220 @@ def _scene_rows(scene: str, rng: random.Random) -> dict:
     }
 
 
+def _scene_rows_v3(scene: str, rng: random.Random) -> dict:
+    rows = _scene_rows(scene, rng)
+    token_mask = rows["token_mask"]
+    generator = torch.Generator().manual_seed(rng.randrange(2**31))
+    directions = torch.nn.functional.normalize(
+        torch.randn(ROWS, TOKENS, 1280, generator=generator),
+        dim=-1,
+    ).half()
+    directions[~token_mask] = 0
+    support_fill = torch.tensor(
+        [[False, True, False, False], [False, False, True, False]]
+    )
+    geometry = torch.randn(
+        ROWS, TOKENS, 16, generator=generator, dtype=torch.float16
+    )
+    geometry[..., 14] = support_fill.to(geometry.dtype)
+    geometry[~token_mask] = 0
+    rows["radio_features"] = directions
+    rows["geometry"] = geometry
+    rows["support_fill_mask"] = support_fill
+    for index, record in enumerate(rows["records"]):
+        fill = int(support_fill[index].sum())
+        record.update(
+            {
+                "support_fill_tokens": fill,
+                "semantic_tokens": int(token_mask[index].sum()) - fill,
+                "minimum_satisfied": True,
+            }
+        )
+    return rows
+
+
+def _paired_scene_rows_v3(scene: str, rng: random.Random) -> dict:
+    rows = _scene_rows_v3(scene, rng)
+    for key in SCENE_TENSOR_KEYS_V3:
+        rows[key] = rows[key][torch.tensor([0, 0])].clone()
+    full_id = f"{scene}-full"
+    shared = {
+        **rows["records"][0],
+        "region_id": full_id,
+        "seed": 7,
+        "physical_radius_m": 0.25,
+        "teacher_support_sha256": "a" * 64,
+        "teacher_target_sha256": "b" * 64,
+        "tokens": int(rows["token_mask"][0].sum()),
+        "support_fill_tokens": int(rows["support_fill_mask"][0].sum()),
+        "semantic_tokens": int(
+            rows["token_mask"][0].sum()
+            - rows["support_fill_mask"][0].sum()
+        ),
+        "anchor_local_index": int(rows["anchor_index"][0]),
+        "eligibility_variants_per_teacher_region": 1,
+        "paired_full_region_id": full_id,
+    }
+    rows["records"] = [
+        {
+            **shared,
+            "row_role": "full_support",
+            "eligibility_variant_index": -1,
+            "eligibility_sha256": "",
+        },
+        {
+            **shared,
+            "region_id": f"{full_id}-completion",
+            "row_role": "eligibility_completion",
+            "eligibility_variant_index": 0,
+            "eligibility_sha256": "c" * 64,
+            "eligibility_policy": STRUCTURED_ELIGIBILITY_POLICY,
+            "eligibility_semantic_eligible_tokens": int(
+                rows["token_mask"][1].sum()
+                - rows["support_fill_mask"][1].sum()
+            ),
+            "eligibility_nominal_semantic_keep_tokens": int(
+                rows["token_mask"][1].sum()
+                - rows["support_fill_mask"][1].sum()
+            ),
+            "eligibility_expected_fill_tokens": int(
+                rows["support_fill_mask"][1].sum()
+            ),
+            "eligibility_extreme_graph_fallback": False,
+            "eligibility_extreme_graph_fallback_reason": "",
+        },
+    ]
+    return rows
+
+
 def _empty_merge() -> tuple[list[dict], dict[str, list[torch.Tensor]]]:
     return [], {key: [] for key in SCENE_TENSOR_KEYS}
+
+
+def test_v3_scene_resume_round_trip_and_cross_version_fail_closed(
+    tmp_path: Path,
+) -> None:
+    contract = _contract([SCENES[0]])
+    contract["row_contract"] = {
+        **contract["row_contract"],
+        "row_schema_version": SCENE_ROW_SCHEMA_V3,
+        "geometry_dimension": 16,
+    }
+    root, authority, contract_sha = open_or_create_resume_contract(
+        tmp_path / "resume-v3", contract
+    )
+    rng = random.Random(91)
+    before = rng.getstate()
+    rows = _scene_rows_v3(SCENES[0], rng)
+    commit_scene_partial(
+        root,
+        scene_index=0,
+        scene_name=SCENES[0],
+        scene_rows=rows,
+        rng_state_before=before,
+        rng_state_after=rng.getstate(),
+        expected_rows=ROWS,
+        maximum_tokens=TOKENS,
+        teacher_views=VIEWS,
+        contract_record=authority,
+        contract_payload_sha256=contract_sha,
+        row_schema_version=SCENE_ROW_SCHEMA_V3,
+    )
+    partial = load_scene_partial(
+        root,
+        scene_index=0,
+        scene_name=SCENES[0],
+        expected_rows=ROWS,
+        maximum_tokens=TOKENS,
+        teacher_views=VIEWS,
+        contract_record=authority,
+        contract_payload_sha256=contract_sha,
+        row_schema_version=SCENE_ROW_SCHEMA_V3,
+    )
+    assert partial is not None
+    assert set(partial["rows"]) == set(SCENE_TENSOR_KEYS_V3) | {"records"}
+    records: list[dict] = []
+    tensors = {key: [] for key in SCENE_TENSOR_KEYS_V3}
+    append_scene_rows(partial["rows"], records=records, tensor_rows=tensors)
+    assert records == rows["records"]
+    for key in SCENE_TENSOR_KEYS_V3:
+        assert torch.equal(torch.stack(tensors[key]), rows[key])
+
+    with pytest.raises(SceneResumeStateError, match="cannot be trusted"):
+        load_scene_partial(
+            root,
+            scene_index=0,
+            scene_name=SCENES[0],
+            expected_rows=ROWS,
+            maximum_tokens=TOKENS,
+            teacher_views=VIEWS,
+            contract_record=authority,
+            contract_payload_sha256=contract_sha,
+        )
+
+
+def test_v3_paired_completion_resume_requires_exact_shared_teacher(
+    tmp_path: Path,
+) -> None:
+    contract = _contract([SCENES[0]])
+    contract["row_contract"] = {
+        **contract["row_contract"],
+        "row_schema_version": SCENE_ROW_SCHEMA_V3,
+        "geometry_dimension": 16,
+        "eligibility_variants_per_teacher_region": 1,
+    }
+    root, authority, contract_sha = open_or_create_resume_contract(
+        tmp_path / "resume-paired-v3", contract
+    )
+    rng = random.Random(92)
+    before = rng.getstate()
+    rows = _paired_scene_rows_v3(SCENES[0], rng)
+    commit_scene_partial(
+        root,
+        scene_index=0,
+        scene_name=SCENES[0],
+        scene_rows=rows,
+        rng_state_before=before,
+        rng_state_after=rng.getstate(),
+        expected_rows=ROWS,
+        maximum_tokens=TOKENS,
+        teacher_views=VIEWS,
+        contract_record=authority,
+        contract_payload_sha256=contract_sha,
+        row_schema_version=SCENE_ROW_SCHEMA_V3,
+        eligibility_variants_per_region=1,
+    )
+    assert load_scene_partial(
+        root,
+        scene_index=0,
+        scene_name=SCENES[0],
+        expected_rows=ROWS,
+        maximum_tokens=TOKENS,
+        teacher_views=VIEWS,
+        contract_record=authority,
+        contract_payload_sha256=contract_sha,
+        row_schema_version=SCENE_ROW_SCHEMA_V3,
+        eligibility_variants_per_region=1,
+    ) is not None
+
+    bad = _paired_scene_rows_v3(SCENES[0], random.Random(92))
+    bad["official_summary_tokens"][1, 0, 0] += 1
+    with pytest.raises(ValueError, match="exact teacher tensors"):
+        commit_scene_partial(
+            tmp_path / "unused-resume",
+            scene_index=0,
+            scene_name=SCENES[0],
+            scene_rows=bad,
+            rng_state_before=before,
+            rng_state_after=rng.getstate(),
+            expected_rows=ROWS,
+            maximum_tokens=TOKENS,
+            teacher_views=VIEWS,
+            contract_record=authority,
+            contract_payload_sha256=contract_sha,
+            row_schema_version=SCENE_ROW_SCHEMA_V3,
+            eligibility_variants_per_region=1,
+        )
 
 
 def _stack_merge(

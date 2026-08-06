@@ -4,6 +4,9 @@ import json
 import pytest
 import torch
 
+from radio_gs.field.factorized_radio_contract import (
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT,
+)
 from radio_gs.querying.support_solver import (
     SupportGraphConfig,
     build_primitive_support_graph,
@@ -11,12 +14,22 @@ from radio_gs.querying.support_solver import (
 )
 from radio_gs.querying.query_spec import QueryIntent
 from radio_gs.scripts.build_canonical_support_graph import (
+    build,
     capability_affinity_features,
     deterministic_feature_hash,
     estimate_unoriented_local_surface_normals,
     load_covisibility_observations,
     visibility_from_registration_responsibility,
 )
+
+
+def test_support_graph_builder_no_clobber_precedes_loading(tmp_path):
+    from argparse import Namespace
+
+    output = tmp_path / "graph.pt"
+    output.write_bytes(b"occupied")
+    with pytest.raises(FileExistsError, match="refuses to clobber"):
+        build(Namespace(output=str(output)))
 
 
 def test_deterministic_feature_hash_is_repeatable_and_normalized():
@@ -83,9 +96,7 @@ def test_exact_capability_graph_composes_with_manifold_and_covisibility_relation
     The test deliberately supplies no query/object/label state.
     """
 
-    xyz = torch.tensor(
-        [[float(x), float(y), 0.0] for y in range(3) for x in range(3)]
-    )
+    xyz = torch.tensor([[float(x), float(y), 0.0] for y in range(3) for x in range(3)])
     appearance = torch.arange(72, dtype=torch.float32).reshape(9, 8) + 1.0
     boundary = torch.arange(45, dtype=torch.float32).reshape(9, 5) + 3.0
     exact_appearance, exact_boundary, audit = capability_affinity_features(
@@ -144,9 +155,7 @@ def test_exact_capability_graph_composes_with_manifold_and_covisibility_relation
 
 
 def test_local_surface_normal_estimate_is_sign_agnostic_and_planarity_weighted():
-    grid = torch.tensor(
-        [[float(x), float(y), 0.0] for y in range(3) for x in range(3)]
-    )
+    grid = torch.tensor([[float(x), float(y), 0.0] for y in range(3) for x in range(3)])
     normals, reliability = estimate_unoriented_local_surface_normals(
         grid, neighbors=8, batch_size=3
     )
@@ -241,6 +250,95 @@ def test_covisibility_sidecar_is_digest_bound_to_the_capability_mpr(tmp_path):
     with pytest.raises(ValueError, match="digest"):
         load_covisibility_observations(
             {"mpr_cache": str(mpr)},
+            responsibility_cache=responsibility,
+            num_global_rows=3,
+            global_rows=torch.tensor([0, 2]),
+        )
+
+
+def test_factorized_covisibility_reuses_validated_top_level_geometry(tmp_path):
+    geometry_sha = "a" * 64
+    responsibility = tmp_path / "factorized-responsibility.pt"
+    torch.save(
+        {
+            "schema_version": 1,
+            "metadata": {
+                "xyz_sha256": geometry_sha,
+                "selected_dataset_indices": [0, 1],
+            },
+            "assignments": [
+                {"gaussian_ids": torch.tensor([0, 1])},
+                {"gaussian_ids": torch.tensor([1, 2])},
+            ],
+        },
+        responsibility,
+    )
+    digest = hashlib.sha256(responsibility.read_bytes()).hexdigest()
+    mpr = tmp_path / "factorized-radio.pt"
+    mpr.touch()
+    (tmp_path / "factorized-radio.pt.json").write_text(
+        json.dumps(
+            {
+                "metadata": {
+                    "registration_responsibility_cache_sha256": digest,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    capability_metadata = {
+        "mpr_cache": str(mpr),
+        "field_checkpoint_schema_version": 2,
+        "field_checkpoint_contract": CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT,
+        "registration_responsibility_cache_sha256": digest,
+        "mpr_geometry_fingerprint": {
+            "num_gaussians": 3,
+            "xyz_sha256": geometry_sha,
+        },
+    }
+    visible, audit = load_covisibility_observations(
+        capability_metadata,
+        responsibility_cache=responsibility,
+        num_global_rows=3,
+        global_rows=torch.tensor([0, 2]),
+    )
+    assert visible.tolist() == [[True, False], [False, True]]
+    assert audit["raw_mpr_xyz_sha256"] == geometry_sha
+
+    (tmp_path / "factorized-radio.pt.json").write_text(
+        json.dumps(
+            {
+                "metadata": {
+                    "registration_responsibility_cache_sha256": "0" * 64,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="sidecar responsibility digest"):
+        load_covisibility_observations(
+            capability_metadata,
+            responsibility_cache=responsibility,
+            num_global_rows=3,
+            global_rows=torch.tensor([0, 2]),
+        )
+
+    (tmp_path / "factorized-radio.pt.json").write_text(
+        json.dumps(
+            {
+                "metadata": {
+                    "registration_responsibility_cache_sha256": digest,
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    corrupted = dict(capability_metadata)
+    corrupted["field_checkpoint_contract"] = "wrong"
+    with pytest.raises(ValueError, match="exact checkpoint lineage"):
+        load_covisibility_observations(
+            corrupted,
             responsibility_cache=responsibility,
             num_global_rows=3,
             global_rows=torch.tensor([0, 2]),

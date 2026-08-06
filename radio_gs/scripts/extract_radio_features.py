@@ -58,6 +58,9 @@ RESUME_CONTRACT_SCHEMA_VERSION = 2
 FRAME_COMMIT_SCHEMA_VERSION = 1
 OUTPUT_BUNDLE_SCHEMA_VERSION = 1
 LEGACY_RESEAL_CONTRACT = "radio-feature-legacy-tensor-reseal-v1"
+INCOMPLETE_RUNTIME_RESEAL_CONTRACT = (
+    "radio-feature-incomplete-runtime-tensor-reseal-v1"
+)
 LEGACY_SOURCE_MANIFEST_FILENAME = "frame_manifest.legacy.json"
 
 
@@ -1187,29 +1190,69 @@ def _validate_resealed_legacy_output_bundle(
     """
 
     execution = manifest.get("execution")
-    if not isinstance(execution, dict) or execution.get(
-        "formalization_contract"
-    ) != LEGACY_RESEAL_CONTRACT:
-        raise ValueError("legacy feature reseal execution contract differs")
-    legacy_name = str(execution.get("legacy_source_manifest", ""))
-    if legacy_name != LEGACY_SOURCE_MANIFEST_FILENAME:
-        raise ValueError("legacy feature reseal source path differs")
-    legacy_path = root / legacy_name
+    if not isinstance(execution, dict):
+        raise ValueError("feature reseal execution contract is missing")
+    formalization_contract = str(execution.get("formalization_contract", ""))
+    if formalization_contract == LEGACY_RESEAL_CONTRACT:
+        source_name_key = "legacy_source_manifest"
+        source_sha_key = "legacy_source_manifest_sha256"
+        source_bundle_sha_key = "legacy_source_manifest_sha256"
+        source_name = str(execution.get(source_name_key, ""))
+        if source_name != LEGACY_SOURCE_MANIFEST_FILENAME:
+            raise ValueError("legacy feature reseal source path differs")
+    elif formalization_contract == INCOMPLETE_RUNTIME_RESEAL_CONTRACT:
+        source_name_key = "incomplete_runtime_source_manifest"
+        source_sha_key = "incomplete_runtime_source_manifest_sha256"
+        source_bundle_sha_key = "incomplete_runtime_source_manifest_sha256"
+        source_name = str(execution.get(source_name_key, ""))
+        expected_suffix = f".{execution.get(source_sha_key, '')}.json"
+        if (
+            Path(source_name).name != source_name
+            or not source_name.startswith("frame_manifest.original.")
+            or not source_name.endswith(expected_suffix)
+        ):
+            raise ValueError(
+                "incomplete-runtime feature reseal source path is not content-addressed"
+            )
+    else:
+        raise ValueError("feature reseal execution contract differs")
+    legacy_path = root / source_name
     try:
         legacy, legacy_sha256, _source = load_json_object(
             legacy_path,
             expected_sha256=str(
-                execution.get("legacy_source_manifest_sha256", "")
+                execution.get(source_sha_key, "")
             ),
             label="legacy RADIO feature manifest",
         )
     except (OSError, ValueError) as exc:
         raise ValueError("legacy RADIO source manifest is unreadable") from exc
-    if any(
-        key in legacy
-        for key in ("execution", "output_bundle", "output_bundle_sha256")
-    ):
-        raise ValueError("legacy RADIO source manifest is not an unsealed source")
+    if formalization_contract == LEGACY_RESEAL_CONTRACT:
+        if any(
+            key in legacy
+            for key in ("execution", "output_bundle", "output_bundle_sha256")
+        ):
+            raise ValueError("legacy RADIO source manifest is not an unsealed source")
+    else:
+        source_execution = legacy.get("execution")
+        if not isinstance(source_execution, dict):
+            raise ValueError("incomplete-runtime source execution is missing")
+        if (
+            str(source_execution.get("resume_contract", ""))
+            or str(source_execution.get("resume_contract_sha256", ""))
+            or str(source_execution.get("resume_contract_file_sha256", ""))
+            or legacy.get("output_bundle") is not None
+            or str(legacy.get("output_bundle_sha256", ""))
+        ):
+            raise ValueError(
+                "incomplete-runtime source is not an unbundled completed extraction"
+            )
+        if execution.get("original_extraction_execution") != source_execution:
+            raise ValueError(
+                "incomplete-runtime reseal does not preserve extraction execution"
+            )
+        if legacy_path.stat().st_mode & 0o222:
+            raise ValueError("incomplete-runtime source manifest is not read-only")
     frame_records = legacy.get("frames")
     radio = legacy.get("radio")
     if not isinstance(frame_records, list) or not frame_records:
@@ -1231,8 +1274,8 @@ def _validate_resealed_legacy_output_bundle(
     if (
         bundle.get("schema_version") != OUTPUT_BUNDLE_SCHEMA_VERSION
         or bundle.get("contract") != "radio-feature-output-bundle-v1"
-        or bundle.get("source_contract") != LEGACY_RESEAL_CONTRACT
-        or bundle.get("legacy_source_manifest_sha256") != legacy_sha256
+        or bundle.get("source_contract") != formalization_contract
+        or bundle.get(source_bundle_sha_key) != legacy_sha256
     ):
         raise ValueError("resealed legacy output bundle contract differs")
     observed_bundle_sha256 = str(manifest.get("output_bundle_sha256", ""))
@@ -1362,7 +1405,8 @@ def _validate_resealed_legacy_output_bundle(
         "manifest_sha256": manifest_sha256,
         "output_bundle_sha256": observed_bundle_sha256,
         "legacy_source_manifest_sha256": legacy_sha256,
-        "formalization_contract": LEGACY_RESEAL_CONTRACT,
+        "source_manifest_sha256": legacy_sha256,
+        "formalization_contract": formalization_contract,
         "num_frames": len(frame_records),
         "logical_tensor_bytes": total_bytes,
         "feature_signature": signature,
@@ -1408,7 +1452,10 @@ def _validate_final_output_bundle(
     frame_records = manifest.get("frames")
     if not isinstance(execution, dict) or not isinstance(radio, dict):
         raise ValueError("final feature manifest provenance is incomplete")
-    if execution.get("formalization_contract") == LEGACY_RESEAL_CONTRACT:
+    if execution.get("formalization_contract") in {
+        LEGACY_RESEAL_CONTRACT,
+        INCOMPLETE_RUNTIME_RESEAL_CONTRACT,
+    }:
         return _validate_resealed_legacy_output_bundle(
             root,
             manifest,

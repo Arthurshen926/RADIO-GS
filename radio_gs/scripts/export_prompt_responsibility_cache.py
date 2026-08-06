@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Export an authority-bound exact prompt-view compositor matrix.
 
-Only the two official prompt scribble files are opened (for native dimensions
-and source hashes).  Evaluation RGB and ground-truth masks are never opened.
+Official prompt files are opened only for native dimensions and source hashes.
+A SPIn reference mask is a source-file authority only: its pixels are never
+decoded or interpreted.  Evaluation RGB and target masks are never opened.
 Historical top-1 ``responsibility.pt`` files are neither read nor accepted.
 """
 
@@ -10,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 from contextlib import contextmanager
+from dataclasses import dataclass
 import fcntl
 import gc
 import hashlib
@@ -79,6 +81,193 @@ def _native_prompt_shape(scene: dict) -> tuple[int, int, dict[str, Path]]:
     return height, width, paths
 
 
+@dataclass(frozen=True)
+class NativePromptHeaderAuthority:
+    """Prompt-file identity and raster geometry, never prompt pixels."""
+
+    prompt_type: str
+    reference_frame_id: str
+    height: int
+    width: int
+    paths: dict[str, Path]
+    source_sha256: dict[str, str] | None = None
+
+
+def _require_lowercase_sha256(value: object, *, label: str) -> str:
+    text = str(value)
+    if len(text) != 64 or any(char not in "0123456789abcdef" for char in text):
+        raise ValueError(f"{label} must be a lowercase SHA-256")
+    return text
+
+
+def _native_reference_mask_header_authority(
+    scene: dict,
+    *,
+    expected_prompt_type: str | None,
+    expected_reference_frame_id: str | None,
+    expected_reference_mask_sha256: str | None,
+    expected_native_height: int | None,
+    expected_native_width: int | None,
+) -> NativePromptHeaderAuthority:
+    """Seal a full-mask source file without decoding or interpreting its pixels."""
+
+    prompt = scene.get("prompt")
+    if not isinstance(prompt, dict) or prompt.get("type") != "reference_binary_mask":
+        raise ValueError("reference-mask authority requires prompt type reference_binary_mask")
+    if expected_prompt_type != "reference_binary_mask":
+        raise ValueError(
+            "reference-mask authority requires --expected-prompt-type "
+            "reference_binary_mask"
+        )
+    reference_frame_id = str(prompt.get("frame_id", ""))
+    if not reference_frame_id or str(expected_reference_frame_id or "") != reference_frame_id:
+        raise ValueError("reference-mask authority frame id differs from the expected frame")
+    declared_frames = scene.get("prompt_frame_ids")
+    if not isinstance(declared_frames, list) or [str(value) for value in declared_frames] != [
+        reference_frame_id
+    ]:
+        raise ValueError("reference-mask authority requires exactly one matching prompt frame")
+    expected_sha256 = _require_lowercase_sha256(
+        expected_reference_mask_sha256,
+        label="expected reference mask SHA-256",
+    )
+    if expected_native_height is None or int(expected_native_height) <= 0:
+        raise ValueError("expected native height must be positive")
+    if expected_native_width is None or int(expected_native_width) <= 0:
+        raise ValueError("expected native width must be positive")
+
+    mask_path = Path(str(prompt.get("mask_path", ""))).resolve()
+    if not mask_path.is_file():
+        raise FileNotFoundError(mask_path)
+    # PIL is intentionally used only as a lazy header parser.  Do not call
+    # load(), convert(), getdata(), __array__(), or otherwise access pixels.
+    with Image.open(mask_path) as image:
+        width, height = tuple(map(int, image.size))
+    if height <= 0 or width <= 0:
+        raise ValueError("reference mask header reported a non-positive native shape")
+    if (height, width) != (int(expected_native_height), int(expected_native_width)):
+        raise ValueError("reference mask native shape differs from the expected shape")
+    mask_sha256 = sha256_file(mask_path)
+    if mask_sha256 != expected_sha256:
+        raise ValueError("reference mask file SHA-256 differs from the expected authority")
+    return NativePromptHeaderAuthority(
+        prompt_type="reference_binary_mask",
+        reference_frame_id=reference_frame_id,
+        height=height,
+        width=width,
+        paths={"reference_binary_mask": mask_path},
+        source_sha256={"reference_binary_mask": mask_sha256},
+    )
+
+
+def _native_prompt_header_authority(
+    scene: dict,
+    *,
+    expected_prompt_type: str | None = None,
+    expected_reference_frame_id: str | None = None,
+    expected_reference_mask_sha256: str | None = None,
+    expected_native_height: int | None = None,
+    expected_native_width: int | None = None,
+) -> NativePromptHeaderAuthority:
+    prompt = scene.get("prompt")
+    prompt_type = prompt.get("type") if isinstance(prompt, dict) else None
+    if expected_prompt_type is not None and expected_prompt_type != prompt_type:
+        raise ValueError("manifest prompt type differs from --expected-prompt-type")
+    if prompt_type == "positive_negative_scribbles":
+        if any(
+            value is not None
+            for value in (
+                expected_reference_frame_id,
+                expected_reference_mask_sha256,
+                expected_native_height,
+                expected_native_width,
+            )
+        ):
+            raise ValueError("reference-mask expectations are invalid for scribble prompts")
+        # Preserve the legacy helper and its exact positive/negative path order.
+        height, width, paths = _native_prompt_shape(scene)
+        prompt_frames = scene.get("prompt_frame_ids", [prompt.get("frame_id")])
+        frame_id = str(prompt_frames[0])
+        return NativePromptHeaderAuthority(
+            prompt_type="positive_negative_scribbles",
+            reference_frame_id=frame_id,
+            height=height,
+            width=width,
+            paths=paths,
+        )
+    if prompt_type == "reference_binary_mask":
+        return _native_reference_mask_header_authority(
+            scene,
+            expected_prompt_type=expected_prompt_type,
+            expected_reference_frame_id=expected_reference_frame_id,
+            expected_reference_mask_sha256=expected_reference_mask_sha256,
+            expected_native_height=expected_native_height,
+            expected_native_width=expected_native_width,
+        )
+    raise ValueError(f"unsupported prompt type for exact-W export: {prompt_type!r}")
+
+
+def _reference_mask_report_metadata(
+    prompt: NativePromptHeaderAuthority,
+    source_sha256: dict[str, str],
+    authority: PromptResponsibilityAuthority,
+) -> dict[str, object]:
+    """Build and revalidate the no-pixel/no-target full-mask report binding."""
+
+    if prompt.prompt_type != "reference_binary_mask":
+        raise ValueError("reference-mask report requires reference_binary_mask authority")
+    prompt_sources = dict(prompt.source_sha256 or {})
+    if set(prompt.paths) != {"reference_binary_mask"} or set(prompt_sources) != {
+        "reference_binary_mask"
+    }:
+        raise ValueError("reference-mask authority requires one clear source SHA key")
+    if source_sha256.get("reference_binary_mask") != prompt_sources[
+        "reference_binary_mask"
+    ]:
+        raise ValueError("reference-mask source SHA binding changed before report")
+    if (
+        authority.frame_id != prompt.reference_frame_id
+        or authority.height != prompt.height
+        or authority.width != prompt.width
+    ):
+        raise ValueError("reference-mask raster/frame authority changed before report")
+    required_bindings = {
+        "camera_mapping",
+        "contribution_compositor_source",
+        "exporter_source",
+        "gaussfm_config",
+        "geometry_checkpoint",
+    }
+    if not required_bindings.issubset(source_sha256):
+        raise ValueError("reference-mask report is missing geometry/camera/implementation SHA bindings")
+    return {
+        "prompt_type": prompt.prompt_type,
+        "reference_frame_id": prompt.reference_frame_id,
+        "native_height": prompt.height,
+        "native_width": prompt.width,
+        "source_sha256_key": "reference_binary_mask",
+        "reference_binary_mask_sha256": prompt_sources["reference_binary_mask"],
+        "source_mask_pixels_decoded": False,
+        "source_mask_pixels_interpreted": False,
+        "query_or_evidence_constructed": False,
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+        "geometry_camera_implementation_bindings": {
+            "camera_mapping_sha256": source_sha256["camera_mapping"],
+            "contribution_compositor_source_sha256": source_sha256[
+                "contribution_compositor_source"
+            ],
+            "exporter_source_sha256": source_sha256["exporter_source"],
+            "gaussfm_config_sha256": source_sha256["gaussfm_config"],
+            "geometry_checkpoint_sha256": authority.geometry_checkpoint_sha256,
+            "geometry_xyz_sha256": authority.geometry_xyz_sha256,
+            "intrinsics_sha256": authority.intrinsics_sha256,
+            "pose_sha256": authority.pose_sha256,
+        },
+    }
+
+
 @contextmanager
 def _exclusive_cpu_staging_lock(path: str | None):
     """Serialize native triplet CPU residency across parallel GPU exporters."""
@@ -135,7 +324,21 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         if not path.is_file():
             raise FileNotFoundError(path)
 
-    height, width, prompt_paths = _native_prompt_shape(scene)
+    prompt_authority = _native_prompt_header_authority(
+        scene,
+        expected_prompt_type=getattr(args, "expected_prompt_type", None),
+        expected_reference_frame_id=getattr(args, "expected_reference_frame_id", None),
+        expected_reference_mask_sha256=getattr(
+            args, "expected_reference_mask_sha256", None
+        ),
+        expected_native_height=getattr(args, "expected_native_height", None),
+        expected_native_width=getattr(args, "expected_native_width", None),
+    )
+    height, width, prompt_paths = (
+        prompt_authority.height,
+        prompt_authority.width,
+        prompt_authority.paths,
+    )
     config = load_config(str(config_path))
     camera_mapping = json.loads(camera_map_path.read_text(encoding="utf-8"))
     views = resolve_protocol_views(
@@ -144,7 +347,7 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         scene_root=Path(str(config.scene_root)).resolve(),
         camera_mapping=camera_mapping,
     )
-    prompt_frame = str(scene.get("prompt_frame_ids", [scene["prompt"]["frame_id"]])[0])
+    prompt_frame = prompt_authority.reference_frame_id
     view = _view_by_frame(views, prompt_frame)
 
     model, _codec, renderer, _sharpener, refiner, _field_config, _is_hybrid = (
@@ -183,6 +386,9 @@ def export(args: argparse.Namespace) -> dict[str, object]:
     # while building/loading the CPU cache.  Avoid a redundant full GPU sort,
     # whose temporary memory can exceed the native triplet payload.
 
+    prompt_source_sha256 = prompt_authority.source_sha256 or {
+        role: sha256_file(path) for role, path in prompt_paths.items()
+    }
     source_sha256 = {
         "benchmark_manifest": sha256_file(manifest_path),
         "camera_mapping": sha256_file(camera_map_path),
@@ -190,7 +396,7 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         "exporter_source": sha256_file(Path(__file__).resolve()),
         "gaussfm_config": sha256_file(config_path),
         "geometry_checkpoint": sha256_file(checkpoint_path),
-        **{role: sha256_file(path) for role, path in prompt_paths.items()},
+        **prompt_source_sha256,
     }
     authority = PromptResponsibilityAuthority(
         scene_id=str(args.scene_id),
@@ -253,6 +459,10 @@ def export(args: argparse.Namespace) -> dict[str, object]:
         ),
         "process_peak_rss_kib": int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss),
     }
+    if prompt_authority.prompt_type == "reference_binary_mask":
+        report["reference_mask_header_authority"] = _reference_mask_report_metadata(
+            prompt_authority, source_sha256, authority
+        )
     if args.report:
         report_path = Path(args.report).resolve()
         report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -274,6 +484,32 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--telemetry-log", help="thermal-guard CSV to bind and summarize")
     parser.add_argument("--execution-log", help="captured stdout/stderr path to record")
+    parser.add_argument(
+        "--expected-prompt-type",
+        choices=("positive_negative_scribbles", "reference_binary_mask"),
+        help=(
+            "optional legacy scribble assertion; required as reference_binary_mask "
+            "for a full-mask header authority"
+        ),
+    )
+    parser.add_argument(
+        "--expected-reference-frame-id",
+        help="required exact source reference frame for a reference_binary_mask",
+    )
+    parser.add_argument(
+        "--expected-reference-mask-sha256",
+        help="required lowercase complete-file SHA-256 for a reference_binary_mask",
+    )
+    parser.add_argument(
+        "--expected-native-height",
+        type=int,
+        help="required source raster height for a reference_binary_mask",
+    )
+    parser.add_argument(
+        "--expected-native-width",
+        type=int,
+        help="required source raster width for a reference_binary_mask",
+    )
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
 

@@ -1,0 +1,112 @@
+{
+  "schema_version": 1,
+  "artifact_type": "method_preregistration",
+  "experiment": "canonical-factorized-radio-v1-figurines-exact-marginal-source-only-v2",
+  "date": "2026-08-05",
+  "question": "Does one query-free exact front-to-back sparse marginal authority restore the primitive support discarded by top-1 lifting while preserving the factorized RADIO and official capability target semantics?",
+  "frozen_inputs": {
+    "config": {
+      "path": "radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "feature_manifest": {
+      "path": "/root/RADIO-GS/output/canonical_teacher_features/figurines/frame_manifest.json",
+      "sha256": "3db488c92f81289fb66c4d27a312d37dd0fb0fca5c271f8744721528f50eaaf9",
+      "output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3"
+    },
+    "radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "excluded_target_frame_ids": [41, 105, 152, 195],
+    "adaptive_capacity_result": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_source_only_adaptive_capacity_results_20260805.json",
+      "sha256": "40cd428d87c4b5f280773626b2e7b949fec3e7233e3ae6913b37a95eb1fd3a51",
+      "selected_coefficient_dim": 512,
+      "selected_local_dim": 512
+    }
+  },
+  "implementation_authority": {
+    "builder_sha256": "4b0a54ebaa34758e6a2e272bd43575f9857c36729ae9cf4ea0ccf73b0b19c42f",
+    "sparse_authority_sha256": "9905c2378d762495a10e480c1da23140ce92fd8b8f5cb64f32d36decdf4c4bb6",
+    "contribution_compositor_sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0",
+    "factorized_cache_loader_sha256": "ebf813a9fd281a0c9e1e6876790f453dc6f1b133532d15d4355d92e7de41e711",
+    "observation_contract_module_sha256": "1bb66807dddb4d7c97cb0be20fe8a451c406268d794f2cb16cc92989b6b01b42",
+    "trainer_sha256": "45245e8007efbdadb0d54debb681b400e73ea43d965dc83914cacddce0a5e2ec",
+    "joint_regression": "120 passed"
+  },
+  "factorized_builder_contract": {
+    "name": "canonical-factorized-radio-v1-builder-exact-marginal-v2",
+    "sha256": "ac5476d3861bcad69cd254d21d3dde6a973ed8d5e3f6d9bb1dd364a5e302fb8f",
+    "parent_core_contract_sha256": "81cd1fd9f7d4fbe6183785d0b0bc937c456b1ca9c4a9aedfd657c53510e296b2",
+    "normalize_each_view": false,
+    "semantic_weight": "exact_base_weight_times_pixel_marginal",
+    "visibility_weight": "exact_base_weight"
+  },
+  "conventional_exact_marginal_contract": {
+    "name": "canonical-exact-marginal-mpr-v1",
+    "sha256": "2dde958ec433fd41eea56e3554dd47acfcf96924df7e00d0b638a5e53273d66b",
+    "schema_version": 1,
+    "view_selection": "uniform_temporal_deterministic",
+    "maximum_views": 120,
+    "aggregation_mode": "raster_marginal_responsibility",
+    "registration_weight_mode": "exact_front_to_back_marginal_responsibility",
+    "raster_view_fusion": "contribution_mean",
+    "normalize_each_view": true,
+    "per_view_normalization_stage": "pixel_feature_before_raster_lifting",
+    "alpha_threshold": 0.0,
+    "feature_projection_order": "per_view_before_mpr",
+    "responsibility_authority_schema": "radio_gs.sparse_exact_marginal_responsibility_authority.v1",
+    "responsibility_formula_sha256": "a17a67f3fffcebd57c925e83eee249c97c24b4b2e56b0b0ac611530f570d85d4",
+    "query_independent": true
+  },
+  "shared_semantic_and_geometric_policy": {
+    "semantic_assignment_gate": "pre_adaptor_raw_radio_l2_norm_strictly_positive",
+    "view_count_semantics": "views_with_pre_adaptor_raw_radio_l2_norm_strictly_positive",
+    "geometric_visibility_semantics": "independent_exact_base_weight_authority_includes_zero_amplitude_hits",
+    "zero_amplitude_policy": "exclude from semantic numerator and view count, retain in geometric visibility denominator",
+    "authority_storage": "gaussian_id_pixel_id_base_weight_only",
+    "marginal_weight": "recomputed from the frozen formula for the complete view before observation or channel chunking"
+  },
+  "planned_outputs": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v2",
+    "responsibility_authority": "exact_marginal_responsibility_authority.json",
+    "factorized_radio": "factorized_raw_radio_exact_marginal.pt",
+    "normalized_raw_radio": "raw_radio_matched_exact_marginal.pt",
+    "dino_v3": "dino_v3_matched_exact_marginal.pt",
+    "sam3": "sam3_matched_exact_marginal.pt",
+    "cohort_authority": "paper/artifacts/canonical_factorized_radio_v1_figurines_exact_marginal_capability_cohort_authority_20260805.json",
+    "field_checkpoint": "fields/trainable_basis_d512_l512_exact_marginal.pth"
+  },
+  "execution_policy": {
+    "authority": "create once from the factorized raw build, then immutable SHA-bound reuse for raw, DINO-v3, and SAM3",
+    "capability_map_source": "project_raw",
+    "capability_target_contract": "matched_exact_marginal",
+    "no_clobber": true,
+    "resume": "verify and adopt complete orphan shards under a single-writer lock",
+    "scene_specific_parameters": false,
+    "target_dependent_branching": false
+  },
+  "source_only_promotion_gates": {
+    "completed_authority_views": 120,
+    "all_authority_shards_hash_verified": true,
+    "four_cache_geometry_frames_valid_and_view_counts_exactly_equal": true,
+    "four_cache_responsibility_authority_sha256_exactly_equal": true,
+    "geometric_view_counts_sha256_exactly_equal": true,
+    "semantic_valid_support_strictly_greater_than_top1_34669": true,
+    "semantic_valid_support_at_least_existing_exact_source_sentinel_82088": true,
+    "visibility_purity_bounds": [0.0, 1.0],
+    "factorized_source_reconstruction_gates": "reuse the absolute direction, amplitude, DINO-v3, and SAM3 gates from the source-only adaptive-capacity preregistration"
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  },
+  "benchmark_gate": "Do not open LERF queries or benchmark masks until the shared authority, four-cache parity, and D512/L512 source reconstruction gates all pass."
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_hard_sibling_margin_dev2_v1",
+  "status": "rejected_by_preregistered_development_gate",
+  "results": {
+    "figurines": {
+      "baseline_miou": 0.4074466527,
+      "candidate_miou": 0.2365195304,
+      "delta": -0.1709271223,
+      "report": "output/optimization_20260804/lerf3d_hard_sibling_margin_dev2_v1/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "report_sha256": "802f1662f579bd61e7e82de7b86aa7ec0224186c2cfe0a655e9fbff518e0779a"
+    },
+    "waldo_kitchen": {
+      "baseline_miou": 0.2408391386,
+      "candidate_miou": 0.2436395091,
+      "delta": 0.0028003705,
+      "report": "output/optimization_20260804/lerf3d_hard_sibling_margin_dev2_v1/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "report_sha256": "e6907ec92dabcae6a58f728756da49c3050f8c3e46fcf80ed8ef4a00061d096b"
+    }
+  },
+  "gate_decision": {
+    "required": "both scenes improve and two-scene macro improves by at least 0.01",
+    "observed": "Figurines regressed by 0.17093",
+    "decision": "reject and do not expand"
+  },
+  "interpretation": "LERF scene queries are not mutually exclusive negatives: part/whole, category/instance, and attribute-bearing queries overlap. Hard positive-sibling competition destroys valid hierarchical evidence and is not a generally sound open-vocabulary interface."
+}

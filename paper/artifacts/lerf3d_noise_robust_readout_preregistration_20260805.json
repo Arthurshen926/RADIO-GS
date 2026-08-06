@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_noise_robust_readout_figurines_dev1_v1",
+  "status": "registered before candidate target-label evaluation; amended before evaluation after the legacy descriptor failed the current row/xyz authority check",
+  "question": "Does a globally trained, query-free SurfaceRegion readout exposed during training to the measured 13-degree canonical direction error reduce the field-to-readout compatibility gap?",
+  "candidate": {
+    "field": "unchanged current frozen canonical field",
+    "field_checkpoint_sha256": "328ba9f9f19f69f02a118462cbb427fac7670cbc83e4d4eade7e66902943aa66",
+    "readout": "SurfaceRegion V2 trained on 24 non-benchmark scenes with 13-degree isotropic tangent-direction noise; validation scenes are disjoint",
+    "readout_checkpoint_sha256": "1111936653db3fd65abeb06970a4f1e8bfbae0e766b2e17066ecdc370cc6145f",
+    "rejected_legacy_descriptor_cache_sha256": "532932166c31ef63a57af2284f755b9dcf5d72ada13a19bbffb2278156e9e8b1",
+    "descriptor_cache": "rebuilt query-free from the pinned field/readout/support graph with the current complete row/xyz authority",
+    "descriptor_cache_sha256": "4d3cff65f4274b50fa346cae8a2231e1f093c0d61b6f4cf8cdaac44e49d6f9d9",
+    "clean_readout_validation_selection_score": 0.9487422132,
+    "noise_robust_validation_selection_score": 0.9488876085,
+    "canonical_negative_formula": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "downstream_protocol": "unchanged frozen vala_repo_3d",
+    "benchmark_masks_used_for_training": false,
+    "benchmark_queries_used_for_training": false,
+    "trainable_parameters_after_registration": 0
+  },
+  "development_scene": "figurines",
+  "control_miou": 0.4753371775,
+  "gate": {
+    "primary": "candidate mIoU must exceed the clean-readout control by at least 0.005",
+    "threshold_miou": 0.4803371775,
+    "on_success": "run AP/oracle diagnostics and then rebuild Field-B descriptors with the same readout to test representation-readout additivity",
+    "on_failure": "reject generic tangent-noise augmentation as insufficient and implement explicit factorized direction/reliability readout training"
+  },
+  "claim_boundary": "The existing query-free checkpoint is evaluated without retraining or target-label access. The legacy descriptor was not consumed because current code rejected its incomplete geometry authority; rebuilding the disposable descriptor does not alter the method. No threshold, graph, scale, or query-set parameter changes."
+}

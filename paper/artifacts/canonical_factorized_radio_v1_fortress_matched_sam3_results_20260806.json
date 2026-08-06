@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_matched_top1_cache_result",
+  "recorded_at": "2026-08-06T06:20:00+08:00",
+  "scene": "fortress",
+  "feature_space": "sam3",
+  "source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_fortress_source_chain_preregistration_20260806.json",
+    "sha256": "b99bc96639974423e2867d9ddeee5a42065f779dc5e5a7aa916a3e2467815421"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/sam3_matched_top1.pt",
+    "sha256": "0d1c44e39cb62c80a4667620f8d81849e6cb6bda5e68bdefed018a3105eab55b",
+    "report_sha256": "0d6647a36998f62b10f7ae676f7b0f6ac996b8ff77a5b1f2bc5bc7ff4acabeaa",
+    "support_sha256": "c68848da2630f95d6955f0de409dc4d0b6ef4d2b06345e33e4ced051dc00b533",
+    "feature_dim": 1024,
+    "channel_shards": 4
+  },
+  "official_capability": {
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "projection_order": "per_view_before_mpr",
+    "capability_map_source": "project_raw"
+  },
+  "statistics": {
+    "num_gaussians": 938089,
+    "valid_count": 405386,
+    "views": 42,
+    "mean_views_if_valid": 28.51914405822754,
+    "median_views_if_valid": 35.0
+  },
+  "validation": {
+    "formal_sharded_loader_all_hash_gates": "passed",
+    "feature_space": "sam3",
+    "geometry_xyz_sha256": "f1ae3616b6447e8361f162c3b95aa527e4e04fb93d979c857a7a186d7aada2f1",
+    "shared_responsibility_sha256": "870ebbb6573360009ae59bbf84861a44195500624488a1d367bb3d067121f049",
+    "support_matches_radio_exactly": true
+  },
+  "resource_observation": {
+    "physical_gpu": 0,
+    "maximum_temperature_c": 58,
+    "thermal_stop_triggered": false
+  },
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

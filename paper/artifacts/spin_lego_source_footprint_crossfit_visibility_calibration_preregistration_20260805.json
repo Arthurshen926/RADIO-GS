@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "registration": "spin_source_footprint_crossfit_visibility_calibration_v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "status": "registered_on_previously_opened_lego_development_sentinel_before_matched_oof_or_candidate_prediction",
+  "claim_boundary": {
+    "scene": "lego",
+    "role": "previously opened difficult development sentinel; not an unbiased confirmatory scene",
+    "known_before_registration": [
+      "factorized matched-interface foreground IoU 0.6296096108315573",
+      "previous compact matched-interface foreground IoU 0.6331459007792092",
+      "post-metric diagnosis that the source-selected threshold 0.71 is above a stronger target operating point near 0.66",
+      "K16-only source-footprint OOF selected propagation but did not predict its novel-view regression"
+    ],
+    "forbidden_use": "No previously opened target RGB, target mask, target score, target metric, or post-metric threshold may enter OOF construction, completion-threshold selection, source-visible coverage, or candidate prediction."
+  },
+  "question": "Can a source-only cross-fitted calibration distinguish source-visible rows from completion rows while preserving the frozen factorized SPIn matched interface?",
+  "frozen_inputs": {
+    "matched_interface_preregistration": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_matched_interface_preregistration_20260805.json",
+      "sha256": "460dedab40465793f2f7c7955c951e12f5f83f9dd3bb4dbefc5f772c0ae124e9"
+    },
+    "matched_interface_result_for_historical_context_only": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_matched_interface_results_20260805.json",
+      "sha256": "d757cdd76dbbaefd5dbc469e0f0b2889e6e82c8d5832d974f7cdbdfaf9a3a122",
+      "not_a_method_input": true
+    },
+    "source_footprint_oof_preregistration": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_source_footprint_oof_preregistration_20260805.json",
+      "sha256": "442a30134a6e49d3bf2e441195260582d1f5f1cb6c8b2917e6cffee64e8ef05c"
+    },
+    "source_footprint_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority.pt",
+      "file_sha256": "07328660ae6844c2348a936d000d8080c79b3494c84399a03fbc57a2d0fd7396",
+      "authority_sha256": "50e8286e85cad6b2a7c0294b385bb7e1b3b91226285463057d74ae900bce0ffa",
+      "assignment": "source_raster_dominant_footprint_blocks_v1; fixed 8-cell long axis; SplitMix64(group_id) modulo 3"
+    },
+    "base_k16_oof_folds_used_only_as_fold_evidence_authorities": [
+      {
+        "fold": 0,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1/fold_0.pt",
+        "sha256": "ca00c08c1d12c39109c2675e867da3d91922e6721b2b6e157952aef0a776b0dc"
+      },
+      {
+        "fold": 1,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1/fold_1.pt",
+        "sha256": "cfddb6f8444844211aa58f70ba2ae855d997f86ed4c3689149f7cc27339d1dce"
+      },
+      {
+        "fold": 2,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1/fold_2.pt",
+        "sha256": "0c611abcc94d9d5b4b629ea1badd663eb6ece14d60d09801e5cda9af98800e49"
+      }
+    ],
+    "query_diffusion_knn": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_euclidean_k200_self.pt",
+      "sha256": "26e6757bcfbda88c4ec177a1af28ce8bec79d9a4358a6c17ac855a6fc65261e0",
+      "official_neighbors": 200,
+      "effective_columns_including_self": 201
+    },
+    "query_diffusion_relation": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_dino_signed_hash256.pt",
+      "sha256": "4138760ba4c82b14d86d07ce9b61f4d443415787987f42405b7c4626a354c891",
+      "dimension": 256
+    },
+    "full_fit_pre_metric_prediction_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/pre_metric_prediction_receipt.json",
+      "sha256": "d23378e3f819f46319fa1eec3b75ddbc06c314c91c43f38adc75bde50e32f076",
+      "use": "source-visible threshold and immutable continuous target-score bindings only",
+      "required_safety": {
+        "sealed_before_target_ground_truth_open": true,
+        "target_rgb_opened": false,
+        "target_mask_opened": false,
+        "target_metric_opened": false
+      }
+    }
+  },
+  "matched_oof_contract": {
+    "base_compiler": "the existing exact-W K4 source-footprint fold with all evidence tensors cleared on one complete held-out footprint group fold before compilation",
+    "base_graph_and_stage": "the same factorized surface-safe K16 and propagated readout already sealed in each source fold",
+    "query_diffusion_kernel": "ludvig_release_compat",
+    "query_diffusion_knn": "fixed K201 cache above",
+    "query_relation": "fixed signed-hash256 DINO relation above",
+    "feature_bandwidth": 0.5,
+    "regularizer_bandwidth": 1.0,
+    "bandwidth_origin": "the source-only selected Lego matched-interface operating point is now frozen as a single development-method constant; it is not rescanned in OOF",
+    "logistic_c": 0.01,
+    "iterations": 100,
+    "edge_binarize_threshold": 0.00001,
+    "max_positive_fraction": 0.1,
+    "positive_cap": "released argsort rule",
+    "readout": "K201 propagated support; connected selection off",
+    "heldout_semantics": "Held-out rows have exact zero positive evidence and exact zero reference sample weight before logistic fit, graph reachability, or any query-conditioned operation.",
+    "target_access": false,
+    "parameter_scan": false
+  },
+  "calibration_contract": {
+    "threshold_grid": "0.99,0.98,...,0.03 descending",
+    "tie_break": "strict improvement retains the first descending threshold",
+    "t_seen": "The score_threshold in the immutable full-fit pre-metric receipt; no evaluation report is read.",
+    "t_completion": "One pooled threshold maximizing responsibility-weighted soft IoU over exactly the held-out observed rows from the three matched-interface OOF folds.",
+    "weighted_soft_iou": "sum(selected*positive_weight)/(sum(positive_weight)+sum(selected*negative_weight))",
+    "fold_stability": "Report each fold threshold and require max-minus-min <= 0.10 before any target prediction.",
+    "source_visible_row": "reference_weight > 0 in the immutable full source evidence authority",
+    "target_camera_coverage": "Render the binary source-visible row indicator with the same alpha-normalized scalar Gaussian compositor and the target pose; no target raster, RGB, feature, or mask is opened.",
+    "spatial_threshold": "t(x)=c(x)*t_seen+(1-c(x))*t_completion",
+    "prediction": "candidate(x)=continuous_matched_score(x)>=t(x)",
+    "new_scalar_or_scene_parameter": false
+  },
+  "cpu_preflight_stop_rules": [
+    "Fail closed unless exactly folds 0,1,2 share scene, protocol, graph, capability, footprint, relation, KNN, row, geometry, and method-contract authorities.",
+    "Fail closed if any held-out source evidence or reference sample weight survives.",
+    "Stop before target rendering if any fold is class-degenerate or if the three completion thresholds span more than 0.10.",
+    "Do not change the block grid, fold assignment, K, bandwidth, regularizer, threshold grid, visibility definition, interpolation formula, or stability bound after observing the result."
+  ],
+  "development_sentinel_gate": {
+    "baseline": 0.6296096108315573,
+    "historical_compact_control": 0.6331459007792092,
+    "promotion": "candidate foreground IoU must be at least 0.6346096108315573 and strictly exceed 0.6331459007792092",
+    "minimum_absolute_gain": 0.005,
+    "prediction_separation": "All continuous scores, coverage maps, spatial thresholds, and binary predictions must be sealed before the frozen target masks are opened for this new evaluation.",
+    "failure": "Stop this calibration branch without exponent, blend, threshold, fold, or scene-specific tuning."
+  },
+  "forbidden": [
+    "target RGB or target foundation-model features",
+    "target masks or metrics before candidate prediction receipt",
+    "the known post-metric target threshold near 0.66 as an input",
+    "using the old K16-only pooled diagnostic threshold as t_completion",
+    "bandwidth, coverage exponent, interpolation-weight, fold-count, block-grid, or threshold-grid scans",
+    "connected-component selection",
+    "modification of NVOS source-completion or source-observation gates"
+  ],
+  "execution": {
+    "cpu_first": true,
+    "gpu_execution_authorized_by_this_registration": false,
+    "gpu_rule": "After CPU implementation, tests, and stability tooling are complete, report the exact GPU command and resource estimate before any Lego matched-OOF or target-coverage run.",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_visibility_calibration_v1/lego"
+  }
+}

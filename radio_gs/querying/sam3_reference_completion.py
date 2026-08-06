@@ -79,7 +79,11 @@ def entropy_reliability_soft_observation(
     values = np.asarray(aggregate_probability, dtype=np.float64)
     positive = np.asarray(raw_positive, dtype=bool)
     negative = np.asarray(raw_negative, dtype=bool)
-    if values.ndim != 2 or positive.shape != values.shape or negative.shape != values.shape:
+    if (
+        values.ndim != 2
+        or positive.shape != values.shape
+        or negative.shape != values.shape
+    ):
         raise ValueError("aggregate and signed scribbles must be aligned 2D arrays")
     if not np.isfinite(values).all() or bool(((values < 0) | (values > 1)).any()):
         raise ValueError("aggregate probability must be finite in [0,1]")
@@ -99,4 +103,47 @@ def entropy_reliability_soft_observation(
     return (
         reliability.astype(np.float32, copy=False),
         observation.astype(np.float32, copy=False),
+    )
+
+
+def probability_preserving_entropy_observation(
+    aggregate_probability: np.ndarray,
+    raw_positive: np.ndarray,
+    raw_negative: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Keep source probability and reliability as separate Bernoulli terms.
+
+    The historical soft-completion diagnostic returned ``q * c(q)`` as if it
+    were a foreground probability.  That turns low confidence into negative
+    evidence.  This helper instead returns the overwritten foreground
+    probability ``q`` and the independent entropy reliability ``c(q)``.  A
+    downstream exact adjoint can therefore pool ``c*q`` and ``c*(1-q)`` and
+    recover both the conditional foreground probability and its confidence.
+    """
+
+    values = np.asarray(aggregate_probability, dtype=np.float64)
+    positive = np.asarray(raw_positive, dtype=bool)
+    negative = np.asarray(raw_negative, dtype=bool)
+    if values.ndim != 2 or positive.shape != values.shape or negative.shape != values.shape:
+        raise ValueError("aggregate and signed scribbles must be aligned 2D arrays")
+    if not np.isfinite(values).all() or bool(((values < 0) | (values > 1)).any()):
+        raise ValueError("aggregate probability must be finite in [0,1]")
+    if bool(np.logical_and(positive, negative).any()):
+        raise ValueError("raw positive and negative scribbles overlap")
+
+    reliability = np.ones_like(values, dtype=np.float64)
+    interior = (values > 0) & (values < 1)
+    probability = values[interior]
+    entropy = -probability * np.log(probability) - (
+        1.0 - probability
+    ) * np.log1p(-probability)
+    reliability[interior] = 1.0 - entropy / np.log(2.0)
+    reliability = np.clip(reliability, 0.0, 1.0)
+    probability = values.copy()
+    probability[positive] = 1.0
+    probability[negative] = 0.0
+    reliability[positive | negative] = 1.0
+    return (
+        probability.astype(np.float32, copy=False),
+        reliability.astype(np.float32, copy=False),
     )

@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_scalar_contribution_sharpening_difficult2_v1",
+  "status": "rejected_by_preregistered_development_gate",
+  "candidate": {
+    "feature_contribution_gamma": 2.0,
+    "camera_clearance_sigma": 2.0
+  },
+  "development_results": {
+    "lego": {
+      "baseline_foreground_iou": 0.6181460710,
+      "candidate_foreground_iou": 0.5902925460,
+      "delta": -0.0278535250,
+      "baseline_reference_selected_threshold": 0.69,
+      "candidate_reference_selected_threshold": 0.72,
+      "candidate_report": "output/optimization_20260804/spin9_scalar_gamma2_clearance2_v1/reference_calibrated/lego/lego_evaluation.json",
+      "candidate_report_sha256": "8e93bdd434c3272c64ff9aed211c86587761f203d63dec882185b44041e34b68"
+    },
+    "truck": {
+      "status": "not_completed_after_lego_failed_gate",
+      "baseline_foreground_iou": 0.7899438648
+    }
+  },
+  "gate_decision": {
+    "required": "foreground IoU improves on both Lego and Truck",
+    "observed": "Lego decreased by 0.02785",
+    "decision": "stop candidate and do not expand full9"
+  },
+  "interpretation": "Concentrating exact scalar raster contributions is not a general remedy. The remaining SPIn bottleneck is upstream primitive unary/cross-view evidence rather than dilution by the scalar compositor.",
+  "runtime_note": "The Truck process ended with the bounded orchestration command after the already-observed Lego gate failure; no thermal or driver event occurred."
+}

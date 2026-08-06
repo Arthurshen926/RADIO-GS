@@ -1,0 +1,53 @@
+{
+  "artifact_type": "experiment_preregistration",
+  "experiment": "canonical-factorized-radio-v1-label-free-source-gate",
+  "date": "2026-08-05",
+  "status": "registered_before_factorized_cache_build_or_metric_computation",
+  "development_scene": "SPIn-NeRF Lego",
+  "source_authorities": {
+    "raw_radio_control": {
+      "path": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/raw_radio.pt",
+      "sha256": "e4a287e3b9e863a321d2c3f244a9e265014eda9d0b94415cc3f3cf53e025cc27"
+    },
+    "responsibility_sidecar": {
+      "path": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/responsibility.pt",
+      "sha256": "bc131100dfbe7f9c254eb2482861ce7476ab35688997835420dd3d98ef2f8a3e"
+    },
+    "exact_dino_mpr": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/dino_v3.pt",
+    "exact_sam3_mpr": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/sam3.pt",
+    "raw_source_amplitude_probe": {
+      "path": "paper/artifacts/canonical_radio_raw_amplitude_probe_20260805.json",
+      "sha256": "1ae63fdfd40b95cf466650e99f72cd1dab6facda87f8518f50d900bcc43cd87c"
+    }
+  },
+  "fixed_comparison": {
+    "rows": "intersection of valid primitive rows in factorized raw, legacy raw, exact DINO and exact SAM caches",
+    "sampling": "all common valid rows when memory permits, otherwise the first 16384 rows after ascending global-row order",
+    "legacy_projection": "official frozen adaptor applied to legacy normalized raw MPR",
+    "factorized_projection": "same official frozen adaptor applied to factorized canonical_feature",
+    "teacher": "official adaptor-before-MPR DINO/SAM cache",
+    "metrics": [
+      "input canonical norm mean median p05 p95",
+      "cosine to exact capability target mean and p05",
+      "centered row-variation RMS relative to exact capability target",
+      "factorized cache reconstruction and scalar-schema invariants"
+    ]
+  },
+  "promotion_gates": {
+    "factorized_active_median_norm_lower": 28.6447,
+    "factorized_active_median_norm_upper": 34.5264,
+    "dino_mean_cosine_delta_vs_legacy_minimum": -0.002,
+    "dino_p05_cosine_delta_vs_legacy_minimum": -0.005,
+    "sam3_mean_cosine_delta_vs_legacy_minimum": -0.002,
+    "sam3_p05_cosine_delta_vs_legacy_minimum": -0.005,
+    "centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "all_cache_and_lineage_invariants": true
+  },
+  "decision": "Only a passing label-free source gate may proceed to factorized field training. A failing gate is diagnosed without opening benchmark target masks or text-query metrics.",
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_gate": false
+  }
+}

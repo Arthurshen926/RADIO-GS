@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_lego_source_footprint_oof_digest_correction",
+  "registered_at": "2026-08-05T14:52:11+08:00",
+  "status": "registered_after_fold_0_receipt_review_and_before_folds_1_and_2",
+  "parent_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_source_footprint_oof_preregistration_20260805.json",
+    "sha256": "442a30134a6e49d3bf2e441195260582d1f5f1cb6c8b2917e6cffee64e8ef05c"
+  },
+  "correction": {
+    "field": "inputs.source_footprint_fold_authority.tensor_bundle_sha256",
+    "incorrect_redundant_digest": "cc842528656a41c0dd2320f97264b6679b38bc13f5da327575494923c83796e3",
+    "correct_digest": "cc84252803a37abbef9b60491be5fe0426f3cd08f6843af398ed9e415bb50d65",
+    "cause": "manual transcription error in the preregistration receipt",
+    "asset_changed": false,
+    "method_or_hyperparameter_changed": false,
+    "selection_rule_changed": false
+  },
+  "unambiguous_original_asset_binding": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority.pt",
+    "file_sha256": "07328660ae6844c2348a936d000d8080c79b3494c84399a03fbc57a2d0fd7396",
+    "authority_sha256": "50e8286e85cad6b2a7c0294b385bb7e1b3b91226285463057d74ae900bce0ffa",
+    "authority_sha_includes_correct_tensor_bundle_sha": true,
+    "build_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority_report.json",
+      "sha256": "64fb7f6dae739af39e6097b780cb0a6a021a87064328d82cbbd03c5d644f8cd0"
+    },
+    "build_result_receipt": {
+      "path": "paper/artifacts/spin_lego_source_footprint_fold_results_20260805.json",
+      "sha256": "618878dcc7495fb247f0e60782e0e0d64637f327b0423a7c8b6aaf519fef76b4"
+    }
+  },
+  "fold_0_validation": {
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1/fold_0.pt.receipt.json",
+    "receipt_sha256": "370fb827e5ef8836282f669acd19db8b6f5c6f217f14b98f0eadbbe65394bb54",
+    "strict_file_sha_replayed": true,
+    "strict_authority_sha_replayed": true,
+    "strict_tensor_bundle_sha_replayed": true,
+    "fold_invalidated": false
+  },
+  "opening_rule": "Continue folds 1 and 2 with the same exact file SHA and authority SHA. The immutable loader-computed tensor-bundle digest is the corrected value above.",
+  "safety": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

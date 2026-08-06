@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "artifact_type": "full_scalar_typed_context_cross_scene_training_preregistration_v1",
+  "status": "sealed_before_cross_scene_training_or_benchmark_opening",
+  "scientific_question": "Can a single scene-disjoint, query-independent typed-context residual recover local part/object/context information that AcceptedV2 loses, without regressing its descriptor direction, hard-row tail, or relation geometry?",
+  "method": {
+    "base": "immutable AcceptedV2 descriptor e0",
+    "candidate": "SurfaceRegionAcceptedV2TypedContextResidualV1",
+    "persistent_inputs": [
+      "AcceptedV2 e0",
+      "full-scalar primitive/region statistics",
+      "typed anchor-core and context-shell summaries"
+    ],
+    "output": "bounded tangent residual with maximum angle 0.15 radians and alpha at most 0.25",
+    "fallback": "inactive, invalid, or train-envelope-OOD rows are bitwise AcceptedV2 e0",
+    "query_independent": true,
+    "scene_specific_parameters": false,
+    "benchmark_queries_used_for_training_or_selection": false
+  },
+  "frozen_implementation": {
+    "training_contract_sha256": "5cfb48867eba92bb4bb386c62da35d03c89a17941cb5c3511ae1e8558097fb58",
+    "radio_gs/interfaces/surface_region_typed_context_training.py": "684849e88fdd25978087afec4dea0115d1d0f095174ca43aa59b511803647aff",
+    "radio_gs/scripts/train_surface_region_typed_context_residual.py": "02e9ba0124134b8d4bfe0ee6d76ae73fdde32fc8e7a54dc9efc8db5b0845f680",
+    "radio_gs/models/surface_region_typed_context_residual.py": "06287aa06223da788a2f1b95fc6906cb8496e36d722eff594d1d397c243ae36f",
+    "radio_gs/interfaces/surface_region_typed_context_adaptive.py": "de93ee9e549c766e7e5f4aedb8249b91f4315691f782ebc54f7f71988286dbc8",
+    "radio_gs/scripts/materialize_accepted_v2_typed_context_adaptive_authority.py": "c345a4e5f72acf09b084387c406f659c25ed6f26deed5d6a992550afcabc4841"
+  },
+  "frozen_clean_cohort": {
+    "authority_path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "authority_file_sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "benchmark_exclusion_path": "paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "benchmark_exclusion_file_sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29",
+    "source_train_scene_count": 24,
+    "source_validation_scene_count": 8,
+    "scene_and_physical_space_disjoint": true,
+    "normalization_and_ood_envelope_fit": "source_train_only",
+    "checkpoint_selection": "source_validation_scene_macro_only"
+  },
+  "fixed_training_objective": {
+    "all_teacher_view_cosine_weight": 1.0,
+    "teacher_relation_gram_weight": 0.1,
+    "boundary_balanced_hard_negative_ranking_weight": 0.25,
+    "hard_negative_margin": 0.1,
+    "hard_negative_teacher_cosine_ceiling": 0.8,
+    "scene_weighting": "equal_scene_gradient_accumulation",
+    "per_scene_weights": false
+  },
+  "source_validation_promotion_gate": {
+    "required_non_regressions": [
+      "macro mean all-view cosine",
+      "macro p05 row all-view cosine",
+      "macro relation fidelity",
+      "worst paired scene mean-cosine delta",
+      "inactive and OOD bitwise AcceptedV2 e0"
+    ],
+    "epoch_zero_identity_fallback": true,
+    "selection_order": [
+      "mean all-view cosine",
+      "p05 row all-view cosine",
+      "relation fidelity",
+      "earliest epoch"
+    ],
+    "benchmark_metric_contribution": false
+  },
+  "post_training_evaluation_order": [
+    "seal checkpoint, normalization authority, training certificate, and input hashes",
+    "run query-free descriptor and relation audits",
+    "run frozen LERF3D sentinel without changing checkpoint, threshold, or query route",
+    "reject on catastrophic scene regression or AP/oracle degradation",
+    "only after the sentinel gate, run the frozen LERF3D full4 protocol once",
+    "reuse the same persistent field/checkpoint for SPIn9 and NVOS interface gates"
+  ],
+  "stopping_rules": [
+    "reject an identity-selected run as no method improvement",
+    "reject a candidate that improves only calibrated or fixed-threshold IoU while AP, oracle IoU, or ranking degrades",
+    "reject any scene-specific threshold, checkpoint, expert, or graph choice",
+    "do not reopen full-cohort metrics to tune this checkpoint"
+  ],
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false,
+    "per_scene_hyperparameters": false
+  }
+}

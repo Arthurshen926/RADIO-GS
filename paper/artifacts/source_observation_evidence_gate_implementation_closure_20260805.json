@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "experiment": "target_blind_source_observation_evidence_gate_v1_implementation_closure",
+  "status": "implementation complete and CPU-verified; three-fold GPU benchmark execution not yet run",
+  "preregistration": {
+    "path": "paper/artifacts/source_observation_evidence_gate_preregistration_20260805.json",
+    "sha256": "d0e7f927423f1a8ea8d855aeeac13519dd16df565ac6aa4ab3ee5225699647c7"
+  },
+  "implementation": {
+    "fold_authority_and_gate": {
+      "path": "radio_gs/querying/query_specific_propagation_cv.py",
+      "sha256": "fc35596a283d10fad4df05a2a136603009a17126591224d47cf1d4105deb06eb"
+    },
+    "evaluator_integration": {
+      "path": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+      "sha256": "ef1de201cccda66227f679a674cfc2865a4385f7a6958690020a3cf3169e9b50"
+    },
+    "dedicated_tests": {
+      "path": "tests/test_source_observation_evidence_gate.py",
+      "sha256": "51acb7e8e9e61929deb7cce564a5d3ecdb089c34a989b577d5378e2d10e5c986"
+    }
+  },
+  "closed_requirements": [
+    "SplitMix64(global primitive row) three-fold assignment",
+    "exact held-out clearing of positive_weight, negative_weight, raw_positive_mass, and raw_negative_mass before direct observation, prototype construction, anchors, unary scoring, and graph propagation",
+    "immutable untampered signed responsibility evidence and responsibility weight retained only as evaluation authority",
+    "OOF probabilities read only on observed rows in the held-out fold",
+    "current unary and fixed surface-safe propagated action names replace the obsolete hash256/K201 actions",
+    "responsibility-class-balanced Bernoulli log-loss, responsibility-weighted ROC AUC, twelve-decimal ordering, and unary complexity tie-break",
+    "minimum 32 positive and 32 negative rows in every held-out and training population",
+    "fold tensor hashes, method contract, capability cache SHA, support graph SHA, scene, and protocol must agree across all three folds",
+    "SPIn K4 direct-adjoint and NVOS K16 anchor-only task compiler contracts fail closed",
+    "each fold exits before target score rendering, target RGB access, target mask access, or target metric computation",
+    "the third independent fold execution seals one immutable gate receipt"
+  ],
+  "command_interface": {
+    "fold_output": "--source-observation-oof-output-dir <dir>",
+    "heldout_fold": "--source-observation-oof-heldout-fold {0,1,2}",
+    "execution": "run the otherwise identical frozen evaluator command three times, once per held-out fold; no target predictions or metrics are produced by these invocations",
+    "gate_receipt": "<dir>/source_observation_oof_gate_receipt.json"
+  },
+  "verification": {
+    "py_compile": "passed",
+    "dedicated_and_legacy_cv_tests": "15 passed",
+    "evaluator_and_historical_selector_tests": "76 passed",
+    "total_focused_tests": 91,
+    "cli_help_exposes_both_gate_arguments": true,
+    "git_diff_check": "passed for scoped implementation files",
+    "gpu_used": false,
+    "target_benchmark_opened": false
+  },
+  "benchmark_readiness": {
+    "ready": true,
+    "remaining": "Execute folds 0, 1, and 2 for development scenes spin9:lego and nvos:fern, verify the preregistered expected decisions, then and only then seal heldout scene gates and full-fit target prediction receipts.",
+    "promotion_not_claimed": true
+  }
+}

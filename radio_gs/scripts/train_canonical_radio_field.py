@@ -7,24 +7,36 @@ import argparse
 from dataclasses import asdict
 import hashlib
 import json
-import os
 from pathlib import Path
 import re
-import tempfile
 
 import torch
 import torch.nn.functional as F
 
 from radio_gs.field import (
+    CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
     CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
     CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
     CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
     CANONICAL_OBSERVATION_CONTRACT_NAME,
     CanonicalGaussianField,
     FeatureSpaceSignature,
+    canonical_observation_contract,
     fit_affine_basis,
     load_canonical_field_checkpoint,
+    validate_basis_conditioning,
     validate_observation_contract_metadata,
+    observation_contract_sha256,
+)
+from radio_gs.field.checkpoint import load_factorized_canonical_field_checkpoint
+from radio_gs.field.factorized_radio_contract import (
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT,
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_SCHEMA_VERSION,
+    CANONICAL_FACTORIZED_RADIO_CONTRACT_NAME,
+    CANONICAL_FACTORIZED_RADIO_CONTRACT_SHA256,
+    FactorizedRadioFieldSignature,
+    canonical_factorized_radio_contract,
+    factorized_radio_checkpoint_metadata,
 )
 from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews
 from radio_gs.rendering.contribution_compositor import (
@@ -41,27 +53,96 @@ from radio_gs.training.primitive_consensus import (
     consensus_target_rows,
 )
 from radio_gs.training.tensor_cache_io import ShardedMPRCache, load_mpr_cache
+from radio_gs.training.factorized_radio_cache import (
+    CANONICAL_FACTORIZED_RADIO_BUILDER_CACHE_SCHEMA_V2,
+    FACTORIZED_RADIO_EXACT_MARGINAL_PURITY_AUTHORITY,
+    FactorizedRadioTrainingCache,
+    canonical_factorized_radio_builder_contract_v2,
+    factorized_radio_builder_contract_v2_sha256,
+    load_factorized_radio_training_cache,
+)
+from radio_gs.training.factorized_radio_loss import (
+    FACTORIZED_RADIO_EXACT_MARGINAL_VISIBILITY_SAFE_LOSS_CONTRACT,
+    FACTORIZED_RADIO_RECONSTRUCTION_LOSS_CONTRACT,
+    FACTORIZED_RADIO_RELIABILITY_POLICY_LEGACY,
+    FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE,
+)
 from radio_gs.utils.immutable_artifacts import (
     load_json_object,
     load_torch_mapping,
     sha256_file,
+    write_frozen_json,
+    write_torch_noclobber,
 )
 
 
 CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1 = "matched_top1"
+CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL = "matched_exact_marginal"
 CAPABILITY_TARGET_CONTRACT_FIELD_A = "field_a_exact_adjoint"
 CAPABILITY_TARGET_CONTRACT_FIELD_C = "field_c_exact_center_uncertainty"
+LEGACY_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT = (
+    "canonical-factorized-radio-v1-label-free-source-gate"
+)
+FORMAL_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT = (
+    "canonical-factorized-radio-v1-formal-capability-cohort"
+)
 RELATION_OBJECTIVE_DISABLED = "disabled"
 RELATION_OBJECTIVE_FIELD_B = "field_b_boundary_ranking_v1"
 FIELD_B_RELATION_WEIGHT = CanonicalFieldLossConfig().relation_weight
 STRICT_OBSERVATION_CONTRACT_MODES = frozenset(
     {
         CANONICAL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
         CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
         CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
         CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
     }
 )
+
+
+def _factorized_loss_reliability_policy(
+    factorized: FactorizedRadioTrainingCache | None,
+    *,
+    capability_target_contract: str,
+) -> str:
+    """Bind visibility weighting to one source-only exact-marginal authority."""
+
+    if factorized is None or (
+        str(capability_target_contract) != CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL
+    ):
+        return FACTORIZED_RADIO_RELIABILITY_POLICY_LEGACY
+    metadata = factorized.metadata
+    registration_sha256 = str(
+        metadata.get("registration_responsibility_cache_sha256", "")
+    )
+    expected_authority = {
+        **FACTORIZED_RADIO_EXACT_MARGINAL_PURITY_AUTHORITY,
+        "registration_responsibility_cache_sha256": registration_sha256,
+    }
+    if (
+        factorized.provenance().get("storage")
+        != CANONICAL_FACTORIZED_RADIO_BUILDER_CACHE_SCHEMA_V2
+        or metadata.get("builder_contract")
+        != canonical_factorized_radio_builder_contract_v2()
+        or metadata.get("builder_contract_sha256")
+        != factorized_radio_builder_contract_v2_sha256()
+        or re.fullmatch(r"[0-9a-f]{64}", registration_sha256) is None
+        or metadata.get("visibility_purity_authority") != expected_authority
+        or metadata.get("query_independent") is not True
+        or any(
+            metadata.get(name) is not False
+            for name in (
+                "benchmark_images_opened",
+                "benchmark_masks_opened",
+                "text_queries_opened",
+            )
+        )
+    ):
+        raise ValueError(
+            "matched exact-marginal visibility-safe loss requires its frozen "
+            "source-only measured-purity authority"
+        )
+    return FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE
 
 
 def _validate_training_observation_contract_metadata(
@@ -106,8 +187,7 @@ def _assert_initial_field_signature_compatible(
     if (
         allow_legacy_normalization
         and set(mismatches) == {"normalization"}
-        and mismatches["normalization"]
-        == ["radio_direction_unit", "none"]
+        and mismatches["normalization"] == ["radio_direction_unit", "none"]
     ):
         return {
             "legacy_normalization_mismatch_accepted": True,
@@ -157,8 +237,10 @@ def _load_field_b_relation_triplets(
         or channel.shape != margin.shape
     ):
         raise ValueError("Field-B pair/margin/channel tensors do not align")
-    if margin.numel() == 0 or not bool(torch.isfinite(margin).all()) or bool(
-        ((margin <= 0) | (margin > 1)).any()
+    if (
+        margin.numel() == 0
+        or not bool(torch.isfinite(margin).all())
+        or bool(((margin <= 0) | (margin > 1)).any())
     ):
         raise ValueError("Field-B teacher margins must be non-empty in (0,1]")
     if bool((pairs < 0).any()) or int(pairs.max()) >= int(num_rows):
@@ -194,9 +276,10 @@ def _load_field_b_relation_triplets(
         raise ValueError(f"Field-B relation policy differs: {mismatched}")
     if metadata.get("geometry_fingerprint") != geometry_fingerprint:
         raise ValueError("Field-B relation geometry differs")
-    if dict(metadata.get("dino_mpr", {})).get("sha256") != expected_dino_sha256 or dict(
-        metadata.get("sam3_mpr", {})
-    ).get("sha256") != expected_sam3_sha256:
+    if (
+        dict(metadata.get("dino_mpr", {})).get("sha256") != expected_dino_sha256
+        or dict(metadata.get("sam3_mpr", {})).get("sha256") != expected_sam3_sha256
+    ):
         raise ValueError("Field-B relation exact capability targets differ")
     return {
         "pair_index": pairs,
@@ -315,14 +398,10 @@ def _consensus_from_cache(
     }:
         expected_contract = (
             MARGINAL_RESPONSIBILITY_CONTRACT
-            if metadata.get("aggregation_mode")
-            == "raster_marginal_responsibility"
+            if metadata.get("aggregation_mode") == "raster_marginal_responsibility"
             else EXACT_CENTER_UNCERTAINTY_CONTRACT
         )
-        if (
-            metadata.get("marginal_responsibility_contract")
-            != expected_contract
-        ):
+        if metadata.get("marginal_responsibility_contract") != expected_contract:
             raise ValueError("marginal MPR responsibility contract differs")
         purity = torch.as_tensor(cache.get("visibility_purity")).float().cpu()
         if purity.shape != valid.shape:
@@ -379,12 +458,11 @@ def _load_capability_mpr_target(
             "raster_reliability_mode": "mean_resultant",
             "normalize_each_view": True,
             "per_view_normalization_applied": True,
-            "per_view_normalization_stage": (
-                "pixel_feature_before_raster_lifting"
-            ),
+            "per_view_normalization_stage": ("pixel_feature_before_raster_lifting"),
         }
         mismatched_exact = [
-            key for key, expected in exact_policy.items()
+            key
+            for key, expected in exact_policy.items()
             if metadata.get(key) != expected
         ]
         if mismatched_exact:
@@ -399,26 +477,21 @@ def _load_capability_mpr_target(
     elif target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C:
         exact_policy = {
             "aggregation_mode": "raster_exact_center_uncertainty",
-            "registration_weight_mode": (
-                "exact_front_to_back_adjoint_center"
-            ),
+            "registration_weight_mode": ("exact_front_to_back_adjoint_center"),
             "raster_view_fusion": "contribution_mean",
             "raster_reliability_mode": "mean_resultant",
             "normalize_each_view": True,
             "per_view_normalization_applied": True,
-            "per_view_normalization_stage": (
-                "pixel_feature_before_raster_lifting"
-            ),
-            "marginal_responsibility_contract": (
-                EXACT_CENTER_UNCERTAINTY_CONTRACT
-            ),
+            "per_view_normalization_stage": ("pixel_feature_before_raster_lifting"),
+            "marginal_responsibility_contract": (EXACT_CENTER_UNCERTAINTY_CONTRACT),
             "visibility_uncertainty_semantics": (
                 "per_primitive_sum_weight_times_responsibility_over_sum_weight"
             ),
             "alpha_threshold": 0.0,
         }
         mismatched_exact = [
-            key for key, expected in exact_policy.items()
+            key
+            for key, expected in exact_policy.items()
             if metadata.get(key) != expected
         ]
         if mismatched_exact:
@@ -493,9 +566,7 @@ def _load_capability_mpr_target(
             "capability_adaptor_execution",
         }
         missing_native_provenance = sorted(
-            key
-            for key in required_native_provenance
-            if not str(metadata.get(key, ""))
+            key for key in required_native_provenance if not str(metadata.get(key, ""))
         )
         if missing_native_provenance:
             raise ValueError(
@@ -511,9 +582,7 @@ def _load_capability_mpr_target(
                 "C-RADIO runtime adaptor output"
             )
         if (
-            metadata.get(
-                "capability_native_map_radio_checkpoint_load_contract"
-            )
+            metadata.get("capability_native_map_radio_checkpoint_load_contract")
             != "external_sha256_same_fd_restricted_pickle_hub_injection_v1"
         ):
             raise ValueError(
@@ -552,8 +621,7 @@ def _load_capability_mpr_target(
     )
     if (
         target_contract == CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1
-        and str(raw_metadata.get("aggregation_mode", ""))
-        == "raster_gaussian_top1"
+        and str(raw_metadata.get("aggregation_mode", "")) == "raster_gaussian_top1"
     ):
         raw_responsibility_sha256 = str(
             raw_metadata.get("registration_responsibility_cache_sha256", "")
@@ -604,9 +672,11 @@ def _load_capability_mpr_target(
         "projection_order": (
             "official_adaptor_then_exact_raster_adjoint_contribution_mpr"
             if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
-            else "official_adaptor_then_exact_center_plus_uncertainty_mpr"
-            if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
-            else "official_adaptor_then_geometry_matched_mpr"
+            else (
+                "official_adaptor_then_exact_center_plus_uncertainty_mpr"
+                if target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
+                else "official_adaptor_then_geometry_matched_mpr"
+            )
         ),
         "official_adaptor_name": metadata.get("official_adaptor_name"),
         "official_adaptor_checkpoint_sha256": metadata.get(
@@ -631,9 +701,7 @@ def _load_capability_mpr_target(
         "capability_native_map_radio_checkpoint_load_contract": metadata.get(
             "capability_native_map_radio_checkpoint_load_contract", ""
         ),
-        "capability_native_map_grid": metadata.get(
-            "capability_native_map_grid", []
-        ),
+        "capability_native_map_grid": metadata.get("capability_native_map_grid", []),
         "capability_adaptor_execution": metadata.get(
             "capability_adaptor_execution", ""
         ),
@@ -651,6 +719,585 @@ def _load_capability_mpr_target(
             else {"storage": "dense_torch_tensor"}
         ),
     }
+
+
+def _load_factorized_matched_capability_targets(
+    *,
+    factorized: FactorizedRadioTrainingCache,
+    reference_path: str | Path,
+    reference_expected_sha256: str,
+    dino_path: str | Path,
+    dino_expected_sha256: str,
+    sam3_path: str | Path,
+    sam3_expected_sha256: str,
+    correction_path: str | Path,
+    correction_expected_sha256: str,
+    radio_checkpoint_sha256: str,
+) -> tuple[dict[str, PrimitiveConsensus | ShardedMPRCache], dict[str, dict], dict]:
+    """Load one hash-bound matched-top1 cohort through a narrow receipt.
+
+    Historical cohorts may use the frozen July compatibility receipt.  New
+    cohorts must use the formal receipt and carry the same sealed feature
+    bundle as the factorized RADIO cache.  Keeping the two modes explicit
+    prevents fresh scene assets from masquerading as legacy exceptions.
+    """
+
+    repo_root = Path(__file__).resolve().parents[2]
+
+    def resolve(value: str | Path) -> Path:
+        path = Path(value).expanduser()
+        return (path if path.is_absolute() else repo_root / path).resolve()
+
+    correction, correction_sha256, correction_source = load_json_object(
+        resolve(correction_path),
+        expected_sha256=correction_expected_sha256,
+        label="factorized capability legacy receipt correction",
+    )
+    experiment = str(correction.get("experiment", ""))
+    legacy_cohort = experiment == LEGACY_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT
+    formal_cohort = experiment == FORMAL_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT
+    if legacy_cohort:
+        target_access_is_false = (
+            correction.get("scientific_contract_unchanged", {}).get("target_access")
+            is False
+        )
+        cohort_bundle_sha256 = ""
+    elif formal_cohort:
+        target_access = correction.get("target_access")
+        target_access_is_false = isinstance(target_access, dict) and all(
+            target_access.get(key) is False
+            for key in (
+                "benchmark_images_opened",
+                "benchmark_masks_opened",
+                "text_queries_opened",
+                "target_metrics_used_for_selection",
+            )
+        )
+        cohort_bundle_sha256 = str(correction.get("feature_output_bundle_sha256", ""))
+        if (
+            correction.get("artifact_type") != "factorized_capability_cohort_authority"
+            or int(correction.get("schema_version", -1)) != 1
+            or re.fullmatch(r"[0-9a-f]{64}", cohort_bundle_sha256) is None
+            or factorized.metadata.get("feature_output_bundle_sha256")
+            != cohort_bundle_sha256
+        ):
+            raise ValueError("formal factorized capability receipt differs")
+    else:
+        target_access_is_false = False
+        cohort_bundle_sha256 = ""
+    if not target_access_is_false:
+        raise ValueError("factorized capability correction receipt differs")
+    authorities = correction.get("frozen_cache_authorities")
+    if not isinstance(authorities, dict) or set(authorities) != {
+        "radio",
+        "dino_v3",
+        "sam3",
+    }:
+        raise ValueError("factorized capability correction authorities differ")
+    requested = {
+        "radio": (resolve(reference_path), reference_expected_sha256),
+        "dino_v3": (resolve(dino_path), dino_expected_sha256),
+        "sam3": (resolve(sam3_path), sam3_expected_sha256),
+    }
+    for name, (path, digest) in requested.items():
+        authority = authorities.get(name)
+        if not isinstance(authority, dict) or (
+            resolve(str(authority.get("path", ""))) != path
+            or authority.get("sha256") != str(digest)
+        ):
+            raise ValueError(f"factorized capability {name} receipt authority differs")
+
+    reference, reference_sha256, reference_source = load_mpr_cache(
+        resolve(reference_path),
+        expected_sha256=reference_expected_sha256,
+        expected_feature_space="radio",
+        require_reliability=True,
+        require_formal_safety=formal_cohort,
+    )
+    reference_metadata = dict(reference.get("metadata", {}))
+    factorized_metadata = factorized.metadata
+    if formal_cohort and (
+        reference_metadata.get("feature_output_bundle_sha256") != cohort_bundle_sha256
+    ):
+        raise ValueError("formal factorized capability reference bundle differs")
+    factorized_geometry = dict(factorized.geometry_fingerprint)
+    reference_geometry = dict(reference.get("geometry_fingerprint", {}))
+    if reference_geometry != factorized_geometry:
+        raise ValueError("factorized capability reference geometry differs")
+    reference_valid = torch.as_tensor(reference.get("valid")).bool().cpu()
+    reference_counts = torch.as_tensor(reference.get("view_counts")).long().cpu()
+    if not torch.equal(reference_valid, factorized.valid) or not torch.equal(
+        reference_counts, factorized.view_counts
+    ):
+        raise ValueError("factorized capability reference support differs")
+    source_only = (
+        "benchmark_images_opened",
+        "benchmark_masks_opened",
+        "text_queries_opened",
+    )
+    if any(reference_metadata.get(key) is not False for key in source_only):
+        raise ValueError("factorized capability reference is not source-only")
+    responsibility_sha256 = str(
+        factorized_metadata.get("registration_responsibility_cache_sha256", "")
+    )
+    if (
+        not responsibility_sha256
+        or reference_metadata.get("registration_responsibility_cache_sha256")
+        != responsibility_sha256
+        or reference_metadata.get("shared_registration_responsibility") is not True
+    ):
+        raise ValueError("factorized capability reference responsibility differs")
+    common_policy = (
+        "config",
+        "checkpoint",
+        "selected_dataset_indices",
+        "selected_frame_indices",
+        "aggregation_mode",
+        "registration_weight_mode",
+        "raster_view_fusion",
+    )
+    mismatched_reference = [
+        key
+        for key in common_policy
+        if reference_metadata.get(key) != factorized_metadata.get(key)
+    ]
+    if mismatched_reference:
+        raise ValueError(
+            "factorized capability reference policy differs: " f"{mismatched_reference}"
+        )
+    lifting = reference_metadata.get("observation_lifting_contract")
+    if not isinstance(lifting, dict) or (
+        lifting.get("name") != "canonical-mpr-v1"
+        or lifting.get("feature_projection_order") != "per_view_before_mpr"
+        or lifting.get("responsibility_sharing")
+        != "exact_sidecar_across_feature_spaces"
+        or lifting.get("query_independent") is not True
+    ):
+        raise ValueError("factorized capability reference lifting differs")
+
+    targets: dict[str, PrimitiveConsensus | ShardedMPRCache] = {}
+    provenance: dict[str, dict] = {}
+    legacy_policy = (
+        "config",
+        "checkpoint",
+        "selected_dataset_indices",
+        "selected_frame_indices",
+        "excluded_frame_ids",
+        "aggregation_mode",
+        "registration_weight_mode",
+        "raster_view_fusion",
+        "raster_topk",
+        "depth_tolerance",
+        "relative_depth_tolerance",
+        "alpha_threshold",
+        "normalize_each_view",
+        "per_view_normalization_applied",
+        "per_view_normalization_stage",
+    )
+    for name, path, expected_sha256 in (
+        ("dino_v3", dino_path, dino_expected_sha256),
+        ("sam3", sam3_path, sam3_expected_sha256),
+    ):
+        cache, digest, source = load_mpr_cache(
+            resolve(path),
+            expected_sha256=expected_sha256,
+            expected_feature_space=name,
+            require_reliability=True,
+            require_formal_safety=formal_cohort,
+        )
+        metadata = dict(cache.get("metadata", {}))
+        if formal_cohort and (
+            metadata.get("feature_output_bundle_sha256") != cohort_bundle_sha256
+        ):
+            raise ValueError(f"formal factorized {name} capability bundle differs")
+        if any(metadata.get(key) is not False for key in source_only) or (
+            metadata.get("capability_projection_before_mpr") is not True
+            or metadata.get("custom_adaptor_head") is not False
+            or metadata.get("capability_map_source") != "project_raw"
+            or metadata.get("shared_registration_responsibility") is not True
+            or metadata.get("official_adaptor_checkpoint_sha256")
+            != radio_checkpoint_sha256
+            or metadata.get("registration_responsibility_cache_sha256")
+            != responsibility_sha256
+        ):
+            raise ValueError(f"factorized {name} capability lineage differs")
+        if dict(cache.get("geometry_fingerprint", {})) != reference_geometry:
+            raise ValueError(f"factorized {name} capability geometry differs")
+        if not torch.equal(
+            torch.as_tensor(cache.get("valid")).bool().cpu(), reference_valid
+        ) or not torch.equal(
+            torch.as_tensor(cache.get("view_counts")).long().cpu(), reference_counts
+        ):
+            raise ValueError(f"factorized {name} capability support differs")
+        mismatched = [
+            key
+            for key in legacy_policy
+            if metadata.get(key) != reference_metadata.get(key)
+        ]
+        if mismatched:
+            raise ValueError(
+                f"factorized {name} capability policy differs: {mismatched}"
+            )
+        target_lifting = metadata.get("observation_lifting_contract")
+        if not isinstance(target_lifting, dict) or (
+            target_lifting.get("name") != "canonical-mpr-v1"
+            or target_lifting.get("feature_projection_order") != "per_view_before_mpr"
+            or target_lifting.get("responsibility_sharing")
+            != "exact_sidecar_across_feature_spaces"
+            or target_lifting.get("query_independent") is not True
+        ):
+            raise ValueError(f"factorized {name} capability lifting differs")
+        targets[name] = _consensus_from_cache(cache, preserve_target_dtype=True)
+        provenance[name] = {
+            "path": str(source.resolve()),
+            "sha256": digest,
+            "feature_space": name,
+            "target_contract": CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+            "projection_order": "official_adaptor_then_geometry_matched_mpr",
+            "official_adaptor_checkpoint_sha256": radio_checkpoint_sha256,
+            "registration_responsibility_cache_sha256": responsibility_sha256,
+            "historical_feature_bundle_receipt_compatibility": legacy_cohort,
+            "formal_feature_bundle_authority": formal_cohort,
+            "feature_output_bundle_sha256": (
+                cohort_bundle_sha256 if formal_cohort else ""
+            ),
+            "uses_query_or_benchmark_supervision": False,
+        }
+    reference_provenance = {
+        "path": str(reference_source.resolve()),
+        "sha256": reference_sha256,
+        "geometry_fingerprint": reference_geometry,
+        "registration_responsibility_cache_sha256": responsibility_sha256,
+        "legacy_receipt_correction": {
+            "path": str(correction_source.resolve()),
+            "sha256": correction_sha256,
+        },
+        "capability_cohort_authority_mode": (
+            "formal_feature_bundle_v1" if formal_cohort else "legacy_compatibility_v1"
+        ),
+        "historical_feature_bundle_receipt_compatibility": legacy_cohort,
+        "formal_feature_bundle_authority": formal_cohort,
+        "feature_output_bundle_sha256": (cohort_bundle_sha256 if formal_cohort else ""),
+        "uses_query_or_benchmark_supervision": False,
+    }
+    return targets, provenance, reference_provenance
+
+
+def _load_factorized_exact_marginal_capability_targets(
+    *,
+    factorized: FactorizedRadioTrainingCache,
+    reference_path: str | Path,
+    reference_expected_sha256: str,
+    dino_path: str | Path,
+    dino_expected_sha256: str,
+    sam3_path: str | Path,
+    sam3_expected_sha256: str,
+    correction_path: str | Path,
+    correction_expected_sha256: str,
+    radio_checkpoint_sha256: str,
+) -> tuple[dict[str, PrimitiveConsensus | ShardedMPRCache], dict[str, dict], dict]:
+    """Load a builder-v2 cohort sharing one exact sparse marginal authority.
+
+    This intentionally does not reuse the historical top-1 compatibility
+    bridge.  Every one of the factorized/raw/DINO/SAM caches must be a formal,
+    source-only artifact with identical geometry, frames, semantic support,
+    and responsibility authority.  The factorized cache retains its raw
+    amplitude-aware core contract; only conventional caches declare the
+    normalized exact-marginal observation-lifting contract.
+    """
+
+    repo_root = Path(__file__).resolve().parents[2]
+
+    def resolve(value: str | Path) -> Path:
+        path = Path(value).expanduser()
+        return (path if path.is_absolute() else repo_root / path).resolve()
+
+    expected_lifting = canonical_observation_contract(
+        CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME
+    )
+    expected_lifting_sha256 = observation_contract_sha256(expected_lifting)
+    factorized_metadata = factorized.metadata
+    if (
+        factorized_metadata.get("builder_contract")
+        != canonical_factorized_radio_builder_contract_v2()
+        or factorized_metadata.get("builder_contract_sha256")
+        != factorized_radio_builder_contract_v2_sha256()
+        or factorized_metadata.get("observation_lifting_contract")
+        != canonical_factorized_radio_contract()
+        or factorized_metadata.get("observation_lifting_contract_sha256")
+        != CANONICAL_FACTORIZED_RADIO_CONTRACT_SHA256
+        or factorized.provenance().get("storage")
+        != CANONICAL_FACTORIZED_RADIO_BUILDER_CACHE_SCHEMA_V2
+    ):
+        raise ValueError(
+            "factorized exact-marginal target requires builder-v2 exact support "
+            "and the unchanged raw-amplitude factorized core contract"
+        )
+
+    source_only_flags = (
+        "benchmark_images_opened",
+        "benchmark_masks_opened",
+        "text_queries_opened",
+    )
+    if (
+        any(factorized_metadata.get(key) is not False for key in source_only_flags)
+        or factorized_metadata.get("query_independent") is not True
+    ):
+        raise ValueError("factorized exact-marginal cache is not source-only")
+    shared_semantic_policy = {
+        "semantic_assignment_gate": ("pre_adaptor_raw_radio_l2_norm_strictly_positive"),
+        "view_count_semantics": (
+            "views_with_pre_adaptor_raw_radio_l2_norm_strictly_positive"
+        ),
+        "geometric_visibility_semantics": (
+            "independent_exact_base_weight_authority_includes_zero_amplitude_hits"
+        ),
+    }
+    factorized_semantic_policy = {
+        **shared_semantic_policy,
+        "valid_semantics": (
+            "positive_raw_radio_amplitude_responsibility_mass_and_"
+            "nonzero_direction_resultant"
+        ),
+        "invalid_row_purity_policy": (
+            "core_v1_requires_zero_for_semantically_invalid_rows"
+        ),
+    }
+    if any(
+        factorized_metadata.get(key) != value
+        for key, value in factorized_semantic_policy.items()
+    ):
+        raise ValueError("factorized exact-marginal semantic evidence policy differs")
+    geometric_authority_fields = (
+        "geometric_view_counts_sha256",
+        "geometric_visible_gaussian_count",
+        "semantic_valid_gaussian_count",
+        "geometric_visible_semantic_invalid_gaussian_count",
+    )
+    if (
+        re.fullmatch(
+            r"[0-9a-f]{64}",
+            str(factorized_metadata.get("geometric_view_counts_sha256", "")),
+        )
+        is None
+    ):
+        raise ValueError("factorized exact-marginal geometric counts authority differs")
+
+    correction, correction_sha256, correction_source = load_json_object(
+        resolve(correction_path),
+        expected_sha256=correction_expected_sha256,
+        label="factorized exact-marginal capability cohort authority",
+    )
+    cohort_bundle_sha256 = str(correction.get("feature_output_bundle_sha256", ""))
+    target_access = correction.get("target_access")
+    if (
+        correction.get("experiment") != FORMAL_FACTORIZED_CAPABILITY_RECEIPT_EXPERIMENT
+        or correction.get("artifact_type") != "factorized_capability_cohort_authority"
+        or int(correction.get("schema_version", -1)) != 1
+        or re.fullmatch(r"[0-9a-f]{64}", cohort_bundle_sha256) is None
+        or cohort_bundle_sha256
+        != factorized_metadata.get("feature_output_bundle_sha256")
+        or not isinstance(target_access, dict)
+        or any(
+            target_access.get(key) is not False
+            for key in (
+                "benchmark_images_opened",
+                "benchmark_masks_opened",
+                "text_queries_opened",
+                "target_metrics_used_for_selection",
+            )
+        )
+    ):
+        raise ValueError("formal exact-marginal capability cohort authority differs")
+
+    authorities = correction.get("frozen_cache_authorities")
+    if not isinstance(authorities, dict) or set(authorities) != {
+        "radio",
+        "dino_v3",
+        "sam3",
+    }:
+        raise ValueError("formal exact-marginal cache authorities differ")
+    requested = {
+        "radio": (resolve(reference_path), str(reference_expected_sha256)),
+        "dino_v3": (resolve(dino_path), str(dino_expected_sha256)),
+        "sam3": (resolve(sam3_path), str(sam3_expected_sha256)),
+    }
+    for name, (path, digest) in requested.items():
+        authority = authorities.get(name)
+        if not isinstance(authority, dict) or (
+            resolve(str(authority.get("path", ""))) != path
+            or authority.get("sha256") != digest
+        ):
+            raise ValueError(f"formal exact-marginal {name} authority differs")
+
+    reference, reference_sha256, reference_source = load_mpr_cache(
+        requested["radio"][0],
+        expected_sha256=requested["radio"][1],
+        expected_feature_space="radio",
+        require_reliability=True,
+        require_formal_safety=True,
+    )
+    reference_metadata = dict(reference.get("metadata", {}))
+    validate_observation_contract_metadata(
+        reference_metadata,
+        require_declaration=True,
+        contract_name=CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
+    )
+    if (
+        reference_metadata.get("feature_output_bundle_sha256") != cohort_bundle_sha256
+        or reference_metadata.get("capability_projection_before_mpr") is not False
+        or reference_metadata.get("custom_adaptor_head") is not False
+    ):
+        raise ValueError("formal exact-marginal raw feature bundle differs")
+    conventional_semantic_policy = {
+        **shared_semantic_policy,
+        "valid_semantics": (
+            "positive_pre_adaptor_raw_radio_amplitude_responsibility_mass"
+        ),
+        "invalid_row_purity_policy": (
+            "mpr_schema_v1_requires_zero_for_semantically_invalid_rows"
+        ),
+    }
+    if any(
+        reference_metadata.get(key) != value
+        for key, value in conventional_semantic_policy.items()
+    ) or any(
+        reference_metadata.get(key) != factorized_metadata.get(key)
+        for key in geometric_authority_fields
+    ):
+        raise ValueError("factorized exact-marginal raw semantic authority differs")
+
+    reference_geometry = dict(reference.get("geometry_fingerprint", {}))
+    reference_valid = torch.as_tensor(reference.get("valid")).bool().cpu()
+    reference_counts = torch.as_tensor(reference.get("view_counts")).long().cpu()
+    if (
+        reference_geometry != dict(factorized.geometry_fingerprint)
+        or not torch.equal(reference_valid, factorized.valid)
+        or not torch.equal(reference_counts, factorized.view_counts)
+    ):
+        raise ValueError("factorized exact-marginal raw geometry/support differs")
+
+    common_frames = (
+        "selected_dataset_indices",
+        "selected_frame_indices",
+        "num_declared_views",
+    )
+    if any(
+        reference_metadata.get(key) != factorized_metadata.get(key)
+        for key in common_frames
+    ):
+        raise ValueError("factorized exact-marginal raw frame authority differs")
+
+    responsibility_sha256 = str(
+        factorized_metadata.get("registration_responsibility_cache_sha256", "")
+    )
+    responsibility_contract = factorized_metadata.get(
+        "registration_responsibility_contract"
+    )
+    if (
+        re.fullmatch(r"[0-9a-f]{64}", responsibility_sha256) is None
+        or not isinstance(responsibility_contract, dict)
+        or factorized_metadata.get("shared_registration_responsibility") is not True
+        or reference_metadata.get("registration_responsibility_cache_sha256")
+        != responsibility_sha256
+        or reference_metadata.get("registration_responsibility_contract")
+        != responsibility_contract
+        or reference_metadata.get("shared_registration_responsibility") is not True
+    ):
+        raise ValueError("factorized exact-marginal raw responsibility differs")
+
+    targets: dict[str, PrimitiveConsensus | ShardedMPRCache] = {}
+    provenance: dict[str, dict] = {}
+    for name in ("dino_v3", "sam3"):
+        cache, digest, source = load_mpr_cache(
+            requested[name][0],
+            expected_sha256=requested[name][1],
+            expected_feature_space=name,
+            require_reliability=True,
+            require_formal_safety=True,
+        )
+        metadata = dict(cache.get("metadata", {}))
+        validate_observation_contract_metadata(
+            metadata,
+            require_declaration=True,
+            contract_name=CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
+        )
+        valid = torch.as_tensor(cache.get("valid")).bool().cpu()
+        counts = torch.as_tensor(cache.get("view_counts")).long().cpu()
+        if (
+            dict(cache.get("geometry_fingerprint", {})) != reference_geometry
+            or not torch.equal(valid, reference_valid)
+            or not torch.equal(counts, reference_counts)
+        ):
+            raise ValueError(
+                f"factorized exact-marginal {name} geometry/support differs"
+            )
+        if any(
+            metadata.get(key) != reference_metadata.get(key) for key in common_frames
+        ):
+            raise ValueError(
+                f"factorized exact-marginal {name} frame authority differs"
+            )
+        if any(
+            metadata.get(key) != value
+            for key, value in conventional_semantic_policy.items()
+        ) or any(
+            metadata.get(key) != reference_metadata.get(key)
+            for key in geometric_authority_fields
+        ):
+            raise ValueError(
+                f"factorized exact-marginal {name} semantic authority differs"
+            )
+        if (
+            metadata.get("observation_lifting_contract") != expected_lifting
+            or metadata.get("observation_lifting_contract_sha256")
+            != expected_lifting_sha256
+            or metadata.get("registration_responsibility_cache_sha256")
+            != responsibility_sha256
+            or metadata.get("registration_responsibility_contract")
+            != responsibility_contract
+            or metadata.get("shared_registration_responsibility") is not True
+        ):
+            raise ValueError(f"factorized exact-marginal {name} lifting differs")
+        if (
+            metadata.get("feature_output_bundle_sha256") != cohort_bundle_sha256
+            or any(metadata.get(key) is not False for key in source_only_flags)
+            or metadata.get("capability_projection_before_mpr") is not True
+            or metadata.get("custom_adaptor_head") is not False
+            or metadata.get("capability_map_source") != "project_raw"
+            or metadata.get("official_adaptor_checkpoint_sha256")
+            != radio_checkpoint_sha256
+        ):
+            raise ValueError(f"factorized exact-marginal {name} feature target differs")
+        targets[name] = _consensus_from_cache(cache, preserve_target_dtype=True)
+        provenance[name] = {
+            "path": str(source.resolve()),
+            "sha256": digest,
+            "feature_space": name,
+            "target_contract": CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL,
+            "projection_order": ("official_adaptor_then_shared_exact_marginal_mpr"),
+            "official_adaptor_checkpoint_sha256": radio_checkpoint_sha256,
+            "registration_responsibility_cache_sha256": responsibility_sha256,
+            "observation_lifting_contract_sha256": expected_lifting_sha256,
+            "feature_output_bundle_sha256": cohort_bundle_sha256,
+            "uses_query_or_benchmark_supervision": False,
+        }
+
+    reference_provenance = {
+        "path": str(reference_source.resolve()),
+        "sha256": reference_sha256,
+        "geometry_fingerprint": reference_geometry,
+        "registration_responsibility_cache_sha256": responsibility_sha256,
+        "observation_lifting_contract_sha256": expected_lifting_sha256,
+        "capability_cohort_authority": {
+            "path": str(correction_source.resolve()),
+            "sha256": correction_sha256,
+        },
+        "capability_cohort_authority_mode": "formal_exact_marginal_v1",
+        "feature_output_bundle_sha256": cohort_bundle_sha256,
+        "uses_query_or_benchmark_supervision": False,
+    }
+    return targets, provenance, reference_provenance
 
 
 def _load_field_a_observation_reference(
@@ -704,8 +1351,7 @@ def _load_field_a_observation_reference(
         "normalize_each_view": True,
     }
     mismatched = [
-        key for key, value in expected_policy.items()
-        if metadata.get(key) != value
+        key for key, value in expected_policy.items() if metadata.get(key) != value
     ]
     if mismatched:
         raise ValueError(
@@ -722,19 +1368,23 @@ def _load_field_a_observation_reference(
         reference_xyz
     ) != _sha256_tensor_rows(primary_xyz):
         raise ValueError("Field-A observation reference geometry differs")
-    return cache, metadata, {
-        "path": str(source.resolve()),
-        "sha256": digest,
-        "aggregation_mode": metadata["aggregation_mode"],
-        "raster_view_fusion": metadata["raster_view_fusion"],
-        "selected_frame_indices": list(metadata.get("selected_frame_indices", [])),
-        "uses_query_or_benchmark_supervision": False,
-        **(
-            cache.provenance()
-            if isinstance(cache, ShardedMPRCache)
-            else {"storage": "dense_torch_tensor"}
-        ),
-    }
+    return (
+        cache,
+        metadata,
+        {
+            "path": str(source.resolve()),
+            "sha256": digest,
+            "aggregation_mode": metadata["aggregation_mode"],
+            "raster_view_fusion": metadata["raster_view_fusion"],
+            "selected_frame_indices": list(metadata.get("selected_frame_indices", [])),
+            "uses_query_or_benchmark_supervision": False,
+            **(
+                cache.provenance()
+                if isinstance(cache, ShardedMPRCache)
+                else {"storage": "dense_torch_tensor"}
+            ),
+        },
+    )
 
 
 @torch.no_grad()
@@ -759,6 +1409,41 @@ def _reconstruction_metrics(
         "mean_cosine": float(cosine.mean()),
         "p05_cosine": float(cosine.quantile(0.05)),
         "mean_rmse": float(rmse.mean()),
+    }
+
+
+@torch.no_grad()
+def _factorized_amplitude_metrics(
+    field: CanonicalGaussianField,
+    target: FactorizedRadioTrainingCache,
+    rows: torch.Tensor,
+    batch_size: int,
+) -> dict[str, float]:
+    """Measure the independently supervised raw-RADIO gauge."""
+
+    absolute_log_errors: list[torch.Tensor] = []
+    predicted_norms: list[torch.Tensor] = []
+    target_norms: list[torch.Tensor] = []
+    device = field.local_codes.device
+    for start in range(0, rows.numel(), int(batch_size)):
+        batch = rows[start : start + int(batch_size)]
+        predicted = field.radio_features(batch.to(device)).float().cpu()
+        predicted_norm = torch.linalg.vector_norm(predicted, dim=-1)
+        predicted_log = torch.log(
+            torch.sqrt(predicted_norm.square() + torch.finfo(torch.float32).eps ** 2)
+        )
+        target_log = target.log_amplitude[batch].float()
+        absolute_log_errors.append((predicted_log - target_log).abs())
+        predicted_norms.append(predicted_norm)
+        target_norms.append(torch.exp(target_log))
+    error = torch.cat(absolute_log_errors)
+    predicted_norm = torch.cat(predicted_norms)
+    target_norm = torch.cat(target_norms)
+    return {
+        "mean_abs_log_amplitude_error": float(error.mean()),
+        "p95_abs_log_amplitude_error": float(error.quantile(0.95)),
+        "predicted_norm_median": float(predicted_norm.median()),
+        "target_norm_median": float(target_norm.median()),
     }
 
 
@@ -806,14 +1491,14 @@ def _capability_reconstruction_metrics(
 
 
 @torch.no_grad()
-def _cross_basis_projection(local_decoder, output_decoder) -> tuple[torch.Tensor, torch.Tensor]:
+def _cross_basis_projection(
+    local_decoder, output_decoder
+) -> tuple[torch.Tensor, torch.Tensor]:
     """Map local PCA coordinates into the higher-rank output PCA coordinates."""
 
     scale_ratio = local_decoder.scale / output_decoder.scale
     output_inverse = output_decoder.encoding_projection()
-    matrix = (
-        local_decoder.basis.transpose(0, 1) * scale_ratio[None]
-    ) @ output_inverse
+    matrix = (local_decoder.basis.transpose(0, 1) * scale_ratio[None]) @ output_inverse
     bias = (
         (local_decoder.mean - output_decoder.mean) / output_decoder.scale
     ) @ output_inverse
@@ -821,13 +1506,23 @@ def _cross_basis_projection(local_decoder, output_decoder) -> tuple[torch.Tensor
 
 
 def train(args: argparse.Namespace) -> dict:
+    output = Path(args.output).resolve()
+    report_path = output.with_suffix(output.suffix + ".json")
+    for candidate in (output, report_path):
+        if candidate.exists() or candidate.is_symlink():
+            raise FileExistsError(
+                f"refuse to overwrite canonical field artifact: {candidate}"
+            )
     torch.manual_seed(int(args.seed))
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(int(args.seed))
     device = torch.device(args.device)
-    observation_contract_mode = str(
-        getattr(args, "observation_contract", "unchecked")
+    basis_fit_device = torch.device(
+        str(getattr(args, "basis_fit_device", "")).strip() or "cpu"
     )
+    if basis_fit_device.type == "cuda" and not torch.cuda.is_available():
+        raise ValueError("CUDA basis fitting requested but CUDA is unavailable")
+    observation_contract_mode = str(getattr(args, "observation_contract", "unchecked"))
     capability_target_contract = str(
         getattr(
             args,
@@ -835,44 +1530,89 @@ def train(args: argparse.Namespace) -> dict:
             CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
         )
     )
-    cache, mpr_cache_sha256, mpr_cache_path = load_mpr_cache(
-        args.mpr_cache,
-        expected_sha256=(
-            str(getattr(args, "expected_mpr_cache_sha256", "")) or None
-        ),
-        expected_feature_space="radio",
-        require_reliability=True,
-        require_formal_safety=(
-            observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES
-            or capability_target_contract
-            == CAPABILITY_TARGET_CONTRACT_FIELD_C
-        ),
+    factorized_mode = (
+        observation_contract_mode == CANONICAL_FACTORIZED_RADIO_CONTRACT_NAME
     )
-    metadata = dict(cache.get("metadata", {}))
-    _validate_training_observation_contract_metadata(
-        metadata,
-        observation_contract_mode,
-    )
-    if metadata.get("benchmark_masks_opened", False) or metadata.get("text_queries_opened", False):
-        raise ValueError("MPR training cache is contaminated by benchmark queries or masks")
-    if str(metadata.get("feature_space", "radio")) != "radio":
-        raise ValueError("canonical main field must reconstruct raw RADIO, not a query head")
-    consensus = _consensus_from_cache(cache)
-    raw_mpr_storage_provenance = (
-        cache.provenance()
-        if isinstance(cache, ShardedMPRCache)
-        else {"storage": "dense_torch_tensor"}
-    )
-    radio_hash = sha256_file(args.radio_checkpoint)
-    expected_radio_hash = str(
-        getattr(args, "expected_radio_checkpoint_sha256", "")
-    )
-    if expected_radio_hash and radio_hash != expected_radio_hash:
-        raise ValueError("RADIO checkpoint differs from caller authority")
     expected_feature_bundle_sha256 = str(
         getattr(args, "expected_feature_output_bundle_sha256", "")
     )
-    if observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES and (
+    radio_hash = sha256_file(args.radio_checkpoint)
+    expected_radio_hash = str(getattr(args, "expected_radio_checkpoint_sha256", ""))
+    if factorized_mode and re.fullmatch(r"[0-9a-f]{64}", expected_radio_hash) is None:
+        raise ValueError(
+            "canonical-factorized-radio-v1 requires the official RADIO SHA-256"
+        )
+    if expected_radio_hash and radio_hash != expected_radio_hash:
+        raise ValueError("RADIO checkpoint differs from caller authority")
+    factorized_target: FactorizedRadioTrainingCache | None = None
+    if factorized_mode:
+        if bool(getattr(args, "fusion_reliability", True)):
+            raise ValueError(
+                "canonical-factorized-radio-v1 requires --no-fusion-reliability"
+            )
+        if capability_target_contract not in {
+            CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+            CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL,
+        }:
+            raise ValueError(
+                "factorized RADIO accepts only matched top1 or exact-marginal "
+                "capability targets"
+            )
+        if str(getattr(args, "relation_objective", RELATION_OBJECTIVE_DISABLED)) != (
+            RELATION_OBJECTIVE_DISABLED
+        ):
+            raise ValueError(
+                "factorized RADIO does not accept legacy relation objectives"
+            )
+        factorized_target = load_factorized_radio_training_cache(
+            args.mpr_cache,
+            expected_sha256=str(getattr(args, "expected_mpr_cache_sha256", "")),
+            expected_feature_output_bundle_sha256=(expected_feature_bundle_sha256),
+        )
+        cache: dict | ShardedMPRCache = factorized_target.support_mapping()
+        mpr_cache_sha256 = factorized_target.sha256
+        mpr_cache_path = factorized_target.source
+        metadata = dict(factorized_target.metadata)
+        consensus = factorized_target.as_consensus()
+        raw_mpr_storage_provenance = factorized_target.provenance()
+    else:
+        cache, mpr_cache_sha256, mpr_cache_path = load_mpr_cache(
+            args.mpr_cache,
+            expected_sha256=(
+                str(getattr(args, "expected_mpr_cache_sha256", "")) or None
+            ),
+            expected_feature_space="radio",
+            require_reliability=True,
+            require_formal_safety=(
+                observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES
+                or capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
+            ),
+        )
+        metadata = dict(cache.get("metadata", {}))
+        _validate_training_observation_contract_metadata(
+            metadata,
+            observation_contract_mode,
+        )
+        consensus = _consensus_from_cache(cache)
+        raw_mpr_storage_provenance = (
+            cache.provenance()
+            if isinstance(cache, ShardedMPRCache)
+            else {"storage": "dense_torch_tensor"}
+        )
+    if metadata.get("benchmark_masks_opened", False) or metadata.get(
+        "text_queries_opened", False
+    ):
+        raise ValueError(
+            "MPR training cache is contaminated by benchmark queries or masks"
+        )
+    if str(metadata.get("feature_space", "radio")) != "radio":
+        raise ValueError(
+            "canonical main field must reconstruct raw RADIO, not a query head"
+        )
+    if (
+        observation_contract_mode in STRICT_OBSERVATION_CONTRACT_MODES
+        or factorized_mode
+    ) and (
         not expected_feature_bundle_sha256
         or metadata.get("feature_output_bundle_sha256")
         != expected_feature_bundle_sha256
@@ -891,8 +1631,10 @@ def train(args: argparse.Namespace) -> dict:
                 raise ValueError(
                     f"Field-A requires a trusted SHA-256 for the {name} MPR target"
                 )
-        capability_observation_cache, capability_observation_metadata, (
-            capability_observation_provenance
+        (
+            capability_observation_cache,
+            capability_observation_metadata,
+            (capability_observation_provenance),
         ) = _load_field_a_observation_reference(
             getattr(args, "capability_observation_reference_mpr_cache", ""),
             primary_raw_cache=cache,
@@ -910,9 +1652,7 @@ def train(args: argparse.Namespace) -> dict:
             raise ValueError("Field-C requires --official-capability-loss")
         if metadata.get("aggregation_mode") != "raster_exact_center_uncertainty":
             raise ValueError("Field-C requires an exact-center uncertainty raw MPR")
-        if not str(args.dino_mpr_cache).strip() or not str(
-            args.sam3_mpr_cache
-        ).strip():
+        if not str(args.dino_mpr_cache).strip() or not str(args.sam3_mpr_cache).strip():
             raise ValueError("Field-C requires both DINO and SAM3 MPR targets")
         for name in ("dino_v3", "sam3"):
             if not str(getattr(args, f"expected_{name}_mpr_cache_sha256", "")):
@@ -925,36 +1665,129 @@ def train(args: argparse.Namespace) -> dict:
             != expected_feature_bundle_sha256
         ):
             raise ValueError("Field-C raw MPR belongs to another feature bundle")
+    elif (
+        capability_target_contract == CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL
+    ):
+        if not factorized_mode:
+            raise ValueError(
+                "matched_exact_marginal capability targets require factorized RADIO"
+            )
     elif capability_target_contract != CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1:
         raise ValueError(
             f"unsupported capability target contract: {capability_target_contract}"
         )
-    capability_targets: dict[
-        str, PrimitiveConsensus | ShardedMPRCache
-    ] = {}
+    capability_targets: dict[str, PrimitiveConsensus | ShardedMPRCache] = {}
     capability_target_provenance: dict[str, dict] = {}
-    for name, path in (
-        ("dino_v3", args.dino_mpr_cache),
-        ("sam3", args.sam3_mpr_cache),
-    ):
-        if not str(path).strip():
-            continue
-        target, provenance = _load_capability_mpr_target(
-            path,
-            expected_space=name,
-            raw_cache=capability_observation_cache,
-            raw_metadata=capability_observation_metadata,
-            radio_checkpoint_sha256=radio_hash,
-            expected_cache_sha256=str(
-                getattr(args, f"expected_{name}_mpr_cache_sha256", "")
+    if factorized_mode:
+        required_factorized_capability = {
+            "official_capability_loss": bool(args.official_capability_loss),
+            "dino_mpr_cache": bool(str(args.dino_mpr_cache).strip()),
+            "sam3_mpr_cache": bool(str(args.sam3_mpr_cache).strip()),
+            "expected_dino_v3_mpr_cache_sha256": bool(
+                str(getattr(args, "expected_dino_v3_mpr_cache_sha256", ""))
             ),
-            expected_feature_output_bundle_sha256=(
-                expected_feature_bundle_sha256
+            "expected_sam3_mpr_cache_sha256": bool(
+                str(getattr(args, "expected_sam3_mpr_cache_sha256", ""))
             ),
-            target_contract=capability_target_contract,
+            "factorized_capability_reference_mpr_cache": bool(
+                str(
+                    getattr(args, "factorized_capability_reference_mpr_cache", "")
+                ).strip()
+            ),
+            "expected_factorized_capability_reference_mpr_cache_sha256": bool(
+                str(
+                    getattr(
+                        args,
+                        "expected_factorized_capability_reference_mpr_cache_sha256",
+                        "",
+                    )
+                )
+            ),
+            "factorized_capability_legacy_receipt_correction": bool(
+                str(
+                    getattr(
+                        args,
+                        "factorized_capability_legacy_receipt_correction",
+                        "",
+                    )
+                ).strip()
+            ),
+            "expected_factorized_capability_legacy_receipt_correction_sha256": bool(
+                str(
+                    getattr(
+                        args,
+                        "expected_factorized_capability_legacy_receipt_correction_sha256",
+                        "",
+                    )
+                )
+            ),
+        }
+        missing = sorted(
+            name
+            for name, present in required_factorized_capability.items()
+            if not present
         )
-        capability_targets[name] = target
-        capability_target_provenance[name] = provenance
+        if missing:
+            raise ValueError(
+                "factorized RADIO requires a frozen matched capability cohort: "
+                f"{missing}"
+            )
+        assert factorized_target is not None
+        factorized_loader = (
+            _load_factorized_exact_marginal_capability_targets
+            if capability_target_contract
+            == CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL
+            else _load_factorized_matched_capability_targets
+        )
+        (
+            capability_targets,
+            capability_target_provenance,
+            (capability_observation_provenance),
+        ) = factorized_loader(
+            factorized=factorized_target,
+            reference_path=getattr(args, "factorized_capability_reference_mpr_cache"),
+            reference_expected_sha256=str(
+                getattr(
+                    args,
+                    "expected_factorized_capability_reference_mpr_cache_sha256",
+                )
+            ),
+            dino_path=args.dino_mpr_cache,
+            dino_expected_sha256=str(args.expected_dino_v3_mpr_cache_sha256),
+            sam3_path=args.sam3_mpr_cache,
+            sam3_expected_sha256=str(args.expected_sam3_mpr_cache_sha256),
+            correction_path=getattr(
+                args, "factorized_capability_legacy_receipt_correction"
+            ),
+            correction_expected_sha256=str(
+                getattr(
+                    args,
+                    "expected_factorized_capability_legacy_receipt_correction_sha256",
+                )
+            ),
+            radio_checkpoint_sha256=radio_hash,
+        )
+    else:
+        for name, path in (
+            ("dino_v3", args.dino_mpr_cache),
+            ("sam3", args.sam3_mpr_cache),
+        ):
+            if not str(path).strip():
+                continue
+            target, provenance = _load_capability_mpr_target(
+                path,
+                expected_space=name,
+                raw_cache=capability_observation_cache,
+                raw_metadata=capability_observation_metadata,
+                radio_checkpoint_sha256=radio_hash,
+                expected_cache_sha256=str(
+                    getattr(args, f"expected_{name}_mpr_cache_sha256", "")
+                ),
+                expected_feature_output_bundle_sha256=(expected_feature_bundle_sha256),
+                target_contract=capability_target_contract,
+            )
+            capability_targets[name] = target
+            capability_target_provenance[name] = provenance
     if capability_targets and not args.official_capability_loss:
         raise ValueError(
             "auxiliary capability MPR targets require --official-capability-loss"
@@ -1001,9 +1834,7 @@ def train(args: argparse.Namespace) -> dict:
             )
         registration, registration_sha, registration_path = load_json_object(
             args.field_b_experiment_registration,
-            expected_sha256=(
-                args.expected_field_b_experiment_registration_sha256
-            ),
+            expected_sha256=(args.expected_field_b_experiment_registration_sha256),
             label="Field-B experiment registration",
         )
         if registration.get("schema_version") != (
@@ -1014,9 +1845,7 @@ def train(args: argparse.Namespace) -> dict:
         current_source_hashes = {
             "trainer": sha256_file(Path(__file__).resolve()),
             "losses": sha256_file(
-                Path(__file__).parents[1]
-                / "training"
-                / "canonical_field_losses.py"
+                Path(__file__).parents[1] / "training" / "canonical_field_losses.py"
             ),
         }
         if any(
@@ -1026,9 +1855,7 @@ def train(args: argparse.Namespace) -> dict:
             raise ValueError("Field-B registered training source SHA-256 differs")
         immutable_inputs = dict(registration.get("immutable_inputs", {}))
         expected_registered_inputs = {
-            "field_a_checkpoint": str(
-                args.expected_initial_field_checkpoint_sha256
-            ),
+            "field_a_checkpoint": str(args.expected_initial_field_checkpoint_sha256),
             "primary_raw_mpr": str(mpr_cache_sha256),
             "exact_observation_reference": str(
                 args.expected_capability_observation_reference_mpr_cache_sha256
@@ -1053,9 +1880,7 @@ def train(args: argparse.Namespace) -> dict:
             "sam3_weight": float(args.sam3_weight),
             "relation_weight": relation_weight,
             "coefficient_weight": float(args.coefficient_weight),
-            "basis_orthogonality_weight": float(
-                args.basis_orthogonality_weight
-            ),
+            "basis_orthogonality_weight": float(args.basis_orthogonality_weight),
         }
         if any(registered_loss.get(key) != value for key, value in actual_loss.items()):
             raise ValueError("Field-B registered loss contract differs")
@@ -1105,47 +1930,80 @@ def train(args: argparse.Namespace) -> dict:
         adaptor_name="backbone",
         token_type="primitive",
         normalization=(
-            "radio_direction_unit"
-            if bool(metadata.get("normalize_each_view", False))
-            else "radio_raw_full"
+            "radio_raw_full"
+            if factorized_mode
+            else (
+                "radio_direction_unit"
+                if bool(metadata.get("normalize_each_view", False))
+                else "radio_raw_full"
+            )
         ),
-        crop_policy="training_views_depth_alpha_checked_mpr",
+        crop_policy=(
+            "training_views_canonical_factorized_radio_v1"
+            if factorized_mode
+            else "training_views_depth_alpha_checked_mpr"
+        ),
         # The field stores exactly the declared MPR RADIO semantics.  Semantic alignment is a
         # separately selected, frozen capability view and is never part of the
         # field checkpoint contract.
         semantic_alignment="none",
     )
+    factorized_field_signature = (
+        FactorizedRadioFieldSignature.create(signature) if factorized_mode else None
+    )
     initial_field_provenance: dict = {}
     if str(args.initial_field_checkpoint).strip():
         initial_path = Path(args.initial_field_checkpoint)
-        field, initial_payload = load_canonical_field_checkpoint(
-            initial_path,
-            map_location="cpu",
-            expected_sha256=(
-                str(
-                    getattr(
-                        args,
-                        "expected_initial_field_checkpoint_sha256",
-                        "",
-                    )
+        initial_expected_sha256 = (
+            str(
+                getattr(
+                    args,
+                    "expected_initial_field_checkpoint_sha256",
+                    "",
                 )
-                or None
-            ),
+            )
+            or None
         )
+        if factorized_mode:
+            assert factorized_field_signature is not None
+            field, initial_payload, _initial_factorized_signature = (
+                load_factorized_canonical_field_checkpoint(
+                    initial_path,
+                    map_location="cpu",
+                    expected_sha256=initial_expected_sha256,
+                    expected_signature=factorized_field_signature,
+                )
+            )
+        else:
+            field, initial_payload = load_canonical_field_checkpoint(
+                initial_path,
+                map_location="cpu",
+                expected_sha256=initial_expected_sha256,
+            )
         if initial_payload.get("benchmark_masks_opened", False) or initial_payload.get(
             "text_queries_opened", False
         ):
             raise ValueError("initial field used benchmark masks or text queries")
+        if factorized_mode and (
+            initial_payload.get("factorized_cache_sha256") != mpr_cache_sha256
+            or initial_payload.get("feature_output_bundle_sha256")
+            != expected_feature_bundle_sha256
+        ):
+            raise ValueError("initial factorized field source lineage differs")
         if field.num_gaussians != consensus_num_rows:
             raise ValueError("initial field Gaussian count differs from the MPR cache")
         if field.decoder.feature_dim != consensus_feature_dim:
             raise ValueError("initial field RADIO dimension differs from the MPR cache")
-        signature_compatibility = _assert_initial_field_signature_compatible(
-            signature,
-            field.signature,
-            allow_legacy_normalization=(
-                observation_contract_mode == "compatible-legacy"
-            ),
+        signature_compatibility = (
+            {"factorized_schema_v2_exact": True}
+            if factorized_mode
+            else _assert_initial_field_signature_compatible(
+                signature,
+                field.signature,
+                allow_legacy_normalization=(
+                    observation_contract_mode == "compatible-legacy"
+                ),
+            )
         )
         expected_geometry = str(
             cache.get("geometry_fingerprint", {}).get("xyz_sha256", "")
@@ -1155,13 +2013,19 @@ def train(args: argparse.Namespace) -> dict:
         )
         if not expected_geometry or actual_geometry != expected_geometry:
             raise ValueError("initial field geometry differs from the MPR cache")
-        if field.reliability.shape != consensus.reliability.shape:
-            raise ValueError("initial field reliability shape differs from the MPR cache")
-        # Registration support is part of the current raw target contract.
-        # Updating this fixed buffer affects control and treatment identically;
-        # no learned state or query signal is introduced.
-        with torch.no_grad():
-            field.reliability.copy_(consensus.reliability)
+        if factorized_mode:
+            if field.reliability.shape != (consensus_num_rows, 0):
+                raise ValueError("factorized initial field reconstructed reliability")
+        else:
+            if field.reliability.shape != consensus.reliability.shape:
+                raise ValueError(
+                    "initial field reliability shape differs from the MPR cache"
+                )
+            # Registration support is part of the current raw target contract.
+            # Updating this fixed buffer affects control and treatment identically;
+            # no learned state or query signal is introduced.
+            with torch.no_grad():
+                field.reliability.copy_(consensus.reliability)
         field = field.to(device)
         basis_fit_report = dict(initial_payload.get("basis_fit_report", {}))
         initial_field_provenance = {
@@ -1174,7 +2038,8 @@ def train(args: argparse.Namespace) -> dict:
             "source_training_epochs": len(initial_payload.get("history", [])),
             "architecture_reused_exactly": True,
             "learned_state_reinitialized": False,
-            "fixed_reliability_refreshed_from_current_raw_mpr": True,
+            "fixed_reliability_refreshed_from_current_raw_mpr": (not factorized_mode),
+            "factorized_target_reliability_entered_field": False,
             "signature_compatibility": signature_compatibility,
         }
     else:
@@ -1185,7 +2050,7 @@ def train(args: argparse.Namespace) -> dict:
             valid_rows,
             max_samples=int(args.pca_samples),
             seed=int(args.seed),
-        )
+        ).to(basis_fit_device)
         decoder, fit_report = fit_affine_basis(
             basis_values,
             int(args.coefficient_dim),
@@ -1207,8 +2072,7 @@ def train(args: argparse.Namespace) -> dict:
         )
         use_fusion = bool(args.primitive_fusion)
         if (
-            local_dim != int(args.coefficient_dim)
-            or int(args.spatial_coarse_dim) > 0
+            local_dim != int(args.coefficient_dim) or int(args.spatial_coarse_dim) > 0
         ) and not use_fusion:
             raise ValueError("compact local/spatial codes require --primitive-fusion")
         spatial_hash = None
@@ -1232,12 +2096,12 @@ def train(args: argparse.Namespace) -> dict:
                 primitive_positions if spatial_hash is not None else None
             ),
             spatial_hash=spatial_hash,
-            reliability=consensus.reliability,
-            fusion_reliability=bool(args.fusion_reliability),
-            hidden_dim=int(args.hidden_dim),
-            fusion_residual_blocks=int(
-                getattr(args, "fusion_residual_blocks", 0)
+            reliability=None if factorized_mode else consensus.reliability,
+            fusion_reliability=(
+                False if factorized_mode else bool(args.fusion_reliability)
             ),
+            hidden_dim=int(args.hidden_dim),
+            fusion_residual_blocks=int(getattr(args, "fusion_residual_blocks", 0)),
             use_fusion=use_fusion,
         ).to(device)
         with torch.no_grad():
@@ -1253,7 +2117,7 @@ def train(args: argparse.Namespace) -> dict:
                     valid_rows,
                     max_samples=int(args.pca_samples),
                     seed=int(args.seed),
-                )
+                ).to(basis_fit_device)
                 local_decoder, _local_fit_report = fit_affine_basis(
                     local_basis_values,
                     local_dim,
@@ -1272,11 +2136,15 @@ def train(args: argparse.Namespace) -> dict:
                     local_decoder.cpu()
                     encoded = None
                 else:
-                    encoded = local_decoder.encode(consensus.targets).to(device)
+                    encoded = local_decoder.encode(
+                        consensus.targets.to(basis_fit_device)
+                    ).to(device)
                 del local_basis_values
                 if field.fusion is None:
                     raise RuntimeError("local compression requires primitive fusion")
-                weight, bias = _cross_basis_projection(local_decoder, decoder.cpu())
+                weight, bias = _cross_basis_projection(
+                    local_decoder.cpu(), decoder.cpu()
+                )
                 decoder.to(device)
                 field.fusion.initialize_base_projection(weight, bias)
             if encoded is not None:
@@ -1288,6 +2156,10 @@ def train(args: argparse.Namespace) -> dict:
             args.radio_checkpoint,
             expected_sha256=radio_hash,
         ).to(device)
+    factorized_reliability_policy = _factorized_loss_reliability_policy(
+        factorized_target,
+        capability_target_contract=capability_target_contract,
+    )
     loss_config = CanonicalFieldLossConfig(
         mpr_weight=float(args.mpr_weight),
         dino_weight=float(args.dino_weight if official_views is not None else 0.0),
@@ -1299,13 +2171,22 @@ def train(args: argparse.Namespace) -> dict:
     capability_reliability_policy = (
         "field_a_boundary_safe"
         if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
-        else "field_c_visibility_safe"
-        if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
-        else "legacy_mean"
+        else (
+            "field_c_visibility_safe"
+            if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
+            else (
+                FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE
+                if capability_target_contract
+                == CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL
+                else "legacy_mean"
+            )
+        )
     )
     generator = torch.Generator(device="cpu").manual_seed(int(args.seed))
     order = valid_rows[torch.randperm(valid_rows.numel(), generator=generator)]
-    validation_count = max(1, int(round(order.numel() * float(args.validation_fraction))))
+    validation_count = max(
+        1, int(round(order.numel() * float(args.validation_fraction)))
+    )
     validation_rows = order[:validation_count]
     training_rows = order[validation_count:]
     if training_rows.numel() == 0:
@@ -1349,8 +2230,7 @@ def train(args: argparse.Namespace) -> dict:
         )
         epoch_batches = max(
             1,
-            (epoch_order.numel() + int(args.batch_size) - 1)
-            // int(args.batch_size),
+            (epoch_order.numel() + int(args.batch_size) - 1) // int(args.batch_size),
         )
         field.train()
         for batch_index, start in enumerate(
@@ -1365,6 +2245,8 @@ def train(args: argparse.Namespace) -> dict:
                 official_views=official_views,
                 capability_targets=capability_targets,
                 capability_reliability_policy=capability_reliability_policy,
+                factorized_target=factorized_target,
+                factorized_reliability_policy=factorized_reliability_policy,
                 config=loss_config,
             )
             if relation_cache is not None:
@@ -1388,6 +2270,15 @@ def train(args: argparse.Namespace) -> dict:
         validation = _reconstruction_metrics(
             field, consensus, validation_rows, int(args.eval_batch_size)
         )
+        if factorized_target is not None:
+            validation.update(
+                _factorized_amplitude_metrics(
+                    field,
+                    factorized_target,
+                    validation_rows,
+                    int(args.eval_batch_size),
+                )
+            )
         if official_views is not None and capability_targets:
             validation.update(
                 _capability_reconstruction_metrics(
@@ -1402,16 +2293,15 @@ def train(args: argparse.Namespace) -> dict:
             "epoch": epoch + 1,
             "loss": sum(totals) / max(1, len(totals)),
             "relation_ranking_loss": (
-                sum(relation_totals) / len(relation_totals)
-                if relation_totals
-                else 0.0
+                sum(relation_totals) / len(relation_totals) if relation_totals else 0.0
             ),
             **validation,
         }
         history.append(record)
         print(json.dumps(record), flush=True)
         if (
-            epoch + 1 >= int(args.min_epochs)
+            not factorized_mode
+            and epoch + 1 >= int(args.min_epochs)
             and validation["mean_cosine"] >= float(args.target_cosine)
         ):
             break
@@ -1420,6 +2310,15 @@ def train(args: argparse.Namespace) -> dict:
     final_metrics = _reconstruction_metrics(
         field, consensus, valid_rows, int(args.eval_batch_size)
     )
+    if factorized_target is not None:
+        final_metrics.update(
+            _factorized_amplitude_metrics(
+                field,
+                factorized_target,
+                valid_rows,
+                int(args.eval_batch_size),
+            )
+        )
     final_capability_metrics = (
         _capability_reconstruction_metrics(
             field,
@@ -1432,7 +2331,6 @@ def train(args: argparse.Namespace) -> dict:
         else {}
     )
     field.cpu()
-    output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     architecture = {
         "num_gaussians": field.num_gaussians,
@@ -1459,10 +2357,7 @@ def train(args: argparse.Namespace) -> dict:
             field.decoder.mean.requires_grad or field.decoder.scale.requires_grad
         ),
     }
-    training_config = {
-        key: value
-        for key, value in vars(args).items()
-    }
+    training_config = {key: value for key, value in vars(args).items()}
     training_config_sha256 = hashlib.sha256(
         json.dumps(
             training_config,
@@ -1470,12 +2365,10 @@ def train(args: argparse.Namespace) -> dict:
             separators=(",", ":"),
         ).encode("utf-8")
     ).hexdigest()
+    basis_conditioning = validate_basis_conditioning(field.decoder.basis).to_dict()
     payload = {
-        "schema_version": 1,
         "architecture": architecture,
-        "feature_signature": field.signature.to_dict(),
         "state_dict": field.state_dict(),
-        "reliability": consensus.reliability.half(),
         "geometry_fingerprint": cache.get("geometry_fingerprint", {}),
         "mpr_cache": str(mpr_cache_path),
         "mpr_cache_sha256": mpr_cache_sha256,
@@ -1483,21 +2376,35 @@ def train(args: argparse.Namespace) -> dict:
         "mpr_cache_metadata": metadata,
         "feature_output_bundle_sha256": expected_feature_bundle_sha256,
         "basis_fit_report": basis_fit_report,
+        "basis_conditioning": basis_conditioning,
         "initial_field_checkpoint": initial_field_provenance,
         "loss_config": asdict(loss_config),
         "capability_target_mode": (
             "official_adaptor_then_exact_raster_adjoint_contribution_mpr"
             if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_A
-            else "official_adaptor_then_exact_center_plus_uncertainty_mpr"
-            if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
-            else "official_adaptor_then_geometry_matched_mpr"
-            if capability_targets
-            else "adaptor_of_raw_mpr_target"
-            if official_views is not None
-            else "none"
+            else (
+                "official_adaptor_then_exact_center_plus_uncertainty_mpr"
+                if capability_target_contract == CAPABILITY_TARGET_CONTRACT_FIELD_C
+                else (
+                    "official_adaptor_then_shared_exact_marginal_mpr"
+                    if capability_target_contract
+                    == CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL
+                    and capability_targets
+                    else (
+                        "official_adaptor_then_geometry_matched_mpr"
+                        if capability_targets
+                        else (
+                            "adaptor_of_raw_mpr_target"
+                            if official_views is not None
+                            else "none"
+                        )
+                    )
+                )
+            )
         ),
         "capability_target_contract": capability_target_contract,
         "capability_reliability_policy": capability_reliability_policy,
+        "factorized_reliability_policy": factorized_reliability_policy,
         "capability_observation_reference": capability_observation_provenance,
         "capability_mpr_targets": capability_target_provenance,
         "relation_objective": relation_objective,
@@ -1512,18 +2419,68 @@ def train(args: argparse.Namespace) -> dict:
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
     }
-    descriptor, temporary_name = tempfile.mkstemp(
-        prefix=f".{output.name}.",
-        suffix=".tmp",
-        dir=output.parent,
-    )
-    os.close(descriptor)
-    temporary = Path(temporary_name)
-    try:
-        torch.save(payload, temporary)
-        os.replace(temporary, output)
-    finally:
-        temporary.unlink(missing_ok=True)
+    if factorized_mode:
+        assert factorized_field_signature is not None
+        exact_visibility_safe = (
+            factorized_reliability_policy
+            == FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE
+        )
+        payload.update(
+            {
+                "schema_version": (
+                    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_SCHEMA_VERSION
+                ),
+                "checkpoint_contract": (CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT),
+                "factorized_radio_metadata": factorized_radio_checkpoint_metadata(
+                    factorized_field_signature
+                ),
+                "factorized_cache_sha256": mpr_cache_sha256,
+                "reliability": torch.empty(field.num_gaussians, 0),
+                "factorized_loss_contract": {
+                    "name": (
+                        FACTORIZED_RADIO_EXACT_MARGINAL_VISIBILITY_SAFE_LOSS_CONTRACT
+                        if exact_visibility_safe
+                        else FACTORIZED_RADIO_RECONSTRUCTION_LOSS_CONTRACT
+                    ),
+                    "amplitude_weight": 0.25,
+                    "target_reliability_columns_entered_field": False,
+                    **(
+                        {
+                            "reliability_policy": factorized_reliability_policy,
+                            "target_reliability_columns_entered_loss": [
+                                "directional_resultant",
+                                "log_amplitude_std",
+                                "observation_evidence",
+                                "visibility_purity",
+                            ],
+                            "visibility_purity_authority": dict(
+                                factorized_target.metadata[
+                                    "visibility_purity_authority"
+                                ]
+                            ),
+                            "visibility_purity_weighting": (
+                                "multiply_legacy_row_weight_by_uniform_half_purity"
+                            ),
+                        }
+                        if exact_visibility_safe
+                        else {}
+                    ),
+                    "official_capability_projection": (
+                        "predicted_raw_radio_then_official_adaptor"
+                    ),
+                    "early_stopping": "disabled_run_all_registered_epochs",
+                },
+            }
+        )
+    else:
+        payload.update(
+            {
+                "schema_version": 1,
+                "feature_signature": field.signature.to_dict(),
+                "reliability": consensus.reliability.half(),
+            }
+        )
+    write_torch_noclobber(output, payload)
     report = {
         "output": str(output),
         "num_gaussians": field.num_gaussians,
@@ -1532,12 +2489,14 @@ def train(args: argparse.Namespace) -> dict:
         "local_dim": field.local_codes.shape[1],
         "coarse_dim": field.coarse_dim,
         "basis_fit": basis_fit_report,
+        "basis_conditioning": basis_conditioning,
         "initial_field_checkpoint": initial_field_provenance,
         "final_metrics": final_metrics,
         "final_capability_metrics": final_capability_metrics,
         "capability_target_mode": payload["capability_target_mode"],
         "capability_target_contract": capability_target_contract,
         "capability_reliability_policy": capability_reliability_policy,
+        "factorized_reliability_policy": factorized_reliability_policy,
         "capability_observation_reference": capability_observation_provenance,
         "capability_mpr_targets": capability_target_provenance,
         "relation_objective": relation_objective,
@@ -1548,17 +2507,14 @@ def train(args: argparse.Namespace) -> dict:
         "feature_output_bundle_sha256": expected_feature_bundle_sha256,
         "training_config_sha256": training_config_sha256,
         "feature_signature": field.signature.to_dict(),
+        "factorized_field_signature": (
+            factorized_field_signature.to_dict()
+            if factorized_field_signature is not None
+            else None
+        ),
         "xyz_sha256": _sha256_tensor_rows(torch.as_tensor(cache["xyz"])),
     }
-    report_path = output.with_suffix(output.suffix + ".json")
-    temporary_report = report_path.with_suffix(
-        report_path.suffix + ".tmp"
-    )
-    temporary_report.write_text(
-        json.dumps(report, indent=2),
-        encoding="utf-8",
-    )
-    temporary_report.replace(report_path)
+    write_frozen_json(report_path, report)
     return report
 
 
@@ -1573,7 +2529,9 @@ def main() -> None:
     parser.add_argument(
         "--observation-contract",
         choices=[
+            CANONICAL_FACTORIZED_RADIO_CONTRACT_NAME,
             CANONICAL_OBSERVATION_CONTRACT_NAME,
+            CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
             CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
             CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
             CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME,
@@ -1648,6 +2606,15 @@ def main() -> None:
         help="Optional local/coarse/reliability residual fusion; stage-1 main is direct local coefficients.",
     )
     parser.add_argument("--pca-samples", type=int, default=50000)
+    parser.add_argument(
+        "--basis-fit-device",
+        default="",
+        help=(
+            "Optional device for the source-only PCA fit; empty preserves the "
+            "historical CPU path. Use cuda:0 inside the selected "
+            "CUDA_VISIBLE_DEVICES scope for faster high-rank fits."
+        ),
+    )
     parser.add_argument("--no-standardize", action="store_true")
     parser.add_argument("--freeze-basis", action="store_true")
     parser.add_argument("--official-capability-loss", action="store_true")
@@ -1655,6 +2622,7 @@ def main() -> None:
         "--capability-target-contract",
         choices=[
             CAPABILITY_TARGET_CONTRACT_MATCHED_TOP1,
+            CAPABILITY_TARGET_CONTRACT_MATCHED_EXACT_MARGINAL,
             CAPABILITY_TARGET_CONTRACT_FIELD_A,
             CAPABILITY_TARGET_CONTRACT_FIELD_C,
         ],
@@ -1703,6 +2671,46 @@ def main() -> None:
         "--expected-sam3-mpr-cache-sha256",
         default="",
         help="Caller-trusted SHA-256 for --sam3-mpr-cache.",
+    )
+    parser.add_argument(
+        "--factorized-capability-reference-mpr-cache",
+        default="",
+        help=(
+            "For canonical-factorized-radio-v1 only, the frozen raw "
+            "matched-top1 MPR defining DINO/SAM support and operator policy."
+        ),
+    )
+    parser.add_argument(
+        "--expected-factorized-capability-reference-mpr-cache-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the factorized capability reference.",
+    )
+    parser.add_argument(
+        "--factorized-capability-legacy-receipt-correction",
+        default="",
+        help=(
+            "Immutable authority freezing the raw/DINO/SAM matched-top1 cohort. "
+            "Accepts the historical compatibility receipt or the strict formal "
+            "feature-bundle cohort schema."
+        ),
+    )
+    parser.add_argument(
+        "--expected-factorized-capability-legacy-receipt-correction-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the capability cohort authority.",
+    )
+    parser.add_argument(
+        "--factorized-capability-cohort-authority",
+        default="",
+        help=(
+            "Preferred name for a strict formal raw/DINO/SAM cohort authority. "
+            "Mutually exclusive with the legacy compatibility option."
+        ),
+    )
+    parser.add_argument(
+        "--expected-factorized-capability-cohort-authority-sha256",
+        default="",
+        help="Caller-trusted SHA-256 for the formal capability cohort authority.",
     )
     parser.add_argument("--mpr-weight", type=float, default=1.0)
     parser.add_argument("--dino-weight", type=float, default=0.20)
@@ -1768,17 +2776,48 @@ def main() -> None:
         parser.error("--fusion-residual-blocks requires --primitive-fusion")
     if args.min_epochs <= 0 or args.min_epochs > args.epochs:
         parser.error("--min-epochs must lie in [1, --epochs]")
-    if (
-        args.capability_target_contract
-        != CAPABILITY_TARGET_CONTRACT_FIELD_A
-        and (
-            args.capability_observation_reference_mpr_cache
-            or args.expected_capability_observation_reference_mpr_cache_sha256
-        )
+    if args.capability_target_contract != CAPABILITY_TARGET_CONTRACT_FIELD_A and (
+        args.capability_observation_reference_mpr_cache
+        or args.expected_capability_observation_reference_mpr_cache_sha256
     ):
         parser.error(
             "Observation-reference arguments require "
             "--capability-target-contract field_a_exact_adjoint"
+        )
+    formal_cohort_pair = (
+        args.factorized_capability_cohort_authority,
+        args.expected_factorized_capability_cohort_authority_sha256,
+    )
+    if any(formal_cohort_pair) and not all(formal_cohort_pair):
+        parser.error(
+            "formal factorized capability cohort path and SHA-256 are both required"
+        )
+    legacy_cohort_pair = (
+        args.factorized_capability_legacy_receipt_correction,
+        args.expected_factorized_capability_legacy_receipt_correction_sha256,
+    )
+    if any(formal_cohort_pair) and any(legacy_cohort_pair):
+        parser.error(
+            "formal and legacy factorized capability cohort authorities are "
+            "mutually exclusive"
+        )
+    if all(formal_cohort_pair):
+        args.factorized_capability_legacy_receipt_correction = formal_cohort_pair[0]
+        args.expected_factorized_capability_legacy_receipt_correction_sha256 = (
+            formal_cohort_pair[1]
+        )
+    factorized_capability_arguments = (
+        args.factorized_capability_reference_mpr_cache,
+        args.expected_factorized_capability_reference_mpr_cache_sha256,
+        args.factorized_capability_legacy_receipt_correction,
+        args.expected_factorized_capability_legacy_receipt_correction_sha256,
+    )
+    if args.observation_contract != CANONICAL_FACTORIZED_RADIO_CONTRACT_NAME and any(
+        factorized_capability_arguments
+    ):
+        parser.error(
+            "factorized capability authority arguments require "
+            "--observation-contract canonical-factorized-radio-v1"
         )
     print(json.dumps(train(args), indent=2))
 

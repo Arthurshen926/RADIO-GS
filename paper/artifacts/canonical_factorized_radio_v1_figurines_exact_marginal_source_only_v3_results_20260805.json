@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "artifact_type": "method_source_only_gate_results",
+  "experiment": "canonical-factorized-radio-v1-figurines-exact-marginal-source-only-v3",
+  "date": "2026-08-05",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_figurines_exact_marginal_source_only_v3_preregistration_20260805.json",
+    "sha256": "2b4200949461a58d65fa09bbbc0cb83ae277f92697c9de56280868b07e30c7e9"
+  },
+  "shared_exact_marginal_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/exact_marginal_responsibility_authority.json",
+    "sha256": "5bff25c917a1fe9c973b4d201502f07836117e1d313756263ddb533e83834fd4",
+    "declared_views": 120,
+    "verified_shards": 120,
+    "total_hits": 32766223
+  },
+  "cache_authorities": {
+    "factorized_radio": {
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    },
+    "radio": {
+      "sha256": "9c82f3d33101cb1e088af3cdf021df89130166a4b49e4005378f5d672108fb7c"
+    },
+    "dino_v3": {
+      "sha256": "dd2c3623a206e0bdf04615c8086cbda29556e170af019f5b298cc5a5346b8067"
+    },
+    "sam3": {
+      "sha256": "8a6a5d289e04f4b3e4587eca7085a67f617ef17d01ff55934ca73952c66fdb33"
+    },
+    "formal_cohort": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_figurines_exact_marginal_v3_capability_cohort_authority_20260805.json",
+      "sha256": "8f490353a890101c00a9047c401d5cd6464dfd2c4bf6656696e5e26ad339f11a"
+    }
+  },
+  "four_cache_parity": {
+    "passed": true,
+    "num_gaussians": 168791,
+    "semantic_valid_gaussians": 96879,
+    "valid_ratio": 0.5739583373069763,
+    "top1_control_valid_gaussians": 34669,
+    "existing_exact_source_sentinel_valid_gaussians": 82088,
+    "geometric_view_counts_sha256": "73e555c25fe1c099f8eb442c948011654a6f11f64717fd84cb749c13295c073e",
+    "geometry_frames_valid_view_counts_exactly_equal": true,
+    "purity_fp16_bitwise_equal": true
+  },
+  "selected_field": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+    "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5",
+    "report_sha256": "f8a9f679ffe0fde572ded0ce0f8d65ee993890710e7f7aba924006dec9e0628d",
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "epochs": 20,
+    "capability_target_contract": "matched_exact_marginal",
+    "capability_reliability_policy": "legacy_mean"
+  },
+  "source_reconstruction": {
+    "radio_direction_mean_cosine": 0.9935972690582275,
+    "radio_direction_p05_cosine": 0.9861637353897095,
+    "mean_abs_log_amplitude_error": 0.02478753961622715,
+    "p95_abs_log_amplitude_error": 0.05218286067247391,
+    "dino_v3_mean_cosine": 0.9881994128227234,
+    "dino_v3_p05_cosine": 0.9691436886787415,
+    "sam3_mean_cosine": 0.9861958026885986,
+    "sam3_p05_cosine": 0.9674181342124939
+  },
+  "promotion_decision": {
+    "all_source_only_gates_passed": true,
+    "selected_capacity": "D512_L512",
+    "run_d1024": false,
+    "benchmark_gate_opened_after_source_gates": true
+  },
+  "target_access_during_selection": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

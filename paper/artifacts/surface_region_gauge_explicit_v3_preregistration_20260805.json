@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_gauge_explicit_minimum_support_v3_v1",
+  "status": "registered_before_v3_cache_build_training_and_benchmark_opening",
+  "hypothesis": "A scene-independent readout can recover the historical raw-gauge text capability without an implicit train/deployment mismatch when RADIO direction and raw norm are separately identified, sparse deployment support is represented during training, and minimum support recovery is explicit rather than mislabeled as semantic membership.",
+  "single_method_change": {
+    "base": "frozen SurfaceRegion V2 method and frozen benchmark protocols",
+    "candidate": "SurfaceRegion V3 direction-plus-log-norm carrier, eligible-induced tiered support recovery, support-fill reliability, and matched sparse-support training",
+    "forbidden": [
+      "per-scene or per-query parameters",
+      "benchmark-label checkpoint selection",
+      "threshold, graph, radius, or solver sweep",
+      "loading a V2 readout into V3",
+      "post-expansion primary filtering",
+      "using support-fill as semantic membership or tensor padding"
+    ]
+  },
+  "representation_contract": {
+    "feature_gauge": "l2_direction_plus_log_raw_norm_v1",
+    "geometry_dimension": 16,
+    "geometry_prefix": "indices 0:14 retain V2 semantics",
+    "support_fill_flag_index": 14,
+    "log_raw_radio_l2_norm_index": 15,
+    "base_gauge_reconstruction": "direction_times_exp_log_raw_norm_v1",
+    "reliability_attention_mode": "input_only",
+    "support_fill_reliability": "primitive_reliability_times_exp_negative_recovery_distance_over_radius_v1",
+    "minimum_tokens": 24,
+    "maximum_tokens": 256,
+    "radii_m": [0.25, 0.45, 0.7]
+  },
+  "topology_contract": {
+    "semantic_membership": "hard_gated_physical_radius_ball",
+    "tier2": "full_relation_weighted_graph_support_fill",
+    "tier3": "eligible_euclidean_support_fill",
+    "primary_anchor_eligibility": "primary_induced_graph",
+    "fallback_anchor_eligibility": "all_output_valid",
+    "minimum_must_be_satisfied": true
+  },
+  "training_contract": {
+    "source": "ScanNet RGB-D-pose only, benchmark physical spaces excluded",
+    "teacher": "frozen V2 fixed-core official C-RADIO crop targets replayed exactly",
+    "raw_norm_source": "fresh raw spatial RADIO observations before voxel-fused direction normalization",
+    "sparse_augmentation": "SHA256(seed,epoch,region_id) log-uniform token prefix from 24 to available",
+    "checkpoint_selection": "full-support scene-disjoint validation only",
+    "fixed_sparse_gate": "seed0 epoch0 diagnostic after selection",
+    "seed": 0
+  },
+  "generic_opening_gate": {
+    "all_cache_regions_minimum_satisfied": true,
+    "padding_features_geometry_reliability_exact_zero": true,
+    "train_validation_scene_overlap": 0,
+    "minimum_selection_score": 0.9487422,
+    "minimum_all_view_descriptor_cosine": 0.9394547,
+    "fixed_sparse_gate_must_pass": true
+  },
+  "benchmark_sequence": {
+    "first": "LERF3D Figurines frozen VALA direct3D threshold-0.6 sentinel",
+    "figurines_primary_floor_miou": 0.4803372,
+    "full_lerf_opening": "only after the primary floor and all generic gates pass",
+    "then": ["LERF3D full4", "SPIn9 strict", "NVOS exact"],
+    "fixed_protocols_only": true
+  },
+  "failure_actions": {
+    "generic_gate_failure": "do not open benchmark; diagnose representation/training only",
+    "figurines_failure": "do not open full4 and do not tune the scene; decompose base score calibration and carrier/readout distribution",
+    "success": "freeze the exact field/readout/contract hashes before other benchmark evaluation"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_k16_decoupled_prototype_anchor_full8_v1",
+  "status": "registered after dev2 gate and before opening heldout-six outcomes",
+  "source_preregistration": "paper/artifacts/nvos_k16_decoupled_prototype_anchor_dev2_preregistration_20260804.json",
+  "source_dev_result": "paper/artifacts/nvos_k16_decoupled_prototype_anchor_dev2_results_20260804.json",
+  "heldout_scenes": ["flower", "fortress", "horns_center", "leaves", "orchids", "trex"],
+  "candidate": {
+    "prototype_count": 16,
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "winner_take_all",
+    "registered_observation_fusion": "hard_seed_anchor_only_probability",
+    "hard_seed_threshold": 0.2,
+    "final_readout": "unary_prior",
+    "target_rgb": false,
+    "scene_specific_parameters": false
+  },
+  "comparison": "Reuse the already completed and numerically revalidated K16 winner-take-all control reports; candidate is the only new heldout-six run.",
+  "gate": {
+    "primary": "candidate full8 macro exceeds 0.7249680053",
+    "secondary": "candidate heldout6 macro is no worse than the K16 control heldout6 macro by more than 0.005",
+    "reporting": "report all scene and stage outcomes regardless of gate"
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_evaluator_modified": false,
+    "score_threshold": 0.5
+  }
+}

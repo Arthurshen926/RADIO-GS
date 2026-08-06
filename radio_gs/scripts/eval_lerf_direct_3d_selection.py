@@ -77,6 +77,9 @@ from radio_gs.evaluation.openclip_readout import (
     load_or_generate_openclip_prompt_ensemble_embeddings,
 )
 from radio_gs.querying.unified_query import cosine_relevancy_torch
+from radio_gs.interfaces.capability_cache import (
+    load_canonical_primitive_reliability,
+)
 from radio_gs.scripts.eval_lerf_grounding import (
     DEFAULT_GT_FEATURE_ROOT,
     DEFAULT_LABEL_DIR,
@@ -115,6 +118,23 @@ OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT = (
 OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT = (
     "radio_gs.lerf_multiscale_query_score_authority.v2"
 )
+OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_VERSION = 4
+OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_CONTRACT = (
+    "radio_gs.ours_lerf_direct3d_multiscale_query_scores_fp32.v4"
+)
+OURS_MULTISCALE_QUERY_SCORE_FP32_AUTHORITY_CONTRACT = (
+    "radio_gs.lerf_multiscale_query_score_fp32_authority.v4"
+)
+OURS_MULTISCALE_QUERY_PROBABILITY_CACHE_VERSION = 3
+OURS_MULTISCALE_QUERY_PROBABILITY_CACHE_CONTRACT = (
+    "radio_gs.ours_lerf_direct3d_multiscale_query_probabilities.v3"
+)
+OURS_MULTISCALE_QUERY_PROBABILITY_AUTHORITY_CONTRACT = (
+    "radio_gs.lerf_multiscale_query_probability_authority.v3"
+)
+OURS_CANONICAL_NEGATIVE_PROBABILITY_SEMANTICS = (
+    "canonical_negative_bernoulli_probability"
+)
 OURS_MULTISCALE_QUERY_SCORE_SCALE_COUNT = 3
 OURS_VALA_MASK_THRESHOLD = 0.6
 DEFAULT_RADIO_ADAPTOR_CHECKPOINT = "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar"
@@ -147,6 +167,34 @@ def tensor_sha256_float32(tensor: torch.Tensor) -> str:
     """Stable SHA256 hash for a float32 tensor payload."""
     arr = tensor.detach().cpu().float().contiguous().numpy()
     return hashlib.sha256(arr.tobytes()).hexdigest()
+
+
+def tensor_sha256_typed(tensor: torch.Tensor) -> str:
+    """Hash dtype, shape, and bytes as bound by versioned score authorities."""
+
+    value = tensor.detach().cpu()
+    if value.layout != torch.strided:
+        raise ValueError("typed tensor hashing requires a strided tensor")
+    digest = hashlib.sha256()
+    digest.update(
+        json.dumps(
+            {"dtype": str(value.dtype), "shape": list(value.shape)},
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode("ascii")
+    )
+    digest.update(b"\0")
+    if value.ndim == 0:
+        digest.update(value.contiguous().numpy().tobytes(order="C"))
+    else:
+        for start in range(0, int(value.shape[0]), 4096):
+            digest.update(
+                value[start : start + 4096]
+                .contiguous()
+                .numpy()
+                .tobytes(order="C")
+            )
+    return digest.hexdigest()
 
 
 def xyz_geometry_fingerprint(xyz: torch.Tensor) -> Dict[str, Any]:
@@ -233,6 +281,10 @@ class OursMultiscaleQueryScoreCache:
     field_checkpoint_sha256: str
     readout_checkpoint_sha256: str
     renderer_geometry_checkpoint_sha256: str
+    score_semantics: str
+    score_formula: str
+    probability_route: str
+    semantic_source_artifacts: Mapping[str, Mapping[str, str]]
 
 
 @dataclass(frozen=True)
@@ -496,12 +548,70 @@ def _validate_ours_multiscale_authority(
     field_checkpoint_sha256: str,
     readout_checkpoint_sha256: str,
     renderer_geometry_checkpoint_sha256: str,
-) -> None:
+    probability_mode: bool,
+    fp32_mode: bool,
+    query_scores: torch.Tensor,
+) -> tuple[str, str, str, Mapping[str, Mapping[str, str]]]:
     authority = payload.get("authority")
     if not isinstance(authority, Mapping):
         raise ValueError("Ours multiscale cache requires shared authority")
-    if authority.get("contract") != OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT:
+    expected_authority_contract = (
+        OURS_MULTISCALE_QUERY_PROBABILITY_AUTHORITY_CONTRACT
+        if probability_mode
+        else OURS_MULTISCALE_QUERY_SCORE_FP32_AUTHORITY_CONTRACT
+        if fp32_mode
+        else OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT
+    )
+    if authority.get("contract") != expected_authority_contract:
         raise ValueError("Ours multiscale cache shared authority contract mismatch")
+    expected_semantics = (
+        OURS_CANONICAL_NEGATIVE_PROBABILITY_SEMANTICS
+        if probability_mode
+        else "raw_independent_normalized_cosine"
+    )
+    score_semantics = str(authority.get("score_semantics", ""))
+    score_formula = str(authority.get("score_formula", ""))
+    probability_route = str(authority.get("probability_route", ""))
+    if score_semantics != expected_semantics or not score_formula:
+        raise ValueError("Ours multiscale cache score semantics differ")
+    if fp32_mode:
+        if authority.get("schema_version") != 3:
+            raise ValueError("Ours FP32 cache authority schema differs")
+        if authority.get("score_dtype") != "torch.float32":
+            raise ValueError("Ours FP32 cache authority score dtype differs")
+        if score_formula != (
+            "l2_normalize(descriptor) @ l2_normalize(text_embedding).T"
+        ):
+            raise ValueError("Ours FP32 cache score formula differs")
+        precision = authority.get("precision_contract")
+        expected_precision = {
+            "normalization_dtype": "torch.float32",
+            "matmul_dtype": "torch.float32",
+            "storage_dtype": "torch.float32",
+            "post_matmul_quantization": False,
+            "legacy_fp16_default_changed": False,
+        }
+        if precision != expected_precision:
+            raise ValueError("Ours FP32 cache precision contract differs")
+        declared_scores_sha = _require_sha256(
+            authority.get("query_scores_sha256"),
+            field="authority.query_scores_sha256",
+        )
+        observed_scores_sha = tensor_sha256_typed(query_scores)
+        if declared_scores_sha != observed_scores_sha:
+            raise ValueError("Ours FP32 cache query-score SHA256 differs")
+    if probability_mode:
+        if authority.get("value_range") != [0.0, 1.0]:
+            raise ValueError("Ours probability cache value range differs")
+        if float(authority.get("logit_scale", -1.0)) != 10.0:
+            raise ValueError("Ours probability cache logit scale differs")
+        if authority.get("generic_negative_queries") != list(NEGATIVE_PROMPTS):
+            raise ValueError("Ours probability cache generic negatives differ")
+        if probability_route not in {
+            "query_router_v1",
+            "exact_frozen_v2_slot0_control",
+        }:
+            raise ValueError("Ours probability cache route differs")
     raw_axis = authority.get("scale_axis")
     expected_axis = [
         {"id": scale_id, "value": radius, "unit": "meter"}
@@ -549,6 +659,60 @@ def _validate_ours_multiscale_authority(
             raise ValueError(
                 f"Ours multiscale cache authority source artifact {role} differs"
             )
+    if fp32_mode:
+        for role in (
+            "descriptor_cache",
+            "text_query_cache",
+            "materializer_source",
+            "legacy_fp16_materializer_source",
+        ):
+            record = sources.get(role)
+            if (
+                not isinstance(record, Mapping)
+                or not isinstance(record.get("path"), str)
+                or not record.get("path")
+                or re.fullmatch(r"[0-9a-f]{64}", str(record.get("sha256")))
+                is None
+            ):
+                raise ValueError(
+                    f"Ours FP32 cache source artifact {role} differs"
+                )
+            source_path = Path(str(record["path"]))
+            if (
+                not source_path.is_file()
+                or sha256_file(source_path) != record["sha256"]
+            ):
+                raise ValueError(
+                    f"Ours FP32 cache source artifact {role} SHA256 differs"
+                )
+    semantic_sources: dict[str, Mapping[str, str]] = {}
+    if probability_mode:
+        for role in (
+            "residual_codebook_checkpoint",
+            "query_router_checkpoint",
+            "generic_negative_text_cache",
+        ):
+            record = sources.get(role)
+            if (
+                not isinstance(record, Mapping)
+                or not isinstance(record.get("path"), str)
+                or not record.get("path")
+                or re.fullmatch(r"[0-9a-f]{64}", str(record.get("sha256")))
+                is None
+            ):
+                raise ValueError(
+                    f"Ours probability cache source artifact {role} differs"
+                )
+            source_path = Path(str(record["path"]))
+            if not source_path.is_file() or sha256_file(source_path) != record["sha256"]:
+                raise ValueError(
+                    f"Ours probability cache source artifact {role} SHA256 differs"
+                )
+            semantic_sources[role] = {
+                "path": str(source_path.resolve()),
+                "sha256": str(record["sha256"]),
+            }
+    return score_semantics, score_formula, probability_route, semantic_sources
 
 
 def validate_ours_multiscale_query_score_cache(
@@ -569,16 +733,30 @@ def validate_ours_multiscale_query_score_cache(
     if not isinstance(payload, Mapping):
         raise ValueError("Ours multiscale query-score cache must be a mapping")
     version = int(payload.get("version", -1))
-    if version != OURS_MULTISCALE_QUERY_SCORE_CACHE_VERSION:
+    if version not in {
+        OURS_MULTISCALE_QUERY_SCORE_CACHE_VERSION,
+        OURS_MULTISCALE_QUERY_PROBABILITY_CACHE_VERSION,
+        OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_VERSION,
+    }:
         raise ValueError(
             "unsupported Ours multiscale query-score cache version "
-            f"{version}; expected {OURS_MULTISCALE_QUERY_SCORE_CACHE_VERSION}"
+            f"{version}; expected raw-cosine FP16 v2, probability v3, "
+            "or raw-cosine FP32 v4"
         )
+    probability_mode = version == OURS_MULTISCALE_QUERY_PROBABILITY_CACHE_VERSION
+    fp32_mode = version == OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_VERSION
+    expected_contract = (
+        OURS_MULTISCALE_QUERY_PROBABILITY_CACHE_CONTRACT
+        if probability_mode
+        else OURS_MULTISCALE_QUERY_SCORE_FP32_CACHE_CONTRACT
+        if fp32_mode
+        else OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT
+    )
     contract = str(payload.get("contract", ""))
-    if contract != OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT:
+    if contract != expected_contract:
         raise ValueError(
             "Ours multiscale query-score cache contract mismatch: "
-            f"{contract!r} vs {OURS_MULTISCALE_QUERY_SCORE_CACHE_CONTRACT!r}"
+            f"{contract!r} vs {expected_contract!r}"
         )
 
     expected_queries = tuple(str(value) for value in expected_query_ids)
@@ -709,9 +887,20 @@ def validate_ours_multiscale_query_score_cache(
         raise ValueError(
             f"Ours multiscale cache query_scores must be [N,3,Q] {expected_shape}"
         )
+    if fp32_mode and (
+        query_scores.dtype != torch.float32 or not query_scores.is_contiguous()
+    ):
+        raise ValueError(
+            "Ours FP32 multiscale cache query_scores must be contiguous torch.float32"
+        )
     query_scores_cpu = query_scores.detach().cpu().float()
     if not bool(torch.isfinite(query_scores_cpu).all()):
         raise ValueError("Ours multiscale cache query_scores contains non-finite values")
+    if probability_mode and (
+        bool((query_scores_cpu < 0.0).any())
+        or bool((query_scores_cpu > 1.0).any())
+    ):
+        raise ValueError("Ours Bernoulli probability cache must lie in [0,1]")
 
     valid = payload.get("valid")
     if (
@@ -726,7 +915,12 @@ def validate_ours_multiscale_query_score_cache(
     if not bool(valid_cpu.any()):
         raise ValueError("Ours multiscale cache valid must keep at least one primitive")
 
-    _validate_ours_multiscale_authority(
+    (
+        score_semantics,
+        score_formula,
+        probability_route,
+        semantic_source_artifacts,
+    ) = _validate_ours_multiscale_authority(
         payload,
         query_ids=query_ids,
         scale_ids=scale_ids,
@@ -736,6 +930,9 @@ def validate_ours_multiscale_query_score_cache(
         field_checkpoint_sha256=field_checkpoint_sha256,
         readout_checkpoint_sha256=readout_checkpoint_sha256,
         renderer_geometry_checkpoint_sha256=renderer_geometry_checkpoint_sha256,
+        probability_mode=probability_mode,
+        fp32_mode=fp32_mode,
+        query_scores=query_scores,
     )
 
     return OursMultiscaleQueryScoreCache(
@@ -750,6 +947,10 @@ def validate_ours_multiscale_query_score_cache(
         renderer_geometry_checkpoint_sha256=(
             renderer_geometry_checkpoint_sha256
         ),
+        score_semantics=score_semantics,
+        score_formula=score_formula,
+        probability_route=probability_route,
+        semantic_source_artifacts=semantic_source_artifacts,
     )
 
 
@@ -2846,6 +3047,7 @@ def raster_adjoint_registered_view_features(
     alpha_map: Optional[torch.Tensor] = None,
     alpha_threshold: float = 0.0,
     channel_chunk_size: Optional[int] = None,
+    row_confidence: Optional[torch.Tensor] = None,
 ) -> Tuple[torch.Tensor, torch.Tensor]:
     """Lift rendered features to primitives with the rasterizer's color adjoint.
 
@@ -2886,6 +3088,15 @@ def raster_adjoint_registered_view_features(
     opacities = model.get_opacity().detach().to(device=device, dtype=torch.float32)
     if opacities.dim() == 2 and int(opacities.shape[1]) == 1:
         opacities = opacities[:, 0]
+    if row_confidence is not None:
+        confidence = torch.as_tensor(
+            row_confidence, device=device, dtype=opacities.dtype
+        ).reshape(-1)
+        if confidence.shape != opacities.shape:
+            raise ValueError("row_confidence must align with Gaussian rows")
+        if not bool(torch.isfinite(confidence).all()) or bool((confidence < 0).any()):
+            raise ValueError("row_confidence must be finite and non-negative")
+        opacities = opacities * confidence.clamp(max=1.0)
     Ks = renderer.scaled_intrinsics(width, height).detach().to(
         device=device, dtype=torch.float32
     ).unsqueeze(0)
@@ -3192,6 +3403,278 @@ def vala_knn_minmax_scores(
     )
 
 
+def hard_sibling_margin_query_scores(query_scores: torch.Tensor) -> torch.Tensor:
+    """Contrast every query against its strongest scene-query sibling.
+
+    The operation is scale-free and target-blind: at each primitive (and at
+    each native scale, when present), query ``q`` receives
+    ``score[q] - max(score[j], j != q)``.  It deliberately consumes the
+    benchmark query set only as a query-time interface and leaves the source
+    score cache and its independent-cosine authority unchanged.
+    """
+    values = query_scores.detach().float().cpu()
+    if values.ndim not in {2, 3}:
+        raise ValueError(
+            f"Expected query scores [N,Q] or [N,L,Q], got {tuple(values.shape)}"
+        )
+    queries = int(values.shape[-1])
+    if queries < 2:
+        raise ValueError("hard-sibling margin requires at least two queries")
+    top_values, top_indices = values.topk(k=2, dim=-1)
+    query_axis = torch.arange(queries).view(
+        *((1,) * (values.ndim - 1)), queries
+    )
+    strongest_is_self = top_indices[..., :1] == query_axis
+    competitor = torch.where(
+        strongest_is_self,
+        top_values[..., 1:2],
+        top_values[..., :1],
+    )
+    return values - competitor
+
+
+def entropy_gated_listwise_query_scores(
+    query_scores: torch.Tensor,
+) -> torch.Tensor:
+    """Suppress only confident cross-query competition.
+
+    Canonical relevancy scores are independent Bernoulli responses, so scene
+    queries must not be forced into a mutually exclusive softmax.  We use the
+    normalized response vector only to measure local ambiguity.  Let ``p`` be
+    that normalized vector, ``c=1-H(p)/log(Q)``, and ``p_max=max(p)``.  The
+    returned response is ``r_q*((1-c)+c*p_q/p_max)``.  It is exactly the input
+    for a uniform/fully ambiguous query set, preserves the winning response,
+    and softly suppresses non-winners only when the local query distribution
+    itself provides confident listwise evidence.
+    """
+
+    values = query_scores.detach().float().cpu()
+    if values.ndim not in {2, 3}:
+        raise ValueError(
+            f"Expected query scores [N,Q] or [N,L,Q], got {tuple(values.shape)}"
+        )
+    queries = int(values.shape[-1])
+    if queries < 2:
+        raise ValueError("entropy-gated listwise scoring requires multiple queries")
+    if not bool(torch.isfinite(values).all()) or bool((values < 0).any()):
+        raise ValueError(
+            "entropy-gated listwise scoring requires finite non-negative "
+            "canonical relevancy scores"
+        )
+    eps = torch.finfo(values.dtype).eps
+    normalizer = values.sum(dim=-1, keepdim=True)
+    probabilities = values / normalizer.clamp_min(eps)
+    entropy = -(
+        probabilities * probabilities.clamp_min(eps).log()
+    ).sum(dim=-1, keepdim=True)
+    confidence = (1.0 - entropy / math.log(float(queries))).clamp_(0.0, 1.0)
+    relative = probabilities / probabilities.amax(
+        dim=-1, keepdim=True
+    ).clamp_min(eps)
+    result = values * ((1.0 - confidence) + confidence * relative)
+    return torch.where(normalizer > 0, result, values)
+
+
+def reliability_tempered_query_scores(
+    query_scores: torch.Tensor,
+    confidence: torch.Tensor,
+    *,
+    valid_mask: torch.Tensor,
+) -> torch.Tensor:
+    """Temper Bernoulli relevancy toward ignorance by primitive precision.
+
+    A low-precision descriptor is not evidence for background.  For canonical
+    relevancy ``r`` and query-independent precision ``c``, the calibrated
+    response is therefore ``0.5 + c*(r-0.5)`` on capability-valid rows.  The
+    operation has no fitted strength or threshold and leaves invalid rows
+    untouched for the downstream authority mask.
+    """
+
+    values = query_scores.detach().float().cpu()
+    reliability = torch.as_tensor(confidence).float().cpu().reshape(-1)
+    valid = torch.as_tensor(valid_mask).bool().cpu().reshape(-1)
+    if values.ndim not in {2, 3}:
+        raise ValueError(
+            f"Expected query scores [N,Q] or [N,L,Q], got {tuple(values.shape)}"
+        )
+    if reliability.shape != (values.shape[0],) or valid.shape != reliability.shape:
+        raise ValueError("primitive reliability does not align with query scores")
+    if not bool(torch.isfinite(values).all()) or bool((values < 0).any()) or bool(
+        (values > 1).any()
+    ):
+        raise ValueError(
+            "reliability tempering requires finite Bernoulli relevancy scores"
+        )
+    if not bool(torch.isfinite(reliability).all()) or bool(
+        (reliability < 0).any()
+    ) or bool((reliability > 1).any()):
+        raise ValueError("primitive reliability confidence must be in [0,1]")
+    if bool((reliability[~valid] != 0).any()):
+        raise ValueError("invalid primitives must have zero reliability")
+    broadcast_shape = (values.shape[0],) + (1,) * (values.ndim - 1)
+    tempered = 0.5 + reliability.reshape(broadcast_shape) * (values - 0.5)
+    result = values.clone()
+    result[valid] = tempered[valid]
+    return result
+
+
+def reliability_logit_power_query_scores(
+    query_scores: torch.Tensor,
+    confidence: torch.Tensor,
+    *,
+    valid_mask: torch.Tensor,
+) -> torch.Tensor:
+    """Apply the Bernoulli power posterior ``logit(p')=c*logit(p)``."""
+
+    values = query_scores.detach().float().cpu()
+    reliability = torch.as_tensor(confidence).float().cpu().reshape(-1)
+    valid = torch.as_tensor(valid_mask).bool().cpu().reshape(-1)
+    if values.ndim not in {2, 3}:
+        raise ValueError(
+            f"Expected query scores [N,Q] or [N,L,Q], got {tuple(values.shape)}"
+        )
+    if reliability.shape != (values.shape[0],) or valid.shape != reliability.shape:
+        raise ValueError("primitive reliability does not align with query scores")
+    if not bool(torch.isfinite(values).all()) or bool((values < 0).any()) or bool(
+        (values > 1).any()
+    ):
+        raise ValueError(
+            "reliability logit power requires finite Bernoulli relevancy scores"
+        )
+    if not bool(torch.isfinite(reliability).all()) or bool(
+        (reliability < 0).any()
+    ) or bool((reliability > 1).any()):
+        raise ValueError("primitive reliability confidence must be in [0,1]")
+    if bool((reliability[~valid] != 0).any()):
+        raise ValueError("invalid primitives must have zero reliability")
+    eps = torch.finfo(values.dtype).eps
+    logits = torch.logit(values.clamp(eps, 1.0 - eps))
+    broadcast_shape = (values.shape[0],) + (1,) * (values.ndim - 1)
+    tempered = torch.sigmoid(reliability.reshape(broadcast_shape) * logits)
+    result = values.clone()
+    result[valid] = tempered[valid]
+    return result
+
+
+def canonical_negative_relevancy_query_scores(
+    positive_scores: torch.Tensor,
+    negative_scores: torch.Tensor,
+    *,
+    logit_scale: float,
+) -> torch.Tensor:
+    """Convert independent cosine banks to canonical binary relevancy.
+
+    This is the score-cache equivalent of ``cosine_relevancy_torch``: every
+    positive query competes with the strongest generic canonical negative,
+    never with another positive scene query.
+    """
+    positives = positive_scores.detach().float().cpu()
+    negatives = negative_scores.detach().float().cpu()
+    if positives.ndim not in {2, 3} or negatives.ndim != positives.ndim:
+        raise ValueError("positive and negative scores must both be [N,Q] or [N,L,Q]")
+    if positives.shape[:-1] != negatives.shape[:-1]:
+        raise ValueError("positive and negative score prefix dimensions differ")
+    if int(positives.shape[-1]) == 0 or int(negatives.shape[-1]) == 0:
+        raise ValueError("positive and negative score banks must be non-empty")
+    if not math.isfinite(float(logit_scale)) or float(logit_scale) <= 0.0:
+        raise ValueError("logit_scale must be finite and positive")
+    hardest_negative = negatives.amax(dim=-1, keepdim=True)
+    return torch.sigmoid((positives - hardest_negative) * float(logit_scale))
+
+
+def load_directional_mixture_weights(
+    path: Path,
+    *,
+    expected_rows: int,
+    expected_xyz_sha256: str,
+    expected_renderer_geometry_checkpoint_sha256: str,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, object]]:
+    """Load a query-free two-mode observation-frequency carrier."""
+
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    if not isinstance(payload, Mapping):
+        raise ValueError("directional mixture cache must be a mapping")
+    if payload.get("schema_version") != 1 or payload.get("contract") != (
+        "weighted_spherical_two_prototype_v1"
+    ):
+        raise ValueError("directional mixture cache contract differs")
+    geometry = payload.get("geometry_fingerprint")
+    if not isinstance(geometry, Mapping):
+        raise ValueError("directional mixture cache lacks geometry fingerprint")
+    if int(geometry.get("num_gaussians", -1)) != int(expected_rows):
+        raise ValueError("directional mixture cache Gaussian count differs")
+    if str(geometry.get("xyz_sha256", "")) != str(expected_xyz_sha256):
+        raise ValueError("directional mixture cache xyz SHA256 differs")
+    metadata = payload.get("metadata")
+    if not isinstance(metadata, Mapping):
+        raise ValueError("directional mixture cache lacks metadata")
+    if str(metadata.get("geometry_checkpoint_sha256", "")) != str(
+        expected_renderer_geometry_checkpoint_sha256
+    ):
+        raise ValueError("directional mixture renderer geometry SHA256 differs")
+    rows = torch.as_tensor(payload.get("global_rows")).long().reshape(-1)
+    weights = torch.as_tensor(payload.get("mixture_weight")).float()
+    if weights.shape != (rows.numel(), 2):
+        raise ValueError("directional mixture weights must align as [M,2]")
+    if rows.numel() == 0 or int(rows.min()) < 0 or int(rows.max()) >= expected_rows:
+        raise ValueError("directional mixture global rows are empty or out of range")
+    if int(torch.unique(rows).numel()) != int(rows.numel()):
+        raise ValueError("directional mixture global rows contain duplicates")
+    if not bool(torch.isfinite(weights).all()) or bool((weights < 0).any()):
+        raise ValueError("directional mixture weights must be finite and non-negative")
+    row_sums = weights.sum(dim=1)
+    if not torch.allclose(row_sums, torch.ones_like(row_sums), atol=2e-3, rtol=0.0):
+        raise ValueError("directional mixture weights must sum to one")
+    weights = weights / row_sums[:, None].clamp_min(1e-8)
+    return rows, weights, {
+        "path": str(path.resolve()),
+        "sha256": sha256_file(path),
+        "contract": str(payload["contract"]),
+        "directional_rows": int(rows.numel()),
+        "fallback_rows": int(expected_rows - rows.numel()),
+        "mixing": "query_independent_observation_frequency",
+    }
+
+
+def directional_probability_mixture_query_scores(
+    primary_positive: torch.Tensor,
+    primary_negative: torch.Tensor,
+    secondary_positive: torch.Tensor,
+    secondary_negative: torch.Tensor,
+    *,
+    mixture_rows: torch.Tensor,
+    mixture_weights: torch.Tensor,
+    logit_scale: float,
+) -> torch.Tensor:
+    """Marginalize calibrated mode probabilities by view-frequency mass."""
+
+    primary = canonical_negative_relevancy_query_scores(
+        primary_positive,
+        primary_negative,
+        logit_scale=logit_scale,
+    )
+    secondary = canonical_negative_relevancy_query_scores(
+        secondary_positive,
+        secondary_negative,
+        logit_scale=logit_scale,
+    )
+    if primary.shape != secondary.shape:
+        raise ValueError("directional mode relevancy shapes differ")
+    rows = torch.as_tensor(mixture_rows).long().reshape(-1)
+    weights = torch.as_tensor(mixture_weights).float()
+    if weights.shape != (rows.numel(), 2):
+        raise ValueError("directional mixture weights must be [M,2]")
+    if rows.numel() and (int(rows.min()) < 0 or int(rows.max()) >= primary.shape[0]):
+        raise ValueError("directional mixture rows are out of score range")
+    result = primary.clone()
+    if rows.numel():
+        result[rows] = (
+            weights[:, 0, None, None] * primary[rows]
+            + weights[:, 1, None, None] * secondary[rows]
+        )
+    return result
+
+
 def vala_multiscale_knn_peak_select_scores(
     query_scores: torch.Tensor,
     xyz: torch.Tensor,
@@ -3199,6 +3682,8 @@ def vala_multiscale_knn_peak_select_scores(
     k: int = 10,
     chunk_size: int = 65536,
     valid_mask: Optional[torch.Tensor] = None,
+    query_contrast: str = "none",
+    scale_fusion: str = "peak_select",
 ) -> ValaMultiscaleQueryReadout:
     """Apply frozen VALA three-level selection to Ours primitive scores.
 
@@ -3209,6 +3694,12 @@ def vala_multiscale_knn_peak_select_scores(
     values = query_scores.detach().float().cpu()
     if values.ndim != 3 or values.shape[1] != 3:
         raise ValueError(f"Expected multiscale query scores [N,3,Q], got {tuple(values.shape)}")
+    if query_contrast == "hard_sibling_margin":
+        values = hard_sibling_margin_query_scores(values)
+    elif query_contrast == "entropy_gated_listwise":
+        values = entropy_gated_listwise_query_scores(values)
+    elif query_contrast != "none":
+        raise ValueError(f"Unsupported query_contrast: {query_contrast}")
     count, levels, queries = (int(value) for value in values.shape)
     if queries == 0:
         raise ValueError("Multiscale query scores must contain at least one query")
@@ -3229,6 +3720,18 @@ def vala_multiscale_knn_peak_select_scores(
         valid_mask=valid,
     ).reshape(count, levels, queries)
     raw_smoothed_peaks = smoothed[valid].amax(dim=0)
+    if scale_fusion == "mean":
+        selected_scores = vala_minmax_remap_scores(
+            smoothed.mean(dim=1),
+            valid_mask=valid,
+        )
+        return ValaMultiscaleQueryReadout(
+            scores=selected_scores,
+            selected_scale_indices=torch.full((queries,), -1, dtype=torch.long),
+            raw_smoothed_peaks=raw_smoothed_peaks,
+        )
+    if scale_fusion != "peak_select":
+        raise ValueError(f"Unsupported scale_fusion: {scale_fusion}")
     selected_scale_indices = raw_smoothed_peaks.argmax(dim=0)
 
     remapped = vala_minmax_remap_scores(
@@ -6631,6 +7134,14 @@ def evaluate_scene(
     external_query_feature_cache_path: Optional[str],
     external_query_score_cache_path: Optional[str],
     ours_multiscale_query_score_cache_path: Optional[str],
+    ours_multiscale_negative_score_cache_path: Optional[str],
+    ours_secondary_multiscale_query_score_cache_path: Optional[str],
+    ours_secondary_multiscale_negative_score_cache_path: Optional[str],
+    ours_directional_mixture_cache_path: Optional[str],
+    ours_primitive_reliability_cache_path: Optional[str],
+    ours_primitive_reliability_tempering: str,
+    ours_query_contrast: str,
+    ours_scale_fusion: str,
     prompt_templates: List[str],
     selection_specs: List[SelectionSpec],
     score_source: str,
@@ -7239,12 +7750,225 @@ def evaluate_scene(
                 checkpoint_path
             ),
         )
+        readout_input_scores = cache.query_scores
+        probability_cache = (
+            cache.score_semantics
+            == OURS_CANONICAL_NEGATIVE_PROBABILITY_SEMANTICS
+        )
+        if probability_cache:
+            incompatible_probability_options = {
+                "canonical_negative_cache": (
+                    ours_multiscale_negative_score_cache_path
+                ),
+                "secondary_cache": (
+                    ours_secondary_multiscale_query_score_cache_path
+                ),
+                "secondary_negative_cache": (
+                    ours_secondary_multiscale_negative_score_cache_path
+                ),
+                "directional_mixture": ours_directional_mixture_cache_path,
+                "primitive_reliability": ours_primitive_reliability_cache_path,
+            }
+            enabled = [
+                name
+                for name, value in incompatible_probability_options.items()
+                if value
+            ]
+            if enabled:
+                raise ValueError(
+                    "precomputed Bernoulli probability cache cannot be "
+                    "recalibrated or mixed with: " + ", ".join(enabled)
+                )
+            if ours_query_contrast != "none":
+                raise ValueError(
+                    "precomputed Bernoulli probability cache requires "
+                    "ours_query_contrast='none'"
+                )
+        negative_cache: Optional[OursMultiscaleQueryScoreCache] = None
+        mixture_info: Optional[dict[str, object]] = None
+        reliability_info: Optional[dict[str, object]] = None
+        if ours_multiscale_negative_score_cache_path:
+            negative_path = Path(ours_multiscale_negative_score_cache_path)
+            print(f"  loading Ours canonical-negative scores: {negative_path}")
+            negative_cache = load_ours_multiscale_query_score_cache(
+                negative_path,
+                expected_xyz=model.get_xyz().detach().cpu(),
+                expected_query_ids=NEGATIVE_PROMPTS,
+                expected_renderer_geometry_checkpoint_sha256=sha256_file(
+                    checkpoint_path
+                ),
+            )
+            if (
+                cache.score_semantics != "raw_independent_normalized_cosine"
+                or negative_cache.score_semantics
+                != "raw_independent_normalized_cosine"
+            ):
+                raise ValueError(
+                    "canonical-negative conversion requires raw-cosine caches"
+                )
+            paired_fields = (
+                "valid",
+                "scale_ids",
+                "scale_radii_m",
+                "xyz_sha256",
+                "field_checkpoint_sha256",
+                "readout_checkpoint_sha256",
+                "renderer_geometry_checkpoint_sha256",
+            )
+            for field in paired_fields:
+                positive_value = getattr(cache, field)
+                negative_value = getattr(negative_cache, field)
+                equal = (
+                    torch.equal(positive_value, negative_value)
+                    if isinstance(positive_value, torch.Tensor)
+                    else positive_value == negative_value
+                )
+                if not bool(equal):
+                    raise ValueError(
+                        f"Ours positive/canonical-negative cache {field} differs"
+                    )
+            if ours_secondary_multiscale_query_score_cache_path:
+                secondary_cache = load_ours_multiscale_query_score_cache(
+                    Path(ours_secondary_multiscale_query_score_cache_path),
+                    expected_xyz=model.get_xyz().detach().cpu(),
+                    expected_query_ids=scene_categories,
+                    expected_renderer_geometry_checkpoint_sha256=sha256_file(
+                        checkpoint_path
+                    ),
+                )
+                secondary_negative_cache = load_ours_multiscale_query_score_cache(
+                    Path(ours_secondary_multiscale_negative_score_cache_path),
+                    expected_xyz=model.get_xyz().detach().cpu(),
+                    expected_query_ids=NEGATIVE_PROMPTS,
+                    expected_renderer_geometry_checkpoint_sha256=sha256_file(
+                        checkpoint_path
+                    ),
+                )
+                for secondary_name, secondary_value in (
+                    ("valid", secondary_cache.valid),
+                    ("negative valid", secondary_negative_cache.valid),
+                ):
+                    if not torch.equal(cache.valid, secondary_value):
+                        raise ValueError(
+                            f"Ours directional {secondary_name} mask differs"
+                        )
+                for secondary_name, secondary_value in (
+                    ("scale_ids", secondary_cache.scale_ids),
+                    ("negative scale_ids", secondary_negative_cache.scale_ids),
+                    ("scale_radii_m", secondary_cache.scale_radii_m),
+                    ("negative scale_radii_m", secondary_negative_cache.scale_radii_m),
+                    ("xyz_sha256", secondary_cache.xyz_sha256),
+                    ("negative xyz_sha256", secondary_negative_cache.xyz_sha256),
+                    (
+                        "readout_checkpoint_sha256",
+                        secondary_cache.readout_checkpoint_sha256,
+                    ),
+                    (
+                        "negative readout_checkpoint_sha256",
+                        secondary_negative_cache.readout_checkpoint_sha256,
+                    ),
+                    (
+                        "renderer_geometry_checkpoint_sha256",
+                        secondary_cache.renderer_geometry_checkpoint_sha256,
+                    ),
+                    (
+                        "negative renderer_geometry_checkpoint_sha256",
+                        secondary_negative_cache.renderer_geometry_checkpoint_sha256,
+                    ),
+                ):
+                    primary_value = (
+                        cache.scale_ids
+                        if "scale_ids" in secondary_name
+                        else cache.scale_radii_m
+                        if "scale_radii_m" in secondary_name
+                        else cache.xyz_sha256
+                        if "xyz_sha256" in secondary_name
+                        else cache.readout_checkpoint_sha256
+                        if "readout_checkpoint_sha256" in secondary_name
+                        else cache.renderer_geometry_checkpoint_sha256
+                    )
+                    if primary_value != secondary_value:
+                        raise ValueError(
+                            f"Ours directional {secondary_name} differs"
+                        )
+                mixture_rows, mixture_weights, mixture_info = (
+                    load_directional_mixture_weights(
+                        Path(ours_directional_mixture_cache_path),
+                        expected_rows=int(cache.valid.numel()),
+                        expected_xyz_sha256=cache.xyz_sha256,
+                        expected_renderer_geometry_checkpoint_sha256=(
+                            cache.renderer_geometry_checkpoint_sha256
+                        ),
+                    )
+                )
+                readout_input_scores = directional_probability_mixture_query_scores(
+                    cache.query_scores,
+                    negative_cache.query_scores,
+                    secondary_cache.query_scores,
+                    secondary_negative_cache.query_scores,
+                    mixture_rows=mixture_rows,
+                    mixture_weights=mixture_weights,
+                    logit_scale=softmax_temperature,
+                )
+            else:
+                mixture_info = None
+                readout_input_scores = canonical_negative_relevancy_query_scores(
+                    cache.query_scores,
+                    negative_cache.query_scores,
+                    logit_scale=softmax_temperature,
+                )
+            if ours_primitive_reliability_cache_path:
+                reliability_path = Path(ours_primitive_reliability_cache_path)
+                primitive_reliability = load_canonical_primitive_reliability(
+                    reliability_path,
+                    expected_xyz=model.get_xyz().detach().cpu(),
+                    expected_valid=cache.valid,
+                    expected_field_checkpoint_sha256=(
+                        cache.field_checkpoint_sha256
+                    ),
+                )
+                if ours_primitive_reliability_tempering == "linear":
+                    readout_input_scores = reliability_tempered_query_scores(
+                        readout_input_scores,
+                        primitive_reliability.confidence,
+                        valid_mask=cache.valid,
+                    )
+                    reliability_formula = (
+                        "0.5 + reliability * (relevancy - 0.5)"
+                    )
+                elif ours_primitive_reliability_tempering == "logit_power":
+                    readout_input_scores = reliability_logit_power_query_scores(
+                        readout_input_scores,
+                        primitive_reliability.confidence,
+                        valid_mask=cache.valid,
+                    )
+                    reliability_formula = (
+                        "sigmoid(reliability * logit(relevancy))"
+                    )
+                else:
+                    raise ValueError(
+                        "unsupported primitive reliability tempering: "
+                        f"{ours_primitive_reliability_tempering}"
+                    )
+                valid_confidence = primitive_reliability.valid_confidence()
+                reliability_info = {
+                    "path": str(reliability_path.resolve()),
+                    "sha256": sha256_file(reliability_path),
+                    "source": primitive_reliability.metadata.get("source"),
+                    "formula": reliability_formula,
+                    "tempering": ours_primitive_reliability_tempering,
+                    "valid_mean": float(valid_confidence.mean()),
+                    "valid_min": float(valid_confidence.min()),
+                    "valid_max": float(valid_confidence.max()),
+                }
         readout = vala_multiscale_knn_peak_select_scores(
-            cache.query_scores,
+            readout_input_scores,
             model.get_xyz().detach().cpu(),
             k=vala_knn_k,
             chunk_size=vala_knn_chunk_size,
             valid_mask=cache.valid,
+            query_contrast=ours_query_contrast,
+            scale_fusion=ours_scale_fusion,
         )
         scores = readout.scores
         score_valid_mask = cache.valid
@@ -7253,7 +7977,8 @@ def evaluate_scene(
             int(value) for value in readout.selected_scale_indices.tolist()
         ]
         selected_scale_ids = [
-            cache.scale_ids[index] for index in selected_scale_indices
+            cache.scale_ids[index] if index >= 0 else "equal_mean"
+            for index in selected_scale_indices
         ]
         registration_stats = {
             "source": "ours_multiscale_query_score_cache",
@@ -7264,10 +7989,56 @@ def evaluate_scene(
             "feature_level_count": 3,
             "scale_ids": list(cache.scale_ids),
             "scale_radii_m": list(cache.scale_radii_m),
-            "level_selection": "highest_raw_knn_smoothed_peak_per_query",
+            "level_selection": (
+                "highest_raw_knn_smoothed_peak_per_query"
+                if ours_scale_fusion == "peak_select"
+                else "equal_mean_after_independent_knn_smoothing"
+            ),
+            "scale_fusion": ours_scale_fusion,
             "selected_scale_indices": selected_scale_indices,
             "selected_scale_ids": selected_scale_ids,
             "raw_smoothed_peaks": readout.raw_smoothed_peaks.tolist(),
+            "query_contrast": ours_query_contrast,
+            "query_contrast_formula": (
+                "score_q - max(score_j for j != q)"
+                if ours_query_contrast == "hard_sibling_margin"
+                else (
+                    "r_q*((1-c)+c*p_q/max(p)); p=r/sum(r), "
+                    "c=1-H(p)/log(Q)"
+                    if ours_query_contrast == "entropy_gated_listwise"
+                    else "identity"
+                )
+            ),
+            "score_semantics": cache.score_semantics,
+            "probability_route": cache.probability_route,
+            "semantic_source_artifacts": dict(
+                cache.semantic_source_artifacts
+            ),
+            "canonical_negative_relevancy": bool(
+                probability_cache or negative_cache is not None
+            ),
+            "canonical_negative_score_cache": (
+                str(Path(ours_multiscale_negative_score_cache_path))
+                if negative_cache is not None
+                else ""
+            ),
+            "canonical_negative_query_ids": (
+                list(negative_cache.query_ids) if negative_cache is not None else []
+            ),
+            "canonical_negative_logit_scale": (
+                float(softmax_temperature)
+                if probability_cache or negative_cache is not None
+                else None
+            ),
+            "canonical_negative_formula": (
+                cache.score_formula
+                if probability_cache
+                else "sigmoid(logit_scale * (positive_cosine - max_canonical_negative_cosine))"
+                if negative_cache is not None
+                else ""
+            ),
+            "directional_probability_mixture": mixture_info,
+            "primitive_reliability_tempering": reliability_info,
             "xyz_sha256": cache.xyz_sha256,
             "field_checkpoint_sha256": cache.field_checkpoint_sha256,
             "readout_checkpoint_sha256": cache.readout_checkpoint_sha256,
@@ -7828,6 +8599,61 @@ def main() -> None:
             "query_ids/scale_ids, row-aligned xyz fingerprint, and geometry checkpoint SHA"
         ),
     )
+    parser.add_argument(
+        "--ours_query_contrast",
+        choices=["none", "hard_sibling_margin", "entropy_gated_listwise"],
+        default="none",
+        help=(
+            "Optional target-blind query-set contrast applied to Ours raw "
+            "multiscale scores before the otherwise frozen VALA readout"
+        ),
+    )
+    parser.add_argument(
+        "--ours_multiscale_negative_score_cache",
+        default="",
+        help=(
+            "Optional immutable raw-cosine cache for the frozen canonical "
+            "negative prompts, paired row-for-row with Ours positive scores"
+        ),
+    )
+    parser.add_argument(
+        "--ours_secondary_multiscale_query_score_cache",
+        default="",
+        help="Second query-free directional mode raw-cosine score cache.",
+    )
+    parser.add_argument(
+        "--ours_secondary_multiscale_negative_score_cache",
+        default="",
+        help="Canonical-negative raw-cosine cache paired with the second mode.",
+    )
+    parser.add_argument(
+        "--ours_directional_mixture_cache",
+        default="",
+        help="Query-free per-primitive two-mode observation-frequency cache.",
+    )
+    parser.add_argument(
+        "--ours_primitive_reliability_cache",
+        default="",
+        help=(
+            "Optional query-independent canonical primitive reliability used "
+            "to temper Bernoulli relevancy toward 0.5."
+        ),
+    )
+    parser.add_argument(
+        "--ours_primitive_reliability_tempering",
+        choices=["linear", "logit_power"],
+        default="linear",
+        help="Parameter-free Bernoulli tempering rule for primitive reliability.",
+    )
+    parser.add_argument(
+        "--ours_scale_fusion",
+        choices=["peak_select", "mean"],
+        default="peak_select",
+        help=(
+            "Ours three-scale reduction after independent frozen kNN smoothing; "
+            "mean is a parameter-free cross-scale consensus candidate"
+        ),
+    )
     parser.add_argument("--prompt_templates", default=DEFAULT_PROMPT_TEMPLATES, help="Prompt templates separated by '|'; use {query}")
     parser.add_argument(
         "--selection_mode",
@@ -8148,6 +8974,65 @@ def main() -> None:
                 "--ours_multiscale_query_score_cache cannot be combined with "
                 + ", ".join(conflicting)
             )
+        if (
+            args.ours_multiscale_negative_score_cache
+            and args.ours_query_contrast == "hard_sibling_margin"
+        ):
+            parser.error(
+                "canonical-negative relevancy cannot be combined with "
+                "hard-sibling margin"
+            )
+        if (
+            args.ours_query_contrast == "entropy_gated_listwise"
+            and not args.ours_multiscale_negative_score_cache
+        ):
+            parser.error(
+                "entropy-gated listwise scoring requires the canonical-negative "
+                "relevancy cache"
+            )
+        directional_inputs = (
+            args.ours_secondary_multiscale_query_score_cache,
+            args.ours_secondary_multiscale_negative_score_cache,
+            args.ours_directional_mixture_cache,
+        )
+        if any(directional_inputs) and not all(directional_inputs):
+            parser.error(
+                "directional probability mixture requires both secondary "
+                "score caches and --ours_directional_mixture_cache"
+            )
+        if all(directional_inputs) and not args.ours_multiscale_negative_score_cache:
+            parser.error(
+                "directional probability mixture requires the primary "
+                "canonical-negative score cache"
+            )
+        if (
+            args.ours_primitive_reliability_cache
+            and not args.ours_multiscale_negative_score_cache
+        ):
+            parser.error(
+                "primitive reliability tempering requires the canonical-negative "
+                "relevancy cache"
+            )
+        if (
+            not args.ours_primitive_reliability_cache
+            and args.ours_primitive_reliability_tempering != "linear"
+        ):
+            parser.error(
+                "non-default primitive reliability tempering requires its cache"
+            )
+    elif args.ours_query_contrast != "none":
+        parser.error(
+            "--ours_query_contrast requires --ours_multiscale_query_score_cache"
+        )
+    elif args.ours_multiscale_negative_score_cache:
+        parser.error(
+            "--ours_multiscale_negative_score_cache requires "
+            "--ours_multiscale_query_score_cache"
+        )
+    elif args.ours_scale_fusion != "peak_select":
+        parser.error(
+            "--ours_scale_fusion requires --ours_multiscale_query_score_cache"
+        )
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
     args.label_dir = resolve_lerf_label_dir(args.label_dir)
@@ -8270,6 +9155,26 @@ def main() -> None:
         ours_multiscale_query_score_cache_path=(
             args.ours_multiscale_query_score_cache or None
         ),
+        ours_multiscale_negative_score_cache_path=(
+            args.ours_multiscale_negative_score_cache or None
+        ),
+        ours_secondary_multiscale_query_score_cache_path=(
+            args.ours_secondary_multiscale_query_score_cache or None
+        ),
+        ours_secondary_multiscale_negative_score_cache_path=(
+            args.ours_secondary_multiscale_negative_score_cache or None
+        ),
+        ours_directional_mixture_cache_path=(
+            args.ours_directional_mixture_cache or None
+        ),
+        ours_primitive_reliability_cache_path=(
+            args.ours_primitive_reliability_cache or None
+        ),
+        ours_primitive_reliability_tempering=(
+            args.ours_primitive_reliability_tempering
+        ),
+        ours_query_contrast=args.ours_query_contrast,
+        ours_scale_fusion=args.ours_scale_fusion,
         prompt_templates=prompt_templates,
         selection_specs=specs,
         score_source=args.score_source,
@@ -8415,7 +9320,11 @@ def main() -> None:
             "protocol_preset": args.protocol_preset,
             "feature_level_count": 3 if args.ours_multiscale_query_score_cache else 1,
             "level_selection": (
-                "highest_raw_knn_smoothed_peak_per_query"
+                (
+                    "highest_raw_knn_smoothed_peak_per_query"
+                    if args.ours_scale_fusion == "peak_select"
+                    else "equal_mean_after_independent_knn_smoothing"
+                )
                 if args.ours_multiscale_query_score_cache
                 else "not_applicable_single_level_representation"
             ),
@@ -8458,6 +9367,32 @@ def main() -> None:
             "score_cache": args.score_cache,
             "registered_feature_cache": args.registered_feature_cache,
             "ours_multiscale_query_score_cache": args.ours_multiscale_query_score_cache,
+            "ours_multiscale_negative_score_cache": (
+                args.ours_multiscale_negative_score_cache
+            ),
+            "ours_secondary_multiscale_query_score_cache": (
+                args.ours_secondary_multiscale_query_score_cache
+            ),
+            "ours_secondary_multiscale_negative_score_cache": (
+                args.ours_secondary_multiscale_negative_score_cache
+            ),
+            "ours_directional_mixture_cache": (
+                args.ours_directional_mixture_cache
+            ),
+            "directional_probability_mixture": scene_report.get(
+                "registration", {}
+            ).get("directional_probability_mixture"),
+            "ours_primitive_reliability_cache": (
+                args.ours_primitive_reliability_cache
+            ),
+            "ours_primitive_reliability_tempering": (
+                args.ours_primitive_reliability_tempering
+            ),
+            "primitive_reliability_tempering": scene_report.get(
+                "registration", {}
+            ).get("primitive_reliability_tempering"),
+            "ours_query_contrast": args.ours_query_contrast,
+            "ours_scale_fusion": args.ours_scale_fusion,
             "compact_feature_key": args.compact_feature_key,
             "direct_readout_mode": args.direct_readout_mode,
             "direct_readout_k": args.direct_readout_k,
@@ -8649,6 +9584,35 @@ def main() -> None:
             "ours_multiscale_query_score_cache_sha256": (
                 sha256_file_if_exists(args.ours_multiscale_query_score_cache)
                 if args.ours_multiscale_query_score_cache
+                else ""
+            ),
+            "ours_multiscale_negative_score_cache_sha256": (
+                sha256_file_if_exists(args.ours_multiscale_negative_score_cache)
+                if args.ours_multiscale_negative_score_cache
+                else ""
+            ),
+            "ours_secondary_multiscale_query_score_cache_sha256": (
+                sha256_file_if_exists(
+                    args.ours_secondary_multiscale_query_score_cache
+                )
+                if args.ours_secondary_multiscale_query_score_cache
+                else ""
+            ),
+            "ours_secondary_multiscale_negative_score_cache_sha256": (
+                sha256_file_if_exists(
+                    args.ours_secondary_multiscale_negative_score_cache
+                )
+                if args.ours_secondary_multiscale_negative_score_cache
+                else ""
+            ),
+            "ours_directional_mixture_cache_sha256": (
+                sha256_file_if_exists(args.ours_directional_mixture_cache)
+                if args.ours_directional_mixture_cache
+                else ""
+            ),
+            "ours_primitive_reliability_cache_sha256": (
+                sha256_file_if_exists(args.ours_primitive_reliability_cache)
+                if args.ours_primitive_reliability_cache
                 else ""
             ),
             "summary_head_weights_sha256": sha256_file_if_exists(args.summary_head_weights),

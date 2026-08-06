@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_target_blind_text_response_distillation_v1",
+  "status": "registered_after_failed_figurines_sentinel_and_before_candidate_implementation_or_training",
+  "failed_sentinel": {
+    "scene": "figurines",
+    "protocol": "frozen_vala_repo_3d_canonical_negative",
+    "result_sha256": "7475112fd7c96ab9ee5e297f2624fd36f70f62ae7c1e8f278733eeb8c81c6899",
+    "miou": 0.1944,
+    "evaluated_pairs": 56,
+    "promotion_threshold_miou": 0.4803371775
+  },
+  "query_free_diagnosis": {
+    "validation_rows": 96,
+    "validation_scenes": 8,
+    "held_out_text_queries": 101,
+    "v3_canonical_descriptor_cosine": 0.9425745606422424,
+    "matched_v2_canonical_descriptor_cosine": 0.9429590106010437,
+    "v3_response_profile_cosine_p05": 0.3896467089653015,
+    "matched_v2_response_profile_cosine_p05": 0.6719610691070557,
+    "v3_support_top1_agreement": 0.23514851927757263,
+    "matched_v2_support_top1_agreement": 0.2599009871482849,
+    "finding": "Mean descriptor cosine is non-diagnostic for text capability: V3 preserves the average descriptor but loses held-out text-manifold response tails and scene-level support ordering."
+  },
+  "single_change": {
+    "candidate": "add frozen target-blind text-response distillation, within-scene listwise ranking, and teacher top-vs-runner-up gap preservation to the existing single-summary schema-7 V3 readout",
+    "unchanged": [
+      "fresh paired V3 train and validation caches",
+      "schema-7 model architecture and gauge-explicit raw base",
+      "field, MPR, support graph, region contract, official summary head, and optimizer defaults",
+      "completion-row weight 1.0 and no sparse-support augmentation",
+      "frozen LERF evaluator, scales, threshold, query prompts, canonical negatives, and renderer"
+    ],
+    "fit_text_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+      "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+      "queries": 806
+    },
+    "validation_text_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+      "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+      "queries": 101
+    },
+    "vocabulary_contract": {
+      "fit_dev_query_disjoint": true,
+      "benchmark_vocabulary_opened_for_construction": false,
+      "benchmark_labels_or_metrics_used_for_training": false
+    }
+  },
+  "training_rule": {
+    "main_loss": "existing token cosine plus all-view descriptor cosine plus relation loss",
+    "response_teacher": "temperature-0.05 log-mean-exp of frozen official per-view descriptor responses",
+    "response_student": "single query-invariant descriptor cosine response",
+    "auxiliary_loss": "equal mean of response SmoothL1, scene-listwise KL, and teacher top-runner-up gap SmoothL1",
+    "warmup_epochs": 3,
+    "auxiliary_gradient_ratio": 0.25,
+    "weight_calibration": "one deterministic gradient-norm calibration after warmup; no scalar sweep",
+    "checkpoint_feasibility_floor": 0.9255443984,
+    "floor_source": "previous no-sparse full-support selection 0.9275443984 minus the pre-existing 0.002 matched generic noninferiority margin",
+    "checkpoint_selection": "among epochs meeting the base floor, lexicographically maximize held-out support top1, ranking Spearman p05, response-profile cosine p05, base selection, then minimize response SmoothL1"
+  },
+  "generic_gate": {
+    "base_selection_score_min": 0.9255443984,
+    "response_profile_cosine_p05_min": 0.6719610691070557,
+    "support_top1_agreement_min": 0.2599009871482849,
+    "ranking_spearman_p05_delta_min": -0.002,
+    "text_response_smooth_l1": "strictly lower than the current V3 8.909132884582505e-05",
+    "completion_nonregression_required": true
+  },
+  "benchmark_rule": {
+    "first_sentinel": "rerun Figurines only after all generic gates pass",
+    "figurines_promotion_threshold_miou": 0.4803371775,
+    "on_success": "expand unchanged to LERF full4, then frozen SPIn9 and NVOS",
+    "on_failure": "reject this objective-only branch and move to region hierarchy or distributional carrier; do not tune benchmark parameters"
+  },
+  "forbidden": [
+    "benchmark vocabulary in either text bank",
+    "threshold, prompt, graph, radius, scene, or query sweeps",
+    "checkpoint or seed selection on Figurines",
+    "changing the field or renderer in this experiment"
+  ],
+  "source_sha256_at_registration": {
+    "train_surface_region_summary_readout.py": "467c49cc121ba5472498bb67f96b97821dcff4f1268d4d8f4a00766b5add05cb",
+    "surface_region_codebook_loss.py": "3bd8e140fc0105c6205274b78c47be6829c4198f46149047fc28ecb7e795b9c6"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_fortress_source_footprint_oof_v1",
+  "registered_at": "2026-08-06T07:22:00+08:00",
+  "status": "registered_after_query_free_footprint_authority_and_before_source_mask_pixel_access",
+  "question": "Under complete query-free source-raster footprint holdout, should the frozen Fortress compiler retain its unary or use the fixed surface-safe propagation before the K201 matched interface?",
+  "parent_source_chain": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_fortress_source_chain_preregistration_20260806.json",
+    "sha256": "b99bc96639974423e2867d9ddeee5a42065f779dc5e5a7aa916a3e2467815421"
+  },
+  "inputs": {
+    "benchmark_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "scene_id": "fortress",
+    "source_mask_hash_only": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/SPIn-NeRF/multiview_annotations/fortress (llff)/image000.png",
+      "sha256": "680ba842af40f979e6291cc45c6fb1726a800832486fec59ce0114fb33f472d5",
+      "pixels_opened_at_registration": false
+    },
+    "carrier": {
+      "config_sha256": "ae7239aa1ce5c5db2dd297e4a505a3cc3d178aca16e976f66b4dede5774659db",
+      "checkpoint_sha256": "9b3ca20e39fb205f5b067a8d0eef767c6749f879df8686b98ca86fa5d4b54b93",
+      "camera_map_sha256": "5693d26c2a02f8d864eff3a683c80bf56fd5ddf402993a49730e67b439918ea5",
+      "all_three_caller_hash_verified_before_each_fold": true
+    },
+    "factorized_field_sha256": "d1df2085874c00d34c41e69a82a2461aa94db4563d5b8d1db4f551c9f81f607c",
+    "capability_cache_sha256": "66e8ad7a97136374578add2b9e101985925b2fdbea37a265caeaf19fcd4e2059",
+    "support_graph_sha256": "cca0815e96f5c93272b3f2165838b6f841f6a928f943ef71a794bc11c7f2b73a",
+    "source_footprint_fold_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/fortress/source_footprint_fold_authority.pt",
+      "file_sha256": "81b2b04ed2b6c472318e74c563c2fc7041766100f9f875edefb397c9eb99fdd4",
+      "authority_sha256": "16d2f4f2ebf66d27f3c3e0bf3d6767f9edfabce48324b99b4a94ec46509b76eb",
+      "tensor_bundle_sha256": "df54452378b9d93288f3ef27e11fe5f1e32bd7ee30ec0b15e25039c47001fe38"
+    }
+  },
+  "fold_contract": {
+    "mode": "source_footprint_v1",
+    "assignment": "splitmix64_source_footprint_group_v1",
+    "folds": 3,
+    "authority_loaded_before_source_prompt_labels": true,
+    "heldout_clear_tensors": ["positive_weight", "negative_weight", "raw_positive_mass", "raw_negative_mass"],
+    "candidate_actions_when_non_degenerate": ["unary", "surface_safe_propagated"],
+    "primary_metric": "responsibility_balanced_log_loss",
+    "secondary_metric": "responsibility_weighted_auc",
+    "complexity_tiebreak": "unary",
+    "target_feedback": false
+  },
+  "fixed_compiler": {
+    "region_space": "sam3",
+    "prototype_count": 4,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_registration_mode": "raster_adjoint",
+    "prompt_registration_scale": 1.0,
+    "alpha_threshold": 0.0,
+    "support_threshold": 0.0,
+    "registered_observation_fusion": "direct_raster_adjoint",
+    "registered_observation_confidence": "relative_joint_max",
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "shared",
+    "registered_selection_mode": "all_components",
+    "registered_readout_stage": "propagated",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "graph_policy": "typed",
+    "component_graph_policy": "same",
+    "channel_confidence_mode": "none",
+    "solver_type": "confidence_random_walker",
+    "solver_iterations": 12,
+    "solver_residual": 0.3,
+    "solver_unary_temperature": 0.1,
+    "solver_support_threshold": 0.5,
+    "laplacian_weight": 1.0,
+    "cg_iterations": 64,
+    "cg_tolerance": 0.00001,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "positive_priority",
+    "hard_seed_conflict_margin": 0.0,
+    "component_edge_threshold": 0.00001,
+    "seeded_component_min_weight": 0.2,
+    "connected_selection": false,
+    "query_conditioned_diffusion": "none",
+    "scene_specific_tuning": false
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "30-second polls; stop only after six consecutive observations at or above 88 C",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/source_footprint_oof_v1"
+  },
+  "opening_rule": "Run and seal folds 0, 1, and 2; load the immutable gate receipt; then build the matched K201 source-only full fit. No target score, RGB, mask, or metric may be opened in these invocations.",
+  "safety": {
+    "source_prompt_opened_at_registration": false,
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

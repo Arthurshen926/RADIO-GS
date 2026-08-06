@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "artifact_type": "execution_wrapper_addendum",
+  "registered_at": "2026-08-05T23:03:25+08:00",
+  "parent_runtime_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_cuda_driver_runtime_addendum_20260805.json",
+    "sha256": "ce17326f61d3c128d55c6c57c7bb1ca930702e63e7bcaa71bca6c9385546e671"
+  },
+  "interrupted_direct_preload_attempt": {
+    "exit_code": 130,
+    "reason": "replaced by the repository-authoritative Python/CUDA wrapper before GPU execution",
+    "output_created": false,
+    "target_access": false
+  },
+  "authoritative_wrapper": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_repo_python.sh",
+    "sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd",
+    "invocation_prefix": "env CUDA_VISIBLE_DEVICES=1 bash radio_gs/scripts/run_repo_python.sh",
+    "detected_kernel_driver": "535.288.01",
+    "actual_python": "/root/miniconda3/envs/cybersim_agent/bin/python3.9",
+    "actual_ld_preload": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "actual_preloaded_libcuda_sha256": "deb92bbc5e2990ded3ca2fd13103d346d2a8dee4374d7f9f64d996e420c0ec9d"
+  },
+  "wrapper_smoke_validation": {
+    "physical_gpu": 1,
+    "device_name": "NVIDIA GeForce RTX 3090",
+    "cuda_tensor_kernel_and_synchronize": "passed",
+    "sum": 523776
+  },
+  "scientific_contract": {
+    "method_or_hyperparameter_changed": false,
+    "input_or_output_authority_changed": false,
+    "source_only": true
+  },
+  "execution_decision": "restart_the_identical_preregistered_materialization_through_the_repository_wrapper"
+}

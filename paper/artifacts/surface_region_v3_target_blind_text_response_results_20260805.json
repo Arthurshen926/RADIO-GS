@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "experiment": "surface_region_v3_target_blind_centered_text_response_seed0",
+  "status": "generic_gate_failed_benchmark_not_opened",
+  "registration": {
+    "parent": "paper/artifacts/surface_region_v3_target_blind_text_response_preregistration_20260805.json",
+    "addendum": "paper/artifacts/surface_region_v3_target_blind_text_response_addendum_20260805.json"
+  },
+  "candidate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/readout_v3_target_blind_centered_response_h256_seed0.pt",
+    "sha256": "3b51d01f5b90ec58009e4875f703c287dcb0d4b5ac27901f538fd523fb3fe2d7",
+    "report_sha256": "88e62e455ec5af911e4cfbed2272999ab122ee2a5d2aadbf1064cc4ef30751bc",
+    "seed": 0,
+    "epochs_completed": 26,
+    "best_epoch": 18,
+    "checkpoint_schema_version": 7
+  },
+  "best_checkpoint_validation": {
+    "base_selection_score": 0.9258649566814368,
+    "summary_token_cosine": 0.7912076724072298,
+    "mean_descriptor_cosine": 0.9408277347683907,
+    "all_view_descriptor_cosine": 0.9109021785944829,
+    "text_response_smooth_l1": 0.00011137749970657751,
+    "response_profile_cosine_p05": 0.7863919138908386,
+    "ranking_spearman_mean": 0.44988057017326355,
+    "ranking_spearman_p05": -0.19335661828517914,
+    "top_decile_overlap_mean": 0.4016089141368866,
+    "support_top1_agreement": 0.2858910858631134
+  },
+  "best_observed_across_epochs": {
+    "base_selection_score": {"value": 0.9274788977716848, "epoch": 22},
+    "response_profile_cosine_p05": {"value": 0.7967888116836548, "epoch": 20},
+    "ranking_spearman_p05": {"value": -0.16538459062576294, "epoch": 21},
+    "support_top1_agreement": {"value": 0.2858910858631134, "epoch": 18},
+    "text_response_smooth_l1": {"value": 0.00010866101365536451, "epoch": 14}
+  },
+  "gate": {
+    "base_selection_score": true,
+    "response_profile_cosine_p05": false,
+    "support_top1_agreement": true,
+    "ranking_spearman_p05": false,
+    "text_response_smooth_l1": true,
+    "completion_nonregression": true,
+    "all_conditions_passed": false,
+    "any_epoch_passed_all_frozen_conditions": false
+  },
+  "interpretation": [
+    "The centered response objective improves mean response fidelity and support overlap without destroying the descriptor score.",
+    "It does not recover the held-out within-scene ranking tail; even the best ranking p05 is below the frozen matched-V2 gate.",
+    "An objective-only change on the existing V3 architecture and contract is therefore rejected. No LERF, SPIn9, or NVOS benchmark was opened for this checkpoint.",
+    "The next causal branch is a new contract/base design: enforce an actual independent context budget, preserve a V2-compatible safe base, and bound any learned residual under query-free deployment OOD statistics."
+  ],
+  "benchmark_metrics": null
+}

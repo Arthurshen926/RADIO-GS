@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "artifact_type": "factorized_capability_cohort_authority",
+  "experiment": "canonical-factorized-radio-v1-formal-capability-cohort",
+  "registered_at": "2026-08-06T05:12:00+08:00",
+  "scene": "pinecone",
+  "feature_output_bundle_sha256": "d395b1268ccaea07d8a1a89cb74f724689e7c6f95bea070e9711b9a937ade4a9",
+  "frozen_cache_authorities": {
+    "radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/raw_radio_matched_top1.pt",
+      "sha256": "20a35c1260dff71c34d827b7dba316f33283eea33b136d214356d56cd8b9214d"
+    },
+    "dino_v3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/dino_v3_matched_top1.pt",
+      "sha256": "95f6975154ed51855f41f6373b6d2778c14ea60030c6a81f968d8e65ebc5e929"
+    },
+    "sam3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/sam3_matched_top1.pt",
+      "sha256": "0b888454215b668bdc4899f51a02bb24b330f3d066f59d154879662fc7d49f3c"
+    }
+  },
+  "storage_authority": {
+    "schema": "radio_gs.channel_sharded_mpr.v1",
+    "shard_channels": 256,
+    "raw_shards": 5,
+    "dino_v3_shards": 16,
+    "sam3_shards": 4,
+    "formal_loader_all_hash_gates": "passed",
+    "all_manifest_shard_hashes_verified": true,
+    "support_geometry_valid_and_view_counts_exactly_equal": true
+  },
+  "shared_lineage": {
+    "num_gaussians": 450000,
+    "valid_count": 310718,
+    "xyz_sha256": "c37ca284eeb405ae7365258a43e3fc7a3e55a3120692ecab3b0ce065ed628b65",
+    "registration_responsibility_cache_sha256": "b8e91d82af0889fc546d1a868c60a75316f44a043d5c5179c9de983104db5f10",
+    "geometry_checkpoint_sha256": "e2e66dd2c03e52ed2307679e26fb1cc55d6734dadfc9f201b39fabe484c891d3",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

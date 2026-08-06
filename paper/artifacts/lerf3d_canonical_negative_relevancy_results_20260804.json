@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_canonical_negative_relevancy_dev2_v1",
+  "status": "accepted_by_development_gate_and_expanded_full4",
+  "method": {
+    "formula": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "canonical_negatives": ["object", "things", "stuff", "texture"],
+    "trainable_parameters": 0,
+    "scene_specific_parameters": false,
+    "frozen_vala_readout_changed": false,
+    "evaluation_protocol_changed": false
+  },
+  "results": {
+    "figurines": {
+      "baseline_miou": 0.4074466527,
+      "candidate_miou": 0.4753371775,
+      "delta": 0.0678905248,
+      "report_sha256": "8a49023e0200e2d1676262726ad3b526e81b0527fbf8f5a4193a69ccf455bbb0",
+      "negative_score_cache_sha256": "d778361b2ea860cfb07f586ace82cb1558df5129a55ad462b097e4e6c366ba90"
+    },
+    "waldo_kitchen": {
+      "baseline_miou": 0.2408391386,
+      "candidate_miou": 0.2954942882,
+      "delta": 0.0546551496,
+      "report_sha256": "a079f7290b0e5aece32fc52e8562f41ccc0b788673e528113771027eff91a4d5",
+      "negative_score_cache_sha256": "a3681dc1f3900666b6e44e7ea2c2b97df6b6c39ac63801563fc63fdee44a7188"
+    },
+    "ramen": {
+      "baseline_miou": 0.3062327802,
+      "candidate_miou": 0.2979446054,
+      "delta": -0.0082881749,
+      "report_sha256": "fdf1b7eff58fb4e989b012a8d4db635483a2f7b6b7626c8adee3bc7734c3b1e0",
+      "negative_score_cache_sha256": "bac6fbde27f2d3fc04fc19a1c52df89a63741677875eb68c036309bfa8a77a87"
+    },
+    "teatime": {
+      "baseline_miou": 0.3545279503,
+      "candidate_miou": 0.4058458805,
+      "delta": 0.0513179302,
+      "report_sha256": "24905ef67a0dce285fb8ef91b4df01b689ec6f8d7156e3e8040fcf2fe7de3d04",
+      "negative_score_cache_sha256": "0de45869d87ca77f568f452282b70c761f0c9c491548315ad78618d6449d02a4"
+    }
+  },
+  "aggregate": {
+    "baseline_full4_scene_macro_miou": 0.3272616304,
+    "candidate_full4_scene_macro_miou": 0.3686554879,
+    "delta": 0.0413938575,
+    "improved_scenes": 3,
+    "total_scenes": 4
+  },
+  "conclusion": "The positive-only cache branch was a material query-interface omission. Restoring generic-negative relevancy gives a large general improvement without changing the field or benchmark protocol, although Ramen's small regression shows that canonical-negative calibration alone does not solve region-scale/context selection."
+}

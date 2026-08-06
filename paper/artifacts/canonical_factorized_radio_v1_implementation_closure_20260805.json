@@ -1,0 +1,76 @@
+{
+  "artifact_type": "implementation_closure",
+  "method_contract": "canonical-factorized-radio-v1",
+  "date": "2026-08-05",
+  "status": "implemented_and_cpu_contract_verified",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_preregistration_20260805.json",
+    "sha256": "95ea81cd1d7917dc1496298b06e43a855e332a4b7993bc1f0479b6c511406d88"
+  },
+  "pre_cache_build_correction": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_evidence_correction_addendum_20260805.json",
+    "sha256": "77bb2f86a7dd9a67bc3b17e89a037e8654aa65f93ac088073a133073e54d2ff0",
+    "change": "observation evidence is bounded positive-view support n/(n+1), and semantic direction is derived instead of duplicating the dominant N x D cache tensor"
+  },
+  "cpu_fp16_parser_correction": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_cpu_fp16_parser_correction_20260805.json",
+    "sha256": "3577a25f2d0272dcf81902b714f0932c55b1063585cb83c7465b927ee5cb06a5",
+    "semantic_change": false
+  },
+  "implementation": {
+    "path": "radio_gs/field/factorized_radio_contract.py",
+    "sha256": "cded4da0e4025a6f0d3f1b3838279b02d8644bdb280d74ce0b97b58bb66380fc",
+    "contract_sha256": "81cd1fd9f7d4fbe6183785d0b0bc937c456b1ca9c4a9aedfd657c53510e296b2",
+    "reliability_scalar_names": [
+      "directional_resultant",
+      "directional_dispersion",
+      "log_amplitude_std",
+      "observation_evidence",
+      "visibility_purity"
+    ],
+    "reliability_scalar_names_sha256": "169eb81aae3808a71762b2c96fcfc3fd70c77f4e1fdfb23d8bc52a94dd256b56",
+    "legacy_contract_mutated": false,
+    "legacy_checkpoint_loader_accepts_new_schema": false
+  },
+  "tests": {
+    "path": "tests/test_factorized_radio_contract.py",
+    "sha256": "3f80ef881cc6fbcc11c5949593a3b8e7b059343433db2ef4a57d4d4530ccc437",
+    "focused": "10 passed",
+    "focused_plus_legacy_regression": "41 passed, 1 unrelated TypedStorage deprecation warning",
+    "suites": [
+      "tests/test_factorized_radio_contract.py",
+      "tests/test_observation_lifting_contract.py",
+      "tests/test_canonical_radio_field.py",
+      "tests/test_free_canonical_radio_field.py"
+    ],
+    "py_compile": "passed",
+    "black_check": "passed",
+    "git_diff_check": "passed",
+    "ruff": "not_available_in_repository_environment"
+  },
+  "verified_properties": [
+    "strictly positive amplitude selection occurs before torch.log",
+    "invalid rows and all invalid-row scalar columns are exactly zero",
+    "view permutation invariance",
+    "uniform positive scaling translates only log amplitude and scales only reconstructed canonical feature",
+    "observation evidence is bounded, matches n/(n+1), and is invariant to common responsibility/visibility rescaling",
+    "semantic direction round-trips as a derived value while the serialized cache omits the redundant N x D tensor",
+    "opposite directional evidence changes resultant and dispersion without changing amplitude statistics",
+    "cache parser binds the immutable contract, canonical reconstruction, ordered reliability names, and names digest",
+    "factorized field signature rejects base RADIO, contract, and scalar-column mismatches",
+    "factorized checkpoint schema-v2 rejects legacy schema and is rejected by the legacy canonical schema-v1 loader"
+  ],
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used": false
+  },
+  "execution": {
+    "gpu_used": false,
+    "cache_rebuilt": false,
+    "field_trained": false,
+    "benchmark_evaluated": false
+  },
+  "next_stage_not_executed": "bind the contract to a new cache builder and retrain a same-query-free canonical field under a separately preregistered experiment"
+}

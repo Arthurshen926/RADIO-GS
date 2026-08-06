@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_factorized_radio_source_cache_result",
+  "recorded_at": "2026-08-06T03:25:38+08:00",
+  "scene": "orchids",
+  "source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_orchids_source_chain_preregistration_20260806.json",
+    "sha256": "9bc432b2deff2bdaedddcd2898a2c4c67da6f47393cfd4e78f8188bb2f2a5e76"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/factorized_raw_radio.pt",
+    "sha256": "3dcf63416da05972d977b5b39ab62f2f8097e6cce340aa0bb56b456ca12002f7",
+    "bytes": 1172258535,
+    "report_sha256": "273f9bdb144abf19025a28f8754cfe51a906be57e5a4a02c5103e312ad251715"
+  },
+  "source_authority": {
+    "feature_output_bundle_sha256": "94c0e33b66c3418875f7b9403153695879ab11918d310a0250c4348a971dbee5",
+    "geometry_checkpoint_sha256": "15bc471a55544e74442463ee3cb576d6e9685b8ee7f39fcd080aa539d3332828",
+    "responsibility_sha256": "804baa9a5e54c29d7e1ac801d623156b3b70aa472e8273699ca28444fee49e5a",
+    "selected_frame_indices": "exactly_0_through_24"
+  },
+  "statistics": {
+    "num_gaussians": 450000,
+    "num_views": 25,
+    "valid_count": 393133,
+    "valid_ratio": 0.8736289143562317,
+    "mean_views_if_valid": 14.604026794433594,
+    "median_views_if_valid": 16.0,
+    "max_views": 25,
+    "estimated_peak_cpu_bytes": 3941589580
+  },
+  "validation": {
+    "builder_formal_payload_validator": "passed_before_atomic_save",
+    "invalid_row_purity": "passed",
+    "finite_values": "passed",
+    "source_lineage": "passed",
+    "query_independent": true
+  },
+  "resource_observation": {
+    "physical_gpu": 0,
+    "maximum_temperature_c": 52,
+    "thermal_stop_triggered": false,
+    "cuda_release_verified": true
+  },
+  "safety": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

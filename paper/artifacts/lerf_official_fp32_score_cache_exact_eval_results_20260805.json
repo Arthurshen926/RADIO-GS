@@ -1,0 +1,102 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf_official_fp32_score_cache_exact_eval_results",
+  "status": "complete",
+  "preregistration": {
+    "path": "paper/artifacts/lerf_official_fp32_score_cache_exact_eval_preregistration_20260805.json",
+    "sha256": "4d73937f5c88a5168520e18e01f34a073ce848e08f181b7cfbfb8224c4d1ea54"
+  },
+  "implementation": {
+    "strategy": "separate explicit-opt-in FP32 materializer; legacy FP16 source and defaults unchanged",
+    "fp32_materializer": {
+      "path": "radio_gs/scripts/materialize_lerf_multiscale_query_score_cache_fp32.py",
+      "sha256": "3ab6fcc5dbebf27a37de0f3d694626dd4d92ac71b748677d7a4ecd7dbbf1b4fd"
+    },
+    "evaluator": {
+      "path": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "fp32_payload_version": 4,
+    "fp32_payload_contract": "radio_gs.ours_lerf_direct3d_multiscale_query_scores_fp32.v4",
+    "fp32_authority_contract": "radio_gs.lerf_multiscale_query_score_fp32_authority.v4",
+    "validator": "requires contiguous torch.float32, exact precision contract, typed tensor SHA256, and source artifact SHA256",
+    "legacy_fp16_behavior_changed": false,
+    "explicit_float32_operands": true,
+    "explicit_cast_regeneration_numeric_bit_exact_to_prior_shared-cosine_result": true
+  },
+  "tests": {
+    "command": "/root/miniconda3/envs/cybersim_agent/bin/python -m pytest -q tests/test_materialize_lerf_multiscale_query_score_cache.py tests/test_lerf_direct_3d_selection.py",
+    "passed": 140,
+    "failed": 0,
+    "test_source_sha256": "5de5201c9d42dde7accc7ad28be24a1c758f222dbacfa3d51a294ed07e1736ad"
+  },
+  "fp32_caches": {
+    "positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_positive.pt",
+      "sha256": "7e7611ac7c886917d0b415c613e16c740d6248cb46c0bde536df6d353d9f739c",
+      "shape": [168791, 3, 21],
+      "dtype": "torch.float32"
+    },
+    "negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_negative.pt",
+      "sha256": "a887eb9da5631ed8a1966e3ad844bb0797d94626a6025e1293b5712e11b9b19f",
+      "shape": [168791, 3, 4],
+      "dtype": "torch.float32"
+    }
+  },
+  "exact_evaluation": {
+    "scene": "figurines",
+    "protocol_preset": "vala_repo_3d",
+    "physical_gpu": 1,
+    "cuda_visible_device": 0,
+    "driver_preload": "535.288.01",
+    "maximum_observed_gpu_temperature_c": 41,
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_direct3d_accepted_v2_fp32_exact_explicit_f32_v2/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "4bbd8c963898b9dd7fb47dfa75dbea28f6062ecca8d8c74ccb2fbc9b2dcbfc12"
+    },
+    "metrics": {
+      "miou": 0.4753887355327606,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.682007372379303,
+      "trimap_iou": 0.38083696365356445,
+      "n": 56
+    }
+  },
+  "fp16_baseline": {
+    "result": {
+      "path": "output/optimization_20260804/lerf3d_canonical_negative_relevancy_dev2_v1/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "8a49023e0200e2d1676262726ad3b526e81b0527fbf8f5a4193a69ccf455bbb0"
+    },
+    "metrics": {
+      "miou": 0.4753371775150299,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.6820145845413208,
+      "trimap_iou": 0.3808259963989258,
+      "n": 56
+    }
+  },
+  "delta_fp32_minus_fp16": {
+    "miou": 0.00005155801773071289,
+    "acc025": 0.0,
+    "acc050": 0.0,
+    "boundary_f": -0.000007212162017822266,
+    "trimap_iou": 0.000010967254638671875,
+    "primitive_query_membership_flips": 25,
+    "primitive_query_membership_flip_fraction": 0.000014412021239860423,
+    "selected_scale_query_flips": 0
+  },
+  "visible_change_attribution": {
+    "queries_with_primitive_count_changes": 9,
+    "toy_cat_statue_miou_delta": 0.0009625554084777832,
+    "spatula_miou_delta": -3.725290298461914e-8,
+    "other_changed_queries_exact_miou_delta": 0.0
+  },
+  "decision": {
+    "preregistered_gate_passed": true,
+    "adopt_fp32_formal_cache": true,
+    "interpretation": "FP32 removes a real but extremely small threshold-boundary precision loss; it does not materially explain the LERF3D accuracy gap."
+  }
+}

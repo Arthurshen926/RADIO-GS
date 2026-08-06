@@ -1,0 +1,74 @@
+{
+  "artifact": "gaussian_carrier_ceiling_lerf_results_v1",
+  "date": "2026-08-04",
+  "interpretation": {
+    "boundary_local_problem": "Mixed primitives carry a disproportionate fraction of GT boundary-band mass, so sparse boundary-local refinement remains justified.",
+    "carrier_global_decision": "The frozen RGB Gaussian carrier is not the primary LERF-OVS accuracy limit: a feasible one-scalar-per-Gaussian assignment exceeds 0.90 mIoU in every scene.",
+    "next_method_priority": "Repair capability/readout calibration and scalar first-surface unary conversion before any global carrier rebuild.",
+    "rigor": "Each reported best feasible score is a lower bound on the unknown scalar-membership optimum, not an estimated upper bound. A lower bound above the target is sufficient to rule out a carrier hard limit."
+  },
+  "macro": {
+    "best_feasible_lower_bound_miou": 0.9296393678347458,
+    "boundary_mass_carried_by_ambiguous_rows": 0.4306571543630626,
+    "minimum_scene_feasible_lower_bound_miou": 0.904107862794903,
+    "optimized_fixed_0p5_miou": 0.9103525406382176
+  },
+  "protocol": {
+    "benchmark_masks_opened": true,
+    "diagnostic_only": true,
+    "full_resolution_exact_evaluation": true,
+    "geometry_frozen": true,
+    "text_queries_opened": false,
+    "valid_benchmark_method": false
+  },
+  "scenes": {
+    "figurines": {
+      "best_feasible_lower_bound_miou": 0.9262406453490257,
+      "boundary_mass_carried_by_ambiguous_rows": 0.32951622846580686,
+      "fixed_0p5_adjoint_miou": 0.8883611261844635,
+      "fixed_0p5_optimized_miou": 0.8970605581998825,
+      "frames": 4,
+      "num_gaussians": 168791,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/carrier_ceiling/figurines_uniform_v3.json",
+        "sha256": "06612cd63beef894f9ab9b859fdf0cd0f450d5b4e2507bbe546befd40577011c"
+      }
+    },
+    "ramen": {
+      "best_feasible_lower_bound_miou": 0.904107862794903,
+      "boundary_mass_carried_by_ambiguous_rows": 0.5208403084959302,
+      "fixed_0p5_adjoint_miou": 0.8957367384097945,
+      "fixed_0p5_optimized_miou": 0.8994791629448743,
+      "frames": 7,
+      "num_gaussians": 382687,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/carrier_ceiling/ramen_uniform_v3.json",
+        "sha256": "10682b72072468cf373ad6f64710c5c49461f3f9ccea283cd0fca02594ac0ea7"
+      }
+    },
+    "teatime": {
+      "best_feasible_lower_bound_miou": 0.9483995053727748,
+      "boundary_mass_carried_by_ambiguous_rows": 0.38817518417324337,
+      "fixed_0p5_adjoint_miou": 0.9281244237544173,
+      "fixed_0p5_optimized_miou": 0.9252414582139354,
+      "frames": 6,
+      "num_gaussians": 460157,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/carrier_ceiling/teatime_uniform_v3.json",
+        "sha256": "f3bc060c6a01410bc39933db653d5883733ac24a7db226931ed58e7b8e9dce3c"
+      }
+    },
+    "waldo_kitchen": {
+      "best_feasible_lower_bound_miou": 0.9398094578222795,
+      "boundary_mass_carried_by_ambiguous_rows": 0.48409689631727004,
+      "fixed_0p5_adjoint_miou": 0.9053374962373213,
+      "fixed_0p5_optimized_miou": 0.9196289831941779,
+      "frames": 5,
+      "num_gaussians": 691728,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/carrier_ceiling/waldo_kitchen_uniform_v3.json",
+        "sha256": "0df025ed5edfa914296cdadcd510c970eb607f2deaee1ec4380a107182d5f244"
+      }
+    }
+  }
+}

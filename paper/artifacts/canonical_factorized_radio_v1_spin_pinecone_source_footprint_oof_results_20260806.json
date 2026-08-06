@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_factorized_radio_v1_spin_source_footprint_oof_result_v1",
+  "scene": "pinecone",
+  "status": "pass_source_only_oof_gate",
+  "completed_at": "2026-08-06T05:47:32+08:00",
+  "preregistration_provenance": {
+    "full9_parent": {
+      "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+      "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+    },
+    "scene_source_chain": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_pinecone_source_chain_preregistration_20260806.json",
+      "sha256": "8010015f8ceaa83f5434e428b313c46622a69a9db14e5888415857bfe312253d"
+    },
+    "scene_oof": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_pinecone_source_footprint_oof_preregistration_20260806.json",
+      "sha256": "36fd901cf46b771a04268878b5c76d28a144d17cb6ea97d9cd1c8146c718fe6d"
+    }
+  },
+  "gate_receipt": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+    "sha256": "d312a7174859b81899f6efa0b71f79a16d4472b1e1d62d3cb4c3246bb005af4d"
+  },
+  "fold_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/pinecone/source_footprint_fold_authority.pt",
+    "file_sha256": "09c8bfcd094afec01083fc7cc1ff5ac0faf9b4eb37bfd7e4b8a36bbe8abd0254",
+    "authority_sha256": "21a7d24b567791511ce58362f0cf355280e930575fb76a7a113bddc1bbd64f63",
+    "tensor_bundle_sha256": "2d28c9c643d084b84d24b2730cc34c20b9da8cdef8e09071efaccf31535a3d01",
+    "fold_rows": [54986, 56472, 199260],
+    "visible_rows_per_fold": [54986, 56472, 48286],
+    "total_rows": 310718,
+    "visible_rows": 159744,
+    "invisible_rows": 150974
+  },
+  "fold_artifacts": {
+    "0": {
+      "sha256": "9179ba0caaab3f868a90bd91f0456aab3d18c864eeb07de05a122ad2b04505e5",
+      "receipt_sha256": "405c077d5db6de3fb2c54b1940bf8a4e5e68cf428d101189e4da38636950c5eb"
+    },
+    "1": {
+      "sha256": "4b6927e90b5b8ce5918e2713c98f17f8407ae871615489b090de95445fca0957",
+      "receipt_sha256": "17ba2d90e4288988d9fdc31b56f1bb144b7a67707a817d69b1fb52e81412d64e"
+    },
+    "2": {
+      "sha256": "645c5cb55b5182857491ff007b93780006783d862b98142b1b9ccaa83dddebac",
+      "receipt_sha256": "43985ad87a827150ca6b3683624f0f0bf192de8d60e4d55eb68f6ebc5361e6e"
+    }
+  },
+  "selection": {
+    "selected_action": "surface_safe_propagated",
+    "balanced_log_loss": 0.5514344549964506,
+    "weighted_auc": 0.7809652025854074,
+    "unary_balanced_log_loss": 0.6931471805599452,
+    "unary_weighted_auc": 0.5,
+    "full_fit_predictions_used_as_oof": false,
+    "connected_selection": "off"
+  },
+  "independent_replay": {
+    "authority_validated": true,
+    "all_fold_and_receipt_hashes_exact": true,
+    "fold_reports_exact": true,
+    "metrics_exact": true,
+    "selected_action_exact": true,
+    "observed_rows_exact": true,
+    "all_observed_oof_probabilities_finite": true
+  },
+  "safety": {
+    "source_only": true,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

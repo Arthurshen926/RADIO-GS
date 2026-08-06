@@ -3,9 +3,17 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 
 import torch
 from torch import nn
+
+
+BASIS_CONDITIONING_CONTRACT_VERSION = "affine-basis-conditioning-v1"
+MAXIMUM_BASIS_CONDITION_NUMBER_V1 = 1_000_000.0
+_BASIS_RANK_TOLERANCE_SEMANTICS = (
+    "max(feature_dim,coefficient_dim)*float64_eps*largest_singular_value"
+)
 
 
 def _validate_feature_matrix(features: torch.Tensor) -> torch.Tensor:
@@ -24,6 +32,126 @@ class BasisFitReport:
     sample_count: int
     explained_variance_ratio: float
     reconstruction_cosine: float
+
+
+@dataclass(frozen=True)
+class BasisConditioningReport:
+    """Numerical authority for one affine decoder basis.
+
+    Diagnostics are computed in float64 on CPU so checkpoint acceptance does
+    not depend on the requested inference device or mixed-precision policy.
+    The v1 condition-number ceiling is deliberately permissive enough for the
+    existing trained canonical assets while still rejecting effectively
+    singular decoder coordinates before they reach an inverse or readout.
+    """
+
+    contract_version: str
+    feature_dim: int
+    coefficient_dim: int
+    numerical_rank: int
+    largest_singular_value: float
+    smallest_singular_value: float
+    rank_tolerance: float
+    rank_tolerance_semantics: str
+    condition_number: float
+    maximum_condition_number: float
+
+    def to_dict(self) -> dict[str, int | float | str]:
+        return {
+            "contract_version": self.contract_version,
+            "feature_dim": self.feature_dim,
+            "coefficient_dim": self.coefficient_dim,
+            "numerical_rank": self.numerical_rank,
+            "largest_singular_value": self.largest_singular_value,
+            "smallest_singular_value": self.smallest_singular_value,
+            "rank_tolerance": self.rank_tolerance,
+            "rank_tolerance_semantics": self.rank_tolerance_semantics,
+            "condition_number": self.condition_number,
+            "maximum_condition_number": self.maximum_condition_number,
+        }
+
+
+@torch.no_grad()
+def basis_conditioning_report(
+    basis: torch.Tensor,
+    *,
+    maximum_condition_number: float = MAXIMUM_BASIS_CONDITION_NUMBER_V1,
+) -> BasisConditioningReport:
+    """Return deterministic rank and condition diagnostics for ``basis``."""
+
+    values = torch.as_tensor(basis)
+    if values.ndim != 2 or min(values.shape) <= 0:
+        raise ValueError("basis conditioning requires a non-empty matrix")
+    feature_dim, coefficient_dim = map(int, values.shape)
+    if coefficient_dim > feature_dim:
+        raise ValueError(
+            "basis conditioning requires coefficient_dim <= feature_dim"
+        )
+    if not values.dtype.is_floating_point or not bool(
+        torch.isfinite(values).all()
+    ):
+        raise ValueError("basis conditioning requires finite floating-point values")
+    bound = float(maximum_condition_number)
+    if not math.isfinite(bound) or bound < 1.0:
+        raise ValueError("maximum basis condition number must be finite and >= 1")
+
+    diagnostic = values.detach().to(device="cpu", dtype=torch.float64)
+    try:
+        singular_values = torch.linalg.svdvals(diagnostic)
+    except RuntimeError as error:
+        raise ValueError("basis singular-value diagnostics failed") from error
+    largest = float(singular_values[0])
+    smallest = float(singular_values[-1])
+    tolerance = (
+        max(feature_dim, coefficient_dim)
+        * torch.finfo(torch.float64).eps
+        * largest
+    )
+    numerical_rank = int((singular_values > tolerance).sum())
+    condition_number = (
+        largest / smallest if smallest > 0.0 else float("inf")
+    )
+    return BasisConditioningReport(
+        contract_version=BASIS_CONDITIONING_CONTRACT_VERSION,
+        feature_dim=feature_dim,
+        coefficient_dim=coefficient_dim,
+        numerical_rank=numerical_rank,
+        largest_singular_value=largest,
+        smallest_singular_value=smallest,
+        rank_tolerance=float(tolerance),
+        rank_tolerance_semantics=_BASIS_RANK_TOLERANCE_SEMANTICS,
+        condition_number=float(condition_number),
+        maximum_condition_number=bound,
+    )
+
+
+@torch.no_grad()
+def validate_basis_conditioning(
+    basis: torch.Tensor,
+    *,
+    maximum_condition_number: float = MAXIMUM_BASIS_CONDITION_NUMBER_V1,
+) -> BasisConditioningReport:
+    """Fail closed when an affine basis is rank deficient or ill-conditioned."""
+
+    report = basis_conditioning_report(
+        basis,
+        maximum_condition_number=maximum_condition_number,
+    )
+    if report.numerical_rank != report.coefficient_dim:
+        raise ValueError(
+            f"basis is rank deficient under {report.contract_version}: "
+            f"rank {report.numerical_rank} != {report.coefficient_dim}"
+        )
+    if (
+        not math.isfinite(report.condition_number)
+        or report.condition_number > report.maximum_condition_number
+    ):
+        raise ValueError(
+            f"basis condition number {report.condition_number:.9g} exceeds "
+            f"{report.contract_version} maximum "
+            f"{report.maximum_condition_number:.9g}"
+        )
+    return report
 
 
 class AffineBasisDecoder(nn.Module):
@@ -67,6 +195,8 @@ class AffineBasisDecoder(nn.Module):
             basis_value = torch.as_tensor(basis).float()
         if basis_value.shape != (self.feature_dim, self.coefficient_dim):
             raise ValueError("basis must have shape [feature_dim,coefficient_dim]")
+        if basis is not None:
+            validate_basis_conditioning(basis_value)
 
         if trainable_statistics:
             self.mean = nn.Parameter(mean_value.clone())
@@ -113,10 +243,12 @@ class AffineBasisDecoder(nn.Module):
 
         PCA initializes orthonormal columns, but the basis can subsequently be
         trained.  Multiplication by ``basis`` is then no longer the inverse of
-        ``coefficients @ basis.T``.  Solve the normal equations once per call;
-        fall back to a Moore-Penrose inverse only for a rank-deficient basis.
+        ``coefficients @ basis.T``.  Fail closed on rank/conditioning before
+        solving the normal equations; the pseudoinverse remains only as a
+        numerical fallback if Cholesky fails for an otherwise accepted basis.
         """
 
+        validate_basis_conditioning(self.basis)
         gram = self.basis.transpose(0, 1) @ self.basis
         cholesky, info = torch.linalg.cholesky_ex(gram)
         if bool((info == 0).all()):

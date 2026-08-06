@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "artifact_type": "query_free_construction_smoke_result",
+  "experiment": "accepted-v2-full-scalar-exact-state-scannet-construction-smoke-v1",
+  "preregistration": {
+    "path": "paper/artifacts/full_scalar_exact_state_scannet_smoke_preregistration_20260805.json",
+    "sha256": "957cfbc272cc3d04c68e2f0129f4a0bb00fe36905bd3fcaba8bd95da85827724"
+  },
+  "status": "cross_scene_exact_builder_and_one_complete_field_state_chain_passed",
+  "claim_boundary": "Construction and source-capability fidelity only. Both scenes are members of a ScanNet benchmark cohort. No point label, text query, target image, target mask, or benchmark metric was opened, and no outcome selected a method or hyperparameter.",
+  "scene0097_00": {
+    "role": "independent cross-scene exact-responsibility and factorized-observation builder smoke",
+    "gaussian_rows": 72007,
+    "declared_source_views": 38,
+    "valid_rows": 69620,
+    "valid_ratio": 0.9668504595756531,
+    "mean_views_if_valid": 6.01183557510376,
+    "factorized_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_source_smoke_v1/scene0097_00/factorized_raw_radio.pt",
+      "sha256": "68293a324155adcdd745be8966fd1ca6028fe7c9230857f392f64a88fd104843"
+    },
+    "exact_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_source_smoke_v1/scene0097_00/exact_marginal_responsibility_authority.json",
+      "sha256": "58e7db25684540ff75c42f3ca98c49add8c1af96f7717be3d5d14513ba70e3e8"
+    },
+    "geometry_checkpoint_sha256": "28e00ac88cf6cb1a8687d0ac44e9b3cc025910c24a7060a6850b6f62e669079c",
+    "feature_output_bundle_sha256": "cb8d41739f663c807c81ee99e6e2f78411a3a09e3f79b3ac130514b6b6f76d96"
+  },
+  "scene0070_00": {
+    "role": "complete exact responsibility, formal capability cohort, D512/L512 field, and schema-v2 primitive-state closure",
+    "gaussian_rows": 109380,
+    "declared_source_views": 67,
+    "valid_rows": 103602,
+    "valid_ratio": 0.9471749663352966,
+    "mean_views_if_valid": 13.315302848815918,
+    "exact_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_source_smoke_v1/scene0070_00/exact_marginal_responsibility_authority.json",
+      "sha256": "5b1c06f83133e9c5b8509f9fd9b64bdc103980ba8fd39745679fbdb64fbd299a"
+    },
+    "factorized_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_source_smoke_v1/scene0070_00/factorized_raw_radio.pt",
+      "sha256": "f09a72c27fcb38340a7c62c45d574082b0afa40d8da98ef9d1ac3584238ffbd0"
+    },
+    "formal_exact_marginal_capability_cohort": {
+      "authority_path": "paper/artifacts/full_scalar_source_smoke_scene0070_factorized_capability_cohort_authority_20260805.json",
+      "authority_sha256": "786678b9ab1eb5cd00d13d371f2ba7e79d15e78eff93019c4f88c5a11d415fb8",
+      "normalized_radio_sha256": "f283b68feb1e54f85b1108bec4c7f4138d62092e0d7737e55c4b08e9d19b1a2f",
+      "dino_v3_sha256": "332cf06585f6eb21c4e9ee5c81064b84e760504d251b38c968b2854bbcfdc205",
+      "sam3_sha256": "2778ecb2dcc4fca67dab18f24a8e644ca9cdb6267dedecb31f0b40ca83e8a936",
+      "shared_exact_responsibility": true
+    },
+    "field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_source_smoke_v1/scene0070_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "3c04d59d93acabcbbbeecb94d8b4f1c83aac96a9d52e0e43646a2572ee869b30",
+      "report_sha256": "c532521c08398091bd711692fcae8394b54537f576550ba6251bb38833a2f24f",
+      "coefficient_dim": 512,
+      "local_dim": 512,
+      "radio_direction_mean_cosine": 0.9957448244094849,
+      "radio_direction_p05_cosine": 0.991003692150116,
+      "mean_abs_log_amplitude_error": 0.021837055683135986,
+      "dino_v3_mean_cosine": 0.9921876788139343,
+      "dino_v3_p05_cosine": 0.9805160760879517,
+      "sam3_mean_cosine": 0.9891367554664612,
+      "sam3_p05_cosine": 0.9750422239303589
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_source_smoke_v1/scene0070_00/factorized_primitive_state_v2.pt",
+      "sha256": "295da140e6ece77e7baa2ff0b05a9f5c8979daceb38b96b4017646299439639a",
+      "schema_version": 2,
+      "contract_sha256": "292ca8c209a8c89e4cd3a5f29e44ab51a83323289f8aeb3506da9133d664a428",
+      "semantic_direction_rows": 103602,
+      "semantic_direction_dim": 1280,
+      "scalar_encoding_dim": 6,
+      "measured_visibility_purity_rows": 103602,
+      "strict_lineage_reload_passed": true
+    }
+  },
+  "validation": {
+    "focused_tests": "15 passed",
+    "query_independent": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "point_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "conclusion": "The exact sparse compositor authority, factorized raw observation, formal raw/DINO/SAM cohort, high-rank canonical field, and schema-v2 primitive state close on a real ScanNet scene and the exact builder independently closes on a second scene. This removes implementation feasibility as the blocker for full-scalar training. Promotion training remains blocked until the separate clean 24-train/8-validation source cohort and its externally bound teacher shards are materialized."
+}

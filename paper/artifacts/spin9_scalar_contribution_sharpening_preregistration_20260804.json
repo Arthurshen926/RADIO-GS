@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_scalar_contribution_sharpening_difficult2_v1",
+  "status": "registered before candidate runs",
+  "hypothesis": "After primitive-space query scoring, concentration of the exact front-to-back scalar mixture should reduce foreground/background dilution at depth and object boundaries without changing primitive evidence, relation diffusion, or benchmark protocol.",
+  "candidate": {
+    "feature_contribution_gamma": 2.0,
+    "camera_clearance_sigma": 2.0,
+    "gamma_selection": "single fixed square-contribution alternative already implemented by the exact compositor; no scene or target metric sweep",
+    "query_dependent": false,
+    "changes_primitive_scores": false,
+    "changes_geometry": false
+  },
+  "development_scenes": [
+    "lego",
+    "truck"
+  ],
+  "baseline": {
+    "lego": {
+      "foreground_iou": 0.6181,
+      "report_sha256": "fd044dde5b743fac1d14fd8ac0eb73c3e520e86a77819536f55f7bf903707412"
+    },
+    "truck": {
+      "foreground_iou": 0.7899438648,
+      "report_sha256": "8914c4584876b1774a354a974cbff3638b62856d82f7c25458990f3ff7c43874"
+    }
+  },
+  "gate": {
+    "primary": "foreground IoU must improve on both development scenes",
+    "secondary": "reference-only selected threshold and all target-frame predictions are persisted before target masks are opened",
+    "on_failure": "retain as a compositor diagnostic and do not expand full9"
+  },
+  "locked_code": {
+    "evaluator_sha256": "7932e5bb2eb8aecb03e065052fa9a5c2324bce308d10415bf746b9827859e9e4",
+    "contribution_compositor_sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0"
+  },
+  "output_root": "output/optimization_20260804/spin9_scalar_gamma2_clearance2_v1"
+}

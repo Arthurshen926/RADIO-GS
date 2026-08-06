@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_physical_v2_residual_router_figurines_legacy_radio_execution_addendum_v1",
+  "status": "sealed_before_resumed_source_build_and_before_benchmark_metrics",
+  "parent_execution_receipt": {
+    "path": "paper/artifacts/surface_region_accepted_v2_residual_router_figurines_raw_sentinel_execution_receipt_20260805.json",
+    "sha256": "2be2cce7d36de9ff7ce8053aed0150861373c7aa930604128affd273efdd5781"
+  },
+  "pre_gpu_failure": {
+    "cause": "The immutable accepted-V2 readout retained exact training-cache paths and split hashes but omitted the already-present RADIO checkpoint SHA from its summarized provenance.",
+    "semantic_output_written": false,
+    "resume_state_written": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false
+  },
+  "narrow_compatibility_closure": {
+    "authority": {
+      "path": "paper/artifacts/surface_region_accepted_v2_legacy_radio_authority_20260805.json",
+      "sha256": "2d72ed54eef69378c665ddf83067838d79e42d6b72545d89aab12f95cb781948"
+    },
+    "rule": "Only the exact accepted-V2 readout, contract, RADIO checkpoint, train/validation split hashes, and six byte-identical query-free source caches are authorized. Every source cache is reopened and its metadata revalidated before GPU work.",
+    "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "region_contract_sha256": "ac77e31694ebe796befcc725ea60685ad6f97978a9a903e1029aa7a7a05abc07",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "implementation_authority": {
+    "stream_builder_sha256": "019e74e82bf3e1c8c64fdb79dd461c400e74a87d2eecd406174395371f0d00f5",
+    "focused_test_file_sha256": "6e6bf807760dc94daf422196b745ac450e435cc8466b365ea563e1b9047a1bab",
+    "focused_tests_passed": 30,
+    "focused_tests_failed": 0,
+    "python_compilation_passed": true
+  },
+  "resumed_execution": {
+    "same_candidate_and_control": true,
+    "same_output_intent": true,
+    "new_arguments": [
+      "--readout-legacy-radio-authority",
+      "--readout-legacy-radio-authority-sha256"
+    ],
+    "benchmark_gate_unchanged": true,
+    "source_parity_gate_unchanged": true,
+    "thermal_policy_unchanged": true
+  },
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "benchmark_metrics_opened": false,
+  "full4_opened": false
+}

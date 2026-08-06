@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_field_b_canonical_negative_figurines_dev1_v1",
+  "status": "rejected_by_preregistered_gate",
+  "results": {
+    "current_field_canonical_negative_miou": 0.4753371775,
+    "field_b_canonical_negative_miou": 0.4658662975,
+    "delta": -0.0094708800,
+    "gate_threshold_miou": 0.4803371775,
+    "gate_passed": false,
+    "field_b_boundary_f": 0.6789742112,
+    "current_field_boundary_f": 0.6820145845,
+    "field_b_trimap_iou": 0.3993644714,
+    "current_field_trimap_iou": 0.3808259964,
+    "field_b_acc025": 0.7678571429,
+    "current_field_acc025": 0.8035714286,
+    "field_b_acc050": 0.5178571429,
+    "current_field_acc050": 0.5357142857
+  },
+  "artifacts": {
+    "result_sha256": "d406428ac5e91e8092825b7f101a47e7d3bad9755510f09bd903ed50ee043100",
+    "canonical_negative_score_cache_sha256": "45e6be197a5cf8497adb6b13549f3bf83a3859ea16d83fa7682489b805383165",
+    "field_checkpoint_sha256": "f9b2d926c7a455acd6fcb2b87e3be9e385cd5cf2357204d0867546da93d9b710",
+    "positive_score_cache_sha256": "02f9f41357811b576f16b15126dd786852b2563208b84f90ddd86ba4a81b4a13",
+    "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+  },
+  "diagnosis": {
+    "improved_categories": 11,
+    "degraded_categories": 9,
+    "unchanged_categories": 1,
+    "largest_failure": "waldo: 0.718336 to 0.114479 while selected primitives increase 64 to 2206",
+    "interpretation": "Boundary-balanced query-free relation learning is not additive with the canonical-negative interface under the old clean SurfaceRegion readout. The mixed category response and Waldo false-positive explosion indicate a field/readout gauge and negative-response geometry compatibility failure, not a universal loss of field capacity."
+  },
+  "stop_decision": "No threshold, graph, or per-category calibration is attempted. Field-B is not expanded from this result; compatibility must be addressed in the global capability/readout contract."
+}

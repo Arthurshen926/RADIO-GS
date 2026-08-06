@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_learned_gauge_prior_query_free_v1",
+  "status": "rejected_by_preregistered_generic_gate_benchmark_not_opened",
+  "preregistration": {
+    "path": "paper/artifacts/surface_region_v3_learned_gauge_prior_preregistration_20260805.json",
+    "sha256": "b51f655d3e19c6bd3956fa10dfdcfe5359b62b1a8c2fe9beda4c30a012811a62"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/readout_v3_gated_raw_prior_h256_seed0.pt",
+    "sha256": "80fe58d710a84fe867a08ec47e99cffc37bf9a62a2daf373040ab80313d6b058",
+    "schema_version": 8,
+    "best_epoch": 7
+  },
+  "control": {
+    "checkpoint_sha256": "0d706fe564c1fd9f6a8be510ae33043bca292c727396601bdb0a5d80c312ac22",
+    "full_selection_score": 0.9275443983958429,
+    "summary_token_cosine": 0.8201395850628614,
+    "mean_descriptor_cosine": 0.9425745929280916,
+    "all_view_descriptor_cosine": 0.9125142038635942,
+    "completion_selection_score": 0.9243956013837128
+  },
+  "candidate": {
+    "full_selection_score": 0.9250396501595348,
+    "summary_token_cosine": 0.8314212262630463,
+    "mean_descriptor_cosine": 0.9402521296093861,
+    "all_view_descriptor_cosine": 0.9098271707096837,
+    "completion_selection_score": 0.9229405613426913,
+    "full_selection_delta": -0.002504748236308085
+  },
+  "gates": {
+    "strict_full_selection_improvement": false,
+    "matched_v2_mean_descriptor_noninferiority": false,
+    "completion_above_untrained": true,
+    "overall_pass": false
+  },
+  "conclusion": "Weakening the compulsory raw-gauge prior raises summary-token cosine but lowers official descriptor and multiview selection. The official-head objective does not reward a more direct teacher-token reconstruction here. Retain the schema-7 no-sparse candidate and stop adding readout variants before the frozen sentinel.",
+  "benchmark_state": {
+    "opened": false
+  }
+}

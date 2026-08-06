@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import json
 from pathlib import Path
 import struct
@@ -12,9 +13,122 @@ import zipfile
 import numpy as np
 import torch
 
+from radio_gs.field.factorized_radio_contract import (
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT,
+    CANONICAL_FACTORIZED_RADIO_CONTRACT_SHA256,
+    FactorizedRadioFieldSignature,
+)
 from radio_gs.field.field_signature import FeatureSpaceSignature
+from radio_gs.interfaces.capability_projection_contract import (
+    validate_capability_projection_order,
+)
 from radio_gs.interfaces.primitive_row_authority import PrimitiveRowAuthority
 from radio_gs.querying.support_solver import PrimitiveSupportGraph
+
+
+_FACTORIZED_CAPABILITY_LINEAGE_KEYS = (
+    "field_checkpoint_schema_version",
+    "field_checkpoint_contract",
+    "factorized_radio_field_signature",
+    "factorized_radio_field_signature_sha256",
+    "factorized_radio_contract_sha256",
+    "factorized_radio_cache_sha256",
+    "registration_responsibility_cache_sha256",
+    "mpr_geometry_fingerprint",
+)
+
+
+def _is_sha256(value: object) -> bool:
+    text = str(value)
+    return len(text) == 64 and all(
+        character in "0123456789abcdef" for character in text
+    )
+
+
+def _float32_rows_sha256(values: torch.Tensor) -> str:
+    array = (
+        torch.as_tensor(values)
+        .detach()
+        .float()
+        .cpu()
+        .contiguous()
+        .numpy()
+        .astype("<f4", copy=False)
+    )
+    return hashlib.sha256(array.tobytes()).hexdigest()
+
+
+def _validate_capability_field_lineage(
+    metadata: Mapping[str, Any],
+) -> FactorizedRadioFieldSignature | None:
+    """Validate optional schema-v2 lineage while preserving schema-v1 caches."""
+
+    raw_version = metadata.get("field_checkpoint_schema_version", 1)
+    if not isinstance(raw_version, int) or isinstance(raw_version, bool):
+        raise ValueError("capability field checkpoint schema version is malformed")
+    version = int(raw_version)
+    if version == 1:
+        leaked = [
+            name for name in _FACTORIZED_CAPABILITY_LINEAGE_KEYS[1:] if name in metadata
+        ]
+        if leaked:
+            raise ValueError(
+                f"schema-v1 capability carries factorized lineage: {leaked}"
+            )
+        return None
+    if version != 2:
+        raise ValueError("unsupported capability field checkpoint schema")
+    missing = [
+        name for name in _FACTORIZED_CAPABILITY_LINEAGE_KEYS if name not in metadata
+    ]
+    if missing:
+        raise ValueError(f"factorized capability lineage is incomplete: {missing}")
+    if (
+        metadata.get("field_checkpoint_contract")
+        != CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT
+        or metadata.get("factorized_radio_contract_sha256")
+        != CANONICAL_FACTORIZED_RADIO_CONTRACT_SHA256
+    ):
+        raise ValueError("factorized capability field contract differs")
+    raw_signature = metadata.get("factorized_radio_field_signature")
+    if not isinstance(raw_signature, Mapping):
+        raise ValueError("factorized capability field signature is malformed")
+    signature = FactorizedRadioFieldSignature.from_mapping(raw_signature)
+    if metadata.get("factorized_radio_field_signature_sha256") != signature.digest:
+        raise ValueError("factorized capability field signature digest differs")
+    for name in (
+        "field_checkpoint_sha256",
+        "factorized_radio_cache_sha256",
+        "feature_output_bundle_sha256",
+        "registration_responsibility_cache_sha256",
+    ):
+        if not _is_sha256(metadata.get(name)):
+            raise ValueError(f"factorized capability {name} is malformed")
+    if metadata.get("mpr_cache_sha256") != metadata.get(
+        "factorized_radio_cache_sha256"
+    ):
+        raise ValueError("factorized capability support cache digest differs")
+    geometry = metadata.get("mpr_geometry_fingerprint")
+    if (
+        not isinstance(geometry, Mapping)
+        or set(geometry) != {"num_gaussians", "xyz_sha256"}
+        or not isinstance(geometry.get("num_gaussians"), int)
+        or isinstance(geometry.get("num_gaussians"), bool)
+        or int(geometry.get("num_gaussians", 0)) <= 0
+        or not _is_sha256(geometry.get("xyz_sha256"))
+    ):
+        raise ValueError("factorized capability geometry fingerprint differs")
+    return signature
+
+
+def _factorized_lineage_projection(metadata: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        name: metadata.get(name)
+        for name in (
+            *_FACTORIZED_CAPABILITY_LINEAGE_KEYS,
+            "feature_output_bundle_sha256",
+        )
+    }
 
 
 @dataclass(frozen=True)
@@ -140,17 +254,13 @@ def _load_memory_mapped_capability_payload(path: Path) -> Mapping[str, Any]:
     }
     with zipfile.ZipFile(path) as archive:
         members = [
-            member
-            for member in archive.infolist()
-            if "/data/" in member.filename
+            member for member in archive.infolist() if "/data/" in member.filename
         ]
     resolved: dict[str, zipfile.ZipInfo] = {}
     for name, size in expected_sizes.items():
         matches = [member for member in members if member.file_size == size]
         if len(matches) != 1:
-            raise ValueError(
-                f"cannot uniquely identify {name} storage in {path}"
-            )
+            raise ValueError(f"cannot uniquely identify {name} storage in {path}")
         resolved[name] = matches[0]
     xyz = torch.from_numpy(
         _stored_zip_member_memmap(
@@ -232,17 +342,34 @@ def load_canonical_capability_bank(
     path: str | Path,
     *,
     expected_field_checkpoint_sha256: str = "",
+    expected_source: str = "canonical_radio_field_official_frozen_capability_views",
     require_signatures: bool = True,
     require_row_authority: bool = False,
+    require_formal_projection_order: bool = False,
+    allow_raw_mpr_projection_diagnostic: bool = False,
+    legacy_projection_authority: str | Path | Mapping[str, Any] | None = None,
 ) -> CanonicalCapabilityBank:
     cache_path = Path(path)
     sidecar_path = cache_path.with_suffix(cache_path.suffix + ".json")
     sidecar: Mapping[str, Any] = {}
+    sidecar_factorized_signature: FactorizedRadioFieldSignature | None = None
     if sidecar_path.is_file():
         raw_sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
         if not isinstance(raw_sidecar, Mapping):
             raise ValueError("capability cache sidecar must be an object")
         sidecar = raw_sidecar
+        # Projection-order errors should fail before deserializing a multi-GB
+        # capability tensor.  The identical check is repeated on payload
+        # metadata below, so a divergent sidecar cannot authorize the cache.
+        validate_capability_projection_order(
+            sidecar,
+            cache_path=cache_path,
+            expected_source=expected_source,
+            require_formal=require_formal_projection_order,
+            allow_raw_mpr_diagnostic=allow_raw_mpr_projection_diagnostic,
+            legacy_authority=legacy_projection_authority,
+        )
+        sidecar_factorized_signature = _validate_capability_field_lineage(sidecar)
     compact_sidecar = sidecar.get("feature_storage") == "valid_rows_compact_v1"
     if (
         cache_path.stat().st_size >= 2 * 1024**3
@@ -254,18 +381,62 @@ def load_canonical_capability_bank(
         payload = _load_payload(cache_path)
     required = {"xyz", "valid", "appearance_dino_v3", "boundary_sam3", "metadata"}
     if not required.issubset(payload):
-        raise ValueError(f"capability cache lacks keys: {sorted(required - set(payload))}")
+        raise ValueError(
+            f"capability cache lacks keys: {sorted(required - set(payload))}"
+        )
     metadata = payload["metadata"]
     if not isinstance(metadata, Mapping):
         raise ValueError("capability cache metadata must be a mapping")
-    if metadata.get("source") != "canonical_radio_field_official_frozen_capability_views":
-        raise ValueError("capability cache was not derived from a canonical RADIO field")
+    supported_sources = {
+        "canonical_radio_field_official_frozen_capability_views",
+        "exact_radio_mpr_official_frozen_capability_views",
+        "exact_capability_mpr_official_frozen_capability_views",
+    }
+    if expected_source not in supported_sources:
+        raise ValueError("unsupported expected capability source contract")
+    if metadata.get("source") != expected_source:
+        raise ValueError("capability cache source contract differs")
+    validate_capability_projection_order(
+        metadata,
+        cache_path=cache_path,
+        expected_source=expected_source,
+        require_formal=require_formal_projection_order,
+        allow_raw_mpr_diagnostic=allow_raw_mpr_projection_diagnostic,
+        legacy_authority=legacy_projection_authority,
+    )
+    factorized_signature = _validate_capability_field_lineage(metadata)
+    if sidecar_path.is_file() and (
+        (sidecar_factorized_signature is None) != (factorized_signature is None)
+        or (
+            factorized_signature is not None
+            and _factorized_lineage_projection(sidecar)
+            != _factorized_lineage_projection(metadata)
+        )
+    ):
+        raise ValueError("capability sidecar/payload field lineage differs")
+    if expected_source == "exact_radio_mpr_official_frozen_capability_views":
+        exact_digest = str(metadata.get("exact_raw_mpr_sha256", ""))
+        if (
+            len(exact_digest) != 64
+            or str(metadata.get("field_checkpoint_sha256", "")) != exact_digest
+        ):
+            raise ValueError("exact-MPR capability source digest is absent or differs")
+    if expected_source == "exact_capability_mpr_official_frozen_capability_views":
+        exact_digest = str(metadata.get("exact_capability_mpr_pair_sha256", ""))
+        if (
+            len(exact_digest) != 64
+            or str(metadata.get("field_checkpoint_sha256", "")) != exact_digest
+        ):
+            raise ValueError("exact capability-MPR source digest is absent or differs")
     if metadata.get("custom_adaptor_head") is not False:
         raise ValueError("canonical capability cache must use official frozen adaptors")
     if metadata.get("query_independent") is not True:
         raise ValueError("canonical capability cache must be query independent")
     actual_field_hash = str(metadata.get("field_checkpoint_sha256", ""))
-    if expected_field_checkpoint_sha256 and actual_field_hash != expected_field_checkpoint_sha256:
+    if (
+        expected_field_checkpoint_sha256
+        and actual_field_hash != expected_field_checkpoint_sha256
+    ):
         raise ValueError("capability cache canonical-field hash mismatch")
 
     memory_mapped = bool(payload.get("_memory_mapped", False))
@@ -296,6 +467,12 @@ def load_canonical_capability_bank(
             raise ValueError("compact capability row count declaration differs")
     if not bool(torch.isfinite(xyz).all()):
         raise ValueError("capability geometry contains NaN or infinity")
+    if factorized_signature is not None:
+        geometry = metadata["mpr_geometry_fingerprint"]
+        if int(geometry["num_gaussians"]) != count or str(
+            geometry["xyz_sha256"]
+        ) != _float32_rows_sha256(xyz):
+            raise ValueError("factorized capability geometry does not match rows")
     raw_row_authority = metadata.get("primitive_row_authority")
     if require_row_authority and raw_row_authority is None:
         raise ValueError("capability cache lacks primitive row authority")
@@ -333,6 +510,28 @@ def load_canonical_capability_bank(
             raise ValueError(f"capability cache lacks {name} signature")
         if signature is not None and signature.adaptor_output_dim != matrix.shape[1]:
             raise ValueError(f"{name} signature output dimension does not match cache")
+        if factorized_signature is not None and signature is not None:
+            base = factorized_signature.base_feature_signature
+            expected = {
+                "radio_version": base.radio_version,
+                "radio_checkpoint_sha256": base.radio_checkpoint_sha256,
+                "raw_feature_dim": base.raw_feature_dim,
+                "token_type": "primitive",
+                "normalization": "l2",
+                "field_checkpoint_sha256": str(
+                    metadata.get("field_checkpoint_sha256", "")
+                ),
+                "adaptor_sha256": str(metadata.get("radio_checkpoint_sha256", "")),
+            }
+            mismatched = [
+                key
+                for key, value in expected.items()
+                if getattr(signature, key) != value
+            ]
+            if mismatched:
+                raise ValueError(
+                    f"factorized capability {name} signature differs: {mismatched}"
+                )
     return CanonicalCapabilityBank(
         xyz=xyz,
         valid=valid,
@@ -356,7 +555,9 @@ def load_canonical_primitive_reliability(
     payload = _load_payload(path)
     required = {"xyz", "valid", "confidence", "components", "metadata"}
     if not required.issubset(payload):
-        raise ValueError(f"reliability cache lacks keys: {sorted(required - set(payload))}")
+        raise ValueError(
+            f"reliability cache lacks keys: {sorted(required - set(payload))}"
+        )
     metadata = payload["metadata"]
     if not isinstance(metadata, Mapping):
         raise ValueError("reliability metadata must be a mapping")
@@ -385,9 +586,15 @@ def load_canonical_primitive_reliability(
     valid = torch.as_tensor(payload["valid"]).bool().cpu()
     confidence = torch.as_tensor(payload["confidence"]).float().cpu()
     count = int(xyz.shape[0]) if xyz.ndim == 2 else -1
-    if xyz.shape != (count, 3) or valid.shape != (count,) or confidence.shape != (count,):
+    if (
+        xyz.shape != (count, 3)
+        or valid.shape != (count,)
+        or confidence.shape != (count,)
+    ):
         raise ValueError("reliability geometry/confidence rows are malformed")
-    if not bool(torch.isfinite(xyz).all()) or not bool(torch.isfinite(confidence).all()):
+    if not bool(torch.isfinite(xyz).all()) or not bool(
+        torch.isfinite(confidence).all()
+    ):
         raise ValueError("reliability cache contains NaN or infinity")
     if bool((confidence < 0).any()) or bool((confidence > 1).any()):
         raise ValueError("primitive reliability confidence must be in [0,1]")
@@ -419,7 +626,9 @@ def load_canonical_primitive_reliability(
             raise ValueError("reliability cache geometry does not align")
     if expected_valid is not None:
         reference_valid = torch.as_tensor(expected_valid).bool().cpu()
-        if reference_valid.shape != valid.shape or not torch.equal(reference_valid, valid):
+        if reference_valid.shape != valid.shape or not torch.equal(
+            reference_valid, valid
+        ):
             raise ValueError("reliability cache valid rows do not align")
     return CanonicalPrimitiveReliability(
         xyz=xyz,
@@ -473,10 +682,14 @@ def load_canonical_support_graph(
         ):
             raise ValueError("support graph xyz rows do not match capability rows")
     capability_metadata = metadata.get("capability_metadata", {})
+    if not isinstance(capability_metadata, Mapping):
+        raise ValueError("support graph capability metadata must be a mapping")
     if capability_metadata.get("field_checkpoint_sha256") != bank.metadata.get(
         "field_checkpoint_sha256"
     ):
-        raise ValueError("support graph and capability bank canonical-field hashes differ")
+        raise ValueError(
+            "support graph and capability bank canonical-field hashes differ"
+        )
     if capability_metadata.get("radio_checkpoint_sha256") != bank.metadata.get(
         "radio_checkpoint_sha256"
     ):
@@ -488,8 +701,7 @@ def load_canonical_support_graph(
     ):
         raise ValueError("support graph lacks source capability row authority")
     if (
-        graph_capability_authority is not None
-        or bank_capability_authority is not None
+        graph_capability_authority is not None or bank_capability_authority is not None
     ) and graph_capability_authority != bank_capability_authority:
         raise ValueError("support graph and capability bank row authorities differ")
     graph_signatures = capability_metadata.get("capability_signatures")
@@ -499,6 +711,13 @@ def load_canonical_support_graph(
         if graph_signatures.get(name) != signature.to_dict():
             raise ValueError(
                 f"support graph and capability bank {name} signatures differ"
+            )
+    if bank.metadata.get("field_checkpoint_schema_version", 1) == 2:
+        graph_lineage = _factorized_lineage_projection(capability_metadata)
+        bank_lineage = _factorized_lineage_projection(bank.metadata)
+        if graph_lineage != bank_lineage:
+            raise ValueError(
+                "support graph and capability bank factorized lineage differ"
             )
     return PrimitiveSupportGraph(
         edge_index=payload["edge_index"],

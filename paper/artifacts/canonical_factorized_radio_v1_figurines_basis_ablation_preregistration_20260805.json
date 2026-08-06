@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "artifact_type": "method_preregistration",
+  "experiment": "canonical-factorized-radio-v1-figurines-source-only-basis-ablation",
+  "date": "2026-08-05",
+  "question": "Does optimizing the 256-D affine PCA basis materially improve source-only reconstruction over keeping the identical initialized basis fixed?",
+  "frozen_inputs": {
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/factorized_raw_radio.pt",
+      "sha256": "d37a3f2ee2df93045bf52109a426f53761f76a1ad963f2f95a23512f49f37135"
+    },
+    "capability_cohort_authority": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_figurines_capability_cohort_authority_20260805.json",
+      "sha256": "ebe082374694809b29e33ee3132d9daf1aff575ae54d713445530a64cc5befb4"
+    },
+    "feature_output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "implementation_authority": {
+    "trainer_sha256": "3cb2d5199934a4af755a3f3402c79f2965dff3e83d0c042f9e4ce1562af1ad28",
+    "factorized_cache_loader_sha256": "ee16c7b2cd92d096f5c0b280a5b4eaa24ee948cc1fc18f52f8e3044530befbff",
+    "factorized_loss_sha256": "eee8a8f02587d1b2ed754f05422ff04b195de2e0d0a6a3abe7c734e4dce24349"
+  },
+  "matched_training": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "primitive_fusion": true,
+    "fusion_reliability": false,
+    "official_capability_loss": true,
+    "capability_target_contract": "matched_top1",
+    "mpr_weight": 1.0,
+    "dino_weight": 0.2,
+    "sam3_weight": 0.2,
+    "relation_objective": "disabled",
+    "relation_weight": 0.0,
+    "epochs": 20,
+    "min_epochs": 20,
+    "batch_size": 4096,
+    "eval_batch_size": 16384,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0
+  },
+  "arms": {
+    "trainable_basis": "Default trainer behavior after the same source-only PCA initialization.",
+    "fixed_pca_basis": "The only command-line difference is --freeze-basis."
+  },
+  "absolute_source_only_gates": {
+    "direction_mean_cosine_minimum": 0.98,
+    "direction_p05_cosine_minimum": 0.94,
+    "mean_abs_log_amplitude_error_maximum": 0.03,
+    "p95_abs_log_amplitude_error_maximum": 0.15,
+    "dino_v3_target_mean_cosine_minimum": 0.985,
+    "dino_v3_target_p05_cosine_minimum": 0.965,
+    "sam3_target_mean_cosine_minimum": 0.965,
+    "sam3_target_p05_cosine_minimum": 0.925
+  },
+  "selection_rule": {
+    "first": "Reject any arm that fails an absolute source-only gate.",
+    "fixed_basis_noninferiority": {
+      "direction_mean_cosine_maximum_deficit": 0.002,
+      "direction_p05_cosine_maximum_deficit": 0.005,
+      "mean_abs_log_amplitude_error_maximum_excess": 0.003,
+      "p95_abs_log_amplitude_error_maximum_excess": 0.01,
+      "dino_or_sam_mean_cosine_maximum_deficit": 0.002,
+      "dino_or_sam_p05_cosine_maximum_deficit": 0.005
+    },
+    "decision": "Prefer fixed_pca_basis if it passes every noninferiority bound against trainable_basis; otherwise select trainable_basis if it passes every absolute gate. If neither arm passes, do not open benchmark targets."
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false,
+    "per_scene_hyperparameter_search": false
+  },
+  "gpu_policy": {
+    "physical_gpus": [0, 1],
+    "power_limit_watts": 300,
+    "check_frequency": "stage boundaries or approximately every 180 seconds",
+    "thermal_stop": "at least 88 Celsius in two consecutive checks"
+  }
+}

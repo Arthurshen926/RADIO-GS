@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "result": "canonical_factorized_radio_v1_pinecone_surface_safe_graph",
+  "completed_at": "2026-08-06T05:27:00+08:00",
+  "status": "pass",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_pinecone_surface_safe_graph_preregistration_20260806.json",
+    "sha256": "2d27b8d434937168af1cde470d04c84506eb1e74aa1a54cb8930b1a5711a8b10"
+  },
+  "graph": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/shared_support_graph_surface_safe_k16.pt",
+    "sha256": "f2b751659903b4d0740568f81d20b79dfbeae1ad3d33a86dcbc2346d94982594",
+    "report_sha256": "cbfb9c2aac0ecab371f7b0e8b9b930c781e967f1079ca8b991efe961ee89417e",
+    "strict_reload": true,
+    "num_nodes": 310718,
+    "num_edges": 3868846,
+    "edge_channels": [
+      "appearance",
+      "boundary",
+      "covisibility",
+      "geometry",
+      "normal",
+      "surface_tangent"
+    ]
+  },
+  "lineage": {
+    "capability_cache_sha256": "ae762afce2bccef73ecdc94e5b3bd9ec4b4f1a9ad3707b37da6152193a4a7aeb",
+    "field_checkpoint_sha256": "746f7b0e9a274742733b067aafbaf791843735c989e532a9f9da0e5c155f5671",
+    "factorized_radio_cache_sha256": "73319e3f8e9fe38a6913c08b68e98153276b96486fa089582d9ec538bab0277b",
+    "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373",
+    "feature_output_bundle_sha256": "d395b1268ccaea07d8a1a89cb74f724689e7c6f95bea070e9711b9a937ade4a9",
+    "capability_cohort_authority_sha256": "0ae6eb5d3f5c06324cd011c6e4989790bd6951a6f9b2b78bf082f662484f77a0",
+    "registration_responsibility_cache_sha256": "b8e91d82af0889fc546d1a868c60a75316f44a043d5c5179c9de983104db5f10",
+    "geometry_xyz_sha256": "c37ca284eeb405ae7365258a43e3fc7a3e55a3120692ecab3b0ce065ed628b65"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "maximum_temperature_c": 45,
+    "thermal_stop_triggered": false
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  },
+  "decision": "allow_matched_k201_query_independent_cache_build"
+}

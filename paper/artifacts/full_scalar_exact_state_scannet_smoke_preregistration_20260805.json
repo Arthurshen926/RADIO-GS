@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "experiment": "accepted-v2-full-scalar-exact-state-scannet-construction-smoke-v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "purpose": "Validate that the exact-marginal factorized-state pipeline closes on two small real ScanNet Gaussian scenes before any residual training or benchmark selection.",
+  "claim_boundary": "Construction and capacity smoke test only. These scenes belong to the ScanNet benchmark cohort; no label, text query, held-out target, or benchmark metric may be opened, and their outcomes cannot select a method, loss, threshold, or checkpoint.",
+  "scenes": {
+    "scene0097_00": {
+      "gpu": 0,
+      "train_views": 38,
+      "gaussian_rows": 72007,
+      "geometry_checkpoint_sha256": "28e00ac88cf6cb1a8687d0ac44e9b3cc025910c24a7060a6850b6f62e669079c",
+      "feature_output_bundle_sha256": "cb8d41739f663c807c81ee99e6e2f78411a3a09e3f79b3ac130514b6b6f76d96"
+    },
+    "scene0070_00": {
+      "gpu": 1,
+      "train_views": 67,
+      "gaussian_rows": 109380,
+      "geometry_checkpoint_sha256": "2e083e662b8be14dcb5c02c58e3b34ea893294f82c9f583e1f1dad571e7437d1",
+      "feature_output_bundle_sha256": "0b13a36666b63d4d47abc2d841065c98ed4d3229eb6de6833b69aa8ea7f83068"
+    }
+  },
+  "frozen_builder": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "aggregation_mode": "raster_marginal_responsibility",
+    "raster_view_fusion": "contribution_mean",
+    "feature_space": "radio",
+    "capability_map_source": "project_raw",
+    "capability_storage": "dense",
+    "maximum_views": 120,
+    "robust_mpr": false,
+    "alpha_threshold": 0.0,
+    "registration_weight_mode": "alpha_depth",
+    "frame_authority": "scene train_frames.txt only",
+    "responsibility_authority": "new no-clobber exact marginal sparse view shards"
+  },
+  "gates": {
+    "exact_authority_reopens_all_declared_view_shards": true,
+    "cache_geometry_and_row_authority_match_checkpoint": true,
+    "factorized_field_and_state_load_through_strict_schema_v2": true,
+    "no_result_based_hyperparameter_selection": true
+  },
+  "resource_policy": {
+    "power_limit_w": 300,
+    "monitor": "launch and stage boundary only",
+    "thermal_abort": "temperature at least 88C twice consecutively"
+  },
+  "forbidden_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "point_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_k16_decoupled_prototype_anchor_dev2_v1",
+  "status": "registered before opening candidate outcomes",
+  "motivation": "Prototype coverage and exact prompt constraints are different statistical objects. Preserve winner-take-all conditional masses for multimodal prototype construction while using joint-signed exact-adjoint evidence only for solver seeds and hard unary anchors.",
+  "development_scenes": ["fern", "horns_left"],
+  "control": {
+    "prototype_count": 16,
+    "registered_seed_construction": "winner_take_all",
+    "registered_prototype_seed_construction": "shared",
+    "registered_observation_fusion": "additive",
+    "final_readout": "unary_prior"
+  },
+  "candidate": {
+    "prototype_count": 16,
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "winner_take_all",
+    "registered_observation_fusion": "hard_seed_anchor_only_probability",
+    "prototype_seed_normalization": "independent_max",
+    "solver_seed_normalization": "none",
+    "anchor_formula": "a=1[c>0 and abs(s)>=0.2]; p=(1-a)*p_field+a*q",
+    "final_readout": "unary_prior"
+  },
+  "shared": {
+    "prototype_strategy": "spherical_mean_fps",
+    "prototype_temperature": 0.07,
+    "prompt_registration": "native exact front-to-back raster adjoint",
+    "score_render_resolution": "scaled_renderer",
+    "valid_support_normalization": false,
+    "target_rgb": false,
+    "target_mask_feedback": false,
+    "scene_specific_parameters": false
+  },
+  "gate": {
+    "reproducibility": "control scores match the earlier K16 scores within 1e-7",
+    "primary": "candidate dev2 macro exceeds control dev2 macro",
+    "safety": "neither scene regresses by more than 0.02",
+    "expansion": "only if all three pass, expand unchanged to heldout six"
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_evaluator_modified": false,
+    "score_threshold": 0.5
+  }
+}

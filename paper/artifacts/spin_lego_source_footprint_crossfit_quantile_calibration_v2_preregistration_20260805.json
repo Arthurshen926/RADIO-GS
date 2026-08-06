@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "registration": "spin_source_footprint_crossfit_quantile_calibration_v2",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "status": "registered_after_explicitly_posthoc_source_only_fold_feasibility_and_before_full_fit_gauge_or_target_prediction",
+  "claim_boundary": {
+    "scene": "lego",
+    "role": "previously opened difficult development sentinel; not an unbiased confirmatory scene",
+    "v1_is_closed": true,
+    "v1_result": {
+      "path": "paper/artifacts/spin_lego_source_footprint_crossfit_visibility_calibration_results_20260805.json",
+      "sha256": "b7b76080400dba26ac39c7ef3c6af52237132c1c6e0e09f423db3dc9eed964b9",
+      "status": "stop_before_target_prediction_due_raw_fold_threshold_span_0.61"
+    },
+    "known_posthoc_source_only_feasibility": {
+      "scientific_status": "exploratory diagnosis; not a preregistered or unbiased result",
+      "fixed_map_tested_once": "exact-reference-weighted right-continuous empirical CDF fitted separately on each fold's training-source scores",
+      "fold_quantile_thresholds": [0.95, 0.99, 0.93],
+      "threshold_span": 0.06,
+      "pooled_quantile_threshold": 0.96,
+      "fold_weighted_soft_iou": [
+        0.6253431634066156,
+        0.7648186377832347,
+        0.7511961737853222
+      ],
+      "pooled_weighted_soft_iou": 0.5513620165942273,
+      "positive_quantile_weighted_mean": [
+        0.9623751755282497,
+        0.9634874224772744,
+        0.9575252837528342
+      ]
+    },
+    "permitted_claim": "A source-only rank gauge removes most fold-specific absolute-score drift on this opened Lego diagnostic; any subsequent target result remains development evidence.",
+    "forbidden_claim": "The posthoc OOF feasibility numbers are confirmatory evidence or an unbiased benchmark result."
+  },
+  "frozen_inputs": {
+    "matched_oof_folds": [
+      {
+        "fold": 0,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_visibility_calibration_v1/lego/matched_oof/fold_0.pt",
+        "file_sha256": "836628d1a288da3ab9755646d7f9df4a009eb2998fc2dbc0cecf9bfb467c6635",
+        "receipt_sha256": "5697b439bbd5a2803ee498aeeb3feb5325241e0b899158fd4b50bff458dc8121"
+      },
+      {
+        "fold": 1,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_visibility_calibration_v1/lego/matched_oof/fold_1.pt",
+        "file_sha256": "dfb27bfc5fcca0a7e10636b3c5a5caa36fec6a60fb730850da736714cc23d81b",
+        "receipt_sha256": "f190b8eda3d9b5fd918911cc6fa1ce76fa37d32c661c50509b7152424ece4a5d"
+      },
+      {
+        "fold": 2,
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_visibility_calibration_v1/lego/matched_oof/fold_2.pt",
+        "file_sha256": "30c61ed16f5304737ba7d015b631454f9d512b23c2e80ca0c9f2732453104c5b",
+        "receipt_sha256": "9a098c39466040d687356f3219eced872df91317d0ee7442c6c05315242dc320"
+      }
+    ],
+    "query_diffusion_knn": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_euclidean_k200_self.pt",
+      "sha256": "26e6757bcfbda88c4ec177a1af28ce8bec79d9a4358a6c17ac855a6fc65261e0",
+      "effective_columns_including_self": 201
+    },
+    "query_diffusion_relation": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_dino_signed_hash256.pt",
+      "sha256": "4138760ba4c82b14d86d07ce9b61f4d443415787987f42405b7c4626a354c891"
+    },
+    "full_fit_pre_metric_prediction_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/pre_metric_prediction_receipt.json",
+      "sha256": "d23378e3f819f46319fa1eec3b75ddbc06c314c91c43f38adc75bde50e32f076",
+      "use": "immutable raw t_seen=0.71 and sealed continuous target-score paths only after the full-fit source gauge is sealed"
+    }
+  },
+  "rank_gauge_contract": {
+    "score": "frozen matched K201 propagated probability",
+    "fold_training_population": "rows whose exact training_reference_weight is positive",
+    "full_fit_population": "rows whose immutable complete-source reference_weight is positive",
+    "weight": "the corresponding exact reference responsibility weight",
+    "mapping": "F(s)=sum_i(w_i*1[p_i<=s])/sum_i(w_i)",
+    "tie_semantics": "right-continuous; all source mass exactly equal to s is included",
+    "zero_weight_rows": "excluded",
+    "smoothing": false,
+    "temperature": null,
+    "bandwidth": null,
+    "cdf_definition_scan": false,
+    "target_distribution_fit": false
+  },
+  "completion_contract": {
+    "threshold_grid": "0.99,0.98,...,0.03 descending in the OOF quantile gauge",
+    "tie_break": "strict improvement retains the first descending threshold",
+    "selection": "one pooled threshold maximizing responsibility-weighted soft IoU on exactly the three held-out observed populations",
+    "fold_stability": "report per-fold optima and require max-minus-min <= 0.10",
+    "frozen_after_known_feasibility": "t_completion_quantile=0.96; it may not be changed after full-fit or target access"
+  },
+  "full_fit_and_prediction_contract": {
+    "full_fit_support": "run the same frozen K201 interface once using complete invariant source positive/reference evidence and no heldout clearing",
+    "full_fit_cdf": "fit the fixed weighted right-ECDF only to full-fit primitive scores with complete-source reference weights",
+    "t_seen": "map the sealed raw 0.71 threshold through the same full-fit source CDF",
+    "target_score": "map each already sealed continuous target score through the same full-fit source CDF; target values do not alter the CDF",
+    "source_visibility": "unchanged v1 query-independent source-visible definition and rendering",
+    "spatial_threshold": "c*q_seen+(1-c)*0.96",
+    "prediction": "F_full(continuous_target_score)>=spatial_threshold",
+    "parameter_scan": false
+  },
+  "stop_rules": [
+    "Fail closed unless the three input fold files and all tensor authorities match their frozen hashes.",
+    "Stop if the independently implemented CPU authority does not reproduce thresholds 0.95,0.99,0.93, span 0.06, and pooled threshold 0.96.",
+    "Stop before target prediction unless the full-fit support and source-only ECDF are sealed with tensor hashes.",
+    "Do not change CDF definition, weight, ties, K, bandwidth, cap, threshold grid, visibility rule, interpolation, or threshold after any target access."
+  ],
+  "forbidden": [
+    "overwriting or extending any stopped v1 output",
+    "target RGB, target foundation features, masks, or metrics as calibration inputs",
+    "target-score histogram matching or target-distribution normalization",
+    "CDF smoothing, temperature, cap, bandwidth, interpolation-weight, threshold-family, or scene-specific scans",
+    "modification of NVOS gates"
+  ],
+  "execution": {
+    "cpu_oof_authority_first": true,
+    "gpu_full_fit_after_cpu_pass_only": true,
+    "expected_gpu_work": "one fixed Lego K201 full-fit support, approximately 10-25 seconds on one GPU",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_quantile_calibration_v2/lego"
+  }
+}

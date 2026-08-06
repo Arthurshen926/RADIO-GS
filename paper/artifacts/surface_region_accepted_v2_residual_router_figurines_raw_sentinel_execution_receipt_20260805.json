@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_physical_v2_residual_router_figurines_raw_sentinel_execution_v1",
+  "status": "sealed_before_source_build_and_before_benchmark_metrics",
+  "causal_question": "Does the frozen residual router improve Figurines when the accepted physical V2 contract and the empirically accepted raw-gauge immutable V2 slot-zero fallback are restored exactly?",
+  "protocol_authority": {
+    "preregistration": {
+      "path": "paper/artifacts/surface_region_accepted_v2_residual_router_preregistration_20260805.json",
+      "sha256": "3dc2e8855bbb58fc7725eb57f59f09541f2d5540b3b1f25c70691c4695a06b8c"
+    },
+    "gauge_addendum": {
+      "path": "paper/artifacts/surface_region_accepted_v2_deployment_gauge_parity_addendum_20260805.json",
+      "sha256": "dad0bbdbc419f352e9e08b393e4d888777ca28c8049dca36f0d278ce5886f50e"
+    }
+  },
+  "frozen_method": {
+    "region_contract": "accepted SurfaceRegion V2 physical expansion",
+    "region_contract_sha256": "ac77e31694ebe796befcc725ea60685ad6f97978a9a903e1029aa7a7a05abc07",
+    "expansion": "undirected_dijkstra_physical_edge_length",
+    "radii_m": [0.25, 0.45, 0.7],
+    "readout_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "canonical_slot0_gauge": "caller_provided_legacy_raw_exact_frozen_v2",
+    "residual_gauge": "l2_direction_tangent_plus_log_norm",
+    "residual_codebook_sha256": "9d0a7ef3275809aaa553a7045bcdc1f8ad2f0baa1a2f4310e64d3ff610756f1e",
+    "query_router_sha256": "d530b753078b9bbad4a8414c7f66c1dc5e716e20f7346e514558eb01376c7461",
+    "official_summary_head": "C-RADIOv4 SigLIP2-G",
+    "logit_scale": 10.0,
+    "candidate": "query_router_v1",
+    "control": "exact_same_run_frozen_v2_slot0",
+    "mixed_gauge_transfer_diagnostic": true,
+    "l2_deployment_result_reused": false,
+    "new_relation_contract_used": false
+  },
+  "input_authority": {
+    "field_sha256": "328ba9f9f19f69f02a118462cbb427fac7670cbc83e4d4eade7e66902943aa66",
+    "mpr_sha256": "df01507d65b6a6e6ad75e001fd926b30e18482dd64cb065f3c58710c17969f81",
+    "support_graph_sha256": "abcdd466fbbd726f277b59b137a59ac93b0a2c270a7557fc9916a478a66a1451",
+    "positive_text_cache_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+    "generic_negative_text_cache_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "renderer_geometry_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "accepted_positive_score_cache_sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac",
+    "accepted_negative_score_cache_sha256": "d778361b2ea860cfb07f586ace82cb1558df5129a55ad462b097e4e6c366ba90"
+  },
+  "implementation_authority": {
+    "stream_builder_sha256": "2b4497f6c07dec800b094909acd02190069621ee2ee44014075dfd2134f1e3ec",
+    "authority_materializer_sha256": "29d05494a889e5d5475483c9e5395608ac1e7d7cf7207c2e33f0841552ab4f98",
+    "frozen_evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+  },
+  "source_parity_gate": {
+    "opened_before_benchmark_metrics": true,
+    "expected_probability": "fp16(sigmoid(10*(accepted_positive_cosine-max_accepted_generic_negative_cosine)))",
+    "required_valid_mask_and_axes_exact": true,
+    "minimum_pearson": 0.9999,
+    "maximum_mean_absolute_error": 0.0005,
+    "maximum_absolute_error": 0.002,
+    "failure_action": "stop before opening benchmark masks or metrics"
+  },
+  "benchmark_gate": {
+    "preset": "vala_repo_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "candidate_floor_miou": 0.4803371775,
+    "mechanistic_requirement": "candidate_miou > exact_same_run_slot0_miou",
+    "full4_opening": "only if both requirements pass"
+  },
+  "output_intent": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_accepted_physical_v2_residual_router_figurines_raw_v2",
+    "streamed_candidate": "streamed/figurines_router.pt",
+    "streamed_control": "streamed/figurines_slot0_control.pt",
+    "authority_candidate": "authority/figurines_router.pt",
+    "authority_control": "authority/figurines_slot0_control.pt"
+  },
+  "thermal_policy": {
+    "preferred_physical_gpu": 1,
+    "alternative_physical_gpu": 0,
+    "power_limit_w": 300,
+    "stage_boundary_checks": true,
+    "stop_only_after_temperature_above_88c_on_two_consecutive_checks": true
+  },
+  "verification_before_execution": {
+    "focused_tests_passed": 164,
+    "focused_tests_failed": 0,
+    "output_root_absent": true,
+    "gpu0_start_temperature_c": 40,
+    "gpu1_start_temperature_c": 35
+  },
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "benchmark_metrics_opened": false,
+  "full4_opened": false
+}

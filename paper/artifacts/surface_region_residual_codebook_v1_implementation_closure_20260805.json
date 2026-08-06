@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_frozen_v2_residual_codebook_v1_implementation_closure",
+  "status": "closed_after_implementation_and_unit_tests_before_training_or_new_generic_validation",
+  "preregistration": {
+    "path": "paper/artifacts/surface_region_residual_codebook_v1_preregistration_20260805.json",
+    "sha256": "c161ef5ce15e5eb14546d3659ca881b166095a712cc07b078579fcfd8f877511"
+  },
+  "source_sha256": {
+    "surface_region_summary.py": "b8598ff48ce5fababa9e2a91966a415af96f5950122d6cb15ccbfe076afd0796",
+    "surface_region_codebook_loss.py": "3bd8e140fc0105c6205274b78c47be6829c4198f46149047fc28ecb7e795b9c6",
+    "train_surface_region_residual_codebook.py": "c4b2c5b0c31cbf4abcfa02b71c075de8f956288e06ebd5fe7997fae8bb2618a1"
+  },
+  "implementation_contract": {
+    "checkpoint_schema_version": 5,
+    "total_slots": 4,
+    "learned_residual_slots": 3,
+    "canonical_and_slot0_exact_frozen_v2": true,
+    "reliability_forwarded_to_canonical_and_direction_conditioning": true,
+    "frozen_base_forced_eval_during_training": true,
+    "gauge_aware_set_matching": true,
+    "explicit_codebook_hard_max_route": true,
+    "legacy_priors_one_hot_fallback": true,
+    "control_referenced_feasible_checkpoint_selection": true
+  },
+  "pretraining_validation": {
+    "pytest_command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_surface_region_residual_codebook.py tests/test_surface_region_codebook_loss.py tests/test_surface_region_codebook_v3.py tests/test_surface_region_summary.py",
+    "passed": 25,
+    "failed": 0,
+    "py_compile_passed": true
+  }
+}

@@ -80,6 +80,7 @@ run_guard() {
   local pcie_fail_at="$4"
   local child_seconds="$5"
   local maximum_overheat_polls="${6:-1}"
+  local poll_seconds="${7:-1}"
   local case_root="$TEST_ROOT/$case_name"
   mkdir -p "$case_root/state"
   PATH="$FAKE_BIN:$PATH" \
@@ -90,7 +91,7 @@ run_guard() {
     GPU_TELEMETRY_LOG="$case_root/telemetry.csv" \
     GPU_MAX_TEMP_C=86 \
     GPU_START_MAX_TEMP_C=80 \
-    GPU_POLL_SECONDS=1 \
+    GPU_POLL_SECONDS="$poll_seconds" \
     GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES="$maximum_failures" \
     GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS="$maximum_overheat_polls" \
     bash "$GUARD" -- bash -c "sleep $child_seconds" \
@@ -101,6 +102,15 @@ run_guard recover recover 2 0 4
 [[ "$(grep -c ',telemetry_retry_1_of_2$' \
   "$TEST_ROOT/recover/telemetry.csv")" -eq 2 ]]
 grep -q ',sample$' "$TEST_ROOT/recover/telemetry.csv"
+
+# A poll interval greater than one must still produce periodic runtime samples.
+# This specifically guards against using Bash's special ``_`` parameter as a
+# counter: commands inside the loop rewrite ``_`` and previously made the wait
+# loop effectively infinite for every production interval above one second.
+run_guard periodic steady 2 0 8 1 2
+periodic_count="$(cat "$TEST_ROOT/periodic/state/telemetry_count")"
+[[ "$periodic_count" -ge 4 ]]
+[[ "$(grep -c ',sample$' "$TEST_ROOT/periodic/telemetry.csv")" -ge 3 ]]
 
 set +e
 run_guard threshold threshold 2 0 20

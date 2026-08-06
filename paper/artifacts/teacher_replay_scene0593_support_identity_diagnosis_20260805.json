@@ -1,0 +1,97 @@
+{
+  "artifact_type": "teacher-replay-support-identity-diagnosis-v1",
+  "date": "2026-08-05",
+  "decision_scope": "diagnostic_only_no_historical_replay_compatibility",
+  "scene": "scene0593_00",
+  "seed": 9437,
+  "physical_radius_m": 0.7,
+  "teacher_region_contract_sha256": "a96e8721e6c9ed12c7da7528273b9af7d03da6bc709002e1e49639b9ee6b2f82",
+  "historical_sources": {
+    "teacher_replay_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/caches/control_c256_geometric/validation_shard0.pt",
+    "scene_intermediate": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260801/surface_c1024_attention_pooling_v1_gpu1only_p4_h78_srcd44cf2c8/scene_intermediate/control_c256_geometric/validation_shard0/scene0593_00/intermediate.pt"
+  },
+  "reproduction": {
+    "description": "Fresh current RADIO and both frozen adaptors were run over the same eight authenticated RGB-D-pose frames. The current SurfaceRegion V3 candidate graph was built, then the frozen replay V2 teacher contract was used for core-only expansion.",
+    "historical_teacher_support_sha256": "6e1eec414af43d9e9a5779f206f9ccbb127106c797f0d07668a07ee338fab771",
+    "fresh_teacher_support_sha256": "33bea609bf4e819b69597f1e2cfc092f577ca2e781240002e23e93e333901220",
+    "failed_run_teacher_support_sha256": "33bea609bf4e819b69597f1e2cfc092f577ca2e781240002e23e93e333901220",
+    "failed_run_sha_reproduced_exactly": true
+  },
+  "support_comparison": {
+    "historical_tokens": 1428,
+    "fresh_tokens": 1428,
+    "ordered_indices_exact": false,
+    "ordered_position_mismatches": 2,
+    "set_intersection": 1428,
+    "historical_only": 0,
+    "fresh_only": 0,
+    "membership_exact": true,
+    "teacher_region_saturated": false
+  },
+  "geometry_comparison": {
+    "scene_voxels_historical": 17687,
+    "scene_voxels_fresh": 17687,
+    "full_scene_voxel_lattice_keys_exact": true,
+    "historical_xyz_raw_sha256": "9471ee96b48fafcc1901a45f4b33b990d44fcec89bc128bd2691ff44e98c76a8",
+    "fresh_xyz_raw_sha256": "9471ee96b48fafcc1901a45f4b33b990d44fcec89bc128bd2691ff44e98c76a8",
+    "xyz_byte_exact": true,
+    "shared_support_max_absolute_coordinate_difference_m": 0.0,
+    "shared_support_mean_absolute_coordinate_difference_m": 0.0
+  },
+  "crop_comparison": {
+    "exact": true,
+    "historical": [
+      {
+        "frame": "000000.jpg",
+        "crop_box_tlbr": [279, 737, 720, 1135]
+      },
+      {
+        "frame": "001300.jpg",
+        "crop_box_tlbr": [8, 122, 955, 1087]
+      },
+      {
+        "frame": "001900.jpg",
+        "crop_box_tlbr": [314, 75, 968, 584]
+      }
+    ],
+    "fresh": [
+      {
+        "frame": "000000.jpg",
+        "crop_box_tlbr": [279, 737, 720, 1135]
+      },
+      {
+        "frame": "001300.jpg",
+        "crop_box_tlbr": [8, 122, 955, 1087]
+      },
+      {
+        "frame": "001900.jpg",
+        "crop_box_tlbr": [314, 75, 968, 584]
+      }
+    ]
+  },
+  "diagnosis": {
+    "root_cause": "The legacy support digest binds the incidental ordered Dijkstra output. Two nodes exchange order even though the unsaturated physical support set, voxel coordinates, selected views, and crop boxes are identical.",
+    "semantic_effect": "none_for_teacher_crop_target",
+    "legacy_check_assessment": "strict_but_not_semantically_canonical"
+  },
+  "stable_identity_design_if_ever_needed": {
+    "membership_representation": "canonical_lexicographically_sorted_int64_voxel_lattice_keys",
+    "required_bindings": [
+      "scene",
+      "seed_voxel_key",
+      "physical_radius_m",
+      "teacher_region_contract_sha256",
+      "voxel_size_m",
+      "canonical_support_membership_sha256",
+      "teacher_region_saturated_false"
+    ],
+    "historical_proof_requirement": "authenticated historical scene intermediate or an authority artifact derived from it",
+    "not_sufficient": [
+      "token_count",
+      "view_names",
+      "crop_boxes",
+      "legacy_raw_coordinate_sha256"
+    ]
+  },
+  "recommended_mainline_decision": "Use fresh official teacher targets for every SurfaceRegion V3 shard under one frozen V2 teacher contract and RADIO checkpoint; do not mix historical replay targets with freshly reconstructed student graphs."
+}

@@ -418,12 +418,16 @@ process_group_has_live_members() {
 }
 
 wait_until_next_poll_or_child_exit() {
-  local _
+  local poll_index
   # A sparse GPU telemetry interval must not impose the same delay between
   # short jobs.  Poll only the local process table once per second and return
   # immediately when the guarded process group exits; nvidia-smi is still
   # queried no more often than GPU_POLL_SECONDS.
-  for ((_=0; _<GPU_POLL_SECONDS; _++)); do
+  # Do not use Bash's special ``_`` parameter as the loop counter.  Bash
+  # rewrites ``_`` after every simple command (for example ``sleep 1``), which
+  # can reset the counter and prevent every post-launch telemetry sample when
+  # GPU_POLL_SECONDS is greater than one.
+  for ((poll_index=0; poll_index<GPU_POLL_SECONDS; poll_index++)); do
     process_group_has_live_members || return 0
     sleep 1
   done
@@ -444,11 +448,11 @@ resume_child_group() {
 }
 
 terminate_child_group() {
-  local _
+  local termination_poll
   if process_group_has_live_members; then
     resume_child_group
     kill -TERM -- "-$child_pid" 2>/dev/null || true
-    for _ in {1..20}; do
+    for termination_poll in {1..20}; do
       if ! process_group_has_live_members; then
         child_paused=0
         return 0
@@ -456,7 +460,7 @@ terminate_child_group() {
       sleep 1
     done
     kill -KILL -- "-$child_pid" 2>/dev/null || true
-    for _ in {1..5}; do
+    for termination_poll in {1..5}; do
       if ! process_group_has_live_members; then
         child_paused=0
         return 0
@@ -471,7 +475,7 @@ terminate_child_group() {
 }
 
 verify_target_gpu_released() {
-  local _ current_uuid owners release_sample
+  local release_poll current_uuid owners release_sample
   if ! check_pcie; then
     echo "GPU$GPU lost PCIe response during CUDA-release verification" >&2
     return 1
@@ -486,7 +490,7 @@ verify_target_gpu_released() {
     return 1
   fi
   owners=""
-  for _ in {1..20}; do
+  for release_poll in {1..20}; do
     owners="$(target_compute_owners)" || return 1
     if [[ -z "$owners" ]]; then
       release_sample="$(sample_gpu)" || return 1

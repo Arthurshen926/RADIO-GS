@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_physical_v2_residual_router_v1",
+  "status": "registered_before_training_and_before_new_benchmark_opening",
+  "hypothesis": "Complementary residual view evidence and a global query-conditioned router can improve text-query unary quality when the previously accepted physical region contract and exact frozen-V2 fallback are held fixed.",
+  "single_variable_policy": {
+    "fixed": [
+      "accepted physical region expansion contract",
+      "accepted frozen-V2 slot-zero readout",
+      "official RADIO summary head and l2-direction gauge",
+      "generic scene-disjoint train/dev caches and text banks",
+      "frozen benchmark evaluator, scales, threshold, and postprocess"
+    ],
+    "candidate_change": "add residual evidence slots and a query-conditioned attention router",
+    "explicitly_separate_future_change": "minimum-token contract repair and sparse-support augmentation"
+  },
+  "frozen_base": {
+    "readout_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+    "readout_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "region_contract_sha256": "ac77e31694ebe796befcc725ea60685ad6f97978a9a903e1029aa7a7a05abc07",
+    "expansion": "undirected_dijkstra_physical_edge_length",
+    "maximum_tokens": 256,
+    "official_summary_head": "c-radio_v4 siglip2-g",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "training_sources": {
+    "train_cache_sha256": [
+      "9e607ec3202beec545b1ae0577640ab519e242be9471699a0e338396e8f2aef9",
+      "52360dfae6f3adb11bde880027b044b67d8a7a3978b888bf895b81c0a585e6ec",
+      "f92072270380824871f61bbacc32a751de15affe2f09038382a9c927d61fc8cf"
+    ],
+    "validation_cache_sha256": [
+      "3998f33ac705b4561455b0213732422983b228e032c340c730777dd54718fbb9",
+      "d210be6dd060022fa505344592dc193432d0a023dba59e0cd391116b0eb8da00",
+      "2c3cce72a051daf75e0cfb3283445cf90deba9eb74b304cd300fbaf86debd34a"
+    ],
+    "fit_text_bank_sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+    "validation_text_bank_sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+    "generic_negative_text_bank_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "uses_benchmark_scenes": false,
+    "uses_benchmark_test_vocabulary": false
+  },
+  "canary_policy": {
+    "seed": 0,
+    "residual_representation_gate": "teacher_best_slot_cosine_mean must exceed the recomputed frozen-V2 control while slot zero remains exact",
+    "router_generic_gate": "text-response and support/ranking gates in train_surface_region_query_router.py must all pass on scene-disjoint validation",
+    "benchmark_opening": "only after the router generic gate passes",
+    "development_scene": "figurines",
+    "figurines_primary_floor_miou": 0.4803371775,
+    "figurines_mechanistic_gate": "candidate must exceed the exact same-run slot-zero fallback",
+    "full4_opening": "only if both Figurines gates pass"
+  },
+  "frozen_lerf_protocol": {
+    "preset": "vala_repo_3d",
+    "scale_radii_m": [0.25, 0.45, 0.7],
+    "scale_readout": "highest_raw_knn10_smoothed_peak_per_query",
+    "score_postprocess": "vala_knn_minmax",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6
+  },
+  "forbidden": [
+    "per-scene parameter tuning",
+    "threshold or graph sweep",
+    "benchmark-label checkpoint selection",
+    "seed selection on Figurines",
+    "changing region contract or base readout in this experiment"
+  ],
+  "failure_action": "do not open LERF full4; diagnose generic representation/query gates or reject this branch without benchmark-specific tuning"
+}

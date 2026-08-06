@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "registration": "target_blind_source_observation_evidence_gate_v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "question": "Can source-view responsibility evidence select between the current strong unary and one fixed surface-safe propagated field without target RGB, mask, metric, or scene identity?",
+  "historical_failure_audit": {
+    "old_method": "hash256 logistic unary versus fixed f2/g4 K201 release-compatible diffusion",
+    "fern_selection": "hash256 diffusion",
+    "fern_oof_log_loss": 0.04954757711060761,
+    "fern_target_iou": 0.5308410361456904,
+    "horns_left_selection": "hash256 strong unary",
+    "horns_left_target_iou": 0.35605994905419497,
+    "finding": "The three-fold mechanics were strict, but both candidates belonged to an obsolete hash256/K201 interface and cannot gate the current K4/K16 compiler or surface-safe graph.",
+    "reuse": "Reuse only deterministic folds, heldout clearing, balanced log-loss, weighted AUC, and unary tie-break. Never reuse hash256 features, K201 topology, or old full-fit predictions."
+  },
+  "candidate_actions": [
+    {
+      "name": "unary",
+      "definition": "Current task compiler's canonical unary_prior probability using only the two training folds' source prompt evidence."
+    },
+    {
+      "name": "surface_safe_propagated",
+      "definition": "The same fold-specific unary followed only by the fixed typed surface-safe canonical support graph; no hash256 relation, no K201 kernel, and no connected selection."
+    }
+  ],
+  "fixed_surface_safe_graph": {
+    "neighbors": 16,
+    "topology_mode": "mutual_knn",
+    "capability_affinity_mode": "exact_official_capability",
+    "surface_relation": "local_pca_tangent_v1",
+    "surface_normal_neighbors": 24,
+    "surface_normal_min_planarity": 0.0,
+    "surface_topology_min_affinity": 0.0,
+    "covisibility": "admit only a responsibility sidecar cryptographically bound to raw MPR geometry; soft weight 0.25; otherwise omit",
+    "require_covisibility_topology": false,
+    "graph_policy": "typed",
+    "resolved_instance_policy_when_all_channels_exist": "instance_manifold_covisibility_mix",
+    "connected_selection": "off",
+    "query_conditioned_diffusion_kernel": "none"
+  },
+  "task_compilers": {
+    "spin9": {
+      "prompt_type": "full reference binary mask",
+      "prototype_count": 4,
+      "prompt_registration": "native exact front-to-back raster adjoint",
+      "observation_fusion": "direct_raster_adjoint",
+      "seed_construction": "joint_signed",
+      "registered_selection_mode": "all_components"
+    },
+    "nvos": {
+      "prompt_type": "positive and negative scribbles",
+      "prototype_count": 16,
+      "prompt_registration": "native exact front-to-back raster adjoint",
+      "observation_fusion": "hard_seed_anchor_only_probability",
+      "observation_confidence": "poisson_mass_coverage",
+      "seed_construction": "joint_signed",
+      "prototype_seed_construction": "winner_take_all",
+      "hard_seed_threshold": 0.2,
+      "hard_seed_conflict_policy": "exclusive_relative",
+      "registered_selection_mode": "all_components"
+    }
+  },
+  "cross_validation": {
+    "folds": 3,
+    "fold_key": "SplitMix64(global primitive row) modulo 3",
+    "population": "capability-valid rows with nonzero untampered source signed responsibility evidence",
+    "label": "raw positive responsibility mass greater than raw negative responsibility mass; exact ties excluded",
+    "reference_weight": "raw positive plus raw negative raster-adjoint responsibility mass",
+    "minimum_positive_rows_per_training_or_heldout_fold": 32,
+    "minimum_negative_rows_per_training_or_heldout_fold": 32,
+    "leakage_rule": "For fold f, set positive_weight, negative_weight, raw_positive_mass, and raw_negative_mass to exact zero on every capability-valid row assigned to f before constructing direct observation, solver seeds, prototypes, unary anchors, unary, or propagation.",
+    "heldout_prediction": "Read each action's probability only on nonzero heldout source-evidence rows; never overwrite heldout predictions with direct anchors.",
+    "full_fit_predictions_as_oof": "forbidden",
+    "primary_metric": "responsibility-class-balanced Bernoulli log-loss",
+    "probability_epsilon": 1e-7,
+    "secondary_metric": "responsibility-weighted ROC AUC",
+    "metric_round_decimals": 12,
+    "selection": "lexicographically minimize rounded log-loss, maximize rounded AUC, then choose unary on a tie",
+    "scene_id_rule": false
+  },
+  "development": {
+    "scenes": ["spin9:lego", "nvos:fern"],
+    "role": "validate that the immutable source-only gate chooses the previously observed target-safe action",
+    "expected_selection": {
+      "spin9:lego": "surface_safe_propagated",
+      "nvos:fern": "unary"
+    },
+    "promotion_gate": "Both development selections must match the expected action; otherwise stop before heldout target scoring and report source-observation gate mismatch."
+  },
+  "heldout": {
+    "scenes": ["spin9:room", "nvos:horns_center", "nvos:horns_left"],
+    "opening_rule": "For every heldout scene, freeze and reload the complete three-fold OOF gate receipt first; then generate and seal both full-fit action predictions before any target mask or target metric is opened.",
+    "forbidden_before_gate_and_prediction_receipts": [
+      "target RGB",
+      "target mask contents",
+      "target metrics",
+      "previous heldout target outcomes"
+    ],
+    "rule_after_target_metrics": "The selected action and all method constants are immutable; no branching or parameter changes."
+  },
+  "predictions": {
+    "spin9:room": "Gate likely selects propagated if surface relations reconstruct heldout source responsibilities better; otherwise unary.",
+    "nvos:horns_center": "Gate likely selects unary because sparse strong anchors make propagation unnecessary.",
+    "nvos:horns_left": "Gate likely selects unary because the old reference-only CV already rejected propagation despite using weaker candidates."
+  },
+  "promotion": {
+    "rule": "Promote the gate only if the development selection gate passes and heldout selected-action macro IoU is not below always-unary macro IoU; report per-scene deltas without scene-specific overrides.",
+    "stop": "Any leakage, insufficient fold population, action mismatch on development, missing receipt, or heldout macro regression stops promotion."
+  },
+  "execution": {
+    "output_root": "output/optimization_20260805/source_observation_evidence_gate_v1",
+    "physical_gpu": 1,
+    "thermal_check": "stage boundaries and at most every 180 seconds",
+    "thermal_abort": "two consecutive samples at or above 88C"
+  }
+}

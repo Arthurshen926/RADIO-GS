@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "result": "canonical_factorized_radio_v1_lego_field_training",
+  "completed_at": "2026-08-05T14:26:36+08:00",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_lego_field_training_preregistration_20260805.json",
+    "sha256": "619ccc073a38650006d110db944846629f1f4ca048974a58888e5e615314253d"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_field_d256_l128.pth",
+    "sha256": "12ebdbe8e18c29e30a9c6f40c466f24e9ed7d2accd8a83ba536fbc90ba808637",
+    "report_sha256": "181c3bcb3dffe9664a1e6ca318a0c639f93aac489b90004826a5fc940514e5e6",
+    "log_sha256": "37c622a4d6ddbba7de77ccc912e44d71b3ec5cc34c9c617586cb6e57030913db",
+    "strict_schema_v2_reload": true,
+    "checkpoint_contract": "canonical-factorized-radio-checkpoint-v1",
+    "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373",
+    "factorized_cache_sha256": "179920a8d2ae7947284df35b595e57d2029183759843a77fbbc320d234fd313f",
+    "feature_output_bundle_sha256": "3f2d8fb3fcab457d4ad81a274652f505f0c26c3ba0c1fbb3dd6c0cec0537c181",
+    "num_gaussians": 636148,
+    "valid_gaussians": 128780,
+    "field_reliability_shape": [
+      636148,
+      0
+    ],
+    "fusion_reliability": false
+  },
+  "final_metrics": {
+    "direction_mean_cosine": 0.981511652469635,
+    "direction_p05_cosine": 0.9499999284744263,
+    "mean_abs_log_amplitude_error": 0.019066791981458664,
+    "p95_abs_log_amplitude_error": 0.037680886685848236,
+    "predicted_norm_median": 30.735326766967773,
+    "target_norm_median": 31.380712509155273,
+    "dino_mean_cosine": 0.9907039999961853,
+    "dino_p05_cosine": 0.975043773651123,
+    "sam3_mean_cosine": 0.9755763411521912,
+    "sam3_p05_cosine": 0.9444383382797241
+  },
+  "promotion_gate": {
+    "direction_mean_cosine": true,
+    "direction_p05_cosine": true,
+    "mean_abs_log_amplitude_error": true,
+    "p95_abs_log_amplitude_error": true,
+    "predicted_norm_median": true,
+    "dino_mean_cosine": true,
+    "dino_p05_cosine": true,
+    "sam3_mean_cosine": true,
+    "sam3_p05_cosine": true,
+    "checkpoint_schema_version": true,
+    "field_reliability_columns": true,
+    "all_source_and_lineage_invariants": true,
+    "passed": true
+  },
+  "basis": {
+    "explained_variance_ratio": 0.9584032297134399,
+    "reconstruction_cosine": 0.9867168664932251,
+    "numerical_rank": 256,
+    "condition_number": 5.7449699912951235
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "epochs_completed": 20,
+    "gpu_power_limit_w": 300,
+    "stage_end_gpu_temperature_c": 40,
+    "thermal_stop_triggered": false
+  },
+  "implementation": {
+    "capability_builder_sha256": "4127f97d9107d6f2cfcaccc57b87d2eb353923c1ac3f0f46eb23563cafe285e5",
+    "capability_cache_loader_sha256": "889fc1b5a616878d1262d0d96ac224a888dadce1e309b1055643dc2e3a78a791",
+    "support_graph_builder_sha256": "f087538dbff4bd0c3434aab4beb46be299f15e5d60a98cfcb4e4f0c4d17e671d"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  },
+  "decision": "promote_to_source_only_capability_materialization_gate"
+}

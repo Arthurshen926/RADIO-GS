@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_surface_direction_contract_figurines_dev1_v1",
+  "status": "registered before candidate target-label evaluation",
+  "candidate": {
+    "change": "L2-normalize field-decoded RADIO tokens before SurfaceRegionSummaryReadoutV2, exactly matching its training caches and declared region contract",
+    "field_checkpoint_sha256": "328ba9f9f19f69f02a118462cbb427fac7670cbc83e4d4eade7e66902943aa66",
+    "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "descriptor_cache_sha256": "0eb38c3c6b08bb4221fadc1a804a47b5550b00ec9cd369f4c77f5485148e584d",
+    "canonical_negative_formula": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "trainable_parameters": 0,
+    "benchmark_masks_accessed_by_candidate_build": false,
+    "benchmark_queries_accessed_by_candidate_build": false,
+    "other_method_changes": false
+  },
+  "development_scene": "figurines",
+  "control_miou": 0.4753371775,
+  "gate": {
+    "primary": "candidate mIoU must improve by at least 0.005",
+    "threshold_miou": 0.4803371775,
+    "on_success": "run score-quality diagnostics, then test the same contract fix on Field-B and one additional existing-scene descriptor before expansion",
+    "on_failure": "retain the bug fix as an explicit versioned option but do not promote it; proceed to a newly trained factorized readout"
+  },
+  "stop_rules": [
+    "No threshold, graph, scale, prompt, or category tuning",
+    "Do not combine with reliability tempering during this causal test",
+    "Do not expand Field-B unless the current-field sentinel passes"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_orchids_surface_safe_graph",
+  "registered_at": "2026-08-06T04:41:30+08:00",
+  "status": "registered_after_source_only_capability_gate_and_before_graph_build",
+  "purpose": "Build the uniformly frozen query-independent surface-safe mutual-K16 Orchids topology on the promoted factorized capability bank.",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_orchids_source_chain_preregistration_20260806.json",
+    "sha256": "9bc432b2deff2bdaedddcd2898a2c4c67da6f47393cfd4e78f8188bb2f2a5e76"
+  },
+  "inputs": {
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/official_dino_sam3_views.pt",
+      "sha256": "7b5db9fd29cf3e4f1545b2da36d2893a90d440b248658bc57705d4c6d20e3a7a",
+      "field_checkpoint_sha256": "063abe4b81a5b0ddabd62e2e2c96e414aaaff8f36ce00ebdc1177c16c9c90a64",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373",
+      "feature_output_bundle_sha256": "94c0e33b66c3418875f7b9403153695879ab11918d310a0250c4348a971dbee5",
+      "capability_cohort_authority_sha256": "04a6b247b832dac3369b6cc902a9055b766896188c049baf0a31bf8ee2b79ff5"
+    },
+    "capability_source_only_gate": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_orchids_capability_batch2048_audit_results_20260806.json",
+      "sha256": "2dcfdb8f4e3faf1fc741a58ea989e547353314769044977c662670ea96d4ec44",
+      "passed": true,
+      "full_fp16_parity": true
+    },
+    "registration_responsibility_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/orchids/responsibility.pt",
+      "sha256": "804baa9a5e54c29d7e1ac801d623156b3b70aa472e8273699ca28444fee49e5a"
+    },
+    "geometry_xyz_sha256": "e1929bd077c1cdf0ceeedb33ee8d645223999d661a1d248751475b8811010993",
+    "primitive_global_rows_sha256": "032a3fe39f3319745c1307745920bfa482275622313057bb8b41b32e483dc29a",
+    "primitive_valid_sha256": "fd95e34dc4a1a086bb292a83f2c54bb6f2485e64c1494d81f625d4745e15db52"
+  },
+  "fixed_graph": {
+    "neighbors": 16,
+    "topology_mode": "mutual_knn",
+    "capability_affinity_mode": "exact_official_capability",
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "surface_relation": "local_pca_tangent_v1",
+    "surface_normal_neighbors": 24,
+    "surface_normal_min_planarity": 0.0,
+    "surface_topology_min_affinity": 0.0,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "covisibility_weight": 0.25,
+    "require_covisibility_topology": false,
+    "affinity_chunk_size": 65536,
+    "scene_specific_tuning": false,
+    "labels_or_queries_used": false
+  },
+  "implementation": {
+    "support_graph_builder_sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "stage_local_execution_authority": true,
+    "method_or_graph_hyperparameter_changed_from_leaves": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "device": "cuda:0",
+    "affinity_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "temperature_limit_c": 88,
+    "poll_seconds": 30,
+    "consecutive_overheat_polls_before_stop": 6,
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/shared_support_graph_surface_safe_k16.pt"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

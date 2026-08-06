@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "status": "implementation_contract_mismatch_confirmed_before candidate evaluation",
+  "contract": "SurfaceRegionContractV2.feature_normalization = l2_direction",
+  "training_cache_active_token_norm": {
+    "mean": 0.9999998212,
+    "std": 0.0000213340,
+    "min": 0.9998452067,
+    "max": 1.0001635551
+  },
+  "inference_field_raw_norm_first_10000_rows": {
+    "current_field": {
+      "mean": 11.5020685196,
+      "std": 4.9303278923,
+      "min": 7.9292488098,
+      "max": 35.5432472229
+    },
+    "field_b": {
+      "mean": 14.1083812714,
+      "std": 9.3028039932,
+      "min": 5.6677885056,
+      "max": 48.9536285400
+    }
+  },
+  "code_path": "build_surface_region_semantic_cache.py passed field.radio_features directly to SurfaceRegionSummaryReadoutV2 without enforcing the declared l2_direction contract",
+  "impact": "Feature encoders begin with LayerNorm, but the readout base contains an unnormalized raw weighted mean and the frozen official summary head is nonlinear; therefore the mismatch changes both gauge and text-response geometry.",
+  "fix_policy": "Expose both gauges explicitly and bind the selected mode into resume/output metadata. Keep legacy_raw for the accepted old checkpoint; use l2_direction only with a jointly trained compatible readout. Evaluate either mode without changing field, thresholds, scales, or queries."
+}

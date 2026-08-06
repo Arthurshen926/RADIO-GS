@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "experiment": "surface_region_connected_completion_v3_fresh_validation_shard0_canary",
+  "status": "replacement_canary_passed_before_full_cache_build_training_and_benchmarks",
+  "registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_connected_completion_v3_calibration_preregistration_20260805.json",
+    "sha256": "779d41b570b20cbcad6ba55ae18243f1012bb3eb4bbd5e5dd909a3417d9728e8"
+  },
+  "cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/caches/validation_shard0.pt",
+    "sha256": "7a6c99dc2107d14fe7b0dbed9711a58bc1b3842d7745476ce9bbadd887b83913",
+    "bytes": 65480715,
+    "teacher_target_source": "fresh_official_runtime",
+    "scenes": 4,
+    "rows": 96,
+    "full_support_rows": 48,
+    "eligibility_completion_rows": 48,
+    "failed_scenes": 0
+  },
+  "gates": {
+    "all_rows_minimum_satisfied": true,
+    "completion_row_fill_coverage": 1.0,
+    "completion_semantic_tokens_unique": [
+      20
+    ],
+    "completion_support_fill_tokens_unique": [
+      4
+    ],
+    "completion_selected_tokens_unique": [
+      24
+    ],
+    "completion_fill_fraction": 0.16666666666666666,
+    "extreme_graph_fallback_rows": 0,
+    "padding_radio_nonzero": 0,
+    "padding_geometry_nonzero": 0,
+    "padding_reliability_nonzero": 0,
+    "overall_pass": true
+  },
+  "distribution": {
+    "all_active_support_fill_tokens": 192,
+    "all_active_fill_fraction": 0.016020024195313454,
+    "raw_radio_norm_minimum": 20.521730422973633,
+    "raw_radio_norm_median": 29.22428321838379,
+    "raw_radio_norm_maximum": 40.101200103759766
+  },
+  "gpu": {
+    "physical_gpu": 0,
+    "wall_seconds": 94.3,
+    "maximum_observed_temperature_c": 54,
+    "guard_intervention": false,
+    "power_limit_w": 300.0
+  },
+  "decision": "open full query-free ScanNet cache construction only; training and benchmarks remain unopened until all cache integrity gates pass"
+}

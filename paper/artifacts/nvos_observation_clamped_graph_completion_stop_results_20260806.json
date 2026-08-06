@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_observation_clamped_graph_completion_stop_results_v1",
+  "status": "complete_stop_graph_completion_retain_graph_off_v2",
+  "conclusion": "Observation clamping fixes the graph/unary interface invariant but does not make graph completion a reliable cross-view correspondence model. Direct completion is catastrophically harmful on fern while useful on horns_left. A fixed source-only component LOO gate cannot distinguish this failure: it authorizes 81.34% of fern unknown rows but only 11.12% of horns_left unknown rows. No gated target prediction is authorized or scored. Retain the frozen graph-off hierarchical-trust v2 method.",
+  "retained_method": {
+    "name": "nvos_hierarchical_trust_local_positive_completion_full8_v2_graph_off",
+    "scene_macro_foreground_iou": 0.7477712404198159,
+    "results_path": "paper/artifacts/nvos_hierarchical_trust_local_positive_full8_exact_results_20260805.json",
+    "results_sha256": "240f4978146869f210e0c2ce2677763927bb6e111aad271602322a06c1ec21da",
+    "fern_foreground_iou": 0.7350345861696804,
+    "horns_left_foreground_iou": 0.7663050940546479
+  },
+  "direct_observation_clamped_exact_results": {
+    "protocol": "sealed prediction authority followed by exact front-to-back Wu/W1 target score freeze, strict reload, and only then frozen-mask scoring at threshold 0.5",
+    "fern": {
+      "foreground_iou": 0.49045438862092033,
+      "delta_from_retained_graph_off": -0.2445801975487601,
+      "prediction_authority_sha256": "ced24602179acf2d1496592ebeff2983fb3d2203a16169ddc971f360f8a1c5ff",
+      "score_sha256": "d564dcda1a6625d32f95643284508b4f55e9bcca2c5a62e38c47de9af9549ab9",
+      "report_sha256": "5c8ddba1f9a059b28e8c5a20ec1e57a4ba89c43a7a72de3d1c4bea8c7826115e"
+    },
+    "horns_left": {
+      "foreground_iou": 0.8207416104365923,
+      "delta_from_retained_graph_off": 0.0544365163819444,
+      "prediction_authority_sha256": "30b4fcc0a4be1140435551d590561422580faefc2b5de20a3b67f235c95465ec",
+      "score_sha256": "011d76bdd9342fedf13ab331f4e316b88fbdbd8168aa943a5808679c821685e7",
+      "report_sha256": "e2949288675e1b436a43d0a3cbc32274ecc0215e54da98da0d14cdbffe50bc39"
+    },
+    "decision": "reject_unconditional_graph_completion"
+  },
+  "source_invariant_audits": {
+    "preregistration_sha256": "f944804c75ffa89eed9b33bb1ededc4ed886716543af301baa8230e1d0486c23",
+    "fern": {
+      "selector_sha256": "32f9b009819bd74f8f4e2d5a65208b5489d42584bf497495e5d5e2df56c19970",
+      "report_sha256": "65b875851e0119fcbca5e5ea1957fbbd42e561b0283a97e55f23232e6ca6e748",
+      "observed_rows": 172843,
+      "observed_primitive_max_absolute_change": 0.0,
+      "source_observed_pixel_max_absolute_change": 0.0,
+      "unknown_changed_rows": 121908,
+      "unreachable_no_boundary_rows": 2449,
+      "unreachable_no_boundary_rows_bitwise_equal": true
+    },
+    "horns_left": {
+      "selector_sha256": "3d0d8a607672efe6ea3a7bd2cce8565582ff482505ed088f2dbb706b1726029d",
+      "report_sha256": "7866b8886afd0d563386cab1ec051bfd35fdaf1218882e05ecfa758f29816319",
+      "observed_rows": 147884,
+      "observed_primitive_max_absolute_change": 0.0,
+      "source_observed_pixel_max_absolute_change": 0.0,
+      "unknown_changed_rows": 9188,
+      "unreachable_no_boundary_rows": 811,
+      "unreachable_no_boundary_rows_bitwise_equal": true
+    }
+  },
+  "source_loo_component_diagnostic": {
+    "preregistration_sha256": "a07ca92537b77b0cc40789a6c0c55ca69e00a25b2e8edd2ad803a9363d934578",
+    "method_contract_sha256": "3310584ff577a7f4bda55bcddf88dd122de9e8e5e2b7db77cd7105b026a398af",
+    "target_rgb_mask_or_metric_opened": false,
+    "fern": {
+      "selector_sha256": "ec9def93dac2ee5de34e954b5ad3afb1bc811c510a72cee47174b5b2d0ced7d7",
+      "report_sha256": "610ec1eec8be67dd52d85fa2ceb3334c0868a402865a74bca7cbded6249cb746",
+      "component_count": 524,
+      "positive_validation_component_count": 499,
+      "accepted_component_count": 337,
+      "rejected_positive_validation_component_count": 162,
+      "unknown_rows": 124357,
+      "accepted_unknown_rows": 101152,
+      "accepted_unknown_row_fraction": 0.8134001302701095,
+      "accepted_ring_candidate_brier": 0.07768760194299486,
+      "accepted_ring_field_brier": 0.11223689532656446
+    },
+    "horns_left": {
+      "selector_sha256": "7b250a523d0be034dd5b06958fb1aeb0b7d50c5c9e31eaa36fb0fc1ac2f0f477",
+      "report_sha256": "773102511b3d6071dde34b65cbae76cbc632a4016b5aa601f51fef5661fff40f",
+      "component_count": 222,
+      "positive_validation_component_count": 49,
+      "accepted_component_count": 17,
+      "rejected_positive_validation_component_count": 32,
+      "unknown_rows": 9999,
+      "accepted_unknown_rows": 1112,
+      "accepted_unknown_row_fraction": 0.1112111211121112,
+      "accepted_ring_candidate_brier": 0.01414480372353942,
+      "accepted_ring_field_brier": 0.042570847035691306
+    },
+    "diagnosis": "Held-out source boundary interpolation is not a valid proxy for target-view Gaussian correspondence. The proxy assigns substantially more completion coverage to the failed fern scene, so further source-LOO gating or threshold tuning would be posthoc and scientifically unsupported.",
+    "decision": "stop_without_gated_target_scoring"
+  },
+  "source_access_authority": {
+    "fern": {
+      "base_unary_sha256": "d25221bad2f6ae7f6ed245c6a339b27a723c24a7390f03376f3a0e10ad29763b",
+      "support_graph_k16_sha256": "2d570d098e36dabb7fc82b06944f75def6ebc13598e97afce232f008cea34eeb",
+      "exact_w_cache_sha256": "cc2dbc08ef06ae5a8573413145d72675fe7181ccf7fb3cbae6cb4d5a14ca3db1",
+      "exact_w_report_sha256": "6e5af7ac8f0794a4794fa5bd0ceb675c85b96b9f0c2698e12e21bc67b1c60aff",
+      "source_completion_sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+      "source_completion_receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a",
+      "source_gate_sha256": "4d9769d0f6140461a0806abdbd035dc9577df43ff86e0cb14eab2a357aad0d3a"
+    },
+    "horns_left": {
+      "base_unary_sha256": "20352e766edebecb3de86a994732a3ff1b4e93624878f1f2dd4f041f3aea7a48",
+      "support_graph_k16_sha256": "cb8c0384d0951e9a4347935402e762a4c0c25fa4dcf9e493de8465054d47b7ba",
+      "exact_w_cache_sha256": "c56fc72d858c23f11c6237cf5e330d949bc1d8be709e3932cb4ccd287e0ebfe0",
+      "exact_w_report_sha256": "8aab469b9f585b42a55aed8234d87a9b1b41f2103b306ebea6982bb012594420",
+      "source_completion_sha256": "08a0f366702b79eee7d59f25a85a2480543b0298ef1abd8c30f0ff9edc027155",
+      "source_completion_receipt_sha256": "cd6e04e7ed4126b24e07bd09e11cdc7fbd20066c2ff88b6a28326cc4637d9dfd",
+      "source_gate_sha256": "66f646f9316e3214d5eed9ca7931463ea484cef51280983fee6d768b6c0bb424"
+    },
+    "all_source_records_target_rgb_opened": false,
+    "all_source_records_target_mask_opened": false,
+    "all_source_records_target_metric_computed": false
+  },
+  "new_source_files": {
+    "radio_gs/querying/observation_clamped_harmonic.py": "6a1a7197645ff885ad601c31e05a36a5850a8d72360451e0cd7584724144bebe",
+    "radio_gs/scripts/materialize_nvos_observation_clamped_harmonic.py": "f88832920c578946965490bafdd07e1b3fcacf0b9e49ef834c17b828feb7191e",
+    "radio_gs/scripts/seal_nvos_observation_clamped_prediction_authority.py": "f640e93a328a598ef6c979f8e0b809d3cb55795b3ed9ec3ee00c17d2ad94b0ec",
+    "radio_gs/scripts/eval_nvos_observation_clamped_frozen_exact.py": "dfbb63374cca8665e2e93d779ce4a917c65d8b7b3dd1d1d4b9733a2d09929586",
+    "radio_gs/querying/source_loo_component_gate.py": "04be4bcb134e1db1f518441217e9ad18f43fcd18ca79a2a29bddfd657cf399fb",
+    "radio_gs/scripts/materialize_nvos_source_loo_component_gate.py": "424e3b69807f66c9fe23d691650b0c1f055f6d74d1c6d434a9c49e44034fafd9",
+    "tests/test_observation_clamped_harmonic.py": "94f8660d20ca068ac93818cdf52e004dc2b509dc508f0e6f7e8afb1d528a1c51",
+    "tests/test_source_loo_component_gate.py": "cd42938d09b1e57706c7c61835176c5044ac21c84e483064591204969683d1e4",
+    "paper/artifacts/nvos_observation_clamped_harmonic_source_audit_preregistration_20260805.json": "f944804c75ffa89eed9b33bb1ededc4ed886716543af301baa8230e1d0486c23",
+    "paper/artifacts/nvos_source_loo_component_gate_preregistration_20260806.json": "a07ca92537b77b0cc40789a6c0c55ca69e00a25b2e8edd2ad803a9363d934578"
+  },
+  "verification": {
+    "pytest": "7 passed in 2.83s",
+    "py_compile": "passed for all six new Python implementation files",
+    "gpu1_guard": "300W physical limit, start at most 85C, hard threshold 88C, 30-second polling, six consecutive overheat polls, exclusive-singleton-after-clear-v1",
+    "gpu1_peak_sampled_temperature_c": {
+      "fern": 43,
+      "horns_left": 44
+    },
+    "gpu1_cuda_release_verified_no_compute_owner": true,
+    "shared_files_restored_or_untouched": {
+      "radio_gs/scripts/eval_nvos_gaussian_first.py": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+      "radio_gs/querying/support_solver.py": "0c764bf127b8ba3f30b82fbcb1a34a682ba559e2287ed6daa80b9970ebb29fd3",
+      "radio_gs/querying/query_engine.py": "21e00c56807da92659a2479ed6c94250527c9e9ae153f29d104834942fdf6c28"
+    }
+  },
+  "final_method_policy": {
+    "nvos_default": "frozen graph-off hierarchical-trust v2",
+    "observation_clamped_harmonic": "diagnostic_only_rejected",
+    "source_loo_component_gate": "diagnostic_only_not_authorized_for_target",
+    "connected_selection": false,
+    "scene_specific_tuning": false,
+    "further_graph_parameter_sweep": false
+  }
+}

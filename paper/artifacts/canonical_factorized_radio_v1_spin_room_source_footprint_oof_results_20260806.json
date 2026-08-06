@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "experiment": "canonical_factorized_radio_v1_spin_room_source_footprint_oof_v1",
+  "completed_at": "2026-08-06T02:04:06+08:00",
+  "status": "pass_select_surface_safe_propagated",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_room_source_footprint_oof_preregistration_20260806.json",
+    "sha256": "42ba87ff64501c09c563954a74d2216ac4d96dc735bc3df8e52f8f7aed21ea5a"
+  },
+  "gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+    "sha256": "6185f5b8e294cf9b22e492e295b598a06796b8935d9d814f1fb45e0e58e8c9f6",
+    "artifact_type": "source_observation_surface_safe_footprint_oof_gate_v1",
+    "gate_mode": "eligible_source_oof",
+    "method_contract_sha256": "eb0f8d551cad64df96ff81a2c0b95f456faca7b08a3f0893d39d5a92171d30e9",
+    "selected_action": "surface_safe_propagated",
+    "full_fit_predictions_used_as_oof": false,
+    "target_feedback": false
+  },
+  "metrics": {
+    "unary": {
+      "responsibility_balanced_log_loss": 0.6931471805599453,
+      "responsibility_weighted_auc": 0.5
+    },
+    "surface_safe_propagated": {
+      "responsibility_balanced_log_loss": 0.5377051616757659,
+      "responsibility_weighted_auc": 0.8364000284362317
+    },
+    "propagation_log_loss_reduction": 0.1554420188841794,
+    "propagation_auc_gain": 0.3364000284362317
+  },
+  "population": {
+    "observed_rows": 169253,
+    "folds": 3,
+    "fold_positive_rows": [
+      10504,
+      9129,
+      2686
+    ],
+    "fold_negative_rows": [
+      52858,
+      49391,
+      44685
+    ],
+    "complete_footprint_groups_held_out": true
+  },
+  "folds": {
+    "0": {
+      "artifact_sha256": "c6367824411b85a2df6b18d1f9caef6753358de17f2b751b1da17b6563e4467e",
+      "receipt_sha256": "5e26340cfdd5f012ae8247e768b2ceb66d9402d7b0ebe03756e3aa03eee2fecd",
+      "log_sha256": "dbf044ccb2078cf934897ed0bb0983bdf094ff451adcf82f7ba9d769e28d59ed",
+      "telemetry_sha256": "3f75bdf381210471fa2bd1c0110848a3d2ff7a47ab67e4b0c904e8c48aaa477b",
+      "owner_audit_sha256": "ca6f6833d3a24d1ce40f19612b98b16060f26333822f08bf915033e1ed65e986"
+    },
+    "1": {
+      "artifact_sha256": "9900b2d48f4caff798d810462163c5cea17d00419d99d88e5d3e40c6fe6d4875",
+      "receipt_sha256": "cd017ef4abc09c162d33abbcd83204ce5a6ea52e67f7cb6d980fe16ec23af50a",
+      "log_sha256": "f546e3dabbd1c0c0af23ae00d76b0772ffb7ace2d437608354e240e1b8a00246",
+      "telemetry_sha256": "c6d704ce5690beb8d3fea0f1846e9c097c9db756e7d6be520468fee6fd9cf254",
+      "owner_audit_sha256": "340f2f5a211493b490958fbbd0273f2285ea1927bc8233ad186c874b445470e0"
+    },
+    "2": {
+      "artifact_sha256": "c5a91e43d10df71ce4fb259071205b6f06a92cfd943fb6e49481824329f2c4b5",
+      "receipt_sha256": "85d9ddea2997da23479003453a9d62e50c7ae50fdff520a0e265edd3ee8eb44b",
+      "log_sha256": "16426beba8018fa3cbc9855d6f80f499ca8b65e3ef00f43feb6f640843d58f85",
+      "telemetry_sha256": "8d6facb62e3a3ff1362d04b8e8e06539df67d8db26c298ddce3671947858c3a5",
+      "owner_audit_sha256": "0aed9f1ca3159ba0131292228891c0c2277933a1ca90c0e9f39d14887e3645c1"
+    }
+  },
+  "lineage": {
+    "external_carrier_config_sha256": "3a1f60c0ae5329dc2fb14391250f4284e0012924cc362a3ed437c5d33a0c85d9",
+    "external_carrier_checkpoint_sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0",
+    "external_carrier_camera_map_sha256": "c89d1b61dd1a4512f4574f7092a0b773c2023b16b18b9c86941a119c34ab89af",
+    "capability_cache_sha256": "7e2c1ea44cb11317e9e8b9e41eb2f356cb431dba777c9ef62495a3bc6d4374a0",
+    "support_graph_sha256": "847f184c6b4d01294564cc80017c69840153ec84c4da0ae351246f7df25ef31a",
+    "source_evidence_authority_sha256": "04d3df79426b65a4826b6c41770832daee3c4e90dc4e200f26be67e53d095830",
+    "source_evidence_content_sha256": "8e9f83b611f852d1c8af256f1521c66985dcf0f0b77bb94d382f6efa9c53462c",
+    "source_footprint_file_sha256": "e566e1f618465578ad0b4cefaae97388b7f289ff01e54cedcdcf7c4ab3fcaeb7",
+    "source_footprint_authority_sha256": "b5c84c873acafccfe659d0f3c30ef36794eb745e48cee6eb47af0d859de94c36",
+    "source_footprint_tensor_bundle_sha256": "4928bec33bcbcd9ac5ebccdf365a5e951aa4bbe870e35199e647ddcf14ed05e2"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 51,
+    "thermal_abort": false,
+    "all_three_carrier_hashes_verified_before_fold_loop": true
+  },
+  "verification": {
+    "strict_independent_gate_replay": true,
+    "complete_file_hashes_replayed": true,
+    "heldout_prompt_evidence_exact_zero": true,
+    "shared_method_contract_exact": true
+  },
+  "decision": "Use the exact selected surface_safe_propagated base score to build the fixed K201 matched source-only support and full-fit q=0.96 right-ECDF gauge.",
+  "safety": {
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

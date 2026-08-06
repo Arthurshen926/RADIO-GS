@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_codebook_v3_query_independent_multihypothesis_v1",
+  "status": "registered_before_new_generic_validation_or_benchmark_evaluation",
+  "hypothesis": "The dominant remaining text bottleneck is the forced single SurfaceRegion summary. A globally trained three-slot query-independent codebook should preserve the official multiview teacher set and its held-out generic-text retrieval geometry better than the frozen single-summary V2 control.",
+  "representation": {
+    "slots": 3,
+    "reason": "The frozen cache contains at most three official teacher views; K is matched to that authority and is not swept.",
+    "radio_gauge": "l2_direction_inside_model",
+    "core_semantics": "only core tokens construct the summary-token base",
+    "context_semantics": "separately normalized context conditions a gated residual",
+    "reliability_semantics": "input_only_as_explicit_geometry_channel",
+    "persistent_state_query_independent": true,
+    "custom_text_projection": false,
+    "official_siglip2_summary_head_frozen": true
+  },
+  "training": {
+    "train_scenes": "32 disjoint ScanNet scenes from the four frozen context_c1024_geometric train shards",
+    "validation_scenes": "8 disjoint ScanNet scenes from the two frozen context_c1024_geometric validation shards",
+    "input_tokens": "256 published tokens deterministically stratified from up to 1024 surface candidates",
+    "fit_text_queries": 806,
+    "validation_text_queries": 101,
+    "text_query_splits_disjoint": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_masks_labels_opened": false,
+    "set_matching": "exact masked permutation minimum over K=3",
+    "set_cost": "descriptor cosine loss + 0.25 * summary-token cosine loss",
+    "query_response": "temperature_0p05_log_mean_exp_over_query_independent_hypotheses_with_learned_priors",
+    "scene_objective": "equal mean of standardized listwise KL, teacher top1-runner-up gap SmoothL1, teacher-set relation-tercile-balanced SmoothL1, and slot-prior anti-collapse KL",
+    "loss_weighting": "3-epoch set warmup, then independent-response and scene branches each receive 0.25 of the main gradient norm from one deterministic warm-start calibration",
+    "seeds": [0, 1, 2],
+    "seed_policy": "run seed0 canary first; run seeds1/2 only if seed0 passes structural and generic gates",
+    "hyperparameter_sweeps": false
+  },
+  "generic_gate": {
+    "control": "seed-matched frozen SurfaceRegion V2 on the identical validation cache and held-out generic dev text bank, recomputed against the same multiview latent teacher response",
+    "teacher_best_slot_cosine_mean_gain_min": 0.005,
+    "text_response_smooth_l1": "strictly_lower",
+    "support_top1_agreement": "nondecreasing",
+    "ranking_spearman_p05_delta_min": -0.002,
+    "response_profile_cosine_p05_delta_min": -0.002,
+    "canonical_descriptor_cosine_delta_min": -0.002,
+    "effective_slots_mean_min": 1.5,
+    "minimum_query_slot_usage_each": 0.05,
+    "multiseed_requirement": "mean gate passes and at least two of three seeds win teacher-best-slot and response SmoothL1"
+  },
+  "benchmark_opening_rule": {
+    "allowed_only_after_generic_gate": true,
+    "first_sentinel": "LERF3D Figurines frozen VALA/canonical-negative protocol",
+    "full_lerf_gate": "four-scene macro improves at least 0.01 and no scene drops more than 0.01",
+    "spin9_nvos_gate": "frozen strict result is noninferior within 0.002 before any claim of shared-task improvement",
+    "forbidden": [
+      "per-scene tuning",
+      "threshold sweeps",
+      "graph sweeps",
+      "connected-component repair",
+      "benchmark-label checkpoint selection"
+    ]
+  },
+  "source_sha256_at_registration": {
+    "surface_region_summary.py": "31858efa397b21a4602bedd30e48c1e41443d96df3a09c1feebffd00c7137272",
+    "surface_region_codebook_loss.py": "2c0cfa772c0f683a729ee3060a7f7bd16417e53466664c8d2a86fa7e5a033f6f",
+    "train_surface_region_codebook_v3.py": "f0607ed8b3c1ff43ee20760e9850a4b981c87bf1e1a572d62922a4d8cb74fe43"
+  },
+  "cache_sha256": {
+    "train_shard0": "0e94c25ab1a3e0351bdd068517de9b3b61bf97b55f49f9410bdfad2ad07b1415",
+    "train_shard1": "9b085d0ea07777d48a356447b4f18ae885e9a836475089c9d6dcb74e4ee229d9",
+    "train_shard2": "ac590c9031ad1de929bf06bf8102d66408c7c1a485a63a8f073aac1926446321",
+    "train_shard3": "7cabecee49cd09f8c1254c1f6b0dafbc34339eb1cb0bb4c6a30fd4ba212b2aab",
+    "validation_shard0": "c97867a10f199deffbc401348de5ba1aee1e0bf6ef71e0ac9a54ae2305270025",
+    "validation_shard1": "2b2a81a3bf2070c43939c9aa07773d7aee3efd02fb92a20aca24007804e84a1f",
+    "fit_text_bank": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+    "validation_text_bank": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+    "seed0_v2_control_readout": "0fb724035a0afc9653f89104aa6f004f022e683728db7e43322de24d51170fb4"
+  }
+}

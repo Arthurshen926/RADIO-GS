@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_directional_probability_mixture_dev1_v1",
+  "status": "rejected_by_preregistered_development_gate",
+  "method": {
+    "formula": "sum_m observation_frequency_m * sigmoid(10 * (positive_cosine_m - max_canonical_negative_cosine_m))",
+    "directional_contract": "weighted_spherical_two_prototype_v1",
+    "fallback": "mode0 probability for rows without two registered directional modes",
+    "query_dependent_mode_selection": false,
+    "trainable_parameters": 0,
+    "scene_specific_parameters": false,
+    "frozen_vala_readout_changed": false,
+    "evaluation_protocol_changed": false
+  },
+  "development_result": {
+    "scene": "figurines",
+    "current_canonical_negative_miou": 0.4753371775,
+    "field_d_mode0_positive_only_miou": 0.0201810990,
+    "field_d_mode1_positive_only_miou": 0.0166724697,
+    "candidate_miou": 0.0245420150,
+    "delta_vs_current": -0.4507951625,
+    "report": "output/optimization_20260805/lerf3d_directional_probability_mixture_dev1_v1/figurines/figurines/lerf_direct_3d_selection_results.json",
+    "mode0_negative_cache": "output/optimization_20260805/lerf_field_d_directional_probability_mixture_v1/figurines_mode0_negative.pt",
+    "mode0_negative_cache_sha256": "9f863144fa135a127cd028a6eb91a8e4b1d67aba74de78ea3ecb83e5578a63ae",
+    "mode1_negative_cache": "output/optimization_20260805/lerf_field_d_directional_probability_mixture_v1/figurines_mode1_negative.pt",
+    "mode1_negative_cache_sha256": "fe60ba5ec8865492751560a1e47c30c7d5e9802e48b1ec8567a2a6daf7731901",
+    "directional_mixture_cache_sha256": "488041b0fda91060e9582d4dce02927534f3e06d767242f4fd6721bde6a70c1b"
+  },
+  "gate_decision": {
+    "required": "beat both the current canonical-negative Figurines sentinel (0.4753371775) and the previous positive-only sentinel (0.4074466527)",
+    "observed": "candidate mIoU 0.0245420150",
+    "decision": "reject and do not expand"
+  },
+  "interpretation": "Probability-space marginalization avoids the invalid high-dimensional blend-then-nonlinearity operation, but it cannot rescue directional mode fields whose individual frozen text-query rankings are already unusable. The two-mode carrier improves observation reconstruction capacity, not the text-aligned capability readout. Directional capacity and downstream query capability must therefore be trained and validated as separate contracts."
+}

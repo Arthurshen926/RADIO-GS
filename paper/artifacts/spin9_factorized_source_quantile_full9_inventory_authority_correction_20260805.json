@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "artifact_type": "pre_execution_registration_timestamp_correction",
+  "corrected_at": "2026-08-05T19:58:02+08:00",
+  "reason": "The first serialized full9 preregistration used a date placeholder rather than its actual sealing time.",
+  "inventory": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_asset_inventory_20260805.json",
+    "sha256": "0c3521bfc99595b00ceda49e2b2eaa2aaf4d8c7ea091913833d3a325083bbf5e"
+  },
+  "superseded_preregistration_digest": {
+    "sha256": "a47efaf2b7d28bf8b5bf41aa259213e3de840d194c451794a2571f74bad30611",
+    "execution_authority": false,
+    "used_by_non_lego_source_gpu_stage": false,
+    "used_by_non_lego_target_prediction": false,
+    "used_by_non_lego_target_evaluation": false
+  },
+  "corrected_preregistration": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063",
+    "registered_at": "2026-08-05T19:58:02+08:00",
+    "execution_authority": true
+  },
+  "scientific_contract_changed": false,
+  "target_access_before_correction": {
+    "new_non_lego_prediction_built": false,
+    "new_non_lego_target_mask_opened": false,
+    "new_non_lego_target_metric_computed": false
+  },
+  "gpu_execution_before_correction": {
+    "new_non_lego_source_stage_started": false,
+    "new_non_lego_source_artifact_written": false
+  }
+}

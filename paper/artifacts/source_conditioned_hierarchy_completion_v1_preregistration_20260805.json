@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "registration": "source_conditioned_hierarchy_completion_v1",
+  "registered_at": "2026-08-05T13:00:00+08:00",
+  "status": "registered_after_probability_preserving_source_unary_sentinels_and_before_hierarchy_target_predictions_or_metrics",
+  "claim_boundary": "posthoc-registered causal method iteration on historically opened development and heldout scenes; a future unseen-scene confirmation remains required",
+  "question": "Can a query-free surface hierarchy convert source-view evidence into object-scale support without scene-specific graph tuning, target RGB, target masks, or connected-component postselection?",
+  "motivation": {
+    "compact_field_not_primary": "Exact capability MPR and compact field have nearly identical NVOS/SPIn unary behavior; raw-MPR followed by the nonlinear adaptor collapses probability dynamic range by about 202 times.",
+    "local_graph_not_completion": "Surface-safe propagation gives only a small SPIn Lego gain and does not improve the frozen NVOS unary macro; connected selection regresses strongly.",
+    "probability_preserving_completion_sentinel": {
+      "fern_iou": 0.7143203052887704,
+      "fern_compact_unary_iou": 0.7553155907838534,
+      "horns_left_iou": 0.7663050940546479,
+      "horns_left_compact_unary_iou": 0.7000681428736316,
+      "finding": "Source completion can recover missing object support but entropy confidence cannot detect confident systematic errors; the two-scene candidate is rejected by its fern regression gate."
+    }
+  },
+  "query_free_hierarchy": {
+    "input": "immutable typed surface-safe support graph bound to exact official DINO/SAM capability, local tangent relation, and available cryptographically bound covisibility",
+    "construction": "deterministic maximum-spanning forest using descending affinity and canonical primitive-row edge identity as the exact tie-break",
+    "hierarchy": "every successful Kruskal union creates one parent proposal over the union of its child leaf memberships; disconnected components remain separate roots",
+    "ground_truth_used": false,
+    "query_or_scene_identity_used": false,
+    "new_gaussian_geometry": false
+  },
+  "source_observation": {
+    "field_base": "current graph-free compact canonical field unary: SPIn K4 or NVOS K16 decoupled prototype/anchor",
+    "sufficient_statistics": [
+      "positive responsibility mass",
+      "negative responsibility mass",
+      "visible responsibility mass"
+    ],
+    "probability": "q_obs=m_positive/(m_positive+m_negative) on observed rows",
+    "confidence": "c_obs=(m_positive+m_negative)/m_visible clamped to [0,1]",
+    "direct_source_evidence": "signed scribbles or a full reference mask remain the immutable source evidence; unobserved rows are never interpreted as negative"
+  },
+  "proposal_policy": {
+    "candidate_domain": "only ancestor chains of source-positive observed leaves in the fixed hierarchy; arbitrary graph cuts, edge thresholds, k grids, and target-selected proposals are forbidden",
+    "multi_part_objects": "deduplicated proposals from multiple positive branches are retained; a single connected component is never imposed",
+    "selection": "source-only out-of-fold responsibility-balanced Bernoulli log-loss, then responsibility-weighted AUC, then smaller support, then the field base on an exact tie",
+    "multiple_comparison_control": "the candidate family is exactly the predeclared ancestor chains and the final complexity tie-break is deterministic; no scene-specific candidate injection is allowed",
+    "base_fail_safe": "if the hierarchy arm does not strictly beat the field base under the frozen OOF rule, return the field base unchanged"
+  },
+  "probability_contract": {
+    "hierarchy_probability": "p_H is the bounded probability induced by the selected deduplicated hierarchy proposals; multi-branch combination must remain in [0,1] and be sealed in the implementation closure before target prediction",
+    "final_probability": "p_final=(1-c_obs)*p_H+c_obs*q_obs",
+    "forbidden_after_fusion": [
+      "graph diffusion",
+      "connected selection",
+      "target-derived threshold calibration",
+      "scene-specific numeric parameters"
+    ],
+    "threshold": 0.5
+  },
+  "cross_validation": {
+    "authority": "one immutable source-evidence authority is sealed before any fold clearing and bound by every fold receipt",
+    "preferred_fold_unit": "source-raster footprint blocks or complete hierarchy subtrees, never independent primitive rows when spatially adjacent rows share the same raster evidence",
+    "heldout_rule": "clear every positive, negative, and raw prompt-evidence tensor for the complete heldout group before prototype, anchor, unary, hierarchy scoring, or fusion",
+    "primary": "responsibility-class-balanced Bernoulli log-loss",
+    "secondary": "responsibility-weighted ROC AUC",
+    "audits": [
+      "Brier score",
+      "expected calibration error",
+      "positive and negative heldout population",
+      "proposal support size"
+    ],
+    "target_access": false
+  },
+  "implementation_gate": {
+    "required_before_benchmark_integration": [
+      "deterministic hierarchy under edge permutation",
+      "probabilities finite and in [0,1]",
+      "unobserved rows do not become negative labels",
+      "multi-branch support survives",
+      "base exact-tie behavior",
+      "unknown graph or source authority fails closed",
+      "implementation closure seals the exact p_H construction without target access"
+    ]
+  },
+  "development": {
+    "scenes": [
+      "spin9:lego",
+      "nvos:fern"
+    ],
+    "comparators": {
+      "spin9_lego_surface_safe_propagated_iou": 0.6331459,
+      "nvos_fern_compact_graph_free_unary_iou": 0.7553155907838534
+    },
+    "promotion": "Both hierarchy selections must agree with their source-only OOF receipts; target IoU must improve the two-scene macro, and neither scene may regress more than 0.02. Otherwise stop before heldout."
+  },
+  "heldout_after_development_only": {
+    "spin9": [
+      "room"
+    ],
+    "nvos": [
+      "horns_center",
+      "horns_left"
+    ],
+    "opening_rule": "Seal the complete source-only OOF decision and all candidate target score receipts before opening any target mask or metric.",
+    "promotion": "Selected-action macro must be no lower than the always-base macro and no scene may regress more than 0.02."
+  },
+  "expansion_after_heldout_only": {
+    "spin9": "remaining strict local9 scenes with unchanged implementation",
+    "nvos": "remaining strict full8 scenes with unchanged implementation",
+    "current_strict_references": {
+      "spin9_macro_iou": 0.877162,
+      "nvos_macro_iou": 0.7262272301
+    }
+  },
+  "thermal_policy": {
+    "gpus": [
+      0,
+      1
+    ],
+    "power_limit_w": 300,
+    "poll": "stage boundary or approximately 180 seconds",
+    "abort": "temperature at least 88C twice consecutively"
+  }
+}

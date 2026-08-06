@@ -1,0 +1,134 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_leaves_source_chain_v1",
+  "registered_at": "2026-08-05T20:09:40+08:00",
+  "status": "registered_after_feature_bundle_seal_and_before_any_leaves_factorized_or_matched_cache_build",
+  "parent_registration": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "scene": "leaves",
+  "purpose": "Build the first non-Lego SPIn9 factorized source authority using one sealed source feature bundle, one frozen geometry carrier, and one shared top1 responsibility authority, without target access or historical compact substitution.",
+  "frozen_inputs": {
+    "config": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/gaussfm_main_track.yaml",
+      "sha256": "03c4c1119fdcfaaa5af64ecbb08c1f4e2c78eed3fde1f5f6e6688080a932477b"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/feature_field/checkpoints/best.pth",
+      "sha256": "d96ba9dcf984068e39c2c4f6775f1fb825df245c794ff600849206cdd9590b02"
+    },
+    "camera_mapping": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/rgb_to_colmap_camera_mapping.json",
+      "sha256": "290c099b0ebeff18167d52ec45064775079fc1db16fb20028a7ce173f432d923"
+    },
+    "source_feature_bundle": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/radio_features/frame_manifest.json",
+      "sealed_manifest_sha256": "ee80751070574f8afd3a74174d254485d0192412b2f7eeb1d5ba0e1a81c7aee1",
+      "output_bundle_sha256": "466248d6546d9fff98289b0c95f435ac18516eeab51f85d4da421111b90e677e",
+      "legacy_source_manifest_sha256": "737b92473322ae1d7d147d6fb9bffb058a18fe3000b489a200dc05cf0973927d",
+      "tensor_values_modified": false
+    },
+    "feature_seal_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/legacy_reseal_receipt.json",
+      "sha256": "1f2d4aa5a936645f75ef8913e9833dd05e5b4d2d7c291ae9de8699293a32a796"
+    },
+    "shared_responsibility": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/leaves/responsibility.pt",
+      "sha256": "6a205bdb6a53f8755006eae583b800cf0fc7d1f234f59bfa1bf76bfca6d86551"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "uniform_builder_policy": {
+    "max_views": 120,
+    "render_batch_size": 4,
+    "view_chunk_size": 8,
+    "point_chunk_size": 4096,
+    "max_estimated_cpu_memory_fraction": 0.85,
+    "aggregation_mode": "raster_gaussian_top1",
+    "registration_weight_mode": "alpha_depth",
+    "raster_view_fusion": "contribution_mean",
+    "robust_mpr": false,
+    "capability_map_source": "project_raw",
+    "capability_storage": "dense",
+    "historical_compact_cache_as_training_target": false,
+    "fresh_formal_matched_cohort": true
+  },
+  "registered_outputs": {
+    "factorized_radio": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/factorized_raw_radio.pt",
+    "matched_radio": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/raw_radio_matched_top1.pt",
+    "matched_dino_v3": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/dino_v3_matched_top1.pt",
+    "matched_sam3": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/sam3_matched_top1.pt",
+    "field": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/factorized_field_d256_l128.pth",
+    "capability": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/official_dino_sam3_views.pt",
+    "surface_graph": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/shared_support_graph_surface_safe_k16.pt",
+    "matched_k201_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/query_diffusion_matched_interface_v1",
+    "exact_source_w": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w.pt"
+  },
+  "field_policy": {
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "spatial_coarse_dim": 0,
+    "primitive_fusion": true,
+    "fusion_reliability": false,
+    "official_capability_loss": true,
+    "capability_target_contract": "matched_top1",
+    "mpr_weight": 1.0,
+    "dino_weight": 0.2,
+    "sam3_weight": 0.2,
+    "relation_objective": "disabled",
+    "relation_weight": 0.0,
+    "coefficient_weight": 0.00001,
+    "basis_orthogonality_weight": 0.001,
+    "epochs": 20,
+    "min_epochs": 20,
+    "batch_size": 4096,
+    "eval_batch_size": 16384,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0
+  },
+  "stage_gate": {
+    "order": [
+      "factorized_radio",
+      "matched_radio",
+      "matched_dino_v3",
+      "matched_sam3",
+      "formal_capability_cohort_authority",
+      "factorized_field",
+      "capability_materialization_and_audit",
+      "surface_safe_graph",
+      "matched_k201",
+      "exact_source_w",
+      "full_fit_source_gauge",
+      "target_blind_prediction_receipt"
+    ],
+    "failure": "fail closed before the next dependent stage",
+    "target_evaluation": "forbidden until the full eight-scene receipt index required by the parent registration is sealed"
+  },
+  "implementation": {
+    "feature_sealer_sha256": "0db7bf589021d88d1f430e2a8e799e3931d57ed1b595d471084b81fcfc6e1528",
+    "cache_builder_sha256": "0901151a29e5dbd45bd1cd98314916f4815259721ab157a1b5a13ed35670743d",
+    "field_trainer_sha256": "2fb345b8e425c91b19ca16093bbbdaf048598f3862f27b48c4b2861c8e62b123",
+    "capability_builder_sha256": "d0633698c3841666bbf3a8798265df7f699a130f253548be2c7c2345b532616a",
+    "graph_builder_sha256": "b57ab599d03190d03e42f3e3d5bec89594979bcb4fe9c21efde9c4740bea329e"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "one_heavy_process_per_gpu": true,
+    "thermal_policy": "stage boundaries and approximately every 180 seconds only for stages longer than six minutes; stop after two consecutive temperatures at or above 88 C or a driver/Xid error"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false,
+    "target_score_used_for_selection": false
+  }
+}

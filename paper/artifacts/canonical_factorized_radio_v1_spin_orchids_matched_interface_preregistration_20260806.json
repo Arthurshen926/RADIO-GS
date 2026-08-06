@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_orchids_matched_interface_v1",
+  "registered_at": "2026-08-06T04:45:30+08:00",
+  "status": "registered_before_building_query_independent_k201_or_signed_hash256_caches",
+  "purpose": "Materialize the frozen SPIn query-diffusion interface for Orchids without opening target masks or selecting scene parameters.",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "frozen_inputs": {
+    "manifest_sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+    "scene_id": "orchids",
+    "factorized_field_sha256": "063abe4b81a5b0ddabd62e2e2c96e414aaaff8f36ce00ebdc1177c16c9c90a64",
+    "factorized_capability_cache_sha256": "7b5db9fd29cf3e4f1545b2da36d2893a90d440b248658bc57705d4c6d20e3a7a",
+    "factorized_surface_safe_graph_sha256": "bd4d267e43c595a4a3fb68de026ec4aef2d9c8b111b9705819c129884691c2b4",
+    "surface_safe_graph_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_orchids_surface_safe_graph_results_20260806.json",
+      "sha256": "3d9e9c4653696a23c7ef289e12466256a573cc7b64bb5c88bbcbb01f7d107e15"
+    }
+  },
+  "query_independent_cache_build": {
+    "knn": {
+      "builder_sha256": "49f716bbef4d4d8c82a3497bd84cf2ae0fe9c9e329383a49689129172c55a120",
+      "official_num_neighbors": 200,
+      "include_self": true,
+      "effective_k": 201,
+      "construction": "exact scipy cKDTree Euclidean"
+    },
+    "relation": {
+      "builder_sha256": "206803cf3113fbd0e97e93f3212e63be94aca0a4a1c38a7c3579552f161e8d7b",
+      "source": "factorized field official DINOv3 capability rows",
+      "projection": "signed_multiplicative_hash",
+      "output_dimension": 256,
+      "normalization": "l2_after_projection"
+    },
+    "labels_queries_or_target_inputs": false
+  },
+  "fixed_query_interface": {
+    "base_compiler": "K4 spherical_mean_fps exact raster-adjoint direct observation, joint-signed shared seeds, all components",
+    "base_graph": "typed surface-safe K16",
+    "base_readout_stage": "propagated",
+    "query_diffusion_kernel": "ludvig_release_compat",
+    "feature_bandwidth_grid": [0.5, 1.0, 2.0, 4.0, 8.0],
+    "regularizer_bandwidth_grid": [0.125, 0.25, 0.5, 1.0],
+    "logistic_c": 0.01,
+    "iterations": 100,
+    "edge_binarize_threshold": 0.00001,
+    "max_positive_fraction": 0.1,
+    "reference_threshold_source": "source_weighted_right_ecdf_q0.96",
+    "calibration_input": "declared source reference mask only",
+    "connected_selection": false,
+    "scene_specific_tuning": false
+  },
+  "execution": {
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1"
+  },
+  "decision_rule": {
+    "cache_gate": "both caches must strict-reload with frozen graph, capability, field, and registration lineage before exact source-W export",
+    "target_evaluation": "forbidden until the parent full-scene receipt index is sealed"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false,
+    "target_score_used_for_selection": false
+  }
+}

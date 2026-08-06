@@ -1,0 +1,162 @@
+{
+  "schema_version": 1,
+  "experiment": "full_scalar_scene0001_accepted_v2_source_only_chain",
+  "status": "capability_and_support_graph_sealed_sparse_region_authority_pending",
+  "scene_id": "scene0001_00",
+  "physical_space_id": "scene0001",
+  "preregistration": {
+    "path": "paper/artifacts/full_scalar_scene0001_accepted_v2_source_only_chain_preregistration_20260805.json",
+    "sha256": "5f6e8387e18668dbfaa1fd75a2a6b4abcaf9e393306c72ea9df15c3e78bd463c"
+  },
+  "implementations": {
+    "capability_producer": {
+      "path": "radio_gs/scripts/build_canonical_capability_views.py",
+      "sha256": "9f2de4b2115af391aa1e5be72a033c0b405880908944cdae919fbd71c702f278"
+    },
+    "support_graph_producer": {
+      "path": "radio_gs/scripts/build_canonical_support_graph.py",
+      "sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254"
+    },
+    "accepted_region_preflight_producer": {
+      "path": "radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+      "sha256": "d2705eace65624de19f5057c3b7cfce50b5c8e169c5a1c8104a9358b06faa53e"
+    }
+  },
+  "capability_materialization": {
+    "status": "sealed",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=1",
+      "bash",
+      "radio_gs/scripts/run_repo_python.sh",
+      "radio_gs/scripts/build_canonical_capability_views.py",
+      "--field-checkpoint-schema",
+      "factorized-v2",
+      "--expected-field-checkpoint-sha256",
+      "c273e6ac149d983e69de7005d54e53f55130e04703b555ff8fa8a3f71599ce77",
+      "--expected-mpr-cache-sha256",
+      "7d9ed70b5baddbd0ccecdced962874f130a6045e9ccd0e541729df2d12446067",
+      "--expected-radio-checkpoint-sha256",
+      "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+      "--batch-size",
+      "4096",
+      "--device",
+      "cuda:0"
+    ],
+    "output": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_capability_bank.pt",
+      "sha256": "bdd816914433381b6c38b11e26edf43ccaf3fba43563724938836f722c96c735",
+      "size_bytes": 1959348767
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_capability_bank.pt.json",
+      "sha256": "a8ca588c366c355b08fc93720565179ade7c6f8cc041dbf206703290fa041abb",
+      "size_bytes": 9456
+    },
+    "rows": {
+      "num_global_rows": 200000,
+      "num_active_rows": 191088,
+      "global_rows_sha256": "d56ac65c6756226db0c9944c40d96f785841e7176bfb1522a442f629b883f1ea"
+    },
+    "feature_dimensions": {
+      "appearance_dino_v3": 4096,
+      "boundary_sam3": 1024
+    },
+    "formal_source_authority": {
+      "exact_dino_v3_sha256": "c707fa105d511e4179e9cad48dfcf7d25c20b26a731e322a5efe949c45c3c4b6",
+      "exact_sam3_sha256": "bc4699bac9eafbdcee685e3bf1c3a404c1901d2c7e6ac73898a501bfc1df65bd",
+      "exact_raw_reference_sha256": "7f6eacaa2f731ecef17e7ae590fce9ccf109a94cc098097ac6a3d7a4b7335294",
+      "capability_cohort_sha256": "5e220649d143fd723a2502052656aebc7fe47af5b4f993807e633ccaff035fca",
+      "registration_responsibility_sha256": "2a8c061061aa4e7d9481878232c7ba63323da0d039585ec7d82978e32a3d2e7e"
+    },
+    "gpu1_telemetry": {
+      "guard_max_temp_c": 82,
+      "guard_consecutive_overheat_polls": 2,
+      "observed_max_temp_c": 47,
+      "observed_max_power_w": 36.03
+    }
+  },
+  "support_graph_materialization": {
+    "status": "sealed",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=1",
+      "bash",
+      "radio_gs/scripts/run_repo_python.sh",
+      "radio_gs/scripts/build_canonical_support_graph.py",
+      "--expected-capability-cache-sha256",
+      "bdd816914433381b6c38b11e26edf43ccaf3fba43563724938836f722c96c735",
+      "--neighbors",
+      "16",
+      "--spatial-scale",
+      "2.0",
+      "--appearance-temperature",
+      "0.10",
+      "--boundary-temperature",
+      "0.10",
+      "--covisibility-weight",
+      "0.0",
+      "--capability-affinity-mode",
+      "signed_hash",
+      "--affinity-dim",
+      "256",
+      "--affinity-device",
+      "cuda:0",
+      "--topology-mode",
+      "symmetric_union"
+    ],
+    "output": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "040691ac254610b67a6e7269031dcaf7eb356e6a5bd6120b35f98493446b576c",
+      "size_bytes": 96899979
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_support_graph_accepted_v2.pt.json",
+      "sha256": "bc6ac7d29efa51fc617cfdacd5bedffddc31d759e33d3786ab8cdfbd8f0e5e84",
+      "size_bytes": 12221
+    },
+    "num_nodes": 191088,
+    "num_edges": 3550106,
+    "edge_channels": [
+      "appearance",
+      "boundary",
+      "geometry"
+    ],
+    "capability_authority_bootstrap": null,
+    "gpu1_telemetry": {
+      "guard_max_temp_c": 88,
+      "guard_consecutive_overheat_polls": 2,
+      "observed_max_temp_c": 48,
+      "observed_max_power_w": 122.59
+    }
+  },
+  "accepted_region_preflight": {
+    "status": "ready_dense_contract_but_not_materialized",
+    "active_primitive_rows": 191088,
+    "region_scales_m": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "dense_canonical_region_rows": 573264,
+    "outputs_written": false,
+    "deferred_reason": "trainer and teacher now freeze sparse-v2 at 4096 scale-stratified region fingerprints per scene; dense 573264-row e0 authority would be unused and its fingerprint selection is not yet bound to the sparse-v2 registry contract",
+    "required_next_interface": "sparse-v2 producer input/output contract carrying the identical scale-stratified stable region fingerprint selection used by teacher and trainer"
+  },
+  "aborted_attempts": [
+    {
+      "stage": "capability_materialization",
+      "reason": "CLI field schema alias canonical-factorized-v2 was rejected before input loading; corrected to the declared factorized-v2 choice",
+      "outputs_written": false
+    }
+  ],
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "text_queries_opened": false
+  }
+}

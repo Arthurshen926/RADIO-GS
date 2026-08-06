@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "registration": "target_blind_source_observation_evidence_gate_stable_code_rerun_v1",
+  "status": "sealed_before_stable-code_rerun_and_before_target_access",
+  "parent_preregistration": {
+    "path": "paper/artifacts/source_observation_evidence_gate_preregistration_20260805.json",
+    "sha256": "d0e7f927423f1a8ea8d855aeeac13519dd16df565ac6aa4ab3ee5225699647c7"
+  },
+  "invalidated_execution": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/source_observation_evidence_gate_v1",
+    "cause": "A parallel probability-preserving source-unary implementation changed eval_nvos_gaussian_first.py after fold 0 and before folds 1 and 2. The gate correctly rejected the resulting method_contract_sha256 mismatch.",
+    "fold_0_evaluator_sha256": "ef1de201cccda66227f679a674cfc2865a4385f7a6958690020a3cf3169e9b50",
+    "fold_1_and_2_evaluator_sha256": "96c72c2cb5d485a9b85f41b78f6e4ea0ff7f46c83cea79ce873765c7d80de449",
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "eligible_for_selection": false
+  },
+  "stable_rerun": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/source_observation_evidence_gate_stable_code96c_v2",
+    "eval_nvos_gaussian_first_sha256": "96c72c2cb5d485a9b85f41b78f6e4ea0ff7f46c83cea79ce873765c7d80de449",
+    "query_specific_propagation_cv_sha256": "fc35596a283d10fad4df05a2a136603009a17126591224d47cf1d4105deb06eb",
+    "all_three_folds_must_match": true,
+    "method_constants_unchanged": true,
+    "development_scenes_unchanged": [
+      "spin9:lego",
+      "nvos:fern"
+    ],
+    "expected_selections_unchanged": {
+      "spin9:lego": "surface_safe_propagated",
+      "nvos:fern": "unary"
+    }
+  },
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "benchmark_metrics_opened": false
+}

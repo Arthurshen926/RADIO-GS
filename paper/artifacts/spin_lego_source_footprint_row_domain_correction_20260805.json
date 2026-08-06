@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "registration": "spin_lego_source_footprint_row_domain_correction_v1",
+  "registered_at": "2026-08-05T14:00:49+08:00",
+  "status": "registered_after_first_fail_closed_attempt_and_before_second_build_attempt",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_fold_build_preregistration_20260805.json",
+    "sha256": "7dba0f1b61947530535774253ac93bc067cceaef0f38d1e0c8b232c624056e40"
+  },
+  "first_attempt": {
+    "artifact_written": false,
+    "query_or_target_opened": false,
+    "failure": "exact W contains source-visible Gaussian rows outside the frozen 128780-row capability/hierarchy authority",
+    "decision": "do not expand or reinterpret the hierarchy row domain"
+  },
+  "correction": {
+    "operation": "filter exact-W triplets by exact membership in the caller-SHA-bound sorted global_rows tensor before footprint accumulation",
+    "labels_or_queries_used_for_filter": false,
+    "required_report_fields": [
+      "input triplet count and weight mass",
+      "retained triplet count and weight mass",
+      "excluded triplet count and weight mass"
+    ],
+    "authority_semantics": "source_triplet_authority_sha256 continues to bind the complete native exact-W artifact; canonical_triplet_sha256 binds the deterministic hierarchy-row subset consumed by the footprint authority"
+  },
+  "implementation": {
+    "builder_sha256": "1d143323255fb38893f13fe8d0b826e2298719cdd038a2c6923492361c586e20",
+    "builder_test_sha256": "ba2af5b23ac8ee3ac97523cd8d0bb3ab283275d6f4ef1e4f8cabe0a0aa6a7e2d",
+    "focused_tests": "18 passed"
+  },
+  "safety": {
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_metric_computed": false
+  }
+}

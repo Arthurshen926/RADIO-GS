@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_target_blind_text_response_distillation_addendum_v1",
+  "status": "registered_after_teacher_and_text_bank_audit_and_before_candidate_training",
+  "parent_registration": {
+    "path": "paper/artifacts/surface_region_v3_target_blind_text_response_preregistration_20260805.json",
+    "sha256": "38dea41c7266087bcf6759b3312c612513cfbfbe9db6d7dc407a5cfe75b6f8a1"
+  },
+  "audit_corrections": {
+    "teacher_token_target": {
+      "finding": "For two valid views, pairwise-consensus medoid selection is an exact tie and is resolved by floating-point ordering. Recomputing from fp16 tensors disagrees with the cache record for 188 of 768 training rows and 56 of 192 validation rows, all with two views.",
+      "registered_change": "Replace the medoid token loss only in the response-enabled candidate with the per-region mean cosine loss over every valid frozen teacher token.",
+      "invariances": [
+        "teacher-view permutation invariant",
+        "teacher padding invariant",
+        "each region has equal weight independent of valid-view count"
+      ],
+      "unchanged": "Descriptor teacher remains the frozen all-view target and legacy/default training remains byte-contract compatible."
+    },
+    "text_direction_gauge": {
+      "finding": "The uncentered 806-query fit bank places 69.74 percent of Gram energy in one common direction and has effective rank 2.05; after centering its effective rank is 68.50 and the leading energy fraction is 9.01 percent.",
+      "registered_change": "Both fit and dev embeddings are transformed deterministically as normalize(t - mean(T)) after strict artifact and SHA validation.",
+      "reason": "The objective must preserve discriminative contrast directions rather than the shared text embedding component.",
+      "benchmark_vocabulary_opened": false
+    }
+  },
+  "corrected_query_free_controls": {
+    "bank": "centered target-blind ImageNet-1K dev split with 101 queries",
+    "current_v3": {
+      "mean_descriptor_cosine": 0.9425745606422424,
+      "text_response_smooth_l1": 0.00011793594161234796,
+      "response_profile_cosine_p05": 0.7723200917243958,
+      "ranking_spearman_p05": -0.09999997168779373,
+      "support_top1_agreement": 0.2883663475513458
+    },
+    "matched_v2_control": {
+      "mean_descriptor_cosine": 0.9429590106010437,
+      "text_response_smooth_l1": 0.00011931003205245361,
+      "response_profile_cosine_p05": 0.7909541130065918,
+      "ranking_spearman_p05": -0.09090908616781235,
+      "support_top1_agreement": 0.28217822313308716
+    },
+    "interpretation": "Centered generic directions reduce the apparent V2/V3 gap; they remain a target-blind objective and regression gate, not evidence that the deployment OOD failure is solved."
+  },
+  "corrected_generic_gate": {
+    "base_selection_score_min": 0.9255443984,
+    "response_profile_cosine_p05_min": 0.7909541130065918,
+    "support_top1_agreement_min": 0.28217822313308716,
+    "ranking_spearman_p05_min": -0.09290908616781235,
+    "text_response_smooth_l1_max": 0.00011793594161234796,
+    "completion_nonregression_required": true,
+    "all_conditions_required": true
+  },
+  "deployment_ood_gate": {
+    "finding": "The failed Figurines sentinel has reliability, raw feature norm, normalized geometry distance, and support-fill statistics far outside the ScanNet cache distribution; the actual V3-to-teacher descriptor cosine is only 0.760 to 0.810 across scales.",
+    "rule": "Passing the corrected generic gate authorizes only the already-frozen Figurines sentinel. It does not authorize expansion unless the sentinel reaches 0.4803371775 mIoU. Failure rejects the objective-only branch without benchmark tuning.",
+    "longer_term_candidate": "A new contract version must repair the inactive context budget and use a frozen V2-compatible base with a bounded query-free OOD-gated residual; V3 semantics and hashes must remain unchanged."
+  },
+  "single_candidate_rule": {
+    "seed": 0,
+    "text_response_temperature": 0.05,
+    "warmup_epochs": 3,
+    "response_gradient_ratio": 0.25,
+    "no_scalar_sweep": true,
+    "no_benchmark_selection": true,
+    "no_scene_or_query_tuning": true
+  }
+}

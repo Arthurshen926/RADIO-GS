@@ -1,0 +1,27 @@
+{
+  "audit": "frozen_rgb_gaussian_scalar_membership_ceiling_v1_uniform_refinement",
+  "benchmark_masks_opened": true,
+  "change_motivation_frozen_before_v2_results": "The preregistered v1 stratified sampler already oversampled foreground and boundary pixels; applying a second inverse-frequency positive weight reduced sampled loss but regressed full-image IoU. V2 uses uniform pixels and uniform BCE so the optimized empirical risk matches the full-image measure.",
+  "diagnostic_only": true,
+  "evaluation_unchanged_from_v1": true,
+  "frozen_before_results": true,
+  "membership_model": "one continuous probability in [0,1] per frozen RGB Gaussian and query",
+  "observation_operator": "exact frozen front-to-back contribution, alpha-conditioned scalar membership",
+  "optimization": {
+    "boundary_union_cap_per_view": 0,
+    "foreground_union_cap_per_view": 0,
+    "learning_rate": 0.05,
+    "loss": "uniform probability BCE plus 0.5 soft Dice",
+    "random_uniform_pixels_per_view": 196608,
+    "steps": 80,
+    "weight_decay": 0.0
+  },
+  "result_interpretation": "Report the best constructed feasible membership as a lower bound on the true optimum. An optimizer regression cannot lower that bound and cannot establish a carrier hard limit.",
+  "text_queries_opened": false,
+  "threshold_grid": {
+    "maximum": 0.95,
+    "minimum": 0.05,
+    "step": 0.025
+  },
+  "valid_benchmark_method": false
+}

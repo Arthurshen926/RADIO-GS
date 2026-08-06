@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_leaves_source_footprint_fold_build_v1",
+  "completed_at": "2026-08-05T23:30:52+08:00",
+  "status": "pass",
+  "preregistration": {
+    "path": "paper/artifacts/spin_leaves_source_footprint_fold_build_preregistration_20260805.json",
+    "sha256": "627512047a0ea88ba1de8ec91bfd58bc4d5ebfc7a703228b7e72a2df54b1c40b"
+  },
+  "artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/source_footprint_fold_authority.pt",
+    "sha256": "7a5ea95bd43c96c03d3575a901d6c6ca987d1876f60be30fc4b1a7334b6d8d7e",
+    "authority_sha256": "3420ab00359ed61a8dbbf60a1f16db8c5303853969fb81e53b5f71154fe0b68e",
+    "tensor_bundle_sha256": "b8a42816a848db90fd3daf099e966c9995b464ff6d306eda46faf6ae8948927b",
+    "report_sha256": "e897595ebf087487241127566104725cf7348c9bd661bd4a0f67d268d3873932"
+  },
+  "source_authorities": {
+    "exact_w_sha256": "fecb42234c154ff51827e8b943655d160cd2002ed2845583ec64a0216851c51c",
+    "exact_w_authority_sha256": "f4e452cda96148eb3d77bf739211d87a8aee6b4d5d1bd7b98397ec7f7d8ce2e8",
+    "primitive_row_authority_sha256": "39edb163e6136eb840cd5154bf5679261d98c3ee491a10ccc19d04b66278973d"
+  },
+  "row_domain": {
+    "input_triplets": 16725352,
+    "retained_triplets": 16326018,
+    "excluded_triplets": 399334,
+    "input_weight_mass": 181411.29444375657,
+    "retained_weight_mass": 179032.66452378122,
+    "excluded_weight_mass": 2378.6299199753803,
+    "filter": "exact membership in frozen sorted global_rows; no labels or queries"
+  },
+  "population": {
+    "primitive_rows": 147607,
+    "visible_rows": 134962,
+    "invisible_rows": 12645,
+    "fold_rows": [41590, 45903, 60114],
+    "fold_visible_rows": [41590, 45903, 47469],
+    "mean_dominant_footprint_purity_visible": 0.9537752190840616
+  },
+  "raster_groups": {
+    "height": 756,
+    "width": 1008,
+    "block_rows": 6,
+    "block_cols": 8,
+    "block_count": 48,
+    "invisible_group_id": 48
+  },
+  "verification": {
+    "strict_artifact_reload": true,
+    "complete_file_sha_replayed": true,
+    "authority_digest_replayed": true,
+    "all_tensor_digests_replayed": true,
+    "tensor_bundle_replayed": true
+  },
+  "safety": {
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "decision": "eligible_for_source_adjoint_population_check_and_structured_oof"
+}

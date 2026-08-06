@@ -20,6 +20,7 @@ from radio_gs.field import (
     AffineBasisDecoder,
     CanonicalGaussianField,
     load_canonical_field_checkpoint,
+    validate_basis_conditioning,
 )
 from radio_gs.field.field_signature import FeatureSpaceSignature
 
@@ -82,6 +83,9 @@ def build_free_field_payload(
     with torch.no_grad():
         field.local_codes.copy_(features)
     fingerprint = dict(mpr_payload.get("geometry_fingerprint", {}))
+    basis_conditioning = validate_basis_conditioning(
+        field.decoder.basis
+    ).to_dict()
     return {
         "schema_version": 1,
         "architecture": {
@@ -111,6 +115,7 @@ def build_free_field_payload(
             "explained_variance_ratio": 1.0,
             "reconstruction_cosine": 1.0,
         },
+        "basis_conditioning": basis_conditioning,
         "render_ceiling": {
             "kind": "full_dimensional_free_primitive",
             "identity_decoder": True,

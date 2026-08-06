@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_hard_sibling_margin_dev2_v1",
+  "status": "registered before candidate runs",
+  "hypothesis": "Independent text cosine scores rank target primitives well but confuse semantically adjacent scene queries. A scale-free per-primitive margin against the strongest competing benchmark query should improve discrimination without changing the compact field, query embeddings, geometry, frozen VALA spatial readout, threshold, or evaluation protocol.",
+  "candidate": {
+    "query_contrast": "hard_sibling_margin",
+    "formula": "margin_q = raw_score_q - max(raw_score_j for j != q)",
+    "application_point": "independently at every primitive and native scale, before frozen VALA kNN10 smoothing, peak scale selection, per-query min-max/2x-1 remap, and fixed 0.6 threshold",
+    "trainable_parameters": 0,
+    "temperature": null,
+    "scene_specific_parameters": false,
+    "target_mask_access": false
+  },
+  "development_scenes": [
+    "figurines",
+    "waldo_kitchen"
+  ],
+  "baseline": {
+    "figurines": {
+      "miou": 0.4074466527,
+      "report": "output/optimization_20260802/lerf_direct3d_ours_native_multiscale_v2/figurines/figurines/lerf_direct_3d_selection_results.json"
+    },
+    "waldo_kitchen": {
+      "miou": 0.2408391386,
+      "report": "output/optimization_20260802/lerf_direct3d_ours_native_multiscale_v2/waldo_kitchen/waldo_kitchen/lerf_direct_3d_selection_results.json"
+    }
+  },
+  "gate": {
+    "primary": "fixed-threshold mIoU must improve on both development scenes",
+    "secondary": "macro mIoU across the two scenes must improve by at least 0.01",
+    "on_failure": "reject hard-sibling margin and do not expand to Ramen/Teatime"
+  },
+  "frozen_protocol": {
+    "preset": "vala_repo_3d",
+    "knn_k": 10,
+    "mask_score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "alpha_binarization": "png_uint8_gt10",
+    "official_frames_only": true
+  }
+}

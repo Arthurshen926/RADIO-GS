@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_k16_decoupled_prototype_anchor_full8_v1",
+  "status": "complete; primary and secondary preregistered gates passed",
+  "scene_iou": {
+    "fern": 0.7553155908,
+    "flower": 0.8521961715,
+    "fortress": 0.8417940829,
+    "horns_center": 0.6831020618,
+    "horns_left": 0.7000681429,
+    "leaves": 0.6683183446,
+    "orchids": 0.6917511196,
+    "trex": 0.6172723267
+  },
+  "candidate_minus_k16_control": {
+    "fern": -0.0010028958,
+    "flower": -0.0000683968,
+    "fortress": -0.0004836798,
+    "horns_center": 0.0082776183,
+    "horns_left": 0.0171192356,
+    "leaves": 0.0015553329,
+    "orchids": 0.0000469187,
+    "trex": -0.0153703348
+  },
+  "aggregate": {
+    "candidate_full8_macro_iou": 0.7262272301,
+    "k16_control_full8_macro_iou": 0.7249680053,
+    "full8_improvement": 0.0012592248,
+    "scenes_improved": 5,
+    "scenes_total": 8,
+    "candidate_heldout6_macro_iou": 0.7257390179,
+    "k16_control_heldout6_macro_iou": 0.7267461081,
+    "heldout6_delta": -0.0010070902
+  },
+  "stage_macro_iou": {
+    "unary_prior": 0.7262272301,
+    "propagated": 0.7244749068,
+    "connected": 0.6720623752
+  },
+  "gate": {
+    "full8_exceeds_0_7249680053": true,
+    "heldout6_regression_within_0_005": true
+  },
+  "valid_anchor_rows": {
+    "fern": 14635,
+    "flower": 12067,
+    "fortress": 15212,
+    "horns_center": 8542,
+    "horns_left": 10809,
+    "leaves": 4973,
+    "orchids": 9864,
+    "trex": 6684
+  },
+  "report_sha256": {
+    "fern": "0a4c797e218bdd055a126d51667ebc827c007c76db9c84fc7920188bfed41fd1",
+    "flower": "05d48a65a414ecf2c6e86f5a135532353655ccd3ba11d8a462ebf5eb5ba0a1c7",
+    "fortress": "641aabf4c180a4f9a5a71754a9489d2bde53323c3f6f5cb549e2fb5f8a05c66d",
+    "horns_center": "7a3d992e90b73edd627f082cfa11160571cab30db15f4830669f33e63fa75f35",
+    "horns_left": "e72dffc6574911b99dc91e14aa67bf70b58912835e398ee59034071b640c2aca",
+    "leaves": "6364335ae2ac2085cf2a47541b840f71a1a6a64824d58a8376718e1bbb424f83",
+    "orchids": "195d89242af55aee8e6e950079ea04fef802e5ae75a3119417b1404f8a6374ed",
+    "trex": "7a7350ba992f7af1de25c17e01c53a3e7c0ab61060c28f6ae6b8ba244c93e97a"
+  },
+  "conclusion": "Separating prototype coverage from exact constraint seeds is a valid general design improvement and raises the frozen strict full-eight macro. Its small net gain is limited by scene-dependent anchor reliability, especially Trex; further work should learn or derive reliability from reference-view evidence rather than tune anchor thresholds per scene."
+}

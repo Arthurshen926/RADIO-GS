@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "result": "canonical_factorized_radio_v1_spin_pinecone_matched_interface_caches",
+  "completed_at": "2026-08-06T05:30:00+08:00",
+  "status": "pass",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_spin_pinecone_matched_interface_preregistration_20260806.json",
+    "sha256": "39b93135f21928bd07a4004c61d7dbed24366bf1adaafd63d4ae31418c598a77"
+  },
+  "knn": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/query_diffusion_matched_interface_v1/pinecone_euclidean_k200_self.pt",
+    "sha256": "fb0ca2fdbe1988efa90a62efcdb4c44d11d5a078d3d1c714c56e8922607f9ee5",
+    "sidecar_sha256": "b3271efc06e740e32bab29dac65208fb23040b1a044ac9d2602399d3b3a53b11",
+    "num_nodes": 310718,
+    "official_num_neighbors": 200,
+    "include_self": true,
+    "effective_k": 201
+  },
+  "relation": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/query_diffusion_matched_interface_v1/pinecone_dino_signed_hash256.pt",
+    "sha256": "fd21d06c8756b03f1ffb1a2b0bf5d5e27a959d626ff6624026cdb31acc775bc6",
+    "sidecar_sha256": "38e37a1cd33a8e81a99f30701fa8fd8111fa1b7ef0968e8c53f51069e3b96652",
+    "num_nodes": 310718,
+    "feature_dimension": 256,
+    "feature_sha256": "010c9753562d86a94321a861a0af7af2829cbd3ffa1dd3f3884ac8758d977588"
+  },
+  "strict_reload": {
+    "passed": true,
+    "source_graph_sha256": "f2b751659903b4d0740568f81d20b79dfbeae1ad3d33a86dcbc2346d94982594",
+    "source_capability_sidecar_sha256": "49e84397976a2406bd833af2b34edfc68fba1c99ddea1d589f8ac94e5e3eaa33",
+    "field_checkpoint_sha256": "746f7b0e9a274742733b067aafbaf791843735c989e532a9f9da0e5c155f5671",
+    "experiment_registration_sha256": "39b93135f21928bd07a4004c61d7dbed24366bf1adaafd63d4ae31418c598a77",
+    "rows_and_geometry_exact": true
+  },
+  "safety": {
+    "query_independent": true,
+    "labels_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "decision": "allow_exact_source_prompt_responsibility_export"
+}

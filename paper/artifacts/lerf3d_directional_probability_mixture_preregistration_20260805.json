@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_directional_probability_mixture_figurines_v1",
+  "status": "registered before materializing mode-negative scores or opening candidate outcomes",
+  "development_scene": "figurines",
+  "hypothesis": "A primitive has a distribution of view-conditioned semantic directions. Each mode must first produce a calibrated text-vs-canonical-negative probability; these probabilities can then be marginalized by query-independent observation-frequency weights. Unconditional max and feature-space averaging are both statistically incorrect.",
+  "candidate": {
+    "field_modes": 2,
+    "mode_source": "query-free weighted spherical two-prototype Field-D carrier",
+    "mode_probability": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "mixture": "sum_m observation_frequency_m * mode_probability_m",
+    "fallback_for_rows_without_two_supported_modes": "mode0 only",
+    "canonical_negatives": ["object", "things", "stuff", "texture"],
+    "scale_selection": "frozen VALA kNN10 peak-select",
+    "threshold": 0.6,
+    "trainable_parameters": 0,
+    "query_specific_parameters": false,
+    "target_labels_or_masks": false
+  },
+  "comparators": {
+    "initial_field_positive_only": 0.4074466527,
+    "initial_field_canonical_negative_relevancy": 0.4753371775,
+    "field_d_unconditional_raw_mode_max": 0.0178
+  },
+  "gate": {
+    "primary": "candidate fixed-protocol Figurines mIoU exceeds 0.4753371775",
+    "safety": "candidate must also exceed the initial positive-only 0.4074466527",
+    "expansion": "only after both gates pass; other scenes require separately built query-free directional carriers, never per-scene target tuning"
+  },
+  "frozen_protocol": {
+    "preset": "vala_repo_3d",
+    "target_evaluator_modified": false,
+    "selection_threshold": 0.6
+  }
+}

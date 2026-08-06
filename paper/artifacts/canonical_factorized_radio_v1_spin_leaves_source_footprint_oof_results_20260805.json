@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "experiment": "canonical_factorized_radio_v1_spin_leaves_source_footprint_oof_v1",
+  "completed_at": "2026-08-05T23:41:42+08:00",
+  "status": "pass_select_surface_safe_propagated",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_leaves_source_footprint_oof_preregistration_20260805.json",
+    "sha256": "93cee9bb60e7a94f9761007ec0e1420cd636ebe7ebe0aafc6d2f0a4988d40b24"
+  },
+  "gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+    "sha256": "60947c0d3cb06d316e940b028048525be461920b5c7c76d88a42d3b7f86dd06c",
+    "artifact_type": "source_observation_surface_safe_footprint_oof_gate_v1",
+    "gate_mode": "eligible_source_oof",
+    "method_contract_sha256": "9fe4fd7ed5a954b42f966bf9de78e109abd4948488f28aafa80be6a97422c4a1",
+    "selected_action": "surface_safe_propagated",
+    "full_fit_predictions_used_as_oof": false,
+    "target_feedback": false
+  },
+  "metrics": {
+    "unary": {
+      "responsibility_balanced_log_loss": 0.6931471805599453,
+      "responsibility_weighted_auc": 0.5
+    },
+    "surface_safe_propagated": {
+      "responsibility_balanced_log_loss": 0.6043215486414458,
+      "responsibility_weighted_auc": 0.7019958005767074
+    },
+    "propagation_log_loss_reduction": 0.08882563191849953,
+    "propagation_auc_gain": 0.2019958005767074
+  },
+  "population": {
+    "observed_rows": 134962,
+    "folds": 3,
+    "fold_positive_rows": [4568, 8644, 18615],
+    "fold_negative_rows": [37022, 37259, 28854],
+    "complete_footprint_groups_held_out": true
+  },
+  "folds": {
+    "0": {
+      "artifact_sha256": "7226858150162bfffcf709615e68707dea7924815dd40dcf7b5c34b82d588564",
+      "receipt_sha256": "9d4f33260bf2a830ab7921560ab836b1da0984c39d3371ea7738302785935952",
+      "log_sha256": "bacd77810277200c27ce45da38a7c78da8c84ec4bef45264d2e81ca71aec1260"
+    },
+    "1": {
+      "artifact_sha256": "9e191a710da5deb2d953a2baa54a6106371bd51821d80ef9492080d4a6c7995e",
+      "receipt_sha256": "9ad9c27a06dfb70cda9ba1235962d6c4e8d6dda6ef181e6f497625e160522bd6",
+      "log_sha256": "8c49bbe9f99d4845f63bd7b36aa1e2baefc9ca922859277f06e9fcaad526ad62"
+    },
+    "2": {
+      "artifact_sha256": "3a4fa9e9a8c54aa1746bb4dd1c19cd1a5af65f5c20c29b8604afdad77c369900",
+      "receipt_sha256": "2583b8287d1a2ec83678cedd23136d92ce96698de1d5088bde0cd9a577a03fb9",
+      "log_sha256": "9bdf235a30818586e0aa498988f9f2c1b944b58bb62d994f73beeae2691079e3"
+    }
+  },
+  "lineage": {
+    "capability_cache_sha256": "921e500666561b259a14a29046c89105e22003163ffee14be9832bea087d6223",
+    "support_graph_sha256": "39edb163e6136eb840cd5154bf5679261d98c3ee491a10ccc19d04b66278973d",
+    "source_evidence_authority_sha256": "7523ef93508777f823340d568ae875f06b09ddbe400bd0e7a03d1c380d8067d0",
+    "source_footprint_file_sha256": "7a5ea95bd43c96c03d3575a901d6c6ca987d1876f60be30fc4b1a7334b6d8d7e",
+    "source_footprint_authority_sha256": "3420ab00359ed61a8dbbf60a1f16db8c5303853969fb81e53b5f71154fe0b68e",
+    "source_footprint_tensor_bundle_sha256": "b8a42816a848db90fd3daf099e966c9995b464ff6d306eda46faf6ae8948927b"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "maximum_temperature_celsius": 55,
+    "thermal_abort": false,
+    "concurrent_code_drift_incident": "The first fold-1 attempt fail-closed before artifact creation because a parallel task changed the evaluator SHA after fold 0. The shared evaluator was restored byte-for-byte to f7d8a8f3... before the successful fold-1 retry; sealed fold 0 and evidence authority were never modified."
+  },
+  "verification": {
+    "strict_independent_gate_replay": true,
+    "complete_file_hashes_replayed": true,
+    "heldout_prompt_evidence_exact_zero": true,
+    "shared_method_contract_exact": true
+  },
+  "decision": "Use the exact selected surface_safe_propagated base score to build the fixed K201 matched source-only support and full-fit q=0.96 right-ECDF gauge.",
+  "safety": {
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

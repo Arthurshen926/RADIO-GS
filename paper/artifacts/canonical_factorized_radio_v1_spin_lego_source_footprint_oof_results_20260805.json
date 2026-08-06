@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "experiment": "canonical_factorized_radio_v1_spin_lego_source_footprint_oof_v1",
+  "completed_at": "2026-08-05T14:58:41+08:00",
+  "status": "pass_select_surface_safe_propagated",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_source_footprint_oof_preregistration_20260805.json",
+    "sha256": "442a30134a6e49d3bf2e441195260582d1f5f1cb6c8b2917e6cffee64e8ef05c"
+  },
+  "digest_correction": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_source_footprint_oof_digest_correction_20260805.json",
+    "sha256": "89f3887a21f6bbb293de5f7523f95c02c5c536fcabcbb736fc257edf1cfef909",
+    "asset_or_method_changed": false
+  },
+  "gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+    "sha256": "85b3c7097c621525f8a23310c58d4d1c84dcbb46989ff6d3de78f4784c20ddc5",
+    "artifact_type": "source_observation_surface_safe_footprint_oof_gate_v1",
+    "gate_mode": "eligible_source_oof",
+    "method_contract_sha256": "5300d87927222fa5c6fe15ce622d27e8627bf9965915df4725628256d40dcfe3",
+    "selected_action": "surface_safe_propagated",
+    "full_fit_predictions_used_as_oof": false,
+    "target_feedback": false
+  },
+  "metrics": {
+    "unary": {
+      "responsibility_balanced_log_loss": 0.6931471805599453,
+      "responsibility_weighted_auc": 0.5
+    },
+    "surface_safe_propagated": {
+      "responsibility_balanced_log_loss": 0.5381368131289874,
+      "responsibility_weighted_auc": 0.8249008114960077
+    },
+    "propagation_log_loss_reduction": 0.1550103674309579,
+    "propagation_auc_gain": 0.3249008114960077
+  },
+  "population": {
+    "observed_rows": 88360,
+    "folds": 3,
+    "fold_positive_rows": [1322, 5987, 1917],
+    "fold_negative_rows": [27592, 34877, 16665],
+    "complete_footprint_groups_held_out": true
+  },
+  "folds": {
+    "0": {
+      "artifact_sha256": "ca00c08c1d12c39109c2675e867da3d91922e6721b2b6e157952aef0a776b0dc",
+      "receipt_sha256": "370fb827e5ef8836282f669acd19db8b6f5c6f217f14b98f0eadbbe65394bb54",
+      "log_sha256": "270f95b2c1223d1d1e86f7fc9112e95bb4cb77b593eb0ec47e32e2efb29cb425"
+    },
+    "1": {
+      "artifact_sha256": "cfddb6f8444844211aa58f70ba2ae855d997f86ed4c3689149f7cc27339d1dce",
+      "receipt_sha256": "c9aebade1b20eddf386708aa9bbe84efc358ba3635a873702635b7aa29b1b1cb",
+      "log_sha256": "5e46aebce7808793328b61668f7fa764beafde024cfa3abcc59b5882975ce53e"
+    },
+    "2": {
+      "artifact_sha256": "0c611abcc94d9d5b4b629ea1badd663eb6ece14d60d09801e5cda9af98800e49",
+      "receipt_sha256": "aeaa04b859e80ca499e9f31a327d85fb7b5c6ce72bfca522f38db431724ec10e",
+      "log_sha256": "4d1d92043df9b5868f16c2c4d59414c6a975b641d7214b242b830964cd7db5f6"
+    }
+  },
+  "lineage": {
+    "capability_cache_sha256": "dcdf63e4718f987422b094a74c042b33e78b6d6013d69e12108d0f74c8731147",
+    "support_graph_sha256": "feb6aeeffbca39be841a3e6b7bb72b285f6258f0f041e5c1b3529e728c82466b",
+    "source_evidence_authority_sha256": "c43f5a65b29dd2d4e4f0a8eb25ac347ac10604f3c57ac459417f6e3213bfebb2",
+    "source_footprint_file_sha256": "07328660ae6844c2348a936d000d8080c79b3494c84399a03fbc57a2d0fd7396",
+    "source_footprint_authority_sha256": "50e8286e85cad6b2a7c0294b385bb7e1b3b91226285463057d74ae900bce0ffa",
+    "source_footprint_tensor_bundle_sha256": "cc84252803a37abbef9b60491be5fe0426f3cd08f6843af398ed9e415bb50d65"
+  },
+  "deployment_closure": {
+    "evaluator_sha256_after_fail_closed_gate_binding": "aaae651102e546f5ebc5e5c783ca7d1f385834034bbdea06e8ca15157ffd951b",
+    "deployment_gate_requires_exact_file_sha": true,
+    "deployment_gate_requires_matching_scene_protocol_capability_and_graph": true,
+    "deployment_gate_requires_selected_readout_stage": true,
+    "deployment_gate_forbids_connected_selection_and_query_diffusion": true,
+    "focused_regression_tests": "84 passed"
+  },
+  "decision": "Deploy the exact selected surface_safe_propagated readout, seal all target score files and their stage scores in a pre-metric prediction receipt, then open frozen target masks.",
+  "safety": {
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

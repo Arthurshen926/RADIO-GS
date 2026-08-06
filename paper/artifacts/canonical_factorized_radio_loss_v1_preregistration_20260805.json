@@ -1,0 +1,39 @@
+{
+  "artifact_type": "method_preregistration",
+  "method_contract": "canonical-factorized-radio-loss-v1",
+  "date": "2026-08-05",
+  "status": "registered_before_implementation_training_or_target_evaluation",
+  "scope": "pure reconstruction-loss contract for a future factorized canonical field",
+  "fixed_design": {
+    "direction_target": "normalize(canonical_feature)",
+    "direction_loss": "one minus cosine similarity",
+    "direction_weight": "observation_evidence times directional_resultant",
+    "amplitude_target": "persisted responsibility-weighted log_amplitude",
+    "amplitude_loss": "SmoothL1 of predicted log L2 norm and target log_amplitude",
+    "amplitude_weight": 0.25,
+    "amplitude_row_weight": "observation_evidence divided by one plus log_amplitude_std",
+    "visibility_purity_use": "preserved as a separate readout scalar and not folded into reconstruction weighting",
+    "invalid_policy": "invalid rows contribute exactly zero and at least one valid row is required",
+    "schema_policy": "ordered factorized reliability scalar names and digest must match exactly",
+    "legacy_policy": "existing primitive_reconstruction_loss remains unchanged"
+  },
+  "required_tests": [
+    "direction and amplitude errors are independently measurable",
+    "uniform positive scaling only changes the amplitude term when the target is not scaled",
+    "invalid rows do not affect either loss",
+    "zero predicted vectors produce finite losses and gradients",
+    "scalar-schema mismatch fails closed"
+  ],
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_design": false
+  },
+  "execution": {
+    "gpu_used": false,
+    "field_trained": false,
+    "cache_rebuilt": false,
+    "benchmark_evaluated": false
+  }
+}

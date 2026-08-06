@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_accepted_v2_raw_gauge_safe_fallback_v1",
+  "status": "registered_after_source_only_probe_and_before_full_materialization_or_evaluator",
+  "causal_question": "Does preserving the current V3 physical region while replacing its deployment-unstable learned readout with the immutable accepted V2 raw-gauge readout recover the historical LERF unary without changing evaluator, graph, threshold, prompt, or field?",
+  "method": {
+    "region_selection": "exact_frozen_surface_region_contract_v3",
+    "feature_gauge": "exact_raw_RADIO_vectors_from_SHA_terminal_bound_resume_shards",
+    "support_fill": "excluded_from_the_V2_token_mask_and_zeroed",
+    "geometry": "exact_V3_geometry_prefix_indices_0_through_13",
+    "readout": "immutable_accepted_SurfaceRegionSummaryReadoutV2",
+    "projection": "official_frozen_c_radio_siglip2_g_summary_head",
+    "learned_residual": false,
+    "query_dependent_routing": false
+  },
+  "authorities": {
+    "accepted_v2_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "v3_raw_resume_contract": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_v3_gauge_explicit_figurines_sentinel_v1/resume/contract.json",
+      "sha256": "74dd1c219601cbb5ddedf4e109c7acd3313225469cdb4efa5dd8d79c6415d376"
+    },
+    "source_probe": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_v3_to_accepted_v2_source_probe_figurines_1024_v2.json",
+      "sha256": "31e89e1b9fb7550037c4ae4bbd41eb5791e299bdd35658fa31733d9fcc2d5ef7",
+      "script_sha256": "be6ba27a1d0110d0cfcb55542793393e2662c1b55220c2389f3a1c3b8540b249"
+    }
+  },
+  "source_only_gate": {
+    "sample_rows": 1024,
+    "seed": 20260805,
+    "benchmark_evaluator_run": false,
+    "benchmark_labels_or_masks_opened": false,
+    "accepted_v2_descriptor_cosine_mean": 0.9905512928962708,
+    "accepted_v2_descriptor_cosine_p05": 0.9617204666137695,
+    "accepted_v2_margin_pearson_flat": 0.9805601836875077,
+    "accepted_v2_margin_spearman_mean": 0.9538498520851135,
+    "accepted_v2_margin_top1pct_overlap": 0.8492063283920288,
+    "full_mpr_teacher_descriptor_cosine_mean": 0.9532065987586975,
+    "full_mpr_teacher_margin_pearson_flat": 0.9337552019968219,
+    "passed": true
+  },
+  "frozen_validation": {
+    "first_and_only_sentinel": "LERF3D Figurines",
+    "protocol": "vala_repo_3d canonical-negative exact frozen protocol",
+    "historical_accepted_v2_miou": 0.4753371775,
+    "noninferiority_tolerance": 0.005,
+    "promotion_threshold_miou": 0.4703371775,
+    "on_pass": "record stop-the-bleeding fallback and materialize/evaluate unchanged LERF full4; this does not claim the approximately 0.54 target is solved",
+    "on_fail": "reject the adapter path without seed, threshold, graph, radius, or scene tuning"
+  },
+  "forbidden": [
+    "benchmark labels or masks before this registration",
+    "threshold, graph, radius, prompt, scale, scene, or query sweeps",
+    "seed selection",
+    "modifying the accepted V2 checkpoint",
+    "including V3 support-fill tokens in the V2 base",
+    "using this fallback result to select V4 teacher or contract parameters"
+  ]
+}

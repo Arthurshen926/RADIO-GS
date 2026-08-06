@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_full8_expansion_v1",
+  "status": "runtime_import_correction_registered_before_successful_source_completion",
+  "preregistration_sha256": "d5e8521d037f4f3baca9ac260d196505d9dd7777aa8422e357e5fe2dc12aa280",
+  "failed_attempt": {
+    "stage": "python import before CUDA initialization or SAM3 model loading",
+    "error": "ModuleNotFoundError: No module named radio_gs",
+    "cause": "The isolated easy3d/SAM3 runtime PYTHONPATH omitted the repository root. Adding the root then exposed a separate package-topology issue: importing radio_gs.querying executes heavyweight query and rendering package initializers, which require gsplat unavailable in the isolated SAM3 runtime.",
+    "source_completion_artifacts_written": 0,
+    "target_rgb_mask_or_metric_opened": false,
+    "gpu_inference_started": false,
+    "failed_telemetry_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/logs/remaining6.gpu0.telemetry.csv",
+    "failed_owner_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/logs/remaining6.gpu0.owner.csv"
+  },
+  "correction": {
+    "description": "Load the leaf radio_gs/querying/sam3_reference_completion.py file directly with importlib instead of executing radio_gs.querying.__init__. The exact helper source file and functions remain unchanged.",
+    "previous_builder_sha256": "ca797f036e56edabb7c2d6712fb641430212154537d6ed5f653f7541333591f9",
+    "corrected_builder_sha256": "66b3f2cec6f14480932a84a4388c62bdcf31a564fb4cc398ab3b60a420917e96",
+    "helper_source_sha256": "15ca3c291e862d6888de3421e06f458c6fe3745bd0575f37acc2e39913a77396",
+    "point_sampling_changed": false,
+    "SAM3_inference_changed": false,
+    "trial_aggregation_changed": false,
+    "scribble_overwrite_changed": false,
+    "receipt_schema_changed": false,
+    "authority_validation_changed": false
+  },
+  "preflight": {
+    "easy3d_leaf_import": "passed",
+    "expected_fixed_order": [
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ]
+  }
+}

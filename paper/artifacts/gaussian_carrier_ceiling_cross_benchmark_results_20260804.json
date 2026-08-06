@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "audit": "fixed_gaussian_shared_scalar_carrier_cross_benchmark_v1",
+  "semantics": "Every number below is a feasible lower bound on an unknown carrier optimum, not an upper bound. Target masks are opened, so none is a valid benchmark method result.",
+  "lerf3d": {
+    "figurines": 0.9262409874017365,
+    "ramen": 0.9041078427027619,
+    "teatime": 0.948399861440992,
+    "waldo_kitchen": 0.9398089538576523,
+    "scene_macro": 0.9296394113507857,
+    "conclusion": "global fixed RGB Gaussian carrier is not the dominant LERF3D bottleneck; feature/query ranking and readout remain dominant"
+  },
+  "nvos": {
+    "fern": 0.912078,
+    "horns_left": 0.972055,
+    "conclusion": "source scribble/full-mask evidence is not being converted into a sufficiently strong continuous primitive unary"
+  },
+  "spin_nerf": {
+    "orchids": 0.932830,
+    "pinecone_unguarded": 0.925924,
+    "pinecone_camera_clearance_2sigma": 0.9453274407340297,
+    "conclusion": "global carrier is strong, but the base renderer had a real camera-plane collision bug on Pinecone; after repair the remaining gap is source evidence transfer and relation/readout"
+  },
+  "design_gate": {
+    "global_geometry_densification": "rejected",
+    "global_subprimitive_expansion": "rejected",
+    "local_query_independent_visibility_repair": "accepted",
+    "sparse_boundary_secondary_mode": "deferred until a clean feature/query error ladder demonstrates a residual carrier-local need"
+  }
+}

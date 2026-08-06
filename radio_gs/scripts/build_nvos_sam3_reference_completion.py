@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -17,13 +18,36 @@ from PIL import Image
 from skimage import __version__ as skimage_version
 from skimage.filters import threshold_li
 
-from radio_gs.querying.sam3_reference_completion import (
-    aggregate_completed_positive,
-    deterministic_positive_points,
-)
 from radio_gs.scripts.build_sam3_foundation_cache import (
     _load_sam3_model,
     set_requested_cuda_device,
+)
+
+
+def _load_source_completion_helpers():
+    """Load the leaf helper without importing the heavyweight query package."""
+
+    helper_path = (
+        Path(__file__).resolve().parents[1]
+        / "querying"
+        / "sam3_reference_completion.py"
+    )
+    spec = importlib.util.spec_from_file_location(
+        "radio_gs_sam3_reference_completion_leaf", helper_path
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"cannot load source-completion helper {helper_path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+_SOURCE_COMPLETION_HELPERS = _load_source_completion_helpers()
+aggregate_completed_positive = (
+    _SOURCE_COMPLETION_HELPERS.aggregate_completed_positive
+)
+deterministic_positive_points = (
+    _SOURCE_COMPLETION_HELPERS.deterministic_positive_points
 )
 
 
@@ -31,6 +55,44 @@ WIDTH = 1008
 HEIGHT = 756
 TRIALS = 10
 POINTS_PER_TRIAL = 3
+FROZEN_MANIFEST_SHA256 = (
+    "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea"
+)
+FROZEN_FULL_COHORT = (
+    "fern",
+    "flower",
+    "fortress",
+    "horns_center",
+    "horns_left",
+    "leaves",
+    "orchids",
+    "trex",
+)
+LEGACY_SENTINEL_ORDER = ("horns_left", "fern")
+LEGACY_SENTINEL_REGISTRATION_SHA256 = (
+    "a30db1d31a6ffc2d651af37c50675cd12a9fb38b448bd3d96c5eb54740428eca"
+)
+FULL8_EXPANSION_ORDER = (
+    "flower",
+    "fortress",
+    "horns_center",
+    "leaves",
+    "orchids",
+    "trex",
+)
+FULL8_EXPANSION_REGISTRATION_SHA256 = (
+    "d5e8521d037f4f3baca9ac260d196505d9dd7777aa8422e357e5fe2dc12aa280"
+)
+_REGISTERED_EXECUTION_AUTHORITIES = {
+    LEGACY_SENTINEL_ORDER: {
+        "name": "legacy_two_task_sentinel_v1",
+        "registration_sha256": LEGACY_SENTINEL_REGISTRATION_SHA256,
+    },
+    FULL8_EXPANSION_ORDER: {
+        "name": "remaining_six_full8_expansion_v1",
+        "registration_sha256": FULL8_EXPANSION_REGISTRATION_SHA256,
+    },
+}
 
 
 def _canonical_sha256(value: object) -> str:
@@ -60,6 +122,31 @@ def tensor_sha256(value: torch.Tensor) -> str:
     digest.update(b"\0")
     digest.update(tensor.numpy().tobytes())
     return digest.hexdigest()
+
+
+def validate_registered_execution_authority(
+    *,
+    scene_ids: list[str] | tuple[str, ...],
+    manifest_sha256: str,
+    registration_sha256: str,
+    manifest_cohort: list[str] | tuple[str, ...],
+) -> dict[str, str]:
+    """Fail closed before CUDA unless the request is an exact frozen phase."""
+
+    if str(manifest_sha256) != FROZEN_MANIFEST_SHA256:
+        raise ValueError("NVOS source-completion manifest SHA256 differs")
+    cohort = tuple(str(value) for value in manifest_cohort)
+    if cohort != FROZEN_FULL_COHORT:
+        raise ValueError("NVOS source-completion manifest cohort differs")
+    requested = tuple(str(value) for value in scene_ids)
+    authority = _REGISTERED_EXECUTION_AUTHORITIES.get(requested)
+    if authority is None:
+        raise ValueError(
+            "source-completion scene order is not a registered execution authority"
+        )
+    if str(registration_sha256) != str(authority["registration_sha256"]):
+        raise ValueError("source-completion registration SHA256 differs")
+    return dict(authority)
 
 
 def _atomic_torch_save(value: object, output: Path) -> None:
@@ -296,10 +383,16 @@ def run(args: argparse.Namespace) -> dict:
     registration_path = Path(args.registration).resolve()
     checkpoint_path = Path(args.checkpoint).resolve()
     output_root = Path(args.output_root).resolve()
+    manifest_sha256 = sha256_file(manifest_path)
+    registration_sha256 = sha256_file(registration_path)
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     scene_ids = [value for value in args.scene_ids.replace(",", " ").split() if value]
-    if scene_ids != ["horns_left", "fern"]:
-        raise ValueError("phase-1 scene order must be exactly: horns_left fern")
+    execution_authority = validate_registered_execution_authority(
+        scene_ids=scene_ids,
+        manifest_sha256=manifest_sha256,
+        registration_sha256=registration_sha256,
+        manifest_cohort=manifest.get("protocol", {}).get("cohort", []),
+    )
     for scene_id in scene_ids:
         if (output_root / "receipts" / f"{scene_id}.json").exists():
             raise FileExistsError(output_root / "receipts" / f"{scene_id}.json")
@@ -325,12 +418,13 @@ def run(args: argparse.Namespace) -> dict:
     ]
     summary = {
         "schema_version": "nvos_sam3_reference_completion_phase1_v1",
-        "status": "both_source_reference_receipts_frozen",
+        "status": "all_registered_source_reference_receipts_frozen",
+        "execution_authority": execution_authority,
         "scene_order": scene_ids,
         "manifest_path": str(manifest_path),
-        "manifest_sha256": sha256_file(manifest_path),
+        "manifest_sha256": manifest_sha256,
         "registration_path": str(registration_path),
-        "registration_sha256": sha256_file(registration_path),
+        "registration_sha256": registration_sha256,
         "checkpoint_path": str(checkpoint_path),
         "checkpoint_sha256": sha256_file(checkpoint_path),
         "official_sam3_source": "/root/external/sam3",

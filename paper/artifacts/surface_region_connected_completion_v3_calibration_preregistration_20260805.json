@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_connected_completion_v3_calibration_v1",
+  "status": "registered_after_query_free_cache_canary_and_before_replacement_cache_training_or_any_benchmark_opening",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_gauge_explicit_completion_v3_addendum_preregistration_20260805.json",
+    "sha256": "789998b78dc6f8e366ff1b86cfa5a6213a504ef765e4a4c810dc5eb311793867"
+  },
+  "rejected_canary": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_gauge_explicit_completion_v3_canary_results_20260805.json",
+    "sha256": "d88df00a3b0a0582537020183537745be6e9810bf1c0b6b8fd17eca02da90da8",
+    "benchmark_opened": false,
+    "failure": "nominal semantic nodes were not anchor-connected; actual completion fill fraction was 0.9401041666666666"
+  },
+  "calibrated_completion_contract": {
+    "policy": "hash_direction_anchor_connected_shortest_path_tree_with_external_support_v2",
+    "hash_domain": "surface-region-v3-eligibility-completion-v2",
+    "orientation": "SHA256 teacher-region identity chooses one of six signed world axes",
+    "semantic_source": "full hard-semantic radius-times-context ball",
+    "connected_selection": "direction-aware frontier prefix of the anchor shortest-path predecessor tree",
+    "minimum_tokens": 24,
+    "nominal_semantic_keep_tokens": 20,
+    "nominal_support_fill_tokens": 4,
+    "completion_total_tokens": 24,
+    "conditional_completion_fill_fraction": 0.16666666666666666,
+    "variants_per_teacher_region": 1,
+    "full_to_completion_row_ratio": "1:1",
+    "external_support": "all eligible nodes outside the full hard-semantic ball",
+    "materialization": "real eligibility-induced SurfaceRegionContractV3 expansion",
+    "post_hoc_masking": false
+  },
+  "strict_checks": {
+    "builder": "actual semantic equals effective keep, actual fill equals minimum minus semantic, and actual total equals minimum",
+    "resume_and_loader": "policy, pair identity, semantic/fill/total budget, teacher target identity, and fallback provenance must match",
+    "normal_case": "semantic=20, fill=4, total=24",
+    "extreme_graph_fallback": "allowed only when semantic component or external support is below nominal; effective budget and reason are explicit",
+    "minimum_fill_under_fallback": 1,
+    "unrepresentable_completion": "fail closed"
+  },
+  "unchanged_from_parent": [
+    "fresh official teacher targets for every shard",
+    "SurfaceRegion V3 contract and direction-plus-log-norm gauge",
+    "schema-7 raw-norm-base-only readout",
+    "sparse prefix augmentation",
+    "full-support-only checkpoint selection",
+    "generic opening thresholds",
+    "Figurines-first benchmark sequence and frozen evaluation protocols"
+  ],
+  "replacement_canary_gate": {
+    "completion_row_fill_coverage": 1.0,
+    "extreme_graph_fallback_rows": 0,
+    "completion_semantic_tokens_per_row": 20,
+    "completion_support_fill_tokens_per_row": 4,
+    "completion_selected_tokens_per_row": 24,
+    "completion_fill_fraction": 0.16666666666666666,
+    "all_rows_minimum_satisfied": true,
+    "padding_exact_zero": true,
+    "teacher_target_source": "fresh_official_runtime",
+    "failed_scenes": 0
+  },
+  "implementation_sources": {
+    "surface_region_eligibility_completion.py": "3802bbf3a7bd590f69373590ccd5274fc6f9167df712092422e1046f47803289",
+    "build_scannet_surface_region_cache.py": "ec92955bf9dffc118ae6cd5d9021c96a10f5d3c43c1d6d39482506f956c13408",
+    "surface_region_scene_resume.py": "eec82e414037882af6b4662bce9f1515ccb6dd3ac9d35a64624d2dc9b362b663",
+    "train_surface_region_summary_readout.py": "15720c6b5d668429c93137b939c2dccb0b3d9db03c6a41117bd133e6c553c342"
+  }
+}

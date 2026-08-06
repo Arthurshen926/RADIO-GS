@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_only_method_result",
+  "experiment": "canonical-factorized-radio-v1-figurines-source-only-basis-ablation",
+  "preregistration_sha256": "c77833afe5753eb370123ecccd4965e7db128574eaafea19fe8502aea4e53dd4",
+  "status": "both_arms_rejected_before_benchmark_opening",
+  "arms": {
+    "trainable_basis": {
+      "checkpoint_sha256": "d9808669bbfb62909274a7285ea81c20a84976b74d8481b36b56e5ec5df196aa",
+      "report_sha256": "092ca41a552d17b556e1bb480295cdd05b4deda144cec03bdd16f28b8db6f5be",
+      "basis_reconstruction_cosine": 0.9768775105476379,
+      "direction_mean_cosine": 0.9645817875862122,
+      "direction_p05_cosine": 0.9218639135360718,
+      "mean_abs_log_amplitude_error": 0.025769993662834167,
+      "p95_abs_log_amplitude_error": 0.05963541939854622,
+      "dino_v3_target_mean_cosine": 0.981283962726593,
+      "dino_v3_target_p05_cosine": 0.9573535919189453,
+      "sam3_target_mean_cosine": 0.9568658471107483,
+      "sam3_target_p05_cosine": 0.9120693206787109,
+      "passes_all_absolute_gates": false
+    },
+    "fixed_pca_basis": {
+      "checkpoint_sha256": "3c35cc1d9b6115fb1edc713d0aee8b941ff543316b58da5aa79dece8fd09e806",
+      "report_sha256": "5af67cfd9a7d027578bec4276ab9319db3338ddf32d2240d969d2c140020f3c2",
+      "basis_reconstruction_cosine": 0.9768775105476379,
+      "direction_mean_cosine": 0.9620086550712585,
+      "direction_p05_cosine": 0.9175260663032532,
+      "mean_abs_log_amplitude_error": 0.04099759832024574,
+      "p95_abs_log_amplitude_error": 0.07939190417528152,
+      "dino_v3_target_mean_cosine": 0.9778861999511719,
+      "dino_v3_target_p05_cosine": 0.9485648274421692,
+      "sam3_target_mean_cosine": 0.950979471206665,
+      "sam3_target_p05_cosine": 0.9014837145805359,
+      "passes_all_absolute_gates": false
+    }
+  },
+  "fixed_minus_trainable": {
+    "direction_mean_cosine": -0.0025731325149536133,
+    "direction_p05_cosine": -0.0043378472328186035,
+    "mean_abs_log_amplitude_error": 0.015227604657411575,
+    "p95_abs_log_amplitude_error": 0.019756484776735306,
+    "dino_v3_target_mean_cosine": -0.0033977627754211426,
+    "dino_v3_target_p05_cosine": -0.008788764476776123,
+    "sam3_target_mean_cosine": -0.005886375904083252,
+    "sam3_target_p05_cosine": -0.010585606098175049
+  },
+  "decision": {
+    "fixed_basis_noninferior": false,
+    "preferred_within_d256_l128": "trainable_basis",
+    "benchmark_promotion": false,
+    "reason": "D256/L128 is below the preregistered source-only direction and official capability gates on both arms. The failure is therefore visible without target metrics and cannot be repaired by freezing the basis."
+  },
+  "first_principles_followup": {
+    "support": "Replace top1-only lifting with one query-free sparse exact marginal responsibility authority shared by raw RADIO, DINO-v3, and SAM3; the existing 16-view exact marginal control covers 82088 rows versus 82603 accepted V2 rows, while top1 covers only 34669.",
+    "capacity": "After support is restored, select the smallest global affine rank and per-primitive local dimension that pass the same source-only direction, amplitude, DINO, and SAM gates; do not open benchmark targets for D256/L128."
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

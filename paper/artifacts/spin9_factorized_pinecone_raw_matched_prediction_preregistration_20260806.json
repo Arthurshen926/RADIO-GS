@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_factorized_pinecone_raw_matched_prediction_v1",
+  "registered_at": "2026-08-06T05:48:00+08:00",
+  "status": "registered_after_source_only_fold_gate_and_before_target_score_rendering",
+  "parent": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "scene": "pinecone",
+  "protocol": {
+    "manifest": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "manifest_sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+  },
+  "source_authorities": {
+    "exact_w_sha256": "97cacb8748157343dab2b54d4aa7295edc20c1691119af948fe8dc6ddd58afc4",
+    "exact_w_authority_sha256": "0072b7a928b5526c00f81d7e5f6e61f4e2f67197f11f82ab67c49d0d56e0c9d4",
+    "source_mask_sha256": "990c441ec9067104647de1046917fb918957b93fe40cf39d2faf1715c96f38ae",
+    "footprint_gate": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+      "sha256": "d312a7174859b81899f6efa0b71f79a16d4472b1e1d62d3cb4c3246bb005af4d",
+      "selected_action": "surface_safe_propagated"
+    },
+    "footprint_result_sha256": "7938a642f866d0e826467fbab430969bd5512e526a307b71fc09d2f435e179c6"
+  },
+  "query_assets": {
+    "field_sha256": "746f7b0e9a274742733b067aafbaf791843735c989e532a9f9da0e5c155f5671",
+    "capability_cache_sha256": "ae762afce2bccef73ecdc94e5b3bd9ec4b4f1a9ad3707b37da6152193a4a7aeb",
+    "support_graph_sha256": "f2b751659903b4d0740568f81d20b79dfbeae1ad3d33a86dcbc2346d94982594",
+    "knn_sha256": "fb0ca2fdbe1988efa90a62efcdb4c44d11d5a078d3d1c714c56e8922607f9ee5",
+    "relation_sha256": "fd21d06c8756b03f1ffb1a2b0bf5d5e27a959d626ff6624026cdb31acc775bc6",
+    "matched_interface_result_sha256": "6afc03fd34044960c31cd1fa56e4a06ad840734f9b2562b73a15880578c000b2"
+  },
+  "explicit_carrier": {
+    "config": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/gaussfm_main_track.yaml",
+      "sha256": "84fc359e406ae86c6f7eaa64d95def26ea055a3647fd77473ed16efd22fe1613"
+    },
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/feature_field/checkpoints/best.pth",
+      "sha256": "e2e66dd2c03e52ed2307679e26fb1cc55d6734dadfc9f201b39fabe484c891d3"
+    },
+    "camera_map": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/rgb_to_colmap_camera_mapping.json",
+      "sha256": "f12e617f141710cc4712f827f524fa30a1fe245af50d749723f02beb54a1208d"
+    },
+    "all_three_caller_hash_verified_before_prediction": true,
+    "silent_queue_fallback": false
+  },
+  "fixed_method": {
+    "base_compiler": "K4 exact raster-adjoint direct observation with OOF-selected surface-safe K16 propagated stage",
+    "query_kernel": "ludvig_release_compat",
+    "effective_k_including_self": 201,
+    "feature_bandwidth": 0.5,
+    "regularizer_bandwidth": 1.0,
+    "logistic_c": 0.01,
+    "iterations": 100,
+    "edge_binarize_threshold": 0.00001,
+    "max_positive_fraction": 0.1,
+    "reference_threshold_calibration": false,
+    "raw_seen_threshold_reserved_for_full9_source_gauge": 0.71,
+    "completion_quantile_reserved_for_full9_source_gauge": 0.96,
+    "connected_selection": false,
+    "parameter_scan": false
+  },
+  "execution": {
+    "evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+    "physical_gpu": 1,
+    "device": "cuda:0",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/query_diffusion_matched_interface_v1/raw_matched_prediction_v1",
+    "output_root_was_absent_at_registration": true,
+    "prediction_only": true,
+    "thermal_policy": "30-second polls; stop only after six consecutive observations at or above 88 C"
+  },
+  "sealing_order": [
+    "render every continuous raw matched target score without opening target RGB or masks",
+    "seal target score, carrier, gate, and implementation hashes in the pre-metric receipt chain",
+    "strictly replay the receipt before fitting the exact-W source gauge",
+    "do not evaluate target masks until the full nine-scene cohort gate"
+  ],
+  "safety": {
+    "target_scores_rendered_at_registration": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

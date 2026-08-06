@@ -1,0 +1,49 @@
+{
+  "audit": "frozen_rgb_gaussian_scalar_membership_ceiling_v1",
+  "benchmark_masks_opened": true,
+  "decision_gate": {
+    "carrier_is_hard_limit_if_gap_to_reproduced_reference_exceeds_points": 3.0,
+    "carrier_is_not_primary_if_gap_to_reproduced_reference_is_within_points": 3.0,
+    "require_consistent_evidence_on_multiple_tasks_before_changing_carrier": true
+  },
+  "diagnostic_only": true,
+  "first_sentinel": {
+    "benchmark": "LERF-OVS",
+    "scene": "figurines",
+    "views": [
+      41,
+      105,
+      152,
+      195
+    ]
+  },
+  "frozen_before_results": true,
+  "membership_model": "one continuous probability in [0,1] per frozen RGB Gaussian and query",
+  "observation_operator": "exact frozen front-to-back contribution, alpha-conditioned scalar membership",
+  "optimization": {
+    "boundary_union_cap_per_view": 49152,
+    "foreground_union_cap_per_view": 49152,
+    "learning_rate": 0.25,
+    "random_pixel_cap_per_view": 65536,
+    "steps": 80,
+    "training_loss": "class-balanced probability BCE plus soft Dice",
+    "weight_decay": 0.0
+  },
+  "reported_metrics": [
+    "fixed_0.5_mIoU",
+    "globally_oracle_threshold_mIoU",
+    "per_sample_oracle_threshold_mIoU",
+    "soft_mIoU",
+    "contribution_weighted_membership_entropy",
+    "ambiguous_total_mass_fraction",
+    "ambiguous_foreground_mass_fraction",
+    "boundary_mass_carried_by_ambiguous_rows"
+  ],
+  "threshold_grid": {
+    "maximum": 0.95,
+    "minimum": 0.05,
+    "step": 0.025
+  },
+  "text_queries_opened": false,
+  "valid_benchmark_method": false
+}

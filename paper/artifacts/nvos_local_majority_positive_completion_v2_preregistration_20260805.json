@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_local_majority_positive_completion_v2",
+  "registered_at": "2026-08-05T19:58:00+08:00",
+  "status": "registered_before_v2_implementation_source_only_diagnostic_or_target_prediction",
+  "claim_boundary": "Posthoc method development after full8 v1 target results were opened. This registration authorizes only source-view diagnostics. It does not authorize target rendering or target-mask access.",
+  "lineage": {
+    "full8_v1_exact_results": "paper/artifacts/nvos_source_completion_loo_abstention_full8_exact_results_20260805.json",
+    "full8_v1_exact_results_sha256": "27bd57537ebb0a53f29337c72cbbcbaef9dc87b690a387f98bee8865c98416ce",
+    "mechanistic_observation": "The all-or-nothing LOO gate is safe but rejects seven of eight tasks. The v2 question is whether spatially local positive consensus can preserve defensible evidence without importing SAM absence as negative evidence.",
+    "v1_target_outcomes_used_to_choose_v2_numeric_constants": false
+  },
+  "frozen_dataset_authority": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "scene_order": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "horns_left",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "unit_of_analysis": "source_task_instance"
+  },
+  "frozen_completion_assets": {
+    "fern": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/fern.pt",
+      "sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+      "receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a"
+    },
+    "flower": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/flower.pt",
+      "sha256": "eca24b3980f601b782a62518c95a581ca665d09f52a2328163cf36984b08f751",
+      "receipt_sha256": "e214a6110818b7688b3de1ae4b5fe5c35b53ec8c70243a6e2838a381ccc9c678"
+    },
+    "fortress": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/fortress.pt",
+      "sha256": "776abc80bc552a9c2ebb834ef02140d941641a75dfad4f345cd35133cae64399",
+      "receipt_sha256": "b1d9cdd867959525ace275b39a90bdb447bddb93eb30a7263c0ff04535704269"
+    },
+    "horns_center": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/horns_center.pt",
+      "sha256": "af1450efabed90506db744fcd3ec17c118b0aefea41129abe6d9096f87bc6799",
+      "receipt_sha256": "57e18c02bfaeb69ba0be05dc60e15621dcd39b309c9ca22e2b0fb0fb4fca1d67"
+    },
+    "horns_left": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/nvos_official_sam3_reference_completion_v1/masks/horns_left.pt",
+      "sha256": "08a0f366702b79eee7d59f25a85a2480543b0298ef1abd8c30f0ff9edc027155",
+      "receipt_sha256": "cd6e04e7ed4126b24e07bd09e11cdc7fbd20066c2ff88b6a28326cc4637d9dfd"
+    },
+    "leaves": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/leaves.pt",
+      "sha256": "6fe8ef428b74390d4effed5b6a9342cdf2b4b0487e029e7e2d1e9267228f4861",
+      "receipt_sha256": "b589f7d2685fddd2bbcdedc4590263e58d42f55d16457639d6e34dc7d3b369d1"
+    },
+    "orchids": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/orchids.pt",
+      "sha256": "e43b7483488895d89a7e9a4996568045179fbbd863228c7aa996cf7bde8cd732",
+      "receipt_sha256": "5632ec75a8cac9c0246696a7772df57c13e0969c225aca1321b52d367a1b0167"
+    },
+    "trex": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/masks/trex.pt",
+      "sha256": "8ec90e6755d7c9f8ac5e90e2eff1851f6b2947876b1a7892155c0d40085de322",
+      "receipt_sha256": "ddf711dcc3ff2fafc40ec864dbcc9f5ed0bb478401e76395cf6bfe65663f766c"
+    }
+  },
+  "fixed_candidate_contract": {
+    "name": "local_majority_positive_proposal_v2",
+    "completion_probability": "q=mean of immutable binary SAM3 source-view trials",
+    "proposal_region": "q>0.5",
+    "completion_proposal_probability": "p=1 where q>0.5",
+    "completion_reliability": "c=max(2*q-1,0)",
+    "completion_absence_policy": "c=0 where q<=0.5; absence is abstention and never negative evidence",
+    "raw_positive_scribble_override": "p=1,c=1",
+    "raw_negative_scribble_override": "p=0,c=1",
+    "scribble_conflict_policy": "fail_closed",
+    "fusion_domain": "Bernoulli probability with reliability separate from proposal probability",
+    "majority_threshold_source": "fixed binary majority rule",
+    "parameter_sweep": false,
+    "learned_constants": false,
+    "scene_specific_constants": false,
+    "target_rgb_mask_or_metric_used": false
+  },
+  "first_principles_properties": {
+    "positive_only_semantics": "The completion operator may add foreground evidence only where a strict source-trial majority proposed foreground.",
+    "absence_is_not_background": "Pixels without a majority proposal have zero completion reliability; the canonical field and raw negative scribble remain responsible for background evidence.",
+    "margin_reliability": "2q-1 is the signed distance from binary indecision rescaled to [0,1], with no additional threshold or temperature.",
+    "conservativeness": "For q in (0.5,1], 0<2q-1<=q, so completion reliability never exceeds its empirical trial support fraction.",
+    "local_abstention": "Unstable regions abstain locally instead of causing a scene-wide completion veto.",
+    "raw_prompt_authority": "Raw signed scribbles remain unit-confidence observations and override completion proposals exactly."
+  },
+  "source_only_loo_diagnostic": {
+    "heldout_protocol": "For each of ten trials, compute q from the other nine trials only, form the fixed v2 evidence, then compare the positive proposal with the held-out binary trial.",
+    "per_trial_metrics": [
+      "proposal_pixels",
+      "proposal_confidence_mass",
+      "hard_majority_precision",
+      "confidence_weighted_precision",
+      "hard_majority_recall",
+      "hard_majority_iou",
+      "confidence_weighted_false_positive_fraction"
+    ],
+    "per_scene_metrics": [
+      "full_fit_proposal_fraction",
+      "full_fit_confidence_mass_fraction",
+      "mean_loo_hard_majority_precision",
+      "mean_loo_confidence_weighted_precision",
+      "mean_loo_precision_gain_from_margin_weighting",
+      "minimum_loo_confidence_weighted_precision",
+      "v1_gate_decision"
+    ],
+    "pooled_diagnostic": "Pool intersection/proposal and confidence-weighted heldout mass across all scene-trials; do not scene-average before the pooled precision comparison.",
+    "no_target_access": true
+  },
+  "source_only_admissibility_gate": {
+    "structural_invariants_all_pass": true,
+    "pooled_confidence_weighted_precision_at_least_pooled_hard_majority_precision": true,
+    "at_least_one_v1_rejected_scene_retains_non_scribble_positive_confidence": true,
+    "all_metrics_finite": true,
+    "no_numeric_margin_or_target_threshold": true,
+    "failure_action": "Do not implement target evaluator path and retain v1 global abstention.",
+    "pass_action": "Conclude only that v2 has a stronger source-side semantic basis than global abstention and may be implemented for a separately registered target sentinel. Passing this gate does not authorize target evaluation."
+  },
+  "output_authority": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_local_majority_positive_completion_v2",
+    "diagnostic": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_local_majority_positive_completion_v2/source_only_diagnostic.json",
+    "no_clobber": true
+  },
+  "forbidden_before_separate_authorization": [
+    "target RGB open",
+    "target score rendering",
+    "target mask open",
+    "target metric computation",
+    "evaluator modification",
+    "scene-specific gate or parameter selection"
+  ]
+}

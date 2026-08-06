@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_entropy_gated_listwise_dev2_v1",
+  "status": "rejected_by_preregistered_development_gate",
+  "results": {
+    "figurines": {
+      "control_miou": 0.4753371775,
+      "candidate_miou": 0.4753972590,
+      "delta": 0.0000600815,
+      "report": "output/optimization_20260805/lerf3d_entropy_gated_listwise_dev2_v1/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "report_sha256": "8e53f3ad4ba7af3adc6a74a8d4aecba54a620d2a8cebc04d121fe7e67e47f8cd"
+    },
+    "ramen": {
+      "control_miou": 0.2979446054,
+      "candidate_miou": 0.2979124784,
+      "delta": -0.0000321270,
+      "report": "output/optimization_20260805/lerf3d_entropy_gated_listwise_dev2_v1/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "report_sha256": "0077cfcb551e8864d35bfe739b7f0730f31015b6382982a4f740cd12b8d4aad5"
+    }
+  },
+  "aggregate": {
+    "control_macro_miou": 0.3866408915,
+    "candidate_macro_miou": 0.3866548687,
+    "delta": 0.0000139773
+  },
+  "gate_decision": {
+    "required": "macro gain at least 0.01 and no scene regression larger than 0.01",
+    "macro_gain_pass": false,
+    "per_scene_safety_pass": true,
+    "decision": "reject without parameter sweep or full-four expansion"
+  },
+  "interpretation": "Entropy gating solves the logical defect of hard mutual exclusion and is effectively non-destructive, but the listwise correction is negligible. The remaining LERF deficit is upstream in absolute semantic response and instance support-domain construction, not in query-set competition strength."
+}

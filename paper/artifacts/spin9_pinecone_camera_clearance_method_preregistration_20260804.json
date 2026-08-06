@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_pinecone_camera_clearance_real_method_v1",
+  "status": "registered before target prediction rerun",
+  "hypothesis": "A query-independent two-sigma camera-plane clearance guard removes near-camera floating Gaussian occluders and recovers the two known zero-support frames without changing the source-mask inference, graph, reference-only calibration, scalar threshold, or frozen benchmark evaluation protocol.",
+  "candidate": {
+    "base_method": "SPIn query-conditioned diffusion reference-calibrated v1",
+    "only_method_change": "camera_clearance_sigma=2.0 applied consistently to reference prompt adjoint, reference-only threshold calibration, and target scalar rendering",
+    "clearance_contract": "gaussian_two_sigma_support_strictly_in_front_of_camera_near_plane_v1",
+    "scene_specific_parameter": false,
+    "target_rgb_used": false,
+    "target_masks_used_before_predictions_persisted": false
+  },
+  "frozen_protocol": {
+    "manifest": "output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "scene": "pinecone",
+    "metric": "unweighted frame mean foreground IoU",
+    "calibration": "reference mask only",
+    "all_non-clearance CLI arguments": "bit-for-bit copied from radio_gs/scripts/run_spin9_query_conditioned_diffusion.sh"
+  },
+  "primary": {
+    "baseline_foreground_iou": 0.9079864777733617,
+    "baseline_report": {
+      "path": "output/optimization_20260803/spin9_query_conditioned_diffusion_v1/reference_calibrated/pinecone/pinecone_evaluation.json",
+      "sha256": "92a3331ad4fd846978ce5062e97957e9fc60f5af3bae75f13488d08dd2d24c8c"
+    },
+    "expected_direction": "increase",
+    "failure_frames": [
+      "IMG_7280",
+      "IMG_7281"
+    ],
+    "acceptance": "both failure frames become nonzero and scene foreground IoU does not decrease"
+  },
+  "locked_code": {
+    "evaluator_sha256": "7932e5bb2eb8aecb03e065052fa9a5c2324bce308d10415bf746b9827859e9e4",
+    "raster_adjoint_sha256": "008e3bed5bc7d2707da088a4136758221f74af951db3be12321cf82ccdb35ac8",
+    "camera_clearance_sha256": "ed4e7c77351a487447e22a1f9a0bcf42535834cc238b2e75de34a2d7ec4fb667",
+    "relation_cache_sha256": "4e3381cb32a36afd289f673323fe648ce8b427397ab4e37d408b283e6a0c8888",
+    "knn_cache_sha256": "fdca375c2799b934b6190af842b5f3051a621414a3ce7bb1551d887487d16081"
+  },
+  "output": "output/optimization_20260804/spin9_camera_clearance2_v1/reference_calibrated/pinecone"
+}

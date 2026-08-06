@@ -1,0 +1,37 @@
+{
+  "artifact_type": "method_correction_addendum",
+  "method_contract": "canonical-factorized-radio-v1",
+  "date": "2026-08-05",
+  "status": "registered_before_cache_build_training_or_target_evaluation",
+  "supersedes_fixed_design_fields": [
+    "observation_evidence",
+    "cache_storage"
+  ],
+  "previous_definition": "sum of effective responsibility weights attached to positive-amplitude observations",
+  "corrected_definition": "n_positive_views / (n_positive_views + 1)",
+  "cache_storage_correction": "Persist canonical_feature and log_amplitude, but derive semantic_direction as normalize(canonical_feature) instead of duplicating a second N x D tensor.",
+  "reason": "Raw responsibility mass depends on image resolution, projected primitive footprint, and compositing scale, so it is not a scene-comparable observation-evidence scalar. The bounded positive-view count matches the existing canonical primitive reliability semantics and is invariant to a common positive rescaling of responsibility and visibility weights. Semantic direction is exactly derivable from the nonzero canonical feature, so persisting it would double the dominant cache storage without adding information.",
+  "unchanged_fields": [
+    "semantic_direction",
+    "log_amplitude",
+    "directional_resultant",
+    "directional_dispersion",
+    "log_amplitude_std",
+    "visibility_purity",
+    "canonical_feature",
+    "zero_amplitude_policy",
+    "invalid_row_policy"
+  ],
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_correction": false
+  },
+  "execution_before_registration": {
+    "factorized_cache_built": false,
+    "factorized_field_trained": false,
+    "benchmark_evaluated": false,
+    "gpu_used": false
+  }
+}

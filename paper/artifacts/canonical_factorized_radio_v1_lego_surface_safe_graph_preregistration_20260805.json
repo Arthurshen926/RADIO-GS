@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_lego_surface_safe_graph",
+  "registered_at": "2026-08-05T14:43:56+08:00",
+  "status": "registered_after_source_only_capability_gate_and_before_graph_build",
+  "purpose": "Rebuild the already frozen query-independent surface-safe Lego topology on the promoted factorized capability bank, with exact cache and responsibility lineage.",
+  "inputs": {
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/official_dino_sam3_views.pt",
+      "sha256": "dcdf63e4718f987422b094a74c042b33e78b6d6013d69e12108d0f74c8731147",
+      "field_checkpoint_sha256": "12ebdbe8e18c29e30a9c6f40c466f24e9ed7d2accd8a83ba536fbc90ba808637",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373"
+    },
+    "capability_source_only_gate": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_lego_capability_materialization_results_20260805.json",
+      "sha256": "c7d32373203537a4c8b52a62536c3bf2a9dd135eec5d15bbe0a9231f17ab7b40",
+      "passed": true
+    },
+    "registration_responsibility_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/responsibility.pt",
+      "sha256": "bc131100dfbe7f9c254eb2482861ce7476ab35688997835420dd3d98ef2f8a3e"
+    },
+    "geometry_xyz_sha256": "74d9d97dbfbc31445b8ffcdc4bebb2ebc7f3dfd20490318b3712ff189611e337",
+    "primitive_global_rows_sha256": "75d25f7794e04b6c805202b99f759f0945ef48a621d6a0f8ae0cf7a45b9bf1d6"
+  },
+  "fixed_graph": {
+    "neighbors": 16,
+    "topology_mode": "mutual_knn",
+    "capability_affinity_mode": "exact_official_capability",
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "surface_relation": "local_pca_tangent_v1",
+    "surface_normal_neighbors": 24,
+    "surface_normal_min_planarity": 0.0,
+    "surface_topology_min_affinity": 0.0,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "covisibility_weight": 0.25,
+    "require_covisibility_topology": false,
+    "affinity_chunk_size": 65536,
+    "scene_specific_tuning": false,
+    "labels_or_queries_used": false
+  },
+  "lineage_gate": {
+    "caller_trusted_capability_file_sha256_required": true,
+    "embedded_responsibility_sha256_required": true,
+    "mpr_sidecar_responsibility_sha256_cross_check": true,
+    "embedded_factorized_geometry_required": true,
+    "payload_sidecar_capability_lineage_exact": true,
+    "graph_metadata_records_capability_file_sha256": true,
+    "target_access": false
+  },
+  "implementation": {
+    "support_graph_builder_sha256": "b57ab599d03190d03e42f3e3d5bec89594979bcb4fe9c21efde9c4740bea329e",
+    "capability_cache_loader_sha256": "af6315eb956c998a3145f0b0fe4c5f9a7eae6a9ea25fe73bd4e351ba0960c35a",
+    "focused_tests": "25 passed including materialization audit; 23 graph/capability tests passed before audit addition"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "affinity_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary and approximately 180-second checks; stop only after two consecutive observations at or above 88 C",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/shared_support_graph_surface_safe_k16.pt",
+    "output_was_absent_at_registration": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

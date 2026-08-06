@@ -1,0 +1,206 @@
+{
+  "capabilities": {
+    "dino_v3": {
+      "centered_variation_definition": "sqrt(mean((row_l2_normalized_embedding - column_mean)^2))",
+      "dimension": 4096,
+      "exact": {
+        "centered_row_variation_rms": 0.010802553774204613
+      },
+      "factorized": {
+        "centered_row_variation_ratio_to_exact": 1.0457767274518934,
+        "centered_row_variation_rms": 0.0112970593341108,
+        "cosine_mean": 0.992061972618103,
+        "cosine_p05": 0.9729627370834351
+      },
+      "factorized_minus_legacy": {
+        "cosine_mean": 0.38091588020324707,
+        "cosine_p05": 0.5121303796768188
+      },
+      "legacy": {
+        "centered_row_variation_ratio_to_exact": 0.07924909663071165,
+        "centered_row_variation_rms": 0.0008560926279104002,
+        "cosine_mean": 0.611146092414856,
+        "cosine_p05": 0.4608323574066162
+      },
+      "normalization": "independent_fp32_l2_for_prediction_and_exact_source_rows",
+      "rows": 16384
+    },
+    "sam3": {
+      "centered_variation_definition": "sqrt(mean((row_l2_normalized_embedding - column_mean)^2))",
+      "dimension": 1024,
+      "exact": {
+        "centered_row_variation_rms": 0.02256918118022348
+      },
+      "factorized": {
+        "centered_row_variation_ratio_to_exact": 1.053630571898817,
+        "centered_row_variation_rms": 0.023779579274206885,
+        "cosine_mean": 0.9798270463943481,
+        "cosine_p05": 0.9420236945152283
+      },
+      "factorized_minus_legacy": {
+        "cosine_mean": 0.38461756706237793,
+        "cosine_p05": 0.5460118651390076
+      },
+      "legacy": {
+        "centered_row_variation_ratio_to_exact": 0.05240448529946341,
+        "centered_row_variation_rms": 0.0011827263233799476,
+        "cosine_mean": 0.5952094793319702,
+        "cosine_p05": 0.3960118293762207
+      },
+      "normalization": "independent_fp32_l2_for_prediction_and_exact_source_rows",
+      "rows": 16384
+    }
+  },
+  "execution": {
+    "benchmark_evaluated": false,
+    "device": "cuda:0",
+    "field_trained": false,
+    "projection_batch_size": 256
+  },
+  "experiment": "canonical-factorized-radio-v1-label-free-source-gate",
+  "implementation": {
+    "audit_factorized_radio_label_free_gate.py": {
+      "path": "radio_gs/scripts/audit_factorized_radio_label_free_gate.py",
+      "sha256": "637a1d3e5847e884fe32062ef6b6264901e98d13d92e9183dc728eb88bdee6ed"
+    },
+    "build_gaussian_multiview_teacher_cache.py": {
+      "path": "radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+      "sha256": "470c532d8eea61ff05779a768d00cd37cb8724605a5385c9e0c541bdf9b2adb3"
+    },
+    "factorized_radio_contract.py": {
+      "path": "radio_gs/field/factorized_radio_contract.py",
+      "sha256": "cded4da0e4025a6f0d3f1b3838279b02d8644bdb280d74ce0b97b58bb66380fc"
+    },
+    "frozen_radio_views.py": {
+      "path": "radio_gs/interfaces/frozen_radio_views.py",
+      "sha256": "1c053d70b99807c47bce675eaab65d58b017ace851698f9e9a88aaa5d36eb1d4"
+    },
+    "radio_adaptors.py": {
+      "path": "radio_gs/models/radio_adaptors.py",
+      "sha256": "0f41e480fe2c234df049a84febc5940ae5e24dbf5046750a75f33433a6810e17"
+    },
+    "tensor_cache_io.py": {
+      "path": "radio_gs/training/tensor_cache_io.py",
+      "sha256": "bf700037317778ff6fc0efccf444f50a17a36fad75cf96e9470db096635f79ad"
+    }
+  },
+  "input_norms": {
+    "factorized_all_active_rows": {
+      "maximum": 42.185733795166016,
+      "mean": 31.597902297973633,
+      "median": 31.380769729614258,
+      "minimum": 25.201200485229492,
+      "p05": 29.224586486816406,
+      "p95": 34.72606658935547,
+      "rows": 128780
+    },
+    "factorized_selected_common_rows": {
+      "maximum": 41.470211029052734,
+      "mean": 31.520002365112305,
+      "median": 31.05947494506836,
+      "minimum": 27.763107299804688,
+      "p05": 29.165559768676758,
+      "p95": 35.04484176635742,
+      "rows": 16384
+    },
+    "legacy_selected_common_rows": {
+      "maximum": 1.000200867652893,
+      "mean": 0.862865686416626,
+      "median": 0.8673851490020752,
+      "minimum": 0.5547348856925964,
+      "p05": 0.7078081369400024,
+      "p95": 0.9999963641166687,
+      "rows": 16384
+    }
+  },
+  "inputs": {
+    "exact_capability_mpr": {
+      "dino_v3": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/dino_v3.pt",
+        "sha256": "89d252ddf81995a8e9bd89d396bf1bfbf0ebe0b821b6bc19472ed60fe99f25fa"
+      },
+      "sam3": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/sam3.pt",
+        "sha256": "93e6b6c76c43038dea07997d7c408feb613c0afa2fced37bb83ad2614279fc22"
+      }
+    },
+    "factorized_radio": {
+      "builder_envelope_parser_validated": true,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_raw_radio.pt",
+      "sha256": "179920a8d2ae7947284df35b595e57d2029183759843a77fbbc320d234fd313f"
+    },
+    "geometry_fingerprint": {
+      "num_gaussians": 636148,
+      "xyz_sha256": "74d9d97dbfbc31445b8ffcdc4bebb2ebc7f3dfd20490318b3712ff189611e337"
+    },
+    "legacy_raw_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/raw_radio.pt",
+      "sha256": "e4a287e3b9e863a321d2c3f244a9e265014eda9d0b94415cc3f3cf53e025cc27"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "raw_source_amplitude_probe": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_radio_raw_amplitude_probe_20260805.json",
+      "sha256": "1ae63fdfd40b95cf466650e99f72cd1dab6facda87f8518f50d900bcc43cd87c"
+    },
+    "responsibility_sidecar": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/responsibility.pt",
+      "sha256": "bc131100dfbe7f9c254eb2482861ce7476ab35688997835420dd3d98ef2f8a3e"
+    }
+  },
+  "legacy_receipt_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_label_free_gate_legacy_receipt_correction_20260805.json",
+    "sha256": "0968490d3efb14721e74763da61c87d99e8b712599a338c74994f0c5265a0385"
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_label_free_gate_preregistration_20260805.json",
+    "sha256": "5136375d574f710d38d02d4901520313ede6ad3226dd1c0a449658a833e2536a",
+    "status": "registered_before_factorized_cache_build_or_metric_computation"
+  },
+  "promotion_gate": {
+    "checks": {
+      "all_cache_and_lineage_invariants": true,
+      "dino_v3_centered_row_variation_ratio": true,
+      "dino_v3_mean_cosine_delta": true,
+      "dino_v3_p05_cosine_delta": true,
+      "factorized_active_median_norm_lower": true,
+      "factorized_active_median_norm_upper": true,
+      "sam3_centered_row_variation_ratio": true,
+      "sam3_mean_cosine_delta": true,
+      "sam3_p05_cosine_delta": true
+    },
+    "decision": "proceed_to_factorized_field_training",
+    "passed": true,
+    "status": "pass",
+    "thresholds": {
+      "all_cache_and_lineage_invariants": true,
+      "centered_row_variation_ratio_to_exact_minimum": 0.8,
+      "dino_mean_cosine_delta_vs_legacy_minimum": -0.002,
+      "dino_p05_cosine_delta_vs_legacy_minimum": -0.005,
+      "factorized_active_median_norm_lower": 28.6447,
+      "factorized_active_median_norm_upper": 34.5264,
+      "sam3_mean_cosine_delta_vs_legacy_minimum": -0.002,
+      "sam3_p05_cosine_delta_vs_legacy_minimum": -0.005
+    }
+  },
+  "sampling": {
+    "common_valid_rows": 128780,
+    "first_global_row": 1,
+    "last_global_row": 29341,
+    "maximum_rows": 16384,
+    "rule": "first_rows_after_ascending_common_valid_global_row_order",
+    "selected_rows": 16384
+  },
+  "scene": "SPIn-NeRF Lego",
+  "schema_version": 1,
+  "source_only": true,
+  "status": "pass",
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "benchmark_targets_opened": false,
+    "target_metrics_used_for_gate": false,
+    "text_queries_opened": false
+  }
+}

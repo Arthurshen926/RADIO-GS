@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_full_mpr_teacher_canonical_negative_figurines_diagnostic_v1",
+  "status": "registered before diagnostic target-label evaluation",
+  "purpose": "Measure the text-interface ceiling after the canonical-negative omission is repaired while replacing only compact field-decoded RADIO with its frozen query-free full-MPR teacher.",
+  "candidate": {
+    "positive_score_cache_sha256": "34e11ac5622cb53584abdaa2f05d82649325c82c825e7deb9291b1556c59037d",
+    "descriptor_cache_sha256": "9d3bf81e37b680647a0d032457292d1c443c993528d0543c006584d525bd8efc",
+    "canonical_negative_formula": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "capacity_diagnostic_only": true,
+    "deployable_method": false,
+    "benchmark_masks_used_to_build_representation": false,
+    "text_queries_used_to_build_representation": false
+  },
+  "comparisons": {
+    "compact_field_plus_canonical_negative_miou": 0.4753371775,
+    "full_mpr_teacher_positive_only_miou": 0.4326345017,
+    "compact_field_positive_only_miou": 0.4074466624
+  },
+  "interpretation_rule": "A large gain over compact plus canonical negatives prioritizes field/capability preservation. A small gain or regression proves that the remaining LERF gap is mainly region target/readout/interface rather than compact field capacity."
+}

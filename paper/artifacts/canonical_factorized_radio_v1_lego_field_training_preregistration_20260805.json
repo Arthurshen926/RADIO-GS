@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_lego_field_training",
+  "registered_at": "2026-08-05T14:12:50+08:00",
+  "status": "registered_after_source_only_input_gate_and_before_field_training",
+  "purpose": "Matched-architecture Lego sentinel isolating the corrected raw RADIO gauge and factorized reconstruction objective before any benchmark target access.",
+  "inputs": {
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_raw_radio.pt",
+      "sha256": "179920a8d2ae7947284df35b595e57d2029183759843a77fbbc320d234fd313f"
+    },
+    "feature_output_bundle_sha256": "3f2d8fb3fcab457d4ad81a274652f505f0c26c3ba0c1fbb3dd6c0cec0537c181",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "legacy_matched_top1_reference": {
+      "raw_radio_sha256": "e4a287e3b9e863a321d2c3f244a9e265014eda9d0b94415cc3f3cf53e025cc27",
+      "dino_v3_sha256": "89d252ddf81995a8e9bd89d396bf1bfbf0ebe0b821b6bc19472ed60fe99f25fa",
+      "sam3_sha256": "93e6b6c76c43038dea07997d7c408feb613c0afa2fced37bb83ad2614279fc22",
+      "receipt_correction_sha256": "0968490d3efb14721e74763da61c87d99e8b712599a338c74994f0c5265a0385"
+    },
+    "geometry_xyz_sha256": "74d9d97dbfbc31445b8ffcdc4bebb2ebc7f3dfd20490318b3712ff189611e337",
+    "registration_responsibility_sha256": "bc131100dfbe7f9c254eb2482861ce7476ab35688997835420dd3d98ef2f8a3e"
+  },
+  "matched_architecture": {
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "spatial_coarse_dim": 0,
+    "primitive_fusion": true,
+    "fusion_reliability": false,
+    "hidden_dim": 192,
+    "fusion_residual_blocks": 0,
+    "pca_samples": 50000,
+    "standardize": true,
+    "trainable_basis": true,
+    "trainable_statistics": false,
+    "epochs": 20,
+    "early_stopping": "disabled_run_all_registered_epochs",
+    "batch_size": 4096,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0
+  },
+  "loss": {
+    "factorized_direction_weight": 1.0,
+    "factorized_log_amplitude_weight": 0.25,
+    "dino_v3_weight": 0.2,
+    "sam3_weight": 0.2,
+    "relation_weight": 0.0,
+    "coefficient_weight": 0.00001,
+    "basis_orthogonality_weight": 0.001,
+    "target_reliability_columns_entered_field": false,
+    "capability_projection": "predicted_raw_radio_then_official_adaptor"
+  },
+  "legacy_control": {
+    "field_path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/canonical_d256_l128_capability_first.pth",
+    "field_sha256": "b84b8058a5407714caae42f14cab169774fdf34810ea2d3539ee8364af8a4ff5",
+    "raw_mean_cosine": 0.9778013825416565,
+    "raw_p05_cosine": 0.9406864643096924,
+    "dino_mean_cosine": 0.9871185421943665,
+    "dino_p05_cosine": 0.9715515375137329,
+    "sam3_mean_cosine": 0.9671220183372498,
+    "sam3_p05_cosine": 0.9277953505516052
+  },
+  "promotion_gate": {
+    "direction_mean_cosine_minimum": 0.9758013825416565,
+    "direction_p05_cosine_minimum": 0.9356864643096924,
+    "mean_abs_log_amplitude_error_maximum": 0.03,
+    "p95_abs_log_amplitude_error_maximum": 0.15,
+    "predicted_norm_median_lower": 28.6447,
+    "predicted_norm_median_upper": 34.5264,
+    "dino_mean_cosine_minimum": 0.9851185421943665,
+    "dino_p05_cosine_minimum": 0.9665515375137329,
+    "sam3_mean_cosine_minimum": 0.9651220183372498,
+    "sam3_p05_cosine_minimum": 0.9227953505516052,
+    "checkpoint_schema_version": 2,
+    "field_reliability_columns": 0,
+    "all_source_and_lineage_invariants": true
+  },
+  "post_training_cache_gate": {
+    "required_before_benchmark": true,
+    "dino_and_sam_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "materialized_cache_vs_independent_field_adaptor_fp16_parity": true,
+    "target_or_text_query_access": false
+  },
+  "implementation": {
+    "trainer_sha256": "d50ec9a11e9cbc78244f884fe320fb9170127c42575dfa29378d3c0fd44f9c75",
+    "cache_loader_sha256": "ee16c7b2cd92d096f5c0b280a5b4eaa24ee948cc1fc18f52f8e3044530befbff",
+    "factorized_loss_sha256": "eee8a8f02587d1b2ed754f05422ff04b195de2e0d0a6a3abe7c734e4dce24349",
+    "canonical_losses_sha256": "9e03f1e9ddb243fd86eced9fdd1e533c1ea59fa3089380405fec313faa61b864",
+    "checkpoint_loader_sha256": "3a900311b22d10ed4b486e050a21008518da45d219016c3a7e773aef3c92dc13",
+    "factorized_contract_sha256": "cded4da0e4025a6f0d3f1b3838279b02d8644bdb280d74ce0b97b58bb66380fc",
+    "focused_training_test_sha256": "9a771802cda47bdc05184b46d531db83e97885667f9b24962d7ca21f85d31f96"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary and approximately 180-second checks; stop only after two consecutive observations at or above 88 C",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_field_d256_l128.pth"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

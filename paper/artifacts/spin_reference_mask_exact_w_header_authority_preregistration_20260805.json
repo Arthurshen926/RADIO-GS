@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "registration": "spin_reference_mask_exact_w_header_authority_v1",
+  "registered_at": "2026-08-05T13:37:20+08:00",
+  "status": "registered_before_implementation_and_before_any_real_export_or_gpu_execution",
+  "purpose": "Allow a SPIn-NeRF reference_binary_mask to authorize only the native source-raster geometry and immutable source-file identity needed to export the query-free exact compositor matrix W.",
+  "claim_boundary": "Exporter/header authority only. The reference mask may not be decoded, converted, materialized as an array/tensor, interpreted as foreground/background, passed to an adjoint, or used to construct query evidence or a metric.",
+  "legacy_contract": {
+    "positive_negative_scribbles": "The existing _native_prompt_shape branch, source SHA keys, authority construction, compositor execution, and tensor-cache construction remain unchanged.",
+    "artifact_note": "The exporter_source SHA naturally changes when the source file changes; this registration makes no claim that whole-file serialized cache hashes remain equal across exporter source revisions. Exact W tensors and legacy control flow remain unchanged."
+  },
+  "reference_mask_contract": {
+    "manifest_prompt_type": "reference_binary_mask",
+    "required_cli_expectations": [
+      "reference_binary_mask prompt type",
+      "reference frame id",
+      "lowercase SHA-256 of the complete source mask file",
+      "native source height",
+      "native source width"
+    ],
+    "allowed_file_access": [
+      "PIL lazy Image.open context sufficient to inspect format-independent width and height",
+      "raw binary streaming of the complete file for SHA-256"
+    ],
+    "forbidden_file_access": [
+      "Image.load",
+      "Image.convert",
+      "pixel access",
+      "NumPy conversion",
+      "tensor conversion",
+      "foreground/background interpretation"
+    ],
+    "authority_source_key": "reference_binary_mask",
+    "example_native_binding": {
+      "scene_id": "lego",
+      "reference_frame_id": "0_00001",
+      "width": 1015,
+      "height": 764
+    }
+  },
+  "cryptographic_bindings": [
+    "benchmark manifest",
+    "camera mapping",
+    "GaussFM config",
+    "geometry checkpoint",
+    "geometry xyz rows",
+    "reference camera pose and intrinsics",
+    "contribution compositor implementation",
+    "exporter implementation",
+    "reference_binary_mask complete-file SHA-256"
+  ],
+  "safety_flags": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_metric_computed": false
+  },
+  "required_tests": [
+    "header-only full-mask access rejects any accidental load, convert, pixel, NumPy, or tensor operation",
+    "legacy scribble shape/path behavior regression",
+    "unsupported or mismatched prompt type fails closed",
+    "reference frame mismatch fails closed",
+    "native height or width mismatch fails closed",
+    "complete-file SHA mismatch or malformed expected SHA fails closed",
+    "full-mask metadata binds prompt type, reference frame, SHA, H/W, and no-target/no-decode flags"
+  ],
+  "real_export_run": false,
+  "gpu_used": false,
+  "target_metric_computed": false
+}

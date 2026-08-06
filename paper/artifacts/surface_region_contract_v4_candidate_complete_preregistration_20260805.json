@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_contract_v4_candidate_complete_typed_budget_v1",
+  "status": "registered_after_implementation_unit_tests_and_before_any_v4_cache_build_training_or_benchmark",
+  "causal_diagnosis": {
+    "bug": "SurfaceRegion V3 stored token_candidate_limit and core_token_fraction in its contract and digest but bounded strict expansion at maximum_tokens; a dense core could consume all 256 settled candidates before the context shell was observed.",
+    "consequence": "The claimed core-plus-context representation was often effectively core-only, so the readout could not learn the intended object-local contextual correction.",
+    "frozen_v3_policy": "V3 code, digest, and dense-core behavior remain immutable; the correction is a new contract version."
+  },
+  "single_change": {
+    "candidate": "surface-region-contract-v4",
+    "digest": "55d051772c24f0e27bc464c4ed55b90f519d0c919231b977006152ce1f03e147",
+    "token_candidate_limit": 1024,
+    "maximum_tokens": 256,
+    "core_token_fraction": 0.6,
+    "selection": "enumerate_candidate_limit_then_reserve_core_and_context_budgets_then_deterministic_core_first_context_second_backfill",
+    "recovery": "unchanged_explicit_soft_relation_then_euclidean_support_fill",
+    "unchanged": [
+      "physical radii and context ratio",
+      "hard semantic graph and eligibility",
+      "minimum-token completion policy",
+      "geometry-16 tensor layout and direction-plus-log-raw-norm gauge",
+      "fixed teacher target protocol for the first canary",
+      "all frozen benchmark protocols"
+    ],
+    "deliberately_not_added": [
+      "scene-specific radius or token budgets",
+      "unregistered distance clipping",
+      "unregistered local-scale normalization",
+      "benchmark-dependent gates"
+    ]
+  },
+  "staged_validation": {
+    "stage_1": {
+      "scope": "one four-scene query-free ScanNet validation shard with the exact existing schema-1 fixed-core teacher tensors",
+      "purpose": "verify cache integrity and prove that context capacity is materially present",
+      "required": [
+        "all rows satisfy the minimum-token contract",
+        "core, context, support-fill, and padding masks are mutually consistent",
+        "single and batch expansion remain exact",
+        "teacher tensors are byte-identical to the replay authority",
+        "no benchmark scene, vocabulary, label, instance, or mask is opened"
+      ]
+    },
+    "stage_2": {
+      "scope": "all eight held-out query-free ScanNet validation scenes",
+      "purpose": "evaluate the immutable V2-compatible safe base before any residual training",
+      "base_descriptor_cosine_floor": 0.9409590106010437,
+      "floor_source": "matched fixed-core V2 control 0.9429590106010437 minus frozen 0.002 noninferiority margin"
+    },
+    "stage_3": {
+      "scope": "train-only V4 residual candidate with centered text and visual response objectives",
+      "opening_rule": "only after stages 1 and 2 pass; benchmark remains closed until all target-blind generic gates pass"
+    }
+  },
+  "teacher_schema2_rule": {
+    "status": "implemented_but_not_enabled_in_the_v4_contract_canary",
+    "reason": "best-view selection and factorized teacher evidence are a separate causal variable and require their own replay/cache comparison",
+    "policy": "deterministic_union_coverage_purity_camera_diversity_v2"
+  },
+  "implementation_sources": {
+    "surface_region_contract.py": "7a8c8a597e22f6e77fe3d2fae9533e97030678de0279da588f390b976c471523",
+    "surface_region_selection.py": "7910d3371fc1afe4ebc1c08018fbaa022b30664fdd145c2fe18a4eb06e82b85d",
+    "build_scannet_surface_region_cache.py": "bcbe041836cb68cf624ccefa8de2295d0607e70760a4da94d5e5b0355a8f5774",
+    "test_surface_region_contract_v4.py": "32447d07ddd45b82c193377dc3953c563907c8b87d3e09f62bce02804e72733d"
+  },
+  "unit_validation": {
+    "v4_tests_passed": 7,
+    "combined_relevant_tests_passed": 103,
+    "v2_v3_behavior_changed": false,
+    "benchmark_opened": false
+  }
+}

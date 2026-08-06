@@ -37,6 +37,12 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     load_text_projection_head,
     load_score_cache,
     load_ours_multiscale_query_score_cache,
+    canonical_negative_relevancy_query_scores,
+    directional_probability_mixture_query_scores,
+    entropy_gated_listwise_query_scores,
+    hard_sibling_margin_query_scores,
+    reliability_logit_power_query_scores,
+    reliability_tempered_query_scores,
     merge_registered_scores,
     average_registered_signal_sums,
     normalize_registered_feature_sums,
@@ -70,6 +76,7 @@ from radio_gs.scripts.eval_lerf_direct_3d_selection import (
     _project_points_to_image,
     trimap_iou,
     vala_knn_minmax_scores,
+    vala_minmax_remap_scores,
     vala_multiscale_knn_peak_select_scores,
     validate_ours_multiscale_query_score_cache,
     xyz_geometry_fingerprint,
@@ -1021,6 +1028,10 @@ def _ours_multiscale_cache_payload(
         ),
         "authority": {
             "contract": OURS_MULTISCALE_QUERY_SCORE_AUTHORITY_CONTRACT,
+            "score_semantics": "raw_independent_normalized_cosine",
+            "score_formula": (
+                "l2_normalize(descriptor) @ l2_normalize(text_embedding).T"
+            ),
             "scale_axis": [
                 {"id": scale_id, "value": radius, "unit": "meter"}
                 for scale_id, radius in zip(scale_ids, scale_radii_m)
@@ -1078,6 +1089,160 @@ def test_ours_multiscale_vala_selects_raw_smoothed_peak_per_query_then_threshold
     )
     assert torch.equal(selected[:, 0].bool(), torch.tensor([False, True, False, False]))
     assert torch.equal(selected[:, 1].bool(), torch.tensor([False, False, False, True]))
+
+
+def test_ours_multiscale_vala_equal_mean_fuses_smoothed_scales_before_remap():
+    xyz = torch.arange(3, dtype=torch.float32)[:, None].expand(-1, 3).contiguous()
+    scores = torch.tensor(
+        [
+            [[0.0], [0.0], [0.0]],
+            [[1.0], [0.4], [0.1]],
+            [[0.0], [0.8], [0.5]],
+        ]
+    )
+
+    readout = vala_multiscale_knn_peak_select_scores(
+        scores,
+        xyz,
+        k=1,
+        scale_fusion="mean",
+    )
+
+    expected = vala_minmax_remap_scores(scores.mean(dim=1))
+    assert torch.equal(readout.selected_scale_indices, torch.tensor([-1]))
+    assert torch.allclose(readout.scores, expected)
+
+
+def test_hard_sibling_margin_uses_second_best_only_for_winning_query():
+    scores = torch.tensor(
+        [
+            [[0.8, 0.3, 0.1], [0.2, 0.6, 0.4], [0.5, 0.5, 0.2]],
+            [[-0.1, -0.2, -0.4], [0.9, 0.1, 0.2], [0.0, 0.2, 0.1]],
+        ]
+    )
+
+    margins = hard_sibling_margin_query_scores(scores)
+
+    assert torch.allclose(margins[0, 0], torch.tensor([0.5, -0.5, -0.7]))
+    assert torch.allclose(margins[0, 1], torch.tensor([-0.4, 0.2, -0.2]))
+    assert torch.allclose(margins[0, 2], torch.tensor([0.0, 0.0, -0.3]))
+    assert torch.allclose(margins[1, 0], torch.tensor([0.1, -0.1, -0.3]))
+
+
+def test_hard_sibling_margin_requires_multiple_queries():
+    with pytest.raises(ValueError, match="at least two queries"):
+        hard_sibling_margin_query_scores(torch.ones(4, 3, 1))
+
+
+def test_entropy_gated_listwise_preserves_winner_and_ambiguous_rows():
+    scores = torch.tensor(
+        [
+            [[0.8, 0.1, 0.1]],
+            [[0.4, 0.4, 0.4]],
+        ],
+        dtype=torch.float32,
+    )
+    result = entropy_gated_listwise_query_scores(scores)
+    assert result.shape == scores.shape
+    assert torch.equal(result[1], scores[1])
+    assert torch.isclose(result[0, 0, 0], scores[0, 0, 0])
+    assert bool((result[0, 0, 1:] < scores[0, 0, 1:]).all())
+    assert bool((result >= 0).all())
+
+
+def test_entropy_gated_listwise_rejects_raw_signed_cosines():
+    with pytest.raises(ValueError, match="non-negative"):
+        entropy_gated_listwise_query_scores(torch.tensor([[0.2, -0.1]]))
+
+
+def test_reliability_tempering_moves_relevancy_toward_ignorance():
+    scores = torch.tensor([[[0.9, 0.1]], [[0.7, 0.3]], [[0.0, 0.0]]])
+    confidence = torch.tensor([1.0, 0.25, 0.0])
+    valid = torch.tensor([True, True, False])
+    result = reliability_tempered_query_scores(
+        scores,
+        confidence,
+        valid_mask=valid,
+    )
+    assert torch.allclose(result[0], scores[0])
+    assert torch.allclose(result[1], torch.tensor([[0.55, 0.45]]))
+    assert torch.equal(result[2], scores[2])
+
+
+def test_reliability_tempering_rejects_signed_raw_cosines():
+    with pytest.raises(ValueError, match="Bernoulli"):
+        reliability_tempered_query_scores(
+            torch.tensor([[0.2, -0.1]]),
+            torch.tensor([0.8]),
+            valid_mask=torch.tensor([True]),
+        )
+
+
+def test_reliability_logit_power_is_identity_at_one_and_neutral_at_zero():
+    scores = torch.tensor([[[0.9, 0.1]], [[0.7, 0.3]], [[0.0, 0.0]]])
+    confidence = torch.tensor([1.0, 0.0, 0.0])
+    valid = torch.tensor([True, True, False])
+    result = reliability_logit_power_query_scores(
+        scores,
+        confidence,
+        valid_mask=valid,
+    )
+    assert torch.allclose(result[0], scores[0])
+    assert torch.equal(result[1], torch.full_like(scores[1], 0.5))
+    assert torch.equal(result[2], scores[2])
+
+
+def test_canonical_negative_relevancy_matches_binary_softmax_margin():
+    positives = torch.tensor([[[0.8, 0.1], [0.3, 0.4]]])
+    negatives = torch.tensor([[[0.2, 0.5, 0.4], [0.1, 0.2, 0.0]]])
+
+    relevancy = canonical_negative_relevancy_query_scores(
+        positives,
+        negatives,
+        logit_scale=10.0,
+    )
+
+    expected = torch.sigmoid(
+        torch.tensor([[[3.0, -4.0], [1.0, 2.0]]])
+    )
+    assert torch.allclose(relevancy, expected)
+
+
+def test_canonical_negative_relevancy_rejects_unpaired_shapes():
+    with pytest.raises(ValueError, match="prefix dimensions differ"):
+        canonical_negative_relevancy_query_scores(
+            torch.ones(4, 3, 2),
+            torch.ones(5, 3, 4),
+            logit_scale=10.0,
+        )
+
+
+def test_directional_probability_mixture_marginalizes_after_relevancy() -> None:
+    primary_positive = torch.tensor([[[0.8]], [[0.2]], [[0.7]]])
+    primary_negative = torch.tensor([[[0.1]], [[0.1]], [[0.2]]])
+    secondary_positive = torch.tensor([[[0.1]], [[0.9]], [[0.3]]])
+    secondary_negative = torch.tensor([[[0.2]], [[0.0]], [[0.1]]])
+
+    actual = directional_probability_mixture_query_scores(
+        primary_positive,
+        primary_negative,
+        secondary_positive,
+        secondary_negative,
+        mixture_rows=torch.tensor([1, 2]),
+        mixture_weights=torch.tensor([[0.25, 0.75], [0.6, 0.4]]),
+        logit_scale=10.0,
+    )
+
+    primary = torch.sigmoid(
+        10.0 * (primary_positive - primary_negative)
+    )
+    secondary = torch.sigmoid(
+        10.0 * (secondary_positive - secondary_negative)
+    )
+    expected = primary.clone()
+    expected[1] = 0.25 * primary[1] + 0.75 * secondary[1]
+    expected[2] = 0.6 * primary[2] + 0.4 * secondary[2]
+    torch.testing.assert_close(actual, expected)
 
 
 def test_ours_multiscale_cache_loads_strict_n3q_contract(tmp_path):

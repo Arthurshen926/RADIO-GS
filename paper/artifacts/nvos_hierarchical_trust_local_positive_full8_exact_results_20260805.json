@@ -1,0 +1,131 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_hierarchical_trust_local_positive_full8_exact_results_v2",
+  "status": "full8_prediction_barrier_and_single_frozen_scoring_pass_complete",
+  "claim_boundary": "Posthoc method-development result on a cohort whose v1 target outcomes were already known. No per-scene target selection or parameter tuning was performed.",
+  "lineage": {
+    "target_preregistration": "paper/artifacts/nvos_hierarchical_trust_local_positive_full8_target_preregistration_20260805.json",
+    "target_preregistration_sha256": "11b6202ed49da8bba315cbf2d56fff3264f96732b80d6cc8ef76dd8d059db024",
+    "source_diagnostic_results_sha256": "dc98b0a80e1349c1f0fa9e243cacdf08289af5edc90f5b6df8780cad843c1ceb",
+    "method_implementation_closure_sha256": "edeeae7c0e70a8638077838bd1013d888a3f4bce10fefe74d8f7c47127b8dede",
+    "prediction_barrier_addendum_sha256": "42ebac5f8169aced80d8e1857199f02b31b92ab1bd583e29daca058c1b4a9a9f",
+    "evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0"
+  },
+  "prediction_barrier": {
+    "run_manifest": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/run_manifest.json",
+    "run_manifest_sha256": "bf34e7a370259e841067f0cd9e982ca9301892ba1877a12d48220d5f8dc65432",
+    "batch_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/prediction_batch_authority.json",
+    "batch_authority_sha256": "2d4b18af162a24eded51174f060712850efcd384d91bd4478ee288f27df0b113",
+    "all_eight_receipts_sealed_before_first_target_ground_truth_open": true,
+    "metric_inspection_before_batch_complete": false,
+    "receipt_sha256": {
+      "fern": "8ec0cee097f6d39407cc9feb65d3c51db6ef79530425c4d504c7fe66ad72906c",
+      "flower": "917bbfbba52b5bf24b69d1a9c8a98b5ef4aa04b4daaf606b6a7b7faf53b4e99a",
+      "fortress": "cc2bdccbf952feb6270296f89ad05792ec236debbacceae3dc47f420e994df16",
+      "horns_center": "c8b17ac875fcae74881cf78c5f42795c4f76b8647c681d8a93cbae5a9c395a1d",
+      "horns_left": "6e62fa94ef9d086429cf556f305c3de44a2852e294570caa347ded88735812f3",
+      "leaves": "d735b7be0c445d1c6a99860ad5b899abf25961fae08a74b326f4d7ae1d9ea0af",
+      "orchids": "1fecbdef19bb6420cda66051151d559c0f540d98b47544f3255e947d679ad4e5",
+      "trex": "f3c1173b86fdce608073123eff891c455de42b0b0d091f0d500fc7aeb7e565a0"
+    }
+  },
+  "exact_scoring": {
+    "results": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/full8_exact_results.json",
+    "results_sha256": "c2759a08ba769a36598b9614ac7e4b901b4322004424e075651cb91eb667ce21",
+    "scorer": "radio_gs/scripts/score_nvos_sealed_prediction_batch.py",
+    "scorer_sha256": "743e28ea286f7e6b6fb02b2810438c0925ce84a022bea4ee93b5a2d98e408eac",
+    "protocol": "cv2.INTER_LINEAR score resize, probability >= 0.5, exact frozen target masks, task-instance scene macro",
+    "scene_macro_foreground_iou": 0.7477712404198159,
+    "scene_macro_pixel_accuracy": 0.9522878395516123,
+    "identical_no_clobber_rescore_sha256": "c2759a08ba769a36598b9614ac7e4b901b4322004424e075651cb91eb667ce21"
+  },
+  "per_scene": {
+    "fern": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.7350345861696804,
+      "delta_vs_compact": -0.020281004614173037,
+      "delta_vs_v1": -0.020281004614173037
+    },
+    "flower": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.8234007862831756,
+      "delta_vs_compact": -0.028795385233363447,
+      "delta_vs_v1": -0.028795385233363447
+    },
+    "fortress": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.8796406837615117,
+      "delta_vs_compact": 0.03784660083131419,
+      "delta_vs_v1": 0.03784660083131419
+    },
+    "horns_center": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.7928185438661812,
+      "delta_vs_compact": 0.10971648206204909,
+      "delta_vs_v1": 0.10971648206204909
+    },
+    "horns_left": {
+      "branch": "v1_full_probability_preserving_completion",
+      "iou": 0.7663050940546479,
+      "delta_vs_compact": 0.06623695118101625,
+      "delta_vs_v1": 0.0
+    },
+    "leaves": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.6866184536347662,
+      "delta_vs_compact": 0.01830010898685408,
+      "delta_vs_v1": 0.01830010898685408
+    },
+    "orchids": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.6928720794390146,
+      "delta_vs_compact": 0.0011209598601578117,
+      "delta_vs_v1": 0.0011209598601578117
+    },
+    "trex": {
+      "branch": "v2_local_majority_positive_completion",
+      "iou": 0.6054796961495501,
+      "delta_vs_compact": -0.01179263056352553,
+      "delta_vs_v1": -0.01179263056352553
+    }
+  },
+  "aggregate_comparison": {
+    "frozen_compact_macro_iou": 0.7262272301060249,
+    "v1_global_abstention_macro_iou": 0.7345068490036519,
+    "hierarchical_v2_macro_iou": 0.7477712404198159,
+    "delta_vs_compact": 0.02154401031379105,
+    "delta_vs_v1": 0.013264391416163979,
+    "historical_reference_iou": 0.749,
+    "gap_to_historical_reference": -0.0012287595801840911,
+    "improved_vs_compact_scene_count": 5,
+    "regressed_vs_compact_scene_count": 3,
+    "unchanged_vs_v1_scene_count": 1,
+    "largest_gain_scene": "horns_center",
+    "largest_gain": 0.10971648206204909,
+    "largest_regression_scene": "flower",
+    "largest_regression": -0.028795385233363447
+  },
+  "verification": {
+    "method_and_receipt_tests": "72 passed, 2 warnings",
+    "batch_scorer_tests": "2 passed",
+    "legacy_sealed_score_replay": "All eight historical reports matched scorer IoU and pixel accuracy exactly.",
+    "python_compile_passed": true,
+    "json_validation_passed": true,
+    "git_diff_check_passed": true
+  },
+  "gpu_and_io": {
+    "physical_gpu": 1,
+    "power_limit_w": 300,
+    "maximum_stage_boundary_temperature_c": 55,
+    "final_temperature_c": 38,
+    "leaves_and_orchids_concurrent": false,
+    "thermal_pause_or_abort": false,
+    "leaves_delay": "Host /mnt/pool folio I/O contention, not GPU temperature or driver failure; the original process was retained and completed after competing I/O paused."
+  },
+  "conclusion": {
+    "promote_as_current_nvos_candidate": true,
+    "mechanistic_result": "Hierarchical trust resolves the main all-or-nothing failure: globally trusted completion remains unchanged, while globally rejected scenes can still contribute locally repeatable positive evidence without importing absence as background.",
+    "remaining_limitation": "Local positive completion still expands false-positive or boundary regions on fern, flower, and trex. These target regressions cannot justify posthoc per-scene routing.",
+    "next_step": "Use only source-view trial-level calibration and coverage statistics to test whether a general cross-scene reliability rule can identify unsafe local evidence. If no robust source-only separator exists, stop rather than tune by target scene."
+  }
+}

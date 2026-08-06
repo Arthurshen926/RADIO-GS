@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_hierarchical_trust_local_positive_v2_implementation_closure",
+  "sealed_at": "2026-08-05T20:13:47+08:00",
+  "status": "implementation_and_source_authority_checks_passed_before_any_v2_target_prediction",
+  "preregistration": {
+    "path": "paper/artifacts/nvos_hierarchical_trust_local_positive_full8_target_preregistration_20260805.json",
+    "sha256": "11b6202ed49da8bba315cbf2d56fff3264f96732b80d6cc8ef76dd8d059db024"
+  },
+  "implementation": {
+    "evaluator": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+    "evaluator_sha256": "93d87a3038494b5e729ce4e012eefc55ac550e95c801dea8cff12fa90466738c",
+    "local_positive_module": "radio_gs/querying/nvos_local_positive_completion.py",
+    "local_positive_module_sha256": "d2d61097c0cc84c8ee754ffdb383e08f2121221efadb0767a4fdf01e3366b8d3",
+    "new_calibration_mode": "all_trial_loo_hierarchical_local_positive_v2",
+    "v1_accept_branch": "Returns the already validated full probability and entropy-reliability tensors by identity.",
+    "v1_reject_branch": "Applies strict q>0.5 local proposals with p=1,c=2q-1; all nonproposals have c=0; raw signed scribbles override.",
+    "graph_or_threshold_changed": false
+  },
+  "source_only_full8_branch_audit": {
+    "target_rgb_mask_or_metric_opened": false,
+    "expected_branch_assignment_exact": true,
+    "fern": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.226997778,
+      "nonraw_positive_confidence_pixels": 160796,
+      "nonraw_zero_confidence_pixels": 541687
+    },
+    "flower": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.211717874,
+      "nonraw_positive_confidence_pixels": 125910,
+      "nonraw_zero_confidence_pixels": 568228
+    },
+    "fortress": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.167313859,
+      "nonraw_positive_confidence_pixels": 83412,
+      "nonraw_zero_confidence_pixels": 613292
+    },
+    "horns_center": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.120214202,
+      "nonraw_positive_confidence_pixels": 82027,
+      "nonraw_zero_confidence_pixels": 633775
+    },
+    "horns_left": {
+      "branch": "v1_full_probability_preserving_completion",
+      "reliability_mean_including_raw_scribbles": 0.974171877,
+      "nonraw_positive_confidence_pixels": 695175,
+      "nonraw_zero_confidence_pixels": 1444
+    },
+    "leaves": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.087625712,
+      "nonraw_positive_confidence_pixels": 23085,
+      "nonraw_zero_confidence_pixels": 685340
+    },
+    "orchids": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.094693780,
+      "nonraw_positive_confidence_pixels": 62017,
+      "nonraw_zero_confidence_pixels": 652045
+    },
+    "trex": {
+      "branch": "v2_local_majority_positive_completion",
+      "reliability_mean_including_raw_scribbles": 0.069137909,
+      "nonraw_positive_confidence_pixels": 36080,
+      "nonraw_zero_confidence_pixels": 688678
+    }
+  },
+  "verification": {
+    "focused_tests": "63 passed, 2 warnings",
+    "evaluator_test": "tests/test_nvos_gaussian_first.py",
+    "evaluator_test_sha256": "1afbdb442f028cfd273591b70de215c96817c2c58ef09bb537a99728bb91272e",
+    "local_positive_test": "tests/test_nvos_local_positive_completion.py",
+    "local_positive_test_sha256": "25cf736ac588aa58a47675620eda792fd7f59def36e8b77ec70ca303efe7f2d0",
+    "python_compile_passed": true,
+    "git_diff_check_passed": true,
+    "target_prediction_started": false
+  }
+}

@@ -1,6 +1,14 @@
 """Primitive-first canonical RADIO field components."""
 
-from .basis_decoder import AffineBasisDecoder, fit_affine_basis
+from .basis_decoder import (
+    BASIS_CONDITIONING_CONTRACT_VERSION,
+    MAXIMUM_BASIS_CONDITION_NUMBER_V1,
+    AffineBasisDecoder,
+    BasisConditioningReport,
+    basis_conditioning_report,
+    fit_affine_basis,
+    validate_basis_conditioning,
+)
 from .canonical_gaussian_field import CanonicalGaussianField
 from .directional_canonical_field import (
     DirectionalCanonicalField,
@@ -19,9 +27,13 @@ from .boundary_screen_residual import (
     BoundaryConditionedScreenResidual,
     load_boundary_screen_residual_checkpoint,
 )
-from .checkpoint import load_canonical_field_checkpoint
+from .checkpoint import (
+    load_canonical_field_checkpoint,
+    load_factorized_canonical_field_checkpoint,
+)
 from .view_residual import ZeroMeanViewResidual, load_view_residual_checkpoint
 from .observation_lifting_contract import (
+    CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
     CANONICAL_FULL_OBSERVATION_CONTRACT_NAME,
     CANONICAL_FULL_OBSERVATION_CONTRACT_NAMES,
     CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME,
@@ -44,6 +56,10 @@ from .spatial_hash import PrimitiveSpatialHash
 
 __all__ = [
     "AffineBasisDecoder",
+    "BASIS_CONDITIONING_CONTRACT_VERSION",
+    "MAXIMUM_BASIS_CONDITION_NUMBER_V1",
+    "BasisConditioningReport",
+    "basis_conditioning_report",
     "CanonicalGaussianField",
     "DirectionalCanonicalField",
     "DIRECTIONAL_PROTOTYPE_CONTRACT",
@@ -61,11 +77,14 @@ __all__ = [
     "PrimitiveSpatialHash",
     "canonical_primitive_reliability",
     "fit_affine_basis",
+    "validate_basis_conditioning",
     "load_canonical_field_checkpoint",
+    "load_factorized_canonical_field_checkpoint",
     "load_boundary_screen_residual_checkpoint",
     "ZeroMeanViewResidual",
     "load_view_residual_checkpoint",
     "CANONICAL_FULL_OBSERVATION_CONTRACT_NAME",
+    "CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME",
     "CANONICAL_FULL_OBSERVATION_CONTRACT_NAMES",
     "CANONICAL_FULL_OBSERVATION_V2_CONTRACT_NAME",
     "CANONICAL_FULL_OBSERVATION_V3_CONTRACT_NAME",

@@ -27,8 +27,24 @@ import torch.nn.functional as F
 from torchvision.transforms.functional import pil_to_tensor
 
 from radio_gs.interfaces.frozen_radio_views import OfficialCropSummaryRuntime
-from radio_gs.interfaces.surface_region_contract import SurfaceRegionContractV2
-from radio_gs.interfaces.surface_region_summary import surface_region_geometry_v2
+from radio_gs.interfaces.surface_region_contract import (
+    SurfaceRegionContractV2,
+    SurfaceRegionContractV3,
+    SurfaceRegionContractV4,
+)
+from radio_gs.interfaces.surface_region_selection import (
+    RegionSelection,
+    as_region_selection,
+    surface_region_contract_from_specification,
+)
+from radio_gs.interfaces.surface_region_summary import (
+    SURFACE_GEOMETRY_V2_DIM,
+    SURFACE_GEOMETRY_V3_DIM,
+    SURFACE_REGION_V3_FEATURE_GAUGE,
+    surface_region_effective_reliability_v3,
+    surface_region_geometry_v2,
+    surface_region_geometry_v3,
+)
 from radio_gs.interfaces.surface_scene_intermediate import (
     SourceFileBinding,
     SurfaceSceneFrameBinding,
@@ -46,6 +62,8 @@ from radio_gs.scripts.build_canonical_support_graph import deterministic_feature
 from radio_gs.scripts.surface_region_scene_resume import (
     RESUME_CONTRACT_ARTIFACT_TYPE,
     RESUME_SCHEMA_VERSION,
+    SCENE_ROW_SCHEMA_V2,
+    SCENE_ROW_SCHEMA_V3,
     SCENE_PARTIAL_SUFFIX,
     SCENE_TERMINAL_SUFFIX,
     append_scene_rows,
@@ -54,6 +72,12 @@ from radio_gs.scripts.surface_region_scene_resume import (
     encode_rng_state,
     load_scene_partial,
     open_or_create_resume_contract,
+)
+from radio_gs.training.surface_region_eligibility_completion import (
+    STRUCTURED_ELIGIBILITY_POLICY,
+    StructuredEligibilityVariant,
+    completion_region_id,
+    structured_eligibility_variant,
 )
 from radio_gs.utils.immutable_artifacts import (
     file_record,
@@ -75,6 +99,11 @@ FIXED_CORE_TEACHER_SEMANTICS = (
 TEACHER_CROP_PROTOCOL = (
     "core_support_defined_unmasked_bbox_min24_context_pad0_v1"
 )
+TEACHER_VIEW_SELECTION_LEGACY = "sorted_valid_frames_even_spacing_v1"
+TEACHER_VIEW_SELECTION_COVERAGE_DIVERSITY = (
+    "deterministic_union_coverage_purity_camera_diversity_v2"
+)
+TEACHER_VIEW_STATISTICS_SCHEMA_VERSION = 1
 SCENE_INTERMEDIATE_MANIFEST_ARTIFACT_TYPE = (
     "surface-scene-intermediate-manifest-v1"
 )
@@ -979,12 +1008,26 @@ def _teacher_target_protocol(
             raise ValueError(
                 "lightweight teacher protocol requires RADIO version and SHA-256"
             )
-    return {
+    view_selection = str(
+        getattr(
+            args,
+            "teacher_view_selection",
+            TEACHER_VIEW_SELECTION_LEGACY,
+        )
+    )
+    if view_selection not in {
+        TEACHER_VIEW_SELECTION_LEGACY,
+        TEACHER_VIEW_SELECTION_COVERAGE_DIVERSITY,
+    }:
+        raise ValueError(
+            f"unsupported teacher view selection: {view_selection}"
+        )
+    protocol = {
         "schema_version": 1,
         "support_semantics": FIXED_CORE_TEACHER_SEMANTICS,
         "teacher_region_contract_sha256": teacher_contract.digest,
         "crop_protocol": TEACHER_CROP_PROTOCOL,
-        "frame_selection": "sorted_valid_frames_even_spacing_v1",
+        "frame_selection": TEACHER_VIEW_SELECTION_LEGACY,
         "frames_per_scene": int(args.frames_per_scene),
         "minimum_visible_support_tokens": int(
             args.min_visible_tokens
@@ -996,6 +1039,29 @@ def _teacher_target_protocol(
         "target_padding": "left_aligned_zero_padding_v1",
         "teacher_medoid": "official_descriptor_pairwise_consensus_v1",
     }
+    if view_selection == TEACHER_VIEW_SELECTION_COVERAGE_DIVERSITY:
+        protocol.update(
+            {
+                "schema_version": 2,
+                "frame_selection": view_selection,
+                "view_selection_objective": (
+                    "greedy_equal_weight_union_visible_coverage_"
+                    "depth_consistency_purity_and_minimum_pairwise_"
+                    "camera_angle_v1"
+                ),
+                "view_statistics_schema_version": (
+                    TEACHER_VIEW_STATISTICS_SCHEMA_VERSION
+                ),
+                "projected_support_mask_encoding": (
+                    "numpy_packbits_little_bitorder_hex_v1"
+                ),
+                "image_projected_support_mask": (
+                    "visible_core_points_in_native_crop_coordinates_v1"
+                ),
+                "view_statistics_query_free": True,
+            }
+        )
+    return protocol
 
 
 def _json_sha256(payload: dict) -> str:
@@ -1022,6 +1088,7 @@ def _load_teacher_replay_cache(
     expected_excluded_physical_spaces: set[str],
     expected_regions_per_scene: int,
     expected_teacher_views: int,
+    expected_teacher_target_schema_version: int = 1,
 ) -> tuple[
     dict,
     dict[str, list[tuple[int, dict]]],
@@ -1044,8 +1111,21 @@ def _load_teacher_replay_cache(
         ) from error
     metadata = payload.get("metadata", {})
     current_builder_sha256 = _sha256(Path(__file__).resolve())
+    source_excluded_physical_spaces = metadata.get(
+        "excluded_physical_spaces"
+    )
+    exclusions_are_compatible = (
+        isinstance(source_excluded_physical_spaces, list)
+        and all(
+            isinstance(value, str)
+            for value in source_excluded_physical_spaces
+        )
+        and set(source_excluded_physical_spaces).issubset(
+            expected_excluded_physical_spaces
+        )
+    )
     if (
-        metadata.get("schema_version") != 3
+        metadata.get("schema_version") not in {3, 4}
         or metadata.get("split_role") != expected_split_role
         or metadata.get("split_file_sha256")
         != expected_split_file_sha256
@@ -1056,11 +1136,11 @@ def _load_teacher_replay_cache(
         != expected_teacher_target_protocol_sha256
         or metadata.get("radio_checkpoint_sha256")
         != expected_radio_checkpoint_sha256
-        or set(metadata.get("excluded_physical_spaces", []))
-        != expected_excluded_physical_spaces
+        or not exclusions_are_compatible
         or metadata.get("teacher_region_semantics")
         != FIXED_CORE_TEACHER_SEMANTICS
-        or metadata.get("teacher_target_schema_version") != 1
+        or metadata.get("teacher_target_schema_version")
+        != int(expected_teacher_target_schema_version)
         or metadata.get("teacher_crop_protocol")
         != TEACHER_CROP_PROTOCOL
         or metadata.get("teacher_target_source")
@@ -1199,9 +1279,66 @@ def _load_teacher_replay_cache(
         len(payload[key]) != len(records) for key in required
     ):
         raise ValueError("teacher replay cache tensors do not align with records")
-    by_scene: dict[str, list[tuple[int, dict]]] = {}
+    replay_rows = list(range(len(records)))
+    if metadata.get("schema_version") == 4:
+        completion = metadata.get("eligibility_completion")
+        if (
+            not isinstance(completion, dict)
+            or completion.get("schema_version") != 1
+            or completion.get("validation_checkpoint_selection")
+            != "full_support_rows_only"
+        ):
+            raise ValueError(
+                "paired teacher replay cache lacks its completion contract"
+            )
+        full_by_id: dict[str, int] = {}
+        completion_rows: list[int] = []
+        for row, record in enumerate(records):
+            role = record.get("row_role")
+            region_id = str(record.get("region_id", ""))
+            paired = str(record.get("paired_full_region_id", ""))
+            if role == "full_support":
+                if not region_id or paired != region_id or region_id in full_by_id:
+                    raise ValueError("paired teacher replay full-row identity differs")
+                full_by_id[region_id] = row
+            elif role == "eligibility_completion":
+                if not region_id or not paired:
+                    raise ValueError(
+                        "paired teacher replay completion identity differs"
+                    )
+                completion_rows.append(row)
+            else:
+                raise ValueError("paired teacher replay has an unknown row role")
+        if not full_by_id or len(completion_rows) != len(records) - len(full_by_id):
+            raise ValueError("paired teacher replay rows are incomplete")
+        for row in completion_rows:
+            full_row = full_by_id.get(str(records[row]["paired_full_region_id"]))
+            if full_row is None:
+                raise ValueError("paired teacher replay completion lacks its full row")
+            for key in required:
+                if not torch.equal(
+                    torch.as_tensor(payload[key][row]),
+                    torch.as_tensor(payload[key][full_row]),
+                ):
+                    raise ValueError(
+                        "paired teacher replay does not share exact teacher tensors"
+                    )
+            for key in (
+                "scene",
+                "seed",
+                "physical_radius_m",
+                "teacher_support_sha256",
+                "teacher_target_sha256",
+            ):
+                if records[row].get(key) != records[full_row].get(key):
+                    raise ValueError(
+                        "paired teacher replay does not share teacher identity"
+                    )
+        replay_rows = sorted(full_by_id.values())
+    source_by_scene: dict[str, list[tuple[int, dict]]] = {}
     seen: set[str] = set()
-    for row, record in enumerate(records):
+    for row in replay_rows:
+        record = records[row]
         if (
             record.get("teacher_target_source")
             != "fresh_official_runtime"
@@ -1259,6 +1396,68 @@ def _load_teacher_replay_cache(
             raise ValueError(
                 "teacher replay cache has malformed target tensors"
             )
+        if int(expected_teacher_target_schema_version) == 2:
+            statistics = record.get("teacher_view_statistics")
+            statistic_scalars = (
+                "union_visible_support_fraction",
+                "view_angular_dispersion_mean_pi",
+                "view_angular_dispersion_min_pi",
+                "support_visibility_dispersion",
+                "official_summary_token_cosine_dispersion",
+                "official_crop_descriptor_cosine_dispersion",
+            )
+            if (
+                not isinstance(statistics, dict)
+                or statistics.get("schema_version")
+                != TEACHER_VIEW_STATISTICS_SCHEMA_VERSION
+                or statistics.get("mask_encoding")
+                != "numpy_packbits_little_bitorder_hex_v1"
+                or int(statistics.get("support_tokens", 0))
+                != int(record.get("teacher_region_tokens", 0))
+                or len(statistics.get("views", [])) != view_count
+                or any(
+                    not math.isfinite(float(statistics.get(key, math.nan)))
+                    for key in statistic_scalars
+                )
+                or [
+                    value.get("frame")
+                    for value in statistics.get("views", [])
+                    if isinstance(value, dict)
+                ]
+                != [value.get("frame") for value in record["teacher_views"]]
+                or any(
+                    statistic_view.get(
+                        "crop_projected_support_mask_shape_hw"
+                    )
+                    != [
+                        int(record_view["crop_box_tlbr"][2])
+                        - int(record_view["crop_box_tlbr"][0]),
+                        int(record_view["crop_box_tlbr"][3])
+                        - int(record_view["crop_box_tlbr"][1]),
+                    ]
+                    for statistic_view, record_view in zip(
+                        statistics.get("views", []),
+                        record["teacher_views"],
+                    )
+                    if isinstance(statistic_view, dict)
+                )
+                or any(
+                    not isinstance(view, dict)
+                    or not _valid_packed_support_mask(
+                        view.get("projected_support_mask"),
+                        int(record.get("teacher_region_tokens", 0)),
+                    )
+                    or not _valid_packed_support_mask(
+                        view.get("visible_support_mask"),
+                        int(record.get("teacher_region_tokens", 0)),
+                    )
+                    or not _valid_crop_projected_support_mask(view)
+                    for view in statistics.get("views", [])
+                )
+            ):
+                raise ValueError(
+                    "teacher replay cache has malformed view statistics"
+                )
         target_sha256 = _teacher_target_sha256(
             summary_tokens,
             crop_summaries,
@@ -1267,14 +1466,42 @@ def _load_teacher_replay_cache(
         if record.get("teacher_target_sha256") != target_sha256:
             raise ValueError("teacher replay target digest is inconsistent")
         seen.add(region_id)
-        by_scene.setdefault(str(record["scene"]), []).append((row, record))
-    if set(by_scene) != set(metadata.get("scene_names", [])):
+        source_by_scene.setdefault(str(record["scene"]), []).append(
+            (row, record)
+        )
+    source_scene_names = set(source_by_scene)
+    if source_scene_names != set(metadata.get("scene_names", [])):
         raise ValueError("teacher replay cache scene metadata is inconsistent")
-    if metadata.get("scene_region_counts") != {
+    if any(
+        _physical_space(scene) in set(source_excluded_physical_spaces)
+        for scene in source_scene_names
+    ):
+        raise ValueError(
+            "teacher replay cache contains a source-excluded physical space"
+        )
+    source_teacher_counts = {
         scene: len(values)
-        for scene, values in sorted(by_scene.items())
-    }:
+        for scene, values in sorted(source_by_scene.items())
+    }
+    source_row_counts = {
+        scene: sum(str(record.get("scene", "")) == scene for record in records)
+        for scene in sorted(source_scene_names)
+    }
+    if metadata.get("scene_region_counts") != source_row_counts:
         raise ValueError("teacher replay cache region counts are inconsistent")
+    if (
+        metadata.get("schema_version") == 4
+        and metadata.get("scene_teacher_region_counts")
+        != source_teacher_counts
+    ):
+        raise ValueError(
+            "paired teacher replay cache teacher region counts are inconsistent"
+        )
+    by_scene = {
+        scene: values
+        for scene, values in source_by_scene.items()
+        if _physical_space(scene) not in expected_excluded_physical_spaces
+    }
     provenance = {
         "path": str(cache_path),
         "sha256": cache_sha256,
@@ -1406,43 +1633,87 @@ def _lift_observation(
 def _voxel_fuse(
     xyz: torch.Tensor, features: torch.Tensor, footprint: torch.Tensor, voxel_size: float
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
-    keys = torch.floor(xyz / float(voxel_size)).to(torch.int64)
-    unique, inverse = torch.unique(keys, dim=0, return_inverse=True)
-    count = torch.bincount(inverse, minlength=unique.shape[0]).float()
-    fused_xyz = torch.zeros(unique.shape[0], 3).index_add_(0, inverse, xyz) / count[:, None]
-    fused_features = torch.zeros(unique.shape[0], features.shape[1]).index_add_(
-        0, inverse, features
-    ) / count[:, None]
-    fused_footprint = torch.zeros(unique.shape[0]).index_add_(0, inverse, footprint) / count
-    return fused_xyz, fused_features, fused_footprint, count
+    # CPU index_add can change its float reduction tree with the caller's
+    # thread count.  Teacher support identities bind raw xyz bytes, so even a
+    # one-ULP centroid drift is a protocol failure.  Use a scoped single-thread
+    # reduction and restore the execution setting for all subsequent work.
+    previous_threads = torch.get_num_threads()
+    torch.set_num_threads(1)
+    try:
+        keys = torch.floor(xyz / float(voxel_size)).to(torch.int64)
+        unique, inverse = torch.unique(keys, dim=0, return_inverse=True)
+        count = torch.bincount(inverse, minlength=unique.shape[0]).float()
+        fused_xyz = (
+            torch.zeros(unique.shape[0], 3).index_add_(0, inverse, xyz)
+            / count[:, None]
+        )
+        fused_features = torch.zeros(
+            unique.shape[0], features.shape[1]
+        ).index_add_(0, inverse, features) / count[:, None]
+        fused_footprint = (
+            torch.zeros(unique.shape[0]).index_add_(
+                0, inverse, footprint
+            )
+            / count
+        )
+        return fused_xyz, fused_features, fused_footprint, count
+    finally:
+        torch.set_num_threads(previous_threads)
 
 
-def _project_region_box(
+def _project_region_observation(
     xyz: torch.Tensor, depth: torch.Tensor, depth_intrinsic: torch.Tensor,
     color_intrinsic: torch.Tensor, camera_to_world: torch.Tensor,
     color_size: tuple[int, int], *, min_visible: int, context_pad: float = 0.12,
-) -> list[int] | None:
+) -> dict | None:
+    """Project one physical support and retain query-free visibility evidence.
+
+    The support-level masks deliberately precede the rectangular crop.  They
+    measure what fraction of the fixed 3-D teacher support is projected and
+    depth-consistent, without requiring semantic masks or benchmark labels.
+    """
+
+    points = torch.as_tensor(xyz).float()
+    if points.ndim != 2 or points.shape[1] != 3 or len(points) == 0:
+        raise ValueError("projected teacher support must have shape [N, 3]")
     world_to_camera = torch.linalg.inv(camera_to_world)
-    camera = torch.cat([xyz, torch.ones(len(xyz), 1)], dim=1) @ world_to_camera.T
+    camera = torch.cat(
+        [points, torch.ones(len(points), 1, dtype=points.dtype)], dim=1
+    ) @ world_to_camera.T
     z = camera[:, 2]
-    valid = z > 0.15
-    if not bool(valid.any()):
+    positive_depth = z > 0.15
+    if not bool(positive_depth.any()):
         return None
-    camera = camera[valid]
-    z = z[valid]
-    ud = depth_intrinsic[0, 0] * camera[:, 0] / z + depth_intrinsic[0, 2]
-    vd = depth_intrinsic[1, 1] * camera[:, 1] / z + depth_intrinsic[1, 2]
+    ud = depth_intrinsic[0, 0] * camera[:, 0] / z.clamp_min(1e-6) + depth_intrinsic[0, 2]
+    vd = depth_intrinsic[1, 1] * camera[:, 1] / z.clamp_min(1e-6) + depth_intrinsic[1, 2]
     ix, iy = ud.round().long(), vd.round().long()
-    inside = (ix >= 0) & (iy >= 0) & (ix < depth.shape[1]) & (iy < depth.shape[0])
-    visible = torch.zeros_like(inside)
-    if bool(inside.any()):
-        observed = depth[iy[inside], ix[inside]]
-        visible[inside] = (observed > 0) & ((observed - z[inside]).abs() < 0.10)
+    inside = (
+        positive_depth
+        & (ix >= 0)
+        & (iy >= 0)
+        & (ix < depth.shape[1])
+        & (iy < depth.shape[0])
+    )
+    projected = inside.clone()
+    visible = torch.zeros(len(points), dtype=torch.bool)
+    if bool(projected.any()):
+        observed = depth[iy[projected], ix[projected]]
+        visible[projected] = (
+            (observed > 0)
+            & torch.isfinite(observed)
+            & ((observed - z[projected]).abs() < 0.10)
+        )
     if int(visible.sum()) < int(min_visible):
         return None
-    camera, z = camera[visible], z[visible]
-    u = color_intrinsic[0, 0] * camera[:, 0] / z + color_intrinsic[0, 2]
-    v = color_intrinsic[1, 1] * camera[:, 1] / z + color_intrinsic[1, 2]
+    visible_camera, visible_z = camera[visible], z[visible]
+    u = (
+        color_intrinsic[0, 0] * visible_camera[:, 0] / visible_z
+        + color_intrinsic[0, 2]
+    )
+    v = (
+        color_intrinsic[1, 1] * visible_camera[:, 1] / visible_z
+        + color_intrinsic[1, 2]
+    )
     width, height = color_size
     x0, x1 = float(u.min()), float(u.max())
     y0, y1 = float(v.min()), float(v.max())
@@ -1463,7 +1734,267 @@ def _project_region_box(
         bottom = min(height, top + minimum_crop)
     if right <= left or bottom <= top:
         return None
-    return [top, left, bottom, right]
+    crop_projected_support_mask = torch.zeros(
+        bottom - top,
+        right - left,
+        dtype=torch.bool,
+    )
+    crop_x = u.round().long() - int(left)
+    crop_y = v.round().long() - int(top)
+    crop_inside = (
+        (crop_x >= 0)
+        & (crop_y >= 0)
+        & (crop_x < right - left)
+        & (crop_y < bottom - top)
+    )
+    if bool(crop_inside.any()):
+        crop_projected_support_mask[
+            crop_y[crop_inside], crop_x[crop_inside]
+        ] = True
+    camera_centre = torch.as_tensor(camera_to_world).float()[:3, 3]
+    support_centre = points.mean(dim=0)
+    view_direction = F.normalize(
+        camera_centre - support_centre,
+        dim=0,
+        eps=1e-8,
+    )
+    return {
+        "crop_box_tlbr": [top, left, bottom, right],
+        "projected_support_mask": projected.cpu(),
+        "visible_support_mask": visible.cpu(),
+        "crop_projected_support_mask": crop_projected_support_mask,
+        "coverage": float(visible.float().mean()),
+        "visibility_purity": float(
+            visible.sum().float() / projected.sum().clamp_min(1).float()
+        ),
+        "view_direction": view_direction.cpu(),
+    }
+
+
+def _project_region_box(
+    xyz: torch.Tensor, depth: torch.Tensor, depth_intrinsic: torch.Tensor,
+    color_intrinsic: torch.Tensor, camera_to_world: torch.Tensor,
+    color_size: tuple[int, int], *, min_visible: int, context_pad: float = 0.12,
+) -> list[int] | None:
+    """Backward-compatible crop-only wrapper for the frozen schema-1 path."""
+
+    observation = _project_region_observation(
+        xyz,
+        depth,
+        depth_intrinsic,
+        color_intrinsic,
+        camera_to_world,
+        color_size,
+        min_visible=min_visible,
+        context_pad=context_pad,
+    )
+    if observation is None:
+        return None
+    return list(observation["crop_box_tlbr"])
+
+
+def _minimum_pairwise_view_diversity(candidates: list[dict]) -> float:
+    if len(candidates) < 2:
+        return 0.0
+    directions = F.normalize(
+        torch.stack(
+            [torch.as_tensor(value["view_direction"]).float() for value in candidates]
+        ),
+        dim=-1,
+        eps=1e-8,
+    )
+    cosine = (directions @ directions.T).clamp(-1.0, 1.0)
+    rows, cols = torch.triu_indices(len(candidates), len(candidates), offset=1)
+    return float(torch.acos(cosine[rows, cols]).min() / math.pi)
+
+
+def _teacher_view_subset_objective(candidates: list[dict]) -> tuple[float, ...]:
+    if not candidates:
+        raise ValueError("teacher view objective requires at least one candidate")
+    masks = torch.stack(
+        [torch.as_tensor(value["visible_support_mask"]).bool() for value in candidates]
+    )
+    if masks.ndim != 2 or masks.shape[1] == 0:
+        raise ValueError("teacher view masks must share a non-empty support")
+    union_coverage = float(masks.any(dim=0).float().mean())
+    mean_purity = float(
+        np.mean([float(value["visibility_purity"]) for value in candidates])
+    )
+    diversity = _minimum_pairwise_view_diversity(candidates)
+    if len(candidates) == 1:
+        objective = 0.5 * (union_coverage + mean_purity)
+    else:
+        objective = (union_coverage + mean_purity + diversity) / 3.0
+    return objective, union_coverage, mean_purity, diversity
+
+
+def _select_teacher_views_coverage_diversity(
+    candidates: list[dict],
+    maximum_views: int,
+) -> list[dict]:
+    """Greedily select query-free high-coverage, non-redundant views.
+
+    All objective terms live in ``[0, 1]`` and receive equal fixed weight.
+    Ties are resolved by canonical frame order, never by scene-specific knobs.
+    """
+
+    count = int(maximum_views)
+    if count <= 0:
+        raise ValueError("maximum teacher views must be positive")
+    ordered = sorted(candidates, key=lambda value: str(value["frame"]))
+    if len(ordered) <= count:
+        # Still use greedy ordering: left-aligned targets must be deterministic
+        # even if all candidates fit in the budget.
+        count = len(ordered)
+    selected: list[dict] = []
+    remaining = list(enumerate(ordered))
+    while remaining and len(selected) < count:
+        best_position = max(
+            range(len(remaining)),
+            key=lambda position: (
+                *_teacher_view_subset_objective(
+                    selected + [remaining[position][1]]
+                ),
+                -remaining[position][0],
+            ),
+        )
+        _index, candidate = remaining.pop(best_position)
+        selected.append(candidate)
+    return selected
+
+
+def _pack_support_mask(mask: torch.Tensor) -> str:
+    values = torch.as_tensor(mask).bool().cpu().numpy().astype(np.uint8)
+    if values.ndim != 1:
+        raise ValueError("support mask must be one-dimensional")
+    return np.packbits(values, bitorder="little").tobytes().hex()
+
+
+def _pack_binary_mask(mask: torch.Tensor) -> str:
+    values = torch.as_tensor(mask).bool().cpu().reshape(-1)
+    return _pack_support_mask(values)
+
+
+def _valid_packed_support_mask(value: object, support_tokens: int) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        raw = bytes.fromhex(value)
+    except ValueError:
+        return False
+    return len(raw) == math.ceil(int(support_tokens) / 8)
+
+
+def _valid_crop_projected_support_mask(view: dict) -> bool:
+    shape = view.get("crop_projected_support_mask_shape_hw")
+    if (
+        not isinstance(shape, list)
+        or len(shape) != 2
+        or any(not isinstance(value, int) or value <= 0 for value in shape)
+    ):
+        return False
+    return _valid_packed_support_mask(
+        view.get("crop_projected_support_mask"),
+        int(shape[0]) * int(shape[1]),
+    )
+
+
+def _mean_pairwise_cosine_dispersion(values: torch.Tensor) -> float:
+    tensor = F.normalize(torch.as_tensor(values).float(), dim=-1, eps=1e-8)
+    if tensor.ndim != 2 or tensor.shape[0] < 2:
+        return 0.0
+    rows, cols = torch.triu_indices(len(tensor), len(tensor), offset=1)
+    return float(1.0 - (tensor[rows] * tensor[cols]).sum(dim=-1).mean())
+
+
+def _teacher_view_statistics(
+    selected: list[dict],
+    *,
+    summary_tokens: torch.Tensor | None = None,
+    crop_descriptors: torch.Tensor | None = None,
+) -> dict:
+    if len(selected) < 2:
+        raise ValueError("teacher view statistics require at least two views")
+    support_tokens = int(
+        torch.as_tensor(selected[0]["visible_support_mask"]).numel()
+    )
+    if any(
+        int(torch.as_tensor(value["visible_support_mask"]).numel())
+        != support_tokens
+        for value in selected
+    ):
+        raise ValueError("selected teacher views do not share one support")
+    visibility = torch.stack(
+        [torch.as_tensor(value["visible_support_mask"]).bool() for value in selected]
+    )
+    directions = F.normalize(
+        torch.stack(
+            [torch.as_tensor(value["view_direction"]).float() for value in selected]
+        ),
+        dim=-1,
+        eps=1e-8,
+    )
+    rows, cols = torch.triu_indices(len(selected), len(selected), offset=1)
+    angular = torch.acos(
+        (directions[rows] * directions[cols]).sum(dim=-1).clamp(-1.0, 1.0)
+    ) / math.pi
+    result = {
+        "schema_version": TEACHER_VIEW_STATISTICS_SCHEMA_VERSION,
+        "mask_encoding": "numpy_packbits_little_bitorder_hex_v1",
+        "support_tokens": support_tokens,
+        "union_visible_support_fraction": float(
+            visibility.any(dim=0).float().mean()
+        ),
+        "view_angular_dispersion_mean_pi": float(angular.mean()),
+        "view_angular_dispersion_min_pi": float(angular.min()),
+        "support_visibility_dispersion": float(
+            visibility.float().var(dim=0, unbiased=False).mean()
+        ),
+        "views": [
+            {
+                "frame": str(value["frame"]),
+                "coverage": float(value["coverage"]),
+                "visibility_purity": float(value["visibility_purity"]),
+                "view_direction": [
+                    float(item)
+                    for item in torch.as_tensor(value["view_direction"]).tolist()
+                ],
+                "projected_support_mask": _pack_support_mask(
+                    value["projected_support_mask"]
+                ),
+                "visible_support_mask": _pack_support_mask(
+                    value["visible_support_mask"]
+                ),
+                "crop_projected_support_mask_shape_hw": list(
+                    torch.as_tensor(
+                        value["crop_projected_support_mask"]
+                    ).shape
+                ),
+                "crop_projected_support_mask": _pack_binary_mask(
+                    value["crop_projected_support_mask"]
+                ),
+                "crop_projected_support_fraction": float(
+                    torch.as_tensor(
+                        value["crop_projected_support_mask"]
+                    ).float().mean()
+                ),
+            }
+            for value in selected
+        ],
+    }
+    if summary_tokens is not None:
+        if len(summary_tokens) != len(selected):
+            raise ValueError("summary token views differ from selected views")
+        result["official_summary_token_cosine_dispersion"] = (
+            _mean_pairwise_cosine_dispersion(summary_tokens)
+        )
+    if crop_descriptors is not None:
+        if len(crop_descriptors) != len(selected):
+            raise ValueError("crop descriptor views differ from selected views")
+        result["official_crop_descriptor_cosine_dispersion"] = (
+            _mean_pairwise_cosine_dispersion(crop_descriptors)
+        )
+    return result
 
 
 def _teacher_medoid(tokens: torch.Tensor, descriptors: torch.Tensor | None = None) -> int:
@@ -1529,8 +2060,68 @@ def _candidate_reliability_from_geometric(
     raise ValueError(f"unsupported candidate reliability mode: {mode}")
 
 
+def _candidate_region_contract(
+    args: argparse.Namespace,
+) -> SurfaceRegionContractV2 | SurfaceRegionContractV3 | SurfaceRegionContractV4:
+    """Build the explicitly selected student-region contract.
+
+    V2 retains every historical default.  V3/V4 refuse ambiguous CLI values
+    instead of silently overriding them, so their physical semantic membership
+    and deterministic token order are manifest-visible.
+    """
+
+    version = str(getattr(args, "region_contract_version", "v2"))
+    if version not in {"v2", "v3", "v4"}:
+        raise ValueError("region-contract-version must be v2, v3, or v4")
+    token_subsampling = str(args.token_subsampling)
+    path_cost_mode = str(args.path_cost_mode)
+    expected_token_policy = {
+        "v3": "nearest_geodesic_then_node_index",
+        "v4": "complete_core_then_typed_context_deterministic_backfill_v1",
+    }
+    if version in expected_token_policy:
+        if token_subsampling != expected_token_policy[version]:
+            raise ValueError(
+                f"SurfaceRegion {version.upper()} requires "
+                f"{expected_token_policy[version]}"
+            )
+        if path_cost_mode != "euclidean":
+            raise ValueError(
+                f"SurfaceRegion {version.upper()} requires euclidean path-cost-mode"
+            )
+    contract_type = {
+        "v2": SurfaceRegionContractV2,
+        "v3": SurfaceRegionContractV3,
+        "v4": SurfaceRegionContractV4,
+    }[version]
+    return contract_type(
+        radii_m=tuple(
+            float(value)
+            for value in str(args.region_radii).replace(",", " ").split()
+        ),
+        context_ratio=float(args.context_ratio),
+        neighbors=int(args.graph_neighbors),
+        maximum_tokens=int(args.max_tokens),
+        minimum_tokens=int(args.min_tokens),
+        path_cost_mode=path_cost_mode,
+        path_affinity_floor=float(args.path_affinity_floor),
+        token_subsampling=token_subsampling,
+        token_candidate_limit=int(args.token_candidate_limit),
+        core_token_fraction=float(args.core_token_fraction),
+        reliability_semantics=str(
+            getattr(
+                args,
+                "region_reliability_mode",
+                "geometric_mean_observation_agreement",
+            )
+        ),
+    )
+
+
 def _teacher_region_contract(
-    input_contract: SurfaceRegionContractV2,
+    input_contract: (
+        SurfaceRegionContractV2 | SurfaceRegionContractV3 | SurfaceRegionContractV4
+    ),
     candidate_limit: int,
 ) -> SurfaceRegionContractV2:
     """Build a fixed core-only teacher support independent of input sampling."""
@@ -1540,18 +2131,206 @@ def _teacher_region_contract(
         raise ValueError(
             "teacher-region candidate limit is below the minimum token count"
         )
-    return replace(
-        input_contract,
+    if type(input_contract) is SurfaceRegionContractV2:
+        # Preserve the frozen V2 constructor and digest byte-for-byte.
+        return replace(
+            input_contract,
+            context_ratio=1.0,
+            maximum_tokens=limit,
+            minimum_tokens=1,
+            token_candidate_limit=limit,
+            token_subsampling="nearest_geodesic_then_node_index",
+            core_token_fraction=1.0,
+            # Reliability weights condition the student input only; they neither
+            # define the physical teacher ball nor the official crop target.
+            reliability_semantics="uniform_valid",
+        )
+    if not isinstance(input_contract, SurfaceRegionContractV3):
+        raise TypeError("teacher input contract must be SurfaceRegion V2 or V3")
+    # V3 support fill is a student-readout device, never teacher membership.
+    # Construct an explicit frozen V2 physical core so existing teacher replay
+    # remains reusable and candidate/teacher prepared graphs cannot be mixed.
+    return SurfaceRegionContractV2(
+        radii_m=input_contract.radii_m,
         context_ratio=1.0,
+        neighbors=input_contract.neighbors,
+        spatial_scale=input_contract.spatial_scale,
+        appearance_temperature=input_contract.appearance_temperature,
+        boundary_temperature=input_contract.boundary_temperature,
+        minimum_appearance_affinity=input_contract.minimum_appearance_affinity,
+        minimum_boundary_affinity=input_contract.minimum_boundary_affinity,
+        topology_mode=input_contract.topology_mode,
         maximum_tokens=limit,
         minimum_tokens=1,
-        token_candidate_limit=limit,
-        token_subsampling="nearest_geodesic_then_node_index",
-        core_token_fraction=1.0,
-        # Reliability weights condition the student input only; they neither
-        # define the physical teacher ball nor the official crop target.
+        # The teacher is an independent frozen V2 authority.  Its feature
+        # gauge describes official teacher tokens, not the V3 student input.
+        feature_normalization="l2_direction",
+        scale_semantics=input_contract.scale_semantics,
         reliability_semantics="uniform_valid",
+        opacity_semantics=input_contract.opacity_semantics,
+        token_subsampling="nearest_geodesic_then_node_index",
+        path_cost_mode="appearance_boundary_geometric",
+        path_affinity_floor=input_contract.path_affinity_floor,
+        token_candidate_limit=limit,
+        core_token_fraction=1.0,
     )
+
+
+def _v3_teacher_contract_from_replay(
+    replay_cache: str | Path,
+    *,
+    expected_candidate_limit: int,
+) -> SurfaceRegionContractV2:
+    """Read the independent frozen V2 teacher authority from a replay cache."""
+
+    payload, _, _ = load_torch_mapping(
+        replay_cache,
+        map_location="cpu",
+        label="SurfaceRegion V3 teacher replay authority",
+    )
+    metadata = payload.get("metadata")
+    if not isinstance(metadata, dict):
+        raise ValueError("V3 teacher replay cache lacks metadata")
+    raw = metadata.get("teacher_region_contract")
+    if not isinstance(raw, dict):
+        raise ValueError("V3 teacher replay cache lacks its teacher contract")
+    contract = surface_region_contract_from_specification(raw)
+    if type(contract) is not SurfaceRegionContractV2:
+        raise ValueError("V3 teacher replay authority must use frozen contract V2")
+    if metadata.get("teacher_region_contract_sha256") != contract.digest:
+        raise ValueError("V3 teacher replay contract digest differs")
+    if (
+        contract.context_ratio != 1.0
+        or contract.minimum_tokens != 1
+        or contract.maximum_tokens != int(expected_candidate_limit)
+        or contract.token_candidate_limit != int(expected_candidate_limit)
+        or contract.token_subsampling != "nearest_geodesic_then_node_index"
+        or contract.core_token_fraction != 1.0
+        or contract.reliability_semantics != "uniform_valid"
+    ):
+        raise ValueError("V3 teacher replay is not the frozen fixed-core authority")
+    return contract
+
+
+def _materialize_region_student_row(
+    *,
+    contract: SurfaceRegionContractV2 | SurfaceRegionContractV3,
+    expansion: tuple[torch.Tensor, torch.Tensor, torch.Tensor] | object,
+    anchor_row: int,
+    xyz: torch.Tensor,
+    radio_features: torch.Tensor,
+    raw_radio_l2_norm: torch.Tensor | None,
+    local_sigma: torch.Tensor,
+    primitive_reliability: torch.Tensor,
+    radius: float,
+) -> tuple[dict[str, torch.Tensor], RegionSelection, dict[str, int | bool]]:
+    """Pack one V2/V3 candidate into its versioned cache row schema."""
+
+    selection = as_region_selection(expansion, anchor_row=int(anchor_row))
+    if selection.selected_count > contract.maximum_tokens:
+        raise RuntimeError("region selection exceeds its maximum-token contract")
+    idx = selection.rows
+    features = torch.as_tensor(radio_features).float()
+    points = torch.as_tensor(xyz).float()
+    sigma = torch.as_tensor(local_sigma).float()
+    reliability = torch.as_tensor(primitive_reliability).float()
+    if (
+        features.ndim != 2
+        or features.shape[1] != 1280
+        or points.shape != (len(features), 3)
+        or sigma.shape != (len(features),)
+        or reliability.shape != (len(features),)
+    ):
+        raise ValueError("student-region scene tensors do not align")
+    rel = reliability[idx, None]
+    scale = sigma[idx, None].expand(-1, 3).clamp_min(1e-4)
+    if isinstance(contract, SurfaceRegionContractV3):
+        if raw_radio_l2_norm is None:
+            raise ValueError("SurfaceRegion V3 requires raw fused RADIO norms")
+        selected_direction_norm = torch.linalg.vector_norm(
+            features[idx], dim=-1
+        )
+        if not torch.allclose(
+            selected_direction_norm,
+            torch.ones_like(selected_direction_norm),
+            rtol=2e-4,
+            atol=2e-4,
+        ):
+            raise ValueError(
+                "SurfaceRegion V3 requires unit RADIO direction features"
+            )
+        raw_norm = torch.as_tensor(raw_radio_l2_norm).float()
+        if raw_norm.shape != (len(features),):
+            raise ValueError("raw fused RADIO norms do not align with scene rows")
+        effective_reliability = surface_region_effective_reliability_v3(
+            rel,
+            selection.recovery_distance,
+            float(radius),
+            support_fill_mask=selection.support_fill_mask,
+            token_mask=selection.token_mask,
+        )
+        geometry = surface_region_geometry_v3(
+            points[idx],
+            scale,
+            effective_reliability,
+            float(radius),
+            raw_radio_l2_norm=raw_norm[idx, None],
+            anchor_index=selection.anchor_index,
+            core_mask=selection.core_mask,
+            context_mask=selection.context_mask,
+            support_fill_mask=selection.support_fill_mask,
+            token_mask=selection.token_mask,
+        )
+        geometry_dim = SURFACE_GEOMETRY_V3_DIM
+        stored_reliability = effective_reliability
+    else:
+        if raw_radio_l2_norm is not None:
+            raise ValueError("SurfaceRegion V2 does not accept a raw-norm side channel")
+        geometry = surface_region_geometry_v2(
+            points[idx],
+            scale,
+            rel,
+            float(radius),
+            anchor_index=selection.anchor_index,
+            core_mask=selection.core_mask,
+            token_mask=selection.token_mask,
+        )
+        geometry_dim = SURFACE_GEOMETRY_V2_DIM
+        stored_reliability = rel
+    padded = selection.pad_to(contract.maximum_tokens)
+    feature_row = torch.zeros(contract.maximum_tokens, 1280, dtype=torch.float16)
+    geometry_row = torch.zeros(contract.maximum_tokens, geometry_dim, dtype=torch.float16)
+    reliability_row = torch.zeros(contract.maximum_tokens, 1, dtype=torch.float16)
+    count = selection.selected_count
+    feature_row[:count] = features[idx].half()
+    geometry_row[:count] = geometry.half()
+    reliability_row[:count] = stored_reliability.half()
+    row = {
+        "radio_features": feature_row,
+        "geometry": geometry_row,
+        "token_mask": padded.token_mask,
+        "reliability": reliability_row,
+        "anchor_index": torch.tensor(selection.anchor_index, dtype=torch.long),
+    }
+    if isinstance(contract, SurfaceRegionContractV3):
+        row["support_fill_mask"] = padded.support_fill_mask
+    semantic_tokens = int((selection.core_mask | selection.context_mask).sum())
+    counts: dict[str, int | bool] = {
+        "tokens": count,
+        "core_tokens": int(selection.core_mask.sum()),
+        "context_tokens": int(selection.context_mask.sum()),
+        "semantic_tokens": semantic_tokens,
+        "support_fill_tokens": int(selection.support_fill_mask.sum()),
+        "minimum_satisfied": bool(count >= contract.minimum_tokens),
+    }
+    if isinstance(contract, SurfaceRegionContractV3) and not counts[
+        "minimum_satisfied"
+    ]:
+        raise RuntimeError("SurfaceRegion V3 candidate violated minimum support")
+    for key in ("radio_features", "geometry", "reliability"):
+        if bool(row[key][~padded.token_mask].count_nonzero()):
+            raise RuntimeError("student-region tensor padding is not exactly zero")
+    return row, selection, counts
 
 
 def _normalize_resume_cli(args: argparse.Namespace, resume_dir: Path) -> dict:
@@ -1737,6 +2516,29 @@ def build(args: argparse.Namespace) -> dict:
     split_role = str(args.split_role)
     if split_role not in {"train", "validation"}:
         raise ValueError("split-role must be train or validation")
+    contract = _candidate_region_contract(args)
+    row_schema_version = (
+        SCENE_ROW_SCHEMA_V3
+        if isinstance(contract, SurfaceRegionContractV3)
+        else SCENE_ROW_SCHEMA_V2
+    )
+    geometry_dimension = (
+        SURFACE_GEOMETRY_V3_DIM
+        if row_schema_version == SCENE_ROW_SCHEMA_V3
+        else SURFACE_GEOMETRY_V2_DIM
+    )
+    eligibility_variants_per_region = (
+        int(getattr(args, "v3_eligibility_variants_per_region", 1))
+        if row_schema_version == SCENE_ROW_SCHEMA_V3
+        else 0
+    )
+    if row_schema_version == SCENE_ROW_SCHEMA_V3 and (
+        eligibility_variants_per_region <= 0
+    ):
+        raise ValueError(
+            "SurfaceRegion V3/V4 requires at least one structured eligibility "
+            "completion variant per frozen teacher region"
+        )
     excluded_spaces, exclusion_files = _excluded_spaces(
         args.exclude_scene_files,
         args.exclude_scene_names,
@@ -1776,6 +2578,13 @@ def build(args: argparse.Namespace) -> dict:
     intermediate_manifest_sha256 = str(
         getattr(args, "scene_intermediate_manifest_sha256", "") or ""
     ).strip()
+    if isinstance(contract, SurfaceRegionContractV3) and (
+        intermediate_output_raw or intermediate_manifest_raw
+    ):
+        raise ValueError(
+            "SurfaceRegion V3 forbids scene-intermediate output/replay because "
+            "the frozen V2 intermediate omits raw fused RADIO norms"
+        )
     if intermediate_output_raw and intermediate_manifest_raw:
         raise ValueError(
             "scene-intermediate output and replay modes are mutually exclusive"
@@ -1786,6 +2595,9 @@ def build(args: argparse.Namespace) -> dict:
         raise ValueError(
             "scene-intermediate replay requires both manifest path and SHA-256"
         )
+    expected_scene_rows = int(args.regions_per_scene) * (
+        1 + eligibility_variants_per_region
+    )
     intermediate_run_contract = (
         _scene_intermediate_run_contract(
             args,
@@ -1866,28 +2678,22 @@ def build(args: argparse.Namespace) -> dict:
         raise ValueError(
             "radio-thermal-pacing-seconds-per-image must be finite and non-negative"
         )
-    contract = SurfaceRegionContractV2(
-        radii_m=tuple(float(v) for v in str(args.region_radii).replace(",", " ").split()),
-        context_ratio=float(args.context_ratio),
-        neighbors=int(args.graph_neighbors),
-        maximum_tokens=int(args.max_tokens),
-        minimum_tokens=int(args.min_tokens),
-        path_cost_mode=str(args.path_cost_mode),
-        path_affinity_floor=float(args.path_affinity_floor),
-        token_subsampling=str(args.token_subsampling),
-        token_candidate_limit=int(args.token_candidate_limit),
-        core_token_fraction=float(args.core_token_fraction),
-        reliability_semantics=str(
-            getattr(
-                args,
-                "region_reliability_mode",
-                "geometric_mean_observation_agreement",
-            )
-        ),
-    )
-    teacher_contract = _teacher_region_contract(
-        contract,
-        int(args.teacher_region_candidate_limit),
+    teacher_replay_path = str(
+        getattr(args, "teacher_replay_cache", "") or ""
+    ).strip()
+    teacher_contract = (
+        _v3_teacher_contract_from_replay(
+            teacher_replay_path,
+            expected_candidate_limit=int(
+                args.teacher_region_candidate_limit
+            ),
+        )
+        if isinstance(contract, SurfaceRegionContractV3)
+        and teacher_replay_path
+        else _teacher_region_contract(
+            contract,
+            int(args.teacher_region_candidate_limit),
+        )
     )
     teacher_target_protocol = _teacher_target_protocol(
         args,
@@ -1898,6 +2704,9 @@ def build(args: argparse.Namespace) -> dict:
     )
     teacher_target_protocol_sha256 = _json_sha256(
         teacher_target_protocol
+    )
+    teacher_view_selection = str(
+        teacher_target_protocol["frame_selection"]
     )
     teacher_replay = _load_teacher_replay_cache(
         str(getattr(args, "teacher_replay_cache", "")),
@@ -1920,6 +2729,9 @@ def build(args: argparse.Namespace) -> dict:
         expected_excluded_physical_spaces=excluded_spaces,
         expected_regions_per_scene=int(args.regions_per_scene),
         expected_teacher_views=int(args.teacher_views),
+        expected_teacher_target_schema_version=int(
+            teacher_target_protocol["schema_version"]
+        ),
     )
     replay_payload = None
     replay_by_scene: dict[str, list[tuple[int, dict]]] = {}
@@ -2057,15 +2869,32 @@ def build(args: argparse.Namespace) -> dict:
         },
         "selected_scenes": list(scenes),
         "row_contract": {
-            "regions_per_scene": int(args.regions_per_scene),
+            "regions_per_scene": expected_scene_rows,
             "maximum_tokens": int(args.max_tokens),
             "feature_dimension": 1280,
-            "geometry_dimension": 14,
+            "geometry_dimension": geometry_dimension,
             "teacher_views": int(args.teacher_views),
             "region_contract_sha256": contract.digest,
             "teacher_region_contract_sha256": teacher_contract.digest,
             "teacher_target_protocol_sha256": (
                 teacher_target_protocol_sha256
+            ),
+            **(
+                {
+                    "row_schema_version": SCENE_ROW_SCHEMA_V3,
+                    "feature_gauge": SURFACE_REGION_V3_FEATURE_GAUGE,
+                    "support_fill_tensor": "support_fill_mask",
+                    "raw_radio_l2_norm_channel": 15,
+                    "frozen_teacher_regions_per_scene": int(
+                        args.regions_per_scene
+                    ),
+                    "eligibility_variants_per_teacher_region": (
+                        eligibility_variants_per_region
+                    ),
+                    "eligibility_policy": STRUCTURED_ELIGIBILITY_POLICY,
+                }
+                if row_schema_version == SCENE_ROW_SCHEMA_V3
+                else {}
             ),
             **(
                 {
@@ -2113,6 +2942,7 @@ def build(args: argparse.Namespace) -> dict:
         adaptor.requires_grad_(False)
     rng = random.Random(int(args.seed) + int(args.shard_index) * 100003)
     records, feature_rows, geometry_rows, masks, reliability_rows = [], [], [], [], []
+    support_fill_rows: list[torch.Tensor] = []
     teacher_tokens, teacher_descriptors, teacher_masks, anchor_rows = [], [], [], []
     tensor_rows = {
         "radio_features": feature_rows,
@@ -2124,16 +2954,11 @@ def build(args: argparse.Namespace) -> dict:
         "teacher_mask": teacher_masks,
         "anchor_index": anchor_rows,
     }
+    if row_schema_version == SCENE_ROW_SCHEMA_V3:
+        tensor_rows["support_fill_mask"] = support_fill_rows
     aligned_rows = (
         records,
-        feature_rows,
-        geometry_rows,
-        masks,
-        reliability_rows,
-        teacher_tokens,
-        teacher_descriptors,
-        teacher_masks,
-        anchor_rows,
+        *tensor_rows.values(),
     )
     failures = {}
     radii = contract.radii_m
@@ -2144,11 +2969,15 @@ def build(args: argparse.Namespace) -> dict:
             resume_dir,
             scene_index=scene_index,
             scene_name=scene_name,
-            expected_rows=int(args.regions_per_scene),
+            expected_rows=expected_scene_rows,
             maximum_tokens=int(args.max_tokens),
             teacher_views=int(args.teacher_views),
             contract_record=resume_contract_record,
             contract_payload_sha256=resume_contract_payload_sha256,
+            row_schema_version=row_schema_version,
+            eligibility_variants_per_region=(
+                eligibility_variants_per_region
+            ),
         )
         if resumed is not None:
             if resumed["rng_state_before"] != encode_rng_state(
@@ -2253,6 +3082,7 @@ def build(args: argparse.Namespace) -> dict:
                     "geometric_mean_observation_agreement",
                 )
             )
+            raw_radio_l2_norm_all: torch.Tensor | None = None
             if scene_intermediate is None:
                 xyz, features, _footprint, _counts = _voxel_fuse(
                     torch.cat(lifted_xyz),
@@ -2267,6 +3097,13 @@ def build(args: argparse.Namespace) -> dict:
                         torch.cat(lifted_features),
                         float(args.voxel_size),
                         features,
+                    )
+                if isinstance(contract, SurfaceRegionContractV3):
+                    # Preserve amplitude before fixing the student feature
+                    # gauge to a unit direction.  V2 intentionally keeps no
+                    # amplitude side channel.
+                    raw_radio_l2_norm_all = torch.linalg.vector_norm(
+                        features.float(), dim=-1
                     )
                 features = F.normalize(
                     features.float(),
@@ -2357,6 +3194,16 @@ def build(args: argparse.Namespace) -> dict:
                     "raw_affinity": graph.raw_affinity,
                     "local_sigma": graph.local_sigma,
                     "edge_channels": graph.edge_channels,
+                    **(
+                        {
+                            "raw_radio_l2_norm": raw_radio_l2_norm_all,
+                            "student_feature_gauge": (
+                                SURFACE_REGION_V3_FEATURE_GAUGE
+                            ),
+                        }
+                        if isinstance(contract, SurfaceRegionContractV3)
+                        else {}
+                    ),
                     "depth_intrinsic": kd,
                     "color_intrinsic": kc,
                     "frames": [
@@ -2392,6 +3239,9 @@ def build(args: argparse.Namespace) -> dict:
                 }
                 torch.save(graph_payload, graph_root / f"{scene_name}.pt")
             prepared_graph = contract.prepare_graph(graph, xyz)
+            teacher_prepared_graph = teacher_contract.prepare_graph(
+                graph, xyz
+            )
             if replay_payload is None:
                 candidates = list(range(len(xyz)))
                 rng.shuffle(candidates)
@@ -2420,10 +3270,9 @@ def build(args: argparse.Namespace) -> dict:
                     if replay_record is not None
                     else radii[scene_regions % len(radii)]
                 )
-                rows, core, _geodesic = contract.expand(
+                candidate_expansion = contract.expand(
                     graph, xyz, seed, radius, prepared_graph=prepared_graph
                 )
-                idx = rows
                 teacher_idx, teacher_core, _teacher_geodesic = (
                     teacher_contract.expand(
                         graph,
@@ -2431,7 +3280,7 @@ def build(args: argparse.Namespace) -> dict:
                         seed,
                         radius,
                         include_context=False,
-                        prepared_graph=prepared_graph,
+                        prepared_graph=teacher_prepared_graph,
                     )
                 )
                 teacher_region_saturated = (
@@ -2452,32 +3301,92 @@ def build(args: argparse.Namespace) -> dict:
                     teacher_idx,
                 )
                 crops, views = [], []
-                for color_path, color, depth, pose in frame_data:
-                    box = _project_region_box(
-                        xyz[teacher_idx], depth, kd, kc, pose,
-                        (int(color.shape[2]), int(color.shape[1])),
-                        min_visible=min(
-                            int(args.min_visible_tokens),
-                            len(teacher_idx),
-                        ),
-                        context_pad=0.0,
-                    )
-                    if box is None:
-                        continue
-                    top, left, bottom, right = box
-                    if replay_payload is None:
-                        crops.append(F.interpolate(
-                            color[:, top:bottom, left:right][None],
-                            (
-                                int(args.radio_resolution),
-                                int(args.radio_resolution),
+                selected_observations: list[dict] = []
+                if teacher_view_selection == TEACHER_VIEW_SELECTION_LEGACY:
+                    for color_path, color, depth, pose in frame_data:
+                        box = _project_region_box(
+                            xyz[teacher_idx], depth, kd, kc, pose,
+                            (int(color.shape[2]), int(color.shape[1])),
+                            min_visible=min(
+                                int(args.min_visible_tokens),
+                                len(teacher_idx),
                             ),
-                            mode="bilinear",
-                            align_corners=False,
-                        )[0])
-                    views.append({"frame": color_path.name, "crop_box_tlbr": box})
-                    if len(views) >= int(args.teacher_views):
-                        break
+                            context_pad=0.0,
+                        )
+                        if box is None:
+                            continue
+                        top, left, bottom, right = box
+                        if replay_payload is None:
+                            crops.append(F.interpolate(
+                                color[:, top:bottom, left:right][None],
+                                (
+                                    int(args.radio_resolution),
+                                    int(args.radio_resolution),
+                                ),
+                                mode="bilinear",
+                                align_corners=False,
+                            )[0])
+                        views.append(
+                            {
+                                "frame": color_path.name,
+                                "crop_box_tlbr": box,
+                            }
+                        )
+                        if len(views) >= int(args.teacher_views):
+                            break
+                else:
+                    view_candidates: list[dict] = []
+                    for color_path, color, depth, pose in frame_data:
+                        observation = _project_region_observation(
+                            xyz[teacher_idx],
+                            depth,
+                            kd,
+                            kc,
+                            pose,
+                            (int(color.shape[2]), int(color.shape[1])),
+                            min_visible=min(
+                                int(args.min_visible_tokens),
+                                len(teacher_idx),
+                            ),
+                            context_pad=0.0,
+                        )
+                        if observation is None:
+                            continue
+                        observation["frame"] = color_path.name
+                        if replay_payload is None:
+                            top, left, bottom, right = observation[
+                                "crop_box_tlbr"
+                            ]
+                            observation["resized_crop"] = F.interpolate(
+                                color[:, top:bottom, left:right][None],
+                                (
+                                    int(args.radio_resolution),
+                                    int(args.radio_resolution),
+                                ),
+                                mode="bilinear",
+                                align_corners=False,
+                            )[0]
+                        view_candidates.append(observation)
+                    selected_observations = (
+                        _select_teacher_views_coverage_diversity(
+                            view_candidates,
+                            int(args.teacher_views),
+                        )
+                    )
+                    views = [
+                        {
+                            "frame": str(value["frame"]),
+                            "crop_box_tlbr": list(
+                                value["crop_box_tlbr"]
+                            ),
+                        }
+                        for value in selected_observations
+                    ]
+                    if replay_payload is None:
+                        crops = [
+                            value["resized_crop"]
+                            for value in selected_observations
+                        ]
                 if len(views) < 2:
                     continue
                 region_id = _surface_region_id(
@@ -2487,6 +3396,7 @@ def build(args: argparse.Namespace) -> dict:
                     teacher_contract.digest,
                     teacher_support_sha256,
                 )
+                teacher_view_statistics: dict | None = None
                 if replay_payload is None:
                     if runtime is None:
                         raise RuntimeError(
@@ -2519,28 +3429,58 @@ def build(args: argparse.Namespace) -> dict:
                     )
                     padded_teacher_mask[:view_count] = True
                     teacher_medoid = _teacher_medoid(tokens, descriptors)
+                    if selected_observations:
+                        teacher_view_statistics = _teacher_view_statistics(
+                            selected_observations,
+                            summary_tokens=tokens,
+                            crop_descriptors=descriptors,
+                        )
                 else:
                     assert replay_record is not None and replay_row is not None
                     source_views = replay_record.get("teacher_views", [])
-                    if (
-                        json.dumps(views, sort_keys=True)
-                        != json.dumps(source_views, sort_keys=True)
-                        or int(replay_record["teacher_region_tokens"])
-                        != len(teacher_idx)
-                        or replay_record.get("teacher_region_saturated")
-                        is not False
-                        or str(
-                            replay_record.get(
-                                "teacher_support_sha256",
-                                "",
+                    replay_geometry_checks = {
+                        "views": (
+                            json.dumps(views, sort_keys=True)
+                            == json.dumps(source_views, sort_keys=True)
+                        ),
+                        "teacher_region_tokens": (
+                            int(replay_record["teacher_region_tokens"])
+                            == len(teacher_idx)
+                        ),
+                        "teacher_region_saturated": (
+                            replay_record.get("teacher_region_saturated")
+                            is False
+                        ),
+                        "teacher_support_sha256": (
+                            str(
+                                replay_record.get(
+                                    "teacher_support_sha256",
+                                    "",
+                                )
                             )
+                            == teacher_support_sha256
+                        ),
+                        "region_id": (
+                            str(replay_record["region_id"]) == region_id
+                        ),
+                    }
+                    if not all(replay_geometry_checks.values()):
+                        failed_checks = sorted(
+                            key
+                            for key, passed in replay_geometry_checks.items()
+                            if not passed
                         )
-                        != teacher_support_sha256
-                        or str(replay_record["region_id"]) != region_id
-                    ):
                         raise RuntimeError(
                             "recomputed fixed-core teacher geometry differs "
-                            "from the replay cache"
+                            "from the replay cache; "
+                            f"scene={scene_name}, seed={seed}, "
+                            f"radius={radius}, failed_checks={failed_checks}, "
+                            "recomputed_tokens="
+                            f"{len(teacher_idx)}, replay_tokens="
+                            f"{int(replay_record['teacher_region_tokens'])}, "
+                            "recomputed_support_sha256="
+                            f"{teacher_support_sha256}, replay_support_sha256="
+                            f"{replay_record.get('teacher_support_sha256', '')}"
                         )
                     padded_tokens = torch.as_tensor(
                         replay_payload["official_summary_tokens"][replay_row]
@@ -2584,66 +3524,250 @@ def build(args: argparse.Namespace) -> dict:
                         raise RuntimeError(
                             "teacher replay medoid is outside valid views"
                         )
-                padded_features = torch.zeros(int(args.max_tokens), 1280, dtype=torch.float16)
-                padded_geometry = torch.zeros(int(args.max_tokens), 14, dtype=torch.float16)
-                padded_mask = torch.zeros(int(args.max_tokens), dtype=torch.bool)
-                padded_reliability = torch.zeros(int(args.max_tokens), 1, dtype=torch.float16)
-                n = len(idx)
-                rel = reliability_all[idx, None]
-                scale = graph.local_sigma[idx, None].expand(-1, 3).clamp_min(1e-4)
-                anchor_local = int(torch.where(idx == int(seed))[0][0])
-                geom = surface_region_geometry_v2(
-                    xyz[idx], scale, rel, float(radius), anchor_index=anchor_local,
-                    core_mask=core,
-                )
-                padded_features[:n] = features[idx].half()
-                padded_geometry[:n] = geom.half()
-                padded_mask[:n] = True; padded_reliability[:n] = rel.half()
-                feature_rows.append(padded_features); geometry_rows.append(padded_geometry)
-                masks.append(padded_mask); reliability_rows.append(padded_reliability)
-                teacher_tokens.append(padded_tokens); teacher_descriptors.append(padded_descriptors)
-                teacher_masks.append(padded_teacher_mask)
+                    if selected_observations:
+                        recomputed_statistics = _teacher_view_statistics(
+                            selected_observations
+                        )
+                        source_statistics = replay_record.get(
+                            "teacher_view_statistics"
+                        )
+                        if not isinstance(source_statistics, dict) or any(
+                            source_statistics.get(key) != value
+                            for key, value in recomputed_statistics.items()
+                        ):
+                            raise RuntimeError(
+                                "recomputed teacher view statistics differ "
+                                "from the replay cache"
+                            )
+                        teacher_view_statistics = source_statistics
                 teacher_target_sha256 = _teacher_target_sha256(
                     padded_tokens,
                     padded_descriptors,
                     padded_teacher_mask,
                 )
-                record = {
-                    "region_id": region_id,
-                    "scene": scene_name, "seed": int(seed), "physical_radius_m": radius,
-                    "tokens": n, "teacher_views": views,
-                    "teacher_medoid": teacher_medoid,
-                    "teacher_region_tokens": int(len(teacher_idx)),
-                    "teacher_support_sha256": (
-                        teacher_support_sha256
-                    ),
-                    "teacher_region_saturated": False,
-                    "teacher_target_source": teacher_target_source,
-                    "teacher_target_sha256": teacher_target_sha256,
-                    "anchor_local_index": anchor_local,
-                    "core_tokens": int(core.sum()),
-                    "below_nominal_minimum": bool(len(idx) < contract.minimum_tokens),
-                }
-                if replay_row is not None:
-                    record["teacher_replay_source_row"] = int(replay_row)
-                    record["teacher_replay_source_region_id"] = str(
-                        replay_record["region_id"]
+                row_variants: list[
+                    tuple[object, StructuredEligibilityVariant | None]
+                ] = [(candidate_expansion, None)]
+                if isinstance(contract, SurfaceRegionContractV3):
+                    for variant_index in range(
+                        eligibility_variants_per_region
+                    ):
+                        eligibility_variant = structured_eligibility_variant(
+                            contract=contract,
+                            prepared_graph=prepared_graph,
+                            anchor=int(seed),
+                            radius_m=float(radius),
+                            teacher_region_id=region_id,
+                            variant_index=variant_index,
+                        )
+                        eligibility_expansion = contract.expand(
+                            graph,
+                            xyz,
+                            int(seed),
+                            float(radius),
+                            prepared_graph=prepared_graph,
+                            selection_eligibility=(
+                                eligibility_variant.mask
+                            ),
+                        )
+                        actual_semantic = int(
+                            (
+                                eligibility_expansion.core_mask
+                                | eligibility_expansion.context_mask
+                            ).sum()
+                        )
+                        actual_fill = int(
+                            eligibility_expansion.support_fill_mask.sum()
+                        )
+                        expected_semantic = int(
+                            eligibility_variant.semantic_eligible_tokens
+                        )
+                        expected_fill = (
+                            int(contract.minimum_tokens)
+                            - expected_semantic
+                        )
+                        if (
+                            actual_semantic != expected_semantic
+                            or actual_fill != expected_fill
+                            or len(eligibility_expansion.rows)
+                            != int(contract.minimum_tokens)
+                        ):
+                            raise RuntimeError(
+                                "structured eligibility expansion differs "
+                                "from its anchor-connected completion budget"
+                            )
+                        row_variants.append(
+                            (eligibility_expansion, eligibility_variant)
+                        )
+                for row_expansion, eligibility_variant in row_variants:
+                    student_row, selection, support_counts = (
+                        _materialize_region_student_row(
+                            contract=contract,
+                            expansion=row_expansion,
+                            anchor_row=int(seed),
+                            xyz=xyz,
+                            radio_features=features,
+                            raw_radio_l2_norm=raw_radio_l2_norm_all,
+                            local_sigma=graph.local_sigma,
+                            primitive_reliability=reliability_all,
+                            radius=float(radius),
+                        )
                     )
-                if scene_intermediate_provenance is not None:
-                    record["scene_intermediate_contract_sha256"] = str(
-                        scene_intermediate_provenance["contract_sha256"]
+                    n = int(support_counts["tokens"])
+                    anchor_local = int(selection.anchor_index)
+                    feature_rows.append(student_row["radio_features"])
+                    geometry_rows.append(student_row["geometry"])
+                    masks.append(student_row["token_mask"])
+                    reliability_rows.append(student_row["reliability"])
+                    if row_schema_version == SCENE_ROW_SCHEMA_V3:
+                        support_fill_rows.append(
+                            student_row["support_fill_mask"]
+                        )
+                    teacher_tokens.append(padded_tokens)
+                    teacher_descriptors.append(padded_descriptors)
+                    teacher_masks.append(padded_teacher_mask)
+                    row_region_id = (
+                        region_id
+                        if eligibility_variant is None
+                        else completion_region_id(
+                            teacher_region_id=region_id,
+                            variant=eligibility_variant,
+                        )
                     )
-                    record[
-                        "scene_intermediate_tensor_bundle_sha256"
-                    ] = str(
-                        scene_intermediate_provenance[
-                            "tensor_bundle_sha256"
-                        ]
-                    )
-                records.append(record)
-                anchor_rows.append(
-                    torch.tensor(anchor_local, dtype=torch.long)
-                )
+                    record = {
+                        "region_id": row_region_id,
+                        "scene": scene_name,
+                        "seed": int(seed),
+                        "physical_radius_m": radius,
+                        "tokens": n,
+                        "teacher_views": views,
+                        "teacher_medoid": teacher_medoid,
+                        "teacher_region_tokens": int(len(teacher_idx)),
+                        "teacher_support_sha256": teacher_support_sha256,
+                        "teacher_region_saturated": False,
+                        "teacher_target_source": teacher_target_source,
+                        "teacher_target_sha256": teacher_target_sha256,
+                        "anchor_local_index": anchor_local,
+                        "core_tokens": int(support_counts["core_tokens"]),
+                        "below_nominal_minimum": bool(
+                            n < contract.minimum_tokens
+                        ),
+                    }
+                    if teacher_view_statistics is not None:
+                        record["teacher_view_statistics"] = (
+                            teacher_view_statistics
+                        )
+                    if row_schema_version == SCENE_ROW_SCHEMA_V3:
+                        record.update(
+                            {
+                                "context_tokens": int(
+                                    support_counts["context_tokens"]
+                                ),
+                                "semantic_tokens": int(
+                                    support_counts["semantic_tokens"]
+                                ),
+                                "support_fill_tokens": int(
+                                    support_counts["support_fill_tokens"]
+                                ),
+                                "minimum_satisfied": bool(
+                                    support_counts["minimum_satisfied"]
+                                ),
+                                "row_role": (
+                                    "full_support"
+                                    if eligibility_variant is None
+                                    else "eligibility_completion"
+                                ),
+                                "paired_full_region_id": region_id,
+                                "eligibility_variants_per_teacher_region": (
+                                    eligibility_variants_per_region
+                                ),
+                                "eligibility_variant_index": (
+                                    -1
+                                    if eligibility_variant is None
+                                    else eligibility_variant.variant_index
+                                ),
+                                "eligibility_policy": (
+                                    "all_scene_nodes_eligible_v1"
+                                    if eligibility_variant is None
+                                    else eligibility_variant.policy
+                                ),
+                                "eligibility_sha256": (
+                                    ""
+                                    if eligibility_variant is None
+                                    else eligibility_variant.mask_sha256
+                                ),
+                                "eligibility_globally_eligible_tokens": (
+                                    int(len(xyz))
+                                    if eligibility_variant is None
+                                    else eligibility_variant.globally_eligible_tokens
+                                ),
+                                "eligibility_semantic_domain_tokens": (
+                                    int(support_counts["semantic_tokens"])
+                                    if eligibility_variant is None
+                                    else eligibility_variant.semantic_domain_tokens
+                                ),
+                                "eligibility_semantic_eligible_tokens": (
+                                    int(support_counts["semantic_tokens"])
+                                    if eligibility_variant is None
+                                    else eligibility_variant.semantic_eligible_tokens
+                                ),
+                                "eligibility_nominal_semantic_keep_tokens": (
+                                    int(support_counts["semantic_tokens"])
+                                    if eligibility_variant is None
+                                    else eligibility_variant.nominal_semantic_keep_tokens
+                                ),
+                                "eligibility_expected_fill_tokens": (
+                                    0
+                                    if eligibility_variant is None
+                                    else int(contract.minimum_tokens)
+                                    - eligibility_variant.semantic_eligible_tokens
+                                ),
+                                "eligibility_extreme_graph_fallback": (
+                                    False
+                                    if eligibility_variant is None
+                                    else eligibility_variant.extreme_graph_fallback
+                                ),
+                                "eligibility_extreme_graph_fallback_reason": (
+                                    ""
+                                    if eligibility_variant is None
+                                    else eligibility_variant.extreme_graph_fallback_reason
+                                ),
+                                "eligibility_orientation_axis": (
+                                    -1
+                                    if eligibility_variant is None
+                                    else eligibility_variant.orientation_axis
+                                ),
+                                "eligibility_orientation_sign": (
+                                    0
+                                    if eligibility_variant is None
+                                    else eligibility_variant.orientation_sign
+                                ),
+                            }
+                        )
+                    if replay_row is not None:
+                        record["teacher_replay_source_row"] = int(
+                            replay_row
+                        )
+                        record["teacher_replay_source_region_id"] = str(
+                            replay_record["region_id"]
+                        )
+                    if scene_intermediate_provenance is not None:
+                        record[
+                            "scene_intermediate_contract_sha256"
+                        ] = str(
+                            scene_intermediate_provenance[
+                                "contract_sha256"
+                            ]
+                        )
+                        record[
+                            "scene_intermediate_tensor_bundle_sha256"
+                        ] = str(
+                            scene_intermediate_provenance[
+                                "tensor_bundle_sha256"
+                            ]
+                        )
+                    records.append(record)
+                    anchor_rows.append(student_row["anchor_index"])
                 scene_regions += 1
             if scene_regions != int(args.regions_per_scene):
                 raise RuntimeError(
@@ -2670,11 +3794,15 @@ def build(args: argparse.Namespace) -> dict:
             scene_rows=scene_rows,
             rng_state_before=rng_state_before,
             rng_state_after=rng.getstate(),
-            expected_rows=int(args.regions_per_scene),
+            expected_rows=expected_scene_rows,
             maximum_tokens=int(args.max_tokens),
             teacher_views=int(args.teacher_views),
             contract_record=resume_contract_record,
             contract_payload_sha256=resume_contract_payload_sha256,
+            row_schema_version=row_schema_version,
+            eligibility_variants_per_region=(
+                eligibility_variants_per_region
+            ),
         )
     if replay_payload is not None and failures:
         raise RuntimeError(
@@ -2706,7 +3834,18 @@ def build(args: argparse.Namespace) -> dict:
             )
             scene_intermediate_provenance_by_scene[scene_name] = provenance
     metadata = {
-        "schema_version": 3, "training_scope": "global_cross_scene_3d_surface_v2",
+        "schema_version": (
+            4 if row_schema_version == SCENE_ROW_SCHEMA_V3 else 3
+        ),
+        "training_scope": (
+            (
+                "global_cross_scene_3d_surface_v4"
+                if isinstance(contract, SurfaceRegionContractV4)
+                else "global_cross_scene_3d_surface_v3"
+            )
+            if row_schema_version == SCENE_ROW_SCHEMA_V3
+            else "global_cross_scene_3d_surface_v2"
+        ),
         "dataset_id": "ScanNet_frames_25k_query_free",
         "dataset_root": dataset_root,
         "split_role": split_role,
@@ -2716,14 +3855,24 @@ def build(args: argparse.Namespace) -> dict:
         "uses_benchmark_test_vocabulary": False, "uses_benchmark_scenes": False,
         "annotations_opened": False, "labels_opened": False, "instances_opened": False,
         "masks_opened": False, "text_opened": False,
-        "region_construction": "shared_surface_region_contract_v2",
+        "region_construction": (
+            (
+                "shared_surface_region_contract_v4"
+                if isinstance(contract, SurfaceRegionContractV4)
+                else "shared_surface_region_contract_v3"
+            )
+            if row_schema_version == SCENE_ROW_SCHEMA_V3
+            else "shared_surface_region_contract_v2"
+        ),
         "region_contract": contract.to_dict(),
         "region_contract_version": contract.version,
         "region_contract_sha256": contract.digest,
         "teacher_region_semantics": FIXED_CORE_TEACHER_SEMANTICS,
         "teacher_region_contract": teacher_contract.to_dict(),
         "teacher_region_contract_sha256": teacher_contract.digest,
-        "teacher_target_schema_version": 1,
+        "teacher_target_schema_version": int(
+            teacher_target_protocol["schema_version"]
+        ),
         "teacher_crop_protocol": TEACHER_CROP_PROTOCOL,
         "teacher_target_protocol": teacher_target_protocol,
         "teacher_target_protocol_sha256": (
@@ -2737,7 +3886,28 @@ def build(args: argparse.Namespace) -> dict:
             for record in records
         ),
         "regions_per_scene_requested": int(args.regions_per_scene),
+        "cache_rows_per_scene_expected": expected_scene_rows,
         "teacher_views_requested": int(args.teacher_views),
+        **(
+            {
+                "teacher_view_statistics": {
+                    "schema_version": (
+                        TEACHER_VIEW_STATISTICS_SCHEMA_VERSION
+                    ),
+                    "rows_with_statistics": sum(
+                        "teacher_view_statistics" in record
+                        for record in records
+                    ),
+                    "projected_support_mask_encoding": (
+                        "numpy_packbits_little_bitorder_hex_v1"
+                    ),
+                    "query_free": True,
+                }
+            }
+            if teacher_view_selection
+            == TEACHER_VIEW_SELECTION_COVERAGE_DIVERSITY
+            else {}
+        ),
         "complete_scene_regions": True,
         "radio_version": runtime_version,
         "radio_checkpoint_sha256": runtime_checkpoint_sha256,
@@ -2761,8 +3931,127 @@ def build(args: argparse.Namespace) -> dict:
             scene: sum(record["scene"] == scene for record in records)
             for scene in sorted({record["scene"] for record in records})
         },
+        "scene_teacher_region_counts": {
+            scene: sum(
+                record["scene"] == scene
+                and record.get("row_role", "full_support") == "full_support"
+                for record in records
+            )
+            for scene in sorted({record["scene"] for record in records})
+        },
         "regions_below_nominal_minimum": sum(
             bool(record["below_nominal_minimum"]) for record in records
+        ),
+        **(
+            {
+                "surface_region_row_schema_version": (
+                    SCENE_ROW_SCHEMA_V3
+                ),
+                "voxel_fusion_reduction": (
+                    "cpu_single_thread_index_add_restore_v1"
+                ),
+                "student_feature_gauge": (
+                    SURFACE_REGION_V3_FEATURE_GAUGE
+                ),
+                "geometry_dimension": SURFACE_GEOMETRY_V3_DIM,
+                "raw_radio_l2_norm_storage": (
+                    "geometry_index_15_log_raw_l2_norm"
+                ),
+                "support_fill_storage": (
+                    "support_fill_mask_and_geometry_index_14"
+                ),
+                "support_fill_reliability": (
+                    "primitive_reliability_times_exp_negative_"
+                    "recovery_distance_over_radius"
+                ),
+                "semantic_tokens_total": sum(
+                    int(record["semantic_tokens"])
+                    for record in records
+                ),
+                "support_fill_tokens_total": sum(
+                    int(record["support_fill_tokens"])
+                    for record in records
+                ),
+                "regions_minimum_satisfied": sum(
+                    bool(record["minimum_satisfied"])
+                    for record in records
+                ),
+                "eligibility_completion": {
+                    "schema_version": 1,
+                    "policy": STRUCTURED_ELIGIBILITY_POLICY,
+                    "source": (
+                        "query_free_frozen_graph_geometry_and_sha256_"
+                        "teacher_region_identity"
+                    ),
+                    "variants_per_teacher_region": (
+                        eligibility_variants_per_region
+                    ),
+                    "nominal_semantic_keep_tokens": (
+                        int(contract.minimum_tokens)
+                        - max(1, int(contract.minimum_tokens) // 6)
+                    ),
+                    "nominal_support_fill_tokens": max(
+                        1, int(contract.minimum_tokens) // 6
+                    ),
+                    "full_support_rows": sum(
+                        record["row_role"] == "full_support"
+                        for record in records
+                    ),
+                    "completion_variant_rows": sum(
+                        record["row_role"]
+                        == "eligibility_completion"
+                        for record in records
+                    ),
+                    "completion_rows_with_fill": sum(
+                        record["row_role"]
+                        == "eligibility_completion"
+                        and int(record["support_fill_tokens"]) > 0
+                        for record in records
+                    ),
+                    "extreme_graph_fallback_rows": sum(
+                        record["row_role"] == "eligibility_completion"
+                        and bool(
+                            record["eligibility_extreme_graph_fallback"]
+                        )
+                        for record in records
+                    ),
+                    "completion_support_fill_tokens": sum(
+                        int(record["support_fill_tokens"])
+                        for record in records
+                        if record["row_role"]
+                        == "eligibility_completion"
+                    ),
+                    "completion_selected_tokens": sum(
+                        int(record["tokens"])
+                        for record in records
+                        if record["row_role"]
+                        == "eligibility_completion"
+                    ),
+                    "completion_row_fill_coverage": 1.0,
+                    "completion_token_fill_fraction": (
+                        sum(
+                            int(record["support_fill_tokens"])
+                            for record in records
+                            if record["row_role"]
+                            == "eligibility_completion"
+                        )
+                        / sum(
+                            int(record["tokens"])
+                            for record in records
+                            if record["row_role"]
+                            == "eligibility_completion"
+                        )
+                    ),
+                    "teacher_target_sharing": (
+                        "exact_tensor_and_sha256_with_paired_full_row"
+                    ),
+                    "validation_checkpoint_selection": (
+                        "full_support_rows_only"
+                    ),
+                },
+            }
+            if row_schema_version == SCENE_ROW_SCHEMA_V3
+            else {}
         ),
         "region_records": records, "failed_scenes": failures,
         "forbidden_eval_scenes": sorted(FORBIDDEN_EVAL_SCENES),
@@ -2780,6 +4069,11 @@ def build(args: argparse.Namespace) -> dict:
         "official_crop_summaries": torch.stack(teacher_descriptors),
         "teacher_mask": torch.stack(teacher_masks), "metadata": metadata,
         "anchor_index": torch.stack(anchor_rows),
+        **(
+            {"support_fill_mask": torch.stack(support_fill_rows)}
+            if row_schema_version == SCENE_ROW_SCHEMA_V3
+            else {}
+        ),
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     if bool(getattr(args, "overwrite_output", False)):
@@ -2892,6 +4186,25 @@ def main() -> None:
     )
     parser.add_argument("--frames-per-scene", type=int, default=8)
     parser.add_argument("--regions-per-scene", type=int, default=12)
+    parser.add_argument(
+        "--region-contract-version",
+        choices=("v2", "v3", "v4"),
+        default="v2",
+        help=(
+            "Explicit student-region contract. V3 requires nearest-geodesic "
+            "order; V4 requires candidate-complete typed budgeting. Both use "
+            "Euclidean semantic membership."
+        ),
+    )
+    parser.add_argument(
+        "--v3-eligibility-variants-per-region",
+        type=int,
+        default=1,
+        help=(
+            "Fixed query-free structured eligibility completion variants "
+            "paired with every V3/V4 full-support teacher region. Ignored by V2."
+        ),
+    )
     parser.add_argument("--region-radii", default="0.25,0.45,0.70")
     parser.add_argument("--context-ratio", type=float, default=1.20)
     parser.add_argument("--graph-neighbors", type=int, default=16)
@@ -2901,7 +4214,11 @@ def main() -> None:
     parser.add_argument("--max-tokens", type=int, default=256)
     parser.add_argument(
         "--token-subsampling",
-        choices=("nearest_geodesic_then_node_index", "core_context_radial_stratified_v1"),
+        choices=(
+            "nearest_geodesic_then_node_index",
+            "core_context_radial_stratified_v1",
+            "complete_core_then_typed_context_deterministic_backfill_v1",
+        ),
         default="core_context_radial_stratified_v1",
         help=(
             "Declared fixed-budget region-token selection policy. New caches "
@@ -2940,6 +4257,20 @@ def main() -> None:
     parser.add_argument("--path-affinity-floor", type=float, default=1e-4)
     parser.add_argument("--min-visible-tokens", type=int, default=12)
     parser.add_argument("--teacher-views", type=int, default=3)
+    parser.add_argument(
+        "--teacher-view-selection",
+        choices=(
+            TEACHER_VIEW_SELECTION_LEGACY,
+            TEACHER_VIEW_SELECTION_COVERAGE_DIVERSITY,
+        ),
+        default=TEACHER_VIEW_SELECTION_LEGACY,
+        help=(
+            "Explicit teacher target schema. The default preserves the frozen "
+            "first-valid-view protocol; v2 evaluates every bound frame and "
+            "deterministically balances visible support, depth-consistency "
+            "purity, and camera-angle diversity."
+        ),
+    )
     parser.add_argument(
         "--teacher-region-candidate-limit",
         type=int,

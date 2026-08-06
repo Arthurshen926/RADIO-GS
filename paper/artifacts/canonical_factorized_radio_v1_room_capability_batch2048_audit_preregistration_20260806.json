@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_room_capability_batch2048_audit",
+  "registered_at": "2026-08-06T01:47:00+08:00",
+  "status": "registered_after_uniform_batch2048_rematerialization_and_before_independent_audit",
+  "purpose": "Apply the exact Leaves producer/auditor batch-2048 parity protocol to the Room source-only capability bank.",
+  "superseded_attempt": {
+    "capability_sha256": "4387825d8acd89b5b7a7d90a34913c07613594d322ee182e584bd99a8c7d70da",
+    "producer_batch_size": 4096,
+    "audit_batch_size": 2048,
+    "maximum_absolute_error": 0.00048828125,
+    "decision": "superseded_before_graph"
+  },
+  "inputs": {
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_field_d256_l128.pth",
+      "sha256": "343b833b415d467f8993b6ce19057ea838fa12ae19395041347beaf273eef5f7",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "registration_responsibility_cache_sha256": "56541bafacd1dc430ba783130c9601821f0c25f9d371f041aa5851a18c4f344c",
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/official_dino_sam3_views.pt",
+      "sha256": "7e2c1ea44cb11317e9e8b9e41eb2f356cb431dba777c9ef62495a3bc6d4374a0"
+    }
+  },
+  "materialization_contract": {
+    "producer_batch_size": 2048,
+    "audit_batch_size": 2048,
+    "field_checkpoint_schema": "factorized-v2",
+    "feature_storage": "valid_rows_compact_v1",
+    "num_global_rows": 291619,
+    "num_valid_rows": 214612,
+    "appearance_dim": 4096,
+    "boundary_dim": 1024
+  },
+  "promotion_gate": {
+    "dino_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "sam3_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "exact_full_fp16_parity_required": true,
+    "formal_projection_contract_required": true,
+    "source_only_required": true
+  },
+  "execution": {
+    "producer_physical_gpu": 1,
+    "audit_physical_gpu": 1,
+    "device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "temperature_limit_c": 88,
+    "poll_seconds": 30,
+    "consecutive_overheat_polls_before_stop": 6
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_leaves_capability_materialization",
+  "registered_at": "2026-08-05T22:50:19+08:00",
+  "status": "registered_after_field_promotion_gate_and_before_capability_materialization",
+  "purpose": "Freeze the source-only materialization and validation of official DINOv3 and SAM3 primitive capability banks from the promoted factorized Leaves field.",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_source_chain_preregistration_20260805.json",
+    "sha256": "c2a28b2451bd4aa31a8db5a31204fc6852a3756caa1749a407101759dc6f4dd8"
+  },
+  "field_training_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_field_training_results_20260805.json",
+    "sha256_at_registration": "ddedf9e33d4c7b98c58433d654861ee06274681d84a4276c72f351be79f272d0"
+  },
+  "inputs": {
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/factorized_field_d256_l128.pth",
+      "sha256": "e8d0eb10a4e24cb9c22869336b0c159e6b8fe3ec84161f20669c897bd158b807",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373",
+      "strict_schema_v2_reload": true
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/factorized_raw_radio.pt",
+      "sha256": "947ad26da1a45176699c750b213ad83d147a883cf930649abecebda94fdaf45b"
+    },
+    "feature_output_bundle_sha256": "466248d6546d9fff98289b0c95f435ac18516eeab51f85d4da421111b90e677e",
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "geometry_xyz_sha256": "c6cd5b5bd6bde8da68dc60c5639199b5f3cab65cc71f7caaceed253005efb781",
+    "registration_responsibility_cache_sha256": "6a205bdb6a53f8755006eae583b800cf0fc7d1f234f59bfa1bf76bfca6d86551"
+  },
+  "materialization_contract": {
+    "field_checkpoint_schema": "factorized-v2",
+    "observation_contract": "canonical",
+    "projection_order": "raw_gauge_compact_radio_field_then_official_adaptor_then_l2",
+    "feature_storage": "valid_rows_compact_v1",
+    "feature_row_order": "torch_where_valid_ascending",
+    "num_global_rows": 1400000,
+    "num_valid_rows": 147607,
+    "appearance_dim": 4096,
+    "boundary_dim": 1024,
+    "batch_size": 2048,
+    "caller_trusted_field_sha256_required": true,
+    "caller_trusted_mpr_sha256_required": true,
+    "caller_trusted_radio_sha256_required": true,
+    "adaptor_loader_expected_sha256_required": true,
+    "factorized_lineage_embeds_responsibility_sha256": true
+  },
+  "promotion_gate": {
+    "strict_capability_loader": true,
+    "formal_projection_contract": true,
+    "payload_sidecar_factorized_lineage_exact": true,
+    "independent_field_adaptor_fp16_parity": true,
+    "dino_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "sam3_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "field_training_gate_remains_passed": true,
+    "capability_file_sha256_frozen_before_graph_or_benchmark": true,
+    "target_or_text_query_access": false
+  },
+  "implementation": {
+    "capability_builder_sha256": "9f2de4b2115af391aa1e5be72a033c0b405880908944cdae919fbd71c702f278",
+    "capability_auditor_sha256": "66e77d9a6491c57a4817796cad59c98f3518e46ce2953cb32c7ba7c098f0b677",
+    "capability_cache_loader_sha256": "af6315eb956c998a3145f0b0fe4c5f9a7eae6a9ea25fe73bd4e351ba0960c35a",
+    "capability_projection_contract_sha256": "b9555cfa4e8e0607b177836d7f8f02f265af883f274878ce09d813bab62b1f10",
+    "stage_local_execution_authority": true,
+    "parent_registered_capability_builder_sha256": "d0633698c3841666bbf3a8798265df7f699a130f253548be2c7c2345b532616a",
+    "method_or_hyperparameter_changed_since_parent_registration": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary and approximately 180-second checks for stages longer than six minutes; stop only after two consecutive observations at or above 88 C or a driver/Xid error",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/official_dino_sam3_views.pt",
+    "output_was_absent_at_registration": true,
+    "gpu_launch_deferred_for_cross_task_thermal_coordination": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

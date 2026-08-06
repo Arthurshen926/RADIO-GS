@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "registration": "source_raster_dominant_footprint_blocks_v1_implementation_closure",
+  "status": "sealed_after_preregistration_and_before_evaluator_or_exporter_integration_or_target_prediction",
+  "preregistration": {
+    "path": "paper/artifacts/source_raster_dominant_footprint_blocks_v1_preregistration_20260805.json",
+    "sha256": "95ade3ebb9279f21a41496c2dce74d249be0ff160f48fb82a015a15ec428a241"
+  },
+  "implementation": {
+    "path": "radio_gs/querying/source_footprint_fold_authority.py",
+    "sha256": "8b885ac473f8acea8d16c18d129739a14aafc2cb049af4e75079d1b7b2de8c1f",
+    "runtime": "CPU only",
+    "benchmark_evaluator_dependency": false,
+    "benchmark_exporter_dependency": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "gpu_used": false
+  },
+  "sealed_authority": {
+    "method_contract": "source_raster_dominant_footprint_blocks_v1",
+    "input_supervision": "none; the constructor signature accepts exact W COO triplets, raster geometry, hierarchy rows, and responsibility SHAs only",
+    "grid": "long axis has exactly 8 cells; short axis is nearest 8*short/long with half-up integer arithmetic and minimum one",
+    "pixel_mapping": "row-major pixel centers",
+    "primitive_mapping": "maximum accumulated exact responsibility mass over blocks",
+    "tie_break": "smallest row-major block id on an exact mass tie",
+    "invisible_group": "block_count",
+    "output_alignment": "one row per strictly increasing hierarchy primitive_rows entry in the same order",
+    "permutation_invariance": "triplets are canonically ordered by hierarchy-local primitive index and pixel id before hashing or accumulation",
+    "duplicate_policy": "a repeated pixel/primitive COO pair is rejected rather than merged"
+  },
+  "cryptographic_bindings": {
+    "external": "caller-provided exact raster-responsibility authority must exactly equal its expected SHA-256",
+    "canonical_triplets": "sorted pixel ids, hierarchy-local primitive indices, and float64 weights have one content SHA-256",
+    "canonical_tensors": [
+      "primitive_rows",
+      "group_ids",
+      "visible_mass",
+      "dominant_mass",
+      "purity"
+    ],
+    "authority_digest": "canonical tensor hashes, tensor bundle hash, triplet hashes, fixed grid geometry, and no-target flags are JSON-canonicalized into one SHA-256",
+    "replay": "every helper revalidates the authority, so in-place tensor mutation and unknown expected authority fail closed"
+  },
+  "fold_preflight": {
+    "assignment": "SplitMix64(group_id) modulo 3",
+    "whole_group_clear": [
+      "positive_weight",
+      "negative_weight",
+      "raw_positive_mass",
+      "raw_negative_mass"
+    ],
+    "minimum_class_rows": 32,
+    "degenerate_action": "field_base",
+    "eligible_action": "run_source_oof",
+    "target_access": false
+  },
+  "fail_closed": [
+    "non-CPU or non-vector triplets",
+    "non-integer pixel or primitive identifiers",
+    "non-floating, non-finite, non-positive, or greater-than-one weights",
+    "front-to-back responsibility mass greater than one at a source pixel",
+    "pixel and primitive range violations",
+    "ambiguous primitive identifier domain",
+    "hierarchy rows that are empty, negative, repeated, unsorted, or unmatched",
+    "repeated exact pixel/primitive pairs",
+    "invalid grid, group, mass, purity, tensor hash, bundle hash, or authority digest",
+    "unknown responsibility or footprint authority"
+  ],
+  "tests": {
+    "path": "tests/test_source_footprint_fold_authority.py",
+    "sha256": "8c70436d153818a99895b6fa528407219706fed335d5626dbf7901e503bb62c0",
+    "focused": "15 passed",
+    "compatibility": "38 passed across footprint authority, hierarchy completion, query-specific propagation CV, and source-observation evidence gate",
+    "covered": [
+      "portrait and landscape fixed-grid pixel-center mapping",
+      "triplet permutation invariance",
+      "exact dominant-mass tie to the smallest block",
+      "local and global primitive identifiers aligned to hierarchy rows",
+      "invisible sentinel",
+      "constructor signature excludes masks, labels, queries, targets, and probabilities",
+      "same group always has one fold",
+      "fold ids exactly replay the hierarchy completion SplitMix64 helper",
+      "per-pixel exact front-to-back responsibility mass is at most one",
+      "synthetic exact W-adjoint composition",
+      "all four evidence tensors cleared over complete heldout groups",
+      "eligible 32-positive/32-negative population in every fold",
+      "degenerate population returns field_base",
+      "range, duplicate, SHA, row, and tensor tamper rejection"
+    ]
+  },
+  "integration_decision": "The pure authority core is ready for a separately frozen adapter. This closure does not modify an evaluator/exporter and does not authorize target access."
+}

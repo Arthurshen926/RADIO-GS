@@ -6,6 +6,7 @@ import pytest
 import torch
 
 from radio_gs.scripts.extract_radio_features import (
+    INCOMPLETE_RUNTIME_RESEAL_CONTRACT,
     LEGACY_RESEAL_CONTRACT,
     _sha256_file,
     _validate_final_output_bundle,
@@ -115,3 +116,54 @@ def test_legacy_reseal_validator_rejects_tensor_change(tmp_path: Path) -> None:
             root,
             expected_output_bundle_sha256=receipt["output_bundle_sha256"],
         )
+
+
+def test_incomplete_runtime_reseal_is_formal_and_resume_safe(tmp_path: Path) -> None:
+    root, raw_manifest, tensors = _legacy_bundle(tmp_path)
+    manifest = json.loads(raw_manifest)
+    original_execution = {
+        "extractor_sha256": "a" * 64,
+        "runtime_fingerprint": {"contract": "test-runtime-v1"},
+        "resume_contract": "",
+        "resume_contract_sha256": "",
+        "resume_contract_file_sha256": "",
+        "resume_partial": False,
+    }
+    manifest.update(
+        {
+            "execution": original_execution,
+            "output_bundle": None,
+            "output_bundle_sha256": "",
+        }
+    )
+    runtime_raw = json.dumps(manifest, indent=2).encode("utf-8") + b"\n"
+    (root / "frame_manifest.json").write_bytes(runtime_raw)
+    runtime_sha = hashlib.sha256(runtime_raw).hexdigest()
+    tensor_hashes = {path: _sha256_file(path) for path in tensors}
+
+    receipt = seal_legacy_bundle(
+        root,
+        expected_legacy_manifest_sha256=runtime_sha,
+    )
+    sealed = json.loads((root / "frame_manifest.json").read_text())
+    execution = sealed["execution"]
+    assert execution["formalization_contract"] == INCOMPLETE_RUNTIME_RESEAL_CONTRACT
+    assert execution["original_extraction_execution"] == original_execution
+    source = root / f"frame_manifest.original.{runtime_sha}.json"
+    assert source.read_bytes() == runtime_raw
+    assert source.stat().st_mode & 0o222 == 0
+    assert all(_sha256_file(path) == digest for path, digest in tensor_hashes.items())
+
+    validation = _validate_final_output_bundle(
+        root,
+        expected_output_bundle_sha256=receipt["output_bundle_sha256"],
+    )
+    assert validation["source_manifest_sha256"] == runtime_sha
+    assert validation["formalization_contract"] == INCOMPLETE_RUNTIME_RESEAL_CONTRACT
+
+    resumed = seal_legacy_bundle(
+        root,
+        expected_legacy_manifest_sha256=runtime_sha,
+    )
+    assert resumed["idempotent_existing_seal"] is True
+    assert resumed["output_bundle_sha256"] == receipt["output_bundle_sha256"]

@@ -35,6 +35,7 @@ from radio_gs.interfaces.query_diffusion_cache import (
     load_query_diffusion_knn_cache,
     load_query_diffusion_relation_cache,
 )
+from radio_gs.interfaces.prompt_responsibility_cache import tensor_sha256
 from radio_gs.models.radio_adaptors import load_radio_adaptor_from_checkpoint
 from radio_gs.querying.evidence_scorer import (
     EvidenceScoringConfig,
@@ -48,6 +49,26 @@ from radio_gs.querying.evidence_scorer import (
     registered_seed_observation,
 )
 from radio_gs.querying.query_compilers import compile_registered_primitive_seeds
+from radio_gs.querying.query_specific_propagation_cv import (
+    ACTION_SOURCE_UNARY,
+    ACTION_SURFACE_SAFE_PROPAGATED,
+    SourceObservationOOFFold,
+    audit_signed_cv_population,
+    evaluate_source_observation_footprint_oof_artifacts,
+    evaluate_source_observation_oof_artifacts,
+    prepare_source_observation_footprint_oof_fold,
+    prepare_source_observation_oof_fold,
+)
+from radio_gs.querying.source_footprint_fold_authority import (
+    FIELD_BASE_ACTION,
+    SourceFoldBaseDecision,
+    SourceFootprintFoldAuthority,
+    load_source_footprint_fold_authority,
+)
+from radio_gs.querying.source_observation_authority import (
+    SourceObservationEvidenceAuthority,
+    seal_or_load_source_observation_evidence_authority,
+)
 from radio_gs.querying.query_engine import CanonicalQueryEngine
 from radio_gs.querying.query_conditioned_diffusion import (
     QueryConditionedDiffusionConfig,
@@ -60,9 +81,25 @@ from radio_gs.querying.query_conditioned_diffusion import (
     solve_continuous_query_support,
     weighted_logistic_query_compatibility,
 )
+from radio_gs.rendering.camera_clearance import (
+    CAMERA_PLANE_CLEARANCE_CONTRACT,
+    camera_plane_clearance_confidence,
+)
 from radio_gs.querying.reliability_fusion import (
     DUAL_PROTOTYPE_SEED_PROVENANCE,
     DUAL_SOLVER_SEED_PROVENANCE,
+)
+from radio_gs.querying.nvos_source_completion_calibration import (
+    METHOD as SOURCE_COMPLETION_LOO_METHOD,
+    load_source_completion_loo_gate,
+    source_completion_loo_method_contract,
+)
+from radio_gs.querying.nvos_local_positive_completion import (
+    local_majority_positive_evidence,
+    method_contract as local_positive_completion_method_contract,
+)
+from radio_gs.querying.sam3_reference_completion import (
+    probability_preserving_entropy_observation,
 )
 from radio_gs.querying.query_spec import (
     PrimitiveUnaryEvidence,
@@ -96,6 +133,1636 @@ _BERNOULLI_POE_FUSIONS = frozenset(
     {"raster_adjoint_bernoulli_poe", "dual_registration_bernoulli_poe"}
 )
 _FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD = 0.02
+_EXACT_WINNER_TAKE_ALL_PROTOTYPE_SEED_PROVENANCE = (
+    "native_exact_adjoint_conditional_fraction_winner_take_all_prototype_v1"
+)
+_EXACT_JOINT_SIGNED_SOLVER_SEED_PROVENANCE = (
+    "native_exact_adjoint_joint_signed_solver_anchor_v1"
+)
+_CANONICAL_FIELD_CAPABILITY_SOURCE = (
+    "canonical_radio_field_official_frozen_capability_views"
+)
+_EXACT_MPR_CAPABILITY_SOURCE = (
+    "exact_radio_mpr_official_frozen_capability_views"
+)
+_EXACT_CAPABILITY_MPR_SOURCE = (
+    "exact_capability_mpr_official_frozen_capability_views"
+)
+_PROBABILITY_PRESERVING_SOURCE_UNARY = (
+    "sam3_entropy_probability_preserving_mixture_v1"
+)
+_SOURCE_COMPLETION_LOO_CALIBRATION = SOURCE_COMPLETION_LOO_METHOD
+_SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION = (
+    "all_trial_loo_hierarchical_local_positive_v2"
+)
+
+
+def _apply_hierarchical_source_completion_trust(
+    probability: torch.Tensor,
+    reliability: torch.Tensor,
+    *,
+    accept_full_completion: bool,
+    raw_positive: np.ndarray,
+    raw_negative: np.ndarray,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, object]]:
+    """Apply the fixed v1-global/v2-local source-only trust hierarchy."""
+
+    if bool(accept_full_completion):
+        return probability, reliability, {
+            "branch": "v1_full_probability_preserving_completion",
+            "v1_global_gate_accepted": True,
+            "local_positive_contract": None,
+        }
+    positive = torch.from_numpy(np.ascontiguousarray(raw_positive)).bool()
+    negative = torch.from_numpy(np.ascontiguousarray(raw_negative)).bool()
+    local_probability, local_reliability = local_majority_positive_evidence(
+        probability,
+        positive_scribble=positive,
+        negative_scribble=negative,
+    )
+    return local_probability, local_reliability, {
+        "branch": "v2_local_majority_positive_completion",
+        "v1_global_gate_accepted": False,
+        "local_positive_contract": local_positive_completion_method_contract(),
+    }
+
+
+def _probability_preserving_registration_maps(
+    prompt_maps: torch.Tensor,
+    probability: torch.Tensor,
+    reliability: torch.Tensor,
+) -> torch.Tensor:
+    """Pack raw signed prompts and calibrated completion into one adjoint."""
+
+    raw = torch.as_tensor(prompt_maps)
+    foreground = torch.as_tensor(
+        probability, device=raw.device, dtype=torch.float32
+    )
+    confidence = torch.as_tensor(
+        reliability, device=raw.device, dtype=torch.float32
+    )
+    if raw.ndim != 4 or raw.shape[:2] != (1, 2):
+        raise ValueError("raw registered prompt maps must have shape [1,2,H,W]")
+    if foreground.shape != raw.shape[2:] or confidence.shape != raw.shape[2:]:
+        raise ValueError("source completion probability/reliability shape differs")
+    if (
+        not bool(torch.isfinite(foreground).all())
+        or not bool(torch.isfinite(confidence).all())
+        or bool(((foreground < 0) | (foreground > 1)).any())
+        or bool(((confidence < 0) | (confidence > 1)).any())
+    ):
+        raise ValueError("source completion probability/reliability must be in [0,1]")
+    completion = torch.stack(
+        [confidence * foreground, confidence * (1.0 - foreground)], dim=0
+    )[None]
+    return torch.cat([raw.to(dtype=torch.float32), completion], dim=1)
+
+
+def _source_completion_unary_contract(
+    args: argparse.Namespace,
+) -> dict[str, object] | None:
+    mode = str(getattr(args, "source_completion_unary", "none"))
+    if mode == "none":
+        return None
+    if mode != _PROBABILITY_PRESERVING_SOURCE_UNARY:
+        raise ValueError(f"unknown source completion unary mode {mode!r}")
+    calibration = str(
+        getattr(args, "source_completion_calibration", "none")
+    )
+    if calibration not in {
+        "none",
+        _SOURCE_COMPLETION_LOO_CALIBRATION,
+        _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
+    }:
+        raise ValueError(f"unknown source completion calibration {calibration!r}")
+    return {
+        "mode": mode,
+        "source_probability": (
+            "q=mean_of_frozen_official_SAM3_binary_trials_with_signed_"
+            "scribble_overwrite"
+        ),
+        "source_reliability": "c(q)=1-H2(q)/ln2_with_signed_scribble_c=1",
+        "exact_adjoint_channels": ["c*q", "c*(1-q)"],
+        "primitive_probability": "W^T(c*q)/W^T(c)",
+        "primitive_confidence": "W^T(c)/W^T(1)",
+        "fusion": "(1-c_primitive)*p_field+c_primitive*p_source",
+        "uncertain_probability_policy": "preserve_q_separately_from_confidence",
+        "graph": "disabled_zero_edge_unary_prior_only",
+        "source_only_calibration": (
+            source_completion_loo_method_contract()
+            if calibration
+            in {
+                _SOURCE_COMPLETION_LOO_CALIBRATION,
+                _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
+            }
+            else None
+        ),
+        "calibration_reject_fallback": (
+            "frozen_compact_hard_seed_anchor_only_probability_base"
+            if calibration == _SOURCE_COMPLETION_LOO_CALIBRATION
+            else (
+                "v2_local_majority_positive_completion"
+                if calibration
+                == _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION
+                else None
+            )
+        ),
+        "hierarchical_local_positive_contract": (
+            local_positive_completion_method_contract()
+            if calibration
+            == _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION
+            else None
+        ),
+        "target_rgb_or_mask_used": False,
+        "scene_specific_numeric_constants": False,
+    }
+
+
+def _validate_source_completion_unary_args(args: argparse.Namespace) -> None:
+    """Fail closed before model loading for source-completed unary fusion."""
+
+    contract = _source_completion_unary_contract(args)
+    asset_names = (
+        "source_completion",
+        "source_completion_sha256",
+        "source_completion_receipt",
+        "source_completion_receipt_sha256",
+    )
+    assets = {
+        name: str(getattr(args, name, "")).strip() for name in asset_names
+    }
+    calibration = str(
+        getattr(args, "source_completion_calibration", "none")
+    )
+    gate_assets = {
+        "source_completion_calibration_gate": str(
+            getattr(args, "source_completion_calibration_gate", "")
+        ).strip(),
+        "source_completion_calibration_gate_sha256": str(
+            getattr(args, "source_completion_calibration_gate_sha256", "")
+        ).strip(),
+    }
+    if contract is None:
+        dangling = [f"--{name.replace('_', '-')}" for name, value in assets.items() if value]
+        dangling.extend(
+            f"--{name.replace('_', '-')}"
+            for name, value in gate_assets.items()
+            if value
+        )
+        if calibration != "none":
+            dangling.append("--source-completion-calibration")
+        if dangling:
+            raise ValueError(
+                "source completion assets require --source-completion-unary "
+                f"{_PROBABILITY_PRESERVING_SOURCE_UNARY}: " + ", ".join(dangling)
+            )
+        return
+    calibrated = calibration in {
+        _SOURCE_COMPLETION_LOO_CALIBRATION,
+        _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
+    }
+    if calibration == "none" and any(gate_assets.values()):
+        raise ValueError(
+            "source completion calibration gate assets require "
+            "a source-only --source-completion-calibration"
+        )
+    requirements = {
+        "--support-mode canonical_support": str(args.support_mode)
+        == "canonical_support",
+        "--disable-registered-graph": bool(args.disable_registered_graph),
+        "--registered-readout-stage unary_prior": str(args.registered_readout_stage)
+        == "unary_prior",
+        "--query-conditioned-diffusion-kernel none": str(
+            args.query_conditioned_diffusion_kernel
+        )
+        == "none",
+        "--registered-forward-unary none": str(args.registered_forward_unary)
+        == "none",
+        "--registered-observation-fusion probability_mixture": str(
+            args.registered_observation_fusion
+        )
+        == "probability_mixture",
+        "--registered-seed-unary-weight 0": float(
+            args.registered_seed_unary_weight
+        )
+        == 0.0,
+        "--prompt-registration-mode raster_adjoint": str(
+            args.prompt_registration_mode
+        )
+        == "raster_adjoint",
+        "--prompt-registration-scale 1": float(args.prompt_registration_scale)
+        == 1.0,
+        "--alpha-threshold 0": float(args.alpha_threshold) == 0.0,
+        "--feature-contribution-gamma 1": float(args.feature_contribution_gamma)
+        == 1.0,
+        "no --registered-reference-threshold-calibration": not bool(
+            args.registered_reference_threshold_calibration
+        ),
+        **{
+            f"--{name.replace('_', '-')}": bool(value)
+            for name, value in assets.items()
+        },
+        **(
+            {
+                f"--{name.replace('_', '-')}": bool(value)
+                for name, value in gate_assets.items()
+            }
+            if calibrated
+            else {}
+        ),
+    }
+    for name in ("source_completion_sha256", "source_completion_receipt_sha256"):
+        requirements[f"--{name.replace('_', '-')} valid SHA256"] = (
+            len(assets[name]) == 64
+            and all(character in "0123456789abcdef" for character in assets[name].lower())
+        )
+    if calibrated:
+        gate_sha256 = gate_assets["source_completion_calibration_gate_sha256"]
+        requirements["--source-completion-calibration-gate-sha256 valid SHA256"] = (
+            len(gate_sha256) == 64
+            and all(
+                character in "0123456789abcdef"
+                for character in gate_sha256.lower()
+            )
+        )
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(
+            f"{_PROBABILITY_PRESERVING_SOURCE_UNARY} requires "
+            + ", ".join(failed)
+        )
+
+
+def _load_probability_preserving_source_completion(
+    args: argparse.Namespace,
+    *,
+    scene_id: str,
+    frame_id: str,
+    positive_path: str | Path,
+    negative_path: str | Path,
+    raw_positive: np.ndarray,
+    raw_negative: np.ndarray,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, object]]:
+    """Load and bind a frozen source-only completion without opening targets."""
+
+    completion_path = Path(args.source_completion).expanduser().resolve()
+    receipt_path = Path(args.source_completion_receipt).expanduser().resolve()
+    completion_sha256 = _file_sha256(completion_path)
+    receipt_sha256 = _file_sha256(receipt_path)
+    if completion_sha256 != str(args.source_completion_sha256):
+        raise ValueError("source completion SHA256 differs")
+    if receipt_sha256 != str(args.source_completion_receipt_sha256):
+        raise ValueError("source completion receipt SHA256 differs")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if (
+        receipt.get("schema_version")
+        != "nvos_sam3_reference_completion_receipt_v1"
+        or receipt.get("scene_id") != str(scene_id)
+        or receipt.get("frame_id") != str(frame_id)
+        or Path(str(receipt.get("artifact_path"))).expanduser().resolve()
+        != completion_path
+        or receipt.get("artifact_sha256") != completion_sha256
+        or receipt.get("target_rgb_opened") is not False
+        or receipt.get("target_mask_opened") is not False
+        or receipt.get("target_metric_opened") is not False
+    ):
+        raise ValueError("source completion receipt authority differs")
+    payload = torch.load(completion_path, map_location="cpu", weights_only=True)
+    authority = payload.get("authority", {}) if isinstance(payload, Mapping) else {}
+    tensors = payload.get("tensors") if isinstance(payload, Mapping) else None
+    expected_tensor_keys = {
+        "trial_masks",
+        "aggregate_probability",
+        "completed_positive",
+        "raw_positive",
+        "raw_negative",
+        "point_coordinates_xy",
+        "quality",
+    }
+    if (
+        not isinstance(payload, Mapping)
+        or payload.get("artifact_type")
+        != "radio_gs.nvos_sam3_reference_completion"
+        or payload.get("schema_version") != 1
+        or authority.get("scene_id") != str(scene_id)
+        or authority.get("frame_id") != str(frame_id)
+        or authority.get("target_rgb_opened") is not False
+        or authority.get("target_mask_opened") is not False
+        or not isinstance(tensors, Mapping)
+        or set(tensors) != expected_tensor_keys
+    ):
+        raise ValueError("source completion artifact authority differs")
+    digests = {name: tensor_sha256(value) for name, value in sorted(tensors.items())}
+    tensor_bundle_sha256 = hashlib.sha256(
+        json.dumps(digests, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    if (
+        payload.get("tensor_sha256") != digests
+        or receipt.get("tensor_sha256") != digests
+        or payload.get("tensor_bundle_sha256") != tensor_bundle_sha256
+        or receipt.get("tensor_bundle_sha256") != tensor_bundle_sha256
+    ):
+        raise ValueError("source completion tensor hashes differ")
+    positive_cpu = torch.from_numpy(np.ascontiguousarray(raw_positive)).bool()
+    negative_cpu = torch.from_numpy(np.ascontiguousarray(raw_negative)).bool()
+    aggregate = torch.as_tensor(tensors["aggregate_probability"])
+    if (
+        aggregate.device.type != "cpu"
+        or aggregate.dtype != torch.float32
+        or tuple(aggregate.shape) != tuple(positive_cpu.shape)
+        or not bool(torch.isfinite(aggregate).all())
+        or bool(((aggregate < 0) | (aggregate > 1)).any())
+        or not torch.equal(torch.as_tensor(tensors["raw_positive"]), positive_cpu)
+        or not torch.equal(torch.as_tensor(tensors["raw_negative"]), negative_cpu)
+    ):
+        raise ValueError("source completion probability or scribble tensors differ")
+    if (
+        authority.get("positive_scribble_sha256")
+        != _file_sha256(Path(positive_path).expanduser().resolve())
+        or authority.get("negative_scribble_sha256")
+        != _file_sha256(Path(negative_path).expanduser().resolve())
+    ):
+        raise ValueError("source completion signed scribble authority differs")
+    probability, reliability = probability_preserving_entropy_observation(
+        aggregate.numpy(), raw_positive, raw_negative
+    )
+    return (
+        torch.from_numpy(probability).contiguous(),
+        torch.from_numpy(reliability).contiguous(),
+        {
+            "contract": _source_completion_unary_contract(args),
+            "completion_path": str(completion_path),
+            "completion_sha256": completion_sha256,
+            "receipt_path": str(receipt_path),
+            "receipt_sha256": receipt_sha256,
+            "tensor_bundle_sha256": tensor_bundle_sha256,
+            "target_rgb_opened": False,
+            "target_mask_opened": False,
+        },
+    )
+
+
+def _disabled_registered_graph(num_nodes: int) -> PrimitiveSupportGraph:
+    """Return a zero-edge graph for a strictly unary-only compiler audit."""
+
+    if int(num_nodes) <= 0:
+        raise ValueError("disabled registered graph requires positive nodes")
+    return PrimitiveSupportGraph(
+        edge_index=torch.empty((2, 0), dtype=torch.long),
+        edge_weight=torch.empty((0,), dtype=torch.float32),
+        raw_affinity=torch.empty((0,), dtype=torch.float32),
+        local_sigma=torch.ones((int(num_nodes),), dtype=torch.float32),
+        num_nodes=int(num_nodes),
+        edge_channels={},
+    )
+
+
+def _write_primitive_unary_artifact(
+    path: str | Path,
+    *,
+    scene_id: str,
+    protocol_hash: str,
+    capability_cache: str | Path,
+    capability_source_contract: str,
+    valid: torch.Tensor,
+    primitive_unary_probability: torch.Tensor,
+    compiler_contract: Mapping[str, object],
+) -> Path:
+    """Persist the pre-render primitive unary before target GT is opened."""
+
+    valid_cpu = torch.as_tensor(valid).detach().bool().cpu().reshape(-1)
+    unary_cpu = (
+        torch.as_tensor(primitive_unary_probability)
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1)
+    )
+    if unary_cpu.shape != valid_cpu.shape:
+        raise ValueError("primitive unary must align with the global row domain")
+    if not bool(torch.isfinite(unary_cpu).all()) or bool(
+        ((unary_cpu < 0) | (unary_cpu > 1)).any()
+    ):
+        raise ValueError("primitive unary probabilities must be finite and in [0,1]")
+    output = Path(path).expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "schema_version": 1,
+            "artifact_type": "nvos_frozen_k16_primitive_unary_probability_v1",
+            "scene_id": str(scene_id),
+            "protocol_hash": str(protocol_hash),
+            "capability_cache": str(Path(capability_cache).expanduser().resolve()),
+            "capability_cache_sha256": _file_sha256(
+                Path(capability_cache).expanduser().resolve()
+            ),
+            "capability_source_contract": str(capability_source_contract),
+            "valid": valid_cpu,
+            "valid_rows": torch.where(valid_cpu)[0],
+            "primitive_unary_probability": unary_cpu,
+            "compiler_contract": dict(compiler_contract),
+            "written_before_target_ground_truth_open": True,
+            "target_rgb_opened": False,
+            "target_mask_opened": False,
+        },
+        output,
+    )
+    return output
+
+
+def _write_source_observation_oof_artifact(
+    path: str | Path,
+    *,
+    scene_id: str,
+    protocol_hash: str,
+    heldout_fold: int,
+    capability_cache: str | Path,
+    support_graph: str | Path,
+    authority: SourceObservationOOFFold,
+    evidence_authority: SourceObservationEvidenceAuthority,
+    valid: torch.Tensor,
+    global_rows: torch.Tensor,
+    unary_probability: torch.Tensor,
+    propagated_probability: torch.Tensor,
+    method_contract: Mapping[str, object],
+) -> tuple[Path, str, Path]:
+    """Seal one source-only OOF fold before any target asset is opened."""
+
+    tensors = {
+        "valid": torch.as_tensor(valid).detach().bool().cpu().reshape(-1),
+        "global_rows": torch.as_tensor(global_rows).detach().long().cpu().reshape(-1),
+        "fold_ids": authority.fold_ids.detach().long().cpu().reshape(-1),
+        "observed": authority.observed.detach().bool().cpu().reshape(-1),
+        "heldout": authority.heldout.detach().bool().cpu().reshape(-1),
+        "signed_reference_evidence": authority.signed_reference_evidence.detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "reference_weight": authority.reference_weight.detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "unary_probability": torch.as_tensor(unary_probability)
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "surface_safe_propagated_probability": torch.as_tensor(
+            propagated_probability
+        )
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+    }
+    full_shape = tensors["valid"].shape
+    full_names = set(tensors) - {"global_rows"}
+    if any(tensors[name].shape != full_shape for name in full_names):
+        raise ValueError("OOF artifact tensors must align with the global row domain")
+    if not torch.equal(tensors["global_rows"], torch.where(tensors["valid"])[0]):
+        raise ValueError("OOF artifact global rows differ from valid-row authority")
+    for name in ("unary_probability", "surface_safe_propagated_probability"):
+        value = tensors[name]
+        if not bool(torch.isfinite(value).all()) or bool(
+            ((value < 0) | (value > 1)).any()
+        ):
+            raise ValueError(f"OOF {name} must be finite and in [0,1]")
+    heldout = tensors["heldout"]
+    cleared = {
+        "positive_weight_sum": float(authority.training_positive_weight[heldout].sum()),
+        "negative_weight_sum": float(authority.training_negative_weight[heldout].sum()),
+        "raw_positive_mass_sum": float(
+            authority.training_raw_positive_mass[heldout].sum()
+        ),
+        "raw_negative_mass_sum": float(
+            authority.training_raw_negative_mass[heldout].sum()
+        ),
+    }
+    if any(value != 0.0 for value in cleared.values()):
+        raise RuntimeError("OOF artifact detected held-out prompt-evidence leakage")
+
+    capability_path = Path(capability_cache).expanduser().resolve()
+    graph_path = Path(support_graph).expanduser().resolve()
+    evidence_path = evidence_authority.path.expanduser().resolve()
+    if (
+        not capability_path.is_file()
+        or not graph_path.is_file()
+        or not evidence_path.is_file()
+    ):
+        raise FileNotFoundError(
+            "OOF artifact requires immutable capability, graph, and source-evidence assets"
+        )
+    if _file_sha256(evidence_path) != evidence_authority.sha256:
+        raise ValueError("OOF source-evidence authority changed before fold sealing")
+
+    def tensor_sha256(value: torch.Tensor) -> str:
+        array = value.contiguous().numpy()
+        return hashlib.sha256(array.tobytes(order="C")).hexdigest()
+
+    tensor_hashes = {name: tensor_sha256(value) for name, value in tensors.items()}
+    authority_contract = {
+        "schema_version": 1,
+        "artifact_type": "source_observation_surface_safe_oof_fold_v1",
+        "scene_id": str(scene_id),
+        "protocol_hash": str(protocol_hash),
+        "heldout_fold": int(heldout_fold),
+        "num_folds": 3,
+        "fold_assignment": "splitmix64_global_primitive_row_v1",
+        "capability_cache": str(capability_path),
+        "capability_cache_sha256": _file_sha256(capability_path),
+        "support_graph": str(graph_path),
+        "support_graph_sha256": _file_sha256(graph_path),
+        "source_evidence_authority": str(evidence_path),
+        "source_evidence_authority_sha256": evidence_authority.sha256,
+        "source_evidence_authority_content_sha256": (
+            evidence_authority.content_sha256
+        ),
+        "source_evidence_replay_max_relative_error": dict(
+            evidence_authority.replay_max_relative_error
+        ),
+        "method_contract": dict(method_contract),
+        "method_contract_sha256": _json_sha256(dict(method_contract)),
+        "tensor_sha256": tensor_hashes,
+        "heldout_prompt_evidence_after_clear": cleared,
+        "heldout_clear_boundary": (
+            "before_direct_observation_prototypes_anchors_unary_and_graph_propagation"
+        ),
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+    }
+    content_sha256 = _json_sha256(authority_contract)
+    payload = {
+        **authority_contract,
+        "content_sha256": content_sha256,
+        **tensors,
+    }
+    output = Path(path).expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        existing = torch.load(output, map_location="cpu", weights_only=False)
+        if not isinstance(existing, Mapping) or existing.get("content_sha256") != content_sha256:
+            raise FileExistsError(f"refusing to overwrite different OOF artifact: {output}")
+    else:
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        torch.save(payload, temporary)
+        temporary.replace(output)
+    artifact_sha256 = _file_sha256(output)
+    receipt = {
+        **authority_contract,
+        "content_sha256": content_sha256,
+        "artifact_path": str(output),
+        "artifact_sha256": artifact_sha256,
+    }
+    receipt_path = output.with_suffix(output.suffix + ".receipt.json")
+    receipt_bytes = (
+        json.dumps(receipt, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    if receipt_path.exists() and receipt_path.read_bytes() != receipt_bytes:
+        raise FileExistsError(f"refusing to overwrite different OOF receipt: {receipt_path}")
+    if not receipt_path.exists():
+        temporary_receipt = receipt_path.with_suffix(receipt_path.suffix + ".tmp")
+        temporary_receipt.write_bytes(receipt_bytes)
+        temporary_receipt.replace(receipt_path)
+    return output, artifact_sha256, receipt_path
+
+
+def _write_source_observation_oof_gate_receipt(
+    output_dir: str | Path,
+) -> tuple[Path | None, dict[str, object]]:
+    """Seal the gate once all three independently executed folds exist."""
+
+    root = Path(output_dir).expanduser().resolve()
+    fold_paths = {fold: root / f"fold_{fold}.pt" for fold in range(3)}
+    missing = [fold for fold, path in fold_paths.items() if not path.is_file()]
+    if missing:
+        return None, {
+            "status": "awaiting_source_observation_oof_folds",
+            "missing_folds": missing,
+            "target_rgb_opened": False,
+            "target_mask_opened": False,
+            "target_metric_computed": False,
+        }
+    payloads = {
+        fold: torch.load(path, map_location="cpu", weights_only=False)
+        for fold, path in fold_paths.items()
+    }
+    if any(not isinstance(payload, Mapping) for payload in payloads.values()):
+        raise ValueError("source-observation OOF fold payload is not a mapping")
+    result = evaluate_source_observation_oof_artifacts(payloads)
+    fold_records = {
+        str(fold): {
+            "path": str(path),
+            "sha256": _file_sha256(path),
+            "receipt_path": str(path.with_suffix(path.suffix + ".receipt.json")),
+            "receipt_sha256": _file_sha256(
+                path.with_suffix(path.suffix + ".receipt.json")
+            ),
+        }
+        for fold, path in fold_paths.items()
+    }
+    receipt = {
+        "schema_version": 1,
+        "artifact_type": "source_observation_surface_safe_oof_gate_v1",
+        "scene_id": result.scene_id,
+        "protocol_hash": result.protocol_hash,
+        "method_contract_sha256": result.method_contract_sha256,
+        "capability_cache_sha256": result.capability_cache_sha256,
+        "support_graph_sha256": result.support_graph_sha256,
+        "source_evidence_authority_sha256": (
+            result.source_evidence_authority_sha256
+        ),
+        "source_evidence_authority_content_sha256": (
+            result.source_evidence_authority_content_sha256
+        ),
+        "fold_artifacts": fold_records,
+        "fold_assignment": "splitmix64_global_primitive_row_v1",
+        "num_folds": 3,
+        "minimum_positive_rows_per_training_or_heldout_fold": 32,
+        "minimum_negative_rows_per_training_or_heldout_fold": 32,
+        "metric_round_decimals": 12,
+        "probability_epsilon": 1e-7,
+        "metrics": result.metrics,
+        "fold_reports": result.fold_reports,
+        "selected_action": result.selected_action,
+        "observed_rows": int(result.observed.sum()),
+        "selection_rule": (
+            "minimize rounded balanced log-loss, maximize rounded weighted "
+            "AUC, then choose unary"
+        ),
+        "full_fit_predictions_used_as_oof": False,
+        "connected_selection": "off",
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+    }
+    encoded = json.dumps(
+        receipt,
+        indent=2,
+        sort_keys=True,
+        allow_nan=False,
+    ) + "\n"
+    output = root / "source_observation_oof_gate_receipt.json"
+    if output.exists() and output.read_text(encoding="utf-8") != encoded:
+        raise FileExistsError(
+            f"refusing to overwrite different source-observation gate: {output}"
+        )
+    if not output.exists():
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        temporary.write_text(encoded, encoding="utf-8")
+        temporary.replace(output)
+    return output, receipt
+
+
+def _load_source_observation_oof_deployment_gate(
+    args: argparse.Namespace,
+    *,
+    scene_id: str,
+    protocol_hash: str,
+) -> dict[str, object] | None:
+    """Bind a source-only OOF decision to the deployed pre-metric readout.
+
+    OOF generation deliberately exits before target rendering.  A separate
+    deployment invocation therefore has to replay the immutable gate and
+    prove that the selected action is exactly the readout stage being used.
+    """
+
+    raw_path = str(
+        getattr(args, "source_observation_oof_gate_receipt", "")
+    ).strip()
+    raw_sha256 = str(
+        getattr(args, "source_observation_oof_gate_receipt_sha256", "")
+    ).strip()
+    if bool(raw_path) != bool(raw_sha256):
+        raise ValueError(
+            "source-observation OOF deployment requires both gate receipt "
+            "path and expected SHA-256"
+        )
+    if not raw_path:
+        return None
+    gate_path = Path(raw_path).expanduser().resolve()
+    actual_sha256 = _file_sha256(gate_path)
+    if actual_sha256 != raw_sha256:
+        raise ValueError("source-observation OOF deployment gate SHA-256 differs")
+    try:
+        gate = json.loads(gate_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError("source-observation OOF deployment gate is unreadable") from error
+    if not isinstance(gate, Mapping):
+        raise ValueError("source-observation OOF deployment gate is not a mapping")
+    supported_schemas = {
+        "source_observation_surface_safe_oof_gate_v1",
+        "source_observation_surface_safe_footprint_oof_gate_v1",
+    }
+    if gate.get("schema_version") != 1 or gate.get("artifact_type") not in supported_schemas:
+        raise ValueError("source-observation OOF deployment gate schema differs")
+    if str(gate.get("scene_id", "")) != str(scene_id):
+        raise ValueError("source-observation OOF deployment gate scene differs")
+    if str(gate.get("protocol_hash", "")) != str(protocol_hash):
+        raise ValueError("source-observation OOF deployment gate protocol differs")
+    for flag in ("target_rgb_opened", "target_mask_opened", "target_metric_computed"):
+        if gate.get(flag) is not False:
+            raise ValueError(
+                "source-observation OOF deployment gate target-access flag differs"
+            )
+    if gate.get("full_fit_predictions_used_as_oof") is not False:
+        raise ValueError("source-observation OOF gate used full-fit predictions as OOF")
+    if str(gate.get("connected_selection", "")) != "off":
+        raise ValueError("source-observation OOF deployment gate enables connected selection")
+
+    capability_path = Path(args.canonical_capability_cache).expanduser().resolve()
+    graph_path = Path(args.canonical_support_graph).expanduser().resolve()
+    if str(gate.get("capability_cache_sha256", "")) != _file_sha256(capability_path):
+        raise ValueError("source-observation OOF gate capability cache differs")
+    if str(gate.get("support_graph_sha256", "")) != _file_sha256(graph_path):
+        raise ValueError("source-observation OOF gate support graph differs")
+
+    selected_action = str(gate.get("selected_action", ""))
+    required_stage = {
+        ACTION_SOURCE_UNARY: "unary_prior",
+        ACTION_SURFACE_SAFE_PROPAGATED: "propagated",
+    }.get(selected_action)
+    if required_stage is None:
+        raise ValueError(
+            "source-observation OOF deployment gate selected an unsupported "
+            f"full-fit action: {selected_action!r}"
+        )
+    if str(args.registered_readout_stage) != required_stage:
+        raise ValueError(
+            "source-observation OOF selected action requires "
+            f"--registered-readout-stage {required_stage}"
+        )
+    if str(args.registered_selection_mode) != "all_components":
+        raise ValueError(
+            "source-observation OOF deployment requires all-components selection"
+        )
+    if str(args.query_conditioned_diffusion_kernel) != "none":
+        raise ValueError(
+            "source-observation OOF deployment forbids query-conditioned diffusion"
+        )
+    return {
+        "path": str(gate_path),
+        "sha256": actual_sha256,
+        "artifact_type": str(gate["artifact_type"]),
+        "method_contract_sha256": str(gate.get("method_contract_sha256", "")),
+        "selected_action": selected_action,
+        "required_readout_stage": required_stage,
+        "selection_rule": str(gate.get("selection_rule", "")),
+        "target_feedback": False,
+    }
+
+
+def _write_source_observation_footprint_oof_artifact(
+    path: str | Path,
+    *,
+    scene_id: str,
+    protocol_hash: str,
+    heldout_fold: int,
+    capability_cache: str | Path,
+    support_graph: str | Path,
+    authority: SourceObservationOOFFold,
+    evidence_authority: SourceObservationEvidenceAuthority,
+    footprint_path: str | Path,
+    footprint_file_sha256: str,
+    footprint_authority: SourceFootprintFoldAuthority,
+    valid: torch.Tensor,
+    global_rows: torch.Tensor,
+    population_positive_weight: torch.Tensor,
+    population_negative_weight: torch.Tensor,
+    unary_probability: torch.Tensor,
+    propagated_probability: torch.Tensor,
+    method_contract: Mapping[str, object],
+) -> tuple[Path, str, Path]:
+    """Seal one whole-footprint OOF fold before any target asset is opened."""
+
+    footprint_authority.validate(
+        expected_authority_sha256=footprint_authority.authority_sha256
+    )
+    tensors = {
+        "valid": torch.as_tensor(valid).detach().bool().cpu().reshape(-1),
+        "global_rows": torch.as_tensor(global_rows).detach().long().cpu().reshape(-1),
+        "fold_ids": authority.fold_ids.detach().long().cpu().reshape(-1),
+        "observed": authority.observed.detach().bool().cpu().reshape(-1),
+        "heldout": authority.heldout.detach().bool().cpu().reshape(-1),
+        "signed_reference_evidence": authority.signed_reference_evidence.detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "reference_weight": authority.reference_weight.detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "population_positive_weight": torch.as_tensor(population_positive_weight)
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "population_negative_weight": torch.as_tensor(population_negative_weight)
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "unary_probability": torch.as_tensor(unary_probability)
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+        "surface_safe_propagated_probability": torch.as_tensor(
+            propagated_probability
+        )
+        .detach()
+        .float()
+        .cpu()
+        .reshape(-1),
+    }
+    full_shape = tensors["valid"].shape
+    if any(
+        tensors[name].shape != full_shape
+        for name in set(tensors) - {"global_rows"}
+    ):
+        raise ValueError("source-footprint OOF tensors must align globally")
+    if (
+        not torch.equal(tensors["global_rows"], torch.where(tensors["valid"])[0])
+        or not torch.equal(
+            tensors["global_rows"], footprint_authority.primitive_rows
+        )
+    ):
+        raise ValueError(
+            "source-footprint rows, capability rows, and valid rows differ"
+        )
+    for name in (
+        "population_positive_weight",
+        "population_negative_weight",
+    ):
+        value = tensors[name]
+        if not bool(torch.isfinite(value).all()) or bool((value < 0).any()):
+            raise ValueError(f"source-footprint {name} is invalid")
+    for name in ("unary_probability", "surface_safe_propagated_probability"):
+        value = tensors[name]
+        if not bool(torch.isfinite(value).all()) or bool(
+            ((value < 0) | (value > 1)).any()
+        ):
+            raise ValueError(f"source-footprint {name} must be in [0,1]")
+    heldout = tensors["heldout"]
+    cleared = {
+        "positive_weight_sum": float(authority.training_positive_weight[heldout].sum()),
+        "negative_weight_sum": float(authority.training_negative_weight[heldout].sum()),
+        "raw_positive_mass_sum": float(
+            authority.training_raw_positive_mass[heldout].sum()
+        ),
+        "raw_negative_mass_sum": float(
+            authority.training_raw_negative_mass[heldout].sum()
+        ),
+    }
+    if any(value != 0.0 for value in cleared.values()):
+        raise RuntimeError("source-footprint held-out evidence leaked")
+
+    capability_path = Path(capability_cache).expanduser().resolve()
+    graph_path = Path(support_graph).expanduser().resolve()
+    evidence_path = evidence_authority.path.expanduser().resolve()
+    footprint_asset = Path(footprint_path).expanduser().resolve()
+    if any(
+        not asset.is_file()
+        for asset in (capability_path, graph_path, evidence_path, footprint_asset)
+    ):
+        raise FileNotFoundError(
+            "source-footprint OOF requires immutable capability, graph, evidence, and footprint assets"
+        )
+    if _file_sha256(evidence_path) != evidence_authority.sha256:
+        raise ValueError("source-footprint source-evidence authority changed")
+    if _file_sha256(footprint_asset) != str(footprint_file_sha256):
+        raise ValueError("source-footprint authority file changed before sealing")
+
+    def tensor_digest(value: torch.Tensor) -> str:
+        return hashlib.sha256(
+            value.contiguous().numpy().tobytes(order="C")
+        ).hexdigest()
+
+    tensor_hashes = {name: tensor_digest(value) for name, value in tensors.items()}
+    authority_contract = {
+        "schema_version": 1,
+        "artifact_type": "source_observation_surface_safe_footprint_oof_fold_v1",
+        "scene_id": str(scene_id),
+        "protocol_hash": str(protocol_hash),
+        "heldout_fold": int(heldout_fold),
+        "num_folds": 3,
+        "fold_assignment": "splitmix64_source_footprint_group_v1",
+        "capability_cache": str(capability_path),
+        "capability_cache_sha256": _file_sha256(capability_path),
+        "support_graph": str(graph_path),
+        "support_graph_sha256": _file_sha256(graph_path),
+        "source_evidence_authority": str(evidence_path),
+        "source_evidence_authority_sha256": evidence_authority.sha256,
+        "source_evidence_authority_content_sha256": evidence_authority.content_sha256,
+        "source_evidence_replay_max_relative_error": dict(
+            evidence_authority.replay_max_relative_error
+        ),
+        "source_footprint_fold_authority": str(footprint_asset),
+        "source_footprint_fold_authority_file_sha256": str(
+            footprint_file_sha256
+        ),
+        "source_footprint_fold_authority_sha256": (
+            footprint_authority.authority_sha256
+        ),
+        "source_footprint_fold_authority_tensor_bundle_sha256": (
+            footprint_authority.tensor_bundle_sha256
+        ),
+        "method_contract": dict(method_contract),
+        "method_contract_sha256": _json_sha256(dict(method_contract)),
+        "tensor_sha256": tensor_hashes,
+        "heldout_prompt_evidence_after_clear": cleared,
+        "heldout_clear_boundary": (
+            "after_query_free_footprint_groups_before_prototypes_anchors_unary_and_graph"
+        ),
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+    }
+    content_sha256 = _json_sha256(authority_contract)
+    payload = {**authority_contract, "content_sha256": content_sha256, **tensors}
+    output = Path(path).expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        existing = torch.load(output, map_location="cpu", weights_only=False)
+        if not isinstance(existing, Mapping) or existing.get("content_sha256") != content_sha256:
+            raise FileExistsError(
+                f"refusing to overwrite different source-footprint OOF artifact: {output}"
+            )
+    else:
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        torch.save(payload, temporary)
+        temporary.replace(output)
+    artifact_sha256 = _file_sha256(output)
+    receipt = {
+        **authority_contract,
+        "content_sha256": content_sha256,
+        "artifact_path": str(output),
+        "artifact_sha256": artifact_sha256,
+    }
+    receipt_path = output.with_suffix(output.suffix + ".receipt.json")
+    receipt_bytes = (
+        json.dumps(receipt, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    ).encode("utf-8")
+    if receipt_path.exists() and receipt_path.read_bytes() != receipt_bytes:
+        raise FileExistsError(
+            f"refusing to overwrite different source-footprint receipt: {receipt_path}"
+        )
+    if not receipt_path.exists():
+        temporary_receipt = receipt_path.with_suffix(receipt_path.suffix + ".tmp")
+        temporary_receipt.write_bytes(receipt_bytes)
+        temporary_receipt.replace(receipt_path)
+    return output, artifact_sha256, receipt_path
+
+
+def _write_source_observation_footprint_oof_gate_receipt(
+    output_dir: str | Path,
+) -> tuple[Path | None, dict[str, object]]:
+    """Seal an eligible structured gate from exactly three footprint folds."""
+
+    root = Path(output_dir).expanduser().resolve()
+    fold_paths = {fold: root / f"fold_{fold}.pt" for fold in range(3)}
+    missing = [fold for fold, path in fold_paths.items() if not path.is_file()]
+    if missing:
+        return None, {
+            "status": "awaiting_source_observation_footprint_oof_folds",
+            "missing_folds": missing,
+            "target_rgb_opened": False,
+            "target_mask_opened": False,
+            "target_metric_computed": False,
+        }
+    payloads = {
+        fold: torch.load(path, map_location="cpu", weights_only=False)
+        for fold, path in fold_paths.items()
+    }
+    if any(not isinstance(payload, Mapping) for payload in payloads.values()):
+        raise ValueError("source-footprint OOF payload is not a mapping")
+    reference = payloads[0]
+    footprint_path = Path(
+        str(reference.get("source_footprint_fold_authority", ""))
+    ).expanduser().resolve()
+    footprint_file_sha256 = str(
+        reference.get("source_footprint_fold_authority_file_sha256", "")
+    )
+    footprint_authority_sha256 = str(
+        reference.get("source_footprint_fold_authority_sha256", "")
+    )
+    footprint_authority = load_source_footprint_fold_authority(
+        footprint_path,
+        expected_file_sha256=footprint_file_sha256,
+        expected_authority_sha256=footprint_authority_sha256,
+    )
+    result = evaluate_source_observation_footprint_oof_artifacts(
+        payloads,
+        footprint_authority=footprint_authority,
+        footprint_authority_path=str(footprint_path),
+        footprint_authority_file_sha256=footprint_file_sha256,
+    )
+    fold_records = {
+        str(fold): {
+            "path": str(path),
+            "sha256": _file_sha256(path),
+            "receipt_path": str(path.with_suffix(path.suffix + ".receipt.json")),
+            "receipt_sha256": _file_sha256(
+                path.with_suffix(path.suffix + ".receipt.json")
+            ),
+        }
+        for fold, path in fold_paths.items()
+    }
+    receipt = {
+        "schema_version": 1,
+        "artifact_type": "source_observation_surface_safe_footprint_oof_gate_v1",
+        "gate_mode": "eligible_source_oof",
+        "scene_id": result.scene_id,
+        "protocol_hash": result.protocol_hash,
+        "method_contract_sha256": result.method_contract_sha256,
+        "capability_cache_sha256": result.capability_cache_sha256,
+        "support_graph_sha256": result.support_graph_sha256,
+        "source_evidence_authority_sha256": result.source_evidence_authority_sha256,
+        "source_evidence_authority_content_sha256": (
+            result.source_evidence_authority_content_sha256
+        ),
+        "source_footprint_fold_authority": str(footprint_path),
+        "source_footprint_fold_authority_file_sha256": footprint_file_sha256,
+        "source_footprint_fold_authority_sha256": (
+            footprint_authority.authority_sha256
+        ),
+        "source_footprint_fold_authority_tensor_bundle_sha256": (
+            footprint_authority.tensor_bundle_sha256
+        ),
+        "fold_artifacts": fold_records,
+        "fold_assignment": "splitmix64_source_footprint_group_v1",
+        "num_folds": 3,
+        "minimum_positive_rows_per_training_or_heldout_fold": 32,
+        "minimum_negative_rows_per_training_or_heldout_fold": 32,
+        "metric_round_decimals": 12,
+        "probability_epsilon": 1e-7,
+        "metrics": result.metrics,
+        "fold_reports": result.fold_reports,
+        "selected_action": result.selected_action,
+        "observed_rows": int(result.observed.sum()),
+        "selection_rule": (
+            "minimize rounded balanced log-loss, maximize rounded weighted AUC, then choose unary"
+        ),
+        "full_fit_predictions_used_as_oof": False,
+        "connected_selection": "off",
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+    }
+    encoded = json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    output = root / "source_observation_oof_gate_receipt.json"
+    if output.exists() and output.read_text(encoding="utf-8") != encoded:
+        raise FileExistsError(
+            f"refusing to overwrite different source-footprint gate: {output}"
+        )
+    if not output.exists():
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        temporary.write_text(encoded, encoding="utf-8")
+        temporary.replace(output)
+    return output, receipt
+
+
+def _write_source_observation_footprint_field_base_receipt(
+    output_dir: str | Path,
+    *,
+    scene_id: str,
+    protocol_hash: str,
+    capability_cache: str | Path,
+    support_graph: str | Path,
+    evidence_authority: SourceObservationEvidenceAuthority,
+    footprint_path: str | Path,
+    footprint_file_sha256: str,
+    footprint_authority: SourceFootprintFoldAuthority,
+    population_decision: SourceFoldBaseDecision,
+    method_contract: Mapping[str, object],
+) -> tuple[Path, dict[str, object]]:
+    """Seal the preregistered field-base fallback for degenerate groups."""
+
+    if population_decision.run_source_oof or population_decision.selected_action != FIELD_BASE_ACTION:
+        raise ValueError("field-base receipt requires a degenerate population")
+    if population_decision.authority_sha256 != footprint_authority.authority_sha256:
+        raise ValueError("field-base population authority differs")
+    capability_path = Path(capability_cache).expanduser().resolve()
+    graph_path = Path(support_graph).expanduser().resolve()
+    footprint_asset = Path(footprint_path).expanduser().resolve()
+    evidence_path = evidence_authority.path.expanduser().resolve()
+    if any(
+        not path.is_file()
+        for path in (capability_path, graph_path, footprint_asset, evidence_path)
+    ):
+        raise FileNotFoundError("field-base receipt requires immutable source assets")
+    if _file_sha256(evidence_path) != evidence_authority.sha256:
+        raise ValueError("field-base source-evidence authority changed")
+    if _file_sha256(footprint_asset) != str(footprint_file_sha256):
+        raise ValueError("field-base footprint authority file changed")
+    receipt = {
+        "schema_version": 1,
+        "artifact_type": "source_observation_surface_safe_footprint_oof_gate_v1",
+        "gate_mode": "degenerate_population_field_base",
+        "scene_id": str(scene_id),
+        "protocol_hash": str(protocol_hash),
+        "method_contract_sha256": _json_sha256(dict(method_contract)),
+        "capability_cache_sha256": _file_sha256(capability_path),
+        "support_graph_sha256": _file_sha256(graph_path),
+        "source_evidence_authority_sha256": evidence_authority.sha256,
+        "source_evidence_authority_content_sha256": evidence_authority.content_sha256,
+        "source_footprint_fold_authority": str(footprint_asset),
+        "source_footprint_fold_authority_file_sha256": str(footprint_file_sha256),
+        "source_footprint_fold_authority_sha256": footprint_authority.authority_sha256,
+        "source_footprint_fold_authority_tensor_bundle_sha256": (
+            footprint_authority.tensor_bundle_sha256
+        ),
+        "fold_artifacts": {},
+        "fold_assignment": "splitmix64_source_footprint_group_v1",
+        "num_folds": 3,
+        "minimum_positive_rows_per_training_or_heldout_fold": (
+            population_decision.minimum_class_rows
+        ),
+        "minimum_negative_rows_per_training_or_heldout_fold": (
+            population_decision.minimum_class_rows
+        ),
+        "metrics": {},
+        "fold_reports": list(population_decision.fold_reports),
+        "selected_action": FIELD_BASE_ACTION,
+        "degenerate_reason": population_decision.reason,
+        "full_fit_predictions_used_as_oof": False,
+        "connected_selection": "off",
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+    }
+    encoded = json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    output = Path(output_dir).expanduser().resolve() / "source_observation_oof_gate_receipt.json"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists() and output.read_text(encoding="utf-8") != encoded:
+        raise FileExistsError(
+            f"refusing to overwrite different source-footprint base gate: {output}"
+        )
+    if not output.exists():
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        temporary.write_text(encoded, encoding="utf-8")
+        temporary.replace(output)
+    return output, receipt
+
+
+def _load_source_observation_footprint_authority(
+    args: argparse.Namespace,
+    capability_bank,
+) -> tuple[Path, str, SourceFootprintFoldAuthority] | None:
+    """Load the explicit structured-fold authority before prompt labels open."""
+
+    mode = str(
+        getattr(
+            args,
+            "source_observation_oof_fold_mode",
+            "stable_primitive_rows_v1",
+        )
+    )
+    path_value = str(
+        getattr(args, "source_footprint_fold_authority", "")
+    ).strip()
+    file_sha256 = str(
+        getattr(args, "source_footprint_fold_authority_file_sha256", "")
+    ).strip()
+    authority_sha256 = str(
+        getattr(args, "source_footprint_fold_authority_sha256", "")
+    ).strip()
+    values = (path_value, file_sha256, authority_sha256)
+    if mode == "stable_primitive_rows_v1":
+        if any(values):
+            raise ValueError(
+                "legacy source-observation folds forbid source-footprint authority inputs"
+            )
+        return None
+    if mode != "source_footprint_v1":
+        raise ValueError("source-observation OOF fold mode is unregistered")
+    if not str(getattr(args, "source_observation_oof_output_dir", "")).strip():
+        raise ValueError("source_footprint_v1 requires source-observation OOF output")
+    if not all(values):
+        raise ValueError(
+            "source_footprint_v1 requires authority path, file SHA-256, and authority SHA-256"
+        )
+    if capability_bank is None:
+        raise ValueError("source_footprint_v1 requires a canonical capability bank")
+    path = Path(path_value).expanduser().resolve()
+    authority = load_source_footprint_fold_authority(
+        path,
+        expected_file_sha256=file_sha256,
+        expected_authority_sha256=authority_sha256,
+    )
+    valid = capability_bank.valid.detach().bool().cpu().reshape(-1)
+    rows = capability_bank.global_rows.detach().long().cpu().reshape(-1)
+    if (
+        not torch.equal(rows, torch.where(valid)[0])
+        or not torch.equal(authority.primitive_rows, rows)
+    ):
+        raise ValueError(
+            "footprint rows, capability global_rows, and sorted valid rows must match exactly"
+        )
+    return path, file_sha256, authority
+
+
+def _validate_source_observation_oof_contract(
+    args: argparse.Namespace,
+    *,
+    prompt_type: str,
+) -> None:
+    """Fail closed unless the invocation is exactly the preregistered gate."""
+
+    if not str(getattr(args, "source_observation_oof_output_dir", "")).strip():
+        return
+    common = {
+        "canonical support": str(args.support_mode) == "canonical_support",
+        "real support graph": bool(str(args.canonical_support_graph).strip())
+        and not bool(args.disable_registered_graph),
+        "field capability contract": str(args.canonical_capability_source_contract)
+        == "field",
+        "exact raster adjoint": str(args.prompt_registration_mode)
+        == "raster_adjoint",
+        "native prompt scale": float(args.prompt_registration_scale) == 1.0,
+        "zero registration alpha threshold": float(args.alpha_threshold) == 0.0,
+        "typed graph policy": str(args.graph_policy) == "typed",
+        "same component graph policy": str(args.component_graph_policy) == "same",
+        "no primitive reliability modulation": not str(
+            args.canonical_reliability_cache
+        ).strip(),
+        "no graph affinity override": not str(
+            args.diagnostic_graph_affinity_override
+        ).strip(),
+        "no query-conditioned diffusion": str(args.query_conditioned_diffusion_kernel)
+        == "none",
+        "no forward unary": str(args.registered_forward_unary) == "none",
+        "no negative spatial augmentation": str(args.negative_spatial_mode) == "none",
+        "all-component selection": str(args.registered_selection_mode)
+        == SelectionMode.ALL_COMPONENTS.value,
+        "propagated readout": str(args.registered_readout_stage) == "propagated",
+        "typed confidence random walker": str(args.solver_type)
+        == "confidence_random_walker",
+        "no prompt-cycle diagnostic": not bool(
+            args.export_registered_prompt_cycle_diagnostic
+        ),
+        "no reference threshold calibration": not bool(
+            args.registered_reference_threshold_calibration
+        ),
+        "asset hashes required": bool(args.require_asset_hashes),
+    }
+    if prompt_type == "reference_binary_mask":
+        task = {
+            "SPIn K4 compiler": int(args.prototype_count) == 4,
+            "SPIn direct adjoint unary": str(args.registered_observation_fusion)
+            == "direct_raster_adjoint",
+            "SPIn joint signed seeds": str(args.registered_seed_construction)
+            == "joint_signed",
+            "SPIn shared prototype seeds": str(
+                args.registered_prototype_seed_construction
+            )
+            == "shared",
+        }
+    elif prompt_type == "positive_negative_scribbles":
+        task = {
+            "NVOS K16 compiler": int(args.prototype_count) == 16,
+            "NVOS anchor-only unary": str(args.registered_observation_fusion)
+            == "hard_seed_anchor_only_probability",
+            "NVOS Poisson coverage confidence": str(
+                args.registered_observation_confidence
+            )
+            == "poisson_mass_coverage",
+            "NVOS joint signed seeds": str(args.registered_seed_construction)
+            == "joint_signed",
+            "NVOS winner-take-all prototype seeds": str(
+                args.registered_prototype_seed_construction
+            )
+            == "winner_take_all",
+            "NVOS fixed mass scale": float(args.registered_observation_mass_scale)
+            == 1.0,
+            "NVOS fixed coverage power": float(
+                args.registered_observation_coverage_power
+            )
+            == 1.0,
+            "NVOS fixed hard-seed threshold": float(args.hard_seed_threshold)
+            == 0.2,
+            "NVOS exclusive relative conflicts": str(
+                args.hard_seed_conflict_policy
+            )
+            == "exclusive_relative",
+            "NVOS zero conflict margin": float(args.hard_seed_conflict_margin)
+            == 0.0,
+        }
+    else:
+        raise ValueError("source-observation OOF gate prompt type is unregistered")
+    failed = [name for name, valid in {**common, **task}.items() if not valid]
+    if failed:
+        raise ValueError(
+            "source-observation OOF contract differs: " + ", ".join(failed)
+        )
+
+
+def _source_observation_oof_method_contract(
+    args: argparse.Namespace,
+    *,
+    prompt_type: str,
+) -> dict[str, object]:
+    """Return every primitive-domain constant shared by the three folds."""
+
+    return {
+        "schema_version": 1,
+        "method": "target_blind_source_observation_evidence_gate_v1",
+        "preregistration": {
+            "path": str(
+                Path(__file__).resolve().parents[2]
+                / (
+                    "paper/artifacts/"
+                    "source_observation_evidence_gate_preregistration_20260805.json"
+                )
+            ),
+            "sha256": _file_sha256(
+                Path(__file__).resolve().parents[2]
+                / (
+                    "paper/artifacts/"
+                    "source_observation_evidence_gate_preregistration_20260805.json"
+                )
+            ),
+        },
+        "implementation_sha256": {
+            "query_specific_propagation_cv.py": _file_sha256(
+                Path(__file__).resolve().parents[1]
+                / "querying"
+                / "query_specific_propagation_cv.py"
+            ),
+            "eval_nvos_gaussian_first.py": _file_sha256(Path(__file__).resolve()),
+            "source_observation_authority.py": _file_sha256(
+                Path(__file__).resolve().parents[1]
+                / "querying"
+                / "source_observation_authority.py"
+            ),
+        },
+        "numeric_replay_correction": {
+            "path": str(
+                Path(__file__).resolve().parents[2]
+                / (
+                    "paper/artifacts/"
+                    "source_observation_evidence_authority_correction_addendum_20260805.json"
+                )
+            ),
+            "sha256": _file_sha256(
+                Path(__file__).resolve().parents[2]
+                / (
+                    "paper/artifacts/"
+                    "source_observation_evidence_authority_correction_addendum_20260805.json"
+                )
+            ),
+        },
+        "prompt_type": str(prompt_type),
+        "candidate_actions": ["unary", "surface_safe_propagated"],
+        "folds": 3,
+        "heldout_clear_tensors": [
+            "positive_weight",
+            "negative_weight",
+            "raw_positive_mass",
+            "raw_negative_mass",
+        ],
+        "capability_source_contract": str(
+            args.canonical_capability_source_contract
+        ),
+        "prompt_registration": {
+            "mode": str(args.prompt_registration_mode),
+            "scale": float(args.prompt_registration_scale),
+            "alpha_threshold": float(args.alpha_threshold),
+        },
+        "compiler": {
+            "prototype_count": int(args.prototype_count),
+            "prototype_strategy": str(args.prototype_strategy),
+            "prompt_support_threshold": float(args.support_threshold),
+            "registered_observation_fusion": str(
+                args.registered_observation_fusion
+            ),
+            "registered_observation_confidence": str(
+                args.registered_observation_confidence
+            ),
+            "registered_observation_mass_scale": float(
+                args.registered_observation_mass_scale
+            ),
+            "registered_observation_coverage_power": float(
+                args.registered_observation_coverage_power
+            ),
+            "registered_seed_construction": str(
+                args.registered_seed_construction
+            ),
+            "registered_prototype_seed_construction": str(
+                args.registered_prototype_seed_construction
+            ),
+            "registered_seed_unary_weight": float(
+                args.registered_seed_unary_weight
+            ),
+            "registered_selection_mode": str(args.registered_selection_mode),
+        },
+        "scoring": {
+            "appearance_weight": float(args.appearance_weight),
+            "boundary_weight": float(args.boundary_weight),
+            "prototype_temperature": float(args.prototype_temperature),
+            "feature_calibration": str(args.feature_calibration),
+            "background_centroids": int(args.background_centroids),
+            "calibration_sample_size": int(args.calibration_sample_size),
+            "centroid_iterations": int(args.centroid_iterations),
+            "score_calibration": str(args.score_calibration),
+            "score_tanh_scale": float(args.score_tanh_scale),
+            "score_chunk_size": int(args.score_chunk_size),
+            "negative_spatial_mode": str(args.negative_spatial_mode),
+        },
+        "surface_safe_graph_readout": {
+            "graph_policy": str(args.graph_policy),
+            "component_graph_policy": str(args.component_graph_policy),
+            "graph_legacy_residual": float(args.graph_legacy_residual),
+            "channel_confidence_mode": str(args.channel_confidence_mode),
+            "solver_type": str(args.solver_type),
+            "iterations": int(args.solver_iterations),
+            "residual": float(args.solver_residual),
+            "unary_temperature": float(args.solver_unary_temperature),
+            "support_threshold": float(args.solver_support_threshold),
+            "laplacian_weight": float(args.laplacian_weight),
+            "cg_iterations": int(args.cg_iterations),
+            "cg_tolerance": float(args.cg_tolerance),
+            "hard_seed_threshold": float(args.hard_seed_threshold),
+            "hard_seed_conflict_policy": str(args.hard_seed_conflict_policy),
+            "hard_seed_conflict_margin": float(args.hard_seed_conflict_margin),
+            "component_edge_threshold": float(args.component_edge_threshold),
+            "seeded_component_min_weight": float(
+                args.seeded_component_min_weight
+            ),
+            "connected_selection": "off",
+        },
+        "selection": {
+            "primary": "responsibility_balanced_log_loss",
+            "secondary": "responsibility_weighted_auc",
+            "metric_round_decimals": 12,
+            "complexity_tiebreak": "unary",
+        },
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_computed": False,
+    }
+
+
+def _source_observation_footprint_oof_method_contract(
+    args: argparse.Namespace,
+    *,
+    prompt_type: str,
+    footprint_path: Path,
+    footprint_file_sha256: str,
+    footprint_authority: SourceFootprintFoldAuthority,
+) -> dict[str, object]:
+    """Bind the structured source groups without changing the legacy contract."""
+
+    contract = _source_observation_oof_method_contract(
+        args,
+        prompt_type=prompt_type,
+    )
+    contract["method"] = "target_blind_source_footprint_observation_evidence_gate_v1"
+    contract["fold_assignment"] = "splitmix64_source_footprint_group_v1"
+    structured_preregistration = (
+        Path(__file__).resolve().parents[2]
+        / "paper"
+        / "artifacts"
+        / "source_raster_dominant_footprint_blocks_v1_implementation_closure_20260805.json"
+    )
+    contract["structured_fold_preregistration"] = {
+        "path": str(structured_preregistration),
+        "sha256": _file_sha256(structured_preregistration),
+    }
+    contract["source_footprint_fold_authority"] = {
+        "path": str(footprint_path),
+        "file_sha256": str(footprint_file_sha256),
+        "authority_sha256": footprint_authority.authority_sha256,
+        "tensor_bundle_sha256": footprint_authority.tensor_bundle_sha256,
+        "method_contract": "source_raster_dominant_footprint_blocks_v1",
+        "loaded_before_source_prompt_labels": True,
+    }
+    implementation = dict(contract["implementation_sha256"])
+    implementation["source_footprint_fold_authority.py"] = _file_sha256(
+        Path(__file__).resolve().parents[1]
+        / "querying"
+        / "source_footprint_fold_authority.py"
+    )
+    contract["implementation_sha256"] = implementation
+    return contract
+
+
+def _write_pre_metric_prediction_receipt(
+    path: str | Path,
+    *,
+    scene_id: str,
+    protocol_hash: str,
+    capability_cache: str | Path,
+    support_graph: str | Path,
+    score_paths: Mapping[str, str],
+    score_sha256: Mapping[str, str],
+    stage_score_paths: Mapping[str, Mapping[str, str]],
+    stage_score_sha256: Mapping[str, Mapping[str, str]],
+    method_contract: Mapping[str, object],
+    graph_disabled: bool = False,
+) -> tuple[Path, str]:
+    """Seal every rendered target score before opening target masks.
+
+    The evaluator has always rendered and persisted all target scores before
+    entering its metric loop.  This explicit receipt makes that ordering
+    externally auditable and fail-closed: an existing receipt may be reused
+    only when its canonical JSON bytes are identical.
+    """
+
+    if not score_paths or set(score_paths) != set(score_sha256):
+        raise ValueError("prediction receipt requires aligned non-empty score maps")
+    if set(stage_score_paths) != set(stage_score_sha256):
+        raise ValueError("prediction receipt stage names do not align")
+    for stage_name, stage_paths in stage_score_paths.items():
+        if set(stage_paths) != set(score_paths):
+            raise ValueError(
+                f"prediction receipt stage {stage_name!r} lacks target frames"
+            )
+        if set(stage_paths) != set(stage_score_sha256[stage_name]):
+            raise ValueError(
+                f"prediction receipt stage {stage_name!r} hashes do not align"
+            )
+
+    capability_path = Path(capability_cache).expanduser().resolve()
+    if not capability_path.is_file():
+        raise FileNotFoundError(
+            f"prediction receipt capability cache is missing: {capability_path}"
+        )
+    graph_value = str(support_graph).strip()
+    if bool(graph_disabled):
+        if graph_value:
+            raise ValueError("graph-disabled prediction receipt forbids a graph asset")
+        graph_authority: dict[str, object] = {
+            "policy": "disabled_zero_edge_unary_prior_only",
+            "path": None,
+            "sha256": None,
+        }
+    else:
+        graph_path = Path(graph_value).expanduser().resolve()
+        if not graph_path.is_file():
+            raise FileNotFoundError(
+                f"prediction receipt support graph is missing: {graph_path}"
+            )
+        graph_authority = {
+            "policy": "frozen_asset",
+            "path": str(graph_path),
+            "sha256": _file_sha256(graph_path),
+        }
+
+    def _records(
+        paths: Mapping[str, str], hashes: Mapping[str, str]
+    ) -> dict[str, dict[str, str]]:
+        records: dict[str, dict[str, str]] = {}
+        for frame_id in sorted(paths):
+            score_path = Path(paths[frame_id]).expanduser().resolve()
+            expected = str(hashes[frame_id])
+            if not score_path.is_file() or _file_sha256(score_path) != expected:
+                raise ValueError(
+                    f"prediction receipt score changed before sealing: {score_path}"
+                )
+            records[str(frame_id)] = {
+                "path": str(score_path),
+                "sha256": expected,
+            }
+        return records
+
+    payload = {
+        "schema_version": 1,
+        "artifact_type": "nvos_pre_metric_prediction_receipt_v1",
+        "scene_id": str(scene_id),
+        "protocol_hash": str(protocol_hash),
+        "capability_cache": {
+            "path": str(capability_path),
+            "sha256": _file_sha256(capability_path),
+        },
+        "support_graph": graph_authority,
+        "method_contract": dict(method_contract),
+        "target_scores": _records(score_paths, score_sha256),
+        "stage_target_scores": {
+            str(stage_name): _records(
+                stage_score_paths[stage_name], stage_score_sha256[stage_name]
+            )
+            for stage_name in sorted(stage_score_paths)
+        },
+        "sealed_before_target_ground_truth_open": True,
+        "target_rgb_opened": False,
+        "target_mask_opened": False,
+        "target_metric_opened": False,
+    }
+    encoded = json.dumps(
+        payload, indent=2, sort_keys=True, allow_nan=False
+    ) + "\n"
+    output = Path(path).expanduser().resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    if output.exists():
+        if output.read_text(encoding="utf-8") != encoded:
+            raise ValueError(
+                "refusing to overwrite a different frozen prediction receipt: "
+                f"{output}"
+            )
+    else:
+        output.write_text(encoded, encoding="utf-8")
+    return output, _file_sha256(output)
 
 
 def _requires_legacy_prototype_observation(observation_fusion: str) -> bool:
@@ -896,6 +2563,86 @@ def _validate_hard_seed_anchor_only_probability_args(
         )
 
 
+def _validate_registered_prototype_seed_construction_args(
+    args: argparse.Namespace,
+) -> None:
+    """Fail closed when prototype coverage is decoupled from solver seeds."""
+
+    construction = str(
+        getattr(args, "registered_prototype_seed_construction", "shared")
+    )
+    if construction == "shared":
+        return
+    source_completion = _source_completion_unary_contract(args)
+    requirements = {
+        "--registered-prototype-seed-construction winner_take_all": (
+            construction == "winner_take_all"
+        ),
+        "--support-mode canonical_support": (
+            str(args.support_mode) == "canonical_support"
+        ),
+        "--prompt-registration-mode raster_adjoint": (
+            str(args.prompt_registration_mode) == "raster_adjoint"
+        ),
+        "--prompt-registration-scale 1": (
+            float(args.prompt_registration_scale) == 1.0
+        ),
+        "--alpha-threshold 0": float(args.alpha_threshold) == 0.0,
+        "--registered-seed-construction joint_signed": (
+            str(args.registered_seed_construction) == "joint_signed"
+        ),
+        "--registered-observation-fusion hard_seed_anchor_only_probability": (
+            str(args.registered_observation_fusion)
+            == "hard_seed_anchor_only_probability"
+            or (
+                source_completion is not None
+                and str(args.registered_observation_fusion)
+                == "probability_mixture"
+            )
+        ),
+        "--registered-forward-unary none": (
+            str(args.registered_forward_unary) == "none"
+        ),
+    }
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(
+            "decoupled registered prototype seeds require "
+            + ", ".join(failed)
+        )
+
+
+def _validate_registered_reference_threshold_calibration_args(
+    args: argparse.Namespace,
+) -> None:
+    """Fail closed before model loading for source-view unary calibration."""
+
+    if not bool(
+        getattr(args, "registered_reference_threshold_calibration", False)
+    ):
+        return
+    requirements = {
+        "--support-mode canonical_support": (
+            str(args.support_mode) == "canonical_support"
+        ),
+        "--registered-readout-stage unary_prior": (
+            str(args.registered_readout_stage) == "unary_prior"
+        ),
+        "--query-conditioned-diffusion-kernel none": (
+            str(args.query_conditioned_diffusion_kernel) == "none"
+        ),
+        "--registered-forward-unary none": (
+            str(args.registered_forward_unary) == "none"
+        ),
+    }
+    failed = [name for name, satisfied in requirements.items() if not satisfied]
+    if failed:
+        raise ValueError(
+            "registered reference-threshold calibration requires "
+            + ", ".join(failed)
+        )
+
+
 def _compact_registered_forward_beta_diagnostics(
     diagnostics: RegisteredForwardBetaDiagnostics,
     capability_valid: torch.Tensor,
@@ -1218,6 +2965,53 @@ def _execute_registered_forward_beta(
     return result, field_result, forward_observation, diagnostics
 
 
+def _declared_prompt_asset_hashes(
+    manifest: Mapping[str, object],
+    scene: Mapping[str, object],
+) -> dict[str, object]:
+    """Resolve explicit hashes or the exact same frozen reference-frame asset."""
+
+    scene_id = str(scene["scene_id"])
+    protocol = dict(manifest.get("protocol", {}))
+    explicit = dict(
+        dict(protocol.get("prompt_asset_sha256", {})).get(scene_id, {})
+    )
+    if explicit:
+        return explicit
+    prompt = dict(scene.get("prompt", {}))
+    frame_records = {
+        str(frame["frame_id"]): frame for frame in scene.get("frames", [])
+    }
+    prompt_frame = frame_records.get(str(prompt.get("frame_id", "")))
+    prompt_path = Path(str(prompt.get("mask_path", ""))).resolve()
+    frame_path = (
+        Path(
+            str(
+                prompt_frame.get(
+                    "ground_truth",
+                    prompt_frame.get("gt_mask_path", ""),
+                )
+            )
+        ).resolve()
+        if isinstance(prompt_frame, Mapping)
+        else None
+    )
+    frame_digest = (
+        str(prompt_frame.get("ground_truth_sha256", "")).strip()
+        if isinstance(prompt_frame, Mapping)
+        else ""
+    )
+    if (
+        str(prompt.get("type", "")) != "reference_binary_mask"
+        or frame_path is None
+        or prompt_path != frame_path
+        or len(frame_digest) != 64
+        or any(character not in "0123456789abcdef" for character in frame_digest)
+    ):
+        raise ValueError(f"{scene_id}: prompt asset hashes are undeclared")
+    return {"reference_binary_mask": frame_digest}
+
+
 def _dataset_protocol_contract(
     manifest: Mapping[str, object],
     *,
@@ -1231,7 +3025,6 @@ def _dataset_protocol_contract(
     cohort = [str(value) for value in protocol.get("cohort", scene_ids)]
     if cohort != scene_ids:
         raise ValueError("manifest scene order differs from its declared cohort")
-    prompt_hashes = dict(protocol.get("prompt_asset_sha256", {}))
     scene_contracts: list[dict[str, object]] = []
     for scene in scenes:
         scene_id = str(scene["scene_id"])
@@ -1258,46 +3051,7 @@ def _dataset_protocol_contract(
                     "ground_truth_sha256": digest,
                 }
             )
-        declared_prompt_hashes = dict(prompt_hashes.get(scene_id, {}))
-        if not declared_prompt_hashes:
-            # Legacy frozen full-reference-mask manifests already bind the
-            # prompt image as a frame-level ground-truth asset.  Requiring the
-            # same digest to be duplicated under a newer protocol field would
-            # change the computed protocol hash despite changing no frames,
-            # paths, or scoring semantics.  Reuse that declaration only when
-            # the prompt and frame paths are exactly the same asset; every
-            # other prompt type still fails closed.
-            prompt_frame_id = str(prompt.get("frame_id", ""))
-            prompt_frame = frame_records.get(prompt_frame_id)
-            prompt_path = Path(str(prompt.get("mask_path", ""))).resolve()
-            frame_path = (
-                Path(
-                    str(
-                        prompt_frame.get(
-                            "ground_truth",
-                            prompt_frame.get("gt_mask_path", ""),
-                        )
-                    )
-                ).resolve()
-                if isinstance(prompt_frame, Mapping)
-                else None
-            )
-            frame_digest = (
-                str(prompt_frame.get("ground_truth_sha256", "")).strip()
-                if isinstance(prompt_frame, Mapping)
-                else ""
-            )
-            if (
-                str(prompt.get("type", "")) != "reference_binary_mask"
-                or frame_path is None
-                or prompt_path != frame_path
-                or len(frame_digest) != 64
-                or any(character not in "0123456789abcdef" for character in frame_digest)
-            ):
-                raise ValueError(f"{scene_id}: prompt asset hashes are undeclared")
-            declared_prompt_hashes = {
-                "reference_binary_mask": frame_digest,
-            }
+        declared_prompt_hashes = _declared_prompt_asset_hashes(manifest, scene)
         scene_contracts.append(
             {
                 "scene_id": scene_id,
@@ -1370,6 +3124,40 @@ def _verify_declared_sha256(
     if actual != declared:
         raise ValueError(f"{label} SHA256 mismatch")
     return actual
+
+
+def _resolve_scene_carrier_assets(
+    queue_scene: Path,
+    *,
+    scene_config: str = "",
+    scene_checkpoint: str = "",
+    camera_map: str = "",
+) -> tuple[Path, Path, Path]:
+    """Resolve either the queue-layout carrier or one explicit frozen bundle."""
+
+    overrides = [
+        str(scene_config).strip(),
+        str(scene_checkpoint).strip(),
+        str(camera_map).strip(),
+    ]
+    if any(overrides) and not all(overrides):
+        raise ValueError(
+            "explicit scene carrier requires --scene-config, "
+            "--scene-checkpoint, and --camera-map together"
+        )
+    if all(overrides):
+        paths = tuple(Path(value).expanduser().resolve() for value in overrides)
+    else:
+        paths = (
+            queue_scene / "gaussfm_main_track.yaml",
+            queue_scene / "feature_field" / "checkpoints" / "best.pth",
+            queue_scene / "rgb_to_colmap_camera_mapping.json",
+        )
+    labels = ("scene config", "scene checkpoint", "camera map")
+    missing = [label for label, path in zip(labels, paths) if not path.is_file()]
+    if missing:
+        raise FileNotFoundError("missing " + ", ".join(missing))
+    return paths
 
 
 def _registered_strong_unary_method_contract(
@@ -1484,6 +3272,7 @@ def _candidate_method_manifest_contract(
     posterior_consensus = _registered_posterior_consensus_method_contract(
         observation_fusion
     )
+    source_completion_unary = _source_completion_unary_contract(args)
     return {
         "support_mode": str(args.support_mode),
         "region_space": str(args.region_space),
@@ -1507,6 +3296,11 @@ def _candidate_method_manifest_contract(
             else "independent_max"
         ),
         "observation_fusion": observation_fusion,
+        **(
+            {"source_completion_unary": source_completion_unary}
+            if source_completion_unary is not None
+            else {}
+        ),
         "registered_seed_unary_weight": float(
             getattr(args, "registered_seed_unary_weight", 0.0)
         ),
@@ -2011,6 +3805,7 @@ def _screen_region_map(
 
 def run(args: argparse.Namespace) -> dict:
     _validate_registered_forward_unary_args(args)
+    _validate_source_completion_unary_args(args)
     registered_forward_contract = _registered_forward_unary_contract(args)
     device = torch.device(args.device)
     manifest_path = Path(args.manifest).resolve()
@@ -2045,14 +3840,24 @@ def run(args: argparse.Namespace) -> dict:
         else ""
     )
     scene = _scene_record(manifest, args.scene_id)
+    source_observation_oof_deployment_gate = (
+        _load_source_observation_oof_deployment_gate(
+            args,
+            scene_id=str(args.scene_id),
+            protocol_hash=str(manifest["protocol_hash"]),
+        )
+    )
     base_scene_id = str(scene.get("base_scene_id") or args.scene_id)
     scene_root = Path(args.queue_root).resolve() / "scenes"
     queue_scene = scene_root / args.scene_id
     if not queue_scene.is_dir():
         queue_scene = scene_root / base_scene_id
-    config_path = queue_scene / "gaussfm_main_track.yaml"
-    checkpoint_path = queue_scene / "feature_field" / "checkpoints" / "best.pth"
-    camera_map_path = queue_scene / "rgb_to_colmap_camera_mapping.json"
+    config_path, checkpoint_path, camera_map_path = _resolve_scene_carrier_assets(
+        queue_scene,
+        scene_config=str(getattr(args, "scene_config", "")),
+        scene_checkpoint=str(getattr(args, "scene_checkpoint", "")),
+        camera_map=str(getattr(args, "camera_map", "")),
+    )
     camera_mapping = json.loads(camera_map_path.read_text(encoding="utf-8"))
     config = load_config(str(config_path))
     views = resolve_protocol_views(
@@ -2103,18 +3908,45 @@ def run(args: argparse.Namespace) -> dict:
     capability_bank = None
     support_graph = None
     primitive_reliability = None
+    source_observation_footprint_bundle: (
+        tuple[Path, str, SourceFootprintFoldAuthority] | None
+    ) = None
     if args.support_mode == "canonical_support":
-        if not args.canonical_capability_cache or not args.canonical_support_graph:
+        graph_disabled = bool(
+            getattr(args, "disable_registered_graph", False)
+        )
+        if not args.canonical_capability_cache or (
+            not graph_disabled and not args.canonical_support_graph
+        ):
             raise ValueError(
-                "canonical_support requires --canonical-capability-cache and "
-                "--canonical-support-graph"
+                "canonical_support requires --canonical-capability-cache and, "
+                "unless graph-disabled, --canonical-support-graph"
             )
+        source_contract = str(
+            getattr(args, "canonical_capability_source_contract", "field")
+        )
+        expected_capability_source = {
+            "field": _CANONICAL_FIELD_CAPABILITY_SOURCE,
+            "exact_mpr": _EXACT_MPR_CAPABILITY_SOURCE,
+            "exact_capability_mpr": _EXACT_CAPABILITY_MPR_SOURCE,
+        }[source_contract]
         capability_bank = load_canonical_capability_bank(
             args.canonical_capability_cache,
             expected_field_checkpoint_sha256=args.canonical_field_sha256,
+            expected_source=expected_capability_source,
+            require_formal_projection_order=source_contract
+            in {"field", "exact_capability_mpr"},
+            allow_raw_mpr_projection_diagnostic=source_contract == "exact_mpr",
+            legacy_projection_authority=str(
+                getattr(args, "canonical_capability_projection_authority", "")
+            ),
         )
-        support_graph = load_canonical_support_graph(
-            args.canonical_support_graph, capability_bank
+        support_graph = (
+            _disabled_registered_graph(int(capability_bank.valid.sum()))
+            if graph_disabled
+            else load_canonical_support_graph(
+                args.canonical_support_graph, capability_bank
+            )
         )
         if str(args.canonical_reliability_cache).strip():
             primitive_reliability = load_canonical_primitive_reliability(
@@ -2155,6 +3987,12 @@ def run(args: argparse.Namespace) -> dict:
             geometry_xyz, capability_bank.xyz, atol=1e-6, rtol=0.0
         ):
             raise ValueError("canonical capability geometry does not match renderer geometry")
+        source_observation_footprint_bundle = (
+            _load_source_observation_footprint_authority(
+                args,
+                capability_bank,
+            )
+        )
     if args.support_mode == "prompt_gaussian":
         region_rows = decode_region_rows(
             model, codec, adaptor, device=device, chunk_size=max(1, args.chunk_size)
@@ -2162,11 +4000,7 @@ def run(args: argparse.Namespace) -> dict:
 
     prompt = scene["prompt"]
     prompt_type = str(prompt.get("type", ""))
-    declared_prompt_hashes = dict(
-        manifest.get("protocol", {})
-        .get("prompt_asset_sha256", {})
-        .get(args.scene_id, {})
-    )
+    declared_prompt_hashes = _declared_prompt_asset_hashes(manifest, scene)
     if prompt_type == "positive_negative_scribbles":
         if bool(getattr(args, "require_asset_hashes", False)):
             _verify_declared_sha256(
@@ -2188,7 +4022,11 @@ def run(args: argparse.Namespace) -> dict:
             _verify_declared_sha256(
                 Path(prompt["mask_path"]),
                 declared_prompt_hashes.get(
-                    "mask", declared_prompt_hashes.get("positive")
+                    "mask",
+                    declared_prompt_hashes.get(
+                        "positive",
+                        declared_prompt_hashes.get("reference_binary_mask"),
+                    ),
                 ),
                 label=f"{args.scene_id} reference mask",
             )
@@ -2196,6 +4034,87 @@ def run(args: argparse.Namespace) -> dict:
         negative_native = np.logical_not(positive_native)
     else:
         raise ValueError(f"Unsupported registered prompt type: {prompt_type!r}")
+    _validate_source_observation_oof_contract(
+        args,
+        prompt_type=prompt_type,
+    )
+    source_completion_probability: torch.Tensor | None = None
+    source_completion_reliability: torch.Tensor | None = None
+    source_completion_evidence: dict[str, object] | None = None
+    source_completion_abstained = False
+    if _source_completion_unary_contract(args) is not None:
+        if prompt_type != "positive_negative_scribbles":
+            raise ValueError(
+                "probability-preserving source completion requires signed scribbles"
+            )
+        (
+            source_completion_probability,
+            source_completion_reliability,
+            source_completion_evidence,
+        ) = _load_probability_preserving_source_completion(
+            args,
+            scene_id=str(args.scene_id),
+            frame_id=prompt_frame,
+            positive_path=prompt["positive_path"],
+            negative_path=prompt["negative_path"],
+            raw_positive=positive_native,
+            raw_negative=negative_native,
+        )
+        source_completion_calibration = str(
+            getattr(args, "source_completion_calibration", "none")
+        )
+        if source_completion_calibration in {
+            _SOURCE_COMPLETION_LOO_CALIBRATION,
+            _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
+        }:
+            source_completion_gate = load_source_completion_loo_gate(
+                args.source_completion_calibration_gate,
+                expected_gate_sha256=(
+                    args.source_completion_calibration_gate_sha256
+                ),
+                completion_path=args.source_completion,
+                expected_completion_sha256=args.source_completion_sha256,
+                expected_completion_receipt_sha256=(
+                    args.source_completion_receipt_sha256
+                ),
+                expected_scene_id=str(args.scene_id),
+                expected_frame_id=prompt_frame,
+            )
+            source_completion_evidence["source_only_calibration_gate"] = {
+                **source_completion_gate,
+                "path": str(
+                    Path(args.source_completion_calibration_gate)
+                    .expanduser()
+                    .resolve()
+                ),
+                "sha256": str(
+                    args.source_completion_calibration_gate_sha256
+                ),
+            }
+            accept_source_completion = bool(
+                source_completion_gate["decision"]["accept_source_completion"]
+            )
+            if (
+                source_completion_calibration
+                == _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION
+            ):
+                (
+                    source_completion_probability,
+                    source_completion_reliability,
+                    hierarchical_trust,
+                ) = _apply_hierarchical_source_completion_trust(
+                    source_completion_probability,
+                    source_completion_reliability,
+                    accept_full_completion=accept_source_completion,
+                    raw_positive=positive_native,
+                    raw_negative=negative_native,
+                )
+                source_completion_evidence["hierarchical_trust"] = (
+                    hierarchical_trust
+                )
+            elif not accept_source_completion:
+                source_completion_abstained = True
+                source_completion_reliability.zero_()
     if bool(
         getattr(args, "export_registered_prompt_cycle_diagnostic", False)
     ) and prompt_type != "reference_binary_mask":
@@ -2235,15 +4154,41 @@ def run(args: argparse.Namespace) -> dict:
         np.stack([positive, negative], axis=0).astype(np.float32)
     )[None].to(device)
     prompt_pose = torch.from_numpy(prompt_view["w2c"].copy()).float().to(device)
+    camera_clearance_sigma = float(getattr(args, "camera_clearance_sigma", 0.0))
+
+    def row_confidence_for_pose(pose: torch.Tensor) -> torch.Tensor | None:
+        if camera_clearance_sigma <= 0:
+            return None
+        return camera_plane_clearance_confidence(
+            model.get_xyz(),
+            model.get_rotation(),
+            model.get_scaling(),
+            pose,
+            near_plane=float(renderer.near_plane),
+            support_sigma=camera_clearance_sigma,
+        ).confidence
+
+    prompt_row_confidence = row_confidence_for_pose(prompt_pose)
     support_view_count = 1
     prediction_threshold = 0.0
     canonical_stage_gaussian_scores: dict[str, torch.Tensor] | None = None
     registered_prompt_cycle_gaussian_scores: dict[str, torch.Tensor] | None = None
     registered_prompt_evidence: dict[str, object] | None = None
+    source_observation_oof_authority: SourceObservationOOFFold | None = None
+    source_observation_evidence_authority: (
+        SourceObservationEvidenceAuthority | None
+    ) = None
+    source_observation_oof_contract: dict[str, object] | None = None
+    source_observation_population_positive_weight: torch.Tensor | None = None
+    source_observation_population_negative_weight: torch.Tensor | None = None
+    source_completion_observation: PrimitiveUnaryEvidence | None = None
+    configured_observation_fusion = str(
+        getattr(args, "registered_observation_fusion", "additive")
+    )
+    observation_fusion = configured_observation_fusion
     if args.support_mode in {"prompt_gaussian", "canonical_support"}:
-        observation_fusion = str(
-            getattr(args, "registered_observation_fusion", "additive")
-        )
+        if source_completion_abstained:
+            observation_fusion = "hard_seed_anchor_only_probability"
         legacy_prototype_support: tuple[torch.Tensor, torch.Tensor] | None = None
         if (
             getattr(args, "prompt_registration_mode", "legacy_alpha_depth")
@@ -2262,15 +4207,44 @@ def run(args: argparse.Namespace) -> dict:
                     ),
                     feature_height=height,
                     feature_width=width,
+                    row_confidence=prompt_row_confidence,
                 )["alpha_map"]
-            support_sum, support_count = raster_adjoint_registered_view_features(
+            registration_maps = prompt_maps
+            if (
+                source_completion_probability is not None
+                and not source_completion_abstained
+            ):
+                assert source_completion_reliability is not None
+                registration_maps = _probability_preserving_registration_maps(
+                    prompt_maps,
+                    source_completion_probability,
+                    source_completion_reliability,
+                )
+            registered_sum, support_count = raster_adjoint_registered_view_features(
                 model=model,
                 renderer=renderer,
                 viewmat=prompt_pose,
-                siglip_feat=prompt_maps,
+                siglip_feat=registration_maps,
                 alpha_map=prompt_alpha,
                 alpha_threshold=args.alpha_threshold,
+                row_confidence=prompt_row_confidence,
             )
+            support_sum = registered_sum[:, :2]
+            if source_completion_probability is not None:
+                completion_sum = (
+                    registered_sum[:, 2:]
+                    if not source_completion_abstained
+                    else torch.zeros(
+                        (registered_sum.shape[0], 2),
+                        device=registered_sum.device,
+                        dtype=registered_sum.dtype,
+                    )
+                )
+                source_completion_observation = registered_raster_adjoint_observation(
+                    completion_sum[:, 0].detach().float().clamp_min(0.0),
+                    completion_sum[:, 1].detach().float().clamp_min(0.0),
+                    support_count.detach().float().clamp_min(0.0),
+                )
             if _requires_legacy_prototype_observation(observation_fusion):
                 # The two experts deliberately use independent observation
                 # operators.  Reconstruct the frozen historical prototype
@@ -2322,6 +4296,182 @@ def run(args: argparse.Namespace) -> dict:
         negative_weight = support_fraction[:, 1]
         raw_positive_mass = support_sum[:, 0].detach().float().clamp_min(0.0)
         raw_negative_mass = support_sum[:, 1].detach().float().clamp_min(0.0)
+        if str(
+            getattr(args, "source_observation_oof_output_dir", "")
+        ).strip():
+            assert capability_bank is not None
+            oof_root = Path(
+                args.source_observation_oof_output_dir
+            ).expanduser().resolve()
+            if source_observation_footprint_bundle is None:
+                source_observation_oof_contract = (
+                    _source_observation_oof_method_contract(
+                        args,
+                        prompt_type=prompt_type,
+                    )
+                )
+            else:
+                (
+                    footprint_path,
+                    footprint_file_sha256,
+                    footprint_authority,
+                ) = source_observation_footprint_bundle
+                source_observation_oof_contract = (
+                    _source_observation_footprint_oof_method_contract(
+                        args,
+                        prompt_type=prompt_type,
+                        footprint_path=footprint_path,
+                        footprint_file_sha256=footprint_file_sha256,
+                        footprint_authority=footprint_authority,
+                    )
+                )
+            evidence_provenance = {
+                "scene_id": str(args.scene_id),
+                "protocol_hash": str(manifest["protocol_hash"]),
+                "method_contract_sha256": _json_sha256(
+                    source_observation_oof_contract
+                ),
+                "capability_cache_sha256": _file_sha256(
+                    Path(args.canonical_capability_cache)
+                    .expanduser()
+                    .resolve()
+                ),
+                "support_graph_sha256": _file_sha256(
+                    Path(args.canonical_support_graph)
+                    .expanduser()
+                    .resolve()
+                ),
+            }
+            if source_observation_footprint_bundle is not None:
+                evidence_provenance.update(
+                    {
+                        "source_footprint_fold_authority": str(footprint_path),
+                        "source_footprint_fold_authority_file_sha256": (
+                            footprint_file_sha256
+                        ),
+                        "source_footprint_fold_authority_sha256": (
+                            footprint_authority.authority_sha256
+                        ),
+                        "source_footprint_fold_authority_tensor_bundle_sha256": (
+                            footprint_authority.tensor_bundle_sha256
+                        ),
+                    }
+                )
+            source_observation_evidence_authority = (
+                seal_or_load_source_observation_evidence_authority(
+                    oof_root / "source_observation_evidence_authority.pt",
+                    heldout_fold=int(args.source_observation_oof_heldout_fold),
+                    provenance=evidence_provenance,
+                    valid=capability_bank.valid,
+                    global_rows=capability_bank.global_rows,
+                    positive_weight=positive_weight,
+                    negative_weight=negative_weight,
+                    raw_positive_mass=raw_positive_mass,
+                    raw_negative_mass=raw_negative_mass,
+                )
+            )
+            sealed_evidence = source_observation_evidence_authority.tensors
+            source_observation_population_positive_weight = sealed_evidence[
+                "positive_weight"
+            ]
+            source_observation_population_negative_weight = sealed_evidence[
+                "negative_weight"
+            ]
+            if source_observation_footprint_bundle is None:
+                source_observation_oof_authority = prepare_source_observation_oof_fold(
+                    sealed_evidence["global_rows"],
+                    sealed_evidence["valid"],
+                    sealed_evidence["positive_weight"],
+                    sealed_evidence["negative_weight"],
+                    sealed_evidence["raw_positive_mass"],
+                    sealed_evidence["raw_negative_mass"],
+                    heldout_fold=int(args.source_observation_oof_heldout_fold),
+                    num_folds=3,
+                )
+                audit_signed_cv_population(
+                    capability_bank.global_rows,
+                    source_observation_oof_authority.signed_reference_evidence[
+                        capability_bank.valid
+                    ],
+                    source_observation_oof_authority.reference_weight[
+                        capability_bank.valid
+                    ],
+                    num_folds=3,
+                    minimum_class_rows=32,
+                )
+            else:
+                source_observation_oof_authority, population_decision = (
+                    prepare_source_observation_footprint_oof_fold(
+                        footprint_authority,
+                        sealed_evidence["global_rows"],
+                        sealed_evidence["valid"],
+                        sealed_evidence["positive_weight"],
+                        sealed_evidence["negative_weight"],
+                        sealed_evidence["raw_positive_mass"],
+                        sealed_evidence["raw_negative_mass"],
+                        heldout_fold=int(args.source_observation_oof_heldout_fold),
+                        expected_footprint_authority_sha256=(
+                            footprint_authority.authority_sha256
+                        ),
+                    )
+                )
+                if source_observation_oof_authority is None:
+                    gate_path, gate_receipt = (
+                        _write_source_observation_footprint_field_base_receipt(
+                            oof_root,
+                            scene_id=str(args.scene_id),
+                            protocol_hash=str(manifest["protocol_hash"]),
+                            capability_cache=args.canonical_capability_cache,
+                            support_graph=args.canonical_support_graph,
+                            evidence_authority=(
+                                source_observation_evidence_authority
+                            ),
+                            footprint_path=footprint_path,
+                            footprint_file_sha256=footprint_file_sha256,
+                            footprint_authority=footprint_authority,
+                            population_decision=population_decision,
+                            method_contract=source_observation_oof_contract,
+                        )
+                    )
+                    return {
+                        "schema_version": 1,
+                        "status": "source_observation_footprint_field_base_sealed",
+                        "scene_id": str(args.scene_id),
+                        "protocol_hash": str(manifest["protocol_hash"]),
+                        "selected_action": FIELD_BASE_ACTION,
+                        "gate_receipt": str(gate_path),
+                        "gate_receipt_sha256": _file_sha256(gate_path),
+                        "gate": gate_receipt,
+                        "target_score_rendering_performed": False,
+                        "target_rgb_opened": False,
+                        "target_mask_opened": False,
+                        "target_metric_computed": False,
+                    }
+            assert source_observation_oof_authority is not None
+            positive_weight = (
+                source_observation_oof_authority.training_positive_weight.to(
+                    device=positive_weight.device,
+                    dtype=positive_weight.dtype,
+                )
+            )
+            negative_weight = (
+                source_observation_oof_authority.training_negative_weight.to(
+                    device=negative_weight.device,
+                    dtype=negative_weight.dtype,
+                )
+            )
+            raw_positive_mass = (
+                source_observation_oof_authority.training_raw_positive_mass.to(
+                    device=raw_positive_mass.device,
+                    dtype=raw_positive_mass.dtype,
+                )
+            )
+            raw_negative_mass = (
+                source_observation_oof_authority.training_raw_negative_mass.to(
+                    device=raw_negative_mass.device,
+                    dtype=raw_negative_mass.dtype,
+                )
+            )
         raw_joint_mass = raw_positive_mass + raw_negative_mass
         visibility_tolerance = 1e-4 * max(
             1.0,
@@ -2450,8 +4600,35 @@ def run(args: argparse.Namespace) -> dict:
                 construction=seed_construction,
             )
             seed_normalization = "independent_max"
+        prototype_seed_construction = str(
+            getattr(
+                args,
+                "registered_prototype_seed_construction",
+                "shared",
+            )
+        )
+        prototype_seed_normalization = seed_normalization
+        prototype_seed_provenance: str | None = None
+        solver_seed_provenance: str | None = None
         prototype_positive_solver_mass = positive_solver_mass
         prototype_negative_solver_mass = negative_solver_mass
+        if prototype_seed_construction == "winner_take_all":
+            (
+                prototype_positive_solver_mass,
+                prototype_negative_solver_mass,
+            ) = _registered_solver_masses(
+                positive_weight,
+                negative_weight,
+                support_threshold=float(args.support_threshold),
+                construction="winner_take_all",
+            )
+            prototype_seed_normalization = "independent_max"
+            prototype_seed_provenance = (
+                _EXACT_WINNER_TAKE_ALL_PROTOTYPE_SEED_PROVENANCE
+            )
+            solver_seed_provenance = (
+                _EXACT_JOINT_SIGNED_SOLVER_SEED_PROVENANCE
+            )
         if _requires_legacy_prototype_observation(observation_fusion):
             if legacy_prototype_support is None:
                 raise RuntimeError(
@@ -2470,6 +4647,10 @@ def run(args: argparse.Namespace) -> dict:
                     construction="winner_take_all",
                 )
             )
+            prototype_seed_construction = "legacy_winner_take_all"
+            prototype_seed_normalization = "independent_max"
+            prototype_seed_provenance = DUAL_PROTOTYPE_SEED_PROVENANCE
+            solver_seed_provenance = DUAL_SOLVER_SEED_PROVENANCE
             _require_bipolar_solver_support(
                 prototype_positive_solver_mass,
                 prototype_negative_solver_mass,
@@ -2485,6 +4666,11 @@ def run(args: argparse.Namespace) -> dict:
         registered_prompt_evidence = {
             "seed_construction": seed_construction,
             "seed_normalization": seed_normalization,
+            "prototype_seed_construction": prototype_seed_construction,
+            "prototype_seed_normalization": prototype_seed_normalization,
+            "prototype_seed_decoupled": (
+                prototype_seed_construction != "shared"
+            ),
             "observation_mass_source": direct_mass_source,
             "observation_confidence_mode": observation_confidence_mode,
             "observation_mass_scale": observation_mass_scale,
@@ -2618,6 +4804,30 @@ def run(args: argparse.Namespace) -> dict:
                     & ~negative_support
                 ).sum()
             ),
+            **(
+                {
+                    "source_completion_unary": {
+                        **source_completion_evidence,
+                        "probability_mean": float(
+                            source_completion_probability.float().mean()
+                        ),
+                        "reliability_mean": float(
+                            source_completion_reliability.float().mean()
+                        ),
+                        "primitive_confidence_sum": float(
+                            source_completion_observation.confidence.sum()
+                        ),
+                        "primitive_signed_sum": float(
+                            source_completion_observation.values.sum()
+                        ),
+                    }
+                }
+                if source_completion_observation is not None
+                and source_completion_evidence is not None
+                and source_completion_probability is not None
+                and source_completion_reliability is not None
+                else {}
+            ),
         }
         if args.support_mode == "prompt_gaussian":
             assert region_rows is not None
@@ -2678,15 +4888,30 @@ def run(args: argparse.Namespace) -> dict:
                 prototype_negative_soft,
                 label="Capability-valid prototype",
             )
+            unary_observation = (
+                source_completion_observation
+                if (
+                    source_completion_observation is not None
+                    and not source_completion_abstained
+                )
+                else direct_observation
+            )
             valid_observation = PrimitiveUnaryEvidence(
-                direct_observation.values[valid_rows_device].detach().float().cpu(),
-                direct_observation.source,
+                unary_observation.values[valid_rows_device].detach().float().cpu(),
                 (
-                    direct_observation.confidence[valid_rows_device]
+                    _PROBABILITY_PRESERVING_SOURCE_UNARY
+                    if (
+                        source_completion_observation is not None
+                        and not source_completion_abstained
+                    )
+                    else unary_observation.source
+                ),
+                (
+                    unary_observation.confidence[valid_rows_device]
                     .detach()
                     .float()
                     .cpu()
-                    if direct_observation.confidence is not None
+                    if unary_observation.confidence is not None
                     else None
                 ),
             )
@@ -2744,9 +4969,7 @@ def run(args: argparse.Namespace) -> dict:
                                 (prototype_negative_soft > 0).sum()
                             ),
                         }
-                        if _requires_legacy_prototype_observation(
-                            observation_fusion
-                        )
+                        if prototype_seed_construction != "shared"
                         else {}
                     ),
                 }
@@ -2769,32 +4992,16 @@ def run(args: argparse.Namespace) -> dict:
                 seed_normalization=seed_normalization,
                 prototype_positive_seeds=(
                     prototype_positive_soft
-                    if _requires_legacy_prototype_observation(
-                        observation_fusion
-                    )
+                    if prototype_seed_construction != "shared"
                     else None
                 ),
                 prototype_negative_seeds=(
                     prototype_negative_soft
-                    if _requires_legacy_prototype_observation(
-                        observation_fusion
-                    )
+                    if prototype_seed_construction != "shared"
                     else None
                 ),
-                prototype_seed_provenance=(
-                    DUAL_PROTOTYPE_SEED_PROVENANCE
-                    if _requires_legacy_prototype_observation(
-                        observation_fusion
-                    )
-                    else None
-                ),
-                solver_seed_provenance=(
-                    DUAL_SOLVER_SEED_PROVENANCE
-                    if _requires_legacy_prototype_observation(
-                        observation_fusion
-                    )
-                    else None
-                ),
+                prototype_seed_provenance=prototype_seed_provenance,
+                solver_seed_provenance=solver_seed_provenance,
                 selection_mode=SelectionMode(
                     getattr(
                         args,
@@ -2873,13 +5080,7 @@ def run(args: argparse.Namespace) -> dict:
                     registered_seed_unary_weight=float(
                         getattr(args, "registered_seed_unary_weight", 0.0)
                     ),
-                    registered_observation_fusion=str(
-                        getattr(
-                            args,
-                            "registered_observation_fusion",
-                            "additive",
-                        )
-                    ),
+                    registered_observation_fusion=observation_fusion,
                 ),
                 solver_config=SupportSolverConfig(
                     iterations=args.solver_iterations,
@@ -2999,6 +5200,106 @@ def run(args: argparse.Namespace) -> dict:
                 "propagated": expand_valid_rows(result.probabilities),
                 "connected": expand_valid_rows(result.selected_probabilities),
             }
+            if source_observation_oof_authority is not None:
+                assert source_observation_evidence_authority is not None
+                assert source_observation_oof_contract is not None
+                oof_root = Path(
+                    args.source_observation_oof_output_dir
+                ).expanduser().resolve()
+                heldout_fold = int(args.source_observation_oof_heldout_fold)
+                if source_observation_footprint_bundle is None:
+                    fold_path, fold_sha256, fold_receipt = (
+                        _write_source_observation_oof_artifact(
+                            oof_root / f"fold_{heldout_fold}.pt",
+                            scene_id=str(args.scene_id),
+                            protocol_hash=str(manifest["protocol_hash"]),
+                            heldout_fold=heldout_fold,
+                            capability_cache=args.canonical_capability_cache,
+                            support_graph=args.canonical_support_graph,
+                            authority=source_observation_oof_authority,
+                            evidence_authority=source_observation_evidence_authority,
+                            valid=capability_bank.valid,
+                            global_rows=valid_rows,
+                            unary_probability=canonical_stage_gaussian_scores[
+                                "unary_prior"
+                            ],
+                            propagated_probability=canonical_stage_gaussian_scores[
+                                "propagated"
+                            ],
+                            method_contract=source_observation_oof_contract,
+                        )
+                    )
+                    gate_path, gate_status = (
+                        _write_source_observation_oof_gate_receipt(oof_root)
+                    )
+                    sealed_status = "source_observation_oof_fold_sealed"
+                else:
+                    assert source_observation_population_positive_weight is not None
+                    assert source_observation_population_negative_weight is not None
+                    footprint_path, footprint_file_sha256, footprint_authority = (
+                        source_observation_footprint_bundle
+                    )
+                    fold_path, fold_sha256, fold_receipt = (
+                        _write_source_observation_footprint_oof_artifact(
+                            oof_root / f"fold_{heldout_fold}.pt",
+                            scene_id=str(args.scene_id),
+                            protocol_hash=str(manifest["protocol_hash"]),
+                            heldout_fold=heldout_fold,
+                            capability_cache=args.canonical_capability_cache,
+                            support_graph=args.canonical_support_graph,
+                            authority=source_observation_oof_authority,
+                            evidence_authority=source_observation_evidence_authority,
+                            footprint_path=footprint_path,
+                            footprint_file_sha256=footprint_file_sha256,
+                            footprint_authority=footprint_authority,
+                            valid=capability_bank.valid,
+                            global_rows=valid_rows,
+                            population_positive_weight=(
+                                source_observation_population_positive_weight
+                            ),
+                            population_negative_weight=(
+                                source_observation_population_negative_weight
+                            ),
+                            unary_probability=canonical_stage_gaussian_scores[
+                                "unary_prior"
+                            ],
+                            propagated_probability=canonical_stage_gaussian_scores[
+                                "propagated"
+                            ],
+                            method_contract=source_observation_oof_contract,
+                        )
+                    )
+                    gate_path, gate_status = (
+                        _write_source_observation_footprint_oof_gate_receipt(
+                            oof_root
+                        )
+                    )
+                    sealed_status = (
+                        "source_observation_footprint_oof_fold_sealed"
+                    )
+                return {
+                    "schema_version": 1,
+                    "status": sealed_status,
+                    "scene_id": str(args.scene_id),
+                    "protocol_hash": str(manifest["protocol_hash"]),
+                    "heldout_fold": heldout_fold,
+                    "fold_artifact": str(fold_path),
+                    "fold_artifact_sha256": fold_sha256,
+                    "fold_receipt": str(fold_receipt),
+                    "fold_receipt_sha256": _file_sha256(fold_receipt),
+                    "source_evidence_authority": str(
+                        source_observation_evidence_authority.path
+                    ),
+                    "source_evidence_authority_sha256": (
+                        source_observation_evidence_authority.sha256
+                    ),
+                    "gate_receipt": str(gate_path) if gate_path is not None else None,
+                    "gate": gate_status,
+                    "target_score_rendering_performed": False,
+                    "target_rgb_opened": False,
+                    "target_mask_opened": False,
+                    "target_metric_computed": False,
+                }
             query_diffusion_kernel = str(
                 getattr(args, "query_conditioned_diffusion_kernel", "none")
             )
@@ -3140,6 +5441,7 @@ def run(args: argparse.Namespace) -> dict:
                                 feature_width=int(renderer.image_width),
                                 alpha_normalize=True,
                                 contribution_gamma=args.feature_contribution_gamma,
+                                row_confidence=prompt_row_confidence,
                             )["feature_map"][0]
                         score = rendered.detach().float().cpu().numpy()
                         return cv2.resize(
@@ -3601,6 +5903,60 @@ def run(args: argparse.Namespace) -> dict:
         prediction_threshold = 0.0
 
     output_root = Path(args.output_dir).resolve()
+    primitive_unary_path: str | None = None
+    primitive_unary_sha256: str | None = None
+    if str(getattr(args, "primitive_unary_output", "")).strip():
+        if canonical_stage_gaussian_scores is None:
+            raise ValueError(
+                "primitive unary export requires canonical-support compilation"
+            )
+        unary_artifact = _write_primitive_unary_artifact(
+            args.primitive_unary_output,
+            scene_id=str(args.scene_id),
+            protocol_hash=str(manifest["protocol_hash"]),
+            capability_cache=args.canonical_capability_cache,
+            capability_source_contract=str(
+                getattr(args, "canonical_capability_source_contract", "field")
+            ),
+            valid=capability_bank.valid,
+            primitive_unary_probability=canonical_stage_gaussian_scores[
+                "unary_prior"
+            ],
+            compiler_contract={
+                "prototype_count": int(args.prototype_count),
+                "prototype_strategy": str(args.prototype_strategy),
+                "registered_seed_construction": str(
+                    args.registered_seed_construction
+                ),
+                "registered_prototype_seed_construction": str(
+                    args.registered_prototype_seed_construction
+                ),
+                "registered_observation_fusion": observation_fusion,
+                "configured_registered_observation_fusion": (
+                    configured_observation_fusion
+                ),
+                "registered_observation_confidence": str(
+                    args.registered_observation_confidence
+                ),
+                "hard_seed_threshold": float(args.hard_seed_threshold),
+                "unary_temperature": float(args.solver_unary_temperature),
+                "graph_disabled": bool(args.disable_registered_graph),
+                "connected_selection_applied": False,
+                "readout": "unary_prior",
+                **(
+                    {
+                        "source_completion_unary": registered_prompt_evidence[
+                            "source_completion_unary"
+                        ]
+                    }
+                    if registered_prompt_evidence is not None
+                    and "source_completion_unary" in registered_prompt_evidence
+                    else {}
+                ),
+            },
+        )
+        primitive_unary_path = str(unary_artifact)
+        primitive_unary_sha256 = _file_sha256(unary_artifact)
     score_paths: dict[str, str] = {}
     score_sha256: dict[str, str] = {}
     predictions: dict[str, np.ndarray] = {}
@@ -3635,6 +5991,7 @@ def run(args: argparse.Namespace) -> dict:
         pose: torch.Tensor,
         values: torch.Tensor,
     ) -> np.ndarray:
+        row_confidence = row_confidence_for_pose(pose)
         with torch.no_grad():
             if valid_support is None:
                 score_map = renderer.render_feature_rows(
@@ -3645,6 +6002,7 @@ def run(args: argparse.Namespace) -> dict:
                     feature_width=score_width,
                     alpha_normalize=True,
                     contribution_gamma=args.feature_contribution_gamma,
+                    row_confidence=row_confidence,
                 )["feature_map"][0]
             else:
                 channels = renderer.render_feature_rows(
@@ -3658,6 +6016,7 @@ def run(args: argparse.Namespace) -> dict:
                     feature_width=score_width,
                     alpha_normalize=True,
                     contribution_gamma=args.feature_contribution_gamma,
+                    row_confidence=row_confidence,
                 )["feature_map"]
                 score_map = _valid_normalized_score_map(
                     channels,
@@ -3669,6 +6028,72 @@ def run(args: argparse.Namespace) -> dict:
         if registered_forward_protocol_authority is not None:
             return _center_registered_forward_score_map(rendered_score)
         return rendered_score
+
+    registered_reference_threshold_calibration: dict[str, object] | None = None
+    if bool(getattr(args, "registered_reference_threshold_calibration", False)):
+        if prompt_type != "reference_binary_mask":
+            raise ValueError(
+                "registered reference-threshold calibration requires a full "
+                "reference binary mask"
+            )
+        if canonical_stage_gaussian_scores is None:
+            raise ValueError(
+                "registered reference-threshold calibration requires canonical support"
+            )
+        if str(args.query_conditioned_diffusion_kernel) != "none":
+            raise ValueError(
+                "registered reference-threshold calibration cannot be combined "
+                "with query-diffusion calibration"
+            )
+        if str(args.registered_readout_stage) != "unary_prior":
+            raise ValueError(
+                "registered reference-threshold calibration requires unary_prior"
+            )
+        prompt_score = render_scalar_scores(prompt_pose, gaussian_scores)
+        prompt_score_native = cv2.resize(
+            prompt_score,
+            (native_width, native_height),
+            interpolation=cv2.INTER_LINEAR,
+        )
+        best_reference_iou = -1.0
+        best_threshold = None
+        threshold_records: list[dict[str, float]] = []
+        for threshold in np.arange(0.99, 0.02, -0.01, dtype=np.float64):
+            selected = prompt_score_native >= float(threshold)
+            intersection = int(np.logical_and(selected, positive_native).sum())
+            union = int(np.logical_or(selected, positive_native).sum())
+            reference_iou = float(intersection / union) if union else 1.0
+            threshold_records.append(
+                {
+                    "threshold": float(threshold),
+                    "reference_iou": reference_iou,
+                }
+            )
+            if reference_iou > best_reference_iou:
+                best_reference_iou = reference_iou
+                best_threshold = float(threshold)
+        if best_threshold is None:
+            raise RuntimeError("reference unary threshold calibration failed")
+        prediction_threshold = best_threshold
+        registered_reference_threshold_calibration = {
+            "policy": "reference_mask_unary_threshold_v1",
+            "threshold_grid": {
+                "start": 0.99,
+                "stop_exclusive": 0.02,
+                "step": -0.01,
+                "source": "existing_release_compatible_reference_grid",
+            },
+            "selected_threshold": best_threshold,
+            "selected_reference_iou": best_reference_iou,
+            "candidates": threshold_records,
+            "reference_only": True,
+            "target_masks_opened": False,
+            "target_metrics_opened": False,
+        }
+        assert registered_prompt_evidence is not None
+        registered_prompt_evidence["reference_threshold_calibration"] = (
+            registered_reference_threshold_calibration
+        )
 
     registered_prompt_cycle_report: dict[str, object] | None = None
     if registered_prompt_cycle_gaussian_scores is not None:
@@ -3690,6 +6115,7 @@ def run(args: argparse.Namespace) -> dict:
                 feature_width=native_width,
                 alpha_normalize=True,
                 contribution_gamma=args.feature_contribution_gamma,
+                row_confidence=prompt_row_confidence,
             )
         prompt_cycle_maps = (
             prompt_cycle_render["feature_map"].detach().float().cpu().numpy()
@@ -3851,6 +6277,190 @@ def run(args: argparse.Namespace) -> dict:
                 ] = _file_sha256(stage_path)
                 stage_predictions.setdefault(stage_name, {})[frame_id] = stage_rendered
 
+    prediction_receipt_path: str | None = None
+    prediction_receipt_sha256: str | None = None
+    if str(getattr(args, "prediction_receipt_output", "")).strip():
+        receipt_path, receipt_sha256 = _write_pre_metric_prediction_receipt(
+            args.prediction_receipt_output,
+            scene_id=str(args.scene_id),
+            protocol_hash=str(manifest["protocol_hash"]),
+            capability_cache=args.canonical_capability_cache,
+            support_graph=args.canonical_support_graph,
+            score_paths=score_paths,
+            score_sha256=score_sha256,
+            stage_score_paths=stage_score_paths,
+            stage_score_sha256=stage_score_sha256,
+            method_contract={
+                "support_mode": str(args.support_mode),
+                "capability_source_contract": str(
+                    args.canonical_capability_source_contract
+                ),
+                "prototype_count": int(args.prototype_count),
+                "prototype_strategy": str(args.prototype_strategy),
+                "registered_seed_construction": str(
+                    args.registered_seed_construction
+                ),
+                "registered_prototype_seed_construction": str(
+                    args.registered_prototype_seed_construction
+                ),
+                "registered_observation_fusion": observation_fusion,
+                "configured_registered_observation_fusion": (
+                    configured_observation_fusion
+                ),
+                "registered_observation_confidence": str(
+                    args.registered_observation_confidence
+                ),
+                "registered_observation_mass_scale": float(
+                    args.registered_observation_mass_scale
+                ),
+                "registered_observation_coverage_power": float(
+                    args.registered_observation_coverage_power
+                ),
+                "prompt_registration_mode": str(args.prompt_registration_mode),
+                "prompt_registration_scale": float(
+                    args.prompt_registration_scale
+                ),
+                "alpha_threshold": float(args.alpha_threshold),
+                "registered_selection_mode": str(
+                    args.registered_selection_mode
+                ),
+                "registered_readout_stage": str(args.registered_readout_stage),
+                "graph_policy": str(args.graph_policy),
+                "component_graph_policy": str(args.component_graph_policy),
+                "channel_confidence_mode": str(args.channel_confidence_mode),
+                "solver_type": str(args.solver_type),
+                "solver_iterations": int(args.solver_iterations),
+                "solver_residual": float(args.solver_residual),
+                "solver_unary_temperature": float(
+                    args.solver_unary_temperature
+                ),
+                "solver_support_threshold": float(
+                    args.solver_support_threshold
+                ),
+                "laplacian_weight": float(args.laplacian_weight),
+                "hard_seed_threshold": float(args.hard_seed_threshold),
+                "hard_seed_conflict_policy": str(
+                    args.hard_seed_conflict_policy
+                ),
+                "hard_seed_conflict_margin": float(
+                    args.hard_seed_conflict_margin
+                ),
+                "appearance_weight": float(args.appearance_weight),
+                "boundary_weight": float(args.boundary_weight),
+                "prototype_temperature": float(args.prototype_temperature),
+                "feature_calibration": str(args.feature_calibration),
+                "score_calibration": str(args.score_calibration),
+                "query_conditioned_diffusion": (
+                    {
+                        "kernel": str(args.query_conditioned_diffusion_kernel),
+                        "knn_cache": {
+                            "path": str(
+                                Path(args.query_diffusion_knn_cache)
+                                .expanduser()
+                                .resolve()
+                            ),
+                            "sha256": _file_sha256(
+                                Path(args.query_diffusion_knn_cache)
+                                .expanduser()
+                                .resolve()
+                            ),
+                        },
+                        "relation_cache": {
+                            "path": str(
+                                Path(args.query_diffusion_feature_cache)
+                                .expanduser()
+                                .resolve()
+                            ),
+                            "sha256": _file_sha256(
+                                Path(args.query_diffusion_feature_cache)
+                                .expanduser()
+                                .resolve()
+                            ),
+                        },
+                        "reference_calibration": bool(
+                            args.query_diffusion_reference_calibration
+                        ),
+                        "feature_bandwidth": float(
+                            args.query_diffusion_feature_bandwidth
+                        ),
+                        "regularizer_bandwidth": float(
+                            args.query_diffusion_regularizer_bandwidth
+                        ),
+                        "logistic_c": float(args.query_diffusion_logistic_c),
+                        "iterations": int(args.query_diffusion_iterations),
+                        "edge_binarize_threshold": float(
+                            args.query_diffusion_edge_binarize_threshold
+                        ),
+                        "max_positive_fraction": float(
+                            args.query_diffusion_max_positive_fraction
+                        ),
+                    }
+                    if str(args.query_conditioned_diffusion_kernel) != "none"
+                    else None
+                ),
+                "score_threshold": float(prediction_threshold),
+                "score_render_resolution": str(args.score_render_resolution),
+                "score_render_scale": float(args.score_render_scale),
+                "valid_support_normalization": bool(
+                    args.valid_support_normalization
+                ),
+                "feature_contribution_gamma": float(
+                    args.feature_contribution_gamma
+                ),
+                "source_observation_oof_deployment_gate": (
+                    source_observation_oof_deployment_gate
+                ),
+                "registered_graph_disabled": bool(
+                    args.disable_registered_graph
+                ),
+                "evaluator_sha256": _file_sha256(Path(__file__).resolve()),
+                "candidate_args": {
+                    str(name): value
+                    for name, value in sorted(vars(args).items())
+                },
+                "source_completion_unary": source_completion_evidence,
+                "primitive_unary_artifact": (
+                    {
+                        "path": primitive_unary_path,
+                        "file_sha256": primitive_unary_sha256,
+                        "score_tensor_sha256": tensor_sha256(
+                            canonical_stage_gaussian_scores["unary_prior"]
+                            .detach()
+                            .float()
+                            .cpu()
+                            .contiguous()
+                        ),
+                    }
+                    if primitive_unary_path is not None
+                    and canonical_stage_gaussian_scores is not None
+                    else None
+                ),
+            },
+            graph_disabled=bool(args.disable_registered_graph),
+        )
+        prediction_receipt_path = str(receipt_path)
+        prediction_receipt_sha256 = str(receipt_sha256)
+
+    if bool(getattr(args, "prediction_only", False)):
+        return {
+            "schema_version": 1,
+            "artifact_type": "nvos_prediction_only_completion_v1",
+            "scene_id": str(args.scene_id),
+            "protocol_hash": str(manifest["protocol_hash"]),
+            "prediction_receipt": prediction_receipt_path,
+            "prediction_receipt_sha256": prediction_receipt_sha256,
+            "target_score_paths": dict(score_paths),
+            "target_score_sha256": dict(score_sha256),
+            "primitive_unary_path": primitive_unary_path,
+            "primitive_unary_sha256": primitive_unary_sha256,
+            "safety": {
+                "stopped_before_target_ground_truth_open": True,
+                "target_rgb_opened": False,
+                "target_mask_opened": False,
+                "target_metric_opened": False,
+            },
+        }
+
     # Evaluation begins only after every prediction has been persisted.
     frame_metrics: list[dict] = []
     stage_frame_metrics: dict[str, list[dict]] = {
@@ -4007,7 +6617,16 @@ def run(args: argparse.Namespace) -> dict:
                 else None
             ),
             "query_dependent": False,
-            "changes_geometry_or_alpha": False,
+            "changes_geometry_or_alpha": camera_clearance_sigma > 0,
+            "camera_clearance": (
+                {
+                    "contract": CAMERA_PLANE_CLEARANCE_CONTRACT,
+                    "support_sigma": camera_clearance_sigma,
+                    "uses_rgb_prompt_query_or_mask": False,
+                }
+                if camera_clearance_sigma > 0
+                else None
+            ),
             **(
                 {
                     "post_compositor_scoring_adapter": (
@@ -4019,6 +6638,24 @@ def run(args: argparse.Namespace) -> dict:
             ),
         },
         "score_threshold": prediction_threshold,
+        "primitive_unary_artifact": (
+            {
+                "path": primitive_unary_path,
+                "sha256": primitive_unary_sha256,
+                "written_before_target_ground_truth_open": True,
+            }
+            if primitive_unary_path is not None
+            else None
+        ),
+        "canonical_capability_source_contract": str(
+            getattr(args, "canonical_capability_source_contract", "field")
+        ),
+        "source_observation_oof_deployment_gate": (
+            source_observation_oof_deployment_gate
+        ),
+        "registered_graph_disabled": bool(
+            getattr(args, "disable_registered_graph", False)
+        ),
         "shared_solver": (
             {
                 "appearance_weight": float(args.appearance_weight),
@@ -4055,8 +6692,9 @@ def run(args: argparse.Namespace) -> dict:
                 "registered_seed_unary_weight": float(
                     getattr(args, "registered_seed_unary_weight", 0.0)
                 ),
-                "registered_observation_fusion": str(
-                    getattr(args, "registered_observation_fusion", "additive")
+                "registered_observation_fusion": observation_fusion,
+                "configured_registered_observation_fusion": (
+                    configured_observation_fusion
                 ),
                 **(
                     {
@@ -4073,13 +6711,7 @@ def run(args: argparse.Namespace) -> dict:
                             "new_numeric_constant": False,
                         }
                     }
-                    if str(
-                        getattr(
-                            args,
-                            "registered_observation_fusion",
-                            "additive",
-                        )
-                    )
+                    if observation_fusion
                     == "hard_seed_anchored_probability"
                     else {}
                 ),
@@ -4087,23 +6719,11 @@ def run(args: argparse.Namespace) -> dict:
                     {
                         "registered_posterior_consensus": (
                             _registered_posterior_consensus_method_contract(
-                                str(
-                                    getattr(
-                                        args,
-                                        "registered_observation_fusion",
-                                        "additive",
-                                    )
-                                )
+                                observation_fusion
                             )
                         )
                     }
-                    if str(
-                        getattr(
-                            args,
-                            "registered_observation_fusion",
-                            "additive",
-                        )
-                    )
+                    if observation_fusion
                     in _BERNOULLI_POE_FUSIONS
                     else {}
                 ),
@@ -4125,13 +6745,7 @@ def run(args: argparse.Namespace) -> dict:
                             "new_numeric_constant": False,
                         }
                     }
-                    if str(
-                        getattr(
-                            args,
-                            "registered_observation_fusion",
-                            "additive",
-                        )
-                    )
+                    if observation_fusion
                     == "hard_seed_anchor_only_probability"
                     else {}
                 ),
@@ -4141,6 +6755,18 @@ def run(args: argparse.Namespace) -> dict:
                         "registered_seed_construction",
                         "winner_take_all",
                     )
+                ),
+                "registered_prototype_seed_construction": str(
+                    getattr(
+                        args,
+                        "registered_prototype_seed_construction",
+                        "shared",
+                    )
+                ),
+                "registered_prototype_seed_normalization": (
+                    str(prototype_seed_normalization)
+                    if registered_prompt_evidence is not None
+                    else None
                 ),
                 "registered_seed_normalization": (
                     str(seed_normalization)
@@ -4262,6 +6888,15 @@ def run(args: argparse.Namespace) -> dict:
         "pixel_accuracy": float(np.mean([value["pixel_accuracy"] for value in frame_metrics])),
         "score_paths": score_paths,
         "score_sha256": score_sha256,
+        "pre_metric_prediction_receipt": (
+            {
+                "path": prediction_receipt_path,
+                "sha256": prediction_receipt_sha256,
+                "sealed_before_target_ground_truth_open": True,
+            }
+            if prediction_receipt_path is not None
+            else None
+        ),
         "stage_metrics": stage_metrics,
         "stage_score_paths": stage_score_paths,
         "stage_score_sha256": stage_score_sha256,
@@ -4276,6 +6911,13 @@ def run(args: argparse.Namespace) -> dict:
             "test_calibration": False,
             "reference_query_calibration": bool(
                 getattr(args, "query_diffusion_reference_calibration", False)
+            )
+            or bool(
+                getattr(
+                    args,
+                    "registered_reference_threshold_calibration",
+                    False,
+                )
             ),
             "reference_query_calibration_uses_target_masks_or_metrics": False,
             "test_calibration_definition": (
@@ -4283,6 +6925,12 @@ def run(args: argparse.Namespace) -> dict:
                 "unlabeled evaluation-scene statistics are disclosed separately"
             ),
             "official_sam_decoder": False,
+            "frozen_source_completion_official_sam3": (
+                source_completion_evidence is not None
+            ),
+            "source_completion_target_rgb_or_mask_opened": (
+                False if source_completion_evidence is not None else None
+            ),
             "canonical_capability_cache": (
                 str(Path(args.canonical_capability_cache).resolve())
                 if args.canonical_capability_cache
@@ -4303,6 +6951,17 @@ def run(args: argparse.Namespace) -> dict:
                 if str(args.diagnostic_graph_affinity_override).strip()
                 else ""
             ),
+            "scene_carrier_assets": {
+                "config": str(config_path),
+                "config_sha256": _file_sha256(config_path),
+                "checkpoint": str(checkpoint_path),
+                "checkpoint_sha256": _file_sha256(checkpoint_path),
+                "camera_map": str(camera_map_path),
+                "camera_map_sha256": _file_sha256(camera_map_path),
+                "explicit_override": bool(
+                    str(getattr(args, "scene_config", "")).strip()
+                ),
+            },
             "candidate_eligibility": candidate_eligibility,
             "frozen_diagnostic_eligible": (
                 registered_forward_contract is None
@@ -4383,10 +7042,13 @@ def run(args: argparse.Namespace) -> dict:
         "radio_gs/querying/evidence_scorer.py",
         "radio_gs/querying/query_engine.py",
         "radio_gs/querying/query_conditioned_diffusion.py",
+        "radio_gs/querying/nvos_local_positive_completion.py",
+        "radio_gs/querying/sam3_reference_completion.py",
         "radio_gs/querying/score_calibration.py",
         "radio_gs/querying/support_solver.py",
         "radio_gs/rendering/feature_renderer.py",
         "radio_gs/rendering/contribution_compositor.py",
+        "radio_gs/rendering/camera_clearance.py",
         "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
         "radio_gs/scripts/eval_lerf_grounding.py",
         "radio_gs/scripts/render_promptable_nvs_features.py",
@@ -4430,6 +7092,7 @@ def run(args: argparse.Namespace) -> dict:
         "asset_hash_verification_required": bool(
             getattr(args, "require_asset_hashes", False)
         ),
+        "scene_carrier_assets": report["safety"]["scene_carrier_assets"],
         "prompt_type": prompt_type,
         "support_mode": str(args.support_mode),
         "region_space": str(args.region_space),
@@ -4508,7 +7171,19 @@ def run(args: argparse.Namespace) -> dict:
                 getattr(args, "valid_support_coverage_power", 0.0)
             ),
             "feature_contribution_gamma": float(args.feature_contribution_gamma),
+            "camera_clearance": (
+                {
+                    "contract": CAMERA_PLANE_CLEARANCE_CONTRACT,
+                    "support_sigma": camera_clearance_sigma,
+                    "query_independent": True,
+                }
+                if camera_clearance_sigma > 0
+                else None
+            ),
             "pixel_threshold": float(prediction_threshold),
+            "reference_threshold_calibration": (
+                registered_reference_threshold_calibration
+            ),
             "threshold_comparison": "greater_or_equal",
             "resize_to_ground_truth": (
                 "cv2.INTER_NEAREST"
@@ -4567,6 +7242,14 @@ def run(args: argparse.Namespace) -> dict:
             ),
             "feature_contribution_gamma": float(
                 args.feature_contribution_gamma
+            ),
+            "camera_clearance": (
+                {
+                    "contract": CAMERA_PLANE_CLEARANCE_CONTRACT,
+                    "support_sigma": camera_clearance_sigma,
+                }
+                if camera_clearance_sigma > 0
+                else None
             ),
         },
         "resize_to_ground_truth": (
@@ -4636,6 +7319,21 @@ def main() -> None:
     parser.add_argument("--scene-id", required=True)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument(
+        "--scene-config",
+        default="",
+        help="Explicit frozen carrier config; requires the other two carrier overrides.",
+    )
+    parser.add_argument(
+        "--scene-checkpoint",
+        default="",
+        help="Explicit frozen geometry carrier checkpoint.",
+    )
+    parser.add_argument(
+        "--camera-map",
+        default="",
+        help="Explicit frozen RGB-to-COLMAP camera map.",
+    )
+    parser.add_argument(
         "--run-manifest",
         default="",
         help="Optional immutable candidate run manifest bound into the report.",
@@ -4687,8 +7385,144 @@ def main() -> None:
         default="prompt_gaussian",
     )
     parser.add_argument("--canonical-capability-cache", default="")
+    parser.add_argument(
+        "--canonical-capability-projection-authority",
+        default=(
+            "paper/artifacts/"
+            "formal_capability_projection_lineage_closure_20260805.json"
+        ),
+        help=(
+            "Exact path/sidecar/field-bound authority for pre-contract compact "
+            "capability caches. New caches must carry an inline formal contract."
+        ),
+    )
     parser.add_argument("--canonical-support-graph", default="")
     parser.add_argument("--canonical-reliability-cache", default="")
+    parser.add_argument(
+        "--canonical-capability-source-contract",
+        choices=("field", "exact_mpr", "exact_capability_mpr"),
+        default="field",
+        help=(
+            "Provenance contract for the capability rows. exact_mpr is "
+            "diagnostic-only and must be combined with unary-only graph disable."
+        ),
+    )
+    parser.add_argument(
+        "--disable-registered-graph",
+        action="store_true",
+        help=(
+            "Use a zero-edge graph for a strictly unary-only same-compiler "
+            "diagnostic; requires unary_prior and forbids connected/diffusion."
+        ),
+    )
+    parser.add_argument(
+        "--primitive-unary-output",
+        default="",
+        help="Optional pre-GT dense primitive unary probability artifact.",
+    )
+    parser.add_argument(
+        "--source-observation-oof-output-dir",
+        default="",
+        help=(
+            "Source-only three-fold evidence gate directory. One invocation "
+            "seals the requested fold and exits before target rendering; the "
+            "third fold also seals the immutable gate receipt."
+        ),
+    )
+    parser.add_argument(
+        "--source-observation-oof-heldout-fold",
+        type=int,
+        choices=(0, 1, 2),
+        default=None,
+        help="Held-out SplitMix64 fold for a source-observation gate invocation.",
+    )
+    parser.add_argument(
+        "--source-observation-oof-fold-mode",
+        choices=("stable_primitive_rows_v1", "source_footprint_v1"),
+        default="stable_primitive_rows_v1",
+        help=(
+            "Explicit OOF fold authority. The default preserves the frozen "
+            "global-row SplitMix64 protocol; source_footprint_v1 holds out "
+            "complete query-free source-raster footprint groups."
+        ),
+    )
+    parser.add_argument(
+        "--source-footprint-fold-authority",
+        default="",
+        help="Immutable source-footprint fold authority artifact.",
+    )
+    parser.add_argument(
+        "--source-footprint-fold-authority-file-sha256",
+        default="",
+        help="Expected SHA-256 of the complete source-footprint artifact file.",
+    )
+    parser.add_argument(
+        "--source-footprint-fold-authority-sha256",
+        default="",
+        help="Expected canonical authority contract SHA-256 stored in the artifact.",
+    )
+    parser.add_argument(
+        "--source-observation-oof-gate-receipt",
+        default="",
+        help=(
+            "Immutable source-only OOF gate selected before target rendering; "
+            "the deployed readout stage must match its selected action."
+        ),
+    )
+    parser.add_argument(
+        "--source-observation-oof-gate-receipt-sha256",
+        default="",
+        help="Expected complete-file SHA-256 of the source-only OOF gate.",
+    )
+    parser.add_argument(
+        "--source-completion-unary",
+        choices=("none", _PROBABILITY_PRESERVING_SOURCE_UNARY),
+        default="none",
+        help=(
+            "Optional source/reference-only SAM3 completion fused strictly in "
+            "Bernoulli probability space with entropy reliability kept separate."
+        ),
+    )
+    parser.add_argument("--source-completion", default="")
+    parser.add_argument("--source-completion-sha256", default="")
+    parser.add_argument("--source-completion-receipt", default="")
+    parser.add_argument("--source-completion-receipt-sha256", default="")
+    parser.add_argument(
+        "--source-completion-calibration",
+        choices=(
+            "none",
+            _SOURCE_COMPLETION_LOO_CALIBRATION,
+            _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
+        ),
+        default="none",
+        help=(
+            "Optional immutable source-only leave-one-trial consistency gate. "
+            "The v1 mode fully abstains on rejection; the hierarchical v2 "
+            "mode retains only strict-majority local positive evidence."
+        ),
+    )
+    parser.add_argument("--source-completion-calibration-gate", default="")
+    parser.add_argument(
+        "--source-completion-calibration-gate-sha256", default=""
+    )
+    parser.add_argument(
+        "--prediction-receipt-output",
+        default="",
+        help=(
+            "Optional immutable JSON receipt binding every rendered target "
+            "score and graph/capability SHA before target-mask metrics. "
+            "Requires --require-asset-hashes; graph-disabled unary runs bind "
+            "an explicit zero-edge policy instead of a graph file."
+        ),
+    )
+    parser.add_argument(
+        "--prediction-only",
+        action="store_true",
+        help=(
+            "Stop immediately after sealing all target scores, the primitive "
+            "unary, and the pre-metric receipt; do not open target ground truth."
+        ),
+    )
     parser.add_argument(
         "--query-conditioned-diffusion-kernel",
         choices=(
@@ -4801,6 +7635,16 @@ def main() -> None:
         help=(
             "Query-independent exponent for normalized front-to-back feature "
             "mixture weights; 1 is ordinary alpha averaging."
+        ),
+    )
+    parser.add_argument(
+        "--camera-clearance-sigma",
+        type=float,
+        default=0.0,
+        help=(
+            "Query-independent camera-plane visibility guard. A positive value "
+            "rejects Gaussian rows whose corresponding axial support bound "
+            "intersects the renderer near plane; 2.0 is the physical two-sigma rule."
         ),
     )
     parser.add_argument(
@@ -4946,6 +7790,16 @@ def main() -> None:
         ),
     )
     parser.add_argument(
+        "--registered-prototype-seed-construction",
+        choices=("shared", "winner_take_all"),
+        default="shared",
+        help=(
+            "Use the solver seed masses for prototype construction (shared), "
+            "or preserve independent winner-take-all prototype coverage while "
+            "the exact joint-signed path supplies solver seeds and unary anchors."
+        ),
+    )
+    parser.add_argument(
         "--registered-selection-mode",
         choices=(
             SelectionMode.SEEDED_COMPONENT.value,
@@ -4964,6 +7818,16 @@ def main() -> None:
         help=(
             "Choose the continuous unary/graph field or the component-masked "
             "support as the final scalar render; all stages remain reported."
+        ),
+    )
+    parser.add_argument(
+        "--registered-reference-threshold-calibration",
+        action="store_true",
+        help=(
+            "For a declared full reference mask and unary_prior readout, "
+            "select the rendered probability threshold on that reference view "
+            "using the existing release-compatible 0.99..0.03 grid before "
+            "opening any target mask."
         ),
     )
     parser.add_argument(
@@ -5023,12 +7887,144 @@ def main() -> None:
         ),
     )
     args = parser.parse_args()
+    source_oof_enabled = bool(
+        str(args.source_observation_oof_output_dir).strip()
+    )
+    if source_oof_enabled != (args.source_observation_oof_heldout_fold is not None):
+        parser.error(
+            "--source-observation-oof-output-dir and "
+            "--source-observation-oof-heldout-fold are required together"
+        )
+    footprint_values = (
+        str(args.source_footprint_fold_authority).strip(),
+        str(args.source_footprint_fold_authority_file_sha256).strip(),
+        str(args.source_footprint_fold_authority_sha256).strip(),
+    )
+    if args.source_observation_oof_fold_mode == "stable_primitive_rows_v1":
+        if any(footprint_values):
+            parser.error(
+                "stable_primitive_rows_v1 forbids source-footprint authority inputs"
+            )
+    elif not source_oof_enabled or not all(footprint_values):
+        parser.error(
+            "source_footprint_v1 requires OOF output/fold plus authority path, "
+            "file SHA-256, and authority SHA-256"
+        )
+    if source_oof_enabled and str(args.prediction_receipt_output).strip():
+        parser.error(
+            "source-observation OOF exits before target prediction receipts"
+        )
+    deployment_gate_values = (
+        str(args.source_observation_oof_gate_receipt).strip(),
+        str(args.source_observation_oof_gate_receipt_sha256).strip(),
+    )
+    if bool(deployment_gate_values[0]) != bool(deployment_gate_values[1]):
+        parser.error(
+            "source-observation OOF deployment requires gate receipt path and SHA-256"
+        )
+    if source_oof_enabled and any(deployment_gate_values):
+        parser.error(
+            "source-observation OOF fold generation and deployment are separate invocations"
+        )
+    if any(deployment_gate_values) and not str(args.prediction_receipt_output).strip():
+        parser.error(
+            "source-observation OOF deployment requires --prediction-receipt-output"
+        )
+    if str(args.prediction_receipt_output).strip():
+        receipt_requirements = {
+            "--support-mode canonical_support": (
+                str(args.support_mode) == "canonical_support"
+            ),
+            "--canonical-capability-cache": bool(
+                str(args.canonical_capability_cache).strip()
+            ),
+            "--require-asset-hashes": bool(args.require_asset_hashes),
+            "graph asset or explicit disable": (
+                bool(str(args.canonical_support_graph).strip())
+                != bool(args.disable_registered_graph)
+            ),
+        }
+        failed = [
+            name for name, satisfied in receipt_requirements.items() if not satisfied
+        ]
+        if failed:
+            parser.error(
+                "--prediction-receipt-output requires " + ", ".join(failed)
+            )
+    if bool(args.prediction_only):
+        prediction_only_requirements = {
+            "--prediction-receipt-output": bool(
+                str(args.prediction_receipt_output).strip()
+            ),
+            "--primitive-unary-output": bool(
+                str(args.primitive_unary_output).strip()
+            ),
+            "--require-asset-hashes": bool(args.require_asset_hashes),
+        }
+        failed = [
+            name
+            for name, satisfied in prediction_only_requirements.items()
+            if not satisfied
+        ]
+        if failed:
+            parser.error("--prediction-only requires " + ", ".join(failed))
+    if bool(args.disable_registered_graph):
+        disabled_graph_requirements = {
+            "--support-mode canonical_support": (
+                str(args.support_mode) == "canonical_support"
+            ),
+            "--registered-readout-stage unary_prior": (
+                str(args.registered_readout_stage) == "unary_prior"
+            ),
+            "--query-conditioned-diffusion-kernel none": (
+                str(args.query_conditioned_diffusion_kernel) == "none"
+            ),
+            "--negative-spatial-mode none": (
+                str(args.negative_spatial_mode) == "none"
+            ),
+            "--registered-forward-unary none": (
+                str(args.registered_forward_unary) == "none"
+            ),
+            "no --canonical-support-graph": (
+                not str(args.canonical_support_graph).strip()
+            ),
+        }
+        failed = [
+            name
+            for name, satisfied in disabled_graph_requirements.items()
+            if not satisfied
+        ]
+        if failed:
+            parser.error("--disable-registered-graph requires " + ", ".join(failed))
+    if args.canonical_capability_source_contract in {
+        "exact_mpr",
+        "exact_capability_mpr",
+    }:
+        exact_requirements = {
+            "--disable-registered-graph": bool(args.disable_registered_graph),
+            "empty --canonical-field-sha256": not str(
+                args.canonical_field_sha256
+            ).strip(),
+            "--primitive-unary-output": bool(
+                str(args.primitive_unary_output).strip()
+            ),
+        }
+        failed = [
+            name for name, satisfied in exact_requirements.items() if not satisfied
+        ]
+        if failed:
+            parser.error(
+                "non-field --canonical-capability-source-contract requires "
+                + ", ".join(failed)
+            )
     try:
         _validate_registered_forward_unary_args(args)
     except ValueError as error:
         parser.error(str(error))
     if not np.isfinite(args.feature_contribution_gamma) or args.feature_contribution_gamma <= 0:
         parser.error("--feature-contribution-gamma must be finite and positive")
+    if not np.isfinite(args.camera_clearance_sigma) or args.camera_clearance_sigma < 0:
+        parser.error("--camera-clearance-sigma must be finite and non-negative")
     if (
         not np.isfinite(args.prompt_registration_scale)
         or args.prompt_registration_scale <= 0
@@ -5147,6 +8143,14 @@ def main() -> None:
         )
     try:
         _validate_hard_seed_anchor_only_probability_args(args)
+    except ValueError as error:
+        parser.error(str(error))
+    try:
+        _validate_registered_prototype_seed_construction_args(args)
+    except ValueError as error:
+        parser.error(str(error))
+    try:
+        _validate_registered_reference_threshold_calibration_args(args)
     except ValueError as error:
         parser.error(str(error))
     if args.registered_observation_fusion in {

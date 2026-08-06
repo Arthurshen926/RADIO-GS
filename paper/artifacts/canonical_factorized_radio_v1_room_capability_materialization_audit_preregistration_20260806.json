@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_room_capability_materialization",
+  "registered_at": "2026-08-06T01:34:00+08:00",
+  "status": "registered_after_source_only_materialization_and_before_independent_capability_audit",
+  "purpose": "Independently require exact fp16 rematerialization parity and source-only fidelity for the Room capability bank before graph construction.",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_room_source_chain_preregistration_20260806.json",
+    "sha256": "920c60de642fa99c21818f27dd00b946a07cb37c09fdecb9cdb1909f89c6c07d"
+  },
+  "inputs": {
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_field_d256_l128.pth",
+      "sha256": "343b833b415d467f8993b6ce19057ea838fa12ae19395041347beaf273eef5f7",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373",
+      "strict_schema_v2_reload": true
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/factorized_raw_radio.pt",
+      "sha256": "0ae585ec98cccd9fb3d5d401c79b11def346d3598ec1600ebb72ef6b8d6ca76c"
+    },
+    "feature_output_bundle_sha256": "f76f3d40fd6317979e8517623d9d2ef7d14bf5b67a52f6ee7c3e0a9a1a807b04",
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "geometry_xyz_sha256": "0f520313afe582b3225890f8c023a760e60a097f9125a95cc2dab92071a7b12c",
+    "registration_responsibility_cache_sha256": "56541bafacd1dc430ba783130c9601821f0c25f9d371f041aa5851a18c4f344c"
+  },
+  "materialization_contract": {
+    "field_checkpoint_schema": "factorized-v2",
+    "observation_contract": "canonical",
+    "projection_order": "raw_gauge_compact_radio_field_then_official_adaptor_then_l2",
+    "feature_storage": "valid_rows_compact_v1",
+    "feature_row_order": "torch_where_valid_ascending",
+    "num_global_rows": 291619,
+    "num_valid_rows": 214612,
+    "appearance_dim": 4096,
+    "boundary_dim": 1024,
+    "audit_batch_size": 2048,
+    "caller_hash_gates_required": true,
+    "factorized_lineage_embeds_responsibility_sha256": true
+  },
+  "promotion_gate": {
+    "strict_capability_loader": true,
+    "formal_projection_contract": true,
+    "independent_field_adaptor_fp16_parity": true,
+    "dino_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "sam3_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "capability_file_sha256_frozen_before_graph_or_benchmark": true,
+    "target_or_text_query_access": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "temperature_limit_c": 88,
+    "poll_seconds": 30,
+    "consecutive_overheat_polls_before_stop": 6,
+    "capability_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/official_dino_sam3_views.pt",
+    "capability_sha256": "4387825d8acd89b5b7a7d90a34913c07613594d322ee182e584bd99a8c7d70da"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

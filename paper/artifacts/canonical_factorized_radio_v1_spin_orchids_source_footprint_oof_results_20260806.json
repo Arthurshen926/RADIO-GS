@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_factorized_radio_v1_spin_source_footprint_oof_result_v1",
+  "scene": "orchids",
+  "status": "pass_source_only_oof_gate",
+  "completed_at": "2026-08-06T05:05:48+08:00",
+  "preregistration_provenance": {
+    "full9_parent": {
+      "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+      "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+    },
+    "scene_source_chain": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_orchids_source_chain_preregistration_20260806.json",
+      "sha256": "9bc432b2deff2bdaedddcd2898a2c4c67da6f47393cfd4e78f8188bb2f2a5e76"
+    },
+    "note": "No retroactive scene-specific OOF preregistration was created; the frozen full9 source-only method and the scene source-chain registration are the pre-build authorities."
+  },
+  "gate_receipt": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+    "sha256": "e37b7a26c348e47738a07e3355ad3d20441911f43854412c57c8091d3c093c90"
+  },
+  "fold_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/orchids/source_footprint_fold_authority.pt",
+    "file_sha256": "c1a63de567eef42567ad49c39623c9d7f3ebd08fb4facb994c23cfe4eb61b397",
+    "authority_sha256": "b74deecd9da5281f6c18be6d5ac9ef312c7b60d25297a905f34b5d2bbe610cda",
+    "tensor_bundle_sha256": "e4b159f5c1b9b69adf2220e7439c3485e9e051715ffb82e84c43834dbd50f533",
+    "fold_rows": [93601, 101051, 198481],
+    "visible_rows_per_fold": [93601, 101051, 79823],
+    "total_rows": 393133,
+    "visible_rows": 274475,
+    "invisible_rows": 118658
+  },
+  "fold_artifacts": {
+    "0": {
+      "sha256": "d8db23bff5db8c7b34970efaf81378a258fdaa4c043021321169ab0235a6d76d",
+      "receipt_sha256": "53ab3d6dfef6cecf45413131543265252ba15285fa8c90c6b8c81a1386d5ad6c"
+    },
+    "1": {
+      "sha256": "6716e749f76429d465f63c1426bafe4efc83656446ae95a707e810ed32c2adfb",
+      "receipt_sha256": "ea475eb21fd9c288da2a5ed9e7298d5619a73dfafc45bd08c0830258d9b42a4d"
+    },
+    "2": {
+      "sha256": "bafba5b9d321eecb8e7e4cc30646959a83c3ef4dc8c4356e1fbcaca986d4be42",
+      "receipt_sha256": "242782f1cd45c468aafe6c61f94e5a4a00ae1d33adb51c1732eeba800961c845"
+    }
+  },
+  "selection": {
+    "selected_action": "surface_safe_propagated",
+    "balanced_log_loss": 0.6372684207474131,
+    "weighted_auc": 0.64635125596644,
+    "unary_balanced_log_loss": 0.6931471805599453,
+    "unary_weighted_auc": 0.5,
+    "full_fit_predictions_used_as_oof": false,
+    "connected_selection": "off"
+  },
+  "safety": {
+    "source_only": true,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

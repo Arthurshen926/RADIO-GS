@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_lego_source_footprint_oof",
+  "registered_at": "2026-08-05T14:47:03+08:00",
+  "status": "registered_after_factorized_capability_and_graph_gates_and_before_source_prompt_access",
+  "question": "When source-visible evidence is held out by complete query-free raster-footprint groups, should the frozen SPIn compiler retain its unary or use the fixed surface-safe propagation?",
+  "inputs": {
+    "benchmark_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "queue_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712",
+    "scene_id": "lego",
+    "geometry_checkpoint_sha256": "b0f054692c678836cbcdc6badfb2abadae4b2ad6b6b430b6a8b33199485aff18",
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/official_dino_sam3_views.pt",
+      "sha256": "dcdf63e4718f987422b094a74c042b33e78b6d6013d69e12108d0f74c8731147"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/shared_support_graph_surface_safe_k16.pt",
+      "sha256": "feb6aeeffbca39be841a3e6b7bb72b285f6258f0f041e5c1b3529e728c82466b",
+      "result_receipt_sha256": "6d1b640e43b5dbd6638f70402f7fa78aa64c07696fc04d8a4b7586c93b312f97"
+    },
+    "source_footprint_fold_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority.pt",
+      "file_sha256": "07328660ae6844c2348a936d000d8080c79b3494c84399a03fbc57a2d0fd7396",
+      "authority_sha256": "50e8286e85cad6b2a7c0294b385bb7e1b3b91226285463057d74ae900bce0ffa",
+      "tensor_bundle_sha256": "cc842528656a41c0dd2320f97264b6679b38bc13f5da327575494923c83796e3"
+    }
+  },
+  "fold_contract": {
+    "mode": "source_footprint_v1",
+    "assignment": "splitmix64_source_footprint_group_v1",
+    "folds": 3,
+    "authority_loaded_before_source_prompt_labels": true,
+    "row_authority": "footprint primitive_rows == capability global_rows == torch.where(valid)",
+    "heldout_clear_tensors": [
+      "positive_weight",
+      "negative_weight",
+      "raw_positive_mass",
+      "raw_negative_mass"
+    ],
+    "degenerate_population_action": "field_base",
+    "candidate_actions_when_non_degenerate": [
+      "unary",
+      "surface_safe_propagated"
+    ],
+    "primary_metric": "responsibility_balanced_log_loss",
+    "secondary_metric": "responsibility_weighted_auc",
+    "complexity_tiebreak": "unary",
+    "target_feedback": false
+  },
+  "fixed_compiler": {
+    "region_space": "sam3",
+    "prototype_count": 4,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_registration_mode": "raster_adjoint",
+    "prompt_registration_scale": 1.0,
+    "alpha_threshold": 0.0,
+    "support_threshold": 0.0,
+    "registered_observation_fusion": "direct_raster_adjoint",
+    "registered_observation_confidence": "relative_joint_max",
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "shared",
+    "registered_selection_mode": "all_components",
+    "registered_readout_stage": "propagated",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "graph_policy": "typed",
+    "component_graph_policy": "same",
+    "channel_confidence_mode": "none",
+    "solver_type": "confidence_random_walker",
+    "solver_iterations": 12,
+    "solver_residual": 0.3,
+    "solver_unary_temperature": 0.1,
+    "solver_support_threshold": 0.5,
+    "laplacian_weight": 1.0,
+    "cg_iterations": 64,
+    "cg_tolerance": 0.00001,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "positive_priority",
+    "hard_seed_conflict_margin": 0.0,
+    "component_edge_threshold": 0.00001,
+    "seeded_component_min_weight": 0.2,
+    "connected_selection": false,
+    "query_conditioned_diffusion": "none",
+    "scene_specific_tuning": false
+  },
+  "implementation": {
+    "structured_fold_closure_sha256": "38485507a8ea92c4c2eafa96b72b01f7d2795f4c5f7dc374f0423e8911f63e92",
+    "evaluator_sha256": "90d8fb354f40507a2e7a7c2430efae8545b34f103d3678a09ed5a6ef7bca1594",
+    "oof_evaluator_sha256": "d73cd40fccaf79465108e530022dc6b142b28bc29abcdc4aabaa44cbaa465dc3",
+    "evidence_authority_sha256": "0d110f9c78661b896c5fcb99266fd4ea2c7a37110a49f8847b2933e176398fa6",
+    "footprint_authority_loader_sha256": "8c365c4f8974a770f6a58176d4d1de6518237065b7a8230d90bfa8a8ff7a508d",
+    "independent_focused_tests": "30 passed",
+    "agent_regression_tests": "96 passed"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary and approximately 180-second checks; stop only after two consecutive observations at or above 88 C",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1",
+    "output_root_was_absent_at_registration": true
+  },
+  "opening_rule": "Run and seal folds 0, 1, and 2; load the immutable gate receipt; only then may the selected full-fit action render target scores and seal a pre-metric prediction receipt.",
+  "safety": {
+    "source_prompt_opened_at_registration": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

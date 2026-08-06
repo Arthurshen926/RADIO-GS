@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "registration": "source_raster_dominant_footprint_blocks_v1",
+  "registered_at": "2026-08-05T16:20:00+08:00",
+  "status": "registered_before_evaluator_or_exporter_integration_and_before_any_target_prediction_or_metric",
+  "purpose": "Replace spatially leaking independent-primitive source OOF folds with deterministic groups derived only from the exact source-raster responsibility footprint.",
+  "claim_boundary": "CPU authority construction and source-evidence fold preflight only; no benchmark adapter, target image, target mask, target metric, or GPU execution is part of this registration.",
+  "inputs": {
+    "allowed": [
+      "verified exact raster-responsibility COO pixel identifiers",
+      "verified exact raster-responsibility COO primitive identifiers",
+      "strictly positive finite responsibility weights",
+      "source raster height and width",
+      "sorted hierarchy primitive global rows",
+      "cryptographically bound responsibility authority"
+    ],
+    "forbidden": [
+      "source mask",
+      "source labels",
+      "query probability",
+      "target RGB",
+      "target mask",
+      "scene-specific tuning"
+    ]
+  },
+  "fixed_grid": {
+    "long_axis_blocks": 8,
+    "short_axis_blocks": "max(1,floor(8*short/long+0.5))",
+    "pixel_assignment": "row-major pixel center mapped into the fixed rectangular grid",
+    "primitive_assignment": "responsibility-weighted mass argmax over blocks",
+    "exact_tie": "smallest row-major block id",
+    "invisible": "one sentinel group whose id equals the number of visible raster blocks"
+  },
+  "row_contract": {
+    "output_order": "exact hierarchy primitive_rows order",
+    "primitive_identifier_domain": "caller must explicitly declare local hierarchy indices or global primitive rows",
+    "duplicate_semantics": "a repeated exact pixel/primitive COO pair is malformed and rejected rather than silently summed",
+    "triplet_permutation": "canonical sorting makes all outputs and digests invariant to triplet input order"
+  },
+  "fold_contract": {
+    "folds": 3,
+    "assignment": "SplitMix64(group_id) modulo 3",
+    "clear": "positive_weight, negative_weight, raw_positive_mass, and raw_negative_mass are all set to exact zero for every primitive in every heldout group before compilation",
+    "minimum_population": "every heldout fold must contain at least 32 observed positive rows and 32 observed negative rows; otherwise the method returns the field base without running hierarchy selection",
+    "base_decision_is_not_failure": true
+  },
+  "authority": {
+    "canonical_tensors": [
+      "primitive_rows",
+      "group_ids",
+      "visible_mass",
+      "dominant_mass",
+      "purity"
+    ],
+    "bindings": [
+      "responsibility authority SHA-256",
+      "canonical exact COO content SHA-256",
+      "grid geometry",
+      "canonical tensor bundle SHA-256"
+    ],
+    "tamper_policy": "unknown authority, row misalignment, invalid ranges, non-finite/non-positive weights, duplicates, and digest changes fail closed"
+  },
+  "required_tests": [
+    "portrait and landscape grid geometry",
+    "triplet permutation invariance and exact tie break",
+    "invisible sentinel",
+    "authority construction API has no label or mask input",
+    "same group always maps to the same fold",
+    "all four evidence tensors are cleared for the whole heldout group",
+    "class-degenerate fold returns the field base",
+    "synthetic exact-adjoint evidence composes with the authority",
+    "range, duplicate, alignment, SHA, and tensor tamper fail closed"
+  ],
+  "target_rgb_opened": false,
+  "target_mask_opened": false,
+  "target_metric_computed": false,
+  "gpu_used": false
+}

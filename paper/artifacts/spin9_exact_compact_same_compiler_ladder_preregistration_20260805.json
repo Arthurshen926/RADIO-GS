@@ -1,0 +1,74 @@
+{
+  "schema_version": "spin9_exact_compact_same_compiler_ladder_preregistration_v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "purpose": "Locate the SPIn strict unary loss under a single graph-free K4 probability compiler and scalar renderer by changing only exact-MPR versus compact-field representation.",
+  "sentinels": ["lego", "room"],
+  "selection_status": "previously_opened_difficult_sentinels_for_attribution_only",
+  "immutable_protocol": {
+    "manifest": "output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "manifest_sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "authority": "paper/artifacts/spin9_canonical_mpr_v3_exact_local9_authority_20260803.json",
+    "authority_sha256": "9eea89217b85b75319a87b90e3da4a27c8b62ed0c920f8b8da0a14a091899340",
+    "claim_scope": "strict_local9_full_reference_mask_diagnostic",
+    "target_rgb_at_query": "forbidden",
+    "target_rgb_compatible_information": "forbidden",
+    "target_masks": "opened_only_after_all_variant prediction receipts are sealed"
+  },
+  "representation_ladder": [
+    {
+      "name": "exact_capability",
+      "source": "official DINOv3 and SAM3 adaptor projection before exact MPR",
+      "role": "lifting/fusion ceiling"
+    },
+    {
+      "name": "exact_raw_adapted",
+      "source": "exact raw RADIO MPR followed by the same frozen official DINOv3/SAM3 adaptors",
+      "role": "projection-order attribution"
+    },
+    {
+      "name": "compact_field",
+      "source": "compact canonical RADIO field followed by the same in-process frozen official DINOv3/SAM3 adaptor modules",
+      "role": "compression attribution"
+    }
+  ],
+  "same_compiler": {
+    "graph": "disabled_not_constructed",
+    "prototype_count": 4,
+    "prototype_strategy": "spherical_mean_fps",
+    "seed_construction": "winner_take_all",
+    "seed_normalization": "independent_max",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "score_calibration": "none",
+    "direct_registered_unary_weight": 0.0,
+    "probability": "sigmoid(K4 weighted cosine logit)"
+  },
+  "same_renderer": {
+    "operator": "alpha-normalized scalar Gaussian compositor",
+    "feature_contribution_gamma": 1.0,
+    "invalid_rows": "zero abstention without valid-support renormalization",
+    "target_resize": "bilinear continuous score"
+  },
+  "required_outputs": [
+    "full global-row primitive unary logits and probabilities with valid mask",
+    "reference rendered unary",
+    "per-target rendered unary sealed before target-mask access",
+    "fixed probability 0.5 IoU",
+    "reference-only calibrated IoU on the frozen 0.99..0.03 grid",
+    "primitive exact-to-compact MAE/RMSE/Pearson"
+  ],
+  "interpretation": {
+    "compact_close_to_exact_capability": "the remaining SPIn deficit is mainly observation/correspondence/query-interface rather than compact compression",
+    "exact_capability_materially_above_compact": "field compression/readout remains a causal SPIn unary bottleneck",
+    "exact_raw_materially_below_exact_capability": "projection-before-MPR preserves task capability lost by adaptor-after-fusion"
+  },
+  "no_tuning": true,
+  "gpu": {
+    "physical_index": 1,
+    "visibility": "CUDA_VISIBLE_DEVICES=1",
+    "logical_device": "cuda:0",
+    "driver_preload": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "temperature_policy": "check only before and after; abort only above 88C twice consecutively"
+  }
+}

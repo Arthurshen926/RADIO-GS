@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_consensus_scale_fusion_dev2_v1",
+  "status": "registered before candidate runs",
+  "hypothesis": "Raw-peak hard scale selection is sensitive to one isolated primitive response and chooses the smallest radius for most queries. Equal fusion of all three calibrated scale observations after spatial smoothing should reward cross-scale semantic consensus without a learned or scene-specific parameter.",
+  "candidate": {
+    "positive_negative_scoring": "accepted canonical-negative relevancy",
+    "scale_fusion": "equal_mean_after_independent_knn10_smoothing_before_final_per_query_minmax",
+    "formula": "smoothed_q = mean_k(knn10(relevancy_kq))",
+    "trainable_parameters": 0,
+    "mixture_temperature": null,
+    "scene_specific_parameters": false,
+    "target_mask_access": false
+  },
+  "development_scenes": ["figurines", "waldo_kitchen"],
+  "baseline_miou": {
+    "figurines": 0.4753371775,
+    "waldo_kitchen": 0.2954942882,
+    "macro": 0.3854157329
+  },
+  "gate": {
+    "primary": "mIoU improves on both development scenes",
+    "secondary": "two-scene macro improves by at least 0.01",
+    "on_failure": "reject equal consensus fusion and keep canonical relevancy with frozen raw-peak scale selection"
+  }
+}

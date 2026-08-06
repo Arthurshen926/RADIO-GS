@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_full8_expansion_v1",
+  "registered_at": "2026-08-05T19:00:00+08:00",
+  "status": "registered_before_builder_authority_generalization_remaining_source_completions_gates_or_target_predictions",
+  "claim_boundary": "Posthoc full-cohort expansion after the two-task source-only sentinel passed. The remaining six target outcomes have not been opened for this candidate at registration. The final full8 result remains a method-development result rather than an independent validation set.",
+  "lineage": {
+    "sentinel_preregistration_path": "paper/artifacts/nvos_source_completion_loo_abstention_preregistration_20260805.json",
+    "sentinel_preregistration_sha256": "8436e72685cf41bc2b0417c2493b6f1df74c7aa9249ab6513cfab7246edd78d4",
+    "sentinel_implementation_correction_path": "paper/artifacts/nvos_source_completion_loo_abstention_implementation_correction_20260805.json",
+    "sentinel_implementation_correction_sha256": "1bc2944fe71205f147c67b7b484e64856fa3b51f3eee9a68a05cbe36fd66bda1",
+    "sentinel_results_path": "paper/artifacts/nvos_source_completion_loo_abstention_sentinel_results_20260805.json",
+    "sentinel_results_sha256": "7ab8b401738e75e5756a73498dbc26fafd3d74a22f1b3404bf26610ce640d30f",
+    "sentinel_scope_correction_path": "paper/artifacts/nvos_source_completion_loo_abstention_sentinel_scope_correction_20260805.json",
+    "sentinel_scope_correction_sha256": "7f0148cee42cea0ce0ee01830dcfdb4f4913bc492ba90d768b7a86b3d8a317b3",
+    "sentinel_promotion_passed": true
+  },
+  "frozen_dataset_authority": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "legacy_protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "full_cohort_task_instances": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "horns_left",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "already_sealed_sentinel_task_instances": [
+      "fern",
+      "horns_left"
+    ],
+    "fixed_remaining_task_order": [
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "remaining_task_count": 6,
+    "unit_of_aggregation": "task_instance_scene_macro",
+    "horns_note": "horns_center and horns_left share base_scene_id horns but are distinct frozen task instances with different signed scribbles and ground truth."
+  },
+  "fixed_remaining_task_authority": {
+    "flower": {
+      "prompt_frame_id": "IMG_2983",
+      "target_frame_id": "IMG_2962",
+      "canonical_field_sha256": "de7c89ec123946d3782e9c4b3b07abe29b02a8d31d930a5d4f7f5440ed152b36"
+    },
+    "fortress": {
+      "prompt_frame_id": "IMG_1821",
+      "target_frame_id": "IMG_1800",
+      "canonical_field_sha256": "e9b1f4e573ba237c278b2616acad16a62dd1357b75923644c067ae4fb57eadb2"
+    },
+    "horns_center": {
+      "prompt_frame_id": "DJI_20200223_163055_437",
+      "target_frame_id": "DJI_20200223_163024_597",
+      "canonical_field_sha256": "7addbbbf48fd3b7c28f540d07fa15b0f7fe2410b2fb168da5e1a74c666d3171b"
+    },
+    "leaves": {
+      "prompt_frame_id": "IMG_3011",
+      "target_frame_id": "IMG_2997",
+      "canonical_field_sha256": "edd2c7bfc7b1e6fd09d10b7daed9b74afddcf3df0578353748a7ca2e948033db"
+    },
+    "orchids": {
+      "prompt_frame_id": "IMG_4479",
+      "target_frame_id": "IMG_4480",
+      "canonical_field_sha256": "6c71bc70233312584b68c30312c40d1ce112c187c9deda0fad49f28350b8f9a4"
+    },
+    "trex": {
+      "prompt_frame_id": "DJI_20200223_163607_906",
+      "target_frame_id": "DJI_20200223_163619_411",
+      "canonical_field_sha256": "408d3bb5d2ce08f943586417fe4b2245888c75f72b5bfc789efb970f4d55d8f7"
+    }
+  },
+  "source_completion_method_unchanged": {
+    "official_sam3_source_commit": "46957e47805eaa273f4aa7bbbd25a88bca9108ce",
+    "checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "source_rgb_only": true,
+    "trials": 10,
+    "positive_points_per_trial": 3,
+    "negative_points_sent_to_sam3": 0,
+    "point_sampling": "deterministic SplitMix64 rank of raw positive scribble pixels, take 30 and reshape contiguously to ten triplets",
+    "multimask_output": false,
+    "trial_aggregation": "arithmetic mean of ten official binary SAM3 masks",
+    "legacy_completed_mask": "Li threshold retained only for artifact compatibility; the promoted probability-preserving unary consumes the trial mean and entropy reliability",
+    "scribble_overwrite": "raw positive true then raw negative false",
+    "decoder_resolution": [
+      1008,
+      756
+    ],
+    "dtype": "bfloat16",
+    "scene_specific_method_changes": false
+  },
+  "source_only_gate_unchanged": {
+    "method": "all_trial_loo_majority_iou_v1",
+    "leave_one_out_consensus": "mean(other_nine)>=0.5",
+    "heldout_metric": "binary_jaccard_iou",
+    "minimum_each_heldout_iou": 0.5,
+    "acceptance": "all_heldout_trials_pass",
+    "empty_policy": "fail_closed",
+    "accept_action": "retain_probability_preserving_source_completion_reliability",
+    "reject_action": "original_two_channel_raw_signed_scribble_adjoint_and_frozen_hard_seed_anchor_only_probability",
+    "target_rgb_mask_or_metric_used": false,
+    "learned_or_scene_specific_constants": false
+  },
+  "builder_authority_generalization": {
+    "allowed_change": "Replace the sentinel-only scene-order guard with two exact registered authorities: the legacy horns_left,fern sentinel order and this exact remaining-six order; validate complete-file manifest SHA256 and complete-file registration SHA256 before CUDA initialization.",
+    "forbidden_changes": [
+      "point sampling",
+      "SAM3 model or checkpoint",
+      "SAM3 call count or prompt labels",
+      "trial aggregation",
+      "scribble overwrite",
+      "source-only gate statistic or threshold",
+      "evaluator compiler, readout, threshold, or graph setting"
+    ],
+    "wrong_manifest_order_subset_duplicate_or_registration": "fail_closed_before_model_loading"
+  },
+  "execution_freeze": {
+    "phase_1": "Generate, reload, and hash all six source-completion artifacts in the fixed remaining-task order without opening target RGB, masks, or metrics.",
+    "phase_2": "Generate and hash all six source-only LOO gate receipts before any candidate target rendering.",
+    "phase_3": "Only after all phase-2 receipts exist, render and persist all six primitive unaries and target scores under the frozen evaluator.",
+    "phase_4": "Only after all six target scores exist, open target masks, report every remaining-task result, and combine with the two sealed sentinel results for full8 macro aggregation.",
+    "method_mutation_after_any_target_score": false
+  },
+  "output_authority": {
+    "source_completion_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1",
+    "candidate_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_source_completion_loo_abstention_full8_v1",
+    "no_clobber": true
+  },
+  "reporting": {
+    "report_all_remaining_task_results_regardless_of_outcome": true,
+    "full8_macro": "scene macro over the eight frozen task instances, using the already sealed fern and horns_left final reports plus the six new reports",
+    "do_not_select_per_task_from_target_metric": true,
+    "do_not_change_gate_after_partial_results": true
+  },
+  "thermal_policy": {
+    "power_limit_w": 300,
+    "poll": "launch and stage boundary only unless abnormal",
+    "abort": "temperature at least 88C twice consecutively",
+    "gpu_launch_at_registration": false
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_factorized_complementary_coverage_numeric_addendum_v1",
+  "registered_at": "2026-08-06T00:10:00+08:00",
+  "status": "registered_after_target_blind_numeric_failure_and_before_any_prediction_receipt_or_target_mask_access",
+  "parent": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "superseded_numeric_implementation": {
+    "path": "paper/artifacts/spin_lego_quantile_coverage_fp32_projection_addendum_20260805.json",
+    "sha256": "42f141e626a99ea646576dc57c48bb6b5ff8c368aa0b42235eed06b9efd45261",
+    "scope": "scalar numerator divided by separately accumulated alpha followed by a 16-epsilon admissibility check"
+  },
+  "trigger": {
+    "scene": "leaves",
+    "frame": "image001",
+    "stage": "source-visible coverage before margin construction",
+    "failure_log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/logs/build.log",
+      "sha256": "8db39015ca9f2cfa4983e88fe3fcaf8bbd58d06025f4dae9a21fce77be4729e6"
+    },
+    "maximum_observed_positive_overshoot": 0.000008344650268554688,
+    "prior_absolute_tolerance": 0.0000019073486328125,
+    "prediction_arrays_written": false,
+    "prediction_receipt_written": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "diagnosis": {
+    "mathematical_invariant": "0 <= sum_i(W_i*v_i)/sum_i(W_i) <= 1 for binary v_i and nonnegative W_i",
+    "numeric_failure": "the scalar numerator and geometric alpha are accumulated through different FP32 output channels, so their independently rounded values need not preserve numerator<=denominator near weak support",
+    "why_threshold_relaxation_is_rejected": "a larger scene-derived epsilon would be an avoidable data-dependent numeric constant and would not restore the algebraic invariant"
+  },
+  "implementation_correction": {
+    "primitive_channels": [
+      "v_i=1[source reference responsibility weight is positive]",
+      "1-v_i"
+    ],
+    "render": "render both channels in one unnormalized Gaussian feature-compositor call with contribution_gamma=1",
+    "visible_mass": "first rendered channel",
+    "invisible_mass": "second rendered channel",
+    "denominator": "visible_mass+invisible_mass",
+    "coverage": "FP64 visible_mass/denominator when denominator>0, cast once to FP32; exact-zero denominator is unsupported background with exact-zero coverage",
+    "nonnegative_requirement": true,
+    "finite_requirement": true,
+    "postcondition": "coverage must be finite and exactly within [0,1] without clipping",
+    "scalar_alpha_diagnostic": "the renderer alpha map may be retained only as a diagnostic and cannot define the corrected denominator",
+    "new_tunable_constant": false
+  },
+  "equivalence_argument": {
+    "exact_arithmetic": "sum_i(W_i*v_i)+sum_i(W_i*(1-v_i))=sum_i(W_i), hence paired coverage equals the registered alpha-normalized scalar coverage",
+    "support_epsilon": 0.0,
+    "support_semantics": "exact-zero denominator is unsupported background and receives zero; every strictly positive paired denominator uses the FP64 ratio",
+    "query_semantics_changed": false,
+    "source_visibility_changed": false,
+    "ecdf_or_threshold_changed": false,
+    "target_distribution_used": false,
+    "parameter_scan": false
+  },
+  "verification_before_promotion": [
+    "fail closed on negative or non-finite paired masses",
+    "require corrected coverage in [0,1] for every frozen target frame",
+    "record maximum absolute difference from the legacy scalar-alpha coverage on pixels where the legacy value is within its original 16-epsilon admissibility interval",
+    "seal every coverage, quantile, threshold and continuous-margin array before any target mask access"
+  ]
+}

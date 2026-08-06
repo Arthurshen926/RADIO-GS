@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_only_method_result",
+  "experiment": "canonical-factorized-radio-v1-fern-source-only-field",
+  "status": "passed_all_registered_source_only_gates",
+  "capacity": {
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "adaptive_rule_interpretation": "Fern passes at the smallest registered legacy capacity, so no dimension increase is permitted."
+  },
+  "artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/fields/trainable_basis_d256_l128.pth",
+    "sha256": "8fc58e09dee9e62cf4831ab2db06549118aa59e6b0917ae3ecce72f7346c53d3",
+    "report_sha256": "1142a1805277c3a0f17453f458e0b60fe4a5e082a38c685d25f2494806757639"
+  },
+  "source_only_metrics": {
+    "pca_reconstruction_cosine": 0.9957804679870605,
+    "pca_explained_variance_ratio": 0.9849429726600647,
+    "direction_mean_cosine": 0.9943143129348755,
+    "direction_p05_cosine": 0.9843645691871643,
+    "mean_abs_log_amplitude_error": 0.010530044324696064,
+    "p95_abs_log_amplitude_error": 0.025358684360980988,
+    "dino_v3_target_mean_cosine": 0.9977120757102966,
+    "dino_v3_target_p05_cosine": 0.9921494722366333,
+    "sam3_target_mean_cosine": 0.9891706109046936,
+    "sam3_target_p05_cosine": 0.9707105159759521,
+    "all_absolute_gates_passed": true
+  },
+  "decision": "Promote this field to query-independent capability materialization and the already frozen graph-free NVOS Fern unary sentinel. Do not increase capacity and do not tune graph or threshold.",
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

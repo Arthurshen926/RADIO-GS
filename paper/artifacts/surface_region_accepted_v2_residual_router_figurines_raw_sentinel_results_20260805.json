@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_physical_v2_residual_router_figurines_raw_sentinel_result_v1",
+  "status": "complete_failed_closed",
+  "protocol": {
+    "scene": "figurines",
+    "preset": "vala_repo_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "queries": 21,
+    "frames": 4,
+    "evaluated_pairs": 56,
+    "per_scene_or_per_query_tuning": false
+  },
+  "source_parity_gate": {
+    "artifact": {
+      "path": "paper/artifacts/surface_region_accepted_v2_residual_router_figurines_raw_source_parity_20260805.json",
+      "sha256": "ac4b5d1a382b8ac9ccaa478c723485d1a405186034a6009acd3aa7bf0d052a42"
+    },
+    "valid_primitives": 82603,
+    "pearson": 0.9999993443489075,
+    "mean_absolute_error": 0.00006705174018861726,
+    "maximum_absolute_error": 0.0004990100860595703,
+    "passed": true,
+    "interpretation": "The exact same-run slot-zero control restores the historical accepted raw-gauge probability route; the previous L2 sentinel was a deployment-gauge confound."
+  },
+  "results": {
+    "exact_same_run_slot0_control": {
+      "streamed_score_cache_sha256": "6d4e8694cdb0a24f753600641b041c84a48460aa5c96fec103c003a098543bf4",
+      "authority_score_cache_sha256": "d0ef42fe972b5bee097a919e355816ca532a46395a87f42eb87d844121df533b",
+      "result_sha256": "2c2299198a42c80a374852b74857cdacf0f6e14d2a96ebd00d8d32515480d147",
+      "miou": 0.4753396809101105,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.6820253729820251,
+      "trimap_iou": 0.3808259963989258
+    },
+    "residual_query_router": {
+      "streamed_score_cache_sha256": "4afffbe066920b80b1c02d7a754873018f6a181897f1a0ed828e51a247c76350",
+      "authority_score_cache_sha256": "b69f2b0728048cc94e390b755927b05790f6abccbc865c34241fc9781014c436",
+      "result_sha256": "89f8129b988248bc63a7ff786ebfbbf76bac7d4fb8e979d8c24ee462b698cc55",
+      "miou": 0.4392955005168915,
+      "acc025": 0.75,
+      "acc050": 0.4642857142857143,
+      "boundary_f": 0.6591907143592834,
+      "trimap_iou": 0.4208342730998993,
+      "delta_miou_over_slot0": -0.036044180393218994,
+      "delta_boundary_f_over_slot0": -0.0228346586227417,
+      "delta_trimap_iou_over_slot0": 0.04000827670097351
+    }
+  },
+  "failure_analysis": {
+    "categories_improved": 6,
+    "categories_unchanged": 1,
+    "categories_regressed": 14,
+    "largest_improvements": {
+      "pikachu": 0.20992040634155273,
+      "toy elephant": 0.16964071989059448,
+      "miffy": 0.07273499481379986
+    },
+    "largest_regressions": {
+      "waldo": -0.2709755301475525,
+      "toy cat statue": -0.25297102332115173,
+      "porcelain hand": -0.17039495706558228,
+      "green apple": -0.13169610500335693
+    },
+    "mechanistic_interpretation": "The residual modes contain useful missing evidence for a minority of queries, but the globally trained router is not sufficiently calibrated to preserve the immutable slot-zero support on scene-disjoint object instances. For the largest regressions it generally selects a broader primitive support, increasing false positives. Generic descriptor/response gates therefore did not predict frozen support-selection quality."
+  },
+  "decision": {
+    "candidate_floor_miou": 0.4803371775,
+    "beats_exact_same_run_control": false,
+    "beats_candidate_floor": false,
+    "promote": false,
+    "run_remaining_lerf_scenes": false,
+    "full4_opened": false,
+    "next_method_requirement": "Keep immutable slot-zero probability as a calibrated prior and allow residual modes to contribute only through target-blind OOF evidence or a bounded prior-preserving update; do not replace the base probability by unconstrained router selection."
+  },
+  "thermal_execution": {
+    "physical_gpus": [0, 1],
+    "poll_seconds": 180,
+    "hard_max_temp_c": 88,
+    "consecutive_overheat_polls": 2,
+    "soft_pause": false,
+    "maximum_observed_stage_boundary_temperature_c": 59,
+    "guard_intervention": false
+  }
+}

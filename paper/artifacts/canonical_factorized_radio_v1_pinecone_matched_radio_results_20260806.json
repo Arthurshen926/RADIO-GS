@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_matched_top1_cache_result",
+  "recorded_at": "2026-08-06T03:10:29+08:00",
+  "scene": "pinecone",
+  "feature_space": "radio",
+  "source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_pinecone_source_chain_preregistration_20260806.json",
+    "sha256": "8010015f8ceaa83f5434e428b313c46622a69a9db14e5888415857bfe312253d"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/raw_radio_matched_top1.pt",
+    "sha256": "20a35c1260dff71c34d827b7dba316f33283eea33b136d214356d56cd8b9214d",
+    "report_sha256": "04d4075800207c89811d35221ca629a43c7429dbf74507012f5cb49cc718fa5b",
+    "support_sha256": "dd4d6c4dc8b8a2d6273344bacb6c3d3ed638cbeaa4526732175d88b2b61818ea",
+    "feature_dim": 1280,
+    "channel_shards": 5
+  },
+  "statistics": {
+    "num_gaussians": 450000,
+    "valid_count": 310718,
+    "views": 99,
+    "median_views_if_valid": 24.0
+  },
+  "validation": {
+    "formal_sharded_loader_all_hash_gates": "passed",
+    "feature_space": "radio",
+    "geometry_xyz_sha256": "c37ca284eeb405ae7365258a43e3fc7a3e55a3120692ecab3b0ce065ed628b65",
+    "shared_responsibility_sha256": "b8e91d82af0889fc546d1a868c60a75316f44a043d5c5179c9de983104db5f10",
+    "support_matches_sam3_exactly": true
+  },
+  "resource_observation": {
+    "physical_gpu": 1,
+    "maximum_temperature_c": 70,
+    "thermal_stop_triggered": false
+  },
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

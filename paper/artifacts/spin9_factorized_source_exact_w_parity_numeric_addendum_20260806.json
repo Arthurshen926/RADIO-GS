@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_factorized_source_exact_w_parity_numeric_addendum_v1",
+  "recorded_at": "2026-08-06T06:01:00+08:00",
+  "status": "registered_after_source_only_numeric_failure_and_before_successful_pinecone_gauge_build",
+  "scope": "uniform_full9_source_only_exact_w_lineage_authentication",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "observed_failure": {
+    "scene": "pinecone",
+    "target_distribution_opened": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "visible_support_exact": true,
+    "visible_rows": 187531,
+    "failed_rows_under_previous_tolerance": 1,
+    "failed_global_row": 92179,
+    "exact_reference_mass": 0.0005957498797215521,
+    "oof_reference_mass": 0.0005938276881352067,
+    "absolute_error": 0.000001922191586345434,
+    "relative_error": 0.003226507720394083,
+    "reference_relative_error_p9999": 0.0002917575091625306,
+    "exact_reference_mass_sum": 174118.9150880513,
+    "oof_reference_mass_sum": 174118.94302975928
+  },
+  "correction": {
+    "previous_rtol": 0.001,
+    "previous_atol": 0.000001,
+    "corrected_rtol": 0.001,
+    "corrected_atol": 0.000002,
+    "support_equality_remains_exact": true,
+    "source_fold_hash_and_gate_binding_remain_exact": true,
+    "native_exact_w_hash_and_authority_binding_remain_exact": true,
+    "deployed_source_probability": "native exact-W adjoint only",
+    "deployed_source_weight": "native exact-W visible mass only",
+    "oof_numeric_values_used_for_deployed_gauge": false,
+    "reason": "The OOF evaluator and native exact-W exporter use independent floating-point accumulation paths. The parity check authenticates lineage; it must not reject a single near-zero-mass row whose two-micro-unit discrepancy has negligible weighted-ECDF influence while exact support, hashes, and native exact-W deployment remain unchanged.",
+    "scene_specific_branch": false,
+    "parameter_scan": false,
+    "method_threshold_changed": false
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/build_spin9_factorized_source_quantile_full_fit.py",
+    "previous_sha256": "f3eaf8c72c9fad186efb8289a3fa08be0464806955a960e5bb944dcd5c3a7370",
+    "corrected_sha256": "98fe61012082dc4ec3c876fb4c05f363f5b591d48e3178e75c76b0681f14fa01",
+    "syntax_check": "pass"
+  },
+  "safety": {
+    "source_only": true,
+    "target_distribution_opened": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_frozen_v2_residual_codebook_v1_device_closure",
+  "status": "closed_before_any_training_epoch_or_new_generic_metric",
+  "supersedes_trainer_sha256": "c4b2c5b0c31cbf4abcfa02b71c075de8f956288e06ebd5fe7997fae8bb2618a1",
+  "trainer_sha256": "8d66706bc2c3b565a31ed3e4ce50e87f6512dc934416f2d42a0c307ef4b512d6",
+  "change": "Move the already SHA-verified frozen V2 control module to the requested training device before identical-control evaluation.",
+  "method_semantics_changed": false,
+  "failed_attempt": {
+    "entered_training_epoch": false,
+    "created_checkpoint": false,
+    "opened_new_generic_metric": false,
+    "opened_benchmark": false,
+    "failure": "CPU control parameters were evaluated with CUDA cache tensors."
+  },
+  "validation": {
+    "py_compile_passed": true,
+    "focused_tests_passed": 13,
+    "focused_tests_failed": 0
+  }
+}

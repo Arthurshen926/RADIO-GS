@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_lego_source_footprint_fold_build_v1",
+  "completed_at": "2026-08-05T14:03:52+08:00",
+  "status": "pass",
+  "preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_fold_build_preregistration_20260805.json",
+    "sha256": "7dba0f1b61947530535774253ac93bc067cceaef0f38d1e0c8b232c624056e40"
+  },
+  "row_domain_correction": {
+    "path": "paper/artifacts/spin_lego_source_footprint_row_domain_correction_20260805.json",
+    "sha256": "21abbed65465ad3a9e88c22cf0755d4137c5f32e0310e9cf58e7813416d3f7f8",
+    "first_attempt_artifact_written": false
+  },
+  "artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority.pt",
+    "sha256": "07328660ae6844c2348a936d000d8080c79b3494c84399a03fbc57a2d0fd7396",
+    "authority_sha256": "50e8286e85cad6b2a7c0294b385bb7e1b3b91226285463057d74ae900bce0ffa",
+    "tensor_bundle_sha256": "cc84252803a37abbef9b60491be5fe0426f3cd08f6843af398ed9e415bb50d65",
+    "report_sha256": "64fb7f6dae739af39e6097b780cb0a6a021a87064328d82cbbd03c5d644f8cd0"
+  },
+  "source_authorities": {
+    "exact_w_sha256": "f572dede45dca479f7430b7735a0e63805ea598e1b61d6a1d6336b00efbdd1aa",
+    "exact_w_authority_sha256": "fed59f104a3930157c09acd2f4470cb294cb9d52b939dd1fe75da366e05ab170",
+    "primitive_row_authority_sha256": "ca84a2f204977761aed30265af35ffabd7b89037b59c05f2f08c5b0e49a4a988"
+  },
+  "row_domain": {
+    "input_triplets": 71039533,
+    "retained_triplets": 45962147,
+    "excluded_triplets": 25077386,
+    "input_weight_mass": 755221.9979039058,
+    "retained_weight_mass": 582540.5889257896,
+    "excluded_weight_mass": 172681.40897811623,
+    "filter": "exact membership in frozen sorted global_rows; no labels or queries"
+  },
+  "population": {
+    "primitive_rows": 128780,
+    "visible_rows": 88360,
+    "invisible_rows": 40420,
+    "fold_rows": [28914, 40864, 59002],
+    "fold_visible_rows": [28914, 40864, 18582],
+    "mean_dominant_footprint_purity_visible": 0.9416976571169072
+  },
+  "raster_groups": {
+    "height": 764,
+    "width": 1015,
+    "block_rows": 6,
+    "block_cols": 8,
+    "block_count": 48,
+    "invisible_group_id": 48
+  },
+  "verification": {
+    "strict_artifact_reload": true,
+    "complete_file_sha_replayed": true,
+    "authority_digest_replayed": true,
+    "all_tensor_digests_replayed": true,
+    "tensor_bundle_replayed": true,
+    "focused_tests": "18 passed"
+  },
+  "safety": {
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "decision": "eligible_for_source_adjoint_population_check_and_structured_oof"
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "experiment": "canonical_radio_raw_amplitude_probe_v1",
+  "status": "complete_query_free_source_feature_audit_before_factorized_cache_build_or_target_evaluation",
+  "scene": "spin9:lego",
+  "source": {
+    "feature_manifest": "output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/radio_features/frame_manifest.json",
+    "feature_manifest_sha256": "0fd8298fc85c74feaab9d6193fec914257508be893f25be7005bb9f032ef82b1",
+    "radio_version": "c-radio_v4-h",
+    "feature_grid": [
+      48,
+      63
+    ],
+    "feature_dimension": 1280,
+    "dtype": "float16",
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "sampling": {
+    "frame_indices": [
+      0,
+      9,
+      18,
+      27,
+      36,
+      45,
+      54,
+      63,
+      72,
+      81,
+      90,
+      101
+    ],
+    "tokens": 36288,
+    "selection": "fixed evenly spaced source-frame indices chosen before statistics"
+  },
+  "raw_token_l2_norm": {
+    "mean": 31.169519424438477,
+    "std": 1.9233410358428955,
+    "coefficient_of_variation": 0.06170582900726083,
+    "minimum": 24.997108459472656,
+    "p001": 27.256616592407227,
+    "p01": 27.99541664123535,
+    "p05": 28.644697189331055,
+    "median": 30.864635467529297,
+    "p95": 34.52643966674805,
+    "p99": 37.21617126464844,
+    "p999": 40.23480224609375,
+    "maximum": 43.23942947387695
+  },
+  "raw_token_log_l2_norm": {
+    "mean": 3.437598466873169,
+    "std": 0.06024310737848282,
+    "p01": 3.332040786743164,
+    "p05": 3.354968309402466,
+    "median": 3.4296109676361084,
+    "p95": 3.5417253971099854,
+    "p99": 3.616743326187134
+  },
+  "frozen_old_mpr": {
+    "path": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/raw_radio.pt",
+    "sha256": "e4a287e3b9e863a321d2c3f244a9e265014eda9d0b94415cc3f3cf53e025cc27",
+    "old_contract": "normalize every raw pixel token before MPR and retain the mean-resultant norm",
+    "consequence": "The persisted feature norm is directional agreement in [0,1], not the observed RADIO raw amplitude near 31."
+  },
+  "interpretation": {
+    "raw_amplitude_is_exactly_constant": false,
+    "raw_amplitude_variation_is_material": true,
+    "main_scale_mismatch": "The old normalized MPR sends a norm below or near one to a frozen nonlinear adaptor trained on raw RADIO tokens whose norm is about 31, confounding adaptor calibration with view agreement.",
+    "relation_to_existing_dynamic_range_audit": "The independently frozen SPIn ladder found that adaptor-after-normalized-raw-MPR collapses primitive probability standard deviation by about 202 times.",
+    "decision": "Proceed with a versioned factorized MPR that restores responsibility-weighted raw log-amplitude while storing view-directional resultant separately. Do not mutate canonical-mpr-v1."
+  },
+  "target_metric_computed": false
+}

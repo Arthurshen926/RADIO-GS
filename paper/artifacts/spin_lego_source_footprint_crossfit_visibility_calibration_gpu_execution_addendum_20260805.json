@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "registration": "spin_source_footprint_crossfit_visibility_calibration_v1_gpu_execution_addendum",
+  "registered_at": "2026-08-05T18:59:58+08:00",
+  "status": "gpu_execution_approved_but_waiting_for_gpu0_owner_release",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_crossfit_visibility_calibration_preregistration_20260805.json",
+    "sha256": "10cf24dac7811c30e21e723dbd49c478a585903f3f09a328b6960ffb986ed15e"
+  },
+  "approval_boundary": {
+    "approved": true,
+    "condition": "Do not start while the scene0097 exact-state smoke owns GPU0; begin only after the coordinating agent explicitly reports GPU0 free.",
+    "method_change_authorized": false,
+    "parameter_scan_authorized": false,
+    "target_access_authorized": false
+  },
+  "sealed_implementation": {
+    "contract": {
+      "path": "radio_gs/querying/spin_source_footprint_visibility_calibration.py",
+      "sha256": "c064afb2d42139a403b278995d4143f5794c215cd50a5f6df0a0db9fe747e372"
+    },
+    "matched_oof_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_matched_oof.py",
+      "sha256": "714c965166719389bbc77976b89ad5561bf6a3293f030b3b02ff44eeea2c3661"
+    },
+    "calibration_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_visibility_calibration.py",
+      "sha256": "729ae79b2f2ece754d88f92ff79e6186b335d981b495d96b3212e51613540a3d"
+    },
+    "tests": {
+      "path": "tests/test_spin_source_footprint_visibility_calibration.py",
+      "sha256": "2e3f7ba1216a02a6c5d0ee5672aec02fcfbc6704a9f1395261e7b002e00e5be5",
+      "focused": "9 passed",
+      "query_diffusion_and_footprint_compatibility": "48 passed before the final builder integration test was added"
+    },
+    "real_asset_cpu_preflight": {
+      "status": "pass",
+      "valid_rows": 128780,
+      "heldout_observed_rows": [28914, 40864, 18582],
+      "relation_shape": [128780, 256],
+      "knn_shape": [128780, 201],
+      "all_file_row_geometry_and_lineage_sha256_validated": true
+    }
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "logical_device": "cuda:0",
+    "fold_schedule": "sequential 0,1,2",
+    "thermal_observation": "once before launch, at every fold boundary, and approximately every 180 seconds during a fold",
+    "thermal_stop": "stop only after two consecutive observations at or above 88 C",
+    "soft_pause": false,
+    "power_limit_w": 300,
+    "estimated_vram_gib": "1-2",
+    "estimated_time_per_fold_minutes": "2-5",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_visibility_calibration_v1/lego/matched_oof",
+    "output_root_absent_at_addendum": true
+  },
+  "post_fold_rule": "After all three immutable fold artifacts are sealed, run the CPU calibration builder. Stop before target coverage or candidate rendering if the three fold thresholds span more than 0.10."
+}

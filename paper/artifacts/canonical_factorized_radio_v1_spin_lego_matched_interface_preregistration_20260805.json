@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_lego_matched_interface_v1",
+  "registered_at": "2026-08-05T15:06:05+08:00",
+  "status": "registered_before_building_factorized_query_diffusion_caches_or_rendering_matched_interface_predictions",
+  "question": "Under the same previously frozen SPIn query-conditioned diffusion and source-only reference calibration interface, does canonical-factorized-radio-v1 retain or improve the compact canonical field result?",
+  "reason_for_matched_interface": {
+    "previous_result": {
+      "foreground_iou": 0.6331459007792092,
+      "reference_selected_threshold": 0.6599999999999997,
+      "query_diffusion_kernel": "ludvig_release_compat"
+    },
+    "factorized_k16_only_result": {
+      "result_receipt": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_full_fit_target_results_20260805.json",
+      "result_receipt_sha256": "35f18acab12bb38001eab898465cf8a689ac18268c65caf22c7f5341346141a2",
+      "foreground_iou": 0.5696462064018898,
+      "query_diffusion_kernel": "none",
+      "score_threshold": 0.5
+    },
+    "method_choice_origin": "The query-conditioned diffusion kernel, K201 Euclidean topology, signed-hash256 DINO relation, bandwidth grid, logistic C, iteration count, positive cap, and propagated reference-threshold source were frozen by the earlier SPIn method before this factorized target result. No new parameter is selected from target metrics."
+  },
+  "frozen_inputs": {
+    "manifest_sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+    "scene_id": "lego",
+    "factorized_field_sha256": "12ebdbe8e18c29e30a9c6f40c466f24e9ed7d2accd8a83ba536fbc90ba808637",
+    "factorized_capability_cache_sha256": "dcdf63e4718f987422b094a74c042b33e78b6d6013d69e12108d0f74c8731147",
+    "factorized_surface_safe_graph_sha256": "feb6aeeffbca39be841a3e6b7bb72b285f6258f0f041e5c1b3529e728c82466b"
+  },
+  "query_independent_cache_build": {
+    "knn": {
+      "builder_sha256": "49f716bbef4d4d8c82a3497bd84cf2ae0fe9c9e329383a49689129172c55a120",
+      "official_num_neighbors": 200,
+      "include_self": true,
+      "effective_k": 201,
+      "construction": "exact scipy cKDTree Euclidean"
+    },
+    "relation": {
+      "builder_sha256": "206803cf3113fbd0e97e93f3212e63be94aca0a4a1c38a7c3579552f161e8d7b",
+      "source": "factorized field official DINOv3 capability rows",
+      "projection": "signed_multiplicative_hash",
+      "output_dimension": 256,
+      "normalization": "l2_after_projection"
+    },
+    "labels_queries_or_target_inputs": false
+  },
+  "fixed_query_interface": {
+    "base_compiler": "K4 spherical_mean_fps exact raster-adjoint direct observation, joint-signed shared seeds, all components",
+    "base_graph": "typed surface-safe K16",
+    "base_readout_stage": "propagated",
+    "query_diffusion_kernel": "ludvig_release_compat",
+    "feature_bandwidth_grid": [0.5, 1.0, 2.0, 4.0, 8.0],
+    "regularizer_bandwidth_grid": [0.125, 0.25, 0.5, 1.0],
+    "logistic_c": 0.01,
+    "iterations": 100,
+    "edge_binarize_threshold": 0.00001,
+    "max_positive_fraction": 0.1,
+    "reference_threshold_source": "propagated",
+    "calibration_input": "declared source reference mask only",
+    "connected_selection": false,
+    "scene_specific_tuning": false
+  },
+  "execution": {
+    "evaluator_sha256": "aaae651102e546f5ebc5e5c783ca7d1f385834034bbdea06e8ca15157ffd951b",
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1",
+    "output_root_was_absent_at_registration": true,
+    "physical_gpu_for_evaluation": 1,
+    "pre_metric_prediction_receipt_required": true
+  },
+  "decision_rule": {
+    "primary": "report frozen target foreground IoU after source-only reference calibration",
+    "promotion": "promote over K16-only factorized result if foreground IoU improves; compare to prior compact 0.6331459007792092 only under this matched interface",
+    "diagnostics": [
+      "reference-selected feature and regularizer bandwidth",
+      "reference-selected rendered threshold",
+      "unary, K16 propagated, query compatibility, and final query-diffusion IoU"
+    ]
+  },
+  "safety": {
+    "previous_factorized_target_metrics_are_known": true,
+    "previous_target_metrics_used_to_choose_new_hyperparameters": false,
+    "restored_interface_was_frozen_before_previous_target_open": true,
+    "new_target_scores_rendered": false
+  }
+}

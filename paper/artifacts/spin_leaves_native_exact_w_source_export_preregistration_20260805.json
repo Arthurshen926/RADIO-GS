@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "registration": "spin_leaves_native_exact_w_source_export_v1",
+  "registered_at": "2026-08-05T23:21:01+08:00",
+  "status": "registered_before_real_export_or_gpu_execution",
+  "purpose": "Export the native-resolution, query-free exact compositor matrix W for the SPIn-NeRF Leaves reference view so source-footprint folds and the full-fit source gauge can be constructed without decoding prompt labels.",
+  "parent_chain": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_spin_leaves_matched_interface_cache_results_20260805.json",
+    "sha256": "12580642a1b2338d3cbbc640f538c64dde8e5bf60d8ac22ecaeb7c5263f3c300"
+  },
+  "scope": {
+    "scene_id": "leaves",
+    "reference_frame_id": "image000",
+    "camera_name": "IMG_2997",
+    "native_width": 1008,
+    "native_height": 756,
+    "prompt_type": "reference_binary_mask",
+    "reference_binary_mask_sha256": "775fde70ff26df13285301007111a14dbab507233ca214d42e3bedf02aabf7bd"
+  },
+  "inputs": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "queue_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712",
+    "gaussfm_config_sha256": "03c4c1119fdcfaaa5af64ecbb08c1f4e2c78eed3fde1f5f6e6688080a932477b",
+    "camera_mapping_sha256": "290c099b0ebeff18167d52ec45064775079fc1db16fb20028a7ce173f432d923",
+    "geometry_checkpoint_sha256": "d96ba9dcf984068e39c2c4f6775f1fb825df245c794ff600849206cdd9590b02"
+  },
+  "implementation": {
+    "header_authority_closure_sha256": "7d95e29467a3f64b47de4bc4a7c981950c8dd78e01dc8f124b40a1a20dcd9d89",
+    "exporter_sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "exact_compositor_sha256": "b342bab12ec0d61fc998b83bfd221895daad43a2e9c731530906177273f299a3",
+    "repository_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd",
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_guard": {
+      "maximum_temperature_c": 88,
+      "start_maximum_temperature_c": 85,
+      "poll_seconds": 30,
+      "maximum_consecutive_overheat_polls": 6,
+      "approximately_continuous_overheat_seconds_before_stop": 180
+    },
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w_report.json"
+  },
+  "forbidden_access": {
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "evaluation_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "post_export_checks": [
+    "reload the cache through the strict PromptResponsibilityAuthority parser",
+    "verify the complete file SHA and all tensor bundle SHA values",
+    "verify native H/W, frame, geometry, camera, compositor, exporter, and source-file bindings",
+    "record triplet count, visible primitive count, peak RSS, telemetry, and stage-end GPU temperature",
+    "do not decode or apply the reference mask"
+  ]
+}

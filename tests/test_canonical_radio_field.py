@@ -2,10 +2,14 @@ import pytest
 import torch
 
 from radio_gs.field import (
+    BASIS_CONDITIONING_CONTRACT_VERSION,
+    MAXIMUM_BASIS_CONDITION_NUMBER_V1,
     AffineBasisDecoder,
     CanonicalGaussianField,
     FeatureSpaceSignature,
+    basis_conditioning_report,
     fit_affine_basis,
+    validate_basis_conditioning,
 )
 from radio_gs.rendering.normalized_splat import affine_commutation_error
 
@@ -184,6 +188,50 @@ def test_encode_is_least_squares_inverse_after_basis_loses_orthogonality():
 
     torch.testing.assert_close(restored, coefficients, atol=2e-6, rtol=2e-6)
     torch.testing.assert_close(decoder(restored), features, atol=2e-6, rtol=2e-6)
+
+
+def test_basis_conditioning_contract_accepts_well_conditioned_basis():
+    basis = torch.tensor(
+        [
+            [2.0, 0.0],
+            [0.0, 0.5],
+            [1.0, 0.2],
+        ]
+    )
+
+    report = validate_basis_conditioning(basis)
+
+    assert report.contract_version == BASIS_CONDITIONING_CONTRACT_VERSION
+    assert report.numerical_rank == 2
+    assert report.condition_number < MAXIMUM_BASIS_CONDITION_NUMBER_V1
+    assert report.to_dict()["rank_tolerance_semantics"].startswith("max(")
+
+
+def test_basis_conditioning_contract_rejects_rank_deficient_basis():
+    basis = torch.tensor(
+        [
+            [1.0, 2.0],
+            [2.0, 4.0],
+            [3.0, 6.0],
+        ]
+    )
+
+    report = basis_conditioning_report(basis)
+    assert report.numerical_rank == 1
+    with pytest.raises(ValueError, match="rank deficient"):
+        validate_basis_conditioning(basis)
+    with pytest.raises(ValueError, match="rank deficient"):
+        AffineBasisDecoder(feature_dim=3, coefficient_dim=2, basis=basis)
+
+
+def test_basis_conditioning_contract_rejects_ill_conditioned_basis():
+    basis = torch.diag(torch.tensor([1.0, 1e-7]))
+
+    report = basis_conditioning_report(basis)
+    assert report.numerical_rank == 2
+    assert report.condition_number > MAXIMUM_BASIS_CONDITION_NUMBER_V1
+    with pytest.raises(ValueError, match="condition number"):
+        validate_basis_conditioning(basis)
 
 
 def test_signature_comparison_preserves_but_allows_token_provenance() -> None:

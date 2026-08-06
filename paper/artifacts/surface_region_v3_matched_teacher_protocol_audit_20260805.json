@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_matched_teacher_protocol_audit_v1",
+  "status": "completed_without_benchmark_access",
+  "historical_gate_problem": {
+    "old_reported_v2_selection_score": 0.9487422132264409,
+    "old_reported_v2_all_view_descriptor_cosine": 0.9394547194904751,
+    "old_validation_scenes": [
+      "scene0304_00",
+      "scene0412_00",
+      "scene0412_01",
+      "scene0488_00",
+      "scene0488_01",
+      "scene0568_00",
+      "scene0568_01",
+      "scene0568_02"
+    ],
+    "old_validation_cache_sha256": [
+      "3998f33ac705b4561455b0213732422983b228e032c340c730777dd54718fbb9",
+      "d210be6dd060022fa505344592dc193432d0a023dba59e0cd391116b0eb8da00",
+      "2c3cce72a051daf75e0cfb3283445cf90deba9eb74b304cd300fbaf86debd34a"
+    ],
+    "finding": "These values came from a different validation scene set and an older cache/teacher generation. They are not a causal noninferiority authority for the current fixed-core teacher protocol."
+  },
+  "matched_fixed_core_authority": {
+    "validation_scenes": [
+      "scene0164_03",
+      "scene0187_00",
+      "scene0423_02",
+      "scene0553_00",
+      "scene0593_00",
+      "scene0690_01",
+      "scene0699_00",
+      "scene0702_00"
+    ],
+    "teacher_protocol_sha256": "fedb19c3a70dbc23686a2f4e4f8aca88d508add53ccc3a77f43fa551744201fb",
+    "v2_context_c1024_validation_cache_sha256": [
+      "c97867a10f199deffbc401348de5ba1aee1e0bf6ef71e0ac9a54ae2305270025",
+      "2b2a81a3bf2070c43939c9aa07773d7aee3efd02fb92a20aca24007804e84a1f"
+    ],
+    "v3_validation_cache_sha256": [
+      "7a6c99dc2107d14fe7b0dbed9711a58bc1b3842d7745476ce9bbadd887b83913",
+      "865cb0a7a47f13409e57c978ad6c1072ed6b58d88ad2057e15c5435038d455ac"
+    ],
+    "teacher_tensor_identity": {
+      "rows": 96,
+      "official_summary_tokens_bitwise_equal": true,
+      "official_crop_summaries_bitwise_equal": true,
+      "teacher_mask_bitwise_equal": true,
+      "validation_shard0": {
+        "official_summary_tokens_sha256": "0ba1f325fd07d9e8bef515ab34069a6c2d76e3feefb988112116f022cc47ed86",
+        "official_crop_summaries_sha256": "3665a3d12572f680dbc559fe0bc4360c588d0c44fd6bba873f36440ecb808658",
+        "teacher_mask_sha256": "384cb37eea3234e498afd726315ef56a33e137aad11a1963e7a6bf8736e3a6fb"
+      },
+      "validation_shard1": {
+        "official_summary_tokens_sha256": "cf1a022172f8e6c6a36305a09961e782000aa2e22ffd6c9963e9462f724363fc",
+        "official_crop_summaries_sha256": "a6c2107d0748caa6c20b0b3cf4c8cf4aee90bd0b0815896b0c9c1024e0e4e1e0",
+        "teacher_mask_sha256": "3e1d3a296c7d304a1f295411c4acf48def1c56468957b40eb2a9d2a33181aa62"
+      }
+    },
+    "preexisting_v2_control": {
+      "source": "paper/artifacts/surface_region_codebook_v3_results_20260805.json",
+      "source_sha256": "c588a0ebd547dcdf8343550576147b5c52676c038291f41d247200dbbc115dbc",
+      "canonical_descriptor_cosine": 0.9429590106010437,
+      "teacher_best_slot_cosine_mean": 0.9126817584037781
+    },
+    "v3_no_sparse_candidate": {
+      "checkpoint_sha256": "0d706fe564c1fd9f6a8be510ae33043bca292c727396601bdb0a5d80c312ac22",
+      "mean_descriptor_cosine": 0.9425745929280916,
+      "all_view_descriptor_cosine": 0.9125142038635942,
+      "mean_descriptor_delta_vs_matched_v2": -0.00038441767295205254,
+      "matched_noninferiority_margin": -0.002,
+      "matched_noninferiority_passed": true
+    }
+  },
+  "support_audit": {
+    "v2_relation_vs_v3_hard_core_jaccard_mean": 0.99238,
+    "v2_relation_vs_v3_hard_semantic_jaccard_mean": 0.99311,
+    "conclusion": "The current V3 generic capability is matched to the fixed-core V2 authority and the V2/V3 student support difference is too small to explain the old cross-protocol gap."
+  },
+  "benchmark_state": {
+    "opened": false
+  }
+}

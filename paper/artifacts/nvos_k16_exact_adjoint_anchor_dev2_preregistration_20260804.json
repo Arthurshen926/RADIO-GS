@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_k16_exact_adjoint_anchor_dev2_v1",
+  "status": "registered before opening candidate target outcomes",
+  "motivation": "The K16 multimodal field unary is strong, but the observed scribble/full-mask evidence should be an exact local constraint rather than only a prototype-bank constructor. Test whether exact-adjoint high-confidence rows can strengthen the unary without changing non-anchor rows.",
+  "development_scenes": ["fern", "horns_left"],
+  "fixed_shared_configuration": {
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "prototype_temperature": 0.07,
+    "prompt_registration": "native exact front-to-back raster adjoint",
+    "registered_seed_construction": "joint_signed",
+    "registered_observation_confidence": "poisson_mass_coverage",
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "exclusive_relative",
+    "score_render_resolution": "scaled_renderer",
+    "valid_support_normalization": false,
+    "final_readout": "unary_prior",
+    "target_rgb": false,
+    "target_mask_feedback": false
+  },
+  "control": {
+    "registered_observation_fusion": "additive",
+    "registered_seed_unary_weight": 0.0,
+    "purpose": "Measure the K16 joint-signed prototype unary before any direct anchor overwrite."
+  },
+  "candidate": {
+    "registered_observation_fusion": "hard_seed_anchor_only_probability",
+    "registered_seed_unary_weight": 0.0,
+    "formula": "a=1[c>0 and abs(s)>=0.2]; p=(1-a)*p_field+a*q",
+    "non_anchor_policy": "bitwise preserve the control field unary"
+  },
+  "gate": {
+    "primary": "candidate development-scene macro IoU exceeds the joint-signed control",
+    "safety": "neither scene regresses by more than 0.02 against the control",
+    "expansion": "only if both primary and safety pass, run all six heldout scenes unchanged"
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_evaluator_modified": false,
+    "score_threshold": 0.5
+  }
+}

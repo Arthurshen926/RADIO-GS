@@ -1,0 +1,45 @@
+{
+  "artifact_type": "method_preregistration",
+  "method_contract": "canonical-factorized-radio-v1",
+  "date": "2026-08-05",
+  "repository_head_before_implementation": "16ea8696645a15641b78e3ca5597037d654b90ef",
+  "scope": "pure CPU aggregation, serialization, field-signature, and checkpoint-metadata contracts only",
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_design": false
+  },
+  "execution": {
+    "gpu_used": false,
+    "cache_rebuilt": false,
+    "field_trained": false,
+    "benchmark_evaluated": false
+  },
+  "fixed_design": {
+    "input": "raw RADIO observations indexed by view, primitive, and feature channel",
+    "semantic_direction": "responsibility-weighted mean of per-observation unit directions, renormalized once per primitive",
+    "log_amplitude": "responsibility-weighted population mean of log L2 amplitude over strictly positive-amplitude observations",
+    "directional_resultant": "norm of the responsibility-weighted mean unit direction",
+    "directional_dispersion": "one minus directional_resultant",
+    "log_amplitude_std": "responsibility-weighted population standard deviation in log-amplitude space",
+    "observation_evidence": "sum of effective responsibility weights attached to positive-amplitude observations",
+    "visibility_purity": "effective responsibility mass divided by visible mass",
+    "canonical_feature": "exp(log_amplitude) times semantic_direction",
+    "zero_amplitude_policy": "exclude before logarithm; never evaluate log(0)",
+    "invalid_row_policy": "valid is false and every emitted tensor value is exactly zero",
+    "reliability_contract": "ordered scalar column names and their canonical JSON SHA-256 are persisted and validated",
+    "schema_policy": "new cache and checkpoint schema; canonical-mpr-v1 and canonical checkpoint schema-v1 remain unchanged"
+  },
+  "required_invariants": [
+    "view permutation invariance",
+    "uniform positive feature scaling changes log amplitude by log(scale) and leaves direction/reliability unchanged",
+    "adding equal-amplitude opposite-direction evidence changes directional dispersion without changing log amplitude",
+    "invalid and zero-amplitude rows are finite and exactly zero",
+    "field signature and checkpoint metadata fail closed on every factorized-contract or scalar-column mismatch"
+  ],
+  "implementation_files_planned": [
+    "radio_gs/field/factorized_radio_contract.py",
+    "tests/test_factorized_radio_contract.py"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "artifact_type": "formal_factorized_matched_teacher_cache_result",
+  "recorded_at": "2026-08-05T20:39:02+08:00",
+  "scene": "leaves",
+  "feature_space": "radio",
+  "authorities": {
+    "source_chain_preregistration_sha256": "c2a28b2451bd4aa31a8db5a31204fc6852a3756caa1749a407101759dc6f4dd8",
+    "storage_correction_sha256": "c8899a3af34f9ac4d413daebfa5df70edaa9eeefd880be12e0a470c9b43d014c",
+    "storage_validation_sha256": "0bcf9514902c067ee2c3ec68c20aa469002ed989332e0cdece684fa04d2ee569"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/raw_radio_matched_top1.pt",
+    "manifest_sha256": "3a3bd80ec270e329f0c14d61043cff8ce6f75be9eeac7375edb159be78866ac7",
+    "schema": "radio_gs.channel_sharded_mpr.v1",
+    "feature_shape": [
+      1400000,
+      1280
+    ],
+    "shard_channels": 256,
+    "num_shards": 5
+  },
+  "statistics": {
+    "num_views": 26,
+    "valid_count": 147607,
+    "valid_ratio": 0.10543356835842133,
+    "mean_views_if_valid": 19.90780258178711,
+    "median_views_if_valid": 25.0,
+    "max_views": 26
+  },
+  "formal_loader_gate": {
+    "all_manifest_support_and_shard_hashes": "passed",
+    "feature_output_bundle_sha256": "466248d6546d9fff98289b0c95f435ac18516eeab51f85d4da421111b90e677e",
+    "registration_responsibility_cache_sha256": "6a205bdb6a53f8755006eae583b800cf0fc7d1f234f59bfa1bf76bfca6d86551",
+    "row_fetch_finite": true,
+    "invalid_row_zero_and_reliability_contract": "passed",
+    "require_formal_safety": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

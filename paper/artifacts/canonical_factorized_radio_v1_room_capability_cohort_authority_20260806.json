@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "artifact_type": "factorized_capability_cohort_authority",
+  "experiment": "canonical-factorized-radio-v1-formal-capability-cohort",
+  "registered_at": "2026-08-06T01:24:00+08:00",
+  "scene": "room",
+  "feature_output_bundle_sha256": "f76f3d40fd6317979e8517623d9d2ef7d14bf5b67a52f6ee7c3e0a9a1a807b04",
+  "frozen_cache_authorities": {
+    "radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/raw_radio_matched_top1.pt",
+      "sha256": "f0c2d23b42f8da9e979e8eaee7defc99730fd0d0828d00b065f811191e701b59"
+    },
+    "dino_v3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/dino_v3_matched_top1.pt",
+      "sha256": "106bb9bb28e8ef91d491fcf7422d6a02b863f4da39675cea300b5460ca6a3748"
+    },
+    "sam3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/sam3_matched_top1.pt",
+      "sha256": "815ac86c875aa8e7c3d7f47f88cf99a8d2aa2e360d28681dcbb195094de79fa3"
+    }
+  },
+  "storage_authority": {
+    "schema": "radio_gs.channel_sharded_mpr.v1",
+    "shard_channels": 256,
+    "raw_shards": 5,
+    "dino_v3_shards": 16,
+    "sam3_shards": 4,
+    "formal_loader_all_hash_gates": "passed",
+    "all_manifest_shard_hashes_verified": true,
+    "support_geometry_valid_and_view_counts_exactly_equal": true
+  },
+  "shared_lineage": {
+    "num_gaussians": 291619,
+    "valid_count": 214612,
+    "xyz_sha256": "0f520313afe582b3225890f8c023a760e60a097f9125a95cc2dab92071a7b12c",
+    "registration_responsibility_cache_sha256": "56541bafacd1dc430ba783130c9601821f0c25f9d371f041aa5851a18c4f344c",
+    "geometry_checkpoint_sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "external_carrier_authority": {
+    "config_sha256": "3a1f60c0ae5329dc2fb14391250f4284e0012924cc362a3ed437c5d33a0c85d9",
+    "checkpoint_sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0",
+    "camera_map_sha256": "c89d1b61dd1a4512f4574f7092a0b773c2023b16b18b9c86941a119c34ab89af",
+    "all_three_caller_bound": true,
+    "silent_queue_fallback": false
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

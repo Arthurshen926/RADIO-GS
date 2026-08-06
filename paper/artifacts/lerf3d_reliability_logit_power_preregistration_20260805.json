@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_reliability_logit_power_dev2_v1",
+  "status": "registered_before_candidate_target_metrics",
+  "motivation": "Reliability is evidence precision. A power posterior scales Bernoulli log odds by precision and is more probability-consistent than linear interpolation in probability space.",
+  "candidate": {
+    "formula": "p_tempered=sigmoid(c*logit(clamp(p_canonical_negative,eps,1-eps)))",
+    "reliability_source": "same frozen query-independent canonical_primitive_reliability_v1 sidecars as the linear candidate",
+    "trainable_parameters": 0,
+    "new_thresholds": 0,
+    "scene_specific_parameters": false,
+    "frozen_vala_readout_changed": false,
+    "evaluation_protocol_changed": false
+  },
+  "development_scenes": ["figurines", "ramen"],
+  "frozen_control_miou": {
+    "figurines": 0.4753371775,
+    "ramen": 0.2979446054,
+    "macro": 0.3866408915
+  },
+  "gate": {
+    "macro_minimum_gain": 0.01,
+    "maximum_per_scene_regression": 0.01,
+    "on_pass": "expand unchanged to waldo_kitchen and teatime",
+    "on_fail": "close reliability posthoc family without exponent sweep"
+  },
+  "safety": {
+    "candidate_outputs_opened_before_registration": false,
+    "candidate_target_metrics_opened_before_registration": false,
+    "target_rgb_used": false,
+    "target_masks_used_for_reliability": false
+  }
+}

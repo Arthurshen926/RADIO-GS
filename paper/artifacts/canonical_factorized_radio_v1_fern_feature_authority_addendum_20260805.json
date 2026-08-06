@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "artifact_type": "preregistration_addendum",
+  "experiment": "canonical-factorized-radio-v1 Fern source feature authority",
+  "date": "2026-08-05",
+  "parent_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_figurines_fern_sentinel_preregistration_20260805.json",
+    "sha256": "44fd18c7709e7a2c4df3e3e5a4a9957c07e666bc7f6d815bb0ca341f9d66a0e5"
+  },
+  "reason": "The historical Fern feature manifest has no per-frame source_sha256 values. The strict legacy resealer therefore rejected it before writing. A fresh, source-only extraction is required instead of inventing provenance.",
+  "failed_reseal": {
+    "legacy_manifest_sha256": "2c743513c069773f6562ea635f794c45e54d29df4a319f8cd386a00b1c1086fb",
+    "failure": "missing source_sha256 prevents strict source-image binding",
+    "legacy_tensor_modified": false,
+    "legacy_manifest_modified": false
+  },
+  "fixed_reextraction": {
+    "scene": "fern",
+    "image_dir": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/NVOS/llff_undistorted/fern_undistort/images",
+    "excluded_image_stems_file": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/gaussfm_jobs/nvos_strict_unseen_v1/scenes/fern/excluded_image_stems.json",
+    "expected_excluded_image": "IMG_4027.JPG",
+    "frame_id_mode": "source_rank",
+    "resolution_scale": 0.25,
+    "radio_repo": "/root/RADIO",
+    "radio_version": "c-radio_v4-h",
+    "radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "batch_size": 1,
+    "amp": true,
+    "skip_pca_stats": true,
+    "adaptors_extracted": false,
+    "expected_frames": 19,
+    "expected_backbone_shape": [
+      1280,
+      47,
+      62
+    ],
+    "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/radio_features_reextracted"
+  },
+  "comparison_policy": "After extraction, compare every raw backbone tensor to the historical source-only tensor. Exact equality is diagnostic only; the new sealed bundle is the authority regardless of the outcome.",
+  "downstream_policy": "Rebuild raw, DINO-v3, and SAM3 matched MPR against the same frozen responsibility sidecar and the new sealed feature bundle. Do not reuse lineage-incompatible legacy capability MPR.",
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_design": false
+  }
+}

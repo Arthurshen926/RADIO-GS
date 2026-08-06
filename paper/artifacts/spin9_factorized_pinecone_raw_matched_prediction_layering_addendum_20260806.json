@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_factorized_raw_prediction_layering_addendum_v1",
+  "recorded_at": "2026-08-06T05:54:00+08:00",
+  "scene": "pinecone",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin9_factorized_pinecone_raw_matched_prediction_preregistration_20260806.json",
+    "sha256": "4862f93ebbaf71f53f3f88b7e4bca204f44b1c90bc9a6c7727de4461069a85b4"
+  },
+  "status": "registered_after_failed_preflight_and_before_any_target_score_rendering",
+  "failed_preflight": {
+    "error": "source-observation OOF deployment forbids query-conditioned diffusion",
+    "evaluator_boundary": "_load_source_observation_oof_deployment_gate",
+    "output_root_created": false,
+    "target_score_rendered": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "layering_correction": {
+    "raw_matched_prediction": "Bind and render the fixed K201 relation/interface in a target-blind pre-metric receipt without passing the source OOF deployment gate to the evaluator.",
+    "source_oof_gate": "Bind the independently sealed source-footprint gate in the subsequent full-fit source-gauge builder.",
+    "paired_target_prediction": "Bind both the raw K201 receipt and full-fit source gauge in the paired FP64 target-prediction builder.",
+    "reason": "The evaluator deliberately forbids deploying a base-readout OOF action and query-conditioned diffusion in one invocation; the downstream full9 builders validate the two independent authorities before composing them.",
+    "method_parameters_changed": false,
+    "target_feedback_used": false
+  },
+  "implementation_authority": {
+    "evaluator_path": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+    "evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+    "full_fit_builder_path": "radio_gs/scripts/build_spin9_factorized_source_quantile_full_fit.py"
+  },
+  "safety": {
+    "target_scores_rendered_at_addendum": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

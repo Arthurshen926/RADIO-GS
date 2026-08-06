@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_figurines_exact_marginal_visibility_safe_retrain_v1",
+  "registered_at": "2026-08-05T17:41:41+08:00",
+  "status": "registered_before_retraining",
+  "purpose": "Make the previously measured exact-marginal visibility purity causally active in source-only field learning while preserving every legacy and top1 path exactly.",
+  "design_provenance": {
+    "policy_was_identified_before_the_exact_lerf_sentinel_metric": true,
+    "basis": "The pre-evaluation state audit established that exact purity was a measured but unused scalar in both primary RADIO and matched capability losses.",
+    "post_evaluation_use": "The already-open Figurines sentinel may be used only as a single development confirmation after all source gates pass; it cannot select an exponent, threshold, graph, support mask, or scene policy."
+  },
+  "frozen_inputs": {
+    "factorized_radio_cache_sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b",
+    "matched_raw_radio_cache_sha256": "9c82f3d33101cb1e088af3cdf021df89130166a4b49e4005378f5d672108fb7c",
+    "matched_dino_v3_cache_sha256": "dd2c3623a206e0bdf04615c8086cbda29556e170af019f5b298cc5a5346b8067",
+    "matched_sam3_cache_sha256": "8a6a5d289e04f4b3e4587eca7085a67f617ef17d01ff55934ca73952c66fdb33",
+    "capability_cohort_authority_sha256": "8f490353a890101c00a9047c401d5cd6464dfd2c4bf6656696e5e26ad339f11a",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "training_rows": 96879,
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "epochs": 20,
+    "batch_size": 4096,
+    "seed": 0
+  },
+  "fixed_policy": {
+    "name": "matched_exact_marginal_visibility_safe_v1",
+    "activation": "factorized-v2 plus matched_exact_marginal only",
+    "primary_radio_weight": "legacy_direction_or_amplitude_weight * 0.5 * (1 + visibility_purity)",
+    "capability_weight": "0.5 * (1 + (coverage * agreement * visibility_purity)^(1/3))",
+    "boundary_preservation": "Every valid source row retains at least half of its corresponding confidence contribution.",
+    "unknown_top1_policy": "Legacy top1 remains legacy_evidence_resultant/legacy_mean and never interprets the exact-zero unknown sentinel as a measurement.",
+    "authority_gate": "Require builder-v2, the exact-marginal measured-purity authority, exact registration SHA, query_independent=true, and all benchmark/text access flags false."
+  },
+  "source_only_promotion_gates": {
+    "direction_mean_cosine_minimum": 0.98,
+    "direction_p05_cosine_minimum": 0.94,
+    "mean_absolute_log_amplitude_error_maximum": 0.03,
+    "p95_absolute_log_amplitude_error_maximum": 0.15,
+    "dino_mean_cosine_minimum": 0.985,
+    "dino_p05_cosine_minimum": 0.965,
+    "sam3_mean_cosine_minimum": 0.965,
+    "sam3_p05_cosine_minimum": 0.925,
+    "capacity_escalation": "forbidden; this is a one-policy causal ablation at the already promoted D512/L512 capacity"
+  },
+  "implementation": {
+    "factorized_loss_sha256": "a8596cc8fe842c130dd848e4646c331c899a018661b8b15d66d44114776417ef",
+    "canonical_losses_sha256": "745b1ae1398675b7e1c17b1c5147aa401e3bfbfdc3d92f93182cac96f2a43a57",
+    "trainer_sha256": "2fb345b8e425c91b19ca16093bbbdaf048598f3862f27b48c4b2861c8e62b123",
+    "focused_regression": "78 passed"
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal_visibility_safe_v1.pth",
+  "safety": {
+    "benchmark_images_opened_by_training": false,
+    "benchmark_masks_opened_by_training": false,
+    "text_queries_opened_by_training": false,
+    "per_scene_parameter_search": false,
+    "gpu_policy": "300 W; stage-boundary or approximately 180-second checks; stop only after two consecutive readings at or above 88 C"
+  }
+}

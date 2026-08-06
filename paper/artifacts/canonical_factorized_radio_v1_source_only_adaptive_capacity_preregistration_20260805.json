@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "artifact_type": "method_preregistration",
+  "experiment": "canonical-factorized-radio-v1-source-only-adaptive-capacity-v1",
+  "date": "2026-08-05",
+  "question": "Can a query-free doubling rule restore compact-field capability when the fixed D256/L128 bottleneck fails before any benchmark is opened?",
+  "trigger_authority": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_figurines_basis_ablation_results_20260805.json",
+    "sha256": "dcda6a1a428257e93448179b19f7acbf4547b6b8ca8c235e56747dedd1af1073",
+    "trigger": "Both D256/L128 arms failed the preregistered source-only direction and official-capability gates."
+  },
+  "generic_capacity_rule": {
+    "coefficient_dimensions": [256, 512, 1024],
+    "local_dimension": "equal to coefficient_dimension so no unregistered secondary intrinsic-dimension bottleneck remains",
+    "basis": "trainable after the same source-only affine PCA initialization",
+    "selection": "Choose the first dimension in ascending order that passes every unchanged source-only gate. Stop without benchmark opening if none passes.",
+    "scene_specific_parameters": false,
+    "target_metric_feedback": false
+  },
+  "current_candidate": {
+    "scene": "figurines",
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "reason": "D256 is already rejected; 512 is the next deterministic doubling step."
+  },
+  "frozen_inputs": {
+    "factorized_radio_cache_sha256": "d37a3f2ee2df93045bf52109a426f53761f76a1ad963f2f95a23512f49f37135",
+    "capability_cohort_authority_sha256": "ebe082374694809b29e33ee3132d9daf1aff575ae54d713445530a64cc5befb4",
+    "feature_output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "trainer_sha256": "a10c1b91fad8391943ea4bf3fe1626922f886f52fbcc51265062a9ca57fd7427"
+  },
+  "matched_training": {
+    "primitive_fusion": true,
+    "fusion_reliability": false,
+    "official_capability_loss": true,
+    "capability_target_contract": "matched_top1",
+    "mpr_weight": 1.0,
+    "dino_weight": 0.2,
+    "sam3_weight": 0.2,
+    "relation_objective": "disabled",
+    "epochs": 20,
+    "min_epochs": 20,
+    "batch_size": 4096,
+    "eval_batch_size": 16384,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "validation_fraction": 0.05,
+    "seed": 0
+  },
+  "absolute_source_only_gates": {
+    "direction_mean_cosine_minimum": 0.98,
+    "direction_p05_cosine_minimum": 0.94,
+    "mean_abs_log_amplitude_error_maximum": 0.03,
+    "p95_abs_log_amplitude_error_maximum": 0.15,
+    "dino_v3_target_mean_cosine_minimum": 0.985,
+    "dino_v3_target_p05_cosine_minimum": 0.965,
+    "sam3_target_mean_cosine_minimum": 0.965,
+    "sam3_target_p05_cosine_minimum": 0.925
+  },
+  "orthogonal_support_fix": "Capacity promotion does not waive the sparse exact-marginal support requirement. LERF benchmark opening additionally requires the shared raw/DINO/SAM support authority to pass exact parity and coverage gates.",
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  },
+  "gpu_policy": {
+    "physical_gpu": 0,
+    "power_limit_watts": 300,
+    "check_frequency": "stage boundaries or approximately every 180 seconds",
+    "thermal_stop": "at least 88 Celsius in two consecutive checks"
+  }
+}

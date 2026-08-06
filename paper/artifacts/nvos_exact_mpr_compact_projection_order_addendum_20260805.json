@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_exact_mpr_compact_projection_order_addendum_v1",
+  "status": "registered after observing only the direct raw-RADIO post-MPR projection arm and before materializing or opening any pre-MPR capability-teacher outcome",
+  "trigger": "The requested direct raw-MPR arm showed that adaptor(mean(raw RADIO)) is not an upper bound for a compiler operating in official DINO/SAM spaces.",
+  "reason": "The compact field was capability-first trained against MPR(adaptor(per-view raw RADIO)). A valid compression audit must therefore include that exact pre-projection capability MPR teacher; otherwise projection-order noncommutation is confounded with field compression.",
+  "arms_after_addendum": {
+    "post_mpr_raw_radio": "adaptor(MPR(raw RADIO)); requested raw-MPR diagnostic, already observed",
+    "pre_mpr_exact_capability_teacher": "MPR(adaptor(per-view raw RADIO)); exact query-space teacher, outcome unopened",
+    "compact_field": "adaptor(compact_field_decode); already observed only for the requested raw ladder"
+  },
+  "frozen_invariants": "All K16 prototype, prompt registration, anchor fusion, unary temperature, scalar renderer, resize, threshold, and protocol settings remain byte-for-byte the same as the parent preregistration.",
+  "new_selection_or_tuning": false,
+  "reporting": "Report all three arms, both projection-order and teacher-to-compact gaps, and do not relabel the post-MPR raw arm as an upper bound."
+}

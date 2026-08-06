@@ -1,0 +1,12 @@
+{
+  "artifact": "gaussian_carrier_ceiling_uniform_sampling_cap_fix_v1",
+  "affected_result": "output/optimization_20260804/carrier_ceiling/figurines_uniform_v2.json",
+  "affected_result_status": "diagnostic retained but not used as the declared uniform-only refinement result",
+  "bug": "A cap value of zero was interpreted as unlimited instead of disabled, so the v2 optimization sample included every foreground-union and boundary-union pixel in addition to 196608 uniform pixels per view.",
+  "discovered_before_corrected_result": true,
+  "evaluation_metrics_unaffected": "All reported final masks in v2 were still evaluated on every full-resolution pixel with exact contributions; only the optimization sampling distribution differed from the v2 preregistration.",
+  "fix": "cap == 0 now returns an empty stratum, cap < 0 means unlimited, and positive caps retain their original meaning",
+  "frozen_before_corrected_result": true,
+  "required_corrected_run": "figurines_uniform_v3.json",
+  "test": "test_zero_stratified_caps_mean_uniform_only"
+}

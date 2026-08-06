@@ -1,0 +1,38 @@
+{
+  "alignment": "exact_xyz_valid_query_and_scale_axes",
+  "artifact_type": "lerf_source_probability_parity_gate_v1",
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "benchmark_metrics_opened": false,
+  "formula": "sigmoid(10*(accepted_positive_cosine-max_accepted_negative_cosine))",
+  "inputs": {
+    "control": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_accepted_physical_v2_residual_router_figurines_raw_v2/streamed/figurines_slot0_control.pt",
+      "sha256": "6d4e8694cdb0a24f753600641b041c84a48460aa5c96fec103c003a098543bf4"
+    },
+    "negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf_native_multiscale_canonical_negative_scores_v1/figurines.pt",
+      "sha256": "d778361b2ea860cfb07f586ace82cb1558df5129a55ad462b097e4e6c366ba90"
+    },
+    "positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/figurines.pt",
+      "sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac"
+    }
+  },
+  "metrics": {
+    "maximum_absolute_error": 0.0004990100860595703,
+    "mean_absolute_error": 6.705174018861726e-05,
+    "pearson": 0.9999993443489075
+  },
+  "passed": true,
+  "queries": 21,
+  "scales": 3,
+  "schema_version": 1,
+  "status": "pass",
+  "thresholds": {
+    "maximum_absolute_error": 0.002,
+    "maximum_mean_absolute_error": 0.0005,
+    "minimum_pearson": 0.9999
+  },
+  "valid_primitives": 82603
+}

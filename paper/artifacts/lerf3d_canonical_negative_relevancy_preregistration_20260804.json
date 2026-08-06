@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_canonical_negative_relevancy_dev2_v1",
+  "status": "registered before candidate runs",
+  "problem_statement": "The frozen Ours cache stores raw independent positive cosine scores, but the evaluator preset labels the path scoring=relevancy and loads canonical negatives without consuming them on this cache branch. This is an interface-contract omission, not a field-capacity limitation.",
+  "candidate": {
+    "positive_scores": "existing immutable raw independent normalized-cosine cache",
+    "negative_scores": "new immutable cache materialized from the identical descriptor rows/scales and the already-frozen canonical prompts: object, things, stuff, texture",
+    "formula": "sigmoid(10 * (positive_cosine - max_canonical_negative_cosine))",
+    "implementation_equivalence": "radio_gs.querying.unified_query.cosine_relevancy_torch with normalized inputs",
+    "application_point": "before the unchanged frozen VALA kNN10, raw-peak scale selection, per-query min-max/2x-1 remap, fixed 0.6 threshold, and selected-only-alpha projection",
+    "trainable_parameters": 0,
+    "scene_specific_parameters": false,
+    "benchmark_mask_access": false
+  },
+  "development_scenes": [
+    "figurines",
+    "waldo_kitchen"
+  ],
+  "baseline_miou": {
+    "figurines": 0.4074466527,
+    "waldo_kitchen": 0.2408391386,
+    "macro": 0.3241428957
+  },
+  "gate": {
+    "primary": "fixed-threshold mIoU must improve on both development scenes",
+    "secondary": "two-scene macro mIoU must improve by at least 0.01",
+    "on_success": "expand unchanged to Ramen and Teatime",
+    "on_failure": "reject and retain the omission as a diagnosed but empirically non-beneficial protocol mismatch"
+  }
+}

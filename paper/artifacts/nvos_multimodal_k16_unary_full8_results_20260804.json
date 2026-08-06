@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_multimodal_k16_unary_full8_v1",
+  "status": "complete",
+  "protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_rgb_used": false,
+    "target_evaluator_modified": false,
+    "score_threshold": 0.5,
+    "final_readout": "unary_prior"
+  },
+  "development_disclosure": {
+    "scenes": ["fern", "horns_left"],
+    "prototype_counts_observed": [4, 8, 16],
+    "selection": "K16 was selected globally on the two disclosed development scenes; the full-eight result is therefore not a pristine target-blind model-selection estimate."
+  },
+  "method": {
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "prototype_temperature": 0.07,
+    "prompt_inverse": "native exact front-to-back raster adjoint",
+    "scene_specific_parameters": false,
+    "graph_used_in_final_output": false
+  },
+  "scene_iou": {
+    "fern": 0.7563184866,
+    "flower": 0.8522645683,
+    "fortress": 0.8422777627,
+    "horns_center": 0.6748244435,
+    "horns_left": 0.6829489073,
+    "leaves": 0.6667630117,
+    "orchids": 0.6917042009,
+    "trex": 0.6326426615
+  },
+  "aggregate": {
+    "full8_scene_macro_iou": 0.7249680053,
+    "frozen_strict_baseline_scene_macro_iou": 0.6119535409,
+    "absolute_improvement": 0.1130144644,
+    "scenes_improved": 7,
+    "scenes_total": 8,
+    "heldout6_candidate_macro_iou": 0.7267461081,
+    "heldout6_baseline_macro_iou": 0.6564245354,
+    "heldout6_absolute_improvement": 0.0703215727,
+    "heldout6_scenes_improved": 5,
+    "heldout6_scenes_total": 6
+  },
+  "stage_macro_iou": {
+    "unary_prior": 0.7249680053,
+    "propagated": 0.722127,
+    "connected": 0.675256
+  },
+  "stage_conclusion": "Once the multimodal unary is strong, the current graph is slightly harmful and connected selection is substantially harmful. Retain unary_prior as the strict final readout.",
+  "failure_disclosure": {
+    "scene": "fortress",
+    "baseline_iou": 0.920215,
+    "candidate_iou": 0.8422777627,
+    "interpretation": "A fixed K16 bank is not uniformly optimal; this motivates reliability-aware component allocation rather than per-scene K tuning."
+  },
+  "report_sha256": {
+    "fern": "2e2a7c16af15f954b1b9cf76cef8e54296be5397afd35414fe3064e5456cf15f",
+    "flower": "836627dc73c7db8986c9f6e3fc458e26668f0e01fbbd14d1c229647fee1676c3",
+    "fortress": "3d247199fcff54776cd5b47aa36e8d3d188666e2dce7d5191dd60c2920fd6972",
+    "horns_center": "76764146e7037f88553e3dc018dbca06097cfad753deddfdcf3250486251327b",
+    "horns_left": "0160240c745e8df1d6483086188d3763c18132539ea71e77b95928e11d396bba",
+    "leaves": "4769409ca778c38901e77b9971dbb59b5b7d0fb4c743949d0e6c797e43b6c2ec",
+    "orchids": "dfe1aad6dfd0ae76727d3e51047e394e9e5e220372da511a266e1008db075dae",
+    "trex": "804d136419a6a91474192c82e12e97d12a61b31bfa70b178411418e2710017b4"
+  },
+  "conclusion": "The main NVOS deficit was an under-capacity foreground/background evidence model before graph inference. A globally fixed multimodal bank recovers 11.30 IoU points under the frozen strict protocol without target RGB, target labels, or scene-specific parameters."
+}

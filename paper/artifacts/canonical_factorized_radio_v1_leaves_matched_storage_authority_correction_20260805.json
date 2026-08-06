@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_chain_execution_authority_correction",
+  "registered_at": "2026-08-05T20:12:48+08:00",
+  "scene": "leaves",
+  "status": "registered_during_factorized_raw_build_and_before_any_matched_cache_output",
+  "corrected_registration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_leaves_source_chain_preregistration_20260805.json",
+    "sha256": "c2a28b2451bd4aa31a8db5a31204fc6852a3756caa1749a407101759dc6f4dd8"
+  },
+  "correction_scope": {
+    "original_entry": "uniform_builder_policy.capability_storage=dense",
+    "original_entry_execution_authority": false,
+    "affected_outputs": [
+      "matched_radio",
+      "matched_dino_v3",
+      "matched_sam3"
+    ],
+    "unaffected_outputs": {
+      "factorized_radio": "remains the frozen dense canonical-factorized-radio-v1 cache",
+      "field_and_downstream": "unchanged"
+    }
+  },
+  "replacement_execution_authority": {
+    "storage": "radio_gs.channel_sharded_mpr.v1",
+    "capability_storage_cli": "channel_sharded",
+    "capability_shard_channels": 256,
+    "applies_identically_to": [
+      "radio",
+      "dino_v3",
+      "sam3"
+    ],
+    "feature_dtype": "float16",
+    "layout": "row_major_channel_shards",
+    "support_storage": "hash_bound_torch_sidecar",
+    "read_policy": "validated_read_only_memmap_fetch_rows",
+    "manifest_and_every_shard_sha256_required": true,
+    "full_feature_materialization_forbidden_by_loader": true
+  },
+  "scientific_invariance": {
+    "primitive_rows": "identical",
+    "source_feature_bundle": "identical",
+    "shared_responsibility": "identical",
+    "selected_views": "identical",
+    "lifting_and_fusion": "identical",
+    "float16_values": "identical row-by-row and channel-by-channel",
+    "training_fetch_semantics": "identical tensors for the same requested rows",
+    "architecture_loss_and_hyperparameters": "unchanged",
+    "target_or_query_information_used": false,
+    "reason": "avoid simultaneous dense teacher residency and repeated whole-container hashing for the 1.4M-row formal cohort"
+  },
+  "validation_gate": {
+    "required_before_matched_build": "focused dense-versus-sharded synthetic equality and formal loader tests pass",
+    "required_after_each_build": "manifest/support/shard SHA validation plus finite, invalid-row-zero, support, geometry, bundle, and responsibility checks pass",
+    "failure": "fail closed before the next matched or field stage"
+  },
+  "implementation": {
+    "builder": {
+      "path": "radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+      "sha256": "0901151a29e5dbd45bd1cd98314916f4815259721ab157a1b5a13ed35670743d"
+    },
+    "loader": "radio_gs/training/tensor_cache_io.py",
+    "focused_test": "tests/test_sharded_mpr_streaming.py"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "experiment": "pinecone_query_independent_camera_plane_clearance_v1",
+  "outcome": "accepted",
+  "causal_diagnosis": {
+    "IMG_7280": {
+      "unguarded_unique_contributing_rows": 131,
+      "unguarded_rows_for_50_percent_mass": 1,
+      "unguarded_mass_below_depth_0p1": 1.0
+    },
+    "IMG_7281": {
+      "unguarded_unique_contributing_rows": 21,
+      "unguarded_rows_for_50_percent_mass": 2,
+      "unguarded_mass_below_depth_0p1": 1.0
+    },
+    "interpretation": "near-tangent anisotropic floating Gaussians intersected the camera plane and front-to-back occluded the scene"
+  },
+  "carrier_diagnostic": {
+    "unguarded_feasible_lower_bound_miou": 0.9259237418729762,
+    "guarded_feasible_lower_bound_miou": 0.9453274407340297,
+    "delta": 0.01940369886105353,
+    "guarded_IMG_7280_fixed_iou": 0.9425,
+    "guarded_IMG_7281_fixed_iou": 0.9464,
+    "guarded_report": {
+      "path": "output/optimization_20260804/carrier_ceiling/spin_pinecone_clearance2_v1.json",
+      "sha256": "b7cda41e8222ab4c874101dcdb255a73791152649293c57d4e8ef0a3b35c8e5a"
+    },
+    "valid_benchmark_method": false,
+    "reason": "carrier diagnostic opens target masks"
+  },
+  "real_method": {
+    "baseline_foreground_iou": 0.9079864777733617,
+    "guarded_foreground_iou": 0.9267070940639618,
+    "delta": 0.018720616290600067,
+    "baseline_IMG_7280_iou": 0.0,
+    "guarded_IMG_7280_iou": 0.919921458146583,
+    "baseline_IMG_7281_iou": 0.0,
+    "guarded_IMG_7281_iou": 0.9054603360851528,
+    "mean_delta_excluding_IMG_7280_IMG_7281": 0.00009623544007369052,
+    "reference_selected_threshold_baseline": 0.39999999999999947,
+    "reference_selected_threshold_guarded": 0.39999999999999947,
+    "guarded_report": {
+      "path": "output/optimization_20260804/spin9_camera_clearance2_v1/reference_calibrated/pinecone/pinecone_evaluation.json",
+      "sha256": "89524f3d6e1500fc36b6f0a8bc93e6665a734721e029425f96ced4464f6129ef"
+    },
+    "frozen_dataset_protocol_sha256": "a1dbb5118a7c926a66a7951d0351b5a10c9100a5dbd331095a2426f4ed4a711e",
+    "method_config_sha256": "559250f2003e78fe746b6ef2b6da1565a2bd8fe5418fbc84ee15591c932b4562",
+    "evaluation_protocol_sha256": "415d6cc1ead1b2158fd74c6e570cc80f27b036dcb22156431efd7f3c09b31732"
+  },
+  "conclusion": "The two-sigma camera-plane guard is a general, query-independent base-renderer correction. It repairs the complete visibility collapse while leaving the other 96 Pinecone target frames effectively unchanged."
+}

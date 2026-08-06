@@ -30,6 +30,9 @@ from radio_gs.utils.immutable_artifacts import (
     write_frozen_json,
     write_torch_noclobber,
 )
+from radio_gs.training.surface_region_eligibility_completion import (
+    STRUCTURED_ELIGIBILITY_POLICY,
+)
 
 
 RESUME_CONTRACT_ARTIFACT_TYPE = "surface-region-scene-resume-contract-v1"
@@ -49,7 +52,29 @@ SCENE_TENSOR_KEYS = (
     "teacher_mask",
     "anchor_index",
 )
+SCENE_ROW_SCHEMA_V2 = 1
+SCENE_ROW_SCHEMA_V3 = 2
+SCENE_TENSOR_KEYS_V3 = (
+    "radio_features",
+    "geometry",
+    "token_mask",
+    "support_fill_mask",
+    "reliability",
+    "official_summary_tokens",
+    "official_crop_summaries",
+    "teacher_mask",
+    "anchor_index",
+)
 _SCENE_NAME = re.compile(r"^scene[0-9]{4}_[0-9]{2}$")
+
+
+def _scene_tensor_keys(row_schema_version: int) -> tuple[str, ...]:
+    version = int(row_schema_version)
+    if version == SCENE_ROW_SCHEMA_V2:
+        return SCENE_TENSOR_KEYS
+    if version == SCENE_ROW_SCHEMA_V3:
+        return SCENE_TENSOR_KEYS_V3
+    raise ValueError("unsupported SurfaceRegion scene row schema")
 
 
 class SceneResumeStateError(RuntimeError):
@@ -370,11 +395,14 @@ def validate_scene_rows(
     expected_rows: int,
     maximum_tokens: int,
     teacher_views: int,
+    row_schema_version: int = SCENE_ROW_SCHEMA_V2,
+    eligibility_variants_per_region: int = 0,
 ) -> dict[str, Any]:
+    tensor_keys = _scene_tensor_keys(row_schema_version)
     rows = dict(
         _require_exact_keys(
             scene_rows,
-            set(SCENE_TENSOR_KEYS) | {"records"},
+            set(tensor_keys) | {"records"},
             label="scene partial rows",
         )
     )
@@ -394,7 +422,11 @@ def validate_scene_rows(
         rows["geometry"],
         key="geometry",
         dtype=torch.float16,
-        shape=(expected_rows, maximum_tokens, 14),
+        shape=(
+            expected_rows,
+            maximum_tokens,
+            16 if row_schema_version == SCENE_ROW_SCHEMA_V3 else 14,
+        ),
     )
     token_mask = _require_tensor(
         rows["token_mask"],
@@ -408,6 +440,14 @@ def validate_scene_rows(
         dtype=torch.float16,
         shape=(expected_rows, maximum_tokens, 1),
     )
+    support_fill = None
+    if row_schema_version == SCENE_ROW_SCHEMA_V3:
+        support_fill = _require_tensor(
+            rows["support_fill_mask"],
+            key="support_fill_mask",
+            dtype=torch.bool,
+            shape=(expected_rows, maximum_tokens),
+        )
     summary = _require_tensor(
         rows["official_summary_tokens"],
         key="official_summary_tokens",
@@ -462,6 +502,23 @@ def validate_scene_rows(
         or bool(descriptors[~teacher_mask].count_nonzero())
     ):
         raise ValueError("scene partial padding must be exactly zero")
+    if row_schema_version == SCENE_ROW_SCHEMA_V3:
+        assert support_fill is not None
+        if bool((support_fill & ~token_mask).any()) or not torch.equal(
+            geometry[..., 14] > 0.5,
+            support_fill,
+        ):
+            raise ValueError(
+                "V3 support-fill mask must be selected and match geometry index 14"
+            )
+        active_norm = torch.linalg.vector_norm(features.float(), dim=-1)[token_mask]
+        if not torch.allclose(
+            active_norm,
+            torch.ones_like(active_norm),
+            rtol=2e-3,
+            atol=2e-3,
+        ):
+            raise ValueError("V3 scene partial RADIO features must be unit directions")
     for index, record in enumerate(records):
         if not isinstance(record, dict):
             raise TypeError("scene partial record must be a dictionary")
@@ -472,13 +529,142 @@ def validate_scene_rows(
             or len(record.get("teacher_views", [])) != int(teacher_counts[index])
         ):
             raise ValueError("scene partial record differs from its tensor row")
+        if row_schema_version == SCENE_ROW_SCHEMA_V3:
+            assert support_fill is not None
+            fill_count = int(support_fill[index].sum())
+            semantic_count = int(token_counts[index]) - fill_count
+            if (
+                int(record.get("support_fill_tokens", -1)) != fill_count
+                or int(record.get("semantic_tokens", -1)) != semantic_count
+                or record.get("minimum_satisfied") is not True
+            ):
+                raise ValueError("V3 scene partial record differs from support tiers")
+    variants = int(eligibility_variants_per_region)
+    if variants < 0:
+        raise ValueError("eligibility variant count cannot be negative")
+    if variants:
+        if row_schema_version != SCENE_ROW_SCHEMA_V3:
+            raise ValueError("eligibility completion is only valid for V3 rows")
+        full_by_id: dict[str, int] = {}
+        completion_by_full: dict[str, list[int]] = {}
+        for index, record in enumerate(records):
+            region_id = str(record.get("region_id", ""))
+            paired = str(record.get("paired_full_region_id", ""))
+            role = record.get("row_role")
+            if (
+                not region_id
+                or not paired
+                or int(
+                    record.get(
+                        "eligibility_variants_per_teacher_region", -1
+                    )
+                )
+                != variants
+            ):
+                raise ValueError("V3 scene partial has invalid paired row identity")
+            if role == "full_support":
+                if (
+                    paired != region_id
+                    or int(record.get("eligibility_variant_index", -2)) != -1
+                    or region_id in full_by_id
+                ):
+                    raise ValueError("V3 full-support row identity differs")
+                full_by_id[region_id] = index
+            elif role == "eligibility_completion":
+                variant_index = int(
+                    record.get("eligibility_variant_index", -1)
+                )
+                digest = str(record.get("eligibility_sha256", ""))
+                if (
+                    not 0 <= variant_index < variants
+                    or len(digest) != 64
+                    or any(value not in "0123456789abcdef" for value in digest)
+                    or int(record.get("support_fill_tokens", 0)) <= 0
+                    or record.get("eligibility_policy")
+                    != STRUCTURED_ELIGIBILITY_POLICY
+                ):
+                    raise ValueError("V3 completion row identity/fill differs")
+                semantic = int(record.get("semantic_tokens", -1))
+                semantic_eligible = int(
+                    record.get("eligibility_semantic_eligible_tokens", -2)
+                )
+                nominal = int(
+                    record.get(
+                        "eligibility_nominal_semantic_keep_tokens", -3
+                    )
+                )
+                expected_fill = int(
+                    record.get("eligibility_expected_fill_tokens", -4)
+                )
+                fallback = record.get(
+                    "eligibility_extreme_graph_fallback"
+                )
+                if (
+                    semantic != semantic_eligible
+                    or fill_count != expected_fill
+                    or int(record.get("tokens", -1))
+                    != semantic + expected_fill
+                    or not isinstance(fallback, bool)
+                    or (not fallback and semantic != nominal)
+                    or (
+                        fallback
+                        and not str(
+                            record.get(
+                                "eligibility_extreme_graph_fallback_reason",
+                                "",
+                            )
+                        )
+                    )
+                ):
+                    raise ValueError(
+                        "V3 completion row budget/provenance differs"
+                    )
+                completion_by_full.setdefault(paired, []).append(index)
+            else:
+                raise ValueError("V3 scene partial has an unknown row role")
+        expected_full = expected_rows // (variants + 1)
+        if (
+            expected_full * (variants + 1) != expected_rows
+            or len(full_by_id) != expected_full
+            or set(completion_by_full) != set(full_by_id)
+        ):
+            raise ValueError("V3 scene partial paired row counts differ")
+        for full_id, full_index in full_by_id.items():
+            completion_indices = completion_by_full[full_id]
+            variant_indices = sorted(
+                int(records[index]["eligibility_variant_index"])
+                for index in completion_indices
+            )
+            if variant_indices != list(range(variants)):
+                raise ValueError("V3 completion variant indices differ")
+            for index in completion_indices:
+                for tensor in (summary, descriptors, teacher_mask):
+                    if not torch.equal(tensor[index], tensor[full_index]):
+                        raise ValueError(
+                            "V3 paired rows do not share exact teacher tensors"
+                        )
+                for key in (
+                    "scene",
+                    "seed",
+                    "physical_radius_m",
+                    "teacher_support_sha256",
+                    "teacher_target_sha256",
+                ):
+                    if records[index].get(key) != records[full_index].get(key):
+                        raise ValueError(
+                            "V3 paired rows do not share frozen teacher identity"
+                        )
     return rows
 
 
-def scene_rows_digest(scene_rows: Mapping[str, Any]) -> tuple[dict[str, str], str]:
+def scene_rows_digest(
+    scene_rows: Mapping[str, Any],
+    *,
+    row_schema_version: int = SCENE_ROW_SCHEMA_V2,
+) -> tuple[dict[str, str], str]:
     tensor_digests = {
         key: tensor_sha256(torch.as_tensor(scene_rows[key]))
-        for key in SCENE_TENSOR_KEYS
+        for key in _scene_tensor_keys(row_schema_version)
     }
     components = {
         "tensors": tensor_digests,
@@ -497,6 +683,8 @@ def _validate_partial_payload(
     teacher_views: int,
     contract_record: Mapping[str, str],
     contract_payload_sha256: str,
+    row_schema_version: int = SCENE_ROW_SCHEMA_V2,
+    eligibility_variants_per_region: int = 0,
 ) -> dict[str, Any]:
     value = _require_exact_keys(
         payload,
@@ -533,8 +721,13 @@ def _validate_partial_payload(
         expected_rows=expected_rows,
         maximum_tokens=maximum_tokens,
         teacher_views=teacher_views,
+        row_schema_version=row_schema_version,
+        eligibility_variants_per_region=eligibility_variants_per_region,
     )
-    tensor_digests, bundle_digest = scene_rows_digest(rows)
+    tensor_digests, bundle_digest = scene_rows_digest(
+        rows,
+        row_schema_version=row_schema_version,
+    )
     if value["tensor_sha256"] != tensor_digests:
         raise ValueError("scene partial tensor digests differ")
     if value["row_bundle_sha256"] != bundle_digest:
@@ -555,6 +748,8 @@ def commit_scene_partial(
     teacher_views: int,
     contract_record: Mapping[str, str],
     contract_payload_sha256: str,
+    row_schema_version: int = SCENE_ROW_SCHEMA_V2,
+    eligibility_variants_per_region: int = 0,
 ) -> dict[str, Any]:
     """No-clobber publish a scene data file, then its SHA authority terminal."""
 
@@ -574,8 +769,13 @@ def commit_scene_partial(
         expected_rows=expected_rows,
         maximum_tokens=maximum_tokens,
         teacher_views=teacher_views,
+        row_schema_version=row_schema_version,
+        eligibility_variants_per_region=eligibility_variants_per_region,
     )
-    tensor_digests, bundle_digest = scene_rows_digest(rows)
+    tensor_digests, bundle_digest = scene_rows_digest(
+        rows,
+        row_schema_version=row_schema_version,
+    )
     payload = {
         "artifact_type": SCENE_PARTIAL_ARTIFACT_TYPE,
         "schema_version": RESUME_SCHEMA_VERSION,
@@ -616,6 +816,8 @@ def load_scene_partial(
     teacher_views: int,
     contract_record: Mapping[str, str],
     contract_payload_sha256: str,
+    row_schema_version: int = SCENE_ROW_SCHEMA_V2,
+    eligibility_variants_per_region: int = 0,
 ) -> dict[str, Any] | None:
     """Strictly reopen one completed scene or return ``None`` if absent."""
 
@@ -690,6 +892,8 @@ def load_scene_partial(
             teacher_views=teacher_views,
             contract_record=contract_record,
             contract_payload_sha256=contract_payload_sha256,
+            row_schema_version=row_schema_version,
+            eligibility_variants_per_region=eligibility_variants_per_region,
         )
         if value["row_bundle_sha256"] != expected_terminal["row_bundle_sha256"]:
             raise ValueError("scene partial terminal row digest differs")
@@ -710,7 +914,14 @@ def append_scene_rows(
     """Append one validated scene in row order without changing tensor bytes."""
 
     records.extend(scene_rows["records"])
-    for key in SCENE_TENSOR_KEYS:
+    destination_keys = set(tensor_rows)
+    if destination_keys == set(SCENE_TENSOR_KEYS):
+        keys = SCENE_TENSOR_KEYS
+    elif destination_keys == set(SCENE_TENSOR_KEYS_V3):
+        keys = SCENE_TENSOR_KEYS_V3
+    else:
+        raise ValueError("scene tensor merge keys do not match V2 or V3 row schema")
+    for key in keys:
         destination = tensor_rows[key]
         value = torch.as_tensor(scene_rows[key])
         destination.extend(value.unbind(0))

@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "artifact_type": "method_result_and_first_principles_diagnosis",
+  "experiment": "canonical-factorized-radio-v1 Figurines exact-marginal visibility-safe v1",
+  "source_only_field": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal_visibility_safe_v1.pth",
+    "sha256": "bd203f881105dd864bed01e0a9b919acf69daf5305650e50b8f90c502167c4c7",
+    "source_gates": {
+      "radio_direction_mean_cosine": 0.9936468601,
+      "radio_direction_p05_cosine": 0.9862855673,
+      "log_amplitude_mae": 0.0243504178,
+      "log_amplitude_p95": 0.0487592742,
+      "dino_mean_cosine": 0.9881201386,
+      "dino_p05_cosine": 0.9689611197,
+      "sam3_mean_cosine": 0.9861262441,
+      "sam3_p05_cosine": 0.9669460058,
+      "all_passed": true
+    },
+    "capability_reliability_policy": "matched_exact_marginal_visibility_safe_v1",
+    "factorized_reliability_policy": "matched_exact_marginal_visibility_safe_v1"
+  },
+  "frozen_lerf_results": {
+    "accepted_v2_fp32_control": {
+      "miou": 0.4753887355,
+      "acc025": 0.8035714286,
+      "acc050": 0.5357142857,
+      "boundary_f": 0.6820073724,
+      "trimap_iou": 0.3808369637
+    },
+    "exact_marginal_legacy_loss": {
+      "result_sha256": "44539593cfd75c1c087962cb5c4ba76efbf2608dc60a25da1c7761950031579e",
+      "miou": 0.4443484843,
+      "acc025": 0.7678571429,
+      "acc050": 0.5535714286,
+      "boundary_f": 0.6662414670,
+      "trimap_iou": 0.4223096371
+    },
+    "exact_marginal_visibility_safe_loss": {
+      "result_sha256": "227cac7e61a6e8056df41daf716f0662258877b22971dd6391717796b51bcc18",
+      "miou": 0.4453954399,
+      "acc025": 0.7500000000,
+      "acc050": 0.5535714286,
+      "boundary_f": 0.6667138338,
+      "trimap_iou": 0.4234886467
+    },
+    "visibility_safe_minus_exact_legacy": {
+      "miou": 0.0010469556,
+      "acc025": -0.0178571429,
+      "acc050": 0.0,
+      "boundary_f": 0.0004723668,
+      "trimap_iou": 0.0011790097
+    },
+    "visibility_safe_minus_accepted_v2_miou": -0.0299932957
+  },
+  "support_diagnosis": {
+    "accepted_rows": 82603,
+    "exact_rows": 96879,
+    "overlap_rows": 82400,
+    "accepted_only_rows": 203,
+    "exact_only_rows": 14479,
+    "overlap_purity_median": 0.0053371699,
+    "exact_only_purity_median": 0.0000540628,
+    "purity_median_ratio_overlap_over_exact_only": 98.7,
+    "exact_only_observation_evidence_median": 0.75,
+    "overlap_observation_evidence_median": 0.9524,
+    "exact_only_mean_raw_relevancy": 0.3468,
+    "overlap_mean_raw_relevancy": 0.3365,
+    "overlap_old_new_query_relevance_correlation_mean": 0.827,
+    "interpretation": "Arbitrarily small positive marginal mass admits a low-responsibility tail. The old readout does not consume purity/knownness, so these rows fail to abstain and also alter graph neighborhoods and overlap-row score calibration."
+  },
+  "decision": {
+    "visibility_safe_training_policy": "retain as a correct source-only contract improvement",
+    "expanded_exact_support_under_accepted_v2_readout": "reject",
+    "no_further_graph_or_threshold_tuning": true,
+    "next_method": "immutable accepted-V2 base plus bounded full-scalar descriptor residual on the accepted/exact overlap only",
+    "support_policy": {
+      "overlap_82400": "eligible for scalar residual",
+      "accepted_only_203": "bitwise base fallback",
+      "exact_only_14479": "abstain until a separate source-only responsibility-mass or effective-sample-size admission contract is preregistered"
+    }
+  },
+  "gpu": {
+    "power_limit_w": 300,
+    "maximum_observed_temperature_c": 47,
+    "driver_instability": false
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_gauge_explicit_completion_v3_addendum_v1",
+  "status": "registered_before_fresh_v3_cache_build_training_and_benchmark_opening",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_gauge_explicit_v3_preregistration_20260805.json",
+    "sha256": "b0776d5eb4bcc668c1356049d9d76acc1aa227fd13f6d2a4ced60fd59129b2f5"
+  },
+  "reason_for_addendum": {
+    "canary_evidence": {
+      "scannet_completed_scenes": 3,
+      "scannet_regions": 36,
+      "scannet_active_tokens": 8249,
+      "scannet_support_fill_tokens": 0,
+      "figurines_deployment_anchor_sample": 1024,
+      "figurines_fill_region_fraction_by_radius": {
+        "0.25": 0.4727,
+        "0.45": 0.2881,
+        "0.70": 0.1504
+      },
+      "figurines_fill_token_fraction_by_radius": {
+        "0.25": 0.0825,
+        "0.45": 0.0289,
+        "0.70": 0.0122
+      }
+    },
+    "diagnosis": "Full-eligibility ScanNet rows and suffix-only sparse masking do not train the explicit support-fill channel that is frequently active under deployment eligibility. Raw RADIO norm also entered both base reconstruction and the learned geometry path, creating an avoidable train/deployment domain shift."
+  },
+  "single_method_change": {
+    "candidate": "SurfaceRegion V3 with one deterministic eligibility-induced completion pair per full-support teacher region and raw norm restricted to a gauge side-channel",
+    "unchanged": [
+      "SurfaceRegion V3 hard semantic membership and tiered recovery contract",
+      "minimum 24 and maximum 256 tokens",
+      "radii 0.25, 0.45, 0.70 metres",
+      "frozen official C-RADIO checkpoint and summary head",
+      "query-free scene-disjoint ScanNet source",
+      "all frozen benchmark evaluation protocols"
+    ],
+    "forbidden": [
+      "per-scene, per-query, or benchmark-label parameter selection",
+      "post-hoc token deletion mislabeled as support fill",
+      "using completion validation to select a checkpoint",
+      "loading schema-6 V3 readouts into schema-7 deployment",
+      "mixing historical replay and fresh teacher targets",
+      "relaxing teacher geometry or target integrity checks"
+    ]
+  },
+  "completion_training_contract": {
+    "variants_per_teacher_region": 1,
+    "row_order": [
+      "full_support",
+      "eligibility_completion"
+    ],
+    "policy": "hash_oriented_axial_semantic_dropout_with_full_external_support_v1",
+    "orientation_key": "SHA256(frozen_teacher_region_id,variant_index)",
+    "semantic_eligible_tokens": "strictly_below_region_contract_minimum",
+    "external_recovery_support": "all_query_free_scene_nodes_outside_full_hard_semantic_ball",
+    "materialization": "real_SurfaceRegionContractV3_expand_with_selection_eligibility",
+    "required_completion_fill_tokens": "greater_than_zero_for_every_completion_row",
+    "paired_teacher_target": "bit_exact_shared_official_summary_tokens_descriptors_mask_and_target_sha256",
+    "training_row_weight": "equal_per_materialized_row",
+    "expected_completion_training_row_fraction": 0.5,
+    "validation_checkpoint_selection": "full_support_rows_only",
+    "completion_validation": "diagnostic_nonregression_only"
+  },
+  "gauge_architecture_contract": {
+    "checkpoint_schema_version": 7,
+    "feature_gauge": "l2_direction_plus_log_raw_norm_v1",
+    "geometry_storage_dimension": 16,
+    "learned_geometry_dimension": 15,
+    "support_fill_index": 14,
+    "log_raw_radio_norm_index": 15,
+    "raw_norm_usage": "base_reconstruction_only_v1",
+    "learned_geometry_input": "geometry_indices_0_through_14",
+    "base_gauge_reconstruction": "direction_times_exp_log_raw_norm_v1",
+    "reliability_attention_mode": "input_only",
+    "context_pooling_mode": "joint_attention_v1"
+  },
+  "teacher_and_reproducibility_contract": {
+    "teacher_target_source": "fresh_official_runtime_for_every_shard",
+    "teacher_region_contract": "frozen_independent_v2_relation_weighted_fixed_core",
+    "teacher_region_contract_sha256": "a96e8721e6c9ed12c7da7528273b9af7d03da6bc709002e1e49639b9ee6b2f82",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "historical_teacher_replay_used": false,
+    "voxel_reduction": "scoped_single_cpu_thread_index_add_then_restore_v1",
+    "replay_failure_diagnosis": "Historical support membership and coordinates were identical, but two equal-distance nodes exchanged Dijkstra order; ordered raw-float support SHA was therefore not a stable semantic identity."
+  },
+  "training_contract": {
+    "seed": 0,
+    "hidden_dim": 256,
+    "epochs": 60,
+    "patience": 10,
+    "batch_size": 16,
+    "learning_rate": 0.0002,
+    "weight_decay": 0.0001,
+    "token_weight": 0.25,
+    "relation_weight": 0.1,
+    "canonical_noise_degrees": 0.0,
+    "sparse_support_augmentation": "sha256_seed_epoch_region_id_log_uniform_v1",
+    "checkpoint_selection": "full_support_scene_disjoint_validation_only"
+  },
+  "generic_opening_gate": {
+    "all_full_and_completion_rows_minimum_satisfied": true,
+    "every_completion_row_has_support_fill": true,
+    "completion_row_fill_coverage": 1.0,
+    "paired_teacher_targets_bit_exact": true,
+    "padding_features_geometry_reliability_exact_zero": true,
+    "train_validation_scene_overlap": 0,
+    "minimum_full_support_selection_score": 0.9487422,
+    "minimum_full_support_all_view_descriptor_cosine": 0.9394547,
+    "completion_selection_nonregression_from_untrained_baseline": true,
+    "fixed_sparse_gate_must_pass": true
+  },
+  "benchmark_sequence": {
+    "first": "LERF3D Figurines frozen VALA direct3D threshold-0.6 sentinel",
+    "figurines_primary_floor_miou": 0.4803372,
+    "full_lerf_opening": "only_after_all_generic_gates_and_figurines_floor_pass",
+    "then": [
+      "LERF3D full4",
+      "SPIn9 strict",
+      "NVOS exact"
+    ],
+    "fixed_protocols_only": true
+  },
+  "gpu_execution_policy": {
+    "physical_gpus": [
+      0,
+      1
+    ],
+    "power_limit_w": 300.0,
+    "poll_seconds_after_canary": 180,
+    "start_max_temp_c": 84,
+    "hard_max_temp_c": 88,
+    "hard_stop_consecutive_polls": 2,
+    "soft_pause": false
+  },
+  "implementation_sources": {
+    "surface_region_contract.py": "9f283e60a556ef47eb4ef6a5c8877f5562449c04fd52d0b32f152a5254d6e5f6",
+    "surface_region_selection.py": "26b6e8a8ec9ef66074a59428ca837bf795acf63518cc5b0eff52e3dbf5acc393",
+    "surface_region_summary.py": "7e0fbdfdcae5c152a412dece3bd4b215c9e8a9ae16e700cb186601e0ea6f336b",
+    "surface_region_eligibility_completion.py": "2e863d711898122619628abc0b66a9551b1eaf630a19d008f14b6798dc3b6941",
+    "surface_region_sparse_support.py": "a22cae9638a9ab87cc21da060ec8b1dc776c96dea0331bed29e64275064bb27c",
+    "build_scannet_surface_region_cache.py": "edbab2cbb8fcb4ae0a04ef10418923993666ce1f8fbd40d9c850d16c63d8da8b",
+    "surface_region_scene_resume.py": "e9d075d54c62187eb54bae223fbc48bd356cb3e517ed13fca1910ea140240807",
+    "train_surface_region_summary_readout.py": "7ffee7ed57d5dcd8ee2f6d9125e955764311b0720c1d9bb89cda1f079a3adc93",
+    "build_surface_region_semantic_cache.py": "7dadefa11575dd61f2e981eb1969a9920c119aac62847e9322a1d463f358f1fb"
+  }
+}

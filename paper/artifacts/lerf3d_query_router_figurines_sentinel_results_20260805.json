@@ -1,0 +1,103 @@
+{
+  "schema_version": 1,
+  "experiment": "lerf3d_query_router_figurines_sentinel_v1",
+  "status": "sentinel_failed_full4_not_opened",
+  "registered_gate": {
+    "primary": "router_miou >= accepted_old_contract_miou + 0.005",
+    "mechanistic": "router_miou > same_run_new_contract_slot0_miou"
+  },
+  "frozen_protocol": {
+    "preset": "vala_repo_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "scale_readout": "highest_raw_knn10_smoothed_peak_per_query",
+    "evaluation_protocol_changed": false
+  },
+  "results": {
+    "accepted_old_physical_contract": {
+      "miou": 0.4753371775,
+      "role": "previously_frozen_reference"
+    },
+    "new_relation_weighted_contract_slot0": {
+      "miou": 0.030869895592331886,
+      "acc025": 0.03571428571428571,
+      "acc050": 0.0,
+      "n": 56,
+      "report_sha256": "0964052111246969caacd08e2fd3bd1232d75ff5452c29db68a8490509e6a79e",
+      "authority_sha256": "3d000f42c75d01d49f01d1042a825960dc428554f96fef24d5a3eeb6d460a376"
+    },
+    "new_relation_weighted_contract_query_router": {
+      "miou": 0.03520093113183975,
+      "acc025": 0.03571428571428571,
+      "acc050": 0.0,
+      "n": 56,
+      "report_sha256": "0a160f16e10070e2f93c075abac415e8b5d5883fe9f143e208e93e7e8f24daa2",
+      "authority_sha256": "00c6184e4c15c0e0fb1e06819687f5d11b41f3c5a143c0b2999100acd91154b4"
+    },
+    "router_delta_over_same_run_slot0": 0.004331035539507864,
+    "router_delta_to_registered_primary_floor": -0.44513624636816025,
+    "gate_passed": {
+      "primary": false,
+      "mechanistic": true,
+      "overall": false
+    }
+  },
+  "mechanistic_diagnostics": {
+    "valid_rows": 82603,
+    "valid_mask_exact_match": true,
+    "query_router_vs_slot0": {
+      "pearson_mean": 0.9013,
+      "top1_percent_overlap_mean": 0.3635,
+      "absolute_difference_mean": 0.022457,
+      "absolute_difference_max": 0.14453,
+      "fraction_positions_changed": 0.99677
+    },
+    "new_slot0_vs_accepted_old": {
+      "pearson_mean": 0.15505,
+      "pearson_min": -0.075,
+      "pearson_max": 0.488,
+      "top1_percent_overlap_mean": 0.0565
+    },
+    "new_router_vs_accepted_old": {
+      "pearson_mean": 0.17324,
+      "top1_percent_overlap_mean": 0.0792
+    },
+    "generic_negative_embeddings_bitwise_equal_to_frozen_old_cache": true,
+    "radio_feature_norm_mean_approximately_one": true
+  },
+  "token_support_distribution": {
+    "sampled_uniform_centers": 2048,
+    "accepted_physical_contract": {
+      "contract_sha256": "ac77e31694ebe796befcc725ea60685ad6f97978a9a903e1029aa7a7a05abc07",
+      "radius_0p25": {"mean": 86.13, "p05": 1, "median": 29, "p95": 256, "singleton_count": 127},
+      "radius_0p45": {"mean": 133.62, "p05": 3, "median": 98, "p95": 256, "singleton_count": 45},
+      "radius_0p70": {"mean": 167.10, "p05": 10, "median": 256, "p95": 256, "singleton_count": 20}
+    },
+    "new_relation_weighted_contract": {
+      "contract_sha256": "2f974bb5d72b4fe9afe5151582cda6fe972f8531d332745fe1861a52715822c4",
+      "radius_0p25": {"mean": 28.76, "p05": 1, "median": 6, "p95": 158.65, "singleton_count": 428},
+      "radius_0p45": {"mean": 62.94, "p05": 1, "median": 17, "p95": 256, "singleton_count": 211},
+      "radius_0p70": {"mean": 97.46, "p05": 1, "median": 42, "p95": 256, "singleton_count": 122}
+    },
+    "new_contract_training_cache": {
+      "train_shard0_mean": 230.08,
+      "train_shard0_p05": 108.75,
+      "train_shard0_median": 256,
+      "validation_shard0_mean": 224.96,
+      "validation_shard0_p05": 128.75,
+      "validation_shard0_median": 256
+    }
+  },
+  "root_cause": [
+    "The relation-weighted deployment neighborhoods are much sparser than both its own train/validation caches and the accepted physical-contract deployment neighborhoods.",
+    "SurfaceRegionContractV2.minimum_tokens is validated as configuration but is not enforced by expand, expand_batch, or _select_tokens.",
+    "Changing contract/readout and query routing together destroyed the strong fallback; the router itself produced only a small positive delta on that weak fallback."
+  ],
+  "decision": {
+    "full4_opened": false,
+    "reject_router": false,
+    "reject_new_contract_as_current_benchmark_base": true,
+    "next_experiment": "train the residual codebook and query router on the accepted physical contract/readout, keeping exact slot0 fallback fixed at the accepted base; repair minimum-token enforcement separately"
+  }
+}

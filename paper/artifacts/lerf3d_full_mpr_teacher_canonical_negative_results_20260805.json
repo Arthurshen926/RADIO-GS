@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_full_mpr_teacher_canonical_negative_figurines_diagnostic_v1",
+  "status": "diagnostic_completed_small_gain",
+  "results": {
+    "compact_field_plus_canonical_negative_miou": 0.4753371775,
+    "full_mpr_teacher_plus_canonical_negative_miou": 0.4800066352,
+    "delta": 0.0046694577,
+    "same_round_uniform_plus_0p005_reference_miou": 0.4803371775,
+    "exceeds_same_round_reference": false,
+    "acc025": 0.8214285714,
+    "acc050": 0.5535714286,
+    "boundary_f": 0.6904355288,
+    "trimap_iou": 0.3792886436
+  },
+  "artifacts": {
+    "result_sha256": "74e87b1a42caf5d357e9e9f36860befd3b8b9d497d1e24b7fc2b385722e7af60",
+    "descriptor_cache_sha256": "9d3bf81e37b680647a0d032457292d1c443c993528d0543c006584d525bd8efc",
+    "positive_score_cache_sha256": "34e11ac5622cb53584abdaa2f05d82649325c82c825e7deb9291b1556c59037d",
+    "negative_score_cache_sha256": "f33bd4200781bdcc1574321504f22a89460beefa6c898d9d340ad23811970a35"
+  },
+  "conclusion": "Bypassing the compact field while keeping the repaired canonical-negative query interface improves Figurines by only 0.47 mIoU point. This is a small gain under the preregistered interpretation rule and also falls just below the same-round uniform +0.005 diagnostic reference used by neighboring candidates. The dominant remaining LERF3D limitation is therefore region target/readout/query geometry rather than compact-field capacity or MPR compression."
+}

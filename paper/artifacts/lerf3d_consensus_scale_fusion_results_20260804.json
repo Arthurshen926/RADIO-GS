@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_consensus_scale_fusion_dev2_v1",
+  "status": "rejected_by_preregistered_development_gate",
+  "results": {
+    "figurines": {
+      "baseline_miou": 0.4753371775,
+      "candidate_miou": 0.4675867856,
+      "delta": -0.0077503919,
+      "report_sha256": "03840411d4ab01855d4f073120eb73674fa490e9bbb45b4392e96eab0a4d7a97"
+    },
+    "waldo_kitchen": {
+      "baseline_miou": 0.2954942882,
+      "candidate_miou": 0.2950872481,
+      "delta": -0.0004070401,
+      "report_sha256": "73fae01448959d38fbea54b90ae7ff72d989648c760ba30e73f7e128a7c00cd0"
+    }
+  },
+  "gate_decision": {
+    "required": "both scenes improve and macro improves by at least 0.01",
+    "observed": "both scenes regressed",
+    "decision": "reject and do not expand"
+  },
+  "interpretation": "The three region scales are not equally reliable. Parameter-free averaging suppresses useful scale-specific evidence, so a future mixture must predict query/region specificity from globally trained, benchmark-independent supervision rather than assume equal weights."
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "registration": "spin_room_native_exact_w_source_export_v1",
+  "registered_at": "2026-08-06T02:02:00+08:00",
+  "status": "registered_before_source-mask-pixel-decode_or_gpu_export",
+  "purpose": "Export native-resolution query-free exact compositor W for the SPIn-NeRF Room reference view through the caller-hashed external carrier.",
+  "parent_chain": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_spin_room_matched_interface_cache_results_20260806.json",
+    "sha256": "05e751e84f2939a66ad277d3a44c5846d1beba5a7f564c2c7a8d079030ca699f"
+  },
+  "scope": {
+    "scene_id": "room",
+    "reference_frame_id": "DJI_20200226_143850_006",
+    "camera_name": "DJI_20200226_143850_006",
+    "native_width": 1008,
+    "native_height": 756,
+    "prompt_type": "reference_binary_mask",
+    "reference_binary_mask_sha256": "e6bb02f67d844aba18e91de777ee2b5337281b92e7e243e210770f9e7e13d7a7"
+  },
+  "inputs": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "external_carrier": {
+      "config": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/config.yaml",
+        "sha256": "3a1f60c0ae5329dc2fb14391250f4284e0012924cc362a3ed437c5d33a0c85d9"
+      },
+      "checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/geometry_carrier.pth",
+        "sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0"
+      },
+      "camera_map": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/room/rgb_to_colmap_camera_mapping.json",
+        "sha256": "c89d1b61dd1a4512f4574f7092a0b773c2023b16b18b9c86941a119c34ab89af"
+      },
+      "all_three_caller_hash_verified": true,
+      "silent_queue_fallback": false
+    }
+  },
+  "implementation": {
+    "explicit_carrier_wrapper_sha256": "292ba97795002295c7dc54dff9c30cd5b6516e33985843755c11a3bfa8e8e4e3",
+    "legacy_exporter_sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "contribution_compositor_sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0",
+    "repository_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd",
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "temperature_limit_c": 88,
+    "poll_seconds": 30,
+    "consecutive_overheat_polls_before_stop": 6,
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/reference_exact_w.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/reference_exact_w_report.json"
+  },
+  "forbidden_access": {
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "evaluation_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "post_export_checks": [
+    "strict PromptResponsibilityAuthority reload",
+    "complete file and tensor bundle SHA replay",
+    "native H/W frame carrier camera compositor and source-file binding",
+    "do not decode or apply the reference mask"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "registration": "source_observation_evidence_authority_correction_v1",
+  "status": "sealed_after_source_only_failure_diagnosis_and_before_corrected_rerun_or_target_access",
+  "parent_preregistration": {
+    "path": "paper/artifacts/source_observation_evidence_gate_preregistration_20260805.json",
+    "sha256": "d0e7f927423f1a8ea8d855aeeac13519dd16df565ac6aa4ab3ee5225699647c7"
+  },
+  "invalidated_source_only_execution": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/source_observation_evidence_gate_stable_code96c_v2",
+    "reason": "Independent exact raster-adjoint CUDA backward executions reproduce support, sign, fold assignment, and observed population exactly but differ in low floating-point accumulation bits. The strict cross-fold reference-evidence invariant correctly rejected both gates.",
+    "spin9_lego_fold_sha256": [
+      "0f883b8c58a0860e9adfacf4ffa2b70985cb1a155dda2edb98ff399c79c5f9ab",
+      "4eaa00698be493c38cbb8aeb8f791f8c9475140fb06847acde90cd782a0feb6e",
+      "dce615abe0fa5b059c49a1271764d217b039097f85138752a6182d10d909d83c"
+    ],
+    "nvos_fern_fold_sha256": [
+      "4b00ffc3c5df9e1dc3ccd47922627ed50474f0e677b65f9cf4cd7fbd561cd246",
+      "987678d90c2fbff3d1de1d9c3bb369ff5200e4de243e4bcdc88f6613645ff701",
+      "3d4219c79ab02dd24bb096cb6b815fcc2abad1013ff5d187ab3c445964fa9e68"
+    ],
+    "eligible_for_selection": false,
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "diagnosis": {
+    "heldout_clear_order_bug": false,
+    "source": "exact raster-adjoint CUDA backward atomic accumulation",
+    "bitwise_stable": [
+      "valid",
+      "global_rows",
+      "fold_ids",
+      "observed",
+      "zero support",
+      "signed label"
+    ],
+    "spin9_lego_max_signed_relative_difference": 0.000053336177929489575,
+    "nvos_fern_max_signed_relative_difference": 0.000000516130790432628,
+    "all_pairs_pass_fixed_replay_attestation": "rtol=1e-4, atol=0 with exact zero support"
+  },
+  "correction": {
+    "authority": "Fold 0 seals positive_weight, negative_weight, raw_positive_mass, raw_negative_mass, valid, and global_rows before any heldout clearing or target access.",
+    "later_folds": "Folds 1 and 2 must reproduce exact zero support and pass the fixed float32 replay attestation, then replace all four locally recomputed evidence tensors with the same sealed authority before clearing their heldout fold.",
+    "compiler_inputs": "Every fold-specific compiler consumes bitwise-identical authority tensors except for its registered heldout clearing.",
+    "fold_receipts": "Every fold receipt must bind the same authority SHA256.",
+    "gate_invariants": "The original exact cross-fold tensor equality remains unchanged; no allclose relaxation is permitted at the gate.",
+    "new_numeric_method_parameters": false,
+    "target_information_used": false
+  },
+  "corrected_execution": {
+    "new_output_root_required": true,
+    "development_scenes": [
+      "spin9:lego",
+      "nvos:fern"
+    ],
+    "expected_selections_unchanged": {
+      "spin9:lego": "surface_safe_propagated",
+      "nvos:fern": "unary"
+    },
+    "failure_rule": "If either corrected development selection differs, stop before heldout execution and do not alter the gate rule or method constants."
+  },
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "benchmark_metrics_opened": false
+}

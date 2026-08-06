@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_probability_preserving_source_unary_v1",
+  "status": "sentinel_gate_failed_no_full_cohort_expansion",
+  "registered_authority": {
+    "preregistration_path": "paper/artifacts/nvos_probability_preserving_source_unary_preregistration_20260805.json",
+    "preregistration_sha256": "f76b4e752f47ed5fdcd4cfaa4e028a8f196f0e8332939e4c4379513450e66ec4",
+    "implementation_correction_path": "paper/artifacts/nvos_probability_preserving_source_unary_implementation_correction_20260805.json",
+    "implementation_correction_sha256": "e442f60e63d7fdb9635415ee3a6c7ef74f3ba0336dcc2c79144f73a797986447",
+    "evaluator_sha256": "5cfc036a2de217c178201e5fdce350a7c553bf29cc97940992df84bb52fa8a47",
+    "completion_helper_sha256": "15ca3c291e862d6888de3421e06f458c6fe3745bd0575f37acc2e39913a77396"
+  },
+  "method_contract": {
+    "source_probability": "q=mean_of_frozen_official_SAM3_binary_trials_with_signed_scribble_overwrite",
+    "source_reliability": "c(q)=1-H2(q)/ln2_with_signed_scribble_c=1",
+    "primitive_probability": "W^T(c*q)/W^T(c)",
+    "primitive_confidence": "W^T(c)/W^T(1)",
+    "fusion": "(1-c_primitive)*p_field+c_primitive*p_source",
+    "graph": "disabled",
+    "readout": "unary_prior",
+    "threshold": 0.5,
+    "scene_specific_numeric_constants": false,
+    "evaluation_protocol_changed": false
+  },
+  "registered_gate": {
+    "comparator_macro_iou": 0.7276918668287425,
+    "minimum_macro_delta": 0.005,
+    "require_at_least_one_scene_improvement": true,
+    "maximum_allowed_scene_regression": 0.02
+  },
+  "results": {
+    "fern": {
+      "candidate_iou": 0.7143203052887704,
+      "candidate_pixel_accuracy": 0.9045808495378419,
+      "compact_comparator_iou": 0.7553155907838534,
+      "iou_delta": -0.040995285495083,
+      "source_probability_mean": 0.22541072964668274,
+      "source_reliability_mean": 0.8382959365844727,
+      "valid_primitive_completion_confidence_sum": 195042.09375,
+      "report_path": "output/optimization_20260805/nvos_probability_preserving_source_unary_v1/fern/fern_evaluation.json",
+      "report_sha256": "046abf5f9e07ea0a94a49ce6b50563f04733ccd56028f99ba5d94612ec5c5b62",
+      "primitive_unary_sha256": "34d4582c28a3d92bd1dbafd739a1880e98631d46a2d2ca592dd40195ee02baf9",
+      "target_score_sha256": "c49c6805ca758745a9dee0ac20baf82857b4dcb09d7150178c719a33564dce7c"
+    },
+    "horns_left": {
+      "candidate_iou": 0.7663050940546479,
+      "candidate_pixel_accuracy": 0.9834289838916616,
+      "compact_comparator_iou": 0.7000681428736316,
+      "iou_delta": 0.0662369511810163,
+      "source_probability_mean": 0.05659131333231926,
+      "source_reliability_mean": 0.9741718769073486,
+      "valid_primitive_completion_confidence_sum": 142402.328125,
+      "report_path": "output/optimization_20260805/nvos_probability_preserving_source_unary_v1/horns_left/horns_left_evaluation.json",
+      "report_sha256": "698fd5e05daf284d2f5fcc98ad9b695c56c606c47581f219b66115e1b1d08a80",
+      "primitive_unary_sha256": "80956ee3e7ce594e178d96c4ec9d063fd58af0b2ac1888783ec74359085fdfee",
+      "target_score_sha256": "1fd1f8b885a3ad232f7938f8626f8756d5722e36bfc2d59289f21ddf04e5639c"
+    },
+    "aggregate": {
+      "candidate_macro_iou": 0.7403126996717092,
+      "comparator_macro_iou": 0.7276918668287425,
+      "macro_iou_delta": 0.0126208328429667,
+      "gate_passed": {
+        "macro_delta": true,
+        "at_least_one_scene_improvement": true,
+        "no_scene_regression_beyond_0p02": false,
+        "overall": false
+      }
+    }
+  },
+  "safety_and_validation": {
+    "primitive_unary_written_before_target_ground_truth_open": true,
+    "all_target_scores_persisted_before_target_masks_open": true,
+    "explicit_pre_metric_prediction_receipt": false,
+    "focused_tests": "112 passed",
+    "python_compile": "passed",
+    "git_diff_check": "passed",
+    "gpu": {
+      "physical_gpu": 0,
+      "power_limit_w": 300,
+      "thermal_hard_stop_c": 88,
+      "observed_max_temperature_c": 50,
+      "telemetry_note": "Sparse 180-second polling plus release samples; this is the maximum observed sample, not a guaranteed instantaneous peak.",
+      "final_cuda_compute_owner": false
+    }
+  },
+  "decision": {
+    "promote": false,
+    "full_nvos_cohort_opened": false,
+    "reason": "The macro gate and improvement gate passed, but fern regressed by 0.0409952855, exceeding the registered maximum per-scene regression of 0.02.",
+    "mechanistic_conclusion": "Probability-preserving source completion is materially useful on horns_left, but entropy agreement across SAM3 trials is not a correctness-calibrated reliability signal and can confidently override a stronger compact field on fern.",
+    "next_generic_direction": "Calibrate abstention from source-only evidence using source-cycle semantic agreement, leave-one-trial consensus, or source-only out-of-fold field agreement; retain the graph-off unary isolation and avoid scene-specific tuning."
+  }
+}

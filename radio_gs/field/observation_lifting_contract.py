@@ -7,8 +7,14 @@ import json
 from argparse import Namespace
 from typing import Any, Mapping, Sequence
 
+from radio_gs.rendering.sparse_marginal_authority import (
+    SPARSE_EXACT_MARGINAL_AUTHORITY_SCHEMA,
+    SPARSE_EXACT_MARGINAL_FORMULA_SHA256,
+)
+
 
 CANONICAL_OBSERVATION_CONTRACT_NAME = "canonical-mpr-v1"
+CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME = "canonical-exact-marginal-mpr-v1"
 CANONICAL_FULL_OBSERVATION_CONTRACT_NAME = "canonical-full-observation-mpr-v1"
 # Keep the original 240-view full-observation reconstruction frozen as an
 # explicit control.  ``v2`` is intentionally a new contract rather than a
@@ -43,7 +49,10 @@ def canonical_observation_contract(
     """
 
     name = str(name)
-    if name == CANONICAL_OBSERVATION_CONTRACT_NAME:
+    if name in {
+        CANONICAL_OBSERVATION_CONTRACT_NAME,
+        CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME,
+    }:
         view_selection = "uniform_temporal_deterministic"
         require_full_source = False
         maximum_views = 120
@@ -63,7 +72,7 @@ def canonical_observation_contract(
         }[name]
     else:
         raise ValueError(f"unsupported canonical observation contract: {name}")
-    contract = {
+    contract: dict[str, Any] = {
         "name": name,
         "schema_version": 1,
         "view_selection": view_selection,
@@ -81,6 +90,30 @@ def canonical_observation_contract(
         "query_independent": True,
         "requires_full_observation_source_contract": require_full_source,
     }
+    if name == CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME:
+        # This is a new contract, not a reinterpretation of canonical-mpr-v1.
+        # It binds the exact sparse compositor authority used by every feature
+        # space while leaving the feature projection before the shared lift.
+        contract.update(
+            {
+                "aggregation_mode": "raster_marginal_responsibility",
+                "registration_weight_mode": (
+                    "exact_front_to_back_marginal_responsibility"
+                ),
+                "depth_tolerance": 0.0,
+                "relative_depth_tolerance": 0.0,
+                "depth_filter": "not_applied_to_exact_compositor_hits",
+                "alpha_threshold": 0.0,
+                "post_compositor_alpha_threshold": 0.0,
+                "responsibility_sharing": (
+                    "sparse_exact_authority_across_feature_spaces"
+                ),
+                "responsibility_authority_schema": (
+                    SPARSE_EXACT_MARGINAL_AUTHORITY_SCHEMA
+                ),
+                "responsibility_formula_sha256": (SPARSE_EXACT_MARGINAL_FORMULA_SHA256),
+            }
+        )
     # Promoted declarations carry their source-size lower bound. Do not add
     # this key to v1: v1 cache digests are a frozen 240-view control.
     if name in {
@@ -215,12 +248,67 @@ def validate_observation_contract_metadata(
         raise ValueError(
             f"MPR metadata violates canonical observation contract: {sorted(mismatched)}"
         )
+    if str(expected.get("name", "")) == (
+        CANONICAL_EXACT_MARGINAL_OBSERVATION_CONTRACT_NAME
+    ):
+        responsibility_sha256 = str(
+            metadata.get("registration_responsibility_cache_sha256", "")
+        )
+        responsibility = metadata.get("registration_responsibility_contract")
+        selected_dataset = metadata.get("selected_dataset_indices")
+        selected_frames = metadata.get("selected_frame_indices")
+        declared_views = int(metadata.get("num_declared_views", 0))
+        exact_mismatches: list[str] = []
+        if (
+            metadata.get("per_view_normalization_stage")
+            != expected["per_view_normalization_stage"]
+        ):
+            exact_mismatches.append("per_view_normalization_stage")
+        if not (
+            len(responsibility_sha256) == 64
+            and all(
+                character in "0123456789abcdef" for character in responsibility_sha256
+            )
+        ):
+            exact_mismatches.append("registration_responsibility_cache_sha256")
+        if metadata.get("shared_registration_responsibility") is not True:
+            exact_mismatches.append("shared_registration_responsibility")
+        if not isinstance(responsibility, Mapping) or (
+            responsibility.get("formula_sha256")
+            != expected["responsibility_formula_sha256"]
+            or responsibility.get("registration_weight_mode")
+            != expected["registration_weight_mode"]
+            or responsibility.get("post_compositor_alpha_threshold") != 0.0
+            or responsibility.get("query_independent") is not True
+        ):
+            exact_mismatches.append("registration_responsibility_contract")
+        if not (
+            isinstance(selected_dataset, list)
+            and isinstance(selected_frames, list)
+            and 0 < declared_views <= int(expected["maximum_views"])
+            and len(selected_dataset) == declared_views
+            and len(selected_frames) == declared_views
+            and len(set(selected_dataset)) == declared_views
+            and len(set(selected_frames)) == declared_views
+        ):
+            exact_mismatches.append("deterministic_source_view_authority")
+        if metadata.get("benchmark_images_opened") is not False:
+            exact_mismatches.append("benchmark_images_opened")
+        if exact_mismatches:
+            raise ValueError(
+                "MPR metadata violates exact-marginal observation contract: "
+                f"{sorted(exact_mismatches)}"
+            )
     if bool(metadata.get("robust_mpr", False)):
-        raise ValueError("canonical raster MPR must not declare center-only robust fusion")
+        raise ValueError(
+            "canonical raster MPR must not declare center-only robust fusion"
+        )
     minimum_source_views = int(expected.get("minimum_source_views", 0))
-    if minimum_source_views and int(
-        metadata.get("full_observation_source_view_count", 0)
-    ) < minimum_source_views:
+    if (
+        minimum_source_views
+        and int(metadata.get("full_observation_source_view_count", 0))
+        < minimum_source_views
+    ):
         raise ValueError(
             "MPR cache lacks the full "
             f"{minimum_source_views}-view source prefix required by its observation contract"

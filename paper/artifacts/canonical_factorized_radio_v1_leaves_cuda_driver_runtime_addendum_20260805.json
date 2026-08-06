@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "artifact_type": "execution_environment_addendum",
+  "registered_at": "2026-08-05T23:02:13+08:00",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_capability_materialization_preregistration_20260805.json",
+    "sha256": "427ad0888fe2312ab7dd4d7c46b26ba2758481acf02ef62ae9428de6fd3b853a"
+  },
+  "consumer_fix_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_capability_authority_consumer_fix_20260805.json",
+    "sha256": "6acbfeceef06127d79d1e68fb69d7dda298ba31134fb442763970a26b23337fc"
+  },
+  "failed_cuda_initialization": {
+    "exit_code": 1,
+    "output_created": false,
+    "cuda_error": 804,
+    "message": "forward compatibility was attempted on non supported HW",
+    "failed_before_actual_gpu_load": true,
+    "thermal_failure": false,
+    "gpu_oom": false
+  },
+  "root_cause": {
+    "kernel_driver_version": "535.288.01",
+    "system_libcuda_symlink": "/usr/lib/x86_64-linux-gnu/libcuda.so.1",
+    "system_libcuda_symlink_target": "libcuda.so.580.105.08",
+    "mismatch": "new CUDA contexts loaded libcuda 580 against kernel module 535",
+    "gpu_hardware_failure": false
+  },
+  "local_non_mutating_workaround": {
+    "environment": "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "preloaded_libcuda_sha256": "deb92bbc5e2990ded3ca2fd13103d346d2a8dee4374d7f9f64d996e420c0ec9d",
+    "mismatched_default_libcuda_sha256": "df9183549feb062f4195e6cf130e0ef372de4a59e59dbe51554ad8c3c5b167db",
+    "system_symlink_modified": false,
+    "scope": "only the Leaves capability materialization process"
+  },
+  "smoke_validation": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "cu_init_return_code": 0,
+    "torch_cuda_available": true,
+    "visible_device_count": 1,
+    "device_name": "NVIDIA GeForce RTX 3090",
+    "cuda_tensor_kernel_and_synchronize": "passed"
+  },
+  "scientific_contract": {
+    "method_or_hyperparameter_changed": false,
+    "input_or_output_authority_changed": false,
+    "source_only": true
+  },
+  "execution_decision": "retry_identical_preregistered_command_with_process_local_matching_libcuda"
+}

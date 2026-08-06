@@ -1,0 +1,116 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_codebook_v3_query_independent_multihypothesis_v1",
+  "status": "seed0_generic_gate_failed_benchmark_not_opened",
+  "preregistration": {
+    "path": "paper/artifacts/surface_region_codebook_v3_preregistration_20260805.json",
+    "sha256": "d6301a339331bc34520fc859dcbff5e1ac50663c94a31e94994fc9a438a00c85"
+  },
+  "checkpoint": {
+    "path": "output/optimization_20260805/surface_region_codebook_v3_v1/seed0.pt",
+    "sha256": "fd899ec41b2562393f286d4de57df7282ca80cda47a2d75c84586a7ae2624342",
+    "sidecar_sha256": "d857d4fc381ed9072d4099cf25b92eb3d0faef15be6beb7867e03b2267c9f0d6",
+    "seed": 0,
+    "best_epoch": 10
+  },
+  "protocol_integrity": {
+    "registered_before_training": true,
+    "registered_source_sha256_match": true,
+    "registered_cache_sha256_match": true,
+    "train_validation_scene_overlap": [],
+    "benchmark_vocabulary_opened": false,
+    "benchmark_evaluation_opened": false
+  },
+  "control": {
+    "teacher_best_slot_cosine_mean": 0.9126817584037781,
+    "text_response_smooth_l1": 0.00012367252202238888,
+    "support_top1_agreement": 0.2599009871482849,
+    "ranking_spearman_p05": 0.13286712765693665,
+    "response_profile_cosine_p05": 0.6719610691070557,
+    "canonical_descriptor_cosine": 0.9429590106010437
+  },
+  "candidate": {
+    "teacher_best_slot_cosine_mean": 0.8990373015403748,
+    "text_response_smooth_l1": 0.00011263930355198681,
+    "support_top1_agreement": 0.22524753212928772,
+    "ranking_spearman_p05": -0.011538445018231869,
+    "response_profile_cosine_p05": 0.625592827796936,
+    "canonical_descriptor_cosine": 0.928156852722168,
+    "effective_slots_mean": 3.0,
+    "query_slot_usage": [
+      0.05507425591349602,
+      0.9022276997566223,
+      0.04269801825284958
+    ]
+  },
+  "gates": {
+    "teacher_best_slot_cosine_mean": {
+      "delta": -0.01364445686340332,
+      "requirement": "delta_at_least_0.005",
+      "pass": false
+    },
+    "text_response_smooth_l1": {
+      "delta": -0.000011033218470402062,
+      "relative_improvement": 0.08921459833375503,
+      "requirement": "strictly_lower",
+      "pass": true
+    },
+    "support_top1_agreement": {
+      "delta": -0.03465345501899719,
+      "requirement": "nondecreasing",
+      "pass": false
+    },
+    "ranking_spearman_p05": {
+      "delta": -0.14440557267516851,
+      "requirement": "delta_at_least_minus_0.002",
+      "pass": false
+    },
+    "response_profile_cosine_p05": {
+      "delta": -0.04636824131011963,
+      "requirement": "delta_at_least_minus_0.002",
+      "pass": false
+    },
+    "canonical_descriptor_cosine": {
+      "delta": -0.014802157878875732,
+      "requirement": "delta_at_least_minus_0.002",
+      "pass": false
+    },
+    "effective_slots_mean": {
+      "value": 3.0,
+      "requirement": "at_least_1.5",
+      "pass": true
+    },
+    "minimum_query_slot_usage": {
+      "value": 0.04269801825284958,
+      "requirement": "each_at_least_0.05",
+      "pass": false
+    }
+  },
+  "gate_summary": {
+    "passed": 2,
+    "failed": 6,
+    "overall_pass": false
+  },
+  "diagnosis": {
+    "semantic_slot_collapse": true,
+    "student_slot_descriptor_pair_cosine_mean": 0.9999392629,
+    "student_slot_descriptor_pair_cosine_p05": 0.9998030066,
+    "student_slot_token_pair_cosine_mean": 0.9998695,
+    "teacher_view_descriptor_pair_cosine_mean": 0.8942576051,
+    "teacher_view_descriptor_pair_cosine_p05": 0.7322884798,
+    "maximum_prior_deviation_from_uniform": 0.000153,
+    "uniform_priors_do_not_imply_semantic_diversity": true,
+    "no_arithmetic_index_or_provenance_bug_found": true,
+    "control_architecture_confound_present": true,
+    "control_confound": "V2 uses joint attention and reliability log-prior while V3 simultaneously changed core/context pooling and ignored the explicit reliability argument.",
+    "unmatched_slot_issue": "Most two-view rows leave one of the three V3 slots outside the set-matching objective.",
+    "gauge_loss_issue": "The registered token matching cost uses cosine only and does not directly supervise official summary-token norm."
+  },
+  "decision": {
+    "run_seeds_1_2": false,
+    "open_lerf3d": false,
+    "open_spin9": false,
+    "open_nvos": false,
+    "reason": "Seed0 failed six of eight preregistered structural and held-out generic gates."
+  }
+}

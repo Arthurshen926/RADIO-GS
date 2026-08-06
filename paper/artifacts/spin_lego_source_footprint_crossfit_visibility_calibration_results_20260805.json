@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_source_footprint_crossfit_visibility_calibration_v1",
+  "completed_at": "2026-08-05T19:10:00+08:00",
+  "status": "stopped_by_preregistered_source_only_stability_gate_before_target_prediction",
+  "preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_crossfit_visibility_calibration_preregistration_20260805.json",
+    "sha256": "10cf24dac7811c30e21e723dbd49c478a585903f3f09a328b6960ffb986ed15e"
+  },
+  "gpu_execution_addendum": {
+    "path": "paper/artifacts/spin_lego_source_footprint_crossfit_visibility_calibration_gpu_execution_addendum_20260805.json",
+    "sha256": "ba2c1ec4cbc4532c71e1a61df33c0c2273838a28374b11839e91335cc4696a72"
+  },
+  "implementation": {
+    "contract": "radio_gs/querying/spin_source_footprint_visibility_calibration.py",
+    "matched_oof_builder": "radio_gs/scripts/build_spin_source_footprint_matched_oof.py",
+    "calibration_builder": "radio_gs/scripts/build_spin_source_footprint_visibility_calibration.py",
+    "focused_tests": "9 passed",
+    "query_diffusion_and_footprint_regression": "48 passed",
+    "nvos_gate_modified": false
+  },
+  "matched_oof_folds": {
+    "0": {
+      "artifact_sha256": "836628d1a288da3ab9755646d7f9df4a009eb2998fc2dbc0cecf9bfb467c6635",
+      "receipt_sha256": "5697b439bbd5a2803ee498aeeb3feb5325241e0b899158fd4b50bff458dc8121",
+      "heldout_observed_rows": 28914,
+      "heldout_positive_mass": 1328.3696426415981,
+      "heldout_negative_mass": 27585.630484261666,
+      "training_positive_rows_before_cap": 11639,
+      "training_positive_rows_after_cap": 930,
+      "training_reference_rows": 59446,
+      "completion_threshold": 0.7699999999999998,
+      "weighted_soft_iou": 0.6814552419210405,
+      "weighted_positive_probability_mean": 0.8606152997261213,
+      "weighted_negative_probability_mean": 0.09880671167871918,
+      "heldout_training_positive_weight_sum": 0.0,
+      "heldout_training_reference_weight_sum": 0.0
+    },
+    "1": {
+      "artifact_sha256": "dfb27bfc5fcca0a7e10636b3c5a5caa36fec6a60fb730850da736714cc23d81b",
+      "receipt_sha256": "f190b8eda3d9b5fd918911cc6fa1ce76fa37d32c661c50509b7152424ece4a5d",
+      "heldout_observed_rows": 40864,
+      "heldout_positive_mass": 5953.17592303647,
+      "heldout_negative_mass": 34910.824242748145,
+      "training_positive_rows_before_cap": 6573,
+      "training_positive_rows_after_cap": 423,
+      "training_reference_rows": 47496,
+      "completion_threshold": 0.4099999999999995,
+      "weighted_soft_iou": 0.8270551822004054,
+      "weighted_positive_probability_mean": 0.7724693161064321,
+      "weighted_negative_probability_mean": 0.05927938350555975,
+      "heldout_training_positive_weight_sum": 0.0,
+      "heldout_training_reference_weight_sum": 0.0
+    },
+    "2": {
+      "artifact_sha256": "30c61ed16f5304737ba7d015b631454f9d512b23c2e80ca0c9f2732453104c5b",
+      "receipt_sha256": "9a098c39466040d687356f3219eced872df91317d0ee7442c6c05315242dc320",
+      "heldout_observed_rows": 18582,
+      "heldout_positive_mass": 1882.0719212200245,
+      "heldout_negative_mass": 16699.92817891585,
+      "training_positive_rows_before_cap": 11116,
+      "training_positive_rows_after_cap": 877,
+      "training_reference_rows": 69778,
+      "completion_threshold": 0.15999999999999925,
+      "weighted_soft_iou": 0.7519927810205338,
+      "weighted_positive_probability_mean": 0.7029872429730093,
+      "weighted_negative_probability_mean": 0.035417370850871724,
+      "heldout_training_positive_weight_sum": 0.0,
+      "heldout_training_reference_weight_sum": 0.0
+    }
+  },
+  "calibration": {
+    "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_visibility_calibration_v1/lego/visibility_calibration.pt",
+    "artifact_sha256": "10061a2bf1ef1ef570b751bdc5cd81ee9503954076bc2d7ec5135a8743302916",
+    "receipt_sha256": "0d1df6b81fb1cf163abe0c424c5d41aa99ddacf705240b8f7fbe93ebd9a5f951",
+    "t_seen": 0.7099999999999997,
+    "pooled_t_completion_diagnostic_only": 0.49999999999999956,
+    "pooled_weighted_soft_iou": 0.7520998853488479,
+    "fold_thresholds": [
+      0.7699999999999998,
+      0.4099999999999995,
+      0.15999999999999925
+    ],
+    "threshold_span": 0.6100000000000005,
+    "maximum_registered_span": 0.1,
+    "stable": false,
+    "deployment_eligible": false
+  },
+  "source_only_diagnosis": {
+    "authority_or_implementation_failure": false,
+    "evidence": "All folds share exact row, geometry, feature, KNN, graph, source-evidence, and footprint authorities; held-out positive evidence and logistic sample weights are exact zero; all target-access flags are false.",
+    "primary_failure": "The absolute score gauge of the matched release-compatible K201 classifier is conditional on which complete source footprint is withheld. The three folds remove strongly different foreground populations, leaving 6573 to 11639 positive rows before the frozen ten-percent cap and only 423 to 930 after it.",
+    "interpretation": "The single full reference mask supports ranking completion inside each held-out region, but it does not identify one transferable absolute completion threshold. A pooled threshold would combine three incompatible conditional gauges rather than estimate a stable novel-view operating point.",
+    "not_feature_compression_evidence": true
+  },
+  "decision": {
+    "action": "stop_source_footprint_crossfit_visibility_calibration_v1",
+    "target_coverage_rendered": false,
+    "candidate_target_predictions_rendered": false,
+    "target_masks_opened": false,
+    "target_metrics_computed": false,
+    "pooled_threshold_promoted": false,
+    "followup_tuning_forbidden": [
+      "block grid or fold assignment",
+      "bandwidth or regularizer",
+      "positive-cap fraction",
+      "coverage exponent",
+      "threshold interpolation",
+      "stability bound",
+      "scene-specific constants"
+    ]
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "successful_fold_sessions": [73139, 10770, 17700],
+    "initial_direct_python_attempt": "failed before artifact creation with CUDA error 804; rerun used the project driver-pinned run_repo_python.sh entrypoint",
+    "maximum_observed_gpu0_temperature_c": 46,
+    "thermal_abort": false
+  },
+  "safety": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "all_fold_artifacts_sealed_before_calibration": true,
+    "stopped_before_target_prediction": true
+  }
+}

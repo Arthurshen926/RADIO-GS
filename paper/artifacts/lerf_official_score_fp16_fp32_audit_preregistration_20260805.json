@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf_official_score_precision_audit_preregistration",
+  "registered_at": "2026-08-05",
+  "status": "registered_before_tensor_value_audit",
+  "scope": {
+    "scene": "figurines",
+    "method": "accepted_surface_region_v2",
+    "descriptor_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt",
+    "positive_score_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/figurines.pt",
+    "negative_score_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf_native_multiscale_canonical_negative_scores_v1/figurines.pt",
+    "frozen_positive_text_cache": "checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+    "frozen_negative_text_cache": "checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt"
+  },
+  "closure": {
+    "query_independent_method_change": true,
+    "benchmark_closed_numeric_audit": true,
+    "benchmark_queries_are_opened_only_as_already_frozen_score_interface_inputs": true,
+    "benchmark_images_opened": false,
+    "benchmark_annotations_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_used_for_decisions": false,
+    "parameter_or_threshold_tuning": false,
+    "formal_materializer_modified": false,
+    "execution_device": "cpu"
+  },
+  "fixed_comparisons": [
+    "authority-source FP32 normalized cosine versus existing FP16 score cache",
+    "authority-source FP32 normalized cosine cast to FP16 versus existing FP16 score cache",
+    "current frozen text-bank FP32 normalized cosine versus authority-source FP32 normalized cosine",
+    "canonical-negative relevancy at fixed logit scale 10",
+    "frozen VALA kNN10 raw-peak scale selection and independent min-max remap",
+    "strict score greater than 0.6 primitive selection"
+  ],
+  "fixed_rank_cutoffs": {
+    "absolute": [1, 10, 100],
+    "fractions": [0.01, 0.05]
+  },
+  "fixed_reported_metrics": [
+    "absolute error mean p50 p95 p99 maximum",
+    "FP16 round-trip exact element count",
+    "per-query/per-scale stable rank displacement and Spearman correlation",
+    "per-query/per-scale top-k membership overlap",
+    "per-query/per-scale relevancy threshold-0.6 flips",
+    "selected native scale flips",
+    "final VALA score threshold-0.6 primitive-selection flips"
+  ],
+  "decision_rule": {
+    "upgrade_formal_cache_dtype": "recommend only if FP16 alone changes at least one final frozen VALA threshold-0.6 primitive decision, or if an exact downstream evaluator metric changes",
+    "retain_fp16": "retain when final primitive selection is exactly identical; raw score/rank perturbations alone are diagnostic and do not justify a method change"
+  }
+}

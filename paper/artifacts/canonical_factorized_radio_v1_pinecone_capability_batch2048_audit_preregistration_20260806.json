@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_pinecone_capability_batch2048_audit",
+  "registered_at": "2026-08-06T05:21:00+08:00",
+  "status": "registered_after_uniform_batch2048_materialization_and_before_independent_audit",
+  "purpose": "Apply the frozen producer/auditor batch-2048 parity protocol to the Pinecone source-only capability bank.",
+  "inputs": {
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/factorized_field_d256_l128.pth",
+      "sha256": "746f7b0e9a274742733b067aafbaf791843735c989e532a9f9da0e5c155f5671",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "registration_responsibility_cache_sha256": "b8e91d82af0889fc546d1a868c60a75316f44a043d5c5179c9de983104db5f10",
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/official_dino_sam3_views.pt",
+      "sha256": "ae762afce2bccef73ecdc94e5b3bd9ec4b4f1a9ad3707b37da6152193a4a7aeb"
+    }
+  },
+  "materialization_contract": {
+    "producer_batch_size": 2048,
+    "audit_batch_size": 2048,
+    "field_checkpoint_schema": "factorized-v2",
+    "feature_storage": "valid_rows_compact_v1",
+    "num_global_rows": 450000,
+    "num_valid_rows": 310718,
+    "appearance_dim": 4096,
+    "boundary_dim": 1024
+  },
+  "promotion_gate": {
+    "dino_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "sam3_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "exact_full_fp16_parity_required": true,
+    "formal_projection_contract_required": true,
+    "source_only_required": true
+  },
+  "execution": {
+    "producer_physical_gpu": 1,
+    "audit_physical_gpu": 1,
+    "device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "temperature_limit_c": 88,
+    "poll_seconds": 30,
+    "consecutive_overheat_polls_before_stop": 6
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

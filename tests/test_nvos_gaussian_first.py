@@ -18,21 +18,30 @@ from radio_gs.querying.reliability_fusion import (
 )
 from radio_gs.scripts.eval_nvos_gaussian_first import (
     _FROZEN_LEGACY_PROTOTYPE_ALPHA_THRESHOLD,
+    _PROBABILITY_PRESERVING_SOURCE_UNARY,
+    _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION,
+    _apply_hierarchical_source_completion_trust,
     _dataset_protocol_contract,
     _joint_signed_observation_seeds,
     _load_training_poses,
     _registered_solver_masses,
     _prompt_cycle_fixed_ranking,
     _prompt_cycle_reconstruction_metrics,
+    _probability_preserving_registration_maps,
     _require_bipolar_solver_support,
     _render_registered_stage_maps,
     _registered_strong_unary_method_contract,
     _registered_posterior_consensus_method_contract,
     _requires_legacy_prototype_observation,
     _resolve_observed_feature_path,
+    _resolve_scene_carrier_assets,
     _scaled_raster_shape,
+    _source_completion_unary_contract,
     _validate_direct_raster_adjoint_args,
     _validate_hard_seed_anchor_only_probability_args,
+    _validate_registered_prototype_seed_construction_args,
+    _validate_registered_reference_threshold_calibration_args,
+    _validate_source_completion_unary_args,
     _valid_normalized_score_map,
     _weighted_spherical_prototypes,
 )
@@ -124,6 +133,34 @@ def test_observed_feature_path_uses_frozen_camera_mapping(tmp_path) -> None:
     )
 
     assert _resolve_observed_feature_path(tmp_path, "IMG_4027") == feature_path
+
+
+def test_scene_carrier_assets_allow_complete_explicit_frozen_bundle(
+    tmp_path,
+) -> None:
+    queue_scene = tmp_path / "queue_scene"
+    config = tmp_path / "config.yaml"
+    checkpoint = tmp_path / "carrier.pth"
+    camera_map = tmp_path / "camera.json"
+    for path in (config, checkpoint, camera_map):
+        path.write_text("frozen", encoding="utf-8")
+
+    actual = _resolve_scene_carrier_assets(
+        queue_scene,
+        scene_config=str(config),
+        scene_checkpoint=str(checkpoint),
+        camera_map=str(camera_map),
+    )
+
+    assert actual == (config.resolve(), checkpoint.resolve(), camera_map.resolve())
+
+
+def test_scene_carrier_assets_reject_partial_explicit_bundle(tmp_path) -> None:
+    with pytest.raises(ValueError, match="requires --scene-config"):
+        _resolve_scene_carrier_assets(
+            tmp_path,
+            scene_config=str(tmp_path / "config.yaml"),
+        )
 
 
 def test_single_prototype_matches_weighted_mean() -> None:
@@ -398,6 +435,7 @@ def _direct_raster_adjoint_args(**updates: object) -> Namespace:
         "alpha_threshold": 0.0,
         "registered_seed_unary_weight": 0.0,
         "registered_seed_construction": "joint_signed",
+        "registered_prototype_seed_construction": "winner_take_all",
         "registered_forward_unary": "none",
     }
     values.update(updates)
@@ -537,6 +575,7 @@ def _anchor_only_args(**updates: object) -> Namespace:
         "hard_seed_conflict_policy": "exclusive_relative",
         "hard_seed_conflict_margin": 0.0,
         "registered_forward_unary": "none",
+        "registered_prototype_seed_construction": "shared",
     }
     values.update(updates)
     return Namespace(**values)
@@ -580,6 +619,255 @@ def test_anchor_only_method_contract_discloses_bitwise_fallback() -> None:
         "non_anchor_policy": "bitwise_field_unary_preservation",
         "new_numeric_constant": False,
     }
+
+
+def test_decoupled_prototype_seed_contract_accepts_exact_dual_path() -> None:
+    _validate_registered_prototype_seed_construction_args(
+        _anchor_only_args(
+            registered_prototype_seed_construction="winner_take_all"
+        )
+    )
+
+
+def test_decoupled_prototype_seed_contract_rejects_coupled_solver_mode() -> None:
+    with pytest.raises(
+        ValueError,
+        match=(
+            "decoupled registered prototype seeds require.*"
+            "--registered-seed-construction joint_signed.*"
+            "--registered-observation-fusion hard_seed_anchor_only_probability"
+        ),
+    ):
+        _validate_registered_prototype_seed_construction_args(
+            _anchor_only_args(
+                registered_prototype_seed_construction="winner_take_all",
+                registered_seed_construction="winner_take_all",
+                registered_observation_fusion="additive",
+            )
+        )
+
+
+def test_reference_threshold_calibration_contract_accepts_unary_only() -> None:
+    _validate_registered_reference_threshold_calibration_args(
+        Namespace(
+            registered_reference_threshold_calibration=True,
+            support_mode="canonical_support",
+            registered_readout_stage="unary_prior",
+            query_conditioned_diffusion_kernel="none",
+            registered_forward_unary="none",
+        )
+    )
+
+
+def test_reference_threshold_calibration_rejects_query_diffusion() -> None:
+    with pytest.raises(
+        ValueError,
+        match="--query-conditioned-diffusion-kernel none",
+    ):
+        _validate_registered_reference_threshold_calibration_args(
+            Namespace(
+                registered_reference_threshold_calibration=True,
+                support_mode="canonical_support",
+                registered_readout_stage="unary_prior",
+                query_conditioned_diffusion_kernel="ludvig_release_compat",
+                registered_forward_unary="none",
+            )
+        )
+
+
+def _source_completion_args(**updates: object) -> Namespace:
+    values = {
+        "source_completion_unary": _PROBABILITY_PRESERVING_SOURCE_UNARY,
+        "source_completion": "/frozen/source.pt",
+        "source_completion_sha256": "a" * 64,
+        "source_completion_receipt": "/frozen/source.json",
+        "source_completion_receipt_sha256": "b" * 64,
+        "source_completion_calibration": "none",
+        "source_completion_calibration_gate": "",
+        "source_completion_calibration_gate_sha256": "",
+        "support_mode": "canonical_support",
+        "disable_registered_graph": True,
+        "registered_readout_stage": "unary_prior",
+        "query_conditioned_diffusion_kernel": "none",
+        "registered_forward_unary": "none",
+        "registered_observation_fusion": "probability_mixture",
+        "registered_seed_unary_weight": 0.0,
+        "prompt_registration_mode": "raster_adjoint",
+        "prompt_registration_scale": 1.0,
+        "alpha_threshold": 0.0,
+        "feature_contribution_gamma": 1.0,
+        "registered_reference_threshold_calibration": False,
+    }
+    values.update(updates)
+    return Namespace(**values)
+
+
+def test_probability_preserving_source_unary_contract_is_graph_off_and_parameter_free():
+    args = _source_completion_args()
+    _validate_source_completion_unary_args(args)
+    _validate_registered_prototype_seed_construction_args(args)
+    contract = _source_completion_unary_contract(args)
+    assert contract is not None
+    assert contract["graph"] == "disabled_zero_edge_unary_prior_only"
+    assert contract["scene_specific_numeric_constants"] is False
+    assert contract["target_rgb_or_mask_used"] is False
+    assert contract["exact_adjoint_channels"] == ["c*q", "c*(1-q)"]
+    assert contract["source_only_calibration"] is None
+
+
+def test_source_completion_loo_gate_requires_both_immutable_assets() -> None:
+    args = _source_completion_args(
+        source_completion_calibration="all_trial_loo_majority_iou_v1",
+        source_completion_calibration_gate="/frozen/gate.json",
+        source_completion_calibration_gate_sha256="c" * 64,
+    )
+    _validate_source_completion_unary_args(args)
+    contract = _source_completion_unary_contract(args)
+    assert contract is not None
+    assert contract["source_only_calibration"]["uses_target_rgb_mask_or_metric"] is False
+    assert contract["calibration_reject_fallback"] == (
+        "frozen_compact_hard_seed_anchor_only_probability_base"
+    )
+
+    with pytest.raises(ValueError, match="calibration-gate-sha256"):
+        _validate_source_completion_unary_args(
+            _source_completion_args(
+                source_completion_calibration="all_trial_loo_majority_iou_v1",
+                source_completion_calibration_gate="/frozen/gate.json",
+            )
+        )
+
+
+def test_hierarchical_source_completion_contract_is_fixed_local_positive_v2() -> None:
+    args = _source_completion_args(
+        source_completion_calibration=(
+            _SOURCE_COMPLETION_HIERARCHICAL_LOCAL_POSITIVE_CALIBRATION
+        ),
+        source_completion_calibration_gate="/frozen/gate.json",
+        source_completion_calibration_gate_sha256="c" * 64,
+    )
+    _validate_source_completion_unary_args(args)
+    contract = _source_completion_unary_contract(args)
+    assert contract is not None
+    assert contract["calibration_reject_fallback"] == (
+        "v2_local_majority_positive_completion"
+    )
+    local = contract["hierarchical_local_positive_contract"]
+    assert local["proposal_region"] == "q>0.5"
+    assert local["proposal_reliability"] == "c=2*q-1"
+    assert local["nonproposal_policy"] == "c=0_no_negative_evidence"
+    assert local["parameter_sweep"] is False
+
+
+def test_hierarchical_reject_keeps_only_local_positive_completion() -> None:
+    probability = torch.tensor([[0.2, 0.5, 0.6], [0.9, 0.1, 1.0]])
+    entropy_reliability = torch.full_like(probability, 0.75)
+    raw_positive = np.zeros((2, 3), dtype=bool)
+    raw_negative = np.zeros((2, 3), dtype=bool)
+    raw_positive[1, 1] = True
+    raw_negative[1, 2] = True
+    local_probability, local_reliability, evidence = (
+        _apply_hierarchical_source_completion_trust(
+            probability,
+            entropy_reliability,
+            accept_full_completion=False,
+            raw_positive=raw_positive,
+            raw_negative=raw_negative,
+        )
+    )
+    torch.testing.assert_close(
+        local_probability,
+        torch.tensor([[0.5, 0.5, 1.0], [1.0, 1.0, 0.0]]),
+    )
+    torch.testing.assert_close(
+        local_reliability,
+        torch.tensor([[0.0, 0.0, 0.2], [0.8, 1.0, 1.0]]),
+    )
+    assert evidence["branch"] == "v2_local_majority_positive_completion"
+    assert evidence["v1_global_gate_accepted"] is False
+
+
+def test_hierarchical_accept_preserves_full_v1_tensors_exactly() -> None:
+    probability = torch.tensor([[0.2, 0.8]])
+    reliability = torch.tensor([[0.3, 0.7]])
+    result_probability, result_reliability, evidence = (
+        _apply_hierarchical_source_completion_trust(
+            probability,
+            reliability,
+            accept_full_completion=True,
+            raw_positive=np.zeros((1, 2), dtype=bool),
+            raw_negative=np.zeros((1, 2), dtype=bool),
+        )
+    )
+    assert result_probability is probability
+    assert result_reliability is reliability
+    assert evidence["branch"] == "v1_full_probability_preserving_completion"
+    assert evidence["local_positive_contract"] is None
+
+
+def test_source_completion_gate_assets_are_rejected_when_calibration_is_disabled():
+    with pytest.raises(ValueError, match="calibration gate assets require"):
+        _validate_source_completion_unary_args(
+            _source_completion_args(
+                source_completion_calibration_gate="/frozen/gate.json",
+                source_completion_calibration_gate_sha256="c" * 64,
+            )
+        )
+
+
+def test_probability_preserving_registration_uses_one_four_channel_adjoint_input():
+    raw = torch.tensor([[[[1.0, 0.0]], [[0.0, 1.0]]]])
+    probability = torch.tensor([[0.75, 0.25]])
+    reliability = torch.tensor([[0.8, 0.4]])
+
+    packed = _probability_preserving_registration_maps(
+        raw, probability, reliability
+    )
+
+    assert packed.shape == (1, 4, 1, 2)
+    torch.testing.assert_close(packed[:, :2], raw)
+    torch.testing.assert_close(
+        packed[0, 2], torch.tensor([[0.6, 0.1]])
+    )
+    torch.testing.assert_close(
+        packed[0, 3], torch.tensor([[0.2, 0.3]])
+    )
+    torch.testing.assert_close(packed[0, 2] + packed[0, 3], reliability)
+
+
+def test_probability_preserving_registration_rejects_invalid_inputs():
+    with pytest.raises(ValueError, match="shape"):
+        _probability_preserving_registration_maps(
+            torch.zeros(1, 2, 2, 2),
+            torch.zeros(1, 2),
+            torch.ones(1, 2),
+        )
+    invalid = torch.tensor([[0.0, 1.1]])
+    with pytest.raises(ValueError, match=r"\[0,1\]"):
+        _probability_preserving_registration_maps(
+            torch.zeros(1, 2, 1, 2), invalid, torch.ones(1, 2)
+        )
+
+
+@pytest.mark.parametrize(
+    "updates, expected",
+    [
+        ({"disable_registered_graph": False}, "--disable-registered-graph"),
+        ({"registered_readout_stage": "propagated"}, "unary_prior"),
+        ({"registered_observation_fusion": "additive"}, "probability_mixture"),
+        ({"prompt_registration_scale": 0.5}, "registration-scale 1"),
+        ({"source_completion_sha256": "bad"}, "valid SHA256"),
+    ],
+)
+def test_probability_preserving_source_unary_fails_closed(updates, expected):
+    with pytest.raises(ValueError, match=expected):
+        _validate_source_completion_unary_args(_source_completion_args(**updates))
+
+
+def test_source_completion_assets_are_rejected_when_mode_is_disabled():
+    args = _source_completion_args(source_completion_unary="none")
+    with pytest.raises(ValueError, match="source completion assets require"):
+        _validate_source_completion_unary_args(args)
 
 
 def test_joint_signed_registered_seeds_leave_conflicting_mass_neutral() -> None:

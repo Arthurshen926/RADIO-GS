@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_reliability_logit_power_dev2_v1",
+  "status": "rejected_by_preregistered_development_gate_and_posthoc_family_closed",
+  "results": {
+    "figurines": {
+      "control_miou": 0.4753371775,
+      "candidate_miou": 0.4730651081,
+      "delta": -0.0022720695,
+      "report_sha256": "7fe980a371b3132eca35f361d4cdea00fb471f067eb07210043aaed9e118a7c4"
+    },
+    "ramen": {
+      "control_miou": 0.2979446054,
+      "candidate_miou": 0.3180177212,
+      "delta": 0.0200731158,
+      "report_sha256": "4771e066fa5233e727795d2787326aeb1920bdc7d6e19f7567b2ea794c037186"
+    }
+  },
+  "aggregate": {
+    "control_macro_miou": 0.3866408915,
+    "candidate_macro_miou": 0.3955414146,
+    "delta": 0.0089005232
+  },
+  "gate_decision": {
+    "required": "macro gain at least 0.01 and no scene regression larger than 0.01",
+    "macro_gain_pass": false,
+    "per_scene_safety_pass": true,
+    "decision": "reject; close posthoc reliability tempering without exponent, threshold, or scene-policy sweep"
+  },
+  "conclusion": "Both probability-linear and logit-power reliability tempering produce a repeatable approximately +0.020 Ramen gain and a small Figurines loss. Reliability is useful information, but a single posthoc contraction cannot be the common readout. The next structural change must expose reliability to capability/readout learning or evidence fusion while retaining semantic direction separately."
+}

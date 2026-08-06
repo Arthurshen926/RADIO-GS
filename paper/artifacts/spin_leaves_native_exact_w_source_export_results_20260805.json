@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_leaves_native_exact_w_source_export_v1",
+  "completed_at": "2026-08-05T23:25:18+08:00",
+  "status": "pass_after_strict_replay",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin_leaves_native_exact_w_source_export_preregistration_20260805.json",
+    "sha256": "b1e9c7c0ea2d2b197e4bdd96793a2fc8a06a6698ac845ff60f0b8b8b7b8a5e7c"
+  },
+  "implementation_hash_correction": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin_leaves_native_exact_w_compositor_hash_correction_20260805.json",
+    "sha256_at_result_seal": "8a72bd469341f26ed502047c7d84cd63cf240d47d762f89fe7b16ff3d9fb19d4"
+  },
+  "artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w.pt",
+    "sha256": "fecb42234c154ff51827e8b943655d160cd2002ed2845583ec64a0216851c51c",
+    "authority_sha256": "f4e452cda96148eb3d77bf739211d87a8aee6b4d5d1bd7b98397ec7f7d8ce2e8",
+    "tensor_bundle_sha256": "1ba4af99e35dd98f5098949d340f2902748078c0d19f5ec462ee3177deb4ff37",
+    "report_sha256": "720c09e11b04091d1e84904cd376df2690e419be8ad29d9953ec1ed635e0207e",
+    "execution_log_sha256": "c8409eadfb8e7f881b24ae9c963fbe00722694aa9c438d4b28f857a92d4f7f51",
+    "gpu_telemetry_sha256": "409024e3927b93f1e2354035dcd830b864450fd62e6c7f0046050f6a3cfdf2bb",
+    "gpu_owner_audit_sha256": "54fe168a61f207aeb8300d750ce8ce2834cfa1c10fb481e7fe21985abddd9da5"
+  },
+  "authority": {
+    "scene_id": "leaves",
+    "frame_id": "image000",
+    "camera_name": "IMG_2997",
+    "native_height": 756,
+    "native_width": 1008,
+    "num_gaussians": 1400000,
+    "geometry_xyz_sha256": "c6cd5b5bd6bde8da68dc60c5639199b5f3cab65cc71f7caaceed253005efb781",
+    "pose_sha256": "9a96a0fa06c20dd086ab6272cd08703d1009fdd1e8e7c8489f3c93a1d21522a4",
+    "intrinsics_sha256": "992cb05ebd1371e4706e4b5c3ad34b5fff6d13aaa2437e4957087203cd80e8fa",
+    "reference_binary_mask_sha256": "775fde70ff26df13285301007111a14dbab507233ca214d42e3bedf02aabf7bd",
+    "contribution_compositor_sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0"
+  },
+  "statistics": {
+    "triplet_count": 16725352,
+    "visible_gaussians": 147146,
+    "visible_mass_sum": 181411.29444375657,
+    "zero_weight_hits_dropped": 0,
+    "process_peak_rss_kib": 2036484
+  },
+  "verification": {
+    "strict_prompt_responsibility_reload": true,
+    "complete_file_sha_replayed": true,
+    "authority_replayed": true,
+    "tensor_digests_replayed": true,
+    "tensor_bundle_replayed": true,
+    "visible_mass_recomputed_exactly": true,
+    "source_mask_hash_and_header_only": true
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "power_limit_w": 300,
+    "stage_maximum_temperature_c": 44,
+    "thermal_stop_triggered": false,
+    "scientific_child_completed": true,
+    "guard_wrapper_exit_code": 86,
+    "guard_exit_after_artifact_and_report_completion": true,
+    "guard_owner_namespace_false_positive": {
+      "mode_used": "strict",
+      "host_pid_reported_as_foreign": 2947863,
+      "prelaunch_compute_owners_empty": true,
+      "future_mode": "exclusive-singleton-after-clear-v1"
+    }
+  },
+  "safety": {
+    "historical_top1_responsibility_opened": false,
+    "source_mask_pixels_decoded": false,
+    "source_mask_pixels_interpreted": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "decision": "eligible_for_query_free_source_footprint_authority_construction"
+}

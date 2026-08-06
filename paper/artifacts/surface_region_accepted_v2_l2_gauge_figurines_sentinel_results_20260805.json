@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_physical_v2_l2_gauge_figurines_sentinel_result_v1",
+  "status": "complete_failed_closed",
+  "scene": "figurines",
+  "protocol": {
+    "preset": "vala_repo_3d",
+    "score_threshold": 0.6,
+    "queries": 21,
+    "frames": 4,
+    "evaluated_pairs": 56,
+    "per_scene_or_per_query_tuning": false
+  },
+  "source_parity_evidence": {
+    "accepted_frozen_miou": 0.4753372,
+    "accepted_probability_vs_l2_slot0_pearson": 0.5901628136634827,
+    "accepted_probability_vs_l2_slot0_mean_absolute_error": 0.04854293540120125,
+    "interpretation": "The historical accepted deployment is not reproduced by the explicitly L2-normalized path despite legacy metadata claiming the L2 contract."
+  },
+  "results": {
+    "l2_slot0_control": {
+      "score_cache_sha256": "3c7bb5476931257715b5d3ac1ccf3e76b922ee19b9f3f51643a01d234b34a07d",
+      "result_sha256": "10b716a8f571a1ac0ffdcf4ac0f8973a9056c73cd078f129b00cdb53402e3e8a",
+      "miou": 0.01794680953025818,
+      "acc025": 0.0,
+      "acc050": 0.0
+    },
+    "l2_residual_query_router": {
+      "score_cache_sha256": "5b850f40265f624ee30551d5d6a87d8a08f5cf7f91c6c9b1470e7ca3852379b1",
+      "result_sha256": "eda9549084c546b82d66c00a3978ba01b3404fdd2ac1db33c6fd67e1fd57daac",
+      "miou": 0.030075225979089737,
+      "acc025": 0.017857142857142856,
+      "acc050": 0.0,
+      "delta_miou_over_slot0": 0.012128416448831558
+    }
+  },
+  "thermal_execution": {
+    "physical_gpus": [0, 1],
+    "poll_seconds": 180,
+    "start_max_temp_c": 84,
+    "hard_max_temp_c": 88,
+    "consecutive_overheat_polls": 2,
+    "soft_pause": false,
+    "observed_final_temp_c": {"gpu0": 46, "gpu1": 42},
+    "guard_intervention": false
+  },
+  "decision": {
+    "promote": false,
+    "run_remaining_lerf_scenes": false,
+    "reason": "The router improves the broken L2 control only slightly and remains 0.4453 mIoU below the accepted frozen route. The experiment isolates a base-representation gauge failure, not a query-router capacity failure.",
+    "required_next_step": "Train and deploy a gauge-explicit V3 base that keeps RADIO direction and raw feature norm as separate, provenance-bound inputs, with minimum-support recovery matched between training and deployment."
+  }
+}

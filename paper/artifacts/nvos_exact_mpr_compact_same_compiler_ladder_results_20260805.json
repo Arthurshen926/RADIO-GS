@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_exact_mpr_compact_same_compiler_ladder_v1",
+  "status": "complete",
+  "scenes": [
+    "fern",
+    "horns_center",
+    "horns_left"
+  ],
+  "frozen_protocol_modified": false,
+  "graph_propagation_enabled": false,
+  "connected_selection_applied": false,
+  "per_scene": {
+    "fern": {
+      "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+      "valid_primitives": 297200,
+      "arms": {
+        "raw_radio_post_mpr_projection_diagnostic": {
+          "foreground_iou": 0.6060073100082582,
+          "pixel_accuracy": 0.8724254609403738,
+          "capability_source_contract": "exact_mpr",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact_raw_mpr_capability.pt",
+          "capability_cache_sha256": "af57d82ef2edb3a4699b48c3e208b56690f08f930ca3b64c86115c18ccacf1a7",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact/primitive_unary.pt",
+          "primitive_unary_sha256": "67977224252bba8c0cd8c3d6173fe138c5934d8d20ad49a2e901bca5ef786e7e",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact/scores/fern/IMG_4027.npy",
+          "rendered_score_sha256": "df3e0cf4fd7ded04ec93fc771b48473b9bb928d2340c89a90dd7162c7bd80adc",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact/fern_evaluation.json",
+          "evaluation_report_sha256": "f3db52b43ebe896dc8dfb34decfd0c8340abc5c0590232a9e29741293a52c4a3"
+        },
+        "formal_exact_capability_mpr_teacher": {
+          "foreground_iou": 0.7568215050785277,
+          "pixel_accuracy": 0.914760169914287,
+          "capability_source_contract": "exact_capability_mpr",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact_capability_mpr.pt",
+          "capability_cache_sha256": "38c8031f4af225cf81654cd1832110177f8e5ff2594c6bcf143799bd4d3d34ea",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact_capability/primitive_unary.pt",
+          "primitive_unary_sha256": "25c00386b7abf990cf49de04584b1522b41eec987d30cc5896f6d7fbb6e78649",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact_capability/scores/fern/IMG_4027.npy",
+          "rendered_score_sha256": "8c3dee9a7f9f91f7d51fdb7ac5a914da0abedd3652c2c3afcec86bc46aa5d22a",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/exact_capability/fern_evaluation.json",
+          "evaluation_report_sha256": "17a5884f6b2f839b91f3fca4cf9648c3616cc181d9ca6103d8dd37ed68df72a8"
+        },
+        "compact_canonical_field": {
+          "foreground_iou": 0.7553155907838534,
+          "pixel_accuracy": 0.9152140137295313,
+          "capability_source_contract": "field",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fern/official_dino_sam3_views.pt",
+          "capability_cache_sha256": "e2ae42289efa7d49c9ef1fb684e860a7703d6a77758e3847c903e038cc2f845f",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/compact/primitive_unary.pt",
+          "primitive_unary_sha256": "fd2eb7e4e85ea05ce035fbbb108b0b6734dde1c81724d2032a3a7cefb2077dd1",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/compact/scores/fern/IMG_4027.npy",
+          "rendered_score_sha256": "3931cddc5a05bca9747e1ced2a114effd4c4c78528fdb10712b09082929c8fda",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/fern/compact/fern_evaluation.json",
+          "evaluation_report_sha256": "0e3b5395d8b40ce8e20044d73545a9a2f2a84c50062223b4dc938bf5e572bdff"
+        }
+      },
+      "formal_teacher_to_compact": {
+        "iou_delta_compact_minus_teacher": -0.001505914294674393,
+        "primitive_unary": {
+          "mean_absolute_error": 0.01735282503068447,
+          "root_mean_square_error": 0.028951706364750862,
+          "pearson": 0.9980595707893372,
+          "threshold_disagreement_fraction": 0.013112382031977177,
+          "reference_mean": 0.5032070875167847,
+          "candidate_mean": 0.49133938550949097
+        },
+        "rendered_unary": {
+          "mean_absolute_error": 0.011657150462269783,
+          "root_mean_square_error": 0.01968631148338318,
+          "pearson": 0.9990622997283936,
+          "threshold_disagreement_fraction": 0.009951955638825893,
+          "reference_mean": 0.3321067988872528,
+          "candidate_mean": 0.32444190979003906
+        }
+      },
+      "raw_projection_diagnostic_to_compact": {
+        "iou_delta_compact_minus_raw": 0.1493082807755951,
+        "primitive_unary": {
+          "mean_absolute_error": 0.36599352955818176,
+          "root_mean_square_error": 0.392048180103302,
+          "pearson": 0.30995070934295654,
+          "threshold_disagreement_fraction": 0.031298790127038956,
+          "reference_mean": 0.5104979276657104,
+          "candidate_mean": 0.49133938550949097
+        },
+        "rendered_unary": {
+          "mean_absolute_error": 0.33020660281181335,
+          "root_mean_square_error": 0.35726457834243774,
+          "pearson": 0.5268602967262268,
+          "threshold_disagreement_fraction": 0.08510638028383255,
+          "reference_mean": 0.4567214250564575,
+          "candidate_mean": 0.32444190979003906
+        }
+      },
+      "field_training_query_free_capability_fidelity": {
+        "dino_v3_target_mean_cosine": 0.992662787437439,
+        "dino_v3_target_p05_cosine": 0.9866427183151245,
+        "sam3_target_mean_cosine": 0.9776610732078552,
+        "sam3_target_p05_cosine": 0.9496537446975708
+      }
+    },
+    "horns_center": {
+      "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+      "valid_primitives": 150900,
+      "arms": {
+        "raw_radio_post_mpr_projection_diagnostic": {
+          "foreground_iou": 0.49012374425885663,
+          "pixel_accuracy": 0.9059751655279193,
+          "capability_source_contract": "exact_mpr",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact_raw_mpr_capability.pt",
+          "capability_cache_sha256": "816e3e52a805002101acef591f27330f34df99eb3b3f8bec011480da9386d6d9",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact/primitive_unary.pt",
+          "primitive_unary_sha256": "e8a2aa749118e19ff22cbfdd497feccf09e9a1a8143750e8d5cb3c84f155d534",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact/scores/horns_center/DJI_20200223_163024_597.npy",
+          "rendered_score_sha256": "9e825a9642a8ce581157b08fa7bf703170c4699d36eed4c96f3515dbe7541be7",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact/horns_center_evaluation.json",
+          "evaluation_report_sha256": "4cf1574902423295be7f4ff915f056fc5a67ac22a1655c1cc3990df84e93ca42"
+        },
+        "formal_exact_capability_mpr_teacher": {
+          "foreground_iou": 0.6904165139725177,
+          "pixel_accuracy": 0.9422143918377007,
+          "capability_source_contract": "exact_capability_mpr",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact_capability_mpr.pt",
+          "capability_cache_sha256": "817556561ce9a30a0ca30afe69e6996693520d6d8e510e7064f93a17debcf838",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact_capability/primitive_unary.pt",
+          "primitive_unary_sha256": "4223238b556c8e396001c9e0088a48d9b3a7641ec2dd86747ebab704e7b9256e",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact_capability/scores/horns_center/DJI_20200223_163024_597.npy",
+          "rendered_score_sha256": "f5b90ae475af4e009b48e75374570ea261a84f2fc67e8e5b96be2115a964dc5a",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/exact_capability/horns_center_evaluation.json",
+          "evaluation_report_sha256": "4c5d9225fe9a71d1b4e9fe2904e2058903bdd3a9c377d6c61a20dac94abd1f6c"
+        },
+        "compact_canonical_field": {
+          "foreground_iou": 0.6831020618041321,
+          "pixel_accuracy": 0.9409197265941284,
+          "capability_source_contract": "field",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_center/official_dino_sam3_views.pt",
+          "capability_cache_sha256": "6fc60d02b1965ecbadd62f246d275df47b2ad9d6ceb3ec82e46b82e12733044d",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/compact/primitive_unary.pt",
+          "primitive_unary_sha256": "9f064329069d0d6f7ba504e85ef538def37fc6008d3b92b131499152f6ae1f47",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/compact/scores/horns_center/DJI_20200223_163024_597.npy",
+          "rendered_score_sha256": "ef22866d95abd37c126bbe209af7bc807e8dc1893758bb0d0e8d5aa7f3d14a4e",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_center/compact/horns_center_evaluation.json",
+          "evaluation_report_sha256": "2a24742ec1a4fa4dbae583f8b39ce1d9e35a13bffa0eba050657d5001d4c1b74"
+        }
+      },
+      "formal_teacher_to_compact": {
+        "iou_delta_compact_minus_teacher": -0.0073144521683855546,
+        "primitive_unary": {
+          "mean_absolute_error": 0.024586470797657967,
+          "root_mean_square_error": 0.03579053282737732,
+          "pearson": 0.9943734407424927,
+          "threshold_disagreement_fraction": 0.020921139046549797,
+          "reference_mean": 0.3657577335834503,
+          "candidate_mean": 0.36074507236480713
+        },
+        "rendered_unary": {
+          "mean_absolute_error": 0.014998014084994793,
+          "root_mean_square_error": 0.025253932923078537,
+          "pearson": 0.9953019022941589,
+          "threshold_disagreement_fraction": 0.006416751071810722,
+          "reference_mean": 0.18261171877384186,
+          "candidate_mean": 0.18115007877349854
+        }
+      },
+      "raw_projection_diagnostic_to_compact": {
+        "iou_delta_compact_minus_raw": 0.1929783175452755,
+        "primitive_unary": {
+          "mean_absolute_error": 0.2908516526222229,
+          "root_mean_square_error": 0.3293095529079437,
+          "pearson": 0.42977699637413025,
+          "threshold_disagreement_fraction": 0.06814446300268173,
+          "reference_mean": 0.5094560980796814,
+          "candidate_mean": 0.36074507236480713
+        },
+        "rendered_unary": {
+          "mean_absolute_error": 0.2581954598426819,
+          "root_mean_square_error": 0.2843591272830963,
+          "pearson": 0.6577739119529724,
+          "threshold_disagreement_fraction": 0.06416751444339752,
+          "reference_mean": 0.39062950015068054,
+          "candidate_mean": 0.18115007877349854
+        }
+      },
+      "field_training_query_free_capability_fidelity": {
+        "dino_v3_target_mean_cosine": 0.9912002086639404,
+        "dino_v3_target_p05_cosine": 0.9808859825134277,
+        "sam3_target_mean_cosine": 0.9710221886634827,
+        "sam3_target_p05_cosine": 0.9332498908042908
+      }
+    },
+    "horns_left": {
+      "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+      "valid_primitives": 157883,
+      "arms": {
+        "raw_radio_post_mpr_projection_diagnostic": {
+          "foreground_iou": 0.6335474353852301,
+          "pixel_accuracy": 0.9722167068902188,
+          "capability_source_contract": "exact_mpr",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact_raw_mpr_capability.pt",
+          "capability_cache_sha256": "73611e046bb487fbd403b6df98d6b0c7c829c3b3b6f8d1fcdafbc53d7b3db5d2",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact/primitive_unary.pt",
+          "primitive_unary_sha256": "57f61ed6a927d308fc82c64798ac8c7f613f4dcf7521b1f3e2c18f2cbcd9503f",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact/scores/horns_left/DJI_20200223_163024_597.npy",
+          "rendered_score_sha256": "e092e903c8d58d08ba7fcdb51f462214d35baa298df7e74fe6e76aa6ac39d5ba",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact/horns_left_evaluation.json",
+          "evaluation_report_sha256": "b6435125588fec96614921549a26d4f0b143beb6d8f9225aef616b5700f8c56c"
+        },
+        "formal_exact_capability_mpr_teacher": {
+          "foreground_iou": 0.6898716776112209,
+          "pixel_accuracy": 0.9764394725275164,
+          "capability_source_contract": "exact_capability_mpr",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact_capability_mpr.pt",
+          "capability_cache_sha256": "0abdf6cba438b589ce85b91fd5654780c99e96d23224b1d1fd42c78db0d11ee6",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact_capability/primitive_unary.pt",
+          "primitive_unary_sha256": "8827a5df9a8496726d3761bd4d506b58da6bafc8511712ba679c891c4e95b950",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact_capability/scores/horns_left/DJI_20200223_163024_597.npy",
+          "rendered_score_sha256": "1ccf337f7ec432091bc43185535a59e1dde0ce8527c0c3bfadb0206974545df0",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/exact_capability/horns_left_evaluation.json",
+          "evaluation_report_sha256": "e9eb8b36f9598b3093198e815be29e6fe108380d98cc7c3ed1e3d45ed73a9bd5"
+        },
+        "compact_canonical_field": {
+          "foreground_iou": 0.7000681428736316,
+          "pixel_accuracy": 0.9775107876287987,
+          "capability_source_contract": "field",
+          "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/horns_left/official_dino_sam3_views.pt",
+          "capability_cache_sha256": "a7c6a3a938b51ee853e5aa1bc3e36ef468e0fda3785c526ab4529270b665f82d",
+          "primitive_unary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/compact/primitive_unary.pt",
+          "primitive_unary_sha256": "32973308779329f1ddccb7e26b0b0ca4b1232f73746c49ca794ed91c4d52bbc8",
+          "rendered_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/compact/scores/horns_left/DJI_20200223_163024_597.npy",
+          "rendered_score_sha256": "26cbe72569c57ee1b160b9c6085186748b5e1ba263afaab4ac59978119a1cf9e",
+          "evaluation_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_exact_mpr_compact_same_compiler_ladder_v1/horns_left/compact/horns_left_evaluation.json",
+          "evaluation_report_sha256": "4520e6f6e47d22e329c03bb32b30e3e4f6d066ce298a18de057b79208325fed7"
+        }
+      },
+      "formal_teacher_to_compact": {
+        "iou_delta_compact_minus_teacher": 0.010196465262410692,
+        "primitive_unary": {
+          "mean_absolute_error": 0.026712048798799515,
+          "root_mean_square_error": 0.040061336010694504,
+          "pearson": 0.9899483323097229,
+          "threshold_disagreement_fraction": 0.01578384079039097,
+          "reference_mean": 0.2543546259403229,
+          "candidate_mean": 0.23834742605686188
+        },
+        "rendered_unary": {
+          "mean_absolute_error": 0.011566713452339172,
+          "root_mean_square_error": 0.021262265741825104,
+          "pearson": 0.9955358505249023,
+          "threshold_disagreement_fraction": 0.002364066196605563,
+          "reference_mean": 0.13462114334106445,
+          "candidate_mean": 0.1291692554950714
+        }
+      },
+      "raw_projection_diagnostic_to_compact": {
+        "iou_delta_compact_minus_raw": 0.06652070748840155,
+        "primitive_unary": {
+          "mean_absolute_error": 0.2840772569179535,
+          "root_mean_square_error": 0.32197922468185425,
+          "pearson": 0.424739271402359,
+          "threshold_disagreement_fraction": 0.015068120323121548,
+          "reference_mean": 0.4794390797615051,
+          "candidate_mean": 0.23834742605686188
+        },
+        "rendered_unary": {
+          "mean_absolute_error": 0.2582175135612488,
+          "root_mean_square_error": 0.28587180376052856,
+          "pearson": 0.6062833070755005,
+          "threshold_disagreement_fraction": 0.01992570050060749,
+          "reference_mean": 0.36951854825019836,
+          "candidate_mean": 0.1291692554950714
+        }
+      },
+      "field_training_query_free_capability_fidelity": {
+        "dino_v3_target_mean_cosine": 0.9912391901016235,
+        "dino_v3_target_p05_cosine": 0.981347918510437,
+        "sam3_target_mean_cosine": 0.9713724851608276,
+        "sam3_target_p05_cosine": 0.9352962970733643
+      }
+    }
+  },
+  "aggregate": {
+    "raw_radio_post_mpr_projection_diagnostic_macro_iou": 0.5765594965507818,
+    "formal_exact_capability_mpr_teacher_macro_iou": 0.7123698988874221,
+    "compact_canonical_field_macro_iou": 0.7128285984872057,
+    "compact_minus_formal_teacher_macro_iou": 0.0004586995997835815,
+    "compact_minus_raw_projection_diagnostic_macro_iou": 0.13626910193642405
+  },
+  "gt_primitive_oracle": {
+    "available": false,
+    "path": null,
+    "status": "unavailable; no pre-existing frozen target-GT-to-primitive row authority found",
+    "posthoc_oracle_constructed": false
+  },
+  "conclusion": "The formal exact capability-MPR teacher and compact field produce nearly identical K16 primitive/rendered unaries; compact compression is not the material NVOS bottleneck on these scenes. The poor direct raw-RADIO MPR arm is a projection-order diagnostic, not a ceiling."
+}

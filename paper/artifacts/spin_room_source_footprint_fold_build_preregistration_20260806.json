@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "registration": "spin_room_source_footprint_fold_build_v1",
+  "registered_at": "2026-08-06T01:56:30+08:00",
+  "status": "registered_after_exact_w_strict_replay_and_before_footprint_authority_build",
+  "purpose": "Assign every valid Room factorized primitive to one fixed native-raster footprint group for structured source-only three-fold OOF fitting.",
+  "method": {
+    "contract": "source_raster_dominant_footprint_blocks_v1",
+    "native_raster": [
+      756,
+      1008
+    ],
+    "fixed_grid": [
+      6,
+      8
+    ],
+    "primitive_assignment": "responsibility_mass_argmax_exact_tie_smallest_block",
+    "fold_assignment": "SplitMix64(group_id) modulo 3",
+    "invisible_group": "one shared sentinel group",
+    "minimum_class_rows_per_train_and_heldout_population": 32,
+    "scene_specific_tuning": false
+  },
+  "inputs": {
+    "exact_w": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/reference_exact_w.pt",
+      "sha256": "c550e1c8a0a31936eecbaf42beb63f1b4246ab88cb95c7e3d7530dc505e5bb20",
+      "report_sha256": "2cf7ee1485d6e9ef50d1efd2c8dbfb932350ad2cfd4273766e01a9c821591138",
+      "authority_sha256": "c8bb0f6878e8e2f42cdd0c8258e769464a1bbf06eb63ea45c856d1597015a80e",
+      "tensor_bundle_sha256": "3d5bfd3b5663b1f6cdacdc44936bde67965d64065ae6bf89662a731c4a610599",
+      "triplet_count": 31650689,
+      "strict_replay": true,
+      "result_receipt": {
+        "path": "/root/RADIO-GS/paper/artifacts/spin_room_native_exact_w_source_export_results_20260806.json",
+        "sha256": "c39c89ed0818b1ac2e9303482a2ba91ba9ef86fef7c561d7563fc9e4f60c7a0c"
+      }
+    },
+    "primitive_row_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/shared_support_graph_surface_safe_k16.pt",
+      "sha256": "847f184c6b4d01294564cc80017c69840153ec84c4da0ae351246f7df25ef31a",
+      "global_rows": 214612,
+      "num_global_rows": 291619
+    }
+  },
+  "implementation": {
+    "core_sha256": "8c365c4f8974a770f6a58176d4d1de6518237065b7a8230d90bfa8a8ff7a508d",
+    "builder_sha256": "1d143323255fb38893f13fe8d0b826e2298719cdd038a2c6923492361c586e20",
+    "core_test_sha256": "181914949cde0249520e06fa274e6e949a41a077bc789305c993fd0108e66929",
+    "builder_test_sha256": "ba2af5b23ac8ee3ac97523cd8d0bb3ab283275d6f4ef1e4f8cabe0a0aa6a7e2d"
+  },
+  "output": {
+    "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/source_footprint_fold_authority.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/source_footprint_fold_authority_report.json"
+  },
+  "safety": {
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

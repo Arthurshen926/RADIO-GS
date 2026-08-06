@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "registration": "spin_orchids_native_exact_w_source_export_v1",
+  "registered_at": "2026-08-06T04:48:30+08:00",
+  "status": "registered_before_source_mask_decode_or_real_export",
+  "purpose": "Export the native-resolution query-free exact compositor matrix W for the frozen SPIn-NeRF Orchids reference view, independently of target data and historical compact assets.",
+  "parent_chain": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_orchids_source_chain_preregistration_20260806.json",
+    "sha256": "9bc432b2deff2bdaedddcd2898a2c4c67da6f47393cfd4e78f8188bb2f2a5e76"
+  },
+  "matched_interface_gate": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_orchids_matched_interface_cache_results_20260806.json",
+    "sha256": "846122311d74a3333117ce112a20c0f0493dcc13db4f7e7cd5cb10b84b8f5e1d",
+    "passed": true
+  },
+  "scope": {
+    "scene_id": "orchids",
+    "reference_frame_id": "image000",
+    "camera_name": "IMG_4467",
+    "native_width": 1008,
+    "native_height": 756,
+    "prompt_type": "reference_binary_mask",
+    "reference_binary_mask_sha256": "2b6ee8b978391d2cf59fb6e9d40690396d98a020153ba371c5d51e4bdbb62f08"
+  },
+  "inputs": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "queue_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712",
+    "gaussfm_config_sha256": "a993a6e1e16d5e1aa881bb01bae64008018d29751c84daf9125b270de83e39f2",
+    "camera_mapping_sha256": "9bc3fc8000be617a7d49d445fa35c0fc4a63581e5b8275f0889ec0f1b8c1e2a6",
+    "geometry_checkpoint_sha256": "15bc471a55544e74442463ee3cb576d6e9685b8ee7f39fcd080aa539d3332828"
+  },
+  "implementation": {
+    "header_authority_closure_sha256": "7d95e29467a3f64b47de4bc4a7c981950c8dd78e01dc8f124b40a1a20dcd9d89",
+    "exporter_sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "exact_compositor_sha256": "b342bab12ec0d61fc998b83bfd221895daad43a2e9c731530906177273f299a3",
+    "repository_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd",
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "maximum_temperature_c": 88,
+    "poll_seconds": 30,
+    "maximum_consecutive_overheat_polls": 6,
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/orchids/reference_exact_w.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/orchids/reference_exact_w_report.json"
+  },
+  "forbidden_access": {
+    "source_mask_pixels_decoded_before_registration": false,
+    "query_or_evidence_constructed": false,
+    "evaluation_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "post_export_checks": [
+    "strict PromptResponsibilityAuthority replay",
+    "complete file SHA and tensor bundle SHA replay",
+    "native H/W frame geometry camera compositor exporter and source-file bindings",
+    "triplet count visible primitive count mass and telemetry recording"
+  ]
+}

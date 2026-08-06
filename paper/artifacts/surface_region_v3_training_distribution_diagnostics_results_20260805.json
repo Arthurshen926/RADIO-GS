@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_training_distribution_diagnostics_v1",
+  "status": "complete_hypotheses_rejected",
+  "benchmark_state": {
+    "opened": false
+  },
+  "paired_sparse_control": {
+    "checkpoint_sha256": "99c360ecf3f1f773a46cde73bbcf16dcb186e8133aa78d5d5361ad73796fc919",
+    "full_selection_score": 0.9269933043932476,
+    "completion_selection_score": 0.9245699115806341,
+    "sparse_selection_score": 0.9248698176269836
+  },
+  "paired_no_sparse": {
+    "checkpoint_sha256": "0d706fe564c1fd9f6a8be510ae33043bca292c727396601bdb0a5d80c312ac22",
+    "full_selection_score": 0.9275443983958429,
+    "completion_selection_score": 0.9243956013837128,
+    "delta_vs_sparse": 0.0005510940025952602
+  },
+  "full_only_no_sparse": {
+    "checkpoint_sha256": "81b1675e4de89cb5da0fdf98f487aa73133bd36dd8e4fea09ace26147b5353c6",
+    "full_selection_score": 0.9259214498867443,
+    "completion_selection_score": 0.9218961020241436,
+    "delta_vs_paired_no_sparse": -0.0016229485090985951
+  },
+  "conclusions": [
+    "Always-on sparse prefix augmentation is not the generic-gap cause; disabling it changes the primary score by only +0.00055.",
+    "Equal-weight connected completion rows do not harm the primary full-support metric; removing them lowers both full and completion validation.",
+    "Use paired no-sparse training for the current benchmark candidate because it is selected entirely by query-free generic validation."
+  ]
+}

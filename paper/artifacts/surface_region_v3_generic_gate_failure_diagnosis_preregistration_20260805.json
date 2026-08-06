@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_generic_gate_failure_diagnosis_v1",
+  "status": "registered_after_generic_validation_failure_and_before_query_free_diagnostic_training",
+  "failed_candidate": {
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/readout_v3_connected_completion_h256_seed0.pt",
+      "sha256": "99c360ecf3f1f773a46cde73bbcf16dcb186e8133aa78d5d5361ad73796fc919"
+    },
+    "full_selection_score": 0.9269933043932476,
+    "full_all_view_descriptor_cosine": 0.9119604971787448,
+    "completion_selection_score": 0.9245699115806341,
+    "sparse_selection_score": 0.9248698176269836,
+    "generic_opening_gate_passed": false,
+    "benchmarks_opened": false
+  },
+  "hypothesis": "Always-on log-uniform prefix truncation means full-support training rows are almost never observed as full support. Combined with paired completion rows, this shifts training away from the full-support checkpoint-selection distribution even though completion and sparse robustness are learned.",
+  "diagnostic": {
+    "single_change": "disable sparse-support augmentation",
+    "unchanged": [
+      "all six frozen fresh V3 caches",
+      "schema-7 gauge/base architecture",
+      "one connected completion row per full row",
+      "full-only validation checkpoint selection",
+      "seed 0 and all optimizer/loss hyperparameters"
+    ],
+    "benchmark_access": "forbidden",
+    "decision": {
+      "full_metric_recovers": "replace always-on sparse augmentation with deterministic identity-plus-sparse mixture and revalidate all generic gates",
+      "full_metric_does_not_recover": "diagnose V3 representation/base and completion row weighting without opening benchmarks"
+    }
+  }
+}

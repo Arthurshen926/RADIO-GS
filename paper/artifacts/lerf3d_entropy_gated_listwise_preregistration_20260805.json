@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_entropy_gated_listwise_dev2_v1",
+  "status": "registered_before_candidate_target_metrics",
+  "motivation": "The previous hard-sibling margin treated all scene queries as mutually exclusive and catastrophically removed valid part/whole and attribute evidence. Canonical-negative relevancy is retained as the absolute objectness term; listwise evidence is allowed to suppress a sibling only when the complete local query distribution is itself confident.",
+  "candidate": {
+    "input": "frozen canonical-negative relevancy r_q in [0,1]",
+    "formula": "p_q=r_q/sum_j(r_j); c=1-H(p)/log(Q); score_q=r_q*((1-c)+c*p_q/max_j(p_j))",
+    "properties": [
+      "the local winning query is exactly preserved",
+      "a uniform or fully ambiguous query response is exactly preserved",
+      "non-winning queries are suppressed only in proportion to parameter-free normalized entropy confidence",
+      "no benchmark label, mask, target RGB, trainable parameter, temperature, or scene branch is introduced"
+    ],
+    "frozen_downstream": "VALA repository 3-D kNN10 peak-scale selection, per-query minmax remap, threshold 0.6, selected-only alpha rendering"
+  },
+  "development_scenes": [
+    "figurines",
+    "ramen"
+  ],
+  "frozen_control_miou": {
+    "figurines": 0.4753371775,
+    "ramen": 0.2979446054,
+    "macro": 0.3866408915
+  },
+  "gate": {
+    "macro_minimum_gain": 0.01,
+    "maximum_per_scene_regression": 0.01,
+    "on_pass": "expand unchanged to waldo_kitchen and teatime",
+    "on_fail": "reject without parameter sweep"
+  },
+  "safety": {
+    "evaluation_protocol_changed": false,
+    "threshold_tuned": false,
+    "candidate_outputs_opened_before_registration": false,
+    "candidate_target_metrics_opened_before_registration": false
+  }
+}

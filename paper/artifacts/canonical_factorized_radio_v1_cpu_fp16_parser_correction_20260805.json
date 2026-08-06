@@ -1,0 +1,28 @@
+{
+  "artifact_type": "implementation_correction_addendum",
+  "method_contract": "canonical-factorized-radio-v1",
+  "date": "2026-08-05",
+  "status": "registered_after_cpu_unit_failure_and_before_cache_build_training_or_target_evaluation",
+  "supersedes_implementation_sha256": "cd8fbdd5cc377313baae17f132d80344305c312281a6504e204ce1f40b58f31f",
+  "corrected_implementation": {
+    "path": "radio_gs/field/factorized_radio_contract.py",
+    "sha256": "cded4da0e4025a6f0d3f1b3838279b02d8644bdb280d74ce0b97b58bb66380fc"
+  },
+  "failure": "parse_factorized_radio_payload attempted CPU clamp_min directly on a float16 norm denominator, which is unsupported by the repository PyTorch runtime",
+  "correction": "derive the unit semantic direction entirely in float32 and cast only the bounded result back to the persisted canonical dtype",
+  "semantic_change": false,
+  "cache_schema_change": false,
+  "contract_sha256_change": false,
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used": false
+  },
+  "execution": {
+    "gpu_used": false,
+    "cache_rebuilt": false,
+    "field_trained": false,
+    "benchmark_evaluated": false
+  }
+}

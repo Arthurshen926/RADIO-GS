@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_k16_exact_adjoint_anchor_dev2_v1",
+  "status": "development gate passed",
+  "control_iou": {
+    "fern": 0.7549143051,
+    "horns_left": 0.7086130221,
+    "macro": 0.7317636636
+  },
+  "anchor_iou": {
+    "fern": 0.7540757435,
+    "horns_left": 0.7266920843,
+    "macro": 0.7403839139
+  },
+  "anchor_minus_control": {
+    "fern": -0.0008385616,
+    "horns_left": 0.0180790622,
+    "macro": 0.0086202503
+  },
+  "valid_anchor_rows": {
+    "fern": 14635,
+    "horns_left": 10809
+  },
+  "gate": {
+    "macro_improvement": true,
+    "no_scene_regression_over_0_02": true,
+    "decision": "expand both control and anchor arms to the heldout six scenes unchanged"
+  },
+  "report_sha256": {
+    "control_fern": "2a45281b45469eeb68a9602a1b05de182acce5557284771814b4851fe87a7422",
+    "control_horns_left": "fc8bccb78a05467be8f7a4d4e7b5e821268a4a737e15fa51baeacd7ea7c36289",
+    "anchor_fern": "c811e4309e658c4c05cededb7869ceffe00fae27a5a2e633f049682dfb7ea8db",
+    "anchor_horns_left": "65d001ca130da2d00d15723086f1ba62cda5d7f5c13d9b918e0fdbd2936c91f7"
+  },
+  "conclusion": "Joint-signed seed construction is already materially stronger than the earlier independently normalized K16 bank on horns_left. Exact-adjoint hard anchors add a further 0.86 development-macro points while preserving all non-anchor unary rows."
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_local_majority_positive_completion_v2_source_diagnostic_results",
+  "evaluated_at": "2026-08-05T20:03:02+08:00",
+  "claim_boundary": "Source-only evidence diagnostic. No target RGB, target rendering, target mask, or target metric was opened. Passing authorizes only a separately preregistered target sentinel.",
+  "lineage": {
+    "preregistration": "paper/artifacts/nvos_local_majority_positive_completion_v2_preregistration_20260805.json",
+    "preregistration_sha256": "5b7bda622a923d0333929bc0f641b9ab8d20a6a7496ee287a0c5f75f6af46152",
+    "source_authority_correction": "paper/artifacts/nvos_local_majority_positive_completion_v2_source_authority_correction_20260805.json",
+    "source_authority_correction_sha256": "e2c6fd77e792ac2f30ec60b09356fa854d57b32d217b4cf832a221992578d3a4",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "implementation": "radio_gs/querying/nvos_local_positive_completion.py",
+    "implementation_sha256": "d2d61097c0cc84c8ee754ffdb383e08f2121221efadb0767a4fdf01e3366b8d3",
+    "builder": "radio_gs/scripts/build_nvos_local_positive_completion_diagnostic.py",
+    "builder_sha256": "f0e67e3711572109e5557faaa96581063e9847f0f62dd36456858daa467f3df1"
+  },
+  "failed_attempt_audit": {
+    "cause": "The frozen manifest did not contain prompt.asset_sha256.",
+    "resolution": "A pre-result source-authority correction froze all sixteen path-resolved scribble hashes; the builder now requires and SHA-binds it.",
+    "diagnostic_output_written_before_correction": false,
+    "method_or_gate_changed": false,
+    "target_information_used": false
+  },
+  "diagnostic": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_local_majority_positive_completion_v2/source_only_diagnostic.json",
+    "sha256": "83a5c4059d0e7c33c709b08fac78a2b2595cca0631150d605c5b5c5711ca140b",
+    "scene_count": 8,
+    "trial_count_per_scene": 10,
+    "pooled_hard_majority_precision": 0.7983481772128406,
+    "pooled_confidence_weighted_precision": 0.816062364269164,
+    "precision_gain_from_margin_weighting": 0.017714187056323438,
+    "pooled_proposal_pixels": 6303945,
+    "pooled_intersection_pixels": 5032743,
+    "pooled_confidence_mass": 3987746.693611741,
+    "pooled_true_confidence_mass": 3254249.994895339,
+    "v1_rejected_scenes_retaining_non_scribble_positive_confidence": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ]
+  },
+  "per_scene": {
+    "fern": {
+      "full_fit_proposal_fraction": 0.22889664233867582,
+      "mean_loo_hard_precision": 0.8337376416466279,
+      "mean_loo_weighted_precision": 0.8640808067484793,
+      "pooled_loo_hard_recall": 0.9198312321209096,
+      "pooled_loo_hard_iou": 0.7739006354010444
+    },
+    "flower": {
+      "full_fit_proposal_fraction": 0.18139044397511733,
+      "mean_loo_hard_precision": 0.8653334444460722,
+      "mean_loo_weighted_precision": 0.89399826045294,
+      "pooled_loo_hard_recall": 0.9734382724980273,
+      "pooled_loo_hard_iou": 0.8445705704549392
+    },
+    "fortress": {
+      "full_fit_proposal_fraction": 0.1197237277236818,
+      "mean_loo_hard_precision": 0.8668749999311085,
+      "mean_loo_weighted_precision": 0.8772735259062985,
+      "pooled_loo_hard_recall": 0.9835464351059834,
+      "pooled_loo_hard_iou": 0.8537071985793558
+    },
+    "horns_center": {
+      "full_fit_proposal_fraction": 0.11459453871321958,
+      "mean_loo_hard_precision": 0.7513690043601158,
+      "mean_loo_weighted_precision": 0.7721990756264295,
+      "pooled_loo_hard_recall": 0.7915204972679837,
+      "pooled_loo_hard_iou": 0.6210892439765703
+    },
+    "horns_left": {
+      "full_fit_proposal_fraction": 0.05269595000997676,
+      "mean_loo_hard_precision": 0.884415874168902,
+      "mean_loo_weighted_precision": 0.9199474014563643,
+      "pooled_loo_hard_recall": 0.9282684312035553,
+      "pooled_loo_hard_iou": 0.8269173537804387
+    },
+    "leaves": {
+      "full_fit_proposal_fraction": 0.032586371175494934,
+      "mean_loo_hard_precision": 0.7587650137302104,
+      "mean_loo_weighted_precision": 0.7908036848991346,
+      "pooled_loo_hard_recall": 0.8860768779342723,
+      "pooled_loo_hard_iou": 0.683665383744623
+    },
+    "orchids": {
+      "full_fit_proposal_fraction": 0.08685100173374301,
+      "mean_loo_hard_precision": 0.6743055705518074,
+      "mean_loo_weighted_precision": 0.6878265635380416,
+      "pooled_loo_hard_recall": 0.7697409078406368,
+      "pooled_loo_hard_iou": 0.5511489490134692
+    },
+    "trex": {
+      "full_fit_proposal_fraction": 0.049782134174441675,
+      "mean_loo_hard_precision": 0.6422813551376888,
+      "mean_loo_weighted_precision": 0.6838697461758262,
+      "pooled_loo_hard_recall": 0.3971926055897889,
+      "pooled_loo_hard_iou": 0.31909061493086505
+    }
+  },
+  "admissibility_gate": {
+    "structural_invariants_all_pass": true,
+    "pooled_confidence_weighted_precision_at_least_pooled_hard_majority_precision": true,
+    "at_least_one_v1_rejected_scene_retains_non_scribble_positive_confidence": true,
+    "all_metrics_finite": true,
+    "no_numeric_margin_or_target_threshold": true,
+    "overall": true,
+    "authorized_next_step": "separate_target_sentinel_preregistration_only"
+  },
+  "interpretation": {
+    "theoretical_result": "Local abstention is better grounded than the v1 scene-global veto: all seven formerly rejected scenes preserve some repeatable non-scribble positive evidence, while non-proposal pixels contribute exactly zero completion confidence.",
+    "empirical_source_result": "Margin reliability improves pooled held-out precision by 1.7714 points without a tuned threshold.",
+    "limitation": "Source repeatability is weakest for trex and orchids, and individual held-out trials can disagree sharply. The source gate does not establish target-view accuracy.",
+    "target_claim": "none"
+  },
+  "verification": {
+    "focused_tests": "7 passed in 2.24s",
+    "test_file": "tests/test_nvos_local_positive_completion.py",
+    "test_file_sha256": "25cf736ac588aa58a47675620eda792fd7f59def36e8b77ec70ca303efe7f2d0",
+    "python": "/root/miniconda3/envs/cybersim_agent/bin/python",
+    "py_compile_passed": true,
+    "json_validation_passed": true,
+    "git_diff_check_passed": true,
+    "identical_no_clobber_rerun_sha256": "83a5c4059d0e7c33c709b08fac78a2b2595cca0631150d605c5b5c5711ca140b"
+  },
+  "safety": {
+    "source_rgb_opened": false,
+    "source_scribbles_opened": true,
+    "source_completion_trials_opened": true,
+    "target_rgb_opened": false,
+    "target_score_rendered": false,
+    "target_mask_opened": false,
+    "target_metric_opened": false,
+    "evaluator_modified": false
+  }
+}

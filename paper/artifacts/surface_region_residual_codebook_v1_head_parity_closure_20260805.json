@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_frozen_v2_residual_codebook_v1_head_parity_closure",
+  "status": "closed_before_repeated_seed0_training_or_new_generic_validation",
+  "trainer_sha256": "de230f61bee007fd5b6f88e487cbb1ef4648fe4dd03ee83121de9c356425adba",
+  "test_sha256": "8d6f02d5efa8b2355b5afe186efacac161010886f506e74bc146eced1c9c7a2b",
+  "change": "Project fallback and each residual slot independently from a contiguous [B,1,D] tensor through the frozen official SigLIP2 summary head.",
+  "method_semantics_changed": false,
+  "numeric_contract": {
+    "identical_slot_tokens_produce_bitwise_identical_descriptors": true,
+    "hard_max_duplicate_fallback_must_equal_singleton_fallback": true,
+    "different_gemm_sequence_lengths_mixed": false
+  },
+  "validation": {
+    "py_compile_passed": true,
+    "focused_tests_passed": 14,
+    "focused_tests_failed": 0
+  }
+}

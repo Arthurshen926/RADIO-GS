@@ -1,0 +1,127 @@
+{
+  "schema_version": "spin9_exact_compact_same_compiler_ladder_results_v1",
+  "status": "complete_two_scene_attribution_ladder",
+  "registration": {
+    "path": "paper/artifacts/spin9_exact_compact_same_compiler_ladder_preregistration_20260805.json",
+    "sha256": "6121f2e4685a82e76e263d362435d868b56f830d0b7ff4c9ee9a698eef8680d7"
+  },
+  "protocol": {
+    "cohort": "SPIn strict local9 full-reference-mask diagnostic",
+    "sentinels": ["lego", "room"],
+    "sentinel_role": "previously opened difficult-scene attribution only",
+    "target_rgb_at_query": false,
+    "target_rgb_compatible_information_used": false,
+    "graph_constructed": false,
+    "diffusion_or_connected_selection_used": false,
+    "all_prediction_receipts_sealed_before_target_masks_opened": true
+  },
+  "shared_method": {
+    "compiler": "K4 spherical-mean FPS; appearance 1.0; boundary 0.35; temperature 0.07; no score calibration; sigmoid probability",
+    "compiler_sha256": "d3ec17c95dab7a9603c5bfd7811ed161568ac659c184c936430965bd37dcee32",
+    "renderer": "alpha-normalized scalar Gaussian compositor; contribution gamma 1.0; invalid rows zero-abstain",
+    "renderer_sha256": "63296fb019f41042f92a23fd05f2c5a278892a8acbf29e7a0d028c7c5a067b8d",
+    "official_adaptor_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "scene_results": {
+    "lego": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin9_exact_compact_same_compiler_ladder_v1/lego/lego_unary_ladder_evaluation.json",
+      "report_sha256": "0f030dde05b435ff936269da390bdad7113703eef1de10b42db4e349f0b3ac4e",
+      "num_frames": 43,
+      "valid_gaussians": 128780,
+      "exact_capability": {
+        "fixed_probability_0p5_iou": 0.29594933427084297,
+        "reference_only_iou": 0.6023555581041882,
+        "reference_threshold": 0.5299999999999996,
+        "primitive_probability_std": 0.050127629190683365
+      },
+      "exact_raw_adapted": {
+        "fixed_probability_0p5_iou": 0.29608827780903746,
+        "reference_only_iou": 0.29608827780903746,
+        "reference_threshold": 0.49999999999999956,
+        "primitive_probability_std": 0.00025997794000431895
+      },
+      "compact_field": {
+        "fixed_probability_0p5_iou": 0.28486507915281845,
+        "reference_only_iou": 0.59769921662741,
+        "reference_threshold": 0.5299999999999996,
+        "primitive_probability_std": 0.04905790835618973,
+        "primitive_probability_mae_vs_exact": 0.00382432178594172,
+        "primitive_probability_rmse_vs_exact": 0.006501060910522938,
+        "primitive_probability_pearson_vs_exact": 0.9916835427284241,
+        "fixed_iou_delta_vs_exact": -0.011084255118024522,
+        "reference_only_iou_delta_vs_exact": -0.004656341476778181
+      }
+    },
+    "room": {
+      "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin9_exact_compact_same_compiler_ladder_v1/room/room_unary_ladder_evaluation.json",
+      "report_sha256": "49d076d2594c685c73733837be14d90b25ad90e79f45371575aed8511a9141e7",
+      "num_frames": 40,
+      "valid_gaussians": 214612,
+      "exact_capability": {
+        "fixed_probability_0p5_iou": 0.4975562507355559,
+        "reference_only_iou": 0.5509106578376624,
+        "reference_threshold": 0.48999999999999955,
+        "primitive_probability_std": 0.044159118086099625
+      },
+      "exact_raw_adapted": {
+        "fixed_probability_0p5_iou": 0.21878546197575108,
+        "reference_only_iou": 0.21878546197575108,
+        "reference_threshold": 0.49999999999999956,
+        "primitive_probability_std": 0.0002057305391645059
+      },
+      "compact_field": {
+        "fixed_probability_0p5_iou": 0.5682299038191011,
+        "reference_only_iou": 0.6840019543559753,
+        "reference_threshold": 0.48999999999999955,
+        "primitive_probability_std": 0.040944915264844894,
+        "primitive_probability_mae_vs_exact": 0.006410186178982258,
+        "primitive_probability_rmse_vs_exact": 0.014608764089643955,
+        "primitive_probability_pearson_vs_exact": 0.9445998072624207,
+        "fixed_iou_delta_vs_exact": 0.07067365308354517,
+        "reference_only_iou_delta_vs_exact": 0.13309129651831297
+      }
+    }
+  },
+  "sentinel_macro": {
+    "fixed_probability_0p5_iou": {
+      "exact_capability": 0.39675279250319945,
+      "exact_raw_adapted": 0.2574368698923943,
+      "compact_field": 0.4265474914859598,
+      "compact_minus_exact": 0.029794698982760326
+    },
+    "reference_only_iou": {
+      "exact_capability": 0.5766331079709253,
+      "exact_raw_adapted": 0.2574368698923943,
+      "compact_field": 0.6408505854916926,
+      "compact_minus_exact": 0.0642174775207674
+    },
+    "primitive_exact_to_compact": {
+      "mean_scene_mae": 0.005117253982461989,
+      "mean_scene_rmse": 0.010554912500083447,
+      "mean_scene_pearson": 0.9681416749954224
+    },
+    "primitive_probability_std": {
+      "exact_capability": 0.047143373638391495,
+      "exact_raw_adapted": 0.00023285423958441243,
+      "compact_field": 0.04500141181051731,
+      "exact_to_raw_dynamic_range_ratio": 202.4587631372813
+    }
+  },
+  "conclusions": [
+    "Compact-field compression is not the causal SPIn unary bottleneck on the Lego/Room sentinels. Compact preserves exact-capability primitive ranking closely and does not regress rendered unary in the two-scene macro.",
+    "The unsafe base design is adaptor-after-fused-raw-MPR. Its primitive probability standard deviation collapses from 0.04714 to 0.000233, roughly 202 times smaller, and reference-only IoU loses 0.31920 macro versus capability-before-MPR.",
+    "Official DINOv3/SAM3 capability projection must remain before MPR, or the compact field must be explicitly capability-supervised as the current field is. A single fused raw center is not a sufficient statistic for nonlinear adaptor capabilities.",
+    "Lego also exposes a calibration issue: exact and compact both move from about 0.29 fixed IoU to about 0.60 with a reference-only threshold while retaining nearly identical ranking. This is an interface calibration effect, not compression loss.",
+    "Because exact capability does not beat compact, widening the persistent field or replacing it with uncompressed capability MPR is not justified by this ladder. Remaining strict-SPIn work should target source observation/completion and reference-derived probability calibration; compatible target-RGB SAM remains a separately labelled track."
+  ],
+  "implementation": {
+    "entry": "radio_gs/scripts/eval_spin9_exact_compact_unary_ladder.py",
+    "entry_sha256": "db3b8bb64ec5e2722bc1aadfdba0d914c0ed7b6968ec66fe4a47f8c7f566848c",
+    "test": "tests/test_spin9_exact_compact_unary_ladder.py",
+    "test_sha256": "9a6d3cd6194d8ba94e550035d249513bbc540082721e620a65b25222fb040e95",
+    "focused_regression": "53 passed",
+    "gpu": "physical GPU1 only, exposed as cuda:0 with pinned libcuda preload",
+    "final_gpu1_temperature_c": 41,
+    "thermal_abort": false
+  }
+}

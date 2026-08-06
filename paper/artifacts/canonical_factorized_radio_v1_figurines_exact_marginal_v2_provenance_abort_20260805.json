@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_only_execution_abort",
+  "experiment": "canonical-factorized-radio-v1-figurines-exact-marginal-source-only-v2",
+  "date": "2026-08-05",
+  "status": "ineligible_provenance_binding",
+  "preregistration_sha256": "9f7e8c44da099a679c7a7e2a2e8ff8fd5161cb84d2471adf30a49bc6998c5854",
+  "reason": "inspect.getsourcefile on a torch.no_grad-decorated compositor resolved torch/utils/_contextlib.py rather than the repository compositor source, so the manifest field named compositor_implementation_sha256 did not bind the implementation it claimed to bind",
+  "numeric_formula_changed": false,
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  },
+  "frozen_but_ineligible_assets": {
+    "authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v2/exact_marginal_responsibility_authority.json",
+      "sha256": "97ad42c2d62021af5168e5646c7f3c0ea5c620361700cfe7ce2713ad693dac27",
+      "declared_compositor_implementation_sha256": "f8bca0f4283b0258342ee747ab5fed874ec9e344467a473f7da9b2b2a99019b8",
+      "actual_repo_compositor_sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0",
+      "views": 120,
+      "total_hits": 32766223
+    },
+    "factorized_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v2/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "d7cd0661b5f40f0c6f6e23af6804587f45c272d370dda97cb39ff5b1c167edbd",
+      "semantic_valid_gaussians": 96879
+    }
+  },
+  "partial_outputs": {
+    "normalized_raw_cache_published": false,
+    "dino_v3_cache_started": false,
+    "sam3_cache_started": false
+  },
+  "disposition": "Preserve all bytes for audit; do not use any v2 asset in a formal cohort, field checkpoint, or benchmark. Re-register a new output root after unwrapping the decorated callable before source hashing."
+}

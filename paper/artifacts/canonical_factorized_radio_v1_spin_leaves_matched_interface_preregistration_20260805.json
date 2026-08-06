@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_leaves_matched_interface_v1",
+  "registered_at": "2026-08-05T23:17:21+08:00",
+  "status": "registered_before_building_query_independent_k201_or_signed_hash256_caches",
+  "purpose": "Materialize the same frozen SPIn query-diffusion interface used by Lego for Leaves, without opening a target mask or selecting any scene-specific parameter.",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "frozen_inputs": {
+    "manifest_sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+    "scene_id": "leaves",
+    "factorized_field_sha256": "e8d0eb10a4e24cb9c22869336b0c159e6b8fe3ec84161f20669c897bd158b807",
+    "factorized_capability_cache_sha256": "921e500666561b259a14a29046c89105e22003163ffee14be9832bea087d6223",
+    "factorized_surface_safe_graph_sha256": "39edb163e6136eb840cd5154bf5679261d98c3ee491a10ccc19d04b66278973d",
+    "surface_safe_graph_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_surface_safe_graph_results_20260805.json",
+      "sha256": "7800c8cb6aa501eaf79252d7fb5c037a4460d0668f18c11a7906d67ebcf18f1f"
+    }
+  },
+  "query_independent_cache_build": {
+    "knn": {
+      "builder_sha256": "49f716bbef4d4d8c82a3497bd84cf2ae0fe9c9e329383a49689129172c55a120",
+      "official_num_neighbors": 200,
+      "include_self": true,
+      "effective_k": 201,
+      "construction": "exact scipy cKDTree Euclidean"
+    },
+    "relation": {
+      "builder_sha256": "206803cf3113fbd0e97e93f3212e63be94aca0a4a1c38a7c3579552f161e8d7b",
+      "source": "factorized field official DINOv3 capability rows",
+      "projection": "signed_multiplicative_hash",
+      "output_dimension": 256,
+      "normalization": "l2_after_projection"
+    },
+    "labels_queries_or_target_inputs": false
+  },
+  "fixed_query_interface": {
+    "base_compiler": "K4 spherical_mean_fps exact raster-adjoint direct observation, joint-signed shared seeds, all components",
+    "base_graph": "typed surface-safe K16",
+    "base_readout_stage": "propagated",
+    "query_diffusion_kernel": "ludvig_release_compat",
+    "feature_bandwidth_grid": [
+      0.5,
+      1.0,
+      2.0,
+      4.0,
+      8.0
+    ],
+    "regularizer_bandwidth_grid": [
+      0.125,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "logistic_c": 0.01,
+    "iterations": 100,
+    "edge_binarize_threshold": 0.00001,
+    "max_positive_fraction": 0.1,
+    "reference_threshold_source": "source_weighted_right_ecdf_q0.96",
+    "calibration_input": "declared source reference mask only",
+    "connected_selection": false,
+    "scene_specific_tuning": false
+  },
+  "execution": {
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/query_diffusion_matched_interface_v1",
+    "output_root_was_absent_at_registration": true,
+    "repository_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd"
+  },
+  "decision_rule": {
+    "cache_gate": "both caches must strict-reload with the frozen graph, capability, field, and registration lineage before exact source-W export",
+    "target_evaluation": "forbidden until the parent full-scene receipt index is sealed"
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false,
+    "target_score_used_for_selection": false
+  }
+}

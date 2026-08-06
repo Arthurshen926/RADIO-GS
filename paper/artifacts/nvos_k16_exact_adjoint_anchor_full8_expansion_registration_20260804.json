@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_k16_exact_adjoint_anchor_full8_expansion_v1",
+  "status": "registered after the dev2 gate and before opening heldout-six outcomes",
+  "source_preregistration": "paper/artifacts/nvos_k16_exact_adjoint_anchor_dev2_preregistration_20260804.json",
+  "source_dev_result": "paper/artifacts/nvos_k16_exact_adjoint_anchor_dev2_results_20260804.json",
+  "heldout_scenes": ["flower", "fortress", "horns_center", "leaves", "orchids", "trex"],
+  "arms": [
+    {
+      "name": "joint_signed_control",
+      "registered_observation_fusion": "additive",
+      "registered_seed_construction": "joint_signed",
+      "prototype_count": 16
+    },
+    {
+      "name": "exact_anchor_candidate",
+      "registered_observation_fusion": "hard_seed_anchor_only_probability",
+      "registered_seed_construction": "joint_signed",
+      "prototype_count": 16
+    }
+  ],
+  "policy": "All numeric and structural settings are copied unchanged from dev2; run both arms so joint-signed and anchor effects remain identifiable.",
+  "success_criteria": {
+    "primary": "full8 anchor macro exceeds full8 joint-signed control macro",
+    "secondary": "heldout6 anchor macro does not regress by more than 0.005 against heldout6 joint-signed control",
+    "reporting": "report every scene, including failures, and compare both arms with the earlier K16 winner-take-all unary"
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_evaluator_modified": false,
+    "target_rgb": false,
+    "score_threshold": 0.5
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_source_loo_component_gate_preregistration_v1",
+  "status": "registered_before_source_loo_materialization_or_gated_target_prediction",
+  "claim_boundary": "This component gate is registered after the direct observation-clamped target sentinel outcomes became known (fern 0.4904543886, horns_left 0.8207416104). Those target outcomes motivate stopping unconditional graph completion but do not set any fold, score, margin, component, or scene-specific gate value below. All gate decisions use source-view exact-W observations only.",
+  "first_principles_hypothesis": "An unknown component is safe to complete only if its observed source boundary ring can be predicted from the remaining source boundaries more accurately than the graph-off field prior under a proper held-out score. Otherwise graph-off is the only authorized output.",
+  "implementation": {
+    "module": "radio_gs/querying/source_loo_component_gate.py",
+    "module_sha256": "04be4bcb134e1db1f518441217e9ad18f43fcd18ca79a2a29bddfd657cf399fb",
+    "materializer": "radio_gs/scripts/materialize_nvos_source_loo_component_gate.py",
+    "materializer_sha256": "424e3b69807f66c9fe23d691650b0c1f055f6d74d1c6d434a9c49e44034fafd9",
+    "tests": "tests/test_source_loo_component_gate.py",
+    "tests_sha256": "cd42938d09b1e57706c7c61835176c5044ac21c84e483064591204969683d1e4",
+    "target_evaluator_modified": false,
+    "shared_query_engine_modified": false,
+    "shared_support_solver_modified": false
+  },
+  "method_contract": {
+    "schema_version": 1,
+    "method": "source_loo_unknown_component_gate_v1",
+    "default": "graph_off_field_prior",
+    "candidate": "observation_clamped_harmonic_extension_v1",
+    "unknown_component": "positive_affinity_connected_component_induced_by_source_confidence_equal_zero",
+    "validation_ring": "source_observed_rows_adjacent_to_unknown_component",
+    "fold_count": 4,
+    "fold_assignment": "blake2s(scene_id_colon_global_primitive_row)_uint32_mod_4",
+    "heldout_eligibility": "strictly_between_zero_and_one_source_confidence_and_algebraically_recoverable_in_unit_interval_field_prior",
+    "validation_target": "exact_adjoint_source_observation_probability",
+    "validation_weight": "source_observation_confidence_times_boundary_raw_affinity",
+    "proper_score": "weighted_binary_brier",
+    "acceptance": "positive_validation_weight_in_every_fold_and_strictly_lower_candidate_brier_than_field_brier_in_every_fold_and_overall",
+    "no_boundary_or_insufficient_validation": "fail_closed_to_graph_off",
+    "observed_rows": "preserve_fused_unary_bitwise",
+    "no_numeric_gain_margin": true,
+    "scene_specific_parameters": false,
+    "uses_target_rgb_mask_or_metric": false
+  },
+  "method_contract_sha256": "3310584ff577a7f4bda55bcddf88dd122de9e8e5e2b7db77cd7105b026a398af",
+  "source_authorities": {
+    "fern": {
+      "prediction_authority_sha256": "ced24602179acf2d1496592ebeff2983fb3d2203a16169ddc971f360f8a1c5ff"
+    },
+    "horns_left": {
+      "prediction_authority_sha256": "30b4fcc0a4be1140435551d590561422580faefc2b5de20a3b67f235c95465ec"
+    }
+  },
+  "source_only_diagnostic_gate": {
+    "required_for_each_sentinel": [
+      "observed rows remain bitwise equal to graph-off unary",
+      "rejected and no-boundary component rows remain bitwise equal to graph-off unary",
+      "at least one component with positive validation evidence is accepted",
+      "at least one component with positive validation evidence is rejected",
+      "accepted-component aggregate candidate Brier is strictly below accepted-component aggregate field Brier"
+    ],
+    "advance_only_if_both_sentinels_pass": true,
+    "failure_action": "Stop graph completion and retain the frozen graph-off hierarchical-trust v2 result.",
+    "pass_action": "Seal the gated selector before any new target rendering; any target result remains posthoc development evidence."
+  },
+  "forbidden": {
+    "target_rgb": true,
+    "target_mask": true,
+    "target_metric": true,
+    "target_derived_threshold_or_margin": true,
+    "scene_specific_exception": true,
+    "threshold_sweep": true
+  }
+}

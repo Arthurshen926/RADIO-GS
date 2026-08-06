@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_lego_full_fit_target_v1",
+  "registered_at": "2026-08-05T14:59:34+08:00",
+  "status": "registered_after_source_only_oof_selection_and_before_target_score_rendering_or_target_mask_access",
+  "question": "Does the source-only selected factorized field plus surface-safe propagation improve the frozen SPIn Lego target-view IoU, and which stage supplies the improvement?",
+  "selection_authority": {
+    "oof_results": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_source_footprint_oof_results_20260805.json",
+      "sha256": "d7b9ad5d97456c55f8e6faf05714005895fbab8928c011f5c6333289aa419f85"
+    },
+    "gate_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/source_footprint_oof_v1/source_observation_oof_gate_receipt.json",
+      "sha256": "85b3c7097c621525f8a23310c58d4d1c84dcbb46989ff6d3de78f4784c20ddc5",
+      "selected_action": "surface_safe_propagated",
+      "selected_readout_stage": "propagated"
+    },
+    "target_feedback_used_for_selection": false
+  },
+  "inputs": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "scene_id": "lego",
+    "geometry_checkpoint_sha256": "b0f054692c678836cbcdc6badfb2abadae4b2ad6b6b430b6a8b33199485aff18",
+    "factorized_field_sha256": "12ebdbe8e18c29e30a9c6f40c466f24e9ed7d2accd8a83ba536fbc90ba808637",
+    "capability_cache_sha256": "dcdf63e4718f987422b094a74c042b33e78b6d6013d69e12108d0f74c8731147",
+    "support_graph_sha256": "feb6aeeffbca39be841a3e6b7bb72b285f6258f0f041e5c1b3529e728c82466b"
+  },
+  "fixed_method": {
+    "region_space": "sam3",
+    "prototype_count": 4,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_registration_mode": "raster_adjoint",
+    "prompt_registration_scale": 1.0,
+    "alpha_threshold": 0.0,
+    "support_threshold": 0.0,
+    "registered_observation_fusion": "direct_raster_adjoint",
+    "registered_observation_confidence": "relative_joint_max",
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "shared",
+    "registered_selection_mode": "all_components",
+    "registered_readout_stage": "propagated",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "graph_policy": "typed",
+    "component_graph_policy": "same",
+    "solver_type": "confidence_random_walker",
+    "solver_iterations": 12,
+    "solver_residual": 0.3,
+    "solver_unary_temperature": 0.1,
+    "solver_support_threshold": 0.5,
+    "laplacian_weight": 1.0,
+    "cg_iterations": 64,
+    "cg_tolerance": 0.00001,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "positive_priority",
+    "connected_selection": false,
+    "query_conditioned_diffusion": "none",
+    "score_threshold": 0.5,
+    "scene_specific_tuning": false
+  },
+  "execution": {
+    "evaluator_sha256": "aaae651102e546f5ebc5e5c783ca7d1f385834034bbdea06e8ca15157ffd951b",
+    "deployment_gate_binding_tests": "84 passed",
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/full_fit_surface_safe_propagated_target_v1",
+    "output_dir_was_absent_at_registration": true,
+    "pre_metric_prediction_receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/full_fit_surface_safe_propagated_target_v1/pre_metric_prediction_receipt.json"
+  },
+  "opening_order": [
+    "fail-closed replay OOF gate and selected action",
+    "render and persist every target continuous score and every stage score",
+    "seal pre-metric prediction receipt with exact file hashes",
+    "only then verify and open frozen target masks",
+    "compute final and stage metrics"
+  ],
+  "reported_metrics": [
+    "foreground_iou",
+    "pixel_accuracy",
+    "stage_metrics.unary_prior.foreground_iou",
+    "stage_metrics.propagated.foreground_iou",
+    "stage_metrics.connected.foreground_iou"
+  ],
+  "safety": {
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

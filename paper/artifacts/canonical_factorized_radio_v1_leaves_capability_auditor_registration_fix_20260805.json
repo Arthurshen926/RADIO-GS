@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "artifact_type": "implementation_authority_addendum",
+  "registered_at": "2026-08-05T23:08:12+08:00",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_capability_materialization_preregistration_20260805.json",
+    "sha256": "427ad0888fe2312ab7dd4d7c46b26ba2758481acf02ef62ae9428de6fd3b853a"
+  },
+  "failed_pre_gpu_audit_attempt": {
+    "exit_code": 1,
+    "result_created": false,
+    "failure": "auditor hard-coded the original Lego registration identity",
+    "target_access": false,
+    "gpu_oom": false,
+    "thermal_failure": false
+  },
+  "fix_contract": {
+    "new_argument": "--expected-registration",
+    "comparison": "exact full-string equality with preregistration.registration",
+    "default": "canonical_factorized_radio_v1_lego_capability_materialization",
+    "default_preserves_lego_compatibility": true,
+    "leaves_expected_registration": "canonical_factorized_radio_v1_leaves_capability_materialization",
+    "prefix_regex_or_filename_inference": false,
+    "unknown_or_mismatched_registration": "fail_closed",
+    "method_or_promotion_threshold_changed": false
+  },
+  "implementation": {
+    "auditor_path": "/root/RADIO-GS/radio_gs/scripts/audit_factorized_capability_materialization.py",
+    "auditor_sha256_before": "66e77d9a6491c57a4817796cad59c98f3518e46ce2953cb32c7ba7c098f0b677",
+    "auditor_sha256_after": "fc6fb5c825689a9a371d90586a2cca32a46fbfc8096269580a93da5bc70acc12",
+    "focused_test_path": "/root/RADIO-GS/tests/test_factorized_capability_materialization_audit.py",
+    "focused_test_sha256": "0bb80c80819be67590e2f52210f1359e4f7eadf989e68c24d2c50be98ae4794d"
+  },
+  "validation": {
+    "combined_builder_and_auditor_tests": "11 passed",
+    "actual_leaves_registration_cpu_preflight": "passed",
+    "result_path_absent_before_retry": true
+  },
+  "execution_decision": "retry_the_same_source_only_audit_with_explicit_exact_leaves_registration"
+}

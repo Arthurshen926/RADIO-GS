@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_only_method_result",
+  "experiment": "canonical-factorized-radio-v1-source-only-adaptive-capacity-v1",
+  "preregistration_sha256": "d4c3f78d87c441b83ca1e72eaa8a71085bc9e88eaf73b4d19997b9328ab39f92",
+  "status": "first_doubling_step_passed_all_source_only_gates",
+  "selected_capacity": {
+    "coefficient_dim": 512,
+    "local_dim": 512,
+    "basis": "trainable_source_only_pca_initialized",
+    "minimal_under_registered_grid": true
+  },
+  "artifact": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/fields/trainable_basis_d512_l512.pth",
+    "sha256": "600d1e3e9e8eb430980ce5e8c0159188d9eaa6671fd4e717c447886487fef7db",
+    "report_sha256": "6c3020e96a3176907f6152acc0e06ca54ffae5912c57f71030e443ed7ae8d3e1"
+  },
+  "source_only_metrics": {
+    "pca_reconstruction_cosine": 0.9918320178985596,
+    "pca_explained_variance_ratio": 0.9791993498802185,
+    "direction_mean_cosine": 0.990969717502594,
+    "direction_p05_cosine": 0.9808671474456787,
+    "mean_abs_log_amplitude_error": 0.01935032568871975,
+    "p95_abs_log_amplitude_error": 0.04302911460399628,
+    "dino_v3_target_mean_cosine": 0.9876253604888916,
+    "dino_v3_target_p05_cosine": 0.9660529494285583,
+    "sam3_target_mean_cosine": 0.9820842742919922,
+    "sam3_target_p05_cosine": 0.9551573991775513,
+    "all_absolute_gates_passed": true
+  },
+  "improvement_over_d256_l128_trainable": {
+    "direction_mean_cosine": 0.026387929916381836,
+    "direction_p05_cosine": 0.059003233909606934,
+    "mean_abs_log_amplitude_error": -0.006419667974114418,
+    "dino_v3_target_mean_cosine": 0.006341397762298584,
+    "dino_v3_target_p05_cosine": 0.008699357509613037,
+    "sam3_target_mean_cosine": 0.025218427181243896,
+    "sam3_target_p05_cosine": 0.04308807849884033
+  },
+  "interpretation": "The original D256/L128 field imposed two avoidable source-visible bottlenecks: insufficient affine rank and a smaller per-primitive intrinsic code. One deterministic doubling to D512/L512 restores representation and official capability fidelity without target supervision. No D1024 run is authorized because D512 is already the first passing rank.",
+  "benchmark_promotion": {
+    "capacity_gate": true,
+    "support_gate": false,
+    "action": "Wait for the shared sparse exact-marginal raw/DINO/SAM authority. Do not treat the current top1-only field as LERF eligible."
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

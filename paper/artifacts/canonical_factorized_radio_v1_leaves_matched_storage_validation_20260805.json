@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_chain_storage_validation_result",
+  "recorded_at": "2026-08-05T20:13:57+08:00",
+  "scene": "leaves",
+  "authority_correction": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_leaves_matched_storage_authority_correction_20260805.json",
+    "sha256": "c8899a3af34f9ac4d413daebfa5df70edaa9eeefd880be12e0a470c9b43d014c"
+  },
+  "implementation": {
+    "loader": {
+      "path": "radio_gs/training/tensor_cache_io.py",
+      "sha256": "bf700037317778ff6fc0efccf444f50a17a36fad75cf96e9470db096635f79ad"
+    },
+    "test": {
+      "path": "tests/test_sharded_mpr_streaming.py",
+      "sha256": "01100f2311abc59b13dc96242df295319cb8b0123761b11393fedade739b72f6"
+    }
+  },
+  "focused_tests": [
+    "test_sharded_cache_random_row_fetch_matches_dense",
+    "test_streamed_contribution_mean_matches_dense_and_resumes",
+    "test_dense_and_sharded_training_losses_are_equivalent",
+    "test_sharded_pca_materializes_the_same_frozen_sample",
+    "test_trainer_streams_raw_target_and_binds_all_shards"
+  ],
+  "result": "5 passed in 5.53s",
+  "gate": "passed_before_any_leaves_matched_cache_output",
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

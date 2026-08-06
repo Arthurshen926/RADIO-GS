@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "experiment": "surface_safe_topology_spin_lego_nvos_fern_query_free_pilot_v1",
+  "status": "SPIn Lego passes; NVOS fern graph-repair gate fails; no graph parameter tuning or expansion",
+  "preregistration": {
+    "path": "paper/artifacts/surface_safe_topology_spin_lego_nvos_fern_preregistration_20260805.json",
+    "sha256": "2da137204aecaf2110bf070b0948b9d74e842404440efaafe2b223853de3f6f3"
+  },
+  "method": {
+    "capability_source": "unchanged compact canonical-field official DINOv3/SAM3 rows",
+    "graph": {
+      "neighbors": 16,
+      "topology_mode": "mutual_knn",
+      "capability_affinity_mode": "exact_official_capability",
+      "surface_relation": "local_pca_tangent_v1",
+      "surface_normal_neighbors": 24,
+      "surface_normal_min_planarity": 0.0,
+      "surface_topology_min_affinity": 0.0,
+      "covisibility": "cryptographically bound MPR top1-view Jaccard soft channel",
+      "covisibility_weight": 0.25,
+      "require_covisibility_topology": false
+    },
+    "readout": {
+      "graph_policy": "typed",
+      "resolved_instance_policy": "instance_manifold_covisibility_mix",
+      "channel_confidence_mode": "none",
+      "registered_selection_mode": "all_components",
+      "connected_selection_final": false
+    },
+    "scene_specific_tuning": false,
+    "target_metric_feedback": false
+  },
+  "graph_artifacts": {
+    "spin9_lego": {
+      "path": "output/optimization_20260805/surface_safe_topology_spin_lego_nvos_fern_v1/graphs/spin9_lego_surface_safe.pt",
+      "sha256": "8d83121e45aefdd316a8f60e01b08734d48bfff51e921e42a214977a706b8e4d",
+      "receipt_sha256": "1a8660f278a3212b0db4ead0245caa2fe8ef169ef6129ca60e9bf179fa3ab36b",
+      "num_nodes": 128780,
+      "num_edges": 1472684,
+      "old_graph_num_edges": 2648276,
+      "all_valid_nodes_have_covisibility": true,
+      "legacy_capability_exact_file_sha256_bound": true,
+      "source_capability_mutated": false
+    },
+    "nvos_fern": {
+      "path": "output/optimization_20260805/surface_safe_topology_spin_lego_nvos_fern_v1/graphs/nvos_fern_surface_safe.pt",
+      "sha256": "8b0367419ccdb7569ae844c442c75d15a8a59ce762e707ddbc4670db6ba267d9",
+      "receipt_sha256": "2b9f2b44c0811845d85bf1a39d327c9868e19a27a8a5994e46deb48aa2743539",
+      "num_nodes": 297200,
+      "num_edges": 3304520,
+      "old_graph_num_edges": 6205880,
+      "all_valid_nodes_have_covisibility": true,
+      "legacy_capability_exact_file_sha256_bound": true,
+      "source_capability_mutated": false
+    }
+  },
+  "results": {
+    "spin9_lego": {
+      "formal_repeat": 2,
+      "baseline_final_iou": 0.6181460736735999,
+      "surface_safe_final_iou": 0.6331459007792092,
+      "absolute_improvement": 0.0149998271056093,
+      "selected_reference_threshold": 0.6599999999999997,
+      "baseline_selected_reference_threshold": 0.6899999999999997,
+      "stage_iou": {
+        "unary_prior_at_shared_selected_threshold": 0.5372461105614978,
+        "propagated": 0.6331459007792092,
+        "connected_diagnostic": 0.6331459007792092,
+        "query_compatibility": 0.6338287095399675
+      },
+      "promotion_gate": "pass",
+      "report": "output/optimization_20260805/surface_safe_topology_spin_lego_nvos_fern_v1/spin9_lego/evaluation/lego_evaluation.json",
+      "report_sha256": "f23528e0ab130069372ec0bbdff565f1e2d40cad7377171392f45d1d72a3f2c0",
+      "pre_metric_prediction_receipt": "output/optimization_20260805/surface_safe_topology_spin_lego_nvos_fern_v1/spin9_lego/pre_metric_prediction_receipt_v2.json",
+      "pre_metric_prediction_receipt_sha256": "2f61e2780253cdbee80006417dfd024f322ff92278efe07ea4d57f69c4ddd931",
+      "receipt_target_frames": 43,
+      "receipt_binds_query_diffusion_caches": true,
+      "first_repeat_diagnostic": {
+        "final_iou": 0.6625059254018203,
+        "selected_reference_threshold": 0.5999999999999996,
+        "receipt_sha256": "50feaae5318930777f5db8d013d31806cd2b3b44eae3fc0ccdf8e2b864e68223",
+        "promotion_status": "not promoted; target score files were intentionally overwritten by the stronger-provenance repeat",
+        "finding": "reference-calibrated SPIn has material run-to-run numeric/threshold sensitivity despite nearly identical unary maps; report the conservative latest sealed repeat"
+      }
+    },
+    "nvos_fern": {
+      "baseline_unary_iou": 0.7553155907838534,
+      "baseline_legacy_graph_propagated_iou": 0.7541518712890158,
+      "baseline_connected_iou": 0.7313840585743523,
+      "surface_safe_unary_iou": 0.7553155907838534,
+      "surface_safe_propagated_iou": 0.753379286392662,
+      "surface_safe_connected_diagnostic_iou": 0.7480411083208901,
+      "propagated_minus_unary": -0.0019363043911914,
+      "propagated_minus_old_graph": -0.0007725848963538,
+      "connected_minus_old_connected": 0.0166570497465378,
+      "promotion_gate": "fail",
+      "decision": "retain unary_prior; stop the surface-safe topology branch for NVOS without parameter tuning",
+      "report": "output/optimization_20260805/surface_safe_topology_spin_lego_nvos_fern_v1/nvos_fern/evaluation/fern_evaluation.json",
+      "report_sha256": "25b6f523573672492aadcd299b79df571b1678e825297d2566226096b7502a5c",
+      "primitive_unary_sha256": "9c3a595f368335c73ed507fdd63ec713a755e5664985e3da805fd05ead43e0ad",
+      "pre_metric_prediction_receipt": "output/optimization_20260805/surface_safe_topology_spin_lego_nvos_fern_v1/nvos_fern/pre_metric_prediction_receipt.json",
+      "pre_metric_prediction_receipt_sha256": "e368dabb72fb33ad1788f2426699433d167cd9db326bf35c45b259e8205f561a",
+      "receipt_target_frames": 1
+    }
+  },
+  "same_unary_audit": {
+    "spin9_lego": {
+      "frames": 43,
+      "maximum_absolute_rendered_unary_difference": 1.1920928955078125e-07,
+      "mean_absolute_rendered_unary_difference": 9.63157683436893e-11,
+      "seed_counts_equal": true,
+      "interpretation": "unary is numerically unchanged; its reported IoU changes because SPIn applies the propagated field's newly selected reference-only threshold to all diagnostic stages"
+    },
+    "nvos_fern": {
+      "frames": 1,
+      "maximum_absolute_rendered_unary_difference": 1.7881393432617188e-07,
+      "mean_absolute_rendered_unary_difference": 1.1782776647456394e-08,
+      "unary_iou_exactly_equal": true,
+      "seed_counts_equal": true
+    }
+  },
+  "first_principles_conclusion": {
+    "spin9": "The previous graph was a real bottleneck for the full-mask/query-conditioned interface. Mutual topology plus exact capability and reliable manifold/co-visibility relations gives a transferable Lego gain without changing compact features or the compiler.",
+    "nvos": "A stronger surface graph does not repair scribble propagation when the K16 anchor unary is already strong. Continuous propagation still crosses or erodes the 0.5 decision boundary; the correct generic fallback is unary retention, not connected selection or scene-wise graph tuning.",
+    "shared": "Graph quality is task-interface dependent. Surface-safe topology is useful evidence support for SPIn, but cannot be promoted as a universal replacement on the evidence of fern."
+  },
+  "implementation": {
+    "legacy_capability_authority_migration": "radio_gs/scripts/build_canonical_support_graph.py",
+    "legacy_capability_authority_migration_sha256": "e6d2991abe6e3876ba9a7f56548556e927ac3f4ea4c0fe2a9dfb8c8fdb945f5a",
+    "pre_metric_receipt": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+    "pre_metric_receipt_sha256": "b4ce5ae9f3377e22b9e049687da977c90002e7fbe7cfc71e3df2187c473d47ae"
+  },
+  "verification": {
+    "pytest": "56 passed",
+    "py_compile": "passed",
+    "git_diff_check": "passed before final result artifact write",
+    "maximum_observed_gpu1_temperature_c": 46,
+    "thermal_poll_seconds": 180,
+    "thermal_abort": "two consecutive polls at or above 88C",
+    "target_predictions_sealed_before_metrics": true
+  }
+}

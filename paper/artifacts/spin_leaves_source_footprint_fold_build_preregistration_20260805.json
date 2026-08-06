@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "registration": "spin_leaves_source_footprint_fold_build_v1",
+  "registered_at": "2026-08-05T23:26:37+08:00",
+  "status": "registered_after_exact_w_strict_replay_and_before_footprint_authority_build",
+  "purpose": "Assign every valid Leaves factorized primitive to one fixed native-raster footprint group for structured source-only three-fold OOF fitting.",
+  "method": {
+    "contract": "source_raster_dominant_footprint_blocks_v1",
+    "native_raster": [
+      756,
+      1008
+    ],
+    "fixed_grid": [
+      6,
+      8
+    ],
+    "primitive_assignment": "responsibility_mass_argmax_exact_tie_smallest_block",
+    "fold_assignment": "SplitMix64(group_id) modulo 3",
+    "invisible_group": "one shared sentinel group",
+    "minimum_class_rows_per_train_and_heldout_population": 32,
+    "scene_specific_tuning": false
+  },
+  "inputs": {
+    "exact_w": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w.pt",
+      "sha256": "fecb42234c154ff51827e8b943655d160cd2002ed2845583ec64a0216851c51c",
+      "report_sha256": "720c09e11b04091d1e84904cd376df2690e419be8ad29d9953ec1ed635e0207e",
+      "authority_sha256": "f4e452cda96148eb3d77bf739211d87a8aee6b4d5d1bd7b98397ec7f7d8ce2e8",
+      "tensor_bundle_sha256": "1ba4af99e35dd98f5098949d340f2902748078c0d19f5ec462ee3177deb4ff37",
+      "triplet_count": 16725352,
+      "strict_replay": true,
+      "result_receipt": {
+        "path": "/root/RADIO-GS/paper/artifacts/spin_leaves_native_exact_w_source_export_results_20260805.json",
+        "sha256": "7f54d10e8a09c9748f4517585c0277690b261c3f34054354680efc7f144ab9f2"
+      }
+    },
+    "primitive_row_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/shared_support_graph_surface_safe_k16.pt",
+      "sha256": "39edb163e6136eb840cd5154bf5679261d98c3ee491a10ccc19d04b66278973d",
+      "global_rows": 147607,
+      "num_global_rows": 1400000
+    }
+  },
+  "implementation": {
+    "core_sha256": "8c365c4f8974a770f6a58176d4d1de6518237065b7a8230d90bfa8a8ff7a508d",
+    "builder_sha256": "1d143323255fb38893f13fe8d0b826e2298719cdd038a2c6923492361c586e20",
+    "core_test_sha256": "181914949cde0249520e06fa274e6e949a41a077bc789305c993fd0108e66929",
+    "builder_test_sha256": "ba2af5b23ac8ee3ac97523cd8d0bb3ab283275d6f4ef1e4f8cabe0a0aa6a7e2d"
+  },
+  "output": {
+    "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/source_footprint_fold_authority.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/source_footprint_fold_authority_report.json"
+  },
+  "safety": {
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

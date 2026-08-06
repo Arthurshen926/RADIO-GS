@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "experiment": "spin9_reference_calibrated_multimodal_unary_dev2_v1",
+  "status": "K16 gate failed; no anchor test and no full9 expansion",
+  "k4": {
+    "lego": {
+      "target_iou": 0.5629084015,
+      "selected_threshold": 0.75,
+      "reference_iou": 0.5967195847
+    },
+    "truck": {
+      "target_iou": 0.7144464061,
+      "selected_threshold": 0.50,
+      "reference_iou": 0.7703327432
+    },
+    "macro": 0.6386774038
+  },
+  "k16": {
+    "lego": {
+      "target_iou": 0.5986770617,
+      "selected_threshold": 0.65,
+      "reference_iou": 0.7686258432
+    },
+    "truck": {
+      "target_iou": 0.6738982884,
+      "selected_threshold": 0.41,
+      "reference_iou": 0.7840977661
+    },
+    "macro": 0.6362876751
+  },
+  "k16_minus_k4": {
+    "lego_target_iou": 0.0357686602,
+    "truck_target_iou": -0.0405481176,
+    "macro": -0.0023897287
+  },
+  "gate": {
+    "macro_improvement": false,
+    "no_scene_regression_over_0_02": false,
+    "decision": "stop K16/anchor branch for SPIn"
+  },
+  "retained_release_compatible": {
+    "lego": 0.6181460737,
+    "truck": 0.7899440557
+  },
+  "report_sha256": {
+    "k4_lego": "ba86579e47d021605cfade73db1bc133dd7e6259142d76229205422deca3df25",
+    "k4_truck": "3d2282bbee5c1de407818888d46df9c11fdebcb6828e6502ec5d092f4d25c97a",
+    "k16_lego": "50dd3379f0104f8778388a522eabcdb16943f18262a2d8b87312a52f076709c7",
+    "k16_truck": "48726d682bd918c2eb3b77c93f6289a16cab7b7a1bd6c4f52801642f7d37b0a6"
+  },
+  "conclusion": "Reference calibration removes the fixed-threshold confound but does not make K16 transferable. Truck source reconstruction improves while target IoU falls, demonstrating that the remaining SPIn deficit is cross-view observability/correspondence rather than prototype capacity or scalar calibration."
+}

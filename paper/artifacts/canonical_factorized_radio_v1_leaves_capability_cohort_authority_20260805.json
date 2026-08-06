@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "artifact_type": "factorized_capability_cohort_authority",
+  "experiment": "canonical-factorized-radio-v1-formal-capability-cohort",
+  "registered_at": "2026-08-05T22:25:06+08:00",
+  "scene": "leaves",
+  "feature_output_bundle_sha256": "466248d6546d9fff98289b0c95f435ac18516eeab51f85d4da421111b90e677e",
+  "frozen_cache_authorities": {
+    "radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/raw_radio_matched_top1.pt",
+      "sha256": "3a3bd80ec270e329f0c14d61043cff8ce6f75be9eeac7375edb159be78866ac7"
+    },
+    "dino_v3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/dino_v3_matched_top1.pt",
+      "sha256": "25acafaa186ab085ee09e0875e371bb8cdd8b6969725bc636416d71ace56413e"
+    },
+    "sam3": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/sam3_matched_top1.pt",
+      "sha256": "0cffb4539797f74855ee08303a868ad19fbebbb6e3b9a1359247b4d569f2a238"
+    }
+  },
+  "storage_authority": {
+    "schema": "radio_gs.channel_sharded_mpr.v1",
+    "shard_channels": 256,
+    "raw_shards": 5,
+    "dino_v3_shards": 16,
+    "sam3_shards": 4,
+    "formal_loader_all_hash_gates": "passed"
+  },
+  "shared_lineage": {
+    "num_gaussians": 1400000,
+    "valid_count": 147607,
+    "registration_responsibility_cache_sha256": "6a205bdb6a53f8755006eae583b800cf0fc7d1f234f59bfa1bf76bfca6d86551",
+    "geometry_checkpoint_sha256": "d96ba9dcf984068e39c2c4f6775f1fb825df245c794ff600849206cdd9590b02",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "target_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_selection": false
+  }
+}

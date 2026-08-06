@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_probability_preserving_source_unary_implementation_correction_v1",
+  "parent_preregistration": {
+    "path": "paper/artifacts/nvos_probability_preserving_source_unary_preregistration_20260805.json",
+    "sha256": "f76b4e752f47ed5fdcd4cfaa4e028a8f196f0e8332939e4c4379513450e66ec4"
+  },
+  "status": "implementation_corrected_before_any_candidate_target_score_or_metric",
+  "first_attempt": {
+    "scene": "fern",
+    "old_evaluator_sha256": "96c72c2cb5d485a9b85f41b78f6e4ea0ff7f46c83cea79ce873765c7d80de449",
+    "failure": "Two mathematically identical exact-adjoint calls returned microscopically different visible counts because CUDA backward accumulation is atomic and not bitwise deterministic; an absolute 1e-6 equality guard rejected the run.",
+    "failure_boundary": "source completion primitive observation construction",
+    "primitive_unary_written": false,
+    "target_score_rendered_or_written": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "output_files": []
+  },
+  "correction": {
+    "new_evaluator_sha256": "5cfc036a2de217c178201e5fdce350a7c553bf29cc97940992df84bb52fa8a47",
+    "operator": "Concatenate raw-positive, raw-negative, c*q, and c*(1-q) into one four-channel source raster and execute one exact raster adjoint; split its single registered_sum and reuse its single support_count.",
+    "semantic_equivalence": "The linear adjoint of a channel concatenation equals concatenating the adjoints of the channels; the corrected implementation changes neither the registered probability, reliability, field fusion, threshold, nor benchmark protocol.",
+    "new_numeric_parameters": false,
+    "scene_specific_parameters": false,
+    "runtime_effect": "one exact-adjoint call instead of two, so lower runtime and one shared visibility authority"
+  },
+  "unchanged": {
+    "completion_helper_sha256": "15ca3c291e862d6888de3421e06f458c6fe3745bd0575f37acc2e39913a77396",
+    "frozen_inputs": true,
+    "sentinel_scenes": [
+      "fern",
+      "horns_left"
+    ],
+    "gate": true,
+    "graph": "disabled",
+    "readout": "unary_prior",
+    "threshold": 0.5
+  }
+}

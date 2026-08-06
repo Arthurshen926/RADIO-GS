@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_learned_gauge_prior_query_free_v1",
+  "status": "registered_after_generic_only_base_audit_and_before_candidate_training",
+  "benchmark_state": {
+    "candidate_benchmarks_opened": false
+  },
+  "generic_audit": {
+    "authority": "same frozen 8-scene validation split and identical official teacher tensors",
+    "rows": 96,
+    "v2_relation_vs_v3_hard_student_core_jaccard_mean": 0.99238,
+    "v2_relation_vs_v3_hard_student_semantic_jaccard_mean": 0.99311,
+    "interpretation_of_support": "The two student support definitions are nearly identical and share the same 256-token cap against a larger fixed-core teacher, so support topology does not explain the historical cross-protocol gap.",
+    "v3_raw_amplitude_base_summary_token_cosine": 0.19959,
+    "v3_unit_direction_base_summary_token_cosine": 0.19983,
+    "v3_complete_model_summary_token_cosine": 0.82014,
+    "raw_amplitude_base_descriptor_selection": 0.75591,
+    "unit_direction_base_descriptor_selection": 0.67852,
+    "complete_model_descriptor_selection": 0.9275443983958429,
+    "interpretation_of_base": "Raw norm is important to the frozen official head, but the fixed pooled base is a poor teacher approximation and the learned residual currently performs almost all reconstruction. Gauge must remain explicit while its direct contribution becomes learnable rather than compulsory."
+  },
+  "candidate": {
+    "single_structural_change": "replace the compulsory pooled-base-plus-fixed-anchor output with learned residual plus one globally learned sigmoid gate on the raw-amplitude pooled prior",
+    "prior_gate_initial_value": 0.05,
+    "anchor_mix": "removed from the direct output prior",
+    "unchanged": [
+      "all six frozen fresh V3 caches",
+      "direction plus log-raw-norm input contract",
+      "raw norm excluded from the learned geometry encoder",
+      "joint attention, reliability input-only, hidden dimension 256",
+      "paired connected completion rows and no sparse augmentation",
+      "seed 0, optimizer, loss, checkpoint-selection validation split"
+    ]
+  },
+  "generic_gate": {
+    "primary": "full-support selection score must strictly exceed 0.9275443983958429",
+    "matched_control_noninferiority": "mean descriptor cosine must remain within 0.002 of the pre-existing identical-cache V2 control value 0.9429590106010437",
+    "completion_nonregression": "completion diagnostic must exceed its untrained baseline and remain finite",
+    "on_success": "select this checkpoint for the frozen Figurines sentinel after sealing a protocol-correction receipt",
+    "on_failure": "retain the no-sparse schema-7 checkpoint and do not add more base/readout variants before the sentinel"
+  },
+  "forbidden": [
+    "benchmark labels, queries, masks, images, or metrics during selection",
+    "per-scene or per-query hyperparameters",
+    "simultaneous support-contract or completion-weight changes",
+    "threshold, graph, prompt, or scale sweeps"
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "artifact_type": "full_scalar_sparse_teacher_sampling_v2_preregistration",
+  "registered_at": "2026-08-05T22:04:00+08:00",
+  "status": "registered_before_sparse_v2_implementation_and_before_any_gpu_execution",
+  "motivation": {
+    "observed_scene": "scene0001_00",
+    "accepted_valid_primitives": 191088,
+    "accepted_scales": 3,
+    "accepted_regions": 573264,
+    "source_views": 120,
+    "dense_region_view_pairs": 68791680,
+    "dense_float32_descriptor_bytes": 422656081920,
+    "dense_total_teacher_tensor_bytes": 425476540800,
+    "dense_total_teacher_tensor_gib": 396.2559074163437,
+    "conclusion": "dense_R_by_V_by_1536_is_a_real_protocol_bug_and_is_forbidden"
+  },
+  "frozen_global_sampling_contract": {
+    "name": "exact_overlap_anchor_visible_scale_stratified_hash_cap_v1",
+    "per_scene_region_cap": 4096,
+    "scene_specific_cap_allowed": false,
+    "candidate": "AcceptedV2 anchor is in exact factorized-state overlap and has at least one positive finite exact-marginal source-view hit",
+    "strata": "AcceptedV2 scale_index in frozen ascending order",
+    "quota": "floor(4096/num_scales) plus one for the first 4096 mod num_scales strata; no scene-dependent redistribution",
+    "within_stratum_order": "ascending stable AcceptedV2 region fingerprint SHA-256",
+    "published_row_order": "ascending AcceptedV2 canonical region index",
+    "query_or_label_usage": false
+  },
+  "frozen_global_view_contract": {
+    "name": "exact_marginal_anchor_visible_coverage_hit_topk_v1",
+    "views_per_selected_region_cap": 4,
+    "scene_specific_k_allowed": false,
+    "eligible_view": "positive finite exact-marginal anchor hit",
+    "order": [
+      "descending number of distinct active region primitives with positive hits",
+      "descending number of positive exact-marginal raster hits over the region",
+      "ascending sealed responsibility view index"
+    ],
+    "descriptor_definition_unchanged": "official C-RADIO crop re-encode -> genuine first 1280-D summary slot -> the same official SigLIP2 summary head used by AcceptedV2 -> float32 unit L2",
+    "query_or_label_usage": false
+  },
+  "sparse_storage_contract": {
+    "teacher_authority": "COO pair_region_indices plus pair_view_indices plus float32 pair_descriptors plus per-pair crop/hit/coverage evidence",
+    "training_shard": "sampled AcceptedV2 rows plus sparse COO teacher pairs",
+    "full_R_by_V_tensor_allowed": false,
+    "trainer": "batch-local pair gather only; full-cohort teacher densification forbidden",
+    "descriptor_dtype": "float32",
+    "maximum_pairs_per_scene": 16384,
+    "maximum_descriptor_bytes_per_scene": 100663296,
+    "maximum_descriptor_mib_per_scene": 96.0,
+    "maximum_descriptor_gib_for_32_scenes": 3.0
+  },
+  "capacity_rationale": {
+    "trainer_rows_per_scene_per_epoch": 64,
+    "trainer_frozen_max_epochs": 30,
+    "cap_to_epoch_batch_ratio": 64,
+    "region_cap_reason": "4096 supplies substantially more source-only region diversity than the 64 rows consumed per scene per epoch while bounding validation and host storage; it was chosen from the frozen trainer schedule, not a benchmark result",
+    "view_cap_reason": "four independent source views preserve multi-view mean, dispersion, and disagreement supervision while reducing the 120-view worst case by 30x; selection is exact source coverage based and not score tuned"
+  },
+  "validation_gates": [
+    "synthetic exact sampling/top-K determinism and tie-break tests",
+    "validator rejects dense-v1 impostors, duplicate COO pairs, non-unit descriptors, wrong Accepted/state/source lineage, and per-scene cap violations",
+    "trainer tests prove only requested batch rows are locally gathered",
+    "existing full-scalar source-only test suite remains green",
+    "real scene preflight reports candidate/selected/pair/storage counts before any model execution"
+  ],
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false,
+    "per_scene_hyperparameters": false
+  }
+}

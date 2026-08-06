@@ -1,0 +1,73 @@
+{
+  "artifact_type": "source_only_representation_result",
+  "experiment": "canonical-factorized-radio-v1 Lego cache construction and gauge audit",
+  "date": "2026-08-05",
+  "status": "cache_built_and_structurally_verified_gauge_gate_passed_capability_gate_pending",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_label_free_gate_preregistration_20260805.json",
+    "sha256": "5136375d574f710d38d02d4901520313ede6ad3226dd1c0a449658a833e2536a"
+  },
+  "implementation": {
+    "builder_path": "radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+    "builder_sha256": "470c532d8eea61ff05779a768d00cd37cb8724605a5385c9e0c541bdf9b2adb3",
+    "factorized_contract_path": "radio_gs/field/factorized_radio_contract.py",
+    "factorized_contract_implementation_sha256": "cded4da0e4025a6f0d3f1b3838279b02d8644bdb280d74ce0b97b58bb66380fc",
+    "factorized_contract_sha256": "81cd1fd9f7d4fbe6183785d0b0bc937c456b1ca9c4a9aedfd657c53510e296b2",
+    "builder_contract_sha256": "5c9b7a7574a87ef5952f590cf5c9103ee2448cdb8b4126bb1c99fd483f60742a"
+  },
+  "source_authorities": {
+    "geometry_checkpoint_sha256": "b0f054692c678836cbcdc6badfb2abadae4b2ad6b6b430b6a8b33199485aff18",
+    "responsibility_sidecar_sha256": "bc131100dfbe7f9c254eb2482861ce7476ab35688997835420dd3d98ef2f8a3e",
+    "legacy_feature_manifest_sha256": "0fd8298fc85c74feaab9d6193fec914257508be893f25be7005bb9f032ef82b1",
+    "sealed_feature_manifest_sha256": "7ffb1791d0b946bcec1edc6c30a46f9120e9d85f28a35103fa79848089c9582f",
+    "feature_output_bundle_sha256": "3f2d8fb3fcab457d4ad81a274652f505f0c26c3ba0c1fbb3dd6c0cec0537c181",
+    "legacy_reseal_receipt_sha256": "387a84d84567b36aacd087ef8a4b254c24a9b917a309f4304b2fcd5059486125",
+    "tensor_values_modified_by_reseal": false
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_raw_radio.pt",
+    "sha256": "179920a8d2ae7947284df35b595e57d2029183759843a77fbbc320d234fd313f",
+    "schema": "radio_gs.canonical_factorized_radio_builder_cache.v1",
+    "num_gaussians": 636148,
+    "num_source_views": 102,
+    "valid_rows": 128780,
+    "valid_ratio": 0.202437162399292,
+    "mean_views_if_valid": 11.401778221130371,
+    "median_views_if_valid": 8.0,
+    "maximum_views_if_valid": 76
+  },
+  "label_free_gauge_audit": {
+    "canonical_norm_mean": 31.597902297973633,
+    "canonical_norm_std": 1.816848635673523,
+    "canonical_norm_p01": 28.672258377075195,
+    "canonical_norm_p05": 29.224586486816406,
+    "canonical_norm_median": 31.380769729614258,
+    "canonical_norm_p95": 34.72606658935547,
+    "canonical_norm_p99": 37.1027946472168,
+    "log_amplitude_mean": 3.451477289199829,
+    "directional_resultant_mean": 0.8648821711540222,
+    "directional_resultant_p05": 0.7007006406784058,
+    "log_amplitude_std_mean": 0.026439104229211807,
+    "observation_evidence_mean": 0.8244047164916992,
+    "visibility_purity_unknown_sentinel_all_zero": true,
+    "registered_median_norm_interval": [
+      28.6447,
+      34.5264
+    ],
+    "gauge_gate_passed": true
+  },
+  "resource_observation": {
+    "estimated_peak_cpu_bytes": 5032039188,
+    "physical_gpu": 1,
+    "gpu_temperature_celsius_before": 33,
+    "gpu_temperature_celsius_after": 35,
+    "thermal_stop_triggered": false
+  },
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_computed": false
+  },
+  "next_gate": "official frozen DINO/SAM adaptor projections versus exact adaptor-before-MPR source capability targets"
+}

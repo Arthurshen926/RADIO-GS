@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_pinecone_source_chain_v1",
+  "registered_at": "2026-08-06T02:19:54+08:00",
+  "status": "registered_before_legacy_feature_seal_and_before_any_new_pinecone_factorized_source_or_target_score_build",
+  "parent": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "scene": "pinecone",
+  "protocol": {
+    "manifest": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "manifest_sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+    "reference_frame": "IMG_7238",
+    "reference_frame_index": 0,
+    "reference_mask": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/SPIn-NeRF/multiview_annotations/pinecone (nerf_real_360)/IMG_7238.png",
+      "sha256": "990c441ec9067104647de1046917fb918957b93fe40cf39d2faf1715c96f38ae",
+      "native_width": 484,
+      "native_height": 363,
+      "role": "source_reference_only",
+      "pixels_decoded_before_registration": false
+    },
+    "target_frames": 98
+  },
+  "frozen_carrier": {
+    "config": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/gaussfm_main_track.yaml",
+      "sha256": "84fc359e406ae86c6f7eaa64d95def26ea055a3647fd77473ed16efd22fe1613"
+    },
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/feature_field/checkpoints/best.pth",
+      "sha256": "e2e66dd2c03e52ed2307679e26fb1cc55d6734dadfc9f201b39fabe484c891d3"
+    },
+    "camera_map": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/rgb_to_colmap_camera_mapping.json",
+      "sha256": "f12e617f141710cc4712f827f524fa30a1fe245af50d749723f02beb54a1208d"
+    },
+    "point_cloud": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/geometry/point_cloud/iteration_30000/point_cloud.ply",
+      "sha256": "b4949b9407a49afcf19ce91fb673519c13c683104cff528969199d87f503099d",
+      "primitive_count": 450000
+    },
+    "all_caller_hashes_must_be_verified": true,
+    "silent_carrier_substitution": false
+  },
+  "source_inputs": {
+    "legacy_feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/radio_features/frame_manifest.json",
+      "sha256": "587f9acaf29cf58dddd5b9ac5902823e7787ba2d09a84ad71d297abdc8202c0e",
+      "frames": 99,
+      "grid_height": 189,
+      "grid_width": 252,
+      "tensor_values_may_be_modified": false
+    },
+    "planned_feature_seal_receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/legacy_reseal_receipt.json",
+    "shared_top1_responsibility": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/pinecone/responsibility.pt",
+      "sha256": "b8e91d82af0889fc546d1a868c60a75316f44a043d5c5179c9de983104db5f10",
+      "assignment_mode": "raster_gaussian_top1",
+      "selected_frame_indices": "exactly_0_through_98",
+      "views": 99,
+      "assignment_triplets": 7961580
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "uniform_source_method": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "max_views": 120,
+    "aggregation_mode": "raster_gaussian_top1",
+    "registration_weight_mode": "alpha_depth",
+    "raster_view_fusion": "contribution_mean",
+    "robust_mpr": false,
+    "capability_map_source": "project_raw",
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "spatial_coarse_dim": 0,
+    "primitive_fusion": true,
+    "fusion_reliability": false,
+    "official_capability_loss": true,
+    "mpr_weight": 1.0,
+    "dino_weight": 0.2,
+    "sam3_weight": 0.2,
+    "epochs": 20,
+    "min_epochs": 20,
+    "batch_size": 4096,
+    "learning_rate": 0.002,
+    "weight_decay": 0.00001,
+    "seed": 0,
+    "surface_graph": "mutual_K16_surface_safe_same_uniform_policy_as_Leaves_and_Room",
+    "query_interface": "Euclidean_K201_including_self_plus_signed_hash256_official_DINO_relation",
+    "raw_seen_threshold": 0.71,
+    "completion_quantile": 0.96,
+    "coverage": "paired_complementary_FP64_ratio_addendum",
+    "scene_parameter_scan": false
+  },
+  "outputs": {
+    "root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone",
+    "factorized_raw": "factorized_raw_radio.pt",
+    "matched_raw": "raw_radio_matched_top1.pt",
+    "matched_dino": "dino_v3_matched_top1.pt",
+    "matched_sam3": "sam3_matched_top1.pt",
+    "field": "factorized_field_d256_l128.pth",
+    "capability": "official_dino_sam3_views.pt",
+    "graph": "shared_support_graph_surface_safe_k16.pt",
+    "matched_interface": "query_diffusion_matched_interface_v1",
+    "exact_w_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/pinecone"
+  },
+  "implementation": {
+    "legacy_feature_sealer_sha256": "b6e1c79754dd7e0a435a7c27d7795fa44586c5930743eeada59598a5a58bb51e",
+    "factorized_builder_sha256": "0901151a29e5dbd45bd1cd98314916f4815259721ab157a1b5a13ed35670743d",
+    "field_trainer_sha256": "2fb345b8e425c91b19ca16093bbbdaf048598f3862f27b48c4b2861c8e62b123",
+    "capability_builder_sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34",
+    "surface_graph_builder_sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254",
+    "exact_w_exporter_sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "source_oof_builder_sha256": "714c965166719389bbc77976b89ad5561bf6a3293f030b3b02ff44eeea2c3661",
+    "source_gauge_builder_sha256": "f3eaf8c72c9fad186efb8289a3fa08be0464806955a960e5bb944dcd5c3a7370",
+    "target_receipt_builder_sha256": "0ecd013944f97a4100e511acb2ddcb8a38ff2cd718c035b57edaf7fd9ea6aa36"
+  },
+  "stage_gate": {
+    "order": [
+      "legacy_feature_bundle_seal",
+      "factorized_radio",
+      "matched_radio",
+      "matched_dino_v3",
+      "matched_sam3",
+      "formal_capability_cohort_authority",
+      "factorized_field",
+      "capability_materialization_batch2048_and_exact_audit",
+      "surface_safe_graph",
+      "matched_k201_and_relation",
+      "exact_source_w",
+      "query_free_source_footprint_authority",
+      "source_only_oof_gate",
+      "target_blind_raw_prediction",
+      "full_fit_source_gauge",
+      "paired_fp64_target_prediction_receipt"
+    ],
+    "failure": "fail_closed_before_next_dependent_stage",
+    "target_ground_truth": "forbidden_until_all_nine_compatible_pre_metric_receipts_are_sealed"
+  },
+  "execution": {
+    "preferred_physical_gpu": 1,
+    "fallback_physical_gpu": 0,
+    "process_device": "cuda:0",
+    "power_limit_w": 300,
+    "temperature_limit_c": 88,
+    "poll_seconds": 30,
+    "consecutive_overheat_polls_before_stop": 6,
+    "one_heavy_process_per_gpu": true
+  },
+  "safety": {
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "target_distribution_fit": false,
+    "historical_compact_cache_substituted": false
+  }
+}

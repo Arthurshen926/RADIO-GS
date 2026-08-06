@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "result": "factorized_primitive_state_v1_cpu_implementation_closure",
+  "completed_at": "2026-08-05T14:58:07+08:00",
+  "scope": "CPU-only contract, builder, loader, shared schema-v2 support loading, and opt-in SurfaceRegion lineage binding; no training, GPU, target, readout, graph, or evaluator mutation",
+  "contract": {
+    "schema": "radio_gs.factorized_primitive_state.v1",
+    "schema_version": 1,
+    "contract_sha256": "bb32067a8c73d983d72d4de808c0632baccb306f1e8574be8aadcafa2f8dda3f",
+    "scalar_names": [
+      "predicted_log_amplitude",
+      "directional_dispersion",
+      "log_amplitude_std",
+      "observation_evidence",
+      "visibility_purity_value",
+      "visibility_purity_known"
+    ],
+    "scalar_names_sha256": "a7df4b51182f31904d71b507489b2db4a963dc8f423fd098cbc913ac39f82e5a",
+    "semantic_direction": "unit_direction_of_schema_v2_field_decode",
+    "predicted_log_amplitude": "log_l2_norm_of_schema_v2_field_decode",
+    "unknown_purity_policy": "mask_value_to_exact_zero_before_encoding",
+    "current_visibility_purity_known": false
+  },
+  "implementation": {
+    "state_contract_loader": {
+      "path": "radio_gs/interfaces/factorized_primitive_state.py",
+      "sha256": "e2e6f0b036ae689a4dc74c2e5a8720e07833ba68045490f6995dc653445fd14e"
+    },
+    "cpu_builder": {
+      "path": "radio_gs/scripts/build_factorized_primitive_state.py",
+      "sha256": "c0232f5cd63123798c385de95e689e58dabd173a819ff6c14e0c30979fb75685"
+    },
+    "capability_builder_shared_loader_refactor": {
+      "path": "radio_gs/scripts/build_canonical_capability_views.py",
+      "sha256": "57824bff048c7168b763a21e42fce3a6a34144c4490bb8be563a9198c1fc4259"
+    },
+    "surface_region_opt_in_binding": {
+      "path": "radio_gs/scripts/build_surface_region_semantic_cache.py",
+      "sha256": "685a9476a24dfe4dbe1adacdf1342b3a182718276ab33e2d92976db97f9b4013",
+      "legacy_default_changed": false,
+      "factorized_full_scalar_encoder_used": false,
+      "residual_head_added": false
+    }
+  },
+  "tests": {
+    "focused_and_integration": {
+      "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_factorized_primitive_state.py tests/test_build_canonical_capability_views.py tests/test_surface_region_semantic_cache.py tests/test_factorized_radio_training_integration.py tests/test_factorized_capability_materialization_audit.py tests/test_capability_cache.py tests/test_canonical_support_graph_cache.py",
+      "passed": 47,
+      "failed": 0
+    },
+    "final_state_contract_rerun": {
+      "passed": 6,
+      "failed": 0
+    },
+    "python_compile": true,
+    "git_diff_check": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false,
+    "gpu_used": false,
+    "support_graph_files_modified": false,
+    "evaluator_files_modified": false
+  },
+  "decision": "ready_for_cpu_materialization_of_a_schema_v2_state_sidecar_then_source_only_surface_region_preflight; not authorized for residual-head training or target evaluation"
+}

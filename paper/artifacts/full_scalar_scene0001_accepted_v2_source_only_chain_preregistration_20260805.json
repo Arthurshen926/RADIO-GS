@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "experiment": "full_scalar_scene0001_accepted_v2_source_only_chain",
+  "status": "preregistered_before_gpu_execution",
+  "scene_id": "scene0001_00",
+  "physical_space_id": "scene0001",
+  "implementations": {
+    "capability_producer": {
+      "path": "radio_gs/scripts/build_canonical_capability_views.py",
+      "sha256": "9f2de4b2115af391aa1e5be72a033c0b405880908944cdae919fbd71c702f278"
+    },
+    "support_graph_producer": {
+      "path": "radio_gs/scripts/build_canonical_support_graph.py",
+      "sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254"
+    },
+    "accepted_region_producer": {
+      "path": "radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+      "sha256": "a8784412f6d190a090fbda03c714baaf10527355596592db1432095a964443f7"
+    },
+    "thermal_guard": {
+      "path": "radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "bba05a680758849677bf77fdf2d395e97a265a965d0b26b88dc8c82894680c22"
+    }
+  },
+  "sealed_inputs": {
+    "factorized_field_checkpoint_sha256": "c273e6ac149d983e69de7005d54e53f55130e04703b555ff8fa8a3f71599ce77",
+    "factorized_primitive_state_sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9",
+    "factorized_radio_cache_sha256": "7d9ed70b5baddbd0ccecdced962874f130a6045e9ccd0e541729df2d12446067",
+    "exact_dino_v3_mpr_sha256": "c707fa105d511e4179e9cad48dfcf7d25c20b26a731e322a5efe949c45c3c4b6",
+    "exact_sam3_mpr_sha256": "bc4699bac9eafbdcee685e3bf1c3a404c1901d2c7e6ac73898a501bfc1df65bd",
+    "capability_cohort_authority_sha256": "5e220649d143fd723a2502052656aebc7fe47af5b4f993807e633ccaff035fca",
+    "accepted_v2_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "frozen_graph_contract": {
+    "neighbors": 16,
+    "spatial_scale": 2.0,
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "surface_tangent_relation": false,
+    "surface_topology_min_affinity": 0.0,
+    "covisibility_weight": 0.0,
+    "require_covisibility_topology": false,
+    "minimum_sigma": 0.0001,
+    "topology_mode": "symmetric_union",
+    "capability_affinity_mode": "signed_hash",
+    "affinity_dim": 256
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_device": "cuda:0",
+    "gpu_poll_seconds": 20,
+    "gpu_start_max_temp_c": 75,
+    "gpu_max_temp_c": 82,
+    "gpu_max_consecutive_overheat_polls": 2,
+    "capability_batch_size": 4096,
+    "accepted_region_batch_size": 128
+  },
+  "promotion_gate": {
+    "native_nonbootstrap_primitive_row_authority": true,
+    "exact_state_graph_rows_and_xyz": true,
+    "accepted_v2_graph_parameters_exact_except_construction_chunking": true,
+    "source_only": true,
+    "no_clobber": true
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "text_queries_opened": false
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "audit": "promptable_nvs_frozen_gaussian_scalar_membership_ceiling_pinecone_memory_fallback_v1",
+  "benchmark_masks_opened": true,
+  "diagnostic_only": true,
+  "failure_observed_before_fallback_registration": "The preregistered per-view cap exceeded Pinecone's 189x252 raster size, retaining every hit from 35 views in one differentiable CSR operator. Backward required an additional 5.54 GiB with only 2.37 GiB free and failed before the first optimizer update.",
+  "fallback_frozen_before_result": true,
+  "geometry_adjoint_and_full_evaluation_unchanged": true,
+  "optimization_change_only": {
+    "learning_rate": 0.05,
+    "loss": "uniform probability BCE plus 0.5 soft Dice",
+    "random_uniform_pixels_per_view": 8192,
+    "steps": 80,
+    "weight_decay": 0.0
+  },
+  "result_interpretation": "The exact all-view adjoint feasible membership is unchanged by this fallback. Only the optional gradient refinement uses the smaller unbiased uniform pixel sample.",
+  "scene": "pinecone",
+  "text_queries_opened": false,
+  "valid_benchmark_method": false
+}

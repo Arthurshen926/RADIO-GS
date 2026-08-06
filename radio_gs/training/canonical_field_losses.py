@@ -10,6 +10,13 @@ import torch.nn.functional as F
 
 from radio_gs.field.canonical_gaussian_field import CanonicalGaussianField
 from radio_gs.interfaces.frozen_radio_views import FrozenRadioViews
+from .factorized_radio_cache import FactorizedRadioTrainingCache
+from .factorized_radio_loss import (
+    FACTORIZED_RADIO_RELIABILITY_POLICY_LEGACY,
+    FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE,
+    factorized_radio_reconstruction_loss,
+    uniform_half_confidence,
+)
 from .primitive_consensus import (
     PrimitiveConsensus,
     consensus_target_rows,
@@ -27,14 +34,17 @@ class CanonicalFieldLossConfig:
     basis_orthogonality_weight: float = 1e-3
 
     def __post_init__(self) -> None:
-        if min(
-            self.mpr_weight,
-            self.dino_weight,
-            self.sam3_weight,
-            self.relation_weight,
-            self.coefficient_weight,
-            self.basis_orthogonality_weight,
-        ) < 0:
+        if (
+            min(
+                self.mpr_weight,
+                self.dino_weight,
+                self.sam3_weight,
+                self.relation_weight,
+                self.coefficient_weight,
+                self.basis_orthogonality_weight,
+            )
+            < 0
+        ):
             raise ValueError("loss weights cannot be negative")
 
 
@@ -74,15 +84,19 @@ def hard_boundary_relation_ranking_loss(
     """
 
     pairs = torch.as_tensor(pair_index, device=predicted_dino.device).long()
-    margin = torch.as_tensor(
-        teacher_margin, device=predicted_dino.device
-    ).float().reshape(-1)
+    margin = (
+        torch.as_tensor(teacher_margin, device=predicted_dino.device)
+        .float()
+        .reshape(-1)
+    )
     if pairs.ndim != 2 or pairs.shape[0] != 2 or pairs.shape[1] != 2 * margin.numel():
         raise ValueError("Field-B pair_index must be [2,2T] aligned with T margins")
     if margin.numel() == 0:
         return predicted_dino.sum() * 0.0
-    if predicted_dino.ndim != 2 or predicted_sam3.ndim != 2 or (
-        predicted_dino.shape[0] != predicted_sam3.shape[0]
+    if (
+        predicted_dino.ndim != 2
+        or predicted_sam3.ndim != 2
+        or (predicted_dino.shape[0] != predicted_sam3.shape[0])
     ):
         raise ValueError("Field-B predicted DINO/SAM rows must align")
     if bool((pairs < 0).any()) or int(pairs.max()) >= predicted_dino.shape[0]:
@@ -142,8 +156,11 @@ def _capability_consensus_loss(
         # the other half rewards jointly well-covered, view-consistent rows.
         # This fixed mixture has no benchmark- or query-selected parameter.
         reliable = (coverage * agreement).clamp_min(0.0).sqrt()
-        weights_all = 0.5 * (torch.ones_like(reliable) + reliable)
-    elif reliability_policy == "field_c_visibility_safe":
+        weights_all = uniform_half_confidence(reliable)
+    elif reliability_policy in {
+        "field_c_visibility_safe",
+        FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE,
+    }:
         if reliability.shape[1] < 3:
             raise ValueError("Field-C reliability requires visibility purity")
         purity = reliability[:, 2]
@@ -156,11 +173,12 @@ def _capability_consensus_loss(
         # uniform half keeps real boundary rows trainable instead of erasing
         # them simply because their observation distribution is ambiguous.
         reliable = (coverage * agreement * purity).clamp_min(0.0).pow(1.0 / 3.0)
-        weights_all = 0.5 * (torch.ones_like(reliable) + reliable)
+        weights_all = uniform_half_confidence(reliable)
     else:
         raise ValueError(
             "capability reliability policy must be legacy_mean or "
-            "field_a_boundary_safe or field_c_visibility_safe"
+            "field_a_boundary_safe or field_c_visibility_safe or "
+            f"{FACTORIZED_RADIO_RELIABILITY_POLICY_MATCHED_EXACT_MARGINAL_VISIBILITY_SAFE}"
         )
     weights = weights_all[valid].clamp_min(1e-4)
     errors = 1.0 - F.cosine_similarity(
@@ -178,6 +196,10 @@ def canonical_primitive_loss(
     official_views: FrozenRadioViews | None = None,
     capability_targets: Mapping[str, PrimitiveConsensus | Any] | None = None,
     pair_index: torch.Tensor | None = None,
+    factorized_target: FactorizedRadioTrainingCache | None = None,
+    factorized_reliability_policy: str = (
+        FACTORIZED_RADIO_RELIABILITY_POLICY_LEGACY
+    ),
     capability_reliability_policy: str = "legacy_mean",
     config: CanonicalFieldLossConfig = CanonicalFieldLossConfig(),
 ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
@@ -185,13 +207,47 @@ def canonical_primitive_loss(
 
     rows = torch.as_tensor(row_indices, device=field.local_codes.device).long()
     predicted_radio = field.radio_features(rows)
-    mpr, stats = primitive_reconstruction_loss(
-        predicted_radio, consensus, row_indices=rows.detach().cpu()
-    )
-    target_radio = consensus_target_rows(
-        consensus, rows.detach().cpu()
-    ).to(predicted_radio.device).float()
-    valid = consensus.valid[rows.detach().cpu()].to(predicted_radio.device)
+    rows_cpu = rows.detach().cpu()
+    if factorized_target is None:
+        mpr, stats = primitive_reconstruction_loss(
+            predicted_radio, consensus, row_indices=rows_cpu
+        )
+        target_radio = (
+            consensus_target_rows(consensus, rows_cpu)
+            .to(predicted_radio.device)
+            .float()
+        )
+        valid = consensus.valid[rows_cpu].to(predicted_radio.device)
+    else:
+        if factorized_target.shape != (
+            int(consensus.targets.shape[0]),
+            int(consensus.targets.shape[1]),
+        ) or not torch.equal(factorized_target.valid, consensus.valid):
+            raise ValueError("factorized RADIO target and consensus support differ")
+        target_radio = (
+            factorized_target.canonical_feature[rows_cpu]
+            .to(predicted_radio.device)
+            .float()
+        )
+        valid = factorized_target.valid[rows_cpu].to(predicted_radio.device)
+        factorized = factorized_radio_reconstruction_loss(
+            predicted_radio,
+            target_radio,
+            factorized_target.log_amplitude[rows_cpu].to(predicted_radio.device),
+            valid,
+            factorized_target.reliability[rows_cpu].to(predicted_radio.device),
+            reliability_scalar_names=factorized_target.reliability_scalar_names,
+            reliability_scalar_names_digest=(
+                factorized_target.reliability_scalar_names_sha256
+            ),
+            reliability_policy=factorized_reliability_policy,
+        )
+        mpr = factorized.total
+        stats = {
+            "factorized_direction": factorized.direction.detach(),
+            "factorized_log_amplitude": factorized.log_amplitude.detach(),
+            "valid_ratio": valid.float().mean().detach(),
+        }
     zero = predicted_radio.sum() * 0.0
     dino = zero
     sam3 = zero
@@ -203,7 +259,6 @@ def canonical_primitive_loss(
     if targets and official_views is None:
         raise ValueError("capability targets require frozen official RADIO views")
     if official_views is not None and bool(valid.any()):
-        rows_cpu = rows.detach().cpu()
         projected_dino = official_views.project_dino_primitives(predicted_radio)
         projected_sam3 = official_views.project_sam3_primitives(predicted_radio)
         if "dino_v3" in targets:
@@ -217,9 +272,7 @@ def canonical_primitive_loss(
             dino_valid = valid
             with torch.no_grad():
                 target_dino_all = official_views.project_dino_primitives(target_radio)
-            dino = _cosine_loss(
-                projected_dino[dino_valid], target_dino_all[dino_valid]
-            )
+            dino = _cosine_loss(projected_dino[dino_valid], target_dino_all[dino_valid])
         if "sam3" in targets:
             sam3, target_sam3_all, sam3_valid = _capability_consensus_loss(
                 projected_sam3,
@@ -231,9 +284,7 @@ def canonical_primitive_loss(
             sam3_valid = valid
             with torch.no_grad():
                 target_sam3_all = official_views.project_sam3_primitives(target_radio)
-            sam3 = _cosine_loss(
-                projected_sam3[sam3_valid], target_sam3_all[sam3_valid]
-            )
+            sam3 = _cosine_loss(projected_sam3[sam3_valid], target_sam3_all[sam3_valid])
         if pair_index is not None and torch.equal(dino_valid, sam3_valid):
             pairs = torch.as_tensor(pair_index, device=predicted_radio.device).long()
             if pairs.ndim != 2 or pairs.shape[0] != 2:

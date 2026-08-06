@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_matched_top1_cache_result",
+  "recorded_at": "2026-08-06T03:10:29+08:00",
+  "scene": "pinecone",
+  "feature_space": "sam3",
+  "source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_pinecone_source_chain_preregistration_20260806.json",
+    "sha256": "8010015f8ceaa83f5434e428b313c46622a69a9db14e5888415857bfe312253d"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/sam3_matched_top1.pt",
+    "sha256": "0b888454215b668bdc4899f51a02bb24b330f3d066f59d154879662fc7d49f3c",
+    "report_sha256": "70d45536a6617170254f9fce2f7d355403c709b059142e18399452a92bd79d37",
+    "support_sha256": "47f9cc3a7ae774e71ef6885648436db8d9f0891d647b7dfcc676d8dfc0c7073f",
+    "feature_dim": 1024,
+    "channel_shards": 4
+  },
+  "official_capability": {
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "projection_order": "per_view_before_mpr",
+    "capability_map_source": "project_raw"
+  },
+  "statistics": {
+    "num_gaussians": 450000,
+    "valid_count": 310718,
+    "views": 99,
+    "median_views_if_valid": 24.0
+  },
+  "validation": {
+    "formal_sharded_loader_all_hash_gates": "passed",
+    "feature_space": "sam3",
+    "geometry_xyz_sha256": "c37ca284eeb405ae7365258a43e3fc7a3e55a3120692ecab3b0ce065ed628b65",
+    "shared_responsibility_sha256": "b8e91d82af0889fc546d1a868c60a75316f44a043d5c5179c9de983104db5f10",
+    "support_matches_radio_exactly": true
+  },
+  "resource_observation": {
+    "physical_gpu": 0,
+    "maximum_temperature_c": 57,
+    "thermal_stop_triggered": false
+  },
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "diagnostic": "canonical_factorized_radio_v1_spin_lego_postmetric_calibration_diagnosis",
+  "completed_at": "2026-08-05T15:16:37+08:00",
+  "status": "postmetric_diagnosis_only_not_method_selection",
+  "sealed_inputs": {
+    "previous_compact_report_sha256": "f23528e0ab130069372ec0bbdff565f1e2d40cad7377171392f45d1d72a3f2c0",
+    "factorized_report_sha256": "b18fad2b9cedcf6ec4dd712ac05c64a01b3980dee5d8fef0f35202d5cf72ec95",
+    "factorized_pre_metric_prediction_receipt_sha256": "d23378e3f819f46319fa1eec3b75ddbc06c314c91c43f38adc75bde50e32f076"
+  },
+  "reported_operating_points": {
+    "previous": {
+      "source_selected_threshold": 0.6599999999999997,
+      "target_iou": 0.6331459007792092
+    },
+    "factorized": {
+      "source_selected_threshold": 0.7099999999999997,
+      "target_iou": 0.6296096108315573
+    }
+  },
+  "cross_threshold_target_diagnostic": {
+    "previous_scores_at_threshold_0_66_iou": 0.6331459007792092,
+    "previous_scores_at_threshold_0_71_iou": 0.5983699211697104,
+    "factorized_scores_at_threshold_0_66_iou": 0.6580471098266646,
+    "factorized_scores_at_threshold_0_71_iou": 0.6296096108315573,
+    "factorized_query_compatibility_at_threshold_0_66_iou": 0.6587489249825059,
+    "disclosure": "Threshold 0.66 is evaluated only after targets were opened and is not promoted or used as a new method."
+  },
+  "ranking_diagnostic_quarter_resolution": {
+    "previous_macro_average_precision": 0.8358423273631165,
+    "factorized_macro_average_precision": 0.847304954609405,
+    "delta_average_precision": 0.0114626272462885,
+    "previous_oracle_global_grid_iou": 0.6583810490254525,
+    "factorized_oracle_global_grid_iou": 0.6640825479186747,
+    "delta_oracle_iou": 0.0057014988932222
+  },
+  "score_relation": {
+    "mean_framewise_pixel_pearson": 0.9983996874200644,
+    "p05_framewise_pixel_pearson": 0.9977929847275543,
+    "mean_absolute_score_difference": 0.0034350755158811808
+  },
+  "conclusion": {
+    "representation_ranking": "improved rather than weakened on this sentinel",
+    "remaining_failure": "source-reference threshold overestimates the target-view operating point; the factorized source-selected threshold moved upward by 0.05 despite nearly identical target score ordering",
+    "first_principles_implication": "Do not enlarge the feature field to fix this residual. A future improvement must calibrate source-to-novel-view score attenuation from source/geometry only and must be validated without choosing a target-derived threshold."
+  },
+  "safety": {
+    "target_metrics_were_already_open_before_this_diagnostic": true,
+    "method_or_prediction_changed": false,
+    "formal_result_overwritten": false
+  }
+}

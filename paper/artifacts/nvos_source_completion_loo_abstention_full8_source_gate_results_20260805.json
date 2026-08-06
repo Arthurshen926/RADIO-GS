@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_full8_expansion_v1",
+  "status": "remaining_six_source_completions_and_gates_sealed_target_evaluation_not_started",
+  "registered_authority": {
+    "preregistration_path": "paper/artifacts/nvos_source_completion_loo_abstention_full8_expansion_preregistration_20260805.json",
+    "preregistration_sha256": "d5e8521d037f4f3baca9ac260d196505d9dd7777aa8422e357e5fe2dc12aa280",
+    "implementation_closure_path": "paper/artifacts/nvos_source_completion_loo_abstention_full8_expansion_implementation_closure_20260805.json",
+    "implementation_closure_sha256": "9f3098de7aeee86e204d01f8e82ee0680eb3befde5139986e2bbfeb95ca3f05e",
+    "runtime_import_correction_path": "paper/artifacts/nvos_source_completion_full8_easy3d_import_correction_20260805.json",
+    "runtime_import_correction_sha256": "08b9e4acad90d04b483085dce068dd6a5231bfa73bc621daea1c5821c8554430",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "builder_sha256": "66b3f2cec6f14480932a84a4388c62bdcf31a564fb4cc398ab3b60a420917e96",
+    "source_gate_core_sha256": "9e1e76d3a91371025d0921bb89e939928bb9eb4a19a8ef09ae59490b99f5922b",
+    "source_gate_builder_sha256": "15fefa80b904588a70fa6019dc54214ac4a9b3f44b9522b6d74ceed3fca3b749"
+  },
+  "source_completion_phase": {
+    "summary_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_official_sam3_reference_completion_full8_expansion_v1/phase1_summary.json",
+    "summary_sha256": "d6ea0c012617860e0a14dd7ee4a033ec3b84cda5d318aafc54e8d5e89b06235a",
+    "fixed_order": [
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "official_sam3_checkpoint_sha256": "9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e",
+    "torch_version": "2.5.1+cu118",
+    "torch_cuda_runtime": "11.8",
+    "numpy_version": "2.4.4",
+    "skimage_version": "0.24.0",
+    "peak_cuda_memory_bytes": 1709438976,
+    "target_rgb_mask_or_metric_opened": false
+  },
+  "remaining_six": {
+    "flower": {
+      "completion_artifact_sha256": "eca24b3980f601b782a62518c95a581ca665d09f52a2328163cf36984b08f751",
+      "completion_receipt_sha256": "e214a6110818b7688b3de1ae4b5fe5c35b53ec8c70243a6e2838a381ccc9c678",
+      "completion_tensor_bundle_sha256": "6a49bedd61b5314d4e959dd7146a4a019137499a99aee86222c76537197fe2f0",
+      "completed_positive_fraction": 0.21516492399428908,
+      "quality_mean": 0.776171875,
+      "gate_sha256": "b8c3085d8c964b4d658fd5841b33fe4eb7e6077ba3129ad3323428c2b2796320",
+      "minimum_heldout_iou": 0.35322371485766807,
+      "mean_heldout_iou": 0.8547211694799552,
+      "maximum_heldout_iou": 0.9756818764339253,
+      "failed_trial_indices": [
+        6
+      ],
+      "accept_source_completion": false,
+      "action": "zero_source_completion_reliability_abstain_to_field"
+    },
+    "fortress": {
+      "completion_artifact_sha256": "776abc80bc552a9c2ebb834ef02140d941641a75dfad4f345cd35133cae64399",
+      "completion_receipt_sha256": "b1d9cdd867959525ace275b39a90bdb447bddb93eb30a7263c0ff04535704269",
+      "completion_tensor_bundle_sha256": "58570dc1e117022ec805da719dd167b50c5dd1725fa3083b88df8983e3df430e",
+      "completed_positive_fraction": 0.1391132842025699,
+      "quality_mean": 0.7244140625,
+      "gate_sha256": "289d4ce846c8ec86f6b92d5a097a0698e0c0999892f030e0982289176ecbe7ab",
+      "minimum_heldout_iou": 0.18402526988896273,
+      "mean_heldout_iou": 0.8603773870680561,
+      "maximum_heldout_iou": 0.9838878587281304,
+      "failed_trial_indices": [
+        3
+      ],
+      "accept_source_completion": false,
+      "action": "zero_source_completion_reliability_abstain_to_field"
+    },
+    "horns_center": {
+      "completion_artifact_sha256": "af1450efabed90506db744fcd3ec17c118b0aefea41129abe6d9096f87bc6799",
+      "completion_receipt_sha256": "57e18c02bfaeb69ba0be05dc60e15621dcd39b309c9ca22e2b0fb0fb4fca1d67",
+      "completion_tensor_bundle_sha256": "8e1657b9c94b88f3b663282559769ad043c9f158865f240979fcf39387e3fb22",
+      "completed_positive_fraction": 0.18581900352733685,
+      "quality_mean": 0.6306640625,
+      "gate_sha256": "3935b124700eca746229c59f53ff8e24d87d18e68f2aa464b83820b331edb50a",
+      "minimum_heldout_iou": 0.08079956059476637,
+      "mean_heldout_iou": 0.6298109246894874,
+      "maximum_heldout_iou": 0.8502454287108534,
+      "failed_trial_indices": [
+        4,
+        6
+      ],
+      "accept_source_completion": false,
+      "action": "zero_source_completion_reliability_abstain_to_field"
+    },
+    "leaves": {
+      "completion_artifact_sha256": "6fe8ef428b74390d4effed5b6a9342cdf2b4b0487e029e7e2d1e9267228f4861",
+      "completion_receipt_sha256": "b589f7d2685fddd2bbcdedc4590263e58d42f55d16457639d6e34dc7d3b369d1",
+      "completion_tensor_bundle_sha256": "de92ec480ba0be1fa01f1fdecbf9d83561c0f0077f0934d152aee5c695cea9b0",
+      "completed_positive_fraction": 0.05080519862265894,
+      "quality_mean": 0.5591796875,
+      "gate_sha256": "e14edc78e04f19cd0633c75f5e86bb30a1b0cd3cb78e9673d3295a47bdd114eb",
+      "minimum_heldout_iou": 0.23781687865346768,
+      "mean_heldout_iou": 0.7180132664286332,
+      "maximum_heldout_iou": 0.9127506996268657,
+      "failed_trial_indices": [
+        1,
+        5
+      ],
+      "accept_source_completion": false,
+      "action": "zero_source_completion_reliability_abstain_to_field"
+    },
+    "orchids": {
+      "completion_artifact_sha256": "e43b7483488895d89a7e9a4996568045179fbbd863228c7aa996cf7bde8cd732",
+      "completion_receipt_sha256": "5632ec75a8cac9c0246696a7772df57c13e0969c225aca1321b52d367a1b0167",
+      "completion_tensor_bundle_sha256": "a3e410d6976adcbdd95f6cf0f0213b0224dd8b5b94f440fe68d3c50b7669d0b7",
+      "completed_positive_fraction": 0.1539010665994793,
+      "quality_mean": 0.55234375,
+      "gate_sha256": "1fe7e76c769084bea936bb0c55a7e8dc0873f52e214ee4c4e4677152d3d06521",
+      "minimum_heldout_iou": 0.013613525696498456,
+      "mean_heldout_iou": 0.5404559940067907,
+      "maximum_heldout_iou": 0.8556055493063367,
+      "failed_trial_indices": [
+        3,
+        4,
+        5
+      ],
+      "accept_source_completion": false,
+      "action": "zero_source_completion_reliability_abstain_to_field"
+    },
+    "trex": {
+      "completion_artifact_sha256": "8ec90e6755d7c9f8ac5e90e2eff1851f6b2947876b1a7892155c0d40085de322",
+      "completion_receipt_sha256": "ddf711dcc3ff2fafc40ec864dbcc9f5ed0bb478401e76395cf6bfe65663f766c",
+      "completion_tensor_bundle_sha256": "87fdfd06ac245f577195ee6da6a9b1079eafd52c7923c3650907396e5d0314c9",
+      "completed_positive_fraction": 0.41862848534475516,
+      "quality_mean": 0.53056640625,
+      "gate_sha256": "1d04551ca8447b5cb1b70f6de45d64d9a9471088e59498a81b33abf0eeffdd2d",
+      "minimum_heldout_iou": 0.0,
+      "mean_heldout_iou": 0.4165644497922923,
+      "maximum_heldout_iou": 0.6833011041107854,
+      "failed_trial_indices": [
+        1,
+        3,
+        4,
+        7,
+        8
+      ],
+      "accept_source_completion": false,
+      "action": "zero_source_completion_reliability_abstain_to_field"
+    }
+  },
+  "source_only_aggregate": {
+    "remaining_six_accept_count": 0,
+    "remaining_six_abstain_count": 6,
+    "remaining_six_accept_fraction": 0.0,
+    "full8_accept_task_instances_after_combining_sealed_sentinels": [
+      "horns_left"
+    ],
+    "full8_abstain_task_instances_after_combining_sealed_sentinels": [
+      "fern",
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "mechanistic_interpretation": "Official SAM3 source completion is not stable enough to override the compact raw-scribble unary on any remaining task under the preregistered all-trial criterion. High mean agreement on flower and fortress is insufficient because one held-out trial collapses materially; the all-trial gate fails closed as designed."
+  },
+  "execution_safety": {
+    "successful_gpu_run": {
+      "physical_gpu": 0,
+      "power_limit_w": 300,
+      "poll_seconds": 180,
+      "soft_pause_enabled": false,
+      "thermal_hard_stop_c": 88,
+      "maximum_observed_temperature_c": 52,
+      "final_temperature_c": 46,
+      "final_compute_owner": false,
+      "overheat_pause_or_abort": false
+    },
+    "initial_import_failure_disclosed": true,
+    "target_evaluation_started": false,
+    "target_scores_written": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_opened": false,
+    "focused_tests": "209 passed, 3 warnings",
+    "python_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "next_step": "Wait for coordinated GPU authorization, then run all six frozen evaluator invocations and report all outcomes. The gate actions and all source assets are immutable before that target phase."
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_hierarchical_trust_local_positive_v2_prediction_barrier_addendum",
+  "sealed_at": "2026-08-05T20:21:50+08:00",
+  "status": "sealed_before_any_v2_target_prediction",
+  "lineage": {
+    "target_preregistration_sha256": "11b6202ed49da8bba315cbf2d56fff3264f96732b80d6cc8ef76dd8d059db024",
+    "method_implementation_closure_sha256": "edeeae7c0e70a8638077838bd1013d888a3f4bce10fefe74d8f7c47127b8dede",
+    "method_change_after_closure": false
+  },
+  "authorized_execution_only_change": {
+    "description": "Add a native prediction-only phase and graph-disabled pre-metric receipt so all eight predictions can be sealed before any target ground-truth open.",
+    "evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+    "prediction_only_behavior": "After primitive unary and every target/stage score are persisted and hashed, atomically seal the receipt and return before the target-metric loop.",
+    "receipt_binds": [
+      "complete evaluator SHA-256",
+      "all parsed candidate arguments",
+      "capability cache SHA-256",
+      "explicit disabled-zero-edge graph policy",
+      "source completion and source-gate evidence",
+      "primitive unary file and tensor SHA-256",
+      "every rendered target and stage-score SHA-256"
+    ],
+    "method_numerics_changed": false,
+    "renderer_or_threshold_changed": false,
+    "target_ground_truth_opened": false
+  },
+  "batch_barrier": {
+    "phase_1": "Run all eight fixed commands with --prediction-only on physical GPU1 in scene order; no target ground truth is opened.",
+    "phase_2_authorization": "Only an eight-receipt batch authority with all hashes verified may authorize CPU scoring.",
+    "intermediate_metric_inspection": false,
+    "leaves_and_orchids_concurrent": false
+  },
+  "verification": {
+    "focused_tests": "72 passed, 2 warnings",
+    "graph_disabled_receipt_test_sha256": "153c0660584d89f78f889a3bd27bb7c9892091e004ed4d7d5fa7f51b62b6a7db",
+    "python_compile_passed": true,
+    "git_diff_check_passed": true
+  }
+}

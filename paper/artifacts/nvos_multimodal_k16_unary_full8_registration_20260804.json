@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_multimodal_k16_unary_full8_v1",
+  "status": "registered before opening the remaining six target outcomes",
+  "motivation": "The reference mask is multi-modal in appearance. A single or four spherical prototypes collapse foreground/background modes before the unary is formed; K16 is a global capacity increase, not a graph or per-scene parameter.",
+  "development_disclosure": {
+    "scenes": ["fern", "horns_left"],
+    "prototype_counts_already_observed": [4, 8, 16],
+    "selection": "K16 selected globally from the two disclosed development scenes; it is not a pristine target-blind full8 comparison",
+    "k16_miou": {
+      "fern": 0.7563184866,
+      "horns_left": 0.6829489073,
+      "macro": 0.7196336969
+    }
+  },
+  "candidate": {
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_inverse": "native exact front-to-back raster adjoint",
+    "reference_seed_construction": "winner_take_all",
+    "final_readout": "unary_prior",
+    "target_rgb": false,
+    "graph_used_in_final_output": false,
+    "scene_specific_parameters": false
+  },
+  "heldout_expansion_scenes": [
+    "flower",
+    "fortress",
+    "horns_center",
+    "leaves",
+    "orchids",
+    "trex"
+  ],
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "target_evaluator_modified": false,
+    "score_threshold": 0.5,
+    "official_single_target_per_scene": true
+  },
+  "gate": {
+    "primary": "full8 scene-macro IoU exceeds the frozen strict 0.61195354 baseline",
+    "secondary": "heldout-six macro exceeds their frozen baseline macro and at least four of six heldout scenes improve",
+    "reporting": "always disclose K16 as development-selected and report all scene outcomes"
+  }
+}

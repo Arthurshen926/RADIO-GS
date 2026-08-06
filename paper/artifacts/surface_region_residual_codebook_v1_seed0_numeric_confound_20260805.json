@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_frozen_v2_residual_codebook_v1_seed0_numeric_confound",
+  "status": "invalidated_diagnostic_checkpoint_not_a_method_result",
+  "checkpoint": {
+    "path": "output/optimization_20260805/surface_region_residual_codebook_v1/seed0.pt",
+    "sha256": "e2b6bd187c11b305a9f77c532dcca674db145c02144fee73f4d9cda85efc5089",
+    "sidecar_sha256": "d56489c2b31745abb5f1abc1c756acc74170c3b45d1ea739377640a7f5857bbd"
+  },
+  "confound": {
+    "description": "The exact fallback was projected through the official head as [B,1,D], while the three residual slots were projected jointly as [B,3,D]. Tiny matrix-shape-dependent floating-point differences between otherwise bitwise-identical tokens were amplified by hard-max and rank metrics.",
+    "zero_initialization_should_match_control": true,
+    "observed_untrained_control_ranking_spearman_p05": 0.13286712765693665,
+    "observed_untrained_candidate_ranking_spearman_p05": 0.00699300691485405,
+    "observed_untrained_control_support_top1": 0.2599009871482849,
+    "observed_untrained_candidate_support_top1": 0.2141089141368866,
+    "method_conclusion_valid": false
+  },
+  "benchmark_opened": false,
+  "promotion_allowed": false,
+  "resolution": "Project every slot through an identical contiguous [B,1,D] official-head call and require exact duplicate-slot descriptor parity in unit tests before repeating seed0."
+}

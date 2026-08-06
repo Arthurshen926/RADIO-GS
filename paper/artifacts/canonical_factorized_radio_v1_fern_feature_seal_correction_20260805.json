@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "artifact_type": "non_overwriting_execution_correction",
+  "experiment": "canonical-factorized-radio-v1 Fern source feature authority",
+  "date": "2026-08-05",
+  "parent_addendum": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_fern_feature_authority_addendum_20260805.json",
+    "sha256": "04715d4670141b02fe37634d6a6bff0512ae51c8216219dacfdd0bd437fa0a08"
+  },
+  "trigger": "The first fresh extraction completed all 19 tensors, but the extractor emits a content-addressed output_bundle only under its strict atomic resume protocol. The original command omitted --resume-partial.",
+  "first_output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/radio_features_reextracted",
+    "status": "diagnostic_unsealed_preserved",
+    "tensors_modified_after_completion": false,
+    "manifest_output_bundle": null,
+    "promotable": false
+  },
+  "correction": {
+    "policy": "Repeat the identical source-only extraction in a new directory with --resume-partial; preserve the first output for comparison and never overwrite it.",
+    "only_argument_changes": {
+      "resume_partial": true,
+      "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/radio_features_reextracted_sealed_v1"
+    },
+    "batch_size": 1,
+    "skip_pca_stats": true,
+    "expected_frames": 19,
+    "expected_backbone_shape": [
+      1280,
+      47,
+      62
+    ]
+  },
+  "promotion_rule": "Only the second output may define feature_output_bundle_sha256 and enter factorized MPR construction.",
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used_for_design": false
+  }
+}

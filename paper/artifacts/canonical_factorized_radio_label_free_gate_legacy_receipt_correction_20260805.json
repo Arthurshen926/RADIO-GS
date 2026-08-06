@@ -1,0 +1,34 @@
+{
+  "artifact_type": "implementation_correction_addendum",
+  "experiment": "canonical-factorized-radio-v1-label-free-source-gate",
+  "date": "2026-08-05",
+  "trigger": "The first source-only run stopped before adaptor projection because the generic loader required a feature-output-bundle receipt that the preregistered July legacy raw control predates.",
+  "correction": "All three preregistered July MPR caches are loaded with historical feature-bundle-receipt compatibility. Before any adaptor metric, this addendum freezes their complete-file SHA-256 values; the implementation additionally requires exact source-only flags, a common geometry fingerprint, one registration-responsibility SHA-256, canonical-mpr-v1 projection order, and for DINOv3/SAM3 the project-raw, adaptor-before-MPR and official-checkpoint lineage.",
+  "frozen_cache_authorities": {
+    "radio": {
+      "path": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/raw_radio.pt",
+      "sha256": "e4a287e3b9e863a321d2c3f244a9e265014eda9d0b94415cc3f3cf53e025cc27"
+    },
+    "dino_v3": {
+      "path": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/dino_v3.pt",
+      "sha256": "89d252ddf81995a8e9bd89d396bf1bfbf0ebe0b821b6bc19472ed60fe99f25fa"
+    },
+    "sam3": {
+      "path": "output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/sam3.pt",
+      "sha256": "93e6b6c76c43038dea07997d7c408feb613c0afa2fced37bb83ad2614279fc22"
+    }
+  },
+  "scientific_contract_unchanged": {
+    "source_authorities": true,
+    "common_row_rule": true,
+    "maximum_rows": 16384,
+    "metrics": true,
+    "promotion_thresholds": true,
+    "target_access": false
+  },
+  "first_attempt": {
+    "failed_before_metric_computation": true,
+    "failed_before_gpu_projection": true,
+    "result_artifact_written": false
+  }
+}

@@ -61,6 +61,26 @@ STREAMED_SCALE_AGGREGATION = "none_frozen_downstream_only"
 STREAMED_COMPLETION_REASON = (
     "frozen_direct3d_requires_raw_unreduced_scale_scores"
 )
+PROBABILITY_STREAMED_SCHEMA_VERSION = 4
+PROBABILITY_FEATURE_SPACE = (
+    "primitive_canonical_negative_probability_multiscale_unreduced"
+)
+PROBABILITY_SCORE_SEMANTICS = "canonical_negative_bernoulli_probability"
+PROBABILITY_DIRECT3D_VERSION = 3
+PROBABILITY_DIRECT3D_CONTRACT = (
+    "radio_gs.ours_lerf_direct3d_multiscale_query_probabilities.v3"
+)
+PROBABILITY_AUTHORITY_CONTRACT = (
+    "radio_gs.lerf_multiscale_query_probability_authority.v3"
+)
+PROBABILITY_CONSTRUCTIONS = {
+    "surface_residual_codebook_slotwise_head_then_query_router",
+    "surface_residual_codebook_exact_frozen_v2_slot0",
+}
+PROBABILITY_SCORING = {
+    "canonical_negative_bernoulli_query_router_v1",
+    "canonical_negative_bernoulli_frozen_v2_slot0",
+}
 
 
 def _resolve_declared_path(value: object, *, label: str) -> Path:
@@ -89,6 +109,20 @@ def _require_source_binding(
         raise ValueError(f"streamed score cache {role} SHA256 differs")
 
 
+def _validated_provenance_artifact(
+    provenance: Mapping[str, Any],
+    *,
+    role: str,
+) -> dict[str, str]:
+    path = _resolve_declared_path(provenance.get(role), label=role)
+    digest = _require_sha256(
+        provenance.get(f"{role}_sha256"), label=f"{role}_sha256"
+    )
+    if sha256_file(path) != digest:
+        raise ValueError(f"streamed score cache {role} SHA256 differs")
+    return {"path": str(path), "sha256": digest}
+
+
 def _validate_streamed_scores(
     payload: Mapping[str, Any],
     *,
@@ -103,11 +137,16 @@ def _validate_streamed_scores(
     metadata = payload.get("metadata")
     if not isinstance(metadata, Mapping):
         raise ValueError("streamed score cache metadata must be a mapping")
+    probability_mode = (
+        metadata.get("score_semantics") == PROBABILITY_SCORE_SEMANTICS
+    )
     required = {
-        "schema_version": 3,
-        "feature_space": STREAMED_FEATURE_SPACE,
-        "construction": STREAMED_CONSTRUCTION,
-        "scoring": "raw_independent_normalized_cosine",
+        "schema_version": (
+            PROBABILITY_STREAMED_SCHEMA_VERSION if probability_mode else 3
+        ),
+        "feature_space": (
+            PROBABILITY_FEATURE_SPACE if probability_mode else STREAMED_FEATURE_SPACE
+        ),
         "scale_aggregation": STREAMED_SCALE_AGGREGATION,
         "scale_count": SCALE_COUNT,
         "semantic_cache_materialized": False,
@@ -115,6 +154,36 @@ def _validate_streamed_scores(
         "benchmark_masks_opened": False,
         "text_queries_opened": True,
     }
+    if probability_mode:
+        if metadata.get("construction") not in PROBABILITY_CONSTRUCTIONS:
+            raise ValueError("streamed probability construction differs")
+        if metadata.get("scoring") not in PROBABILITY_SCORING:
+            raise ValueError("streamed probability scoring route differs")
+        if metadata.get("value_range") != [0.0, 1.0]:
+            raise ValueError("streamed probability value range differs")
+        if float(metadata.get("logit_scale", -1.0)) != 10.0:
+            raise ValueError("streamed probability logit scale differs")
+        if metadata.get("generic_negative_queries") != [
+            "object",
+            "things",
+            "stuff",
+            "texture",
+        ]:
+            raise ValueError("streamed probability generic negatives differ")
+        probability_route = str(metadata.get("probability_route", ""))
+        if probability_route not in {
+            "query_router_v1",
+            "exact_frozen_v2_slot0_control",
+        }:
+            raise ValueError("streamed probability route differs")
+    else:
+        required.update(
+            {
+                "construction": STREAMED_CONSTRUCTION,
+                "scoring": "raw_independent_normalized_cosine",
+            }
+        )
+        probability_route = ""
     for key, expected in required.items():
         if metadata.get(key) != expected:
             raise ValueError(
@@ -179,13 +248,17 @@ def _validate_streamed_scores(
     if not isinstance(provenance, Mapping):
         raise ValueError("streamed score cache lacks semantic provenance")
     provenance_required = {
-        "source": "canonical_radio_surface_region_readout",
-        "query_set_invariant": True,
+        "source": (
+            "canonical_radio_surface_region_residual_codebook_query_router"
+            if probability_mode
+            else "canonical_radio_surface_region_readout"
+        ),
+        "query_set_invariant": not probability_mode,
         "official_summary_head": True,
         "custom_text_projection": False,
         "benchmark_images_opened": False,
         "benchmark_masks_opened": False,
-        "text_queries_opened": False,
+        "text_queries_opened": probability_mode,
         "region_radii_m": list(radii),
     }
     for key, expected in provenance_required.items():
@@ -207,6 +280,34 @@ def _validate_streamed_scores(
         provenance.get("official_radio_checkpoint_sha256"),
         label="official_radio_checkpoint_sha256",
     )
+    probability_sources: dict[str, dict[str, str]] = {}
+    if probability_mode:
+        if (
+            provenance.get("representation_query_set_invariant") is not True
+            or provenance.get("query_router_query_dependent") is not True
+            or provenance.get("exact_frozen_v2_slot0_control") is not True
+            or provenance.get("query_router_score_contract")
+            != "canonical_negative_bernoulli_query_first"
+            or float(provenance.get("query_router_logit_scale", -1.0)) != 10.0
+            or provenance.get("slot_projection_contract")
+            != "four_independent_official_head_calls_Bx1x1280"
+        ):
+            raise ValueError("streamed probability provenance differs")
+        for role in (
+            "residual_codebook_checkpoint",
+            "query_router_checkpoint",
+            "generic_negative_text_cache",
+        ):
+            probability_sources[role] = _validated_provenance_artifact(
+                provenance, role=role
+            )
+        if provenance.get("generic_negative_queries") != [
+            "object",
+            "things",
+            "stuff",
+            "texture",
+        ]:
+            raise ValueError("streamed probability provenance negatives differ")
 
     xyz = payload.get("xyz")
     valid = payload.get("valid")
@@ -236,7 +337,12 @@ def _validate_streamed_scores(
     scores = scores.detach().cpu().contiguous()
     if not bool(torch.isfinite(scores).all()):
         raise ValueError("streamed scores contain NaN or infinity")
-    if bool((scores.float().abs() > 1.0005).any()):
+    if probability_mode:
+        if bool((scores.float() < 0.0).any()) or bool(
+            (scores.float() > 1.0).any()
+        ):
+            raise ValueError("Bernoulli probability scores must lie in [0,1]")
+    elif bool((scores.float().abs() > 1.0005).any()):
         raise ValueError("normalized cosine scores exceed their valid range")
     if bool(scores[~valid].any()):
         raise ValueError("invalid primitive rows must have zero streamed scores")
@@ -253,6 +359,13 @@ def _validate_streamed_scores(
         "official_radio_checkpoint_sha256": radio_sha,
         "streaming_implementation_path": implementation_path,
         "streaming_implementation_sha256": implementation_sha,
+        "score_semantics": (
+            PROBABILITY_SCORE_SEMANTICS
+            if probability_mode
+            else "raw_independent_normalized_cosine"
+        ),
+        "probability_route": probability_route,
+        "probability_sources": probability_sources,
     }
 
 
@@ -371,15 +484,57 @@ def materialize_streamed(
         "materializer_source": _file_record(
             implementation_path, implementation_digest
         ),
+        **streamed["probability_sources"],
     }
+    probability_mode = streamed["score_semantics"] == PROBABILITY_SCORE_SEMANTICS
+    direct_contract = (
+        PROBABILITY_DIRECT3D_CONTRACT if probability_mode else DIRECT3D_CONTRACT
+    )
+    authority_contract = (
+        PROBABILITY_AUTHORITY_CONTRACT
+        if probability_mode
+        else SHARED_AUTHORITY_CONTRACT
+    )
+    schema_version = (
+        PROBABILITY_DIRECT3D_VERSION if probability_mode else SCHEMA_VERSION
+    )
+    if probability_mode:
+        score_formula = (
+            "slotwise sigmoid(10*(positive_cosine-max_generic_negative_cosine)); "
+            "frozen query-conditioned residual attention"
+            if streamed["probability_route"] == "query_router_v1"
+            else "sigmoid(10*(slot0_positive_cosine-max_slot0_generic_negative_cosine))"
+        )
+        score_implementation = (
+            "radio_gs.interfaces.surface_region_query_router."
+            "SurfaceRegionQueryRouterV1"
+        )
+    else:
+        score_formula = SCORING_FORMULA
+        score_implementation = SCORING_IMPLEMENTATION
     authority = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "artifact_type": ARTIFACT_TYPE,
-        "contract": SHARED_AUTHORITY_CONTRACT,
-        "score_semantics": "raw_independent_normalized_cosine",
-        "score_formula": SCORING_FORMULA,
-        "score_implementation": SCORING_IMPLEMENTATION,
+        "contract": authority_contract,
+        "score_semantics": streamed["score_semantics"],
+        "score_formula": score_formula,
+        "score_implementation": score_implementation,
         "score_dtype": "torch.float16",
+        **(
+            {
+                "probability_route": streamed["probability_route"],
+                "value_range": [0.0, 1.0],
+                "logit_scale": 10.0,
+                "generic_negative_queries": [
+                    "object",
+                    "things",
+                    "stuff",
+                    "texture",
+                ],
+            }
+            if probability_mode
+            else {}
+        ),
         "scale_axis": scale_records,
         "query_axis": {
             "ids": list(streamed["query_ids"]),
@@ -413,12 +568,16 @@ def materialize_streamed(
         "source_artifacts": sources,
         "consumer_contracts": {
             "direct3d": {
-                "contract": DIRECT3D_CONTRACT,
+                "contract": direct_contract,
                 "tensor_layout": "[primitive_row,scale,query]",
                 "scale_selection": "downstream_frozen_VALA_readout_only",
             },
             "lerf2d_scalar_map_renderer": {
-                "score_semantics": SCORE_SEMANTICS_2D,
+                "score_semantics": (
+                    PROBABILITY_SCORE_SEMANTICS
+                    if probability_mode
+                    else SCORE_SEMANTICS_2D
+                ),
                 "tensor_layout_before_render": "[primitive_row,scale,query]",
                 "scale_ids": list(scale_ids),
                 "query_text_axis": list(streamed["query_ids"]),
@@ -440,8 +599,8 @@ def materialize_streamed(
         },
     }
     payload = {
-        "version": 2,
-        "contract": DIRECT3D_CONTRACT,
+        "version": schema_version,
+        "contract": direct_contract,
         "query_scores": query_scores,
         "query_ids": list(streamed["query_ids"]),
         "scale_ids": list(scale_ids),
@@ -457,7 +616,7 @@ def materialize_streamed(
     write_torch_noclobber(output_path, payload)
     output_digest = sha256_file(output_path)
     report = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "artifact_type": ARTIFACT_TYPE,
         "status": "complete_calibration_free_streamed_query_score_materialization",
         "query_score_cache": _file_record(output_path, output_digest),
@@ -470,6 +629,8 @@ def materialize_streamed(
             "descriptor_cache_materialized": False,
             "changes_method": False,
         },
+        "score_semantics": streamed["score_semantics"],
+        "probability_route": streamed["probability_route"],
         "shared_renderer_authority": authority,
     }
     write_frozen_json(report_path, report)

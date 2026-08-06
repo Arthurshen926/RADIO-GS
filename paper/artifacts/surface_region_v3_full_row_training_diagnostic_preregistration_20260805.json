@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_full_row_training_diagnostic_v1",
+  "status": "registered_after_no_sparse_diagnostic_and_before_training",
+  "motivation": {
+    "failed_sparse_candidate_full_selection_score": 0.9269933043932476,
+    "no_sparse_candidate_full_selection_score": 0.927544377779166,
+    "interpretation": "Removing sparse-support augmentation changes the fixed full-support score by only +0.000551, so sparse truncation is not the generic-gap cause. The remaining query-free row-role hypothesis is equal training weight for paired completion rows while checkpoint selection uses full-support rows only."
+  },
+  "diagnostic": {
+    "single_change_from_no_sparse_control": "eligibility_completion_training_weight=0.0",
+    "unchanged": [
+      "all six frozen fresh V3 caches",
+      "schema-7 direction-times-exp-log-norm base architecture",
+      "no sparse-support augmentation",
+      "full-support validation checkpoint selection",
+      "seed 0 and all optimizer/loss hyperparameters"
+    ],
+    "benchmark_access": "forbidden",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_connected_completion_v3_v3/readout_v3_full_rows_only_h256_seed0_diagnostic.pt",
+    "decision": {
+      "material_recovery": "completion rows are causing an objective-distribution tradeoff; retain completion as diagnostic or lower its global weight before generic revalidation",
+      "no_material_recovery": "reject completion weighting as the cause and adjudicate the generic gate only against a matched teacher/support protocol before opening a benchmark sentinel"
+    }
+  },
+  "benchmark_state_at_registration": {
+    "v3_candidate_benchmarks_opened": false
+  }
+}

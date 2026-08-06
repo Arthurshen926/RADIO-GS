@@ -1,0 +1,970 @@
+{
+  "schema_version": 1,
+  "kind": "spin9_factorized_source_quantile_full9_asset_inventory",
+  "status": "fail_closed_pending_source_authority",
+  "audit_mode": "cpu_metadata_and_ply_headers_only",
+  "manifest": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+    "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+  },
+  "queue": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/queue_plan.json",
+    "sha256": "8cfb744099b8aa1efe9e8f65e376b61c305320e200310de448d8ab85c44953f3"
+  },
+  "representation_contract": {
+    "required": "canonical_factorized_radio_v1 with matched surface-safe K201 interface",
+    "historical_compact_mixing": "forbidden",
+    "scene_specific_method_overrides": "forbidden"
+  },
+  "scenes": [
+    {
+      "scene": "orchids",
+      "evaluation_frames": 23,
+      "training_views": 25,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/orchids/geometry/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 111601531,
+        "source": "frozen_spin9_queue",
+        "num_primitives": 450000
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/orchids/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/orchids/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/orchids/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/orchids_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/orchids_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/orchids/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/orchids/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/orchids/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 4613853913
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/orchids/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 240401099
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/orchids_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 319226167
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/orchids_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 405715959
+        },
+        "declared_global_rows": 450000,
+        "declared_active_rows": 393133,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 3.39,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 6.57,
+        "estimated_gpu_field_capability_graph_hours": [
+          2.29,
+          4.12
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          14
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          10,
+          27
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "leaves",
+      "evaluation_frames": 25,
+      "training_views": 26,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/leaves/geometry/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 347201532,
+        "source": "frozen_spin9_queue",
+        "num_primitives": 1400000
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/query_diffusion_matched_interface_v1/leaves_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/query_diffusion_matched_interface_v1/leaves_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/leaves/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/leaves/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 14354203961
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/leaves/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 743901131
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/leaves_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 119859123
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/leaves_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 152333171
+        },
+        "declared_global_rows": 1400000,
+        "declared_active_rows": 147607,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 10.01,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 5.4,
+        "estimated_gpu_field_capability_graph_hours": [
+          0.86,
+          1.55
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          10
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          5,
+          12
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "fern",
+      "evaluation_frames": 19,
+      "training_views": 20,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/fern/geometry/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 326051348,
+        "source": "frozen_spin9_queue",
+        "num_primitives": 1314717
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 3053223685
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/query_diffusion_matched_interface_v1/fern_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/query_diffusion_matched_interface_v1/fern_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [
+          760715
+        ],
+        "declared_active_rows": [
+          297200
+        ],
+        "carrier_rows_match": false,
+        "active_rows_match": true
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/fern/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/fern/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing",
+          "current_asset_carrier_row_mismatch"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/fern/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 13479796857
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/fern/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 698700363
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/fern_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 626292075
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/fern_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 795977067
+        },
+        "declared_global_rows": 1314717,
+        "declared_active_rows": 771293,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 9.42,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 7.29,
+        "estimated_gpu_field_capability_graph_hours": [
+          1.73,
+          3.12
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          13
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          8,
+          21
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "room",
+      "evaluation_frames": 40,
+      "training_views": 41,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 72323043,
+        "source": "frozen_exact_local9_external_carrier",
+        "num_primitives": 291619
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/room/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/room/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/room/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/room/query_diffusion_matched_interface_v1/room_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/room/query_diffusion_matched_interface_v1/room_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/room/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/room/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/fields/room/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 2201421893
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/fields/room/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 156467563
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/room_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 174267115
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/room_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 221482283
+        },
+        "declared_global_rows": 291619,
+        "declared_active_rows": 214612,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 2.28,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 3.69,
+        "estimated_gpu_field_capability_graph_hours": [
+          1.25,
+          2.25
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          11
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          7,
+          18
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "horns",
+      "evaluation_frames": 61,
+      "training_views": 62,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/nvos/released_all_view/horns/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 238598611,
+        "source": "frozen_exact_local9_external_carrier",
+        "num_primitives": 962085
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/horns/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/horns/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/horns/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/horns/query_diffusion_matched_interface_v1/horns_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/horns/query_diffusion_matched_interface_v1/horns_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/horns/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/horns/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/fields/horns/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 5806333945
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/fields/horns/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 511814827
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/horns_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 459434223
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/horns_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 583911407
+        },
+        "declared_global_rows": 962085,
+        "declared_active_rows": 565803,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 6.96,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 10.2,
+        "estimated_gpu_field_capability_graph_hours": [
+          3.3,
+          5.93
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          17
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          16,
+          43
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "fortress",
+      "evaluation_frames": 41,
+      "training_views": 42,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/fortress/geometry/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 232647603,
+        "source": "frozen_spin9_queue",
+        "num_primitives": 938089
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fortress/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fortress/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fortress/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/fortress_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/fortress_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/fortress/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/fortress/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/fortress/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 9618230457
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/fortress/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 499088587
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/fortress_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 329175611
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/fortress_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 418361083
+        },
+        "declared_global_rows": 938089,
+        "declared_active_rows": 405386,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 6.79,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 7.9,
+        "estimated_gpu_field_capability_graph_hours": [
+          2.36,
+          4.25
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          14
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          11,
+          30
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "pinecone",
+      "evaluation_frames": 98,
+      "training_views": 99,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/pinecone/geometry/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 111601531,
+        "source": "frozen_spin9_queue",
+        "num_primitives": 450000
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/pinecone/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/pinecone/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/pinecone/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/pinecone/query_diffusion_matched_interface_v1/pinecone_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/pinecone/query_diffusion_matched_interface_v1/pinecone_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/pinecone/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/pinecone/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/pinecone/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 4613853913
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/pinecone/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 240401995
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/pinecone_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 252305275
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/pinecone_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 320663739
+        },
+        "declared_global_rows": 450000,
+        "declared_active_rows": 310718,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 3.39,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 5.41,
+        "estimated_gpu_field_capability_graph_hours": [
+          1.81,
+          3.26
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          13
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          12,
+          32
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "truck",
+      "evaluation_frames": 64,
+      "training_views": 251,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 640766572,
+        "source": "frozen_exact_local9_external_carrier",
+        "num_primitives": 2583730
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/truck/factorized_field_d256_l128.pth",
+          "present": false
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/truck/official_dino_sam3_views.pt",
+          "present": false
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/truck/shared_support_graph_surface_safe_k16.pt",
+          "present": false
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/truck/query_diffusion_matched_interface_v1/truck_euclidean_k200_self.pt",
+          "present": false
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/truck/query_diffusion_matched_interface_v1/truck_dino_signed_hash256.pt",
+          "present": false
+        },
+        "declared_global_rows": [],
+        "declared_active_rows": [],
+        "carrier_rows_match": false,
+        "active_rows_match": false
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/truck/reference_exact_w.pt",
+          "present": false
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/truck/reference_exact_w_report.json",
+          "present": false
+        },
+        "ready": false,
+        "decision": "fail_closed",
+        "blockers": [
+          "current_factorized_field_missing",
+          "current_factorized_capability_missing",
+          "current_surface_safe_graph_missing",
+          "current_matched_k201_interface_missing",
+          "exact_source_responsibility_authority_missing"
+        ]
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/fields/truck/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 6518400249
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/fields/truck/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 1371292715
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/truck_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 514227183
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/truck_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 653549743
+        },
+        "declared_global_rows": 2583730,
+        "declared_active_rows": 633282,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 18.27,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 15.01,
+        "estimated_gpu_field_capability_graph_hours": [
+          3.69,
+          6.64
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          18
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          18,
+          47
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    },
+    {
+      "scene": "lego",
+      "evaluation_frames": 43,
+      "training_views": 102,
+      "carrier": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/geometry/point_cloud/iteration_30000/point_cloud.ply",
+        "present": true,
+        "bytes": 157766235,
+        "source": "frozen_spin9_queue",
+        "num_primitives": 636148
+      },
+      "current_factorized_v1": {
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_field_d256_l128.pth",
+          "present": true,
+          "bytes": 327618187
+        },
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 1326983493
+        },
+        "surface_safe_graph": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/shared_support_graph_surface_safe_k16.pt",
+          "present": true,
+          "bytes": 50228197
+        },
+        "matched_k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 104571627
+        },
+        "matched_k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/query_diffusion_matched_interface_v1/lego_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 132903723
+        },
+        "declared_global_rows": [
+          636148,
+          636148,
+          636148,
+          636148
+        ],
+        "declared_active_rows": [
+          128780,
+          128780,
+          128780,
+          128780,
+          128780
+        ],
+        "carrier_rows_match": true,
+        "active_rows_match": true
+      },
+      "source_calibration_authority": {
+        "exact_w": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/reference_exact_w.pt",
+          "present": true,
+          "bytes": 1425883689
+        },
+        "exact_w_report": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/reference_exact_w_report.json",
+          "present": true,
+          "bytes": 4312,
+          "sha256": "a8f5566b609eb94c3676103323f4b4eadd091d0b6b6242c3e5427d093e8f27be"
+        },
+        "ready": true,
+        "decision": "eligible",
+        "blockers": []
+      },
+      "historical_compact_context_only": {
+        "capability": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/official_dino_sam3_views.pt",
+          "present": true,
+          "bytes": 6522429433
+        },
+        "field": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/canonical_d256_l128_capability_first.pth",
+          "present": true,
+          "bytes": 339064139
+        },
+        "k201_knn": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/knn/lego_euclidean_k200_self.pt",
+          "present": true,
+          "bytes": 104571563
+        },
+        "k201_relation": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/features/lego_dino_signed_hash256.pt",
+          "present": true,
+          "bytes": 132903659
+        },
+        "declared_global_rows": 636148,
+        "declared_active_rows": 128780,
+        "carrier_rows_match": true,
+        "permitted_use": "rebuild input and historical context only",
+        "forbidden_use": "silent substitution into factorized-v1 cohort"
+      },
+      "planning_estimate": {
+        "estimated_cpu_peak_gib_factorized_builder": 4.69,
+        "estimated_new_disk_gib_before_exact_w_and_predictions": 3.32,
+        "estimated_gpu_field_capability_graph_hours": [
+          0.75,
+          1.35
+        ],
+        "estimated_gpu_vram_gib": [
+          6,
+          10
+        ],
+        "estimated_fullfit_and_target_minutes": [
+          5,
+          13
+        ],
+        "basis": "scaled conservatively from the completed Lego factorized build; exact-W size and render time remain resolution/sparsity dependent"
+      }
+    }
+  ],
+  "summary": {
+    "scenes": 9,
+    "eligible_source_authority": [
+      "lego"
+    ],
+    "fail_closed": [
+      "orchids",
+      "leaves",
+      "fern",
+      "room",
+      "horns",
+      "fortress",
+      "pinecone",
+      "truck"
+    ],
+    "eligible_count": 1,
+    "fail_closed_count": 8,
+    "target_masks_opened_by_audit": false,
+    "target_rgb_opened_by_audit": false,
+    "gpu_used": false
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_contract_v4_candidate_complete_typed_budget_v1",
+  "status": "stage1_complete_stage2_failed_stage3_and_benchmark_closed",
+  "validation_caches": [
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_contract_v4_candidate_complete_v1/caches/validation_shard0.pt",
+      "sha256": "eb621133c24536c6da48677b2fb7fd518935baeb2cd72062dca443a734643bcd"
+    },
+    {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_contract_v4_candidate_complete_v1/caches/validation_shard1.pt",
+      "sha256": "d9d9abbc4ba6979f3964c533a1e86c5e11eddcc5369f91936d94af57b2f99028"
+    }
+  ],
+  "stage1": {
+    "scenes": 8,
+    "rows": 192,
+    "failed_scenes": 0,
+    "teacher_source": "sha_bound_exact_cache_replay",
+    "shard0_teacher_tensor_rows_bit_exact": 96,
+    "shard0_full_completion_pairs_bit_exact": 48,
+    "shard0_mask_partition_exact": true,
+    "shard0_padding_zero_exact": true,
+    "shard0_full_support_context_mean": 72.0625,
+    "shard0_full_support_context_zero_rows": 4,
+    "shard0_full_support_core256_context0_rows_requiring_graph_replay": 4,
+    "candidate_limit_exhaustion_proven": false,
+    "candidate_limit_exhaustion_note": "A cached core=256/context=0 row is compatible with either 1024 core candidates exhausting the bounded search or no reachable context shell. Exact attribution requires graph replay."
+  },
+  "stage2": {
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_contract_v4_candidate_complete_v1/stage2_safe_base.json",
+      "sha256": "5c1101e56b7ccde1c6dc3878fca8c9ba3533dd97e7766b869ba9ccc443393895"
+    },
+    "full_support_rows": 96,
+    "summary_token_cosine": 0.4998499657958746,
+    "mean_descriptor_cosine": 0.868528605128328,
+    "all_view_descriptor_cosine": 0.8416821700820596,
+    "selection_score": 0.8551053876051937,
+    "mean_descriptor_cosine_floor": 0.9409590106010437,
+    "passed": false
+  },
+  "decisions": {
+    "stage3_residual_training_authorized": false,
+    "benchmark_opening_authorized": false,
+    "v4_safe_base_claim_rejected": true,
+    "reason": "The accepted V2 weights are exact, but applying them to the changed V4 token distribution is not an immutable V2 base and causes severe generic OOD regression.",
+    "next_contract": "Exact V2 selection and readout must remain the immutable base. A candidate-complete typed-context branch may only contribute a bounded residual after query-free noninferiority gates; it must not replace the base token set."
+  }
+}

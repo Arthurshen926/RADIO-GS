@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_v1",
+  "status": "implementation_correction_registered_before_corrected_fallback_prediction",
+  "claim_boundary": "The source-only gate decisions were frozen before any candidate target prediction, but this implementation correction follows an opened sentinel and is therefore disclosed as posthoc.",
+  "preregistration": {
+    "path": "paper/artifacts/nvos_source_completion_loo_abstention_preregistration_20260805.json",
+    "sha256": "8436e72685cf41bc2b0417c2493b6f1df74c7aa9249ab6513cfab7246edd78d4"
+  },
+  "source_gate_receipts_unchanged": {
+    "fern_sha256": "4d9769d0f6140461a0806abdbd035dc9577df43ff86e0cb14eab2a357aad0d3a",
+    "fern_action": "abstain",
+    "horns_left_sha256": "66f646f9316e3214d5eed9ca7931463ea484cef51280983fee6d768b6c0bb424",
+    "horns_left_action": "accept"
+  },
+  "discovered_issue": {
+    "first_attempt": "A rejected completion received zero confidence but the evaluator still used the generic probability-mixture branch, which fell back to the prototype field alone rather than the frozen compact comparator's raw-scribble hard anchors.",
+    "numeric_closure_attempt": "Removing the two zero completion channels from the raster adjoint closed the operator-width confound but correctly showed that the remaining discrepancy was semantic: pure field fallback is not the registered compact strong-raw-unary comparator.",
+    "evidence": {
+      "historical_compact_fern_iou": 0.7553155907838534,
+      "incorrect_pure_field_fallback_fern_iou": 0.756318486636662,
+      "primitive_probability_mae_vs_historical_compact": 0.001371607160796936,
+      "primitive_probability_differing_rows": 63327
+    }
+  },
+  "corrected_interpretation_of_preregistered_fallback": {
+    "preregistered_text": "preserve the raw signed-scribble compiler and compact field unary",
+    "effective_rejected_completion_branch": "use the original two-channel raw signed-scribble adjoint, the original direct observation, and frozen hard_seed_anchor_only_probability; do not execute or concatenate source-completion channels",
+    "accepted_completion_branch": "unchanged probability-preserving source completion mixture",
+    "target_dependent_choice": false,
+    "scene_specific_numeric_constants": false,
+    "gate_decision_changed": false
+  },
+  "implementation": {
+    "evaluator_sha256": "5379303305a5085deb1d4967e45f5af26bcbaa96c1ccadcbc21206c0809ccd61",
+    "source_gate_core_sha256": "9e1e76d3a91371025d0921bb89e939928bb9eb4a19a8ef09ae59490b99f5922b",
+    "source_gate_builder_sha256": "15fefa80b904588a70fa6019dc54214ac4a9b3f44b9522b6d74ceed3fca3b749"
+  },
+  "corrected_sentinel": {
+    "rerun": "fern only because horns_left accepted the completion and its branch is unchanged",
+    "output_must_precede_target_metric": true,
+    "expected_invariant": "fern primitive unary and rendered score must reproduce the frozen compact comparator up to the evaluator's existing CUDA replay behavior"
+  }
+}

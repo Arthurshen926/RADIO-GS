@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "artifact_type": "radio_gs_lerf_official_fp32_score_cache_exact_eval_preregistration",
+  "registered_at": "2026-08-05",
+  "status": "registered_before_fp32_cache_materialization_or_exact_evaluation",
+  "causal_basis": {
+    "audit": "paper/artifacts/lerf_official_score_fp16_fp32_audit_results_final_20260805.json",
+    "finding": "source-exact FP32 changes 25 of 1734663 valid primitive-query threshold decisions after the frozen readout",
+    "parameter_selection_from_benchmark_metrics": false
+  },
+  "scope": {
+    "scene": "figurines",
+    "descriptor": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt",
+    "positive_text": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_figurines_officialcanonical_prompt5.pt",
+    "negative_text": "checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "baseline_positive_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_query_scores_v2/figurines.pt",
+    "baseline_negative_score": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/lerf_native_multiscale_canonical_negative_scores_v1/figurines.pt"
+  },
+  "implementation_contract": {
+    "fp32_is_explicit_opt_in": true,
+    "fp32_uses_new_payload_version": true,
+    "fp32_uses_new_authority_contract": true,
+    "existing_fp16_materializer_source_modified": false,
+    "existing_fp16_payload_and_authority_contracts_modified": false,
+    "fp32_score_formula": "l2_normalize(descriptor) @ l2_normalize(text_embedding).T",
+    "fp32_score_dtype": "torch.float32",
+    "fp32_tensor_sha_is_fail_closed": true
+  },
+  "frozen_exact_evaluation": {
+    "protocol_preset": "vala_repo_3d",
+    "query_relevancy_logit_scale": 10.0,
+    "vala_knn_k": 10,
+    "scale_fusion": "raw_smoothed_peak_select",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "mask_refinement": "none",
+    "changed_inputs": [
+      "positive score cache dtype and values",
+      "negative score cache dtype and values"
+    ],
+    "all_other_inputs_and_parameters_frozen": true
+  },
+  "reported_outcomes": [
+    "FP32 cache validation and provenance",
+    "FP32 versus FP16 primitive-selection differences",
+    "Figurines exact macro mIoU",
+    "absolute and signed mIoU difference from the accepted FP16 baseline"
+  ],
+  "decision_rule": {
+    "adopt_fp32_formal_cache": "adopt when the new cache validates fail-closed and exact mIoU is no worse than FP16 within 1e-12; otherwise retain FP16 and report the precision sensitivity",
+    "no_scene_or_query_tuning": true
+  }
+}

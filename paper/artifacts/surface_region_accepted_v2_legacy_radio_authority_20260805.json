@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_v2_legacy_radio_training_authority_v1",
+  "status": "sealed_before_raw_gauge_sentinel_source_build_and_before_benchmark_metrics",
+  "purpose": "Close the missing inline RADIO checkpoint provenance of the immutable accepted SurfaceRegion V2 readout without weakening the formal deployment check for any other checkpoint.",
+  "readout_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+  "region_contract_sha256": "ac77e31694ebe796befcc725ea60685ad6f97978a9a903e1029aa7a7a05abc07",
+  "radio_version": "c-radio_v4-h",
+  "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+  "cache_validation": {
+    "rule": "Every path must exactly match the cache_paths embedded in the readout, every file SHA-256 must match, and every reopened cache metadata record must bind the same split role, split hash, region contract, RADIO version/checkpoint, and query/benchmark-free flags.",
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false
+  },
+  "train": {
+    "split_file_sha256": "96acca299b7855f02824c496b19077904d80996e7ced1bb9f0dac98f7dd4d0c8",
+    "caches": [
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/train_shard0.pt",
+        "sha256": "9e607ec3202beec545b1ae0577640ab519e242be9471699a0e338396e8f2aef9"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/train_shard1.pt",
+        "sha256": "52360dfae6f3adb11bde880027b044b67d8a7a3978b888bf895b81c0a585e6ec"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/train_shard2.pt",
+        "sha256": "f92072270380824871f61bbacc32a751de15affe2f09038382a9c927d61fc8cf"
+      }
+    ]
+  },
+  "validation": {
+    "split_file_sha256": "d75d4971c3fa7128c643695840e279042c212ef904fe933bd00cf9918c61b083",
+    "caches": [
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/val_shard0.pt",
+        "sha256": "3998f33ac705b4561455b0213732422983b228e032c340c730777dd54718fbb9"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/val_shard1.pt",
+        "sha256": "d210be6dd060022fa505344592dc193432d0a023dba59e0cd391116b0eb8da00"
+      },
+      {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/val_shard2.pt",
+        "sha256": "2c3cce72a051daf75e0cfb3283445cf90deba9eb74b304cd300fbaf86debd34a"
+      }
+    ]
+  }
+}

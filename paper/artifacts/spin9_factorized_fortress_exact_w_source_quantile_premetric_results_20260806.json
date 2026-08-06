@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_factorized_exact_w_source_quantile_premetric_scene_result_v1",
+  "scene": "fortress",
+  "status": "pass_sealed_before_full9_cohort_target_ground_truth_gate",
+  "completed_at": "2026-08-06T07:36:00+08:00",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "scene_source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_fortress_source_chain_preregistration_20260806.json",
+    "sha256": "b99bc96639974423e2867d9ddeee5a42065f779dc5e5a7aa916a3e2467815421"
+  },
+  "raw_matched_prediction": {
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/raw_matched_prediction_v1/pre_metric_prediction_receipt.json",
+      "sha256": "e18ca0e4dd637933eb516f41dda0e172773826cbf074dda657df0b660e24de9f"
+    },
+    "primitive_unary": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/raw_matched_prediction_v1/primitive_unary.pt",
+      "sha256": "10b9a27318770f33b48e2db0378ef4c6d01554ea07dc8926e94d1cfe0dbc135b"
+    },
+    "target_frames": 41,
+    "known_annotation_gaps": [],
+    "selected_stage": "propagated",
+    "query_kernel": "ludvig_release_compat",
+    "effective_k_including_self": 201,
+    "feature_bandwidth": 0.5,
+    "regularizer_bandwidth": 1.0,
+    "logistic_c": 0.01,
+    "target_score_or_threshold_scan": false,
+    "strict_replay": {
+      "status": "pass",
+      "files_rehashed": 205,
+      "all_shapes_dtypes_and_finite_checks": true,
+      "final_equals_propagated": true,
+      "target_feedback": false
+    }
+  },
+  "source_footprint_gate": {
+    "result": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_fortress_source_footprint_oof_results_20260806.json",
+      "sha256": "e3ca35d86f27228f718ef8a15294f6dddc4455c7f4ad9f5362d99eac54ae0fc7"
+    },
+    "gate_receipt_sha256": "e983a058e7a796621f25abd085f7c0f06701fb4a85bc356a12fe5970dcb9741e",
+    "selected_action": "surface_safe_propagated",
+    "balanced_log_loss": 0.6112988643480659,
+    "weighted_auc": 0.6796776859851698
+  },
+  "source_quantile_gauge": {
+    "artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/source_quantile_gauge_exact_w_v1.pt",
+      "sha256": "6b8c15361fc79dfd977ae2fa29deebd24c1f07977958d16cb686e393a22342fd",
+      "content_sha256": "0cf886b69694cff8e5d3e36de3912200a05262146323b852a5b59242c685ed3e"
+    },
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/source_quantile_gauge_exact_w_v1.pt.receipt.json",
+      "sha256": "d27ffae1072dd2069840f366705b311124fa4c68ba662bd53b7deee3d596f539"
+    },
+    "source_unary": "native exact-W adjoint source-mask conditional probability",
+    "source_weight": "native exact-W visible mass",
+    "source_mask_positive_pixels": 141080,
+    "raw_seen_threshold": 0.71,
+    "seen_quantile": 0.990305643493788,
+    "completion_quantile": 0.96,
+    "ecdf_definition": "exact-source-weighted right-continuous empirical CDF",
+    "ecdf_rows_in_factorized_relation_domain": 308202,
+    "ecdf_weight_mass": 601284.4867986899,
+    "ecdf_unique_support_values": 297876,
+    "exact_w_fold_parity": {
+      "visible_support_exact": true,
+      "exact_visible_rows_global": 590164,
+      "maximum_reference_mass_relative_error": 0.00035787988222222937,
+      "maximum_reference_mass_absolute_error": 0.19052082975395024,
+      "total_reference_mass_relative_error": 1.1884240091249942e-07,
+      "maximum_positive_fraction_absolute_error": 7.576038440582078e-05,
+      "reference_mass_failed_rows": 0,
+      "allclose_rtol": 0.001,
+      "allclose_atol": 2e-06
+    },
+    "target_distribution_fit": false,
+    "parameter_scan": false
+  },
+  "source_exact_w_numeric_reconciliation": {
+    "addendum": {
+      "path": "paper/artifacts/spin9_factorized_source_exact_w_parity_numeric_addendum_20260806.json",
+      "sha256": "b46576bfde715fb1cbe44644ae345e723e690f0798f81545b69db3d772280038"
+    },
+    "support_and_hash_bindings_remain_exact": true,
+    "deployed_gauge_uses_native_exact_w_only": true,
+    "scene_specific_branch": false,
+    "target_feedback": false
+  },
+  "coverage_numeric_correction": {
+    "addendum": {
+      "path": "paper/artifacts/spin9_factorized_complementary_coverage_numeric_addendum_20260806.json",
+      "sha256": "2aa499be114454d3479310a38f556edf8b343da46652a78ade36962e3890f7a2"
+    },
+    "corrected_operator": "single-call complementary [source-visible,source-invisible] mass render followed by FP64 visible/(visible+invisible) and one FP32 cast",
+    "coverage_clipped": false,
+    "coverage_range": [
+      0.0,
+      1.0
+    ],
+    "maximum_fp32_vs_fp64_oracle_absolute_difference": 2.9802248668886477e-08,
+    "maximum_corrected_vs_legacy_admissible_absolute_difference": 9.179115295410156e-06,
+    "maximum_legacy_positive_overshoot": 7.62939453125e-06,
+    "unsupported_zero_pixels": 9511,
+    "minimum_positive_paired_denominator": 0.0039216335862874985,
+    "unit_tests": "5 passed"
+  },
+  "final_prediction": {
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+      "sha256": "3fc9c217952bd30f0fc54fa3e254ea35eb082c3a6ba2932a9bd23d9c7928a38e",
+      "content_sha256": "7329c4bb3bb12401f1928459ad4e1a9513cce374b8dc886e3d7a473b699bf8ec"
+    },
+    "frame_count": 41,
+    "coverage_frame_macro_mean": 0.6940777534391822,
+    "low_resolution_prediction_positive_fraction_frame_macro_mean": 0.05485961322198256,
+    "representation": "continuous quantile margin",
+    "adapter_after_cohort_gate": "bilinear margin resize to frozen target shape then greater-or-equal zero",
+    "strict_replay": {
+      "status": "pass",
+      "files_rehashed": 205,
+      "all_shapes_dtypes_and_finite_checks": true,
+      "coverage_range_check": true,
+      "maximum_score_quantile_formula_absolute_error": 0.0,
+      "maximum_threshold_formula_absolute_error": 0.0,
+      "maximum_margin_formula_absolute_error": 0.0,
+      "binary_prediction_mismatches": 0,
+      "coverage_receipt_macro_mean_exact": true
+    },
+    "target_metric": null
+  },
+  "implementation": {
+    "full9_source_gauge_builder": {
+      "path": "radio_gs/scripts/build_spin9_factorized_source_quantile_full_fit.py",
+      "sha256": "98fe61012082dc4ec3c876fb4c05f363f5b591d48e3178e75c76b0681f14fa01"
+    },
+    "full9_target_prediction_builder": {
+      "path": "radio_gs/scripts/build_spin9_factorized_source_quantile_target_prediction.py",
+      "sha256": "0ecd013944f97a4100e511acb2ddcb8a38ff2cd718c035b57edaf7fd9ea6aa36"
+    },
+    "coverage_tests": {
+      "path": "tests/test_spin9_factorized_complementary_coverage.py",
+      "sha256": "3844d75d4d6eb6f6b0a113206e3d61d01de8b5d8a21cf82231863996eca15d0f",
+      "result": "5 passed"
+    }
+  },
+  "gpu": {
+    "physical_indices": [
+      0,
+      1
+    ],
+    "power_limit_w": 300,
+    "maximum_observed_temperature_c_full_fortress_chain": 83,
+    "overheat_or_driver_event": false
+  },
+  "safety": {
+    "sealed_before_target_ground_truth_open": true,
+    "target_distribution_opened": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "eligible_for_partial_evaluation": false,
+    "compatible_scene_receipts_sealed": 6,
+    "compatible_scene_receipts_required": 9,
+    "remaining_scenes": [
+      "fern",
+      "horns",
+      "truck"
+    ],
+    "next_gate": "seal and index Fern, Horns, and Truck together with Fortress, Pinecone, Orchids, Room, Leaves, and Lego"
+  }
+}

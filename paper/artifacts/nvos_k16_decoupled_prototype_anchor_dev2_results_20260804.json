@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_k16_decoupled_prototype_anchor_dev2_v1",
+  "status": "all development gates passed",
+  "control_iou": {
+    "fern": 0.7563184866,
+    "horns_left": 0.6829489073,
+    "macro": 0.7196336969
+  },
+  "candidate_iou": {
+    "fern": 0.7553155908,
+    "horns_left": 0.7000681429,
+    "macro": 0.7276918668
+  },
+  "candidate_minus_control": {
+    "fern": -0.0010028958,
+    "horns_left": 0.0171192356,
+    "macro": 0.0080581699
+  },
+  "reproducibility": {
+    "control_matches_prior_k16_within_1e_7": true,
+    "prior_fern": 0.7563184866,
+    "prior_horns_left": 0.6829489073
+  },
+  "gate": {
+    "reproducibility_pass": true,
+    "macro_improvement_pass": true,
+    "no_scene_regression_over_0_02_pass": true,
+    "decision": "expand unchanged to heldout six"
+  },
+  "valid_anchor_rows": {
+    "fern": 14635,
+    "horns_left": 10809
+  },
+  "report_sha256": {
+    "control_fern": "50717accbd5d2596630e9822af9e6d51f7e9412e45d6a4bfdb2f0eb97b9e24ae",
+    "control_horns_left": "178d571f8926a1858f621fcb0d6d2514207e73cd4d94b4f997e8ebe6a91583b5",
+    "candidate_fern": "0a4c797e218bdd055a126d51667ebc827c007c76db9c84fc7920188bfed41fd1",
+    "candidate_horns_left": "e72dffc6574911b99dc91e14aa67bf70b58912835e398ee59034071b640c2aca"
+  }
+}

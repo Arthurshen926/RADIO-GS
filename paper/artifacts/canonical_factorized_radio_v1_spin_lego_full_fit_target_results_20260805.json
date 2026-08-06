@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "experiment": "canonical_factorized_radio_v1_spin_lego_full_fit_target_v1",
+  "completed_at": "2026-08-05T15:05:29+08:00",
+  "status": "valid_result_but_surface_safe_propagation_not_promoted",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_spin_lego_full_fit_target_preregistration_20260805.json",
+    "sha256": "34c43d81dbaa38f5779c259230fed4e938021ae185d258ea96c6399165136ecf"
+  },
+  "artifacts": {
+    "pre_metric_prediction_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/full_fit_surface_safe_propagated_target_v1/pre_metric_prediction_receipt.json",
+      "sha256": "1ea0989308ca3b11f74cc6d181a12d562b6590278f786977ae9d3c74dac5c0c8",
+      "sealed_before_target_ground_truth_open": true
+    },
+    "evaluation_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/full_fit_surface_safe_propagated_target_v1/lego_evaluation.json",
+      "sha256": "7a7d3b8d1bb11d998dec8a140c9b7399bab6b1e1697541ace702b1c6cf4e72e0"
+    },
+    "log_sha256": "193c30c196484e4d24c645cf1a6f68abd6429eba21c840c62ba9385f82249b87"
+  },
+  "metrics": {
+    "frames": 43,
+    "score_threshold": 0.5,
+    "selected_final_stage": "propagated",
+    "final_foreground_iou": 0.5696462064018898,
+    "final_pixel_accuracy": 0.9825643773928036,
+    "stage_foreground_iou": {
+      "unary_prior": 0.5840481138049051,
+      "propagated": 0.5696462064018898,
+      "connected": 0.5740508091178147
+    },
+    "propagated_minus_unary": -0.0144019074030153,
+    "connected_minus_unary": -0.0099973046870904,
+    "frames_where_propagated_exceeds_unary": 8
+  },
+  "comparison": {
+    "previous_compact_surface_safe_unary_at_its_shared_reference_selected_threshold": 0.5372461105614978,
+    "factorized_unary_at_fixed_0_5_threshold": 0.5840481138049051,
+    "raw_difference_not_a_matched_threshold_comparison": 0.0468020032434073,
+    "previous_full_spin_interface": {
+      "foreground_iou": 0.6331459007792092,
+      "reference_selected_threshold": 0.6599999999999997,
+      "included_ludvig_release_compatible_query_diffusion": true
+    },
+    "this_run_included_query_diffusion": false,
+    "this_run_is_not_a_matched_reproduction_of_the_previous_full_spin_interface": true
+  },
+  "oof_to_target_diagnosis": {
+    "source_footprint_oof_selected_surface_safe_propagated": true,
+    "source_footprint_oof_auc_gain": 0.3249008114960077,
+    "novel_view_target_propagation_regression": -0.0144019074030153,
+    "interpretation": "Complete source-raster footprint holdout tests spatial completion within the source visibility support. It does not reproduce novel-view visibility, occlusion, scalar rendering, or the frozen SPIn reference-calibrated query-diffusion interface, so it is a useful source diagnostic but not a sufficient deployment selector."
+  },
+  "decision": "Do not promote K16 surface_safe_propagated over factorized unary. Restore the already-frozen SPIn query-conditioned diffusion and source-only reference calibration, rebuild its query-independent relation cache against the factorized capability field, and perform a matched-interface evaluation.",
+  "safety": {
+    "gate_replayed_fail_closed": true,
+    "scores_sealed_before_target_masks": true,
+    "target_rgb_opened": false,
+    "maximum_stage_boundary_gpu1_temperature_c": 40
+  }
+}

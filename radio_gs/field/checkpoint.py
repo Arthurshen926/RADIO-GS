@@ -4,14 +4,21 @@ from __future__ import annotations
 
 import math
 from pathlib import Path
+import re
 from typing import Any, Mapping
 
 import torch
 
 from radio_gs.utils.immutable_artifacts import load_torch_mapping
 
-from .basis_decoder import AffineBasisDecoder
+from .basis_decoder import AffineBasisDecoder, validate_basis_conditioning
 from .canonical_gaussian_field import CanonicalGaussianField
+from .factorized_radio_contract import (
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT,
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_SCHEMA_VERSION,
+    FactorizedRadioFieldSignature,
+    validate_factorized_radio_checkpoint_metadata,
+)
 from .field_signature import FeatureSpaceSignature
 
 
@@ -29,6 +36,18 @@ def load_canonical_field_checkpoint(
     )
     if not isinstance(payload, Mapping) or payload.get("schema_version") != 1:
         raise ValueError("not a canonical RADIO field schema-v1 checkpoint")
+    field = _canonical_field_from_payload(payload, map_location=map_location)
+    return field, payload
+
+
+def _canonical_field_from_payload(
+    payload: Mapping[str, Any],
+    *,
+    map_location: str | torch.device,
+    signature: FeatureSpaceSignature | None = None,
+) -> CanonicalGaussianField:
+    """Construct a field after the caller has validated its schema boundary."""
+
     architecture = payload.get("architecture")
     if not isinstance(architecture, Mapping):
         raise ValueError("canonical field checkpoint lacks architecture metadata")
@@ -57,10 +76,9 @@ def load_canonical_field_checkpoint(
         "hidden_dim",
         "use_fusion",
     }
-    if (
-        not required_architecture.issubset(architecture)
-        or not set(architecture).issubset(allowed_architecture)
-    ):
+    if not required_architecture.issubset(architecture) or not set(
+        architecture
+    ).issubset(allowed_architecture):
         raise ValueError("canonical field architecture fields differ")
 
     def bounded_int(name: str, minimum: int, maximum: int) -> int:
@@ -129,7 +147,10 @@ def load_canonical_field_checkpoint(
             "max_resolution",
             "hidden_dim",
         }
-        if set(spatial_hash) not in (required_spatial, required_spatial | {"output_dim"}):
+        if set(spatial_hash) not in (
+            required_spatial,
+            required_spatial | {"output_dim"},
+        ):
             raise ValueError("canonical field spatial hash fields differ")
 
         def spatial_int(name: str, minimum: int, maximum: int) -> int:
@@ -139,7 +160,9 @@ def load_canonical_field_checkpoint(
                 or isinstance(value, bool)
                 or not minimum <= value <= maximum
             ):
-                raise ValueError(f"canonical field spatial hash {name} is out of bounds")
+                raise ValueError(
+                    f"canonical field spatial hash {name} is out of bounds"
+                )
             return int(value)
 
         spatial_spec = {
@@ -179,8 +202,7 @@ def load_canonical_field_checkpoint(
         growth = (
             math.exp(
                 math.log(
-                    spatial_spec["max_resolution"]
-                    / spatial_spec["base_resolution"]
+                    spatial_spec["max_resolution"] / spatial_spec["base_resolution"]
                 )
                 / (levels - 1)
             )
@@ -224,7 +246,11 @@ def load_canonical_field_checkpoint(
                 features_per_level,
             )
         expected_dtypes.update(
-            {key: torch.float32 for key in expected_shapes if key not in expected_dtypes}
+            {
+                key: torch.float32
+                for key in expected_shapes
+                if key not in expected_dtypes
+            }
         )
         expected_dtypes["normalized_positions"] = torch.float16
         for key in (
@@ -268,7 +294,11 @@ def load_canonical_field_checkpoint(
                 }
             )
         expected_dtypes.update(
-            {key: torch.float32 for key in expected_shapes if key not in expected_dtypes}
+            {
+                key: torch.float32
+                for key in expected_shapes
+                if key not in expected_dtypes
+            }
         )
     if set(state_dict) != set(expected_shapes):
         raise ValueError("canonical field state_dict keys differ from architecture")
@@ -287,8 +317,19 @@ def load_canonical_field_checkpoint(
     ):
         raise ValueError("canonical field reliability copies differ")
 
-    signature = FeatureSpaceSignature.from_mapping(payload["feature_signature"])
-    if signature.raw_feature_dim != feature_dim:
+    # Decoder coordinates are an authority boundary, not merely trainable
+    # weights.  Validate the persisted basis before constructing a model or
+    # exposing any decoded feature.  Legacy schema-v1 assets remain eligible:
+    # the versioned contract is recomputed from their state rather than
+    # requiring newly written metadata.
+    validate_basis_conditioning(state_dict["decoder.basis"])
+
+    payload_signature = (
+        FeatureSpaceSignature.from_mapping(payload["feature_signature"])
+        if signature is None
+        else signature
+    )
+    if payload_signature.raw_feature_dim != feature_dim:
         raise ValueError("canonical field signature feature dimension differs")
     decoder = AffineBasisDecoder(
         feature_dim=feature_dim,
@@ -299,7 +340,7 @@ def load_canonical_field_checkpoint(
     field = CanonicalGaussianField(
         num_gaussians=num_gaussians,
         decoder=decoder,
-        signature=signature,
+        signature=payload_signature,
         local_dim=local_dim,
         coarse_dim=coarse_dim,
         spatial_hash=spatial_spec,
@@ -321,4 +362,87 @@ def load_canonical_field_checkpoint(
     target = torch.device(map_location)
     if target.type != "cpu":
         field = field.to(target)
-    return field, payload
+    return field
+
+
+def load_factorized_canonical_field_checkpoint(
+    path: str | Path,
+    *,
+    map_location: str | torch.device = "cpu",
+    expected_sha256: str | None = None,
+    expected_signature: FactorizedRadioFieldSignature | None = None,
+) -> tuple[CanonicalGaussianField, Mapping[str, Any], FactorizedRadioFieldSignature]:
+    """Load a schema-v2 factorized field without accepting schema-v1 assets."""
+
+    payload, _, _ = load_torch_mapping(
+        Path(path),
+        expected_sha256=expected_sha256,
+        map_location="cpu",
+        label="factorized canonical RADIO field checkpoint",
+    )
+    if (
+        not isinstance(payload, Mapping)
+        or payload.get("schema_version")
+        != CANONICAL_FACTORIZED_RADIO_CHECKPOINT_SCHEMA_VERSION
+        or payload.get("checkpoint_contract")
+        != CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT
+    ):
+        raise ValueError("not a canonical factorized RADIO field schema-v2 checkpoint")
+    metadata = payload.get("factorized_radio_metadata")
+    if not isinstance(metadata, Mapping):
+        raise ValueError("factorized field checkpoint lacks contract metadata")
+    factorized_signature = validate_factorized_radio_checkpoint_metadata(
+        metadata,
+        expected_signature=expected_signature,
+    )
+    if "feature_signature" in payload:
+        raise ValueError("factorized field forbids a legacy feature signature copy")
+    if metadata.get("checkpoint_contract") != payload.get("checkpoint_contract"):
+        raise ValueError("factorized field checkpoint contract copies differ")
+    architecture = payload.get("architecture")
+    if not isinstance(architecture, Mapping):
+        raise ValueError("factorized field checkpoint lacks model architecture")
+    if architecture.get("fusion_reliability") is not False:
+        raise ValueError("factorized field must disable reliability fusion")
+    if int(architecture.get("feature_dim", -1)) != int(
+        factorized_signature.base_feature_signature.raw_feature_dim
+    ):
+        raise ValueError("factorized field model feature dimension differs")
+    reliability = payload.get("reliability")
+    if reliability is not None and (
+        not torch.is_tensor(reliability)
+        or reliability.ndim != 2
+        or reliability.shape[1] != 0
+    ):
+        raise ValueError("factorized field must not persist target reliability")
+    state = payload.get("state_dict")
+    if not isinstance(state, Mapping):
+        raise ValueError("factorized field state_dict is malformed")
+    state_reliability = state.get("reliability")
+    if (
+        not torch.is_tensor(state_reliability)
+        or state_reliability.ndim != 2
+        or state_reliability.shape[1] != 0
+    ):
+        raise ValueError("factorized field state must have zero reliability columns")
+    geometry = payload.get("geometry_fingerprint")
+    if (
+        not isinstance(geometry, Mapping)
+        or set(geometry) != {"num_gaussians", "xyz_sha256"}
+        or int(geometry.get("num_gaussians", -1))
+        != int(architecture.get("num_gaussians", -2))
+        or re.fullmatch(r"[0-9a-f]{64}", str(geometry.get("xyz_sha256", ""))) is None
+    ):
+        raise ValueError("factorized field geometry fingerprint differs")
+    for name in ("factorized_cache_sha256", "feature_output_bundle_sha256"):
+        value = payload.get(name)
+        if re.fullmatch(r"[0-9a-f]{64}", str(value or "")) is None:
+            raise ValueError(f"factorized field {name} differs")
+    field = _canonical_field_from_payload(
+        payload,
+        map_location=map_location,
+        signature=factorized_signature.base_feature_signature,
+    )
+    if field.reliability.shape != (field.num_gaussians, 0):
+        raise ValueError("factorized field reconstructed target reliability")
+    return field, payload, factorized_signature

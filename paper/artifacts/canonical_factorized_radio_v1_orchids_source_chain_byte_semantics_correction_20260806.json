@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "artifact_type": "preregistration_metadata_semantics_correction",
+  "recorded_at": "2026-08-06T03:21:28+08:00",
+  "scene": "orchids",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_orchids_source_chain_preregistration_20260806.json",
+    "sha256": "9bc432b2deff2bdaedddcd2898a2c4c67da6f47393cfd4e78f8188bb2f2a5e76"
+  },
+  "correction": {
+    "field": "source_inputs.legacy_feature_manifest.logical_frame_tensor_bytes",
+    "registered_value": 3048481940,
+    "registered_value_actual_semantics": "sum_of_on_disk_file_sizes_for_the_50_frame_tensor_files",
+    "correct_logical_tensor_bytes": 3048448000,
+    "difference_bytes": 33940,
+    "cause": "torch_container_overhead_was_included_in_the_read_only_preflight_file_size_sum",
+    "selection_or_method_changed": false,
+    "tensor_values_changed": false
+  }
+}

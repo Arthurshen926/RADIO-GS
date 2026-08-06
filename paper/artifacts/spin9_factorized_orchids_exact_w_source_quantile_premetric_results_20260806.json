@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "artifact_type": "spin9_factorized_exact_w_source_quantile_premetric_scene_result_v1",
+  "scene": "orchids",
+  "status": "pass_sealed_before_full9_cohort_target_ground_truth_gate",
+  "completed_at": "2026-08-06T05:05:48+08:00",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_expansion_preregistration_20260805.json",
+    "sha256": "903fde97be5a7085a08c77e8cc6c44fb33876e7ac2495ee9e29f911d1be97063"
+  },
+  "scene_source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_orchids_source_chain_preregistration_20260806.json",
+    "sha256": "9bc432b2deff2bdaedddcd2898a2c4c67da6f47393cfd4e78f8188bb2f2a5e76"
+  },
+  "raw_matched_prediction": {
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/raw_matched_prediction_v1/pre_metric_prediction_receipt.json",
+      "sha256": "d9e962ed07c723186852d8d3a38f694c35628149276dea10bb8b6c56a9e0bf44"
+    },
+    "primitive_unary": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/raw_matched_prediction_v1/primitive_unary.pt",
+      "sha256": "e02024ee47194f67b0febe4dbbe13e1884a5d5105f7ace31a1efbeac054bce3b"
+    },
+    "target_frames": 23,
+    "known_annotation_gap": "image014",
+    "selected_stage": "propagated",
+    "query_kernel": "ludvig_release_compat",
+    "effective_k_including_self": 201,
+    "feature_bandwidth": 0.5,
+    "regularizer_bandwidth": 1.0,
+    "logistic_c": 0.01,
+    "target_score_or_threshold_scan": false
+  },
+  "source_footprint_gate": {
+    "result": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_spin_orchids_source_footprint_oof_results_20260806.json",
+      "sha256": "0beb4ef79bc690fbce55d5ffa045567293045605e1160e9e77f39fa5409e8a1e"
+    },
+    "gate_receipt_sha256": "e37b7a26c348e47738a07e3355ad3d20441911f43854412c57c8091d3c093c90",
+    "selected_action": "surface_safe_propagated",
+    "balanced_log_loss": 0.6372684207474131,
+    "weighted_auc": 0.64635125596644
+  },
+  "source_quantile_gauge": {
+    "artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/source_quantile_gauge_exact_w_v1.pt",
+      "sha256": "4a0046dcf29178db5252dc90c3ff252c364e9fb963e5f6e8071368b08b5b1e9f",
+      "content_sha256": "20cb9c5d333e3034559611708b4a6ba9c9e99493926b8842dd9085b74314b2bb"
+    },
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/source_quantile_gauge_exact_w_v1.pt.receipt.json",
+      "sha256": "6cb49a102fbc3f496b579ee63416bc2c49775004ff3e69678f9e5649ebdaf439"
+    },
+    "source_unary": "native exact-W adjoint source-mask conditional probability",
+    "source_weight": "native exact-W visible mass",
+    "source_mask_positive_pixels": 122027,
+    "raw_seen_threshold": 0.71,
+    "seen_quantile": 0.8684669066758116,
+    "completion_quantile": 0.96,
+    "ecdf_definition": "exact-source-weighted right-continuous empirical CDF",
+    "ecdf_rows_in_factorized_relation_domain": 274475,
+    "ecdf_weight_mass": 733649.344398572,
+    "ecdf_unique_support_values": 248418,
+    "exact_w_fold_parity": {
+      "visible_support_exact": true,
+      "exact_visible_rows_global": 284732,
+      "maximum_reference_mass_relative_error": 0.0006041674262020417,
+      "maximum_positive_fraction_absolute_error": 0.00009689029936987836,
+      "allclose_rtol": 0.001,
+      "allclose_atol": 0.000001
+    },
+    "target_distribution_fit": false,
+    "parameter_scan": false
+  },
+  "coverage_numeric_correction": {
+    "addendum": {
+      "path": "paper/artifacts/spin9_factorized_complementary_coverage_numeric_addendum_20260806.json",
+      "sha256": "2aa499be114454d3479310a38f556edf8b343da46652a78ade36962e3890f7a2"
+    },
+    "corrected_operator": "single-call complementary [source-visible,source-invisible] mass render followed by FP64 visible/(visible+invisible) and one FP32 cast",
+    "coverage_clipped": false,
+    "coverage_range": [0.0, 1.0],
+    "maximum_fp32_vs_fp64_oracle_absolute_difference": 0.000000029802309953197437,
+    "maximum_corrected_vs_legacy_admissible_absolute_difference": 0.000006735324859619141,
+    "maximum_legacy_positive_overshoot": 0.000007271766662597656,
+    "unsupported_zero_pixels": 196,
+    "minimum_positive_paired_denominator": 0.00393302645534277,
+    "unit_tests": "5 passed"
+  },
+  "final_prediction": {
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+      "sha256": "095c0a827743ded2f2997dd827448224a94dda3b410a24afbe119b8af64a55ea",
+      "content_sha256": "f472b964105c086e74e8ff57c88cf36b3967c057d95a7984bdb494b6207068c5"
+    },
+    "frame_count": 23,
+    "coverage_frame_macro_mean": 0.8900219668512759,
+    "low_resolution_prediction_positive_fraction_frame_macro_mean": 0.16029208247979815,
+    "representation": "continuous quantile margin",
+    "adapter_after_cohort_gate": "bilinear margin resize to frozen target shape then greater-or-equal zero",
+    "strict_replay": {
+      "status": "pass",
+      "files_rehashed": 115,
+      "all_shapes_dtypes_and_finite_checks": true,
+      "coverage_range_check": true,
+      "maximum_threshold_formula_absolute_error": 0.0,
+      "maximum_margin_formula_absolute_error": 0.0,
+      "binary_prediction_mismatches": 0,
+      "coverage_receipt_mean_semantics": "recorded per-frame means use float32 reduction; independent float64 diagnostic differs by at most approximately 1.2e-7"
+    },
+    "target_metric": null
+  },
+  "implementation": {
+    "full9_source_gauge_builder": {
+      "path": "radio_gs/scripts/build_spin9_factorized_source_quantile_full_fit.py",
+      "sha256": "f3eaf8c72c9fad186efb8289a3fa08be0464806955a960e5bb944dcd5c3a7370"
+    },
+    "full9_target_prediction_builder": {
+      "path": "radio_gs/scripts/build_spin9_factorized_source_quantile_target_prediction.py",
+      "sha256": "0ecd013944f97a4100e511acb2ddcb8a38ff2cd718c035b57edaf7fd9ea6aa36"
+    },
+    "coverage_tests": {
+      "path": "tests/test_spin9_factorized_complementary_coverage.py",
+      "sha256": "3844d75d4d6eb6f6b0a113206e3d61d01de8b5d8a21cf82231863996eca15d0f",
+      "result": "5 passed"
+    }
+  },
+  "gpu": {
+    "physical_index": 0,
+    "power_limit_w": 300,
+    "maximum_observed_temperature_c_full_orchids_chain": 66,
+    "overheat_or_driver_event": false
+  },
+  "safety": {
+    "sealed_before_target_ground_truth_open": true,
+    "target_distribution_opened": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false,
+    "eligible_for_partial_evaluation": false,
+    "next_gate": "seal and index the remaining five non-Lego scene receipts together with Orchids, Room, Leaves, and the existing Lego receipt"
+  }
+}

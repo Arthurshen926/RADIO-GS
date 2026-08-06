@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_surface_direction_contract_figurines_dev1_v1",
+  "status": "rejected_by_preregistered_gate",
+  "results": {
+    "legacy_raw_control_miou": 0.4753371775,
+    "l2_direction_miou": 0.0179848485,
+    "delta": -0.4573523290,
+    "gate_threshold_miou": 0.4803371775,
+    "gate_passed": false,
+    "acc025": 0.0,
+    "acc050": 0.0,
+    "boundary_f": 0.0459350869,
+    "trimap_iou": 0.3703298569
+  },
+  "artifacts": {
+    "result_sha256": "ca97fa9edf696ffe2506fb4124884196b6381840b6f1eb949400bf79e1e09ef1",
+    "descriptor_cache_sha256": "0eb38c3c6b08bb4221fadc1a804a47b5550b00ec9cd369f4c77f5485148e584d",
+    "positive_score_cache_sha256": "39dc3ed5856df7fa8af02d39688a454419bf2cbcfc92a02ee5b29c49f300572c",
+    "negative_score_cache_sha256": "b4c08b4a85b609c90b601635d035b6c741b8b73f8b3e333411761514411ea9ec"
+  },
+  "conclusion": "The nominal train/inference normalization mismatch is real but not independently repairable. Current text capability relies on the raw field amplitude and the readout residual/base being jointly calibrated. Post-hoc direction normalization destroys that implicit gauge. The correct fix is joint factorized direction/gauge/reliability readout training, not a normalization patch.",
+  "implementation_decision": "Keep both modes versioned and authority-bound, but retain legacy_raw as the default for the accepted old checkpoint. l2_direction remains diagnostic-only until paired with a newly trained compatible readout."
+}

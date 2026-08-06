@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_permutation_invariant_query_router_v1",
+  "status": "registered_before_implementation_training_or_router_validation",
+  "hypothesis": "The residual codebook preserves additional valid teacher views, but unconditional hard-max treats every high residual response as equally trustworthy and inflates background. A global permutation-invariant query-conditioned confidence router can use response margin, slot-to-fallback agreement and token gauge to select useful residual evidence while retaining the exact V2 fallback.",
+  "frozen_inputs": {
+    "residual_codebook_path": "output/optimization_20260805/surface_region_residual_codebook_v1/seed0_headparity.pt",
+    "residual_codebook_sha256": "34dc94f53f041150abce353ca80eba78672bf4301fab756d1d525e480cedd2b7",
+    "codebook_state_semantics": "frozen final representation diagnostic; canonical is exact V2 and teacher-best-slot gain is +0.0084808469",
+    "official_siglip2_summary_head_frozen": true,
+    "custom_text_projection": false,
+    "codebook_parameters_trainable": false
+  },
+  "router": {
+    "persistent_field_query_independent": true,
+    "query_conditioning_scope": "ephemeral readout weights only",
+    "permutation_invariant_over_three_residual_slots": true,
+    "shared_per_slot_features": [
+      "fallback_query_cosine",
+      "slot_query_cosine",
+      "slot_minus_fallback_response",
+      "slot_descriptor_cosine_to_fallback",
+      "slot_log_norm_ratio_to_fallback",
+      "slot_response_relative_to_best_residual",
+      "residual_response_standard_deviation"
+    ],
+    "parameterization": "one shared low-capacity MLP produces each residual logit; fallback logit is fixed at zero; softmax produces a convex response mixture",
+    "initial_prior": "0.9 exact-fallback mass and 0.1 total residual mass, encoded only as the shared scorer bias and trainable thereafter",
+    "slot_specific_parameters": false,
+    "thresholds": false,
+    "scene_specific_parameters": false
+  },
+  "training": {
+    "data_and_splits": "same frozen 32/8 scene-disjoint caches and 806/101 query-disjoint generic text banks",
+    "target_response": "hard maximum of official teacher-view descriptor cosine, identical for candidate and V2 control",
+    "objectives": [
+      "SmoothL1 query-response fidelity",
+      "within-scene listwise KL",
+      "teacher top1-runner-up gap SmoothL1"
+    ],
+    "loss_weighting": "response fidelity is main; listwise and hard-negative gradients are each calibrated once to 0.25 of the main gradient norm",
+    "checkpoint_selection": "first require every control-referenced response/ranking noninferiority condition, then minimize response error and maximize top1",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "seed_policy": "seed0 canary first; seeds1/2 only after seed0 passes",
+    "hyperparameter_sweeps": false,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_masks_labels_opened": false
+  },
+  "generic_gate": {
+    "control": "exact frozen V2 evaluated against the identical hard-max multiview teacher",
+    "text_response_smooth_l1": "strictly_lower",
+    "support_top1_agreement": "nondecreasing",
+    "ranking_spearman_p05_delta_min": -0.002,
+    "response_profile_cosine_p05_delta_min": -0.002,
+    "mean_residual_attention_min": 0.02,
+    "canonical_fallback_unchanged": true,
+    "multiseed_requirement": "mean gate passes and at least two of three seeds pass every noninferiority condition"
+  },
+  "benchmark_opening_rule": {
+    "allowed_only_after_generic_gate": true,
+    "first_sentinel": "LERF3D Figurines frozen VALA/canonical-negative protocol",
+    "full_lerf_gate": "four-scene macro improves at least 0.01 and no scene drops more than 0.01",
+    "spin9_nvos_noninferiority": 0.002,
+    "forbidden": [
+      "per-scene tuning",
+      "threshold sweeps",
+      "graph sweeps",
+      "benchmark-label checkpoint selection"
+    ]
+  }
+}

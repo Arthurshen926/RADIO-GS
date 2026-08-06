@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_source_footprint_crossfit_quantile_calibration_v2_target",
+  "scene": "lego",
+  "scientific_status": "opened_development_sentinel_posthoc_rank_gauge_branch",
+  "status": "single_exact_evaluation_complete_no_parameter_scan",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_crossfit_quantile_calibration_v2_preregistration_20260805.json",
+    "sha256": "7d6bcbb083285965796a240e0b62fcad542e1b64c610f301ea82c41ae8add2ec"
+  },
+  "numeric_addendum": {
+    "path": "paper/artifacts/spin_lego_quantile_coverage_fp32_projection_addendum_20260805.json",
+    "sha256": "42f141e626a99ea646576dc57c48bb6b5ff8c368aa0b42235eed06b9efd45261",
+    "reason": "A target-blind coverage raster exceeded its mathematical binary-convex range by nine FP32 epsilons. The registered correction fails outside sixteen epsilons and otherwise projects to [0,1].",
+    "maximum_all_view_preclamp_overshoot": 0.0000010728836059570312,
+    "registered_absolute_bound": 0.0000019073486328125,
+    "bound_exceeded": false,
+    "method_semantics_changed": false
+  },
+  "sealed_prediction": {
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_quantile_calibration_v2/lego/target_prediction_v2_fp32_projection/pre_metric_prediction_receipt.json",
+    "receipt_sha256": "732995adf390e3aa344edae813ec995893ec3f30c1ae362a05dd8688869ec5ca",
+    "content_sha256": "5c799e61e542a889ce29b65ea42e14d857a8909532958acba8cad63d460c7daf",
+    "frames": 43,
+    "representation": "continuous_margin=F_full(raw_score)-[coverage*q_seen+(1-coverage)*q_completion]",
+    "evaluation_adapter": "cv2.INTER_LINEAR margin to frozen target shape, then greater-equal zero",
+    "coverage_compositor": "frozen alpha-normalized scalar Gaussian compositor; contribution_gamma=1",
+    "coverage_frame_macro_mean_before_gt": 0.5183743092902872,
+    "sealed_before_target_ground_truth_open": true,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "exact_evaluation": {
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_quantile_calibration_v2/lego/target_prediction_v2_fp32_projection/lego_exact_evaluation.json",
+    "report_sha256": "f4e982842a1bbc7a90bcbfe0c57c81c8bbc86961b3ded1116645d49e78364ead",
+    "content_sha256": "cbac6d61f1a4c6df054691faf72ad40dba02ea0f39bf88beebb005626424e750",
+    "frames": 43,
+    "foreground_iou": 0.6422606532678946,
+    "pixel_accuracy": 0.9870970808624321,
+    "parameter_scan": false,
+    "target_mask_opened_after_prediction_receipt": true,
+    "target_metric_computed": true
+  },
+  "comparisons": {
+    "historical_compact_full_interface": {
+      "foreground_iou": 0.6331459007792092,
+      "delta_v2": 0.00911475248868543
+    },
+    "matched_factorized_baseline_recomputed_from_same_sealed_scores": {
+      "foreground_iou": 0.6296096108315573,
+      "pixel_accuracy": 0.9873292311420259,
+      "foreground_iou_delta_v2": 0.0126510424363373,
+      "pixel_accuracy_delta_v2": -0.0002321502795937791
+    },
+    "frame_delta_vs_matched_factorized": {
+      "improved_frames": 32,
+      "worse_frames": 11,
+      "equal_frames": 0,
+      "minimum": -0.05936672887693817,
+      "median": 0.015355092250552427,
+      "maximum": 0.10573433624164474
+    }
+  },
+  "coverage_diagnostic_frame_macro": {
+    "all_mean": 0.5183741983979248,
+    "ground_truth_foreground_mean": 0.8799302189849144,
+    "ground_truth_background_mean": 0.5071810095809227,
+    "true_positive_mean": 0.8657161468683288,
+    "false_negative_mean": 0.9494013481361921,
+    "false_positive_mean": 0.8020363852035167,
+    "true_negative_mean": 0.5049748898938645,
+    "boundary_mean": 0.876937446206115,
+    "nonboundary_mean": 0.5176801986472551
+  },
+  "boundary_diagnostic_frame_macro": {
+    "definition": "both sides of every exact four-neighbour ground-truth label transition; no radius or bandwidth",
+    "pixel_fraction": 0.0018962188384508759,
+    "error_rate": 0.4956722322195262,
+    "nonboundary_error_rate": 0.011986779383416312,
+    "foreground_boundary_recall": 0.6451605996995552
+  },
+  "interpretation": {
+    "gain": "The source-only rank gauge plus continuous visibility-adaptive operating point recovers 1.265 IoU points over the same factorized matched-interface score field and exceeds the historical compact full interface by 0.911 points.",
+    "remaining_bottleneck": "False negatives have higher, not lower, source-visible coverage than true positives. Coverage absence is therefore not the main remaining completion error. Almost half of exact transition-boundary pixels are wrong while non-boundary error is about 1.20%, identifying ordering/localization near object boundaries as the dominant residual weakness.",
+    "claim_limit": "This is an opened Lego development result. It validates the gauge correction but does not establish unbiased SPIn9 or cross-benchmark improvement."
+  },
+  "implementation": {
+    "query_module": {
+      "path": "radio_gs/querying/spin_source_footprint_quantile_calibration.py",
+      "sha256": "d076bc2baf21413630772004f7665402d76f807428d74140f16a213293d9da4b"
+    },
+    "prediction_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_quantile_target_prediction.py",
+      "sha256": "714dbb84634e2f8720e8dc26cfc84b19196d9d100a69ba434c8d194e7076a1c9"
+    },
+    "exact_evaluator": {
+      "path": "radio_gs/scripts/eval_spin_source_footprint_quantile_target_prediction.py",
+      "sha256": "2b444cdae6764c86d4215942a8a6940c4770616c20a9683c893706b7f969a6aa"
+    },
+    "tests": {
+      "path": "tests/test_spin_source_footprint_quantile_calibration.py",
+      "sha256": "995cece90b02b2c3c3d0811bb485190484e88a8f7720b08a7450a8a31f07b559",
+      "focused_suite": "35 passed"
+    }
+  },
+  "thermal_observations": {
+    "full_fit_source_gauge_gpu1_celsius": [37, 44],
+    "initial_strict_coverage_gpu0_celsius": [45, 51],
+    "numeric_diagnostic_gpu0_start_celsius": 44,
+    "corrected_coverage_gpu0_celsius": [54, 51],
+    "maximum_stage_boundary_celsius": 54,
+    "thermal_stop_triggered": false
+  },
+  "immutability": {
+    "stopped_v1_modified": false,
+    "nvos_gate_modified": false,
+    "target_feedback_used_for_parameter_selection": false
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_permutation_invariant_query_router_v1_prevalidation_addendum",
+  "status": "registered_after_read_only_design_review_before_router_training_or_generic_router_metrics",
+  "supersedes": [
+    "raw_cosine_router_scores",
+    "0.9_fallback_initial_prior"
+  ],
+  "reason": "The deployed frozen LERF interface is query-first canonical-negative Bernoulli relevancy, not raw positive cosine. A raw-cosine router would introduce another train/deploy contract mismatch. Exact fallback is also stronger and testable than a 0.9 initial prior.",
+  "score_contract": {
+    "per_slot_formula": "sigmoid(10 * (positive_cosine - max_generic_negative_cosine))",
+    "logit_scale": 10.0,
+    "generic_negative_queries": [
+      "object",
+      "things",
+      "stuff",
+      "texture"
+    ],
+    "generic_negative_cache": "checkpoints/siglip2_lerf_all_generic_negatives_exact_official.pt",
+    "generic_negative_cache_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "benchmark_category_vocabulary_used": false,
+    "teacher_and_student_formula_identical": true
+  },
+  "router_correction": {
+    "residual_attention": "shared permutation-equivariant scorer over each residual slot",
+    "residual_gate": "separate permutation-invariant confidence head",
+    "response": "fallback_probability + gate * (attention_weighted_residual_probability - fallback_probability)",
+    "zero_gate": "clamp(softplus(raw_gate)-log(2),0,1), which is exactly zero at initialization and has derivative 0.5",
+    "initial_response_bitwise_fallback": true,
+    "hard_route_threshold": false,
+    "scene_specific_calibration": false
+  },
+  "unchanged": {
+    "frozen_codebook_sha256": "34dc94f53f041150abce353ca80eba78672bf4301fab756d1d525e480cedd2b7",
+    "scene_and_query_splits": "same preregistered 32/8 scenes and 806/101 positive query banks",
+    "generic_gate": "unchanged",
+    "benchmark_opening_rule": "unchanged"
+  }
+}

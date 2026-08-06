@@ -1,0 +1,120 @@
+{
+  "artifact_type": "implementation_closure",
+  "method_contract": "canonical-factorized-radio-v1-builder",
+  "date": "2026-08-05",
+  "status": "implemented_cpu_verified_and_real_source_cache_built",
+  "parent_contract": {
+    "name": "canonical-factorized-radio-v1",
+    "sha256": "81cd1fd9f7d4fbe6183785d0b0bc937c456b1ca9c4a9aedfd657c53510e296b2",
+    "implementation_closure": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_implementation_closure_20260805.json",
+      "sha256": "321d789a7319a016f48421aa3e1db479f9cfab7d81196a44ceb116d6710a220e"
+    },
+    "cpu_fp16_parser_correction": {
+      "path": "paper/artifacts/canonical_factorized_radio_v1_cpu_fp16_parser_correction_20260805.json",
+      "sha256": "3577a25f2d0272dcf81902b714f0932c55b1063585cb83c7465b927ee5cb06a5"
+    }
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+    "sha256": "470c532d8eea61ff05779a768d00cd37cb8724605a5385c9e0c541bdf9b2adb3",
+    "builder_cache_schema": "radio_gs.canonical_factorized_radio_builder_cache.v1",
+    "builder_contract_sha256": "5c9b7a7574a87ef5952f590cf5c9103ee2448cdb8b4126bb1c99fd483f60742a",
+    "legacy_canonical_mpr_v1_branch_mutated": false,
+    "legacy_parser_defaults_mutated": false
+  },
+  "frozen_cli_policy": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "feature_space": "radio",
+    "max_views": 120,
+    "aggregation_mode": "raster_gaussian_top1",
+    "raster_view_fusion": "contribution_mean",
+    "registration_weight_mode": "alpha_depth",
+    "capability_map_source": "project_raw",
+    "capability_storage": "dense",
+    "normalize_each_view": false,
+    "robust_mpr": false,
+    "responsibility_cache": "required_existing_sidecar",
+    "expected_responsibility_cache_sha256": "required",
+    "expected_feature_output_bundle_sha256": "required",
+    "expected_geometry_checkpoint_sha256": "required",
+    "live_responsibility_fallback": false,
+    "query_or_target_bearing_options": false
+  },
+  "streaming_implementation": {
+    "observation_unit": "each_positive-norm_raw_RADIO_pixel_referenced_by_the_frozen_sidecar",
+    "accumulators": [
+      "sum_weight_times_unit_direction",
+      "sum_weight_times_log_amplitude",
+      "sum_weight_times_squared_log_amplitude",
+      "responsibility_mass",
+      "positive_view_count"
+    ],
+    "zero_norm_policy": "excluded_before_division_and_logarithm",
+    "canonical_feature": "exp_weighted_mean_log_amplitude_times_normalized_weighted_direction",
+    "persistent_dtypes": {
+      "canonical_feature": "float16",
+      "log_amplitude": "float32",
+      "reliability": "float32",
+      "valid": "bool",
+      "view_counts": "int64"
+    },
+    "semantic_direction_persisted": false
+  },
+  "visibility_purity_authority": {
+    "authority": "raster_gaussian_top1_sidecar_v1_missing_visible_mass",
+    "measurement_available": false,
+    "encoding": "exact_zero_unknown_sentinel",
+    "consumer_policy": "must_not_treat_visibility_purity_as_a_measurement",
+    "binding": "registration_responsibility_cache_sha256",
+    "validator_fail_closed": true
+  },
+  "memory_preflight": {
+    "example_num_gaussians": 636148,
+    "feature_dim": 1280,
+    "weighted_unit_sum_float32_bytes": 3257077760,
+    "canonical_feature_float16_bytes": 1628538880,
+    "estimated_peak_bytes_at_4096_row_chunks": 5032039188,
+    "policy": "fail_before_dense_allocation_if_estimate_exceeds_configured_fraction_of_MemAvailable"
+  },
+  "validation": {
+    "test_path": "tests/test_factorized_radio_builder.py",
+    "test_sha256": "30afc708a412acabc29197a5facdffac2cdc53355b23604374d52800b0058470",
+    "focused_plus_contract_plus_legacy_builder": "49 passed",
+    "suites": [
+      "tests/test_factorized_radio_builder.py",
+      "tests/test_factorized_radio_contract.py",
+      "tests/test_gaussian_multiview_teacher_cache.py"
+    ],
+    "verified": [
+      "one_raw_feature_view_is_loaded_at_a_time",
+      "uniform_raw_feature_scaling_preserves_direction_and_reliability_and_translates_log_amplitude",
+      "zero_norm_observations_are_excluded_and_invalid_rows_are_exact_zero",
+      "positive_view_count_advances_once_per_primitive_per_view",
+      "parser_roundtrip_preserves_the_versioned_contract",
+      "all_non-frozen_CLI_routes_fail_closed",
+      "legacy_policy_namespace_is_unchanged",
+      "geometry_fingerprint_is_recomputed_from_xyz",
+      "canonical_norm_matches_exp_log_amplitude_in_row_chunks",
+      "reliability_bounds_and_resultant_dispersion_identity_are_checked",
+      "unknown_visibility_purity_is_bound_to_the_sidecar_and_cannot_claim_measurement_authority",
+      "dense_CPU_peak_is_preflighted"
+    ],
+    "py_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used": false
+  },
+  "execution": {
+    "gpu_used": true,
+    "gpu_usage": "physical GPU1 geometry initialization only; factorized accumulation and finalization were CPU streaming",
+    "real_cache_built_after_final_code_and_tests": true,
+    "real_cache_sha256": "179920a8d2ae7947284df35b595e57d2029183759843a77fbbc320d234fd313f",
+    "field_trained": false,
+    "benchmark_evaluated": false
+  }
+}

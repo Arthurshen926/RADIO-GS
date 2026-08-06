@@ -13,12 +13,19 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from radio_gs.interfaces.capability_cache import load_canonical_capability_bank
+from radio_gs.field.factorized_radio_contract import (
+    CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT,
+)
+from radio_gs.interfaces.capability_cache import (
+    CanonicalCapabilityBank,
+    load_canonical_capability_bank,
+)
 from radio_gs.interfaces.primitive_row_authority import PrimitiveRowAuthority
 from radio_gs.querying.support_solver import (
     SupportGraphConfig,
     build_primitive_support_graph,
 )
+from radio_gs.utils.immutable_artifacts import write_frozen_json, write_torch_noclobber
 
 
 def _sha256_file(path: str | Path) -> str:
@@ -55,7 +62,11 @@ def visibility_from_registration_responsibility(
     rows = torch.as_tensor(global_rows).long().cpu()
     if rows.ndim != 1 or rows.numel() == 0:
         raise ValueError("global_rows must be a non-empty [N] tensor")
-    if num_global_rows <= 0 or bool((rows < 0).any()) or bool((rows >= num_global_rows).any()):
+    if (
+        num_global_rows <= 0
+        or bool((rows < 0).any())
+        or bool((rows >= num_global_rows).any())
+    ):
         raise ValueError("global_rows are outside the responsibility domain")
     if rows.unique().numel() != rows.numel():
         raise ValueError("global_rows must be unique")
@@ -68,11 +79,17 @@ def visibility_from_registration_responsibility(
     registered_global_rows = 0
     for view_index, assignment in enumerate(assignments):
         if not isinstance(assignment, dict) or "gaussian_ids" not in assignment:
-            raise ValueError(f"responsibility assignment {view_index} lacks gaussian_ids")
-        identifiers = torch.as_tensor(assignment["gaussian_ids"]).long().cpu().reshape(-1)
+            raise ValueError(
+                f"responsibility assignment {view_index} lacks gaussian_ids"
+            )
+        identifiers = (
+            torch.as_tensor(assignment["gaussian_ids"]).long().cpu().reshape(-1)
+        )
         if identifiers.numel() == 0:
             continue
-        if bool((identifiers < 0).any()) or bool((identifiers >= num_global_rows).any()):
+        if bool((identifiers < 0).any()) or bool(
+            (identifiers >= num_global_rows).any()
+        ):
             raise ValueError(
                 f"responsibility assignment {view_index} has out-of-range Gaussian ids"
             )
@@ -127,13 +144,47 @@ def load_covisibility_observations(
     if not mpr_path:
         raise ValueError("capability cache lacks raw MPR provenance")
     mpr_metadata = _load_mpr_sidecar_metadata(mpr_path)
-    expected_digest = str(mpr_metadata.get("registration_responsibility_cache_sha256", ""))
-    expected_xyz_digest = str(mpr_metadata.get("xyz_sha256", ""))
+    sidecar_digest = str(
+        mpr_metadata.get("registration_responsibility_cache_sha256", "")
+    )
+    sidecar_xyz_digest = str(mpr_metadata.get("xyz_sha256", ""))
+    if capability_metadata.get("field_checkpoint_schema_version") == 2:
+        geometry = capability_metadata.get("mpr_geometry_fingerprint")
+        embedded_digest = str(
+            capability_metadata.get("registration_responsibility_cache_sha256", "")
+        )
+        if (
+            capability_metadata.get("field_checkpoint_contract")
+            != CANONICAL_FACTORIZED_RADIO_CHECKPOINT_CONTRACT
+            or not isinstance(geometry, dict)
+            or set(geometry) != {"num_gaussians", "xyz_sha256"}
+            or int(geometry.get("num_gaussians", -1)) != int(num_global_rows)
+            or len(embedded_digest) != 64
+            or any(c not in "0123456789abcdef" for c in embedded_digest)
+        ):
+            raise ValueError(
+                "factorized MPR geometry fallback lacks exact checkpoint lineage"
+            )
+        expected_xyz_digest = str(geometry.get("xyz_sha256", ""))
+        expected_digest = embedded_digest
+        if sidecar_digest and sidecar_digest != expected_digest:
+            raise ValueError(
+                "factorized MPR sidecar responsibility digest differs from capability"
+            )
+        if sidecar_xyz_digest and sidecar_xyz_digest != expected_xyz_digest:
+            raise ValueError(
+                "factorized MPR sidecar geometry differs from capability"
+            )
+    else:
+        expected_digest = sidecar_digest
+        expected_xyz_digest = sidecar_xyz_digest
     if not expected_digest or not expected_xyz_digest:
         raise ValueError("MPR sidecar lacks responsibility/geometry provenance")
     cache_path = Path(responsibility_cache).resolve()
     if _sha256_file(cache_path) != expected_digest:
-        raise ValueError("responsibility cache digest differs from canonical MPR provenance")
+        raise ValueError(
+            "responsibility cache digest differs from canonical MPR provenance"
+        )
     payload = torch.load(cache_path, map_location="cpu")
     metadata = payload.get("metadata", {}) if isinstance(payload, dict) else {}
     if not isinstance(metadata, dict):
@@ -286,7 +337,9 @@ def estimate_unoriented_local_surface_normals(
         raise ValueError("local surface normals require finite xyz [N,3]")
     count = len(points)
     if neighbors < 3 or batch_size <= 0 or not 0.0 <= float(minimum_planarity) < 1.0:
-        raise ValueError("surface-normal neighbors/batch/planarity arguments are invalid")
+        raise ValueError(
+            "surface-normal neighbors/batch/planarity arguments are invalid"
+        )
     normals = np.zeros((count, 3), dtype=np.float32)
     reliability = np.zeros(count, dtype=np.float32)
     if count < 4:
@@ -319,9 +372,81 @@ def estimate_unoriented_local_surface_normals(
     return torch.from_numpy(normals), torch.from_numpy(reliability)
 
 
+def load_graph_capability_bank(
+    capability_cache: str | Path,
+    *,
+    expected_capability_cache_sha256: str = "",
+    legacy_capability_cache_sha256: str = "",
+) -> tuple[CanonicalCapabilityBank, dict[str, object] | None]:
+    """Load a strict bank or explicitly bind a pre-authority legacy cache."""
+
+    legacy_capability_digest = str(legacy_capability_cache_sha256).strip()
+    expected_capability_digest = str(expected_capability_cache_sha256).strip()
+    capability_path = Path(capability_cache).expanduser().resolve()
+    capability_authority_bootstrap: dict[str, object] | None = None
+    if expected_capability_digest and legacy_capability_digest:
+        raise ValueError(
+            "modern and legacy capability cache SHA-256 authorities are mutually exclusive"
+        )
+    if expected_capability_digest:
+        if (
+            len(expected_capability_digest) != 64
+            or any(c not in "0123456789abcdef" for c in expected_capability_digest)
+            or _sha256_file(capability_path) != expected_capability_digest
+        ):
+            raise ValueError("capability cache SHA-256 is malformed or differs")
+    if legacy_capability_digest:
+        if (
+            len(legacy_capability_digest) != 64
+            or any(c not in "0123456789abcdef" for c in legacy_capability_digest)
+            or _sha256_file(capability_path) != legacy_capability_digest
+        ):
+            raise ValueError("legacy capability cache SHA-256 is malformed or differs")
+        bank = load_canonical_capability_bank(
+            capability_path, require_row_authority=False
+        )
+        if bank.metadata.get("primitive_row_authority") is not None:
+            raise ValueError(
+                "legacy capability bootstrap is forbidden when source authority exists"
+            )
+        derived_authority = PrimitiveRowAuthority.from_tensors(bank.xyz, bank.valid)
+        capability_authority_bootstrap = {
+            "mode": "legacy_capability_exact_bytes_plus_tensor_authority_v1",
+            "capability_cache": str(capability_path),
+            "capability_cache_sha256": legacy_capability_digest,
+            "derived_primitive_row_authority": derived_authority.to_dict(),
+            "mutates_source_cache": False,
+            "query_independent": True,
+            "labels_opened": False,
+        }
+    else:
+        bank = load_canonical_capability_bank(
+            capability_path, require_row_authority=True
+        )
+        if (
+            bank.metadata.get("field_checkpoint_schema_version") == 2
+            and not expected_capability_digest
+        ):
+            raise ValueError(
+                "factorized capability graph requires a caller-trusted cache SHA-256"
+            )
+    return bank, capability_authority_bootstrap
+
+
 def build(args: argparse.Namespace) -> dict:
-    bank = load_canonical_capability_bank(
-        args.capability_cache, require_row_authority=True
+    output = Path(args.output).expanduser().resolve()
+    report_output = output.with_suffix(output.suffix + ".json")
+    if output.exists() or output.is_symlink() or report_output.exists() or report_output.is_symlink():
+        raise FileExistsError(f"refuses to clobber canonical support graph: {output}")
+    expected_capability_cache_sha256 = str(
+        getattr(args, "expected_capability_cache_sha256", "")
+    ).strip()
+    bank, capability_authority_bootstrap = load_graph_capability_bank(
+        args.capability_cache,
+        expected_capability_cache_sha256=expected_capability_cache_sha256,
+        legacy_capability_cache_sha256=str(
+            getattr(args, "legacy_capability_cache_sha256", "")
+        ),
     )
     capability = {
         "xyz": bank.xyz,
@@ -336,9 +461,7 @@ def build(args: argparse.Namespace) -> dict:
     if args.valid_mask_cache:
         mask_payload = torch.load(args.valid_mask_cache, map_location="cpu")
         if args.valid_mask_key not in mask_payload:
-            raise ValueError(
-                f"valid-mask cache lacks key {args.valid_mask_key!r}"
-            )
+            raise ValueError(f"valid-mask cache lacks key {args.valid_mask_key!r}")
         valid = torch.as_tensor(mask_payload[args.valid_mask_key]).bool().cpu()
         if valid.shape != capability_valid.shape:
             raise ValueError("override valid mask does not align with capability rows")
@@ -398,7 +521,10 @@ def build(args: argparse.Namespace) -> dict:
             num_global_rows=int(capability_valid.numel()),
             global_rows=global_rows,
         )
-        covisibility_audit = {"mode": "mpr_top1_view_membership_v1", **covisibility_audit}
+        covisibility_audit = {
+            "mode": "mpr_top1_view_membership_v1",
+            **covisibility_audit,
+        }
     config = SupportGraphConfig(
         neighbors=int(args.neighbors),
         spatial_scale=float(args.spatial_scale),
@@ -407,13 +533,9 @@ def build(args: argparse.Namespace) -> dict:
         normal_temperature=float(args.normal_temperature),
         surface_tangent_temperature=float(args.surface_tangent_temperature),
         surface_tangent_relation=surface_relation == "local_pca_tangent_v1",
-        surface_topology_min_affinity=float(
-            args.surface_topology_min_affinity
-        ),
+        surface_topology_min_affinity=float(args.surface_topology_min_affinity),
         covisibility_weight=float(args.covisibility_weight),
-        require_covisibility_topology=bool(
-            args.require_covisibility_topology
-        ),
+        require_covisibility_topology=bool(args.require_covisibility_topology),
         affinity_chunk_size=int(args.affinity_chunk_size),
         topology_mode=str(args.topology_mode),
     )
@@ -431,10 +553,16 @@ def build(args: argparse.Namespace) -> dict:
         "schema_version": 1,
         "source": "canonical_official_dino_sam3_multichannel_support_graph",
         "capability_cache": str(Path(args.capability_cache).resolve()),
+        **(
+            {"capability_cache_sha256": expected_capability_cache_sha256}
+            if expected_capability_cache_sha256
+            else {}
+        ),
         "capability_metadata": capability["metadata"],
         "primitive_row_authority": PrimitiveRowAuthority.from_tensors(
             bank.xyz, valid
         ).to_dict(),
+        "capability_authority_bootstrap": capability_authority_bootstrap,
         "valid_mask_source": valid_mask_source,
         # Retain the historic key for readers that audit old graph files, but
         # make a high-fidelity exact route explicit rather than allowing a
@@ -480,9 +608,9 @@ def build(args: argparse.Namespace) -> dict:
         "benchmark_masks_opened": False,
         "text_queries_opened": False,
     }
-    output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(
+    write_torch_noclobber(
+        output,
         {
             "schema_version": 1,
             "global_rows": global_rows,
@@ -497,7 +625,6 @@ def build(args: argparse.Namespace) -> dict:
             "local_sigma": graph.local_sigma,
             "metadata": metadata,
         },
-        output,
     )
     report = {
         **metadata,
@@ -505,15 +632,31 @@ def build(args: argparse.Namespace) -> dict:
         "num_nodes": graph.num_nodes,
         "num_edges": int(graph.edge_index.shape[1]),
     }
-    output.with_suffix(output.suffix + ".json").write_text(
-        json.dumps(report, indent=2), encoding="utf-8"
-    )
+    write_frozen_json(report_output, report)
     return report
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capability-cache", required=True)
+    parser.add_argument(
+        "--expected-capability-cache-sha256",
+        default="",
+        help=(
+            "Caller-trusted exact SHA-256 for modern capability caches; required "
+            "for factorized schema-v2 banks before graph construction."
+        ),
+    )
+    parser.add_argument(
+        "--legacy-capability-cache-sha256",
+        default="",
+        help=(
+            "Explicit exact-file binding for an immutable legacy capability "
+            "cache that predates embedded primitive-row authority. The graph "
+            "derives and records xyz/valid/global-row authority without "
+            "modifying the source cache; omitted keeps strict authority required."
+        ),
+    )
     parser.add_argument(
         "--valid-mask-cache",
         default="",

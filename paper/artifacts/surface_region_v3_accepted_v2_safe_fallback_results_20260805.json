@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_v3_accepted_v2_safe_fallback_figurines_v1",
+  "status": "completed_and_rejected_by_preregistered_noninferiority_gate",
+  "hypothesis_tested": "Whether exact V3 region selection with support-fill removed, exact raw RADIO gauge restoration, and the immutable accepted V2 readout can recover the accepted Figurines text response without training or calibration.",
+  "method": {
+    "region_selection": "exact_frozen_surface_region_v3",
+    "support_fill": "excluded_from_v2_token_mask",
+    "radio_gauge": "legacy_raw_exact_field_decode_resume_shards",
+    "geometry": "surface_region_v3_indices_0_through_13",
+    "readout": "immutable_accepted_surface_region_summary_readout_v2",
+    "score_materialization": "official_calibration_free_fp16_cosine",
+    "evaluator": "frozen_vala_repo_3d_thr0p6"
+  },
+  "artifacts": {
+    "descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_v3_accepted_v2_safe_fallback_figurines_v1/figurines_v3_regions_accepted_v2_raw_descriptor.pt",
+      "sha256": "24beae4e5eb855aefb37bd98c5f60aff4c81a1ab77917b6ec47384f6dbc533d5"
+    },
+    "positive_scores_figurines_21": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_v3_accepted_v2_safe_fallback_figurines_v1/official_positive_figurines21.pt",
+      "sha256": "92f68a2a91c110867e8fd14d23a527d6702860d4c52c202e7642886dfcbeba4b"
+    },
+    "negative_scores": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_v3_accepted_v2_safe_fallback_figurines_v1/official_negative.pt",
+      "sha256": "c01328d91b15ac218983157f72e8fa6d43c39cff6a3bb8025067f673b952f384"
+    },
+    "exact_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_v3_accepted_v2_safe_fallback_figurines_v1/eval_official_figurines21/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "2de86392e74ebcbfca3bc11037623e9bb40c9ce52810ed7f13ce0cc46bcbb140"
+    }
+  },
+  "source_probe_full_population": {
+    "rows": 82603,
+    "descriptor_cosine_mean_vs_accepted_v2": 0.9907513856887817,
+    "descriptor_cosine_p05_vs_accepted_v2": 0.9621821641921997,
+    "margin_pearson_vs_accepted_v2": 0.9813156353302687,
+    "margin_spearman_mean_vs_accepted_v2": 0.95713871717453,
+    "margin_top1pct_overlap_mean_vs_accepted_v2": 0.881951630115509,
+    "margin_pearson_vs_current_v3": 0.5866800673614475,
+    "margin_spearman_mean_vs_current_v3": 0.39580509066581726
+  },
+  "frozen_exact_result": {
+    "miou": 0.4691656529903412,
+    "acc025": 0.8035714285714286,
+    "acc050": 0.5357142857142857,
+    "boundary_f": 0.6786747574806213,
+    "trimap_iou": 0.3832269310951233,
+    "queries": 56,
+    "current_v3_miou": 0.19443154335021973,
+    "accepted_v2_miou": 0.4753371775150299,
+    "recovered_fraction_of_v3_to_v2_gap": 0.9780261108304322,
+    "delta_vs_accepted_v2": -0.006171524524688721
+  },
+  "promotion_gate": {
+    "minimum_miou": 0.4703371775150299,
+    "observed_miou": 0.4691656529903412,
+    "shortfall": 0.0011715245246886996,
+    "passed": false
+  },
+  "conclusion": "The learned V3 readout is the dominant source of the catastrophic Figurines regression, but V3 selection is not exactly noninferior to the accepted V2 selection. This fallback is a valid recovery control, not a promoted mainline. The next candidate must preserve exact V2 selection as its immutable base and add any new context through a separately bounded residual."
+}

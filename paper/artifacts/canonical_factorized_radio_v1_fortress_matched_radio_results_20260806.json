@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "artifact_type": "canonical_matched_top1_cache_result",
+  "recorded_at": "2026-08-06T06:20:00+08:00",
+  "scene": "fortress",
+  "feature_space": "radio",
+  "source_chain_preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_fortress_source_chain_preregistration_20260806.json",
+    "sha256": "b99bc96639974423e2867d9ddeee5a42065f779dc5e5a7aa916a3e2467815421"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/raw_radio_matched_top1.pt",
+    "sha256": "79bdcd74cae515df4013031ae578dd001ba8fde60b786cb7647bcff0e9438443",
+    "report_sha256": "3b9c02e6e674ffe5b67cc6182c6267ad26f19e1785c85fd1e13855459ae88d58",
+    "support_sha256": "d3ac600109419aa8eca92b38f48abc1b6e8c056744772e793c6a9060937de4aa",
+    "feature_dim": 1280,
+    "channel_shards": 5
+  },
+  "statistics": {
+    "num_gaussians": 938089,
+    "valid_count": 405386,
+    "views": 42,
+    "mean_views_if_valid": 28.51914405822754,
+    "median_views_if_valid": 35.0
+  },
+  "validation": {
+    "formal_sharded_loader_all_hash_gates": "passed",
+    "feature_space": "radio",
+    "geometry_xyz_sha256": "f1ae3616b6447e8361f162c3b95aa527e4e04fb93d979c857a7a186d7aada2f1",
+    "shared_responsibility_sha256": "870ebbb6573360009ae59bbf84861a44195500624488a1d367bb3d067121f049",
+    "support_matches_sam3_exactly": true
+  },
+  "target_access": {
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

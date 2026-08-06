@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_frozen_v2_residual_codebook_v1",
+  "status": "seed0_generic_gate_failed_benchmark_not_opened",
+  "preregistration_sha256": "c161ef5ce15e5eb14546d3659ca881b166095a712cc07b078579fcfd8f877511",
+  "checkpoint": {
+    "path": "output/optimization_20260805/surface_region_residual_codebook_v1/seed0_headparity.pt",
+    "sha256": "34dc94f53f041150abce353ca80eba78672bf4301fab756d1d525e480cedd2b7",
+    "sidecar_sha256": "e5606fb150fd7844e256e96210f076d8f912929095a12a44b1dc762e5e676d5c",
+    "seed": 0,
+    "epochs": 40,
+    "feasible_epochs": 0,
+    "state_semantics": "diagnostic_final_epoch_only_no_promoted_checkpoint"
+  },
+  "protocol_correction": {
+    "description": "The checkpoint sidecar compared the registered hard-max candidate to the older V3 log-mean-exp teacher control. The corrected control below is the independently exact V2 fallback under the identical hard-max teacher authority; it is also bitwise reproduced by the untrained residual codebook.",
+    "training_trajectory_affected": false,
+    "checkpoint_selection_affected": false,
+    "reason_checkpoint_selection_unaffected": "No one of the 40 epochs satisfies the corrected control-referenced feasibility conditions.",
+    "benchmark_opened": false
+  },
+  "corrected_hard_max_control": {
+    "teacher_best_slot_cosine_mean": 0.9126817584037781,
+    "text_response_smooth_l1": 0.00011041510879294947,
+    "support_top1_agreement": 0.2141089141368866,
+    "ranking_spearman_p05": 0.00699300691485405,
+    "response_profile_cosine_p05": 0.6618000864982605,
+    "canonical_descriptor_cosine": 0.9429590106010437
+  },
+  "candidate_final_epoch": {
+    "teacher_best_slot_cosine_mean": 0.9211626052856445,
+    "teacher_best_slot_cosine_p05": 0.8473184108734131,
+    "teacher_best_slot_elementwise_gain_min": 0.0,
+    "text_response_smooth_l1": 0.00015226572577375919,
+    "support_top1_agreement": 0.18193069100379944,
+    "ranking_spearman_p05": -0.1818181872367859,
+    "response_profile_cosine_p05": 0.5590663552284241,
+    "canonical_descriptor_cosine": 0.9429590106010437,
+    "canonical_fallback_bitwise_equal": true,
+    "query_slot_usage": [
+      0.18296204507350922,
+      0.05311468616127968,
+      0.7542285323143005,
+      0.009694719687104225
+    ],
+    "slot_descriptor_pair_cosine_mean": 0.9810380935668945,
+    "slot_descriptor_pair_cosine_p05": 0.9479402303695679
+  },
+  "gates": {
+    "canonical_fallback_bitwise_equal": {
+      "pass": true
+    },
+    "teacher_best_slot_elementwise_nondecreasing": {
+      "minimum_delta": 0.0,
+      "pass": true
+    },
+    "teacher_best_slot_cosine_mean": {
+      "delta": 0.008480846881866455,
+      "requirement": "delta_at_least_0.005",
+      "pass": true
+    },
+    "text_response_smooth_l1": {
+      "delta": 0.00004185061698080972,
+      "requirement": "strictly_lower",
+      "pass": false
+    },
+    "support_top1_agreement": {
+      "delta": -0.03217822313308716,
+      "requirement": "nondecreasing",
+      "pass": false
+    },
+    "ranking_spearman_p05": {
+      "delta": -0.18881119415163994,
+      "requirement": "delta_at_least_minus_0.002",
+      "pass": false
+    },
+    "response_profile_cosine_p05": {
+      "delta": -0.10273373126983643,
+      "requirement": "delta_at_least_minus_0.002",
+      "pass": false
+    },
+    "minimum_query_winner_usage_each_learned_slot": {
+      "value": 0.009694719687104225,
+      "requirement": "at_least_0.02",
+      "pass": false
+    }
+  },
+  "gate_summary": {
+    "passed": 3,
+    "failed": 5,
+    "overall_pass": false
+  },
+  "diagnosis": {
+    "canonical_regression_removed": true,
+    "semantic_slot_collapse_substantially_reduced": true,
+    "teacher_set_fidelity_improved": true,
+    "unconditional_hard_max_false_positive_inflation": true,
+    "conclusion": "Preserving multiple valid views is useful, but selecting the strongest view for every query and region is not a calibrated concept readout. The next missing component is a globally trained query-conditioned confidence router with exact V2 fallback, not more slots or another field-width sweep."
+  },
+  "decision": {
+    "run_seeds_1_2": false,
+    "open_lerf3d": false,
+    "open_spin9": false,
+    "open_nvos": false,
+    "retain_frozen_v2_mainline": true
+  }
+}

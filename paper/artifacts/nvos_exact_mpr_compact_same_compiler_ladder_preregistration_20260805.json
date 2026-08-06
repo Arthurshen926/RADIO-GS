@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "registration": "nvos_exact_mpr_compact_same_compiler_ladder_v1",
+  "status": "registered before materializing exact-MPR capability views or opening ladder outcomes",
+  "question": "How much of the frozen NVOS K16 unary deficit is introduced by compact canonical-field reconstruction when exact raw MPR and compact field use the identical query compiler and scalar renderer?",
+  "scenes": [
+    "fern",
+    "horns_center",
+    "horns_left"
+  ],
+  "arms": {
+    "exact_raw_mpr": "Apply the frozen official DINOv3/SAM3 feature_projection adaptors directly to valid rows of raw_radio.pt, then L2-normalize.",
+    "compact_field": "Reuse official_dino_sam3_views.pt, produced by decoding canonical_d256_l128_capability_first.pth before applying the same frozen adaptors and L2 normalization."
+  },
+  "only_changed_variable": "primitive descriptor source: exact raw MPR versus compact canonical field",
+  "frozen_query_compiler": {
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "winner_take_all",
+    "registered_prototype_seed_normalization": "independent_max",
+    "registered_observation_fusion": "hard_seed_anchor_only_probability",
+    "registered_observation_confidence": "poisson_mass_coverage",
+    "registered_observation_mass_scale": 1.0,
+    "registered_observation_coverage_power": 1.0,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "exclusive_relative",
+    "hard_seed_conflict_margin": 0.0,
+    "prototype_temperature": 0.07,
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "feature_calibration": "none",
+    "score_calibration": "none",
+    "final_readout": "unary_prior"
+  },
+  "frozen_prompt_and_renderer": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "prompt_registration": "native exact front-to-back raster adjoint",
+    "prompt_registration_scale": 1.0,
+    "prompt_alpha_threshold": 0.0,
+    "score_render_resolution": "scaled_renderer",
+    "score_render_scale": 1.0,
+    "valid_support_normalization": false,
+    "feature_contribution_gamma": 1.0,
+    "pixel_threshold": 0.5,
+    "threshold_comparison": "greater_or_equal",
+    "resize_to_ground_truth": "cv2.INTER_LINEAR",
+    "target_rgb": false,
+    "target_mask_feedback": false
+  },
+  "disabled_post_unary_operators": {
+    "graph_propagation": true,
+    "connected_component_selection": true,
+    "query_conditioned_diffusion": true,
+    "implementation": "zero-edge diagnostic graph used only to satisfy the shared compiler result interface; only sigmoid(result.unary/0.1) is exported and rendered"
+  },
+  "required_outputs": [
+    "query-independent exact-MPR capability cache with source and SHA-256 provenance",
+    "dense primitive unary artifact written before any target ground truth is opened",
+    "rendered unary score and frozen foreground IoU",
+    "per-scene exact-minus-compact IoU and primitive-unary discrepancy",
+    "GT primitive oracle status, reported only if a pre-existing exact row authority is available"
+  ],
+  "oracle_rule": "Do not construct a target-GT primitive oracle post hoc. Report unavailable unless a pre-existing frozen artifact maps target GT to the exact renderer primitive row authority without ambiguity.",
+  "selection_and_tuning": {
+    "development_scene_selection": false,
+    "scene_specific_parameters": false,
+    "threshold_tuning": false,
+    "outcome_dependent_branching": false
+  }
+}

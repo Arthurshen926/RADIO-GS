@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "status": "registered_before_new_gate_receipts_or_candidate_target_predictions",
+  "claim_boundary": "Posthoc method iteration after earlier NVOS target results were opened. The gate is source-only and may support a method-design claim, but this sentinel is not an independent validation set.",
+  "failure_being_addressed": "Entropy of the ten-mask mean measures pixelwise SAM3 self-agreement but does not detect an individual completion trial that collapses or loses the object. Such a failure can still produce high aggregate confidence and override a stronger compact field.",
+  "source_only_gate": {
+    "name": "all_trial_loo_majority_iou_v1",
+    "input": "the ten immutable official SAM3 binary source-view trial masks before scribble overwrite",
+    "trial_count": 10,
+    "for_each_trial": "hold out trial t; form a binary strict source consensus as mean(other nine)>=0.5; compute Jaccard IoU between heldout trial and that consensus",
+    "accept": "all ten heldout IoUs are at least 0.5",
+    "threshold_authority": "0.5 is used both as the Bernoulli majority decision and as the minimum majority-overlap criterion; it is fixed globally and is not fit to a scene or target result",
+    "empty_policy": "an empty heldout mask, empty leave-one-out consensus, or empty union fails closed",
+    "deployment": {
+      "accept": "retain the frozen probability-preserving source completion reliability",
+      "reject": "set only source-completion reliability to exact zero; preserve the raw signed-scribble compiler and compact field unary; zero-confidence fusion must return the field unary bit-for-bit"
+    },
+    "new_scene_specific_parameters": false,
+    "learned_parameters": false,
+    "target_rgb": false,
+    "target_mask": false,
+    "target_metric": false
+  },
+  "authority_requirements": {
+    "gate_receipt": "immutable no-clobber JSON created before target rendering",
+    "must_bind": [
+      "scene_id",
+      "prompt_frame_id",
+      "source completion complete-file SHA256",
+      "source completion receipt complete-file SHA256",
+      "source tensor bundle SHA256",
+      "trial_masks tensor SHA256",
+      "method-contract SHA256",
+      "all ten per-trial source-only metrics",
+      "boolean accept/abstain decision"
+    ],
+    "evaluator": "must recompute the source-only decision from the bound completion artifact and fail closed on any mismatch"
+  },
+  "frozen_sentinel": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "scenes": [
+      "fern",
+      "horns_left"
+    ],
+    "base": "compact canonical field, graph off, raw signed-scribble K16 unary, threshold 0.5",
+    "candidate": "the previously frozen probability-preserving source unary with the new immutable source-only abstention receipt",
+    "all_other_compiler_and_evaluation_settings": "unchanged frozen protocol"
+  },
+  "comparison": {
+    "base": {
+      "fern": 0.7553155907838534,
+      "horns_left": 0.7000681428736316,
+      "macro": 0.7276918668287425
+    },
+    "previous_ungated_source_completion": {
+      "fern": 0.7143203052887704,
+      "horns_left": 0.7663050940546479,
+      "macro": 0.7403126996717092
+    }
+  },
+  "promotion_gate": {
+    "pass": "candidate macro exceeds the compact base by at least 0.005, at least one scene improves, and neither scene regresses by more than 0.02",
+    "failure": "retain only the source-only diagnostic and do not expand to the remaining NVOS cohort",
+    "success": "expand the exact same gate and compiler without scene-specific changes"
+  },
+  "thermal_policy": {
+    "gpu": "either available GPU",
+    "power_limit_w": 300,
+    "poll": "launch and stage boundary only unless a run becomes abnormal",
+    "abort": "temperature at least 88C twice consecutively"
+  }
+}

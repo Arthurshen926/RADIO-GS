@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "artifact_type": "benchmark_execution_preregistration",
+  "experiment": "canonical-factorized-radio-v1-fern-frozen-k16-graph-free-unary-sentinel",
+  "date": "2026-08-05",
+  "question": "Does the source-qualified factorized field preserve or improve the frozen NVOS Fern K16 graph-free unary under the independently restored strict protocol?",
+  "protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "logical_protocol_hash": "d21b52d3c2155f82d63c18a6c9c4a56eb25c42f09c10306aa924135317cadaf9",
+    "scene": "fern",
+    "target_rgb_at_query": false,
+    "target_mask_use": "metric_after_continuous_score_write_only"
+  },
+  "implementation": {
+    "evaluator": "radio_gs/scripts/eval_nvos_gaussian_first.py",
+    "evaluator_sha256": "aaae651102e546f5ebc5e5c783ca7d1f385834034bbdea06e8ca15157ffd951b",
+    "capability_loader_sha256": "af6315eb956c998a3145f0b0fe4c5f9a7eae6a9ea25fe73bd4e351ba0960c35a",
+    "promptable_segmentation_sha256": "e7cca6be3f92ebd07d4349bbb1378c2438ddbcc66b266a16cc99fb2617696da8",
+    "legacy_equivalence_policy": "Run the historical compact capability control first with the current evaluator and require exact metric reproduction before opening the candidate result."
+  },
+  "arms": {
+    "historical_control": {
+      "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_nvos8/fern/official_dino_sam3_views.pt",
+      "capability_cache_sha256": "e2ae42289efa7d49c9ef1fb684e860a7703d6a77758e3847c903e038cc2f845f",
+      "field_checkpoint_sha256": "f19dfdcc09e7b5b0033c7c24abbc192e021921703e7b88d050145b4de0c6ca3e",
+      "expected_foreground_iou": 0.7553155907838534,
+      "absolute_tolerance": 0.00000001
+    },
+    "factorized_candidate": {
+      "field_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/fields/trainable_basis_d256_l128.pth",
+      "field_checkpoint_sha256": "8fc58e09dee9e62cf4831ab2db06549118aa59e6b0917ae3ecce72f7346c53d3",
+      "source_only_field_result_sha256": "9ee6b36ada0621fe936a3e06092ce8b8a63c736bcf45a759afac688c101a7fde",
+      "capability_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/fern/official_dino_sam3_views.pt",
+      "capability_cache_sha256": "bc6054c316c580d2c8cf517aeae699cadad2fd74676dce7db4f4396996d5f7d8"
+    }
+  },
+  "frozen_compiler": {
+    "support_mode": "canonical_support",
+    "region_space": "sam3",
+    "graph": "disabled_zero_edge_diagnostic",
+    "prototype_count": 16,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_registration": "raster_adjoint_scale1_alpha0",
+    "seed_construction": "joint_signed",
+    "prototype_seed_construction": "winner_take_all",
+    "observation_fusion": "hard_seed_anchor_only_probability",
+    "observation_confidence": "poisson_mass_coverage",
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "exclusive_relative",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "feature_calibration": "none",
+    "score_calibration": "none",
+    "readout": "unary_prior",
+    "score_render": "scaled_renderer_scale1_gamma1_threshold0.5"
+  },
+  "execution_gate": {
+    "control_first": true,
+    "candidate_runs_only_if_control_reproduces": true,
+    "candidate_promotion": "Report delta without threshold tuning; retain candidate only if it does not regress the historical control by more than 0.005.",
+    "graph_or_connected_followup": false
+  },
+  "gpu_policy": {
+    "physical_gpus": [0, 1],
+    "power_limit_watts": 300,
+    "check_frequency": "stage boundaries or approximately every 180 seconds",
+    "thermal_stop": "at least 88 Celsius in two consecutive checks"
+  }
+}

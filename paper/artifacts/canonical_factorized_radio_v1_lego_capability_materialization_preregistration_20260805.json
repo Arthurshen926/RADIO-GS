@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_lego_capability_materialization",
+  "registered_at": "2026-08-05T14:29:55+08:00",
+  "status": "registered_after_field_promotion_gate_and_before_capability_materialization",
+  "purpose": "Freeze the source-only materialization and validation of official DINOv3 and SAM3 primitive capability banks from the promoted factorized Lego field.",
+  "inputs": {
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_field_d256_l128.pth",
+      "sha256": "12ebdbe8e18c29e30a9c6f40c466f24e9ed7d2accd8a83ba536fbc90ba808637",
+      "factorized_field_signature_sha256": "9a8e762888fa976d3edfb7e786931f59e23147d867b71cf0436786f9a4d47373"
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/factorized_raw_radio.pt",
+      "sha256": "179920a8d2ae7947284df35b595e57d2029183759843a77fbbc320d234fd313f"
+    },
+    "feature_output_bundle_sha256": "3f2d8fb3fcab457d4ad81a274652f505f0c26c3ba0c1fbb3dd6c0cec0537c181",
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "geometry_xyz_sha256": "74d9d97dbfbc31445b8ffcdc4bebb2ebc7f3dfd20490318b3712ff189611e337",
+    "registration_responsibility_cache_sha256": "bc131100dfbe7f9c254eb2482861ce7476ab35688997835420dd3d98ef2f8a3e",
+    "field_training_result_sha256": "f2cd9d3bfd0ce3147da86200ca230eda97bd3fd699ad836d9439aae0d242cb57"
+  },
+  "materialization_contract": {
+    "field_checkpoint_schema": "factorized-v2",
+    "observation_contract": "canonical",
+    "projection_order": "raw_gauge_compact_radio_field_then_official_adaptor_then_l2",
+    "feature_storage": "valid_rows_compact_v1",
+    "feature_row_order": "torch_where_valid_ascending",
+    "num_global_rows": 636148,
+    "num_valid_rows": 128780,
+    "appearance_dim": 4096,
+    "boundary_dim": 1024,
+    "batch_size": 2048,
+    "caller_trusted_field_sha256_required": true,
+    "caller_trusted_radio_sha256_required": true,
+    "adaptor_loader_expected_sha256_required": true,
+    "factorized_lineage_embeds_responsibility_sha256": true
+  },
+  "promotion_gate": {
+    "strict_capability_loader": true,
+    "formal_projection_contract": true,
+    "payload_sidecar_factorized_lineage_exact": true,
+    "independent_field_adaptor_fp16_parity": true,
+    "dino_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "sam3_centered_row_variation_ratio_to_exact_minimum": 0.8,
+    "field_training_gate_remains_passed": true,
+    "capability_file_sha256_frozen_before_graph_or_benchmark": true,
+    "target_or_text_query_access": false
+  },
+  "implementation": {
+    "capability_builder_sha256": "705b7f3bbf849a61bba4398b3c1939f28f7295aed6c725741372660e6cae5f2b",
+    "capability_cache_loader_sha256": "af6315eb956c998a3145f0b0fe4c5f9a7eae6a9ea25fe73bd4e351ba0960c35a",
+    "support_graph_builder_pre_lineage_fix_sha256": "f087538dbff4bd0c3434aab4beb46be299f15e5d60a98cfcb4e4f0c4d17e671d",
+    "focused_tests": "22 passed"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "thermal_policy": "stage-boundary and approximately 180-second checks; stop only after two consecutive observations at or above 88 C",
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/lego/official_dino_sam3_views.pt",
+    "output_was_absent_at_registration": true
+  },
+  "safety": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metric_computed": false
+  }
+}

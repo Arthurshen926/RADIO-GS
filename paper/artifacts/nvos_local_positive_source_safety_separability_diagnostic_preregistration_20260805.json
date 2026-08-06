@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_local_positive_source_safety_separability_diagnostic_v1",
+  "registered_at": "2026-08-05T20:59:18+08:00",
+  "status": "posthoc_after_v2_target_results_and_before_source_statistic_separability_computation",
+  "claim_boundary": "Retrospective diagnostic only. Target deltas define the already sealed unsafe/safe outcome groups, but no raw target mask, score, or new target run is opened. No threshold or deployment branch may be selected from these outcomes.",
+  "lineage": {
+    "v2_source_diagnostic": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_local_majority_positive_completion_v2/source_only_diagnostic.json",
+    "v2_source_diagnostic_sha256": "83a5c4059d0e7c33c709b08fac78a2b2595cca0631150d605c5b5c5711ca140b",
+    "v2_target_result_artifact": "paper/artifacts/nvos_hierarchical_trust_local_positive_full8_exact_results_20260805.json",
+    "v2_target_result_artifact_sha256": "240f4978146869f210e0c2ce2677763927bb6e111aad271602322a06c1ec21da",
+    "v1_remaining_source_gate_results_sha256": "a01d4873c9ebc1510d3fa963150f1bfa58f07287b60c89a815713f9a0a7f440f",
+    "v1_sentinel_source_gate_results_sha256": "7ab8b401738e75e5756a73498dbc26fafd3d74a22f1b3404bf26610ce640d30f"
+  },
+  "fixed_cohort": {
+    "unsafe_target_regression": [
+      "fern",
+      "flower",
+      "trex"
+    ],
+    "safe_nonregression_with_v2_local_branch": [
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids"
+    ],
+    "excluded_different_branch": [
+      "horns_left"
+    ]
+  },
+  "fixed_existing_source_statistics_and_unsafe_direction": {
+    "mean_loo_confidence_weighted_precision": "lower",
+    "minimum_loo_confidence_weighted_precision": "lower",
+    "pooled_confidence_weighted_precision": "lower",
+    "pooled_hard_majority_recall": "lower",
+    "pooled_hard_majority_iou": "lower",
+    "full_fit_proposal_fraction": "higher",
+    "full_fit_confidence_mass_fraction": "higher",
+    "v1_minimum_heldout_iou": "lower",
+    "v1_failed_trial_count": "higher"
+  },
+  "fixed_reliability_test": {
+    "strict_rank_separation": "For a lower-is-unsafe statistic require max(unsafe)<min(safe); for a higher-is-unsafe statistic require min(unsafe)>max(safe).",
+    "pairwise_concordance": "Report the fraction of unsafe-safe pairs ordered in the preregistered unsafe direction, with ties worth 0.5.",
+    "reliable_identification": "At least one individual existing statistic must achieve strict rank separation. No statistic combination, fitted weight, threshold sweep, scene-specific exception, or sign flip is allowed.",
+    "pass_action": "A later source-only cross-scene calibration may be separately preregistered; do not run target.",
+    "fail_action": "Conclude existing source statistics cannot identify all three regressions reliably and stop this routing direction without a second target run."
+  },
+  "forbidden": [
+    "open raw target masks or target scores",
+    "select a numeric threshold from target outcomes",
+    "fit a multivariate classifier or statistic weights",
+    "change the hierarchical v2 method",
+    "run any second target evaluation"
+  ]
+}

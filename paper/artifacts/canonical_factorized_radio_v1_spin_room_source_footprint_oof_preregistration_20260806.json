@@ -1,0 +1,140 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_spin_room_source_footprint_oof_v1",
+  "registered_at": "2026-08-06T01:59:38+08:00",
+  "status": "registered_after_query_free_footprint_authority_and_before_source_mask_pixel_access",
+  "question": "Under complete query-free source-raster footprint holdout, should the frozen Room compiler retain its unary or use the fixed surface-safe propagation before the K201 matched interface?",
+  "inputs": {
+    "benchmark_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "queue_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_exact_adjoint_ladder/eval_queue",
+    "scene_id": "room",
+    "source_mask_hash_only": {
+      "path": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/SPIn-NeRF/multiview_annotations/room (llff)/DJI_20200226_143850_006.png",
+      "sha256": "e6bb02f67d844aba18e91de777ee2b5337281b92e7e243e210770f9e7e13d7a7",
+      "pixels_opened_at_registration": false
+    },
+    "external_carrier": {
+      "config": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/config.yaml",
+        "sha256": "3a1f60c0ae5329dc2fb14391250f4284e0012924cc362a3ed437c5d33a0c85d9"
+      },
+      "checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/geometry_carrier.pth",
+        "sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0"
+      },
+      "camera_map": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/room/rgb_to_colmap_camera_mapping.json",
+        "sha256": "c89d1b61dd1a4512f4574f7092a0b773c2023b16b18b9c86941a119c34ab89af"
+      },
+      "all_three_caller_hash_verified_before_each_fold": true,
+      "silent_queue_fallback": false
+    },
+    "geometry_checkpoint_sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0",
+    "factorized_field_sha256": "343b833b415d467f8993b6ce19057ea838fa12ae19395041347beaf273eef5f7",
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/official_dino_sam3_views.pt",
+      "sha256": "7e2c1ea44cb11317e9e8b9e41eb2f356cb431dba777c9ef62495a3bc6d4374a0"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/shared_support_graph_surface_safe_k16.pt",
+      "sha256": "847f184c6b4d01294564cc80017c69840153ec84c4da0ae351246f7df25ef31a"
+    },
+    "source_footprint_fold_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/room/source_footprint_fold_authority.pt",
+      "file_sha256": "e566e1f618465578ad0b4cefaae97388b7f289ff01e54cedcdcf7c4ab3fcaeb7",
+      "authority_sha256": "b5c84c873acafccfe659d0f3c30ef36794eb745e48cee6eb47af0d859de94c36",
+      "tensor_bundle_sha256": "4928bec33bcbcd9ac5ebccdf365a5e951aa4bbe870e35199e647ddcf14ed05e2",
+      "result_receipt_sha256": "25ac4b7ad994382b3cb8d0c986950782a5a12add89a642a8088aeb7ef2db2074"
+    }
+  },
+  "fold_contract": {
+    "mode": "source_footprint_v1",
+    "assignment": "splitmix64_source_footprint_group_v1",
+    "folds": 3,
+    "authority_loaded_before_source_prompt_labels": true,
+    "row_authority": "footprint primitive_rows == capability global_rows == graph global_rows",
+    "heldout_clear_tensors": [
+      "positive_weight",
+      "negative_weight",
+      "raw_positive_mass",
+      "raw_negative_mass"
+    ],
+    "candidate_actions_when_non_degenerate": [
+      "unary",
+      "surface_safe_propagated"
+    ],
+    "primary_metric": "responsibility_balanced_log_loss",
+    "secondary_metric": "responsibility_weighted_auc",
+    "complexity_tiebreak": "unary",
+    "target_feedback": false
+  },
+  "fixed_compiler": {
+    "region_space": "sam3",
+    "prototype_count": 4,
+    "prototype_strategy": "spherical_mean_fps",
+    "prompt_registration_mode": "raster_adjoint",
+    "prompt_registration_scale": 1.0,
+    "alpha_threshold": 0.0,
+    "support_threshold": 0.0,
+    "registered_observation_fusion": "direct_raster_adjoint",
+    "registered_observation_confidence": "relative_joint_max",
+    "registered_seed_construction": "joint_signed",
+    "registered_prototype_seed_construction": "shared",
+    "registered_selection_mode": "all_components",
+    "registered_readout_stage": "propagated",
+    "appearance_weight": 1.0,
+    "boundary_weight": 0.35,
+    "prototype_temperature": 0.07,
+    "graph_policy": "typed",
+    "component_graph_policy": "same",
+    "channel_confidence_mode": "none",
+    "solver_type": "confidence_random_walker",
+    "solver_iterations": 12,
+    "solver_residual": 0.3,
+    "solver_unary_temperature": 0.1,
+    "solver_support_threshold": 0.5,
+    "laplacian_weight": 1.0,
+    "cg_iterations": 64,
+    "cg_tolerance": 0.00001,
+    "hard_seed_threshold": 0.2,
+    "hard_seed_conflict_policy": "positive_priority",
+    "hard_seed_conflict_margin": 0.0,
+    "component_edge_threshold": 0.00001,
+    "seeded_component_min_weight": 0.2,
+    "connected_selection": false,
+    "query_conditioned_diffusion": "none",
+    "scene_specific_tuning": false
+  },
+  "implementation": {
+    "evaluator_sha256": "f7d8a8f36fb6318f30b49e7654d52cb446bb7858e235edef8887f5e754f246d0",
+    "oof_evaluator_sha256": "d73cd40fccaf79465108e530022dc6b142b28bc29abcdc4aabaa44cbaa465dc3",
+    "evidence_authority_sha256": "0d110f9c78661b896c5fcb99266fd4ea2c7a37110a49f8847b2933e176398fa6",
+    "footprint_authority_loader_sha256": "8c365c4f8974a770f6a58176d4d1de6518237065b7a8230d90bfa8a8ff7a508d"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300.5,
+    "thermal_policy": "30-second polls; stop only after six consecutive observations at or above 88 C",
+    "owner_policy": "exclusive-singleton-after-clear-v1 after empty compute-owner preflight",
+    "preflight": {
+      "compute_owners": 0,
+      "temperature_celsius": 36,
+      "utilization_percent": 0
+    },
+    "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/source_footprint_oof_v1",
+    "output_root_was_absent_at_registration": true
+  },
+  "opening_rule": "Run and seal folds 0, 1, and 2; load the immutable gate receipt; then build the matched K201 source-only full fit. No target score, RGB, mask, or metric may be opened in these invocations.",
+  "safety": {
+    "source_prompt_opened_at_registration": false,
+    "target_score_rendering_performed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "registration": "canonical_factorized_radio_v1_figurines_visibility_safe_lerf_single_confirmation_v1",
+  "registered_at": "2026-08-05T17:48:00+08:00",
+  "status": "registered_after_source_only_gates_before_descriptor_text_scores_or_metric",
+  "purpose": "Run one causal development confirmation of the pre-specified visibility-safe loss while preserving the exact-marginal support and accepted V2 interface.",
+  "frozen_assets": {
+    "field_sha256": "bd203f881105dd864bed01e0a9b919acf69daf5305650e50b8f90c502167c4c7",
+    "state_sha256": "583223899bb21f6371ecaa6753b633ab0c14d25569f3bc97ee83929a21e8018b",
+    "capability_sha256": "2503b410a08bf43dad7cbcdd726fba9beb66656cd55b79a60edf64d079674925",
+    "support_graph_sha256": "4a48c8825762e016f21fa481482b33ca7d85222a637c7fb95115e44e8919784b",
+    "readout_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "readout_legacy_radio_authority_sha256": "2d72ed54eef69378c665ddf83067838d79e42d6b72545d89aab12f95cb781948",
+    "positive_text_sha256": "08fa6f870c824fde212b302d6c88cf74487f1122055fac709708399fb480578b",
+    "negative_text_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "renderer_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+  },
+  "fixed_protocol": {
+    "radii_m": [0.25, 0.45, 0.70],
+    "graph_neighbors": 16,
+    "radio_feature_normalization": "legacy_raw",
+    "score_precision": "FP32",
+    "protocol_preset": "vala_repo_3d",
+    "score_threshold": 0.6,
+    "scene": "figurines"
+  },
+  "interpretation": {
+    "single_run_only": true,
+    "no_threshold_graph_support_or_formula_sweep": true,
+    "comparison": "visibility-safe field versus the immediately preceding exact-marginal field under otherwise identical construction",
+    "promotion_rule": "This run is attribution only. A gain cannot by itself promote the method because the remaining full-scalar/graph reliability interface must be validated cross-scene."
+  },
+  "safety": {
+    "source_only_gates_passed": true,
+    "benchmark_images_masks_or_text_opened_during_training": false,
+    "per_scene_parameter_search": false
+  }
+}

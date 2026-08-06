@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_frozen_v2_residual_codebook_v1",
+  "status": "registered_before_implementation_training_or_new_validation",
+  "hypothesis": "A residual multi-view codebook can add held-out teacher-view and text-ranking capability without relearning or perturbing the already strong SurfaceRegion V2 canonical path. Exact fallback inclusion and explicit token-gauge supervision remove the two structural failure modes of the rejected from-scratch V3.",
+  "representation": {
+    "total_slots": 4,
+    "fallback_slots": 1,
+    "learned_residual_slots": 3,
+    "slot_count_reason": "The frozen authority exposes at most three teacher views; three learned hypotheses preserve that capacity while the additional slot is an exact V2 fallback.",
+    "canonical_token": "bitwise frozen V2 output on the caller-provided RADIO input and reliability",
+    "fallback_slot0": "bitwise identical to canonical_token",
+    "residual_conditioning": "pooled context from the same frozen V2 evaluated on per-token L2 RADIO directions, with reliability passed unchanged",
+    "residual_parameterization": "base-direction tangent residual plus independent exp(tanh(delta_log_norm)) gauge ratio",
+    "initialization": "all residual slots have an exact frozen-V2 forward value with a straight-through zero branch",
+    "persistent_state_query_independent": true,
+    "custom_text_projection": false,
+    "official_siglip2_summary_head_frozen": true,
+    "legacy_marginal_safety": "returned priors are one-hot on slot0; codebook-max is an explicit separate route"
+  },
+  "training": {
+    "data_and_splits": "identical frozen 32/8 scene-disjoint ScanNet caches and 806/101 query-disjoint generic text banks used by the rejected V3",
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_masks_labels_opened": false,
+    "set_matching": "exact permutation matching between the three learned residual slots and up to three valid teacher views; slot0 never consumes teacher capacity",
+    "set_cost": "descriptor cosine + 0.25 * summary-token direction cosine + 0.25 * SmoothL1 log token norm",
+    "unmatched_slot_rule": "a learned slot unmatched on a one-view or two-view row is supervised back to the exact frozen fallback",
+    "query_response": "masked hard maximum over query-independent slot descriptors for both teacher and student",
+    "warmup": "three epochs of gauge-aware residual set matching before response or scene-ranking objectives",
+    "canonical_loss": "monitor_only_frozen_constant",
+    "optimizer_scope": "residual heads and slot embeddings only; V2 remains eval and requires_grad false",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "seed_policy": "run seed0 canary first; seeds1/2 only if seed0 passes the structural and held-out generic gate",
+    "hyperparameter_sweeps": false
+  },
+  "checkpoint_selection": {
+    "control_referenced": true,
+    "required_feasibility_before_quality_selection": [
+      "support_top1_agreement_nonnegative_delta",
+      "ranking_spearman_p05_delta_at_least_minus_0.002",
+      "response_profile_cosine_p05_delta_at_least_minus_0.002",
+      "text_response_smooth_l1_strictly_lower"
+    ],
+    "among_feasible_epochs": "maximize teacher-best-slot cosine gain, then minimize response SmoothL1",
+    "no_feasible_epoch": "reject candidate and retain frozen V2; do not select a least-bad epoch for promotion"
+  },
+  "generic_gate": {
+    "canonical_token_bitwise_equal_control": true,
+    "fallback_descriptor_bitwise_equal_control": true,
+    "teacher_best_slot_elementwise_nondecreasing_by_construction": true,
+    "teacher_best_slot_cosine_mean_gain_min": 0.005,
+    "text_response_smooth_l1": "strictly_lower",
+    "support_top1_agreement": "nondecreasing",
+    "ranking_spearman_p05_delta_min": -0.002,
+    "response_profile_cosine_p05_delta_min": -0.002,
+    "minimum_query_winner_usage_each_learned_slot": 0.02,
+    "multiseed_requirement": "mean gate passes and at least two of three seeds pass every noninferiority gate"
+  },
+  "benchmark_opening_rule": {
+    "allowed_only_after_generic_gate": true,
+    "first_sentinel": "LERF3D Figurines frozen VALA/canonical-negative protocol",
+    "full_lerf_gate": "four-scene macro improves at least 0.01 and no scene drops more than 0.01",
+    "spin9_nvos_gate": "frozen strict result is noninferior within 0.002 before any shared-task improvement claim",
+    "forbidden": [
+      "per-scene tuning",
+      "threshold sweeps",
+      "graph sweeps",
+      "connected-component repair",
+      "benchmark-label checkpoint selection"
+    ]
+  },
+  "failure_response": "If the generic response/ranking gate fails despite exact fallback and improved teacher-set fidelity, stop the codebook branch and move to confidence-factorized source-completion unary and/or rebuild caches with explicit coverage, dispersion and gauge channels."
+}

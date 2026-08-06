@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "experiment": "surface_region_gauge_explicit_completion_v3_fresh_validation_shard0_canary",
+  "status": "rejected_before_training_or_benchmark_opening",
+  "registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_gauge_explicit_completion_v3_addendum_preregistration_20260805.json",
+    "sha256": "789998b78dc6f8e366ff1b86cfa5a6213a504ef765e4a4c810dc5eb311793867"
+  },
+  "cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/surface_region_gauge_explicit_completion_v3_v2/caches/validation_shard0.pt",
+    "sha256": "ce1692a859505f24a9824b18611bec1a230ce9253150d9d0f52d014a2936a1a0",
+    "bytes": 65477259,
+    "teacher_target_source": "fresh_official_runtime",
+    "scenes": 4,
+    "rows": 96,
+    "full_support_rows": 48,
+    "eligibility_completion_rows": 48,
+    "failed_scenes": 0
+  },
+  "integrity": {
+    "schema_version": 4,
+    "training_scope": "global_cross_scene_3d_surface_v3",
+    "minimum_active_tokens": 24,
+    "mean_active_tokens": 124.84375,
+    "maximum_active_tokens": 256,
+    "all_rows_minimum_satisfied": true,
+    "completion_row_fill_coverage": 1.0,
+    "padding_radio_nonzero": 0,
+    "padding_geometry_nonzero": 0,
+    "padding_reliability_nonzero": 0
+  },
+  "distribution": {
+    "all_active_tokens": 11985,
+    "all_support_fill_tokens": 1083,
+    "all_active_fill_fraction": 0.09036295115947723,
+    "completion_selected_tokens": 1152,
+    "completion_support_fill_tokens": 1083,
+    "completion_fill_fraction": 0.9401041666666666,
+    "raw_radio_norm_minimum": 20.322298049926758,
+    "raw_radio_norm_median": 29.22428321838379,
+    "raw_radio_norm_maximum": 40.101200103759766
+  },
+  "diagnosis": "The hash-oriented semantic nodes were not guaranteed to form an anchor-connected induced subgraph. Although the eligibility mask retained a nominal semantic subset, V3 traversal reached almost only the anchor and filled nearly the entire minimum support.",
+  "decision": {
+    "generic_opening_gate_passed": false,
+    "training_started": false,
+    "benchmark_opened": false,
+    "action": "replace disconnected axial selection with deterministic direction-aware anchor-connected semantic support and rerun the canary"
+  },
+  "gpu": {
+    "physical_gpu": 0,
+    "wall_seconds": 96.2,
+    "maximum_observed_temperature_c": 54,
+    "guard_intervention": false,
+    "power_limit_w": 300.0
+  }
+}

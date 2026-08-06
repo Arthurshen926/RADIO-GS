@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_probability_preserving_source_unary_v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "status": "registered_before_candidate_target_metrics",
+  "claim_boundary": "posthoc_method_iteration_after_prior_NVOS_target_results; not an independent validation claim",
+  "hypothesis": "The prior soft-SAM failure partly comes from encoding uncertainty as q*c(q), which changes an uncertain foreground probability into negative evidence, followed by graph propagation that no longer preserves the unary. Keeping q and c separate and fusing only in Bernoulli space should retain the compact field where source completion is unreliable while accepting confident source completion evidence.",
+  "method": {
+    "source_probability": "q is the mean of the ten already-frozen official SAM3 binary source masks, then official positive scribbles overwrite q=1 and negative scribbles overwrite q=0",
+    "source_reliability": "c(q)=1-H2(q)/ln(2), with signed scribbles overwriting c=1",
+    "exact_adjoint": {
+      "channels": [
+        "c*q",
+        "c*(1-q)"
+      ],
+      "primitive_probability": "W^T(c*q)/W^T(c)",
+      "primitive_confidence": "W^T(c)/W^T(1)"
+    },
+    "field_fusion": "p=(1-c_primitive)*p_field+c_primitive*p_source",
+    "prototype_and_seed_source": "unchanged raw signed scribble exact-adjoint compiler",
+    "graph": "disabled zero-edge graph",
+    "readout": "continuous unary_prior at the frozen 0.5 threshold",
+    "new_numeric_parameters": false,
+    "scene_specific_parameters": false,
+    "target_rgb": false,
+    "target_mask_before_score_freeze": false
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "scenes": [
+      "fern",
+      "horns_left"
+    ],
+    "capability_source": "compact canonical field official DINO/SAM3 views",
+    "field_capability": {
+      "fern_sha256": "e2ae42289efa7d49c9ef1fb684e860a7703d6a77758e3847c903e038cc2f845f",
+      "horns_left_sha256": "a7c6a3a938b51ee853e5aa1bc3e36ef468e0fda3785c526ab4529270b665f82d"
+    },
+    "source_completion": {
+      "fern_sha256": "9ca7256983ac61229f5d28d61bc30e7a895a6a9083fd325ac6d87ac6362e49e8",
+      "fern_receipt_sha256": "1b9d38c53a14da0dbda0e7ddd429b3b11c6f4a232e88e3d5795acebab223d53a",
+      "horns_left_sha256": "08a0f366702b79eee7d59f25a85a2480543b0298ef1abd8c30f0ff9edc027155",
+      "horns_left_receipt_sha256": "cd6e04e7ed4126b24e07bd09e11cdc7fbd20066c2ff88b6a28326cc4637d9dfd"
+    }
+  },
+  "implementation": {
+    "evaluator_sha256": "96c72c2cb5d485a9b85f41b78f6e4ea0ff7f46c83cea79ce873765c7d80de449",
+    "completion_helper_sha256": "15ca3c291e862d6888de3421e06f458c6fe3745bd0575f37acc2e39913a77396"
+  },
+  "comparators": {
+    "compact_graph_off_strong_raw_unary": {
+      "fern": 0.7553155907838534,
+      "horns_left": 0.7000681428736316,
+      "macro": 0.7276918668287425
+    },
+    "historical_entropy_q_times_c_graph_support_macro": 0.6019767936016795,
+    "historical_binary_Li_graph_support_macro": 0.5531083412667963
+  },
+  "gate": {
+    "pass": "candidate macro exceeds 0.7276918668 by at least 0.005, at least one scene improves, and neither scene regresses by more than 0.02",
+    "failure": "retain implementation as a negative/diagnostic result; do not expand to the remaining NVOS cohort",
+    "success": "expand unchanged operator and frozen threshold to the remaining NVOS cohort"
+  },
+  "thermal_policy": {
+    "physical_gpu": 0,
+    "power_limit_w": 300,
+    "poll": "stage boundary or approximately 180 seconds",
+    "abort": "temperature at least 88C twice consecutively"
+  }
+}

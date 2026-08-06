@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "result": "canonical_factorized_radio_v1_spin_room_matched_interface_caches",
+  "completed_at": "2026-08-06T01:59:00+08:00",
+  "status": "pass",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_spin_room_matched_interface_preregistration_20260806.json",
+    "sha256": "6b1c5b2b27e5308728cf62d9b6c850cf3022c099b0cd27fd6afa6a7806ce8db0"
+  },
+  "knn": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/query_diffusion_matched_interface_v1/room_euclidean_k200_self.pt",
+    "sha256": "fcaff5a30a79d5d2f9e474c73a7ec5703f37954c616012bd768b058b75e83932",
+    "sidecar_sha256": "fba55a78cb7800dc713bbc40946e842f5aa98c85beb6ee9dfdfaaf8dcd507b79",
+    "num_nodes": 214612,
+    "official_num_neighbors": 200,
+    "include_self": true,
+    "effective_k": 201
+  },
+  "relation": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/query_diffusion_matched_interface_v1/room_dino_signed_hash256.pt",
+    "sha256": "b37fa33c29c2aad829fcba5935bd949f2d47c7235a84d7a3430926b1b12542b3",
+    "sidecar_sha256": "e2ae57f4d4a0d8ef777c9ea16c800b56316ddbf10433e89405278483959aa74f",
+    "num_nodes": 214612,
+    "feature_dimension": 256,
+    "feature_sha256": "261f6ceb412a2ad7beb9073b97e6b98fd716bfd911fc4ed588bdcecf7c7b2bba"
+  },
+  "strict_reload": {
+    "passed": true,
+    "source_graph_sha256": "847f184c6b4d01294564cc80017c69840153ec84c4da0ae351246f7df25ef31a",
+    "source_capability_sidecar_sha256": "164218148d1d987174c572d6078e424b759364e2557a94288b0bf935639284d0",
+    "field_checkpoint_sha256": "343b833b415d467f8993b6ce19057ea838fa12ae19395041347beaf273eef5f7",
+    "experiment_registration_sha256": "6b1c5b2b27e5308728cf62d9b6c850cf3022c099b0cd27fd6afa6a7806ce8db0",
+    "rows_and_geometry_exact": true
+  },
+  "safety": {
+    "query_independent": true,
+    "labels_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "decision": "allow_exact_source_prompt_responsibility_export"
+}

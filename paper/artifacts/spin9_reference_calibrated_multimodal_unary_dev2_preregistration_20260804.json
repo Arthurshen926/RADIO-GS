@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_reference_calibrated_multimodal_unary_dev2_v1",
+  "status": "registered before opening calibrated target outcomes",
+  "motivation": "Prototype count changes evidence amplitude. Compare K4 and K16 after applying the same source-only full-mask threshold calibration, so the experiment tests target-view ranking rather than an arbitrary fixed probability scale.",
+  "development_scenes": ["lego", "truck"],
+  "arms": [
+    {"name": "reference_calibrated_k4", "prototype_count": 4},
+    {"name": "reference_calibrated_k16", "prototype_count": 16}
+  ],
+  "shared": {
+    "final_readout": "unary_prior",
+    "threshold_grid": "0.99 down to 0.03 inclusive in steps of 0.01",
+    "threshold_grid_source": "existing SPIn release-compatible reference calibration",
+    "threshold_selection": "maximize IoU on the declared reference mask; descending grid and strict improvement give deterministic first tie",
+    "target_masks_opened_during_calibration": false,
+    "target_rgb": false,
+    "query_conditioned_diffusion": false,
+    "scene_specific_learned_parameters": false
+  },
+  "gate": {
+    "primary": "calibrated K16 dev2 macro exceeds calibrated K4",
+    "safety": "neither scene regresses by more than 0.02",
+    "comparison_to_retained": "also report against release-compatible query diffusion Lego 0.6181460737 and Truck 0.7899440557",
+    "next": "only if primary and safety pass, evaluate the decoupled exact-anchor variant"
+  },
+  "frozen_protocol": {
+    "manifest": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+    "target_evaluator_modified": false
+  }
+}

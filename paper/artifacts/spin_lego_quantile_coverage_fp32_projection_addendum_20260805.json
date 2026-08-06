@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "registration": "spin_lego_quantile_coverage_fp32_projection_addendum_v1",
+  "registered_at": "2026-08-05T00:00:00+08:00",
+  "status": "registered_after_target_blind_compositor_numeric_failure_and_before_corrected_prediction_receipt",
+  "parent_preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_crossfit_quantile_calibration_v2_preregistration_20260805.json",
+    "sha256": "7d6bcbb083285965796a240e0b62fcad542e1b64c610f301ea82c41ae8add2ec"
+  },
+  "failed_execution": {
+    "target_masks_opened": false,
+    "target_metrics_computed": false,
+    "failure_frame": "0_00097",
+    "failure_stage": "query-independent source-visible coverage rendering",
+    "coverage_dtype": "torch.float32",
+    "coverage_min": 0.063982754945755,
+    "coverage_max": 1.000001072883606,
+    "positive_overshoot": 0.000001072883606,
+    "positive_overshoot_in_float32_epsilons": 9.0,
+    "numerator_dtype": "torch.float32",
+    "numerator_min": 0.0639740452170372,
+    "numerator_max": 0.9999002814292908,
+    "denominator_dtype": "torch.float32",
+    "denominator_min": 0.7169764637947083,
+    "denominator_max": 0.9998999834060669,
+    "interpretation": "The numerator and alpha denominator are separately accumulated FP32 rasters. Their quotient exceeds the mathematical binary-convex support by nine FP32 epsilons. No label, target mask, or metric was opened."
+  },
+  "implementation_correction": {
+    "mathematical_support": [0.0, 1.0],
+    "finite_required": true,
+    "dtype_required": "torch.float32",
+    "float32_epsilon": 0.00000011920928955078125,
+    "safety_multiple": 16,
+    "absolute_tolerance": 0.0000019073486328125,
+    "bound_origin": "next power-of-two FP32-epsilon envelope above the observed source-only nine-epsilon overshoot",
+    "operation": "fail closed outside [-tolerance,1+tolerance], otherwise clamp to the exact mathematical support [0,1]",
+    "method_semantics_changed": false,
+    "numeric_parameter_scan": false,
+    "target_feedback_used": false
+  },
+  "execution": {
+    "old_partial_output_is_not_an_authority": true,
+    "corrected_output_must_use_a_new_directory": true,
+    "corrected_run_must_report_the_maximum_preclamp_overshoot_over_all_43_views": true,
+    "corrected_run_must_stop_if_the_registered_bound_is_exceeded": true
+  }
+}

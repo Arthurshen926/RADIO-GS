@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_local_positive_source_safety_separability_diagnostic_results_v1",
+  "status": "completed_stop_no_reliable_source_only_router",
+  "preregistration": {
+    "path": "paper/artifacts/nvos_local_positive_source_safety_separability_diagnostic_preregistration_20260805.json",
+    "sha256": "11fe3c43c8e087544bd336eda229ca7901429692af014f4c5331e0fc6cb54000"
+  },
+  "diagnostic": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_hierarchical_trust_local_positive_full8_v2/source_safety_separability_diagnostic.json",
+    "sha256": "edf19655e3430d4dec737d1b2ffc583271967cc94a02661f8125315d060137db"
+  },
+  "cohort": {
+    "unsafe_target_regression": [
+      "fern",
+      "flower",
+      "trex"
+    ],
+    "safe_nonregression_with_v2_local_branch": [
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids"
+    ],
+    "excluded_different_v1_branch": [
+      "horns_left"
+    ]
+  },
+  "fixed_statistic_results": {
+    "mean_loo_confidence_weighted_precision": {
+      "unsafe_direction": "lower",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.4166666666666667,
+      "unsafe_range": [0.6838697461758262, 0.89399826045294],
+      "safe_range": [0.6878265635380416, 0.8772735259062985]
+    },
+    "minimum_loo_confidence_weighted_precision": {
+      "unsafe_direction": "lower",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.6666666666666666,
+      "unsafe_range": [0.0, 0.36650845829595563],
+      "safe_range": [0.004469508674011436, 0.20660149758638235]
+    },
+    "pooled_confidence_weighted_precision": {
+      "unsafe_direction": "lower",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.3333333333333333,
+      "unsafe_range": [0.6198536156362816, 0.8820398060066285],
+      "safe_range": [0.5812077659534631, 0.858605502364358]
+    },
+    "pooled_hard_majority_recall": {
+      "unsafe_direction": "lower",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.5,
+      "unsafe_range": [0.3971926055897889, 0.9734382724980273],
+      "safe_range": [0.7697409078406368, 0.9835464351059834]
+    },
+    "pooled_hard_majority_iou": {
+      "unsafe_direction": "lower",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.5,
+      "unsafe_range": [0.31909061493086505, 0.8445705704549392],
+      "safe_range": [0.5511489490134692, 0.8537071985793558]
+    },
+    "full_fit_proposal_fraction": {
+      "unsafe_direction": "higher",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.75,
+      "unsafe_range": [0.049782134174441675, 0.22889664233867582],
+      "safe_range": [0.032586371175494934, 0.1197237277236818]
+    },
+    "full_fit_confidence_mass_fraction": {
+      "unsafe_direction": "higher",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.75,
+      "unsafe_range": [0.021243505660065255, 0.16145329478335196],
+      "safe_range": [0.018565126348829945, 0.08921607660724083]
+    },
+    "v1_minimum_heldout_iou": {
+      "unsafe_direction": "lower",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.6666666666666666,
+      "unsafe_range": [0.0, 0.35322371485766807],
+      "safe_range": [0.013613525696498456, 0.23781687865346768]
+    },
+    "v1_failed_trial_count": {
+      "unsafe_direction": "higher",
+      "strict_rank_separation": false,
+      "pairwise_concordance": 0.4166666666666667,
+      "unsafe_range": [1.0, 5.0],
+      "safe_range": [1.0, 3.0]
+    }
+  },
+  "decision": {
+    "at_least_one_existing_statistic_strictly_separates_all_regressions": false,
+    "source_only_cross_scene_calibration_authorized": false,
+    "second_target_run_authorized": false,
+    "action": "stop_no_reliable_source_only_router"
+  },
+  "interpretation": {
+    "key_counterexample": "Flower has very high source-view mean weighted precision (0.893998) yet is the largest target regression, while fortress has a similar 0.877274 and is a strong target gain. Source repeatability is therefore not cross-view correctness.",
+    "coverage_result": "Proposal/confidence coverage is the best weak indicator at 0.75 pairwise concordance, but trex is unsafe at low coverage and fortress is safe at moderate coverage, so it cannot supply a general threshold.",
+    "first_principles_limitation": "Repeated source-view masks estimate within-view epistemic stability. They do not observe the cross-view visibility, occlusion, and 3-D ownership errors that determine whether a locally stable source completion transfers safely.",
+    "methodological_conclusion": "Do not convert the three known regressions into scene exceptions or a tuned gate. The current 0.74777 full8 result remains the honest fixed-candidate result."
+  },
+  "safety": {
+    "raw_target_mask_or_score_opened_for_diagnostic": false,
+    "sealed_target_summary_used_only_to_define_outcome_groups": true,
+    "numeric_threshold_selected": false,
+    "multivariate_fit": false,
+    "scene_specific_exception": false,
+    "new_target_run": false
+  }
+}

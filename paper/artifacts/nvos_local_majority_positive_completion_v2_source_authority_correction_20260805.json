@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_local_majority_positive_completion_v2_source_authority_correction",
+  "registered_at": "2026-08-05T20:03:02+08:00",
+  "status": "registered_after_failed_source_only_parser_attempt_and_before_successful_source_diagnostic",
+  "scope": "Correct only the missing raw-scribble asset hashes in the frozen manifest authority. The fixed v2 method, source-only metrics, admissibility gates, scene order, and completion assets remain unchanged.",
+  "failed_attempt": {
+    "failure": "KeyError: asset_sha256 because the frozen manifest prompt records paths but does not embed raw scribble hashes",
+    "builder_sha256": "ebd4841e9c8412f37037b31a150f3b7a4da67f6c8f2aa289230a30d2a60e25d2",
+    "diagnostic_output_written": false,
+    "target_rgb_opened": false,
+    "target_score_rendered": false,
+    "target_mask_opened": false,
+    "target_metric_opened": false
+  },
+  "lineage": {
+    "preregistration": "paper/artifacts/nvos_local_majority_positive_completion_v2_preregistration_20260805.json",
+    "preregistration_sha256": "5b7bda622a923d0333929bc0f641b9ab8d20a6a7496ee287a0c5f75f6af46152",
+    "manifest": "/mnt/pool/sqy/3d_understanding/segmentation_benchmarks/manifests/nvos_strict_unseen_v1.json",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea"
+  },
+  "authority_policy": {
+    "paths": "Raw positive_path and negative_path remain exactly those in the frozen manifest.",
+    "hashes": "The following SHA-256 values were computed from those path-resolved files before the successful diagnostic.",
+    "builder_requirement": "The diagnostic builder must require and SHA-bind this correction, verify both raw files before opening their pixels, and record this authority in its output.",
+    "method_or_gate_change": false,
+    "target_information_used": false
+  },
+  "scribble_assets": {
+    "fern": {
+      "positive_sha256": "cd0090254cf4cc986ec45c78615e3fbb0d3eeb433f4f6cb04b7695d1d9859118",
+      "negative_sha256": "c7c1af3d082a7a8caadaac3f822691b33325e4a71432869e1e65d524e7f2a535"
+    },
+    "flower": {
+      "positive_sha256": "8a5498548e7329ccf218c2f91de7ca63ef0f918f471515ef5fcfecf59d5ec8b5",
+      "negative_sha256": "b3ff983aa88372fcd718876c43ff6970f42a4605f8a87dc4eef2a6dd4d7b6112"
+    },
+    "fortress": {
+      "positive_sha256": "9748da7c5f5166bf8942bceaf0949b9094d5c92bfea32cee4d21b1cb271ac551",
+      "negative_sha256": "4d20630fb34cf2769fa2f984eb80a5ea0484366dfe1be39c2f9907fa109b61b7"
+    },
+    "horns_center": {
+      "positive_sha256": "15b6da05eb29682c751a075e5842181d29923098ee0088be4d820015b24b88fa",
+      "negative_sha256": "4f17eef4338ed3d57751ca65e2306f57c8958406f843489c21e3865d6474608d"
+    },
+    "horns_left": {
+      "positive_sha256": "1b4ef9a1b28322bb8c28c2293f767603c08644fd2d784e5e9ccf97503730ef51",
+      "negative_sha256": "03fa4a98a919aa4daaf248628a38d84c778dc33f7cd1e8fb0a892bc4710f16cc"
+    },
+    "leaves": {
+      "positive_sha256": "a3af8e0d8027df8f668f3c6b090ad6f0c2bbd71e446b75caf1209b87b2a83735",
+      "negative_sha256": "ad2439b4b332dc52d1593a6489a2e39ced135e9e65d0ee78462d0b816116a0cd"
+    },
+    "orchids": {
+      "positive_sha256": "e3b664f59081b6c34dabac0af9378d559ce283bb2ccaa514b46a4758585b5a37",
+      "negative_sha256": "35d69cd11a48eaf75df0b00db1ffc101725834af8f931d1ea146a128d2777685"
+    },
+    "trex": {
+      "positive_sha256": "db4fae46a91fec45eda85e7773c60410c4e26bda6a770df7fafe4904c927f234",
+      "negative_sha256": "f0b52cd49b3971b02db2b801977dd8d0202f6f65fee42c7fa8ab7ac62e769444"
+    }
+  }
+}

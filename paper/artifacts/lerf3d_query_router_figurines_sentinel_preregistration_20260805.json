@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_query_router_figurines_sentinel_v1",
+  "status": "registered_after_generic_multiseed_gate_before_new_route_benchmark_metrics",
+  "development_scene": "figurines",
+  "hypothesis": "The frozen-V2 residual codebook preserves complementary view evidence, and the generic query-conditioned residual attention can convert it to stronger canonical-negative primitive unaries without benchmark-specific fitting.",
+  "frozen_candidate": {
+    "codebook_path": "output/optimization_20260805/surface_region_residual_codebook_v1/seed0_headparity.pt",
+    "codebook_sha256": "34dc94f53f041150abce353ca80eba78672bf4301fab756d1d525e480cedd2b7",
+    "router_seed_policy": "seed0 fixed before benchmark opening; no benchmark-based seed selection or ensemble",
+    "router_path": "output/optimization_20260805/surface_region_query_router_v1/seed0.pt",
+    "router_sha256": "cfedf8853ec65efa1775e56ea982eba0e6383b4f911e4ee5e0438e7fb122d7d4",
+    "generic_negatives": ["object", "things", "stuff", "texture"],
+    "generic_negative_cache_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "radio_feature_gauge": "l2_direction, fixed to the codebook training contract before benchmark opening",
+    "region_contract_sha256": "2f974bb5d72b4fe9afe5151582cda6fe972f8531d332745fe1861a52715822c4",
+    "support_graph_sha256": "abcdd466fbbd726f277b59b137a59ac93b0a2c270a7557fc9916a478a66a1451",
+    "formula": "slotwise sigmoid(10*(positive_cosine-max_generic_negative_cosine)), followed by the frozen shared query router",
+    "scene_specific_parameters": false,
+    "benchmark_vocabulary_training": false
+  },
+  "frozen_protocol": {
+    "preset": "vala_repo_3d",
+    "scale_radii_m": [0.25, 0.45, 0.7],
+    "scale_readout": "highest_raw_knn10_smoothed_peak_per_query",
+    "score_postprocess": "vala_knn_minmax",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "evaluation_protocol_changed": false
+  },
+  "controls": {
+    "accepted_old_contract_canonical_negative_miou": 0.4753371775,
+    "new_contract_exact_fallback": "materialized in the same run from slot zero, before router attention",
+    "attribution_rule": "Report old-to-new-base and new-base-to-router deltas separately. Do not attribute a contract/readout change to the router."
+  },
+  "sentinel_gate": {
+    "primary": "router mIoU must exceed the accepted old-contract result by at least 0.005",
+    "mechanistic": "router mIoU must exceed the same-run new-contract exact fallback mIoU",
+    "failure_action": "reject benchmark expansion and diagnose train/deploy or background false-positive mismatch; do not tune scene thresholds, graph parameters, or seed",
+    "pass_action": "expand unchanged to all four LERF3D scenes and apply the existing full4 gate"
+  },
+  "full4_gate_if_opened": {
+    "scene_macro_delta_min": 0.01,
+    "maximum_allowed_scene_drop": 0.01
+  },
+  "forbidden": [
+    "per-scene tuning",
+    "threshold sweep",
+    "graph sweep",
+    "benchmark-label checkpoint selection",
+    "router-seed selection on Figurines"
+  ]
+}

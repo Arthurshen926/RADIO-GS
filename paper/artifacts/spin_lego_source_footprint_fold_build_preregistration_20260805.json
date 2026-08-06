@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "registration": "spin_lego_source_footprint_fold_build_v1",
+  "registered_at": "2026-08-05T13:57:47+08:00",
+  "status": "registered_after_exact_w_export_and_before_footprint_authority_build",
+  "purpose": "Assign every valid Lego primitive to one fixed native-raster footprint group for structured source-only three-fold OOF fitting.",
+  "method": {
+    "contract": "source_raster_dominant_footprint_blocks_v1",
+    "native_raster": [764, 1015],
+    "fixed_grid": [6, 8],
+    "primitive_assignment": "responsibility_mass_argmax_exact_tie_smallest_block",
+    "fold_assignment": "SplitMix64(group_id) modulo 3",
+    "invisible_group": "one shared sentinel group",
+    "minimum_class_rows_per_train_and_heldout_population": 32
+  },
+  "inputs": {
+    "exact_w": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/reference_exact_w.pt",
+      "sha256": "f572dede45dca479f7430b7735a0e63805ea598e1b61d6a1d6336b00efbdd1aa",
+      "report_sha256": "a8f5566b609eb94c3676103323f4b4eadd091d0b6b6242c3e5427d093e8f27be",
+      "authority_sha256": "fed59f104a3930157c09acd2f4470cb294cb9d52b939dd1fe75da366e05ab170",
+      "tensor_bundle_sha256": "204758fdc53f124183d10e8a9634266b2fb80abecea63d886e8a99d21417a948",
+      "triplet_count": 71039533
+    },
+    "primitive_row_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/evaluation_closeout_20260716/canonical_mpr_v3_spin9/lego/shared_support_graph_k16.pt",
+      "sha256": "ca84a2f204977761aed30265af35ffabd7b89037b59c05f2f08c5b0e49a4a988",
+      "global_rows": 128780,
+      "num_global_rows": 636148
+    }
+  },
+  "implementation": {
+    "core_sha256": "8c365c4f8974a770f6a58176d4d1de6518237065b7a8230d90bfa8a8ff7a508d",
+    "builder_sha256": "3ef4e6ff4b5f9a16514f07b12642da8b465acfededce41c9fbc37ccaed9ec460",
+    "core_test_sha256": "181914949cde0249520e06fa274e6e949a41a077bc789305c993fd0108e66929",
+    "builder_test_sha256": "4a33319145a9a1221b93a1553c3f33a01cdccee286cbfdf58a35cd443f09b5fe",
+    "focused_tests": "18 passed"
+  },
+  "output": {
+    "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_exact_w_v1/lego/source_footprint_fold_authority_report.json"
+  },
+  "safety": {
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  }
+}

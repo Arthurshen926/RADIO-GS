@@ -1,0 +1,43 @@
+{
+  "artifact_type": "implementation_closure",
+  "method_contract": "canonical-factorized-radio-loss-v1",
+  "date": "2026-08-05",
+  "status": "implemented_and_cpu_verified_not_integrated_into_training",
+  "preregistration": {
+    "path": "paper/artifacts/canonical_factorized_radio_loss_v1_preregistration_20260805.json",
+    "sha256": "12386c2b2986017c5e44a06d5bcf9ff7fc6531583986f05e096d81d561ccad38"
+  },
+  "implementation": {
+    "path": "radio_gs/training/factorized_radio_loss.py",
+    "sha256": "eee8a8f02587d1b2ed754f05422ff04b195de2e0d0a6a3abe7c734e4dce24349",
+    "legacy_loss_mutated": false,
+    "training_entrypoint_integrated": false
+  },
+  "tests": {
+    "path": "tests/test_factorized_radio_loss.py",
+    "sha256": "69f304ac92710c4575ebdf825506fe4e14d7a664f24779cd69230cab1664184c",
+    "focused_plus_legacy": "7 passed",
+    "py_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "verified_properties": [
+    "direction and amplitude errors are measured independently",
+    "invalid rows cannot influence either component",
+    "zero predictions have finite loss and gradients",
+    "direction and amplitude use separate precision weights",
+    "visibility purity remains an explicit readout scalar rather than being collapsed into reconstruction confidence",
+    "unknown reliability scalar schemas fail closed"
+  ],
+  "target_access": {
+    "benchmark_targets_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "target_metrics_used": false
+  },
+  "execution": {
+    "gpu_used": false,
+    "field_trained": false,
+    "cache_rebuilt": false,
+    "benchmark_evaluated": false
+  }
+}

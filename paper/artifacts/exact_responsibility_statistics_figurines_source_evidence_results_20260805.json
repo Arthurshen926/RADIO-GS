@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "artifact_type": "query_independent_source_evidence_results",
+  "experiment": "exact-responsibility-statistics-v1-figurines",
+  "date": "2026-08-05",
+  "question": "Does the exact-marginal support expansion add primitives with evidence comparable to the immutable Accepted V2 support?",
+  "authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/exact_marginal_responsibility_authority.json",
+    "sha256": "5bff25c917a1fe9c973b4d201502f07836117e1d313756263ddb533e83834fd4",
+    "views": 120,
+    "total_hits": 32766223
+  },
+  "statistics_sidecar": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/exact_responsibility_statistics_v1.pt",
+    "sha256": "3862ee2a90afe022d2fb8067c57836e81417ec38f7d569fc0ef4d4c9147e306d",
+    "schema": "radio_gs.exact_responsibility_statistics.v1",
+    "contract": "source_only_exact_responsibility_statistics_v1",
+    "contains_admission_decision": false
+  },
+  "implementation": {
+    "builder": {
+      "path": "radio_gs/rendering/exact_responsibility_statistics.py",
+      "sha256": "b342bab12ec0d61fc998b83bfd221895daad43a2e9c731530906177273f299a3"
+    },
+    "test": {
+      "path": "tests/test_exact_responsibility_statistics.py",
+      "sha256": "5ae6aad20a72e1115f6f373abb5fe63104c30bd83115dcad0566342da5dfe1b9"
+    }
+  },
+  "support_partition": {
+    "immutable_accepted_v2_descriptor_sha256": "24beae4e5eb855aefb37bd98c5f60aff4c81a1ab77917b6ec47384f6dbc533d5",
+    "overlap": 82400,
+    "accepted_only": 203,
+    "exact_only": 14479,
+    "policy_used_for_this_analysis": "descriptive_partition_only_no_threshold_no_admission"
+  },
+  "overlap_evidence": {
+    "visible_mass_mean": 4.067308736208756,
+    "visible_mass_median": 0.2595892582201884,
+    "semantic_mass_mean": 0.40319343671307506,
+    "semantic_mass_median": 0.0014318446485546753,
+    "kish_ess_mean": 61.00461272109194,
+    "kish_ess_median": 17.32069876235272,
+    "nonzero_hit_count_median": 166.0,
+    "nonzero_view_count_median": 20.0,
+    "purity_mean": 0.017441877383407873,
+    "purity_median": 0.005337306501243741
+  },
+  "exact_only_evidence": {
+    "visible_mass_mean": 0.23782312914877232,
+    "visible_mass_median": 0.0002151598872330851,
+    "semantic_mass_mean": 0.0325122105533837,
+    "semantic_mass_median": 1.1786283277265465e-08,
+    "kish_ess_mean": 9.245367024470518,
+    "kish_ess_median": 2.379962615946669,
+    "nonzero_hit_count_median": 9.0,
+    "nonzero_view_count_median": 3.0,
+    "purity_mean": 0.0028153830317997086,
+    "purity_median": 0.000054062804141086385
+  },
+  "conclusion": {
+    "exact_only_median_purity_ratio_to_overlap": 0.01012915431353998,
+    "exact_only_median_semantic_mass_ratio_to_overlap": 0.0000082315444085617,
+    "interpretation": "The support expansion is dominated by a weak-evidence tail. Exact visibility establishes nonzero existence but is not itself semantic admission authority.",
+    "method_decision": "Keep exact-only primitives abstained in the first full-scalar residual contract. Preserve the continuous statistics for a separately preregistered future admission rule; do not choose a threshold from LERF metrics."
+  },
+  "target_access": {
+    "query_independent_scene_source_views_only": true,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "benchmark_metrics_used_for_threshold_selection": false
+  }
+}

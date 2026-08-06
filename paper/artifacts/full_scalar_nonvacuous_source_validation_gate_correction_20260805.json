@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "artifact_type": "source_only_contract_correction_and_runtime_audit",
+  "completed_at": "2026-08-05T20:37:51+08:00",
+  "scope": "AcceptedV2-to-full-scalar training, certificate, and runtime trust-chain audit; CPU only; no benchmark target, GT, query, label, or metric opened",
+  "finding": {
+    "severity": "promotion_certificate_fail_open",
+    "previous_behavior": "A validation cohort with every residual-eligible row routed OOD to the bitwise AcceptedV2 base was marked vacuous_fallback_only but still passed the in-domain gate. Partial in-domain coverage across the eight frozen validation scenes was also sufficient.",
+    "why_invalid": "Bitwise OOD fallback is a runtime safety property, not evidence that the residual generalizes. It cannot authorize a full-scalar promotion certificate when the candidate was not exercised in every frozen source-validation scene.",
+    "runtime_base_fallback_was_unsafe": false
+  },
+  "correction": {
+    "eligible_coverage": "at least two eligible rows in each of the eight frozen source-validation scenes",
+    "in_domain_coverage": "at least two non-OOD residual rows in each of the eight frozen source-validation scenes",
+    "vacuous_fallback_gate_allowed": false,
+    "reporting": "eligible and in-domain per-scene row counts, covered count, and missing-or-insufficient scene list",
+    "certificate_validation": "recompute coverage from signed per-scene row counts and cross-check total eligible/in-domain rows; do not trust optimistic boolean declarations",
+    "unchanged": [
+      "source-train-only normalization fit",
+      "OOD rows are excluded from training",
+      "OOD deployment rows use bitwise AcceptedV2 base fallback",
+      "AcceptedV2 field, graph, region selection, readout, and descriptor gauge"
+    ]
+  },
+  "contract_sha256": {
+    "training": "ebda6d5633f9bab64452719fa62600d07a6ce9f19e468788ceef73cab824983c",
+    "training_certificate": "344ebb64e705a70f68ade52b352163f226e91266ed5a0cffab77e04b0438ab35",
+    "residual_checkpoint": "681f3302d3db9955a7454ca6c7261aa3a5438c48b3c5423d58004351ac98ba24"
+  },
+  "implementation": {
+    "trainer": {
+      "path": "radio_gs/scripts/train_surface_region_full_scalar_residual.py",
+      "sha256": "1cb719a0197009feacee6472f8118676cc0bdb6af1f915d688996ec0318b3a57"
+    },
+    "training_certificate": {
+      "path": "radio_gs/interfaces/surface_region_full_scalar_training_certificate.py",
+      "sha256": "fbec3c57d119c1691af01a804828736c8316752ff77256db38b3978a431ab664"
+    },
+    "residual_checkpoint": {
+      "path": "radio_gs/interfaces/surface_region_full_scalar_residual_checkpoint.py",
+      "sha256": "0c0fe1e29eb7d2ffb4f967c37955216d3c8e84334e2a538e980d43d0a930e8c3"
+    }
+  },
+  "validation": {
+    "focused_training_certificate_runtime": "46 passed",
+    "pilot_cohort_contract_integration": "30 passed",
+    "new_failure_cases": [
+      "all validation rows OOD",
+      "one frozen validation scene has only one in-domain row",
+      "certificate retains pass booleans while forging one per-scene count below two"
+    ],
+    "python_compile": true,
+    "git_diff_check": true
+  },
+  "remaining_source_only_blocker": {
+    "status": "real_clean_cohort_required_before_any_performance_claim",
+    "current_pilot_terminal_product": "query-free exact factorized primitive state sidecar; this is necessary but not a training shard",
+    "missing_materializer_interface": [
+      "build or reopen the immutable AcceptedV2 canonical-v1 field, support graph, validity, row order, and frozen radii for each clean source scene",
+      "materialize the exact AcceptedV2 region selections and normalized e0 descriptors with stable scene and region-row IDs",
+      "gather the exact-state global Gaussian rows for those same regions and aggregate the raw 18-D scalar summary without changing AcceptedV2 support",
+      "compute official multiview SigLIP2 teacher descriptors from source RGB only and bind stable ordered teacher-view IDs",
+      "write one schema-valid source_train/source_validation shard per scene plus source-state and teacher manifests whose scene, physical-space, region, view, and file SHA authorities match the frozen 24/8 cohort",
+      "run the corrected nonvacuous source-validation gate before producing a residual certificate"
+    ],
+    "forbidden_shortcuts": [
+      "reuse benchmark scenes, queries, masks, labels, or target-heldout views",
+      "map depth points or factorized-only rows approximately into AcceptedV2 regions",
+      "claim improvement from field/state fidelity alone",
+      "tune the OOD envelope or residual per scene"
+    ]
+  },
+  "conclusion": "The AcceptedV2 overlay runtime remains structurally conservative, but its prior source-validation certificate could falsely treat universal or partial OOD fallback as residual evidence. That bug is closed. Whether full scalars improve LERF3D or other tasks remains empirically undecided until the real clean 24/8 region-and-teacher shards are materialized and pass this nonvacuous gate."
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "registration": "spin_fortress_native_exact_w_source_export_v1",
+  "registered_at": "2026-08-06T06:43:00+08:00",
+  "status": "registered_before_source_mask_decode_or_real_export",
+  "purpose": "Export the native-resolution query-free exact compositor matrix W for the frozen SPIn-NeRF Fortress reference view, independently of target data and historical compact assets.",
+  "parent_chain": {
+    "path": "paper/artifacts/canonical_factorized_radio_v1_fortress_source_chain_preregistration_20260806.json",
+    "sha256": "b99bc96639974423e2867d9ddeee5a42065f779dc5e5a7aa916a3e2467815421"
+  },
+  "scope": {
+    "scene_id": "fortress",
+    "reference_frame_id": "image000",
+    "camera_name": "IMG_1800",
+    "native_width": 1008,
+    "native_height": 756,
+    "prompt_type": "reference_binary_mask",
+    "reference_binary_mask_sha256": "680ba842af40f979e6291cc45c6fb1726a800832486fec59ce0114fb33f472d5"
+  },
+  "inputs": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "queue_root": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712",
+    "gaussfm_config_sha256": "ae7239aa1ce5c5db2dd297e4a505a3cc3d178aca16e976f66b4dede5774659db",
+    "camera_mapping_sha256": "5693d26c2a02f8d864eff3a683c80bf56fd5ddf402993a49730e67b439918ea5",
+    "geometry_checkpoint_sha256": "9b3ca20e39fb205f5b067a8d0eef767c6749f879df8686b98ca86fa5d4b54b93"
+  },
+  "implementation": {
+    "header_authority_closure_sha256": "7d95e29467a3f64b47de4bc4a7c981950c8dd78e01dc8f124b40a1a20dcd9d89",
+    "exporter_sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "exact_compositor_sha256": "b342bab12ec0d61fc998b83bfd221895daad43a2e9c731530906177273f299a3",
+    "repository_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd",
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "process_device": "cuda:0",
+    "gpu_power_limit_w": 300,
+    "maximum_temperature_c": 88,
+    "poll_seconds": 30,
+    "maximum_consecutive_overheat_polls": 6,
+    "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/fortress/reference_exact_w.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/spin_source_exact_w_v1/fortress/reference_exact_w_report.json"
+  },
+  "forbidden_access": {
+    "source_mask_pixels_decoded_before_registration": false,
+    "query_or_evidence_constructed": false,
+    "evaluation_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "post_export_checks": [
+    "strict PromptResponsibilityAuthority replay",
+    "complete file SHA and tensor bundle SHA replay",
+    "native H/W frame geometry camera compositor exporter and source-file bindings",
+    "triplet count visible primitive count mass and telemetry recording"
+  ]
+}

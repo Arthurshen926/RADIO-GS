@@ -22,6 +22,16 @@ from typing import Any, Mapping, Sequence
 import torch
 
 from radio_gs.evaluation.openclip_readout import cosine_logits
+from radio_gs.interfaces.surface_region_selection import (
+    surface_region_contract_from_specification,
+)
+from radio_gs.interfaces.surface_region_summary import (
+    SURFACE_REGION_V3_GATED_RAW_PRIOR,
+    SURFACE_REGION_V3_LEGACY_RAW_BASE,
+    SURFACE_SUMMARY_READOUT_V3,
+    SURFACE_SUMMARY_READOUT_V3_GATED_BASE_SCHEMA_VERSION,
+    SURFACE_SUMMARY_READOUT_V3_SCHEMA_VERSION,
+)
 from radio_gs.utils.immutable_artifacts import (
     canonical_json_sha256,
     load_sha_bound_project_checkpoint_mapping,
@@ -193,16 +203,58 @@ def _require_metadata_file_binding(
 
 
 def _readout_native_scales(payload: Mapping[str, Any]) -> tuple[float, ...]:
-    if payload.get("schema_version") != 3:
+    schema_version = payload.get("schema_version")
+    if type(schema_version) is not int or schema_version not in {
+        3,
+        SURFACE_SUMMARY_READOUT_V3_SCHEMA_VERSION,
+        SURFACE_SUMMARY_READOUT_V3_GATED_BASE_SCHEMA_VERSION,
+    }:
         raise ValueError("surface-region readout checkpoint schema differs")
+    architecture = payload.get("architecture")
+    if not isinstance(architecture, Mapping):
+        raise ValueError("surface-region readout checkpoint lacks architecture")
+    expected_architecture, expected_contract_version = (
+        ("surface_region_summary_readout_v2", "surface-region-contract-v2")
+        if schema_version == 3
+        else (SURFACE_SUMMARY_READOUT_V3, "surface-region-contract-v3")
+    )
+    if architecture.get("name") != expected_architecture:
+        raise ValueError("surface-region readout checkpoint architecture differs")
+    base_output_mode = architecture.get(
+        "base_output_mode", SURFACE_REGION_V3_LEGACY_RAW_BASE
+    )
+    if (
+        schema_version == SURFACE_SUMMARY_READOUT_V3_SCHEMA_VERSION
+        and base_output_mode != SURFACE_REGION_V3_LEGACY_RAW_BASE
+    ) or (
+        schema_version == SURFACE_SUMMARY_READOUT_V3_GATED_BASE_SCHEMA_VERSION
+        and base_output_mode != SURFACE_REGION_V3_GATED_RAW_PRIOR
+    ):
+        raise ValueError("surface-region readout schema/base-output mode differs")
     provenance = payload.get("provenance")
     if not isinstance(provenance, Mapping):
         raise ValueError("surface-region readout checkpoint lacks provenance")
-    region_contract = provenance.get("region_contract")
-    if not isinstance(region_contract, Mapping):
+    specification = provenance.get("region_contract")
+    if not isinstance(specification, Mapping):
         raise ValueError("surface-region readout checkpoint lacks region contract")
-    raw = region_contract.get("radii_m")
-    if not isinstance(raw, (list, tuple)) or len(raw) != SCALE_COUNT:
+    contract = surface_region_contract_from_specification(specification)
+    if contract.version != expected_contract_version:
+        raise ValueError("surface-region readout schema/contract version differs")
+    declared_version = provenance.get("region_contract_version")
+    if declared_version is not None and declared_version != contract.version:
+        raise ValueError("surface-region readout contract version binding differs")
+    provenance_digest = _require_sha256(
+        provenance.get("region_contract_sha256"),
+        label="surface-region readout provenance region_contract_sha256",
+    )
+    architecture_digest = _require_sha256(
+        architecture.get("contract_sha256"),
+        label="surface-region readout architecture contract_sha256",
+    )
+    if provenance_digest != contract.digest or architecture_digest != contract.digest:
+        raise ValueError("surface-region readout contract SHA256 differs")
+    raw = contract.radii_m
+    if len(raw) != SCALE_COUNT:
         raise ValueError("surface-region readout must bind exactly three native scales")
     try:
         values = tuple(float(value) for value in raw)
@@ -370,7 +422,11 @@ def _validate_descriptor_cache(
     }
 
 
-def _validate_text_query_cache(payload: Mapping[str, Any]) -> dict[str, Any]:
+def _validate_text_query_cache(
+    payload: Mapping[str, Any],
+    *,
+    allow_missing_canonicalization_metadata: bool = False,
+) -> dict[str, Any]:
     raw_queries = payload.get("queries")
     if not isinstance(raw_queries, (list, tuple)) or not raw_queries:
         raise ValueError("frozen text query cache queries must be a non-empty list")
@@ -388,8 +444,13 @@ def _validate_text_query_cache(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("frozen text query cache must use the official SigLIP2 encoder")
     if payload.get("model_name") != SIGLIP2_MODEL_NAME:
         raise ValueError("frozen text query cache model_name differs")
-    if payload.get("text_canonicalization") != SIGLIP2_TEXT_CANONICALIZATION:
-        raise ValueError("frozen text query cache canonicalization differs")
+    declared_canonicalization = payload.get("text_canonicalization")
+    if declared_canonicalization != SIGLIP2_TEXT_CANONICALIZATION:
+        if not (
+            declared_canonicalization is None
+            and allow_missing_canonicalization_metadata
+        ):
+            raise ValueError("frozen text query cache canonicalization differs")
     embeddings = payload.get("embeddings")
     expected_shape = (len(query_ids), DESCRIPTOR_DIMENSION)
     if (
@@ -407,6 +468,9 @@ def _validate_text_query_cache(payload: Mapping[str, Any]) -> dict[str, Any]:
         "query_ids": query_ids,
         "embeddings": embeddings,
         "embedding_tensor_sha256": _tensor_sha256(embeddings),
+        "canonicalization_metadata_present": bool(
+            declared_canonicalization == SIGLIP2_TEXT_CANONICALIZATION
+        ),
     }
 
 
@@ -460,6 +524,7 @@ def materialize(
     renderer_geometry_checkpoint_sha256: str,
     output: str | Path,
     chunk_size: int = 4096,
+    allow_missing_text_canonicalization_metadata: bool = False,
 ) -> dict[str, Any]:
     """Build one immutable Direct3D cache and its shared renderer receipt."""
 
@@ -533,7 +598,12 @@ def materialize(
         raise ValueError(
             "renderer geometry xyz/count/row-order differs from descriptor cache"
         )
-    text = _validate_text_query_cache(text_payload)
+    text = _validate_text_query_cache(
+        text_payload,
+        allow_missing_canonicalization_metadata=(
+            allow_missing_text_canonicalization_metadata
+        ),
+    )
     query_scores = _compile_query_scores(
         descriptor["descriptors"],
         descriptor["global_rows"],
@@ -576,6 +646,14 @@ def materialize(
             "text_encoder": "official_siglip2_g",
             "model_name": SIGLIP2_MODEL_NAME,
             "text_canonicalization": SIGLIP2_TEXT_CANONICALIZATION,
+            "text_canonicalization_metadata_present": text[
+                "canonicalization_metadata_present"
+            ],
+            "text_canonicalization_authority": (
+                "source_cache_metadata"
+                if text["canonicalization_metadata_present"]
+                else "explicit_legacy_frozen_cache_allowance"
+            ),
             "prompt_templates": ["{query}"],
         },
         "geometry_axis": {
@@ -659,6 +737,9 @@ def materialize(
             "device": "cpu",
             "chunk_size": int(chunk_size),
             "chunk_size_changes_method": False,
+            "allow_missing_text_canonicalization_metadata": bool(
+                allow_missing_text_canonicalization_metadata
+            ),
         },
         "shared_renderer_authority": shared_authority,
     }
@@ -685,6 +766,14 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=4096,
         help="CPU execution chunk only; it does not alter any query score",
     )
+    parser.add_argument(
+        "--allow-missing-text-canonicalization-metadata",
+        action="store_true",
+        help=(
+            "Allow a SHA-pinned legacy frozen text cache whose embeddings are "
+            "valid but whose metadata predates the canonicalization field"
+        ),
+    )
     args = parser.parse_args(argv)
     report = materialize(
         descriptor_cache=args.descriptor_cache,
@@ -701,6 +790,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         ),
         output=args.output,
         chunk_size=args.chunk_size,
+        allow_missing_text_canonicalization_metadata=(
+            args.allow_missing_text_canonicalization_metadata
+        ),
     )
     print(json.dumps(report, indent=2, sort_keys=True))
 

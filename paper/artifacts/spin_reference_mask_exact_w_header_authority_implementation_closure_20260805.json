@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "registration": "spin_reference_mask_exact_w_header_authority_v1_implementation_closure",
+  "status": "sealed_after_preregistration_without_real_export_gpu_execution_query_construction_or_target_metric",
+  "preregistration": {
+    "path": "paper/artifacts/spin_reference_mask_exact_w_header_authority_preregistration_20260805.json",
+    "sha256": "502f978c414a112e1e9e7aa2da3a38abd6e7378bf4c26ccca1b76af57b31ad20"
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/export_prompt_responsibility_cache.py",
+    "sha256": "5ba326b6fcfb5dd1901569f6537ffb19b53760f86dafff787ba92ea9e8ed16e4",
+    "legacy_parent_git_blob_sha256": "6f86ee670c7dd3fd62025e91149443779aa156788c4e1059dc937d9f9871c56c",
+    "responsibility_interface": {
+      "path": "radio_gs/interfaces/prompt_responsibility_cache.py",
+      "sha256": "e3494e8c6b5e56a8397f36a031cae4c5a88771dee60e2cf6b39b37bb984a4434"
+    },
+    "exact_compositor": {
+      "path": "radio_gs/rendering/contribution_compositor.py",
+      "sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0"
+    }
+  },
+  "upstream_authority": {
+    "source_footprint_preregistration": {
+      "path": "paper/artifacts/source_raster_dominant_footprint_blocks_v1_preregistration_20260805.json",
+      "sha256": "95ade3ebb9279f21a41496c2dce74d249be0ff160f48fb82a015a15ec428a241"
+    },
+    "spin9_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede"
+    },
+    "lego_header_example": {
+      "prompt_type": "reference_binary_mask",
+      "reference_frame_id": "0_00001",
+      "reference_binary_mask_sha256": "09c1ff833ec86dce91ca382d0bd424e26dee7da7ddde75c6ef329024b379c53d",
+      "native_width": 1015,
+      "native_height": 764,
+      "pixels_decoded": false
+    }
+  },
+  "sealed_behavior": {
+    "full_mask": {
+      "required_cli_bindings": [
+        "--expected-prompt-type reference_binary_mask",
+        "--expected-reference-frame-id",
+        "--expected-reference-mask-sha256",
+        "--expected-native-height",
+        "--expected-native-width"
+      ],
+      "allowed_mask_access": "PIL lazy image.size header plus raw complete-file SHA-256 streaming only",
+      "authority_source_sha_key": "reference_binary_mask",
+      "prompt_pixels_loaded": false,
+      "prompt_pixels_converted": false,
+      "prompt_pixels_materialized": false,
+      "query_or_evidence_constructed": false
+    },
+    "legacy_scribble": {
+      "native_shape_helper_modified": false,
+      "source_sha_keys": [
+        "positive_scribble",
+        "negative_scribble"
+      ],
+      "prompt_frame_selection": "same first prompt_frame_ids entry",
+      "exact_W_compositor_call_modified": false,
+      "cache_tensor_builder_modified": false,
+      "programmatic_namespace_backward_compatibility": "new arguments use getattr(..., None)"
+    },
+    "report": {
+      "full_mask_only_metadata": [
+        "prompt type",
+        "reference frame",
+        "native H/W",
+        "reference_binary_mask SHA-256",
+        "camera mapping SHA-256",
+        "GaussFM config SHA-256",
+        "geometry checkpoint and xyz SHA-256",
+        "pose and intrinsics SHA-256",
+        "compositor and exporter implementation SHA-256",
+        "all no-decode/no-query/no-target/no-metric flags"
+      ],
+      "target_rgb_opened": false,
+      "target_mask_opened": false,
+      "target_metric_computed": false
+    }
+  },
+  "fail_closed": [
+    "unsupported or mismatched prompt type",
+    "missing, empty, or mismatched reference frame",
+    "more or fewer than one declared reference prompt frame",
+    "missing reference mask file",
+    "malformed, uppercase, missing, or mismatched expected SHA-256",
+    "missing, non-positive, or mismatched expected native height or width",
+    "changed source SHA between header authority and report",
+    "changed frame or native raster between header authority and PromptResponsibilityAuthority",
+    "missing geometry, camera, or implementation SHA report bindings"
+  ],
+  "tests": {
+    "path": "tests/test_export_prompt_responsibility_cache.py",
+    "sha256": "039e14d7ed931faf76ebc7b38bd60161cc2f5b451b854ad81a3c9a712b680ee4",
+    "focused_and_compatibility": "50 passed across exporter, prompt responsibility cache, promptable manifest, and source footprint authority",
+    "header_only_mock": "load, convert, getdata, and __array__ each raise AssertionError if called",
+    "legacy_regression": "the unmodified _native_prompt_shape return tuple, dict insertion order, and dispatcher result are exact",
+    "py_compile": "passed",
+    "git_diff_check": "passed"
+  },
+  "execution": {
+    "lego_header_hash_authority_dry_run": {
+      "passed": true,
+      "prompt_type": "reference_binary_mask",
+      "reference_frame_id": "0_00001",
+      "native_width": 1015,
+      "native_height": 764,
+      "reference_binary_mask_sha256": "09c1ff833ec86dce91ca382d0bd424e26dee7da7ddde75c6ef329024b379c53d",
+      "access": "lazy header and raw file hash only"
+    },
+    "real_exact_w_export_run": false,
+    "gpu_used": false,
+    "source_mask_pixels_decoded": false,
+    "query_or_evidence_constructed": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "integration_decision": "The exporter is ready for a separately authorized native exact-W export. This closure does not itself authorize a real export, source-label adjoint, hierarchy selection, target prediction, or benchmark metric."
+}

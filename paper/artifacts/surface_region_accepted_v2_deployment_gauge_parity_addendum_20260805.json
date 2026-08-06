@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_accepted_physical_v2_deployment_gauge_parity_addendum_v1",
+  "status": "registered_after_generic_training_before_new_candidate_benchmark_metrics",
+  "reason": "The previously accepted descriptor cache predates explicit gauge metadata. A source-only numerical parity check showed that the l2-direction deployment path does not reproduce the accepted frozen slot-zero probabilities.",
+  "evidence_without_benchmark_labels": {
+    "accepted_positive_cache_sha256": "3366c96839fe392d6cc1f6d55939691787e095491581c63006f74e44862d4cac",
+    "accepted_negative_cache_sha256": "d778361b2ea860cfb07f586ace82cb1558df5129a55ad462b097e4e6c366ba90",
+    "l2_direction_slot0_authority_sha256": "3c7bb5476931257715b5d3ac1ccf3e76b922ee19b9f3f51643a01d234b34a07d",
+    "valid_probability_pearson": 0.5901628136634827,
+    "valid_absolute_difference_mean": 0.04854293540120125,
+    "valid_absolute_difference_max": 0.4691048860549927,
+    "accepted_probability_mean": 0.33904948830604553,
+    "l2_direction_slot0_probability_mean": 0.3610357940196991,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false
+  },
+  "gauge_resolution_rule": {
+    "candidates": ["l2_direction", "legacy_raw"],
+    "selection_metric": "source-cache probability parity only; no labels or benchmark metrics",
+    "required": "the paired slot-zero path must reproduce the previously accepted positive/negative probability tensor up to the known fp16 streaming path",
+    "selected_before_benchmark": "pending legacy_raw parity build"
+  },
+  "attribution_constraint": {
+    "generic_training_gauge": "l2_direction",
+    "warning": "If legacy_raw restores fallback parity, the existing residual codebook/router becomes a mixed-gauge transfer diagnostic, not a fully matched generic promotion candidate.",
+    "promotion_requirement": "A benchmark gain alone cannot promote a mixed-gauge candidate; matched-gauge scene-disjoint validation or a gauge-decoupled architecture is required."
+  },
+  "forbidden": [
+    "benchmark-label gauge selection",
+    "threshold sweep",
+    "per-query or per-scene gauge selection",
+    "claiming l2 generic gates as matched validation for a raw deployment"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "artifact_type": "nvos_observation_clamped_harmonic_source_audit_preregistration_v1",
+  "status": "registered_before_source_audit_materialization_or_new_target_prediction",
+  "claim_boundary": "Target-blind implementation and source-only invariant audit. Prior NVOS development metrics are known, but no target RGB, target mask, or target metric may be opened by this experiment.",
+  "first_principles_hypothesis": "The dense source-view positive/negative/unknown posterior is the data term. Every primitive with nonzero exact-adjoint source confidence is a Dirichlet boundary. The graph may complete only confidence-zero primitives and may not rewrite source-observed evidence.",
+  "implementation": {
+    "solver": "radio_gs/querying/observation_clamped_harmonic.py",
+    "solver_sha256": "6a1a7197645ff885ad601c31e05a36a5850a8d72360451e0cd7584724144bebe",
+    "materializer": "radio_gs/scripts/materialize_nvos_observation_clamped_harmonic.py",
+    "materializer_sha256": "f88832920c578946965490bafdd07e1b3fcacf0b9e49ef834c17b828feb7191e",
+    "shared_evaluator_modified": false,
+    "shared_query_engine_modified": false,
+    "shared_support_solver_modified": false
+  },
+  "fixed_method": {
+    "source_posterior": "Replay the already sealed hierarchical SAM3 posterior: full entropy-calibrated Bernoulli only when its frozen all-trial LOO gate accepts; otherwise strict local-majority positive evidence with raw positive/negative overrides and zero confidence elsewhere.",
+    "primitive_unary": "Replay exact W.T on c*p and c*(1-p); primitive source confidence is W.T(c)/W.T(1).",
+    "boundary": "source_confidence > 0, with no numeric confidence threshold",
+    "interior": "source_confidence == 0",
+    "graph": "Frozen canonical shared support graph; unnormalized symmetric nonnegative affinity Laplacian.",
+    "boundary_value": "The already fused graph-off primitive unary probability, exactly preserved.",
+    "unobserved_component": "If a graph component has no boundary, preserve its graph-off field/unary prior bit-for-bit.",
+    "connected_selection": false,
+    "scene_specific_parameters": false,
+    "target_dependent_parameters": false,
+    "cg_iterations": 64,
+    "cg_tolerance": 0.00001,
+    "hard_seed_threshold": "Reuse the sealed base compiler value 0.20; no new method threshold."
+  },
+  "source_only_sentinels": {
+    "fern": {
+      "base_unary_sha256": "d25221bad2f6ae7f6ed245c6a339b27a723c24a7390f03376f3a0e10ad29763b",
+      "support_graph_sha256": "2d570d098e36dabb7fc82b06944f75def6ebc13598e97afce232f008cea34eeb",
+      "responsibility_cache_sha256": "cc2dbc08ef06ae5a8573413145d72675fe7181ccf7fb3cbae6cb4d5a14ca3db1",
+      "responsibility_report_sha256": "6e5af7ac8f0794a4794fa5bd0ceb675c85b96b9f0c2698e12e21bc67b1c60aff"
+    },
+    "horns_left": {
+      "base_unary_sha256": "20352e766edebecb3de86a994732a3ff1b4e93624878f1f2dd4f041f3aea7a48",
+      "support_graph_sha256": "cb8c0384d0951e9a4347935402e762a4c0c25fa4dcf9e493de8465054d47b7ba",
+      "responsibility_cache_sha256": "c56fc72d858c23f11c6237cf5e330d949bc1d8be709e3932cb4ccd287e0ebfe0",
+      "responsibility_report_sha256": "8aab469b9f585b42a55aed8234d87a9b1b41f2103b306ebea6982bb012594420"
+    }
+  },
+  "advance_gate": {
+    "observed_primitive_max_absolute_change": 0.0,
+    "all_probabilities_in_unit_interval": true,
+    "unobserved_components_preserve_prior_exactly": true,
+    "at_least_one_unknown_primitive_changes": true,
+    "source_observed_pixel_max_absolute_change": 0.0,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "next_step_if_pass": "Seal a separate prediction authority before any new target scoring. Do not add target-derived routing, thresholds, or per-scene exceptions.",
+  "next_step_if_fail": "Stop this graph-completion branch and retain the graph-off 0.7477712404 candidate."
+}

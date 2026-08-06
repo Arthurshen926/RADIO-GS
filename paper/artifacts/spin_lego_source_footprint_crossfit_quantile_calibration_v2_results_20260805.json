@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "experiment": "spin_source_footprint_crossfit_quantile_calibration_v2",
+  "scene": "lego",
+  "scientific_status": "opened_development_sentinel_posthoc_gauge_diagnosis_then_preregistered_full_fit_construction",
+  "status": "source_only_gauge_passed_and_full_fit_authority_sealed_ready_for_separate_target_prediction",
+  "v1_immutability": {
+    "modified": false,
+    "stopped_result": "paper/artifacts/spin_lego_source_footprint_crossfit_visibility_calibration_results_20260805.json",
+    "stopped_result_sha256": "b7b76080400dba26ac39c7ef3c6af52237132c1c6e0e09f423db3dc9eed964b9"
+  },
+  "preregistration": {
+    "path": "paper/artifacts/spin_lego_source_footprint_crossfit_quantile_calibration_v2_preregistration_20260805.json",
+    "sha256": "7d6bcbb083285965796a240e0b62fcad542e1b64c610f301ea82c41ae8add2ec",
+    "timing": "written after one explicitly posthoc source-only fold feasibility check and before full-fit gauge construction or target prediction"
+  },
+  "fixed_method": {
+    "mapping": "exact-reference-weighted right-continuous empirical CDF",
+    "formula": "F(s)=sum_i(w_i*1[p_i<=s])/sum_i(w_i)",
+    "fold_population": "each fold's training-source rows with training_reference_weight>0",
+    "full_fit_population": "complete-source rows with reference_weight>0",
+    "ties": "include all source mass with score equal to the query",
+    "zero_weight_rows": "excluded",
+    "scanned_choices": [],
+    "target_distribution_used": false
+  },
+  "cpu_oof_authority": {
+    "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_quantile_calibration_v2/lego/quantile_oof_authority.pt",
+    "artifact_sha256": "46729d81c78e899b8b141d85982e220bff3c509c20a08ffafb4c3e103c06e96a",
+    "receipt_sha256": "944cd263b5f832c16426fd8b0b7c20b7610b2c5db820750f511bdd69c147103b",
+    "content_sha256": "9e74f7bae30828e2d7c03f4154d41b3d5a59f14772c41a8c985ae2891940b9ee",
+    "status": "pass_stable_source_only_quantile_gauge",
+    "fold_raw_thresholds_from_closed_v1": [0.77, 0.41, 0.16],
+    "fold_raw_threshold_span": 0.61,
+    "fold_quantile_thresholds": [0.95, 0.99, 0.93],
+    "fold_quantile_threshold_span": 0.06,
+    "registered_maximum_span": 0.1,
+    "t_completion_quantile": 0.96,
+    "pooled_weighted_soft_iou": 0.5513620165942273,
+    "pooled_eligible_rows": 88360,
+    "fold_weighted_soft_iou": [
+      0.6253431634066156,
+      0.7648186377832347,
+      0.7511961737853222
+    ],
+    "fold_positive_quantile_weighted_mean": [
+      0.9623751655772861,
+      0.9634873995299464,
+      0.9575253347634516
+    ],
+    "fold_negative_quantile_weighted_mean": [
+      0.5405930498983852,
+      0.6951425818407664,
+      0.5458383776267407
+    ]
+  },
+  "full_fit_source_gauge": {
+    "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_quantile_calibration_v2/lego/full_fit_source_quantile_gauge.pt",
+    "artifact_sha256": "be831ec31cddd2006b30871cb40dc30c567184d7221f5a053e5988b27e8d666c",
+    "receipt_sha256": "d4e576f46d6ae88d57ece6e605f80e912a30a7768fdbcc084798ab2328d27e05",
+    "content_sha256": "e4d3b2aa9175898036ac4813cc08c657638a395b6d5ace40202f7098a27eb6a7",
+    "status": "sealed_full_fit_source_only_quantile_gauge",
+    "t_seen_raw": 0.71,
+    "t_seen_quantile": 0.969153329521933,
+    "t_completion_quantile": 0.96,
+    "seen_completion_quantile_gap": 0.009153329521933,
+    "source_reference_rows": 88360,
+    "source_reference_weight": 582540.5585852469,
+    "unique_score_support_values": 85921,
+    "target_distribution_opened": false,
+    "target_rgb_opened": false,
+    "target_mask_opened": false,
+    "target_metric_computed": false
+  },
+  "implementation": {
+    "module": {
+      "path": "radio_gs/querying/spin_source_footprint_quantile_calibration.py",
+      "sha256": "14e8150c105edaf231b831e2fb53dd978e76c521b8a888c1b43b349651a2168b"
+    },
+    "cpu_authority_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_quantile_oof.py",
+      "sha256": "f7310bdef75f7feb6b27dacebc143c8e45210031878878e70821b1877712aa9b"
+    },
+    "full_fit_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_quantile_full_fit.py",
+      "sha256": "06cdb3747a2587822cceab07c03d4f15ca300215b3bd4d6910fe6dde733ca49d"
+    },
+    "tests": {
+      "path": "tests/test_spin_source_footprint_quantile_calibration.py",
+      "sha256": "35562bebb46ed59a24da6a57838032f2c82346a87ec76474c8cf34ef9cf37277",
+      "focused_suite": "33 passed"
+    }
+  },
+  "gpu_execution": {
+    "physical_gpu": 1,
+    "visible_device": "cuda:0 under CUDA_VISIBLE_DEVICES=1",
+    "parameter_scan": false,
+    "jobs": 1,
+    "temperature_before_celsius": 37,
+    "temperature_after_celsius": 44,
+    "thermal_stop_triggered": false
+  },
+  "conclusion": {
+    "first_principles_result": "The v1 instability was primarily a fold-specific absolute score-gauge failure: a source-only monotone rank gauge reduced threshold span from 0.61 to 0.06 without changing the score ordering or using target information.",
+    "what_is_not_fixed": "The rank map cannot improve primitive ordering, cross-view completion, or boundary localization. The full-fit seen/completion operating points differ by only 0.00915 in quantile space, so a large benchmark gain should not be assumed.",
+    "next_gate": "A separate immutable prediction receipt may map the already sealed propagated target scores with this full-fit source CDF, render query-independent source-visible coverage with the frozen compositor, and threshold at c*0.969153329521933+(1-c)*0.96 before opening target masks.",
+    "enter_target_prediction": true,
+    "target_prediction_completed": false
+  }
+}

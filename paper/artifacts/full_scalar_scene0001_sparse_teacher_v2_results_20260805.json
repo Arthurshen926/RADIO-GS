@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "artifact": "full_scalar_scene0001_sparse_teacher_v2_results",
+  "observed_at": "2026-08-05T23:11:45+08:00",
+  "scene_id": "scene0001_00",
+  "status": "accepted_and_teacher_materialized_quality_review_complete",
+  "implementations": {
+    "sampling_contract": {
+      "path": "radio_gs/interfaces/full_scalar_sparse_teacher_selection.py",
+      "sha256": "4a61b481c3e0773e789c638b70973b035e33b3c542bd8187abf8522b866fe4ab",
+      "contract_sha256": "2e1f6c744e082f0f5761d3f81f9dfde5347b32480c207fe2d137bf0e414feeeb"
+    },
+    "accepted_producer": {
+      "path": "radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+      "sha256": "75f234e8376c2ac0f27a5f847baaf1de7b2fc4d6dfafc2d4c532208a71f081cf"
+    },
+    "source_rgb_producer": {
+      "path": "radio_gs/scripts/materialize_clean_source_rgb_scene_authority.py",
+      "sha256": "6356634db896fddc6297b917e099c1b05d5f112eaabef509155b60af037f21ba"
+    },
+    "teacher_producer": {
+      "path": "radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+      "sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5"
+    },
+    "quality_audit": {
+      "interface_path": "radio_gs/interfaces/full_scalar_sparse_teacher_quality_audit.py",
+      "interface_sha256": "fdb7d8a9fe90df48c8ed3034418c2d85d7c45da45a0b048fe08c55d91220f0e3",
+      "script_path": "radio_gs/scripts/audit_full_scalar_sparse_teacher_quality.py",
+      "script_sha256": "fa724ead6dec5f0fa2fac13665e95e1740a4e33a64c24b068f5cc4f5de021a46"
+    }
+  },
+  "outputs": {
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+      "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8",
+      "size_bytes": 35211731
+    },
+    "source_rgb_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/source_rgb_scene_authority_v1.json",
+      "sha256": "e72285f77da7ac2059610c24026b9b32ab344453c0d42549ecb96397e0b875c0",
+      "content_authority_sha256": "61e3c0d572ad4afe2f874be22674c28a448a45a6406b125c121aa7a861ca8445",
+      "size_bytes": 86354
+    },
+    "official_sparse_teacher": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+      "sha256": "ce2edd5034c6769a14a1afa0efe567cb648fc68e9cd72ca6f94c13db13d5e92f",
+      "size_bytes": 100567699
+    },
+    "quality_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/sparse_teacher_quality_audit_v1.json",
+      "sha256": "fc5ad2c2b6ff2906fabef3dedf0d22ad8853175e2e88dc947c52e65e1734185b",
+      "content_authority_sha256": "167880da427cb9da565e8eba806de3b130ee201f32e12ac3f5299d0ed17402f0",
+      "size_bytes": 13879
+    }
+  },
+  "selection": {
+    "active_primitive_rows": 191088,
+    "canonical_candidate_regions": 573264,
+    "selected_regions": 4096,
+    "selected_by_scale": [1366, 1365, 1365],
+    "source_views": 120,
+    "dense_pairs_forbidden": 491520,
+    "sparse_pairs": 16138,
+    "maximum_views_per_region": 4,
+    "descriptor_bytes": 99151872,
+    "descriptor_byte_cap": 100663296
+  },
+  "quality": {
+    "regions_below_24_tokens": 0,
+    "active_token_mean": 252.083740234375,
+    "views_per_region": {
+      "one": 43,
+      "two": 44,
+      "three": 29,
+      "four": 3980,
+      "four_view_fraction": 0.9716796875
+    },
+    "multiview_region_fraction": 0.989501953125,
+    "per_region_pairwise_descriptor_cosine": {
+      "mean": 0.9786089971822193,
+      "p05": 0.9470691789649595,
+      "minimum": 0.8172583866475769
+    },
+    "crop_area_fraction": {
+      "median": 0.035,
+      "p95": 0.07875,
+      "maximum": 0.46
+    },
+    "support_occupancy_proxy": {
+      "median": 1.0,
+      "p05": 0.8359375,
+      "mean": 0.9700457586567562
+    },
+    "v2_context_present_fraction": {
+      "all": 0.109375,
+      "scale_0p25": 0.3052708638360176,
+      "scale_0p45": 0.01904761904761905,
+      "scale_0p70": 0.003663003663003663
+    },
+    "camera_angle_or_baseline_authority": "unavailable_in_sealed_v2_schema"
+  },
+  "decisions": {
+    "sparse_teacher_assets_may_expand_to_clean_cohort": true,
+    "reason": "97.17 percent of regions have four source views, 98.95 percent are multiview, descriptor agreement and support occupancy are high, and no region violates the 24-token diagnostic.",
+    "single_view_rows": "must be reported separately and treated as base-only fallback by the next multiview-residual contract",
+    "v2_context": "insufficient_for_a_context-complete_claim; preserve immutable V2 e0 and test a candidate-complete typed-context bounded residual",
+    "global_geometry_rebuild": "not_authorized"
+  },
+  "execution_caveat": {
+    "worker_result": "official teacher worker exited zero after atomic no-clobber materialization",
+    "launch_guard_sha256": "bba05a680758849677bf77fdf2d395e97a265a965d0b26b88dc8c82894680c22",
+    "outer_guard_exit_status": 2,
+    "outer_guard_failure": "The guard file was patched while its old shell instance was still running; after the worker completed, the old instance reached a rewritten tail and reported an unmatched quote. The current guard passes bash -n and its CPU integration test.",
+    "independent_postconditions": {
+      "teacher_file_sha256_matches_worker_receipt": true,
+      "teacher_authority_and_channels_reloaded_by_quality_audit": true,
+      "gpu0_cuda_owner_released": true,
+      "gpu0_memory_mib_after_exit": 1,
+      "kernel_xid_observed": false
+    },
+    "current_fixed_guard": {
+      "path": "radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+      "fix": "replace Bash special underscore poll counter so intervals above one second produce periodic telemetry",
+      "tests": "tests/test_run_with_gpu_thermal_guard.sh passed"
+    }
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false
+  }
+}

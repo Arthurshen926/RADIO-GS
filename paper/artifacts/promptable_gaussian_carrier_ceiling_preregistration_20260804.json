@@ -1,0 +1,33 @@
+{
+  "audit": "promptable_nvs_frozen_gaussian_scalar_membership_ceiling_v1",
+  "benchmark_masks_opened": true,
+  "diagnostic_only": true,
+  "frozen_before_results": true,
+  "membership_model": "one continuous foreground probability per frozen Gaussian shared across every audited view",
+  "nvos_sentinels": [
+    "fern",
+    "horns_left"
+  ],
+  "nvos_view_scope": "the one official strict-unseen target view; source scribbles are not treated as a full mask",
+  "observation_operator": "exact frozen front-to-back contribution divided by frozen total alpha",
+  "optimization": {
+    "learning_rate": 0.05,
+    "loss": "uniform probability BCE plus 0.5 soft Dice",
+    "random_uniform_pixels_per_view": 196608,
+    "steps": 80,
+    "weight_decay": 0.0
+  },
+  "result_interpretation": "The best constructed feasible membership is a lower bound on the unknown optimum. It diagnoses carrier/render capacity only and does not diagnose whether strict source evidence can recover that membership.",
+  "spin_sentinels": [
+    "orchids",
+    "pinecone"
+  ],
+  "spin_view_scope": "the single reference full mask plus every official evaluation mask, with one shared Gaussian membership",
+  "text_queries_opened": false,
+  "threshold_grid": {
+    "maximum": 0.95,
+    "minimum": 0.05,
+    "step": 0.025
+  },
+  "valid_benchmark_method": false
+}

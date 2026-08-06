@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "registration": "spin9_factorized_source_quantile_full9_expansion_v1",
+  "registered_at": "2026-08-05T19:58:02+08:00",
+  "status": "registered_before_any_new_non_lego_target_prediction_or_target_mask_access",
+  "purpose": "Expand the source-only right-ECDF gauge validated on the opened Lego development sentinel to the frozen SPIn9 cohort without scene tuning or representation mixing.",
+  "claim_boundary": {
+    "lego": "previously opened development sentinel; its immutable receipt is retained but it is not an unbiased confirmation scene",
+    "remaining_eight": "no new target prediction, target mask, or target metric may be opened until every source authority gate passes and the cohort receipt index is sealed",
+    "full9": "diagnostic full-reference-mask protocol, not directly comparable to the published sparse-point interaction protocol"
+  },
+  "frozen_protocol": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "queue": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/queue_plan.json",
+      "sha256": "8cfb744099b8aa1efe9e8f65e376b61c305320e200310de448d8ab85c44953f3"
+    },
+    "scene_order": [
+      "orchids",
+      "leaves",
+      "fern",
+      "room",
+      "horns",
+      "fortress",
+      "pinecone",
+      "truck",
+      "lego"
+    ],
+    "aggregation": "per-frame foreground IoU, per-scene unweighted mean, then unweighted macro over nine scenes",
+    "reference_scored": false,
+    "resize": "bilinear continuous margin to frozen target shape, then greater-or-equal zero",
+    "target_mask_use": "scoring only after cohort receipt gate"
+  },
+  "development_authority": {
+    "lego_v2_preregistration": {
+      "path": "paper/artifacts/spin_lego_source_footprint_crossfit_quantile_calibration_v2_preregistration_20260805.json",
+      "sha256": "7d6bcbb083285965796a240e0b62fcad542e1b64c610f301ea82c41ae8add2ec"
+    },
+    "fp32_projection_addendum": {
+      "path": "paper/artifacts/spin_lego_quantile_coverage_fp32_projection_addendum_20260805.json",
+      "sha256": "42f141e626a99ea646576dc57c48bb6b5ff8c368aa0b42235eed06b9efd45261"
+    },
+    "lego_result": {
+      "path": "paper/artifacts/spin_lego_source_footprint_quantile_v2_target_results_20260805.json",
+      "sha256": "094dcc214eba31d67dfc3459ecc092fa92bcff271c375aada3d26f973770c678",
+      "foreground_iou": 0.6422606532678946,
+      "role": "method-development evidence only"
+    },
+    "fixed_completion_quantile": 0.96,
+    "raw_seen_threshold": 0.71
+  },
+  "uniform_representation_contract": {
+    "required_field": "canonical_factorized_radio_v1",
+    "coefficient_dim": 256,
+    "local_dim": 128,
+    "spatial_coarse_dim": 0,
+    "primitive_fusion": true,
+    "fusion_reliability": false,
+    "epochs": 20,
+    "capability_projection": "factorized raw RADIO field then frozen official DINOv3/SAM3 adaptors",
+    "surface_graph": "surface-safe mutual-K16 with exact official capability affinity, local tangent relation, and source co-visibility",
+    "matched_interface": "exact Euclidean K201 including self plus fixed 256-dimensional signed hash of official DINO capability",
+    "historical_compact_assets": "rebuild inputs and historical context only",
+    "historical_compact_substitution": "forbidden",
+    "scene_specific_architecture_or_graph_parameters": "forbidden"
+  },
+  "per_scene_source_authority_gate": [
+    "frozen carrier and camera mapping are present and geometry-consistent",
+    "factorized raw observation cache is sealed with the feature bundle, geometry checkpoint, and source responsibility SHA-256 values",
+    "factorized field passes the same source reconstruction and capability fidelity gates used for Lego",
+    "materialized official capability cache passes strict lineage and fp16 parity",
+    "surface-safe graph, K201 neighbor cache, and relation cache share exact primitive row authority",
+    "native exact reference responsibility W is exported and sealed",
+    "full-fit source support score and source-weighted ECDF gauge are sealed",
+    "continuous target margins and per-frame hashes are sealed in a pre-metric receipt"
+  ],
+  "source_quantile_gauge": {
+    "fit_scope": "separately for each scene using only its complete invariant source reference",
+    "population": "factorized matched-K201 primitive rows whose exact source reference responsibility weight is positive",
+    "weight": "exact source reference responsibility weight",
+    "mapping": "F_scene(s)=sum_i(w_i*1[p_i<=s])/sum_i(w_i)",
+    "tie_semantics": "right-continuous",
+    "zero_weight_rows": "excluded",
+    "seen_quantile": "q_seen_scene=F_scene(0.71)",
+    "completion_quantile": 0.96,
+    "smoothing": false,
+    "temperature": null,
+    "bandwidth": null,
+    "target_distribution_fit": false,
+    "quantile_or_threshold_scan": false
+  },
+  "prediction_contract": {
+    "source_visibility": "same query-independent source-visible definition and alpha-normalized scalar Gaussian compositor as Lego v2",
+    "spatial_quantile_threshold": "coverage*q_seen_scene+(1-coverage)*0.96",
+    "continuous_margin": "F_scene(raw_target_score)-spatial_quantile_threshold",
+    "prediction": "resized continuous_margin >= 0",
+    "coverage_projection": "require finite FP32 values within [-16 eps,1+16 eps], fail outside, otherwise project to [0,1]",
+    "parameter_scan": false,
+    "target_rgb_at_query": false,
+    "target_mask_or_metric_in_prediction": false
+  },
+  "cohort_receipt_gate": {
+    "lego_existing_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/spin_source_footprint_crossfit_quantile_calibration_v2/lego/target_prediction_v2_fp32_projection/pre_metric_prediction_receipt.json",
+      "sha256": "732995adf390e3aa344edae813ec995893ec3f30c1ae362a05dd8688869ec5ca",
+      "content_sha256": "5c799e61e542a889ce29b65ea42e14d857a8909532958acba8cad63d460c7daf",
+      "prior_target_opening_acknowledged": true
+    },
+    "remaining_receipts": "all eight must exist, pass hash/lineage checks, and be indexed together before any new target mask access",
+    "partial_evaluation": "forbidden",
+    "receipt_failure": "fail closed without opening any remaining target mask"
+  },
+  "preflight_inventory": {
+    "path": "paper/artifacts/spin9_factorized_source_quantile_full9_asset_inventory_20260805.json",
+    "sha256": "0c3521bfc99595b00ceda49e2b2eaa2aaf4d8c7ea091913833d3a325083bbf5e",
+    "eligible_at_registration": [
+      "lego"
+    ],
+    "fail_closed_pending_rebuild": [
+      "orchids",
+      "leaves",
+      "fern",
+      "room",
+      "horns",
+      "fortress",
+      "pinecone",
+      "truck"
+    ],
+    "gpu_used_by_preflight": false,
+    "target_masks_opened_by_preflight": false
+  },
+  "execution_order": {
+    "priority": "estimated fixed source-authority cost, smallest first, without sharing a GPU with an active job",
+    "planned_non_lego_order": [
+      "leaves",
+      "room",
+      "pinecone",
+      "orchids",
+      "fortress",
+      "horns",
+      "fern",
+      "truck"
+    ],
+    "stage_order_per_scene": [
+      "source feature bundle seal and exact SHA bindings",
+      "factorized raw cache",
+      "factorized field",
+      "capability materialization and audit",
+      "surface-safe graph",
+      "matched K201 relation and neighbor caches",
+      "native exact source W",
+      "full-fit source gauge",
+      "target-blind prediction receipt"
+    ],
+    "stage_failure": "stop the scene before downstream work",
+    "target_evaluation": "deferred until the cohort receipt gate passes"
+  },
+  "thermal_and_concurrency_policy": {
+    "power_limit_w": 300,
+    "one_heavy_process_per_gpu": true,
+    "polling": "stage boundaries plus approximately every 180 seconds for stages longer than six minutes",
+    "stop_temperature_c": 88,
+    "stop_rule": "stop only after two consecutive observations at or above 88 C or any Xid/ECC/driver error",
+    "cooldown_hysteresis": "resume only below 82 C",
+    "short_stage_rule": "do not interrupt or poll repeatedly merely because a sub-six-minute stage is busy"
+  },
+  "stop_rules": [
+    "Fail closed on any missing or mismatched source authority, primitive row set, geometry fingerprint, or SHA-256.",
+    "Do not silently use an NVOS scene asset for the same-named SPIn scene.",
+    "Do not change q=0.96, raw seen threshold 0.71, right-ECDF ties, exact weights, K=201, coverage rule, interpolation, or comparison after registration.",
+    "Do not use historical target scores, target masks, target metrics, or per-scene oracle thresholds to rebuild or calibrate a scene.",
+    "Do not open any new non-Lego target mask until the full cohort receipt index is sealed."
+  ],
+  "implementation": {
+    "quantile_module": {
+      "path": "radio_gs/querying/spin_source_footprint_quantile_calibration.py",
+      "sha256": "d076bc2baf21413630772004f7665402d76f807428d74140f16a213293d9da4b"
+    },
+    "full_fit_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_quantile_full_fit.py",
+      "sha256": "06cdb3747a2587822cceab07c03d4f15ca300215b3bd4d6910fe6dde733ca49d"
+    },
+    "prediction_builder": {
+      "path": "radio_gs/scripts/build_spin_source_footprint_quantile_target_prediction.py",
+      "sha256": "714dbb84634e2f8720e8dc26cfc84b19196d9d100a69ba434c8d194e7076a1c9"
+    },
+    "audit": {
+      "path": "radio_gs/scripts/audit_spin9_factorized_quantile_assets.py",
+      "sha256": "a16e05f205e3b615f9508a49ee826f7a5dfdda04768d8ecd624b7850ed8be875"
+    },
+    "audit_tests": {
+      "path": "tests/test_audit_spin9_factorized_quantile_assets.py",
+      "sha256": "d47c6d1fa95cb17d07a9079f1ccc02c54d18bddbcf15cb93a243bc2198f007ff",
+      "result": "5 passed"
+    }
+  }
+}

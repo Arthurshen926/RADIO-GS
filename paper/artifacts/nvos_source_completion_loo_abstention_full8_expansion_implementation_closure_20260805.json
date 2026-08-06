@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_full8_expansion_v1",
+  "status": "implementation_closed_before_gpu_source_completion_or_target_prediction",
+  "preregistration": {
+    "path": "paper/artifacts/nvos_source_completion_loo_abstention_full8_expansion_preregistration_20260805.json",
+    "sha256": "d5e8521d037f4f3baca9ac260d196505d9dd7777aa8422e357e5fe2dc12aa280"
+  },
+  "scope_correction": {
+    "path": "paper/artifacts/nvos_source_completion_loo_abstention_sentinel_scope_correction_20260805.json",
+    "sha256": "7f0148cee42cea0ce0ee01830dcfdb4f4913bc492ba90d768b7a86b3d8a317b3",
+    "corrected_sentinel_results_sha256": "7ab8b401738e75e5756a73498dbc26fafd3d74a22f1b3404bf26610ce640d30f",
+    "metrics_or_method_changed": false
+  },
+  "runtime_import_correction": {
+    "path": "paper/artifacts/nvos_source_completion_full8_easy3d_import_correction_20260805.json",
+    "sha256": "08b9e4acad90d04b483085dce068dd6a5231bfa73bc621daea1c5821c8554430",
+    "successful_source_completion_started_before_correction": false
+  },
+  "implementation_sha256": {
+    "radio_gs/scripts/build_nvos_sam3_reference_completion.py": "66b3f2cec6f14480932a84a4388c62bdcf31a564fb4cc398ab3b60a420917e96",
+    "radio_gs/scripts/build_nvos_source_completion_loo_gate.py": "15fefa80b904588a70fa6019dc54214ac4a9b3f44b9522b6d74ceed3fca3b749",
+    "radio_gs/querying/nvos_source_completion_calibration.py": "9e1e76d3a91371025d0921bb89e939928bb9eb4a19a8ef09ae59490b99f5922b",
+    "radio_gs/scripts/eval_nvos_gaussian_first.py": "5379303305a5085deb1d4967e45f5af26bcbaa96c1ccadcbc21206c0809ccd61",
+    "tests/test_nvos_sam3_reference_completion_authority.py": "492848f1d73bd4944f9170113555ffa0f3e2712ea42092008e9aa0a73cb8b12c"
+  },
+  "authority_generalization": {
+    "legacy_sentinel_order": [
+      "horns_left",
+      "fern"
+    ],
+    "remaining_six_order": [
+      "flower",
+      "fortress",
+      "horns_center",
+      "leaves",
+      "orchids",
+      "trex"
+    ],
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea",
+    "full8_expansion_registration_sha256": "d5e8521d037f4f3baca9ac260d196505d9dd7777aa8422e357e5fe2dc12aa280",
+    "validation_occurs_before_cuda_initialization": true,
+    "wrong_manifest_cohort_registration_order_subset_duplicate_or_unknown_task": "fail_closed"
+  },
+  "method_diff_boundary": {
+    "changed": [
+      "registered execution authority validation",
+      "generic all-registered-receipts summary status and authority metadata",
+      "isolated direct loading of the unchanged leaf source-completion helper for the easy3d runtime"
+    ],
+    "unchanged": [
+      "deterministic positive point sampling",
+      "ten trials and three positive points per trial",
+      "official SAM3 model, checkpoint, dtype, resolution, and point labels",
+      "multimask_output false",
+      "binary trial mask arithmetic mean",
+      "Li compatibility mask generation",
+      "raw signed scribble overwrite",
+      "completion tensor and receipt contents",
+      "LOO gate statistic and threshold",
+      "probability-preserving unary compiler",
+      "fallback compiler",
+      "target evaluator and frozen protocol"
+    ],
+    "scene_specific_method_changes": false
+  },
+  "cpu_validation": {
+    "focused_tests": "209 passed",
+    "python_compile": "passed",
+    "git_diff_check": "passed",
+    "negative_authority_cases": [
+      "wrong remaining-task order",
+      "subset",
+      "sentinel task appended",
+      "duplicate task",
+      "unknown task",
+      "wrong manifest SHA256",
+      "wrong manifest cohort",
+      "wrong registration SHA256",
+      "invalid run rejected before CUDA initialization"
+    ]
+  },
+  "gpu": {
+    "launched": false,
+    "reason": "GPU0 and GPU1 are reserved by the parent ScanNet smoke build until explicit release authorization."
+  }
+}

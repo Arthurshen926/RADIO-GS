@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_noise_robust_readout_figurines_dev1_v1",
+  "status": "rejected_by_preregistered_gate",
+  "results": {
+    "clean_readout_control_miou": 0.4753371775,
+    "noise_robust_readout_miou": 0.4646224976,
+    "delta": -0.0107146799,
+    "gate_threshold_miou": 0.4803371775,
+    "gate_passed": false,
+    "acc025": 0.7857142857,
+    "acc050": 0.5,
+    "boundary_f": 0.6704217196,
+    "trimap_iou": 0.3904510438
+  },
+  "artifacts": {
+    "result_sha256": "ba586c041a04bb93aa0a70face9fe3dd4c287d42f8721d6d509ebc4c7394adb3",
+    "descriptor_cache_sha256": "4d3cff65f4274b50fa346cae8a2231e1f093c0d61b6f4cf8cdaac44e49d6f9d9",
+    "positive_score_cache_sha256": "a80bd1a0b6c09edae7e4aabe2ec77ebd910709db99cd8bbc156266cb66315d7f",
+    "negative_score_cache_sha256": "8216b4ab06d4f9a167b2feba527999cb1b7c30d113a29c07d2309a0cec4fc7d8",
+    "readout_checkpoint_sha256": "1111936653db3fd65abeb06970a4f1e8bfbae0e766b2e17066ecdc370cc6145f"
+  },
+  "conclusion": "Generic tangent-direction noise augmentation does not close the compatibility gap. The readout needs an explicitly matched semantic-direction/gauge contract rather than stochastic robustness around the old input path."
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_permutation_invariant_query_router_v1",
+  "status": "generic_multiseed_gate_passed_lerf_sentinel_opened",
+  "frozen_codebook": {
+    "path": "output/optimization_20260805/surface_region_residual_codebook_v1/seed0_headparity.pt",
+    "sha256": "34dc94f53f041150abce353ca80eba78672bf4301fab756d1d525e480cedd2b7"
+  },
+  "control": {
+    "text_response_smooth_l1": 0.0010390595998615026,
+    "support_top1_agreement": 0.21905940771102905,
+    "ranking_spearman_p05": -0.0419580414891243,
+    "response_profile_cosine_p05": 0.9960075616836548
+  },
+  "seeds": [
+    {
+      "seed": 0,
+      "checkpoint": "output/optimization_20260805/surface_region_query_router_v1/seed0.pt",
+      "checkpoint_sha256": "cfedf8853ec65efa1775e56ea982eba0e6383b4f911e4ee5e0438e7fb122d7d4",
+      "selected_epoch": 29,
+      "text_response_smooth_l1": 0.0008992973016574979,
+      "support_top1_agreement": 0.22896039485931396,
+      "ranking_spearman_p05": -0.0419580414891243,
+      "response_profile_cosine_p05": 0.9956928491592407,
+      "residual_gate_mean": 1.0,
+      "generic_gate_pass": true
+    },
+    {
+      "seed": 1,
+      "checkpoint": "output/optimization_20260805/surface_region_query_router_v1/seed1.pt",
+      "checkpoint_sha256": "a93095d9e440d283095107535db647696f10ab4d3732ffb141c20d68bc413e9b",
+      "selected_epoch": 31,
+      "text_response_smooth_l1": 0.0008997338591143489,
+      "support_top1_agreement": 0.23019802570343018,
+      "ranking_spearman_p05": -0.0419580414891243,
+      "response_profile_cosine_p05": 0.9956841468811035,
+      "residual_gate_mean": 1.0,
+      "generic_gate_pass": true
+    },
+    {
+      "seed": 2,
+      "checkpoint": "output/optimization_20260805/surface_region_query_router_v1/seed2.pt",
+      "checkpoint_sha256": "44cbd2908337478801776dd088de9fc2c36eaa4ab31b3aa73db148d8c678c38a",
+      "selected_epoch": 31,
+      "text_response_smooth_l1": 0.00089810392819345,
+      "support_top1_agreement": 0.22648514807224274,
+      "ranking_spearman_p05": -0.0419580414891243,
+      "response_profile_cosine_p05": 0.9956990480422974,
+      "residual_gate_mean": 1.0,
+      "generic_gate_pass": true
+    }
+  ],
+  "multiseed_mean": {
+    "text_response_smooth_l1": 0.000899045029655099,
+    "text_response_smooth_l1_delta": -0.00014001457020640373,
+    "support_top1_agreement": 0.2285478562116623,
+    "support_top1_agreement_delta": 0.00948844850063324,
+    "ranking_spearman_p05": -0.0419580414891243,
+    "ranking_spearman_p05_delta": 0.0,
+    "response_profile_cosine_p05": 0.9956920146942139,
+    "response_profile_cosine_p05_delta": -0.00031554698944091797
+  },
+  "generic_gate": {
+    "seeds_passing_all_checks": 3,
+    "required_seeds_passing_all_checks": 2,
+    "mean_gate_pass": true,
+    "multiseed_requirement_pass": true
+  },
+  "interpretation": {
+    "representation": "The frozen-V2 residual codebook retains complementary multi-view responses.",
+    "readout": "A shared query-conditioned permutation-equivariant attention is more accurate than unconditional hard maximum on the generic validation split.",
+    "gate_caveat": "All selected seeds have residual_gate_mean=1.0. The observed gain is attributable to query-conditioned attention over residual slots, not learned selective fallback. The exact fallback remains a structural safety path but was not used by the selected validation solutions.",
+    "benchmark_claim": "none_until_frozen_lerf_sentinel"
+  }
+}

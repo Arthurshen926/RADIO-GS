@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "registration": "surface_region_permutation_invariant_query_router_v1_implementation_closure",
+  "status": "closed_after_implementation_and_tests_before_router_training_or_generic_router_metrics",
+  "preregistration_sha256": "c45c350cd7f8e1be0a44839e8858774bd2a8bcd3fabf28d91b72344fe3d5c6b5",
+  "prevalidation_addendum_sha256": "51256db2cd068b99fd5915b8e7e39b739f4a64923eb764354719a22511e9d124",
+  "source_sha256": {
+    "surface_region_query_router.py": "8a1b9a8afb91b425eb6e539ca018eaf6baf3b6604f139a4523f279c20175a499",
+    "train_surface_region_query_router.py": "4a1bcc3be165972eb715f0c7af51311d74e4352e3a4ac6075af7786e867b4309",
+    "test_surface_region_query_router.py": "43de7d8577267fcc97b60834efbb292151cf6878a2c7d454be4af70e7ee8a5f5"
+  },
+  "frozen_authorities": {
+    "residual_codebook_sha256": "34dc94f53f041150abce353ca80eba78672bf4301fab756d1d525e480cedd2b7",
+    "generic_negative_text_bank_sha256": "0699bcf9b4dbbbd74ccbee2164a06810f7137bc8b7f0a00238661b8e993a47d0",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "implementation_contract": {
+    "query_first_canonical_negative_probability": true,
+    "permutation_invariant_residual_attention": true,
+    "separate_exact_zero_residual_gate": true,
+    "initial_response_exact_v2": true,
+    "slot_specific_parameters": false,
+    "raw_text_embedding_entering_router": false,
+    "scene_specific_parameters": false
+  },
+  "validation": {
+    "py_compile_passed": true,
+    "focused_tests_passed": 19,
+    "focused_tests_failed": 0
+  }
+}

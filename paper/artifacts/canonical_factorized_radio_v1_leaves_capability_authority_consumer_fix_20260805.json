@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "artifact_type": "implementation_authority_addendum",
+  "registered_at": "2026-08-05T22:58:00+08:00",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_leaves_capability_materialization_preregistration_20260805.json",
+    "sha256": "427ad0888fe2312ab7dd4d7c46b26ba2758481acf02ef62ae9428de6fd3b853a"
+  },
+  "failed_pre_gpu_attempt": {
+    "exit_code": 1,
+    "output_created": false,
+    "failure": "consumer rejected the producer-declared formal_feature_bundle_v1 authority because it only implemented formal_exact_marginal_v1",
+    "gpu_oom": false,
+    "thermal_failure": false,
+    "target_access": false
+  },
+  "root_cause": {
+    "producer_error": false,
+    "consumer_error": true,
+    "producer_formal_modes": {
+      "formal_exact_marginal_v1": "capability_cohort_authority",
+      "formal_feature_bundle_v1": "legacy_receipt_correction"
+    },
+    "note": "legacy_receipt_correction is a historical CLI field name; the referenced Leaves JSON is a hash-sealed formal factorized_capability_cohort_authority."
+  },
+  "fix_contract": {
+    "dispatch_source": "field checkpoint capability_cohort_authority_mode",
+    "formal_feature_bundle_validation": [
+      "rehash authority JSON",
+      "validate schema, artifact type, and experiment",
+      "validate exact radio, dino_v3, and sam3 cache path and SHA records",
+      "validate feature bundle, responsibility, RADIO checkpoint, geometry, and support lineage",
+      "validate channel-sharded formal loader gate",
+      "require all source-only and target-selection flags false"
+    ],
+    "unknown_mode": "fail_closed",
+    "mixed_authority_fields": "fail_closed",
+    "cohort_verification_skipped": false,
+    "method_or_hyperparameter_changed": false
+  },
+  "implementation": {
+    "capability_builder_path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_capability_views.py",
+    "capability_builder_sha256_before": "9f2de4b2115af391aa1e5be72a033c0b405880908944cdae919fbd71c702f278",
+    "capability_builder_sha256_after": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34",
+    "focused_test_path": "/root/RADIO-GS/tests/test_build_canonical_capability_views.py",
+    "focused_test_sha256": "4bfec13794d6705c6992b581fc49d83841cdcf6054a178e5efee60d45c323f99"
+  },
+  "validation": {
+    "builder_tests": "8 passed",
+    "producer_integration_tests": "2 passed",
+    "actual_leaves_cpu_loader_preflight": "passed",
+    "actual_leaves_authority": {
+      "mode": "formal_feature_bundle_v1",
+      "cohort_sha256": "7493d52dd7081a3bd3b6ac8f880f26dacb8c1d996813eae8d822a3e33fb59d15",
+      "radio_sha256": "3a3bd80ec270e329f0c14d61043cff8ce6f75be9eeac7375edb159be78866ac7",
+      "dino_v3_sha256": "25acafaa186ab085ee09e0875e371bb8cdd8b6969725bc636416d71ace56413e",
+      "sam3_sha256": "0cffb4539797f74855ee08303a868ad19fbebbb6e3b9a1359247b4d569f2a238",
+      "source_flags_all_false": true
+    }
+  },
+  "execution_decision": "retry_the_same_preregistered_materialization_after_this_fail_closed_consumer_fix"
+}

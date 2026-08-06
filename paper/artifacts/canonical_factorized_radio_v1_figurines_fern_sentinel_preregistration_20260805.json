@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "artifact_type": "method_preregistration",
+  "experiment": "canonical-factorized-radio-v1 Figurines and Fern source-only sentinel assets",
+  "date": "2026-08-05",
+  "objective": "Build matched-registration factorized fields for the already-open Figurines and Fern development sentinels without target-driven selection.",
+  "implementation": {
+    "builder": "radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+    "builder_sha256": "470c532d8eea61ff05779a768d00cd37cb8724605a5385c9e0c541bdf9b2adb3",
+    "trainer": "radio_gs/scripts/train_canonical_radio_field.py",
+    "trainer_sha256": "d50ec9a11e9cbc78244f884fe320fb9170127c42575dfa29378d3c0fd44f9c75",
+    "capability_builder": "radio_gs/scripts/build_canonical_capability_views.py",
+    "capability_builder_sha256": "57824bff048c7168b763a21e42fce3a6a34144c4490bb8be563a9198c1fc4259"
+  },
+  "fixed_representation": {
+    "name": "canonical-factorized-radio-v1",
+    "responsibility": "one frozen raster_gaussian_top1 sidecar shared exactly by raw RADIO, DINO-v3, and SAM3 source MPR",
+    "semantic_direction": "responsibility-weighted unit RADIO directions",
+    "amplitude": "responsibility-weighted mean raw RADIO log L2 amplitude",
+    "field_dimensions": {
+      "coefficient_dim": 256,
+      "local_dim": 128
+    },
+    "epochs": 20,
+    "seed": 0,
+    "fusion_reliability": false,
+    "official_capability_loss": true
+  },
+  "scenes": {
+    "figurines": {
+      "role": "LERF3D development sentinel",
+      "config_sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11",
+      "geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+      "feature_output_bundle_sha256": "2fc5c37e1790afba62ccb18175c1a853d624b5bd9f039a8701fbdb7d783b08e3",
+      "excluded_target_frame_ids": [
+        41,
+        105,
+        152,
+        195
+      ],
+      "maximum_source_views": 120,
+      "responsibility_policy": "create once from source-only raw RADIO and reuse without modification"
+    },
+    "fern": {
+      "role": "NVOS exact development sentinel",
+      "config_sha256": "c8958c55f48ce119f4685fde96ce245c75019e8640953192bb02b4a277dd18ce",
+      "geometry_checkpoint_sha256": "1fe3354ba506d9fa48db30008fa8b47873e53888384ca604a20a61d1b819e5fc",
+      "responsibility_cache_sha256": "5fd6de5d4951b1112dd1308ddffa5098df0ed2eba6b5cfb019278ab147e607eb",
+      "matched_raw_mpr_sha256": "c7bd41c0cdd653eaa9b03347a53bb436d104b1e57626661f591c9971976d33be",
+      "matched_dino_v3_mpr_sha256": "2048f26d3c088c2fd667bb93b27e7bcf27f793baa4ef457aec29c20469d07a64",
+      "matched_sam3_mpr_sha256": "e93b2119206936adfff4d5e2efdf8983de580d0e16ded74f61e8e19a4d47ac42",
+      "maximum_source_views": 120,
+      "responsibility_policy": "reuse frozen strict-NVOS source-only authority"
+    }
+  },
+  "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+  "gates": {
+    "direction_mean_cosine_minimum": 0.98,
+    "direction_p05_cosine_minimum": 0.94,
+    "mean_absolute_log_amplitude_error_maximum": 0.03,
+    "p95_absolute_log_amplitude_error_maximum": 0.15,
+    "dino_mean_cosine_minimum": 0.985,
+    "dino_p05_cosine_minimum": 0.965,
+    "sam3_mean_cosine_minimum": 0.965,
+    "sam3_p05_cosine_minimum": 0.925,
+    "benchmark_promotion": "Only assets passing all source-only representation gates may be opened by the already frozen benchmark evaluators."
+  },
+  "target_access": {
+    "benchmark_images_opened_during_asset_build": false,
+    "benchmark_masks_opened_during_asset_build": false,
+    "text_queries_opened_during_asset_build": false,
+    "target_metrics_used_for_design": false,
+    "per_scene_hyperparameter_search": false
+  },
+  "gpu_policy": {
+    "physical_gpus": [
+      0,
+      1
+    ],
+    "power_limit_watts": 300,
+    "check_frequency": "stage boundaries or approximately every 180 seconds for long stages",
+    "thermal_stop": "temperature at least 88 Celsius in two consecutive checks"
+  }
+}

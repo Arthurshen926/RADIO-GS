@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "experiment": "nvos_source_completion_loo_abstention_v1",
+  "status": "sentinel_promotion_gate_passed_expand_unchanged_method",
+  "claim_boundary": "Posthoc method iteration after earlier NVOS target results were opened. The source-only gate and its two decisions were sealed before the candidate target predictions, but this two-scene sentinel is not an independent validation set.",
+  "registered_authority": {
+    "preregistration_path": "paper/artifacts/nvos_source_completion_loo_abstention_preregistration_20260805.json",
+    "preregistration_sha256": "8436e72685cf41bc2b0417c2493b6f1df74c7aa9249ab6513cfab7246edd78d4",
+    "implementation_correction_path": "paper/artifacts/nvos_source_completion_loo_abstention_implementation_correction_20260805.json",
+    "implementation_correction_sha256": "1bc2944fe71205f147c67b7b484e64856fa3b51f3eee9a68a05cbe36fd66bda1",
+    "evaluator_sha256": "5379303305a5085deb1d4967e45f5af26bcbaa96c1ccadcbc21206c0809ccd61",
+    "source_gate_core_sha256": "9e1e76d3a91371025d0921bb89e939928bb9eb4a19a8ef09ae59490b99f5922b",
+    "source_gate_builder_sha256": "15fefa80b904588a70fa6019dc54214ac4a9b3f44b9522b6d74ceed3fca3b749",
+    "manifest_sha256": "bafc48ce30a0a637f5ea4d81a196ea240f80c153c41a3e257b6a2fd45fa3f2ea"
+  },
+  "method_contract": {
+    "gate": "all_trial_loo_majority_iou_v1",
+    "source_only_statistic": "For each of ten immutable SAM3 source-view trials, Jaccard IoU against the majority mask of the other nine trials.",
+    "acceptance": "Every held-out IoU must be at least 0.5; empty inputs fail closed.",
+    "accept_action": "Retain probability-preserving SAM3 source completion reliability.",
+    "reject_action": "Execute the original two-channel raw signed-scribble adjoint and frozen hard_seed_anchor_only_probability compact unary; no completion channel is appended.",
+    "graph": "disabled",
+    "readout": "unary_prior",
+    "threshold": 0.5,
+    "target_rgb_mask_or_metric_used_by_gate": false,
+    "learned_or_scene_specific_numeric_constants": false,
+    "frozen_evaluation_protocol_changed": false
+  },
+  "source_only_gate_results": {
+    "fern": {
+      "decision": "abstain_to_frozen_compact_raw_scribble_unary",
+      "minimum_heldout_iou": 0.003683126287533554,
+      "mean_heldout_iou": 0.7798908862877633,
+      "maximum_heldout_iou": 0.9235385901933589,
+      "failed_trial_indices": [
+        7
+      ],
+      "failed_trial_foreground_pixels": 2711,
+      "failed_trial_loo_consensus_foreground_pixels": 190225,
+      "gate_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_source_completion_loo_abstention_v1/source_gates/fern.json",
+      "gate_sha256": "4d9769d0f6140461a0806abdbd035dc9577df43ff86e0cb14eab2a357aad0d3a"
+    },
+    "horns_left": {
+      "decision": "accept_probability_preserving_source_completion",
+      "minimum_heldout_iou": 0.5313961545123852,
+      "mean_heldout_iou": 0.8364326547043761,
+      "maximum_heldout_iou": 0.9298613760651151,
+      "failed_trial_indices": [],
+      "gate_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_source_completion_loo_abstention_v1/source_gates/horns_left.json",
+      "gate_sha256": "66f646f9316e3214d5eed9ca7931463ea484cef51280983fee6d768b6c0bb424"
+    }
+  },
+  "results": {
+    "fern": {
+      "candidate_iou": 0.7553155907838534,
+      "candidate_pixel_accuracy": 0.9152140137295313,
+      "compact_comparator_iou": 0.7553155907838534,
+      "iou_delta": 0.0,
+      "configured_observation_fusion": "probability_mixture",
+      "effective_observation_fusion": "hard_seed_anchor_only_probability",
+      "completion_reliability_mean": 0.0,
+      "completion_primitive_confidence_sum": 0.0,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_source_completion_loo_abstention_v1/fern_corrected_fallback/fern_evaluation.json",
+      "report_sha256": "c0e73180d41e8f96ad5d6c4d54b4d2d096e2977f59af71aeda82597d2a5a27ec",
+      "primitive_unary_sha256": "b74552c4e93f0e1fd03a8a95e275b628d5753cb0bbdbd535167181dd766c8c61",
+      "target_score_sha256": "5b2fa451b29588a50214242931f003199461065a9d00d43bffccd6c2b77122cc",
+      "fallback_replay_vs_historical_compact": {
+        "same_two_channel_and_hard_seed_calculation_graph": true,
+        "primitive_bitwise_equal": false,
+        "primitive_max_absolute_difference": 3.5762786865234375e-07,
+        "primitive_mean_absolute_difference": 2.8444855360021393e-09,
+        "primitive_differing_rows": 51688,
+        "rendered_score_bitwise_equal": false,
+        "rendered_score_max_absolute_difference": 1.1920928955078125e-07,
+        "rendered_score_mean_absolute_difference": 4.875311265806204e-09,
+        "thresholded_binary_mask_bitwise_equal": true,
+        "thresholded_binary_mask_differing_pixels": 0,
+        "iou_equal": true,
+        "numeric_interpretation": "The non-bitwise float differences are CUDA reduction replay noise; promotion is closed on the identical thresholded mask and IoU, not on a false bitwise-float claim."
+      }
+    },
+    "horns_left": {
+      "candidate_iou": 0.7663050940546479,
+      "candidate_pixel_accuracy": 0.9834289838916616,
+      "compact_comparator_iou": 0.7000681428736316,
+      "iou_delta": 0.0662369511810163,
+      "configured_observation_fusion": "probability_mixture",
+      "effective_observation_fusion": "probability_mixture",
+      "completion_probability_mean": 0.05659131333231926,
+      "completion_reliability_mean": 0.9741718769073486,
+      "valid_primitive_completion_confidence_sum": 142402.328125,
+      "report_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/nvos_source_completion_loo_abstention_v1/horns_left_final/horns_left_evaluation.json",
+      "report_sha256": "f37903de917444a1cb5a5b4d16d33ac7895fc85feac73d45f41e0585df6603d7",
+      "primitive_unary_sha256": "c2e708579de52525a29b1d70932a434f5b0c14e6ff988b2a260370d90929bd85",
+      "target_score_sha256": "94e8675cc51e3c941182c8a65d47518e15405a14437475bf354b4b41bdf2cea2",
+      "final_evaluator_replay_vs_initial_accepted_branch": {
+        "thresholded_binary_mask_bitwise_equal": true,
+        "thresholded_binary_mask_differing_pixels": 0,
+        "iou_equal": true,
+        "primitive_max_absolute_difference": 3.8743019104003906e-07,
+        "primitive_mean_absolute_difference": 1.7247963057798188e-09
+      }
+    },
+    "aggregate": {
+      "candidate_macro_iou": 0.7608103424192506,
+      "compact_comparator_macro_iou": 0.7276918668287424,
+      "macro_iou_delta": 0.03311847559050818,
+      "minimum_scene_iou_delta": 0.0,
+      "maximum_scene_regression": 0.0,
+      "promotion_gate": {
+        "macro_delta_at_least_0p005": true,
+        "at_least_one_scene_improves": true,
+        "no_scene_regresses_beyond_0p02": true,
+        "overall": true
+      }
+    }
+  },
+  "excluded_intermediate_attempts": {
+    "incorrect_zero_confidence_generic_mixture_fern_iou": 0.756318486636662,
+    "reason_excluded": "It returned the pure prototype field rather than the preregistered frozen compact raw-scribble unary. It is retained only as implementation-diagnosis evidence and is not counted in the candidate result.",
+    "gate_decisions_changed_after_target_open": false
+  },
+  "safety_and_validation": {
+    "primitive_unary_written_before_target_ground_truth_open": true,
+    "all_target_scores_persisted_before_target_masks_open": true,
+    "gate_recomputed_and_bound_by_evaluator": true,
+    "focused_tests": "141 passed",
+    "python_compile": "passed",
+    "git_diff_check": "passed",
+    "gpu": {
+      "final_runs_physical_gpu": 0,
+      "power_limit_w": 300,
+      "thermal_hard_stop_c": 88,
+      "fern_max_observed_temperature_c": 51,
+      "horns_left_max_observed_temperature_c": 50,
+      "telemetry_note": "Sparse stage-boundary polling; reported values are maximum observed samples, not guaranteed instantaneous peaks.",
+      "final_cuda_compute_owner": false,
+      "final_gpu0_temperature_c": 46,
+      "final_gpu1_temperature_c": 37
+    }
+  },
+  "decision": {
+    "promote": true,
+    "mechanistic_conclusion": "SAM3 source completion is a high-value conditional unary, not a universally safe replacement for the compact field. Leave-one-trial source consistency catches fern's collapsed completion trial and preserves the strong raw-scribble compact path, while retaining the 6.62-point horns_left gain.",
+    "scope": "After a separate frozen full8 expansion preregistration, materialize source-only SAM3 completion and LOO gate receipts for the remaining six frozen NVOS task instances, then evaluate the unchanged gate and compiler without scene-specific method changes before making a full-benchmark claim.",
+    "lerf3d_or_spin9_claim": "This result fixes an NVOS query-interface reliability failure; it does not by itself demonstrate a stronger canonical text field or solve LERF3D/SPIn9."
+  }
+}

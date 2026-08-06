@@ -66,6 +66,8 @@ def test_free_field_rejects_query_contaminated_mpr() -> None:
         ("non_boolean_architecture", "use_fusion must be boolean"),
         ("state_shape", "state tensor local_codes differs"),
         ("state_nonfinite", "state tensor decoder.mean is non-finite"),
+        ("basis_rank_deficient", "rank deficient"),
+        ("basis_ill_conditioned", "condition number"),
         ("reliability_copy", "reliability copies differ"),
         ("signature_dimension", "signature feature dimension differs"),
     ],
@@ -88,6 +90,12 @@ def test_field_loader_rejects_malformed_payload_before_model_use(
         payload["state_dict"]["local_codes"] = torch.zeros(3, 3)
     elif mutation == "state_nonfinite":
         payload["state_dict"]["decoder.mean"][0] = float("nan")
+    elif mutation == "basis_rank_deficient":
+        payload["state_dict"]["decoder.basis"][:, 1] = payload["state_dict"][
+            "decoder.basis"
+        ][:, 0]
+    elif mutation == "basis_ill_conditioned":
+        payload["state_dict"]["decoder.basis"][:, 1] *= 1e-7
     elif mutation == "reliability_copy":
         payload["reliability"][0, 0] = 0.5
     else:
