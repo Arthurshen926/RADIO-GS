@@ -1,0 +1,37 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_dev_audit_disjointness_proof.v1",
+  "schema_version": 1,
+  "status": "sealed_disjoint_before_reserved_audit_confirmation",
+  "dev_manifest": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.manifest.json",
+    "sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3",
+    "split": "dev",
+    "queries": 101,
+    "synsets": 101,
+    "ordered_records_sha256": "824b2d7f8115db39fe379ec2f8cb834f1c78da5e7c1d3051fb52bb3464887711",
+    "split_synset_tab_query_lf_sha256": "26b814d872a6455961097d1ab1390d951d69e69c2a88d4c58e9bd003217f6544"
+  },
+  "audit_manifest": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+    "sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4",
+    "split": "audit",
+    "queries": 90,
+    "synsets": 90,
+    "ordered_records_sha256": "0bfe94aeb6b5e0fecc978c6c66d77bba0fc0b5b7be59d922a801915843bd748f",
+    "split_synset_tab_query_lf_sha256": "3b78a2e81e2750dd7314d6431ac44ddea05dd505948d775e9d1e33e87ae0bc7b"
+  },
+  "proof": {
+    "comparison_axis": "exact canonical query strings and exact ImageNet synset identifiers from the two content-addressed manifests",
+    "query_intersection_count": 0,
+    "synset_intersection_count": 0,
+    "dev_audit_disjoint": true,
+    "benchmark_vocabulary_opened_by_banks": false
+  },
+  "access_audit": {
+    "dev_manifest_opened": true,
+    "reserved_audit_manifest_opened_for_confirmation_authority": true,
+    "reserved_audit_embedding_tensor_opened": false,
+    "benchmark_queries_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

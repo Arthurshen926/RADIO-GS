@@ -1,0 +1,99 @@
+{
+  "schema": "radio_gs.lerf_all_available_o2_valid_domain_knn10_frozen_exact_result.v1",
+  "schema_version": 1,
+  "status": "complete_rejected_no_benchmark_gain",
+  "authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_all_available_o2_valid_domain_knn10_frozen_exact_metric_execution_authority_20260809.json",
+    "sha256": "2fe069c291b2efb847ebaf71966c23f7d74abf26080db02d5acd2cf493c4aa6d"
+  },
+  "independent_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_all_available_o2_valid_domain_knn10_frozen_exact_independent_audit_20260809.json",
+    "sha256": "573eda0553fd311066718e42c6475be1789590b09733f04eeaab3854134174b4",
+    "decision": "PASS"
+  },
+  "execution_contract": {
+    "single_candidate": true,
+    "no_sweep": true,
+    "no_threshold_scene_or_query_tuning": true,
+    "no_retry": true,
+    "both_exit_code": 0,
+    "frozen_protocol_unchanged": true
+  },
+  "results": {
+    "teatime": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "4901bfc5646b246d0804df6970cee76f798d93b2dc530657477fa52953b9856a"
+      },
+      "accepted_control_miou": 0.5278149843215942,
+      "candidate_miou": 0.5275582671165466,
+      "delta_miou": -0.0002567172050476074,
+      "metric_deltas": {
+        "acc025": -0.016949152542372836,
+        "acc050": 0.016949152542372947,
+        "boundary_f": -0.0045566558837890625,
+        "trimap_iou": 0.008852511644363403
+      },
+      "largest_query_deltas": {
+        "positive": {"coffee mug": 0.11014410853385925},
+        "negative": {
+          "dall-e brand": -0.06243239343166351,
+          "hooves": -0.05616840720176697,
+          "plate": -0.054673731327056885
+        }
+      },
+      "telemetry": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1_telemetry.csv",
+        "sha256": "d28864cdf3e0ff1cf8245fcc06b3c52ff55e5010740dc35ee257e43de03fc29e",
+        "max_sampled_temperature_c": 52,
+        "cuda_release_verified": true
+      },
+      "owner_audit": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1_owner.log",
+        "sha256": "16e96b56d6e7daad39fbcd28eb08bb365bb4d8542eeaea2d8fcbb3c4b234539f"
+      }
+    },
+    "waldo_kitchen": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "01ba23493c81ea5e0e14873a63cb350d6a87633971666b527a0e255ec812363b"
+      },
+      "accepted_control_miou": 0.34969425201416016,
+      "candidate_miou": 0.33172285556793213,
+      "delta_miou": -0.017971396446228027,
+      "metric_deltas": {
+        "acc025": 0.0,
+        "acc050": -0.04545454545454544,
+        "boundary_f": 0.01568695902824402,
+        "trimap_iou": -0.008682668209075928
+      },
+      "largest_query_deltas": {
+        "positive": {
+          "pot": 0.37330517917871475,
+          "knife": 0.06392672657966614,
+          "red cup": 0.041197121143341064
+        },
+        "negative": {
+          "cabinet": -0.7275284603238106,
+          "refrigerator": -0.07183405756950378,
+          "yellow desk": -0.052768275141716
+        }
+      },
+      "telemetry": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1_telemetry.csv",
+        "sha256": "3695500b813b6c50603442c840c6e0fffa795ff1a3c8a7599c7db466107059d1",
+        "max_sampled_temperature_c": 49,
+        "cuda_release_verified": true
+      },
+      "owner_audit": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1_owner.log",
+        "sha256": "b012b31f82b0c4c218bd5e72b5e4e77ab103af0079e37488f25b065fe39492ee"
+      }
+    }
+  },
+  "decision": {
+    "promote_candidate": false,
+    "reason": "The source-only coverage and leave-one-out agreement gains do not transfer to frozen target separation. Equal-weight all-available aggregation is query-sensitive: improvements on some objects are offset by severe view/background contamination on others, led by waldo_kitchen cabinet.",
+    "next_principle": "Use a target-free reliability-conditioned view contribution rule or source-consistency safeguard before admitting omitted views; do not tune the frozen threshold or individual scenes/queries."
+  }
+}

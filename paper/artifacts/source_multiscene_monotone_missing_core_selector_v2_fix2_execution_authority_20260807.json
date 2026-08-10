@@ -1,0 +1,68 @@
+{
+  "schema": "radio_gs.source_multiscene_monotone_missing_core_selector_authority.v2",
+  "schema_version": 2,
+  "status": "sealed_after_scene0001_scene0002_source_tables_before_multiscene_fit",
+  "source_scenes": ["scene0001_00", "scene0002_00"],
+  "implementation": {"path": "/root/RADIO-GS/radio_gs/scripts/fit_source_multiscene_monotone_missing_core_selector_v2.py", "sha256": "8118d657ecb549c74b791224ec215cd36a443ac2614643c8ef97949256d8f19c"},
+  "selector_interface": {"path": "/root/RADIO-GS/radio_gs/interfaces/source_multiscene_monotone_missing_core_selector.py", "sha256": "ba2e5fd9ed9fd4ab5dc3f4af8550be5596c3d6f7e4dbcd54899889e83aa180c4"},
+  "source_inputs": [
+    {
+      "scene_id": "scene0001_00",
+      "role": "mechanism_train",
+      "authority": {"path": "/root/RADIO-GS/paper/artifacts/source_same_axis_o0_scene0001_mechanism_audit_execution_authority_20260807.json", "sha256": "49e84d59f7437a29eb086c73f34c543d949d31232de9b31918d9da022591d168"},
+      "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/mechanism_audit_report.json", "sha256": "785422cecd2a9424ee6f56b9305f8c7dc576f1838d43a2d54fde072937bd457c"},
+      "unit_table": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/missing_core_unit_table.pt", "sha256": "ba7239d61a4affd66be0b360dc21e712c1630ef9a155fa1c345b23876677939a"}
+    },
+    {
+      "scene_id": "scene0002_00",
+      "role": "external_source_train",
+      "authority": {"path": "/root/RADIO-GS/paper/artifacts/source_monotone_missing_core_selector_scene0002_external_execution_authority_20260807.json", "sha256": "29b86e65ee31d159ca2f481f9ab184ce48df2027e68674297fafcfd74a335b6b"},
+      "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0002_00/frozen_selector_external_report.json", "sha256": "8180c8e181e55a1693028806360e8d7ac469b75d92c634ce786f662694a6ebd9"},
+      "unit_table": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0002_00/frozen_selector_external_unit_table.pt", "sha256": "c0209a53cad638c788d90cd9c740aa719ad51f9eeeae9cb5fe4d8bc91d1d7aa4"}
+    }
+  ],
+  "fixed_fit": {
+    "model": "six_feature_monotone_additive_logistic",
+    "feature_names": ["unit_o0_score_positive", "appearance_concentration_positive", "boundary_concentration_positive", "negative_log1p_core_spatial_rms_radius", "negative_query_selected_scale_index", "negative_log1p_full_scalar_source_robust_ood_linf"],
+    "source_unit_feature_indices": [0, 14, 15, 17, 9, 18],
+    "feature_orientation": "larger_is_safer_after_fixed_transform",
+    "normalization": "per_fold_training_median_and_1p4826_MAD",
+    "training_loss": "equal_scene_mass_then_equal_region_mass_within_scene_BCE_plus_L2",
+    "l2_strength": 0.01,
+    "maximum_LBFGS_iterations": 100,
+    "positive_weight_parameterization": "softplus_nonnegative",
+    "fold_assignment": "splitmix64_complete_packed_scene_region_groups",
+    "fold_count": 3,
+    "threshold_selection": "largest_tie_complete_global_OOF_population_passing_overall_and_every_scene_gates",
+    "threshold_inclusive": true,
+    "minimum_selected_per_scene": 256,
+    "minimum_overall_hard_precision_Wilson95_lower": 0.8,
+    "minimum_each_scene_hard_precision_Wilson95_lower": 0.75,
+    "minimum_signed_utility_mean_exclusive": 0.0,
+    "require_overall_and_each_scene_signed_utility_above_unconditional": true,
+    "require_selected_hard_positive_and_negative_per_scene": true,
+    "target_probability": "minimum_probability_across_three_fold_models",
+    "scene_or_query_identifiers_as_features": false,
+    "scene_identifier_use": "fold_routing_and_sample_balance_only",
+    "instance_labels_as_features": false,
+    "deep_network": false
+  },
+  "outputs": {
+    "model": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/multiscene_scene0001_scene0002_selector_v2_fix2/monotone_missing_core_selector_v2.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/multiscene_scene0001_scene0002_selector_v2_fix2/monotone_missing_core_selector_v2_report.json"
+  },
+  "source_access": {
+    "scene0001_source_membership_opened": true,
+    "scene0002_source_membership_opened": true,
+    "scene0003_membership_opened": false,
+    "scene0004_membership_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false
+  },
+  "source_validation_execution_authorized": false,
+  "benchmark_execution_authorized": false
+}

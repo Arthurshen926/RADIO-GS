@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_support_readout_oracle_d0_d5_figurines_gpu0_execution_binding_v1",
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_cpu_binding_verification_and_before_any_successful_d2_d5_metric_or_output",
+  "parent_authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_preregistration_20260806.json",
+      "sha256": "473b70468c14bedce0d347828800f0d029838c0c7bfe5e4c480c86f3e73febf8"
+    },
+    "teacher_availability_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_teacher_availability_addendum_20260806.json",
+      "sha256": "4aa709366b9d21eb8120c365c93720b403540e2494f598d8b8eaba395125936f"
+    },
+    "scale_axis_correction_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_scale_axis_correction_addendum_20260806.json",
+      "sha256": "aa60919c659953d5bd5823d3c6be04e3e644d97de4845aa1697759782c3ffefb"
+    },
+    "corrected_execution_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_corrected_execution_addendum_20260806.json",
+      "sha256": "cb3f78180c56f26184dd3217b3d7fe751773adc5757dbdbd3bd160f2ded1581a"
+    }
+  },
+  "baseline_result_bindings": {
+    "D0": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o0_diagnostic_retry1/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677"
+    },
+    "D1": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o4_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "b06d6cd6a3b88df0c2cd6f92caf9b68c277f81942625735ccdf38898fda6cc9f"
+    },
+    "policy": "Both files must exist and match their exact registered SHA-256 before any model, target adjoint, candidate oracle, or metric is constructed. The stored D0 and D1 scalar values and oracle definitions remain unchanged."
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/eval_lerf_support_readout_oracle_d0_d5.py",
+    "sha256": "00d52d065cfb91fa25e9deda90003df9b904ed163b1723dac992f0ec878e846b",
+    "test_path": "tests/test_eval_lerf_support_readout_oracle_d0_d5.py",
+    "test_sha256": "96b29d3af5548b95152beff3836478d1814b1ae184a686994c854bf61584d72c",
+    "verification": "black_check_passed_and_3_tests_passed",
+    "change_scope": "read_only_D0_D1_path_and_sha256_binding_plus_output_provenance_only",
+    "oracle_definition_changed": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "aborted_prelaunch": {
+    "attempted_at": "2026-08-07T00:00:00+08:00",
+    "reason": "Execution was interrupted immediately when the missing D0/D1 runtime SHA binding was identified.",
+    "stdout": "empty",
+    "result_json_created": false,
+    "membership_artifact_created": false,
+    "reportable_metric_created": false,
+    "reuse_policy": "No output from the aborted prelaunch may be used."
+  },
+  "gpu_execution": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "preferred_gpu_in_parent_preregistration": 1,
+    "deviation_reason": "Physical GPU1 is reserved for parallel asset preparation in the parent optimization plan; the oracle is GPU-invariant and is therefore executed on the user-authorized idle physical GPU0.",
+    "preflight_temperature_c": 41,
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 30,
+    "hard_temperature_c": 88,
+    "consecutive_hot_polls_before_stop": 6,
+    "nvml_failure_policy": "do_not_start_or_safely_stop"
+  },
+  "execution_policy": {
+    "all_D4_and_D5_variants_must_be_reported": true,
+    "result_dependent_selection": false,
+    "threshold_or_scale_sweep": false,
+    "development_only_nonbenchmark_oracle": true,
+    "execution_authorized_after_this_addendum": true
+  }
+}

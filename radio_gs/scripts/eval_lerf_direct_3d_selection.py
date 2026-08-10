@@ -268,6 +268,118 @@ class SelectionSpec:
         return f"{self.mode}_{self.value:g}".replace(".", "p")
 
 
+def validate_scalar_posterior_projection(
+    projection_mode: str,
+    spec: SelectionSpec,
+    *,
+    selection_refinement: str,
+    selection_min_ratio: float,
+    selection_max_ratio: float,
+) -> None:
+    """Fail closed when pixel-domain posterior projection changes selection policy."""
+    if projection_mode != "scalar_posterior":
+        return
+    if spec.mode != "score_threshold":
+        raise ValueError("scalar_posterior requires score_threshold selection")
+    if selection_refinement != "none":
+        raise ValueError("scalar_posterior does not permit primitive selection refinement")
+    if float(selection_min_ratio) != 0.0 or float(selection_max_ratio) != 0.0:
+        raise ValueError("scalar_posterior does not permit primitive selection ratio bounds")
+
+
+def validate_selected_membership_posterior_projection(
+    projection_mode: str,
+    spec: SelectionSpec,
+    *,
+    selection_refinement: str,
+    selection_min_ratio: float,
+    selection_max_ratio: float,
+    mask_refinement: str,
+) -> None:
+    """Keep the frozen primitive decision while changing only visibility projection."""
+    if projection_mode != "selected_membership_posterior":
+        return
+    if spec.mode != "score_threshold":
+        raise ValueError(
+            "selected_membership_posterior requires score_threshold selection"
+        )
+    if selection_refinement != "none":
+        raise ValueError(
+            "selected_membership_posterior does not permit primitive selection refinement"
+        )
+    if float(selection_min_ratio) != 0.0 or float(selection_max_ratio) != 0.0:
+        raise ValueError(
+            "selected_membership_posterior does not permit primitive selection ratio bounds"
+        )
+    if mask_refinement != "none":
+        raise ValueError(
+            "selected_membership_posterior does not permit mask refinement"
+        )
+
+
+def scalar_posterior_mask(score_map: np.ndarray, threshold: float) -> np.ndarray:
+    """Threshold a rendered continuous query posterior without re-calibration."""
+    values = np.asarray(score_map, dtype=np.float32)
+    if values.ndim != 2 or not np.isfinite(values).all():
+        raise ValueError("scalar posterior must be a finite 2D array")
+    return values > float(threshold)
+
+
+def selected_membership_posterior_mask(
+    membership_map: np.ndarray,
+    full_scene_alpha: np.ndarray,
+) -> np.ndarray:
+    """Bayes-majority membership inside the frozen VALA visible-alpha support."""
+    values = np.asarray(membership_map, dtype=np.float32)
+    if values.ndim != 2 or not np.isfinite(values).all():
+        raise ValueError("selected membership posterior must be a finite 2D array")
+    alpha = np.asarray(full_scene_alpha, dtype=np.float32)
+    if alpha.shape != values.shape or not np.isfinite(alpha).all():
+        raise ValueError(
+            "full-scene alpha must be finite and shape-aligned with membership"
+        )
+    alpha_u8 = np.clip(np.floor(alpha * 255.0 + 0.5), 0, 255).astype(np.uint8)
+    return (values > 0.5) & (alpha_u8 > 10)
+
+
+def visible_selected_membership_posterior(
+    premultiplied_membership: np.ndarray,
+    full_scene_alpha: np.ndarray,
+    *,
+    eps: float = 1e-6,
+) -> np.ndarray:
+    """Normalize one or more selected-membership composites by scene alpha."""
+    composite = np.asarray(premultiplied_membership, dtype=np.float32)
+    alpha = np.asarray(full_scene_alpha, dtype=np.float32)
+    if composite.ndim not in {2, 3} or alpha.ndim != 2:
+        raise ValueError("membership composite must be 2D/3D and alpha must be 2D")
+    if composite.shape[-2:] != alpha.shape:
+        raise ValueError("membership composite and alpha spatial shapes must align")
+    if not np.isfinite(composite).all() or not np.isfinite(alpha).all():
+        raise ValueError("membership composite and alpha must be finite")
+    if float(eps) <= 0.0:
+        raise ValueError("eps must be positive")
+    denominator = alpha if composite.ndim == 2 else alpha[None, ...]
+    return np.divide(
+        composite,
+        denominator,
+        out=np.zeros_like(composite),
+        where=denominator > float(eps),
+    )
+
+
+def projection_semantics(mode: str) -> str:
+    if mode == "feature_composite":
+        return "full-scene visibility-aware premultiplied selected-membership composite"
+    if mode == "selected_only_alpha":
+        return "physically subset selected primitives and render their alpha"
+    if mode == "scalar_posterior":
+        return "alpha-normalized continuous primitive query posterior, then fixed pixel threshold"
+    if mode == "selected_membership_posterior":
+        return "alpha-normalized visible selected-primitive membership, then fixed Bayes-majority threshold"
+    raise ValueError(f"Unsupported projection_mode: {mode}")
+
+
 @dataclass(frozen=True)
 class OursMultiscaleQueryScoreCache:
     """Strict, row-aligned input for the frozen three-level Ours/VALA readout."""
@@ -6375,6 +6487,21 @@ def evaluate_selection_spec(
     save_geometry_maps: bool,
     device: torch.device,
 ) -> Dict:
+    validate_scalar_posterior_projection(
+        projection_mode,
+        spec,
+        selection_refinement=selection_refinement,
+        selection_min_ratio=selection_min_ratio,
+        selection_max_ratio=selection_max_ratio,
+    )
+    validate_selected_membership_posterior_projection(
+        projection_mode,
+        spec,
+        selection_refinement=selection_refinement,
+        selection_min_ratio=selection_min_ratio,
+        selection_max_ratio=selection_max_ratio,
+        mask_refinement=mask_refinement,
+    )
     selected = select_gaussians_from_scores(
         scores,
         spec,
@@ -6422,6 +6549,13 @@ def evaluate_selection_spec(
         )
     selected = selected.to(device=device, dtype=torch.float32)
     proxy = GaussianSelectionProxy(model, selected)
+    scalar_posterior_rows = (
+        compute_selection_ranking_scores(scores, mode=spec.mode).to(
+            device=device, dtype=torch.float32
+        )
+        if projection_mode == "scalar_posterior"
+        else None
+    )
     needs_prompt_heatmap = (
         mask_refinement == "rgb_grabcut_score_component_guard"
         or (
@@ -6490,6 +6624,26 @@ def evaluate_selection_spec(
                 .numpy()
                 if score_heatmap_proxy is not None
                 else None
+            )
+            scalar_posterior_maps = (
+                renderer.render_feature_rows(
+                    model,
+                    viewmat,
+                    scalar_posterior_rows,
+                    alpha_normalize=True,
+                )["feature_map"]
+                .detach()
+                .float()
+                .cpu()
+                .numpy()
+                if scalar_posterior_rows is not None
+                else None
+            )
+        selected_membership_posterior_maps = None
+        if projection_mode == "selected_membership_posterior":
+            selected_membership_posterior_maps = visible_selected_membership_posterior(
+                silhouette,
+                alpha_np,
             )
         geometry_maps = geometry_discontinuity_maps(alpha_np, depth_np) if save_geometry_maps else None
         if save_geometry_maps and geometry_maps is not None:
@@ -6565,6 +6719,17 @@ def evaluate_selection_spec(
                     raise ValueError(f"Unsupported alpha_binarization: {alpha_binarization}")
             elif projection_mode == "feature_composite":
                 pred = silhouette[cat_idx] > float(silhouette_threshold)
+            elif projection_mode == "scalar_posterior":
+                assert scalar_posterior_maps is not None
+                pred = scalar_posterior_mask(
+                    scalar_posterior_maps[cat_idx], float(spec.value)
+                )
+            elif projection_mode == "selected_membership_posterior":
+                assert selected_membership_posterior_maps is not None
+                pred = selected_membership_posterior_mask(
+                    selected_membership_posterior_maps[cat_idx],
+                    alpha_np,
+                )
             else:
                 raise ValueError(f"Unsupported projection_mode: {projection_mode}")
             initial_pred = pred.copy()
@@ -7058,10 +7223,14 @@ def evaluate_selection_spec(
             "component_rank_by": component_rank_by,
             "silhouette_threshold": silhouette_threshold,
             "projection_mode": projection_mode,
-            "projection_semantics": (
-                "full-scene visibility-aware premultiplied selected-membership composite"
-                if projection_mode == "feature_composite"
-                else "physically subset selected primitives and render their alpha"
+            "projection_semantics": projection_semantics(projection_mode),
+            "pixel_posterior_threshold": (
+                0.5 if projection_mode == "selected_membership_posterior" else None
+            ),
+            "alpha_support_rule": (
+                "floor(full_scene_alpha * 255 + 0.5) > 10"
+                if projection_mode == "selected_membership_posterior"
+                else None
             ),
             "alpha_binarization": alpha_binarization,
             "mask_refinement": mask_refinement,
@@ -8766,12 +8935,39 @@ def main() -> None:
     parser.add_argument("--silhouette_threshold", type=float, default=0.7, help="OpenGaussian-style rendered silhouette threshold")
     parser.add_argument(
         "--projection_mode",
-        choices=["feature_composite", "selected_only_alpha"],
+        choices=[
+            "feature_composite",
+            "selected_only_alpha",
+            "scalar_posterior",
+            "selected_membership_posterior",
+        ],
         default="feature_composite",
         help=(
             "Projection mask source. feature_composite keeps all scene opacity "
             "so unselected primitives remain occluders while compositing binary "
-            "selected membership; selected_only_alpha physically removes them."
+            "selected membership; selected_only_alpha physically removes them; "
+            "scalar_posterior renders alpha-normalized continuous query scores "
+            "before applying the unchanged score threshold; "
+            "selected_membership_posterior preserves the frozen primitive decision "
+            "and renders its full-scene visible-membership posterior."
+        ),
+    )
+    parser.add_argument(
+        "--scalar_posterior_projection",
+        action="store_true",
+        help=(
+            "After freezing a VALA protocol preset, replace only its primitive-first "
+            "binary projection with the parameter-free continuous scalar-posterior "
+            "projection. All score construction and the 0.6 threshold remain frozen."
+        ),
+    )
+    parser.add_argument(
+        "--selected_membership_posterior_projection",
+        action="store_true",
+        help=(
+            "After freezing a VALA protocol preset, preserve its primitive score "
+            "threshold exactly, render binary selected membership with all scene "
+            "occluders, and apply the fixed Bayes-majority pixel decision at 0.5."
         ),
     )
     parser.add_argument(
@@ -8947,6 +9143,32 @@ def main() -> None:
             args.canonical_embedding_cache = (
                 f"checkpoints/{args.text_encoder}_lerf_negative_embeddings.pt"
             )
+    if args.scalar_posterior_projection and args.selected_membership_posterior_projection:
+        parser.error(
+            "--scalar_posterior_projection and "
+            "--selected_membership_posterior_projection are mutually exclusive"
+        )
+    if args.scalar_posterior_projection:
+        if args.protocol_preset not in {"vala_paper_3d", "vala_repo_3d"}:
+            parser.error(
+                "--scalar_posterior_projection requires a frozen VALA protocol preset"
+            )
+        args.projection_mode = "scalar_posterior"
+    if args.selected_membership_posterior_projection:
+        if args.protocol_preset not in {"vala_paper_3d", "vala_repo_3d"}:
+            parser.error(
+                "--selected_membership_posterior_projection requires a frozen "
+                "VALA protocol preset"
+            )
+        args.projection_mode = "selected_membership_posterior"
+    if (
+        args.projection_mode == "selected_membership_posterior"
+        and not args.selected_membership_posterior_projection
+    ):
+        parser.error(
+            "selected_membership_posterior is available only through the frozen "
+            "--selected_membership_posterior_projection protocol intervention"
+        )
     if (
         args.sam3_prompt_mask_head_oracle_prompt != "none"
         and not args.allow_sam3_prompt_mask_head_oracle_diagnostic
@@ -9468,22 +9690,44 @@ def main() -> None:
             "render_role": (
                 "render binary selected membership with full-scene visibility and opacity"
                 if args.projection_mode == "feature_composite"
-                else "render physically selected primitives only for mask evaluation"
+                else (
+                    "render physically selected primitives only for mask evaluation"
+                    if args.projection_mode == "selected_only_alpha"
+                    else (
+                        "render the continuous primitive query posterior before thresholding"
+                        if args.projection_mode == "scalar_posterior"
+                        else "render alpha-normalized selected membership with full-scene occlusion"
+                    )
+                )
             ),
             "projection_mode": args.projection_mode,
-            "projection_semantics": (
-                "full-scene visibility-aware premultiplied selected-membership composite"
-                if args.projection_mode == "feature_composite"
-                else "physically subset selected primitives and render their alpha"
+            "projection_semantics": projection_semantics(args.projection_mode),
+            "pixel_posterior_threshold": (
+                0.5
+                if args.projection_mode == "selected_membership_posterior"
+                else None
+            ),
+            "alpha_support_rule": (
+                "floor(full_scene_alpha * 255 + 0.5) > 10"
+                if args.projection_mode == "selected_membership_posterior"
+                else None
             ),
             "alpha_binarization": args.alpha_binarization,
             "metrics": ["mIoU", "Acc@0.25", "Acc@0.50", "boundary_f", "trimap_iou"],
             "geometry_alignment_maps": bool(args.save_geometry_maps),
             "silhouette_threshold": args.silhouette_threshold,
             "silhouette_threshold_source": (
-                "VALA released compute_lerf_iou.py PNG threshold 10/255"
-                if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}
-                else "evaluator argument"
+                "not used by scalar_posterior"
+                if args.projection_mode == "scalar_posterior"
+                else (
+                    "VALA PNG round-to-uint8 full-scene support threshold >10"
+                    if args.projection_mode == "selected_membership_posterior"
+                    else (
+                        "VALA released compute_lerf_iou.py PNG threshold 10/255"
+                        if args.protocol_preset in {"vala_paper_3d", "vala_repo_3d"}
+                        else "evaluator argument"
+                    )
+                )
             ),
             "mask_refinement": args.mask_refinement,
             "rgb_refinement_source": (

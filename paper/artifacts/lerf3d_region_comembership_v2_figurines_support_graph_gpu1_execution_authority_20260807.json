@@ -1,0 +1,56 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_support_graph_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T04:33:00+08:00",
+  "status": "sealed_after_formal_capability_success_and_before_support_graph_execution",
+  "scene_id": "figurines",
+  "input": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/canonical_capability_bank.pt",
+    "sha256": "f34fc6b71a7a7e37cd51db46b9b9a65f7c9f18c6d4b46d20091f482e79c73e8e",
+    "formal_loader_validation_passed": true,
+    "active_primitive_rows": 96879,
+    "capability_training_authority_source": "formal_exact_marginal_capability_training_authority_v1"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_support_graph.py",
+    "sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254"
+  },
+  "frozen_contract": {
+    "same_as_source_4train_2validation": true,
+    "neighbors": 16,
+    "spatial_scale": 2.0,
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "surface_relation": "none",
+    "surface_topology_min_affinity": 0.0,
+    "covisibility_weight": 0.0,
+    "responsibility_cache": null,
+    "capability_affinity_mode": "signed_hash",
+    "affinity_dim": 256,
+    "hash_batch_size": 8192,
+    "affinity_chunk_size": 65536,
+    "topology_mode": "symmetric_union",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/canonical_support_graph_accepted_v2.pt",
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "affinity_device": "cuda:0_after_CUDA_VISIBLE_DEVICES_1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "maximum_power_limit_w": 300.5,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

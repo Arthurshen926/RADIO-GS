@@ -1,0 +1,211 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_exact_metric_results.v2",
+  "schema_version": 2,
+  "status": "complete_frozen_control_O1_O2_single_candidate_comparison",
+  "scene_id": "ramen",
+  "source_materialization": {
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/execution_authority.json",
+      "sha256": "e357aa6c865e454072782011283c2cc5cd722ea0648a31a912f0c66af22a7b1d"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o1_o2_streaming_result.json",
+      "sha256": "48bc92437012ef862856220f286f67003cb1bf1aba4b5e978103f286efbb1a9b"
+    },
+    "teacher_mean": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_teacher_mean_fp16.pt",
+      "sha256": "719a68f12e6fbf8873d306de1b5d00249292f7989eb8d713ea74a8c7542606a2"
+    },
+    "O1_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o1_positive.pt",
+      "sha256": "b21f4611722e2dffa3b673399d2d6e320485fb08d8b9fefda4280ff6e39b4fd3"
+    },
+    "O1_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o1_negative.pt",
+      "sha256": "f93e8f2c1646ad3611fd518622c00decc0d64e16f8ab4ef3e9623be518af49fd"
+    },
+    "O2_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o2_positive.pt",
+      "sha256": "bc20f3f41ff88184daaf5502f3202407f81b66e735d8caf1a2571ea046827d11"
+    },
+    "O2_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o2_negative.pt",
+      "sha256": "3ff8f01ac286d636ae6772592cf119abc9d46112d5a21d853149c9a582b78635"
+    },
+    "accepted_rows": 221608,
+    "rows_with_teacher": 221608,
+    "rows_without_teacher_bitwise_o0_fallback": 0,
+    "selected_projection_batch": 128,
+    "preflight_peak_cuda_bytes": 6401363456,
+    "materialization_peak_temperature_c": 54,
+    "materialization_peak_power_w": 125.84
+  },
+  "frozen_protocol": {
+    "config_sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93",
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "renderer_geometry_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d",
+    "protocol_preset": "vala_repo_3d",
+    "single_candidate_no_sweep": true,
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "control_gate": {
+    "replay_result_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_frozen_config_control_replay_result_20260807.json",
+      "sha256": "ed564b1eb2fdfd56241dbc169b67f25ddd1221f9d1fd0f9338ada51516c7a424"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o0_exact_frozen_config_control_v1/ramen/lerf_direct_3d_selection_results.json",
+      "sha256": "c73412a12bcf655731c3b3c8dbad3afcf7cae03708514f483644ead4d805bd21"
+    },
+    "lineage_replay_passed": true
+  },
+  "metric_authorities": {
+    "O1": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_ramen_one_shot_exact_metric_execution_authority_fix2_20260807.json",
+      "sha256": "d3a3cc7403c42d7f330dbb2393735ba203f5e09ed54bb822834db93aff32922a"
+    },
+    "O2": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o2_ramen_one_shot_exact_metric_execution_authority_fix2_20260807.json",
+      "sha256": "a7a055af9a720fc7a473681dcfea44e5bc36a73c8ee314315ca07a46f73d6ac4"
+    }
+  },
+  "metric_results": {
+    "O0": {
+      "miou": 0.3012723922729492,
+      "acc025": 0.5633802816901409,
+      "acc050": 0.18309859154929578,
+      "boundary_f": 0.4585232138633728,
+      "trimap_iou": 0.4094906747341156,
+      "n": 71
+    },
+    "O1": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o1_exact_fix2/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "21a26585ad7ff449c16f88e58c4cdc36ce6adf5a75fb5722e8bcb205a683bc19"
+      },
+      "miou": 0.36481034755706787,
+      "acc025": 0.6197183098591549,
+      "acc050": 0.352112676056338,
+      "boundary_f": 0.6059969067573547,
+      "trimap_iou": 0.3879842758178711,
+      "n": 71,
+      "delta_vs_O0": {
+        "miou": 0.06353795528411865,
+        "acc025": 0.05633802816901401,
+        "acc050": 0.16901408450704222,
+        "boundary_f": 0.14747369289398193,
+        "trimap_iou": -0.021506398916244507
+      },
+      "gpu_peak_temperature_c": 51,
+      "gpu_peak_power_w": 121.17,
+      "telemetry_sha256": "48dd78b55da37c15361994c89e5ed5b46f27dd3da1b73a726c81539b3dc6d31c"
+    },
+    "O2": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o2_exact_fix2/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "8aada9b2709bbe4df6daddef7d472c3f07a8aaf4820bdabb6bf8efa036c1ffd6"
+      },
+      "miou": 0.38143566250801086,
+      "acc025": 0.676056338028169,
+      "acc050": 0.29577464788732394,
+      "boundary_f": 0.6208915114402771,
+      "trimap_iou": 0.3959977626800537,
+      "n": 71,
+      "delta_vs_O0": {
+        "miou": 0.08016327023506165,
+        "acc025": 0.11267605633802813,
+        "acc050": 0.11267605633802816,
+        "boundary_f": 0.1623682975769043,
+        "trimap_iou": -0.01349291205406189
+      },
+      "gpu_peak_temperature_c": 53,
+      "gpu_peak_power_w": 121.86,
+      "telemetry_sha256": "3f1dd001ead400845ea1bdb5b801680ff1453a19ff0f05604a1f3aa6675dd95e"
+    }
+  },
+  "paired_frame_query_bootstrap": {
+    "seed": 20260807,
+    "resamples": 20000,
+    "O1_minus_O0": {
+      "n": 71,
+      "mean_delta": 0.06353793907371456,
+      "median_delta": 0.05023681994209663,
+      "improved": 58,
+      "equal": 3,
+      "worsened": 10,
+      "ci95": [0.03796734845083277, 0.08938354276430274],
+      "bootstrap_probability_nonpositive": 0.0
+    },
+    "O2_minus_O0": {
+      "n": 71,
+      "mean_delta": 0.080163222121223,
+      "median_delta": 0.07988749079493601,
+      "improved": 53,
+      "equal": 3,
+      "worsened": 15,
+      "ci95": [0.04042194162306444, 0.11881448156332033],
+      "bootstrap_probability_nonpositive": 0.00005
+    }
+  },
+  "per_category_miou_delta_vs_O0": {
+    "O1": {
+      "bowl": -0.15410181879997253,
+      "chopsticks": 0.056853026151657104,
+      "corn": 0.02440398931503296,
+      "egg": 0.20361635088920593,
+      "glass of water": 0.1596287488937378,
+      "hand": 0.0,
+      "kamaboko": 0.14410841464996338,
+      "napkin": 0.015130668878555298,
+      "nori": -0.0032807588577270508,
+      "onion segments": 0.014409422874450684,
+      "plate": 0.018896132707595825,
+      "sake cup": 0.15922361612319946,
+      "spoon": 0.12550455331802368,
+      "wavy noodles": 0.08137312531471252
+    },
+    "O2": {
+      "bowl": -0.2463454306125641,
+      "chopsticks": 0.049167245626449585,
+      "corn": 0.001350894570350647,
+      "egg": 0.27080896496772766,
+      "glass of water": 0.12500524520874023,
+      "hand": 0.0,
+      "kamaboko": 0.18106064200401306,
+      "napkin": 0.026160582900047302,
+      "nori": -0.10032057762145996,
+      "onion segments": 0.20819266885519028,
+      "plate": 0.025271564722061157,
+      "sake cup": 0.21218019723892212,
+      "spoon": 0.18225109577178955,
+      "wavy noodles": 0.06205660104751587
+    }
+  },
+  "selected_scale_audit": {
+    "O0_indices": [0, 0, 2, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1],
+    "O1_indices": [0, 0, 2, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0, 0],
+    "O2_indices": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "O2_all_index_zero_explanation": "O2 is a single canonical teacher-mean descriptor whose raw scores are intentionally replicated identically across the evaluator's three-scale compatibility axis. peak_select deterministically resolves these exact ties to index zero, so index zero is not evidence that O2 selected a physical 0.25m observation scale. However, the identical replication does collapse scale-specific capability by design; the higher mean mIoU is therefore accompanied by an instance/scale-specificity cost visible on bowl and nori."
+  },
+  "access_audit": {
+    "source_materialization_target_images_opened": false,
+    "source_materialization_target_ground_truth_opened": false,
+    "source_materialization_target_masks_opened": false,
+    "source_materialization_target_metrics_opened": false,
+    "metric_authorities_built_without_target_access": true,
+    "exact_O0_then_O1_then_O2_metrics_executed_only_after_authority_and_control_gate": true,
+    "scene_specific_parameter_sweep_executed": false
+  },
+  "conclusion": {
+    "primary_miou_winner": "O2",
+    "highest_acc050": "O1",
+    "general_result": "Source-view teacher aggregation materially restores Ramen feature-field capability under a frozen evaluator: O1 improves mIoU by 6.35 points and O2 by 8.02 points.",
+    "tradeoff": "Both variants substantially improve boundary_f but reduce trimap_iou; O1 preserves scale-specific descriptors and is stronger at Acc@0.50, while O2 collapses the scale axis to a single canonical descriptor and obtains higher mean coverage and mIoU at the cost of larger regressions on bowl and nori.",
+    "next_method_gate": "Treat O2 as the primary mIoU result and O1 as the scale-specific high-precision complement; reproduce the frozen contract without tuning on Teatime, then investigate a source-only reliability gate between O1 and O2 rather than scene-specific parameter selection."
+  }
+}

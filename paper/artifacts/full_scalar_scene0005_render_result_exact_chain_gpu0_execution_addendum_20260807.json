@@ -1,0 +1,58 @@
+{
+  "artifact": "full_scalar_scene0005_render_result_exact_chain_gpu0_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T02:08:51+08:00",
+  "status": "sealed_after_radio_and_render_success_and_before_factorized_radio",
+  "scene_id": "scene0005_00",
+  "parent_preregistration": "paper/artifacts/full_scalar_scene0005_base_chain_execution_preregistration_20260807.json",
+  "inputs": {
+    "radio_feature_receipt_sha256": "3d9db40f2360181773edacf6c4dd245f42b68e1fc364b57c7813431345851786",
+    "feature_manifest_sha256": "d05f5d5912267204fbb2e381da421f31c665209a9f0b64a348147abe3ba3f4a1",
+    "feature_output_bundle_sha256": "05aa367e363143102ee7eca20f4c9d68bec3a42aad94254f8baf7388034e31dc",
+    "feature_frames": 240,
+    "render_receipt_sha256": "a664e9efc9e71c0729c7742ae424c818bf5a73f5d7f134ae321a2639a939a389",
+    "render_config_sha256": "971d4e4df79ca443f3b181892bd171cd236b581d652301268872941d83e96e66",
+    "render_checkpoint_sha256": "c13a648ef2ae24d60821c7829eb95f27d4ae29de27d3838cc41c9ca021c0f17d"
+  },
+  "frozen_exact_chain": {
+    "ordered_stages": [
+      "factorized_radio",
+      "exact_raw_reference",
+      "exact_dino_v3",
+      "exact_sam3",
+      "capability_cohort",
+      "factorized_field",
+      "factorized_state"
+    ],
+    "factorized_radio_observation_contract": "canonical-factorized-radio-v1",
+    "exact_observation_contract": "canonical-exact-marginal-mpr-v1",
+    "alpha_threshold": 0,
+    "responsibility_authority_created_once_then_reused": true,
+    "exact_feature_spaces": ["radio", "dino_v3", "sam3"],
+    "per_scene_hyperparameters": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "initial_temperature_c": 43,
+    "power_limit_w": 300,
+    "factorized_radio_output_preexisting": false,
+    "atomic_no_clobber": true,
+    "contiguous_receipt_resume_only": true
+  },
+  "thermal_guard": {
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false
+  },
+  "source_access": {
+    "source_rgb_and_query_free_features_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "frozen_evaluator_metric_renderer_modified": false
+}

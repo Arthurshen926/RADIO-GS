@@ -1,0 +1,171 @@
+{
+  "schema": "radio_gs.lerf_all_available_source_view_o1_o2_source_ab_design.v1",
+  "schema_version": 1,
+  "status": "cpu_design_complete_gpu_not_started",
+  "objective": "Test whether the fixed legacy-120 source subset weakens the query-free teacher without opening any target metric.",
+  "diagnosis": {
+    "mechanism": "The streamer itself does not take a prefix. Its exact-120 input contract freezes an upstream deterministic uniform temporal subset and omits otherwise available feature-manifest frames.",
+    "simple_prefix_truncation": false,
+    "affected_scene_count": 3,
+    "total_omitted_available_views": 288,
+    "cpu_domain_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/cpu_domain_audit_v1.json",
+      "sha256": "4ddd61e2db6064b0ad1de87c639a0ad6cfab7fa2c2671572a27b4227cb0ede6a"
+    },
+    "scenes": [
+      {
+        "scene_id": "ramen",
+        "all_available": 120,
+        "legacy": 120,
+        "omitted": 0,
+        "role": "implementation equivalence control"
+      },
+      {
+        "scene_id": "teatime",
+        "all_available": 171,
+        "legacy": 120,
+        "omitted": 51,
+        "role": "first source-only pilot"
+      },
+      {
+        "scene_id": "waldo_kitchen",
+        "all_available": 182,
+        "legacy": 120,
+        "omitted": 62,
+        "role": "first source-only pilot"
+      },
+      {
+        "scene_id": "figurines",
+        "all_available": 295,
+        "legacy": 120,
+        "omitted": 175,
+        "role": "deferred scale confirmation after an exact O1/O2 reference authority exists"
+      }
+    ]
+  },
+  "implementation": {
+    "legacy_core_unchanged": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "domain_contract": {
+      "path": "/root/RADIO-GS/radio_gs/querying/all_available_source_views.py",
+      "sha256": "e8a7b486cd2d4e74be4f9471b2ac3d1a131b4c645436ab079c4fa5f50b7650d4"
+    },
+    "lineage_validator": {
+      "path": "/root/RADIO-GS/radio_gs/querying/all_available_source_view_authority.py",
+      "sha256": "3803ebf362c128688d317cffb7f87da1830e80e807bedd55887766d83951c97a"
+    },
+    "supplement_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_all_available_responsibility_supplement.py",
+      "sha256": "148e5a13d525995357207ba54716e26461f84a89d7c99bff3ebdc762fdf474dc"
+    },
+    "all_available_o1_o2_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_all_available_streaming.py",
+      "sha256": "2ebe62d9118404f9f99405b8c04c1a204c8e98f5022b19612987dd2fe396962e"
+    },
+    "composition": "Use the sealed legacy-120 exact responsibility plus an exact omitted-only supplement, then retain the global top four by exact marginal mass over the combined manifest-order axis.",
+    "forbidden_shortcut": "Do not average independently finalized legacy and supplemental teacher means because each has already discarded non-top-four observations."
+  },
+  "sealed_reference_authorities": {
+    "ramen": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+      "sha256": "939c82d5e4a3cab51982dcac5ef318604f9072ee85a3b0e0a0e86d2c9fdd4ed5"
+    },
+    "teatime": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+      "sha256": "cad8230bc67547004f989b285a63b6f13942df7fcc6699317f91db9a598e924a"
+    },
+    "waldo_kitchen": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v2_execution_authority_20260807.json",
+      "sha256": "a9f616b28a8b0e1ab4998ca9d3c61efa67f9e622eee31a04dd80912014da8df8"
+    },
+    "figurines": null
+  },
+  "execution_order": [
+    {
+      "stage": 0,
+      "scene_ids": [
+        "ramen"
+      ],
+      "action": "Run the explicit no-supplement all-available control and a matching sealed legacy replay if the prior tensor cache is unavailable.",
+      "gate": "teacher_mean, teacher_valid, retained_view_count and every O1/O2 query_scores tensor must be bitwise equal; artifact-file hashes may differ only because provenance is intentionally different."
+    },
+    {
+      "stage": 1,
+      "scene_ids": [
+        "teatime",
+        "waldo_kitchen"
+      ],
+      "action": "Render omitted-only exact responsibilities in parallel, then materialize each all-available global-top4 teacher and O1/O2 source cache.",
+      "gate": "No frame overlap, exact omitted frame axis, no loss of teacher-valid rows, no decrease in retained-view count for any row, finite normalized descriptors and complete source-only provenance."
+    },
+    {
+      "stage": 2,
+      "scene_ids": [
+        "teatime",
+        "waldo_kitchen"
+      ],
+      "action": "Add an online all-available teacher-agreement/leave-one-source-view-out wrapper reusing the sealed v2 formula, without persisting target-bearing data.",
+      "gate": "Query-free source LOO agreement must not regress on either pilot scene; aggregate gains may not compensate for a per-scene regression."
+    },
+    {
+      "stage": 3,
+      "scene_ids": [
+        "figurines"
+      ],
+      "action": "Construct and seal the missing exact O1/O2 reference authority, then repeat stages 1 and 2.",
+      "gate": "Same per-scene source-only non-regression gates."
+    }
+  ],
+  "promotion_policy": {
+    "target_metric_execution_authorized": false,
+    "target_images_or_masks_authorized": false,
+    "scene_specific_tuning_authorized": false,
+    "promotion_requires": [
+      "Ramen implementation-equivalence control passes",
+      "Every affected pilot passes exact composite-axis validation",
+      "Every affected pilot passes source-only LOO non-regression",
+      "One shared parameter-free all-available policy is used for every scene"
+    ],
+    "after_promotion": "Create a separate one-shot target metric authority under the frozen evaluator; do not modify the evaluator."
+  },
+  "resource_estimate": {
+    "basis": {
+      "teatime_legacy120_elapsed_seconds": 407.1074706870131,
+      "waldo_legacy120_elapsed_seconds": 373.14362459699623,
+      "scaling_assumption": "Projection cost is approximately linear in source-view count; omitted-only responsibility rendering is shorter than full O1/O2 projection."
+    },
+    "two_gpu_teatime_waldo_wall_minutes": [
+      15,
+      20
+    ],
+    "ramen_control_with_optional_legacy_replay_wall_minutes": [
+      8,
+      16
+    ],
+    "figurines_after_reference_ready_wall_minutes": [
+      20,
+      30
+    ],
+    "thermal_policy": "One scene per GPU, 300 W host power limit, external 300 s polling, hard stop only at 88 C; no frequent trigger/pause loop."
+  },
+  "cpu_verification": {
+    "command_scope": "all-available domain tests plus frozen legacy streaming and low-memory regression tests",
+    "tests_passed": 35,
+    "tests_failed": 0,
+    "gpu_used": false,
+    "target_metrics_opened": false
+  },
+  "access_audit": {
+    "source_manifests_opened": true,
+    "source_responsibility_manifests_opened": true,
+    "source_tensor_payloads_opened_for_final_cpu_gate": false,
+    "images_opened": false,
+    "queries_opened_by_new_domain_audit": false,
+    "labels_or_masks_opened": false,
+    "target_metrics_opened": false,
+    "gpu_used": false
+  },
+  "metric_execution_authorized": false
+}

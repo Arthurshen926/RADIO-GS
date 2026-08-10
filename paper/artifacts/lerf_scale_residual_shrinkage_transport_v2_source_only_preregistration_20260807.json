@@ -1,0 +1,117 @@
+{
+  "schema": "radio_gs.lerf_scale_residual_shrinkage_transport_v2_source_only_preregistration.v1",
+  "schema_version": 1,
+  "status": "implementation_and_tests_complete_source_and_target_not_executed",
+  "motivation_bound_before_execution": {
+    "known_transport_v1_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_exact_result_20260807.json",
+      "sha256": "9eca56e8f4609c32500d747f46661c7f3c2869d03f4cda7cc3a53a5098bb76b8"
+    },
+    "known_category_analysis_and_v2_design": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_category_analysis_and_v2_design_20260807.json",
+      "sha256": "317b47d03899a74448cf2c73932f1607bf16ca342ffd1a8755b1413d262c58e3"
+    },
+    "diagnosis": "rigid_common_transport_preserves_unreliable_centered_scale_residuals",
+    "teatime_metric_or_category_used_to_choose_v2_candidate": false
+  },
+  "implementation": {
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_scale_residual_shrinkage_transport.py",
+      "sha256": "82836a8a27dcccc054cc6f52e39d614e3c06d3705275a39ea6bc42d2ad40e856"
+    },
+    "residual_shrinkage_contract_sha256": "fdaff654f782cd065d970e0ab913d078950d93ba89820f2cdfae7e1a6ef11957",
+    "streaming_source_loo_hook": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_source_loo_streaming_hook.py",
+      "sha256": "7118e4ab57b5e0ea4407d755eab109209ff06ae6f687e41c0a94ee4431655336"
+    },
+    "streaming_hook_contract_sha256": "b896daa0106c0e560737553037aa7bbd8461b6739685a844bfa5d0ebd63ba101",
+    "test": {
+      "path": "/root/RADIO-GS/tests/test_lerf_scale_residual_shrinkage_transport.py",
+      "sha256": "9bab1d969b1bd4d53c4495e5d17f73d378066592f2cfdac0cf1e53f35d74eddd"
+    }
+  },
+  "frozen_math": {
+    "common_transport": "one_v1_shortest_plane_orthogonal_map_shared_by_all_three_scales",
+    "decomposition": [
+      "mu=mean_s(x_s)",
+      "delta_s=x_s-mu",
+      "mu_prime=R_phi(mu)",
+      "delta_prime_s=R_phi(delta_s)",
+      "z_s=mu_prime+gamma*delta_prime_s",
+      "y_s=l2_normalize(z_s)"
+    ],
+    "source_reliability": "rho=sqrt(clamp((retained_view_count-1)/3,0,1)*teacher_view_directional_resultant)",
+    "query_free_scale_dispersion": "d=sqrt(mean_s(||x_s-mu||^2)/mean_s(||x_s||^2))",
+    "gamma_family": {
+      "rigid": "gamma=1",
+      "k0": "gamma=1-rho",
+      "k0p5": "gamma=1-rho*(1-d)^0.5",
+      "k1": "gamma=1-rho*(1-d)",
+      "k2": "gamma=1-rho*(1-d)^2"
+    },
+    "monotonicity": {
+      "gamma_nonincreasing_in_source_reliability": true,
+      "gamma_nondecreasing_in_query_free_scale_dispersion": true
+    },
+    "single_view": "rho=0_and_gamma=1_for_every_policy",
+    "scene_or_query_identifier_consumed": false,
+    "benchmark_label_mask_or_metric_consumed": false
+  },
+  "frozen_joint_grid": {
+    "maximum_angle_radians": [0.15, 0.3, 0.45, 0.6, 0.75],
+    "gamma_policy_order": ["rigid", "k0", "k0p5", "k1", "k2"],
+    "candidate_count": 25,
+    "iteration_order": "maximum_angle_outer_gamma_policy_inner",
+    "baseline_candidate_index": 0,
+    "baseline_candidate": {
+      "maximum_angle_radians": 0.15,
+      "gamma_policy": "rigid"
+    },
+    "one_global_candidate_shared_by_every_scene_and_query": true
+  },
+  "source_only_leave_one_view_out_protocol": {
+    "inputs": "canonical_top4_source_view_descriptors_and_accepted_v2_o0_three_scale_frame",
+    "prediction": "equal_view_normalized_mean_of_remaining_source_views",
+    "evaluation_unit": "heldout_source_view_times_o0_scale",
+    "statistics": ["mean_cosine", "exact_linear_p05_cosine"],
+    "descriptor_compute": "row_chunked",
+    "compute_device": "cpu",
+    "common_rotation_compute": "five_ceiling_evaluations_per_fold_reused_across_five_gamma_policies",
+    "candidate_by_observation_cosine_matrix": "transient_scalar_only_for_exact_p05",
+    "per_view_descriptors_durable": false,
+    "minimum_source_scenes": 2
+  },
+  "cross_scene_gate_frozen_before_source_execution": {
+    "eligibility": [
+      "pooled_mean_cosine_delta_vs_baseline_strictly_greater_than_zero",
+      "every_source_scene_mean_cosine_delta_vs_baseline_greater_than_or_equal_to_zero",
+      "every_source_scene_p05_cosine_delta_vs_baseline_greater_than_or_equal_to_zero"
+    ],
+    "selection_primary": "maximum_pooled_mean_cosine_among_eligible_candidates",
+    "selection_exact_tie_break": "earliest_joint_grid_index",
+    "no_eligible_candidate": "stop_without_target_candidate"
+  },
+  "fail_closed_invariants": [
+    "invalid_teacher_returns_bitwise_o0",
+    "undefined_scale_mean_returns_bitwise_o0",
+    "same_teacher_direction_returns_bitwise_o0",
+    "antipodal_teacher_direction_returns_bitwise_o0",
+    "degenerate_reconstruction_returns_bitwise_o0",
+    "unretained_source_view_slots_must_be_exact_zero",
+    "retained_source_view_descriptors_must_be_nonzero"
+  ],
+  "verification": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_lerf_scale_residual_shrinkage_transport.py tests/test_lerf_scale_equivariant_geodesic_transport.py",
+    "passed": 17,
+    "failed": 0,
+    "duration_seconds": 5.41,
+    "gpu_used": false
+  },
+  "execution_state_at_seal": {
+    "source_loo_executed": false,
+    "target_score_materialized": false,
+    "target_metric_executed": false,
+    "formal_target_candidate_authorized": false,
+    "next_action": "wait_for_main_thread_decision_then_run_source_only_streaming_loo"
+  }
+}

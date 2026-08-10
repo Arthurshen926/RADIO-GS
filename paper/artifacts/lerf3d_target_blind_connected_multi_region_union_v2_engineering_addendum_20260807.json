@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_target_blind_connected_multi_region_union_v2_engineering",
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_implementation_verification_and_before_v2_cache_or_metric",
+  "parent_preregistration": {
+    "path": "paper/artifacts/lerf3d_target_blind_connected_multi_region_union_v2_preregistration_20260807.json",
+    "sha256": "e77eae7a8e69cff5a2f1148d9bd2288163f4f8b0cc1e1789c8c3e4cc2a6bc5b1"
+  },
+  "implementation": {
+    "selector": {
+      "path": "radio_gs/querying/multi_region_union_readout.py",
+      "sha256": "131b7342b9e32608502b7dad0e41eb36c8a08562d6956530e183296afc0f2121"
+    },
+    "producer": {
+      "path": "radio_gs/scripts/build_lerf_target_blind_multi_region_union_cache.py",
+      "sha256": "98b5730cd57fb432980057e8f710092de2fc701913eaca898f191354cc475cfc"
+    },
+    "selector_test": {
+      "path": "tests/test_multi_region_union_readout.py",
+      "sha256": "c0f5dcc2c5a1f52f8b3f3ed12b255b27cd3212007f631829e6d672dfa4fcc0f8"
+    },
+    "producer_test": {
+      "path": "tests/test_build_lerf_target_blind_multi_region_union_cache.py",
+      "sha256": "6083b4869d4c28109cc4ccdbf90d556762a29e6b412739c9a6b31558ebb5426d"
+    },
+    "verification": "black_and_py_compile_passed_and_12_tests_passed",
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "semantic_checks": {
+    "seed_prefers_probability_times_core_count": true,
+    "disconnected_higher_probability_region_is_rejected_after_seed": true,
+    "core_overlap_is_connected_without_an_explicit_edge": true,
+    "support_edge_indices_fail_closed": true,
+    "three_scale_probability_is_not_broadcast": true,
+    "ground_truth_input_exists": false
+  },
+  "execution": {
+    "selector_mode": "connected_v2",
+    "score_gate": 0.6,
+    "maximum_regions": 8,
+    "result_dependent_selection": false,
+    "execution_authorized_after_this_addendum": true
+  }
+}

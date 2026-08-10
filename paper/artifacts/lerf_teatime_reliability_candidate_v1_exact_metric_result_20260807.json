@@ -1,0 +1,165 @@
+{
+  "schema": "radio_gs.lerf_reliability_candidate_exact_metric_result.v1",
+  "schema_version": 1,
+  "status": "complete_frozen_control_reliability_candidate_single_comparison",
+  "scene_id": "teatime",
+  "single_candidate_no_sweep": true,
+  "source_materialization": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_reliability_candidate_v1_execution_authority_20260807.json",
+      "sha256": "c4d9b59c28fca7a458c9c140c1970cf7777c03603f1532c8177e287e159f5438"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/teatime/teatime_reliability_candidate_result.json",
+      "sha256": "5534e8aa04c32280d6634ba611a4d7461759cce926c02d6552bff8263da7669f"
+    },
+    "accepted_rows": 334250,
+    "rows_with_expanded_budget": 331956,
+    "rows_with_score_replacement": 334161,
+    "global_ceiling_radians": 0.75,
+    "elapsed_seconds": 92.83622631896287,
+    "method_contract_sha256": "51d28c205e8dc3f1221122c8ed9564ebb0268124efa07521e4d13557a0f2e953"
+  },
+  "frozen_protocol": {
+    "metric_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_reliability_candidate_v1_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "7af02b1c1a0c5f2d015962f60d5d09ef573da8f5b477321437af24617ac8c67b"
+    },
+    "config_sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775",
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/teatime/evaluation/exact_one_shot_v1/teatime/lerf_direct_3d_selection_results.json",
+    "sha256": "70fbebb40c0cacc38ee52b5cd64b39fb47588384b869843bbd92b61438ad50b0"
+  },
+  "metric_results": {
+    "O0": {
+      "miou": 0.404494971036911,
+      "acc025": 0.7457627118644068,
+      "acc050": 0.3050847457627119,
+      "boundary_f": 0.5610557198524475,
+      "trimap_iou": 0.44391149282455444,
+      "n": 59
+    },
+    "O1": {
+      "miou": 0.4942660927772522,
+      "acc025": 0.847457627118644,
+      "acc050": 0.559322033898305,
+      "boundary_f": 0.7052473425865173,
+      "trimap_iou": 0.42199259996414185,
+      "n": 59
+    },
+    "O2": {
+      "miou": 0.5255449414253235,
+      "acc025": 0.8813559322033898,
+      "acc050": 0.5084745762711864,
+      "boundary_f": 0.7528204321861267,
+      "trimap_iou": 0.37641486525535583,
+      "n": 59
+    },
+    "candidate": {
+      "miou": 0.5258249640464783,
+      "acc025": 0.8813559322033898,
+      "acc050": 0.5084745762711864,
+      "boundary_f": 0.7528097033500671,
+      "trimap_iou": 0.37652650475502014,
+      "n": 59,
+      "bootstrap_miou_ci95": [0.47135061845183374, 0.5847715184092521]
+    }
+  },
+  "metric_deltas": {
+    "candidate_minus_O0": {
+      "miou": 0.12132999300956726,
+      "acc025": 0.13559322033898302,
+      "acc050": 0.20338983050847453,
+      "boundary_f": 0.19175398349761963,
+      "trimap_iou": -0.0673849880695343
+    },
+    "candidate_minus_O1": {
+      "miou": 0.031558871269226074,
+      "acc025": 0.03389830508474578,
+      "acc050": -0.05084745762711862,
+      "boundary_f": 0.047562360763549805,
+      "trimap_iou": -0.045466095209121704
+    },
+    "candidate_minus_O2": {
+      "miou": 0.00028002262115478516,
+      "acc025": 0.0,
+      "acc050": 0.0,
+      "boundary_f": -0.000010728836059570312,
+      "trimap_iou": 0.00011163949966430664
+    }
+  },
+  "paired_frame_query_bootstrap": {
+    "seed": 20260807,
+    "resamples": 20000,
+    "candidate_minus_O0": {
+      "n": 59,
+      "mean_delta": 0.1213299784274327,
+      "median_delta": 0.11846232785299046,
+      "improved": 44,
+      "equal": 0,
+      "worsened": 15,
+      "ci95": [0.06477868444812844, 0.17959781870091882],
+      "bootstrap_probability_nonpositive": 0.0
+    },
+    "candidate_minus_O1": {
+      "n": 59,
+      "mean_delta": 0.03155883039409829,
+      "median_delta": 0.03366347364148631,
+      "improved": 34,
+      "equal": 0,
+      "worsened": 25,
+      "ci95": [-0.017236990919424655, 0.08285370906561731],
+      "bootstrap_probability_nonpositive": 0.1103
+    },
+    "candidate_minus_O2": {
+      "n": 59,
+      "mean_delta": 0.00028002983981924605,
+      "median_delta": 0.0,
+      "improved": 17,
+      "equal": 33,
+      "worsened": 9,
+      "ci95": [0.00007582423687411747, 0.0005227022613995229],
+      "bootstrap_probability_nonpositive": 0.00165
+    }
+  },
+  "selected_scale_audit": {
+    "O0_indices": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    "O1_indices": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+    "O2_indices": [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+    "candidate_indices": [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 2]
+  },
+  "execution_audit": {
+    "candidate_metric_executions": 1,
+    "premetric_validation_rejections": 1,
+    "premetric_rejection_reason": "The first launch omitted the already-frozen canonical negative text embedding cache argument and exited before output creation or target access; the corrected control-equivalent launch produced the only candidate metric.",
+    "target_access_during_source_materialization": false,
+    "scene_specific_parameter_sweep_executed": false,
+    "physical_gpu": 1,
+    "thermal_guard": {
+      "telemetry": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_reliability_candidate_v1_exact_metric_gpu1_telemetry_20260807.csv",
+        "sha256": "0154578a0f162a6a1e9272060cedbc8832bb919a0587873a0c36c2fd084e2e9b"
+      },
+      "owner_audit": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_reliability_candidate_v1_exact_metric_gpu1_owner_audit_20260807.csv",
+        "sha256": "586b1760cbe6ee68d9a5deed55dc74bcd883ad742885c3266549ae8e171eb9e2"
+      },
+      "peak_temperature_c": 49,
+      "peak_power_w": 125.16,
+      "thermal_guard_triggered": false,
+      "foreign_gpu_owner_observed": false
+    }
+  },
+  "conclusion": {
+    "validated_improvement": "The reliability-conditioned candidate gives a large frozen-protocol Teatime gain over O0 (+12.13 mIoU points) and a smaller gain over O1 (+3.16 points), with no scene-specific sweep.",
+    "comparison_to_O2": "The candidate is effectively O2-like on Teatime: +0.028 mIoU points over O2, unchanged Acc@0.25/0.50, virtually unchanged boundary_f and trimap_iou. This tiny delta must not be presented as a material O2 improvement.",
+    "mechanistic_readout": "The global 0.75-radian ceiling expands 331956 of 334250 accepted rows, so most reliable rows converge to canonical teacher averaging. The rule restores some nonzero scale selections but does not recover O1's Acc@0.50 or trimap advantage.",
+    "next_gate": "A stronger source-only arbitration signal must preserve O1 locally where canonical averaging erases scale or instance specificity; changing the global ceiling or any scene-specific threshold is not authorized by this result."
+  }
+}

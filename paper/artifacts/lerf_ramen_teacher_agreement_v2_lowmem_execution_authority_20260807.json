@@ -1,0 +1,200 @@
+{
+  "access_audit": {
+    "exact_o0_pair_opened": true,
+    "exact_query_axis_opened": true,
+    "source_feature_bundle_opened": true,
+    "source_responsibility_opened": true,
+    "target_ground_truth_opened": false,
+    "target_images_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "execution": {
+    "cuda_visible_devices": "0",
+    "maximum_temperature_c": 88,
+    "pacing_seconds_per_projection_batch": 0.0,
+    "physical_gpu": 0,
+    "program_device": "cuda:0",
+    "projection_batch_candidates": [
+      128,
+      64
+    ],
+    "soft_pause_temperature_c": 0,
+    "thermal_poll_seconds": 300
+  },
+  "feature_output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+    "sha256": "7c7a2096bb927ae5b6aef99349e4dd66a62782df9f87c290e47ec13f098484a7"
+  },
+  "inputs": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen.pt",
+      "sha256": "823cfa6fe0d6a1d80987aa5774ea9de3bd45743019e863a57536f1bbc12851b4"
+    },
+    "feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1/frame_manifest.json",
+      "sha256": "70c54e2efa63ca17fd7813fbfb06a67338fc23f9fcf510d34d0d6e94276fa301"
+    },
+    "frozen_metric_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+      "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+    },
+    "negative_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen_text_negatives_single.pt",
+      "sha256": "4de02e79ae864c3c373831de1ee5b9c6a2e553c9d6f04c1338c532d17015046b"
+    },
+    "o0_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_negative.pt",
+      "sha256": "de70dd2bbb33983541f10d6896e1d377f7a767690590831db005e2d116035520"
+    },
+    "o0_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_positive.pt",
+      "sha256": "e33d3c8ea28bb58345f17c228aeaf6b7215d9f1baade27194f94a6f15f385abe"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "positive_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen_text_queries_single.pt",
+      "sha256": "aae64415968c696bebeacc4deb927dda26cb310ea01ebb868e7e9289e4673abe"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+    },
+    "scene_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_fix4c_exact120_teacher.yaml",
+      "sha256": "716b4f4fb0ce947cfc14464e26c518b8525edb2e1255ce9f8d597bc7232b5b57"
+    }
+  },
+  "method_contract": {
+    "O1": {
+      "maximum_angle_radians": 0.15,
+      "operation": "closed_form_unit_sphere_geodesic_projection",
+      "per_scale": true
+    },
+    "O2": {
+      "operation": "normalized_equal_view_teacher_mean",
+      "repeated_scale_slots": 3
+    },
+    "O3_materialized": false,
+    "O4_materialized": false,
+    "agreement_and_loo_implementation_reused_without_change": true,
+    "canonical_negative_queries": [
+      "object",
+      "things",
+      "stuff",
+      "texture"
+    ],
+    "durable_teacher_dtype": "torch.float16",
+    "execution_device_authority": {
+      "implemented_physical_gpu": 0,
+      "other_physical_gpu_authorized": false,
+      "program_device": "cuda:0",
+      "required_cuda_visible_devices": "0"
+    },
+    "lowmem_allocation_reference_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced_gpu1_lowmem.py",
+      "sha256": "4ca34e3eac9833c2d1c0f79355db2388647947d38de5a81f304a44d7653f5748"
+    },
+    "metric_execution_authorized": false,
+    "per_scene_or_per_query_hyperparameters": false,
+    "projection_pacing_affects_method_numerics": false,
+    "projection_pacing_seconds_per_batch": 0.0,
+    "reliability_budget_candidate_materialized": false,
+    "reliability_budget_maximum_angle_authorized": false,
+    "reliability_budget_next_gate": "source_only_global_ceiling_preregistration_without_target_metrics",
+    "reliability_geodesic_budget_contract_sha256": "6d7a391df895d3918281b07fd8eac6ae56924b0e508db0c955eefaa4da1d2769",
+    "scale_ids": [
+      "0.25",
+      "0.45",
+      "0.7"
+    ],
+    "scale_radii_m": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "schema": "radio_gs.lerf_o1_o2_teacher_agreement_streaming_execution.v2",
+    "schema_version": 2,
+    "score_dtype": "torch.float32",
+    "score_semantics": "raw_independent_normalized_cosine",
+    "source_only_leave_one_view_out_ceiling_audit": {
+      "baseline": "same_prediction_with_0.15_radian_ceiling",
+      "candidate_budget": "0.15+(candidate_ceiling-0.15)*sqrt(loo_count_sufficiency*loo_directional_resultant)",
+      "candidate_maximum_angles_radians": [
+        0.15,
+        0.3,
+        0.45,
+        0.6,
+        0.75
+      ],
+      "durable_per_view_descriptors": false,
+      "evaluation_unit": "heldout_source_view_x_o0_scale",
+      "field": "source_only_leave_one_view_out_ceiling_audit",
+      "hash_field": "source_only_leave_one_view_out_ceiling_audit_sha256",
+      "hash_semantics": "canonical_json_sha256",
+      "prediction": "per_retained_view_direction_from_normalized_mean_of_other_retained_unit_teacher_directions",
+      "query_independent": true,
+      "source_only_diagnostic": true,
+      "target_candidate_authorization": false
+    },
+    "source_view_count": 120,
+    "streaming_core_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "streaming_entrypoint_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+      "sha256": "7c7a2096bb927ae5b6aef99349e4dd66a62782df9f87c290e47ec13f098484a7"
+    },
+    "teacher_aggregation": "equal_view_normalized_mean",
+    "teacher_agreement_v2_numerical_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2.py",
+      "sha256": "9bc3d38ebdeb5c28f11804c698a455a144453acfa9e3d51b324f0c9350baf074"
+    },
+    "teacher_mean_chunking_affects_method_numerics": false,
+    "teacher_mean_chunking_changes_only_allocation_schedule": true,
+    "teacher_mean_finalization": "row_chunked_fp32_canonical_top4_sum_normalize_fp16_v1",
+    "teacher_mean_finalization_chunk_rows": 4096,
+    "teacher_payload": {
+      "additional_tensor": "teacher_view_directional_resultant",
+      "additional_tensor_dtype": "torch.float32",
+      "additional_tensor_hash": "teacher_view_directional_resultant_sha256",
+      "additional_tensor_hash_semantics": "typed_tensor_sha256",
+      "additional_tensor_invalid_value": "exact_zero",
+      "additional_tensor_shape": "accepted_rows",
+      "calculation_point": "after_top4_axis_canonicalization_before_teacher_sum_normalization",
+      "formula": "l2_norm(sum(top4_retained_unit_teacher_descriptors))/retained_view_count",
+      "query_independent": true,
+      "schema": "radio_gs.lerf_source_teacher_mean_siglip.v2",
+      "schema_version": 2,
+      "top4_descriptors_durable": false
+    },
+    "teacher_retention": "top4_exact_marginal_mass_desc_then_frame_id_asc",
+    "thermal_safety_owner": "external_300s_hard88_guard",
+    "top4_descriptors_durable": false
+  },
+  "method_contract_sha256": "78e4d78293a863ba962440cccfdc5b62dd0b4c9b14e941722df63b708c44cba0",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "o1_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o1_negative.pt",
+    "o1_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o1_positive.pt",
+    "o2_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o2_negative.pt",
+    "o2_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o2_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o1_o2_streaming_result.json",
+    "teacher_mean": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt"
+  },
+  "query_free_materialization_authorized": true,
+  "scene_id": "ramen",
+  "schema": "radio_gs.lerf_o1_o2_teacher_agreement_streaming_execution.v2",
+  "schema_version": 2,
+  "status": "authorized_source_only_premetric_o1_o2_streaming"
+}

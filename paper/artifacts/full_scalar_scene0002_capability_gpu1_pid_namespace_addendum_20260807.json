@@ -1,0 +1,27 @@
+{
+  "artifact": "full_scalar_scene0002_capability_gpu1_pid_namespace_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:27:00+08:00",
+  "status": "sealed_after_failed_owner_audit_and_before_clean_restart",
+  "parent_authority": "paper/artifacts/full_scalar_scene0002_capability_chain_gpu1_execution_authority_20260807.json",
+  "first_attempt": {
+    "worker_container_pid": 17641,
+    "guard_container_pid": 17616,
+    "exit_code": 86,
+    "reason": "strict PID namespace audit could not resolve the singleton host PID 3606225 to the container worker process group",
+    "prelaunch_gpu_owner_clear": true,
+    "runtime_reported_gpu_owner_count": 1,
+    "partial_output_written": false,
+    "peak_temperature_c": 40,
+    "thermal_or_nvml_failure": false
+  },
+  "restart_change": {
+    "gpu_owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "justification": "The existing guard mode binds exactly one invisible host PID only after an atomically owner-free preflight; it rejects PID changes, multiple owners, telemetry loss, PCIe loss, or temperature violations.",
+    "method_command_and_all_input_output_hashes_unchanged": true,
+    "thermal_thresholds_unchanged": true
+  },
+  "benchmark_metric_opened": false,
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

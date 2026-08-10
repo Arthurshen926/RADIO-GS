@@ -1,0 +1,89 @@
+{
+  "command": [
+    "/root/RADIO-GS/radio_gs/scripts/run_repo_python.sh",
+    "-m",
+    "radio_gs.scripts.audit_mpr_view_consistency",
+    "heldout",
+    "--config",
+    "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_official_crop_summary_train.yaml",
+    "--geometry-checkpoint",
+    "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "--mpr-cache",
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/ramen_official_crop_summary_mpr.pt",
+    "--output",
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/source_heldout_readiness_v1.pt",
+    "--device",
+    "cuda:0",
+    "--frame-ids",
+    "2,45,87,130"
+  ],
+  "explicit_frame_argument": "2,45,87,130",
+  "forbidden_target_frame_ids": [
+    6,
+    24,
+    60,
+    65,
+    81,
+    119,
+    128
+  ],
+  "gate_wrapper_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_official_crop_summary_heldout_gate.py",
+    "sha256": "ca9fd043429b01da229f953d8dda4090a169643a53ba06cbcd86311f3e090d66"
+  },
+  "inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_official_crop_summary_train.yaml",
+      "sha256": "cbbc536db5c283dc40195d9c0e4ac704b1d6672ff24254ca05cd8082e9f1e16b"
+    },
+    "genuine_mpr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/ramen_official_crop_summary_mpr.pt",
+      "sha256": "1e6c04f896addec052a6b218c8bd32edf91568349133392ca20329b02a50f945"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "heldout_audit_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/audit_mpr_view_consistency.py",
+      "sha256": "73c68f1b90de728b004afb9b3db2da21671d3e4ef167a2e44524bed42849670c"
+    }
+  },
+  "large_input_hashes_verified": true,
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_official_crop_summary_source_heldout_preregistration_20260809.json",
+    "sha256": "3ae93f9e1217edfa1ea17163e7c9c79921f1a15b2808e226a3d81994140771f6"
+  },
+  "protocol": {
+    "benchmark_masks_opened": false,
+    "historical_mpr_excluded_frame_fallback_allowed": false,
+    "performance_role": "diagnostic_readiness_gate_not_target_promotion",
+    "required_result_checks": [
+      "exact_preregistered_source_heldout_frame_ids",
+      "every_frame_has_positive_visible_pixels",
+      "every_frame_has_positive_registered_rows",
+      "every_frame_mean_pixel_cosine_is_finite"
+    ],
+    "source_only": true,
+    "target_metric_execution_authorized": false,
+    "text_queries_opened": false
+  },
+  "reseal": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/ramen_official_crop_summary_content_reseal.json",
+    "sha256": "0b23676b4ee5a6ba61e33e15d5de8bc69b2c95268e413e8294ded830c0a1ecba"
+  },
+  "result_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/source_heldout_readiness_v1.pt",
+  "scene": "ramen",
+  "schema": "radio_gs.lerf_official_crop_summary_heldout_gate_authority.v1",
+  "schema_version": 1,
+  "selected_view_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+    "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+  },
+  "source_heldout_frame_ids": [
+    2,
+    45,
+    87,
+    130
+  ]
+}

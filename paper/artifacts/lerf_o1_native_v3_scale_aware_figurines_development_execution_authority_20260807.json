@@ -1,0 +1,60 @@
+{
+  "schema": "radio_gs.lerf_o1_native_v3_scale_aware_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_figurines_development_premetric_materialization",
+  "scene_id": "figurines",
+  "method_contract_sha256": "0327429dfde0d5629176ecf23f1a8632a0415c28ddce3014cb70fe33e9f05d10",
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_native_v3_scale_aware_fusion.py",
+    "sha256": "3e88f086ac5c88d213bb6377ffd293379ea382e19e8b5c3af61fc6f639958ae3"
+  },
+  "inputs": {
+    "o1_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/matrix/figurines_oracle_matrix_manifest.json",
+      "sha256": "f40a0babf6aae65f2849e3156d40e7b5addbae524e2f5256083c110674859d84"
+    },
+    "o1_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/matrix/figurines_o1_positive.pt",
+      "sha256": "46965a0c30d59a3d1b4fcb1547ca103b11f4370ac3281afe7da7e76e8b769c5d"
+    },
+    "o1_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/matrix/figurines_o1_negative.pt",
+      "sha256": "1cb3cb176e61aa517be0299e7d7af310493b1c2463a7cf4b306a28df6c0484c8"
+    },
+    "native_v3_feature": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_features_native_v3.pt",
+      "sha256": "9bb68f6cae6e0f63586e31fdd48019ee755a15cbab45db3481c6aedee59ac2d4"
+    },
+    "native_v3_inference": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_inference_native_v3.pt",
+      "sha256": "c49afb2d8eca4e020ceede8b17ee8becb876c586c1fada7c4c93e90e632d8eb2"
+    },
+    "frozen_evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    }
+  },
+  "outputs": {
+    "cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/figurines/external_query_scores.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/figurines/premetric_report.json"
+  },
+  "constants": {
+    "canonical_negative_logit_scale": 10.0,
+    "knn_k": 10,
+    "semantic_boundary": 0.6,
+    "native_v3_relation_threshold": 0.85,
+    "maximum_regions": 8,
+    "path_method": "widest_path"
+  },
+  "access_audit": {
+    "benchmark_query_score_caches_opened": true,
+    "native_v3_query_independent_authorities_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false,
+    "result_dependent_parameters": false
+  },
+  "metric_execution_authorized": false
+}

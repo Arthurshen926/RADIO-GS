@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_support_readout_oracle_d0_d5_figurines_corrected_execution_v2",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_after_scale_axis_correction_and_before_any_d2_d5_metric",
+  "parent_authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_preregistration_20260806.json",
+      "sha256": "473b70468c14bedce0d347828800f0d029838c0c7bfe5e4c480c86f3e73febf8"
+    },
+    "teacher_availability_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_teacher_availability_addendum_20260806.json",
+      "sha256": "4aa709366b9d21eb8120c365c93720b403540e2494f598d8b8eaba395125936f"
+    },
+    "scale_axis_correction_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_scale_axis_correction_addendum_20260806.json",
+      "sha256": "aa60919c659953d5bd5823d3c6be04e3e644d97de4845aa1697759782c3ffefb"
+    },
+    "superseded_execution_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_execution_addendum_20260806.json",
+      "sha256": "7bbc6f2ae4baa66c1c4b0fe27ebedfe41182c66048a3f74be2fd91a464949a88"
+    }
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/eval_lerf_support_readout_oracle_d0_d5.py",
+    "sha256": "973c0262dbdf9476cc06180fb5ccf164494e1835c1653d51e8a946571584314e",
+    "output_schema": "radio_gs.lerf_support_readout_oracle_d0_d5.v2",
+    "black": "passed",
+    "py_compile": "passed",
+    "git_diff_check": "passed",
+    "synthetic_checks": {
+      "candidate_tie_and_union": "passed",
+      "primitive_metric": "passed",
+      "three_fixed_scale_slots": "passed",
+      "per_primitive_max_exact": "passed",
+      "teacher_unavailable_exact_zero_all_four_variants": "passed"
+    }
+  },
+  "corrected_D4_D5_contract": {
+    "D4_variants": [
+      "D4_s0",
+      "D4_s1",
+      "D4_s2",
+      "D4_per_primitive_max"
+    ],
+    "D5_variants": [
+      "D5_s0",
+      "D5_s1",
+      "D5_s2",
+      "D5_per_primitive_max"
+    ],
+    "per_primitive_max": "target-independent maximum over the three final canonical-negative probabilities for each primitive/query",
+    "membership": "each corresponding D4 score >= fixed 0.6",
+    "reporting": "all four primitive metric sets and all four rendered metric sets are mandatory",
+    "result_dependent_selection": false,
+    "teacher_unavailable_policy": "exact abstention at zero in every branch"
+  },
+  "source_immutability": {
+    "frozen_evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "frozen_evaluator_modified": false,
+    "metric_modified": false,
+    "renderer_modified": false,
+    "loss_v2p1_files_modified": false
+  },
+  "metric_open_state": {
+    "new_d2_d5_metrics_opened": false,
+    "gpu_checked_or_executed_after_correction": false,
+    "output_result_created": false
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_descriptor_first_compact_scene_summary_manifest.v2",
+  "schema_version": 2,
+  "status": "complete_source_only_selector_passed",
+  "independent_preexecution_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_v2_independent_preexecution_audit_20260809.json",
+    "sha256": "b712cc2946fd939761e9de7e5a8d8da5bb5e2ec0edfbb89c41fd50e9c0c0a2d7"
+  },
+  "supersession_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_v2_supersession_addendum_20260809.json",
+    "sha256": "7739f02fa4301b4fb2bc1302ab78d17fa7e732314d0401df5e7cff7c116af280"
+  },
+  "materializer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+    "sha256": "873214d57360d1278177f56c9d1c77ffc7384d6d97116da3aa81e9d879f8c6fe",
+    "response_order": "render_1536d_descriptors_then_alpha_normalize_then_pixel_l2_normalize_then_text_dot"
+  },
+  "scenes": [
+    {
+      "scene_id": "ramen",
+      "physical_gpu": 0,
+      "source_heldout_frames": 4,
+      "valid_pixels": 11408,
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_v2_gpu0_execution_authority_20260809.json",
+        "sha256": "2944a8d43b7c09f30aa4ef4e7957268c291e41dc19334e63a26eb5ea7400d0b3"
+      },
+      "control_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/ramen/ramen_legacy_teacher_mean_v2_descriptor_first_source_response_summary.json",
+        "sha256": "7536822bed137d09208c7f5bd72575a4983baa25ccdd1831d54dd74a9576daf7"
+      },
+      "candidate_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/ramen/ramen_genuine_official_crop_summary_mpr_descriptor_first_source_response_summary.json",
+        "sha256": "0dc861cf220d423014bacd85d234b176c4f23d0ec0623142b070118604563928"
+      },
+      "execution_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/ramen/ramen_descriptor_first_source_response_mpr_ab_result.json",
+        "sha256": "7b3645bcd9d69544731eba91c3a0c48bba5bb6e50a3109a14b8b287b1994fd51"
+      },
+      "control": {
+        "response_mae": 0.013781979790216035,
+        "response_profile_cosine_mean": 0.7854640688982284,
+        "ranking_spearman_mean": 0.39066672018428744,
+        "ranking_spearman_p05": -0.010304410471782216,
+        "top_decile_overlap_mean": 0.217994876410718,
+        "top_decile_overlap_p05": 0.0
+      },
+      "candidate": {
+        "response_mae": 0.0058164271203478245,
+        "response_profile_cosine_mean": 0.9547468670611211,
+        "ranking_spearman_mean": 0.7360086022202995,
+        "ranking_spearman_p05": 0.4987577934984309,
+        "top_decile_overlap_mean": 0.427958180433428,
+        "top_decile_overlap_p05": 0.12692307692307694
+      },
+      "deltas": {
+        "response_mae_improvement": 0.00796555266986821,
+        "response_profile_cosine_delta": 0.1692827981628927,
+        "ranking_spearman_mean_delta": 0.34534188203601207,
+        "ranking_spearman_p05_delta": 0.5090622039702132,
+        "top_decile_overlap_mean_delta": 0.20996330402271,
+        "top_decile_overlap_p05_delta": 0.12692307692307694
+      },
+      "all_metrics_nonregressing": true,
+      "thermal_receipt": {
+        "launch_temperature_c": 39,
+        "release_temperature_c": 50,
+        "maximum_sampled_temperature_c": 50,
+        "thermal_abort": false,
+        "postexit_compute_owner_clear": true
+      }
+    },
+    {
+      "scene_id": "teatime",
+      "physical_gpu": 1,
+      "source_heldout_frames": 51,
+      "valid_pixels": 145452,
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_v2_gpu1_execution_authority_20260809.json",
+        "sha256": "3ecb70e31089b92b9e6c922fd89513b5c4bd68b6e780c0d40edcc217417ccbde"
+      },
+      "control_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/teatime/teatime_legacy_teacher_mean_v2_descriptor_first_source_response_summary.json",
+        "sha256": "5fbf636c3e1a6eb116a33955a47254ab09ae4e2762e4902cc6a8db59310b9de6"
+      },
+      "candidate_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/teatime/teatime_genuine_official_crop_summary_mpr_descriptor_first_source_response_summary.json",
+        "sha256": "3a8823dbcb0550f5e11926fbb06288b2c78ed7e88088eba5d7dab05f9f197248"
+      },
+      "execution_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/teatime/teatime_descriptor_first_source_response_mpr_ab_result.json",
+        "sha256": "3358d8d615a8ba7fbb653a14dc64e94ab785f76b8fa4a0c362ddcef478adc9b5"
+      },
+      "control": {
+        "response_mae": 0.016244607964479053,
+        "response_profile_cosine_mean": 0.6970867659028647,
+        "ranking_spearman_mean": 0.32508086373907946,
+        "ranking_spearman_p05": -0.14551467408833357,
+        "top_decile_overlap_mean": 0.2218749024223689,
+        "top_decile_overlap_p05": 0.0
+      },
+      "candidate": {
+        "response_mae": 0.007850040539481958,
+        "response_profile_cosine_mean": 0.9137299960171338,
+        "ranking_spearman_mean": 0.5453434288860936,
+        "ranking_spearman_p05": 0.11181110893655137,
+        "top_decile_overlap_mean": 0.3166762377595226,
+        "top_decile_overlap_p05": 0.017482517482517484
+      },
+      "deltas": {
+        "response_mae_improvement": 0.008394567424997095,
+        "response_profile_cosine_delta": 0.21664323011426911,
+        "ranking_spearman_mean_delta": 0.2202625651470141,
+        "ranking_spearman_p05_delta": 0.25732578302488496,
+        "top_decile_overlap_mean_delta": 0.09480133533715368,
+        "top_decile_overlap_p05_delta": 0.017482517482517484
+      },
+      "all_metrics_nonregressing": true,
+      "thermal_receipt": {
+        "launch_temperature_c": 34,
+        "release_temperature_c": 62,
+        "maximum_sampled_temperature_c": 62,
+        "thermal_abort": false,
+        "postexit_compute_owner_clear": true
+      }
+    }
+  ],
+  "pooled": {
+    "frames": 55,
+    "valid_pixels": 156860,
+    "control": {
+      "response_mae": 0.01606550773362356,
+      "response_profile_cosine_mean": 0.7035142061207094,
+      "ranking_spearman_mean": 0.3298507442078218,
+      "ranking_spearman_p05": -0.13957187361976006,
+      "top_decile_overlap_mean": 0.2215927187124307,
+      "top_decile_overlap_p05": 0.0
+    },
+    "candidate": {
+      "response_mae": 0.007702141381726749,
+      "response_profile_cosine_mean": 0.9167130411839692,
+      "ranking_spearman_mean": 0.5592099869467632,
+      "ranking_spearman_p05": 0.12301011205864842,
+      "top_decile_overlap_mean": 0.3247694699539884,
+      "top_decile_overlap_p05": 0.02097902097902098
+    },
+    "deltas": {
+      "response_mae_improvement": 0.00836336635189681,
+      "response_profile_cosine_delta": 0.21319883506325987,
+      "ranking_spearman_mean_delta": 0.22935924273894137,
+      "ranking_spearman_p05_delta": 0.2625819856784085,
+      "top_decile_overlap_mean_delta": 0.10317675124155773,
+      "top_decile_overlap_p05_delta": 0.02097902097902098
+    }
+  },
+  "cpu_selector_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/descriptor_first_v2_source_text_response_ranking_gate_result.json",
+    "sha256": "11be2adc41d21da1d2ce37ec09af1f8665bc928cec46b497080f7a59bd3f6af8",
+    "decision": "PASS",
+    "candidate_eligible_for_next_source_gate": true,
+    "every_scene_all_metrics_nonregressing": true,
+    "strict_pooled_response_ranking_and_top_decile_improvement": true
+  },
+  "comparison_disclosure": {
+    "end_to_end_interface_ab_not_capacity_matched": true,
+    "interpretation": "This establishes that genuine official crop-summary descriptors preserve source pixel response profiles and rankings substantially better than the legacy sparse teacher-mean interface under the exact descriptor-first renderer; it is not yet a target benchmark result or a capacity-matched causal ablation."
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false,
+    "target_metric_executed": false
+  }
+}

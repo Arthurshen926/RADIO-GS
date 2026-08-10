@@ -1,0 +1,69 @@
+{
+  "schema": "radio_gs.lerf_all_available_parallel_host_oom_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_recoverable_host_memory_failure",
+  "scene_id": "teatime",
+  "failed_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_all_available_teacher_agreement_gpu0_execution_authority_20260809.json",
+    "sha256": "7d9052e951853a9111d05c218a350626c4c5d281472e92e2d1ea775bafffa47d"
+  },
+  "failure": {
+    "exit_code": 137,
+    "signal_interpretation": "SIGKILL from host memory exhaustion",
+    "last_completed_event": {
+      "event": "all_available_view_progress",
+      "views_complete": 171,
+      "views_total": 171,
+      "fraction": 1.0,
+      "elapsed_seconds": 262.6569211249007
+    },
+    "failure_phase": "after all source views and before teacher/source-LOO final artifacts were committed",
+    "gpu_thermal_abort": false,
+    "gpu_driver_failure": false,
+    "pcie_failure": false,
+    "cause": "Teatime and Waldo simultaneously retained scene-wide global-top4 host tensors; Teatime entered finalization while Waldo held its larger top4 state, exceeding safe host-memory concurrency.",
+    "method_numerics_implicated": false
+  },
+  "safety_evidence": {
+    "gpu0_telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/telemetry/teatime_allview_gpu0.csv",
+      "sha256": "e19f7ba96f4c7b26a523a30e37178170c157d86cffa35a5ce221d6cd74a98446"
+    },
+    "gpu0_owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/telemetry/teatime_allview_gpu0_owner.csv",
+      "sha256": "b2187e230fd2137a4a06110a826c9220ec772cd8599f0d889be51c272cffa425"
+    },
+    "power_limit_w": 300.0,
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_enabled": false,
+    "maximum_observed_guard_sample_temperature_c": 62,
+    "guard_thermal_exit_code": 86,
+    "observed_exit_code": 137
+  },
+  "artifact_audit": {
+    "final_output_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement",
+    "committed_final_file_count_after_failure": 0,
+    "partial_final_artifacts_detected": false,
+    "omitted_responsibility_authority_is_complete_and_reusable": true,
+    "omitted_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/omitted_exact_marginal_responsibility.json",
+      "sha256": "bf8649d7b108fb188f438816a23f35e9ac77c2ef46931164b6a2e0580dc11098"
+    }
+  },
+  "recovery": {
+    "authority_reused_without_change": true,
+    "supplement_recomputed": false,
+    "required_execution_change": "single-scene host-memory scheduling only",
+    "resume_after": "Waldo all-available process exits and releases its host top4 state",
+    "swap_as_memory_strategy": false,
+    "target_metric_execution_authorized": false
+  },
+  "access_audit": {
+    "target_images_opened": false,
+    "queries_opened_by_new_method": false,
+    "labels_or_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "metric_execution_authorized": false
+}

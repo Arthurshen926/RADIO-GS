@@ -1,0 +1,72 @@
+{
+  "schema": "radio_gs.lerf_selected_membership_posterior.dual_scene_registration.v1",
+  "schema_version": 1,
+  "status": "registered_after_implementation_and_tests_before_any_candidate_target_metric",
+  "claim_scope": "single frozen causal projection test; all benchmark outcomes were previously available",
+  "causal_hypothesis": "The accepted selected-only alpha projection preserves the calibrated primitive decision but physically deletes unselected occluders. Rendering binary selected membership through the full scene should remove that intervention-induced visibility error without averaging uncalibrated continuous scores.",
+  "frozen_method": {
+    "score_source": "accepted uniform valid-domain O2 kNN10 caches materialized 2026-08-09",
+    "protocol_preset": "vala_paper_3d",
+    "primitive_selection_mode": "score_threshold",
+    "primitive_score_threshold": 0.6,
+    "projection_mode": "selected_membership_posterior",
+    "posterior": "front-to-back alpha-normalized binary selected-primitive membership with all scene primitives retained as occluders",
+    "pixel_decision_threshold": 0.5,
+    "pixel_decision_interpretation": "equal-cost Bayes majority over visible primitive membership",
+    "visible_support_gate": "frozen VALA round(full_scene_alpha * 255) > 10",
+    "selection_refinement": "none",
+    "selection_min_ratio": 0.0,
+    "selection_max_ratio": 0.0,
+    "mask_refinement": "none",
+    "trainable_parameters_added": 0,
+    "scene_specific_parameters": false,
+    "target_mask_used_by_method": false
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "sha256": "0613193c3b6042facbcd719e0ef13625722c506d795024dce8fa53b2a1be97fc",
+    "flag": "--selected_membership_posterior_projection",
+    "reuse_existing_raster": "membership is computed as the existing full-scene premultiplied selected composite divided by full-scene alpha; no duplicate raster pass",
+    "focused_tests": "10 passed; 19 related projection/SPIn tests passed after final alpha-support hardening"
+  },
+  "scenes": {
+    "ramen": {
+      "physical_gpu": 0,
+      "same_cache_control_miou": 0.39180755615234375,
+      "accepted_mainline_miou": 0.3924490213394165,
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "score_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/ramen/ramen_gaussian_valid_domain_o2_scores.pt"
+    },
+    "teatime": {
+      "physical_gpu": 1,
+      "same_cache_control_miou": 0.5274040102958679,
+      "accepted_mainline_miou": 0.5278149843215942,
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "score_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/teatime/teatime_gaussian_valid_domain_o2_scores.pt"
+    }
+  },
+  "execution": {
+    "output_root": "/root/radio_gs_local_cache/optimization_20260810/lerf_selected_membership_posterior_dual_scene_v1",
+    "parallel_gpus": [0, 1],
+    "target_metric_passes_per_scene": 1,
+    "parameter_retry_after_metric": false,
+    "local_ssd_minimum_free_gib": 100,
+    "pre_metric_fail_closed_attempts": [
+      "missing explicit frozen raw text cache; rejected before rendering",
+      "validator keyword wiring error; rejected before rendering"
+    ]
+  },
+  "decision_rule": {
+    "expand_to_full4_only_if": "both scenes are nonregressing against the same-cache control and the two-scene macro mIoU strictly improves",
+    "otherwise": "reject globally, retain selected_only_alpha mainline, and terminate the LERF projection family without threshold tuning",
+    "report_all_results": true
+  },
+  "thermal_policy": {
+    "power_limit_w": 300,
+    "soft_pause_enabled": false,
+    "hard_stop_temperature_c": 87,
+    "hard_stop_consecutive_polls": 2
+  }
+}

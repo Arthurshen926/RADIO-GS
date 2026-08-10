@@ -1,0 +1,161 @@
+{
+  "schema": "radio_gs.lerf_o0_conditional_missing_core_FIX6b_figurines_result.v1",
+  "schema_version": 1,
+  "status": "complete_accepted_as_current_best_Figurines_candidate",
+  "scene_id": "figurines",
+  "method": {
+    "base": "frozen_exact_O0",
+    "proposal": "qualified_region_missing_core",
+    "selector": "source_scene0001_three_fold_monotone_additive_logistic_min_consensus",
+    "selector_threshold_inclusive": 0.5480217337608337,
+    "source_validation": "strict_scene0004_heldout_PASS_without_refit",
+    "completion": "pointwise_max_O0_and_selected_region_positive_fraction",
+    "target_metric_tuning": false,
+    "scene_or_query_identifier_feature": false,
+    "instance_or_target_label_feature": false
+  },
+  "source_train_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_monotone_missing_core_selector_scene0001_execution_authority_20260807.json",
+    "sha256": "0eb677906826f27629dbf4af60253e62d99d960d95fe1691f38ef0b08f47413c"
+  },
+  "source_heldout_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_monotone_missing_core_selector_scene0004_heldout_execution_authority_20260807.json",
+    "sha256": "e391750ce842f2a7cdeb0763819f247d0a1f088fa4cfec8928e7466a95d617e3"
+  },
+  "source_heldout_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0004_00/frozen_selector_heldout_report.json",
+    "sha256": "9d345b2693f50828e478d2fc2e509d59618571e052838053b051195496bb1363"
+  },
+  "cache_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6b_v1_fix2/figurines/execution_authority.json",
+    "sha256": "4d3461b1699f4ffa0dfa9577526fc47dbd7b775f1eb08af54feac0393488a7c5"
+  },
+  "external_query_score_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6b_v1_fix2/figurines/external_query_scores.pt",
+    "sha256": "d6a123159dc42731a0b1a28fb09afd66f936b16748668c5579362c63310ab004"
+  },
+  "no_GT_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6b_v1_fix2/figurines/no_gt_report.json",
+    "sha256": "672a1d4f1d70a28268063dc226643391a25a49a22027deb417a8209760abb332"
+  },
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_conditional_missing_core_fix6b_figurines_one_shot_metric_execution_authority_20260807.json",
+    "sha256": "e2d02da1c5f601cf702faa6955f2afdb90985bd5ed603a79ceeffdad805aa214"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6b_v1_fix2/figurines/evaluation/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "689f93f715d006f4bb0661ecf0aa9279f68cf8ad2c5bf16118403a8c9e48a2bd"
+  },
+  "frozen_O0_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_direct3d_accepted_v2_fp32_exact_explicit_f32_v2/figurines/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "4bbd8c963898b9dd7fb47dfa75dbea28f6062ecca8d8c74ccb2fbc9b2dcbfc12"
+  },
+  "protocol": {
+    "protocol_preset": "vala_paper_3d",
+    "score_threshold": 0.6,
+    "score_postprocess": "none",
+    "selection_mode": "score_threshold",
+    "projection_mode": "selected_only_alpha",
+    "threshold_scan": false,
+    "single_candidate_no_sweep": true
+  },
+  "source_heldout": {
+    "selected": 2048,
+    "hard_precision": 0.93359375,
+    "hard_precision_Wilson95_lower": 0.9239596573677963,
+    "selected_signed_utility_mean": 0.8528863787651062,
+    "unconditional_signed_utility_mean": 0.4716673791408539,
+    "selector_average_precision": 0.9187209606170654,
+    "O0_score_average_precision": 0.7674250602722168,
+    "model_or_threshold_refit": false
+  },
+  "target_no_GT_gate": {
+    "candidate_units": 6329,
+    "selected_units": 1978,
+    "rejected_units": 4351,
+    "unconditional_FIX6_unique_cells": 2340,
+    "selected_unique_cells": 731,
+    "threshold_membership_flips": 731,
+    "maximum_per_query_membership_expansion": 1.1761658191680908,
+    "all_fixed_checks_passed": true
+  },
+  "metrics": {
+    "frozen_O0": {
+      "miou": 0.4753887355327606,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.682007372379303,
+      "trimap_iou": 0.38083696365356445,
+      "n": 56
+    },
+    "FIX6b": {
+      "miou": 0.47772565484046936,
+      "acc025": 0.7857142857142857,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.6846569776535034,
+      "trimap_iou": 0.38497892022132874,
+      "n": 56
+    },
+    "delta_FIX6b_minus_O0": {
+      "miou": 0.0023369193077087402,
+      "acc025": -0.017857142857142905,
+      "acc050": 0.0,
+      "boundary_f": 0.0026496052742004395,
+      "trimap_iou": 0.004141956567764282
+    },
+    "previous_best_FIX5C_miou": 0.47752127051353455,
+    "delta_FIX6b_minus_FIX5C_miou": 0.00020438432693481445
+  },
+  "per_category_extremes": {
+    "largest_improvements": {
+      "green apple": 0.05037206411361694,
+      "toy cat statue": 0.007752597332000732,
+      "rubics cube": 0.007516384124755859,
+      "old camera": 0.0035254359245300293,
+      "rubber duck with hat": 0.0027828216552734375
+    },
+    "largest_regressions": {
+      "rubber duck with buoy": -0.038770079612731934,
+      "green toy chair": -0.007967442274093628,
+      "red toy chair": -0.0025240182876586914,
+      "pumpkin": -0.001578986644744873
+    }
+  },
+  "posthoc_paired_descriptive_audit": {
+    "status": "descriptive_not_a_preregistered_adoption_gate",
+    "unit": "56_aligned_frame_query_pairs",
+    "bootstrap": "10000 paired resamples, torch generator seed 0",
+    "miou_delta": {
+      "positive_zero_negative": [15, 26, 15],
+      "ci95": [-0.0034165459988976152, 0.009029022323773095],
+      "bootstrap_fraction_at_or_below_zero": 0.2338
+    },
+    "boundary_f_delta": {
+      "positive_zero_negative": [12, 30, 14],
+      "ci95": [-0.0033484590511233714, 0.009504099930712686],
+      "bootstrap_fraction_at_or_below_zero": 0.2104
+    },
+    "trimap_iou_delta": {
+      "positive_zero_negative": [12, 41, 3],
+      "ci95": [0.0013893782832200227, 0.0074039010488206195],
+      "bootstrap_fraction_at_or_below_zero": 0.0001
+    }
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "start_temperature_c": 43,
+    "release_temperature_c": 52,
+    "maximum_power_limit_w": 300.0,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6b_v1_fix2/figurines/gpu1_metric_telemetry.csv",
+      "sha256": "ed6482f06cc8c23fdac9a9c1a6f95def8abc8140ea303724b818b1018c79cf3c"
+    },
+    "driver_or_thermal_failure": false
+  },
+  "decision": {
+    "adopt_as_current_best_Figurines_candidate": true,
+    "claim_strength": "credible small benchmark improvement with a stronger positive boundary/trimap signal; mIoU paired uncertainty still includes zero",
+    "remaining_failure": "The selector still admits sibling/background expansion for rubber duck with buoy and chair categories.",
+    "next_intervention": "Add a source-trained overlap-conflict veto or conservative utility head without target-scene threshold tuning; retain exact O0 fallback."
+  }
+}

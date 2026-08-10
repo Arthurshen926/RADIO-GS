@@ -1,0 +1,49 @@
+{
+  "schema": "radio_gs.surface_region_v21c_stage_i_audit_result_receipt.v1",
+  "schema_version": 1,
+  "status": "complete_stage_ii_not_authorized",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21c_stage_i_execution_authority_20260807.json",
+    "sha256": "76aa11d0adf18e0f425d723759b9302f2f2dd325c18480864c4f1bd26c7e74c2"
+  },
+  "audit_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21c_stage_i_audit1/stage_i_result.json",
+    "sha256": "b53d862ced697308925048420bc224ceddb43936a49987f3c7437969cd2c9e68"
+  },
+  "audited_steps": 30,
+  "pairwise_conflict_steps": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "pairwise_conflict_step_count": 7,
+  "required_pairwise_conflict_step_count": 16,
+  "pairwise_candidate_cosine_median": 0.023460767107742808,
+  "pairwise_candidate_dot_median": 0.00009620872432126529,
+  "absolute_conflict_steps": [],
+  "maximum_adamw_candidate_reconstruction_abs_error": 1.1132215149700642e-08,
+  "final_model_state_dict_sha256": "57869db3e88cdcdd89e8a14e157da71421ee8c54cca2ea04bdda8c97afa0ca37",
+  "matches_promoted_v21b_final_model": true,
+  "strict_majority_pairwise_conflict_confirmed": false,
+  "stage_ii_projection_authorized": false,
+  "causal_conclusion": "The ordinary AdamW update conflicts with pairwise relevance only during steps 1-7, then enters a common descent regime for steps 8-30; persistent-gradient projection is not justified.",
+  "gpu_guard": {
+    "gpu": 1,
+    "power_limit_w": 300.0,
+    "maximum_observed_temperature_c": 72,
+    "overheat_stop_triggered": false,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21c_stage_i_audit1/logs/gpu1_thermal.csv",
+      "sha256": "0f450380659e90b64e5a413edc72eccf4536c0ed217268e38afa27c60a458bd7"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21c_stage_i_audit1/logs/gpu1_owner_audit.csv",
+      "sha256": "b0973d51864e291bc125295be58631865fa59646b64b954dda4193165b2d96bd"
+    }
+  },
+  "benchmark_opened": false
+}

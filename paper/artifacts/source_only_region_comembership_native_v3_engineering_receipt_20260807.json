@@ -1,0 +1,115 @@
+{
+  "artifact": "source_only_region_comembership_native_v3_engineering_receipt",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T12:52:56+08:00",
+  "status": "exact4train_2validation_source_authority_complete_ready_for_gpu0_training",
+  "candidate": {
+    "legacy_parent": "RegionCoMembershipV2",
+    "legacy_pair_feature_dimension": 21,
+    "factorized_native_pair_feature_dimension": 9,
+    "combined_pair_feature_dimension": 30,
+    "architecture": "30_64_32_1_GELU",
+    "epoch_zero_probability": 0.5,
+    "legacy_v2_default_changed": false,
+    "raw_radio_vector_reconstructed": false
+  },
+  "implementation": {
+    "native_interface": {
+      "path": "radio_gs/interfaces/factorized_native_region_relation.py",
+      "sha256": "8278b3126fce2f3dee080ac5fe933bc0c1fbe136f0392c5fc4fec06ed3a15d5e"
+    },
+    "model": {
+      "path": "radio_gs/models/region_comembership_native_v3.py",
+      "sha256": "e93abc46adac0aa44102dad7cc11a202a37e1cfa61a5335ddcb22d5eba28b2c6"
+    },
+    "materializer": {
+      "path": "radio_gs/scripts/materialize_source_region_comembership_native_v3.py",
+      "sha256": "ea593363d7035ad4cc2cda015763015b5a4f38a9a9e772a709f17ff75f81d1d9"
+    },
+    "trainer": {
+      "path": "radio_gs/scripts/train_source_region_comembership_native_v3.py",
+      "sha256": "b244151bd41bfc7432aaec024a201160d344ff4196f6800e207ba7d01d865b92"
+    },
+    "preregistration": {
+      "path": "paper/artifacts/source_only_region_comembership_native_v3_preregistration_20260807.json",
+      "sha256": "a1433b52f732fb682499b13df0bad558b3866bacc71b9bcdbde08f9801e287e3"
+    }
+  },
+  "source_authorities": {
+    "source_train": [
+      {
+        "scene_id": "scene0001_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0001_00/source_region_comembership_authority_native_v3.pt",
+        "sha256": "c32dd00f77a53a0155384be4ad06ce7d83bb77ee1fb034ad726b05772ccafe69"
+      },
+      {
+        "scene_id": "scene0002_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0002_00/source_region_comembership_authority_native_v3.pt",
+        "sha256": "883c7d0099e3e0be214004b5201fab4166f87bd9b741622d04ba87dda7223776"
+      },
+      {
+        "scene_id": "scene0003_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0003_00/source_region_comembership_authority_native_v3.pt",
+        "sha256": "8af29b542cbc417ab2f79245690c3a3a5b5c5e61842301a43c563d82b10a040b"
+      },
+      {
+        "scene_id": "scene0005_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0005_00/source_region_comembership_authority_native_v3.pt",
+        "sha256": "f1c8f35477cf5784119d3e441525c8218e1465e425739cf57a0458a1ca0e70b3"
+      }
+    ],
+    "source_validation": [
+      {
+        "scene_id": "scene0004_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0004_00/source_region_comembership_authority_native_v3.pt",
+        "sha256": "a5ad4543d5bfe031a876423bc6d9a2d9a380546f9f7c2e64c54c18bfc563bc0a"
+      },
+      {
+        "scene_id": "scene0008_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0008_00/source_region_comembership_authority_native_v3.pt",
+        "sha256": "ae6ebd2168c698c0cd8d95913fbe4fed708d6794548a26d9303c1eb8051b517c"
+      }
+    ],
+    "materialized_region_count": 24576,
+    "materialized_pair_count": 321911
+  },
+  "execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/formal_exact4x2_execution_authority.json",
+    "sha256": "e21ef16078f082cf9572e6fb86d700d55ad2f8ab19a85043b0c0f34f24c6d50f",
+    "training_authorized": true,
+    "target_execution_authorized": false
+  },
+  "promotion_gate": {
+    "heldout_topology": [
+      "selected_epoch_positive",
+      "topology_strictly_exceeds_singleton",
+      "iou_strictly_exceeds_singleton",
+      "f1_strictly_exceeds_singleton"
+    ],
+    "heldout_absolute_calibration": [
+      "macro_brier_strictly_improves_epoch_zero",
+      "macro_log_loss_strictly_improves_epoch_zero",
+      "every_validation_scene_brier_non_regression"
+    ],
+    "target_execution_before_promotion": false
+  },
+  "gpu0_command": "CUDA_VISIBLE_DEVICES=0 bash radio_gs/scripts/run_repo_python.sh -m radio_gs.scripts.train_source_region_comembership_native_v3 train --execution-authority /mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/formal_exact4x2_execution_authority.json --expected-execution-authority-sha256 e21ef16078f082cf9572e6fb86d700d55ad2f8ab19a85043b0c0f34f24c6d50f --device cuda:0 --output /mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/formal_native_v3_checkpoint.pt",
+  "verification": {
+    "tests_passed": 57,
+    "tests_failed": 0,
+    "warnings": 1,
+    "warning_scope": "PyTorch TypedStorage deprecation only",
+    "synthetic_epoch_zero_probability": 0.5,
+    "synthetic_final_layer_gradient_nonzero": true
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false,
+    "gpu_started": false
+  }
+}

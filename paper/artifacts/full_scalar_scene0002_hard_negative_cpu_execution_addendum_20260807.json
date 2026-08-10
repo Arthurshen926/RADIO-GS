@@ -1,0 +1,55 @@
+{
+  "artifact": "full_scalar_scene0002_hard_negative_cpu_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:41:04+08:00",
+  "status": "sealed_after_teacher_success_and_before_first_scene0002_miner_execution",
+  "scene_id": "scene0002_00",
+  "cohort_split": "source_train",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/clean_scene_source_query_response_hard_negative_cohort_v2_preregistration_20260806.json",
+    "sha256": "de4aa57ab283b195d10ddb6965a4de03be3a8bd0fbb5647215a6a15cd43dab16"
+  },
+  "inputs": {
+    "cohort_authority_sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "accepted_v2_sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89",
+    "official_multiview_teacher_sha256": "a8da368dbe2703f2a9d199618afc6fc41c4e09e301f681a32a1f7ceae4299e49",
+    "fit_text_bank_sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+    "fit_text_bank_manifest_sha256": "5d6c7fa167b63a4052f9be57389a2f5f0e469c75391916ef0b7fe562cce7e3f0",
+    "dev_text_bank_sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+    "dev_text_bank_manifest_sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/mine_source_query_response_hard_negatives_cohort_v2.py",
+    "sha256": "bbf04c8c601847378f6e86b200153693e36d6bbc277d3608e5337c05a7843973"
+  },
+  "temperature_roles": {
+    "mining_temperature": 0.05,
+    "mining_role": "freeze the target-blind response-profile-neighbor candidate pair set only",
+    "v2_1_supervision_temperature": 0.1,
+    "supervision_role": "recompute teacher response, relevance gap, and continuous weight on the fixed mined pairs during V2.1 training",
+    "temperatures_are_intentionally_distinct": true
+  },
+  "frozen_contract": {
+    "device": "cpu",
+    "per_source_k": 4,
+    "teacher_cosine_minimum_inclusive": 0.8,
+    "teacher_cosine_maximum_inclusive": 0.98,
+    "matrix_block_rows": 128,
+    "cross_scene_similarity_matrix": false,
+    "per_scene_hyperparameters": false
+  },
+  "outputs": {
+    "authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0002_00/hard_negative_index_authority_bound_v1.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0002_00/hard_negative_index_authority_bound_v1.report.json"
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

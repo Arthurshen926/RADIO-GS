@@ -1,0 +1,51 @@
+{
+  "artifact": "full_scalar_scene0002_official_teacher_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:40:00+08:00",
+  "status": "sealed_after_accepted_v2_success_and_before_teacher_execution",
+  "scene_id": "scene0002_00",
+  "inputs": {
+    "source_rgb_scene_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/source_rgb_scene_authority_v1.json",
+      "file_sha256": "3d5901d9dc1e76b6f5cc604d1b45fd753805af2b7a3de7f7cdb89d7e133da18e",
+      "content_authority_sha256": "136a8374f55045a2aa4ec7a1da33bf5c4ad716f2a5be6148acecbff3d29d0fb2"
+    },
+    "source_rgb_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/field240/scene0002_00/color",
+    "accepted_v2_file_sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89",
+    "factorized_primitive_state_sha256": "7036ae2e0ab581c684f9c43c76923836659b666d30bdddcc7790f139d77fdfbe",
+    "exact_marginal_responsibility_authority_sha256": "6765db28f57fc32f0cb301b49fcf0699b8e13f2db1558bf18bf7d64189a08927",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+    "sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5"
+  },
+  "frozen_contract": {
+    "crop_resolution": 384,
+    "crop_batch_size": 4,
+    "region_batch_size": 4096,
+    "maximum_views_per_region": 4,
+    "maximum_regions": 4096,
+    "descriptor": "official C-RADIO first summary slot through official SigLIP2-g head, float32 unit L2",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+  "thermal_guard": {
+    "physical_gpu": 1,
+    "pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed"
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

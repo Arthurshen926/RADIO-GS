@@ -1,0 +1,48 @@
+{
+  "access_audit": {
+    "gpu_used": false,
+    "labels_or_masks_opened": false,
+    "source_feature_manifest_opened": true,
+    "source_feature_tensors_opened": false,
+    "source_geometry_opened": false,
+    "source_poses_opened": false,
+    "target_images_opened": false,
+    "target_metrics_opened": false,
+    "text_queries_opened": false
+  },
+  "execution": {
+    "cuda_visible_devices": "1",
+    "maximum_temperature_c": 88,
+    "physical_gpu": 1,
+    "program_device": "cuda:0",
+    "thermal_poll_seconds": 300
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_all_available_responsibility_supplement.py",
+    "sha256": "148e5a13d525995357207ba54716e26461f84a89d7c99bff3ebdc762fdf474dc"
+  },
+  "method_contract": {
+    "feature_independent": true,
+    "legacy_authority_modified": false,
+    "per_scene_or_per_query_hyperparameters": false,
+    "query_independent": true,
+    "rendered_view_domain": "exactly_all_available_minus_legacy120",
+    "responsibility": "exact_front_to_back_sparse_marginal",
+    "schema": "radio_gs.lerf_all_available_responsibility_supplement_execution.v1",
+    "schema_version": 1,
+    "source_view_domain": "feature_manifest_order_minus_frozen_excluded_frames",
+    "target_metric_execution_authorized": false
+  },
+  "method_contract_sha256": "7a36c0c99145da1bb8a702e80b39c883f8f117a617fbfc09adbfa9f0ed7870d8",
+  "metric_execution_authorized": false,
+  "output_responsibility_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/omitted_exact_marginal_responsibility.json",
+  "reference_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v2_execution_authority_20260807.json",
+    "sha256": "a9f616b28a8b0e1ab4998ca9d3c61efa67f9e622eee31a04dd80912014da8df8"
+  },
+  "scene_id": "waldo_kitchen",
+  "schema": "radio_gs.lerf_all_available_responsibility_supplement_execution.v1",
+  "schema_version": 1,
+  "source_only_materialization_authorized": true,
+  "status": "authorized_source_only_omitted_view_responsibility"
+}

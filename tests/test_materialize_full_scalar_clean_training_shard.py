@@ -523,6 +523,157 @@ def test_registry_rejects_partial_or_vacuous_validation_coverage(
         materializer.validate_cohort_region_view_registry(vacuous)
 
 
+def _pilot_registry_payload() -> dict:
+    teacher_model_sha = canonical_json_sha256(
+        materializer.official_teacher_model_authority()
+    )
+    scene_records = []
+    split_scenes = (
+        ("source_train", materializer.PILOT_TRAIN_SCENES),
+        ("source_validation", materializer.PILOT_VALIDATION_SCENES),
+    )
+    for split, scenes in split_scenes:
+        for scene in scenes:
+            region_count = 2 if split == "source_validation" else 1
+            regions = []
+            for index in range(region_count):
+                fingerprint = hashlib.sha256(
+                    f"{scene}-pilot-region-{index}".encode()
+                ).hexdigest()
+                view_sha = hashlib.sha256(
+                    f"{scene}-pilot-view-{index}".encode()
+                ).hexdigest()
+                regions.append(
+                    {
+                        "region_fingerprint": fingerprint,
+                        "region_row_id": materializer.stable_region_id(
+                            scene, fingerprint
+                        ),
+                        "teacher_view_ids": [f"{scene}:source-rgb:{view_sha}"],
+                        "eligible_overlap_teacher": True,
+                    }
+                )
+            regions.sort(key=lambda item: item["region_row_id"])
+            accepted_sha = hashlib.sha256(f"{scene}-accepted".encode()).hexdigest()
+            state_sha = hashlib.sha256(f"{scene}-state".encode()).hexdigest()
+            scene_records.append(
+                {
+                    "scene_id": scene,
+                    "physical_space_id": trainer.canonical_physical_space_id(scene),
+                    "split": split,
+                    "accepted_region_authority_file_sha256": accepted_sha,
+                    "factorized_state_file_sha256": state_sha,
+                    "teacher_observation_authority_file_sha256": hashlib.sha256(
+                        f"{scene}-teacher".encode()
+                    ).hexdigest(),
+                    "source_state_artifact_sha256": (
+                        materializer.source_state_artifact_sha256(
+                            accepted_region_file_sha256=accepted_sha,
+                            factorized_state_file_sha256=state_sha,
+                        )
+                    ),
+                    "teacher_model_authority_sha256": teacher_model_sha,
+                    "eligible_overlap_teacher_row_count": region_count,
+                    "region_records": regions,
+                }
+            )
+    scene_records.sort(key=lambda item: item["scene_id"])
+    contract = materializer.pilot_cohort_registry_contract()
+    payload = {
+        "schema": materializer.PILOT_COHORT_REGISTRY_SCHEMA,
+        "schema_version": materializer.SCHEMA_VERSION,
+        "contract": contract,
+        "contract_sha256": canonical_json_sha256(contract),
+        "cohort_authority_sha256": "a" * 64,
+        "cohort_authority_file_sha256": "b" * 64,
+        "pilot_splits": {
+            "source_train": list(materializer.PILOT_TRAIN_SCENES),
+            "source_validation": list(materializer.PILOT_VALIDATION_SCENES),
+        },
+        "teacher_model_authority_sha256": teacher_model_sha,
+        "scene_records": scene_records,
+        "source_access": materializer._authority_access(source_rgb_used=True),
+    }
+    payload["authority_sha256"] = materializer._authority_content_sha256(payload)
+    return payload
+
+
+def test_pilot_registry_is_independent_exact_six_and_fail_closed() -> None:
+    assert (
+        materializer.PILOT_MATERIALIZATION_RECEIPT_SCHEMA
+        != materializer.MATERIALIZATION_RECEIPT_SCHEMA
+    )
+    assert (
+        registry_sealer.PILOT_REGISTRY_SEAL_RECEIPT_SCHEMA
+        != registry_sealer.REGISTRY_SEAL_RECEIPT_SCHEMA
+    )
+    assert registry_sealer.pilot_registry_seal_receipt_contract()["output"] == (
+        materializer.PILOT_COHORT_REGISTRY_SCHEMA
+    )
+    valid = _pilot_registry_payload()
+    frozen = materializer.validate_pilot_cohort_region_view_registry(valid)
+    assert [row["scene_id"] for row in frozen["scene_records"]] == sorted(
+        materializer.PILOT_TRAIN_SCENES
+        + materializer.PILOT_VALIDATION_SCENES
+    )
+
+    full_schema = copy.deepcopy(valid)
+    full_schema["schema"] = materializer.COHORT_REGISTRY_SCHEMA
+    full_schema["authority_sha256"] = materializer._authority_content_sha256(
+        full_schema
+    )
+    with pytest.raises(ValueError, match="pilot cohort.*contract"):
+        materializer.validate_pilot_cohort_region_view_registry(full_schema)
+
+    missing = copy.deepcopy(valid)
+    missing["scene_records"].pop()
+    missing["authority_sha256"] = materializer._authority_content_sha256(missing)
+    with pytest.raises(ValueError, match=r"exact 4\+2"):
+        materializer.validate_pilot_cohort_region_view_registry(missing)
+
+    wrong_split = copy.deepcopy(valid)
+    wrong_split["scene_records"][0]["split"] = "source_validation"
+    wrong_split["authority_sha256"] = materializer._authority_content_sha256(
+        wrong_split
+    )
+    with pytest.raises(ValueError, match="scene/split"):
+        materializer.validate_pilot_cohort_region_view_registry(wrong_split)
+
+    wrong_sha = copy.deepcopy(valid)
+    wrong_sha["scene_records"][0][
+        "accepted_region_authority_file_sha256"
+    ] = "g" * 64
+    wrong_sha["authority_sha256"] = materializer._authority_content_sha256(
+        wrong_sha
+    )
+    with pytest.raises(ValueError, match="SHA-256"):
+        materializer.validate_pilot_cohort_region_view_registry(wrong_sha)
+
+
+@pytest.mark.parametrize(
+    "guard",
+    [materializer._require_outputs_absent, registry_sealer._require_absent],
+)
+def test_output_preflight_rejects_same_and_alias_paths(tmp_path: Path, guard) -> None:
+    output = tmp_path / "artifact.json"
+    with pytest.raises(ValueError, match="paths must be unique"):
+        guard([output, output])
+    alias = tmp_path / "nested" / ".." / "artifact.json"
+    with pytest.raises(ValueError, match="paths must be unique"):
+        guard([output, alias])
+
+
+@pytest.mark.parametrize(
+    "guard",
+    [materializer._require_outputs_absent, registry_sealer._require_absent],
+)
+def test_output_preflight_rejects_dangling_symlink(tmp_path: Path, guard) -> None:
+    dangling = tmp_path / "dangling.json"
+    dangling.symlink_to(tmp_path / "missing-target.json")
+    with pytest.raises(FileExistsError):
+        guard([dangling])
+
+
 def test_formal_authorities_reject_semantic_cache_and_radio_summary_impostors(
     tmp_path: Path,
 ) -> None:

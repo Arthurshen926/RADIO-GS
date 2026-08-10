@@ -1,0 +1,85 @@
+{
+  "schema": "radio_gs.anchor_preserving_prompt_transport.clean_gate_preregistration.v2_1",
+  "schema_version": 1,
+  "status": "sealed_before_v2_1_scene0001_fit_and_scene0003_label_open",
+  "scientific_question": "Does prompt-level worst-quartile risk-sensitive training remove lower-tail regressions while retaining the average full-mask and scribble gains of the unchanged anchor-preserving transport?",
+  "fit_scene": "scene0001_00",
+  "confirmation_scene": "scene0003_00",
+  "forbidden_scene0002_use": true,
+  "epochs": 80,
+  "unchanged_from_v2": {
+    "head": "RegisteredEvidenceToUnaryV2",
+    "hidden_dim": 32,
+    "max_delta_logit": 4.0,
+    "fully_observed_tolerance": 0.00001,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "data_loss": "target-supported-pixel class-balanced BCE",
+    "residual_l2_weight": 0.05,
+    "confidence_calibration_weight": 0.02,
+    "transport_contract": "anchor_preserving_confidence_gated_logit_residual_v1",
+    "fixed_probability_threshold": 0.5,
+    "graph": false,
+    "connected_selection": false
+  },
+  "sole_method_change": {
+    "training_objective": "0.5 prompt-mean plus 0.5 worst-quartile CVaR",
+    "cvar_fraction": 0.25,
+    "prompt_weighting": "each epoch ranks the current scene0001 training prompt held-out-view balanced BCE; all prompts receive weight 0.5 and the stable worst ceil(0.25*N) receive an additional 0.5*N/K; weights have exact mean one",
+    "checkpoint_selection": "lexicographic maximum on scene0001 validation of worst-prompt AP delta, worst-quartile mean AP delta, minimum prompt-mode AP delta, minimum prompt-mode IoU@0.5 delta, macro AP, negative macro BCE, and negative epoch",
+    "scene_or_prompt_parameters": false
+  },
+  "promotion_rule": {
+    "engineering_invariants": [
+      "fully observed rows are bitwise analytic identity",
+      "inactive-domain rows are bitwise analytic identity",
+      "complement and residual-sign symmetry tests pass",
+      "scene0002 does not enter fit, selection, or confirmation"
+    ],
+    "scene0001_fit_gate": "for both full-mask and scribble, AP and IoU@0.5 do not regress analytic, precision delta is at least -0.01, absolute log area-ratio error decreases, and worst-prompt AP delta is at least -0.005",
+    "scene0003_confirmation_gate": "the identical rule is evaluated exactly once with no fit, threshold, calibration, or candidate selection",
+    "failure_policy": "if scene0003 fails, report and stop; do not tune from scene0003 and do not substitute scene0002",
+    "target_authority": "only if both clean gates and engineering invariants pass may one single-scene NVOS or SPIn sentinel be separately preregistered"
+  },
+  "authority": {
+    "fit_asset_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_execution_authority_v2_20260806.json",
+      "sha256": "de7cb637b8980d9cd0fef46b7a6453840318add276a7b7dbe6b3d507462d36ab"
+    },
+    "confirmation_asset_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/anchor_preserving_prompt_transport_scene0003_confirmation_asset_authority_20260809.json",
+      "sha256": "a72debdf890d53e3775a9ceff26ea17ffe0ee2ed4b9967e8dc5a45335eccb975"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_anchor_preserving_prompt_transport_clean_v21.py",
+      "sha256": "75a1dcaae45692fd3ff7fb8096bc3ef4d939b243786376f4c54117daf0d8bdcf"
+    },
+    "base_asset_loader": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_anchor_preserving_prompt_transport_clean.py",
+      "sha256": "3a8d198bf452a72297ebf239c2ae00d9eb7c2c79ea64671abf60234284407c1b"
+    },
+    "transport_contract": {
+      "path": "/root/RADIO-GS/radio_gs/querying/anchor_preserving_transport.py",
+      "sha256": "df369a76b458dc9e2827458f61989753cd2d04d91897a79a50a87b5129d229aa"
+    },
+    "future_target_checkpoint_loader": {
+      "path": "/root/RADIO-GS/radio_gs/querying/anchor_preserving_transport_checkpoint.py",
+      "sha256": "6a4d7ba3ff2af67ef0944916673f064e961764e61a98f0e699726aca14345918"
+    }
+  },
+  "source_access": {
+    "scene0001_labels_used_for_fit_and_selection": true,
+    "scene0002_labels_used_for_failure_attribution_only": true,
+    "scene0002_enters_v2_1_fit_selection_or_gate": false,
+    "scene0003_labels_opened_before_seal": false,
+    "scene0003_labels_used_once_for_confirmation": true,
+    "scene0003_labels_enter_fit_or_selection": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

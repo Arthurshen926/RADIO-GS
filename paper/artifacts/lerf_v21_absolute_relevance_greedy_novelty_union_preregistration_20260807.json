@@ -1,0 +1,46 @@
+{
+  "registration": "lerf_v21_absolute_relevance_greedy_novelty_union_v1",
+  "date": "2026-08-07",
+  "status": "preregistered_before_any_target_metric_execution",
+  "scientific_question": "Can source-promoted V2.1 absolute relevance recover disconnected but semantically positive object supports when formal co-membership edges are too sparse to expand beyond singleton regions?",
+  "single_deployment_candidate": {
+    "semantic_input": "V2.1 target descriptor scored by the exact source-training positive-versus-maximum-canonical-negative binary softmax",
+    "logit_scale": 10.0,
+    "absolute_relevance_threshold": 0.5,
+    "threshold_authority": "model equal-logit boundary",
+    "selector": "greedy_novelty_union_readout",
+    "utility": "absolute_relevance times fraction_of_semantic_core_not_yet_covered",
+    "maximum_regions": 8,
+    "maximum_regions_authority": "existing source-formal global maximum",
+    "stop_rule": "stop when no threshold-eligible candidate has positive novelty",
+    "tie_break": "lower immutable canonical region index",
+    "validity_policy": "clip final primitive membership by the immutable renderer-aligned valid mask",
+    "co_membership_role": "auxiliary audit only; never a hard deployment edge"
+  },
+  "forbidden_operations": [
+    "legacy O0 query scores",
+    "KNN query smoothing",
+    "scene min-max remapping",
+    "query rank normalization",
+    "scene-specific threshold or K",
+    "target label, mask, image, or metric access during materialization",
+    "parallel target candidate selection"
+  ],
+  "formal_bindings": [
+    "promoted V2.1 source result",
+    "promoted checkpoint and normalization",
+    "exact source-training canonical-negative bank",
+    "target V2.1 descriptor",
+    "official exact-query SigLIP2 embedding cache",
+    "formal source-promoted co-membership inference for audit",
+    "renderer geometry checkpoint and primitive valid mask"
+  ],
+  "benchmark_access_before_execution": {
+    "queries": true,
+    "images": false,
+    "masks": false,
+    "labels": false,
+    "metrics": false
+  },
+  "evaluation_policy": "Materialize this one candidate, then run the already frozen exact evaluator once; do not select among target variants."
+}

@@ -1,0 +1,110 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_descriptor_first_audit90_confirmation_independent_preexecution_audit.v1",
+  "schema_version": 1,
+  "status": "PASS_GPU_CONFIRMATION_RELEASED",
+  "auditor": "/root/audit_source_v2",
+  "audit_boundary": "independent CPU/content-address audit completed before either reserved audit90 confirmation GPU launch",
+  "implementation": {
+    "confirmation_sibling": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_confirmation.py",
+      "sha256": "6d1b9194d583de7ed84a6beb230cab84b65982d8070f636cd101c7b88a631bf2"
+    },
+    "unchanged_completed_dev_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+      "sha256": "873214d57360d1278177f56c9d1c77ffc7384d6d97116da3aa81e9d879f8c6fe",
+      "byte_identical_to_completed_dev_v2": true
+    },
+    "confirmation_selector": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/select_lerf_source_text_response_ranking_audit_confirmation.py",
+      "sha256": "1c0baf4da9d0779e5696081de6c2b180ada3af7b3bbdf27b217a0499cd6a6af9"
+    },
+    "focused_and_inherited_tests": {
+      "passed": 15,
+      "failed": 0
+    }
+  },
+  "fail_closed_remediation": {
+    "initial_sibling_sha256": "8ccbdfff1e5fc6022dab45979caea0bda7b9aad9ac77f173f4a88db0cd8531e0",
+    "initial_audit_decision": "FAIL_NOT_RELEASED",
+    "issue": "development gate and dev/audit disjointness records were initially syntax-checked but not content-validated at runtime",
+    "remediation_in_released_sha": "runtime now verifies both records, validates gate candidate lock, opens both content-addressed manifests, and recomputes zero query and synset intersections",
+    "remediated": true
+  },
+  "confirmation_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_audit90_confirmation_preregistration_20260809.json",
+    "sha256": "49da2a8b7f0b7616e569a57fdfa65bc144c5f246c9b5669119088eb76e69202a",
+    "candidate_locked_after_dev_pass": true
+  },
+  "reserved_query_bank": {
+    "artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+      "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721"
+    },
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+      "sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4"
+    },
+    "embedding_tensor_sha256": "8cc8e9ca3903488ef7558ce19d9e4bec9cb6378570c8c12d72a56da1aec016d",
+    "split": "audit",
+    "shape": [90, 1536],
+    "dev_query_intersection_count": 0,
+    "dev_synset_intersection_count": 0,
+    "disjointness_proof": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+      "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf"
+    }
+  },
+  "descriptor_first_formula": {
+    "status": "PASS",
+    "order": "render raw 1536-D primitive descriptors -> alpha normalize rendered descriptor map -> per-pixel channel L2 normalize -> normalized audit text dot",
+    "response_first_primitive_projection_used": false,
+    "common_renderer_and_descriptor_loader_inherited_from_frozen_dev_materializer": true
+  },
+  "scene_audits": {
+    "ramen": {
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_audit90_confirmation_gpu0_authority_20260809.json",
+        "sha256": "cfac6b71b84f454fca93a0bf3934fc2afb2e95a6d6ace2325e9ce82183736024"
+      },
+      "source_frames": 4,
+      "same_control_candidate_methods_and_payloads_as_dev": true,
+      "same_frames_config_geometry_reseal_and_execution_as_dev": true,
+      "all_three_outputs_new_and_absent": true
+    },
+    "teatime": {
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_audit90_confirmation_gpu1_authority_20260809.json",
+        "sha256": "552ce51cac668796adf43fb92dbd6bbcec2e05b4a600b08d070a95824f319cce"
+      },
+      "source_frames": 51,
+      "same_control_candidate_methods_and_payloads_as_dev": true,
+      "same_frames_config_geometry_reseal_and_execution_as_dev": true,
+      "all_three_outputs_new_and_absent": true
+    }
+  },
+  "operator_mismatch_disclosure": {
+    "present": true,
+    "end_to_end_interface_ab_not_capacity_matched": true,
+    "candidate_locked_without_audit_bank_selection": true,
+    "interpretation_boundary": "reserved source-only confirmation of an already locked interface comparison, not a capacity-matched causal ablation"
+  },
+  "no_clobber": {
+    "all_six_output_paths_absolute_pairwise_distinct_and_absent": true,
+    "none_overlap_completed_dev_outputs": true,
+    "inherited_base_materializer_raises_FileExistsError_if_any_output_exists": true
+  },
+  "access_audit": {
+    "benchmark_queries_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false,
+    "target_metric_executed": false
+  },
+  "release": {
+    "gpu_confirmation_permitted": true,
+    "permitted_authority_sha256": [
+      "cfac6b71b84f454fca93a0bf3934fc2afb2e95a6d6ace2325e9ce82183736024",
+      "552ce51cac668796adf43fb92dbd6bbcec2e05b4a600b08d070a95824f319cce"
+    ],
+    "target_metric_permitted": false,
+    "any_authority_or_implementation_change_requires_reaudit": true
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_support_readout_oracle_d0_d5_figurines_scale_axis_correction_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_after_failed_prelaunch_and_before_any_d2_d5_metric_or_corrected_implementation",
+  "parent_authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_preregistration_20260806.json",
+      "sha256": "473b70468c14bedce0d347828800f0d029838c0c7bfe5e4c480c86f3e73febf8"
+    },
+    "teacher_availability_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_teacher_availability_addendum_20260806.json",
+      "sha256": "4aa709366b9d21eb8120c365c93720b403540e2494f598d8b8eaba395125936f"
+    },
+    "superseded_execution_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_execution_addendum_20260806.json",
+      "sha256": "7bbc6f2ae4baa66c1c4b0fe27ebedfe41182c66048a3f74be2fd91a464949a88"
+    }
+  },
+  "discovery": {
+    "timing": "static code review after both GPU preflights failed and before any D2-D5 process entered Python",
+    "new_d2_d5_metrics_opened": false,
+    "incorrect_code_path_executed": false,
+    "issue": "The first implementation used O4 query_scores scale slot 0 for D4. O4 retains three registered scale slots, so choosing slot 0 would mix a scale choice into the intended no-region-pooling diagnostic."
+  },
+  "replacement_D4": {
+    "D4_s0": "Use O4 final canonical-negative probability at registered scale slot 0 only.",
+    "D4_s1": "Use O4 final canonical-negative probability at registered scale slot 1 only.",
+    "D4_s2": "Use O4 final canonical-negative probability at registered scale slot 2 only.",
+    "D4_per_primitive_max": "Use the fixed, target-independent maximum of the three final canonical-negative probabilities independently for every primitive/query.",
+    "teacher_unavailable_rows": "Exact abstention at score zero for all four variants.",
+    "metrics": "Available-row and end-to-end primitive metrics are reported independently for all four variants."
+  },
+  "replacement_D5": {
+    "memberships": "Threshold each of the four corrected D4 score tensors independently at the unchanged fixed probability 0.6.",
+    "renderer": "Render all four memberships through the identical frozen final renderer.",
+    "selection": "All four D5 results must be reported. No result-dependent choice, promotion, fallback, threshold scan, or scale selection is permitted."
+  },
+  "unchanged": [
+    "D0 and D1",
+    "D2 exhaustive single-region GT oracle",
+    "D3 registered top-1024 greedy union oracle",
+    "positive versus maximum canonical-negative relevance semantics",
+    "teacher availability abstention",
+    "fixed threshold 0.6",
+    "development-only non-deployable interpretation",
+    "frozen evaluator, metric and renderer"
+  ],
+  "execution": {
+    "gpu_execution_authorized_by_this_addendum": false,
+    "next_action": "correct implementation and complete CPU-only static and synthetic validation"
+  }
+}

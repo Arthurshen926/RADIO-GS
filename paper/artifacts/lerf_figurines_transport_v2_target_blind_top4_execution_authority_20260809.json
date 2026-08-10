@@ -1,0 +1,298 @@
+{
+  "access_audit": {
+    "base_descriptor_opened": true,
+    "exact_o0_pair_opened_for_geometry_and_invalid_row_template": true,
+    "frozen_text_embedding_banks_opened": true,
+    "source_only_cross_scene_gate_opened": true,
+    "target_ground_truth_opened": false,
+    "target_images_opened": false,
+    "target_masks_opened": false,
+    "target_metric_executed": false,
+    "target_metrics_opened": false,
+    "teacher_agreement_v2_opened": true
+  },
+  "execution": {
+    "cuda_visible_devices": "0",
+    "maximum_power_limit_w": 300.5,
+    "maximum_temperature_c": 88,
+    "physical_gpu": 0,
+    "program_device": "cuda:0",
+    "row_batch_size": 256,
+    "soft_pause_temperature_c": 0,
+    "thermal_poll_seconds": 300
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_target_blind_top4_candidate_scores.py",
+    "sha256": "f8b902eadddee455767b14e8b7eba68ef7cf294baa271af9cef30439e3685c93"
+  },
+  "inputs": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt",
+      "sha256": "49528e9901a5cef53410e5651740ad96b677b5c492d51c713b4a28a2efabcceb"
+    },
+    "frozen_negative_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "frozen_positive_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "o0_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_negative.pt",
+      "sha256": "a887eb9da5631ed8a1966e3ad844bb0797d94626a6025e1293b5712e11b9b19f"
+    },
+    "o0_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_positive.pt",
+      "sha256": "7e7611ac7c886917d0b415c613e16c740d6248cb46c0bde536df6d353d9f739c"
+    },
+    "source_gate": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_transport_v2_ramen_teatime_cross_scene_source_gate_result_20260809.json",
+      "sha256": "13e5bcad24aa196fa63ba17a45a807e529bce3a19e749449c3430acc5c6b7587"
+    },
+    "teacher_agreement_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_teacher_agreement_from_top4.pt",
+      "sha256": "6fde6a77a803d5325a1b432cebbe0215a8496e195a399eb0087a8f9fa4b26a90"
+    }
+  },
+  "method_contract": {
+    "accepted_rows_recomputed_against_frozen_text": true,
+    "descriptor_materialization": "row_batch_only",
+    "immutable_backbone": "accepted_v2_o0_descriptor_three_scale_frame",
+    "invalid_rows": "preserve_exact_o0_template_and_excluded_by_validity_domain",
+    "metric_execution_authorized": false,
+    "query_independent_transport": true,
+    "residual_shrinkage_contract": {
+      "baseline_candidate": {
+        "gamma_policy": "rigid",
+        "maximum_angle_radians": 0.15
+      },
+      "benchmark_labels_or_metrics_consumed": false,
+      "decomposition": {
+        "centered_residual": "delta_s=x_s-mu",
+        "cosine_gauge": "y_s=l2_normalize(z_s)",
+        "mean": "mu=mean_s(x_s_as_stored)",
+        "reconstruction": "z_s=R_phi(mu)+gamma*R_phi(delta_s)",
+        "transport": "same_R_phi_applied_to_mu_and_every_delta_s"
+      },
+      "fallback": {
+        "antipodal": "bitwise_o0_score_cache",
+        "degenerate_reconstruction": "bitwise_o0_score_cache",
+        "same_direction": "bitwise_o0_score_cache",
+        "teacher_invalid": "bitwise_o0_score_cache",
+        "undefined_scale_mean": "bitwise_o0_score_cache"
+      },
+      "formal_target_candidate_authorized": false,
+      "gamma_family": {
+        "dispersion_exponents": [
+          0.0,
+          0.5,
+          1.0,
+          2.0
+        ],
+        "monotone": "gamma_k=1-rho*(1-d)^k",
+        "monotone_nondecreasing_in_dispersion": true,
+        "monotone_nonincreasing_in_reliability": true,
+        "range": [
+          0.0,
+          1.0
+        ],
+        "rigid": "gamma=1",
+        "zero_exponent_definition": "(1-d)^0=1_including_d_equal_one"
+      },
+      "joint_candidate_grid": [
+        {
+          "dispersion_exponent": null,
+          "gamma_policy": "rigid",
+          "maximum_angle_radians": 0.15
+        },
+        {
+          "dispersion_exponent": 0.0,
+          "gamma_policy": "k0",
+          "maximum_angle_radians": 0.15
+        },
+        {
+          "dispersion_exponent": 0.5,
+          "gamma_policy": "k0p5",
+          "maximum_angle_radians": 0.15
+        },
+        {
+          "dispersion_exponent": 1.0,
+          "gamma_policy": "k1",
+          "maximum_angle_radians": 0.15
+        },
+        {
+          "dispersion_exponent": 2.0,
+          "gamma_policy": "k2",
+          "maximum_angle_radians": 0.15
+        },
+        {
+          "dispersion_exponent": null,
+          "gamma_policy": "rigid",
+          "maximum_angle_radians": 0.3
+        },
+        {
+          "dispersion_exponent": 0.0,
+          "gamma_policy": "k0",
+          "maximum_angle_radians": 0.3
+        },
+        {
+          "dispersion_exponent": 0.5,
+          "gamma_policy": "k0p5",
+          "maximum_angle_radians": 0.3
+        },
+        {
+          "dispersion_exponent": 1.0,
+          "gamma_policy": "k1",
+          "maximum_angle_radians": 0.3
+        },
+        {
+          "dispersion_exponent": 2.0,
+          "gamma_policy": "k2",
+          "maximum_angle_radians": 0.3
+        },
+        {
+          "dispersion_exponent": null,
+          "gamma_policy": "rigid",
+          "maximum_angle_radians": 0.45
+        },
+        {
+          "dispersion_exponent": 0.0,
+          "gamma_policy": "k0",
+          "maximum_angle_radians": 0.45
+        },
+        {
+          "dispersion_exponent": 0.5,
+          "gamma_policy": "k0p5",
+          "maximum_angle_radians": 0.45
+        },
+        {
+          "dispersion_exponent": 1.0,
+          "gamma_policy": "k1",
+          "maximum_angle_radians": 0.45
+        },
+        {
+          "dispersion_exponent": 2.0,
+          "gamma_policy": "k2",
+          "maximum_angle_radians": 0.45
+        },
+        {
+          "dispersion_exponent": null,
+          "gamma_policy": "rigid",
+          "maximum_angle_radians": 0.6
+        },
+        {
+          "dispersion_exponent": 0.0,
+          "gamma_policy": "k0",
+          "maximum_angle_radians": 0.6
+        },
+        {
+          "dispersion_exponent": 0.5,
+          "gamma_policy": "k0p5",
+          "maximum_angle_radians": 0.6
+        },
+        {
+          "dispersion_exponent": 1.0,
+          "gamma_policy": "k1",
+          "maximum_angle_radians": 0.6
+        },
+        {
+          "dispersion_exponent": 2.0,
+          "gamma_policy": "k2",
+          "maximum_angle_radians": 0.6
+        },
+        {
+          "dispersion_exponent": null,
+          "gamma_policy": "rigid",
+          "maximum_angle_radians": 0.75
+        },
+        {
+          "dispersion_exponent": 0.0,
+          "gamma_policy": "k0",
+          "maximum_angle_radians": 0.75
+        },
+        {
+          "dispersion_exponent": 0.5,
+          "gamma_policy": "k0p5",
+          "maximum_angle_radians": 0.75
+        },
+        {
+          "dispersion_exponent": 1.0,
+          "gamma_policy": "k1",
+          "maximum_angle_radians": 0.75
+        },
+        {
+          "dispersion_exponent": 2.0,
+          "gamma_policy": "k2",
+          "maximum_angle_radians": 0.75
+        }
+      ],
+      "per_scene_parameters": false,
+      "scale_dispersion": "d=sqrt(mean_s(||x_s-mu||^2)/mean_s(||x_s||^2))",
+      "scene_or_query_id_consumed": false,
+      "schema": "radio_gs.lerf_scale_residual_shrinkage_transport.v1",
+      "schema_version": 1,
+      "single_view_policy": "rho_zero_gamma_one_common_0p15_transport",
+      "source_loo_compute": {
+        "common_rotation_evaluations_per_fold": 5,
+        "common_rotation_reused_across_gamma_policies": true,
+        "device": "cpu"
+      },
+      "source_only_gate": {
+        "eligibility": "pooled_mean_delta_gt_zero_and_every_scene_mean_delta_ge_zero_and_every_scene_p05_delta_ge_zero",
+        "every_source_scene_mean_nonregression": true,
+        "every_source_scene_p05_nonregression": true,
+        "minimum_source_scenes": 2,
+        "pooled_mean_strict_improvement": true,
+        "selection_exact_tie_break": "earliest_joint_candidate_grid_index",
+        "selection_primary": "maximum_pooled_mean_cosine",
+        "statistics": [
+          "mean_cosine",
+          "exact_p05_cosine"
+        ]
+      },
+      "source_reliability": "rho=sqrt(clamp(((retained_view_count-1)/3),0,1)*teacher_view_directional_resultant)",
+      "upstream_common_transport_contract_sha256": "04843d109308d67efd34fd2001b8f6879b7a08f42f167a971e06ae57a9cf5470"
+    },
+    "residual_shrinkage_contract_sha256": "fdaff654f782cd065d970e0ab913d078950d93ba89820f2cdfae7e1a6ef11957",
+    "row_batch_size": 256,
+    "scene_or_query_specific_parameters": false,
+    "schema": "radio_gs.lerf_transport_v2_target_blind_top4_execution.v1",
+    "schema_version": 1,
+    "score_dtype": "torch.float32",
+    "score_input": "l2_normalize(transport_v2_descriptor)",
+    "selected_candidate_index": 11,
+    "selected_gamma_policy": "k0",
+    "selected_maximum_angle_radians": 0.45,
+    "source_gate_sha256": "13e5bcad24aa196fa63ba17a45a807e529bce3a19e749449c3430acc5c6b7587",
+    "target_data_or_metric_access": false,
+    "teacher_adapter_contract": {
+      "directional_resultant": "norm(sum(unit(masked_fp16_top4)))/retained_view_count",
+      "maximum_views": 4,
+      "query_independent": true,
+      "required_construction": "top4_exact_marginal_source_observation_then_official_siglip2_summary_v1",
+      "required_retention_order": "marginal_mass_descending_then_frame_id_ascending",
+      "required_top4_schema": "radio_gs.lerf_source_teacher_view_siglip_authority.v1",
+      "schema": "radio_gs.lerf_teacher_agreement_from_canonical_top4.v1",
+      "schema_version": 1,
+      "source_view_count": 120,
+      "target_data_or_metric_access": false,
+      "teacher_mean": "fp16(normalize(sum(masked_fp16_top4),dim=descriptor))",
+      "teacher_valid": "retained_view_count_gt_zero"
+    },
+    "teacher_adapter_contract_sha256": "beda2b68087ef10911de2b63693721b33d54eeb2fa53e55fef5166280d65a06d",
+    "teacher_payload": "validated_canonical_top4_deterministic_adapter"
+  },
+  "method_contract_sha256": "e310367cec304d11e1d4ec91218f1a89c82a6257b97c27cb6ebe078c5b5a381a",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_transport_v2_negative.pt",
+    "positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_transport_v2_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_transport_v2_result.json"
+  },
+  "scene_id": "figurines",
+  "schema": "radio_gs.lerf_transport_v2_target_blind_top4_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_source_gated_transport_v2_top4_target_blind",
+  "target_blind_materialization_authorized": true
+}

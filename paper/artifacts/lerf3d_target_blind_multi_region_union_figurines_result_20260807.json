@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "artifact_type": "frozen_development_sentinel_result",
+  "date": "2026-08-07",
+  "scene": "figurines",
+  "candidate": "target_blind_greedy_novelty_union_v1",
+  "status": "completed_and_rejected",
+  "promotion": false,
+  "protocol": {
+    "execution_addendum": {
+      "path": "paper/artifacts/lerf3d_target_blind_multi_region_union_figurines_execution_addendum_20260807.json",
+      "sha256": "8e88ae5d96c01c5e97f01de31f74a3c31425112923a004c23f947444eea99019"
+    },
+    "score_postprocess": "none",
+    "selection_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "alpha_binarization": "png_uint8_gt10",
+    "official_frames_only": true,
+    "result_dependent_selection": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "wall_time_seconds": 20.474,
+    "evaluator_elapsed_seconds": 13.915639162063599,
+    "maximum_observed_temperature_c": 46,
+    "thermal_stop_triggered": false
+  },
+  "candidate_result": {
+    "miou": 0.35686323046684265,
+    "acc025": 0.6428571428571429,
+    "acc050": 0.30357142857142855,
+    "boundary_f": 0.5383343696594238,
+    "trimap_iou": 0.4244433045387268,
+    "samples": 56
+  },
+  "bound_O0_control": {
+    "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o0_diagnostic_retry1/figurines/lerf_direct_3d_selection_results.json",
+    "result_sha256": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677",
+    "miou": 0.4753887355327606,
+    "acc025": 0.8035714285714286,
+    "acc050": 0.5357142857142857,
+    "boundary_f": 0.682007372379303,
+    "trimap_iou": 0.38083696365356445
+  },
+  "delta_candidate_minus_O0": {
+    "miou": -0.11852550506591797,
+    "acc025": -0.1607142857142857,
+    "acc050": -0.23214285714285715,
+    "boundary_f": -0.14367300271987915,
+    "trimap_iou": 0.043606340885162354,
+    "samples_improved": 16,
+    "samples_regressed": 37,
+    "samples_equal": 3
+  },
+  "category_delta_examples": {
+    "improved": {
+      "toy elephant": 0.2843567728996277,
+      "pikachu": 0.20353162288665771,
+      "green toy chair": 0.12608492374420166
+    },
+    "regressed": {
+      "pink ice cream": -0.5348535776138306,
+      "porcelain hand": -0.3432537317276001,
+      "toy cat statue": -0.3396068215370178,
+      "pirate hat": -0.3078678846359253,
+      "waldo": -0.27269330620765686
+    }
+  },
+  "diagnosis": {
+    "basis_capacity": "The D3 oracle shows that a multi-region semantic-core union can represent the target, but this source-only selector does not identify the correct union.",
+    "failure": "Probability times uncovered fraction cannot distinguish a second region belonging to the same queried object from a disconnected high-response semantic distractor.",
+    "slot_saturation": "Every query filled all eight slots; several late selections contributed only one previously uncovered primitive, so a merely positive novelty utility is not a sufficient stopping rule.",
+    "conclusion": "Retain the multi-region interface and reject the v1 selection rule. Additional object-identity or cross-view co-membership evidence is required before multi-region union is deployable."
+  },
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/evaluation/union_v1/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "4b6d9362d7288564cdbb4024f82b2df740fd0b814d17851a634d0a6fc6b4782b"
+    },
+    "log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/evaluation/union_v1.execution.log",
+      "sha256": "adeecc9ddbd1416295b13a4de7a076818c4a91ce39607681a645ecbf6d2011ab"
+    },
+    "candidate_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/figurines/external_query_scores.pt",
+      "sha256": "85cab0001d98512a2909114520d523033c31c57a7def2473c9003c66a17b0de7"
+    }
+  }
+}

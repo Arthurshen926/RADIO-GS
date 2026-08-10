@@ -1,0 +1,92 @@
+{
+  "schema": "radio_gs.spin_registered_resolution_local_cache.execution_addendum.v1",
+  "schema_version": 1,
+  "status": "registered_before_remaining_four_scene_materialization_and_before_registered_rescoring",
+  "claim_scope": "transparent_method-development correction; not a prospectively blind benchmark claim",
+  "supersedes": {
+    "artifact": "/root/RADIO-GS/paper/artifacts/spin_unified_canonical_sam_reference_selector_full9_registration_20260810.json",
+    "field": "remaining_execution.render_resolution",
+    "old_value": "native",
+    "new_value": "registered"
+  },
+  "causal_reason": {
+    "benchmark_contract": "The frozen evaluator consumes masks in the registered benchmark image domain, so a query posterior should be rasterized in that same domain rather than the raw LLFF camera-file domain.",
+    "camera_contract": "The renderer analytically rescales the frozen camera intrinsics to the permitted reference-mask height and width; no target-mask property enters camera calibration.",
+    "representation_contract": "The scalar query posterior remains independent of the canonical RADIO descriptor patch lattice.",
+    "systems_observation": "Raw 3024x4032 float32 score arrays caused multi-minute folio_wait_bit_common stalls while writing to the remote mechanical storage, with both GPUs idle.",
+    "metric_independence": "The resolution is determined solely by the frozen reference-mask shape shared by registered benchmark views, not selected from target metrics. All target metrics were already available during project development, so the experiment remains explicitly non-blind."
+  },
+  "completed_before_addendum": {
+    "lego": {
+      "native_equals_registered": true,
+      "target_foreground_iou": 0.9268476227604813
+    },
+    "truck": {
+      "native_equals_registered": true,
+      "target_foreground_iou": 0.9674729125791468
+    },
+    "room": {
+      "native_equals_registered": false,
+      "native_target_foreground_iou": 0.9727365752576113,
+      "action": "rescore at registered resolution"
+    },
+    "fern": {
+      "native_equals_registered": false,
+      "native_target_foreground_iou": 0.9651616723089061,
+      "native_reference_iou": 0.9641707704835395,
+      "action": "rescore at registered resolution"
+    },
+    "fortress": {
+      "native_equals_registered": false,
+      "native_target_foreground_iou": 0.9831881910884682,
+      "native_reference_iou": 0.9872405484239153,
+      "action": "rescore at registered resolution"
+    }
+  },
+  "remaining_primary_execution": {
+    "materialize_full_carrier_sam": [
+      "horns",
+      "leaves",
+      "orchids",
+      "pinecone"
+    ],
+    "registered_rescore": [
+      "room",
+      "fern",
+      "fortress",
+      "horns",
+      "leaves",
+      "orchids",
+      "pinecone"
+    ],
+    "candidate_threshold_grid": "0.99_to_0.03_step_negative_0.01",
+    "reference_selector": "maximum permitted-reference IoU, canonical on exact tie",
+    "target_masks_used_for_selection": false
+  },
+  "implementation": {
+    "scorer": "/root/RADIO-GS/radio_gs/scripts/eval_spin_sam_query_interface_component.py",
+    "scorer_sha256": "422cf89290e222b08b2fecd639298d4c9faa1121b6fa519b1ce4ae6966a810d2",
+    "render_resolution_argument": "registered",
+    "materializer": "/root/RADIO-GS/reproductions/ludvig/run_ludvig_sam.py",
+    "materializer_sha256": "81714a8942c4359261909e3a90a1f45eefc80d69cf91b15a2e12756478745e25"
+  },
+  "storage_policy": {
+    "local_cache_root": "/root/radio_gs_local_cache/optimization_20260810",
+    "local_ssd_free_gib_before_execution": 188,
+    "minimum_free_gib_guard": 100,
+    "local_contents": "regenerable SAM fields, rendered query scores, receipts, evaluations, and logs",
+    "remote_storage": "reuse immutable datasets and existing carrier assets in place; do not duplicate them",
+    "deletion_of_existing_remote_outputs": false
+  },
+  "gpu_policy": {
+    "physical_gpus": [
+      0,
+      1
+    ],
+    "power_limit_w": 300,
+    "poll_seconds": 120,
+    "soft_pause_enabled": false,
+    "hard_stop_temperature_c": 87,
+    "hard_stop_consecutive_polls": 2
+  }
+}

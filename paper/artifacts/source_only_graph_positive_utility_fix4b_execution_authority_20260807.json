@@ -1,0 +1,59 @@
+{
+  "schema": "radio_gs.source_only_graph_positive_utility_fix4b_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_positive_utility_fix4b",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/finalize_source_only_graph_positive_utility_fix4b.py",
+    "sha256": "1c9f1ccaab35be434c53cc1049ad6dfc38581774dedca3759cf7d032f5170f67"
+  },
+  "positive_utility_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_anchored_positive_utility_residual.py",
+    "sha256": "b67385ec245e7ccae25d65f42b7df29debd90ff6fbcbb7d53eddb0a188b8b27c"
+  },
+  "positive_utility_interface_contract_sha256": "04c864500f4607fe6fdeff9b4bd245de96f2e61e11ae9ca656873824d783fd28",
+  "fix4_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_expected_utility_fix4_execution_authority_20260807.json",
+    "sha256": "940fb3fba6ceb8b16c5e7b51610d23e8fb82ad0a096e5ed944db90891390938c"
+  },
+  "fix4_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_expected_utility_audit_result_fix4_20260807.json",
+    "sha256": "80afc4c8faff33ce1f6044a20b0cb07698f0fc0f837e97f88c4b640719963054"
+  },
+  "fix3_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_fix3_execution_authority_20260807.json",
+    "sha256": "8985dee7eb19da1102744e14ea6aec1990c5044849a870ac52f5e7382f6dcf9b"
+  },
+  "fix3_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_calibration_result_fix3_20260807.json",
+    "sha256": "5064aae6ab15272f427d31e50391e134b154262d171164c4bacae1c7fcab7568"
+  },
+  "fix2_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_execution_authority_20260807.json",
+    "sha256": "07d607e34033ace02ad104663d26813c5f7fb7950b9385df4001336be2e14152"
+  },
+  "fix2_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_result_fix2_20260807.json",
+    "sha256": "16b9980d79ec9938a9fa4b70ed90ee67cbec2a26ba08d25a9fd13d8e65e0d7d1"
+  },
+  "promotion_gate": {
+    "minimum_every_validation_scene_Wilson95_lower": 0.95,
+    "validation_pooled_marginal_weighted_signed_utility": "strictly_greater_than_zero",
+    "validation_true_pseudo_anchor_reach": "strictly_greater_than_fix3",
+    "failure_action": "reject_fix4b_do_not_open_target"
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "source_query_evidence_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

@@ -1,0 +1,21 @@
+{
+  "artifact_type": "source_global_response_listwise_v21a_execution_authority_addendum",
+  "base_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_global_response_listwise_v21a_anchor_triplet_full30_rescue_preregistration_20260807.json",
+    "sha256": "53410c6199ca4f77ae2c56c872cee658f07f5b033cef5eb02e5785c627aea7ac"
+  },
+  "benchmark_execution_authorized": false,
+  "benchmark_opened": false,
+  "clarification": "The phrase same frozen V2.1 execution authority and assets in the base preregistration means same frozen asset projection. V2.1A training must use a separately versioned no-clobber execution authority whose implementation fields bind the V2.1A trainer, objective adapter, loss, preregistration, and this addendum. The baseline V2.1 authority is an immutable SHA-bound parent asset authority and is not itself training authorization for V2.1A.",
+  "fixed_before_execution_authority_builder_implementation": true,
+  "required_v21a_authority": {
+    "baseline_parent_authority_role": "source_asset_parent_only",
+    "direct_asset_projection_must_equal_parent": true,
+    "independent_schema": "radio_gs.surface_region_v21a_rescue_execution_authority.v1",
+    "no_clobber": true,
+    "training_implementation_must_not_equal_baseline_implementation": true
+  },
+  "schema": "radio_gs.source_global_response_listwise_v21a_execution_authority_addendum.v1",
+  "schema_version": 1,
+  "status": "preregistered_clarification_before_builder_implementation"
+}

@@ -1,0 +1,149 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_confirmation_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_reserved_audit_source_only_confirmation",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_confirmation.py",
+    "sha256": "6d1b9194d583de7ed84a6beb230cab84b65982d8070f636cd101c7b88a631bf2"
+  },
+  "base_materializer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+    "sha256": "873214d57360d1278177f56c9d1c77ffc7384d6d97116da3aa81e9d879f8c6fe"
+  },
+  "frame_evaluator_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/lerf_source_text_response_ranking.py",
+    "sha256": "25792bb0b41e3117e95137f3007caa36dd8e5bc470892f3c9c35688bfc6ca5b7"
+  },
+  "scene_id": "ramen",
+  "source_heldout_frame_ids": [2, 45, 87, 130],
+  "forbidden_target_frame_ids": [6, 24, 60, 65, 81, 119, 128],
+  "inputs": {
+    "source_gate_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_audit90_confirmation_preregistration_20260809.json",
+      "sha256": "49da2a8b7f0b7616e569a57fdfa65bc144c5f246c9b5669119088eb76e69202a"
+    },
+    "source_view_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_official_crop_summary_source_heldout_preregistration_20260809.json",
+      "sha256": "3ae93f9e1217edfa1ea17163e7c9c79921f1a15b2808e226a3d81994140771f6"
+    },
+    "scene_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_official_crop_summary_train.yaml",
+      "sha256": "cbbc536db5c283dc40195d9c0e4ac704b1d6672ff24254ca05cd8082e9f1e16b"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "query_bank_artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+      "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721"
+    },
+    "query_bank_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+      "sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4"
+    },
+    "source_reseal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/ramen_official_crop_summary_content_reseal.json",
+      "sha256": "0b23676b4ee5a6ba61e33e15d5de8bc69b2c95268e413e8294ded830c0a1ecba",
+      "required_schema": "radio_gs.lerf_official_crop_summary_reseal.v1",
+      "required_mode": "content_addressed_immutable_reseal"
+    }
+  },
+  "methods": [
+    {
+      "method_id": "legacy_teacher_mean_v2_descriptor_first_v2",
+      "role": "control",
+      "descriptor_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt",
+        "sha256": "44032362a47867a3ad0ff7873c5c43a651be24c60cba7be0be5e6db74dbc3a07"
+      },
+      "descriptor_payload_kind": "sparse_teacher_mean_v2",
+      "descriptor_payload_contract": {
+        "schema": "radio_gs.lerf_source_teacher_mean_siglip.v2",
+        "schema_version": 2,
+        "descriptor_dimension": 1536
+      },
+      "descriptor_provenance_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+        "sha256": "939c82d5e4a3cab51982dcac5ef318604f9072ee85a3b0e0a0e86d2c9fdd4ed5"
+      },
+      "descriptor_geometry_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+        "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+      }
+    },
+    {
+      "method_id": "genuine_official_crop_summary_mpr_descriptor_first_v2",
+      "role": "candidate",
+      "descriptor_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/ramen_official_crop_summary_mpr.pt",
+        "sha256": "1e6c04f896addec052a6b218c8bd32edf91568349133392ca20329b02a50f945"
+      },
+      "descriptor_payload_kind": "dense_official_crop_summary_mpr_v1",
+      "descriptor_payload_contract": {
+        "metadata_schema_version": 1,
+        "feature_space": "semantic_descriptor",
+        "construction": "semantic_descriptor_raster_gaussian_top1_contribution_mean",
+        "descriptor_dimension": 1536
+      },
+      "descriptor_provenance_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_official_crop_summary_source_heldout_gpu0_execution_authority_20260809.json",
+        "sha256": "890b8c9d018a5843a41213a79a036fd72675cca85f9e602eb2067f53b9839c6d"
+      },
+      "descriptor_geometry_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_official_crop_summary_source_heldout_gpu0_execution_authority_20260809.json",
+        "sha256": "890b8c9d018a5843a41213a79a036fd72675cca85f9e602eb2067f53b9839c6d"
+      }
+    }
+  ],
+  "equivalence_smoke": false,
+  "query_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+    "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721",
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+    "manifest_sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4",
+    "query_split": "audit",
+    "queries": 90,
+    "embedding_tensor_sha256": "8cc8e9ca3903488ef7558ce19d9e4bec9cb6378570c8c12d72ac96219c8dd415"
+  },
+  "geometry": {
+    "num_gaussians": 382687,
+    "xyz_sha256": "9eff48af13e315e933a43cbb9598aa74b087f5b8b7698f4274672b8bc329310e"
+  },
+  "execution": {
+    "required_cuda_visible_devices": "0",
+    "program_device": "cuda:0",
+    "physical_gpu": 0,
+    "thermal_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    },
+    "thermal_poll_seconds": 300,
+    "maximum_temperature_c": 88,
+    "soft_pause_temperature_c": 0,
+    "power_limit_watts": 300
+  },
+  "outputs": {
+    "control_summary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/ramen/ramen_control_audit90_source_response_summary.json",
+    "candidate_summary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/ramen/ramen_candidate_audit90_source_response_summary.json",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/ramen/ramen_audit90_confirmation_materialization_result.json"
+  },
+  "confirmation": {
+    "candidate_locked_after_dev_gate": true,
+    "dev_gate_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/descriptor_first_v2_source_text_response_ranking_gate_result.json",
+      "sha256": "11be2adc41d21da1d2ce37ec09af1f8665bc928cec46b497080f7a59bd3f6af8"
+    },
+    "reserved_bank_opened_once": true,
+    "dev_audit_disjointness_proof": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+      "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf"
+    },
+    "end_to_end_interface_ab_not_capacity_matched": true
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

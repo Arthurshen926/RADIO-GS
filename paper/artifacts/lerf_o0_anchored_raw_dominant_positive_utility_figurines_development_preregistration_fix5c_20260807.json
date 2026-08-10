@@ -1,0 +1,140 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_raw_dominant_positive_utility_development_preregistration_fix5c.v1",
+  "schema_version": 1,
+  "status": "preregistered_single_development_confirmation_before_FIX5C_target_quality_execution",
+  "scene": "figurines",
+  "single_candidate_no_sweep": true,
+  "claim_scope": "development_confirmation_not_independent_promotion_evidence",
+  "primary_endpoint": "exact_macro_mIoU_under_frozen_vala_paper_3d",
+  "candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.pt",
+      "sha256": "f2327395440ff4104f4ef108a7f5b0d59d1650d1cb03cd43410f4d4d83709f2e"
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.report.json",
+      "sha256": "c448e2759332edb63aac305ab2f0dc5f8cb0513f871fd2265d2f21ba99aae675"
+    },
+    "target_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_figurines_execution_authority_fix5c_20260807.json",
+      "sha256": "f70232b21e89608b4ffc3b5de88a2e290abaf8994088be850ebeb524a71f4555"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_raw_dominant_positive_utility_cache_fix5.py",
+      "sha256": "5ec272bf019456a08926312ce95f0586487ddf3be8df6b40b7096f95bdaead16"
+    },
+    "raw_unary_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_raw_unary_region_specificity.py",
+      "sha256": "3a0e85a2e88eb575bc8489d53b88aff45b7588bf280df770005f232b0b72ec24",
+      "contract_sha256": "a48b0cfaddb5680c2745e898dcc57a8337d9ebf0cfcbfa8bf44a83f4c02033f1"
+    },
+    "source_promotion_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_raw_dominant_fix5_audit_result_20260807.json",
+      "sha256": "7056dc5a97c3f11db4acb70100da63e71762ba86deb8994ca3f293b8ae90d281"
+    },
+    "structural_preflight": {
+      "query_count": 21,
+      "query_gate_true_count": 2,
+      "selected_region_count": 3,
+      "selected_queries": {
+        "green apple": [141346, 89783],
+        "pumpkin": [78700]
+      },
+      "residual_mask_primitive_total": 553,
+      "actual_strict_increase_total": 552,
+      "quantized_no_change_total": 1,
+      "decrease_total": 0,
+      "changed_outside_selected_region_union_count": 0,
+      "outside_selected_union_bitwise_O0": true,
+      "failed_gate_bitwise_O0": true,
+      "invalid_primitive_bitwise_O0": true,
+      "selected_updates_non_decreasing": true,
+      "actual_changes_strictly_increase_exact_O0": true
+    }
+  },
+  "comparators": {
+    "frozen_exact_O0": {
+      "miou": 0.4753887355327606,
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_official_fp32_score_cache_exact_eval_results_20260805.json",
+        "sha256": "c556bece1cda1a6b8f2f99d5eb7be518d95210be6ccc05429ac344b9c3b7c9ea"
+      }
+    },
+    "FIX4C_development_result": {
+      "miou": 0.47654908895492554,
+      "result": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_positive_utility_monotone_figurines_one_shot_result_20260807.json",
+        "sha256": "3de3eebb2d057f8bc3da160a5cee8b9e6522ca3bda8dd2cb71f6de5032c16538"
+      }
+    }
+  },
+  "development_prediction": {
+    "predicted_mIoU": 0.4775213120239122,
+    "derivation": "O0 plus the already_observed_FIX4C green_apple and pumpkin category contributions, because FIX5C keeps those score updates bitwise and reverts all FIX4C negative-change queries to exact O0",
+    "used_for_parameter_selection": false,
+    "evaluation_rule": "record_the_single_actual_frozen_metric_without_followup_sweep"
+  },
+  "frozen_protocol": {
+    "preset": "vala_paper_3d",
+    "score_postprocess": "none",
+    "selection_threshold": 0.6,
+    "selection_comparison": "strictly_greater_than",
+    "projection": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "frames": "official_only"
+  },
+  "metric_inputs": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "renderer_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "text_embedding_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_directory": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+  },
+  "output": {
+    "directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/evaluation/figurines_raw_dominant_fix5c_development",
+    "must_not_exist_before_execution": true,
+    "thermal_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/raw_dominant_fix5c_development_gpu0_thermal.csv",
+    "owner_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/raw_dominant_fix5c_development_gpu0_owners.csv"
+  },
+  "gpu_policy": {
+    "physical_gpu": 0,
+    "CUDA_VISIBLE_DEVICES": "0",
+    "evaluator_gpu_argument": 0,
+    "power_limit_watts": 300.0,
+    "launch_max_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "consecutive_hard_polls_before_stop": 6,
+    "poll_seconds": 30,
+    "soft_pause_disabled": true
+  },
+  "access_audit": {
+    "FIX5C_candidate_metric_executed_before_preregistration": false,
+    "FIX5C_target_images_masks_or_quality_opened_during_candidate_build": false,
+    "historical_exact_O0_metric_known": true,
+    "historical_FIX4C_target_metric_known_and_used_for_failure_diagnosis": true,
+    "target_query_names_and_raw_score_caches_used_for_query_alignment_and_unary": true,
+    "independent_confirmation_still_required": ["teatime", "ramen"]
+  }
+}

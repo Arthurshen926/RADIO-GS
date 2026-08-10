@@ -1,0 +1,55 @@
+{
+  "schema": "radio_gs.lerf_scale_equivariant_transport_development_preregistration.v1",
+  "schema_version": 1,
+  "status": "preregistered_before_transport_candidate_materialization_or_metric",
+  "development_only": true,
+  "prior_target_metric_context_known": true,
+  "known_prior_methods": ["O0", "O1", "O2", "reliability_conditioned_v1"],
+  "new_transport_metric_opened_before_this_preregistration": false,
+  "method": {
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_scale_equivariant_geodesic_transport.py",
+      "sha256": "06da87702e4095d7c57cb27985d756d71907c678044c9816b3207855dbf192b3"
+    },
+    "transport_contract_sha256": "04843d109308d67efd34fd2001b8f6879b7a08f42f167a971e06ae57a9cf5470",
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_scale_equivariant_transport_candidate_scores.py",
+      "sha256": "2dd284040460f94f2e5448d9be7bef2d61b70e6ec63f32b8ead65e9f7ddd3e83"
+    },
+    "materializer_method_contract_sha256": "8b4fe41381851b92e8324738682a1cc9e032f95ae0ecc59c1bd54f8174fcfbf8",
+    "same_orthogonal_rotation_applied_to_all_three_scales": true,
+    "per_scale_norm_and_three_by_three_gram_preserved": true
+  },
+  "ceiling_lineage": {
+    "candidate_grid_radians": [0.15, 0.3, 0.45, 0.6, 0.75],
+    "single_sentinel_ceiling_radians": 0.75,
+    "source": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_only_global_ceiling_lowmem_lineage_compatibility_result_20260807.json",
+      "sha256": "b747b23ad3ecd5c3cfcba93d24b1379072f99fe7d30a25f709e8ba98db462c2c"
+    },
+    "old_selector_directly_authorizes_transport": false,
+    "formal_transport_ceiling_authorized": false,
+    "role": "development_grid_and_single_tentative_value_only",
+    "required_formal_followup": "new_source_only_leave_one_view_out_transport_validation"
+  },
+  "target_sentinel": {
+    "scene_id": "teatime",
+    "candidate_count": 1,
+    "parameter_sweep": false,
+    "scene_or_query_specific_parameter": false,
+    "frozen_protocol": {
+      "config_sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775",
+      "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+      "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+      "protocol_preset": "vala_repo_3d",
+      "ours_query_contrast": "none",
+      "ours_scale_fusion": "peak_select"
+    },
+    "interpretation": "development signal only; cannot validate or select a formal ceiling"
+  },
+  "access_audit": {
+    "target_images_opened_for_new_transport": false,
+    "target_labels_or_masks_opened_for_new_transport": false,
+    "new_transport_target_metric_opened": false
+  }
+}

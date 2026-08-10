@@ -1,0 +1,111 @@
+{
+  "artifact": "full_scalar_scene0005_official_teacher_gpu0_exact_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T04:54:33+08:00",
+  "status": "sealed_after_exact_input_preflight_and_output_absence_audit_and_before_teacher_execution",
+  "scene_id": "scene0005_00",
+  "cohort_split": "source_train",
+  "inputs": {
+    "source_rgb_scene_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/source_rgb_scene_authority_v1.json",
+      "file_sha256": "3cb83d9c7206e4d101e1aec6417dcbe71c97b2c418b431fc64e9e47910051c17",
+      "content_authority_sha256": "2dd7f31ddd82f1e62a4da55487d6468b2fcc295c848ccabf959669a72fc2e802",
+      "frames": 240
+    },
+    "source_rgb_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/field240/scene0005_00/color",
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+      "sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e",
+      "regions": 4096
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/factorized_primitive_state_v2.pt",
+      "sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/exact_marginal_responsibility_authority.json",
+      "sha256": "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+    "sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5"
+  },
+  "preflight": {
+    "status": "ready",
+    "regions": 4096,
+    "source_views": 120,
+    "active_region_view_pairs": 16177,
+    "maximum_views_per_region": 4,
+    "maximum_sparse_descriptor_bytes": 99391488,
+    "outputs_written": false
+  },
+  "frozen_contract": {
+    "same_as_scene0002_and_scene0003_successful_contract": true,
+    "crop_resolution": 384,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "maximum_views_per_region": 4,
+    "maximum_regions": 4096,
+    "descriptor": "official C-RADIO first summary slot through official SigLIP2-g head, float32 unit L2",
+    "crop_order_and_tensor_math_unchanged": true,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+  "command": [
+    "env", "GPU=0",
+    "GPU_TELEMETRY_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/logs/official_teacher_gpu0_batch1_telemetry.csv",
+    "GPU_OWNER_AUDIT_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/logs/official_teacher_gpu0_batch1_owner_audit.log",
+    "GPU_OWNER_PID_NAMESPACE_MODE=exclusive-singleton-after-clear-v1",
+    "GPU_MAX_TEMP_C=88", "GPU_START_MAX_TEMP_C=82", "GPU_POLL_SECONDS=30",
+    "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES=1", "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS=6",
+    "GPU_MAX_POWER_LIMIT_W=300.5", "CUDA_VISIBLE_DEVICES=0",
+    "bash", "radio_gs/scripts/run_with_gpu_thermal_guard.sh", "--",
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+    "--source-rgb-scene-authority", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/source_rgb_scene_authority_v1.json",
+    "--expected-source-rgb-scene-authority-sha256", "3cb83d9c7206e4d101e1aec6417dcbe71c97b2c418b431fc64e9e47910051c17",
+    "--source-rgb-root", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/field240/scene0005_00/color",
+    "--accepted-region-authority", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+    "--expected-accepted-region-authority-sha256", "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e",
+    "--factorized-primitive-state", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/factorized_primitive_state_v2.pt",
+    "--expected-factorized-primitive-state-sha256", "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8",
+    "--exact-marginal-responsibility-authority", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/exact_marginal_responsibility_authority.json",
+    "--expected-exact-marginal-responsibility-authority-sha256", "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050",
+    "--official-radio-checkpoint", "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "--expected-official-radio-checkpoint-sha256", "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "--radio-repo", "/root/RADIO", "--device", "cuda:0",
+    "--crop-resolution", "384", "--crop-batch-size", "1", "--region-batch-size", "4096",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/official_multiview_siglip2_teacher_sparse_v2.pt"
+  ],
+  "execution": {
+    "physical_gpu": 0,
+    "pci_bus_id": "00000000:02:00.0",
+    "initial_temperature_c": 48,
+    "power_limit_w": 300.0,
+    "output_preexisting": false,
+    "atomic_no_clobber": true
+  },
+  "thermal_guard": {
+    "pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

@@ -1,0 +1,51 @@
+{
+  "artifact": "source_only_region_comembership_v2_4train_materialization_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:18:00+08:00",
+  "status": "sealed_before_4train_v2_authority_materialization",
+  "producer": {
+    "path": "radio_gs/scripts/materialize_source_region_comembership_v2.py",
+    "sha256": "7a2c257b59f0cb09163ae99e34eab3b5220ce107e841f3a0b444f2d0a6686ab8"
+  },
+  "preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v2_preregistration_20260807.json",
+    "sha256": "f0b47c26548573d39d982b748b0281d5080967390dc49e77ba457e0b02aa64b9"
+  },
+  "efficiency_addendum": {
+    "path": "paper/artifacts/source_only_region_comembership_v2_formal_selection_efficiency_addendum_20260807.json",
+    "sha256": "50b9a44aa6f76a9843e28d8df85a5fb8eb75445a3cf1c4bfd44687dbbc755bda"
+  },
+  "source_train": {
+    "scene0001_00": {
+      "v1_sha256": "dc7a1bb44353d81c631ff1abcca6337cafa1977dd286d3c5c4973ed430869b99",
+      "capability_descriptor_sha256": "a273d86b6531af72b3d48db873313ced6e3da64b6c3a3410dfeeb7eaf9044025"
+    },
+    "scene0002_00": {
+      "v1_sha256": "3c73a794c1583aef409dcf572c9b4fa92b1c4ffa2f00ddf45e4f1c2c88dde49c",
+      "capability_descriptor_sha256": "b5d2add2ef9e31690a489d42d4d4677810b960fb6a30d1ff0857dbb4ac6b512c"
+    },
+    "scene0003_00": {
+      "v1_sha256": "be7051a84d6823ce31c1af75c3897cb872b61e52db9a5bb8aa4d9652b8b36edb",
+      "capability_descriptor_sha256": "bac276a980a1891ecc45954a81534f4879c727b22be12178dd07b38fc205727a"
+    },
+    "scene0005_00": {
+      "v1_sha256": "fa362490a2b015e0df72654e3d0825b1967d16bd48adad7b82761ed8dd67af29",
+      "capability_descriptor_sha256": "0a782344e7313ef27f590e885739d6ac68a614fb7d6d08972116f9572fca5a06"
+    }
+  },
+  "output_pattern": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/{scene_id}/source_region_comembership_authority_v2.pt",
+  "execution": {
+    "python_wrapper": "bash radio_gs/scripts/run_repo_python.sh",
+    "device": "cpu",
+    "overwrite": false,
+    "parallel_scenes": false
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

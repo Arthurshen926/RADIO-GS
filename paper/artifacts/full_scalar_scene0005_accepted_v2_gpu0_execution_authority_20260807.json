@@ -1,0 +1,40 @@
+{
+  "artifact": "full_scalar_scene0005_accepted_v2_gpu0_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T02:55:02+08:00",
+  "status": "sealed_after_graph_success_and_before_accepted_v2_execution",
+  "scene_id": "scene0005_00",
+  "inputs": {
+    "factorized_field_sha256": "41d4cd16a35b1a65135879481e1eef0fe64eb849f878cea6d4daeb7fc713c260",
+    "factorized_primitive_state_sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8",
+    "factorized_radio_cache_sha256": "5ea488054b696aec1e04b8a52d072521abca8f46033878e63092a466bd16065f",
+    "support_graph_sha256": "b9bacfb4b58ee540c51e8b74df82d2e676707ce0b75da89b2977429e4ea03fd8",
+    "exact_marginal_responsibility_authority_sha256": "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050",
+    "accepted_v2_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+    "sha256": "75f234e8376c2ac0f27a5f847baaf1de7b2fc4d6dfafc2d4c532208a71f081cf"
+  },
+  "sampling_contract": {
+    "per_scene_region_cap": 4096,
+    "scales": [0.25, 0.45, 0.7],
+    "selection_batch_size": 8192,
+    "readout_batch_size": 128,
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+  "thermal_guard": {
+    "physical_gpu": 0,
+    "pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed"
+  },
+  "benchmark_metric_opened": false,
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

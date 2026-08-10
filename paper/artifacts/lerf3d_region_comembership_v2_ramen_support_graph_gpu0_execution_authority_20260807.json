@@ -1,0 +1,48 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_ramen_support_graph_gpu0_execution_authority",
+  "schema_version": 1,
+  "status": "sealed_after_formal_capability_success_and_before_support_graph_execution",
+  "scene_id": "ramen",
+  "input": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/canonical_capability_bank.pt",
+    "sha256": "9c3da78abaeeacad84b94c9b198a25940b784ac634ed8cb1c3d4cd425e562ae9",
+    "formal_loader_validation_passed": true,
+    "active_primitive_rows": 328453,
+    "capability_training_authority_source": "formal_exact_marginal_capability_training_authority_v1"
+  },
+  "frozen_contract": {
+    "same_as_source_4train_2validation": true,
+    "neighbors": 16,
+    "spatial_scale": 2.0,
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "surface_relation": "none",
+    "surface_topology_min_affinity": 0.0,
+    "covisibility_weight": 0.0,
+    "responsibility_cache": null,
+    "capability_affinity_mode": "signed_hash",
+    "affinity_dim": 256,
+    "hash_batch_size": 8192,
+    "affinity_chunk_size": 65536,
+    "topology_mode": "symmetric_union",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/canonical_support_graph_accepted_v2.pt",
+  "thermal_guard": {
+    "physical_gpu": 0,
+    "poll_seconds": 30,
+    "start_maximum_temperature_c": 87,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

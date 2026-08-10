@@ -1,0 +1,42 @@
+{
+  "artifact": "lerf_o0_anchored_raw_dominant_fix5_development_failures_erratum",
+  "schema_version": 1,
+  "failures": [
+    {
+      "attempt": "FIX5_initial",
+      "attempted_execution_authority_sha256": "3a97e70c7eee2d70e01ba3ee543ef9a03ab3ae0dff6264bcb235bc7c6846a899",
+      "failure": "builder attempted to read a nonexistent xyz attribute from the validated O0 cache dataclass before target evidence construction",
+      "output_cache_written": false,
+      "output_report_written": false,
+      "authority_path_was_mistakenly_updated_during_development": true,
+      "invalidated": true
+    },
+    {
+      "attempt": "FIX5B",
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_figurines_execution_authority_fix5b_20260807.json",
+        "sha256": "bb5fcb4537434c81a2bd2a2be56c7ece6b2379306962478d6d45c56314d3b645"
+      },
+      "failure": "pure raw-unary interface correctly rejected target regions whose cores contained no O0-valid primitive; failure occurred before target evidence construction",
+      "output_cache_written": false,
+      "output_report_written": false,
+      "invalidated": true
+    }
+  ],
+  "resolution": {
+    "policy": "all-invalid region cores receive zero raw statistics and dominant=false, so they cannot be anchors or candidates and remain exact O0",
+    "final_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_figurines_execution_authority_fix5c_20260807.json",
+      "sha256": "f70232b21e89608b4ffc3b5de88a2e290abaf8994088be850ebeb524a71f4555"
+    },
+    "final_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.pt",
+      "sha256": "f2327395440ff4104f4ef108a7f5b0d59d1650d1cb03cd43410f4d4d83709f2e"
+    },
+    "final_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.report.json",
+      "sha256": "c448e2759332edb63aac305ab2f0dc5f8cb0513f871fd2265d2f21ba99aae675"
+    }
+  },
+  "target_quality_execution_performed": false
+}

@@ -1,0 +1,54 @@
+{
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "source_promotion_validated_before_target_files": true,
+    "target_metrics_computed": false
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_surface_region_rank256_champion_target.py",
+    "sha256": "ad9eac49b51f8061d8902c78c3d88f922f22c2dab0f80aef14bffa815af6ef2c"
+  },
+  "materialization_authorized": true,
+  "metric_execution_authorized": false,
+  "physical_space_id": "lerf:teatime:geometry-checkpoint-sha256:53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_v21_absolute_relevance_greedy_novelty_union_preregistration_20260807.json",
+    "sha256": "32aeaedd72f667593b1ca64c582f2c3bdde19792b33065fd5047d7e36c299c60"
+  },
+  "query_execution_authorized": false,
+  "scene_id": "teatime",
+  "schema": "radio_gs.surface_region_rank256_champion_target_execution_authority.v1",
+  "schema_version": 1,
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.json",
+    "sha256": "0ff977f7bf150b591c04806f0dfc093b91dc5d38df44df91c1eaf2f444549b1a"
+  },
+  "source_variant": "v21b",
+  "status": "authorized_after_rank256_source_pass_for_query_free_target",
+  "target_descriptor_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/target_descriptor.pt",
+  "target_inputs": {
+    "champion_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt",
+      "sha256": "6b6d434d62ac07f96a05080a27718b42ba748cd31b5db3fdfa43a043c6e40285"
+    },
+    "champion_normalization": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.normalization.pt",
+      "sha256": "1a4ff28c15781d9606b7b876dc2f8983ddaf55577d4bd654887d8eb8c98f2384"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/factorized_primitive_state_v2.pt",
+      "sha256": "3e12685568f5be72b84a617e4cffe09f5b1abf6fd0727d56e23936bfa5c9a3c6"
+    },
+    "target_accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/accepted_v2_sparse_v2.pt",
+      "sha256": "318748c25124c7ec77602649b1660b8eb055fd482f69f6ec73dea25222d4dd7c"
+    },
+    "target_adaptive_typed_context": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/adaptive_typed_context_v2.pt",
+      "sha256": "cd45890d8f57804f13712c1d28e1a717c9272f4392f3d6d8bea7add976acd3c5"
+    }
+  }
+}

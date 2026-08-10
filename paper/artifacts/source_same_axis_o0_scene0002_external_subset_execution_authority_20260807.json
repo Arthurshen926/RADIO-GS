@@ -1,0 +1,87 @@
+{
+  "schema": "radio_gs.source_same_axis_o0_external_subset_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_before_scene0002_label_blind_query_subset",
+  "scene_id": "scene0002_00",
+  "split": "source_external_validation_selector_only",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_source_same_axis_o0_external_query_subset.py",
+    "sha256": "2ce99c32576e5c66ddab39ea377621a51eb1ca2940d915e14404279ab4def740"
+  },
+  "frozen_selection_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_source_same_axis_o0_query_subset.py",
+    "sha256": "5d08a993d752829d0fb2347218bff1880fce30ed802e6d5bdd662d5cba5fadf6"
+  },
+  "frozen_method": {
+    "query_bank_order": [
+      "imagenet1k_primary_fit",
+      "counterfactual_attributes_fit",
+      "high_precision_part_of_fit",
+      "lexical_sibling_relation_fit",
+      "synonym_relation_fit"
+    ],
+    "region_query_selection": "lower_index_argmax_raw_canonical_negative_probability",
+    "raw_probability": "sigmoid(10*(region_query_cosine-hardest_canonical_negative_cosine))",
+    "absolute_threshold": 0.5,
+    "absolute_comparator": "strictly_greater_than",
+    "selected_positive_order": "ascending_global_bank_row",
+    "combined_stream_order": "selected_positive_then_four_canonical_negative",
+    "query_strings_forwarded_to_streamer": false,
+    "source_instance_labels_used_for_query_generation": false,
+    "per_scene_hyperparameters": false
+  },
+  "accepted_v2": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/accepted_v2_sparse_v2.pt",
+    "sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89"
+  },
+  "text_banks": [
+    {
+      "component_id": "imagenet1k_primary_fit",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+      "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4"
+    },
+    {
+      "component_id": "counterfactual_attributes_fit",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/counterfactual_attributes_fit_embeddings.pt",
+      "sha256": "b5978e4f4915d729d4a39148484827c044604ff7000e50da5287fb87a4681b81"
+    },
+    {
+      "component_id": "high_precision_part_of_fit",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/high_precision_part_of_fit_embeddings.pt",
+      "sha256": "58ae47ae887222c9fb363b265c6500aed56245b624dfb4867799e2bff666f003"
+    },
+    {
+      "component_id": "lexical_sibling_relation_fit",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/lexical_sibling_relation_fit_embeddings.pt",
+      "sha256": "58d9940ac85d5eca7f8846eb6487a389cc5b771fff471d6ec99c54ed7819d54e"
+    },
+    {
+      "component_id": "synonym_relation_fit",
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/synonym_relation_fit_embeddings.pt",
+      "sha256": "d541bafbf6ccf5631d66b45aca81bcb9c5ce7a5c621ddfecd14551b97eed024e"
+    }
+  ],
+  "canonical_negative_bank": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "source_membership_authority_deferred": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0002_00/source_region_comembership_authority_v2.pt",
+    "sha256": "76a5f72c89cc4ea6458355c99eabe194cd47cce8ce857071bcd1be61b319906f"
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0002_00/combined_text_subset.pt",
+  "source_access": {
+    "source_accepted_v2_region_descriptors_opened": true,
+    "target_blind_text_banks_opened": true,
+    "canonical_negative_bank_opened": true,
+    "source_instance_membership_payload_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

@@ -1,0 +1,138 @@
+{
+  "access_audit": {
+    "base_descriptor_opened": true,
+    "exact_o0_pair_opened": true,
+    "exact_query_axis_opened": true,
+    "source_only_global_selector_opened": true,
+    "target_ground_truth_opened": false,
+    "target_images_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false,
+    "teacher_agreement_v2_opened": true
+  },
+  "execution": {
+    "cuda_visible_devices": "0",
+    "maximum_temperature_c": 88,
+    "physical_gpu": 0,
+    "program_device": "cuda:0",
+    "row_batch_size": 256,
+    "thermal_safety_owner": "external_300s_hard88_guard"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_reliability_conditioned_candidate_scores.py",
+    "sha256": "9ad784fd03973b65681dd6a9076e40deaa353e7d6dbff991b7ccaca75bd9f4a7"
+  },
+  "inputs": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen.pt",
+      "sha256": "823cfa6fe0d6a1d80987aa5774ea9de3bd45743019e863a57536f1bbc12851b4"
+    },
+    "global_ceiling_selector": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_only_global_ceiling_lowmem_lineage_compatibility_result_20260807.json",
+      "sha256": "b747b23ad3ecd5c3cfcba93d24b1379072f99fe7d30a25f709e8ba98db462c2c"
+    },
+    "negative_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen_text_negatives_single.pt",
+      "sha256": "4de02e79ae864c3c373831de1ee5b9c6a2e553c9d6f04c1338c532d17015046b"
+    },
+    "o0_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_negative.pt",
+      "sha256": "de70dd2bbb33983541f10d6896e1d377f7a767690590831db005e2d116035520"
+    },
+    "o0_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_positive.pt",
+      "sha256": "e33d3c8ea28bb58345f17c228aeaf6b7215d9f1baade27194f94a6f15f385abe"
+    },
+    "positive_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen_text_queries_single.pt",
+      "sha256": "aae64415968c696bebeacc4deb927dda26cb310ea01ebb868e7e9289e4673abe"
+    },
+    "teacher_agreement_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt",
+      "sha256": "44032362a47867a3ad0ff7873c5c43a651be24c60cba7be0be5e6db74dbc3a07"
+    }
+  },
+  "method_contract": {
+    "accepted_selector_authorities": [
+      {
+        "contract_sha256": "d46d118aa90d55921409bafba07c1db63f6ceaa2cea7b6fc346be710a7c4cf07",
+        "implementation": {
+          "path": "/root/RADIO-GS/radio_gs/scripts/select_lerf_source_only_global_reliability_ceiling.py",
+          "sha256": "8cbe1b962cbf3a2aaa35048d6bc5abde6aa64f1d61a7c8d7a46bcdab8eb1a5e1"
+        },
+        "schema": "radio_gs.source_only_global_reliability_ceiling_candidate_authority.v1"
+      },
+      {
+        "contract_sha256": "1380e3b808cf334035ceac0d5ce3b49bbab4206a33b84ebd9a9b011e76a9c29d",
+        "implementation": {
+          "path": "/root/RADIO-GS/radio_gs/scripts/execute_lerf_source_only_global_ceiling_lowmem_lineage_compatibility.py",
+          "sha256": "a7550454f3a9114a5299cb9d62a806ee8f12ce54e507e573969e86f002a4d19c"
+        },
+        "post_result_lineage_compatibility_only": true,
+        "schema": "radio_gs.source_only_global_reliability_ceiling_lowmem_lineage_compatibility.v1"
+      }
+    ],
+    "accepted_teacher_payload_method_contract_sha256": [
+      "538da1d1e40051d034360009d9e775b4604b1ec9e93e9da2dc3110f6f3baa79c",
+      "78e4d78293a863ba962440cccfdc5b62dd0b4c9b14e941722df63b708c44cba0"
+    ],
+    "accepted_teacher_payload_producers": [
+      {
+        "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2.py",
+        "sha256": "9bc3d38ebdeb5c28f11804c698a455a144453acfa9e3d51b324f0c9350baf074"
+      },
+      {
+        "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+        "sha256": "7c7a2096bb927ae5b6aef99349e4dd66a62782df9f87c290e47ec13f098484a7"
+      }
+    ],
+    "candidate_grid_radians": [
+      0.15,
+      0.3,
+      0.45,
+      0.6,
+      0.75
+    ],
+    "conservative_0p15_route": "exact_existing_O1_geodesic_project_for_nonfallback_scales",
+    "descriptor_hash": "typed_float32_row_order_stream_sha256",
+    "descriptor_materialization": "row_batch_only",
+    "fallback": {
+      "antipodal_route": "bitwise_O0_score_cache",
+      "same_direction": "bitwise_O0_score_cache",
+      "single_retained_view": "exact_conservative_O1_no_expansion",
+      "teacher_invalid": "bitwise_O0_score_cache"
+    },
+    "full_n_by_3_by_d_candidate_descriptor_allocated": false,
+    "fusion": "existing_reliability_conditioned_geodesic_budget_v1",
+    "global_ceiling_application": "canonical_field_attenuation=(selected-0.15)/(0.75-0.15)",
+    "immutable_backbone": "accepted_v2_o0_descriptor_per_scale",
+    "metric_execution_authorized": false,
+    "one_global_ceiling": true,
+    "query_independent_fusion": true,
+    "reliability_geodesic_budget_contract_sha256": "6d7a391df895d3918281b07fd8eac6ae56924b0e508db0c955eefaa4da1d2769",
+    "row_batch_size": 256,
+    "scale_axis": "three_O0_scales_preserved_independently",
+    "scene_or_query_specific_parameters": false,
+    "schema": "radio_gs.lerf_reliability_conditioned_candidate_execution.v1",
+    "schema_version": 1,
+    "score_dtype": "torch.float32",
+    "score_semantics": "raw_independent_normalized_cosine",
+    "selector_method_contract_sha256": "d46d118aa90d55921409bafba07c1db63f6ceaa2cea7b6fc346be710a7c4cf07",
+    "selector_schema": "radio_gs.source_only_global_reliability_ceiling_candidate_authority.v1",
+    "target_data_or_metric_access": false,
+    "teacher_payload_schema": "radio_gs.lerf_source_teacher_mean_siglip.v2"
+  },
+  "method_contract_sha256": "51d28c205e8dc3f1221122c8ed9564ebb0268124efa07521e4d13557a0f2e953",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/ramen_reliability_candidate_negative.pt",
+    "positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/ramen_reliability_candidate_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/ramen_reliability_candidate_result.json"
+  },
+  "query_free_materialization_authorized": true,
+  "scene_id": "ramen",
+  "schema": "radio_gs.lerf_reliability_conditioned_candidate_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_global_reliability_candidate"
+}

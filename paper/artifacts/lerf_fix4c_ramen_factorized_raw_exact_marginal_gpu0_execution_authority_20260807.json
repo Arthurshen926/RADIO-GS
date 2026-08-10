@@ -1,0 +1,81 @@
+{
+  "schema": "radio_gs.lerf_fix4c_factorized_raw_exact_marginal_execution_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_after_teacher_bundle_success_before_gpu0_exact_marginal_execution",
+  "scene_id": "ramen",
+  "implementation": {
+    "builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+      "sha256": "0901151a29e5dbd45bd1cd98314916f4815259721ab157a1b5a13ed35670743d"
+    },
+    "sparse_marginal_authority": {
+      "path": "/root/RADIO-GS/radio_gs/rendering/sparse_marginal_authority.py",
+      "sha256": "9905c2378d762495a10e480c1da23140ce92fd8b8f5cb64f32d36decdf4c4bb6"
+    },
+    "contribution_compositor": {
+      "path": "/root/RADIO-GS/radio_gs/rendering/contribution_compositor.py",
+      "sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0"
+    }
+  },
+  "inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_fix4c_exact120_teacher.yaml",
+      "sha256": "716b4f4fb0ce947cfc14464e26c518b8525edb2e1255ce9f8d597bc7232b5b57"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1/frame_manifest.json",
+      "sha256": "70c54e2efa63ca17fd7813fbfb06a67338fc23f9fcf510d34d0d6e94276fa301",
+      "output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292"
+    }
+  },
+  "frozen_contract": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "aggregation_mode": "raster_marginal_responsibility",
+    "registration_weight_mode": "exact_front_to_back_marginal_responsibility",
+    "feature_space": "radio",
+    "capability_map_source": "project_raw",
+    "maximum_views": 120,
+    "excluded_frame_ids": [2, 6, 24, 45, 60, 65, 81, 87, 119, 128, 130],
+    "normalize_each_view": false,
+    "robust_mpr": false,
+    "raster_view_fusion": "contribution_mean",
+    "query_independent": true,
+    "per_scene_hyperparameters": false,
+    "no_clobber": true
+  },
+  "execution_only": {
+    "render_batch_size": 1,
+    "view_chunk_size": 8,
+    "point_chunk_size": 4096,
+    "raster_channel_chunk_size": 256,
+    "maximum_estimated_cpu_memory_fraction": 0.85
+  },
+  "outputs": {
+    "factorized_raw_radio": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/factorized_raw_radio_exact_marginal.pt",
+    "exact_marginal_responsibility_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json"
+  },
+  "thermal_guard": {
+    "physical_gpu": 0,
+    "launch_maximum_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "hard_temperature_consecutive_polls": 6,
+    "poll_seconds": 30,
+    "soft_pause_temperature_c": 0,
+    "power_limit_maximum_w": 300.5,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_holdout_images_opened": false,
+    "canonical_dev_holdout_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_queries_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "metric_execution_authorized": false
+}

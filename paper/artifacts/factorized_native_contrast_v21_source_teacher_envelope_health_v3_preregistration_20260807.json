@@ -1,0 +1,79 @@
+{
+  "schema": "radio_gs.factorized_native_contrast_v21_source_teacher_envelope_health_preregistration.v1",
+  "schema_version": 1,
+  "status": "preregistered_before_opening_contrast_v21_target_descriptor_or_target_health_statistics",
+  "decision_rationale": {
+    "accepted_v2_and_official_teacher_share_descriptor_dimension_but_not_dispersion_gauge": true,
+    "accepted_relative_dispersion_is_diagnostic_not_a_valid_hard_promotion_comparator": true,
+    "perfect_source_teacher_must_be_eligible_under_its_own_query_free_health_envelope": true,
+    "catastrophic_common_component_collapse_must_still_be_rejected": true
+  },
+  "source_only_inputs": {
+    "contrast_v21_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_contrast_v21_execution_authority_20260807.json",
+      "sha256": "f24008d976067a5b0ee42eb2b9cf3e3276c11199c82b68754f5c000a5166c171"
+    },
+    "contrast_v21_source_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt.json",
+      "sha256": "bc264f50c33a20199201875eba638ee36c654b888d270d32d3259beeebd5debc"
+    },
+    "source_validation_scenes": [
+      "scene0004_00",
+      "scene0008_00"
+    ],
+    "target_or_benchmark_opened": false,
+    "query_or_text_opened": false
+  },
+  "deterministic_statistics_contract": {
+    "descriptor": "unit_l2_official_multiview_teacher_prototype_per_canonical_region",
+    "regions_per_scene": 4096,
+    "pair_axis": "fixed_modular_ordered_distinct_region_pairs_cap65536",
+    "gram_axis": "fixed_evenly_spaced_region_rows_cap512",
+    "centered_spread": "full_mean_squared_radius_about_full_centroid",
+    "effective_rank": "trace_squared_over_frobenius_squared"
+  },
+  "source_teacher_statistics": {
+    "scene0004_00": {
+      "centroid_squared_norm": 0.9306945536984119,
+      "pair_cosine_mean": 0.9299202843863827,
+      "pair_cosine_p90": 0.9782162890074985,
+      "centered_mean_squared_radius": 0.0693054558824002,
+      "centered_gram_effective_rank": 8.128847675495077
+    },
+    "scene0008_00": {
+      "centroid_squared_norm": 0.9341804997637767,
+      "pair_cosine_mean": 0.9344291100900307,
+      "pair_cosine_p90": 0.9733973438278788,
+      "centered_mean_squared_radius": 0.06581950467121542,
+      "centered_gram_effective_rank": 11.241233933265148
+    }
+  },
+  "frozen_global_gate": {
+    "maximum_centroid_squared_norm": 0.9441804997637767,
+    "maximum_pair_cosine_mean": 0.9444291100900307,
+    "maximum_pair_cosine_p90": 0.9882162890074985,
+    "minimum_centered_mean_squared_radius": 0.04936462850341157,
+    "minimum_centered_gram_effective_rank": 6.096635756621308,
+    "derivation": {
+      "centroid_pair_and_p90": "worst_source_validation_teacher_plus_fixed_0p01_absolute_slack",
+      "spread": "0p75_times_minimum_source_validation_teacher_spread",
+      "effective_rank": "0p75_times_minimum_source_validation_teacher_effective_rank"
+    },
+    "all_five_checks_required": true,
+    "scene_specific_parameters": false,
+    "target_statistics_used_to_define_thresholds": false
+  },
+  "required_alignment_invariants": {
+    "float32_cpu_finite_unit_l2": true,
+    "canonical_region_identity_equal_to_accepted_v2": true,
+    "exact_active_fallback_masks_consistent": true,
+    "fallback_descriptor_bitwise_equal_to_accepted_v2": true
+  },
+  "execution_policy": {
+    "accepted_relative_health_v2_must_be_recorded_as_diagnostic": true,
+    "source_teacher_envelope_health_v3_is_the_query_authority_hard_gate": true,
+    "query_manifest_or_text_must_not_open_before_v3_pass": true,
+    "benchmark_metric_must_not_run_before_v3_pass": true,
+    "single_target_candidate_no_threshold_sweep": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_ramen_target_feature_inference_execution_addendum",
+  "schema_version": 1,
+  "status": "sealed_after_target_execution_authority_success_before_feature_and_inference",
+  "scene_id": "ramen",
+  "target_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/region_comembership_v2_target_execution_authority.json",
+    "sha256": "b49237ec30c24e9fe558d873175140838a10e2e71acab3a23554db4bdd1cee06"
+  },
+  "source_promoted_checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_checkpoint.pt",
+    "sha256": "8b108930fd4c187f1eee1ec36076c0b0964a331ba1c4b4ba3bdf343bb634d04e"
+  },
+  "frozen_contract": {
+    "domain": "target",
+    "source_selected_epoch": 100,
+    "source_selected_method": "dual_path_widest",
+    "source_selected_maximum_regions": 8,
+    "source_selected_threshold": 0.9,
+    "query_or_label_usage": false,
+    "target_metric_authorized": false,
+    "per_scene_hyperparameters": false
+  },
+  "outputs": {
+    "feature": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/region_comembership_features_v2.pt",
+    "inference": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/region_comembership_inference_v2.pt"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

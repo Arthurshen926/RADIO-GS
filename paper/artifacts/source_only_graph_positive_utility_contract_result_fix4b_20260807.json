@@ -1,0 +1,352 @@
+{
+  "benchmark_execution_authorized": false,
+  "content_authority_sha256": "cf7d00002d15bc35be1ea0da53f1b41b913ea49c302c0a719d1bec20e8288303",
+  "deployment_config": {
+    "anchor": {
+      "O0_final_score_minimum": 0.6,
+      "quorum": 2,
+      "valid_core_supermajority": 0.75
+    },
+    "edge_confidence_surrogate": {
+      "epsilon_logit": 0.4134312141523724,
+      "lower_score_formula": "sigmoid(logit(clamp(raw_edge_score,1e-7,1-1e-7))-epsilon_logit)",
+      "raw_probability_minimum": 0.9,
+      "semantics": "source_frozen_conservative_edge_confidence_surrogate_not_a_posterior_probability_or_conformal_or_FWER_guarantee"
+    },
+    "feature_OOD": {
+      "input": "used_direct_edge_pair_features_exact_21_channel_order",
+      "raw_score_limit": 70.06049346923828,
+      "unit_score_maximum": 0.5
+    },
+    "interface": {
+      "contract_sha256": "04c864500f4607fe6fdeff9b4bd245de96f2e61e11ae9ca656873824d783fd28",
+      "schema": "radio_gs.lerf_o0_anchored_positive_utility_residual.v1"
+    },
+    "positive_utility_config": {
+      "epsilon_logit": 0.4134312141523724,
+      "maximum_feature_ood_score": 0.5,
+      "minimum_anchor_agreement": 0.75,
+      "minimum_reliability": 0.8761253952980042,
+      "minimum_stability": 1.0,
+      "novel_mass_reference": 256.0
+    },
+    "query_gate": {
+      "conjunction": true,
+      "failed_gate": "bitwise_O0_only",
+      "inputs": [
+        "pair_feature_reliability",
+        "pair_feature_OOD_score",
+        "O0_anchor_agreement",
+        "deterministic_replay_stability"
+      ]
+    },
+    "residual": {
+      "aggregation": "pointwise_max",
+      "canonical_capability": "exact_frozen_O0_primitive_logits",
+      "per_primitive_logit_maximum": 0.4134312141523724,
+      "sign": "nonnegative_only"
+    },
+    "selection": {
+      "comparison": "strictly_greater_than",
+      "gain_formula": "positive_part(2*lower_score-1)*unique_valid_marginal_primitives/256",
+      "maximum_selected_regions": 3,
+      "minimum_positive_gain": 0.0,
+      "tie_break": "lower_canonical_region_index"
+    }
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_positive_utility_fix4b_execution_authority_20260807.json",
+    "sha256": "b2adf33f14684df8a01569567f7f9d263b8504fb572fcf4cc646ed63c7ef2c4d"
+  },
+  "method_claim": "risk_bounded_positive_utility_soft_residual_using_a_source_frozen_conservative_edge_confidence_surrogate;not_posterior_not_conformal_not_FWER_and_not_hard_graph_completion",
+  "parent_chain": {
+    "fix2_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_execution_authority_20260807.json",
+      "sha256": "07d607e34033ace02ad104663d26813c5f7fb7950b9385df4001336be2e14152"
+    },
+    "fix2_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_result_fix2_20260807.json",
+      "sha256": "16b9980d79ec9938a9fa4b70ed90ee67cbec2a26ba08d25a9fd13d8e65e0d7d1"
+    },
+    "fix3_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_fix3_execution_authority_20260807.json",
+      "sha256": "8985dee7eb19da1102744e14ea6aec1990c5044849a870ac52f5e7382f6dcf9b"
+    },
+    "fix3_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_calibration_result_fix3_20260807.json",
+      "sha256": "5064aae6ab15272f427d31e50391e134b154262d171164c4bacae1c7fcab7568"
+    },
+    "fix4_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_expected_utility_fix4_execution_authority_20260807.json",
+      "sha256": "940fb3fba6ceb8b16c5e7b51610d23e8fb82ad0a096e5ed944db90891390938c"
+    },
+    "fix4_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_expected_utility_audit_result_fix4_20260807.json",
+      "sha256": "80afc4c8faff33ce1f6044a20b0cb07698f0fc0f837e97f88c4b640719963054"
+    }
+  },
+  "promotion_gate": {
+    "decision": "promote_source_only",
+    "fix3_validation_true_pseudo_anchor_reach": 0.1932144910868315,
+    "outcomes": {
+      "both_validation_scene_Wilson95_lower_at_least_0.95": true,
+      "passed": true,
+      "validation_pooled_marginal_weighted_signed_utility_positive": true,
+      "validation_true_pseudo_anchor_reach_strictly_exceeds_fix3": true
+    },
+    "thresholds": {
+      "failure_action": "reject_fix4b_do_not_open_target",
+      "minimum_every_validation_scene_Wilson95_lower": 0.95,
+      "validation_pooled_marginal_weighted_signed_utility": "strictly_greater_than_zero",
+      "validation_true_pseudo_anchor_reach": "strictly_greater_than_fix3"
+    }
+  },
+  "schema": "radio_gs.source_only_graph_positive_utility_contract_fix4b.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "benchmark_queries_opened": false,
+    "source_instance_labels_opened": true,
+    "source_query_evidence_opened": false,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "target_pair_features_opened": false
+  },
+  "source_exact_consumer_audit": {
+    "by_split": {
+      "source_train": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 16369.09375,
+          "marginal_weighted_signed_utility": 0.6970167667433381,
+          "negative_count": 1829,
+          "positive_count": 21447,
+          "selected_count": 23276,
+          "signed_gain_sum": 11409.532800143585
+        },
+        "scene_count": 4,
+        "selected_count_by_step": [
+          10103,
+          7539,
+          5634
+        ],
+        "selected_edge_count": 23276,
+        "selected_negative_edge_count": 1829,
+        "selected_positive_edge_count": 21447,
+        "selected_precision": 0.921421206392851,
+        "selected_precision_Wilson95_lower": 0.9184709346268325,
+        "true_pseudo_anchor_reach": 1.0
+      },
+      "source_validation": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 8369.03125,
+          "marginal_weighted_signed_utility": 0.773695644100024,
+          "negative_count": 363,
+          "positive_count": 11956,
+          "selected_count": 12319,
+          "signed_gain_sum": 6475.083023461979
+        },
+        "scene_count": 2,
+        "selected_count_by_step": [
+          5376,
+          4003,
+          2940
+        ],
+        "selected_edge_count": 12319,
+        "selected_negative_edge_count": 363,
+        "selected_positive_edge_count": 11956,
+        "selected_precision": 0.970533322509944,
+        "selected_precision_Wilson95_lower": 0.9679219822314433,
+        "true_pseudo_anchor_reach": 1.0
+      }
+    },
+    "per_scene": {
+      "scene0001_00": {
+        "edge_gate": {
+          "all_edge_count": 53143,
+          "all_three_edge_gate_count": 4674,
+          "raw_and_reliability_gate_count": 4674,
+          "raw_probability_gate_count": 4797
+        },
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 3919.8828125,
+          "marginal_weighted_signed_utility": 0.5459040081375441,
+          "negative_count": 981,
+          "positive_count": 4786,
+          "selected_count": 5767,
+          "signed_gain_sum": 2139.8797387732193
+        },
+        "selected_count_by_step": [
+          2577,
+          1865,
+          1325
+        ],
+        "selected_edge_count": 5767,
+        "selected_negative_edge_count": 981,
+        "selected_positive_edge_count": 4786,
+        "selected_precision": 0.8298942257672967,
+        "selected_precision_Wilson95_lower": 0.8216018658556983,
+        "split": "source_train",
+        "true_pseudo_anchor_eligible_count": 2109,
+        "true_pseudo_anchor_reach": 1.0,
+        "true_pseudo_anchor_with_any_selected_count": 2109
+      },
+      "scene0002_00": {
+        "edge_gate": {
+          "all_edge_count": 53996,
+          "all_three_edge_gate_count": 2293,
+          "raw_and_reliability_gate_count": 2293,
+          "raw_probability_gate_count": 2964
+        },
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 2268.45703125,
+          "marginal_weighted_signed_utility": 0.769648939121236,
+          "negative_count": 108,
+          "positive_count": 3252,
+          "selected_count": 3360,
+          "signed_gain_sum": 1745.915547543671
+        },
+        "selected_count_by_step": [
+          1667,
+          1033,
+          660
+        ],
+        "selected_edge_count": 3360,
+        "selected_negative_edge_count": 108,
+        "selected_positive_edge_count": 3252,
+        "selected_precision": 0.9678571428571429,
+        "selected_precision_Wilson95_lower": 0.962463573984691,
+        "split": "source_train",
+        "true_pseudo_anchor_eligible_count": 1616,
+        "true_pseudo_anchor_reach": 1.0,
+        "true_pseudo_anchor_with_any_selected_count": 1616
+      },
+      "scene0003_00": {
+        "edge_gate": {
+          "all_edge_count": 51405,
+          "all_three_edge_gate_count": 8372,
+          "raw_and_reliability_gate_count": 8372,
+          "raw_probability_gate_count": 8690
+        },
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 5879.67578125,
+          "marginal_weighted_signed_utility": 0.729017539259658,
+          "negative_count": 486,
+          "positive_count": 7719,
+          "selected_count": 8205,
+          "signed_gain_sum": 4286.386769691482
+        },
+        "selected_count_by_step": [
+          3282,
+          2718,
+          2205
+        ],
+        "selected_edge_count": 8205,
+        "selected_negative_edge_count": 486,
+        "selected_positive_edge_count": 7719,
+        "selected_precision": 0.9407678244972578,
+        "selected_precision_Wilson95_lower": 0.9363342253272906,
+        "split": "source_train",
+        "true_pseudo_anchor_eligible_count": 3143,
+        "true_pseudo_anchor_reach": 1.0,
+        "true_pseudo_anchor_with_any_selected_count": 3143
+      },
+      "scene0004_00": {
+        "edge_gate": {
+          "all_edge_count": 57937,
+          "all_three_edge_gate_count": 7101,
+          "raw_and_reliability_gate_count": 7101,
+          "raw_probability_gate_count": 7322
+        },
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 4808.03125,
+          "marginal_weighted_signed_utility": 0.7821624174985173,
+          "negative_count": 195,
+          "positive_count": 6849,
+          "selected_count": 7044,
+          "signed_gain_sum": 3760.6613459084183
+        },
+        "selected_count_by_step": [
+          2891,
+          2332,
+          1821
+        ],
+        "selected_edge_count": 7044,
+        "selected_negative_edge_count": 195,
+        "selected_positive_edge_count": 6849,
+        "selected_precision": 0.9723168654173765,
+        "selected_precision_Wilson95_lower": 0.9689156721237133,
+        "split": "source_validation",
+        "true_pseudo_anchor_eligible_count": 2797,
+        "true_pseudo_anchor_reach": 1.0,
+        "true_pseudo_anchor_with_any_selected_count": 2797
+      },
+      "scene0005_00": {
+        "edge_gate": {
+          "all_edge_count": 53117,
+          "all_three_edge_gate_count": 5951,
+          "raw_and_reliability_gate_count": 5951,
+          "raw_probability_gate_count": 6093
+        },
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 4301.078125,
+          "marginal_weighted_signed_utility": 0.7526835481825181,
+          "negative_count": 254,
+          "positive_count": 5690,
+          "selected_count": 5944,
+          "signed_gain_sum": 3237.350744135212
+        },
+        "selected_count_by_step": [
+          2577,
+          1923,
+          1444
+        ],
+        "selected_edge_count": 5944,
+        "selected_negative_edge_count": 254,
+        "selected_positive_edge_count": 5690,
+        "selected_precision": 0.9572678331090175,
+        "selected_precision_Wilson95_lower": 0.9527407481210635,
+        "split": "source_train",
+        "true_pseudo_anchor_eligible_count": 2497,
+        "true_pseudo_anchor_reach": 1.0,
+        "true_pseudo_anchor_with_any_selected_count": 2497
+      },
+      "scene0008_00": {
+        "edge_gate": {
+          "all_edge_count": 52313,
+          "all_three_edge_gate_count": 3558,
+          "raw_and_reliability_gate_count": 3558,
+          "raw_probability_gate_count": 3743
+        },
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 3561.0,
+          "marginal_weighted_signed_utility": 0.7622638802453133,
+          "negative_count": 168,
+          "positive_count": 5107,
+          "selected_count": 5275,
+          "signed_gain_sum": 2714.4216775535606
+        },
+        "selected_count_by_step": [
+          2485,
+          1671,
+          1119
+        ],
+        "selected_edge_count": 5275,
+        "selected_negative_edge_count": 168,
+        "selected_positive_edge_count": 5107,
+        "selected_precision": 0.9681516587677725,
+        "selected_precision_Wilson95_lower": 0.963928673862605,
+        "split": "source_validation",
+        "true_pseudo_anchor_eligible_count": 2420,
+        "true_pseudo_anchor_reach": 1.0,
+        "true_pseudo_anchor_with_any_selected_count": 2420
+      }
+    }
+  },
+  "status": "source_only_positive_utility_fix4b_promoted_target_unopened",
+  "target_execution_performed": false
+}

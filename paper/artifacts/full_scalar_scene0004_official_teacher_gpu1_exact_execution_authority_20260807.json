@@ -1,0 +1,87 @@
+{
+  "artifact": "full_scalar_scene0004_official_teacher_gpu1_exact_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:31:00+08:00",
+  "status": "sealed_after_exact_input_preflight_and_output_absence_audit_before_teacher_execution",
+  "scene_id": "scene0004_00",
+  "cohort_split": "source_validation",
+  "inputs": {
+    "source_rgb_scene_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/source_rgb_scene_authority_v1.json",
+      "file_sha256": "ce3de80bdab10739b1a4a0206fb3c7e4f30ecaad3a64ccd8502ba26b15a36868",
+      "content_authority_sha256": "131961ad91b530f24557a6980e3b4ddcd6290342e9c9264d864622210a814c29",
+      "frames": 240
+    },
+    "source_rgb_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/field240/scene0004_00/color",
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/accepted_v2_sparse_v2.pt",
+      "sha256": "bbfc1ecc1ef9b5f6d638b2b954245199f671e8cb66a53c98d30d23f9df0c39de",
+      "regions": 4096
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/factorized_primitive_state_v2.pt",
+      "sha256": "edfaab08aa4ebe1c7850931578ffb941a1e7439c428c4521019fb7c1ce8aa7d4"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/exact_marginal_responsibility_authority.json",
+      "sha256": "fd963d34b3837b0943053e8646036a98daf948544f38ea0a8fefd8c520e3cb05"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+    "sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5"
+  },
+  "preflight": {
+    "status": "ready",
+    "regions": 4096,
+    "source_views": 120,
+    "active_region_view_pairs": 16036,
+    "maximum_views_per_region": 4,
+    "maximum_sparse_descriptor_bytes": 98525184,
+    "outputs_written": false
+  },
+  "frozen_contract": {
+    "same_as_scene0002_scene0003_scene0005_contract": true,
+    "crop_resolution": 384,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "maximum_views_per_region": 4,
+    "maximum_regions": 4096,
+    "descriptor": "official C-RADIO first summary slot through official SigLIP2-g head, float32 unit L2",
+    "crop_order_and_tensor_math_unchanged": true,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+  "runtime_driver_binding": {
+    "host_driver_version": "535.288.01",
+    "preloaded_libcuda": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "system_driver_files_modified": false
+  },
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_device": "cuda:0",
+    "owner_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "start_maximum_temperature_c": 82,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "maximum_power_limit_w": 300.5,
+    "dynamic_pause": false
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

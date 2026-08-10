@@ -1,0 +1,179 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_descriptor_first_audit90_confirmation_result.v1",
+  "schema_version": 1,
+  "status": "passed_reserved_source_only_confirmation",
+  "decision": {
+    "every_scene_all_metrics_nonregressing": true,
+    "strict_pooled_response_ranking_and_top_decile_improvement": true,
+    "candidate_confirmed_on_reserved_audit90": true,
+    "recommend_candidate_for_separately_authorized_target_evaluation": true,
+    "target_metric_execution_authorized_by_this_artifact": false
+  },
+  "candidate": "genuine_official_crop_summary_mpr_descriptor_first_v2",
+  "control": "legacy_teacher_mean_v2_descriptor_first_v2",
+  "confirmation_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_audit90_confirmation_preregistration_20260809.json",
+    "sha256": "49da2a8b7f0b7616e569a57fdfa65bc144c5f246c9b5669119088eb76e69202a"
+  },
+  "independent_preexecution_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_audit90_confirmation_independent_preexecution_audit_20260809.json",
+    "sha256": "404ac1a78c3c2403427149b45fcc9013aa505b3ceaa64a6f5ea973683c606ff3"
+  },
+  "dev_audit_disjointness_proof": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+    "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf",
+    "query_intersection_count": 0,
+    "synset_intersection_count": 0
+  },
+  "gate_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/descriptor_first_audit90_confirmation_gate_result.json",
+    "sha256": "16a1d2f8b9be46c93c7fd7fe00ae6d399ba51fe1d90e33eff86b8b890bb465c8"
+  },
+  "query_bank": {
+    "split": "audit",
+    "queries": 90,
+    "artifact_sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721",
+    "embedding_tensor_sha256": "8cc8e9ca3903488ef7558ce19d9e4bec9cb6378570c8c12d72ac96219c8dd415"
+  },
+  "scene_results": [
+    {
+      "scene_id": "ramen",
+      "frames": 4,
+      "valid_pixels": 11408,
+      "control_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/ramen/ramen_control_audit90_source_response_summary.json",
+        "sha256": "c88ed817cc376e44af8b996d1184a38386fc87cfe5b216fbe96c051e287c8722"
+      },
+      "candidate_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/ramen/ramen_candidate_audit90_source_response_summary.json",
+        "sha256": "a78cf28dae625d704ae6f301f2bc17e6684cedda0a63be6af2b5505cce52d732"
+      },
+      "control": {
+        "response_mae": 0.01323018940244306,
+        "response_profile_cosine_mean": 0.8248007875562843,
+        "ranking_spearman_mean": 0.4333025103487978,
+        "ranking_spearman_p05": 0.05147807975916672,
+        "top_decile_overlap_mean": 0.2524087024087024,
+        "top_decile_overlap_p05": 0.010314685314685313
+      },
+      "candidate": {
+        "response_mae": 0.005866430374670825,
+        "response_profile_cosine_mean": 0.9582206045040994,
+        "ranking_spearman_mean": 0.7374258183902856,
+        "ranking_spearman_p05": 0.5105827855855746,
+        "top_decile_overlap_mean": 0.453982128982129,
+        "top_decile_overlap_p05": 0.17465034965034965
+      },
+      "deltas": {
+        "response_mae_improvement": 0.007363759027772234,
+        "response_profile_cosine_delta": 0.13341981694781513,
+        "ranking_spearman_mean_delta": 0.30412330804148785,
+        "ranking_spearman_p05_delta": 0.45910470582640783,
+        "top_decile_overlap_mean_delta": 0.20157342657342658,
+        "top_decile_overlap_p05_delta": 0.16433566433566432
+      },
+      "all_metrics_nonregressing": true,
+      "thermal_receipt": {
+        "physical_gpu": 0,
+        "launch_temperature_c": 39,
+        "release_temperature_c": 50,
+        "maximum_sampled_temperature_c": 50,
+        "thermal_abort": false,
+        "postexit_compute_owner_clear": true
+      }
+    },
+    {
+      "scene_id": "teatime",
+      "frames": 51,
+      "valid_pixels": 145452,
+      "control_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/teatime/teatime_control_audit90_source_response_summary.json",
+        "sha256": "16d52f89d114ab54de8ec44c4a00c62adc2f3b3a7c6784be77416ac24c4b5e34"
+      },
+      "candidate_summary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/teatime/teatime_candidate_audit90_source_response_summary.json",
+        "sha256": "dcbdf71ad7d6fe4d1f3f9174fad58cc4eb8b81d0ea70433e66125d2056ed29ea"
+      },
+      "control": {
+        "response_mae": 0.016148208209793003,
+        "response_profile_cosine_mean": 0.696971585091466,
+        "ranking_spearman_mean": 0.33738720963819274,
+        "ranking_spearman_p05": -0.15345416630146758,
+        "top_decile_overlap_mean": 0.22190685131861604,
+        "top_decile_overlap_p05": 0.0
+      },
+      "candidate": {
+        "response_mae": 0.007765139143178544,
+        "response_profile_cosine_mean": 0.9196946310267748,
+        "ranking_spearman_mean": 0.565425867556751,
+        "ranking_spearman_p05": 0.15287736029760599,
+        "top_decile_overlap_mean": 0.3162964486493898,
+        "top_decile_overlap_p05": 0.02097902097902098
+      },
+      "deltas": {
+        "response_mae_improvement": 0.00838306906661446,
+        "response_profile_cosine_delta": 0.2227230459353089,
+        "ranking_spearman_mean_delta": 0.2280386579185582,
+        "ranking_spearman_p05_delta": 0.3063315265990736,
+        "top_decile_overlap_mean_delta": 0.09438959733077379,
+        "top_decile_overlap_p05_delta": 0.02097902097902098
+      },
+      "all_metrics_nonregressing": true,
+      "thermal_receipt": {
+        "physical_gpu": 1,
+        "launch_temperature_c": 35,
+        "release_temperature_c": 62,
+        "maximum_sampled_temperature_c": 62,
+        "thermal_abort": false,
+        "postexit_compute_owner_clear": true
+      }
+    }
+  ],
+  "pooled": {
+    "frames": 55,
+    "valid_pixels": 156860,
+    "control": {
+      "response_mae": 0.015935988660167554,
+      "response_profile_cosine_mean": 0.7062682543616345,
+      "ranking_spearman_mean": 0.3443628678716913,
+      "ranking_spearman_p05": -0.1403534902154972,
+      "top_decile_overlap_mean": 0.22412516776153144,
+      "top_decile_overlap_p05": 0.0
+    },
+    "candidate": {
+      "response_mae": 0.007627051232741619,
+      "response_profile_cosine_mean": 0.9224965200069439,
+      "ranking_spearman_mean": 0.5779349548900988,
+      "ranking_spearman_p05": 0.16526060296613665,
+      "top_decile_overlap_mean": 0.32630995267358903,
+      "top_decile_overlap_p05": 0.024475524475524476
+    },
+    "deltas": {
+      "response_mae_improvement": 0.008308937427425936,
+      "response_profile_cosine_delta": 0.2162282656453094,
+      "ranking_spearman_mean_delta": 0.23357208701840754,
+      "ranking_spearman_p05_delta": 0.30561409318163385,
+      "top_decile_overlap_mean_delta": 0.1021847849120576,
+      "top_decile_overlap_p05_delta": 0.024475524475524476
+    }
+  },
+  "cross_split_consistency": {
+    "development_101_status": "passed",
+    "reserved_audit_90_status": "passed",
+    "same_global_candidate": true,
+    "same_source_frames_geometry_descriptors_and_renderer": true,
+    "both_splits_every_scene_all_metrics_nonregressing": true,
+    "both_splits_strict_pooled_gate_passed": true
+  },
+  "comparison_disclosure": {
+    "end_to_end_interface_ab_not_capacity_matched": true,
+    "causal_claim_not_made": true,
+    "supported_claim": "The genuine crop-summary descriptor interface has substantially better source response fidelity and within-view text ranking than the legacy sparse teacher-mean interface on both the development and disjoint reserved audit query banks."
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false,
+    "target_metric_executed": false
+  }
+}

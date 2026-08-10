@@ -1,0 +1,245 @@
+{
+  "schema": "radio_gs.lerf_official_crop_summary_source_heldout_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_before_source_gate_execution",
+  "causal_question": "Do genuine official crop-summary descriptors already present on disk provide a trustworthy source-heldout signal on both Ramen and Teatime before any capacity-matched exact lifting or target evaluation?",
+  "implementation": {
+    "resealer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/seal_lerf_official_crop_summary_bundle.py",
+      "sha256": "6f819d667b8914a3c13ca47da3e44cee56075857e356704db07249a6ab0546e9"
+    },
+    "gate_wrapper": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_official_crop_summary_heldout_gate.py",
+      "sha256": "ca9fd043429b01da229f953d8dda4090a169643a53ba06cbcd86311f3e090d66"
+    }
+  },
+  "heldout_audit_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/audit_mpr_view_consistency.py",
+    "sha256": "73c68f1b90de728b004afb9b3db2da21671d3e4ef167a2e44524bed42849670c"
+  },
+  "historical_extraction_evidence": {
+    "global_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_teacher_train/manifest.json",
+      "sha256": "af0ea7042715a9e291fab7bf23d8f5bef686c682a7ca942cf7541bc927c05600"
+    },
+    "authority_limitation": "The historical global manifest was overwritten to list only Figurines and is not accepted as Ramen or Teatime per-scene tensor authority.",
+    "teacher_space": "official_siglip2_crop_summary",
+    "radio_version": "c-radio_v4-h",
+    "radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "scales": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "stride_ratio": 0.5,
+    "crop_resolution": 384,
+    "output_size": [
+      46,
+      62
+    ],
+    "label_content_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "scenes": {
+    "ramen": {
+      "raw_tensor_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_teacher_train/ramen",
+      "raw_frame_count": 124,
+      "selected_frame_count": 120,
+      "selected_view_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+        "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+      },
+      "source_heldout_frame_ids": [
+        2,
+        45,
+        87,
+        130
+      ],
+      "forbidden_target_frame_ids": [
+        6,
+        24,
+        60,
+        65,
+        81,
+        119,
+        128
+      ],
+      "tensor_contract": {
+        "shape": [
+          1536,
+          46,
+          62
+        ],
+        "dtype": "float16",
+        "descriptor_axis": 0,
+        "spatial_axes": [
+          1,
+          2
+        ],
+        "maximum_norm_deviation": 0.002,
+        "zero_descriptors_allowed": true
+      },
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_official_crop_summary_train.yaml",
+        "sha256": "cbbc536db5c283dc40195d9c0e4ac704b1d6672ff24254ca05cd8082e9f1e16b"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+      },
+      "genuine_mpr": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/ramen_official_crop_summary_mpr.pt",
+        "sha256": "1e6c04f896addec052a6b218c8bd32edf91568349133392ca20329b02a50f945"
+      },
+      "genuine_mpr_sidecar": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/ramen_official_crop_summary_mpr.pt.json",
+        "sha256": "11f4e504776fa5361271fa3d5e0c7d1ebfa65a88a2b2c763313f345ff82c320a"
+      },
+      "audit_computed_unsealed_raw_bundle_digest": "3d16b999352ac964b218a841fafc441d11fb962020273d2034213e9f376375c1"
+    },
+    "teatime": {
+      "raw_tensor_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_teacher_train/teatime",
+      "raw_frame_count": 171,
+      "selected_frame_count": 120,
+      "selected_view_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/exact_marginal_responsibility_authority.json",
+        "sha256": "de485f2b264b7b40be054ac257b4245645cb52437ccd95135a6ab179ec384d05"
+      },
+      "source_heldout_frame_ids": [
+        4,
+        7,
+        10,
+        14,
+        17,
+        20,
+        24,
+        28,
+        31,
+        35,
+        38,
+        41,
+        46,
+        49,
+        52,
+        56,
+        59,
+        62,
+        66,
+        69,
+        72,
+        76,
+        79,
+        82,
+        86,
+        89,
+        92,
+        96,
+        99,
+        102,
+        106,
+        110,
+        113,
+        117,
+        120,
+        123,
+        127,
+        131,
+        134,
+        138,
+        142,
+        145,
+        150,
+        153,
+        158,
+        162,
+        165,
+        168,
+        172,
+        175,
+        178
+      ],
+      "forbidden_target_frame_ids": [
+        2,
+        25,
+        43,
+        107,
+        129,
+        140
+      ],
+      "tensor_contract": {
+        "shape": [
+          1536,
+          46,
+          62
+        ],
+        "dtype": "float16",
+        "descriptor_axis": 0,
+        "spatial_axes": [
+          1,
+          2
+        ],
+        "maximum_norm_deviation": 0.002,
+        "zero_descriptors_allowed": true
+      },
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_teatime_official_crop_summary_train.yaml",
+        "sha256": "cf5fc3e573a06cc37a51b799065f5654d21d314e916dd2ea8cbd59fdcb5a5919"
+      },
+      "geometry_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+      },
+      "genuine_mpr": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/teatime_official_crop_summary_mpr.pt",
+        "sha256": "adda0f094d184d96bfb15ad9e5268e3b34198a995d89865b30904de2a8b17460"
+      },
+      "genuine_mpr_sidecar": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/teatime_official_crop_summary_mpr.pt.json",
+        "sha256": "748db88db97aaa53a3c80ba70a8da441321526d6d03f717845452e54f4c0c17f"
+      },
+      "audit_computed_unsealed_raw_bundle_digest": "22385a37e7f4da726086eebc6c8e33bb223c9e63d4ef7c9ffba33b2727d14681"
+    }
+  },
+  "reseal_contract": {
+    "source_tensor_directory_modified": false,
+    "tensor_reencoding_or_inference": false,
+    "frame_inventory": "exact selected-view authority frame IDs union exact source-heldout IDs",
+    "unexpected_or_missing_rgb_tensor": "fail_closed",
+    "per_tensor_checks": [
+      "sha256",
+      "shape",
+      "dtype",
+      "finite",
+      "nonzero_pixel_l2_normalization"
+    ],
+    "metadata_only_plan_may_skip_tensor_bytes": true,
+    "completed_gate_requires_full_content_reseal": true
+  },
+  "source_gate_contract": {
+    "audit_command": "audit_mpr_view_consistency heldout",
+    "frame_selection": "exact explicit source_heldout_frame_ids only",
+    "historical_mpr_excluded_frame_ids_fallback": "forbidden",
+    "ramen_exact_frame_argument": "2,45,87,130",
+    "required_operational_checks": [
+      "every heldout frame has positive visible pixels",
+      "every heldout frame has positive registered rows",
+      "every heldout frame mean pixel cosine is finite"
+    ],
+    "fixed_cosine_threshold": null,
+    "threshold_rationale": "This P1 gate tests provenance and source-heldout observability only. No honest pre-result scalar performance threshold or paired capacity-matched baseline exists yet.",
+    "performance_role": "diagnostic_readiness_gate_not_target_promotion",
+    "next_decision": "Only a passed two-scene operational gate permits the separately preregistered capacity-matched exact genuine-map lifting/source-LOO A/B."
+  },
+  "contamination_controls": {
+    "query_embeddings_or_scores_opened": false,
+    "benchmark_images_masks_labels_metrics_opened": false,
+    "new_source_gate_results_opened_at_seal": false,
+    "historical_target_results_used_for_gate_selection_or_thresholds": false,
+    "per_scene_or_per_query_parameter_sweep": false
+  },
+  "target_data_or_metrics_opened_at_seal": false,
+  "target_metric_execution_authorized": false,
+  "frozen_producer_or_evaluator_edit_authorized": false
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "radio_gs.lerf_o1_native_v3_coverage_deficit_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_post_result_coverage_deficit_premetric_audit",
+  "scene_id": "teatime",
+  "method_contract_sha256": "464cfdeefe1cca79cae2079a6d7ae2a3f3ec5e41ee5f0d02429897ec0a06d4e8",
+  "producer": {"path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_native_v3_coverage_deficit_fusion.py", "sha256": "71ce729d6365102134789739b486f949c089589360c5513ae53c1e98b0d66948"},
+  "parent_execution_authority": {"path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_deployed_corroborated_teatime_premetric_execution_authority_20260807.json", "sha256": "c3a403edb3c8408cdc3692bdcef143a604d80cf4f716c67d39f9ecd259e2cc6b"},
+  "outputs": {
+    "cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_coverage_deficit_fusion_v1/teatime/external_query_scores.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_coverage_deficit_fusion_v1/teatime/premetric_report.json"
+  },
+  "constants": {"semantic_boundary": 0.6, "native_v3_relation_threshold": 0.85, "maximum_regions": 8, "path_method": "widest_path", "source_observation_strength": "clip_2e_minus_1", "coverage_deficit": "one_minus_mean_times_one_minus_median", "target_anchor_evidence": "normalized_selected_scale_excess"},
+  "access_audit": {"benchmark_query_score_caches_opened": true, "native_v3_query_independent_authorities_opened": true, "benchmark_images_opened": false, "benchmark_masks_opened": false, "benchmark_labels_opened": false, "target_metrics_computed": false, "gpu_used": false, "result_dependent_parameters": false},
+  "metric_execution_authorized": false
+}

@@ -1,0 +1,75 @@
+{
+  "schema": "radio_gs.source_heldout_missing_support_audit_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_heldout_support_audit",
+  "scene_id": "scene0001_00",
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/audit_source_heldout_missing_support_v1.py",
+    "sha256": "3d29ba587f08f8632eafbe46dc6ce9a5f45d8fb91222e57a94511404858b5c93"
+  },
+  "inputs": {
+    "native_v3_source": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0001_00/source_region_comembership_authority_native_v3.pt",
+      "sha256": "c32dd00f77a53a0155384be4ad06ce7d83bb77ee1fb034ad726b05772ccafe69"
+    },
+    "native_v3_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/formal_native_v3_checkpoint.pt",
+      "sha256": "4bad11178e9e7b22e0fc0fdd4c53ee6c77dd5135eeef486d21175a9386c75eee"
+    },
+    "combined_text_subset": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/combined_text_subset.pt",
+      "sha256": "8740df01d507a25004cbf094d6bc2e1c343e3c5cd8dbbf8c7112f8d634df24b0"
+    },
+    "raw_combined_multiscale_scores": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/combined_raw_multiscale_scores.pt",
+      "sha256": "2c792e00facf5b32cce52ba69861795599f1a8a904a6c25690812ab34af33a89"
+    }
+  },
+  "fixed_protocol": {
+    "fold_count": 3,
+    "fold_assignment": "view_index_modulo_3",
+    "training_evidence": "exact_view_mass_from_other_two_folds",
+    "label_evidence": "exact_view_mass_from_heldout_fold_only",
+    "semantic_boundary": 0.6,
+    "relation_threshold": 0.85,
+    "maximum_regions": 8,
+    "path_method": "widest_path",
+    "candidate": "nonseed_selected_native_v3_region_with_anchor_above_boundary_and_missing_core",
+    "hard_label": "heldout_missing_core_seed_instance_mass_strictly_exceeds_every_other_instance",
+    "signed_utility": "2_times_heldout_seed_instance_mass_fraction_minus_1",
+    "ranking": "within_query_fold_maximin_empirical_rank_top1_no_label_threshold",
+    "feature_names": [
+      "edge_comembership_reliability",
+      "source_observation_count",
+      "source_observation_agreement",
+      "target_selected_scale_anchor",
+      "target_selected_scale_maximum",
+      "target_selected_scale_mean",
+      "target_selected_scale_median",
+      "target_selected_scale_covered_fraction",
+      "seed_to_target_median_ratio",
+      "log1p_target_region_size",
+      "target_visibility",
+      "coverage_deficit"
+    ]
+  },
+  "outputs": {
+    "table": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0001_00/unit_table.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0001_00/report.json"
+  },
+  "source_access": {
+    "source_query_scores_opened": true,
+    "source_exact_responsibility_views_opened": true,
+    "source_instance_labels_opened": true,
+    "source_native_v3_pair_features_opened": true,
+    "source_factorized_state_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false
+  },
+  "benchmark_execution_authorized": false
+}

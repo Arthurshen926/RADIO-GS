@@ -1,0 +1,177 @@
+{
+  "active_pair_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_global_response_listwise_loss_v21_active_pair_denominator_addendum_20260807.json",
+    "sha256": "0630f1bd0483fc2e532e9f35c414401535cb18e95609d841ad14347d2567f4b4"
+  },
+  "benchmark_exclusion_manifest": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+  },
+  "benchmark_execution_authorized": false,
+  "canonical_negative_bank": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "cohort_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+  },
+  "compositional_banks": {
+    "counterfactual_attributes": {
+      "loss_weight": 0.3,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/counterfactual_attributes_fit_embeddings.pt",
+      "sha256": "b5978e4f4915d729d4a39148484827c044604ff7000e50da5287fb87a4681b81"
+    },
+    "high_precision_part_of": {
+      "loss_weight": 0.05,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/high_precision_part_of_fit_embeddings.pt",
+      "sha256": "58ae47ae887222c9fb363b265c6500aed56245b624dfb4867799e2bff666f003"
+    },
+    "lexical_sibling_relation": {
+      "loss_weight": 0.2,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/lexical_sibling_relation_fit_embeddings.pt",
+      "sha256": "58d9940ac85d5eca7f8846eb6487a389cc5b771fff471d6ec99c54ed7819d54e"
+    },
+    "synonym_relation": {
+      "loss_weight": 0.2,
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/synonym_relation_fit_embeddings.pt",
+      "sha256": "d541bafbf6ccf5631d66b45aca81bcb9c5ce7a5c621ddfecd14551b97eed024e"
+    }
+  },
+  "fit_text_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+    "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_surface_region_typed_context_response_listwise_v21_pilot.py",
+    "sha256": "f913e7f6f7c87752a1170a705a825ad72d60281913c398fe2616aa262457236f"
+  },
+  "pilot_cohort_region_view_registry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_cohort_region_view_registry/pilot_exact4train_2validation/region_view_registry_v1.json",
+    "sha256": "bbf149fc719bb1936d29e3ecab06e006dac40d46708c45a16f2064239127f1f9"
+  },
+  "schema": "radio_gs.surface_region_typed_context_response_listwise_v21_pilot_execution_authority.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_text_queries_opened": false,
+    "canonical_generic_negative_bank_opened": true,
+    "generic_target_blind_text_bank_opened": true,
+    "per_scene_hyperparameters": false,
+    "query_independent": true,
+    "source_validation_used_for_selection": true,
+    "target_heldout_opened": false,
+    "text_queries_opened": false,
+    "typed_relation_authority_opened": true
+  },
+  "source_train": [
+    {
+      "adaptive_context": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "2b27eda34e292096b4f9222a545209230ee2017a980786ee433ea1f293232dda"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/scene0001_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "243df78a8aaa103d61fd8ed1361af4031e90484cf028ce4da0ac0d612cdec36d"
+      },
+      "hard_negative_content_authority_sha256": "12b9e5e0f2663f3db1d162971f007fba6fd88f1f9d6db03b5c818d301991572e",
+      "scene_id": "scene0001_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0001_00/training_shard_v1.pt",
+        "sha256": "125a25f5784b679da863958c08eec701c92e5da3f5447024653e6237d0efd61f"
+      }
+    },
+    {
+      "adaptive_context": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "49cf1bbc141a0bf8e5310afd14379e63a4fe40eb815291aa84fc1e25d1d41349"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0002_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "1e5235065898367d24fdd2d694ce15a8fed8abe5ad7ecc27412e98ce9b6876a6"
+      },
+      "hard_negative_content_authority_sha256": "971f6d2573a17a20407edc94d39c434a98d4d553cb14256eed8c67b61fbca9d6",
+      "scene_id": "scene0002_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0002_00/training_shard_v1.pt",
+        "sha256": "7c4f95159558bf6652329573b1017239b5db8bd75ef6e4a64a467a29c9b1b7ef"
+      }
+    },
+    {
+      "adaptive_context": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "6df7732de6c577ba10fd6728671e01599c13888caabd6132a0f94436cb1c279c"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0003_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "6cd4ddf08bb518b3ff20d162ff46f5e36cbab7b52ba054c99708681f2d158ff0"
+      },
+      "hard_negative_content_authority_sha256": "25dc1ca4ef0a265b28fbd1eb2a8c7a642e3de747ea9b075adb82f211503864ad",
+      "scene_id": "scene0003_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0003_00/training_shard_v1.pt",
+        "sha256": "0f3354891f88ea12404d37f7f29d2c3a4e9f98cde0ff3bab771a81d630ea1af3"
+      }
+    },
+    {
+      "adaptive_context": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "20f49415e9e20985ff7103ef7da658af829ccf081d601ff1f3dc7277247a2257"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0005_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "32c9f6eedf4721295e46b62848018a1b84261361f2db58e44007d99e0eee94be"
+      },
+      "hard_negative_content_authority_sha256": "a14e19f6c6af3ed06034cd470c736e5575112c0e28067c48d591cdaffd4acdd2",
+      "scene_id": "scene0005_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0005_00/training_shard_v1.pt",
+        "sha256": "935e9ad3ba92586223008bc9e59979631d6ef641b562a30cafc54a02f9ac335d"
+      }
+    }
+  ],
+  "source_validation": [
+    {
+      "adaptive_context": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "e70cd2be73dc88d476b72fed13fedf008394c8795ae4802e9169b3b4b6f4d3b9"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0004_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "cf0bccb273f8fc075b5e1e079366708588eebb77be05172136768cca2bba5e62"
+      },
+      "hard_negative_content_authority_sha256": "555ee1b3a40e36d385e07f5f3c03878e3b6e8310cbd2337b1e7b518fbfe932f4",
+      "scene_id": "scene0004_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0004_00/training_shard_v1.pt",
+        "sha256": "efd526330c280e332c741f717096f2d7fadb8dd87551d8785f8043a19328b881"
+      }
+    },
+    {
+      "adaptive_context": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "7733457686b640abcd4b87186d8031d40cabf5f4b18750b975ca873917cb0f70"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0008_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "68b82fd4580ca8e1d9bc8560b51e2912add8651df3901651ff4ad2711347c377"
+      },
+      "hard_negative_content_authority_sha256": "c6d227c70e28e8083736ef75b5b0c276bb8d4ca917c694202379e9a05f66b2a2",
+      "scene_id": "scene0008_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0008_00/training_shard_v1.pt",
+        "sha256": "8e7a830e0ae1d9279325328c7c7dd97b197c371d12d1ee674ff1c3db75236470"
+      }
+    }
+  ],
+  "status": "authorized_source_only_4train_2validation_v21_pilot",
+  "training_authorized": true,
+  "typed_relation_authority": {
+    "content_authority_sha256": "2063e25fad95ba74f5480ed5419f020151dee8aa9abf0efa51f0b9ef8051345d",
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_typed_text_relation_authority_v1/fit_relation_indices.pt",
+    "sha256": "482e363bf31884e190b255cc0cf0996461400bcbb3cb3f8785fbc236da2702a9"
+  }
+}

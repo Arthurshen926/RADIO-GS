@@ -1,0 +1,52 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_ramen_target_accepted_v2_gpu0_execution_authority",
+  "schema_version": 1,
+  "status": "sealed_after_query_free_graph_success_before_target_accepted_v2_execution",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "ramen",
+    "geometry_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d",
+    "physical_space_id": "lerf:ramen:geometry-checkpoint-sha256:e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+  },
+  "inputs": {
+    "factorized_field_sha256": "2bcf9cc8ba3ec128dfba80737c35a7dfdff8a8128b49fc52887626fb0d4cdee1",
+    "factorized_primitive_state_sha256": "2cf8733e0ecf2f88a02afa145d5ec4476d0bba95f0bb97751ac302d6928408b5",
+    "factorized_radio_cache_sha256": "1b3c6c5ac01b6dea3e993db64217b60a942ba33adbed2e34e8357846854b3f8e",
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/canonical_support_graph_accepted_v2.pt",
+      "sha256": "58c0adf629380d11a3b24a394f4b7053d3f1ee3d0b1ab69138a5e0d478988195"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e",
+      "declared_views": 120
+    },
+    "accepted_v2_checkpoint_sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "frozen_contract": {
+    "same_mathematical_payload_as_source_accepted_v2": true,
+    "per_scene_region_cap": 4096,
+    "scales_m": [0.25, 0.45, 0.7],
+    "selection_batch_size": 8192,
+    "readout_batch_size": 128,
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/accepted_v2_sparse_v2.pt",
+  "thermal_guard": {
+    "physical_gpu": 0,
+    "poll_seconds": 30,
+    "start_maximum_temperature_c": 87,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

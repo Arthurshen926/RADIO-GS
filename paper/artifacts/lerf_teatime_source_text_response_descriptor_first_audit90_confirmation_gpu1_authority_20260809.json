@@ -1,0 +1,149 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_confirmation_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_reserved_audit_source_only_confirmation",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_confirmation.py",
+    "sha256": "6d1b9194d583de7ed84a6beb230cab84b65982d8070f636cd101c7b88a631bf2"
+  },
+  "base_materializer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+    "sha256": "873214d57360d1278177f56c9d1c77ffc7384d6d97116da3aa81e9d879f8c6fe"
+  },
+  "frame_evaluator_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/lerf_source_text_response_ranking.py",
+    "sha256": "25792bb0b41e3117e95137f3007caa36dd8e5bc470892f3c9c35688bfc6ca5b7"
+  },
+  "scene_id": "teatime",
+  "source_heldout_frame_ids": [4, 7, 10, 14, 17, 20, 24, 28, 31, 35, 38, 41, 46, 49, 52, 56, 59, 62, 66, 69, 72, 76, 79, 82, 86, 89, 92, 96, 99, 102, 106, 110, 113, 117, 120, 123, 127, 131, 134, 138, 142, 145, 150, 153, 158, 162, 165, 168, 172, 175, 178],
+  "forbidden_target_frame_ids": [2, 25, 43, 107, 129, 140],
+  "inputs": {
+    "source_gate_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_audit90_confirmation_preregistration_20260809.json",
+      "sha256": "49da2a8b7f0b7616e569a57fdfa65bc144c5f246c9b5669119088eb76e69202a"
+    },
+    "source_view_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_official_crop_summary_source_heldout_preregistration_20260809.json",
+      "sha256": "3ae93f9e1217edfa1ea17163e7c9c79921f1a15b2808e226a3d81994140771f6"
+    },
+    "scene_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_teatime_official_crop_summary_train.yaml",
+      "sha256": "cf5fc3e573a06cc37a51b799065f5654d21d314e916dd2ea8cbd59fdcb5a5919"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+    },
+    "query_bank_artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+      "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721"
+    },
+    "query_bank_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+      "sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4"
+    },
+    "source_reseal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/teatime/teatime_official_crop_summary_content_reseal.json",
+      "sha256": "ade230993ac2ffb688327c1a989696547797914f54a7ce41fbeedd748165ddb5",
+      "required_schema": "radio_gs.lerf_official_crop_summary_reseal.v1",
+      "required_mode": "content_addressed_immutable_reseal"
+    }
+  },
+  "methods": [
+    {
+      "method_id": "legacy_teacher_mean_v2_descriptor_first_v2",
+      "role": "control",
+      "descriptor_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+        "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+      },
+      "descriptor_payload_kind": "sparse_teacher_mean_v2",
+      "descriptor_payload_contract": {
+        "schema": "radio_gs.lerf_source_teacher_mean_siglip.v2",
+        "schema_version": 2,
+        "descriptor_dimension": 1536
+      },
+      "descriptor_provenance_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+        "sha256": "cad8230bc67547004f989b285a63b6f13942df7fcc6699317f91db9a598e924a"
+      },
+      "descriptor_geometry_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/exact_marginal_responsibility_authority.json",
+        "sha256": "de485f2b264b7b40be054ac257b4245645cb52437ccd95135a6ab179ec384d05"
+      }
+    },
+    {
+      "method_id": "genuine_official_crop_summary_mpr_descriptor_first_v2",
+      "role": "candidate",
+      "descriptor_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/teatime_official_crop_summary_mpr.pt",
+        "sha256": "adda0f094d184d96bfb15ad9e5268e3b34198a995d89865b30904de2a8b17460"
+      },
+      "descriptor_payload_kind": "dense_official_crop_summary_mpr_v1",
+      "descriptor_payload_contract": {
+        "metadata_schema_version": 1,
+        "feature_space": "semantic_descriptor",
+        "construction": "semantic_descriptor_raster_gaussian_top1_contribution_mean",
+        "descriptor_dimension": 1536
+      },
+      "descriptor_provenance_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_official_crop_summary_source_heldout_gpu1_execution_authority_20260809.json",
+        "sha256": "b67acb30f7a68912a246a1c609ca21ea5d1c6f9806f8f3eb3bbc07a3c4b05eba"
+      },
+      "descriptor_geometry_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_official_crop_summary_source_heldout_gpu1_execution_authority_20260809.json",
+        "sha256": "b67acb30f7a68912a246a1c609ca21ea5d1c6f9806f8f3eb3bbc07a3c4b05eba"
+      }
+    }
+  ],
+  "equivalence_smoke": false,
+  "query_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+    "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721",
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+    "manifest_sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4",
+    "query_split": "audit",
+    "queries": 90,
+    "embedding_tensor_sha256": "8cc8e9ca3903488ef7558ce19d9e4bec9cb6378570c8c12d72ac96219c8dd415"
+  },
+  "geometry": {
+    "num_gaussians": 460157,
+    "xyz_sha256": "fe91d632a50a086120aa63f884af193faa5ee09b305c636ebae405ae21d71938"
+  },
+  "execution": {
+    "required_cuda_visible_devices": "1",
+    "program_device": "cuda:0",
+    "physical_gpu": 1,
+    "thermal_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    },
+    "thermal_poll_seconds": 300,
+    "maximum_temperature_c": 88,
+    "soft_pause_temperature_c": 0,
+    "power_limit_watts": 300
+  },
+  "outputs": {
+    "control_summary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/teatime/teatime_control_audit90_source_response_summary.json",
+    "candidate_summary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/teatime/teatime_candidate_audit90_source_response_summary.json",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/teatime/teatime_audit90_confirmation_materialization_result.json"
+  },
+  "confirmation": {
+    "candidate_locked_after_dev_gate": true,
+    "dev_gate_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/descriptor_first_v2_source_text_response_ranking_gate_result.json",
+      "sha256": "11be2adc41d21da1d2ce37ec09af1f8665bc928cec46b497080f7a59bd3f6af8"
+    },
+    "reserved_bank_opened_once": true,
+    "dev_audit_disjointness_proof": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+      "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf"
+    },
+    "end_to_end_interface_ab_not_capacity_matched": true
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

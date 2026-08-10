@@ -1,0 +1,73 @@
+{
+  "artifact": "full_scalar_scene0004_base_exact_chain_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T02:56:00+08:00",
+  "status": "source_validation_base_exact_chain_complete",
+  "scene_id": "scene0004_00",
+  "cohort_split": "source_validation",
+  "pilot_receipt": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/pilot_receipt.json",
+    "sha256": "ecf203bde82675d874e0eafc11b283506ef4d9843fa1cfeb431e109a6b97ef56",
+    "authority_sha256": "99e2a9055c6b7a8f2896d525021162930d6b394cda0281850ad2f2b9edc994b4",
+    "stage_receipts": 12
+  },
+  "outputs": {
+    "factorized_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/factorized_raw_radio.pt",
+      "sha256": "dea169fced97968330a599b10a4c7a8cf7f5a67b1e0b835a8eb75df49542d9a7",
+      "size_bytes": 445718887
+    },
+    "exact_marginal_responsibility": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/exact_marginal_responsibility_authority.json",
+      "sha256": "fd963d34b3837b0943053e8646036a98daf948544f38ea0a8fefd8c520e3cb05",
+      "size_bytes": 38079,
+      "formula_sha256": "a17a67f3fffcebd57c925e83eee249c97c24b4b2e56b0b0ac611530f570d85d4",
+      "source_views": 120
+    },
+    "exact_raw_reference": {
+      "sha256": "766518351c3c5c5a4b64cf045ede0de43b9395b33c2c8189825c5c776bae0aa3",
+      "size_bytes": 442980231
+    },
+    "exact_dino_v3": {
+      "sha256": "30486e355322024d6a7db215fc1ca300a4ef8289eb01a9c1e4956a1c897cda9e",
+      "size_bytes": 1406598775
+    },
+    "exact_sam3": {
+      "sha256": "48ea625b0d7f842fba5e60a33361313801c5156643c4932d06f8aa3580bc112d",
+      "size_bytes": 355378783
+    },
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "316b5cce8f80ec244991579cb1f16afc424b3b9a5456865f955d02778cdafc90",
+      "size_bytes": 354908609,
+      "mean_cosine": 0.9982628226280212,
+      "dino_v3_target_mean_cosine": 0.9956665635108948,
+      "sam3_target_mean_cosine": 0.9960494637489319
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/factorized_primitive_state_v2.pt",
+      "sha256": "edfaab08aa4ebe1c7850931578ffb941a1e7439c428c4521019fb7c1ce8aa7d4",
+      "size_bytes": 411961927,
+      "num_gaussians": 171097,
+      "valid_gaussians": 158258,
+      "visibility_purity_unknown_count": 0
+    }
+  },
+  "gpu1_execution": {
+    "exact_chain_maximum_temperature_c": 77,
+    "exact_chain_maximum_power_w": 275.33,
+    "thermal_warnings": 0,
+    "thermal_aborts": 0,
+    "all_cuda_release_checks_passed": true
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": true,
+  "frozen_evaluator_metric_renderer_modified": false
+}

@@ -1,0 +1,101 @@
+{
+  "artifact": "full_scalar_scene0003_accepted_v2_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T02:05:00+08:00",
+  "status": "sealed_after_support_graph_success_and_before_accepted_v2_execution",
+  "scene_id": "scene0003_00",
+  "cohort_split": "source_train",
+  "inputs": {
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "49df15c4cb4f00ccf5fdeb47bb774690ce6ca6fa3d079f496c886e4dd4fea34e"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+      "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd"
+    },
+    "factorized_radio_cache_sha256": "5032b6314b289459b4f146e81a094fd067b58728dbedce7ce9ce0cb301ad5920",
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "995a287f785df609730a74e0ed4ad8e483545736a6d477d08a4044fbde1ead9a"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/exact_marginal_responsibility_authority.json",
+      "sha256": "6047309b1c6a165157f1ae9ee805645587716f74649d9c7748b282f63c4fe49c"
+    },
+    "accepted_v2_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+    "sha256": "75f234e8376c2ac0f27a5f847baaf1de7b2fc4d6dfafc2d4c532208a71f081cf"
+  },
+  "frozen_contract": {
+    "same_as_scene0002": true,
+    "per_scene_region_cap": 4096,
+    "scales": [0.25, 0.45, 0.7],
+    "selection_batch_size": 8192,
+    "readout_batch_size": 128,
+    "device": "cuda:0",
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+  "command": [
+    "env",
+    "GPU=1",
+    "GPU_TELEMETRY_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/logs/accepted_v2_gpu1_telemetry.csv",
+    "GPU_OWNER_AUDIT_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/logs/accepted_v2_gpu1_owner.csv",
+    "GPU_OWNER_PID_NAMESPACE_MODE=exclusive-singleton-after-clear-v1",
+    "GPU_MAX_TEMP_C=88",
+    "GPU_START_MAX_TEMP_C=82",
+    "GPU_POLL_SECONDS=30",
+    "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES=1",
+    "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS=6",
+    "GPU_MAX_POWER_LIMIT_W=300.5",
+    "bash", "radio_gs/scripts/run_with_gpu_thermal_guard.sh", "--",
+    "env", "CUDA_VISIBLE_DEVICES=1",
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/materialize_accepted_v2_canonical_region_authority.py",
+    "--scene-id", "scene0003_00",
+    "--factorized-field-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_field_d512_l512_exact_marginal.pth",
+    "--expected-factorized-field-checkpoint-sha256", "49df15c4cb4f00ccf5fdeb47bb774690ce6ca6fa3d079f496c886e4dd4fea34e",
+    "--factorized-primitive-state", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+    "--expected-factorized-primitive-state-sha256", "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd",
+    "--expected-factorized-radio-cache-sha256", "5032b6314b289459b4f146e81a094fd067b58728dbedce7ce9ce0cb301ad5920",
+    "--support-graph", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_support_graph_accepted_v2.pt",
+    "--expected-support-graph-sha256", "995a287f785df609730a74e0ed4ad8e483545736a6d477d08a4044fbde1ead9a",
+    "--exact-marginal-responsibility-authority", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/exact_marginal_responsibility_authority.json",
+    "--expected-exact-marginal-responsibility-authority-sha256", "6047309b1c6a165157f1ae9ee805645587716f74649d9c7748b282f63c4fe49c",
+    "--accepted-v2-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+    "--expected-accepted-v2-checkpoint-sha256", "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+    "--official-radio-checkpoint", "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "--expected-official-radio-checkpoint-sha256", "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+    "--selection-batch-size", "8192",
+    "--readout-batch-size", "128",
+    "--device", "cuda:0"
+  ],
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "soft_pause_enabled": false,
+    "nvml_failure": "fail_closed",
+    "peer_GPU_monitoring": false
+  },
+  "forbidden_stages": [
+    "official_multiview_siglip2_teacher",
+    "any_benchmark_evaluator_or_metric"
+  ],
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

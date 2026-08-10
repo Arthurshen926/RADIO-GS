@@ -1,0 +1,76 @@
+{
+  "artifact": "rank256_o0_primitive_lifting_figurines_prefix256_dryrun_result",
+  "schema_version": 1,
+  "date": "2026-08-07",
+  "status": "complete_nonformal_query_free_prefix_dryrun",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/rank256_o0_primitive_lifting_figurines_prefix256_execution_authority_20260807.json",
+    "sha256": "efe27d3a2af6946758da2bf96e12c17b8d5d1016ea8d7621cf1cabe51a24ecfe"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_primitive_lifting_prefix256_dryrun.pt",
+    "sha256": "5b5f87bceebab78e8a8d6a2e9940f343d8ba2e0e67fe3bd13b27b7dad643ed38"
+  },
+  "implementation": {
+    "lifting_module": {
+      "path": "/root/RADIO-GS/radio_gs/field/rank256_primitive_residual_lifting.py",
+      "sha256": "58f804ff96fdd06a035d4fb0faa4105ccd7acc2e07cfc8594543814bf925286e"
+    },
+    "dryrun_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_rank256_o0_primitive_lifting_dryrun.py",
+      "sha256": "0f1635bfe5535b2e1a0376867cb974172d7ef13449cf4c4dc14d636bbacf0717"
+    },
+    "lifting_contract_sha256": "c82355d30221b821f5c9be40535cc06aba96949189d951fb9a9d1d481bb2951a"
+  },
+  "configuration": {
+    "max_angle_radians": 0.15,
+    "minimum_region_reliability": 0.0,
+    "valid_row_prefix_limit": 256,
+    "selection_basis": "interface_dryrun_only_not_target_metric_selected"
+  },
+  "routing_audit": {
+    "valid_prefix_primitives": 256,
+    "intersecting_regions": 688,
+    "contributing_regions": 679,
+    "covered_primitives": 208,
+    "updated_primitive_scales": 624,
+    "fallback_primitive_scales": 144,
+    "maximum_overlap_count": 27,
+    "median_nonzero_overlap_count": 7.0,
+    "mean_aggregate_reliability_on_covered": 0.6679971868080405,
+    "aggregate_residual_norm_p05": 0.276063732894553,
+    "aggregate_residual_norm_median": 0.3007979737189921,
+    "aggregate_residual_norm_p95": 0.35133114889464456,
+    "minimum_updated_angle_radians": 0.15,
+    "median_updated_angle_radians": 0.15,
+    "p95_updated_angle_radians": 0.15,
+    "maximum_updated_angle_radians": 0.15,
+    "angular_cap_saturated_updates": 624,
+    "fallback_bitwise_o0": true
+  },
+  "verification": {
+    "focused_and_adjacent_tests": "26 passed",
+    "focused_test_source": {
+      "path": "/root/RADIO-GS/tests/test_rank256_primitive_residual_lifting.py",
+      "sha256": "969d9b4e909b4917c85cc9d5cf5324c7b83698d6b3999e1a3336a5991e18c9ee"
+    },
+    "materializer_test_source": {
+      "path": "/root/RADIO-GS/tests/test_materialize_rank256_o0_primitive_lifting_dryrun.py",
+      "sha256": "37eb8a68e11c5bf4de587267e6cee894c4df59a92a0a36524780d10b434558e2"
+    },
+    "gpu_used": false,
+    "target_queries_opened": false,
+    "target_images_opened": false,
+    "target_labels_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_computed": false
+  },
+  "interpretation": {
+    "validated": "The source-gated rank256 region residual can be lifted onto the frozen O0 multiscale primitive capability carrier with deterministic FP64 overlap aggregation, per-scale tangent projection, exponential-map updates, a strict angular cap, and byte-exact fallbacks.",
+    "diagnostic": "All 624 covered primitive-scale updates reached the conservative 0.15-radian cap in this prefix. This is consistent with a large region-to-primitive tangent mismatch and makes the cap safety-critical; it is not evidence for increasing the cap.",
+    "not_validated": "This prefix artifact is not a formal candidate and contains no benchmark or performance evidence. No LERF accuracy claim is authorized."
+  },
+  "formal_candidate_authorized": false,
+  "query_execution_authorized": false,
+  "metric_execution_authorized": false
+}

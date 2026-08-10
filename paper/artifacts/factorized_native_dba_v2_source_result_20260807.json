@@ -1,0 +1,89 @@
+{
+  "schema": "radio_gs.factorized_native_dba_v2_source_result_summary.v1",
+  "schema_version": 1,
+  "status": "source_only_promotion_candidate_complete",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/factorized_native_dba_v2_execution_authority_20260807.json",
+    "sha256": "763ecb3f7fe6aba184ded17166a857708521d33611e0266360117b75203d0c09"
+  },
+  "frozen_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/dba_v2_precision_ranking/model.pt.json",
+    "sha256": "2e5861382fdf38f4a14835718f7482e68b0b64463b4bc76d303ccc12c3a706a5"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/dba_v2_precision_ranking/model.pt",
+    "sha256": "1c6d51560b804bfa33b5931616c73acdde62b510cd9241d939eff2acc49a8666"
+  },
+  "selected_step": 40,
+  "eligible_steps": [16, 32, 40, 64],
+  "macro_step0": {
+    "teacher_positive_precision": 0.37376662328329224,
+    "teacher_positive_recall": 0.14378334129779602,
+    "teacher_positive_f1": 0.20763595283939046,
+    "class_balanced_hard_bce": 0.6070889234542847,
+    "class_balanced_soft_teacher_brier": 0.003962276503443718,
+    "predicted_positive_rate": 0.0008649423755428039,
+    "sampled_margin_rank_correlation": 0.6938976833543711,
+    "mean_all_view_cosine": 0.9443123638629913,
+    "mean_teacher_centered_residual_cosine": 0.46052832901477814
+  },
+  "macro_selected_step40": {
+    "teacher_positive_precision": 0.31142473781690845,
+    "teacher_positive_recall": 0.3264446005690107,
+    "teacher_positive_f1": 0.31548762759325863,
+    "class_balanced_hard_bce": 0.5875717401504517,
+    "class_balanced_soft_teacher_brier": 0.002838995074853301,
+    "predicted_positive_rate": 0.0022234668211073202,
+    "sampled_margin_rank_correlation": 0.6967282755337848,
+    "mean_all_view_cosine": 0.9510133564472198,
+    "p05_row_mean_all_view_cosine": 0.9096753299236298,
+    "mean_teacher_centered_residual_cosine": 0.5396396815776825,
+    "p05_teacher_centered_residual_cosine": 0.2631616145372391,
+    "student_to_teacher_spread_ratio": 0.8456958532333374,
+    "teacher_centered_pair_gram_mae": 0.24502379447221756,
+    "teacher_centered_pair_gram_correlation": 0.6902551651000977,
+    "absolute_visual_probe_response_mae": 0.023388054221868515,
+    "absolute_visual_probe_response_correlation": 0.682820737361908,
+    "absolute_visual_probe_response_std_ratio": 0.9062237441539764
+  },
+  "selected_improvements": {
+    "macro_f1_absolute": 0.1078516747538682,
+    "macro_recall_absolute": 0.18266125927121468,
+    "macro_balanced_hard_bce_reduction": 0.019517183303833008,
+    "macro_rank_correlation_change": 0.0028305921794137,
+    "dba_v1_step64_predicted_positive_rate": 0.008400285214407568,
+    "dba_v2_step40_predicted_positive_rate": 0.0022234668211073202
+  },
+  "selected_per_scene": {
+    "scene0004_00": {
+      "teacher_positive_precision": 0.2604221175649747,
+      "teacher_positive_recall": 0.33900999091734785,
+      "teacher_positive_f1": 0.29456446680477455,
+      "sampled_margin_rank_correlation": 0.6271533335300994,
+      "predicted_positive_rate": 0.0017365486391129033,
+      "student_to_teacher_spread_ratio": 0.8029452562332153,
+      "all_boundary_checks_passed": true,
+      "all_visual_checks_passed": true
+    },
+    "scene0008_00": {
+      "teacher_positive_precision": 0.3624273580688422,
+      "teacher_positive_recall": 0.3138792102206736,
+      "teacher_positive_f1": 0.3364107883817427,
+      "sampled_margin_rank_correlation": 0.7663032175374701,
+      "predicted_positive_rate": 0.002710385003101737,
+      "student_to_teacher_spread_ratio": 0.8884464502334595,
+      "all_boundary_checks_passed": true,
+      "all_visual_checks_passed": true
+    }
+  },
+  "access_audit": {
+    "source_train_4_and_source_validation_2_only": true,
+    "target_heldout_opened": false,
+    "target_descriptor_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

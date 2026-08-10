@@ -1,0 +1,68 @@
+{
+  "artifact": "source_only_region_comembership_v1_target_execution_gate",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_target_feature_materialization_inference_or_metric",
+  "base_preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "candidate_axis_distinction": {
+    "region_comembership_axis": "AcceptedV2 canonical regions, exactly 4096 rows per scene",
+    "figurines_d3_axis": "all scale-major valid-anchor regions, approximately valid_anchor_count_times_three",
+    "axes_equal": false,
+    "forbidden_claim": "The previously observed Figurines D3=0.771 is not an upper bound for the 4096-row AcceptedV2 RegionCoMembership method.",
+    "required_target_report": "Any eventual target run must separately report its AcceptedV2-axis support/oracle ceiling when labels are opened under the one authorized final evaluation; until then no target ceiling is claimed."
+  },
+  "source_accepted_v2_candidate_graph_oracle": {
+    "scene0001_00": {
+      "eligible_regions": 3250,
+      "eligible_instances": 21,
+      "instance_macro_iou": 0.9550979008493695,
+      "instance_macro_f1": 0.9694445603607288
+    },
+    "scene0002_00": {
+      "eligible_regions": 4092,
+      "eligible_instances": 56,
+      "instance_macro_iou": 0.9932149671783879,
+      "instance_macro_f1": 0.9950324108818954
+    },
+    "semantics": "Oracle retains exactly candidate edges whose endpoints share one positive dominant source instance; it measures candidate connectivity only, not model accuracy."
+  },
+  "target_prerequisites": [
+    "all four fixed source-train and two fixed source-validation RegionCoMembership authorities exist and pass strict SHA reload",
+    "the topology-consistent 4+2 pilot selects a non-epoch-zero checkpoint and satisfies its frozen source-validation promotion gate",
+    "the target scene has a query-independent AcceptedV2 sparse authority, matching support graph, factorized primitive state and adaptive typed-context authority",
+    "if the target AcceptedV2 chain is absent, build capability then support graph then AcceptedV2 then adaptive typed context without reading target queries labels masks or metrics",
+    "source parity proves the feature-only materializer emits pair_indices and all 15 features bitwise equal to the instance-supervised builder"
+  ],
+  "text_seed_rule": {
+    "per_query_seed_count": 1,
+    "selection": "the AcceptedV2 canonical region with the highest frozen O0 query score",
+    "tie_break": "lowest canonical region index",
+    "query_conditioning_of_pair_head": false,
+    "scene_or_query_specific_threshold": false,
+    "connected_filter": "retain the thresholded RegionCoMembership connected component containing that unique seed"
+  },
+  "execution_order_after_promotion": [
+    "materialize one query-independent target pair-feature authority",
+    "run the single frozen checkpoint and source-validation-selected global threshold",
+    "read frozen O0 scores only to select the unique seed per query",
+    "produce the external connected-region cache",
+    "run the frozen benchmark evaluator once and report the AcceptedV2-axis support ceiling separately"
+  ],
+  "current_authorization": {
+    "four_train_two_validation_gate_complete": false,
+    "target_feature_materialization_authorized": false,
+    "target_checkpoint_inference_authorized": false,
+    "target_external_cache_authorized": false,
+    "target_metric_authorized": false
+  },
+  "access_audit_at_seal": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_raw_dominant_positive_utility_independent_result_fix5c.v1",
+  "schema_version": 1,
+  "status": "single_independent_candidate_complete_effective_no_op_tiny_negative_mIoU_delta",
+  "scene": "teatime",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_teatime_independent_preregistration_fix5c_20260807.json",
+    "sha256": "97e5f8ceb363a6a74e9a6b309ff1e17acd182dc27366c05bc205df2ea27f54b5"
+  },
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_teatime_independent_metric_execution_authority_fix5c_20260807.json",
+    "sha256": "4cf3c44b8839030e8de82e472db95e34db991920c95cd459520549f5a762d9ff"
+  },
+  "control_metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/evaluation/teatime_exact_o0_control/teatime/lerf_direct_3d_selection_results.json",
+    "sha256": "29b296bf7718f4fc2178d45e0df007a20890fd0ffde6b125afc06f207e9d2226"
+  },
+  "candidate_metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/evaluation/teatime_raw_dominant_fix5c_independent/teatime/lerf_direct_3d_selection_results.json",
+    "sha256": "7cc210f45c6ec8eff6f73bc660062c58982980fb342e1be9a3151b6564749f38"
+  },
+  "primary_metric": {
+    "name": "exact_macro_mIoU",
+    "exact_FP32_O0": 0.404494971036911,
+    "FIX5C": 0.40449294447898865,
+    "absolute_delta": -0.0000020265579223632812,
+    "relative_delta_percent": -0.0005010094234715105,
+    "interpretation": "effective_no_op_not_an_improvement"
+  },
+  "secondary_metrics": {
+    "acc_at_0.25_control": 0.7457627118644068,
+    "acc_at_0.25_FIX5C": 0.7457627118644068,
+    "acc_at_0.50_control": 0.3050847457627119,
+    "acc_at_0.50_FIX5C": 0.3050847457627119,
+    "boundary_f_delta": 0.00003415346145629883,
+    "trimap_iou_delta": 0.000025928020477294922,
+    "object_count": 59
+  },
+  "affected_query": {
+    "name": "stuffed bear",
+    "control_mIoU": 0.515282154083252,
+    "FIX5C_mIoU": 0.5152581334114075,
+    "delta_mIoU": -0.000024020671844482422,
+    "selected_gaussians_control": 69133,
+    "selected_gaussians_FIX5C": 69351
+  },
+  "method_conclusion": {
+    "independent_mIoU_improvement_observed": false,
+    "material_benchmark_recovery_observed": false,
+    "FIX5_semantic_filter_sufficient_for_extent_completion": false,
+    "cross_scene_evidence": "Figurines_small_positive_Ramen_tiny_positive_Teatime_effective_no_op",
+    "remaining_bottleneck": "query_specific_graph_extent_is_not_equivalent_to_instance_or_boundary_utility;_factorized_exact_state_is_not_consumed_by_the_legacy_gauge_readout",
+    "no_followup_Teatime_tuning_authorized": true
+  },
+  "gpu1_telemetry": {
+    "control": {
+      "thermal_log_sha256": "143ad5815429dd46f8a00c6b913fd13f8516c9b4081c3386e286c97ecc284956",
+      "owner_log_sha256": "db795d25fa3dad698c195ed79ef36b710d056ccadf1073c919f6ac9ff559a7ef",
+      "temperature_c_max": 53,
+      "hard_stop_triggered": false
+    },
+    "candidate": {
+      "thermal_log_sha256": "2f614088f79aa3a33077023a61af8fdde06b4dc4a330c2512c8316b1172b3c25",
+      "owner_log_sha256": "a9aed1289e17d73b372ed3cd76438d13bed096e7707c00a629dae83d330b1764",
+      "temperature_c_max": 53,
+      "hard_stop_triggered": false
+    }
+  },
+  "single_candidate_no_sweep_respected": true
+}

@@ -1,0 +1,81 @@
+{
+  "schema": "radio_gs.factorized_native_dba_v2_figurines_fix2_premetric_result.v1",
+  "schema_version": 1,
+  "status": "REJECT_STOP_BEFORE_METRIC",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_factorized_native_dba_v2_figurines.py",
+    "sha256": "120b43acff5a81cbdbe96fa845d50b08e713cb0d0bd004cc8fd86315f19c5373"
+  },
+  "enhanced_fail_closed_test": {
+    "path": "/root/RADIO-GS/tests/test_materialize_factorized_native_dba_v2_figurines.py",
+    "sha256": "131e79aa35dc997cbe2c26459887e38d4dc0a808a9042e9c433d9dd11101a0f8",
+    "passed": 30
+  },
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/dba_v2_precision_ranking/model.pt.json",
+    "sha256": "2e5861382fdf38f4a14835718f7482e68b0b64463b4bc76d303ccc12c3a706a5",
+    "selected_step": 40
+  },
+  "target_descriptor_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_dba_v2_target_fix2/figurines/execution_authority.json",
+    "sha256": "3a88ff05ca4caad20fd1d7ed7d1c8100dd930e20e113923bafe476799acb3f2a"
+  },
+  "target_descriptor": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_dba_v2_target_fix2/figurines/descriptor.pt",
+    "sha256": "e1714ccb77865a1230db3bb2910666b213a13dd9127e64dc3670ed7654fd5a13",
+    "shape": [4096, 1536]
+  },
+  "exact_query_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_dba_v2_exact_fix2/figurines/query_execution_authority.json",
+    "sha256": "93e8667152841b68c58351bb0d6128068bf25c9bc13a952d1b782c18f12d1d38"
+  },
+  "exact_relevance": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_dba_v2_exact_fix2/figurines/region_absolute_relevance.pt",
+    "sha256": "8155a4ef91bc98218980b1ef2185b2b5c6b5f62741da110f7045b0b87c1f245b",
+    "shape": [4096, 21],
+    "dtype": "torch.float32",
+    "finite": true
+  },
+  "premetric_structural_audit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_dba_v2_exact_fix2/figurines/premetric_structural_audit.json",
+    "sha256": "6f2d529e1c742123e87740270bd8e1bc3d1997725c8d06c0224fb902cb083731"
+  },
+  "coverage": {
+    "candidate_supported_queries": 4,
+    "contrast_v21_supported_queries": 2,
+    "exact_o0_strong_supported_queries": 21,
+    "candidate_exact_o0_overlap_queries": 4,
+    "exact_o0_strong_query_recall": 0.19047619047619047,
+    "candidate_positive_unit_rate": 0.002697172574698925,
+    "candidate_supported_query_ids": [
+      "green toy chair",
+      "jake",
+      "red toy chair",
+      "tesla door handle"
+    ]
+  },
+  "descriptor_statistics": {
+    "candidate_centroid_squared_norm": 0.9205233042782879,
+    "contrast_v21_centroid_squared_norm": 0.9172445385268486,
+    "candidate_centered_mean_squared_radius": 0.07947669597844685,
+    "contrast_v21_centered_mean_squared_radius": 0.0827554670945845,
+    "candidate_centered_gram_effective_rank": 3.9185835801042987,
+    "contrast_v21_centered_gram_effective_rank": 3.1740447778747836,
+    "all_noncollapse_gates_passed": true
+  },
+  "failed_checks": [
+    "candidate_supported_queries_at_least_o0_strong_supported_queries",
+    "o0_strong_query_recall_at_least_0p8",
+    "candidate_coverage_gain_over_contrast_v21_at_least_5"
+  ],
+  "conclusion": "DBA-v2 adds two supported queries over contrast-v21 without descriptor collapse, but does not recover broad exact-O0 semantic coverage; the remaining target weakness is absolute query-readout/calibration coverage rather than global descriptor collapse.",
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false
+  },
+  "metric_authority_recommended": false,
+  "metric_executed": false
+}

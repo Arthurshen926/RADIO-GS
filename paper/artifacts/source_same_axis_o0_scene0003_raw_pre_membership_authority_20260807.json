@@ -1,0 +1,81 @@
+{
+  "schema": "radio_gs.source_same_axis_o0_scene0003_raw_pre_membership_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_after_scene0003_raw_O0_before_multisource_selector_and_membership_payload_open",
+  "scene_id": "scene0003_00",
+  "split": "source_external_validation_multisource_selector_only",
+  "registered_membership_split": "source_train",
+  "subset_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_same_axis_o0_scene0003_external_subset_execution_authority_20260807.json",
+    "sha256": "2e3aca32a805825ce01804672306dec5c17d9277d481083db35c0ff635a7edcb"
+  },
+  "dense_stream_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_same_axis_o0_scene0003_dense_stream_0p05_execution_authority_20260807.json",
+    "sha256": "37c986d1895232dab21f5147c5256bd0c2e4d435f73f65306ed5037a1ca0f0ec"
+  },
+  "combined_text_subset": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0003_00/combined_text_subset.pt",
+    "sha256": "72f50f6f39d068254292af2ddca49917b02e0f61d8ffacfdce6db99020741cff",
+    "positive_queries": 54,
+    "canonical_negative_queries": 4,
+    "absolute_regions": 3859
+  },
+  "raw_combined_multiscale_scores": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0003_00/combined_raw_multiscale_scores.pt",
+    "sha256": "b94430c7a9c51a209aea49cda62a342d363323726617957bb069a1ac6f867280",
+    "shape": [200000, 3, 58],
+    "dtype": "float16",
+    "valid_primitives": 195910,
+    "completion_applied": false
+  },
+  "raw_sidecar": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0003_00/combined_raw_multiscale_scores.pt.json",
+    "sha256": "2241cf5b0d72d5b832c2a1d7add2a904cdb7efcd8ef1c59e49b8b1aed7b08836"
+  },
+  "source_assets": {
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+      "sha256": "28b56a2270917f290aa35bbb29542dfbbbdd657da6696f738b4bdc4f0c5f819e"
+    },
+    "source_full_scalar_shard": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0003_00/training_shard_v1.pt",
+      "sha256": "0f3354891f88ea12404d37f7f29d2c3a4e9f98cde0ff3bab771a81d630ea1af3"
+    },
+    "source_capability_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0003_00/region_capability_descriptors_v2.pt",
+      "sha256": "bac276a980a1891ecc45954a81534f4879c727b22be12178dd07b38fc205727a"
+    },
+    "source_membership_authority_deferred": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0003_00/source_region_comembership_authority_v2.pt",
+      "sha256": "59f6d431f24cdf2cac91a720e4875072c4f97c7094d6d18c793dcc47be02f058",
+      "payload_opened": false
+    }
+  },
+  "thermal_execution": {
+    "physical_gpu": 1,
+    "pacing_seconds_per_batch": 0.05,
+    "telemetry_poll_seconds": 300,
+    "maximum_observed_temperature_c": 63,
+    "maximum_observed_power_w": 138.32,
+    "thermal_pause_or_abort": false,
+    "foreign_compute_owner": false,
+    "CUDA_owner_released_after_completion": true
+  },
+  "deferred_validation_contract": {
+    "required_selector": "scene0001_plus_scene0002_multisource_selector_frozen_before_scene0003_membership_open",
+    "selector_or_threshold_refit_on_scene0003": false,
+    "scene0003_membership_payload_may_open_only_after_final_validation_authority_is_sealed": true
+  },
+  "source_access": {
+    "scene0003_membership_payload_opened": false,
+    "multisource_selector_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

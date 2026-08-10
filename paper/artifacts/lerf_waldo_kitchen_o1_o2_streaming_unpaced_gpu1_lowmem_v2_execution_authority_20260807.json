@@ -1,0 +1,158 @@
+{
+  "access_audit": {
+    "exact_o0_pair_opened": true,
+    "exact_query_axis_opened": true,
+    "source_feature_bundle_opened": true,
+    "source_responsibility_opened": true,
+    "target_ground_truth_opened": false,
+    "target_images_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "execution": {
+    "cuda_visible_devices": "1",
+    "maximum_temperature_c": 88,
+    "pacing_seconds_per_projection_batch": 0.0,
+    "physical_gpu": 1,
+    "program_device": "cuda:0",
+    "projection_batch_candidates": [
+      128,
+      64
+    ],
+    "soft_pause_temperature_c": 0,
+    "thermal_poll_seconds": 300
+  },
+  "feature_output_bundle_sha256": "e650014f7a4b5497818412ae80972c5b6b62c39f99964b92fb9f95ba1b0913a8",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced_gpu1_lowmem.py",
+    "sha256": "4ca34e3eac9833c2d1c0f79355db2388647947d38de5a81f304a44d7653f5748"
+  },
+  "inputs": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/waldo_kitchen.pt",
+      "sha256": "f8e368473fdbd3bec007eb17cf1ca0dc1db347acb6c7d6aeb48265b6c2c19a58"
+    },
+    "feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.json",
+      "sha256": "4a12657f0d0c2be97c1941eeae30c19ff6d2e6a4ed208e5ceedd345ab16d80f8"
+    },
+    "frozen_metric_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+      "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+    },
+    "negative_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_negatives_single.pt",
+      "sha256": "432348abb1fe33b265a0c0df56d0e0dec61e70119a87d11a8babfd59999dff37"
+    },
+    "o0_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_negative.pt",
+      "sha256": "3eb9a71ebd196687beebe5c3b6464aefb6ed88b38cab5a699a06413199dabfcb"
+    },
+    "o0_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_positive.pt",
+      "sha256": "c0a4d000c5b1bd05da9e3e30b18132bc8ecfd5476a35474f94dfa335f09b45ef"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "positive_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_queries_single.pt",
+      "sha256": "8872a922f8190684db0e0616c6047470394f59bd0816b3cf07b4cd27cdb5119b"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+    },
+    "responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "9d17c0ce6fb2c578800634d4ba21f6a778497c7276311c55c0b713aaba9982db"
+    },
+    "scene_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_waldo_kitchen_exact120_teacher.yaml",
+      "sha256": "c05808cf41dfc3935a3288bbe9cfe1ceda9867f9fd6cb3e0584307736aef9152"
+    }
+  },
+  "method_contract": {
+    "O1": {
+      "maximum_angle_radians": 0.15,
+      "operation": "closed_form_unit_sphere_geodesic_projection",
+      "per_scale": true
+    },
+    "O2": {
+      "operation": "normalized_equal_view_teacher_mean",
+      "repeated_scale_slots": 3
+    },
+    "O3_materialized": false,
+    "O4_materialized": false,
+    "canonical_negative_queries": [
+      "object",
+      "things",
+      "stuff",
+      "texture"
+    ],
+    "core_execution_physical_gpu_field_interpretation": "logical_cuda_ordinal_within_CUDA_VISIBLE_DEVICES",
+    "device_namespace_affects_method_numerics": false,
+    "durable_teacher_dtype": "torch.float16",
+    "execution_authority_physical_gpu_semantics": "host_nvidia_smi_index",
+    "gpu1_streaming_entrypoint": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced_gpu1.py",
+      "sha256": "18cf7fa8871422cd807937433835e8ce36c89bed9b369a7f193534fd6e2e1a07"
+    },
+    "host_cuda_visible_devices": "1",
+    "host_physical_gpu": 1,
+    "host_physical_gpu_bound_by_external_thermal_guard": true,
+    "metric_execution_authorized": false,
+    "per_scene_or_per_query_hyperparameters": false,
+    "program_logical_device": "cuda:0",
+    "projection_pacing_affects_method_numerics": false,
+    "projection_pacing_seconds_per_batch": 0.0,
+    "scale_ids": [
+      "0.25",
+      "0.45",
+      "0.7"
+    ],
+    "scale_radii_m": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "schema": "radio_gs.lerf_o1_o2_streaming_execution.v1",
+    "schema_version": 1,
+    "score_dtype": "torch.float32",
+    "score_semantics": "raw_independent_normalized_cosine",
+    "source_view_count": 120,
+    "streaming_core_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "teacher_aggregation": "equal_view_normalized_mean",
+    "teacher_mean_chunking_affects_method_numerics": false,
+    "teacher_mean_chunking_changes_only_allocation_schedule": true,
+    "teacher_mean_finalization": "row_chunked_fp32_top4_sum_v1",
+    "teacher_mean_finalization_chunk_rows": 4096,
+    "teacher_retention": "top4_exact_marginal_mass_desc_then_frame_id_asc",
+    "thermal_safety_owner": "external_300s_hard88_guard",
+    "top4_descriptors_durable": false,
+    "unpaced_streaming_entrypoint": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced.py",
+      "sha256": "e686f0d1dee5cc3a68a16dbf6cf00ce014f4e761b864716a062f365119e2eddc"
+    }
+  },
+  "method_contract_sha256": "ae57b558a02318d5b2223ee858cb71e3edf5e6327f1b577af89c5caebc7fe524",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "o1_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_negative.pt",
+    "o1_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_positive.pt",
+    "o2_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_negative.pt",
+    "o2_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_o2_streaming_result.json",
+    "teacher_mean": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_teacher_mean_fp16.pt"
+  },
+  "query_free_materialization_authorized": true,
+  "scene_id": "waldo_kitchen",
+  "schema": "radio_gs.lerf_o1_o2_streaming_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_premetric_o1_o2_streaming"
+}

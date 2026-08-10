@@ -1,0 +1,132 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_positive_utility_monotone_one_shot_preregistration.v1",
+  "schema_version": 1,
+  "status": "preregistered_single_candidate_before_target_quality_execution",
+  "scene": "figurines",
+  "single_candidate_no_sweep": true,
+  "primary_endpoint": "exact_macro_mIoU_under_frozen_vala_paper_3d",
+  "candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility_monotone.fix4c.pt",
+      "sha256": "3089fe4cc481d52a2f2c501591c639d8d913d7d123888903dc51a0b2d80849ff"
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility_monotone.fix4c.report.json",
+      "sha256": "89fc33471c8f2c086fe73d84fec1dccf8ae84c4ff2d8e0ff0384c45d6971897f"
+    },
+    "target_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_positive_utility_monotone_figurines_execution_authority_fix4c_20260807.json",
+      "sha256": "34204379bcacdb6722c5e1a49574ab4717abb8454407ec5d3451a584a26983e1"
+    },
+    "fix4c_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache_fix4c.py",
+      "sha256": "5070bb112590a43937e4ee1867ed57cd3d49027c5cf8bfca18a9f42f904a95e9"
+    },
+    "frozen_fix4b_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache.py",
+      "sha256": "79fee20a29b670dc1b2700bf42a9587f60efe71daed8a130d3d95f214f63e51e"
+    },
+    "positive_utility_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_anchored_positive_utility_residual.py",
+      "sha256": "b67385ec245e7ccae25d65f42b7df29debd90ff6fbcbb7d53eddb0a188b8b27c",
+      "contract_sha256": "04c864500f4607fe6fdeff9b4bd245de96f2e61e11ae9ca656873824d783fd28"
+    },
+    "source_contract": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_positive_utility_contract_result_fix4b_20260807.json",
+      "sha256": "0043b85c9c55f2532bb217a8c5126a7dfa3903e1c852073a3ca9be8a83a03280"
+    },
+    "structural_preflight": {
+      "query_count": 21,
+      "query_gate_true_count": 6,
+      "selected_region_count": 8,
+      "residual_mask_primitive_total": 1448,
+      "actual_strict_increase_total": 1446,
+      "quantized_no_change_total": 2,
+      "decrease_total": 0,
+      "outside_selected_union_bitwise_O0": true,
+      "failed_gate_bitwise_O0": true,
+      "invalid_primitive_bitwise_O0": true,
+      "selected_updates_non_decreasing": true
+    }
+  },
+  "control": {
+    "name": "frozen_exact_O0",
+    "miou": 0.4753887355327606,
+    "authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_official_fp32_score_cache_exact_eval_results_20260805.json",
+      "sha256": "c556bece1cda1a6b8f2f99d5eb7be518d95210be6ccc05429ac344b9c3b7c9ea"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_direct3d_accepted_v2_fp32_exact_explicit_f32_v2/figurines/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "4bbd8c963898b9dd7fb47dfa75dbea28f6062ecca8d8c74ccb2fbc9b2dcbfc12"
+    }
+  },
+  "frozen_protocol": {
+    "preset": "vala_paper_3d",
+    "score_postprocess": "none",
+    "selection_threshold": 0.6,
+    "selection_comparison": "strictly_greater_than",
+    "projection": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "frames": "official_only",
+    "reason_for_score_postprocess_none": "candidate_cache_already_contains_canonical_negative_knn_minmax_and_peak_scale_selected_final_scores"
+  },
+  "metric_inputs": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "renderer_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "text_embedding_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_directory": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+  },
+  "output": {
+    "directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/evaluation/figurines_positive_utility_fix4c_one_shot",
+    "must_not_exist_before_execution": true,
+    "thermal_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/positive_utility_fix4c_one_shot_gpu1_thermal.csv",
+    "owner_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/positive_utility_fix4c_one_shot_gpu1_owners.csv"
+  },
+  "gpu_policy": {
+    "physical_gpu": 1,
+    "CUDA_VISIBLE_DEVICES": "1",
+    "evaluator_gpu_argument": 0,
+    "power_limit_watts": 300.0,
+    "launch_max_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "consecutive_hard_polls_before_stop": 6,
+    "poll_seconds": 30,
+    "soft_pause_disabled": true
+  },
+  "promotion_rule": {
+    "metric": "exact_macro_mIoU",
+    "comparison": "candidate_strictly_greater_than_control_plus_tolerance",
+    "tolerance": 1e-12,
+    "failure_action": "do_not_promote_and_do_not_sweep_within_this_one_shot"
+  },
+  "access_audit": {
+    "candidate_target_quality_executed_before_preregistration": false,
+    "candidate_target_labels_or_masks_opened_before_preregistration": false,
+    "historical_control_metric_known": true,
+    "target_query_names_used_for_cache_alignment": true
+  }
+}

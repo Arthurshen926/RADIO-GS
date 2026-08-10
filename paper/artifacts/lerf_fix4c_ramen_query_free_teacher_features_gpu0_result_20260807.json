@@ -1,0 +1,69 @@
+{
+  "schema": "radio_gs.lerf_fix4c_query_free_teacher_feature_result.v1",
+  "schema_version": 1,
+  "status": "query_free_teacher_feature_bundle_complete",
+  "scene_id": "ramen",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_fix4c_ramen_query_free_teacher_features_gpu0_execution_authority_20260807.json",
+    "sha256": "a19d1deb235bacbd47bc86e7a92019c2425212ddf5ba2e10b6c46e2e402e34a2"
+  },
+  "output": {
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1/frame_manifest.json",
+      "sha256": "70c54e2efa63ca17fd7813fbfb06a67338fc23f9fcf510d34d0d6e94276fa301"
+    },
+    "output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292",
+    "resume_contract": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1/.extract_resume_contract.json",
+      "sha256": "ab75cdf67a189b1eb3d4c9cfcf64b98040a9fb844bf5b4699fce3d9627d4cf52"
+    },
+    "frames": 120,
+    "backbone_shape_per_frame": [1280, 46, 62],
+    "backbone_dtype": "torch.float16",
+    "summary_dimension": 2560,
+    "summary_dtype": "torch.float32",
+    "logical_disk_megabytes": 836.7
+  },
+  "execution": {
+    "elapsed_seconds": 101.1,
+    "seconds_per_frame": 0.84,
+    "strict_committed_frame_resume": true,
+    "heldout_frames_excluded_before_model_execution": true,
+    "gpu0_max_temperature_c": 63,
+    "gpu0_max_power_w": 199.69,
+    "gpu0_power_limit_w": 300.0
+  },
+  "telemetry": {
+    "thermal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/ramen_fix4c_teacher_features_gpu0_thermal.csv",
+      "sha256": "73a0747ea3c91f22c3d22ca9969f623ba8e309603c13acdf6a2a08a595d85535"
+    },
+    "owners": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/ramen_fix4c_teacher_features_gpu0_owners.csv",
+      "sha256": "77c30d4376a257272ed903d17ff0ce50f321b8f1afb4915a483ae48d16b2f7bb"
+    }
+  },
+  "verification": {
+    "tests": [
+      "tests/test_extract_radio_features_resume.py",
+      "tests/test_gaussian_multiview_teacher_cache.py"
+    ],
+    "passed": 38,
+    "failed": 0
+  },
+  "next_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_fix4c_ramen_factorized_raw_exact_marginal_gpu0_execution_authority_20260807.json",
+    "sha256": "04cadcfeedd26489444c8b37456e5b171c75eb00d4d147f3ccf142bda83703e8"
+  },
+  "next_stage_status": "ready_but_waiting_for_gpu0_teatime_owner_to_release",
+  "metric_execution_performed": false,
+  "access_audit": {
+    "benchmark_holdout_images_opened": false,
+    "canonical_dev_holdout_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_queries_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  }
+}

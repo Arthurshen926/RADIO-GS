@@ -1,0 +1,45 @@
+{
+  "schema": "radio_gs.lerf_official_crop_summary_heldout_launcher_failure_addendum.v1",
+  "schema_version": 1,
+  "status": "authorized_launcher_only_continuation_after_pre_gpu_failure",
+  "date": "2026-08-09",
+  "failed_attempts": {
+    "ramen": {
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_official_crop_summary_source_heldout_gpu0_execution_authority_20260809.json",
+        "sha256": "890b8c9d018a5843a41213a79a036fd72675cca85f9e602eb2067f53b9839c6d"
+      },
+      "exit_code": 1,
+      "result_output_absent_after_failure": true
+    },
+    "teatime": {
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_official_crop_summary_source_heldout_gpu1_execution_authority_20260809.json",
+        "sha256": "b67acb30f7a68912a246a1c609ca21ea5d1c6f9806f8f3eb3bbc07a3c4b05eba"
+      },
+      "exit_code": 1,
+      "result_output_absent_after_failure": true
+    }
+  },
+  "failure": {
+    "type": "PermissionError",
+    "message": "[Errno 13] Permission denied: /root/RADIO-GS/radio_gs/scripts/run_repo_python.sh",
+    "stage": "subprocess launch before audit_mpr_view_consistency process creation",
+    "gpu_computation_started": false,
+    "source_result_written": false,
+    "target_data_or_metrics_opened": false,
+    "cause": "the sealed command invoked the non-executable repository Python launcher as an executable instead of through bash"
+  },
+  "continuation": {
+    "authorized_change": "prepend exactly one bash token to each sealed command",
+    "all_original_command_tokens_preserved_in_order": true,
+    "input_paths_or_hashes_changed": false,
+    "frame_ids_changed": false,
+    "device_changed": false,
+    "audit_implementation_changed": false,
+    "numeric_method_changed": false,
+    "result_paths_changed": false,
+    "retry_scope": "same source-only readiness audit only",
+    "target_metric_execution_authorized": false
+  }
+}

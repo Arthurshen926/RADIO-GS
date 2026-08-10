@@ -1,0 +1,45 @@
+{
+  "schema": "radio_gs.lerf_source_only_all_available_view_gate_manifest.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_gate_inputs",
+  "scenes": [
+    {
+      "scene_id": "teatime",
+      "legacy_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+        "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+      },
+      "candidate_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_teacher_mean_fp16.pt",
+        "sha256": "c57cdc21dd0c732bb0318d2c0d3fc7c94800dbea82bb5adc04e126fb6d6a5fa0"
+      }
+    },
+    {
+      "scene_id": "waldo_kitchen",
+      "legacy_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/waldo_kitchen/waldo_kitchen_teacher_mean_fp16.pt",
+        "sha256": "a2d8f65394df59404e4797737526e6a064ab4b7123748505e9f5b7fdf32bfd76"
+      },
+      "candidate_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/o1_o2_teacher_agreement/waldo_kitchen_all_available_teacher_mean_fp16.pt",
+        "sha256": "a1dbd53833cb556f14a6c9eed4ebf7da706a83dcf94b63f311c2807d2d9376cd"
+      }
+    }
+  ],
+  "selection_rule": {
+    "coverage_nonregression": true,
+    "retained_view_count_elementwise_nonregression": true,
+    "loo_direction_mean_cosine_nonregression": true,
+    "frozen_o1_0p15_source_mean_cosine_nonregression": true,
+    "aggregate_compensation_for_scene_regression": false,
+    "per_scene_or_per_query_tuning": false
+  },
+  "access_audit": {
+    "source_teacher_payloads_authorized": true,
+    "target_images_authorized": false,
+    "queries_authorized": false,
+    "labels_or_masks_authorized": false,
+    "target_metrics_authorized": false
+  },
+  "metric_execution_authorized": false
+}

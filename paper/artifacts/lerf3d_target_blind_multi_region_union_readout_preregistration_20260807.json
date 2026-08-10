@@ -1,0 +1,44 @@
+{
+  "artifact": "lerf3d_target_blind_multi_region_union_readout_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_development_oracle_diagnosis_but_before_candidate_implementation_or_candidate_metric",
+  "development_evidence": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_support_readout_oracle_d0_d5_figurines_v2/sealed_run/result.json",
+    "sha256": "775df3adff6ac95aba1dd3061e6202fa8501405bdc768d1a1e2cf2b951c2aba1",
+    "D2_single_region_fixed_iou": 0.37671367448205106,
+    "D3_eight_region_gt_oracle_fixed_iou": 0.7712979414964831,
+    "D3_selected_purity": 0.9617678067928489,
+    "D3_positive_coverage": 0.8014539782135564,
+    "interpretation": "The registered semantic-core basis is expressive, but a single selected region is structurally insufficient. This development oracle is not benchmark performance."
+  },
+  "candidate": {
+    "name": "target_blind_greedy_novelty_union_v1",
+    "input_score_semantics": "canonical_negative_bernoulli_probability_after_the_existing_fixed_query_readout",
+    "input_region_membership": "registered_surface_region_semantic_core_only",
+    "score_gate": 0.6,
+    "maximum_selected_regions_per_query": 8,
+    "selection_utility": "region_probability_times_fraction_of_core_rows_not_yet_covered",
+    "iteration": "select the maximum positive utility among unselected score-gated regions",
+    "tie_break": "smaller immutable candidate row index",
+    "stop": "eight regions selected or no score-gated region has positive uncovered utility",
+    "output": "binary union of selected semantic-core primitive rows",
+    "unsupported_primitive_probability": 0.0,
+    "ground_truth_access": false,
+    "scene_specific_parameters": false,
+    "connected_component_selection": false,
+    "graph_parameter_sweep": false,
+    "threshold_sweep": false
+  },
+  "constant_provenance": {
+    "score_gate_0p6": "existing frozen LERF fixed score threshold",
+    "maximum_regions_8": "maximum union size sealed in the D0-D5 oracle before its metric",
+    "novelty_fraction": "scale-invariant set-cover marginal utility; no metric-derived coefficient"
+  },
+  "evaluation_gate": {
+    "first_candidate": "Figurines development sentinel",
+    "promotion_requires": "improve fixed mIoU and not materially regress AP/oracle IoU versus exact same-run O0",
+    "other_lerf_scenes_before_sentinel_pass": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "artifact": "source_only_region_comembership_v2_scene0008_capability_descriptor_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:50:20+08:00",
+  "status": "sealed_after_accepted_v2_and_capability_bank_success_and_before_descriptor_materialization",
+  "scene_id": "scene0008_00",
+  "split": "source_validation",
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_region_capability_descriptors_v2.py",
+    "sha256": "09d69fd6e50b4e2d6cdc4a6b1430562cb6ea336655d13a2700deadf0de4032bc"
+  },
+  "inputs": {
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/accepted_v2_sparse_v2.pt",
+      "sha256": "56fdd38079300e06d129763a38ac56e5186c1aa9fea15d354046ace830d2eaae"
+    },
+    "canonical_capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/canonical_capability_bank.pt",
+      "sha256": "d7917dfbe28ab3fbf8438783d3bd1635b10c860611d7009f7c48efd4152b8b17"
+    },
+    "factorized_field_checkpoint_sha256": "eedf3c12850e368eef3b7c44e88c64be83fe48e70f279749d29c3d76feebaf2b"
+  },
+  "pooling_contract": {
+    "batch_size": 16,
+    "device": "cpu",
+    "primitive_normalization": "explicit_l2",
+    "aggregation": "uniform_mean_over_unpadded_region_tokens",
+    "direction": "l2_normalized_mean",
+    "concentration": "l2_norm_of_mean_primitive_unit_directions",
+    "storage": "float16_direction_float32_concentration",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0008_00/region_capability_descriptors_v2.pt",
+  "source_access": {
+    "source_instance_labels_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

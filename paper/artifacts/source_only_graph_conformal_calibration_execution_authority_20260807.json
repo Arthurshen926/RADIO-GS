@@ -1,0 +1,94 @@
+{
+  "schema": "radio_gs.source_only_graph_calibration_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_calibration",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/calibrate_source_only_graph_confidence_v1.py",
+    "sha256": "c9132d64bdf3650cd82d9ce6884ad1b9f122c2b467216e143e1368bbc1b1d60f"
+  },
+  "residual_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_anchored_conformal_residual.py",
+    "sha256": "8fccbff2add6f68e3b43f05278573036a1884d348b1c8506e4afe644d33472a6"
+  },
+  "residual_interface_contract_sha256": "3375422ee1e3e28098e3e622768d2a3ee3006020d6bec587268cd864240a788b",
+  "source_training_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_execution_authority.json",
+    "sha256": "0c3eaf3b8c6557bc8bb3cd65cf1bc358ed27856cf7e5864fccc7694aaffd8f48"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_checkpoint.pt",
+    "sha256": "8b108930fd4c187f1eee1ec36076c0b0964a331ba1c4b4ba3bdf343bb634d04e"
+  },
+  "source_train": [
+    {
+      "scene_id": "scene0001_00",
+      "authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0001_00/source_region_comembership_authority_v2.pt",
+        "sha256": "a8229d4f241308275f64836124a7efd28cf48a3bc92d0a438cd57c2f5993ee63"
+      }
+    },
+    {
+      "scene_id": "scene0002_00",
+      "authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0002_00/source_region_comembership_authority_v2.pt",
+        "sha256": "76a5f72c89cc4ea6458355c99eabe194cd47cce8ce857071bcd1be61b319906f"
+      }
+    },
+    {
+      "scene_id": "scene0003_00",
+      "authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0003_00/source_region_comembership_authority_v2.pt",
+        "sha256": "59f6d431f24cdf2cac91a720e4875072c4f97c7094d6d18c793dcc47be02f058"
+      }
+    },
+    {
+      "scene_id": "scene0005_00",
+      "authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0005_00/source_region_comembership_authority_v2.pt",
+        "sha256": "6d1ac3f6ab57b6dad8a4f4fbacb4b4473a86abbb113d1af6f708c919b91d32f3"
+      }
+    }
+  ],
+  "source_validation": [
+    {
+      "scene_id": "scene0004_00",
+      "authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0004_00/source_region_comembership_authority_v2.pt",
+        "sha256": "e574871744491c1ee20c933c4340c4904a33ff252c02841bd27961283bb7f646"
+      }
+    },
+    {
+      "scene_id": "scene0008_00",
+      "authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0008_00/source_region_comembership_authority_v2.pt",
+        "sha256": "35d996a48a848034eedfc59df381869dd03ab9952b7f7278c18170139b857180"
+      }
+    }
+  ],
+  "fixed_method": {
+    "raw_edge_probability_minimum": 0.9,
+    "one_sided_confidence": 0.95,
+    "tail_quantile": 0.99,
+    "novel_mass_reference": 256.0,
+    "null_steps": 3,
+    "anchor_quorum": 2,
+    "o0_core_supermajority": 0.75,
+    "maximum_null_activation": 0.0,
+    "minimum_stability": 1.0
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "source_query_evidence_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

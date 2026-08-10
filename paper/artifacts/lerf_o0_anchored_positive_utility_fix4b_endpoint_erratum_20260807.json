@@ -1,0 +1,31 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_positive_utility_fix4b_endpoint_erratum.v1",
+  "schema_version": 1,
+  "status": "fix4b_cache_superseded_by_fix4c_before_metric",
+  "superseded_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility.fix4b.pt",
+    "sha256": "0b3bec77e62623c3f592ca4478c2a06c26ccd94ab91e49c108b5f160a4ed761a"
+  },
+  "superseded_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility.fix4b.report.json",
+    "sha256": "0c9e5e38ce4132429dcd9380ef08287c5cafe21636d0f6e0129211903977fe1d"
+  },
+  "issue": {
+    "cause": "finite_logit_clamp_recomputed_two_selected_exact_O0_probability_one_endpoints",
+    "affected_primitive_query_entries": 2,
+    "maximum_decrease": 1.1920928955078125e-07,
+    "unaffected_invariants": [
+      "outside_selected_region_union_is_bitwise_exact_O0",
+      "failed_query_gate_is_bitwise_exact_O0",
+      "invalid_primitive_is_bitwise_exact_O0"
+    ]
+  },
+  "formal_metric_authorized": false,
+  "target_metric_executed": false,
+  "target_GT_opened": false,
+  "replacement_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_positive_utility_monotone_figurines_execution_authority_fix4c_20260807.json",
+    "sha256": "34204379bcacdb6722c5e1a49574ab4717abb8454407ec5d3451a584a26983e1"
+  },
+  "replacement_policy": "FIX4C_monotone_probability_fusion_no_other_method_or_selection_change"
+}

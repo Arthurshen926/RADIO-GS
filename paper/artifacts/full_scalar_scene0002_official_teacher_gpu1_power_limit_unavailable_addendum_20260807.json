@@ -1,0 +1,22 @@
+{
+  "artifact": "full_scalar_scene0002_official_teacher_gpu1_power_limit_unavailable_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:59:00+08:00",
+  "status": "sealed_after_failed_power_limit_request_and_before_batch2_restart",
+  "parent_addendum": "paper/artifacts/full_scalar_scene0002_official_teacher_gpu1_batch4_abort_and_batch2_restart_addendum_20260807.json",
+  "requested_change": "temporarily lower physical GPU1 power limit from 300W to 250W",
+  "result": "nvidia-smi rejected the request with Insufficient Permissions because the container lacks host power-management capability",
+  "physical_gpu1_power_limit_after_request_w": 300,
+  "gpu_configuration_changed": false,
+  "restart_policy": {
+    "crop_batch_size": 2,
+    "power_limit_w": 300,
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "fallback_if_batch2_repeats_abort": "clean restart at crop batch size 1, not another batch2 retry"
+  },
+  "method_inputs_outputs_and_protocol_unchanged": true,
+  "benchmark_metric_opened": false,
+  "training_executed": false
+}

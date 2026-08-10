@@ -1,0 +1,77 @@
+{
+  "schema": "radio_gs.lerf_source_marginal_copula_grid_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_source_only_before_execution",
+  "scientific_question": "Can genuine crop-summary MPR improve target-blind source response and support topology when restricted to an observation-barrier-aware copula residual with the exact accepted O2 empirical marginal?",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_source_marginal_copula_residual_grid.py",
+    "sha256": "e87e8aa3fef8af20af875963822f9fe23bac41542f81e9a7065859e380230968"
+  },
+  "interface_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_marginal_preserving_copula_residual.py",
+    "sha256": "f2cff65b32bacb3adc14b71a12fa2e2f2534d7a7216fda0c12e4c9c94d449347"
+  },
+  "interface_contract": "lerf-accepted-marginal-bounded-copula-residual-v1",
+  "split": "dev",
+  "policies": [
+    {"policy_id": "b05_s1", "strength": 1.0, "maximum_rank_fraction": 0.05},
+    {"policy_id": "b10_s1", "strength": 1.0, "maximum_rank_fraction": 0.1},
+    {"policy_id": "b40_s05", "strength": 0.5, "maximum_rank_fraction": 0.4}
+  ],
+  "source_authorities": {
+    "ramen": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_v2_gpu0_execution_authority_20260809.json",
+      "sha256": "2944a8d43b7c09f30aa4ef4e7957268c291e41dc19334e63a26eb5ea7400d0b3"
+    },
+    "teatime": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_v2_gpu1_execution_authority_20260809.json",
+      "sha256": "3ecb70e31089b92b9e6c922fd89513b5c4bd68b6e780c0d40edcc217417ccbde"
+    }
+  },
+  "decision_rule": {
+    "one_global_policy": true,
+    "eligibility": [
+      "strict pooled response MAE improvement",
+      "strict pooled ranking Spearman improvement",
+      "strict pooled top-decile overlap improvement",
+      "every source scene nonregression on all six frozen response metrics",
+      "every source scene top-decile boundary-F nonregression",
+      "every source scene top-decile component-count absolute-error nonregression",
+      "exact accepted empirical marginal on every frame and query",
+      "zero selected-count error on every generic-query top-decile support"
+    ],
+    "selection": "highest pooled ranking Spearman among eligible candidates; tie break by policy order",
+    "fallback": "unchanged accepted O2",
+    "per_scene_or_per_query_tuning": false,
+    "reserved_audit90_opened_during_development": false
+  },
+  "development_disclosure": {
+    "superseded_v1_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_marginal_copula_residual_dev101_preregistration_20260809.json",
+      "sha256": "8fc0ea5710f8bd6b2c46eec2c928e9dfd8297e7fccd5cf46e882d2ec16b88eb6"
+    },
+    "v1_ramen_source_result_opened": true,
+    "v1_teatime_interrupted_before_result": true,
+    "v2_changes": [
+      "formal [N,Q] benchmark adapter",
+      "zero-gate fixed-rank observation barriers",
+      "top-decile boundary-F and component-count no-harm gate",
+      "reduced representative source-development grid"
+    ],
+    "benchmark_queries_masks_labels_or_target_metrics_opened": false
+  },
+  "application_boundary": {
+    "required_target_location": "after the complete frozen canonical-negative plus valid-domain-KNN10 plus per-scale-minmax compiler",
+    "formal_score_shape": "[primitive,query]",
+    "accepted_score_multiset_preserved_exactly_per_query": true,
+    "selected_count_preserved_at_every_fixed_threshold": true,
+    "zero_gate_item_is_fixed_rank_barrier": true,
+    "LERF_text_direct_observation_authority": 0,
+    "maximum_item_rank_displacement": "ceil(maximum_rank_fraction*N)-1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

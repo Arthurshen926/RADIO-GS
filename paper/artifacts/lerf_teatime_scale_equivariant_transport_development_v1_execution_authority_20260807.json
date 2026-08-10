@@ -1,0 +1,143 @@
+{
+  "access_audit": {
+    "base_descriptor_opened": true,
+    "exact_o0_pair_opened": true,
+    "exact_query_axis_opened": true,
+    "independent_scale_selector_opened_for_development_grid_only": true,
+    "target_ground_truth_opened": false,
+    "target_images_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false,
+    "teacher_agreement_v2_opened": true
+  },
+  "development_materialization_authorized": true,
+  "execution": {
+    "cuda_visible_devices": "1",
+    "maximum_temperature_c": 88,
+    "physical_gpu": 1,
+    "program_device": "cuda:0",
+    "row_batch_size": 256,
+    "thermal_safety_owner": "external_300s_hard88_guard"
+  },
+  "formal_transport_ceiling_authorized": false,
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_scale_equivariant_transport_candidate_scores.py",
+    "sha256": "2dd284040460f94f2e5448d9be7bef2d61b70e6ec63f32b8ead65e9f7ddd3e83"
+  },
+  "inputs": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/teatime.pt",
+      "sha256": "5642dc69902a6b25aae18630a3f7e85abf1a5b7fcc5e17f5ced23c4653916e45"
+    },
+    "global_ceiling_selector": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_only_global_ceiling_lowmem_lineage_compatibility_result_20260807.json",
+      "sha256": "b747b23ad3ecd5c3cfcba93d24b1379072f99fe7d30a25f709e8ba98db462c2c"
+    },
+    "negative_text": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "o0_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/teatime_negative.pt",
+      "sha256": "a3aa48829fdc1be908dfae4da66bf5db8f9c6e46ca06c39b9a595839587e5b02"
+    },
+    "o0_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/teatime_positive.pt",
+      "sha256": "320a42e3b51d8585efc048c05a6c783ea82b7a15ad792865c5028b527495be7e"
+    },
+    "positive_text": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_teatime_officialcanonical_prompt5.pt",
+      "sha256": "ecc942ae3ac2e43d1a503a4bb606baf35d7d1b3fa3d49b85ed2641117ef9c6a0"
+    },
+    "teacher_agreement_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+      "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+    }
+  },
+  "method_contract": {
+    "candidate_grid_radians": [
+      0.15,
+      0.3,
+      0.45,
+      0.6,
+      0.75
+    ],
+    "descriptor_materialization": "row_batch_only",
+    "development_status": "requires_new_source_only_transport_loo_before_formal_target_claim",
+    "fallback_score_semantics": "bitwise_exact_o0_cache",
+    "full_n_by_3_by_d_candidate_descriptor_allocated": false,
+    "immutable_backbone": "accepted_v2_o0_descriptor_three_scale_frame",
+    "metric_execution_authorized": false,
+    "old_selector_authorizes_transport": false,
+    "one_global_ceiling": true,
+    "post_rotation_descriptor_renormalization": false,
+    "query_independent_transport": true,
+    "row_batch_size": 256,
+    "scene_or_query_specific_parameters": false,
+    "schema": "radio_gs.lerf_scale_equivariant_transport_execution.v1",
+    "schema_version": 1,
+    "score_dtype": "torch.float32",
+    "score_input": "l2_normalize(rotated_descriptor_only_for_cosine_readout)",
+    "score_semantics": "raw_independent_normalized_cosine",
+    "target_data_or_metric_access": false,
+    "teacher_payload": "validated_teacher_agreement_v2_or_lowmem",
+    "tentative_ceiling_source": "old_independent_scale_source_only_selector_grid_and_value_only",
+    "transport_contract": {
+      "angular_budget": "0.15+(0.75-0.15)*reliability",
+      "antipodal_policy": "bitwise_o0_fallback",
+      "candidate_grid_radians": [
+        0.15,
+        0.3,
+        0.45,
+        0.6,
+        0.75
+      ],
+      "conservative_angle_radians": 0.15,
+      "frame_anchor": "normalize(mean_s(o0_scale_s_as_stored))",
+      "global_ceiling_attenuation": "(ceiling-0.15)/(0.75-0.15)",
+      "immutable_backbone": "accepted_v2_o0_descriptor_three_scale_frame",
+      "invalid_teacher_policy": "bitwise_o0_fallback",
+      "invariants": [
+        "per_scale_l2_norm",
+        "three_by_three_pairwise_gram"
+      ],
+      "maximum_interface_angle_radians": 0.75,
+      "old_independent_scale_selector_directly_authorizes_transport": false,
+      "plane": "span(frame_anchor,teacher)",
+      "post_rotation_renormalization": false,
+      "query_independent": true,
+      "reliability": "sqrt(count_sufficiency*teacher_view_directional_resultant)*global_ceiling_attenuation",
+      "rotation": "x+(cos(phi)-1)*(<x,a>*a+<x,e2>*e2)+sin(phi)*(<x,a>*e2-<x,e2>*a)",
+      "same_direction_policy": "bitwise_o0_fallback",
+      "same_orthogonal_map_for_all_scales": true,
+      "scene_or_query_specific_parameters": false,
+      "schema": "radio_gs.lerf_scale_equivariant_geodesic_transport.v1",
+      "schema_version": 1,
+      "single_view_policy": "common_rotation_with_exact_0.15_budget",
+      "source_only_validation": {
+        "baseline": "same_transport_with_0.15_ceiling",
+        "evaluation_unit": "heldout_source_view_x_o0_scale",
+        "every_source_scene_nonregression_required": true,
+        "one_global_ceiling_required": true,
+        "pooled_improvement_required": true,
+        "prediction": "leave_one_retained_source_view_out"
+      },
+      "target_labels_masks_metrics_consumed": false,
+      "teacher": "normalized_equal_view_source_teacher_mean",
+      "undefined_frame_mean_policy": "bitwise_o0_fallback"
+    },
+    "transport_contract_sha256": "04843d109308d67efd34fd2001b8f6879b7a08f42f167a971e06ae57a9cf5470"
+  },
+  "method_contract_sha256": "8b4fe41381851b92e8324738682a1cc9e032f95ae0ecc59c1bd54f8174fcfbf8",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_negative.pt",
+    "positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_result.json"
+  },
+  "scene_id": "teatime",
+  "schema": "radio_gs.lerf_scale_equivariant_transport_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_development_scale_equivariant_transport_sentinel"
+}

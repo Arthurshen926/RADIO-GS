@@ -1,0 +1,172 @@
+{
+  "schema": "radio_gs.lerf_scale_equivariant_transport_development_result.v1",
+  "schema_version": 1,
+  "status": "complete_negative_development_sentinel_stop_before_cross_scene_loo",
+  "scene_id": "teatime",
+  "development_only": true,
+  "formal_transport_ceiling_authorized": false,
+  "single_candidate_no_sweep": true,
+  "method": {
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_scale_equivariant_geodesic_transport.py",
+      "sha256": "06da87702e4095d7c57cb27985d756d71907c678044c9816b3207855dbf192b3"
+    },
+    "transport_contract_sha256": "04843d109308d67efd34fd2001b8f6879b7a08f42f167a971e06ae57a9cf5470",
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_scale_equivariant_transport_candidate_scores.py",
+      "sha256": "872da05bbe0d330e79b032e1c8c0eff63df8625c83c6016f436084ecdae8afd8"
+    },
+    "method_contract_sha256": "8b4fe41381851b92e8324738682a1cc9e032f95ae0ecc59c1bd54f8174fcfbf8",
+    "specialized_tests_passed": 11,
+    "source_only_transport_loo_statistic_implemented_and_unit_tested": true,
+    "source_only_transport_loo_executed_on_full_source_scenes": false
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_scale_equivariant_transport_development_sentinel_preregistration_20260807.json",
+    "sha256": "bf591dba3c9e1d1ffd62ab0b0eecb1a372214d03dd4df7e68ec3ff3d10d0fd5b"
+  },
+  "materialization": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_fix1_execution_authority_20260807.json",
+      "sha256": "cfbacd96c8991f15cb6293f39b3c41ffe7dcd561c0be1140eb1ed92f8c90b9aa"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_result.json",
+      "sha256": "1c148075c7eedd36819bfb2af56778da03df36b0f5a95e018593480f14a25187"
+    },
+    "accepted_rows": 334250,
+    "rows_with_score_replacement": 334161,
+    "rows_with_expanded_budget": 331956,
+    "maximum_per_scale_norm_absolute_error": 2.384185791015625e-7,
+    "maximum_scale_gram_absolute_error": 5.364418029785156e-7,
+    "invariants_passed": true
+  },
+  "metric": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "79e54809f29f0ed2d5968325f13449283fc61302474566e5bbaae7f15c6ddd98"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/evaluation/exact_development_sentinel_v1/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "89005edb7e7fa144fd3a29434c426c9732f68d2bbf8d0ccdac08caeb4b0b763c"
+    },
+    "frozen_protocol": {
+      "config_sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775",
+      "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+      "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+      "protocol_preset": "vala_repo_3d",
+      "ours_query_contrast": "none",
+      "ours_scale_fusion": "peak_select"
+    }
+  },
+  "metrics": {
+    "O0": {
+      "miou": 0.404494971036911,
+      "acc025": 0.7457627118644068,
+      "acc050": 0.3050847457627119,
+      "boundary_f": 0.5610557198524475,
+      "trimap_iou": 0.44391149282455444
+    },
+    "O1": {
+      "miou": 0.4942660927772522,
+      "acc025": 0.847457627118644,
+      "acc050": 0.559322033898305,
+      "boundary_f": 0.7052473425865173,
+      "trimap_iou": 0.42199259996414185
+    },
+    "O2": {
+      "miou": 0.5255449414253235,
+      "acc025": 0.8813559322033898,
+      "acc050": 0.5084745762711864,
+      "boundary_f": 0.7528204321861267,
+      "trimap_iou": 0.37641486525535583
+    },
+    "reliability_v1": {
+      "miou": 0.5258249640464783,
+      "acc025": 0.8813559322033898,
+      "acc050": 0.5084745762711864,
+      "boundary_f": 0.7528097033500671,
+      "trimap_iou": 0.37652650475502014
+    },
+    "scale_equivariant_transport": {
+      "miou": 0.5046792030334473,
+      "acc025": 0.847457627118644,
+      "acc050": 0.4745762711864407,
+      "boundary_f": 0.7349898219108582,
+      "trimap_iou": 0.37702152132987976,
+      "n": 59
+    }
+  },
+  "miou_deltas": {
+    "transport_minus_O0": 0.10018423199653625,
+    "transport_minus_O1": 0.010413110256195068,
+    "transport_minus_O2": -0.02086573839187622,
+    "transport_minus_reliability_v1": -0.021145761013031006
+  },
+  "paired_frame_query_bootstrap": {
+    "seed": 20260807,
+    "resamples": 20000,
+    "transport_minus_O0": {
+      "mean_delta": 0.1001842297744351,
+      "improved": 42,
+      "equal": 0,
+      "worsened": 17,
+      "ci95": [0.04732288610105043, 0.1545370012377212],
+      "probability_nonpositive": 0.0
+    },
+    "transport_minus_O1": {
+      "mean_delta": 0.01041308174110067,
+      "improved": 33,
+      "equal": 0,
+      "worsened": 26,
+      "ci95": [-0.031748170642646116, 0.05363296559154142],
+      "probability_nonpositive": 0.3204
+    },
+    "transport_minus_O2": {
+      "mean_delta": -0.020865718813178384,
+      "improved": 15,
+      "equal": 10,
+      "worsened": 34,
+      "ci95": [-0.049525206431588864, -0.0013270552545257518],
+      "probability_nonpositive": 0.9998
+    },
+    "transport_minus_reliability_v1": {
+      "mean_delta": -0.021145748652997627,
+      "improved": 14,
+      "equal": 16,
+      "worsened": 29,
+      "ci95": [-0.04981952429218402, -0.001617003810017478],
+      "probability_nonpositive": 1.0
+    }
+  },
+  "selected_scale_indices": {
+    "O0": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    "O1": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+    "O2": [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+    "reliability_v1": [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 2, 0, 2],
+    "scale_equivariant_transport": [1, 2, 1, 0, 2, 0, 1, 0, 0, 1, 1, 0, 0, 0]
+  },
+  "execution_audit": {
+    "physical_gpu": 1,
+    "materialization_telemetry": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_fix1_gpu1_telemetry_20260807.csv",
+      "sha256": "1f92c80952a38b0f213234178ee161fdf8ac112fc13303d29ad8ad498df1f8c3",
+      "peak_temperature_c": 52,
+      "peak_power_w": 125.65
+    },
+    "metric_telemetry": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_exact_metric_gpu1_telemetry_20260807.csv",
+      "sha256": "0376cfeaad95a0e66d2c3c3b123b0cd3acde5b4813085aca8f36e6d4fd853b95",
+      "peak_temperature_c": 55,
+      "peak_power_w": 126.5
+    },
+    "thermal_guard_triggered": false,
+    "foreign_gpu_owner_observed": false
+  },
+  "conclusion": {
+    "invariant_result": "The common rotation achieves its exact structural goal: actual stored-scale norms and the complete three-by-three Gram are preserved to below 5.4e-7 absolute error.",
+    "benchmark_result": "Despite preserving scale geometry, it is 2.09 mIoU points below O2 and 2.11 points below reliability-v1; the paired CI excludes zero in the harmful direction.",
+    "diagnosis": "Relative scale geometry is not the only missing capability. A rigid rotation changes the absolute semantic orientation of every scale, including already-correct O0/O1 directions, and therefore restores scale diversity without restoring high-confidence query precision.",
+    "gate_decision": "Stop this branch before expensive full Ramen-plus-Teatime source-only LOO and do not tune the ceiling on Teatime. The source-only statistic remains implemented for future use, but this target sentinel does not justify formal promotion."
+  }
+}

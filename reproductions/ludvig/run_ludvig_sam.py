@@ -224,7 +224,10 @@ def _runtime_environment(args: argparse.Namespace) -> tuple[dict[str, str], Path
     driver_library_dir = args.driver_library_dir.resolve()
     driver_library = _driver_library(driver_library_dir)
     environment = os.environ.copy()
-    environment["CUDA_VISIBLE_DEVICES"] = "0"
+    physical_gpu = int(getattr(args, "physical_gpu", 0))
+    if physical_gpu not in (0, 1):
+        raise ProtocolError("--physical-gpu must be 0 or 1")
+    environment["CUDA_VISIBLE_DEVICES"] = str(physical_gpu)
     environment["LD_LIBRARY_PATH"] = str(driver_library_dir) + os.pathsep + environment.get(
         "LD_LIBRARY_PATH", ""
     )
@@ -1362,13 +1365,16 @@ def _config(args: argparse.Namespace, run_dir: Path, inputs: dict[str, Any]) -> 
     }
     if args.benchmark == "nvos":
         evaluation["thresholding"] = 75
-    return {
+    config = {
         "tag": "sam",
         "dst_dir": str(run_dir),
-        "prune_gaussians": 0.5,
         "feature": feature,
-        "evaluation": evaluation,
     }
+    if not bool(getattr(args, "materialize_only", False)):
+        config["evaluation"] = evaluation
+    if not bool(getattr(args, "retain_full_carrier", False)):
+        config["prune_gaussians"] = 0.5
+    return config
 
 
 def launch(args: argparse.Namespace) -> Path:
@@ -1509,6 +1515,13 @@ def launch(args: argparse.Namespace) -> Path:
         ],
         "target_rgb_visible_during_uplifting": True,
         "target_view_2d_foundation_model_calls": True,
+        "materialize_only": bool(getattr(args, "materialize_only", False)),
+        "target_masks_opened_by_materializer": False
+        if bool(getattr(args, "materialize_only", False))
+        else None,
+        "retain_full_carrier": bool(
+            getattr(args, "retain_full_carrier", False)
+        ),
         "reference_mask_calibration": inputs["reference_mask_calibration"],
         "target_masks_scoring_only": True,
         "aggregation": inputs["aggregation"],
@@ -1544,9 +1557,11 @@ def launch(args: argparse.Namespace) -> Path:
         f" > {shlex.quote(str(gpu_started_marker))}; "
         f"exec {shlex.join(command)}"
     )
+    physical_gpu = int(getattr(args, "physical_gpu", 0))
+    lock_path = Path(f"/tmp/radio-gs-gpu{physical_gpu}.lock")
     locked_command = [
         "flock",
-        str(LOCK_PATH),
+        str(lock_path),
         "-c",
         locked_script,
     ]
@@ -1596,6 +1611,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--benchmark", choices=("nvos", "spin"), required=True)
     parser.add_argument("--scene", required=True)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument(
+        "--physical-gpu",
+        type=int,
+        choices=(0, 1),
+        default=0,
+        help="Physical GPU exposed as cuda:0 inside the audited child.",
+    )
     parser.add_argument("--upstream", type=Path, required=True)
     parser.add_argument("--python", type=Path, required=True)
     parser.add_argument("--pythonpath", type=Path)
@@ -1656,6 +1678,24 @@ def parse_args() -> argparse.Namespace:
         default=Path("/root/baselines/VALA/ckpts/sam_vit_h_4b8939.pth"),
     )
     parser.add_argument("--gs-source", type=Path)
+    parser.add_argument(
+        "--retain-full-carrier",
+        action="store_true",
+        help=(
+            "Do not prune low-visibility Gaussians after uplifting. This is "
+            "required when the query field will be rendered on the same frozen "
+            "full carrier, so every carrier row receives an explicit hypothesis."
+        ),
+    )
+    parser.add_argument(
+        "--materialize-only",
+        action="store_true",
+        help=(
+            "Persist the uplifted query field and carrier without running the "
+            "upstream evaluator. This keeps target masks sealed for a separate "
+            "receipt-first frozen-renderer evaluation."
+        ),
+    )
     parser.add_argument(
         "--gs-training-manifest",
         type=Path,

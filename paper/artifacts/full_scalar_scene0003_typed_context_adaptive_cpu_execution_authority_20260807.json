@@ -1,0 +1,70 @@
+{
+  "artifact": "full_scalar_scene0003_typed_context_adaptive_cpu_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T02:12:00+08:00",
+  "status": "sealed_after_accepted_v2_and_support_graph_success_and_before_stage_b_execution",
+  "scene_id": "scene0003_00",
+  "cohort_split": "source_train",
+  "inputs": {
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+      "sha256": "28b56a2270917f290aa35bbb29542dfbbbdd657da6696f738b4bdc4f0c5f819e"
+    },
+    "factorized_field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "49df15c4cb4f00ccf5fdeb47bb774690ce6ca6fa3d079f496c886e4dd4fea34e"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+      "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd"
+    },
+    "factorized_radio_cache_sha256": "5032b6314b289459b4f146e81a094fd067b58728dbedce7ce9ce0cb301ad5920",
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "995a287f785df609730a74e0ed4ad8e483545736a6d477d08a4044fbde1ead9a"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_accepted_v2_typed_context_adaptive_authority.py",
+    "sha256": "c345a4e5f72acf09b084387c406f659c25ed6f26deed5d6a992550afcabc4841"
+  },
+  "frozen_contract": {
+    "same_as_scene0002": true,
+    "candidate_batch_size": 8,
+    "field_batch_size": 4096,
+    "device": "cpu",
+    "adaptive_search": "typed-budget-complete Stage B V2",
+    "accepted_v2_e0_copied": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/typed_context_stage_b_adaptive_v2.pt",
+  "command": [
+    "env", "CUDA_VISIBLE_DEVICES=",
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/materialize_accepted_v2_typed_context_adaptive_authority.py",
+    "--scene-id", "scene0003_00",
+    "--accepted-v2-authority", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+    "--expected-accepted-v2-authority-sha256", "28b56a2270917f290aa35bbb29542dfbbbdd657da6696f738b4bdc4f0c5f819e",
+    "--factorized-field-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_field_d512_l512_exact_marginal.pth",
+    "--expected-factorized-field-checkpoint-sha256", "49df15c4cb4f00ccf5fdeb47bb774690ce6ca6fa3d079f496c886e4dd4fea34e",
+    "--factorized-primitive-state", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+    "--expected-factorized-primitive-state-sha256", "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd",
+    "--expected-factorized-radio-cache-sha256", "5032b6314b289459b4f146e81a094fd067b58728dbedce7ce9ce0cb301ad5920",
+    "--support-graph", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_support_graph_accepted_v2.pt",
+    "--expected-support-graph-sha256", "995a287f785df609730a74e0ed4ad8e483545736a6d477d08a4044fbde1ead9a",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/typed_context_stage_b_adaptive_v2.pt",
+    "--candidate-batch-size", "8",
+    "--field-batch-size", "4096",
+    "--device", "cpu"
+  ],
+  "source_access": {
+    "source_rgb_used": false,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

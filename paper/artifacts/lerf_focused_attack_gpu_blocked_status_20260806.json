@@ -1,0 +1,80 @@
+{
+  "artifact_type": "focused_attack_status",
+  "date": "2026-08-06",
+  "priority": "LERF3D",
+  "overall_status": "method_changes_implemented_performance_validation_gpu_blocked",
+  "honest_benchmark_status": {
+    "latest_frozen_lerf3d_mean": 0.3776461,
+    "new_lerf3d_benchmark_result_this_round": null,
+    "reason": "No new metric was opened after both GPUs became unavailable through NVML.",
+    "claim": "No benchmark improvement is claimed until the frozen evaluator produces a new result."
+  },
+  "completed_changes": {
+    "support_readout_oracle": {
+      "status": "implemented_and_cpu_verified_gpu_execution_pending",
+      "purpose": "Separate candidate support, support union, primitive readout, and rendered readout limitations without changing the frozen evaluator.",
+      "entrypoint": "radio_gs/scripts/eval_lerf_support_readout_oracle_d0_d5.py",
+      "verification_addendum": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_cpu_verification_addendum_20260806.json"
+    },
+    "source_global_response_listwise_v21": {
+      "status": "implemented_and_cpu_verified",
+      "entrypoint": "radio_gs/scripts/train_surface_region_typed_context_response_listwise_v21.py",
+      "loss": "radio_gs/losses/source_global_response_listwise_loss_v21.py",
+      "changes": [
+        "absolute positive-response calibration",
+        "exact canonical-negative relevance matching frozen inference",
+        "continuous small-margin weighting instead of a hard 0.05 floor",
+        "component-balanced compositional query-bank aggregation",
+        "retained descriptor triplet constraint"
+      ],
+      "diagnostic": {
+        "scene": "scene0001_00",
+        "hard_negative_pair_query_units": 25768626,
+        "units_retained_by_old_hard_floor": 13376924,
+        "retained_fraction": 0.519117,
+        "discarded_fraction": 0.480883
+      }
+    },
+    "target_blind_compositional_text_bank_v2": {
+      "status": "implemented_and_cpu_verified_embeddings_pending",
+      "artifact": "paper/artifacts/target_blind_imagenet1k_compositional_text_bank_v2.json",
+      "query_count": 5808,
+      "target_dataset_vocabulary_used": false,
+      "removed_invalid_random_part_phrases": 956
+    },
+    "pilot_inventory": {
+      "status": "split_frozen_assets_incomplete",
+      "train_scenes": [
+        "scene0001_00",
+        "scene0002_00",
+        "scene0003_00",
+        "scene0005_00"
+      ],
+      "validation_scenes": [
+        "scene0004_00",
+        "scene0008_00"
+      ],
+      "estimated_dual_gpu_asset_build_hours": "4-6",
+      "receipt": "paper/artifacts/lerf_v21_4train_2validation_pilot_feasibility_and_text_bank_result_20260806.json"
+    }
+  },
+  "verification": {
+    "combined_cpu_test_result": "27 passed",
+    "frozen_evaluator_modified": false,
+    "frozen_renderer_modified": false,
+    "frozen_metrics_modified": false
+  },
+  "gpu_blocker": {
+    "gpu0": "NVML Unknown Error",
+    "gpu1": "NVML Unknown Error",
+    "cuda_jobs_started_after_failure": 0,
+    "safety_decision": "Do not start CUDA while temperatures cannot be read; do not repeatedly poll the failed driver."
+  },
+  "shortest_recovery_sequence": [
+    "Run the preregistered Figurines D0-D5 oracle first.",
+    "Use D2-D5 deltas to decide whether the first intervention must target proposal support or response/readout calibration.",
+    "Materialize the target-blind text-bank embeddings and complete missing 4+2 pilot assets.",
+    "Warm-start the V2.1 pilot and select only from the frozen validation cohort.",
+    "Run the frozen LERF3D sentinel, then the full frozen suite only after sentinel improvement."
+  ]
+}

@@ -4,8 +4,11 @@
 This CPU-only boundary consumes three independent, caller-SHA-bound scene
 authorities: canonical AcceptedV2 regions/e0, an exact-marginal factorized
 primitive state, and precomputed official multi-view SigLIP2 descriptors.  A
-fourth authority, the complete 24/8 cohort region/view registry, makes the two
-trainer manifests global rather than accidentally scene-local.
+fourth authority makes the two trainer manifests global rather than
+accidentally scene-local.  The default remains the complete 24/8 registry;
+the explicit ``--pilot-cohort-registry`` path accepts only the independently
+versioned exact four-train/two-validation pilot registry and emits an
+independent pilot shard schema.
 
 The materializer never opens benchmark data, labels, masks, or text queries;
 it also never runs AcceptedV2, RADIO, or the SigLIP2 head.  Missing real
@@ -59,8 +62,20 @@ TEACHER_OBSERVATION_SCHEMA = (
 COHORT_REGISTRY_SCHEMA = (
     "radio_gs.surface_region_full_scalar_clean_cohort_region_view_registry.v1"
 )
+PILOT_COHORT_REGISTRY_SCHEMA = (
+    "radio_gs.surface_region_full_scalar_clean_pilot_4train_2validation_"
+    "region_view_registry.v1"
+)
+PILOT_TRAINING_SHARD_SCHEMA = (
+    "radio_gs.surface_region_full_scalar_clean_pilot_4train_2validation_"
+    "training_shard.v1"
+)
 MATERIALIZATION_RECEIPT_SCHEMA = (
     "radio_gs.surface_region_full_scalar_clean_shard_materialization_receipt.v1"
+)
+PILOT_MATERIALIZATION_RECEIPT_SCHEMA = (
+    "radio_gs.surface_region_full_scalar_clean_pilot_4train_2validation_"
+    "shard_materialization_receipt.v1"
 )
 SCHEMA_VERSION = 1
 ACCEPTED_REGION_SCHEMA_VERSION = 2
@@ -71,6 +86,13 @@ OFFICIAL_RADIO_CHECKPOINT_SHA256 = (
     "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
 )
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
+PILOT_TRAIN_SCENES = (
+    "scene0001_00",
+    "scene0002_00",
+    "scene0003_00",
+    "scene0005_00",
+)
+PILOT_VALIDATION_SCENES = ("scene0004_00", "scene0008_00")
 
 
 def _require_sha256(value: object, *, label: str) -> str:
@@ -276,6 +298,64 @@ def cohort_registry_contract() -> dict[str, Any]:
         },
         "query_independent": True,
     }
+
+
+def pilot_cohort_registry_contract() -> dict[str, Any]:
+    """Return the independent, exact six-scene pilot registry contract."""
+
+    return {
+        "schema": PILOT_COHORT_REGISTRY_SCHEMA,
+        "schema_version": SCHEMA_VERSION,
+        "cohort": {
+            "source_train": list(PILOT_TRAIN_SCENES),
+            "source_validation": list(PILOT_VALIDATION_SCENES),
+            "exact_scene_and_split_binding": True,
+            "parent_clean_24train_8validation_authority_required": True,
+        },
+        "scene_records": "exact_six_scene_set_sorted_by_scene_id",
+        "artifact_binding": (
+            "accepted_region_factorized_state_teacher_observation_file_sha256"
+        ),
+        "global_manifests": "deterministic_derivation_from_six_scene_records",
+        "stable_ids": "globally_unique_region_ids_and_scene_scoped_view_ids",
+        "nonvacuous_certificate_prerequisite": {
+            "minimum_overlap_teacher_rows_per_train_scene": 1,
+            "minimum_overlap_teacher_rows_per_validation_scene": 2,
+            "claim_is_only_necessary_not_sufficient": True,
+            "in_domain_after_train4_normalization_checked_later": True,
+        },
+        "full_24train_8validation_registry_accepted": False,
+        "query_independent": True,
+    }
+
+
+def pilot_training_shard_contract() -> dict[str, Any]:
+    """Reuse the tensor math while giving the 4+2 pilot its own schema."""
+
+    contract = dict(trainer.training_shard_contract())
+    contract.update(
+        {
+            "schema": PILOT_TRAINING_SHARD_SCHEMA,
+            "schema_version": SCHEMA_VERSION,
+            "lineage": (
+                "accepted_source_state_pilot4plus2_registry_file_content_"
+                "and_teacher_caller_sha_bound"
+            ),
+            "cohort": {
+                "source_train": list(PILOT_TRAIN_SCENES),
+                "source_validation": list(PILOT_VALIDATION_SCENES),
+                "scene_disjoint": True,
+                "per_scene_hyperparameters": False,
+                "full_24plus8_contract_used": False,
+            },
+        }
+    )
+    return contract
+
+
+PILOT_TRAINING_SHARD_CONTRACT_SHA256 = canonical_json_sha256(
+    pilot_training_shard_contract()
+)
 
 
 def official_teacher_model_authority() -> dict[str, Any]:
@@ -1016,10 +1096,232 @@ def build_cohort_region_view_registry(
     )
 
 
+def validate_pilot_cohort_region_view_registry(
+    value: object,
+    *,
+    cohort_authority: Mapping[str, Any] | None = None,
+    cohort_authority_file_sha256: str = "",
+) -> dict[str, Any]:
+    """Validate only the fixed 4-train/2-validation pilot registry.
+
+    This intentionally does not accept or reinterpret the complete 24+8
+    registry.  The exact six scene/split identities and every scene artifact
+    SHA remain independently bound.
+    """
+
+    if not isinstance(value, Mapping):
+        raise ValueError("pilot cohort region/view registry must be a mapping")
+    registry = dict(value)
+    required = {
+        "schema", "schema_version", "contract", "contract_sha256",
+        "cohort_authority_sha256", "cohort_authority_file_sha256",
+        "pilot_splits", "teacher_model_authority_sha256", "scene_records",
+        "source_access", "authority_sha256",
+    }
+    contract = pilot_cohort_registry_contract()
+    expected_splits = {
+        "source_train": list(PILOT_TRAIN_SCENES),
+        "source_validation": list(PILOT_VALIDATION_SCENES),
+    }
+    if (
+        set(registry) != required
+        or registry.get("schema") != PILOT_COHORT_REGISTRY_SCHEMA
+        or registry.get("schema_version") != SCHEMA_VERSION
+        or registry.get("contract") != contract
+        or registry.get("contract_sha256") != canonical_json_sha256(contract)
+        or registry.get("pilot_splits") != expected_splits
+        or registry.get("source_access") != _authority_access(source_rgb_used=True)
+        or registry.get("teacher_model_authority_sha256")
+        != canonical_json_sha256(official_teacher_model_authority())
+    ):
+        raise ValueError("pilot cohort region/view registry contract differs")
+    _require_sha256(registry.get("cohort_authority_sha256"), label="cohort content")
+    _require_sha256(registry.get("cohort_authority_file_sha256"), label="cohort file")
+    records = registry.get("scene_records")
+    expected_scene_split = {
+        **{scene: "source_train" for scene in PILOT_TRAIN_SCENES},
+        **{scene: "source_validation" for scene in PILOT_VALIDATION_SCENES},
+    }
+    if not isinstance(records, list) or len(records) != len(expected_scene_split):
+        raise ValueError("pilot cohort registry must cover exact 4+2 scenes")
+    frozen: list[dict[str, Any]] = []
+    all_region_ids: list[str] = []
+    for record in records:
+        if not isinstance(record, Mapping) or set(record) != {
+            "scene_id", "physical_space_id", "split",
+            "accepted_region_authority_file_sha256",
+            "factorized_state_file_sha256",
+            "teacher_observation_authority_file_sha256",
+            "source_state_artifact_sha256", "teacher_model_authority_sha256",
+            "eligible_overlap_teacher_row_count", "region_records",
+        }:
+            raise ValueError("pilot cohort registry scene record differs")
+        scene = str(record["scene_id"])
+        split = str(record["split"])
+        accepted_sha = _require_sha256(
+            record["accepted_region_authority_file_sha256"],
+            label="pilot registry AcceptedV2 region file",
+        )
+        state_sha = _require_sha256(
+            record["factorized_state_file_sha256"],
+            label="pilot registry factorized state file",
+        )
+        if (
+            expected_scene_split.get(scene) != split
+            or record["physical_space_id"] != trainer.canonical_physical_space_id(scene)
+            or record["source_state_artifact_sha256"]
+            != source_state_artifact_sha256(
+                accepted_region_file_sha256=accepted_sha,
+                factorized_state_file_sha256=state_sha,
+            )
+            or record["teacher_model_authority_sha256"]
+            != registry["teacher_model_authority_sha256"]
+        ):
+            raise ValueError("pilot cohort registry scene/split authority differs")
+        _require_sha256(
+            record["teacher_observation_authority_file_sha256"],
+            label="pilot registry teacher observation file",
+        )
+        region_records = record["region_records"]
+        if not isinstance(region_records, list) or not region_records:
+            raise ValueError("pilot cohort registry region records differ")
+        scene_regions: list[dict[str, Any]] = []
+        eligible_count = 0
+        for region in region_records:
+            if not isinstance(region, Mapping) or set(region) != {
+                "region_fingerprint", "region_row_id", "teacher_view_ids",
+                "eligible_overlap_teacher",
+            }:
+                raise ValueError("pilot cohort registry region record differs")
+            fingerprint = _require_sha256(
+                region["region_fingerprint"],
+                label="pilot registry region fingerprint",
+            )
+            row_id = stable_region_id(scene, fingerprint)
+            views = region["teacher_view_ids"]
+            eligible = region["eligible_overlap_teacher"]
+            if (
+                region["region_row_id"] != row_id
+                or not isinstance(eligible, bool)
+                or not isinstance(views, list)
+                or any(
+                    not isinstance(view, str)
+                    or not view.startswith(f"{scene}:source-rgb:")
+                    or _SHA256.fullmatch(view.rsplit(":", 1)[-1]) is None
+                    for view in views
+                )
+                or len(set(views)) != len(views)
+                or (eligible and not views)
+                or (not eligible and bool(views))
+            ):
+                raise ValueError("pilot cohort registry stable row/view ID differs")
+            eligible_count += int(eligible)
+            scene_regions.append(
+                {
+                    "region_fingerprint": fingerprint,
+                    "region_row_id": row_id,
+                    "teacher_view_ids": list(views),
+                    "eligible_overlap_teacher": eligible,
+                }
+            )
+            all_region_ids.append(row_id)
+        if [item["region_row_id"] for item in scene_regions] != sorted(
+            item["region_row_id"] for item in scene_regions
+        ):
+            raise ValueError("pilot cohort registry region records are not sorted")
+        minimum = 2 if split == "source_validation" else 1
+        if eligible_count != int(record["eligible_overlap_teacher_row_count"]):
+            raise ValueError("pilot cohort registry eligible row count differs")
+        if eligible_count < minimum:
+            raise ValueError(
+                "pilot cohort registry is nonvacuous-certificate insufficient"
+            )
+        frozen.append({**record, "region_records": scene_regions})
+    scenes = [str(record["scene_id"]) for record in frozen]
+    if scenes != sorted(expected_scene_split) or len(set(scenes)) != len(scenes):
+        raise ValueError("pilot cohort registry must bind the exact sorted six scenes")
+    if len(set(all_region_ids)) != len(all_region_ids):
+        raise ValueError("pilot cohort registry repeats a stable region ID")
+    if len({str(record["physical_space_id"]) for record in frozen}) != len(frozen):
+        raise ValueError("pilot cohort registry repeats a physical space")
+    if cohort_authority is not None:
+        cohort = trainer.validate_cohort_authority_payload(cohort_authority)
+        if (
+            not set(PILOT_TRAIN_SCENES).issubset(cohort["source_train_scene_ids"])
+            or not set(PILOT_VALIDATION_SCENES).issubset(
+                cohort["source_validation_scene_ids"]
+            )
+            or registry["cohort_authority_sha256"] != cohort["authority_sha256"]
+            or registry["cohort_authority_file_sha256"]
+            != _require_sha256(cohort_authority_file_sha256, label="cohort file")
+        ):
+            raise ValueError("pilot cohort registry/parent cohort authority differs")
+    expected_authority = _require_sha256(
+        registry.get("authority_sha256"), label="pilot cohort registry authority"
+    )
+    if _authority_content_sha256(registry) != expected_authority:
+        raise ValueError("pilot cohort registry content SHA-256 differs")
+    return {**registry, "scene_records": frozen}
+
+
+def build_pilot_cohort_region_view_registry(
+    *,
+    cohort_authority: Mapping[str, Any],
+    cohort_authority_file_sha256: str,
+    scene_records: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Seal the exact pilot six without fabricating the other 26 scenes."""
+
+    cohort = trainer.validate_cohort_authority_payload(cohort_authority)
+    payload: dict[str, Any] = {
+        "schema": PILOT_COHORT_REGISTRY_SCHEMA,
+        "schema_version": SCHEMA_VERSION,
+        "contract": pilot_cohort_registry_contract(),
+        "contract_sha256": canonical_json_sha256(
+            pilot_cohort_registry_contract()
+        ),
+        "cohort_authority_sha256": cohort["authority_sha256"],
+        "cohort_authority_file_sha256": _require_sha256(
+            cohort_authority_file_sha256, label="cohort file"
+        ),
+        "pilot_splits": {
+            "source_train": list(PILOT_TRAIN_SCENES),
+            "source_validation": list(PILOT_VALIDATION_SCENES),
+        },
+        "teacher_model_authority_sha256": canonical_json_sha256(
+            official_teacher_model_authority()
+        ),
+        "scene_records": sorted(
+            [dict(record) for record in scene_records],
+            key=lambda record: str(record.get("scene_id", "")),
+        ),
+        "source_access": _authority_access(source_rgb_used=True),
+    }
+    payload["authority_sha256"] = _authority_content_sha256(payload)
+    return validate_pilot_cohort_region_view_registry(
+        payload,
+        cohort_authority=cohort,
+        cohort_authority_file_sha256=cohort_authority_file_sha256,
+    )
+
+
 def derive_global_manifests(
     registry: Mapping[str, Any],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     frozen = validate_cohort_region_view_registry(registry)
+    return _derive_global_manifests_from_registry(frozen)
+
+
+def derive_pilot_global_manifests(
+    registry: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    frozen = validate_pilot_cohort_region_view_registry(registry)
+    return _derive_global_manifests_from_registry(frozen)
+
+
+def _derive_global_manifests_from_registry(
+    frozen: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
     source = {
         "schema": trainer.SOURCE_STATE_MANIFEST_SCHEMA,
         "schema_version": trainer.SOURCE_MANIFEST_SCHEMA_VERSION,
@@ -1106,7 +1408,13 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
         ),
         label="full-scalar clean cohort region/view registry",
     )
-    registry = validate_cohort_region_view_registry(
+    pilot_mode = bool(getattr(args, "pilot_cohort_registry", False))
+    registry_validator = (
+        validate_pilot_cohort_region_view_registry
+        if pilot_mode
+        else validate_cohort_region_view_registry
+    )
+    registry = registry_validator(
         registry_value,
         cohort_authority=cohort,
         cohort_authority_file_sha256=cohort_file["sha256"],
@@ -1140,8 +1448,16 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
     scene = accepted["scene_id"]
     if teacher["scene_id"] != scene:
         raise ValueError("AcceptedV2 and teacher scene IDs differ")
-    train = cohort["source_train_scene_ids"]
-    validation = cohort["source_validation_scene_ids"]
+    train = (
+        list(PILOT_TRAIN_SCENES)
+        if pilot_mode
+        else cohort["source_train_scene_ids"]
+    )
+    validation = (
+        list(PILOT_VALIDATION_SCENES)
+        if pilot_mode
+        else cohort["source_validation_scene_ids"]
+    )
     if (scene in train) == (scene in validation):
         raise ValueError("materialization scene is not a unique cohort member")
     split = "source_train" if scene in train else "source_validation"
@@ -1223,7 +1539,10 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
         or registry_scene["region_records"] != observed_regions
     ):
         raise ValueError("scene materialization differs from frozen cohort registry")
-    source_manifest, teacher_manifest = derive_global_manifests(registry)
+    manifest_builder = (
+        derive_pilot_global_manifests if pilot_mode else derive_global_manifests
+    )
+    source_manifest, teacher_manifest = manifest_builder(registry)
     return {
         "scene_id": scene,
         "physical_space_id": accepted["physical_space_id"],
@@ -1247,6 +1566,7 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
         "view_ids": view_ids,
         "source_manifest": source_manifest,
         "teacher_manifest": teacher_manifest,
+        "pilot_mode": pilot_mode,
         "nonvacuous_prerequisite": {
             "eligible_overlap_teacher_rows": int(eligible.sum()),
             "minimum_required": minimum,
@@ -1257,8 +1577,110 @@ def preflight(args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def validate_pilot_training_shard_payload(
+    value: object,
+    *,
+    expected_split: str | None = None,
+) -> dict[str, Any]:
+    """Validate the independent pilot schema using the shared tensor checks."""
+
+    if not isinstance(value, Mapping):
+        raise ValueError("pilot full-scalar training shard must contain a mapping")
+    shard = dict(value)
+    if (
+        shard.get("schema") != PILOT_TRAINING_SHARD_SCHEMA
+        or shard.get("schema_version") != SCHEMA_VERSION
+        or shard.get("contract") != pilot_training_shard_contract()
+        or shard.get("contract_sha256")
+        != PILOT_TRAINING_SHARD_CONTRACT_SHA256
+    ):
+        raise ValueError("pilot full-scalar training shard contract differs")
+    lineage = shard.get("lineage")
+    pilot_lineage_fields = {
+        "pilot_cohort_region_view_registry_authority_sha256",
+        "pilot_cohort_region_view_registry_file_sha256",
+    }
+    base_lineage_fields = {
+        "accepted_v2_authority",
+        "source_state_cohort_authority_sha256",
+        "source_state_manifest_file_sha256",
+        "cohort_authority_sha256",
+        "cohort_authority_file_sha256",
+        "teacher_authority_sha256",
+        "teacher_manifest_file_sha256",
+    }
+    if not isinstance(lineage, Mapping) or set(lineage) != (
+        base_lineage_fields | pilot_lineage_fields
+    ):
+        raise ValueError("pilot full-scalar training shard lineage differs")
+    frozen_lineage = dict(lineage)
+    for name in pilot_lineage_fields:
+        _require_sha256(frozen_lineage[name], label=name.replace("_", " "))
+
+    # The base validator owns all exact tensor, row, teacher and source-access
+    # checks.  Only an in-memory metadata projection is used; a full-32 shard
+    # can never enter this function because the pilot header was checked above.
+    projected = {
+        **shard,
+        "schema": trainer.TRAINING_SHARD_SCHEMA,
+        "schema_version": trainer.TRAINING_SHARD_SCHEMA_VERSION,
+        "contract": trainer.training_shard_contract(),
+        "contract_sha256": trainer.TRAINING_SHARD_CONTRACT_SHA256,
+        "lineage": {
+            name: frozen_lineage[name] for name in base_lineage_fields
+        },
+    }
+    validated = trainer.validate_training_shard_payload(
+        projected, expected_split=expected_split
+    )
+    split = str(validated["split"])
+    expected_scenes = (
+        PILOT_TRAIN_SCENES
+        if split == "source_train"
+        else PILOT_VALIDATION_SCENES
+    )
+    scene_ids = set(str(scene) for scene in validated["scene_ids"])
+    if len(scene_ids) != 1 or next(iter(scene_ids)) not in expected_scenes:
+        raise ValueError("pilot training shard scene/split is outside exact 4+2")
+    return {
+        **validated,
+        "schema": PILOT_TRAINING_SHARD_SCHEMA,
+        "schema_version": SCHEMA_VERSION,
+        "contract": pilot_training_shard_contract(),
+        "contract_sha256": PILOT_TRAINING_SHARD_CONTRACT_SHA256,
+        "lineage": frozen_lineage,
+    }
+
+
+def load_pilot_training_shard(
+    path: str | Path,
+    *,
+    expected_sha256: str,
+    expected_split: str,
+) -> tuple[dict[str, Any], dict[str, str]]:
+    expected = _require_sha256(expected_sha256, label="pilot training shard")
+    value, observed, source = load_torch_mapping(
+        path,
+        expected_sha256=expected,
+        map_location="cpu",
+        label="pilot 4+2 full-scalar training shard",
+    )
+    shard = validate_pilot_training_shard_payload(
+        value, expected_split=expected_split
+    )
+    return shard, {"path": str(source), "sha256": observed}
+
+
 def _require_outputs_absent(paths: Sequence[str | Path]) -> None:
-    existing = [str(Path(path).resolve()) for path in paths if Path(path).exists()]
+    raw = [Path(path).expanduser() for path in paths]
+    resolved = [path.resolve(strict=False) for path in raw]
+    if len(set(resolved)) != len(resolved):
+        raise ValueError("full-scalar materialization output paths must be unique")
+    existing = [
+        str(path.resolve(strict=False))
+        for path in raw
+        if path.exists() or path.is_symlink()
+    ]
     if existing:
         raise FileExistsError(
             "full-scalar materialization refuses to clobber outputs: "
@@ -1279,6 +1701,7 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
         return {
             "scene_id": prepared["scene_id"],
             "split": prepared["split"],
+            "pilot_cohort_registry_mode": prepared["pilot_mode"],
             "registry_file": prepared["registry_file"],
             "nonvacuous_prerequisite": prepared["nonvacuous_prerequisite"],
             "outputs_written": False,
@@ -1297,11 +1720,26 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
         prepared["view_ids"][int(view)]
         for view in teacher["pair_view_indices"]
     ]
+    pilot_mode = bool(prepared["pilot_mode"])
     shard: dict[str, Any] = {
-        "schema": trainer.TRAINING_SHARD_SCHEMA,
-        "schema_version": trainer.TRAINING_SHARD_SCHEMA_VERSION,
-        "contract": trainer.training_shard_contract(),
-        "contract_sha256": trainer.TRAINING_SHARD_CONTRACT_SHA256,
+        "schema": (
+            PILOT_TRAINING_SHARD_SCHEMA
+            if pilot_mode
+            else trainer.TRAINING_SHARD_SCHEMA
+        ),
+        "schema_version": (
+            SCHEMA_VERSION if pilot_mode else trainer.TRAINING_SHARD_SCHEMA_VERSION
+        ),
+        "contract": (
+            pilot_training_shard_contract()
+            if pilot_mode
+            else trainer.training_shard_contract()
+        ),
+        "contract_sha256": (
+            PILOT_TRAINING_SHARD_CONTRACT_SHA256
+            if pilot_mode
+            else trainer.TRAINING_SHARD_CONTRACT_SHA256
+        ),
         "split": prepared["split"],
         "accepted_v2_e0": prepared["accepted"]["accepted_v2_e0"].clone(),
         "raw_full_scalar_summary": prepared["summary"].summary.float().clone(),
@@ -1340,15 +1778,45 @@ def materialize(args: argparse.Namespace) -> dict[str, Any]:
                 "authority_sha256"
             ],
             "teacher_manifest_file_sha256": teacher_manifest_file["sha256"],
+            **(
+                {
+                    "pilot_cohort_region_view_registry_authority_sha256": (
+                        prepared["registry"]["authority_sha256"]
+                    ),
+                    "pilot_cohort_region_view_registry_file_sha256": (
+                        prepared["registry_file"]["sha256"]
+                    ),
+                }
+                if pilot_mode
+                else {}
+            ),
         },
         "source_access": trainer._source_access(prepared["split"]),
     }
     shard["channel_sha256"] = trainer.training_shard_channel_sha256(shard)
-    trainer.validate_training_shard_payload(shard, expected_split=prepared["split"])
+    shard_validator = (
+        validate_pilot_training_shard_payload
+        if pilot_mode
+        else trainer.validate_training_shard_payload
+    )
+    shard_validator(shard, expected_split=prepared["split"])
     write_torch_noclobber(args.output_shard, shard)
     receipt = {
-        "schema": MATERIALIZATION_RECEIPT_SCHEMA,
+        "schema": (
+            PILOT_MATERIALIZATION_RECEIPT_SCHEMA
+            if pilot_mode
+            else MATERIALIZATION_RECEIPT_SCHEMA
+        ),
         "schema_version": SCHEMA_VERSION,
+        **(
+            {
+                "artifact_type": "full_scalar_clean_pilot_4train_2validation_shard",
+                "status": "pilot_scene_shard_materialized_from_exact_six_registry",
+                "pilot_cohort_registry_mode": True,
+            }
+            if pilot_mode
+            else {}
+        ),
         "scene_id": prepared["scene_id"],
         "physical_space_id": prepared["physical_space_id"],
         "split": prepared["split"],
@@ -1384,6 +1852,14 @@ def main() -> None:
     parser.add_argument("--cohort-region-view-registry", required=True)
     parser.add_argument(
         "--expected-cohort-region-view-registry-sha256", required=True
+    )
+    parser.add_argument(
+        "--pilot-cohort-registry",
+        action="store_true",
+        help=(
+            "require the independent exact scene0001/2/3/5 train plus "
+            "scene0004/8 validation pilot registry and emit pilot-schema shards"
+        ),
     )
     parser.add_argument("--accepted-region-authority", required=True)
     parser.add_argument("--expected-accepted-region-authority-sha256", required=True)

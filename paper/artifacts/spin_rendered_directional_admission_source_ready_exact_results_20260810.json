@@ -1,0 +1,85 @@
+{
+  "schema": "radio_gs.spin_rendered_directional_admission.source_ready_exact_results.v1",
+  "schema_version": 1,
+  "status": "completed_exact_five_scene_diagnostic_not_promoted_to_full9_mainline",
+  "parent_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin_rendered_directional_admission_source_ready_expansion_authority_20260810.json",
+    "sha256": "38e7cbae8e3fcd417e207b03e8a54b7c538336d0c29cb2d98bdbe835acf138a3"
+  },
+  "frozen_mainline": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/full9_audit.json",
+    "sha256": "6a73b77d8d2d15f6f589b06a42aecf218ee1780159adefa12bb184a22d16e05a",
+    "full9_query_conditioned_support_foreground_iou": 0.8771615046217028,
+    "full9_local_ludvig_sam_foreground_iou": 0.9372004495923849
+  },
+  "scenes": {
+    "fortress": {
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/fortress_exact_result.json",
+      "result_sha256": "55b2fda9f1179357c123d34e4f584d00778ac7010383b9d61d158166b9a57437",
+      "unary_at_0_5": 0.924728226535259,
+      "proposal_at_0_5": 0.9504521257458867,
+      "quantile_baseline": 0.3375166827670813,
+      "directional_admission": 0.9273004555965211,
+      "accepted_mainline": 0.9609142205208767
+    },
+    "leaves": {
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/leaves_exact_result.json",
+      "result_sha256": "09e2f6d69ab530e359c07b5ff34e42226a364b3476c70602afca7fb2e6dc0a8d",
+      "unary_at_0_5": 0.7883428529459156,
+      "proposal_at_0_5": 0.9114110288520368,
+      "quantile_baseline": 0.9185102957461969,
+      "directional_admission": 0.8991632606409244,
+      "accepted_mainline": 0.9259014165981039
+    },
+    "orchids": {
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/orchids_exact_result.json",
+      "result_sha256": "2f1662a17f0fd76a955c6428b3d0682266449cd17e370e4e1f31ec7c06ac0d1f",
+      "unary_at_0_5": 0.7492939815919044,
+      "proposal_at_0_5": 0.902749849749201,
+      "quantile_baseline": 0.8903188280817311,
+      "directional_admission": 0.7767909604344603,
+      "accepted_mainline": 0.9035069250268507
+    },
+    "pinecone": {
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/pinecone_exact_result.json",
+      "result_sha256": "0d0ce3b2f57b68a421fc5ab7b0f5df32e534273116355a6253a98a68491a836f",
+      "unary_at_0_5": 0.5761602857107254,
+      "proposal_at_0_5": 0.9048064753043009,
+      "quantile_baseline": 0.7845669627201242,
+      "directional_admission": 0.7711814436982867,
+      "accepted_mainline": 0.9079864777733617
+    },
+    "room": {
+      "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/room_exact_result.json",
+      "result_sha256": "7db67580747dc7419291e63bea69894386413a569be1d8ba41297d542c82b05a",
+      "unary_at_0_5": 0.7868343193901438,
+      "proposal_at_0_5": 0.8618636820639194,
+      "quantile_baseline": 0.6798306635787125,
+      "directional_admission": 0.7976006156411743,
+      "accepted_mainline": 0.888438210272626
+    }
+  },
+  "five_scene_macro": {
+    "unary_at_0_5": 0.7650719332347897,
+    "proposal_at_0_5": 0.9062566323430689,
+    "quantile_baseline": 0.7221486865787692,
+    "directional_admission": 0.8344073472022734,
+    "accepted_mainline": 0.9173494500383639,
+    "directional_minus_quantile": 0.1122586606235042,
+    "proposal_at_0_5_minus_quantile": 0.1841079457642997,
+    "proposal_at_0_5_minus_accepted_mainline": -0.011092817695295,
+    "directional_minus_accepted_mainline": -0.0829421028360905
+  },
+  "decision": {
+    "preregistered_directional_vs_quantile_gate_passed": true,
+    "promote_over_broken_quantile_branch": true,
+    "replace_frozen_full9_mainline": false,
+    "reason": "The diagnostic repairs the failed quantile/visibility branch, but neither the source-fitted directional transport nor a universal 0.5 threshold exceeds the accepted reference-calibrated mainline on the identical five-scene cohort.",
+    "next_bottleneck": "The full9 gap is concentrated in lego and truck, with room secondary; address missing target-RGB-conditioned query evidence instead of graph or global-threshold tuning."
+  },
+  "causal_conclusion": {
+    "supported": "A strong graph proposal exists, and the prior quantile readout discards it. Source-only directional admission can repair that readout failure without target tuning.",
+    "not_supported": "One source-fitted transport coefficient or one universal threshold is a globally transferable replacement for reference-calibrated query inference.",
+    "required_interface_change": "Keep the canonical carrier query-independent, but allow a benchmark-compatible target-RGB-aware proposal at query time, admitted through the same anchor-preserving transport contract and selected only by the full reference mask."
+  }
+}

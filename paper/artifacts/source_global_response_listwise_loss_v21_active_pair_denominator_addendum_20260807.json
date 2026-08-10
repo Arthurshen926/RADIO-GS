@@ -1,0 +1,53 @@
+{
+  "artifact": "source_global_response_listwise_loss_v21_active_pair_denominator_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_active_pair_denominator_implementation_or_v21_training",
+  "parents": {
+    "typed_relation_addendum": {
+      "path": "paper/artifacts/source_global_response_listwise_loss_v21_typed_relation_addendum_20260807.json",
+      "sha256": "b2ae81aa96c1cc55bbea0d90fa44c6a7d304259cfa45770243f95789be951f60"
+    },
+    "pilot_feasibility": {
+      "path": "paper/artifacts/lerf_v21_4train_2validation_pilot_feasibility_and_text_bank_result_20260806.json",
+      "sha256": "63a8091aefdeeecb96d435e39e56fd88bcbb67e1de41741423dc0913d73ae692"
+    }
+  },
+  "pre_change_v21_implementation": {
+    "path": "radio_gs/losses/source_global_response_listwise_loss_v21.py",
+    "sha256": "64c9eb2226aba193b510122b55f73e124ff497c85f54e9073c2c78803da0b370"
+  },
+  "identified_problem": "The frozen hard-negative authority spans complete canonical scene rows, but inactive or OOD rows are bitwise immutable AcceptedV2. A hard-negative pair whose two endpoints are both immutable cannot receive a residual update. Including those pairs in a training mean dilutes gradients on pairs with at least one trainable endpoint.",
+  "correction": {
+    "complete_scene_forward": true,
+    "training_pair_denominator": "retain exactly authority pairs for which anchor_trainable OR negative_trainable",
+    "training_descriptor_triplet_denominator": "the same retained pair set",
+    "validation_pair_denominator": "all authority pairs, including pairs with two immutable endpoints",
+    "response_profile_absolute_response_absolute_relevance": "retain all canonical rows because they audit the deployed complete-scene field and immutable rows remain exact controls",
+    "typed_text_relation": "retain all canonical rows; it is a same-region text-relation objective rather than a hard-negative endpoint-pair mean",
+    "empty_training_pair_set": "fail closed",
+    "per_scene_or_benchmark_tuning": false
+  },
+  "required_audit": {
+    "authority_pair_count": "report before masking",
+    "objective_pair_count": "report after masking",
+    "pair_trainable_endpoint_coverage": "objective_pair_count divided by authority_pair_count",
+    "both_immutable_pairs_excluded": "report exact count",
+    "validation": "report the same coverage diagnostically while objective_pair_count remains equal to authority_pair_count"
+  },
+  "frozen_components_modified": {
+    "v2_loss": false,
+    "v1_trainer": false,
+    "v2_trainer": false,
+    "evaluator": false,
+    "metric": false,
+    "renderer": false
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_metrics_computed_before_registration": false
+  }
+}

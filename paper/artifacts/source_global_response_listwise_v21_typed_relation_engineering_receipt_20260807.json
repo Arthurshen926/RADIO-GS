@@ -1,0 +1,65 @@
+{
+  "artifact": "source_global_response_listwise_v21_typed_relation_engineering_receipt",
+  "schema_version": 1,
+  "completed_at": "2026-08-07T00:00:00+08:00",
+  "status": "source_only_authority_and_loss_complete_no_training_no_benchmark",
+  "preregistration_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_global_response_listwise_loss_v21_typed_relation_addendum_20260807.json",
+    "sha256": "b2ae81aa96c1cc55bbea0d90fa44c6a7d304259cfa45770243f95789be951f60"
+  },
+  "authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_typed_text_relation_authority_v1/fit_relation_indices.pt",
+    "sha256": "482e363bf31884e190b255cc0cf0996461400bcbb3cb3f8785fbc236da2702a9",
+    "content_authority_sha256": "2063e25fad95ba74f5480ed5419f020151dee8aa9abf0efa51f0b9ef8051345d",
+    "synonym_pairs": 657,
+    "sibling_pairs": 167,
+    "runtime_query_strings_consumed": false,
+    "all_five_embedding_components_file_and_tensor_sha256_bound": true
+  },
+  "implementations": {
+    "authority_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_target_blind_typed_text_relation_authority.py",
+      "sha256": "b5c5a064217b9ed41e7921abac74ed857b575b13122abb3e348833375bee7501"
+    },
+    "typed_relation_loss": {
+      "path": "/root/RADIO-GS/radio_gs/losses/source_typed_text_relation_loss_v21.py",
+      "sha256": "bcdec0068b0ea787dbea5ed197924b96cd1e844826474d0628d6a7792e3e2609"
+    },
+    "v21_loss": {
+      "path": "/root/RADIO-GS/radio_gs/losses/source_global_response_listwise_loss_v21.py",
+      "sha256": "64c9eb2226aba193b510122b55f73e124ff497c85f54e9073c2c78803da0b370"
+    },
+    "adapter": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_surface_region_typed_context_response_listwise_v21.py",
+      "sha256": "a237e1bd73fef3c9e673806d62dda2e1c8d9ffcd761314b658bfe6cd136ad254"
+    }
+  },
+  "loss": {
+    "teacher_multiview_temperature": 0.1,
+    "canonical_negative_logit_scale": 10.0,
+    "synonym": "teacher-calibrated response-gap and relevance-gap SmoothL1",
+    "sibling": "same-region continuous-gap weighted and direction-balanced relevance-gap distillation",
+    "typed_relation_auxiliary_weight": 0.25,
+    "hard_gap_floor": false,
+    "previous_v21_behavior_when_authority_absent": "exact"
+  },
+  "validation": {
+    "focused_tests_passed": 20,
+    "authority_loader_sha_bound": true,
+    "synonym_gradient_nonzero": true,
+    "sibling_left_and_right_directions_present": true,
+    "complete_scene_adapter_relation_active": true,
+    "complete_scene_adapter_gradient_nonzero": true,
+    "git_diff_check_passed": true
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "benchmark_executed": false,
+  "frozen_v2_evaluator_metric_renderer_modified": false
+}

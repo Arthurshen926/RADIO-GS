@@ -1,0 +1,77 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_one_shot_exact_metric_execution_authority.v2",
+  "schema_version": 2,
+  "status": "authorized_after_independent_exact_o0_frozen_config_control_replay_and_completed_O1",
+  "scene_id": "waldo_kitchen",
+  "oracle": "O2",
+  "single_candidate_no_sweep": true,
+  "metric_execution_authorized": true,
+  "source_materialization": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v2_execution_authority_20260807.json",
+      "sha256": "a9f616b28a8b0e1ab4998ca9d3c61efa67f9e622eee31a04dd80912014da8df8"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_o2_streaming_result.json",
+      "sha256": "e9492a056bec99e63c856c447609b94a7df070f05f41e2fa979adfe40c4ae581"
+    }
+  },
+  "satisfied_control_gate": {
+    "replay_result_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_waldo_kitchen_frozen_config_control_replay_result_20260807.json",
+      "sha256": "8b51e06c4f35b78334e26017af7898639a0c0157a4776290eb62eb677b60ce67"
+    },
+    "metric_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "sha256": "a07b7ef185a3556ec7977083a4c085b04973c98cfe9d4f07c5fce240b45d8d47"
+    },
+    "exact_control_miou": 0.29311421513557434,
+    "lineage_replay_passed": true
+  },
+  "completed_prior_stage": {
+    "oracle": "O1",
+    "metric_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_waldo_kitchen_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "2c62dba52d3ad70df09d003032204dab4ef9865b3d06a6e25979cc3f2e9a3a03"
+    },
+    "metric_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o1_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "sha256": "56ece96a65d04bc46fb45fb0526438b40dab4c3fc3b1b04a2203d669cdcff800"
+    }
+  },
+  "candidate": {
+    "positive_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_positive.pt",
+      "sha256": "b03cb8feb2d243d2b3e7852ada422b27fd88fb4eedeb0ebbac94143ed5bc6264"
+    },
+    "canonical_negative_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_negative.pt",
+      "sha256": "873c03ad24c57e107d400a672db8fedc8e34f92d1a2d61cfe88d1b9faa35e73d"
+    }
+  },
+  "frozen_protocol": {
+    "must_equal_control_bitwise_except_candidate_caches_and_output_directory": true,
+    "config_sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264",
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "renderer_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_gpu_argument": 0,
+    "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o2_exact_v1",
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_disabled": true
+  },
+  "access_audit": {
+    "target_images_opened_during_authority_build": false,
+    "target_ground_truth_opened_during_authority_build": false,
+    "target_masks_opened_during_authority_build": false,
+    "target_metrics_opened_during_authority_build": false,
+    "candidate_metric_executed_before_authority": false
+  }
+}

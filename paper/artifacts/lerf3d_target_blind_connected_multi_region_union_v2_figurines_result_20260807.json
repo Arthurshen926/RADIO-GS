@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "artifact_type": "frozen_development_sentinel_result",
+  "date": "2026-08-07",
+  "scene": "figurines",
+  "candidate": "target_blind_connected_expected_mass_union_v2",
+  "status": "completed_and_rejected",
+  "promotion": false,
+  "execution_authority": {
+    "path": "paper/artifacts/lerf3d_target_blind_connected_multi_region_union_v2_figurines_execution_addendum_20260807.json",
+    "sha256": "d184d4d7e30182b0f1d2e2f81f36d2233bf29270e10a0779e9d42755c683a267"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "wall_time_seconds": 18.558,
+    "maximum_observed_temperature_c": 45,
+    "thermal_stop_triggered": false,
+    "score_postprocess": "none",
+    "fixed_threshold": 0.6,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "results": {
+    "v2": {
+      "miou": 0.3340669274330139,
+      "acc025": 0.5357142857142857,
+      "acc050": 0.3392857142857143,
+      "boundary_f": 0.47112253308296204,
+      "trimap_iou": 0.4079969823360443
+    },
+    "v1": {
+      "miou": 0.35686323046684265,
+      "acc025": 0.6428571428571429,
+      "acc050": 0.30357142857142855,
+      "boundary_f": 0.5383343696594238,
+      "trimap_iou": 0.4244433045387268
+    },
+    "O0": {
+      "miou": 0.4753887355327606,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.682007372379303,
+      "trimap_iou": 0.38083696365356445
+    },
+    "delta_v2_minus_v1_miou": -0.022796303033828735,
+    "delta_v2_minus_O0_miou": -0.1413218080997467
+  },
+  "local_category_evidence": {
+    "above_O0": {
+      "pikachu": 0.4181947708129883,
+      "toy elephant": 0.28915566205978394,
+      "rubber duck with hat": 0.07553279399871826,
+      "green apple": 0.05897289514541626,
+      "green toy chair": 0.03813067078590393
+    },
+    "below_O0": {
+      "waldo": -0.5991153419017792,
+      "pink ice cream": -0.5348535776138306,
+      "red apple": -0.47470521926879883,
+      "rubber duck with buoy": -0.39142632484436035,
+      "toy cat statue": -0.35086654126644135
+    }
+  },
+  "conclusion": {
+    "topology": "Support connectivity is a necessary high-value prior because D3 is 96.33% connected versus 67.35% for v1, but it is not sufficient for deployable selection.",
+    "failure": "Expected-mass seed selection can choose the wrong semantic mode; immutable support connectivity then expands consistently from that wrong mode and can include adjacent distractors.",
+    "next_method_requirement": "Retain the connected multi-region interface but require stronger object-identity or source-view co-membership evidence for seed and edge semantics. Do not tune K, score gate, or graph thresholds."
+  },
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_connected_multi_region_union_v2/evaluation/figurines_v2/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "5fc8a1e21c44b279e3cf0ab7a72e815da08c55dc90d895c851dd7ae0b418fc79"
+    },
+    "log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_connected_multi_region_union_v2/evaluation/figurines_v2.execution.log",
+      "sha256": "63084d7c8ac5afe2b41155432d38287fde4b23526fc533b78411dd7ca6d68c68"
+    },
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_connected_multi_region_union_v2/figurines/external_query_scores.pt",
+      "sha256": "50e88cdc72818699dab7cd244a19cdaeea9087771da3969837875d073e0ce676"
+    }
+  }
+}

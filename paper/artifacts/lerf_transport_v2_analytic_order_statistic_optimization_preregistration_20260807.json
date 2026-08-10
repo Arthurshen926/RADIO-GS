@@ -1,0 +1,123 @@
+{
+  "schema": "radio_gs.lerf_transport_v2_analytic_optimization_preregistration.v1",
+  "schema_version": 1,
+  "status": "implementation_complete_real_chunk_and_teatime_not_executed",
+  "objective": "Remove candidate descriptor materialization and full-sort p05 from the sealed transport-v2 source-only LOO implementation without changing candidate scores, statistics, or gates.",
+  "sealed_parent_lineage": {
+    "ramen_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_transport_v2_source_loo_exact_execution_authority_20260807.json",
+      "sha256": "04c7d2620f1f95eb34ec3d8e1335d45e58ac86f0f029504f00c36219378e4f58"
+    },
+    "ramen_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_transport_v2_source_loo_exact/ramen/v1/ramen_transport_v2_source_loo_result.json",
+      "sha256": "6b98a47b093537bb09f8ad2d05651d2a3f4a30b5ebf148005422cf2b02fc2181"
+    },
+    "ramen_result_receipt": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_transport_v2_source_loo_exact_result_receipt_20260807.json",
+      "sha256": "879e51aaa8fe95751ffd20b2926369b2f2254c3e7f25ad9d804ac920c7445331"
+    },
+    "sealed_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_scale_residual_shrinkage_transport.py",
+      "sha256": "82836a8a27dcccc054cc6f52e39d614e3c06d3705275a39ea6bc42d2ad40e856"
+    },
+    "sealed_streaming_hook": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_source_loo_streaming_hook.py",
+      "sha256": "7118e4ab57b5e0ea4407d755eab109209ff06ae6f687e41c0a94ee4431655336"
+    },
+    "sealed_exact_runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_source_loo_exact.py",
+      "sha256": "7fa99ea18d0781bf1385312042704cacb02e0f29a4a81ba4a93aab18e7e712ee"
+    },
+    "sealed_test": {
+      "path": "/root/RADIO-GS/tests/test_lerf_scale_residual_shrinkage_transport.py",
+      "sha256": "9bab1d969b1bd4d53c4495e5d17f73d378066592f2cfdac0cf1e53f35d74eddd"
+    }
+  },
+  "implementation": {
+    "source_loo_execution_contract_sha256": "0d731a7bb75fde9f0de928c4d014da2c24eb117294c9a4913b94359ae6ea8628",
+    "analytic_hook_contract_sha256": "9598c2b853c98d61d76d409596dd81d1034668721d275457b7cfd0714110a679",
+    "analytic_runner_method_contract_sha256": "1bc999903f3e1c292dcf355eb05c4d4c4e738424b5e5099f5ad6dfc68705b0da",
+    "analytic_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_scale_residual_shrinkage_transport_order_statistic_v2.py",
+      "sha256": "d9ec468134a938286560fb49e73d868e4f21289025c35cb2d32cd524266cee28"
+    },
+    "analytic_streaming_hook": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_analytic_source_loo_streaming_hook.py",
+      "sha256": "d94c5d9c39b384eeef23d2e90b9d37f8d9ab0bf3cdbcee1e47eb54cc4a4cfc83"
+    },
+    "analytic_exact_runner": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_analytic_source_loo_exact.py",
+      "sha256": "521d6cd7638917fee9d6543ab369f51b8afa087db174050b799e3ba5d4dabe35"
+    },
+    "analytic_interface_test": {
+      "path": "/root/RADIO-GS/tests/test_lerf_scale_residual_shrinkage_transport_order_statistic_v2.py",
+      "sha256": "6673cd0b5fe9c497a3995385d61784ad6d1a885d94ca79b526e01d5ec8b01536"
+    },
+    "analytic_runner_test": {
+      "path": "/root/RADIO-GS/tests/test_materialize_lerf_transport_v2_analytic_source_loo_exact.py",
+      "sha256": "bd6fbadc59b624796ee1a17a2356e080688e58e3ee4c7e345e62771353717fb3"
+    }
+  },
+  "analytic_formula": {
+    "a": "dot(heldout,R_mu)",
+    "b_s": "dot(heldout,R_delta_s)",
+    "u": "squared_norm(R_mu)",
+    "v_s": "dot(R_mu,R_delta_s)",
+    "w_s": "squared_norm(R_delta_s)",
+    "cos_gamma": "(a+gamma*b_s)/sqrt(u+2*gamma*v_s+gamma^2*w_s)",
+    "candidate_descriptor_materialization": false
+  },
+  "implementation_tests_at_seal": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_lerf_scale_residual_shrinkage_transport_order_statistic_v2.py tests/test_lerf_scale_residual_shrinkage_transport.py tests/test_materialize_lerf_transport_v2_source_loo_exact.py tests/test_materialize_lerf_transport_v2_analytic_source_loo_exact.py tests/test_lerf_scale_equivariant_geodesic_transport.py",
+    "passed": 33,
+    "failed": 0,
+    "warnings": 2
+  },
+  "synthetic_full_descriptor_dimension_benchmark": {
+    "seed": 2026080702,
+    "shape": [2048, 4, 1536],
+    "observations": 24576,
+    "sealed_seconds": 10.61994813196361,
+    "analytic_seconds": 5.228156899916939,
+    "speedup": 2.031298665143797,
+    "maximum_mean_abs_error": 8.285558350529243e-11,
+    "maximum_p05_abs_error": 7.450580596923828e-09,
+    "candidate_gate_equal": true
+  },
+  "p05_order_statistic_benchmark": {
+    "seed": 20260807,
+    "shape": [25, 2, 622900],
+    "torch_quantile_seconds": 1.12963,
+    "adjacent_kth_seconds": 0.76779,
+    "speedup": 1.471,
+    "bitwise_equal": true,
+    "maximum_abs_error": 0.0,
+    "gate_equal": true,
+    "conclusion": "p05 sorting was measurable but not the dominant 28-minute Ramen bottleneck"
+  },
+  "required_real_source_equivalence_gate": {
+    "scene": "ramen",
+    "selection": "first_2048_valid_loo_rows_in_canonical_accepted_row_order",
+    "candidate_count": 25,
+    "maximum_per_cell_abs_error": 1e-6,
+    "maximum_per_candidate_mean_abs_error": 1e-6,
+    "maximum_per_candidate_p05_abs_error": 1e-6,
+    "all_single_scene_candidate_flags_identical": true,
+    "single_scene_selected_candidate_identical": true,
+    "must_pass_before_teatime": true
+  },
+  "teatime_execution_if_gate_passes": {
+    "physical_gpu": 1,
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 300,
+    "hard_stop_temperature_c": 88,
+    "soft_pause_temperature_c": 0,
+    "gpu_owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "query_or_target_metric_authorized": false
+  },
+  "execution_state_at_seal": {
+    "real_source_chunk_equivalence_executed": false,
+    "teatime_source_loo_executed": false,
+    "target_metric_executed": false
+  }
+}

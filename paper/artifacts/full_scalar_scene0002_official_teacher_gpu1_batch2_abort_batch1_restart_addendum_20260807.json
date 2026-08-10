@@ -1,0 +1,35 @@
+{
+  "artifact": "full_scalar_scene0002_official_teacher_gpu1_batch2_abort_batch1_restart_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:06:00+08:00",
+  "status": "sealed_after_batch2_thermal_abort_and_before_batch1_restart",
+  "parent_addendum": "paper/artifacts/full_scalar_scene0002_official_teacher_gpu1_power_limit_unavailable_addendum_20260807.json",
+  "batch2_attempt": {
+    "guard_exit_code": 86,
+    "maximum_temperature_c": 89,
+    "steady_state_power_draw_w": "252_to_260",
+    "thermal_warnings": 6,
+    "nvml_failure": false,
+    "driver_healthy_after_abort": true,
+    "output_written": false,
+    "partial_output_present": false
+  },
+  "batch1_restart": {
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "power_limit_w": 300,
+    "minimum_restart_temperature_c": 60,
+    "same_ordered_crops_model_checkpoint_resolution_and_float32_l2_contract": true,
+    "all_source_and_output_paths_unchanged": true,
+    "further_identical_restart_after_thermal_abort": false
+  },
+  "thermal_guard": {
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed"
+  },
+  "benchmark_metric_opened": false,
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

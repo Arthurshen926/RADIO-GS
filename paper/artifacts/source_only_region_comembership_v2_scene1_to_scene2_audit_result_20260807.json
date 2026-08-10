@@ -1,0 +1,104 @@
+{
+  "artifact": "source_only_region_comembership_v2_scene1_to_scene2_audit_result",
+  "schema_version": 1,
+  "status": "source_heldout_positive_for_capability_conditioned_nonlinear_relation_and_primitive_union",
+  "preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v2_scene1_to_scene2_audit_preregistration_20260807.json",
+    "sha256": "3ad0709db446d1078e317cc9b9d8eaa897f911e9ca2d40e45edc14cb7d21a52e"
+  },
+  "result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/region_comembership_v2_scene0001_fit_scene0002_heldout_v1.json",
+    "sha256": "c3276796e2646e843d44e1b79de8a3c4612441c32ce14e5a2a6c2343c76c1d44"
+  },
+  "producer": {
+    "audit_script": {
+      "path": "radio_gs/scripts/audit_region_comembership_v2_scene1_to_scene2.py",
+      "sha256": "ef877705fcc45c72f374009c9c55d66a6fd807787d1b4b9da6b45a30dfce87e7"
+    },
+    "model": {
+      "path": "radio_gs/models/region_comembership_v2.py",
+      "sha256": "c0346e187a0b1995d19a1128fefda0809a8216737b3f89b39a7da19d298bf4ad"
+    },
+    "primitive_metric": {
+      "path": "radio_gs/evaluation/primitive_instance_union.py",
+      "sha256": "771082de5dfa310ded907fd6b4b00badcbb80f9af4c7ebe91ba3a6e0bcd9dc9c"
+    }
+  },
+  "selected_on_scene0001": {
+    "method": "dual_path_widest",
+    "maximum_regions": 8,
+    "threshold": 0.8
+  },
+  "heldout_scene0002_region_evidence": {
+    "singleton": {
+      "iou": 0.10117378828582071,
+      "f1": 0.15342190899954455,
+      "contamination": 0.0,
+      "topology_score": 0.10117378828582071
+    },
+    "selected": {
+      "iou": 0.16617203498329475,
+      "f1": 0.24039349851593164,
+      "contamination": 0.022339854908260882,
+      "giant_excess": 0.000006902329032509391,
+      "topology_score": 0.14382527774600137,
+      "selected_regions": 3.014898074108107
+    },
+    "selected_minus_singleton": {
+      "iou": 0.06499824669747404,
+      "f1": 0.08697158951638709,
+      "topology_score": 0.04265148946018066
+    },
+    "selected_minus_previous_linear_dual_path_k8": {
+      "iou": 0.01556862009967761,
+      "f1": 0.016183383136225646,
+      "contamination": -0.03403796524268207,
+      "topology_score": 0.04963434520096256
+    }
+  },
+  "heldout_scene0002_deduplicated_primitive_instance": {
+    "singleton": {
+      "iou": 0.15651399947303948,
+      "f1": 0.24723116823887184,
+      "contamination": 0.29277583981389493,
+      "giant_excess": 0.000034088368678488986,
+      "topology_score": -0.13629592870953394
+    },
+    "selected": {
+      "iou": 0.18558855842073285,
+      "f1": 0.2853929129897677,
+      "contamination": 0.31587178910244335,
+      "giant_excess": 0.00008290859499879161,
+      "topology_score": -0.1303661392767093,
+      "selected_unique_primitives": 364.6231096281971,
+      "selected_regions": 3.0554254360713364
+    },
+    "selected_minus_singleton": {
+      "iou": 0.02907455894769337,
+      "f1": 0.03816174475089587,
+      "contamination": 0.023095949288548412,
+      "topology_score": 0.005929789432824656
+    }
+  },
+  "selection_metric_diagnosis": {
+    "scene0001_primitive_selected_minus_singleton_iou": 0.04983262595365376,
+    "scene0001_primitive_selected_minus_singleton_f1": 0.0743373627336445,
+    "scene0001_primitive_selected_minus_singleton_contamination": 0.05243301899370151,
+    "scene0001_primitive_selected_minus_singleton_topology_score": -0.0026938369276406915,
+    "interpretation": "The 21-channel nonlinear relation transfers and improves heldout primitive IoU/F1/topology. The small negative fit-scene primitive topology delta shows that canonical-region proxy selection is not aligned tightly enough; formal V2 must select checkpoint/readout directly on deduplicated primitive-instance source-validation evidence."
+  },
+  "decision": {
+    "engineering_signal_positive": true,
+    "formal_4plus2_authorized": true,
+    "target_execution_authorized": false,
+    "next_step": "materialize all six source capability and primitive evidence authorities then run the frozen V2 4train_2validation protocol"
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

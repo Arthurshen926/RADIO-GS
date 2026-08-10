@@ -21,6 +21,8 @@ import math
 import torch
 from torch import nn
 
+from .anchor_preserving_transport import apply_anchor_preserving_logit_residual
+
 
 FEATURE_NAMES: tuple[str, ...] = (
     "analytic_logit",
@@ -59,6 +61,7 @@ class RegisteredUnaryOutput:
     abstention: torch.Tensor
     analytic_probability: torch.Tensor
     bounded_logit_residual: torch.Tensor
+    residual_gate: torch.Tensor | None = None
 
 
 def _vector(
@@ -296,23 +299,20 @@ class RegisteredEvidenceToUnaryV2(RegisteredEvidenceToUnaryV1):
 
         raw = self.output(self.backbone(values))
         confidence = torch.sigmoid(raw[:, 1])
-        unlabeled_fraction = (1.0 - coverage).clamp(0.0, 1.0)
-        residual_gate = torch.where(
-            coverage >= 1.0 - self.fully_observed_tolerance,
-            torch.zeros_like(unlabeled_fraction),
-            unlabeled_fraction,
-        )
-        residual = (
-            self.max_delta_logit * residual_gate * confidence * torch.tanh(raw[:, 0])
-        )
-        analytic_logit = torch.logit(analytic)
-        probability = analytic + (
-            torch.sigmoid(analytic_logit + residual) - torch.sigmoid(analytic_logit)
+        proposed_residual = self.max_delta_logit * confidence * torch.tanh(raw[:, 0])
+        transported = apply_anchor_preserving_logit_residual(
+            analytic,
+            proposed_residual,
+            coverage,
+            active_domain=features.capability_valid,
+            max_abs_logit_residual=self.max_delta_logit,
+            fully_observed_tolerance=self.fully_observed_tolerance,
         )
         return RegisteredUnaryOutput(
-            foreground_probability=probability,
+            foreground_probability=transported.probability,
             confidence=confidence,
             abstention=1.0 - confidence,
             analytic_probability=analytic,
-            bounded_logit_residual=residual,
+            bounded_logit_residual=transported.applied_logit_residual,
+            residual_gate=transported.residual_gate,
         )

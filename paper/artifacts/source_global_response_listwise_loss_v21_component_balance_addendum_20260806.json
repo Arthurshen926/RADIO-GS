@@ -1,0 +1,32 @@
+{
+  "artifact": "source_global_response_listwise_loss_v21_component_balance_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-06T19:05:00+08:00",
+  "status": "sealed_before_component_balance_implementation_or_compositional_bank_execution",
+  "parent_preregistration": {
+    "path": "paper/artifacts/source_global_response_listwise_loss_v21_preregistration_20260806.json",
+    "sha256": "dd75dd833ee3431db944b2be88f9b323f7247ead9f870051da539ffdc14d674b"
+  },
+  "identified_risk": "A row-wise mean after concatenating an optional compositional bank can make bank size an unintended loss coefficient and let numerous low-response counterfactual rows dominate the 806-row primary component.",
+  "clarification": {
+    "query_axis_concatenation": "retained for input and audit identity only",
+    "loss_reduction": "compute a mean independently inside the primary component and every optional component, then take an unweighted mean over components",
+    "applies_to": [
+      "centered response profile",
+      "absolute response",
+      "absolute canonical-negative relevance",
+      "continuous pairwise relevance"
+    ],
+    "descriptor_triplet": "computed once because it has no query-bank axis",
+    "component_weight": "one divided by the number of active bank components",
+    "per_scene_or_per_vocabulary_tuning": false
+  },
+  "required_invariance_test": "Uniformly duplicating every row of one optional component must not change its effective component weight or the reduced loss, up to floating-point reduction tolerance.",
+  "source_access": {
+    "benchmark_text_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_or_benchmark_executed_before_addendum": false
+}

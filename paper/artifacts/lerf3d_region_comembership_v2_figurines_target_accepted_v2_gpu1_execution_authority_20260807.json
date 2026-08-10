@@ -1,0 +1,81 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_target_accepted_v2_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T04:44:00+08:00",
+  "status": "sealed_after_target_schema_tests_and_query_free_graph_success_before_target_accepted_v2_execution",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "figurines",
+    "geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "physical_space_id": "lerf:figurines:geometry-checkpoint-sha256:6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+  },
+  "inputs": {
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_primitive_state_v2.pt",
+      "sha256": "1060d9e2bad4a3a1c1015ce1d84995b0b25ceb674b847eb93200ce8f66f3e3ca"
+    },
+    "factorized_radio_cache_sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b",
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/canonical_support_graph_accepted_v2.pt",
+      "sha256": "be19d62870f5bcead5ae4e6804897ce3453088c18080947e5e7b0373b6f70c1d"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/exact_marginal_responsibility_authority_nonempty_v2.json",
+      "sha256": "d280aa006a9d2edac58e62aa05abfda1b4e5af89a9df2d7d07f3f7c373dd787b",
+      "correction_addendum": "paper/artifacts/lerf3d_region_comembership_v2_figurines_empty_responsibility_manifest_correction_addendum_20260807.json"
+    },
+    "accepted_v2_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_target_accepted_v2_canonical_region_authority.py",
+    "sha256": "f63e62a3c411c483244142a12f34284887f12e0e519dfb9da1db703531b83399"
+  },
+  "target_schema_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/surface_region_target_accepted_v2.py",
+    "sha256": "6e601832c1fc960ead9b652a5750e6fb7657530dd76680d0528862310ff53743"
+  },
+  "verification_before_execution": {
+    "tests": "tests/test_materialize_target_accepted_v2_canonical_region_authority.py",
+    "passed": 4,
+    "failed": 0
+  },
+  "frozen_contract": {
+    "same_mathematical_payload_as_source_accepted_v2": true,
+    "per_scene_region_cap": 4096,
+    "scales_m": [0.25, 0.45, 0.7],
+    "selection_batch_size": 8192,
+    "readout_batch_size": 128,
+    "device": "cuda:0_after_CUDA_VISIBLE_DEVICES_1",
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/accepted_v2_sparse_v2.pt",
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "maximum_power_limit_w": 300.5,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

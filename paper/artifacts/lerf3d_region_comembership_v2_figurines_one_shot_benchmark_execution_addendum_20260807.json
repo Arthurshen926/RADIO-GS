@@ -1,0 +1,91 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_one_shot_benchmark_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:16:00+08:00",
+  "status": "sealed_after_distinct_fixed_cache_success_before_any_target_image_mask_or_metric_access",
+  "candidate": {
+    "query_readout_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_region_comembership_v2_figurines_query_readout_execution_authority_v2_20260807.json",
+      "sha256": "519d094966dc089c515867c4bc4ad8ffbc7ae462c0d595063265444626e85662"
+    },
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/external_query_scores_formal_v2_validity_domain_fix.pt",
+      "sha256": "742a8810d74f059e9d0aec61bd3c38d5db2f72f3a0d287ce262f8b511c0914eb"
+    },
+    "build_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/external_query_scores_formal_v2_validity_domain_fix_report.json",
+      "sha256": "d92363bc5dff81ec392c0fba9199496c128d4748637ff95413544a6c59e5a303"
+    },
+    "selected_rule": {
+      "method": "dual_path_widest",
+      "maximum_regions": 8,
+      "probability_threshold": 0.9,
+      "source": "formal_4train_2heldout_global_selection"
+    },
+    "selected_region_counts": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  },
+  "frozen_evaluator": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "modified_for_candidate": false
+  },
+  "frozen_inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "query_text_embeddings": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_text_embeddings": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+  },
+  "evaluation": {
+    "scene": "figurines",
+    "protocol_preset": "vala_paper_3d",
+    "score_source": "direct",
+    "scoring": "relevancy",
+    "score_postprocess": "none",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_frames_only": true,
+    "all_labeled_frames": false,
+    "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/evaluation/figurines_formal_v2_validity_domain_fix",
+    "single_candidate_no_sweep": true
+  },
+  "controls_reused_without_reexecution": {
+    "O0_miou": 0.4753887355327606,
+    "old_v1_miou": 0.35686323046684265,
+    "old_union_v2_miou": 0.3340669274330139
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_gpu_argument": 0,
+    "preloaded_libcuda": "/usr/lib/x86_64-linux-gnu/libcuda.so.535.288.01",
+    "power_limit_w": 300.5,
+    "thermal_poll_seconds": 30,
+    "start_maximum_temperature_c": 85,
+    "hard_temperature_c": 88,
+    "consecutive_hot_polls_before_stop": 6,
+    "owner_mode": "exclusive-singleton-after-clear-v1",
+    "candidate_metric_opened": false,
+    "execution_authorized_after_this_addendum": true
+  }
+}

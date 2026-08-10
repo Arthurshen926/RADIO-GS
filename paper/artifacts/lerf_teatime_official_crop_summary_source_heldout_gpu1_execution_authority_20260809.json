@@ -1,0 +1,135 @@
+{
+  "command": [
+    "/root/RADIO-GS/radio_gs/scripts/run_repo_python.sh",
+    "-m",
+    "radio_gs.scripts.audit_mpr_view_consistency",
+    "heldout",
+    "--config",
+    "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_teatime_official_crop_summary_train.yaml",
+    "--geometry-checkpoint",
+    "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "--mpr-cache",
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/teatime_official_crop_summary_mpr.pt",
+    "--output",
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/teatime/source_heldout_readiness_v1.pt",
+    "--device",
+    "cuda:0",
+    "--frame-ids",
+    "4,7,10,14,17,20,24,28,31,35,38,41,46,49,52,56,59,62,66,69,72,76,79,82,86,89,92,96,99,102,106,110,113,117,120,123,127,131,134,138,142,145,150,153,158,162,165,168,172,175,178"
+  ],
+  "explicit_frame_argument": "4,7,10,14,17,20,24,28,31,35,38,41,46,49,52,56,59,62,66,69,72,76,79,82,86,89,92,96,99,102,106,110,113,117,120,123,127,131,134,138,142,145,150,153,158,162,165,168,172,175,178",
+  "forbidden_target_frame_ids": [
+    2,
+    25,
+    43,
+    107,
+    129,
+    140
+  ],
+  "gate_wrapper_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_official_crop_summary_heldout_gate.py",
+    "sha256": "ca9fd043429b01da229f953d8dda4090a169643a53ba06cbcd86311f3e090d66"
+  },
+  "inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_teatime_official_crop_summary_train.yaml",
+      "sha256": "cf5fc3e573a06cc37a51b799065f5654d21d314e916dd2ea8cbd59fdcb5a5919"
+    },
+    "genuine_mpr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/teatime_official_crop_summary_mpr.pt",
+      "sha256": "adda0f094d184d96bfb15ad9e5268e3b34198a995d89865b30904de2a8b17460"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+    },
+    "heldout_audit_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/audit_mpr_view_consistency.py",
+      "sha256": "73c68f1b90de728b004afb9b3db2da21671d3e4ef167a2e44524bed42849670c"
+    }
+  },
+  "large_input_hashes_verified": true,
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_official_crop_summary_source_heldout_preregistration_20260809.json",
+    "sha256": "3ae93f9e1217edfa1ea17163e7c9c79921f1a15b2808e226a3d81994140771f6"
+  },
+  "protocol": {
+    "benchmark_masks_opened": false,
+    "historical_mpr_excluded_frame_fallback_allowed": false,
+    "performance_role": "diagnostic_readiness_gate_not_target_promotion",
+    "required_result_checks": [
+      "exact_preregistered_source_heldout_frame_ids",
+      "every_frame_has_positive_visible_pixels",
+      "every_frame_has_positive_registered_rows",
+      "every_frame_mean_pixel_cosine_is_finite"
+    ],
+    "source_only": true,
+    "target_metric_execution_authorized": false,
+    "text_queries_opened": false
+  },
+  "reseal": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/teatime/teatime_official_crop_summary_content_reseal.json",
+    "sha256": "ade230993ac2ffb688327c1a989696547797914f54a7ce41fbeedd748165ddb5"
+  },
+  "result_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/teatime/source_heldout_readiness_v1.pt",
+  "scene": "teatime",
+  "schema": "radio_gs.lerf_official_crop_summary_heldout_gate_authority.v1",
+  "schema_version": 1,
+  "selected_view_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/exact_marginal_responsibility_authority.json",
+    "sha256": "de485f2b264b7b40be054ac257b4245645cb52437ccd95135a6ab179ec384d05"
+  },
+  "source_heldout_frame_ids": [
+    4,
+    7,
+    10,
+    14,
+    17,
+    20,
+    24,
+    28,
+    31,
+    35,
+    38,
+    41,
+    46,
+    49,
+    52,
+    56,
+    59,
+    62,
+    66,
+    69,
+    72,
+    76,
+    79,
+    82,
+    86,
+    89,
+    92,
+    96,
+    99,
+    102,
+    106,
+    110,
+    113,
+    117,
+    120,
+    123,
+    127,
+    131,
+    134,
+    138,
+    142,
+    145,
+    150,
+    153,
+    158,
+    162,
+    165,
+    168,
+    172,
+    175,
+    178
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_target_blind_connected_multi_region_union_v2",
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_read_only_topology_attribution_and_before_v2_implementation_cache_or_metric",
+  "development_only_topology_attribution": {
+    "D3_oracle": {
+      "region_count": 130,
+      "addition_count": 109,
+      "connected_additions": 105,
+      "connected_fraction": 0.963302752293578,
+      "overlap_fraction": 0.8990825688073395,
+      "queries_all_additions_connected": 18,
+      "queries_with_disconnected_addition": 3
+    },
+    "target_blind_union_v1": {
+      "region_count": 168,
+      "addition_count": 147,
+      "connected_additions": 99,
+      "connected_fraction": 0.673469387755102,
+      "overlap_fraction": 0.4897959183673469,
+      "queries_all_additions_connected": 6,
+      "queries_with_disconnected_addition": 15
+    },
+    "connected_fraction_gap": 0.289833364538476,
+    "connection_definition": "candidate semantic core overlaps the current union or at least one immutable support-graph edge has one endpoint in the candidate core and the other endpoint in the current union",
+    "decision": "The 28.98-point connection gap is material, so execute the single registered v2 intervention.",
+    "oracle_choices_are_diagnostic_only": true,
+    "oracle_choices_consumed_by_deployable_selector": false
+  },
+  "evidence": {
+    "D3_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_support_readout_oracle_d0_d5_figurines_v2/sealed_run/result.json",
+      "sha256": "775df3adff6ac95aba1dd3061e6202fa8501405bdc768d1a1e2cf2b951c2aba1"
+    },
+    "union_v1_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/figurines/external_query_scores.pt",
+      "sha256": "85cab0001d98512a2909114520d523033c31c57a7def2473c9003c66a17b0de7"
+    },
+    "union_v1_frozen_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/evaluation/union_v1/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "4b6d9362d7288564cdbb4024f82b2df740fd0b814d17851a634d0a6fc6b4782b"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/global_3d_readout/figurines_support_graph_v3.pt",
+      "sha256": "abcdd466fbbd726f277b59b137a59ac93b0a2c270a7557fc9916a478a66a1451"
+    }
+  },
+  "candidate": {
+    "name": "target_blind_connected_expected_mass_union_v2",
+    "input_region_probability": "same_scale_O0_canonical_negative_probability_after_independent_frozen_knn10_and_minmax",
+    "input_region_membership": "registered_surface_region_semantic_core_only",
+    "input_topology": "immutable_registered_support_graph_only",
+    "score_gate": 0.6,
+    "maximum_regions": 8,
+    "first_seed_utility": "region_probability_times_semantic_core_row_count",
+    "later_candidate_gate": "semantic_core_overlap_or_at_least_one_support_edge_to_current_union",
+    "later_utility": "region_probability_times_number_of_semantic_core_rows_not_yet_covered",
+    "tie_break": "smaller_immutable_scale_major_candidate_index",
+    "stop": "eight regions selected or no gated connected candidate has positive novel utility",
+    "output": "binary union of selected semantic-core primitive rows",
+    "ground_truth_access": false,
+    "scene_specific_parameters": false,
+    "continuous_parameters": false,
+    "threshold_sweep": false,
+    "K_sweep": false,
+    "graph_parameter_sweep": false
+  },
+  "constant_provenance": {
+    "score_gate_0p6": "unchanged frozen LERF score threshold",
+    "maximum_regions_8": "unchanged capacity registered before the D3 metric",
+    "core_count": "discrete expected supported mass without a fitted coefficient",
+    "support_connectivity": "binary immutable graph relation without a fitted distance or affinity threshold"
+  },
+  "evaluation": {
+    "first_and_only_metric": "Figurines frozen development sentinel",
+    "score_postprocess_after_binary_union": "none",
+    "promotion_requires": "fixed mIoU above both union_v1 and the bound O0 control",
+    "result_dependent_followup_on_this_candidate": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  }
+}

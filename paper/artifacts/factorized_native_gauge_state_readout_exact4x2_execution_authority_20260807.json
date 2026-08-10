@@ -1,0 +1,150 @@
+{
+  "authorized_arms": [
+    "direction_only",
+    "direction_plus_log_amplitude",
+    "direction_plus_log_amplitude_plus_full_state"
+  ],
+  "benchmark_exclusion_manifest": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+  },
+  "benchmark_execution_authorized": false,
+  "cohort_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+  },
+  "interface_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/factorized_native_gauge_state_readout.py",
+    "sha256": "29e87b9478a83b6b28decd55c3f620810881b6ec8dc4265396dcea4adbfadf96"
+  },
+  "model_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/models/factorized_native_gauge_state_readout.py",
+    "sha256": "d242a767712aef64b809dc3fccde4aa0c61b97c598b8f70fc5948787d43b1d31"
+  },
+  "official_radio_checkpoint": {
+    "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "pilot_asset_loader_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_full_scalar_clean_training_shard.py",
+    "sha256": "e193a003209223f44ce756a8800ab7fbb7214e93e7e004c43e5e1467a977d460"
+  },
+  "pilot_cohort_region_view_registry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_cohort_region_view_registry/pilot_exact4train_2validation/region_view_registry_v1.json",
+    "sha256": "bbf149fc719bb1936d29e3ecab06e006dac40d46708c45a16f2064239127f1f9"
+  },
+  "schema": "radio_gs.factorized_native_gauge_state_readout_exact4x2_execution_authority.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "per_scene_hyperparameters": false,
+    "query_independent": true,
+    "runtime_query_strings_consumed": false,
+    "scene_identifiers_consumed_by_model": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false
+  },
+  "source_train": [
+    {
+      "accepted_region_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+        "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8"
+      },
+      "factorized_state": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/factorized_primitive_state_v2.pt",
+        "sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9"
+      },
+      "scene_id": "scene0001_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0001_00/training_shard_v1.pt",
+        "sha256": "125a25f5784b679da863958c08eec701c92e5da3f5447024653e6237d0efd61f"
+      }
+    },
+    {
+      "accepted_region_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/accepted_v2_sparse_v2.pt",
+        "sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89"
+      },
+      "factorized_state": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/factorized_primitive_state_v2.pt",
+        "sha256": "7036ae2e0ab581c684f9c43c76923836659b666d30bdddcc7790f139d77fdfbe"
+      },
+      "scene_id": "scene0002_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0002_00/training_shard_v1.pt",
+        "sha256": "7c4f95159558bf6652329573b1017239b5db8bd75ef6e4a64a467a29c9b1b7ef"
+      }
+    },
+    {
+      "accepted_region_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+        "sha256": "28b56a2270917f290aa35bbb29542dfbbbdd657da6696f738b4bdc4f0c5f819e"
+      },
+      "factorized_state": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+        "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd"
+      },
+      "scene_id": "scene0003_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0003_00/training_shard_v1.pt",
+        "sha256": "0f3354891f88ea12404d37f7f29d2c3a4e9f98cde0ff3bab771a81d630ea1af3"
+      }
+    },
+    {
+      "accepted_region_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+        "sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e"
+      },
+      "factorized_state": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/factorized_primitive_state_v2.pt",
+        "sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8"
+      },
+      "scene_id": "scene0005_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0005_00/training_shard_v1.pt",
+        "sha256": "935e9ad3ba92586223008bc9e59979631d6ef641b562a30cafc54a02f9ac335d"
+      }
+    }
+  ],
+  "source_validation": [
+    {
+      "accepted_region_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/accepted_v2_sparse_v2.pt",
+        "sha256": "bbfc1ecc1ef9b5f6d638b2b954245199f671e8cb66a53c98d30d23f9df0c39de"
+      },
+      "factorized_state": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/exact_state/scene0004_00/factorized_primitive_state_v2.pt",
+        "sha256": "edfaab08aa4ebe1c7850931578ffb941a1e7439c428c4521019fb7c1ce8aa7d4"
+      },
+      "scene_id": "scene0004_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0004_00/training_shard_v1.pt",
+        "sha256": "efd526330c280e332c741f717096f2d7fadb8dd87551d8785f8043a19328b881"
+      }
+    },
+    {
+      "accepted_region_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/accepted_v2_sparse_v2.pt",
+        "sha256": "56fdd38079300e06d129763a38ac56e5186c1aa9fea15d354046ace830d2eaae"
+      },
+      "factorized_state": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/factorized_primitive_state_v2.pt",
+        "sha256": "ab19362055999cfdf0d4b3559b85a32f0071074ef1706686cf29cf218d15e84a"
+      },
+      "scene_id": "scene0008_00",
+      "training_shard": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0008_00/training_shard_v1.pt",
+        "sha256": "8e7a830e0ae1d9279325328c7c7dd97b197c371d12d1ee674ff1c3db75236470"
+      }
+    }
+  ],
+  "status": "authorized_source_only_exact4train_2validation",
+  "trainer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2.py",
+    "sha256": "89770aaa501be87fffbbb562eb38800a71673691b5d1856b1d3296d246fe3aa2"
+  },
+  "training_authorized": true
+}

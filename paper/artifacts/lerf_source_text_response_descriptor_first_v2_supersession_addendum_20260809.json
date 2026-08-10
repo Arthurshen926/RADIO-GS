@@ -1,0 +1,39 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_descriptor_first_supersession_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_before_descriptor_first_v2_execution",
+  "reason": "The v1 authorities were sealed against an implementation that projected normalized primitive descriptors into query responses before compositing. That order is not equivalent when several primitives contribute to one pixel. Descriptor-first v2 composites raw 1536-D descriptors, normalizes each rendered pixel, and only then projects the target-blind source query bank.",
+  "superseded_v1_authorities": [
+    {
+      "scene_id": "ramen",
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_mpr_ab_gpu0_execution_authority_20260809.json",
+      "sha256": "6ad8edfbb3283822875db7cf7e3326ea31c23ecda548c58d071ea4e6570272b0",
+      "execution_status": "never_executed_under_this_authority",
+      "superseded": true
+    },
+    {
+      "scene_id": "teatime",
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_mpr_ab_gpu1_execution_authority_20260809.json",
+      "sha256": "45c11846c3a0638676c5ceb8a7d07632d944e5aa7593cc1163cb5ca096a24f03",
+      "execution_status": "never_executed_under_this_authority",
+      "superseded": true
+    }
+  ],
+  "replacement_v2_authorities": [
+    {
+      "scene_id": "ramen",
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_v2_gpu0_execution_authority_20260809.json",
+      "sha256": "2944a8d43b7c09f30aa4ef4e7957268c291e41dc19334e63a26eb5ea7400d0b3"
+    },
+    {
+      "scene_id": "teatime",
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_v2_gpu1_execution_authority_20260809.json",
+      "sha256": "3ecb70e31089b92b9e6c922fd89513b5c4bd68b6e780c0d40edcc217417ccbde"
+    }
+  ],
+  "comparison_disclosure": {
+    "end_to_end_interface_ab_not_capacity_matched": true,
+    "target_metric_execution_authorized": false,
+    "benchmark_queries_or_masks_opened": false
+  }
+}

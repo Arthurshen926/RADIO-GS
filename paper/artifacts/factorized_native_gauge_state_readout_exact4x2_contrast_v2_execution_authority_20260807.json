@@ -1,0 +1,41 @@
+{
+  "schema": "radio_gs.factorized_native_gauge_state_readout_exact4x2_contrast_v2_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_contrast_v2_exact4train_2validation",
+  "trainer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2_contrast_v2.py",
+    "sha256": "deb3019af8cb7c2000f001c20b9f60a6d59c0b040c839d0cfa27c93df59963a0"
+  },
+  "contrast_objective_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/models/source_contrast_preservation.py",
+    "sha256": "e12f8a333f5e23944a4fc264e997b18f7a8fb33cd621efd2c466bd3e8eb6f571"
+  },
+  "model_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/models/factorized_native_gauge_state_readout.py",
+    "sha256": "d242a767712aef64b809dc3fccde4aa0c61b97c598b8f70fc5948787d43b1d31"
+  },
+  "interface_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/factorized_native_gauge_state_readout.py",
+    "sha256": "29e87b9478a83b6b28decd55c3f620810881b6ec8dc4265396dcea4adbfadf96"
+  },
+  "base_v1_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json",
+    "sha256": "2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd"
+  },
+  "training_contract_sha256": "22d07185b6c16d0888dd7365df4748c49a571a102382ecff58cb054a48c69c87",
+  "authorized_arm": "direction_only",
+  "training_authorized": true,
+  "benchmark_execution_authorized": false,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "per_scene_hyperparameters": false,
+    "query_independent": true,
+    "runtime_query_strings_consumed": false,
+    "scene_identifiers_consumed_by_model": false,
+    "target_heldout_opened": false,
+    "text_queries_opened": false
+  }
+}

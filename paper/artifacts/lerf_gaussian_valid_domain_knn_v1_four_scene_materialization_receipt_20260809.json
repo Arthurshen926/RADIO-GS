@@ -1,0 +1,101 @@
+{
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "gpu_used": false,
+    "raw_canonical_negative_score_caches_opened": true,
+    "raw_positive_query_score_caches_opened": true,
+    "reliability_sidecars_opened": false,
+    "source_only_policy_gate_opened": true,
+    "target_metrics_computed": false,
+    "target_metrics_opened": false
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_gaussian_valid_domain_knn_candidate.py",
+    "sha256": "89ecad4095a2387944b3661e5ec628df323a94506c9747cc3eb4f907e2397be2"
+  },
+  "method_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/querying/reliability_weighted_valid_domain_knn_readout.py",
+    "sha256": "e0bf58dd20e84200f9ef7b310ac96d74539a98e4f63064917af60be42c411645"
+  },
+  "metric_executed": false,
+  "metric_execution_authorized_by_this_receipt": false,
+  "next_gate": "separate_per_scene_one_shot_frozen_exact_metric_authority",
+  "outputs": [
+    {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/figurines/figurines_gaussian_valid_domain_o2_scores.pt",
+        "sha256": "bca21f7f5d003ea037bfd1216f39a75eb0bef88f33150f268180ca2d30ccd881"
+      },
+      "parent_lineage": "frozen_matrix_o2",
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/figurines/figurines_gaussian_valid_domain_o2_report.json",
+        "sha256": "4ff465ff334791af4607eecd2835872ad31d55e32e87220be672a608b63b83fb"
+      },
+      "scene_id": "figurines"
+    },
+    {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/ramen/ramen_gaussian_valid_domain_o2_scores.pt",
+        "sha256": "66056ef8d0771454c25566ff6491f66f84274b597d9b8a3858ea8f2ee33b35f6"
+      },
+      "parent_lineage": "fix2_exact_o2",
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/ramen/ramen_gaussian_valid_domain_o2_report.json",
+        "sha256": "44fa114dc14b22b8c8ccfc6eb1b1d07ab2a3d391a027f22ca418179587400608"
+      },
+      "scene_id": "ramen"
+    },
+    {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/teatime/teatime_gaussian_valid_domain_o2_scores.pt",
+        "sha256": "fe2be5e732f048784f33c31555489818c4523182a253a0cdf5d4237cf6c730da"
+      },
+      "parent_lineage": "frozen_text_rebind_o2",
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/teatime/teatime_gaussian_valid_domain_o2_report.json",
+        "sha256": "1b30544d890cb4260c7cb0ea935b33d701f14aa7644808440abd94fbac824852"
+      },
+      "scene_id": "teatime"
+    },
+    {
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/waldo_kitchen/waldo_kitchen_gaussian_valid_domain_o2_scores.pt",
+        "sha256": "e2a69026c37a11c9fbd82e30997300c4a50e0a14d6029c9ef7b03e5991144cd1"
+      },
+      "parent_lineage": "frozen_v3_exact_o2",
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/waldo_kitchen/waldo_kitchen_gaussian_valid_domain_o2_report.json",
+        "sha256": "ecb7c5a73b8ab7bc9639551610c928b7c1041f8e664f3a8370ce8fc012e3295d"
+      },
+      "scene_id": "waldo_kitchen"
+    }
+  ],
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_reliability_weighted_valid_domain_knn_v2_preregistration_20260809.json",
+    "sha256": "374838ebf5d8d1aaa6e539b22fa9b02228a45b8acb031f0ab835b0da508f3a3e"
+  },
+  "schema": "radio_gs.lerf_gaussian_valid_domain_knn_four_scene_materialization_receipt.v1",
+  "schema_version": 1,
+  "source_gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_reliability_weighted_knn_v2/source_gate_v1/source_gate_result.json",
+    "sha256": "f609c23318bc1bac35a93e98687cc3603c2393e826b8298bab128874382c0e39"
+  },
+  "source_gate_selected_policy": "gaussian",
+  "status": "complete_four_scene_premetric_materialization",
+  "tests": [
+    {
+      "path": "/root/RADIO-GS/tests/test_reliability_weighted_valid_domain_knn_readout.py",
+      "sha256": "bf84516d8ce90b621719257945f639e3b31dcd4564662a866da5e673939b9fb2"
+    },
+    {
+      "path": "/root/RADIO-GS/tests/test_select_lerf_source_only_reliability_weighted_knn.py",
+      "sha256": "bb4120e56f6e1e601a10e4ec84460f56be55924bc6866bbb605ef78ff2beb406"
+    },
+    {
+      "path": "/root/RADIO-GS/tests/test_materialize_lerf_gaussian_valid_domain_knn_candidate.py",
+      "sha256": "d59d863380d8837d32b6a9f712dbd51209bbc2e5b450c594789a407d886a44b4"
+    }
+  ],
+  "tests_result": "23 passed"
+}

@@ -1,0 +1,53 @@
+{
+  "schema": "radio_gs.region_comembership_v2_target_query_readout_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_after_v2_target_feature_and_inference_complete",
+  "scene_id": "figurines",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_region_comembership_external_cache_v2.py",
+    "sha256": "5f4d93373dac114f686308985ea232ce4025e06d24842738105f6d845bf18a1c"
+  },
+  "implementation_dependencies": {
+    "frozen_o0": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "bounded_query_readout": {
+      "path": "/root/RADIO-GS/radio_gs/querying/bounded_region_comembership_query_readout.py",
+      "sha256": "6c9949bd4b40a0a74d6683ed239ad8bdb6b442fe1d86d3cd5111e6008cc259f4"
+    },
+    "scale_major_helpers": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_region_comembership_external_cache_v1.py",
+      "sha256": "cd10adde64aa4595eaad417de058b1c3ae6c88e2ef7d8ebe5293096cdccb31b5"
+    }
+  },
+  "feature_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_features_v2.pt",
+    "sha256": "c65b6c799569e4423547e96632f0652b7ce9ef5de107792e645e46e8eec2a927"
+  },
+  "inference_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_inference_v2.pt",
+    "sha256": "baf3446bd5c83bd1f2b639d534b4d0edcf4124ca19e282e2f8c4a24c998ba421"
+  },
+  "positive_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_positive.pt",
+    "sha256": "7e7611ac7c886917d0b415c613e16c740d6248cb46c0bde536df6d353d9f739c"
+  },
+  "negative_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_negative.pt",
+    "sha256": "a887eb9da5631ed8a1966e3ad844bb0797d94626a6025e1293b5712e11b9b19f"
+  },
+  "renderer_geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+  "knn_chunk_size": 65536,
+  "output_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/external_query_scores_formal_v2.pt",
+  "output_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/external_query_scores_formal_v2_report.json",
+  "query_readout_authorized": true,
+  "target_metric_authorized": false,
+  "access_audit": {
+    "benchmark_queries_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

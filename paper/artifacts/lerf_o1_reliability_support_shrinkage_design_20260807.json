@@ -1,0 +1,89 @@
+{
+  "schema": "radio_gs.lerf_o1_reliability_support_shrinkage_design.v1",
+  "schema_version": 1,
+  "status": "implemented_and_cpu_verified_row_streamable_source_only_interface_no_metric_authorization",
+  "date": "2026-08-07",
+  "evidence": {
+    "support_readout_oracle": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_result_20260807.json",
+      "sha256": "9f1d2475fd3e814188731e585aea069ac1d12808ff64d9b317fcaa58da0b9ecf"
+    },
+    "ramen_O1_O2_exact": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_o2_ramen_exact_metric_results_fix2_20260807.json",
+      "sha256": "d2ae02af5fc03fc22da5c40fe0e52cf932889c15c2b62de3a762aff4f222b49d"
+    },
+    "rejected_unconditional_multi_region_union": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_target_blind_multi_region_union_figurines_result_20260807.json",
+      "sha256": "1cf3244301355cf52b4cbf176d64b915af4f2083d5cf55ae18388b479cd047f1"
+    },
+    "frozen_evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    }
+  },
+  "causal_attribution": {
+    "region_core_quality": "D2 has high selected purity but only 0.3973 positive coverage; the core representation is locally precise rather than intrinsically noisy.",
+    "primitive_support": "D3 raises fixed IoU from D2 0.3767 and D1 0.5254 to 0.7713 by composing multiple semantic cores, so incomplete object support is the largest measured post-field capacity gap.",
+    "teacher_semantics": "Direct teacher primitive response is weak: D4 available-row fixed IoU/AP/oracle-IoU are 0.1556/0.6013/0.4933. Ramen O1 nevertheless gains 0.0635 mIoU under the unchanged readout, proving that teacher-guided field direction remains useful when conservatively fused.",
+    "renderer": "D4 end-to-end abstain fixed IoU 0.1491 and D5 rendered fixed IoU 0.1423 differ by only 0.0068. Domain metrics are not directly interchangeable, but the frozen renderer is not consistent with the dominant loss.",
+    "selection_not_capacity": "The previous target-blind eight-region novelty union selected all eight slots and regressed Figurines by 0.1185 mIoU; a support mechanism needs reliability evidence and a conservative fallback, not more unconditional regions."
+  },
+  "calibration_audit": {
+    "canonical_response": "sigmoid(logit_scale_times_positive_minus_per_primitive_hardest_canonical_negative)",
+    "frozen_readout": "independent_KNN10_per_scale_then_raw_peak_scale_selection_then_independent_per_scale_per_query_minmax_then_clip_2x_minus_1",
+    "fixed_0p6_equivalence": "threshold_0p8_on_the_pre_clip_per_query_minmax_coordinate",
+    "conclusion": "Global absolute probability calibration is not the main frozen-protocol bottleneck because every scale/query channel is independently min-max remapped. Within-query ordering, upper-tail shape, spatial support, and raw peak scale choice remain causal."
+  },
+  "candidate": {
+    "name": "reliability_conditioned_leave_one_out_surface_region_shrinkage",
+    "placement": "after_query_free_O1_direction_materialization_before_any_text_query_scoring",
+    "scope": "within_region_unary_support_repair_not_a_multi_region_selector",
+    "query_free_meaning": "support construction and descriptor mutation consume no query axis; later frozen text scoring remains query-conditioned by definition",
+    "rule": "low-reliability O1 directions may rotate toward the reliability-weighted leave-one-out spherical mean of a source-reliable query-independent region core",
+    "cross_scale_gate": "the same physical region must have strictly positive support at all three O1 scale slots",
+    "rotation_cap_radians": 0.15,
+    "scale_axis_collapsed": false,
+    "fallback": "absence_of_cross_scale_leave_one_out_support_is_bitwise_O1",
+    "memory_contract": {
+      "planning_state": "one_region_index_plus_four_float_scalars_per_primitive",
+      "forbidden_full_allocation": "no_additional_N_by_3_by_D_best_target_or_output_clone",
+      "materialization": "explicit_unique_row_batch_recomputes_only_its_selected_region_leave_one_out_targets",
+      "input_dtype": "existing_contiguous_float16_or_float32_O1_tensor",
+      "batch_output_dtype": "same_as_input"
+    }
+  },
+  "implementation": {
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o1_reliability_support_shrinkage.py",
+      "sha256": "6edcfacb46726a467e72167fdf58cf373200b7625aaad770a95efc1a4ec52206"
+    },
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_lerf_o1_reliability_support_shrinkage.py",
+      "sha256": "79ecebd11850f31dcb079f05f56f00b3b9920526ed8dc3f98c60a22989fcaae5"
+    },
+    "verification": "19_passed_combined_with_lerf_reliability_geodesic_budget_tests_including_float16_row_batch_equivalence_and_bitwise_fallback",
+    "frozen_streamer_wrappers_evaluator_modified": false,
+    "gpu_used": false,
+    "new_ground_truth_or_metric_opened": false
+  },
+  "required_promotion_gate": {
+    "source_only": [
+      "bind primitive reliability to retained-view count and directional resultant from the sealed O1 streaming-v2 payload",
+      "bind region reliability to one immutable source-only cross-fitted authority",
+      "require held-out source non-regression for query-macro AP and missing-support utility",
+      "freeze one materializer candidate and every input hash before any target metric"
+    ],
+    "target": [
+      "materialize exactly one three-scale candidate without target images, labels, masks, or metrics",
+      "replay the exact O1 frozen control before candidate metric authorization",
+      "run one candidate under the unchanged canonical-negative and VALA readout"
+    ],
+    "forbidden": [
+      "scene_or_query_specific_rotation_or_threshold_selection",
+      "unconditional_eight_region_union",
+      "scale_slot_replication_or_collapse",
+      "changing_the_frozen_evaluator_or_renderer",
+      "claiming_benchmark_improvement_before_the_one_shot_metric"
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_raw_dominant_positive_utility_independent_preregistration_fix5c.v1",
+  "schema_version": 1,
+  "status": "preregistered_single_independent_candidate_before_teatime_FIX5C_target_quality_execution",
+  "scene": "teatime",
+  "single_candidate_no_sweep": true,
+  "primary_endpoint": "FIX5C_minus_exact_FP32_O0_macro_mIoU_under_frozen_VALA_protocol",
+  "candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.pt",
+      "sha256": "3d8ece1754076b712310bb9acb8c6a0182479912aff0c2b3a1aadf1fb3d7c33f"
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.report.json",
+      "sha256": "7ac66de643ecc329973f6712213a0011112fef93d3c149ebd966a8711d1253d7"
+    },
+    "target_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_teatime_execution_authority_fix5c_20260807.json",
+      "sha256": "5454e636c21fcea9dcbbaabd1050d36064fe9a37d047ba224e1f788de21e3790"
+    },
+    "structural_preflight": {
+      "query_count": 14,
+      "query_gate_true_count": 1,
+      "selected_query": "stuffed bear",
+      "filtered_FIX4C_query": "bear nose",
+      "selected_region_count": 3,
+      "actual_strict_increase_total": 767,
+      "quantized_no_change_total": 0,
+      "decrease_total": 0,
+      "changed_outside_selected_region_union_count": 0,
+      "outside_selected_union_bitwise_O0": true,
+      "failed_gate_bitwise_O0": true,
+      "invalid_primitive_bitwise_O0": true,
+      "selected_updates_non_decreasing": true
+    }
+  },
+  "exact_FP32_O0_control": {
+    "positive_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/teatime_positive.pt",
+      "sha256": "320a42e3b51d8585efc048c05a6c783ea82b7a15ad792865c5028b527495be7e"
+    },
+    "negative_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/teatime_negative.pt",
+      "sha256": "a3aa48829fdc1be908dfae4da66bf5db8f9c6e46ca06c39b9a595839587e5b02"
+    },
+    "historical_FP16_reference_mIoU": 0.4058458805,
+    "historical_reference_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_canonical_negative_relevancy_results_20260804.json",
+      "sha256": "2501bc60afc4d26578538088fb15074b40e38dc5f4522f7d62918b5bb2eba160"
+    }
+  },
+  "frozen_protocol_equivalence": {
+    "control_preset": "vala_repo_3d_with_exact_multiscale_positive_and_negative_caches",
+    "candidate_preset": "vala_paper_3d_with_already_materialized_exact_final_scores",
+    "selection_threshold": 0.6,
+    "projection": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "frames": "official_only",
+    "sweep": false
+  },
+  "metric_inputs": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_teatime_radio_verified_pose.yaml",
+      "sha256": "e8077e3fd055fc61b7bf470cbb21e0792572bb296ad8852b26e2ae0651d09613"
+    },
+    "renderer_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "text_embedding_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_directory": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+  },
+  "outputs": {
+    "control_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/evaluation/teatime_exact_o0_control",
+    "candidate_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_teatime/evaluation/teatime_raw_dominant_fix5c_independent",
+    "must_not_exist_before_execution": true
+  },
+  "gpu_policy": {
+    "physical_gpu": 1,
+    "CUDA_VISIBLE_DEVICES": "1",
+    "logical_gpu_argument": 0,
+    "launch_max_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "consecutive_hard_polls_before_stop": 6,
+    "poll_seconds": 30,
+    "soft_pause_disabled": true
+  },
+  "access_audit": {
+    "teatime_FIX5C_metric_executed_before_preregistration": false,
+    "current_exact_FP32_O0_metric_known": false,
+    "candidate_target_images_masks_or_quality_opened_during_build": false,
+    "Ramen_independent_result_known": true,
+    "method_or_candidate_changed_after_Ramen_result": false,
+    "Teatime_evaluation_was_preplanned_before_Ramen_result": true
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "schema": "radio_gs.lerf_transport_v2_valid_domain_knn_full4_result.v1",
+  "schema_version": 1,
+  "status": "complete_rejected_cross_scene_candidate",
+  "fixed_candidate": {
+    "transport_v2_candidate_index": 11,
+    "maximum_angle_radians": 0.45,
+    "gamma_policy": "k0",
+    "readout": "uniform valid-domain kNN10",
+    "scene_or_query_specific_parameters": false,
+    "frozen_protocol_modified": false
+  },
+  "source_gate": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_transport_v2_ramen_teatime_cross_scene_source_gate_result_20260809.json",
+    "sha256": "13e5bcad24aa196fa63ba17a45a807e529bce3a19e749449c3430acc5c6b7587",
+    "pooled_observations": 6571941,
+    "pooled_mean_cosine_delta": 0.015465263082407144,
+    "every_source_scene_mean_and_p05_nonregression": true
+  },
+  "scene_results": {
+    "figurines": {
+      "baseline_miou": 0.5284488797187805,
+      "candidate_miou": 0.5162671804428101,
+      "delta_miou": -0.012181699275970459,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_valid_domain_knn_v1/figurines/evaluation/exact_one_shot_gpu0_v1/figurines/lerf_direct_3d_selection_results.json",
+        "sha256": "358ed453bacac8148fa88b5e0e0514f8f5d6cd353bf06970970baecb78864741"
+      }
+    },
+    "ramen": {
+      "baseline_miou": 0.3924490213394165,
+      "candidate_miou": 0.3919541537761688,
+      "delta_miou": -0.0004948675632476807,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_valid_domain_knn_v1/ramen/evaluation/exact_one_shot_gpu1_v1/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "4eb44b553a7f3c6e0dcfc6351678a4bf2fd1780aa5e2fea17f41defa7c402c48"
+      }
+    },
+    "teatime": {
+      "baseline_miou": 0.5278149843215942,
+      "candidate_miou": 0.5325330495834351,
+      "delta_miou": 0.00471806526184082,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_valid_domain_knn_v1/teatime/evaluation/exact_one_shot_gpu0_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "cc0ffd35ec7e4f892bdf222db81eaa934983be813cf6e2c8ee2af0e063eb5881"
+      }
+    },
+    "waldo_kitchen": {
+      "baseline_miou": 0.34969425201416016,
+      "candidate_miou": 0.3441433906555176,
+      "delta_miou": -0.005550861358642578,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_valid_domain_knn_v1/waldo_kitchen/evaluation/exact_one_shot_gpu1_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "a770f79fb7b822d2c6baf7fa71f473f3db5dfc5bfcab88dcbcfd7c7dfb2b5b22"
+      }
+    }
+  },
+  "full4_macro": {
+    "miou": {
+      "baseline": 0.44960178434848785,
+      "candidate": 0.4462244436144829,
+      "delta": -0.0033773407340049744
+    },
+    "acc025": {
+      "baseline": 0.7900641522478475,
+      "candidate": 0.793274186722802,
+      "delta": 0.0032100344749545207
+    },
+    "acc050": {
+      "baseline": 0.4146792348854297,
+      "candidate": 0.41539539626045957,
+      "delta": 0.0007161613750298473
+    },
+    "boundary_f": {
+      "baseline": 0.6595116704702377,
+      "candidate": 0.6506704315543175,
+      "delta": -0.008841238915920258
+    },
+    "trimap_iou": {
+      "baseline": 0.36292098462581635,
+      "candidate": 0.3600570783019066,
+      "delta": -0.0028639063239097595
+    }
+  },
+  "decision": {
+    "promote": false,
+    "retained_mainline": "O2 canonical teacher descriptor plus uniform valid-domain kNN10",
+    "reason": "The dual-source descriptor-cosine gate does not transfer to frozen text ranking: only Teatime improves, three scenes regress, and full4 mIoU, Boundary-F, and Trimap-IoU regress.",
+    "methodological_conclusion": "Future source gates must cover every available scene and include a query-bank response/ranking proxy in addition to descriptor reconstruction."
+  }
+}

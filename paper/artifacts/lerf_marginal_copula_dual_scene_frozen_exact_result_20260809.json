@@ -1,0 +1,101 @@
+{
+  "schema": "radio_gs.lerf_marginal_copula_dual_scene_frozen_exact_result.v1",
+  "schema_version": 1,
+  "status": "completed_global_rejected",
+  "authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_marginal_copula_dual_scene_frozen_exact_execution_authority_20260809.json",
+    "sha256": "2cad5f8e62011537399f0a10c42569a735761ab300ae706aaa7f589265dece0e"
+  },
+  "preexecution_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_marginal_copula_dual_scene_frozen_exact_preexecution_audit_20260809.json",
+    "status": "PASS"
+  },
+  "policy": {
+    "policy_id": "b40_s05",
+    "strength": 0.5,
+    "maximum_rank_fraction": 0.4,
+    "single_candidate_no_sweep": true,
+    "threshold_adjustment_after_metric": false
+  },
+  "frozen_protocol": {
+    "protocol_preset": "vala_paper_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "mask_refinement": "none"
+  },
+  "scenes": {
+    "ramen": {
+      "accepted_control": {
+        "miou": 0.3924490213394165,
+        "acc025": 0.704225352112676,
+        "acc050": 0.323943661971831,
+        "boundary_f": 0.6458472013473511,
+        "trimap_iou": 0.4025343060493469
+      },
+      "candidate": {
+        "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_metric_v1/ramen/exact_gpu0_v1/ramen/lerf_direct_3d_selection_results.json",
+        "result_sha256": "4ee43b5e84e60128bf6c3df6c5fbddc9dc595eeed84e891123132856f9eb6d99",
+        "miou": 0.35031360387802124,
+        "acc025": 0.7323943661971831,
+        "acc050": 0.19718309859154928,
+        "boundary_f": 0.5582338571548462,
+        "trimap_iou": 0.33908337354660034
+      },
+      "delta": {
+        "miou": -0.042135417461395264,
+        "acc025": 0.028169014084507005,
+        "acc050": -0.12676056338028172,
+        "boundary_f": -0.08761334419250488,
+        "trimap_iou": -0.06345093250274658
+      },
+      "scene_promoted": false,
+      "maximum_temperature_c": 52
+    },
+    "teatime": {
+      "accepted_control": {
+        "miou": 0.5278149843215942,
+        "acc025": 0.8813559322033898,
+        "acc050": 0.5084745762711864,
+        "boundary_f": 0.758794903755188,
+        "trimap_iou": 0.37410005927085876
+      },
+      "candidate": {
+        "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_metric_v1/teatime/exact_gpu1_v1/teatime/lerf_direct_3d_selection_results.json",
+        "result_sha256": "45d3b5d0c60c73d4f1e5b16bb28833b55cdf6b3675b45eb669cfa60a40fa72dc",
+        "miou": 0.5339580178260803,
+        "acc025": 0.9322033898305084,
+        "acc050": 0.5254237288135594,
+        "boundary_f": 0.767571747303009,
+        "trimap_iou": 0.37425121665000916
+      },
+      "delta": {
+        "miou": 0.006143033504486084,
+        "acc025": 0.05084745762711862,
+        "acc050": 0.016949152542372947,
+        "boundary_f": 0.008776843547821045,
+        "trimap_iou": 0.00015115737915039062
+      },
+      "scene_promoted": true,
+      "maximum_temperature_c": 49
+    }
+  },
+  "two_scene_macro": {
+    "accepted_control_miou": 0.46013200283050537,
+    "candidate_miou": 0.4421358108520508,
+    "delta_miou": -0.01799619197845459
+  },
+  "decision": {
+    "global_method_promoted": false,
+    "fallback_mainline": "accepted_o2_valid_domain_knn10",
+    "reason": "ramen regressed and the two-scene macro mIoU decreased, violating the frozen global promotion rule"
+  },
+  "causal_conclusion": {
+    "supported": [
+      "exact marginal and fixed-threshold count preservation removes score calibration and selected-cardinality changes as explanations",
+      "the positive teatime result despite 99369 protected missing candidate rows rejects missing-coverage as the sole cause",
+      "source-response topology is useful but is not sufficient to identify target-query semantic direction"
+    ],
+    "next_required_change": "add target-mask-free query-conditioned admission before any bounded copula transport; do not retune b40_s05 from these opened target metrics"
+  }
+}

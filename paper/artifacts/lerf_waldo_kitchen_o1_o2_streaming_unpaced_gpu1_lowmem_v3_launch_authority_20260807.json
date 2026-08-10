@@ -1,0 +1,64 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_o1_o2_lowmem_launch_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_after_full_roundtrip_before_gpu1_execution",
+  "sealed_at": "2026-08-07T19:40:24+08:00",
+  "scene_id": "waldo_kitchen",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v2_execution_authority_20260807.json",
+    "sha256": "a9f616b28a8b0e1ab4998ca9d3c61efa67f9e622eee31a04dd80912014da8df8"
+  },
+  "implementation": {
+    "lowmem_entrypoint": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced_gpu1_lowmem.py",
+      "sha256": "4ca34e3eac9833c2d1c0f79355db2388647947d38de5a81f304a44d7653f5748"
+    },
+    "gpu1_entrypoint_sha256": "18cf7fa8871422cd807937433835e8ce36c89bed9b369a7f193534fd6e2e1a07",
+    "unpaced_entrypoint_sha256": "e686f0d1dee5cc3a68a16dbf6cf00ce014f4e761b864716a062f365119e2eddc",
+    "numerical_core_sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058",
+    "gpu_thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "cgroup_memory_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_cgroup_memory_guard.sh",
+      "sha256": "23cd53d3d65d91f4f8233371e3a0d3886077474e3ee50c4689804a51f7400858"
+    }
+  },
+  "verification": {
+    "method_tests_passed": 32,
+    "memory_guard_tests_passed": 2,
+    "bitwise_dense_core_equivalence_passed": true,
+    "all_projection_calls_explicitly_unpaced": true,
+    "full_real_asset_authority_roundtrip_passed": true
+  },
+  "preflight": {
+    "physical_gpu": 1,
+    "gpu_uuid": "GPU-0eac2c76-4004-49eb-bc0c-a9a30aec041a",
+    "temperature_c": 37,
+    "power_draw_w": 30.71,
+    "power_limit_w": 300.0,
+    "utilization_percent": 0,
+    "memory_used_mib": 1,
+    "cgroup_memory_current_bytes": 17387679744
+  },
+  "environment": {
+    "GPU": "1",
+    "CUDA_VISIBLE_DEVICES": "1",
+    "GPU_POLL_SECONDS": "300",
+    "GPU_START_MAX_TEMP_C": "87",
+    "GPU_MAX_TEMP_C": "88",
+    "GPU_MAX_POWER_LIMIT_W": "300.5",
+    "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS": "1",
+    "GPU_SOFT_PAUSE_TEMP_C": "0",
+    "GPU_SOFT_RESUME_TEMP_C": "0",
+    "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
+    "HOST_MEMORY_CURRENT_PATH": "/sys/fs/cgroup/memory.current",
+    "HOST_MEMORY_MAX_BYTES": "30064771072",
+    "HOST_MEMORY_POLL_SECONDS": "5"
+  },
+  "logs": {
+    "host_memory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/logs/host_memory.csv",
+    "gpu_telemetry": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/logs/gpu1.telemetry.csv",
+    "gpu_owner_audit": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/logs/gpu1.owner_audit.csv"
+  },
+  "guard_nesting": "cgroup_memory_guard_outer__gpu_thermal_guard_inner__materializer",
+  "metric_execution_authorized": false
+}

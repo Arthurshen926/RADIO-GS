@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_target_blind_multi_region_union_scale_alignment_v1",
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_preoutput_abort_and_before_any_candidate_cache_or_candidate_metric",
+  "parent_preregistration": {
+    "path": "paper/artifacts/lerf3d_target_blind_multi_region_union_readout_preregistration_20260807.json",
+    "sha256": "2fc9a45de78e0e64f3b00d498d618e5957153dffaa1f526fc33b13e26666598a"
+  },
+  "clarification": {
+    "ambiguity": "The phrase existing fixed query readout did not explicitly state whether its per-query peak-selected scale could be copied onto candidate regions from the other two registered physical radii.",
+    "prohibited_interpretation": "A peak-selected single-scale probability must not be repeated over all three region radii because that would authorize a region core with evidence from a different physical scale.",
+    "required_interpretation": "Convert O0 positive and canonical-negative cosine scores to Bernoulli relevance, apply frozen kNN10 independently to every scale-query slot, apply frozen per-slot scene min-max and 2x-1 clipping independently, then pair every scale-major anchor candidate with the probability from exactly the same scale slot.",
+    "peak_scale_selection_before_union": false,
+    "scale_broadcast": false,
+    "candidate_order": "scale_index_ascending_then_immutable_local_anchor_row_ascending",
+    "selector_changed": false,
+    "score_gate": 0.6,
+    "maximum_regions": 8,
+    "utility": "same_scale_probability_times_uncovered_semantic_core_fraction"
+  },
+  "aborted_preoutput_attempt": {
+    "reason": "The parent audit interrupted the first producer while it still used peak-selected score replication.",
+    "cache_created": false,
+    "report_created": false,
+    "candidate_metric_opened": false,
+    "reuse_allowed": false,
+    "only_runtime_log_created": true
+  },
+  "implementation": {
+    "producer": {
+      "path": "radio_gs/scripts/build_lerf_target_blind_multi_region_union_cache.py",
+      "sha256": "a3d4c86ab729e27889434885c82db0fc4ba52f497e3fe6ea0832065452053b8e"
+    },
+    "producer_test": {
+      "path": "tests/test_build_lerf_target_blind_multi_region_union_cache.py",
+      "sha256": "6083b4869d4c28109cc4ccdbf90d556762a29e6b412739c9a6b31558ebb5426d"
+    },
+    "selector": {
+      "path": "radio_gs/querying/multi_region_union_readout.py",
+      "sha256": "65bfa4c4b1726ea8cf3ac4f1e18c95e1a6372d7ee15d53501b57cc2ed6aca2bb"
+    },
+    "selector_test": {
+      "path": "tests/test_multi_region_union_readout.py",
+      "sha256": "a5026cbe7cbb4fffc466e96f9887cd12be6498d77721032b26ca2fa5f972f366"
+    },
+    "verification": "black_check_passed_and_8_tests_passed",
+    "scale_replication_test": "passed",
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "evaluation_policy": {
+    "first_and_only_candidate": "Figurines development sentinel",
+    "result_dependent_variant_selection": false,
+    "threshold_or_graph_sweep": false,
+    "execution_authorized_after_this_addendum": true
+  }
+}

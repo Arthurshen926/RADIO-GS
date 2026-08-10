@@ -1,0 +1,37 @@
+{
+  "artifact": "source_global_response_listwise_loss_v21_o4_temperature_alignment_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_v21_training_or_benchmark_execution",
+  "parent_preregistration": {
+    "path": "paper/artifacts/source_global_response_listwise_loss_v21_preregistration_20260806.json",
+    "sha256": "dd75dd833ee3431db944b2be88f9b323f7247ead9f870051da539ffdc14d674b"
+  },
+  "identified_mismatch": {
+    "o4_oracle_implementation": {
+      "path": "radio_gs/scripts/materialize_lerf_teacher_view_oracle_matrix.py",
+      "constant": "BETA=10.0",
+      "normalized_lse": "logsumexp(beta*cosine + log(equal_view_weight))/beta",
+      "equivalent_temperature": 0.1
+    },
+    "original_v21": {
+      "temperature": 0.05,
+      "equivalent_beta": 20.0
+    },
+    "effect": "The original V2.1 target is more max-view-like and is not the O4 response whose measured LERF headroom motivated response distillation."
+  },
+  "correction": {
+    "v21_teacher_multiview_temperature": 0.1,
+    "v21_teacher_multiview_beta": 10.0,
+    "positive_and_each_canonical_negative_use_the_same_aggregation": true,
+    "final_relevance_logit_scale": 10.0,
+    "frozen_v2_modified": false,
+    "evaluator_metric_renderer_modified": false
+  },
+  "required_test": "For equal valid-view weights, the V2.1 teacher response must equal the O4 normalized-LSE definition up to float32 tolerance.",
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "target_metrics_computed_before_registration": false,
+    "per_scene_temperature": false
+  }
+}

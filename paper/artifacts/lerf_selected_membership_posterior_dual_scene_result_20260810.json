@@ -1,0 +1,70 @@
+{
+  "schema": "radio_gs.lerf_selected_membership_posterior.dual_scene_result.v1",
+  "schema_version": 1,
+  "status": "complete_rejected_by_preregistered_gate",
+  "registration": "/root/RADIO-GS/paper/artifacts/lerf_selected_membership_posterior_dual_scene_registration_20260810.json",
+  "implementation_sha256": "0613193c3b6042facbcd719e0ef13625722c506d795024dce8fa53b2a1be97fc",
+  "frozen_intervention": {
+    "primitive_score_threshold": 0.6,
+    "posterior": "alpha-normalized binary selected-primitive membership with all scene occluders retained",
+    "pixel_posterior_threshold": 0.5,
+    "alpha_support_rule": "floor(full_scene_alpha * 255 + 0.5) > 10",
+    "parameter_retry_after_metric": false
+  },
+  "results": {
+    "ramen": {
+      "same_cache_control_miou": 0.39180755615234375,
+      "accepted_mainline_miou": 0.3924490213394165,
+      "candidate_miou": 0.3433530628681183,
+      "delta_vs_same_cache": -0.048454493284225464,
+      "delta_vs_accepted_mainline": -0.04909595847129822,
+      "queries": 71,
+      "query_gains": 28,
+      "query_losses": 41,
+      "query_ties": 2,
+      "zero_prediction_queries": 4,
+      "prediction_area_below_gt_queries": 69,
+      "micro_precision": 0.8880082387141349,
+      "micro_recall": 0.26702049887990154,
+      "aggregate_prediction_to_gt_area_ratio": 0.30069597019342525,
+      "selected_gaussian_counts_bitwise_equal_to_same_cache_control": true,
+      "result_path": "/root/radio_gs_local_cache/optimization_20260810/lerf_selected_membership_posterior_dual_scene_v1/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "result_sha256": "a0086b1617f993345c834c66765bcc4c87f9706581d30a3f6b277f1ec789e93b"
+    },
+    "teatime": {
+      "same_cache_control_miou": 0.5274040102958679,
+      "accepted_mainline_miou": 0.5278149843215942,
+      "candidate_miou": 0.3269190490245819,
+      "delta_vs_same_cache": -0.200484961271286,
+      "delta_vs_accepted_mainline": -0.20089593529701233,
+      "queries": 59,
+      "query_gains": 10,
+      "query_losses": 49,
+      "query_ties": 0,
+      "zero_prediction_queries": 0,
+      "prediction_area_below_gt_queries": 59,
+      "micro_precision": 0.9607628757125429,
+      "micro_recall": 0.37615972380312596,
+      "aggregate_prediction_to_gt_area_ratio": 0.391521917959361,
+      "selected_gaussian_counts_bitwise_equal_to_same_cache_control": true,
+      "result_path": "/root/radio_gs_local_cache/optimization_20260810/lerf_selected_membership_posterior_dual_scene_v1/teatime/teatime/lerf_direct_3d_selection_results.json",
+      "result_sha256": "b1fe6bc4d1ec0913655bb769dfba7ba528b2eaf1358676934bfcfeec70634ae7"
+    },
+    "dual_scene_macro": {
+      "same_cache_control_miou": 0.45960578322410583,
+      "accepted_mainline_miou": 0.46013200283050535,
+      "candidate_miou": 0.3351360559463501,
+      "delta_vs_same_cache": -0.12446972727775574,
+      "delta_vs_accepted_mainline": -0.12499594688415527
+    }
+  },
+  "decision": {
+    "gate": "both scenes nonregressing versus same-cache control and macro strictly improves",
+    "passed": false,
+    "expand_to_full4": false,
+    "retain_as_mainline": false,
+    "threshold_retry_permitted": false,
+    "projection_family_terminated": true
+  },
+  "causal_conclusion": "Keeping unselected occluders fixes a real semantic defect, and some compact-object queries improve strongly, but a universal visible-majority decision systematically removes object extent. LERF's remaining error is therefore upstream query-identity admission and primitive unary calibration, not a common pixel projection rule. Future work must improve query-conditioned evidence before the frozen primitive threshold, using source-only heldout gates rather than target-scene threshold tuning."
+}

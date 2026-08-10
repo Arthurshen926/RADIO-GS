@@ -1,0 +1,109 @@
+{
+  "artifact": "factorized_native_relation_absolute_relevance_architecture_audit",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T12:32:04+08:00",
+  "status": "source_only_architecture_audit_and_opt_in_implementation_complete",
+  "scope": {
+    "factorized_exact_field": true,
+    "accepted_v2_region_relation": true,
+    "v21_absolute_relevance": true,
+    "target_ground_truth_opened": false,
+    "target_queries_opened": false,
+    "target_metrics_computed": false,
+    "gpu_started": false
+  },
+  "findings": {
+    "factorized_native_relation": {
+      "status": "missing_from_formal_region_comembership_v2_pair_tensor",
+      "evidence": [
+        "RegionCoMembershipV2 consumes the frozen 15 V1 channels plus six pooled DINO/SAM capability channels.",
+        "The 21-channel tensor has no explicit pair channel for factorized semantic direction, separate log amplitude, direction concentration, or state availability.",
+        "AcceptedV2 e0 reconstructs row-wise RADIO features and feeds the legacy surface-region readout; the independent factorized-native gauge/state readout remains opt-in and is not a RegionCoMembershipV2 relation input."
+      ],
+      "minimum_fix": "append a separately versioned nine-channel factorized-native relation block to a future relation head; retain the exact V2 tensor and checkpoint as legacy defaults"
+    },
+    "absolute_final_relevance": {
+      "training_and_adapter_status": "already_present_and_gauge_aligned_in_v21",
+      "evidence": {
+        "shared_definition": "positive versus hardest frozen canonical negative, binary softmax with logit scale 10 and equal-logit boundary 0.5",
+        "validation_macro_step_0_absolute_relevance_loss": 0.02170814387500286,
+        "validation_macro_step_30_absolute_relevance_loss": 0.015721707604825497,
+        "relative_improvement": 0.27576914473423975
+      },
+      "remaining_gap": "the bounded co-membership consumer returns a binary selected-region union seeded by argmax, so it does not preserve or expose continuous absolute relevance as the final graph-conditioned score",
+      "minimum_fix": "retain the absolute unary exactly and permit only bounded, source-thresholded positive completion whose magnitude is the product of absolute seed excess and normalized path support"
+    }
+  },
+  "implemented_opt_in_modules": {
+    "factorized_native_region_relation": {
+      "path": "radio_gs/interfaces/factorized_native_region_relation.py",
+      "sha256": "8278b3126fce2f3dee080ac5fe933bc0c1fbe136f0392c5fc4fec06ed3a15d5e",
+      "features": [
+        "anchor_semantic_direction_cosine",
+        "pooled_semantic_direction_cosine",
+        "minimum_semantic_direction_concentration",
+        "absolute_semantic_direction_concentration_difference",
+        "absolute_anchor_log_amplitude_difference",
+        "absolute_mean_log_amplitude_difference",
+        "minimum_mean_observation_evidence",
+        "minimum_mean_visibility_purity_known_value",
+        "minimum_visibility_purity_known_fraction"
+      ],
+      "raw_vector_reconstruction": false,
+      "query_independent": true,
+      "legacy_default_changed": false
+    },
+    "absolute_relevance_relation_readout": {
+      "path": "radio_gs/querying/absolute_relevance_relation_readout.py",
+      "sha256": "0fbcc93670dfb513bddd16946f59150caf279dbab7e065e9d703b5e64b5eb1ef",
+      "supported_path_methods": [
+        "maximum_product",
+        "widest_path"
+      ],
+      "invariants": [
+        "final_relevance_not_below_absolute_unary",
+        "failed_query_gate_bitwise_exact_unary",
+        "outside_bounded_relation_support_bitwise_exact_unary",
+        "seed_bitwise_exact_unary",
+        "no_rank_or_minmax_normalization"
+      ],
+      "query_strings_consumed": false,
+      "legacy_default_changed": false
+    }
+  },
+  "source_only_validation_plan": {
+    "relation": [
+      "materialize the nine new channels on the same frozen four-train/two-validation source cohort",
+      "train a separately named relation head with the V2 21 channels plus the native nine channels",
+      "require held-out exact primitive IoU, F1, topology, contamination, and singleton non-regression under one global rule",
+      "do not replace or mutate the V2 checkpoint unless the source gate passes"
+    ],
+    "readout": [
+      "feed source-held-out V2.1 absolute relevance and source instance relations into the continuous readout",
+      "freeze 0.5 from the V2.1 relevance gauge and choose any relation threshold/maximum-regions only on source validation",
+      "require absolute calibration non-regression plus positive completion utility before sealing a target execution authority"
+    ]
+  },
+  "expected_lerf3d_effect": {
+    "native_relation": "adjacent regions with similar pooled e0 can still differ in anchor direction, spherical concentration, amplitude and observation reliability, giving a source-trained head evidence for sibling and part/object separation before graph closure",
+    "absolute_readout": "a strong text unary retains its calibrated fixed-threshold semantics while relation support can complete an object continuously; a weak seed or barely accepted edge can no longer become an unconditional binary foreground union",
+    "not_graph_parameter_tuning": true
+  },
+  "verification": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_factorized_native_region_relation.py tests/test_absolute_relevance_relation_readout.py tests/test_factorized_native_gauge_state_readout.py tests/test_region_comembership_v2.py tests/test_bounded_region_comembership_query_readout.py tests/test_source_global_response_listwise_loss_v21.py tests/test_surface_region_v21_query_relevance.py tests/test_region_comembership_native_v3.py tests/test_materialize_source_region_comembership_native_v3.py tests/test_train_source_region_comembership_native_v3.py",
+    "passed": 57,
+    "failed": 0,
+    "warnings": 1,
+    "warning_scope": "PyTorch TypedStorage deprecation only"
+  },
+  "evidence_authorities": {
+    "v21b_source_result": {
+      "path": "paper/artifacts/surface_region_v21b_exact4x2_source_result_20260807.json",
+      "sha256": "546b3ce5d4238082f0d8eac5b1c1485aac95471a96c361105efd401d1328ff08"
+    },
+    "region_comembership_v2_source_result": {
+      "path": "paper/artifacts/source_only_region_comembership_v2_formal_result_20260807.json",
+      "sha256": "3ab7443bbfc7eca010cc26b07a9e34fae980117b289ecc866ebc7289af3863ab"
+    }
+  }
+}

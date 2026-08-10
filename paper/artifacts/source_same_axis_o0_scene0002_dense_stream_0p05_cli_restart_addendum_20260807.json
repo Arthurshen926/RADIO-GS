@@ -1,0 +1,26 @@
+{
+  "schema": "radio_gs.source_same_axis_o0_external_dense_stream_cli_restart_addendum.v1",
+  "schema_version": 1,
+  "status": "sealed_after_precompute_contract_exit_before_corrected_restart",
+  "parent_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_same_axis_o0_scene0002_dense_stream_0p05_execution_authority_20260807.json",
+    "sha256": "c2ae584840aeedbbe5129d45524e104fc0795bc9a53d1a54baa5de7caf0f6211"
+  },
+  "failed_attempt": {
+    "session_id": 40277,
+    "exit_code": 1,
+    "failure": "preserve_streamed_text_scales_requires_stream_text_queries",
+    "GPU_work_started": false,
+    "raw_output_created": false,
+    "resume_directory_created": false,
+    "source_membership_payload_opened": false,
+    "telemetry_initial_temperature_c": 43
+  },
+  "only_command_change": {
+    "addition": "--stream-text-queries <exact comma-separated subset query IDs in stored order>",
+    "semantics": "query IDs only; embeddings remain loaded from the SHA-bound combined_text_subset"
+  },
+  "append_existing_audit_logs": true,
+  "all_method_inputs_and_execution_settings_unchanged": true,
+  "benchmark_execution_authorized": false
+}

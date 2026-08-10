@@ -1,0 +1,36 @@
+{
+  "artifact": "source_only_region_comembership_v1_source_promotion_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_complete_4plus2_source_validation_or_target_execution",
+  "base_preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "topology_checkpoint_addendum": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_topology_checkpoint_selection_addendum_20260807.json"
+  },
+  "promotion_gate": {
+    "selected_epoch_must_be_positive": true,
+    "selected_source_validation_scene_macro_instance_macro_topology_score_must_strictly_exceed_epoch_zero": true,
+    "all_four_train_and_two_validation_authorities_must_be_strictly_sha_reloaded": true,
+    "candidate_graph_oracle_ceiling_must_be_reported": true,
+    "failure_action": "retain source diagnostic result but prohibit target feature materialization checkpoint inference external-cache production and target metric"
+  },
+  "target_checkpoint_binding": {
+    "execution_authority_must_bind_four_plus_two_result_by_path_and_sha256": true,
+    "four_plus_two_result_must_bind_checkpoint_by_path_and_sha256": true,
+    "target_inference_checkpoint_must_exactly_equal_that_result_checkpoint_record": true,
+    "checkpoint_selected_epoch_must_equal_result_selected_epoch_and_be_positive": true,
+    "checkpoint_model_state_dict_sha256_and_training_contract_sha256_must_revalidate": true,
+    "checkpoint_selected_threshold_must_equal_result_selected_topology_threshold": true
+  },
+  "access_audit_at_seal": {
+    "complete_source_validation_metrics_computed": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

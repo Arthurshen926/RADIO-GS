@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
+import math
 from typing import Mapping
 
 import torch
 
 from radio_gs.field.field_signature import FeatureSpaceSignature
+from .anchor_preserving_transport import (
+    apply_anchor_preserving_probability_proposal,
+)
 from .evidence_scorer import (
     EvidenceScoringConfig,
     fuse_registered_observation_unary,
@@ -23,7 +27,7 @@ from .reliability_fusion import (
     DUAL_SOLVER_SEED_PROVENANCE,
     geometric_consensus_unary,
 )
-from .query_spec import QueryModality, QuerySpec
+from .query_spec import QueryModality, QuerySpec, SelectionMode
 from .support_solver import (
     PrimitiveSupportGraph,
     SupportSolverConfig,
@@ -46,6 +50,8 @@ class QueryResult:
     graph_policy: str = "typed_if_available"
     channel_confidence_mode: str = "none"
     negative_spatial_mode: str = "none"
+    registered_2d_transport_policy: str = "legacy_graph_solver_final"
+    registered_2d_transport_diagnostics: Mapping[str, object] | None = None
 
     @property
     def selected_probabilities(self) -> torch.Tensor:
@@ -69,6 +75,10 @@ class CanonicalQueryEngine:
         score_calibration_by_modality: Mapping[
             QueryModality | str, str
         ] | None = None,
+        registered_2d_transport_policy: str = "legacy",
+        registered_2d_graph_proposal: bool = True,
+        registered_2d_anchor_projection: bool = True,
+        registered_2d_transport_max_abs_logit_residual: float = 2.0,
     ) -> None:
         self.graph = graph
         self.scoring_config = scoring_config
@@ -127,6 +137,34 @@ class CanonicalQueryEngine:
             # fails at construction rather than silently at query time.
             replace(scoring_config, score_calibration=calibration)
             self.score_calibration_by_modality[typed_modality] = calibration
+        self.registered_2d_transport_policy = str(
+            registered_2d_transport_policy
+        )
+        if self.registered_2d_transport_policy not in {
+            "legacy",
+            "anchor_preserving_graph_proposal_v1",
+        }:
+            raise ValueError(
+                "registered_2d_transport_policy must be legacy or "
+                "anchor_preserving_graph_proposal_v1"
+            )
+        self.registered_2d_graph_proposal = bool(registered_2d_graph_proposal)
+        self.registered_2d_anchor_projection = bool(
+            registered_2d_anchor_projection
+        )
+        self.registered_2d_transport_max_abs_logit_residual = float(
+            registered_2d_transport_max_abs_logit_residual
+        )
+        if (
+            not math.isfinite(
+                self.registered_2d_transport_max_abs_logit_residual
+            )
+            or self.registered_2d_transport_max_abs_logit_residual <= 0
+        ):
+            raise ValueError(
+                "registered_2d_transport_max_abs_logit_residual must be "
+                "finite and positive"
+            )
         self._calibrations: dict[str, SceneSpaceCalibration] = {}
         self._calibration_bank_shapes: dict[str, tuple[int, int]] = {}
         self._query_graphs: dict[
@@ -476,13 +514,104 @@ class CanonicalQueryEngine:
                     channel_confidence_mode=self.channel_confidence_mode,
                 )
             component_graph = self._query_graphs[component_key]
-        probabilities = solve_primitive_support(
-            query_graph,
-            unary,
-            positive_seeds=query.positive_seeds,
-            negative_seeds=query.negative_seeds,
-            config=self.solver_config,
+        transport_enabled = (
+            self.registered_2d_transport_policy
+            == "anchor_preserving_graph_proposal_v1"
+            and query.modality is QueryModality.REGISTERED_2D
+            and query.primitive_unary_evidence is not None
         )
+        transport_policy = "legacy_graph_solver_final"
+        transport_diagnostics: dict[str, object] | None = None
+        if transport_enabled:
+            observation_authority = query.primitive_unary_evidence.confidence
+            if observation_authority is None:
+                raise ValueError(
+                    "anchor-preserving registered 2-D transport requires "
+                    "PrimitiveUnaryEvidence.confidence as observation authority"
+                )
+            observation_authority = observation_authority.to(
+                device=unary.device, dtype=unary.dtype
+            )
+            anchor_probability = torch.sigmoid(
+                unary / self.solver_config.unary_temperature
+            )
+            if self.registered_2d_graph_proposal:
+                graph_proposal = solve_primitive_support(
+                    query_graph,
+                    unary,
+                    positive_seeds=query.positive_seeds,
+                    negative_seeds=query.negative_seeds,
+                    config=self.solver_config,
+                )
+            else:
+                # The proposal-off arm is the causal identity control.  The
+                # graph is not evaluated and projection alone cannot change
+                # the analytic/fused unary anchor.
+                graph_proposal = anchor_probability
+            residual_gate = torch.zeros_like(anchor_probability)
+            applied_logit_residual = torch.zeros_like(anchor_probability)
+            if self.registered_2d_anchor_projection:
+                transported = apply_anchor_preserving_probability_proposal(
+                    anchor_probability,
+                    graph_proposal,
+                    observation_authority,
+                    max_abs_logit_residual=(
+                        self.registered_2d_transport_max_abs_logit_residual
+                    ),
+                )
+                probabilities = transported.probability
+                residual_gate = transported.residual_gate
+                applied_logit_residual = transported.applied_logit_residual
+            else:
+                probabilities = graph_proposal
+            if self.registered_2d_graph_proposal:
+                transport_policy = (
+                    "anchor_preserving_graph_probability_proposal_v1"
+                    if self.registered_2d_anchor_projection
+                    else "graph_probability_proposal_unprojected_ablation"
+                )
+            else:
+                transport_policy = (
+                    "anchor_identity_projection_control"
+                    if self.registered_2d_anchor_projection
+                    else "anchor_identity_control"
+                )
+            fully_observed = observation_authority >= 1.0 - 1e-5
+            transport_diagnostics = {
+                "declared_policy": self.registered_2d_transport_policy,
+                "effective_policy": transport_policy,
+                "graph_solver_role": (
+                    "completion_proposal"
+                    if self.registered_2d_graph_proposal
+                    else "not_evaluated"
+                ),
+                "graph_proposal_enabled": self.registered_2d_graph_proposal,
+                "anchor_projection_enabled": (
+                    self.registered_2d_anchor_projection
+                ),
+                "observation_authority": (
+                    "PrimitiveUnaryEvidence.confidence"
+                ),
+                "fully_observed_rows": int(fully_observed.sum().item()),
+                "residual_gate_max": float(residual_gate.max().item()),
+                "max_abs_applied_logit_residual": float(
+                    applied_logit_residual.abs().max().item()
+                ),
+                "max_abs_logit_residual_budget": (
+                    self.registered_2d_transport_max_abs_logit_residual
+                ),
+                "connected_selection_applied": (
+                    query.selection_mode is not SelectionMode.ALL_COMPONENTS
+                ),
+            }
+        else:
+            probabilities = solve_primitive_support(
+                query_graph,
+                unary,
+                positive_seeds=query.positive_seeds,
+                negative_seeds=query.negative_seeds,
+                config=self.solver_config,
+            )
         selected = select_support_components(
             component_graph,
             probabilities,
@@ -504,4 +633,6 @@ class CanonicalQueryEngine:
             graph_policy=self.graph_policy,
             channel_confidence_mode=self.channel_confidence_mode,
             negative_spatial_mode=scoring_config.negative_spatial_mode,
+            registered_2d_transport_policy=transport_policy,
+            registered_2d_transport_diagnostics=transport_diagnostics,
         )

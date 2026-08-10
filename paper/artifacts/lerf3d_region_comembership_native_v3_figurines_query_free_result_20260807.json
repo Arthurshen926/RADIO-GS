@@ -1,0 +1,106 @@
+{
+  "artifact": "lerf3d_region_comembership_native_v3_figurines_query_free_result",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T13:32:14+08:00",
+  "status": "source_promoted_native_v3_target_feature_and_inference_complete",
+  "source_promotion": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/formal_native_v3_checkpoint.pt.json",
+      "sha256": "6a215431a3bdcb3af3961d30e1c70b61e75d2c32323ea49583c28f72d22e19e5"
+    },
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/formal_native_v3_checkpoint.pt",
+      "sha256": "4bad11178e9e7b22e0fc0fdd4c53ee6c77dd5135eeef486d21175a9386c75eee"
+    },
+    "promotion_passed": true,
+    "selected_epoch": 100,
+    "selected_rule": {
+      "method": "dual_path_widest",
+      "maximum_regions": 8,
+      "threshold": 0.85
+    },
+    "heldout_topology_gate_passed": true,
+    "heldout_absolute_calibration_gate_passed": true
+  },
+  "implementation": {
+    "formal_target_interface": {
+      "path": "radio_gs/interfaces/region_comembership_native_v3_target.py",
+      "sha256": "834f2f01cb3d6d8a61de992a784b5e9dc662ae0721fcb35d70033fdf7e8dd162"
+    },
+    "authority_builder": {
+      "path": "radio_gs/scripts/build_region_comembership_native_v3_target_execution_authority.py",
+      "sha256": "b6d5182ec55d5d75127fae6225d2b667347a5e6d8257e75cd2450caf9dc6793e"
+    },
+    "feature_materializer": {
+      "path": "radio_gs/scripts/materialize_region_comembership_features_native_v3.py",
+      "sha256": "641376ca2ea035bf13c9d87e8f56e9de28eed1f9c7216cf5f61e45f032dc47e2"
+    },
+    "inference_runner": {
+      "path": "radio_gs/scripts/infer_region_comembership_native_v3.py",
+      "sha256": "3d293e52a6c0ad729834b2c3db19902becb2bedb8d9e9978daf8c7f6868d8c74"
+    }
+  },
+  "figurines_outputs": {
+    "target_execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_native_v3_target_execution_authority.json",
+      "sha256": "18614ee58c6804a6a35a7b949b80bf414d8f93b87606b44daec46dfab21b47c7"
+    },
+    "feature_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_features_native_v3.pt",
+      "sha256": "9bb68f6cae6e0f63586e31fdd48019ee755a15cbab45db3481c6aedee59ac2d4"
+    },
+    "inference_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_inference_native_v3.pt",
+      "sha256": "c49afb2d8eca4e020ceede8b17ee8becb876c586c1fada7c4c93e90e632d8eb2"
+    }
+  },
+  "exact_anchor_routing": {
+    "canonical_regions": 4096,
+    "exact_state_anchor_regions": 4096,
+    "legacy_anchor_fallback_regions": 0,
+    "candidate_pairs": 66216,
+    "native_active_pairs": 66216,
+    "legacy_v2_fallback_pairs": 0,
+    "alternate_anchor_substitution": false,
+    "fallback_probability_policy": "bitwise parent V2 probability",
+    "fallback_edge_policy": "bitwise parent V2 accepted-edge decision",
+    "fallback_semantics_cpu_tested": true
+  },
+  "query_free_health_topology_audit": {
+    "accepted_edges": 914,
+    "edge_additions_vs_parent_v2": 562,
+    "edge_removals_vs_parent_v2": 16,
+    "isolated_regions": 3192,
+    "connected_components_including_isolates": 3490,
+    "largest_component_regions": 27,
+    "largest_component_fraction": 0.006591796875,
+    "mean_accepted_degree": 0.4462890625,
+    "maximum_accepted_degree": 13,
+    "probability_mean": 0.23894307360395006,
+    "probability_p05": 0.00003388604727661004,
+    "probability_p50": 0.15672413259744644,
+    "probability_p95": 0.6941244304180145,
+    "interpretation": "native-v3 adds substantially more local relation support than V2 while the largest query-free component remains only 27 regions; there is no pre-query giant-component warning"
+  },
+  "verification": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_region_comembership_native_v3_target.py tests/test_factorized_native_region_relation.py tests/test_region_comembership_native_v3.py tests/test_materialize_source_region_comembership_native_v3.py tests/test_train_source_region_comembership_native_v3.py tests/test_materialize_region_comembership_features_v2.py tests/test_infer_region_comembership_v2.py",
+    "passed": 31,
+    "failed": 0,
+    "warnings": 1,
+    "warning_scope": "PyTorch TypedStorage deprecation only"
+  },
+  "access_audit": {
+    "source_promotion_validated_before_target_files": true,
+    "source_instance_labels_opened": false,
+    "target_feature_authorities_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "text_queries_opened": false,
+    "query_readout_executed": false,
+    "target_metrics_computed": false,
+    "gpu_started": false
+  },
+  "decision": "Figurines query-free native-v3 chain is healthy and authority-complete. This result does not claim benchmark improvement; a separate authorized query/readout evaluation is required to measure LERF3D accuracy. Teatime was intentionally not opened in this stage."
+}

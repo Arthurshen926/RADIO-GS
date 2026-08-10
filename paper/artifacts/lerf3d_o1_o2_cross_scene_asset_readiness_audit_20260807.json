@@ -1,0 +1,172 @@
+{
+  "schema": "radio_gs.lerf3d_o1_o2_cross_scene_asset_readiness_audit.v1",
+  "schema_version": 1,
+  "status": "RAMEN_AND_TEATIME_INPUT_READY_WALDO_BLOCKED",
+  "scope": {
+    "scenes": ["ramen", "teatime", "waldo_kitchen"],
+    "read_only": true,
+    "bounded_roots_only": true,
+    "ground_truth_opened": false,
+    "benchmark_masks_opened": false,
+    "metric_outputs_opened": false,
+    "metric_computed": false
+  },
+  "method": {
+    "O1": "fixed 0.15-radian geodesic projection of each three-scale O0 descriptor toward the normalized equal-weight mean of the four highest exact-marginal source-view descriptors",
+    "O2": "normalized equal-weight mean of the four highest exact-marginal source-view descriptors, repeated over the three frozen scale slots",
+    "scene_specific_hyperparameters": false,
+    "fixed_scale_ids": ["0.25", "0.45", "0.7"],
+    "fixed_canonical_negatives": ["object", "things", "stuff", "texture"]
+  },
+  "scenes": {
+    "ramen": {
+      "ready": true,
+      "total_primitives": 382687,
+      "accepted_multiscale_rows": 221608,
+      "accepted_v2_multiscale_descriptor": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen.pt",
+        "sha256": "823cfa6fe0d6a1d80987aa5774ea9de3bd45743019e863a57536f1bbc12851b4"
+      },
+      "exact_source_view_responsibility": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+        "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e",
+        "source_views": 120,
+        "query_independent": true,
+        "feature_independent": true,
+        "missing_view_sidecars": 0,
+        "descriptor_xyz_aligned": true
+      },
+      "source_feature_bundle": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1/frame_manifest.json",
+        "sha256": "70c54e2efa63ca17fd7813fbfb06a67338fc23f9fcf510d34d0d6e94276fa301",
+        "output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292",
+        "formal_validator_passed": true,
+        "authority_frames_covered": true
+      },
+      "o0_positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_positive.pt",
+        "sha256": "e33d3c8ea28bb58345f17c228aeaf6b7215d9f1baade27194f94a6f15f385abe",
+        "shape": [382687, 3, 14]
+      },
+      "o0_negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_negative.pt",
+        "sha256": "de70dd2bbb33983541f10d6896e1d377f7a767690590831db005e2d116035520",
+        "shape": [382687, 3, 4]
+      },
+      "positive_text": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen_text_queries_single.pt",
+        "sha256": "aae64415968c696bebeacc4deb927dda26cb310ea01ebb868e7e9289e4673abe"
+      },
+      "negative_text": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen_text_negatives_single.pt",
+        "sha256": "4de02e79ae864c3c373831de1ee5b9c6a2e553c9d6f04c1338c532d17015046b"
+      },
+      "frozen_metric_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+        "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+      }
+    },
+    "teatime": {
+      "ready": true,
+      "total_primitives": 460157,
+      "accepted_multiscale_rows": 334250,
+      "accepted_v2_multiscale_descriptor": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/teatime.pt",
+        "sha256": "5642dc69902a6b25aae18630a3f7e85abf1a5b7fcc5e17f5ced23c4653916e45"
+      },
+      "exact_source_view_responsibility": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/exact_marginal_responsibility_authority.json",
+        "sha256": "de485f2b264b7b40be054ac257b4245645cb52437ccd95135a6ab179ec384d05",
+        "source_views": 120,
+        "query_independent": true,
+        "feature_independent": true,
+        "missing_view_sidecars": 0,
+        "descriptor_xyz_aligned": true
+      },
+      "source_feature_bundle": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/teatime/frame_manifest.json",
+        "sha256": "64638b9892abc04224ba31b6a3f57ae6c01ab436494c5e4ce35d81a06e8372f5",
+        "output_bundle_sha256": "b90eba9afee399b5704361178f4e93f76b8aa801873fb7b53ea667e0dc281a76",
+        "formal_validator_passed": true,
+        "manifest_frames": 177,
+        "authority_frames": 120,
+        "authority_frames_covered": true
+      },
+      "o0_positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/teatime_positive.pt",
+        "sha256": "320a42e3b51d8585efc048c05a6c783ea82b7a15ad792865c5028b527495be7e",
+        "shape": [460157, 3, 14]
+      },
+      "o0_negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/teatime_negative.pt",
+        "sha256": "a3aa48829fdc1be908dfae4da66bf5db8f9c6e46ca06c39b9a595839587e5b02",
+        "shape": [460157, 3, 4]
+      },
+      "positive_text": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260715/text/siglip2_lerf_teatime_officialcanonical_prompt5.pt",
+        "sha256": "ecc942ae3ac2e43d1a503a4bb606baf35d7d1b3fa3d49b85ed2641117ef9c6a0"
+      },
+      "negative_text": {
+        "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+        "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+      },
+      "frozen_metric_config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+        "sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775"
+      }
+    },
+    "waldo_kitchen": {
+      "ready": false,
+      "total_primitives": 691728,
+      "accepted_multiscale_rows": 433043,
+      "present": {
+        "accepted_v2_multiscale_descriptor": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/waldo_kitchen.pt",
+        "legacy_aggregated_mpr": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_mpr/waldo_kitchen_raw_radio_top1_120_plus_adjoint16_support_verified_pose.pt",
+        "legacy_feature_manifest": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.json",
+        "frozen_metric_config": {
+          "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+          "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+        }
+      },
+      "missing": [
+        "query-independent exact per-view marginal responsibility authority and sidecars",
+        "formally sealed feature bundle with output_bundle_sha256",
+        "exact FP32 v4 O0 positive cache",
+        "exact FP32 v4 O0 canonical-negative cache",
+        "SHA-bound positive and canonical-negative text pair for the exact O0 axis"
+      ],
+      "legacy_mpr_is_not_a_substitute": "the stored contribution-mean MPR has already collapsed the source-view axis and cannot reconstruct top-four per-view SigLIP descriptors"
+    }
+  },
+  "implementation_readiness": {
+    "existing_teacher_producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_teacher_view_siglip_authority.py",
+      "sha256": "60de453ad3e47ae08e7fdb5ea940cbbc81e45fbc71150a023dd2a51e75fdff18"
+    },
+    "existing_oracle_matrix_producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_teacher_view_oracle_matrix.py",
+      "sha256": "f05fa8be771afe155a8cec09cf3361f254a7dc4c70de08d2d6665f909507cde6"
+    },
+    "direct_reuse_blockers": [
+      "both producers hard-code Figurines scene identity, output names, and held-out frame IDs",
+      "the current teacher producer stores all four FP16 view descriptors and its 1.2-GB registered ceiling would reject Ramen and Teatime",
+      "the current matrix producer unnecessarily materializes O3/O4 and retains very large FP32 O1/O2/O3 representations"
+    ]
+  },
+  "shortest_general_execution_plan": [
+    "freeze one cross-scene O1/O2-only authority with fixed top-4 exact-marginal retention, equal view weights, 0.15-radian O1 cap, O2 mean, the same three scales, and no scene/query threshold",
+    "generalize scene identity and held-out frame IDs by exact binding to each responsibility authority; never use a hard-coded Figurines list",
+    "stream the 120 source views, keep top-4 descriptors only transiently, and persist only FP16 normalized teacher mean plus mask/count/frame-id audit, avoiding the multi-gigabyte top-4 output",
+    "stream O1/O2 raw FP32 positive and canonical-negative scores directly; do not materialize O3/O4 or full FP32 representation tensors",
+    "run Ramen first as the smallest transfer scene, require exact O0 cache reproduction before any separate frozen-metric authority, then run Teatime unchanged"
+  ],
+  "estimate_on_one_3090": {
+    "generalization_and_fail_closed_tests": "45-75 minutes",
+    "ramen_teacher_mean_and_o1_o2_scores": "45-75 minutes",
+    "teatime_teacher_mean_and_o1_o2_scores": "60-100 minutes",
+    "ramen_first_readout_ready": "about 1.5-2.5 hours",
+    "both_ready_scenes_materialized": "about 3-4 hours total",
+    "waldo_additional_asset_build": "not included; requires a new exact-marginal source authority and exact O0 pair first"
+  },
+  "decision": "Ramen is the shortest valid cross-scene transfer sentinel; Teatime is also input-complete. Waldo must not run through O1/O2 yet."
+}

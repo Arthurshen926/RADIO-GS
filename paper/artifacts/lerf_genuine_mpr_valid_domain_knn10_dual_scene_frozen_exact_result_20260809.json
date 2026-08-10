@@ -1,0 +1,166 @@
+{
+  "schema": "radio_gs.lerf_genuine_mpr_valid_domain_knn10_dual_scene_frozen_exact_result.v1",
+  "schema_version": 1,
+  "status": "complete_rejected_large_regression",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_genuine_mpr_valid_domain_knn10_dual_scene_frozen_exact_execution_authority_20260809.json",
+    "sha256": "8d729aa0b328f2ecdf08f03db463bae045572cdb30008a12d7c732b04b7f4f37"
+  },
+  "independent_preexecution_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_genuine_mpr_valid_domain_knn10_dual_scene_frozen_exact_independent_preexecution_audit_20260809.json",
+    "sha256": "c0db60a781cca506ebbbb5990066075fbd14197e4f0acf5dc7f5568c74d956d1",
+    "status": "passed"
+  },
+  "source_gate_context": {
+    "development_101_passed": true,
+    "reserved_audit_90_passed": true,
+    "interpretation": "The genuine MPR interface improved continuous source-heldout text-response fidelity and spatial ranking on two disjoint generic query banks, but those gates did not constrain the fixed threshold operating point after canonical-negative probability, KNN, min-max, and released score remap."
+  },
+  "scene_results": {
+    "ramen": {
+      "accepted_control": {
+        "miou": 0.3924490213394165,
+        "acc025": 0.704225352112676,
+        "acc050": 0.323943661971831,
+        "boundary_f": 0.6458472013473511,
+        "trimap_iou": 0.4025343060493469
+      },
+      "candidate": {
+        "miou": 0.16496406495571136,
+        "acc025": 0.2535211267605634,
+        "acc050": 0.028169014084507043,
+        "boundary_f": 0.18153569102287292,
+        "trimap_iou": 0.3697942793369293
+      },
+      "delta": {
+        "miou": -0.22748495638370514,
+        "acc025": -0.45070422535211263,
+        "acc050": -0.29577464788732394,
+        "boundary_f": -0.46431151032447815,
+        "trimap_iou": -0.0327400267124176
+      },
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_genuine_mpr_valid_domain_knn10/ramen/v1/evaluation/frozen_exact_gpu0_v1/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "8c86d88b76121e5d277cbf842e8a1a0a654b7cfc45296e0be5b675c41f24ff07"
+      },
+      "coverage": {
+        "accepted_control_valid_gaussians": 221608,
+        "candidate_valid_gaussians": 221608,
+        "exact_same_valid_domain": true
+      },
+      "operating_point_diagnostic": {
+        "candidate_to_control_selected_count_ratio_median": 2.252972605163377,
+        "candidate_to_control_selected_count_ratio_min": 0.5314672847209841,
+        "candidate_to_control_selected_count_ratio_max": 36.69328703703704,
+        "threshold_0p6_positive_set_jaccard_median": 0.07521064664310206,
+        "primitive_score_spearman_median": 0.43196202998796046,
+        "examples": {
+          "bowl_selected_count_ratio": 19.162,
+          "chopsticks_selected_count_ratio": 15.334,
+          "kamaboko_selected_count_ratio": 36.693,
+          "sake_cup_selected_count_ratio": 0.531
+        }
+      }
+    },
+    "teatime": {
+      "accepted_control": {
+        "miou": 0.5278149843215942,
+        "acc025": 0.8813559322033898,
+        "acc050": 0.5084745762711864,
+        "boundary_f": 0.758794903755188,
+        "trimap_iou": 0.37410005927085876
+      },
+      "candidate": {
+        "miou": 0.31528210639953613,
+        "acc025": 0.6101694915254238,
+        "acc050": 0.1694915254237288,
+        "boundary_f": 0.4641757011413574,
+        "trimap_iou": 0.417550653219223
+      },
+      "delta": {
+        "miou": -0.2125328779220581,
+        "acc025": -0.27118644067796605,
+        "acc050": -0.3389830508474576,
+        "boundary_f": -0.29461920261383057,
+        "trimap_iou": 0.04345059394836426
+      },
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_genuine_mpr_valid_domain_knn10/teatime/v1/evaluation/frozen_exact_gpu1_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "2ec3c9e1e6dfa9b165da4af942329b74377ebf3325e751bb6f6e159cbc4b195b"
+      },
+      "coverage": {
+        "accepted_control_valid_gaussians": 334250,
+        "candidate_valid_gaussians": 234881,
+        "accepted_control_valid_but_candidate_missing": 99369,
+        "coverage_loss_is_additional_but_not_sufficient_explanation": true
+      },
+      "operating_point_diagnostic": {
+        "candidate_to_control_selected_count_ratio_median": 2.1784720182032893,
+        "candidate_to_control_selected_count_ratio_min": 0.10945273631840796,
+        "candidate_to_control_selected_count_ratio_max": 30.620746887966806,
+        "threshold_0p6_positive_set_jaccard_median": 0.15015762687980705,
+        "primitive_score_spearman_median": 0.414823383610931,
+        "examples": {
+          "bear_nose_selected_count_ratio": 30.621,
+          "coffee_mug_selected_count_ratio": 11.026,
+          "yellow_pouf_selected_count_ratio": 0.109,
+          "stuffed_bear_selected_count_ratio": 0.779
+        }
+      }
+    }
+  },
+  "two_scene_macro": {
+    "miou": {
+      "control": 0.46013200283050537,
+      "candidate": 0.24012308567762375,
+      "delta": -0.22000891715288162
+    },
+    "acc025": {
+      "control": 0.7927906421580329,
+      "candidate": 0.43184530914299357,
+      "delta": -0.3609453330150393
+    },
+    "acc050": {
+      "control": 0.4162091191215087,
+      "candidate": 0.09883026975411792,
+      "delta": -0.3173788493673908
+    },
+    "boundary_f": {
+      "control": 0.7023210525512695,
+      "candidate": 0.3228556960821152,
+      "delta": -0.37946535646915436
+    },
+    "trimap_iou": {
+      "control": 0.38831718266010284,
+      "candidate": 0.39367246627807617,
+      "delta": 0.005355283617973328
+    }
+  },
+  "thermal_execution": {
+    "ramen_gpu0": {
+      "maximum_sampled_temperature_c": 47,
+      "released_without_compute_owner": true,
+      "telemetry_sha256": "77f46429762606edf67e93a23601d0255e4c52a10aacea9cbddf8cb6ebcc7652"
+    },
+    "teatime_gpu1": {
+      "maximum_sampled_temperature_c": 44,
+      "released_without_compute_owner": true,
+      "telemetry_sha256": "f8f5335281ce0bd08d4bda77259903df05e09235dd64503520aff5d181e68e17"
+    },
+    "thermal_or_driver_failure": false
+  },
+  "first_principles_conclusion": {
+    "continuous_capability_improved": true,
+    "fixed_unary_operating_point_preserved": false,
+    "primary_failure": "Replacing the accepted O2 unary with genuine MPR changed the per-query score distribution and threshold support by orders of magnitude. Continuous cosine fidelity/ranking is not sufficient for a fixed 0.6 selection interface.",
+    "ramen_rules_out_coverage_as_primary_cause": true,
+    "teatime_has_secondary_coverage_loss": true,
+    "source_gate_missing_constraint": "The gate must exercise the complete canonical-negative plus KNN plus min-max plus threshold plus rendered-support interface, not only continuous descriptor/text responses."
+  },
+  "decision": {
+    "promote_candidate": false,
+    "retry_or_posthoc_threshold_adjustment": false,
+    "accepted_mainline_unchanged": true,
+    "next_method_direction": "Use O2 as the calibrated unary anchor and inject genuine MPR only through a marginal-preserving, reliability-gated residual or copula/rank fusion. Add a target-blind full-interface source gate that constrains threshold support mass and topology on generic dev/audit queries before any new target metric."
+  }
+}

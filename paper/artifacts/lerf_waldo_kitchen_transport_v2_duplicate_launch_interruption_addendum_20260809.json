@@ -1,0 +1,50 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_transport_v2_duplicate_launch_interruption_addendum.v1",
+  "schema_version": 1,
+  "status": "complete_no_artifact_contamination",
+  "scene_id": "waldo_kitchen",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_transport_v2_target_blind_execution_authority_20260809.json",
+    "sha256": "5c71b5c4b401bad12d63a0d4befcfa843ecdc216b2f86344e64654ed6fb5e0df"
+  },
+  "event": {
+    "cause": "Two collaborating workers independently launched the same immutable Waldo materialization authority against the same no-clobber output paths.",
+    "duplicate_detected_after_approximately_seconds": 30,
+    "duplicate_action": "keyboard_interrupt",
+    "duplicate_exit_code": 130,
+    "primary_action": "continued_to_completion",
+    "duplicate_output_written": false,
+    "duplicate_metric_executed": false,
+    "telemetry_note": "The duplicate launch may have emitted an additional same-interval thermal telemetry observation; telemetry is not a method or benchmark artifact."
+  },
+  "non_contamination_basis": {
+    "writes_occur_only_after_score_materialization_returns": true,
+    "duplicate_interrupted_before_output_write_stage": true,
+    "output_writer_is_no_clobber": true,
+    "single_final_result_exists": true,
+    "final_result_recursively_records_both_score_outputs": true
+  },
+  "canonical_completed_artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/waldo_kitchen_v1/waldo_kitchen_transport_v2_result.json",
+      "sha256": "80efcc0a222f22b01d08a196fa5988ad96b59a4542571ecd96c5faa5a0e93dfc"
+    },
+    "positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/waldo_kitchen_v1/waldo_kitchen_transport_v2_positive.pt",
+      "sha256": "ce9a7b7b78b7779dbbe0da9b48cfc737b9ec8f3daf6f727b0aaa26837e78873b"
+    },
+    "negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/waldo_kitchen_v1/waldo_kitchen_transport_v2_negative.pt",
+      "sha256": "565c1f813ce75ba03fa84c2f5caa0a4e81772e0f48f2319ea9b9a7a404cb7009"
+    }
+  },
+  "methodological_impact": {
+    "candidate_values_changed": false,
+    "output_values_changed": false,
+    "frozen_evaluator_changed": false,
+    "benchmark_result_changed": false,
+    "thermal_guard_policy_changed": false
+  },
+  "interpretation": "This was an orchestration race with wasted compute, not a data race in a published artifact. The interrupted duplicate produced no cache or result; only the completed primary process supplied the content-addressed outputs used downstream."
+}
+

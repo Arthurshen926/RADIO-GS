@@ -1,0 +1,41 @@
+{
+  "schema": "radio_gs.surface_region_v21c_stage2_pair_conflict_trigger_addendum.v1",
+  "schema_version": 1,
+  "status": "preregistered_before_stage_ii_execution",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21c_two_stage_constrained_adamw_preregistration_20260807.json",
+    "sha256": "6b6d13e65619fd0a37bd46918f2ad405edb10ebcba683aa872d3d0f2cf36fda0"
+  },
+  "rationale": "Stage-II is an intervention for the observed continuous-pairwise regression. A majority trigger based on either protected objective is insufficient because absolute-only conflict does not diagnose the target failure mode.",
+  "stage_ii_authorization": {
+    "all_required": [
+      "the frozen Stage-I result passes its formal completion and authorization validator",
+      "exactly 30 Stage-I steps expose finite pairwise candidate directional derivatives and cosines",
+      "g_pairwise dot u0 is strictly below -1e-12 on at least 16 of 30 steps",
+      "the deterministic median of all 30 pairwise candidate cosines is strictly below zero"
+    ],
+    "pairwise_directional_derivative_threshold": -1e-12,
+    "minimum_pairwise_conflict_steps": 16,
+    "pairwise_candidate_cosine_median_maximum_exclusive": 0.0,
+    "median_definition": "arithmetic mean of sorted positions 15 and 16 for the fixed even count 30",
+    "absolute_only_conflict_authorizes_stage_ii": false
+  },
+  "stage_ii_method": {
+    "model_forward_loss_assets": "frozen V2.1B",
+    "optimizer_candidate": "ordinary AdamW descent displacement including advanced moments and decoupled weight decay",
+    "projection": "minimize ||u-u0||^2 subject to g_absolute dot u >= 0 and g_pairwise dot u >= 0",
+    "optimizer_steps": 30,
+    "early_stopping": false,
+    "per_scene_parameters_or_tuning": false
+  },
+  "promotion": {
+    "macro_auxiliary_relative_improvement_minimum": 0.005,
+    "macro_absolute_relative_improvement_minimum": 0.005,
+    "macro_pairwise_relative_improvement_minimum": 0.005,
+    "absolute_every_validation_scene_non_regression": true,
+    "pairwise_every_validation_scene_non_regression": true,
+    "v1_non_regression": true,
+    "active_and_pair_coverage_minimum": 0.95
+  },
+  "benchmark_execution_authorized": false
+}

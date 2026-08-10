@@ -1,0 +1,53 @@
+{
+  "benchmark_execution_authorized": false,
+  "execution_builder_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_surface_region_v21c_execution_authority.py",
+    "sha256": "421ad471d5db10ec4e4f143c6f148d127fd7119418212da0dee0a8e19aa1a9cd"
+  },
+  "parent_v21b_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21b_exact4x2_execution_authority_20260807.json",
+    "sha256": "5d26c32d7fb6ff95ddf92369601949bbc66bd133dad005bc6041036c22c971a6"
+  },
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21c_two_stage_constrained_adamw_preregistration_20260807.json",
+    "sha256": "6b6d13e65619fd0a37bd46918f2ad405edb10ebcba683aa872d3d0f2cf36fda0"
+  },
+  "projection_authorized": false,
+  "projection_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/optimization/adamw_two_constraint_projection_v21c.py",
+    "sha256": "2df8bd3b83b884843ad21b28b1f3581f627fa8a147a36c2dcf902bfcdbe67c46"
+  },
+  "schema": "radio_gs.surface_region_v21c_two_stage_constrained_adamw_execution_authority.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "canonical_generic_negative_bank_opened": true,
+    "generic_target_blind_text_bank_opened": true,
+    "per_scene_hyperparameters": false,
+    "query_independent": true,
+    "runtime_query_strings_consumed": false,
+    "scene_identifiers_consumed_by_model": false,
+    "source_validation_used_for_selection": true,
+    "stage_i_gradient_conflict_audit_opened": true,
+    "stage_ii_projection_conditioned_on_frozen_stage_i": true,
+    "target_heldout_opened": false,
+    "target_query_or_benchmark_opened": false,
+    "text_queries_opened": false,
+    "typed_relation_authority_opened": true
+  },
+  "source_gate_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/surface_region_v21c_source_gate.py",
+    "sha256": "b41e305af3929a7f56d30c54421a0f4e8c88da94f6599e5430b7b56609bb0798"
+  },
+  "stage": "stage_i_gradient_conflict_audit",
+  "stage_i_audit_result": null,
+  "status": "authorized_source_only_stage_i_audit",
+  "trainer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_surface_region_v21c_two_stage_constrained_adamw.py",
+    "sha256": "8b669d4af4b52181d7d1e840c76e40d1e863dcd8685ff824032cf3f577d4af57"
+  },
+  "training_authorized": true
+}

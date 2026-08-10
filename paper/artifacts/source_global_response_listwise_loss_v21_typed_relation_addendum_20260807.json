@@ -1,0 +1,65 @@
+{
+  "artifact": "source_global_response_listwise_loss_v21_typed_relation_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_typed_relation_authority_implementation_training_or_benchmark_execution",
+  "parents": {
+    "v21_preregistration_sha256": "dd75dd833ee3431db944b2be88f9b323f7247ead9f870051da539ffdc14d674b",
+    "temperature_alignment_addendum_sha256": "537642ff722faba20af1484b133875de18b02df4d33f22c24bd8e874ca7f0d61",
+    "stratified_weight_addendum_sha256": "8af98e8de851ef22a2bb228143317f0404469fa488d2df13856adc039cd4394f",
+    "target_blind_compositional_source_sha256": "b53693a2821c29a5cc18b3ab69a9e7d9189b2c0746343b702747234ce5704b7a"
+  },
+  "authority_contract": {
+    "schema": "radio_gs.target_blind_typed_text_relation_authority.v1",
+    "split": "fit",
+    "source_relation_records": "all and only fit synonym and lexical_head_sibling_contrast records from the SHA-bound compositional v2 JSON",
+    "query_lookup": "exact string identity resolved once by the CPU authority producer",
+    "runtime_query_strings_consumed": false,
+    "synonym_indices": "left indices into the frozen primary object bank and right indices into the frozen synonym component",
+    "sibling_indices": "left and right indices into the frozen primary object bank",
+    "required_counts": {
+      "synonym_pairs": 657,
+      "sibling_pairs": 167
+    },
+    "all_embedding_artifact_file_and_tensor_sha256_bound": true,
+    "duplicate_or_missing_relation": "reject"
+  },
+  "loss_contract": {
+    "teacher_multiview_temperature": 0.1,
+    "canonical_negative_logit_scale": 10.0,
+    "synonym": {
+      "target": "teacher left-minus-right response gap and teacher left-minus-right canonical-negative relevance gap on every canonical source region",
+      "student": "the same two gaps from the student descriptor",
+      "reduction": "equal mean of response-gap SmoothL1 and relevance-gap SmoothL1",
+      "purpose": "teacher-calibrated synonym consistency without assuming exact equality of two text embeddings"
+    },
+    "sibling": {
+      "target": "teacher left-minus-right canonical-negative relevance gap on the same canonical source region",
+      "continuous_weight": "multiview_stability * abs_gap/(abs_gap+0.05)",
+      "direction_balance": "equal mean of left-dominant and right-dominant weighted means when both exist; one available direction otherwise",
+      "hard_gap_floor": false,
+      "purpose": "fine-grained sibling specificity without target labels"
+    },
+    "relation_type_weights": {
+      "synonym": 0.2,
+      "sibling": 0.2,
+      "normalization": "normalize across the two relation types to equal effective relation-type weight"
+    },
+    "typed_relation_auxiliary_weight": 0.25,
+    "combination": "existing V2.1 auxiliary plus 0.25 times typed_relation_loss; exact previous V2.1 behavior when no relation authority is supplied"
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_metrics_computed_before_registration": false,
+    "per_scene_hyperparameters": false
+  },
+  "frozen_components_modified": {
+    "v2_loss": false,
+    "evaluator": false,
+    "metric": false,
+    "renderer": false
+  }
+}

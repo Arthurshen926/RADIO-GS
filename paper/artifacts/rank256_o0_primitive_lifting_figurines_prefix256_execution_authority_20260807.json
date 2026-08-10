@@ -1,0 +1,78 @@
+{
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "formal_candidate_materialized": false,
+    "o0_query_free_descriptor_opened": true,
+    "renderer_geometry_opened": true,
+    "source_promotion_validated_before_target_files": true,
+    "target_metrics_computed": false
+  },
+  "configuration": {
+    "max_angle_radians": 0.15,
+    "minimum_region_reliability": 0.0
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_rank256_o0_primitive_lifting_dryrun.py",
+    "sha256": "0f1635bfe5535b2e1a0376867cb974172d7ef13449cf4c4dc14d636bbacf0717"
+  },
+  "input_authority": {
+    "o0_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt",
+      "sha256": "49528e9901a5cef53410e5651740ad96b677b5c492d51c713b4a28a2efabcceb"
+    },
+    "rank256_target_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/target_descriptor.fix2.pt",
+      "sha256": "0a4ee25c3040cc741c543fc87241dc83ab08be259d6da49bc6cac607a82e83f3"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "target_accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/accepted_v2_sparse_v2.pt",
+      "sha256": "fcc086d6be5773672758296582d6f79c4441b4c2aae098e945e70297d01a5042"
+    }
+  },
+  "lifting_contract": {
+    "canonical_capability": "immutable_o0_multiscale_primitive_descriptor",
+    "canonical_order": "unique_nonnegative_canonical_region_index",
+    "fallback": "uncovered_invalid_zero_tangent_inactive_or_ood_is_bitwise_o0",
+    "overlap_aggregation": "canonical_region_index_ordered_fp64_reliability_weighted_sum_divided_by_contributor_count",
+    "primitive_transport": "ambient_overlap_residual_projected_to_each_o0_scale_tangent_plane",
+    "primitive_update": "unit_sphere_exponential_map_with_hard_angular_cap",
+    "query_conditioned_parameters": false,
+    "region_gate": "active_and_not_ood_and_reliability_at_least_source_fixed_minimum",
+    "region_residual": "unit_sphere_log_map_rank256_base_to_semantic",
+    "scale_axis": "original_o0_scale_order_preserved_without_reduction",
+    "scene_conditioned_parameters": false,
+    "schema": "radio_gs.rank256_region_residual_to_o0_primitive_multiscale.v1",
+    "target_metrics_used": false
+  },
+  "lifting_contract_sha256": "c82355d30221b821f5c9be40535cc06aba96949189d951fb9a9d1d481bb2951a",
+  "lifting_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/field/rank256_primitive_residual_lifting.py",
+    "sha256": "58f804ff96fdd06a035d4fb0faa4105ccd7acc2e07cfc8594543814bf925286e"
+  },
+  "materialization_authorized": true,
+  "metric_execution_authorized": false,
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_primitive_lifting_prefix256_dryrun.pt",
+  "query_execution_authorized": false,
+  "scene_id": "figurines",
+  "schema": "radio_gs.rank256_o0_primitive_lifting_dryrun_authority.v1",
+  "schema_version": 1,
+  "scope": {
+    "dry_run_only": true,
+    "formal_candidate_authorized": false,
+    "prefix_order": "o0_global_rows_ascending_storage_order",
+    "valid_row_prefix_limit": 256
+  },
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.json",
+    "sha256": "0ff977f7bf150b591c04806f0dfc093b91dc5d38df44df91c1eaf2f444549b1a"
+  },
+  "source_variant": "v21b",
+  "status": "authorized_query_free_nonformal_prefix_dryrun"
+}

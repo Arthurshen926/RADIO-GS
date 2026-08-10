@@ -1,0 +1,72 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_o1_o2_streaming_failure.v1",
+  "schema_version": 1,
+  "status": "failed_after_all_source_views_during_dense_teacher_mean_finalization",
+  "recorded_at": "2026-08-07T19:28:56+08:00",
+  "scene_id": "waldo_kitchen",
+  "launch_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_launch_20260807.json",
+    "sha256": "93ff34edc67939f921b7e601cdb99c6190c955bb8291e3d7a9828b8296be8ab4"
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_execution_authority_20260807.json",
+    "sha256": "6c26f5effcfb4cf554ae872496b731e18035f8131ef63ad8fd42e01ccd4e60a6"
+  },
+  "observed_progress": {
+    "preflight_projection_batch": 128,
+    "preflight_peak_cuda_bytes": 8061950464,
+    "views_complete": 120,
+    "views_total": 120,
+    "source_view_elapsed_seconds": 106.98241607402451,
+    "process_exit_code": 137,
+    "termination_signal": "SIGKILL"
+  },
+  "evidence": {
+    "cgroup_memory_events_after_failure": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 1,
+      "oom_group_kill": 0
+    },
+    "host_memory_after_process_release": {
+      "total_gib": 31,
+      "available_gib": 28,
+      "swap_total_gib": 2.0,
+      "swap_used_gib": 1.6
+    },
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_v1/logs/o1_o2_gpu1.telemetry.csv",
+      "sha256": "8ad986955c8f7511554dc1fc484af7c9a8f41ba5a606a77da347d532ac64ca23",
+      "maximum_observed_temperature_c": 67,
+      "maximum_observed_power_w": 229.49,
+      "thermal_guard_event_observed": false
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_v1/logs/o1_o2_gpu1.owner_audit.csv",
+      "sha256": "1d5264db6cf588ac70557515f6561b29a5ce1608a7751ea3972a76b81c0ad536",
+      "foreign_owner_observed": false
+    },
+    "expected_outputs_created": 0
+  },
+  "root_cause": {
+    "stage": "dense_teacher_mean_finalization",
+    "accepted_rows": 433043,
+    "top_view_count": 4,
+    "descriptor_dimension": 1536,
+    "persistent_top_descriptor_fp16_estimated_bytes": 5321232384,
+    "single_dense_fp32_top_descriptor_estimated_bytes": 10642464768,
+    "expression": "F.normalize((top_descriptors.float() * teacher_mask[..., None]).sum(dim=1), dim=-1)",
+    "cause": "the dense expression simultaneously retains the FP16 source and multiple full-size FP32 temporaries, exceeding the 31 GiB host memory envelope"
+  },
+  "recovery_contract": {
+    "reuse_partial_output": false,
+    "modify_existing_frozen_implementations": false,
+    "next_entrypoint": "independent_hash_bound_row_chunked_fp32_teacher_mean_finalization",
+    "method_numerics_must_remain_bitwise_equal_per_row": true,
+    "fresh_authority_and_output_required": true
+  },
+  "metric_execution_authorized": false,
+  "metric_executed": false
+}

@@ -1,0 +1,76 @@
+{
+  "artifact": "full_scalar_scene0004_hard_negative_cpu_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T06:36:51+08:00",
+  "status": "sealed_after_teacher_success_and_strict_double_reload_before_first_scene0004_miner_execution",
+  "scene_id": "scene0004_00",
+  "cohort_split": "source_validation",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/clean_scene_source_query_response_hard_negative_cohort_v2_preregistration_20260806.json",
+    "sha256": "de4aa57ab283b195d10ddb6965a4de03be3a8bd0fbb5647215a6a15cd43dab16"
+  },
+  "inputs": {
+    "cohort_authority_sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "accepted_v2_sha256": "bbfc1ecc1ef9b5f6d638b2b954245199f671e8cb66a53c98d30d23f9df0c39de",
+    "official_multiview_teacher_sha256": "15784cb99b38983b7b8e8b723ad61360082a24cd7714929607dd690dabcbdc53",
+    "fit_text_bank_sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+    "fit_text_bank_manifest_sha256": "5d6c7fa167b63a4052f9be57389a2f5f0e469c75391916ef0b7fe562cce7e3f0",
+    "dev_text_bank_sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+    "dev_text_bank_manifest_sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3"
+  },
+  "teacher_validation": {
+    "strict_double_reload_identical": true,
+    "strict_accepted_v2_alignment_passed": true,
+    "source_only_contract_passed": true,
+    "regions": 4096,
+    "active_region_view_pairs": 16036,
+    "descriptor_dimension": 1536,
+    "minimum_views_per_region": 1,
+    "maximum_views_per_region": 4,
+    "descriptor_norm_minimum": 0.9999996423721313,
+    "descriptor_norm_maximum": 1.000000238418579,
+    "pair_descriptors_sha256": "4c1a00966bfe68cf015c517bcfd29621f26b4cf771f2e7e9b96a477d786ab50a"
+  },
+  "teacher_execution": {
+    "physical_gpu": 1,
+    "fixed_schedule_id": "fixed-duty-cycle-45run-30cool-nvml30-v1",
+    "guard_returncode": 0,
+    "maximum_temperature_c": 92,
+    "maximum_consecutive_overheat_samples": 1,
+    "status_log_sha256": "766854523d61c6df49b00d9e40732f3b152881ad3a00ab25fcb7fc4b04493c3b"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/mine_source_query_response_hard_negatives_cohort_v2.py",
+    "sha256": "bbf04c8c601847378f6e86b200153693e36d6bbc277d3608e5337c05a7843973"
+  },
+  "temperature_roles": {
+    "mining_temperature": 0.05,
+    "mining_role": "freeze the target-blind response-profile-neighbor candidate pair set only",
+    "v2_1_supervision_temperature": 0.1,
+    "supervision_role": "recompute teacher response, relevance gap, and continuous weight on the fixed mined pairs during V2.1 training",
+    "temperatures_are_intentionally_distinct": true
+  },
+  "frozen_contract": {
+    "device": "cpu",
+    "per_source_k": 4,
+    "teacher_cosine_minimum_inclusive": 0.8,
+    "teacher_cosine_maximum_inclusive": 0.98,
+    "matrix_block_rows": 128,
+    "cross_scene_similarity_matrix": false,
+    "per_scene_hyperparameters": false
+  },
+  "outputs": {
+    "authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0004_00/hard_negative_index_authority_bound_v1.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0004_00/hard_negative_index_authority_bound_v1.report.json"
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

@@ -1,0 +1,49 @@
+{
+  "artifact": "source_global_response_listwise_loss_v21_stratified_weight_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_compositional_embedding_materialization_training_or_benchmark_execution",
+  "parents": {
+    "v21_preregistration": {
+      "path": "paper/artifacts/source_global_response_listwise_loss_v21_preregistration_20260806.json",
+      "sha256": "dd75dd833ee3431db944b2be88f9b323f7247ead9f870051da539ffdc14d674b"
+    },
+    "component_balance_addendum": {
+      "path": "paper/artifacts/source_global_response_listwise_loss_v21_component_balance_addendum_20260806.json",
+      "sha256": "d2a1ec82a63c56a3aacb8bedecb255fbc9a22e5371833ff89d4a2df3e1f1e8cc"
+    },
+    "target_blind_bank_feasibility": {
+      "path": "paper/artifacts/lerf_v21_4train_2validation_pilot_feasibility_and_text_bank_result_20260806.json",
+      "sha256": "63a8091aefdeeecb96d435e39e56fd88bcbb67e1de41741423dc0913d73ae692"
+    }
+  },
+  "identified_ambiguity": "Equal component weighting would assign 0.20 to the very small high-precision part stratum, while loading all 5808 rows as one component would instead make the numerous counterfactual attribute rows dominate by row count. Neither interpretation implements the already recorded five-stratum pilot prior.",
+  "fixed_stratified_weights": {
+    "object_noun_primary": 0.25,
+    "synonym_relation": 0.20,
+    "lexical_sibling_relation": 0.20,
+    "counterfactual_attributes_collective": 0.30,
+    "high_precision_part_of": 0.05
+  },
+  "reduction_contract": {
+    "within_component": "unweighted mean over the SHA-bound query rows of that component",
+    "across_components": "weighted mean using explicit positive finite component weights, normalized by their runtime sum",
+    "applies_to": [
+      "centered_response_profile",
+      "absolute_response",
+      "absolute_canonical_negative_relevance",
+      "continuous_pairwise_relevance"
+    ],
+    "descriptor_triplet": "computed once and unchanged because it has no query component axis",
+    "single_primary_only": "normalization makes the primary component retain exact unit effective weight",
+    "row_duplication": "uniform row duplication within a component cannot change its component weight"
+  },
+  "implementation_constraints": {
+    "five_strata_must_be_materialized_as_distinct_sha_bound_embedding_components": true,
+    "one_combined_5808_row_embedding_component_is_not_authorized": true,
+    "missing_non_primary_stratum_is_fail_closed_for_the_full_compositional_pilot": true,
+    "per_scene_weights": false,
+    "benchmark_vocabulary_opened": false,
+    "target_metrics_computed_before_registration": false
+  }
+}

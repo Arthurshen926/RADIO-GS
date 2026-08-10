@@ -1,0 +1,61 @@
+{
+  "schema": "radio_gs.lerf_scalar_posterior_projection.dual_scene_result.v1",
+  "schema_version": 1,
+  "status": "rejected_by_preregistered_dual_scene_gate",
+  "registration": "/root/RADIO-GS/paper/artifacts/lerf_scalar_posterior_projection_dual_scene_registration_20260810.json",
+  "frozen_intervention": {
+    "projection_mode": "scalar_posterior",
+    "primitive_score_source": "accepted uniform valid-domain O2 kNN10 caches",
+    "primitive_score_threshold": 0.6,
+    "pixel_score_threshold": 0.6,
+    "selection_refinement": "none",
+    "mask_refinement": "none",
+    "parameter_retry_after_metric": false
+  },
+  "results": {
+    "ramen": {
+      "accepted_control_miou": 0.3924490213394165,
+      "same_cache_projection_control_miou": 0.39180755615234375,
+      "candidate_miou": 0.13178928196430206,
+      "delta_miou": -0.26065973937511444,
+      "same_cache_delta_miou": -0.2600182741880417,
+      "queries": 71,
+      "zero_prediction_queries": 9,
+      "prediction_area_below_gt_queries": 71,
+      "median_prediction_to_gt_area_ratio": 0.06988188976377953,
+      "mean_prediction_to_gt_area_ratio": 0.14780037993250658,
+      "result_path": "/root/radio_gs_local_cache/optimization_20260810/lerf_scalar_posterior_dual_scene_v1/ramen/ramen/lerf_direct_3d_selection_results.json",
+      "result_sha256": "9b362bdd1487c511bf99116230d244286463de30ba1f3c1a7812ad2fa4df2637"
+    },
+    "teatime": {
+      "accepted_control_miou": 0.5278149843215942,
+      "same_cache_projection_control_miou": 0.5274040102958679,
+      "candidate_miou": 0.17085689306259155,
+      "delta_miou": -0.35695809125900263,
+      "same_cache_delta_miou": -0.35654711723327637,
+      "queries": 59,
+      "zero_prediction_queries": 4,
+      "prediction_area_below_gt_queries": 59,
+      "median_prediction_to_gt_area_ratio": 0.10603678666876278,
+      "mean_prediction_to_gt_area_ratio": 0.17779379416081664,
+      "result_path": "/root/radio_gs_local_cache/optimization_20260810/lerf_scalar_posterior_dual_scene_v1/teatime/teatime/lerf_direct_3d_selection_results.json",
+      "result_sha256": "7c4f457d0df2b9059fc5c12828e97d75d04f9f3b9b4a425d3fce61515bd0a3e3"
+    },
+    "dual_scene_macro": {
+      "accepted_control_miou": 0.46013200283050535,
+      "same_cache_projection_control_miou": 0.45960578322410583,
+      "candidate_miou": 0.1513230875134468,
+      "delta_miou": -0.30880891531705856,
+      "same_cache_delta_miou": -0.308282695710659
+    }
+  },
+  "decision": {
+    "gate": "both scenes nonregressing and macro strictly improves",
+    "passed": false,
+    "expand_to_full4": false,
+    "retain_as_mainline": false,
+    "threshold_retry_permitted": false
+  },
+  "causal_conclusion": "The primitive score is calibrated for a per-primitive decision. Front-to-back alpha normalization converts it into a visible-mixture expectation, whose numerical scale and support differ from the primitive score. Reusing 0.6 in that new random-variable domain systematically under-selects pixels; the SPIn9 posterior-lattice repair therefore does not transfer to LERF by threshold relocation alone.",
+  "audit_note": "The accepted controls and the 2026-08-09 re-materialized score caches differ slightly. Both deltas are reported; unchanged per-query selected counts against the same-cache control isolate projection as the cause."
+}

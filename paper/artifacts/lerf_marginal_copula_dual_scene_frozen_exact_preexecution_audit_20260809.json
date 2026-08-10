@@ -1,0 +1,33 @@
+{
+  "schema": "radio_gs.lerf_marginal_copula_dual_scene_preexecution_audit.v1",
+  "schema_version": 1,
+  "status": "PASS",
+  "authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_marginal_copula_dual_scene_frozen_exact_execution_authority_20260809.json",
+    "sha256": "2cad5f8e62011537399f0a10c42569a735761ab300ae706aaa7f589265dece0e"
+  },
+  "checks": {
+    "all_nested_path_sha256_records_match": true,
+    "dev101_selection_status_passed": true,
+    "audit90_selection_status_passed": true,
+    "dev_and_audit_policy_exactly_equal_b40_s05": true,
+    "audit_preregistration_binds_dev_selection_before_audit_open": true,
+    "source_interface_hash_same_in_dev_and_audit": true,
+    "candidate_cache_materializer_and_interface_hash_bound": true,
+    "accepted_valid_domain_authoritative": true,
+    "teatime_candidate_missing_99369_rows_are_fixed_rank_barriers": true,
+    "accepted_score_multiset_exact": true,
+    "every_fixed_threshold_selected_count_exact": true,
+    "frozen_evaluator_sha256_matches": true,
+    "protocol_preset_is_vala_paper_3d": true,
+    "fixed_score_threshold_is_0_6": true,
+    "output_directories_absent": true,
+    "target_metric_not_executed_before_authority": true,
+    "single_candidate_no_sweep": true
+  },
+  "authorized_execution": {
+    "scenes": ["ramen", "teatime"],
+    "parallel_physical_gpus": {"ramen": 0, "teatime": 1},
+    "no_retry_no_threshold_adjustment": true
+  }
+}

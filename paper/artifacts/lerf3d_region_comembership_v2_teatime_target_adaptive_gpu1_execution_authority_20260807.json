@@ -1,0 +1,53 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_teatime_target_adaptive_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T11:26:00+08:00",
+  "status": "sealed_after_target_accepted_v2_success_before_execution",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "teatime",
+    "geometry_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+    "physical_space_id": "lerf:teatime:geometry-checkpoint-sha256:53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+  },
+  "inputs": {
+    "target_accepted_v2_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/accepted_v2_sparse_v2.pt",
+      "sha256": "318748c25124c7ec77602649b1660b8eb055fd482f69f6ec73dea25222d4dd7c"
+    },
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "9eb0ffc066c582f028b5e7b0cd516bc9dc14f25d7e9c62d3b229e651af2854a3"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/factorized_primitive_state_v2.pt",
+      "sha256": "3e12685568f5be72b84a617e4cffe09f5b1abf6fd0727d56e23936bfa5c9a3c6"
+    },
+    "factorized_radio_cache_sha256": "c9d903172972c982d24e6062416b2a01136b4e1c5e7cc0fc2694fa5e4dcc1af3",
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/canonical_support_graph_accepted_v2.pt",
+      "sha256": "4d08e407bd6c4ec27fe0151499d81ecd7a9066db36e22b3e825ada2fba2073b2"
+    }
+  },
+  "implementation": {
+    "producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_target_adaptive_typed_context_authority.py",
+      "sha256": "78473a11939bd34c12560783dd7932a872866ad08cbc4b97b7a0c8260c2a4620"
+    }
+  },
+  "frozen_contract": {
+    "same_adaptive_selection_and_carrier_math_as_source_v2": true,
+    "candidate_batch_size": 8,
+    "field_batch_size": 4096,
+    "device": "cuda:0_after_CUDA_VISIBLE_DEVICES_1",
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/adaptive_typed_context_v2.pt",
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

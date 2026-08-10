@@ -1,0 +1,94 @@
+{
+  "schema": "radio_gs.lerf_scale_equivariant_transport_development_metric_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_single_development_sentinel_after_preregistration_and_o0_control",
+  "scene_id": "teatime",
+  "development_only": true,
+  "formal_transport_ceiling_authorized": false,
+  "single_candidate_no_sweep": true,
+  "development_metric_execution_authorized": true,
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_scale_equivariant_transport_development_sentinel_preregistration_20260807.json",
+    "sha256": "bf591dba3c9e1d1ffd62ab0b0eecb1a372214d03dd4df7e68ec3ff3d10d0fd5b"
+  },
+  "source_materialization": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_fix1_execution_authority_20260807.json",
+      "sha256": "cfbacd96c8991f15cb6293f39b3c41ffe7dcd561c0be1140eb1ed92f8c90b9aa"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_result.json",
+      "sha256": "1c148075c7eedd36819bfb2af56778da03df36b0f5a95e018593480f14a25187"
+    },
+    "maximum_per_scale_norm_absolute_error": 2.384185791015625e-7,
+    "maximum_scale_gram_absolute_error": 5.364418029785156e-7
+  },
+  "satisfied_control_gate": {
+    "metric_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_teatime_frozen_config_control_metric_execution_authority_20260807.json",
+      "sha256": "30d4243919880b23b2f8e373c60feffeac09591fb75e2a7fcac7d2204d517da7"
+    },
+    "replay_result_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_teatime_frozen_config_control_replay_result_20260807.json",
+      "sha256": "92196588a63a79a0207bcf6adc63c5abb17acb8c6cd47d8703663a3103510473"
+    },
+    "metric_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o0_exact_frozen_config_control_v1/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "ac02a4ed0566813027ddcb5021c495138d5f3f889d632f24b37338df963ec1d0"
+    },
+    "exact_control_miou": 0.404494971036911,
+    "lineage_replay_passed": true
+  },
+  "candidate": {
+    "positive_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_positive.pt",
+      "sha256": "64da590b48d437fe42921295ce69878dc417dbfd0e037e751f1214503247de40"
+    },
+    "canonical_negative_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/teatime_scale_transport_development_negative.pt",
+      "sha256": "0e421bca6411ee6da9ce97a502e3c25630798ed75e5d8f65e9613fba1624bb8c"
+    }
+  },
+  "frozen_protocol": {
+    "must_equal_control_bitwise_except_candidate_caches_and_output_directory": true,
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+      "sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+    },
+    "summary_head_sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c",
+    "all_query_text_embedding_cache_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "canonical_negative_text_embedding_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_gpu_argument": 0,
+    "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_scale_equivariant_transport_development_v1/teatime/evaluation/exact_development_sentinel_v1",
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_disabled": true,
+    "command_from_control": {
+      "replace_positive_cache_with": "candidate.positive_multiscale_query_score_cache",
+      "replace_negative_cache_with": "candidate.canonical_negative_multiscale_query_score_cache",
+      "replace_output_directory_with": "execution.output_directory_must_not_exist_before_execution",
+      "all_other_arguments_unchanged": true
+    }
+  },
+  "access_audit": {
+    "new_transport_target_images_opened_during_authority_build": false,
+    "new_transport_target_ground_truth_opened_during_authority_build": false,
+    "new_transport_target_masks_opened_during_authority_build": false,
+    "new_transport_target_metric_opened_before_authority": false
+  }
+}

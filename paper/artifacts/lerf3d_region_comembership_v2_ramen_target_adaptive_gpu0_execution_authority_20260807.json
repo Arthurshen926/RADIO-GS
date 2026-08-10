@@ -1,0 +1,41 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_ramen_target_adaptive_gpu0_execution_authority",
+  "schema_version": 1,
+  "status": "sealed_after_target_accepted_v2_success_before_execution",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "ramen",
+    "geometry_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d",
+    "physical_space_id": "lerf:ramen:geometry-checkpoint-sha256:e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+  },
+  "inputs": {
+    "target_accepted_v2_authority_sha256": "c10ac1e0f41ddc990309effc3463f41a74e59502a78bf7ab21d1631e0a68c8c9",
+    "factorized_field_sha256": "2bcf9cc8ba3ec128dfba80737c35a7dfdff8a8128b49fc52887626fb0d4cdee1",
+    "factorized_primitive_state_sha256": "2cf8733e0ecf2f88a02afa145d5ec4476d0bba95f0bb97751ac302d6928408b5",
+    "factorized_radio_cache_sha256": "1b3c6c5ac01b6dea3e993db64217b60a942ba33adbed2e34e8357846854b3f8e",
+    "support_graph_sha256": "58c0adf629380d11a3b24a394f4b7053d3f1ee3d0b1ab69138a5e0d478988195"
+  },
+  "frozen_contract": {
+    "same_adaptive_selection_and_carrier_math_as_source_v2": true,
+    "candidate_batch_size": 8,
+    "field_batch_size": 4096,
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/adaptive_typed_context_v2.pt",
+  "thermal_guard": {
+    "physical_gpu": 0,
+    "poll_seconds": 30,
+    "start_maximum_temperature_c": 87,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

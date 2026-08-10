@@ -1,0 +1,71 @@
+{
+  "artifact": "source_global_response_listwise_v21_pilot_registry_and_full_source_replay_engineering_receipt",
+  "schema_version": 1,
+  "recorded_at": "2026-08-07T05:56:46+08:00",
+  "status": "engineering_complete_source_assets_and_training_execution_not_claimed",
+  "fixed_cohort": {
+    "source_train": ["scene0001_00", "scene0002_00", "scene0003_00", "scene0005_00"],
+    "source_validation": ["scene0004_00", "scene0008_00"]
+  },
+  "independent_contracts": {
+    "pilot_registry_schema": "radio_gs.surface_region_full_scalar_clean_pilot_4train_2validation_region_view_registry.v1",
+    "pilot_registry_contract_sha256": "b4bdbed9ce46c1ed33750582627e940737681e96c3aa1e2b9707e897bd3eb09c",
+    "pilot_training_shard_schema": "radio_gs.surface_region_full_scalar_clean_pilot_4train_2validation_training_shard.v1",
+    "pilot_training_shard_contract_sha256": "6301e611d16e7dcbb25aab4152fb3c2d5f755e90b05b37335d087fa62dce09aa",
+    "v21_training_contract_sha256": "13c8d68cbbe71b6fb43f6ca04bcb68bdbbdaeb193fe8ebcffe2065cd012ba8fa"
+  },
+  "implementation": {
+    "materializer": {
+      "path": "radio_gs/scripts/materialize_full_scalar_clean_training_shard.py",
+      "sha256": "e193a003209223f44ce756a8800ab7fbb7214e93e7e004c43e5e1467a977d460"
+    },
+    "registry_sealer": {
+      "path": "radio_gs/scripts/seal_full_scalar_clean_cohort_region_view_registry.py",
+      "sha256": "e4e169a14de7cee56fd3ad486fbb3e8945dbee6f6845a6180bce85d615ed4622"
+    },
+    "pilot_trainer": {
+      "path": "radio_gs/scripts/train_surface_region_typed_context_response_listwise_v21_pilot.py",
+      "sha256": "3d84b8418293b34b6cf16cd28827d404bf95742af7349e56fdfaa9262709f101"
+    },
+    "source_gate": {
+      "path": "radio_gs/interfaces/surface_region_v21_source_gate.py",
+      "sha256": "6583acf1b2c209e2a70f3ff60dd4385d4469d3497483a61792dff746b9861c4a"
+    },
+    "execution_authority_builder": {
+      "path": "radio_gs/scripts/build_surface_region_v21_pilot_execution_authority.py",
+      "sha256": "14a2cecf12e209f99193619e7fce6234c5c9e635856e805c83a17b0f98e4b277"
+    }
+  },
+  "closed_gaps": [
+    "independent exact-4+2 registry, shard schema, sealer and loader without padding a 24+8 registry",
+    "normalization, objective, validation and V1 non-regression all route through pilot-only loaders",
+    "one registry file/content authority is shared by all six shard lineages",
+    "derived six-scene source and teacher manifest authorities and deterministic file SHA-256 are checked",
+    "parent cohort content/file and context accepted/state file lineage are checked",
+    "hard-negative accepted/teacher files and four channel summaries are checked against registry and shard",
+    "source promotion replays the complete source-only prepare_inputs loader before target authorization",
+    "normalization binds the six-scene source-state manifest authority rather than the parent 24+8 cohort",
+    "pilot and formal materialization receipts use distinct schemas",
+    "materializer and sealer reject output aliases, duplicate paths and dangling symlinks before writes",
+    "execution-authority builder is caller-SHA-bound, fixed-protocol and no-clobber"
+  ],
+  "verification": {
+    "py_compile": "passed",
+    "git_diff_check": "passed",
+    "focused_pytest": "48 passed in 6.54s",
+    "tests": {
+      "tests/test_materialize_full_scalar_clean_training_shard.py": "f3878bfe3c7d55683b102db06709eaf70b8b86727f218b6ef8f63d06465d0cb8",
+      "tests/test_train_surface_region_typed_context_response_listwise_v21_pilot.py": "1903c51e029d6e8af4dddee1c55bcef61856cb8ddedec74cec21af583255050a",
+      "tests/test_surface_region_v21_source_gate.py": "a3ef596f1da12280ac77c9ee5cf70a3f1af9ccfa89d8984891b1acd8666a359c"
+    }
+  },
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "benchmark_execution_authorized": false
+}

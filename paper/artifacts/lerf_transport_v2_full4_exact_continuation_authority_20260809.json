@@ -1,0 +1,70 @@
+{
+  "schema": "radio_gs.lerf_transport_v2_full4_exact_continuation_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_after_ramen_teatime_one_shot_before_figurines_waldo_exact",
+  "scientific_scope": {
+    "source_gate_preceded_all_target_execution": true,
+    "candidate_parameters_fixed_before_all_target_execution": true,
+    "formal_metric_authority_file_preceded_ramen_teatime": false,
+    "formal_metric_authority_file_precedes_figurines_waldo": true,
+    "note": "Ramen and Teatime were executed directly after the sealed dual-source gate. This continuation record does not retroactively claim otherwise; it freezes the same global candidate before the remaining two scenes."
+  },
+  "fixed_candidate": {
+    "transport_v2_candidate_index": 11,
+    "maximum_angle_radians": 0.45,
+    "gamma_policy": "k0",
+    "scene_or_query_specific_parameters": false,
+    "readout": "uniform valid-domain kNN10",
+    "score_threshold": 0.6,
+    "protocol_preset": "vala_paper_3d",
+    "score_postprocess": "none_after_external_valid_domain_cache"
+  },
+  "sealed_source_gate": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_transport_v2_ramen_teatime_cross_scene_source_gate_result_20260809.json",
+    "sha256": "13e5bcad24aa196fa63ba17a45a807e529bce3a19e749449c3430acc5c6b7587"
+  },
+  "implementation": {
+    "transport_materializer": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_target_blind_candidate_scores.py",
+    "valid_domain_readout": {
+      "path": "/root/RADIO-GS/radio_gs/querying/valid_domain_knn_readout.py",
+      "sha256": "d4ca07376f4a18d3f7b45fd9fcf19730b8a436270ea50c23f0962948c4f7878a"
+    },
+    "frozen_evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "frozen_evaluator_modified": false
+  },
+  "already_opened_results": {
+    "ramen": {
+      "miou": 0.3919541537761688,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_valid_domain_knn_v1/ramen/evaluation/exact_one_shot_gpu1_v1/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "4eb44b553a7f3c6e0dcfc6351678a4bf2fd1780aa5e2fea17f41defa7c402c48"
+      }
+    },
+    "teatime": {
+      "miou": 0.5325330495834351,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_valid_domain_knn_v1/teatime/evaluation/exact_one_shot_gpu0_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "cc0ffd35ec7e4f892bdf222db81eaa934983be813cf6e2c8ee2af0e063eb5881"
+      }
+    }
+  },
+  "remaining_execution": {
+    "scene_ids": [
+      "figurines",
+      "waldo_kitchen"
+    ],
+    "same_global_candidate_required": true,
+    "single_exact_execution_per_scene": true,
+    "no_result_dependent_adjustment": true,
+    "metric_execution_authorized": true,
+    "thermal_policy": {
+      "poll_seconds": 300,
+      "hard_stop_temperature_c": 88,
+      "soft_pause_temperature_c": 0,
+      "power_limit_w": 300
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schema": "radio_gs.anchor_preserving_prompt_transport.clean_scene_asset_authority.v1",
+  "schema_version": 1,
+  "status": "bound_before_v2_1_confirmation_label_open",
+  "scene_id": "scene0003_00",
+  "scene_role": "single untouched V2.1 prompt-transport confirmation scene",
+  "inputs": {
+    "responsibility_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/exact_marginal_responsibility_authority.json",
+      "sha256": "6047309b1c6a165157f1ae9ee805645587716f74649d9c7748b282f63c4fe49c"
+    },
+    "label_zip": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/source_instances/scene0003_00_2d-instance-filt.zip",
+      "sha256": "f43092a7147edef4533ee5b812f6ffc1c2f1c057728b961f6d163bc9a872f981"
+    },
+    "capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_capability_bank.pt",
+      "sha256": "30b4e0dfaec10d4961e98febb4f7596417a6b143b50a787641f07ebccab89f38"
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+      "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd"
+    },
+    "clean_cohort_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+      "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+    },
+    "benchmark_exclusion_manifest": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+      "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+    }
+  },
+  "readiness": {
+    "exact_responsibility_views": 120,
+    "num_global_rows": 200000,
+    "num_capability_valid_rows": 195910,
+    "responsibility_capability_state_cross_asset_check_required_at_runtime": true,
+    "official_instance_zip_exists_and_sha_bound": true,
+    "scene_id_absent_from_frozen_benchmark_exclusion_scene_ids": true,
+    "physical_space_id_absent_from_frozen_benchmark_exclusion_physical_spaces": true
+  },
+  "independence": {
+    "used_by_v2_or_v2_1_training": false,
+    "used_by_v2_or_v2_1_epoch_selection": false,
+    "used_by_v2_scene0002_failure_attribution": false,
+    "scene0003_prompt_labels_opened_for_v2_1_before_this_authority": false,
+    "scene0003_assets_used_by_other_query_free_source_studies": true,
+    "other_source_studies_do_not_share_v2_1_prompt_head_parameters": true
+  },
+  "source_access": {
+    "scene0003_prompt_labels_opened_at_binding": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

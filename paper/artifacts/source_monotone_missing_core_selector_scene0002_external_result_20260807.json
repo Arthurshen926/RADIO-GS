@@ -1,0 +1,74 @@
+{
+  "schema": "radio_gs.source_monotone_missing_core_scene0002_external_result.v1",
+  "schema_version": 1,
+  "status": "scene0002_frozen_selector_external_gate_passed",
+  "scene_id": "scene0002_00",
+  "scene_role_caveat": "original_source_train_scene_but_unseen_by_scene0001_only_selector_fit",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_monotone_missing_core_selector_scene0002_external_execution_authority_20260807.json",
+    "sha256": "29b86e65ee31d159ca2f481f9ab184ce48df2027e68674297fafcfd74a335b6b"
+  },
+  "label_blind_subset": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0002_00/combined_text_subset.pt",
+    "sha256": "8339cf14487a95556b10b0451d5353c7ec73dd8b3b756c491f3a0e00b5ae7215",
+    "positive_queries": 112,
+    "canonical_negative_queries": 4,
+    "absolute_regions": 3826
+  },
+  "raw_same_axis_O0": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0002_00/combined_raw_multiscale_scores.pt",
+    "sha256": "1ece7114fa1199faa7c4ed9560db3606f8cf77033a77c36a845d7fbcd97148fe",
+    "shape": [200000, 3, 116],
+    "dtype": "float16",
+    "valid_primitives": 198116,
+    "completion_applied": false
+  },
+  "validation_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0002_00/frozen_selector_external_report.json",
+    "sha256": "8180c8e181e55a1693028806360e8d7ac469b75d92c634ce786f662694a6ebd9"
+  },
+  "validation_outcomes": {
+    "qualified_anchor_query_pairs": 888,
+    "missing_core_units": 22675,
+    "hard_positive_missing_units": 17315,
+    "hard_negative_missing_units": 5360,
+    "frozen_threshold_inclusive": 0.5480217337608337,
+    "selected": 14497,
+    "selected_hard_positive": 11356,
+    "selected_hard_negative": 3141,
+    "selected_hard_precision": 0.783334482996482,
+    "selected_hard_precision_Wilson95_lower": 0.7776538575851334,
+    "selected_signed_utility_mean": 0.5469381809234619,
+    "unconditional_signed_utility_mean": 0.5087708234786987,
+    "selector_average_precision": 0.8250812292098999,
+    "unit_O0_score_average_precision": 0.8156598806381226,
+    "selector_AP_gain": 0.009421348571777344,
+    "all_formal_gates_passed": true,
+    "non_gate_Wilson95_lower_at_least_0p80": false
+  },
+  "thermal_execution": {
+    "physical_gpu": 1,
+    "pacing_seconds_per_batch": 0.05,
+    "telemetry_poll_seconds": 300,
+    "maximum_observed_temperature_c": 64,
+    "maximum_observed_power_w": 144.18,
+    "thermal_pause_or_abort": false,
+    "foreign_compute_owner": false
+  },
+  "interpretation": {
+    "supported": "the scene0001-only monotone selector remains a positive and safety-gated conditional completion rule on a second unseen selector-fit scene",
+    "not_supported": "a large universal gain claim; scene0002 AP improvement is modest and the non-gate Wilson-0.80 bar is not met",
+    "target_or_benchmark_evidence": false
+  },
+  "source_access": {
+    "membership_payload_opened_only_after_raw_O0_and_selector_were_frozen": true,
+    "selector_or_threshold_refit_on_scene0002": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

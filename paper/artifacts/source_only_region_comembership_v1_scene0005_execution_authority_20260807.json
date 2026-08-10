@@ -1,0 +1,60 @@
+{
+  "artifact": "source_only_region_comembership_v1_scene0005_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:07:20+08:00",
+  "status": "sealed_after_source_zip_and_region_chain_validation_and_before_build",
+  "scene_id": "scene0005_00",
+  "split": "source_train",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_source_region_comembership_v1.py",
+    "sha256": "010edffb34b9cf0381ed88749abdf66a3ed74bb34c73185222035a2d19e3f3f5"
+  },
+  "inputs": {
+    "instance_zip": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/source_instances/scene0005_00_2d-instance-filt.zip",
+      "sha256": "be578632cc48bfcf276e63e27a9997d08aebfa8c6b555c9eb1249451cf9441b7",
+      "full_zip_test_passed": true
+    },
+    "exact_marginal_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/exact_marginal_responsibility_authority.json",
+      "sha256": "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050"
+    },
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+      "sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e"
+    },
+    "typed_context": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/typed_context_stage_b_adaptive_v2.pt",
+      "sha256": "20f49415e9e20985ff7103ef7da658af829ccf081d601ff1f3dc7277247a2257"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "b9bacfb4b58ee540c51e8b74df82d2e676707ce0b75da89b2977429e4ea03fd8"
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/factorized_primitive_state_v2.pt",
+      "sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8"
+    }
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/scene0005_00/region_comembership_authority_v1_provenance_bound.pt",
+  "execution": {
+    "device": "cpu",
+    "output_preexisting": false,
+    "atomic_no_clobber": true,
+    "per_scene_hyperparameters": false
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

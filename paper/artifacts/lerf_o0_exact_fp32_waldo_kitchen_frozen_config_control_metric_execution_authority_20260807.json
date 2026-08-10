@@ -1,0 +1,63 @@
+{
+  "schema": "radio_gs.lerf_exact_fp32_o0_frozen_config_control_metric_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_single_exact_fp32_o0_frozen_config_control",
+  "scene_id": "waldo_kitchen",
+  "single_candidate_no_sweep": true,
+  "metric_execution_authorized": true,
+  "source_gate": {
+    "streaming_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_o2_streaming_result.json",
+      "sha256": "e9492a056bec99e63c856c447609b94a7df070f05f41e2fa979adfe40c4ae581"
+    },
+    "required_status": "complete_source_only_premetric_o1_o2_streaming",
+    "required_metric_executed": false,
+    "required_next_gate": "independent_exact_o0_control_replay_before_any_candidate_metric_authority"
+  },
+  "control": {
+    "positive_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_positive.pt",
+      "sha256": "c0a4d000c5b1bd05da9e3e30b18132bc8ecfd5476a35474f94dfa335f09b45ef"
+    },
+    "canonical_negative_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_negative.pt",
+      "sha256": "3eb9a71ebd196687beebe5c3b6464aefb6ed88b38cab5a699a06413199dabfcb"
+    }
+  },
+  "frozen_metric_inputs": {
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "config_sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264",
+    "renderer_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+    "summary_head_sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c",
+    "all_query_text_embedding_cache_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "canonical_negative_text_embedding_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "frozen_protocol": {
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select",
+    "selection_mode": "score_threshold",
+    "selection_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "official_labeled_frames_only": true,
+    "sweep": false
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_gpu_argument": 0,
+    "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1",
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_disabled": true
+  },
+  "access_audit": {
+    "target_images_opened_during_authority_build": false,
+    "target_ground_truth_opened_during_authority_build": false,
+    "target_masks_opened_during_authority_build": false,
+    "target_metrics_opened_during_authority_build": false,
+    "control_metric_executed_before_authority": false
+  }
+}

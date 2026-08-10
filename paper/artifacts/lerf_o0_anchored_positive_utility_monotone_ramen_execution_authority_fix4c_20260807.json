@@ -1,0 +1,48 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_positive_utility_monotone_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_source_fixed_positive_utility_monotone_target_score_cache_only",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache_fix4c.py",
+    "sha256": "5070bb112590a43937e4ee1867ed57cd3d49027c5cf8bfca18a9f42f904a95e9"
+  },
+  "dependencies": {
+    "frozen_fix4b_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache.py",
+      "sha256": "79fee20a29b670dc1b2700bf42a9587f60efe71daed8a130d3d95f214f63e51e"
+    },
+    "positive_utility_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_anchored_positive_utility_residual.py",
+      "sha256": "b67385ec245e7ccae25d65f42b7df29debd90ff6fbcbb7d53eddb0a188b8b27c"
+    }
+  },
+  "parent_fix4b_target_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_positive_utility_ramen_execution_authority_fix4b_20260807.json",
+    "sha256": "9e8fb24a9b2eb8980108c2a9e4214a1e5e54f6806a6857177099fe1fcfdc567a"
+  },
+  "supersedes_fix4b_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/o0_anchored_positive_utility.fix4b.pt",
+    "sha256": "10cf23a25b029abe2db74b70648b5470a9fc741c95f2ea9788789a6a6d47aecb"
+  },
+  "supersedes_fix4b_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/o0_anchored_positive_utility.fix4b.report.json",
+    "sha256": "0f8e282db11313d7466515f14a2fcfcad1d89963b5f6e9385a2003ea5f54cb4c"
+  },
+  "fixed_intervention": {
+    "scope": "probability_fusion_only",
+    "candidate": "maximum(exact_O0_probability,sigmoid(fused_logit))",
+    "actual_changed": "candidate_probability_strictly_greater_than_exact_O0",
+    "endpoint_policy": "exact_O0_probability_one_remains_bitwise_one",
+    "all_other_method_and_selection_logic": "bitwise_frozen_FIX4B"
+  },
+  "output_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/o0_anchored_positive_utility_monotone.fix4c.pt",
+  "output_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/o0_anchored_positive_utility_monotone.fix4c.report.json",
+  "target_score_cache_authorized": true,
+  "target_quality_execution_authorized": false,
+  "access_audit": {
+    "query_names_opened": true,
+    "target_images_opened": false,
+    "target_quality_data_opened": false,
+    "target_quality_readout_executed": false
+  }
+}

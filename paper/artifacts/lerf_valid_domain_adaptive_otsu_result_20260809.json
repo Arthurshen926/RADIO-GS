@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "registration": "lerf_valid_domain_adaptive_otsu_development_v1",
+  "status": "completed_and_rejected_by_independent_gate",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_valid_domain_adaptive_otsu_development_preregistration_20260809.json",
+    "sha256": "f7e698895a16dfabb352169ead78670746489e7fd8f8fa6e62e1735f4bbe8e52"
+  },
+  "development_selection": {
+    "scene": "figurines",
+    "parent_miou": 0.5284488797187805,
+    "stage2_miou": 0.5308423042297363,
+    "stage2_delta": 0.0023934245109558105,
+    "stage3_miou": 0.44861623644828796,
+    "stage3_delta": -0.07983264327049255,
+    "selected_global_variant": "recursive_upper_otsu_stage2",
+    "stage3_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_valid_domain_adaptive_otsu_v1/figurines/stage3/evaluation/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "dac3c19f1a7474bbaabb6c9c1b0f462dc0b08798ecb607004a73a8bac3bbd752"
+    }
+  },
+  "stage2_results": {
+    "figurines": {
+      "parent_miou": 0.5284488797187805,
+      "candidate_miou": 0.5308423042297363,
+      "delta_miou": 0.0023934245109558105,
+      "delta_acc025": 0.0,
+      "delta_acc050": 0.0357142857142857,
+      "delta_boundary_f": -0.010044753551483154,
+      "delta_trimap_iou": 0.036378324031829834,
+      "result": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_valid_domain_adaptive_otsu_v1/figurines/stage2/evaluation/figurines/lerf_direct_3d_selection_results.json", "sha256": "e9831474a0a72354af43dfbaf87a1db519f9007641191af8a57565eb2b4da4e3"}
+    },
+    "ramen": {
+      "parent_miou": 0.3924490213394165,
+      "candidate_miou": 0.3722456693649292,
+      "delta_miou": -0.020203351974487305,
+      "delta_acc025": -0.09859154929577463,
+      "delta_acc050": 0.04225352112676056,
+      "delta_boundary_f": -0.08943897485733032,
+      "delta_trimap_iou": 0.0480000376701355,
+      "result": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_valid_domain_adaptive_otsu_v1/ramen/stage2/evaluation/ramen/lerf_direct_3d_selection_results.json", "sha256": "ac47b381d3009f5d7614214eff9cba680920f019345f1a35f602b54ab9e6a15f"}
+    },
+    "teatime": {
+      "parent_miou": 0.5278149843215942,
+      "candidate_miou": 0.5036487579345703,
+      "delta_miou": -0.024166226387023926,
+      "delta_acc025": -0.0847457627118644,
+      "delta_acc050": 0.03389830508474578,
+      "delta_boundary_f": -0.11290884017944336,
+      "delta_trimap_iou": 0.06684178113937378,
+      "result": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_valid_domain_adaptive_otsu_v1/teatime/stage2/evaluation/teatime/lerf_direct_3d_selection_results.json", "sha256": "f1b2ad443a5a6a6971445f3b63919c5aac11ec8609f5ac66956791be349ef723"}
+    },
+    "waldo_kitchen": {
+      "parent_miou": 0.34969425201416016,
+      "candidate_miou": 0.3165450394153595,
+      "delta_miou": -0.03314921259880066,
+      "delta_acc025": -0.13636363636363635,
+      "delta_acc050": -0.13636363636363635,
+      "delta_boundary_f": -0.10691547393798828,
+      "delta_trimap_iou": 0.09628862142562866,
+      "result": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_valid_domain_adaptive_otsu_v1/waldo_kitchen/stage2/evaluation/waldo_kitchen/lerf_direct_3d_selection_results.json", "sha256": "d98c9e1998702a36e8c668320d25718b9372a9d3d49c4437f7f9288b294ebcb6"}
+    }
+  },
+  "macro": {
+    "valid_domain_parent": 0.44960178434848785,
+    "adaptive_stage2": 0.43082044273614883,
+    "delta": -0.01878134161233902
+  },
+  "decision": {
+    "promotion": false,
+    "reason": "The globally selected stage improves the development scene only slightly but regresses all three independent scenes and the full4 macro.",
+    "method_conclusion": "A query-wise response-tail threshold is not an object-identity estimator. It expands both missing target support and semantically related distractors; calibration alone cannot repair the remaining unary errors.",
+    "next_priority": "change feature-direction transport or reliability-conditioned neighbor evidence; do not scan more thresholds"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "maximum_observed_temperature_c": 53,
+    "thermal_stop_triggered": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  }
+}

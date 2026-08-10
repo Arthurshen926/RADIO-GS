@@ -1,0 +1,142 @@
+{
+  "access_audit": {
+    "analytic_optimization_preregistration_opened": true,
+    "frozen_target_config_opened": false,
+    "o0_query_score_cache_opened": false,
+    "query_embeddings_or_text_opened": false,
+    "source_base_descriptor_opened": true,
+    "source_feature_bundle_opened": true,
+    "source_lineage_authority_opened": true,
+    "source_responsibility_opened": true,
+    "target_images_opened": false,
+    "target_labels_or_masks_opened": false,
+    "target_metric_executed": false,
+    "target_metrics_opened": false
+  },
+  "analytic_optimization_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_transport_v2_analytic_order_statistic_optimization_preregistration_20260807.json",
+    "sha256": "0506c61d429158b64d73f225059c27e07ccf9961254e8ec2fbae9f04dd08b364"
+  },
+  "equivalence_row_limit": 2048,
+  "execution": {
+    "cuda_visible_devices": "1",
+    "gpu_owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "maximum_power_limit_w": 300.5,
+    "maximum_temperature_c": 88,
+    "physical_gpu": 1,
+    "program_device": "cuda:0",
+    "projection_batch_candidates": [
+      128,
+      64
+    ],
+    "soft_pause_temperature_c": 0,
+    "thermal_poll_seconds": 300
+  },
+  "feature_output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_analytic_source_loo_exact.py",
+    "sha256": "521d6cd7638917fee9d6543ab369f51b8afa087db174050b799e3ba5d4dabe35"
+  },
+  "method_contract": {
+    "execution": {
+      "cuda_visible_devices": "1",
+      "gpu_owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+      "physical_gpu": 1,
+      "program_device": "cuda:0",
+      "projection_batch_candidates": [
+        128,
+        64
+      ],
+      "projection_pacing_seconds": 0.0,
+      "thermal_safety_owner": "external_300s_hard88_no_soft_guard"
+    },
+    "metric_execution_authorized": false,
+    "o0_query_score_cache_consumed": false,
+    "outputs": "one_scalar_only_json_result",
+    "query_embeddings_or_text_consumed": false,
+    "run_modes": {
+      "equivalence_real_chunk": "bounded_source_chunk_old_descriptor_vs_analytic_per_cell",
+      "source_loo": "full_source_analytic_scalar_audit"
+    },
+    "schema": "radio_gs.lerf_transport_v2_analytic_source_loo_execution.v2",
+    "schema_version": 2,
+    "source_loo": {
+      "analytic_scalar_terms": [
+        "a",
+        "b_s",
+        "u",
+        "v_s",
+        "w_s"
+      ],
+      "candidate_by_observation_matrix": "transient_float32",
+      "candidate_count": 25,
+      "candidate_descriptor_materialization": false,
+      "compute_device": "cpu",
+      "p05": "exact_adjacent_kth_order_statistics_linear_interpolation",
+      "row_chunk": 2048,
+      "statistics": [
+        "mean_cosine",
+        "exact_linear_p05_cosine"
+      ]
+    },
+    "source_projection_core": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "source_view_count": 120,
+    "source_view_projection": "official_c_radio_v4_h_siglip2_summary_head",
+    "target_candidate_authorized": false,
+    "target_images_labels_masks_metrics_consumed": false,
+    "teacher_retention": "top4_exact_marginal_mass_desc_then_frame_id_asc",
+    "top4_descriptor_dtype": "torch.float16",
+    "top4_descriptors_durable": false,
+    "transport_v2_hook_contract_sha256": "9598c2b853c98d61d76d409596dd81d1034668721d275457b7cfd0714110a679",
+    "transport_v2_streaming_hook": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_analytic_source_loo_streaming_hook.py",
+      "sha256": "d94c5d9c39b384eeef23d2e90b9d37f8d9ab0bf3cdbcee1e47eb54cc4a4cfc83"
+    }
+  },
+  "method_contract_sha256": "1bc999903f3e1c292dcf355eb05c4d4c4e738424b5e5099f5ad6dfc68705b0da",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "gpu_owner_audit": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_analytic/ramen_equivalence_v1/ramen_analytic_transport_v2_gpu1_owner_audit.csv",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_analytic/ramen_equivalence_v1/ramen_analytic_transport_v2_equivalence_real_chunk_result.json",
+    "thermal_telemetry": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_analytic/ramen_equivalence_v1/ramen_analytic_transport_v2_gpu1_telemetry.csv"
+  },
+  "run_mode": "equivalence_real_chunk",
+  "scene_id": "ramen",
+  "schema": "radio_gs.lerf_transport_v2_analytic_source_loo_execution.v2",
+  "schema_version": 2,
+  "source_inputs": {
+    "base_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen.pt",
+      "sha256": "823cfa6fe0d6a1d80987aa5774ea9de3bd45743019e863a57536f1bbc12851b4"
+    },
+    "feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1/frame_manifest.json",
+      "sha256": "70c54e2efa63ca17fd7813fbfb06a67338fc23f9fcf510d34d0d6e94276fa301"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+    },
+    "scene_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_fix4c_exact120_teacher.yaml",
+      "sha256": "716b4f4fb0ce947cfc14464e26c518b8525edb2e1255ce9f8d597bc7232b5b57"
+    }
+  },
+  "source_lineage_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+    "sha256": "939c82d5e4a3cab51982dcac5ef318604f9072ee85a3b0e0a0e86d2c9fdd4ed5"
+  },
+  "status": "authorized_source_only_analytic_transport_v2",
+  "target_candidate_authorized": false
+}

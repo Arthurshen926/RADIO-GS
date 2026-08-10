@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_target_blind_connected_multi_region_union_v2_figurines_execution",
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_target_blind_v2_cache_and_before_any_v2_metric",
+  "authorities": {
+    "preregistration_sha256": "e77eae7a8e69cff5a2f1148d9bd2288163f4f8b0cc1e1789c8c3e4cc2a6bc5b1",
+    "engineering_addendum_sha256": "65f5b5a3cbeeb5c2118fa0002ed41e171c98d170065b099ea2685bc1cbf59903",
+    "selector_sha256": "131b7342b9e32608502b7dad0e41eb36c8a08562d6956530e183296afc0f2121",
+    "producer_sha256": "98b5730cd57fb432980057e8f710092de2fc701913eaca898f191354cc475cfc",
+    "frozen_evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+  },
+  "candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_connected_multi_region_union_v2/figurines/external_query_scores.pt",
+      "sha256": "50e88cdc72818699dab7cd244a19cdaeea9087771da3969837875d073e0ce676"
+    },
+    "build_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_connected_multi_region_union_v2/figurines/build_report.json",
+      "sha256": "d7b753736b829abb99aa7373d6bc50ec211f0e7f7b40e2c9f071fcaec530b96c"
+    },
+    "selected_region_counts": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 8, 8, 8]
+  },
+  "evaluation": {
+    "scene": "figurines",
+    "protocol_preset": "vala_paper_3d",
+    "score_postprocess": "none",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_frames_only": true,
+    "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_connected_multi_region_union_v2/evaluation/figurines_v2",
+    "cache_sha256_preflight_required": true,
+    "result_dependent_selection": false
+  },
+  "controls": {
+    "O0_miou": 0.4753887355327606,
+    "O0_result_sha256": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677",
+    "union_v1_miou": 0.35686323046684265,
+    "union_v1_result_sha256": "4b6d9362d7288564cdbb4024f82b2df740fd0b814d17851a634d0a6fc6b4782b"
+  },
+  "gpu": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 30,
+    "hard_temperature_c": 88,
+    "consecutive_hot_polls_before_stop": 6,
+    "execution_authorized_after_this_addendum": true
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "radio_gs.lerf_exact_fp32_o0_frozen_config_control_replay_result.v1",
+  "schema_version": 1,
+  "status": "passed_exact_frozen_lineage_control_replay",
+  "scene_id": "waldo_kitchen",
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_waldo_kitchen_frozen_config_control_metric_execution_authority_20260807.json",
+    "sha256": "68ae044be0d7a182c24a1b8de60279db23c1de4e1eb3fe9c6da1c7881f522911"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+    "sha256": "a07b7ef185a3556ec7977083a4c085b04973c98cfe9d4f07c5fce240b45d8d47"
+  },
+  "metrics": {
+    "miou": 0.29311421513557434,
+    "acc025": 0.5454545454545454,
+    "acc050": 0.2727272727272727,
+    "boundary_f": 0.27739694714546204,
+    "trimap_iou": 0.3331482410430908,
+    "n": 22
+  },
+  "historical_lower_precision_reference": {
+    "artifact": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_canonical_negative_relevancy_results_20260804.json",
+      "sha256": "2501bc60afc4d26578538088fb15074b40e38dc5f4522f7d62918b5bb2eba160"
+    },
+    "miou": 0.2954942882,
+    "exact_fp32_minus_historical_miou": -0.002380073064425669,
+    "interpretation": "The exact-FP32 replay preserves the frozen O0 method, protocol, renderer, and query axes; the small numerical delta is the expected precision-lineage correction and is not a method or evaluator change."
+  },
+  "frozen_config_sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264",
+  "renderer_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+  "lineage_replay_passed": true,
+  "telemetry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/o0_exact_control_gpu1_telemetry.csv",
+    "sha256": "c4866db1544aa7a95096a30c96cf5a4dd1ea54c5e88a4b103f7b33a9605fec66",
+    "peak_temperature_c": 52,
+    "thermal_guard_triggered": false
+  },
+  "candidate_metric_gate": "satisfied_for_subsequently_frozen_O1_and_O2_single_candidate_authorities"
+}

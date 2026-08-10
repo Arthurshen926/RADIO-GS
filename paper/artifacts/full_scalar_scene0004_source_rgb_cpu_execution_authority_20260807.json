@@ -1,0 +1,54 @@
+{
+  "artifact": "full_scalar_scene0004_source_rgb_cpu_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:25:00+08:00",
+  "status": "sealed_after_strict_readiness_preflight_before_CPU_materialization",
+  "scene_id": "scene0004_00",
+  "physical_space_id": "scene0004",
+  "frozen_cohort_role": "source_validation",
+  "frozen_cohort": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "file_sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "authority_sha256": "397a436ecaef1fc270aa9c38a0f0e029f92c91841e43c26efdc257353bc6ab2e"
+  },
+  "inputs": {
+    "field_source_contract": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/field240/scene0004_00/field_source_contract.json",
+      "sha256": "3deb30d58e82f51c9f3cd6450479640b51369d3b7bfd2f279edb73bdc0b78e4c",
+      "selected_frame_count": 240,
+      "field_frame_manifest_sha256": "63357d3c2fd2e93c74e331a63fb761df4f93f295a47016f5751fdbb18aa0483d"
+    },
+    "strict_feature_frame_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/radio_features/scene0004_00/frame_manifest.json",
+      "sha256": "eddfc2eded65aa246746f514bff3ae818218298b0b0da38581cd491f82539106",
+      "resume_contract": ".extract_resume_contract.json",
+      "resume_partial": true,
+      "frame_count": 240
+    },
+    "source_rgb_root": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/field240/scene0004_00/color",
+      "observed_files": 240
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_clean_source_rgb_scene_authority.py",
+    "sha256": "7a39b4e4c12e0770b39b1b4cc0166ae0948bad8adbefd72a02e279d5ce2927f6",
+    "execution_class": "CPU_only_PIL_validation_and_SHA_sealing"
+  },
+  "readiness": {
+    "preflight_status": "ready",
+    "preflight_frames": 240,
+    "expected_content_authority_sha256": "131961ad91b530f24557a6980e3b4ddcd6290342e9c9264d864622210a814c29",
+    "outputs_written": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/source_rgb_scene_authority_v1.json",
+  "execution_constraints": {
+    "GPU_used": false,
+    "CUDA_visible_devices": "empty",
+    "benchmark_assets_opened": false,
+    "target_labels_queries_or_masks_opened": false,
+    "per_scene_approximation_or_substitution": false,
+    "output_preexisting": false,
+    "noclobber": true
+  }
+}

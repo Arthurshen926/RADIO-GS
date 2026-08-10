@@ -1,0 +1,8 @@
+base_config: ../../lerf_hybrid_v14_waldo_kitchen_fdh_ws240_240ep.yaml
+
+# Query-free source features only.  The exact-marginal builder independently
+# excludes the frozen five LERF evaluation frame ids before its deterministic
+# 120-view selection; no label, mask, category string, or metric is consumed.
+feature_dir: /mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen
+pose_file: ""
+pose_dir: /mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/poses_c2w_colmap_verified

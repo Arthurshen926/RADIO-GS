@@ -1,0 +1,71 @@
+{
+  "schema": "radio_gs.source_heldout_missing_support_direct_pair_result.v1",
+  "schema_version": 1,
+  "status": "sealed_source_cross_scene_promotion_failure",
+  "date": "2026-08-07",
+  "scientific_question": "Can exact source-heldout support labels and direct native-V3 pair evidence separate true query-conditioned missing support from semantic false response across scenes?",
+  "label_protocol": {
+    "view_folds": 3,
+    "assignment": "view_index_modulo_3",
+    "seed_instance": "dominant positive instance from the complementary two view folds only",
+    "target_label": "heldout missing-core seed-instance mass strictly exceeds every other heldout instance mass",
+    "signed_utility": "2_times_heldout_seed_instance_mass_fraction_minus_1",
+    "view_fold_overlap": 0,
+    "target_benchmark_access": false
+  },
+  "data_audit": {
+    "scene0001_00": {"units": 150, "positive": 84, "negative": 66, "positive_fraction": 0.56, "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0001_00/report.json", "sha256": "406c797f06f2a860aa21a1d1c746bbecc7cc9ac010bc7b2d9a19fe14636dc1d7"}},
+    "scene0002_00": {"units": 301, "positive": 187, "negative": 114, "positive_fraction": 0.6212624311447144, "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0002_00/report.json", "sha256": "7a8795b127a685f8e703fc4bc72e204a618e4f9d01c6d4986da31d99879641e0"}},
+    "scene0003_00": {"units": 263, "positive": 228, "negative": 35, "positive_fraction": 0.8669201731681824, "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0003_00/report.json", "sha256": "e7fd6900fc4491135750f640ce946cf5cba969862eb12e9f2a4d1ecab15748ff"}},
+    "scene0004_00": {"units": 237, "positive": 192, "negative": 45, "positive_fraction": 0.8101266026496887, "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0004_00/report.json", "sha256": "e51c68a8ccaa5b03ca66de7ffd2978a272b73d00e9afb12795d781eb6b51c6e4"}}
+  },
+  "direct_pair_audit": {
+    "model": "30-axis monotone additive logistic over nine proposal axes and twenty-one selected raw native-V3 pair axes",
+    "source_train": ["scene0001_00", "scene0002_00", "scene0003_00"],
+    "source_validation": ["scene0004_00"],
+    "direct_pair_retention": {"scene0001_00": 0.9800000190734863, "scene0002_00": 0.9800664186477661, "scene0003_00": 0.8631178736686707, "scene0004_00": 1.0},
+    "cross_scene_LOO_query_macro": {
+      "selector_AUROC": 0.4038587510585785,
+      "edge_probability_AUROC": 0.4742575983206431,
+      "selector_average_precision": 0.5647205511728922,
+      "edge_probability_average_precision": 0.6118956208229065
+    },
+    "source_validation_scene0004": {
+      "selector_query_macro_AUROC": 0.8333333134651184,
+      "edge_query_macro_AUROC": 0.7777777314186096,
+      "selector_query_macro_average_precision": 0.9060845971107483,
+      "edge_query_macro_average_precision": 0.8574073910713196,
+      "selector_query_AP_p05": 0.692460298538208,
+      "edge_query_AP_p05": 0.694444477558136,
+      "selector_brier": 0.1461676846635502,
+      "training_prevalence_constant_brier": 0.16775702836698522,
+      "selector_log_loss": 0.45282593983405545,
+      "training_prevalence_constant_log_loss": 0.521826145981005
+    },
+    "promotion_gate": {
+      "LOO_query_macro_AUROC_strictly_improves_edge": false,
+      "LOO_query_macro_AP_strictly_improves_edge": false,
+      "source_validation_query_AP_p05_non_regression": false,
+      "passed": false
+    },
+    "execution_authority": {"path": "/root/RADIO-GS/paper/artifacts/source_heldout_direct_pair_selector_execution_authority_20260807.json", "sha256": "47061b8bf27d42b8904995124a0b7f0263140af695b220e21412e7d8458b0c10"},
+    "model": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_direct_pair_selector_v1/model.pt", "sha256": "53e16d0250cafcc1282b6130190b19b9f01c58a739495cc4e4fb423eb9417219"},
+    "report": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_direct_pair_selector_v1/report.json", "sha256": "40ffbf45aee8e14226d010ff450a51dd9e905ff6ab5467bed3441f3ed5d5c7ca"}
+  },
+  "decision": {
+    "target_materialization_authorized": false,
+    "gpu_metric_authorized": false,
+    "reason": "The source-validation scene shows attractive global and query-macro gains, but source-train cross-scene LOO query ranking regresses and the validation AP lower tail also regresses. The current descriptors therefore do not provide a scene-invariant conditional statistic for true missing support."
+  },
+  "first_principle_conclusion": "Coverage deficit is a valid missingness statistic but not an object-identity statistic. Native-V3 pair evidence remains scene-dependent after query grouping. A promotable completion rule needs a representation trained on heldout support recovery itself, with scene-disjoint relation learning or a view-conditioned identity correspondence channel; another target-side threshold or graph parameter cannot repair this failure.",
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false
+  }
+}

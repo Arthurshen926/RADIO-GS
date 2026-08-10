@@ -14,6 +14,11 @@ from typing import Literal
 import numpy as np
 import torch
 
+from .anchor_preserving_transport import (
+    AnchorPreservingTransportOutput,
+    apply_anchor_preserving_probability_proposal,
+)
+
 
 DiffusionKernel = Literal[
     "ludvig_release_compat", "symmetric_normalized", "continuous_convex_v2"
@@ -530,6 +535,55 @@ def solve_continuous_query_support(
         preconditioned = next_preconditioned
         residual_product = next_product
     return (solution * free + fixed_values).clamp(0.0, 1.0)
+
+
+def solve_anchor_preserving_query_support(
+    observation_probability: torch.Tensor,
+    observation_confidence: torch.Tensor,
+    neighbor_indices: torch.Tensor,
+    feature_similarities: torch.Tensor,
+    query_compatibility: torch.Tensor,
+    *,
+    config: QueryConditionedDiffusionConfig,
+    completion_confidence: torch.Tensor | None = None,
+    active_domain: torch.Tensor | None = None,
+    max_abs_logit_residual: float = 4.0,
+) -> AnchorPreservingTransportOutput:
+    """Wrap continuous graph completion in the shared no-harm contract.
+
+    The existing ``continuous_convex_v2`` solver is retained as a proposal
+    generator so frozen experiments keep their original semantics.  This
+    explicit wrapper is the unified method path: observed rows anchor to their
+    exact registered unary, unobserved rows anchor to the query classifier,
+    and only the gated logit residual can alter either value.
+    """
+
+    probability = torch.as_tensor(observation_probability).float().reshape(-1)
+    confidence = torch.as_tensor(
+        observation_confidence, device=probability.device
+    ).float().reshape(-1)
+    compatibility = torch.as_tensor(
+        query_compatibility, device=probability.device
+    ).float().reshape(-1)
+    if confidence.shape != probability.shape or compatibility.shape != probability.shape:
+        raise ValueError("anchor-preserving query-support rows do not align")
+    proposal = solve_continuous_query_support(
+        probability,
+        confidence,
+        neighbor_indices,
+        feature_similarities,
+        compatibility,
+        config=config,
+    )
+    anchor = torch.where(confidence > 0, probability, compatibility)
+    return apply_anchor_preserving_probability_proposal(
+        anchor,
+        proposal,
+        confidence,
+        completion_confidence=completion_confidence,
+        active_domain=active_domain,
+        max_abs_logit_residual=max_abs_logit_residual,
+    )
 
 
 def _undirected_boolean_propagation(

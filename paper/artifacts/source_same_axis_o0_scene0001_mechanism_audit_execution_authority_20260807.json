@@ -1,0 +1,130 @@
+{
+  "schema": "radio_gs.source_same_axis_o0_mechanism_audit_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_after_raw_O0_scores_before_source_instance_utility_open",
+  "scene_id": "scene0001_00",
+  "split": "source_train",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/audit_source_same_axis_o0_missing_core_mechanism.py",
+    "sha256": "18a983ce27060c47b1f944e39a1f3dd83812c6bbb5fd66e462502843b15ae641"
+  },
+  "utility_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/source_missing_core_conditional_utility.py",
+    "sha256": "abf749c6c267c4498d05f33c74e90090ae4799651179595ec7a67ac46e1e04ec"
+  },
+  "exact_o0_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_graph_residual_cache.py",
+    "sha256": "05d900e848ca5cb1cf9dbff652e06dd1945c0bf88d4ca37e07b4d1550ac624fe"
+  },
+  "parent_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_same_axis_o0_missing_core_sentinel_execution_authority_20260807.json",
+    "sha256": "84b2f03361472041869cf799f38149e12754fb7ca1d2c6eee2ac20e5745879fa"
+  },
+  "dense_stream_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_same_axis_o0_scene0001_dense_stream_execution_authority_20260807.json",
+    "sha256": "8388863d973a2027a1bebd94c4cdd0a18f4e4844da3d246b36f40939c7d7c533"
+  },
+  "combined_text_subset": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/combined_text_subset.pt",
+    "sha256": "8740df01d507a25004cbf094d6bc2e1c343e3c5cd8dbbf8c7112f8d634df24b0"
+  },
+  "raw_combined_multiscale_scores": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/combined_raw_multiscale_scores.pt",
+    "sha256": "2c792e00facf5b32cce52ba69861795599f1a8a904a6c25690812ab34af33a89"
+  },
+  "accepted_v2": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+    "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8"
+  },
+  "source_membership_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0001_00/source_region_comembership_authority_v2.pt",
+    "sha256": "a8229d4f241308275f64836124a7efd28cf48a3bc92d0a438cd57c2f5993ee63"
+  },
+  "source_training_shard": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_pilot_4train_2validation_v21/shards_v1/scene0001_00/training_shard_v1.pt",
+    "sha256": "125a25f5784b679da863958c08eec701c92e5da3f5447024653e6237d0efd61f"
+  },
+  "source_capability_descriptor": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0001_00/region_capability_descriptors_v2.pt",
+    "sha256": "a273d86b6531af72b3d48db873313ced6e3da64b6c3a3410dfeeb7eaf9044025"
+  },
+  "fixed_audit": {
+    "positive_query_count": 64,
+    "canonical_negative_count": 4,
+    "canonical_negative_probability_logit_scale": 10.0,
+    "knn": 10,
+    "knn_chunk_size": 65536,
+    "scale_selection": "highest_raw_smoothed_peak_lower_scale_tie_break",
+    "per_scale_query_minmax": true,
+    "o0_positive": "strictly_greater_than_0p6",
+    "qualified_anchor": "valid_core_positive_fraction_at_least_0p75",
+    "missing_core": "valid_core_O0_score_less_than_or_equal_to_0p6",
+    "hard_label": "primitive_exact_mass_argmax_equals_anchor_dominant_instance",
+    "soft_utility": "2_times_target_instance_mass_fraction_minus_1",
+    "feature_names": [
+      "unit_o0_score",
+      "unit_margin_below_0p6",
+      "missing_min_seed_distance_over_seed_nn_median",
+      "missing_mean_seed_distance_over_seed_nn_median",
+      "missing_core_knn10_seed_density",
+      "anchor_positive_fraction",
+      "log1p_anchor_missing_count",
+      "log1p_valid_core_count",
+      "region_scale_index",
+      "query_selected_scale_index",
+      "missing_score_q25",
+      "missing_score_q50",
+      "missing_score_q75",
+      "missing_score_maximum",
+      "appearance_concentration",
+      "boundary_concentration",
+      "boundary_dispersion_one_minus_concentration",
+      "core_spatial_rms_radius",
+      "full_scalar_source_robust_ood_linf",
+      "full_scalar_source_robust_00",
+      "full_scalar_source_robust_01",
+      "full_scalar_source_robust_02",
+      "full_scalar_source_robust_03",
+      "full_scalar_source_robust_04",
+      "full_scalar_source_robust_05",
+      "full_scalar_source_robust_06",
+      "full_scalar_source_robust_07",
+      "full_scalar_source_robust_08",
+      "full_scalar_source_robust_09",
+      "full_scalar_source_robust_10",
+      "full_scalar_source_robust_11",
+      "full_scalar_source_robust_12",
+      "full_scalar_source_robust_13",
+      "full_scalar_source_robust_14",
+      "full_scalar_source_robust_15",
+      "full_scalar_source_robust_16",
+      "full_scalar_source_robust_17"
+    ],
+    "scene0001_gate": {
+      "minimum_qualified_anchor_query_pairs": 32,
+      "minimum_missing_core_units": 256,
+      "minimum_hard_positive_missing_units": 32,
+      "minimum_hard_negative_missing_units": 32
+    },
+    "heldout_scene_opened_before_gate": false
+  },
+  "outputs": {
+    "unit_table": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/missing_core_unit_table.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_same_axis_o0_missing_core_sentinel_v1/scene0001_00/mechanism_audit_report.json"
+  },
+  "source_access": {
+    "source_train_instance_labels_opened_after_O0_frozen": true,
+    "source_validation_instance_labels_opened": false,
+    "source_accepted_v2_opened": true,
+    "source_query_independent_capability_reliability_opened": true,
+    "source_train_full_scalar_shard_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

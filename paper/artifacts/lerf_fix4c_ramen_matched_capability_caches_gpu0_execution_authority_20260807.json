@@ -1,0 +1,71 @@
+{
+  "schema": "radio_gs.lerf3d_matched_exact_marginal_capability_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_but_paused_for_parent_gpu0_development_confirmation",
+  "registered_at": "2026-08-07T10:33:06+08:00",
+  "scene": "ramen",
+  "frozen_inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_fix4c_exact120_teacher.yaml",
+      "sha256": "716b4f4fb0ce947cfc14464e26c518b8525edb2e1255ce9f8d597bc7232b5b57"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "feature_output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292",
+    "responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "maximum_views": 120,
+    "excluded_frame_ids": [2, 6, 24, 45, 60, 65, 81, 87, 119, 128, 130]
+  },
+  "fixed_contract": {
+    "observation_contract": "canonical-exact-marginal-mpr-v1",
+    "aggregation_mode": "raster_marginal_responsibility",
+    "raster_view_fusion": "contribution_mean",
+    "normalize_each_view": true,
+    "robust_mpr": false,
+    "post_compositor_alpha_threshold": 0.0,
+    "capability_map_source": "project_raw",
+    "capability_storage": "dense",
+    "shared_responsibility": true,
+    "query_independent": true
+  },
+  "planned_outputs": {
+    "raw_radio": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/raw_radio_matched_exact_marginal.pt",
+    "dino_v3": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/dino_v3_matched_exact_marginal.pt",
+    "sam3": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/sam3_matched_exact_marginal.pt"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+    "sha256": "0901151a29e5dbd45bd1cd98314916f4815259721ab157a1b5a13ed35670743d"
+  },
+  "gpu_execution": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "program_device": "cuda:0",
+    "power_limit_w": 300.0,
+    "start_maximum_temperature_c": 87,
+    "hard_stop_temperature_c": 88,
+    "hard_stop_consecutive_polls": 6,
+    "poll_seconds": 30,
+    "soft_pause": false,
+    "thermal_guard_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "repo_python_wrapper_sha256": "37c54ab59b99d1f9d1fca54ed23980979e087fe25434292d18aea349eb9638dd"
+  },
+  "execution_policy": {
+    "no_clobber": true,
+    "first_writer_only": true,
+    "do_not_launch_until_parent_releases_gpu0": true,
+    "formal_metric_computed": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  }
+}

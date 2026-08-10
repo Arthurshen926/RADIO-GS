@@ -1,0 +1,26 @@
+{
+  "schema": "radio_gs.metric_authority_supersession.v1",
+  "schema_version": 1,
+  "status": "superseded_before_execution",
+  "scene_id": "ramen",
+  "superseded_authorities": {
+    "O1": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_ramen_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "11d7c29f2d708e87460989a8e3ff7c345a847fe2477a365233ade0a5432f1a8e"
+    },
+    "O2": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o2_ramen_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "1c8d174ab091d3967fc07d3a787f2fed4a1ed4afca5d13c5e1906aec8b0edc37"
+    }
+  },
+  "reason": "The source result requires independent_exact_o0_control_replay_before_any_metric_authority. These candidate authorities were constructed before that gate was satisfied and are therefore invalid for execution.",
+  "execution_audit": {
+    "O1_metric_executed": false,
+    "O2_metric_executed": false,
+    "target_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "required_next_gate": "register_and_execute_exact_fp32_o0_control_with_frozen_eval_20260802_config_sha256_9fdb2cc5"
+}

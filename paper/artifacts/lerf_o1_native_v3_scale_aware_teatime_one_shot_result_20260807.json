@@ -1,0 +1,194 @@
+{
+  "schema": "radio_gs.lerf_o1_native_v3_scale_aware_one_shot_result.v2",
+  "schema_version": 2,
+  "status": "complete_independent_scene_negative_replication",
+  "scene_id": "teatime",
+  "method_contract_sha256": "0327429dfde0d5629176ecf23f1a8632a0415c28ddce3014cb70fe33e9f05d10",
+  "fixed_constants": {
+    "semantic_boundary": 0.6,
+    "native_v3_relation_threshold": 0.85,
+    "maximum_regions": 8,
+    "path_method": "widest_path",
+    "completion": "continuous_monotone_noisy_OR",
+    "canonical_negative_logit_scale": 10.0,
+    "knn_k": 10,
+    "changed_after_figurines": false
+  },
+  "query_free_native_v3": {
+    "execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/teatime/region_comembership_native_v3_target_execution_authority.json",
+      "sha256": "8ca14f1fce81ad6cb331f74f3b4896040d380ada530dbe314cbbd89b99a3a3d9"
+    },
+    "feature": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/teatime/region_comembership_features_native_v3.pt",
+      "sha256": "7d7bae57abbf70d3fc30199ea69013c5c5c090b5c59c9a2b749df5d713376802"
+    },
+    "inference": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/teatime/region_comembership_inference_native_v3.pt",
+      "sha256": "290f9e3c3b0985b7f597e1b5c4dce4e555d96d92d33e314443a42d7bb50d0af9"
+    },
+    "topology": {
+      "canonical_regions": 4096,
+      "candidate_pairs": 60524,
+      "accepted_edges": 2803,
+      "edge_additions_vs_parent_v2": 1687,
+      "edge_removals_vs_parent_v2": 19,
+      "isolated_regions": 2229,
+      "largest_component_regions": 124,
+      "largest_component_fraction": 0.0302734375,
+      "maximum_accepted_degree": 20,
+      "giant_component_warning": false
+    }
+  },
+  "cross_scene_implementation": {
+    "producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_native_v3_scale_aware_fusion_cross_scene.py",
+      "sha256": "0e08fac0832f6bba9b33dc2081f2831dd67ee07fc9f247f133dbd8ba0afb38ab"
+    },
+    "test": {
+      "path": "/root/RADIO-GS/tests/test_materialize_lerf_o1_native_v3_scale_aware_fusion_cross_scene.py",
+      "sha256": "59e4f4496e052bcd360e343d3d109978c79280e580efbed93f84f51f502f1977"
+    },
+    "frozen_figurines_producer_preserved": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_native_v3_scale_aware_fusion.py",
+      "sha256": "3e88f086ac5c88d213bb6377ffd293379ea382e19e8b5c3af61fc6f639958ae3"
+    },
+    "related_tests_passed": 28
+  },
+  "premetric": {
+    "authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_scale_aware_teatime_development_execution_authority_20260807.json",
+      "sha256": "281c6709fddbe51a0cdb6d602a77b346d324539580b623f2be1e9ff1ebe23550"
+    },
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/teatime/external_query_scores.pt",
+      "sha256": "fdcd43c943420c0c9b6c953be95ddbfa6217c129aa062299b9ecd7524329a3b4"
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/teatime/premetric_report.json",
+      "sha256": "6381149c4b6b23d984f033a7fe917d3c6d05197af202e7b7ab48b328e1448ad2"
+    },
+    "valid_primitives": 334250,
+    "query_count": 14,
+    "changed_primitive_query_cells": 1215,
+    "decreased_primitive_query_cells": 0,
+    "base_threshold_support": 99058,
+    "candidate_threshold_support": 99118,
+    "new_threshold_crossings": 60,
+    "relative_threshold_support_increase": 0.0006057053463564798,
+    "queries_exactly_O1": 9,
+    "queries_with_new_threshold_crossings": {
+      "paper napkin": 21,
+      "yellow pouf": 39
+    }
+  },
+  "metric": {
+    "authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_scale_aware_teatime_one_shot_metric_execution_authority_20260807.json",
+      "sha256": "e79e36d8db19397f282a98a854ed5ec694060b61bdc5c3724a951b50afdd39a3"
+    },
+    "control": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o1_exact_v1/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "d60879c3a543a0f20830a2345591875ba48598da86580149f4fecc450c4ce0c4",
+      "miou": 0.4942660927772522,
+      "acc025": 0.847457627118644,
+      "acc050": 0.559322033898305,
+      "boundary_f": 0.7052473425865173,
+      "trimap_iou": 0.42199259996414185
+    },
+    "candidate": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/evaluation/teatime_one_shot/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "2402c7706f7efcabe8b5e73947da2d04b54d3cb2ac1175c086e85784cc5608c4",
+      "miou": 0.4933878481388092,
+      "acc025": 0.847457627118644,
+      "acc050": 0.5423728813559322,
+      "boundary_f": 0.7031548023223877,
+      "trimap_iou": 0.42199259996414185
+    },
+    "delta": {
+      "miou": -0.0008782446384429932,
+      "miou_points": -0.08782446384429932,
+      "acc025": 0.0,
+      "acc050": -0.016949152542372836,
+      "boundary_f": -0.0020925402641296387,
+      "trimap_iou": 0.0
+    },
+    "paired_query_frame_analysis": {
+      "sample_count": 59,
+      "alignment_key": [
+        "frame_id",
+        "category"
+      ],
+      "miou": {
+        "improved": 0,
+        "regressed": 4,
+        "unchanged": 55,
+        "bootstrap_resamples": 20000,
+        "bootstrap_seed": 20260807,
+        "bootstrap_95_percent_interval": [
+          -0.0019306742217137006,
+          -0.000034961271204914476
+        ]
+      },
+      "boundary_f": {
+        "improved": 0,
+        "regressed": 4,
+        "unchanged": 55,
+        "bootstrap_95_percent_interval": [
+          -0.0046679842564501875,
+          -0.00009763904419218158
+        ]
+      },
+      "trimap_iou": {
+        "improved": 0,
+        "regressed": 0,
+        "unchanged": 59
+      },
+      "only_changed_metric_category": {
+        "name": "paper napkin",
+        "mean_iou_delta": -0.01036325113184946,
+        "mean_boundary_f_delta": -0.02469148070290923,
+        "regressed_frames": 4,
+        "unchanged_frames": 1
+      }
+    }
+  },
+  "execution_audit": {
+    "parser_only_attempt": {
+      "status": "failed_before_scene_or_metric_loading_due_to_hyphenated_argument_names",
+      "candidate_metric_executed": false,
+      "output_created": false,
+      "telemetry": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/gpu1_telemetry.csv",
+        "sha256": "0e1503d19d427b9705ab20fccc1033390c5a9d6943cbc4e7c14723f3a294fe15"
+      },
+      "owner_audit": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/gpu1_owner_audit.csv",
+        "sha256": "d4c60dd4ec8e2fe434d798a9b1cbcff675e53db70a188b4d702c152934576463"
+      }
+    },
+    "actual_one_shot": {
+      "physical_gpu": 1,
+      "start_temperature_c": 38,
+      "end_and_peak_sample_temperature_c": 47,
+      "peak_sample_power_w": 122.55,
+      "postexit_owner_clear": true,
+      "telemetry": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/gpu1_telemetry_attempt2.csv",
+        "sha256": "b65afa0937fef2c70fdeb815990670437c8ad51b889d59fbc1403875c7a96717"
+      },
+      "owner_audit": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v2/gpu1_owner_audit_attempt2.csv",
+        "sha256": "319f75bc9d00052f768044f4b9a6686b808ea1718db96bba168086e4f89e90d1"
+      }
+    }
+  },
+  "decision": {
+    "figurines_positive_candidate_replication_passed": false,
+    "promote_as_default": false,
+    "interpretation": "The relation can still manufacture false foreground from one strong seed. Teatime is not a topology-collapse failure: only 60 new crossings were added, yet all rendered metric changes were regressions concentrated in paper napkin.",
+    "first_principle_correction": "A relation should consolidate independently present semantic evidence, not create a new decision crossing from a single seed. The next generic design should require target-side semantic confirmation before relation support can cross the frozen boundary.",
+    "prohibited_followup": "Do not tune relation threshold, K, path length, or query-specific gates on Teatime.",
+    "recommended_followup": "Implement target-confirmed relation support as a new source-defined contract, audit its premetric effect on existing sealed scenes, then validate once on a third independent scene."
+  }
+}

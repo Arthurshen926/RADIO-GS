@@ -1,0 +1,60 @@
+{
+  "benchmark_execution_authorized": false,
+  "fix4b_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_positive_utility_contract_result_fix4b_20260807.json",
+    "sha256": "0043b85c9c55f2532bb217a8c5126a7dfa3903e1c852073a3ca9be8a83a03280"
+  },
+  "fix5_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_raw_dominant_fix5_audit_result_20260807.json",
+    "sha256": "7056dc5a97c3f11db4acb70100da63e71762ba86deb8994ca3f293b8ae90d281"
+  },
+  "fixed_candidate": {
+    "absolute_threshold": 0.5,
+    "dominance": "argmax_all_exact_ties_retained",
+    "dominance_reference": "same_frozen_target_blind_806_query_bank",
+    "per_scene_parameters": false,
+    "raw_probability": "sigmoid(10*(query_cosine-hardest_canonical_negative_cosine))",
+    "scene_query_bank_argmax_used": false,
+    "target_requirement": "runtime_query_must_beat_the_same_806_distractors",
+    "threshold_source": "semantic_neutral_point_not_fitted"
+  },
+  "graph_calibration_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_execution_authority_20260807.json",
+    "sha256": "07d607e34033ace02ad104663d26813c5f7fb7950b9385df4001336be2e14152"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/audit_source_only_absolute_raw_unary_fix6.py",
+    "sha256": "f220e003fe103b045da751a15a91102a60365018111b1cb3ff2ed409f717da00"
+  },
+  "promotion_gate": {
+    "every_validation_scene_confirmed_anchor_coverage": "at_least_FIX5_retained_reach",
+    "failure_action": "reject_FIX6_keep_target_unopened",
+    "minimum_every_validation_scene_graph_Wilson95_lower": 0.95,
+    "minimum_every_validation_scene_unary_Wilson95_lower": 0.95,
+    "validation_pooled_signed_absolute_utility": "strictly_greater_than_zero"
+  },
+  "schema": "radio_gs.source_only_absolute_raw_unary_fix6_execution_authority.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "benchmark_queries_opened": false,
+    "canonical_generic_negative_bank_opened": true,
+    "generic_target_blind_806_query_bank_opened": true,
+    "per_scene_hyperparameters": false,
+    "source_aggregate_prototypes_opened": true,
+    "source_instance_labels_opened": true,
+    "source_official_multiview_teacher_opened": true,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  },
+  "source_v21b_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21b_exact4x2_execution_authority_20260807.json",
+    "sha256": "5d26c32d7fb6ff95ddf92369601949bbc66bd133dad005bc6041036c22c971a6"
+  },
+  "status": "authorized_source_only_absolute_raw_unary_FIX6"
+}

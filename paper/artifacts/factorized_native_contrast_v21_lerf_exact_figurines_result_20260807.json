@@ -1,0 +1,78 @@
+{
+  "artifact": "factorized_native_contrast_v21_lerf_exact_figurines_result",
+  "schema_version": 1,
+  "status": "exact_region_absolute_relevance_materialized_without_metric_access",
+  "scene_id": "figurines",
+  "hard_gate": {
+    "name": "source_student_envelope_health_v4",
+    "status": "pass",
+    "checks_passed": 5,
+    "checks_total": 5,
+    "query_authority_eligible": true,
+    "record": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_contrast_v21_target_descriptor/figurines/descriptor.health_audit.v4.json",
+      "sha256": "8855cb4f6ab33faa0ca3ef9105b478f8ef6b9b0b85f342e7380c8a8e8bc709b5"
+    }
+  },
+  "diagnostic_gates": {
+    "accepted_relative_health_v2": "reject_more_collapsed_than_accepted",
+    "source_teacher_envelope_health_v3": "reject_outside_source_teacher_envelope",
+    "v3_failed_check": "centered_gram_effective_rank_3p1740_below_teacher_envelope_6p0966",
+    "interpretation": "v2_and_v3_are_immutable_diagnostics_not_query_hard_gates"
+  },
+  "query_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_contrast_v21_lerf_exact/figurines/query_execution_authority.json",
+    "sha256": "906331afc616a69db7000d733a3878664918745793ab99ddf7467182c1075c0b"
+  },
+  "region_absolute_relevance": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_contrast_v21_lerf_exact/figurines/region_absolute_relevance.pt",
+    "sha256": "c0649481d5e1594047ed1c8c38ccc1c40da81ecb5f6c40465e54d33c6d5d5a8d",
+    "tensor_sha256": "51e9a0b20414ad2a3f66bebcefe034ef5ec5b6ef56c0dd5956ba952f5fdcf606",
+    "shape": [4096, 21],
+    "dtype": "float32",
+    "formula": "sigmoid(10*(positive_cosine-max_four_canonical_negative_cosines))",
+    "global_minimum": 0.1579858511686325,
+    "global_maximum": 0.5395482182502747,
+    "queries_with_any_region_gt_0p5": 2,
+    "queries_total": 21
+  },
+  "per_query_response": [
+    {"query_id": "bag", "maximum": 0.45602479577064514, "regions_gt_0p5": 0},
+    {"query_id": "green apple", "maximum": 0.4071846604347229, "regions_gt_0p5": 0},
+    {"query_id": "green toy chair", "maximum": 0.5395482182502747, "regions_gt_0p5": 70},
+    {"query_id": "jake", "maximum": 0.505984365940094, "regions_gt_0p5": 3},
+    {"query_id": "miffy", "maximum": 0.4226858913898468, "regions_gt_0p5": 0},
+    {"query_id": "old camera", "maximum": 0.48879942297935486, "regions_gt_0p5": 0},
+    {"query_id": "pikachu", "maximum": 0.42716264724731445, "regions_gt_0p5": 0},
+    {"query_id": "pink ice cream", "maximum": 0.4250485301017761, "regions_gt_0p5": 0},
+    {"query_id": "pirate hat", "maximum": 0.4086214005947113, "regions_gt_0p5": 0},
+    {"query_id": "porcelain hand", "maximum": 0.48444077372550964, "regions_gt_0p5": 0},
+    {"query_id": "pumpkin", "maximum": 0.3961712121963501, "regions_gt_0p5": 0},
+    {"query_id": "red apple", "maximum": 0.4026399850845337, "regions_gt_0p5": 0},
+    {"query_id": "red toy chair", "maximum": 0.47838273644447327, "regions_gt_0p5": 0},
+    {"query_id": "rubber duck with buoy", "maximum": 0.3526291251182556, "regions_gt_0p5": 0},
+    {"query_id": "rubber duck with hat", "maximum": 0.33959439396858215, "regions_gt_0p5": 0},
+    {"query_id": "rubics cube", "maximum": 0.47533056139945984, "regions_gt_0p5": 0},
+    {"query_id": "spatula", "maximum": 0.45454585552215576, "regions_gt_0p5": 0},
+    {"query_id": "tesla door handle", "maximum": 0.4825502634048462, "regions_gt_0p5": 0},
+    {"query_id": "toy cat statue", "maximum": 0.43069204688072205, "regions_gt_0p5": 0},
+    {"query_id": "toy elephant", "maximum": 0.4310765862464905, "regions_gt_0p5": 0},
+    {"query_id": "waldo", "maximum": 0.47066667675971985, "regions_gt_0p5": 0}
+  ],
+  "conclusion": {
+    "health": "target_descriptor_is_not_outside_the_preregistered_source_student_dispersion_envelope",
+    "query_response": "absolute_calibration_is_too_weak_for_19_of_21_exact_queries_at_the_model_defined_0p5_boundary",
+    "primary_remaining_bottleneck": "contrast_v21_descriptor_to_text_absolute_margin_not_region_graph_or_scene_threshold",
+    "threshold_sweep_performed": false,
+    "scene_specific_parameters_used": false
+  },
+  "access_audit": {
+    "exact_query_manifest_opened_after_health_v4_pass": true,
+    "positive_all_query_and_negative_text_banks_opened_after_health_v4_pass": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false
+  }
+}

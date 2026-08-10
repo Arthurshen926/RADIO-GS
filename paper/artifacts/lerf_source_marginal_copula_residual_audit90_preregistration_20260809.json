@@ -1,0 +1,70 @@
+{
+  "schema": "radio_gs.lerf_source_marginal_copula_grid_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_source_only_before_execution",
+  "scientific_question": "Does the single dev101-selected b40_s05 marginal-preserving copula residual reproduce its response and topology gains on the disjoint reserved audit90 generic-query bank?",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_source_marginal_copula_residual_grid.py",
+    "sha256": "e87e8aa3fef8af20af875963822f9fe23bac41542f81e9a7065859e380230968"
+  },
+  "interface_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_marginal_preserving_copula_residual.py",
+    "sha256": "f2cff65b32bacb3adc14b71a12fa2e2f2534d7a7216fda0c12e4c9c94d449347"
+  },
+  "interface_contract": "lerf-accepted-marginal-bounded-copula-residual-v1",
+  "split": "audit",
+  "policies": [
+    {"policy_id": "b40_s05", "strength": 0.5, "maximum_rank_fraction": 0.4}
+  ],
+  "source_authorities": {
+    "ramen": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_audit90_confirmation_gpu0_authority_20260809.json",
+      "sha256": "cfac6b71b84f454fca93a0bf3934fc2afb2e95a6d6ace2325e9ce82183736024"
+    },
+    "teatime": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_audit90_confirmation_gpu1_authority_20260809.json",
+      "sha256": "552ce51cac668796adf43fb92dbd6bbcec2e05b4a600b08d070a95824f319cce"
+    }
+  },
+  "candidate_lock": {
+    "development_selection": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_marginal_copula_dev101_v2/selection/result.json",
+      "sha256": "20d9a9ac6cc1de7d3e267a0e5b5fe4fabe0b9f23bce6717558c174a08e6f03df"
+    },
+    "dev_audit_disjointness_proof": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+      "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf"
+    },
+    "candidate_selected_before_audit_embedding_open": true,
+    "one_shot_reserved_confirmation": true
+  },
+  "decision_rule": {
+    "one_global_policy": true,
+    "eligibility": [
+      "strict pooled response MAE improvement",
+      "strict pooled ranking Spearman improvement",
+      "strict pooled top-decile overlap improvement",
+      "every audit scene nonregression on all six frozen response metrics",
+      "every audit scene top-decile boundary-F nonregression",
+      "every audit scene top-decile component-count absolute-error nonregression",
+      "exact accepted empirical marginal on every frame and query",
+      "zero selected-count error on every generic-query top-decile support"
+    ],
+    "fallback": "unchanged accepted O2",
+    "per_scene_or_per_query_tuning": false,
+    "additional_audit_candidate_after_failure": false
+  },
+  "application_boundary": {
+    "required_target_location": "after the complete frozen canonical-negative plus valid-domain-KNN10 plus per-scale-minmax compiler",
+    "formal_score_shape": "[primitive,query]",
+    "accepted_valid_domain_is_authoritative": true,
+    "missing_candidate_rows": "fill accepted score and set reliability zero fixed-rank barrier",
+    "candidate_valid_intersection_as_output_domain": false,
+    "selected_count_preserved_at_every_fixed_threshold": true
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

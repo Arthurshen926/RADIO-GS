@@ -1,0 +1,212 @@
+{
+  "schema": "radio_gs.lerf_o1_native_v3_scale_aware_one_shot_result.v1",
+  "schema_version": 1,
+  "status": "complete_single_scene_positive_candidate_not_yet_promoted",
+  "scene_id": "figurines",
+  "method": {
+    "name": "O1/native-V3 scale-aware continuous support fusion",
+    "first_principle": "preserve the complete strong continuous text unary and use source-promoted object relations only as bounded positive support",
+    "contract_sha256": "0327429dfde0d5629176ecf23f1a8632a0415c28ddce3014cb70fe33e9f05d10",
+    "constants": {
+      "semantic_boundary": 0.6,
+      "native_v3_relation_threshold": 0.85,
+      "maximum_regions": 8,
+      "path_method": "widest_path",
+      "canonical_negative_logit_scale": 10.0,
+      "knn_k": 10
+    },
+    "invariants": {
+      "query_names_do_not_enter_the_fusion": true,
+      "benchmark_labels_images_masks_or_metrics_used_to_construct_candidate": false,
+      "scene_specific_parameters": false,
+      "primitive_unary_never_decreases": true,
+      "failed_gate_or_isolated_seed_is_exact_O1": true,
+      "seed_region_is_not_binary_filled": true,
+      "relation_support_is_bounded": true,
+      "each_supported_region_retains_its_registered_scale_unary": true
+    }
+  },
+  "implementation": {
+    "fusion": {
+      "path": "/root/RADIO-GS/radio_gs/querying/scale_aware_native_v3_support_fusion.py",
+      "sha256": "28b0fea351c7ec952f06772b798b31a2ed4e191cefb2f2fd66ca10b40051d562"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_native_v3_scale_aware_fusion.py",
+      "sha256": "3e88f086ac5c88d213bb6377ffd293379ea382e19e8b5c3af61fc6f639958ae3"
+    },
+    "fusion_test": {
+      "path": "/root/RADIO-GS/tests/test_scale_aware_native_v3_support_fusion.py",
+      "sha256": "bfb2892c62d812f86e89ece86de96a1465306f7ea9b2f39432e37c793ea6e83b"
+    },
+    "materializer_test": {
+      "path": "/root/RADIO-GS/tests/test_materialize_lerf_o1_native_v3_scale_aware_fusion.py",
+      "sha256": "496b919fdfa04b365236d3c5ac4efadac4d110775152d4673d88fa1cdb2b04fb"
+    }
+  },
+  "authorities": {
+    "premetric": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_scale_aware_figurines_development_execution_authority_20260807.json",
+      "sha256": "e4c421d8020c2d7a2b760cde881ff9dcf0cc79a4408156a247d66df4033e3d30"
+    },
+    "metric": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_scale_aware_figurines_one_shot_metric_execution_authority_20260807.json",
+      "sha256": "5f57d45a5e790d16ab7b9e3c616116cfa0a04edb69de40a3cfb932e0cfe9570d"
+    }
+  },
+  "sealed_candidate": {
+    "external_query_scores": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/figurines/external_query_scores.pt",
+      "sha256": "dd8e0e41227c671d904bbb559fa081f6b2a3374a63e28d0e4d32861dfb64509a"
+    },
+    "premetric_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/figurines/premetric_report.json",
+      "sha256": "6149a38a2deceb50c8dd5e812d2076a2f2bbdaa3c4b9f8d8f46f300e0b565cca"
+    },
+    "premetric": {
+      "valid_primitive_count": 82603,
+      "query_count": 21,
+      "changed_primitive_query_cells": 4088,
+      "decreased_primitive_query_cells": 0,
+      "base_threshold_support": 17667,
+      "candidate_threshold_support": 18219,
+      "new_threshold_crossings": 552,
+      "relative_threshold_support_increase": 0.031244693496349127,
+      "queries_exactly_O1": 9,
+      "queries_with_passed_seed_gate": 19
+    }
+  },
+  "frozen_evaluation": {
+    "control_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o1_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "8372e7aa5567d5ec72a1cb40cf5079876d0773d24db0096b5a83ce371cd33bd2"
+    },
+    "candidate_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/evaluation/figurines_one_shot/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "d6639b18afc11a20ac3d2bf30e1a4f6f706419ba6c3d6277217607c81f89bef3"
+    },
+    "comparable_readout": {
+      "control_preset_label": "vala_repo_3d",
+      "candidate_preset_label": "vala_paper_3d",
+      "reason_for_label_difference": "the candidate external cache already contains the exact frozen O1 logit10, kNN10, per-scale VALA min-max plus 2x-1 clip and raw-smoothed-peak scale gather, so score_postprocess is none to prevent a second transformation",
+      "materializer_gather_matches_frozen_evaluator_bitwise": true,
+      "selection_mode": "score_threshold",
+      "score_threshold": 0.6,
+      "projection_mode": "selected_only_alpha",
+      "silhouette_threshold": 0.0392156862745098,
+      "alpha_binarization": "png_uint8_gt10",
+      "mask_refinement": "none",
+      "official_frames_only": true,
+      "frozen_evaluator_metric_renderer_modified": false
+    },
+    "sample_count": 56,
+    "control": {
+      "miou": 0.5215655565261841,
+      "acc025": 0.8571428571428571,
+      "acc050": 0.625,
+      "boundary_f": 0.7443976402282715,
+      "trimap_iou": 0.38612276315689087
+    },
+    "candidate": {
+      "miou": 0.5240988731384277,
+      "acc025": 0.8571428571428571,
+      "acc050": 0.625,
+      "boundary_f": 0.7438547015190125,
+      "trimap_iou": 0.39135631918907166
+    },
+    "delta": {
+      "miou": 0.0025333166122436523,
+      "miou_points": 0.25333166122436523,
+      "acc025": 0.0,
+      "acc050": 0.0,
+      "boundary_f": -0.0005429387092590332,
+      "trimap_iou": 0.005233556032180786
+    },
+    "paired_query_frame_analysis": {
+      "alignment_key": [
+        "frame_id",
+        "category"
+      ],
+      "sample_count": 56,
+      "bootstrap": {
+        "resamples": 20000,
+        "seed": 20260807,
+        "unit": "paired_query_frame_sample",
+        "interpretation": "descriptive within one scene; not evidence of cross-scene generalization"
+      },
+      "miou": {
+        "mean_delta_from_details": 0.00253327363950683,
+        "median_delta": 0.0,
+        "improved": 15,
+        "regressed": 8,
+        "unchanged": 33,
+        "bootstrap_95_percent_interval": [
+          -0.0023167620885282377,
+          0.00768576214180129
+        ]
+      },
+      "boundary_f": {
+        "mean_delta_from_details": -0.0005428829501081283,
+        "median_delta": 0.0,
+        "improved": 12,
+        "regressed": 6,
+        "unchanged": 38,
+        "bootstrap_95_percent_interval": [
+          -0.003515505072031628,
+          0.002137769192898796
+        ]
+      },
+      "trimap_iou": {
+        "mean_delta_from_details": 0.005233563887323828,
+        "median_delta": 0.0,
+        "improved": 15,
+        "regressed": 2,
+        "unchanged": 39,
+        "bootstrap_95_percent_interval": [
+          0.0020191830537902343,
+          0.009424520998160393
+        ]
+      }
+    },
+    "changed_category_mean_miou_deltas": {
+      "pumpkin": 0.03289089004761725,
+      "green apple": 0.029496272367017184,
+      "toy cat statue": 0.027790310631143473,
+      "rubber duck with hat": 0.005957392903360045,
+      "jake": 0.0009589748276577122,
+      "toy elephant": 0.0007347642351614447,
+      "red apple": -0.015116572552034024,
+      "miffy": -0.03797232937126476
+    }
+  },
+  "gpu_safety": {
+    "physical_gpu": 1,
+    "power_limit_w": 300,
+    "wall_time_seconds": 14.32,
+    "start_temperature_c": 41,
+    "end_and_peak_sample_temperature_c": 50,
+    "peak_sample_power_w": 124.74,
+    "postexit_owner_clear": true,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/gpu1_telemetry.csv",
+      "sha256": "ce0db813b37fa665635158d32f71d09b5281815cfb4eae49b09260f434efa3eb"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/gpu1_owner_audit.csv",
+      "sha256": "6710607c13788aa0ed9d6eb3b17a500f21220d832a30f5746718e1b9611d2bac"
+    }
+  },
+  "decision": {
+    "accepted_as_positive_candidate": true,
+    "promoted_as_default_method": false,
+    "claim": "This is the first sealed positive Figurines result from bounded multi-region support on top of the strong O1 unary. It supports the diagnosis that relations can recover missing object support only when they complement rather than replace a calibrated continuous unary.",
+    "limitations": [
+      "the absolute mIoU gain is small",
+      "the paired mIoU bootstrap interval crosses zero",
+      "miffy and red apple regress",
+      "only one scene has a complete native-V3 target artifact"
+    ],
+    "minimum_next_experiment": "materialize the same native-V3 target artifact for one independent LERF scene and run this exact contract and constants once; do not tune threshold, K, path method, or category-specific gates on Figurines",
+    "promotion_rule": "require nonnegative mIoU on the independent scene and no material aggregate boundary degradation before broader LERF evaluation"
+  }
+}

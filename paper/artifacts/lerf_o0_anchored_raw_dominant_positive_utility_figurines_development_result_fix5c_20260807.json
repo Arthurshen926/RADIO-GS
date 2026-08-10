@@ -1,0 +1,122 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_raw_dominant_positive_utility_development_result_fix5c.v1",
+  "schema_version": 1,
+  "status": "single_candidate_development_confirmation_complete_actual_improvement",
+  "scene": "figurines",
+  "claim_scope": "development_confirmation_not_independent_promotion_evidence",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_figurines_development_preregistration_fix5c_20260807.json",
+    "sha256": "f63f1a03cf113c551b22266810abddc9d5135e3e96d27c7a89590ba3ffe4ec90"
+  },
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_figurines_development_metric_execution_authority_fix5c_20260807.json",
+    "sha256": "ce816ba7b037cd7e0fab9886faea3a67d3e37f3344913f1b43c2457261f293a6"
+  },
+  "candidate_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.pt",
+    "sha256": "f2327395440ff4104f4ef108a7f5b0d59d1650d1cb03cd43410f4d4d83709f2e"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/evaluation/figurines_raw_dominant_fix5c_development/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "e1b232072399ce26cb8504810226f646c91d97096413c63077c9d661c803ed6d"
+  },
+  "protocol": {
+    "preset": "vala_paper_3d",
+    "selection_threshold": 0.6,
+    "score_postprocess": "none",
+    "projection": "selected_only_alpha",
+    "mask_refinement": "none",
+    "object_count": 56,
+    "category_count": 21
+  },
+  "primary_metric": {
+    "name": "exact_macro_mIoU",
+    "frozen_O0": 0.4753887355327606,
+    "FIX4C": 0.47654908895492554,
+    "FIX5C": 0.47752127051353455,
+    "absolute_delta_vs_O0": 0.0021325349807739258,
+    "relative_delta_percent_vs_O0": 0.4485876129109428,
+    "absolute_delta_vs_FIX4C": 0.0009721815586090088,
+    "relative_delta_percent_vs_FIX4C": 0.20400449421506767
+  },
+  "development_prediction_audit": {
+    "predicted_mIoU": 0.4775213120239122,
+    "actual_mIoU": 0.47752127051353455,
+    "actual_minus_prediction": -4.151037763522325e-08,
+    "interpretation": "matches_the_pre_metric_structural_prediction_up_to_float_render_reduction"
+  },
+  "secondary_metrics": {
+    "acc_at_0.25": 0.8035714285714286,
+    "delta_acc_at_0.25_vs_O0": 0.0,
+    "delta_acc_at_0.25_vs_FIX4C": 0.017857142857142905,
+    "acc_at_0.50": 0.5357142857142857,
+    "boundary_f": 0.6830888390541077,
+    "delta_boundary_f_vs_O0": 0.0010814666748046875,
+    "delta_boundary_f_vs_FIX4C": 0.0006524920463562012,
+    "trimap_iou": 0.38206419348716736,
+    "delta_trimap_iou_vs_O0": 0.0012272298336029053,
+    "delta_trimap_iou_vs_FIX4C": 0.0
+  },
+  "query_effects": {
+    "kept_FIX4C_positive_updates": {
+      "green apple": {
+        "O0_mIoU": 0.5775737166404724,
+        "FIX5C_mIoU": 0.6033286452293396,
+        "delta_vs_O0": 0.025754928588867188,
+        "selected_region_count": 2,
+        "strictly_changed_primitive_count": 303
+      },
+      "pumpkin": {
+        "O0_mIoU": 0.8319082856178284,
+        "FIX5C_mIoU": 0.8483128547668457,
+        "delta_vs_O0": 0.016404569149017334,
+        "selected_region_count": 1,
+        "strictly_changed_primitive_count": 249
+      }
+    },
+    "reverted_FIX4C_negative_updates_to_exact_O0": {
+      "red apple": {
+        "FIX4C_mIoU": 0.47143062949180603,
+        "FIX5C_mIoU": 0.47470521926879883,
+        "recovery_vs_FIX4C": 0.003274589776992798
+      },
+      "red toy chair": {
+        "FIX4C_mIoU": 0.4374190866947174,
+        "FIX5C_mIoU": 0.4404141306877136,
+        "recovery_vs_FIX4C": 0.002995043992996216
+      },
+      "rubber duck with buoy": {
+        "FIX4C_mIoU": 0.5134773254394531,
+        "FIX5C_mIoU": 0.5273529291152954,
+        "recovery_vs_FIX4C": 0.013875603675842285
+      }
+    },
+    "bag": "reverted_to_exact_O0_because_no_raw_specific_candidate_region"
+  },
+  "method_conclusion": {
+    "actual_method_improvement_observed": true,
+    "first_principles_change": "query_agnostic_graph_support_is_now_conditioned_on_shared_scale_raw_canonical_unary_dominance_at_both_anchor_and_candidate_regions",
+    "why_it_helped": "the_graph_can_complete_extent_but_cannot_identify_which_related_text_query_owns_a_region;_raw_unary_dominance_supplies_that_missing_semantic_identity",
+    "per_scene_parameter_tuning": false,
+    "target_metric_used_by_gate": false,
+    "remaining_limit": "gain_is_still_small_and_Figurines_was_used_for_FIX4C_failure_diagnosis_so_Teatime_and_Ramen_are_required_for_independent_confirmation"
+  },
+  "gpu0_telemetry": {
+    "thermal_log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/raw_dominant_fix5c_development_gpu0_thermal.csv",
+      "sha256": "1bd35f0b6d5e3f6621e2c0e97e76b5c86f5521cb31685e1fc6cc99f84fdccbd0"
+    },
+    "owner_log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/raw_dominant_fix5c_development_gpu0_owners.csv",
+      "sha256": "e1724feab00ef3e922dc5e9e8c060764ebb00ff1a5ec53e59472b2da0e3f0eff"
+    },
+    "sample_count": 3,
+    "temperature_c_min": 49.0,
+    "temperature_c_max": 55.0,
+    "power_w_max": 124.99,
+    "hard_stop_triggered": false,
+    "postexit_cuda_owner_clear": true
+  },
+  "single_candidate_no_sweep_respected": true,
+  "independent_confirmation_pending": ["teatime", "ramen"]
+}

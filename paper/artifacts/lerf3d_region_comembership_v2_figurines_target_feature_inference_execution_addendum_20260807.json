@@ -1,0 +1,54 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_target_feature_inference_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:04:00+08:00",
+  "status": "sealed_after_target_execution_authority_success_before_target_feature_and_inference_execution",
+  "target_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_v2_target_execution_authority.json",
+    "sha256": "5570dc7cc7add19eae4774bc0276345ee3cf993f2a1ebb90fa394961ce5590c9"
+  },
+  "source_promoted_checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_checkpoint.pt",
+    "sha256": "8b108930fd4c187f1eee1ec36076c0b0964a331ba1c4b4ba3bdf343bb634d04e"
+  },
+  "implementations": {
+    "feature_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_region_comembership_features_v2.py",
+      "sha256": "31f0896e8f3cea44be3a56c902e9bfc6e71b5ae5fc576cdaf2a78105b2d8231c"
+    },
+    "inference": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/infer_region_comembership_v2.py",
+      "sha256": "198ffdb548ec162a875a268193f80f7ca9772dfcbcddfcf06d864c1d30658bc2"
+    }
+  },
+  "verification_before_execution": {
+    "tests": [
+      "tests/test_materialize_region_comembership_features_v2.py",
+      "tests/test_infer_region_comembership_v2.py"
+    ],
+    "passed": 11,
+    "failed": 0
+  },
+  "frozen_contract": {
+    "domain": "target",
+    "scene_id": "figurines",
+    "source_selected_epoch": 100,
+    "source_selected_method": "dual_path_widest",
+    "source_selected_maximum_regions": 8,
+    "source_selected_threshold": 0.9,
+    "query_or_label_usage": false,
+    "target_metric_authorized": false,
+    "per_scene_hyperparameters": false
+  },
+  "outputs": {
+    "feature": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_features_v2.pt",
+    "inference": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_inference_v2.pt"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

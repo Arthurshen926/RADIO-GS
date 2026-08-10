@@ -1,0 +1,111 @@
+{
+  "schema": "radio_gs.lerf_scale_equivariant_transport_category_analysis_and_v2_design.v1",
+  "schema_version": 1,
+  "status": "complete_negative_branch_analysis_and_source_only_next_design",
+  "source_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_exact_result_20260807.json",
+    "sha256": "9eca56e8f4609c32500d747f46661c7f3c2869d03f4cda7cc3a53a5098bb76b8"
+  },
+  "paired_frame_query_summary": {
+    "transport_minus_O1_miou_ci95": [-0.031748170642646116, 0.05363296559154142],
+    "transport_minus_O2_miou_ci95": [-0.049525206431588864, -0.0013270552545257518],
+    "transport_minus_reliability_v1_miou_ci95": [-0.04981952429218402, -0.001617003810017478],
+    "interpretation": "The apparent +1.04 point mean over O1 is uncertain, while the losses against O2 and reliability-v1 are paired and directionally credible."
+  },
+  "per_category_miou_delta": {
+    "transport_minus_O1": {
+      "apple": 0.21875154972076416,
+      "bag of cookies": -0.19348716735839844,
+      "bear nose": -0.017639607191085815,
+      "coffee": 0.23107297718524933,
+      "coffee mug": -0.24342080950737,
+      "dall-e brand": 0.08388343453407288,
+      "hooves": -0.01864941418170929,
+      "paper napkin": 0.08704060316085815,
+      "plate": 0.0692930817604065,
+      "sheep": -0.1495872139930725,
+      "stuffed bear": 0.0974995493888855,
+      "tea in a glass": 0.010970592498779297,
+      "three cookies": -0.06462758779525757,
+      "yellow pouf": 0.2851446866989136
+    },
+    "transport_minus_O2": {
+      "apple": 0.0,
+      "bag of cookies": -0.000019997358322143555,
+      "bear nose": -0.006202191114425659,
+      "coffee": -0.27699485421180725,
+      "coffee mug": -0.0000896453857421875,
+      "dall-e brand": 0.0,
+      "hooves": -0.03657485544681549,
+      "paper napkin": -0.0004062056541442871,
+      "plate": 0.0016481876373291016,
+      "sheep": -0.00472867488861084,
+      "stuffed bear": -0.0032327771186828613,
+      "tea in a glass": -0.0003751516342163086,
+      "three cookies": -0.00022044777870178223,
+      "yellow pouf": 0.0
+    },
+    "transport_minus_reliability_v1": {
+      "apple": 0.0,
+      "bag of cookies": -0.000025063753128051758,
+      "bear nose": -0.006202191114425659,
+      "coffee": -0.2770150601863861,
+      "coffee mug": -0.0000896453857421875,
+      "dall-e brand": 0.0,
+      "hooves": -0.03659220039844513,
+      "paper napkin": -0.0004628300666809082,
+      "plate": 0.0008072853088378906,
+      "sheep": -0.006395518779754639,
+      "stuffed bear": -0.004374206066131592,
+      "tea in a glass": -0.0003751516342163086,
+      "three cookies": 0.0,
+      "yellow pouf": 0.0
+    }
+  },
+  "category_diagnosis": {
+    "dominant_regression_vs_O2": "coffee loses 0.2770 category mIoU and explains most of the aggregate gap; hooves is the next material loss at 0.0366.",
+    "near_O2_categories": "Nine categories are exactly equal or within 0.0017 mIoU of O2.",
+    "mixed_vs_O1": "Large O1 gains on apple, coffee, and yellow pouf coexist with large losses on bag of cookies, coffee mug, and sheep.",
+    "implication": "The rigid map is not uniformly weak. It preserves or reproduces the O2 solution for many categories but cannot selectively attenuate the harmful scale residual responsible for a small set of high-impact failures."
+  },
+  "method_judgement": {
+    "label": "directionally_valid_but_not_champion",
+    "reason": "A common orthogonal map is the correct way to avoid artificial scale-Gram collapse, but requiring gamma=1 preserves every scale residual, including unreliable residuals. Pure Gram preservation is therefore too strong as the final capability constraint."
+  },
+  "next_version": {
+    "name": "source_validated_common_transport_with_scale_residual_shrinkage",
+    "decomposition": [
+      "mu=mean_s(x_s)",
+      "delta_s=x_s-mu",
+      "mu_prime=R_phi(mu)",
+      "delta_prime_s=R_phi(delta_s)",
+      "z_s=mu_prime+gamma*delta_prime_s",
+      "y_s=normalize(z_s) only for the cosine readout"
+    ],
+    "endpoint_interpretation": {
+      "gamma_1": "the tested Gram-preserving common rotation",
+      "gamma_0": "a rank-one common field preserving teacher-driven coverage",
+      "intermediate_gamma": "retain only source-supported scale specificity"
+    },
+    "allowed_gamma_inputs": [
+      "source-view directional resultant",
+      "retained-view count sufficiency",
+      "query-free O0 scale dispersion sqrt(mean_s(||x_s-mu||^2))"
+    ],
+    "candidate_parameterization": "a monotone gamma=g(reliability,scale_dispersion) learned or selected only from held-out source views",
+    "source_validation_requirements": [
+      "pooled held-out source-view cosine improvement",
+      "every source scene nonregression",
+      "no regression of a predeclared lower-tail held-out cosine statistic",
+      "one global function shared by all scenes and queries",
+      "freeze before any new target metric"
+    ],
+    "forbidden": [
+      "choosing gamma from Teatime categories or metrics",
+      "per-scene gamma",
+      "per-query gamma",
+      "using the old independent-scale selector as formal authorization"
+    ]
+  },
+  "execution_decision": "Do not run Ramen or full source LOO for v1. Implement and source-validate residual shrinkage v2 first."
+}

@@ -1,0 +1,149 @@
+{
+  "accepted_rows": 334250,
+  "elapsed_seconds": 407.1074706870131,
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+    "sha256": "cad8230bc67547004f989b285a63b6f13942df7fcc6699317f91db9a598e924a"
+  },
+  "materialization_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o1_o2_streaming_result.json",
+    "sha256": "7cb249ad6beb5dc66e377bf8993b21be2e640cbbfd5a01f975dcd2f2860ea41b"
+  },
+  "materializer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+    "sha256": "7c7a2096bb927ae5b6aef99349e4dd66a62782df9f87c290e47ec13f098484a7"
+  },
+  "method_contract_sha256": "78e4d78293a863ba962440cccfdc5b62dd0b4c9b14e941722df63b708c44cba0",
+  "next_gate": "independent_cross_scene_source_only_ceiling_selector",
+  "outputs": {
+    "o1_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o1_negative.pt",
+      "sha256": "d18e1461895f481990eb8edc4fbffc8ea0cd0affdef9dd5c1efea3748c4a384a"
+    },
+    "o1_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o1_positive.pt",
+      "sha256": "d82266d97ea78d0808c06a80449320f3d58c9051625a0016fe20bd2cde067e3a"
+    },
+    "o2_negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o2_negative.pt",
+      "sha256": "a4d15cf7b6f7436eaec35f49c56601776861cf8e8f0597efeaf1d081d5662c38"
+    },
+    "o2_positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o2_positive.pt",
+      "sha256": "6faf7a9a88aa5c45bc66a5e52d0279ef59523c2428a12082c4e43d80addccdd6"
+    },
+    "teacher_mean": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+      "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+    }
+  },
+  "preflight_peak_cuda_bytes": 7596760064,
+  "result_materialization_complete": true,
+  "rows_with_teacher": 334161,
+  "rows_without_teacher_bitwise_o0_fallback": 89,
+  "scene_id": "teatime",
+  "schema": "radio_gs.lerf_teacher_agreement_v2_source_summary.v1",
+  "schema_version": 1,
+  "score_materialization_complete": true,
+  "selected_projection_batch": 128,
+  "source_only_leave_one_view_out_ceiling_audit": {
+    "candidate_baseline_maximum_angle_radians": 0.15,
+    "candidate_role": "source_only_diagnostic_not_target_authorization",
+    "candidates": [
+      {
+        "cosine_sum": 3452944.1942739785,
+        "delta_cosine_sum_vs_o1_0p15": 0.0,
+        "heldout_scale_observations": 3949041,
+        "maximum_angle_radians": 0.15,
+        "mean_cosine": 0.8743753722166923,
+        "mean_delta_cosine_vs_o1_0p15": 0.0,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 3508059.64416191,
+        "delta_cosine_sum_vs_o1_0p15": 55115.44988793135,
+        "heldout_scale_observations": 3949041,
+        "maximum_angle_radians": 0.3,
+        "mean_cosine": 0.8883320391360611,
+        "mean_delta_cosine_vs_o1_0p15": 0.013956666919368867,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 3524569.7096930444,
+        "delta_cosine_sum_vs_o1_0p15": 71625.51541906595,
+        "heldout_scale_observations": 3949041,
+        "maximum_angle_radians": 0.45,
+        "mean_cosine": 0.8925128175911682,
+        "mean_delta_cosine_vs_o1_0p15": 0.01813744537447597,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 3522225.8316352665,
+        "delta_cosine_sum_vs_o1_0p15": 69281.63736128807,
+        "heldout_scale_observations": 3949041,
+        "maximum_angle_radians": 0.6,
+        "mean_cosine": 0.8919192866407988,
+        "mean_delta_cosine_vs_o1_0p15": 0.01754391442410653,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 3517248.8467285037,
+        "delta_cosine_sum_vs_o1_0p15": 64304.65245452523,
+        "heldout_scale_observations": 3949041,
+        "maximum_angle_radians": 0.75,
+        "mean_cosine": 0.8906589844796505,
+        "mean_delta_cosine_vs_o1_0p15": 0.01628361226295833,
+        "scene_nonregression_vs_o1_0p15": true
+      }
+    ],
+    "cross_scene_gate": {
+      "every_source_scene_nonregression_required": true,
+      "one_global_ceiling_required": true,
+      "pooled_improvement_required": true,
+      "pooled_statistic": "sum(delta_cosine_sum_vs_o1_0p15)/sum(heldout_scale_observations)",
+      "preregister_before_target_metric": true
+    },
+    "heldout_predictions": 1316347,
+    "heldout_scale_observations": 3949041,
+    "loo_direction_mean_angular_error_radians": 0.45095287524824723,
+    "loo_direction_mean_cosine": 0.8901355221529329,
+    "query_independent": true,
+    "retained_view_capacity": 4,
+    "rows": 334250,
+    "rows_with_expansion_evidence": 328332,
+    "rows_with_valid_loo_prediction": 331956,
+    "schema": "radio_gs.source_only_loo_reliability_ceiling_audit.v1",
+    "schema_version": 1,
+    "target_candidate_authorized": false,
+    "target_images_labels_masks_metrics_opened": false
+  },
+  "source_only_leave_one_view_out_ceiling_audit_sha256": "e0ea58bb6a269220d864bb571494e556dfc7473abf34f1c72be425557ddad017",
+  "source_summary_scientifically_complete": true,
+  "status": "complete_source_only_premetric_teacher_agreement_v2_lowmem",
+  "target_candidate_authorized": false,
+  "target_images_labels_masks_metrics_opened": false,
+  "teacher_mean_sha256": "62eed613464bc1ba2b38a7cfb1f4f8871dc4a3f52db8ccea8df78fd204e05c97",
+  "teacher_view_directional_resultant_sha256": "96ba2dc620b11eb02b086838c14d98f66326122ed0ea7159766687ba33cdbf6e",
+  "thermal_execution": {
+    "cuda_visible_devices": "0",
+    "guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    },
+    "maximum_temperature_c": 88,
+    "owner_audit": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_gpu0_owner_audit_20260807.csv",
+      "sha256": "f1198bd1d1b32fb3e61d716bbe7eb356cf35c3a97571bbe461730b750a4f7fdb"
+    },
+    "owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "physical_gpu": 0,
+    "poll_seconds": 300,
+    "postexit_owner_clear": true,
+    "program_device": "cuda:0",
+    "soft_pause_temperature_c": 0,
+    "telemetry": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_gpu0_telemetry_20260807.csv",
+      "sha256": "bf6307362c54d946a92c43ee44882deb33fe73f886452b11a522e89eb9f8e84f"
+    }
+  }
+}

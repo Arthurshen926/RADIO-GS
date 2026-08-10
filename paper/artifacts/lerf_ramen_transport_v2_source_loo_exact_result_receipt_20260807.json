@@ -1,0 +1,112 @@
+{
+  "schema": "radio_gs.lerf_ramen_transport_v2_source_loo_exact_result_receipt.v1",
+  "schema_version": 1,
+  "status": "complete_source_only_no_target_access",
+  "scene_id": "ramen",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_transport_v2_source_loo_exact_execution_authority_20260807.json",
+    "sha256": "04c7d2620f1f95eb34ec3d8e1335d45e58ac86f0f029504f00c36219378e4f58"
+  },
+  "result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_transport_v2_source_loo_exact/ramen/v1/ramen_transport_v2_source_loo_result.json",
+    "sha256": "6b98a47b093537bb09f8ad2d05651d2a3f4a30b5ebf148005422cf2b02fc2181"
+  },
+  "source_loo_audit_sha256": "1eb6879314fddf1a3d05475eac3dda8c2b532ca3efa60b26d25868b4bf1152be",
+  "recursive_validation": {
+    "status": "pass",
+    "candidate_count": 25,
+    "feature_bundle_and_120_responsibility_sidecars_reopened": true,
+    "transport_v2_hook_capture_validation": "pass",
+    "query_embeddings_or_text_opened": false,
+    "o0_query_score_cache_opened": false,
+    "target_images_labels_masks_metrics_opened": false,
+    "target_metric_executed": false
+  },
+  "coverage": {
+    "accepted_rows": 221608,
+    "rows_with_valid_loo_prediction": 219971,
+    "rows_with_expansion_evidence": 218846,
+    "heldout_predictions": 874300,
+    "heldout_scale_observations": 2622900
+  },
+  "candidate_columns": [
+    "index",
+    "maximum_angle_radians",
+    "gamma_policy",
+    "mean_cosine",
+    "exact_p05_cosine",
+    "mean_delta_vs_baseline",
+    "p05_delta_vs_baseline",
+    "ramen_mean_strict_improvement_and_p05_nonregression"
+  ],
+  "candidate_rows": [
+    [0, 0.15, "rigid", 0.9138033708453592, 0.8155111074447632, 0.0, 0.0, false],
+    [1, 0.15, "k0", 0.9140840414539476, 0.8160991668701172, 0.0002806706085883848, 0.0005880594253540039, true],
+    [2, 0.15, "k0p5", 0.914078482687621, 0.8160799741744995, 0.0002751118422618104, 0.0005688667297363281, true],
+    [3, 0.15, "k1", 0.9140721522344409, 0.8160427212715149, 0.000268781389081707, 0.000531613826751709, true],
+    [4, 0.15, "k2", 0.9140581770291425, 0.8159984946250916, 0.0002548061837832627, 0.00048738718032836914, true],
+    [5, 0.3, "rigid", 0.9240687900267825, 0.8274155855178833, 0.010265419181423319, 0.011904478073120117, true],
+    [6, 0.3, "k0", 0.9243533076150658, 0.827924907207489, 0.010549936769706614, 0.01241379976272583, true],
+    [7, 0.3, "k0p5", 0.9243476565176698, 0.8279165029525757, 0.010544285672310583, 0.0124053955078125, true],
+    [8, 0.3, "k1", 0.9243412210708932, 0.8278950452804565, 0.010537850225533996, 0.01238393783569336, true],
+    [9, 0.3, "k2", 0.9243270182632737, 0.8278670310974121, 0.01052364741791445, 0.012355923652648926, true],
+    [10, 0.45, "rigid", 0.9246687833722977, 0.8247931003570557, 0.010865412526938512, 0.00928199291229248, true],
+    [11, 0.45, "k0", 0.9249537798226587, 0.8252393007278442, 0.011150408977299464, 0.009728193283081055, true],
+    [12, 0.45, "k0p5", 0.9249481063302644, 0.8252232670783997, 0.011144735484905133, 0.009712159633636475, true],
+    [13, 0.45, "k1", 0.9249416460811017, 0.8252106308937073, 0.011138275235742512, 0.009699523448944092, true],
+    [14, 0.45, "k2", 0.9249273922947969, 0.8251900672912598, 0.011124021449437693, 0.009678959846496582, true],
+    [15, 0.6, "rigid", 0.9234877883976426, 0.8166893124580383, 0.009684417552283331, 0.0011782050132751465, true],
+    [16, 0.6, "k0", 0.9237723391495284, 0.817035436630249, 0.009968968304169157, 0.0015243291854858398, true],
+    [17, 0.6, "k0p5", 0.9237666727898074, 0.8170287013053894, 0.009963301944448166, 0.0015175938606262207, true],
+    [18, 0.6, "k1", 0.9237602210542759, 0.8170261383056641, 0.009956850208916679, 0.001515030860900879, true],
+    [19, 0.6, "k2", 0.9237459878707851, 0.8170110583305359, 0.00994261702542587, 0.001499950885772705, true],
+    [20, 0.75, "rigid", 0.9231170156986911, 0.812488317489624, 0.00931364485333186, -0.00302278995513916, false],
+    [21, 0.75, "k0", 0.9234013300695068, 0.812831699848175, 0.009597959224147523, -0.0026794075965881348, false],
+    [22, 0.75, "k0p5", 0.9233956708491855, 0.8128252625465393, 0.00959230000382627, -0.002685844898223877, false],
+    [23, 0.75, "k1", 0.923389227605106, 0.8128217458724976, 0.00958585675974677, -0.002689361572265625, false],
+    [24, 0.75, "k2", 0.9233750134694908, 0.8127972483634949, 0.009571642624131571, -0.0027138590812683105, false]
+  ],
+  "single_scene_gate": {
+    "baseline_index": 0,
+    "strict_mean_improvement_and_p05_nonregression_indices": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    "rejected_by_p05_regression_indices": [20, 21, 22, 23, 24],
+    "best_mean_candidate_index": 11,
+    "best_mean_candidate": "ceiling_0p45_gamma_k0",
+    "best_exact_p05_candidate_index": 6,
+    "best_exact_p05_candidate": "ceiling_0p30_gamma_k0",
+    "cross_scene_gate_evaluated": false,
+    "formal_global_candidate_selected": false
+  },
+  "method_conclusion": {
+    "residual_shrinkage_signal": "positive_but_small_and_consistent_within_each_ceiling",
+    "strongest_gamma_policy_at_every_ceiling_by_mean": "k0",
+    "ceiling_conclusion": "0p75_is_rejected_by_ramen_lower_tail_despite_positive_mean",
+    "next_requirement": "prove_exact_order_statistic_p05_equivalence_then_run_teatime_unchanged"
+  },
+  "runtime": {
+    "elapsed_seconds": 1691.8841735289898,
+    "source_view_projection_120_views_seconds": 137.7489008900011,
+    "selected_projection_batch": 128,
+    "torch_cuda_peak_allocated_bytes": 6401363456,
+    "torch_cuda_peak_allocated_gib": 5.961734294891357,
+    "sampled_process_vm_hwm_kib": 13743740,
+    "sampled_process_vm_hwm_gib": 13.107051849365234,
+    "host_peak_note": "VmHWM was sampled repeatedly through the CPU LOO phase; terminal rusage was not instrumented, so this is the maximum directly observed process high-water mark rather than a claim about an unsampled final instant.",
+    "guard_maximum_observed_temperature_c": 46,
+    "guard_temperature_poll_seconds": 300,
+    "temperature_note": "46C is the maximum guard sample; the 300-second frozen polling interval does not identify an unsampled instantaneous peak.",
+    "power_limit_w": 300.0,
+    "guard_exit_status": 0,
+    "cuda_release_verified_no_compute_owner": true
+  },
+  "thermal_telemetry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_transport_v2_source_loo_exact/ramen/v1/ramen_transport_v2_gpu1_telemetry.csv",
+    "sha256": "bb540cfeec949a303ba9f27fe5c3b143f59a8de43fd53d5691e0ddbe25770f8c"
+  },
+  "gpu_owner_audit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_transport_v2_source_loo_exact/ramen/v1/ramen_transport_v2_gpu1_owner_audit.csv",
+    "sha256": "9f9b932e63390c2ef0fb3fa535e735636afe011722d05d35ffe67fa377b21e81"
+  },
+  "target_candidate_authorized": false,
+  "teatime_started": false
+}

@@ -1,0 +1,47 @@
+{
+  "artifact_type": "cpu_verification_addendum",
+  "date": "2026-08-06",
+  "scope": "LERF3D Figurines D0-D5 support/readout oracle",
+  "status": "implementation_verified_gpu_execution_pending",
+  "protocol": {
+    "frozen_evaluator_modified": false,
+    "new_benchmark_metric_opened": false,
+    "result_dependent_selection_allowed": false,
+    "teacher_unavailable_policy": "exact_zero"
+  },
+  "implementation": {
+    "script": "radio_gs/scripts/eval_lerf_support_readout_oracle_d0_d5.py",
+    "script_sha256": "973c0262dbdf9476cc06180fb5ccf164494e1835c1653d51e8a946571584314e",
+    "test": "tests/test_eval_lerf_support_readout_oracle_d0_d5.py",
+    "test_sha256": "2feebf0265ac328f03288a0e275f102bdc8d197d0a94203674a809a0b6aced81",
+    "schema_version": 2,
+    "d4_variants": [
+      "D4_s0",
+      "D4_s1",
+      "D4_s2",
+      "D4_per_primitive_max"
+    ],
+    "d5_memberships": [
+      "D4_s0",
+      "D4_s1",
+      "D4_s2",
+      "D4_per_primitive_max"
+    ]
+  },
+  "verification": {
+    "combined_test_result": "27 passed",
+    "checks": [
+      "all fixed scale variants and per-primitive maximum are emitted",
+      "teacher-unavailable rows are exactly zero",
+      "invalid tensor shapes are rejected",
+      "V2.1 loss and complete-scene adapter tests pass",
+      "compositional text-bank construction tests pass"
+    ]
+  },
+  "dependencies": {
+    "preregistration": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_preregistration_20260806.json",
+    "scale_axis_correction_addendum": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_scale_axis_correction_addendum_20260806.json",
+    "corrected_execution_addendum": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_corrected_execution_addendum_20260806.json"
+  },
+  "blocking_condition": "CUDA execution was not started because NVML failed with Unknown Error on both GPUs, so temperature-safe execution could not be guaranteed."
+}

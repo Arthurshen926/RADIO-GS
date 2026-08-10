@@ -1,0 +1,72 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_raw_dominant_positive_utility_independent_result_fix5c.v1",
+  "schema_version": 1,
+  "status": "single_independent_candidate_complete_tiny_positive_mIoU_delta",
+  "scene": "ramen",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_ramen_independent_preregistration_fix5c_20260807.json",
+    "sha256": "27b90f83fdd3a67128bcf1025930b7ab2b24bfb679dabe360b5e042d5d0c7aa6"
+  },
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_ramen_independent_metric_execution_authority_fix5c_20260807.json",
+    "sha256": "e6559d6a11c8b08d596242e465b5daceab618f87873a5fe7f367294c8daec694"
+  },
+  "control_metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/evaluation/ramen_exact_o0_control/ramen/lerf_direct_3d_selection_results.json",
+    "sha256": "585f86f355fc006048f72457de61d3a90287fb6c328394709f0b062d07e4c66d"
+  },
+  "candidate_metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/evaluation/ramen_raw_dominant_fix5c_independent/ramen/lerf_direct_3d_selection_results.json",
+    "sha256": "d9c25ed1e379bb69b0a1eb27d11011eab4d007b8a0de68b9cab7f8dbc54739c1"
+  },
+  "primary_metric": {
+    "name": "exact_macro_mIoU",
+    "exact_FP32_O0": 0.3012723922729492,
+    "FIX5C": 0.30136099457740784,
+    "absolute_delta": 0.00008860230445861816,
+    "relative_delta_percent": 0.02940936731379805,
+    "interpretation": "positive_but_too_small_to_resolve_the_Ramen_gap"
+  },
+  "secondary_metrics": {
+    "acc_at_0.25_control": 0.5633802816901409,
+    "acc_at_0.25_FIX5C": 0.5633802816901409,
+    "acc_at_0.50_control": 0.18309859154929578,
+    "acc_at_0.50_FIX5C": 0.18309859154929578,
+    "boundary_f_control": 0.4585232138633728,
+    "boundary_f_FIX5C": 0.4583726227283478,
+    "boundary_f_delta": -0.00015059113502502441,
+    "trimap_iou_control": 0.4094906747341156,
+    "trimap_iou_FIX5C": 0.4094265103340149,
+    "trimap_iou_delta": -0.00006416440010070801,
+    "object_count": 71
+  },
+  "affected_queries": {
+    "bowl": {"delta_mIoU": 0.0020749568939208984, "selected_gaussians_control": 8049, "selected_gaussians_FIX5C": 8170},
+    "glass of water": {"delta_mIoU": -0.00001823902130126953, "selected_gaussians_control": 8052, "selected_gaussians_FIX5C": 8069},
+    "kamaboko": {"delta_mIoU": 0.0, "selected_gaussians_control": 1384, "selected_gaussians_FIX5C": 1403},
+    "nori": {"delta_mIoU": 0.0005764961242675781, "selected_gaussians_control": 8401, "selected_gaussians_FIX5C": 8415},
+    "spoon": {"delta_mIoU": -0.0037522315979003906, "selected_gaussians_control": 803, "selected_gaussians_FIX5C": 853}
+  },
+  "method_conclusion": {
+    "independent_mIoU_improvement_observed": true,
+    "material_benchmark_recovery_observed": false,
+    "FIX5_semantic_filter_sufficient_for_extent_completion": false,
+    "remaining_bottleneck": "region_extent_updates_remain_query_specific_but_are_not_boundary_or_instance_utility_aware;_the_new_factorized_field_is_still_consumed_by_the_legacy_gauge_readout",
+    "no_followup_Ramen_tuning_authorized": true
+  },
+  "gpu0_telemetry": {
+    "control": {
+      "thermal_log_sha256": "4a65f4470014dedcb7ec2b0d929b4f87689e6a346648da121309bd17374c0632",
+      "owner_log_sha256": "b255a93a4adef8607334fb9c8750449dab717bdd0138799e72b247a82dcc0967",
+      "temperature_c_max": 53,
+      "hard_stop_triggered": false
+    },
+    "candidate": {
+      "thermal_log_sha256": "4adca5fb77300566958a38e9f6d8f2ef1e3089b9c068c82ba118ed2fefda6b42",
+      "owner_log_sha256": "8bbd2db2755c74e4f0e33c393434727f9bdb271c1afe011fe2716e16f2af538c",
+      "temperature_c_max": 52,
+      "hard_stop_triggered": false
+    }
+  },
+  "single_candidate_no_sweep_respected": true
+}

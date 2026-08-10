@@ -1,0 +1,82 @@
+{
+  "access_audit": {
+    "FIX6c_authority_cache_report_and_O0_lineage_validated": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "frozen_evaluator_inputs_validated": true,
+    "label_root_opened": false,
+    "multisource_v2_and_scene0003_external_PASS_revalidated": true,
+    "subprocess_started": false,
+    "target_metrics_computed": false,
+    "threshold_scan": false
+  },
+  "all_query_text_cache": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+    "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+  },
+  "cache_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_conditional_missing_core_fix6c_multisource_v2_scene0003_pass_figurines_execution_authority_20260807.json",
+    "sha256": "ebebbc648b3984a0308f636f0b96a4bbbbce7183745854129c70a28a8e3e748e"
+  },
+  "canonical_negative_text_cache": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "conditional_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_conditional_missing_core_completion_v2.py",
+    "sha256": "032be7b16f66025dac5dd1a0fcb3309068c9e7e3fc7b5842a84f7c5ef645e91d"
+  },
+  "conditional_materializer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o0_conditional_missing_core_completion_v2.py",
+    "sha256": "b6103b72629a9fc8cad96a4b5d074491e5c2971729af2993b32b83b0d502c3cc"
+  },
+  "config": {
+    "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+    "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+  },
+  "external_query_score_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6c_multisource_v2_scene0003_pass/figurines/external_query_scores_v2.pt",
+    "sha256": "921a7a259597f93095e9eac0b0ff81eb273c9ef9c8474eac18e5e7f555355940"
+  },
+  "frozen_evaluator": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+  },
+  "frozen_summary_head": {
+    "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+    "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_lerf_o0_conditional_missing_core_metric_v2.py",
+    "sha256": "66bc2bc6bdfce05c3674a88c85848b360c72a077bf27405036f20b4f5961b1a6"
+  },
+  "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+  "metric_execution_authorized": true,
+  "no_GT_report": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6c_multisource_v2_scene0003_pass/figurines/no_gt_report_v2.json",
+    "sha256": "a917774247c8b0f4394bc96e4090b780be7d3f4e470b01af510731066494a5e8"
+  },
+  "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o0_conditional_missing_core_fix6c_multisource_v2_scene0003_pass/figurines/evaluation",
+  "protocol": {
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_frames_only": true,
+    "projection_mode": "selected_only_alpha",
+    "protocol_preset": "vala_paper_3d",
+    "score_postprocess": "none",
+    "score_threshold": 0.6,
+    "selection_mode": "score_threshold",
+    "silhouette_threshold": 0.0392156862745098,
+    "threshold_scan": false
+  },
+  "renderer_geometry_checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+  },
+  "scene_id": "figurines",
+  "schema": "radio_gs.lerf_o0_conditional_missing_core_frozen_metric.v2",
+  "schema_version": 2,
+  "single_candidate_no_sweep": true,
+  "status": "authorized_single_FIX6c_multisource_v2_scene0003_PASS_metric"
+}

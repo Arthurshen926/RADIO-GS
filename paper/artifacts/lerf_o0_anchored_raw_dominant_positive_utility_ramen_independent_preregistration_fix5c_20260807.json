@@ -1,0 +1,117 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_raw_dominant_positive_utility_independent_preregistration_fix5c.v1",
+  "schema_version": 1,
+  "status": "preregistered_single_independent_candidate_before_ramen_FIX5C_target_quality_execution",
+  "scene": "ramen",
+  "single_candidate_no_sweep": true,
+  "primary_endpoint": "FIX5C_minus_exact_FP32_O0_macro_mIoU_under_frozen_VALA_protocol",
+  "candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.pt",
+      "sha256": "98af65db687cf57a93451b9a39f01a5d974fd3a611f17eec05cdd0f68b3f2a85"
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/o0_anchored_raw_dominant_positive_utility_monotone.fix5c.report.json",
+      "sha256": "80db8b4fd7d18a815674890967df68a1a0e6e0c6bc1a6a53b0e57b96bd535e55"
+    },
+    "target_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_raw_dominant_positive_utility_ramen_execution_authority_fix5c_20260807.json",
+      "sha256": "32676751e507923110ec18d43fa444c0cfe9ddaf6ac174a8d79dfe0098b0b471"
+    },
+    "structural_preflight": {
+      "query_count": 14,
+      "query_gate_true_count": 5,
+      "selected_queries": ["bowl", "glass of water", "kamaboko", "nori", "spoon"],
+      "filtered_FIX4C_query": "hand",
+      "selected_region_count": 8,
+      "actual_strict_increase_total": 1574,
+      "quantized_no_change_total": 0,
+      "decrease_total": 0,
+      "changed_outside_selected_region_union_count": 0,
+      "outside_selected_union_bitwise_O0": true,
+      "failed_gate_bitwise_O0": true,
+      "invalid_primitive_bitwise_O0": true,
+      "selected_updates_non_decreasing": true
+    }
+  },
+  "exact_FP32_O0_control": {
+    "positive_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_positive.pt",
+      "sha256": "e33d3c8ea28bb58345f17c228aeaf6b7215d9f1baade27194f94a6f15f385abe"
+    },
+    "negative_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_negative.pt",
+      "sha256": "de70dd2bbb33983541f10d6896e1d377f7a767690590831db005e2d116035520"
+    },
+    "historical_FP16_reference_mIoU": 0.2979446054,
+    "historical_reference_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf3d_canonical_negative_relevancy_results_20260804.json",
+      "sha256": "2501bc60afc4d26578538088fb15074b40e38dc5f4522f7d62918b5bb2eba160"
+    },
+    "reason_for_rerun": "materialize_the_exact_current_FP32_O0_control_under_the_same_frozen_evaluator_before_comparison"
+  },
+  "frozen_protocol_equivalence": {
+    "control_preset": "vala_repo_3d_with_exact_multiscale_positive_and_negative_caches",
+    "candidate_preset": "vala_paper_3d_with_already_materialized_exact_final_scores",
+    "candidate_score_postprocess": "none",
+    "selection_threshold": 0.6,
+    "projection": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "frames": "official_only",
+    "sweep": false
+  },
+  "metric_inputs": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_radio_verified_pose.yaml",
+      "sha256": "b6f8fee744f6278e24c12f052a5f24405130b85cf07c7801a26414556ca610d7"
+    },
+    "renderer_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "text_embedding_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_directory": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+  },
+  "outputs": {
+    "control_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/evaluation/ramen_exact_o0_control",
+    "candidate_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/evaluation/ramen_raw_dominant_fix5c_independent",
+    "must_not_exist_before_execution": true,
+    "control_thermal_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/logs/ramen_exact_o0_control_gpu0_thermal.csv",
+    "candidate_thermal_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_ramen/logs/ramen_fix5c_independent_gpu0_thermal.csv"
+  },
+  "gpu_policy": {
+    "physical_gpu": 0,
+    "CUDA_VISIBLE_DEVICES": "0",
+    "logical_gpu_argument": 0,
+    "launch_max_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "consecutive_hard_polls_before_stop": 6,
+    "poll_seconds": 30,
+    "soft_pause_disabled": true
+  },
+  "access_audit": {
+    "ramen_FIX5C_metric_executed_before_preregistration": false,
+    "ramen_FIX5C_target_images_masks_or_quality_opened_during_candidate_build": false,
+    "historical_FP16_O0_metric_known": true,
+    "current_exact_FP32_O0_metric_known": false,
+    "Figurines_development_metric_was_used_to_design_FIX5": true,
+    "Ramen_is_independent_of_FIX5_design": true
+  }
+}

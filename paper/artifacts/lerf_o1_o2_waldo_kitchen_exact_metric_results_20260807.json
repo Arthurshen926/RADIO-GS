@@ -1,0 +1,1129 @@
+{
+  "access_audit": {
+    "exact_O0_then_O1_then_O2_metrics_executed_only_after_fresh_authority_and_control_gate": true,
+    "frozen_protocol_changed_between_stages": false,
+    "scene_specific_parameter_sweep_executed": false
+  },
+  "conclusion": {
+    "general_result": "On Waldo Kitchen, query-free source-view teacher aggregation improves exact-FP32 O0 mIoU by 3.13 points with O1 and 4.92 points with O2 under the frozen one-shot protocol. O2 also improves boundary-F by 14.14 points and Acc@0.25 by 13.64 points while preserving O0 Acc@0.50.",
+    "highest_acc050": "O0_and_O2_tie",
+    "highest_boundary_f": "O2",
+    "highest_trimap_iou": "O0",
+    "primary_miou_winner": "O2",
+    "tradeoff": "O2 strongly recovers cabinet and plate but collapses yellow desk, pot, and ottolenghi; both O1 and O2 reduce trimap-IoU. This independently supports reliability-conditioned O1-to-O2 arbitration plus a boundary-band calibration rather than global O2 replacement.",
+    "uncertainty": "The Waldo O2 paired mIoU confidence interval crosses zero because N=22 and a few large opposing query effects dominate; its boundary-F gain is positive with CI95 [0.0453, 0.2335]. This is meaningful one-shot improvement, not evidence that unrestricted O2 is uniformly safe."
+  },
+  "control_gate": {
+    "exact_fp32_minus_historical_miou": -0.0023800730644256696,
+    "exact_fp32_miou": 0.29311421513557434,
+    "historical_lower_precision_miou": 0.2954942882,
+    "lineage_replay_passed": true,
+    "replay_receipt": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_waldo_kitchen_frozen_config_control_replay_result_20260807.json",
+      "sha256": "8b51e06c4f35b78334e26017af7898639a0c0157a4776290eb62eb677b60ce67"
+    }
+  },
+  "frozen_protocol": {
+    "config_sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264",
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select",
+    "protocol_preset": "vala_repo_3d",
+    "renderer_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+    "selection_threshold": 0.6,
+    "single_candidate_no_sweep": true
+  },
+  "gpu1_thermal_receipts": {
+    "O0": {
+      "peak_temperature_c": 52,
+      "telemetry_sha256": "c4866db1544aa7a95096a30c96cf5a4dd1ea54c5e88a4b103f7b33a9605fec66"
+    },
+    "O1": {
+      "peak_temperature_c": 50,
+      "telemetry_sha256": "d0e288c6991ecdd2344af4106dfb9d9ea667f5b3b20746af7caee8b3b601ea60"
+    },
+    "O2": {
+      "peak_temperature_c": 55,
+      "telemetry_sha256": "f84dc8d5bb0304611cbc891eafe6adc02fb9d7b2f845e4de54b4753dace7686b"
+    },
+    "hard_temperature_c": 88,
+    "thermal_guard_triggered": false
+  },
+  "metric_authorities": {
+    "O0": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_waldo_kitchen_frozen_config_control_metric_execution_authority_20260807.json",
+      "sha256": "68ae044be0d7a182c24a1b8de60279db23c1de4e1eb3fe9c6da1c7881f522911"
+    },
+    "O1": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_waldo_kitchen_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "2c62dba52d3ad70df09d003032204dab4ef9865b3d06a6e25979cc3f2e9a3a03"
+    },
+    "O2": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o2_waldo_kitchen_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "b7009983590bda31266b2a28167020f09b5be9d28153e5cde998a8fdbe09e968"
+    }
+  },
+  "metric_results": {
+    "O0": {
+      "acc025": 0.5454545454545454,
+      "acc050": 0.2727272727272727,
+      "boundary_f": 0.27739694714546204,
+      "miou": 0.29311421513557434,
+      "n": 22,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "a07b7ef185a3556ec7977083a4c085b04973c98cfe9d4f07c5fce240b45d8d47"
+      },
+      "trimap_iou": 0.3331482410430908
+    },
+    "O1": {
+      "acc025": 0.5454545454545454,
+      "acc050": 0.22727272727272727,
+      "boundary_f": 0.34529250860214233,
+      "delta_vs_O0": {
+        "acc025": 0.0,
+        "acc050": -0.04545454545454544,
+        "boundary_f": 0.0678955614566803,
+        "miou": 0.03125399351119995,
+        "trimap_iou": -0.007256060838699341
+      },
+      "miou": 0.3243682086467743,
+      "n": 22,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o1_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "56ece96a65d04bc46fb45fb0526438b40dab4c3fc3b1b04a2203d669cdcff800"
+      },
+      "trimap_iou": 0.3258921802043915
+    },
+    "O2": {
+      "acc025": 0.6818181818181818,
+      "acc050": 0.2727272727272727,
+      "boundary_f": 0.4187788665294647,
+      "delta_vs_O0": {
+        "acc025": 0.13636363636363635,
+        "acc050": 0.0,
+        "boundary_f": 0.14138191938400269,
+        "miou": 0.049205482006073,
+        "trimap_iou": -0.03349825739860535
+      },
+      "delta_vs_O1": {
+        "acc025": 0.13636363636363635,
+        "acc050": 0.04545454545454544,
+        "boundary_f": 0.07348635792732239,
+        "miou": 0.017951488494873047,
+        "trimap_iou": -0.026242196559906006
+      },
+      "miou": 0.34231969714164734,
+      "n": 22,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o2_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "e661692a270349c4047c03719a20341b4dd81ff19f862f1c5a928bc3168e6840"
+      },
+      "trimap_iou": 0.2996499836444855
+    }
+  },
+  "paired_frame_query_bootstrap": {
+    "resamples": 20000,
+    "results": {
+      "O1_minus_O0": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 1.0,
+          "ci95": [
+            -0.13636363636363635,
+            0.0
+          ],
+          "equal": 21,
+          "improved": 0,
+          "mean_delta": -0.045454545454545456,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 1
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.0003,
+          "ci95": [
+            0.025791546435793313,
+            0.11328798685386912
+          ],
+          "equal": 4,
+          "improved": 14,
+          "mean_delta": 0.06789559083311918,
+          "median_delta": 0.024195701280645784,
+          "n": 22,
+          "worsened": 4
+        },
+        "miou": {
+          "bootstrap_probability_nonpositive": 0.0332,
+          "ci95": [
+            -0.0018949793440180263,
+            0.06927533047007066
+          ],
+          "equal": 3,
+          "improved": 13,
+          "mean_delta": 0.031254015637798796,
+          "median_delta": 0.00696311638617092,
+          "n": 22,
+          "worsened": 6
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.86385,
+          "ci95": [
+            -0.021240305850886747,
+            0.005128368909939944
+          ],
+          "equal": 5,
+          "improved": 7,
+          "mean_delta": -0.007256021112294605,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 10
+        }
+      },
+      "O2_minus_O0": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 0.58395,
+          "ci95": [
+            -0.22727272727272727,
+            0.22727272727272727
+          ],
+          "equal": 16,
+          "improved": 3,
+          "mean_delta": 0.0,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 3
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.00255,
+          "ci95": [
+            0.04527389595050421,
+            0.2335355918431737
+          ],
+          "equal": 1,
+          "improved": 16,
+          "mean_delta": 0.14138184470000115,
+          "median_delta": 0.15434218451731105,
+          "n": 22,
+          "worsened": 5
+        },
+        "miou": {
+          "bootstrap_probability_nonpositive": 0.18925,
+          "ci95": [
+            -0.059206612695629574,
+            0.1644351048309646
+          ],
+          "equal": 1,
+          "improved": 13,
+          "mean_delta": 0.049205478846415865,
+          "median_delta": 0.05613499616146095,
+          "n": 22,
+          "worsened": 8
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.88125,
+          "ci95": [
+            -0.09039033122780857,
+            0.022173440037586003
+          ],
+          "equal": 2,
+          "improved": 7,
+          "mean_delta": -0.033498217753004315,
+          "median_delta": -0.030916076962408667,
+          "n": 22,
+          "worsened": 13
+        }
+      },
+      "O2_minus_O1": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 0.4072,
+          "ci95": [
+            -0.13636363636363635,
+            0.22727272727272727
+          ],
+          "equal": 17,
+          "improved": 3,
+          "mean_delta": 0.045454545454545456,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 2
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.0802,
+          "ci95": [
+            -0.0307309485668189,
+            0.16413827036852185
+          ],
+          "equal": 1,
+          "improved": 15,
+          "mean_delta": 0.07348625386688196,
+          "median_delta": 0.07449679270169682,
+          "n": 22,
+          "worsened": 6
+        },
+        "miou": {
+          "bootstrap_probability_nonpositive": 0.3769,
+          "ci95": [
+            -0.0836658270870741,
+            0.12630029672795903
+          ],
+          "equal": 1,
+          "improved": 11,
+          "mean_delta": 0.017951463208617072,
+          "median_delta": 0.011459628512533598,
+          "n": 22,
+          "worsened": 10
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.84465,
+          "ci95": [
+            -0.07803428030731512,
+            0.025445433831371458
+          ],
+          "equal": 2,
+          "improved": 6,
+          "mean_delta": -0.026242196640709713,
+          "median_delta": -0.020191613196545916,
+          "n": 22,
+          "worsened": 14
+        }
+      }
+    },
+    "rng_stream_order": [
+      "O1_minus_O0.miou",
+      "O1_minus_O0.boundary_f",
+      "O1_minus_O0.trimap_iou",
+      "O1_minus_O0.acc050",
+      "O2_minus_O0.miou",
+      "O2_minus_O0.boundary_f",
+      "O2_minus_O0.trimap_iou",
+      "O2_minus_O0.acc050",
+      "O2_minus_O1.miou",
+      "O2_minus_O1.boundary_f",
+      "O2_minus_O1.trimap_iou",
+      "O2_minus_O1.acc050"
+    ],
+    "sampling_unit": "one of the 22 frozen official frame-query observations with replacement",
+    "seed": 20260807
+  },
+  "per_category_frame_query_macro_miou_delta_vs_O0": {
+    "O1": {
+      "Stainless steel pots": 0.03752204475398507,
+      "cabinet": 0.04889933697748462,
+      "dark cup": -0.06332929965727624,
+      "frog cup": -0.06509098893452242,
+      "ketchup": 0.2872302767368604,
+      "knife": 0.06261901105657662,
+      "ottolenghi": -0.028688920755945202,
+      "plastic ladle": 0.17161491544897825,
+      "plate": 0.014921427085548306,
+      "pot": -0.07026850324072509,
+      "pour-over vessel": -0.08338091152712726,
+      "red cup": 0.1380843850860774,
+      "refrigerator": -0.014935166008164275,
+      "sink": 1.8660541811210685e-05,
+      "spatula": 0.0,
+      "spoon": 0.06342051420432784,
+      "toaster": 0.03808688762596002,
+      "yellow desk": 0.010686564897211537
+    },
+    "O2": {
+      "Stainless steel pots": 0.06044130177905227,
+      "cabinet": 0.7942739399197484,
+      "dark cup": 0.06437156562127899,
+      "frog cup": -0.1395283184795728,
+      "ketchup": 0.16515998872151294,
+      "knife": 0.09840926473588456,
+      "ottolenghi": -0.27315904014612175,
+      "plastic ladle": -0.04723225030084236,
+      "plate": 0.35399714566976564,
+      "pot": -0.38415935275520213,
+      "pour-over vessel": 0.1579950167442026,
+      "red cup": 0.2533046931777174,
+      "refrigerator": 0.07292547121888648,
+      "sink": -0.09571677303042792,
+      "spatula": 0.05182869054386962,
+      "spoon": -0.006203257184323935,
+      "toaster": 0.0020630056398002194,
+      "yellow desk": -0.501349459365186
+    }
+  },
+  "per_frame_query_metrics_and_deltas": [
+    {
+      "O0": {
+        "boundary_f": 0.727578947368421,
+        "iou": 0.3665630456074607,
+        "trimap_iou": 0.3762135922330097
+      },
+      "O1": {
+        "boundary_f": 0.7869069631904554,
+        "iou": 0.4040850903614458,
+        "trimap_iou": 0.3566265060240964
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0593280158220344,
+        "iou": 0.03752204475398507,
+        "trimap_iou": -0.019587086208913307
+      },
+      "O2": {
+        "boundary_f": 0.8065357483823062,
+        "iou": 0.427004347386513,
+        "trimap_iou": 0.3385260635110845
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.07895680101388525,
+        "iou": 0.06044130177905227,
+        "trimap_iou": -0.03768752872192521
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.01962878519185085,
+        "iou": 0.022919257025067197,
+        "trimap_iou": -0.018100442513011905
+      },
+      "frame": "frame_00053",
+      "query": "Stainless steel pots"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.3225450912491156,
+        "iou": 0.29510997887411455,
+        "trimap_iou": 0.4938682186655581
+      },
+      "O1": {
+        "boundary_f": 0.5112109319379183,
+        "iou": 0.40208677948848454,
+        "trimap_iou": 0.4995760915642221
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.1886658406888027,
+        "iou": 0.10697680061436998,
+        "trimap_iou": 0.005707872898664035
+      },
+      "O2": {
+        "boundary_f": 0.5830695701026294,
+        "iou": 0.4578993478049255,
+        "trimap_iou": 0.5030581039755352
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.26052447885351376,
+        "iou": 0.16278936893081097,
+        "trimap_iou": 0.009189885309977108
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.07185863816471105,
+        "iou": 0.05581256831644099,
+        "trimap_iou": 0.0034820124113130735
+      },
+      "frame": "frame_00053",
+      "query": "knife"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.5358580314672521,
+        "iou": 0.5830004331712951,
+        "trimap_iou": 0.3180616740088106
+      },
+      "O1": {
+        "boundary_f": 0.5378568202496515,
+        "iou": 0.5543115124153499,
+        "trimap_iou": 0.3398305084745763
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.001998788782399452,
+        "iou": -0.028688920755945202,
+        "trimap_iou": 0.02176883446576572
+      },
+      "O2": {
+        "boundary_f": 0.46506315844885876,
+        "iou": 0.3098413930251734,
+        "trimap_iou": 0.3221070811744387
+      },
+      "O2_minus_O0": {
+        "boundary_f": -0.07079487301839332,
+        "iou": -0.27315904014612175,
+        "trimap_iou": 0.004045407165628123
+      },
+      "O2_minus_O1": {
+        "boundary_f": -0.07279366180079277,
+        "iou": -0.24447011939017654,
+        "trimap_iou": -0.017723427300137595
+      },
+      "frame": "frame_00053",
+      "query": "ottolenghi"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.36340357166660237,
+        "iou": 0.20134555911236504,
+        "trimap_iou": 0.20607661822985468
+      },
+      "O1": {
+        "boundary_f": 0.3492402634444848,
+        "iou": 0.11796464758523778,
+        "trimap_iou": 0.13696612665684832
+      },
+      "O1_minus_O0": {
+        "boundary_f": -0.014163308222117588,
+        "iou": -0.08338091152712726,
+        "trimap_iou": -0.06911049157300636
+      },
+      "O2": {
+        "boundary_f": 0.5445215862467188,
+        "iou": 0.35934057585656765,
+        "trimap_iou": 0.29404145077720206
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.1811180145801164,
+        "iou": 0.1579950167442026,
+        "trimap_iou": 0.08796483254734738
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.19528132280223398,
+        "iou": 0.24137592827132986,
+        "trimap_iou": 0.15707532412035374
+      },
+      "frame": "frame_00053",
+      "query": "pour-over vessel"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.6818576731695759,
+        "iou": 0.5052889953830869,
+        "trimap_iou": 0.4806584362139918
+      },
+      "O1": {
+        "boundary_f": 0.679472590371708,
+        "iou": 0.5433758830090469,
+        "trimap_iou": 0.48157051282051283
+      },
+      "O1_minus_O0": {
+        "boundary_f": -0.0023850827978678657,
+        "iou": 0.03808688762596002,
+        "trimap_iou": 0.0009120766065210395
+      },
+      "O2": {
+        "boundary_f": 0.719477239896988,
+        "iou": 0.5073520010228871,
+        "trimap_iou": 0.42483660130718953
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.03761956672741207,
+        "iou": 0.0020630056398002194,
+        "trimap_iou": -0.05582183490680226
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.040004649525279934,
+        "iou": -0.0360238819861598,
+        "trimap_iou": -0.0567339115133233
+      },
+      "frame": "frame_00053",
+      "query": "toaster"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.35730265260466604,
+        "iou": 0.5322740726299559,
+        "trimap_iou": 0.42005130397605817
+      },
+      "O1": {
+        "boundary_f": 0.4277517714541933,
+        "iou": 0.5429606375271674,
+        "trimap_iou": 0.3146673516568199
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.07044911884952726,
+        "iou": 0.010686564897211537,
+        "trimap_iou": -0.10538395231923825
+      },
+      "O2": {
+        "boundary_f": 0.10131598203329918,
+        "iou": 0.030924613264769807,
+        "trimap_iou": 0.053239929947460594
+      },
+      "O2_minus_O0": {
+        "boundary_f": -0.25598667057136687,
+        "iou": -0.501349459365186,
+        "trimap_iou": -0.3668113740285976
+      },
+      "O2_minus_O1": {
+        "boundary_f": -0.32643578942089413,
+        "iou": -0.5120360242623976,
+        "trimap_iou": -0.26142742170935934
+      },
+      "frame": "frame_00053",
+      "query": "yellow desk"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.3930913178192537,
+        "iou": 0.04723225030084236,
+        "trimap_iou": 0.08884073672806067
+      },
+      "O1": {
+        "boundary_f": 0.6707280639085536,
+        "iou": 0.2188471657498206,
+        "trimap_iou": 0.0655367231638418
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.27763674608929984,
+        "iou": 0.17161491544897825,
+        "trimap_iou": -0.023304013564218864
+      },
+      "O2": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O2_minus_O0": {
+        "boundary_f": -0.3930913178192537,
+        "iou": -0.04723225030084236,
+        "trimap_iou": -0.08884073672806067
+      },
+      "O2_minus_O1": {
+        "boundary_f": -0.6707280639085536,
+        "iou": -0.2188471657498206,
+        "trimap_iou": -0.0655367231638418
+      },
+      "frame": "frame_00066",
+      "query": "plastic ladle"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.6303279839049268,
+        "iou": 0.5379554915968546,
+        "trimap_iou": 0.009115770282588878
+      },
+      "O1": {
+        "boundary_f": 0.5339346278558383,
+        "iou": 0.46768698835612954,
+        "trimap_iou": 0.07100085543199315
+      },
+      "O1_minus_O0": {
+        "boundary_f": -0.0963933560490885,
+        "iou": -0.07026850324072509,
+        "trimap_iou": 0.06188508514940427
+      },
+      "O2": {
+        "boundary_f": 0.5204984421298461,
+        "iou": 0.1537961388416525,
+        "trimap_iou": 0.1079734219269103
+      },
+      "O2_minus_O0": {
+        "boundary_f": -0.10982954177508075,
+        "iou": -0.38415935275520213,
+        "trimap_iou": 0.09885765164432142
+      },
+      "O2_minus_O1": {
+        "boundary_f": -0.013436185725992256,
+        "iou": -0.31389084951447704,
+        "trimap_iou": 0.03697256649491715
+      },
+      "frame": "frame_00066",
+      "query": "pot"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.04915628808063283,
+        "iou": 0.26097194967101467,
+        "trimap_iou": 0.5134952766531714
+      },
+      "O1": {
+        "boundary_f": 0.05042118659475183,
+        "iou": 0.2460367836628504,
+        "trimap_iou": 0.5134952766531714
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0012648985141189978,
+        "iou": -0.014935166008164275,
+        "trimap_iou": 0.0
+      },
+      "O2": {
+        "boundary_f": 0.07516557451729333,
+        "iou": 0.33389742088990115,
+        "trimap_iou": 0.5134952766531714
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.0260092864366605,
+        "iou": 0.07292547121888648,
+        "trimap_iou": 0.0
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.0247443879225415,
+        "iou": 0.08786063722705076,
+        "trimap_iou": 0.0
+      },
+      "frame": "frame_00066",
+      "query": "refrigerator"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O1": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O2": {
+        "boundary_f": 0.37280264775781374,
+        "iou": 0.05182869054386962,
+        "trimap_iou": 0.2205071664829107
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.37280264775781374,
+        "iou": 0.05182869054386962,
+        "trimap_iou": 0.2205071664829107
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.37280264775781374,
+        "iou": 0.05182869054386962,
+        "trimap_iou": 0.2205071664829107
+      },
+      "frame": "frame_00066",
+      "query": "spatula"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O1": {
+        "boundary_f": 0.0,
+        "iou": 0.04889933697748462,
+        "trimap_iou": 0.0
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0,
+        "iou": 0.04889933697748462,
+        "trimap_iou": 0.0
+      },
+      "O2": {
+        "boundary_f": 0.3383335434261944,
+        "iou": 0.7942739399197484,
+        "trimap_iou": 0.2413572343149808
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.3383335434261944,
+        "iou": 0.7942739399197484,
+        "trimap_iou": 0.2413572343149808
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.3383335434261944,
+        "iou": 0.7453746029422638,
+        "trimap_iou": 0.2413572343149808
+      },
+      "frame": "frame_00089",
+      "query": "cabinet"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.48079137994539384,
+        "iou": 0.1297007635035804,
+        "trimap_iou": 0.4982517482517482
+      },
+      "O1": {
+        "boundary_f": 0.7955801104972376,
+        "iou": 0.4169310402404408,
+        "trimap_iou": 0.4948770491803279
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.3147887305518438,
+        "iou": 0.2872302767368604,
+        "trimap_iou": -0.0033746990714203506
+      },
+      "O2": {
+        "boundary_f": 0.9391771019677996,
+        "iou": 0.29486075222509334,
+        "trimap_iou": 0.22281167108753316
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.45838572202240574,
+        "iou": 0.16515998872151294,
+        "trimap_iou": -0.27544007716421504
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.14359699147056193,
+        "iou": -0.12207028801534747,
+        "trimap_iou": -0.27206537809279474
+      },
+      "frame": "frame_00089",
+      "query": "ketchup"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.3133035423028703,
+        "iou": 0.34290289139560903,
+        "trimap_iou": 0.49894871560471704
+      },
+      "O1": {
+        "boundary_f": 0.5203845001256867,
+        "iou": 0.4237831239509689,
+        "trimap_iou": 0.5096572618822193
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.20708095782281644,
+        "iou": 0.08088023255535987,
+        "trimap_iou": 0.010708546277502229
+      },
+      "O2": {
+        "boundary_f": 0.6945227907488685,
+        "iou": 0.4753413166724517,
+        "trimap_iou": 0.4925187032418953
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.3812192484459982,
+        "iou": 0.1324384252768427,
+        "trimap_iou": -0.006430012362821758
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.17413829062318176,
+        "iou": 0.05155819272148282,
+        "trimap_iou": -0.017138558640323986
+      },
+      "frame": "frame_00089",
+      "query": "knife"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.11668536770973542,
+        "iou": 0.27757324106113035,
+        "trimap_iou": 0.49694555112881805
+      },
+      "O1": {
+        "boundary_f": 0.1826801729391498,
+        "iou": 0.2142439414038541,
+        "trimap_iou": 0.49508370980600586
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.06599480522941437,
+        "iou": -0.06332929965727624,
+        "trimap_iou": -0.0018618413228121966
+      },
+      "O2": {
+        "boundary_f": 0.3003096017578979,
+        "iou": 0.34194480668240934,
+        "trimap_iou": 0.47280092592592593
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.18362423404816247,
+        "iou": 0.06437156562127899,
+        "trimap_iou": -0.024144625202892123
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.1176294288187481,
+        "iou": 0.12770086527855523,
+        "trimap_iou": -0.022282783880079926
+      },
+      "frame": "frame_00140",
+      "query": "dark cup"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.2790954219525648,
+        "iou": 0.23811616494543325,
+        "trimap_iou": 0.08917197452229299
+      },
+      "O1": {
+        "boundary_f": 0.23727948773550006,
+        "iou": 0.17302517601091083,
+        "trimap_iou": 0.05441354292623942
+      },
+      "O1_minus_O0": {
+        "boundary_f": -0.041815934217064754,
+        "iou": -0.06509098893452242,
+        "trimap_iou": -0.03475843159605357
+      },
+      "O2": {
+        "boundary_f": 0.21966998402508361,
+        "iou": 0.09858784646586044,
+        "trimap_iou": 0.0025429116338207248
+      },
+      "O2_minus_O0": {
+        "boundary_f": -0.0594254379274812,
+        "iou": -0.1395283184795728,
+        "trimap_iou": -0.08662906288847226
+      },
+      "O2_minus_O1": {
+        "boundary_f": -0.017609503710416446,
+        "iou": -0.07443732954505039,
+        "trimap_iou": -0.051870631292418694
+      },
+      "frame": "frame_00140",
+      "query": "frog cup"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.22113935878959587,
+        "iou": 0.18920874267001753,
+        "trimap_iou": 0.45390855457227136
+      },
+      "O1": {
+        "boundary_f": 0.224983642603377,
+        "iou": 0.19244841054514783,
+        "trimap_iou": 0.4524068041983351
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0038442838137811297,
+        "iou": 0.003239667875130303,
+        "trimap_iou": -0.0015017503739362392
+      },
+      "O2": {
+        "boundary_f": 0.5759885765647127,
+        "iou": 0.5263731584773907,
+        "trimap_iou": 0.3656716417910448
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.3548492177751168,
+        "iou": 0.3371644158073732,
+        "trimap_iou": -0.08823691278122658
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.3510049339613357,
+        "iou": 0.3339247479322429,
+        "trimap_iou": -0.08673516240729034
+      },
+      "frame": "frame_00140",
+      "query": "plate"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.1852855636839172,
+        "iou": 0.673890280931279,
+        "trimap_iou": 0.5041360060898249
+      },
+      "O1": {
+        "boundary_f": 0.2357169708997403,
+        "iou": 0.6739276020149014,
+        "trimap_iou": 0.48998475369328637
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.05043140721582312,
+        "iou": 3.732108362242137e-05,
+        "trimap_iou": -0.014151252396538527
+      },
+      "O2": {
+        "boundary_f": 0.3128519181384229,
+        "iou": 0.5382367684032971,
+        "trimap_iou": 0.3299059139784946
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.1275663544545057,
+        "iou": -0.13565351252798186,
+        "trimap_iou": -0.17423009211133028
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.07713494723868258,
+        "iou": -0.13569083361160428,
+        "trimap_iou": -0.16007883971479175
+      },
+      "frame": "frame_00140",
+      "query": "sink"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.28534649216906244,
+        "iou": 0.15958117213631295,
+        "trimap_iou": 0.425
+      },
+      "O1": {
+        "boundary_f": 0.4789917031486462,
+        "iou": 0.2230016863406408,
+        "trimap_iou": 0.433288409703504
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.19364521097958376,
+        "iou": 0.06342051420432784,
+        "trimap_iou": 0.00828840970350403
+      },
+      "O2": {
+        "boundary_f": 0.37647087739564833,
+        "iou": 0.15337791495198902,
+        "trimap_iou": 0.47976111479761113
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.09112438522658589,
+        "iou": -0.006203257184323935,
+        "trimap_iou": 0.05476111479761114
+      },
+      "O2_minus_O1": {
+        "boundary_f": -0.10252082575299787,
+        "iou": -0.06962377138865178,
+        "trimap_iou": 0.046472705094107114
+      },
+      "frame": "frame_00140",
+      "query": "spoon"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O1": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O2": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "frame": "frame_00154",
+      "query": "knife"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.15996416062892316,
+        "iou": 0.28475917919990257,
+        "trimap_iou": 0.4587419682110247
+      },
+      "O1": {
+        "boundary_f": 0.2045112793764336,
+        "iou": 0.3113623654958689,
+        "trimap_iou": 0.47744666992346524
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.04454711874751044,
+        "iou": 0.026603186295966308,
+        "trimap_iou": 0.01870470171244054
+      },
+      "O2": {
+        "boundary_f": 0.4887744516988436,
+        "iou": 0.6555890547320606,
+        "trimap_iou": 0.41718922906676503
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.32881029106992044,
+        "iou": 0.37082987553215807,
+        "trimap_iou": -0.041552739144259665
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.28426317232241,
+        "iou": 0.34422668923619176,
+        "trimap_iou": -0.060257440856700206
+      },
+      "frame": "frame_00154",
+      "query": "plate"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.0,
+        "iou": 0.16822492349768153,
+        "trimap_iou": 0.4974565493853328
+      },
+      "O1": {
+        "boundary_f": 0.16878475650780475,
+        "iou": 0.30630930858375893,
+        "trimap_iou": 0.4828820765271873
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.16878475650780475,
+        "iou": 0.1380843850860774,
+        "trimap_iou": -0.014574472858145504
+      },
+      "O2": {
+        "boundary_f": 0.45610960071003015,
+        "iou": 0.42152961667539895,
+        "trimap_iou": 0.3859465128474043
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.45610960071003015,
+        "iou": 0.2533046931777174,
+        "trimap_iou": -0.11151003653792851
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.28732484420222537,
+        "iou": 0.11522030809164002,
+        "trimap_iou": -0.09693556367978301
+      },
+      "frame": "frame_00154",
+      "query": "red cup"
+    },
+    {
+      "O0": {
+        "boundary_f": 0.0,
+        "iou": 0.6548139331349554,
+        "trimap_iou": 0.5003178639542276
+      },
+      "O1": {
+        "boundary_f": 0.0,
+        "iou": 0.6548139331349554,
+        "trimap_iou": 0.5003178639542276
+      },
+      "O1_minus_O0": {
+        "boundary_f": 0.0,
+        "iou": 0.0,
+        "trimap_iou": 0.0
+      },
+      "O2": {
+        "boundary_f": 0.3224750319632789,
+        "iou": 0.5990338996020814,
+        "trimap_iou": 0.40400881370388797
+      },
+      "O2_minus_O0": {
+        "boundary_f": 0.3224750319632789,
+        "iou": -0.055780033532873974,
+        "trimap_iou": -0.09630905025033965
+      },
+      "O2_minus_O1": {
+        "boundary_f": 0.3224750319632789,
+        "iou": -0.055780033532873974,
+        "trimap_iou": -0.09630905025033965
+      },
+      "frame": "frame_00154",
+      "query": "sink"
+    }
+  ],
+  "scene_id": "waldo_kitchen",
+  "schema": "radio_gs.lerf_o1_o2_exact_metric_results.v2",
+  "schema_version": 2,
+  "source_materialization": {
+    "O1_negative_sha256": "79bcf34da1004f085c1286a46ab5d4d6d036d7103b4c6507551aea0485e28539",
+    "O1_positive_sha256": "dc9e7bd15f9df02af1d31d9bc8fbf3a02be3b6285aa5a56bc5d72fb29f4e7066",
+    "O2_negative_sha256": "873c03ad24c57e107d400a672db8fedc8e34f92d1a2d61cfe88d1b9faa35e73d",
+    "O2_positive_sha256": "b03cb8feb2d243d2b3e7852ada422b27fd88fb4eedeb0ebbac94143ed5bc6264",
+    "accepted_rows": 433043,
+    "elapsed_seconds": 373.14362459699623,
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v2_execution_authority_20260807.json",
+      "sha256": "a9f616b28a8b0e1ab4998ca9d3c61efa67f9e622eee31a04dd80912014da8df8"
+    },
+    "method_contract_sha256": "ae57b558a02318d5b2223ee858cb71e3edf5e6327f1b577af89c5caebc7fe524",
+    "preflight_peak_cuda_bytes": 8061950464,
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_o2_streaming_result.json",
+      "sha256": "e9492a056bec99e63c856c447609b94a7df070f05f41e2fa979adfe40c4ae581"
+    },
+    "rows_with_teacher": 431460,
+    "rows_without_teacher_bitwise_o0_fallback": 1583,
+    "selected_projection_batch": 128,
+    "teacher_mean": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_teacher_mean_fp16.pt",
+      "sha256": "f037b9f2e465f3463942ed8ff08b077c903ba7c65a4fa3fd6ffe30f751cb298f"
+    }
+  },
+  "status": "complete_frozen_control_O1_O2_single_candidate_comparison"
+}

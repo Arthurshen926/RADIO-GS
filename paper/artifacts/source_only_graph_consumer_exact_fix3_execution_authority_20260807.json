@@ -1,0 +1,46 @@
+{
+  "schema": "radio_gs.source_only_graph_consumer_exact_fix3_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_consumer_exact_fix3",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/calibrate_source_only_graph_consumer_exact_fix3.py",
+    "sha256": "9f29c5182f9f902c872dbf8d22bbcaae7db93c3977ac56ad3e66cd3292b867d2"
+  },
+  "fix2_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_execution_authority_20260807.json",
+    "sha256": "07d607e34033ace02ad104663d26813c5f7fb7950b9385df4001336be2e14152"
+  },
+  "fix2_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_result_fix2_20260807.json",
+    "sha256": "16b9980d79ec9938a9fa4b70ed90ee67cbec2a26ba08d25a9fd13d8e65e0d7d1"
+  },
+  "calibration_change": {
+    "gain": "(2*calibrated_edge_lower-1)_plus*marginal_unique_primitives/256",
+    "covered_update": "exact_union_after_each_selected_candidate",
+    "null_population": "different_instance_direct_edges_after_raw_p_reliability_and_pair_feature_OOD_gates",
+    "aggregation": "per_scene_q99_then_max_across_six_scenes",
+    "steps": 3,
+    "unchanged": [
+      "epsilon_logit",
+      "raw_edge_probability_minimum",
+      "O0_anchor_contract",
+      "pair_reliability_gate",
+      "pair_feature_OOD_gate"
+    ]
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "source_query_evidence_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

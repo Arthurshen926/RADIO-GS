@@ -1,0 +1,45 @@
+{
+  "artifact": "full_scalar_scene0004_typed_context_adaptive_cpu_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T03:17:40+08:00",
+  "status": "typed_context_stage_b_adaptive_v2_complete",
+  "scene_id": "scene0004_00",
+  "cohort_split": "source_validation",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0004_typed_context_adaptive_cpu_execution_authority_20260807.json",
+    "sha256": "fd53b129ef53597a1a68cf5f2b5c3b79237b72008ff79509453c6e02a53bf054"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/typed_context_stage_b_adaptive_v2.pt",
+    "sha256": "e70cd2be73dc88d476b72fed13fedf008394c8795ae4802e9169b3b4b6f4d3b9",
+    "size_bytes": 15429173,
+    "regions": 4096,
+    "selection_complete": 4096,
+    "context_present": 4091,
+    "typed_context_valid": 4091,
+    "true_no_context_fallback_rows": 5,
+    "typed_context_valid_by_scale": [1364, 1363, 1364],
+    "context_tokens": 246752,
+    "maximum_adaptive_rounds": 4,
+    "maximum_final_probe_width": 65600,
+    "maximum_settled_candidates": 24324,
+    "maximum_estimated_working_bytes": 109180544,
+    "termination_counts": {
+      "natural_exhaustion": 3418,
+      "typed_budget_satisfied": 678
+    }
+  },
+  "execution": {
+    "device": "cpu",
+    "run_log_sha256": "a6f10025bf90b2e65cce6e4ba0b65eb816681e97cdc7f07e613ba7b3436f2b30"
+  },
+  "source_access": {
+    "official_multiview_teacher_executed": false,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  }
+}

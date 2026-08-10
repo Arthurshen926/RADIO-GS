@@ -1,0 +1,41 @@
+{
+  "artifact": "full_scalar_scene0002_official_teacher_gpu1_batch1_abort_gpu0_restart_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:12:57+08:00",
+  "status": "sealed_after_gpu1_batch1_thermal_abort_and_before_gpu0_batch1_restart",
+  "parent_addendum": "paper/artifacts/full_scalar_scene0002_official_teacher_gpu1_batch2_abort_batch1_restart_addendum_20260807.json",
+  "gpu1_batch1_attempt": {
+    "guard_exit_code": 86,
+    "maximum_temperature_c": 89,
+    "steady_state_power_draw_w": "251_to_265",
+    "thermal_warnings": 6,
+    "nvml_failure": false,
+    "driver_healthy_after_abort": true,
+    "output_written": false,
+    "partial_output_present": false
+  },
+  "gpu0_restart": {
+    "physical_gpu": 0,
+    "pci_bus_id": "00000000:02:00.0",
+    "initial_temperature_c": 46,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "power_limit_w": 300,
+    "same_producer_sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5",
+    "same_ordered_crops_model_checkpoint_resolution_and_float32_l2_contract": true,
+    "all_source_and_output_paths_unchanged": true,
+    "device_assignment_is_execution_only_and_numerically_batch_device_invariant": true,
+    "further_unthrottled_restart_after_thermal_abort": false
+  },
+  "thermal_guard": {
+    "pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed"
+  },
+  "fallback_if_gpu0_also_thermally_aborts": "separately preregister a pure execution-layer fixed-duty-cycle throttle without changing crop order, model, checkpoint, tensor math, output schema, or source assets",
+  "benchmark_metric_opened": false,
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

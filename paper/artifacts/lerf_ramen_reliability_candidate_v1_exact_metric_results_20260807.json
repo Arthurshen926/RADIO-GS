@@ -1,0 +1,739 @@
+{
+  "access_audit": {
+    "candidate_metric_executed_once": true,
+    "candidate_sweep_executed": false,
+    "frozen_protocol_changed": false,
+    "metric_authority_built_before_candidate_metric": true,
+    "source_materialization_target_data_or_metrics_opened": false
+  },
+  "candidate_metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/evaluation/exact_one_shot_v1/ramen/lerf_direct_3d_selection_results.json",
+    "sha256": "bf9eeaa0d2768d3dce1ed287bf760b9adcc3724564733e9b8ff6066b8ba4980d"
+  },
+  "candidate_name": "source_only_global_reliability_conditioned_O1_to_O2_v1",
+  "conclusion": {
+    "candidate_exceeds_O2_boundary_f": true,
+    "candidate_exceeds_O2_miou": true,
+    "candidate_exceeds_O2_trimap_iou": true,
+    "candidate_miou_gain_vs_O0": 0.08307942748069763,
+    "candidate_miou_gain_vs_O1": 0.01954147219657898,
+    "candidate_miou_gain_vs_O2": 0.0029161572456359863,
+    "candidate_preserves_O2_acc050": true,
+    "interpretation": "The preregistered source-only reliability-conditioned O1-to-O2 candidate is the first one-shot Ramen variant to exceed full O2 in mIoU, boundary F, and trimap IoU simultaneously; the small candidate-vs-O2 mIoU gain remains uncertain under 71-query paired bootstrap and requires cross-scene confirmation.",
+    "primary_miou_winner": "candidate"
+  },
+  "frozen_protocol": {
+    "argument_difference_vs_O1_control": [
+      "ours_multiscale_negative_score_cache",
+      "ours_multiscale_query_score_cache",
+      "output_dir"
+    ],
+    "baseline_summary": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_o2_ramen_exact_metric_results_fix2_20260807.json",
+      "sha256": "d2ae02af5fc03fc22da5c40fe0e52cf932889c15c2b62de3a762aff4f222b49d"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+      "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "protocol_preset": "vala_repo_3d",
+    "renderer_geometry_checkpoint_sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d",
+    "score_postprocess": "vala_knn_minmax",
+    "score_threshold": 0.6,
+    "silhouette_threshold": 0.0392156862745098,
+    "vala_knn_k": 10
+  },
+  "global_maximum_angle_radians": 0.75,
+  "metric_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_one_shot_exact_metric_execution_authority_20260807.json",
+    "sha256": "c14f3c02e40be3169d3327b8c3b5bb45fc645f2014fa6e13bc3de49cd9c1589f"
+  },
+  "metric_owner_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_exact_metric_gpu0_owner_audit_20260807.csv",
+    "sha256": "9a2063df060166c45c1969e18daed5f25f5e331b2cc2b421fe3650f798ccab0c"
+  },
+  "metric_results": {
+    "O0": {
+      "acc025": 0.5633802816901409,
+      "acc050": 0.18309859154929578,
+      "boundary_f": 0.4585232138633728,
+      "miou": 0.3012723922729492,
+      "n": 71,
+      "trimap_iou": 0.4094906747341156
+    },
+    "O1": {
+      "acc025": 0.6197183098591549,
+      "acc050": 0.352112676056338,
+      "boundary_f": 0.6059969067573547,
+      "miou": 0.36481034755706787,
+      "n": 71,
+      "trimap_iou": 0.3879842758178711
+    },
+    "O2": {
+      "acc025": 0.676056338028169,
+      "acc050": 0.29577464788732394,
+      "boundary_f": 0.6208915114402771,
+      "miou": 0.38143566250801086,
+      "n": 71,
+      "trimap_iou": 0.3959977626800537
+    },
+    "candidate": {
+      "absolute_bootstrap_ci95": {
+        "boundary_f": [
+          0.57450041025877,
+          0.6782372146844864
+        ],
+        "miou": [
+          0.3363715186715126,
+          0.43700774759054184
+        ],
+        "trimap_iou": [
+          0.37475809901952745,
+          0.4291800603270531
+        ]
+      },
+      "acc025": 0.676056338028169,
+      "acc050": 0.29577464788732394,
+      "boundary_f": 0.6229839324951172,
+      "delta_vs": {
+        "O0": {
+          "acc025": 0.11267605633802813,
+          "acc050": 0.11267605633802816,
+          "boundary_f": 0.16446071863174438,
+          "miou": 0.08307942748069763,
+          "trimap_iou": -0.006985306739807129
+        },
+        "O1": {
+          "acc025": 0.05633802816901412,
+          "acc050": -0.056338028169014065,
+          "boundary_f": 0.01698702573776245,
+          "miou": 0.01954147219657898,
+          "trimap_iou": 0.014521092176437378
+        },
+        "O2": {
+          "acc025": 0.0,
+          "acc050": 0.0,
+          "boundary_f": 0.002092421054840088,
+          "miou": 0.0029161572456359863,
+          "trimap_iou": 0.006507605314254761
+        }
+      },
+      "miou": 0.38435181975364685,
+      "n": 71,
+      "trimap_iou": 0.40250536799430847
+    }
+  },
+  "metric_telemetry": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_exact_metric_gpu0_telemetry_20260807.csv",
+    "sha256": "443b3bbb0fd78b07048177c201c472e93e01ca9aa02cd28de2923e795a916992"
+  },
+  "paired_frame_query_bootstrap": {
+    "candidate_minus_O0": {
+      "acc050": {
+        "bootstrap_probability_nonpositive": 0.0336,
+        "ci95": [
+          0.0,
+          0.22535211267605634
+        ],
+        "equal": 53,
+        "improved": 13,
+        "mean_delta": 0.11267605633802817,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 5
+      },
+      "boundary_f": {
+        "bootstrap_probability_nonpositive": 0.0,
+        "ci95": [
+          0.10999101826619571,
+          0.2188346864341091
+        ],
+        "equal": 2,
+        "improved": 56,
+        "mean_delta": 0.16446074231393973,
+        "median_delta": 0.15246467983008072,
+        "n": 71,
+        "worsened": 13
+      },
+      "miou": {
+        "bootstrap_probability_nonpositive": 5e-05,
+        "ci95": [
+          0.04323541964298549,
+          0.1221450212852146
+        ],
+        "equal": 2,
+        "improved": 54,
+        "mean_delta": 0.08307933289683608,
+        "median_delta": 0.08425997087676848,
+        "n": 71,
+        "worsened": 15
+      },
+      "trimap_iou": {
+        "bootstrap_probability_nonpositive": 0.67915,
+        "ci95": [
+          -0.03779001586446704,
+          0.024465318109229736
+        ],
+        "equal": 5,
+        "improved": 26,
+        "mean_delta": -0.006985326246978946,
+        "median_delta": -0.005537974683544333,
+        "n": 71,
+        "worsened": 40
+      }
+    },
+    "candidate_minus_O1": {
+      "acc050": {
+        "bootstrap_probability_nonpositive": 0.95015,
+        "ci95": [
+          -0.1267605633802817,
+          0.014084507042253521
+        ],
+        "equal": 63,
+        "improved": 2,
+        "mean_delta": -0.056338028169014086,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 6
+      },
+      "boundary_f": {
+        "bootstrap_probability_nonpositive": 0.04675,
+        "ci95": [
+          -0.0027782374558243447,
+          0.036680963491807696
+        ],
+        "equal": 5,
+        "improved": 41,
+        "mean_delta": 0.016987018291671235,
+        "median_delta": 0.011392996450491855,
+        "n": 71,
+        "worsened": 25
+      },
+      "miou": {
+        "bootstrap_probability_nonpositive": 0.03205,
+        "ci95": [
+          -0.0010497231646091547,
+          0.04021155839958845
+        ],
+        "equal": 2,
+        "improved": 38,
+        "mean_delta": 0.019541393823121492,
+        "median_delta": 0.0067324593721824755,
+        "n": 71,
+        "worsened": 31
+      },
+      "trimap_iou": {
+        "bootstrap_probability_nonpositive": 0.1245,
+        "ci95": [
+          -0.00896923147759801,
+          0.04025840770232924
+        ],
+        "equal": 5,
+        "improved": 32,
+        "mean_delta": 0.014521085603323975,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 34
+      }
+    },
+    "candidate_minus_O2": {
+      "acc050": {
+        "bootstrap_probability_nonpositive": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "equal": 71,
+        "improved": 0,
+        "mean_delta": 0.0,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 0
+      },
+      "boundary_f": {
+        "bootstrap_probability_nonpositive": 0.3619,
+        "ci95": [
+          -0.002058560820433663,
+          0.00932175288527869
+        ],
+        "equal": 54,
+        "improved": 7,
+        "mean_delta": 0.0020924506050061784,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 10
+      },
+      "miou": {
+        "bootstrap_probability_nonpositive": 0.3624,
+        "ci95": [
+          -0.0007888520327660608,
+          0.010017083272943088
+        ],
+        "equal": 49,
+        "improved": 1,
+        "mean_delta": 0.0029161107756130946,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 21
+      },
+      "trimap_iou": {
+        "bootstrap_probability_nonpositive": 0.3624,
+        "ci95": [
+          -8.617944806808654e-05,
+          0.019644191736016472
+        ],
+        "equal": 65,
+        "improved": 1,
+        "mean_delta": 0.006507618293360309,
+        "median_delta": 0.0,
+        "n": 71,
+        "worsened": 5
+      }
+    },
+    "resamples": 20000,
+    "sampling_unit": "paired_frame_query",
+    "seed": 20260807
+  },
+  "per_category": {
+    "bowl": {
+      "candidate": {
+        "acc025": 0.2,
+        "acc050": 0.0,
+        "boundary_f": 0.41433200240135193,
+        "miou": 0.1261632740497589,
+        "n": 5,
+        "trimap_iou": 0.0726872906088829
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": -0.2965565621852875,
+          "miou": -0.2463454306125641,
+          "trimap_iou": -0.29441145807504654
+        },
+        "O1": {
+          "boundary_f": -0.14483121037483215,
+          "miou": -0.09224361181259155,
+          "trimap_iou": -0.1227271780371666
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "chopsticks": {
+      "candidate": {
+        "acc025": 0.7142857142857143,
+        "acc050": 0.42857142857142855,
+        "boundary_f": 0.8099592328071594,
+        "miou": 0.4220704734325409,
+        "n": 7,
+        "trimap_iou": 0.44032129645347595
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.02869778871536255,
+          "miou": 0.049165159463882446,
+          "trimap_iou": 0.008871138095855713
+        },
+        "O1": {
+          "boundary_f": 0.012954235076904297,
+          "miou": -0.007687866687774658,
+          "trimap_iou": 0.00033861398696899414
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": -2.086162567138672e-06,
+          "trimap_iou": -3.212690353393555e-05
+        }
+      }
+    },
+    "corn": {
+      "candidate": {
+        "acc025": 0.0,
+        "acc050": 0.0,
+        "boundary_f": 0.497354120016098,
+        "miou": 0.15624836087226868,
+        "n": 5,
+        "trimap_iou": 0.4475272297859192
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.05214041471481323,
+          "miou": -0.00268632173538208,
+          "trimap_iou": -0.05249589681625366
+        },
+        "O1": {
+          "boundary_f": 0.09037107229232788,
+          "miou": -0.02709031105041504,
+          "trimap_iou": 0.006532579660415649
+        },
+        "O2": {
+          "boundary_f": -0.01291230320930481,
+          "miou": -0.004037216305732727,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "egg": {
+      "candidate": {
+        "acc025": 1.0,
+        "acc050": 1.0,
+        "boundary_f": 0.9231001734733582,
+        "miou": 0.7200807332992554,
+        "n": 7,
+        "trimap_iou": 0.4962247908115387
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.5053800642490387,
+          "miou": 0.27038630843162537,
+          "trimap_iou": -0.0012583732604980469
+        },
+        "O1": {
+          "boundary_f": 0.05053675174713135,
+          "miou": 0.06676995754241943,
+          "trimap_iou": -0.002202153205871582
+        },
+        "O2": {
+          "boundary_f": 0.0004602670669555664,
+          "miou": -0.0004226565361022949,
+          "trimap_iou": -0.00021141767501831055
+        }
+      }
+    },
+    "glass of water": {
+      "candidate": {
+        "acc025": 1.0,
+        "acc050": 1.0,
+        "boundary_f": 0.7138632535934448,
+        "miou": 0.5910181999206543,
+        "n": 2,
+        "trimap_iou": 0.41123583912849426
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.2342197597026825,
+          "miou": 0.12500524520874023,
+          "trimap_iou": -0.06209489703178406
+        },
+        "O1": {
+          "boundary_f": 0.020888864994049072,
+          "miou": -0.03462350368499756,
+          "trimap_iou": -0.04563835263252258
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "hand": {
+      "candidate": {
+        "acc025": 0.0,
+        "acc050": 0.0,
+        "boundary_f": 0.23486952483654022,
+        "miou": 0.24589507281780243,
+        "n": 1,
+        "trimap_iou": 0.4653031527996063
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.23486952483654022,
+          "miou": 0.24589507281780243,
+          "trimap_iou": 0.4653031527996063
+        },
+        "O1": {
+          "boundary_f": 0.23486952483654022,
+          "miou": 0.24589507281780243,
+          "trimap_iou": 0.4653031527996063
+        },
+        "O2": {
+          "boundary_f": 0.23486952483654022,
+          "miou": 0.24589507281780243,
+          "trimap_iou": 0.4653031527996063
+        }
+      }
+    },
+    "kamaboko": {
+      "candidate": {
+        "acc025": 1.0,
+        "acc050": 0.0,
+        "boundary_f": 0.6451735496520996,
+        "miou": 0.39083215594291687,
+        "n": 7,
+        "trimap_iou": 0.49161896109580994
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.37419381737709045,
+          "miou": 0.1788191795349121,
+          "trimap_iou": 0.0010568201541900635
+        },
+        "O1": {
+          "boundary_f": 0.036757469177246094,
+          "miou": 0.03471076488494873,
+          "trimap_iou": 0.0008048117160797119
+        },
+        "O2": {
+          "boundary_f": -0.003566563129425049,
+          "miou": -0.002241462469100952,
+          "trimap_iou": -0.0002225041389465332
+        }
+      }
+    },
+    "napkin": {
+      "candidate": {
+        "acc025": 0.2,
+        "acc050": 0.2,
+        "boundary_f": 0.35142236948013306,
+        "miou": 0.22913804650306702,
+        "n": 5,
+        "trimap_iou": 0.19356480240821838
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.01322031021118164,
+          "miou": 0.026160582900047302,
+          "trimap_iou": 0.0030237436294555664
+        },
+        "O1": {
+          "boundary_f": -0.012198388576507568,
+          "miou": 0.011029914021492004,
+          "trimap_iou": 0.003650188446044922
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "nori": {
+      "candidate": {
+        "acc025": 1.0,
+        "acc050": 0.3333333333333333,
+        "boundary_f": 0.7379109263420105,
+        "miou": 0.5227468609809875,
+        "n": 6,
+        "trimap_iou": 0.4160573482513428
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.0008747577667236328,
+          "miou": -0.10032057762145996,
+          "trimap_iou": -0.029904156923294067
+        },
+        "O1": {
+          "boundary_f": -0.03222024440765381,
+          "miou": -0.09703981876373291,
+          "trimap_iou": -0.0011824369430541992
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "onion segments": {
+      "candidate": {
+        "acc025": 0.5714285714285714,
+        "acc050": 0.0,
+        "boundary_f": 0.5834178328514099,
+        "miou": 0.25303134322166443,
+        "n": 7,
+        "trimap_iou": 0.4017949104309082
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.25688228011131287,
+          "miou": 0.20819266885519028,
+          "trimap_iou": 0.2562302350997925
+        },
+        "O1": {
+          "boundary_f": 0.07553648948669434,
+          "miou": 0.1937832459807396,
+          "trimap_iou": 0.2526940107345581
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "plate": {
+      "candidate": {
+        "acc025": 0.5,
+        "acc050": 0.0,
+        "boundary_f": 0.3792651295661926,
+        "miou": 0.24809998273849487,
+        "n": 4,
+        "trimap_iou": 0.4428863525390625
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.16817402839660645,
+          "miou": 0.025271177291870117,
+          "trimap_iou": -0.04345044493675232
+        },
+        "O1": {
+          "boundary_f": 0.044121772050857544,
+          "miou": 0.006375044584274292,
+          "trimap_iou": -0.023539453744888306
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": -3.8743019104003906e-07,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "sake cup": {
+      "candidate": {
+        "acc025": 0.6666666666666666,
+        "acc050": 0.5,
+        "boundary_f": 0.608038067817688,
+        "miou": 0.420360803604126,
+        "n": 6,
+        "trimap_iou": 0.37846434116363525
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.2810256779193878,
+          "miou": 0.21218019723892212,
+          "trimap_iou": -0.10645046830177307
+        },
+        "O1": {
+          "boundary_f": 0.02352970838546753,
+          "miou": 0.052956581115722656,
+          "trimap_iou": -0.07417133450508118
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "spoon": {
+      "candidate": {
+        "acc025": 1.0,
+        "acc050": 1.0,
+        "boundary_f": 0.8256969451904297,
+        "miou": 0.5505730509757996,
+        "n": 2,
+        "trimap_iou": 0.4856265187263489
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.14052367210388184,
+          "miou": 0.18225109577178955,
+          "trimap_iou": 0.02869325876235962
+        },
+        "O1": {
+          "boundary_f": 0.03485053777694702,
+          "miou": 0.05674654245376587,
+          "trimap_iou": 0.0215798020362854
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "wavy noodles": {
+      "candidate": {
+        "acc025": 1.0,
+        "acc050": 0.14285714285714285,
+        "boundary_f": 0.611145555973053,
+        "miou": 0.4355715215206146,
+        "n": 7,
+        "trimap_iou": 0.48593732714653015
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.1897372305393219,
+          "miou": 0.06205660104751587,
+          "trimap_iou": -0.005344182252883911
+        },
+        "O1": {
+          "boundary_f": -0.023116469383239746,
+          "miou": -0.019316524267196655,
+          "trimap_iou": -0.0055190324783325195
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    }
+  },
+  "scene_id": "ramen",
+  "schema": "radio_gs.lerf_reliability_candidate_exact_metric_results.v1",
+  "schema_version": 1,
+  "single_candidate_no_sweep": true,
+  "source_materialization": {
+    "accepted_rows": 221608,
+    "descriptor_sha256": "82feba8a7148b255a475fff896f986c8eb5bea21c4591aa4e504917e71cbbd49",
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_execution_authority_20260807.json",
+      "sha256": "cea092ba2dc665b6a4481786fff57e82211f0c6e6d090099b23645cb23a9909a"
+    },
+    "global_ceiling_selector": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_only_global_ceiling_lowmem_lineage_compatibility_result_20260807.json",
+      "sha256": "b747b23ad3ecd5c3cfcba93d24b1379072f99fe7d30a25f709e8ba98db462c2c"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_reliability_conditioned_candidate_scores.py",
+      "sha256": "9ad784fd03973b65681dd6a9076e40deaa353e7d6dbff991b7ccaca75bd9f4a7"
+    },
+    "materialization_owner_audit": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_gpu0_owner_audit_20260807.csv",
+      "sha256": "679890bd20573dda5720b723876582aaa4766178af71ee3ef7773a32333b3ec7"
+    },
+    "materialization_telemetry": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_gpu0_telemetry_20260807.csv",
+      "sha256": "6650983485de2144e97c53fee54ad3c6d8bba501fd112f75a995f4696c1de629"
+    },
+    "negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/ramen_reliability_candidate_negative.pt",
+      "sha256": "c5de9d228159cc40043e8bcc2464848822c1d95acc551673e3b58362a8ab0d5e"
+    },
+    "positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/ramen_reliability_candidate_positive.pt",
+      "sha256": "cee8d90243ad1d592a10c307d05824cef9e02d52db0835ecb5bb8c2c0b289713"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/ramen_reliability_candidate_result.json",
+      "sha256": "13e42e5d8245ae8d0e6d91c97c72eb4ef6f52d3f56376355934886b782292fa8"
+    },
+    "retained_view_count_histogram": {
+      "0": 0,
+      "1": 1637,
+      "2": 1125,
+      "3": 3334,
+      "4": 215512
+    },
+    "rows_with_conservative_O1_budget": 1637,
+    "rows_with_expanded_budget": 219971,
+    "rows_with_score_replacement": 221608,
+    "teacher_agreement_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt",
+      "sha256": "44032362a47867a3ad0ff7873c5c43a651be24c60cba7be0be5e6db74dbc3a07"
+    }
+  },
+  "status": "complete_frozen_control_O1_O2_reliability_candidate_one_shot_comparison"
+}

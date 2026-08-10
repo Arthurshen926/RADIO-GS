@@ -1,0 +1,158 @@
+{
+  "schema": "radio_gs.lerf_transport_v2_four_scene_materialization_receipt.v1",
+  "schema_version": 1,
+  "status": "complete_content_addressed_target_blind_materialization",
+  "fixed_global_candidate": {
+    "candidate_index": 11,
+    "maximum_angle_radians": 0.45,
+    "gamma_policy": "k0",
+    "scene_or_query_specific_parameters": false
+  },
+  "source_gate": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_transport_v2_ramen_teatime_cross_scene_source_gate_result_20260809.json",
+    "sha256": "13e5bcad24aa196fa63ba17a45a807e529bce3a19e749449c3430acc5c6b7587"
+  },
+  "implementations": {
+    "native_teacher_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_target_blind_candidate_scores.py",
+      "sha256": "2b8e3f1485da33aad96532843d5314e1409274e75e7f2ca9f8797bcc80c16114"
+    },
+    "canonical_top4_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_transport_v2_target_blind_top4_candidate_scores.py",
+      "sha256": "f8b902eadddee455767b14e8b7eba68ef7cf294baa271af9cef30439e3685c93"
+    },
+    "canonical_top4_teacher_adapter": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/derive_lerf_teacher_agreement_from_top4.py",
+      "sha256": "f0754423fcde0ac7bda1b57c9e0587fa695fbfbc8750b00c5bcee90940a30069"
+    }
+  },
+  "scenes": {
+    "ramen": {
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_transport_v2_target_blind_execution_authority_20260809.json",
+        "sha256": "43cbf4d464b443bdd456d902154aa798a707579784d6ce661a9791fcc6f4d0c4"
+      },
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/ramen_v1/ramen_transport_v2_result.json",
+        "sha256": "d0a89d61314c287814efa6c47e9f0b4201f0aeedb4987b60ef6d4bdb3cc29d80"
+      },
+      "positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/ramen_v1/ramen_transport_v2_positive.pt",
+        "sha256": "df9b65840684f7e88a8e6b0275280b4ff9a8d0b6f88447fc0842aaf91897366f"
+      },
+      "negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/ramen_v1/ramen_transport_v2_negative.pt",
+        "sha256": "b7195dc762d5ec128c5af5bec529fd0a519ae1093d3b44055e08b81c436ad2ee"
+      },
+      "accepted_rows": 221608,
+      "rows_with_teacher_applied": 221608,
+      "rows_with_o0_descriptor_fallback": 0,
+      "elapsed_seconds": 67.25945669109933
+    },
+    "teatime": {
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_transport_v2_target_blind_execution_authority_20260809.json",
+        "sha256": "7b3da4e3d1ea5ba041fd3b7891293b8f988a3cc397015c1935414acb82131c3d"
+      },
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/teatime_v1/teatime_transport_v2_result.json",
+        "sha256": "1f137e8fb58f0c7c2498b6b80ccd0adee05b1c196eba430b8421599c1fdf5ff8"
+      },
+      "positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/teatime_v1/teatime_transport_v2_positive.pt",
+        "sha256": "2b2aa64063303d3d1cb76accc65eb4140f217250e08826150b0f340bf4a1d36e"
+      },
+      "negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/teatime_v1/teatime_transport_v2_negative.pt",
+        "sha256": "1da9a656c3e5c899570ab1bdd2c7ebd69f4f870cf902459cb0e64cadd2be4133"
+      },
+      "accepted_rows": 334250,
+      "rows_with_teacher_applied": 334161,
+      "rows_with_o0_descriptor_fallback": 89,
+      "elapsed_seconds": 98.09723828895949
+    },
+    "waldo_kitchen": {
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_transport_v2_target_blind_execution_authority_20260809.json",
+        "sha256": "5c71b5c4b401bad12d63a0d4befcfa843ecdc216b2f86344e64654ed6fb5e0df"
+      },
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/waldo_kitchen_v1/waldo_kitchen_transport_v2_result.json",
+        "sha256": "80efcc0a222f22b01d08a196fa5988ad96b59a4542571ecd96c5faa5a0e93dfc"
+      },
+      "positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/waldo_kitchen_v1/waldo_kitchen_transport_v2_positive.pt",
+        "sha256": "ce9a7b7b78b7779dbbe0da9b48cfc737b9ec8f3daf6f727b0aaa26837e78873b"
+      },
+      "negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/waldo_kitchen_v1/waldo_kitchen_transport_v2_negative.pt",
+        "sha256": "565c1f813ce75ba03fa84c2f5caa0a4e81772e0f48f2319ea9b9a7a404cb7009"
+      },
+      "accepted_rows": 433043,
+      "rows_with_teacher_applied": 431460,
+      "rows_with_o0_descriptor_fallback": 1583,
+      "elapsed_seconds": 171.52711484197062,
+      "execution_note": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_transport_v2_duplicate_launch_interruption_addendum_20260809.json",
+        "sha256": "232e2a6302b820aace7910bc54c19281035d1b6163395c30c0df7cdc2371375e"
+      }
+    },
+    "figurines": {
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_figurines_transport_v2_target_blind_top4_execution_authority_20260809.json",
+        "sha256": "a2e2ede10e6688439c3954f1a87ec8118c28a1bd9bd97e9d335ee5e2789f8ef2"
+      },
+      "teacher_adapter": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_teacher_agreement_from_top4.pt",
+        "sha256": "6fde6a77a803d5325a1b432cebbe0215a8496e195a399eb0087a8f9fa4b26a90"
+      },
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_transport_v2_result.json",
+        "sha256": "a58e6f14ec2407af097e59b87849cf53254abc9c33fa5588b38fda80e18d5bac"
+      },
+      "positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_transport_v2_positive.pt",
+        "sha256": "f3b46500667fdbf22b5c616c53eec97003e762d99c53daa97b34e9e4a58565a8"
+      },
+      "negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_transport_v2_target_blind/figurines_v1/figurines_transport_v2_negative.pt",
+        "sha256": "426c4d099b343b1c72bea03611e3d157146b762d2bce5c90371212a15fcd1faa"
+      },
+      "accepted_rows": 82603,
+      "rows_with_teacher_applied": 82400,
+      "rows_with_o0_descriptor_fallback": 203,
+      "elapsed_seconds": 37.321577116963454
+    }
+  },
+  "invariants": {
+    "all_scenes_materialized": true,
+    "all_unit_norm_maximum_absolute_error": 1.1920928955078125e-7,
+    "all_outputs_content_addressed": true,
+    "target_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_metric_executed_during_materialization": false,
+    "frozen_evaluator_modified": false
+  },
+  "focused_verification": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_materialize_lerf_transport_v2_target_blind_candidate_scores.py tests/test_derive_lerf_teacher_agreement_from_top4.py tests/test_lerf_scale_residual_shrinkage_transport.py tests/test_lerf_scale_residual_shrinkage_transport_order_statistic_v2.py tests/test_materialize_lerf_transport_v2_analytic_source_loo_exact.py",
+    "passed": 30,
+    "failed": 0,
+    "test_files": {
+      "target_blind_materializer": {
+        "path": "/root/RADIO-GS/tests/test_materialize_lerf_transport_v2_target_blind_candidate_scores.py",
+        "sha256": "5f6a2678ab7795e2b1b22c86aacc8a06ab590692e109c6f0e1e627a76b8d3f58"
+      },
+      "canonical_top4_adapter": {
+        "path": "/root/RADIO-GS/tests/test_derive_lerf_teacher_agreement_from_top4.py",
+        "sha256": "21963b81027fd9e2bd12e4cfa72fa016a6df1c35fefbb476b66d5e6d9c613935"
+      }
+    }
+  },
+  "downstream_exact_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_transport_v2_valid_domain_knn_full4_result_20260809.json",
+    "sha256": "df8587971a1c827c07dbdff9becd8885790331ef740d3a81d7fa3e6a2a852730",
+    "promoted": false
+  }
+}

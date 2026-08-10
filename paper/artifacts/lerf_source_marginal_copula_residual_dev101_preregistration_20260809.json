@@ -1,0 +1,62 @@
+{
+  "schema": "radio_gs.lerf_source_marginal_copula_grid_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_source_only_before_execution",
+  "scientific_question": "Can genuine crop-summary MPR improve target-blind source response ordering when it is restricted to a bounded copula residual whose output score marginal is exactly the accepted O2 marginal?",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_source_marginal_copula_residual_grid.py",
+    "sha256": "b3abf26dd8bc68517a3eacf3c0c94ff9909c97e54cf0b162210d79dd54d0ea49"
+  },
+  "interface_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_marginal_preserving_copula_residual.py",
+    "sha256": "2be68c649209c383e0fa1c2218c592bb89cd58356646dcf81abfdd7c88648b80"
+  },
+  "interface_contract": "lerf-accepted-marginal-bounded-copula-residual-v1",
+  "split": "dev",
+  "policies": [
+    {"policy_id": "b02_s1", "strength": 1.0, "maximum_rank_fraction": 0.02},
+    {"policy_id": "b05_s05", "strength": 0.5, "maximum_rank_fraction": 0.05},
+    {"policy_id": "b05_s1", "strength": 1.0, "maximum_rank_fraction": 0.05},
+    {"policy_id": "b10_s05", "strength": 0.5, "maximum_rank_fraction": 0.1},
+    {"policy_id": "b10_s1", "strength": 1.0, "maximum_rank_fraction": 0.1},
+    {"policy_id": "b20_s05", "strength": 0.5, "maximum_rank_fraction": 0.2},
+    {"policy_id": "b20_s1", "strength": 1.0, "maximum_rank_fraction": 0.2},
+    {"policy_id": "b40_s05", "strength": 0.5, "maximum_rank_fraction": 0.4}
+  ],
+  "source_authorities": {
+    "ramen": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_v2_gpu0_execution_authority_20260809.json",
+      "sha256": "2944a8d43b7c09f30aa4ef4e7957268c291e41dc19334e63a26eb5ea7400d0b3"
+    },
+    "teatime": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_v2_gpu1_execution_authority_20260809.json",
+      "sha256": "3ecb70e31089b92b9e6c922fd89513b5c4bd68b6e780c0d40edcc217417ccbde"
+    }
+  },
+  "decision_rule": {
+    "one_global_policy": true,
+    "eligibility": [
+      "strict pooled response MAE improvement",
+      "strict pooled ranking Spearman improvement",
+      "strict pooled top-decile overlap improvement",
+      "every source scene nonregression on all six frozen source metrics",
+      "exact accepted empirical marginal on every frame and query"
+    ],
+    "selection": "highest pooled ranking Spearman among eligible candidates; tie break by policy order",
+    "fallback": "unchanged accepted O2",
+    "per_scene_or_per_query_tuning": false,
+    "reserved_audit90_opened_during_development": false
+  },
+  "application_boundary": {
+    "required_target_location": "after the complete frozen canonical-negative plus valid-domain-KNN10 plus per-scale-minmax compiler",
+    "raw_cosine_application_preserves_later_nonlinear_compiler": false,
+    "accepted_score_multiset_preserved_exactly": true,
+    "selected_count_preserved_at_every_fixed_threshold": true,
+    "maximum_item_rank_displacement": "ceil(maximum_rank_fraction*N)-1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

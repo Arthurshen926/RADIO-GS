@@ -1,0 +1,53 @@
+{
+  "schema": "radio_gs.source_only_graph_expected_utility_fix4_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_expected_utility_fix4",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/audit_source_only_graph_expected_utility_fix4.py",
+    "sha256": "3beb9de0c319d9275a67f74196d2ce73b6169ae8f6e2627a182fc7899dbb8935"
+  },
+  "fix3_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_fix3_execution_authority_20260807.json",
+    "sha256": "8985dee7eb19da1102744e14ea6aec1990c5044849a870ac52f5e7382f6dcf9b"
+  },
+  "fix3_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_calibration_result_fix3_20260807.json",
+    "sha256": "5064aae6ab15272f427d31e50391e134b154262d171164c4bacae1c7fcab7568"
+  },
+  "fixed_intervention": {
+    "consumer_null_step_thresholds": [0.0, 0.0, 0.0],
+    "comparison": "strict_gain_greater_than_zero",
+    "maximum_selected_regions": 3,
+    "unchanged": [
+      "epsilon_logit",
+      "raw_edge_probability_minimum",
+      "pair_reliability_gate",
+      "pair_feature_OOD_gate",
+      "O0_supermajority_anchor_contract",
+      "anchor_quorum",
+      "nonnegative_bounded_residual",
+      "bitwise_O0_fallback"
+    ]
+  },
+  "source_gate": {
+    "minimum_validation_mixed_precision_Wilson95_lower": 0.95,
+    "minimum_every_validation_scene_mixed_precision_Wilson95_lower": 0.9,
+    "minimum_validation_true_pseudo_anchor_coverage": 0.9,
+    "failure_action": "reject_fix4_do_not_open_target"
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "source_query_evidence_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_heldout_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false
+  },
+  "benchmark_execution_authorized": false
+}

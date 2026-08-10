@@ -1,0 +1,77 @@
+{
+  "artifact": "full_scalar_scene0008_query_free_result_geometry_gpu0_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:10:57+08:00",
+  "status": "sealed_after_query_free_success_and_before_geometry_training",
+  "scene_id": "scene0008_00",
+  "cohort_split": "source_validation",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0008_base_chain_execution_preregistration_20260807.json",
+    "sha256": "a5a73a3605f507e8b52547ff2f47c87bec7fb23a547f0e479bc5db39dc2752d3"
+  },
+  "query_free_result": {
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/receipts/01_query_free_materialization.json",
+    "receipt_sha256": "ccb7833cff494797457b44720d4b23069c41a5c03186e4c21e768ff3db276dce",
+    "receipt_authority_sha256": "2628edff3c792bbce8ad5f1f439d4859179a15c5a71a9009fc331c4448e45333",
+    "materialization_report_sha256": "64b9662f6e5f0ba9adc9899e1a299954ad9700d8aa174fabf77c3f16af624936",
+    "field_source_contract_sha256": "2ca730d45615b45b2feff0c3bd370b421f4f3d214a6535b49250a4dbd9ac79d5",
+    "field_frame_manifest_sha256": "874ade7991f8d2d41f9ee77cc3a44db78d7b55098cba7fea85191029519b7d56",
+    "full_sens_frames": 1038,
+    "valid_pose_frames": 1038,
+    "selected_field_frames": 240,
+    "rgb_depth_pose_counts_equal_240": true,
+    "query_free_valid": true
+  },
+  "geometry_contract": {
+    "implementation": "/root/RADIO-GS/radio_gs/scripts/train_scannet_gs.py",
+    "iterations": 15000,
+    "frame_stride": 1,
+    "initialization_frames": 50,
+    "initialization_stride": 8,
+    "maximum_points": 200000,
+    "initialization_selection_policy": "coverage_prefix",
+    "field_source_contract_bound": true,
+    "per_scene_hyperparameters": false
+  },
+  "command": [
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/run_full_scalar_scannet_clean_pilot_v3.py",
+    "--scene-id", "scene0008_00",
+    "--scan-archive-part", "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "--cohort-authority", "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "--expected-cohort-authority-sha256", "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "--exclusion-manifest", "paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "--expected-exclusion-manifest-sha256", "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29",
+    "--inventory", "paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+    "--expected-inventory-sha256", "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539",
+    "--pilot-root", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00",
+    "--gpu", "0",
+    "--stop-after", "geometry"
+  ],
+  "execution": {
+    "physical_gpu": 0,
+    "pci_bus_id": "00000000:02:00.0",
+    "initial_temperature_c": 46,
+    "power_limit_w": 300.0,
+    "compute_owner_pids": [],
+    "output_preexisting": false,
+    "atomic_no_clobber": true
+  },
+  "thermal_guard": {
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false,
+    "peer_gpu_monitoring": false
+  },
+  "source_access": {
+    "source_rgb_depth_pose_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "frozen_evaluator_metric_renderer_modified": false
+}

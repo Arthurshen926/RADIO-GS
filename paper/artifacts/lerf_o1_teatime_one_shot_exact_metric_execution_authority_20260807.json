@@ -1,0 +1,66 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_one_shot_exact_metric_execution_authority.v2",
+  "schema_version": 2,
+  "status": "authorized_after_independent_exact_o0_frozen_config_control_replay",
+  "scene_id": "teatime",
+  "oracle": "O1",
+  "single_candidate_no_sweep": true,
+  "metric_execution_authorized": true,
+  "source_materialization": {
+    "execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/execution_authority.json",
+      "sha256": "7bb48a052b31b58a3827ead0500968f97f9b320e9f4d13b6004c1a3b375b912b"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/teatime_o1_o2_streaming_result.json",
+      "sha256": "7323e7674f0ae2368d9cc31cdd3275c08f6bcf35f97d952e1b470927787a20a2"
+    }
+  },
+  "satisfied_control_gate": {
+    "replay_result_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_teatime_frozen_config_control_replay_result_20260807.json",
+      "sha256": "92196588a63a79a0207bcf6adc63c5abb17acb8c6cd47d8703663a3103510473"
+    },
+    "metric_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o0_exact_frozen_config_control_v1/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "ac02a4ed0566813027ddcb5021c495138d5f3f889d632f24b37338df963ec1d0"
+    },
+    "exact_control_miou": 0.404494971036911,
+    "lineage_replay_passed": true
+  },
+  "candidate": {
+    "positive_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/teatime_o1_positive.pt",
+      "sha256": "012982b3af8f2d67db2b6ccf7112f76403803b930bedd96c19e0464c6a1f7f30"
+    },
+    "canonical_negative_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/teatime_o1_negative.pt",
+      "sha256": "a82816715d0a46370c74a11469250c4cff7cb49848447575186ce6359df09c35"
+    }
+  },
+  "frozen_protocol": {
+    "must_equal_control_bitwise_except_candidate_caches_and_output_directory": true,
+    "config_sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775",
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "logical_gpu_argument": 0,
+    "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o1_exact_v1",
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_disabled": true
+  },
+  "access_audit": {
+    "target_images_opened_during_authority_build": false,
+    "target_ground_truth_opened_during_authority_build": false,
+    "target_masks_opened_during_authority_build": false,
+    "target_metrics_opened_during_authority_build": false,
+    "candidate_metric_executed_before_authority": false
+  }
+}

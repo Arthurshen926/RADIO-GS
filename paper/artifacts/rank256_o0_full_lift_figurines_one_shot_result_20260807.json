@@ -1,0 +1,99 @@
+{
+  "schema": "radio_gs.rank256_o0_full_lift_figurines_one_shot_result.v1",
+  "schema_version": 1,
+  "status": "complete_rejected",
+  "scene_id": "figurines",
+  "candidate": "source_promoted_v21b_rank256_region_residual_lifted_to_frozen_O0_multiscale_primitives",
+  "configuration": {
+    "max_angle_radians": 0.15,
+    "minimum_region_reliability": 0.0,
+    "query_conditioned_parameters": false,
+    "scene_conditioned_parameters": false,
+    "target_metric_tuning": false
+  },
+  "premetric_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_query_premetric_v1_fix2/figurines/execution_authority.json",
+    "sha256": "cce96d4ce63afdbff247c87360f74ce15caa25665151725f72458c968c35067d"
+  },
+  "external_query_score_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_query_premetric_v1_fix2/figurines/external_query_scores.pt",
+    "sha256": "85f4729d283e194fc0135218a305ade344985ca50afbcfd1bc8b045c12e495b2"
+  },
+  "premetric_audit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_query_premetric_v1_fix2/figurines/premetric_audit.json",
+    "sha256": "ef2c676277610eeb1dbbda475d3754aa7be2865c1a0fc3db1535465ee60d1230"
+  },
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/rank256_o0_full_lift_figurines_one_shot_metric_execution_authority_20260807.json",
+    "sha256": "9abfc6b9907c0f8f68201c168d2601f388d37e63eecf12f174150cb5b877dbfc"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_frozen_metric_v1/figurines/evaluation/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "f8f433d1828bc159836c28cd2573b9b2841d643d48c572b43e6ff5cf8abbb8df"
+  },
+  "frozen_O0_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_direct3d_accepted_v2_fp32_exact_explicit_f32_v2/figurines/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "4bbd8c963898b9dd7fb47dfa75dbea28f6062ecca8d8c74ccb2fbc9b2dcbfc12"
+  },
+  "protocol": {
+    "protocol_preset": "vala_paper_3d",
+    "score_threshold": 0.6,
+    "score_postprocess": "none",
+    "projection_mode": "selected_only_alpha",
+    "threshold_scan": false,
+    "single_candidate_no_sweep": true
+  },
+  "premetric": {
+    "supported_queries": 21,
+    "query_count": 21,
+    "micro_O0_seed_precision": 0.8392447319006885,
+    "micro_O0_seed_recall": 0.9125971300550167,
+    "maximum_per_query_expansion": 2.1421856639247943,
+    "minimum_per_query_pearson": 0.9059197368685453,
+    "fallback_raw_max_abs_difference": 1.2665987014770508e-07,
+    "all_fixed_checks_passed": true
+  },
+  "metrics": {
+    "frozen_O0": {
+      "miou": 0.4753887355327606,
+      "acc025": 0.8035714285714286,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.682007372379303,
+      "trimap_iou": 0.38083696365356445,
+      "n": 56
+    },
+    "rank256_full_lift": {
+      "miou": 0.46538281440734863,
+      "acc025": 0.7857142857142857,
+      "acc050": 0.5535714285714286,
+      "boundary_f": 0.6691867113113403,
+      "trimap_iou": 0.3897266983985901,
+      "n": 56
+    },
+    "delta_candidate_minus_O0": {
+      "miou": -0.010005921125411987,
+      "acc025": -0.017857142857142905,
+      "acc050": 0.017857142857142905,
+      "boundary_f": -0.012820661067962646,
+      "trimap_iou": 0.008889734745025635
+    }
+  },
+  "diagnostic_extremes": {
+    "largest_improvements": {
+      "red apple": 0.04945951700210571,
+      "toy elephant": 0.015443205833435059,
+      "rubics cube": 0.0057392120361328125
+    },
+    "largest_regressions": {
+      "pink ice cream": -0.12576895952224731,
+      "porcelain hand": -0.03865468502044678,
+      "pikachu": -0.035793811082839966,
+      "red toy chair": -0.035606831312179565
+    }
+  },
+  "decision": {
+    "adopt": false,
+    "reason": "A query-free source-promoted residual has real local gains but unconditional primitive updates damage fine-grained instance boundaries and sibling separation; O0-seed agreement is not a sufficient utility gate.",
+    "next_intervention": "Keep O0 immutable and condition missing-core completion on the frozen cross-scene-validated monotone utility selector."
+  }
+}

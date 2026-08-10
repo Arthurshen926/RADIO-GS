@@ -1,0 +1,118 @@
+{
+  "schema": "radio_gs.lerf_genuine_mpr_valid_domain_knn10_dual_scene_frozen_exact_independent_preexecution_audit.v1",
+  "schema_version": 1,
+  "status": "PASS_TARGET_EXECUTION_RELEASED",
+  "auditor": "/root/audit_source_v2",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_genuine_mpr_valid_domain_knn10_dual_scene_frozen_exact_execution_authority_20260809.json",
+    "sha256": "8d729aa0b328f2ecdf08f03db463bae045572cdb30008a12d7c732b04b7f4f37"
+  },
+  "source_gate_audit": {
+    "development_101": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/descriptor_first_v2_source_text_response_ranking_gate_result.json",
+      "sha256": "11be2adc41d21da1d2ce37ec09af1f8665bc928cec46b497080f7a59bd3f6af8",
+      "status": "PASS",
+      "candidate_eligible": true,
+      "target_metric_executed": false
+    },
+    "reserved_audit_90": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_audit90_confirmation/descriptor_first_audit90_confirmation_gate_result.json",
+      "sha256": "16a1d2f8b9be46c93c7fd7fe00ae6d399ba51fe1d90e33eff86b8b890bb465c8",
+      "status": "PASS",
+      "every_scene_all_metrics_nonregressing": true,
+      "strict_pooled_improvements": true,
+      "target_metric_executed": false
+    },
+    "independent_confirmation_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_audit90_confirmation_result_20260809.json",
+      "sha256": "d6cf4d92742d77411d863fbf1b169c43bbfcccbf9283a33b44c769eae7a79963",
+      "cross_split_same_global_candidate": true
+    }
+  },
+  "frozen_protocol_audit": {
+    "verified_path_sha256_records": 24,
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "summary_head_weights_sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c",
+    "positive_text_bank_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "canonical_negative_bank_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "protocol_preset": "vala_paper_3d",
+    "exact_frozen_tokens_preserved": true,
+    "candidate_score_postprocess_at_evaluator": "none"
+  },
+  "candidate_audit": {
+    "readout_materializer_sha256": "62984cf602a17a69ea042f80f74f902878a6d47240f945111097fe3375e76bb9",
+    "readout_implementation_sha256": "d4ca07376f4a18d3f7b45fd9fcf19730b8a436270ea50c23f0962948c4f7878a",
+    "knn_k": 10,
+    "single_candidate_no_sweep": true,
+    "per_scene_or_per_query_tuning": false,
+    "scores_finite_in_unit_interval": true,
+    "invalid_primitive_scores_exact_zero": true,
+    "cache_tensor_semantic_hashes_match_reports": true,
+    "cache_xyz_geometry_hashes_match_renderer_checkpoints": true
+  },
+  "scenes": {
+    "ramen": {
+      "candidate_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_genuine_mpr_valid_domain_knn10/ramen/v1/ramen_genuine_mpr_valid_domain_knn10_scores.pt",
+        "sha256": "a20981045420932db759f0fc121359a2165bfafa4083588fe33fb675d65a973d",
+        "shape": [382687, 14],
+        "valid_gaussians": 221608
+      },
+      "premetric_report_sha256": "bc03da8fce8cc9119506784c0db8419ac7c6f331312ca9192105728eac810fd9",
+      "accepted_exact_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_o2_valid_domain_knn_one_shot_exact_metric_execution_authority_20260807.json",
+        "sha256": "13e9ebd3676fa21e7a43c4757657e5ed8b3291242cf4cde4b61bb91e4518b08d"
+      },
+      "command_exact_except_candidate_and_output_values": true,
+      "cuda_visible_devices": "0",
+      "logical_gpu_argument": 0,
+      "output_directory_telemetry_and_owner_logs_absent": true
+    },
+    "teatime": {
+      "candidate_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_genuine_mpr_valid_domain_knn10/teatime/v1/teatime_genuine_mpr_valid_domain_knn10_scores.pt",
+        "sha256": "aa1b5a2f22f6fa10edb0eba412c3e1f562fa57ce911299e840995bcdd2e080e7",
+        "shape": [460157, 14],
+        "valid_gaussians": 234881,
+        "accepted_control_valid_but_candidate_missing": 99369
+      },
+      "premetric_report_sha256": "0dd339bd5af945cccfffad36611ea3b676db331aa26ede5271a72192a7385516",
+      "accepted_exact_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_rebound_o2_valid_domain_knn_one_shot_exact_metric_execution_authority_20260807.json",
+        "sha256": "32aeb20299645411ef9ff928e59e02f8e7a2f3652aff202e4f3cb748e35e7f6e"
+      },
+      "command_exact_except_candidate_and_output_values": true,
+      "cuda_visible_devices": "1",
+      "logical_gpu_argument": 0,
+      "cuda_mapping_interpretation": "physical GPU1 is the sole visible CUDA device and is therefore logical cuda:0; --gpu 0 is correct",
+      "output_directory_telemetry_and_owner_logs_absent": true
+    }
+  },
+  "fresh_no_clobber": {
+    "both_output_directories_absent": true,
+    "all_four_telemetry_and_owner_log_paths_absent": true,
+    "all_six_future_paths_pairwise_distinct": true,
+    "authority_requires_output_directory_nonexistence": true,
+    "release_condition": "launcher must preserve the audited nonexistence precondition"
+  },
+  "thermal_policy": {
+    "poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_temperature_c": 0,
+    "power_limit_watts": 300,
+    "host_pid_singleton_owner_mode": true,
+    "status": "PASS"
+  },
+  "decision_rule": {
+    "fixed_before_target_execution": true,
+    "promote_scene_only_on_strict_miou_improvement": true,
+    "promote_global_only_if_both_scenes_nonregress_and_macro_miou_strictly_improves": true,
+    "no_retry_or_threshold_adjustment": true,
+    "fallback": "accepted_o2_valid_domain_knn10_mainline"
+  },
+  "release": {
+    "target_execution_permitted": true,
+    "permitted_authority_sha256": "8d729aa0b328f2ecdf08f03db463bae045572cdb30008a12d7c732b04b7f4f37",
+    "any_authority_candidate_evaluator_or_frozen_input_change_requires_reaudit": true
+  }
+}

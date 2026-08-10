@@ -1,0 +1,97 @@
+{
+  "schema": "radio_gs.lerf_o0_exact_fp32_score_cache_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_no_gt_exact_frozen_o0_score_cache_only",
+  "scene_id": "waldo_kitchen",
+  "frozen_protocol_config": {
+    "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+    "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_multiscale_query_score_cache_fp32.py",
+    "sha256": "3ab6fcc5dbebf27a37de0f3d694626dd4d92ac71b748677d7a4ecd7dbbf1b4fd"
+  },
+  "legacy_exact_o0_helper": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_multiscale_query_score_cache.py",
+    "sha256": "277702e733ae0e4d801b23396129af3213988340c6f07c0e3b1db6fa6b22aa91"
+  },
+  "inputs": {
+    "descriptor_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/waldo_kitchen.pt",
+      "sha256": "f8e368473fdbd3bec007eb17cf1ca0dc1db347acb6c7d6aeb48265b6c2c19a58"
+    },
+    "positive_text_query_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_queries_single.pt",
+      "sha256": "8872a922f8190684db0e0616c6047470394f59bd0816b3cf07b4cd27cdb5119b"
+    },
+    "negative_text_query_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_negatives_single.pt",
+      "sha256": "432348abb1fe33b265a0c0df56d0e0dec61e70119a87d11a8babfd59999dff37"
+    },
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/waldo_kitchen_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth",
+      "sha256": "3f5a8892c47985f1f4312f104e110b9f57b76ba6b95801906a0bb230b61c8861"
+    },
+    "readout_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+    }
+  },
+  "outputs": {
+    "positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_positive.pt",
+    "negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_negative.pt"
+  },
+  "execution": {
+    "device": "cpu",
+    "chunk_size": 8192,
+    "positive_allow_missing_text_canonicalization_metadata": false,
+    "negative_allow_missing_text_canonicalization_metadata": false,
+    "no_clobber": true
+  },
+  "commands": {
+    "positive": [
+      "bash", "radio_gs/scripts/run_repo_python.sh", "-m", "radio_gs.scripts.materialize_lerf_multiscale_query_score_cache_fp32",
+      "--descriptor-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/waldo_kitchen.pt",
+      "--descriptor-cache-sha256", "f8e368473fdbd3bec007eb17cf1ca0dc1db347acb6c7d6aeb48265b6c2c19a58",
+      "--text-query-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_queries_single.pt",
+      "--text-query-cache-sha256", "8872a922f8190684db0e0616c6047470394f59bd0816b3cf07b4cd27cdb5119b",
+      "--field-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/waldo_kitchen_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth",
+      "--field-checkpoint-sha256", "3f5a8892c47985f1f4312f104e110b9f57b76ba6b95801906a0bb230b61c8861",
+      "--readout-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "--readout-checkpoint-sha256", "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+      "--renderer-geometry-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "--renderer-geometry-checkpoint-sha256", "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+      "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_positive.pt",
+      "--chunk-size", "8192"
+    ],
+    "negative": [
+      "bash", "radio_gs/scripts/run_repo_python.sh", "-m", "radio_gs.scripts.materialize_lerf_multiscale_query_score_cache_fp32",
+      "--descriptor-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/waldo_kitchen.pt",
+      "--descriptor-cache-sha256", "f8e368473fdbd3bec007eb17cf1ca0dc1db347acb6c7d6aeb48265b6c2c19a58",
+      "--text-query-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_negatives_single.pt",
+      "--text-query-cache-sha256", "432348abb1fe33b265a0c0df56d0e0dec61e70119a87d11a8babfd59999dff37",
+      "--field-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/waldo_kitchen_compact_d256_l128_primary_frozen_adjoint16_fallback_caploss_seed0.pth",
+      "--field-checkpoint-sha256", "3f5a8892c47985f1f4312f104e110b9f57b76ba6b95801906a0bb230b61c8861",
+      "--readout-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "--readout-checkpoint-sha256", "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb",
+      "--renderer-geometry-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "--renderer-geometry-checkpoint-sha256", "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+      "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_negative.pt",
+      "--chunk-size", "8192"
+    ]
+  },
+  "access_audit": {
+    "query_names_opened": true,
+    "target_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "score_cache_execution_authorized": true,
+  "target_quality_execution_authorized": false
+}

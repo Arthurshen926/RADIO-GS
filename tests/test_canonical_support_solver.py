@@ -1,8 +1,12 @@
+from dataclasses import replace
+
 import pytest
 import torch
 
+from radio_gs.querying.evidence_scorer import EvidenceScoringConfig
 from radio_gs.querying.query_engine import CanonicalQueryEngine
 from radio_gs.querying.query_spec import (
+    PrimitiveUnaryEvidence,
     QueryIntent,
     QueryModality,
     QuerySpec,
@@ -811,3 +815,138 @@ def test_query_conditioned_affinity_preserves_smooth_edges_and_gates_unary_bound
     torch.testing.assert_close(
         query_conditioned_laplacian_affinity(graph, prior, contrast=0.0), baseline
     )
+
+
+def _registered_transport_fixture():
+    graph = build_primitive_support_graph(
+        torch.tensor(
+            [
+                [0.00, 0.0, 0.0],
+                [0.08, 0.0, 0.0],
+                [0.16, 0.0, 0.0],
+                [0.24, 0.0, 0.0],
+            ]
+        ),
+        config=SupportGraphConfig(neighbors=1),
+    )
+    query = QuerySpec(
+        modality=QueryModality.REGISTERED_2D,
+        intent=QueryIntent.REGION,
+        registration=RegistrationMode.CAMERA,
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            torch.tensor([0.8, 0.2, 0.0, -0.8]),
+            "raster_adjoint_foreground_background_continuous",
+            confidence=torch.tensor([1.0, 0.5, 0.0, 1.0]),
+        ),
+        selection_mode=SelectionMode.ALL_COMPONENTS,
+    )
+    scoring = EvidenceScoringConfig(
+        registered_observation_fusion="direct_raster_adjoint"
+    )
+    solver = SupportSolverConfig(
+        iterations=3,
+        residual=0.2,
+        unary_temperature=1.0,
+        support_threshold=0.5,
+    )
+    return graph, query, scoring, solver
+
+
+def test_registered_transport_default_is_bitwise_legacy_solver_path():
+    graph, query, scoring, solver = _registered_transport_fixture()
+    result = CanonicalQueryEngine(
+        graph,
+        scoring_config=scoring,
+        solver_config=solver,
+    ).execute(query, {})
+    query_graph = graph_for_query_intent(
+        graph,
+        query.intent,
+        policy="typed_if_available",
+        legacy_residual=0.0,
+        channel_confidence_mode="none",
+    )
+    expected = solve_primitive_support(query_graph, result.unary, config=solver)
+
+    assert torch.equal(result.probabilities, expected)
+    assert result.registered_2d_transport_policy == "legacy_graph_solver_final"
+    assert result.registered_2d_transport_diagnostics is None
+
+
+def test_registered_anchor_transport_has_causal_two_by_two_controls():
+    graph, query, scoring, solver = _registered_transport_fixture()
+    results = {}
+    for proposal_enabled in (False, True):
+        for projection_enabled in (False, True):
+            results[(proposal_enabled, projection_enabled)] = (
+                CanonicalQueryEngine(
+                    graph,
+                    scoring_config=scoring,
+                    solver_config=solver,
+                    registered_2d_transport_policy=(
+                        "anchor_preserving_graph_proposal_v1"
+                    ),
+                    registered_2d_graph_proposal=proposal_enabled,
+                    registered_2d_anchor_projection=projection_enabled,
+                    registered_2d_transport_max_abs_logit_residual=2.0,
+                ).execute(query, {})
+            )
+
+    anchor = torch.sigmoid(
+        results[(False, False)].unary / solver.unary_temperature
+    )
+    # Projection has no effect in the proposal-off identity-control arm.
+    assert torch.equal(results[(False, False)].probabilities, anchor)
+    assert torch.equal(results[(False, True)].probabilities, anchor)
+    # The graph-only arm isolates the proposal intervention.
+    graph_proposal = results[(True, False)].probabilities
+    assert not torch.equal(graph_proposal, anchor)
+
+    projected = results[(True, True)]
+    confidence = query.primitive_unary_evidence.confidence
+    assert confidence is not None
+    fully_observed = confidence == 1
+    assert torch.equal(
+        projected.probabilities[fully_observed], anchor[fully_observed]
+    )
+    logit_shift = (
+        torch.logit(projected.probabilities) - torch.logit(anchor)
+    ).abs()
+    assert logit_shift[1] <= (1.0 - confidence[1]) * 2.0 + 1e-6
+    assert logit_shift[2] <= 2.0 + 1e-6
+    assert logit_shift[2] > 0
+
+    # ALL_COMPONENTS remains a threshold readout, never an implicit connected
+    # strong selection after completion.
+    assert torch.equal(
+        projected.selected_support,
+        projected.probabilities >= solver.support_threshold,
+    )
+    diagnostics = projected.registered_2d_transport_diagnostics
+    assert diagnostics is not None
+    assert diagnostics["graph_solver_role"] == "completion_proposal"
+    assert diagnostics["observation_authority"] == (
+        "PrimitiveUnaryEvidence.confidence"
+    )
+    assert diagnostics["fully_observed_rows"] == 2
+    assert diagnostics["connected_selection_applied"] is False
+    assert diagnostics["max_abs_applied_logit_residual"] <= 2.0
+
+
+def test_registered_anchor_transport_fails_closed_without_authority():
+    graph, query, scoring, solver = _registered_transport_fixture()
+    query = replace(
+        query,
+        primitive_unary_evidence=PrimitiveUnaryEvidence(
+            query.primitive_unary_evidence.values,
+            "raster_adjoint_foreground_background_continuous",
+        ),
+    )
+    engine = CanonicalQueryEngine(
+        graph,
+        scoring_config=EvidenceScoringConfig(registered_seed_unary_weight=1.0),
+        solver_config=solver,
+        registered_2d_transport_policy="anchor_preserving_graph_proposal_v1",
+    )
+    with pytest.raises(ValueError, match="observation authority"):
+        engine.execute(query, {})

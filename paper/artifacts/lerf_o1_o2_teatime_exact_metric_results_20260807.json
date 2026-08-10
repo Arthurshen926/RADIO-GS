@@ -1,0 +1,200 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_exact_metric_results.v2",
+  "schema_version": 2,
+  "status": "complete_frozen_control_O1_O2_single_candidate_comparison",
+  "scene_id": "teatime",
+  "source_materialization": {
+    "unpaced_wrapper": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced.py",
+      "sha256": "e686f0d1dee5cc3a68a16dbf6cf00ce014f4e761b864716a062f365119e2eddc"
+    },
+    "streaming_core": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "method_contract_sha256": "c4c47c7098ec60ea1bee71051551c20784f6900828e470c57f8056c4c2fd7214",
+    "execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/execution_authority.json",
+      "sha256": "7bb48a052b31b58a3827ead0500968f97f9b320e9f4d13b6004c1a3b375b912b"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/teatime_o1_o2_streaming_result.json",
+      "sha256": "7323e7674f0ae2368d9cc31cdd3275c08f6bcf35f97d952e1b470927787a20a2"
+    },
+    "teacher_mean": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/teatime_teacher_mean_fp16.pt",
+      "sha256": "80ce83dafd4589caa58e71b3cff8d8acb11c2183e5c834bffec9e4da0d20ecb2"
+    },
+    "O1_positive_sha256": "012982b3af8f2d67db2b6ccf7112f76403803b930bedd96c19e0464c6a1f7f30",
+    "O1_negative_sha256": "a82816715d0a46370c74a11469250c4cff7cb49848447575186ce6359df09c35",
+    "O2_positive_sha256": "cc67b8322de9f85189939df9ee4bad159f72a4d0352df343278c816501aaf0ab",
+    "O2_negative_sha256": "fb01f1d50cd0eae8bfebaa3acdec12c3ec9f53ab6f2f91b57634baa6c181e039",
+    "accepted_rows": 334250,
+    "rows_with_teacher": 334161,
+    "rows_without_teacher_bitwise_o0_fallback": 89,
+    "source_view_loop_seconds": 147.44505504402332,
+    "total_elapsed_seconds": 395.82992985495366,
+    "projection_batch": 128,
+    "preflight_peak_cuda_bytes": 7596760064,
+    "guard_log_peak_temperature_c": 56,
+    "guard_log_peak_power_w": 126.38,
+    "unpaced_speedup_lower_bound_at_30_views": 42.4,
+    "speedup_basis": "The superseded paced run remained below 30/120 after at least 2100 seconds; the unpaced run reached 30/120 in 49.5363 seconds."
+  },
+  "frozen_protocol": {
+    "config_sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775",
+    "evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+    "protocol_preset": "vala_repo_3d",
+    "single_candidate_no_sweep": true,
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "control_gate": {
+    "replay_receipt": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_teatime_frozen_config_control_replay_result_20260807.json",
+      "sha256": "92196588a63a79a0207bcf6adc63c5abb17acb8c6cd47d8703663a3103510473"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o0_exact_frozen_config_control_v1/teatime/lerf_direct_3d_selection_results.json",
+      "sha256": "ac02a4ed0566813027ddcb5021c495138d5f3f889d632f24b37338df963ec1d0"
+    },
+    "lineage_replay_passed": true
+  },
+  "metric_authorities": {
+    "O1": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_teatime_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "dbb41ded78150169e6abe183ca9d458aa588b81f5ce620c31f63b2245296095a"
+    },
+    "O2": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o2_teatime_one_shot_exact_metric_execution_authority_20260807.json",
+      "sha256": "3f053493e7659a13cbd35217f6fee01d4c6f7d531ad2baa158bf4f0e223320a8"
+    }
+  },
+  "metric_results": {
+    "O0": {
+      "miou": 0.404494971036911,
+      "acc025": 0.7457627118644068,
+      "acc050": 0.3050847457627119,
+      "boundary_f": 0.5610557198524475,
+      "trimap_iou": 0.44391149282455444,
+      "n": 59
+    },
+    "O1": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o1_exact_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "d60879c3a543a0f20830a2345591875ba48598da86580149f4fecc450c4ce0c4"
+      },
+      "miou": 0.4942660927772522,
+      "acc025": 0.847457627118644,
+      "acc050": 0.559322033898305,
+      "boundary_f": 0.7052473425865173,
+      "trimap_iou": 0.42199259996414185,
+      "n": 59,
+      "delta_vs_O0": {
+        "miou": 0.08977112174034119,
+        "acc025": 0.10169491525423724,
+        "acc050": 0.25423728813559315,
+        "boundary_f": 0.14419162273406982,
+        "trimap_iou": -0.021918892860412598
+      }
+    },
+    "O2": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o2_exact_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "6bca5411562a6bc529eda88f42e3f6386c5896d1681fcfcf5a2d718a595e2d35"
+      },
+      "miou": 0.5255449414253235,
+      "acc025": 0.8813559322033898,
+      "acc050": 0.5084745762711864,
+      "boundary_f": 0.7528204321861267,
+      "trimap_iou": 0.37641486525535583,
+      "n": 59,
+      "delta_vs_O0": {
+        "miou": 0.12104997038841248,
+        "acc025": 0.13559322033898302,
+        "acc050": 0.20338983050847453,
+        "boundary_f": 0.1917647123336792,
+        "trimap_iou": -0.06749662756919861
+      }
+    }
+  },
+  "paired_frame_query_bootstrap": {
+    "seed": 20260807,
+    "resamples": 20000,
+    "O1_minus_O0": {
+      "n": 59,
+      "mean_delta": 0.08977114803333441,
+      "median_delta": 0.06946282074863327,
+      "improved": 51,
+      "equal": 0,
+      "worsened": 8,
+      "ci95": [0.06668566867705449, 0.114465167242541],
+      "bootstrap_probability_nonpositive": 0.0
+    },
+    "O2_minus_O0": {
+      "n": 59,
+      "mean_delta": 0.12104994858761346,
+      "median_delta": 0.11879409721165571,
+      "improved": 44,
+      "equal": 0,
+      "worsened": 15,
+      "ci95": [0.06452625181416545, 0.17940575405365822],
+      "bootstrap_probability_nonpositive": 0.0
+    }
+  },
+  "per_category_miou_delta_vs_O0": {
+    "O1": {
+      "apple": 0.1489785611629486,
+      "bag of cookies": 0.063283771276474,
+      "bear nose": 0.1127888560295105,
+      "coffee": 0.0066528767347335815,
+      "coffee mug": -0.0010777115821838379,
+      "dall-e brand": 0.03814779967069626,
+      "hooves": -0.005466237664222717,
+      "paper napkin": 0.1866893470287323,
+      "plate": 0.06653404235839844,
+      "sheep": 0.09958460927009583,
+      "stuffed bear": 0.023924827575683594,
+      "tea in a glass": 0.07614970207214355,
+      "three cookies": 0.1856638789176941,
+      "yellow pouf": 0.38873735070228577
+    },
+    "O2": {
+      "apple": 0.36773011088371277,
+      "bag of cookies": -0.1301833987236023,
+      "bear nose": 0.10135143995285034,
+      "coffee": 0.5147207081317902,
+      "coffee mug": -0.24440887570381165,
+      "dall-e brand": 0.12203123420476913,
+      "hooves": 0.012459203600883484,
+      "paper napkin": 0.27413615584373474,
+      "plate": 0.13417893648147583,
+      "sheep": -0.045273929834365845,
+      "stuffed bear": 0.12465715408325195,
+      "tea in a glass": 0.08749544620513916,
+      "three cookies": 0.1212567389011383,
+      "yellow pouf": 0.6738820374011993
+    }
+  },
+  "selected_scale_audit": {
+    "O0_indices": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1],
+    "O1_indices": [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+    "O2_indices": [0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+    "interpretation": "O1 preserves per-scale capability. O2 intentionally repeats one canonical teacher descriptor across the three scale slots; most ties resolve to index zero. The one index-two query is driven by the unchanged O0 fallback/non-teacher rows, not by an O2 physical-scale descriptor."
+  },
+  "access_audit": {
+    "source_materialization_target_access": false,
+    "metric_authorities_built_without_target_access": true,
+    "exact_O0_then_O1_then_O2_metrics_executed_only_after_authority_and_control_gate": true,
+    "scene_specific_parameter_sweep_executed": false,
+    "Ramen_feedback_changed_Teatime_method_or_protocol": false
+  },
+  "conclusion": {
+    "primary_miou_winner": "O2",
+    "highest_acc050": "O1",
+    "general_result": "Without any Ramen-feedback tuning, O1 improves Teatime mIoU by 8.98 points and O2 by 12.10 points under the frozen evaluator. Together with the positive Ramen deltas, source-view teacher aggregation is now a replicated cross-scene method improvement rather than a local patch.",
+    "tradeoff": "O2 obtains the highest mIoU, Acc@0.25, and boundary_f but sacrifices scale capability, Acc@0.50 relative to O1, and substantially more trimap_iou. O1 is the safer scale-specific high-precision variant.",
+    "next_method_gate": "Develop a target-blind source-reliability arbitration between O1 and O2, preserving O1 where canonical averaging destroys instance/scale specificity and using O2 where multi-view consensus is strong; validate without per-scene tuning."
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "radio_gs.spin_target_rgb_sam_full_carrier.lego_truck_preregistration.v1",
+  "schema_version": 1,
+  "status": "preregistered_after_cpu_preflight_before_gpu_materialization_or_new_target_scoring",
+  "causal_hypothesis": {
+    "claim": "The remaining SPIn9 deficit in lego and truck is caused primarily by missing target-RGB-conditioned query evidence and, for truck, loss of primitive support after visibility pruning; it is not primarily a graph-capacity or global-threshold problem.",
+    "intervention": "Keep the query-independent canonical field and frozen Gaussian carrier unchanged. At query time, inverse-render the full reference mask, render that anchor into every registered RGB view, obtain three SAM hypotheses per view, and alpha/raster-uplift them onto every row of the same frozen carrier.",
+    "control": "Candidate id and rendered threshold are selected only on the full reference mask; target masks are scoring-only and graph/connected-component postprocessing is absent."
+  },
+  "implementation": {
+    "launcher": {
+      "path": "/root/RADIO-GS/reproductions/ludvig/run_ludvig_sam.py",
+      "sha256": "81714a8942c4359261909e3a90a1f45eefc80d69cf91b15a2e12756478745e25"
+    },
+    "frozen_renderer_scorer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_spin_sam_query_interface_component.py",
+      "sha256": "51f74f27fc8b1cb86cff6ef5f8bf9046034b107c4652c80bc4ca214a2a6ef590"
+    },
+    "focused_test": {
+      "path": "/root/RADIO-GS/tests/test_ludvig_sam_full_carrier.py",
+      "sha256": "8e5345165c5a2a1069b07210339c73956a9814b302ce8d4dec34906a56767993"
+    },
+    "test_receipt": "20 passed: materialize-only/full-carrier switches plus existing lego/truck protocol suites",
+    "materialize_only": true,
+    "target_masks_opened_by_materializer": false,
+    "retain_full_carrier": true,
+    "visibility_pruning": false,
+    "sam_candidate_count": 3,
+    "positive_points_per_prediction": 3,
+    "stochastic_predictions_per_view": 10,
+    "seed": 0
+  },
+  "cpu_preflight": {
+    "lego": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_target_rgb_sam_full_carrier_v1/spin/strict_geometry_hybrid_diagnostic/lego/seed_0/attempts/current_carrier_full_query_cpu_preflight_v2/run_manifest.json",
+      "sha256": "68f24a785ee67a45ba421a66284998547ab4578270d3c5934ba817f483413587",
+      "status": "dry_run"
+    },
+    "truck": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_target_rgb_sam_full_carrier_v1/spin/strict_geometry_hybrid_diagnostic/truck/seed_0/attempts/current_carrier_full_query_cpu_preflight_v2/run_manifest.json",
+      "sha256": "2edf8a6375fe629187903ae6c971833925ed28b986cb47ff30daa69b4bb99df3",
+      "status": "dry_run"
+    }
+  },
+  "frozen_inputs": {
+    "sam_checkpoint": {
+      "path": "/root/baselines/VALA/ckpts/sam_vit_h_4b8939.pth",
+      "sha256": "a7bf3b02f3ebf1267aba913ff637d9a2d5c33d3173bb679e46d9f338c26f262e"
+    },
+    "lego": {
+      "carrier_ply": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/geometry/point_cloud/iteration_30000/point_cloud.ply",
+      "carrier_ply_sha256": "71b52383d7ed1d997aa640ddde9c1f99a87b0e453bbf828577ab37a1444732b4",
+      "carrier_rows": 636148,
+      "renderer_config": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/gaussfm_main_track.yaml",
+      "renderer_config_sha256": "4a1fdbc3b5461a195cee03a14782bfecfac8ef95ab285225500aedf10bb12dd8",
+      "renderer_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/spin9_gaussfm_queue_20260712/scenes/lego/feature_field/checkpoints/best.pth",
+      "renderer_checkpoint_sha256": "b0f054692c678836cbcdc6badfb2abadae4b2ad6b6b430b6a8b33199485aff18"
+    },
+    "truck": {
+      "carrier_ply": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/truck/training/attempts/exact_f7a_allview_30k_v1/model/point_cloud/iteration_30000/point_cloud.ply",
+      "carrier_ply_sha256": "aa5b6d166277cde9d49632c9ffa427c392a4e52b7c68719c3d6ca312bedc3492",
+      "carrier_rows": 2583730,
+      "renderer_config": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/truck/config.yaml",
+      "renderer_config_sha256": "81fbc2deba8b0d7e96adbc6c5ab39ad83d46ae63dc845cebd0a23dd3e8da5dea",
+      "renderer_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/truck/geometry_carrier.pth",
+      "renderer_checkpoint_sha256": "ba11cdbc8ff51cb23e9d730668f12c63f543ca1c8edc8a224013085e71ac8839"
+    }
+  },
+  "frozen_baselines": {
+    "lego": {
+      "accepted_query_conditioned_support": 0.6181460736735999,
+      "local_ludvig_sam": 0.931486693471259
+    },
+    "truck": {
+      "accepted_query_conditioned_support": 0.7899440557354362,
+      "incomplete_subset_sam_on_frozen_renderer": 0.8376792780564066,
+      "local_ludvig_sam": 0.9671095971529335
+    }
+  },
+  "execution_order": [
+    "materialize all-view SAM candidates and uplift onto every frozen carrier row",
+    "persist full-row features and Gaussian row receipt",
+    "render all candidates with the frozen RADIO-GS renderer",
+    "select candidate and threshold on the reference mask and persist the receipt",
+    "persist every target prediction",
+    "only then open target masks and compute frozen foreground IoU"
+  ],
+  "decision_rule": {
+    "per_scene_improvement_required_over_accepted_mainline": true,
+    "truck_must_improve_over_incomplete_subset_diagnostic": true,
+    "promote_to_spin9_query_interface_if_both_scene_gates_pass": true,
+    "no_retry_with_changed_sam_prompt_sampling_threshold_or_seed_after_target_metrics": true,
+    "report_failure_without_scene_exclusion": true
+  },
+  "gpu_policy": {
+    "lego_physical_gpu": 0,
+    "truck_physical_gpu": 1,
+    "power_limit_w": 300,
+    "poll_seconds": 120,
+    "soft_pause_enabled": false,
+    "hard_stop_temperature_c": 87,
+    "hard_stop_consecutive_polls": 2
+  }
+}

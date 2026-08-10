@@ -1,0 +1,76 @@
+{
+  "artifact": "source_only_region_comembership_native_v3_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T12:32:04+08:00",
+  "status": "frozen_before_native_v3_source_training",
+  "scientific_question": "Do explicit factorized-native direction, amplitude, concentration and observation-state relations improve held-out source topology without losing absolute pair-probability calibration?",
+  "cohort": {
+    "source_train": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0003_00",
+      "scene0005_00"
+    ],
+    "source_validation": [
+      "scene0004_00",
+      "scene0008_00"
+    ],
+    "identical_to_formal_region_comembership_v2": true
+  },
+  "candidate": {
+    "parent_pair_axis": "exact formal RegionCoMembershipV2 source authority",
+    "parent_feature_dimension": 21,
+    "factorized_native_feature_dimension": 9,
+    "combined_feature_dimension": 30,
+    "architecture": "30_64_32_1_GELU",
+    "epoch_zero_probability": 0.5,
+    "raw_radio_vector_reconstruction": false,
+    "query_input": false,
+    "scene_embedding": false,
+    "legacy_v2_default_changed": false
+  },
+  "training": {
+    "normalization": "source_train_positive_evidence_median_and_1.4826_MAD",
+    "objective": "equal_scene_equal_class_evidence_weighted_BCE",
+    "optimizer": "AdamW",
+    "seed": 0,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "epochs": 100,
+    "snapshot_epochs": [
+      0,
+      25,
+      50,
+      75,
+      100
+    ]
+  },
+  "selection": {
+    "topology_rule_grid": "identical_to_formal_region_comembership_v2",
+    "primary": "heldout_deduplicated_exact_primitive_topology_score",
+    "calibration": {
+      "metric": "equal_class_evidence_weighted_pair_probability_Brier_and_log_loss",
+      "macro_strict_improvement_over_epoch_zero": true,
+      "every_validation_scene_Brier_non_regression": true
+    }
+  },
+  "promotion_gate": [
+    "selected_epoch_positive",
+    "heldout_topology_strictly_exceeds_singleton",
+    "heldout_IoU_strictly_exceeds_singleton",
+    "heldout_F1_strictly_exceeds_singleton",
+    "heldout_macro_Brier_strictly_improves_epoch_zero",
+    "heldout_macro_log_loss_strictly_improves_epoch_zero",
+    "each_validation_scene_Brier_non_regression"
+  ],
+  "access_policy": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false,
+    "target_execution_authorized": false
+  }
+}

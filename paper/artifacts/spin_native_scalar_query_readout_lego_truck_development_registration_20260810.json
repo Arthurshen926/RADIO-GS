@@ -1,0 +1,62 @@
+{
+  "schema": "radio_gs.spin_native_scalar_query_readout.lego_truck_development_registration.v1",
+  "schema_version": 1,
+  "status": "registered_post_low_resolution_target_diagnostic_before_native_resolution_execution",
+  "claim_scope": "method_development_not_blind_confirmation",
+  "diagnosis": {
+    "legacy_readout": "The query-specific scalar posterior was rendered at the canonical RADIO patch grid and then bilinearly enlarged to the benchmark mask.",
+    "lego_resolution": [48, 63],
+    "truck_resolution": [34, 61],
+    "lego_reference_iou": 0.7680461280198526,
+    "truck_reference_iou": 0.8137227401120729,
+    "native_ludvig_reference_iou": {
+      "lego": 0.9385247693585763,
+      "truck": 0.9713872138721387
+    },
+    "causal_localization": "The loss is already present on the permitted reference mask, before target transfer. Full row alignment therefore does not address the dominant scalar-readout rasterization bottleneck."
+  },
+  "global_method_change": {
+    "change": "Render query-specific scalar hypotheses at the registered native image resolution using the renderer's analytically scaled intrinsics.",
+    "unchanged": [
+      "frozen Gaussian carrier",
+      "uplifted three-candidate field",
+      "SAM seed and prompt sampling",
+      "reference-only candidate selection",
+      "reference-only threshold grid",
+      "target prediction and scoring protocol",
+      "no graph and no connected-component selection"
+    ],
+    "scene_specific_parameters": false,
+    "rationale": "Canonical descriptor storage/training resolution and query scalar rasterization resolution are separate interface contracts; a pixel-level mask posterior should not inherit the descriptor patch lattice."
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_spin_sam_query_interface_component.py",
+    "sha256": "a52815996d8c6a918bd38a8f0cd85bec7a5da78f3b1bc7b0d15a29418bcbbab8",
+    "test": {
+      "path": "/root/RADIO-GS/tests/test_spin_sam_query_interface_component.py",
+      "sha256": "fa989cc3c685473f8419031152e4a97e61ba26d1588dcb1bcc7e08f7cf8e8f8b"
+    },
+    "test_receipt": "11 focused query-interface and full-carrier tests passed"
+  },
+  "frozen_query_fields": {
+    "lego": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_target_rgb_sam_full_carrier_v1/spin/strict_geometry_hybrid_diagnostic/lego/seed_0/attempts/current_carrier_full_query_seed0_v1/lego/sam/features.npy",
+      "sha256": "eac88fd0db2801807876c74c05febfbe1423e7953ff1222005397214fc7529f9"
+    },
+    "truck": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_target_rgb_sam_full_carrier_v1/spin/strict_geometry_hybrid_diagnostic/truck/seed_0/attempts/current_carrier_full_query_seed0_v1/truck/sam/features.npy",
+      "sha256": "746bcc2a68c122274fefb3151878ac676fa5c7a141237c9f11d6031b054977d6"
+    }
+  },
+  "legacy_target_diagnostic_already_observed": {
+    "lego": 0.6671478866375888,
+    "truck": 0.8421232248062024,
+    "disclosure": "These target metrics were observed before this development registration, so the native-resolution result is not labeled as a blind confirmation."
+  },
+  "decision_rule": {
+    "run_exactly_one_native_resolution_readout_per_scene": true,
+    "no_candidate_threshold_or_field_regeneration": true,
+    "retain_if_both_reference_iou_and_target_iou_improve_over_legacy_patch_grid": true,
+    "report_both_scenes_without_exclusion": true
+  }
+}

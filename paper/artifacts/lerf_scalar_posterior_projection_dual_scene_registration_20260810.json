@@ -1,0 +1,67 @@
+{
+  "schema": "radio_gs.lerf_scalar_posterior_projection.dual_scene_registration.v1",
+  "schema_version": 1,
+  "status": "registered_after_implementation_and_tests_before_any_scalar_posterior_target_metric",
+  "claim_scope": "posthoc method-development consistency test; all benchmark outcomes were previously available",
+  "causal_hypothesis": "The accepted LERF interface destroys continuous query evidence by thresholding primitives before visibility projection. Rendering the continuous query posterior first and applying the identical fixed threshold in the registered pixel domain should preserve mixed-surface evidence and boundaries, matching the posterior-output separation that repaired SPIn9.",
+  "frozen_method": {
+    "score_source": "accepted uniform valid-domain O2 kNN10 caches",
+    "protocol_preset": "vala_paper_3d",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "scalar_posterior",
+    "posterior_compositor": "front-to-back alpha-normalized continuous primitive query scores",
+    "threshold_location": "registered pixel posterior",
+    "selection_refinement": "none",
+    "selection_min_ratio": 0.0,
+    "selection_max_ratio": 0.0,
+    "mask_refinement": "none",
+    "trainable_parameters_added": 0,
+    "scene_specific_parameters": false,
+    "target_mask_used_by_method": false
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "sha256": "1e9e48701ec84786020a582d907318af4b4245e3dde383445db709a723dcad3c",
+    "flag": "--scalar_posterior_projection",
+    "focused_tests": "12 passed"
+  },
+  "scenes": {
+    "ramen": {
+      "physical_gpu": 0,
+      "accepted_control_miou": 0.3924490213394165,
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "score_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/ramen/ramen_gaussian_valid_domain_o2_scores.pt"
+    },
+    "teatime": {
+      "physical_gpu": 1,
+      "accepted_control_miou": 0.5278149843215942,
+      "config": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+      "checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "score_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/teatime/teatime_gaussian_valid_domain_o2_scores.pt"
+    }
+  },
+  "execution": {
+    "output_root": "/root/radio_gs_local_cache/optimization_20260810/lerf_scalar_posterior_dual_scene_v1",
+    "parallel_gpus": [
+      0,
+      1
+    ],
+    "target_metric_passes_per_scene": 1,
+    "parameter_retry_after_metric": false,
+    "local_ssd_minimum_free_gib": 100
+  },
+  "decision_rule": {
+    "expand_to_full4_only_if": "both scenes are nonregressing and the two-scene macro mIoU strictly improves",
+    "otherwise": "reject globally and retain selected_only_alpha mainline",
+    "report_all_results": true
+  },
+  "thermal_policy": {
+    "power_limit_w": 300,
+    "poll_seconds": 120,
+    "soft_pause_enabled": false,
+    "hard_stop_temperature_c": 87,
+    "hard_stop_consecutive_polls": 2
+  }
+}

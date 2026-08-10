@@ -1,0 +1,122 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_exact_marginal_execution_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_after_feature_bundle_validation_before_gpu1_execution",
+  "sealed_at": "2026-08-07T18:49:00+08:00",
+  "scene": "waldo_kitchen",
+  "implementation": {
+    "builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_gaussian_multiview_teacher_cache.py",
+      "sha256": "0901151a29e5dbd45bd1cd98314916f4815259721ab157a1b5a13ed35670743d"
+    },
+    "sparse_marginal_authority": {
+      "path": "/root/RADIO-GS/radio_gs/rendering/sparse_marginal_authority.py",
+      "sha256": "9905c2378d762495a10e480c1da23140ce92fd8b8f5cb64f32d36decdf4c4bb6"
+    },
+    "contribution_compositor": {
+      "path": "/root/RADIO-GS/radio_gs/rendering/contribution_compositor.py",
+      "sha256": "c9f74494112ef1c9cfe9705fbb6fea2e6cec8d824bf4e31f6382612e7f6929b0"
+    },
+    "thermal_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    }
+  },
+  "inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_waldo_kitchen_exact120_teacher.yaml",
+      "sha256": "c05808cf41dfc3935a3288bbe9cfe1ceda9867f9fd6cb3e0584307736aef9152"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+    },
+    "feature_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.json",
+      "sha256": "4a12657f0d0c2be97c1941eeae30c19ff6d2e6a4ed208e5ceedd345ab16d80f8",
+      "output_bundle_sha256": "e650014f7a4b5497818412ae80972c5b6b62c39f99964b92fb9f95ba1b0913a8",
+      "legacy_reseal_receipt_sha256": "ba9709c049ab17fed990091a0228ef4969c631c518487347b260f422dfcd99f0"
+    }
+  },
+  "frozen_contract": {
+    "observation_contract": "canonical-factorized-radio-v1",
+    "aggregation_mode": "raster_marginal_responsibility",
+    "registration_weight_mode": "exact_front_to_back_marginal_responsibility",
+    "feature_space": "radio",
+    "capability_map_source": "project_raw",
+    "maximum_views": 120,
+    "view_selection": "uniform_temporal_deterministic_after_frozen_evaluation_frame_exclusion",
+    "excluded_frame_ids": [53, 66, 89, 140, 154],
+    "normalize_each_view": false,
+    "robust_mpr": false,
+    "raster_view_fusion": "contribution_mean",
+    "post_compositor_alpha_threshold": 0.0,
+    "query_independent": true,
+    "feature_independent_responsibility": true,
+    "scene_specific_hyperparameters": false,
+    "no_clobber": true
+  },
+  "execution_only": {
+    "physical_gpu": 1,
+    "cuda_visible_device": 1,
+    "logical_device": "cuda:0",
+    "render_batch_size": 1,
+    "view_chunk_size": 8,
+    "point_chunk_size": 4096,
+    "raster_channel_chunk_size": 256,
+    "maximum_estimated_cpu_memory_fraction": 0.85,
+    "per_view_pacing_seconds": 0.0,
+    "per_view_pacing_reason": "the frozen exact-marginal builder has no execution-only pacing switch; output-compatible source changes were forbidden, so safety is supplied by low-frequency hard-only telemetry without a soft pause"
+  },
+  "thermal_guard": {
+    "physical_gpu": 1,
+    "launch_maximum_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "hard_temperature_consecutive_polls": 1,
+    "telemetry_poll_seconds": 300,
+    "soft_pause_temperature_c": 0,
+    "power_limit_maximum_w": 300.5,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "outputs": {
+    "factorized_raw_radio": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/factorized_raw_radio_exact_marginal.pt",
+    "exact_marginal_responsibility_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/exact_marginal_responsibility_authority.json",
+    "telemetry": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/logs/exact_marginal_gpu1.telemetry.csv",
+    "owner_audit": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/logs/exact_marginal_gpu1.owner_audit.csv"
+  },
+  "frozen_command": [
+    "bash", "radio_gs/scripts/run_with_gpu_thermal_guard.sh", "--",
+    "bash", "radio_gs/scripts/run_repo_python.sh", "-m", "radio_gs.scripts.build_gaussian_multiview_teacher_cache",
+    "--config", "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_waldo_kitchen_exact120_teacher.yaml",
+    "--checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/factorized_raw_radio_exact_marginal.pt",
+    "--device", "cuda:0",
+    "--observation-contract", "canonical-factorized-radio-v1",
+    "--max-views", "120",
+    "--exclude-frame-ids", "53,66,89,140,154",
+    "--render-batch-size", "1",
+    "--view-chunk-size", "8",
+    "--point-chunk-size", "4096",
+    "--max-estimated-cpu-memory-fraction", "0.85",
+    "--alpha-threshold", "0",
+    "--no-robust-mpr",
+    "--feature-space", "radio",
+    "--capability-map-source", "project_raw",
+    "--capability-storage", "dense",
+    "--expected-geometry-checkpoint-sha256", "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+    "--expected-feature-output-bundle-sha256", "e650014f7a4b5497818412ae80972c5b6b62c39f99964b92fb9f95ba1b0913a8",
+    "--save-responsibility-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/exact_marginal_responsibility_authority.json",
+    "--aggregation-mode", "raster_marginal_responsibility",
+    "--registration-weight-mode", "alpha_depth",
+    "--raster-channel-chunk-size", "256",
+    "--raster-view-fusion", "contribution_mean"
+  ],
+  "access_audit": {
+    "ground_truth_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "metric_outputs_opened": false,
+    "metric_computed": false,
+    "metric_execution_authorized": false
+  }
+}

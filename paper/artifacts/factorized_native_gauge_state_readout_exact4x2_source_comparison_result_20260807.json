@@ -1,0 +1,137 @@
+{
+  "schema": "radio_gs.factorized_native_gauge_state_readout_exact4x2_source_comparison_result.v1",
+  "schema_version": 1,
+  "status": "source_only_winner_promoted_for_query_free_target_materialization",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json",
+    "sha256": "2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd"
+  },
+  "implementation": {
+    "model": {
+      "path": "/root/RADIO-GS/radio_gs/models/factorized_native_gauge_state_readout.py",
+      "sha256": "d242a767712aef64b809dc3fccde4aa0c61b97c598b8f70fc5948787d43b1d31"
+    },
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/factorized_native_gauge_state_readout.py",
+      "sha256": "29e87b9478a83b6b28decd55c3f620810881b6ec8dc4265396dcea4adbfadf96"
+    },
+    "trainer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2.py",
+      "sha256": "89770aaa501be87fffbbb562eb38800a71673691b5d1856b1d3296d246fe3aa2"
+    }
+  },
+  "selection_rule": [
+    "maximum_heldout_macro_mean_all_view_cosine",
+    "maximum_heldout_macro_p05_row_mean_all_view_cosine",
+    "fixed_arm_order"
+  ],
+  "arms": {
+    "direction_only": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_only/model.pt.json",
+        "sha256": "315f04330c024652887b98978b09a91d99a4a8b372ee6fbbd19e8ad509ee4131"
+      },
+      "checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_only/model.pt",
+        "sha256": "d09a50e88ea0a6e0208180c9dbefa377a82a4538fc78442573b9204b0cd78685"
+      },
+      "selected_step": 30,
+      "step0_macro_mean": 0.688351184129715,
+      "step0_macro_p05": 0.6483350396156311,
+      "selected_macro_mean": 0.9341487884521484,
+      "selected_macro_p05": 0.8961045444011688,
+      "relative_macro_mean_improvement": 0.35708169026133996,
+      "per_scene": {
+        "scene0004_00": {
+          "eligible_rows": 4096,
+          "mean_all_view_cosine": 0.9261001348495483,
+          "p05_row_mean_all_view_cosine": 0.893965482711792
+        },
+        "scene0008_00": {
+          "eligible_rows": 4096,
+          "mean_all_view_cosine": 0.9421974420547485,
+          "p05_row_mean_all_view_cosine": 0.8982436060905457
+        }
+      }
+    },
+    "direction_plus_log_amplitude": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_plus_log_amplitude/model.pt.json",
+        "sha256": "a6b14d3dae167297cf265ed00a91daa77fdedb10836185aceeeaeb09ea23c7eb"
+      },
+      "checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_plus_log_amplitude/model.pt",
+        "sha256": "17ddb67cb517676a4c6060c8aa14774b0f199cba42f7a7e743bc549317d848f2"
+      },
+      "selected_step": 30,
+      "step0_macro_mean": 0.6883653700351715,
+      "step0_macro_p05": 0.6482495069503784,
+      "selected_macro_mean": 0.9329295754432678,
+      "selected_macro_p05": 0.8946520984172821,
+      "relative_macro_mean_improvement": 0.3552825520487768,
+      "per_scene": {
+        "scene0004_00": {
+          "eligible_rows": 4096,
+          "mean_all_view_cosine": 0.9252133369445801,
+          "p05_row_mean_all_view_cosine": 0.8932248950004578
+        },
+        "scene0008_00": {
+          "eligible_rows": 4096,
+          "mean_all_view_cosine": 0.9406458139419556,
+          "p05_row_mean_all_view_cosine": 0.8960793018341064
+        }
+      }
+    },
+    "direction_plus_log_amplitude_plus_full_state": {
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_plus_log_amplitude_plus_full_state/model.pt.json",
+        "sha256": "17bb5e32824b42f80932c53e9a370a25b47ea70bf814888b8e68194cdd1a3935"
+      },
+      "checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_plus_log_amplitude_plus_full_state/model.pt",
+        "sha256": "357ba3160c14954be86164405efb759112ecbee56e7614fe7983dc2b5565750b"
+      },
+      "selected_step": 30,
+      "step0_macro_mean": 0.6883701086044312,
+      "step0_macro_p05": 0.6483070850372314,
+      "selected_macro_mean": 0.9329932034015656,
+      "selected_macro_p05": 0.8945226967334747,
+      "relative_macro_mean_improvement": 0.3553656553929566,
+      "per_scene": {
+        "scene0004_00": {
+          "eligible_rows": 4096,
+          "mean_all_view_cosine": 0.9251810312271118,
+          "p05_row_mean_all_view_cosine": 0.8929443955421448
+        },
+        "scene0008_00": {
+          "eligible_rows": 4096,
+          "mean_all_view_cosine": 0.9408053755760193,
+          "p05_row_mean_all_view_cosine": 0.8961009979248047
+        }
+      }
+    }
+  },
+  "winner": {
+    "arm": "direction_only",
+    "selected_step": 30,
+    "macro_mean_margin_over_log_amplitude": 0.0012192130088806152,
+    "macro_mean_margin_over_full_state": 0.0011555850505828857,
+    "macro_p05_margin_over_log_amplitude": 0.0014524459838867188,
+    "macro_p05_margin_over_full_state": 0.0015818476676940918,
+    "every_validation_scene_mean_and_p05_superior_to_both_other_arms": true
+  },
+  "method_conclusion": {
+    "canonical_semantic_descriptor": "unit_direction_only",
+    "log_amplitude": "do_not_inject_into_semantic_descriptor",
+    "full_factorized_state": "reserve_for_relation_reliability_or_calibration",
+    "raw_radio_vector_reconstruction": "prohibited"
+  },
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "source_winner_selected_before_target_descriptor_materialization": true
+  }
+}

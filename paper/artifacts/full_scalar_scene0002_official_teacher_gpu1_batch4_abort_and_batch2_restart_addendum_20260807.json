@@ -1,0 +1,43 @@
+{
+  "artifact": "full_scalar_scene0002_official_teacher_gpu1_batch4_abort_and_batch2_restart_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:58:00+08:00",
+  "status": "sealed_after_batch4_thermal_abort_and_before_batch2_250w_restart",
+  "parent_authority": "paper/artifacts/full_scalar_scene0002_official_teacher_gpu1_execution_authority_20260807.json",
+  "batch4_attempt": {
+    "guard_exit_code": 86,
+    "maximum_temperature_c": 89,
+    "thermal_warnings": 6,
+    "abort_rule": "temperature at least 88C for six consecutive 30-second samples",
+    "nvml_failure": false,
+    "driver_healthy_after_abort": true,
+    "output_written": false,
+    "partial_output_present": false,
+    "input_or_source_change": false
+  },
+  "restart_execution_change": {
+    "crop_batch_size_before": 4,
+    "crop_batch_size_after": 2,
+    "region_batch_size": 4096,
+    "physical_gpu1_power_limit_before_w": 300,
+    "physical_gpu1_temporary_power_limit_w": 250,
+    "restore_power_limit_after_task_w": 300,
+    "minimum_restart_temperature_c": 60,
+    "temperature_guard_and_polling_unchanged": true
+  },
+  "batch_invariance": {
+    "claim_scope": "execution chunking only",
+    "same_ordered_crop_records": true,
+    "same_crop_resolution": 384,
+    "same_model_checkpoint_and_head": true,
+    "same_float32_l2_output_contract": true,
+    "same_sparse_pair_selection": true,
+    "no_cross_crop_batch_statistics": true,
+    "mathematical_result_unchanged": true,
+    "possible_numerical_effect": "only implementation-level floating point batch kernel differences; final authority is independently SHA-bound"
+  },
+  "all_source_and_output_paths_unchanged": true,
+  "benchmark_metric_opened": false,
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

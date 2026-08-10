@@ -1,0 +1,63 @@
+{
+  "artifact_type": "source_only_engineering_receipt",
+  "date": "2026-08-07",
+  "implementation": {
+    "interface": {
+      "path": "radio_gs/interfaces/surface_region_v21b_reliability_conditioned_residual.py",
+      "sha256": "d0a8619b08af1077c875f5d0b4cef8bbc3f70159ed85b6864ef33c54d5c0a86d"
+    },
+    "model": {
+      "path": "radio_gs/models/surface_region_v21b_reliability_conditioned_residual.py",
+      "sha256": "9dca7cc7141b4ee015fa9d7991299d9fa6a3dd2d247364fe4f085ec7832d3da4"
+    },
+    "preregistration": {
+      "path": "paper/artifacts/surface_region_v21b_reliability_conditioned_rank256_preregistration_20260807.json",
+      "sha256": "5397e29ece42b03c8af0b77865a9c8327920c59f0be050dbd99eb8ca91ece60a"
+    }
+  },
+  "method_status": {
+    "accepted_v2_fallback": "bitwise_verified",
+    "angular_budget_high_reliability_radians": 0.75,
+    "angular_budget_low_reliability_radians": 0.15,
+    "capacity_trainable_parameters": 1451520,
+    "geodesic_bound": "verified",
+    "hidden_rank": 256,
+    "inactive_and_ood_residual_gradient": "exact_zero_verified",
+    "scene_parameters": false,
+    "tangent_constraint": "verified",
+    "zero_initialization_first_step_gradient": "nonzero_verified"
+  },
+  "scope": {
+    "baseline_files_edited": false,
+    "benchmark_or_target_data_opened": false,
+    "gpu_used": false,
+    "trainer_executed": false
+  },
+  "tests": {
+    "compatibility_and_new_total": {
+      "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_surface_region_typed_context_residual.py tests/test_train_surface_region_typed_context_response_listwise_v21.py tests/test_surface_region_v21b_reliability_conditioned_residual.py tests/test_surface_region_v21b_reliability_conditioned_interface.py",
+      "passed": 16,
+      "result": "passed"
+    },
+    "new_only": {
+      "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_surface_region_v21b_reliability_conditioned_residual.py tests/test_surface_region_v21b_reliability_conditioned_interface.py",
+      "passed": 9,
+      "result": "passed"
+    },
+    "test_files": [
+      {
+        "path": "tests/test_surface_region_v21b_reliability_conditioned_residual.py",
+        "sha256": "bce70c928820e4e776f904969365bf60a050f1eb9eb1bb12670688895e1cfe58"
+      },
+      {
+        "path": "tests/test_surface_region_v21b_reliability_conditioned_interface.py",
+        "sha256": "f135ec4a3c3a853ba25765d151edf393ccdbb44456775945c7801d27fa49046c"
+      }
+    ]
+  },
+  "trainer_integration_point": {
+    "constructor": "radio_gs.interfaces.surface_region_v21b_reliability_conditioned_residual.build_model_from_source_normalization",
+    "forward": "radio_gs.interfaces.surface_region_v21b_reliability_conditioned_residual.forward_complete_scene",
+    "next_required_authority": "new_v21b_checkpoint_training_certificate_and_source_gate_before_any_target_materialization"
+  }
+}

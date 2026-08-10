@@ -1,0 +1,92 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_ranking_audit_confirmation_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_candidate_specific_after_dev_pass_before_reserved_audit_open",
+  "one_shot_confirmation": true,
+  "development_selection_complete": true,
+  "candidate_id": "genuine_official_crop_summary_mpr_descriptor_first_v2",
+  "control_id": "legacy_teacher_mean_v2_descriptor_first_v2",
+  "development_gate_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_descriptor_first_v2/descriptor_first_v2_source_text_response_ranking_gate_result.json",
+    "sha256": "11be2adc41d21da1d2ce37ec09af1f8665bc928cec46b497080f7a59bd3f6af8",
+    "status": "passed",
+    "candidate_eligible_for_next_source_gate": true
+  },
+  "dev_audit_disjointness_proof": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+    "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf"
+  },
+  "materializer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_confirmation.py",
+    "sha256": "6d1b9194d583de7ed84a6beb230cab84b65982d8070f636cd101c7b88a631bf2"
+  },
+  "frozen_base_materializer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+    "sha256": "873214d57360d1278177f56c9d1c77ffc7384d6d97116da3aa81e9d879f8c6fe"
+  },
+  "selector_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/select_lerf_source_text_response_ranking_audit_confirmation.py",
+    "sha256": "1c0baf4da9d0779e5696081de6c2b180ada3af7b3bbdf27b217a0499cd6a6af9"
+  },
+  "frame_evaluator_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/lerf_source_text_response_ranking.py",
+    "sha256": "25792bb0b41e3117e95137f3007caa36dd8e5bc470892f3c9c35688bfc6ca5b7"
+  },
+  "shared_response_metric_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/text_response_fidelity.py",
+    "sha256": "ecc43f7c2002414024739c820136b2facfd7b3dee80d4b11f29c2d9a53c6b526"
+  },
+  "query_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+    "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721",
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+    "manifest_sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4",
+    "query_split": "audit",
+    "queries": 90,
+    "embedding_tensor_sha256": "8cc8e9ca3903488ef7558ce19d9e4bec9cb6378570c8c12d72ac96219c8dd415"
+  },
+  "source_scenes": {
+    "ramen": {
+      "source_heldout_frame_ids": [2, 45, 87, 130],
+      "forbidden_target_frame_ids": [6, 24, 60, 65, 81, 119, 128]
+    },
+    "teatime": {
+      "source_heldout_frame_ids": [4, 7, 10, 14, 17, 20, 24, 28, 31, 35, 38, 41, 46, 49, 52, 56, 59, 62, 66, 69, 72, 76, 79, 82, 86, 89, 92, 96, 99, 102, 106, 110, 113, 117, 120, 123, 127, 131, 134, 138, 142, 145, 150, 153, 158, 162, 165, 168, 172, 175, 178],
+      "forbidden_target_frame_ids": [2, 25, 43, 107, 129, 140]
+    }
+  },
+  "decision_rule": {
+    "one_global_policy": true,
+    "required_source_scenes": ["ramen", "teatime"],
+    "strict_pooled_improvements": [
+      "response_mae_lower",
+      "ranking_spearman_mean_higher",
+      "top_decile_overlap_mean_higher"
+    ],
+    "every_scene_nonregression": [
+      "response_mae",
+      "response_profile_cosine_mean",
+      "ranking_spearman_mean",
+      "ranking_spearman_p05",
+      "top_decile_overlap_mean",
+      "top_decile_overlap_p05"
+    ],
+    "tolerance": 0.0,
+    "fallback": "unchanged_control",
+    "per_scene_or_per_query_thresholds": false
+  },
+  "comparison_disclosure": {
+    "descriptor_first_render_then_pixel_normalize_then_text_project": true,
+    "end_to_end_interface_ab_not_capacity_matched": true,
+    "candidate_locked_without_audit_bank_selection": true
+  },
+  "access_audit": {
+    "dev_gate_result_opened": true,
+    "reserved_audit_manifest_opened_for_disjointness_proof": true,
+    "reserved_audit_embedding_tensor_opened_at_seal": false,
+    "benchmark_queries_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  },
+  "target_results_used_for_gate_design": false,
+  "target_metric_execution_authorized": false
+}

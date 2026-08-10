@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "artifact_type": "development_oracle_execution_receipt",
+  "date": "2026-08-07",
+  "scene": "figurines",
+  "status": "completed",
+  "benchmark_method": false,
+  "deployable_candidate": false,
+  "authorities": {
+    "preregistration_sha256": "473b70468c14bedce0d347828800f0d029838c0c7bfe5e4c480c86f3e73febf8",
+    "teacher_availability_addendum_sha256": "4aa709366b9d21eb8120c365c93720b403540e2494f598d8b8eaba395125936f",
+    "scale_axis_correction_addendum_sha256": "aa60919c659953d5bd5823d3c6be04e3e644d97de4845aa1697759782c3ffefb",
+    "gpu0_execution_binding_addendum_sha256": "66049d60c0ec72d5b81e0aa08c36f09af545c7aa5d06ad96ca1d56109e1a44eb"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "wall_time_seconds": 174.297,
+    "maximum_observed_temperature_c": 50,
+    "thermal_stop_triggered": false,
+    "result_dependent_selection": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "results": {
+    "D0": {
+      "fixed_iou": 0.4753887355327606,
+      "average_precision": 0.7424453958489884,
+      "oracle_threshold_iou": 0.6481929084043052
+    },
+    "D1": {
+      "fixed_iou": 0.5254328846931458,
+      "average_precision": 0.7999563649716682,
+      "oracle_threshold_iou": 0.6746785279094568
+    },
+    "D2_single_region_rendered": {
+      "fixed_iou": 0.37671367448205106,
+      "average_precision": 0.7328689967815583,
+      "oracle_threshold_iou": 0.6440938547925599,
+      "positive_coverage": 0.3972774537025098
+    },
+    "D3_up_to_eight_region_union_rendered": {
+      "fixed_iou": 0.7712979414746058,
+      "average_precision": 0.961137567425781,
+      "oracle_threshold_iou": 0.863364287010864,
+      "positive_coverage": 0.8014539781678985,
+      "fixed_gain_over_D1": 0.24586505678146,
+      "oracle_gain_over_D1": 0.1886857591014072
+    },
+    "D4_all_four_variants_exactly_equal": {
+      "teacher_available_rows": 82400,
+      "teacher_unavailable_rows": 203,
+      "available_primitive": {
+        "fixed_iou": 0.15555241245219714,
+        "average_precision": 0.6013478930386232,
+        "oracle_threshold_iou": 0.49331715145559063
+      },
+      "end_to_end_abstain_primitive": {
+        "fixed_iou": 0.1491163637713901,
+        "average_precision": 0.5763557279488145,
+        "oracle_threshold_iou": 0.4762434030028939
+      }
+    },
+    "D5_all_four_variants_exactly_equal": {
+      "fixed_iou": 0.14229863119422603,
+      "average_precision": 0.5404588519268737,
+      "oracle_threshold_iou": 0.4856679656198536,
+      "positive_coverage": 0.1455156667484896
+    },
+    "multi_region_statistics": {
+      "query_count": 21,
+      "mean_selected_regions": 6.190476190476191,
+      "median_selected_regions": 8,
+      "queries_reaching_eight_region_limit": 11,
+      "single_region_queries": 2,
+      "mean_primitive_iou_D2": 0.34706458307447885,
+      "mean_primitive_iou_D3": 0.7180927012647901
+    }
+  },
+  "interpretation": {
+    "primary": "A single SurfaceRegion is structurally insufficient for most Figurines queries. A target-independent deployable multi-region selection mechanism is the highest-value next intervention.",
+    "response": "Direct retained teacher primitive response is weak even on teacher-available rows, so replacing support alone cannot recover the full semantic field capability.",
+    "D5_caution": "D5 includes explicit abstention on teacher-unavailable rows while D1 uses the registered O0 fallback. Therefore D5 minus D1 is not a pure estimate of kNN, remapping, or renderer loss.",
+    "scale": "All three stored D4 scale slots and their per-primitive maximum are bitwise identical; no result-dependent scale branch is promoted."
+  },
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_support_readout_oracle_d0_d5_figurines_v2/sealed_run/result.json",
+      "sha256": "775df3adff6ac95aba1dd3061e6202fa8501405bdc768d1a1e2cf2b951c2aba1"
+    },
+    "memberships": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_support_readout_oracle_d0_d5_figurines_v2/sealed_run/oracle_memberships.pt",
+      "sha256": "1ebb46ab69d367264d54fa29fdce64b70213dbd56358a75d7bd8fed8280ed333"
+    },
+    "log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_support_readout_oracle_d0_d5_figurines_v2/sealed_run.execution.log",
+      "sha256": "41a17b7fad9cbc8b5966317e9865a35f325d8784d4cdc1c8ad52f4f8c136cd84"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "radio_gs.lerf_fix4c_query_free_teacher_feature_execution_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_before_gpu0_query_free_teacher_feature_extraction",
+  "scene_id": "ramen",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/extract_radio_features.py",
+    "sha256": "f09f7aca23723a476d4b89672ec4f7a5239806fae09d37389a37a52366b68b92"
+  },
+  "thermal_guard": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+    "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "power_limit_maximum_w": 300.5,
+    "launch_maximum_temperature_c": 87,
+    "hard_temperature_c": 88,
+    "hard_temperature_consecutive_polls": 6,
+    "poll_seconds": 30,
+    "soft_pause_temperature_c": 0,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "inputs": {
+    "source_image_dir": "/mnt/pool/sqy/3d_understanding/lerf_ovs/ramen/images",
+    "query_free_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_radio_verified_pose.yaml",
+      "sha256": "b6f8fee744f6278e24c12f052a5f24405130b85cf07c7801a26414556ca610d7"
+    },
+    "benchmark_holdout_split": {
+      "path": "/root/RADIO-GS/radio_gs/configs/splits/lerf_ramen_benchmark.txt",
+      "sha256": "b172a349a449d38fd1389dfeb494a5276875743c61e2b2af13d89b62e02af958"
+    },
+    "canonical_dev_holdout_split": {
+      "path": "/root/RADIO-GS/radio_gs/configs/splits/lerf_ramen_canonical_dev.txt",
+      "sha256": "cd29a48d66087a08c4388bf7f04b7268c02cada120206ea1ae7bd18435e69830"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    },
+    "radio_hubconf": {
+      "path": "/root/RADIO/hubconf.py",
+      "sha256": "fef3259dc0b27b2961b900a60c845e49af61ec418099b193dbdf03d128794381"
+    }
+  },
+  "heldout_frame_ids": [2, 6, 24, 45, 60, 65, 81, 87, 119, 128, 130],
+  "extraction_contract": {
+    "radio_version": "c-radio_v4-h",
+    "batch_size": 1,
+    "frame_id_mode": "auto",
+    "resolution_scale": 1.0,
+    "amp": true,
+    "skip_pca_stats": true,
+    "resume_partial": true,
+    "expected_selected_training_views": 120,
+    "query_independent": true,
+    "per_scene_hyperparameters": false,
+    "no_clobber_or_strict_committed_frame_resume": true
+  },
+  "output_root": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/ramen_fix4c_exact120_v1",
+  "access_audit": {
+    "training_source_images_opened": true,
+    "benchmark_holdout_images_opened": false,
+    "canonical_dev_holdout_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_queries_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "metric_execution_authorized": false
+}

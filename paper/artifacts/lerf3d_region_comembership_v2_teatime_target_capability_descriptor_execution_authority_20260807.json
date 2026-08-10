@@ -1,0 +1,42 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_teatime_target_capability_descriptor_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T11:27:00+08:00",
+  "status": "sealed_after_target_accepted_v2_and_capability_bank_success_before_descriptor_materialization",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "teatime",
+    "geometry_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+    "physical_space_id": "lerf:teatime:geometry-checkpoint-sha256:53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+  },
+  "inputs": {
+    "target_accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/accepted_v2_sparse_v2.pt",
+      "sha256": "318748c25124c7ec77602649b1660b8eb055fd482f69f6ec73dea25222d4dd7c"
+    },
+    "canonical_capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/canonical_capability_bank.pt",
+      "sha256": "2b9a16822451a568f90eb6660c91f50d7e08ed369c9e8dd60a9ace55f98efbf8"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_target_region_capability_descriptors_v2.py",
+    "sha256": "628e218b7be3d1cd2d1f0780c690b7c8dc8905f00d51c3b6c1b423152fd1e6a9"
+  },
+  "frozen_contract": {
+    "same_pooling_math_and_output_schema_as_formal_source_v2": true,
+    "batch_size": 16,
+    "appearance_source": "formal_query_free_dino_capability",
+    "boundary_source": "formal_query_free_sam3_capability",
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/region_capability_descriptor_v2.pt",
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

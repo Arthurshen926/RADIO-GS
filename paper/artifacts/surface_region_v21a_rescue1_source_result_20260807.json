@@ -1,0 +1,78 @@
+{
+  "schema": "radio_gs.surface_region_v21a_rescue_source_result_receipt.v1",
+  "schema_version": 1,
+  "status": "complete_no_source_promotion",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21a_rescue_execution_authority_fix2parent_20260807.json",
+    "sha256": "893ebb02967c946f84fe90c0063b2c4e989ea38044f87635c30bbf7583b3448e"
+  },
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21a_rescue1/checkpoint.pt.json",
+    "sha256": "24f8a00ee91cc50f7679d246ef26c01ca71813fb4bfd0b04f69eef2b925adfd0"
+  },
+  "normalization_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21a_rescue1/checkpoint.pt.normalization.pt",
+    "sha256": "baa19a43258e87b431155cd9d895a5ac5241a916970336a37dd5d5bb9a71b4c4"
+  },
+  "certificate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21a_rescue1/checkpoint.pt.certificate.json",
+    "sha256": "f43358a3f8e9ae8309115b29e94f77bd0ef1fa882bfb28eec683c2f0a55363ee"
+  },
+  "optimizer_steps_completed": 30,
+  "selected_epoch": null,
+  "selection_status": "no_epoch_satisfied_all_promotion_constraints",
+  "source_promotion_authorized": false,
+  "target_execution_authorized": false,
+  "validation_scene_macro": {
+    "epoch_0": {
+      "auxiliary_loss": 0.09711384773254395,
+      "absolute_relevance_loss": 0.02170814387500286,
+      "continuous_pairwise_relevance_loss": 0.014229141175746918
+    },
+    "epoch_30": {
+      "auxiliary_loss": 0.09339208900928497,
+      "absolute_relevance_loss": 0.0186228696256876,
+      "continuous_pairwise_relevance_loss": 0.014301714021712542
+    },
+    "epoch_30_relative_improvement": {
+      "auxiliary": 0.038323666605290616,
+      "absolute_relevance": 0.142125198132116,
+      "continuous_pairwise_relevance": -0.005100296993983149
+    },
+    "continuous_pairwise_best_epoch": 0
+  },
+  "validation_per_scene_epoch_30_relative_improvement": {
+    "scene0004_00": {
+      "auxiliary": 0.016011081647540195,
+      "absolute_relevance": 0.09371886467680554,
+      "continuous_pairwise_relevance": 0.00735019459619486
+    },
+    "scene0008_00": {
+      "auxiliary": 0.06086647857077143,
+      "absolute_relevance": 0.17324119374932032,
+      "continuous_pairwise_relevance": -0.017058825793835122
+    }
+  },
+  "diagnostic_conclusion": {
+    "triplet_anchor_denominator_bug_fixed": true,
+    "full_30_step_training_completed": true,
+    "checkpoint_selection_aligned_with_source_gate": true,
+    "performance_changed_materially_from_v21_baseline": false,
+    "dominant_remaining_failure": "held-out continuous pairwise negative transfer on scene0008_00"
+  },
+  "gpu_guard": {
+    "gpu": 1,
+    "power_limit_w": 300.0,
+    "maximum_observed_temperature_c": 67,
+    "overheat_stop_triggered": false,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21a_rescue1/gpu1_telemetry.jsonl",
+      "sha256": "d17c3d775fb08b7d3cd862e2f2fadffbd6e2722ab221ba7d09c65c827b67a90f"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21a_rescue1/gpu1_owner_audit.jsonl",
+      "sha256": "1b64bc0d487a4115fda8a1b21f58cc8e57e1c8b2e0b919fcfeb505de33bbdb3f"
+    }
+  },
+  "benchmark_opened": false
+}

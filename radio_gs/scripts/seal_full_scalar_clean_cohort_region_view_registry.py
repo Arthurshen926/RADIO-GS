@@ -12,6 +12,10 @@ authority.  ``registry`` accepts exactly the 32 independently sealed scene
 declarations named by the frozen 24-train/8-validation cohort and then emits
 the one global registry.  A partial set can never produce a global artifact.
 
+The registry command defaults to the complete 24/8 seal; its explicit pilot
+mode seals exactly scene0001/2/3/5 as train and scene0004/8 as validation under
+a distinct schema, without padding the other 26 scenes.
+
 Neither command opens source images, benchmark data, labels, masks, queries,
 or metrics, and neither command executes a model.
 """
@@ -51,6 +55,10 @@ SCENE_DECLARATION_SCHEMA = (
 )
 REGISTRY_SEAL_RECEIPT_SCHEMA = (
     "radio_gs.surface_region_full_scalar_clean_cohort_registry_seal_receipt.v1"
+)
+PILOT_REGISTRY_SEAL_RECEIPT_SCHEMA = (
+    "radio_gs.surface_region_full_scalar_clean_pilot_4train_2validation_"
+    "registry_seal_receipt.v1"
 )
 SCHEMA_VERSION = 1
 
@@ -111,6 +119,23 @@ def registry_seal_receipt_contract() -> dict[str, Any]:
     }
 
 
+def pilot_registry_seal_receipt_contract() -> dict[str, Any]:
+    return {
+        "schema": PILOT_REGISTRY_SEAL_RECEIPT_SCHEMA,
+        "schema_version": SCHEMA_VERSION,
+        "input": "exact_complete_set_of_six_caller_sha_bound_scene_declarations",
+        "cohort": {
+            "source_train": list(shard.PILOT_TRAIN_SCENES),
+            "source_validation": list(shard.PILOT_VALIDATION_SCENES),
+        },
+        "parent_cohort": "caller_sha_bound_clean_24train_8validation_authority",
+        "output": shard.PILOT_COHORT_REGISTRY_SCHEMA,
+        "full_24plus8_registry_accepted": False,
+        "no_partial_global_seal": True,
+        "query_independent": True,
+    }
+
+
 def _content_sha256(value: Mapping[str, Any]) -> str:
     content = dict(value)
     content.pop("authority_sha256", None)
@@ -118,10 +143,14 @@ def _content_sha256(value: Mapping[str, Any]) -> str:
 
 
 def _require_absent(paths: Sequence[str | Path]) -> None:
+    raw = [Path(path).expanduser() for path in paths]
+    resolved = [path.resolve(strict=False) for path in raw]
+    if len(set(resolved)) != len(resolved):
+        raise ValueError("clean cohort registry sealer output paths must be unique")
     existing = [
-        str(Path(path).expanduser().resolve())
-        for path in paths
-        if Path(path).expanduser().exists() or Path(path).expanduser().is_symlink()
+        str(path.resolve(strict=False))
+        for path in raw
+        if path.exists() or path.is_symlink()
     ]
     if existing:
         raise FileExistsError(
@@ -588,7 +617,12 @@ def seal_scene(args: argparse.Namespace) -> dict[str, Any]:
 def _paired_scene_inputs(args: argparse.Namespace) -> list[tuple[str, str]]:
     paths = list(args.scene_declaration)
     shas = list(args.expected_scene_declaration_sha256)
-    required = trainer.TRAIN_SCENE_COUNT + trainer.VALIDATION_SCENE_COUNT
+    pilot_mode = bool(getattr(args, "pilot_cohort_registry", False))
+    required = (
+        len(shard.PILOT_TRAIN_SCENES) + len(shard.PILOT_VALIDATION_SCENES)
+        if pilot_mode
+        else trainer.TRAIN_SCENE_COUNT + trainer.VALIDATION_SCENE_COUNT
+    )
     if len(paths) != len(shas):
         raise ValueError("scene declaration paths and expected SHA-256 counts differ")
     if len(paths) != required:
@@ -628,23 +662,41 @@ def prepare_registry(args: argparse.Namespace) -> dict[str, Any]:
                 "authority_sha256": declaration["authority_sha256"],
             }
         )
+    pilot_mode = bool(getattr(args, "pilot_cohort_registry", False))
     expected_scenes = sorted(
-        cohort["source_train_scene_ids"] + cohort["source_validation_scene_ids"]
+        list(shard.PILOT_TRAIN_SCENES) + list(shard.PILOT_VALIDATION_SCENES)
+        if pilot_mode
+        else cohort["source_train_scene_ids"]
+        + cohort["source_validation_scene_ids"]
     )
     observed_scenes = sorted(str(record["scene_id"]) for record in records)
     if observed_scenes != expected_scenes or len(set(observed_scenes)) != len(records):
         raise ValueError("scene declarations do not cover the exact frozen cohort")
-    registry = shard.build_cohort_region_view_registry(
+    registry_builder = (
+        shard.build_pilot_cohort_region_view_registry
+        if pilot_mode
+        else shard.build_cohort_region_view_registry
+    )
+    registry = registry_builder(
         cohort_authority=cohort,
         cohort_authority_file_sha256=cohort_file["sha256"],
         scene_records=records,
     )
     declaration_files.sort(key=lambda item: item["scene_id"])
+    receipt_contract = (
+        pilot_registry_seal_receipt_contract()
+        if pilot_mode
+        else registry_seal_receipt_contract()
+    )
     receipt: dict[str, Any] = {
-        "schema": REGISTRY_SEAL_RECEIPT_SCHEMA,
+        "schema": (
+            PILOT_REGISTRY_SEAL_RECEIPT_SCHEMA
+            if pilot_mode
+            else REGISTRY_SEAL_RECEIPT_SCHEMA
+        ),
         "schema_version": SCHEMA_VERSION,
-        "contract": registry_seal_receipt_contract(),
-        "contract_sha256": canonical_json_sha256(registry_seal_receipt_contract()),
+        "contract": receipt_contract,
+        "contract_sha256": canonical_json_sha256(receipt_contract),
         "cohort_authority": {
             "file_sha256": cohort_file["sha256"],
             "authority_sha256": cohort["authority_sha256"],
@@ -665,8 +717,16 @@ def seal_registry(args: argparse.Namespace) -> dict[str, Any]:
     result = {
         "status": "ready" if bool(args.preflight_only) else "sealed",
         "scene_count": len(registry["scene_records"]),
-        "train_scene_count": trainer.TRAIN_SCENE_COUNT,
-        "validation_scene_count": trainer.VALIDATION_SCENE_COUNT,
+        "train_scene_count": (
+            len(shard.PILOT_TRAIN_SCENES)
+            if bool(getattr(args, "pilot_cohort_registry", False))
+            else trainer.TRAIN_SCENE_COUNT
+        ),
+        "validation_scene_count": (
+            len(shard.PILOT_VALIDATION_SCENES)
+            if bool(getattr(args, "pilot_cohort_registry", False))
+            else trainer.VALIDATION_SCENE_COUNT
+        ),
         "registry_authority_sha256": registry["authority_sha256"],
         "outputs_written": False,
     }
@@ -712,6 +772,11 @@ def main() -> None:
     registry.add_argument("--scene-declaration", action="append", required=True)
     registry.add_argument(
         "--expected-scene-declaration-sha256", action="append", required=True
+    )
+    registry.add_argument(
+        "--pilot-cohort-registry",
+        action="store_true",
+        help="seal the independent exact 4-train/2-validation pilot registry",
     )
     registry.add_argument("--output-registry", required=True)
     registry.add_argument("--output-receipt", required=True)

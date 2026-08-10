@@ -1,0 +1,91 @@
+{
+  "artifact": "full_scalar_scene0004_response_chain_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T06:41:28+08:00",
+  "status": "source_validation_scene_official_teacher_hard_negative_and_declaration_chain_complete",
+  "scene_id": "scene0004_00",
+  "cohort_split": "source_validation",
+  "outputs": {
+    "official_multiview_siglip2_teacher": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/run/accepted_v2_source_only/scene0004_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+      "sha256": "15784cb99b38983b7b8e8b723ad61360082a24cd7714929607dd690dabcbdc53",
+      "size_bytes": 99934419,
+      "regions": 4096,
+      "source_views": 120,
+      "active_region_view_pairs": 16036,
+      "descriptor_dimension": 1536,
+      "minimum_views_per_region": 1,
+      "maximum_views_per_region": 4,
+      "descriptor_norm_minimum": 0.9999996423721313,
+      "descriptor_norm_maximum": 1.000000238418579,
+      "pair_descriptors_sha256": "4c1a00966bfe68cf015c517bcfd29621f26b4cf771f2e7e9b96a477d786ab50a",
+      "strict_double_reload_and_accepted_alignment_passed": true
+    },
+    "hard_negative_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0004_00/hard_negative_index_authority_bound_v1.pt",
+      "sha256": "cf0bccb273f8fc075b5e1e079366708588eebb77be05172136768cca2bba5e62",
+      "content_authority_sha256": "555ee1b3a40e36d385e07f5f3c03878e3b6e8310cbd2337b1e7b518fbfe932f4",
+      "size_bytes": 2424575,
+      "anchors": 4096,
+      "anchors_with_any_negative": 4096,
+      "directed_pairs": 31938,
+      "selected_pairs": 16384,
+      "minimum_negatives_per_anchor": 4,
+      "maximum_negatives_per_anchor": 8,
+      "mean_negatives_per_anchor": 7.79736328125,
+      "zero_shared_active_token_pairs": 31938,
+      "strict_double_reload_passed": true
+    },
+    "hard_negative_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0004_00/hard_negative_index_authority_bound_v1.report.json",
+      "sha256": "e9ab7e9402166c149a8fe850dc27b580d4676085d5f566e9d1885ff7efa8f292"
+    },
+    "scene_declaration": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/full_scalar_clean_cohort_region_view_registry/scene_declarations/scene0004_00.json",
+      "sha256": "93d4ce5f39593bf9fabe71034b59a706845ab34be163fb6b9ea48153a1340745",
+      "authority_sha256": "001eb68a7acc3e8c519ad61b9c82a72005d918771393542129a9e73350cd34f1",
+      "eligible_overlap_teacher_row_count": 4096
+    }
+  },
+  "source_only_response_diagnostic": {
+    "generic_dev_queries": 101,
+    "mean_spearman": 0.2164843249248705,
+    "mean_top10_overlap": 0.020792079207920793,
+    "mean_top_decile_overlap": 0.17845930934556872,
+    "mean_centered_response_profile_cosine": 0.8056379709378234,
+    "interpretation": "The immutable AcceptedV2 base descriptor preserves broad response shape but not the official multiview teacher top-ranked region ordering. This source-validation result independently supports the frozen V2.1 response/listwise supervision without opening benchmark queries."
+  },
+  "teacher_execution": {
+    "successful_physical_gpu": 1,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "fixed_schedule_id": "fixed-duty-cycle-45run-30cool-nvml30-v1",
+    "worker_returncode": 0,
+    "wall_seconds": 3907.66074,
+    "effective_unpaused_seconds": 1658.583895,
+    "effective_duty_fraction": 0.42444418933870903,
+    "maximum_temperature_c": 92,
+    "maximum_consecutive_overheat_samples": 1,
+    "status_log_sha256": "766854523d61c6df49b00d9e40732f3b152881ad3a00ab25fcb7fc4b04493c3b",
+    "cuda_release_verified": true,
+    "math_or_order_changed_for_thermal_handling": false
+  },
+  "temperature_role_separation": {
+    "hard_negative_mining_temperature": 0.05,
+    "v2_1_supervision_temperature": 0.1,
+    "contract": "0.05 freezes only target-blind candidate pairs; V2.1 recomputes teacher response, relevance gap and continuous weight at 0.1 on those fixed pairs"
+  },
+  "source_access": {
+    "source_rgb_used_for_official_teacher": true,
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

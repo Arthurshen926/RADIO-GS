@@ -1,0 +1,84 @@
+{
+  "schema": "radio_gs.spin_unified_canonical_sam_reference_selector.full9_registration.v1",
+  "schema_version": 1,
+  "status": "registered_method_development_before_remaining_six_full_carrier_sam_materializations",
+  "claim_scope": "full9_method_consistency_and_exact_frozen_protocol_evaluation_not_blind_confirmation",
+  "method": {
+    "canonical_branch": "Accepted query-conditioned canonical support, including its reference-selected solver candidate and threshold.",
+    "proposal_branch": "Three target-RGB-conditioned SAM hypotheses uplifted onto every row of the identical frozen carrier and rendered at native image resolution.",
+    "selector": "Choose the branch/candidate/threshold with maximum foreground IoU on the single permitted full reference mask.",
+    "target_transfer": "Freeze the selected branch, candidate, and threshold for every target frame.",
+    "scene_identifier_used_by_selector": false,
+    "scene_specific_hyperparameters": false,
+    "graph_added_to_sam_branch": false,
+    "connected_selection": false
+  },
+  "causal_unification": {
+    "canonical_field_role": "query-independent capability and geometry-aware default posterior",
+    "sam_role": "query-time target-RGB proposal that supplies missing cross-view object evidence",
+    "reference_mask_role": "source-side authority for admitting either posterior without target labels",
+    "native_scalar_readout_role": "preserve pixel-level posterior boundaries independently of the descriptor patch lattice"
+  },
+  "frozen_mainline": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260803/spin9_query_conditioned_diffusion_v1/full9_audit.json",
+    "sha256": "6a73b77d8d2d15f6f589b06a42aecf218ee1780159adefa12bb184a22d16e05a",
+    "foreground_iou": 0.8771615046217028
+  },
+  "completed_native_sam_branch": {
+    "lego": {
+      "reference_iou": 0.9428872682541077,
+      "target_foreground_iou": 0.9268476227604813,
+      "report_sha256": "301b4bdd227e5de9e584f5a12632c09a143f0a7b1454eee19332375e23de28d0"
+    },
+    "truck": {
+      "reference_iou": 0.971427928468555,
+      "target_foreground_iou": 0.9674729125791468,
+      "report_sha256": "80d22cdbb992c382a079500e93c2aec56538e77ec0d486491a0d808f60870519"
+    },
+    "room": {
+      "reference_iou": 0.9674483300827021,
+      "target_foreground_iou": 0.9727365752576113,
+      "report_sha256": "fcbce72d0596ac8d3413f9fe885bd1296b46f481f546fb3bb2fea5cb68bb5af7"
+    }
+  },
+  "remaining_scenes": [
+    "fern",
+    "fortress",
+    "horns",
+    "leaves",
+    "orchids",
+    "pinecone"
+  ],
+  "remaining_execution": {
+    "materializer": "/root/RADIO-GS/reproductions/ludvig/run_ludvig_sam.py",
+    "materializer_sha256": "81714a8942c4359261909e3a90a1f45eefc80d69cf91b15a2e12756478745e25",
+    "materialize_only": true,
+    "retain_full_carrier": true,
+    "sam_seed": 0,
+    "scorer": "/root/RADIO-GS/radio_gs/scripts/eval_spin_sam_query_interface_component.py",
+    "scorer_sha256": "a52815996d8c6a918bd38a8f0cd85bec7a5da78f3b1bc7b0d15a29418bcbbab8",
+    "render_resolution": "native",
+    "candidate_threshold_grid": "0.99_to_0.03_step_negative_0.01",
+    "target_masks_opened_by_materializer": false
+  },
+  "selection_and_reporting": {
+    "compare_canonical_and_sam_reference_iou_for_every_scene": true,
+    "select_higher_reference_iou_with_canonical_on_exact_tie": true,
+    "report_both_branch_target_metrics_even_when_not_selected": true,
+    "aggregate_selected_foreground_iou_as_equal_weight_full9_macro": true,
+    "no_scene_exclusion": true,
+    "no_parameter_change_after_any_remaining_target_metric": true
+  },
+  "prior_target_access_disclosure": {
+    "all_scene_target_metrics_previously_observed_during_project_development": true,
+    "effect": "This experiment validates a frozen protocol and a scene-agnostic selector but is not described as a prospectively blind benchmark."
+  },
+  "gpu_policy": {
+    "physical_gpus": [0, 1],
+    "power_limit_w": 300,
+    "poll_seconds": 120,
+    "soft_pause_enabled": false,
+    "hard_stop_temperature_c": 87,
+    "hard_stop_consecutive_polls": 2
+  }
+}

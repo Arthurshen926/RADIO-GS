@@ -1,0 +1,92 @@
+{
+  "artifact": "full_scalar_scene0005_region_comembership_chain_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T03:04:32+08:00",
+  "status": "source_train_scene_region_comembership_chain_complete_teacher_deferred",
+  "scene_id": "scene0005_00",
+  "cohort_split": "source_train",
+  "base_chain": {
+    "status": "complete_through_factorized_state",
+    "pilot_receipt_sha256": "ecc43a4163c5a4b5dec9f5c7088dc7e1cd9f518e1da4f9d419f8b33451ff5aa3",
+    "factorized_field_sha256": "41d4cd16a35b1a65135879481e1eef0fe64eb849f878cea6d4daeb7fc713c260",
+    "factorized_primitive_state_sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8",
+    "factorized_radio_cache_sha256": "5ea488054b696aec1e04b8a52d072521abca8f46033878e63092a466bd16065f",
+    "exact_marginal_responsibility_authority_sha256": "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050"
+  },
+  "outputs": {
+    "canonical_capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/canonical_capability_bank.pt",
+      "sha256": "9e77b3afdc30403cfae456a3b2d0d638601d56d283b73a14b32ee5e1f3257a25",
+      "size_bytes": 2003370655,
+      "active_primitive_rows": 195387
+    },
+    "canonical_support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "b9bacfb4b58ee540c51e8b74df82d2e676707ce0b75da89b2977429e4ea03fd8",
+      "size_bytes": 99348555,
+      "nodes": 195387,
+      "edges": 3640302
+    },
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+      "sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e",
+      "size_bytes": 35211731,
+      "canonical_candidate_regions": 586161,
+      "selected_regions": 4096,
+      "selected_by_scale": [1366, 1365, 1365]
+    },
+    "typed_context_stage_b_adaptive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/typed_context_stage_b_adaptive_v2.pt",
+      "sha256": "20f49415e9e20985ff7103ef7da658af829ccf081d601ff1f3dc7277247a2257",
+      "size_bytes": 15660021,
+      "regions": 4096,
+      "selection_complete": 4096,
+      "typed_context_valid": 4096,
+      "true_no_context_fallback_rows": 0,
+      "maximum_adaptive_rounds": 4,
+      "maximum_estimated_working_bytes": 131906848,
+      "termination_counts": {
+        "natural_exhaustion": 3180,
+        "typed_budget_satisfied": 916
+      }
+    }
+  },
+  "sealed_authorities": {
+    "capability": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0005_region_comembership_capability_gpu0_execution_authority_20260807.json",
+      "sha256": "b24ee444b736fbe502ffb8c12120eb3fd62facd977e3bfef7640d93ca5c7ae88"
+    },
+    "support_graph": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0005_support_graph_gpu0_execution_authority_20260807.json",
+      "sha256": "881a6d56afc7aa5fd4316a1d75a786d5c8e61e4dc6fab32cf79d65e387027761"
+    },
+    "accepted_v2": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0005_accepted_v2_gpu0_execution_authority_20260807.json",
+      "sha256": "aa6b660e787a54befc8a82a4639afbce14115f0eb58f047f00af7d9dc6db0e9b"
+    },
+    "typed_context": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0005_typed_context_adaptive_cpu_execution_authority_20260807.json",
+      "sha256": "2afdb251ab6c88f785a0e7c426d41f8a1a42b0c2733f9008ed327d4f59737c08"
+    }
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "support_graph_maximum_temperature_c": 51,
+    "accepted_v2_maximum_temperature_c": 53,
+    "thermal_warnings": 0,
+    "thermal_aborts": 0,
+    "guard_exit_codes_zero": true,
+    "official_multiview_siglip2_teacher_executed": false,
+    "official_multiview_siglip2_teacher_deferred": true
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

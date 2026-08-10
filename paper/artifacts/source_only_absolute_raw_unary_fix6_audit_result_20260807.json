@@ -1,0 +1,388 @@
+{
+  "benchmark_execution_authorized": false,
+  "by_split": {
+    "source_train": {
+      "graph_conditioned": {
+        "selected_count": 14274,
+        "selected_negative_count": 1240,
+        "selected_positive_count": 13034,
+        "selected_precision": 0.913128765587782,
+        "selected_precision_Wilson95_lower": 0.9091724925864336
+      },
+      "scene_count": 4,
+      "unary": {
+        "candidate_count": 12060,
+        "precision": 0.2574626865671642,
+        "precision_Wilson95_lower": 0.25096867063806627,
+        "signed_absolute_utility_per_candidate": -0.040893735933066604,
+        "signed_strength_ratio": -0.3200625138513111,
+        "signed_strength_sum": -493.1784553527832,
+        "strength_sum": 1540.8816528320312,
+        "teacher_negative_count": 8955,
+        "teacher_positive_count": 3105,
+        "teacher_positive_recall": 0.9400544959128065,
+        "teacher_positive_reference_count": 3303
+      }
+    },
+    "source_validation": {
+      "graph_conditioned": {
+        "selected_count": 7027,
+        "selected_negative_count": 278,
+        "selected_positive_count": 6749,
+        "selected_precision": 0.960438309378113,
+        "selected_precision_Wilson95_lower": 0.956432881196183
+      },
+      "scene_count": 2,
+      "unary": {
+        "candidate_count": 5737,
+        "precision": 0.2792400209168555,
+        "precision_Wilson95_lower": 0.2696033536903176,
+        "signed_absolute_utility_per_candidate": -0.024072823965821673,
+        "signed_strength_ratio": -0.22227172596629705,
+        "signed_strength_sum": -138.10579109191895,
+        "strength_sum": 621.337646484375,
+        "teacher_negative_count": 4135,
+        "teacher_positive_count": 1602,
+        "teacher_positive_recall": 0.9615846338535414,
+        "teacher_positive_reference_count": 1666
+      }
+    }
+  },
+  "candidate_contract": {
+    "absolute_threshold": 0.5,
+    "dominance": "argmax_all_exact_ties_retained",
+    "dominance_reference": "same_frozen_target_blind_806_query_bank",
+    "per_scene_parameters": false,
+    "raw_probability": "sigmoid(10*(query_cosine-hardest_canonical_negative_cosine))",
+    "scene_query_bank_argmax_used": false,
+    "target_requirement": "runtime_query_must_beat_the_same_806_distractors",
+    "threshold_source": "semantic_neutral_point_not_fitted"
+  },
+  "cardinality_control": {
+    "scene_query_count_used": false,
+    "source": "candidate query competes with the frozen 806-query bank",
+    "target_if_promoted": "runtime query must compete with the same frozen 806 distractors"
+  },
+  "content_authority_sha256": "d7b7f26bd6a7bf0480105a9e0c9e05bd3ba9d2218e836e509861476822ebaf1d",
+  "decision": "reject_do_not_implement_or_open_target",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_absolute_raw_unary_fix6_execution_authority_20260807.json",
+    "sha256": "c274ac2f51c0059186f1f9700d8c70306c6709f0802f8d6630eb102307484c7c"
+  },
+  "per_scene": {
+    "scene0001_00": {
+      "FIX5_retained_true_anchor_reach": 0.9449976292081556,
+      "absolute_raw_region_query_pair_count_before_dominance": 16836,
+      "coverage_minus_FIX5": -0.8169748690553388,
+      "dominant_absolute_region_count": 2411,
+      "dominant_exact_tie_region_count": 0,
+      "edge_gate": {
+        "all_edge_count": 53143,
+        "all_three_edge_gate_count": 4674,
+        "raw_and_reliability_gate_count": 4674,
+        "raw_probability_gate_count": 4797
+      },
+      "fixed_distractor_query_count": 806,
+      "graph_conditioned": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 1667.60546875,
+          "marginal_weighted_signed_utility": 0.49349327460460707,
+          "negative_count": 500,
+          "positive_count": 2054,
+          "selected_count": 2554,
+          "signed_gain_sum": 822.9520835219882
+        },
+        "selected_count": 2554,
+        "selected_negative_count": 500,
+        "selected_positive_count": 2054,
+        "selected_precision": 0.8042286609240408,
+        "selected_precision_Wilson95_lower": 0.7909949371504568
+      },
+      "original_true_eligible_anchor_count": 2109,
+      "split": "source_train",
+      "teacher_confirmed_absolute_anchor_count": 270,
+      "teacher_confirmed_absolute_anchor_coverage": 0.12802276015281677,
+      "unary": {
+        "candidate_count": 2411,
+        "precision": 0.32725010369141433,
+        "precision_Wilson95_lower": 0.31173342818981736,
+        "signed_absolute_utility_per_candidate": -0.00896375617363897,
+        "signed_strength_ratio": -0.0860172915943195,
+        "signed_strength_sum": -21.611616134643555,
+        "strength_sum": 251.24734497070312,
+        "teacher_negative_count": 1622,
+        "teacher_positive_count": 789,
+        "teacher_positive_recall": 0.8795986622073578,
+        "teacher_positive_reference_count": 897
+      }
+    },
+    "scene0002_00": {
+      "FIX5_retained_true_anchor_reach": 0.948019801980198,
+      "absolute_raw_region_query_pair_count_before_dominance": 21029,
+      "coverage_minus_FIX5": -0.6280940467178231,
+      "dominant_absolute_region_count": 3304,
+      "dominant_exact_tie_region_count": 0,
+      "edge_gate": {
+        "all_edge_count": 53996,
+        "all_three_edge_gate_count": 2293,
+        "raw_and_reliability_gate_count": 2293,
+        "raw_probability_gate_count": 2964
+      },
+      "fixed_distractor_query_count": 806,
+      "graph_conditioned": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 1761.60546875,
+          "marginal_weighted_signed_utility": 0.7729432644678864,
+          "negative_count": 86,
+          "positive_count": 2551,
+          "selected_count": 2637,
+          "signed_gain_sum": 1361.6210817201063
+        },
+        "selected_count": 2637,
+        "selected_negative_count": 86,
+        "selected_positive_count": 2551,
+        "selected_precision": 0.9673871824042473,
+        "selected_precision_Wilson95_lower": 0.9612015113876303
+      },
+      "original_true_eligible_anchor_count": 1616,
+      "split": "source_train",
+      "teacher_confirmed_absolute_anchor_count": 517,
+      "teacher_confirmed_absolute_anchor_coverage": 0.3199257552623749,
+      "unary": {
+        "candidate_count": 3304,
+        "precision": 0.39921307506053266,
+        "precision_Wilson95_lower": 0.38528678078249134,
+        "signed_absolute_utility_per_candidate": 0.008203426227153934,
+        "signed_strength_ratio": 0.06865475255317616,
+        "signed_strength_sum": 27.1041202545166,
+        "strength_sum": 394.7886962890625,
+        "teacher_negative_count": 1985,
+        "teacher_positive_count": 1319,
+        "teacher_positive_recall": 0.9407988587731811,
+        "teacher_positive_reference_count": 1402
+      }
+    },
+    "scene0003_00": {
+      "FIX5_retained_true_anchor_reach": 0.9611835825644289,
+      "absolute_raw_region_query_pair_count_before_dominance": 22558,
+      "coverage_minus_FIX5": -0.8701877194844042,
+      "dominant_absolute_region_count": 3238,
+      "dominant_exact_tie_region_count": 0,
+      "edge_gate": {
+        "all_edge_count": 51405,
+        "all_three_edge_gate_count": 8372,
+        "raw_and_reliability_gate_count": 8372,
+        "raw_probability_gate_count": 8690
+      },
+      "fixed_distractor_query_count": 806,
+      "graph_conditioned": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 3828.74609375,
+          "marginal_weighted_signed_utility": 0.6945140275762366,
+          "negative_count": 453,
+          "positive_count": 5107,
+          "selected_count": 5560,
+          "signed_gain_sum": 2659.1178701370955
+        },
+        "selected_count": 5560,
+        "selected_negative_count": 453,
+        "selected_positive_count": 5107,
+        "selected_precision": 0.9185251798561151,
+        "selected_precision_Wilson95_lower": 0.912285074900982
+      },
+      "original_true_eligible_anchor_count": 3143,
+      "split": "source_train",
+      "teacher_confirmed_absolute_anchor_count": 286,
+      "teacher_confirmed_absolute_anchor_coverage": 0.09099586308002472,
+      "unary": {
+        "candidate_count": 3238,
+        "precision": 0.1596664607782582,
+        "precision_Wilson95_lower": 0.14936301474204938,
+        "signed_absolute_utility_per_candidate": -0.06789946246839292,
+        "signed_strength_ratio": -0.49216358119489023,
+        "signed_strength_sum": -219.85845947265625,
+        "strength_sum": 446.71826171875,
+        "teacher_negative_count": 2721,
+        "teacher_positive_count": 517,
+        "teacher_positive_recall": 0.9904214559386973,
+        "teacher_positive_reference_count": 522
+      }
+    },
+    "scene0004_00": {
+      "FIX5_retained_true_anchor_reach": 0.985341437254201,
+      "absolute_raw_region_query_pair_count_before_dominance": 13885,
+      "coverage_minus_FIX5": -0.8873793334701167,
+      "dominant_absolute_region_count": 2850,
+      "dominant_exact_tie_region_count": 0,
+      "edge_gate": {
+        "all_edge_count": 57937,
+        "all_three_edge_gate_count": 7101,
+        "raw_and_reliability_gate_count": 7101,
+        "raw_probability_gate_count": 7322
+      },
+      "fixed_distractor_query_count": 806,
+      "graph_conditioned": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 2610.33203125,
+          "marginal_weighted_signed_utility": 0.7697992793738537,
+          "negative_count": 143,
+          "positive_count": 3928,
+          "selected_count": 4071,
+          "signed_gain_sum": 2009.4317165827379
+        },
+        "selected_count": 4071,
+        "selected_negative_count": 143,
+        "selected_positive_count": 3928,
+        "selected_precision": 0.964873495455662,
+        "selected_precision_Wilson95_lower": 0.9598102739696006
+      },
+      "original_true_eligible_anchor_count": 2797,
+      "split": "source_validation",
+      "teacher_confirmed_absolute_anchor_count": 274,
+      "teacher_confirmed_absolute_anchor_coverage": 0.09796210378408432,
+      "unary": {
+        "candidate_count": 2850,
+        "precision": 0.20701754385964913,
+        "precision_Wilson95_lower": 0.194814629922473,
+        "signed_absolute_utility_per_candidate": -0.03879566661098547,
+        "signed_strength_ratio": -0.33765799465071444,
+        "signed_strength_sum": -110.5676498413086,
+        "strength_sum": 327.4545593261719,
+        "teacher_negative_count": 2260,
+        "teacher_positive_count": 590,
+        "teacher_positive_recall": 0.9735973597359736,
+        "teacher_positive_reference_count": 606
+      }
+    },
+    "scene0005_00": {
+      "FIX5_retained_true_anchor_reach": 0.9703644373247897,
+      "absolute_raw_region_query_pair_count_before_dominance": 21700,
+      "coverage_minus_FIX5": -0.9034841813872134,
+      "dominant_absolute_region_count": 3107,
+      "dominant_exact_tie_region_count": 0,
+      "edge_gate": {
+        "all_edge_count": 53117,
+        "all_three_edge_gate_count": 5951,
+        "raw_and_reliability_gate_count": 5951,
+        "raw_probability_gate_count": 6093
+      },
+      "fixed_distractor_query_count": 806,
+      "graph_conditioned": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 2479.671875,
+          "marginal_weighted_signed_utility": 0.7273690662484449,
+          "negative_count": 201,
+          "positive_count": 3322,
+          "selected_count": 3523,
+          "signed_gain_sum": 1803.6366163212806
+        },
+        "selected_count": 3523,
+        "selected_negative_count": 201,
+        "selected_positive_count": 3322,
+        "selected_precision": 0.9429463525404485,
+        "selected_precision_Wilson95_lower": 0.9361722201618993
+      },
+      "original_true_eligible_anchor_count": 2497,
+      "split": "source_train",
+      "teacher_confirmed_absolute_anchor_count": 167,
+      "teacher_confirmed_absolute_anchor_coverage": 0.0668802559375763,
+      "unary": {
+        "candidate_count": 3107,
+        "precision": 0.15448986160283232,
+        "precision_Wilson95_lower": 0.14412574259553215,
+        "signed_absolute_utility_per_candidate": -0.08973688445445768,
+        "signed_strength_ratio": -0.6221724697033969,
+        "signed_strength_sum": -278.8125,
+        "strength_sum": 448.1273498535156,
+        "teacher_negative_count": 2627,
+        "teacher_positive_count": 480,
+        "teacher_positive_recall": 0.995850622406639,
+        "teacher_positive_reference_count": 482
+      }
+    },
+    "scene0008_00": {
+      "FIX5_retained_true_anchor_reach": 0.9421487603305785,
+      "absolute_raw_region_query_pair_count_before_dominance": 15566,
+      "coverage_minus_FIX5": -0.7673553679107634,
+      "dominant_absolute_region_count": 2887,
+      "dominant_exact_tie_region_count": 0,
+      "edge_gate": {
+        "all_edge_count": 52313,
+        "all_three_edge_gate_count": 3558,
+        "raw_and_reliability_gate_count": 3558,
+        "raw_probability_gate_count": 3743
+      },
+      "fixed_distractor_query_count": 806,
+      "graph_conditioned": {
+        "marginal_weighted_signed_utility": {
+          "marginal_weight_sum": 2032.71875,
+          "marginal_weighted_signed_utility": 0.7400581855485244,
+          "negative_count": 135,
+          "positive_count": 2821,
+          "selected_count": 2956,
+          "signed_gain_sum": 1504.3301498554647
+        },
+        "selected_count": 2956,
+        "selected_negative_count": 135,
+        "selected_positive_count": 2821,
+        "selected_precision": 0.9543301759133965,
+        "selected_precision_Wilson95_lower": 0.9475879982722011
+      },
+      "original_true_eligible_anchor_count": 2420,
+      "split": "source_validation",
+      "teacher_confirmed_absolute_anchor_count": 423,
+      "teacher_confirmed_absolute_anchor_coverage": 0.17479339241981506,
+      "unary": {
+        "candidate_count": 2887,
+        "precision": 0.35053688950467615,
+        "precision_Wilson95_lower": 0.33607643519588304,
+        "signed_absolute_utility_per_candidate": -0.009538670332736527,
+        "signed_strength_ratio": -0.09370440986209601,
+        "signed_strength_sum": -27.53814125061035,
+        "strength_sum": 293.8830871582031,
+        "teacher_negative_count": 1875,
+        "teacher_positive_count": 1012,
+        "teacher_positive_recall": 0.9547169811320755,
+        "teacher_positive_reference_count": 1060
+      }
+    }
+  },
+  "promotion_gate": {
+    "outcomes": {
+      "both_validation_scene_confirmed_anchor_coverage_at_least_FIX5": false,
+      "both_validation_scene_graph_Wilson95_lower_at_least_0.95": false,
+      "both_validation_scene_unary_Wilson95_lower_at_least_0.95": false,
+      "passed": false,
+      "validation_pooled_signed_absolute_utility_positive": false
+    },
+    "thresholds": {
+      "every_validation_scene_confirmed_anchor_coverage": "at_least_FIX5_retained_reach",
+      "failure_action": "reject_FIX6_keep_target_unopened",
+      "minimum_every_validation_scene_graph_Wilson95_lower": 0.95,
+      "minimum_every_validation_scene_unary_Wilson95_lower": 0.95,
+      "validation_pooled_signed_absolute_utility": "strictly_greater_than_zero"
+    }
+  },
+  "schema": "radio_gs.source_only_absolute_raw_unary_fix6_audit.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "benchmark_queries_opened": false,
+    "canonical_generic_negative_bank_opened": true,
+    "generic_target_blind_806_query_bank_opened": true,
+    "per_scene_hyperparameters": false,
+    "source_aggregate_prototypes_opened": true,
+    "source_instance_labels_opened": true,
+    "source_official_multiview_teacher_opened": true,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  },
+  "status": "source_only_absolute_raw_unary_FIX6_rejected_target_remained_unopened",
+  "target_execution_performed": false,
+  "teacher_truth": "official_multiview_teacher_mean_raw_canonical_probability_for_the_exact_candidate_query_above_semantic_neutral_point"
+}

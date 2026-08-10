@@ -1,0 +1,115 @@
+{
+  "schema": "radio_gs.lerf_valid_domain_knn_one_shot_exact_metric_result.v1",
+  "schema_version": 1,
+  "status": "complete_exact_metric_positive",
+  "scene_id": "figurines",
+  "oracle": "O2",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_figurines_o2_valid_domain_knn_one_shot_exact_metric_execution_authority_20260809.json",
+    "sha256": "f16b1b9c1da11759c5f9e09e8c4ead5225d735f373e51e18650630ad8e4c4e35"
+  },
+  "baseline": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o2_fixed/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "fcf41022f9e25aa5d888067353568d540ee9124407960ea930a10b526c7262d9",
+    "metrics": {
+      "miou": 0.5220417976379395,
+      "acc025": 0.8928571428571429,
+      "acc050": 0.5357142857142857,
+      "boundary_f": 0.7915179133415222,
+      "trimap_iou": 0.3736012876033783,
+      "n": 56
+    }
+  },
+  "candidate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_v1/figurines/evaluation/exact_one_shot_gpu0_v1/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "790009fae9752d892b66fd63aa955e9b915fd0ed7448cf7fe80f7f0235ae10e6",
+    "metrics": {
+      "miou": 0.5284488797187805,
+      "acc025": 0.8928571428571429,
+      "acc050": 0.5535714285714286,
+      "boundary_f": 0.7925084233283997,
+      "trimap_iou": 0.3761109411716461,
+      "n": 56
+    },
+    "protocol_checks": {
+      "config_sha256": "e3e213f6551aaa339683b8de18459ba87427f8146d2709ff6173cd58b46be8bd",
+      "checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+      "protocol_preset": "vala_paper_3d",
+      "score_postprocess": "none",
+      "projection_mode": "selected_only_alpha",
+      "alpha_binarization": "png_uint8_gt10",
+      "mask_refinement": "none",
+      "official_frames_only": true
+    }
+  },
+  "delta_candidate_minus_baseline": {
+    "miou": 0.0064070820808410645,
+    "acc025": 0.0,
+    "acc050": 0.017857142857142905,
+    "boundary_f": 0.0009905099868774414,
+    "trimap_iou": 0.0025096535682678223
+  },
+  "paired_frame_cluster_bootstrap": {
+    "unit": "official_frame",
+    "num_frames": 4,
+    "samples": 20000,
+    "seed": 20260809,
+    "equal_frame_weighted_mean_delta": 0.006156779943019449,
+    "ci95": [
+      0.0009310507055113328,
+      0.011382509180527564
+    ],
+    "p_nonpositive": 0.0,
+    "per_frame_mean_iou_delta": {
+      "frame_00041": 0.010205301660412764,
+      "frame_00105": 0.012559716700642366,
+      "frame_00152": 0.0014751138183622065,
+      "frame_00195": 0.0003869875926604593
+    }
+  },
+  "category_summary": {
+    "improved": 9,
+    "unchanged": 6,
+    "regressed": 6,
+    "largest_gains_miou": {
+      "red toy chair": 0.05197089910507202,
+      "spatula": 0.040097951889038086,
+      "tesla door handle": 0.02830713987350464,
+      "green apple": 0.023847222328186035,
+      "jake": 0.023699183017015457
+    },
+    "largest_regression_miou": {
+      "pikachu": -0.02594849467277527
+    }
+  },
+  "full4_derived_summary": {
+    "scenes": [
+      "ramen",
+      "teatime",
+      "waldo_kitchen",
+      "figurines"
+    ],
+    "baseline_miou_macro": 0.4428355246782303,
+    "candidate_miou_macro": 0.44960178434848785,
+    "delta_miou_macro": 0.006766259670257541
+  },
+  "execution_receipt": {
+    "exit_code": 0,
+    "thermal_abort": false,
+    "physical_gpu": 0,
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "observed_temperature_c_min": 44,
+    "observed_temperature_c_max": 46,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_v1/figurines/evaluation/exact_one_shot_gpu0_v1_telemetry.csv",
+      "sha256": "c8bf0ce6160901a678ae2ea5d5501775c448db373f9da552e0ae137f37037b31"
+    },
+    "run_log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_v1/figurines/evaluation/exact_one_shot_gpu0_v1_run.log",
+      "sha256": "5e65714b7a750aaf84e9160f435b2a5be944329939307980d042cdc5315759af"
+    }
+  },
+  "decision": "accept_valid_domain_knn_readout_as_full4_consistent_positive_candidate"
+}

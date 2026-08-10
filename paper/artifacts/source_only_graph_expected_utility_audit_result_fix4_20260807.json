@@ -1,0 +1,556 @@
+{
+  "benchmark_execution_authorized": false,
+  "content_authority_sha256": "1385a9c797127b61d5b1b136695ea5b426114b0b96239dad1adade1f3b67a0b2",
+  "deployment_config": {
+    "anchor": {
+      "definition": "mean(valid_core_exact_O0_final_score_strictly_greater_than_0.6)",
+      "o0_core_supermajority": 0.75,
+      "o0_final_score_minimum": 0.6,
+      "rank256_query_top_tail": "diagnostic_not_used_by_primary",
+      "top_tail_size": 8
+    },
+    "fallback_on_any_failed_gate": "bitwise_O0_only_no_graph_residual",
+    "feature_ood": {
+      "input": "target_used_direct_edge_pair_features_in_the_exact_21_channel_source_order_not_rank256_descriptor_reliability",
+      "maximum_target_ood_fraction": 0.01,
+      "raw_score": "max_abs((pair_feature-source_median)/source_robust_scale)",
+      "raw_score_limit": 70.06049346923828,
+      "scene_quantile": 0.99,
+      "unit_score": "raw_score/(raw_score+raw_score_limit)",
+      "unit_score_maximum": 0.5
+    },
+    "graph": {
+      "anchor_quorum": 2,
+      "anchor_quorum_definition": "at_least_two_query_qualified_O0_supermajority_anchors;candidate_requires_at_least_one_direct_raw_p_ge_0.9_edge_from_any_anchor_not_two_direct_neighbors_or_two_paths",
+      "calibrated_edge_lower_minimum": 0.8561646376880776,
+      "candidate_region_lower": "maximum_calibrated_lower_of_direct_p_ge_0.9_edges_from_any_query_qualified_O0_anchor;O0_anchor_region_lower_is_1",
+      "edge_lower_formula": "sigmoid(logit(clamp(p,1e-7,1-1e-7))-epsilon_logit)",
+      "expected_utility_mode": "strict_positive_one_sided_calibrated_expected_utility_lower",
+      "familywise_q99_hard_null_used": false,
+      "formal_checkpoint_safety_cap": 8,
+      "maximum_selected_regions": 3,
+      "method": "direct_O0_anchor_edge_residual",
+      "null_calibration": "consumer_exact_direct_false_edge_greedy_with_covered_union_and_marginal_primitive_deduplication",
+      "raw_edge_probability_minimum": 0.9
+    },
+    "query_gate_diagnostics": {
+      "anchor_agreement": "minimum_over_quorum_O0_anchors_of_fraction_valid_core_exact_O0_final_scores_strictly_greater_than_0.6;missing_anchor_evidence_is_0",
+      "feature_ood_score": "maximum_over_used_graph_edges_of_raw_score/(raw_score+limit);missing_feature_evidence_is_1",
+      "null_activation": "fraction_of_selected_steps_whose_candidate_gain_is_not_strictly_above_the_corresponding_source_false_edge_null_threshold;valid_sequential_readout_is_exactly_0",
+      "reliability": "minimum_over_used_direct_edge_pair_features_of_minimum_appearance_concentration_channel17_and_boundary_concentration_channel18;no_edges_is_0;never_use_rank256_descriptor_reliability",
+      "stability": "fraction_of_selected_regions_unchanged_under_exact_repeat_and_canonical_tie_replay;missing_replay_is_0"
+    },
+    "residual_config": {
+      "epsilon_logit": 0.4134312141523724,
+      "maximum_feature_ood_score": 0.5,
+      "maximum_null_activation": 0.0,
+      "minimum_anchor_agreement": 0.75,
+      "minimum_reliability": 0.8761253952980042,
+      "minimum_stability": 1.0,
+      "novel_mass_reference": 256.0,
+      "null_step_thresholds": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "source_query_bank_requirement": "not_applicable_primary_uses_only_runtime_O0_supermajority_anchors_and_source_calibrated_query_independent_direct_edges"
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_expected_utility_fix4_execution_authority_20260807.json",
+    "sha256": "940fb3fba6ceb8b16c5e7b51610d23e8fb82ad0a096e5ed944db90891390938c"
+  },
+  "method_interpretation": {
+    "name": "risk_bounded_soft_residual",
+    "not_uncontrolled_graph_reasons": [
+      "raw_edge_probability_must_be_at_least_0.9",
+      "one_sided_logit_correction_is_applied_before_utility",
+      "pair_reliability_and_pair_feature_OOD_gates_are_unchanged",
+      "O0_supermajority_anchor_contract_and_quorum_are_unchanged",
+      "strictly_positive_expected_utility_lower_is_required",
+      "at_most_three_regions_receive_a_nonnegative_residual",
+      "per_primitive_residual_is_bounded_by_epsilon_logit",
+      "O0_logits_remain_the_canonical_capability_and_failed_gates_are_bitwise_O0",
+      "no_hard_connected_component_or_binary_region_union_is_used"
+    ]
+  },
+  "parent_fix3_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_consumer_exact_calibration_result_fix3_20260807.json",
+    "sha256": "5064aae6ab15272f427d31e50391e134b154262d171164c4bacae1c7fcab7568"
+  },
+  "schema": "radio_gs.source_only_graph_expected_utility_audit_fix4.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_metrics_opened": false,
+    "benchmark_queries_opened": false,
+    "source_instance_labels_opened": true,
+    "source_query_evidence_opened": false,
+    "source_train_pair_features_opened": true,
+    "source_validation_pair_features_opened": true,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "target_pair_features_opened": false
+  },
+  "source_exact_consumer_audit": {
+    "by_split": {
+      "source_train": {
+        "scene_count": 4,
+        "selected_count_by_step": [
+          10103,
+          7539,
+          5634
+        ],
+        "selected_edge_count": 23276,
+        "selected_false_edge_count": 1829,
+        "selected_false_rate": 0.07857879360714899,
+        "selected_positive_edge_count": 21447,
+        "selected_precision": 0.921421206392851,
+        "selected_precision_Wilson95_lower": 0.9184709346268325,
+        "true_pseudo_anchor_coverage": 1.0,
+        "true_pseudo_anchor_eligible_count": 9365,
+        "true_pseudo_anchor_with_any_selected_count": 9365
+      },
+      "source_validation": {
+        "scene_count": 2,
+        "selected_count_by_step": [
+          5376,
+          4003,
+          2940
+        ],
+        "selected_edge_count": 12319,
+        "selected_false_edge_count": 363,
+        "selected_false_rate": 0.02946667749005601,
+        "selected_positive_edge_count": 11956,
+        "selected_precision": 0.970533322509944,
+        "selected_precision_Wilson95_lower": 0.9679219822314433,
+        "true_pseudo_anchor_coverage": 1.0,
+        "true_pseudo_anchor_eligible_count": 5217,
+        "true_pseudo_anchor_with_any_selected_count": 5217
+      }
+    },
+    "per_scene": {
+      "scene0001_00": {
+        "edge_gate": {
+          "all_edge_count": 53143,
+          "all_three_edge_gate_count": 4674,
+          "eligible_false_edge_count": 625,
+          "eligible_true_edge_count": 4049,
+          "raw_and_reliability_gate_count": 4674,
+          "raw_probability_gate_count": 4797
+        },
+        "mixed": {
+          "anchor_with_any_selected_count": 2577,
+          "anchor_with_any_selected_rate": 1.0,
+          "bounded_residual_amplitude": {
+            "selected": {
+              "count": 5767,
+              "maximum": 0.39585068821907043,
+              "mean": 0.3297771215438843
+            },
+            "selected_false": {
+              "count": 981,
+              "maximum": 0.3910157382488251,
+              "mean": 0.3285808265209198
+            },
+            "selected_true": {
+              "count": 4786,
+              "maximum": 0.39585068821907043,
+              "mean": 0.33002230525016785
+            }
+          },
+          "eligible_anchor_count": 2577,
+          "mean_marginal_primitives_by_selected_step": [
+            254.43190002441406,
+            125.95013427734375,
+            85.22415161132812
+          ],
+          "selected_count_by_step": [
+            2577,
+            1865,
+            1325
+          ],
+          "selected_edge_count": 5767,
+          "selected_edge_precision": 0.8298942257672967,
+          "selected_false_edge_count": 981,
+          "selected_false_rate": 0.17010577423270334,
+          "selected_positive_edge_count": 4786,
+          "selected_precision_Wilson95_lower": 0.8216018658556983
+        },
+        "split": "source_train",
+        "true_only_capability": {
+          "anchor_with_any_selected_count": 2109,
+          "anchor_with_any_selected_rate": 1.0,
+          "eligible_anchor_count": 2109,
+          "mean_marginal_primitives_by_selected_step": [
+            255.4196319580078,
+            130.79632568359375,
+            89.61203002929688
+          ],
+          "selected_count_by_step": [
+            2109,
+            1576,
+            1147
+          ],
+          "selected_edge_count": 4832,
+          "selected_edge_precision": 1.0,
+          "selected_positive_edge_count": 4832
+        }
+      },
+      "scene0002_00": {
+        "edge_gate": {
+          "all_edge_count": 53996,
+          "all_three_edge_gate_count": 2293,
+          "eligible_false_edge_count": 60,
+          "eligible_true_edge_count": 2233,
+          "raw_and_reliability_gate_count": 2293,
+          "raw_probability_gate_count": 2964
+        },
+        "mixed": {
+          "anchor_with_any_selected_count": 1667,
+          "anchor_with_any_selected_rate": 1.0,
+          "bounded_residual_amplitude": {
+            "selected": {
+              "count": 3360,
+              "maximum": 0.41039198637008667,
+              "mean": 0.33281657099723816
+            },
+            "selected_false": {
+              "count": 108,
+              "maximum": 0.37346115708351135,
+              "mean": 0.32183095812797546
+            },
+            "selected_true": {
+              "count": 3252,
+              "maximum": 0.41039198637008667,
+              "mean": 0.33318138122558594
+            }
+          },
+          "eligible_anchor_count": 1667,
+          "mean_marginal_primitives_by_selected_step": [
+            254.65866088867188,
+            110.33882141113281,
+            63.983333587646484
+          ],
+          "selected_count_by_step": [
+            1667,
+            1033,
+            660
+          ],
+          "selected_edge_count": 3360,
+          "selected_edge_precision": 0.9678571428571429,
+          "selected_false_edge_count": 108,
+          "selected_false_rate": 0.03214285714285714,
+          "selected_positive_edge_count": 3252,
+          "selected_precision_Wilson95_lower": 0.962463573984691
+        },
+        "split": "source_train",
+        "true_only_capability": {
+          "anchor_with_any_selected_count": 1616,
+          "anchor_with_any_selected_rate": 1.0,
+          "eligible_anchor_count": 1616,
+          "mean_marginal_primitives_by_selected_step": [
+            254.8242645263672,
+            110.6848373413086,
+            64.42745971679688
+          ],
+          "selected_count_by_step": [
+            1616,
+            1009,
+            641
+          ],
+          "selected_edge_count": 3266,
+          "selected_edge_precision": 1.0,
+          "selected_positive_edge_count": 3266
+        }
+      },
+      "scene0003_00": {
+        "edge_gate": {
+          "all_edge_count": 51405,
+          "all_three_edge_gate_count": 8372,
+          "eligible_false_edge_count": 431,
+          "eligible_true_edge_count": 7941,
+          "raw_and_reliability_gate_count": 8372,
+          "raw_probability_gate_count": 8690
+        },
+        "mixed": {
+          "anchor_with_any_selected_count": 3282,
+          "anchor_with_any_selected_rate": 1.0,
+          "bounded_residual_amplitude": {
+            "selected": {
+              "count": 8205,
+              "maximum": 0.4013877809047699,
+              "mean": 0.3309515416622162
+            },
+            "selected_false": {
+              "count": 486,
+              "maximum": 0.38784652948379517,
+              "mean": 0.3300786316394806
+            },
+            "selected_true": {
+              "count": 7719,
+              "maximum": 0.4013877809047699,
+              "mean": 0.3310065269470215
+            }
+          },
+          "eligible_anchor_count": 3282,
+          "mean_marginal_primitives_by_selected_step": [
+            255.78945922851562,
+            156.83554077148438,
+            108.57913970947266
+          ],
+          "selected_count_by_step": [
+            3282,
+            2718,
+            2205
+          ],
+          "selected_edge_count": 8205,
+          "selected_edge_precision": 0.9407678244972578,
+          "selected_false_edge_count": 486,
+          "selected_false_rate": 0.05923217550274218,
+          "selected_positive_edge_count": 7719,
+          "selected_precision_Wilson95_lower": 0.9363342253272906
+        },
+        "split": "source_train",
+        "true_only_capability": {
+          "anchor_with_any_selected_count": 3143,
+          "anchor_with_any_selected_rate": 1.0,
+          "eligible_anchor_count": 3143,
+          "mean_marginal_primitives_by_selected_step": [
+            255.61819458007812,
+            157.98876953125,
+            110.63833618164062
+          ],
+          "selected_count_by_step": [
+            3143,
+            2582,
+            2071
+          ],
+          "selected_edge_count": 7796,
+          "selected_edge_precision": 1.0,
+          "selected_positive_edge_count": 7796
+        }
+      },
+      "scene0004_00": {
+        "edge_gate": {
+          "all_edge_count": 57937,
+          "all_three_edge_gate_count": 7101,
+          "eligible_false_edge_count": 118,
+          "eligible_true_edge_count": 6983,
+          "raw_and_reliability_gate_count": 7101,
+          "raw_probability_gate_count": 7322
+        },
+        "mixed": {
+          "anchor_with_any_selected_count": 2891,
+          "anchor_with_any_selected_rate": 1.0,
+          "bounded_residual_amplitude": {
+            "selected": {
+              "count": 7044,
+              "maximum": 0.407605916261673,
+              "mean": 0.33154475688934326
+            },
+            "selected_false": {
+              "count": 195,
+              "maximum": 0.39315420389175415,
+              "mean": 0.32903239130973816
+            },
+            "selected_true": {
+              "count": 6849,
+              "maximum": 0.407605916261673,
+              "mean": 0.33161625266075134
+            }
+          },
+          "eligible_anchor_count": 2891,
+          "mean_marginal_primitives_by_selected_step": [
+            249.11380004882812,
+            141.8837890625,
+            98.73421478271484
+          ],
+          "selected_count_by_step": [
+            2891,
+            2332,
+            1821
+          ],
+          "selected_edge_count": 7044,
+          "selected_edge_precision": 0.9723168654173765,
+          "selected_false_edge_count": 195,
+          "selected_false_rate": 0.027683134582623503,
+          "selected_positive_edge_count": 6849,
+          "selected_precision_Wilson95_lower": 0.9689156721237133
+        },
+        "split": "source_validation",
+        "true_only_capability": {
+          "anchor_with_any_selected_count": 2797,
+          "anchor_with_any_selected_rate": 1.0,
+          "eligible_anchor_count": 2797,
+          "mean_marginal_primitives_by_selected_step": [
+            251.1387176513672,
+            143.85130310058594,
+            99.8150863647461
+          ],
+          "selected_count_by_step": [
+            2797,
+            2273,
+            1790
+          ],
+          "selected_edge_count": 6860,
+          "selected_edge_precision": 1.0,
+          "selected_positive_edge_count": 6860
+        }
+      },
+      "scene0005_00": {
+        "edge_gate": {
+          "all_edge_count": 53117,
+          "all_three_edge_gate_count": 5951,
+          "eligible_false_edge_count": 182,
+          "eligible_true_edge_count": 5769,
+          "raw_and_reliability_gate_count": 5951,
+          "raw_probability_gate_count": 6093
+        },
+        "mixed": {
+          "anchor_with_any_selected_count": 2577,
+          "anchor_with_any_selected_rate": 1.0,
+          "bounded_residual_amplitude": {
+            "selected": {
+              "count": 5944,
+              "maximum": 0.3950492739677429,
+              "mean": 0.32943859696388245
+            },
+            "selected_false": {
+              "count": 254,
+              "maximum": 0.38245245814323425,
+              "mean": 0.3261048197746277
+            },
+            "selected_true": {
+              "count": 5690,
+              "maximum": 0.3950492739677429,
+              "mean": 0.3295874297618866
+            }
+          },
+          "eligible_anchor_count": 2577,
+          "mean_marginal_primitives_by_selected_step": [
+            255.45169067382812,
+            147.98699951171875,
+            109.55540466308594
+          ],
+          "selected_count_by_step": [
+            2577,
+            1923,
+            1444
+          ],
+          "selected_edge_count": 5944,
+          "selected_edge_precision": 0.9572678331090175,
+          "selected_false_edge_count": 254,
+          "selected_false_rate": 0.04273216689098247,
+          "selected_positive_edge_count": 5690,
+          "selected_precision_Wilson95_lower": 0.9527407481210635
+        },
+        "split": "source_train",
+        "true_only_capability": {
+          "anchor_with_any_selected_count": 2497,
+          "anchor_with_any_selected_rate": 1.0,
+          "eligible_anchor_count": 2497,
+          "mean_marginal_primitives_by_selected_step": [
+            255.55426025390625,
+            148.89080810546875,
+            111.44676208496094
+          ],
+          "selected_count_by_step": [
+            2497,
+            1859,
+            1390
+          ],
+          "selected_edge_count": 5746,
+          "selected_edge_precision": 1.0,
+          "selected_positive_edge_count": 5746
+        }
+      },
+      "scene0008_00": {
+        "edge_gate": {
+          "all_edge_count": 52313,
+          "all_three_edge_gate_count": 3558,
+          "eligible_false_edge_count": 95,
+          "eligible_true_edge_count": 3463,
+          "raw_and_reliability_gate_count": 3558,
+          "raw_probability_gate_count": 3743
+        },
+        "mixed": {
+          "anchor_with_any_selected_count": 2485,
+          "anchor_with_any_selected_rate": 1.0,
+          "bounded_residual_amplitude": {
+            "selected": {
+              "count": 5275,
+              "maximum": 0.39466553926467896,
+              "mean": 0.3303055465221405
+            },
+            "selected_false": {
+              "count": 168,
+              "maximum": 0.3704654574394226,
+              "mean": 0.3232550024986267
+            },
+            "selected_true": {
+              "count": 5107,
+              "maximum": 0.39466553926467896,
+              "mean": 0.33053743839263916
+            }
+          },
+          "eligible_anchor_count": 2485,
+          "mean_marginal_primitives_by_selected_step": [
+            254.5134735107422,
+            119.02154541015625,
+            71.7292251586914
+          ],
+          "selected_count_by_step": [
+            2485,
+            1671,
+            1119
+          ],
+          "selected_edge_count": 5275,
+          "selected_edge_precision": 0.9681516587677725,
+          "selected_false_edge_count": 168,
+          "selected_false_rate": 0.03184834123222746,
+          "selected_positive_edge_count": 5107,
+          "selected_precision_Wilson95_lower": 0.963928673862605
+        },
+        "split": "source_validation",
+        "true_only_capability": {
+          "anchor_with_any_selected_count": 2420,
+          "anchor_with_any_selected_rate": 1.0,
+          "eligible_anchor_count": 2420,
+          "mean_marginal_primitives_by_selected_step": [
+            254.93594360351562,
+            119.88599395751953,
+            72.93462371826172
+          ],
+          "selected_count_by_step": [
+            2420,
+            1614,
+            1086
+          ],
+          "selected_edge_count": 5120,
+          "selected_edge_precision": 1.0,
+          "selected_positive_edge_count": 5120
+        }
+      }
+    }
+  },
+  "source_gate": {
+    "decision": "promote_source_only",
+    "outcomes": {
+      "every_validation_scene_mixed_precision_Wilson95_lower": true,
+      "passed": true,
+      "validation_mixed_precision_Wilson95_lower": true,
+      "validation_true_pseudo_anchor_coverage": true
+    },
+    "thresholds": {
+      "failure_action": "reject_fix4_do_not_open_target",
+      "minimum_every_validation_scene_mixed_precision_Wilson95_lower": 0.9,
+      "minimum_validation_mixed_precision_Wilson95_lower": 0.95,
+      "minimum_validation_true_pseudo_anchor_coverage": 0.9
+    }
+  },
+  "status": "source_only_fix4_promoted_target_still_unopened",
+  "target_execution_performed": false
+}

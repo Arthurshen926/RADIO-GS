@@ -1,0 +1,124 @@
+{
+  "access_audit": {
+    "exact_o0_pair_opened": true,
+    "exact_query_axis_opened": true,
+    "legacy_source_responsibility_opened": true,
+    "source_feature_bundle_opened": true,
+    "supplemental_source_responsibility_opened_if_required": true,
+    "target_ground_truth_opened": false,
+    "target_images_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "execution": {
+    "cuda_visible_devices": "0",
+    "maximum_temperature_c": 88,
+    "pacing_seconds_per_projection_batch": 0.0,
+    "physical_gpu": 0,
+    "program_device": "cuda:0",
+    "projection_batch_candidates": [
+      128,
+      64
+    ],
+    "thermal_poll_seconds": 300
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_all_available_teacher_agreement.py",
+    "sha256": "caf8858d4f1284a861f91aa19c6e3e6b1866f6d519dc893bb67d87e0aa80ea31"
+  },
+  "method_contract": {
+    "O1": {
+      "maximum_angle_radians": 0.15,
+      "operation": "closed_form_unit_sphere_geodesic_projection",
+      "per_scale": true
+    },
+    "O2": {
+      "operation": "normalized_equal_view_teacher_mean",
+      "repeated_scale_slots": 3
+    },
+    "all_available_base_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_all_available_streaming.py",
+      "sha256": "2ebe62d9118404f9f99405b8c04c1a204c8e98f5022b19612987dd2fe396962e"
+    },
+    "canonical_negative_queries": [
+      "object",
+      "things",
+      "stuff",
+      "texture"
+    ],
+    "composition": "sealed_legacy120_plus_exact_omitted_only_supplement",
+    "durable_teacher_dtype": "torch.float16",
+    "legacy_default_and_contract_modified": false,
+    "per_scene_or_per_query_hyperparameters": false,
+    "scale_ids": [
+      "0.25",
+      "0.45",
+      "0.7"
+    ],
+    "scale_radii_m": [
+      0.25,
+      0.45,
+      0.7
+    ],
+    "schema": "radio_gs.lerf_o1_o2_all_available_teacher_agreement_execution.v2",
+    "schema_version": 2,
+    "score_dtype": "torch.float32",
+    "score_semantics": "raw_independent_normalized_cosine",
+    "source_loo_numerical_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2.py",
+      "sha256": "9bc3d38ebdeb5c28f11804c698a455a144453acfa9e3d51b324f0c9350baf074"
+    },
+    "source_only_leave_one_view_out_audit": {
+      "evaluation_axis": "global_all_available_top4_source_views",
+      "field": "source_only_leave_one_view_out_ceiling_audit",
+      "formula_reused_without_change": true,
+      "hash_field": "source_only_leave_one_view_out_ceiling_audit_sha256",
+      "query_independent": true,
+      "target_candidate_authorized": false
+    },
+    "source_view_count": "runtime_exact_all_available_count",
+    "source_view_domain": "feature_manifest_order_minus_frozen_excluded_frames",
+    "streaming_entrypoint_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_all_available_teacher_agreement.py",
+      "sha256": "caf8858d4f1284a861f91aa19c6e3e6b1866f6d519dc893bb67d87e0aa80ea31"
+    },
+    "supplement_overlap_policy": "forbidden",
+    "target_metric_execution_authorized": false,
+    "teacher_aggregation": "equal_view_normalized_mean",
+    "teacher_mean_finalization": "row_chunked_fp32_canonical_top4_sum_v1",
+    "teacher_mean_finalization_chunk_rows": 4096,
+    "teacher_payload": {
+      "additional_tensor": "teacher_view_directional_resultant",
+      "formula": "l2_norm(sum(unit(global_top4_teacher_descriptors)))/retained_view_count",
+      "query_independent": true,
+      "schema": "radio_gs.lerf_source_teacher_mean_siglip_all_available.v2",
+      "schema_version": 2,
+      "top4_descriptors_durable": false
+    },
+    "teacher_retention": "global_top4_exact_marginal_mass_desc_then_frame_id_asc"
+  },
+  "method_contract_sha256": "1561ed036928a2055713e95f6c6949ab5ada6f2bf04577cd900f70c9a7bb7ba1",
+  "metric_execution_authorized": false,
+  "outputs": {
+    "o1_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o1_negative.pt",
+    "o1_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o1_positive.pt",
+    "o2_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o2_negative.pt",
+    "o2_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o2_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o1_o2_result.json",
+    "teacher_mean": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_teacher_mean_fp16.pt"
+  },
+  "reference_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+    "sha256": "cad8230bc67547004f989b285a63b6f13942df7fcc6699317f91db9a598e924a"
+  },
+  "scene_id": "teatime",
+  "schema": "radio_gs.lerf_o1_o2_all_available_teacher_agreement_execution.v2",
+  "schema_version": 2,
+  "source_only_materialization_authorized": true,
+  "status": "authorized_source_only_all_available_o1_o2_streaming",
+  "supplemental_responsibility_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/omitted_exact_marginal_responsibility.json",
+    "sha256": "bf8649d7b108fb188f438816a23f35e9ac77c2ef46931164b6a2e0580dc11098"
+  }
+}

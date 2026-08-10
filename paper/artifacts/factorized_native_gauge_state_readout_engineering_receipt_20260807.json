@@ -1,0 +1,107 @@
+{
+  "schema": "radio_gs.factorized_native_gauge_state_readout_engineering_receipt.v1",
+  "schema_version": 1,
+  "status": "engineering_complete_source_training_not_started",
+  "method": {
+    "candidate_is_independent_and_opt_in": true,
+    "legacy_accepted_v2_default_changed": false,
+    "query_free": true,
+    "input_carriers": [
+      "unit_direction_BxTx1280",
+      "separate_log_amplitude_BxT",
+      "factorized_state_BxTx6",
+      "state_known_mask_BxTx6",
+      "token_mask_and_anchor_index_routing"
+    ],
+    "amplitude_contract": {
+      "state_column_zero_must_equal_separate_log_amplitude": true,
+      "duplicate_state_column_zero_excluded_from_full_state_encoder": true,
+      "direction_times_amplitude_prohibited": true,
+      "legacy_raw_radio_vector_prohibited": true
+    },
+    "arms": [
+      "direction_only",
+      "direction_plus_log_amplitude",
+      "direction_plus_log_amplitude_plus_full_state"
+    ],
+    "output": "1280d_official_RADIO_summary_token_then_frozen_official_SigLIP2_head_to_unit_1536d_descriptor",
+    "source_cohort": {
+      "train": [
+        "scene0001_00",
+        "scene0002_00",
+        "scene0003_00",
+        "scene0005_00"
+      ],
+      "validation": [
+        "scene0004_00",
+        "scene0008_00"
+      ],
+      "registry": "existing_frozen_exact4train_2validation_registry"
+    }
+  },
+  "artifacts": {
+    "model": {
+      "path": "/root/RADIO-GS/radio_gs/models/factorized_native_gauge_state_readout.py",
+      "sha256": "d242a767712aef64b809dc3fccde4aa0c61b97c598b8f70fc5948787d43b1d31"
+    },
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/factorized_native_gauge_state_readout.py",
+      "sha256": "29e87b9478a83b6b28decd55c3f620810881b6ec8dc4265396dcea4adbfadf96"
+    },
+    "trainer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2.py",
+      "sha256": "89770aaa501be87fffbbb562eb38800a71673691b5d1856b1d3296d246fe3aa2"
+    },
+    "model_and_interface_tests": {
+      "path": "/root/RADIO-GS/tests/test_factorized_native_gauge_state_readout.py",
+      "sha256": "3f1256fbacd4db1293f382e52c00ed07325dc394aa1e6b4cb12adfc531f7cc34"
+    },
+    "trainer_and_lineage_tests": {
+      "path": "/root/RADIO-GS/tests/test_train_factorized_native_gauge_state_readout_exact4x2.py",
+      "sha256": "cdc2182091c2522b0855387db5fa65328660216efce8e27d87a676c8ed86d68d"
+    },
+    "authority_builder": {
+      "path": "/root/RADIO-GS/paper/artifacts/build_factorized_native_gauge_state_readout_exact4x2_authority_20260807.py",
+      "sha256": "50ec6d8def58a46ab0c6e7f9a90b2c72efe67a498e25d68c8299b531ef077b85"
+    },
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json",
+      "sha256": "2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd"
+    }
+  },
+  "validation": {
+    "cpu_test_command": "/root/miniconda3/envs/cybersim_agent/bin/python -m pytest -q tests/test_factorized_native_gauge_state_readout.py tests/test_train_factorized_native_gauge_state_readout_exact4x2.py tests/test_factorized_primitive_state.py tests/test_surface_region_full_scalar_contract.py tests/test_train_surface_region_v21b_conditioned_rank256_exact4x2.py",
+    "cpu_test_result": "31_passed_1_typed_storage_deprecation_warning",
+    "actual_source_preflight": {
+      "scene_id": "scene0004_00",
+      "eligible_region_rows": 4096,
+      "sample_unit_direction_shape": [
+        2,
+        256,
+        1280
+      ],
+      "sample_state_shape": [
+        2,
+        256,
+        6
+      ],
+      "sample_known_mask_shape": [
+        2,
+        256,
+        6
+      ],
+      "sample_exact_tokens": 512,
+      "raw_vector_built": false
+    },
+    "authority_preflight_passed": true,
+    "benchmark_or_target_opened": false,
+    "gpu_used": false,
+    "source_training_started": false
+  },
+  "pending_source_commands": {
+    "validate_authority_cpu": "/root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.scripts.train_factorized_native_gauge_state_readout_exact4x2 validate-authority --execution-authority /root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json --expected-execution-authority-sha256 2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd",
+    "direction_only_gpu0": "CUDA_VISIBLE_DEVICES=0 /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.scripts.train_factorized_native_gauge_state_readout_exact4x2 train --execution-authority /root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json --expected-execution-authority-sha256 2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd --arm direction_only --output /mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_only/model.pt --device cuda:0",
+    "direction_plus_log_amplitude_gpu1": "CUDA_VISIBLE_DEVICES=1 /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.scripts.train_factorized_native_gauge_state_readout_exact4x2 train --execution-authority /root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json --expected-execution-authority-sha256 2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd --arm direction_plus_log_amplitude --output /mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_plus_log_amplitude/model.pt --device cuda:0",
+    "direction_plus_log_amplitude_plus_full_state_next_free_gpu": "CUDA_VISIBLE_DEVICES=<0_or_1> /root/miniconda3/envs/cybersim_agent/bin/python -m radio_gs.scripts.train_factorized_native_gauge_state_readout_exact4x2 train --execution-authority /root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_execution_authority_20260807.json --expected-execution-authority-sha256 2154d05895d554dadacf2b2e32c678643019ce2e414676e6897d36a596736acd --arm direction_plus_log_amplitude_plus_full_state --output /mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/direction_plus_log_amplitude_plus_full_state/model.pt --device cuda:0"
+  }
+}

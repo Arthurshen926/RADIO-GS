@@ -1,0 +1,53 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_feature_legacy_seal_execution_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_before_legacy_feature_bundle_formalization",
+  "sealed_at": "2026-08-07T18:45:00+08:00",
+  "scene": "waldo_kitchen",
+  "purpose": "Content-address the already materialized query-independent Waldo RADIO tensors without recomputing or changing tensor values, so the exact source-view marginal-responsibility producer can fail closed on one formal feature bundle.",
+  "parent_readiness_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_o1_o2_cross_scene_asset_readiness_audit_20260807.json",
+    "sha256": "903cb439476aad32b92f5909dcc0eab4cfc5f56e0095cf96aeb12969bca347df"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/seal_legacy_radio_feature_bundle.py",
+    "sha256": "b6e1c79754dd7e0a435a7c27d7795fa44586c5930743eeada59598a5a58bb51e"
+  },
+  "input": {
+    "feature_dir": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen",
+    "legacy_manifest": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.json",
+    "legacy_manifest_sha256": "ab145ecf7cdcffa8668e320ce7db48777c94ca2f0a731b8e2d7ce3ecb7abbf2e",
+    "frames": 187,
+    "declared_feature_tensors": 374,
+    "logical_tensor_bytes": 1338119294,
+    "source_image_dir_override": "/mnt/pool/sqy/3d_understanding/lerf_ovs/waldo_kitchen/images"
+  },
+  "planned_output": {
+    "sealed_manifest": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.json",
+    "immutable_source_copy": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.legacy.json",
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/legacy_reseal_receipt.json"
+  },
+  "frozen_command": [
+    "bash",
+    "radio_gs/scripts/run_repo_python.sh",
+    "-m",
+    "radio_gs.scripts.seal_legacy_radio_feature_bundle",
+    "--feature-dir",
+    "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen",
+    "--expected-legacy-manifest-sha256",
+    "ab145ecf7cdcffa8668e320ce7db48777c94ca2f0a731b8e2d7ce3ecb7abbf2e",
+    "--receipt",
+    "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/legacy_reseal_receipt.json",
+    "--source-image-dir-override",
+    "/mnt/pool/sqy/3d_understanding/lerf_ovs/waldo_kitchen/images"
+  ],
+  "safety": {
+    "ground_truth_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "metric_outputs_opened": false,
+    "metric_computed": false,
+    "tensor_values_modified": false,
+    "scene_specific_hyperparameters": false
+  }
+}

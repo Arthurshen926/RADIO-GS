@@ -1,0 +1,76 @@
+{
+  "artifact": "source_only_region_comembership_v1_scene0004_engineering_receipt",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T03:17:40+08:00",
+  "status": "scene0004_source_validation_authority_complete_second_validation_gate_still_closed",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_region_comembership_v1_scene0004_execution_authority_20260807.json",
+    "sha256": "77a40fcd5c556af465db6d46e5becf3b5590dbf17ed3cbbb5f13192e3e5600a7"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_source_region_comembership_v1.py",
+    "sha256": "010edffb34b9cf0381ed88749abdf66a3ed74bb34c73185222035a2d19e3f3f5"
+  },
+  "scene_id": "scene0004_00",
+  "split": "source_validation",
+  "instance_zip": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/source_instances/scene0004_00_2d-instance-filt.zip",
+    "sha256": "03764adcd17e0e71f0bddcab7614d9c8d4fb079bc4b912ce1ee2a3971e60afe6",
+    "size_bytes": 10709937,
+    "entries": 930,
+    "full_zip_test_passed": true
+  },
+  "input_authority": {
+    "exact_marginal_sha256": "fd963d34b3837b0943053e8646036a98daf948544f38ea0a8fefd8c520e3cb05",
+    "factorized_state_sha256": "edfaab08aa4ebe1c7850931578ffb941a1e7439c428c4521019fb7c1ce8aa7d4",
+    "accepted_v2_sha256": "bbfc1ecc1ef9b5f6d638b2b954245199f671e8cb66a53c98d30d23f9df0c39de",
+    "typed_context_sha256": "e70cd2be73dc88d476b72fed13fedf008394c8795ae4802e9169b3b4b6f4d3b9",
+    "support_graph_sha256": "fc3af0a4af22b50589714aa05624537666385864245111959fb185ff34d252ac"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/scene0004_00/region_comembership_authority_v1_provenance_bound.pt",
+    "sha256": "f24b4ddb42ec6e5cea9badf9015dfff8fe2d2e33b671baa376433e816075244d",
+    "content_authority_sha256": "50ec0d86197c881514a57850d7ea41ffd75ffd74ab44ffe1ce6a8b61acbbe75f",
+    "size_bytes": 5155777
+  },
+  "build_log": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/scene0004_00_build.log",
+    "sha256": "169fd4162b9a2bebf7bf638c2b175c55e8519c4709ea3611c6a870a756a11a8b"
+  },
+  "audit": {
+    "source_views": 120,
+    "canonical_regions": 4096,
+    "instance_observed_regions": 3975,
+    "candidate_pairs": 57937,
+    "same_instance_pairs": 51657,
+    "active_evidence_pairs": 55547,
+    "anchor_support_pairs": 1060,
+    "eligible_instances": 14,
+    "candidate_graph_oracle_instance_macro_iou": 0.9875157512143075,
+    "candidate_graph_oracle_instance_macro_f1": 0.9909178351367183,
+    "candidate_graph_oracle_contamination": 0.0,
+    "candidate_graph_oracle_giant_excess": 0.0,
+    "candidate_graph_oracle_topology_score": 0.9875157512143075,
+    "largest_oracle_component_scene_evidence_fraction": 0.5152219171988339
+  },
+  "cohort_progress": {
+    "complete_source_train": ["scene0001_00", "scene0002_00", "scene0003_00", "scene0005_00"],
+    "missing_source_train": [],
+    "complete_source_validation": ["scene0004_00"],
+    "missing_source_validation": ["scene0008_00"],
+    "four_train_two_validation_training_authorized": false,
+    "target_execution_authorized": false
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

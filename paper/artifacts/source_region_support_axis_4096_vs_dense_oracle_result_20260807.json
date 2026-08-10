@@ -1,0 +1,41 @@
+{
+  "artifact": "source_region_support_axis_4096_vs_dense_oracle_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T02:45:00+08:00",
+  "status": "source_only_support_axis_oracle_complete",
+  "scene_id": "scene0001_00",
+  "preregistration": {
+    "path": "paper/artifacts/source_region_support_axis_4096_vs_dense_oracle_preregistration_20260807.json",
+    "sha256": "8325b6fd1965bdb9aebfde19939ae910b54d99845d4eaa4dbf63d641301e1f1a"
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/audit_source_region_support_axis.py",
+    "sha256": "8a38b28a911e9bf7937385d7f56771858f7c7bebc13dbda601c0b42a28a670cc"
+  },
+  "result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/source_region_support_axis_4096_vs_dense_scene0001_v1.json",
+    "sha256": "02d14a7670cb2c71ebb9eaae820197c240238c41055e614fbbb7849bec5c7279"
+  },
+  "metrics": {
+    "instances": 23,
+    "accepted_v2_4096_best_single_macro_primitive_iou": 0.11142454840971724,
+    "accepted_v2_4096_up_to_eight_macro_primitive_iou": 0.425625700827526,
+    "dense_best_single_macro_primitive_iou": 0.14235792141002807,
+    "dense_up_to_eight_macro_primitive_iou": 0.44705913394041685,
+    "dense_minus_sparse_up_to_eight_macro_primitive_iou": 0.021433433112890865,
+    "registered_sparse_axis_failure_signal": false
+  },
+  "decision": "retain AcceptedV2 4096 as the compact support axis for the next bounded source-trained readout; the current dominant failure is semantic relation and selection, not sparse candidate support",
+  "tests": {
+    "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_audit_source_region_support_axis.py",
+    "passed": 3
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

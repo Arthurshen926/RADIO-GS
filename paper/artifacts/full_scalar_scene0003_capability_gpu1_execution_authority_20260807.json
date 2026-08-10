@@ -1,0 +1,91 @@
+{
+  "artifact": "full_scalar_scene0003_capability_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:50:02+08:00",
+  "status": "sealed_after_source_RGB_CPU_success_and_before_capability_execution",
+  "scene_id": "scene0003_00",
+  "frozen_cohort_role": "source_train",
+  "inputs": {
+    "field_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "49df15c4cb4f00ccf5fdeb47bb774690ce6ca6fa3d079f496c886e4dd4fea34e",
+      "schema": "factorized-v2"
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_raw_radio.pt",
+      "sha256": "5032b6314b289459b4f146e81a094fd067b58728dbedce7ce9ce0cb301ad5920"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+      "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd"
+    },
+    "source_RGB_CPU_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0003_source_rgb_cpu_result_20260807.json",
+      "sha256": "41c0785d5d33e294d603541103fe5f644c8374758c68700d0d298ca52c5d1671"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_capability_views.py",
+    "sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34"
+  },
+  "frozen_contract": {
+    "same_as_scene0002": true,
+    "field_checkpoint_schema": "factorized-v2",
+    "batch_size": 4096,
+    "device": "cuda:0",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_capability_bank.pt",
+  "command": [
+    "env",
+    "GPU=1",
+    "GPU_TELEMETRY_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/logs/capability_gpu1_telemetry.csv",
+    "GPU_OWNER_AUDIT_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/logs/capability_gpu1_owner.csv",
+    "GPU_OWNER_PID_NAMESPACE_MODE=exclusive-singleton-after-clear-v1",
+    "GPU_MAX_TEMP_C=88",
+    "GPU_START_MAX_TEMP_C=82",
+    "GPU_POLL_SECONDS=30",
+    "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES=1",
+    "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS=6",
+    "GPU_MAX_POWER_LIMIT_W=300.5",
+    "bash", "radio_gs/scripts/run_with_gpu_thermal_guard.sh", "--",
+    "env", "CUDA_VISIBLE_DEVICES=1",
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/build_canonical_capability_views.py",
+    "--field-checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_field_d512_l512_exact_marginal.pth",
+    "--field-checkpoint-schema", "factorized-v2",
+    "--expected-field-checkpoint-sha256", "49df15c4cb4f00ccf5fdeb47bb774690ce6ca6fa3d079f496c886e4dd4fea34e",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_capability_bank.pt",
+    "--mpr-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_raw_radio.pt",
+    "--expected-mpr-cache-sha256", "5032b6314b289459b4f146e81a094fd067b58728dbedce7ce9ce0cb301ad5920",
+    "--radio-checkpoint", "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+    "--expected-radio-checkpoint-sha256", "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+    "--batch-size", "4096",
+    "--device", "cuda:0"
+  ],
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "soft_pause_enabled": false,
+    "nvml_failure": "fail_closed",
+    "peer_GPU_monitoring": false
+  },
+  "forbidden_stages": [
+    "official_multiview_siglip2_teacher",
+    "any_benchmark_evaluator_or_metric"
+  ],
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

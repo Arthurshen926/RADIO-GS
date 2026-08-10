@@ -86,6 +86,29 @@ def _normalize_candidates(values: torch.Tensor) -> torch.Tensor:
     return (values - lower) / (upper - lower).clamp_min(1e-8)
 
 
+def _resolve_render_resolution(
+    config: object,
+    mode: str,
+    *,
+    registered_resolution: tuple[int, int] | None = None,
+) -> tuple[int, int]:
+    if mode == "feature":
+        height = int(getattr(config, "feature_height"))
+        width = int(getattr(config, "feature_width"))
+    elif mode == "native":
+        height = int(getattr(config, "image_height"))
+        width = int(getattr(config, "image_width"))
+    elif mode == "registered":
+        if registered_resolution is None:
+            raise ValueError("registered render resolution was not provided")
+        height, width = map(int, registered_resolution)
+    else:
+        raise ValueError(f"unknown render-resolution mode: {mode!r}")
+    if height <= 0 or width <= 0:
+        raise ValueError("render resolution must be positive")
+    return height, width
+
+
 def _iou(pred: np.ndarray, gt: np.ndarray) -> float:
     intersection = int(np.logical_and(pred, gt).sum())
     union = int(np.logical_or(pred, gt).sum())
@@ -102,6 +125,13 @@ def run(args: argparse.Namespace) -> dict:
         (queue_scene / "rgb_to_colmap_camera_mapping.json").read_text(encoding="utf-8")
     )
     carrier_config = load_config(str(args.carrier_config.resolve()))
+    prompt_frame = str(scene["prompt_frame_ids"][0])
+    reference_mask = load_ground_truth_mask(scene["prompt"]["mask_path"]).astype(bool)
+    render_height, render_width = _resolve_render_resolution(
+        carrier_config,
+        args.render_resolution,
+        registered_resolution=tuple(reference_mask.shape),
+    )
     views = resolve_protocol_views(
         manifest,
         scene_id=args.scene_id,
@@ -137,7 +167,13 @@ def run(args: argparse.Namespace) -> dict:
 
     def render(view: dict) -> np.ndarray:
         pose = torch.from_numpy(view["w2c"].copy()).float().to(device)
-        raw = renderer.render_feature_rows(model, pose, rows)["feature_map"]
+        raw = renderer.render_feature_rows(
+            model,
+            pose,
+            rows,
+            feature_height=render_height,
+            feature_width=render_width,
+        )["feature_map"]
         candidates = raw[:3]
         if args.missing_row_policy == "valid_normalized":
             candidates = torch.where(
@@ -149,11 +185,9 @@ def run(args: argparse.Namespace) -> dict:
 
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    prompt_frame = str(scene["prompt_frame_ids"][0])
     reference_scores = render(_view(views, prompt_frame))
     reference_score_path = output / "reference_candidates.npy"
     np.save(reference_score_path, reference_scores, allow_pickle=False)
-    reference_mask = load_ground_truth_mask(scene["prompt"]["mask_path"]).astype(bool)
     thresholds = np.arange(0.99, 0.02, -0.01, dtype=np.float64)
     best = None
     calibration = []
@@ -233,7 +267,8 @@ def run(args: argparse.Namespace) -> dict:
         "mapped_sam_rows": len(mapping),
         "mapped_fraction": float(len(mapping) / len(carrier_keys)),
         "missing_row_policy": args.missing_row_policy,
-        "renderer_resolution": [int(renderer.image_height), int(renderer.image_width)],
+        "render_resolution_mode": args.render_resolution,
+        "renderer_resolution": [render_height, render_width],
         "reference_receipt": receipt,
         "reference_receipt_path": str(receipt_path),
         "score_paths": score_paths,
@@ -260,6 +295,17 @@ def main() -> None:
     parser.add_argument("--sam-ply", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--device", default="cuda:0")
+    parser.add_argument(
+        "--render-resolution",
+        choices=("feature", "native", "registered"),
+        default="feature",
+        help=(
+            "Raster resolution for the query-specific scalar field. 'feature' "
+            "preserves the legacy RADIO patch-grid diagnostic; 'native' uses "
+            "the carrier config's original image resolution; 'registered' uses "
+            "the permitted reference-mask resolution shared by the benchmark views."
+        ),
+    )
     parser.add_argument(
         "--missing-row-policy", choices=("zero_fill", "valid_normalized"), default="zero_fill"
     )

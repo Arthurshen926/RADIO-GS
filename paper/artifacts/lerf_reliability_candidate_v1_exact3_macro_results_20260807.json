@@ -1,0 +1,576 @@
+{
+  "candidate_name": "source_only_global_reliability_conditioned_O1_to_O2_v1",
+  "conclusion": {
+    "candidate_vs_O0": "Large and consistent mIoU/boundary improvement on all three scenes; exact3 macro mIoU +0.08083 and boundary +0.16502, while trimap falls 0.03802.",
+    "candidate_vs_O1": "Exact3 macro mIoU +0.01931 and boundary +0.04517, but mIoU CI crosses zero and trimap/Acc@0.50 regress.",
+    "candidate_vs_O2": "Not a universal improvement: exact3 macro mIoU -0.00265, boundary -0.00015, trimap +0.00014, and Acc@0.50 -0.01515. Ramen and Teatime are O2-like/slightly higher, but Waldo regresses by 0.01113 mIoU.",
+    "method_decision": "Retain reliability-conditioned fusion as validated mechanism/ablation, not as the unified default. The next general method must add source-only local arbitration that preserves O1-style specificity where canonical averaging is harmful rather than globally expanding almost every reliable row toward O2."
+  },
+  "global_maximum_angle_radians": 0.75,
+  "paired_stratified_scene_macro_bootstrap": {
+    "resamples": 20000,
+    "results": {
+      "candidate_minus_O0": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 0.03705,
+          "ci95": [
+            -0.00975860297894196,
+            0.1896280482070646
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.11267605633802817,
+            "teatime": 0.2033898305084746,
+            "waldo_kitchen": -0.045454545454545456
+          },
+          "scene_macro_mean_delta": 0.09020378046398576
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.0,
+          "ci95": [
+            0.12396536872500027,
+            0.20536185325973616
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.16446074231393973,
+            "teatime": 0.19175391358623164,
+            "waldo_kitchen": 0.13885053181887516
+          },
+          "scene_macro_mean_delta": 0.16502172923968217
+        },
+        "iou": {
+          "bootstrap_probability_nonpositive": 0.0001,
+          "ci95": [
+            0.03675388367149438,
+            0.1253609494348594
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.08307933289683608,
+            "teatime": 0.1213299784274327,
+            "waldo_kitchen": 0.03807351098931512
+          },
+          "scene_macro_mean_delta": 0.08082760743786131
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.9992,
+          "ci95": [
+            -0.06219809959262951,
+            -0.014313724535215025
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": -0.006985326246978946,
+            "teatime": -0.0673850506528456,
+            "waldo_kitchen": -0.03969600137014475
+          },
+          "scene_macro_mean_delta": -0.03802212608998976
+        }
+      },
+      "candidate_minus_O1": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 0.78075,
+          "ci95": [
+            -0.12542589899954426,
+            0.05396972228853338
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": -0.056338028169014086,
+            "teatime": -0.05084745762711865,
+            "waldo_kitchen": 0.0
+          },
+          "scene_macro_mean_delta": -0.03572849526537758
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.01125,
+          "ci95": [
+            0.006498881899948653,
+            0.08018736700775973
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.016987018291671235,
+            "teatime": 0.04756242928243231,
+            "waldo_kitchen": 0.070954940985756
+          },
+          "scene_macro_mean_delta": 0.045168129519953186
+        },
+        "iou": {
+          "bootstrap_probability_nonpositive": 0.1754,
+          "ci95": [
+            -0.020772500368616692,
+            0.06055449722676374
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.019541393823121492,
+            "teatime": 0.03155883039409829,
+            "waldo_kitchen": 0.00681949535151633
+          },
+          "scene_macro_mean_delta": 0.019306573189578704
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.97695,
+          "ci95": [
+            -0.041844670602503305,
+            -0.00032497614672399215
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.014521085603323975,
+            "teatime": -0.04546614957463149,
+            "waldo_kitchen": -0.03243998025785014
+          },
+          "scene_macro_mean_delta": -0.021128348076385885
+        }
+      },
+      "candidate_minus_O2": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 1.0,
+          "ci95": [
+            -0.04545454545454545,
+            0.0
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.0,
+            "teatime": 0.0,
+            "waldo_kitchen": -0.045454545454545456
+          },
+          "scene_macro_mean_delta": -0.015151515151515152
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.54835,
+          "ci95": [
+            -0.0034233794843195353,
+            0.003499951033007664
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.0020924506050061784,
+            "teatime": -1.0730896744751186e-05,
+            "waldo_kitchen": -0.0025313128811259547
+          },
+          "scene_macro_mean_delta": -0.00014986439095484257
+        },
+        "iou": {
+          "bootstrap_probability_nonpositive": 0.88215,
+          "ci95": [
+            -0.007670407969772864,
+            0.0016214090134407972
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.0029161107756130946,
+            "teatime": 0.00028002983981924605,
+            "waldo_kitchen": -0.011131967857100742
+          },
+          "scene_macro_mean_delta": -0.0026452757472228004
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.5127,
+          "ci95": [
+            -0.004133128922988082,
+            0.0057254917683639776
+          ],
+          "per_scene_mean_deltas": {
+            "ramen": 0.006507618293360309,
+            "teatime": 0.00011161918868478149,
+            "waldo_kitchen": -0.0061977836171404265
+          },
+          "scene_macro_mean_delta": 0.00014048462163488798
+        }
+      }
+    },
+    "rng_policy": "RNG reset independently for every comparator and metric; scene stream order ramen, teatime, waldo_kitchen",
+    "sampling_unit": "paired official frame-query resampled independently within each scene, then equal-weighted across the three scenes",
+    "seed": 20260807
+  },
+  "pooled_frame_query_weighted_deltas": {
+    "note": "descriptive only; unlike scene_macro_metrics this weights scenes by annotated frame-query count",
+    "results": {
+      "candidate_minus_O0": {
+        "acc050": {
+          "mean_delta": 0.125,
+          "n": 152
+        },
+        "boundary_f": {
+          "mean_delta": 0.1713480612229779,
+          "n": 152
+        },
+        "iou": {
+          "mean_delta": 0.0914126223990712,
+          "n": 152
+        },
+        "trimap_iou": {
+          "mean_delta": -0.03516439593550382,
+          "n": 152
+        }
+      },
+      "candidate_minus_O1": {
+        "acc050": {
+          "mean_delta": -0.046052631578947366,
+          "n": 152
+        },
+        "boundary_f": {
+          "mean_delta": 0.03666625215828155,
+          "n": 152
+        },
+        "iou": {
+          "mean_delta": 0.022364729292281477,
+          "n": 152
+        },
+        "trimap_iou": {
+          "mean_delta": -0.015560429689078678,
+          "n": 152
+        }
+      },
+      "candidate_minus_O2": {
+        "acc050": {
+          "mean_delta": -0.006578947368421052,
+          "n": 152
+        },
+        "boundary_f": {
+          "mean_delta": 0.0006068551754126799,
+          "n": 152
+        },
+        "iou": {
+          "mean_delta": -0.00014037938972599423,
+          "n": 152
+        },
+        "trimap_iou": {
+          "mean_delta": 0.002186020995946675,
+          "n": 152
+        }
+      }
+    }
+  },
+  "raw_metric_results": {
+    "ramen": {
+      "O0": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o0_exact_frozen_config_control_v1/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "c73412a12bcf655731c3b3c8dbad3afcf7cae03708514f483644ead4d805bd21"
+      },
+      "O1": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o1_exact_fix2/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "21a26585ad7ff449c16f88e58c4cdc36ce6adf5a75fb5722e8bcb205a683bc19"
+      },
+      "O2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o2_exact_fix2/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "8aada9b2709bbe4df6daddef7d472c3f07a8aaf4820bdabb6bf8efa036c1ffd6"
+      },
+      "candidate": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/ramen/evaluation/exact_one_shot_v1/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "bf9eeaa0d2768d3dce1ed287bf760b9adcc3724564733e9b8ff6066b8ba4980d"
+      }
+    },
+    "teatime": {
+      "O0": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o0_exact_frozen_config_control_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "ac02a4ed0566813027ddcb5021c495138d5f3f889d632f24b37338df963ec1d0"
+      },
+      "O1": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o1_exact_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "d60879c3a543a0f20830a2345591875ba48598da86580149f4fecc450c4ce0c4"
+      },
+      "O2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o2_exact_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "6bca5411562a6bc529eda88f42e3f6386c5896d1681fcfcf5a2d718a595e2d35"
+      },
+      "candidate": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/teatime/evaluation/exact_one_shot_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "70fbebb40c0cacc38ee52b5cd64b39fb47588384b869843bbd92b61438ad50b0"
+      }
+    },
+    "waldo_kitchen": {
+      "O0": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "a07b7ef185a3556ec7977083a4c085b04973c98cfe9d4f07c5fce240b45d8d47"
+      },
+      "O1": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o1_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "56ece96a65d04bc46fb45fb0526438b40dab4c3fc3b1b04a2203d669cdcff800"
+      },
+      "O2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o2_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "e661692a270349c4047c03719a20341b4dd81ff19f862f1c5a928bc3168e6840"
+      },
+      "candidate": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/waldo_kitchen/evaluation/exact_one_shot_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "8551f1c5bb19bb6c506a635e2ca9f4533d0c9477428e8dd75e7dced1de6e54c5"
+      }
+    }
+  },
+  "scene_macro_metrics": {
+    "O0": {
+      "acc025": 0.6181991796696976,
+      "acc050": 0.2536368700130935,
+      "boundary_f": 0.43232529362042743,
+      "miou": 0.3329605261484782,
+      "scene_count": 3,
+      "trimap_iou": 0.3955168028672536
+    },
+    "O1": {
+      "acc025": 0.6708768274774481,
+      "acc050": 0.37956914574245676,
+      "boundary_f": 0.5521789193153381,
+      "miou": 0.3944815496603648,
+      "scene_count": 3,
+      "trimap_iou": 0.3786230186621348
+    },
+    "O2": {
+      "acc025": 0.7464101506832468,
+      "acc050": 0.3589921656285944,
+      "boundary_f": 0.5974969367186228,
+      "miou": 0.4164334336916606,
+      "scene_count": 3,
+      "trimap_iou": 0.357354203859965
+    },
+    "candidate": {
+      "acc025": 0.7464101506832468,
+      "acc050": 0.34384065047707923,
+      "boundary_f": 0.5973470409711202,
+      "delta_vs": {
+        "O0": {
+          "acc025": 0.12821097101354917,
+          "acc050": 0.09020378046398575,
+          "boundary_f": 0.1650217473506928,
+          "miou": 0.08082765340805054,
+          "trimap_iou": -0.03802211085955298
+        },
+        "O1": {
+          "acc025": 0.07553332320579864,
+          "acc050": -0.035728495265377525,
+          "boundary_f": 0.0451681216557821,
+          "miou": 0.01930662989616394,
+          "trimap_iou": -0.021128326654434204
+        },
+        "O2": {
+          "acc025": 0.0,
+          "acc050": -0.015151515151515138,
+          "boundary_f": -0.00014989574750257084,
+          "miou": -0.002645254135131836,
+          "trimap_iou": 0.0001404881477355957
+        }
+      },
+      "miou": 0.41378817955652875,
+      "scene_count": 3,
+      "trimap_iou": 0.3574946920077006
+    }
+  },
+  "scene_metric_results": {
+    "ramen": {
+      "O0": {
+        "acc025": 0.5633802816901409,
+        "acc050": 0.18309859154929578,
+        "boundary_f": 0.4585232138633728,
+        "miou": 0.3012723922729492,
+        "n": 71,
+        "trimap_iou": 0.4094906747341156
+      },
+      "O1": {
+        "acc025": 0.6197183098591549,
+        "acc050": 0.352112676056338,
+        "boundary_f": 0.6059969067573547,
+        "miou": 0.36481034755706787,
+        "n": 71,
+        "trimap_iou": 0.3879842758178711
+      },
+      "O2": {
+        "acc025": 0.676056338028169,
+        "acc050": 0.29577464788732394,
+        "boundary_f": 0.6208915114402771,
+        "miou": 0.38143566250801086,
+        "n": 71,
+        "trimap_iou": 0.3959977626800537
+      },
+      "candidate": {
+        "acc025": 0.676056338028169,
+        "acc050": 0.29577464788732394,
+        "boundary_f": 0.6229839324951172,
+        "delta_vs": {
+          "O0": {
+            "acc025": 0.11267605633802813,
+            "acc050": 0.11267605633802816,
+            "boundary_f": 0.16446071863174438,
+            "miou": 0.08307942748069763,
+            "trimap_iou": -0.006985306739807129
+          },
+          "O1": {
+            "acc025": 0.05633802816901412,
+            "acc050": -0.056338028169014065,
+            "boundary_f": 0.01698702573776245,
+            "miou": 0.01954147219657898,
+            "trimap_iou": 0.014521092176437378
+          },
+          "O2": {
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "boundary_f": 0.002092421054840088,
+            "miou": 0.0029161572456359863,
+            "trimap_iou": 0.006507605314254761
+          }
+        },
+        "miou": 0.38435181975364685,
+        "n": 71,
+        "trimap_iou": 0.40250536799430847
+      }
+    },
+    "teatime": {
+      "O0": {
+        "acc025": 0.7457627118644068,
+        "acc050": 0.3050847457627119,
+        "boundary_f": 0.5610557198524475,
+        "miou": 0.404494971036911,
+        "n": 59,
+        "trimap_iou": 0.44391149282455444
+      },
+      "O1": {
+        "acc025": 0.847457627118644,
+        "acc050": 0.559322033898305,
+        "boundary_f": 0.7052473425865173,
+        "miou": 0.4942660927772522,
+        "n": 59,
+        "trimap_iou": 0.42199259996414185
+      },
+      "O2": {
+        "acc025": 0.8813559322033898,
+        "acc050": 0.5084745762711864,
+        "boundary_f": 0.7528204321861267,
+        "miou": 0.5255449414253235,
+        "n": 59,
+        "trimap_iou": 0.37641486525535583
+      },
+      "candidate": {
+        "acc025": 0.8813559322033898,
+        "acc050": 0.5084745762711864,
+        "boundary_f": 0.7528097033500671,
+        "delta_vs": {
+          "O0": {
+            "acc025": 0.13559322033898302,
+            "acc050": 0.20338983050847453,
+            "boundary_f": 0.19175398349761963,
+            "miou": 0.12132999300956726,
+            "trimap_iou": -0.0673849880695343
+          },
+          "O1": {
+            "acc025": 0.03389830508474578,
+            "acc050": -0.05084745762711862,
+            "boundary_f": 0.047562360763549805,
+            "miou": 0.031558871269226074,
+            "trimap_iou": -0.045466095209121704
+          },
+          "O2": {
+            "acc025": 0.0,
+            "acc050": 0.0,
+            "boundary_f": -1.0728836059570312e-05,
+            "miou": 0.00028002262115478516,
+            "trimap_iou": 0.00011163949966430664
+          }
+        },
+        "miou": 0.5258249640464783,
+        "n": 59,
+        "trimap_iou": 0.37652650475502014
+      }
+    },
+    "waldo_kitchen": {
+      "O0": {
+        "acc025": 0.5454545454545454,
+        "acc050": 0.2727272727272727,
+        "boundary_f": 0.27739694714546204,
+        "miou": 0.29311421513557434,
+        "n": 22,
+        "trimap_iou": 0.3331482410430908
+      },
+      "O1": {
+        "acc025": 0.5454545454545454,
+        "acc050": 0.22727272727272727,
+        "boundary_f": 0.34529250860214233,
+        "miou": 0.3243682086467743,
+        "n": 22,
+        "trimap_iou": 0.3258921802043915
+      },
+      "O2": {
+        "acc025": 0.6818181818181818,
+        "acc050": 0.2727272727272727,
+        "boundary_f": 0.4187788665294647,
+        "miou": 0.34231969714164734,
+        "n": 22,
+        "trimap_iou": 0.2996499836444855
+      },
+      "candidate": {
+        "acc025": 0.6818181818181818,
+        "acc050": 0.22727272727272727,
+        "boundary_f": 0.41624748706817627,
+        "delta_vs": {
+          "O0": {
+            "acc025": 0.13636363636363635,
+            "acc050": -0.04545454545454544,
+            "boundary_f": 0.13885053992271423,
+            "miou": 0.03807353973388672,
+            "trimap_iou": -0.03969603776931763
+          },
+          "O1": {
+            "acc025": 0.13636363636363635,
+            "acc050": 0.0,
+            "boundary_f": 0.07095497846603394,
+            "miou": 0.006819546222686768,
+            "trimap_iou": -0.032439976930618286
+          },
+          "O2": {
+            "acc025": 0.0,
+            "acc050": -0.04545454545454544,
+            "boundary_f": -0.002531379461288452,
+            "miou": -0.01113194227218628,
+            "trimap_iou": -0.00619778037071228
+          }
+        },
+        "miou": 0.33118775486946106,
+        "n": 22,
+        "trimap_iou": 0.2934522032737732
+      }
+    }
+  },
+  "scene_summary_artifacts": {
+    "ramen": {
+      "baseline_O0_O1_O2": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_o2_ramen_exact_metric_results_fix2_20260807.json",
+        "sha256": "d2ae02af5fc03fc22da5c40fe0e52cf932889c15c2b62de3a762aff4f222b49d"
+      },
+      "candidate": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_reliability_candidate_v1_exact_metric_results_20260807.json",
+        "sha256": "70a747115a594ed8fc8bc76218962d0770fa01940e7099a825325222b068a84b"
+      }
+    },
+    "teatime": {
+      "baseline_O0_O1_O2": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_o2_teatime_exact_metric_results_20260807.json",
+        "sha256": "fc25a92ec36fc4f07052d9e09c906f49ada8a9d8bb50a5b72cab3c6b5b9dce04"
+      },
+      "candidate": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_reliability_candidate_v1_exact_metric_result_20260807.json",
+        "sha256": "6fb1aab2f50f2561b1ff505941af95b0f7fadd5d1fea2c1580827c2c8143e5af"
+      }
+    },
+    "waldo_kitchen": {
+      "baseline_O0_O1_O2": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_o2_waldo_kitchen_exact_metric_results_20260807.json",
+        "sha256": "182f97c712fd61cabfa88bcce21d2af56a4516e99a9b24efd6171d3c0512fac7"
+      },
+      "candidate": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_exact_metric_results_20260807.json",
+        "sha256": "ee26c7b61344e5621c8f07a67ff10a4c460a2b081bae1e02356c414d842ccd5c"
+      }
+    }
+  },
+  "scenes": [
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "schema": "radio_gs.lerf_reliability_candidate_exact3_macro_results.v1",
+  "schema_version": 1,
+  "selection_discipline": {
+    "aggregation_executed_after_all_one_shot_exact_results": true,
+    "candidate_sweep_executed": false,
+    "global_ceiling_selector": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_only_global_ceiling_lowmem_lineage_compatibility_result_20260807.json",
+      "sha256": "b747b23ad3ecd5c3cfcba93d24b1379072f99fe7d30a25f709e8ba98db462c2c"
+    },
+    "scene_or_query_specific_parameters": false,
+    "selection_rule": "largest eligible source-only ceiling from preregistered grid",
+    "target_labels_or_metrics_used_for_selection": false
+  },
+  "status": "complete_posthoc_aggregation_no_reselection"
+}

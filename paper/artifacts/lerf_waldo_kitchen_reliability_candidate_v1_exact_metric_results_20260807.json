@@ -1,0 +1,828 @@
+{
+  "access_audit": {
+    "candidate_metric_executed_once": true,
+    "candidate_sweep_executed": false,
+    "frozen_protocol_changed": false,
+    "metric_authority_built_before_candidate_metric": true,
+    "oom_observed_in_this_sequence": false,
+    "source_materialization_target_data_or_metrics_opened": false
+  },
+  "candidate_metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/waldo_kitchen/evaluation/exact_one_shot_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+    "sha256": "8551f1c5bb19bb6c506a635e2ca9f4533d0c9477428e8dd75e7dced1de6e54c5"
+  },
+  "candidate_name": "source_only_global_reliability_conditioned_O1_to_O2_v1",
+  "conclusion": {
+    "candidate_exceeds_O2_boundary_f": false,
+    "candidate_exceeds_O2_miou": false,
+    "candidate_exceeds_O2_trimap_iou": false,
+    "candidate_miou_gain_vs_O0": 0.03807353973388672,
+    "candidate_miou_gain_vs_O1": 0.006819546222686768,
+    "candidate_miou_gain_vs_O2": -0.01113194227218628,
+    "candidate_preserves_O2_acc050": false,
+    "interpretation": "The source-only fixed 0.75-radian reliability budget transfers beyond the source scenes by improving Waldo mIoU over O0 and O1, but it regresses O2 mIoU and Acc@0.50. It is evidence for the mechanism, not a safe universal replacement for O2.",
+    "primary_miou_winner": "O2"
+  },
+  "frozen_protocol": {
+    "argument_difference_vs_O1_control": [
+      "positive multiscale query score cache",
+      "negative multiscale query score cache",
+      "output directory"
+    ],
+    "baseline_summary": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_o2_waldo_kitchen_exact_metric_results_20260807.json",
+      "sha256": "182f97c712fd61cabfa88bcce21d2af56a4516e99a9b24efd6171d3c0512fac7"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+      "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select",
+    "projection_mode": "selected_only_alpha",
+    "protocol_preset": "vala_repo_3d",
+    "renderer_geometry_checkpoint_sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d",
+    "score_threshold": 0.6,
+    "silhouette_threshold": 0.0392156862745098,
+    "vala_knn_k": 10
+  },
+  "global_maximum_angle_radians": 0.75,
+  "metric_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_one_shot_exact_metric_execution_authority_20260807.json",
+    "sha256": "e89a367c8af7f114fa249ebb1109c67ae770b3265fe2a4e345da930ed341d3e3"
+  },
+  "metric_owner_audit": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_exact_metric_gpu0_owner_audit_20260807.csv",
+    "sha256": "5c0ffb5d2553c9f9888ee380d0e8cfb869a297feb20f2ea5d41db86d2def16a6"
+  },
+  "metric_results": {
+    "O0": {
+      "acc025": 0.5454545454545454,
+      "acc050": 0.2727272727272727,
+      "boundary_f": 0.27739694714546204,
+      "miou": 0.29311421513557434,
+      "n": 22,
+      "trimap_iou": 0.3331482410430908
+    },
+    "O1": {
+      "acc025": 0.5454545454545454,
+      "acc050": 0.22727272727272727,
+      "boundary_f": 0.34529250860214233,
+      "miou": 0.3243682086467743,
+      "n": 22,
+      "trimap_iou": 0.3258921802043915
+    },
+    "O2": {
+      "acc025": 0.6818181818181818,
+      "acc050": 0.2727272727272727,
+      "boundary_f": 0.4187788665294647,
+      "miou": 0.34231969714164734,
+      "n": 22,
+      "trimap_iou": 0.2996499836444855
+    },
+    "candidate": {
+      "absolute_bootstrap_ci95": {
+        "boundary_f": [
+          0.3174660913646221,
+          0.5169272109866142
+        ],
+        "miou": [
+          0.2413941953331232,
+          0.41359454989433286
+        ],
+        "trimap_iou": [
+          0.22025810293853282,
+          0.36139380782842634
+        ]
+      },
+      "acc025": 0.6818181818181818,
+      "acc050": 0.22727272727272727,
+      "boundary_f": 0.41624748706817627,
+      "delta_vs": {
+        "O0": {
+          "acc025": 0.13636363636363635,
+          "acc050": -0.04545454545454544,
+          "boundary_f": 0.13885053992271423,
+          "miou": 0.03807353973388672,
+          "trimap_iou": -0.03969603776931763
+        },
+        "O1": {
+          "acc025": 0.13636363636363635,
+          "acc050": 0.0,
+          "boundary_f": 0.07095497846603394,
+          "miou": 0.006819546222686768,
+          "trimap_iou": -0.032439976930618286
+        },
+        "O2": {
+          "acc025": 0.0,
+          "acc050": -0.04545454545454544,
+          "boundary_f": -0.002531379461288452,
+          "miou": -0.01113194227218628,
+          "trimap_iou": -0.00619778037071228
+        }
+      },
+      "miou": 0.33118775486946106,
+      "n": 22,
+      "trimap_iou": 0.2934522032737732
+    }
+  },
+  "metric_telemetry": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_exact_metric_gpu0_telemetry_20260807.csv",
+    "sha256": "e02cffa37354de6934f220bdfb7145c8de451bc8ccf54dc67d264d57e5a7557e"
+  },
+  "paired_frame_query_bootstrap": {
+    "resamples": 20000,
+    "results": {
+      "candidate_minus_O0": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 0.7188,
+          "ci95": [
+            -0.2727272727272727,
+            0.18181818181818182
+          ],
+          "equal": 15,
+          "improved": 3,
+          "mean_delta": -0.045454545454545456,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 4
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.00315,
+          "ci95": [
+            0.03969850374514835,
+            0.23406275630250967
+          ],
+          "equal": 1,
+          "improved": 16,
+          "mean_delta": 0.13885053181887516,
+          "median_delta": 0.13748310165401662,
+          "n": 22,
+          "worsened": 5
+        },
+        "iou": {
+          "bootstrap_probability_nonpositive": 0.2554,
+          "ci95": [
+            -0.07117706302119249,
+            0.15423688648307754
+          ],
+          "equal": 1,
+          "improved": 13,
+          "mean_delta": 0.03807351098931512,
+          "median_delta": 0.05101228331003996,
+          "n": 22,
+          "worsened": 8
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.91335,
+          "ci95": [
+            -0.09754063104501025,
+            0.017379503452386244
+          ],
+          "equal": 2,
+          "improved": 7,
+          "mean_delta": -0.03969600137014475,
+          "median_delta": -0.02917310441351506,
+          "n": 22,
+          "worsened": 13
+        }
+      },
+      "candidate_minus_O1": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 0.5805,
+          "ci95": [
+            -0.22727272727272727,
+            0.22727272727272727
+          ],
+          "equal": 16,
+          "improved": 3,
+          "mean_delta": 0.0,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 3
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.0883,
+          "ci95": [
+            -0.035221771762975376,
+            0.1653793869437827
+          ],
+          "equal": 1,
+          "improved": 15,
+          "mean_delta": 0.070954940985756,
+          "median_delta": 0.05722691504854732,
+          "n": 22,
+          "worsened": 6
+        },
+        "iou": {
+          "bootstrap_probability_nonpositive": 0.45985,
+          "ci95": [
+            -0.09646796704155461,
+            0.11996967066038426
+          ],
+          "equal": 1,
+          "improved": 11,
+          "mean_delta": 0.00681949535151633,
+          "median_delta": 0.011033369730054393,
+          "n": 22,
+          "worsened": 10
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.8855,
+          "ci95": [
+            -0.08439826709741564,
+            0.021581293538172217
+          ],
+          "equal": 2,
+          "improved": 6,
+          "mean_delta": -0.03243998025785014,
+          "median_delta": -0.01844864064765231,
+          "n": 22,
+          "worsened": 14
+        }
+      },
+      "candidate_minus_O2": {
+        "acc050": {
+          "bootstrap_probability_nonpositive": 1.0,
+          "ci95": [
+            -0.13636363636363635,
+            0.0
+          ],
+          "equal": 21,
+          "improved": 0,
+          "mean_delta": -0.045454545454545456,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 1
+        },
+        "boundary_f": {
+          "bootstrap_probability_nonpositive": 0.72525,
+          "ci95": [
+            -0.010602400998602032,
+            0.00546256838036097
+          ],
+          "equal": 9,
+          "improved": 7,
+          "mean_delta": -0.0025313128811259547,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 6
+        },
+        "iou": {
+          "bootstrap_probability_nonpositive": 0.9992,
+          "ci95": [
+            -0.024889736250444102,
+            -0.0015207744678405939
+          ],
+          "equal": 9,
+          "improved": 3,
+          "mean_delta": -0.011131967857100742,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 10
+        },
+        "trimap_iou": {
+          "bootstrap_probability_nonpositive": 0.965,
+          "ci95": [
+            -0.014972867072685827,
+            0.0001834897308978032
+          ],
+          "equal": 17,
+          "improved": 2,
+          "mean_delta": -0.0061977836171404265,
+          "median_delta": 0.0,
+          "n": 22,
+          "worsened": 3
+        }
+      }
+    },
+    "sampling_unit": "paired official frame-query; RNG reset independently for every comparator and metric",
+    "seed": 20260807
+  },
+  "per_category": {
+    "Stainless steel pots": {
+      "candidate": {
+        "boundary_f": 0.8072411417961121,
+        "miou": 0.426151841878891,
+        "n": 1,
+        "trimap_iou": 0.33852607011795044
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.07966220378875732,
+          "miou": 0.05958878993988037,
+          "trimap_iou": -0.0376875102519989
+        },
+        "O1": {
+          "boundary_f": 0.020334184169769287,
+          "miou": 0.022066742181777954,
+          "trimap_iou": -0.018100440502166748
+        },
+        "O2": {
+          "boundary_f": 0.000705420970916748,
+          "miou": -0.0008524954319000244,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "cabinet": {
+      "candidate": {
+        "boundary_f": 0.3383335471153259,
+        "miou": 0.7942739129066467,
+        "n": 1,
+        "trimap_iou": 0.2413572371006012
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.3383335471153259,
+          "miou": 0.7942739129066467,
+          "trimap_iou": 0.2413572371006012
+        },
+        "O1": {
+          "boundary_f": 0.3383335471153259,
+          "miou": 0.7453745752573013,
+          "trimap_iou": 0.2413572371006012
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "dark cup": {
+      "candidate": {
+        "boundary_f": 0.299250990152359,
+        "miou": 0.3419143557548523,
+        "n": 1,
+        "trimap_iou": 0.4762868583202362
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.1825656220316887,
+          "miou": 0.06434112787246704,
+          "trimap_iou": -0.0206587016582489
+        },
+        "O1": {
+          "boundary_f": 0.11657081544399261,
+          "miou": 0.12767040729522705,
+          "trimap_iou": -0.018796861171722412
+        },
+        "O2": {
+          "boundary_f": -0.0010586082935333252,
+          "miou": -3.045797348022461e-05,
+          "trimap_iou": 0.0034859180450439453
+        }
+      }
+    },
+    "frog cup": {
+      "candidate": {
+        "boundary_f": 0.21966998279094696,
+        "miou": 0.09858784824609756,
+        "n": 1,
+        "trimap_iou": 0.0025429115630686283
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": -0.05942542850971222,
+          "miou": -0.1395283117890358,
+          "trimap_iou": -0.08662906428799033
+        },
+        "O1": {
+          "boundary_f": -0.017609506845474243,
+          "miou": -0.07443732768297195,
+          "trimap_iou": -0.05187063058838248
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "ketchup": {
+      "candidate": {
+        "boundary_f": 0.9400112628936768,
+        "miou": 0.2928510010242462,
+        "n": 1,
+        "trimap_iou": 0.22281166911125183
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.45921987295150757,
+          "miou": 0.16315023601055145,
+          "trimap_iou": -0.2754400670528412
+        },
+        "O1": {
+          "boundary_f": 0.14443117380142212,
+          "miou": -0.12408003211021423,
+          "trimap_iou": -0.2720653712749481
+        },
+        "O2": {
+          "boundary_f": 0.0008341670036315918,
+          "miou": -0.002009749412536621,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "knife": {
+      "candidate": {
+        "boundary_f": 0.4265528917312622,
+        "miou": 0.3101826608181,
+        "n": 3,
+        "trimap_iou": 0.33253172039985657
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.21460334956645966,
+          "miou": 0.09751169383525848,
+          "trimap_iou": 0.0015927553176879883
+        },
+        "O1": {
+          "boundary_f": 0.08268773555755615,
+          "miou": 0.03489267826080322,
+          "trimap_iou": -0.0038793981075286865
+        },
+        "O2": {
+          "boundary_f": 0.0006887614727020264,
+          "miou": -0.0008975565433502197,
+          "trimap_iou": 0.0006728172302246094
+        }
+      }
+    },
+    "ottolenghi": {
+      "candidate": {
+        "boundary_f": 0.45064377784729004,
+        "miou": 0.3118492066860199,
+        "n": 1,
+        "trimap_iou": 0.32210707664489746
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": -0.08521425724029541,
+          "miou": -0.27115121483802795,
+          "trimap_iou": 0.004045397043228149
+        },
+        "O1": {
+          "boundary_f": -0.08721303939819336,
+          "miou": -0.24246230721473694,
+          "trimap_iou": -0.017723441123962402
+        },
+        "O2": {
+          "boundary_f": -0.014419376850128174,
+          "miou": 0.002007812261581421,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "plastic ladle": {
+      "candidate": {
+        "boundary_f": 0.0,
+        "miou": 0.0,
+        "n": 1,
+        "trimap_iou": 0.0
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": -0.3930913209915161,
+          "miou": -0.0472322516143322,
+          "trimap_iou": -0.08884073793888092
+        },
+        "O1": {
+          "boundary_f": -0.6707280874252319,
+          "miou": -0.21884717047214508,
+          "trimap_iou": -0.06553672254085541
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "plate": {
+      "candidate": {
+        "boundary_f": 0.532381534576416,
+        "miou": 0.590981125831604,
+        "n": 2,
+        "trimap_iou": 0.39143043756484985
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.341829776763916,
+          "miou": 0.3539971560239792,
+          "trimap_iou": -0.06489482522010803
+        },
+        "O1": {
+          "boundary_f": 0.31763407588005066,
+          "miou": 0.3390757441520691,
+          "trimap_iou": -0.07349628210067749
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "pot": {
+      "candidate": {
+        "boundary_f": 0.4674113988876343,
+        "miou": 0.126654252409935,
+        "n": 1,
+        "trimap_iou": 0.0906040295958519
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": -0.16291660070419312,
+          "miou": -0.4113012105226517,
+          "trimap_iou": 0.08148825913667679
+        },
+        "O1": {
+          "boundary_f": -0.06652325391769409,
+          "miou": -0.3410327285528183,
+          "trimap_iou": 0.019603170454502106
+        },
+        "O2": {
+          "boundary_f": -0.053087055683135986,
+          "miou": -0.027141883969306946,
+          "trimap_iou": -0.017369389533996582
+        }
+      }
+    },
+    "pour-over vessel": {
+      "candidate": {
+        "boundary_f": 0.5456621646881104,
+        "miou": 0.3551850914955139,
+        "n": 1,
+        "trimap_iou": 0.2940414547920227
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.18225860595703125,
+          "miou": 0.15383952856063843,
+          "trimap_iou": 0.08796483278274536
+        },
+        "O1": {
+          "boundary_f": 0.19642189145088196,
+          "miou": 0.23722044378519058,
+          "trimap_iou": 0.15707533061504364
+        },
+        "O2": {
+          "boundary_f": 0.001140594482421875,
+          "miou": -0.004155486822128296,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "red cup": {
+      "candidate": {
+        "boundary_f": 0.4561096131801605,
+        "miou": 0.421529620885849,
+        "n": 1,
+        "trimap_iou": 0.38594651222229004
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.4561096131801605,
+          "miou": 0.25330469012260437,
+          "trimap_iou": -0.11151003837585449
+        },
+        "O1": {
+          "boundary_f": 0.28732486069202423,
+          "miou": 0.11522030830383301,
+          "trimap_iou": -0.09693557024002075
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "refrigerator": {
+      "candidate": {
+        "boundary_f": 0.07357354462146759,
+        "miou": 0.3108615577220917,
+        "n": 1,
+        "trimap_iou": 0.5134952664375305
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.024417255073785782,
+          "miou": 0.049889594316482544,
+          "trimap_iou": 0.0
+        },
+        "O1": {
+          "boundary_f": 0.023152358829975128,
+          "miou": 0.06482477486133575,
+          "trimap_iou": 0.0
+        },
+        "O2": {
+          "boundary_f": -0.0015920326113700867,
+          "miou": -0.02303585410118103,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "sink": {
+      "candidate": {
+        "boundary_f": 0.32145601511001587,
+        "miou": 0.47505825757980347,
+        "n": 2,
+        "trimap_iou": 0.30471426248550415
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.22881323099136353,
+          "miou": -0.18929386138916016,
+          "trimap_iou": -0.197512686252594
+        },
+        "O1": {
+          "boundary_f": 0.2035975307226181,
+          "miou": -0.18931251764297485,
+          "trimap_iou": -0.19043704867362976
+        },
+        "O2": {
+          "boundary_f": 0.0037925243377685547,
+          "miou": -0.09357708692550659,
+          "trimap_iou": -0.062243103981018066
+        }
+      }
+    },
+    "spatula": {
+      "candidate": {
+        "boundary_f": 0.37335607409477234,
+        "miou": 0.052134960889816284,
+        "n": 1,
+        "trimap_iou": 0.2205071598291397
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.37335607409477234,
+          "miou": 0.052134960889816284,
+          "trimap_iou": 0.2205071598291397
+        },
+        "O1": {
+          "boundary_f": 0.37335607409477234,
+          "miou": 0.052134960889816284,
+          "trimap_iou": 0.2205071598291397
+        },
+        "O2": {
+          "boundary_f": 0.000553429126739502,
+          "miou": 0.0003062710165977478,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "spoon": {
+      "candidate": {
+        "boundary_f": 0.37805408239364624,
+        "miou": 0.15323340892791748,
+        "n": 1,
+        "trimap_iou": 0.47976112365722656
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.09270760416984558,
+          "miou": -0.006347760558128357,
+          "trimap_iou": 0.05476111173629761
+        },
+        "O1": {
+          "boundary_f": -0.10093763470649719,
+          "miou": -0.0697682797908783,
+          "trimap_iou": 0.04647272825241089
+        },
+        "O2": {
+          "boundary_f": 0.0015832185745239258,
+          "miou": -0.00014451146125793457,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "toaster": {
+      "candidate": {
+        "boundary_f": 0.7194772362709045,
+        "miou": 0.5073519945144653,
+        "n": 1,
+        "trimap_iou": 0.4248366057872772
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": 0.037619590759277344,
+          "miou": 0.002062976360321045,
+          "trimap_iou": -0.05582183599472046
+        },
+        "O1": {
+          "boundary_f": 0.0400046706199646,
+          "miou": -0.03602391481399536,
+          "trimap_iou": -0.056733906269073486
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    },
+    "yellow desk": {
+      "candidate": {
+        "boundary_f": 0.10131598263978958,
+        "miou": 0.030924612656235695,
+        "n": 1,
+        "trimap_iou": 0.05323993042111397
+      },
+      "delta_vs": {
+        "O0": {
+          "boundary_f": -0.25598668307065964,
+          "miou": -0.5013494547456503,
+          "trimap_iou": -0.3668113760650158
+        },
+        "O1": {
+          "boundary_f": -0.32643579691648483,
+          "miou": -0.5120360311120749,
+          "trimap_iou": -0.2614274136722088
+        },
+        "O2": {
+          "boundary_f": 0.0,
+          "miou": 0.0,
+          "trimap_iou": 0.0
+        }
+      }
+    }
+  },
+  "scene_id": "waldo_kitchen",
+  "schema": "radio_gs.lerf_reliability_candidate_exact_metric_results.v1",
+  "schema_version": 1,
+  "single_candidate_no_sweep": true,
+  "source_materialization": {
+    "accepted_rows": 433043,
+    "descriptor_sha256": "400d4f24cd7536d5d81cfc696551204ff322791a47a93e07c7dce2fbfbf5ad33",
+    "elapsed_seconds": 126.04682333103847,
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_execution_authority_20260807.json",
+      "sha256": "5893d99e0ec64c13951f0b0e3fd530837139270ce9c96740750323915abbe2a1"
+    },
+    "global_ceiling_selector": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_only_global_ceiling_lowmem_lineage_compatibility_result_20260807.json",
+      "sha256": "b747b23ad3ecd5c3cfcba93d24b1379072f99fe7d30a25f709e8ba98db462c2c"
+    },
+    "materialization_owner_audit": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_gpu0_owner_audit_20260807.csv",
+      "sha256": "d8e4713eebcaee800ec19f7d7988676f343e8d0056acc6a0e49e314276d48d43"
+    },
+    "materialization_telemetry": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_reliability_candidate_v1_gpu0_telemetry_20260807.csv",
+      "sha256": "f79c407ef49913dd7549c1f2a436b4300c7ed5b8768c38044ec1ca6c91c1ce76"
+    },
+    "method_contract_sha256": "51d28c205e8dc3f1221122c8ed9564ebb0268124efa07521e4d13557a0f2e953",
+    "negative": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/waldo_kitchen/waldo_kitchen_reliability_candidate_negative.pt",
+      "sha256": "30619bca66001befff0d0785ee82ef4d6cd804342951b412f6b805e2172d4a78"
+    },
+    "positive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/waldo_kitchen/waldo_kitchen_reliability_candidate_positive.pt",
+      "sha256": "53b38c1f118198496dbb7858e323e43651c1447f220d2771242ef7de427864c0"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_reliability_candidate_v1/waldo_kitchen/waldo_kitchen_reliability_candidate_result.json",
+      "sha256": "8acbed01964e02d9652016b21f3ea1aea5b5ef8c1dba21238ad843e0137fc899"
+    },
+    "rows_with_expanded_budget": 427508,
+    "rows_with_score_replacement": 431460,
+    "scales_with_score_replacement": 1294380,
+    "teacher_agreement_v2": {
+      "accepted_rows": 433043,
+      "elapsed_seconds": 496.9774869970279,
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+        "sha256": "3f7d40c888643ebda4ff27eefb31ae1037124cef4cfe9e9b8db2dcdddf622882"
+      },
+      "owner_audit": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_teacher_agreement_v2_lowmem_gpu0_owner_audit_20260807.csv",
+        "sha256": "6e0e2c26b6c2e4c5e4615af501abf19a4bd5507a4aa1d526f9675db24b3a22b1"
+      },
+      "preflight_peak_cuda_bytes": 8061950464,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/waldo_kitchen/waldo_kitchen_o1_o2_streaming_result.json",
+        "sha256": "4d82dcca51097be2d09fa2044da72a41d3734e4872ff7e3cc29fb6d6974665bc"
+      },
+      "rows_with_teacher": 431460,
+      "rows_without_teacher_bitwise_o0_fallback": 1583,
+      "selected_projection_batch": 128,
+      "teacher_mean": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/waldo_kitchen/waldo_kitchen_teacher_mean_fp16.pt",
+        "sha256": "a2d8f65394df59404e4797737526e6a064ab4b7123748505e9f5b7fdf32bfd76"
+      },
+      "telemetry": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_teacher_agreement_v2_lowmem_gpu0_telemetry_20260807.csv",
+        "sha256": "8fdc2b9e22b211e10f419a9d090e8b839cf1f1ee844a91456babba4b9e2f3b78"
+      }
+    }
+  },
+  "status": "complete"
+}

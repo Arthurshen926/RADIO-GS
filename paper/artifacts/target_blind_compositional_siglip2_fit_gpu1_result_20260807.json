@@ -1,0 +1,85 @@
+{
+  "artifact": "target_blind_compositional_siglip2_fit_gpu1_result",
+  "schema_version": 1,
+  "completed_at": "2026-08-07T00:17:36+08:00",
+  "status": "four_optional_fit_components_materialized_and_fail_closed_validated",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/target_blind_compositional_siglip2_fit_gpu1_execution_authority_20260807.json",
+    "sha256": "fee1d72c7b416a8dfaa9c3019dba2537bb77ba029ab2ce9d90f836d18fdcc54b"
+  },
+  "builder": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_target_blind_compositional_siglip2_embeddings.py",
+    "sha256": "3af6d16031f03ebccd944f02062bfd8d27634a054ae671bd2990c6f6a034e5c4"
+  },
+  "execution": {
+    "cuda_visible_devices": "1",
+    "runtime_device": "cuda:0",
+    "physical_gpu": 1,
+    "compute_dtype": "float32",
+    "batch_size": 32,
+    "peak_observed_temperature_c": 47,
+    "thermal_stop_triggered": false,
+    "nvml_error": false
+  },
+  "components": {
+    "object_noun": {
+      "status": "reused_independently_frozen_primary_fit_bank",
+      "shape": [806, 1536],
+      "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+      "artifact_sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4",
+      "manifest_sha256": "5d6c7fa167b63a4052f9be57389a2f5f0e469c75391916ef0b7fe562cce7e3f0",
+      "embedding_tensor_sha256": "8f898aaa59c78308a4cdb7f4d905707f2b903dc067f7a2f02d0862ca8861086c"
+    },
+    "synonym_relation": {
+      "shape": [657, 1536],
+      "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/synonym_relation_fit_embeddings.pt",
+      "artifact_sha256": "d541bafbf6ccf5631d66b45aca81bcb9c5ce7a5c621ddfecd14551b97eed024e",
+      "manifest_sha256": "1a54d040acaf31e135b49cf1855f9553254e51fc88aaf5874c7e87e50615f5b7",
+      "embedding_tensor_sha256": "573cb70f89907e20c8a24c62649c7114f418e8ad9d8cfa1bc16c8eb299557629"
+    },
+    "lexical_sibling_relation": {
+      "shape": [167, 1536],
+      "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/lexical_sibling_relation_fit_embeddings.pt",
+      "artifact_sha256": "58d9940ac85d5eca7f8846eb6487a389cc5b771fff471d6ec99c54ed7819d54e",
+      "manifest_sha256": "a5494a3aa2ebf4da432fbbef35184050b5f74f2a5ed0efc67db021e4c4a73712",
+      "embedding_tensor_sha256": "3da0a78ace8ebb7e4cfc51c24f75fa29b50f0a50537e039f50b10d889e89e9a2"
+    },
+    "counterfactual_attributes": {
+      "shape": [3224, 1536],
+      "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/counterfactual_attributes_fit_embeddings.pt",
+      "artifact_sha256": "b5978e4f4915d729d4a39148484827c044604ff7000e50da5287fb87a4681b81",
+      "manifest_sha256": "7adc36af9a7e8fb70015ead3935e7a1d80ead26e6811b4cd264c74587b6a0049",
+      "embedding_tensor_sha256": "87b311385cb6541be90e63102db46bacb4d3dfccb805a02264a5d30d21f8e650"
+    },
+    "high_precision_part_of": {
+      "shape": [30, 1536],
+      "artifact": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/target_blind_compositional_siglip2_v2_fit_gpu1/high_precision_part_of_fit_embeddings.pt",
+      "artifact_sha256": "58ae47ae887222c9fb363b265c6500aed56245b624dfb4867799e2bff666f003",
+      "manifest_sha256": "4e536e1b3eeffcef467dad3764ce3387fcdeacb9968154861f9b2bcf438cdffd",
+      "embedding_tensor_sha256": "c34b63340d6f221e82ddd372b4ad640a349db299b8bdb88d1f1577321d87daec"
+    }
+  },
+  "validation": {
+    "loader": "radio_gs.losses.source_global_response_listwise_loss_v21.load_frozen_compositional_generic_bank",
+    "all_four_optional_components_fail_closed_loaded": true,
+    "maximum_l2_norm_absolute_error": 1.7881393432617188e-07,
+    "gpu_cpu_overlap": {
+      "component": "lexical_sibling_relation",
+      "rows": 167,
+      "reference": "independently frozen CPU primary fit bank",
+      "minimum_cosine": 0.9999998807907104,
+      "mean_cosine": 1.0,
+      "maximum_absolute_element_error": 1.341104507446289e-07
+    }
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

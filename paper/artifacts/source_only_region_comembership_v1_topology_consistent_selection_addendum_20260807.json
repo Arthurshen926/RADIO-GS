@@ -1,0 +1,61 @@
+{
+  "artifact": "source_only_region_comembership_v1_topology_consistent_selection_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_topology_consistent_threshold_implementation_or_target_execution",
+  "base_preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "identified_protocol_gap": "Pair-edge F1 does not evaluate the transitive connected closure used at query time; one false-positive bridge can merge two otherwise correct objects while changing edge F1 only slightly.",
+  "scope": {
+    "cohort_unchanged": true,
+    "source_train": ["scene0001_00", "scene0002_00", "scene0003_00", "scene0005_00"],
+    "source_validation": ["scene0004_00", "scene0008_00"],
+    "threshold_grid_unchanged": "0.05_to_0.95_inclusive_step_0.05",
+    "target_access": false,
+    "scene_specific_parameters": false
+  },
+  "component_evaluation": {
+    "eligible_regions": "dominant_instance_id_positive_and_instance_purity_times_instance_label_coverage_positive",
+    "region_evidence_weight": "instance_purity_times_instance_label_coverage",
+    "predicted_component": "undirected_connected_component_of_each_eligible_seed_under_edges_with_probability_at_least_threshold",
+    "evaluation_universe": "eligible_regions_only; unlabeled regions remain in graph connectivity but contribute neither target nor predicted evaluation mass",
+    "target_component": "all eligible regions with the seed dominant_instance_id",
+    "seed_iou": "same_instance_selected_evidence_divided_by_union_of_selected_and_target_evidence",
+    "seed_f1": "two_times_same_instance_selected_evidence_divided_by_selected_plus_target_evidence",
+    "seed_contamination": "different_instance_selected_evidence_divided_by_all_selected_evidence",
+    "seed_giant_excess": "maximum_zero_of_selected_scene_evidence_fraction_minus_target_instance_scene_evidence_fraction",
+    "aggregation": "seed evidence weighted mean within each instance, equal instance mean within scene, equal scene mean across source validation"
+  },
+  "threshold_selection": {
+    "primary_score": "scene_macro_instance_macro_iou_minus_contamination_minus_giant_excess",
+    "tie_break_order": [
+      "higher_scene_macro_instance_macro_iou",
+      "higher_scene_macro_instance_macro_f1",
+      "lower_scene_macro_instance_macro_contamination",
+      "lower_scene_macro_instance_macro_giant_excess",
+      "lower_threshold"
+    ],
+    "pair_edge_weighted_f1": "diagnostic_only_not_used_for_selection",
+    "reason": "The promotion threshold must optimize the topology actually used by text-seed connected filtering."
+  },
+  "checkpoint_selection": {
+    "primary": "minimum_source_validation_scene_macro_balanced_weighted_bce_unchanged",
+    "topology_metric": "reported_at_selected_checkpoint_not_used_to_choose_epoch_in_v1"
+  },
+  "required_fail_closed_changes": [
+    "scene authority loader retains and validates dominant_instance_ids, instance_purity, instance_label_coverage and instance_observed",
+    "threshold report contains component metrics and diagnostic pair F1",
+    "synthetic false-positive bridge regression proves topology selection can reject a pair-F1-favored catastrophic closure"
+  ],
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "source_validation_labels_used_for_selection": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

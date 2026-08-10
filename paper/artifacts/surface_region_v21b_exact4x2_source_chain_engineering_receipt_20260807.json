@@ -1,0 +1,64 @@
+{
+  "artifact_type": "source_only_engineering_receipt",
+  "authority": {
+    "complete_content_replay": "passed",
+    "path": "paper/artifacts/surface_region_v21b_exact4x2_execution_authority_20260807.json",
+    "sha256": "5d26c32d7fb6ff95ddf92369601949bbc66bd133dad005bc6041036c22c971a6"
+  },
+  "contracts": {
+    "model_interface_sha256": "2899228836db0fb267b5ea21dc85dbc0c65b5fbfe2817f28c2783793c6b296bb",
+    "training_sha256": "32eccaed0a138b60d3e1076a09d895144b88b397cd9a6aed5c875eff5f860598"
+  },
+  "date": "2026-08-07",
+  "implementation": {
+    "execution_builder": {
+      "path": "radio_gs/scripts/build_surface_region_v21b_execution_authority.py",
+      "sha256": "541fb27f7e5ac6d3efbaba8c2969c4ad1806dac781ae4b0b56c8095e4a9fe40d"
+    },
+    "loss": {
+      "path": "radio_gs/losses/source_global_response_listwise_loss_v21b.py",
+      "sha256": "ffcbee891fc43cd9cfb8bed9fa6f7506b821e6cb447973948b79398d8eb56e20"
+    },
+    "model": {
+      "path": "radio_gs/models/surface_region_v21b_reliability_conditioned_residual.py",
+      "sha256": "9dca7cc7141b4ee015fa9d7991299d9fa6a3dd2d247364fe4f085ec7832d3da4"
+    },
+    "model_interface": {
+      "path": "radio_gs/interfaces/surface_region_v21b_reliability_conditioned_residual.py",
+      "sha256": "d0a8619b08af1077c875f5d0b4cef8bbc3f70159ed85b6864ef33c54d5c0a86d"
+    },
+    "source_gate": {
+      "path": "radio_gs/interfaces/surface_region_v21b_source_gate.py",
+      "sha256": "84d9e8a8bc42c0a5200c86ecf23480ee83380c11aaba765c1bfeea4545f22ac6"
+    },
+    "trainer": {
+      "path": "radio_gs/scripts/train_surface_region_v21b_conditioned_rank256_exact4x2.py",
+      "sha256": "f1f657a4fc5db1f662dd38c2a6e79b8c802abf73f3610e0ea0256937c226fefe"
+    }
+  },
+  "method": {
+    "hard_negative_pairwise_denominator": "any_trainable_endpoint",
+    "hard_negative_triplet_denominator": "trainable_anchor_only",
+    "optimizer_steps": 30,
+    "promotion_eligible_state_retention": "complete",
+    "promotion_selection": "all_gates_then_minimum_auxiliary_then_earliest_step"
+  },
+  "preregistration": {
+    "model_sha256": "5397e29ece42b03c8af0b77865a9c8327920c59f0be050dbd99eb8ca91ece60a",
+    "training_addendum_sha256": "c6441bc63abee9726781db6a9aa083635f170b0b20524cce81b2d474728bba8b"
+  },
+  "scope": {
+    "baseline_files_edited": false,
+    "benchmark_or_target_data_opened": false,
+    "gpu_used": false
+  },
+  "tests": {
+    "baseline_compatibility_and_v21b": {
+      "passed": 69,
+      "result": "passed",
+      "warning": "one upstream PyTorch TypedStorage deprecation warning"
+    },
+    "py_compile": "passed",
+    "whitespace_and_git_diff_check": "passed"
+  }
+}

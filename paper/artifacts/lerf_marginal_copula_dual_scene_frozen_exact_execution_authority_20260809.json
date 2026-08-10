@@ -1,0 +1,152 @@
+{
+  "schema": "radio_gs.lerf_marginal_copula_dual_scene_frozen_exact_execution_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_after_dev101_selection_and_one_shot_audit90_confirmation",
+  "method": "accepted O2 final-score marginal with a source-confirmed genuine-MPR bounded copula ranking residual",
+  "policy": {
+    "policy_id": "b40_s05",
+    "strength": 0.5,
+    "maximum_rank_fraction": 0.4,
+    "per_scene_or_per_query_tuning": false
+  },
+  "single_candidate_no_sweep": true,
+  "metric_execution_authorized": true,
+  "source_only_gates": {
+    "development_101_selection": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_marginal_copula_dev101_v2/selection/result.json",
+      "sha256": "20d9a9ac6cc1de7d3e267a0e5b5fe4fabe0b9f23bce6717558c174a08e6f03df",
+      "status": "passed",
+      "selected_policy": "b40_s05"
+    },
+    "reserved_audit_90_selection": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_marginal_copula_audit90/selection/result.json",
+      "sha256": "bfb7c94f05c4d8f350b62351b15506f1405046b410d84454875a5a3f2281c9e1",
+      "status": "passed",
+      "selected_policy": "b40_s05"
+    },
+    "dev_audit_disjointness_proof": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_dev_audit_query_bank_disjointness_proof_20260809.json",
+      "sha256": "3d5351f42f98bb9ed6469d67b739aa2f9231f9a63e320324583dd6a92ae12edf"
+    }
+  },
+  "frozen_protocol": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "protocol_preset": "vala_paper_3d",
+    "label_directory": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "official_frames_only": true,
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "external_score_postprocess": "none_already_applied_in_candidate",
+    "summary_head_weights": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "positive_text_embedding_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_embedding_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    }
+  },
+  "materialization": {
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_marginal_copula_candidate.py",
+      "sha256": "9ce251ae28a0e2a4a4c750def0fc86287c0be2f29037342d8cf5153db436fe55"
+    },
+    "interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_marginal_preserving_copula_residual.py",
+      "sha256": "f2cff65b32bacb3adc14b71a12fa2e2f2534d7a7216fda0c12e4c9c94d449347"
+    },
+    "accepted_valid_domain_authoritative": true,
+    "candidate_missing_policy": "accepted_score_zero_reliability_fixed_rank_barrier",
+    "accepted_score_multiset_and_every_fixed_threshold_count_exact": true
+  },
+  "thermal_policy": {
+    "guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    },
+    "power_limit_watts": 300,
+    "poll_seconds": 30,
+    "hard_temperature_c": 85,
+    "maximum_consecutive_overheat_polls": 2,
+    "soft_pause_enabled": false
+  },
+  "scenes": {
+    "ramen": {
+      "physical_gpu": 0,
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+        "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+      },
+      "renderer_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+      },
+      "candidate_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_premetric_v1/ramen/ramen_scores.pt",
+        "sha256": "62d8c5ed4225b76de079898cafe368a5d54d6c1dd88d2bd2cdec20c3e405aaef"
+      },
+      "premetric_report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_premetric_v1/ramen/ramen_scores.pt.json",
+        "sha256": "d758294c71853ab28f9a7b82ae615379350c8ad480eb8417decf450deb6499cc",
+        "accepted_valid_gaussians": 221608,
+        "candidate_missing_protected_gaussians": 0
+      },
+      "accepted_control": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_v1/ramen/evaluation/exact_one_shot_gpu0_v1/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "eb6ba3d2dfbcde314751aa0409b81a9942db1e98f156df066bff6e272543e719",
+        "miou": 0.3924490213394165
+      },
+      "output_directory_must_not_exist": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_metric_v1/ramen/exact_gpu0_v1"
+    },
+    "teatime": {
+      "physical_gpu": 1,
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+        "sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775"
+      },
+      "renderer_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+      },
+      "candidate_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_premetric_v1/teatime/teatime_scores.pt",
+        "sha256": "b6778fd47f0841fc2b4ac72f997c314274424d521d04629ad1a830ed8493fd2f"
+      },
+      "premetric_report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_premetric_v1/teatime/teatime_scores.pt.json",
+        "sha256": "01f0c0dc3e67842e14f36af9d621cf137f554b646e9ca4a22ab868d2df1a0a30",
+        "accepted_valid_gaussians": 334250,
+        "candidate_missing_protected_gaussians": 99369
+      },
+      "accepted_control": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_text_v1/teatime/evaluation/exact_one_shot_gpu0_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "e7187ea2dedd1c815bcc515efb7f97a8a2bb40226b3b9ebe451db5d1a62d30d9",
+        "miou": 0.5278149843215942
+      },
+      "output_directory_must_not_exist": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_marginal_copula_target_metric_v1/teatime/exact_gpu1_v1"
+    }
+  },
+  "decision_rule": {
+    "promote_scene_if_miou_strictly_exceeds_accepted_control": true,
+    "promote_global_method_only_if_both_scenes_nonregress_and_two_scene_macro_miou_strictly_improves": true,
+    "no_retry_no_threshold_adjustment_after_metric": true,
+    "failure_fallback": "accepted_o2_valid_domain_knn10_mainline"
+  },
+  "access_audit": {
+    "source_dev101_and_reserved_audit90_passed": true,
+    "benchmark_query_score_caches_opened_for_premetric_materialization": true,
+    "candidate_target_images_masks_or_labels_opened_before_authority": false,
+    "candidate_target_metric_executed_before_authority": false,
+    "frozen_protocol_modified": false
+  }
+}

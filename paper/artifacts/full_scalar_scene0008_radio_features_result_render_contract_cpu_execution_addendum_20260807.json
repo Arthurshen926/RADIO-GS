@@ -1,0 +1,54 @@
+{
+  "artifact": "full_scalar_scene0008_radio_features_result_render_contract_cpu_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:18:27+08:00",
+  "status": "sealed_after_radio_features_success_and_before_render_contract",
+  "scene_id": "scene0008_00",
+  "cohort_split": "source_validation",
+  "parent_preregistration_sha256": "a5a73a3605f507e8b52547ff2f47c87bec7fb23a547f0e479bc5db39dc2752d3",
+  "radio_features_result": {
+    "receipt_sha256": "bb892056e8d2954a931738fc869d6021740c7c73b43c27a21866d38e1b516cf2",
+    "receipt_authority_sha256": "0c623c66ef5d7d5636fec521a5003299c004081f4b6f90a03c898eb1c42fb558",
+    "feature_manifest_sha256": "4e2ef6892ea308cdd59745b71f96f4bd2348b8d8b458c9720603ee8883f86efe",
+    "feature_output_bundle_sha256": "2623eebd3ea97c7c3d156d8318f988f561c8f1eb067b614f9e0a76230082af96",
+    "frames": 240,
+    "maximum_temperature_c": 54,
+    "thermal_warnings": 0,
+    "thermal_aborts": 0,
+    "guard_exit_code": 0,
+    "cuda_release_verified": true
+  },
+  "render_contract": {
+    "geometry_ply_sha256": "aee6fbb2095d5304327d61a9b1755de066cc7c3c24e4373cde3fdd4d653ab7e3",
+    "observation_contract": "scannet_full_observation_v1",
+    "device": "cpu",
+    "per_scene_hyperparameters": false
+  },
+  "command": [
+    "env", "CUDA_VISIBLE_DEVICES=",
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/run_full_scalar_scannet_clean_pilot_v3.py",
+    "--scene-id", "scene0008_00",
+    "--scan-archive-part", "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "--cohort-authority", "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "--expected-cohort-authority-sha256", "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "--exclusion-manifest", "paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "--expected-exclusion-manifest-sha256", "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29",
+    "--inventory", "paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+    "--expected-inventory-sha256", "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539",
+    "--pilot-root", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00",
+    "--gpu", "0",
+    "--stop-after", "render_contract"
+  ],
+  "output_preexisting": false,
+  "atomic_no_clobber": true,
+  "source_access": {
+    "source_rgb_and_query_free_features_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "frozen_evaluator_metric_renderer_modified": false
+}

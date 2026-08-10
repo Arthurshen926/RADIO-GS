@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_target_blind_multi_region_union_figurines_execution_v1",
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_after_target_blind_cache_materialization_and_before_any_candidate_metric",
+  "authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/lerf3d_target_blind_multi_region_union_readout_preregistration_20260807.json",
+      "sha256": "2fc9a45de78e0e64f3b00d498d618e5957153dffaa1f526fc33b13e26666598a"
+    },
+    "scale_alignment_addendum": {
+      "path": "paper/artifacts/lerf3d_target_blind_multi_region_union_scale_alignment_addendum_20260807.json",
+      "sha256": "a968bcfb7f3ba129170ebf74476fd39d908ee0f5cf6357645624f2254bcdf68f"
+    },
+    "producer": {
+      "path": "radio_gs/scripts/build_lerf_target_blind_multi_region_union_cache.py",
+      "sha256": "a3d4c86ab729e27889434885c82db0fc4ba52f497e3fe6ea0832065452053b8e"
+    },
+    "selector": {
+      "path": "radio_gs/querying/multi_region_union_readout.py",
+      "sha256": "65bfa4c4b1726ea8cf3ac4f1e18c95e1a6372d7ee15d53501b57cc2ed6aca2bb"
+    },
+    "frozen_evaluator": {
+      "path": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    }
+  },
+  "materialized_candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/figurines/external_query_scores.pt",
+      "sha256": "85cab0001d98512a2909114520d523033c31c57a7def2473c9003c66a17b0de7"
+    },
+    "build_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/figurines/build_report.json",
+      "sha256": "81e31dbf640fd68a4000cb74fb7031addf25e111cbb43e15b84853366ab2c0a1"
+    },
+    "candidate_regions": 247809,
+    "queries": 21,
+    "selected_regions_per_query": 8,
+    "query_scores": "binary_semantic_core_union_membership"
+  },
+  "frozen_inputs": {
+    "config_sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11",
+    "geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "summary_head_sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c",
+    "query_text_cache_sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+    "canonical_negative_text_cache_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "candidate_evaluation": {
+    "scene": "figurines",
+    "external_query_score_cache_sha256_preflight_required": true,
+    "protocol_preset": "vala_paper_3d",
+    "score_postprocess": "none",
+    "reason_for_no_second_postprocess": "The target-blind producer already applied the registered independent per-scale kNN10 and min-max response before union selection. Reapplying kNN/min-max to binary membership would change the preregistered output.",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_frames_only": true,
+    "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf3d_target_blind_multi_region_union_v1/evaluation/union_v1"
+  },
+  "paired_O0_control": {
+    "policy": "reuse_exact_previously_bound_frozen_result_without_recomputation",
+    "result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o0_diagnostic_retry1/figurines/lerf_direct_3d_selection_results.json",
+    "result_sha256": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677",
+    "protocol_preset": "vala_repo_3d",
+    "positive_cache_sha256": "7e7611ac7c886917d0b415c613e16c740d6248cb46c0bde536df6d353d9f739c",
+    "canonical_negative_cache_sha256": "a887eb9da5631ed8a1966e3ad844bb0797d94626a6025e1293b5712e11b9b19f"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 30,
+    "hard_temperature_c": 88,
+    "consecutive_hot_polls_before_stop": 6,
+    "no_result_dependent_variant_threshold_or_graph_selection": true,
+    "candidate_metric_opened": false,
+    "frozen_evaluator_metric_renderer_modified": false,
+    "execution_authorized_after_this_addendum": true
+  }
+}

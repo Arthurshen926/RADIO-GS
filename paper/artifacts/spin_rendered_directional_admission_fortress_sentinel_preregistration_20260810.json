@@ -1,0 +1,115 @@
+{
+  "schema": "radio_gs.spin_rendered_directional_admission.fortress_sentinel_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_after_source_only_gate_before_candidate_materialization_or_target_score",
+  "scientific_question": "Does source-counterfactual directional admission turn graph completion into a beneficial proposal while preserving rendered source-visible anchors?",
+  "method": {
+    "policy": "source_oof_directional_transport_admission_v1",
+    "transport": "anchor_preserving_confidence_gated_logit_residual_v1",
+    "application_domain": "rendered_unary_and_graph_proposal_before_resolution_adapter",
+    "observation_confidence": "rendered_source_visible_coverage",
+    "expansion_and_contraction_fit_separately": true,
+    "coefficient_aggregation": "minimum_leave_one_complete_footprint_fold",
+    "fixed_probability_threshold": 0.5,
+    "graph_is_proposal_only": true,
+    "connected_selection": false,
+    "scene_specific_hyperparameter": false,
+    "parameter_scan": false
+  },
+  "source_only_gate": {
+    "scenes": {
+      "lego": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/lego/result.json",
+        "sha256": "525d36dda63027866d46b068eff285bba8ddc4f600a5a621863505d9decf8f03"
+      },
+      "fortress": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/fortress/result.json",
+        "sha256": "75d7fff92fd2129e47c253d102429001a6278ca560163b1bb8187b9816c6ea28",
+        "expansion": 1.0,
+        "contraction": 0.0
+      },
+      "leaves": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/leaves/result.json",
+        "sha256": "1214efe950a456a79974785daa1a8e27732df851a6861413d7b0783fe5a8b077"
+      },
+      "orchids": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/orchids/result.json",
+        "sha256": "93e1d69951683aa5658b77dec0a439b92fd9e1a683d931e683e3c1a9631c27c0"
+      },
+      "pinecone": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/pinecone/result.json",
+        "sha256": "45de00d427c92dbfb177b374b4e646e70e5d552fb632349dcc23e988f02a394a"
+      },
+      "room": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/room/result.json",
+        "sha256": "745ede4cba24d3468e126c2613f66a54524f33bdb644d1822d63152a4e26a87f"
+      }
+    },
+    "all_six_scene_gates_passed": true,
+    "scene_macro": {
+      "anchor": {
+        "brier": 0.24553814148724762,
+        "log_loss": 0.6931471805599454,
+        "soft_iou_at_0_5": 0.27016892709518076
+      },
+      "unrestricted_graph_proposal": {
+        "brier": 0.20607350018056284,
+        "log_loss": 0.6038591981288789,
+        "soft_iou_at_0_5": 0.26464895728939314
+      },
+      "directionally_admitted_candidate": {
+        "brier": 0.20015970982592032,
+        "log_loss": 0.5923705308119026,
+        "soft_iou_at_0_5": 0.29876362516848015
+      }
+    },
+    "target_rgb_mask_or_metric_used": false
+  },
+  "sentinel": {
+    "scene_id": "fortress",
+    "reason": "source OOF gives the strongest causal contrast: unrestricted contraction destroys IoU while expansion is consistently beneficial",
+    "base_prediction_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/fortress/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+      "sha256": "3fc9c217952bd30f0fc54fa3e254ea35eb082c3a6ba2932a9bd23d9c7928a38e",
+      "sealed_before_target_ground_truth_open": true
+    },
+    "manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/unified_query/manifests/spin_nerf_full_reference_mask_9scene_diagnostic_v1.json",
+      "sha256": "e3171f135ae9fa50f5803672cbab4d6ae61a532d44d21721fb6a680294e2aede",
+      "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752"
+    },
+    "frame_count": 41,
+    "output_directory_must_not_exist": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/fortress",
+    "exact_result_must_not_exist": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/fortress_exact_result.json"
+  },
+  "implementation": {
+    "admission": {
+      "path": "/root/RADIO-GS/radio_gs/querying/source_oof_transport_admission.py",
+      "sha256": "203365ab86f189aa649d97d879305eb9278f0fbf57e44d1ed378986024dfce59"
+    },
+    "source_evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_spin_source_oof_directional_admission.py",
+      "sha256": "e5850c3283fb1c50bebdfeaff3c3fecca2cdf7458e3b9d53d68c5b173ad0e837"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_spin_rendered_directional_admission.py",
+      "sha256": "ac1b4a6ee91666427ce35c947f56fd7456ce17578896063bc45c7b5a8016e1c0"
+    },
+    "exact_evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_spin_rendered_directional_admission.py",
+      "sha256": "82a5146b82264bc9b8367080f0642bd3f2112454dcc48d51cb14e8e6d338cd14"
+    }
+  },
+  "decision_rule": {
+    "promote_sentinel_if_candidate_foreground_iou_strictly_exceeds_quantile_baseline": true,
+    "if_pass_expand_to_remaining_source_ready_scenes_without_changing_method": true,
+    "if_fail_stop_without_threshold_or_coefficient_adjustment": true,
+    "no_retry_no_parameter_scan": true
+  },
+  "access_audit": {
+    "benchmark_target_masks_have_historical_results_from_prior_methods": true,
+    "this_candidate_selected_or_tuned_from_target_masks_or_metrics": false,
+    "candidate_prediction_receipt_exists_before_this_preregistration": false,
+    "candidate_target_metric_exists_before_this_preregistration": false
+  }
+}

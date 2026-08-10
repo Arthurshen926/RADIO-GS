@@ -1,0 +1,49 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_empty_responsibility_manifest_correction_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T04:24:00+08:00",
+  "status": "sealed_after_query_free_preflight_failure_and_before_corrected_manifest_materialization",
+  "scene_id": "figurines",
+  "failure": {
+    "stage": "AcceptedV2 query-free preflight",
+    "error": "responsibility selection view identity/order differs",
+    "output_written": false,
+    "diagnosis": "The historical sparse responsibility authority contains exactly one zero-hit view record. The current source-frozen AcceptedV2 producer requires every listed view to have positive hit count."
+  },
+  "original_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/exact_marginal_responsibility_authority.json",
+    "sha256": "5bff25c917a1fe9c973b4d201502f07836117e1d313756263ddb533e83834fd4",
+    "view_records": 120,
+    "zero_hit_view_records": 1,
+    "total_hits_unchanged_by_correction": true
+  },
+  "empty_view": {
+    "frame_index": 162,
+    "view_index": 64,
+    "relative_path": "exact_marginal_responsibility_authority.json.views/view_00064.pt",
+    "sha256": "064a5bf2f79795e2b183b26608beae2371294d056cf9519475b26e3cbca7b11e",
+    "num_hits": 0,
+    "gaussian_ids_count": 0,
+    "pixel_ids_count": 0,
+    "base_weights_count": 0,
+    "base_weights_sum": 0.0
+  },
+  "correction_contract": {
+    "operation": "remove only manifest records whose declared and verified tensor payloads both contain zero hits",
+    "preserve_formula_contract_and_sha256": true,
+    "preserve_nonempty_view_records_byte_for_byte": true,
+    "preserve_total_hits": true,
+    "rebuild_frame_indices_from_retained_view_order": true,
+    "primitive_visibility_mask_changed": false,
+    "region_selection_mathematics_changed": false,
+    "per_scene_hyperparameters_changed": false
+  },
+  "planned_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/exact_marginal_responsibility_authority_nonempty_v1.json",
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

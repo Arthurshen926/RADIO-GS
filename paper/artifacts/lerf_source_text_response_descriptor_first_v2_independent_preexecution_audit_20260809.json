@@ -1,0 +1,109 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_descriptor_first_v2_independent_preexecution_audit.v1",
+  "schema_version": 1,
+  "status": "PASS_GPU_EXECUTION_RELEASED",
+  "auditor": "/root/audit_source_v2",
+  "audit_boundary": "independent CPU and content-address audit completed before either descriptor-first v2 GPU launch",
+  "supersession": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_descriptor_first_v2_supersession_addendum_20260809.json",
+    "sha256": "7739f02fa4301b4fb2bc1302ab78d17fa7e732314d0401df5e7cff7c116af280",
+    "old_v1_authorities_explicitly_superseded": true,
+    "old_v1_execution_status": "never_executed_under_those_authorities"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+    "sha256": "873214d57360d1278177f56c9d1c77ffc7384d6d97116da3aa81e9d879f8c6fe",
+    "matches_both_v2_authorities": true,
+    "differs_from_superseded_v1_authority_sha256": true,
+    "focused_cpu_tests": {
+      "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_materialize_lerf_source_text_response_summaries.py",
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "descriptor_first_formula_audit": {
+    "status": "PASS",
+    "exact_order": [
+      "place raw 1536-D descriptor rows on the checkpoint-bound primitive axis without primitive L2 normalization or text projection",
+      "render the raw 1536-D rows with alpha_normalize=false",
+      "divide the premultiplied rendered descriptor map by the rendered alpha map",
+      "L2-normalize each rendered pixel descriptor along its 1536-D channel axis",
+      "dot each normalized pixel descriptor with each normalized target-blind text embedding"
+    ],
+    "source_evidence_lines": {
+      "raw_descriptor_placement": [531, 561],
+      "pixel_l2_then_text_dot": [564, 576],
+      "render_then_alpha_normalize_then_project": [701, 714]
+    },
+    "response_first_primitive_mixture_excluded": true
+  },
+  "target_blindness": {
+    "query_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+      "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+      "embedding_tensor_sha256": "f08fea4e73e7b2125fba5ccc70ef07f9eb5c565a571054c3d72a56da1aec016d",
+      "shape": [101, 1536],
+      "split": "dev",
+      "benchmark_vocabulary_opened": false
+    },
+    "source_frames_match_preregistration_exactly": true,
+    "source_and_forbidden_target_frames_are_disjoint": true,
+    "benchmark_queries_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  },
+  "scene_audits": {
+    "ramen": {
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_source_text_response_descriptor_first_v2_gpu0_execution_authority_20260809.json",
+        "sha256": "2944a8d43b7c09f30aa4ef4e7957268c291e41dc19334e63a26eb5ea7400d0b3"
+      },
+      "source_frame_count": 4,
+      "all_13_input_and_method_path_sha256_records_recomputed": true,
+      "source_reseal_sha256": "0b23676b4ee5a6ba61e33e15d5de8bc69b2c95268e413e8294ded830c0a1ecba",
+      "sparse_control_geometry_authority_sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e",
+      "sparse_geometry_num_gaussians_xyz_and_checkpoint_match": true,
+      "control_provenance_binds_sparse_geometry_authority": true,
+      "all_outputs_absent_before_release": true
+    },
+    "teatime": {
+      "authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_source_text_response_descriptor_first_v2_gpu1_execution_authority_20260809.json",
+        "sha256": "3ecb70e31089b92b9e6c922fd89513b5c4bd68b6e780c0d40edcc217417ccbde"
+      },
+      "source_frame_count": 51,
+      "all_13_input_and_method_path_sha256_records_recomputed": true,
+      "source_reseal_sha256": "ade230993ac2ffb688327c1a989696547797914f54a7ce41fbeedd748165ddb5",
+      "sparse_control_geometry_authority_sha256": "de485f2b264b7b40be054ac257b4245645cb52437ccd95135a6ab179ec384d05",
+      "sparse_geometry_num_gaussians_xyz_and_checkpoint_match": true,
+      "control_provenance_binds_sparse_geometry_authority": true,
+      "all_outputs_absent_before_release": true
+    }
+  },
+  "operator_mismatch_disclosure": {
+    "present_in_both_v2_authorities": true,
+    "end_to_end_interface_ab_not_capacity_matched": true,
+    "control_lifting_operator": "sparse_exact_marginal_responsibility_authority_v1",
+    "candidate_lifting_operator": "semantic_descriptor_raster_gaussian_top1_contribution_mean",
+    "other_declared_differences": [
+      "descriptor provenance",
+      "view aggregation",
+      "row support",
+      "lifting construction"
+    ],
+    "interpretation_boundary": "source-only interface diagnostic; a pass cannot establish a capacity-matched causal attribution and does not authorize a target metric"
+  },
+  "no_clobber": {
+    "three_output_paths_per_scene_are_absolute_and_pairwise_distinct": true,
+    "all_six_expected_output_files_absent_at_audit": true,
+    "materializer_raises_FileExistsError_if_any_sealed_output_exists": true,
+    "source_evidence_lines": [606, 609]
+  },
+  "release": {
+    "gpu_execution_permitted_after_this_audit": true,
+    "permitted_authorities": [
+      "2944a8d43b7c09f30aa4ef4e7957268c291e41dc19334e63a26eb5ea7400d0b3",
+      "3ecb70e31089b92b9e6c922fd89513b5c4bd68b6e780c0d40edcc217417ccbde"
+    ],
+    "any_implementation_or_authority_change_requires_reaudit": true
+  }
+}

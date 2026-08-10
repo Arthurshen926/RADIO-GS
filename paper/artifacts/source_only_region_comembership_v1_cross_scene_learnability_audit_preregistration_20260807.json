@@ -1,0 +1,40 @@
+{
+  "artifact": "source_only_region_comembership_v1_cross_scene_learnability_audit_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_cross_scene_diagnostic_fit_or_metric",
+  "role": "engineering_learnability_audit_only_not_training_selection_promotion_or_hyperparameter_tuning",
+  "fit_scene": "scene0001_00",
+  "heldout_scene": "scene0002_00",
+  "endpoint_isolation": "no scene0002 region pair label purity coverage or feature contributes to normalization fitting optimization stopping or checkpoint selection",
+  "models": {
+    "full_linear": "all fixed 15 RegionCoMembershipV1 pair features",
+    "descriptor_only": "frozen_descriptor_cosine only",
+    "epoch_zero": "constant probability 0.5"
+  },
+  "fit": {
+    "normalization": "fit-scene active-evidence median and 1.4826*MAD only",
+    "objective": "fit-scene evidence-weighted class-balanced BCE",
+    "optimizer": "AdamW seed0 lr0.001 weight_decay0.0001 exactly 100 epochs",
+    "checkpoint_selection": "none; final epoch used",
+    "heldout_early_stopping": false
+  },
+  "reporting": {
+    "edge_metrics": ["evidence_weighted_ROC_AUC", "evidence_weighted_average_precision"],
+    "threshold_grid": "0.05_to_0.95_inclusive_step_0.05",
+    "threshold_metrics": ["edge_weighted_F1", "component_instance_macro_IoU", "component_instance_macro_F1", "contamination", "giant_excess", "topology_score"],
+    "heldout_best_threshold": "descriptive_curve_summary_only_never_reused"
+  },
+  "fixed_inputs": {
+    "scene0001_authority_sha256": "dc7a1bb44353d81c631ff1abcca6337cafa1977dd286d3c5c4973ed430869b99",
+    "scene0002_authority_sha256": "3c73a794c1583aef409dcf572c9b4fa92b1c4ffa2f00ddf45e4f1c2c88dde49c"
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

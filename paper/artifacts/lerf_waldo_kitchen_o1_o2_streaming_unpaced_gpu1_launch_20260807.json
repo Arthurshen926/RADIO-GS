@@ -1,0 +1,83 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_o1_o2_streaming_gpu_launch.v1",
+  "schema_version": 1,
+  "status": "sealed_after_full_authority_roundtrip_before_gpu1_execution",
+  "sealed_at": "2026-08-07T19:19:00+08:00",
+  "scene_id": "waldo_kitchen",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_execution_authority_20260807.json",
+    "sha256": "6c26f5effcfb4cf554ae872496b731e18035f8131ef63ad8fd42e01ccd4e60a6"
+  },
+  "implementation": {
+    "gpu1_entrypoint": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced_gpu1.py",
+      "sha256": "18cf7fa8871422cd807937433835e8ce36c89bed9b369a7f193534fd6e2e1a07"
+    },
+    "unpaced_entrypoint": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming_unpaced.py",
+      "sha256": "e686f0d1dee5cc3a68a16dbf6cf00ce014f4e761b864716a062f365119e2eddc"
+    },
+    "numerical_core": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+      "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+    },
+    "thermal_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    }
+  },
+  "preflight": {
+    "authority_full_roundtrip_passed": true,
+    "tests_passed": 26,
+    "tests_failed": 0,
+    "physical_gpu": 1,
+    "gpu_uuid": "GPU-0eac2c76-4004-49eb-bc0c-a9a30aec041a",
+    "temperature_c": 43,
+    "power_draw_w": 31.17,
+    "power_limit_w": 300.0,
+    "utilization_percent": 0,
+    "memory_used_mib": 1
+  },
+  "environment": {
+    "GPU": "1",
+    "CUDA_VISIBLE_DEVICES": "1",
+    "GPU_POLL_SECONDS": "300",
+    "GPU_START_MAX_TEMP_C": "87",
+    "GPU_MAX_TEMP_C": "88",
+    "GPU_MAX_POWER_LIMIT_W": "300.5",
+    "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS": "1",
+    "GPU_SOFT_PAUSE_TEMP_C": "0",
+    "GPU_SOFT_RESUME_TEMP_C": "0",
+    "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
+    "GPU_TELEMETRY_LOG": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_v1/logs/o1_o2_gpu1.telemetry.csv",
+    "GPU_OWNER_AUDIT_LOG": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_v1/logs/o1_o2_gpu1.owner_audit.csv"
+  },
+  "frozen_command": [
+    "bash",
+    "radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+    "--",
+    "bash",
+    "radio_gs/scripts/run_repo_python.sh",
+    "-m",
+    "radio_gs.scripts.materialize_lerf_o1_o2_streaming_unpaced_gpu1",
+    "materialize",
+    "--execution-authority",
+    "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_execution_authority_20260807.json",
+    "--execution-authority-sha256",
+    "6c26f5effcfb4cf554ae872496b731e18035f8131ef63ad8fd42e01ccd4e60a6"
+  ],
+  "thermal_policy": {
+    "telemetry_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "hard_temperature_consecutive_polls": 1,
+    "soft_pause_disabled": true,
+    "manual_polling_during_execution": false
+  },
+  "access_audit": {
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  },
+  "metric_execution_authorized": false
+}

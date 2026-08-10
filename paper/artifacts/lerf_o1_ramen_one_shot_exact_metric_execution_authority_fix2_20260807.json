@@ -1,0 +1,81 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_one_shot_exact_metric_execution_authority.v2",
+  "schema_version": 2,
+  "status": "authorized_after_independent_exact_o0_frozen_config_control_replay",
+  "scene_id": "ramen",
+  "oracle": "O1",
+  "single_candidate_no_sweep": true,
+  "metric_execution_authorized": true,
+  "source_materialization": {
+    "execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/execution_authority.json",
+      "sha256": "e357aa6c865e454072782011283c2cc5cd722ea0648a31a912f0c66af22a7b1d"
+    },
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o1_o2_streaming_result.json",
+      "sha256": "48bc92437012ef862856220f286f67003cb1bf1aba4b5e978103f286efbb1a9b"
+    }
+  },
+  "satisfied_control_gate": {
+    "metric_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_frozen_config_control_metric_execution_authority_20260807.json",
+      "sha256": "2642f4f195de93eeb163dfca96a6f204c3768e5c3ed4354fddb3b9779a290aa0"
+    },
+    "replay_result_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_frozen_config_control_replay_result_20260807.json",
+      "sha256": "ed564b1eb2fdfd56241dbc169b67f25ddd1221f9d1fd0f9338ada51516c7a424"
+    },
+    "metric_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o0_exact_frozen_config_control_v1/ramen/lerf_direct_3d_selection_results.json",
+      "sha256": "c73412a12bcf655731c3b3c8dbad3afcf7cae03708514f483644ead4d805bd21"
+    },
+    "exact_control_miou": 0.3012723922729492,
+    "lineage_replay_passed": true
+  },
+  "candidate": {
+    "positive_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o1_positive.pt",
+      "sha256": "b21f4611722e2dffa3b673399d2d6e320485fb08d8b9fefda4280ff6e39b4fd3"
+    },
+    "canonical_negative_multiscale_query_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/ramen_o1_negative.pt",
+      "sha256": "f93e8f2c1646ad3611fd518622c00decc0d64e16f8ab4ef3e9623be518af49fd"
+    }
+  },
+  "frozen_protocol": {
+    "must_equal_control_bitwise_except_candidate_caches_and_output_directory": true,
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+      "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "cuda_visible_devices": "0",
+    "logical_gpu_argument": 0,
+    "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o1_exact_fix2",
+    "thermal_poll_seconds": 300,
+    "soft_pause_disabled": true,
+    "hard_temperature_c": 88,
+    "command_from_control": {
+      "replace_positive_cache_with": "candidate.positive_multiscale_query_score_cache",
+      "replace_negative_cache_with": "candidate.canonical_negative_multiscale_query_score_cache",
+      "replace_output_directory_with": "execution.output_directory_must_not_exist_before_execution",
+      "all_other_arguments_unchanged": true
+    }
+  },
+  "access_audit": {
+    "target_images_opened_during_authority_build": false,
+    "target_ground_truth_opened_during_authority_build": false,
+    "target_masks_opened_during_authority_build": false,
+    "target_metrics_opened_during_authority_build": false,
+    "candidate_metric_executed_before_authority": false
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "artifact": "full_scalar_scene0005_query_free_result_geometry_gpu0_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:59:24+08:00",
+  "status": "sealed_after_query_free_success_and_before_geometry_training",
+  "scene_id": "scene0005_00",
+  "parent_preregistration": "paper/artifacts/full_scalar_scene0005_base_chain_execution_preregistration_20260807.json",
+  "query_free_result": {
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/receipts/01_query_free_materialization.json",
+    "receipt_sha256": "945efd56d1b13895d7359f6a9af07b9e92659b3f424463d55d19f14a2b9ad843",
+    "materialization_report_sha256": "4d73c9fbafdac74d8e61ad999b98ef729acc8887dc468ed228a546f4ae3cdb33",
+    "field_source_contract_sha256": "b45fce982352633a0e0b75edff245a24cff32ffc7bc7f284a1d6db3034ad0e41",
+    "field_frame_manifest_sha256": "8158202846e3fc74c5cd96d00294a0ad2b0db4b4268e2b276e20231636ae6c1e",
+    "full_sens_frames": 1159,
+    "valid_pose_frames": 1159,
+    "selected_field_frames": 240,
+    "rgb_depth_pose_counts_equal_240": true,
+    "query_free_valid": true
+  },
+  "geometry_contract": {
+    "implementation": "/root/RADIO-GS/radio_gs/scripts/train_scannet_gs.py",
+    "iterations": 15000,
+    "frame_stride": 1,
+    "initialization_frames": 50,
+    "initialization_stride": 8,
+    "maximum_points": 200000,
+    "initialization_selection_policy": "coverage_prefix",
+    "field_source_contract_bound": true,
+    "per_scene_hyperparameters": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "pci_bus_id": "00000000:02:00.0",
+    "initial_temperature_c": 46,
+    "power_limit_w": 300,
+    "output_preexisting": false,
+    "atomic_no_clobber": true
+  },
+  "thermal_guard": {
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false
+  },
+  "source_access": {
+    "source_rgb_depth_pose_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "frozen_evaluator_metric_renderer_modified": false
+}

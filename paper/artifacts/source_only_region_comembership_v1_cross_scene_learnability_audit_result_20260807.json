@@ -1,0 +1,54 @@
+{
+  "artifact": "source_only_region_comembership_v1_cross_scene_learnability_audit_result",
+  "schema_version": 1,
+  "status": "diagnostic_complete_negative_for_cross_scene_connected_recovery",
+  "preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_cross_scene_learnability_audit_preregistration_20260807.json",
+    "sha256": "022373de8331086beac397a91d6c952ff34f499839727e4637e86aae691fccce"
+  },
+  "result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/cross_scene_learnability_scene0001_fit_scene0002_heldout_v1.json",
+    "sha256": "81bde7f3e0d9ab032db3c2eaa98c695dcfd6d092eaaa3ef82fabf0e0d03ce4b3"
+  },
+  "edge_discrimination": {
+    "full_linear_weighted_auc": 0.7576223984235186,
+    "full_linear_weighted_ap": 0.9372621096467344,
+    "descriptor_only_weighted_auc": 0.7778605766405828,
+    "descriptor_only_weighted_ap": 0.9457375420704132,
+    "epoch_zero_weighted_auc": 0.5,
+    "interpretation": "The 15-channel linear model transfers above chance, but does not improve over descriptor-only in this one-scene-to-one-scene audit."
+  },
+  "topology": {
+    "full_linear_edge_f1_best": {
+      "threshold": 0.15,
+      "edge_weighted_f1": 0.9221640825271606,
+      "component_topology_score": -1.9464285714285707,
+      "component_contamination": 0.9821428571428569,
+      "largest_component_scene_evidence_fraction": 1.0
+    },
+    "full_linear_topology_best": {
+      "threshold": 0.7,
+      "edge_weighted_f1": 0.00964418239891529,
+      "component_instance_macro_iou": 0.10561960810322828,
+      "component_instance_macro_f1": 0.15925329065166505,
+      "component_contamination": 0.0017597085042123843,
+      "component_topology_score": 0.1038598995990159
+    },
+    "epoch_zero_singleton_topology_score": 0.10117378788492193,
+    "interpretation": "Edge-F1 selection catastrophically percolates the candidate graph. Topology-consistent selection rejects the giant component, but the best transferred full-linear closure is only marginally above the singleton baseline and provides essentially no useful multi-region recovery."
+  },
+  "decision": {
+    "used_to_change_frozen_4plus2_hyperparameters": false,
+    "used_for_promotion": false,
+    "target_execution_authorized": false,
+    "required_followup": "Complete the frozen 4+2 gate. If it also selects singleton-like closure or fails promotion, replace equal-cost local edge BCE with a separately preregistered topology-risk-aware training objective or non-percolating query interface before any target run."
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

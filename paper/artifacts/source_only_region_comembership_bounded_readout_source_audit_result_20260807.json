@@ -1,0 +1,71 @@
+{
+  "artifact": "source_only_region_comembership_bounded_readout_source_audit_result",
+  "schema_version": 1,
+  "status": "diagnostic_complete_bounded_readout_contains_percolation_but_does_not_pass_promotion_gate",
+  "preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_bounded_readout_source_audit_preregistration_20260807.json",
+    "sha256": "548af6ba9674e2096b7dc0c75e5f0239b079fa2d149b89073f7e4d95d9fe4282"
+  },
+  "result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/bounded_readout_scene0001_selected_scene0002_heldout_v1.json",
+    "sha256": "a1ca6560de61d73c8d6248f857dd10df5c38888689300b8e145c214db2e4b68f"
+  },
+  "producer": {
+    "audit_script": {
+      "path": "radio_gs/scripts/audit_bounded_region_comembership_readout_source_v1.py",
+      "sha256": "bbc5c211ea41305c6774e1272edb47b273917b0be5ac4032b000de897f6d16c6"
+    },
+    "readout_module": {
+      "path": "radio_gs/querying/bounded_region_comembership_readout.py",
+      "sha256": "eef0bdb709a89a674e53a458dea729efd98c7caa64a5c4114891bb1bc442e2dc"
+    }
+  },
+  "heldout_scene0002": {
+    "singleton": {
+      "iou": 0.10117378828582071,
+      "f1": 0.15342190899954455,
+      "contamination": 0.0,
+      "topology_score": 0.10117378828582071,
+      "selected_regions": 1.0
+    },
+    "maximum_product_or_widest_k4_or_k8": {
+      "source_selected_threshold": 0.7,
+      "iou": 0.1056196086322931,
+      "f1": 0.15925329114075146,
+      "contamination": 0.0017597085042123843,
+      "topology_score": 0.10385990012808072,
+      "selected_regions": 1.0799868896726592
+    },
+    "dual_path_widest_k8": {
+      "source_selected_threshold": 0.6,
+      "iou": 0.15060341488361714,
+      "f1": 0.224210115379706,
+      "contamination": 0.05637782015094295,
+      "topology_score": 0.09419093254503881,
+      "selected_regions": 3.24276232008313
+    },
+    "multipoint_consistency_k8": {
+      "source_selected_threshold": 0.6,
+      "iou": 0.17390400635756512,
+      "f1": 0.24685442623886752,
+      "contamination": 0.07392115065654828,
+      "topology_score": 0.09996165267771391,
+      "selected_regions": 3.203565954187251
+    }
+  },
+  "decision": {
+    "v1_linear_bounded_readout_promoted": false,
+    "target_execution_authorized": false,
+    "interpretation": "Hard K-bounds and path consistency prevent the catastrophic giant component. Multipoint and dual-path rules recover substantially more same-instance evidence, but their contamination offsets the IoU/F1 gain under the preregistered topology objective. The current 15-feature linear edge model remains the limiting component.",
+    "required_followup": "Retain the K<=8 bounded query interface, replace the linear edge relation with a source-only nonlinear model containing official pooled DINO and SAM pair similarities, and select using deduplicated primitive-instance evidence across the frozen source validation cohort."
+  },
+  "metric_limitation": "The completed audit weights canonical-region evidence. Formal V2 selection must deduplicate selected primitive cores and score primitive-instance evidence.",
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "artifact": "source_only_region_comembership_v1_scene0001_engineering_receipt",
+  "schema_version": 1,
+  "status": "scene0001_source_authority_complete_4plus2_gate_closed",
+  "preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "implementation": {
+    "model": {
+      "path": "radio_gs/models/region_comembership_v1.py",
+      "sha256": "9ad2bbf3909636f8532ee884ca9f01d3f61bf676dc8ec7422cb484fd0b09242d"
+    },
+    "builder": {
+      "path": "radio_gs/scripts/build_source_region_comembership_v1.py",
+      "sha256": "010edffb34b9cf0381ed88749abdf66a3ed74bb34c73185222035a2d19e3f3f5"
+    },
+    "trainer": {
+      "path": "radio_gs/scripts/train_source_region_comembership_v1.py",
+      "sha256": "16941975f9fccf7d4601d695fa2037e48c195a791b480193d739c5a61239a95d"
+    }
+  },
+  "verification": {
+    "focused_tests": "15 passed in 5.17s",
+    "python_compile": true,
+    "black_check": true,
+    "trainer_loader_revalidated_materialized_authority": true
+  },
+  "scene0001_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/scene0001_00/region_comembership_authority_v1_provenance_bound.pt",
+    "sha256": "dc7a1bb44353d81c631ff1abcca6337cafa1977dd286d3c5c4973ed430869b99",
+    "source_views": 120,
+    "canonical_regions": 4096,
+    "instance_observed_regions": 3250,
+    "candidate_pairs": 53143,
+    "same_instance_pairs": 33707,
+    "active_evidence_pairs": 40745,
+    "anchor_support_pairs": 785
+  },
+  "source_only_diagnostic": {
+    "active_positive_pairs": 33707,
+    "active_negative_pairs": 7038,
+    "active_positive_fraction": 0.8272671493434778,
+    "candidate_same_instance_pair_recall": 0.03978649593896107,
+    "same_instance_graph_largest_component_region_weighted_fraction": 0.8969230769230769,
+    "fully_connected_instances": 14,
+    "instances_total": 21,
+    "best_direction_free_univariate_auc": {
+      "frozen_descriptor_cosine": 0.7270064533105625,
+      "centroid_distance_m": 0.693654505963427,
+      "core_overlap_over_minimum_core_size": 0.6825536713830122,
+      "pooled_typed_context_cosine": 0.6556045877461314
+    },
+    "interpretation": "The fixed candidate graph is sparse but usually connects most same-instance regions, and multiple frozen channels contain complementary edge-level co-membership signal. This supports proceeding to the preregistered cross-scene 4-train/2-validation gate, but does not establish a target benchmark improvement."
+  },
+  "provenance_correction": {
+    "builder_file_record_added_to_authority_identity": true,
+    "trainer_fails_closed_on_missing_or_changed_builder": true,
+    "audit_field_renamed_from_positive_weight_pairs_to_active_evidence_pairs": true
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  },
+  "gate": {
+    "four_train_two_validation_complete": false,
+    "training_authorized": false,
+    "target_execution_authorized": false,
+    "missing_scenes": [
+      "scene0002_00",
+      "scene0003_00",
+      "scene0005_00",
+      "scene0004_00",
+      "scene0008_00"
+    ]
+  }
+}

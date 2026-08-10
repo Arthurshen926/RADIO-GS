@@ -1,0 +1,101 @@
+{
+  "schema": "radio_gs.surface_region_v21b_exact4x2_source_result_receipt.v1",
+  "schema_version": 1,
+  "status": "complete_source_promotion_passed",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21b_exact4x2_execution_authority_20260807.json",
+    "sha256": "5d26c32d7fb6ff95ddf92369601949bbc66bd133dad005bc6041036c22c971a6"
+  },
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.json",
+    "sha256": "0ff977f7bf150b591c04806f0dfc093b91dc5d38df44df91c1eaf2f444549b1a"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt",
+    "sha256": "6b6d434d62ac07f96a05080a27718b42ba748cd31b5db3fdfa43a043c6e40285"
+  },
+  "certificate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.certificate.json",
+    "sha256": "b0f7d24befd1db1eb177b1af3288322cafddacafa1f9f9231a7e9806c42baef9"
+  },
+  "normalization_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.normalization.pt",
+    "sha256": "1a4ff28c15781d9606b7b876dc2f8983ddaf55577d4bd654887d8eb8c98f2384"
+  },
+  "state_archive": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.epoch_states.pt",
+    "sha256": "3803081fea81c167fd228033b046be148d24672d2327098073970be6cb1f8a72"
+  },
+  "optimizer_steps_completed": 30,
+  "selected_step": 30,
+  "model_state_dict_sha256": "57869db3e88cdcdd89e8a14e157da71421ee8c54cca2ea04bdda8c97afa0ca37",
+  "source_promotion_authorized": true,
+  "validation_scene_macro": {
+    "step_0": {
+      "auxiliary_loss": 0.09711214527487755,
+      "absolute_relevance_loss": 0.02170814387500286,
+      "continuous_pairwise_relevance_loss": 0.014228975865989923
+    },
+    "step_30": {
+      "auxiliary_loss": 0.09061819314956665,
+      "absolute_relevance_loss": 0.015721707604825497,
+      "continuous_pairwise_relevance_loss": 0.013528451789170504
+    },
+    "step_30_relative_improvement": {
+      "auxiliary": 0.06687064843361927,
+      "absolute_relevance": 0.27576914473423975,
+      "continuous_pairwise_relevance": 0.04923222046456706
+    }
+  },
+  "validation_per_scene_step_30_relative_improvement": {
+    "scene0004_00": {
+      "auxiliary": 0.02298491214890724,
+      "absolute_relevance": 0.1096505015257439,
+      "continuous_pairwise_relevance": 0.035186972141311924
+    },
+    "scene0008_00": {
+      "auxiliary": 0.11121010492676103,
+      "absolute_relevance": 0.38255159663763677,
+      "continuous_pairwise_relevance": 0.06272304261290051
+    }
+  },
+  "v1_fidelity_candidate_minus_base": {
+    "mean_all_view_cosine": 0.06649687886238098,
+    "p05_row_mean_all_view_cosine": 0.10381755232810974,
+    "relation_fidelity": 0.041924625635147095
+  },
+  "eligible_steps": [
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30
+  ],
+  "method_conclusion": {
+    "rank": 256,
+    "reliability_conditioned_angular_budget": "0.15 + 0.60 * reliability radians",
+    "triplet_anchor_denominator_fixed": true,
+    "all_three_source_metrics_improved": true,
+    "both_validation_scenes_improved_on_all_three_source_metrics": true
+  },
+  "gpu_guard": {
+    "gpu": 0,
+    "power_limit_w": 300.0,
+    "maximum_observed_temperature_c": 62,
+    "overheat_stop_triggered": false,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/logs/gpu0_thermal.csv",
+      "sha256": "4dd3672b14127ead14671fd9a294e27bff05b41a482a9fa2e10190037f8cc720"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/logs/gpu0_owner_audit.csv",
+      "sha256": "1ad45a2fe5ce7c468377cee11bb2e0cff73424f1ba5bc5f21ed9c0f4322b1d67"
+    }
+  },
+  "benchmark_opened": false
+}

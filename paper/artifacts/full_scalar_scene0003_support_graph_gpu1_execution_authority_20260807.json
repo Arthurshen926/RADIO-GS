@@ -1,0 +1,98 @@
+{
+  "artifact": "full_scalar_scene0003_support_graph_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T02:03:00+08:00",
+  "status": "sealed_after_capability_success_and_before_support_graph_execution",
+  "scene_id": "scene0003_00",
+  "cohort_split": "source_train",
+  "inputs": {
+    "capability_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_capability_bank.pt",
+      "sha256": "30b4e0dfaec10d4961e98febb4f7596417a6b143b50a787641f07ebccab89f38"
+    },
+    "capability_result": {
+      "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0003_capability_gpu1_result_20260807.json",
+      "sha256": "e14b4c50404c21a550741a86e26f762daaa3d55ca15ca81a1cb80e2f7744752b"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_support_graph.py",
+    "sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254"
+  },
+  "frozen_contract": {
+    "same_as_scene0002": true,
+    "neighbors": 16,
+    "spatial_scale": 2.0,
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "surface_relation": "none",
+    "surface_topology_min_affinity": 0.0,
+    "covisibility_weight": 0.0,
+    "responsibility_cache": null,
+    "capability_affinity_mode": "signed_hash",
+    "affinity_dim": 256,
+    "hash_batch_size": 8192,
+    "affinity_chunk_size": 65536,
+    "topology_mode": "symmetric_union",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_support_graph_accepted_v2.pt",
+  "command": [
+    "env",
+    "GPU=1",
+    "GPU_TELEMETRY_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/logs/support_graph_gpu1_telemetry.csv",
+    "GPU_OWNER_AUDIT_LOG=/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/logs/support_graph_gpu1_owner.csv",
+    "GPU_OWNER_PID_NAMESPACE_MODE=exclusive-singleton-after-clear-v1",
+    "GPU_MAX_TEMP_C=88",
+    "GPU_START_MAX_TEMP_C=82",
+    "GPU_POLL_SECONDS=30",
+    "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES=1",
+    "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS=6",
+    "GPU_MAX_POWER_LIMIT_W=300.5",
+    "bash", "radio_gs/scripts/run_with_gpu_thermal_guard.sh", "--",
+    "env", "CUDA_VISIBLE_DEVICES=1",
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/build_canonical_support_graph.py",
+    "--capability-cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_capability_bank.pt",
+    "--expected-capability-cache-sha256", "30b4e0dfaec10d4961e98febb4f7596417a6b143b50a787641f07ebccab89f38",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/canonical_support_graph_accepted_v2.pt",
+    "--neighbors", "16",
+    "--spatial-scale", "2.0",
+    "--appearance-temperature", "0.10",
+    "--boundary-temperature", "0.10",
+    "--normal-temperature", "0.20",
+    "--surface-tangent-temperature", "0.20",
+    "--surface-relation", "none",
+    "--surface-topology-min-affinity", "0.0",
+    "--covisibility-weight", "0.0",
+    "--capability-affinity-mode", "signed_hash",
+    "--affinity-dim", "256",
+    "--hash-batch-size", "8192",
+    "--affinity-device", "cuda:0",
+    "--affinity-chunk-size", "65536",
+    "--topology-mode", "symmetric_union"
+  ],
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "soft_pause_enabled": false,
+    "nvml_failure": "fail_closed",
+    "peer_GPU_monitoring": false
+  },
+  "forbidden_stages": [
+    "official_multiview_siglip2_teacher",
+    "any_benchmark_evaluator_or_metric"
+  ],
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

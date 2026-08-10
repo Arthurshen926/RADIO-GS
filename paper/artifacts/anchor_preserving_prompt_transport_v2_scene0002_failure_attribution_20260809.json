@@ -1,0 +1,75 @@
+{
+  "schema": "radio_gs.anchor_preserving_prompt_transport.scene0002_failure_attribution.v1",
+  "schema_version": 1,
+  "status": "read_only_failure_attribution_complete_not_used_by_v2_1",
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/anchor_preserving_prompt_transport_clean_v1/source_gate/result.json",
+    "sha256": "b1c3aa0687140d4466c3b9180bc88db141992f7cdf2e4601e609f4bf53b6dce4"
+  },
+  "worst_prompt": {
+    "scene_id": "scene0002_00",
+    "instance_id": 2,
+    "mode": "scribble",
+    "source_frame": 1027,
+    "target_view_count": 19,
+    "analytic": {
+      "average_precision": 0.42361406991403444,
+      "auroc": 0.7420753915723384,
+      "oracle_iou": 0.3061666476689844,
+      "iou_at_0_5": 0.21730083234244946,
+      "precision_at_0_5": 0.26786368633198976,
+      "recall_at_0_5": 0.5351390922401171,
+      "area_ratio": 1.9978038067349926,
+      "bce": 0.5660387277603149
+    },
+    "candidate": {
+      "average_precision": 0.4149925407903076,
+      "auroc": 0.729345798758563,
+      "oracle_iou": 0.27155620195304386,
+      "iou_at_0_5": 0.24133368616035988,
+      "precision_at_0_5": 0.7147335423197492,
+      "recall_at_0_5": 0.26705710102489016,
+      "area_ratio": 0.3736456808199122,
+      "bce": 0.397080659866333
+    },
+    "diagnosis": "The tail AP regression is conservative under-selection on an almost entirely unobserved target footprint: fixed-IoU, precision, and BCE improve, while recall and oracle-IoU fall."
+  },
+  "coverage_strata": {
+    "fully_observed": {
+      "primitive_rows": 3,
+      "changed_rows": 0,
+      "target_responsibility_fraction": 0.000027102022517524296,
+      "mean_abs_applied_logit_residual": 0.0
+    },
+    "partial": {
+      "primitive_rows": 1059,
+      "changed_rows": 1059,
+      "target_responsibility_fraction": 0.023963824626706532,
+      "mean_abs_applied_logit_residual": 0.5928310751914978
+    },
+    "unobserved": {
+      "primitive_rows": 197054,
+      "changed_rows": 197054,
+      "target_responsibility_fraction": 0.9760090744305177,
+      "mean_abs_applied_logit_residual": 0.48580503463745117
+    },
+    "inactive": {
+      "primitive_rows": 1884,
+      "changed_rows": 0,
+      "target_responsibility_fraction": 0.0,
+      "mean_abs_applied_logit_residual": 0.0
+    }
+  },
+  "next_worst": [
+    {"instance_id": 39, "mode": "full_mask", "average_precision_delta": -0.006196412126958942},
+    {"instance_id": 2, "mode": "full_mask", "average_precision_delta": -0.0022479079473741725},
+    {"instance_id": 36, "mode": "full_mask", "average_precision_delta": 0.0027943362848239506}
+  ],
+  "causal_implication": "Preserve the transport contract and train against the scene0001 prompt-loss lower tail; do not infer a scene0002-specific confidence threshold or residual bound.",
+  "source_access": {
+    "scene0002_failure_attribution_only": true,
+    "scene0002_enters_v2_1_fit_selection_or_gate": false,
+    "benchmark_assets_opened": false,
+    "per_scene_tuning": false
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "radio_gs.anchor_preserving_prompt_transport.clean_gate_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_before_native_v2_fit_or_scene0002_confirmation",
+  "scientific_question": "Can one globally shared anchor-preserving residual improve both full-mask and signed-scribble evidence transport while exactly preserving complete observations and inactive primitive rows?",
+  "method": {
+    "name": "RegisteredEvidenceToUnaryV2_native",
+    "transport": "anchor_preserving_confidence_gated_logit_residual_v1",
+    "observation_gate": "1-labeled_coverage",
+    "completion_confidence": "globally shared learned confidence",
+    "active_domain": "frozen canonical capability-valid rows",
+    "fully_observed_and_inactive_policy": "bitwise analytic anchor identity",
+    "maximum_absolute_logit_residual": 4.0,
+    "graph": false,
+    "connected_selection": false,
+    "per_scene_parameters": false
+  },
+  "fit_scene": "scene0001_00",
+  "confirmation_scene": "scene0002_00",
+  "epochs": 80,
+  "optimization": {
+    "seed": 260809,
+    "hidden_dim": 32,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "data_loss": "target-supported-pixel class-balanced BCE",
+    "residual_l2_weight": 0.05,
+    "confidence_calibration_weight": 0.02,
+    "fixed_probability_threshold": 0.5,
+    "epoch_selection": "lexicographic maximum of minimum per-mode AP delta, minimum per-mode fixed-IoU delta, macro AP, negative macro BCE, and negative epoch on scene0001 validation only"
+  },
+  "promotion_rule": {
+    "engineering_invariants": [
+      "fully observed rows are bitwise analytic identity",
+      "inactive-domain rows are bitwise analytic identity",
+      "complement and residual-sign symmetry unit test passes"
+    ],
+    "scene0001_fit_gate": "full-mask and scribble AP and IoU@0.5 do not regress analytic; precision delta is at least -0.01; each mode reduces absolute log area-ratio error; worst-prompt AP delta is at least -0.005",
+    "scene0002_confirmation_gate": "same rule evaluated exactly once without fit, selection, calibration, or threshold change",
+    "target_authority": "only if both clean gates and engineering invariants pass may one single-scene NVOS or SPIn sentinel be preregistered"
+  },
+  "authority": {
+    "fit_asset_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/registered_evidence_to_unary_v1_clean_scannet_execution_authority_v2_20260806.json",
+      "sha256": "de7cb637b8980d9cd0fef46b7a6453840318add276a7b7dbe6b3d507462d36ab"
+    },
+    "confirmation_asset_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/prompt_unary_scene0002_cross_scene_execution_authority_v2_20260806.json",
+      "sha256": "4f0683002d8832533447001862dd066581e1e0cd58a15a6996a26a50bcc24eeb"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_anchor_preserving_prompt_transport_clean.py",
+      "sha256": "3a8d198bf452a72297ebf239c2ae00d9eb7c2c79ea64671abf60234284407c1b"
+    },
+    "transport_contract": {
+      "path": "/root/RADIO-GS/radio_gs/querying/anchor_preserving_transport.py",
+      "sha256": "df369a76b458dc9e2827458f61989753cd2d04d91897a79a50a87b5129d229aa"
+    }
+  },
+  "source_access": {
+    "scene0001_labels_used_for_fit_and_validation": true,
+    "scene0002_labels_used_once_for_independent_confirmation": true,
+    "scene0002_labels_enter_fit_or_selection": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_metrics_opened": false,
+    "per_scene_tuning": false
+  }
+}

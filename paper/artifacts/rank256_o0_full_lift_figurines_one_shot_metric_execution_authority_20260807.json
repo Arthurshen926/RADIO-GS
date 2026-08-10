@@ -1,0 +1,81 @@
+{
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "frozen_evaluator_inputs_validated": true,
+    "label_root_opened": false,
+    "passed_premetric_authority_cache_and_audit_validated": true,
+    "subprocess_started": false,
+    "target_metrics_computed": false,
+    "threshold_scan": false
+  },
+  "all_query_text_cache": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+    "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+  },
+  "canonical_negative_text_cache": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "config": {
+    "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+    "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+  },
+  "external_query_score_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_query_premetric_v1_fix2/figurines/external_query_scores.pt",
+    "sha256": "85f4729d283e194fc0135218a305ade344985ca50afbcfd1bc8b045c12e495b2"
+  },
+  "frozen_evaluator": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+    "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+  },
+  "frozen_summary_head": {
+    "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+    "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_rank256_o0_full_lift_metric.py",
+    "sha256": "8f41aec28b8f1747077c215a5109ca8de52d10ff50a867fc914bdd874c094403"
+  },
+  "label_root": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+  "metric_execution_authorized": true,
+  "output_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_frozen_metric_v1/figurines/evaluation",
+  "premetric_audit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_query_premetric_v1_fix2/figurines/premetric_audit.json",
+    "sha256": "ef2c676277610eeb1dbbda475d3754aa7be2865c1a0fc3db1535465ee60d1230"
+  },
+  "premetric_execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/rank256_o0_full_lift_query_premetric_v1_fix2/figurines/execution_authority.json",
+    "sha256": "cce96d4ce63afdbff247c87360f74ce15caa25665151725f72458c968c35067d"
+  },
+  "premetric_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_rank256_o0_full_lift_premetric_cache.py",
+    "sha256": "205ab722466dea0c4053904f486602766694a9dbad0df66fff39660bf12f2b25"
+  },
+  "premetric_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/rank256_o0_full_lift_premetric.py",
+    "sha256": "cdc916bffd185cd33470215b0154b796643d19d689deae1c9a224d53a513bee7"
+  },
+  "protocol": {
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_frames_only": true,
+    "projection_mode": "selected_only_alpha",
+    "protocol_preset": "vala_paper_3d",
+    "score_postprocess": "none",
+    "score_threshold": 0.6,
+    "selection_mode": "score_threshold",
+    "silhouette_threshold": 0.0392156862745098,
+    "threshold_scan": false
+  },
+  "renderer_geometry_checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+  },
+  "scene_id": "figurines",
+  "schema": "radio_gs.rank256_o0_full_lift_frozen_metric_execution.v1",
+  "schema_version": 1,
+  "single_candidate_no_sweep": true,
+  "status": "authorized_single_rank256_O0_full_lift_frozen_LERF_metric"
+}

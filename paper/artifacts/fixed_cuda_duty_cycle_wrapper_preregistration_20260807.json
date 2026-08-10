@@ -1,0 +1,86 @@
+{
+  "artifact": "fixed_cuda_duty_cycle_wrapper_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:27:21+08:00",
+  "status": "sealed_before_any_real_gpu_launch",
+  "scope": "execution_only_last_fallback_after_the_normal_6x88C_guard_has_failed_on_both_physical_gpus",
+  "activation": {
+    "currently_enabled": false,
+    "reason": "the_current_gpu0_batch1_run_is_stable_at_85_to_86C_and_does_not_require_the_fallback",
+    "required_condition": "both_available_gpus_have_reached_the_existing_6_consecutive_samples_at_or_above_88C_abort",
+    "no_real_gpu_or_cuda_was_opened_while_implementing_or_testing_this_wrapper": true
+  },
+  "fixed_production_schedule": {
+    "schedule_id": "fixed-duty-cycle-45run-30cool-nvml30-v1",
+    "maximum_run_seconds": 45,
+    "cool_seconds": 30,
+    "nvml_poll_seconds": 30,
+    "nvml_query_timeout_seconds": 5,
+    "start_max_temperature_c": 65,
+    "hard_abort_temperature_c": 88,
+    "hard_abort_consecutive_samples": 6,
+    "maximum_power_limit_w": 300.5,
+    "steady_state_cuda_duty_fraction": 0.6,
+    "cli_timing_overrides_available": false,
+    "selection_rationale": "observed_unthrottled_heating_was_approximately_45C_to_88C_in_90_seconds_so_the_maximal_contiguous_run_window_is_halved_to_45_seconds_and_followed_by_30_seconds_off"
+  },
+  "safety_contract": {
+    "prelaunch": [
+      "exclusive_per_physical_gpu_fallback_lock",
+      "target_compute_owner_must_be_empty",
+      "NVML_identity_and_telemetry_must_be_valid",
+      "power_limit_must_not_exceed_300.5W",
+      "temperature_must_cool_to_at_most_65C"
+    ],
+    "runtime": [
+      "any_NVML_or_compute_owner_query_failure_immediately_aborts_fail_closed",
+      "first_sample_at_or_above_88C_SIGSTOPs_the_complete_worker_process_group",
+      "six_consecutive_samples_at_or_above_88C_hard_abort_with_exit_86",
+      "a_below_88C_sample_resets_the_consecutive_counter",
+      "foreign_compute_owner_or_process_identity_ambiguity_aborts_with_exit_87"
+    ],
+    "process_identity": [
+      "worker_is_spawned_as_a_new_session_and_process_group",
+      "PID_PGID_SID_and_proc_start_time_are_verified_before_every_group_signal",
+      "NSpid_mapping_is_used_for_visible_host_container_PID_translation",
+      "an_invisible_NVML_host_PID_is_accepted_only_as_a_stable_singleton_after_a_clear_prelaunch_observation",
+      "EXIT_cleanup_resumes_a_stopped_group_before_TERM_then_bounded_KILL_and_reaps_the_direct_worker"
+    ]
+  },
+  "numerical_contract": {
+    "frozen_teacher_producer_modified": false,
+    "command_and_environment_passed_through_unchanged": true,
+    "crop_order_model_checkpoint_tensor_math_output_schema_and_output_paths_unchanged": true,
+    "wrapper_writes_only_its_separate_JSONL_status_log": true,
+    "synthetic_output_byte_sequence_was_identical_after_multiple_pause_resume_cycles": true,
+    "cuda_note": "SIGSTOP_prevents_new_host_enqueues_but_an_already_enqueued_kernel_may_finish_during_the_start_of_a_cool_window"
+  },
+  "wall_time": {
+    "active_fraction_for_long_runs": 0.6,
+    "asymptotic_wall_time_multiplier": 1.6666666666666667,
+    "asymptotic_overhead_percent_relative_to_unthrottled": 66.66666666666667,
+    "finite_job_formula": "T_active + 30 * (ceil(T_active / 45) - 1), excluding prelaunch cooldown and NVML query latency",
+    "additional_delay": "prelaunch_waits_in_30_second_steps_until_temperature_is_at_most_65C;_thermal_hold_or_NVML_query_latency_can_add_more"
+  },
+  "implementation": {
+    "wrapper": {
+      "path": "radio_gs/scripts/run_with_fixed_cuda_duty_cycle.py",
+      "sha256": "369ab18195e93d9633b1e57ec7ac9e7da36b9fc2ef72dc4f861b76cc96697d0f"
+    },
+    "cpu_shell_test": {
+      "path": "tests/test_run_with_fixed_cuda_duty_cycle.sh",
+      "sha256": "133d0017492324d9f912afa4c491d5b3a1a23c5098314cbcdb40af94167fe925"
+    },
+    "synthetic_worker": {
+      "path": "tests/fixtures/fixed_cuda_duty_cycle_worker.sh",
+      "sha256": "700ff100a08d9b7769d4f49278401eafb1744ee588bb2f55a725f9884f70de34"
+    }
+  },
+  "cpu_only_validation": {
+    "fixed_wrapper_shell_integration_test_repetitions": 3,
+    "fixed_wrapper_shell_integration_test_result": "passed",
+    "existing_ludvig_gpu0_thermal_guard_pytest": "21_passed",
+    "existing_thermal_guard_modified": false,
+    "real_GPU_started": false
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "artifact": "full_scalar_scene0008_region_comembership_capability_gpu0_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:41:01+08:00",
+  "status": "sealed_after_factorized_state_success_and_before_capability_execution",
+  "scene_id": "scene0008_00",
+  "cohort_split": "source_validation",
+  "inputs": {
+    "base_pilot_receipt_sha256": "8735230dac96deadf60d0f66286872e9f963adcf1a1bf7c0b652367b6eacf7aa",
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/factorized_field_d512_l512_exact_marginal.pth",
+      "sha256": "eedf3c12850e368eef3b7c44e88c64be83fe48e70f279749d29c3d76feebaf2b",
+      "schema": "factorized-v2"
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/factorized_raw_radio.pt",
+      "sha256": "4f75e0ab98ec1613ad8109872eaa762f8683e079cdd740c25d019344c6f8f607"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/factorized_primitive_state_v2.pt",
+      "sha256": "ab19362055999cfdf0d4b3559b85a32f0071074ef1706686cf29cf218d15e84a"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/exact_marginal_responsibility_authority.json",
+      "sha256": "ff94c0a557e83dad636d26b4a462e6d5a5a487e11de1f8b4924b6a17bbc3a8fa"
+    },
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_capability_views.py",
+    "sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34"
+  },
+  "frozen_contract": {
+    "batch_size": 4096,
+    "device": "cuda:0",
+    "physical_gpu": 0,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/canonical_capability_bank.pt",
+  "thermal_guard": {
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false
+  },
+  "continuation": ["support_graph", "AcceptedV2", "V2_capability_descriptor", "typed_context_stage_b_adaptive", "V1_source_instance_authority"],
+  "official_teacher_deferred": true,
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

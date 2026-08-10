@@ -1,0 +1,71 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_capability_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T04:30:00+08:00",
+  "status": "sealed_after_query_free_lineage_audit_and_before_capability_execution",
+  "scene_id": "figurines",
+  "inputs": {
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "c6c7d8b378c830a1effa3e86b4f4251f00d73a597ab76812add15745ddd352f5",
+      "schema": "factorized-v2"
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "4bad5345f6721f7fb2fab5a234a93ae80c0e5ce39217d1bd841e29559fabbf4b"
+    },
+    "exact_source_capabilities": {
+      "appearance": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/dino_v3_matched_exact_marginal.pt",
+        "sha256": "dd2c3623a206e0bdf04615c8086cbda29556e170af019f5b298cc5a5346b8067"
+      },
+      "boundary": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/sam3_matched_exact_marginal.pt",
+        "sha256": "8a6a5d289e04f4b3e4587eca7085a67f617ef17d01ff55934ca73952c66fdb33"
+      },
+      "raw_reference": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/figurines/exact_marginal_v3/raw_radio_matched_exact_marginal.pt",
+        "sha256": "9c82f3d33101cb1e088af3cdf021df89130166a4b49e4005378f5d672108fb7c"
+      },
+      "cohort_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/canonical_factorized_radio_v1_figurines_exact_marginal_v3_capability_cohort_authority_20260805.json",
+        "sha256": "8f490353a890101c00a9047c401d5cd6464dfd2c4bf6656696e5e26ad339f11a"
+      }
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_capability_views.py",
+    "sha256": "7974c5b7e8567c9b1d30cbf821ff1223a3eaf65e1d7b4af6f32288ab9e43cd34"
+  },
+  "frozen_contract": {
+    "same_as_source_4train_2validation": true,
+    "field_checkpoint_schema": "factorized-v2",
+    "batch_size": 4096,
+    "device": "cuda:0_after_CUDA_VISIBLE_DEVICES_1",
+    "projection_order": "official_adaptor_then_shared_exact_marginal_mpr",
+    "capability_target_contract": "matched_exact_marginal",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/canonical_capability_bank.pt",
+  "thermal_guard": {
+    "implementation_sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e",
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "maximum_power_limit_w": 300.5,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "artifact": "source_global_response_listwise_loss_v21_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-06T18:40:00+08:00",
+  "status": "sealed_before_v21_loss_implementation_or_training",
+  "scientific_question": "Can a source-only descriptor residual learn the absolute canonical-negative relevance scale and retain gradients on stable small-margin confusers, while preserving the frozen V2 implementation and opening no benchmark vocabulary?",
+  "frozen_v2": {
+    "path": "radio_gs/losses/source_global_response_listwise_loss.py",
+    "sha256": "552e7bf0e4d83e9346af731e6ce9eaf891968b14f32b49f728b5188c5e012ae7",
+    "must_remain_byte_identical": true
+  },
+  "frozen_inference_semantics": {
+    "shared_pure_function": "radio_gs.querying.unified_query.cosine_relevancy_torch",
+    "formula": "binary_softmax(logit_scale * positive_cosine, logit_scale * maximum_canonical_negative_cosine)",
+    "logit_scale": 10.0,
+    "canonical_negative_bank": {
+      "path": "checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+      "rows": 4,
+      "text_encoder": "siglip2",
+      "prompt_template": "{query}"
+    },
+    "evaluator_or_renderer_change": false
+  },
+  "v21_loss_contract": {
+    "scene_scope": "complete canonical source-scene rows only",
+    "teacher_multiview_aggregation": "temperature-0.05 log-mean-exp independently for every positive and canonical-negative text direction",
+    "response_fidelity": "equal mean of the frozen centered positive-response profile loss and absolute positive-response SmoothL1",
+    "absolute_relevance": "SmoothL1 between student and teacher canonical-negative binary relevancy",
+    "continuous_pairwise": {
+      "target": "teacher absolute relevance gap on every sealed hard-negative pair and target-blind query",
+      "gap_weight": "absolute_gap / (absolute_gap + 0.05)",
+      "stability": "exp(-(anchor_multiview_relevance_std + negative_multiview_relevance_std) / 0.10)",
+      "hard_gap_floor": false,
+      "exact_zero_gap": "zero directional weight",
+      "every_finite_nonzero_gap": "strictly positive weight"
+    },
+    "descriptor_triplet": "unchanged V2 hard-negative triplet definition",
+    "component_combination": "unweighted mean of response_fidelity, absolute_relevance, continuous_pairwise, and descriptor_triplet",
+    "recommended_auxiliary_weight": 0.25,
+    "smooth_l1_beta": 0.05,
+    "query_chunk_rows": 128,
+    "pair_chunk_rows": 4096,
+    "new_learnable_parameters": false,
+    "per_scene_hyperparameters": false
+  },
+  "compositional_generic_bank_contract": {
+    "primary_component": "the existing SHA-bound target-blind fit bank",
+    "optional_components": "one or more separately SHA-bound target-blind fit embedding caches concatenated only on the query axis",
+    "required_flags": {
+      "benchmark_vocabulary_opened": false,
+      "uses_benchmark_vocabulary_for_construction": false
+    },
+    "required_encoder_and_dimension_match": true,
+    "query_strings_consumed_by_loss": false,
+    "benchmark_vocabulary_opened": false
+  },
+  "audit_plan": {
+    "source_scene0001_v2_dry_loss": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_global_response_listwise_v2_scene0001_dry_loss_v2.json",
+      "sha256": "71de3c1c4999336d2c6fccb5ea0aed8299780b485b81c304c2702daff2677aa6",
+      "benchmark_opened": false
+    },
+    "required_unit_evidence": [
+      "stable nonzero small margin receives nonzero gradient",
+      "absolute response offset is supervised although centered profile is unchanged",
+      "frozen V2 implementation remains byte-identical",
+      "no benchmark vocabulary is embedded in V2.1 implementation or preregistration",
+      "canonical-negative relevance matches the shared inference pure function"
+    ]
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "canonical_generic_negative_bank_opened": true,
+    "benchmark_text_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  },
+  "authorization": {
+    "loss_implementation_and_source_only_unit_audit": true,
+    "source_training": false,
+    "benchmark_execution": false,
+    "evaluator_or_renderer_modification": false
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "radio_gs.source_multiscene_query_balanced_missing_core_selector_failure.v3",
+  "schema_version": 3,
+  "status": "failed_closed_before_model_or_report_write",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_multiscene_query_balanced_missing_core_selector_v3_execution_authority_20260807.json",
+    "sha256": "864ab49c66ace261786471cbaea999a7509d055e9d14b3a80a9c6a025f5cc544"
+  },
+  "failure": "no v3 query-safe threshold passes every source gate",
+  "outputs_created": {
+    "model": false,
+    "report": false
+  },
+  "source_access": {
+    "scene0001_source_membership_opened": true,
+    "scene0002_source_membership_opened": true,
+    "scene0003_membership_opened": false,
+    "scene0004_membership_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false
+  },
+  "diagnostic_hypothesis": "The preregistered lower-tail utility-gain CVaR constraint may be stronger than the requested nonnegative selected-utility and selected-utility-CVaR safeguards.",
+  "next_step": "Diagnose gate feasibility on scene0001 and scene0002 only; any revised gate requires a new implementation hash and a new preregistered authority before refit."
+}

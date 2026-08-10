@@ -1,0 +1,64 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_streaming_incomplete_supersession.v1",
+  "schema_version": 1,
+  "status": "superseded_incomplete_due_to_artificial_pacing",
+  "scene_id": "teatime",
+  "execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/teatime/execution_authority.json",
+    "sha256": "aedca5fe024a213fad56c01f02bd7517e78ed93dcac6c384bfbcd5960b79aaab"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "guard_pid": 865663,
+    "worker_pid": 865688,
+    "selected_projection_batch": 128,
+    "preflight_peak_cuda_bytes": 7596760064,
+    "densest_frame_id": 51,
+    "artificial_pacing_seconds_per_projection_batch": 0.05,
+    "observed_views_complete": "strictly_less_than_30_of_120",
+    "observed_elapsed_seconds_lower_bound": 2100,
+    "termination": "graceful_SIGINT_to_shared_PTY",
+    "exit_code": 130
+  },
+  "reason": "The fixed 50ms sleep was applied after every projection batch, not once per frame. With the larger Teatime active primitive set this artificial delay dominated runtime while GPU temperature remained safe, so the run was superseded before any durable method output was written.",
+  "telemetry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/teatime/gpu0_telemetry.csv",
+    "sha256": "f0ebf9af57dcebdc7739895de730a32bf6740a7b5233403657bb80ed983549bc",
+    "sample_count": 8,
+    "peak_temperature_c": 54,
+    "peak_power_w": 138.21,
+    "peak_memory_mib": 9002,
+    "thermal_pause_or_overheat_event": false
+  },
+  "owner_audit": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/teatime/gpu0_owner_audit.csv",
+    "sha256": "d06eca16c6cabe4b65cfe1c95eef9d2e891d746b5c8a7251e07c09690869c3f9"
+  },
+  "durable_files_preserved": [
+    "execution_authority.json",
+    "gpu0_owner_audit.csv",
+    "gpu0_telemetry.csv"
+  ],
+  "durable_method_outputs_written": false,
+  "expected_method_outputs_absent": [
+    "teatime_teacher_mean_fp16.pt",
+    "teatime_o1_positive.pt",
+    "teatime_o1_negative.pt",
+    "teatime_o2_positive.pt",
+    "teatime_o2_negative.pt",
+    "teatime_o1_o2_streaming_result.json"
+  ],
+  "access_audit": {
+    "target_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "metric_executed": false
+  },
+  "gpu_release_audit": {
+    "worker_and_guard_absent": true,
+    "gpu0_memory_mib_after_release": 1,
+    "gpu0_temperature_c_after_release": 47
+  },
+  "required_restart": "Patch the scene-general method contract to pacing_seconds_per_projection_batch=0, rerun tests, build a new immutable authority in a new output directory, and never reuse this superseded authority."
+}

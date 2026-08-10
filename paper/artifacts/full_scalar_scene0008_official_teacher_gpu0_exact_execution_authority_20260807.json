@@ -1,0 +1,118 @@
+{
+  "artifact": "full_scalar_scene0008_official_teacher_gpu0_exact_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:39:57+08:00",
+  "status": "sealed_after_exact_input_preflight_and_output_absence_audit_and_before_teacher_execution",
+  "scene_id": "scene0008_00",
+  "cohort_split": "source_validation",
+  "inputs": {
+    "source_rgb_scene_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/source_rgb_scene_authority_v1.json",
+      "file_sha256": "01562bc593faf49e025799417d29cefa65afdf03e8375ca7520a0f1cea794a20",
+      "content_authority_sha256": "df8c738721cb5cede56052a70bfd28073dfee3c46e697b679671632260f88105",
+      "frames": 240
+    },
+    "source_rgb_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/field240/scene0008_00/color",
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/accepted_v2_sparse_v2.pt",
+      "sha256": "56fdd38079300e06d129763a38ac56e5186c1aa9fea15d354046ace830d2eaae",
+      "regions": 4096
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/factorized_primitive_state_v2.pt",
+      "sha256": "ab19362055999cfdf0d4b3559b85a32f0071074ef1706686cf29cf218d15e84a"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/exact_marginal_responsibility_authority.json",
+      "sha256": "ff94c0a557e83dad636d26b4a462e6d5a5a487e11de1f8b4924b6a17bbc3a8fa"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+    "sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5"
+  },
+  "preflight": {
+    "status": "ready",
+    "regions": 4096,
+    "source_views": 120,
+    "active_region_view_pairs": 16079,
+    "maximum_views_per_region": 4,
+    "maximum_sparse_descriptor_bytes": 98789376,
+    "outputs_written": false
+  },
+  "frozen_contract": {
+    "same_as_scene0002_scene0003_and_scene0005_successful_contract": true,
+    "crop_resolution": 384,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "maximum_views_per_region": 4,
+    "maximum_regions": 4096,
+    "descriptor": "official C-RADIO first summary slot through official SigLIP2-g head, float32 unit L2",
+    "crop_order_and_tensor_math_unchanged": true,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+  "command_authority": {
+    "runner": ["bash", "radio_gs/scripts/run_with_gpu_thermal_guard.sh", "--", "bash", "radio_gs/scripts/run_repo_python.sh", "radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py"],
+    "environment": {
+      "GPU": "0",
+      "CUDA_VISIBLE_DEVICES": "0",
+      "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
+      "GPU_MAX_TEMP_C": "88",
+      "GPU_START_MAX_TEMP_C": "82",
+      "GPU_POLL_SECONDS": "30",
+      "GPU_MAX_CONSECUTIVE_TELEMETRY_FAILURES": "1",
+      "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS": "6",
+      "GPU_MAX_POWER_LIMIT_W": "300.5"
+    },
+    "producer_arguments": {
+      "source_rgb_scene_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/source_rgb_scene_authority_v1.json",
+      "expected_source_rgb_scene_authority_sha256": "01562bc593faf49e025799417d29cefa65afdf03e8375ca7520a0f1cea794a20",
+      "source_rgb_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/field240/scene0008_00/color",
+      "accepted_region_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/accepted_v2_sparse_v2.pt",
+      "expected_accepted_region_authority_sha256": "56fdd38079300e06d129763a38ac56e5186c1aa9fea15d354046ace830d2eaae",
+      "factorized_primitive_state": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/factorized_primitive_state_v2.pt",
+      "expected_factorized_primitive_state_sha256": "ab19362055999cfdf0d4b3559b85a32f0071074ef1706686cf29cf218d15e84a",
+      "exact_marginal_responsibility_authority": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/exact_state/scene0008_00/exact_marginal_responsibility_authority.json",
+      "expected_exact_marginal_responsibility_authority_sha256": "ff94c0a557e83dad636d26b4a462e6d5a5a487e11de1f8b4924b6a17bbc3a8fa",
+      "official_radio_checkpoint": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "expected_official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+      "radio_repo": "/root/RADIO",
+      "device": "cuda:0",
+      "crop_resolution": 384,
+      "crop_batch_size": 1,
+      "region_batch_size": 4096,
+      "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/run/accepted_v2_source_only/scene0008_00/official_multiview_siglip2_teacher_sparse_v2.pt"
+    }
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "pci_bus_id": "00000000:02:00.0",
+    "initial_temperature_c": 48,
+    "power_limit_w": 300.0,
+    "output_preexisting": false,
+    "atomic_no_clobber": true
+  },
+  "thermal_guard": {
+    "pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

@@ -1,0 +1,62 @@
+{
+  "schema": "radio_gs.factorized_native_contrast_v2_gate_logic_audit.v1",
+  "schema_version": 1,
+  "status": "general_conditional_baseline_logic_bug_confirmed",
+  "v2_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v2_direction_only/model.pt.json",
+    "sha256": "d2ae36d4c5e65e3dbcc1e0e0e3cbeb81dadb4323bd7ce20a3cd1254bf3e0b356"
+  },
+  "frozen_v2_status": "source_only_contrast_v2_complete_no_eligible_candidate",
+  "selected_step": null,
+  "failed_gate_at_step60": "every_scene_pair_geometry_non_regression",
+  "scene0004_step0": {
+    "student_centroid_norm": 0.9987968802452087,
+    "student_to_teacher_spread_ratio": 0.034695815294981,
+    "teacher_centered_pair_gram_mae": 0.47591352462768555,
+    "teacher_centered_pair_gram_correlation": 0.8267816305160522,
+    "variance_qualified": false
+  },
+  "scene0004_step60": {
+    "student_centroid_norm": 0.9699001312255859,
+    "student_to_teacher_spread_ratio": 0.8555445671081543,
+    "teacher_centered_pair_gram_mae": 0.2797059714794159,
+    "teacher_centered_pair_gram_correlation": 0.6896118521690369,
+    "absolute_visual_probe_response_correlation": 0.6971458792686462,
+    "absolute_visual_probe_response_std_ratio": 0.8343454599380493,
+    "variance_qualified": true
+  },
+  "scene0008_step0": {
+    "student_centroid_norm": 0.9985678791999817,
+    "student_to_teacher_spread_ratio": 0.04348515719175339,
+    "teacher_centered_pair_gram_mae": 0.827671229839325,
+    "teacher_centered_pair_gram_correlation": 0.4540897011756897,
+    "variance_qualified": false
+  },
+  "scene0008_step60": {
+    "student_centroid_norm": 0.9694122672080994,
+    "student_to_teacher_spread_ratio": 0.9152265787124634,
+    "teacher_centered_pair_gram_mae": 0.3299447298049927,
+    "teacher_centered_pair_gram_correlation": 0.5720636248588562,
+    "absolute_visual_probe_response_correlation": 0.6089697480201721,
+    "absolute_visual_probe_response_std_ratio": 1.0134698152542114,
+    "variance_qualified": true
+  },
+  "conclusion": {
+    "bug": "correlation_non_regression_used_a_variance_unqualified_collapsed_baseline",
+    "generic_fix": "require_pair_correlation_non_regression_only_for_variance_qualified_baselines",
+    "collapsed_baseline_rule": [
+      "absolute_pair_correlation_at_least_existing_fixed_threshold",
+      "pair_mae_strict_improvement",
+      "all_existing_raw_residual_spread_and_visual_probe_gates"
+    ]
+  },
+  "access_audit": {
+    "source_result_only": true,
+    "target_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "text_queries_opened": false
+  }
+}

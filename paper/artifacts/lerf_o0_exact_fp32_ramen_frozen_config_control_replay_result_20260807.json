@@ -1,0 +1,42 @@
+{
+  "schema": "radio_gs.lerf_exact_fp32_o0_frozen_config_control_replay_result.v1",
+  "schema_version": 1,
+  "status": "passed_exact_frozen_lineage_control_replay",
+  "scene_id": "ramen",
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_frozen_config_control_metric_execution_authority_20260807.json",
+    "sha256": "2642f4f195de93eeb163dfca96a6f204c3768e5c3ed4354fddb3b9779a290aa0"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/evaluation/o0_exact_frozen_config_control_v1/ramen/lerf_direct_3d_selection_results.json",
+    "sha256": "c73412a12bcf655731c3b3c8dbad3afcf7cae03708514f483644ead4d805bd21"
+  },
+  "frozen_config": {
+    "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+    "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+  },
+  "protocol_preset": "vala_repo_3d",
+  "metrics": {
+    "miou": 0.3012723922729492,
+    "acc025": 0.5633802816901409,
+    "acc050": 0.18309859154929578,
+    "boundary_f": 0.4585232138633728,
+    "trimap_iou": 0.4094906747341156,
+    "n": 71
+  },
+  "expected_miou": 0.3012723923,
+  "absolute_miou_error": 2.705080603738752e-11,
+  "lineage_replay_passed": true,
+  "gpu_execution": {
+    "physical_gpu": 0,
+    "guard_pid": 859923,
+    "worker_pid": 859948,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix2/ramen/o0_exact_frozen_control_gpu0_telemetry.csv",
+      "sha256": "1bf8ce44bd3d0f729119c5657c068b55ddb3bdf4f41ca8124debea68b30fa430"
+    },
+    "peak_temperature_c": 52,
+    "thermal_guard_triggered": false
+  },
+  "candidate_metric_gate": "satisfied_for_subsequently_frozen_O1_and_O2_single_candidate_authorities"
+}

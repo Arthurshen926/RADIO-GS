@@ -1,0 +1,125 @@
+{
+  "artifact": "source_only_region_comembership_v2_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_v2_model_or_primitive_union_metric_implementation_and_before_any_target_execution",
+  "role": "source_only_4train_2validation_model_and_readout_selection",
+  "first_principles_hypothesis": "Region completion requires a query-independent estimate that two canonical regions belong to one physical-semantic instance. Geometry and distilled typed context alone do not transfer this relation reliably. Official DINO appearance direction and SAM boundary direction provide complementary identity and boundary evidence; their concentration values expose when either cosine is unreliable. A bounded nonlinear relation can express these conjunctions without allowing sparse false-positive bridges to percolate globally.",
+  "frozen_source_cohort": {
+    "source_train": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0003_00",
+      "scene0005_00"
+    ],
+    "source_validation": [
+      "scene0004_00",
+      "scene0008_00"
+    ],
+    "source_validation_role": "checkpoint_threshold_readout_and_maximum_region_selection_only",
+    "scene_or_instance_specific_fitting": false
+  },
+  "canonical_axis": {
+    "authority": "AcceptedV2_4096_canonical_regions",
+    "dense_axis_enabled": false,
+    "evidence": "The preregistered source primitive oracle obtained K<=8 IoU 0.42563 on AcceptedV2 versus 0.44706 on the dense axis; the 0.02143 gain is below the frozen 0.05 dense-inference trigger."
+  },
+  "pair_features": {
+    "base": "the fixed 15 symmetric RegionCoMembershipV1 channels in their original order",
+    "capability_descriptor_authority_schema": "radio_gs.region_capability_descriptor_authority.v2",
+    "appended_in_fixed_order": [
+      "appearance_direction_cosine",
+      "boundary_direction_cosine",
+      "minimum_appearance_concentration",
+      "minimum_boundary_concentration",
+      "absolute_appearance_concentration_difference",
+      "absolute_boundary_concentration_difference"
+    ],
+    "total_dimension": 21,
+    "candidate_pairs": "the exact sorted unique V1 candidate pairs; capability descriptors do not create additional candidates",
+    "query_input": false,
+    "target_input": false
+  },
+  "model": {
+    "class": "RegionCoMembershipV2",
+    "normalization": "per-channel median and 1.4826*MAD fitted on positive-evidence source-train pair rows only, with zero MAD replaced by one",
+    "architecture": "Linear(21,64)_GELU_Linear(64,32)_GELU_Linear(32,1)",
+    "dropout": 0.0,
+    "final_layer_initialization": "zero_weight_and_zero_bias",
+    "epoch_zero_probability": 0.5,
+    "scene_embedding": false,
+    "query_conditioning": false
+  },
+  "training": {
+    "objective": "equal-scene mean of within-scene evidence-weighted BCE with equal positive and negative class means",
+    "optimizer": "AdamW",
+    "seed": 0,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "maximum_epochs": 100,
+    "early_stopping_patience": 12,
+    "source_validation_gradient": false
+  },
+  "readout": {
+    "seed": "every source-validation region with positive primitive-instance evidence during source selection; target seed remains the unique highest frozen O0 region with lowest-canonical-index tie break",
+    "methods": [
+      "maximum_product",
+      "dual_path_widest",
+      "multipoint_consistency"
+    ],
+    "maximum_selected_regions_including_seed": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "threshold_grid": "0.05_to_0.95_inclusive_step_0.05",
+    "global_rule": "one method_one_K_one_threshold shared by every scene_instance_and_query"
+  },
+  "primitive_instance_metric": {
+    "selection_unit": "deduplicated union of primitive rows in the selected canonical region cores",
+    "source_authority": "exact sparse-marginal primitive-by-instance mass from source training views",
+    "target_instance_for_seed": "the positive instance with maximum exact mass in the seed region core; ties use lowest positive instance ID",
+    "selected_mass": "sum each primitive-by-instance mass cell once after primitive-row deduplication; instance zero contributes false-positive selected mass but never defines an eligible target",
+    "aggregation": "seed-target-mass weighted within each instance_then_equal-instance macro_then_equal-scene macro",
+    "metrics": [
+      "IoU",
+      "F1",
+      "contamination",
+      "giant_excess",
+      "selected_unique_primitives",
+      "selected_regions"
+    ],
+    "topology_score": "IoU_minus_contamination_minus_giant_excess"
+  },
+  "joint_selection": {
+    "checkpoint_and_readout": "maximize source-validation equal-scene topology score jointly over epoch_method_K_threshold",
+    "tie_break": "higher_IoU_then_higher_F1_then_lower_contamination_then_lower_giant_excess_then_lower_K_then_lower_threshold_then_earlier_epoch_then_method_order_as_registered",
+    "edge_F1_and_BCE": "diagnostic_only",
+    "candidate_oracle": "diagnostic_ceiling_only"
+  },
+  "promotion_gate": {
+    "all_required": [
+      "selected_epoch_is_positive",
+      "selected_source_validation_topology_score_strictly_exceeds_epoch_zero_singleton",
+      "selected_source_validation_IoU_strictly_exceeds_epoch_zero_singleton",
+      "selected_source_validation_F1_strictly_exceeds_epoch_zero_singleton",
+      "no_nonfinite_metric_or_authority_mismatch"
+    ],
+    "failure_action": "do_not_open_target_and_report_source_negative_result"
+  },
+  "immutability": {
+    "existing_V1_authorities": "read_only",
+    "evaluation_protocol": "frozen_and_unchanged",
+    "renderer": "unchanged",
+    "target_execution": "forbidden_before_a_separate_exact_execution_authority_after_source_promotion"
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

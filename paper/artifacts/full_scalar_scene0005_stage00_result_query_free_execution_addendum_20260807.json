@@ -1,0 +1,40 @@
+{
+  "artifact": "full_scalar_scene0005_stage00_result_query_free_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:57:11+08:00",
+  "status": "sealed_after_stage00_success_and_before_query_free_materialization",
+  "scene_id": "scene0005_00",
+  "parent_preregistration": "paper/artifacts/full_scalar_scene0005_base_chain_execution_preregistration_20260807.json",
+  "stage00": {
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/receipts/00_sens_extraction.json",
+    "receipt_sha256": "f38d340a8d7fbfe2e8cff128653279afdb212e35d14eeea399d5dca976bbe4f4",
+    "sens_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/source/scans/scene0005_00/scene0005_00.sens",
+    "sens_sha256": "e4112836a51cf9526a9bbbd2a87278bbfabceb152cdb22445a7b5d9a953bbc36",
+    "sens_size_bytes": 365952648,
+    "atomic_output_verified": true
+  },
+  "query_free_contract": {
+    "maximum_frames": 240,
+    "candidate_stride": 1,
+    "frame_selection_policy": "depth_voxel_coverage",
+    "pose_orientation_weight": 0.25,
+    "coverage_voxel_size_m": 0.05,
+    "coverage_depth_stride": 8,
+    "uses_instances_or_semantic_labels": false,
+    "uses_private_anchor": false,
+    "uses_private_depth_pixel": false,
+    "per_scene_hyperparameters": false
+  },
+  "expected_boundary": "query_free_materialization",
+  "field_root_preexisting": false,
+  "source_access": {
+    "source_sens_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

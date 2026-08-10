@@ -1,0 +1,15 @@
+{
+  "schema": "radio_gs.lerf_o0_exact_fp32_score_cache_execution_erratum.v1",
+  "schema_version": 1,
+  "status": "superseded_before_materialization",
+  "superseded_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_score_cache_execution_authority_20260807.json",
+    "sha256": "31967d9f8d79aa6451d3efa2c198147c2285c7efb1dd371ee1b7815dfea21537"
+  },
+  "reason": "The prompt5 positive cache is not the exact single-template frozen O0 query cache required by the materializer.",
+  "failed_preflight": "frozen text query cache must use the exact {query} template",
+  "outputs_materialized": false,
+  "replacement_authority": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_score_cache_execution_authority_fix2_20260807.json",
+  "target_quality_data_opened": false,
+  "target_quality_readout_executed": false
+}

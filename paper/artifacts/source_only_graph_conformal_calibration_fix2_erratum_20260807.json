@@ -1,0 +1,19 @@
+{
+  "artifact": "source_only_graph_conformal_calibration_fix2_erratum",
+  "schema_version": 1,
+  "status": "fix2_is_the_only_currently_authority_bound_result",
+  "reason": "The first result encoded O0 anchors as positive logits and a preliminary query-null fallback. Before target consumption, the frozen primary was clarified to use exact O0 final scores strictly above 0.6 and source false-edge sequential null control. The execution authority was updated to the final implementation, so the first result no longer matches the current authority SHA and must not be consumed.",
+  "superseded_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_result_20260807.json",
+    "sha256": "a2306aa61120118733bcb88ea0700cce348e74b5fef5160a0c9a9c51fe5a6a34"
+  },
+  "current_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_execution_authority_20260807.json",
+    "sha256": "07d607e34033ace02ad104663d26813c5f7fb7950b9385df4001336be2e14152"
+  },
+  "canonical_fix2_result": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_conformal_calibration_result_fix2_20260807.json",
+    "sha256": "16b9980d79ec9938a9fa4b70ed90ee67cbec2a26ba08d25a9fd13d8e65e0d7d1"
+  },
+  "benchmark_or_target_opened": false
+}

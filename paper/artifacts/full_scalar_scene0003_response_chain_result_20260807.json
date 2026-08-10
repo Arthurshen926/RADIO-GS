@@ -1,0 +1,82 @@
+{
+  "artifact": "full_scalar_scene0003_response_chain_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T04:45:00+08:00",
+  "status": "source_train_scene_official_teacher_and_hard_negative_chain_complete",
+  "scene_id": "scene0003_00",
+  "cohort_split": "source_train",
+  "outputs": {
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/accepted_v2_sparse_v2.pt",
+      "sha256": "28b56a2270917f290aa35bbb29542dfbbbdd657da6696f738b4bdc4f0c5f819e",
+      "selected_regions": 4096,
+      "selected_by_scale": [1366, 1365, 1365]
+    },
+    "official_multiview_siglip2_teacher": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+      "sha256": "5bb5d57a46b0b7607cfa0eef8399e02f435b930946050293414a61f6ec2d5288",
+      "size_bytes": 100704147,
+      "source_views": 120,
+      "active_region_view_pairs": 16160,
+      "minimum_views_per_region": 1,
+      "maximum_views_per_region": 4,
+      "descriptor_norm_minimum": 0.9999997019767761,
+      "descriptor_norm_maximum": 1.0000003576278687,
+      "strict_reload_and_accepted_alignment_passed": true
+    },
+    "hard_negative_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0003_00/hard_negative_index_authority_bound_v1.pt",
+      "sha256": "6cd4ddf08bb518b3ff20d162ff46f5e36cbab7b52ba054c99708681f2d158ff0",
+      "content_authority_sha256": "25dc1ca4ef0a265b28fbd1eb2a8c7a642e3de747ea9b075adb82f211503864ad",
+      "size_bytes": 2391295,
+      "anchors": 4096,
+      "anchors_with_any_negative": 4096,
+      "directed_pairs": 31419,
+      "selected_pairs": 16384,
+      "minimum_negatives_per_anchor": 4,
+      "maximum_negatives_per_anchor": 8,
+      "mean_negatives_per_anchor": 7.670654296875,
+      "zero_shared_active_token_pairs": 31419
+    },
+    "hard_negative_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0003_00/hard_negative_index_authority_bound_v1.report.json",
+      "sha256": "886dbb60737b5ae29902549636f08baae28e04b1ca73131d46fac05f1c341dbd"
+    }
+  },
+  "source_only_response_diagnostic": {
+    "generic_dev_queries": 101,
+    "mean_spearman": 0.24730090098221683,
+    "mean_top10_overlap": 0.04653465346534653,
+    "mean_top_decile_overlap": 0.20026563631972957,
+    "mean_centered_response_profile_cosine": 0.7707546890160302,
+    "interpretation": "The immutable AcceptedV2 base descriptor preserves broad response shape but does not recover teacher top-ranked region discrimination; this independently motivates the frozen V2.1 source response/listwise supervision without using benchmark queries."
+  },
+  "teacher_execution": {
+    "successful_physical_gpu": 0,
+    "successful_crop_batch_size": 1,
+    "successful_region_batch_size": 4096,
+    "successful_maximum_temperature_c": 87,
+    "successful_thermal_warnings": 0,
+    "successful_thermal_aborts": 0,
+    "guard_exit_code": 0,
+    "cuda_release_verified": true,
+    "math_or_order_changed_for_thermal_handling": false
+  },
+  "temperature_role_separation": {
+    "hard_negative_mining_temperature": 0.05,
+    "v2_1_supervision_temperature": 0.1,
+    "contract": "0.05 freezes only target-blind candidate pairs; V2.1 recomputes teacher response, relevance gap and continuous weight at 0.1 on those fixed pairs"
+  },
+  "source_access": {
+    "source_rgb_used_for_official_teacher": true,
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

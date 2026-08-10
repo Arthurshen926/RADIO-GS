@@ -1,0 +1,73 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_text_axis_execution_authority.v1",
+  "schema_version": 1,
+  "status": "sealed_before_exact_row_subset_materialization",
+  "sealed_at": "2026-08-07T18:57:11+08:00",
+  "scene": "waldo_kitchen",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_text_axis_subset.py",
+    "sha256": "f4139ae3f8a35c730279083f9e16e688e6f200ba61ecec9599d4f6d414612b35"
+  },
+  "inputs": {
+    "all_query_single_prompt_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "waldo_query_order_only": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_lerf_text_embeddings_promptens_20260515_waldo_kitchen.pt",
+      "sha256": "f27bc1418de1dc7f0ab20676edeab0586223fae855e82ed7132fb915f3c52eec",
+      "embedding_values_consumed": false,
+      "prompt_templates_consumed": false,
+      "queries": 18
+    },
+    "canonical_negative_single_prompt_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+      "queries": ["object", "things", "stuff", "texture"]
+    }
+  },
+  "outputs": {
+    "positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_queries_single.pt",
+    "canonical_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_negatives_single.pt"
+  },
+  "contract": {
+    "text_encoder": "siglip2",
+    "model_name": "google/siglip2-giant-opt-patch16-384",
+    "prompt_templates": ["{query}"],
+    "text_canonicalization": "official_c_radio_siglip2_g",
+    "positive_rows": "exact subset of frozen all-query bank in the frozen Waldo query order",
+    "negative_rows": "exact full frozen four-row canonical-negative bank",
+    "text_reencoding": false,
+    "scene_specific_hyperparameters": false,
+    "no_clobber": true
+  },
+  "commands": {
+    "positive": [
+      "bash", "radio_gs/scripts/run_repo_python.sh", "-m", "radio_gs.scripts.materialize_lerf_text_axis_subset",
+      "--source-bank", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "--expected-source-bank-sha256", "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d",
+      "--query-order-cache", "/root/RADIO-GS/checkpoints/siglip2_lerf_text_embeddings_promptens_20260515_waldo_kitchen.pt",
+      "--expected-query-order-cache-sha256", "f27bc1418de1dc7f0ab20676edeab0586223fae855e82ed7132fb915f3c52eec",
+      "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_queries_single.pt"
+    ],
+    "canonical_negative": [
+      "bash", "radio_gs/scripts/run_repo_python.sh", "-m", "radio_gs.scripts.materialize_lerf_text_axis_subset",
+      "--source-bank", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "--expected-source-bank-sha256", "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+      "--query-order-cache", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "--expected-query-order-cache-sha256", "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+      "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/waldo_text_negatives_single.pt"
+    ]
+  },
+  "validation": {
+    "focused_tests_passed": 25,
+    "source_rows_must_be_bitwise_copied": true
+  },
+  "access_audit": {
+    "query_names_opened": true,
+    "ground_truth_opened": false,
+    "benchmark_masks_opened": false,
+    "metric_outputs_opened": false,
+    "metric_computed": false
+  }
+}

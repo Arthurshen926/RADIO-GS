@@ -1,0 +1,241 @@
+{
+  "schema": "radio_gs.lerf_all_available_failure_attribution_and_admission_design.v1",
+  "schema_version": 1,
+  "status": "complete_cpu_read_only_design_not_target_authorization",
+  "exact_result_for_posthoc_interpretation_only": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_all_available_o2_valid_domain_knn10_frozen_exact_result_20260809.json",
+    "sha256": "135bdc5677d8e4e441366ac0041e22beb0d9a08358b3a9135a41da25696d07bd"
+  },
+  "teacher_inputs": {
+    "teatime": {
+      "legacy": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+        "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+      },
+      "all_available": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_teacher_mean_fp16.pt",
+        "sha256": "c57cdc21dd0c732bb0318d2c0d3fc7c94800dbea82bb5adc04e126fb6d6a5fa0"
+      }
+    },
+    "waldo_kitchen": {
+      "legacy": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/waldo_kitchen/waldo_kitchen_teacher_mean_fp16.pt",
+        "sha256": "a2d8f65394df59404e4797737526e6a064ab4b7123748505e9f5b7fdf32bfd76"
+      },
+      "all_available": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/o1_o2_teacher_agreement/waldo_kitchen_all_available_teacher_mean_fp16.pt",
+        "sha256": "a1dbd53833cb556f14a6c9eed4ebf7da706a83dcf94b63f311c2807d2d9376cd"
+      }
+    }
+  },
+  "access_audit": {
+    "cpu_only": true,
+    "new_metric_executed": false,
+    "target_images_labels_or_masks_opened": false,
+    "teacher_payloads_opened": true,
+    "already_frozen_query_score_caches_opened_for_posthoc_explanation": true,
+    "query_outcomes_used_to_select_formula_or_parameters": false
+  },
+  "scene_statistics": {
+    "teatime": {
+      "accepted_primitives": 334250,
+      "legacy_teacher_valid": 334161,
+      "all_available_teacher_valid": 334250,
+      "new_teacher_valid": 89,
+      "retained_count_delta_histogram": {
+        "0": 326659,
+        "1": 5827,
+        "2": 1652,
+        "3": 111,
+        "4": 1
+      },
+      "new_teacher_count_histogram": {
+        "1": 62,
+        "2": 22,
+        "3": 4,
+        "4": 1
+      },
+      "new_teacher_single_view_fraction": 0.6966292134831461,
+      "legacy_to_all_prototype_angle_degrees": {
+        "p50": 8.107503890991211,
+        "p90": 13.9954252243042,
+        "p95": 16.12240219116211,
+        "p99": 22.132930755615234,
+        "maximum": 50.73762893676758,
+        "rows_at_least_5_degrees": 252655,
+        "rows_at_least_20_degrees": 5607
+      },
+      "overlap_resultant_delta": {
+        "p10": -0.009648740291595459,
+        "p50": 0.001566469669342041,
+        "p90": 0.022815465927124023,
+        "minimum": -0.15361779928207397
+      }
+    },
+    "waldo_kitchen": {
+      "accepted_primitives": 433043,
+      "legacy_teacher_valid": 431460,
+      "all_available_teacher_valid": 433043,
+      "new_teacher_valid": 1583,
+      "retained_count_delta_histogram": {
+        "0": 415775,
+        "1": 12908,
+        "2": 4077,
+        "3": 277,
+        "4": 6
+      },
+      "new_teacher_count_histogram": {
+        "1": 1253,
+        "2": 292,
+        "3": 32,
+        "4": 6
+      },
+      "new_teacher_single_view_fraction": 0.7915350600126342,
+      "legacy_to_all_prototype_angle_degrees": {
+        "p50": 8.852804183959961,
+        "p90": 14.412496566772461,
+        "p95": 16.740129470825195,
+        "p99": 24.04836654663086,
+        "maximum": 53.1524658203125,
+        "rows_at_least_5_degrees": 357708,
+        "rows_at_least_20_degrees": 10030
+      },
+      "overlap_resultant_delta": {
+        "p10": -0.011031060479581356,
+        "p50": 0.0030798614025115967,
+        "p90": 0.02590848132967949,
+        "minimum": -0.1610480546951294
+      }
+    }
+  },
+  "failure_attribution": {
+    "primary": "The all-available global top-4 operation is a replacement operator, not merely a coverage extension. Omitted views replace legacy retained views even when retained count is unchanged, rotating most primitive prototypes by approximately 8-9 degrees at the median.",
+    "why_existing_gate_missed_it": "Coverage and retained-count nonregression cannot detect count-preserving replacement. Scene-average LOO and resultant can improve when newly retained views are mutually coherent but belong to background or a competing identity.",
+    "single_view_resultant_failure": "A one-view teacher has directional resultant exactly or nearly one by construction, so resultant without count sufficiency assigns false confidence to most newly covered primitives.",
+    "not_primarily_coverage": "The frozen valid-domain score caches already treated every accepted primitive as valid; newly teacher-valid rows replaced prior O0 fallback descriptors but did not expand the KNN validity domain.",
+    "conclusion": "The failure is view-admission and prototype-identity drift, not an evaluator, KNN-domain, coverage-count, or thermal issue."
+  },
+  "posthoc_query_explanations_not_used_for_design": {
+    "waldo_kitchen_cabinet": {
+      "miou_delta": -0.7275284603238106,
+      "selected_support_lost": 1260,
+      "selected_support_gained": 599,
+      "changed_support_rows_with_count_delta_zero": 1767,
+      "changed_support_rows_total": 1859,
+      "changed_support_median_prototype_angle_degrees": 9.254996299743652,
+      "changed_support_median_resultant_delta": 0.00235748291015625
+    },
+    "waldo_kitchen_pot": {
+      "miou_delta": 0.37330517917871475,
+      "selected_support_lost": 500,
+      "selected_support_gained": 1442,
+      "changed_support_rows_with_count_delta_zero": 1925,
+      "changed_support_rows_total": 1942,
+      "changed_support_median_prototype_angle_degrees": 8.183308601379395,
+      "changed_support_median_resultant_delta": 0.007249951362609863
+    },
+    "interpretation": "The same count-preserving prototype replacement can greatly help one query and destroy another. Therefore query names, score changes, and target masks cannot define the admission rule."
+  },
+  "minimal_candidate": {
+    "name": "incremental_effective_evidence_anchored_fusion_v1",
+    "role": "single query-independent source-gated candidate",
+    "inputs_per_primitive": [
+      "legacy unit prototype mu_L",
+      "legacy retained count n_L",
+      "legacy directional resultant r_L",
+      "all-available unit prototype mu_A",
+      "all-available retained count n_A",
+      "all-available directional resultant r_A"
+    ],
+    "formula": {
+      "effective_evidence": "E(n,r)=max(n-1,0)*r",
+      "innovation": "DeltaE=max(E(n_A,r_A)-E(n_L,r_L),0)",
+      "legacy_valid_output": "normalize(E_L*mu_L+DeltaE*mu_A); if DeltaE=0 this is exactly mu_L",
+      "legacy_invalid_output": "mu_A only when E_A>0, equivalently n_A>=2; otherwise retain O0 fallback and do not create a teacher",
+      "validity": "preserve every legacy-valid row; add a previously invalid row only with at least two retained views"
+    },
+    "properties": {
+      "one_formula_for_every_primitive_scene_and_query": true,
+      "trainable_or_tuned_thresholds": false,
+      "single_view_false_confidence_rejected": true,
+      "all_available_summary_double_counting_avoided": "Only effective evidence beyond the legacy evidence is treated as innovation.",
+      "count_preserving_replacement_safeguard": "When count is unchanged, a small resultant increase receives only a small innovation weight; a resultant decrease receives zero weight.",
+      "deployable_from_current_teacher_payloads": true
+    },
+    "structural_diagnostic_not_performance_validation": {
+      "teatime": {
+        "rows_with_zero_innovation": 135270,
+        "innovation_weight_alpha_p50": 0.002168596489354968,
+        "innovation_weight_alpha_p95": 0.04417461156845093,
+        "original_prototype_shift_p95_degrees": 16.12240219116211,
+        "candidate_output_shift_p95_degrees": 0.5944611430168152,
+        "new_single_view_rows_kept_on_o0_fallback": 62
+      },
+      "waldo_kitchen": {
+        "rows_with_zero_innovation": 152132,
+        "innovation_weight_alpha_p50": 0.004182283766567707,
+        "innovation_weight_alpha_p95": 0.05557995289564133,
+        "original_prototype_shift_p95_degrees": 16.740129470825195,
+        "candidate_output_shift_p95_degrees": 0.7454609274864197,
+        "new_single_view_rows_kept_on_o0_fallback": 1253
+      }
+    },
+    "caveat": "This diagnostic shows that the formula targets the observed replacement mechanism; it is not a target-performance claim and must pass the source gate below before any target execution."
+  },
+  "executable_source_gate_design": {
+    "preregister_before_execution": true,
+    "source_domains": {
+      "ramen": 120,
+      "teatime": 171,
+      "waldo_kitchen": 182,
+      "figurines": 295
+    },
+    "required_streaming_capture_per_heldout_source_view": [
+      "legacy n_L, r_L, and mu_L excluding the heldout observation",
+      "all-available n_A, r_A, and mu_A excluding the heldout observation",
+      "heldout source descriptor",
+      "candidate prediction from the frozen formula"
+    ],
+    "baseline": "legacy O2 source-view LOO prediction",
+    "candidate": "incremental_effective_evidence_anchored_fusion_v1 source-view LOO prediction",
+    "statistics": [
+      "exact pooled mean heldout cosine",
+      "exact per-scene mean heldout cosine",
+      "exact per-scene p05 heldout cosine",
+      "per-scene fraction of legacy rows preserved",
+      "per-scene newly valid rows split by retained count"
+    ],
+    "pass_conditions": [
+      "pooled mean cosine strictly improves over legacy",
+      "every scene mean cosine is nonregressing",
+      "every scene exact p05 cosine is nonregressing",
+      "every legacy-valid primitive remains valid by construction",
+      "all values are finite and all scene/query parameters are absent"
+    ],
+    "selection": "One candidate versus legacy only; no parameter sweep, no target metric retry, and no aggregate compensation for a regressing scene.",
+    "after_pass": "Materialize one frozen all-scene candidate and run each target benchmark at most once under its accepted frozen evaluator."
+  },
+  "durable_evidence_gaps": {
+    "current_teacher_payloads_are_sufficient_for_deployment_materialization": true,
+    "current_teacher_payloads_are_insufficient_for_exact_source_loo_gate": true,
+    "missing_per_primitive_data": [
+      "legacy and all-available retained top-view frame IDs",
+      "retained view descriptors or an online per-fold legacy/all summary",
+      "per-heldout-fold candidate cosine values needed for exact p05",
+      "marginal responsibility of retained legacy versus omitted views"
+    ],
+    "missing_scene_evidence": [
+      "Figurines all-available teacher and source-LOO capture for its 295-view domain",
+      "Ramen identity-control receipt showing the 120-view all-available path is bitwise legacy-equivalent"
+    ],
+    "robust_m_estimator_status": "A view-level anchored median, Huber, or redescending M-estimator cannot be evaluated or reconstructed exactly from final mean/count/resultant alone. It requires the retained per-view descriptors or an online robust accumulator rerun.",
+    "authorization_consequence": "Do not authorize a target metric for the proposed candidate from the present static statistics alone."
+  },
+  "decision": {
+    "failure_cause_identified": true,
+    "minimal_unified_candidate_defined": true,
+    "target_execution_authorized": false,
+    "next_action": "Implement the formula and its all-four-scene streaming source-LOO capture together, then apply the preregistered mean-and-p05 gate."
+  }
+}
+

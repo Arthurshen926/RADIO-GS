@@ -1,0 +1,61 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_teatime_target_accepted_v2_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T11:15:00+08:00",
+  "status": "sealed_after_query_free_graph_success_before_target_accepted_v2_execution",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "teatime",
+    "geometry_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+    "physical_space_id": "lerf:teatime:geometry-checkpoint-sha256:53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+  },
+  "inputs": {
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "9eb0ffc066c582f028b5e7b0cd516bc9dc14f25d7e9c62d3b229e651af2854a3"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/factorized_primitive_state_v2.pt",
+      "sha256": "3e12685568f5be72b84a617e4cffe09f5b1abf6fd0727d56e23936bfa5c9a3c6"
+    },
+    "factorized_radio_cache_sha256": "c9d903172972c982d24e6062416b2a01136b4e1c5e7cc0fc2694fa5e4dcc1af3",
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/canonical_support_graph_accepted_v2.pt",
+      "sha256": "4d08e407bd6c4ec27fe0151499d81ecd7a9066db36e22b3e825ada2fba2073b2"
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/teatime/exact_marginal_target_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "de485f2b264b7b40be054ac257b4245645cb52437ccd95135a6ab179ec384d05"
+    },
+    "accepted_v2_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260717/surface_region_contract_v2/readout_v2_clean_h256.pth",
+      "sha256": "5b2d123a7827d9ab79aa4aa5a70077f00a656beebcf4c95ea5a3c9efdbe13ccb"
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_target_accepted_v2_canonical_region_authority.py",
+    "sha256": "f63e62a3c411c483244142a12f34284887f12e0e519dfb9da1db703531b83399"
+  },
+  "frozen_contract": {
+    "same_mathematical_payload_as_source_accepted_v2": true,
+    "per_scene_region_cap": 4096,
+    "scales_m": [0.25, 0.45, 0.7],
+    "selection_batch_size": 8192,
+    "readout_batch_size": 128,
+    "device": "cuda:0_after_CUDA_VISIBLE_DEVICES_1",
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/teatime/accepted_v2_sparse_v2.pt",
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

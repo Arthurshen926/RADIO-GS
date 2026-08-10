@@ -1,0 +1,111 @@
+{
+  "schema": "radio_gs.spin_reference_selected_query_interface.full9_exact_result.v1",
+  "schema_version": 1,
+  "status": "complete",
+  "claim_scope": "exact frozen nine-scene full-reference-mask diagnostic; method-development evidence, not prospectively blind",
+  "protocol_hash": "d8a87284ddc2fde946a5d9de83aec190487e61c72259dc62656be603c2af6752",
+  "method": {
+    "canonical_branch": "query-independent canonical capability field plus query-conditioned support posterior",
+    "proposal_branch": "three target-RGB SAM hypotheses uplifted to every frozen carrier row and rendered as a scalar posterior in the registered benchmark domain",
+    "authority": "select branch, candidate, and threshold using only the single permitted full reference mask",
+    "exact_tie": "canonical",
+    "target_metric_used_for_selection": false,
+    "scene_specific_hyperparameters": false,
+    "graph_on_sam_branch": false,
+    "connected_component_selection": false
+  },
+  "macro_foreground_iou": {
+    "previous_canonical_mainline": 0.8771615046217027,
+    "full_carrier_sam_branch_without_canonical_fallback": 0.9469571218061046,
+    "reference_selected_unified_interface": 0.9484146824995366,
+    "reproduced_ludvig_sam": 0.9372004495923849,
+    "delta_unified_vs_previous_mainline": 0.07125317787783392,
+    "delta_unified_vs_reproduced_ludvig_sam": 0.011214232907151733
+  },
+  "scenes": {
+    "fern": {
+      "selected_branch": "sam",
+      "selected_reference_iou": 0.9669097627382341,
+      "selected_target_foreground_iou": 0.9662384094017906,
+      "canonical_target_foreground_iou": 0.9599595485076048,
+      "sam_target_foreground_iou": 0.9662384094017906
+    },
+    "fortress": {
+      "selected_branch": "sam",
+      "selected_reference_iou": 0.986957042000718,
+      "selected_target_foreground_iou": 0.9819794172284169,
+      "canonical_target_foreground_iou": 0.9609142205208767,
+      "sam_target_foreground_iou": 0.9819794172284169
+    },
+    "horns": {
+      "selected_branch": "canonical",
+      "selected_reference_iou": 0.9627341996971163,
+      "selected_target_foreground_iou": 0.9396566134868652,
+      "canonical_target_foreground_iou": 0.9396566134868652,
+      "sam_target_foreground_iou": 0.8990452116384291
+    },
+    "leaves": {
+      "selected_branch": "sam",
+      "selected_reference_iou": 0.9716417593163411,
+      "selected_target_foreground_iou": 0.9714770852627853,
+      "canonical_target_foreground_iou": 0.9259014165981039,
+      "sam_target_foreground_iou": 0.9714770852627853
+    },
+    "lego": {
+      "selected_branch": "sam",
+      "selected_reference_iou": 0.9428872682541077,
+      "selected_target_foreground_iou": 0.9268476227604813,
+      "canonical_target_foreground_iou": 0.6181460736735999,
+      "sam_target_foreground_iou": 0.9268476227604813
+    },
+    "orchids": {
+      "selected_branch": "canonical",
+      "selected_reference_iou": 0.9236109478698981,
+      "selected_target_foreground_iou": 0.9035069250268507,
+      "canonical_target_foreground_iou": 0.9035069250268507,
+      "sam_target_foreground_iou": 0.9190688961908214
+    },
+    "pinecone": {
+      "selected_branch": "canonical",
+      "selected_reference_iou": 0.958484582968248,
+      "selected_target_foreground_iou": 0.9079864777733617,
+      "canonical_target_foreground_iou": 0.9079864777733617,
+      "sam_target_foreground_iou": 0.9199178622169386
+    },
+    "room": {
+      "selected_branch": "sam",
+      "selected_reference_iou": 0.9623574087189765,
+      "selected_target_foreground_iou": 0.9705666789761315,
+      "canonical_target_foreground_iou": 0.888438210272626,
+      "sam_target_foreground_iou": 0.9705666789761315
+    },
+    "truck": {
+      "selected_branch": "sam",
+      "selected_reference_iou": 0.971427928468555,
+      "selected_target_foreground_iou": 0.9674729125791468,
+      "canonical_target_foreground_iou": 0.7899440557354362,
+      "sam_target_foreground_iou": 0.9674729125791468
+    }
+  },
+  "selection_counts": {
+    "sam": 6,
+    "canonical": 3
+  },
+  "full_result": {
+    "path": "/root/radio_gs_local_cache/optimization_20260810/spin_reference_selected_full9_exact_result.json",
+    "sha256": "b5c2a509272efd504ace02c49f52baa74ae426e11d9739cc2e9b058ec153b640"
+  },
+  "storage": {
+    "local_cache_root": "/root/radio_gs_local_cache/optimization_20260810",
+    "cache_size_after_full9": "1.7G",
+    "local_ssd_free_after_full9": "186G",
+    "minimum_free_guard": "100G",
+    "existing_remote_outputs_deleted": false
+  },
+  "thermal_observation": {
+    "power_limit_w": 300,
+    "maximum_observed_temperature_c_this_full9_completion": 71,
+    "driver_failure": false,
+    "thermal_pause_triggered": false
+  }
+}

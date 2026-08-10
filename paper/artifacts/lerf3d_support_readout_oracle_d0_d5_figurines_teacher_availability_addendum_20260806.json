@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_support_readout_oracle_d0_d5_figurines_teacher_availability_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_before_d2_d5_implementation_and_before_any_new_d2_d5_metric",
+  "parent_preregistration": {
+    "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_preregistration_20260806.json",
+    "sha256": "473b70468c14bedce0d347828800f0d029838c0c7bfe5e4c480c86f3e73febf8"
+  },
+  "teacher_view_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/source_only/figurines_teacher_top4_siglip.pt",
+    "sha256": "0369a01256937d28dc3e31d2e3fe8a793a87da35293922924b896f385b637d86",
+    "accepted_rows": 82603,
+    "rows_with_complete_positive_and_canonical_negative_teacher_response": 82400,
+    "rows_without_teacher_response": 203
+  },
+  "correction": {
+    "reason": "The stored O4 probability cache honestly falls back to O0 on 203 rows without a retained teacher view. That fallback is valid for D1 but cannot be described as a per-primitive teacher score in D4.",
+    "D1": "Unchanged: use the exact sealed O4 cache including its declared O0 fallback because D1 reproduces the existing O4 current-support oracle.",
+    "D4": "Use O4 final canonical-negative probability only on rows whose teacher_view_mask has at least one retained view. Rows without a teacher view are explicitly unavailable and abstain at score zero; no O0 value is imputed as teacher evidence.",
+    "D4_reporting": "Report both available-row primitive metrics and end-to-end primitive metrics over all target-observed rows, with unavailable teacher rows fixed to abstention.",
+    "D5": "Render the exact end-to-end D4 membership, including explicit abstention on teacher-unavailable rows."
+  },
+  "unchanged": [
+    "positive versus maximum canonical-negative relevance",
+    "logit scale 10",
+    "fixed D4 membership threshold 0.6",
+    "D2 and D3 GT-oracle definitions",
+    "final frozen rendering semantics",
+    "development-only non-deployable interpretation"
+  ]
+}

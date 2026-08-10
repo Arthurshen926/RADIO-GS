@@ -1,0 +1,39 @@
+{
+  "artifact": "full_scalar_scene0005_source_rgb_cpu_result",
+  "schema_version": 1,
+  "completed_at": "2026-08-07T04:54:33+08:00",
+  "status": "CPU_materialized_and_strictly_validated",
+  "scene_id": "scene0005_00",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0005_source_rgb_cpu_execution_authority_20260807.json",
+    "sha256": "2fa78d8e5cf2542d715f0bac790963787f1146c60bba01cb84c188e550697d76"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/source_rgb_scene_authority_v1.json",
+    "file_sha256": "3cb83d9c7206e4d101e1aec6417dcbe71c97b2c418b431fc64e9e47910051c17",
+    "content_authority_sha256": "2dd7f31ddd82f1e62a4da55487d6468b2fcc295c848ccabf959669a72fc2e802",
+    "frame_count": 240,
+    "first_frame_id": "000000",
+    "last_frame_id": "001158"
+  },
+  "validation": {
+    "strict_reload_passed": true,
+    "strict_resume_bundle_validated": true,
+    "all_240_source_RGB_SHA256_values_match_the_sealed_feature_manifest": true,
+    "field_and_feature_frame_ID_sequences_are_exactly_equal": true,
+    "official_teacher_full_lineage_preflight_passed": true,
+    "official_teacher_preflight_regions": 4096,
+    "official_teacher_preflight_source_views": 120,
+    "official_teacher_preflight_region_view_pairs": 16177,
+    "related_CPU_tests": "12_passed"
+  },
+  "execution": {
+    "CUDA_VISIBLE_DEVICES": "empty",
+    "GPU_used": false,
+    "outputs_written": true,
+    "noclobber": true,
+    "benchmark_assets_opened": false,
+    "benchmark_metrics_computed": false,
+    "target_labels_queries_or_masks_opened": false
+  }
+}

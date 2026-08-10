@@ -1,0 +1,98 @@
+{
+  "schema": "radio_gs.lerf_all_available_o2_valid_domain_knn10_frozen_exact_independent_audit.v1",
+  "schema_version": 1,
+  "status": "pass_authority_may_execute_single_candidate",
+  "audited_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_all_available_o2_valid_domain_knn10_frozen_exact_metric_execution_authority_20260809.json",
+    "sha256": "2fe069c291b2efb847ebaf71966c23f7d74abf26080db02d5acd2cf493c4aa6d"
+  },
+  "source_gate_audit": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/source_only_all_available_view_gate_v1.json",
+      "sha256": "5a8188135c7407ac7ff1cb04be505ffac22b2a8c59f659b13173c4ac91c514ad"
+    },
+    "all_scenes_passed": true,
+    "gate_inputs": "legacy and all-available teacher tensors plus query-independent source LOO audits only",
+    "positive_or_negative_query_score_cache_opened_by_gate": false,
+    "query_or_text_bank_opened_by_gate": false,
+    "target_images_labels_masks_or_metrics_opened_by_gate": false,
+    "gpu_used_by_gate": false
+  },
+  "candidate_lineage_audit": {
+    "teatime": {
+      "only_raw_parent": "all-available O2 positive and canonical-negative score caches",
+      "positive_parent_sha256": "519050f97bcadb7a1c2ea5a7fc64a4406815567340d5faa2ece873be86726fc2",
+      "negative_parent_sha256": "7fc7e4ecf97e044137c462488c3de74cc431e995f07d7217e07f1ab3fd8b5621",
+      "candidate_sha256": "d68e149e8f3891190ce07d9b24bfff209f63ca7aab1a0b70829425a9ba843edb"
+    },
+    "waldo_kitchen": {
+      "only_raw_parent": "all-available O2 positive and canonical-negative score caches",
+      "positive_parent_sha256": "24d39c5b9e8852d66a411458c370ade9a3862b584befabc0b758cd13cd05a0ae",
+      "negative_parent_sha256": "8108ff1c7cc6a1aa9c6b66c705cb7795101bf9d60cfb6826663212d8bf69ad7b",
+      "candidate_sha256": "26708d86eb891b7f449ce282fda113a78d2a6bf061a78967e97eeceabb9cdb17"
+    },
+    "fixed_readout": {
+      "domain": "covered_valid_primitive_xyz_only",
+      "k": 10,
+      "blend": "0.5*raw+0.5*valid_neighbor_mean",
+      "per_scale_minmax": true,
+      "scale_selection": "highest_raw_valid_domain_knn_smoothed_peak_per_query",
+      "scene_or_query_specific_parameters": false
+    },
+    "candidate_materialization_opened_target_images_labels_masks_or_metrics": false,
+    "candidate_materialization_result_dependent_parameters": false
+  },
+  "frozen_exact_command_audit": {
+    "allowed_differences": [
+      "--external_query_score_cache value",
+      "--output_dir value",
+      "physical GPU route while retaining logical --gpu 0"
+    ],
+    "teatime": {
+      "accepted_control_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_rebound_o2_valid_domain_knn_one_shot_exact_metric_execution_authority_20260807.json",
+        "sha256": "32aeb20299645411ef9ff928e59e02f8e7a2f3652aff202e4f3cb748e35e7f6e"
+      },
+      "token_count_control": 25,
+      "token_count_candidate": 25,
+      "differing_value_token_indices_zero_based": [14, 22],
+      "differing_options": [
+        "--output_dir",
+        "--external_query_score_cache"
+      ],
+      "all_other_tokens_identical": true,
+      "output_directory_absent_at_audit": true
+    },
+    "waldo_kitchen": {
+      "accepted_control_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o2_valid_domain_knn_frozen_v3_one_shot_exact_metric_execution_authority_20260807.json",
+        "sha256": "53b2764d41e9fa9c07ada8b1a3d5d708045fc337967cbb5bef1df8af9f4656ff"
+      },
+      "token_count_control": 25,
+      "token_count_candidate": 25,
+      "differing_value_token_indices_zero_based": [14, 22],
+      "differing_options": [
+        "--output_dir",
+        "--external_query_score_cache"
+      ],
+      "all_other_tokens_identical": true,
+      "physical_gpu_change": "0_to_1_with_CUDA_VISIBLE_DEVICES_1_and_logical_gpu_argument_0",
+      "output_directory_absent_at_audit": true
+    },
+    "evaluator_config_checkpoint_summary_head_positive_bank_negative_bank_identical_to_controls": true,
+    "protocol_preset_label_dir_scene_threshold_projection_and_mask_policy_identical_to_controls": true
+  },
+  "content_address_audit": {
+    "file_records_checked": 21,
+    "all_observed_sha256_match": true
+  },
+  "selection_integrity": {
+    "single_candidate_no_sweep": true,
+    "threshold_scene_or_query_tuning": false,
+    "retry_or_alternative_candidate_if_metric_fails": false
+  },
+  "metric_execution_during_audit": false,
+  "gpu_execution_during_audit": false,
+  "decision": "PASS"
+}
+

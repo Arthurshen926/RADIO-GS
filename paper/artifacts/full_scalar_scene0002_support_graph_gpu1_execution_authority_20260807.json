@@ -1,0 +1,44 @@
+{
+  "artifact": "full_scalar_scene0002_support_graph_gpu1_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:29:00+08:00",
+  "status": "sealed_after_capability_success_and_before_graph_execution",
+  "scene_id": "scene0002_00",
+  "capability": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/canonical_capability_bank.pt",
+    "sha256": "c5c1e46369d87fd1f0a817aa6d7399c0dba61293aa5912f3705db519ffce588c",
+    "report_sha256": "d911f3134f53dbaf4e7106563ad2fbb2687180e5cd38e5041eddcf5daf61a262",
+    "active_rows": 198116
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_canonical_support_graph.py",
+    "sha256": "dbbcc5a85664b68970842961f2300332e362f383e1b6fc9e0608399a868ed254"
+  },
+  "frozen_graph_contract": {
+    "neighbors": 16,
+    "spatial_scale": 2.0,
+    "appearance_temperature": 0.1,
+    "boundary_temperature": 0.1,
+    "normal_temperature": 0.2,
+    "surface_tangent_temperature": 0.2,
+    "surface_relation": "none",
+    "surface_topology_min_affinity": 0.0,
+    "covisibility_weight": 0.0,
+    "capability_affinity_mode": "signed_hash",
+    "affinity_dim": 256,
+    "topology_mode": "symmetric_union",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/canonical_support_graph_accepted_v2.pt",
+  "thermal_guard": {
+    "physical_gpu": 1,
+    "pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed"
+  },
+  "benchmark_metric_opened": false,
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

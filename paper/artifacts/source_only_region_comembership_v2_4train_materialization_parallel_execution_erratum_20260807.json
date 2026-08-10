@@ -1,0 +1,31 @@
+{
+  "artifact": "source_only_region_comembership_v2_4train_materialization_parallel_execution_erratum",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T03:30:00+08:00",
+  "status": "transparent_execution_schedule_correction_content_contract_unchanged",
+  "parent_execution_authority": {
+    "path": "paper/artifacts/source_only_region_comembership_v2_4train_materialization_execution_authority_20260807.json",
+    "sha256": "a8e08e34ebfc018b48beae3d678f3abcb9a239917b78af0d29cad2cf0f1d3427"
+  },
+  "declared_schedule": "parallel_scenes_false",
+  "actual_schedule": "scene0001_and_scene0002_ran_as_two_independent_CPU_processes_then_scene0003_and_scene0005_ran_as_two_independent_CPU_processes",
+  "cause": "The two-process source-only materialization was already being coordinated independently when the separate four-train execution receipt fixed a serial scheduling field.",
+  "content_impact": {
+    "shared_mutable_state": false,
+    "GPU_used": false,
+    "random_sampling": false,
+    "output_collision": false,
+    "per_scene_inputs": "unchanged_and_SHA_bound",
+    "per_scene_algorithm": "unchanged_and_deterministic",
+    "formal_acceptance": "each_no-clobber_output_must_pass_the_strict_V2_validator_and_its_independent_file_SHA"
+  },
+  "decision": "Do not reinterpret scheduling as a method or metric change. Retain the deterministic per-scene authorities if every declared input, tensor-channel SHA, content identity, and output SHA validates; do not spend compute producing byte-identical reruns only to serialize process launch.",
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

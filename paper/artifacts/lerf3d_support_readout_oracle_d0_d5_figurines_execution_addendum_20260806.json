@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_support_readout_oracle_d0_d5_figurines_execution_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_after_implementation_and_before_any_new_d2_d5_metric",
+  "parent_authorities": {
+    "preregistration": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_preregistration_20260806.json",
+      "sha256": "473b70468c14bedce0d347828800f0d029838c0c7bfe5e4c480c86f3e73febf8"
+    },
+    "teacher_availability_addendum": {
+      "path": "paper/artifacts/lerf3d_support_readout_oracle_d0_d5_figurines_teacher_availability_addendum_20260806.json",
+      "sha256": "4aa709366b9d21eb8120c365c93720b403540e2494f598d8b8eaba395125936f"
+    }
+  },
+  "implementation": {
+    "path": "radio_gs/scripts/eval_lerf_support_readout_oracle_d0_d5.py",
+    "sha256": "b97831b8c641954c3f9d7741d7b902df55d6f3dd5a22e127fe219f25522eda17",
+    "py_compile": "passed",
+    "black": "passed",
+    "git_diff_check": "passed"
+  },
+  "implementation_contract": {
+    "target_membership": "exact frozen RGB-Gaussian front-to-back contribution adjoint foreground/total ratio, thresholded at 0.5",
+    "candidate_order": "scale index ascending then strictly increasing immutable global anchor row",
+    "D2_search": "exhaustive over 247809 registered anchor/scale regions",
+    "D3_search": "top-1024 by exact D2 primitive IoU then deterministic greedy union of at most 8 regions",
+    "region_membership": "semantic core only; descriptor context shell excluded from object membership",
+    "D4_score": "stored O4 final canonical-negative probability slot 0 only where a retained teacher view exists; unavailable rows exact zero",
+    "D4_membership": "D4 score >= 0.6",
+    "D5_render": "same frozen GaussianSelectionProxy and build_mask_renderer path as the frozen evaluator, without postprocessing"
+  },
+  "source_immutability": {
+    "frozen_evaluator_sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5",
+    "frozen_evaluator_modified": false,
+    "metric_modified": false,
+    "renderer_modified": false,
+    "loss_v2p1_files_modified": false
+  },
+  "metric_open_gate": {
+    "only_figurines_development_labels_may_be_opened": true,
+    "waldo_or_other_lerf_scene_forbidden": true,
+    "oracle_results_may_not_be_reported_as_deployable_benchmark_performance": true
+  }
+}

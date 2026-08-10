@@ -1,0 +1,67 @@
+{
+  "artifact": "full_scalar_scene0004_region_comembership_chain_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T03:17:40+08:00",
+  "status": "source_validation_scene_region_comembership_chain_complete_second_validation_gate_still_closed",
+  "scene_id": "scene0004_00",
+  "cohort_split": "source_validation",
+  "base_chain": {
+    "result_path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0004_base_exact_chain_result_20260807.json",
+    "result_sha256": "7e118df959e60311bd29f5e29d5301d428d525e7f939dda0062cb4590ea0b641",
+    "pilot_receipt_sha256": "ecf203bde82675d874e0eafc11b283506ef4d9843fa1cfeb431e109a6b97ef56",
+    "factorized_field_sha256": "316b5cce8f80ec244991579cb1f16afc424b3b9a5456865f955d02778cdafc90",
+    "factorized_primitive_state_sha256": "edfaab08aa4ebe1c7850931578ffb941a1e7439c428c4521019fb7c1ce8aa7d4",
+    "factorized_radio_cache_sha256": "dea169fced97968330a599b10a4c7a8cf7f5a67b1e0b835a8eb75df49542d9a7",
+    "exact_marginal_responsibility_authority_sha256": "fd963d34b3837b0943053e8646036a98daf948544f38ea0a8fefd8c520e3cb05"
+  },
+  "response_chain": {
+    "capability_result_sha256": "eeb53e94d7a5d9f5faeb5dbea88fd25ce1d0b84f4e858b775ddf029c29b923f8",
+    "canonical_capability_bank_sha256": "a25da5ffbac16e034a3debfdc64a6a6403d727838f1be5d15f8a26d81bb6a5e9",
+    "support_graph_result_sha256": "2d4787eb6b3bf2984ac64b4c3cd50549af367b6d37e10277d8a0bf1c974adc32",
+    "canonical_support_graph_sha256": "fc3af0a4af22b50589714aa05624537666385864245111959fb185ff34d252ac",
+    "accepted_v2_result_sha256": "dd1f5ba0a6c4e4134133c45cdbf9796901b5997236ba1397ac8ee8200547480f",
+    "accepted_v2_sha256": "bbfc1ecc1ef9b5f6d638b2b954245199f671e8cb66a53c98d30d23f9df0c39de",
+    "typed_context_sha256": "e70cd2be73dc88d476b72fed13fedf008394c8795ae4802e9169b3b4b6f4d3b9",
+    "typed_context_valid": 4091,
+    "typed_context_fallback": 5
+  },
+  "region_comembership": {
+    "execution_authority_sha256": "77a40fcd5c556af465db6d46e5becf3b5590dbf17ed3cbbb5f13192e3e5600a7",
+    "authority_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v1/scene0004_00/region_comembership_authority_v1_provenance_bound.pt",
+    "authority_sha256": "f24b4ddb42ec6e5cea9badf9015dfff8fe2d2e33b671baa376433e816075244d",
+    "content_authority_sha256": "50ec0d86197c881514a57850d7ea41ffd75ffd74ab44ffe1ce6a8b61acbbe75f",
+    "canonical_regions": 4096,
+    "observed_regions": 3975,
+    "candidate_pairs": 57937,
+    "same_instance_pairs": 51657,
+    "candidate_graph_oracle_instance_macro_iou": 0.9875157512143075,
+    "candidate_graph_oracle_instance_macro_f1": 0.9909178351367183,
+    "candidate_graph_oracle_contamination": 0.0
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "maximum_temperature_c": 77,
+    "maximum_power_w": 275.33,
+    "thermal_warnings": 0,
+    "thermal_aborts": 0,
+    "all_cuda_release_checks_passed": true,
+    "official_multiview_siglip2_teacher_executed": false
+  },
+  "cohort_gate": {
+    "source_train_complete": true,
+    "source_validation_complete_scenes": ["scene0004_00"],
+    "source_validation_missing_scenes": ["scene0008_00"],
+    "training_authorized": false,
+    "target_execution_authorized": false
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

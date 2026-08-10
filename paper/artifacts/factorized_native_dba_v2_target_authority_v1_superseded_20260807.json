@@ -1,0 +1,30 @@
+{
+  "schema": "radio_gs.factorized_native_dba_v2_target_authority_supersession.v1",
+  "schema_version": 1,
+  "status": "SUPERSEDED_BEFORE_ANY_DESCRIPTOR_QUERY_OR_METRIC_MATERIALIZATION",
+  "superseded_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_dba_v2_target/figurines/execution_authority.json",
+    "sha256": "bcfe9ed7b1a76832a1e924fdb66061b246ced21620adeda3311dbc21e2f8e20d"
+  },
+  "superseded_implementation_sha256": "a7dd5e1fc3d2980dd9f3866d1fe1e81f2f77d7ada0f5e4bc536f18997698cc65",
+  "replacement_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_factorized_native_dba_v2_figurines.py",
+    "sha256": "120b43acff5a81cbdbe96fa845d50b08e713cb0d0bd004cc8fd86315f19c5373"
+  },
+  "reasons": [
+    "old O0 comparator was not the exact frozen KNN10, raw-peak scale selection, and independent per-scale minmax/clip readout",
+    "legacy contrast-v21 relevance did not have a complete scene, physical-space, row, fingerprint, query, dtype, and finite binding",
+    "descriptor authority did not explicitly bind the promoted DBA-v2 source result, checkpoint, and selected step 40",
+    "O0 positive and negative xyz, valid, scale, radii, geometry, renderer, and negative-query identities were not fully interbound"
+  ],
+  "execution_audit": {
+    "descriptor_materialized": false,
+    "query_relevance_materialized": false,
+    "target_metric_executed": false
+  },
+  "replacement_test": {
+    "path": "/root/RADIO-GS/tests/test_materialize_factorized_native_dba_v2_figurines.py",
+    "sha256": "131e79aa35dc997cbe2c26459887e38d4dc0a808a9042e9c433d9dd11101a0f8",
+    "passed": 30
+  }
+}

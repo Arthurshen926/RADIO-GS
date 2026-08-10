@@ -1,0 +1,143 @@
+{
+  "artifact": "source_only_region_comembership_v1_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_builder_model_training_or_target_execution",
+  "scientific_question": "Can exact source-view instance co-membership teach one scene-independent region-pair probability that filters target-blind text seeds into object-consistent multi-region unions?",
+  "motivation": {
+    "failed_predecessors": [
+      "target_blind_multi_region_union_v1",
+      "target_blind_connected_multi_region_union_v2"
+    ],
+    "identified_gap": "Appearance, geometry and generic graph connectivity do not identify whether two semantically plausible regions belong to the same object instance.",
+    "forbidden_response": "No LERF scene, label, query, target metric or per-scene threshold may be used to define or tune co-membership."
+  },
+  "fixed_source_cohort": {
+    "source_train": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0003_00",
+      "scene0005_00"
+    ],
+    "source_validation": ["scene0004_00", "scene0008_00"],
+    "authority": {
+      "path": "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+      "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463"
+    },
+    "scene_and_physical_space_disjoint": true
+  },
+  "source_instance_evidence": {
+    "dataset": "ScanNet v2 official filtered 2D instance annotations",
+    "archive": "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "member_pattern": "scans/{scene_id}/{scene_id}_2d-instance-filt.zip",
+    "scene0001_member_sha256": "9f7660a48028e4a404b09edfa7f7d6e3a7684769d1ca76372dd0d4b5aacafa6b",
+    "label_zero_semantics": "unlabeled_or_background_not_an_instance",
+    "benchmark_source": false,
+    "query_independent": true
+  },
+  "scene0001_audit": {
+    "exact_marginal_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/exact_marginal_responsibility_authority.json",
+      "sha256": "2a8c061061aa4e7d9481878232c7ba63323da0d039585ec7d82978e32a3d2e7e",
+      "views": 120,
+      "raster_height": 60,
+      "raster_width": 80
+    },
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+      "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8",
+      "canonical_regions": 4096
+    },
+    "typed_context": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/typed_context_stage_b_adaptive_v2.pt",
+      "sha256": "2b27eda34e292096b4f9222a545209230ee2017a980786ee433ea1f293232dda"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "040691ac254610b67a6e7269031dcaf7eb356e6a5bd6120b35f98493446b576c"
+    },
+    "factorized_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/exact_state/scene0001_00/factorized_primitive_state_v2.pt",
+      "sha256": "ed9cb9a7cbef9dc5c0149479946c8000b954e0ce6ecec516eb8a5fb2dd351ce9"
+    },
+    "instance_png": {
+      "native_height": 968,
+      "native_width": 1296,
+      "available_frame_ids": 1544,
+      "exact_view_frame_ids_present": 120,
+      "missing_exact_view_frame_ids": 0
+    },
+    "sufficient_for_single_scene_builder_and_dry_run": true
+  },
+  "evidence_aggregation": {
+    "pixel_alignment": "resize each exact frame's uint instance map directly to exact raster HxW with nearest-neighbor, then use row-major pixel_id",
+    "exact_hit_weight": "base_weight_squared_divided_by_sum_base_weight_at_pixel",
+    "primitive_instance_mass": "sum exact_hit_weight by gaussian_id and positive instance_id across all bound source views",
+    "region_instance_mass": "sum primitive_instance_mass over the AcceptedV2 token_mask-selected region core rows",
+    "dominant_instance": "argmax positive instance mass with smallest-ID deterministic tie break",
+    "instance_purity": "dominant positive instance mass divided by total positive instance mass",
+    "instance_label_coverage": "total positive instance mass divided by all exact visible mass including label zero",
+    "unobserved_or_zero_positive_mass": "dominant_instance=-1, purity=0, coverage=0"
+  },
+  "pair_authority": {
+    "candidate_union": [
+      "top16 frozen AcceptedV2 descriptor cosine neighbors per region",
+      "top16 region-centroid Euclidean neighbors per region",
+      "AcceptedV2 anchor pairs joined by one frozen support-graph edge"
+    ],
+    "undirected_canonical_order": "minimum_region_row_then_maximum_region_row_sorted_unique",
+    "same_instance_target": "both dominant IDs positive and exactly equal",
+    "target_weight": "geometric mean label coverage times product of instance purities",
+    "zero_target_weight": "excluded from training denominator but retained in authority audit",
+    "features": [
+      "frozen_descriptor_cosine",
+      "pooled_typed_context_cosine",
+      "typed_context_statistics_absolute_difference_mean",
+      "typed_context_statistics_absolute_difference_maximum",
+      "core_overlap_over_minimum_core_size",
+      "anchor_support_adjacency",
+      "anchor_support_raw_affinity",
+      "centroid_distance_m",
+      "centroid_distance_over_maximum_region_radius",
+      "absolute_log_radius_difference",
+      "same_scale_index",
+      "minimum_core_observation_evidence",
+      "minimum_core_visibility_purity",
+      "absolute_core_observation_evidence_difference",
+      "absolute_core_visibility_purity_difference"
+    ]
+  },
+  "model_and_selection": {
+    "model": "one shared normalized linear logistic pair head; no scene embedding and no query input",
+    "feature_normalization": "coordinate median and 1.4826*MAD fit on the four source-train scenes only",
+    "loss": "equal-scene, class-balanced, evidence-weighted binary cross entropy",
+    "optimizer": "AdamW seed0 lr=0.001 weight_decay=0.0001 maximum_epochs=100 patience=12",
+    "checkpoint_selection": "minimum source-validation scene-macro weighted BCE, epoch0 identity-logit candidate included",
+    "decision_threshold": "single global threshold maximizing source-validation scene-macro evidence-weighted F1 over the fixed grid 0.05 through 0.95 step 0.05; lowest threshold wins exact ties",
+    "four_train_two_validation_required_before_target_use": true,
+    "single_scene_training_or_threshold_selection": false,
+    "per_scene_hyperparameters": false
+  },
+  "query_interface": {
+    "input": "target-blind text seed region indices plus pair probabilities on the same candidate-pair construction",
+    "operation": "retain seed-connected regions through edges at or above the single frozen source-validation threshold",
+    "text_score_used_as_pair_feature": false,
+    "target_scene_parameter": false
+  },
+  "execution_gates": {
+    "scene0001_builder_model_cli_and_synthetic_tests": true,
+    "scene0001_authority_materialization": true,
+    "four_train_two_validation_training": false,
+    "target_execution_before_4plus2_gate": false,
+    "figurines_metric_reopen": false
+  },
+  "source_access": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  }
+}

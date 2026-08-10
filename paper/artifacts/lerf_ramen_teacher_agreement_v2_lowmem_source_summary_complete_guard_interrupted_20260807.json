@@ -1,0 +1,134 @@
+{
+  "accepted_rows": 221608,
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+    "sha256": "939c82d5e4a3cab51982dcac5ef318604f9072ee85a3b0e0a0e86d2c9fdd4ed5"
+  },
+  "expected_absent_outputs": {
+    "o1_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o1_negative.pt",
+    "o1_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o1_positive.pt",
+    "o2_negative": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o2_negative.pt",
+    "o2_positive": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o2_positive.pt",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_o1_o2_streaming_result.json"
+  },
+  "interruption": {
+    "algorithm_exception": false,
+    "cause": "thermal_guard_compute_owner_namespace_mismatch_under_strict_mode",
+    "foreign_host_compute_pid_reported": "516762",
+    "gpu_out_of_memory": false,
+    "guard_exit_code": 86,
+    "guard_poll_seconds": 300,
+    "guard_stderr": "GPU0 has owner(s) outside guarded PGID 900566: 516762",
+    "host_out_of_memory": false,
+    "next_run_owner_namespace_mode": "exclusive-singleton-after-clear-v1",
+    "stage": "after_teacher_payload_atomic_publish_before_score_cache_publish",
+    "thermal_overheat": false
+  },
+  "materializer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+    "sha256": "7c7a2096bb927ae5b6aef99349e4dd66a62782df9f87c290e47ec13f098484a7"
+  },
+  "method_contract_sha256": "78e4d78293a863ba962440cccfdc5b62dd0b4c9b14e941722df63b708c44cba0",
+  "recovery_policy": {
+    "partial_artifact_preserved": true,
+    "ramen_rerun_authorized": false,
+    "teacher_payload_sufficient_for_cross_scene_source_selector": true,
+    "teatime_requires_fresh_authority_and_outputs": true
+  },
+  "result_materialization_complete": false,
+  "rows_with_teacher": 221608,
+  "scene_id": "ramen",
+  "schema": "radio_gs.lerf_teacher_agreement_v2_source_summary_recovery.v1",
+  "schema_version": 1,
+  "score_materialization_complete": false,
+  "source_only_leave_one_view_out_ceiling_audit": {
+    "candidate_baseline_maximum_angle_radians": 0.15,
+    "candidate_role": "source_only_diagnostic_not_target_authorization",
+    "candidates": [
+      {
+        "cosine_sum": 2397141.231068969,
+        "delta_cosine_sum_vs_o1_0p15": 0.0,
+        "heldout_scale_observations": 2622900,
+        "maximum_angle_radians": 0.15,
+        "mean_cosine": 0.9139278016962022,
+        "mean_delta_cosine_vs_o1_0p15": 0.0,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 2424318.210954666,
+        "delta_cosine_sum_vs_o1_0p15": 27176.979885697365,
+        "heldout_scale_observations": 2622900,
+        "maximum_angle_radians": 0.3,
+        "mean_cosine": 0.9242892260302208,
+        "mean_delta_cosine_vs_o1_0p15": 0.010361424334018592,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 2426072.1535997987,
+        "delta_cosine_sum_vs_o1_0p15": 28930.922530829906,
+        "heldout_scale_observations": 2622900,
+        "maximum_angle_radians": 0.45,
+        "mean_cosine": 0.9249579296198096,
+        "mean_delta_cosine_vs_o1_0p15": 0.011030127923607422,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 2423007.1369802356,
+        "delta_cosine_sum_vs_o1_0p15": 25865.905911266804,
+        "heldout_scale_observations": 2622900,
+        "maximum_angle_radians": 0.6,
+        "mean_cosine": 0.9237893693927468,
+        "mean_delta_cosine_vs_o1_0p15": 0.00986156769654459,
+        "scene_nonregression_vs_o1_0p15": true
+      },
+      {
+        "cosine_sum": 2422030.552460015,
+        "delta_cosine_sum_vs_o1_0p15": 24889.321391046047,
+        "heldout_scale_observations": 2622900,
+        "maximum_angle_radians": 0.75,
+        "mean_cosine": 0.9234170393305177,
+        "mean_delta_cosine_vs_o1_0p15": 0.009489237634315471,
+        "scene_nonregression_vs_o1_0p15": true
+      }
+    ],
+    "cross_scene_gate": {
+      "every_source_scene_nonregression_required": true,
+      "one_global_ceiling_required": true,
+      "pooled_improvement_required": true,
+      "pooled_statistic": "sum(delta_cosine_sum_vs_o1_0p15)/sum(heldout_scale_observations)",
+      "preregister_before_target_metric": true
+    },
+    "heldout_predictions": 874300,
+    "heldout_scale_observations": 2622900,
+    "loo_direction_mean_angular_error_radians": 0.3712761693751617,
+    "loo_direction_mean_cosine": 0.923466500104135,
+    "query_independent": true,
+    "retained_view_capacity": 4,
+    "rows": 221608,
+    "rows_with_expansion_evidence": 218846,
+    "rows_with_valid_loo_prediction": 219971,
+    "schema": "radio_gs.source_only_loo_reliability_ceiling_audit.v1",
+    "schema_version": 1,
+    "target_candidate_authorized": false,
+    "target_images_labels_masks_metrics_opened": false
+  },
+  "source_only_leave_one_view_out_ceiling_audit_sha256": "d9587ada8b6ba189f548f5bbde40f7486fa902909e59e15ea92a77e564481861",
+  "source_summary_scientifically_complete": true,
+  "status": "source_summary_complete_score_materialization_guard_interrupted",
+  "target_images_labels_masks_metrics_opened": false,
+  "teacher_mean_sha256": "455f38a8f0596c9d7e7a8d36b5fda18666f4ed9d772a6ea483e83996e134252d",
+  "teacher_payload": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt",
+    "sha256": "44032362a47867a3ad0ff7873c5c43a651be24c60cba7be0be5e6db74dbc3a07"
+  },
+  "teacher_payload_validation": "validate_teacher_payload_lowmem_pass",
+  "teacher_view_directional_resultant_sha256": "4446ec75319fdcd7fd7bb9f90d03d10b01edfb5bb9d3122ac66bbae71d744a8f",
+  "thermal_guard": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+    "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "thermal_telemetry": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_gpu0_telemetry_20260807.csv",
+    "sha256": "cef5afbd0b72ff2f30945f60c6b208bdbd4c4bec353201ea0aba82a3d65c870f"
+  }
+}

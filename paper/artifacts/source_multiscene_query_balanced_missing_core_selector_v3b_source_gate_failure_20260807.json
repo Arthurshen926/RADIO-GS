@@ -1,0 +1,101 @@
+{
+  "schema": "radio_gs.source_multiscene_query_balanced_missing_core_selector_source_gate_failure.v3b",
+  "schema_version": 3,
+  "status": "failed_closed_before_model_or_report_write_and_before_external_source_validation",
+  "formal_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_multiscene_query_balanced_missing_core_selector_v3b_execution_authority_20260807.json",
+    "sha256": "337723b0bf309d20e440f4141efea8ff641710a5f25d078a28aa088a4047a887"
+  },
+  "formal_execution_code": {
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/fit_source_multiscene_query_balanced_missing_core_selector_v3.py",
+      "sha256": "f8fd35e8f43989836bff5a42622e3cb2bc3526faf88985fe756576607a0f6d92"
+    },
+    "selector_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/source_multiscene_query_balanced_missing_core_selector.py",
+      "sha256": "2f60cef460912009f6d6ac69f7b51075ace8bfd0633dfe9df8416c625ea36b6d"
+    }
+  },
+  "formal_failure": "no v3 query-safe threshold passes every source gate",
+  "outputs_created": {
+    "model": false,
+    "report": false,
+    "external_source_validation_report": false
+  },
+  "post_failure_source_only_diagnostic": {
+    "selector_interface_sha256": "397a5d209dbbd98dc126a60204ef097d9dbec2c095d8b9e274994387375ee2f8",
+    "implementation_sha256": "f8fd35e8f43989836bff5a42622e3cb2bc3526faf88985fe756576607a0f6d92",
+    "code_difference_from_formal_authority": "diagnostic counters and closest-threshold-example selection only; the formal authority must not be replayed with this post-failure interface hash",
+    "source_scene_indices": [0, 1],
+    "source_scene_ids": ["scene0001_00", "scene0002_00"],
+    "strict_lower_tail_utility_gain_CVaR_required": false,
+    "tie_complete_thresholds": 37837,
+    "overall_precision_gate_passed_thresholds": 26447,
+    "all_scene_basic_gates_passed_thresholds": 25032,
+    "all_query_gates_passed_thresholds": 0,
+    "minimum_failed_required_query_gates": 1,
+    "thresholds_at_minimum_failed_required_query_gates": 236,
+    "failure_gate_counts_at_minimum": {
+      "evaluable_query_coverage_at_least_minimum": 236,
+      "every_evaluable_query_selected_utility_nonnegative": 0,
+      "query_macro_selected_utility_strictly_above_unconditional": 0,
+      "lower_tail_20pct_selected_utility_CVaR_nonnegative": 0
+    },
+    "unique_nearest_failure_gate": "evaluable_query_coverage_at_least_minimum",
+    "coverage_gate": {
+      "minimum_candidate_units_per_query": 64,
+      "minimum_selected_units_per_query": 16,
+      "minimum_evaluable_query_fraction": 0.8,
+      "minimum_evaluable_queries_per_scene": 8
+    },
+    "closest_single_required_gate_failure": {
+      "threshold_inclusive": 0.8576989769935608,
+      "minimum_across_scenes_evaluable_query_fraction": 0.07547169811320754,
+      "scene0001_00": {
+        "candidate_sufficient_queries": 26,
+        "required_evaluable_queries": 21,
+        "evaluable_queries": 6,
+        "evaluable_query_fraction": 0.23076923076923078,
+        "evaluable_query_shortfall": 15,
+        "selected_units": 1226,
+        "hard_precision_wilson95_lower": 0.931883878170605,
+        "minimum_selected_query_utility": 0.23585962653160095,
+        "query_macro_utility_gain": 0.32918744146580914,
+        "lower_tail_20pct_selected_utility_CVaR": 0.4843603748622252
+      },
+      "scene0002_00": {
+        "candidate_sufficient_queries": 53,
+        "required_evaluable_queries": 43,
+        "evaluable_queries": 4,
+        "evaluable_query_fraction": 0.07547169811320754,
+        "evaluable_query_shortfall": 39,
+        "selected_units": 256,
+        "hard_precision_wilson95_lower": 0.8284299899148077,
+        "minimum_selected_query_utility": 0.6289035658205836,
+        "query_macro_utility_gain": 0.21570274532162417,
+        "lower_tail_20pct_selected_utility_CVaR": 0.6289035658205836
+      }
+    },
+    "best_values_observed_individually_across_scene_basic_thresholds": {
+      "minimum_across_scenes_evaluable_query_fraction": 0.8846153846153846,
+      "minimum_selected_query_utility": 0.23585962653160095,
+      "query_macro_utility_gain": 0.29998468484483515,
+      "lower_tail_20pct_selected_utility_CVaR": 0.4850282220542431,
+      "lower_tail_20pct_utility_gain_CVaR_diagnostic_only": -0.09527852540013548
+    },
+    "interpretation": "The nearest thresholds by required-gate count satisfy every required utility-sign, query-macro-gain, and selected-utility lower-tail safeguard, but the selector is too sparse across queries, especially in scene0002. Individually best values occur at different thresholds and do not constitute a feasible joint threshold."
+  },
+  "source_access": {
+    "scene0001_source_membership_opened": true,
+    "scene0002_source_membership_opened": true,
+    "scene0003_membership_opened": false,
+    "scene0004_membership_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false
+  },
+  "decision": "Reject v3b before model materialization. Do not weaken the preregistered query-coverage gate or continue threshold tuning; the next mechanism must improve query support on source data."
+}

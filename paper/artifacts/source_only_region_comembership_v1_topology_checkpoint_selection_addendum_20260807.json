@@ -1,0 +1,49 @@
+{
+  "artifact": "source_only_region_comembership_v1_topology_checkpoint_selection_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_topology_checkpoint_selection_implementation_or_any_source_validation_or_target_metric",
+  "base_preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_preregistration_20260807.json",
+    "sha256": "df4d25cb22da1340d884288400244ddc6657c3fd0e3fa65b1faf7eafd5ddd170"
+  },
+  "threshold_addendum": {
+    "path": "paper/artifacts/source_only_region_comembership_v1_topology_consistent_selection_addendum_20260807.json"
+  },
+  "replacement_clause": "This addendum replaces both the base edge-F1 threshold selection and the earlier addendum clause that retained BCE-primary checkpoint selection.",
+  "epoch_selection": {
+    "per_epoch_operation": "on the two fixed source-validation scenes, evaluate every fixed probability threshold and retain that epoch's best topology-consistent component threshold",
+    "primary": "higher_scene_macro_instance_macro_topology_score",
+    "tie_break_order": [
+      "higher_scene_macro_instance_macro_iou",
+      "higher_scene_macro_instance_macro_f1",
+      "lower_scene_macro_instance_macro_contamination",
+      "lower_scene_macro_instance_macro_giant_excess",
+      "lower_source_validation_scene_macro_balanced_weighted_bce",
+      "earlier_epoch"
+    ],
+    "early_stopping": "12 consecutive epochs without improvement under the same ordered checkpoint key",
+    "edge_bce_role": "calibration_diagnostic_and_tie_break_only",
+    "pair_edge_weighted_f1_role": "diagnostic_only"
+  },
+  "required_reporting": {
+    "scene_to_instance_macro_iou_and_f1": true,
+    "cross_instance_contamination": true,
+    "giant_component_excess": true,
+    "largest_predicted_component_scene_evidence_fraction": true,
+    "candidate_graph_oracle_ceiling": "compute connected recovery when exactly the candidate edges whose endpoints have the same positive dominant instance are retained"
+  },
+  "gate_unchanged": {
+    "four_train_two_validation_required": true,
+    "target_execution_before_gate": false,
+    "scene_specific_parameters": false
+  },
+  "access_audit_at_seal": {
+    "source_validation_metrics_computed": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

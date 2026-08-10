@@ -1,0 +1,83 @@
+{
+  "schema": "radio_gs.lerf_gaussian_valid_domain_knn_full4_result.v1",
+  "schema_version": 1,
+  "status": "complete_rejected_cross_scene_candidate",
+  "method": "O2 canonical teacher descriptor plus valid-domain Gaussian-local-bandwidth kNN10 readout",
+  "source_gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_reliability_weighted_knn_v2/source_gate_v1/source_gate_result.json",
+    "sha256": "f609c23318bc1bac35a93e98687cc3603c2393e826b8298bab128874382c0e39",
+    "selected_policy_id": "gaussian",
+    "pooled_mean_cosine_delta_vs_uniform": 0.0004011065175291151
+  },
+  "frozen_protocol_modified": false,
+  "scene_results": {
+    "figurines": {
+      "uniform_valid_domain_miou": 0.5284488797187805,
+      "gaussian_miou": 0.5286230444908142,
+      "delta_miou": 0.0001741647720336914,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/figurines/evaluation/exact_one_shot_gpu0_v1/figurines/lerf_direct_3d_selection_results.json",
+        "sha256": "3f5cc9855ea6a3fbed491502f6c93946bb6b47b1e6b408f23116ef40436d6c00"
+      }
+    },
+    "ramen": {
+      "uniform_valid_domain_miou": 0.3924490213394165,
+      "gaussian_miou": 0.39180755615234375,
+      "delta_miou": -0.0006414651870727539,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/ramen/evaluation/exact_one_shot_gpu0_v2/ramen/lerf_direct_3d_selection_results.json",
+        "sha256": "ca5a94b2828e400f6a7b9e4828f87934118cb9f96b6478814a88cbeae53eeb95"
+      }
+    },
+    "teatime": {
+      "uniform_valid_domain_miou": 0.5278149843215942,
+      "gaussian_miou": 0.5274040102958679,
+      "delta_miou": -0.00041097402572631836,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/teatime/evaluation/exact_one_shot_gpu1_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "fd3c6278fd4f525c46575680f6d976fcad8dd3911e4bf36f809e90533ba2cd2f"
+      }
+    },
+    "waldo_kitchen": {
+      "uniform_valid_domain_miou": 0.34969425201416016,
+      "gaussian_miou": 0.3491530120372772,
+      "delta_miou": -0.0005412399768829346,
+      "result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_gaussian_valid_domain_knn_v1/waldo_kitchen/evaluation/exact_one_shot_gpu0_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "3df7433c0fee484438695874c0809af3c92fd54c92a0b5dc77cee713bea7d4e0"
+      }
+    }
+  },
+  "full4_macro": {
+    "miou": {
+      "uniform_valid_domain": 0.44960178434848785,
+      "gaussian": 0.4492469057440758,
+      "delta": -0.00035487860441207886
+    },
+    "acc025": {
+      "uniform_valid_domain": 0.7900641522478475,
+      "gaussian": 0.7900641522478475,
+      "delta": 0.0
+    },
+    "acc050": {
+      "uniform_valid_domain": 0.4146792348854297,
+      "gaussian": 0.4111581081248663,
+      "delta": -0.003521126760563375
+    },
+    "boundary_f": {
+      "uniform_valid_domain": 0.6595116704702377,
+      "gaussian": 0.6599577814340591,
+      "delta": 0.00044611096382141113
+    },
+    "trimap_iou": {
+      "uniform_valid_domain": 0.36292098462581635,
+      "gaussian": 0.36264679580926895,
+      "delta": -0.0002741888165473938
+    }
+  },
+  "decision": {
+    "promote": false,
+    "reason": "Only figurines improves, the other three scenes regress, and full4 macro mIoU regresses. Source descriptor reconstruction is not a sufficient proxy for frozen text-query identity ranking.",
+    "retained_mainline": "uniform valid-domain kNN10"
+  }
+}

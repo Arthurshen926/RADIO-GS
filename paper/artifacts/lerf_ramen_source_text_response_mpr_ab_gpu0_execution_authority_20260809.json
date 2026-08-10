@@ -1,0 +1,129 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_summary_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_compact_summary",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_source_text_response_summaries.py",
+    "sha256": "13051ef79ef90d0b0ba001664ad97c684d401a066017af9e9958a2e68812eb04"
+  },
+  "frame_evaluator_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/lerf_source_text_response_ranking.py",
+    "sha256": "25792bb0b41e3117e95137f3007caa36dd8e5bc470892f3c9c35688bfc6ca5b7"
+  },
+  "scene_id": "ramen",
+  "source_heldout_frame_ids": [2, 45, 87, 130],
+  "forbidden_target_frame_ids": [6, 24, 60, 65, 81, 119, 128],
+  "inputs": {
+    "source_gate_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_source_text_response_ranking_preregistration_20260809.json",
+      "sha256": "8fdc6510b03d8624d869022705127ad2802262d245826f02be492541c741af6c"
+    },
+    "source_view_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_official_crop_summary_source_heldout_preregistration_20260809.json",
+      "sha256": "3ae93f9e1217edfa1ea17163e7c9c79921f1a15b2808e226a3d81994140771f6"
+    },
+    "scene_config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_official_crop_summary_train.yaml",
+      "sha256": "cbbc536db5c283dc40195d9c0e4ac704b1d6672ff24254ca05cd8082e9f1e16b"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "query_bank_artifact": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+      "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4"
+    },
+    "query_bank_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.manifest.json",
+      "sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3"
+    },
+    "source_reseal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/ramen_official_crop_summary_content_reseal.json",
+      "required_schema": "radio_gs.lerf_official_crop_summary_reseal.v1",
+      "required_mode": "content_addressed_immutable_reseal"
+    }
+  },
+  "methods": [
+    {
+      "method_id": "legacy_teacher_mean_v2",
+      "role": "control",
+      "descriptor_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt",
+        "sha256": "44032362a47867a3ad0ff7873c5c43a651be24c60cba7be0be5e6db74dbc3a07"
+      },
+      "descriptor_payload_kind": "sparse_teacher_mean_v2",
+      "descriptor_payload_contract": {
+        "schema": "radio_gs.lerf_source_teacher_mean_siglip.v2",
+        "schema_version": 2,
+        "descriptor_dimension": 1536
+      },
+      "descriptor_provenance_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+        "sha256": "939c82d5e4a3cab51982dcac5ef318604f9072ee85a3b0e0a0e86d2c9fdd4ed5"
+      }
+    },
+    {
+      "method_id": "genuine_official_crop_summary_mpr",
+      "role": "candidate",
+      "descriptor_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_lifting/ramen_official_crop_summary_mpr.pt",
+        "sha256": "1e6c04f896addec052a6b218c8bd32edf91568349133392ca20329b02a50f945"
+      },
+      "descriptor_payload_kind": "dense_official_crop_summary_mpr_v1",
+      "descriptor_payload_contract": {
+        "metadata_schema_version": 1,
+        "feature_space": "semantic_descriptor",
+        "construction": "semantic_descriptor_raster_gaussian_top1_contribution_mean",
+        "descriptor_dimension": 1536
+      },
+      "descriptor_provenance_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_official_crop_summary_source_heldout_gpu0_execution_authority_20260809.json",
+        "sha256": "890b8c9d018a5843a41213a79a036fd72675cca85f9e602eb2067f53b9839c6d"
+      }
+    }
+  ],
+  "equivalence_smoke": false,
+  "query_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+    "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.manifest.json",
+    "manifest_sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3",
+    "query_split": "dev",
+    "queries": 101,
+    "embedding_tensor_sha256": "f08fea4e73e7b2125fba5ccc70ef07f9eb5c565a571054c3d72a56da1aec016d"
+  },
+  "geometry": {
+    "num_gaussians": 382687,
+    "xyz_sha256": "9eff48af13e315e933a43cbb9598aa74b087f5b8b7698f4274672b8bc329310e"
+  },
+  "execution": {
+    "required_cuda_visible_devices": "0",
+    "program_device": "cuda:0",
+    "physical_gpu": 0,
+    "thermal_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    },
+    "thermal_poll_seconds": 300,
+    "maximum_temperature_c": 88,
+    "soft_pause_temperature_c": 0,
+    "power_limit_watts": 300
+  },
+  "outputs": {
+    "control_summary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_ranking_v1/ramen/ramen_legacy_teacher_mean_v2_source_response_summary.json",
+    "candidate_summary": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_ranking_v1/ramen/ramen_genuine_official_crop_summary_mpr_source_response_summary.json",
+    "result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_source_text_response_ranking_v1/ramen/ramen_source_text_response_mpr_ab_result.json"
+  },
+  "content_bindings": {
+    "source_reseal": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/ramen_official_crop_summary_content_reseal.json",
+      "sha256": "0b23676b4ee5a6ba61e33e15d5de8bc69b2c95268e413e8294ded830c0a1ecba"
+    }
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_masks_or_labels_opened": false,
+    "target_metric_execution_authorized": false
+  }
+}

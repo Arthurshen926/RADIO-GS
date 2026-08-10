@@ -1,0 +1,32 @@
+{
+  "schema": "radio_gs.lerf_exact_fp32_o0_frozen_config_control_replay_result.v1",
+  "schema_version": 1,
+  "status": "passed_exact_frozen_lineage_control_replay",
+  "scene_id": "teatime",
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_teatime_frozen_config_control_metric_execution_authority_20260807.json",
+    "sha256": "30d4243919880b23b2f8e373c60feffeac09591fb75e2a7fcac7d2204d517da7"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/evaluation/o0_exact_frozen_config_control_v1/teatime/lerf_direct_3d_selection_results.json",
+    "sha256": "ac02a4ed0566813027ddcb5021c495138d5f3f889d632f24b37338df963ec1d0"
+  },
+  "metrics": {
+    "miou": 0.404494971036911,
+    "acc025": 0.7457627118644068,
+    "acc050": 0.3050847457627119,
+    "boundary_f": 0.5610557198524475,
+    "trimap_iou": 0.44391149282455444,
+    "n": 59
+  },
+  "frozen_config_sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775",
+  "renderer_checkpoint_sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035",
+  "lineage_replay_passed": true,
+  "telemetry": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1_fix4/teatime/o0_exact_control_gpu0_telemetry.csv",
+    "sha256": "c419e359f55b192e06e95ef1452e178bfe886fcc12e36b166da494600b989452",
+    "peak_temperature_c": 53,
+    "thermal_guard_triggered": false
+  },
+  "candidate_metric_gate": "satisfied_for_subsequently_frozen_O1_and_O2_single_candidate_authorities"
+}

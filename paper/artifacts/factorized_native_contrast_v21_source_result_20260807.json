@@ -1,0 +1,100 @@
+{
+  "schema": "radio_gs.factorized_native_contrast_v21_source_result_summary.v1",
+  "schema_version": 1,
+  "status": "source_only_promotion_candidate_complete",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/factorized_native_gauge_state_readout_exact4x2_contrast_v21_execution_authority_20260807.json",
+    "sha256": "f24008d976067a5b0ee42eb2b9cf3e3276c11199c82b68754f5c000a5166c171"
+  },
+  "frozen_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt.json",
+    "sha256": "bc264f50c33a20199201875eba638ee36c654b888d270d32d3259beeebd5debc"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt",
+    "sha256": "952e1d841969c8d2d48586aa8d08a59d4e28fadea10b56d4c17557df1c434185"
+  },
+  "normalization": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt.normalization.pt",
+    "sha256": "24fa2a5c909a4399301a0eaa059e6c2573a12b763eaf6d3a73db87e0209d1d41"
+  },
+  "contrast_reference": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt.contrast_reference.pt",
+    "sha256": "c2790f57a0b24373c223c7afc4aebc46df835485d2361db92c18753301107440"
+  },
+  "selected_step": 60,
+  "eligible_steps": [30, 35, 40, 45, 50, 55, 60],
+  "step60_macro": {
+    "mean_all_view_cosine": 0.9443123638629913,
+    "p05_row_mean_all_view_cosine": 0.9010376632213593,
+    "mean_teacher_centered_residual_cosine": 0.46052832901477814,
+    "p05_teacher_centered_residual_cosine": 0.1579553186893463,
+    "student_to_teacher_spread_ratio": 0.8853855729103088,
+    "teacher_centered_pair_gram_mae": 0.3048253506422043,
+    "teacher_centered_pair_gram_correlation": 0.6308377385139465,
+    "absolute_visual_probe_response_mae": 0.02648248430341482,
+    "absolute_visual_probe_response_correlation": 0.6530578136444092,
+    "absolute_visual_probe_response_std_ratio": 0.9239076375961304,
+    "raw_relative_macro_mean_improvement": 0.37184679221099776,
+    "centered_residual_absolute_macro_mean_improvement": 0.43675739131867886
+  },
+  "step60_per_scene": {
+    "scene0004_00": {
+      "eligible_rows": 4096,
+      "mean_all_view_cosine": 0.9365860819816589,
+      "p05_row_mean_all_view_cosine": 0.8935161828994751,
+      "mean_teacher_centered_residual_cosine": 0.456692636013031,
+      "p05_teacher_centered_residual_cosine": 0.15829141438007355,
+      "student_centroid_norm": 0.9699001312255859,
+      "student_to_teacher_spread_ratio": 0.8555445671081543,
+      "teacher_centered_pair_gram_mae": 0.2797059714794159,
+      "teacher_centered_pair_gram_correlation": 0.6896118521690369,
+      "absolute_visual_probe_response_mae": 0.028345098719000816,
+      "absolute_visual_probe_response_correlation": 0.6971458792686462,
+      "absolute_visual_probe_response_std_ratio": 0.8343454599380493,
+      "pair_comparator": "variance_unqualified_strict_mae_improvement"
+    },
+    "scene0008_00": {
+      "eligible_rows": 4096,
+      "mean_all_view_cosine": 0.9520386457443237,
+      "p05_row_mean_all_view_cosine": 0.9085591435432434,
+      "mean_teacher_centered_residual_cosine": 0.46436402201652527,
+      "p05_teacher_centered_residual_cosine": 0.15761922299861908,
+      "student_centroid_norm": 0.9694122672080994,
+      "student_to_teacher_spread_ratio": 0.9152265787124634,
+      "teacher_centered_pair_gram_mae": 0.3299447298049927,
+      "teacher_centered_pair_gram_correlation": 0.5720636248588562,
+      "absolute_visual_probe_response_mae": 0.024619869887828827,
+      "absolute_visual_probe_response_correlation": 0.6089697480201721,
+      "absolute_visual_probe_response_std_ratio": 1.0134698152542114,
+      "pair_comparator": "variance_unqualified_strict_mae_improvement"
+    }
+  },
+  "step60_gate": {
+    "raw_macro_relative_improvement_at_least_0p2_percent": true,
+    "centered_residual_macro_absolute_improvement_at_least_0p02": true,
+    "every_scene_raw_mean_and_p05_non_regression": true,
+    "every_scene_centered_mean_and_p05_non_regression": true,
+    "every_scene_centroid_dispersion_at_least_0p75_teacher": true,
+    "every_scene_pair_gram_correlation_at_least_0p20": true,
+    "every_scene_pair_geometry_conditional_baseline": true,
+    "every_scene_absolute_visual_probe_calibrated": true,
+    "every_scene_has_two_rows": true
+  },
+  "closure_audit": {
+    "trajectory_model_state_sha_matches_frozen_v2_at_every_evaluated_step": true,
+    "validation_payload_excluding_selection_matches_frozen_v2": true,
+    "contrast_v2_authority_result_and_implementation_modified": false,
+    "checkpoint_strict_model_load_passed": true
+  },
+  "access_audit": {
+    "source_train_4_and_source_validation_2_only": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_labels_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "text_queries_opened": false
+  }
+}

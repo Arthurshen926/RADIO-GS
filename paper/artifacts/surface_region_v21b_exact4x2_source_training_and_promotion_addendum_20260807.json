@@ -1,0 +1,78 @@
+{
+  "artifact_type": "source_only_method_preregistration_addendum",
+  "benchmark_access_before_addendum": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_heldout_opened": false
+  },
+  "cohort": {
+    "source_train": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0003_00",
+      "scene0005_00"
+    ],
+    "source_validation": [
+      "scene0004_00",
+      "scene0008_00"
+    ]
+  },
+  "date": "2026-08-07",
+  "hard_negative_objective": {
+    "absolute_and_profile_rows": "complete_canonical_scene",
+    "pairwise_denominator": "authority_pairs_with_at_least_one_trainable_endpoint",
+    "triplet_denominator": "authority_pairs_whose_anchor_endpoint_is_trainable",
+    "validation_uses_same_denominators": true
+  },
+  "model_preregistration": {
+    "path": "paper/artifacts/surface_region_v21b_reliability_conditioned_rank256_preregistration_20260807.json",
+    "sha256": "5397e29ece42b03c8af0b77865a9c8327920c59f0be050dbd99eb8ca91ece60a"
+  },
+  "optimization": {
+    "early_stopping": false,
+    "equal_scene_gradient_accumulation": true,
+    "optimizer_steps": 30,
+    "scene_order": "fixed_source_train_order"
+  },
+  "promotion": {
+    "active_row_coverage": {
+      "aggregation": "every_source_validation_scene",
+      "denominator": "complete_canonical_scene_rows",
+      "minimum": 0.95
+    },
+    "absolute_relevance_every_scene_non_regression": true,
+    "pairwise_endpoint_coverage": {
+      "aggregation": "every_source_validation_scene",
+      "denominator": "all_authority_hard_negative_pairs",
+      "minimum": 0.95
+    },
+    "relative_improvement_from_epoch_zero": {
+      "formula": "(epoch_zero_loss-candidate_loss)/max(abs(epoch_zero_loss),1e-12)",
+      "minimum": 0.005,
+      "required_scene_macro_losses": [
+        "auxiliary_loss",
+        "absolute_relevance_loss",
+        "continuous_pairwise_relevance_loss"
+      ]
+    },
+    "selection_after_eligibility": [
+      "minimum_scene_macro_auxiliary_loss",
+      "earliest_optimizer_step"
+    ],
+    "v1_fidelity_non_regression": true
+  },
+  "reconstructability": {
+    "epoch_zero_state_saved": true,
+    "every_promotion_eligible_state_saved": true,
+    "state_sha256_bound_in_history": true
+  },
+  "result_policy": {
+    "no_eligible_state": "write_normalization_state_archive_and_full_diagnostic_history_but_no_promoted_checkpoint_or_certificate",
+    "source_gate_default": "require_promotion_and_fail_closed",
+    "target_or_query_access_before_source_pass": false
+  },
+  "scope": "independent_v21b_trainer_checkpoint_source_gate_and_execution_builder",
+  "status": "preregistered_before_implementation"
+}

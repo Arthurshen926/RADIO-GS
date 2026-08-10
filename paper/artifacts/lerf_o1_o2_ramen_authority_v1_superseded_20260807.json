@@ -1,0 +1,26 @@
+{
+  "schema": "radio_gs.lerf_o1_o2_streaming_authority_supersession.v1",
+  "schema_version": 1,
+  "status": "SUPERSEDED_BEFORE_GPU_OR_OUTPUT_MATERIALIZATION",
+  "superseded_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_streaming_v1/ramen/execution_authority.json",
+    "sha256": "b0f8a334883d654f6869b7fbeb38c79c01a9c40f2273511aa22d3f2b4b1d6054"
+  },
+  "reason": "The inherited Figurines validator incorrectly required primary_valid and semantic_confidence fields that are optional across the frozen v5 multiscale descriptor cohort; Ramen validly omits both.",
+  "replacement_validator": "shared seven-field v5 core plus only the two registered optional fields, with full axis, finite, query-invariant, no-target-access, and scale checks",
+  "replacement_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_streaming.py",
+    "sha256": "f779d025e0754dec583c4565542995c6133e4217d60bcf725090336c81370058"
+  },
+  "replacement_tests": {
+    "path": "/root/RADIO-GS/tests/test_materialize_lerf_o1_o2_streaming.py",
+    "sha256": "cc24d89eefc9d461739aef8640c87a453f53cbfc1be376e71086d5308b9287b2",
+    "related_passed": 25
+  },
+  "execution_audit": {
+    "gpu_started": false,
+    "teacher_mean_materialized": false,
+    "o1_or_o2_cache_materialized": false,
+    "metric_executed": false
+  }
+}

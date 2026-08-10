@@ -1,0 +1,69 @@
+{
+  "artifact": "surface_region_v21_pilot_baseline1_source_result",
+  "schema_version": 1,
+  "completed_at": "2026-08-07T07:06:26+08:00",
+  "status": "source_learning_effective_but_promotion_rejected_on_pairwise",
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21_pilot_baseline1/checkpoint.pt.json",
+    "sha256": "e347434bb2d5bfb0bd3d9e98d46f015f3118713d4e0e1bdfe8106e1bd4f3b630"
+  },
+  "checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21_pilot_baseline1/checkpoint.pt",
+    "sha256": "31c0022f731d001edc4ceedaa1c4efae35c9038dc9bdd674a455db7e31f8d9a3",
+    "selected_epoch": 30,
+    "model_state_dict_sha256": "6f281c8748b9aedbe6d47dc3702cc845d497ac91009b4c02873bd3623a244075"
+  },
+  "source_validation_macro": {
+    "epoch_zero": {
+      "response_auxiliary_loss": 0.09711384773254395,
+      "response_absolute_relevance_loss": 0.02170814387500286,
+      "response_continuous_pairwise_relevance_loss": 0.014229141175746918
+    },
+    "selected": {
+      "response_auxiliary_loss": 0.09339208900928497,
+      "response_absolute_relevance_loss": 0.018622868694365025,
+      "response_continuous_pairwise_relevance_loss": 0.014301714021712542
+    },
+    "relative_change_percent": {
+      "response_auxiliary_loss": -3.832366660529063,
+      "response_absolute_relevance_loss": -14.212524103410617,
+      "response_continuous_pairwise_relevance_loss": 0.5100296993983067
+    }
+  },
+  "v1_fidelity_selected_minus_epoch_zero": {
+    "mean_all_view_cosine": 0.033691465854644775,
+    "p05_row_mean_all_view_cosine": 0.0451928973197937,
+    "relation_fidelity": 0.008782893419265747
+  },
+  "promotion": {
+    "selected_epoch_positive": true,
+    "auxiliary_macro_strictly_improved": true,
+    "absolute_relevance_macro_strictly_improved": true,
+    "absolute_relevance_every_scene_non_regression": true,
+    "continuous_pairwise_macro_strictly_improved": false,
+    "v1_fidelity_non_regression": true,
+    "passed": false,
+    "full_promotion_epochs_in_history": []
+  },
+  "causal_conclusion": {
+    "field_learning_signal_effective": true,
+    "epoch_zero_fallback": false,
+    "checkpoint_reselection_alone_sufficient": false,
+    "remaining_source_failure": "continuous_pairwise_objective_conflicts_with_auxiliary_and_absolute_relevance_improvement",
+    "next_action": "train independently preregistered V2.1A objective-selection rescue and V2.1B reliability-conditioned rank-256 candidate"
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "power_limit_w": 300.0,
+    "maximum_observed_temperature_c": 62,
+    "thermal_abort": false
+  },
+  "source_access": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_metrics_computed": false,
+    "benchmark_execution": false
+  }
+}

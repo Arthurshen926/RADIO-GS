@@ -1,0 +1,77 @@
+{
+  "artifact": "source_only_region_comembership_v2_formal_selection_efficiency_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_complete_4train_2validation_authorities_or_formal_execution",
+  "parent_preregistration": {
+    "path": "paper/artifacts/source_only_region_comembership_v2_preregistration_20260807.json",
+    "role": "supersedes_only_the_impractical_every_epoch_exhaustive_selection_schedule_and_early_stopping_implementation"
+  },
+  "motivation": "Exact primitive-row deduplication across every eligible seed is the correct selection metric but cannot be recomputed for 101 checkpoints times every threshold_method_K tuple. A deterministic high-recall proxy shortlist preserves direct primitive final selection without making region evidence the final objective.",
+  "training_schedule": {
+    "epochs": 100,
+    "early_stopping": false,
+    "retained_checkpoint_epochs": [
+      0,
+      25,
+      50,
+      75,
+      100
+    ],
+    "reason": "fixed before validation; avoids using an unaligned BCE or region proxy for early stopping"
+  },
+  "proxy_seed_subset_per_validation_scene": {
+    "maximum_seeds": 256,
+    "construction": "include the lowest-canonical-index eligible seed for every positive instance then fill remaining slots by deterministic evenly-spaced indices over the remaining canonical-order eligible seeds",
+    "uses_primitive_labels": true,
+    "gradient": false,
+    "final_metric_role": false
+  },
+  "proxy_grid": {
+    "methods": [
+      "maximum_product",
+      "dual_path_widest",
+      "multipoint_consistency"
+    ],
+    "maximum_regions": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "thresholds": "0.05_to_0.95_inclusive_step_0.05",
+    "metric": "canonical_region_evidence_topology_score_on_fixed_proxy_seeds"
+  },
+  "deterministic_shortlist_per_checkpoint": {
+    "always_include": "singleton_K1",
+    "per_method_and_K": "for each method and each K in 2_4_8 include its one proxy-best threshold",
+    "global_supplement": "include the proxy-global top 8 nonsingleton tuples before deduplication",
+    "maximum_unique_rules": 18,
+    "tie_break": "proxy_topology_then_IoU_then_F1_then_low_contamination_then_low_giant_excess_then_low_K_then_low_threshold_then_registered_method_order"
+  },
+  "exact_selection": {
+    "seeds": "all eligible positive-instance validation region seeds",
+    "metric": "deduplicated exact primitive-instance topology score",
+    "aggregation": "seed-target-mass weighted within instance_then_equal-instance_then_equal-scene",
+    "joint_axis": "retained_checkpoint_epoch_times_shortlisted_global_rule",
+    "tie_break": "higher_topology_then_IoU_then_F1_then_lower_contamination_then_lower_giant_excess_then_lower_K_then_lower_threshold_then_earlier_epoch_then_registered_method_order",
+    "region_proxy_final_ranking_role": false
+  },
+  "promotion": {
+    "selected_epoch_positive": true,
+    "strictly_exceed_exact_singleton": [
+      "topology_score",
+      "IoU",
+      "F1"
+    ],
+    "target_execution_before_promotion": false
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

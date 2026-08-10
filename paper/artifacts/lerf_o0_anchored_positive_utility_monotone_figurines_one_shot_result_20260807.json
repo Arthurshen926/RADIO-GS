@@ -1,0 +1,100 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_positive_utility_monotone_one_shot_result.v1",
+  "schema_version": 1,
+  "status": "single_candidate_complete_promotion_rule_passed_small_gain",
+  "scene": "figurines",
+  "preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_positive_utility_monotone_figurines_one_shot_preregistration_20260807.json",
+    "sha256": "ede0c483f631ec96468091cabf0ab159d401353b406dcdd49957779246e21df8"
+  },
+  "metric_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_anchored_positive_utility_monotone_figurines_one_shot_metric_execution_authority_20260807.json",
+    "sha256": "ce09cf93021e1f3d00dcae8b6bdd9f7fe422f35767912ad0eb57c7d50a556155"
+  },
+  "candidate_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility_monotone.fix4c.pt",
+    "sha256": "3089fe4cc481d52a2f2c501591c639d8d913d7d123888903dc51a0b2d80849ff"
+  },
+  "metric_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/evaluation/figurines_positive_utility_fix4c_one_shot/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "83c9cdd07267f89c0a231702fe3fa470202078298af91241a177871b79e1ecc8"
+  },
+  "protocol": {
+    "preset": "vala_paper_3d",
+    "selection_threshold": 0.6,
+    "score_postprocess": "none",
+    "projection": "selected_only_alpha",
+    "mask_refinement": "none",
+    "object_count": 56,
+    "category_count": 21
+  },
+  "primary_metric": {
+    "name": "exact_macro_mIoU",
+    "frozen_O0": 0.4753887355327606,
+    "candidate": 0.47654908895492554,
+    "absolute_delta": 0.001160353422164917,
+    "relative_delta_percent": 0.2440851739712535,
+    "promotion_tolerance": 1e-12,
+    "promotion_rule_passed": true
+  },
+  "secondary_metrics": {
+    "acc_at_0.25": 0.7857142857142857,
+    "acc_at_0.50": 0.5357142857142857,
+    "boundary_f": 0.6824363470077515,
+    "trimap_iou": 0.38206419348716736
+  },
+  "affected_category_mIoU": {
+    "green apple": {
+      "frozen_O0": 0.5775737166404724,
+      "candidate": 0.6033286452293396,
+      "delta": 0.025754928588867188
+    },
+    "pumpkin": {
+      "frozen_O0": 0.8319082856178284,
+      "candidate": 0.8483128547668457,
+      "delta": 0.016404569149017334
+    },
+    "red apple": {
+      "frozen_O0": 0.47470521926879883,
+      "candidate": 0.47143062949180603,
+      "delta": -0.003274589776992798
+    },
+    "red toy chair": {
+      "frozen_O0": 0.4404141306877136,
+      "candidate": 0.4374190866947174,
+      "delta": -0.002995043992996216
+    },
+    "rubber duck with buoy": {
+      "frozen_O0": 0.5273529291152954,
+      "candidate": 0.5134773254394531,
+      "delta": -0.013875603675842285
+    }
+  },
+  "interpretation": {
+    "actual_method_improvement_observed": true,
+    "gain_size": "small_but_nonzero",
+    "source_of_net_gain": "green_apple_and_pumpkin_completion_outweighed_three_smaller_category_regressions",
+    "remaining_bottleneck": "query_agnostic_region_completion_can_expand_semantically_ambiguous_near_threshold_regions_for_related_queries",
+    "not_claimed": [
+      "per_category_non_inferiority",
+      "full_LERF3D_macro_improvement_before_other_scenes_run",
+      "posterior_or_conformal_or_FWER_edge_guarantee"
+    ]
+  },
+  "gpu1_telemetry": {
+    "thermal_log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/positive_utility_fix4c_one_shot_gpu1_thermal.csv",
+      "sha256": "2bd115dfb56f9dcb3f5fdf512ebc2896d265f8800996dc0a278a85d8bcc043e8"
+    },
+    "owner_log": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/positive_utility_fix4c_one_shot_gpu1_owners.csv",
+      "sha256": "29104cdbeb598d6a0202100d8d95a9680fd4ada4b9e9c26f44d50ca27edc96b9"
+    },
+    "sample_count": 2,
+    "temperature_c_min": 42.0,
+    "temperature_c_max": 51.0,
+    "power_w_max": 124.06,
+    "hard_stop_triggered": false
+  },
+  "single_candidate_no_sweep_respected": true
+}

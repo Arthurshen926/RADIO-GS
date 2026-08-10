@@ -1,0 +1,87 @@
+{
+  "artifact_type": "source_global_response_listwise_v21a_source_only_rescue_preregistration",
+  "benchmark_execution_authorized": false,
+  "benchmark_opened": false,
+  "candidate_id": "v21a_anchor_trainable_triplet_full30_promotion_constrained",
+  "fixed_before_execution": true,
+  "interventions": {
+    "checkpoint_selection": {
+      "candidate_set": "positive epochs satisfying every source promotion and coverage constraint",
+      "primary": "minimum source-validation scene-macro auxiliary loss",
+      "tie_break": [
+        "minimum source-validation scene-macro absolute relevance loss",
+        "minimum source-validation scene-macro continuous pairwise relevance loss",
+        "maximum v1 mean all-view cosine",
+        "maximum v1 p05 row-mean all-view cosine",
+        "maximum v1 relation fidelity",
+        "earliest epoch"
+      ],
+      "promotion_constraints": [
+        "positive epoch",
+        "auxiliary macro strictly improves over epoch zero",
+        "absolute relevance macro strictly improves over epoch zero",
+        "absolute relevance does not regress on either held-out source scene",
+        "continuous pairwise relevance macro strictly improves over epoch zero",
+        "all frozen V1 fidelity non-regression checks pass",
+        "minimum held-out active-over-eligible row coverage is at least 0.95",
+        "minimum held-out any-trainable-endpoint pair coverage is at least 0.95"
+      ],
+      "zero_passing_epoch_policy": "write diagnostic best-raw-aux and final states but no deployment checkpoint"
+    },
+    "diagnostics_per_epoch": {
+      "gradient_norms": [
+        "descriptor_projection",
+        "context_projection",
+        "scalar_projection",
+        "fusion_projection",
+        "residual_projection",
+        "global_preclip",
+        "global_postclip"
+      ],
+      "routing": [
+        "eligible_rows",
+        "declared_rows",
+        "active_rows",
+        "active_over_eligible_coverage",
+        "pair_trainable_endpoint_coverage",
+        "triplet_anchor_trainable_coverage"
+      ],
+      "update_geometry": [
+        "angle_radians_p50",
+        "angle_radians_p95",
+        "angle_cap_fraction"
+      ]
+    },
+    "hard_negative_denominators": {
+      "continuous_pairwise_training": "authority pairs having at least one trainable endpoint",
+      "triplet_training": "authority pairs whose anchor is trainable",
+      "validation": "all authority pairs for both pairwise and triplet"
+    },
+    "optimizer": {
+      "early_stopping": false,
+      "fixed_optimizer_steps": 30,
+      "otherwise_identical_to_v21_pilot": true
+    },
+    "saved_states": [
+      "promotion-selected deployment state when one exists",
+      "best raw auxiliary diagnostic state",
+      "final epoch diagnostic state"
+    ]
+  },
+  "method_scope": "source-only; exact same frozen four-train/two-validation authority and assets as V2.1",
+  "schema": "radio_gs.source_global_response_listwise_v21a_rescue_preregistration.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_renderer_opened": false,
+    "target_scene_opened": false
+  },
+  "source_gate": {
+    "coverage_threshold": 0.95,
+    "require_all_preregistered_promotion_constraints": true,
+    "target_execution_authorized_by_this_artifact": false
+  },
+  "status": "preregistered_before_implementation_or_execution"
+}

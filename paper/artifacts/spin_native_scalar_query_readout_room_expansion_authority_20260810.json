@@ -1,0 +1,55 @@
+{
+  "schema": "radio_gs.spin_native_scalar_query_readout.room_expansion_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_after_unchanged_method_passed_lego_and_truck_before_room_native_execution",
+  "parent_registration": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin_native_scalar_query_readout_lego_truck_development_registration_20260810.json",
+    "sha256": "5dcb7b72417a6e53696751304bc230c01e0691b59014c780db3888937b780278"
+  },
+  "passed_scenes": {
+    "lego": {
+      "reference_iou": 0.9428872682541077,
+      "target_foreground_iou": 0.9268476227604813,
+      "legacy_patch_grid_target_foreground_iou": 0.6671478866375888,
+      "report_sha256": "301b4bdd227e5de9e584f5a12632c09a143f0a7b1454eee19332375e23de28d0",
+      "reference_receipt_sha256": "5888a5caabd32f6a6695c8d68fa629a474ac5c0d3970b75a1433868bd59d61db"
+    },
+    "truck": {
+      "reference_iou": 0.971427928468555,
+      "target_foreground_iou": 0.9674729125791468,
+      "legacy_patch_grid_target_foreground_iou": 0.8421232248062024,
+      "report_sha256": "80d22cdbb992c382a079500e93c2aec56538e77ec0d486491a0d808f60870519",
+      "reference_receipt_sha256": "1113c8c3524f56d83c335a8eb9d653246d7aab8c3cb44794ebafccbee705bc02"
+    }
+  },
+  "unchanged_method": {
+    "render_resolution": "registered native image resolution",
+    "candidate_count": 3,
+    "per_view_candidate_normalization": "independent min_max",
+    "candidate_and_threshold_selection": "reference full mask only",
+    "graph": "none",
+    "connected_selection": "none",
+    "parameter_change_after_lego_or_truck_metrics": false
+  },
+  "room_input": {
+    "sam_features": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v2_resolution_safe/room/sam/features.npy",
+    "sam_features_sha256": "431da36d8cb45f317247d2754b39021abf2de518c5ace36bd1dd324e86e88f96",
+    "sam_ply": "/mnt/pool/sqy/results/RADIO-GS/output/protocol_audit_20260731/ludvig/spin/released_all_view/room/seed_0/attempts/exact_f7a_allview_room_seed0_v2_resolution_safe/room/sam/gaussians.ply",
+    "sam_ply_sha256": "c12a46a46ab3550905cfe48152916bd75834f5f36485ec4cf1cae03eaef294fd",
+    "carrier_alignment": "full_row_exact",
+    "carrier_config": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/config.yaml",
+    "carrier_config_sha256": "3a1f60c0ae5329dc2fb14391250f4284e0012924cc362a3ed437c5d33a0c85d9",
+    "carrier_checkpoint": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/spin9_exact_local9/carriers/room/geometry_carrier.pth",
+    "carrier_checkpoint_sha256": "a4beb81fce07c4660fe304fe6163e5bea7539e77be8d7938341f52a0afe319b0"
+  },
+  "known_prior_room_diagnostic": {
+    "patch_grid_foreground_iou": 0.9612164706099579,
+    "accepted_mainline_foreground_iou": 0.888438210272626,
+    "disclosure": "Room target metrics were opened in prior component diagnosis; this expansion is method consistency evidence, not blind confirmation."
+  },
+  "decision_rule": {
+    "execute_once_without_method_change": true,
+    "retain_if_reference_and_target_do_not_regress_from_patch_grid": true,
+    "report_result_without_retry": true
+  }
+}

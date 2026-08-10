@@ -12,6 +12,7 @@ from radio_gs.querying.query_conditioned_diffusion import (
     rbf_knn_feature_similarity,
     rbf_similarity_from_distances,
     run_query_conditioned_diffusion,
+    solve_anchor_preserving_query_support,
     solve_continuous_query_support,
     weighted_logistic_query_compatibility,
 )
@@ -452,3 +453,90 @@ def test_continuous_implicit_pcg_matches_dense_hard_eliminated_energy():
         right[free] - system[free][:, fixed] @ fixed_values[fixed],
     )
     torch.testing.assert_close(actual, expected, rtol=2e-4, atol=2e-4)
+
+
+def test_anchor_preserving_wrapper_locks_all_complete_observations() -> None:
+    neighbors = torch.tensor([[0, 1], [1, 0], [2, 1]])
+    similarities = torch.ones_like(neighbors, dtype=torch.float32)
+    probability = torch.tensor([0.8, 0.5, 0.2])
+    confidence = torch.tensor([1.0, 0.0, 1.0])
+    compatibility = torch.tensor([0.9, 0.9, 0.1])
+    result = solve_anchor_preserving_query_support(
+        probability,
+        confidence,
+        neighbors,
+        similarities,
+        compatibility,
+        config=QueryConditionedDiffusionConfig(
+            kernel="continuous_convex_v2",
+            edge_binarize_threshold=None,
+            cg_iterations=128,
+            cg_tolerance=1e-7,
+        ),
+        max_abs_logit_residual=4.0,
+    )
+    assert torch.equal(result.probability[[0, 2]], probability[[0, 2]])
+    assert torch.count_nonzero(result.applied_logit_residual[[0, 2]]) == 0
+    assert result.probability[1].item() != pytest.approx(compatibility[1].item())
+
+
+def test_observed_anchor_is_independent_of_query_compatibility() -> None:
+    neighbors = torch.arange(2)[:, None]
+    probability = torch.tensor([0.37, 0.63])
+    confidence = torch.ones(2)
+    config = QueryConditionedDiffusionConfig(
+        kernel="continuous_convex_v2",
+        edge_binarize_threshold=None,
+    )
+    low = solve_anchor_preserving_query_support(
+        probability,
+        confidence,
+        neighbors,
+        torch.ones(2, 1),
+        torch.tensor([0.01, 0.01]),
+        config=config,
+    )
+    high = solve_anchor_preserving_query_support(
+        probability,
+        confidence,
+        neighbors,
+        torch.ones(2, 1),
+        torch.tensor([0.99, 0.99]),
+        config=config,
+    )
+    assert torch.equal(low.probability, probability)
+    assert torch.equal(high.probability, probability)
+
+
+def test_anchor_preserving_wrapper_scales_partial_observation_budget() -> None:
+    neighbors = torch.tensor([[0, 1], [1, 0]])
+    similarities = torch.ones_like(neighbors, dtype=torch.float32)
+    probability = torch.tensor([0.9, 0.1])
+    compatibility = torch.tensor([0.9, 0.9])
+    config = QueryConditionedDiffusionConfig(
+        kernel="continuous_convex_v2",
+        edge_binarize_threshold=None,
+        cg_iterations=128,
+        cg_tolerance=1e-7,
+    )
+    full_budget = solve_anchor_preserving_query_support(
+        probability,
+        torch.tensor([0.0, 0.0]),
+        neighbors,
+        similarities,
+        compatibility,
+        config=config,
+    )
+    half_budget = solve_anchor_preserving_query_support(
+        probability,
+        torch.tensor([0.5, 0.0]),
+        neighbors,
+        similarities,
+        compatibility,
+        config=config,
+    )
+    # Row zero is anchored to its observation only in the partial case.  The
+    # resulting graph proposal is allowed to differ, but only half its logit
+    # residual can intervene on that anchor.
+    assert half_budget.residual_gate[0].item() == pytest.approx(0.5)
+    assert full_budget.residual_gate[0].item() == pytest.approx(1.0)

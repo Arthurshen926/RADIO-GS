@@ -1,0 +1,141 @@
+{
+  "schema": "radio_gs.lerf_fix4c_target_chain_readiness_result.v1",
+  "schema_version": 1,
+  "status": "exact_o0_complete_query_free_region_chain_blocked_at_missing_factorized_v2_root",
+  "scene_id": "ramen",
+  "frozen_protocol": {
+    "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_ramen_radio_verified_pose.yaml",
+    "sha256": "9fdb2cc5ba5ff9c8786700753cac4e1b5fd0d3f8e089b2af3fb764592fd8ec93"
+  },
+  "source_fixed_method": {
+    "rank256_source_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.json",
+      "sha256": "0ff977f7bf150b591c04806f0dfc093b91dc5d38df44df91c1eaf2f444549b1a"
+    },
+    "fix4b_source_calibration": {
+      "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_positive_utility_contract_result_fix4b_20260807.json",
+      "sha256": "0043b85c9c55f2532bb217a8c5126a7dfa3903e1c852073a3ca9be8a83a03280"
+    },
+    "fix4b_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache.py",
+      "sha256": "79fee20a29b670dc1b2700bf42a9587f60efe71daed8a130d3d95f214f63e51e"
+    },
+    "fix4c_builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache_fix4c.py",
+      "sha256": "5070bb112590a43937e4ee1867ed57cd3d49027c5cf8bfca18a9f42f904a95e9"
+    },
+    "positive_utility_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_anchored_positive_utility_residual.py",
+      "sha256": "b67385ec245e7ccae25d65f42b7df29debd90ff6fbcbb7d53eddb0a188b8b27c"
+    },
+    "per_scene_hyperparameters": false
+  },
+  "completed_assets": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_ramen_score_cache_execution_authority_fix2_20260807.json",
+      "sha256": "0065811523d6b72c4089c16767ca5dd3e6c649126c33baca816cc42013f81177"
+    },
+    "positive_exact_o0_fp32": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_positive.pt",
+      "sha256": "e33d3c8ea28bb58345f17c228aeaf6b7215d9f1baade27194f94a6f15f385abe",
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_positive.pt.json",
+        "sha256": "2797040dd8c099bef24f79538d433e5d8b53bf8447da6b4ff66c6d1147583b67"
+      },
+      "shape": [382687, 3, 14],
+      "dtype": "torch.float32",
+      "valid_primitives": 221608
+    },
+    "negative_exact_o0_fp32": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_negative.pt",
+      "sha256": "de70dd2bbb33983541f10d6896e1d377f7a767690590831db005e2d116035520",
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_ramen_fix4c/ramen_negative.pt.json",
+        "sha256": "89bec1b822b66fe56be778e2e703cf36abcaae2bce37d0aa8f6c8ea4b62ee8ab"
+      },
+      "shape": [382687, 3, 4],
+      "dtype": "torch.float32",
+      "valid_primitives": 221608
+    }
+  },
+  "available_query_free_roots": {
+    "legacy_schema_v1_canonical_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_fields/ramen_canonical_radio_fusion_d256_l128_nohash_mpr40_caploss_renderft256_seed0.pth",
+      "sha256": "c7a930c3e8fc83a9a1484e198fc02928f8de97ca010b83b0f6a79edeb4610c4e",
+      "schema_version": 1,
+      "authorized_as_factorized_v2_substitute": false
+    },
+    "legacy_raster_top1_mpr": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_mpr/ramen_raw_radio_raster_top1_train120_verified_pose.pt",
+      "sha256": "ec9a8f5f6abdb4eefa00b6b67f39453cfd0cd9d3652dc83307b299622db3b4cb",
+      "aggregation_mode": "raster_gaussian_top1",
+      "authorized_as_exact_marginal_builder_v2_substitute": false
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "native_multiscale_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/ramen.pt",
+      "sha256": "823cfa6fe0d6a1d80987aa5774ea9de3bd45743019e863a57536f1bbc12851b4"
+    }
+  },
+  "missing_dependency_chain": [
+    "exact_marginal_responsibility_authority",
+    "factorized_builder_v2_raw_radio_and_matched_capability_cohort",
+    "factorized_v2_field_checkpoint",
+    "factorized_primitive_state_v2",
+    "canonical_capability_bank",
+    "canonical_support_graph_accepted_v2",
+    "target_accepted_v2_sparse_authority",
+    "target_adaptive_typed_context_v2",
+    "target_region_capability_descriptor_v2",
+    "target_region_comembership_features_v2",
+    "target_region_comembership_inference_v2",
+    "rank256_target_descriptor",
+    "rank256_query_relevance",
+    "fix4b_target_external_score_cache",
+    "fix4c_target_external_score_cache"
+  ],
+  "blocker": {
+    "first_missing_root": "ramen has no source-compatible exact-marginal factorized-v2 observation/capability cohort",
+    "why_not_reuse_legacy_assets": "The frozen target validators require schema-v2 factorized field lineage, builder-v2 exact-marginal responsibility authority, and matched query-free capability evidence. The available schema-v1 field and raster-top1 MPR have different missingness and responsibility semantics.",
+    "unsafe_shortcut_rejected": "No legacy graph, schema-v1 field, raster-top1 cache, target metric, GT, mask, or per-scene parameter was silently substituted.",
+    "gpu_stage_runnable": false
+  },
+  "required_execution_order": [
+    "seal ramen exact-marginal observation and matched capability cohort authority",
+    "materialize builder-v2 factorized raw RADIO and train the frozen factorized-v2 field",
+    "materialize factorized primitive state, capability bank, and support graph",
+    "materialize AcceptedV2, adaptive typed context, and region capability descriptors",
+    "materialize target pair features and source-checkpoint inference",
+    "materialize rank256 descriptor and query relevance",
+    "build FIX4B cache under a ramen-specific no-clobber target authority",
+    "seal FIX4C monotone fusion cache without executing any benchmark metric"
+  ],
+  "verification": {
+    "tests": [
+      "tests/test_materialize_lerf_multiscale_query_score_cache.py",
+      "tests/test_build_lerf_o0_anchored_positive_utility_residual_cache.py",
+      "tests/test_build_lerf_o0_anchored_positive_utility_residual_cache_fix4c.py"
+    ],
+    "passed": 32,
+    "failed": 0
+  },
+  "gpu0_final_sample": {
+    "temperature_c": 44,
+    "power_draw_w": 24.15,
+    "power_limit_w": 300.0,
+    "memory_used_mib": 1,
+    "utilization_percent": 0
+  },
+  "metric_execution_performed": false,
+  "access_audit": {
+    "query_names_opened": true,
+    "target_images_opened": false,
+    "target_ground_truth_opened": false,
+    "target_masks_opened": false,
+    "target_metrics_opened": false,
+    "target_quality_readout_executed": false
+  }
+}

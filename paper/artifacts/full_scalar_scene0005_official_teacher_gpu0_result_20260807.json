@@ -1,0 +1,70 @@
+{
+  "artifact": "full_scalar_scene0005_official_teacher_gpu0_result",
+  "schema_version": 1,
+  "completed_at": "2026-08-07T05:21:25+08:00",
+  "status": "source_train_scene_official_teacher_complete_and_strictly_validated",
+  "scene_id": "scene0005_00",
+  "cohort_split": "source_train",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0005_official_teacher_gpu0_exact_execution_authority_20260807.json",
+    "sha256": "43e427a42128e9414a4f55987ccf45e50283146e92270e166fdff5c0b5ccc600"
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_official_multiview_siglip2_teacher_authority.py",
+    "sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5"
+  },
+  "output": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+    "sha256": "456539153a8527ba77b05603e17502ea7992a3004b91708c9aec5bee186e0fea",
+    "size_bytes": 100809875,
+    "regions": 4096,
+    "source_views": 120,
+    "active_region_view_pairs": 16177,
+    "descriptor_dimension": 1536,
+    "minimum_views_per_region": 1,
+    "maximum_views_per_region": 4,
+    "descriptor_norm_minimum": 0.9999997019767761,
+    "descriptor_norm_maximum": 1.000000238418579,
+    "pair_descriptors_sha256": "04ad43af61e6d6aec20c1a6e8e9e4da50e580a05cd794e8d725638a7dc7bb4e7"
+  },
+  "validation": {
+    "strict_double_reload_identical": true,
+    "strict_accepted_v2_alignment_passed": true,
+    "accepted_region_indices_identical": true,
+    "source_only_contract_passed": true,
+    "whole_image_summary_substitution_used": false,
+    "precomputed_radio_summary_used": false,
+    "semantic_cache_final_payload_used": false
+  },
+  "execution": {
+    "physical_gpu": 0,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "maximum_observed_temperature_c": 87,
+    "thermal_warning_count": 0,
+    "thermal_abort_count": 0,
+    "guard_exit_code": 0,
+    "cuda_release_verified": true,
+    "math_or_order_changed_for_thermal_handling": false,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/logs/official_teacher_gpu0_batch1_telemetry.csv",
+      "sha256": "88601ec7c4732941db71d8eb6de41faf085b83ed4fb489ef6154d01761f309d0"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/logs/official_teacher_gpu0_batch1_owner_audit.log",
+      "sha256": "d9ff62df3afddbf544f8995a4f783240bbaecf1f116a19fcb4fd3e60110ff7d7",
+      "postexit_owner_clear": true
+    }
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "generic_target_blind_text_bank_opened": false,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

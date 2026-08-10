@@ -1,0 +1,83 @@
+{
+  "schema": "radio_gs.lerf_o1_native_v3_scale_aware_metric_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_single_figurines_development_metric_after_premetric_seal",
+  "scene_id": "figurines",
+  "candidate": {
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/figurines/external_query_scores.pt",
+      "sha256": "dd8e0e41227c671d904bbb559fa081f6b2a3374a63e28d0e4d32861dfb64509a"
+    },
+    "premetric_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/figurines/premetric_report.json",
+      "sha256": "6149a38a2deceb50c8dd5e812d2076a2f2bbdaa3c4b9f8d8f46f300e0b565cca"
+    },
+    "method_contract_sha256": "0327429dfde0d5629176ecf23f1a8632a0415c28ddce3014cb70fe33e9f05d10",
+    "premetric_changed_cells": 4088,
+    "premetric_new_threshold_crossings": 552,
+    "premetric_support_is_monotone": true
+  },
+  "frozen_control": {
+    "name": "Figurines exact O1",
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o1_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "8372e7aa5567d5ec72a1cb40cf5079876d0773d24db0096b5a83ce371cd33bd2"
+    },
+    "miou": 0.5215655565261841,
+    "average_precision": 0.7690397744816834,
+    "oracle_threshold_iou": 0.6639607112682723
+  },
+  "frozen_inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "all_query_text_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_text_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    }
+  },
+  "protocol": {
+    "protocol_preset": "vala_paper_3d",
+    "score_input": "external_query_score_cache",
+    "score_postprocess": "none",
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": 0.0392156862745098,
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_frames_only": true,
+    "result_dependent_selection": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "cuda_visible_devices": "1",
+    "logical_gpu_argument": 0,
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_disabled": true,
+    "output_directory_must_not_exist": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/evaluation/figurines_one_shot",
+    "expected_result": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_scale_aware_fusion_v1/evaluation/figurines_one_shot/figurines/lerf_direct_3d_selection_results.json",
+    "one_shot_no_sweep": true
+  },
+  "metric_execution_authorized": true
+}

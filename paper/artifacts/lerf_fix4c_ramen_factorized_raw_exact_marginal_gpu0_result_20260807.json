@@ -1,0 +1,64 @@
+{
+  "schema": "radio_gs.lerf3d_factorized_raw_exact_marginal_result.v1",
+  "schema_version": 1,
+  "status": "completed_and_fail_closed_validated",
+  "completed_at": "2026-08-07T10:30:00+08:00",
+  "scene": "ramen",
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_fix4c_ramen_factorized_raw_exact_marginal_gpu0_execution_authority_20260807.json",
+    "sha256": "04cadcfeedd26489444c8b37456e5b171c75eb00d4d147f3ccf142bda83703e8"
+  },
+  "alpha_zero_addendum": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_fix4c_ramen_factorized_raw_exact_marginal_alpha0_addendum_20260807.json",
+    "sha256": "7fba3b65196166861be2f532280fcd840964440161874ec2891d44d6dd9a58d0"
+  },
+  "frozen_inputs": {
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/query_consistency/lerf_ramen_fix4c_exact120_teacher.yaml",
+      "sha256": "716b4f4fb0ce947cfc14464e26c518b8525edb2e1255ce9f8d597bc7232b5b57"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_ramen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "e18ca7ef06009953048b364a379585b378381df1c350c8d14643d5656cc5246d"
+    },
+    "feature_output_bundle_sha256": "9f825e4986462912f54ee6e4f99715c2e0b4a8c0a77074991e9874a544c22292",
+    "maximum_views": 120,
+    "excluded_frame_ids": [2, 6, 24, 45, 60, 65, 81, 87, 119, 128, 130]
+  },
+  "outputs": {
+    "factorized_raw_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "1b3c6c5ac01b6dea3e993db64217b60a942ba33adbed2e34e8357846854b3f8e",
+      "sidecar_sha256": "e782c7cbd6a311d945e4c0233a86e279d519102684ff8222317a75e07268a6b6"
+    },
+    "responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "d6374e239a2815f8a75687fac52d7ef520a81082640d75bab606e6e272db771e",
+      "completed_view_shards": 120
+    }
+  },
+  "source_only_statistics": {
+    "num_gaussians": 382687,
+    "semantic_valid_gaussians": 328453,
+    "semantic_valid_ratio": 0.8582810759544373,
+    "mean_views_if_valid": 39.833648681640625,
+    "maximum_views_if_valid": 120,
+    "total_positive_view_assignments": 13083482,
+    "feature_dim": 1280
+  },
+  "contract_validation": {
+    "loader": "load_factorized_radio_training_cache",
+    "passed": true,
+    "builder_contract_sha256": "ac5476d3861bcad69cd254d21d3dde6a973ed8d5e3f6d9bb1dd364a5e302fb8f",
+    "responsibility_sha256_matches_payload": true,
+    "feature_bundle_sha256_matches": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false
+  },
+  "selection_policy": {
+    "formal_metric_computed": false,
+    "target_quality_branching": false,
+    "next_stage": "reuse the immutable responsibility authority for matched RADIO, DINO-v3, and SAM3 capability caches"
+  }
+}

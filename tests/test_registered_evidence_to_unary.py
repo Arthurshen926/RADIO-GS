@@ -76,7 +76,7 @@ def test_head_update_is_globally_bounded_and_has_no_row_coupling() -> None:
 
 
 def test_v2_nonzero_head_preserves_complete_evidence_and_gates_partial_rows() -> None:
-    features = _features()
+    features = _features(capability_valid=torch.tensor([True, True, True, True]))
     head = RegisteredEvidenceToUnaryV2(hidden_dim=8, max_delta_logit=2.0)
     with torch.no_grad():
         head.output.bias.copy_(torch.tensor([1.0, 10.0]))
@@ -98,6 +98,16 @@ def test_v2_nonzero_head_preserves_complete_evidence_and_gates_partial_rows() ->
     assert output.foreground_probability[2].item() != pytest.approx(
         features.analytic_probability[2].item()
     )
+
+
+def test_v2_preserves_inactive_capability_rows() -> None:
+    features = _features()
+    head = RegisteredEvidenceToUnaryV2(hidden_dim=8, max_delta_logit=2.0)
+    with torch.no_grad():
+        head.output.bias.copy_(torch.tensor([1.0, 10.0]))
+    output = head(features)
+    assert torch.equal(output.foreground_probability[3:], features.analytic_probability[3:])
+    assert output.residual_gate[3].item() == 0.0
 
 
 def test_v2_zero_initialized_head_is_exact_analytic_unary() -> None:

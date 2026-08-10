@@ -1,0 +1,79 @@
+{
+  "schema": "radio_gs.spin_rendered_directional_admission.source_ready_expansion_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_after_fortress_sentinel_pass_before_remaining_candidate_materialization",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/spin_rendered_directional_admission_fortress_sentinel_preregistration_20260810.json",
+    "sha256": "833d5761c499e160f7ef15c3dc05b3589bced25aab0b966cc62c8b531b9fa279"
+  },
+  "sentinel_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_rendered_directional_admission_v1/fortress_exact_result.json",
+    "sha256": "55b2fda9f1179357c123d34e4f584d00778ac7010383b9d61d158166b9a57437",
+    "quantile_baseline_foreground_iou": 0.3375166827670813,
+    "directional_admission_foreground_iou": 0.9273004555965211,
+    "delta": 0.5897837728294397,
+    "sentinel_gate_passed": true
+  },
+  "unchanged_method": {
+    "policy": "source_oof_directional_transport_admission_v1",
+    "application_domain": "rendered_unary_and_graph_proposal_before_resolution_adapter",
+    "observation_confidence": "rendered_source_visible_coverage",
+    "fixed_probability_threshold": 0.5,
+    "parameter_scan": false,
+    "connected_selection": false,
+    "implementation_hashes_unchanged_from_parent": true
+  },
+  "scenes": {
+    "leaves": {
+      "source_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/leaves/result.json",
+        "sha256": "1214efe950a456a79974785daa1a8e27732df851a6861413d7b0783fe5a8b077"
+      },
+      "base_prediction_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/canonical_factorized_radio_v1/leaves/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+        "sha256": "11d4442dd2af6472f67c62c1ca133f5e61ff3668b7fa9388501f81c5372c5493"
+      }
+    },
+    "orchids": {
+      "source_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/orchids/result.json",
+        "sha256": "93e1d69951683aa5658b77dec0a439b92fd9e1a683d931e683e3c1a9631c27c0"
+      },
+      "base_prediction_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/orchids/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+        "sha256": "095c0a827743ded2f2997dd827448224a94dda3b410a24afbe119b8af64a55ea"
+      }
+    },
+    "pinecone": {
+      "source_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/pinecone/result.json",
+        "sha256": "45de00d427c92dbfb177b374b4e646e70e5d552fb632349dcc23e988f02a394a"
+      },
+      "base_prediction_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/pinecone/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+        "sha256": "4e657b05eafde23d633c4c3ae095a96a1b83cd27650b00b701b05e366521ba63"
+      }
+    },
+    "room": {
+      "source_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260810/spin_source_oof_directional_admission_v1/room/result.json",
+        "sha256": "745ede4cba24d3468e126c2613f66a54524f33bdb644d1822d63152a4e26a87f"
+      },
+      "base_prediction_receipt": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/canonical_factorized_radio_v1/room/query_diffusion_matched_interface_v1/target_prediction_full9_exact_w_v1/pre_metric_prediction_receipt.json",
+        "sha256": "97f32f90d8221f5d68540105851379db14db07a47da97d13db85741b971f280f"
+      }
+    }
+  },
+  "decision_rule": {
+    "report_every_scene_without_scene_exclusion": true,
+    "promote_source_ready_method_if_five_scene_macro_strictly_exceeds_quantile_baseline": true,
+    "also_report_unary_and_unrestricted_proposal_at_fixed_0_5_for_attribution": true,
+    "no_retry_no_threshold_or_coefficient_change": true
+  },
+  "access_audit": {
+    "remaining_candidate_directories_absent": true,
+    "remaining_candidate_metric_files_absent": true,
+    "remaining_scene_target_metrics_not_used_to_change_method": true
+  }
+}

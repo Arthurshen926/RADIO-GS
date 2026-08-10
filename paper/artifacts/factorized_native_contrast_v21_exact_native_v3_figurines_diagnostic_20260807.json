@@ -1,0 +1,109 @@
+{
+  "artifact": "factorized_native_contrast_v21_exact_native_v3_figurines_diagnostic",
+  "schema_version": 1,
+  "status": "diagnostic_only_not_final_candidate",
+  "implementation": {
+    "bridge_formal": {
+      "path": "radio_gs/interfaces/factorized_native_contrast_v21_exact_native_v3_bridge.py",
+      "sha256": "731aee538c9755123fccf8ed3958761dd2b89906c310816427b006d17a2e71db"
+    },
+    "materializer": {
+      "path": "radio_gs/scripts/materialize_factorized_native_contrast_v21_exact_native_v3_bridge.py",
+      "sha256": "46dda1e11b480039d7b2e6780843eba8de5a252c2971ffdf97b84fc0d8cc165d"
+    },
+    "tests": {
+      "path": "tests/test_factorized_native_contrast_v21_exact_native_v3_bridge.py",
+      "sha256": "cbdf50e6039473ef9e2d7f03b9363d68436e3a8632b33e57549a8392c5940538"
+    },
+    "old_surface_region_adapter_modified": false
+  },
+  "dispatch": {
+    "supported_input_schema": "radio_gs.factorized_native_contrast_v21_lerf_exact_relevance.v1",
+    "validator": "factorized_native_contrast_v21_lerf_exact.validate_query_relevance",
+    "dispatch_name": "contrast_v21_lerf_exact_relevance_v1",
+    "field_guessing": false,
+    "future_source_global_calibrator": "requires_a_second_explicit_schema_and_validator_entry"
+  },
+  "validated_lineage": {
+    "query_execution_authority": true,
+    "source_contrast_v21_result": true,
+    "source_contrast_v21_checkpoint": true,
+    "target_descriptor_and_exact_query_view": true,
+    "source_student_health_v4_PASS": true,
+    "exact_manifest_positive_all_query_and_negative_banks": true
+  },
+  "forwarded_to_native_v3_readout": [
+    "scene_id",
+    "physical_space_id",
+    "canonical_region_indices",
+    "region_fingerprints_sha256",
+    "region_absolute_relevance_R_by_Q"
+  ],
+  "inputs": {
+    "exact_relevance": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_contrast_v21_lerf_exact/figurines/region_absolute_relevance.pt",
+      "sha256": "c0649481d5e1594047ed1c8c38ccc1c40da81ecb5f6c40465e54d33c6d5d5a8d"
+    },
+    "native_v3_feature": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_features_native_v3.pt",
+      "sha256": "9bb68f6cae6e0f63586e31fdd48019ee755a15cbab45db3481c6aedee59ac2d4"
+    },
+    "native_v3_inference": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_native_v3_target/figurines/region_comembership_inference_native_v3.pt",
+      "sha256": "c49afb2d8eca4e020ceede8b17ee8becb876c586c1fada7c4c93e90e632d8eb2"
+    }
+  },
+  "output": {
+    "schema": "radio_gs.surface_region_v21_native_v3_absolute_readout.v1",
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_contrast_v21_lerf_exact/figurines/native_v3_readout_raw_relevance_diagnostic.pt",
+    "sha256": "ae106940e069087f652819c382f74bcaec17863a0d44b6b973c1700e88fb0416",
+    "absolute_relevance_tensor_sha256": "51e9a0b20414ad2a3f66bebcefe034ef5ec5b6ef56c0dd5956ba952f5fdcf606",
+    "final_relevance_tensor_sha256": "6c10358ef98973535bad9fa0deac7b13e1d410f31c14d6249b5f076ebed56c28",
+    "shape": [4096, 21]
+  },
+  "query_opaque_diagnostic": {
+    "query_gate_passed": 2,
+    "query_gate_failed_exact_unary": 19,
+    "maximum_relation_support_regions": 8,
+    "maximum_union_regions": 8,
+    "total_changed_region_query_cells": 7,
+    "total_selected_primitive_query_cells": 1371,
+    "axis_2": {
+      "changed_regions": 0,
+      "unary_regions_gt_0p5": 70,
+      "final_regions_gt_0p5": 70,
+      "union_regions": 8,
+      "selected_primitives": 965
+    },
+    "axis_3": {
+      "changed_regions": 7,
+      "unary_regions_gt_0p5": 3,
+      "final_regions_gt_0p5": 4,
+      "maximum_gain": 0.0026306211948394775,
+      "union_regions": 4,
+      "selected_primitives": 406
+    },
+    "other_19_axes": "failed_absolute_gate_and_remained_bitwise_exact_unary"
+  },
+  "conclusion": {
+    "protocol_break_fixed": true,
+    "native_v3_readout_is_functional": true,
+    "raw_relevance_remains_primary_bottleneck": true,
+    "reason": "native_v3_can_only_complete_the_two_axes_that_pass_the_fixed_absolute_boundary_and_cannot_rescue_the_other_nineteen",
+    "awaited_next_input": "explicit_source_global_calibrated_relevance_schema_and_validator"
+  },
+  "verification": {
+    "tests_passed": 19,
+    "tests_failed": 0
+  },
+  "access_audit": {
+    "query_identifiers_forwarded_to_readout": false,
+    "query_strings_forwarded_to_readout": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false,
+    "final_candidate": false
+  }
+}

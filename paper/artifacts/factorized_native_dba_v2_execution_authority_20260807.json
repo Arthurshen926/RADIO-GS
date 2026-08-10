@@ -1,0 +1,54 @@
+{
+  "base_dba_v1_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/factorized_native_dba_v1_execution_authority_20260807.json",
+    "sha256": "3439eabc848dc72e7c65356911c381cfc55df6a61e4ab75efae87dcd3755a19e"
+  },
+  "design_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/factorized_native_source_precision_ranking_dba_v2_design_20260807.md",
+    "sha256": "a9096fedd6abe71c1a51e53355219a515d6348d36414202e1a0d7b96d1bc9281"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2_dba_v2.py",
+    "sha256": "244635d292c76f271941a29d0d2752d26a35a71d7a16665c316760527f6d918e"
+  },
+  "implementation_dependencies": {
+    "dba_v1_frozen_source_protocol": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2_dba_v1.py",
+      "sha256": "56f1c2f6aea49708bcd580f7c56575b4c66278ad56cb7ee6e2af268503831d28"
+    },
+    "precision_ranking_loss": {
+      "path": "/root/RADIO-GS/radio_gs/losses/factorized_native_source_precision_ranking.py",
+      "sha256": "4ae40e86d6dbec5657d27a46e95a3a730b87cc2bd1ec97905594d0774534c96f"
+    }
+  },
+  "metric_execution_authorized": false,
+  "query_execution_authorized": false,
+  "schema": "radio_gs.factorized_native_precision_ranking_dba_v2_execution_authority.v1",
+  "schema_version": 2,
+  "source_access": {
+    "benchmark_exclusion_manifest_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "canonical_generic_negative_bank_opened": true,
+    "generic_target_blind_text_bank_opened": true,
+    "per_query_parameters": false,
+    "per_scene_parameters": false,
+    "query_independent": true,
+    "runtime_query_strings_consumed": false,
+    "scene_identifiers_consumed_by_model": false,
+    "source_train_opened": true,
+    "source_validation_opened_for_promotion_only": true,
+    "target_descriptor_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "target_relevance_opened": false,
+    "text_queries_opened": false
+  },
+  "status": "authorized_source_only_precision_ranking_dba_v2_exact4train_2validation",
+  "target_execution_authorized": false,
+  "training_authorized": true,
+  "training_contract_sha256": "02b7240c79342916926aafdde5c0e2b1e23be135fe2b50ffd2fb6f6a3e1f5d62",
+  "training_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/dba_v2_precision_ranking/model.pt"
+}

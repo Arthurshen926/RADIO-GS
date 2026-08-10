@@ -1,0 +1,231 @@
+{
+  "artifact": "lerf_v21_4train_2validation_pilot_feasibility_and_text_bank_result",
+  "schema_version": 1,
+  "audited_at": "2026-08-06T18:05:00+08:00",
+  "status": "pilot_not_executable_assets_incomplete_compositional_bank_cpu_complete",
+  "decision": {
+    "launch_long_asset_production": false,
+    "launch_training": false,
+    "register_execution_authority": false,
+    "reason": "Only one of the required four source-train and two source-validation scenes has the complete AcceptedV2, official teacher, typed-context and hard-negative chain."
+  },
+  "immutable_clean_cohort": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "authority_sha256": "397a436ecaef1fc270aa9c38a0f0e029f92c91841e43c26efdc257353bc6ab2e",
+    "scene_and_physical_space_disjoint": true
+  },
+  "inventory_summary": {
+    "scenes": 32,
+    "complete_for_response_pilot": 1,
+    "factorized_state_complete_but_response_chain_incomplete": 2,
+    "factorized_state_absent": 29,
+    "source_train_complete": 1,
+    "source_validation_complete": 0,
+    "required_complete_source_train": 4,
+    "required_complete_source_validation": 2
+  },
+  "per_scene_gap_groups": [
+    {
+      "scene_ids": ["scene0001_00"],
+      "split": "source_train",
+      "present": [
+        "factorized_primitive_state_v2",
+        "source_rgb_scene_authority_v1",
+        "AcceptedV2",
+        "official_multiview_siglip2_teacher",
+        "typed_context_stage_a",
+        "typed_context_stage_b_adaptive",
+        "hard_negative_authority"
+      ],
+      "missing": [],
+      "complete": true
+    },
+    {
+      "scene_ids": ["scene0002_00"],
+      "split": "source_train",
+      "present": ["factorized_primitive_state_v2", "source_rgb_scene_authority_v1"],
+      "missing": [
+        "canonical_capability_bank",
+        "canonical_support_graph_accepted_v2",
+        "AcceptedV2",
+        "official_multiview_siglip2_teacher",
+        "typed_context_stage_a",
+        "typed_context_stage_b_adaptive",
+        "hard_negative_authority"
+      ],
+      "complete": false
+    },
+    {
+      "scene_ids": ["scene0003_00"],
+      "split": "source_train",
+      "present": ["factorized_primitive_state_v2"],
+      "missing": [
+        "source_rgb_scene_authority_v1",
+        "canonical_capability_bank",
+        "canonical_support_graph_accepted_v2",
+        "AcceptedV2",
+        "official_multiview_siglip2_teacher",
+        "typed_context_stage_a",
+        "typed_context_stage_b_adaptive",
+        "hard_negative_authority"
+      ],
+      "complete": false
+    },
+    {
+      "scene_ids": [
+        "scene0005_00", "scene0006_00", "scene0007_00", "scene0009_00",
+        "scene0010_00", "scene0012_00", "scene0014_00", "scene0016_00",
+        "scene0017_00", "scene0020_00", "scene0021_00", "scene0022_00",
+        "scene0024_00", "scene0026_00", "scene0027_00", "scene0029_00",
+        "scene0031_00", "scene0032_00", "scene0034_00", "scene0035_00",
+        "scene0036_00"
+      ],
+      "split": "source_train",
+      "present": ["archive_member_inventory"],
+      "missing": [
+        "clean_base_pipeline_through_factorized_primitive_state_v2",
+        "source_rgb_scene_authority_v1",
+        "canonical_capability_bank",
+        "canonical_support_graph_accepted_v2",
+        "AcceptedV2",
+        "official_multiview_siglip2_teacher",
+        "typed_context_stage_a",
+        "typed_context_stage_b_adaptive",
+        "hard_negative_authority"
+      ],
+      "complete": false
+    },
+    {
+      "scene_ids": [
+        "scene0004_00", "scene0008_00", "scene0013_00", "scene0018_00",
+        "scene0023_00", "scene0028_00", "scene0033_00", "scene0037_00"
+      ],
+      "split": "source_validation",
+      "present": ["archive_member_inventory"],
+      "missing": [
+        "clean_base_pipeline_through_factorized_primitive_state_v2",
+        "source_rgb_scene_authority_v1",
+        "canonical_capability_bank",
+        "canonical_support_graph_accepted_v2",
+        "AcceptedV2",
+        "official_multiview_siglip2_teacher",
+        "typed_context_stage_a",
+        "typed_context_stage_b_adaptive",
+        "hard_negative_authority"
+      ],
+      "complete": false
+    }
+  ],
+  "verified_present_records": {
+    "scene0001_00": {
+      "accepted_v2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/accepted_v2_sparse_v2.pt",
+        "sha256": "7276261c4bc12c714ca704b6cafcc8f946b098547b85f6f0c3a19a888bc0edd8"
+      },
+      "official_teacher": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+        "sha256": "ce2edd5034c6769a14a1afa0efe567cb648fc68e9cd72ca6f94c13db13d5e92f"
+      },
+      "typed_context_adaptive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_pilot_scene0001_v1/run/accepted_v2_source_only/scene0001_00/typed_context_stage_b_adaptive_v2.pt",
+        "sha256": "2b27eda34e292096b4f9222a545209230ee2017a980786ee433ea1f293232dda"
+      },
+      "hard_negative_authority": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_query_response_hard_negatives_v1/scene0001_00/hard_negative_index_authority_bound_v1.pt",
+        "sha256": "243df78a8aaa103d61fd8ed1361af4031e90484cf028ce4da0ac0d612cdec36d"
+      }
+    },
+    "scene0002_00": {
+      "factorized_primitive_state_v2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/exact_state/scene0002_00/factorized_primitive_state_v2.pt",
+        "sha256": "7036ae2e0ab581c684f9c43c76923836659b666d30bdddcc7790f139d77fdfbe"
+      },
+      "source_rgb_scene_authority_v1": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/source_rgb_scene_authority_v1.json",
+        "sha256": "3d5901d9dc1e76b6f5cc604d1b45fd753805af2b7a3de7f7cdb89d7e133da18e"
+      }
+    },
+    "scene0003_00": {
+      "factorized_primitive_state_v2": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+        "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd"
+      }
+    }
+  },
+  "minimum_4train_2validation_candidate": {
+    "selection_basis": "earliest frozen cohort members with maximum already materialized depth, retaining the original source-train/source-validation split",
+    "source_train": ["scene0001_00", "scene0002_00", "scene0003_00", "scene0005_00"],
+    "source_validation": ["scene0004_00", "scene0008_00"],
+    "all_physical_spaces_unique": true,
+    "complete_now": false,
+    "estimated_additional_cost": {
+      "scene0002_00": "approximately 75-110 GPU-minutes plus 5-10 CPU-minutes",
+      "scene0003_00": "approximately 80-115 GPU-minutes plus 5-10 CPU-minutes",
+      "scene0005_00": "approximately 105-180 GPU-minutes plus 5-10 CPU-minutes",
+      "scene0004_00": "approximately 105-180 GPU-minutes plus 5-10 CPU-minutes",
+      "scene0008_00": "approximately 105-180 GPU-minutes plus 5-10 CPU-minutes",
+      "dual_gpu_wall_clock": "approximately 4-6 hours, dominated by official crop teacher and typed-context materialization",
+      "basis": "observed scene0002/scene0003 base-pipeline receipts and scene0001 post-factorized file timestamps; estimate only, no production launched"
+    }
+  },
+  "compositional_text_bank": {
+    "status": "cpu_built_and_tested",
+    "superseded_unembedded_v1": {
+      "path": "/root/RADIO-GS/paper/artifacts/target_blind_imagenet1k_compositional_text_bank_v1.json",
+      "reason": "unrestricted noun-part cross product generated semantically invalid part-whole phrases; never embedded or trained"
+    },
+    "canonical_json": {
+      "path": "/root/RADIO-GS/paper/artifacts/target_blind_imagenet1k_compositional_text_bank_v2.json",
+      "sha256": "b53693a2821c29a5cc18b3ab69a9e7d9189b2c0746343b702747234ce5704b7a"
+    },
+    "manifest": {
+      "path": "/root/RADIO-GS/paper/artifacts/target_blind_imagenet1k_compositional_text_bank_v2.manifest.json",
+      "sha256": "e031a6bc38242af990ecf488c96c59f667f167126d67fecae66a0b23aeb1cd96"
+    },
+    "builder": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_target_blind_compositional_text_bank.py",
+      "sha256": "fbcad40e8ddec72ba84c4c7e4493faf9a7d07f97009e16aebe177bc71f6d0922"
+    },
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_build_target_blind_compositional_text_bank.py",
+      "sha256": "dc894f26323f8c954af4cc67dc07313a8190fb43a50d0439eb74a764a1d4b0a7",
+      "result": "2 passed"
+    },
+    "counts": {
+      "query_records": 5808,
+      "object_noun": 997,
+      "color_plus_noun": 997,
+      "material_plus_noun": 997,
+      "shape_plus_noun": 997,
+      "adjective_plus_noun": 997,
+      "part_of_object": 41,
+      "unrestricted_random_part_records_removed": 956,
+      "synonym_relations": 782,
+      "lexical_sibling_relations": 169
+    },
+    "composition_contract": {
+      "attribute_compositions": "counterfactual probes, not asserted positives",
+      "part_of_object": "only exact high-precision lexical-head-to-part rules",
+      "recommended_pilot_strata": {
+        "object_noun": 0.25,
+        "synonym_relation": 0.20,
+        "lexical_sibling_relation": 0.20,
+        "counterfactual_attributes_collective": 0.30,
+        "high_precision_part_of": 0.05
+      }
+    },
+    "embedding_status": "not_materialized; this task authorized CPU vocabulary construction only"
+  },
+  "source_access": {
+    "generic_target_blind_text_sources_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  }
+}

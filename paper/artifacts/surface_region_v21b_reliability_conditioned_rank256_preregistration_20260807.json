@@ -1,0 +1,61 @@
+{
+  "artifact_type": "source_only_method_preregistration",
+  "benchmark_access_before_preregistration": {
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_heldout_opened": false
+  },
+  "date": "2026-08-07",
+  "method": {
+    "accepted_v2_base": "immutable_external_bitwise_fallback",
+    "active_route": "declared_adaptive_typed_context_valid_and_not_source_normalization_ood",
+    "angular_budget": {
+      "formula": "0.15 + 0.60 * reliability_score",
+      "high_reliability_radians": 0.75,
+      "low_reliability_radians": 0.15,
+      "monotonicity": "continuous_linear_non_decreasing",
+      "reliability_score": {
+        "aggregation": "unweighted_arithmetic_mean_then_clamp_to_unit_interval",
+        "learned": false,
+        "query_independent_channels": [
+          "legacy_reliability_weighted_mean_directional_agreement",
+          "legacy_reliability_weighted_mean_observation_evidence",
+          "legacy_reliability_weighted_mean_visibility_purity_times_known_fraction",
+          "typed_context_context_reliability_mean",
+          "typed_context_weighted_directional_resultant_length"
+        ],
+        "scene_parameterized": false
+      }
+    },
+    "capacity": {
+      "descriptor_dimension": 1536,
+      "hidden_rank": 256,
+      "input_carriers": [
+        "immutable_accepted_v2_descriptor",
+        "query_free_pooled_typed_context_radio_direction",
+        "query_free_full_scalar_summary",
+        "query_free_typed_context_statistics"
+      ]
+    },
+    "fallback": "inactive_or_ood_rows_are_bitwise_accepted_v2_with_no_gradient_through_residual_branch",
+    "geometry": {
+      "candidate_map": "unit_sphere_exponential_map_followed_by_numerical_unit_normalization",
+      "maximum_hidden_to_tangent_gain": 0.25,
+      "residual_gauge": "accepted_v2_descriptor_tangent_plane"
+    },
+    "initialization": "zero_final_projection_exact_bitwise_identity_with_first_step_gradient",
+    "name": "surface_region_v21b_reliability_conditioned_rank256",
+    "per_scene_hyperparameters": false,
+    "runtime_query_strings_consumed": false
+  },
+  "promotion_order": [
+    "unit_and_contract_tests",
+    "frozen_source_only_training_and_validation_gate",
+    "target_materialization_only_after_source_gate_pass",
+    "single_frozen_lerf3d_evaluation_only_after_source_gate_pass"
+  ],
+  "scope": "model_interface_and_tests_only_before_any_gpu_execution",
+  "status": "preregistered_before_implementation"
+}

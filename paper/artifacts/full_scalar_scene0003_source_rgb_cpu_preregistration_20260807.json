@@ -1,0 +1,104 @@
+{
+  "artifact": "full_scalar_scene0003_source_rgb_cpu_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T01:39:29+08:00",
+  "status": "sealed_after_read_only_preflight_and_before_CPU_materialization",
+  "scene_id": "scene0003_00",
+  "physical_space_id": "scene0003",
+  "frozen_cohort_role": "source_train",
+  "frozen_cohort": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "file_sha256": "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "authority_sha256": "397a436ecaef1fc270aa9c38a0f0e029f92c91841e43c26efdc257353bc6ab2e",
+    "source_train_index_zero_based": 2
+  },
+  "inventory": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+    "file_sha256": "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539",
+    "authority_sha256": "d35fdd149b84ad580cc491ff3fefb183571a6bbca08baad4c2a9048dacbcc572",
+    "archive_path": "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "archive_member": "scans/scene0003_00/scene0003_00.sens",
+    "member_size_bytes": 609532191,
+    "extracted_payload_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/source/scans/scene0003_00/scene0003_00.sens",
+    "extracted_payload_sha256": "4a09ffd1c5b609921ed6a2d591ed85d0eef723d981c17c9b78322da170af58d9"
+  },
+  "completed_factorized_state": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/factorized_primitive_state_v2.pt",
+    "sha256": "e90f32c53ae88688a8b37d21aeb87930a56a54542d43edd75710741ea0076ebd",
+    "sidecar_sha256": "e68e29beb753b32495e395f29524c529de38537b8879115f804aaa48edae5923",
+    "valid_gaussians": 195910,
+    "visibility_purity_unknown_count": 0,
+    "factorized_state_receipt_sha256": "cbfba028306c89b3f69907bab7271c9fb74e6ccee18862ae0824de6c904972ba"
+  },
+  "source_frame_authority_inputs": {
+    "field_source_contract": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/field240/scene0003_00/field_source_contract.json",
+      "sha256": "0e631e3f09006c84cd953181175249af512fb21d7c48a69d7027a1428479802f",
+      "selected_frame_count": 240,
+      "selected_frame_ids_canonical_json_sha256": "0f919f3d151f0e3d6759ee5a40dbaa961566ee848e68ea2b40e430d4fdc17eab"
+    },
+    "strict_feature_frame_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/radio_features/scene0003_00/frame_manifest.json",
+      "sha256": "d7c6ef7456529ed9f45218b841524471538bfb47f3fff63ce03953c1b06ccb8e",
+      "feature_output_bundle_sha256": "e7d14a32f9ab6dd5e27d2734da885bc9518cb16e606b07dde76ce772f6978196",
+      "resume_contract": ".extract_resume_contract.json",
+      "resume_partial": true,
+      "frame_count": 240,
+      "frame_ids_equal_field_source_contract": true,
+      "radio_features_receipt_sha256": "8ef74d0bd568f2e8188528721466e6db1351da5b336af0c42ee600d51feb6635"
+    },
+    "source_rgb_root": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/field240/scene0003_00/color",
+    "observed_jpg_count": 240,
+    "jpg_names_equal_strict_feature_manifest": true
+  },
+  "exact_marginal_view_binding": {
+    "authority_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/exact_state/scene0003_00/exact_marginal_responsibility_authority.json",
+    "authority_sha256": "6047309b1c6a165157f1ae9ee805645587716f74649d9c7748b282f63c4fe49c",
+    "formula_sha256": "a17a67f3fffcebd57c925e83eee249c97c24b4b2e56b0b0ac611530f570d85d4",
+    "factorized_radio_receipt_sha256": "9db03fc4b10b6aa2a5609c6e7294611ea8641d74d4d779c6b0c14218ee28b3e7",
+    "view_count": 120,
+    "view_sidecar_count": 120,
+    "view_frame_ids_canonical_json_sha256": "83202c5ff5b12a80a06625377c4bd15cfb135d61070081964279d6a6104d3757",
+    "view_frame_ids_are_ordered_subset_of_field240": true,
+    "view_frame_ids": [
+      22, 35, 91, 101, 130, 165, 214, 228, 233, 239,
+      249, 258, 269, 314, 366, 383, 413, 420, 449, 454,
+      499, 518, 551, 576, 581, 584, 591, 595, 604, 664,
+      699, 719, 729, 733, 739, 752, 796, 841, 897, 901,
+      990, 1058, 1077, 1106, 1153, 1198, 1287, 1324, 1330, 1332,
+      1334, 1336, 1338, 1340, 1342, 1344, 1346, 1348, 1350, 1352,
+      1356, 1358, 1360, 1362, 1364, 1366, 1368, 1370, 1372, 1374,
+      1376, 1378, 1380, 1382, 1384, 1386, 1388, 1390, 1392, 1394,
+      1397, 1399, 1402, 1405, 1407, 1409, 1411, 1413, 1415, 1417,
+      1420, 1423, 1425, 1427, 1429, 1431, 1433, 1435, 1441, 1446,
+      1448, 1450, 1452, 1455, 1457, 1460, 1462, 1464, 1466, 1468,
+      1470, 1472, 1477, 1481, 1483, 1492, 1544, 1633, 1695, 1735
+    ]
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_clean_source_rgb_scene_authority.py",
+    "sha256": "7a39b4e4c12e0770b39b1b4cc0166ae0948bad8adbefd72a02e279d5ce2927f6",
+    "execution_class": "CPU_only_PIL_validation_and_SHA_sealing"
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/source_rgb_scene_authority_v1.json",
+  "command": [
+    "env", "CUDA_VISIBLE_DEVICES=", "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/materialize_clean_source_rgb_scene_authority.py",
+    "--field-source-contract", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/field240/scene0003_00/field_source_contract.json",
+    "--expected-field-source-contract-sha256", "0e631e3f09006c84cd953181175249af512fb21d7c48a69d7027a1428479802f",
+    "--feature-frame-manifest", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/radio_features/scene0003_00/frame_manifest.json",
+    "--expected-feature-frame-manifest-sha256", "d7c6ef7456529ed9f45218b841524471538bfb47f3fff63ce03953c1b06ccb8e",
+    "--source-rgb-root", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/field240/scene0003_00/color",
+    "--output", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0003_00/run/accepted_v2_source_only/scene0003_00/source_rgb_scene_authority_v1.json"
+  ],
+  "execution_constraints": {
+    "GPU_used": false,
+    "CUDA_visible_devices": "empty",
+    "benchmark_assets_opened": false,
+    "benchmark_evaluator_or_metric_opened": false,
+    "target_labels_queries_or_masks_opened": false,
+    "per_scene_approximation_or_substitution": false,
+    "output_preexisting": false,
+    "noclobber": true
+  }
+}

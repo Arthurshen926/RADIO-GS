@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "registration": "lerf_valid_domain_adaptive_otsu_development_v1",
+  "registered_before_candidate_metrics": true,
+  "hypothesis": "After invalid-neighbour removal, the remaining fixed-threshold gap is partly caused by query-wise upper-tail shape: a single scene maximum is not a stable operating-point anchor. A target-blind recursive-upper-Otsu split can set the operating point while preserving all within-query rankings.",
+  "development_scene": "figurines",
+  "independent_confirmation_scenes": [
+    "ramen",
+    "teatime",
+    "waldo_kitchen"
+  ],
+  "parent_candidate": {
+    "name": "O2 valid-domain kNN10",
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_v1/figurines/figurines_valid_domain_o2_scores.pt",
+    "sha256": "d84ba911029fe18404f62e2e273bbe7fc450fb6ccd20efde22ea17b68d788a7c"
+  },
+  "candidate_family": {
+    "global_variants": [
+      {"name": "upper_otsu_2", "recursive_stages": 2},
+      {"name": "upper_otsu_3", "recursive_stages": 3}
+    ],
+    "stage_1_excluded_before_metrics": "A score-only audit showed that the first split retains 10-38 percent of primitives for several broad queries; it does not isolate the response tail and is therefore not a bounded object-support candidate.",
+    "formula": "piecewise-linear monotone map [0, adaptive_threshold, 1] to [0, 0.6, 1] independently per query",
+    "selection_identity": "calibrated_score > 0.6 iff parent_score > recursive_upper_otsu_threshold",
+    "trainable_parameters": 0,
+    "scene_specific_parameters": false,
+    "query_name_branches": false,
+    "within_query_order_preserved": true
+  },
+  "selection_rule": {
+    "choose_on_development_scene": "higher frozen exact mIoU; tie within 0.001 resolves to fewer stages",
+    "promotion": "selected global variant must improve macro mIoU across all three independent scenes and be non-regressive by more than 0.002 on at least two of three scenes",
+    "failure": "reject adaptive calibration and retain the continuous valid-domain parent"
+  },
+  "frozen_protocol": {
+    "evaluator_metric_renderer_modified": false,
+    "external_query_score_cache_only": true,
+    "selection_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "alpha_binarization": "png_uint8_gt10",
+    "official_frames_only": true
+  },
+  "implementation": {
+    "calibration": {
+      "path": "/root/RADIO-GS/radio_gs/querying/adaptive_otsu_score_calibration.py",
+      "sha256": "2364b302bab5cf840c3e02ace4a88f8e4d5eb624fc6e2b41863723b577094c23"
+    },
+    "materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_adaptive_otsu_candidate.py",
+      "sha256": "b4efc2ef896bdd064657811bf7ad262be0bcb5d8bdd4aa0b17acfab6ebc6a09c"
+    },
+    "focused_tests": "11 passed"
+  },
+  "access_boundary": {
+    "score_distribution_opened": true,
+    "benchmark_images_masks_labels_opened_to_construct_candidate": false,
+    "target_metrics_opened_to_construct_candidate": false
+  }
+}

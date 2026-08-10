@@ -1,0 +1,212 @@
+{
+  "schema": "radio_gs.lerf_source_text_response_ranking_preregistration.v1",
+  "schema_version": 1,
+  "status": "sealed_before_source_response_materialization_or_gate",
+  "scientific_question": "Does a query-invariant candidate improve real target-blind text-response values and within-view spatial ranking on legal LERF source-heldout RGB views, compared with the unchanged frozen control, on both Ramen and Teatime?",
+  "selector_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/select_lerf_source_text_response_ranking_gate.py",
+    "sha256": "ab9f9c86bb66592a18746a6040edc8c21b33ae36a032b0ecd448cbc097fa92e5"
+  },
+  "frame_evaluator_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/lerf_source_text_response_ranking.py",
+    "sha256": "25792bb0b41e3117e95137f3007caa36dd8e5bc470892f3c9c35688bfc6ca5b7"
+  },
+  "shared_response_metric_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/evaluation/text_response_fidelity.py",
+    "sha256": "ecc43f7c2002414024739c820136b2facfd7b3dee80d4b11f29c2d9a53c6b526"
+  },
+  "source_view_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_official_crop_summary_source_heldout_preregistration_20260809.json",
+    "sha256": "3ae93f9e1217edfa1ea17163e7c9c79921f1a15b2808e226a3d81994140771f6"
+  },
+  "query_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.pt",
+    "sha256": "37c8d1f160b3ad69b5d6372c40dcc6207bca5fb9ef0143e139965e95e7beceb4",
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_dev_embeddings.manifest.json",
+    "manifest_sha256": "50335f0f7f1a0f47388b600844bbfeba9b6a8a8290f3f74a88d3814b13b671d3",
+    "query_split": "dev",
+    "queries": 101,
+    "embedding_tensor_sha256": "f08fea4e73e7b2125fba5ccc70ef07f9eb5c565a571054c3d72a56da1aec016d"
+  },
+  "reserved_confirmation_query_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.pt",
+    "sha256": "46dd338340a310e2b59997d1b6ea4882590c76f8aca389d4aa0abc2b3c5c2721",
+    "manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_audit_embeddings.manifest.json",
+    "manifest_sha256": "1f19257393b45d713fb80be707e962a9680b84b793328a7364ba78bdd57b46b4",
+    "query_split": "audit",
+    "queries": 90,
+    "embedding_tensor_sha256": "8cc8e9ca3903488ef7558ce19d9e4bec9cb6378570c8c12d72ac96219c8dd415",
+    "opened_or_authorized_in_this_gate": false,
+    "role": "one_shot_confirmation_only_after_a_separate_candidate_specific_authority"
+  },
+  "query_vocabulary_contract": {
+    "family": "target_blind_imagenet1k_primary_text_bank_v1",
+    "prompt_template": "{query}",
+    "text_encoder": "official_c_radio_siglip2_g",
+    "descriptor_dimension": 1536,
+    "independent_query_responses_no_softmax": true,
+    "fit_dev_audit_disjoint": true,
+    "benchmark_vocabulary_opened_for_construction": false,
+    "benchmark_query_strings_used": false
+  },
+  "source_scenes": {
+    "ramen": {
+      "source_heldout_frame_ids": [
+        2,
+        45,
+        87,
+        130
+      ],
+      "forbidden_target_frame_ids": [
+        6,
+        24,
+        60,
+        65,
+        81,
+        119,
+        128
+      ],
+      "raw_teacher_tensor_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_teacher_train/ramen",
+      "required_reseal_manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/ramen/ramen_official_crop_summary_content_reseal.json",
+      "teacher_descriptor_contract": "genuine_official_crop_summary_[1536,46,62]_fp16",
+      "geometry_and_pose_authority": "exact P1 config/checkpoint records"
+    },
+    "teatime": {
+      "source_heldout_frame_ids": [
+        4,
+        7,
+        10,
+        14,
+        17,
+        20,
+        24,
+        28,
+        31,
+        35,
+        38,
+        41,
+        46,
+        49,
+        52,
+        56,
+        59,
+        62,
+        66,
+        69,
+        72,
+        76,
+        79,
+        82,
+        86,
+        89,
+        92,
+        96,
+        99,
+        102,
+        106,
+        110,
+        113,
+        117,
+        120,
+        123,
+        127,
+        131,
+        134,
+        138,
+        142,
+        145,
+        150,
+        153,
+        158,
+        162,
+        165,
+        168,
+        172,
+        175,
+        178
+      ],
+      "forbidden_target_frame_ids": [
+        2,
+        25,
+        43,
+        107,
+        129,
+        140
+      ],
+      "raw_teacher_tensor_dir": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/semantic_teacher_train/teatime",
+      "required_reseal_manifest_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_official_crop_summary_p1/teatime/teatime_official_crop_summary_content_reseal.json",
+      "teacher_descriptor_contract": "genuine_official_crop_summary_[1536,46,62]_fp16",
+      "geometry_and_pose_authority": "exact P1 config/checkpoint records"
+    }
+  },
+  "source_response_materialization_contract": {
+    "status": "implemented_pending_execution",
+    "implementation_form": "new sibling only; frozen producer, renderer, and evaluator remain unchanged",
+    "control": "candidate-specific authority must bind the unchanged currently frozen accepted descriptor interface",
+    "candidate": "candidate-specific authority must bind exactly one query-invariant descriptor interface before any response summary is opened",
+    "teacher": "genuine official crop-summary descriptor map on the exact source-heldout RGB frame",
+    "prediction": "alpha-normalized rendered descriptor map from the common frozen geometry and pose",
+    "common_valid_mask": "same geometry alpha at least 0.02 AND nonzero finite teacher descriptor; no semantic mask",
+    "spatial_resolution": [
+      46,
+      62
+    ],
+    "streaming_unit": "one scene/frame at a time",
+    "response": "l2_normalize(descriptor) dot frozen target-blind dev text embedding",
+    "ranking_unit": "one scene/frame/query over common valid pixels",
+    "ranking": "Spearman with exact ties averaged; constant teacher query excluded",
+    "selection_support": "top ceil(10 percent) valid pixels with immutable pixel-coordinate tie break",
+    "durable_output": "compact JSON frame and scene summaries; descriptor and response maps are not durable",
+    "benchmark_queries_masks_labels_or_metrics_opened": false,
+    "target_metric_executed": false
+  },
+  "decision_rule": {
+    "one_global_policy": true,
+    "required_source_scenes": [
+      "ramen",
+      "teatime"
+    ],
+    "paired_axes": [
+      "scene",
+      "source_heldout_frame",
+      "valid_pixel",
+      "generic_dev_query",
+      "teacher_response"
+    ],
+    "strict_pooled_improvements": [
+      "response_mae_lower",
+      "ranking_spearman_mean_higher",
+      "top_decile_overlap_mean_higher"
+    ],
+    "every_scene_nonregression": [
+      "response_mae",
+      "response_profile_cosine_mean",
+      "ranking_spearman_mean",
+      "ranking_spearman_p05",
+      "top_decile_overlap_mean",
+      "top_decile_overlap_p05"
+    ],
+    "tolerance": 0.0,
+    "fallback": "unchanged_control",
+    "per_scene_or_per_query_thresholds": false,
+    "descriptor_cosine_substitution_for_response_or_ranking": false,
+    "passing_role": "eligible_for_next_source_gate_only_not_target_metric"
+  },
+  "source_response_asset_status": {
+    "query_bank": "present_reusable",
+    "legal_source_heldout_teacher_maps": "present_formally_content_resealed",
+    "paired_control_candidate_response_summaries": "absent_requires_materialization",
+    "gate_execution_now": "blocked_fail_closed"
+  },
+  "shortest_executable_gap": [
+    "use the completed P1 content reseals without tensor reencoding",
+    "use the implemented candidate-agnostic sibling renderer/summary materializer that reuses frozen geometry loading and calls evaluate_source_response_frame",
+    "seal one candidate-specific authority binding control and candidate descriptor artifacts before summary materialization",
+    "stream 4 Ramen and 51 Teatime source-heldout frames with the 101-query dev bank",
+    "run the compact CPU selector; do not open the reserved audit bank unless separately authorized"
+  ],
+  "new_source_response_results_opened_at_seal": false,
+  "target_results_used_for_gate_design": false,
+  "target_metric_execution_authorized": false,
+  "frozen_protocol_producer_renderer_or_evaluator_edit_authorized": false
+}

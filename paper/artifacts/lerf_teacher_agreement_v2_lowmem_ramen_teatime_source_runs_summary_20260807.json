@@ -1,0 +1,372 @@
+{
+  "access_audit": {
+    "metric_executed": false,
+    "metric_execution_authorized": false,
+    "source_only_loo_summaries_opened": true,
+    "source_teacher_payloads_opened": true,
+    "target_images_opened": false,
+    "target_labels_or_masks_opened": false,
+    "target_metrics_opened": false
+  },
+  "cross_scene_source_evidence": {
+    "all_nonbaseline_candidates_source_safe": true,
+    "candidate_grid": [
+      {
+        "eligible_by_source_statistics_only": false,
+        "every_source_scene_nonregression": true,
+        "maximum_angle_radians": 0.15,
+        "per_scene_mean_delta": {
+          "ramen": 0.0,
+          "teatime": 0.0
+        },
+        "pooled_delta_cosine_sum_vs_o1_0p15": 0.0,
+        "pooled_heldout_scale_observations": 6571941,
+        "pooled_improvement_strict": false,
+        "pooled_mean_delta_cosine_vs_o1_0p15": 0.0
+      },
+      {
+        "eligible_by_source_statistics_only": true,
+        "every_source_scene_nonregression": true,
+        "maximum_angle_radians": 0.3,
+        "per_scene_mean_delta": {
+          "ramen": 0.010361424334018592,
+          "teatime": 0.013956666919368867
+        },
+        "pooled_delta_cosine_sum_vs_o1_0p15": 82292.42977362871,
+        "pooled_heldout_scale_observations": 6571941,
+        "pooled_improvement_strict": true,
+        "pooled_mean_delta_cosine_vs_o1_0p15": 0.012521784625520636
+      },
+      {
+        "eligible_by_source_statistics_only": true,
+        "every_source_scene_nonregression": true,
+        "maximum_angle_radians": 0.45,
+        "per_scene_mean_delta": {
+          "ramen": 0.011030127923607422,
+          "teatime": 0.01813744537447597
+        },
+        "pooled_delta_cosine_sum_vs_o1_0p15": 100556.43794989586,
+        "pooled_heldout_scale_observations": 6571941,
+        "pooled_improvement_strict": true,
+        "pooled_mean_delta_cosine_vs_o1_0p15": 0.015300873509043349
+      },
+      {
+        "eligible_by_source_statistics_only": true,
+        "every_source_scene_nonregression": true,
+        "maximum_angle_radians": 0.6,
+        "per_scene_mean_delta": {
+          "ramen": 0.00986156769654459,
+          "teatime": 0.01754391442410653
+        },
+        "pooled_delta_cosine_sum_vs_o1_0p15": 95147.54327255487,
+        "pooled_heldout_scale_observations": 6571941,
+        "pooled_improvement_strict": true,
+        "pooled_mean_delta_cosine_vs_o1_0p15": 0.014477845019082624
+      },
+      {
+        "eligible_by_source_statistics_only": true,
+        "every_source_scene_nonregression": true,
+        "maximum_angle_radians": 0.75,
+        "per_scene_mean_delta": {
+          "ramen": 0.009489237634315471,
+          "teatime": 0.01628361226295833
+        },
+        "pooled_delta_cosine_sum_vs_o1_0p15": 89193.97384557128,
+        "pooled_heldout_scale_observations": 6571941,
+        "pooled_improvement_strict": true,
+        "pooled_mean_delta_cosine_vs_o1_0p15": 0.013571937703879459
+      }
+    ],
+    "pooled_heldout_scale_observations": 6571941,
+    "pooled_mean_maximum_evidence_angle_radians": 0.45
+  },
+  "execution_conclusion": {
+    "host_oom_kill_counter_after": 1,
+    "host_oom_kill_counter_before": 1,
+    "lowmem_finalization_prevented_scene_wide_fp32_teacher_mean_oom": true,
+    "ramen_interrupt_was_not_oom_or_overheat": true,
+    "ramen_teacher_summary_complete_before_guard_interrupt": true,
+    "teatime_complete_under_31gib_host_memory": true,
+    "teatime_owner_namespace_safe_guard_completed_postexit_clear": true
+  },
+  "global_ceiling_authorization": {
+    "authorized_here": false,
+    "forged_original_v2_summary_created": false,
+    "next_gate": "run_frozen_selector_through_audited_lowmem_equivalence_bridge",
+    "reason": "frozen_original_v2_selector_requires_explicit_allocation_equivalence_compatibility_bridge"
+  },
+  "materializer_implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+    "sha256": "7c7a2096bb927ae5b6aef99349e4dd66a62782df9f87c290e47ec13f098484a7"
+  },
+  "materializer_method_contract_sha256": "78e4d78293a863ba962440cccfdc5b62dd0b4c9b14e941722df63b708c44cba0",
+  "numerical_equivalence_validation": {
+    "agreement_and_loo_payload_exact_equivalent": true,
+    "allocation_schedule_only_changed": true,
+    "related_test_result": "27_passed",
+    "teacher_mean_dense_bitwise_equivalent": true,
+    "tests": {
+      "path": "/root/RADIO-GS/tests/test_materialize_lerf_o1_o2_teacher_agreement_streaming_v2_lowmem.py",
+      "sha256": "a742e62d9f4d37add44102d80169a5a84d5965d040ce5aa40fea787dbd5e23cb"
+    }
+  },
+  "schema": "radio_gs.lerf_teacher_agreement_v2_lowmem_multiscene_source_run_summary.v1",
+  "schema_version": 1,
+  "source_scene_count": 2,
+  "source_scenes": {
+    "ramen": {
+      "accepted_rows": 221608,
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+        "sha256": "939c82d5e4a3cab51982dcac5ef318604f9072ee85a3b0e0a0e86d2c9fdd4ed5"
+      },
+      "interruption": {
+        "algorithm_exception": false,
+        "cause": "thermal_guard_compute_owner_namespace_mismatch_under_strict_mode",
+        "foreign_host_compute_pid_reported": "516762",
+        "gpu_out_of_memory": false,
+        "guard_exit_code": 86,
+        "guard_poll_seconds": 300,
+        "guard_stderr": "GPU0 has owner(s) outside guarded PGID 900566: 516762",
+        "host_out_of_memory": false,
+        "next_run_owner_namespace_mode": "exclusive-singleton-after-clear-v1",
+        "stage": "after_teacher_payload_atomic_publish_before_score_cache_publish",
+        "thermal_overheat": false
+      },
+      "rows_with_teacher": 221608,
+      "scientific_source_summary_usable": true,
+      "score_and_result_status": "guard_interrupted_after_complete_teacher_payload",
+      "source_only_leave_one_view_out_ceiling_audit": {
+        "candidate_baseline_maximum_angle_radians": 0.15,
+        "candidate_role": "source_only_diagnostic_not_target_authorization",
+        "candidates": [
+          {
+            "cosine_sum": 2397141.231068969,
+            "delta_cosine_sum_vs_o1_0p15": 0.0,
+            "heldout_scale_observations": 2622900,
+            "maximum_angle_radians": 0.15,
+            "mean_cosine": 0.9139278016962022,
+            "mean_delta_cosine_vs_o1_0p15": 0.0,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 2424318.210954666,
+            "delta_cosine_sum_vs_o1_0p15": 27176.979885697365,
+            "heldout_scale_observations": 2622900,
+            "maximum_angle_radians": 0.3,
+            "mean_cosine": 0.9242892260302208,
+            "mean_delta_cosine_vs_o1_0p15": 0.010361424334018592,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 2426072.1535997987,
+            "delta_cosine_sum_vs_o1_0p15": 28930.922530829906,
+            "heldout_scale_observations": 2622900,
+            "maximum_angle_radians": 0.45,
+            "mean_cosine": 0.9249579296198096,
+            "mean_delta_cosine_vs_o1_0p15": 0.011030127923607422,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 2423007.1369802356,
+            "delta_cosine_sum_vs_o1_0p15": 25865.905911266804,
+            "heldout_scale_observations": 2622900,
+            "maximum_angle_radians": 0.6,
+            "mean_cosine": 0.9237893693927468,
+            "mean_delta_cosine_vs_o1_0p15": 0.00986156769654459,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 2422030.552460015,
+            "delta_cosine_sum_vs_o1_0p15": 24889.321391046047,
+            "heldout_scale_observations": 2622900,
+            "maximum_angle_radians": 0.75,
+            "mean_cosine": 0.9234170393305177,
+            "mean_delta_cosine_vs_o1_0p15": 0.009489237634315471,
+            "scene_nonregression_vs_o1_0p15": true
+          }
+        ],
+        "cross_scene_gate": {
+          "every_source_scene_nonregression_required": true,
+          "one_global_ceiling_required": true,
+          "pooled_improvement_required": true,
+          "pooled_statistic": "sum(delta_cosine_sum_vs_o1_0p15)/sum(heldout_scale_observations)",
+          "preregister_before_target_metric": true
+        },
+        "heldout_predictions": 874300,
+        "heldout_scale_observations": 2622900,
+        "loo_direction_mean_angular_error_radians": 0.3712761693751617,
+        "loo_direction_mean_cosine": 0.923466500104135,
+        "query_independent": true,
+        "retained_view_capacity": 4,
+        "rows": 221608,
+        "rows_with_expansion_evidence": 218846,
+        "rows_with_valid_loo_prediction": 219971,
+        "schema": "radio_gs.source_only_loo_reliability_ceiling_audit.v1",
+        "schema_version": 1,
+        "target_candidate_authorized": false,
+        "target_images_labels_masks_metrics_opened": false
+      },
+      "source_only_leave_one_view_out_ceiling_audit_sha256": "d9587ada8b6ba189f548f5bbde40f7486fa902909e59e15ea92a77e564481861",
+      "source_summary": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_source_summary_complete_guard_interrupted_20260807.json",
+        "sha256": "eb3b1cc2f4883600a933588043933f0d90e8c444b4e9a491bb64e8b0a0ebb136"
+      },
+      "teacher_mean_sha256": "455f38a8f0596c9d7e7a8d36b5fda18666f4ed9d772a6ea483e83996e134252d",
+      "teacher_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/ramen/ramen_teacher_mean_fp16.pt",
+        "sha256": "44032362a47867a3ad0ff7873c5c43a651be24c60cba7be0be5e6db74dbc3a07"
+      },
+      "teacher_payload_validation": "validate_teacher_payload_lowmem_pass",
+      "teacher_view_directional_resultant_sha256": "4446ec75319fdcd7fd7bb9f90d03d10b01edfb5bb9d3122ac66bbae71d744a8f",
+      "thermal_telemetry": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_ramen_teacher_agreement_v2_lowmem_gpu0_telemetry_20260807.csv",
+        "sha256": "cef5afbd0b72ff2f30945f60c6b208bdbd4c4bec353201ea0aba82a3d65c870f"
+      }
+    },
+    "teatime": {
+      "accepted_rows": 334250,
+      "elapsed_seconds": 407.1074706870131,
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_execution_authority_20260807.json",
+        "sha256": "cad8230bc67547004f989b285a63b6f13942df7fcc6699317f91db9a598e924a"
+      },
+      "materialization_result": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o1_o2_streaming_result.json",
+        "sha256": "7cb249ad6beb5dc66e377bf8993b21be2e640cbbfd5a01f975dcd2f2860ea41b"
+      },
+      "outputs": {
+        "o1_negative": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o1_negative.pt",
+          "sha256": "d18e1461895f481990eb8edc4fbffc8ea0cd0affdef9dd5c1efea3748c4a384a"
+        },
+        "o1_positive": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o1_positive.pt",
+          "sha256": "d82266d97ea78d0808c06a80449320f3d58c9051625a0016fe20bd2cde067e3a"
+        },
+        "o2_negative": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o2_negative.pt",
+          "sha256": "a4d15cf7b6f7436eaec35f49c56601776861cf8e8f0597efeaf1d081d5662c38"
+        },
+        "o2_positive": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_o2_positive.pt",
+          "sha256": "6faf7a9a88aa5c45bc66a5e52d0279ef59523c2428a12082c4e43d80addccdd6"
+        },
+        "teacher_mean": {
+          "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+          "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+        }
+      },
+      "preflight_peak_cuda_bytes": 7596760064,
+      "rows_with_teacher": 334161,
+      "rows_without_teacher_bitwise_o0_fallback": 89,
+      "scientific_source_summary_usable": true,
+      "score_and_result_status": "complete",
+      "source_only_leave_one_view_out_ceiling_audit": {
+        "candidate_baseline_maximum_angle_radians": 0.15,
+        "candidate_role": "source_only_diagnostic_not_target_authorization",
+        "candidates": [
+          {
+            "cosine_sum": 3452944.1942739785,
+            "delta_cosine_sum_vs_o1_0p15": 0.0,
+            "heldout_scale_observations": 3949041,
+            "maximum_angle_radians": 0.15,
+            "mean_cosine": 0.8743753722166923,
+            "mean_delta_cosine_vs_o1_0p15": 0.0,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 3508059.64416191,
+            "delta_cosine_sum_vs_o1_0p15": 55115.44988793135,
+            "heldout_scale_observations": 3949041,
+            "maximum_angle_radians": 0.3,
+            "mean_cosine": 0.8883320391360611,
+            "mean_delta_cosine_vs_o1_0p15": 0.013956666919368867,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 3524569.7096930444,
+            "delta_cosine_sum_vs_o1_0p15": 71625.51541906595,
+            "heldout_scale_observations": 3949041,
+            "maximum_angle_radians": 0.45,
+            "mean_cosine": 0.8925128175911682,
+            "mean_delta_cosine_vs_o1_0p15": 0.01813744537447597,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 3522225.8316352665,
+            "delta_cosine_sum_vs_o1_0p15": 69281.63736128807,
+            "heldout_scale_observations": 3949041,
+            "maximum_angle_radians": 0.6,
+            "mean_cosine": 0.8919192866407988,
+            "mean_delta_cosine_vs_o1_0p15": 0.01754391442410653,
+            "scene_nonregression_vs_o1_0p15": true
+          },
+          {
+            "cosine_sum": 3517248.8467285037,
+            "delta_cosine_sum_vs_o1_0p15": 64304.65245452523,
+            "heldout_scale_observations": 3949041,
+            "maximum_angle_radians": 0.75,
+            "mean_cosine": 0.8906589844796505,
+            "mean_delta_cosine_vs_o1_0p15": 0.01628361226295833,
+            "scene_nonregression_vs_o1_0p15": true
+          }
+        ],
+        "cross_scene_gate": {
+          "every_source_scene_nonregression_required": true,
+          "one_global_ceiling_required": true,
+          "pooled_improvement_required": true,
+          "pooled_statistic": "sum(delta_cosine_sum_vs_o1_0p15)/sum(heldout_scale_observations)",
+          "preregister_before_target_metric": true
+        },
+        "heldout_predictions": 1316347,
+        "heldout_scale_observations": 3949041,
+        "loo_direction_mean_angular_error_radians": 0.45095287524824723,
+        "loo_direction_mean_cosine": 0.8901355221529329,
+        "query_independent": true,
+        "retained_view_capacity": 4,
+        "rows": 334250,
+        "rows_with_expansion_evidence": 328332,
+        "rows_with_valid_loo_prediction": 331956,
+        "schema": "radio_gs.source_only_loo_reliability_ceiling_audit.v1",
+        "schema_version": 1,
+        "target_candidate_authorized": false,
+        "target_images_labels_masks_metrics_opened": false
+      },
+      "source_only_leave_one_view_out_ceiling_audit_sha256": "e0ea58bb6a269220d864bb571494e556dfc7473abf34f1c72be425557ddad017",
+      "source_summary": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_source_summary_complete_20260807.json",
+        "sha256": "fcdb72000291d48aeedca0feed43a74ee0692c7c0a95d1f98b983e7307e2a480"
+      },
+      "teacher_mean_sha256": "62eed613464bc1ba2b38a7cfb1f4f8871dc4a3f52db8ccea8df78fd204e05c97",
+      "teacher_payload": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_o2_teacher_agreement_streaming_v2_lowmem/teatime/teatime_teacher_mean_fp16.pt",
+        "sha256": "594f9b84eb161973e974e257dcc4f98b0307c37af2ace9baabbc20f9c534f73e"
+      },
+      "teacher_view_directional_resultant_sha256": "96ba2dc620b11eb02b086838c14d98f66326122ed0ea7159766687ba33cdbf6e",
+      "thermal_execution": {
+        "cuda_visible_devices": "0",
+        "guard": {
+          "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+          "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+        },
+        "maximum_temperature_c": 88,
+        "owner_audit": {
+          "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_gpu0_owner_audit_20260807.csv",
+          "sha256": "f1198bd1d1b32fb3e61d716bbe7eb356cf35c3a97571bbe461730b750a4f7fdb"
+        },
+        "owner_pid_namespace_mode": "exclusive-singleton-after-clear-v1",
+        "physical_gpu": 0,
+        "poll_seconds": 300,
+        "postexit_owner_clear": true,
+        "program_device": "cuda:0",
+        "soft_pause_temperature_c": 0,
+        "telemetry": {
+          "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_teacher_agreement_v2_lowmem_gpu0_telemetry_20260807.csv",
+          "sha256": "bf6307362c54d946a92c43ee44882deb33fe73f886452b11a522e89eb9f8e84f"
+        }
+      }
+    }
+  },
+  "status": "two_source_summaries_complete_selector_compatibility_bridge_pending"
+}

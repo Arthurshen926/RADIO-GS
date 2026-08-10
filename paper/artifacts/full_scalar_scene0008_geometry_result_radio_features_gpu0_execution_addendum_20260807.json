@@ -1,0 +1,75 @@
+{
+  "artifact": "full_scalar_scene0008_geometry_result_radio_features_gpu0_execution_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:15:50+08:00",
+  "status": "sealed_after_geometry_success_and_before_radio_feature_extraction",
+  "scene_id": "scene0008_00",
+  "cohort_split": "source_validation",
+  "parent_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_scene0008_base_chain_execution_preregistration_20260807.json",
+    "sha256": "a5a73a3605f507e8b52547ff2f47c87bec7fb23a547f0e479bc5db39dc2752d3"
+  },
+  "geometry_result": {
+    "receipt": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00/receipts/02_geometry.json",
+    "receipt_sha256": "ec3e92a8d8c9ab539d289dffae9a58ccd84f61696334b4f39f9f691f6862503f",
+    "receipt_authority_sha256": "e013fe78346174733283389a62737db96b58493a637816873dec7ddeb775ec68",
+    "checkpoint_sha256": "34535cd685d7a7df0cd5f01a31fa394a31ecaca91afd1cd39afb72874f399a9f",
+    "ply_sha256": "aee6fbb2095d5304327d61a9b1755de066cc7c3c24e4373cde3fdd4d653ab7e3",
+    "iterations": 15000,
+    "maximum_temperature_c": 83,
+    "thermal_warnings": 0,
+    "thermal_aborts": 0,
+    "guard_exit_code": 0,
+    "cuda_release_verified": true
+  },
+  "radio_feature_contract": {
+    "images": 240,
+    "radio_repo": "/root/RADIO",
+    "radio_version": "c-radio_v4-h",
+    "batch_size": 1,
+    "resolution_scale": 0.5,
+    "skip_pca_stats": true,
+    "atomic_resume_partial": true,
+    "per_scene_hyperparameters": false
+  },
+  "command": [
+    "bash", "radio_gs/scripts/run_repo_python.sh",
+    "radio_gs/scripts/run_full_scalar_scannet_clean_pilot_v3.py",
+    "--scene-id", "scene0008_00",
+    "--scan-archive-part", "/mnt/pool/sqy/OpenDataLab___ScanNet_v2/raw/scans.tar.part-00",
+    "--cohort-authority", "paper/artifacts/full_scalar_scannet_clean_24train_8validation_cohort_authority_20260805.json",
+    "--expected-cohort-authority-sha256", "7f450c09d2db9f55fa8e1efc85905b29b2a7fc63a66169b6ffa123b6dd1c8463",
+    "--exclusion-manifest", "paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "--expected-exclusion-manifest-sha256", "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29",
+    "--inventory", "paper/artifacts/full_scalar_scannet_clean_24train_8validation_inventory_20260805.json",
+    "--expected-inventory-sha256", "4748f782745e9ffb47b95147706165d358cb48fba2090eeaed9ded4d1614b539",
+    "--pilot-root", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0008_00",
+    "--gpu", "0",
+    "--stop-after", "radio_features"
+  ],
+  "execution": {
+    "physical_gpu": 0,
+    "power_limit_w": 300.0,
+    "initial_temperature_c": 68,
+    "compute_owner_pids": [],
+    "output_preexisting": false,
+    "atomic_no_clobber": true
+  },
+  "thermal_guard": {
+    "poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "nvml_failure": "fail_closed",
+    "dynamic_pause": false,
+    "peer_gpu_monitoring": false
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "frozen_evaluator_metric_renderer_modified": false
+}

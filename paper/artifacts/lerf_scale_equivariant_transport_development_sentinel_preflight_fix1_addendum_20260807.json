@@ -1,0 +1,32 @@
+{
+  "schema": "radio_gs.lerf_scale_equivariant_transport_development_preflight_addendum.v1",
+  "schema_version": 1,
+  "status": "superseded_failed_authority_before_materialization_or_metric",
+  "development_preregistration": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_scale_equivariant_transport_development_sentinel_preregistration_20260807.json",
+    "sha256": "bf591dba3c9e1d1ffd62ab0b0eecb1a372214d03dd4df7e68ec3ff3d10d0fd5b"
+  },
+  "superseded_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf_teatime_scale_equivariant_transport_development_v1_execution_authority_20260807.json",
+    "sha256": "f826a4ba21843163fae04347eb38a3f66695c108a9f44f905feed38a7524bead"
+  },
+  "failure": {
+    "stage": "recursive_authority_preflight_o0_pair_validation",
+    "reason": "duplicate positive cache positional argument",
+    "candidate_output_created": false,
+    "gpu_execution_started": false,
+    "target_metric_executed": false
+  },
+  "fix": {
+    "scope": "remove_duplicate_validator_argument_only",
+    "transport_numerics_changed": false,
+    "method_contract_changed": false,
+    "fixed_materializer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_scale_equivariant_transport_candidate_scores.py",
+      "sha256": "872da05bbe0d330e79b032e1c8c0eff63df8625c83c6016f436084ecdae8afd8"
+    },
+    "method_contract_sha256": "8b4fe41381851b92e8324738682a1cc9e032f95ae0ecc59c1bd54f8174fcfbf8",
+    "specialized_tests_passed": 11
+  },
+  "next_authority": "fresh_fix1_no_clobber"
+}

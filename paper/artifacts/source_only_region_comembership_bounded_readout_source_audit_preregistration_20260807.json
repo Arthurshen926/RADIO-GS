@@ -1,0 +1,42 @@
+{
+  "artifact": "source_only_region_comembership_bounded_readout_source_audit_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_bounded_readout_source_audit",
+  "role": "pure_source_engineering_only_not_formal_4plus2_or_target_selection",
+  "motivation": "The V1 unbounded connected closure percolates through sparse false-positive bridges despite high edge F1.",
+  "probability_model": {
+    "fit_scene": "scene0001_00",
+    "heldout_scene": "scene0002_00",
+    "features": "the fixed 15 RegionCoMembershipV1 pair features",
+    "fit_constants": "median_MAD_on_scene0001_active_pairs_then_class_balanced_evidence_BCE_AdamW_seed0_lr0.001_weight_decay0.0001_100_epochs",
+    "heldout_contribution_to_fit": false
+  },
+  "readouts": {
+    "maximum_product": "best product-of-edge-probabilities path from seed, bounded to the K highest settled regions",
+    "widest_path": "best minimum-edge-probability path from seed, bounded to the K highest settled regions",
+    "dual_path_widest": "remove every bridge from the thresholded undirected graph, then run bounded widest-path only inside the seed's remaining bridge-free component",
+    "multipoint_consistency": "first direct neighbor then additions supported by at least two already-selected regions; rank by geometric mean of the two strongest direct supports"
+  },
+  "global_constants": {
+    "maximum_selected_regions_including_seed": [2, 4, 8],
+    "edge_or_path_score_threshold_grid": "0.05_to_0.95_inclusive_step_0.05",
+    "per_readout_and_K_threshold_selection": "maximize scene0001 instance-macro topology score then IoU then F1 then lower contamination then lower threshold",
+    "scene_or_instance_specific_parameter": false
+  },
+  "heldout_evaluation": {
+    "seeds": "every scene0002 eligible positive-instance region",
+    "aggregation": "seed evidence weighted within instance then equal instance macro",
+    "metrics": ["IoU", "F1", "contamination", "giant_excess", "topology_score", "selected_region_count"],
+    "baselines": ["singleton_seed", "V1_unbounded_closure"]
+  },
+  "promotion_to_v2_preregistration": "recommend only if at least one frozen scene1-selected bounded rule clearly improves scene2 instance-macro IoU and F1 over singleton without material contamination",
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "schema": "radio_gs.lerf_o0_anchored_positive_utility_execution.v1",
+  "schema_version": 1,
+  "status": "authorized_source_fixed_positive_utility_target_score_cache_only",
+  "source_variant": "v21b",
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_positive_utility_residual_cache.py",
+    "sha256": "79fee20a29b670dc1b2700bf42a9587f60efe71daed8a130d3d95f214f63e51e"
+  },
+  "dependencies": {
+    "positive_utility_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/lerf_o0_anchored_positive_utility_residual.py",
+      "sha256": "b67385ec245e7ccae25d65f42b7df29debd90ff6fbcbb7d53eddb0a188b8b27c"
+    },
+    "legacy_exact_o0_helpers": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_o0_anchored_graph_residual_cache.py",
+      "sha256": "05d900e848ca5cb1cf9dbff652e06dd1945c0bf88d4ca37e07b4d1550ac624fe"
+    },
+    "o0_frozen_readout": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "o0_target_binding": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_region_comembership_external_cache_v2.py",
+      "sha256": "d5285b699e0a28219b6c4e8ec2185f133b9d50f14b8ecb2c6dda97ecbfcc3e00"
+    },
+    "o0_scale_axis": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/build_lerf_region_comembership_external_cache_v1.py",
+      "sha256": "cd10adde64aa4595eaad417de058b1c3ae6c88e2ef7d8ebe5293096cdccb31b5"
+    },
+    "direct_graph": {
+      "path": "/root/RADIO-GS/radio_gs/querying/bounded_region_comembership_readout.py",
+      "sha256": "eef0bdb709a89a674e53a458dea729efd98c7caa64a5c4114891bb1bc442e2dc"
+    },
+    "rank256_authority": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/surface_region_rank256_champion.py",
+      "sha256": "0f24b15b236e1980e4ff06022408ad698434f3037d60c5e4a274a463b432716b"
+    },
+    "target_accepted_authority": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/surface_region_target_accepted_v2.py",
+      "sha256": "6e601832c1fc960ead9b652a5750e6fb7657530dd76680d0528862310ff53743"
+    },
+    "target_feature_authority": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_region_comembership_features_v2.py",
+      "sha256": "31f0896e8f3cea44be3a56c902e9bfc6e71b5ae5fc576cdaf2a78105b2d8231c"
+    },
+    "target_inference_authority": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/infer_region_comembership_v2.py",
+      "sha256": "198ffdb548ec162a875a268193f80f7ca9772dfcbcddfcf06d864c1d30658bc2"
+    },
+    "renderer_geometry_loader": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_multiscale_query_score_cache.py",
+      "sha256": "277702e733ae0e4d801b23396129af3213988340c6f07c0e3b1db6fa6b22aa91"
+    },
+    "source_calibration_fix2": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/calibrate_source_only_graph_confidence_v1.py",
+      "sha256": "c9132d64bdf3650cd82d9ce6884ad1b9f122c2b467216e143e1368bbc1b1d60f"
+    },
+    "source_calibration_fix3": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/calibrate_source_only_graph_consumer_exact_fix3.py",
+      "sha256": "9f29c5182f9f902c872dbf8d22bbcaae7db93c3977ac56ad3e66cd3292b867d2"
+    },
+    "source_calibration_fix4": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/audit_source_only_graph_expected_utility_fix4.py",
+      "sha256": "3beb9de0c319d9275a67f74196d2ce73b6169ae8f6e2627a182fc7899dbb8935"
+    },
+    "source_calibration_fix4b": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/finalize_source_only_graph_positive_utility_fix4b.py",
+      "sha256": "1c9f1ccaab35be434c53cc1049ad6dfc38581774dedca3759cf7d032f5170f67"
+    }
+  },
+  "source_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_v21b_conditioned_rank256_exact4x2/model.pt.json",
+    "sha256": "0ff977f7bf150b591c04806f0dfc093b91dc5d38df44df91c1eaf2f444549b1a"
+  },
+  "source_calibration": {
+    "path": "/root/RADIO-GS/paper/artifacts/source_only_graph_positive_utility_contract_result_fix4b_20260807.json",
+    "sha256": "0043b85c9c55f2532bb217a8c5126a7dfa3903e1c852073a3ca9be8a83a03280"
+  },
+  "positive_o0_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_positive.pt",
+    "sha256": "7e7611ac7c886917d0b415c613e16c740d6248cb46c0bde536df6d353d9f739c"
+  },
+  "negative_o0_cache": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/lerf_native_multiscale_query_scores_fp32_v4_explicit_f32_v2/figurines_negative.pt",
+    "sha256": "a887eb9da5631ed8a1966e3ad844bb0797d94626a6025e1293b5712e11b9b19f"
+  },
+  "rank256_target_descriptor": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/target_descriptor.fix2.pt",
+    "sha256": "0a4ee25c3040cc741c543fc87241dc83ab08be259d6da49bc6cac607a82e83f3"
+  },
+  "rank256_query_relevance": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/query_relevance.fix2.pt",
+    "sha256": "86e5af907cc4597f002548b3b9759f7d967acb57b7eae097e86ad110dd001d66"
+  },
+  "region_feature_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_features_v2.pt",
+    "sha256": "c65b6c799569e4423547e96632f0652b7ce9ef5de107792e645e46e8eec2a927"
+  },
+  "region_inference_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_comembership_inference_v2.pt",
+    "sha256": "baf3446bd5c83bd1f2b639d534b4d0edcf4124ca19e282e2f8c4a24c998ba421"
+  },
+  "renderer_geometry_checkpoint": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+    "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+  },
+  "knn_chunk_size": 65536,
+  "output_cache": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility.fix4b.pt",
+  "output_report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/o0_anchored_positive_utility.fix4b.report.json",
+  "target_score_cache_authorized": true,
+  "target_quality_execution_authorized": false,
+  "access_audit": {
+    "query_names_opened": true,
+    "target_images_opened": false,
+    "target_quality_data_opened": false,
+    "target_quality_readout_executed": false
+  }
+}

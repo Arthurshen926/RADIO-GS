@@ -1,0 +1,45 @@
+{
+  "artifact": "source_only_region_comembership_v2_scene1_to_scene2_audit_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T00:00:00+08:00",
+  "status": "sealed_before_scene1_to_scene2_v2_audit",
+  "role": "bounded_source_engineering_only_not_formal_4plus2_or_target_selection",
+  "fit_scene": "scene0001_00",
+  "heldout_scene": "scene0002_00",
+  "model": "the exact preregistered 21_to_64_to_32_to_1 RegionCoMembershipV2 with train-only median_MAD normalization",
+  "training": "scene0001_only_equal_class_evidence_BCE_AdamW_seed0_lr0.001_weight_decay0.0001_100_epochs",
+  "readout_selection": {
+    "scene": "scene0001_00_only",
+    "metric": "legacy canonical-region evidence topology score for efficient engineering selection",
+    "methods": [
+      "maximum_product",
+      "dual_path_widest",
+      "multipoint_consistency"
+    ],
+    "maximum_regions": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "threshold_grid": "0.05_to_0.95_inclusive_step_0.05",
+    "joint_tie_break": "topology_score_then_IoU_then_F1_then_low_contamination_then_low_giant_excess_then_low_K_then_low_threshold_then_registered_method_order"
+  },
+  "heldout_evaluation": {
+    "scene0002_contribution_to_fit_or_selection": false,
+    "report": [
+      "canonical_region_evidence_metrics",
+      "deduplicated_exact_primitive_instance_metrics"
+    ],
+    "primitive_metric_scope": "evaluate singleton and the one globally scene1-selected rule; do not use scene2 primitive evidence to alter the rule"
+  },
+  "promotion_interpretation": "A positive engineering signal requires the frozen scene1-selected rule to improve heldout scene2 IoU and F1 over singleton under deduplicated primitive-instance scoring without reducing primitive topology score. Formal promotion still requires the separate frozen 4train_2validation protocol.",
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

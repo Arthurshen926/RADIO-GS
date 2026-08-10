@@ -1,0 +1,33 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_query_readout_validity_domain_preflight_failure",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:10:00+08:00",
+  "status": "failed_closed_before_external_cache_write",
+  "failed_execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_region_comembership_v2_figurines_query_readout_execution_authority_20260807.json",
+    "sha256": "ecfe277c93873fb2abad5385965b0ecbdab6f1d24efc9585844231aeb08647c6"
+  },
+  "failure": "frozen O0 and V2 support geometry differ",
+  "root_cause": "implementation_conflated_query_independent_MPR_active_domain_with_frozen_O0_readout_valid_domain",
+  "geometry_evidence": {
+    "coordinate_and_row_binding_exact": true,
+    "coordinate_max_absolute_difference": 0.0,
+    "graph_active_primitives": 96879,
+    "o0_valid_primitives": 82603,
+    "intersection_primitives": 82400,
+    "o0_only_primitives": 203,
+    "mpr_only_primitives": 14479
+  },
+  "outputs_written": false,
+  "resolution": {
+    "retain_exact_coordinate_and_row_binding": true,
+    "permit_distinct_validity_domains": true,
+    "mask_final_membership_to_o0_valid": true,
+    "focused_tests_passed": 9,
+    "fixed_implementation_sha256": "d5285b699e0a28219b6c4e8ec2185f133b9d50f14b8ecb2c6dda97ecbfcc3e00"
+  },
+  "benchmark_images_opened": false,
+  "benchmark_masks_opened": false,
+  "benchmark_labels_opened": false,
+  "benchmark_metric_computed": false
+}

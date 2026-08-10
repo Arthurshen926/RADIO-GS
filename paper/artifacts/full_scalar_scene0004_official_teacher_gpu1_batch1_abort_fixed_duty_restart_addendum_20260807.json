@@ -1,0 +1,77 @@
+{
+  "artifact": "full_scalar_scene0004_official_teacher_gpu1_batch1_abort_fixed_duty_restart_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:28:33+08:00",
+  "status": "sealed_after_gpu1_direct_guard_abort_and_before_same_gpu_fixed_duty_restart",
+  "parent_execution_authority": {
+    "path": "paper/artifacts/full_scalar_scene0004_official_teacher_gpu1_exact_execution_authority_20260807.json",
+    "sha256": "dd0cbc39cff9f68cc9f642a447acb92083ea09814b516b0c99c78114c6a93195"
+  },
+  "fixed_duty_preregistration": {
+    "path": "paper/artifacts/fixed_cuda_duty_cycle_wrapper_preregistration_20260807.json",
+    "sha256": "ea0d002ae3c988820c7701d646f662751af96cb0b8f2fbd2460d94f8b8deef6f"
+  },
+  "activation_scope_addendum": {
+    "original_scope": "execution-only fallback after both physical GPUs direct guard failure",
+    "narrowed_scene_local_condition": "the assigned physical GPU1 direct guard has actually failed at six consecutive >=88C samples; physical GPU0 is occupied by a separate legitimate immutable scene chain and is not available for this scene",
+    "reason": "avoid idling GPU1 or contending with the independently assigned GPU0 chain while reducing a demonstrated scene-local thermal risk",
+    "numerical_selection_or_benchmark_change": false,
+    "per_scene_hyperparameter_change": false
+  },
+  "aborted_attempt": {
+    "physical_gpu": 1,
+    "guard_exit_code": 86,
+    "maximum_temperature_c": 91,
+    "thermal_samples_c": [89, 90, 90, 91, 90, 90],
+    "maximum_consecutive_overheat_polls": 6,
+    "output_written": false,
+    "partial_output_present": false,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/logs/official_teacher_gpu1_batch1_telemetry.csv",
+      "sha256": "8496f1e4e755d22672cd01c48826f5a9686d7dcd3f55be08aef6e3ff78f427ad"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/logs/official_teacher_gpu1_batch1_owner_audit.csv",
+      "sha256": "b0f325ca6778e9e14e7684fded6d18d23c7975d55d93e8e9f3438cdc3d67aea2"
+    },
+    "driver_healthy_after_abort": true,
+    "gpu_released_after_abort": true
+  },
+  "restart": {
+    "physical_gpu": 1,
+    "same_output_path": true,
+    "output_proven_absent_before_restart": true,
+    "crop_resolution": 384,
+    "crop_batch_size": 1,
+    "region_batch_size": 4096,
+    "maximum_views_per_region": 4,
+    "same_producer_sha256": "d51a8616e67c05e0c8200c21d0067ccf2389165bddefb204f21902122dc31df5",
+    "same_model_checkpoint_ordered_crops_tensor_math_float32_l2_and_output_schema": true,
+    "execution_layer_change_only": "fixed host-side 45-second run / 30-second cool SIGSTOP/SIGCONT duty cycle",
+    "status_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0004_00/logs/official_teacher_gpu1_batch1_fixed45run30cool_retry_status.jsonl"
+  },
+  "thermal_guard": {
+    "implementation_path": "radio_gs/scripts/run_with_fixed_cuda_duty_cycle.py",
+    "implementation_sha256": "369ab18195e93d9633b1e57ec7ac9e7da36b9fc2ef72dc4f861b76cc96697d0f",
+    "schedule_id": "fixed-duty-cycle-45run-30cool-nvml30-v1",
+    "owner_mode": "exclusive-singleton-after-clear-v1",
+    "run_seconds": 45,
+    "cool_seconds": 30,
+    "nvml_poll_seconds": 30,
+    "start_maximum_temperature_c": 65,
+    "hard_abort_temperature_c": 88,
+    "hard_abort_consecutive_samples": 6,
+    "maximum_power_limit_w": 300.5,
+    "nvml_failure": "fail_closed"
+  },
+  "source_access": {
+    "source_rgb_used": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

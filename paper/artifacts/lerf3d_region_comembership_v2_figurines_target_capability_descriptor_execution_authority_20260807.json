@@ -1,0 +1,47 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_target_capability_descriptor_execution_authority",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:00:00+08:00",
+  "status": "sealed_after_target_accepted_v2_and_capability_bank_success_before_descriptor_materialization",
+  "target_identity": {
+    "dataset_id": "lerf",
+    "scene_id": "figurines",
+    "geometry_checkpoint_sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2",
+    "physical_space_id": "lerf:figurines:geometry-checkpoint-sha256:6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+  },
+  "inputs": {
+    "target_accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/accepted_v2_sparse_v2.pt",
+      "sha256": "fcc086d6be5773672758296582d6f79c4441b4c2aae098e945e70297d01a5042"
+    },
+    "canonical_capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/canonical_capability_bank.pt",
+      "sha256": "f34fc6b71a7a7e37cd51db46b9b9a65f7c9f18c6d4b46d20091f482e79c73e8e"
+    }
+  },
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/materialize_target_region_capability_descriptors_v2.py",
+    "sha256": "628e218b7be3d1cd2d1f0780c690b7c8dc8905f00d51c3b6c1b423152fd1e6a9"
+  },
+  "verification_before_execution": {
+    "tests": "tests/test_materialize_target_region_capability_descriptors_v2.py",
+    "passed": 1,
+    "failed": 0
+  },
+  "frozen_contract": {
+    "same_pooling_math_and_output_schema_as_formal_source_v2": true,
+    "batch_size": 16,
+    "appearance_source": "formal_query_free_dino_capability",
+    "boundary_source": "formal_query_free_sam3_capability",
+    "query_or_label_usage": false,
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/region_capability_descriptor_v2.pt",
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

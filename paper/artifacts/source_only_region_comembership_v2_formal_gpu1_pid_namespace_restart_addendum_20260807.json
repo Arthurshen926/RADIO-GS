@@ -1,0 +1,58 @@
+{
+  "artifact": "source_only_region_comembership_v2_formal_gpu1_pid_namespace_restart_addendum",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T03:57:00+08:00",
+  "status": "sealed_after_nonmetric_abort_and_before_restart",
+  "execution_authority": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_execution_authority.json",
+    "sha256": "0c3eaf3b8c6557bc8bb3cd65cf1bc358ed27856cf7e5864fccc7694aaffd8f48"
+  },
+  "trainer": {
+    "path": "radio_gs/scripts/train_source_region_comembership_v2.py",
+    "sha256": "8b00a6cd8aef776765a2e9261841402ded952b056b093efc097323f12eb0e0bc"
+  },
+  "first_attempt": {
+    "device": "physical_GPU1_via_torch_cuda_ordinal_1_without_CUDA_VISIBLE_DEVICES_remapping",
+    "exit_code": 86,
+    "last_completed_training_epoch": 100,
+    "exact_primitive_validation_started": false,
+    "checkpoint_written": false,
+    "report_written": false,
+    "declared_no_clobber_outputs_rechecked_absent": true,
+    "guard_error": "GPU1 has owner(s) outside guarded PGID 247135: 3875855",
+    "diagnosis": "nvidia-smi reported the CUDA child with a host-namespace PID that was invisible in the container /proc namespace, so strict process-group resolution treated the sole post-launch owner as foreign",
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/formal_v2_4plus2_gpu1_telemetry.csv",
+      "sha256": "2c07775c275461abf59082ee46692d8b7940d69d9e4a558c5dc4415108399817"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/formal_v2_4plus2_gpu1_owners.csv",
+      "sha256": "d2f6cbaed5fb74839811e8f7a20718cc7d14a1960e941bd22461b244d0244045"
+    }
+  },
+  "restart": {
+    "output_paths": "unchanged_because_both_declared_no_clobber_outputs_are_absent",
+    "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
+    "mode_semantics": "require GPU1 owner-free immediately before launch, then bind only the first singleton nvidia-smi host PID that is invisible in container /proc; reject additional owners or a later PID change",
+    "temperature_poll_seconds": 30,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "maximum_power_limit_w": 300.5,
+    "mathematical_protocol_changed": false,
+    "data_or_source_authority_changed": false,
+    "checkpoint_or_readout_selection_changed": false,
+    "thermal_or_PCIe_protection_weakened": false
+  },
+  "guard_implementation": {
+    "path": "radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+    "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

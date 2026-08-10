@@ -1,0 +1,52 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_ramen_capability_gpu0_execution_authority",
+  "schema_version": 1,
+  "status": "sealed_after_query_free_lineage_audit_and_before_capability_execution",
+  "scene_id": "ramen",
+  "inputs": {
+    "factorized_field": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/fields/trainable_basis_d512_l512_exact_marginal.pth",
+      "sha256": "2bcf9cc8ba3ec128dfba80737c35a7dfdff8a8128b49fc52887626fb0d4cdee1",
+      "schema": "factorized-v2"
+    },
+    "factorized_radio_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "1b3c6c5ac01b6dea3e993db64217b60a942ba33adbed2e34e8357846854b3f8e"
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/canonical_factorized_radio_v1/ramen/fix4c_exact_marginal_v1/factorized_primitive_state_v1.pt",
+      "sha256": "2cf8733e0ecf2f88a02afa145d5ec4476d0bba95f0bb97751ac302d6928408b5"
+    },
+    "exact_source_capabilities": {
+      "appearance_sha256": "bf7b5e04b9c8318a32d7e354312c9cea1a3f3970d208705a830b44fa425396e7",
+      "boundary_sha256": "a4b04b268707d1c742cecf410ff2f5c5e17214ee262c59c50f80247ff8aeebe6",
+      "raw_reference_sha256": "34f1d14cd18e41b0fea11b04b24e3c353e3839f8ee41d924bd4f0900f9c30a23",
+      "cohort_authority_sha256": "eab63c1eb55ccb620000241fcbd517a9982e1f9ffe33a23875abe1deb1760321"
+    },
+    "official_radio_checkpoint_sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9"
+  },
+  "frozen_contract": {
+    "same_as_source_4train_2validation": true,
+    "field_checkpoint_schema": "factorized-v2",
+    "batch_size": 4096,
+    "projection_order": "official_adaptor_then_shared_exact_marginal_mpr",
+    "capability_target_contract": "matched_exact_marginal",
+    "per_scene_hyperparameters": false
+  },
+  "output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/ramen/canonical_capability_bank.pt",
+  "thermal_guard": {
+    "physical_gpu": 0,
+    "poll_seconds": 30,
+    "start_maximum_temperature_c": 87,
+    "maximum_temperature_c": 88,
+    "maximum_consecutive_overheat_polls": 6,
+    "owner_mode": "exclusive-singleton-after-clear-v1"
+  },
+  "access_audit": {
+    "benchmark_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

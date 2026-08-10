@@ -1,0 +1,59 @@
+{
+  "artifact": "factorized_native_contrast_v21_lerf_exact_relevance_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T13:44:00+08:00",
+  "status": "frozen_before_opening_any_target_query_manifest_or_text_cache",
+  "candidate": {
+    "source_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt.json",
+      "sha256": "bc264f50c33a20199201875eba638ee36c654b888d270d32d3259beeebd5debc"
+    },
+    "source_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt",
+      "sha256": "952e1d841969c8d2d48586aa8d08a59d4e28fadea10b56d4c17557df1c434185"
+    },
+    "target_descriptor_schema": "radio_gs.factorized_native_contrast_v21_target_descriptor.v1",
+    "exact_query_view_schema": "radio_gs.exact_query_descriptor_view.v1",
+    "health_v4_preregistration": {
+      "path": "/root/RADIO-GS/paper/artifacts/factorized_native_contrast_v21_source_student_envelope_health_v4_preregistration_20260807.json",
+      "sha256": "a1b04ce679e45388c2d2addde2f9a1f4cc62a4a7b1def1b1d3c5d3e7f0d8fc0f"
+    },
+    "health_v4_requirement": "source-student-envelope formal validator require_pass=True and exact descriptor/source/prereg lineage",
+    "health_v4_schema_dispatch": "exported by radio_gs.interfaces.factorized_native_contrast_v21_target_health_v4"
+  },
+  "query_protocol": {
+    "exact_scene_query_manifest": "frozen_scene_specific_exact_query_order",
+    "positive_text": "exact_scene_subset_of_frozen_official_all_query_bank",
+    "all_query_text_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "formula": "sigmoid(10*(positive_cosine-max_four_canonical_negative_cosines))",
+    "implementation": "existing calibrated_v21_absolute_relevance",
+    "output": "float32 region_absolute_relevance_R_by_Q",
+    "postprocess": "none",
+    "threshold_scan": false,
+    "scene_specific_parameters": false,
+    "query_smoothing": false,
+    "scene_minmax_remap": false,
+    "ranking_normalization": false
+  },
+  "ordering_gate": [
+    "validate_complete_contrast_v21_source_result_checkpoint_and_nested_authorities",
+    "validate_contrast_v21_target_descriptor_and_exact_query_view",
+    "validate_source_student_health_v4_formal_PASS_and_descriptor_source_prereg_lineage",
+    "validate_this_preregistration_and_frozen_protocol_records",
+    "only_then_open_exact_query_manifest_positive_all_query_and_canonical_negative_caches"
+  ],
+  "access_policy": {
+    "query_files_before_health_v4_PASS": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  }
+}

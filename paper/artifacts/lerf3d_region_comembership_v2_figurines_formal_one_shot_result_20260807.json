@@ -1,0 +1,80 @@
+{
+  "artifact": "lerf3d_region_comembership_v2_figurines_formal_one_shot_result",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T05:20:00+08:00",
+  "status": "completed_and_rejected",
+  "promotion": false,
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/lerf3d_region_comembership_v2_figurines_one_shot_benchmark_execution_addendum_20260807.json",
+    "sha256": "e8c4ec79a2a727f26dff203417bba5c6097556b6ec63aeed86b8921789b6ca01"
+  },
+  "candidate": {
+    "name": "formal_source_only_region_comembership_v2_target_readout",
+    "selected_rule": {
+      "method": "dual_path_widest",
+      "maximum_regions": 8,
+      "probability_threshold": 0.9
+    },
+    "accepted_edges": 368,
+    "selected_region_counts": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+  },
+  "result": {
+    "miou": 0.3397989273071289,
+    "acc025": 0.625,
+    "acc050": 0.32142857142857145,
+    "boundary_f": 0.5060175061225891,
+    "trimap_iou": 0.22911903262138367,
+    "n": 56
+  },
+  "controls": {
+    "O0_miou": 0.4753887355327606,
+    "old_v1_miou": 0.35686323046684265,
+    "old_union_v2_miou": 0.3340669274330139,
+    "delta_candidate_minus_O0_miou": -0.1355898082256317,
+    "delta_candidate_minus_old_v1_miou": -0.017064303159713745,
+    "delta_candidate_minus_old_union_v2_miou": 0.00573199987411499
+  },
+  "validity_domain_fix": {
+    "coordinate_and_row_binding_exact": true,
+    "graph_active_primitives": 96879,
+    "o0_valid_primitives": 82603,
+    "intersection_primitives": 82400,
+    "o0_only_primitives": 203,
+    "mpr_only_primitives": 14479,
+    "selected_invalid_memberships_removed": 60,
+    "implementation_sha256": "d5285b699e0a28219b6c4e8ec2185f133b9d50f14b8ecb2c6dda97ecbfcc3e00",
+    "focused_tests_passed": 9
+  },
+  "execution": {
+    "physical_gpu": 1,
+    "exit_code": 0,
+    "maximum_observed_temperature_c": 66,
+    "thermal_stop_triggered": false,
+    "postexit_owner_clear": true,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "artifacts": {
+    "result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/evaluation/figurines_formal_v2_validity_domain_fix/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "c98d15c3eb6e889910ad0f139a85e8c7d83f83afb544c7e14a27e7f9b0e65ebf"
+    },
+    "cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/region_comembership_v2_target/figurines/external_query_scores_formal_v2_validity_domain_fix.pt",
+      "sha256": "742a8810d74f059e9d0aec61bd3c38d5db2f72f3a0d287ce262f8b511c0914eb"
+    },
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/figurines_v2_formal_eval_gpu1_telemetry.csv",
+      "sha256": "dcf28fc0ce796b6bbc19130cfb0f0951152c25b5363f5efa58030f19302f2fc5"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/figurines_v2_formal_eval_gpu1_owners.csv",
+      "sha256": "d5b1725dbd4583acd06309e650469194daa995253471cb1805114ff0dc83925c"
+    }
+  },
+  "conclusion": {
+    "first_principles_bug_fixed": "physical-space identity and readout-validity domains are distinct; exact geometry binding is retained while final membership is clipped to the frozen O0 validity domain",
+    "main_method_failure": "the source-selected dual-path rule accepted target edges globally but none were reachable from any of the 21 text-seeded target regions, so target readout collapsed to one 256-token canonical region per query",
+    "implication": "query-free source co-membership alone does not restore the missing target semantic seed/edge calibration; V2.1 source response/listwise supervision and query-calibrated target descriptors remain necessary",
+    "no_scene_specific_tuning_performed": true
+  }
+}

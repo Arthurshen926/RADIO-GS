@@ -1,0 +1,54 @@
+{
+  "candidate_results_opened_at_seal": false,
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/select_lerf_source_only_reliability_weighted_knn.py",
+    "sha256": "81818977f5d9f6baa59074c543fba7865e467872b9526ed7a5ea54883e887034"
+  },
+  "method_contract": {
+    "benchmark_images_masks_labels_metrics_opened": false,
+    "candidate_count": 8,
+    "candidate_grid": [
+      "uniform",
+      "gaussian",
+      "reliability_amplitude",
+      "reliability_precision",
+      "gaussian_reliability_amplitude",
+      "gaussian_reliability_precision",
+      "uniform_leave_self_out",
+      "gaussian_reliability_precision_leave_self_out"
+    ],
+    "gpu_used": false,
+    "knn_k": 10,
+    "one_global_policy": true,
+    "query_embeddings_or_scores_opened": false,
+    "sampling": "sorted_teacher_valid_global_rows_evenly_spaced_max8192_per_scene",
+    "scene_or_query_specific_parameters": false,
+    "schema": "radio_gs.lerf_source_only_reliability_weighted_valid_domain_knn_result.v1",
+    "schema_version": 1,
+    "selection": {
+      "baseline": "uniform",
+      "eligible": "strict_pooled_mean_improvement_and_every_scene_mean_and_p05_nonregression",
+      "fallback": "uniform",
+      "winner": "maximum_pooled_mean_cosine_then_candidate_grid_order"
+    },
+    "source_prediction": "normalized_weighted_mean_of_other_valid_spatial_neighbors",
+    "source_target": "durable_normalized_equal_view_teacher_mean",
+    "statistics": [
+      "mean_cosine",
+      "exact_linear_p05_cosine"
+    ],
+    "center_primitive_removed_from_prediction": true,
+    "target_metric_execution_authorized": false,
+    "weighted_readout_contract": "radio_gs.lerf_reliability_weighted_valid_domain_knn_readout.v2",
+    "weighted_readout_implementation": {
+      "path": "/root/RADIO-GS/radio_gs/querying/reliability_weighted_valid_domain_knn_readout.py",
+      "sha256": "e0bf58dd20e84200f9ef7b310ac96d74539a98e4f63064917af60be42c411645"
+    }
+  },
+  "metric_execution_authorized": false,
+  "schema": "radio_gs.lerf_reliability_weighted_valid_domain_knn_preregistration.v1",
+  "schema_version": 1,
+  "source_scene_count_minimum": 2,
+  "status": "sealed_before_source_gate_or_target_result_inspection",
+  "target_data_or_metrics_opened_at_seal": false
+}

@@ -1,0 +1,109 @@
+{
+  "artifact": "full_scalar_scene0002_response_chain_result",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T01:45:00+08:00",
+  "status": "source_train_scene_response_chain_complete",
+  "scene_id": "scene0002_00",
+  "cohort_split": "source_train",
+  "outputs": {
+    "canonical_capability_bank": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/canonical_capability_bank.pt",
+      "sha256": "c5c1e46369d87fd1f0a817aa6d7399c0dba61293aa5912f3705db519ffce588c",
+      "size_bytes": 2031315615,
+      "active_primitive_rows": 198116
+    },
+    "canonical_support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/canonical_support_graph_accepted_v2.pt",
+      "sha256": "6d0e5457a03de269a63facebf6d27a6acbd466c4962d548ca9948cb0b30a21c5",
+      "size_bytes": 100401419,
+      "nodes": 198116,
+      "edges": 3678276
+    },
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/accepted_v2_sparse_v2.pt",
+      "sha256": "93ea6dbe1cc13b134f338ee4e75207a935081a4edaafcd36eaa9071b15f45a89",
+      "size_bytes": 35211731,
+      "canonical_candidate_regions": 594348,
+      "selected_regions": 4096,
+      "selected_by_scale": [1366, 1365, 1365]
+    },
+    "official_multiview_siglip2_teacher": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/official_multiview_siglip2_teacher_sparse_v2.pt",
+      "sha256": "a8da368dbe2703f2a9d199618afc6fc41c4e09e301f681a32a1f7ceae4299e49",
+      "size_bytes": 99524755,
+      "source_views": 120,
+      "active_region_view_pairs": 15970,
+      "minimum_views_per_region": 1,
+      "maximum_views_per_region": 4,
+      "descriptor_norm_minimum": 0.9999997019767761,
+      "descriptor_norm_maximum": 1.000000238418579,
+      "strict_reload_and_accepted_alignment_passed": true
+    },
+    "typed_context_stage_b_adaptive": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0002_00/run/accepted_v2_source_only/scene0002_00/typed_context_stage_b_adaptive_v2.pt",
+      "sha256": "49cf1bbc141a0bf8e5310afd14379e63a4fe40eb815291aa84fc1e25d1d41349",
+      "size_bytes": 15649013,
+      "regions": 4096,
+      "selection_complete": 4096,
+      "typed_context_valid": 4088,
+      "true_no_context_fallback_rows": 8,
+      "maximum_adaptive_rounds": 3,
+      "maximum_estimated_working_bytes": 126545152
+    },
+    "hard_negative_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0002_00/hard_negative_index_authority_bound_v1.pt",
+      "sha256": "1e5235065898367d24fdd2d694ce15a8fed8abe5ad7ecc27412e98ce9b6876a6",
+      "content_authority_sha256": "971f6d2573a17a20407edc94d39c434a98d4d553cb14256eed8c67b61fbca9d6",
+      "size_bytes": 2322111,
+      "anchors": 4096,
+      "anchors_with_any_negative": 4096,
+      "directed_pairs": 30337,
+      "selected_pairs": 16384,
+      "minimum_negatives_per_anchor": 4,
+      "maximum_negatives_per_anchor": 8,
+      "mean_negatives_per_anchor": 7.406494140625
+    },
+    "hard_negative_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_query_response_hard_negatives_cohort_v2/scene0002_00/hard_negative_index_authority_bound_v1.report.json",
+      "sha256": "ab3f47e5a7e0754b5889d8f018583e937567cdc1d87a764668863e87d60de956"
+    }
+  },
+  "teacher_execution": {
+    "gpu1_batch4_batch2_batch1_attempts": "clean thermal aborts after six consecutive polls at or above 88C; no partial output",
+    "successful_physical_gpu": 0,
+    "successful_crop_batch_size": 1,
+    "successful_region_batch_size": 4096,
+    "successful_maximum_temperature_c": 87,
+    "successful_thermal_warnings": 0,
+    "successful_thermal_aborts": 0,
+    "guard_exit_code": 0,
+    "cuda_release_verified": true,
+    "math_or_order_changed_for_thermal_handling": false
+  },
+  "temperature_role_separation": {
+    "hard_negative_mining_temperature": 0.05,
+    "v2_1_supervision_temperature": 0.1,
+    "contract": "0.05 freezes only target-blind candidate pairs; V2.1 recomputes teacher response, relevance gap and continuous weight at 0.1 on those fixed pairs"
+  },
+  "pilot_progress": {
+    "required_source_train": ["scene0001_00", "scene0002_00", "scene0003_00", "scene0005_00"],
+    "required_source_validation": ["scene0004_00", "scene0008_00"],
+    "complete_source_train": ["scene0001_00", "scene0002_00"],
+    "complete_source_validation": [],
+    "complete_scenes": 2,
+    "required_scenes": 6,
+    "training_launch_authorized_now": false
+  },
+  "source_access": {
+    "source_rgb_used_for_official_teacher": true,
+    "generic_target_blind_text_bank_opened": true,
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "per_scene_hyperparameters": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

@@ -1,0 +1,213 @@
+{
+  "schema": "radio_gs.lerf_o0_o1_o2_exact_metric_staged_authority_template.v1",
+  "schema_version": 1,
+  "status": "template_only_pending_source_materialization_and_control_replay",
+  "scene_id": "waldo_kitchen",
+  "metric_execution_authorized": false,
+  "single_candidate_no_sweep": true,
+  "strict_execution_order": ["O0_exact_control", "O1", "O2"],
+  "stable_source_lineage": {
+    "source_materialization_execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v2_execution_authority_20260807.json",
+      "sha256": "a9f616b28a8b0e1ab4998ca9d3c61efa67f9e622eee31a04dd80912014da8df8"
+    },
+    "source_materialization_result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_o2_streaming_result.json",
+    "source_result_required_status": "complete_source_only_premetric_o1_o2_streaming",
+    "source_result_required_metric_executed": false,
+    "source_result_sha256": "${STREAMING_RESULT_SHA256_AFTER_COMPLETION}"
+  },
+  "frozen_metric_inputs": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "config": {
+      "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+      "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+    },
+    "renderer_geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+    },
+    "summary_head": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "all_query_text_embedding_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_text_embedding_cache": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_directory_unopened_at_template_build": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label"
+  },
+  "frozen_protocol": {
+    "must_equal_teatime_control_bitwise_except_scene_and_cache_paths": true,
+    "protocol_preset": "vala_repo_3d",
+    "ours_query_contrast": "none",
+    "ours_scale_fusion": "peak_select",
+    "selection_mode": "score_threshold",
+    "selection_threshold": 0.6,
+    "score_postprocess": "vala_knn_minmax",
+    "projection_mode": "selected_only_alpha",
+    "silhouette_threshold": "10/255",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "official_labeled_frames_only": true,
+    "sweep": false
+  },
+  "execution_template": {
+    "physical_gpu": "${PHYSICAL_GPU}",
+    "cuda_visible_devices": "${PHYSICAL_GPU}",
+    "logical_gpu_argument": 0,
+    "thermal_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_disabled": true,
+    "thermal_guard": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "sha256": "9bd9d45562629896149624563734aaa3f35840bc0e9f400ee500d71c67f70c7e"
+    }
+  },
+  "stages": {
+    "O0_exact_control": {
+      "authority_status_after_finalization": "authorized_single_exact_fp32_o0_frozen_config_control",
+      "prerequisites": [
+        "streaming result exists and its SHA is frozen",
+        "streaming result status and metric_executed fields match stable_source_lineage",
+        "output directory does not exist"
+      ],
+      "positive_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_positive.pt",
+        "sha256": "c0a4d000c5b1bd05da9e3e30b18132bc8ecfd5476a35474f94dfa335f09b45ef"
+      },
+      "negative_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/o0_fp32/waldo_kitchen_negative.pt",
+        "sha256": "3eb9a71ebd196687beebe5c3b6464aefb6ed88b38cab5a699a06413199dabfcb"
+      },
+      "output_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1",
+      "expected_result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o0_exact_frozen_config_control_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "planned_authority_path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_waldo_kitchen_frozen_config_control_metric_execution_authority_20260807.json",
+      "planned_replay_receipt_path": "/root/RADIO-GS/paper/artifacts/lerf_o0_exact_fp32_waldo_kitchen_frozen_config_control_replay_result_20260807.json",
+      "required_replay_result_status": "passed_exact_frozen_lineage_control_replay"
+    },
+    "O1": {
+      "authority_status_after_control_gate": "authorized_after_independent_exact_o0_frozen_config_control_replay",
+      "prerequisites": [
+        "O0 exact control replay receipt exists and its SHA is frozen",
+        "O0 replay lineage_replay_passed is true",
+        "candidate cache SHAs equal source materialization result output records",
+        "output directory does not exist"
+      ],
+      "positive_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_positive.pt",
+        "sha256": "${O1_POSITIVE_SHA256_AFTER_COMPLETION}"
+      },
+      "negative_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o1_negative.pt",
+        "sha256": "${O1_NEGATIVE_SHA256_AFTER_COMPLETION}"
+      },
+      "output_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o1_exact_v1",
+      "expected_result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o1_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "planned_authority_path": "/root/RADIO-GS/paper/artifacts/lerf_o1_waldo_kitchen_one_shot_exact_metric_execution_authority_20260807.json"
+    },
+    "O2": {
+      "authority_status_after_control_gate": "authorized_after_independent_exact_o0_frozen_config_control_replay",
+      "prerequisites": [
+        "O1 metric completed and its result SHA is frozen",
+        "same O0 exact control replay gate remains satisfied",
+        "candidate cache SHAs equal source materialization result output records",
+        "output directory does not exist"
+      ],
+      "positive_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_positive.pt",
+        "sha256": "${O2_POSITIVE_SHA256_AFTER_COMPLETION}"
+      },
+      "negative_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/waldo_kitchen_o2_negative.pt",
+        "sha256": "${O2_NEGATIVE_SHA256_AFTER_COMPLETION}"
+      },
+      "output_directory": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o2_exact_v1",
+      "expected_result_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_streaming_unpaced_gpu1_lowmem_v3/evaluation/o2_exact_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+      "planned_authority_path": "/root/RADIO-GS/paper/artifacts/lerf_o2_waldo_kitchen_one_shot_exact_metric_execution_authority_20260807.json"
+    }
+  },
+  "command_template": {
+    "environment": {
+      "GPU": "${PHYSICAL_GPU}",
+      "CUDA_VISIBLE_DEVICES": "${PHYSICAL_GPU}",
+      "GPU_POLL_SECONDS": "300",
+      "GPU_START_MAX_TEMP_C": "87",
+      "GPU_MAX_TEMP_C": "88",
+      "GPU_MAX_POWER_LIMIT_W": "300.5",
+      "GPU_MAX_CONSECUTIVE_OVERHEAT_POLLS": "1",
+      "GPU_SOFT_PAUSE_TEMP_C": "0",
+      "GPU_SOFT_RESUME_TEMP_C": "0",
+      "GPU_OWNER_PID_NAMESPACE_MODE": "exclusive-singleton-after-clear-v1",
+      "GPU_TELEMETRY_LOG": "${STAGE_TELEMETRY_CSV}",
+      "GPU_OWNER_AUDIT_LOG": "${STAGE_OWNER_AUDIT_CSV}"
+    },
+    "argv": [
+      "bash",
+      "radio_gs/scripts/run_with_gpu_thermal_guard.sh",
+      "--",
+      "bash",
+      "radio_gs/scripts/run_repo_python.sh",
+      "-m",
+      "radio_gs.scripts.eval_lerf_direct_3d_selection",
+      "--config",
+      "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+      "--checkpoint",
+      "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "--scene",
+      "waldo_kitchen",
+      "--protocol_preset",
+      "vala_repo_3d",
+      "--label_dir",
+      "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+      "--output_dir",
+      "${STAGE_OUTPUT_DIRECTORY}",
+      "--summary_head_weights",
+      "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "--text_embedding_cache",
+      "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "--canonical_embedding_cache",
+      "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "--text_encoder",
+      "siglip2",
+      "--ours_multiscale_query_score_cache",
+      "${STAGE_POSITIVE_CACHE}",
+      "--ours_multiscale_negative_score_cache",
+      "${STAGE_NEGATIVE_CACHE}",
+      "--ours_query_contrast",
+      "none",
+      "--ours_scale_fusion",
+      "peak_select",
+      "--gpu",
+      "0"
+    ]
+  },
+  "unresolved_placeholders": [
+    "${PHYSICAL_GPU}",
+    "${STREAMING_RESULT_SHA256_AFTER_COMPLETION}",
+    "${O1_POSITIVE_SHA256_AFTER_COMPLETION}",
+    "${O1_NEGATIVE_SHA256_AFTER_COMPLETION}",
+    "${O2_POSITIVE_SHA256_AFTER_COMPLETION}",
+    "${O2_NEGATIVE_SHA256_AFTER_COMPLETION}",
+    "${STAGE_OUTPUT_DIRECTORY}",
+    "${STAGE_POSITIVE_CACHE}",
+    "${STAGE_NEGATIVE_CACHE}",
+    "${STAGE_TELEMETRY_CSV}",
+    "${STAGE_OWNER_AUDIT_CSV}"
+  ],
+  "finalization_rule": "do_not_replace_placeholders_or authorize metrics until v3 materialization completion is reported and each referenced file is reopened with an independently supplied SHA-256",
+  "access_audit": {
+    "target_images_opened_during_template_build": false,
+    "target_ground_truth_opened_during_template_build": false,
+    "target_masks_opened_during_template_build": false,
+    "target_metrics_opened_during_template_build": false,
+    "v3_outputs_opened_during_template_build": false,
+    "metric_executed_during_template_build": false
+  }
+}

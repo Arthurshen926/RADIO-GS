@@ -1,0 +1,91 @@
+{
+  "schema": "radio_gs.lerf_o1_native_v3_coverage_deficit_premetric_result.v1",
+  "schema_version": 1,
+  "status": "sealed_premetric_gate_failure",
+  "date": "2026-08-07",
+  "method": {
+    "module": {
+      "path": "/root/RADIO-GS/radio_gs/querying/coverage_deficit_native_v3_support_fusion.py",
+      "sha256": "e79b564f6de195125903d0b369813d3169f154653a3dcbc4fb3e24edfcd096bb"
+    },
+    "producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_o1_native_v3_coverage_deficit_fusion.py",
+      "sha256": "71ce729d6365102134789739b486f949c089589360c5513ae53c1e98b0d66948"
+    },
+    "contract_sha256": "464cfdeefe1cca79cae2079a6d7ae2a3f3ec5e41ee5f0d02429897ec0a06d4e8",
+    "fixed_rule": "seed excess times source-observation-conditioned widest-path excess times target selected-scale anchor strength times one-minus-mean coverage times one-minus-median coverage",
+    "properties": [
+      "monotone_over_O1",
+      "zero_fill_for_single_view_source_edges",
+      "zero_fill_for_low_reliability_edges",
+      "zero_residual_at_saturated_selected_scale_coverage",
+      "no_target_label_or_metric_access"
+    ]
+  },
+  "premetric_gate": {
+    "required": [
+      "substantially_suppress_teatime_paper_napkin_crossings",
+      "preserve_main_figurines_green_apple_pumpkin_and_toy_cat_crossings"
+    ],
+    "decision": "fail_no_gpu_metric",
+    "reason": "Paper-napkin suppression succeeded, but toy-cat crossings were reduced from 27 to 1, so the fixed generic gate did not preserve all three required Figurines positive groups. Miffy also retained 89 crossings, showing that continuous coverage deficit alone does not rank true missing support against semantic false response."
+  },
+  "scenes": {
+    "figurines": {
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_coverage_deficit_figurines_premetric_execution_authority_20260807.json",
+        "sha256": "eba6d3c585bc16b61112adccead43270ce01a2c85a2256ec23ae9ccaa414be35"
+      },
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_coverage_deficit_fusion_v1/figurines/external_query_scores.pt",
+        "sha256": "f430b732c47d1870412d3be3fb260395d1b9322237e8652ec7d7cd0c7ae8ebe4"
+      },
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_coverage_deficit_fusion_v1/figurines/premetric_report.json",
+        "sha256": "ed055d84ab5388cb61a131186b2850639b79d0214c7b007694a931ada03c1d7c"
+      },
+      "prior_crossings": 552,
+      "retained_crossings": 196,
+      "removed_crossings": 356,
+      "changed_primitive_query_cells": 3634,
+      "selected_queries": {
+        "green apple": {"prior": 87, "retained": 25},
+        "pumpkin": {"prior": 130, "retained": 27},
+        "toy cat statue": {"prior": 27, "retained": 1},
+        "miffy": {"prior": 133, "retained": 89},
+        "red apple": {"prior": 46, "retained": 14}
+      }
+    },
+    "teatime": {
+      "execution_authority": {
+        "path": "/root/RADIO-GS/paper/artifacts/lerf_o1_native_v3_coverage_deficit_teatime_premetric_execution_authority_20260807.json",
+        "sha256": "8082530d6ae02815868927875fa65fdbdabd17857505a43ac37b67272fb0ea20"
+      },
+      "cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_coverage_deficit_fusion_v1/teatime/external_query_scores.pt",
+        "sha256": "c94dd328b6731e10b41e79cfa6bac684eb7b80ce5cd641955b3d88e17598c011"
+      },
+      "report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_o1_native_v3_coverage_deficit_fusion_v1/teatime/premetric_report.json",
+        "sha256": "fab9c4f727d796f523974243c74649d170ee169899240a93ee76018c11827210"
+      },
+      "prior_crossings": 60,
+      "retained_crossings": 30,
+      "removed_crossings": 30,
+      "changed_primitive_query_cells": 1012,
+      "selected_queries": {
+        "paper napkin": {"prior": 21, "retained": 4, "suppressed_fraction": 0.8095238095238095},
+        "yellow pouf": {"prior": 39, "retained": 26}
+      }
+    }
+  },
+  "access_audit": {
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false,
+    "result_dependent_parameters": false
+  },
+  "next_first_principle_step": "Learn or rank missing-support utility only from source held-out-view recovery labels, separating relation reliability, source observation agreement, selected-scale target distribution, seed-target score ratio, and region visibility; do not derive thresholds from LERF target crossings."
+}

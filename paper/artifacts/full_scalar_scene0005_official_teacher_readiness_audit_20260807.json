@@ -1,0 +1,58 @@
+{
+  "artifact": "full_scalar_scene0005_official_teacher_readiness_audit",
+  "schema_version": 1,
+  "observed_at": "2026-08-07T04:47:37+08:00",
+  "status": "blocked_missing_required_source_rgb_scene_authority",
+  "scene_id": "scene0005_00",
+  "cohort_split": "source_train",
+  "required_inputs": {
+    "source_rgb_scene_authority": {
+      "expected_path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/source_rgb_scene_authority_v1.json",
+      "exists": false,
+      "all_historical_scene0005_output_search_matches": 0
+    },
+    "source_rgb_root": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/field240/scene0005_00/color",
+      "exists": true,
+      "files": 240
+    },
+    "accepted_v2": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/accepted_v2_source_only/scene0005_00/accepted_v2_sparse_v2.pt",
+      "sha256": "04741b32c0a97e25489cf867729d6f54420adf325e2a22c495e86d890a661e9e",
+      "size_bytes": 35211731,
+      "exists": true
+    },
+    "factorized_primitive_state": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/factorized_primitive_state_v2.pt",
+      "sha256": "2caf90693fd4da1baaea138e0385e82dd748bc2e122a9c4e4fcbfe6f0bb745e8",
+      "size_bytes": 508464391,
+      "exists": true
+    },
+    "exact_marginal_responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260805/full_scalar_clean_scannet_cohort_v3/scene0005_00/run/exact_state/scene0005_00/exact_marginal_responsibility_authority.json",
+      "sha256": "08601f1a3c74be06c2f2ff7e9d179edc693e1e1c9fb58268aacd7ea554f06050",
+      "size_bytes": 38128,
+      "exists": true
+    },
+    "official_radio_checkpoint": {
+      "path": "/root/.cache/torch/hub/checkpoints/c-radio_v4-h_half.pth.tar",
+      "sha256": "bace44df72e750bc8555ea6979cc19d1a87e12ade89582edfe090513d5d6aab9",
+      "exists": true
+    }
+  },
+  "decision": {
+    "exact_execution_authority_sealed": false,
+    "gpu_teacher_started": false,
+    "missing_base_authority_materialized": false,
+    "reason": "The task explicitly required read-only verification and forbade repairing an absent prerequisite base chain without new authorization."
+  },
+  "source_access": {
+    "benchmark_vocabulary_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "target_metrics_computed": false
+  },
+  "training_executed": false,
+  "frozen_evaluator_metric_renderer_modified": false
+}

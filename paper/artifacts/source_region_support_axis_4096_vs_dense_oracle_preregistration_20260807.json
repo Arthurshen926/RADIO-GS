@@ -1,0 +1,49 @@
+{
+  "artifact": "source_region_support_axis_4096_vs_dense_oracle_preregistration",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T02:35:00+08:00",
+  "status": "sealed_before_source_oracle_execution_or_metric",
+  "purpose": "test whether the 4096-row AcceptedV2 training sample is an adequate inference support axis",
+  "role": "source_only_engineering_oracle_not_a_benchmark_method_or_promotion_result",
+  "scene": "scene0001_00",
+  "axes": {
+    "sparse": "the exact immutable 4096 AcceptedV2 canonical rows",
+    "dense": "all scale-major SurfaceRegionV2 candidates at radii 0.25, 0.45, and 0.70 metres over the same support graph"
+  },
+  "target_construction": {
+    "authority": "ScanNet source 2D instance labels registered by the immutable exact-marginal responsibility authority",
+    "primitive_label": "positive dominant instance identity",
+    "eligible_instances": "every positive instance with at least one observed primitive",
+    "benchmark_vocabulary": false,
+    "benchmark_masks": false,
+    "benchmark_labels": false
+  },
+  "selection": {
+    "candidate_pool": 1024,
+    "maximum_union_regions": 8,
+    "algorithm": "the same deterministic greedy primitive-IoU union used by the sealed LERF D3 development oracle",
+    "tie_break": "lowest canonical candidate index",
+    "per_axis_hyperparameters": false
+  },
+  "metrics": {
+    "primary": "equal-instance macro primitive IoU after up to eight regions",
+    "secondary": [
+      "equal-instance macro best-single-region primitive IoU",
+      "mean selected region count",
+      "mean selected primitive count"
+    ],
+    "sparse_axis_failure_signal": "dense_minus_sparse_eight_region_macro_iou_greater_than_0.05"
+  },
+  "decision": {
+    "if_sparse_axis_failure_signal": "decouple the compact source-training row sample from the dense inference support axis",
+    "otherwise": "retain AcceptedV2 as the support axis and focus on semantic ranking and bounded readout"
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_queries_opened": false,
+    "target_metrics_computed": false
+  }
+}

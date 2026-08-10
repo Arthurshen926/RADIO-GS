@@ -1,0 +1,86 @@
+{
+  "benchmark_exclusion_manifest": {
+    "path": "/root/RADIO-GS/paper/artifacts/full_scalar_clean_benchmark_exclusion_manifest_v2_20260805.json",
+    "sha256": "edeeea65feb0a0b739450e8b6e52565efe8db7d6ac3c76121516625e1650fa29"
+  },
+  "canonical_negative_bank": {
+    "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+  },
+  "fit_text_bank": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260731/target_blind_siglip2_text_bank_v1/target_blind_siglip2_fit_embeddings.pt",
+    "sha256": "d67b632e8ccce13d84479379e8f674f5ec31b729acf02a79ce6c4bb2a4f170f4"
+  },
+  "implementation": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2_dba_v1.py",
+    "sha256": "56f1c2f6aea49708bcd580f7c56575b4c66278ad56cb7ee6e2af268503831d28"
+  },
+  "implementation_dependencies": {
+    "benchmark_exclusion_validator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_surface_region_full_scalar_residual.py",
+      "sha256": "847b9fca917f93be45858bafc25aa99938ec8606fe2d659b541ade2adec2f149"
+    },
+    "boundary_alignment_loss": {
+      "path": "/root/RADIO-GS/radio_gs/losses/factorized_native_source_boundary_alignment.py",
+      "sha256": "afe8fbe7c8a56a7ba929acf3571cebc7d5822c09a93f691eb065539f3f275630"
+    },
+    "canonical_negative_loader": {
+      "path": "/root/RADIO-GS/radio_gs/losses/source_global_response_listwise_loss_v21.py",
+      "sha256": "d474894ca93011e310ad85372a973165b66f6c48145e659e63a2bf242123b1e6"
+    },
+    "contrast_v21_source_validator": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/factorized_native_contrast_v21_target_descriptor.py",
+      "sha256": "e64564aa893d507ecd4c81dc4e7bca7a3ba3e10c97999d00eb9b697084af3295"
+    },
+    "contrast_v21_trainer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2_contrast_v21.py",
+      "sha256": "73c9e35604388f4355c716250114143a17c6c0066950ee7a0c199cdf49489204"
+    },
+    "contrast_v2_visual_objective_trainer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/train_factorized_native_gauge_state_readout_exact4x2_contrast_v2.py",
+      "sha256": "deb3019af8cb7c2000f001c20b9f60a6d59c0b040c839d0cfa27c93df59963a0"
+    },
+    "fit_text_bank_loader": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/calibrate_factorized_native_contrast_v21_global_margin.py",
+      "sha256": "dd5af7ab74f66a5ad9a56cba2b18204f95c338d9021c7ea05dd907f6795e7f2f"
+    },
+    "readout_interface": {
+      "path": "/root/RADIO-GS/radio_gs/interfaces/factorized_native_gauge_state_readout.py",
+      "sha256": "29e87b9478a83b6b28decd55c3f620810881b6ec8dc4265396dcea4adbfadf96"
+    }
+  },
+  "metric_execution_authorized": false,
+  "query_execution_authorized": false,
+  "schema": "radio_gs.factorized_native_direct_boundary_alignment_execution_authority.v1",
+  "schema_version": 1,
+  "source_access": {
+    "benchmark_exclusion_manifest_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "canonical_generic_negative_bank_opened": true,
+    "generic_target_blind_text_bank_opened": true,
+    "per_query_parameters": false,
+    "per_scene_parameters": false,
+    "query_independent": true,
+    "runtime_query_strings_consumed": false,
+    "scene_identifiers_consumed_by_model": false,
+    "source_train_opened": true,
+    "source_validation_opened_for_promotion_only": true,
+    "target_descriptor_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false,
+    "target_relevance_opened": false,
+    "text_queries_opened": false
+  },
+  "source_contrast_v21_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/contrast_v21_direction_only/model.pt.json",
+    "sha256": "bc264f50c33a20199201875eba638ee36c654b888d270d32d3259beeebd5debc"
+  },
+  "status": "authorized_source_only_dba_v1_exact4train_2validation",
+  "target_execution_authorized": false,
+  "training_authorized": true,
+  "training_contract_sha256": "ddeee790ef9dcf573fae4b6afbc6c6bdfb4104b0cdfe392611920b29da772afd",
+  "training_output": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/factorized_native_gauge_state_exact4x2/dba_v1_direction_only/model.pt"
+}

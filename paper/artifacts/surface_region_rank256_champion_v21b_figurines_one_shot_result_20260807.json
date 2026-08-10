@@ -1,0 +1,92 @@
+{
+  "artifact": "surface_region_rank256_champion_v21b_figurines_one_shot_result",
+  "schema_version": 1,
+  "registered_at": "2026-08-07",
+  "status": "completed_and_rejected",
+  "promotion": false,
+  "source_variant": "v21b_reliability_conditioned_rank256",
+  "source_gate": {
+    "passed": true,
+    "result": {
+      "path": "/root/RADIO-GS/paper/artifacts/surface_region_v21b_exact4x2_source_result_20260807.json",
+      "sha256": "546b3ce5d4238082f0d8eac5b1c1485aac95471a96c361105efd401d1328ff08"
+    },
+    "selected_step": 30,
+    "relative_improvement_step0_to_step30": {
+      "scene_macro_auxiliary_loss": 0.06687,
+      "scene_macro_absolute_relevance_loss": 0.27577,
+      "scene_macro_continuous_pairwise_relevance_loss": 0.04923
+    },
+    "every_validation_scene_improved_all_three_metrics": true
+  },
+  "execution_authority": {
+    "path": "/root/RADIO-GS/paper/artifacts/surface_region_rank256_champion_v21b_figurines_one_shot_metric_execution_authority_fix2_20260807.json",
+    "sha256": "8f4996d07935d4423bf936fe6d6d6cece2f1971f40ee9e6bfed7f1a9c6abe592"
+  },
+  "candidate": {
+    "target_descriptor": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/target_descriptor.fix2.pt",
+      "sha256": "0a4ee25c3040cc741c543fc87241dc83ab08be259d6da49bc6cac607a82e83f3"
+    },
+    "query_relevance": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/query_relevance.fix2.pt",
+      "sha256": "86e5af907cc4597f002548b3b9759f7d967acb57b7eae097e86ad110dd001d66"
+    },
+    "external_score_cache": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/external_query_scores.fix2.pt",
+      "sha256": "50463ebdd613fe703e5499f8f582527bd7e88013e475d7d19e5af3def15183ed"
+    },
+    "readout": "absolute_rank256_relevance_then_greedy_novelty_hard_region_union",
+    "maximum_regions": 8,
+    "selected_region_counts": [4, 8, 8, 8, 0, 8, 8, 8, 1, 8, 8, 8, 8, 8, 8, 8, 2, 8, 8, 8, 0],
+    "selected_primitive_counts": [38, 1567, 2048, 14, 0, 2038, 845, 685, 256, 519, 1847, 1518, 1870, 1431, 1377, 764, 158, 298, 1127, 1323, 0]
+  },
+  "frozen_result": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/evaluation/figurines_one_shot_fix2/figurines/lerf_direct_3d_selection_results.json",
+    "sha256": "53c46ed9f25d89995b69ac4860d9ddf528658a78110138d1782890b8dca0ba60",
+    "miou": 0.23678287863731384,
+    "acc025": 0.39285714285714285,
+    "acc050": 0.17857142857142858,
+    "boundary_f": 0.37510019540786743,
+    "trimap_iou": 0.38192182779312134,
+    "n": 56
+  },
+  "controls": {
+    "frozen_O0_miou": 0.4753887355327606,
+    "formal_region_comembership_v2_miou": 0.3397989273071289,
+    "target_blind_greedy_union_v1_miou": 0.35686323046684265,
+    "delta_candidate_minus_O0_miou": -0.23860585689544678,
+    "delta_candidate_minus_formal_region_comembership_v2_miou": -0.10301604866981506
+  },
+  "thermal_execution": {
+    "physical_gpu": 1,
+    "power_limit_w": 300,
+    "maximum_observed_temperature_c": 54,
+    "thermal_stop_triggered": false,
+    "postexit_owner_clear": true,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/one_shot_gpu1_thermal.csv",
+      "sha256": "1042c20fdb680d3b720f179632cc826aeb888a08a7347d0240e083e7b2a2ff0e"
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/surface_region_rank256_champion_v21b_figurines/logs/one_shot_gpu1_owner_audit.csv",
+      "sha256": "e944b664de6a3c3a268f0e7b78aa69453e9b2603c14f71f26301da8d4b1f0e9f"
+    }
+  },
+  "diagnosis": {
+    "source_method_failure": false,
+    "target_descriptor_failure": "rank256 relevance has a target common-mode positive drift and broadens several query candidate sets, but this alone does not explain the full benchmark collapse",
+    "query_interface_failure": "the hard binary K-region union replaces rather than conditions the frozen O0 per-primitive text capability; K saturation admits disconnected semantic distractors while empty low-score queries lose all O0 support",
+    "causal_evidence": {
+      "query_relevance_global_correlation_vs_accepted_v2": 0.8382,
+      "query_relevance_mean_absolute_difference_vs_accepted_v2": 0.048,
+      "queries_saturating_k8": 16,
+      "empty_queries": 2,
+      "target_region_query_mean_probability_before": 0.33756,
+      "target_region_query_mean_probability_after": 0.38205,
+      "target_region_query_logit_delta_median": 0.2003
+    },
+    "required_fix": "retain O0 primitive capability as the immutable main path and allow rank256/co-membership evidence only as a source-calibrated, non-negative, bounded residual with exact O0 fallback",
+    "scene_specific_tuning_performed": false
+  }
+}

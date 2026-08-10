@@ -1,0 +1,130 @@
+{
+  "artifact": "source_global_response_listwise_v21_engineering_receipt",
+  "schema_version": 1,
+  "registered_at": "2026-08-06T19:20:00+08:00",
+  "status": "implementation_and_focused_source_only_tests_complete_no_training_no_benchmark",
+  "preregistration_chain": [
+    {
+      "path": "paper/artifacts/source_global_response_listwise_loss_v21_preregistration_20260806.json",
+      "sha256": "dd75dd833ee3431db944b2be88f9b323f7247ead9f870051da539ffdc14d674b"
+    },
+    {
+      "path": "paper/artifacts/source_global_response_listwise_loss_v21_preregistration_sha_erratum_20260806.json",
+      "sha256": "2254701cf97e60fc8129e8d2858fc68ef04f3dfba9e2fa23b35cb8eb33354e27"
+    },
+    {
+      "path": "paper/artifacts/source_global_response_listwise_loss_v21_component_balance_addendum_20260806.json",
+      "sha256": "d2a1ec82a63c56a3aacb8bedecb255fbc9a22e5371833ff89d4a2df3e1f1e8cc"
+    }
+  ],
+  "implementation": {
+    "loss": {
+      "path": "radio_gs/losses/source_global_response_listwise_loss_v21.py",
+      "sha256": "e44fe41c2adf9e1141c6d46078eb37334e3d6d8dc3ae8d9d74f64d631e305216"
+    },
+    "complete_scene_adapter": {
+      "path": "radio_gs/scripts/train_surface_region_typed_context_response_listwise_v21.py",
+      "sha256": "cf692ebe9fd43fbb1faa0bdd36b525adda60854d3ab1669076501250dcb6d315"
+    },
+    "loss_tests": {
+      "path": "tests/test_source_global_response_listwise_loss_v21.py",
+      "sha256": "4ab3443292ce1d1fcf17626cd7b11a7a4fa65f8125949fbf9706eb928d304b9c"
+    },
+    "adapter_tests": {
+      "path": "tests/test_train_surface_region_typed_context_response_listwise_v21.py",
+      "sha256": "37243a9b15f3c8151676f29eb59fe1740590714e0bd93ea7658f4c3d5652b536"
+    },
+    "new_learnable_parameters": false,
+    "optimizer_or_cli_added": false,
+    "evaluator_or_renderer_modified": false
+  },
+  "frozen_v2_identity": {
+    "loss": {
+      "path": "radio_gs/losses/source_global_response_listwise_loss.py",
+      "expected_sha256": "552e7bf0e4d83e9346af731e6ce9eaf891968b14f32b49f728b5188c5e012ae7",
+      "observed_sha256": "552e7bf0e4d83e9346af731e6ce9eaf891968b14f32b49f728b5188c5e012ae7",
+      "byte_identical": true
+    },
+    "trainer": {
+      "path": "radio_gs/scripts/train_surface_region_typed_context_response_listwise_v2.py",
+      "expected_sha256": "56dddf57d03a50f933e722c653941ca9d02c39ec7b6ebd6ba78340b7a894b370",
+      "observed_sha256": "56dddf57d03a50f933e722c653941ca9d02c39ec7b6ebd6ba78340b7a894b370",
+      "byte_identical": true
+    }
+  },
+  "component_audit": {
+    "existing_source_scene0001_v2_dry_receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/source_global_response_listwise_v2_scene0001_dry_loss_v2.json",
+      "sha256": "71de3c1c4999336d2c6fccb5ea0aed8299780b485b81c304c2702daff2677aa6",
+      "sealed_hard_negative_pairs": 31971,
+      "generic_query_rows": 806,
+      "total_pair_query_units": 25768626,
+      "units_retained_by_v2_hard_gap_floor": 13376924,
+      "retained_fraction": 0.5191166964043795,
+      "units_excluded": 12391702,
+      "excluded_fraction": 0.4808833035956205
+    },
+    "v2_centered_profile": "Invariant to a query-wise constant response offset because both fields are centered over scene rows; the absolute-offset unit test confirms zero centered loss with positive absolute-response loss and gradient.",
+    "v2_span_pairwise": "Uses positive-cosine response gaps divided by teacher scene span and removes normalized gaps below 0.05; it neither preserves an absolute response offset nor supervises the final canonical-negative probability.",
+    "v21_absolute_response": "Finite SmoothL1 directly supervises the teacher positive response without centering.",
+    "v21_final_relevance": {
+      "shared_function": "radio_gs.querying.unified_query.cosine_relevancy_torch",
+      "shared_function_file_sha256": "b0e3fc3e4e78dcb5220333c72135916e2fcb4a87dadb5e38d97934c93620745a",
+      "logit_scale": 10.0,
+      "formula": "binary softmax of positive cosine against maximum canonical-negative cosine",
+      "absolute_relevance_supervised": true
+    },
+    "v21_continuous_pairwise": {
+      "hard_gap_floor": false,
+      "every_finite_nonzero_gap_has_positive_weight": true,
+      "multiview_stability_weighted": true,
+      "small_margin_nonzero_gradient_unit_test": true
+    },
+    "component_balance": {
+      "reduction": "mean within each bank component followed by an equal mean across components",
+      "optional_row_count_is_not_a_loss_coefficient": true,
+      "uniform_optional_row_duplication_invariance_unit_test": true
+    }
+  },
+  "canonical_negative_authority": {
+    "path": "checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+    "file_sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67",
+    "embedding_tensor_sha256": "ccdd5c5d68c007565bc9e6f4e3df900ff7343aadd1d49c079c70a44ed3b86a2f",
+    "rows": 4,
+    "dimension": 1536,
+    "strict_loader_tested": true
+  },
+  "verification": {
+    "python_launcher": "bash radio_gs/scripts/run_repo_python.sh",
+    "py_compile": "passed",
+    "black": "passed",
+    "focused_pytest": {
+      "command": "python -m pytest -q tests/test_source_global_response_listwise_loss.py tests/test_source_global_response_listwise_loss_v21.py tests/test_train_surface_region_typed_context_response_listwise_v2.py tests/test_train_surface_region_typed_context_response_listwise_v21.py",
+      "passed": 23,
+      "failed": 0
+    },
+    "git_diff_check": "passed"
+  },
+  "source_scene_v21_dry_execution": {
+    "attempted": false,
+    "reason": "A single pre-execution NVML query returned Unknown Error; per GPU safety instruction no further polling, GPU launch, or long CPU matrix fallback was attempted.",
+    "optimizer_constructed": false,
+    "parameter_update_performed": false
+  },
+  "scientific_scope": {
+    "method_logic_and_gradient_contract_improved": true,
+    "source_training_completed": false,
+    "benchmark_performance_claimed": false,
+    "benchmark_opened": false
+  },
+  "source_access": {
+    "generic_target_blind_text_bank_opened": true,
+    "canonical_generic_negative_bank_opened": true,
+    "benchmark_text_queries_opened": false,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "target_heldout_opened": false,
+    "target_metrics_computed": false
+  }
+}

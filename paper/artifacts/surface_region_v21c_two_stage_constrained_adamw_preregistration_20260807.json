@@ -1,0 +1,83 @@
+{
+  "schema": "radio_gs.surface_region_v21c_two_stage_constrained_adamw_preregistration.v1",
+  "schema_version": 1,
+  "status": "preregistered_before_stage_i_or_stage_ii_execution",
+  "objective": "Diagnose whether the ordinary AdamW update conflicts with absolute-relevance or continuous-pairwise source objectives, and authorize a constrained update only if the diagnosis is positive.",
+  "frozen_parent_method": {
+    "model": "V2.1B reliability-conditioned rank-256 spherical residual",
+    "forward_and_loss_assets_reused_without_modification": true,
+    "source_train_scenes": [
+      "scene0001_00",
+      "scene0002_00",
+      "scene0003_00",
+      "scene0005_00"
+    ],
+    "source_validation_scenes": [
+      "scene0004_00",
+      "scene0008_00"
+    ],
+    "optimizer_steps": 30,
+    "benchmark_opened": false
+  },
+  "stage_i": {
+    "name": "gradient_conflict_audit",
+    "parameter_subset": "all_trainable_named_parameters_sorted_v1",
+    "parameter_subset_identity": "canonical SHA-256 of ordered name, shape, numel, and dtype records",
+    "gradient_order": [
+      "combined",
+      "absolute",
+      "pairwise"
+    ],
+    "evidence_per_step": [
+      "gradient Gram matrix",
+      "gradient cosine matrix",
+      "gradient norms",
+      "ordinary AdamW candidate dot each protected gradient",
+      "ordinary AdamW candidate reconstruction error"
+    ],
+    "adamw_candidate_definition": "descent displacement u0 = theta_before - theta_after for the ordinary AdamW step, including moment advancement and decoupled weight decay",
+    "conflict_definition": "g_absolute dot u0 < -1e-12 or g_pairwise dot u0 < -1e-12",
+    "completion_requirement": "exactly 30 finite audited optimizer steps",
+    "stage_ii_trigger": {
+      "rule": "strict majority of audited steps have an ordinary AdamW candidate conflict",
+      "minimum_conflict_steps": 16,
+      "audited_steps": 30
+    }
+  },
+  "stage_ii": {
+    "authorization": "forbidden unless a frozen, hash-bound Stage-I result passes the preregistered trigger",
+    "optimization": "minimize ||u-u0||^2 subject to g_absolute dot u >= 0 and g_pairwise dot u >= 0",
+    "update_convention": "theta <- theta - u",
+    "solver": "deterministic two-constraint active-set projection with primal, dual, stationarity, and complementarity audit",
+    "adamw_semantics": "advance ordinary AdamW moments and decoupled weight-decay candidate first; project only the candidate parameter displacement; retain the advanced moments",
+    "gradient_clipping": "same fixed global combined-gradient clipping as V2.1B before constructing u0",
+    "optimizer_steps": 30,
+    "early_stopping": false
+  },
+  "selection_and_promotion": {
+    "source_validation_only": true,
+    "minimum_relative_improvement_from_step_zero": 0.005,
+    "required_macro_metrics": [
+      "auxiliary",
+      "absolute_relevance",
+      "continuous_pairwise_relevance"
+    ],
+    "absolute_relevance_every_validation_scene_non_regression": true,
+    "continuous_pairwise_relevance_every_validation_scene_non_regression": true,
+    "v1_fidelity_non_regression": true,
+    "active_row_coverage_every_validation_scene_minimum": 0.95,
+    "pair_endpoint_coverage_every_validation_scene_minimum": 0.95,
+    "eligible_state_selection": [
+      "minimum_auxiliary_loss",
+      "earliest_step"
+    ],
+    "no_eligible_state": "diagnostic_only_no_checkpoint_or_certificate"
+  },
+  "prohibitions": {
+    "per_scene_parameters_or_tuning": true,
+    "target_query_or_benchmark_access_during_source_stages": true,
+    "direct_stage_ii_execution_without_stage_i_trigger": true,
+    "projection_of_adamw_moments": true,
+    "modification_of_v21b_bound_files": true
+  }
+}

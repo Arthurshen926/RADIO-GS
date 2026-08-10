@@ -1,0 +1,79 @@
+{
+  "schema": "radio_gs.lerf_waldo_kitchen_o1_o2_base_asset_result.v1",
+  "schema_version": 1,
+  "status": "complete_feature_bundle_and_exact_marginal_source_authority",
+  "scene": "waldo_kitchen",
+  "feature_bundle": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_feature_legacy_seal_execution_authority_20260807.json",
+      "sha256": "19219aee6348dc896654bb64aa14140eb6775e323c6aae0f2054e7245f4408d8"
+    },
+    "sealed_manifest": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/canonical_teacher_features/waldo_kitchen/frame_manifest.json",
+      "sha256": "4a12657f0d0c2be97c1941eeae30c19ff6d2e6a4ed208e5ceedd345ab16d80f8",
+      "output_bundle_sha256": "e650014f7a4b5497818412ae80972c5b6b62c39f99964b92fb9f95ba1b0913a8"
+    },
+    "receipt": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/legacy_reseal_receipt.json",
+      "sha256": "ba9709c049ab17fed990091a0228ef4969c631c518487347b260f422dfcd99f0"
+    },
+    "frames": 187,
+    "tensors": 374,
+    "logical_tensor_bytes": 1337543680,
+    "tensor_values_modified": false,
+    "formal_validator_passed": true
+  },
+  "exact_marginal_source": {
+    "execution_authority": {
+      "path": "/root/RADIO-GS/paper/artifacts/lerf_waldo_kitchen_exact_marginal_gpu1_execution_authority_20260807.json",
+      "sha256": "3242db2729f3eba9f8c6a96c36472369816ed77ca1997827cccd13d812000517"
+    },
+    "responsibility_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/exact_marginal_responsibility_authority.json",
+      "sha256": "9d17c0ce6fb2c578800634d4ba21f6a778497c7276311c55c0b713aaba9982db",
+      "views": 120,
+      "total_hits": 48566602,
+      "num_gaussians": 691728,
+      "excluded_frame_ids": [53, 66, 89, 140, 154],
+      "query_independent": true,
+      "feature_independent": true
+    },
+    "factorized_raw_radio": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/factorized_raw_radio_exact_marginal.pt",
+      "sha256": "c8d0c8a50284754956d52376f2df1a18d3363983b78d5649bf3524a407ed3d6c",
+      "report_sha256": "48f29dea009ff089ac290ad2c97d1f77f3307b57760dde19229ec150a9397c8e",
+      "valid_gaussians": 514508,
+      "valid_ratio": 0.7438010573387146,
+      "mean_views_if_valid": 15.149604797363281,
+      "maximum_views_if_valid": 83,
+      "formal_loader_reopened": true
+    }
+  },
+  "thermal": {
+    "physical_gpu": 1,
+    "start_temperature_c": 42,
+    "release_temperature_c": 44,
+    "maximum_recorded_temperature_c": 44,
+    "maximum_recorded_power_w": 35.85,
+    "telemetry_poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "soft_pause_enabled": false,
+    "guard_triggered": false,
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_waldo_kitchen_o1_o2_assets_v1/logs/exact_marginal_gpu1.telemetry.csv",
+      "sha256": "d03e2009ec500f8f8d6a1ac3f6849361ca6f9128eaf3975d562f00c7d15c5737"
+    }
+  },
+  "access_audit": {
+    "ground_truth_opened": false,
+    "benchmark_masks_opened": false,
+    "text_queries_opened": false,
+    "metric_outputs_opened": false,
+    "metric_computed": false
+  },
+  "next_blockers": [
+    "materialize one SHA-bound 18-query Waldo single-prompt positive text axis and the frozen four-query canonical-negative axis",
+    "materialize exact FP32 v4 O0 positive and negative caches from the already accepted multiscale descriptor",
+    "run the unchanged O1/O2 streamer against this exact source authority and sealed feature bundle"
+  ]
+}

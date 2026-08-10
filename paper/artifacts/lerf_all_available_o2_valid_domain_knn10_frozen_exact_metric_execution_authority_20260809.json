@@ -1,0 +1,158 @@
+{
+  "schema": "radio_gs.lerf_all_available_o2_valid_domain_knn10_frozen_exact_metric_execution_authority.v1",
+  "schema_version": 1,
+  "status": "pending_independent_authority_audit",
+  "created_date": "2026-08-09",
+  "single_candidate_no_sweep": true,
+  "metric_execution_authorized_after_audit_pass_only": true,
+  "candidate_contract": {
+    "source_views": "all_available_deterministic_source_views",
+    "oracle": "O2",
+    "readout": "covered-valid-primitive-domain KNN10; 0.5*raw+0.5*neighbor_mean; per-scale minmax; raw-peak scale selection",
+    "fixed_across_scenes_and_queries": true,
+    "threshold_tuning": false,
+    "scene_tuning": false,
+    "query_tuning": false,
+    "retry_or_alternative_candidate_if_metric_fails": false
+  },
+  "premetric_source_gate": {
+    "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/source_only_all_available_view_gate_v1.json",
+    "sha256": "5a8188135c7407ac7ff1cb04be505ffac22b2a8c59f659b13173c4ac91c514ad",
+    "status": "passed_both_scenes",
+    "target_metrics_opened_by_gate": false
+  },
+  "frozen_common": {
+    "evaluator": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "summary_head_weights": {
+      "path": "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth",
+      "sha256": "41ccc47b2da9b1aed3ee1e80397dc721ec625e083054175c27698e8840b6263c"
+    },
+    "positive_text_embedding_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt",
+      "sha256": "d0f70797d01cad76e8a12e69c71730fcdfd867e50c3c4b53e3f7bf797e36506d"
+    },
+    "canonical_negative_embedding_bank": {
+      "path": "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt",
+      "sha256": "18d2aac56b50a9670ffe04b397d23a4652dd44fe8f18ed7a309a82b6c1102b67"
+    },
+    "label_dir": "/mnt/pool/sqy/3d_understanding/lerf_ovs/label",
+    "protocol_preset": "vala_paper_3d",
+    "official_frames_only": true,
+    "selection_mode": "score_threshold",
+    "score_threshold": 0.6,
+    "projection_mode": "selected_only_alpha",
+    "alpha_binarization": "png_uint8_gt10",
+    "mask_refinement": "none",
+    "external_scores_are_fully_postprocessed": true,
+    "second_knn_or_minmax_pass": false
+  },
+  "candidate_materializer": {
+    "producer": {
+      "path": "/root/RADIO-GS/radio_gs/scripts/materialize_lerf_valid_domain_knn_candidate.py",
+      "sha256": "62984cf602a17a69ea042f80f74f902878a6d47240f945111097fe3375e76bb9"
+    },
+    "implementation": {
+      "path": "/root/RADIO-GS/radio_gs/querying/valid_domain_knn_readout.py",
+      "sha256": "d4ca07376f4a18d3f7b45fd9fcf19730b8a436270ea50c23f0962948c4f7878a"
+    }
+  },
+  "scenes": {
+    "teatime": {
+      "all_available_raw_o2_positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o2_positive.pt",
+        "sha256": "519050f97bcadb7a1c2ea5a7fc64a4406815567340d5faa2ece873be86726fc2"
+      },
+      "all_available_raw_o2_negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/o1_o2_teacher_agreement/teatime_all_available_o2_negative.pt",
+        "sha256": "7fc7e4ecf97e044137c462488c3de74cc431e995f07d7217e07f1ab3fd8b5621"
+      },
+      "external_query_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/teatime_all_available_o2_valid_domain_knn10.pt",
+        "sha256": "d68e149e8f3891190ce07d9b24bfff209f63ca7aab1a0b70829425a9ba843edb"
+      },
+      "premetric_materialization_report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/teatime_all_available_o2_valid_domain_knn10_report.json",
+        "sha256": "6f21f97d1914de3d180081b266d426f804ef32da82570bcf4ea44c0a711590ce"
+      },
+      "accepted_frozen_valid_domain_control": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_text_v1/teatime/evaluation/exact_one_shot_gpu0_v1/teatime/lerf_direct_3d_selection_results.json",
+        "sha256": "e7187ea2dedd1c815bcc515efb7f97a8a2bb40226b3b9ebe451db5d1a62d30d9",
+        "miou": 0.5278149843215942
+      },
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml",
+        "sha256": "9c92cfbfd3d901134d23b3e4fde88e27cc8a352f4034c213b3de89d10569e775"
+      },
+      "renderer_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "53289b96c03101e2ada82cf7d75aced83859bb9c8d12cdd992cd5072b318f035"
+      },
+      "execution": {
+        "physical_gpu": 0,
+        "cuda_visible_devices": "0",
+        "logical_gpu_argument": 0,
+        "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1",
+        "telemetry_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1_telemetry.csv",
+        "owner_audit_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1_owner.log",
+        "evaluator_command": ["bash", "radio_gs/scripts/run_repo_python.sh", "radio_gs/scripts/eval_lerf_direct_3d_selection.py", "--config", "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_teatime_radio_verified_pose.yaml", "--checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_teatime_v14_fdh_ws240_240ep/checkpoints/best.pth", "--scene", "teatime", "--protocol_preset", "vala_paper_3d", "--label_dir", "/mnt/pool/sqy/3d_understanding/lerf_ovs/label", "--output_dir", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/evaluation/exact_frozen_gpu0_v1", "--summary_head_weights", "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth", "--text_embedding_cache", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt", "--canonical_embedding_cache", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt", "--external_query_score_cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/teatime/valid_domain_knn10_v1/teatime_all_available_o2_valid_domain_knn10.pt", "--gpu", "0"]
+      }
+    },
+    "waldo_kitchen": {
+      "all_available_raw_o2_positive": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/o1_o2_teacher_agreement/waldo_kitchen_all_available_o2_positive.pt",
+        "sha256": "24d39c5b9e8852d66a411458c370ade9a3862b584befabc0b758cd13cd05a0ae"
+      },
+      "all_available_raw_o2_negative": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/o1_o2_teacher_agreement/waldo_kitchen_all_available_o2_negative.pt",
+        "sha256": "8108ff1c7cc6a1aa9c6b66c705cb7795101bf9d60cfb6826663212d8bf69ad7b"
+      },
+      "external_query_score_cache": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/waldo_kitchen_all_available_o2_valid_domain_knn10.pt",
+        "sha256": "26708d86eb891b7f449ce282fda113a78d2a6bf061a78967e97eeceabb9cdb17"
+      },
+      "premetric_materialization_report": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/waldo_kitchen_all_available_o2_valid_domain_knn10_report.json",
+        "sha256": "743ac28fdf49f434bf8f5cfdbd8eec042eabaabff3a95fc97d59d09d7de58823"
+      },
+      "accepted_frozen_valid_domain_control": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/lerf_valid_domain_knn_o2_frozen_v3_v1/waldo_kitchen/evaluation/exact_one_shot_gpu0_v1/waldo_kitchen/lerf_direct_3d_selection_results.json",
+        "sha256": "eac941e5803b63172e86d6fbaa3c6e316e7c0012a283c0bf9a0dedcba152f3ed",
+        "miou": 0.34969425201416016
+      },
+      "config": {
+        "path": "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml",
+        "sha256": "c270ffc84d197a3e5dbadeb00f7e9a23cc32947d09332889401c93459b92c264"
+      },
+      "renderer_checkpoint": {
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth",
+        "sha256": "16a47d24f83744efced0830cbef226ead3c124535e242de9de7f0cbc752ff95d"
+      },
+      "execution": {
+        "physical_gpu": 1,
+        "cuda_visible_devices": "1",
+        "logical_gpu_argument": 0,
+        "output_directory_must_not_exist_before_execution": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1",
+        "telemetry_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1_telemetry.csv",
+        "owner_audit_log": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1_owner.log",
+        "evaluator_command": ["bash", "radio_gs/scripts/run_repo_python.sh", "radio_gs/scripts/eval_lerf_direct_3d_selection.py", "--config", "/root/RADIO-GS/radio_gs/configs/generated/frozen_eval_20260802/lerf_waldo_kitchen_radio_verified_pose.yaml", "--checkpoint", "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_waldo_kitchen_v14_fdh_ws240_240ep/checkpoints/best.pth", "--scene", "waldo_kitchen", "--protocol_preset", "vala_paper_3d", "--label_dir", "/mnt/pool/sqy/3d_understanding/lerf_ovs/label", "--output_dir", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/evaluation/exact_frozen_gpu1_v1", "--summary_head_weights", "/root/RADIO-GS/checkpoints/siglip2_summary_head.pth", "--text_embedding_cache", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_all_queries_raw.pt", "--canonical_embedding_cache", "/root/RADIO-GS/checkpoints/frozen_protocol/siglip2_lerf_negatives_raw.pt", "--external_query_score_cache", "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260809/lerf_all_available_source_views/waldo_kitchen/valid_domain_knn10_v1/waldo_kitchen_all_available_o2_valid_domain_knn10.pt", "--gpu", "0"]
+      }
+    }
+  },
+  "thermal_guard": {
+    "power_limit_w": 300,
+    "poll_seconds": 300,
+    "hard_temperature_c": 88,
+    "start_max_temperature_c": 87,
+    "soft_pause_disabled": true,
+    "singleton_host_pid_after_clear": true
+  },
+  "access_audit": {
+    "target_metrics_opened_for_new_candidate_before_authority": false,
+    "target_metric_executed_for_new_candidate_before_authority": false,
+    "benchmark_labels_or_masks_opened_by_candidate_materialization": false,
+    "candidate_materialization_result_dependent_parameters": false
+  }
+}

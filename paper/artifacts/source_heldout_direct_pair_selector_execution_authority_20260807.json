@@ -1,0 +1,55 @@
+{
+  "schema": "radio_gs.source_heldout_direct_pair_selector_authority.v1",
+  "schema_version": 1,
+  "status": "authorized_source_only_direct_pair_cross_scene_audit",
+  "producer": {
+    "path": "/root/RADIO-GS/radio_gs/scripts/fit_source_heldout_direct_pair_selector_v1.py",
+    "sha256": "dc8d181ca0743e80ee7d0ea20f4161bcf5279950dcb83a55a113fbb7bb953609"
+  },
+  "selector_interface": {
+    "path": "/root/RADIO-GS/radio_gs/interfaces/source_heldout_direct_pair_selector.py",
+    "sha256": "0f2220559f85c9a1a868636aa41dbe5d26e9b5e17c446819941b41a0eeadba85"
+  },
+  "source_train": [
+    {
+      "scene_id": "scene0001_00",
+      "table": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0001_00/unit_table.pt", "sha256": "30b66f7fdf80855484b4f8bbdbeb2b2d1b578a909ecdd2488b4b9ea4e2848de5"},
+      "native_v3_source": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0001_00/source_region_comembership_authority_native_v3.pt", "sha256": "c32dd00f77a53a0155384be4ad06ce7d83bb77ee1fb034ad726b05772ccafe69"}
+    },
+    {
+      "scene_id": "scene0002_00",
+      "table": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0002_00/unit_table.pt", "sha256": "728023a60bc894b2d37f968d256064116d87d36c3ea9e340a573b5e828cf709a"},
+      "native_v3_source": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0002_00/source_region_comembership_authority_native_v3.pt", "sha256": "883c7d0099e3e0be214004b5201fab4166f87bd9b741622d04ba87dda7223776"}
+    },
+    {
+      "scene_id": "scene0003_00",
+      "table": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0003_00/unit_table.pt", "sha256": "64fcb93fe454f2940758d9325dda4d93b42c63d9c4b83e91c714a384a40e9900"},
+      "native_v3_source": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0003_00/source_region_comembership_authority_native_v3.pt", "sha256": "8af29b542cbc417ab2f79245690c3a3a5b5c5e61842301a43c563d82b10a040b"}
+    }
+  ],
+  "source_validation": [
+    {
+      "scene_id": "scene0004_00",
+      "table": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_missing_support_v1/scene0004_00/unit_table.pt", "sha256": "57d9ba6868d730b095d9df81786eaedfc41383129bcfbb2327287c5a97a68382"},
+      "native_v3_source": {"path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_native_v3/scene0004_00/source_region_comembership_authority_native_v3.pt", "sha256": "a5ad4543d5bfe031a876423bc6d9a2d9a380546f9f7c2e64c54c18bfc563bc0a"}
+    }
+  ],
+  "fixed_fit": {"sha256": "f1cef8956ab707782045ac12d40fa455baaf90579c4ecf2acc86db3fb85ee6e8"},
+  "outputs": {
+    "model": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_direct_pair_selector_v1/model.pt",
+    "report": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_heldout_direct_pair_selector_v1/report.json"
+  },
+  "source_access": {
+    "source_train_heldout_tables_opened": true,
+    "source_validation_heldout_tables_opened": true,
+    "source_native_v3_pair_features_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_queries_opened": false,
+    "benchmark_metrics_opened": false,
+    "target_metrics_computed": false,
+    "gpu_used": false
+  },
+  "benchmark_execution_authorized": false
+}

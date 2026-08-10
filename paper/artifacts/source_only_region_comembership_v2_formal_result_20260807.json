@@ -1,0 +1,193 @@
+{
+  "artifact": "source_only_region_comembership_v2_formal_result",
+  "schema_version": 1,
+  "registered_at": "2026-08-07T04:18:05+08:00",
+  "status": "source_only_v2_4train_2validation_strict_promotion_passed",
+  "training_contract": {
+    "preregistration": {
+      "path": "paper/artifacts/source_only_region_comembership_v2_preregistration_20260807.json",
+      "sha256": "f0b47c26548573d39d982b748b0281d5080967390dc49e77ba457e0b02aa64b9"
+    },
+    "selection_efficiency_addendum": {
+      "path": "paper/artifacts/source_only_region_comembership_v2_formal_selection_efficiency_addendum_20260807.json",
+      "sha256": "50b9a44aa6f76a9843e28d8df85a5fb8eb75445a3cf1c4bfd44687dbbc755bda"
+    },
+    "execution_authority": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_execution_authority.json",
+      "sha256": "0c3eaf3b8c6557bc8bb3cd65cf1bc358ed27856cf7e5864fccc7694aaffd8f48"
+    },
+    "pid_namespace_restart_addendum": {
+      "path": "paper/artifacts/source_only_region_comembership_v2_formal_gpu1_pid_namespace_restart_addendum_20260807.json",
+      "sha256": "783acca1a686fed3e21c7fd4735322f6a2d5e99c0f88c9e9164a060b3d740a5e"
+    }
+  },
+  "producer": {
+    "trainer": {
+      "path": "radio_gs/scripts/train_source_region_comembership_v2.py",
+      "sha256": "8b00a6cd8aef776765a2e9261841402ded952b056b093efc097323f12eb0e0bc"
+    },
+    "model": {
+      "path": "radio_gs/models/region_comembership_v2.py",
+      "sha256": "c0346e187a0b1995d19a1128fefda0809a8216737b3f89b39a7da19d298bf4ad"
+    },
+    "primitive_metric": {
+      "path": "radio_gs/evaluation/primitive_instance_union.py",
+      "sha256": "771082de5dfa310ded907fd6b4b00badcbb80f9af4c7ebe91ba3a6e0bcd9dc9c"
+    }
+  },
+  "source_authorities": {
+    "training": [
+      {
+        "scene_id": "scene0001_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0001_00/source_region_comembership_authority_v2.pt",
+        "sha256": "a8229d4f241308275f64836124a7efd28cf48a3bc92d0a438cd57c2f5993ee63"
+      },
+      {
+        "scene_id": "scene0002_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0002_00/source_region_comembership_authority_v2.pt",
+        "sha256": "76a5f72c89cc4ea6458355c99eabe194cd47cce8ce857071bcd1be61b319906f"
+      },
+      {
+        "scene_id": "scene0003_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0003_00/source_region_comembership_authority_v2.pt",
+        "sha256": "59f6d431f24cdf2cac91a720e4875072c4f97c7094d6d18c793dcc47be02f058"
+      },
+      {
+        "scene_id": "scene0005_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0005_00/source_region_comembership_authority_v2.pt",
+        "sha256": "6d1ac3f6ab57b6dad8a4f4fbacb4b4473a86abbb113d1af6f708c919b91d32f3"
+      }
+    ],
+    "validation": [
+      {
+        "scene_id": "scene0004_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0004_00/source_region_comembership_authority_v2.pt",
+        "sha256": "e574871744491c1ee20c933c4340c4904a33ff252c02841bd27961283bb7f646"
+      },
+      {
+        "scene_id": "scene0008_00",
+        "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/scene0008_00/source_region_comembership_authority_v2.pt",
+        "sha256": "35d996a48a848034eedfc59df381869dd03ab9952b7f7278c18170139b857180"
+      }
+    ]
+  },
+  "outputs": {
+    "checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_checkpoint.pt",
+      "sha256": "8b108930fd4c187f1eee1ec36076c0b0964a331ba1c4b4ba3bdf343bb634d04e",
+      "schema": "radio_gs.region_comembership_v2_checkpoint.v1",
+      "model_state_dict_sha256": "d6b0b89be497116d151c6f7675f04a977be25eec1c14a21610a009e60846c8d6"
+    },
+    "report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/source_region_comembership_v2/formal_v2_4train_2validation_checkpoint.pt.json",
+      "sha256": "557d62a2a46c75311ef296661aa5fa7ad12fc01a8b81e266a404dc889b2f788e",
+      "schema": "radio_gs.region_comembership_v2_pilot_result.v1"
+    }
+  },
+  "selected_rule": {
+    "epoch": 100,
+    "method": "dual_path_widest",
+    "maximum_regions": 8,
+    "threshold": 0.9
+  },
+  "exact_primitive_validation": {
+    "candidate_count": 83,
+    "singleton": {
+      "iou": 0.13325531326672657,
+      "f1": 0.21706024700542015,
+      "contamination": 0.25299175065945717,
+      "giant_excess": 0.000040593090061338245,
+      "selected_units": 249.5487123341062,
+      "selected_regions": 1.0,
+      "topology_score": -0.1197770304827919
+    },
+    "selected": {
+      "iou": 0.16034067747716207,
+      "f1": 0.2523601504342393,
+      "contamination": 0.27192776391656226,
+      "giant_excess": 0.000057773236654123426,
+      "selected_units": 340.22124652297725,
+      "selected_regions": 3.2212426369627023,
+      "topology_score": -0.11164485967605432
+    },
+    "selected_minus_singleton": {
+      "iou": 0.0270853642104355,
+      "f1": 0.03529990342881915,
+      "contamination": 0.01893601325710509,
+      "giant_excess": 0.00001718014659278518,
+      "selected_units": 90.67253418887104,
+      "selected_regions": 2.2212426369627023,
+      "topology_score": 0.00813217080673758
+    },
+    "per_scene_selected": {
+      "scene0004_00": {
+        "iou": 0.17364976226443712,
+        "f1": 0.2752902550383545,
+        "contamination": 0.2936398606292284,
+        "topology_score": -0.12007198998172852
+      },
+      "scene0008_00": {
+        "iou": 0.147031592689887,
+        "f1": 0.2294300458301241,
+        "contamination": 0.2502156672038961,
+        "topology_score": -0.10321772937038012
+      }
+    }
+  },
+  "promotion_gate": {
+    "selected_epoch_positive": true,
+    "topology_strictly_exceeds_singleton": true,
+    "iou_strictly_exceeds_singleton": true,
+    "f1_strictly_exceeds_singleton": true,
+    "passed": true
+  },
+  "gpu1_execution_audit": {
+    "device": "physical_GPU1_via_torch_cuda_ordinal_1_without_CUDA_VISIBLE_DEVICES_remapping",
+    "owner_mode": "exclusive-singleton-after-clear-v1",
+    "telemetry": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/formal_v2_4plus2_gpu1_restart_telemetry.csv",
+      "sha256": "ca1a5bc3d0ce0fe7e34b871a41402ec111d46ee1fb37200a23cc115571b2be46",
+      "samples_including_postexit": 35,
+      "maximum_temperature_c": 51,
+      "maximum_power_w": 124.48,
+      "maximum_utilization_percent_at_30_second_poll": 0,
+      "postexit_cuda_release_verified": true
+    },
+    "owner_audit": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260807/logs/formal_v2_4plus2_gpu1_restart_owners.csv",
+      "sha256": "cb8805b17b6167a799658057786a29e6af0328eae72c40736652a9a3bc3997be",
+      "runtime_owner_was_singleton": true,
+      "foreign_owner_detected": false,
+      "postexit_owner_clear": true
+    },
+    "runtime_note": "One best-effort /proc status read raced with a short-lived child PID during CPU exact validation and printed an awk warning. The guard did not abort; subsequent singleton-owner audits continued and the final postexit owner-clear check passed."
+  },
+  "verification": {
+    "checkpoint_validator_passed": true,
+    "checkpoint_selected_rule_matches_report": true,
+    "checkpoint_promotion_gate_matches_report": true,
+    "tests": {
+      "command": "bash radio_gs/scripts/run_repo_python.sh -m pytest -q tests/test_region_comembership_v2.py tests/test_primitive_instance_union.py tests/test_materialize_source_region_comembership_v2.py tests/test_train_source_region_comembership_v2.py tests/test_infer_region_comembership_v2.py tests/test_materialize_region_comembership_features_v2.py tests/test_build_region_comembership_v2_target_execution_authority.py",
+      "passed": 42,
+      "failed": 0,
+      "warnings": 1,
+      "warning_scope": "PyTorch TypedStorage deprecation only"
+    }
+  },
+  "decision": {
+    "source_validation_promotion_passed": true,
+    "target_execution_authorized": true,
+    "target_execution_performed": false,
+    "interpretation": "The capability-conditioned nonlinear RegionCoMembership V2 improves exact deduplicated primitive-instance IoU, F1, and topology simultaneously on both held-out source-validation scenes under one globally selected bounded readout. It is therefore eligible for a separately sealed target execution without benchmark-specific tuning.",
+    "next_step": "seal the target execution authority, materialize target V2 pair features, run the immutable checkpoint and selected rule, then evaluate LERF under the frozen benchmark protocol"
+  },
+  "access_audit": {
+    "source_instance_labels_opened": true,
+    "benchmark_images_opened": false,
+    "benchmark_labels_opened": false,
+    "benchmark_masks_opened": false,
+    "benchmark_queries_opened": false,
+    "target_pair_features_opened": false,
+    "target_metrics_computed": false
+  }
+}

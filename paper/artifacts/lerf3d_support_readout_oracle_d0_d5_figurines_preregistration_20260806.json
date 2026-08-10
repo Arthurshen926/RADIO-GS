@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "registration": "lerf3d_support_readout_oracle_d0_d5_figurines_dev_v1",
+  "registered_at": "2026-08-06T00:00:00+08:00",
+  "status": "sealed_before_d2_d5_implementation_and_before_any_new_d2_d5_metric",
+  "causal_question": "On the already-consumed Figurines development scene, how much of the remaining LERF3D error is caused by descriptor/query response, finite SurfaceRegion support, primitive readout, and final visibility-aware rendering?",
+  "scope": {
+    "scene": "figurines",
+    "development_only": true,
+    "benchmark_method": false,
+    "gt_oracle": true,
+    "deployable_candidate": false,
+    "other_lerf_scenes_opened": false,
+    "training": false,
+    "frozen_evaluator_metric_renderer_modified": false
+  },
+  "immutable_inputs": {
+    "o0_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o0_diagnostic_retry1/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "915872d012c008da129d957ba26c32ab2ffa2579319f26d74a8e000636953677"
+    },
+    "o4_final_relevance": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/matrix/figurines_o4_probability.pt",
+      "sha256": "eead8a89274e7bb3168cf391b7d1d604a33a41d2645f76dae4d41744b1827988",
+      "semantics": "sigmoid(10*(equal_view_normalized_LSE_positive-max_over_four_canonical_negatives_under_the_same_aggregation))"
+    },
+    "o4_current_support_result": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260806/lerf3d_o0_o4_oracle_matrix_v1/evaluation/o4_diagnostic/figurines/lerf_direct_3d_selection_results.json",
+      "sha256": "b06d6cd6a3b88df0c2cd6f92caf9b68c277f81942625735ccdf38898fda6cc9f"
+    },
+    "accepted_v2_descriptor_report": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260802/lerf_native_multiscale_descriptor_v2/figurines.pt.json",
+      "valid_rows": 82603,
+      "total_rows": 168791,
+      "radii_m": [0.25, 0.45, 0.7],
+      "region_contract_sha256": "ac77e31694ebe796befcc725ea60685ad6f97978a9a903e1029aa7a7a05abc07"
+    },
+    "support_graph": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260716/global_3d_readout/figurines_support_graph_v3.pt",
+      "sha256": "abcdd466fbbd726f277b59b137a59ac93b0a2c270a7557fc9916a478a66a1451"
+    },
+    "geometry_checkpoint": {
+      "path": "/mnt/pool/sqy/results/RADIO-GS/output/radio_gs/lerf_figurines_v14_fdh_ws240_240ep/checkpoints/best.pth",
+      "sha256": "6900e08d2380d1f1563a2caf01b5846a9ab8df049b2a3c6a3f710452fa96eff2"
+    },
+    "scene_config": {
+      "path": "radio_gs/configs/generated/query_consistency/lerf_figurines_radio_verified_pose.yaml",
+      "sha256": "a17ada0f1d34cf043f04ddc2f6503c262845d1fed8b4550df8f5d79f2dbd8f11"
+    },
+    "frozen_evaluator": {
+      "path": "radio_gs/scripts/eval_lerf_direct_3d_selection.py",
+      "sha256": "8cb39acf08c4f90f6339002ef32022437f67e7cdaae80fc16206b49abbb917d5"
+    },
+    "label_authority": {
+      "source": "/mnt/pool/sqy/results/RADIO-GS/output/optimization_20260804/carrier_ceiling/figurines_uniform_v3.json",
+      "frames": [41, 105, 152, 195],
+      "label_sha256": [
+        "0511a663bee01558620ff15da6dc66d9e13e0139762407de709861d6cb51853a",
+        "81f2a856e08c089e1be73fc467523850e9f9900049d66ceabd662ec322937e6b",
+        "054d6ebd43f0fade9933c8cb309f4beb33ba3953b4cf136df306d26a42c549fb",
+        "7e5fa1b81394c783fcb53382b2a6af664d8899ae18ad876fcdaafe1a671a3beb"
+      ]
+    }
+  },
+  "oracle_definitions": {
+    "D0": "Existing O0 AcceptedV2 descriptor, canonical-negative probability, frozen kNN10 smoothing, per-query peak scale, per-scale min-max remap, fixed 0.6 selection and final renderer.",
+    "D1": "Existing O4 per-view teacher final canonical-negative relevance with the same frozen kNN10, peak-scale, remap, fixed 0.6 selection and final renderer.",
+    "target_primitive_membership": "Across all four development frames, exact front-to-back contribution adjoint foreground mass divided by total contribution mass for each primitive/query; binary target is membership >= 0.5 on rows with positive mass.",
+    "region_membership": "Only SurfaceRegion-V2 semantic core rows at or inside the registered physical radius; the context shell is descriptor context and is not predicted object membership.",
+    "D2": "GT oracle: for every query, exhaustively choose the single anchor/scale region with maximum observed primitive-space IoU; ties use smaller scale index then smaller immutable global anchor row; render exactly that binary region membership.",
+    "D3": "GT oracle lower bound: retain the 1024 candidates with highest D2 primitive IoU per query, then greedily add at most eight regions by maximum primitive-space union IoU; stop when no strict improvement; ties use smaller scale index then smaller global anchor row; render the exact binary union.",
+    "D4": "Use O4 final canonical-negative probability directly at every primitive, without kNN smoothing, scale selection, region pooling, or min-max remap. Report primitive-space AP, fixed-0.6 IoU and oracle-threshold IoU against target primitive membership. D4 membership is probability >= 0.6.",
+    "D5": "Render the exact binary D4 membership through the same frozen geometry and visibility-aware premultiplied feature compositor; fixed pixel threshold remains 0.6. No post-processing or threshold scan is permitted."
+  },
+  "metrics": {
+    "primitive_space": ["fixed_iou", "average_precision", "oracle_threshold_iou", "observed_rows", "selected_rows"],
+    "rendered_pixel_space": ["fixed_miou", "average_precision", "oracle_threshold_iou", "selected_purity", "positive_coverage", "positive_negative_margin", "within_scene_top1", "rank_correlation"],
+    "aggregation": "mean over the exact annotated frame/category samples used by the existing O0/O4 diagnostic"
+  },
+  "interpretation_rules": {
+    "d1_high_d2_d3_flat": "score calibration/query ranking dominates over region support capacity",
+    "d3_materially_above_d2": "multi-region object composition or hierarchy is required",
+    "d4_materially_above_d1": "current kNN/scale/remap support readout destroys useful per-primitive teacher information",
+    "d4_high_d5_low": "final rendering/compositing is a material bottleneck",
+    "d4_low": "teacher/query semantic discrimination is insufficient before rendering",
+    "oracle_results_are_not_benchmark_performance": true
+  },
+  "execution": {
+    "preferred_physical_gpu": 1,
+    "power_limit_w": 300,
+    "thermal_poll_seconds": 30,
+    "hard_temperature_c": 88,
+    "consecutive_hot_polls_before_stop": 6,
+    "no_threshold_graph_component_scale_prompt_or_scene_sweep": true
+  }
+}
